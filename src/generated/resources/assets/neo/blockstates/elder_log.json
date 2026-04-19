@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "neo:block/elder_log",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "neo:block/elder_log"
+    },
+    "axis=z": {
+      "model": "neo:block/elder_log",
+      "x": 90
+    }
+  }
+}

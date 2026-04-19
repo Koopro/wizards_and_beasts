@@ -1,0 +1,132 @@
+package at.koopro.neo.network;
+
+import at.koopro.neo.Neo;
+import at.koopro.neo.data.PlayerSpellData;
+import at.koopro.neo.registry.ModAttachments;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * Full {@link PlayerSpellData} snapshot pushed from server to client. The wire
+ * format is intentionally <em>typed and decoupled</em> from the on-disk NBT
+ * format: the server may bump {@link PlayerSpellData#CURRENT_VERSION} without
+ * forcing a network protocol bump, and the client never sees raw NBT.
+ * <p>
+ * For per-cast updates (cooldown set + cast-count increment) prefer the
+ * smaller {@link SpellDataDeltaS2CPacket} so we don't re-serialize the entire
+ * known-spells set on every wand release.
+ */
+public record SpellDataSyncS2CPacket(
+        Set<String> knownSpells,
+        String[] loadout,
+        int activeSlot,
+        Map<String, Long> cooldowns,
+        Map<String, Integer> castCounts) implements CustomPacketPayload {
+
+    public static final Type<SpellDataSyncS2CPacket> TYPE = new Type<>(
+            Identifier.fromNamespaceAndPath(Neo.MODID, "spell_data_sync"));
+
+    public static final StreamCodec<ByteBuf, SpellDataSyncS2CPacket> STREAM_CODEC = new StreamCodec<>() {
+        @Override
+        public SpellDataSyncS2CPacket decode(ByteBuf buf) {
+            int knownCount = buf.readInt();
+            Set<String> known = new HashSet<>(Math.max(8, knownCount));
+            for (int i = 0; i < knownCount; i++) {
+                known.add(PacketCodecUtils.readString(buf));
+            }
+
+            String[] loadout = new String[PlayerSpellData.LOADOUT_SIZE];
+            for (int i = 0; i < loadout.length; i++) {
+                if (buf.readBoolean()) {
+                    loadout[i] = PacketCodecUtils.readString(buf);
+                }
+            }
+
+            int activeSlot = buf.readInt();
+
+            int cdCount = buf.readInt();
+            Map<String, Long> cooldowns = new HashMap<>(Math.max(8, cdCount));
+            for (int i = 0; i < cdCount; i++) {
+                String id = PacketCodecUtils.readString(buf);
+                long expiry = buf.readLong();
+                cooldowns.put(id, expiry);
+            }
+
+            int ccCount = buf.readInt();
+            Map<String, Integer> castCounts = new HashMap<>(Math.max(8, ccCount));
+            for (int i = 0; i < ccCount; i++) {
+                String id = PacketCodecUtils.readString(buf);
+                int casts = buf.readInt();
+                castCounts.put(id, casts);
+            }
+
+            return new SpellDataSyncS2CPacket(known, loadout, activeSlot, cooldowns, castCounts);
+        }
+
+        @Override
+        public void encode(ByteBuf buf, SpellDataSyncS2CPacket pkt) {
+            buf.writeInt(pkt.knownSpells.size());
+            for (String s : pkt.knownSpells) {
+                PacketCodecUtils.writeString(buf, s);
+            }
+
+            for (int i = 0; i < PlayerSpellData.LOADOUT_SIZE; i++) {
+                String slot = i < pkt.loadout.length ? pkt.loadout[i] : null;
+                if (slot == null) {
+                    buf.writeBoolean(false);
+                } else {
+                    buf.writeBoolean(true);
+                    PacketCodecUtils.writeString(buf, slot);
+                }
+            }
+
+            buf.writeInt(pkt.activeSlot);
+
+            buf.writeInt(pkt.cooldowns.size());
+            for (Map.Entry<String, Long> e : pkt.cooldowns.entrySet()) {
+                PacketCodecUtils.writeString(buf, e.getKey());
+                buf.writeLong(e.getValue());
+            }
+
+            buf.writeInt(pkt.castCounts.size());
+            for (Map.Entry<String, Integer> e : pkt.castCounts.entrySet()) {
+                PacketCodecUtils.writeString(buf, e.getKey());
+                buf.writeInt(e.getValue());
+            }
+        }
+    };
+
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
+    }
+
+    /** Builds a snapshot packet from server-side player state. */
+    public static SpellDataSyncS2CPacket of(PlayerSpellData data) {
+        return new SpellDataSyncS2CPacket(
+                new HashSet<>(data.getKnownSpells()),
+                data.getLoadout().clone(),
+                data.getActiveSlot(),
+                new HashMap<>(data.getCooldowns()),
+                new HashMap<>(data.getCastCounts()));
+    }
+
+    public static void handleClient(SpellDataSyncS2CPacket pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> ClientSpellDataHolder.applyFullSync(pkt));
+    }
+
+    public static void syncToPlayer(ServerPlayer player) {
+        PlayerSpellData data = player.getData(ModAttachments.SPELL_DATA.get());
+        PacketDistributor.sendToPlayer(player, of(data));
+    }
+}

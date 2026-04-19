@@ -1,0 +1,20 @@
+{
+  "displayName": "Frigora",
+  "category": "utility",
+  "cooldownTicks": 60,
+  "color": -7864321,
+  "castType": "self",
+  "selfEffects": [
+    { "id": "minecraft:slow_falling", "duration": 200, "amplifier": 0 },
+    { "id": "minecraft:water_breathing", "duration": 200, "amplifier": 0 }
+  ],
+  "sound": {
+    "id": "minecraft:block.glass.break",
+    "volume": 0.4,
+    "pitch": 1.5
+  },
+  "requirement": {
+    "type": "knows",
+    "prerequisiteId": "lumos"
+  }
+}

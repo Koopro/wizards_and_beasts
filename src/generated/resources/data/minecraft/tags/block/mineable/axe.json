@@ -1,0 +1,32 @@
+{
+  "values": [
+    "neo:elder_log",
+    "neo:stripped_elder_log",
+    "neo:elder_wood",
+    "neo:stripped_elder_wood",
+    "neo:elder_planks",
+    "neo:elder_slab",
+    "neo:elder_stairs",
+    "neo:yew_log",
+    "neo:stripped_yew_log",
+    "neo:yew_wood",
+    "neo:stripped_yew_wood",
+    "neo:yew_planks",
+    "neo:yew_slab",
+    "neo:yew_stairs",
+    "neo:holly_log",
+    "neo:stripped_holly_log",
+    "neo:holly_wood",
+    "neo:stripped_holly_wood",
+    "neo:holly_planks",
+    "neo:holly_slab",
+    "neo:holly_stairs",
+    "neo:rowan_log",
+    "neo:stripped_rowan_log",
+    "neo:rowan_wood",
+    "neo:stripped_rowan_wood",
+    "neo:rowan_planks",
+    "neo:rowan_slab",
+    "neo:rowan_stairs"
+  ]
+}

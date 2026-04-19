@@ -1,0 +1,20 @@
+{
+  "values": [
+    "neo:elder_log",
+    "neo:stripped_elder_log",
+    "neo:elder_wood",
+    "neo:stripped_elder_wood",
+    "neo:yew_log",
+    "neo:stripped_yew_log",
+    "neo:yew_wood",
+    "neo:stripped_yew_wood",
+    "neo:holly_log",
+    "neo:stripped_holly_log",
+    "neo:holly_wood",
+    "neo:stripped_holly_wood",
+    "neo:rowan_log",
+    "neo:stripped_rowan_log",
+    "neo:rowan_wood",
+    "neo:stripped_rowan_wood"
+  ]
+}

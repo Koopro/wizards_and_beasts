@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/stairs",
+  "textures": {
+    "bottom": "neo:block/holly_planks",
+    "side": "neo:block/holly_planks",
+    "top": "neo:block/holly_planks"
+  }
+}

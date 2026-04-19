@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": "neo:parchment",
+    "I": "neo:ink_bottle",
+    "W": "#neo:wands"
+  },
+  "pattern": [
+    "PIP",
+    "PWP",
+    "PPP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "neo:marauders_map"
+  }
+}

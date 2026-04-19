@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_rowan_planks": {
+      "conditions": {
+        "items": [
+          {
+            "items": "neo:rowan_planks"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "neo:rowan_slab"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_rowan_planks"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "neo:rowan_slab"
+    ]
+  }
+}
