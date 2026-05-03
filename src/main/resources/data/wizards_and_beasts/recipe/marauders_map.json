@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": "wizards_and_beasts:parchment",
+    "I": "wizards_and_beasts:ink_bottle",
+    "W": "#wizards_and_beasts:wands"
+  },
+  "pattern": [
+    "PIP",
+    "PWP",
+    "PPP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "wizards_and_beasts:marauders_map"
+  }
+}

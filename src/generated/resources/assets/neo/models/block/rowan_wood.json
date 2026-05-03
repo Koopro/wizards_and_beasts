@@ -1,7 +1,0 @@
-{
-  "parent": "minecraft:block/cube_column",
-  "textures": {
-    "end": "neo:block/rowan_log",
-    "side": "neo:block/rowan_log"
-  }
-}

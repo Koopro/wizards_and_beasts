@@ -1,0 +1,14 @@
+{
+  "display_name": {
+    "translate": "wand_wood.wizards_and_beasts.elder"
+  },
+  "affinity_tags": ["rare", "dark", "combat"],
+  "spell_modifiers": {
+    "dark_arts": 0.3,
+    "combat": 0.18,
+    "transfiguration": 0.1
+  },
+  "personality_affinity": ["conqueror", "destined", "exceptional"],
+  "rarity": "legendary",
+  "refuse_threshold": 0.1
+}

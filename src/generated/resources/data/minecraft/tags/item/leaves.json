@@ -1,8 +1,8 @@
 {
   "values": [
-    "neo:elder_leaves",
-    "neo:yew_leaves",
-    "neo:holly_leaves",
-    "neo:rowan_leaves"
+    "wizards_and_beasts:elder_leaves",
+    "wizards_and_beasts:yew_leaves",
+    "wizards_and_beasts:holly_leaves",
+    "wizards_and_beasts:rowan_leaves"
   ]
 }

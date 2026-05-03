@@ -4,7 +4,6 @@
 *.iml
 *.ipr
 *.iws
-
 # IntelliJ
 out/
 # mpeltonen/sbt-idea plugin
@@ -124,6 +123,10 @@ bin/
 
 # Local AI / editor state (not shared)
 .claude/
+.cursor/plans/
+
+# Datagen cache (non-source noise)
+src/generated/resources/.cache/
 
 # Accidental vanilla sources copied at repo root — do not commit
 /net/

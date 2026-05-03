@@ -3,10 +3,10 @@
   "category": "building",
   "group": "planks",
   "ingredients": [
-    "neo:stripped_rowan_log"
+    "wizards_and_beasts:stripped_rowan_log"
   ],
   "result": {
     "count": 4,
-    "id": "neo:rowan_planks"
+    "id": "wizards_and_beasts:rowan_planks"
   }
 }

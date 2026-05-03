@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "wizards_and_beasts:block/rowan_slab"
+    },
+    "type=double": {
+      "model": "wizards_and_beasts:block/rowan_planks"
+    },
+    "type=top": {
+      "model": "wizards_and_beasts:block/rowan_slab_top"
+    }
+  }
+}

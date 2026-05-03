@@ -1,9 +1,0 @@
-{
-  "model": {
-    "type": "minecraft:special",
-    "base": "neo:item/sickle",
-    "model": {
-      "type": "geckolib:geckolib"
-    }
-  }
-}

@@ -1,0 +1,28 @@
+{
+  "values": {
+    "wizards_and_beasts:elder_log": {
+      "stripped_block": "wizards_and_beasts:stripped_elder_log"
+    },
+    "wizards_and_beasts:elder_wood": {
+      "stripped_block": "wizards_and_beasts:stripped_elder_wood"
+    },
+    "wizards_and_beasts:yew_log": {
+      "stripped_block": "wizards_and_beasts:stripped_yew_log"
+    },
+    "wizards_and_beasts:yew_wood": {
+      "stripped_block": "wizards_and_beasts:stripped_yew_wood"
+    },
+    "wizards_and_beasts:holly_log": {
+      "stripped_block": "wizards_and_beasts:stripped_holly_log"
+    },
+    "wizards_and_beasts:holly_wood": {
+      "stripped_block": "wizards_and_beasts:stripped_holly_wood"
+    },
+    "wizards_and_beasts:rowan_log": {
+      "stripped_block": "wizards_and_beasts:stripped_rowan_log"
+    },
+    "wizards_and_beasts:rowan_wood": {
+      "stripped_block": "wizards_and_beasts:stripped_rowan_wood"
+    }
+  }
+}

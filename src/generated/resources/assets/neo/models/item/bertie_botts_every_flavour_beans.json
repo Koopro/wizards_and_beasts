@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "neo:item/bertie_botts_every_flavour_beans"
-  }
-}

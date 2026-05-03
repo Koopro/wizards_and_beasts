@@ -1,0 +1,12 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": [
+    "minecraft:meadow",
+    "minecraft:plains",
+    "minecraft:flower_forest"
+  ],
+  "features": [
+    "wizards_and_beasts:mallowsweet_patch"
+  ],
+  "step": "vegetal_decoration"
+}

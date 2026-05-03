@@ -1,0 +1,6 @@
+{
+  "parent": "builtin/entity",
+  "textures": {
+    "particle": "wizards_and_beasts:item/deluminator"
+  }
+}

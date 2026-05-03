@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/outer_stairs",
-  "textures": {
-    "bottom": "neo:block/rowan_planks",
-    "side": "neo:block/rowan_planks",
-    "top": "neo:block/rowan_planks"
-  }
-}

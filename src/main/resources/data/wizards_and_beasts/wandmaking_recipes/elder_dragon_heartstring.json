@@ -1,0 +1,8 @@
+{
+  "wood_key": "wizards_and_beasts:elder",
+  "core_key": "wizards_and_beasts:dragon_heartstring",
+  "minimum_bench_tier": 8.0,
+  "result_length_min": 14.0,
+  "result_length_max": 15.0,
+  "result_integrity": 0.9
+}

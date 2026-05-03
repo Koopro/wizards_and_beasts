@@ -1,0 +1,10 @@
+{
+  "ingredients": [
+    { "item": "minecraft:glistering_melon_slice", "count": 1 },
+    { "item": "minecraft:sweet_berries", "count": 2 },
+    { "item": "wizards_and_beasts:dittany", "count": 1 }
+  ],
+  "cauldronTier": "brass",
+  "heatTimeTicks": 200,
+  "outputBrewId": "wizards_and_beasts:wiggenweld_potion"
+}

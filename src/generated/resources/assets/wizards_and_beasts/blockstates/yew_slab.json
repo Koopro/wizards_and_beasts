@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "wizards_and_beasts:block/yew_slab"
+    },
+    "type=double": {
+      "model": "wizards_and_beasts:block/yew_planks"
+    },
+    "type=top": {
+      "model": "wizards_and_beasts:block/yew_slab_top"
+    }
+  }
+}

@@ -1,9 +1,0 @@
-{
-  "model": {
-    "type": "minecraft:special",
-    "base": "neo:item/deluminator",
-    "model": {
-      "type": "geckolib:geckolib"
-    }
-  }
-}

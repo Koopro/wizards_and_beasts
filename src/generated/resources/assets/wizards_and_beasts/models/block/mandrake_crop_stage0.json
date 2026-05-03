@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/crop",
+  "textures": {
+    "crop": "wizards_and_beasts:block/mandrake_crop_stage0"
+  }
+}

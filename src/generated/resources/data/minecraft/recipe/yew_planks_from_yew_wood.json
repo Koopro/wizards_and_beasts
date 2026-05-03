@@ -3,10 +3,10 @@
   "category": "building",
   "group": "planks",
   "ingredients": [
-    "neo:yew_wood"
+    "wizards_and_beasts:yew_wood"
   ],
   "result": {
     "count": 4,
-    "id": "neo:yew_planks"
+    "id": "wizards_and_beasts:yew_planks"
   }
 }

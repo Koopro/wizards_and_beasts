@@ -1,0 +1,13 @@
+{
+  "display_name": {
+    "translate": "wand_wood.wizards_and_beasts.ash"
+  },
+  "affinity_tags": ["combat", "protective"],
+  "spell_modifiers": {
+    "combat": 0.12,
+    "warding": 0.08
+  },
+  "personality_affinity": ["determined", "focused", "principled"],
+  "rarity": "uncommon",
+  "refuse_threshold": 0.22
+}

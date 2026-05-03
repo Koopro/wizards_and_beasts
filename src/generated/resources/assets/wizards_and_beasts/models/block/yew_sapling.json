@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "wizards_and_beasts:block/yew_sapling"
+  }
+}

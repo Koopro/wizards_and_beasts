@@ -1,0 +1,17 @@
+{
+  "broom_crash": {
+    "subtitle": "subtitles.wizards_and_beasts.broom_crash",
+    "sounds": [
+      {
+        "name": "minecraft:random/explode1",
+        "volume": 0.7,
+        "pitch": 1.2
+      },
+      {
+        "name": "minecraft:random/explode2",
+        "volume": 0.7,
+        "pitch": 1.3
+      }
+    ]
+  }
+}

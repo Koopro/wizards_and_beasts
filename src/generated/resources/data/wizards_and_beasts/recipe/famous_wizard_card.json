@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": "wizards_and_beasts:knut",
+    "I": "wizards_and_beasts:ink_bottle",
+    "P": "minecraft:paper"
+  },
+  "pattern": [
+    "PI",
+    "PG"
+  ],
+  "result": {
+    "count": 2,
+    "id": "wizards_and_beasts:famous_wizard_card"
+  }
+}

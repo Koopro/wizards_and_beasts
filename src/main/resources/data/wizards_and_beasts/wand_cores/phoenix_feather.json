@@ -1,0 +1,12 @@
+{
+  "display_name": {
+    "translate": "wand_core.wizards_and_beasts.phoenix_feather"
+  },
+  "source_key": "fawkes",
+  "raw_power": 1.4,
+  "consistency": 0.82,
+  "loyalty": 0.76,
+  "dark_affinity": 0.25,
+  "initiative": 0.95,
+  "allegiance_transfer_resistance": 0.9
+}

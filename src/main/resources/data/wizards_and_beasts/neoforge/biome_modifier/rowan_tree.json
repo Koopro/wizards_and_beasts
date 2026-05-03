@@ -1,0 +1,13 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": [
+    "minecraft:birch_forest",
+    "minecraft:old_growth_birch_forest",
+    "minecraft:windswept_forest"
+  ],
+  "features": [
+    "wizards_and_beasts:rowan_tree"
+  ],
+  "step": "vegetal_decoration"
+}
+

@@ -1,0 +1,13 @@
+{
+  "display_name": {
+    "translate": "wand_wood.wizards_and_beasts.walnut"
+  },
+  "affinity_tags": ["divination", "protective", "rare"],
+  "spell_modifiers": {
+    "charms": 0.1,
+    "divination": 0.12
+  },
+  "personality_affinity": ["innovator", "inventive", "perceptive"],
+  "rarity": "rare",
+  "refuse_threshold": 0.24
+}

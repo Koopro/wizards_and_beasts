@@ -3,10 +3,10 @@
   "category": "building",
   "group": "planks",
   "ingredients": [
-    "neo:elder_log"
+    "wizards_and_beasts:elder_log"
   ],
   "result": {
     "count": 4,
-    "id": "neo:elder_planks"
+    "id": "wizards_and_beasts:elder_planks"
   }
 }

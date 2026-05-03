@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/leaves",
+  "textures": {
+    "all": "wizards_and_beasts:block/unlit_lantern"
+  }
+}

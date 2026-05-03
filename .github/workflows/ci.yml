@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Run tests
+        run: ./gradlew --no-daemon test
+
+      - name: Run data generation gate
+        run: ./gradlew --no-daemon runData
+
+      - name: Run game test server gate
+        run: ./gradlew --no-daemon runGameTestServer
+
+      - name: Build
+        run: ./gradlew --no-daemon build
+
+      - name: RC gate policy notice
+        if: failure()
+        run: |
+          echo "Pre-beta RC gate failed."
+          echo "Update KNOWN_ISSUES.md with reproducible failure details before retagging."
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wizards-and-beasts-mod-artifact
+          path: build/libs/*.jar
+          if-no-files-found: error

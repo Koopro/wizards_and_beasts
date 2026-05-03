@@ -1,0 +1,9 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "wizards_and_beasts:item/wand",
+    "model": {
+      "type": "geckolib:geckolib"
+    }
+  }
+}

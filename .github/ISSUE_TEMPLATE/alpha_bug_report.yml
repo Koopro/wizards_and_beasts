@@ -1,0 +1,76 @@
+name: Alpha Bug Report
+description: Report an alpha bug with reproducible diagnostics
+title: "[Alpha Bug] "
+labels:
+  - bug
+  - alpha
+body:
+  - type: input
+    id: alpha_version
+    attributes:
+      label: Alpha Version
+      description: Example: 0.1.0-alpha.1
+      placeholder: 0.1.0-alpha.x
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      options:
+        - Singleplayer
+        - Dedicated server
+        - LAN
+    validations:
+      required: true
+  - type: input
+    id: mc_stack
+    attributes:
+      label: Minecraft / NeoForge / Java
+      placeholder: "1.21.11 / 21.11.38-beta / 21"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction Steps
+      placeholder: "1) ... 2) ... 3) ..."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Result
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Result
+    validations:
+      required: true
+  - type: dropdown
+    id: obscurial_form
+    attributes:
+      label: Obscurial form state (if relevant)
+      options:
+        - Not applicable
+        - obscurial_dark
+        - obscurial_human
+        - unknown
+  - type: dropdown
+    id: ability_key
+    attributes:
+      label: Ability key used (if relevant)
+      options:
+        - Not applicable
+        - N (Surge)
+        - M (Grasp)
+        - Other
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / Crash report
+      description: Attach latest.log, server log, and crash report if available.
+    validations:
+      required: true

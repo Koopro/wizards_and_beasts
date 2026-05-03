@@ -1,0 +1,7 @@
+{
+  "width": 2,
+  "height": 1,
+  "asset_id": "minecraft:wasteland",
+  "title": { "translate": "painting.wizards_and_beasts.portrait_gryffindor_common.title" },
+  "author": { "translate": "painting.wizards_and_beasts.portrait_gryffindor_common.author" }
+}

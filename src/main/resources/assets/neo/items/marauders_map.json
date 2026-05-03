@@ -1,9 +1,0 @@
-{
-  "model": {
-    "type": "minecraft:special",
-    "base": "neo:item/marauders_map",
-    "model": {
-      "type": "geckolib:geckolib"
-    }
-  }
-}

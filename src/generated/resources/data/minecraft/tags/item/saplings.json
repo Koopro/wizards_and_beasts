@@ -1,8 +1,8 @@
 {
   "values": [
-    "neo:elder_sapling",
-    "neo:yew_sapling",
-    "neo:holly_sapling",
-    "neo:rowan_sapling"
+    "wizards_and_beasts:elder_sapling",
+    "wizards_and_beasts:yew_sapling",
+    "wizards_and_beasts:holly_sapling",
+    "wizards_and_beasts:rowan_sapling"
   ]
 }
