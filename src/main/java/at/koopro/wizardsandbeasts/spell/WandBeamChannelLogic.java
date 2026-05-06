@@ -2,16 +2,9 @@ package at.koopro.wizardsandbeasts.spell;
 
 import at.koopro.wizardsandbeasts.Config;
 import at.koopro.wizardsandbeasts.data.PlayerSpellData;
-import at.koopro.wizardsandbeasts.effect.ModEffects;
-import at.koopro.wizardsandbeasts.module.Module;
-import at.koopro.wizardsandbeasts.module.ModuleManager;
-import at.koopro.wizardsandbeasts.network.CrucioIntentFeedbackS2CPacket;
-import at.koopro.wizardsandbeasts.registry.ModAttachments;
-import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
-import at.koopro.wizardsandbeasts.skill.SkillTreeId;
 import at.koopro.wizardsandbeasts.item.WandItem;
+import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.network.AvadaBlastS2CPacket;
-import at.koopro.wizardsandbeasts.registry.ModSounds;
 import at.koopro.wizardsandbeasts.network.SpellImpactBurstS2CPacket;
 import at.koopro.wizardsandbeasts.network.SpellCastC2SPacket;
 import at.koopro.wizardsandbeasts.spell.cast.BeamRay;
@@ -25,8 +18,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.decoration.ArmorStand;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -35,7 +26,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.ClipContext;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -116,7 +106,7 @@ public final class WandBeamChannelLogic {
             endChannel(player);
             return;
         }
-        if (Config.enforceSpellRequirements && !spell.getRequirement().isMet(player, data)) {
+        if (Config.enforceSpellRequirements && !spell.getRequirement().isMet(data)) {
             endChannel(player);
             return;
         }
@@ -261,18 +251,11 @@ public final class WandBeamChannelLogic {
         if (los.getType() != HitResult.Type.MISS) {
             return;
         }
-        if (target instanceof ServerPlayer victim
-                && Boolean.TRUE.equals(victim.getData(ModAttachments.LOVE_PROTECTION.get()))) {
-            // TODO(redemption): timed love protection window against AK
-            return;
-        }
         target.invulnerableTime = 0;
         target.hurt(level.damageSources().playerAttack(caster), 1_000_000f);
         if (target.isAlive()) {
             return;
         }
-        level.playSound(null, target.blockPosition(), ModSounds.SPELL_IMPACT_AVADA.get(), SoundSource.PLAYERS,
-                0.85f, 0.94f + level.random.nextFloat() * 0.08f);
         s.avadaConsumed = true;
         recordBeamProficiencyHit(caster, spellId, s, 1);
         AvadaBlastS2CPacket.sendToTracking(caster, caster.getEyePosition(), target.getBoundingBox().getCenter());
@@ -283,9 +266,6 @@ public final class WandBeamChannelLogic {
 
     private static void handleCrucioChannel(ServerPlayer caster, Spell spell,
                                             @Nullable LivingEntity target, Session s, int channelEffectInterval) {
-        if (!ModuleManager.isEnabled(Module.DARK_ARTS)) {
-            return;
-        }
         if (target == null) {
             if (s.lastCrucioTarget != null) {
                 LivingEntity prev = findLivingInLevel(caster, s.lastCrucioTarget);
@@ -306,32 +286,16 @@ public final class WandBeamChannelLogic {
         }
 
         s.lastCrucioTarget = tid;
-        int effectInterval = Math.max(1, (int) (channelEffectInterval / Math.max(0.5f, crucioIntentMultiplier(caster, spell))));
+        int effectInterval = s.beamTicks >= 60 ? 3 : channelEffectInterval;
         if (s.beamTicks % effectInterval == 0) {
-            float intent = crucioIntentMultiplier(caster, spell);
-            PacketDistributor.sendToPlayer(caster, new CrucioIntentFeedbackS2CPacket(intent));
-            float corruption = caster.getData(ModAttachments.DARK_CORRUPTION.get());
-            caster.setData(ModAttachments.DARK_CORRUPTION.get(), Math.min(100f, corruption + 5.0f * intent));
-            target.removeEffect(MobEffects.WITHER);
-            target.removeEffect(MobEffects.SLOWNESS);
-            int painTicks = Math.max(20, (int) (60 / intent));
-            target.addEffect(new MobEffectInstance(ModEffects.CRUCIATUS_PAIN, painTicks, 0, false, true, true));
+            spell.applyTargetEffects(target);
             recordBeamProficiencyHit(caster, spell.getId(), s, 20);
         }
         if (s.beamTicks >= 40 && s.beamTicks % 20 == 0) {
-            float intent = crucioIntentMultiplier(caster, spell);
-            float rampDamage = Math.min(1.5f, 0.4f + (s.beamTicks / 120f)) * intent;
+            float rampDamage = Math.min(1.5f, 0.4f + (s.beamTicks / 120f));
             target.hurt(caster.level().damageSources().magic(), rampDamage);
             recordBeamProficiencyHit(caster, spell.getId(), s, 20);
         }
-    }
-
-    private static float crucioIntentMultiplier(ServerPlayer caster, Spell spell) {
-        float baseIntent = 0.3f;
-        float corruption = caster.getData(ModAttachments.DARK_CORRUPTION.get()) / 100.0f * 0.5f;
-        float prof = spell.getProficiencyScalar(caster) * 0.4f;
-        float darkArtsNodes = SkillSystemAPI.countUnlockedSkillsInTree(caster, SkillTreeId.DARK_ARTS) / 6.0f * 0.3f;
-        return Mth.clamp(baseIntent + corruption + prof + darkArtsNodes, 0.1f, 1.5f);
     }
 
     private static void handleLeviosaChannel(ServerPlayer caster, String spellId, @Nullable Entity target, Session s, float maxReach) {
@@ -493,8 +457,6 @@ public final class WandBeamChannelLogic {
     private static void stripCrucioEffects(LivingEntity entity) {
         entity.removeEffect(MobEffects.WITHER);
         entity.removeEffect(MobEffects.SLOWNESS);
-        entity.removeEffect(ModEffects.CRUCIATUS_PAIN);
-        entity.removeEffect(ModEffects.CRUCIO_SANITY_DRAIN);
     }
 
     static final class Session {

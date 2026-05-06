@@ -16,6 +16,10 @@ public final class SpellRejectCodes {
     public static final String COLLAPSE_INSTABILITY_FIZZLE = "collapse_instability_fizzle";
     public static final String OBSCURIAL_INSTABILITY_FIZZLE = "obscurial_instability_fizzle";
     public static final String DUPLICATE_RELEASE_GUARD = "duplicate_release_guard";
+    /** Held wand has no bonded master (resonance never matched). */
+    public static final String WAND_NOT_BONDED = "wand_not_bonded";
+    /** Held wand is bonded to another player. */
+    public static final String WAND_WRONG_MASTER = "wand_wrong_master";
 
     public static final String ASSIGN_UNKNOWN_SPELL = "assign_unknown_spell";
     public static final String ASSIGN_UNLEARNED_SPELL = "assign_unlearned_spell";
@@ -46,7 +50,9 @@ public final class SpellRejectCodes {
             COOLDOWN_ACTIVE,
             COLLAPSE_INSTABILITY_FIZZLE,
             OBSCURIAL_INSTABILITY_FIZZLE,
-            DUPLICATE_RELEASE_GUARD);
+            DUPLICATE_RELEASE_GUARD,
+            WAND_NOT_BONDED,
+            WAND_WRONG_MASTER);
 
     /** Reasons from {@link at.koopro.wizardsandbeasts.network.ObscurialAbilityUseC2SPacket} only. */
     private static final Set<String> OBSCURUS_ABILITY_PACKET_BASES = Set.of(
