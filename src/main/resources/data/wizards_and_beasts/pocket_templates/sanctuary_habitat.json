@@ -1,0 +1,12 @@
+{
+  "templateId": "sanctuary_habitat",
+  "description": "Scamander-style sanctuary with habitat-biased terrain shell.",
+  "maxRadius": 20,
+  "allowedBuildRadius": 28,
+  "instabilityCost": 3,
+  "intentTags": [
+    "beastcare",
+    "healing",
+    "herbology"
+  ]
+}

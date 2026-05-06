@@ -9,6 +9,8 @@ import at.koopro.wizardsandbeasts.item.wand.WandFlexibility;
 import at.koopro.wizardsandbeasts.item.wand.WandLength;
 import at.koopro.wizardsandbeasts.item.wand.ExpelliarmusDropTag;
 import at.koopro.wizardsandbeasts.item.wand.WandWood;
+import at.koopro.wizardsandbeasts.pocket.PocketAccessMode;
+import at.koopro.wizardsandbeasts.pocket.PocketArchetype;
 import at.koopro.wizardsandbeasts.wand.cast.WandAllegiance;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
@@ -19,6 +21,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import javax.annotation.Nullable;
+import java.util.UUID;
 
 public class ModDataComponents {
 
@@ -115,6 +118,45 @@ public class ModDataComponents {
                             .networkSynchronized(ByteBufCodecs.STRING_UTF8.map(
                                     Identifier::parse,
                                     Identifier::toString))
+                            .build());
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<UUID>> POCKET_CASE_ID =
+            DATA_COMPONENTS.register("pocket_case_id", () ->
+                    DataComponentType.<UUID>builder()
+                            .persistent(net.minecraft.core.UUIDUtil.CODEC)
+                            .networkSynchronized(net.minecraft.core.UUIDUtil.STREAM_CODEC)
+                            .build());
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<UUID>> POCKET_ID =
+            DATA_COMPONENTS.register("pocket_id", () ->
+                    DataComponentType.<UUID>builder()
+                            .persistent(net.minecraft.core.UUIDUtil.CODEC)
+                            .networkSynchronized(net.minecraft.core.UUIDUtil.STREAM_CODEC)
+                            .build());
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<PocketArchetype>> POCKET_ARCHETYPE =
+            DATA_COMPONENTS.register("pocket_archetype", () ->
+                    DataComponentType.<PocketArchetype>builder()
+                            .persistent(PocketArchetype.CODEC)
+                            .networkSynchronized(ByteBufCodecs.STRING_UTF8.map(
+                                    value -> PocketArchetype.valueOf(value.toUpperCase(java.util.Locale.ROOT)),
+                                    PocketArchetype::getSerializedName))
+                            .build());
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<PocketAccessMode>> POCKET_ACCESS_MODE =
+            DATA_COMPONENTS.register("pocket_access_mode", () ->
+                    DataComponentType.<PocketAccessMode>builder()
+                            .persistent(PocketAccessMode.CODEC)
+                            .networkSynchronized(ByteBufCodecs.STRING_UTF8.map(
+                                    value -> PocketAccessMode.valueOf(value.toUpperCase(java.util.Locale.ROOT)),
+                                    PocketAccessMode::getSerializedName))
+                            .build());
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> POCKET_TEMPLATE_ID =
+            DATA_COMPONENTS.register("pocket_template_id", () ->
+                    DataComponentType.<String>builder()
+                            .persistent(com.mojang.serialization.Codec.STRING)
+                            .networkSynchronized(ByteBufCodecs.STRING_UTF8)
                             .build());
 
     /**

@@ -1,0 +1,13 @@
+{
+  "templateId": "adaptive_utility",
+  "description": "Room of Requirement adaptive utility chamber.",
+  "maxRadius": 14,
+  "allowedBuildRadius": 24,
+  "instabilityCost": 2,
+  "intentTags": [
+    "crafting",
+    "storage",
+    "training",
+    "study"
+  ]
+}

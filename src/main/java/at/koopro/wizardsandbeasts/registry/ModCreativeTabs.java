@@ -97,6 +97,7 @@ public class ModCreativeTabs {
                         output.accept(ModItems.DEATHLY_HALLOW_CLOAK.get());
                         output.accept(ModItems.SNEAKOSCOPE.get());
                         output.accept(ModItems.PORTKEY.get());
+                        output.accept(ModItems.POCKET_CASE.get());
                         output.accept(ModItems.PERUVIAN_DARKNESS_POWDER.get());
                         output.accept(ModItems.DECOY_DETONATOR.get());
                         output.accept(ModItems.EXTENDABLE_EARS.get());

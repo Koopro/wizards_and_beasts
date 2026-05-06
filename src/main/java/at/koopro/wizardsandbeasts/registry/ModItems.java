@@ -29,6 +29,7 @@ import at.koopro.wizardsandbeasts.item.wizarding.FlooPowderItem;
 import at.koopro.wizardsandbeasts.item.wizarding.MooncalfDungItem;
 import at.koopro.wizardsandbeasts.item.wizarding.OmniocularsItem;
 import at.koopro.wizardsandbeasts.item.wizarding.PortkeyItem;
+import at.koopro.wizardsandbeasts.item.wizarding.PocketCaseItem;
 import at.koopro.wizardsandbeasts.item.wizarding.RemembrallItem;
 import at.koopro.wizardsandbeasts.item.wizarding.TimeTurnerItem;
 import at.koopro.wizardsandbeasts.item.wizarding.WizardingProjectileItem;
@@ -273,6 +274,8 @@ public class ModItems {
             ITEMS.registerSimpleItem("sneakoscope", new Item.Properties().stacksTo(1));
     public static final DeferredItem<PortkeyItem> PORTKEY =
             ITEMS.registerItem("portkey", PortkeyItem::new, new Item.Properties().stacksTo(1));
+    public static final DeferredItem<PocketCaseItem> POCKET_CASE =
+            ITEMS.registerItem("pocket_case", PocketCaseItem::new, new Item.Properties().stacksTo(1));
     public static final DeferredItem<CloakItem> INVISIBILITY_CLOAK =
             ITEMS.registerItem("invisibility_cloak",
                     props -> new CloakItem(props.stacksTo(1).equippable(EquipmentSlot.CHEST), false), new Item.Properties());

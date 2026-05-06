@@ -177,6 +177,8 @@ public final class SpellExecutor {
             }),
             new SelfUtilityRule("episkey", (level, caster, spell) -> SpellCastHandlers.handleEpiskeySelf(caster, spell)),
             new SelfUtilityRule("frigora", (level, caster, spell) -> SpellCastHandlers.handleFrigoraSelf(level, caster, spell)),
+            new SelfUtilityRule("capacious_extremis", (level, caster, spell) -> SpellCastHandlers.handlePocketIngress(caster)),
+            new SelfUtilityRule("claustra_reverto", (level, caster, spell) -> SpellCastHandlers.handlePocketEgress(caster)),
             new SelfUtilityRule("riddikulus", (level, caster, spell) -> {
                 SpellHelper.spawnBurst(level, spell, caster.getEyePosition(), 18, 0.32);
                 return true;

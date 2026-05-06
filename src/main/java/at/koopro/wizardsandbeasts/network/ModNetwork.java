@@ -20,5 +20,6 @@ public class ModNetwork {
         ModNetworkTeacher.register(registrar);
         ModNetworkWand.register(registrar);
         ModNetworkBestiary.register(registrar);
+        ModNetworkPocket.register(registrar);
     }
 }

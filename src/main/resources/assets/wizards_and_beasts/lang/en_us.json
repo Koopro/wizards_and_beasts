@@ -710,5 +710,13 @@
   "broom_lore.wizards_and_beasts.oakshaft_79.1": "Built for endurance, not speed.",
   "broom_lore.wizards_and_beasts.oakshaft_79.2": "First broom to cross the Atlantic.",
   "broom_lore.wizards_and_beasts.oakshaft_79.3": "Virtually indestructible. Predates the Cushioning Charm.",
-  "broom_lore.wizards_and_beasts.oakshaft_79.4": "Vibrates uncomfortably above moderate speeds."
+  "broom_lore.wizards_and_beasts.oakshaft_79.4": "Vibrates uncomfortably above moderate speeds.",
+  "item.wizards_and_beasts.deluminator.bound": "The Deluminator is now attuned to %s.",
+  "item.wizards_and_beasts.deluminator.bound_tooltip": "Attuned to: %s",
+  "item.wizards_and_beasts.deluminator.return_channeling": "The Deluminator gathers its guiding light...",
+  "item.wizards_and_beasts.deluminator.return_failed": "No guiding bond answers the Deluminator.",
+  "item.wizards_and_beasts.deluminator.return_success": "A guiding light leads you to %s.",
+  "item.wizards_and_beasts.pocket_case": "Pocket Case",
+  "item.wizards_and_beasts.portkey.linked": "Linked destination: %s, %s, %s",
+  "item.wizards_and_beasts.portkey.unlinked": "Sneak-right-click a block to bind this Portkey."
 }

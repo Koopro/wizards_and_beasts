@@ -1,0 +1,17 @@
+{
+  "displayName": "Claustra Reverto",
+  "category": "utility",
+  "cooldownTicks": 80,
+  "color": -4202753,
+  "castType": "self",
+  "selfEffects": [],
+  "sound": {
+    "id": "minecraft:block.ender_chest.open",
+    "volume": 0.45,
+    "pitch": 1.25
+  },
+  "requirement": {
+    "type": "knows",
+    "prerequisiteId": "capacious_extremis"
+  }
+}
