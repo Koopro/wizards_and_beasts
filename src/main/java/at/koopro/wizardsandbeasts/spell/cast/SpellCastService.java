@@ -129,6 +129,18 @@ public final class SpellCastService {
             return;
         }
 
+        var bondCheckStack = WandHelper.getWandStack(player);
+        if (!WandHelper.isWandBondedTo(player, bondCheckStack)) {
+            if (WandComponents.getMaster(bondCheckStack).isEmpty()) {
+                rejectWithHumanStress(player, SpellRejectCodes.WAND_NOT_BONDED);
+                player.displayClientMessage(Component.translatable("wandcraft.cast.requires_bond"), true);
+            } else {
+                rejectWithHumanStress(player, SpellRejectCodes.WAND_WRONG_MASTER);
+                player.displayClientMessage(Component.translatable("wandcraft.cast.wrong_master"), true);
+            }
+            return;
+        }
+
         PlayerSpellData data = player.getData(ModAttachments.SPELL_DATA.get());
         if (!SpellNetworkGuards.canUseWand(player, data, "cast")) {
             applyHumanFailedCastStress(player);
