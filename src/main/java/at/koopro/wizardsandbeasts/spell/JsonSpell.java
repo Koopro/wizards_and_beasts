@@ -38,6 +38,26 @@ public class JsonSpell extends Spell {
     }
 
     @Override
+    public String getRequiredSkillId() {
+        return def.learning().requiredSkillId().orElse(null);
+    }
+
+    @Override
+    public String getRequiredProfessionId() {
+        return def.learning().requiredProfessionId().orElse(null);
+    }
+
+    @Override
+    public String getMasterySourceSpellId() {
+        return def.learning().masterySpellId().orElse(null);
+    }
+
+    @Override
+    public at.koopro.wizardsandbeasts.data.PlayerSpellData.MasteryTier getRequiredMasteryTier() {
+        return def.learning().minMasteryTier().orElse(null);
+    }
+
+    @Override
     public boolean isUnblockable() {
         return def.unblockable();
     }

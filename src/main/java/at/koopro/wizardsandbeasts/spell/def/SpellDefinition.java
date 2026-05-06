@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.spell.def;
 
 import at.koopro.wizardsandbeasts.spell.CastType;
+import at.koopro.wizardsandbeasts.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.spell.Proficiency;
 import at.koopro.wizardsandbeasts.spell.SpellCategory;
 import at.koopro.wizardsandbeasts.spell.SpellFamily;
@@ -63,6 +64,7 @@ public record SpellDefinition(
         List<MobEffectDef> targetEffects,
         Optional<SoundDef> sound,
         SpellRequirementDef requirement,
+        LearningDef learning,
         boolean unblockable,
         Optional<SpellFamily> spellFamily,
         Set<GampDomain> gampDomains) {
@@ -155,6 +157,57 @@ public record SpellDefinition(
         }
     }
 
+    /** Optional progression gates used by teacher learning offers. */
+    public record LearningDef(
+            Optional<String> requiredSkillId,
+            Optional<String> requiredProfessionId,
+            Optional<String> masterySpellId,
+            Optional<PlayerSpellData.MasteryTier> minMasteryTier) {
+
+        public static final LearningDef NONE = new LearningDef(
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty());
+
+        public static final Codec<LearningDef> CODEC = RecordCodecBuilder.create(inst -> inst.group(
+                Codec.STRING.optionalFieldOf("requiredSkillId").forGetter(LearningDef::requiredSkillId),
+                Codec.STRING.optionalFieldOf("requiredProfessionId").forGetter(LearningDef::requiredProfessionId),
+                Codec.STRING.optionalFieldOf("masterySpellId").forGetter(LearningDef::masterySpellId),
+                StringRepresentable.fromValues(MasteryTierValues::values).optionalFieldOf("minMasteryTier")
+                        .xmap(o -> o.map(MasteryTierValues::toTier),
+                                o -> o.map(MasteryTierValues::fromTier))
+                        .forGetter(LearningDef::minMasteryTier)
+        ).apply(inst, LearningDef::new));
+
+        public enum MasteryTierValues implements StringRepresentable {
+            NOVICE("novice", PlayerSpellData.MasteryTier.NOVICE),
+            PROFICIENT("proficient", PlayerSpellData.MasteryTier.PROFICIENT),
+            MASTERED("mastered", PlayerSpellData.MasteryTier.MASTERED);
+
+            private final String name;
+            private final PlayerSpellData.MasteryTier value;
+
+            MasteryTierValues(String name, PlayerSpellData.MasteryTier value) {
+                this.name = name;
+                this.value = value;
+            }
+
+            @Override
+            public String getSerializedName() { return name; }
+
+            public PlayerSpellData.MasteryTier toTier() { return value; }
+
+            public static MasteryTierValues fromTier(PlayerSpellData.MasteryTier tier) {
+                return switch (tier) {
+                    case NOVICE -> NOVICE;
+                    case PROFICIENT -> PROFICIENT;
+                    case MASTERED -> MASTERED;
+                };
+            }
+        }
+    }
+
     /**
      * DFU {@link RecordCodecBuilder#group} supports at most 16 fields.
      * Split into two {@link MapCodec}s merged with {@link Codec#mapPair} so JSON stays one flat object.
@@ -200,6 +253,7 @@ public record SpellDefinition(
             List<MobEffectDef> targetEffects,
             Optional<SoundDef> sound,
             SpellRequirementDef requirement,
+            LearningDef learning,
             boolean unblockable,
             Optional<SpellFamily> spellFamily,
             Set<GampDomain> gampDomains) {
@@ -211,6 +265,7 @@ public record SpellDefinition(
                 MobEffectDef.CODEC.listOf().optionalFieldOf("targetEffects", List.of()).forGetter(SpellDefinitionFieldsB::targetEffects),
                 SoundDef.CODEC.optionalFieldOf("sound").forGetter(SpellDefinitionFieldsB::sound),
                 SpellRequirementDef.CODEC.optionalFieldOf("requirement", SpellRequirementDef.NONE).forGetter(SpellDefinitionFieldsB::requirement),
+                LearningDef.CODEC.optionalFieldOf("learning", LearningDef.NONE).forGetter(SpellDefinitionFieldsB::learning),
                 Codec.BOOL.optionalFieldOf("unblockable", false).forGetter(SpellDefinitionFieldsB::unblockable),
                 StringRepresentable.fromValues(SpellFamily::values).optionalFieldOf("family").forGetter(SpellDefinitionFieldsB::spellFamily),
                 /*
@@ -254,6 +309,7 @@ public record SpellDefinition(
                     pair.getSecond().targetEffects(),
                     pair.getSecond().sound(),
                     pair.getSecond().requirement(),
+                    pair.getSecond().learning(),
                     pair.getSecond().unblockable(),
                     pair.getSecond().spellFamily(),
                     pair.getSecond().gampDomains()),
@@ -280,6 +336,7 @@ public record SpellDefinition(
                             def.targetEffects(),
                             def.sound(),
                             def.requirement(),
+                            def.learning(),
                             def.unblockable(),
                             def.spellFamily(),
                             def.gampDomains())));

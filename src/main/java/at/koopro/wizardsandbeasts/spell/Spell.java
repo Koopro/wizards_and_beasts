@@ -247,4 +247,28 @@ public abstract class Spell {
     public boolean isUnblockable() {
         return false;
     }
+
+    /**
+     * Optional hybrid-learning metadata used by the teacher progression system.
+     * Java spells default to no extra gate; datapack spells can provide these.
+     */
+    @Nullable
+    public String getRequiredSkillId() {
+        return null;
+    }
+
+    @Nullable
+    public String getRequiredProfessionId() {
+        return null;
+    }
+
+    @Nullable
+    public String getMasterySourceSpellId() {
+        return null;
+    }
+
+    @Nullable
+    public PlayerSpellData.MasteryTier getRequiredMasteryTier() {
+        return null;
+    }
 }
