@@ -7,7 +7,7 @@ import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.util.WandHelper;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
-import at.koopro.wizardsandbeasts.wand.cast.WandAllegianceSystem;
+import at.koopro.wizardsandbeasts.wand.cast.WandCastingAllegianceSystem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -106,7 +106,7 @@ public final class ExpelliarmusDisarmHandler {
             return;
         }
         java.util.Optional<UUID> prevMaster = WandComponents.getMaster(wandStack);
-        WandAllegianceSystem.transferTo(wandStack, disarmer.getUUID(), 0.55f, level.getGameTime());
+        WandCastingAllegianceSystem.transferTo(wandStack, disarmer.getUUID(), 0.55f, level.getGameTime());
         disarmer.sendSystemMessage(Component.literal("The wand has chosen you.").withStyle(ChatFormatting.GOLD));
         prevMaster.ifPresent(prev -> {
             Player prevPlayer = level.getPlayerByUUID(prev);

@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.event;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.wand.cast.WandAllegianceSystem;
+import at.koopro.wizardsandbeasts.wand.cast.WandCastingAllegianceSystem;
 import at.koopro.wizardsandbeasts.util.WandHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -28,7 +28,7 @@ public final class PlayerDeathHandler {
             if (drop == null) continue;
             ItemStack stack = drop.getItem();
             if (!WandHelper.isWand(stack)) continue;
-            WandAllegianceSystem.transferTo(stack, killer.getUUID(), 0.3f, gameTick);
+            WandCastingAllegianceSystem.transferTo(stack, killer.getUUID(), 0.3f, gameTick);
             drop.setItem(stack);
         }
     }

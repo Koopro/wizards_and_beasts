@@ -29,7 +29,7 @@ public class ModEntities {
 
     public static final DeferredHolder<EntityType<?>, EntityType<PatronusEntity>> PATRONUS =
             EntityHelper.register(ENTITY_TYPES, "patronus", PatronusEntity::new, MobCategory.MISC, 0.6f, 1.2f, 8, 2);
-    static { EntityAttributes.queue(PATRONUS, PatronusEntity::createAttributes); }
+    static { EntityAttributeBindings.queue(PATRONUS, PatronusEntity::createAttributes); }
 
     public static final DeferredHolder<EntityType<?>, EntityType<ProtegoShieldEntity>> PROTEGO_SHIELD =
             EntityHelper.register(ENTITY_TYPES, "protego_shield", ProtegoShieldEntity::new,
@@ -37,15 +37,15 @@ public class ModEntities {
 
     public static final DeferredHolder<EntityType<?>, EntityType<GoblinTellerEntity>> GOBLIN_TELLER =
             EntityHelper.register(ENTITY_TYPES, "goblin_teller", GoblinTellerEntity::new, MobCategory.CREATURE, 0.6f, 1.5f);
-    static { EntityAttributes.queue(GOBLIN_TELLER, GoblinTellerEntity::createAttributes); }
+    static { EntityAttributeBindings.queue(GOBLIN_TELLER, GoblinTellerEntity::createAttributes); }
 
     public static final DeferredHolder<EntityType<?>, EntityType<NifflerEntity>> NIFFLER =
             EntityHelper.register(ENTITY_TYPES, "niffler", NifflerEntity::new, MobCategory.CREATURE, 0.5f, 0.4f);
-    static { EntityAttributes.queue(NIFFLER, NifflerEntity::createAttributes); }
+    static { EntityAttributeBindings.queue(NIFFLER, NifflerEntity::createAttributes); }
 
     public static final DeferredHolder<EntityType<?>, EntityType<FormMannequinEntity>> FORM_MANNEQUIN =
             EntityHelper.register(ENTITY_TYPES, "form_mannequin", FormMannequinEntity::new, MobCategory.MISC, 0.6f, 1.8f);
-    static { EntityAttributes.queue(FORM_MANNEQUIN, FormMannequinEntity::createAttributes); }
+    static { EntityAttributeBindings.queue(FORM_MANNEQUIN, FormMannequinEntity::createAttributes); }
 
     public static final DeferredHolder<EntityType<?>, EntityType<WizardingThrownEntity>> WIZARDING_THROWN =
             EntityHelper.register(ENTITY_TYPES, "wizarding_thrown", WizardingThrownEntity::new, MobCategory.MISC, 0.25f, 0.25f, 8, 2);

@@ -151,11 +151,11 @@ class SpellDefinitionCodecTest {
 
     @Test
     void loreApproximationSpells_parseFromDatapackFiles() throws IOException {
-        SpellDefinition episkey = parseFile("src/main/resources/data/wizards_and_beasts/wizards_and_beasts/spells/episkey.json");
-        SpellDefinition frigora = parseFile("src/main/resources/data/wizards_and_beasts/wizards_and_beasts/spells/frigora.json");
-        SpellDefinition levicorpus = parseFile("src/main/resources/data/wizards_and_beasts/wizards_and_beasts/spells/levicorpus.json");
+        SpellDefinition episkey = parseFile("src/main/resources/data/wizards_and_beasts/spells/episkey.json");
+        SpellDefinition frigora = parseFile("src/main/resources/data/wizards_and_beasts/spells/frigora.json");
+        SpellDefinition levicorpus = parseFile("src/main/resources/data/wizards_and_beasts/spells/levicorpus.json");
         SpellDefinition finiteIncantatem = parseFile(
-                "src/main/resources/data/wizards_and_beasts/wizards_and_beasts/spells/finite_incantatem.json");
+                "src/main/resources/data/wizards_and_beasts/spells/finite_incantatem.json");
 
         assertEquals(CastType.SELF, episkey.castType());
         assertEquals(0, episkey.selfEffects().size());

@@ -20,7 +20,7 @@ import at.koopro.wizardsandbeasts.bestiary.BestiaryEntryLoader;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.network.ModNetwork;
 import at.koopro.wizardsandbeasts.module.condition.ModConditions;
-import at.koopro.wizardsandbeasts.registry.EntityAttributes;
+import at.koopro.wizardsandbeasts.registry.EntityAttributeBindings;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModAttributes;
 import at.koopro.wizardsandbeasts.skill.SkillTrees;
@@ -76,7 +76,7 @@ public class WizardsAndBeastsMod {
         WandmakingRecipeSerializer.RECIPE_SERIALIZERS.register(modEventBus);
 
         modEventBus.addListener(ModNetwork::register);
-        modEventBus.addListener(EntityAttributes::registerAll);
+        modEventBus.addListener(EntityAttributeBindings::registerAll);
         modEventBus.addListener(WandDatapackRegistries::registerDatapackRegistries);
 
         // Defer Spells.init() until FMLCommonSetupEvent so addon mods get a

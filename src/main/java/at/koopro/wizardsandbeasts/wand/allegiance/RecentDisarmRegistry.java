@@ -9,7 +9,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Tracks recent disarm events so {@link AllegianceSystem} can tell combat disarms from voluntary swaps.
+ * Tracks recent disarm events so {@link WandDisarmAllegianceSystem} can tell combat disarms from voluntary swaps.
  * // Spell system (future): call {@link #registerDisarm} when a disarm spell successfully removes a wand.
  */
 public final class RecentDisarmRegistry {

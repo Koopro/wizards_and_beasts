@@ -7,7 +7,7 @@ import at.koopro.wizardsandbeasts.network.SpellProficiencySyncS2CPacket;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
-import at.koopro.wizardsandbeasts.wand.cast.WandAllegianceSystem;
+import at.koopro.wizardsandbeasts.wand.cast.WandCastingAllegianceSystem;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
@@ -36,7 +36,7 @@ public final class SpellProficiencyTracker {
         SkillEvents.checkProficiencyMilestone(player, spellId, oldHits, newHits);
         ItemStack wandStack = at.koopro.wizardsandbeasts.util.WandHelper.getWandStack(player);
         if (!wandStack.isEmpty() && player.level() instanceof net.minecraft.server.level.ServerLevel level) {
-            WandAllegianceSystem.onSuccessfulCast(player, wandStack, level);
+            WandCastingAllegianceSystem.onSuccessfulCast(player, wandStack, level);
         }
         SpellDataDeltaS2CPacket.sendTo(
                 player,

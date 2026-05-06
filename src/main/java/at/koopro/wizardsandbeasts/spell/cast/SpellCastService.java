@@ -15,7 +15,7 @@ import at.koopro.wizardsandbeasts.spell.proficiency.ProficiencyScaler;
 import at.koopro.wizardsandbeasts.spell.gamp.GampViolationEvent;
 import at.koopro.wizardsandbeasts.spell.gamp.GampsLaw;
 import at.koopro.wizardsandbeasts.spell.Spells;
-import at.koopro.wizardsandbeasts.wand.cast.WandAllegianceSystem;
+import at.koopro.wizardsandbeasts.wand.cast.WandCastingAllegianceSystem;
 import at.koopro.wizardsandbeasts.wand.cast.WandStats;
 import at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver;
 import at.koopro.wizardsandbeasts.type.ObscurialRules;
@@ -144,8 +144,8 @@ public final class SpellCastService {
                 spell instanceof JsonSpell jsonSpell ? jsonSpell.definition() : null,
                 wandStats,
                 spell.getProficiency(player));
-        castContext = castContext.withAllegiance(WandAllegianceSystem.resolve(wandStack));
-        castContext = castContext.withCompatibility(WandAllegianceSystem.applyLayer(castContext, serverLevel));
+        castContext = castContext.withAllegiance(WandCastingAllegianceSystem.resolve(wandStack));
+        castContext = castContext.withCompatibility(WandCastingAllegianceSystem.applyLayer(castContext, serverLevel));
         Identifier spellKey;
         try {
             spellKey = Identifier.parse(spell.getId());
