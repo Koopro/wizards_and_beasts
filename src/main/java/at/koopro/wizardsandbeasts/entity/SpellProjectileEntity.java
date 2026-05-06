@@ -1,13 +1,16 @@
 package at.koopro.wizardsandbeasts.entity;
 
 import at.koopro.wizardsandbeasts.Config;
-import at.koopro.wizardsandbeasts.event.SpellCombatControlHandler;
+import at.koopro.wizardsandbeasts.spell.SpellIds;
+import at.koopro.wizardsandbeasts.spell.expelliarmus.ExpelliarmusDisarmHandler;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
+import at.koopro.wizardsandbeasts.event.SpellCombatControlHandler;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.network.SpellImpactBurstS2CPacket;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
 import at.koopro.wizardsandbeasts.registry.ModEntities;
+import at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions;
 import at.koopro.wizardsandbeasts.registry.ModParticles;
 import at.koopro.wizardsandbeasts.spell.Spell;
 import at.koopro.wizardsandbeasts.spell.SpellFamilies;
@@ -16,6 +19,7 @@ import at.koopro.wizardsandbeasts.spell.Spells;
 import at.koopro.wizardsandbeasts.spell.SpellHelper;
 import at.koopro.wizardsandbeasts.spell.SpellProperties;
 import at.koopro.wizardsandbeasts.spell.Proficiency;
+import at.koopro.wizardsandbeasts.spell.proficiency.SpellScalingProfile;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -35,9 +39,11 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.UUID;
 
 public class SpellProjectileEntity extends ThrowableProjectile {
+    private static final int BASE_PARTICLE_RATE = 1;
 
     private static final EntityDataAccessor<String> DATA_SPELL_ID =
             SynchedEntityData.defineId(SpellProjectileEntity.class, EntityDataSerializers.STRING);
@@ -45,6 +51,7 @@ public class SpellProjectileEntity extends ThrowableProjectile {
     private String spellId = "";
     private Spell cachedSpell;
     private UUID casterUuid;
+    private SpellScalingProfile scalingProfile = SpellScalingProfile.DEFAULT;
 
     public SpellProjectileEntity(EntityType<? extends ThrowableProjectile> type, Level level) {
         super(type, level);
@@ -86,11 +93,11 @@ public class SpellProjectileEntity extends ThrowableProjectile {
             damage = cachedSpell.getDamageForCaster(player);
         }
         if (damage > 0 && hit instanceof LivingEntity living) {
-            living.hurt(level().damageSources().magic(), damage);
+            living.hurt(level().damageSources().magic(), damage * scalingProfile.damageMult());
         }
 
         if (props != null && hit instanceof LivingEntity living) {
-            cachedSpell.applyTargetEffects(living);
+            cachedSpell.applyTargetEffects(living, scalingProfile.durationMult());
             if (isStupefy(cachedSpell.getId()) && owner instanceof ServerPlayer player) {
                 int duration = ModuleManager.isEnabled(Module.WANDS_AND_SPELLS)
                         ? stupefyDurationFor(player, cachedSpell)
@@ -104,11 +111,14 @@ public class SpellProjectileEntity extends ThrowableProjectile {
 
             // Disarm (Expelliarmus)
             if (props.disarms()) {
-                SpellCombatControlHandler.applyExpelliarmusDisarm(
-                        (ServerLevel) level(),
-                        living,
-                        owner instanceof ServerPlayer player ? player : null);
                 ServerLevel projectileLevel = (ServerLevel) level();
+                if (SpellIds.matches(cachedSpell.getId(), "expelliarmus")
+                        && owner instanceof ServerPlayer attacker) {
+                    ExpelliarmusDisarmHandler.apply(projectileLevel, living, attacker, cachedSpell.getProficiencyScalar(attacker));
+                } else {
+                    at.koopro.wizardsandbeasts.event.SpellCombatControlHandler.applyExpelliarmusDisarm(
+                            projectileLevel, living, owner instanceof ServerPlayer player ? player : null);
+                }
                 BlockPos pk = BlockPos.containing(living.position());
                 projectileLevel.playSound(null, pk, ModSounds.SPELL_IMPACT_EXPELLIARMUS.get(),
                         SoundSource.PLAYERS, 0.48f, 1.0f + projectileLevel.random.nextFloat() * 0.14f);
@@ -133,7 +143,8 @@ public class SpellProjectileEntity extends ThrowableProjectile {
         }
 
         if (props != null && props.getKnockbackStrength() != 0) {
-            SpellHelper.applyKnockback(hit, getDeltaMovement(), props.getKnockbackStrength());
+            float baseKnockback = cachedSpell.getBaseKnockback() != 0.0f ? cachedSpell.getBaseKnockback() : props.getKnockbackStrength();
+            SpellHelper.applyKnockback(hit, getDeltaMovement(), baseKnockback * scalingProfile.controlMult());
         }
 
         // Direct hit already applied spell damage; skip center explosion on living targets to avoid double-dip.
@@ -229,9 +240,42 @@ public class SpellProjectileEntity extends ThrowableProjectile {
         return "confringo".equals(spellId) || "wizards_and_beasts:confringo".equals(spellId);
     }
 
+    private void trySpellClash(ServerLevel level) {
+        if (cachedSpell == null || !SpellIds.matches(cachedSpell.getId(), "expelliarmus")) {
+            return;
+        }
+        List<SpellProjectileEntity> nearby = level.getEntitiesOfClass(SpellProjectileEntity.class,
+                getBoundingBox().inflate(0.35), o -> o != this && o.isAlive());
+        for (SpellProjectileEntity other : nearby) {
+            if (other.cachedSpell == null) {
+                continue;
+            }
+            if (SpellIds.matches(other.cachedSpell.getId(), "avada_kedavra")) {
+                continue;
+            }
+            net.minecraft.world.phys.Vec3 mid = position().add(other.position()).scale(0.5);
+            for (int i = 0; i < 12; i++) {
+                level.sendParticles(net.minecraft.core.particles.ParticleTypes.CRIT,
+                        mid.x, mid.y, mid.z, 1, 0.15, 0.15, 0.15, 0.02);
+            }
+            var clashTint = new SpellTintParticleOptions(ModParticles.SPELL_CLASH.get(), 0xFFEEDD);
+            for (int i = 0; i < 8; i++) {
+                level.sendParticles(clashTint, mid.x, mid.y, mid.z, 1, 0.12, 0.12, 0.12, 0.0);
+            }
+            level.playSound(null, BlockPos.containing(mid), ModSounds.SPELL_CLASH.get(), SoundSource.PLAYERS, 0.55f, 1.1f);
+            other.discard();
+            discard();
+            return;
+        }
+    }
+
     @Override
     public void tick() {
         super.tick();
+
+        if (!level().isClientSide() && level() instanceof ServerLevel sl) {
+            trySpellClash(sl);
+        }
 
         if (level().isClientSide()) {
             int interval = projectileTrailInterval();
@@ -242,8 +286,11 @@ public class SpellProjectileEntity extends ThrowableProjectile {
                     cachedSpell = sp;
                 }
                 if (sp != null) {
-                    level().addParticle(ModParticles.tinted(SpellFamilies.of(sp), sp.getColor()),
-                            getX(), getY(), getZ(), 0.0, 0.0, 0.0);
+                    int particleRate = Math.max(1, Math.round(BASE_PARTICLE_RATE * scalingProfile.damageMult()));
+                    for (int i = 0; i < particleRate; i++) {
+                        level().addParticle(ModParticles.tinted(SpellFamilies.of(sp), sp.getColor()),
+                                getX(), getY(), getZ(), 0.0, 0.0, 0.0);
+                    }
                 }
             }
         }
@@ -253,12 +300,16 @@ public class SpellProjectileEntity extends ThrowableProjectile {
         }
     }
 
-    private static int projectileTrailInterval() {
+    private int projectileTrailInterval() {
         return switch (Config.perfProfile) {
             case LOW -> 3;
             case MEDIUM -> 2;
             case HIGH -> 1;
         };
+    }
+
+    public void setScalingProfile(SpellScalingProfile scalingProfile) {
+        this.scalingProfile = scalingProfile == null ? SpellScalingProfile.DEFAULT : scalingProfile;
     }
 
     @Override
@@ -285,6 +336,14 @@ public class SpellProjectileEntity extends ThrowableProjectile {
 
     public String getSpellId() {
         return this.entityData.get(DATA_SPELL_ID);
+    }
+
+    @Nullable
+    public Spell getCachedOrResolveSpell() {
+        if (cachedSpell == null && spellId != null && !spellId.isEmpty()) {
+            cachedSpell = Spells.byId(spellId);
+        }
+        return cachedSpell;
     }
 
     @Nullable

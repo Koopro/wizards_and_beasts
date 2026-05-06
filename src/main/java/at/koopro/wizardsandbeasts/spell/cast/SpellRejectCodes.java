@@ -20,6 +20,7 @@ public final class SpellRejectCodes {
     public static final String WAND_NOT_BONDED = "wand_not_bonded";
     /** Held wand is bonded to another player. */
     public static final String WAND_WRONG_MASTER = "wand_wrong_master";
+    public static final String LANGLOCKED = "langlocked";
 
     public static final String ASSIGN_UNKNOWN_SPELL = "assign_unknown_spell";
     public static final String ASSIGN_UNLEARNED_SPELL = "assign_unlearned_spell";
@@ -52,7 +53,8 @@ public final class SpellRejectCodes {
             OBSCURIAL_INSTABILITY_FIZZLE,
             DUPLICATE_RELEASE_GUARD,
             WAND_NOT_BONDED,
-            WAND_WRONG_MASTER);
+            WAND_WRONG_MASTER,
+            LANGLOCKED);
 
     /** Reasons from {@link at.koopro.wizardsandbeasts.network.ObscurialAbilityUseC2SPacket} only. */
     private static final Set<String> OBSCURUS_ABILITY_PACKET_BASES = Set.of(
@@ -77,7 +79,7 @@ public final class SpellRejectCodes {
     }
 
     /**
-     * Bucket for {@code /wandb debug spells rejects summary}. Mutually exclusive labels for telemetry UI.
+     * Bucket for {@code /wandb debug spell rejects summary}. Mutually exclusive labels for telemetry UI.
      */
     public static String summaryBucket(String storedKey) {
         String base = baseReason(storedKey);

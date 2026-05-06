@@ -1,6 +1,8 @@
 package at.koopro.wizardsandbeasts.item;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.client.wand.WandCastClient;
+import at.koopro.wizardsandbeasts.client.wand.WandRenderer;
 import at.koopro.wizardsandbeasts.item.wand.WandCore;
 import at.koopro.wizardsandbeasts.item.wand.WandFlexibility;
 import at.koopro.wizardsandbeasts.item.wand.WandLength;
@@ -10,7 +12,6 @@ import at.koopro.wizardsandbeasts.spell.cast.WandCastTiming;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.registry.ModItems;
 import at.koopro.wizardsandbeasts.spell.WandBeamChannelLogic;
-import at.koopro.wizardsandbeasts.util.ClientClassBridge;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.resonance.WandResonanceSystem;
 import net.minecraft.ChatFormatting;
@@ -46,16 +47,12 @@ public class WandItem extends GeoItemBase {
     @Override
     public void createGeoRenderer(Consumer<GeoRenderProvider> consumer) {
         consumer.accept(new GeoRenderProvider() {
-            private GeoItemRenderer<?> renderer;
+            private WandRenderer renderer;
 
             @Override
             public GeoItemRenderer<?> getGeoItemRenderer() {
                 if (this.renderer == null) {
-                    this.renderer = ClientClassBridge.instantiate(
-                            "at.koopro.wizardsandbeasts.client.wand.WandRenderer",
-                            GeoItemRenderer.class,
-                            new Class<?>[0],
-                            new Object[0]);
+                    this.renderer = new WandRenderer();
                 }
                 return this.renderer;
             }
@@ -121,9 +118,7 @@ public class WandItem extends GeoItemBase {
             WandBeamChannelLogic.endChannel(sp);
         }
         if (level.isClientSide()) {
-            if (!ClientClassBridge.callStaticBoolean(
-                    "at.koopro.wizardsandbeasts.client.wand.WandCastClient",
-                    "tryOpenImperioCommandMenu")) {
+            if (!WandCastClient.tryOpenImperioCommandMenu()) {
                 ClientPacketDistributor.sendToServer(new SpellCastC2SPacket());
             }
         }

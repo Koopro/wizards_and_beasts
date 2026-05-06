@@ -4,7 +4,6 @@ import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.attachment.DisarmLogState;
 import at.koopro.wizardsandbeasts.attachment.HappinessAttachment;
 import at.koopro.wizardsandbeasts.attachment.ImperioControlState;
-import at.koopro.wizardsandbeasts.data.PlayerAbilityData;
 import at.koopro.wizardsandbeasts.data.PlayerBestiaryData;
 import at.koopro.wizardsandbeasts.data.PlayerSkillData;
 import at.koopro.wizardsandbeasts.data.PlayerSpellData;
@@ -51,12 +50,6 @@ public class ModAttachments {
     public static final Supplier<AttachmentType<PlayerBestiaryData>> BESTIARY_DATA =
             ATTACHMENTS.register("bestiary_data", () -> AttachmentType.builder(() -> new PlayerBestiaryData(new HashMap<>()))
                     .serialize(PlayerBestiaryData.CODEC.fieldOf("bestiary"))
-                    .copyOnDeath()
-                    .build());
-
-    public static final Supplier<AttachmentType<PlayerAbilityData>> PLAYER_ABILITY_DATA =
-            ATTACHMENTS.register("player_ability_data", () -> AttachmentType.builder(() -> PlayerAbilityData.DEFAULT)
-                    .serialize(PlayerAbilityData.CODEC.fieldOf("data"))
                     .copyOnDeath()
                     .build());
 

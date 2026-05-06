@@ -47,6 +47,16 @@ public class ModSounds {
             register("protego_raise");
     public static final DeferredHolder<SoundEvent, SoundEvent> PROTEGO_BLOCK =
             register("protego_block");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PROTEGO_SHATTER =
+            register("protego_shatter"); // TODO(audio): asset needed
+    public static final DeferredHolder<SoundEvent, SoundEvent> PROTEGO_HORRIBILIS_ABSORB =
+            register("protego_horribilis_absorb"); // TODO(audio): asset needed
+    public static final DeferredHolder<SoundEvent, SoundEvent> PROTEGO_TOTALUM_RAISE =
+            register("protego_totalum_raise"); // TODO(audio): asset needed
+    public static final DeferredHolder<SoundEvent, SoundEvent> PROTEGO_MAXIMA_RAISE =
+            register("protego_maxima_raise"); // TODO(audio): asset needed
+    public static final DeferredHolder<SoundEvent, SoundEvent> SPELL_CLASH =
+            register("spell_clash");
 
     private static DeferredHolder<SoundEvent, SoundEvent> register(String path) {
         return SOUND_EVENTS.register(path, () ->

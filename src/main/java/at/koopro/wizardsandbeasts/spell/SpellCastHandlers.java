@@ -9,7 +9,10 @@ import at.koopro.wizardsandbeasts.network.SpellImpactBurstS2CPacket;
 import at.koopro.wizardsandbeasts.util.WandHelper;
 import at.koopro.wizardsandbeasts.wand.cast.WandStats;
 import at.koopro.wizardsandbeasts.spell.proficiency.SpellScalingProfile;
+import at.koopro.wizardsandbeasts.data.PlayerHeritageData;
+import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.spell.imperio.ImperioServerLogic;
+import at.koopro.wizardsandbeasts.type.ObscurialRules;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -51,7 +54,7 @@ final class SpellCastHandlers {
     static boolean handleCone(ServerLevel level, ServerPlayer caster,
                               Spell spell, SpellProperties props,
                               float damageMultiplier, WandStats wand, SpellScalingProfile scalingProfile) {
-        if (SpellCastSupport.isAccio(spell)) {
+        if (isAccio(spell)) {
             return handleAccioCone(level, caster, spell, props, wand);
         }
         Vec3 look = caster.getLookAngle();
@@ -61,7 +64,7 @@ final class SpellCastHandlers {
 
         Vec3 casterEye = caster.getEyePosition();
         boolean successful = false;
-        boolean expectoPatronum = SpellCastSupport.isExpectoPatronum(spell);
+        boolean expectoPatronum = isExpectoPatronum(spell);
         for (Entity entity : entities) {
             if (props.getPullStrength() != 0) {
                 Vec3 diff = caster.position().subtract(entity.position()).normalize()
@@ -73,7 +76,7 @@ final class SpellCastHandlers {
 
             if (entity instanceof LivingEntity living) {
                 // Patronus should only affect dark-aligned targets.
-                if (expectoPatronum && !SpellCastSupport.isPatronusDarkAligned(living)) {
+                if (expectoPatronum && !isPatronusDarkAligned(living)) {
                     continue;
                 }
                 float damage = spell.getBaseDamage() * damageMultiplier;
@@ -111,7 +114,7 @@ final class SpellCastHandlers {
         if (props.ignites()) {
             SpellHelper.tryIgniteBlockAlongLook(level, caster, effectiveRange);
         }
-        if (SpellCastSupport.isGlacius(spell)) {
+        if (isGlacius(spell)) {
             Vec3 end = casterEye.add(look.scale(effectiveRange));
             BlockHitResult hit = SpellHelper.raycastFromCaster(level, caster, casterEye, end,
                     ClipContext.Block.OUTLINE, ClipContext.Fluid.ANY);
@@ -124,7 +127,7 @@ final class SpellCastHandlers {
         if (expectoPatronum) {
             AABB box = caster.getBoundingBox().inflate(4.5);
             for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, box,
-                    living -> living != caster && living.isAlive() && SpellCastSupport.isPatronusDarkAligned(living))) {
+                    living -> living != caster && living.isAlive() && isPatronusDarkAligned(living))) {
                 Vec3 away = target.position().subtract(caster.position());
                 if (away.lengthSqr() < 1.0e-4) continue;
                 SpellHelper.applyKnockback(target, away, 1.2f);
@@ -186,13 +189,13 @@ final class SpellCastHandlers {
     static boolean handleTargeted(ServerLevel level, ServerPlayer caster,
                                   Spell spell, SpellProperties props,
                                   float damageMultiplier, WandStats wand, SpellScalingProfile scalingProfile) {
-        if (SpellCastSupport.isFiniteIncantatem(spell)) {
+        if (isFiniteIncantatem(spell)) {
             return handleFiniteIncantatemTargeted(level, caster, spell, props, wand);
         }
-        if (SpellCastSupport.isLiberacorpus(spell)) {
+        if (isLiberacorpus(spell)) {
             return handleLiberacorpusTargeted(level, caster, spell, props, wand);
         }
-        if (SpellCastSupport.isLevicorpus(spell)) {
+        if (isLevicorpus(spell)) {
             return handleLevicorpusTargeted(level, caster, spell, props, wand);
         }
         Vec3 start = caster.getEyePosition();
@@ -244,7 +247,7 @@ final class SpellCastHandlers {
                 successful = true;
             }
 
-            if (props.controlsMob() && SpellCastSupport.isImperio(spell) && ModuleManager.isEnabled(Module.DARK_ARTS)) {
+            if (props.controlsMob() && isImperio(spell) && ModuleManager.isEnabled(Module.DARK_ARTS)) {
                 int dur = Math.min(600, 200 + (int) (spell.getProficiencyScalar(caster) * 400));
                 ImperioServerLogic.beginControl(level, caster, target, dur);
                 successful = true;
@@ -269,15 +272,15 @@ final class SpellCastHandlers {
             SpellHelper.spawnBeam(level, spell, start, target.getBoundingBox().getCenter());
         }
 
-        if (props.opensBlocks() || (props.explodes() && target == null) || (target == null && SpellCastSupport.isImperio(spell))) {
-            ClipContext.Fluid fluidMode = SpellCastSupport.isImperio(spell) ? ClipContext.Fluid.ANY : ClipContext.Fluid.NONE;
+        if (props.opensBlocks() || (props.explodes() && target == null) || (target == null && isImperio(spell))) {
+            ClipContext.Fluid fluidMode = isImperio(spell) ? ClipContext.Fluid.ANY : ClipContext.Fluid.NONE;
             BlockHitResult blockHit = level.clip(new ClipContext(start, end,
                     ClipContext.Block.OUTLINE, fluidMode, caster));
             if (blockHit.getType() == HitResult.Type.BLOCK) {
                 BlockPos pos = blockHit.getBlockPos();
 
                 if (props.opensBlocks()) {
-                    if (SpellCastSupport.isColloportus(spell)) {
+                    if (isColloportus(spell)) {
                         successful |= handleColloportus(level, pos, caster, spell);
                     } else {
                         successful |= handleAlohomora(level, pos, caster, spell);
@@ -289,12 +292,12 @@ final class SpellCastHandlers {
                             Vec3.atCenterOf(pos), props.getExplosionPower(),
                             props.explosionBreaksBlocks());
                     successful = true;
-                    if (SpellCastSupport.isBombarda(spell)) {
+                    if (isBombarda(spell)) {
                         SpellHelper.playSpellImpact(level, blockHit.getLocation(), spell.getColor());
                         SpellHelper.pushNearbyLightweightEntities(level, caster, blockHit.getLocation(), look, 1.3f, 3.0);
                     }
                 }
-                if (SpellCastSupport.isImperio(spell) && ModuleManager.isEnabled(Module.DARK_ARTS)) {
+                if (isImperio(spell) && ModuleManager.isEnabled(Module.DARK_ARTS)) {
                     Mob controlled = level.getEntitiesOfClass(Mob.class,
                                     new AABB(pos).inflate(2.5),
                                     Mob::isAlive)
@@ -464,7 +467,7 @@ final class SpellCastHandlers {
 
     private static boolean handleColloportus(ServerLevel level, BlockPos pos, ServerPlayer caster, Spell spell) {
         BlockState state = level.getBlockState(pos);
-        int tier = SpellCastSupport.lockTier(state);
+        int tier = lockTier(state);
         if (tier < 1) {
             level.playSound(null, pos, SoundEvents.NOTE_BLOCK_BASS.value(),
                     SoundSource.PLAYERS, 0.4f, 0.55f);
@@ -492,14 +495,14 @@ final class SpellCastHandlers {
                     true);
             return false;
         }
-        if (state.hasProperty(BlockStateProperties.OPEN) && SpellCastSupport.lockTier(state) == 0) {
+        if (state.hasProperty(BlockStateProperties.OPEN) && lockTier(state) == 0) {
             level.setBlockAndUpdate(pos, state.cycle(BlockStateProperties.OPEN));
             level.playSound(null, pos, net.minecraft.sounds.SoundEvents.IRON_TRAPDOOR_OPEN,
                     net.minecraft.sounds.SoundSource.PLAYERS, 0.45f, 1.1f);
             return true;
         }
         Proficiency proficiency = spell.getProficiency(caster);
-        int tier = SpellCastSupport.lockTier(state);
+        int tier = lockTier(state);
         if (tier == 0) {
             level.playSound(null, pos, net.minecraft.sounds.SoundEvents.NOTE_BLOCK_BASS.value(),
                     net.minecraft.sounds.SoundSource.PLAYERS, 0.4f, 0.6f);
@@ -507,7 +510,7 @@ final class SpellCastHandlers {
                     Component.literal("Alohomora fizzles: nothing to unlock here.").withStyle(ChatFormatting.RED), true);
             return false;
         }
-        if (!SpellCastSupport.canUnlockTier(proficiency, tier)) {
+        if (!canUnlockTier(proficiency, tier)) {
             String detail = switch (tier) {
                 case 2 -> "Iron locks need Mastered Alohomora.";
                 default -> "This lock is too complex for your current skill.";
@@ -530,4 +533,71 @@ final class SpellCastHandlers {
         return true;
     }
 
+    private static int lockTier(BlockState state) {
+        if (state.is(Blocks.IRON_DOOR) || state.is(Blocks.IRON_TRAPDOOR)) return 2;
+        if (state.getBlock() instanceof DoorBlock) return 1;
+        if (state.getBlock() instanceof TrapDoorBlock || state.getBlock() instanceof FenceGateBlock) return 1;
+        return 0;
+    }
+
+    private static boolean canUnlockTier(Proficiency proficiency, int tier) {
+        return switch (tier) {
+            case 0 -> true;
+            case 1 -> proficiency == Proficiency.PROFICIENT || proficiency == Proficiency.MASTERED;
+            default -> proficiency == Proficiency.MASTERED;
+        };
+    }
+
+    private static boolean isAccio(Spell spell) {
+        return SpellIds.matches(spell.getId(), "accio");
+    }
+
+    private static boolean isGlacius(Spell spell) {
+        return SpellIds.matches(spell.getId(), "glacius");
+    }
+
+    private static boolean isImperio(Spell spell) {
+        return SpellIds.matches(spell.getId(), "imperio");
+    }
+
+    private static boolean isBombarda(Spell spell) {
+        return SpellIds.matches(spell.getId(), "bombarda");
+    }
+
+    private static boolean isExpectoPatronum(Spell spell) {
+        return SpellIds.matches(spell.getId(), "expecto_patronum");
+    }
+
+    private static boolean isColloportus(Spell spell) {
+        return SpellIds.matches(spell.getId(), "colloportus");
+    }
+
+    private static boolean isLiberacorpus(Spell spell) {
+        return SpellIds.matches(spell.getId(), "liberacorpus");
+    }
+
+    private static boolean isFiniteIncantatem(Spell spell) {
+        String id = spell.getId();
+        if (SpellIds.matches(id, "finite_incantatem")) {
+            return true;
+        }
+        int colon = id.indexOf(':');
+        String path = colon >= 0 ? id.substring(colon + 1) : id;
+        return path.equals("finite_incantatem") || path.endsWith("/finite_incantatem");
+    }
+
+    private static boolean isLevicorpus(Spell spell) {
+        return SpellIds.matches(spell.getId(), "levicorpus");
+    }
+
+    private static boolean isPatronusDarkAligned(LivingEntity entity) {
+        if (entity.isInvertedHealAndHarm()) {
+            return true;
+        }
+        if (entity instanceof ServerPlayer sp) {
+            PlayerHeritageData data = sp.getData(ModAttachments.HERITAGE_DATA.get());
+            return ObscurialRules.isObscurial(data) && ObscurialRules.isDarkForm(data);
+        }
+        return false;
+    }
 }

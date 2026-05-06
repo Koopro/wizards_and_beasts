@@ -25,7 +25,12 @@ import java.util.UUID;
 public final class WandBondDebugModule implements DebugModule {
     @Override
     public String name() {
-        return "wandbond";
+        return "wand";
+    }
+
+    @Override
+    public String summary() {
+        return "Wand item bond, resonance, force/clear (sub: force, clear, clear_cache).";
     }
 
     @Override

@@ -1,8 +1,6 @@
 package at.koopro.wizardsandbeasts;
 
 import at.koopro.wizardsandbeasts.client.ClientSetup;
-import at.koopro.wizardsandbeasts.client.ability.ApparitionClientController;
-import at.koopro.wizardsandbeasts.client.ability.LegilimencyVisionRenderer;
 import at.koopro.wizardsandbeasts.client.wand.gui.OllivanderTrialScreen;
 import at.koopro.wizardsandbeasts.client.wand.gui.WandmakersBenchScreen;
 import at.koopro.wizardsandbeasts.registry.ModMenuTypes;
@@ -56,8 +54,6 @@ public class WizardsAndBeastsClient {
         NeoForge.EVENT_BUS.addListener(WandBeamRenderer::onRenderLevel);
         NeoForge.EVENT_BUS.addListener(ColoredGlowRenderer::onRenderLevel);
         NeoForge.EVENT_BUS.addListener(ProtegoCubeRenderer::onRenderLevel);
-        NeoForge.EVENT_BUS.addListener(ApparitionClientController::onRenderLevel);
-        NeoForge.EVENT_BUS.addListener(LegilimencyVisionRenderer::onRenderLevel);
         NeoForge.EVENT_BUS.addListener(ObscurialClientViewHandler::onRenderHand);
         NeoForge.EVENT_BUS.addListener(ObscurialClientViewHandler::onRenderGuiLayer);
     }

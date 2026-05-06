@@ -1,8 +1,5 @@
 package at.koopro.wizardsandbeasts.client.spell;
 
-import at.koopro.wizardsandbeasts.client.ability.ApparitionClientController;
-import at.koopro.wizardsandbeasts.client.ability.LegilimencyClientController;
-import at.koopro.wizardsandbeasts.client.state.ClientLegilimencyVisionState;
 import at.koopro.wizardsandbeasts.client.state.ClientSignatureSpellState;
 import at.koopro.wizardsandbeasts.client.state.ClientSpellDataState;
 import at.koopro.wizardsandbeasts.client.state.ClientHeritageDataState;
@@ -31,9 +28,6 @@ public class SpellClientInputHandler {
         boolean canUseWandMagic = HudVisibilityPolicy.canUseWandMagic(typeData);
         SpellInputController.handleGameplayBindings(mc, canUseWandMagic);
         ObscurialInputController.handleGameplayBindings(typeData);
-        ApparitionClientController.onClientTick(mc);
-        LegilimencyClientController.onClientTick(mc);
-        ClientLegilimencyVisionState.tick();
         if (mc.player != null && mc.screen == null
                 && ClientSignatureSpellState.isImperioControlled()
                 && mc.options.keyShift.consumeClick()) {

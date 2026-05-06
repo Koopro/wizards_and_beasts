@@ -33,16 +33,23 @@ public final class SpellLearningService {
         List<SpellOffer> offers = new ArrayList<>();
 
         for (Spell spell : Spells.all()) {
-            SpellLearningEligibility.Result eligibility = SpellLearningEligibility.evaluate(null, spell, data, type);
-            if (ObscurialRules.isObscurialAbility(spell) || data.knowsSpell(spell.getId())) {
+            if (ObscurialRules.isObscurialAbility(spell)) {
                 continue;
             }
+            if (data.knowsSpell(spell.getId())) {
+                continue;
+            }
+            boolean typeEligible = ObscurialRules.canHeritageUseSpell(type, spell);
+            boolean requirementMet = typeEligible && isLearnable(spell, data);
+            String requirementText = requirementMet
+                    ? ""
+                    : (typeEligible ? spell.getRequirement().getDescription() : "Only Obscurials can learn this spell.");
             offers.add(new SpellOffer(
                     spell.getId(),
                     spell.getDisplayName(),
                     spell.getCategory().name(),
-                    eligibility.learnable(),
-                    eligibility.reason(),
+                    requirementMet,
+                    requirementText,
                     Config.spellTeacherLearnCostKnuts));
         }
 
@@ -54,7 +61,7 @@ public final class SpellLearningService {
         Spell spell = Spells.byId(spellId);
         PlayerSpellData data = player.getData(ModAttachments.SPELL_DATA.get());
         Heritage type = player.getData(ModAttachments.HERITAGE_DATA.get()).getSelectedHeritage();
-        LearnResult validation = validateLearnAttempt(player, spell, data, type);
+        LearnResult validation = validateLearnAttempt(spell, data, type);
         if (!validation.success()) {
             return validation;
         }
@@ -76,26 +83,30 @@ public final class SpellLearningService {
     }
 
     public static LearnResult validateLearnAttempt(Spell spell, PlayerSpellData data) {
-        return validateLearnAttempt(null, spell, data, null);
+        return validateLearnAttempt(spell, data, null);
     }
 
     public static LearnResult validateLearnAttempt(Spell spell, PlayerSpellData data, Heritage type) {
-        return validateLearnAttempt(null, spell, data, type);
-    }
-
-    public static LearnResult validateLearnAttempt(ServerPlayer player, Spell spell, PlayerSpellData data, Heritage type) {
         if (spell == null) {
             return LearnResult.failure("Unknown spell.");
         }
-        SpellLearningEligibility.Result eligibility = SpellLearningEligibility.evaluate(player, spell, data, type);
-        if (!eligibility.learnable()) {
-            return LearnResult.failure(eligibility.reason());
+        if (ObscurialRules.isObscurialAbility(spell)) {
+            return LearnResult.failure("This is an Obscurial ability, not a learnable spell.");
+        }
+        if (!ObscurialRules.canHeritageUseSpell(type, spell)) {
+            return LearnResult.failure("Only Obscurials can learn this spell.");
+        }
+        if (data.knowsSpell(spell.getId())) {
+            return LearnResult.failure("You already know this spell.");
+        }
+        if (!isLearnable(spell, data)) {
+            return LearnResult.failure(spell.getRequirement().getDescription());
         }
         return LearnResult.success("ok");
     }
 
     public static boolean isLearnable(Spell spell, PlayerSpellData data) {
-        return SpellLearningEligibility.evaluate(null, spell, data, null).learnable();
+        return spell.getRequirement().isMet(data);
     }
 
     public record SpellOffer(

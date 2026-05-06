@@ -98,5 +98,32 @@
     "sounds": [
       { "name": "minecraft:enchant/thorns/hit_metal", "volume": 0.75, "pitch": 1.12 }
     ]
+  },
+  "protego_shatter": {
+    "sounds": [
+      { "name": "minecraft:block/glass/break", "volume": 1.0, "pitch": 0.8 }
+    ]
+  },
+  "protego_horribilis_absorb": {
+    "sounds": [
+      { "name": "minecraft:block/respawn_anchor/charge", "volume": 0.95, "pitch": 0.7 }
+    ]
+  },
+  "protego_totalum_raise": {
+    "sounds": [
+      { "name": "minecraft:block/beacon/activate", "volume": 0.9, "pitch": 1.0 }
+    ]
+  },
+  "protego_maxima_raise": {
+    "sounds": [
+      { "name": "minecraft:block/beacon/power_select", "volume": 1.0, "pitch": 0.9 }
+    ]
+  },
+
+  "spell_clash": {
+    "sounds": [
+      { "name": "minecraft:block/amethyst_cluster/break", "volume": 0.65, "pitch": 1.45 },
+      { "name": "minecraft:block/copper_bulb/turn_off", "volume": 0.5, "pitch": 1.2 }
+    ]
   }
 }
