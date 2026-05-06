@@ -54,13 +54,13 @@ final class WizardingWorldBlockRegistry {
 
     static final DeferredBlock<Block> BRASS_CAULDRON =
             ModBlocks.BLOCKS.registerBlock("brass_cauldron", Block::new,
-                    BlockBehaviour.Properties.of().strength(2.0f).sound(SoundType.COPPER).noOcclusion());
+                    RegistryUtils.metalCauldronProps());
     static final DeferredBlock<Block> WIZARDING_COPPER_CAULDRON =
             ModBlocks.BLOCKS.registerBlock("wizarding_copper_cauldron", Block::new,
-                    BlockBehaviour.Properties.of().strength(2.0f).sound(SoundType.COPPER).noOcclusion());
+                    RegistryUtils.metalCauldronProps());
     static final DeferredBlock<Block> PEWTER_CAULDRON =
             ModBlocks.BLOCKS.registerBlock("pewter_cauldron", Block::new,
-                    BlockBehaviour.Properties.of().strength(2.0f).sound(SoundType.COPPER).noOcclusion());
+                    RegistryUtils.metalCauldronProps());
     static final DeferredBlock<Block> FLOO_GRATE =
             ModBlocks.BLOCKS.registerBlock("floo_grate", Block::new,
                     BlockBehaviour.Properties.of().strength(3.0f).sound(SoundType.COPPER).noOcclusion());
@@ -72,19 +72,19 @@ final class WizardingWorldBlockRegistry {
             ModBlocks.BLOCKS.registerBlock("wandmakers_bench", WandmakersBenchBlock::new,
                     BlockBehaviour.Properties.of().strength(2.5f).sound(SoundType.WOOD));
 
-    static final DeferredItem<BlockItem> DEVILS_SNARE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("devils_snare", DEVILS_SNARE);
-    static final DeferredItem<BlockItem> MALLOWSWEET_ITEM = ModItems.ITEMS.registerSimpleBlockItem("mallowsweet", MALLOWSWEET);
-    static final DeferredItem<BlockItem> GRYFFINDOR_BANNER_ITEM = ModItems.ITEMS.registerSimpleBlockItem("gryffindor_banner", GRYFFINDOR_BANNER);
-    static final DeferredItem<BlockItem> SLYTHERIN_BANNER_ITEM = ModItems.ITEMS.registerSimpleBlockItem("slytherin_banner", SLYTHERIN_BANNER);
-    static final DeferredItem<BlockItem> RAVENCLAW_BANNER_ITEM = ModItems.ITEMS.registerSimpleBlockItem("ravenclaw_banner", RAVENCLAW_BANNER);
-    static final DeferredItem<BlockItem> HUFFLEPUFF_BANNER_ITEM = ModItems.ITEMS.registerSimpleBlockItem("hufflepuff_banner", HUFFLEPUFF_BANNER);
-    static final DeferredItem<BlockItem> FLOATING_CANDLE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("floating_candle", FLOATING_CANDLE);
-    static final DeferredItem<BlockItem> BRASS_CAULDRON_ITEM = ModItems.ITEMS.registerSimpleBlockItem("brass_cauldron", BRASS_CAULDRON);
-    static final DeferredItem<BlockItem> WIZARDING_COPPER_CAULDRON_ITEM = ModItems.ITEMS.registerSimpleBlockItem("wizarding_copper_cauldron", WIZARDING_COPPER_CAULDRON);
-    static final DeferredItem<BlockItem> PEWTER_CAULDRON_ITEM = ModItems.ITEMS.registerSimpleBlockItem("pewter_cauldron", PEWTER_CAULDRON);
-    static final DeferredItem<BlockItem> FLOO_GRATE_ITEM = ModItems.ITEMS.registerSimpleBlockItem("floo_grate", FLOO_GRATE);
-    static final DeferredItem<BlockItem> SPELL_TEACHER_ITEM = ModItems.ITEMS.registerSimpleBlockItem("spell_teacher", SPELL_TEACHER);
-    static final DeferredItem<BlockItem> WANDMAKERS_BENCH_ITEM = ModItems.ITEMS.registerSimpleBlockItem("wandmakers_bench", WANDMAKERS_BENCH);
+    static final DeferredItem<BlockItem> DEVILS_SNARE_ITEM = RegistryUtils.registerSimpleBlockItem("devils_snare", DEVILS_SNARE);
+    static final DeferredItem<BlockItem> MALLOWSWEET_ITEM = RegistryUtils.registerSimpleBlockItem("mallowsweet", MALLOWSWEET);
+    static final DeferredItem<BlockItem> GRYFFINDOR_BANNER_ITEM = RegistryUtils.registerSimpleBlockItem("gryffindor_banner", GRYFFINDOR_BANNER);
+    static final DeferredItem<BlockItem> SLYTHERIN_BANNER_ITEM = RegistryUtils.registerSimpleBlockItem("slytherin_banner", SLYTHERIN_BANNER);
+    static final DeferredItem<BlockItem> RAVENCLAW_BANNER_ITEM = RegistryUtils.registerSimpleBlockItem("ravenclaw_banner", RAVENCLAW_BANNER);
+    static final DeferredItem<BlockItem> HUFFLEPUFF_BANNER_ITEM = RegistryUtils.registerSimpleBlockItem("hufflepuff_banner", HUFFLEPUFF_BANNER);
+    static final DeferredItem<BlockItem> FLOATING_CANDLE_ITEM = RegistryUtils.registerSimpleBlockItem("floating_candle", FLOATING_CANDLE);
+    static final DeferredItem<BlockItem> BRASS_CAULDRON_ITEM = RegistryUtils.registerSimpleBlockItem("brass_cauldron", BRASS_CAULDRON);
+    static final DeferredItem<BlockItem> WIZARDING_COPPER_CAULDRON_ITEM = RegistryUtils.registerSimpleBlockItem("wizarding_copper_cauldron", WIZARDING_COPPER_CAULDRON);
+    static final DeferredItem<BlockItem> PEWTER_CAULDRON_ITEM = RegistryUtils.registerSimpleBlockItem("pewter_cauldron", PEWTER_CAULDRON);
+    static final DeferredItem<BlockItem> FLOO_GRATE_ITEM = RegistryUtils.registerSimpleBlockItem("floo_grate", FLOO_GRATE);
+    static final DeferredItem<BlockItem> SPELL_TEACHER_ITEM = RegistryUtils.registerSimpleBlockItem("spell_teacher", SPELL_TEACHER);
+    static final DeferredItem<BlockItem> WANDMAKERS_BENCH_ITEM = RegistryUtils.registerSimpleBlockItem("wandmakers_bench", WANDMAKERS_BENCH);
 
     private WizardingWorldBlockRegistry() {
     }
