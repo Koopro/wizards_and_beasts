@@ -9,6 +9,7 @@ public enum Module {
     SKILL_TREES,
     PROFICIENCY,
     DARK_ARTS,
+    PLAYER_ABILITIES,
     CREATURES,
     BESTIARY,
     BROOM_FLIGHT

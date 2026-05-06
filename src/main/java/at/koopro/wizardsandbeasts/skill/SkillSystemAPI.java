@@ -1,7 +1,6 @@
 package at.koopro.wizardsandbeasts.skill;
 
 import at.koopro.wizardsandbeasts.data.PlayerSkillData;
-import at.koopro.wizardsandbeasts.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
@@ -113,7 +112,7 @@ public final class SkillSystemAPI {
 
     /**
      * Attempts to unlock (or level up) a skill. Returns true on success.
-     * Applies LearnSpell effects immediately to PlayerSpellData.
+     * Skill unlocks only affect skill-derived bonuses/abilities.
      */
     public static boolean tryUnlock(ServerPlayer player, String skillId) {
         Skill skill = SkillTrees.byId(skillId);
@@ -125,7 +124,7 @@ public final class SkillSystemAPI {
         int newLevel = data.getSkillLevel(skillId) + 1;
         data.setSkillLevel(skillId, newLevel);
 
-        applyImmediateEffects(player, skill, newLevel);
+        applyImmediateEffects(skill);
         SkillAttributeApplicator.applyAll(player);
         return true;
     }
@@ -140,7 +139,7 @@ public final class SkillSystemAPI {
 
         PlayerSkillData data = getSkillData(player);
         data.setSkillLevel(skillId, skill.getMaxLevel());
-        applyImmediateEffects(player, skill, skill.getMaxLevel());
+        applyImmediateEffects(skill);
         SkillAttributeApplicator.applyAll(player);
     }
 
@@ -183,12 +182,9 @@ public final class SkillSystemAPI {
         SkillAttributeApplicator.applyAll(player);
     }
 
-    private static void applyImmediateEffects(ServerPlayer player, Skill skill, int newLevel) {
-        PlayerSpellData spellData = player.getData(ModAttachments.SPELL_DATA.get());
+    private static void applyImmediateEffects(Skill skill) {
         for (SkillEffect effect : skill.getEffects()) {
-            if (effect instanceof SkillEffect.LearnSpell learn) {
-                spellData.learnSpell(learn.spellId());
-            } else if (effect instanceof SkillEffect.UnlockAbility) {
+            if (effect instanceof SkillEffect.UnlockAbility) {
                 // Ability availability is derived from unlocked skill levels via SkillEffectCache.
                 // Keep this branch explicit so unlock effects remain discoverable in one place.
             }

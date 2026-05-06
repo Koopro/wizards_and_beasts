@@ -17,25 +17,18 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.form.FormSystemAPI;
 import at.koopro.wizardsandbeasts.item.DebugWandState;
 import at.koopro.wizardsandbeasts.network.BeamDebugOpenS2CPacket;
-import at.koopro.wizardsandbeasts.network.FormSyncS2CPacket;
-import at.koopro.wizardsandbeasts.network.SkillDataSyncS2CPacket;
-import at.koopro.wizardsandbeasts.network.SpellDataSyncS2CPacket;
-import at.koopro.wizardsandbeasts.network.HeritageDataSyncS2CPacket;
-import at.koopro.wizardsandbeasts.network.VaultSyncS2CPacket;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModItems;
 import at.koopro.wizardsandbeasts.spell.WandBeamChannelLogic;
+import at.koopro.wizardsandbeasts.sync.PlayerStateSyncService;
 import at.koopro.wizardsandbeasts.type.HeritageAPI;
 import at.koopro.wizardsandbeasts.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.client.wand.BeamSettings;
 import at.koopro.wizardsandbeasts.command.debug.DebugModuleRegistry;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
-import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
-import at.koopro.wizardsandbeasts.skill.SkillAttributeApplicator;
 import at.koopro.wizardsandbeasts.util.GlowDebugTags;
 import at.koopro.wizardsandbeasts.util.RgbHex;
 
@@ -50,6 +43,8 @@ public class WizardsAndBeastsCommands {
     public static void onRegisterCommands(RegisterCommandsEvent event) {
         DebugModuleRegistry.bootstrap();
         event.getDispatcher().register(buildRootCommand("wandb"));
+        event.getDispatcher().register(ApparitionCommands.registerWard());
+        event.getDispatcher().register(ApparitionCommands.registerTest());
     }
 
     private static LiteralArgumentBuilder<CommandSourceStack> buildRootCommand(String rootLiteral) {
@@ -126,7 +121,7 @@ public class WizardsAndBeastsCommands {
     public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             boolean needsSelection = !HeritageAPI.hasHeritageSelected(player);
-            resyncPlayerState(player, needsSelection);
+            PlayerStateSyncService.syncFullLoginState(player, needsSelection);
         }
     }
 
@@ -134,7 +129,7 @@ public class WizardsAndBeastsCommands {
     public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             WandBeamChannelLogic.endChannel(player);
-            resyncPlayerState(player, false);
+            PlayerStateSyncService.syncFullLoginState(player, false);
         }
     }
 
@@ -150,21 +145,8 @@ public class WizardsAndBeastsCommands {
     public static void onPlayerChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             WandBeamChannelLogic.endChannel(player);
-            resyncPlayerState(player, false);
+            PlayerStateSyncService.syncFullLoginState(player, false);
         }
-    }
-
-    private static void resyncPlayerState(ServerPlayer player, boolean openTypeSelector) {
-        SkillAttributeApplicator.applyAll(player);
-        SpellDataSyncS2CPacket.syncToPlayer(player);
-        SkillDataSyncS2CPacket.syncToPlayer(player);
-        HeritageDataSyncS2CPacket.syncToPlayer(player, openTypeSelector);
-        VaultSyncS2CPacket.syncToPlayer(player);
-        if (HeritageAPI.hasHeritageSelected(player)) {
-            HeritageAPI.applyStats(player);
-        }
-        FormSystemAPI.reapplyCurrentForm(player);
-        FormSyncS2CPacket.syncToTracking(player);
     }
 
     private static int toggleBeamDebug(CommandSourceStack source) {
