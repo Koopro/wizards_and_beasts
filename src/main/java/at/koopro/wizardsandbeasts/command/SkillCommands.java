@@ -1,14 +1,13 @@
 package at.koopro.wizardsandbeasts.command;
 
 import at.koopro.wizardsandbeasts.data.PlayerSkillData;
-import at.koopro.wizardsandbeasts.network.SkillDataSyncS2CPacket;
-import at.koopro.wizardsandbeasts.network.SpellDataSyncS2CPacket;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.skill.Skill;
 import at.koopro.wizardsandbeasts.skill.SkillEffect;
 import at.koopro.wizardsandbeasts.skill.SkillTreeId;
 import at.koopro.wizardsandbeasts.skill.SkillTrees;
 import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
+import at.koopro.wizardsandbeasts.sync.PlayerStateSyncService;
 import at.koopro.wizardsandbeasts.util.ChatHelper;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -26,6 +25,10 @@ public final class SkillCommands {
 
     private SkillCommands() {}
 
+    /**
+     * {@code points add|set} for another player is under {@code points <player>} and requires gamemaster;
+     * {@code forceunlock} and {@code reset} are gamemaster-only.
+     */
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("skill")
                 .then(Commands.literal("points")
@@ -95,8 +98,7 @@ public final class SkillCommands {
 
         if (SkillSystemAPI.tryUnlock(player, skillId)) {
             ChatHelper.sendSuccess(player, "Unlocked " + skill.getDisplayName() + "!");
-            SkillDataSyncS2CPacket.syncToPlayer(player);
-            SpellDataSyncS2CPacket.syncToPlayer(player);
+            PlayerStateSyncService.syncSkills(player);
             return 1;
         }
 
@@ -114,7 +116,7 @@ public final class SkillCommands {
 
     private static int addPoints(ServerPlayer player, int amount) {
         SkillSystemAPI.awardPoints(player, amount);
-        SkillDataSyncS2CPacket.syncToPlayer(player);
+        PlayerStateSyncService.syncSkills(player);
         ChatHelper.sendSuccess(player, "Added " + amount + " skill points.");
         return 1;
     }
@@ -123,7 +125,7 @@ public final class SkillCommands {
         PlayerSkillData data = player.getData(ModAttachments.SKILL_DATA.get());
         data.setSkillPoints(amount);
         SkillSystemAPI.reconcileDerivedEffects(player);
-        SkillDataSyncS2CPacket.syncToPlayer(player);
+        PlayerStateSyncService.syncSkills(player);
         ChatHelper.sendSuccess(player, "Set skill points to " + amount + ".");
         return 1;
     }
@@ -136,8 +138,7 @@ public final class SkillCommands {
         }
 
         SkillSystemAPI.forceUnlock(player, skillId);
-        SkillDataSyncS2CPacket.syncToPlayer(player);
-        SpellDataSyncS2CPacket.syncToPlayer(player);
+        PlayerStateSyncService.syncSkills(player);
         ChatHelper.sendSuccess(player, "Force-unlocked " + skill.getDisplayName()
                 + " (level " + skill.getMaxLevel() + ").");
         return 1;
@@ -147,7 +148,7 @@ public final class SkillCommands {
         PlayerSkillData data = player.getData(ModAttachments.SKILL_DATA.get());
         data.resetAll();
         SkillSystemAPI.reconcileDerivedEffects(player);
-        SkillDataSyncS2CPacket.syncToPlayer(player);
+        PlayerStateSyncService.syncSkills(player);
         ChatHelper.sendSuccess(player, "All skills reset. Points refunded.");
         return 1;
     }
@@ -167,7 +168,7 @@ public final class SkillCommands {
 
         data.resetSkill(skillId);
         SkillSystemAPI.reconcileDerivedEffects(player);
-        SkillDataSyncS2CPacket.syncToPlayer(player);
+        PlayerStateSyncService.syncSkills(player);
         ChatHelper.sendSuccess(player, "Reset " + skill.getDisplayName() + ". Points refunded.");
         return 1;
     }
@@ -264,7 +265,7 @@ public final class SkillCommands {
 
     private static String describeEffect(SkillEffect effect) {
         return switch (effect) {
-            case SkillEffect.LearnSpell e -> "Learns spell: " + e.spellId();
+            case SkillEffect.LearnSpell e -> "Spell study path: " + e.spellId();
             case SkillEffect.SpellDamageBonus e ->
                     String.format("+%.0f%% %s damage per level", e.bonusPerLevel() * 100, e.spellId());
             case SkillEffect.SpellCooldownReduction e ->

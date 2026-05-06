@@ -18,6 +18,7 @@ public final class DebugModuleRegistry {
     public static void bootstrap() {
         if (!MODULES.isEmpty()) return;
         register(new SpellDebugModule());
+        register(new WandBondDebugModule());
         register(new PlayerDebugModule());
         register(new VaultDebugModule());
         register(new BroomDebugModule());
@@ -30,9 +31,11 @@ public final class DebugModuleRegistry {
 
     public static void attachTo(LiteralArgumentBuilder<CommandSourceStack> debugRoot) {
         MODULES.values().forEach(module -> debugRoot.then(module.register()));
+        debugRoot.then(Commands.literal("help")
+                .executes(ctx -> showOverview(ctx.getSource())));
         debugRoot.then(Commands.literal("toggle")
                 .executes(ctx -> togglePlayer(ctx.getSource()))
-                .then(Commands.literal("global")
+                .then(Commands.literal("all")
                         .executes(ctx -> toggleGlobal(ctx.getSource()))));
         debugRoot.executes(ctx -> showOverview(ctx.getSource()));
     }
@@ -40,7 +43,7 @@ public final class DebugModuleRegistry {
     private static int togglePlayer(CommandSourceStack source) {
         ServerPlayer player = source.getPlayer();
         if (player == null) {
-            source.sendFailure(Component.literal("[W&B Debug] Player toggle requires an in-game player or use global toggle."));
+            source.sendFailure(Component.literal("[W&B Debug] Player toggle requires an in-game player or use all toggle."));
             return 0;
         }
         boolean state = DebugModeService.toggleForPlayer(player);
@@ -50,7 +53,7 @@ public final class DebugModuleRegistry {
 
     private static int toggleGlobal(CommandSourceStack source) {
         boolean state = DebugModeService.toggleGlobal();
-        new DebugOutput(source).ok("Global debug mode: " + (state ? "ON" : "OFF"));
+        new DebugOutput(source).ok("All-player debug mode: " + (state ? "ON" : "OFF"));
         return 1;
     }
 
@@ -59,7 +62,8 @@ public final class DebugModuleRegistry {
         out.header("Debug Modules");
         out.kv("Registered", MODULES.size());
         out.kv("Global debug", DebugModeService.isGlobalEnabled() ? "ON" : "OFF");
-        out.info("Subcommands: " + String.join(", ", MODULES.keySet()) + ", toggle");
+        out.info("Built-in: tree, glow, wandtool, beam, stats, morph, toggle, help");
+        MODULES.values().forEach(m -> out.kv(m.name(), m.summary().isEmpty() ? "—" : m.summary()));
         return 1;
     }
 }

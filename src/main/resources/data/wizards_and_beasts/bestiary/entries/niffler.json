@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:niffler",
+  "displayName": "bestiary.wizards_and_beasts.niffler.name",
+  "category": "SMALL_CREATURE",
+  "mmRating": 1,
+  "habitat": "bestiary.wizards_and_beasts.niffler.habitat",
+  "size": "SMALL",
+  "shortLore": "bestiary.wizards_and_beasts.niffler.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.niffler.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.niffler.ability.1",
+    "bestiary.wizards_and_beasts.niffler.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.niffler.threat.1",
+    "bestiary.wizards_and_beasts.niffler.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.niffler.weakness.1",
+    "bestiary.wizards_and_beasts.niffler.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/niffler.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/niffler.png",
+  "sortOrder": 32
+}

@@ -1,18 +1,31 @@
 package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.item.WandItem;
 import at.koopro.wizardsandbeasts.item.wand.WandCore;
+import at.koopro.wizardsandbeasts.wand.WandComponents;
 import net.minecraft.core.BlockPos;
 import at.koopro.wizardsandbeasts.item.wand.WandFlexibility;
 import at.koopro.wizardsandbeasts.item.wand.WandLength;
+import at.koopro.wizardsandbeasts.item.wand.ExpelliarmusDropTag;
 import at.koopro.wizardsandbeasts.item.wand.WandWood;
 import at.koopro.wizardsandbeasts.wand.cast.WandAllegiance;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
+import javax.annotation.Nullable;
+
 public class ModDataComponents {
+
+    private static final Identifier ELDER_WOOD_KEY =
+            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "elder");
+    private static final Identifier DRAGON_HEARTSTRING_KEY =
+            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "dragon_heartstring");
 
     public static final DeferredRegister<DataComponentType<?>> DATA_COMPONENTS =
             DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, WizardsAndBeastsMod.MODID);
@@ -95,6 +108,65 @@ public class ModDataComponents {
                             .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.STRING_UTF8)
                             .build());
 
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Identifier>> BROOM_DEFINITION =
+            DATA_COMPONENTS.register("broom_definition", () ->
+                    DataComponentType.<Identifier>builder()
+                            .persistent(Identifier.CODEC)
+                            .networkSynchronized(ByteBufCodecs.STRING_UTF8.map(
+                                    Identifier::parse,
+                                    Identifier::toString))
+                            .build());
+
+    /**
+     * Lore: the Elder Wand (and similar artifacts) cannot be mended by Reparo.
+     * Set on stacks that represent such wands; absent means false.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> WAND_ELDER_WAND =
+            DATA_COMPONENTS.register("wand_elder_wand", () ->
+                    DataComponentType.<Boolean>builder()
+                            .persistent(com.mojang.serialization.Codec.BOOL)
+                            .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.BOOL)
+                            .build());
+
+    /** Stable id for a physical wand instance (disarm log / allegiance). */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<java.util.UUID>> WAND_INSTANCE_ID =
+            DATA_COMPONENTS.register("wand_instance_id", () ->
+                    DataComponentType.<java.util.UUID>builder()
+                            .persistent(net.minecraft.core.UUIDUtil.CODEC)
+                            .networkSynchronized(net.minecraft.core.UUIDUtil.STREAM_CODEC)
+                            .build());
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<ExpelliarmusDropTag>> EXPELLIARMUS_DROP =
+            DATA_COMPONENTS.register("expelliarmus_drop", () ->
+                    DataComponentType.<ExpelliarmusDropTag>builder()
+                            .persistent(ExpelliarmusDropTag.CODEC)
+                            .networkSynchronized(ExpelliarmusDropTag.STREAM_CODEC)
+                            .build());
+
     private ModDataComponents() {
+    }
+
+    public static boolean isElderWand(ItemStack stack) {
+        return Boolean.TRUE.equals(stack.get(WAND_ELDER_WAND.get()));
+    }
+
+    /** Lore pairing: elder wood + dragon heartstring (the Deathstick pairing in this mod). */
+    public static boolean isElderWandWoodAndCorePair(@Nullable Identifier wood, @Nullable Identifier core) {
+        return ELDER_WOOD_KEY.equals(wood) && DRAGON_HEARTSTRING_KEY.equals(core);
+    }
+
+    /**
+     * Sets or clears {@link #WAND_ELDER_WAND} from the stack's wand wood/core components.
+     * Call after any code path that assigns {@link WandComponents#WAND_WOOD} / {@link WandComponents#WAND_CORE}.
+     */
+    public static void refreshElderWandMarker(ItemStack stack) {
+        if (!(stack.getItem() instanceof WandItem)) {
+            return;
+        }
+        if (isElderWandWoodAndCorePair(WandComponents.getWood(stack), WandComponents.getCore(stack))) {
+            stack.set(WAND_ELDER_WAND.get(), true);
+        } else {
+            stack.remove(WAND_ELDER_WAND.get());
+        }
     }
 }

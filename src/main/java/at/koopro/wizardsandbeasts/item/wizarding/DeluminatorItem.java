@@ -1,9 +1,9 @@
 package at.koopro.wizardsandbeasts.item.wizarding;
 
-import at.koopro.wizardsandbeasts.client.deluminator.DeluminatorRenderer;
 import at.koopro.wizardsandbeasts.item.GeoItemBase;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
+import at.koopro.wizardsandbeasts.util.ClientClassBridge;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -55,12 +55,16 @@ public class DeluminatorItem extends GeoItemBase {
     @Override
     public void createGeoRenderer(Consumer<GeoRenderProvider> consumer) {
         consumer.accept(new GeoRenderProvider() {
-            private DeluminatorRenderer renderer;
+            private GeoItemRenderer<?> renderer;
 
             @Override
             public GeoItemRenderer<?> getGeoItemRenderer() {
                 if (this.renderer == null)
-                    this.renderer = new DeluminatorRenderer();
+                    this.renderer = ClientClassBridge.instantiate(
+                            "at.koopro.wizardsandbeasts.client.deluminator.DeluminatorRenderer",
+                            GeoItemRenderer.class,
+                            new Class<?>[0],
+                            new Object[0]);
                 return this.renderer;
             }
         });

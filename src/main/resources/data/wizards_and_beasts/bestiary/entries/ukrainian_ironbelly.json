@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:ukrainian_ironbelly",
+  "displayName": "bestiary.wizards_and_beasts.ukrainian_ironbelly.name",
+  "category": "DRAGON",
+  "mmRating": 5,
+  "habitat": "bestiary.wizards_and_beasts.ukrainian_ironbelly.habitat",
+  "size": "ENORMOUS",
+  "shortLore": "bestiary.wizards_and_beasts.ukrainian_ironbelly.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.ukrainian_ironbelly.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.ukrainian_ironbelly.ability.1",
+    "bestiary.wizards_and_beasts.ukrainian_ironbelly.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.ukrainian_ironbelly.threat.1",
+    "bestiary.wizards_and_beasts.ukrainian_ironbelly.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.ukrainian_ironbelly.weakness.1",
+    "bestiary.wizards_and_beasts.ukrainian_ironbelly.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/ukrainian_ironbelly.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/ukrainian_ironbelly.png",
+  "sortOrder": 6
+}

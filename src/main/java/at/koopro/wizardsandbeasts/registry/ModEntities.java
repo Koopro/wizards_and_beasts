@@ -5,6 +5,8 @@ import at.koopro.wizardsandbeasts.entity.BroomEntity;
 import at.koopro.wizardsandbeasts.entity.FormMannequinEntity;
 import at.koopro.wizardsandbeasts.entity.GoblinTellerEntity;
 import at.koopro.wizardsandbeasts.entity.NifflerEntity;
+import at.koopro.wizardsandbeasts.entity.PatronusEntity;
+import at.koopro.wizardsandbeasts.entity.ProtegoShieldEntity;
 import at.koopro.wizardsandbeasts.entity.SpellProjectileEntity;
 import at.koopro.wizardsandbeasts.entity.WizardingThrownEntity;
 import net.minecraft.core.registries.Registries;
@@ -24,6 +26,14 @@ public class ModEntities {
 
     public static final DeferredHolder<EntityType<?>, EntityType<SpellProjectileEntity>> SPELL_PROJECTILE =
             EntityHelper.register(ENTITY_TYPES, "spell_projectile", SpellProjectileEntity::new, MobCategory.MISC, 0.25f, 0.25f, 8, 2);
+
+    public static final DeferredHolder<EntityType<?>, EntityType<PatronusEntity>> PATRONUS =
+            EntityHelper.register(ENTITY_TYPES, "patronus", PatronusEntity::new, MobCategory.MISC, 0.6f, 1.2f, 8, 2);
+    static { EntityAttributes.queue(PATRONUS, PatronusEntity::createAttributes); }
+
+    public static final DeferredHolder<EntityType<?>, EntityType<ProtegoShieldEntity>> PROTEGO_SHIELD =
+            EntityHelper.register(ENTITY_TYPES, "protego_shield", ProtegoShieldEntity::new,
+                    MobCategory.MISC, 0.5f, 0.5f, 16, 2);
 
     public static final DeferredHolder<EntityType<?>, EntityType<GoblinTellerEntity>> GOBLIN_TELLER =
             EntityHelper.register(ENTITY_TYPES, "goblin_teller", GoblinTellerEntity::new, MobCategory.CREATURE, 0.6f, 1.5f);

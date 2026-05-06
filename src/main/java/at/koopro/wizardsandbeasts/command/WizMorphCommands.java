@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.command;
 
-import at.koopro.wizardsandbeasts.data.PlayerTypeData;
+import at.koopro.wizardsandbeasts.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.network.DebugOverlayToggleS2CPacket;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -11,14 +11,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * Morph debug tools under {@code /WizardsAndBeastsMod debug wizmorph ...}.
+ * Morph debug tools under {@code /WizardsAndBeastsMod debug morph ...}.
  */
 public final class WizMorphCommands {
 
     private WizMorphCommands() {}
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
-        return Commands.literal("wizmorph")
+        return Commands.literal("morph")
                 .then(Commands.literal("debug")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.literal("on")
@@ -34,7 +34,7 @@ public final class WizMorphCommands {
     }
 
     private static int toggleDebug(CommandSourceStack source, ServerPlayer target, boolean enabled) {
-        PlayerTypeData data = target.getData(ModAttachments.TYPE_DATA.get());
+        PlayerHeritageData data = target.getData(ModAttachments.HERITAGE_DATA.get());
         data.setDebugOverlay(enabled);
         DebugOverlayToggleS2CPacket.sendToPlayer(target, enabled);
 

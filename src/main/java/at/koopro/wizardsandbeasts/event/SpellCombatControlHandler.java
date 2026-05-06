@@ -1,7 +1,6 @@
 package at.koopro.wizardsandbeasts.event;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.wand.cast.WandAllegianceSystem;
 import at.koopro.wizardsandbeasts.util.WandHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -37,10 +36,6 @@ public final class SpellCombatControlHandler {
         if (target.getMainHandItem().isEmpty()) return;
         ItemStack dropped = target.getMainHandItem().copy();
         target.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-        if (attacker != null && WandHelper.isWand(dropped)) {
-            WandAllegianceSystem.transferTo(dropped, attacker.getUUID(), 0.5f, level.getGameTime());
-        }
-
         ItemEntity itemEntity = new ItemEntity(level,
                 target.getX(), target.getEyeY() - 0.15, target.getZ(), dropped);
         Vec3 throwDir = target.getLookAngle().scale(0.35).add(0, 0.2, 0);

@@ -14,6 +14,11 @@ public final class BroomDebugModule implements DebugModule {
     }
 
     @Override
+    public String summary() {
+        return "Broom vehicle speed/tilt when mounted.";
+    }
+
+    @Override
     public LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal(name())
                 .executes(ctx -> inspect(ctx.getSource(), ctx.getSource().getPlayerOrException()))

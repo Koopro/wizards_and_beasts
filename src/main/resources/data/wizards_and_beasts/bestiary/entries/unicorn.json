@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:unicorn",
+  "displayName": "bestiary.wizards_and_beasts.unicorn.name",
+  "category": "EQUINE",
+  "mmRating": 1,
+  "habitat": "bestiary.wizards_and_beasts.unicorn.habitat",
+  "size": "MEDIUM",
+  "shortLore": "bestiary.wizards_and_beasts.unicorn.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.unicorn.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.unicorn.ability.1",
+    "bestiary.wizards_and_beasts.unicorn.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.unicorn.threat.1",
+    "bestiary.wizards_and_beasts.unicorn.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.unicorn.weakness.1",
+    "bestiary.wizards_and_beasts.unicorn.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/unicorn.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/unicorn.png",
+  "sortOrder": 15
+}

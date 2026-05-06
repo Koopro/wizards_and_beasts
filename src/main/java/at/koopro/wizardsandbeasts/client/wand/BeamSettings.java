@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.client.wand;
 
+import at.koopro.wizardsandbeasts.spell.cast.BeamRayResolver;
+
 /**
  * Holds all adjustable beam parameters. The renderer reads from this
  * instead of hardcoded values. Purely client-side, never serialized.
@@ -21,7 +23,12 @@ public final class BeamSettings {
      * Scaled against beam length; clamped by {@link #minPathSegments}/{@link #maxPathSegments}.
      */
     public static int segmentsPerUnit = 4;
-    public static float extensionSpeed = 8.0f; // blocks per tick (~160 blocks/sec)
+
+    /**
+     * Textured scrolling strip + flashes ({@code true}), or legacy untextured lightning tube ({@code false}).
+     * {@link PerformancePreset#LOW} disables this for FPS.
+     */
+    public static boolean useTextured = true;
 
     public static int minPathSegments = 8;
     public static int maxPathSegments = 28;
@@ -80,9 +87,10 @@ public final class BeamSettings {
         range = 50.0f;
         speed = 0.08f;
         segmentsPerUnit = 4;
-        extensionSpeed = 8.0f;
+        useTextured = true;
         minPathSegments = 8;
         maxPathSegments = 28;
+        BeamRayResolver.setExtensionBlocksPerTick(BeamRayResolver.DEFAULT_EXTENSION_BLOCKS_PER_TICK);
         for (int i = 0; i < layers.length; i++) {
             resetLayer(i);
         }
@@ -101,18 +109,21 @@ public final class BeamSettings {
                 minPathSegments = 4;
                 maxPathSegments = 14;
                 speed = 0.05f;
+                useTextured = false;
             }
             case MEDIUM -> {
                 segmentsPerUnit = 4;
                 minPathSegments = 8;
                 maxPathSegments = 28;
                 speed = 0.08f;
+                useTextured = true;
             }
             case HIGH -> {
                 segmentsPerUnit = 6;
                 minPathSegments = 10;
                 maxPathSegments = 40;
                 speed = 0.10f;
+                useTextured = true;
             }
         }
     }

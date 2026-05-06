@@ -1,9 +1,13 @@
 package at.koopro.wizardsandbeasts.util;
 
 import at.koopro.wizardsandbeasts.item.WandItem;
+import at.koopro.wizardsandbeasts.wand.WandComponents;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Item;
+
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Wand-related utility methods.
@@ -53,5 +57,14 @@ public final class WandHelper {
      */
     public static boolean isUsingWand(Player player) {
         return player.isUsingItem() && isWand(player.getUseItem());
+    }
+
+    /** True when this wand stack lists the player as bonded master (post-resonance match). */
+    public static boolean isWandBondedTo(Player player, ItemStack wand) {
+        if (wand.isEmpty() || !isWand(wand)) {
+            return false;
+        }
+        Optional<UUID> master = WandComponents.getMaster(wand);
+        return master.isPresent() && master.get().equals(player.getUUID());
     }
 }

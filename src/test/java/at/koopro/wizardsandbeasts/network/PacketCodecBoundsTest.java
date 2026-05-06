@@ -62,7 +62,7 @@ class PacketCodecBoundsTest {
             buf.writeInt(0);
             PacketCodecUtils.writeString(buf, "");
             buf.writeBoolean(false);
-            assertThrows(IllegalArgumentException.class, () -> TypeDataSyncS2CPacket.STREAM_CODEC.decode(buf));
+            assertThrows(IllegalArgumentException.class, () -> HeritageDataSyncS2CPacket.STREAM_CODEC.decode(buf));
         } finally {
             buf.release();
         }
@@ -83,7 +83,7 @@ class PacketCodecBoundsTest {
             buf.writeInt(0); // profession points
             buf.writeInt(0); // total profession points
             buf.writeInt(PacketCodecUtils.MAX_UNLOCKED_PROFESSIONS + 1);
-            assertThrows(IllegalArgumentException.class, () -> TypeDataSyncS2CPacket.STREAM_CODEC.decode(buf));
+            assertThrows(IllegalArgumentException.class, () -> HeritageDataSyncS2CPacket.STREAM_CODEC.decode(buf));
         } finally {
             buf.release();
         }
@@ -118,7 +118,7 @@ class PacketCodecBoundsTest {
         try {
             writeOversizedString(buf);
             PacketCodecUtils.writeString(buf, "wizard");
-            assertThrows(IllegalArgumentException.class, () -> TypeSelectC2SPacket.STREAM_CODEC.decode(buf));
+            assertThrows(IllegalArgumentException.class, () -> HeritageSelectC2SPacket.STREAM_CODEC.decode(buf));
         } finally {
             buf.release();
         }

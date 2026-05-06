@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.client.form;
 
-import at.koopro.wizardsandbeasts.client.state.ClientTypeDataState;
+import at.koopro.wizardsandbeasts.client.state.ClientHeritageDataState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
@@ -46,6 +46,6 @@ public final class ObscurialClientViewHandler {
     }
 
     private static boolean isObscurialDark() {
-        return "obscurial_dark".equals(ClientTypeDataState.get().getActiveFormId());
+        return "obscurial_dark".equals(ClientHeritageDataState.get().getActiveFormId());
     }
 }

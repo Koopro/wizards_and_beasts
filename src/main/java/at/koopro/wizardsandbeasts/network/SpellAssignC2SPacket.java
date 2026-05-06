@@ -7,7 +7,7 @@ import at.koopro.wizardsandbeasts.spell.Spell;
 import at.koopro.wizardsandbeasts.spell.Spells;
 import at.koopro.wizardsandbeasts.spell.cast.SpellRejectCodes;
 import at.koopro.wizardsandbeasts.type.ObscurialRules;
-import at.koopro.wizardsandbeasts.type.WizType;
+import at.koopro.wizardsandbeasts.type.Heritage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -72,8 +72,8 @@ public record SpellAssignC2SPacket(int slotIndex, String spellId) implements Cus
                     player.displayClientMessage(Component.literal("\u00A75Obscurial abilities are not assignable as spells."), true);
                     return;
                 }
-                WizType type = player.getData(ModAttachments.TYPE_DATA.get()).getSelectedType();
-                if (!ObscurialRules.canTypeUseSpell(type, spell)) {
+                Heritage type = player.getData(ModAttachments.HERITAGE_DATA.get()).getSelectedHeritage();
+                if (!ObscurialRules.canHeritageUseSpell(type, spell)) {
                     data.incrementRejectReason(SpellRejectCodes.ASSIGN_TYPE_RESTRICTED_SPELL);
                     player.displayClientMessage(Component.literal("\u00A75Only Obscurials can equip this spell."), true);
                     return;

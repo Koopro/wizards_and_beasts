@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.network;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.command.debug.DebugHooks;
 import at.koopro.wizardsandbeasts.item.currency.CurrencyHelper;
+import at.koopro.wizardsandbeasts.item.currency.GringottsTransaction;
 import at.koopro.wizardsandbeasts.data.PlayerVaultData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModItems;
@@ -48,6 +49,7 @@ public record VaultActionC2SPacket(int actionOrdinal, int amount) implements Cus
 
             switch (action) {
                 case DEPOSIT_KNUT -> {
+                    if (!GringottsTransaction.isAcceptedCoin(new net.minecraft.world.item.ItemStack(ModItems.KNUT.get()))) return;
                     int have = CurrencyHelper.countItem(player.getInventory(), ModItems.KNUT.get());
                     int toDeposit = Math.min(pkt.amount, have);
                     if (toDeposit > 0 && CurrencyHelper.removeItems(player.getInventory(), ModItems.KNUT.get(), toDeposit)) {
@@ -55,6 +57,7 @@ public record VaultActionC2SPacket(int actionOrdinal, int amount) implements Cus
                     }
                 }
                 case DEPOSIT_SICKLE -> {
+                    if (!GringottsTransaction.isAcceptedCoin(new net.minecraft.world.item.ItemStack(ModItems.SICKLE.get()))) return;
                     int have = CurrencyHelper.countItem(player.getInventory(), ModItems.SICKLE.get());
                     int toDeposit = Math.min(pkt.amount, have);
                     if (toDeposit > 0 && CurrencyHelper.removeItems(player.getInventory(), ModItems.SICKLE.get(), toDeposit)) {
@@ -62,6 +65,7 @@ public record VaultActionC2SPacket(int actionOrdinal, int amount) implements Cus
                     }
                 }
                 case DEPOSIT_GALLEON -> {
+                    if (!GringottsTransaction.isAcceptedCoin(new net.minecraft.world.item.ItemStack(ModItems.GALLEON.get()))) return;
                     int have = CurrencyHelper.countItem(player.getInventory(), ModItems.GALLEON.get());
                     int toDeposit = Math.min(pkt.amount, have);
                     if (toDeposit > 0 && CurrencyHelper.removeItems(player.getInventory(), ModItems.GALLEON.get(), toDeposit)) {
@@ -69,6 +73,11 @@ public record VaultActionC2SPacket(int actionOrdinal, int amount) implements Cus
                     }
                 }
                 case DEPOSIT_ALL -> {
+                    if (!GringottsTransaction.isAcceptedCoin(new net.minecraft.world.item.ItemStack(ModItems.KNUT.get()))
+                            || !GringottsTransaction.isAcceptedCoin(new net.minecraft.world.item.ItemStack(ModItems.SICKLE.get()))
+                            || !GringottsTransaction.isAcceptedCoin(new net.minecraft.world.item.ItemStack(ModItems.GALLEON.get()))) {
+                        return;
+                    }
                     int haveK = CurrencyHelper.countItem(player.getInventory(), ModItems.KNUT.get());
                     int haveS = CurrencyHelper.countItem(player.getInventory(), ModItems.SICKLE.get());
                     int haveG = CurrencyHelper.countItem(player.getInventory(), ModItems.GALLEON.get());

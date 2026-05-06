@@ -1,7 +1,6 @@
 package at.koopro.wizardsandbeasts.spell.spells;
 
 import at.koopro.wizardsandbeasts.spell.*;
-import net.minecraft.sounds.SoundEvents;
 
 public class Expelliarmus extends Spell {
 
@@ -13,12 +12,26 @@ public class Expelliarmus extends Spell {
     protected SpellProperties buildProperties() {
         return SpellProperties.projectile()
                 .disarms()
-                .sound(SoundEvents.BLAZE_SHOOT, 0.8f, 1.4f)
                 .build();
     }
 
     @Override
     protected SpellRequirement buildRequirement() {
         return SpellRequirement.knows(Spells.STUPEFY);
+    }
+
+    @Override
+    public float getProjectileSpeed() {
+        return 1.6f;
+    }
+
+    @Override
+    public float getProjectileSpread() {
+        return 0.02f;
+    }
+
+    @Override
+    public float getBaseKnockback() {
+        return 1.2f;
     }
 }

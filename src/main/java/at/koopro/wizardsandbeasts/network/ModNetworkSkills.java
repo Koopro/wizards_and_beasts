@@ -11,6 +11,10 @@ final class ModNetworkSkills {
                 SkillDataSyncS2CPacket.TYPE,
                 SkillDataSyncS2CPacket.STREAM_CODEC,
                 SkillDataSyncS2CPacket::handleClient);
+        registrar.playToClient(
+                SkillBonusSyncS2CPayload.TYPE,
+                SkillBonusSyncS2CPayload.STREAM_CODEC,
+                SkillBonusSyncS2CPayload::handleClient);
 
         registrar.playToServer(
                 SkillUnlockC2SPacket.TYPE,

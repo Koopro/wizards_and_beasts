@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:jobberknoll",
+  "displayName": "bestiary.wizards_and_beasts.jobberknoll.name",
+  "category": "MAGICAL_BIRD",
+  "mmRating": 1,
+  "habitat": "bestiary.wizards_and_beasts.jobberknoll.habitat",
+  "size": "TINY",
+  "shortLore": "bestiary.wizards_and_beasts.jobberknoll.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.jobberknoll.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.jobberknoll.ability.1",
+    "bestiary.wizards_and_beasts.jobberknoll.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.jobberknoll.threat.1",
+    "bestiary.wizards_and_beasts.jobberknoll.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.jobberknoll.weakness.1",
+    "bestiary.wizards_and_beasts.jobberknoll.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/jobberknoll.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/jobberknoll.png",
+  "sortOrder": 29
+}

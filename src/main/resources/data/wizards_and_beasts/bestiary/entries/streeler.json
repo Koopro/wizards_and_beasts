@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:streeler",
+  "displayName": "bestiary.wizards_and_beasts.streeler.name",
+  "category": "SMALL_CREATURE",
+  "mmRating": 2,
+  "habitat": "bestiary.wizards_and_beasts.streeler.habitat",
+  "size": "SMALL",
+  "shortLore": "bestiary.wizards_and_beasts.streeler.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.streeler.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.streeler.ability.1",
+    "bestiary.wizards_and_beasts.streeler.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.streeler.threat.1",
+    "bestiary.wizards_and_beasts.streeler.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.streeler.weakness.1",
+    "bestiary.wizards_and_beasts.streeler.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/streeler.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/streeler.png",
+  "sortOrder": 39
+}

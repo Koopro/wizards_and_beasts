@@ -12,6 +12,11 @@ import java.util.*;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 
 public class PlayerSpellData implements ModAttachments.NbtSerializable {
+    public enum MasteryTier {
+        NOVICE,
+        PROFICIENT,
+        MASTERED
+    }
 
     /**
      * On-disk schema version. Bump when the NBT layout changes and add a
@@ -32,6 +37,7 @@ public class PlayerSpellData implements ModAttachments.NbtSerializable {
     private final Map<String, Long> cooldowns = new HashMap<>();
     private final Map<String, Integer> castCount = new HashMap<>();
     private final Map<String, Integer> successfulHits = new HashMap<>();
+    private final Map<String, Float> spellProficiencies = new HashMap<>();
     private final Map<String, Integer> rejectCounts = new HashMap<>();
     private int syncCorrections;
 
@@ -63,6 +69,7 @@ public class PlayerSpellData implements ModAttachments.NbtSerializable {
         cooldowns.clear();
         castCount.clear();
         successfulHits.clear();
+        spellProficiencies.clear();
         rejectCounts.clear();
         syncCorrections = 0;
     }
@@ -128,8 +135,43 @@ public class PlayerSpellData implements ModAttachments.NbtSerializable {
         return successfulHits.getOrDefault(spellId, 0);
     }
 
+    public MasteryTier getMasteryTier(String spellId) {
+        int hits = getSuccessfulHits(spellId);
+        if (hits >= at.koopro.wizardsandbeasts.spell.Proficiency.MASTERED.getCastsRequired()) {
+            return MasteryTier.MASTERED;
+        }
+        if (hits >= at.koopro.wizardsandbeasts.spell.Proficiency.PROFICIENT.getCastsRequired()) {
+            return MasteryTier.PROFICIENT;
+        }
+        return MasteryTier.NOVICE;
+    }
+
+    public boolean hasReachedMasteryTier(String spellId, MasteryTier requiredTier) {
+        if (requiredTier == null) {
+            return true;
+        }
+        return getMasteryTier(spellId).ordinal() >= requiredTier.ordinal();
+    }
+
     public void incrementSuccessfulHits(String spellId) {
         successfulHits.merge(spellId, 1, Integer::sum);
+    }
+
+    public float getSpellProficiency(String spellId) {
+        return spellProficiencies.getOrDefault(spellId, 0.0f);
+    }
+
+    public void setSpellProficiency(String spellId, float proficiency) {
+        float clamped = Math.max(0.0f, Math.min(1.0f, proficiency));
+        if (clamped <= 0.0f) {
+            spellProficiencies.remove(spellId);
+        } else {
+            spellProficiencies.put(spellId, clamped);
+        }
+    }
+
+    public void clearSpellProficiency(String spellId) {
+        spellProficiencies.remove(spellId);
     }
 
     /**
@@ -168,6 +210,10 @@ public class PlayerSpellData implements ModAttachments.NbtSerializable {
         return Collections.unmodifiableMap(successfulHits);
     }
 
+    public Map<String, Float> getSpellProficiencies() {
+        return Collections.unmodifiableMap(spellProficiencies);
+    }
+
     public void incrementRejectReason(String reason) {
         if (reason == null || reason.isBlank()) {
             return;
@@ -186,6 +232,11 @@ public class PlayerSpellData implements ModAttachments.NbtSerializable {
         } else {
             rejectCounts.put(reason, count);
         }
+    }
+
+    /** Clears spell/wand rejection telemetry counters only (debug / support). */
+    public void clearRejectCounts() {
+        rejectCounts.clear();
     }
 
     public int getSyncCorrections() {
@@ -212,6 +263,7 @@ public class PlayerSpellData implements ModAttachments.NbtSerializable {
         NbtHelper.saveStringLongMap(tag, "Cooldowns", cooldowns);
         NbtHelper.saveStringIntMap(tag, "CastCount", castCount);
         NbtHelper.saveStringIntMap(tag, "SuccessfulHits", successfulHits);
+        NbtHelper.saveStringFloatMap(tag, "SpellProficiencies", spellProficiencies);
         NbtHelper.saveStringIntMap(tag, "RejectCount", rejectCounts);
         tag.putInt("SyncCorrections", syncCorrections);
         return tag;
@@ -245,6 +297,10 @@ public class PlayerSpellData implements ModAttachments.NbtSerializable {
         successfulHits.clear();
         for (Map.Entry<String, Integer> entry : NbtHelper.loadStringIntMap(tag, "SuccessfulHits").entrySet()) {
             successfulHits.put(NamespaceMigration.remapLegacyId(entry.getKey()), entry.getValue());
+        }
+        spellProficiencies.clear();
+        for (Map.Entry<String, Float> entry : NbtHelper.loadStringFloatMap(tag, "SpellProficiencies").entrySet()) {
+            spellProficiencies.put(NamespaceMigration.remapLegacyId(entry.getKey()), Math.max(0.0f, Math.min(1.0f, entry.getValue())));
         }
         rejectCounts.clear();
         rejectCounts.putAll(NbtHelper.loadStringIntMap(tag, "RejectCount"));

@@ -21,4 +21,9 @@ public class Alohomora extends Spell {
     protected SpellRequirement buildRequirement() {
         return SpellRequirement.none();
     }
+
+    @Override
+    public float getProjectileSpeed() {
+        return 0.0f;
+    }
 }

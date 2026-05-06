@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.wand.cast;
 
 import at.koopro.wizardsandbeasts.Config;
-import at.koopro.wizardsandbeasts.data.PlayerTypeData;
+import at.koopro.wizardsandbeasts.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.spell.cast.CastContext;
@@ -26,7 +26,7 @@ public final class WandAllegianceSystem {
             return new Compatibility.Score(0.5f, 0.5f);
         }
         WandAllegiance allegiance = resolve(ctx.wandStack());
-        PlayerTypeData typeData = ctx.caster().getData(ModAttachments.TYPE_DATA.get());
+        PlayerHeritageData typeData = ctx.caster().getData(ModAttachments.HERITAGE_DATA.get());
         Compatibility.Score score = Compatibility.score(ctx.wandStack(), typeData, allegiance);
         UUID casterId = ctx.caster().getUUID();
 
@@ -59,7 +59,7 @@ public final class WandAllegianceSystem {
             return;
         }
         WandAllegiance allegiance = resolve(wandStack);
-        PlayerTypeData typeData = caster.getData(ModAttachments.TYPE_DATA.get());
+        PlayerHeritageData typeData = caster.getData(ModAttachments.HERITAGE_DATA.get());
         Compatibility.Score score = Compatibility.score(wandStack, typeData, allegiance);
 
         if (!allegiance.isBound()) {

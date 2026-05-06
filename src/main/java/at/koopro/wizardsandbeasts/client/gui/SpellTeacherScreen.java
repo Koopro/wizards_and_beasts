@@ -52,7 +52,10 @@ public class SpellTeacherScreen extends Screen {
         for (int i = start; i < end; i++) {
             SpellLearningService.SpellOffer offer = offers.get(i);
             String state = offer.learnable() ? "\u00A7aLearn" : "\u00A77Locked";
-            String label = offer.displayName() + " [" + offer.category().toLowerCase() + "] " + state;
+            String lockHint = !offer.learnable() && !offer.requirementText().isBlank()
+                    ? " - " + trimHint(offer.requirementText(), 32)
+                    : "";
+            String label = offer.displayName() + " [" + offer.category().toLowerCase() + "] " + state + lockHint;
             addRenderableWidget(Button.builder(Component.literal(label), b ->
                             ClientPacketDistributor.sendToServer(new SpellTeacherLearnC2SPacket(offer.spellId())))
                     .bounds(panelX + layout.s(8), y, layout.panelW() - layout.s(16), layout.s(20))
@@ -124,5 +127,12 @@ public class SpellTeacherScreen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    private static String trimHint(String text, int max) {
+        if (text == null || text.length() <= max) {
+            return text == null ? "" : text;
+        }
+        return text.substring(0, max - 3) + "...";
     }
 }

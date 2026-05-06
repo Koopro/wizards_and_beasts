@@ -14,12 +14,21 @@ public final class DebugModeService {
     }
 
     public static boolean toggleForPlayer(ServerPlayer player) {
-        UUID id = player.getUUID();
+        return togglePlayerUuid(player.getUUID());
+    }
+
+    /** Same toggle semantics as {@link #toggleForPlayer(ServerPlayer)}; package-private for unit tests. */
+    static boolean togglePlayerUuid(UUID id) {
         if (!ENABLED_PLAYERS.add(id)) {
             ENABLED_PLAYERS.remove(id);
             return false;
         }
         return true;
+    }
+
+    static void resetForTests() {
+        ENABLED_PLAYERS.clear();
+        globalEnabled = false;
     }
 
     public static boolean toggleGlobal() {

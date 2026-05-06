@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:giant",
+  "displayName": "bestiary.wizards_and_beasts.giant.name",
+  "category": "LARGE_BEAST",
+  "mmRating": 4,
+  "habitat": "bestiary.wizards_and_beasts.giant.habitat",
+  "size": "ENORMOUS",
+  "shortLore": "bestiary.wizards_and_beasts.giant.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.giant.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.giant.ability.1",
+    "bestiary.wizards_and_beasts.giant.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.giant.threat.1",
+    "bestiary.wizards_and_beasts.giant.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.giant.weakness.1",
+    "bestiary.wizards_and_beasts.giant.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/giant.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/giant.png",
+  "sortOrder": 23
+}

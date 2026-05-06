@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:billywig",
+  "displayName": "bestiary.wizards_and_beasts.billywig.name",
+  "category": "SMALL_CREATURE",
+  "mmRating": 2,
+  "habitat": "bestiary.wizards_and_beasts.billywig.habitat",
+  "size": "TINY",
+  "shortLore": "bestiary.wizards_and_beasts.billywig.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.billywig.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.billywig.ability.1",
+    "bestiary.wizards_and_beasts.billywig.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.billywig.threat.1",
+    "bestiary.wizards_and_beasts.billywig.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.billywig.weakness.1",
+    "bestiary.wizards_and_beasts.billywig.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/billywig.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/billywig.png",
+  "sortOrder": 35
+}

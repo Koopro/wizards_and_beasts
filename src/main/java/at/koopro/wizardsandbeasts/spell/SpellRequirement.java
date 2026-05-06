@@ -1,6 +1,10 @@
 package at.koopro.wizardsandbeasts.spell;
 
 import at.koopro.wizardsandbeasts.data.PlayerSpellData;
+import at.koopro.wizardsandbeasts.skill.PlayerSkillBonusData;
+import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 
 import javax.annotation.Nullable;
 
@@ -29,11 +33,22 @@ public class SpellRequirement {
     }
 
     public boolean isMet(PlayerSpellData data) {
+        return isMet(null, data);
+    }
+
+    public boolean isMet(@Nullable ServerPlayer player, PlayerSpellData data) {
         if (prerequisiteId == null) return true;
         if (!data.knowsSpell(prerequisiteId)) return false;
         if (minProficiency != null) {
             int casts = data.getSuccessfulHits(prerequisiteId);
-            return Proficiency.fromCastCount(casts).ordinal() >= minProficiency.ordinal();
+            int requiredCasts = minProficiency.getCastsRequired();
+            if (player != null) {
+                Identifier key = prerequisiteId.contains(":")
+                        ? Identifier.parse(prerequisiteId)
+                        : Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, prerequisiteId);
+                requiredCasts = PlayerSkillBonusData.forPlayer(player).spellGateOverrides().getOrDefault(key, requiredCasts);
+            }
+            return casts >= requiredCasts;
         }
         return true;
     }

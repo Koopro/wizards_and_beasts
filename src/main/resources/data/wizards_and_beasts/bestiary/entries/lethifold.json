@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:lethifold",
+  "displayName": "bestiary.wizards_and_beasts.lethifold.name",
+  "category": "SPECTRAL",
+  "mmRating": 5,
+  "habitat": "bestiary.wizards_and_beasts.lethifold.habitat",
+  "size": "MEDIUM",
+  "shortLore": "bestiary.wizards_and_beasts.lethifold.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.lethifold.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.lethifold.ability.1",
+    "bestiary.wizards_and_beasts.lethifold.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.lethifold.threat.1",
+    "bestiary.wizards_and_beasts.lethifold.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.lethifold.weakness.1",
+    "bestiary.wizards_and_beasts.lethifold.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/lethifold.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/lethifold.png",
+  "sortOrder": 48
+}

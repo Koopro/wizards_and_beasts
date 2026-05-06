@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.client.gui;
 
 import at.koopro.wizardsandbeasts.client.wand.BeamSettings;
+import at.koopro.wizardsandbeasts.spell.cast.BeamRayResolver;
 import at.koopro.wizardsandbeasts.spell.Spell;
 import at.koopro.wizardsandbeasts.spell.Spells;
 import net.minecraft.client.gui.GuiGraphics;
@@ -165,7 +166,7 @@ public class BeamDebugScreen extends Screen {
 
         sliderExtension = new ExtendedSlider(rightX, globalY + layout.s(WizardsAndBeastsUiTokens.BeamDebug.GLOBAL_SLIDER_GAP) * 3, rightW, sliderH,
                 Component.literal("Extension: "), Component.literal(" b/t"),
-                1.0, 30.0, BeamSettings.extensionSpeed, true);
+                1.0, 30.0, BeamRayResolver.extensionBlocksPerTick(), true);
         addRenderableWidget(sliderExtension);
 
         // ── Bottom buttons ──
@@ -292,7 +293,7 @@ public class BeamDebugScreen extends Screen {
         BeamSettings.range = (float) sliderRange.getValue();
         BeamSettings.speed = (float) sliderSpeed.getValue();
         BeamSettings.segmentsPerUnit = (int) sliderSegments.getValue();
-        BeamSettings.extensionSpeed = (float) sliderExtension.getValue();
+        BeamRayResolver.setExtensionBlocksPerTick((float) sliderExtension.getValue());
 
         // Selected layer
         BeamSettings.LayerSettings layer = BeamSettings.layers[selectedLayer];

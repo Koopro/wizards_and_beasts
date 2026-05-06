@@ -168,8 +168,8 @@ public final class WizardsAndBeastsUiTokens {
         public static final int ACTIVE_NAME_Y_GAP = 6;
     }
 
-    public static final class TypeSelection {
-        private TypeSelection() {}
+    public static final class HeritageSelection {
+        private HeritageSelection() {}
 
         public static final int PANEL_WIDTH = 392;
         public static final int PANEL_HEIGHT = 308;

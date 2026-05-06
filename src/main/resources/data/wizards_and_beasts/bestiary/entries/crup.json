@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:crup",
+  "displayName": "bestiary.wizards_and_beasts.crup.name",
+  "category": "SMALL_CREATURE",
+  "mmRating": 2,
+  "habitat": "bestiary.wizards_and_beasts.crup.habitat",
+  "size": "SMALL",
+  "shortLore": "bestiary.wizards_and_beasts.crup.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.crup.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.crup.ability.1",
+    "bestiary.wizards_and_beasts.crup.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.crup.threat.1",
+    "bestiary.wizards_and_beasts.crup.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.crup.weakness.1",
+    "bestiary.wizards_and_beasts.crup.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/crup.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/crup.png",
+  "sortOrder": 36
+}

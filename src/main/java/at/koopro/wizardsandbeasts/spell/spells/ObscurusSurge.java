@@ -66,7 +66,7 @@ public class ObscurusSurge extends Spell {
         level.sendParticles(ParticleTypes.LARGE_SMOKE,
                 caster.getX(), caster.getY() + 0.9, caster.getZ(),
                 14, 0.45, 0.25, 0.45, 0.01);
-        SpellHelper.spawnBurst(level, caster.getBoundingBox().getCenter(), getColor(), 20, 0.35);
+        SpellHelper.spawnBurst(level, this, caster.getBoundingBox().getCenter(), 20, 0.35);
         playSound(level, caster);
     }
 }

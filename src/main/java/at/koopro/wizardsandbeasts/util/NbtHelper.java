@@ -86,6 +86,32 @@ public final class NbtHelper {
         return map;
     }
 
+    // ── Map<String, Float> ───────────────────────────────────────────────
+
+    public static void saveStringFloatMap(CompoundTag tag, String key, Map<String, Float> map) {
+        ListTag list = new ListTag();
+        for (Map.Entry<String, Float> entry : map.entrySet()) {
+            CompoundTag entryTag = new CompoundTag();
+            entryTag.putString("id", entry.getKey());
+            entryTag.putFloat("value", entry.getValue());
+            list.add(entryTag);
+        }
+        tag.put(key, list);
+    }
+
+    public static Map<String, Float> loadStringFloatMap(CompoundTag tag, String key) {
+        Map<String, Float> map = new HashMap<>();
+        ListTag list = tag.getList(key).orElse(new ListTag());
+        for (int i = 0; i < list.size(); i++) {
+            list.getCompound(i).ifPresent(entry -> {
+                String id = entry.getString("id").orElse("");
+                float value = entry.getFloat("value").orElse(0.0f);
+                if (!id.isEmpty()) map.put(id, value);
+            });
+        }
+        return map;
+    }
+
     // ── Map<String, String> (parallel ListTags) ──────────────────────────
 
     public static void saveStringStringMap(CompoundTag tag, String keysName,

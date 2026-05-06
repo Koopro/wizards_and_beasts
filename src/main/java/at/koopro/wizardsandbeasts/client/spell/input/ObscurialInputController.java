@@ -2,7 +2,7 @@ package at.koopro.wizardsandbeasts.client.spell.input;
 
 import at.koopro.wizardsandbeasts.client.spell.SpellKeyBindings;
 import at.koopro.wizardsandbeasts.client.ui.InputPolicy;
-import at.koopro.wizardsandbeasts.data.PlayerTypeData;
+import at.koopro.wizardsandbeasts.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.network.ObscurialStressVentC2SPacket;
 import at.koopro.wizardsandbeasts.network.ObscurialToggleFormC2SPacket;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
@@ -10,7 +10,7 @@ import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 public final class ObscurialInputController {
     private ObscurialInputController() {}
 
-    public static void handleGameplayBindings(PlayerTypeData typeData) {
+    public static void handleGameplayBindings(PlayerHeritageData typeData) {
         if (SpellKeyBindings.OBSCURIAL_TOGGLE.consumeClick() && InputPolicy.canToggleObscurialForm(typeData)) {
             ClientPacketDistributor.sendToServer(new ObscurialToggleFormC2SPacket());
         }

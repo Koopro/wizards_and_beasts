@@ -1,6 +1,11 @@
 package at.koopro.wizardsandbeasts.spell;
 
 import at.koopro.wizardsandbeasts.data.PlayerSpellData;
+import at.koopro.wizardsandbeasts.effect.ModEffects;
+import at.koopro.wizardsandbeasts.registry.ModSounds;
+import at.koopro.wizardsandbeasts.module.Module;
+import at.koopro.wizardsandbeasts.module.ModuleManager;
+import at.koopro.wizardsandbeasts.spell.proficiency.SpellScalingProfile;
 import at.koopro.wizardsandbeasts.entity.SpellProjectileEntity;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
@@ -9,6 +14,7 @@ import at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver;
 import at.koopro.wizardsandbeasts.util.WandHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
@@ -67,6 +73,11 @@ public abstract class Spell {
     public int getBaseCooldownTicks() { return baseCooldownTicks; }
     public float getBaseDamage() { return baseDamage; }
     public int getColor() { return color; }
+    public int getBaseEffectDurationTicks() { return 0; }
+    public float getProjectileSpeed() { return 1.5f; }
+    public float getProjectileSpread() { return 0.0f; }
+    public float getBaseKnockback() { return 0.0f; }
+    public float getBaseAoeRadius() { return 0.0f; }
 
     @Nullable
     public SpellProperties getProperties() { return properties; }
@@ -110,18 +121,55 @@ public abstract class Spell {
      */
     public void playSound(ServerLevel level, ServerPlayer caster) {
         if (properties == null) return;
-        level.playSound(null, caster.blockPosition(), properties.getCastSound(),
+        SoundEvent event = resolveCastSoundForPlayback();
+        float proficiencyPitch = 1.0f;
+        if (ModuleManager.isEnabled(Module.PROFICIENCY)) {
+            float proficiency = caster.getData(ModAttachments.SPELL_DATA.get()).getSpellProficiency(id);
+            proficiencyPitch = 0.9f + (Math.max(0.0f, Math.min(1.0f, proficiency)) * 0.2f);
+        }
+        level.playSound(null, caster.blockPosition(), event,
                 SoundSource.PLAYERS, properties.getSoundVolume(),
-                properties.getSoundPitch() + level.random.nextFloat() * 0.3f);
+                (properties.getSoundPitch() + level.random.nextFloat() * 0.3f) * proficiencyPitch);
+    }
+
+    private SoundEvent resolveCastSoundForPlayback() {
+        if (properties == null) {
+            return ModSounds.SPELL_CAST_GENERIC.get();
+        }
+        SoundEvent configured = properties.getCastSound();
+        if (configured == ModSounds.PATRONUS_SUMMON.get()) {
+            return configured;
+        }
+        SpellFamily family = SpellFamilies.of(this);
+        if (family == SpellFamily.DARK) {
+            return ModSounds.SPELL_CAST_DARK.get();
+        }
+        if (family == SpellFamily.LIGHT) {
+            return ModSounds.SPELL_CAST_CHARM.get();
+        }
+        return configured;
     }
 
     /**
      * Applies this spell's self-effects to the caster.
      */
     public void applySelfEffects(ServerPlayer caster) {
+        applySelfEffects(caster, 1.0f);
+    }
+
+    public void applySelfEffects(ServerPlayer caster, float durationMult) {
         if (properties == null) return;
         for (Supplier<MobEffectInstance> factory : properties.getSelfEffects()) {
-            caster.addEffect(factory.get());
+            MobEffectInstance effect = factory.get();
+            if (effect != null && canApplyEffect(effect)) {
+                caster.addEffect(new MobEffectInstance(
+                        effect.getEffect(),
+                        Math.max(1, Math.round(effect.getDuration() * durationMult)),
+                        effect.getAmplifier(),
+                        effect.isAmbient(),
+                        effect.isVisible(),
+                        effect.showIcon()));
+            }
         }
     }
 
@@ -129,18 +177,52 @@ public abstract class Spell {
      * Applies this spell's target-effects to a living entity.
      */
     public void applyTargetEffects(LivingEntity target) {
+        applyTargetEffects(target, 1.0f);
+    }
+
+    public void applyTargetEffects(LivingEntity target, float durationMult) {
         if (properties == null) return;
         for (Supplier<MobEffectInstance> factory : properties.getTargetEffects()) {
-            target.addEffect(factory.get());
+            MobEffectInstance effect = factory.get();
+            if (effect != null && canApplyEffect(effect)) {
+                target.addEffect(new MobEffectInstance(
+                        effect.getEffect(),
+                        Math.max(1, Math.round(effect.getDuration() * durationMult)),
+                        effect.getAmplifier(),
+                        effect.isAmbient(),
+                        effect.isVisible(),
+                        effect.showIcon()));
+            }
         }
+    }
+
+    private static boolean canApplyEffect(MobEffectInstance effect) {
+        if (effect.is(ModEffects.CRUCIATUS_PAIN)
+                || effect.is(ModEffects.SECTUMSEMPRA_BLEED)
+                || effect.is(ModEffects.BAT_BOGEY)) {
+            return ModuleManager.isEnabled(Module.DARK_ARTS);
+        }
+        if (effect.is(ModEffects.DEMENTOR_CHILL)) {
+            return ModuleManager.isEnabled(Module.CREATURES);
+        }
+        return ModuleManager.isEnabled(Module.WANDS_AND_SPELLS);
     }
 
     /**
      * Spawns and shoots a projectile from the caster.
      */
     public SpellProjectileEntity spawnProjectile(ServerLevel level, ServerPlayer caster) {
+        return spawnProjectile(level, caster, SpellScalingProfile.DEFAULT);
+    }
+
+    public SpellProjectileEntity spawnProjectile(ServerLevel level, ServerPlayer caster, SpellScalingProfile profile) {
         SpellProjectileEntity projectile = new SpellProjectileEntity(level, caster, id);
-        projectile.shootFromRotation(caster, caster.getXRot(), caster.getYRot(), 0.0f, 2.0f, 0.5f);
+        projectile.setScalingProfile(profile);
+        float baseSpeed = this instanceof JsonSpell jsonSpell ? jsonSpell.definition().projectileSpeed() : getProjectileSpeed();
+        float baseSpread = this instanceof JsonSpell jsonSpell ? jsonSpell.definition().projectileSpread() : getProjectileSpread();
+        float speed = baseSpeed * profile.controlMult();
+        float spread = baseSpread * profile.accuracyMult();
+        projectile.shootFromRotation(caster, caster.getXRot(), caster.getYRot(), 0.0f, speed, spread);
         level.addFreshEntity(projectile);
         return projectile;
     }
@@ -150,5 +232,43 @@ public abstract class Spell {
      */
     public ItemStack getWandStack(ServerPlayer caster) {
         return WandHelper.getWandStack(caster);
+    }
+
+    /** 0–1-ish scalar derived from proficiency tier (for formulas that expect a float). */
+    public float getProficiencyScalar(ServerPlayer caster) {
+        return switch (getProficiency(caster)) {
+            case NOVICE -> 0.33f;
+            case PROFICIENT -> 0.66f;
+            case MASTERED -> 1.0f;
+        };
+    }
+
+    /** When true, Protego deflection does not apply (datapack / Java override). */
+    public boolean isUnblockable() {
+        return false;
+    }
+
+    /**
+     * Optional hybrid-learning metadata used by the teacher progression system.
+     * Java spells default to no extra gate; datapack spells can provide these.
+     */
+    @Nullable
+    public String getRequiredSkillId() {
+        return null;
+    }
+
+    @Nullable
+    public String getRequiredProfessionId() {
+        return null;
+    }
+
+    @Nullable
+    public String getMasterySourceSpellId() {
+        return null;
+    }
+
+    @Nullable
+    public PlayerSpellData.MasteryTier getRequiredMasteryTier() {
+        return null;
     }
 }

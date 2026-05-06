@@ -6,6 +6,8 @@ import at.koopro.wizardsandbeasts.client.ui.SpellHudUiModel;
 import at.koopro.wizardsandbeasts.client.ui.UiStateProjection;
 import at.koopro.wizardsandbeasts.spell.Spell;
 import at.koopro.wizardsandbeasts.spell.Spells;
+import at.koopro.wizardsandbeasts.module.Module;
+import at.koopro.wizardsandbeasts.module.ModuleManager;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -121,6 +123,23 @@ public class SpellDiamondOverlay {
                         hudY - 11,
                         0xFFE8D2B4, true);
             }
+            if (ModuleManager.isEnabled(Module.PROFICIENCY)) {
+                renderProficiencyPips(graphics, hudX, hudY, data.getSpellProficiency(activeSpellId));
+            }
+        }
+    }
+
+    private static void renderProficiencyPips(GuiGraphics graphics, int hudX, int hudY, float proficiency) {
+        int pipSize = 4;
+        int gap = 2;
+        int totalWidth = 28;
+        int startX = hudX + (HUD_ON_SCREEN_SIZE / 2) - (totalWidth / 2);
+        int y = hudY + HUD_ON_SCREEN_SIZE + 2;
+        int filled = proficiency >= 1.0f ? 5 : Math.max(0, Math.min(4, (int) Math.floor(proficiency * 5.0f)));
+        for (int i = 0; i < 5; i++) {
+            int x = startX + (i * (pipSize + gap));
+            int color = i < filled ? 0xFFD700 : 0x444444;
+            graphics.fill(x, y, x + pipSize, y + pipSize, color);
         }
     }
 

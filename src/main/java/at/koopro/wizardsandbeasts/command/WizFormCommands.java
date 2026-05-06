@@ -3,8 +3,8 @@ package at.koopro.wizardsandbeasts.command;
 import at.koopro.wizardsandbeasts.form.FormRegistry;
 import at.koopro.wizardsandbeasts.form.FormSystemAPI;
 import at.koopro.wizardsandbeasts.form.PlayerForm;
-import at.koopro.wizardsandbeasts.type.TypeFormBridge;
-import at.koopro.wizardsandbeasts.type.WizType;
+import at.koopro.wizardsandbeasts.type.HeritageFormBridge;
+import at.koopro.wizardsandbeasts.type.Heritage;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
@@ -15,14 +15,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * Commands for the form system: {@code /WizardsAndBeastsMod wizform set|reset|list}.
+ * Commands for the form system: {@code /WizardsAndBeastsMod form set|reset|list}.
  */
 public final class WizFormCommands {
 
     private WizFormCommands() {}
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
-        return Commands.literal("wizform")
+        return Commands.literal("form")
                 .then(Commands.literal("set")
                         .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
                         .then(Commands.argument("player", EntityArgument.player())
@@ -43,7 +43,7 @@ public final class WizFormCommands {
                         .executes(ctx -> listForms(ctx.getSource(), null))
                         .then(Commands.argument("type", StringArgumentType.word())
                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
-                                        java.util.Arrays.stream(WizType.values()).map(WizType::getId), builder))
+                                        java.util.Arrays.stream(Heritage.values()).map(Heritage::getId), builder))
                                 .executes(ctx -> listForms(
                                         ctx.getSource(),
                                         StringArgumentType.getString(ctx, "type")))));
@@ -77,14 +77,14 @@ public final class WizFormCommands {
         source.sendSuccess(() -> Component.literal("\u00A76--- Forms ---"), false);
 
         if (typeFilter != null) {
-            WizType type = WizType.byId(typeFilter);
+            Heritage type = Heritage.byId(typeFilter);
             if (type == null) {
                 source.sendFailure(Component.literal("\u00A7cUnknown type: " + typeFilter));
                 return 0;
             }
             source.sendSuccess(() -> Component.literal(
                     "\u00A7eForms for " + type.getDisplayName() + ":"), false);
-            for (String formId : TypeFormBridge.getAvailableFormIds(type)) {
+            for (String formId : HeritageFormBridge.getAvailableFormIds(type)) {
                 PlayerForm form = FormRegistry.get(formId);
                 if (form != null) {
                     source.sendSuccess(() -> Component.literal(

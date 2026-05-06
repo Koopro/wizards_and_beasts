@@ -1,8 +1,9 @@
 package at.koopro.wizardsandbeasts.type.profession;
 
-import at.koopro.wizardsandbeasts.data.PlayerTypeData;
+import at.koopro.wizardsandbeasts.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
-import at.koopro.wizardsandbeasts.type.WizType;
+import at.koopro.wizardsandbeasts.skill.SkillAttributeApplicator;
+import at.koopro.wizardsandbeasts.type.Heritage;
 import net.minecraft.server.level.ServerPlayer;
 
 public final class ProfessionSystemAPI {
@@ -11,17 +12,17 @@ public final class ProfessionSystemAPI {
 
     private ProfessionSystemAPI() {}
 
-    public static PlayerTypeData getData(ServerPlayer player) {
-        return player.getData(ModAttachments.TYPE_DATA.get());
+    public static PlayerHeritageData getData(ServerPlayer player) {
+        return player.getData(ModAttachments.HERITAGE_DATA.get());
     }
 
     public static UnlockCheck evaluateUnlock(ServerPlayer player, ProfessionNode node) {
-        PlayerTypeData data = getData(player);
-        WizType selectedType = data.getSelectedType();
-        if (selectedType == null) {
+        PlayerHeritageData data = getData(player);
+        Heritage selectedHeritage = data.getSelectedHeritage();
+        if (selectedHeritage == null) {
             return new UnlockCheck(false, "type_not_selected");
         }
-        if (selectedType != node.getParentType()) {
+        if (selectedHeritage != node.getParentHeritage()) {
             return new UnlockCheck(false, "wrong_type");
         }
         if (data.hasUnlockedProfession(node.getId())) {
@@ -47,7 +48,7 @@ public final class ProfessionSystemAPI {
         if (!check.allowed()) {
             return false;
         }
-        PlayerTypeData data = getData(player);
+        PlayerHeritageData data = getData(player);
         if (!data.spendProfessionPoints(node.getPointCost())) {
             return false;
         }
@@ -55,16 +56,17 @@ public final class ProfessionSystemAPI {
         if (data.getSelectedProfessionId() == null) {
             data.setSelectedProfessionId(node.getId());
         }
+        SkillAttributeApplicator.applyAll(player);
         return true;
     }
 
     public static UnlockCheck evaluateSelect(ServerPlayer player, ProfessionNode node) {
-        PlayerTypeData data = getData(player);
-        WizType selectedType = data.getSelectedType();
-        if (selectedType == null) {
+        PlayerHeritageData data = getData(player);
+        Heritage selectedHeritage = data.getSelectedHeritage();
+        if (selectedHeritage == null) {
             return new UnlockCheck(false, "type_not_selected");
         }
-        if (selectedType != node.getParentType()) {
+        if (selectedHeritage != node.getParentHeritage()) {
             return new UnlockCheck(false, "wrong_type");
         }
         if (!data.hasUnlockedProfession(node.getId())) {

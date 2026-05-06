@@ -13,5 +13,9 @@
   "requirement": {
     "type": "knows",
     "prerequisiteId": "reparo"
+  },
+  "learning": {
+    "masterySpellId": "reparo",
+    "minMasteryTier": "proficient"
   }
 }

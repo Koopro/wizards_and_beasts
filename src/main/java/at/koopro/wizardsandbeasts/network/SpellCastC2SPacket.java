@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.network;
 
 import at.koopro.wizardsandbeasts.Config;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.command.debug.DebugHooks;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.spell.cast.SpellRejectCodes;
 import at.koopro.wizardsandbeasts.spell.cast.SpellCastService;
@@ -77,6 +78,7 @@ public record SpellCastC2SPacket() implements CustomPacketPayload {
 
     private static void debugReject(ServerPlayer player, String reason) {
         player.getData(ModAttachments.SPELL_DATA.get()).incrementRejectReason(reason);
+        DebugHooks.logSpellCast(player, "cast_reject_packet", reason);
         if (Config.debugLogSpellGateReasons) {
             LOGGER.debug("SpellCast rejected for '{}' reason={}", player.getName().getString(), reason);
         }

@@ -1,9 +1,9 @@
 package at.koopro.wizardsandbeasts.spell.spells;
 
+import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.spell.*;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 
 public class Glacius extends Spell {
 
@@ -14,7 +14,7 @@ public class Glacius extends Spell {
     @Override
     protected SpellProperties buildProperties() {
         return SpellProperties.cone(4.0f)
-                .targetEffect(() -> new MobEffectInstance(MobEffects.SLOWNESS, 85, 3))
+                .targetEffect(() -> new MobEffectInstance(ModEffects.PETRIFICUS_TOTALUS, 40, 0, false, true, true))
                 .sound(SoundEvents.ENDER_PEARL_THROW, 1.0f, 1.8f)
                 .build();
     }

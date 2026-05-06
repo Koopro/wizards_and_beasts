@@ -36,6 +36,12 @@ public class SpellKeyBindings {
     public static final KeyMapping OBSCURIAL_STRESS_VENT = new KeyMapping(
             "key." + WizardsAndBeastsMod.MODID + ".obscurial_stress_vent",
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_B, CATEGORY);
+    public static final KeyMapping APPARATE = new KeyMapping(
+            "key." + WizardsAndBeastsMod.MODID + ".apparate",
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, CATEGORY);
+    public static final KeyMapping LEGILIMENCY = new KeyMapping(
+            "key." + WizardsAndBeastsMod.MODID + ".legilimency",
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_H, CATEGORY);
     public static final KeyMapping OBSCURIAL_ABILITY_PRIMARY = new KeyMapping(
             "key." + WizardsAndBeastsMod.MODID + ".obscurial_ability_primary",
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_N, CATEGORY);
@@ -52,6 +58,8 @@ public class SpellKeyBindings {
         event.register(SKILL_MENU);
         event.register(OBSCURIAL_TOGGLE);
         event.register(OBSCURIAL_STRESS_VENT);
+        event.register(APPARATE);
+        event.register(LEGILIMENCY);
         event.register(OBSCURIAL_ABILITY_PRIMARY);
         event.register(OBSCURIAL_ABILITY_SECONDARY);
     }

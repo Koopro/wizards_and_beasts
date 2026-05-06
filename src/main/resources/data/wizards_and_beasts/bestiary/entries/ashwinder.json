@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:ashwinder",
+  "displayName": "bestiary.wizards_and_beasts.ashwinder.name",
+  "category": "SERPENTINE",
+  "mmRating": 2,
+  "habitat": "bestiary.wizards_and_beasts.ashwinder.habitat",
+  "size": "SMALL",
+  "shortLore": "bestiary.wizards_and_beasts.ashwinder.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.ashwinder.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.ashwinder.ability.1",
+    "bestiary.wizards_and_beasts.ashwinder.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.ashwinder.threat.1",
+    "bestiary.wizards_and_beasts.ashwinder.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.ashwinder.weakness.1",
+    "bestiary.wizards_and_beasts.ashwinder.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/ashwinder.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/ashwinder.png",
+  "sortOrder": 43
+}

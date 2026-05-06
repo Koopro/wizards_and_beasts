@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:grindylow",
+  "displayName": "bestiary.wizards_and_beasts.grindylow.name",
+  "category": "AQUATIC",
+  "mmRating": 3,
+  "habitat": "bestiary.wizards_and_beasts.grindylow.habitat",
+  "size": "SMALL",
+  "shortLore": "bestiary.wizards_and_beasts.grindylow.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.grindylow.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.grindylow.ability.1",
+    "bestiary.wizards_and_beasts.grindylow.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.grindylow.threat.1",
+    "bestiary.wizards_and_beasts.grindylow.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.grindylow.weakness.1",
+    "bestiary.wizards_and_beasts.grindylow.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/grindylow.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/grindylow.png",
+  "sortOrder": 52
+}

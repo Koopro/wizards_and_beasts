@@ -20,4 +20,14 @@ public class AvadaKedavra extends Spell {
     protected SpellRequirement buildRequirement() {
         return SpellRequirement.proficiency(Spells.CRUCIO, Proficiency.MASTERED);
     }
+
+    @Override
+    public boolean isUnblockable() {
+        return true;
+    }
+
+    @Override
+    public float getProjectileSpeed() {
+        return 2.2f;
+    }
 }

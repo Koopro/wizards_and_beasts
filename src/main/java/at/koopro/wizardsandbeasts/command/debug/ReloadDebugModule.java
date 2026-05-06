@@ -13,6 +13,11 @@ public final class ReloadDebugModule implements DebugModule {
     }
 
     @Override
+    public String summary() {
+        return "Runs /reload and reports spell registry count.";
+    }
+
+    @Override
     public LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal(name()).executes(ctx -> reload(ctx.getSource()));
     }

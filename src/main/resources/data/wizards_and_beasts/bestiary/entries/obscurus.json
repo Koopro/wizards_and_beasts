@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:obscurus",
+  "displayName": "bestiary.wizards_and_beasts.obscurus.name",
+  "category": "MAGICAL_CREATURE",
+  "mmRating": 5,
+  "habitat": "bestiary.wizards_and_beasts.obscurus.habitat",
+  "size": "MEDIUM",
+  "shortLore": "bestiary.wizards_and_beasts.obscurus.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.obscurus.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.obscurus.ability.1",
+    "bestiary.wizards_and_beasts.obscurus.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.obscurus.threat.1",
+    "bestiary.wizards_and_beasts.obscurus.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.obscurus.weakness.1",
+    "bestiary.wizards_and_beasts.obscurus.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/obscurus.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/obscurus.png",
+  "sortOrder": 60
+}

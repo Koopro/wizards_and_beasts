@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:swooping_evil",
+  "displayName": "bestiary.wizards_and_beasts.swooping_evil.name",
+  "category": "MAGICAL_CREATURE",
+  "mmRating": 4,
+  "habitat": "bestiary.wizards_and_beasts.swooping_evil.habitat",
+  "size": "MEDIUM",
+  "shortLore": "bestiary.wizards_and_beasts.swooping_evil.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.swooping_evil.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.swooping_evil.ability.1",
+    "bestiary.wizards_and_beasts.swooping_evil.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.swooping_evil.threat.1",
+    "bestiary.wizards_and_beasts.swooping_evil.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.swooping_evil.weakness.1",
+    "bestiary.wizards_and_beasts.swooping_evil.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/swooping_evil.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/swooping_evil.png",
+  "sortOrder": 58
+}

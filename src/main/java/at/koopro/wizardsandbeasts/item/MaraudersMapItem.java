@@ -1,8 +1,8 @@
 package at.koopro.wizardsandbeasts.item;
 
-import at.koopro.wizardsandbeasts.client.map.MaraudersMapRenderer;
 import at.koopro.wizardsandbeasts.item.map.MaraudersMapTracker;
 import at.koopro.wizardsandbeasts.network.MapOpenS2CPacket;
+import at.koopro.wizardsandbeasts.util.ClientClassBridge;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -186,12 +186,16 @@ public class MaraudersMapItem extends GeoItemBase {
     @Override
     public void createGeoRenderer(Consumer<GeoRenderProvider> consumer) {
         consumer.accept(new GeoRenderProvider() {
-            private MaraudersMapRenderer renderer;
+            private GeoItemRenderer<?> renderer;
 
             @Override
             public GeoItemRenderer<?> getGeoItemRenderer() {
                 if (this.renderer == null)
-                    this.renderer = new MaraudersMapRenderer();
+                    this.renderer = ClientClassBridge.instantiate(
+                            "at.koopro.wizardsandbeasts.client.map.MaraudersMapRenderer",
+                            GeoItemRenderer.class,
+                            new Class<?>[0],
+                            new Object[0]);
                 return this.renderer;
             }
         });

@@ -42,7 +42,7 @@ public record ObscurialAbilityUseC2SPacket(String abilityId) implements CustomPa
     public static void handle(ObscurialAbilityUseC2SPacket pkt, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
             if (!(ctx.player() instanceof ServerPlayer player) || !(player.level() instanceof ServerLevel level)) return;
-            var typeData = player.getData(ModAttachments.TYPE_DATA.get());
+            var typeData = player.getData(ModAttachments.HERITAGE_DATA.get());
             PlayerSpellData spellData = player.getData(ModAttachments.SPELL_DATA.get());
 
             if (!ObscurialRules.isObscurial(typeData) || !ObscurialRules.isDarkForm(typeData)) {
@@ -73,7 +73,7 @@ public record ObscurialAbilityUseC2SPacket(String abilityId) implements CustomPa
                 player.displayClientMessage(Component.literal(String.format("\u00A7e%s recharging %.1fs", ability.displayName(), Math.max(0f, sec))), true);
                 return;
             }
-            if (Config.enforceSpellRequirements && !spell.getRequirement().isMet(spellData)) {
+            if (Config.enforceSpellRequirements && !spell.getRequirement().isMet(player, spellData)) {
                 spellData.incrementRejectReason(SpellRejectCodes.ABILITY_REQUIREMENTS_UNMET);
                 player.displayClientMessage(Component.literal("\u00A7c" + spell.getRequirement().getDescription()), true);
                 return;

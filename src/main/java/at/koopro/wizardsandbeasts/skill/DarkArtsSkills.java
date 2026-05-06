@@ -13,14 +13,15 @@ final class DarkArtsSkills {
             .tree(SkillTreeId.DARK_ARTS).cost(2)
             .description("Delve into the forbidden arts.")
             .effect(new SkillEffect.UnlockAbility("dark_knowledge"))
+            .effect(new SkillEffect.CategoryDamageBonus(SpellCategory.DARK_ARTS, 0.04f))
             .position(0, 1)
             .build());
 
-    static final Skill CRUCIO_UNLOCK = SkillTrees.register(Skill.builder("crucio_unlock", "Learn Crucio")
+    static final Skill CRUCIO_UNLOCK = SkillTrees.register(Skill.builder("crucio_unlock", "Crucio Discipline")
             .tree(SkillTreeId.DARK_ARTS).cost(4)
-            .description("Learn the Cruciatus Curse.")
+            .description("Study the discipline and control needed for Cruciatus casting.")
             .prerequisite("dark_knowledge")
-            .effect(new SkillEffect.LearnSpell("crucio"))
+            .effect(new SkillEffect.SpellDamageBonus("crucio", 0.06f))
             .position(1, 0)
             .build());
 
@@ -32,11 +33,11 @@ final class DarkArtsSkills {
             .position(1, 2)
             .build());
 
-    static final Skill IMPERIO_UNLOCK = SkillTrees.register(Skill.builder("imperio_unlock", "Learn Imperio")
+    static final Skill IMPERIO_UNLOCK = SkillTrees.register(Skill.builder("imperio_unlock", "Imperio Discipline")
             .tree(SkillTreeId.DARK_ARTS).cost(4)
-            .description("Learn the Imperius Curse.")
+            .description("Practice coercive-control casting patterns and mental focus.")
             .prerequisite("crucio_unlock")
-            .effect(new SkillEffect.LearnSpell("imperio"))
+            .effect(new SkillEffect.SpellCooldownReduction("imperio", 0.10f))
             .position(2, 0)
             .build());
 
@@ -48,12 +49,12 @@ final class DarkArtsSkills {
             .position(2, 2)
             .build());
 
-    static final Skill AVADA_KEDAVRA_UNLOCK = SkillTrees.register(Skill.builder("avada_kedavra_unlock", "Learn Avada Kedavra")
+    static final Skill AVADA_KEDAVRA_UNLOCK = SkillTrees.register(Skill.builder("avada_kedavra_unlock", "Killing Curse Mastery")
             .tree(SkillTreeId.DARK_ARTS).cost(6)
-            .description("Learn the Killing Curse.")
+            .description("Pursue forbidden mastery of lethal dark-arts channeling.")
             .prerequisite("imperio_unlock")
             .prerequisite("dark_resilience")
-            .effect(new SkillEffect.LearnSpell("avada_kedavra"))
+            .effect(new SkillEffect.SpellCooldownReduction("avada_kedavra", 0.08f))
             .position(3, 1)
             .build());
 }

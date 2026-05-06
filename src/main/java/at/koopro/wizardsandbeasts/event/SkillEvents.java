@@ -34,11 +34,11 @@ public class SkillEvents {
     }
 
     /**
-     * Award skill points when a player first selects their wizard type.
-     * 3 SP for initial type selection.
+     * Award skill points when a player first locks in their heritage.
+     * 3 SP for initial heritage selection.
      */
     @SubscribeEvent
-    public static void onTypeSelected(TypeEvents.PlayerTypeSelectedEvent event) {
+    public static void onHeritageSelected(HeritageEvents.PlayerHeritageSelectedEvent event) {
         ServerPlayer player = event.getPlayer();
         SkillSystemAPI.awardPoints(player, 3);
         SkillDataSyncS2CPacket.syncToPlayer(player);

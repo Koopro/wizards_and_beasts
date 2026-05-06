@@ -2,8 +2,8 @@ package at.koopro.wizardsandbeasts.network;
 
 import at.koopro.wizardsandbeasts.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
-import at.koopro.wizardsandbeasts.type.WizSubtype;
-import at.koopro.wizardsandbeasts.type.WizType;
+import at.koopro.wizardsandbeasts.type.HeritageVariant;
+import at.koopro.wizardsandbeasts.type.Heritage;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -12,9 +12,9 @@ public final class SpellNetworkGuards {
     private SpellNetworkGuards() {}
 
     public static boolean canUseWand(ServerPlayer player, PlayerSpellData data, String rejectReasonPrefix) {
-        WizType type = player.getData(ModAttachments.TYPE_DATA.get()).getSelectedType();
-        WizSubtype subtype = player.getData(ModAttachments.TYPE_DATA.get()).getSelectedSubtype();
-        if (type == null || !type.canUseWand() || subtype == WizSubtype.SQUIB) {
+        Heritage type = player.getData(ModAttachments.HERITAGE_DATA.get()).getSelectedHeritage();
+        HeritageVariant subtype = player.getData(ModAttachments.HERITAGE_DATA.get()).getSelectedHeritageVariant();
+        if (type == null || !type.canUseWand() || (subtype != null && subtype.hasTag("no_wand"))) {
             data.incrementRejectReason(rejectReasonPrefix + "_type_cannot_use_wand");
             player.displayClientMessage(Component.literal("\u00A7cYour type cannot use wand spells."), true);
             return false;

@@ -60,6 +60,9 @@ public final class Spells {
     public static final Reparo REPARO = register(new Reparo());
     public static final WingardiumLeviosa WINGARDIUM_LEVIOSA = register(new WingardiumLeviosa());
     public static final Alohomora ALOHOMORA = register(new Alohomora());
+    public static final Colloportus COLLOPORTUS = register(new Colloportus());
+    public static final Liberacorpus LIBERACORPUS = register(new Liberacorpus());
+    public static final Riddikulus RIDDIKULUS = register(new Riddikulus());
     public static final ArrestoMomentum ARRESTO_MOMENTUM = register(new ArrestoMomentum());
     public static final Aguamenti AGUAMENTI = register(new Aguamenti());
 

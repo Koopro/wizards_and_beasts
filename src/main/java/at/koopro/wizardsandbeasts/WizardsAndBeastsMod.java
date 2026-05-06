@@ -13,11 +13,16 @@ import org.slf4j.Logger;
 
 import at.koopro.wizardsandbeasts.brew.def.BrewReloadListener;
 import at.koopro.wizardsandbeasts.brew.def.BrewingRecipeReloadListener;
+import at.koopro.wizardsandbeasts.broom.BroomDefinitionLoader;
 import at.koopro.wizardsandbeasts.event.RegisterBrewsEvent;
 import at.koopro.wizardsandbeasts.event.RegisterSpellsEvent;
+import at.koopro.wizardsandbeasts.bestiary.BestiaryEntryLoader;
+import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.network.ModNetwork;
+import at.koopro.wizardsandbeasts.module.condition.ModConditions;
 import at.koopro.wizardsandbeasts.registry.EntityAttributes;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
+import at.koopro.wizardsandbeasts.registry.ModAttributes;
 import at.koopro.wizardsandbeasts.skill.SkillTrees;
 import at.koopro.wizardsandbeasts.spell.Spells;
 import at.koopro.wizardsandbeasts.spell.def.SpellReloadListener;
@@ -27,7 +32,10 @@ import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.registry.ModEntities;
 import at.koopro.wizardsandbeasts.registry.ModFeatures;
 import at.koopro.wizardsandbeasts.registry.ModBlockEntities;
+import at.koopro.wizardsandbeasts.registry.ModMenuTypes;
 import at.koopro.wizardsandbeasts.registry.ModItems;
+import at.koopro.wizardsandbeasts.registry.ModParticles;
+import at.koopro.wizardsandbeasts.registry.ModVillager;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
 import at.koopro.wizardsandbeasts.wand.WandAttachments;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
@@ -53,10 +61,17 @@ public class WizardsAndBeastsMod {
         ModFeatures.FEATURES.register(modEventBus);
         ModSounds.SOUND_EVENTS.register(modEventBus);
         ModAttachments.ATTACHMENTS.register(modEventBus);
+        ModAttributes.ATTRIBUTES.register(modEventBus);
+        ModConditions.CONDITION_CODECS.register(modEventBus);
         WandAttachments.ATTACHMENTS.register(modEventBus);
         ModDataComponents.DATA_COMPONENTS.register(modEventBus);
         WandComponents.DATA_COMPONENTS.register(modEventBus);
         ModBlockEntities.BLOCK_ENTITY_TYPES.register(modEventBus);
+        ModMenuTypes.MENUS.register(modEventBus);
+        ModVillager.POI_TYPES.register(modEventBus);
+        ModVillager.PROFESSIONS.register(modEventBus);
+        ModParticles.PARTICLE_TYPES.register(modEventBus);
+        ModEffects.MOB_EFFECTS.register(modEventBus);
         WandmakingRecipeType.RECIPE_TYPES.register(modEventBus);
         WandmakingRecipeSerializer.RECIPE_SERIALIZERS.register(modEventBus);
 
@@ -90,6 +105,12 @@ public class WizardsAndBeastsMod {
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "brewing_recipe_reload_listener"),
                     new BrewingRecipeReloadListener());
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "bestiary_entry_reload_listener"),
+                    new BestiaryEntryLoader());
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "broom_definition_reload_listener"),
+                    new BroomDefinitionLoader());
         });
 
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);

@@ -56,7 +56,7 @@ public final class SkillEffectCache {
                             catCd.merge(e.category(), e.reductionPerLevel() * level, Float::sum);
                     case SkillEffect.UnlockAbility e ->
                             abilities.add(e.abilityId());
-                    case SkillEffect.LearnSpell ignored -> {} // handled at unlock time
+                    case SkillEffect.LearnSpell ignored -> {} // no-op: spell learning is handled outside skill trees
                     case SkillEffect.PassiveAttribute ignored -> {} // handled at unlock time
                 }
             }

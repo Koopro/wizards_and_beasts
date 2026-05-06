@@ -16,4 +16,10 @@ class SpellRejectReasonFormatterTest {
         assertEquals("Ability requires dark form",
                 SpellRejectReasonFormatter.toHudLabel("obscurial_dark_only_spell_outside_dark_form:obscurus_surge"));
     }
+
+    @Test
+    void toHudLabel_mapsWandBondReasons() {
+        assertEquals("Wand has not chosen you", SpellRejectReasonFormatter.toHudLabel("wand_not_bonded"));
+        assertEquals("Wand serves another", SpellRejectReasonFormatter.toHudLabel("wand_wrong_master"));
+    }
 }

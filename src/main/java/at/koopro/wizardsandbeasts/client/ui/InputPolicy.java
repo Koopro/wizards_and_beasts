@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.client.ui;
 
-import at.koopro.wizardsandbeasts.data.PlayerTypeData;
-import at.koopro.wizardsandbeasts.type.WizType;
+import at.koopro.wizardsandbeasts.data.PlayerHeritageData;
+import at.koopro.wizardsandbeasts.type.Heritage;
 import net.minecraft.client.Minecraft;
 
 public final class InputPolicy {
@@ -11,12 +11,12 @@ public final class InputPolicy {
         return mc.player != null && mc.screen == null;
     }
 
-    public static boolean canToggleObscurialForm(PlayerTypeData typeData) {
-        return typeData.getSelectedType() == WizType.OBSCURIAL;
+    public static boolean canToggleObscurialForm(PlayerHeritageData typeData) {
+        return typeData.getSelectedHeritage() == Heritage.OBSCURIAL;
     }
 
-    public static boolean canUseStressVent(PlayerTypeData typeData) {
-        if (typeData.getSelectedType() != WizType.OBSCURIAL) return false;
+    public static boolean canUseStressVent(PlayerHeritageData typeData) {
+        if (typeData.getSelectedHeritage() != Heritage.OBSCURIAL) return false;
         return !ObscurialUiFlags.FORM_DARK.equals(typeData.getActiveFormId());
     }
 }

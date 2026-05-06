@@ -13,6 +13,8 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
 
+import at.koopro.wizardsandbeasts.util.GlowDebugTags;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,8 +23,8 @@ import java.util.List;
  * This runs in parallel to vanilla glowing and does not use scoreboard teams.
  */
 public final class ColoredGlowRenderer {
-    public static final String COLOR_TAG_PREFIX = "neo_colored_glow_";
-    public static final String HASH_COLOR_TAG = "neo_colored_glow";
+    public static final String COLOR_TAG_PREFIX = GlowDebugTags.COLOR_TAG_PREFIX;
+    public static final String HASH_COLOR_TAG = GlowDebugTags.HASH_COLOR_TAG;
 
     private static final double MAX_RENDER_DISTANCE_SQR = 64.0 * 64.0;
     private static final float OUTER_ALPHA = 0.10f;

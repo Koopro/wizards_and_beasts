@@ -1,9 +1,13 @@
 package at.koopro.wizardsandbeasts.wand.block;
 
+import at.koopro.wizardsandbeasts.item.wand.WandFlexibility;
 import at.koopro.wizardsandbeasts.registry.ModBlockEntities;
+import com.mojang.serialization.Codec;
 import at.koopro.wizardsandbeasts.wand.registry.BenchEnhancerDefinition;
 import at.koopro.wizardsandbeasts.wand.registry.WandDatapackRegistries;
+import at.koopro.wizardsandbeasts.wand.resonance.WandResonanceConfigLoader;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -20,6 +24,7 @@ public class WandmakersBenchBlockEntity extends BlockEntity {
     private final ItemStackHandler inventory = new ItemStackHandler(3);
     private float cachedTierScore = 0.0f;
     private List<BlockPos> detectedEnhancers = new ArrayList<>();
+    private int selectedFlexibilityOrdinal = WandFlexibility.SOLID.ordinal();
 
     public WandmakersBenchBlockEntity(BlockPos pos, BlockState blockState) {
         super(ModBlockEntities.WANDMAKERS_BENCH.get(), pos, blockState);
@@ -36,11 +41,23 @@ public class WandmakersBenchBlockEntity extends BlockEntity {
         if (!(level instanceof ServerLevel serverLevel)) {
             return;
         }
-        serverLevel.registryAccess().lookup(WandDatapackRegistries.BENCH_ENHANCER_REGISTRY).ifPresent(registry -> {
-            BenchMultiblockScanner.ScanResult result = BenchMultiblockScanner.scanEnhancersWithPositions(serverLevel, worldPosition, registry);
-            this.cachedTierScore = result.tierScore();
-            this.detectedEnhancers = result.enhancers();
-        });
+        HolderLookup.RegistryLookup<BenchEnhancerDefinition> lookup =
+                serverLevel.registryAccess().lookupOrThrow(WandDatapackRegistries.BENCH_ENHANCER_REGISTRY);
+        int radius = WandResonanceConfigLoader.getConfig(serverLevel.registryAccess()).scanRadius();
+        BenchMultiblockScanner.ScanResult result =
+                BenchMultiblockScanner.scanEnhancersWithPositions(serverLevel, worldPosition, lookup, radius);
+        this.cachedTierScore = result.tierScore();
+        this.detectedEnhancers = result.enhancers();
+    }
+
+    public int getSelectedFlexibilityOrdinal() {
+        return selectedFlexibilityOrdinal;
+    }
+
+    public void setSelectedFlexibilityOrdinal(int selectedFlexibilityOrdinal) {
+        int max = WandFlexibility.values().length - 1;
+        this.selectedFlexibilityOrdinal = Math.max(0, Math.min(max, selectedFlexibilityOrdinal));
+        setChanged();
     }
 
     public float getCachedTierScore() {
@@ -58,6 +75,7 @@ public class WandmakersBenchBlockEntity extends BlockEntity {
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
+        output.store("flexibility_ordinal", Codec.INT, selectedFlexibilityOrdinal);
         for (int i = 0; i < 3; i++) {
             output.store("slot_" + i, ItemStack.CODEC, inventory.getStackInSlot(i));
         }
@@ -66,6 +84,7 @@ public class WandmakersBenchBlockEntity extends BlockEntity {
     @Override
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
+        selectedFlexibilityOrdinal = input.read("flexibility_ordinal", Codec.INT).orElse(WandFlexibility.SOLID.ordinal());
         for (int i = 0; i < 3; i++) {
             inventory.setStackInSlot(i, input.read("slot_" + i, ItemStack.CODEC).orElse(ItemStack.EMPTY));
         }

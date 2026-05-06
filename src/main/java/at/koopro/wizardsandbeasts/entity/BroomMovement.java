@@ -1,6 +1,9 @@
 package at.koopro.wizardsandbeasts.entity;
 
+import at.koopro.wizardsandbeasts.skill.PlayerSkillBonusData;
+import at.koopro.wizardsandbeasts.broom.BroomDefinition;
 import net.minecraft.util.Mth;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.phys.Vec3;
 
@@ -9,28 +12,38 @@ final class BroomMovement {
     private BroomMovement() {}
 
     static void tickMovement(BroomEntity b) {
-        float speedRatioForTurn = Mth.clamp(Math.abs(b.currentSpeed) / (BroomTuning.MAX_SPEED * BroomTuning.BOOST_MULTIPLIER), 0f, 1f);
-        float turnRate = Mth.lerp(speedRatioForTurn, BroomTuning.LOW_SPEED_TURN_RATE, BroomTuning.HIGH_SPEED_TURN_RATE);
-        if (b.inputBoosting) {
+        BroomDefinition def = b.resolveDefinition();
+        boolean canBoost = b.getBoostCooldownTicks() <= 0 && b.getBoostTicksRemaining() > 0;
+        boolean boostingNow = b.inputBoosting && canBoost;
+
+        float speedRatioForTurn = Mth.clamp(Math.abs(b.currentSpeed) / (def.maxSpeed() * def.boostMultiplier()), 0f, 1f);
+        float baseTurnRate = Mth.lerp(speedRatioForTurn, BroomTuning.LOW_SPEED_TURN_RATE, BroomTuning.HIGH_SPEED_TURN_RATE);
+        float turnRate = baseTurnRate * def.turnSpeed();
+        if (boostingNow) {
             turnRate *= 0.82f;
         }
         b.setYRot(Mth.approachDegrees(b.getYRot(), b.inputYaw, turnRate));
         b.setXRot(Mth.approachDegrees(b.getXRot(), Mth.clamp(b.inputPitch, -75f, 75f), BroomTuning.MAX_PITCH_RATE));
 
         float targetSpeed = 0;
-        float accelerationRate = BroomTuning.ACCELERATION;
+        float accelerationRate = def.acceleration();
+        float skillBonus = 0.0f;
+        if (b.getControllingPassenger() instanceof ServerPlayer player) {
+            skillBonus = PlayerSkillBonusData.forPlayer(player).broomSpeedBonus();
+        }
+        float maxForwardSpeed = def.maxSpeed() + skillBonus;
         if (b.inputForward) {
-            targetSpeed = b.inputBoosting ? BroomTuning.MAX_SPEED * BroomTuning.BOOST_MULTIPLIER : BroomTuning.MAX_SPEED;
-            accelerationRate = b.inputBoosting ? BroomTuning.BOOST_ACCELERATION : BroomTuning.ACCELERATION;
+            targetSpeed = boostingNow ? maxForwardSpeed * def.boostMultiplier() : maxForwardSpeed;
+            accelerationRate = boostingNow ? def.acceleration() : def.acceleration();
         } else if (b.inputBackward) {
-            targetSpeed = -BroomTuning.MAX_SPEED * 0.22f;
-            accelerationRate = BroomTuning.ACCELERATION * 0.85f;
+            targetSpeed = -maxForwardSpeed * 0.22f;
+            accelerationRate = def.acceleration() * 0.85f;
         }
 
         if (targetSpeed != 0) {
             b.currentSpeed = Mth.lerp(accelerationRate, b.currentSpeed, targetSpeed);
         } else {
-            b.currentSpeed = Mth.lerp(BroomTuning.DECELERATION, b.currentSpeed, 0);
+            b.currentSpeed = Mth.lerp(def.deceleration(), b.currentSpeed, 0);
             if (Math.abs(b.currentSpeed) < 0.005f) b.currentSpeed = 0;
         }
 
@@ -42,22 +55,36 @@ final class BroomMovement {
         double fwdZ = Mth.cos(yawRad) * Mth.cos(pitchRad);
 
         double targetMotY = fwdY * b.currentSpeed * BroomTuning.PITCH_LIFT_FACTOR;
-        if (b.inputUp) targetMotY += BroomTuning.VERTICAL_SPEED;
-        if (b.inputDown) targetMotY -= BroomTuning.VERTICAL_SPEED;
-        if (!b.inputUp && !b.inputDown && Math.abs(b.currentSpeed) < 0.2f) targetMotY -= BroomTuning.WEAK_GRAVITY;
+        if (b.inputUp) targetMotY += def.ascentSpeed();
+        if (b.inputDown) targetMotY -= def.descentSpeed();
+        if (!b.inputUp && !b.inputDown && Math.abs(b.currentSpeed) < 0.2f) targetMotY -= def.weakGravity();
         b.verticalVelocity = Mth.lerp(BroomTuning.VERTICAL_RESPONSE, b.verticalVelocity, (float) targetMotY);
 
         float preMoveSpeed = b.currentSpeed;
         Vec3 prevMotion = b.getDeltaMovement();
         float drag = (b.inputForward || b.inputBackward || b.inputUp || b.inputDown) ? BroomTuning.INPUT_DRAG : BroomTuning.COAST_DRAG;
-        double motX = Mth.lerp(0.22, prevMotion.x * drag, fwdX * b.currentSpeed);
-        double motZ = Mth.lerp(0.22, prevMotion.z * drag, fwdZ * b.currentSpeed);
+        double motX = Mth.lerp(def.lerpFactor(), prevMotion.x * drag, fwdX * b.currentSpeed);
+        double motZ = Mth.lerp(def.lerpFactor(), prevMotion.z * drag, fwdZ * b.currentSpeed);
         b.setDeltaMovement(motX, b.verticalVelocity, motZ);
         b.move(MoverType.SELF, b.getDeltaMovement());
 
         if (!b.level().isClientSide() && (b.horizontalCollision || b.verticalCollision)) {
             float impactSeverity = BroomImpacts.calculateImpactSeverity(preMoveSpeed, b.horizontalCollision, b.verticalCollision);
             BroomImpacts.handleBlockImpact(b, impactSeverity);
+        }
+
+        if (boostingNow) {
+            b.setBoostTicksRemaining(b.getBoostTicksRemaining() - 1);
+            if (b.getBoostTicksRemaining() <= 0) {
+                b.setBoostCooldownTicks(def.boostCooldownTicks());
+            }
+        } else {
+            if (b.getBoostCooldownTicks() > 0) {
+                b.setBoostCooldownTicks(b.getBoostCooldownTicks() - 1);
+                if (b.getBoostCooldownTicks() == 0) {
+                    b.setBoostTicksRemaining(def.boostDurationTicks());
+                }
+            }
         }
     }
 
@@ -71,12 +98,15 @@ final class BroomMovement {
         b.pitchTilt = Mth.lerp(BroomTuning.TILT_SMOOTHING, b.pitchTilt, targetPitch);
 
         float turnRate = Mth.wrapDegrees(b.getYRot() - b.prevSteerYaw);
-        float targetRoll = Mth.clamp(-turnRate * 4f, -BroomTuning.MAX_ROLL_TILT, BroomTuning.MAX_ROLL_TILT);
-        b.rollTilt = Mth.lerp(BroomTuning.TILT_SMOOTHING, b.rollTilt, targetRoll);
+        BroomDefinition def = b.resolveDefinition();
+        float maxLeanAngle = 30.0f * def.handlingRating();
+        float targetRoll = Mth.clamp(-turnRate * 4f, -maxLeanAngle, maxLeanAngle);
+        float stabilityLerp = 0.05f + (def.stabilityRating() * 0.15f);
+        b.rollTilt = Mth.lerp(stabilityLerp, b.rollTilt, targetRoll);
 
-        float speedRatio = Mth.clamp(Math.abs(b.currentSpeed) / BroomTuning.MAX_SPEED, 0f, 1f);
-        float targetLean = speedRatio * BroomTuning.MAX_FORWARD_LEAN;
-        b.forwardLean = Mth.lerp(BroomTuning.TILT_SMOOTHING, b.forwardLean, targetLean);
+        float speedRatio = Mth.clamp(Math.abs(b.currentSpeed) / def.maxSpeed(), 0f, 1f);
+        float targetLean = speedRatio * maxLeanAngle;
+        b.forwardLean = Mth.lerp(stabilityLerp, b.forwardLean, targetLean);
 
         b.prevSpeed = b.currentSpeed;
         b.prevSteerYaw = b.getYRot();

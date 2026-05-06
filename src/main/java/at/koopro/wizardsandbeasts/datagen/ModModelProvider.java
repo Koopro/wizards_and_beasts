@@ -28,6 +28,15 @@ public class ModModelProvider extends ModelProvider {
         itemModels.declareCustomModelItem(ModItems.MORPH_WAND.get());
         itemModels.declareCustomModelItem(ModItems.WAND.get());
         itemModels.declareCustomModelItem(ModItems.BROOM_ITEM.get());
+        itemModels.declareCustomModelItem(ModItems.CLEANSWEEP_SEVEN.get());
+        itemModels.declareCustomModelItem(ModItems.COMET_260.get());
+        itemModels.declareCustomModelItem(ModItems.NIMBUS_2000.get());
+        itemModels.declareCustomModelItem(ModItems.NIMBUS_2001.get());
+        itemModels.declareCustomModelItem(ModItems.FIREBOLT.get());
+        itemModels.declareCustomModelItem(ModItems.FIREBOLT_SUPREME.get());
+        itemModels.declareCustomModelItem(ModItems.OAKSHAFT_79.get());
+        itemModels.declareCustomModelItem(ModItems.BROOM_POLISH.get());
+        itemModels.declareCustomModelItem(ModItems.ENCHANTED_TWIG_BUNDLE.get());
         itemModels.declareCustomModelItem(ModItems.MARAUDERS_MAP.get());
         itemModels.declareCustomModelItem(ModItems.DELUMINATOR.get());
 

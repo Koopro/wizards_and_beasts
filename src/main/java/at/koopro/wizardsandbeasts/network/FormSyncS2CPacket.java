@@ -3,7 +3,7 @@ package at.koopro.wizardsandbeasts.network;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.client.state.ClientFormDataState;
 import at.koopro.wizardsandbeasts.client.form.SizeLerpTracker;
-import at.koopro.wizardsandbeasts.data.PlayerTypeData;
+import at.koopro.wizardsandbeasts.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.form.FormRegistry;
 import at.koopro.wizardsandbeasts.form.PlayerForm;
 import at.koopro.wizardsandbeasts.form.RenderFlag;
@@ -87,7 +87,7 @@ public record FormSyncS2CPacket(
      * Builds and sends a FormSyncS2CPacket for the given player to all tracking players + self.
      */
     public static void syncToTracking(ServerPlayer player) {
-        PlayerTypeData data = player.getData(ModAttachments.TYPE_DATA.get());
+        PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
         String formId = data.getActiveFormId();
         if (formId == null) formId = "human_default";
 

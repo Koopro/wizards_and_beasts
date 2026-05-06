@@ -1,11 +1,11 @@
 package at.koopro.wizardsandbeasts.network;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.data.PlayerTypeData;
+import at.koopro.wizardsandbeasts.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.form.TransitionManager;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.type.ObscurialRules;
-import at.koopro.wizardsandbeasts.type.WizType;
+import at.koopro.wizardsandbeasts.type.Heritage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
@@ -31,8 +31,8 @@ public record ObscurialToggleFormC2SPacket() implements CustomPacketPayload {
         ctx.enqueueWork(() -> {
             if (!(ctx.player() instanceof ServerPlayer player)) return;
 
-            PlayerTypeData data = player.getData(ModAttachments.TYPE_DATA.get());
-            if (data.getSelectedType() != WizType.OBSCURIAL) {
+            PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
+            if (data.getSelectedHeritage() != Heritage.OBSCURIAL) {
                 return;
             }
             if (TransitionManager.isTransitioning(player.getUUID())) {

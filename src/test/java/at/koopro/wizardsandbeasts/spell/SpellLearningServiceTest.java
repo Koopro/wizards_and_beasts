@@ -57,7 +57,7 @@ class SpellLearningServiceTest {
     @Test
     void obscurialAbility_isNotTypeUsableSpell() {
         assertTrue(ObscurialRules.isObscurialAbility(Spells.OBSCURUS_SURGE));
-        assertFalse(ObscurialRules.canTypeUseSpell(at.koopro.wizardsandbeasts.type.WizType.OBSCURIAL, Spells.OBSCURUS_SURGE));
+        assertFalse(ObscurialRules.canHeritageUseSpell(at.koopro.wizardsandbeasts.type.Heritage.OBSCURIAL, Spells.OBSCURUS_SURGE));
     }
 
     private static final class TestRequirementSpell extends Spell {

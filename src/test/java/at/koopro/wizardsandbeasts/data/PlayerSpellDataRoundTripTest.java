@@ -82,6 +82,31 @@ class PlayerSpellDataRoundTripTest {
     }
 
     @Test
+    void rejectCounts_clear_survivesRoundTrip() {
+        PlayerSpellData data = new PlayerSpellData();
+        data.incrementRejectReason("not_holding_wand");
+        data.incrementRejectReason("not_holding_wand");
+        data.incrementRejectReason("cooldown_active");
+        data.learnSpell("lumos");
+
+        CompoundTag firstSave = data.save();
+        PlayerSpellData reloaded = new PlayerSpellData();
+        reloaded.load(firstSave);
+        assertEquals(2, reloaded.getRejectCounts().get("not_holding_wand"));
+        assertEquals(1, reloaded.getRejectCounts().get("cooldown_active"));
+
+        reloaded.clearRejectCounts();
+        assertTrue(reloaded.getRejectCounts().isEmpty());
+        assertTrue(reloaded.knowsSpell("lumos"));
+
+        CompoundTag afterClearSave = reloaded.save();
+        PlayerSpellData secondReload = new PlayerSpellData();
+        secondReload.load(afterClearSave);
+        assertTrue(secondReload.getRejectCounts().isEmpty());
+        assertTrue(secondReload.knowsSpell("lumos"));
+    }
+
+    @Test
     void copy_isIndependent() {
         PlayerSpellData original = new PlayerSpellData();
         original.learnSpell("lumos");

@@ -17,14 +17,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * Commands for the size system: {@code /WizardsAndBeastsMod wizsize set|reset|profile}.
+ * Commands for the size system: {@code /WizardsAndBeastsMod size set|reset|profile}.
  */
 public final class WizSizeCommands {
 
     private WizSizeCommands() {}
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
-        return Commands.literal("wizsize")
+        return Commands.literal("size")
                 .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
                 .then(Commands.literal("set")
                         .then(Commands.argument("player", EntityArgument.player())

@@ -1,0 +1,28 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "BROOM_FLIGHT"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "NSD",
+    "DSD",
+    "ETE"
+  ],
+  "key": {
+    "N": {"item": "minecraft:nether_star"},
+    "D": {"item": "minecraft:diamond"},
+    "S": {"item": "minecraft:stick"},
+    "E": {"item": "wizards_and_beasts:enchanted_twig_bundle"},
+    "T": {"tag": "minecraft:leaves"}
+  },
+  "result": {
+    "id": "wizards_and_beasts:firebolt_supreme",
+    "count": 1,
+    "components": {
+      "wizards_and_beasts:broom_definition": "wizards_and_beasts:firebolt_supreme"
+    }
+  }
+}

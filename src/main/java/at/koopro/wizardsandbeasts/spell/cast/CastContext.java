@@ -3,6 +3,8 @@ package at.koopro.wizardsandbeasts.spell.cast;
 import at.koopro.wizardsandbeasts.spell.Proficiency;
 import at.koopro.wizardsandbeasts.spell.Spell;
 import at.koopro.wizardsandbeasts.spell.def.SpellDefinition;
+import at.koopro.wizardsandbeasts.spell.gamp.GampDomain;
+import at.koopro.wizardsandbeasts.spell.proficiency.SpellScalingProfile;
 import at.koopro.wizardsandbeasts.wand.cast.Compatibility;
 import at.koopro.wizardsandbeasts.wand.cast.WandAllegiance;
 import at.koopro.wizardsandbeasts.wand.cast.WandStats;
@@ -25,6 +27,8 @@ public record CastContext(
         Proficiency proficiency,
         @Nullable WandAllegiance allegiance,
         @Nullable Compatibility.Score compatibility,
+        @Nullable GampDomain activePenalty,
+        SpellScalingProfile scalingProfile,
         ModifierStack modifiers,
         List<RejectReason> rejections
 ) {
@@ -43,15 +47,25 @@ public record CastContext(
                 proficiency,
                 null,
                 null,
+                null,
+                SpellScalingProfile.DEFAULT,
                 new ModifierStack(),
                 new ArrayList<>());
     }
 
     public CastContext withAllegiance(@Nullable WandAllegiance value) {
-        return new CastContext(caster, wandStack, spell, definition, wandStats, proficiency, value, compatibility, modifiers, rejections);
+        return new CastContext(caster, wandStack, spell, definition, wandStats, proficiency, value, compatibility, activePenalty, scalingProfile, modifiers, rejections);
     }
 
     public CastContext withCompatibility(@Nullable Compatibility.Score value) {
-        return new CastContext(caster, wandStack, spell, definition, wandStats, proficiency, allegiance, value, modifiers, rejections);
+        return new CastContext(caster, wandStack, spell, definition, wandStats, proficiency, allegiance, value, activePenalty, scalingProfile, modifiers, rejections);
+    }
+
+    public CastContext withGampPenalty(GampDomain domain) {
+        return new CastContext(caster, wandStack, spell, definition, wandStats, proficiency, allegiance, compatibility, domain, scalingProfile, modifiers, rejections);
+    }
+
+    public CastContext withScalingProfile(SpellScalingProfile value) {
+        return new CastContext(caster, wandStack, spell, definition, wandStats, proficiency, allegiance, compatibility, activePenalty, value, modifiers, rejections);
     }
 }

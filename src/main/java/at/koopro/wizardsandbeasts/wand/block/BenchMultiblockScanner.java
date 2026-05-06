@@ -2,7 +2,8 @@ package at.koopro.wizardsandbeasts.wand.block;
 
 import at.koopro.wizardsandbeasts.wand.registry.BenchEnhancerDefinition;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
@@ -12,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class BenchMultiblockScanner {
-    private static final int RADIUS = 5;
 
     public record ScanResult(float tierScore, List<BlockPos> enhancers) {
     }
@@ -20,14 +20,15 @@ public final class BenchMultiblockScanner {
     private BenchMultiblockScanner() {
     }
 
-    public static float scanEnhancers(Level level, BlockPos benchPos, Registry<BenchEnhancerDefinition> enhancerRegistry) {
-        return scanEnhancersWithPositions(level, benchPos, enhancerRegistry).tierScore();
+    public static float scanEnhancers(Level level, BlockPos benchPos, HolderLookup.RegistryLookup<BenchEnhancerDefinition> enhancerLookup, int radius) {
+        return scanEnhancersWithPositions(level, benchPos, enhancerLookup, radius).tierScore();
     }
 
-    public static ScanResult scanEnhancersWithPositions(Level level, BlockPos benchPos, Registry<BenchEnhancerDefinition> enhancerRegistry) {
+    public static ScanResult scanEnhancersWithPositions(Level level, BlockPos benchPos, HolderLookup.RegistryLookup<BenchEnhancerDefinition> enhancerLookup, int radius) {
+        List<BenchEnhancerDefinition> definitions = enhancerLookup.listElements().map(Holder::value).toList();
         List<BlockPos> hits = new ArrayList<>();
         float total = 0.0f;
-        for (BlockPos current : BlockPos.betweenClosed(benchPos.offset(-RADIUS, -RADIUS, -RADIUS), benchPos.offset(RADIUS, RADIUS, RADIUS))) {
+        for (BlockPos current : BlockPos.betweenClosed(benchPos.offset(-radius, -radius, -radius), benchPos.offset(radius, radius, radius))) {
             if (current.equals(benchPos)) {
                 continue;
             }
@@ -36,7 +37,7 @@ public final class BenchMultiblockScanner {
             if (blockId == null) {
                 continue;
             }
-            for (BenchEnhancerDefinition definition : enhancerRegistry) {
+            for (BenchEnhancerDefinition definition : definitions) {
                 if (definition.blockId().equals(blockId)) {
                     total += definition.enhancementValue();
                     hits.add(current.immutable());

@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.item.currency;
 
-import at.koopro.wizardsandbeasts.client.currency.CoinRenderer;
 import at.koopro.wizardsandbeasts.item.GeoItemBase;
+import at.koopro.wizardsandbeasts.util.ClientClassBridge;
 import software.bernie.geckolib.animatable.client.GeoRenderProvider;
 import software.bernie.geckolib.animatable.manager.AnimatableManager;
 import software.bernie.geckolib.animation.AnimationController;
@@ -22,12 +22,16 @@ public class CoinItem extends GeoItemBase {
     @Override
     public void createGeoRenderer(Consumer<GeoRenderProvider> consumer) {
         consumer.accept(new GeoRenderProvider() {
-            private CoinRenderer renderer;
+            private GeoItemRenderer<?> renderer;
 
             @Override
             public GeoItemRenderer<?> getGeoItemRenderer() {
                 if (this.renderer == null)
-                    this.renderer = new CoinRenderer(coinName);
+                    this.renderer = ClientClassBridge.instantiate(
+                            "at.koopro.wizardsandbeasts.client.currency.CoinRenderer",
+                            GeoItemRenderer.class,
+                            new Class<?>[] { String.class },
+                            new Object[] { coinName });
                 return this.renderer;
             }
         });

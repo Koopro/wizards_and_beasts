@@ -1,0 +1,27 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "BROOM_FLIGHT"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ISI",
+    "WSW",
+    "WTW"
+  ],
+  "key": {
+    "W": {"tag": "minecraft:planks"},
+    "S": {"item": "minecraft:stick"},
+    "T": {"tag": "minecraft:leaves"},
+    "I": {"item": "minecraft:iron_ingot"}
+  },
+  "result": {
+    "id": "wizards_and_beasts:comet_260",
+    "count": 1,
+    "components": {
+      "wizards_and_beasts:broom_definition": "wizards_and_beasts:comet_260"
+    }
+  }
+}

@@ -9,6 +9,7 @@ public enum SpellCategory implements StringRepresentable {
     DARK_ARTS(0xFF8B00FF);
 
     private final int color;
+    public static final com.mojang.serialization.Codec<SpellCategory> CODEC = StringRepresentable.fromValues(SpellCategory::values);
 
     SpellCategory(int color) {
         this.color = color;

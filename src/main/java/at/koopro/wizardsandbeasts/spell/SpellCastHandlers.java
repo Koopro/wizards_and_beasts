@@ -1,15 +1,27 @@
 package at.koopro.wizardsandbeasts.spell;
 
+import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.effect.FiniteImmuneEffects;
+import at.koopro.wizardsandbeasts.registry.ModDataComponents;
+import at.koopro.wizardsandbeasts.module.Module;
+import at.koopro.wizardsandbeasts.module.ModuleManager;
+import at.koopro.wizardsandbeasts.network.SpellImpactBurstS2CPacket;
 import at.koopro.wizardsandbeasts.util.WandHelper;
 import at.koopro.wizardsandbeasts.wand.cast.WandStats;
-import at.koopro.wizardsandbeasts.data.PlayerTypeData;
-import at.koopro.wizardsandbeasts.registry.ModAttachments;
-import at.koopro.wizardsandbeasts.type.ObscurialRules;
+import at.koopro.wizardsandbeasts.spell.proficiency.SpellScalingProfile;
+import at.koopro.wizardsandbeasts.spell.imperio.ImperioServerLogic;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -28,8 +40,9 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 final class SpellCastHandlers {
 
@@ -37,8 +50,8 @@ final class SpellCastHandlers {
 
     static boolean handleCone(ServerLevel level, ServerPlayer caster,
                               Spell spell, SpellProperties props,
-                              float damageMultiplier, WandStats wand) {
-        if (isAccio(spell)) {
+                              float damageMultiplier, WandStats wand, SpellScalingProfile scalingProfile) {
+        if (SpellCastSupport.isAccio(spell)) {
             return handleAccioCone(level, caster, spell, props, wand);
         }
         Vec3 look = caster.getLookAngle();
@@ -48,7 +61,7 @@ final class SpellCastHandlers {
 
         Vec3 casterEye = caster.getEyePosition();
         boolean successful = false;
-        boolean expectoPatronum = isExpectoPatronum(spell);
+        boolean expectoPatronum = SpellCastSupport.isExpectoPatronum(spell);
         for (Entity entity : entities) {
             if (props.getPullStrength() != 0) {
                 Vec3 diff = caster.position().subtract(entity.position()).normalize()
@@ -60,7 +73,7 @@ final class SpellCastHandlers {
 
             if (entity instanceof LivingEntity living) {
                 // Patronus should only affect dark-aligned targets.
-                if (expectoPatronum && !isPatronusDarkAligned(living)) {
+                if (expectoPatronum && !SpellCastSupport.isPatronusDarkAligned(living)) {
                     continue;
                 }
                 float damage = spell.getBaseDamage() * damageMultiplier;
@@ -79,7 +92,7 @@ final class SpellCastHandlers {
                     successful = true;
                 }
 
-                spell.applyTargetEffects(living);
+                spell.applyTargetEffects(living, scalingProfile.durationMult());
                 successful = true;
 
                 if (props.ignites()) {
@@ -88,7 +101,8 @@ final class SpellCastHandlers {
                 }
 
                 if (props.getKnockbackStrength() != 0) {
-                    SpellHelper.applyKnockback(entity, look, props.getKnockbackStrength());
+                    float baseKnockback = spell.getBaseKnockback() != 0.0f ? spell.getBaseKnockback() : props.getKnockbackStrength();
+                    SpellHelper.applyKnockback(entity, look, baseKnockback * scalingProfile.controlMult());
                     successful = true;
                 }
             }
@@ -97,7 +111,7 @@ final class SpellCastHandlers {
         if (props.ignites()) {
             SpellHelper.tryIgniteBlockAlongLook(level, caster, effectiveRange);
         }
-        if (isGlacius(spell)) {
+        if (SpellCastSupport.isGlacius(spell)) {
             Vec3 end = casterEye.add(look.scale(effectiveRange));
             BlockHitResult hit = SpellHelper.raycastFromCaster(level, caster, casterEye, end,
                     ClipContext.Block.OUTLINE, ClipContext.Fluid.ANY);
@@ -110,7 +124,7 @@ final class SpellCastHandlers {
         if (expectoPatronum) {
             AABB box = caster.getBoundingBox().inflate(4.5);
             for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, box,
-                    living -> living != caster && living.isAlive() && isPatronusDarkAligned(living))) {
+                    living -> living != caster && living.isAlive() && SpellCastSupport.isPatronusDarkAligned(living))) {
                 Vec3 away = target.position().subtract(caster.position());
                 if (away.lengthSqr() < 1.0e-4) continue;
                 SpellHelper.applyKnockback(target, away, 1.2f);
@@ -122,7 +136,7 @@ final class SpellCastHandlers {
         }
 
         Vec3 beamEnd = casterEye.add(look.scale(effectiveRange * 0.65));
-        SpellHelper.spawnBeam(level, casterEye, beamEnd, spell.getColor());
+        SpellHelper.spawnBeam(level, spell, casterEye, beamEnd);
         return successful;
     }
 
@@ -165,14 +179,20 @@ final class SpellCastHandlers {
             successful = true;
         }
 
-        SpellHelper.spawnBeam(level, casterEye, casterEye.add(caster.getLookAngle().scale(effectiveRange * 0.65)), spell.getColor());
+        SpellHelper.spawnBeam(level, spell, casterEye, casterEye.add(caster.getLookAngle().scale(effectiveRange * 0.65)));
         return successful;
     }
 
     static boolean handleTargeted(ServerLevel level, ServerPlayer caster,
                                   Spell spell, SpellProperties props,
-                                  float damageMultiplier, WandStats wand) {
-        if (isLevicorpus(spell)) {
+                                  float damageMultiplier, WandStats wand, SpellScalingProfile scalingProfile) {
+        if (SpellCastSupport.isFiniteIncantatem(spell)) {
+            return handleFiniteIncantatemTargeted(level, caster, spell, props, wand);
+        }
+        if (SpellCastSupport.isLiberacorpus(spell)) {
+            return handleLiberacorpusTargeted(level, caster, spell, props, wand);
+        }
+        if (SpellCastSupport.isLevicorpus(spell)) {
             return handleLevicorpusTargeted(level, caster, spell, props, wand);
         }
         Vec3 start = caster.getEyePosition();
@@ -195,12 +215,13 @@ final class SpellCastHandlers {
                 successful = true;
             }
 
-            spell.applyTargetEffects(target);
+            spell.applyTargetEffects(target, scalingProfile.durationMult());
             successful = true;
 
             if (props.levitatesTarget()) {
                 target.addEffect(new MobEffectInstance(MobEffects.LEVITATION,
-                        props.getLevitateDurationTicks(), 0, false, true, true));
+                        Math.max(1, Math.round(props.getLevitateDurationTicks() * scalingProfile.durationMult())),
+                        0, false, true, true));
                 successful = true;
             }
 
@@ -218,18 +239,23 @@ final class SpellCastHandlers {
             }
 
             if (props.getKnockbackStrength() != 0) {
-                SpellHelper.applyKnockback(target, look, props.getKnockbackStrength());
+                float baseKnockback = spell.getBaseKnockback() != 0.0f ? spell.getBaseKnockback() : props.getKnockbackStrength();
+                SpellHelper.applyKnockback(target, look, baseKnockback * scalingProfile.controlMult());
                 successful = true;
             }
 
-            if (props.controlsMob() && target instanceof Mob mob) {
+            if (props.controlsMob() && SpellCastSupport.isImperio(spell) && ModuleManager.isEnabled(Module.DARK_ARTS)) {
+                int dur = Math.min(600, 200 + (int) (spell.getProficiencyScalar(caster) * 400));
+                ImperioServerLogic.beginControl(level, caster, target, dur);
+                successful = true;
+            } else if (props.controlsMob() && target instanceof Mob mob) {
                 mob.setTarget(null);
                 target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS,
-                        props.getControlDurationTicks(), 4, false, true, true));
+                        Math.max(1, Math.round(props.getControlDurationTicks() * scalingProfile.durationMult())), 4, false, true, true));
                 target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS,
-                        props.getControlDurationTicks(), 2, false, true, true));
+                        Math.max(1, Math.round(props.getControlDurationTicks() * scalingProfile.durationMult())), 2, false, true, true));
                 target.addEffect(new MobEffectInstance(MobEffects.GLOWING,
-                        props.getControlDurationTicks(), 0, false, true, true));
+                        Math.max(1, Math.round(props.getControlDurationTicks() * scalingProfile.durationMult())), 0, false, true, true));
                 successful = true;
             }
 
@@ -240,18 +266,22 @@ final class SpellCastHandlers {
                 successful = true;
             }
 
-            SpellHelper.spawnBeam(level, start, target.getBoundingBox().getCenter(), spell.getColor());
+            SpellHelper.spawnBeam(level, spell, start, target.getBoundingBox().getCenter());
         }
 
-        if (props.opensBlocks() || (props.explodes() && target == null) || (target == null && isImperio(spell))) {
-            ClipContext.Fluid fluidMode = isImperio(spell) ? ClipContext.Fluid.ANY : ClipContext.Fluid.NONE;
+        if (props.opensBlocks() || (props.explodes() && target == null) || (target == null && SpellCastSupport.isImperio(spell))) {
+            ClipContext.Fluid fluidMode = SpellCastSupport.isImperio(spell) ? ClipContext.Fluid.ANY : ClipContext.Fluid.NONE;
             BlockHitResult blockHit = level.clip(new ClipContext(start, end,
                     ClipContext.Block.OUTLINE, fluidMode, caster));
             if (blockHit.getType() == HitResult.Type.BLOCK) {
                 BlockPos pos = blockHit.getBlockPos();
 
                 if (props.opensBlocks()) {
-                    successful |= handleAlohomora(level, pos, caster, spell);
+                    if (SpellCastSupport.isColloportus(spell)) {
+                        successful |= handleColloportus(level, pos, caster, spell);
+                    } else {
+                        successful |= handleAlohomora(level, pos, caster, spell);
+                    }
                 }
 
                 if (props.explodes()) {
@@ -259,12 +289,12 @@ final class SpellCastHandlers {
                             Vec3.atCenterOf(pos), props.getExplosionPower(),
                             props.explosionBreaksBlocks());
                     successful = true;
-                    if (isBombarda(spell)) {
+                    if (SpellCastSupport.isBombarda(spell)) {
                         SpellHelper.playSpellImpact(level, blockHit.getLocation(), spell.getColor());
                         SpellHelper.pushNearbyLightweightEntities(level, caster, blockHit.getLocation(), look, 1.3f, 3.0);
                     }
                 }
-                if (isImperio(spell)) {
+                if (SpellCastSupport.isImperio(spell) && ModuleManager.isEnabled(Module.DARK_ARTS)) {
                     Mob controlled = level.getEntitiesOfClass(Mob.class,
                                     new AABB(pos).inflate(2.5),
                                     Mob::isAlive)
@@ -272,17 +302,14 @@ final class SpellCastHandlers {
                             .min(Comparator.comparingDouble(mob -> mob.distanceToSqr(Vec3.atCenterOf(pos))))
                             .orElse(null);
                     if (controlled != null) {
-                        controlled.setTarget(null);
-                        int duration = Math.max(40, props.getControlDurationTicks());
-                        controlled.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, duration, 2, false, true, true));
-                        controlled.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, duration, 1, false, true, true));
-                        controlled.addEffect(new MobEffectInstance(MobEffects.GLOWING, duration, 0, false, true, true));
+                        int duration = Math.min(600, Math.max(40, 200 + (int) (spell.getProficiencyScalar(caster) * 400)));
+                        ImperioServerLogic.beginControl(level, caster, controlled, duration);
                         SpellHelper.playSpellImpact(level, blockHit.getLocation(), spell.getColor());
                         successful = true;
                     }
                 }
 
-                SpellHelper.spawnBeam(level, start, blockHit.getLocation(), spell.getColor());
+                SpellHelper.spawnBeam(level, spell, start, blockHit.getLocation());
             }
         }
         return successful;
@@ -316,6 +343,83 @@ final class SpellCastHandlers {
         return true;
     }
 
+    private static boolean handleFiniteIncantatemTargeted(ServerLevel level, ServerPlayer caster,
+                                                        Spell spell, SpellProperties props,
+                                                        WandStats wand) {
+        if (!ModuleManager.isEnabled(Module.WANDS_AND_SPELLS)) {
+            return false;
+        }
+        // TODO(finite): amplifier 1 = Finite Incantatem Totalum (area clear) — not implemented
+        float effectiveRange = props.getRange() * wand.rangeFor(spell);
+        LivingEntity lookedAt = SpellHelper.findTargetedEntity(level, caster, effectiveRange);
+        LivingEntity target = lookedAt != null ? lookedAt : caster;
+
+        List<Holder<MobEffect>> toRemove = new ArrayList<>();
+        for (MobEffectInstance inst : target.getActiveEffects()) {
+            Holder<MobEffect> holder = inst.getEffect();
+            MobEffect effect = holder.value();
+            if (FiniteImmuneEffects.isImmune(effect)) {
+                continue;
+            }
+            Identifier effectId = BuiltInRegistries.MOB_EFFECT.getKey(effect);
+            if (effectId == null || !WizardsAndBeastsMod.MODID.equals(effectId.getNamespace())) {
+                continue;
+            }
+            toRemove.add(holder);
+        }
+
+        int removed = 0;
+        for (Holder<MobEffect> holder : toRemove) {
+            if (target.removeEffect(holder)) {
+                removed++;
+            }
+        }
+
+        if (removed > 0) {
+            Vec3 burstPos = target.getBoundingBox().getCenter();
+            SpellImpactBurstS2CPacket.sendToTracking(
+                    target,
+                    burstPos,
+                    SpellFamilies.of(spell),
+                    spell.getColor(),
+                    14,
+                    0.14f);
+            return true;
+        }
+
+        level.playSound(null, caster.blockPosition(), SoundEvents.FIRE_EXTINGUISH,
+                SoundSource.PLAYERS, 0.35f, 1.55f);
+        SpellImpactBurstS2CPacket.sendToTracking(
+                caster,
+                caster.getEyePosition(1.0f),
+                SpellFamily.LIGHT,
+                spell.getColor(),
+                6,
+                0.08f);
+        return true;
+    }
+
+    private static boolean handleLiberacorpusTargeted(ServerLevel level, ServerPlayer caster,
+                                                      Spell spell, SpellProperties props,
+                                                      WandStats wand) {
+        Vec3 start = caster.getEyePosition();
+        float effectiveRange = props.getRange() * wand.rangeFor(spell);
+        LivingEntity target = SpellHelper.findTargetedEntity(level, caster, effectiveRange);
+        if (target == null) {
+            return false;
+        }
+        boolean hadLevitation = target.hasEffect(MobEffects.LEVITATION);
+        target.removeEffect(MobEffects.LEVITATION);
+        if (hadLevitation) {
+            SpellHelper.spawnBurst(level, spell, target.getBoundingBox().getCenter(), 14, 0.22);
+            SpellHelper.spawnBeam(level, spell, start, target.getBoundingBox().getCenter());
+            return true;
+        }
+        level.playSound(null, caster.blockPosition(), SoundEvents.FIRE_EXTINGUISH,
+                SoundSource.PLAYERS, 0.35f, 1.55f);
+        return false;
+    }
+
     private static boolean handleLevicorpusTargeted(ServerLevel level, ServerPlayer caster,
                                                     Spell spell, SpellProperties props,
                                                     WandStats wand) {
@@ -332,7 +436,7 @@ final class SpellCastHandlers {
             mob.setTarget(null);
         }
         spell.applyTargetEffects(target);
-        SpellHelper.spawnBeam(level, start, target.getBoundingBox().getCenter(), spell.getColor());
+        SpellHelper.spawnBeam(level, spell, start, target.getBoundingBox().getCenter());
         return true;
     }
 
@@ -344,31 +448,66 @@ final class SpellCastHandlers {
             toRepair = caster.getOffhandItem();
         }
 
+        if (ModDataComponents.isElderWand(toRepair)) {
+            caster.displayClientMessage(
+                    Component.literal("This wand refuses Reparo.").withStyle(ChatFormatting.DARK_RED), true);
+            return false;
+        }
+
         if (toRepair.isDamageableItem() && toRepair.isDamaged()) {
             int before = toRepair.getDamageValue();
-            toRepair.setDamageValue(Math.max(0, before - repairAmount));
-            return before != toRepair.getDamageValue();
+            toRepair.setDamageValue(0);
+            return before > 0;
         }
         return false;
     }
 
+    private static boolean handleColloportus(ServerLevel level, BlockPos pos, ServerPlayer caster, Spell spell) {
+        BlockState state = level.getBlockState(pos);
+        int tier = SpellCastSupport.lockTier(state);
+        if (tier < 1) {
+            level.playSound(null, pos, SoundEvents.NOTE_BLOCK_BASS.value(),
+                    SoundSource.PLAYERS, 0.4f, 0.55f);
+            caster.displayClientMessage(
+                    Component.literal("Colloportus finds nothing here to seal.").withStyle(ChatFormatting.GRAY), true);
+            return false;
+        }
+        if (ColloportusLockStore.isLocked(level, pos)) {
+            caster.displayClientMessage(
+                    Component.literal("Already magically sealed.").withStyle(ChatFormatting.DARK_AQUA), true);
+            return false;
+        }
+        ColloportusLockStore.lock(level, pos);
+        level.playSound(null, pos, SoundEvents.IRON_DOOR_CLOSE, SoundSource.PLAYERS, 0.55f, 0.85f);
+        SpellHelper.playSpellImpact(level, Vec3.atCenterOf(pos), spell.getColor());
+        return true;
+    }
+
     static boolean handleAlohomora(ServerLevel level, BlockPos pos, ServerPlayer caster, Spell spell) {
         BlockState state = level.getBlockState(pos);
-        if (state.hasProperty(BlockStateProperties.OPEN) && lockTier(state) == 0) {
+        if (ColloportusLockStore.isLocked(level, pos)) {
+            level.playSound(null, pos, SoundEvents.VILLAGER_NO, SoundSource.PLAYERS, 0.55f, 1.0f);
+            caster.displayClientMessage(
+                    Component.literal("Colloportus holds — Alohomora cannot open this.").withStyle(ChatFormatting.DARK_RED),
+                    true);
+            return false;
+        }
+        if (state.hasProperty(BlockStateProperties.OPEN) && SpellCastSupport.lockTier(state) == 0) {
             level.setBlockAndUpdate(pos, state.cycle(BlockStateProperties.OPEN));
             level.playSound(null, pos, net.minecraft.sounds.SoundEvents.IRON_TRAPDOOR_OPEN,
                     net.minecraft.sounds.SoundSource.PLAYERS, 0.45f, 1.1f);
             return true;
         }
         Proficiency proficiency = spell.getProficiency(caster);
-        int tier = lockTier(state);
+        int tier = SpellCastSupport.lockTier(state);
         if (tier == 0) {
             level.playSound(null, pos, net.minecraft.sounds.SoundEvents.NOTE_BLOCK_BASS.value(),
                     net.minecraft.sounds.SoundSource.PLAYERS, 0.4f, 0.6f);
-            caster.displayClientMessage(Component.literal("\u00A7cAlohomora fizzles: nothing to unlock here."), true);
+            caster.displayClientMessage(
+                    Component.literal("Alohomora fizzles: nothing to unlock here.").withStyle(ChatFormatting.RED), true);
             return false;
         }
-        if (!canUnlockTier(proficiency, tier)) {
+        if (!SpellCastSupport.canUnlockTier(proficiency, tier)) {
             String detail = switch (tier) {
                 case 2 -> "Iron locks need Mastered Alohomora.";
                 default -> "This lock is too complex for your current skill.";
@@ -376,7 +515,7 @@ final class SpellCastHandlers {
             level.playSound(null, pos, net.minecraft.sounds.SoundEvents.VILLAGER_NO,
                     net.minecraft.sounds.SoundSource.PLAYERS, 0.7f, 1.0f);
             caster.displayClientMessage(
-                    Component.literal("\u00A7cAlohomora fails. " + detail), true);
+                    Component.literal("Alohomora fails. " + detail).withStyle(ChatFormatting.RED), true);
             return false;
         }
 
@@ -391,53 +530,4 @@ final class SpellCastHandlers {
         return true;
     }
 
-    private static int lockTier(BlockState state) {
-        if (state.is(Blocks.IRON_DOOR) || state.is(Blocks.IRON_TRAPDOOR)) return 2;
-        if (state.getBlock() instanceof DoorBlock) return 1;
-        if (state.getBlock() instanceof TrapDoorBlock || state.getBlock() instanceof FenceGateBlock) return 1;
-        return 0;
-    }
-
-    private static boolean canUnlockTier(Proficiency proficiency, int tier) {
-        return switch (tier) {
-            case 0 -> true;
-            case 1 -> proficiency == Proficiency.PROFICIENT || proficiency == Proficiency.MASTERED;
-            default -> proficiency == Proficiency.MASTERED;
-        };
-    }
-
-    private static boolean isAccio(Spell spell) {
-        return SpellIds.matches(spell.getId(), "accio");
-    }
-
-    private static boolean isGlacius(Spell spell) {
-        return SpellIds.matches(spell.getId(), "glacius");
-    }
-
-    private static boolean isImperio(Spell spell) {
-        return SpellIds.matches(spell.getId(), "imperio");
-    }
-
-    private static boolean isBombarda(Spell spell) {
-        return SpellIds.matches(spell.getId(), "bombarda");
-    }
-
-    private static boolean isExpectoPatronum(Spell spell) {
-        return SpellIds.matches(spell.getId(), "expecto_patronum");
-    }
-
-    private static boolean isLevicorpus(Spell spell) {
-        return SpellIds.matches(spell.getId(), "levicorpus");
-    }
-
-    private static boolean isPatronusDarkAligned(LivingEntity entity) {
-        if (entity.isInvertedHealAndHarm()) {
-            return true;
-        }
-        if (entity instanceof ServerPlayer sp) {
-            PlayerTypeData data = sp.getData(ModAttachments.TYPE_DATA.get());
-            return ObscurialRules.isObscurial(data) && ObscurialRules.isDarkForm(data);
-        }
-        return false;
-    }
 }

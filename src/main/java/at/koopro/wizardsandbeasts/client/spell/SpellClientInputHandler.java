@@ -1,11 +1,16 @@
 package at.koopro.wizardsandbeasts.client.spell;
 
+import at.koopro.wizardsandbeasts.client.ability.ApparitionClientController;
+import at.koopro.wizardsandbeasts.client.ability.LegilimencyClientController;
+import at.koopro.wizardsandbeasts.client.state.ClientLegilimencyVisionState;
+import at.koopro.wizardsandbeasts.client.state.ClientSignatureSpellState;
 import at.koopro.wizardsandbeasts.client.state.ClientSpellDataState;
-import at.koopro.wizardsandbeasts.client.state.ClientTypeDataState;
+import at.koopro.wizardsandbeasts.client.state.ClientHeritageDataState;
 import at.koopro.wizardsandbeasts.client.spell.input.ObscurialInputController;
 import at.koopro.wizardsandbeasts.client.spell.input.SpellInputController;
 import at.koopro.wizardsandbeasts.client.ui.HudVisibilityPolicy;
 import at.koopro.wizardsandbeasts.client.ui.InputPolicy;
+import at.koopro.wizardsandbeasts.network.ImperioResistC2SPacket;
 import at.koopro.wizardsandbeasts.network.SpellLeviosaAdjustC2SPacket;
 import at.koopro.wizardsandbeasts.spell.CastType;
 import at.koopro.wizardsandbeasts.spell.SpellIds;
@@ -22,10 +27,18 @@ public class SpellClientInputHandler {
     public static void onClientTick(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         if (!InputPolicy.canProcessGameplayInput(mc)) return;
-        var typeData = ClientTypeDataState.get();
+        var typeData = ClientHeritageDataState.get();
         boolean canUseWandMagic = HudVisibilityPolicy.canUseWandMagic(typeData);
         SpellInputController.handleGameplayBindings(mc, canUseWandMagic);
         ObscurialInputController.handleGameplayBindings(typeData);
+        ApparitionClientController.onClientTick(mc);
+        LegilimencyClientController.onClientTick(mc);
+        ClientLegilimencyVisionState.tick();
+        if (mc.player != null && mc.screen == null
+                && ClientSignatureSpellState.isImperioControlled()
+                && mc.options.keyShift.consumeClick()) {
+            ClientPacketDistributor.sendToServer(new ImperioResistC2SPacket());
+        }
     }
 
     public static void onScroll(InputEvent.MouseScrollingEvent event) {

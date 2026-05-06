@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:basilisk",
+  "displayName": "bestiary.wizards_and_beasts.basilisk.name",
+  "category": "SERPENTINE",
+  "mmRating": 5,
+  "habitat": "bestiary.wizards_and_beasts.basilisk.habitat",
+  "size": "ENORMOUS",
+  "shortLore": "bestiary.wizards_and_beasts.basilisk.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.basilisk.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.basilisk.ability.1",
+    "bestiary.wizards_and_beasts.basilisk.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.basilisk.threat.1",
+    "bestiary.wizards_and_beasts.basilisk.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.basilisk.weakness.1",
+    "bestiary.wizards_and_beasts.basilisk.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/basilisk.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/basilisk.png",
+  "sortOrder": 41
+}

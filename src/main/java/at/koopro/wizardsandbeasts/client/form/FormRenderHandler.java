@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.client.form;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.client.state.ClientTypeDataState;
+import at.koopro.wizardsandbeasts.client.state.ClientHeritageDataState;
 import at.koopro.wizardsandbeasts.form.ModelType;
 import at.koopro.wizardsandbeasts.form.SizeProfile;
 import at.koopro.wizardsandbeasts.network.ClientTransitionTracker;
@@ -84,7 +84,7 @@ public class FormRenderHandler {
         Player player = mc.player;
         if (player == null || mc.level == null) return;
 
-        String activeForm = ClientTypeDataState.get().getActiveFormId();
+        String activeForm = ClientHeritageDataState.get().getActiveFormId();
         if (!"obscurial_dark".equals(activeForm)) return;
 
         Vec3 velocity = player.getDeltaMovement();

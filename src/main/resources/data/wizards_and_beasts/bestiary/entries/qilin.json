@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:qilin",
+  "displayName": "bestiary.wizards_and_beasts.qilin.name",
+  "category": "MAGICAL_CREATURE",
+  "mmRating": 1,
+  "habitat": "bestiary.wizards_and_beasts.qilin.habitat",
+  "size": "MEDIUM",
+  "shortLore": "bestiary.wizards_and_beasts.qilin.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.qilin.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.qilin.ability.1",
+    "bestiary.wizards_and_beasts.qilin.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.qilin.threat.1",
+    "bestiary.wizards_and_beasts.qilin.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.qilin.weakness.1",
+    "bestiary.wizards_and_beasts.qilin.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/qilin.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/qilin.png",
+  "sortOrder": 59
+}

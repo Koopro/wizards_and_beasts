@@ -8,14 +8,14 @@ final class ModNetworkType {
 
     static void register(PayloadRegistrar registrar) {
         registrar.playToClient(
-                TypeDataSyncS2CPacket.TYPE,
-                TypeDataSyncS2CPacket.STREAM_CODEC,
-                TypeDataSyncS2CPacket::handleClient);
+                HeritageDataSyncS2CPacket.TYPE,
+                HeritageDataSyncS2CPacket.STREAM_CODEC,
+                HeritageDataSyncS2CPacket::handleClient);
 
         registrar.playToServer(
-                TypeSelectC2SPacket.TYPE,
-                TypeSelectC2SPacket.STREAM_CODEC,
-                TypeSelectC2SPacket::handle);
+                HeritageSelectC2SPacket.TYPE,
+                HeritageSelectC2SPacket.STREAM_CODEC,
+                HeritageSelectC2SPacket::handle);
 
         registrar.playToServer(
                 ProfessionUnlockC2SPacket.TYPE,

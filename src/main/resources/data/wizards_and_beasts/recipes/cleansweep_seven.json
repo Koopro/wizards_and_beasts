@@ -1,0 +1,26 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "BROOM_FLIGHT"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "WSW",
+    "WSW",
+    "WTW"
+  ],
+  "key": {
+    "W": {"tag": "minecraft:planks"},
+    "S": {"item": "minecraft:stick"},
+    "T": {"tag": "minecraft:leaves"}
+  },
+  "result": {
+    "id": "wizards_and_beasts:cleansweep_seven",
+    "count": 1,
+    "components": {
+      "wizards_and_beasts:broom_definition": "wizards_and_beasts:cleansweep_seven"
+    }
+  }
+}

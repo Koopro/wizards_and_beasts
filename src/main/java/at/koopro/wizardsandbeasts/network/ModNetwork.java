@@ -14,8 +14,11 @@ public class ModNetwork {
         ModNetworkVault.register(registrar);
         ModNetworkType.register(registrar);
         ModNetworkForm.register(registrar);
+        ModNetworkAbilities.register(registrar);
         ModNetworkBeamDebug.register(registrar);
         ModNetworkSkills.register(registrar);
         ModNetworkTeacher.register(registrar);
+        ModNetworkWand.register(registrar);
+        ModNetworkBestiary.register(registrar);
     }
 }

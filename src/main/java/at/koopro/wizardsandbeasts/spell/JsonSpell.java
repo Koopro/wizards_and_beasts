@@ -38,6 +38,31 @@ public class JsonSpell extends Spell {
     }
 
     @Override
+    public String getRequiredSkillId() {
+        return def.learning().requiredSkillId().orElse(null);
+    }
+
+    @Override
+    public String getRequiredProfessionId() {
+        return def.learning().requiredProfessionId().orElse(null);
+    }
+
+    @Override
+    public String getMasterySourceSpellId() {
+        return def.learning().masterySpellId().orElse(null);
+    }
+
+    @Override
+    public at.koopro.wizardsandbeasts.data.PlayerSpellData.MasteryTier getRequiredMasteryTier() {
+        return def.learning().minMasteryTier().orElse(null);
+    }
+
+    @Override
+    public boolean isUnblockable() {
+        return def.unblockable();
+    }
+
+    @Override
     protected SpellProperties buildProperties() {
         SpellProperties.Builder b = switch (def.castType()) {
             case PROJECTILE -> SpellProperties.projectile();
@@ -48,7 +73,8 @@ public class JsonSpell extends Spell {
             case BEAM_CHANNEL -> SpellProperties.beamChannel(def.range());
         };
 
-        if (def.knockback() != 0.0f) b.knockback(def.knockback());
+        float configuredKnockback = def.baseKnockback() != 0.0f ? def.baseKnockback() : def.knockback();
+        if (configuredKnockback != 0.0f) b.knockback(configuredKnockback);
         def.igniteSeconds().ifPresent(b::ignites);
         def.explode().ifPresent(e -> b.explodes(e.power(), e.breaksBlocks()));
         if (def.disarms()) b.disarms();

@@ -1,34 +1,22 @@
 package at.koopro.wizardsandbeasts.skill;
 
-import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.data.PlayerSkillData;
-import at.koopro.wizardsandbeasts.data.PlayerSpellData;
+import at.koopro.wizardsandbeasts.module.Module;
+import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.spell.Spell;
-import at.koopro.wizardsandbeasts.spell.cast.ModifierStack;
-import at.koopro.wizardsandbeasts.type.TypeSystemAPI;
-import at.koopro.wizardsandbeasts.type.WizType;
-import net.minecraft.resources.Identifier;
+import at.koopro.wizardsandbeasts.spell.SpellCategory;
+import at.koopro.wizardsandbeasts.type.HeritageAPI;
+import at.koopro.wizardsandbeasts.type.HeritageVariant;
+import at.koopro.wizardsandbeasts.type.Heritage;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
+import at.koopro.wizardsandbeasts.spell.cast.ModifierStack;
 
 /**
  * Public API for querying and modifying skill data.
  * Combines proficiency bonuses with skill tree bonuses.
  */
 public final class SkillSystemAPI {
-    private static final Identifier SKILL_MAX_HEALTH_ID =
-            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "skill_max_health");
-    private static final Identifier SKILL_MOVEMENT_SPEED_ID =
-            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "skill_movement_speed");
-    private static final Identifier SKILL_ARMOR_ID =
-            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "skill_armor");
-
     public record UnlockCheck(boolean allowed, String reason) {}
 
     private SkillSystemAPI() {}
@@ -40,8 +28,9 @@ public final class SkillSystemAPI {
      */
     public static float getDamageMultiplier(ServerPlayer player, Spell spell) {
         float profMult = spell.getProficiency(player).getDamageMultiplier();
-        SkillEffectCache cache = getCache(player);
-        float skillMult = cache.getSpellDamageMultiplier(spell.getId(), spell.getCategory());
+        float skillMult = PlayerSkillBonusData.forPlayer(player)
+                .damageMultipliers()
+                .getOrDefault(spell.getCategory(), 1.0f);
         return profMult * skillMult;
     }
 
@@ -50,23 +39,26 @@ public final class SkillSystemAPI {
      */
     public static float getCooldownMultiplier(ServerPlayer player, Spell spell) {
         float profMult = spell.getProficiency(player).getCooldownMultiplier();
-        SkillEffectCache cache = getCache(player);
-        float skillMult = cache.getSpellCooldownMultiplier(spell.getId(), spell.getCategory());
+        float skillMult = PlayerSkillBonusData.forPlayer(player)
+                .cooldownMultipliers()
+                .getOrDefault(spell.getCategory(), 1.0f);
         return profMult * skillMult;
     }
 
     public static void applyDamageModifiers(ModifierStack stack, ServerPlayer player, Spell spell) {
         float profMult = spell.getProficiency(player).getDamageMultiplier();
-        SkillEffectCache cache = getCache(player);
-        float skillMult = cache.getSpellDamageMultiplier(spell.getId(), spell.getCategory());
+        float skillMult = PlayerSkillBonusData.forPlayer(player)
+                .damageMultipliers()
+                .getOrDefault(spell.getCategory(), 1.0f);
         stack.multiplyDamage(profMult, "proficiency");
         stack.multiplyDamage(skillMult, "skill_tree");
     }
 
     public static void applyCooldownModifiers(ModifierStack stack, ServerPlayer player, Spell spell) {
         float profMult = spell.getProficiency(player).getCooldownMultiplier();
-        SkillEffectCache cache = getCache(player);
-        float skillMult = cache.getSpellCooldownMultiplier(spell.getId(), spell.getCategory());
+        float skillMult = PlayerSkillBonusData.forPlayer(player)
+                .cooldownMultipliers()
+                .getOrDefault(spell.getCategory(), 1.0f);
         stack.multiplyCooldown(profMult, "proficiency");
         stack.multiplyCooldown(skillMult, "skill_tree");
     }
@@ -86,6 +78,9 @@ public final class SkillSystemAPI {
      * rejection feedback instead of a generic "cannot unlock" message.
      */
     public static UnlockCheck evaluateUnlock(ServerPlayer player, Skill skill) {
+        if (!ModuleManager.isEnabled(Module.SKILL_TREES)) {
+            return new UnlockCheck(false, "module_disabled");
+        }
         PlayerSkillData data = getSkillData(player);
         if (data.isMaxed(skill.getId())) return new UnlockCheck(false, "maxed");
         if (data.getSkillPoints() < skill.getPointCost()) return new UnlockCheck(false, "not_enough_points");
@@ -101,13 +96,14 @@ public final class SkillSystemAPI {
     }
 
     /**
-     * Checks if a skill tree is available for the player's WizType.
+     * Checks if a skill tree is available for the player's Heritage.
      * Wandlore requires canUseWand. All others are universally available.
      */
     public static boolean isTreeAvailable(ServerPlayer player, SkillTreeId tree) {
         if (tree == SkillTreeId.WANDLORE) {
-            WizType type = TypeSystemAPI.getPlayerType(player);
-            return type != null && type.canUseWand();
+            Heritage type = HeritageAPI.getPlayerHeritage(player);
+            HeritageVariant subtype = HeritageAPI.getPlayerHeritageVariant(player);
+            return type != null && type.canUseWand() && (subtype == null || !subtype.hasTag("no_wand"));
         }
         return true;
     }
@@ -116,7 +112,7 @@ public final class SkillSystemAPI {
 
     /**
      * Attempts to unlock (or level up) a skill. Returns true on success.
-     * Applies LearnSpell effects immediately to PlayerSpellData.
+     * Skill unlocks only affect skill-derived bonuses/abilities.
      */
     public static boolean tryUnlock(ServerPlayer player, String skillId) {
         Skill skill = SkillTrees.byId(skillId);
@@ -128,8 +124,8 @@ public final class SkillSystemAPI {
         int newLevel = data.getSkillLevel(skillId) + 1;
         data.setSkillLevel(skillId, newLevel);
 
-        applyImmediateEffects(player, skill, newLevel);
-        reconcileDerivedEffects(player);
+        applyImmediateEffects(skill);
+        SkillAttributeApplicator.applyAll(player);
         return true;
     }
 
@@ -143,8 +139,8 @@ public final class SkillSystemAPI {
 
         PlayerSkillData data = getSkillData(player);
         data.setSkillLevel(skillId, skill.getMaxLevel());
-        applyImmediateEffects(player, skill, skill.getMaxLevel());
-        reconcileDerivedEffects(player);
+        applyImmediateEffects(skill);
+        SkillAttributeApplicator.applyAll(player);
     }
 
     // ── Point Management ──
@@ -170,57 +166,44 @@ public final class SkillSystemAPI {
         return SkillEffectCache.compute(data);
     }
 
-    public static void reconcileDerivedEffects(ServerPlayer player) {
-        applyPassiveAttributes(player);
+    /** Count of skills in {@code tree} with at least one unlocked level. */
+    public static int countUnlockedSkillsInTree(ServerPlayer player, SkillTreeId tree) {
+        PlayerSkillData data = getSkillData(player);
+        int n = 0;
+        for (Skill skill : SkillTrees.getTree(tree)) {
+            if (data.hasSkill(skill.getId())) {
+                n++;
+            }
+        }
+        return n;
     }
 
-    private static void applyImmediateEffects(ServerPlayer player, Skill skill, int newLevel) {
-        PlayerSpellData spellData = player.getData(ModAttachments.SPELL_DATA.get());
+    public static void reconcileDerivedEffects(ServerPlayer player) {
+        SkillAttributeApplicator.applyAll(player);
+    }
+
+    private static void applyImmediateEffects(Skill skill) {
         for (SkillEffect effect : skill.getEffects()) {
-            if (effect instanceof SkillEffect.LearnSpell learn) {
-                spellData.learnSpell(learn.spellId());
-            } else if (effect instanceof SkillEffect.PassiveAttribute) {
-                applyPassiveAttributes(player);
-            } else if (effect instanceof SkillEffect.UnlockAbility) {
+            if (effect instanceof SkillEffect.UnlockAbility) {
                 // Ability availability is derived from unlocked skill levels via SkillEffectCache.
                 // Keep this branch explicit so unlock effects remain discoverable in one place.
             }
         }
     }
 
-    private static void applyPassiveAttributes(ServerPlayer player) {
-        PlayerSkillData data = getSkillData(player);
-        Map<String, Double> totals = new LinkedHashMap<>();
-        for (Map.Entry<String, Integer> entry : data.getUnlockedSkills().entrySet()) {
-            Skill skill = SkillTrees.byId(entry.getKey());
-            if (skill == null) continue;
-            int level = Math.max(0, entry.getValue());
-            if (level == 0) continue;
-            for (SkillEffect effect : skill.getEffects()) {
-                if (effect instanceof SkillEffect.PassiveAttribute attr) {
-                    totals.merge(attr.attributeId(), attr.amountPerLevel() * level, Double::sum);
-                }
-            }
-        }
-
-        applyAttributeModifier(player, "max_health", Attributes.MAX_HEALTH, SKILL_MAX_HEALTH_ID, totals.getOrDefault("max_health", 0.0));
-        applyAttributeModifier(player, "movement_speed", Attributes.MOVEMENT_SPEED, SKILL_MOVEMENT_SPEED_ID, totals.getOrDefault("movement_speed", 0.0));
-        applyAttributeModifier(player, "armor", Attributes.ARMOR, SKILL_ARMOR_ID, totals.getOrDefault("armor", 0.0));
+    public static int getSpellGateOverride(ServerPlayer player, Spell spell) {
+        return PlayerSkillBonusData.forPlayer(player)
+                .spellGateOverrides()
+                .getOrDefault(
+                        net.minecraft.resources.Identifier.fromNamespaceAndPath("wizards_and_beasts", spell.getId()),
+                        spell.getProficiency(player).getCastsRequired());
     }
 
-    private static void applyAttributeModifier(ServerPlayer player,
-                                               String attributeId,
-                                               net.minecraft.core.Holder<Attribute> attribute,
-                                               Identifier modifierId,
-                                               double value) {
-        var instance = player.getAttribute(attribute);
-        if (instance == null) return;
-        instance.removeModifier(modifierId);
-        if (value != 0.0d) {
-            instance.addTransientModifier(new AttributeModifier(modifierId, value, AttributeModifier.Operation.ADD_VALUE));
-        }
-        if ("max_health".equals(attributeId) && value < 0 && player.getHealth() > player.getMaxHealth()) {
-            player.setHealth(player.getMaxHealth());
-        }
+    public static float getCategoryDamageMultiplier(ServerPlayer player, SpellCategory category) {
+        return PlayerSkillBonusData.forPlayer(player).damageMultipliers().getOrDefault(category, 1.0f);
+    }
+
+    public static float getCategoryCooldownMultiplier(ServerPlayer player, SpellCategory category) {
+        return PlayerSkillBonusData.forPlayer(player).cooldownMultipliers().getOrDefault(category, 1.0f);
     }
 }

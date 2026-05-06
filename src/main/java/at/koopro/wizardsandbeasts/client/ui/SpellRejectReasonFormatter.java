@@ -43,6 +43,12 @@ public final class SpellRejectReasonFormatter {
         if (reason.startsWith("not_holding_wand")) {
             return "Wand required";
         }
+        if (reason.startsWith("wand_not_bonded")) {
+            return "Wand has not chosen you";
+        }
+        if (reason.startsWith("wand_wrong_master")) {
+            return "Wand serves another";
+        }
         return reason;
     }
 }

@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:kneazle",
+  "displayName": "bestiary.wizards_and_beasts.kneazle.name",
+  "category": "FELINE",
+  "mmRating": 2,
+  "habitat": "bestiary.wizards_and_beasts.kneazle.habitat",
+  "size": "SMALL",
+  "shortLore": "bestiary.wizards_and_beasts.kneazle.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.kneazle.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.kneazle.ability.1",
+    "bestiary.wizards_and_beasts.kneazle.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.kneazle.threat.1",
+    "bestiary.wizards_and_beasts.kneazle.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.kneazle.weakness.1",
+    "bestiary.wizards_and_beasts.kneazle.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/kneazle.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/kneazle.png",
+  "sortOrder": 55
+}

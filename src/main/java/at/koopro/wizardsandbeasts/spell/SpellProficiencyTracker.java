@@ -3,6 +3,9 @@ package at.koopro.wizardsandbeasts.spell;
 import at.koopro.wizardsandbeasts.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.event.SkillEvents;
 import at.koopro.wizardsandbeasts.network.SpellDataDeltaS2CPacket;
+import at.koopro.wizardsandbeasts.network.SpellProficiencySyncS2CPacket;
+import at.koopro.wizardsandbeasts.module.Module;
+import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.wand.cast.WandAllegianceSystem;
 import net.minecraft.server.level.ServerPlayer;
@@ -22,6 +25,14 @@ public final class SpellProficiencyTracker {
         int oldHits = data.getSuccessfulHits(spellId);
         data.incrementSuccessfulHits(spellId);
         int newHits = data.getSuccessfulHits(spellId);
+        if (ModuleManager.isEnabled(Module.PROFICIENCY)) {
+            float current = data.getSpellProficiency(spellId);
+            float baseIncrement = 0.002f;
+            float effectiveIncrement = baseIncrement * (current >= 0.8f ? (1.0f - current) : 1.0f);
+            float updated = Math.min(1.0f, current + Math.max(0.0f, effectiveIncrement));
+            data.setSpellProficiency(spellId, updated);
+            SpellProficiencySyncS2CPacket.sendTo(player, spellId, updated);
+        }
         SkillEvents.checkProficiencyMilestone(player, spellId, oldHits, newHits);
         ItemStack wandStack = at.koopro.wizardsandbeasts.util.WandHelper.getWandStack(player);
         if (!wandStack.isEmpty() && player.level() instanceof net.minecraft.server.level.ServerLevel level) {

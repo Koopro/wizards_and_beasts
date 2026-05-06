@@ -1,11 +1,11 @@
 package at.koopro.wizardsandbeasts.form;
 
-import at.koopro.wizardsandbeasts.data.PlayerTypeData;
+import at.koopro.wizardsandbeasts.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.event.FormEvents;
 import at.koopro.wizardsandbeasts.network.FormSyncS2CPacket;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
-import at.koopro.wizardsandbeasts.type.TypeFormBridge;
-import at.koopro.wizardsandbeasts.type.WizType;
+import at.koopro.wizardsandbeasts.type.HeritageFormBridge;
+import at.koopro.wizardsandbeasts.type.Heritage;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.common.NeoForge;
 
@@ -33,7 +33,7 @@ public final class FormSystemAPI {
         PlayerForm newForm = FormRegistry.get(formId);
         if (newForm == null) return null;
 
-        PlayerTypeData data = player.getData(ModAttachments.TYPE_DATA.get());
+        PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
         String oldFormId = data.getActiveFormId();
         PlayerForm oldForm = oldFormId != null ? FormRegistry.get(oldFormId) : null;
 
@@ -57,7 +57,7 @@ public final class FormSystemAPI {
      */
     @Nullable
     public static PlayerForm getPlayerForm(ServerPlayer player) {
-        PlayerTypeData data = player.getData(ModAttachments.TYPE_DATA.get());
+        PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
         String formId = data.getActiveFormId();
         return formId != null ? FormRegistry.get(formId) : null;
     }
@@ -67,17 +67,17 @@ public final class FormSystemAPI {
      */
     @Nullable
     public static String getPlayerFormId(ServerPlayer player) {
-        return player.getData(ModAttachments.TYPE_DATA.get()).getActiveFormId();
+        return player.getData(ModAttachments.HERITAGE_DATA.get()).getActiveFormId();
     }
 
     /**
      * Returns all forms available to the player based on their type.
      */
     public static List<String> getAvailableForms(ServerPlayer player) {
-        PlayerTypeData data = player.getData(ModAttachments.TYPE_DATA.get());
-        WizType type = data.getSelectedType();
+        PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
+        Heritage type = data.getSelectedHeritage();
         if (type == null) return List.of("human_default");
-        return TypeFormBridge.getAvailableFormIds(type);
+        return HeritageFormBridge.getAvailableFormIds(type);
     }
 
     /**
@@ -85,13 +85,13 @@ public final class FormSystemAPI {
      * If no type is selected, resets to "human_default".
      */
     public static void resetToDefault(ServerPlayer player) {
-        PlayerTypeData data = player.getData(ModAttachments.TYPE_DATA.get());
-        WizType type = data.getSelectedType();
+        PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
+        Heritage type = data.getSelectedHeritage();
 
         String defaultFormId;
         if (type != null) {
-            defaultFormId = TypeFormBridge.getDefaultFormId(
-                    type, data.getSelectedSubtype(), data.getTransformationState());
+            defaultFormId = HeritageFormBridge.getDefaultFormId(
+                    type, data.getSelectedHeritageVariant(), data.getTransformationState());
         } else {
             defaultFormId = "human_default";
         }
@@ -103,7 +103,7 @@ public final class FormSystemAPI {
      * Clears the player's form and removes all size modifiers.
      */
     public static void clearForm(ServerPlayer player) {
-        PlayerTypeData data = player.getData(ModAttachments.TYPE_DATA.get());
+        PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
         String oldFormId = data.getActiveFormId();
         PlayerForm oldForm = oldFormId != null ? FormRegistry.get(oldFormId) : null;
 
@@ -120,7 +120,7 @@ public final class FormSystemAPI {
      * Re-applies the current form's size profile (e.g. after respawn/relog).
      */
     public static void reapplyCurrentForm(ServerPlayer player) {
-        PlayerTypeData data = player.getData(ModAttachments.TYPE_DATA.get());
+        PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
         String formId = data.getActiveFormId();
         if (formId != null) {
             PlayerForm form = FormRegistry.get(formId);

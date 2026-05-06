@@ -1,14 +1,14 @@
 package at.koopro.wizardsandbeasts.client.gui;
 
 import at.koopro.wizardsandbeasts.client.state.ClientSpellDataState;
-import at.koopro.wizardsandbeasts.client.state.ClientTypeDataState;
+import at.koopro.wizardsandbeasts.client.state.ClientHeritageDataState;
 import at.koopro.wizardsandbeasts.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.network.SpellAssignC2SPacket;
 import at.koopro.wizardsandbeasts.spell.Spell;
 import at.koopro.wizardsandbeasts.spell.SpellCategory;
 import at.koopro.wizardsandbeasts.spell.Spells;
 import at.koopro.wizardsandbeasts.type.ObscurialRules;
-import at.koopro.wizardsandbeasts.type.WizType;
+import at.koopro.wizardsandbeasts.type.Heritage;
 import at.koopro.wizardsandbeasts.util.MathUtils;
 import at.koopro.wizardsandbeasts.util.TextUtils;
 import net.minecraft.client.gui.GuiGraphics;
@@ -50,7 +50,7 @@ public class SpellMenuScreen extends Screen {
     private void rebuildSpellList() {
         spellEntries.clear();
         PlayerSpellData data = ClientSpellDataState.get();
-        WizType type = ClientTypeDataState.get().getSelectedType();
+        Heritage type = ClientHeritageDataState.get().getSelectedHeritage();
 
         String q = searchQuery == null ? "" : searchQuery.toLowerCase();
 
@@ -60,7 +60,7 @@ public class SpellMenuScreen extends Screen {
                 if (spell.getCategory() == category
                         && data.knowsSpell(spell.getId())
                         && !ObscurialRules.isObscurialAbility(spell)
-                        && ObscurialRules.canTypeUseSpell(type, spell)) {
+                        && ObscurialRules.canHeritageUseSpell(type, spell)) {
                     boolean matches = q.isEmpty()
                             || spell.getDisplayName().toLowerCase().contains(q)
                             || spell.getId().toLowerCase().contains(q);

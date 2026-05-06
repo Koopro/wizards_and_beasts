@@ -1,7 +1,11 @@
 package at.koopro.wizardsandbeasts.event;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.registry.ModSounds;
+import at.koopro.wizardsandbeasts.spell.SpellProtegoRules;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
@@ -28,7 +32,14 @@ public final class ProtegoShieldHandler {
     public static void onIncomingDamage(LivingIncomingDamageEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (!player.getTags().contains(PROTEGO_ACTIVE_TAG)) return;
+        if (SpellProtegoRules.bypassesProtego(event)) {
+            return;
+        }
         event.setCanceled(true);
+        if (player.level() instanceof ServerLevel serverLevel) {
+            serverLevel.playSound(null, player.blockPosition(), ModSounds.PROTEGO_BLOCK.get(),
+                    SoundSource.PLAYERS, 0.72f, 1.03f + serverLevel.random.nextFloat() * 0.09f);
+        }
     }
 
     @SubscribeEvent

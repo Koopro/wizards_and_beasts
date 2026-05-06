@@ -9,6 +9,8 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.module.Module;
+import at.koopro.wizardsandbeasts.module.ModuleManager;
 
 public class ModCreativeTabs {
     public static final DeferredRegister<CreativeModeTab> TABS =
@@ -27,8 +29,20 @@ public class ModCreativeTabs {
 
                         // Magical Tools
                         output.accept(ModItems.WAND.get());
-                        output.accept(ModItems.BROOM_ITEM.get());
+                        if (ModuleManager.isEnabled(Module.BROOM_FLIGHT)) {
+                            output.accept(ModItems.BROOM_ITEM.get());
+                            output.accept(ModItems.CLEANSWEEP_SEVEN.get());
+                            output.accept(ModItems.COMET_260.get());
+                            output.accept(ModItems.NIMBUS_2000.get());
+                            output.accept(ModItems.NIMBUS_2001.get());
+                            output.accept(ModItems.FIREBOLT.get());
+                            output.accept(ModItems.FIREBOLT_SUPREME.get());
+                            output.accept(ModItems.OAKSHAFT_79.get());
+                            output.accept(ModItems.BROOM_POLISH.get());
+                            output.accept(ModItems.ENCHANTED_TWIG_BUNDLE.get());
+                        }
                         output.accept(ModItems.MARAUDERS_MAP.get());
+                        output.accept(ModItems.BESTIARY.get());
 
                         // Wand Cores
                         output.accept(ModItems.PHOENIX_FEATHER.get());

@@ -1,0 +1,16 @@
+package at.koopro.wizardsandbeasts.module;
+
+/**
+ * Feature modules gated by {@link ModuleManager}.
+ */
+public enum Module {
+    WANDS,
+    WANDS_AND_SPELLS,
+    SKILL_TREES,
+    PROFICIENCY,
+    DARK_ARTS,
+    PLAYER_ABILITIES,
+    CREATURES,
+    BESTIARY,
+    BROOM_FLIGHT
+}

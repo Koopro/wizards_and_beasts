@@ -2,14 +2,18 @@ package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.item.BroomItem;
+import at.koopro.wizardsandbeasts.item.BestiaryItem;
 import at.koopro.wizardsandbeasts.item.DebugWandItem;
 import at.koopro.wizardsandbeasts.item.InkItem;
 import at.koopro.wizardsandbeasts.item.MaraudersMapItem;
 import at.koopro.wizardsandbeasts.item.MorphWandItem;
 import at.koopro.wizardsandbeasts.item.ParchmentItem;
+import at.koopro.wizardsandbeasts.item.SimpleTooltipItem;
 import at.koopro.wizardsandbeasts.item.WandItem;
 import at.koopro.wizardsandbeasts.item.WandBlankItem;
 import at.koopro.wizardsandbeasts.item.WandCoreMaterialItem;
+import at.koopro.wizardsandbeasts.item.gamp.ConjuredSpoiledFoodItem;
+import at.koopro.wizardsandbeasts.item.gamp.CounterfeitGalleonItem;
 import at.koopro.wizardsandbeasts.item.currency.CoinItem;
 import at.koopro.wizardsandbeasts.item.currency.LeprechaunGoldItem;
 import at.koopro.wizardsandbeasts.item.wizarding.BertieBottsBeansItem;
@@ -33,6 +37,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.SpawnEggItem;
@@ -64,8 +69,46 @@ public class ModItems {
     // --- Broom ---
 
     public static final DeferredItem<BroomItem> BROOM_ITEM =
-            ITEMS.registerItem("broom", BroomItem::new,
-                    new Item.Properties().stacksTo(1));
+            ITEMS.registerItem("broom", props -> new BroomItem(props,
+                            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "cleansweep_seven")),
+                    new Item.Properties().stacksTo(1).durability(120));
+    public static final DeferredItem<BroomItem> CLEANSWEEP_SEVEN =
+            ITEMS.registerItem("cleansweep_seven", props -> new BroomItem(props,
+                            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "cleansweep_seven")),
+                    new Item.Properties().stacksTo(1).durability(120));
+    public static final DeferredItem<BroomItem> COMET_260 =
+            ITEMS.registerItem("comet_260", props -> new BroomItem(props,
+                            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "comet_260")),
+                    new Item.Properties().stacksTo(1).durability(200));
+    public static final DeferredItem<BroomItem> NIMBUS_2000 =
+            ITEMS.registerItem("nimbus_2000", props -> new BroomItem(props,
+                            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "nimbus_2000")),
+                    new Item.Properties().stacksTo(1).durability(320));
+    public static final DeferredItem<BroomItem> NIMBUS_2001 =
+            ITEMS.registerItem("nimbus_2001", props -> new BroomItem(props,
+                            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "nimbus_2001")),
+                    new Item.Properties().stacksTo(1).durability(340));
+    public static final DeferredItem<BroomItem> FIREBOLT =
+            ITEMS.registerItem("firebolt", props -> new BroomItem(props,
+                            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "firebolt")),
+                    new Item.Properties().stacksTo(1).durability(520));
+    public static final DeferredItem<BroomItem> FIREBOLT_SUPREME =
+            ITEMS.registerItem("firebolt_supreme", props -> new BroomItem(props,
+                            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "firebolt_supreme")),
+                    new Item.Properties().stacksTo(1).durability(700));
+    public static final DeferredItem<BroomItem> OAKSHAFT_79 =
+            ITEMS.registerItem("oakshaft_79", props -> new BroomItem(props,
+                            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "oakshaft_79")),
+                    new Item.Properties().stacksTo(1).durability(2000));
+
+    public static final DeferredItem<SimpleTooltipItem> BROOM_POLISH =
+            ITEMS.registerItem("broom_polish",
+                    props -> new SimpleTooltipItem(props, "item.wizards_and_beasts.broom_polish.tooltip"),
+                    new Item.Properties().stacksTo(16));
+    public static final DeferredItem<SimpleTooltipItem> ENCHANTED_TWIG_BUNDLE =
+            ITEMS.registerItem("enchanted_twig_bundle",
+                    props -> new SimpleTooltipItem(props, "item.wizards_and_beasts.enchanted_twig_bundle.tooltip"),
+                    new Item.Properties().stacksTo(8));
 
     // --- Wand ---
 
@@ -81,12 +124,15 @@ public class ModItems {
 
     public static final DeferredItem<WandCoreMaterialItem> PHOENIX_FEATHER =
             ITEMS.registerItem("phoenix_feather", props -> new WandCoreMaterialItem(props,
+                    Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "phoenix_feather"),
                     Component.literal("Source key: fawkes")), new Item.Properties());
     public static final DeferredItem<WandCoreMaterialItem> DRAGON_HEARTSTRING =
             ITEMS.registerItem("dragon_heartstring", props -> new WandCoreMaterialItem(props,
+                    Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "dragon_heartstring"),
                     Component.literal("Source key: hungarian_horntail")), new Item.Properties());
     public static final DeferredItem<WandCoreMaterialItem> UNICORN_HAIR =
             ITEMS.registerItem("unicorn_hair", props -> new WandCoreMaterialItem(props,
+                    Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "unicorn_hair"),
                     Component.literal("Fragile core material. Handle with care.")), new Item.Properties());
     public static final DeferredItem<Item> THESTRAL_TAIL_HAIR =
             ITEMS.registerSimpleItem("thestral_tail_hair");
@@ -109,6 +155,10 @@ public class ModItems {
             ITEMS.registerItem("marauders_map", MaraudersMapItem::new,
                     new Item.Properties().stacksTo(1));
 
+    public static final DeferredItem<BestiaryItem> BESTIARY =
+            ITEMS.registerItem("bestiary", BestiaryItem::new,
+                    new Item.Properties().stacksTo(1));
+
     public static final DeferredItem<ParchmentItem> PARCHMENT =
             ITEMS.registerItem("parchment", ParchmentItem::new,
                     new Item.Properties());
@@ -128,6 +178,9 @@ public class ModItems {
     public static final DeferredItem<CoinItem> GALLEON =
             ITEMS.registerItem("galleon", props -> new CoinItem(props, "galleon"),
                     new Item.Properties());
+    public static final DeferredItem<CounterfeitGalleonItem> COUNTERFEIT_GALLEON =
+            ITEMS.registerItem("counterfeit_galleon", CounterfeitGalleonItem::new,
+                    new Item.Properties().stacksTo(64));
     public static final DeferredItem<LeprechaunGoldItem> LEPRECHAUN_GOLD =
             ITEMS.registerItem("leprechaun_gold", LeprechaunGoldItem::new,
                     new Item.Properties());
@@ -153,6 +206,9 @@ public class ModItems {
                     props -> new WizardingQuickConsumableItem(props, 2, 0.3f, 28, ItemUseAnimation.DRINK, 10,
                             new MobEffectInstance(MobEffects.REGENERATION, 160, 0)),
                     new Item.Properties());
+    public static final DeferredItem<ConjuredSpoiledFoodItem> CONJURED_SPOILED_FOOD =
+            ITEMS.registerItem("conjured_spoiled_food", ConjuredSpoiledFoodItem::new,
+                    new Item.Properties().stacksTo(1));
 
     public static final DeferredItem<WizardingQuickConsumableItem> PUMPKIN_JUICE =
             ITEMS.registerItem("pumpkin_juice",

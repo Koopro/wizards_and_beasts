@@ -1,10 +1,10 @@
 package at.koopro.wizardsandbeasts.spell.spells;
 
+import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.spell.*;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
@@ -29,9 +29,8 @@ public class Nox extends Spell {
     @Override
     public void execute(ServerLevel level, ServerPlayer caster, ItemStack wandStack) {
         playSound(level, caster);
-        caster.removeEffect(MobEffects.GLOWING);
-        caster.removeEffect(MobEffects.NIGHT_VISION);
+        caster.removeEffect(ModEffects.LUMOS_FIELD);
         Vec3 p = caster.getEyePosition();
-        SpellHelper.spawnBurst(level, p, getColor(), 14, 0.22);
+        SpellHelper.spawnBurst(level, this, p, 14, 0.22);
     }
 }

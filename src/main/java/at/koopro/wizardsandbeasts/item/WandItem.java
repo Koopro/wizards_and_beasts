@@ -1,15 +1,18 @@
 package at.koopro.wizardsandbeasts.item;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.client.wand.WandRenderer;
 import at.koopro.wizardsandbeasts.item.wand.WandCore;
 import at.koopro.wizardsandbeasts.item.wand.WandFlexibility;
 import at.koopro.wizardsandbeasts.item.wand.WandLength;
 import at.koopro.wizardsandbeasts.item.wand.WandWood;
 import at.koopro.wizardsandbeasts.network.SpellCastC2SPacket;
+import at.koopro.wizardsandbeasts.spell.cast.WandCastTiming;
+import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.registry.ModItems;
 import at.koopro.wizardsandbeasts.spell.WandBeamChannelLogic;
+import at.koopro.wizardsandbeasts.util.ClientClassBridge;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
+import at.koopro.wizardsandbeasts.wand.resonance.WandResonanceSystem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
@@ -31,7 +34,6 @@ import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.animation.object.PlayState;
 import software.bernie.geckolib.renderer.GeoItemRenderer;
 
-import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -44,12 +46,16 @@ public class WandItem extends GeoItemBase {
     @Override
     public void createGeoRenderer(Consumer<GeoRenderProvider> consumer) {
         consumer.accept(new GeoRenderProvider() {
-            private WandRenderer renderer;
+            private GeoItemRenderer<?> renderer;
 
             @Override
             public GeoItemRenderer<?> getGeoItemRenderer() {
                 if (this.renderer == null) {
-                    this.renderer = new WandRenderer();
+                    this.renderer = ClientClassBridge.instantiate(
+                            "at.koopro.wizardsandbeasts.client.wand.WandRenderer",
+                            GeoItemRenderer.class,
+                            new Class<?>[0],
+                            new Object[0]);
                 }
                 return this.renderer;
             }
@@ -70,6 +76,20 @@ public class WandItem extends GeoItemBase {
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
         if (!WandModuleHooks.isWandsEnabled()) {
             return InteractionResult.FAIL;
+        }
+        ItemStack stack = player.getItemInHand(hand);
+        if (!level.isClientSide()) {
+            Optional<UUID> master = WandComponents.getMaster(stack);
+            if (master.isEmpty()) {
+                float score = WandResonanceSystem.computeResonance(player, stack, level.registryAccess());
+                WandResonanceSystem.applyResonance(player, stack, score, level.registryAccess());
+                return InteractionResult.SUCCESS;
+            }
+            if (master.get().equals(player.getUUID())) {
+                // Spell system (future): dispatch cast event from here when not using beam channel.
+            } else {
+                player.displayClientMessage(Component.translatable("wandcraft.resonance.notYourWand"), true);
+            }
         }
         player.startUsingItem(hand);
         return InteractionResult.CONSUME;
@@ -96,10 +116,16 @@ public class WandItem extends GeoItemBase {
     @Override
     public boolean releaseUsing(ItemStack stack, Level level, LivingEntity entity, int timeLeft) {
         if (!level.isClientSide() && entity instanceof ServerPlayer sp) {
+            int holdTicks = Math.max(0, getUseDuration(stack, entity) - timeLeft);
+            WandCastTiming.recordRelease(sp, holdTicks);
             WandBeamChannelLogic.endChannel(sp);
         }
         if (level.isClientSide()) {
-            ClientPacketDistributor.sendToServer(new SpellCastC2SPacket());
+            if (!ClientClassBridge.callStaticBoolean(
+                    "at.koopro.wizardsandbeasts.client.wand.WandCastClient",
+                    "tryOpenImperioCommandMenu")) {
+                ClientPacketDistributor.sendToServer(new SpellCastC2SPacket());
+            }
         }
         return true;
     }
@@ -116,17 +142,23 @@ public class WandItem extends GeoItemBase {
         WandFlexibility flexibility = WandComponents.getFlexibility(stack);
         Optional<UUID> master = WandComponents.getMaster(stack);
 
-        tooltipAdder.accept(Component.literal("Wood: " + readableId(wood)).withStyle(ChatFormatting.GOLD));
-        tooltipAdder.accept(Component.literal("Core: " + readableId(core)).withStyle(ChatFormatting.LIGHT_PURPLE));
-        tooltipAdder.accept(Component.literal("Flexibility: " + (flexibility == null ? "unknown" : flexibility.getSerializedName()))
-                .withStyle(ChatFormatting.GRAY));
+        tooltipAdder.accept(Component.translatable("wandcraft.tooltip.wood", readableId(wood)).withStyle(ChatFormatting.GOLD));
+        tooltipAdder.accept(Component.translatable("wandcraft.tooltip.core", readableId(core)).withStyle(ChatFormatting.LIGHT_PURPLE));
+        tooltipAdder.accept(Component.translatable("wandcraft.tooltip.flexibility",
+                flexibility == null ? "?" : flexibility.getSerializedName()).withStyle(ChatFormatting.GRAY));
         if (master.isPresent()) {
-            tooltipAdder.accept(Component.literal("Master: " + master.get()).withStyle(ChatFormatting.AQUA));
+            tooltipAdder.accept(Component.translatable("wandcraft.tooltip.master", master.get().toString())
+                    .withStyle(ChatFormatting.AQUA));
         }
-        tooltipAdder.accept(Component.literal(String.format(Locale.ROOT, "Integrity: %.2f", WandComponents.getIntegrity(stack)))
+        tooltipAdder.accept(Component.translatable("wandcraft.tooltip.integrity", WandComponents.getIntegrity(stack))
                 .withStyle(ChatFormatting.GREEN));
-        tooltipAdder.accept(Component.literal(String.format(Locale.ROOT, "Corruption: %.2f", WandComponents.getCorruption(stack)))
+        tooltipAdder.accept(Component.translatable("wandcraft.tooltip.corruption", WandComponents.getCorruption(stack))
                 .withStyle(ChatFormatting.DARK_RED));
+        Float len = WandComponents.getLength(stack);
+        tooltipAdder.accept(Component.translatable("wandcraft.tooltip.length_in", len == null ? 0.0f : len)
+                .withStyle(ChatFormatting.BLUE));
+        tooltipAdder.accept(Component.translatable("wandcraft.tooltip.allegiance", WandComponents.getAllegianceScore(stack))
+                .withStyle(ChatFormatting.DARK_GREEN));
     }
 
     private static String readableId(Identifier id) {
@@ -163,6 +195,7 @@ public class WandItem extends GeoItemBase {
             }
             stack.set(WandComponents.WAND_LENGTH.get(), inches);
         }
+        ModDataComponents.refreshElderWandMarker(stack);
         return stack;
     }
 }

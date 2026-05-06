@@ -87,6 +87,8 @@ public class ModLanguageProvider extends LanguageProvider {
         add("key.wizards_and_beasts.spell_left", "Spell Slot Left");
         add("key.wizards_and_beasts.spell_menu", "Spell Menu");
         add("key.wizards_and_beasts.skill_menu", "Skill Tree");
+        add("key.wizards_and_beasts.apparate", "Apparate");
+        add("key.wizards_and_beasts.legilimency", "Legilimency");
         add("key.wizards_and_beasts.obscurial_toggle", "Toggle Obscurial Form");
         add("key.wizards_and_beasts.obscurial_stress_vent", "Obscurial Stress Vent");
         add("screen.wizards_and_beasts.skill_tree.title", "Skills");
@@ -142,6 +144,8 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.wizards_and_beasts.sickle.desc", "A silver wizarding coin of medium value.");
         add("item.wizards_and_beasts.galleon", "Galleon");
         add("item.wizards_and_beasts.galleon.desc", "A gold wizarding coin of high value.");
+        add("item.wizards_and_beasts.counterfeit_galleon", "Counterfeit Galleon");
+        add("item.wizards_and_beasts.counterfeit_galleon.tooltip", "A counterfeit Galleon. Gringotts enchantments render this coin worthless - it will be refused by any legitimate vendor.");
         add("item.wizards_and_beasts.leprechaun_gold", "Leprechaun Gold");
         add("item.wizards_and_beasts.leprechaun_gold.desc", "Shimmering coinage that fades after a short while.");
         add("item.wizards_and_beasts.dragot", "Dragot");
@@ -172,6 +176,8 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.wizards_and_beasts.brew.desc", "A bottled brew infused with custom potion effects.");
         add("item.wizards_and_beasts.butterbeer", "Butterbeer");
         add("item.wizards_and_beasts.butterbeer.desc", "Sweet wizarding drink with a mild restorative kick.");
+        add("item.wizards_and_beasts.conjured_spoiled_food", "Conjured Spoiled Food");
+        add("item.wizards_and_beasts.conjured_spoiled_food.tooltip", "This food was conjured against Gamp's Law. It is inedible and will spoil if not disposed of.");
         add("item.wizards_and_beasts.pumpkin_juice", "Pumpkin Juice");
         add("item.wizards_and_beasts.pumpkin_juice.desc", "A hearty pumpkin drink to restore hunger.");
         add("item.wizards_and_beasts.chocolate_frog", "Chocolate Frog");
@@ -247,6 +253,11 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.wizards_and_beasts.extendable_ears.desc", "Magical ears used for sneaky long-range listening.");
         add("item.wizards_and_beasts.floo_powder", "Floo Powder");
         add("item.wizards_and_beasts.floo_powder.desc", "Teleportation powder used with connected Floo networks.");
+        add("gamps_law.wizards_and_beasts.food_conjuration", "Gamp's Law forbids conjuring food from nothing. Magic can only duplicate what already exists.");
+        add("gamps_law.wizards_and_beasts.currency_conjuration", "The goblins of Gringotts have long ensured that wizarding coin cannot be conjured. This spell yields only worthless imitation.");
+        add("gamps_law.wizards_and_beasts.life_creation", "To create life is beyond the reach of magic. Even the darkest wizard cannot overrule this law.");
+        add("gamps_law.wizards_and_beasts.love_conjuration", "Love cannot be conjured. What this magic can imitate is obsession, and obsession is not love.");
+        add("gamps_law.wizards_and_beasts.information_genesis", "Magic cannot conjure knowledge that has no source in the world.");
 
         // Wizarding World — blocks
         add("block.wizards_and_beasts.devils_snare", "Devil's Snare");

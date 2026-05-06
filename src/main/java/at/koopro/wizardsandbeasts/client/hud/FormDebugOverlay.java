@@ -12,7 +12,7 @@ import net.minecraft.resources.Identifier;
 
 /**
  * Debug HUD overlay showing the local player's form, size, and hitbox info.
- * Toggled via {@code /WizardsAndBeastsMod debug wizmorph debug <player> on|off}.
+ * Toggled via {@code /WizardsAndBeastsMod debug morph debug <player> on|off}.
  */
 public final class FormDebugOverlay {
 

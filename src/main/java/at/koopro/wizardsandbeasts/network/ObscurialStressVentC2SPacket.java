@@ -1,10 +1,10 @@
 package at.koopro.wizardsandbeasts.network;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.data.PlayerTypeData;
+import at.koopro.wizardsandbeasts.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.type.ObscurialRules;
-import at.koopro.wizardsandbeasts.type.WizType;
+import at.koopro.wizardsandbeasts.type.Heritage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
@@ -31,8 +31,8 @@ public record ObscurialStressVentC2SPacket() implements CustomPacketPayload {
     public static void handle(ObscurialStressVentC2SPacket pkt, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
             if (!(ctx.player() instanceof ServerPlayer player)) return;
-            PlayerTypeData data = player.getData(ModAttachments.TYPE_DATA.get());
-            if (data.getSelectedType() != WizType.OBSCURIAL) return;
+            PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
+            if (data.getSelectedHeritage() != Heritage.OBSCURIAL) return;
             if (ObscurialRules.isDarkForm(data)) return;
 
             long now = player.level().getGameTime();
@@ -50,7 +50,7 @@ public record ObscurialStressVentC2SPacket() implements CustomPacketPayload {
             player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS,
                     ObscurialRules.getStressVentDrawbackTicks(), 0, false, true, true));
             player.displayClientMessage(Component.literal("\u00A7dYou vent obscurus strain, but feel drained."), true);
-            TypeDataSyncS2CPacket.syncToPlayer(player, false);
+            HeritageDataSyncS2CPacket.syncToPlayer(player, false);
         });
     }
 }

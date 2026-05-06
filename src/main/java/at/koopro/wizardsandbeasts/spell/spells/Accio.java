@@ -21,4 +21,9 @@ public class Accio extends Spell {
     protected SpellRequirement buildRequirement() {
         return SpellRequirement.knows(Spells.WINGARDIUM_LEVIOSA);
     }
+
+    @Override
+    public float getProjectileSpeed() {
+        return 2.0f;
+    }
 }

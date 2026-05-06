@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.spell.def;
 
 import at.koopro.wizardsandbeasts.spell.CastType;
 import at.koopro.wizardsandbeasts.spell.SpellCategory;
+import at.koopro.wizardsandbeasts.spell.SpellFamily;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
@@ -153,6 +154,8 @@ class SpellDefinitionCodecTest {
         SpellDefinition episkey = parseFile("src/main/resources/data/wizards_and_beasts/wizards_and_beasts/spells/episkey.json");
         SpellDefinition frigora = parseFile("src/main/resources/data/wizards_and_beasts/wizards_and_beasts/spells/frigora.json");
         SpellDefinition levicorpus = parseFile("src/main/resources/data/wizards_and_beasts/wizards_and_beasts/spells/levicorpus.json");
+        SpellDefinition finiteIncantatem = parseFile(
+                "src/main/resources/data/wizards_and_beasts/wizards_and_beasts/spells/finite_incantatem.json");
 
         assertEquals(CastType.SELF, episkey.castType());
         assertEquals(0, episkey.selfEffects().size());
@@ -165,6 +168,13 @@ class SpellDefinitionCodecTest {
         assertEquals(CastType.TARGETED, levicorpus.castType());
         assertEquals(0, levicorpus.targetEffects().size());
         assertTrue(levicorpus.sound().isPresent());
+
+        assertEquals(CastType.TARGETED, finiteIncantatem.castType());
+        assertEquals(40, finiteIncantatem.cooldownTicks());
+        assertEquals(SpellCategory.UTILITY, finiteIncantatem.category());
+        assertEquals(Optional.of(SpellFamily.LIGHT), finiteIncantatem.spellFamily());
+        assertEquals(0, finiteIncantatem.targetEffects().size());
+        assertTrue(finiteIncantatem.sound().isPresent());
     }
 
     private static SpellDefinition parse(String json) {

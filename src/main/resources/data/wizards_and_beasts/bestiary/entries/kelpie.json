@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:kelpie",
+  "displayName": "bestiary.wizards_and_beasts.kelpie.name",
+  "category": "AQUATIC",
+  "mmRating": 4,
+  "habitat": "bestiary.wizards_and_beasts.kelpie.habitat",
+  "size": "LARGE",
+  "shortLore": "bestiary.wizards_and_beasts.kelpie.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.kelpie.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.kelpie.ability.1",
+    "bestiary.wizards_and_beasts.kelpie.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.kelpie.threat.1",
+    "bestiary.wizards_and_beasts.kelpie.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.kelpie.weakness.1",
+    "bestiary.wizards_and_beasts.kelpie.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/kelpie.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/kelpie.png",
+  "sortOrder": 53
+}

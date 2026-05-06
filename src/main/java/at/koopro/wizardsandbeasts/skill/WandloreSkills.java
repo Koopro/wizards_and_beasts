@@ -56,4 +56,13 @@ final class WandloreSkills {
             .effect(new SkillEffect.CategoryCooldownReduction(SpellCategory.COMBAT, 0.10f))
             .position(3, 1)
             .build());
+
+    static final Skill APPARITION_TRAINING = SkillTrees.register(Skill.builder("apparition_training", "Apparition Training")
+            .tree(SkillTreeId.WANDLORE).cost(5)
+            .description("Undergo formal apparition training and gain license-level control.")
+            .prerequisite("wand_mastery")
+            .effect(new SkillEffect.UnlockAbility("apparition_training"))
+            .effect(new SkillEffect.CategoryCooldownReduction(SpellCategory.UTILITY, 0.05f))
+            .position(4, 1)
+            .build());
 }

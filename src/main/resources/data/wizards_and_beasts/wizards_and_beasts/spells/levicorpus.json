@@ -14,5 +14,9 @@
   "requirement": {
     "type": "knows",
     "prerequisiteId": "wingardium_leviosa"
+  },
+  "learning": {
+    "masterySpellId": "wingardium_leviosa",
+    "minMasteryTier": "proficient"
   }
 }

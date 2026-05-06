@@ -24,4 +24,14 @@ public class Aguamenti extends Spell {
     protected SpellRequirement buildRequirement() {
         return SpellRequirement.knows(Spells.LUMOS);
     }
+
+    @Override
+    public float getProjectileSpeed() {
+        return 1.3f;
+    }
+
+    @Override
+    public float getProjectileSpread() {
+        return 0.08f;
+    }
 }

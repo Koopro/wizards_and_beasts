@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.spell;
 
+import at.koopro.wizardsandbeasts.registry.ModSounds;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -253,7 +255,8 @@ public final class SpellHelper {
     /** Common impact burst + soft impact sound for world interactions. */
     public static void playSpellImpact(ServerLevel level, Vec3 pos, int color) {
         spawnBurst(level, pos, color, 10, 0.18);
-        level.playSound(null, BlockPos.containing(pos), SoundEvents.AMETHYST_BLOCK_HIT, SoundSource.PLAYERS, 0.22f, 1.4f);
+        level.playSound(null, BlockPos.containing(pos), ModSounds.SPELL_IMPACT_GENERIC.get(), SoundSource.PLAYERS,
+                0.22f, 1.05f + level.random.nextFloat() * 0.12f);
     }
 
     public static BlockHitResult raycastFromCaster(ServerLevel level, ServerPlayer caster, Vec3 start, Vec3 end,
@@ -356,7 +359,9 @@ public final class SpellHelper {
             affected++;
         }
         if (affected > 0) {
-            playSpellImpact(level, center, spell.getColor());
+            spawnBurst(level, spell, center, 10, 0.18);
+            level.playSound(null, BlockPos.containing(center), ModSounds.SPELL_IMPACT_STUPEFY.get(), SoundSource.PLAYERS,
+                    0.38f, 1.03f + level.random.nextFloat() * 0.1f);
         }
         return affected;
     }
@@ -373,6 +378,8 @@ public final class SpellHelper {
     }
 
     public static void applyProtegoCastPulse(ServerLevel level, ServerPlayer caster, Spell spell) {
+        level.playSound(null, caster.blockPosition(), ModSounds.PROTEGO_RAISE.get(), SoundSource.PLAYERS,
+                0.88f, 1.0f + level.random.nextFloat() * 0.12f);
         Vec3 center = caster.getBoundingBox().getCenter();
         AABB area = caster.getBoundingBox().inflate(3.0);
         for (Entity e : level.getEntities(caster, area, entity -> entity instanceof Projectile || entity instanceof LivingEntity)) {
@@ -388,7 +395,7 @@ public final class SpellHelper {
                 level.removeBlock(p, false);
             }
         }
-        playSpellImpact(level, center, spell.getColor());
+        spawnBurst(level, spell, center, 12, 0.2);
     }
 
     public static void applyArrestoAreaStabilize(ServerLevel level, ServerPlayer caster, Spell spell) {
@@ -478,10 +485,14 @@ public final class SpellHelper {
     private static void splash(ServerLevel level, BlockPos pos, Spell spell) {
         Vec3 c = pos.getCenter();
         level.sendParticles(ParticleTypes.SPLASH, c.x, c.y, c.z, 10, 0.25, 0.1, 0.25, 0.0);
-        spawnBurst(level, c, spell.getColor(), 8, 0.2);
+        spawnBurst(level, spell, c, 8, 0.2);
     }
 
     // ── Particles ───────────────────────────────────────────────────────
+
+    public static void spawnBeam(ServerLevel level, Spell spell, Vec3 from, Vec3 to) {
+        SpellParticles.spawnBeam(level, spell, from, to);
+    }
 
     /**
      * Spawns a colored particle beam between two points.
@@ -490,12 +501,25 @@ public final class SpellHelper {
         SpellParticles.spawnBeam(level, from, to, argbColor);
     }
 
+    public static void spawnTrail(ServerLevel level, Spell spell, Vec3 position, Vec3 motion, int segments) {
+        SpellParticles.spawnTrail(level, spell, position, motion, segments);
+    }
+
     /**
      * Spawns a short colored particle trail behind a moving entity/projectile.
      */
     public static void spawnTrail(ServerLevel level, Vec3 position, Vec3 motion,
                                    int argbColor, int segments) {
         SpellParticles.spawnTrail(level, position, motion, argbColor, segments);
+    }
+
+    public static void spawnBurst(ServerLevel level, Spell spell, Vec3 pos, int count, double spread) {
+        SpellParticles.spawnBurst(level, spell, pos, count, spread);
+    }
+
+    public static void spawnBurst(ServerLevel level, SpellFamily family, int argb, Vec3 pos, int count,
+                                  double spread) {
+        SpellParticles.spawnBurst(level, family, argb, pos, count, spread);
     }
 
     /**

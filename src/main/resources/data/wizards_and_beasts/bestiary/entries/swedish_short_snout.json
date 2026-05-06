@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:swedish_short_snout",
+  "displayName": "bestiary.wizards_and_beasts.swedish_short_snout.name",
+  "category": "DRAGON",
+  "mmRating": 4,
+  "habitat": "bestiary.wizards_and_beasts.swedish_short_snout.habitat",
+  "size": "ENORMOUS",
+  "shortLore": "bestiary.wizards_and_beasts.swedish_short_snout.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.swedish_short_snout.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.swedish_short_snout.ability.1",
+    "bestiary.wizards_and_beasts.swedish_short_snout.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.swedish_short_snout.threat.1",
+    "bestiary.wizards_and_beasts.swedish_short_snout.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.swedish_short_snout.weakness.1",
+    "bestiary.wizards_and_beasts.swedish_short_snout.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/swedish_short_snout.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/swedish_short_snout.png",
+  "sortOrder": 8
+}

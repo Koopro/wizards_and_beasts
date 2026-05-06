@@ -33,6 +33,7 @@ final class BroomImpacts {
         }
 
         if (impactSeverity >= BroomTuning.MODERATE_IMPACT_THRESHOLD) {
+            b.applyDurabilityDamage(2);
             b.currentSpeed *= BroomTuning.MODERATE_SPEED_DAMPING;
             b.setDeltaMovement(b.getDeltaMovement().scale(0.55).add(0, BroomTuning.MODERATE_BUMP_Y, 0));
             if (rider != null) {
@@ -43,6 +44,7 @@ final class BroomImpacts {
         }
 
         if (impactSeverity >= BroomTuning.MINOR_IMPACT_THRESHOLD) {
+            b.applyDurabilityDamage(1);
             b.currentSpeed *= BroomTuning.MINOR_SPEED_DAMPING;
             b.setDeltaMovement(b.getDeltaMovement().scale(0.78).add(0, BroomTuning.MINOR_BUMP_Y, 0));
         }
@@ -50,6 +52,7 @@ final class BroomImpacts {
 
     static void handleCrash(BroomEntity b, float impactSeverity) {
         if (!(b.level() instanceof ServerLevel serverLevel)) return;
+        b.applyDurabilityDamage(3);
 
         LivingEntity rider = b.getControllingPassenger();
 

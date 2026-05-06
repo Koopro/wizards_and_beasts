@@ -19,6 +19,27 @@ public class Incendio extends Spell {
 
     @Override
     protected SpellRequirement buildRequirement() {
+        // TODO(effects): Apply ModEffects.SECTUMSEMPRA_BLEED from the future Sectumsempra spell.
         return SpellRequirement.proficiency(Spells.STUPEFY, Proficiency.PROFICIENT);
+    }
+
+    @Override
+    public int getBaseEffectDurationTicks() {
+        return 100;
+    }
+
+    @Override
+    public float getProjectileSpeed() {
+        return 1.4f;
+    }
+
+    @Override
+    public float getProjectileSpread() {
+        return 0.06f;
+    }
+
+    @Override
+    public float getBaseKnockback() {
+        return 0.2f;
     }
 }

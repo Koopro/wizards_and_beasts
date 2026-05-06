@@ -2,8 +2,8 @@ package at.koopro.wizardsandbeasts.command;
 
 import at.koopro.wizardsandbeasts.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.item.WandItem;
-import at.koopro.wizardsandbeasts.network.SpellDataSyncS2CPacket;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
+import at.koopro.wizardsandbeasts.sync.PlayerStateSyncService;
 
 import at.koopro.wizardsandbeasts.spell.Proficiency;
 import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
@@ -34,6 +34,10 @@ public final class SpellCommands {
     private SpellCommands() {
     }
 
+    /**
+     * Spell progression commands: self-service {@code learn}, {@code forget}, {@code list}, and {@code info};
+     * gamemaster-only {@code reset} and {@code learnall}.
+     */
     public static LiteralArgumentBuilder<CommandSourceStack> registerSpellCommand() {
         return Commands.literal("spell")
                 .then(Commands.literal("learn")
@@ -97,7 +101,7 @@ public final class SpellCommands {
         }
 
         data.learnSpell(spellId);
-        SpellDataSyncS2CPacket.syncToPlayer(player);
+        PlayerStateSyncService.syncSpells(player);
         player.displayClientMessage(Component.literal("\u00A7aLearned " + spell.getDisplayName() + "!"), false);
         return 1;
     }
@@ -111,7 +115,7 @@ public final class SpellCommands {
 
         PlayerSpellData data = player.getData(ModAttachments.SPELL_DATA.get());
         data.forgetSpell(spellId);
-        SpellDataSyncS2CPacket.syncToPlayer(player);
+        PlayerStateSyncService.syncSpells(player);
         player.displayClientMessage(Component.literal("\u00A7eForgot " + spell.getDisplayName() + "."), false);
         return 1;
     }
@@ -191,7 +195,7 @@ public final class SpellCommands {
 
         SpellRequirement req = spell.getRequirement();
         if (req != null && req != SpellRequirement.NONE) {
-            boolean met = req.isMet(data);
+            boolean met = req.isMet(player, data);
             String reqColor = met ? "\u00A7a" : "\u00A7c";
             player.displayClientMessage(Component.literal("\u00A77Requirement: "
                     + reqColor + req.getDescription()), false);
@@ -229,7 +233,7 @@ public final class SpellCommands {
     private static int resetSpells(ServerPlayer player) {
         PlayerSpellData data = player.getData(ModAttachments.SPELL_DATA.get());
         data.resetAll();
-        SpellDataSyncS2CPacket.syncToPlayer(player);
+        PlayerStateSyncService.syncSpells(player);
         player.displayClientMessage(Component.literal("\u00A7eAll spell knowledge has been reset."), false);
         return 1;
     }
@@ -239,7 +243,7 @@ public final class SpellCommands {
         for (Spell spell : Spells.all()) {
             data.learnSpell(spell.getId());
         }
-        SpellDataSyncS2CPacket.syncToPlayer(player);
+        PlayerStateSyncService.syncSpells(player);
         player.displayClientMessage(Component.literal("\u00A7aLearned all " + Spells.count() + " spells!"), false);
         return 1;
     }

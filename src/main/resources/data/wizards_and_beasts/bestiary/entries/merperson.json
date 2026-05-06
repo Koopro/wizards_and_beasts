@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:merperson",
+  "displayName": "bestiary.wizards_and_beasts.merperson.name",
+  "category": "AQUATIC",
+  "mmRating": 3,
+  "habitat": "bestiary.wizards_and_beasts.merperson.habitat",
+  "size": "MEDIUM",
+  "shortLore": "bestiary.wizards_and_beasts.merperson.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.merperson.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.merperson.ability.1",
+    "bestiary.wizards_and_beasts.merperson.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.merperson.threat.1",
+    "bestiary.wizards_and_beasts.merperson.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.merperson.weakness.1",
+    "bestiary.wizards_and_beasts.merperson.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/merperson.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/merperson.png",
+  "sortOrder": 51
+}

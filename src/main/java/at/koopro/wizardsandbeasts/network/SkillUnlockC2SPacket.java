@@ -69,9 +69,8 @@ public record SkillUnlockC2SPacket(String skillId) implements CustomPacketPayloa
             if (SkillSystemAPI.tryUnlock(player, safeSkillId)) {
                 ChatHelper.sendSuccess(player, "Unlocked " + skill.getDisplayName() + "!");
 
-                // Sync both skill data and spell data (in case a spell was learned)
+                // Skill unlock no longer grants spells directly; skill sync is sufficient.
                 SkillDataSyncS2CPacket.syncToPlayer(player);
-                SpellDataSyncS2CPacket.syncToPlayer(player);
             }
         });
     }

@@ -1,25 +1,33 @@
 package at.koopro.wizardsandbeasts.spell.cast;
 
 import at.koopro.wizardsandbeasts.Config;
+import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.command.debug.DebugHooks;
 import at.koopro.wizardsandbeasts.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.network.SpellDataDeltaS2CPacket;
 import at.koopro.wizardsandbeasts.network.SpellNetworkGuards;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
+import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.spell.JsonSpell;
 import at.koopro.wizardsandbeasts.spell.Spell;
 import at.koopro.wizardsandbeasts.spell.SpellExecutor;
+import at.koopro.wizardsandbeasts.spell.proficiency.ProficiencyScaler;
+import at.koopro.wizardsandbeasts.spell.gamp.GampViolationEvent;
+import at.koopro.wizardsandbeasts.spell.gamp.GampsLaw;
 import at.koopro.wizardsandbeasts.spell.Spells;
 import at.koopro.wizardsandbeasts.wand.cast.WandAllegianceSystem;
 import at.koopro.wizardsandbeasts.wand.cast.WandStats;
 import at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver;
 import at.koopro.wizardsandbeasts.type.ObscurialRules;
 import at.koopro.wizardsandbeasts.util.WandHelper;
+import at.koopro.wizardsandbeasts.wand.WandComponents;
 import com.mojang.logging.LogUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.resources.Identifier;
+import net.neoforged.neoforge.common.NeoForge;
 import org.slf4j.Logger;
 
 public final class SpellCastService {
@@ -28,57 +36,79 @@ public final class SpellCastService {
 
     private SpellCastService() {}
 
-    public static void completeWandCastRelease(ServerPlayer player) {
+    public static CastResult completeWandCastRelease(ServerPlayer player) {
         if (!(player.level() instanceof ServerLevel serverLevel)) {
             debugReject(player, SpellRejectCodes.NOT_SERVER_LEVEL);
-            return;
+            return CastResult.REJECTED;
         }
 
         if (!WandHelper.isHoldingWand(player)) {
             rejectWithHumanStress(player, SpellRejectCodes.NOT_HOLDING_WAND);
-            return;
+            return CastResult.REJECTED;
+        }
+        if (player.hasEffect(ModEffects.LANGLOCK)) {
+            rejectWithHumanStress(player, SpellRejectCodes.LANGLOCKED);
+            return CastResult.REJECTED;
+        }
+        float mental = player.getData(ModAttachments.MENTAL_STABILITY.get());
+        if (mental <= 10f && serverLevel.random.nextFloat() < 0.20f) {
+            rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.REQUIREMENTS_UNMET, "mental_misfire"));
+            player.displayClientMessage(Component.literal("\u00A75Your mind falters; the spell misfires."), true);
+            return CastResult.REJECTED;
+        }
+
+        var bondCheckStack = WandHelper.getWandStack(player);
+        if (!WandHelper.isWandBondedTo(player, bondCheckStack)) {
+            if (WandComponents.getMaster(bondCheckStack).isEmpty()) {
+                rejectWithHumanStress(player, SpellRejectCodes.WAND_NOT_BONDED);
+                player.displayClientMessage(Component.translatable("wandcraft.cast.requires_bond"), true);
+            } else {
+                rejectWithHumanStress(player, SpellRejectCodes.WAND_WRONG_MASTER);
+                player.displayClientMessage(Component.translatable("wandcraft.cast.wrong_master"), true);
+            }
+            return CastResult.REJECTED;
         }
 
         PlayerSpellData data = player.getData(ModAttachments.SPELL_DATA.get());
         if (!SpellNetworkGuards.canUseWand(player, data, "cast")) {
             applyHumanFailedCastStress(player);
-            return;
+            return CastResult.REJECTED;
         }
         String spellId = data.getActiveSpellId();
         if (spellId == null) {
             rejectWithHumanStress(player, SpellRejectCodes.NO_ACTIVE_SPELL);
-            return;
+            return CastResult.REJECTED;
         }
 
         Spell spell = Spells.byId(spellId);
         if (spell == null) {
             rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.UNKNOWN_SPELL, spellId));
-            return;
+            return CastResult.REJECTED;
         }
 
         if (!data.knowsSpell(spellId)) {
             rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.SPELL_NOT_KNOWN, spellId));
-            return;
+            return CastResult.REJECTED;
         }
         if (ObscurialRules.isObscurialAbility(spell)) {
             rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.ABILITY_REQUIRES_ABILITY_INPUT, spellId));
             player.displayClientMessage(Component.literal("\u00A75Use Obscurial ability keys (N/M) while in obscurus form."), true);
-            return;
+            return CastResult.REJECTED;
         }
 
-        if (Config.enforceSpellRequirements && !spell.getRequirement().isMet(data)) {
+        if (Config.enforceSpellRequirements && !spell.getRequirement().isMet(player, data)) {
             rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.REQUIREMENTS_UNMET, spellId));
             player.displayClientMessage(
                     Component.literal("\u00A7c" + spell.getRequirement().getDescription()),
                     true);
-            return;
+            return CastResult.REJECTED;
         }
 
-        boolean obscurialDark = ObscurialRules.isDarkForm(player.getData(ModAttachments.TYPE_DATA.get()));
+        boolean obscurialDark = ObscurialRules.isDarkForm(player.getData(ModAttachments.HERITAGE_DATA.get()));
         if (ObscurialRules.isDarkFormOnlySpell(spell) && !obscurialDark) {
             rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.OBSCURIAL_DARK_ONLY_OUTSIDE_FORM, spellId));
             player.displayClientMessage(Component.literal("\u00A75This obscurus ability can only be cast in dark form."), true);
-            return;
+            return CastResult.REJECTED;
         }
 
         if (obscurialDark && !ObscurialRules.isSpellAllowedInDarkForm(spell)) {
@@ -88,7 +118,7 @@ public final class SpellCastService {
             player.displayClientMessage(
                     Component.literal("\u00A75Obscurus rejects that spell and lashes back."),
                     true);
-            return;
+            return CastResult.REJECTED;
         }
 
         long currentTick = serverLevel.getGameTime();
@@ -102,7 +132,7 @@ public final class SpellCastService {
                             .append(Component.literal(String.format("%.1fs", Math.max(0f, remainingSec)))
                                     .withStyle(ChatFormatting.RED)),
                     true);
-            return;
+            return CastResult.REJECTED;
         }
 
         var wandStack = WandHelper.getWandStack(player);
@@ -116,9 +146,16 @@ public final class SpellCastService {
                 spell.getProficiency(player));
         castContext = castContext.withAllegiance(WandAllegianceSystem.resolve(wandStack));
         castContext = castContext.withCompatibility(WandAllegianceSystem.applyLayer(castContext, serverLevel));
+        Identifier spellKey;
+        try {
+            spellKey = Identifier.parse(spell.getId());
+        } catch (Exception ignored) {
+            spellKey = Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, spell.getId());
+        }
+        castContext = castContext.withScalingProfile(ProficiencyScaler.getProfileForPlayer(player, spellKey));
 
         long collapseInstabilityUntil = parseLong(
-                player.getData(ModAttachments.TYPE_DATA.get()).getFlag(FLAG_COLLAPSE_CAST_INSTABILITY_UNTIL), 0L);
+                player.getData(ModAttachments.HERITAGE_DATA.get()).getFlag(FLAG_COLLAPSE_CAST_INSTABILITY_UNTIL), 0L);
         if (serverLevel.getGameTime() < collapseInstabilityUntil) {
             if (serverLevel.random.nextFloat() < ObscurialRules.getCollapseCastFizzleChance()) {
                 float backlash = ObscurialRules.getCollapseCastBacklashDamage();
@@ -127,7 +164,7 @@ public final class SpellCastService {
                 }
                 debugReject(player, SpellRejectCodes.withDetail(SpellRejectCodes.COLLAPSE_INSTABILITY_FIZZLE, spellId));
                 player.displayClientMessage(Component.literal("\u00A75Residual obscurus instability disrupts your spell."), true);
-                return;
+                return CastResult.REJECTED;
             }
         }
 
@@ -140,7 +177,24 @@ public final class SpellCastService {
             }
             ObscurialRules.consumeCastSpike(player);
             player.displayClientMessage(Component.literal("\u00A74Your obscurus destabilizes the cast and backlashes."), true);
-            return;
+            return CastResult.REJECTED;
+        }
+
+        GampsLaw.Violation violation = GampsLaw.validate(castContext);
+        if (violation != null) {
+            GampViolationEvent event = new GampViolationEvent(player, violation, castContext);
+            if (!NeoForge.EVENT_BUS.post(event).isCanceled()) {
+                if (violation.isHardReject()) {
+                    player.displayClientMessage(violation.loreMessage().copy().withStyle(ChatFormatting.GOLD), true);
+                    DebugHooks.logSpellCast(player, "cast_gamp_reject", violation.domain().name());
+                    return CastResult.GAMP_REJECTED;
+                }
+                player.displayClientMessage(
+                        violation.loreMessage().copy().withStyle(ChatFormatting.YELLOW, ChatFormatting.ITALIC),
+                        true);
+                castContext = castContext.withGampPenalty(violation.domain());
+                DebugHooks.logSpellCast(player, "cast_gamp_penalty", violation.domain().name());
+            }
         }
 
         try {
@@ -149,11 +203,15 @@ public final class SpellCastService {
         } catch (Exception ex) {
             LOGGER.error("Spell cast failed for player '{}' spell '{}'", player.getName().getString(), spellId, ex);
             DebugHooks.logSpellCast(player, "cast_exception", spellId);
-            return;
+            return CastResult.REJECTED;
         }
 
         float cooldownMult = castContext.modifiers().finalCooldown();
-        int cooldown = Math.max(1, (int)(spell.getBaseCooldownTicks() * cooldownMult));
+        cooldownMult *= castContext.scalingProfile().cooldownMult();
+        int baseCooldown = spell.getBaseCooldownTicks();
+        int cooldown = Math.max(1, Math.round(baseCooldown * cooldownMult));
+        int reductionFloor = Math.max(1, Math.round(baseCooldown * 0.5f));
+        cooldown = Math.max(cooldown, reductionFloor);
         long expiryTick = currentTick + cooldown;
         data.setCooldown(spellId, expiryTick);
         data.incrementCastCount(spellId);
@@ -161,6 +219,7 @@ public final class SpellCastService {
         ObscurialRules.consumeCastSpike(player);
 
         SpellDataDeltaS2CPacket.sendTo(player, spellId, expiryTick, newCount, data.getSuccessfulHits(spellId));
+        return CastResult.SUCCESS;
     }
 
     private static void debugReject(ServerPlayer player, String reason) {
@@ -177,7 +236,7 @@ public final class SpellCastService {
     }
 
     private static void applyHumanFailedCastStress(ServerPlayer player) {
-        var typeData = player.getData(ModAttachments.TYPE_DATA.get());
+        var typeData = player.getData(ModAttachments.HERITAGE_DATA.get());
         if (!ObscurialRules.isObscurial(typeData)) return;
         if (ObscurialRules.isDarkForm(typeData)) return;
         ObscurialRules.applyHumanFailedCastStressSpike(player);

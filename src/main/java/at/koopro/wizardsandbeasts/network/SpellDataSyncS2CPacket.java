@@ -36,6 +36,7 @@ public record SpellDataSyncS2CPacket(
         Map<String, Long> cooldowns,
         Map<String, Integer> castCounts,
         Map<String, Integer> successfulHits,
+        Map<String, Float> spellProficiencies,
         Map<String, Integer> rejectCounts,
         int syncCorrections) implements CustomPacketPayload {
     private static final AtomicInteger NEXT_SYNC_VERSION = new AtomicInteger();
@@ -85,6 +86,13 @@ public record SpellDataSyncS2CPacket(
                 int hits = PacketCodecUtils.clampNonNegative(buf.readInt());
                 successfulHits.put(id, hits);
             }
+            int profCount = PacketCodecUtils.readBoundedCount(buf, PacketCodecUtils.MAX_CAST_COUNTS, "spell-proficiencies");
+            Map<String, Float> spellProficiencies = new HashMap<>(Math.max(8, profCount));
+            for (int i = 0; i < profCount; i++) {
+                String id = PacketCodecUtils.readString(buf);
+                float value = Math.max(0.0f, Math.min(1.0f, buf.readFloat()));
+                spellProficiencies.put(id, value);
+            }
 
             int rejectCount = PacketCodecUtils.readBoundedCount(buf, PacketCodecUtils.MAX_CAST_COUNTS, "reject-counts");
             Map<String, Integer> rejectCounts = new HashMap<>(Math.max(8, rejectCount));
@@ -103,6 +111,7 @@ public record SpellDataSyncS2CPacket(
                     cooldowns,
                     castCounts,
                     successfulHits,
+                    spellProficiencies,
                     rejectCounts,
                     syncCorrections);
         }
@@ -144,6 +153,11 @@ public record SpellDataSyncS2CPacket(
                 PacketCodecUtils.writeString(buf, e.getKey());
                 buf.writeInt(e.getValue());
             }
+            buf.writeInt(pkt.spellProficiencies.size());
+            for (Map.Entry<String, Float> e : pkt.spellProficiencies.entrySet()) {
+                PacketCodecUtils.writeString(buf, e.getKey());
+                buf.writeFloat(Math.max(0.0f, Math.min(1.0f, e.getValue())));
+            }
 
             buf.writeInt(pkt.rejectCounts.size());
             for (Map.Entry<String, Integer> e : pkt.rejectCounts.entrySet()) {
@@ -169,6 +183,7 @@ public record SpellDataSyncS2CPacket(
                 new HashMap<>(data.getCooldowns()),
                 new HashMap<>(data.getCastCounts()),
                 new HashMap<>(data.getSuccessfulHitCounts()),
+                new HashMap<>(data.getSpellProficiencies()),
                 new HashMap<>(data.getRejectCounts()),
                 data.getSyncCorrections());
     }

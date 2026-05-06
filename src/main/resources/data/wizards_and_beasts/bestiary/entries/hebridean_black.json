@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:hebridean_black",
+  "displayName": "bestiary.wizards_and_beasts.hebridean_black.name",
+  "category": "DRAGON",
+  "mmRating": 4,
+  "habitat": "bestiary.wizards_and_beasts.hebridean_black.habitat",
+  "size": "ENORMOUS",
+  "shortLore": "bestiary.wizards_and_beasts.hebridean_black.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.hebridean_black.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.hebridean_black.ability.1",
+    "bestiary.wizards_and_beasts.hebridean_black.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.hebridean_black.threat.1",
+    "bestiary.wizards_and_beasts.hebridean_black.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.hebridean_black.weakness.1",
+    "bestiary.wizards_and_beasts.hebridean_black.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/hebridean_black.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/hebridean_black.png",
+  "sortOrder": 9
+}

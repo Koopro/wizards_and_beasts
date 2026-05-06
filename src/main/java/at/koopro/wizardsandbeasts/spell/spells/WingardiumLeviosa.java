@@ -20,4 +20,9 @@ public class WingardiumLeviosa extends Spell {
     protected SpellRequirement buildRequirement() {
         return SpellRequirement.knows(Spells.LUMOS);
     }
+
+    @Override
+    public float getProjectileSpeed() {
+        return 0.0f;
+    }
 }

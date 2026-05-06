@@ -1,8 +1,8 @@
 package at.koopro.wizardsandbeasts.network;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.data.PlayerTypeData;
-import at.koopro.wizardsandbeasts.event.TypeEvents;
+import at.koopro.wizardsandbeasts.data.PlayerHeritageData;
+import at.koopro.wizardsandbeasts.event.HeritageEvents;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.type.profession.ProfessionNode;
 import at.koopro.wizardsandbeasts.type.profession.ProfessionSystemAPI;
@@ -60,9 +60,9 @@ public record ProfessionUnlockC2SPacket(String professionId) implements CustomPa
                 player.displayClientMessage(Component.literal("§cFailed to unlock profession."), true);
                 return;
             }
-            PlayerTypeData data = player.getData(ModAttachments.TYPE_DATA.get());
-            TypeDataSyncS2CPacket.syncToPlayer(player, false);
-            NeoForge.EVENT_BUS.post(new TypeEvents.PlayerProfessionUnlockedEvent(player, node, data.getProfessionPoints()));
+            PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
+            HeritageDataSyncS2CPacket.syncToPlayer(player, false);
+            NeoForge.EVENT_BUS.post(new HeritageEvents.PlayerProfessionUnlockedEvent(player, node, data.getProfessionPoints()));
             player.displayClientMessage(Component.literal("§aUnlocked profession: " + node.getDisplayName()), true);
         });
     }

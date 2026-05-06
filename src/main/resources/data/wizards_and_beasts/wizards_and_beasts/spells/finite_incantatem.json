@@ -1,0 +1,19 @@
+{
+  "displayName": "Finite Incantatem",
+  "category": "utility",
+  "cooldownTicks": 40,
+  "color": -921025,
+  "castType": "targeted",
+  "range": 20.0,
+  "selfEffects": [],
+  "targetEffects": [],
+  "sound": {
+    "id": "minecraft:entity.evoker.cast_spell",
+    "volume": 0.35,
+    "pitch": 1.45
+  },
+  "family": "light",
+  "requirement": {
+    "type": "none"
+  }
+}

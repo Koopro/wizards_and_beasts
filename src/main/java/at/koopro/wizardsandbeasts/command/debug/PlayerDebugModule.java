@@ -1,10 +1,10 @@
 package at.koopro.wizardsandbeasts.command.debug;
 
 import at.koopro.wizardsandbeasts.data.PlayerSpellData;
-import at.koopro.wizardsandbeasts.data.PlayerTypeData;
+import at.koopro.wizardsandbeasts.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.data.PlayerVaultData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
-import at.koopro.wizardsandbeasts.type.TypeSystemAPI;
+import at.koopro.wizardsandbeasts.type.HeritageAPI;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -18,6 +18,11 @@ public final class PlayerDebugModule implements DebugModule {
     }
 
     @Override
+    public String summary() {
+        return "Cross-check player attachment state (type, form, spells, vault).";
+    }
+
+    @Override
     public LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal(name())
                 .executes(ctx -> inspect(ctx.getSource(), ctx.getSource().getPlayerOrException()))
@@ -28,19 +33,19 @@ public final class PlayerDebugModule implements DebugModule {
     private int inspect(CommandSourceStack source, ServerPlayer target) {
         DebugOutput out = new DebugOutput(source);
         PlayerSpellData spellData = target.getData(ModAttachments.SPELL_DATA.get());
-        PlayerTypeData typeData = target.getData(ModAttachments.TYPE_DATA.get());
+        PlayerHeritageData typeData = target.getData(ModAttachments.HERITAGE_DATA.get());
         PlayerVaultData vaultData = target.getData(ModAttachments.VAULT_DATA.get());
 
         out.header("Player Debug :: " + target.getName().getString());
         out.kv("UUID", target.getUUID());
         out.kv("Debug mode", DebugModeService.isEnabled(target) ? "ON" : "OFF");
-        out.kv("Type selected", typeData.hasTypeSelected());
-        out.kv("Type API selected", TypeSystemAPI.hasTypeSelected(target));
+        out.kv("Type selected", typeData.hasHeritageSelected());
+        out.kv("Type API selected", HeritageAPI.hasHeritageSelected(target));
         out.kv("Active form", typeData.getActiveFormId() == null ? "(none)" : typeData.getActiveFormId());
         out.kv("Known spells", spellData.getKnownSpells().size());
         out.kv("Vault total (knuts)", vaultData.getTotalInKnuts());
 
-        if (TypeSystemAPI.hasTypeSelected(target) != typeData.hasTypeSelected()) {
+        if (HeritageAPI.hasHeritageSelected(target) != typeData.hasHeritageSelected()) {
             out.warn("Validation: Type selection state mismatch between API and attachment.");
         } else {
             out.ok("Validation: Player state looks consistent.");

@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.spell;
 
+import at.koopro.wizardsandbeasts.registry.ModSounds;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.effect.MobEffectInstance;
 
 import java.util.ArrayList;
@@ -119,7 +119,7 @@ public class SpellProperties {
         private int controlDurationTicks;
         private final List<Supplier<MobEffectInstance>> targetEffects = new ArrayList<>();
         private final List<Supplier<MobEffectInstance>> selfEffects = new ArrayList<>();
-        private SoundEvent castSound = SoundEvents.BLAZE_SHOOT;
+        private SoundEvent castSound = ModSounds.SPELL_CAST_GENERIC.get();
         private float soundVolume = 0.8f;
         private float soundPitch = 1.2f;
 

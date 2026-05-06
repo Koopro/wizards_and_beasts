@@ -1,19 +1,19 @@
 package at.koopro.wizardsandbeasts.client.ui;
 
 import at.koopro.wizardsandbeasts.client.state.ClientSpellDataState;
-import at.koopro.wizardsandbeasts.client.state.ClientTypeDataState;
+import at.koopro.wizardsandbeasts.client.state.ClientHeritageDataState;
 import at.koopro.wizardsandbeasts.data.PlayerSpellData;
-import at.koopro.wizardsandbeasts.data.PlayerTypeData;
-import at.koopro.wizardsandbeasts.type.WizType;
+import at.koopro.wizardsandbeasts.data.PlayerHeritageData;
+import at.koopro.wizardsandbeasts.type.Heritage;
 import net.minecraft.client.Minecraft;
 
 public final class UiStateProjection {
     private UiStateProjection() {}
 
     public static ObscurialUiModel obscurialHud() {
-        PlayerTypeData typeData = ClientTypeDataState.get();
+        PlayerHeritageData typeData = ClientHeritageDataState.get();
         return new ObscurialUiModel(
-                typeData.getSelectedType() == WizType.OBSCURIAL,
+                typeData.getSelectedHeritage() == Heritage.OBSCURIAL,
                 typeData.getActiveFormId(),
                 parseMeter(typeData.getFlag(ObscurialUiFlags.FLAG_DRAIN), ObscurialUiFlags.MAX_METER),
                 parseMeter(typeData.getFlag(ObscurialUiFlags.FLAG_CHARGE), ObscurialUiFlags.MAX_METER),
@@ -25,7 +25,7 @@ public final class UiStateProjection {
     }
 
     public static SpellHudUiModel spellHud(Minecraft mc) {
-        PlayerTypeData typeData = ClientTypeDataState.get();
+        PlayerHeritageData typeData = ClientHeritageDataState.get();
         PlayerSpellData spellData = ClientSpellDataState.get();
         boolean canRender = HudVisibilityPolicy.shouldRenderSpellHud(mc, typeData);
         return SpellHudUiModel.from(canRender, spellData);

@@ -15,6 +15,11 @@ public final class VaultDebugModule implements DebugModule {
     }
 
     @Override
+    public String summary() {
+        return "Gringotts balance snapshot (knuts/sickles/galleons).";
+    }
+
+    @Override
     public LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal(name())
                 .executes(ctx -> inspect(ctx.getSource(), ctx.getSource().getPlayerOrException()))

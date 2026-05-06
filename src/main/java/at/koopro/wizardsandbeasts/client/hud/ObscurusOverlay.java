@@ -3,7 +3,7 @@ package at.koopro.wizardsandbeasts.client.hud;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.client.hud.obscurial.ObscurialDarkPanelRenderer;
 import at.koopro.wizardsandbeasts.client.hud.obscurial.ObscurialHumanPanelRenderer;
-import at.koopro.wizardsandbeasts.client.state.ClientTypeDataState;
+import at.koopro.wizardsandbeasts.client.state.ClientHeritageDataState;
 import at.koopro.wizardsandbeasts.client.ui.HudVisibilityPolicy;
 import at.koopro.wizardsandbeasts.client.ui.ObscurialUiModel;
 import at.koopro.wizardsandbeasts.client.ui.UiStateProjection;
@@ -21,7 +21,7 @@ public final class ObscurusOverlay {
     public static void render(GuiGraphics graphics, DeltaTracker delta) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) return;
-        if (!HudVisibilityPolicy.shouldRenderObscurialHud(ClientTypeDataState.get())) return;
+        if (!HudVisibilityPolicy.shouldRenderObscurialHud(ClientHeritageDataState.get())) return;
         ObscurialUiModel obscurialUi = UiStateProjection.obscurialHud();
         if (obscurialUi.isDarkForm()) {
             ObscurialDarkPanelRenderer.render(graphics, mc, obscurialUi);

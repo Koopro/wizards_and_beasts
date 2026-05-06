@@ -1,11 +1,18 @@
 package at.koopro.wizardsandbeasts.wand.block;
 
 import at.koopro.wizardsandbeasts.item.WandModuleHooks;
+import at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.EntityBlock;
@@ -17,6 +24,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.level.redstone.Orientation;
+import net.minecraft.server.level.ServerPlayer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class WandmakersBenchBlock extends BaseEntityBlock implements EntityBlock {
     public static final MapCodec<WandmakersBenchBlock> CODEC = simpleCodec(WandmakersBenchBlock::new);
@@ -35,7 +46,39 @@ public class WandmakersBenchBlock extends BaseEntityBlock implements EntityBlock
         if (!WandModuleHooks.isWandsEnabled()) {
             return InteractionResult.FAIL;
         }
-        // Prompt B: open WandmakersBenchMenu
+        if (!(level.getBlockEntity(pos) instanceof WandmakersBenchBlockEntity bench)) {
+            return InteractionResult.PASS;
+        }
+        if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
+            bench.recalcTierScore();
+            List<Identifier> enhIds = new ArrayList<>();
+            for (BlockPos ep : bench.getDetectedEnhancers()) {
+                Identifier bid = BuiltInRegistries.BLOCK.getKey(level.getBlockState(ep).getBlock());
+                if (bid != null) {
+                    enhIds.add(bid);
+                }
+            }
+            List<Identifier> enhSnapshot = List.copyOf(enhIds);
+            MenuProvider provider = new MenuProvider() {
+                @Override
+                public Component getDisplayName() {
+                    return Component.translatable("gui.wizards_and_beasts.wandmakers_bench");
+                }
+
+                @Override
+                public AbstractContainerMenu createMenu(int syncId, Inventory inv, Player p) {
+                    return new WandmakersBenchMenu(syncId, inv, bench, enhSnapshot);
+                }
+            };
+            final List<Identifier> finalEnh = enhSnapshot;
+            serverPlayer.openMenu(provider, buf -> {
+                buf.writeBlockPos(pos);
+                buf.writeVarInt(finalEnh.size());
+                for (Identifier id : finalEnh) {
+                    buf.writeUtf(id.toString(), 320);
+                }
+            });
+        }
         return InteractionResult.SUCCESS;
     }
 

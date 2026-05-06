@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:acromantula",
+  "displayName": "bestiary.wizards_and_beasts.acromantula.name",
+  "category": "ARACHNID",
+  "mmRating": 5,
+  "habitat": "bestiary.wizards_and_beasts.acromantula.habitat",
+  "size": "LARGE",
+  "shortLore": "bestiary.wizards_and_beasts.acromantula.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.acromantula.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.acromantula.ability.1",
+    "bestiary.wizards_and_beasts.acromantula.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.acromantula.threat.1",
+    "bestiary.wizards_and_beasts.acromantula.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.acromantula.weakness.1",
+    "bestiary.wizards_and_beasts.acromantula.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/acromantula.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/acromantula.png",
+  "sortOrder": 44
+}

@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.type;
 
-import at.koopro.wizardsandbeasts.data.PlayerTypeData;
+import at.koopro.wizardsandbeasts.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.spell.Spell;
 import at.koopro.wizardsandbeasts.spell.SpellCategory;
@@ -134,23 +134,23 @@ public final class ObscurialRules {
 
     private ObscurialRules() {}
 
-    public static boolean isObscurial(PlayerTypeData data) {
-        return data.getSelectedType() == WizType.OBSCURIAL;
+    public static boolean isObscurial(PlayerHeritageData data) {
+        return data.getSelectedHeritage() == Heritage.OBSCURIAL;
     }
 
-    public static boolean isDarkForm(PlayerTypeData data) {
+    public static boolean isDarkForm(PlayerHeritageData data) {
         return "obscurial_dark".equals(data.getActiveFormId());
     }
 
-    public static TransformationState deriveState(PlayerTypeData data) {
+    public static TransformationState deriveState(PlayerHeritageData data) {
         return isDarkForm(data) ? TransformationState.TRANSFORMED : TransformationState.NORMAL;
     }
 
-    public static double getHealthBonus(PlayerTypeData data) {
+    public static double getHealthBonus(PlayerHeritageData data) {
         return isDarkForm(data) ? TRANSFORMED_HEALTH_BONUS : 0.0;
     }
 
-    public static double getSpeedBonus(PlayerTypeData data, ServerLevel level, ServerPlayer player) {
+    public static double getSpeedBonus(PlayerHeritageData data, ServerLevel level, ServerPlayer player) {
         double amount = isDarkForm(data) ? TRANSFORMED_SPEED_BONUS : 0.0;
         if (isDaylightStrained(level, player)) {
             amount -= 0.01;
@@ -161,12 +161,12 @@ public final class ObscurialRules {
         return amount;
     }
 
-    public static double getArmorBonus(PlayerTypeData data) {
+    public static double getArmorBonus(PlayerHeritageData data) {
         return isDarkForm(data) ? TRANSFORMED_ARMOR_BONUS : 0.0;
     }
 
     public static float getDamageMultiplier(ServerPlayer player) {
-        PlayerTypeData data = player.getData(at.koopro.wizardsandbeasts.registry.ModAttachments.TYPE_DATA.get());
+        PlayerHeritageData data = player.getData(at.koopro.wizardsandbeasts.registry.ModAttachments.HERITAGE_DATA.get());
         if (!isObscurial(data)) {
             return 1.0f;
         }
@@ -190,7 +190,7 @@ public final class ObscurialRules {
     }
 
     public static float getCooldownMultiplier(ServerPlayer player) {
-        PlayerTypeData data = player.getData(at.koopro.wizardsandbeasts.registry.ModAttachments.TYPE_DATA.get());
+        PlayerHeritageData data = player.getData(at.koopro.wizardsandbeasts.registry.ModAttachments.HERITAGE_DATA.get());
         if (!isObscurial(data)) {
             return 1.0f;
         }
@@ -225,7 +225,7 @@ public final class ObscurialRules {
     }
 
     public static float getAbilityCooldownMultiplier(ServerPlayer player) {
-        PlayerTypeData data = player.getData(at.koopro.wizardsandbeasts.registry.ModAttachments.TYPE_DATA.get());
+        PlayerHeritageData data = player.getData(at.koopro.wizardsandbeasts.registry.ModAttachments.HERITAGE_DATA.get());
         if (!isObscurial(data)) {
             return 1.0f;
         }
@@ -254,12 +254,12 @@ public final class ObscurialRules {
     }
 
     public static float getDrain(ServerPlayer player) {
-        PlayerTypeData data = player.getData(ModAttachments.TYPE_DATA.get());
+        PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
         return clampDrain(ObscurialValueCodec.parseFloat(data.getFlag(FLAG_DRAIN), MAX_DRAIN));
     }
 
     public static void setDrain(ServerPlayer player, float value) {
-        PlayerTypeData data = player.getData(ModAttachments.TYPE_DATA.get());
+        PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
         data.setFlag(FLAG_DRAIN, String.valueOf(clampDrain(value)));
     }
 
@@ -272,22 +272,22 @@ public final class ObscurialRules {
     }
 
     public static float getCharge(ServerPlayer player) {
-        PlayerTypeData data = player.getData(ModAttachments.TYPE_DATA.get());
+        PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
         return clampDrain(ObscurialValueCodec.parseFloat(data.getFlag(FLAG_CHARGE), MAX_DRAIN));
     }
 
     public static void setCharge(ServerPlayer player, float value) {
-        PlayerTypeData data = player.getData(ModAttachments.TYPE_DATA.get());
+        PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
         data.setFlag(FLAG_CHARGE, String.valueOf(clampDrain(value)));
     }
 
     public static float getStress(ServerPlayer player) {
-        PlayerTypeData data = player.getData(ModAttachments.TYPE_DATA.get());
+        PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
         return clampDrain(ObscurialValueCodec.parseFloat(data.getFlag(FLAG_STRESS), 0f));
     }
 
     public static void setStress(ServerPlayer player, float value) {
-        PlayerTypeData data = player.getData(ModAttachments.TYPE_DATA.get());
+        PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
         data.setFlag(FLAG_STRESS, String.valueOf(clampDrain(value)));
     }
 
@@ -484,12 +484,12 @@ public final class ObscurialRules {
     }
 
     public static void setLockoutUntilTick(ServerPlayer player, long gameTick) {
-        PlayerTypeData data = player.getData(ModAttachments.TYPE_DATA.get());
+        PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
         data.setFlag(FLAG_LOCKOUT_UNTIL, String.valueOf(gameTick));
     }
 
     public static long getLockoutUntilTick(ServerPlayer player) {
-        PlayerTypeData data = player.getData(ModAttachments.TYPE_DATA.get());
+        PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
         return ObscurialValueCodec.parseLong(data.getFlag(FLAG_LOCKOUT_UNTIL), 0L);
     }
 
@@ -521,25 +521,25 @@ public final class ObscurialRules {
         return ObscurialSpellPolicy.isObscurialAbilityId(spellId);
     }
 
-    public static boolean canTypeUseSpell(WizType type, Spell spell) {
+    public static boolean canHeritageUseSpell(Heritage heritage, Spell spell) {
         if (spell == null) return false;
         if (isObscurialAbility(spell)) return false;
         if (!isObscurialOnlySpell(spell)) return true;
-        return type == WizType.OBSCURIAL;
+        return heritage == Heritage.OBSCURIAL;
     }
 
     public static long getStressVentCooldownUntil(ServerPlayer player) {
-        PlayerTypeData data = player.getData(ModAttachments.TYPE_DATA.get());
+        PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
         return ObscurialValueCodec.parseLong(data.getFlag(FLAG_VENT_COOLDOWN_UNTIL), 0L);
     }
 
     public static void setStressVentCooldownUntil(ServerPlayer player, long gameTick) {
-        PlayerTypeData data = player.getData(ModAttachments.TYPE_DATA.get());
+        PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
         data.setFlag(FLAG_VENT_COOLDOWN_UNTIL, String.valueOf(gameTick));
     }
 
     public static float getInstabilityFizzleChance(ServerPlayer player, ServerLevel level) {
-        PlayerTypeData data = player.getData(ModAttachments.TYPE_DATA.get());
+        PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
         if (!isObscurial(data) || !isDarkForm(data)) return 0f;
 
         float chance = INSTABILITY_FIZZLE_BASE;
@@ -562,7 +562,7 @@ public final class ObscurialRules {
     }
 
     public static boolean shouldApplyDaylightVulnerability(ServerPlayer player, ServerLevel level, long gameTick) {
-        PlayerTypeData data = player.getData(ModAttachments.TYPE_DATA.get());
+        PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
         return isObscurial(data)
                 && isDarkForm(data)
                 && isDaylightStrained(level, player)

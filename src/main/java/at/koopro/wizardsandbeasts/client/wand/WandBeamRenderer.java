@@ -7,6 +7,8 @@ import at.koopro.wizardsandbeasts.spell.CastType;
 import at.koopro.wizardsandbeasts.spell.SpellIds;
 import at.koopro.wizardsandbeasts.spell.Spell;
 import at.koopro.wizardsandbeasts.spell.SpellProperties;
+import at.koopro.wizardsandbeasts.spell.cast.BeamRay;
+import at.koopro.wizardsandbeasts.spell.cast.BeamRayResolver;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
@@ -17,7 +19,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
@@ -90,19 +91,17 @@ public final class WandBeamRenderer {
         Vec3 camPos = camera.position();
         float partialTick = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true);
 
-        Vec3 eyePos = player.getEyePosition(partialTick);
-        Vec3 look = player.getViewVector(partialTick);
         Vec3 cachedTip = WandTipWorldCache.getWorldTipOrNull();
         Vec3 beamStart = cachedTip != null ? cachedTip : wandTipWorldPos(mc, player, partialTick, camera);
 
         float range = BeamSettings.range;
-        HitResult hit = player.pick(range, partialTick, false);
-        Vec3 fullEnd = hit.getType() == HitResult.Type.MISS
-                ? eyePos.add(look.scale(range))
-                : hit.getLocation();
+        // Single source of truth: same resolver server-side WandBeamChannelLogic uses.
+        // Includes entity hits so the visual end matches what the server actually damages.
+        BeamRay ray = BeamRayResolver.resolve(player, partialTick, range, BeamRayResolver.LIVING_FILTER);
+        Vec3 fullEnd = ray.end();
 
         float elapsed = (player.tickCount - beamStartTick) + partialTick;
-        float maxReach = elapsed * BeamSettings.extensionSpeed;
+        float maxReach = elapsed * BeamRayResolver.extensionBlocksPerTick();
         double fullDist = beamStart.distanceTo(fullEnd);
         Vec3 beamEnd;
         if (maxReach >= fullDist) {
@@ -137,14 +136,34 @@ public final class WandBeamRenderer {
             return;
         }
 
+        float beamScrollU = (player.tickCount + partialTick) * BeamSettings.speed * 2.0f;
+        boolean textured = BeamSettings.useTextured;
+
         MultiBufferSource.BufferSource bufferSource = mc.renderBuffers().bufferSource();
-        VertexConsumer consumer = bufferSource.getBuffer(RenderTypes.lightning());
+        VertexConsumer tubeConsumer =
+                textured ? null : bufferSource.getBuffer(RenderTypes.lightning());
+        VertexConsumer stripConsumer =
+                textured ? bufferSource.getBuffer(WandBeamRenderType.beamStrip()) : null;
 
         Matrix4f matrix = poseStack.last().pose();
 
-        for (int i = 0; i < BeamSettings.layers.length; i++) {
-            BeamSettings.LayerSettings layer = BeamSettings.layers[i];
-            WandBeamGeometry.renderLayer(matrix, consumer, path, layer, flicker, i);
+        WandBeamGeometry.renderLayers(matrix, tubeConsumer, stripConsumer, camPos, path, flicker,
+                beamScrollU, textured);
+
+        if (textured && stripConsumer != null) {
+            BeamSettings.LayerSettings core = BeamSettings.layers[BeamSettings.CORE];
+            float mu = core.width * 2.1f;
+            WandBeamGeometry.renderMuzzleFlash(matrix, stripConsumer, camPos, beamStart, mu,
+                    core.r, core.g, core.b, Mth.clamp(core.alpha * 1.15f * flicker, 0f, 1f), beamScrollU);
+
+            double reachTol = 0.06;
+            boolean reachedTarget = maxReach + reachTol >= fullDist;
+            if (reachedTarget && ray.hitsAnything()) {
+                WandBeamGeometry.renderImpactFlash(matrix, stripConsumer, camPos, beamEnd,
+                        Math.max(0.09f, core.width * 2.4f),
+                        core.r, core.g, core.b, Mth.clamp(core.alpha * 1.05f * flicker, 0f, 1f),
+                        beamScrollU, ray.hitsEntity());
+            }
         }
 
         bufferSource.endBatch();

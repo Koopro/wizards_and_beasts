@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.event;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.data.PlayerTypeData;
+import at.koopro.wizardsandbeasts.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.type.ObscurialRules;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -71,7 +71,7 @@ public final class ExpectoPatronumAuraHandler {
     private static boolean isDarkAligned(LivingEntity entity) {
         if (entity.isInvertedHealAndHarm()) return true;
         if (entity instanceof ServerPlayer sp) {
-            PlayerTypeData data = sp.getData(ModAttachments.TYPE_DATA.get());
+            PlayerHeritageData data = sp.getData(ModAttachments.HERITAGE_DATA.get());
             return ObscurialRules.isObscurial(data) && ObscurialRules.isDarkForm(data);
         }
         return false;

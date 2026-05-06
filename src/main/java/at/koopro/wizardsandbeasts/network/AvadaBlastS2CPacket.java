@@ -1,14 +1,14 @@
 package at.koopro.wizardsandbeasts.network;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.client.spell.SpellVfxClient;
+import at.koopro.wizardsandbeasts.spell.SpellFamily;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -25,7 +25,7 @@ public record AvadaBlastS2CPacket(
         double endY,
         double endZ) implements CustomPacketPayload {
 
-    private static final int AVADA_RGB = 0x00FF00;
+    private static final int AVADA_ARGB = 0xFF00FF00;
     public static final Type<AvadaBlastS2CPacket> TYPE = new Type<>(
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "avada_blast"));
 
@@ -62,41 +62,8 @@ public record AvadaBlastS2CPacket(
 
             Vec3 from = new Vec3(pkt.startX, pkt.startY, pkt.startZ);
             Vec3 to = new Vec3(pkt.endX, pkt.endY, pkt.endZ);
-            Vec3 delta = to.subtract(from);
-            double distance = delta.length();
-            if (distance < 0.01) {
-                return;
-            }
-            Vec3 dir = delta.scale(1.0 / distance);
-
-            int steps = Math.max(10, (int) (distance * 14.0));
-            for (int i = 0; i <= steps; i++) {
-                double t = i / (double) steps;
-                Vec3 p = from.lerp(to, t);
-                double jitter = 0.025 + mc.level.random.nextDouble() * 0.03;
-                double dx = (mc.level.random.nextDouble() - 0.5) * jitter;
-                double dy = (mc.level.random.nextDouble() - 0.5) * jitter;
-                double dz = (mc.level.random.nextDouble() - 0.5) * jitter;
-                mc.level.addParticle(
-                        new DustParticleOptions(AVADA_RGB, 1.25f),
-                        p.x, p.y, p.z, dx, dy, dz);
-            }
-
-            for (int i = 0; i < 20; i++) {
-                Vec3 burst = to.add(
-                        (mc.level.random.nextDouble() - 0.5) * 0.8,
-                        (mc.level.random.nextDouble() - 0.5) * 0.8,
-                        (mc.level.random.nextDouble() - 0.5) * 0.8);
-                Vec3 velocity = dir.scale(0.02 + mc.level.random.nextDouble() * 0.05)
-                        .add(
-                                (mc.level.random.nextDouble() - 0.5) * 0.08,
-                                (mc.level.random.nextDouble() - 0.5) * 0.08,
-                                (mc.level.random.nextDouble() - 0.5) * 0.08);
-                mc.level.addParticle(
-                        new DustParticleOptions(AVADA_RGB, Mth.lerp(mc.level.random.nextFloat(), 0.9f, 1.5f)),
-                        burst.x, burst.y, burst.z,
-                        velocity.x, velocity.y, velocity.z);
-            }
+            SpellVfxClient.spawnTintBeam(from, to, SpellFamily.DARK, AVADA_ARGB);
+            SpellVfxClient.spawnTintBurst(to, SpellFamily.DARK, AVADA_ARGB, 20, 0.4f);
         });
     }
 

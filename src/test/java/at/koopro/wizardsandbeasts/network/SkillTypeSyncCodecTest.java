@@ -39,7 +39,7 @@ class SkillTypeSyncCodecTest {
         flags.put("example", "true");
         Set<String> unlockedProfessions = new LinkedHashSet<>();
         unlockedProfessions.add("wizard_apprentice");
-        TypeDataSyncS2CPacket original = new TypeDataSyncS2CPacket(
+        HeritageDataSyncS2CPacket original = new HeritageDataSyncS2CPacket(
                 11,
                 "wizardkind",
                 "pure_blood",
@@ -56,11 +56,11 @@ class SkillTypeSyncCodecTest {
 
         ByteBuf buf = Unpooled.buffer();
         try {
-            TypeDataSyncS2CPacket.STREAM_CODEC.encode(buf, original);
-            TypeDataSyncS2CPacket decoded = TypeDataSyncS2CPacket.STREAM_CODEC.decode(buf);
+            HeritageDataSyncS2CPacket.STREAM_CODEC.encode(buf, original);
+            HeritageDataSyncS2CPacket decoded = HeritageDataSyncS2CPacket.STREAM_CODEC.decode(buf);
             assertEquals(original.syncVersion(), decoded.syncVersion());
-            assertEquals(original.typeId(), decoded.typeId());
-            assertEquals(original.subtypeId(), decoded.subtypeId());
+            assertEquals(original.heritageId(), decoded.heritageId());
+            assertEquals(original.variantId(), decoded.variantId());
             assertEquals(original.locked(), decoded.locked());
             assertEquals(original.transformationState(), decoded.transformationState());
             assertEquals(original.activeFormId(), decoded.activeFormId());

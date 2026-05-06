@@ -6,5 +6,10 @@ import net.minecraft.commands.CommandSourceStack;
 public interface DebugModule {
     String name();
 
+    /** One-line description for {@code /wandb debug} overview. */
+    default String summary() {
+        return "";
+    }
+
     LiteralArgumentBuilder<CommandSourceStack> register();
 }

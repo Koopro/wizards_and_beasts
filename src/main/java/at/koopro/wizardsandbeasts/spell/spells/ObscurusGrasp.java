@@ -93,7 +93,7 @@ public class ObscurusGrasp extends Spell {
                 caster.getX(), caster.getY() + 0.8, caster.getZ(),
                 18, 1.3, 0.4, 1.3, 0.02);
         Vec3 beamEnd = eye.add(caster.getLookAngle().scale(GRASP_RADIUS * 0.9));
-        SpellHelper.spawnBeam(level, eye, beamEnd, getColor());
+        SpellHelper.spawnBeam(level, this, eye, beamEnd);
         playSound(level, caster);
     }
 }

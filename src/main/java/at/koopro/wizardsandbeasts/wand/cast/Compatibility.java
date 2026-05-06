@@ -1,12 +1,13 @@
 package at.koopro.wizardsandbeasts.wand.cast;
 
-import at.koopro.wizardsandbeasts.data.PlayerTypeData;
+import at.koopro.wizardsandbeasts.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.item.wand.WandCore;
 import at.koopro.wizardsandbeasts.item.wand.WandFlexibility;
 import at.koopro.wizardsandbeasts.item.wand.WandLength;
 import at.koopro.wizardsandbeasts.item.wand.WandWood;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
-import at.koopro.wizardsandbeasts.type.WizSubtype;
+import at.koopro.wizardsandbeasts.type.HeritageVariant;
+import at.koopro.wizardsandbeasts.type.Heritage;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
@@ -23,8 +24,8 @@ public final class Compatibility {
 
     public record Score(float initialCompat, float totalCompat) {}
 
-    public static Score score(ItemStack wandStack, PlayerTypeData typeData, WandAllegiance allegiance) {
-        WizSubtype subtype = typeData.getSelectedSubtype();
+    public static Score score(ItemStack wandStack, PlayerHeritageData typeData, WandAllegiance allegiance) {
+        HeritageVariant subtype = typeData.getSelectedHeritageVariant();
         WandCore core = resolveCore(wandStack);
         WandWood wood = resolveWood(wandStack);
         WandFlexibility flex = resolveFlexibility(wandStack);
@@ -48,30 +49,35 @@ public final class Compatibility {
         return initialCompat >= BIND_THRESHOLD;
     }
 
-    private static float subtypeAffinity(WandCore core, WandWood wood, WizSubtype subtype) {
+    private static float subtypeAffinity(WandCore core, WandWood wood, HeritageVariant subtype) {
         float score = 0.5f;
-        if (subtype.hasTag("unstable_magic") || subtype.hasTag("volatile")) {
+        if (subtype.hasTag("obscurus_form")) {
             if (core == WandCore.THESTRAL_TAIL || core == WandCore.DRAGON_HEARTSTRING) score += 0.2f;
             if (wood == WandWood.YEW || wood == WandWood.ELDER) score += 0.1f;
         }
-        if (subtype.hasTag("charm_voice") || subtype.hasTag("allure")) {
+        boolean veelaCharm = subtype.getParentHeritage() == Heritage.VEELA
+                && (subtype.hasTag("enhanced_bond") || subtype.hasTag("transformation"));
+        if (veelaCharm) {
             if (core == WandCore.VEELA_HAIR || core == WandCore.UNICORN_HAIR) score += 0.2f;
             if (wood == WandWood.HOLLY) score += 0.05f;
         }
-        if (subtype.hasTag("nature_affinity") || subtype.hasTag("herbalism")) {
+        if (subtype.hasTag("nature_speech")) {
             if (wood == WandWood.ROWAN) score += 0.2f;
             if (core == WandCore.UNICORN_HAIR) score += 0.1f;
         }
-        if (subtype.hasTag("magic_resistant")) {
+        if (subtype.hasTag("dark_resistance")) {
             if (core == WandCore.PHOENIX_FEATHER) score += 0.1f;
             if (wood == WandWood.ELDER) score -= 0.05f;
         }
         return clamp(score);
     }
 
-    private static float flexibilityMatch(WandFlexibility flexibility, WizSubtype subtype) {
+    private static float flexibilityMatch(WandFlexibility flexibility, HeritageVariant subtype) {
         float score = 0.5f;
-        if (subtype.hasTag("volatile") || subtype.hasTag("battle_hardened")) {
+        boolean rigidLean = subtype.hasTag("moon_sensitive")
+                || "warrior".equals(subtype.getId())
+                || (subtype.hasTag("obscurus_form") && subtype.hasTag("transformation"));
+        if (rigidLean) {
             if (flexibility == WandFlexibility.UNYIELDING || flexibility == WandFlexibility.RIGID) score += 0.2f;
         } else {
             if (flexibility == WandFlexibility.SUPPLE || flexibility == WandFlexibility.SPRINGY) score += 0.2f;
@@ -79,11 +85,12 @@ public final class Compatibility {
         return clamp(score);
     }
 
-    private static float lengthMatch(WandLength length, WizSubtype subtype) {
+    private static float lengthMatch(WandLength length, HeritageVariant subtype) {
         float score = 0.5f;
-        if (subtype.hasTag("trampling") || subtype.hasTag("crushing_blow")) {
+        if ("full_giant".equals(subtype.getId()) || "war".equals(subtype.getId())) {
             if (length == WandLength.LONG) score += 0.2f;
-        } else if (subtype.hasTag("enhanced_senses") || subtype.hasTag("rune_master")) {
+        } else if (subtype.hasTag("enhanced_bond") || subtype.hasTag("divination_sight")
+                || subtype.hasTag("rune_affinity")) {
             if (length == WandLength.MEDIUM || length == WandLength.STANDARD) score += 0.15f;
         } else if (length == WandLength.STANDARD) {
             score += 0.1f;
@@ -95,7 +102,7 @@ public final class Compatibility {
         return Math.max(0.0f, Math.min(1.0f, value));
     }
 
-    private static float fate(WandCore core, WandWood wood, WandFlexibility flex, WandLength length, WizSubtype subtype) {
+    private static float fate(WandCore core, WandWood wood, WandFlexibility flex, WandLength length, HeritageVariant subtype) {
         int hash = 17;
         hash = 31 * hash + core.ordinal();
         hash = 31 * hash + wood.ordinal();

@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.command;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -16,23 +17,20 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.form.FormSystemAPI;
 import at.koopro.wizardsandbeasts.item.DebugWandState;
 import at.koopro.wizardsandbeasts.network.BeamDebugOpenS2CPacket;
-import at.koopro.wizardsandbeasts.network.FormSyncS2CPacket;
-import at.koopro.wizardsandbeasts.network.SkillDataSyncS2CPacket;
-import at.koopro.wizardsandbeasts.network.SpellDataSyncS2CPacket;
-import at.koopro.wizardsandbeasts.network.TypeDataSyncS2CPacket;
-import at.koopro.wizardsandbeasts.network.VaultSyncS2CPacket;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModItems;
 import at.koopro.wizardsandbeasts.spell.WandBeamChannelLogic;
-import at.koopro.wizardsandbeasts.type.TypeSystemAPI;
+import at.koopro.wizardsandbeasts.sync.PlayerStateSyncService;
+import at.koopro.wizardsandbeasts.type.HeritageAPI;
 import at.koopro.wizardsandbeasts.data.PlayerSpellData;
-import at.koopro.wizardsandbeasts.client.spell.ColoredGlowRenderer;
 import at.koopro.wizardsandbeasts.client.wand.BeamSettings;
 import at.koopro.wizardsandbeasts.command.debug.DebugModuleRegistry;
-import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
+import at.koopro.wizardsandbeasts.module.Module;
+import at.koopro.wizardsandbeasts.module.ModuleManager;
+import at.koopro.wizardsandbeasts.util.GlowDebugTags;
+import at.koopro.wizardsandbeasts.util.RgbHex;
 
 import java.util.Set;
 
@@ -45,6 +43,8 @@ public class WizardsAndBeastsCommands {
     public static void onRegisterCommands(RegisterCommandsEvent event) {
         DebugModuleRegistry.bootstrap();
         event.getDispatcher().register(buildRootCommand("wandb"));
+        event.getDispatcher().register(ApparitionCommands.registerWard());
+        event.getDispatcher().register(ApparitionCommands.registerTest());
     }
 
     private static LiteralArgumentBuilder<CommandSourceStack> buildRootCommand(String rootLiteral) {
@@ -67,7 +67,7 @@ public class WizardsAndBeastsCommands {
                                                         ctx.getSource(),
                                                         EntityArgument.getPlayer(ctx, "player"),
                                                         StringArgumentType.getString(ctx, "rgb")))))))
-                .then(Commands.literal("wand")
+                .then(Commands.literal("wandtool")
                         .executes(ctx -> giveDebugWand(ctx.getSource().getPlayerOrException(), null))
                         .then(Commands.argument("type", StringArgumentType.word())
                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(TREE_TYPES, builder))
@@ -87,28 +87,41 @@ public class WizardsAndBeastsCommands {
                                 .then(Commands.literal("high").executes(ctx -> setBeamPreset(ctx.getSource(), BeamSettings.PerformancePreset.HIGH)))
                         )
                 )
-                .then(Commands.literal("spellstats")
+                .then(Commands.literal("stats")
                         .executes(ctx -> showSpellTelemetry(ctx.getSource().getPlayerOrException())))
-                .then(WizMorphCommands.register());
+                .then(WizMorphCommands.register())
+                .then(Commands.literal("module")
+                        .then(Commands.argument("module", StringArgumentType.word())
+                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
+                                        java.util.Arrays.stream(Module.values()).map(Enum::name), builder))
+                                .then(Commands.argument("state", StringArgumentType.word())
+                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
+                                                java.util.List.of("DISABLED", "ENABLED", "PREVIEW"), builder))
+                                        .executes(ctx -> setModuleState(
+                                                ctx.getSource(),
+                                                StringArgumentType.getString(ctx, "module"),
+                                                StringArgumentType.getString(ctx, "state"))))));
 
         DebugModuleRegistry.attachTo(debugRoot);
 
         return Commands.literal(rootLiteral)
                 .then(debugRoot)
                 .then(SpellCommands.registerSpellCommand())
+                .then(ProficiencyCommands.register())
                 .then(SpellCommands.registerWandCommand())
-                .then(WizTypeCommands.register("type"))
-                .then(WizTypeCommands.register("wiztype"))
+                .then(HeritageCommands.register("type"))
+                .then(HeritageCommands.register("wiztype"))
                 .then(WizFormCommands.register())
                 .then(WizSizeCommands.register())
-                .then(SkillCommands.register());
+                .then(SkillCommands.register())
+                .then(BestiaryCommands.register());
     }
 
     @SubscribeEvent
     public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            boolean needsSelection = !TypeSystemAPI.hasTypeSelected(player);
-            resyncPlayerState(player, needsSelection);
+            boolean needsSelection = !HeritageAPI.hasHeritageSelected(player);
+            PlayerStateSyncService.syncFullLoginState(player, needsSelection);
         }
     }
 
@@ -116,7 +129,7 @@ public class WizardsAndBeastsCommands {
     public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             WandBeamChannelLogic.endChannel(player);
-            resyncPlayerState(player, false);
+            PlayerStateSyncService.syncFullLoginState(player, false);
         }
     }
 
@@ -132,109 +145,137 @@ public class WizardsAndBeastsCommands {
     public static void onPlayerChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             WandBeamChannelLogic.endChannel(player);
-            resyncPlayerState(player, false);
+            PlayerStateSyncService.syncFullLoginState(player, false);
         }
-    }
-
-    private static void resyncPlayerState(ServerPlayer player, boolean openTypeSelector) {
-        SkillSystemAPI.reconcileDerivedEffects(player);
-        SpellDataSyncS2CPacket.syncToPlayer(player);
-        SkillDataSyncS2CPacket.syncToPlayer(player);
-        TypeDataSyncS2CPacket.syncToPlayer(player, openTypeSelector);
-        VaultSyncS2CPacket.syncToPlayer(player);
-        if (TypeSystemAPI.hasTypeSelected(player)) {
-            TypeSystemAPI.applyStats(player);
-        }
-        FormSystemAPI.reapplyCurrentForm(player);
-        FormSyncS2CPacket.syncToTracking(player);
     }
 
     private static int toggleBeamDebug(CommandSourceStack source) {
         WizardsAndBeastsMod.debugForceBeam = !WizardsAndBeastsMod.debugForceBeam;
-        String state = WizardsAndBeastsMod.debugForceBeam ? "\u00A7aON" : "\u00A7cOFF";
-        source.sendSuccess(() -> Component.literal("\u00A77Beam debug: " + state), false);
+        boolean on = WizardsAndBeastsMod.debugForceBeam;
+        source.sendSuccess(() -> Component.literal("Beam debug: ")
+                .withStyle(ChatFormatting.GRAY)
+                .append(Component.literal(on ? "ON" : "OFF")
+                        .withStyle(on ? ChatFormatting.GREEN : ChatFormatting.RED)), false);
         return 1;
     }
 
     private static int openBeamEditor(ServerPlayer player) {
         WizardsAndBeastsMod.debugForceBeam = true;
         BeamDebugOpenS2CPacket.sendToPlayer(player);
-        player.displayClientMessage(Component.literal("\u00A77Beam debug: \u00A7aON \u00A77(editor opened)"), true);
+        player.displayClientMessage(
+                Component.literal("Beam debug: ")
+                        .withStyle(ChatFormatting.GRAY)
+                        .append(Component.literal("ON").withStyle(ChatFormatting.GREEN))
+                        .append(Component.literal(" (editor opened)").withStyle(ChatFormatting.GRAY)),
+                true);
         return 1;
     }
 
     private static int showSpellTelemetry(ServerPlayer player) {
         PlayerSpellData data = player.getData(ModAttachments.SPELL_DATA.get());
-        player.displayClientMessage(Component.literal("\u00A76[W&B]\u00A7r Sync corrections: " + data.getSyncCorrections()), false);
+        player.displayClientMessage(
+                Component.literal("[W&B]").withStyle(ChatFormatting.GOLD)
+                        .append(Component.literal(" Sync corrections: " + data.getSyncCorrections())
+                                .withStyle(ChatFormatting.RESET)),
+                false);
         if (data.getRejectCounts().isEmpty()) {
-            player.displayClientMessage(Component.literal("\u00A77No rejection telemetry recorded yet."), false);
+            player.displayClientMessage(
+                    Component.literal("No rejection telemetry recorded yet.").withStyle(ChatFormatting.GRAY), false);
             return 1;
         }
-        player.displayClientMessage(Component.literal("\u00A76[W&B]\u00A7r Reject counters:"), false);
+        player.displayClientMessage(
+                Component.literal("[W&B]").withStyle(ChatFormatting.GOLD)
+                        .append(Component.literal(" Reject counters:").withStyle(ChatFormatting.RESET)),
+                false);
         data.getRejectCounts().entrySet().stream()
                 .sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
                 .limit(8)
                 .forEach(e -> player.displayClientMessage(
-                        Component.literal("\u00A77- " + e.getKey() + ": \u00A7f" + e.getValue()), false));
+                        Component.literal("- " + e.getKey() + ": ")
+                                .withStyle(ChatFormatting.GRAY)
+                                .append(Component.literal(String.valueOf(e.getValue()))
+                                        .withStyle(ChatFormatting.WHITE)),
+                        false));
         return 1;
     }
 
     private static int setBeamPreset(CommandSourceStack source, BeamSettings.PerformancePreset preset) {
         BeamSettings.applyPerformancePreset(preset);
-        source.sendSuccess(() -> Component.literal("\u00A77Beam preset set to \u00A7a" + preset.name().toLowerCase()), false);
+        source.sendSuccess(() -> Component.literal("Beam preset set to ")
+                .withStyle(ChatFormatting.GRAY)
+                .append(Component.literal(preset.name().toLowerCase()).withStyle(ChatFormatting.GREEN)), false);
         return 1;
     }
 
     private static int setGlowOff(CommandSourceStack source, ServerPlayer target) {
         clearGlowTags(target);
-        source.sendSuccess(() -> Component.literal("\u00A77Glow debug for \u00A7f" + target.getName().getString() + "\u00A77: \u00A7cOFF"), true);
+        source.sendSuccess(() -> Component.literal("Glow debug for ")
+                .withStyle(ChatFormatting.GRAY)
+                .append(target.getDisplayName().plainCopy().withStyle(ChatFormatting.WHITE))
+                .append(Component.literal(": ").withStyle(ChatFormatting.GRAY))
+                .append(Component.literal("OFF").withStyle(ChatFormatting.RED)), true);
         return 1;
     }
 
     private static int setGlowHash(CommandSourceStack source, ServerPlayer target) {
         clearGlowTags(target);
-        target.addTag(ColoredGlowRenderer.HASH_COLOR_TAG);
-        source.sendSuccess(() -> Component.literal("\u00A77Glow debug for \u00A7f" + target.getName().getString() + "\u00A77: \u00A7aHASH"), true);
+        target.addTag(GlowDebugTags.HASH_COLOR_TAG);
+        source.sendSuccess(() -> Component.literal("Glow debug for ")
+                .withStyle(ChatFormatting.GRAY)
+                .append(target.getDisplayName().plainCopy().withStyle(ChatFormatting.WHITE))
+                .append(Component.literal(": ").withStyle(ChatFormatting.GRAY))
+                .append(Component.literal("HASH").withStyle(ChatFormatting.GREEN)), true);
         return 1;
     }
 
     private static int setGlowColor(CommandSourceStack source, ServerPlayer target, String rgbInput) {
-        String hex = normalizeRgb(rgbInput);
+        String hex = RgbHex.normalizeRgbHex(rgbInput);
         if (hex == null) {
-            source.sendFailure(Component.literal("\u00A7cInvalid color. Use RRGGBB or #RRGGBB."));
+            source.sendFailure(Component.literal("Invalid color. Use RRGGBB or #RRGGBB.").withStyle(ChatFormatting.RED));
             return 0;
         }
 
         clearGlowTags(target);
-        target.addTag(ColoredGlowRenderer.COLOR_TAG_PREFIX + hex);
-        source.sendSuccess(() -> Component.literal("\u00A77Glow debug for \u00A7f" + target.getName().getString()
-                + "\u00A77: \u00A7a#" + hex), true);
+        target.addTag(GlowDebugTags.COLOR_TAG_PREFIX + hex);
+        source.sendSuccess(() -> Component.literal("Glow debug for ")
+                .withStyle(ChatFormatting.GRAY)
+                .append(target.getDisplayName().plainCopy().withStyle(ChatFormatting.WHITE))
+                .append(Component.literal(": ").withStyle(ChatFormatting.GRAY))
+                .append(Component.literal("#" + hex).withStyle(ChatFormatting.GREEN)), true);
         return 1;
     }
 
     private static void clearGlowTags(ServerPlayer target) {
-        target.removeTag(ColoredGlowRenderer.HASH_COLOR_TAG);
+        target.removeTag(GlowDebugTags.HASH_COLOR_TAG);
         target.getTags().stream()
-                .filter(tag -> tag.startsWith(ColoredGlowRenderer.COLOR_TAG_PREFIX))
+                .filter(tag -> tag.startsWith(GlowDebugTags.COLOR_TAG_PREFIX))
                 .toList()
                 .forEach(target::removeTag);
     }
 
-    private static String normalizeRgb(String input) {
-        String value = input.startsWith("#") ? input.substring(1) : input;
-        if (value.length() != 6) {
-            return null;
+    private static int setModuleState(CommandSourceStack source, String moduleName, String stateName) {
+        Module module;
+        try {
+            module = Module.valueOf(moduleName.toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            source.sendFailure(Component.literal("Unknown module: " + moduleName).withStyle(ChatFormatting.RED));
+            return 0;
         }
-        for (int i = 0; i < value.length(); i++) {
-            char c = value.charAt(i);
-            boolean hexDigit = (c >= '0' && c <= '9')
-                    || (c >= 'a' && c <= 'f')
-                    || (c >= 'A' && c <= 'F');
-            if (!hexDigit) {
-                return null;
-            }
+        ModuleManager.State state;
+        try {
+            state = ModuleManager.State.valueOf(stateName.toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            source.sendFailure(Component.literal("Unknown state: " + stateName
+                    + " (use DISABLED, ENABLED, or PREVIEW).").withStyle(ChatFormatting.RED));
+            return 0;
         }
-        return value.toUpperCase();
+        ModuleManager.setState(module, state);
+        source.sendSuccess(() -> Component.literal("Module ")
+                .withStyle(ChatFormatting.GRAY)
+                .append(Component.literal(module.name()).withStyle(ChatFormatting.AQUA))
+                .append(Component.literal(" → ").withStyle(ChatFormatting.DARK_GRAY))
+                .append(Component.literal(state.name()).withStyle(ChatFormatting.GREEN)), true);
+        return 1;
     }
 
     private static int giveDebugWand(ServerPlayer player, String treeType) {
@@ -246,8 +287,13 @@ public class WizardsAndBeastsCommands {
         }
 
         String type = DebugWandState.get(player.getUUID()).getTreeType();
-        player.displayClientMessage(Component.literal(
-                "\u00A7aDebug Wand \u00A77given \u00A77(\u00A7b" + type + "\u00A77)"), true);
+        player.displayClientMessage(
+                Component.literal("Debug Wand ").withStyle(ChatFormatting.GREEN)
+                        .append(Component.literal("given ").withStyle(ChatFormatting.GRAY))
+                        .append(Component.literal("(").withStyle(ChatFormatting.GRAY))
+                        .append(Component.literal(type).withStyle(ChatFormatting.AQUA))
+                        .append(Component.literal(")").withStyle(ChatFormatting.GRAY)),
+                true);
         return 1;
     }
 

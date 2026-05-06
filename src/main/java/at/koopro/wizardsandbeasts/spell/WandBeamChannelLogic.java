@@ -2,10 +2,21 @@ package at.koopro.wizardsandbeasts.spell;
 
 import at.koopro.wizardsandbeasts.Config;
 import at.koopro.wizardsandbeasts.data.PlayerSpellData;
-import at.koopro.wizardsandbeasts.item.WandItem;
+import at.koopro.wizardsandbeasts.effect.ModEffects;
+import at.koopro.wizardsandbeasts.module.Module;
+import at.koopro.wizardsandbeasts.module.ModuleManager;
+import at.koopro.wizardsandbeasts.network.CrucioIntentFeedbackS2CPacket;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
+import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
+import at.koopro.wizardsandbeasts.skill.SkillTreeId;
+import at.koopro.wizardsandbeasts.item.WandItem;
 import at.koopro.wizardsandbeasts.network.AvadaBlastS2CPacket;
+import at.koopro.wizardsandbeasts.registry.ModSounds;
+import at.koopro.wizardsandbeasts.network.SpellImpactBurstS2CPacket;
 import at.koopro.wizardsandbeasts.network.SpellCastC2SPacket;
+import at.koopro.wizardsandbeasts.spell.cast.BeamRay;
+import at.koopro.wizardsandbeasts.spell.cast.BeamRayResolver;
+import at.koopro.wizardsandbeasts.util.WandHelper;
 import at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -14,6 +25,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -22,6 +35,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.ClipContext;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -31,13 +45,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Server-side held-beam spells while {@link WandItem} is in use.
- * Reach ramps with tick count to stay roughly aligned with the client beam extension
- * ({@link at.koopro.wizardsandbeasts.client.wand.BeamSettings#extensionSpeed}).
+ * Reach ramps with tick count to stay aligned with the client beam extension
+ * ({@link BeamRayResolver#extensionBlocksPerTick()}).
  */
 public final class WandBeamChannelLogic {
 
-    /** Keep in sync with {@link at.koopro.wizardsandbeasts.client.wand.BeamSettings#extensionSpeed}. */
-    private static final float BEAM_EXTENSION_BLOCKS_PER_TICK = 8.0f;
     private static final int LEVIOSA_EFFECT_INTERVAL_TICKS = 1;
     private static final int LEVIOSA_TARGET_GRACE_MISS_TICKS = 4;
     private static final int LEVIOSA_PARTICLE_COLOR = 0xFFB266FF;
@@ -56,6 +68,10 @@ public final class WandBeamChannelLogic {
     public static void tick(ServerPlayer player, ItemStack wandStack) {
         if (!(player.level() instanceof ServerLevel level)) return;
         if (!(wandStack.getItem() instanceof WandItem)) {
+            endChannel(player);
+            return;
+        }
+        if (!WandHelper.isWandBondedTo(player, wandStack)) {
             endChannel(player);
             return;
         }
@@ -100,7 +116,7 @@ public final class WandBeamChannelLogic {
             endChannel(player);
             return;
         }
-        if (Config.enforceSpellRequirements && !spell.getRequirement().isMet(data)) {
+        if (Config.enforceSpellRequirements && !spell.getRequirement().isMet(player, data)) {
             endChannel(player);
             return;
         }
@@ -118,7 +134,7 @@ public final class WandBeamChannelLogic {
         int targetScanInterval = getTargetScanIntervalTicks();
         int channelEffectInterval = getChannelEffectIntervalTicks();
 
-        float maxReach = Math.min(range, s.beamTicks * BEAM_EXTENSION_BLOCKS_PER_TICK);
+        float maxReach = Math.min(range, s.beamTicks * BeamRayResolver.extensionBlocksPerTick());
         boolean leviosa = WandBeamSpellIds.isLeviosa(spell.getId());
         boolean aguamenti = WandBeamSpellIds.isAguamenti(spell.getId());
         LivingEntity target = null;
@@ -139,7 +155,13 @@ public final class WandBeamChannelLogic {
             s.cachedTarget = leviosaTarget == null ? null : leviosaTarget.getUUID();
         } else if (!aguamenti) {
             if (s.beamTicks % targetScanInterval == 0 || s.cachedTarget == null) {
-                target = SpellHelper.findLivingAlongCrosshair(player, maxReach);
+                // Use the shared resolver so client visual end and server target always agree.
+                BeamRay ray = BeamRayResolver.resolve(player, 1.0f, maxReach, BeamRayResolver.LIVING_FILTER);
+                if (ray.hitsEntity()
+                        && ray.hit() instanceof net.minecraft.world.phys.EntityHitResult ehr
+                        && ehr.getEntity() instanceof LivingEntity living) {
+                    target = living;
+                }
                 s.cachedTarget = target == null ? null : target.getUUID();
             } else {
                 target = findLivingInLevel(player, s.cachedTarget);
@@ -192,7 +214,7 @@ public final class WandBeamChannelLogic {
         }
         if (s.beamTicks % 3 == 0) {
             Vec3 c = waterAim.getCenter();
-            SpellHelper.spawnBurst(level, c, spell.getColor(), 5, 0.12);
+            SpellImpactBurstS2CPacket.sendToTracking(player, c, SpellFamilies.of(spell), spell.getColor(), 5, 0.12f);
         }
     }
 
@@ -225,7 +247,8 @@ public final class WandBeamChannelLogic {
         if (s.avadaConsumed || target == null) return;
         if (s.beamTicks < AVADA_MIN_CHARGE_TICKS) {
             if (s.beamTicks % 3 == 0) {
-                SpellHelper.spawnBurst(level, target.getBoundingBox().getCenter(), 0xFF00FF00, 4, 0.08);
+                SpellImpactBurstS2CPacket.sendToTracking(caster, target.getBoundingBox().getCenter(),
+                        SpellFamily.DARK, 0xFF00FF00, 4, 0.08f);
             }
             return;
         }
@@ -238,11 +261,18 @@ public final class WandBeamChannelLogic {
         if (los.getType() != HitResult.Type.MISS) {
             return;
         }
+        if (target instanceof ServerPlayer victim
+                && Boolean.TRUE.equals(victim.getData(ModAttachments.LOVE_PROTECTION.get()))) {
+            // TODO(redemption): timed love protection window against AK
+            return;
+        }
         target.invulnerableTime = 0;
         target.hurt(level.damageSources().playerAttack(caster), 1_000_000f);
         if (target.isAlive()) {
             return;
         }
+        level.playSound(null, target.blockPosition(), ModSounds.SPELL_IMPACT_AVADA.get(), SoundSource.PLAYERS,
+                0.85f, 0.94f + level.random.nextFloat() * 0.08f);
         s.avadaConsumed = true;
         recordBeamProficiencyHit(caster, spellId, s, 1);
         AvadaBlastS2CPacket.sendToTracking(caster, caster.getEyePosition(), target.getBoundingBox().getCenter());
@@ -253,6 +283,9 @@ public final class WandBeamChannelLogic {
 
     private static void handleCrucioChannel(ServerPlayer caster, Spell spell,
                                             @Nullable LivingEntity target, Session s, int channelEffectInterval) {
+        if (!ModuleManager.isEnabled(Module.DARK_ARTS)) {
+            return;
+        }
         if (target == null) {
             if (s.lastCrucioTarget != null) {
                 LivingEntity prev = findLivingInLevel(caster, s.lastCrucioTarget);
@@ -273,16 +306,32 @@ public final class WandBeamChannelLogic {
         }
 
         s.lastCrucioTarget = tid;
-        int effectInterval = s.beamTicks >= 60 ? 3 : channelEffectInterval;
+        int effectInterval = Math.max(1, (int) (channelEffectInterval / Math.max(0.5f, crucioIntentMultiplier(caster, spell))));
         if (s.beamTicks % effectInterval == 0) {
-            spell.applyTargetEffects(target);
+            float intent = crucioIntentMultiplier(caster, spell);
+            PacketDistributor.sendToPlayer(caster, new CrucioIntentFeedbackS2CPacket(intent));
+            float corruption = caster.getData(ModAttachments.DARK_CORRUPTION.get());
+            caster.setData(ModAttachments.DARK_CORRUPTION.get(), Math.min(100f, corruption + 5.0f * intent));
+            target.removeEffect(MobEffects.WITHER);
+            target.removeEffect(MobEffects.SLOWNESS);
+            int painTicks = Math.max(20, (int) (60 / intent));
+            target.addEffect(new MobEffectInstance(ModEffects.CRUCIATUS_PAIN, painTicks, 0, false, true, true));
             recordBeamProficiencyHit(caster, spell.getId(), s, 20);
         }
         if (s.beamTicks >= 40 && s.beamTicks % 20 == 0) {
-            float rampDamage = Math.min(1.5f, 0.4f + (s.beamTicks / 120f));
+            float intent = crucioIntentMultiplier(caster, spell);
+            float rampDamage = Math.min(1.5f, 0.4f + (s.beamTicks / 120f)) * intent;
             target.hurt(caster.level().damageSources().magic(), rampDamage);
             recordBeamProficiencyHit(caster, spell.getId(), s, 20);
         }
+    }
+
+    private static float crucioIntentMultiplier(ServerPlayer caster, Spell spell) {
+        float baseIntent = 0.3f;
+        float corruption = caster.getData(ModAttachments.DARK_CORRUPTION.get()) / 100.0f * 0.5f;
+        float prof = spell.getProficiencyScalar(caster) * 0.4f;
+        float darkArtsNodes = SkillSystemAPI.countUnlockedSkillsInTree(caster, SkillTreeId.DARK_ARTS) / 6.0f * 0.3f;
+        return Mth.clamp(baseIntent + corruption + prof + darkArtsNodes, 0.1f, 1.5f);
     }
 
     private static void handleLeviosaChannel(ServerPlayer caster, String spellId, @Nullable Entity target, Session s, float maxReach) {
@@ -346,28 +395,13 @@ public final class WandBeamChannelLogic {
 
     @Nullable
     private static Entity findLeviosaTargetAlongCrosshair(ServerPlayer caster, float maxRange) {
-        if (maxRange <= 0f || !(caster.level() instanceof ServerLevel level)) return null;
-        Vec3 start = caster.getEyePosition();
-        Vec3 end = start.add(caster.getLookAngle().scale(maxRange));
-        AABB searchBox = caster.getBoundingBox().expandTowards(caster.getLookAngle().scale(maxRange)).inflate(1.5);
-
-        Entity closest = null;
-        double closestDistSqr = maxRange * maxRange;
-
-        for (Entity candidate : level.getEntities(caster, searchBox, e -> isValidLeviosaTarget(caster, e))) {
-            double inflate = candidate instanceof ItemEntity
-                    ? 0.6
-                    : Math.max(0.1, candidate.getPickRadius());
-            AABB hitBox = candidate.getBoundingBox().inflate(inflate);
-            java.util.Optional<Vec3> intercept = hitBox.clip(start, end);
-            if (intercept.isEmpty()) continue;
-            double distSqr = start.distanceToSqr(intercept.get());
-            if (distSqr < closestDistSqr) {
-                closestDistSqr = distSqr;
-                closest = candidate;
-            }
+        if (maxRange <= 0f) return null;
+        BeamRay ray = BeamRayResolver.resolve(caster, 1.0f, maxRange, BeamRayResolver.LEVIOSA_FILTER);
+        if (ray.hit() instanceof net.minecraft.world.phys.EntityHitResult ehr) {
+            Entity hit = ehr.getEntity();
+            return isValidLeviosaTarget(caster, hit) ? hit : null;
         }
-        return closest;
+        return null;
     }
 
     private static boolean isValidLeviosaTarget(ServerPlayer caster, Entity entity) {
@@ -416,7 +450,8 @@ public final class WandBeamChannelLogic {
         target.hurtMarked = true;
         target.fallDistance = 0f;
         if (caster.level() instanceof ServerLevel level) {
-            SpellHelper.spawnBurst(level, target.getBoundingBox().getCenter(), LEVIOSA_PARTICLE_COLOR, 6, 0.18);
+            SpellImpactBurstS2CPacket.sendToTracking(caster, target.getBoundingBox().getCenter(),
+                    SpellFamily.ARCANE, LEVIOSA_PARTICLE_COLOR, 6, 0.18f);
         }
     }
 
@@ -450,7 +485,7 @@ public final class WandBeamChannelLogic {
         }
         float range = spell.getProperties().getRange() * WandStatsResolver.resolve(wand).rangeFor(spell);
         if (range <= 0f) range = 32f;
-        float maxReach = Math.min(range, s.beamTicks * BEAM_EXTENSION_BLOCKS_PER_TICK);
+        float maxReach = Math.min(range, s.beamTicks * BeamRayResolver.extensionBlocksPerTick());
         float cap = Math.max(LEVIOSA_MIN_DISTANCE, Math.min(maxReach, LEVIOSA_MAX_DISTANCE));
         s.leviosaHoldDistance = Mth.clamp(s.leviosaHoldDistance + delta, LEVIOSA_MIN_DISTANCE, cap);
     }
@@ -458,6 +493,8 @@ public final class WandBeamChannelLogic {
     private static void stripCrucioEffects(LivingEntity entity) {
         entity.removeEffect(MobEffects.WITHER);
         entity.removeEffect(MobEffects.SLOWNESS);
+        entity.removeEffect(ModEffects.CRUCIATUS_PAIN);
+        entity.removeEffect(ModEffects.CRUCIO_SANITY_DRAIN);
     }
 
     static final class Session {

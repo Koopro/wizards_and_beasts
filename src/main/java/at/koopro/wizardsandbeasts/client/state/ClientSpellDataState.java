@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.client.state;
 
 import at.koopro.wizardsandbeasts.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.network.SpellDataDeltaS2CPacket;
+import at.koopro.wizardsandbeasts.network.SpellProficiencySyncS2CPacket;
 import at.koopro.wizardsandbeasts.network.SpellDataSyncS2CPacket;
 
 import java.util.Map;
@@ -38,6 +39,9 @@ public final class ClientSpellDataState {
         for (Map.Entry<String, Integer> e : pkt.successfulHits().entrySet()) {
             INSTANCE.setSuccessfulHits(e.getKey(), e.getValue());
         }
+        for (Map.Entry<String, Float> e : pkt.spellProficiencies().entrySet()) {
+            INSTANCE.setSpellProficiency(e.getKey(), e.getValue());
+        }
         for (Map.Entry<String, Integer> e : pkt.rejectCounts().entrySet()) {
             INSTANCE.setRejectCount(e.getKey(), e.getValue());
         }
@@ -48,5 +52,9 @@ public final class ClientSpellDataState {
         INSTANCE.setCooldown(pkt.spellId(), pkt.cooldownExpiryTick());
         INSTANCE.setCastCount(pkt.spellId(), pkt.newCastCount());
         INSTANCE.setSuccessfulHits(pkt.spellId(), pkt.newSuccessfulHits());
+    }
+
+    public static void applyProficiencyDelta(SpellProficiencySyncS2CPacket pkt) {
+        INSTANCE.setSpellProficiency(pkt.spellId(), pkt.proficiency());
     }
 }

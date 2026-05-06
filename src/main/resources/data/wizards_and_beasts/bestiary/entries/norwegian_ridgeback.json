@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:norwegian_ridgeback",
+  "displayName": "bestiary.wizards_and_beasts.norwegian_ridgeback.name",
+  "category": "DRAGON",
+  "mmRating": 4,
+  "habitat": "bestiary.wizards_and_beasts.norwegian_ridgeback.habitat",
+  "size": "ENORMOUS",
+  "shortLore": "bestiary.wizards_and_beasts.norwegian_ridgeback.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.norwegian_ridgeback.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.norwegian_ridgeback.ability.1",
+    "bestiary.wizards_and_beasts.norwegian_ridgeback.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.norwegian_ridgeback.threat.1",
+    "bestiary.wizards_and_beasts.norwegian_ridgeback.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.norwegian_ridgeback.weakness.1",
+    "bestiary.wizards_and_beasts.norwegian_ridgeback.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/norwegian_ridgeback.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/norwegian_ridgeback.png",
+  "sortOrder": 1
+}

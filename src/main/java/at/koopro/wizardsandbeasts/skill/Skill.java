@@ -18,6 +18,7 @@ public final class Skill {
     private final int pointCost;
     private final List<String> prerequisites;
     private final List<SkillEffect> effects;
+    private final List<SkillNodeEffect> nodeEffects;
     private final int tier;
     private final int column;
 
@@ -30,6 +31,7 @@ public final class Skill {
         this.pointCost = builder.pointCost;
         this.prerequisites = Collections.unmodifiableList(new ArrayList<>(builder.prerequisites));
         this.effects = Collections.unmodifiableList(new ArrayList<>(builder.effects));
+        this.nodeEffects = Collections.unmodifiableList(new ArrayList<>(builder.nodeEffects));
         this.tier = builder.tier;
         this.column = builder.column;
     }
@@ -42,6 +44,7 @@ public final class Skill {
     public int getPointCost() { return pointCost; }
     public List<String> getPrerequisites() { return prerequisites; }
     public List<SkillEffect> getEffects() { return effects; }
+    public List<SkillNodeEffect> getNodeEffects() { return nodeEffects; }
     public int getTier() { return tier; }
     public int getColumn() { return column; }
 
@@ -58,6 +61,7 @@ public final class Skill {
         private int pointCost = 1;
         private final List<String> prerequisites = new ArrayList<>();
         private final List<SkillEffect> effects = new ArrayList<>();
+        private final List<SkillNodeEffect> nodeEffects = new ArrayList<>();
         private int tier;
         private int column;
 
@@ -96,6 +100,11 @@ public final class Skill {
             return this;
         }
 
+        public Builder nodeEffect(SkillNodeEffect effect) {
+            this.nodeEffects.add(effect);
+            return this;
+        }
+
         public Builder position(int tier, int column) {
             this.tier = tier;
             this.column = column;
@@ -104,7 +113,40 @@ public final class Skill {
 
         public Skill build() {
             if (tree == null) throw new IllegalStateException("Skill '" + id + "' must have a tree");
+            if (nodeEffects.isEmpty()) {
+                deriveNodeEffectsFromLegacyEffects();
+            }
             return new Skill(this);
+        }
+
+        private void deriveNodeEffectsFromLegacyEffects() {
+            for (SkillEffect effect : effects) {
+                if (effect instanceof SkillEffect.CategoryCooldownReduction reduction) {
+                    nodeEffects.add(new SkillNodeEffect.SpellCooldownMultiplier(
+                            reduction.category(),
+                            Math.max(0.1f, 1.0f - reduction.reductionPerLevel())));
+                } else if (effect instanceof SkillEffect.CategoryDamageBonus bonus) {
+                    nodeEffects.add(new SkillNodeEffect.SpellDamageMultiplier(
+                            bonus.category(),
+                            1.0f + bonus.bonusPerLevel()));
+                } else if (effect instanceof SkillEffect.PassiveAttribute passive) {
+                    var attribute = switch (passive.attributeId()) {
+                        case "max_health" -> net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH;
+                        case "movement_speed" -> net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED;
+                        case "armor" -> net.minecraft.world.entity.ai.attributes.Attributes.ARMOR;
+                        default -> null;
+                    };
+                    if (attribute != null) {
+                        nodeEffects.add(new SkillNodeEffect.AttributeBoost(
+                                attribute,
+                                passive.amountPerLevel(),
+                                net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE,
+                                net.minecraft.resources.Identifier.fromNamespaceAndPath(
+                                        "wizards_and_beasts",
+                                        "skill/" + tree.getId() + "/" + id + "/" + passive.attributeId())));
+                    }
+                }
+            }
         }
     }
 }
