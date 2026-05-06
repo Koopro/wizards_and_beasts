@@ -5,6 +5,7 @@ import at.koopro.wizardsandbeasts.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.item.WandItem;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.network.AvadaBlastS2CPacket;
+import at.koopro.wizardsandbeasts.registry.ModSounds;
 import at.koopro.wizardsandbeasts.network.SpellImpactBurstS2CPacket;
 import at.koopro.wizardsandbeasts.network.SpellCastC2SPacket;
 import at.koopro.wizardsandbeasts.spell.cast.BeamRay;
@@ -18,6 +19,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -256,6 +258,8 @@ public final class WandBeamChannelLogic {
         if (target.isAlive()) {
             return;
         }
+        level.playSound(null, target.blockPosition(), ModSounds.SPELL_IMPACT_AVADA.get(), SoundSource.PLAYERS,
+                0.85f, 0.94f + level.random.nextFloat() * 0.08f);
         s.avadaConsumed = true;
         recordBeamProficiencyHit(caster, spellId, s, 1);
         AvadaBlastS2CPacket.sendToTracking(caster, caster.getEyePosition(), target.getBoundingBox().getCenter());

@@ -52,9 +52,10 @@ public final class WandSoundHandler {
 
     @SubscribeEvent
     public static void onAttackEntity(AttackEntityEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) {
+        if (!(event.getEntity() instanceof Player)) {
             return;
         }
+        ServerPlayer player = (ServerPlayer) event.getEntity();
         if (!(player.level() instanceof ServerLevel)) {
             return;
         }
