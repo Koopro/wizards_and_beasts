@@ -1,9 +1,11 @@
 package at.koopro.wizardsandbeasts.wand.allegiance;
 
-import at.koopro.wizardsandbeasts.item.WandItem;
-import at.koopro.wizardsandbeasts.item.wand.WandFlexibility;
+import at.koopro.wizardsandbeasts.wand.elder.ElderWandEventHandler;
+import at.koopro.wizardsandbeasts.wand.item.WandItem;
+import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
+import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.wand.WandAttachments;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.registry.WandCoreDefinition;
@@ -97,6 +99,9 @@ public final class WandDisarmAllegianceSystem {
         float allegiance = Math.max(0.0f, WandComponents.getAllegianceScore(wand) - 0.3f);
         wand.set(WandComponents.WAND_ALLEGIANCE_SCORE.get(), allegiance);
         wand.set(WandComponents.WAND_MASTER.get(), Optional.of(attacker.getUUID()));
+        if (ModDataComponents.isElderWand(wand)) {
+            ElderWandEventHandler.onElderWandMasterChanged((net.minecraft.server.level.ServerLevel) attacker.level(), attacker.getUUID());
+        }
         WandFlexibility flex = WandComponents.getFlexibility(wand);
         Identifier wood = WandComponents.getWood(wand);
         if (wood != null && coreId != null && flex != null) {

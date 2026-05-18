@@ -8,7 +8,7 @@ Audit answers:
 4) Skill tree nodes are Java-defined (SkillTrees + *Skills classes), while bestiary/spells are datapack-driven.
 */
 
-import at.koopro.wizardsandbeasts.network.SkillBonusSyncS2CPayload;
+import at.koopro.wizardsandbeasts.skill.network.SkillBonusSyncS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.skill.SkillNodeEffect.AttributeBoost;
 import at.koopro.wizardsandbeasts.skill.SkillNodeEffect.BestiaryXpMultiplier;
@@ -16,7 +16,7 @@ import at.koopro.wizardsandbeasts.skill.SkillNodeEffect.BroomSpeedBonus;
 import at.koopro.wizardsandbeasts.skill.SkillNodeEffect.SpellCooldownMultiplier;
 import at.koopro.wizardsandbeasts.skill.SkillNodeEffect.SpellDamageMultiplier;
 import at.koopro.wizardsandbeasts.skill.SkillNodeEffect.UnlockSpellEarly;
-import at.koopro.wizardsandbeasts.type.profession.ProfessionNode;
+import at.koopro.wizardsandbeasts.heritage.profession.ProfessionNode;
 import net.minecraft.network.protocol.game.ClientboundUpdateAttributesPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -38,8 +38,8 @@ public final class SkillAttributeApplicator {
     public static void applyAll(ServerPlayer player) {
         removeAll(player);
 
-        Map<at.koopro.wizardsandbeasts.spell.SpellCategory, Float> cooldowns = new EnumMap<>(at.koopro.wizardsandbeasts.spell.SpellCategory.class);
-        Map<at.koopro.wizardsandbeasts.spell.SpellCategory, Float> damages = new EnumMap<>(at.koopro.wizardsandbeasts.spell.SpellCategory.class);
+        Map<at.koopro.wizardsandbeasts.spell.core.SpellCategory, Float> cooldowns = new EnumMap<>(at.koopro.wizardsandbeasts.spell.core.SpellCategory.class);
+        Map<at.koopro.wizardsandbeasts.spell.core.SpellCategory, Float> damages = new EnumMap<>(at.koopro.wizardsandbeasts.spell.core.SpellCategory.class);
         Map<net.minecraft.resources.Identifier, Integer> gateOverrides = new HashMap<>();
         Map<at.koopro.wizardsandbeasts.bestiary.BestiaryCategory, Float> bestiary = new EnumMap<>(at.koopro.wizardsandbeasts.bestiary.BestiaryCategory.class);
         float broomSpeedBonus = 0.0f;

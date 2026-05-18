@@ -1,15 +1,20 @@
 package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.attachment.DisarmLogState;
-import at.koopro.wizardsandbeasts.attachment.HappinessAttachment;
-import at.koopro.wizardsandbeasts.attachment.ImperioControlState;
-import at.koopro.wizardsandbeasts.data.PlayerAbilityData;
-import at.koopro.wizardsandbeasts.data.PlayerBestiaryData;
-import at.koopro.wizardsandbeasts.data.PlayerSkillData;
-import at.koopro.wizardsandbeasts.data.PlayerSpellData;
-import at.koopro.wizardsandbeasts.data.PlayerHeritageData;
-import at.koopro.wizardsandbeasts.data.PlayerVaultData;
+import at.koopro.wizardsandbeasts.azkaban.attachment.AzkabanTrespasserData;
+import at.koopro.wizardsandbeasts.bloodpact.BloodPactRecord;
+import at.koopro.wizardsandbeasts.bestiary.creature.niffler.CarriedNifflerAttachment;
+import at.koopro.wizardsandbeasts.wand.event.DisarmLogState;
+import at.koopro.wizardsandbeasts.bestiary.creature.niffler.HappinessAttachment;
+import at.koopro.wizardsandbeasts.spell.imperio.ImperioControlState;
+import at.koopro.wizardsandbeasts.ability.data.PlayerAbilityData;
+import at.koopro.wizardsandbeasts.bestiary.data.PlayerBestiaryData;
+import at.koopro.wizardsandbeasts.owl.data.PlayerOWLData;
+import at.koopro.wizardsandbeasts.heritage.data.PlayerProfessionData;
+import at.koopro.wizardsandbeasts.skill.data.PlayerSkillData;
+import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
+import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
+import at.koopro.wizardsandbeasts.currency.vault.PlayerVaultData;
 import at.koopro.wizardsandbeasts.skill.PlayerSkillBonusData;
 import net.minecraft.nbt.CompoundTag;
 import net.neoforged.neoforge.attachment.AttachmentType;
@@ -20,7 +25,11 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 import com.mojang.serialization.Codec;
 
@@ -57,6 +66,18 @@ public class ModAttachments {
     public static final Supplier<AttachmentType<PlayerAbilityData>> PLAYER_ABILITY_DATA =
             ATTACHMENTS.register("player_ability_data", () -> AttachmentType.builder(() -> PlayerAbilityData.DEFAULT)
                     .serialize(PlayerAbilityData.CODEC.fieldOf("data"))
+                    .copyOnDeath()
+                    .build());
+
+    public static final Supplier<AttachmentType<PlayerOWLData>> OWL_DATA =
+            ATTACHMENTS.register("owl_data", () -> AttachmentType.builder(() -> PlayerOWLData.DEFAULT)
+                    .serialize(PlayerOWLData.CODEC.fieldOf("data"))
+                    .copyOnDeath()
+                    .build());
+
+    public static final Supplier<AttachmentType<PlayerProfessionData>> PROFESSION_DATA =
+            ATTACHMENTS.register("profession_data", () -> AttachmentType.builder(() -> PlayerProfessionData.DEFAULT)
+                    .serialize(PlayerProfessionData.CODEC.fieldOf("data"))
                     .copyOnDeath()
                     .build());
 
@@ -119,6 +140,35 @@ public class ModAttachments {
                     .serialize(Codec.INT.xmap(v -> Math.max(0, v), v -> v).fieldOf("ticks"))
                     .copyOnDeath()
                     .build());
+
+    /** Tracks the UUID of a Niffler currently carried in the player's pocket. Not persisted on death. */
+    public static final Supplier<AttachmentType<CarriedNifflerAttachment>> CARRIED_NIFFLER =
+            ATTACHMENTS.register("carried_niffler", () -> AttachmentType.builder(() -> CarriedNifflerAttachment.EMPTY)
+                    .serialize(CarriedNifflerAttachment.CODEC.fieldOf("data"))
+                    .build());
+
+    public static final Supplier<AttachmentType<List<BloodPactRecord>>> ACTIVE_BLOOD_PACTS =
+            ATTACHMENTS.register("active_blood_pacts", () ->
+                    AttachmentType.<List<BloodPactRecord>>builder((Supplier<List<BloodPactRecord>>) ArrayList::new)
+                            .serialize(BloodPactRecord.CODEC.listOf().fieldOf("pacts"))
+                            .copyOnDeath()
+                            .build());
+
+    public static final Supplier<AttachmentType<AzkabanTrespasserData>> AZKABAN_TRESPASSER_TAG =
+            ATTACHMENTS.register("azkaban_trespasser_tag", () ->
+                    AttachmentType.builder(() -> AzkabanTrespasserData.DEFAULT)
+                            .serialize(AzkabanTrespasserData.CODEC.fieldOf("data"))
+                            .copyOnDeath()
+                            .build());
+
+    public static final Supplier<AttachmentType<Set<String>>> FLOO_VISITED_DESTINATIONS =
+            ATTACHMENTS.register("floo_visited_destinations", () ->
+                    AttachmentType.<Set<String>>builder(() -> new HashSet<>())
+                            .serialize(Codec.list(Codec.STRING)
+                                    .<Set<String>>xmap(list -> new HashSet<>(list), set -> List.copyOf(set))
+                                    .fieldOf("visited"))
+                            .copyOnDeath()
+                            .build());
 
     private ModAttachments() {
     }

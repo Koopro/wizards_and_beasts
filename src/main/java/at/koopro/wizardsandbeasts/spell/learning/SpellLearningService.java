@@ -1,14 +1,14 @@
 package at.koopro.wizardsandbeasts.spell.learning;
 
 import at.koopro.wizardsandbeasts.Config;
-import at.koopro.wizardsandbeasts.data.PlayerSpellData;
-import at.koopro.wizardsandbeasts.data.PlayerVaultData;
-import at.koopro.wizardsandbeasts.network.SpellDataSyncS2CPacket;
+import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
+import at.koopro.wizardsandbeasts.currency.vault.PlayerVaultData;
+import at.koopro.wizardsandbeasts.spell.network.SpellDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
-import at.koopro.wizardsandbeasts.spell.Spell;
-import at.koopro.wizardsandbeasts.spell.Spells;
-import at.koopro.wizardsandbeasts.type.ObscurialRules;
-import at.koopro.wizardsandbeasts.type.Heritage;
+import at.koopro.wizardsandbeasts.spell.core.Spell;
+import at.koopro.wizardsandbeasts.spell.core.Spells;
+import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialRules;
+import at.koopro.wizardsandbeasts.heritage.Heritage;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayList;
@@ -71,7 +71,7 @@ public final class SpellLearningService {
         }
 
         data.learnSpell(spell.getId());
-        SpellDataSyncS2CPacket.syncToPlayer(player);
+        SpellDataSyncS2CPayload.syncToPlayer(player);
         return LearnResult.success(spell.getDisplayName());
     }
 

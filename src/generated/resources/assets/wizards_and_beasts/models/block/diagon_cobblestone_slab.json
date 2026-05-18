@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "wizards_and_beasts:block/diagon_cobblestone",
+    "side": "wizards_and_beasts:block/diagon_cobblestone",
+    "top": "wizards_and_beasts:block/diagon_cobblestone"
+  }
+}

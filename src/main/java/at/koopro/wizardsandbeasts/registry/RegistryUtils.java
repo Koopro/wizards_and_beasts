@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.item.BroomItem;
+import at.koopro.wizardsandbeasts.broom.item.BroomItem;
 import at.koopro.wizardsandbeasts.item.SimpleTooltipItem;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BlockItem;
@@ -21,14 +21,13 @@ final class RegistryUtils {
     }
 
     static DeferredItem<BroomItem> registerBroom(String name, int durability) {
-        return ModItems.ITEMS.registerItem(name, props -> new BroomItem(props, modId(name)),
-                new Item.Properties().stacksTo(1).durability(durability));
+        return ModItems.ITEMS.registerItem(name,
+                props -> new BroomItem(props.stacksTo(1).durability(durability), modId(name)));
     }
 
     static DeferredItem<SimpleTooltipItem> registerTooltipItem(String name, String tooltipKey, int stackSize) {
         return ModItems.ITEMS.registerItem(name,
-                props -> new SimpleTooltipItem(props, tooltipKey),
-                new Item.Properties().stacksTo(stackSize));
+                props -> new SimpleTooltipItem(props.stacksTo(stackSize), tooltipKey));
     }
 
     static DeferredItem<BlockItem> registerSimpleBlockItem(String name, DeferredBlock<? extends Block> block) {

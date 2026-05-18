@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.spell.cast;
 
+import at.koopro.wizardsandbeasts.spell.core.*;
+
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 

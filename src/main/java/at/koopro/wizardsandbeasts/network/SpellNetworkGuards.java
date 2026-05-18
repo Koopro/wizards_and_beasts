@@ -1,9 +1,9 @@
 package at.koopro.wizardsandbeasts.network;
 
-import at.koopro.wizardsandbeasts.data.PlayerSpellData;
+import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
-import at.koopro.wizardsandbeasts.type.HeritageVariant;
-import at.koopro.wizardsandbeasts.type.Heritage;
+import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
+import at.koopro.wizardsandbeasts.heritage.Heritage;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 

@@ -8,13 +8,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 
 public class ModDimensions {
-    public static final ResourceKey<Level> POCKET_REALM = ResourceKey.create(
+    public static final ResourceKey<Level> EXTENSION_REALM = ResourceKey.create(
             Registries.DIMENSION,
-            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "pocket_realm"));
+            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "extension_realm"));
 
-    public static final ResourceKey<DimensionType> POCKET_REALM_TYPE = ResourceKey.create(
+    public static final ResourceKey<DimensionType> EXTENSION_REALM_TYPE = ResourceKey.create(
             Registries.DIMENSION_TYPE,
-            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "pocket_realm"));
+            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "extension_realm"));
 
     private ModDimensions() {
     }

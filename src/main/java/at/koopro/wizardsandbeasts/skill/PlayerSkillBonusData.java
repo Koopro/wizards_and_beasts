@@ -2,7 +2,7 @@ package at.koopro.wizardsandbeasts.skill;
 
 import at.koopro.wizardsandbeasts.bestiary.BestiaryCategory;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
-import at.koopro.wizardsandbeasts.spell.SpellCategory;
+import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.Identifier;

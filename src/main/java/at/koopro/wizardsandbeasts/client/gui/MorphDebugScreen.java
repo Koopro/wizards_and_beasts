@@ -1,9 +1,9 @@
 package at.koopro.wizardsandbeasts.client.gui;
 
 import at.koopro.wizardsandbeasts.form.FormRegistry;
-import at.koopro.wizardsandbeasts.client.state.ClientFormDataState;
-import at.koopro.wizardsandbeasts.network.FormChangeRequestC2SPacket;
-import at.koopro.wizardsandbeasts.network.SizeOverrideC2SPacket;
+import at.koopro.wizardsandbeasts.form.client.state.ClientFormDataState;
+import at.koopro.wizardsandbeasts.form.network.FormChangeRequestC2SPayload;
+import at.koopro.wizardsandbeasts.form.network.SizeOverrideC2SPayload;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -24,9 +24,10 @@ public class MorphDebugScreen extends Screen {
     private static final int PANEL_W = 400;
     private static final int PANEL_H = 300;
 
-    private ExtendedSlider sliderX;
-    private ExtendedSlider sliderY;
-    private ExtendedSlider sliderZ;
+    private ExtendedSlider sliderHitboxH;
+    private ExtendedSlider sliderModelScale;
+    private ExtendedSlider sliderAspectX;
+    private ExtendedSlider sliderAspectZ;
 
     @Nullable private String selectedFormId;
     private int scrollOffset = 0;
@@ -86,56 +87,60 @@ public class MorphDebugScreen extends Screen {
             }).bounds(listX + btnW + layout.s(4), listY + (maxVisible - 1) * (btnH + layout.s(2)), layout.s(20), layout.s(16)).build());
         }
 
-        // ── Scale sliders (right side) ──
+        // ── Size sliders (right side) ──
         int sliderX_pos = px + layout.s(190);
         int sliderY_pos = py + layout.s(25);
         int sliderW = layout.s(190);
 
-        sliderX = new ExtendedSlider(sliderX_pos, sliderY_pos, sliderW, layout.s(20),
-                Component.literal("X: "), Component.empty(),
+        sliderHitboxH = new ExtendedSlider(sliderX_pos, sliderY_pos, sliderW, layout.s(20),
+                Component.literal("Hitbox H: "), Component.empty(),
+                0.1, 9.0, 1.8, true);
+        sliderModelScale = new ExtendedSlider(sliderX_pos, sliderY_pos + layout.s(28), sliderW, layout.s(20),
+                Component.literal("Model Scale: "), Component.empty(),
                 0.1, 5.0, 1.0, true);
-        sliderY = new ExtendedSlider(sliderX_pos, sliderY_pos + layout.s(28), sliderW, layout.s(20),
-                Component.literal("Y: "), Component.empty(),
-                0.1, 5.0, 1.0, true);
-        sliderZ = new ExtendedSlider(sliderX_pos, sliderY_pos + layout.s(56), sliderW, layout.s(20),
-                Component.literal("Z: "), Component.empty(),
-                0.1, 5.0, 1.0, true);
+        sliderAspectX = new ExtendedSlider(sliderX_pos, sliderY_pos + layout.s(56), sliderW, layout.s(20),
+                Component.literal("Aspect X: "), Component.empty(),
+                0.1, 3.0, 1.0, true);
+        sliderAspectZ = new ExtendedSlider(sliderX_pos, sliderY_pos + layout.s(84), sliderW, layout.s(20),
+                Component.literal("Aspect Z: "), Component.empty(),
+                0.1, 3.0, 1.0, true);
 
-        addRenderableWidget(sliderX);
-        addRenderableWidget(sliderY);
-        addRenderableWidget(sliderZ);
+        addRenderableWidget(sliderHitboxH);
+        addRenderableWidget(sliderModelScale);
+        addRenderableWidget(sliderAspectX);
+        addRenderableWidget(sliderAspectZ);
 
-        // Apply Scale button
-        addRenderableWidget(Button.builder(Component.literal("Apply Scale"), btn -> {
+        // Apply Size button
+        addRenderableWidget(Button.builder(Component.literal("Apply Size"), btn -> {
             if (minecraft != null && minecraft.player != null) {
                 UUID uuid = minecraft.player.getUUID();
-                ClientPacketDistributor.sendToServer(new SizeOverrideC2SPacket(
+                ClientPacketDistributor.sendToServer(new SizeOverrideC2SPayload(
                         uuid,
-                        (float) sliderX.getValue(),
-                        (float) sliderY.getValue(),
-                        (float) sliderZ.getValue()));
+                        (float) sliderHitboxH.getValue(),
+                        (float) sliderModelScale.getValue(),
+                        (float) sliderAspectX.getValue(),
+                        (float) sliderAspectZ.getValue()));
             }
-        }).bounds(sliderX_pos, sliderY_pos + layout.s(90), sliderW, layout.s(20)).build());
+        }).bounds(sliderX_pos, sliderY_pos + layout.s(118), sliderW, layout.s(20)).build());
 
         // Apply Form button
         addRenderableWidget(Button.builder(Component.literal("Apply Form"), btn -> {
             if (selectedFormId != null && minecraft != null && minecraft.player != null) {
-                ClientPacketDistributor.sendToServer(new FormChangeRequestC2SPacket(
+                ClientPacketDistributor.sendToServer(new FormChangeRequestC2SPayload(
                         minecraft.player.getUUID(), selectedFormId));
             }
-        }).bounds(sliderX_pos, sliderY_pos + layout.s(118), sliderW, layout.s(20)).build());
+        }).bounds(sliderX_pos, sliderY_pos + layout.s(146), sliderW, layout.s(20)).build());
 
         // Transition Test button
         addRenderableWidget(Button.builder(Component.literal("Test Transition"), btn -> {
             if (selectedFormId != null && minecraft != null && minecraft.player != null) {
                 String currentFormId = getCurrentFormId();
                 if (currentFormId != null && !currentFormId.equals(selectedFormId)) {
-                    // Send form change — server TransitionManager handles the transition
-                    ClientPacketDistributor.sendToServer(new FormChangeRequestC2SPacket(
+                    ClientPacketDistributor.sendToServer(new FormChangeRequestC2SPayload(
                             minecraft.player.getUUID(), selectedFormId));
                 }
             }
-        }).bounds(sliderX_pos, sliderY_pos + layout.s(146), sliderW, layout.s(20)).build());
+        }).bounds(sliderX_pos, sliderY_pos + layout.s(174), sliderW, layout.s(20)).build());
 
         // Close button
         addRenderableWidget(Button.builder(Component.literal("Close"), btn -> onClose())

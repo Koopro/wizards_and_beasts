@@ -26,6 +26,9 @@ public final class ModuleManager {
         STATES.put(Module.CREATURES, State.DISABLED);
         STATES.put(Module.BESTIARY, State.PREVIEW);
         STATES.put(Module.BROOM_FLIGHT, State.ENABLED);
+        STATES.put(Module.POCKET_DIMENSIONS, State.ENABLED);
+        STATES.put(Module.OWLS, State.PREVIEW);
+        STATES.put(Module.FLOO_NETWORK, State.DISABLED);
     }
 
     private ModuleManager() {

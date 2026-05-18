@@ -1,6 +1,8 @@
 package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.bestiary.creature.niffler.NifflerPouchMenu;
+import at.koopro.wizardsandbeasts.trunk.gui.PocketConfiguratorMenu;
 import at.koopro.wizardsandbeasts.wand.gui.OllivanderTrialMenu;
 import at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu;
 import net.minecraft.core.registries.Registries;
@@ -18,6 +20,12 @@ public final class ModMenuTypes {
 
     public static final DeferredHolder<MenuType<?>, MenuType<OllivanderTrialMenu>> OLLIVANDER_TRIAL =
             MENUS.register("ollivander_trial", () -> IMenuTypeExtension.create(OllivanderTrialMenu::fromNetwork));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<PocketConfiguratorMenu>> POCKET_CONFIGURATOR =
+            MENUS.register("pocket_configurator", () -> IMenuTypeExtension.create(PocketConfiguratorMenu::fromNetwork));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<NifflerPouchMenu>> NIFFLER_POUCH =
+            MENUS.register("niffler_pouch", () -> IMenuTypeExtension.create(NifflerPouchMenu::fromNetwork));
 
     private ModMenuTypes() {
     }

@@ -1,9 +1,9 @@
 package at.koopro.wizardsandbeasts.form;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.event.FormEvents;
-import at.koopro.wizardsandbeasts.network.TransitionEndS2CPacket;
-import at.koopro.wizardsandbeasts.network.TransitionStartS2CPacket;
+import at.koopro.wizardsandbeasts.form.event.FormEvents;
+import at.koopro.wizardsandbeasts.form.network.TransitionEndS2CPayload;
+import at.koopro.wizardsandbeasts.form.network.TransitionStartS2CPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -61,7 +61,7 @@ public final class TransitionManager {
                 player, fromFormId, toFormId, duration));
 
         // Notify clients
-        TransitionStartS2CPacket.sendToTracking(
+        TransitionStartS2CPayload.sendToTracking(
                 player, fromFormId, toFormId, duration, config.screenEffect().ordinal());
 
         return true;
@@ -74,7 +74,7 @@ public final class TransitionManager {
         ActiveTransition transition = ACTIVE.remove(player.getUUID());
         if (transition != null) {
             player.setInvulnerable(transition.wasInvulnerable);
-            TransitionEndS2CPacket.sendToTracking(player, transition.fromFormId);
+            TransitionEndS2CPayload.sendToTracking(player, transition.fromFormId);
         }
     }
 
@@ -119,7 +119,7 @@ public final class TransitionManager {
 
                 NeoForge.EVENT_BUS.post(
                         new FormEvents.PlayerFormTransitionEndEvent(player, t.toFormId));
-                TransitionEndS2CPacket.sendToTracking(player, t.toFormId);
+                TransitionEndS2CPayload.sendToTracking(player, t.toFormId);
             } else {
                 entry.setValue(new ActiveTransition(
                         t.fromFormId, t.toFormId, t.durationTicks,

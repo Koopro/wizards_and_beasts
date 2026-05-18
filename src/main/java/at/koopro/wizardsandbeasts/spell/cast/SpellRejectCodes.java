@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.spell.cast;
 
+import at.koopro.wizardsandbeasts.spell.core.*;
+
 import java.util.Set;
 
 public final class SpellRejectCodes {

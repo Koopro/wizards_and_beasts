@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "wizards_and_beasts:block/hogwarts_flagstone_slab"
+    },
+    "type=double": {
+      "model": "wizards_and_beasts:block/hogwarts_flagstone"
+    },
+    "type=top": {
+      "model": "wizards_and_beasts:block/hogwarts_flagstone_slab_top"
+    }
+  }
+}

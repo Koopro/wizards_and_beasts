@@ -1,6 +1,8 @@
 package at.koopro.wizardsandbeasts.spell.proficiency;
 
-import at.koopro.wizardsandbeasts.data.PlayerSpellData;
+import at.koopro.wizardsandbeasts.spell.core.*;
+
+import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;

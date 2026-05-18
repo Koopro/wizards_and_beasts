@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.wand.cast;
 
-import at.koopro.wizardsandbeasts.spell.Spell;
-import at.koopro.wizardsandbeasts.spell.SpellCategory;
+import at.koopro.wizardsandbeasts.spell.core.Spell;
+import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 
 import java.util.Collections;
 import java.util.EnumMap;
@@ -11,7 +11,7 @@ import java.util.Map;
  * Immutable bundle of wand-derived multipliers and per-{@link SpellCategory}
  * affinity bonuses. Combined with skill and proficiency multipliers in the
  * cast pipeline; see {@link at.koopro.wizardsandbeasts.spell.SpellExecutor} and
- * {@link at.koopro.wizardsandbeasts.network.SpellCastC2SPacket}.
+ * {@link at.koopro.wizardsandbeasts.network.SpellCastC2SPayload}.
  *
  * <p>Multiplier semantics:
  * <ul>

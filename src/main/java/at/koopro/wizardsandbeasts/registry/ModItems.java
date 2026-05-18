@@ -1,39 +1,58 @@
 package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.item.BroomItem;
-import at.koopro.wizardsandbeasts.item.BestiaryItem;
-import at.koopro.wizardsandbeasts.item.DebugWandItem;
+import at.koopro.wizardsandbeasts.broom.item.BroomItem;
+import at.koopro.wizardsandbeasts.item.darkartefact.GauntRingItem;
+import at.koopro.wizardsandbeasts.item.darkartefact.HufflepuffsCupItem;
+import at.koopro.wizardsandbeasts.item.darkartefact.RavenclawsDiademItem;
+import at.koopro.wizardsandbeasts.item.darkartefact.RiddlesDiaryItem;
+import at.koopro.wizardsandbeasts.item.darkartefact.SlytherinsLocketItem;
+import at.koopro.wizardsandbeasts.item.hallow.ResurrectionStoneItem;
+import at.koopro.wizardsandbeasts.bloodpact.item.BloodPactVialItem;
+import at.koopro.wizardsandbeasts.item.trinket.DarkMarkItem;
+import at.koopro.wizardsandbeasts.item.trinket.FoeGlassItem;
+import at.koopro.wizardsandbeasts.item.trinket.HandOfGloryItem;
+import at.koopro.wizardsandbeasts.item.trinket.HermionesBagItem;
+import at.koopro.wizardsandbeasts.trunk.item.MoodysTrunkItem;
+import at.koopro.wizardsandbeasts.item.trinket.NewtsCaseItem;
+import at.koopro.wizardsandbeasts.item.trinket.PensieveItem;
+import at.koopro.wizardsandbeasts.item.consumable.PhilosophersStoneItem;
+import at.koopro.wizardsandbeasts.item.trinket.TwoWayMirrorItem;
+import at.koopro.wizardsandbeasts.wand.WandComponents;
+import at.koopro.wizardsandbeasts.wand.customization.WandConfiguration;
+import at.koopro.wizardsandbeasts.bestiary.item.BestiaryItem;
+import at.koopro.wizardsandbeasts.wand.item.DebugWandItem;
 import at.koopro.wizardsandbeasts.item.InkItem;
-import at.koopro.wizardsandbeasts.item.MaraudersMapItem;
-import at.koopro.wizardsandbeasts.item.MorphWandItem;
+import at.koopro.wizardsandbeasts.map.item.MaraudersMapItem;
+import at.koopro.wizardsandbeasts.wand.item.MorphWandItem;
 import at.koopro.wizardsandbeasts.item.ParchmentItem;
 import at.koopro.wizardsandbeasts.item.SimpleTooltipItem;
-import at.koopro.wizardsandbeasts.item.WandItem;
-import at.koopro.wizardsandbeasts.item.WandBlankItem;
-import at.koopro.wizardsandbeasts.item.WandCoreMaterialItem;
-import at.koopro.wizardsandbeasts.item.gamp.ConjuredSpoiledFoodItem;
-import at.koopro.wizardsandbeasts.item.gamp.CounterfeitGalleonItem;
-import at.koopro.wizardsandbeasts.item.currency.CoinItem;
-import at.koopro.wizardsandbeasts.item.currency.LeprechaunGoldItem;
-import at.koopro.wizardsandbeasts.item.wizarding.BertieBottsBeansItem;
-import at.koopro.wizardsandbeasts.item.wizarding.BezoarItem;
-import at.koopro.wizardsandbeasts.item.wizarding.BrewItem;
-import at.koopro.wizardsandbeasts.item.wizarding.ChocolateFrogItem;
-import at.koopro.wizardsandbeasts.item.wizarding.CloakItem;
-import at.koopro.wizardsandbeasts.item.wizarding.DeluminatorItem;
-import at.koopro.wizardsandbeasts.item.wizarding.DittanyItem;
-import at.koopro.wizardsandbeasts.item.wizarding.ExtendableEarsItem;
-import at.koopro.wizardsandbeasts.item.wizarding.FamousWizardCardItem;
-import at.koopro.wizardsandbeasts.item.wizarding.FlooPowderItem;
-import at.koopro.wizardsandbeasts.item.wizarding.MooncalfDungItem;
-import at.koopro.wizardsandbeasts.item.wizarding.OmniocularsItem;
-import at.koopro.wizardsandbeasts.item.wizarding.PortkeyItem;
-import at.koopro.wizardsandbeasts.item.wizarding.PocketCaseItem;
-import at.koopro.wizardsandbeasts.item.wizarding.RemembrallItem;
-import at.koopro.wizardsandbeasts.item.wizarding.TimeTurnerItem;
-import at.koopro.wizardsandbeasts.item.wizarding.WizardingProjectileItem;
-import at.koopro.wizardsandbeasts.item.wizarding.WizardingQuickConsumableItem;
+import at.koopro.wizardsandbeasts.wand.item.WandItem;
+import at.koopro.wizardsandbeasts.wand.item.WandBlankItem;
+import at.koopro.wizardsandbeasts.wand.item.WandCoreMaterialItem;
+import at.koopro.wizardsandbeasts.spell.gamp.item.ConjuredSpoiledFoodItem;
+import at.koopro.wizardsandbeasts.spell.gamp.item.CounterfeitGalleonItem;
+import at.koopro.wizardsandbeasts.currency.item.CoinItem;
+import at.koopro.wizardsandbeasts.currency.item.LeprechaunGoldItem;
+import at.koopro.wizardsandbeasts.item.consumable.BertieBottsBeansItem;
+import at.koopro.wizardsandbeasts.item.consumable.BezoarItem;
+import at.koopro.wizardsandbeasts.brew.item.BrewItem;
+import at.koopro.wizardsandbeasts.item.consumable.ChocolateFrogItem;
+import at.koopro.wizardsandbeasts.cloak.item.CloakItem;
+import at.koopro.wizardsandbeasts.deluminator.item.DeluminatorItem;
+import at.koopro.wizardsandbeasts.item.consumable.DittanyItem;
+import at.koopro.wizardsandbeasts.item.trinket.ExtendableEarsItem;
+import at.koopro.wizardsandbeasts.item.trinket.FamousWizardCardItem;
+import at.koopro.wizardsandbeasts.floo.item.FlooPowderItem;
+import at.koopro.wizardsandbeasts.item.consumable.MooncalfDungItem;
+import at.koopro.wizardsandbeasts.item.trinket.OmniocularsItem;
+import at.koopro.wizardsandbeasts.item.trinket.PortkeyItem;
+import at.koopro.wizardsandbeasts.trunk.item.EnchantedTrunkItem;
+import at.koopro.wizardsandbeasts.trunk.TrunkTier;
+import at.koopro.wizardsandbeasts.item.trinket.RemembrallItem;
+import at.koopro.wizardsandbeasts.item.trinket.TimeTurnerItem;
+import at.koopro.wizardsandbeasts.item.projectile.WizardingProjectileItem;
+import at.koopro.wizardsandbeasts.item.consumable.WizardingQuickConsumableItem;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -60,12 +79,10 @@ public class ModItems {
     // --- Debug tools ---
 
     public static final DeferredItem<DebugWandItem> DEBUG_WAND =
-            ITEMS.registerItem("debug_wand", DebugWandItem::new,
-                    new Item.Properties().stacksTo(1));
+            ITEMS.registerItem("debug_wand", props -> new DebugWandItem(props.stacksTo(1)));
 
     public static final DeferredItem<MorphWandItem> MORPH_WAND =
-            ITEMS.registerItem("morph_wand", MorphWandItem::new,
-                    new Item.Properties().stacksTo(1));
+            ITEMS.registerItem("morph_wand", props -> new MorphWandItem(props.stacksTo(1)));
 
     // --- Broom ---
 
@@ -84,27 +101,27 @@ public class ModItems {
     // --- Wand ---
 
     public static final DeferredItem<WandItem> WAND =
-            ITEMS.registerItem("wand", WandItem::new,
-                    new Item.Properties().stacksTo(1));
+            ITEMS.registerItem("wand", props -> new WandItem(props
+                    .stacksTo(1)
+                    .component(WandComponents.WAND_CONFIGURATION.get(), WandConfiguration.DEFAULT)));
 
     public static final DeferredItem<WandBlankItem> WAND_BLANK =
-            ITEMS.registerItem("wand_blank", WandBlankItem::new,
-                    new Item.Properties().stacksTo(1));
+            ITEMS.registerItem("wand_blank", props -> new WandBlankItem(props.stacksTo(1)));
 
     // --- Wand Core Materials ---
 
     public static final DeferredItem<WandCoreMaterialItem> PHOENIX_FEATHER =
             ITEMS.registerItem("phoenix_feather", props -> new WandCoreMaterialItem(props,
                     Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "phoenix_feather"),
-                    Component.literal("Source key: fawkes")), new Item.Properties());
+                    Component.literal("Source key: fawkes")));
     public static final DeferredItem<WandCoreMaterialItem> DRAGON_HEARTSTRING =
             ITEMS.registerItem("dragon_heartstring", props -> new WandCoreMaterialItem(props,
                     Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "dragon_heartstring"),
-                    Component.literal("Source key: hungarian_horntail")), new Item.Properties());
+                    Component.literal("Source key: hungarian_horntail")));
     public static final DeferredItem<WandCoreMaterialItem> UNICORN_HAIR =
             ITEMS.registerItem("unicorn_hair", props -> new WandCoreMaterialItem(props,
                     Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "unicorn_hair"),
-                    Component.literal("Fragile core material. Handle with care.")), new Item.Properties());
+                    Component.literal("Fragile core material. Handle with care.")));
     public static final DeferredItem<Item> THESTRAL_TAIL_HAIR =
             ITEMS.registerSimpleItem("thestral_tail_hair");
     public static final DeferredItem<Item> VEELA_HAIR =
@@ -123,38 +140,29 @@ public class ModItems {
     // --- Marauder's Map ---
 
     public static final DeferredItem<MaraudersMapItem> MARAUDERS_MAP =
-            ITEMS.registerItem("marauders_map", MaraudersMapItem::new,
-                    new Item.Properties().stacksTo(1));
+            ITEMS.registerItem("marauders_map", props -> new MaraudersMapItem(props.stacksTo(1)));
 
     public static final DeferredItem<BestiaryItem> BESTIARY =
-            ITEMS.registerItem("bestiary", BestiaryItem::new,
-                    new Item.Properties().stacksTo(1));
+            ITEMS.registerItem("bestiary", props -> new BestiaryItem(props.stacksTo(1)));
 
     public static final DeferredItem<ParchmentItem> PARCHMENT =
-            ITEMS.registerItem("parchment", ParchmentItem::new,
-                    new Item.Properties());
+            ITEMS.registerItem("parchment", ParchmentItem::new);
 
     public static final DeferredItem<InkItem> INK_BOTTLE =
-            ITEMS.registerItem("ink_bottle", InkItem::new,
-                    new Item.Properties());
+            ITEMS.registerItem("ink_bottle", InkItem::new);
 
     // --- Currency ---
 
     public static final DeferredItem<CoinItem> KNUT =
-            ITEMS.registerItem("knut", props -> new CoinItem(props, "knut"),
-                    new Item.Properties());
+            ITEMS.registerItem("knut", props -> new CoinItem(props, "knut"));
     public static final DeferredItem<CoinItem> SICKLE =
-            ITEMS.registerItem("sickle", props -> new CoinItem(props, "sickle"),
-                    new Item.Properties());
+            ITEMS.registerItem("sickle", props -> new CoinItem(props, "sickle"));
     public static final DeferredItem<CoinItem> GALLEON =
-            ITEMS.registerItem("galleon", props -> new CoinItem(props, "galleon"),
-                    new Item.Properties());
+            ITEMS.registerItem("galleon", props -> new CoinItem(props, "galleon"));
     public static final DeferredItem<CounterfeitGalleonItem> COUNTERFEIT_GALLEON =
-            ITEMS.registerItem("counterfeit_galleon", CounterfeitGalleonItem::new,
-                    new Item.Properties().stacksTo(64));
+            ITEMS.registerItem("counterfeit_galleon", props -> new CounterfeitGalleonItem(props.stacksTo(64)));
     public static final DeferredItem<LeprechaunGoldItem> LEPRECHAUN_GOLD =
-            ITEMS.registerItem("leprechaun_gold", LeprechaunGoldItem::new,
-                    new Item.Properties());
+            ITEMS.registerItem("leprechaun_gold", LeprechaunGoldItem::new);
     public static final DeferredItem<Item> DRAGOT =
             ITEMS.registerSimpleItem("dragot");
 
@@ -167,132 +175,186 @@ public class ModItems {
      * {@link BrewItem#of(at.koopro.wizardsandbeasts.brew.Brew)} to build a stack.
      */
     public static final DeferredItem<BrewItem> BREW =
-            ITEMS.registerItem("brew", BrewItem::new,
-                    new Item.Properties().stacksTo(16));
+            ITEMS.registerItem("brew", props -> new BrewItem(props.stacksTo(16)));
 
     // --- Wizarding World: food & drink (instant use; see WizardingQuickConsumableItem) ---
 
     public static final DeferredItem<WizardingQuickConsumableItem> BUTTERBEER =
             ITEMS.registerItem("butterbeer",
                     props -> new WizardingQuickConsumableItem(props, 2, 0.3f, 28, ItemUseAnimation.DRINK, 10,
-                            new MobEffectInstance(MobEffects.REGENERATION, 160, 0)),
-                    new Item.Properties());
+                            new MobEffectInstance(MobEffects.REGENERATION, 160, 0)));
     public static final DeferredItem<ConjuredSpoiledFoodItem> CONJURED_SPOILED_FOOD =
-            ITEMS.registerItem("conjured_spoiled_food", ConjuredSpoiledFoodItem::new,
-                    new Item.Properties().stacksTo(1));
+            ITEMS.registerItem("conjured_spoiled_food", props -> new ConjuredSpoiledFoodItem(props.stacksTo(1)));
 
     public static final DeferredItem<WizardingQuickConsumableItem> PUMPKIN_JUICE =
             ITEMS.registerItem("pumpkin_juice",
-                    props -> new WizardingQuickConsumableItem(props, 4, 0.6f, 28, ItemUseAnimation.DRINK, 0),
-                    new Item.Properties());
+                    props -> new WizardingQuickConsumableItem(props, 4, 0.6f, 28, ItemUseAnimation.DRINK, 0));
 
     public static final DeferredItem<ChocolateFrogItem> CHOCOLATE_FROG =
-            ITEMS.registerItem("chocolate_frog", ChocolateFrogItem::new, new Item.Properties());
+            ITEMS.registerItem("chocolate_frog", ChocolateFrogItem::new);
 
     public static final DeferredItem<FamousWizardCardItem> FAMOUS_WIZARD_CARD =
-            ITEMS.registerItem("famous_wizard_card", FamousWizardCardItem::new, new Item.Properties().stacksTo(16));
+            ITEMS.registerItem("famous_wizard_card", props -> new FamousWizardCardItem(props.stacksTo(16)));
 
     public static final DeferredItem<BertieBottsBeansItem> BERTIE_BOTTS_EVERY_FLAVOUR_BEANS =
-            ITEMS.registerItem("bertie_botts_every_flavour_beans", BertieBottsBeansItem::new, new Item.Properties());
+            ITEMS.registerItem("bertie_botts_every_flavour_beans", BertieBottsBeansItem::new);
 
     public static final DeferredItem<WizardingQuickConsumableItem> DROOBLES_BEST_BLOWING_GUM =
             ITEMS.registerItem("droobles_best_blowing_gum",
                     props -> new WizardingQuickConsumableItem(props, 1, 0.1f, 16, ItemUseAnimation.EAT, 8,
-                            new MobEffectInstance(MobEffects.SLOW_FALLING, 400, 0)),
-                    new Item.Properties());
+                            new MobEffectInstance(MobEffects.SLOW_FALLING, 400, 0)));
 
     public static final DeferredItem<WizardingQuickConsumableItem> FIREWHISKY =
             ITEMS.registerItem("firewhisky",
                     props -> new WizardingQuickConsumableItem(props, 1, 0.05f, 30, ItemUseAnimation.DRINK, 20,
                             new MobEffectInstance(MobEffects.STRENGTH, 160, 0),
-                            new MobEffectInstance(MobEffects.BLINDNESS, 100, 0)),
-                    new Item.Properties());
+                            new MobEffectInstance(MobEffects.BLINDNESS, 100, 0)));
 
     public static final DeferredItem<WizardingQuickConsumableItem> GILLYWEED =
             ITEMS.registerItem("gillyweed",
                     props -> new WizardingQuickConsumableItem(props, 1, 0.1f, 20, ItemUseAnimation.EAT, 15,
-                            new MobEffectInstance(MobEffects.WATER_BREATHING, 800, 0)),
-                    new Item.Properties());
+                            new MobEffectInstance(MobEffects.WATER_BREATHING, 800, 0)));
 
     public static final DeferredItem<WizardingQuickConsumableItem> DIRIGIBLE_PLUM =
             ITEMS.registerItem("dirigible_plum",
                     props -> new WizardingQuickConsumableItem(props, 2, 0.25f, 16, ItemUseAnimation.EAT, 12,
-                            new MobEffectInstance(MobEffects.LEVITATION, 40, 0)),
-                    new Item.Properties());
+                            new MobEffectInstance(MobEffects.LEVITATION, 40, 0)));
 
     public static final DeferredItem<WizardingQuickConsumableItem> TREACLE_TART =
             ITEMS.registerItem("treacle_tart",
-                    props -> new WizardingQuickConsumableItem(props, 7, 0.9f, 24, ItemUseAnimation.EAT, 0),
-                    new Item.Properties());
+                    props -> new WizardingQuickConsumableItem(props, 7, 0.9f, 24, ItemUseAnimation.EAT, 0));
 
     public static final DeferredItem<WizardingQuickConsumableItem> PUMPKIN_PASTY =
             ITEMS.registerItem("pumpkin_pasty",
-                    props -> new WizardingQuickConsumableItem(props, 5, 0.6f, 20, ItemUseAnimation.EAT, 0),
-                    new Item.Properties());
+                    props -> new WizardingQuickConsumableItem(props, 5, 0.6f, 20, ItemUseAnimation.EAT, 0));
 
     public static final DeferredItem<WizardingQuickConsumableItem> FIZZING_WHIZZBEE =
             ITEMS.registerItem("fizzing_whizzbee",
                     props -> new WizardingQuickConsumableItem(props, 2, 0.3f, 16, ItemUseAnimation.EAT, 10,
-                            new MobEffectInstance(MobEffects.JUMP_BOOST, 240, 0)),
-                    new Item.Properties());
+                            new MobEffectInstance(MobEffects.JUMP_BOOST, 240, 0)));
 
     public static final DeferredItem<WizardingQuickConsumableItem> PEPPERMINT_TOAD =
             ITEMS.registerItem("peppermint_toad",
                     props -> new WizardingQuickConsumableItem(props, 2, 0.3f, 16, ItemUseAnimation.EAT, 10,
-                            new MobEffectInstance(MobEffects.SPEED, 200, 0)),
-                    new Item.Properties());
+                            new MobEffectInstance(MobEffects.SPEED, 200, 0)));
 
     public static final DeferredItem<DittanyItem> DITTANY =
-            ITEMS.registerItem("dittany", DittanyItem::new, new Item.Properties());
+            ITEMS.registerItem("dittany", DittanyItem::new);
 
     // --- Wizarding World: magizoology & materials ---
 
     public static final DeferredItem<Item> OCCAMY_EGGSHELL =
             ITEMS.registerSimpleItem("occamy_eggshell");
     public static final DeferredItem<BezoarItem> BEZOAR =
-            ITEMS.registerItem("bezoar", BezoarItem::new, new Item.Properties().stacksTo(16));
+            ITEMS.registerItem("bezoar", props -> new BezoarItem(props.stacksTo(16)));
     public static final DeferredItem<Item> DEMIGUISE_HAIR =
             ITEMS.registerSimpleItem("demiguise_hair");
     public static final DeferredItem<MooncalfDungItem> MOONCALF_DUNG =
-            ITEMS.registerItem("mooncalf_dung", MooncalfDungItem::new, new Item.Properties());
+            ITEMS.registerItem("mooncalf_dung", MooncalfDungItem::new);
     public static final DeferredItem<WizardingProjectileItem> ERUMPENT_HORN =
-            ITEMS.registerItem("erumpent_horn", WizardingProjectileItem::new, new Item.Properties().stacksTo(16));
+            ITEMS.registerItem("erumpent_horn", props -> new WizardingProjectileItem(props.stacksTo(16)));
     public static final DeferredItem<Item> MANDRAKE =
             ITEMS.registerSimpleItem("mandrake");
 
     // --- Wizarding World: gear ---
 
     public static final DeferredItem<RemembrallItem> REMEMBRALL =
-            ITEMS.registerItem("remembrall", RemembrallItem::new, new Item.Properties().stacksTo(1));
+            ITEMS.registerItem("remembrall", props -> new RemembrallItem(props.stacksTo(1)));
     public static final DeferredItem<OmniocularsItem> OMNI_OCULARS =
-            ITEMS.registerItem("omnioculars", OmniocularsItem::new, new Item.Properties().stacksTo(1));
+            ITEMS.registerItem("omnioculars", props -> new OmniocularsItem(props.stacksTo(1)));
     public static final DeferredItem<DeluminatorItem> DELUMINATOR =
-            ITEMS.registerItem("deluminator", DeluminatorItem::new, new Item.Properties().stacksTo(1));
+            ITEMS.registerItem("deluminator", props -> new DeluminatorItem(props.stacksTo(1)));
     public static final DeferredItem<TimeTurnerItem> TIME_TURNER =
-            ITEMS.registerItem("time_turner", TimeTurnerItem::new, new Item.Properties().stacksTo(1));
+            ITEMS.registerItem("time_turner", props -> new TimeTurnerItem(props.stacksTo(1)));
     public static final DeferredItem<Item> SNEAKOSCOPE =
-            ITEMS.registerSimpleItem("sneakoscope", new Item.Properties().stacksTo(1));
+            ITEMS.registerItem("sneakoscope", props -> new Item(props.stacksTo(1)));
     public static final DeferredItem<PortkeyItem> PORTKEY =
-            ITEMS.registerItem("portkey", PortkeyItem::new, new Item.Properties().stacksTo(1));
-    public static final DeferredItem<PocketCaseItem> POCKET_CASE =
-            ITEMS.registerItem("pocket_case", PocketCaseItem::new, new Item.Properties().stacksTo(1));
+            ITEMS.registerItem("portkey", props -> new PortkeyItem(props.stacksTo(1)));
+    public static final DeferredItem<EnchantedTrunkItem> ENCHANTED_TRUNK =
+            ITEMS.registerItem("enchanted_trunk", props -> new EnchantedTrunkItem(TrunkTier.TIER_1, props.stacksTo(1)));
+    public static final DeferredItem<EnchantedTrunkItem> EXPANDED_TRUNK =
+            ITEMS.registerItem("expanded_trunk", props -> new EnchantedTrunkItem(TrunkTier.TIER_2, props.stacksTo(1)));
+    public static final DeferredItem<EnchantedTrunkItem> MASTERS_TRUNK =
+            ITEMS.registerItem("masters_trunk", props -> new EnchantedTrunkItem(TrunkTier.TIER_3, props.stacksTo(1)));
+    public static final DeferredItem<Item> MINISTRY_LICENSE_SCROLL =
+            ITEMS.registerItem("ministry_license_scroll", props -> new Item(props.stacksTo(16)));
     public static final DeferredItem<CloakItem> INVISIBILITY_CLOAK =
             ITEMS.registerItem("invisibility_cloak",
-                    props -> new CloakItem(props.stacksTo(1).equippable(EquipmentSlot.CHEST), false), new Item.Properties());
+                    props -> new CloakItem(props.stacksTo(1).equippable(EquipmentSlot.CHEST), false));
     public static final DeferredItem<CloakItem> DEATHLY_HALLOW_CLOAK =
             ITEMS.registerItem("deathly_hallow_cloak",
-                    props -> new CloakItem(props.stacksTo(1).equippable(EquipmentSlot.CHEST), true), new Item.Properties());
+                    props -> new CloakItem(props.stacksTo(1).equippable(EquipmentSlot.CHEST), true));
 
     // --- Wizarding World: pranks & misc ---
 
     public static final DeferredItem<WizardingProjectileItem> PERUVIAN_DARKNESS_POWDER =
-            ITEMS.registerItem("peruvian_instant_darkness_powder", WizardingProjectileItem::new, new Item.Properties().stacksTo(16));
+            ITEMS.registerItem("peruvian_instant_darkness_powder", props -> new WizardingProjectileItem(props.stacksTo(16)));
     public static final DeferredItem<WizardingProjectileItem> DECOY_DETONATOR =
-            ITEMS.registerItem("decoy_detonator", WizardingProjectileItem::new, new Item.Properties().stacksTo(16));
+            ITEMS.registerItem("decoy_detonator", props -> new WizardingProjectileItem(props.stacksTo(16)));
     public static final DeferredItem<ExtendableEarsItem> EXTENDABLE_EARS =
-            ITEMS.registerItem("extendable_ears", ExtendableEarsItem::new, new Item.Properties());
+            ITEMS.registerItem("extendable_ears", ExtendableEarsItem::new);
     public static final DeferredItem<FlooPowderItem> FLOO_POWDER =
-            ITEMS.registerItem("floo_powder", FlooPowderItem::new, new Item.Properties());
+            ITEMS.registerItem("floo_powder", FlooPowderItem::new);
+
+    // ── Deathly Hallows ──────────────────────────────────────────
+
+    public static final DeferredItem<ResurrectionStoneItem> RESURRECTION_STONE =
+            ITEMS.registerItem("resurrection_stone", props -> new ResurrectionStoneItem(props.stacksTo(1)));
+
+    // ── Horcrux Vessels ──────────────────────────────────────────
+
+    public static final DeferredItem<RiddlesDiaryItem> RIDDLES_DIARY =
+            ITEMS.registerItem("riddles_diary", props -> new RiddlesDiaryItem(props.stacksTo(1)));
+
+    public static final DeferredItem<GauntRingItem> MARVOLO_GAUNTS_RING =
+            ITEMS.registerItem("marvolo_gaunts_ring", props -> new GauntRingItem(props.stacksTo(1)));
+
+    public static final DeferredItem<SlytherinsLocketItem> SLYTHERINS_LOCKET =
+            ITEMS.registerItem("slytherins_locket", props -> new SlytherinsLocketItem(props.stacksTo(1)));
+
+    public static final DeferredItem<HufflepuffsCupItem> HUFFLEPUFFS_CUP =
+            ITEMS.registerItem("hufflepuffs_cup", props -> new HufflepuffsCupItem(props.stacksTo(1)));
+
+    public static final DeferredItem<RavenclawsDiademItem> RAVENCLAWS_DIADEM =
+            ITEMS.registerItem("ravenclaws_diadem", props -> new RavenclawsDiademItem(props.stacksTo(1)));
+
+    // ── Unique Artefacts ─────────────────────────────────────────
+
+    public static final DeferredItem<PhilosophersStoneItem> PHILOSOPHERS_STONE =
+            ITEMS.registerItem("philosophers_stone", props -> new PhilosophersStoneItem(props.stacksTo(1)));
+
+    public static final DeferredItem<PensieveItem> PENSIEVE =
+            ITEMS.registerItem("pensieve", props -> new PensieveItem(props.stacksTo(1)));
+
+    public static final DeferredItem<TwoWayMirrorItem> TWO_WAY_MIRROR =
+            ITEMS.registerItem("two_way_mirror", props -> new TwoWayMirrorItem(props.stacksTo(1)));
+
+    public static final DeferredItem<HandOfGloryItem> HAND_OF_GLORY =
+            ITEMS.registerItem("hand_of_glory", props -> new HandOfGloryItem(props.stacksTo(1)));
+
+    public static final DeferredItem<DarkMarkItem> DARK_MARK_BRAND =
+            ITEMS.registerItem("dark_mark_brand", props -> new DarkMarkItem(props.stacksTo(1)));
+
+    // ── Containers ───────────────────────────────────────────────
+
+    public static final DeferredItem<MoodysTrunkItem> MOODYS_TRUNK =
+            ITEMS.registerItem("moodys_trunk", props -> new MoodysTrunkItem(props.stacksTo(1)));
+
+    public static final DeferredItem<HermionesBagItem> HERMIONES_BEADED_BAG =
+            ITEMS.registerItem("hermiones_beaded_bag", props -> new HermionesBagItem(props.stacksTo(1)));
+
+    // ── Detection & Utility ──────────────────────────────────────
+
+    public static final DeferredItem<FoeGlassItem> FOE_GLASS =
+            ITEMS.registerItem("foe_glass", props -> new FoeGlassItem(props.stacksTo(1)));
+
+    // ── Fantastic Beasts Era ─────────────────────────────────────
+
+    public static final DeferredItem<BloodPactVialItem> BLOOD_PACT_VIAL =
+            ITEMS.registerItem("blood_pact_vial", props -> new BloodPactVialItem(props.stacksTo(1)));
+
+    public static final DeferredItem<NewtsCaseItem> NEWTS_CASE_ITEM =
+            ITEMS.registerItem("newts_case_item", props -> new NewtsCaseItem(props.stacksTo(1)));
 
     // --- Spawn Eggs ---
 

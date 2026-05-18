@@ -1,14 +1,14 @@
 package at.koopro.wizardsandbeasts.skill;
 
-import at.koopro.wizardsandbeasts.data.PlayerSkillData;
+import at.koopro.wizardsandbeasts.skill.data.PlayerSkillData;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
-import at.koopro.wizardsandbeasts.spell.Spell;
-import at.koopro.wizardsandbeasts.spell.SpellCategory;
-import at.koopro.wizardsandbeasts.type.HeritageAPI;
-import at.koopro.wizardsandbeasts.type.HeritageVariant;
-import at.koopro.wizardsandbeasts.type.Heritage;
+import at.koopro.wizardsandbeasts.spell.core.Spell;
+import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
+import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
+import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
+import at.koopro.wizardsandbeasts.heritage.Heritage;
 import net.minecraft.server.level.ServerPlayer;
 import at.koopro.wizardsandbeasts.spell.cast.ModifierStack;
 

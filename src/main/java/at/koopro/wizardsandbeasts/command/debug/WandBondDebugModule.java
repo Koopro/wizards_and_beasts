@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.command.debug;
 
-import at.koopro.wizardsandbeasts.item.WandItem;
+import at.koopro.wizardsandbeasts.wand.item.WandItem;
 import at.koopro.wizardsandbeasts.util.WandHelper;
 import at.koopro.wizardsandbeasts.wand.WandAttachments;
 import at.koopro.wizardsandbeasts.wand.WandComponents;

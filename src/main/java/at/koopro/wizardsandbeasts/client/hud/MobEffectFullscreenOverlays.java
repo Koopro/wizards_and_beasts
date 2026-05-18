@@ -46,5 +46,24 @@ public final class MobEffectFullscreenOverlays {
             int tint = phase == 0 ? 0x18FF0000 : 0x180000FF;
             graphics.fill(0, 0, w, h, tint);
         }
+
+        var chillEffect = player.getEffect(ModEffects.DEMENTOR_CHILL);
+        if (chillEffect != null) {
+            int amp = chillEffect.getAmplifier(); // 0–3
+            // Dark blue-grey vignette scaled by amplifier (alpha 0x20..0x50)
+            int alpha = 0x20 + amp * 0x10;
+            int color = (alpha << 24) | 0x1A2A4A;
+            int edge = Math.min(80 + amp * 24, w / 3);
+            graphics.fill(0, 0, w, edge, color);
+            graphics.fill(0, h - edge, w, h, color);
+            graphics.fill(0, edge, edge, h - edge, color);
+            graphics.fill(w - edge, edge, w, h - edge, color);
+        }
+
+        if (player.hasEffect(ModEffects.SOUL_DRAINED)) {
+            // Pale grey full-screen wash
+            int pulse = (int)(Math.sin(tick * 0.03) * 8 + 24);
+            graphics.fill(0, 0, w, h, (pulse << 24) | 0xE0E0E0);
+        }
     }
 }

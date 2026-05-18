@@ -1,6 +1,9 @@
 package at.koopro.wizardsandbeasts.spell;
 
-import at.koopro.wizardsandbeasts.data.PlayerSpellData;
+import at.koopro.wizardsandbeasts.spell.core.Proficiency;
+import at.koopro.wizardsandbeasts.spell.core.SpellRequirement;
+import at.koopro.wizardsandbeasts.spell.core.Spells;
+import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

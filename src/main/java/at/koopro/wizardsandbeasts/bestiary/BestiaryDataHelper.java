@@ -1,8 +1,8 @@
 package at.koopro.wizardsandbeasts.bestiary;
 
-import at.koopro.wizardsandbeasts.data.PlayerBestiaryData;
-import at.koopro.wizardsandbeasts.event.BestiaryTierAdvancedEvent;
-import at.koopro.wizardsandbeasts.network.BestiaryDataSyncPayload;
+import at.koopro.wizardsandbeasts.bestiary.data.PlayerBestiaryData;
+import at.koopro.wizardsandbeasts.bestiary.event.BestiaryTierAdvancedEvent;
+import at.koopro.wizardsandbeasts.bestiary.network.BestiaryDataSyncPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;

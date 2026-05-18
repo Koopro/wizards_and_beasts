@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.ui;
 
+import at.koopro.wizardsandbeasts.spell.client.ui.SpellRejectReasonFormatter;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

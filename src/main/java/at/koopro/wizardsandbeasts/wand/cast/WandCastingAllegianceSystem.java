@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.wand.cast;
 
 import at.koopro.wizardsandbeasts.Config;
-import at.koopro.wizardsandbeasts.data.PlayerHeritageData;
+import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.spell.cast.CastContext;

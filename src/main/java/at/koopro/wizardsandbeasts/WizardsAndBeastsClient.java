@@ -1,26 +1,28 @@
 package at.koopro.wizardsandbeasts;
 
 import at.koopro.wizardsandbeasts.client.ClientSetup;
-import at.koopro.wizardsandbeasts.client.ability.ApparitionClientController;
-import at.koopro.wizardsandbeasts.client.ability.LegilimencyVisionRenderer;
-import at.koopro.wizardsandbeasts.client.wand.gui.OllivanderTrialScreen;
-import at.koopro.wizardsandbeasts.client.wand.gui.WandmakersBenchScreen;
+import at.koopro.wizardsandbeasts.apparition.client.ApparitionClientController;
+import at.koopro.wizardsandbeasts.bestiary.creature.niffler.client.NifflerPouchScreen;
+import at.koopro.wizardsandbeasts.legilimency.client.LegilimencyVisionRenderer;
+import at.koopro.wizardsandbeasts.trunk.client.gui.PocketConfiguratorScreen;
+import at.koopro.wizardsandbeasts.wand.client.gui.OllivanderTrialScreen;
+import at.koopro.wizardsandbeasts.wand.client.gui.WandmakersBenchScreen;
 import at.koopro.wizardsandbeasts.registry.ModMenuTypes;
-import at.koopro.wizardsandbeasts.client.broom.BroomRiderRenderer;
-import at.koopro.wizardsandbeasts.client.form.FormRenderStateModifier;
-import at.koopro.wizardsandbeasts.client.form.ObscurialClientViewHandler;
-import at.koopro.wizardsandbeasts.client.form.TransitionEffectRenderer;
-import at.koopro.wizardsandbeasts.client.spell.ColoredGlowRenderer;
-import at.koopro.wizardsandbeasts.client.spell.ProtegoCubeRenderer;
-import at.koopro.wizardsandbeasts.client.spell.SpellClientInputHandler;
-import at.koopro.wizardsandbeasts.client.spell.SpellKeyBindings;
-import at.koopro.wizardsandbeasts.client.particle.ModParticleProviders;
-import at.koopro.wizardsandbeasts.client.wand.WandBeamRenderer;
-import at.koopro.wizardsandbeasts.client.hud.FormDebugOverlay;
+import at.koopro.wizardsandbeasts.broom.client.BroomRiderRenderer;
+import at.koopro.wizardsandbeasts.form.client.FormRenderStateModifier;
+import at.koopro.wizardsandbeasts.form.client.ObscurialClientViewHandler;
+import at.koopro.wizardsandbeasts.form.client.TransitionEffectRenderer;
+import at.koopro.wizardsandbeasts.spell.client.ColoredGlowRenderer;
+import at.koopro.wizardsandbeasts.spell.client.ProtegoCubeRenderer;
+import at.koopro.wizardsandbeasts.spell.client.SpellClientInputHandler;
+import at.koopro.wizardsandbeasts.spell.client.SpellKeyBindings;
+import at.koopro.wizardsandbeasts.particle.client.ModParticleProviders;
+import at.koopro.wizardsandbeasts.wand.client.WandBeamRenderer;
+import at.koopro.wizardsandbeasts.form.client.hud.FormDebugOverlay;
 import at.koopro.wizardsandbeasts.client.hud.MobEffectFullscreenOverlays;
-import at.koopro.wizardsandbeasts.client.render.effect.CrucioScreenRenderer;
+import at.koopro.wizardsandbeasts.spell.client.render.CrucioScreenRenderer;
 import at.koopro.wizardsandbeasts.client.hud.ObscurusOverlay;
-import at.koopro.wizardsandbeasts.client.hud.SpellDiamondOverlay;
+import at.koopro.wizardsandbeasts.spell.client.hud.SpellDiamondOverlay;
 import at.koopro.wizardsandbeasts.client.debug.DebugHudRenderer;
 import at.koopro.wizardsandbeasts.client.debug.DebugKeyBindings;
 import net.neoforged.api.distmarker.Dist;
@@ -41,6 +43,7 @@ public class WizardsAndBeastsClient {
         modContainer.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
 
         modEventBus.addListener(ClientSetup::registerRenderers);
+        modEventBus.addListener(ClientSetup::registerLayers);
         modEventBus.addListener(ModParticleProviders::register);
         modEventBus.addListener(BroomRiderRenderer::registerModifiers);
         modEventBus.addListener(FormRenderStateModifier::registerModifiers);
@@ -65,6 +68,8 @@ public class WizardsAndBeastsClient {
     private static void registerMenus(RegisterMenuScreensEvent event) {
         event.register(ModMenuTypes.WANDMAKERS_BENCH.get(), WandmakersBenchScreen::new);
         event.register(ModMenuTypes.OLLIVANDER_TRIAL.get(), OllivanderTrialScreen::new);
+        event.register(ModMenuTypes.POCKET_CONFIGURATOR.get(), PocketConfiguratorScreen::new);
+        event.register(ModMenuTypes.NIFFLER_POUCH.get(), NifflerPouchScreen::new);
     }
 
     private void registerGuiLayers(RegisterGuiLayersEvent event) {

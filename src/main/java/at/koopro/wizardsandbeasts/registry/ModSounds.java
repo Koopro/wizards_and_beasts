@@ -58,6 +58,50 @@ public class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> SPELL_CLASH =
             register("spell_clash");
 
+    // Niffler
+    public static final DeferredHolder<SoundEvent, SoundEvent> NIFFLER_AMBIENT =
+            register("entity.niffler.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> NIFFLER_HURT =
+            register("entity.niffler.hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> NIFFLER_DEATH =
+            register("entity.niffler.death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> NIFFLER_EAT =
+            register("entity.niffler.eat");
+    public static final DeferredHolder<SoundEvent, SoundEvent> NIFFLER_HAPPY =
+            register("entity.niffler.happy");
+    public static final DeferredHolder<SoundEvent, SoundEvent> NIFFLER_HISS =
+            register("entity.niffler.hiss");
+    public static final DeferredHolder<SoundEvent, SoundEvent> NIFFLER_DIG =
+            register("entity.niffler.dig");
+    public static final DeferredHolder<SoundEvent, SoundEvent> NIFFLER_SQUIRM =
+            register("entity.niffler.squirm");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BABY_NIFFLER_AMBIENT =
+            register("entity.baby_niffler.ambient");
+
+    // Deluminator
+    public static final DeferredHolder<SoundEvent, SoundEvent> DELUMINATOR_ABSORB = register("deluminator_absorb");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DELUMINATOR_RESTORE = register("deluminator_restore");
+
+    // Two-Way Mirror
+    public static final DeferredHolder<SoundEvent, SoundEvent> MIRROR_CONNECT = register("mirror_connect");
+
+    // Horcrux
+    public static final DeferredHolder<SoundEvent, SoundEvent> HORCRUX_SHATTER = register("horcrux_shatter");
+
+    // Resurrection Stone
+    public static final DeferredHolder<SoundEvent, SoundEvent> RESURRECTION_STONE_TURN = register("resurrection_stone_turn");
+
+    // Blood Pact
+    public static final DeferredHolder<SoundEvent, SoundEvent> BLOOD_PACT_OFFER = register("blood_pact_offer");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BLOOD_PACT_SEAL = register("blood_pact_seal");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BLOOD_PACT_SHATTER = register("blood_pact_shatter");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BLOOD_PACT_BLOCK = register("blood_pact_block");
+
+    // Floo Network
+    public static final DeferredHolder<SoundEvent, SoundEvent> FLOO_WHOOSH = register("floo_whoosh");
+    public static final DeferredHolder<SoundEvent, SoundEvent> FLOO_IGNITE = register("floo_ignite");
+    public static final DeferredHolder<SoundEvent, SoundEvent> FLOO_LAND = register("floo_land");
+
     private static DeferredHolder<SoundEvent, SoundEvent> register(String path) {
         return SOUND_EVENTS.register(path, () ->
                 SoundEvent.createVariableRangeEvent(

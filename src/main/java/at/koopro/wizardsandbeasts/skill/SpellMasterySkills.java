@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.skill;
 
-import at.koopro.wizardsandbeasts.spell.SpellCategory;
+import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 
 /**
  * Spell Mastery tree skill definitions. Registered via {@link SkillTrees#register(Skill)}.

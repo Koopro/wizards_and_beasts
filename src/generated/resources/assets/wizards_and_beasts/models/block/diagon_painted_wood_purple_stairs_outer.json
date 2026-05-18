@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/outer_stairs",
+  "textures": {
+    "bottom": "wizards_and_beasts:block/diagon_painted_wood_purple",
+    "side": "wizards_and_beasts:block/diagon_painted_wood_purple",
+    "top": "wizards_and_beasts:block/diagon_painted_wood_purple"
+  }
+}

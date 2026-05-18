@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "wizards_and_beasts:block/honeydukes_pastel_pink_slab"
+    },
+    "type=double": {
+      "model": "wizards_and_beasts:block/honeydukes_pastel_pink"
+    },
+    "type=top": {
+      "model": "wizards_and_beasts:block/honeydukes_pastel_pink_slab_top"
+    }
+  }
+}

@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.network;
 
+import at.koopro.wizardsandbeasts.heritage.network.HeritageDataSyncS2CPayload;
+import at.koopro.wizardsandbeasts.skill.network.SkillDataSyncS2CPayload;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.jupiter.api.Test;
@@ -19,11 +21,11 @@ class SkillTypeSyncCodecTest {
         skills.put("spell_mastery.basic", 2);
         skills.put("dark_arts.shadow", 1);
 
-        SkillDataSyncS2CPacket original = new SkillDataSyncS2CPacket(3, 7, 12, skills);
+        SkillDataSyncS2CPayload original = new SkillDataSyncS2CPayload(3, 7, 12, skills);
         ByteBuf buf = Unpooled.buffer();
         try {
-            SkillDataSyncS2CPacket.STREAM_CODEC.encode(buf, original);
-            SkillDataSyncS2CPacket decoded = SkillDataSyncS2CPacket.STREAM_CODEC.decode(buf);
+            SkillDataSyncS2CPayload.STREAM_CODEC.encode(buf, original);
+            SkillDataSyncS2CPayload decoded = SkillDataSyncS2CPayload.STREAM_CODEC.decode(buf);
             assertEquals(original.syncVersion(), decoded.syncVersion());
             assertEquals(original.skillPoints(), decoded.skillPoints());
             assertEquals(original.totalPointsEarned(), decoded.totalPointsEarned());
@@ -39,7 +41,7 @@ class SkillTypeSyncCodecTest {
         flags.put("example", "true");
         Set<String> unlockedProfessions = new LinkedHashSet<>();
         unlockedProfessions.add("wizard_apprentice");
-        HeritageDataSyncS2CPacket original = new HeritageDataSyncS2CPacket(
+        HeritageDataSyncS2CPayload original = new HeritageDataSyncS2CPayload(
                 11,
                 "wizardkind",
                 "pure_blood",
@@ -56,8 +58,8 @@ class SkillTypeSyncCodecTest {
 
         ByteBuf buf = Unpooled.buffer();
         try {
-            HeritageDataSyncS2CPacket.STREAM_CODEC.encode(buf, original);
-            HeritageDataSyncS2CPacket decoded = HeritageDataSyncS2CPacket.STREAM_CODEC.decode(buf);
+            HeritageDataSyncS2CPayload.STREAM_CODEC.encode(buf, original);
+            HeritageDataSyncS2CPayload decoded = HeritageDataSyncS2CPayload.STREAM_CODEC.decode(buf);
             assertEquals(original.syncVersion(), decoded.syncVersion());
             assertEquals(original.heritageId(), decoded.heritageId());
             assertEquals(original.variantId(), decoded.variantId());

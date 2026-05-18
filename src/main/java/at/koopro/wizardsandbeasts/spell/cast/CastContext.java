@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.spell.cast;
 
-import at.koopro.wizardsandbeasts.spell.Proficiency;
-import at.koopro.wizardsandbeasts.spell.Spell;
+import at.koopro.wizardsandbeasts.spell.core.*;
+
 import at.koopro.wizardsandbeasts.spell.def.SpellDefinition;
 import at.koopro.wizardsandbeasts.spell.gamp.GampDomain;
 import at.koopro.wizardsandbeasts.spell.proficiency.SpellScalingProfile;

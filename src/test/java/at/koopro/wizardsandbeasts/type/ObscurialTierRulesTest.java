@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.type;
 
+import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialRules;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -1,15 +1,15 @@
 package at.koopro.wizardsandbeasts.sync;
 
 import at.koopro.wizardsandbeasts.form.FormSystemAPI;
-import at.koopro.wizardsandbeasts.network.FormSyncS2CPacket;
-import at.koopro.wizardsandbeasts.network.HeritageDataSyncS2CPacket;
-import at.koopro.wizardsandbeasts.network.SkillDataSyncS2CPacket;
-import at.koopro.wizardsandbeasts.network.SpellDataSyncS2CPacket;
-import at.koopro.wizardsandbeasts.network.VaultSyncS2CPacket;
-import at.koopro.wizardsandbeasts.network.AbilityDataSyncPayload;
-import at.koopro.wizardsandbeasts.network.ApparitionWardsSyncS2CPayload;
+import at.koopro.wizardsandbeasts.form.network.FormSyncS2CPayload;
+import at.koopro.wizardsandbeasts.heritage.network.HeritageDataSyncS2CPayload;
+import at.koopro.wizardsandbeasts.skill.network.SkillDataSyncS2CPayload;
+import at.koopro.wizardsandbeasts.spell.network.SpellDataSyncS2CPayload;
+import at.koopro.wizardsandbeasts.currency.network.VaultSyncS2CPayload;
+import at.koopro.wizardsandbeasts.ability.network.AbilityDataSyncPayload;
+import at.koopro.wizardsandbeasts.apparition.network.ApparitionWardsSyncS2CPayload;
 import at.koopro.wizardsandbeasts.skill.SkillAttributeApplicator;
-import at.koopro.wizardsandbeasts.type.HeritageAPI;
+import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
 import net.minecraft.server.level.ServerPlayer;
 
 public final class PlayerStateSyncService {
@@ -17,11 +17,11 @@ public final class PlayerStateSyncService {
     }
 
     public static void syncSkills(ServerPlayer player) {
-        SkillDataSyncS2CPacket.syncToPlayer(player);
+        SkillDataSyncS2CPayload.syncToPlayer(player);
     }
 
     public static void syncSpells(ServerPlayer player) {
-        SpellDataSyncS2CPacket.syncToPlayer(player);
+        SpellDataSyncS2CPayload.syncToPlayer(player);
     }
 
     public static void syncAbilities(ServerPlayer player) {
@@ -34,12 +34,12 @@ public final class PlayerStateSyncService {
         syncSpells(player);
         syncSkills(player);
         syncAbilities(player);
-        HeritageDataSyncS2CPacket.syncToPlayer(player, openTypeSelector);
-        VaultSyncS2CPacket.syncToPlayer(player);
+        HeritageDataSyncS2CPayload.syncToPlayer(player, openTypeSelector);
+        VaultSyncS2CPayload.syncToPlayer(player);
         if (HeritageAPI.hasHeritageSelected(player)) {
             HeritageAPI.applyStats(player);
         }
         FormSystemAPI.reapplyCurrentForm(player);
-        FormSyncS2CPacket.syncToTracking(player);
+        FormSyncS2CPayload.syncToTracking(player);
     }
 }

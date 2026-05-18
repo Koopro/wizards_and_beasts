@@ -11,11 +11,14 @@ import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 
+import at.koopro.wizardsandbeasts.azkaban.structure.AzkabanStructures;
 import at.koopro.wizardsandbeasts.brew.def.BrewReloadListener;
 import at.koopro.wizardsandbeasts.brew.def.BrewingRecipeReloadListener;
 import at.koopro.wizardsandbeasts.broom.BroomDefinitionLoader;
-import at.koopro.wizardsandbeasts.event.RegisterBrewsEvent;
-import at.koopro.wizardsandbeasts.event.RegisterSpellsEvent;
+import at.koopro.wizardsandbeasts.wand.customization.WandModuleLoader;
+import at.koopro.wizardsandbeasts.wand.customization.WandModuleRegistry;
+import at.koopro.wizardsandbeasts.brew.event.RegisterBrewsEvent;
+import at.koopro.wizardsandbeasts.spell.event.RegisterSpellsEvent;
 import at.koopro.wizardsandbeasts.bestiary.BestiaryEntryLoader;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.network.ModNetwork;
@@ -24,7 +27,7 @@ import at.koopro.wizardsandbeasts.registry.EntityAttributeBindings;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModAttributes;
 import at.koopro.wizardsandbeasts.skill.SkillTrees;
-import at.koopro.wizardsandbeasts.spell.Spells;
+import at.koopro.wizardsandbeasts.spell.core.Spells;
 import at.koopro.wizardsandbeasts.spell.def.SpellReloadListener;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
 import at.koopro.wizardsandbeasts.registry.ModCreativeTabs;
@@ -72,11 +75,14 @@ public class WizardsAndBeastsMod {
         ModVillager.PROFESSIONS.register(modEventBus);
         ModParticles.PARTICLE_TYPES.register(modEventBus);
         ModEffects.MOB_EFFECTS.register(modEventBus);
+        AzkabanStructures.STRUCTURE_TYPES.register(modEventBus);
+        AzkabanStructures.STRUCTURE_PIECE_TYPES.register(modEventBus);
         WandmakingRecipeType.RECIPE_TYPES.register(modEventBus);
         WandmakingRecipeSerializer.RECIPE_SERIALIZERS.register(modEventBus);
 
         modEventBus.addListener(ModNetwork::register);
         modEventBus.addListener(EntityAttributeBindings::registerAll);
+        modEventBus.addListener(at.koopro.wizardsandbeasts.bestiary.creature.niffler.event.NifflerSpawnHandler::registerSpawnPlacements);
         modEventBus.addListener(WandDatapackRegistries::registerDatapackRegistries);
 
         // Defer Spells.init() until FMLCommonSetupEvent so addon mods get a
@@ -111,10 +117,14 @@ public class WizardsAndBeastsMod {
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "broom_definition_reload_listener"),
                     new BroomDefinitionLoader());
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "wand_module_reload_listener"),
+                    new WandModuleLoader());
         });
 
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 
+        WandModuleRegistry.bootstrap();
         SkillTrees.init();
 
         LOGGER.info("Initializing Wizards & Beasts mod.");

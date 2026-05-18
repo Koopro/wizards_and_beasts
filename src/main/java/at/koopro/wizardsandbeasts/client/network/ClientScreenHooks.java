@@ -1,11 +1,11 @@
 package at.koopro.wizardsandbeasts.client.network;
 
-import at.koopro.wizardsandbeasts.client.gui.BeamDebugScreen;
-import at.koopro.wizardsandbeasts.client.gui.BestiaryScreen;
-import at.koopro.wizardsandbeasts.client.gui.GringottsScreen;
-import at.koopro.wizardsandbeasts.client.gui.SkillScreenRouter;
-import at.koopro.wizardsandbeasts.client.gui.SpellTeacherScreen;
-import at.koopro.wizardsandbeasts.client.gui.HeritageSelectionScreen;
+import at.koopro.wizardsandbeasts.spell.client.gui.BeamDebugScreen;
+import at.koopro.wizardsandbeasts.bestiary.client.gui.BestiaryScreen;
+import at.koopro.wizardsandbeasts.currency.client.gui.GringottsScreen;
+import at.koopro.wizardsandbeasts.skill.client.gui.SkillScreenRouter;
+import at.koopro.wizardsandbeasts.spell.client.gui.SpellTeacherScreen;
+import at.koopro.wizardsandbeasts.heritage.client.gui.HeritageSelectionScreen;
 import net.minecraft.client.Minecraft;
 
 public final class ClientScreenHooks {

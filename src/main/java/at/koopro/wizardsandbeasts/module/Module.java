@@ -12,5 +12,9 @@ public enum Module {
     PLAYER_ABILITIES,
     CREATURES,
     BESTIARY,
-    BROOM_FLIGHT
+    BROOM_FLIGHT,
+    POCKET_DIMENSIONS,
+    OWLS,
+    FLOO_NETWORK,
+    AZKABAN
 }

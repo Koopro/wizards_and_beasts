@@ -3,8 +3,8 @@ package at.koopro.wizardsandbeasts.registry;
 import at.koopro.wizardsandbeasts.block.FloatingCandleBlock;
 import at.koopro.wizardsandbeasts.block.HouseBannerBlock;
 import at.koopro.wizardsandbeasts.block.MallowsweetBlock;
-import at.koopro.wizardsandbeasts.block.SpellTeacherBlock;
-import at.koopro.wizardsandbeasts.wand.block.WandmakersBenchBlock;
+import at.koopro.wizardsandbeasts.spell.teacher.SpellTeacherBlock;
+import at.koopro.wizardsandbeasts.wand.bench.WandmakersBenchBlock;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -17,11 +17,12 @@ import net.neoforged.neoforge.registries.DeferredItem;
 
 final class WizardingWorldBlockRegistry {
     static final DeferredBlock<Block> DEVILS_SNARE =
-            ModBlocks.BLOCKS.registerBlock("devils_snare", Block::new, BlockBehaviour.Properties.ofFullCopy(Blocks.COBWEB));
+            ModBlocks.BLOCKS.registerBlock("devils_snare", Block::new,
+                    () -> BlockBehaviour.Properties.ofFullCopy(Blocks.COBWEB));
 
     static final DeferredBlock<MallowsweetBlock> MALLOWSWEET =
             ModBlocks.BLOCKS.registerBlock("mallowsweet", MallowsweetBlock::new,
-                    BlockBehaviour.Properties.of()
+                    () -> BlockBehaviour.Properties.of()
                             .mapColor(MapColor.PLANT)
                             .noCollision()
                             .instabreak()
@@ -31,20 +32,20 @@ final class WizardingWorldBlockRegistry {
 
     static final DeferredBlock<HouseBannerBlock> GRYFFINDOR_BANNER =
             ModBlocks.BLOCKS.registerBlock("gryffindor_banner", HouseBannerBlock::new,
-                    BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).instabreak().sound(SoundType.WOOL).noOcclusion());
+                    () -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).instabreak().sound(SoundType.WOOL).noOcclusion());
     static final DeferredBlock<HouseBannerBlock> SLYTHERIN_BANNER =
             ModBlocks.BLOCKS.registerBlock("slytherin_banner", HouseBannerBlock::new,
-                    BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GREEN).instabreak().sound(SoundType.WOOL).noOcclusion());
+                    () -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GREEN).instabreak().sound(SoundType.WOOL).noOcclusion());
     static final DeferredBlock<HouseBannerBlock> RAVENCLAW_BANNER =
             ModBlocks.BLOCKS.registerBlock("ravenclaw_banner", HouseBannerBlock::new,
-                    BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE).instabreak().sound(SoundType.WOOL).noOcclusion());
+                    () -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE).instabreak().sound(SoundType.WOOL).noOcclusion());
     static final DeferredBlock<HouseBannerBlock> HUFFLEPUFF_BANNER =
             ModBlocks.BLOCKS.registerBlock("hufflepuff_banner", HouseBannerBlock::new,
-                    BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_YELLOW).instabreak().sound(SoundType.WOOL).noOcclusion());
+                    () -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_YELLOW).instabreak().sound(SoundType.WOOL).noOcclusion());
 
     static final DeferredBlock<FloatingCandleBlock> FLOATING_CANDLE =
             ModBlocks.BLOCKS.registerBlock("floating_candle", FloatingCandleBlock::new,
-                    BlockBehaviour.Properties.of()
+                    () -> BlockBehaviour.Properties.of()
                             .mapColor(MapColor.WOOL)
                             .noCollision()
                             .instabreak()
@@ -53,24 +54,28 @@ final class WizardingWorldBlockRegistry {
                             .noOcclusion());
 
     static final DeferredBlock<Block> BRASS_CAULDRON =
-            ModBlocks.BLOCKS.registerBlock("brass_cauldron", Block::new,
-                    RegistryUtils.metalCauldronProps());
+            ModBlocks.BLOCKS.registerBlock("brass_cauldron", Block::new, RegistryUtils::metalCauldronProps);
     static final DeferredBlock<Block> WIZARDING_COPPER_CAULDRON =
-            ModBlocks.BLOCKS.registerBlock("wizarding_copper_cauldron", Block::new,
-                    RegistryUtils.metalCauldronProps());
+            ModBlocks.BLOCKS.registerBlock("wizarding_copper_cauldron", Block::new, RegistryUtils::metalCauldronProps);
     static final DeferredBlock<Block> PEWTER_CAULDRON =
-            ModBlocks.BLOCKS.registerBlock("pewter_cauldron", Block::new,
-                    RegistryUtils.metalCauldronProps());
+            ModBlocks.BLOCKS.registerBlock("pewter_cauldron", Block::new, RegistryUtils::metalCauldronProps);
+    /**
+     * Decorative grate block — no Floo Network travel logic.
+     * LORE: Intended as a visual prop (fireplace surround), not a travel node.
+     * @deprecated Superseded by {@link at.koopro.wizardsandbeasts.block.FlooFireplaceBlock}.
+     *             Will be removed in beta. Use {@code FLOO_FIREPLACE} for functional travel.
+     */
+    @Deprecated
     static final DeferredBlock<Block> FLOO_GRATE =
             ModBlocks.BLOCKS.registerBlock("floo_grate", Block::new,
-                    BlockBehaviour.Properties.of().strength(3.0f).sound(SoundType.COPPER).noOcclusion());
+                    () -> BlockBehaviour.Properties.of().strength(3.0f).sound(SoundType.COPPER).noOcclusion());
 
     static final DeferredBlock<SpellTeacherBlock> SPELL_TEACHER =
             ModBlocks.BLOCKS.registerBlock("spell_teacher", SpellTeacherBlock::new,
-                    BlockBehaviour.Properties.of().strength(2.5f).sound(SoundType.WOOD));
+                    () -> BlockBehaviour.Properties.of().strength(2.5f).sound(SoundType.WOOD));
     static final DeferredBlock<WandmakersBenchBlock> WANDMAKERS_BENCH =
             ModBlocks.BLOCKS.registerBlock("wandmakers_bench", WandmakersBenchBlock::new,
-                    BlockBehaviour.Properties.of().strength(2.5f).sound(SoundType.WOOD));
+                    () -> BlockBehaviour.Properties.of().strength(2.5f).sound(SoundType.WOOD));
 
     static final DeferredItem<BlockItem> DEVILS_SNARE_ITEM = RegistryUtils.registerSimpleBlockItem("devils_snare", DEVILS_SNARE);
     static final DeferredItem<BlockItem> MALLOWSWEET_ITEM = RegistryUtils.registerSimpleBlockItem("mallowsweet", MALLOWSWEET);

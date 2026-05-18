@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "wizards_and_beasts:block/gringotts_white_marble_pillar_top",
+    "side": "wizards_and_beasts:block/gringotts_white_marble_pillar"
+  }
+}

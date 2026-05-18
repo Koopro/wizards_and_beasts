@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "wizards_and_beasts:azkaban_fortress",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 256,
+    "separation": 128,
+    "salt": 1453714
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "wizards_and_beasts:enchanted_ceiling_tile"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "wizards_and_beasts:blocks/enchanted_ceiling_tile"
+}

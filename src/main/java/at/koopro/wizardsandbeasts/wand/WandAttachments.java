@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.wand;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.item.wand.WandFlexibility;
+import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.Identifier;

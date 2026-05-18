@@ -1,8 +1,8 @@
 package at.koopro.wizardsandbeasts.spell.def;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.spell.JsonSpell;
-import at.koopro.wizardsandbeasts.spell.Spells;
+import at.koopro.wizardsandbeasts.spell.core.JsonSpell;
+import at.koopro.wizardsandbeasts.spell.core.Spells;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.Identifier;

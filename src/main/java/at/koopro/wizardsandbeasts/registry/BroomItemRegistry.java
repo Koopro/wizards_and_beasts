@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.registry;
 
-import at.koopro.wizardsandbeasts.item.BroomItem;
+import at.koopro.wizardsandbeasts.broom.item.BroomItem;
 import at.koopro.wizardsandbeasts.item.SimpleTooltipItem;
 import net.neoforged.neoforge.registries.DeferredItem;
 

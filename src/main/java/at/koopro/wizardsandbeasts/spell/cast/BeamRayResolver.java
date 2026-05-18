@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.spell.cast;
 
+import at.koopro.wizardsandbeasts.spell.core.*;
+
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;

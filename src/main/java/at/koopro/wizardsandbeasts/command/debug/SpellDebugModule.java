@@ -1,9 +1,9 @@
 package at.koopro.wizardsandbeasts.command.debug;
 
-import at.koopro.wizardsandbeasts.data.PlayerSpellData;
-import at.koopro.wizardsandbeasts.network.SpellDataSyncS2CPacket;
+import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
+import at.koopro.wizardsandbeasts.spell.network.SpellDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
-import at.koopro.wizardsandbeasts.spell.Spells;
+import at.koopro.wizardsandbeasts.spell.core.Spells;
 import at.koopro.wizardsandbeasts.spell.cast.SpellRejectCodes;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
@@ -153,7 +153,7 @@ public final class SpellDebugModule implements DebugModule {
     private int clearRejects(CommandSourceStack source, ServerPlayer target) {
         PlayerSpellData data = target.getData(ModAttachments.SPELL_DATA.get());
         data.clearRejectCounts();
-        SpellDataSyncS2CPacket.syncToPlayer(target);
+        SpellDataSyncS2CPayload.syncToPlayer(target);
         new DebugOutput(source).ok("Cleared spell reject counters for " + target.getName().getString());
         return 1;
     }

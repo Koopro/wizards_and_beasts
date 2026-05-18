@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.client.entity;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.entity.ProtegoShieldEntity;
+import at.koopro.wizardsandbeasts.spell.entity.ProtegoShieldEntity;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.resources.Identifier;

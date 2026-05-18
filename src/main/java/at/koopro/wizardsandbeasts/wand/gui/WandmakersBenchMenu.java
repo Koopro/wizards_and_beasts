@@ -1,14 +1,14 @@
 package at.koopro.wizardsandbeasts.wand.gui;
 
-import at.koopro.wizardsandbeasts.item.WandBlankItem;
-import at.koopro.wizardsandbeasts.item.WandCoreMaterialItem;
-import at.koopro.wizardsandbeasts.item.wand.WandFlexibility;
+import at.koopro.wizardsandbeasts.wand.item.WandBlankItem;
+import at.koopro.wizardsandbeasts.wand.item.WandCoreMaterialItem;
+import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.registry.ModItems;
 import at.koopro.wizardsandbeasts.registry.ModMenuTypes;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
-import at.koopro.wizardsandbeasts.wand.block.WandmakersBenchBlockEntity;
+import at.koopro.wizardsandbeasts.wand.bench.WandmakersBenchBlockEntity;
 import at.koopro.wizardsandbeasts.wand.recipe.WandmakingRecipe;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -23,8 +23,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.items.SlotItemHandler;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
+import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +71,7 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
         this.access = ContainerLevelAccess.create(level, bench.getBlockPos());
         this.enhancerBlockIds = List.copyOf(enhancerBlockIds);
 
-        ItemStackHandler handler = bench.getInventory();
+        ItemStacksResourceHandler handler = bench.getInventory();
         addSlot(new WandBlankSlot(handler, 0, 44, 35));
         addSlot(new CoreSlot(handler, 1, 80, 35));
         addSlot(new OutputSlot(this, handler, 2, 134, 35));
@@ -150,30 +152,30 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
         if (level.isClientSide()) {
             return;
         }
-        ItemStackHandler handler = bench.getInventory();
-        ItemStack blank = handler.getStackInSlot(0);
-        ItemStack coreStack = handler.getStackInSlot(1);
-        ItemStack out = handler.getStackInSlot(2);
+        ItemStacksResourceHandler handler = bench.getInventory();
+        ItemStack blank = slotToStack(handler, 0);
+        ItemStack coreStack = slotToStack(handler, 1);
+        ItemStack out = slotToStack(handler, 2);
         if (blank.isEmpty() || coreStack.isEmpty()) {
             if (!out.isEmpty()) {
-                handler.setStackInSlot(2, ItemStack.EMPTY);
+                handler.set(2, ItemResource.of(ItemStack.EMPTY), 0);
             }
             return;
         }
         Identifier wood = WandComponents.getWood(blank);
         Identifier coreId = WandCoreMaterialItem.getCoreKey(coreStack);
         if (wood == null || coreId == null) {
-            handler.setStackInSlot(2, ItemStack.EMPTY);
+            handler.set(2, ItemResource.of(ItemStack.EMPTY), 0);
             return;
         }
         Optional<WandmakingRecipe> recipeOpt = findRecipe(wood, coreId);
         if (recipeOpt.isEmpty()) {
-            handler.setStackInSlot(2, ItemStack.EMPTY);
+            handler.set(2, ItemResource.of(ItemStack.EMPTY), 0);
             return;
         }
         WandmakingRecipe recipe = recipeOpt.get();
         if (bench.getCachedTierScore() < recipe.minimumBenchTier()) {
-            handler.setStackInSlot(2, ItemStack.EMPTY);
+            handler.set(2, ItemResource.of(ItemStack.EMPTY), 0);
             return;
         }
         WandFlexibility flex = WandFlexibility.values()[bench.getSelectedFlexibilityOrdinal()];
@@ -187,7 +189,7 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
         wand.set(WandComponents.WAND_INTEGRITY.get(), recipe.resultIntegrity());
         wand.set(WandComponents.WAND_MASTER.get(), Optional.empty());
         ModDataComponents.refreshElderWandMarker(wand);
-        handler.setStackInSlot(2, wand);
+        handler.set(2, ItemResource.of(wand), wand.getCount());
         bench.setChanged();
     }
 
@@ -251,9 +253,15 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
         return itemstack;
     }
 
-    private static class WandBlankSlot extends SlotItemHandler {
-        WandBlankSlot(ItemStackHandler handler, int id, int x, int y) {
-            super(handler, id, x, y);
+    private static ItemStack slotToStack(ItemStacksResourceHandler handler, int slot) {
+        int count = (int) handler.getAmountAsLong(slot);
+        if (count <= 0) return ItemStack.EMPTY;
+        return handler.getResource(slot).toStack(count);
+    }
+
+    private static class WandBlankSlot extends ResourceHandlerSlot {
+        WandBlankSlot(ItemStacksResourceHandler handler, int id, int x, int y) {
+            super(handler, handler::set, id, x, y);
         }
 
         @Override
@@ -262,9 +270,9 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
         }
     }
 
-    private static class CoreSlot extends SlotItemHandler {
-        CoreSlot(ItemStackHandler handler, int id, int x, int y) {
-            super(handler, id, x, y);
+    private static class CoreSlot extends ResourceHandlerSlot {
+        CoreSlot(ItemStacksResourceHandler handler, int id, int x, int y) {
+            super(handler, handler::set, id, x, y);
         }
 
         @Override
@@ -273,12 +281,14 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
         }
     }
 
-    private static class OutputSlot extends SlotItemHandler {
+    private static class OutputSlot extends ResourceHandlerSlot {
         private final WandmakersBenchMenu menu;
+        private final ItemStacksResourceHandler handler;
 
-        OutputSlot(WandmakersBenchMenu menu, ItemStackHandler handler, int id, int x, int y) {
-            super(handler, id, x, y);
+        OutputSlot(WandmakersBenchMenu menu, ItemStacksResourceHandler handler, int id, int x, int y) {
+            super(handler, handler::set, id, x, y);
             this.menu = menu;
+            this.handler = handler;
         }
 
         @Override
@@ -288,9 +298,11 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
 
         @Override
         public void onTake(Player player, ItemStack stack) {
-            ItemStackHandler h = (ItemStackHandler) getItemHandler();
-            h.extractItem(0, 1, false);
-            h.extractItem(1, 1, false);
+            try (Transaction tx = Transaction.openRoot()) {
+                handler.extract(0, handler.getResource(0), 1, tx);
+                handler.extract(1, handler.getResource(1), 1, tx);
+                tx.commit();
+            }
             super.onTake(player, stack);
             menu.updateCraftingResult();
         }

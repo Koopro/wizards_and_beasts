@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.effect;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.effect.SoulDrainedEffect;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.effect.MobEffect;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -55,6 +56,12 @@ public final class ModEffects {
             MOB_EFFECTS.register("imperio_resisting", ImperioResistingEffect::new);
     public static final DeferredHolder<MobEffect, CrucioSanityDrainEffect> CRUCIO_SANITY_DRAIN =
             MOB_EFFECTS.register("crucio_sanity_drain", CrucioSanityDrainEffect::new);
+
+    public static final DeferredHolder<MobEffect, DisorientedEffect> DISORIENTED =
+            MOB_EFFECTS.register("disoriented", DisorientedEffect::new);
+
+    public static final DeferredHolder<MobEffect, SoulDrainedEffect> SOUL_DRAINED =
+            MOB_EFFECTS.register("soul_drained", SoulDrainedEffect::new);
 
     private ModEffects() {
     }

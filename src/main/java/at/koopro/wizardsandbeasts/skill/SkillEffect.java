@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.skill;
 
-import at.koopro.wizardsandbeasts.spell.SpellCategory;
+import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 
 /**
  * What unlocking a skill does. Effects are code-only — never serialized.

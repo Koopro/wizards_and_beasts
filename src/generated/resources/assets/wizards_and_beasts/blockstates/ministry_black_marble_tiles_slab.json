@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "wizards_and_beasts:block/ministry_black_marble_tiles_slab"
+    },
+    "type=double": {
+      "model": "wizards_and_beasts:block/ministry_black_marble_tiles"
+    },
+    "type=top": {
+      "model": "wizards_and_beasts:block/ministry_black_marble_tiles_slab_top"
+    }
+  }
+}

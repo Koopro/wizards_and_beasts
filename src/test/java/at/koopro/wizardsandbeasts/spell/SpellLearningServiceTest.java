@@ -1,8 +1,14 @@
 package at.koopro.wizardsandbeasts.spell;
 
-import at.koopro.wizardsandbeasts.data.PlayerSpellData;
+import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
+import at.koopro.wizardsandbeasts.heritage.Heritage;
+import at.koopro.wizardsandbeasts.spell.core.Spell;
+import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
+import at.koopro.wizardsandbeasts.spell.core.SpellRequirement;
+import at.koopro.wizardsandbeasts.spell.core.SpellProperties;
+import at.koopro.wizardsandbeasts.spell.core.Spells;
 import at.koopro.wizardsandbeasts.spell.learning.SpellLearningService;
-import at.koopro.wizardsandbeasts.type.ObscurialRules;
+import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialRules;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -57,7 +63,7 @@ class SpellLearningServiceTest {
     @Test
     void obscurialAbility_isNotTypeUsableSpell() {
         assertTrue(ObscurialRules.isObscurialAbility(Spells.OBSCURUS_SURGE));
-        assertFalse(ObscurialRules.canHeritageUseSpell(at.koopro.wizardsandbeasts.type.Heritage.OBSCURIAL, Spells.OBSCURUS_SURGE));
+        assertFalse(ObscurialRules.canHeritageUseSpell(Heritage.OBSCURIAL, Spells.OBSCURUS_SURGE));
     }
 
     private static final class TestRequirementSpell extends Spell {

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "wizards_and_beasts:block/hogwarts_stone_pillar_top",
+    "side": "wizards_and_beasts:block/hogwarts_stone_pillar"
+  }
+}

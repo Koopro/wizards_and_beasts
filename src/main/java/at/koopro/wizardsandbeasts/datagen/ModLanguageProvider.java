@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.datagen;
 
-import at.koopro.wizardsandbeasts.type.profession.ProfessionNode;
+import at.koopro.wizardsandbeasts.heritage.profession.ProfessionNode;
 import net.minecraft.data.PackOutput;
 import net.neoforged.neoforge.common.data.LanguageProvider;
 
@@ -241,6 +241,15 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.wizards_and_beasts.portkey.desc", "Linked transport item. Sneak-use on a block to bind destination.");
         add("item.wizards_and_beasts.portkey.unlinked", "Sneak-use on a block to link a destination.");
         add("item.wizards_and_beasts.portkey.linked", "Linked: %s, %s, %s");
+        add("item.wizards_and_beasts.enchanted_trunk", "Enchanted Trunk");
+        add("item.wizards_and_beasts.expanded_trunk", "Expanded Trunk");
+        add("item.wizards_and_beasts.masters_trunk", "Master's Trunk");
+        add("item.wizards_and_beasts.ministry_license_scroll", "Ministry License Scroll");
+        add("item.wizards_and_beasts.trunk_access_mode.sealed", "Sealed to the owner. None may enter uninvited.");
+        add("item.wizards_and_beasts.trunk_access_mode.keyed", "Entry granted to those holding a Sympathetic Key.");
+        add("item.wizards_and_beasts.trunk_access_mode.open", "Unguarded. Any witch or wizard may enter.");
+        add("item.wizards_and_beasts.enchanted_trunk.desc",
+                "Undetectable Extension Charm focus. Use to enter or leave the bound pocket; sneak-use cycles archetype and access.");
         add("item.wizards_and_beasts.invisibility_cloak", "Invisibility Cloak");
         add("item.wizards_and_beasts.invisibility_cloak.desc", "Wear in chest slot to blend from sight.");
         add("item.wizards_and_beasts.deathly_hallow_cloak", "Deathly Hallow Cloak");
@@ -312,6 +321,168 @@ public class ModLanguageProvider extends LanguageProvider {
         }
         add("screen.wizards_and_beasts.profession_tree.title", "Professions");
         add("screen.wizards_and_beasts.profession_tree.points", "Profession Points");
+
+        // Trunk archetypes
+        add("trunk.archetype.wizards_and_beasts.scamander_sanctuary", "Scamander's Sanctuary");
+        add("trunk.archetype.wizards_and_beasts.field_camp", "Field Camp");
+        add("trunk.archetype.wizards_and_beasts.ministry_standard", "Ministry Standard");
+        add("trunk.archetype.wizards_and_beasts.safehouse", "Safehouse");
+        add("trunk.archetype.wizards_and_beasts.astronomers_retreat", "Astronomer's Retreat");
+
+        // Trunk tiers
+        add("trunk.tier.wizards_and_beasts.tier_1", "Standard Extension");
+        add("trunk.tier.wizards_and_beasts.tier_2", "Greater Extension");
+        add("trunk.tier.wizards_and_beasts.tier_3", "Archmaster Extension");
+
+        // Pocket dimension blocks
+        add("block.wizards_and_beasts.warding_stone", "Warding Stone");
+        add("block.wizards_and_beasts.pocket_configurator", "Expansion Focus");
+
+        // Pocket configurator GUI
+        add("gui.wizards_and_beasts.pocket_configurator.title", "Expansion Focus");
+        add("gui.wizards_and_beasts.pocket_configurator.size", "Size");
+        add("gui.wizards_and_beasts.pocket_configurator.biome", "Biome");
+        add("gui.wizards_and_beasts.pocket_configurator.apply", "Apply");
+
+        // Ministry of Magic
+        add("block.wizards_and_beasts.ministry_black_marble", "Ministry Black Marble");
+        add("block.wizards_and_beasts.ministry_black_marble_slab", "Ministry Black Marble Slab");
+        add("block.wizards_and_beasts.ministry_black_marble_stairs", "Ministry Black Marble Stairs");
+        add("block.wizards_and_beasts.ministry_black_marble_wall", "Ministry Black Marble Wall");
+        add("block.wizards_and_beasts.ministry_black_marble_pillar", "Ministry Marble Pillar");
+        add("block.wizards_and_beasts.ministry_black_marble_tiles", "Ministry Marble Tiles");
+        add("block.wizards_and_beasts.ministry_black_marble_tiles_slab", "Ministry Marble Tiles Slab");
+        add("block.wizards_and_beasts.ministry_black_marble_tiles_stairs", "Ministry Marble Tiles Stairs");
+        add("block.wizards_and_beasts.ministry_gilded_black_marble", "Gilded Black Marble");
+        add("block.wizards_and_beasts.ministry_gilded_black_marble_slab", "Gilded Black Marble Slab");
+        add("block.wizards_and_beasts.ministry_gilded_black_marble_stairs", "Gilded Black Marble Stairs");
+        add("block.wizards_and_beasts.ministry_gilded_black_marble_wall", "Gilded Black Marble Wall");
+        add("block.wizards_and_beasts.ministry_gilded_trim", "Ministry Gilded Trim");
+        add("block.wizards_and_beasts.ministry_dark_tile", "Ministry Dark Tile");
+        add("block.wizards_and_beasts.ministry_dark_tile_slab", "Ministry Dark Tile Slab");
+        add("block.wizards_and_beasts.ministry_dark_tile_stairs", "Ministry Dark Tile Stairs");
+        add("block.wizards_and_beasts.ministry_floor_tile", "Ministry Floor Tile");
+        add("block.wizards_and_beasts.ministry_floor_tile_slab", "Ministry Floor Tile Slab");
+        add("block.wizards_and_beasts.ministry_wall_panel", "Ministry Wall Panel");
+
+        // Hogwarts Castle
+        add("block.wizards_and_beasts.hogwarts_stone", "Hogwarts Stone");
+        add("block.wizards_and_beasts.hogwarts_stone_slab", "Hogwarts Stone Slab");
+        add("block.wizards_and_beasts.hogwarts_stone_stairs", "Hogwarts Stone Stairs");
+        add("block.wizards_and_beasts.hogwarts_stone_wall", "Hogwarts Stone Wall");
+        add("block.wizards_and_beasts.hogwarts_stone_bricks", "Hogwarts Stone Bricks");
+        add("block.wizards_and_beasts.hogwarts_stone_bricks_slab", "Hogwarts Stone Bricks Slab");
+        add("block.wizards_and_beasts.hogwarts_stone_bricks_stairs", "Hogwarts Stone Bricks Stairs");
+        add("block.wizards_and_beasts.hogwarts_stone_bricks_wall", "Hogwarts Stone Bricks Wall");
+        add("block.wizards_and_beasts.hogwarts_cracked_stone_bricks", "Cracked Hogwarts Stone Bricks");
+        add("block.wizards_and_beasts.hogwarts_mossy_stone_bricks", "Mossy Hogwarts Stone Bricks");
+        add("block.wizards_and_beasts.hogwarts_mossy_stone_bricks_slab", "Mossy Hogwarts Stone Bricks Slab");
+        add("block.wizards_and_beasts.hogwarts_mossy_stone_bricks_stairs", "Mossy Hogwarts Stone Bricks Stairs");
+        add("block.wizards_and_beasts.hogwarts_mossy_stone_bricks_wall", "Mossy Hogwarts Stone Bricks Wall");
+        add("block.wizards_and_beasts.hogwarts_stone_pillar", "Hogwarts Stone Pillar");
+        add("block.wizards_and_beasts.hogwarts_dark_stone", "Hogwarts Dark Stone");
+        add("block.wizards_and_beasts.hogwarts_dark_stone_slab", "Hogwarts Dark Stone Slab");
+        add("block.wizards_and_beasts.hogwarts_dark_stone_stairs", "Hogwarts Dark Stone Stairs");
+        add("block.wizards_and_beasts.hogwarts_dark_stone_wall", "Hogwarts Dark Stone Wall");
+        add("block.wizards_and_beasts.hogwarts_flagstone", "Hogwarts Flagstone");
+        add("block.wizards_and_beasts.hogwarts_flagstone_slab", "Hogwarts Flagstone Slab");
+        add("block.wizards_and_beasts.hogwarts_floor_tile", "Hogwarts Floor Tile");
+        add("block.wizards_and_beasts.hogwarts_floor_tile_slab", "Hogwarts Floor Tile Slab");
+        add("block.wizards_and_beasts.enchanted_ceiling_tile", "Enchanted Ceiling Tile");
+
+        // Diagon Alley
+        add("block.wizards_and_beasts.diagon_brick", "Diagon Alley Brick");
+        add("block.wizards_and_beasts.diagon_brick_slab", "Diagon Alley Brick Slab");
+        add("block.wizards_and_beasts.diagon_brick_stairs", "Diagon Alley Brick Stairs");
+        add("block.wizards_and_beasts.diagon_brick_wall", "Diagon Alley Brick Wall");
+        add("block.wizards_and_beasts.diagon_brick_tiles", "Diagon Brick Tiles");
+        add("block.wizards_and_beasts.diagon_brick_tiles_slab", "Diagon Brick Tiles Slab");
+        add("block.wizards_and_beasts.diagon_brick_tiles_stairs", "Diagon Brick Tiles Stairs");
+        add("block.wizards_and_beasts.diagon_worn_brick", "Worn Diagon Brick");
+        add("block.wizards_and_beasts.diagon_worn_brick_slab", "Worn Diagon Brick Slab");
+        add("block.wizards_and_beasts.diagon_worn_brick_stairs", "Worn Diagon Brick Stairs");
+        add("block.wizards_and_beasts.diagon_worn_brick_wall", "Worn Diagon Brick Wall");
+        add("block.wizards_and_beasts.diagon_cobblestone", "Diagon Cobblestone");
+        add("block.wizards_and_beasts.diagon_cobblestone_slab", "Diagon Cobblestone Slab");
+        add("block.wizards_and_beasts.diagon_cobblestone_stairs", "Diagon Cobblestone Stairs");
+        add("block.wizards_and_beasts.diagon_cobblestone_wall", "Diagon Cobblestone Wall");
+        add("block.wizards_and_beasts.diagon_shopfront_wood", "Diagon Shopfront Wood");
+        add("block.wizards_and_beasts.diagon_shopfront_wood_slab", "Diagon Shopfront Wood Slab");
+        add("block.wizards_and_beasts.diagon_shopfront_wood_stairs", "Diagon Shopfront Wood Stairs");
+        add("block.wizards_and_beasts.diagon_shopfront_planks", "Diagon Shopfront Planks");
+        add("block.wizards_and_beasts.diagon_shopfront_planks_slab", "Diagon Shopfront Planks Slab");
+        add("block.wizards_and_beasts.diagon_shopfront_planks_stairs", "Diagon Shopfront Planks Stairs");
+        add("block.wizards_and_beasts.diagon_painted_wood_green", "Painted Wood (Green)");
+        add("block.wizards_and_beasts.diagon_painted_wood_green_slab", "Painted Wood Slab (Green)");
+        add("block.wizards_and_beasts.diagon_painted_wood_green_stairs", "Painted Wood Stairs (Green)");
+        add("block.wizards_and_beasts.diagon_painted_wood_purple", "Painted Wood (Purple)");
+        add("block.wizards_and_beasts.diagon_painted_wood_purple_slab", "Painted Wood Slab (Purple)");
+        add("block.wizards_and_beasts.diagon_painted_wood_purple_stairs", "Painted Wood Stairs (Purple)");
+        add("block.wizards_and_beasts.diagon_street_stone", "Diagon Street Stone");
+        add("block.wizards_and_beasts.diagon_street_stone_slab", "Diagon Street Stone Slab");
+        add("block.wizards_and_beasts.diagon_street_stone_pressure_plate", "Diagon Street Stone Pressure Plate");
+
+        // Hogsmeade
+        add("block.wizards_and_beasts.hogsmeade_stone", "Hogsmeade Stone");
+        add("block.wizards_and_beasts.hogsmeade_stone_slab", "Hogsmeade Stone Slab");
+        add("block.wizards_and_beasts.hogsmeade_stone_stairs", "Hogsmeade Stone Stairs");
+        add("block.wizards_and_beasts.hogsmeade_stone_wall", "Hogsmeade Stone Wall");
+        add("block.wizards_and_beasts.hogsmeade_stone_bricks", "Hogsmeade Stone Bricks");
+        add("block.wizards_and_beasts.hogsmeade_stone_bricks_slab", "Hogsmeade Stone Bricks Slab");
+        add("block.wizards_and_beasts.hogsmeade_stone_bricks_stairs", "Hogsmeade Stone Bricks Stairs");
+        add("block.wizards_and_beasts.hogsmeade_stone_bricks_wall", "Hogsmeade Stone Bricks Wall");
+        add("block.wizards_and_beasts.hogsmeade_worn_stone", "Worn Hogsmeade Stone");
+        add("block.wizards_and_beasts.hogsmeade_worn_stone_slab", "Worn Hogsmeade Stone Slab");
+        add("block.wizards_and_beasts.hogsmeade_worn_stone_stairs", "Worn Hogsmeade Stone Stairs");
+        add("block.wizards_and_beasts.hogsmeade_worn_stone_wall", "Worn Hogsmeade Stone Wall");
+        add("block.wizards_and_beasts.three_broomsticks_timber", "Three Broomsticks Timber");
+        add("block.wizards_and_beasts.three_broomsticks_timber_slab", "Three Broomsticks Timber Slab");
+        add("block.wizards_and_beasts.three_broomsticks_timber_stairs", "Three Broomsticks Timber Stairs");
+        add("block.wizards_and_beasts.three_broomsticks_planks", "Three Broomsticks Planks");
+        add("block.wizards_and_beasts.three_broomsticks_planks_slab", "Three Broomsticks Planks Slab");
+        add("block.wizards_and_beasts.three_broomsticks_planks_stairs", "Three Broomsticks Planks Stairs");
+        add("block.wizards_and_beasts.honeydukes_pastel_pink", "Honeydukes Pastel Pink");
+        add("block.wizards_and_beasts.honeydukes_pastel_pink_slab", "Honeydukes Pastel Pink Slab");
+        add("block.wizards_and_beasts.honeydukes_pastel_pink_stairs", "Honeydukes Pastel Pink Stairs");
+        add("block.wizards_and_beasts.honeydukes_pastel_yellow", "Honeydukes Pastel Yellow");
+        add("block.wizards_and_beasts.honeydukes_pastel_yellow_slab", "Honeydukes Pastel Yellow Slab");
+        add("block.wizards_and_beasts.honeydukes_pastel_yellow_stairs", "Honeydukes Pastel Yellow Stairs");
+        add("block.wizards_and_beasts.hogsmeade_roof_tile", "Hogsmeade Roof Tile");
+        add("block.wizards_and_beasts.hogsmeade_roof_tile_slab", "Hogsmeade Roof Tile Slab");
+        add("block.wizards_and_beasts.hogsmeade_roof_tile_stairs", "Hogsmeade Roof Tile Stairs");
+        add("block.wizards_and_beasts.hogsmeade_chimney_brick", "Hogsmeade Chimney Brick");
+        add("block.wizards_and_beasts.hogsmeade_chimney_brick_slab", "Hogsmeade Chimney Brick Slab");
+        add("block.wizards_and_beasts.hogsmeade_chimney_brick_stairs", "Hogsmeade Chimney Brick Stairs");
+        add("block.wizards_and_beasts.hogsmeade_chimney_brick_wall", "Hogsmeade Chimney Brick Wall");
+
+        // Gringotts Bank
+        add("block.wizards_and_beasts.gringotts_white_marble", "Gringotts White Marble");
+        add("block.wizards_and_beasts.gringotts_white_marble_slab", "Gringotts White Marble Slab");
+        add("block.wizards_and_beasts.gringotts_white_marble_stairs", "Gringotts White Marble Stairs");
+        add("block.wizards_and_beasts.gringotts_white_marble_wall", "Gringotts White Marble Wall");
+        add("block.wizards_and_beasts.gringotts_white_marble_pillar", "Gringotts Marble Pillar");
+        add("block.wizards_and_beasts.gringotts_white_marble_tiles", "Gringotts Marble Tiles");
+        add("block.wizards_and_beasts.gringotts_white_marble_tiles_slab", "Gringotts Marble Tiles Slab");
+        add("block.wizards_and_beasts.gringotts_white_marble_tiles_stairs", "Gringotts Marble Tiles Stairs");
+        add("block.wizards_and_beasts.gringotts_pale_marble", "Gringotts Pale Marble");
+        add("block.wizards_and_beasts.gringotts_pale_marble_slab", "Gringotts Pale Marble Slab");
+        add("block.wizards_and_beasts.gringotts_pale_marble_stairs", "Gringotts Pale Marble Stairs");
+        add("block.wizards_and_beasts.gringotts_pale_marble_wall", "Gringotts Pale Marble Wall");
+        add("block.wizards_and_beasts.gringotts_gold_trim", "Gringotts Gold Trim");
+        add("block.wizards_and_beasts.gringotts_iron_vault_stone", "Iron Vault Stone");
+        add("block.wizards_and_beasts.gringotts_iron_vault_stone_slab", "Iron Vault Stone Slab");
+        add("block.wizards_and_beasts.gringotts_iron_vault_stone_stairs", "Iron Vault Stone Stairs");
+        add("block.wizards_and_beasts.gringotts_iron_vault_stone_wall", "Iron Vault Stone Wall");
+        add("block.wizards_and_beasts.gringotts_vault_bricks", "Vault Bricks");
+        add("block.wizards_and_beasts.gringotts_vault_bricks_slab", "Vault Bricks Slab");
+        add("block.wizards_and_beasts.gringotts_vault_bricks_stairs", "Vault Bricks Stairs");
+        add("block.wizards_and_beasts.gringotts_vault_bricks_wall", "Vault Bricks Wall");
+        add("block.wizards_and_beasts.gringotts_goblin_stonework", "Goblin Stonework");
+        add("block.wizards_and_beasts.gringotts_goblin_stonework_slab", "Goblin Stonework Slab");
+        add("block.wizards_and_beasts.gringotts_goblin_stonework_stairs", "Goblin Stonework Stairs");
+        add("block.wizards_and_beasts.gringotts_goblin_stonework_wall", "Goblin Stonework Wall");
+        add("block.wizards_and_beasts.gringotts_counting_floor", "Counting House Floor");
+        add("block.wizards_and_beasts.gringotts_counting_floor_slab", "Counting House Floor Slab");
     }
 }
 

@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.wand.cast;
 
-import at.koopro.wizardsandbeasts.spell.SpellCategory;
+import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 import org.junit.jupiter.api.Test;
 
 import java.util.EnumMap;

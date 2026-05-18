@@ -1,8 +1,8 @@
 package at.koopro.wizardsandbeasts.client.ui;
 
-import at.koopro.wizardsandbeasts.data.PlayerHeritageData;
-import at.koopro.wizardsandbeasts.type.HeritageVariant;
-import at.koopro.wizardsandbeasts.type.Heritage;
+import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
+import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
+import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.util.WandHelper;
 import net.minecraft.client.Minecraft;
 

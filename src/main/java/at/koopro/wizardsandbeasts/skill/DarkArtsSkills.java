@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.skill;
 
-import at.koopro.wizardsandbeasts.spell.SpellCategory;
+import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 
 /**
  * Dark Arts tree skill definitions.

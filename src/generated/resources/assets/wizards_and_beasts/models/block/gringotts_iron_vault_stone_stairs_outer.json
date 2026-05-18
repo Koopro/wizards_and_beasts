@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/outer_stairs",
+  "textures": {
+    "bottom": "wizards_and_beasts:block/gringotts_iron_vault_stone",
+    "side": "wizards_and_beasts:block/gringotts_iron_vault_stone",
+    "top": "wizards_and_beasts:block/gringotts_iron_vault_stone"
+  }
+}

@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.Block;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
 import at.koopro.wizardsandbeasts.registry.ModItems;
 import at.koopro.wizardsandbeasts.registry.WoodSet;
-import at.koopro.wizardsandbeasts.item.currency.CurrencyHelper;
+import at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper;
 
 import java.util.concurrent.CompletableFuture;
 

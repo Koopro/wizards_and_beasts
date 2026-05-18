@@ -1,10 +1,10 @@
 package at.koopro.wizardsandbeasts.command.debug;
 
-import at.koopro.wizardsandbeasts.data.PlayerSpellData;
-import at.koopro.wizardsandbeasts.data.PlayerHeritageData;
-import at.koopro.wizardsandbeasts.data.PlayerVaultData;
+import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
+import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
+import at.koopro.wizardsandbeasts.currency.vault.PlayerVaultData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
-import at.koopro.wizardsandbeasts.type.HeritageAPI;
+import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;

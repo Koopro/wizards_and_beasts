@@ -1,8 +1,8 @@
 package at.koopro.wizardsandbeasts.mixin.client;
 
-import at.koopro.wizardsandbeasts.client.form.FormModelRenderer;
-import at.koopro.wizardsandbeasts.client.form.FormRenderStateModifier;
-import at.koopro.wizardsandbeasts.client.form.SizeLerpTracker;
+import at.koopro.wizardsandbeasts.form.client.FormModelRenderer;
+import at.koopro.wizardsandbeasts.form.client.FormRenderStateModifier;
+import at.koopro.wizardsandbeasts.form.client.SizeLerpTracker;
 import at.koopro.wizardsandbeasts.form.ModelType;
 import at.koopro.wizardsandbeasts.form.SizeProfile;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -44,11 +44,11 @@ public class LivingEntityRendererMixin {
         float pt = Minecraft.getInstance()
                 .getDeltaTracker().getGameTimeDeltaPartialTick(false);
         float visualScale = SizeLerpTracker.getVisualScale(
-                formData.playerUUID(), size.scaleY(), pt);
+                formData.playerUUID(), size.modelScale(), pt);
 
-        float sx = (size.scaleX() / size.scaleY()) * visualScale;
+        float sx = size.modelAspectX() * visualScale;
         float sy = visualScale;
-        float sz = (size.scaleZ() / size.scaleY()) * visualScale;
+        float sz = size.modelAspectZ() * visualScale;
         poseStack.scale(sx, sy, sz);
 
         // Render custom model through the proper render pipeline

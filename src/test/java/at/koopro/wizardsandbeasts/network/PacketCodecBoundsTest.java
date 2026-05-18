@@ -1,5 +1,16 @@
 package at.koopro.wizardsandbeasts.network;
 
+import at.koopro.wizardsandbeasts.form.network.FormChangeRequestC2SPayload;
+import at.koopro.wizardsandbeasts.form.network.TransitionEndS2CPayload;
+import at.koopro.wizardsandbeasts.form.network.TransitionStartS2CPayload;
+import at.koopro.wizardsandbeasts.heritage.network.HeritageDataSyncS2CPayload;
+import at.koopro.wizardsandbeasts.heritage.network.HeritageSelectC2SPayload;
+import at.koopro.wizardsandbeasts.map.network.MapSyncS2CPayload;
+import at.koopro.wizardsandbeasts.skill.network.SkillDataSyncS2CPayload;
+import at.koopro.wizardsandbeasts.skill.network.SkillUnlockC2SPayload;
+import at.koopro.wizardsandbeasts.spell.network.ObscurialAbilityUseC2SPayload;
+import at.koopro.wizardsandbeasts.spell.network.SpellAssignC2SPayload;
+import at.koopro.wizardsandbeasts.spell.network.SpellDataSyncS2CPayload;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.jupiter.api.Test;
@@ -14,7 +25,7 @@ class PacketCodecBoundsTest {
         try {
             buf.writeInt(1); // sync version
             buf.writeInt(PacketCodecUtils.MAX_KNOWN_SPELLS + 1);
-            assertThrows(IllegalArgumentException.class, () -> SpellDataSyncS2CPacket.STREAM_CODEC.decode(buf));
+            assertThrows(IllegalArgumentException.class, () -> SpellDataSyncS2CPayload.STREAM_CODEC.decode(buf));
         } finally {
             buf.release();
         }
@@ -25,7 +36,7 @@ class PacketCodecBoundsTest {
         ByteBuf buf = Unpooled.buffer();
         try {
             buf.writeInt(PacketCodecUtils.MAX_MAP_ENTRIES + 1);
-            assertThrows(IllegalArgumentException.class, () -> MapSyncS2CPacket.STREAM_CODEC.decode(buf));
+            assertThrows(IllegalArgumentException.class, () -> MapSyncS2CPayload.STREAM_CODEC.decode(buf));
         } finally {
             buf.release();
         }
@@ -39,7 +50,7 @@ class PacketCodecBoundsTest {
             buf.writeInt(0); // skill points
             buf.writeInt(0); // total points
             buf.writeInt(PacketCodecUtils.MAX_UNLOCKED_SKILLS + 1);
-            assertThrows(IllegalArgumentException.class, () -> SkillDataSyncS2CPacket.STREAM_CODEC.decode(buf));
+            assertThrows(IllegalArgumentException.class, () -> SkillDataSyncS2CPayload.STREAM_CODEC.decode(buf));
         } finally {
             buf.release();
         }
@@ -62,7 +73,7 @@ class PacketCodecBoundsTest {
             buf.writeInt(0);
             PacketCodecUtils.writeString(buf, "");
             buf.writeBoolean(false);
-            assertThrows(IllegalArgumentException.class, () -> HeritageDataSyncS2CPacket.STREAM_CODEC.decode(buf));
+            assertThrows(IllegalArgumentException.class, () -> HeritageDataSyncS2CPayload.STREAM_CODEC.decode(buf));
         } finally {
             buf.release();
         }
@@ -83,7 +94,7 @@ class PacketCodecBoundsTest {
             buf.writeInt(0); // profession points
             buf.writeInt(0); // total profession points
             buf.writeInt(PacketCodecUtils.MAX_UNLOCKED_PROFESSIONS + 1);
-            assertThrows(IllegalArgumentException.class, () -> HeritageDataSyncS2CPacket.STREAM_CODEC.decode(buf));
+            assertThrows(IllegalArgumentException.class, () -> HeritageDataSyncS2CPayload.STREAM_CODEC.decode(buf));
         } finally {
             buf.release();
         }
@@ -95,7 +106,7 @@ class PacketCodecBoundsTest {
         try {
             buf.writeInt(0);
             writeOversizedString(buf);
-            assertThrows(IllegalArgumentException.class, () -> SpellAssignC2SPacket.STREAM_CODEC.decode(buf));
+            assertThrows(IllegalArgumentException.class, () -> SpellAssignC2SPayload.STREAM_CODEC.decode(buf));
         } finally {
             buf.release();
         }
@@ -106,7 +117,7 @@ class PacketCodecBoundsTest {
         ByteBuf buf = Unpooled.buffer();
         try {
             writeOversizedString(buf);
-            assertThrows(IllegalArgumentException.class, () -> SkillUnlockC2SPacket.STREAM_CODEC.decode(buf));
+            assertThrows(IllegalArgumentException.class, () -> SkillUnlockC2SPayload.STREAM_CODEC.decode(buf));
         } finally {
             buf.release();
         }
@@ -118,7 +129,7 @@ class PacketCodecBoundsTest {
         try {
             writeOversizedString(buf);
             PacketCodecUtils.writeString(buf, "wizard");
-            assertThrows(IllegalArgumentException.class, () -> HeritageSelectC2SPacket.STREAM_CODEC.decode(buf));
+            assertThrows(IllegalArgumentException.class, () -> HeritageSelectC2SPayload.STREAM_CODEC.decode(buf));
         } finally {
             buf.release();
         }
@@ -130,7 +141,7 @@ class PacketCodecBoundsTest {
         try {
             PacketCodecUtils.writeUUID(buf, java.util.UUID.randomUUID());
             writeOversizedString(buf);
-            assertThrows(IllegalArgumentException.class, () -> FormChangeRequestC2SPacket.STREAM_CODEC.decode(buf));
+            assertThrows(IllegalArgumentException.class, () -> FormChangeRequestC2SPayload.STREAM_CODEC.decode(buf));
         } finally {
             buf.release();
         }
@@ -141,7 +152,7 @@ class PacketCodecBoundsTest {
         ByteBuf buf = Unpooled.buffer();
         try {
             writeOversizedString(buf);
-            assertThrows(IllegalArgumentException.class, () -> ObscurialAbilityUseC2SPacket.STREAM_CODEC.decode(buf));
+            assertThrows(IllegalArgumentException.class, () -> ObscurialAbilityUseC2SPayload.STREAM_CODEC.decode(buf));
         } finally {
             buf.release();
         }
@@ -156,7 +167,7 @@ class PacketCodecBoundsTest {
             PacketCodecUtils.writeString(buf, "obscurial_dark");
             buf.writeInt(40);
             buf.writeInt(0);
-            assertThrows(IllegalArgumentException.class, () -> TransitionStartS2CPacket.STREAM_CODEC.decode(buf));
+            assertThrows(IllegalArgumentException.class, () -> TransitionStartS2CPayload.STREAM_CODEC.decode(buf));
         } finally {
             buf.release();
         }
@@ -168,7 +179,7 @@ class PacketCodecBoundsTest {
         try {
             PacketCodecUtils.writeUUID(buf, java.util.UUID.randomUUID());
             writeOversizedString(buf);
-            assertThrows(IllegalArgumentException.class, () -> TransitionEndS2CPacket.STREAM_CODEC.decode(buf));
+            assertThrows(IllegalArgumentException.class, () -> TransitionEndS2CPayload.STREAM_CODEC.decode(buf));
         } finally {
             buf.release();
         }

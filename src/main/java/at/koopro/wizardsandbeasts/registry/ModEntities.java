@@ -1,14 +1,16 @@
 package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.entity.BroomEntity;
-import at.koopro.wizardsandbeasts.entity.FormMannequinEntity;
-import at.koopro.wizardsandbeasts.entity.GoblinTellerEntity;
-import at.koopro.wizardsandbeasts.entity.NifflerEntity;
-import at.koopro.wizardsandbeasts.entity.PatronusEntity;
-import at.koopro.wizardsandbeasts.entity.ProtegoShieldEntity;
-import at.koopro.wizardsandbeasts.entity.SpellProjectileEntity;
-import at.koopro.wizardsandbeasts.entity.WizardingThrownEntity;
+import at.koopro.wizardsandbeasts.azkaban.entity.DementorEntity;
+import at.koopro.wizardsandbeasts.broom.entity.BroomEntity;
+import at.koopro.wizardsandbeasts.form.entity.FormMannequinEntity;
+import at.koopro.wizardsandbeasts.bestiary.creature.goblin.GoblinTellerEntity;
+import at.koopro.wizardsandbeasts.bestiary.creature.niffler.BabyNifflerEntity;
+import at.koopro.wizardsandbeasts.bestiary.creature.niffler.NifflerEntity;
+import at.koopro.wizardsandbeasts.spell.entity.PatronusEntity;
+import at.koopro.wizardsandbeasts.spell.entity.ProtegoShieldEntity;
+import at.koopro.wizardsandbeasts.spell.entity.SpellProjectileEntity;
+import at.koopro.wizardsandbeasts.spell.entity.WizardingThrownEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -40,8 +42,12 @@ public class ModEntities {
     static { EntityAttributeBindings.queue(GOBLIN_TELLER, GoblinTellerEntity::createAttributes); }
 
     public static final DeferredHolder<EntityType<?>, EntityType<NifflerEntity>> NIFFLER =
-            EntityHelper.register(ENTITY_TYPES, "niffler", NifflerEntity::new, MobCategory.CREATURE, 0.5f, 0.4f);
+            EntityHelper.register(ENTITY_TYPES, "niffler", NifflerEntity::new, MobCategory.CREATURE, 0.4f, 0.5f);
     static { EntityAttributeBindings.queue(NIFFLER, NifflerEntity::createAttributes); }
+
+    public static final DeferredHolder<EntityType<?>, EntityType<BabyNifflerEntity>> BABY_NIFFLER =
+            EntityHelper.register(ENTITY_TYPES, "baby_niffler", BabyNifflerEntity::new, MobCategory.CREATURE, 0.2f, 0.25f);
+    static { EntityAttributeBindings.queue(BABY_NIFFLER, BabyNifflerEntity::createAttributes); }
 
     public static final DeferredHolder<EntityType<?>, EntityType<FormMannequinEntity>> FORM_MANNEQUIN =
             EntityHelper.register(ENTITY_TYPES, "form_mannequin", FormMannequinEntity::new, MobCategory.MISC, 0.6f, 1.8f);
@@ -49,4 +55,8 @@ public class ModEntities {
 
     public static final DeferredHolder<EntityType<?>, EntityType<WizardingThrownEntity>> WIZARDING_THROWN =
             EntityHelper.register(ENTITY_TYPES, "wizarding_thrown", WizardingThrownEntity::new, MobCategory.MISC, 0.25f, 0.25f, 8, 2);
+
+    public static final DeferredHolder<EntityType<?>, EntityType<DementorEntity>> DEMENTOR =
+            EntityHelper.register(ENTITY_TYPES, "dementor", DementorEntity::new, MobCategory.MONSTER, 0.9f, 3.2f, 10, 3);
+    static { EntityAttributeBindings.queue(DEMENTOR, DementorEntity::createAttributes); }
 }

@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.client.ui;
 
-import at.koopro.wizardsandbeasts.data.PlayerHeritageData;
-import at.koopro.wizardsandbeasts.type.Heritage;
+import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
+import at.koopro.wizardsandbeasts.heritage.Heritage;
 import net.minecraft.client.Minecraft;
 
 public final class InputPolicy {

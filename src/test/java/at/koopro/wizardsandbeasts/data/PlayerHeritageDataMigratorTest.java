@@ -1,7 +1,8 @@
 package at.koopro.wizardsandbeasts.data;
 
-import at.koopro.wizardsandbeasts.type.HeritageVariant;
-import at.koopro.wizardsandbeasts.type.Heritage;
+import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
+import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
+import at.koopro.wizardsandbeasts.heritage.Heritage;
 import net.minecraft.nbt.CompoundTag;
 import org.junit.jupiter.api.Test;
 

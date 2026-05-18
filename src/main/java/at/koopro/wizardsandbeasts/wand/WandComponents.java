@@ -1,7 +1,8 @@
 package at.koopro.wizardsandbeasts.wand;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.item.wand.WandFlexibility;
+import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
+import at.koopro.wizardsandbeasts.wand.customization.WandConfiguration;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponentType;
@@ -71,6 +72,12 @@ public final class WandComponents {
             DATA_COMPONENTS.register("wand_length", () -> DataComponentType.<Float>builder()
                     .persistent(Codec.FLOAT)
                     .networkSynchronized(ByteBufCodecs.FLOAT)
+                    .build());
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<WandConfiguration>> WAND_CONFIGURATION =
+            DATA_COMPONENTS.register("wand_configuration", () -> DataComponentType.<WandConfiguration>builder()
+                    .persistent(WandConfiguration.CODEC)
+                    .networkSynchronized(WandConfiguration.STREAM_CODEC)
                     .build());
 
     private WandComponents() {

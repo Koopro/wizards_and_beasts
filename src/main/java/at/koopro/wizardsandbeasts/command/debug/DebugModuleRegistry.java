@@ -19,6 +19,7 @@ public final class DebugModuleRegistry {
         if (!MODULES.isEmpty()) return;
         register(new SpellDebugModule());
         register(new WandBondDebugModule());
+        register(new ElderWandDebugModule());
         register(new PlayerDebugModule());
         register(new VaultDebugModule());
         register(new BroomDebugModule());

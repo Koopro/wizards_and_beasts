@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/pressure_plate_down",
+  "textures": {
+    "texture": "wizards_and_beasts:block/diagon_street_stone"
+  }
+}

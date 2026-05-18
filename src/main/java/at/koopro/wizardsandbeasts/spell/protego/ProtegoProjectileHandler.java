@@ -1,9 +1,9 @@
 package at.koopro.wizardsandbeasts.spell.protego;
 
-import at.koopro.wizardsandbeasts.entity.SpellProjectileEntity;
+import at.koopro.wizardsandbeasts.spell.entity.SpellProjectileEntity;
 import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
 import at.koopro.wizardsandbeasts.skill.SkillTreeId;
-import at.koopro.wizardsandbeasts.spell.Spells;
+import at.koopro.wizardsandbeasts.spell.core.Spells;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 

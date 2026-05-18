@@ -18,7 +18,7 @@ public record TransformationConfig(
 
     /**
      * Screen effect types displayed to the transforming player.
-     * The ordinal is sent over the network via TransitionStartS2CPacket.
+     * The ordinal is sent over the network via TransitionStartS2CPayload.
      */
     public enum ScreenEffect {
         NONE,

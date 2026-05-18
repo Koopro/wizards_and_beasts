@@ -1,24 +1,23 @@
 package at.koopro.wizardsandbeasts.spell.cast;
 
+import at.koopro.wizardsandbeasts.spell.core.*;
+
 import at.koopro.wizardsandbeasts.Config;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.command.debug.DebugHooks;
-import at.koopro.wizardsandbeasts.data.PlayerSpellData;
-import at.koopro.wizardsandbeasts.network.SpellDataDeltaS2CPacket;
+import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
+import at.koopro.wizardsandbeasts.spell.network.SpellDataDeltaS2CPayload;
 import at.koopro.wizardsandbeasts.network.SpellNetworkGuards;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
-import at.koopro.wizardsandbeasts.spell.JsonSpell;
-import at.koopro.wizardsandbeasts.spell.Spell;
-import at.koopro.wizardsandbeasts.spell.SpellExecutor;
 import at.koopro.wizardsandbeasts.spell.proficiency.ProficiencyScaler;
 import at.koopro.wizardsandbeasts.spell.gamp.GampViolationEvent;
 import at.koopro.wizardsandbeasts.spell.gamp.GampsLaw;
-import at.koopro.wizardsandbeasts.spell.Spells;
 import at.koopro.wizardsandbeasts.wand.cast.WandCastingAllegianceSystem;
 import at.koopro.wizardsandbeasts.wand.cast.WandStats;
 import at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver;
-import at.koopro.wizardsandbeasts.type.ObscurialRules;
+import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialCombatRules;
+import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialRules;
 import at.koopro.wizardsandbeasts.util.WandHelper;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import com.mojang.logging.LogUtils;
@@ -112,8 +111,8 @@ public final class SpellCastService {
         }
 
         if (obscurialDark && !ObscurialRules.isSpellAllowedInDarkForm(spell)) {
-            ObscurialRules.applyBlockedCastStressSpike(player);
-            ObscurialRules.applyBlockedCastPressureBacklash(player);
+            ObscurialCombatRules.applyBlockedCastStressSpike(player);
+            ObscurialCombatRules.applyBlockedCastPressureBacklash(player);
             debugReject(player, SpellRejectCodes.withDetail(SpellRejectCodes.OBSCURIAL_DARK_RESTRICTED, spellId));
             player.displayClientMessage(
                     Component.literal("\u00A75Obscurus rejects that spell and lashes back."),
@@ -157,8 +156,8 @@ public final class SpellCastService {
         long collapseInstabilityUntil = parseLong(
                 player.getData(ModAttachments.HERITAGE_DATA.get()).getFlag(FLAG_COLLAPSE_CAST_INSTABILITY_UNTIL), 0L);
         if (serverLevel.getGameTime() < collapseInstabilityUntil) {
-            if (serverLevel.random.nextFloat() < ObscurialRules.getCollapseCastFizzleChance()) {
-                float backlash = ObscurialRules.getCollapseCastBacklashDamage();
+            if (serverLevel.random.nextFloat() < ObscurialCombatRules.getCollapseCastFizzleChance()) {
+                float backlash = ObscurialCombatRules.getCollapseCastBacklashDamage();
                 if (backlash > 0f) {
                     player.hurt(serverLevel.damageSources().magic(), backlash);
                 }
@@ -175,7 +174,7 @@ public final class SpellCastService {
             if (backlash > 0f) {
                 player.hurt(serverLevel.damageSources().magic(), backlash);
             }
-            ObscurialRules.consumeCastSpike(player);
+            ObscurialCombatRules.consumeCastSpike(player);
             player.displayClientMessage(Component.literal("\u00A74Your obscurus destabilizes the cast and backlashes."), true);
             return CastResult.REJECTED;
         }
@@ -216,9 +215,9 @@ public final class SpellCastService {
         data.setCooldown(spellId, expiryTick);
         data.incrementCastCount(spellId);
         int newCount = data.getCastCount(spellId);
-        ObscurialRules.consumeCastSpike(player);
+        ObscurialCombatRules.consumeCastSpike(player);
 
-        SpellDataDeltaS2CPacket.sendTo(player, spellId, expiryTick, newCount, data.getSuccessfulHits(spellId));
+        SpellDataDeltaS2CPayload.sendTo(player, spellId, expiryTick, newCount, data.getSuccessfulHits(spellId));
         return CastResult.SUCCESS;
     }
 
@@ -239,7 +238,7 @@ public final class SpellCastService {
         var typeData = player.getData(ModAttachments.HERITAGE_DATA.get());
         if (!ObscurialRules.isObscurial(typeData)) return;
         if (ObscurialRules.isDarkForm(typeData)) return;
-        ObscurialRules.applyHumanFailedCastStressSpike(player);
+        ObscurialCombatRules.applyHumanFailedCastStressSpike(player);
     }
 
     private static long parseLong(String value, long fallback) {

@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.spell.patronus;
 
-import at.koopro.wizardsandbeasts.type.Heritage;
-import at.koopro.wizardsandbeasts.type.HeritageVariant;
+import at.koopro.wizardsandbeasts.heritage.Heritage;
+import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import org.jspecify.annotations.Nullable;
 
 /**

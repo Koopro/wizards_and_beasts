@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.spell.proficiency;
 
+import at.koopro.wizardsandbeasts.spell.core.*;
+
 public record SpellScalingProfile(
         float damageMult,
         float cooldownMult,

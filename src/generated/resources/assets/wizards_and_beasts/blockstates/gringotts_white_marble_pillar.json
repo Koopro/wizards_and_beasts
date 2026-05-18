@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "wizards_and_beasts:block/gringotts_white_marble_pillar",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "wizards_and_beasts:block/gringotts_white_marble_pillar"
+    },
+    "axis=z": {
+      "model": "wizards_and_beasts:block/gringotts_white_marble_pillar",
+      "x": 90
+    }
+  }
+}

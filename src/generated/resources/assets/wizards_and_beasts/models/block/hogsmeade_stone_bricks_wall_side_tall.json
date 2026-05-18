@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/template_wall_side_tall",
+  "textures": {
+    "wall": "wizards_and_beasts:block/hogsmeade_stone_bricks"
+  }
+}

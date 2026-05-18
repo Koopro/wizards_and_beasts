@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.spell.cast;
 
+import at.koopro.wizardsandbeasts.spell.core.*;
+
 /**
  * Canonical reject bucket used by cast context layers.
  * This starts intentionally small and can grow as Layer 3/4 land.

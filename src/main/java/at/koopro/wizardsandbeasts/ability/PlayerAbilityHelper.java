@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.ability;
 
-import at.koopro.wizardsandbeasts.data.PlayerAbilityData;
-import at.koopro.wizardsandbeasts.network.AbilityDataSyncPayload;
+import at.koopro.wizardsandbeasts.ability.data.PlayerAbilityData;
+import at.koopro.wizardsandbeasts.ability.network.AbilityDataSyncPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.NonNull;

@@ -1,13 +1,13 @@
 package at.koopro.wizardsandbeasts.wand.cast;
 
-import at.koopro.wizardsandbeasts.data.PlayerHeritageData;
-import at.koopro.wizardsandbeasts.item.wand.WandCore;
-import at.koopro.wizardsandbeasts.item.wand.WandFlexibility;
-import at.koopro.wizardsandbeasts.item.wand.WandLength;
-import at.koopro.wizardsandbeasts.item.wand.WandWood;
+import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
+import at.koopro.wizardsandbeasts.wand.stat.WandCore;
+import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
+import at.koopro.wizardsandbeasts.wand.stat.WandLength;
+import at.koopro.wizardsandbeasts.wand.stat.WandWood;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
-import at.koopro.wizardsandbeasts.type.HeritageVariant;
-import at.koopro.wizardsandbeasts.type.Heritage;
+import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
+import at.koopro.wizardsandbeasts.heritage.Heritage;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 

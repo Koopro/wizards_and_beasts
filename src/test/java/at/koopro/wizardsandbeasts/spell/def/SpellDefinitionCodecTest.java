@@ -1,8 +1,8 @@
 package at.koopro.wizardsandbeasts.spell.def;
 
-import at.koopro.wizardsandbeasts.spell.CastType;
-import at.koopro.wizardsandbeasts.spell.SpellCategory;
-import at.koopro.wizardsandbeasts.spell.SpellFamily;
+import at.koopro.wizardsandbeasts.spell.core.CastType;
+import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
+import at.koopro.wizardsandbeasts.spell.core.SpellFamily;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;

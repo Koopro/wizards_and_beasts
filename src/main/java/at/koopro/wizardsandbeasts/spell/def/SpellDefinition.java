@@ -1,10 +1,10 @@
 package at.koopro.wizardsandbeasts.spell.def;
 
-import at.koopro.wizardsandbeasts.spell.CastType;
-import at.koopro.wizardsandbeasts.data.PlayerSpellData;
-import at.koopro.wizardsandbeasts.spell.Proficiency;
-import at.koopro.wizardsandbeasts.spell.SpellCategory;
-import at.koopro.wizardsandbeasts.spell.SpellFamily;
+import at.koopro.wizardsandbeasts.spell.core.CastType;
+import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
+import at.koopro.wizardsandbeasts.spell.core.Proficiency;
+import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
+import at.koopro.wizardsandbeasts.spell.core.SpellFamily;
 import at.koopro.wizardsandbeasts.spell.cast.CastContext;
 import at.koopro.wizardsandbeasts.spell.gamp.GampDomain;
 import com.mojang.datafixers.util.Pair;

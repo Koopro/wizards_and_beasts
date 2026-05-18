@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.wand.gui;
 
-import at.koopro.wizardsandbeasts.item.wand.WandFlexibility;
-import at.koopro.wizardsandbeasts.network.SyncTrialResonancePayload;
+import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
+import at.koopro.wizardsandbeasts.wand.network.SyncTrialResonancePayload;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.registry.ModItems;
 import at.koopro.wizardsandbeasts.registry.ModMenuTypes;

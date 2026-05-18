@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.data;
 
+import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import net.minecraft.nbt.CompoundTag;
 import org.junit.jupiter.api.Test;
 

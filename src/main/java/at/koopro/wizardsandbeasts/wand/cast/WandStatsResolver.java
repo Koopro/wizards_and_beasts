@@ -1,14 +1,14 @@
 package at.koopro.wizardsandbeasts.wand.cast;
 
-import at.koopro.wizardsandbeasts.item.WandItem;
-import at.koopro.wizardsandbeasts.item.wand.WandCore;
-import at.koopro.wizardsandbeasts.item.wand.WandFlexibility;
-import at.koopro.wizardsandbeasts.item.wand.WandLength;
-import at.koopro.wizardsandbeasts.item.wand.WandWood;
+import at.koopro.wizardsandbeasts.wand.item.WandItem;
+import at.koopro.wizardsandbeasts.wand.stat.WandCore;
+import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
+import at.koopro.wizardsandbeasts.wand.stat.WandLength;
+import at.koopro.wizardsandbeasts.wand.stat.WandWood;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
-import at.koopro.wizardsandbeasts.spell.Spell;
+import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.cast.ModifierStack;
-import at.koopro.wizardsandbeasts.spell.SpellCategory;
+import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;

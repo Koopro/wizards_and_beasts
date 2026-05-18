@@ -1,0 +1,7 @@
+{
+  "type": "wizards_and_beasts:azkaban_fortress",
+  "biomes": "#minecraft:is_ocean",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

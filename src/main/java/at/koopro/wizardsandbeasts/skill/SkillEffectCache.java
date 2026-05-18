@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.skill;
 
-import at.koopro.wizardsandbeasts.data.PlayerSkillData;
-import at.koopro.wizardsandbeasts.spell.SpellCategory;
+import at.koopro.wizardsandbeasts.skill.data.PlayerSkillData;
+import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 
 import java.util.*;
 

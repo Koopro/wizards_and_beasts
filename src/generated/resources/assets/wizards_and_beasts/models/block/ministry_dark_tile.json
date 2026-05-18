@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "wizards_and_beasts:block/ministry_dark_tile"
+  }
+}

@@ -1,6 +1,8 @@
 package at.koopro.wizardsandbeasts.network;
 
-import at.koopro.wizardsandbeasts.data.PlayerSpellData;
+import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
+import at.koopro.wizardsandbeasts.spell.network.SpellDataDeltaS2CPayload;
+import at.koopro.wizardsandbeasts.spell.network.SpellDataSyncS2CPayload;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.jupiter.api.Test;
@@ -32,12 +34,12 @@ class SpellDataSyncCodecTest {
         data.incrementSuccessfulHits("stupefy");
         data.incrementSuccessfulHits("lumos");
 
-        SpellDataSyncS2CPacket original = SpellDataSyncS2CPacket.of(data);
+        SpellDataSyncS2CPayload original = SpellDataSyncS2CPayload.of(data);
 
         ByteBuf buf = Unpooled.buffer();
         try {
-            SpellDataSyncS2CPacket.STREAM_CODEC.encode(buf, original);
-            SpellDataSyncS2CPacket decoded = SpellDataSyncS2CPacket.STREAM_CODEC.decode(buf);
+            SpellDataSyncS2CPayload.STREAM_CODEC.encode(buf, original);
+            SpellDataSyncS2CPayload decoded = SpellDataSyncS2CPayload.STREAM_CODEC.decode(buf);
 
             assertEquals(original.syncVersion(), decoded.syncVersion());
             assertEquals(original.knownSpells(), decoded.knownSpells());
@@ -59,12 +61,12 @@ class SpellDataSyncCodecTest {
 
     @Test
     void fullSync_emptyData_roundTrips() {
-        SpellDataSyncS2CPacket original = SpellDataSyncS2CPacket.of(new PlayerSpellData());
+        SpellDataSyncS2CPayload original = SpellDataSyncS2CPayload.of(new PlayerSpellData());
 
         ByteBuf buf = Unpooled.buffer();
         try {
-            SpellDataSyncS2CPacket.STREAM_CODEC.encode(buf, original);
-            SpellDataSyncS2CPacket decoded = SpellDataSyncS2CPacket.STREAM_CODEC.decode(buf);
+            SpellDataSyncS2CPayload.STREAM_CODEC.encode(buf, original);
+            SpellDataSyncS2CPayload decoded = SpellDataSyncS2CPayload.STREAM_CODEC.decode(buf);
 
             assertEquals(original.syncVersion(), decoded.syncVersion());
             assertEquals(0, decoded.knownSpells().size());
@@ -84,12 +86,12 @@ class SpellDataSyncCodecTest {
 
     @Test
     void delta_roundTrip_preservesFields() {
-        SpellDataDeltaS2CPacket original = new SpellDataDeltaS2CPacket("stupefy", 12345L, 7, 4);
+        SpellDataDeltaS2CPayload original = new SpellDataDeltaS2CPayload("stupefy", 12345L, 7, 4);
 
         ByteBuf buf = Unpooled.buffer();
         try {
-            SpellDataDeltaS2CPacket.STREAM_CODEC.encode(buf, original);
-            SpellDataDeltaS2CPacket decoded = SpellDataDeltaS2CPacket.STREAM_CODEC.decode(buf);
+            SpellDataDeltaS2CPayload.STREAM_CODEC.encode(buf, original);
+            SpellDataDeltaS2CPayload decoded = SpellDataDeltaS2CPayload.STREAM_CODEC.decode(buf);
 
             assertEquals(original.spellId(), decoded.spellId());
             assertEquals(original.cooldownExpiryTick(), decoded.cooldownExpiryTick());

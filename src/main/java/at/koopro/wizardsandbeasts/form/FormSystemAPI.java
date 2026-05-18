@@ -1,11 +1,11 @@
 package at.koopro.wizardsandbeasts.form;
 
-import at.koopro.wizardsandbeasts.data.PlayerHeritageData;
-import at.koopro.wizardsandbeasts.event.FormEvents;
-import at.koopro.wizardsandbeasts.network.FormSyncS2CPacket;
+import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
+import at.koopro.wizardsandbeasts.form.event.FormEvents;
+import at.koopro.wizardsandbeasts.form.network.FormSyncS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
-import at.koopro.wizardsandbeasts.type.HeritageFormBridge;
-import at.koopro.wizardsandbeasts.type.Heritage;
+import at.koopro.wizardsandbeasts.heritage.HeritageFormBridge;
+import at.koopro.wizardsandbeasts.heritage.Heritage;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.common.NeoForge;
 
@@ -16,7 +16,7 @@ import java.util.List;
  * Server-side API for the player form system.
  * <p>
  * All form changes are server-authoritative. The client renders
- * whatever the server tells it via {@link FormSyncS2CPacket}.
+ * whatever the server tells it via {@link FormSyncS2CPayload}.
  */
 public final class FormSystemAPI {
 
@@ -44,7 +44,7 @@ public final class FormSystemAPI {
         SizeSystemAPI.applyProfile(player, profile);
 
         // Sync to all tracking players
-        FormSyncS2CPacket.syncToTracking(player);
+        FormSyncS2CPayload.syncToTracking(player);
 
         // Fire event
         NeoForge.EVENT_BUS.post(new FormEvents.PlayerFormChangedEvent(player, oldForm, newForm));
@@ -109,7 +109,7 @@ public final class FormSystemAPI {
 
         data.setActiveFormId(null);
         SizeSystemAPI.removeProfile(player);
-        FormSyncS2CPacket.syncToTracking(player);
+        FormSyncS2CPayload.syncToTracking(player);
 
         if (oldForm != null) {
             NeoForge.EVENT_BUS.post(new FormEvents.PlayerFormChangedEvent(player, oldForm, null));

@@ -2,7 +2,7 @@ package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions;
-import at.koopro.wizardsandbeasts.spell.SpellFamily;
+import at.koopro.wizardsandbeasts.spell.core.SpellFamily;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.particles.ParticleType;

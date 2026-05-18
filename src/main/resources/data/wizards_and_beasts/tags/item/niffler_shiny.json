@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:gold_nugget",
+    "minecraft:gold_ingot",
+    "minecraft:diamond",
+    "minecraft:emerald",
+    "minecraft:amethyst_shard",
+    "minecraft:gold_block",
+    "#minecraft:trimmable_armor_materials",
+    "#wizards_and_beasts:coins"
+  ]
+}

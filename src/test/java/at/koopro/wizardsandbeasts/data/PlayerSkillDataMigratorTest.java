@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.data;
 
+import at.koopro.wizardsandbeasts.skill.data.PlayerSkillData;
 import net.minecraft.nbt.CompoundTag;
 import org.junit.jupiter.api.Test;
 

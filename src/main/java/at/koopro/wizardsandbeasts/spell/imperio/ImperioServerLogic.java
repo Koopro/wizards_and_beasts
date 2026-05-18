@@ -1,16 +1,16 @@
 package at.koopro.wizardsandbeasts.spell.imperio;
 
-import at.koopro.wizardsandbeasts.attachment.ImperioControlState;
+import at.koopro.wizardsandbeasts.spell.imperio.ImperioControlState;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
-import at.koopro.wizardsandbeasts.network.CrucioIntentFeedbackS2CPacket;
-import at.koopro.wizardsandbeasts.network.ImperioControlS2CPacket;
-import at.koopro.wizardsandbeasts.network.ImperioResistS2CPacket;
-import at.koopro.wizardsandbeasts.network.ImperioVictimBoundS2CPacket;
+import at.koopro.wizardsandbeasts.spell.network.CrucioIntentFeedbackS2CPayload;
+import at.koopro.wizardsandbeasts.spell.network.ImperioControlS2CPayload;
+import at.koopro.wizardsandbeasts.spell.network.ImperioResistS2CPayload;
+import at.koopro.wizardsandbeasts.spell.network.ImperioVictimBoundS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
-import at.koopro.wizardsandbeasts.spell.Spells;
+import at.koopro.wizardsandbeasts.spell.core.Spells;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -44,7 +44,7 @@ public final class ImperioServerLogic {
         target.setData(ModAttachments.IMPERIO_CONTROL_STATE.get(), state);
         target.addEffect(new MobEffectInstance(ModEffects.IMPERIO_EUPHORIA, durationTicks, 0, false, true, true));
         if (target instanceof ServerPlayer victim) {
-            PacketDistributor.sendToPlayer(victim, new ImperioControlS2CPacket(true, caster.getUUID()));
+            PacketDistributor.sendToPlayer(victim, new ImperioControlS2CPayload(true, caster.getUUID()));
         }
         if (target instanceof Mob mob) {
             mob.setTarget(null);
@@ -55,7 +55,7 @@ public final class ImperioServerLogic {
         Vec3 p = target.getBoundingBox().getCenter();
         level.sendParticles(ParticleTypes.HAPPY_VILLAGER, p.x, p.y + 1.0, p.z, 20, 0.35, 0.2, 0.35, 0.02);
         CASTER_TO_VICTIM.put(caster.getUUID(), target.getUUID());
-        PacketDistributor.sendToPlayer(caster, new ImperioVictimBoundS2CPacket(target.getUUID()));
+        PacketDistributor.sendToPlayer(caster, new ImperioVictimBoundS2CPayload(target.getUUID()));
     }
 
     public static void applyCommand(ServerPlayer caster, ImperioCommand cmd) {
@@ -115,7 +115,7 @@ public final class ImperioServerLogic {
                     victim.setData(ModAttachments.WILLPOWER.get(), Math.max(0f, will - 30f));
                     victim.displayClientMessage(
                             Component.literal("You throw off the Imperius Curse!").withStyle(ChatFormatting.GOLD), true);
-                    PacketDistributor.sendToPlayer(victim, new ImperioResistS2CPacket(true, 1f));
+                    PacketDistributor.sendToPlayer(victim, new ImperioResistS2CPayload(true, 1f));
                 } else {
                     victim.setData(ModAttachments.WILLPOWER.get(), Math.max(0f, will - 15f));
                     victim.addEffect(new MobEffectInstance(ModEffects.IMPERIO_RESISTING, 20, 0, false, true, true));
@@ -123,10 +123,10 @@ public final class ImperioServerLogic {
                     victim.setData(ModAttachments.IMPERIO_CONTROL_STATE.get(),
                             new ImperioControlState(true, st.controllerUUID(), st.remainingTicks(), prog,
                                     st.imperioCommandOrdinal(), false));
-                    PacketDistributor.sendToPlayer(victim, new ImperioResistS2CPacket(false, prog));
+                    PacketDistributor.sendToPlayer(victim, new ImperioResistS2CPayload(false, prog));
                 }
                 if (controller != null) {
-                    PacketDistributor.sendToPlayer(controller, new CrucioIntentFeedbackS2CPacket(1.0f));
+                    PacketDistributor.sendToPlayer(controller, new CrucioIntentFeedbackS2CPayload(1.0f));
                 }
             }
         }
@@ -147,12 +147,12 @@ public final class ImperioServerLogic {
         victim.removeEffect(ModEffects.IMPERIO_RESISTING);
         victim.setData(ModAttachments.IMPERIO_CONTROL_STATE.get(), ImperioControlState.DEFAULT);
         if (victim instanceof ServerPlayer pl) {
-            PacketDistributor.sendToPlayer(pl, new ImperioControlS2CPacket(false, pl.getUUID()));
+            PacketDistributor.sendToPlayer(pl, new ImperioControlS2CPayload(false, pl.getUUID()));
         }
         ServerPlayer controller = level.getServer().getPlayerList().getPlayer(controllerUuid);
         if (controller != null) {
             CASTER_TO_VICTIM.remove(controllerUuid, victim.getUUID());
-            PacketDistributor.sendToPlayer(controller, new ImperioVictimBoundS2CPacket(new UUID(0L, 0L)));
+            PacketDistributor.sendToPlayer(controller, new ImperioVictimBoundS2CPayload(new UUID(0L, 0L)));
         }
     }
 

@@ -1,13 +1,23 @@
 package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.block.ExaminationDeskBlock;
+import at.koopro.wizardsandbeasts.floo.block.FlooFireplaceBlock;
 import at.koopro.wizardsandbeasts.block.MandrakeCropBlock;
+import at.koopro.wizardsandbeasts.trunk.block.PocketConfiguratorBlock;
+import at.koopro.wizardsandbeasts.block.WardingStoneBlock;
+import at.koopro.wizardsandbeasts.block.location.DiagonAlleyBlocks;
+import at.koopro.wizardsandbeasts.block.location.GringottsBlocks;
+import at.koopro.wizardsandbeasts.block.location.HogwartsBlocks;
+import at.koopro.wizardsandbeasts.block.location.HogsmeadeBlocks;
+import at.koopro.wizardsandbeasts.block.location.MinistryBlocks;
 import at.koopro.wizardsandbeasts.world.ModConfiguredFeatures;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -67,7 +77,7 @@ public class ModBlocks {
      */
     public static final DeferredBlock<MandrakeCropBlock> MANDRAKE_CROP =
             BLOCKS.registerBlock("mandrake_crop", MandrakeCropBlock::new,
-                    BlockBehaviour.Properties.of()
+                    () -> BlockBehaviour.Properties.of()
                             .noCollision()
                             .noOcclusion()
                             .randomTicks()
@@ -102,6 +112,11 @@ public class ModBlocks {
     public static final DeferredBlock<Block> BRASS_CAULDRON = WizardingWorldBlockRegistry.BRASS_CAULDRON;
     public static final DeferredBlock<Block> WIZARDING_COPPER_CAULDRON = WizardingWorldBlockRegistry.WIZARDING_COPPER_CAULDRON;
     public static final DeferredBlock<Block> PEWTER_CAULDRON = WizardingWorldBlockRegistry.PEWTER_CAULDRON;
+    /**
+     * @deprecated Decorative prop only — no travel logic. Use {@link #FLOO_FIREPLACE}.
+     *             Will be removed in beta.
+     */
+    @Deprecated
     public static final DeferredBlock<Block> FLOO_GRATE = WizardingWorldBlockRegistry.FLOO_GRATE;
     public static final DeferredBlock<? extends Block> SPELL_TEACHER = WizardingWorldBlockRegistry.SPELL_TEACHER;
     public static final DeferredBlock<? extends Block> WANDMAKERS_BENCH = WizardingWorldBlockRegistry.WANDMAKERS_BENCH;
@@ -134,5 +149,55 @@ public class ModBlocks {
     public static final DeferredBlock<? extends Block> UNLIT_COPPER_LANTERN = DeluminatorBlockRegistry.UNLIT_COPPER_LANTERN;
     public static final DeferredBlock<Block> UNLIT_GLOWSTONE = DeluminatorBlockRegistry.UNLIT_GLOWSTONE;
 
+    // --- Pocket dimension blocks ---
+
+    public static final DeferredBlock<WardingStoneBlock> WARDING_STONE =
+            BLOCKS.registerBlock("warding_stone", WardingStoneBlock::new,
+                    () -> BlockBehaviour.Properties.of().strength(1.5f, 6.0f).sound(SoundType.STONE).requiresCorrectToolForDrops());
+
+    public static final DeferredItem<BlockItem> WARDING_STONE_ITEM =
+            ModItems.ITEMS.registerSimpleBlockItem("warding_stone", WARDING_STONE);
+
+    public static final DeferredBlock<PocketConfiguratorBlock> POCKET_CONFIGURATOR =
+            BLOCKS.registerBlock("pocket_configurator", PocketConfiguratorBlock::new,
+                    () -> BlockBehaviour.Properties.of().strength(2.0f).sound(SoundType.METAL).requiresCorrectToolForDrops());
+
+    public static final DeferredItem<BlockItem> POCKET_CONFIGURATOR_ITEM =
+            ModItems.ITEMS.registerSimpleBlockItem("pocket_configurator", POCKET_CONFIGURATOR);
+
+    // --- Floo Network ---
+
+    // TODO: asset floo_fireplace.png
+    public static final DeferredBlock<FlooFireplaceBlock> FLOO_FIREPLACE =
+            BLOCKS.registerBlock("floo_fireplace", FlooFireplaceBlock::new,
+                    () -> BlockBehaviour.Properties.of().strength(3.5f, 10.0f).sound(SoundType.STONE)
+                            .requiresCorrectToolForDrops()
+                            .lightLevel(state -> state.getValue(BlockStateProperties.LIT) ? 10 : 0));
+
+    public static final DeferredItem<BlockItem> FLOO_FIREPLACE_ITEM =
+            ModItems.ITEMS.registerSimpleBlockItem("floo_fireplace", FLOO_FIREPLACE);
+
+    // --- Hogwarts structure blocks ---
+
+    /** Placed inside Hogwarts worldgen structure template. Block tag: data/wizards_and_beasts/tags/block/hogwarts_structure_blocks.json */
+    public static final DeferredBlock<ExaminationDeskBlock> EXAMINATION_DESK =
+            BLOCKS.registerBlock("examination_desk", ExaminationDeskBlock::new,
+                    () -> BlockBehaviour.Properties.of().strength(2.5f).sound(SoundType.WOOD).requiresCorrectToolForDrops());
+
+    public static final DeferredItem<BlockItem> EXAMINATION_DESK_ITEM =
+            ModItems.ITEMS.registerSimpleBlockItem("examination_desk", EXAMINATION_DESK);
+
     public static final WoodSet[] ALL_WOOD_SETS = { ELDER, YEW, HOLLY, ROWAN };
+
+    // --- Location decorative blocks ---
+    // Static initializer forces class loading of each location registry,
+    // which triggers DeferredRegister entries before the register event fires.
+    // TODO: gate behind STRUCTURES module when added
+    static {
+        MinistryBlocks.init();
+        HogwartsBlocks.init();
+        DiagonAlleyBlocks.init();
+        HogsmeadeBlocks.init();
+        GringottsBlocks.init();
+    }
 }

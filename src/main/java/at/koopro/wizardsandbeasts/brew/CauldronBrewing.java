@@ -2,7 +2,7 @@ package at.koopro.wizardsandbeasts.brew;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
-import at.koopro.wizardsandbeasts.item.wizarding.BrewItem;
+import at.koopro.wizardsandbeasts.brew.item.BrewItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.network.chat.Component;

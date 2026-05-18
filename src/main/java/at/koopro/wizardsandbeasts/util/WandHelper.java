@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.util;
 
-import at.koopro.wizardsandbeasts.item.WandItem;
+import at.koopro.wizardsandbeasts.wand.item.WandItem;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;

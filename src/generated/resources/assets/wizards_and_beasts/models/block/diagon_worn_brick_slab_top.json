@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "wizards_and_beasts:block/diagon_worn_brick",
+    "side": "wizards_and_beasts:block/diagon_worn_brick",
+    "top": "wizards_and_beasts:block/diagon_worn_brick"
+  }
+}

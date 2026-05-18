@@ -49,20 +49,20 @@ public record WoodSet(
             BlockBehaviour.Properties saplingProps,
             TreeGrower treeGrower) {
 
-        var log = blocks.registerBlock(name + "_log", RotatedPillarBlock::new, logProps);
-        var strippedLog = blocks.registerBlock("stripped_" + name + "_log", RotatedPillarBlock::new, logProps);
-        var wood = blocks.registerBlock(name + "_wood", RotatedPillarBlock::new, logProps);
-        var strippedWood = blocks.registerBlock("stripped_" + name + "_wood", RotatedPillarBlock::new, logProps);
+        var log = blocks.registerBlock(name + "_log", RotatedPillarBlock::new, () -> logProps);
+        var strippedLog = blocks.registerBlock("stripped_" + name + "_log", RotatedPillarBlock::new, () -> logProps);
+        var wood = blocks.registerBlock(name + "_wood", RotatedPillarBlock::new, () -> logProps);
+        var strippedWood = blocks.registerBlock("stripped_" + name + "_wood", RotatedPillarBlock::new, () -> logProps);
 
-        var planks = blocks.registerBlock(name + "_planks", Block::new, planksProps);
-        var slab = blocks.registerBlock(name + "_slab", SlabBlock::new, planksProps);
+        var planks = blocks.registerBlock(name + "_planks", Block::new, () -> planksProps);
+        var slab = blocks.registerBlock(name + "_slab", SlabBlock::new, () -> planksProps);
         var stairs = blocks.registerBlock(name + "_stairs",
-                props -> new StairBlock(planks.get().defaultBlockState(), props), planksProps);
+                p -> new StairBlock(planks.get().defaultBlockState(), p), () -> planksProps);
 
         var leaves = blocks.registerBlock(name + "_leaves",
-                p -> new TintedParticleLeavesBlock(0.01F, p), leavesProps);
+                p -> new TintedParticleLeavesBlock(0.01F, p), () -> leavesProps);
         var sapling = blocks.registerBlock(name + "_sapling",
-                props -> new SaplingBlock(treeGrower, props), saplingProps);
+                p -> new SaplingBlock(treeGrower, p), () -> saplingProps);
 
         return new WoodSet(name,
                 log, strippedLog, wood, strippedWood,

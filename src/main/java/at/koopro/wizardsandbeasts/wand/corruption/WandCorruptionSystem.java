@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.wand.corruption;
 
-import at.koopro.wizardsandbeasts.item.WandItem;
-import at.koopro.wizardsandbeasts.item.WandModuleHooks;
+import at.koopro.wizardsandbeasts.wand.item.WandItem;
+import at.koopro.wizardsandbeasts.wand.item.WandModuleHooks;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
