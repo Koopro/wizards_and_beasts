@@ -1,0 +1,11 @@
+{
+  "templateId": "blank_shell",
+  "description": "Player-authored blank pocket shell with strict build guardrails.",
+  "maxRadius": 12,
+  "allowedBuildRadius": 20,
+  "instabilityCost": 1,
+  "intentTags": [
+    "custom",
+    "sandbox"
+  ]
+}

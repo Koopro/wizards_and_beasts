@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:abraxan",
+  "displayName": "bestiary.wizards_and_beasts.abraxan.name",
+  "category": "WINGED_BEAST",
+  "mmRating": 3,
+  "habitat": "bestiary.wizards_and_beasts.abraxan.habitat",
+  "size": "ENORMOUS",
+  "shortLore": "bestiary.wizards_and_beasts.abraxan.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.abraxan.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.abraxan.ability.1",
+    "bestiary.wizards_and_beasts.abraxan.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.abraxan.threat.1",
+    "bestiary.wizards_and_beasts.abraxan.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.abraxan.weakness.1",
+    "bestiary.wizards_and_beasts.abraxan.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/abraxan.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/abraxan.png",
+  "sortOrder": 13
+}

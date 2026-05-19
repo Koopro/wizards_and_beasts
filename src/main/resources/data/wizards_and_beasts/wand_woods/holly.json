@@ -1,0 +1,14 @@
+{
+  "display_name": {
+    "translate": "wand_wood.wizards_and_beasts.holly"
+  },
+  "affinity_tags": ["protective", "healing"],
+  "spell_modifiers": {
+    "protection": 0.15,
+    "healing": 0.12,
+    "charm": 0.05
+  },
+  "personality_affinity": ["defender", "selfless", "steadfast"],
+  "rarity": "uncommon",
+  "refuse_threshold": 0.25
+}

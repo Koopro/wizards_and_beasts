@@ -1,0 +1,13 @@
+{
+  "display_name": {
+    "translate": "wand_wood.wizards_and_beasts.rowan"
+  },
+  "affinity_tags": ["healing", "protective"],
+  "spell_modifiers": {
+    "healing": 0.18,
+    "protection": 0.14
+  },
+  "personality_affinity": ["gentle", "guardian", "empathetic"],
+  "rarity": "common",
+  "refuse_threshold": 0.65
+}

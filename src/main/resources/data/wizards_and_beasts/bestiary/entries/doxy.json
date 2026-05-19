@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:doxy",
+  "displayName": "bestiary.wizards_and_beasts.doxy.name",
+  "category": "ARACHNID",
+  "mmRating": 2,
+  "habitat": "bestiary.wizards_and_beasts.doxy.habitat",
+  "size": "TINY",
+  "shortLore": "bestiary.wizards_and_beasts.doxy.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.doxy.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.doxy.ability.1",
+    "bestiary.wizards_and_beasts.doxy.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.doxy.threat.1",
+    "bestiary.wizards_and_beasts.doxy.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.doxy.weakness.1",
+    "bestiary.wizards_and_beasts.doxy.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/doxy.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/doxy.png",
+  "sortOrder": 45
+}

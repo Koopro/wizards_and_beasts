@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:runespoor",
+  "displayName": "bestiary.wizards_and_beasts.runespoor.name",
+  "category": "SERPENTINE",
+  "mmRating": 3,
+  "habitat": "bestiary.wizards_and_beasts.runespoor.habitat",
+  "size": "MEDIUM",
+  "shortLore": "bestiary.wizards_and_beasts.runespoor.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.runespoor.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.runespoor.ability.1",
+    "bestiary.wizards_and_beasts.runespoor.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.runespoor.threat.1",
+    "bestiary.wizards_and_beasts.runespoor.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.runespoor.weakness.1",
+    "bestiary.wizards_and_beasts.runespoor.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/runespoor.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/runespoor.png",
+  "sortOrder": 42
+}

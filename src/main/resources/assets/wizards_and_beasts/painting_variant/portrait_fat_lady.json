@@ -1,0 +1,7 @@
+{
+  "width": 2,
+  "height": 2,
+  "asset_id": "minecraft:fighters",
+  "title": { "translate": "painting.wizards_and_beasts.portrait_fat_lady.title" },
+  "author": { "translate": "painting.wizards_and_beasts.portrait_fat_lady.author" }
+}

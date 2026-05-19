@@ -1,0 +1,14 @@
+{
+  "entries": [
+    { "weight": 0.01, "wood_key": "wizards_and_beasts:elder", "core_key": "wizards_and_beasts:dragon_heartstring", "flexibility": "unyielding", "minimum_player_level": 20 },
+    { "weight": 0.15, "wood_key": "wizards_and_beasts:holly", "core_key": "wizards_and_beasts:phoenix_feather", "flexibility": "supple", "minimum_player_level": 0 },
+    { "weight": 0.22, "wood_key": "wizards_and_beasts:rowan", "core_key": "wizards_and_beasts:unicorn_hair", "flexibility": "solid", "minimum_player_level": 0 },
+    { "weight": 0.2, "wood_key": "wizards_and_beasts:ash", "core_key": "wizards_and_beasts:unicorn_hair", "flexibility": "springy", "minimum_player_level": 0 },
+    { "weight": 0.18, "wood_key": "wizards_and_beasts:yew", "core_key": "wizards_and_beasts:unicorn_hair", "flexibility": "rigid", "minimum_player_level": 0 },
+    { "weight": 0.12, "wood_key": "wizards_and_beasts:vine", "core_key": "wizards_and_beasts:dragon_heartstring", "flexibility": "supple", "minimum_player_level": 5 },
+    { "weight": 0.14, "wood_key": "wizards_and_beasts:walnut", "core_key": "wizards_and_beasts:unicorn_hair", "flexibility": "solid", "minimum_player_level": 0 },
+    { "weight": 0.1, "wood_key": "wizards_and_beasts:hawthorn", "core_key": "wizards_and_beasts:unicorn_hair", "flexibility": "rigid", "minimum_player_level": 0 },
+    { "weight": 0.11, "wood_key": "wizards_and_beasts:blackthorn", "core_key": "wizards_and_beasts:dragon_heartstring", "flexibility": "unyielding", "minimum_player_level": 8 },
+    { "weight": 0.16, "wood_key": "wizards_and_beasts:holly", "core_key": "wizards_and_beasts:unicorn_hair", "flexibility": "solid", "minimum_player_level": 0 }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "id": "wizards_and_beasts:nimbus_2000",
+  "displayName": {"translate": "item.wizards_and_beasts.nimbus_2000"},
+  "tier": "RACING",
+  "maxSpeed": 0.66,
+  "acceleration": 0.080,
+  "deceleration": 0.009,
+  "boostMultiplier": 1.8,
+  "boostDurationTicks": 80,
+  "boostCooldownTicks": 140,
+  "weakGravity": 0.008,
+  "lerpFactor": 0.15,
+  "turnSpeed": 1.10,
+  "ascentSpeed": 0.24,
+  "descentSpeed": 0.27,
+  "handlingRating": 0.72,
+  "stabilityRating": 0.70,
+  "durability": 320,
+  "repairMaterial": "#wizards_and_beasts:broom_repair_material_racing",
+  "loreLines": [
+    {"translate": "broom_lore.wizards_and_beasts.nimbus_2000.1"},
+    {"translate": "broom_lore.wizards_and_beasts.nimbus_2000.2"}
+  ]
+}

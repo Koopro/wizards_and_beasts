@@ -1,0 +1,12 @@
+{
+  "structures": [
+    {
+      "structure": "wizards_and_beasts:azkaban_fortress",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "wizards_and_beasts:azkaban_fixed",
+    "salt": 0
+  }
+}

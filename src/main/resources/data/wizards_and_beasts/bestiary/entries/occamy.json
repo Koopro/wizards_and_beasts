@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:occamy",
+  "displayName": "bestiary.wizards_and_beasts.occamy.name",
+  "category": "SERPENTINE",
+  "mmRating": 3,
+  "habitat": "bestiary.wizards_and_beasts.occamy.habitat",
+  "size": "LARGE",
+  "shortLore": "bestiary.wizards_and_beasts.occamy.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.occamy.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.occamy.ability.1",
+    "bestiary.wizards_and_beasts.occamy.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.occamy.threat.1",
+    "bestiary.wizards_and_beasts.occamy.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.occamy.weakness.1",
+    "bestiary.wizards_and_beasts.occamy.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/occamy.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/occamy.png",
+  "sortOrder": 40
+}

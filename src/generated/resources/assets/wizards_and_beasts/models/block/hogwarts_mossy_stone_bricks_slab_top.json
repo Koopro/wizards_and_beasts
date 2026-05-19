@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "wizards_and_beasts:block/hogwarts_mossy_stone_bricks",
+    "side": "wizards_and_beasts:block/hogwarts_mossy_stone_bricks",
+    "top": "wizards_and_beasts:block/hogwarts_mossy_stone_bricks"
+  }
+}

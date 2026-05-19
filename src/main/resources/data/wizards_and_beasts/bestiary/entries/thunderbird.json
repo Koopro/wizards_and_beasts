@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:thunderbird",
+  "displayName": "bestiary.wizards_and_beasts.thunderbird.name",
+  "category": "WINGED_BEAST",
+  "mmRating": 3,
+  "habitat": "bestiary.wizards_and_beasts.thunderbird.habitat",
+  "size": "LARGE",
+  "shortLore": "bestiary.wizards_and_beasts.thunderbird.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.thunderbird.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.thunderbird.ability.1",
+    "bestiary.wizards_and_beasts.thunderbird.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.thunderbird.threat.1",
+    "bestiary.wizards_and_beasts.thunderbird.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.thunderbird.weakness.1",
+    "bestiary.wizards_and_beasts.thunderbird.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/thunderbird.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/thunderbird.png",
+  "sortOrder": 12
+}

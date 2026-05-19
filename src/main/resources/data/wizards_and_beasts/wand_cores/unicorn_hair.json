@@ -1,0 +1,12 @@
+{
+  "display_name": {
+    "translate": "wand_core.wizards_and_beasts.unicorn_hair"
+  },
+  "source_key": "silver_unicorn",
+  "raw_power": 1.15,
+  "consistency": 0.95,
+  "loyalty": 0.98,
+  "dark_affinity": 0.05,
+  "initiative": 0.45,
+  "allegiance_transfer_resistance": 1.25
+}

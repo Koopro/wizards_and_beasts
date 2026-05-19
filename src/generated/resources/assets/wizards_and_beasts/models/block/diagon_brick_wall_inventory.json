@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/wall_inventory",
+  "textures": {
+    "wall": "wizards_and_beasts:block/diagon_brick"
+  }
+}

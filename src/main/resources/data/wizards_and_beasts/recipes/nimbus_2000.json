@@ -1,0 +1,28 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "BROOM_FLIGHT"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GSG",
+    "CSC",
+    "PTP"
+  ],
+  "key": {
+    "G": {"item": "minecraft:gold_ingot"},
+    "S": {"item": "minecraft:stick"},
+    "C": {"item": "wizards_and_beasts:comet_260"},
+    "P": {"item": "wizards_and_beasts:broom_polish"},
+    "T": {"tag": "minecraft:leaves"}
+  },
+  "result": {
+    "id": "wizards_and_beasts:nimbus_2000",
+    "count": 1,
+    "components": {
+      "wizards_and_beasts:broom_definition": "wizards_and_beasts:nimbus_2000"
+    }
+  }
+}

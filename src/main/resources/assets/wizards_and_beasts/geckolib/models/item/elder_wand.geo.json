@@ -1,0 +1,50 @@
+{
+	"format_version": "1.21.110",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.wizards_and_beasts.elder_wand",
+				"texture_width": 16,
+				"texture_height": 16,
+				"visible_bounds_width": 3,
+				"visible_bounds_height": 3,
+				"visible_bounds_offset": [0, 1, 0]
+			},
+			"bones": [
+				{
+					"name": "wand_root",
+					"pivot": [0, 0, 0]
+				},
+				{
+					"name": "shaft",
+					"parent": "wand_root",
+					"pivot": [0, 0, 0],
+					"cubes": [
+						{"origin": [-0.5, 0, -0.5], "size": [1, 13, 1], "uv": [0, 0]}
+					]
+				},
+				{
+					"name": "knob",
+					"parent": "wand_root",
+					"pivot": [0, 13, 0],
+					"cubes": [
+						{"origin": [-1, 13, -1], "size": [2, 2, 2], "uv": [4, 0]}
+					]
+				},
+				{
+					"name": "tip",
+					"parent": "wand_root",
+					"pivot": [0, 0, 0],
+					"cubes": [
+						{"origin": [-0.5, -2, -0.5], "size": [1, 2, 1], "uv": [0, 14]}
+					]
+				},
+				{
+					"name": "wand_tip",
+					"parent": "tip",
+					"pivot": [0, -2, 0]
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_sickle": {
+      "conditions": {
+        "items": [
+          {
+            "items": "wizards_and_beasts:sickle"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "wizards_and_beasts:currency/sickle_to_knut"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_sickle"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "wizards_and_beasts:currency/sickle_to_knut"
+    ]
+  }
+}

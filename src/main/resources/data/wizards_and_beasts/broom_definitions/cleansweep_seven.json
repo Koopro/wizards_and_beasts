@@ -1,0 +1,23 @@
+{
+  "id": "wizards_and_beasts:cleansweep_seven",
+  "displayName": {"translate": "item.wizards_and_beasts.cleansweep_seven"},
+  "tier": "SCHOOL",
+  "maxSpeed": 0.35,
+  "acceleration": 0.050,
+  "deceleration": 0.012,
+  "boostMultiplier": 1.3,
+  "boostDurationTicks": 40,
+  "boostCooldownTicks": 200,
+  "weakGravity": 0.012,
+  "lerpFactor": 0.10,
+  "turnSpeed": 0.75,
+  "ascentSpeed": 0.14,
+  "descentSpeed": 0.18,
+  "handlingRating": 0.40,
+  "stabilityRating": 0.80,
+  "durability": 120,
+  "repairMaterial": "#minecraft:planks",
+  "loreLines": [
+    {"translate": "broom_lore.wizards_and_beasts.cleansweep_seven.1"}
+  ]
+}

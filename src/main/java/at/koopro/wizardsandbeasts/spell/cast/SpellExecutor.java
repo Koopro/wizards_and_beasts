@@ -1,0 +1,218 @@
+package at.koopro.wizardsandbeasts.spell.cast;
+
+import at.koopro.wizardsandbeasts.spell.core.*;
+import at.koopro.wizardsandbeasts.spell.lib.*;
+import at.koopro.wizardsandbeasts.spell.proficiency.*;
+
+import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
+import at.koopro.wizardsandbeasts.item.wand.WandItem;
+import at.koopro.wizardsandbeasts.module.Module;
+import at.koopro.wizardsandbeasts.module.ModuleManager;
+import at.koopro.wizardsandbeasts.effect.ModEffects;
+import at.koopro.wizardsandbeasts.spell.cast.CastContext;
+import at.koopro.wizardsandbeasts.spell.proficiency.SpellScalingProfile;
+import at.koopro.wizardsandbeasts.wand.WandComponents;
+import at.koopro.wizardsandbeasts.wand.cast.WandStats;
+import at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver;
+import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialCombatRules;
+import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialRules;
+import at.koopro.wizardsandbeasts.wand.corruption.WandCorruptionSystem;
+import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
+import at.koopro.wizardsandbeasts.network.spell.SpellDataSyncS2CPayload;
+import at.koopro.wizardsandbeasts.registry.ModAttachments;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import at.koopro.wizardsandbeasts.registry.ModSounds;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
+import java.util.Optional;
+import java.util.UUID;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+
+/**
+ * Default spell execution logic. Individual spells delegate here via {@link Spell#execute}.
+ * Spells can override execute() entirely for custom behavior.
+ */
+public final class SpellExecutor {
+
+    private SpellExecutor() {}
+
+    public static void executeGeneric(Spell spell, ServerLevel level, ServerPlayer caster, ItemStack wandStack) {
+        WandStats wandStats = WandStatsResolver.resolve(wandStack);
+        CastContext ctx = CastContext.create(
+                caster,
+                wandStack,
+                spell,
+                spell instanceof JsonSpell jsonSpell ? jsonSpell.definition() : null,
+                wandStats,
+                spell.getProficiency(caster));
+        executeGeneric(ctx, level);
+    }
+
+    public static void executeGeneric(CastContext ctx, ServerLevel level) {
+        Spell spell = ctx.spell();
+        ServerPlayer caster = ctx.caster();
+        ItemStack wandStack = ctx.wandStack();
+        WandStats wand = ctx.wandStats();
+        if (ModuleManager.isEnabled(Module.WANDS) && wandStack.getItem() instanceof WandItem) {
+            Identifier spellKey;
+            try {
+                spellKey = Identifier.parse(spell.getId());
+            } catch (Exception ex) {
+                spellKey = Identifier.fromNamespaceAndPath(at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID,
+                        spell.getId().replace(":", "_").replace(".", "_"));
+            }
+            WandCorruptionSystem.onSpellCast(caster, wandStack, spellKey);
+            float corruptIntegrity = WandCorruptionSystem.getEffectivePowerMultiplier(wandStack, spellKey, level.registryAccess());
+            ctx.modifiers().multiplyDamage(corruptIntegrity, "wand_corruption_integrity");
+            Optional<UUID> master = WandComponents.getMaster(wandStack);
+            if (master.isPresent() && !master.get().equals(caster.getUUID())) {
+                ctx.modifiers().multiplyDamage(WandComponents.getAllegianceScore(wandStack), "wand_foreign_master");
+            }
+        }
+        SkillSystemAPI.applyDamageModifiers(ctx.modifiers(), caster, spell);
+        SkillSystemAPI.applyCooldownModifiers(ctx.modifiers(), caster, spell);
+        WandStatsResolver.applyToStack(ctx.modifiers(), wand, spell);
+        ObscurialCombatRules.applyCastModifiers(ctx.modifiers(), caster);
+
+        float corruption = caster.getData(ModAttachments.DARK_CORRUPTION.get());
+        if (corruption >= 90.0f
+                && spell.getCategory() != SpellCategory.DARK_ARTS
+                && (spell.getCategory() == SpellCategory.DEFENSE || spell.getCategory() == SpellCategory.UTILITY)) {
+            ctx.modifiers().multiplyDamage(0.7f, "dark_corruption_light_magic");
+        }
+
+        if (ctx.modifiers().finalMisfireChance() > 0.0f
+                && level.random.nextFloat() < ctx.modifiers().finalMisfireChance()) {
+            level.playSound(null, caster.blockPosition(),
+                    ModSounds.SPELL_FIZZLE.get(), SoundSource.PLAYERS, 0.5f, 1.05f + level.random.nextFloat() * 0.25f);
+            caster.displayClientMessage(
+                    Component.literal("\u00A77Your wand fizzles."), true);
+            return;
+        }
+
+        // TODO(skill_tree): keep damage stacking as base * proficiency * skill-tree multipliers.
+        float scaledDamageMult = ctx.modifiers().finalDamage() * ctx.scalingProfile().damageMult();
+        executeGeneric(ctx, spell, level, caster, wandStack, wand, scaledDamageMult);
+    }
+
+    private static void executeGeneric(CastContext ctx,
+                                       Spell spell,
+                                       ServerLevel level,
+                                       ServerPlayer caster,
+                                       ItemStack wandStack,
+                                       WandStats wand,
+                                       float damageMultiplier) {
+        SpellProperties props = spell.getProperties();
+        if (props == null) return;
+
+        CastType castType = props.getCastType();
+        if (castType != CastType.BEAM_LETHAL && castType != CastType.BEAM_CHANNEL) {
+            spell.playSound(level, caster);
+        }
+        SpellScalingProfile scalingProfile = ctx.scalingProfile();
+        spell.applySelfEffects(caster, scalingProfile.durationMult());
+
+        switch (castType) {
+            case PROJECTILE -> spell.spawnProjectile(level, caster, scalingProfile);
+            case SELF -> {
+                boolean successful = false;
+                if (props.repairsItem()) {
+                    boolean repaired = SpellCastHandlers.handleRepair(caster, wandStack, props.getRepairAmount());
+                    if (!repaired) {
+                        Vec3 start = caster.getEyePosition();
+                        float range = 5.0f * wand.rangeFor(spell);
+                        Vec3 end = start.add(caster.getLookAngle().scale(range));
+                        BlockHitResult blockHit = level.clip(new ClipContext(
+                                start, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, caster));
+                        if (blockHit.getType() == HitResult.Type.BLOCK) {
+                            repaired = SpellHelper.tryReparoRepairBlock(level, blockHit.getBlockPos(), spell);
+                        }
+                    }
+                    if (repaired) {
+                        Vec3 p = caster.getEyePosition();
+                        SpellHelper.spawnBurst(level, spell, p, 12, 0.2);
+                        successful = true;
+                    }
+                }
+                successful |= handleSelfUtilitySpell(level, caster, spell);
+                if (!props.getSelfEffects().isEmpty()) {
+                    successful = true;
+                }
+                if (successful) {
+                    SpellProficiencyTracker.recordSuccessfulHit(caster, spell.getId());
+                }
+            }
+            case CONE -> {
+                if (SpellCastHandlers.handleCone(level, caster, spell, props, damageMultiplier, wand, scalingProfile)) {
+                    SpellProficiencyTracker.recordSuccessfulHit(caster, spell.getId());
+                }
+            }
+            case TARGETED -> {
+                if (SpellCastHandlers.handleTargeted(level, caster, spell, props, damageMultiplier, wand, scalingProfile)) {
+                    SpellProficiencyTracker.recordSuccessfulHit(caster, spell.getId());
+                }
+            }
+            case BEAM_LETHAL, BEAM_CHANNEL -> {
+                /* Damage and targeting run each tick in {@link at.koopro.wizardsandbeasts.spell.WandBeamChannelLogic}. */
+            }
+        }
+    }
+
+    private static final SelfUtilityRule[] SELF_UTILITY_RULES = new SelfUtilityRule[] {
+            new SelfUtilityRule("lumos", (level, caster, spell) -> {
+                SpellHelper.spawnBurst(level, spell, caster.getEyePosition(), 16, 0.28);
+                PlayerSpellData lumosData = caster.getData(ModAttachments.SPELL_DATA.get());
+                lumosData.learnSpell("nox");
+                lumosData.setLoadoutSpell(lumosData.getActiveSlot(), "nox");
+                SpellDataSyncS2CPayload.syncToPlayer(caster);
+                return true;
+            }),
+            new SelfUtilityRule("nox", (level, caster, spell) -> {
+                caster.removeEffect(ModEffects.LUMOS_FIELD);
+                SpellHelper.spawnBurst(level, spell, caster.getEyePosition(), 12, 0.22);
+                PlayerSpellData noxData = caster.getData(ModAttachments.SPELL_DATA.get());
+                noxData.setLoadoutSpell(noxData.getActiveSlot(), "lumos");
+                SpellDataSyncS2CPayload.syncToPlayer(caster);
+                return true;
+            }),
+            new SelfUtilityRule("protego", (level, caster, spell) -> {
+                SpellHelper.applyProtegoCastPulse(level, caster, spell);
+                return true;
+            }),
+            new SelfUtilityRule("arresto_momentum", (level, caster, spell) -> {
+                SpellHelper.applyArrestoAreaStabilize(level, caster, spell);
+                return true;
+            }),
+            new SelfUtilityRule("episkey", (level, caster, spell) -> SpellCastHandlers.handleEpiskeySelf(caster, spell)),
+            new SelfUtilityRule("frigora", (level, caster, spell) -> SpellCastHandlers.handleFrigoraSelf(level, caster, spell)),
+            new SelfUtilityRule("capacious_extremis", (level, caster, spell) -> SpellCastHandlers.handlePocketIngress(caster)),
+            new SelfUtilityRule("claustra_reverto", (level, caster, spell) -> SpellCastHandlers.handlePocketEgress(caster)),
+            new SelfUtilityRule("riddikulus", (level, caster, spell) -> {
+                SpellHelper.spawnBurst(level, spell, caster.getEyePosition(), 18, 0.32);
+                return true;
+            })
+    };
+
+    private static boolean handleSelfUtilitySpell(ServerLevel level, ServerPlayer caster, Spell spell) {
+        String id = spell.getId();
+        for (SelfUtilityRule rule : SELF_UTILITY_RULES) {
+            if (SpellIds.matches(id, rule.spellId())) {
+                return rule.handler().apply(level, caster, spell);
+            }
+        }
+        return false;
+    }
+
+    private record SelfUtilityRule(String spellId, SelfUtilityHandler handler) {}
+
+    @FunctionalInterface
+    private interface SelfUtilityHandler {
+        boolean apply(ServerLevel level, ServerPlayer caster, Spell spell);
+    }
+}

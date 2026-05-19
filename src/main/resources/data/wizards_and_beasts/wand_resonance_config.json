@@ -1,0 +1,10 @@
+{
+  "match_threshold": 0.65,
+  "refuse_threshold": 0.2,
+  "scan_radius": 5,
+  "wood_weight": 0.4,
+  "core_weight": 0.3,
+  "length_weight": 0.15,
+  "flexibility_weight": 0.15,
+  "corruption_dark_bonus_threshold": 0.5
+}

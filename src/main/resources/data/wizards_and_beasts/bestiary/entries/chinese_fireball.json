@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:chinese_fireball",
+  "displayName": "bestiary.wizards_and_beasts.chinese_fireball.name",
+  "category": "DRAGON",
+  "mmRating": 4,
+  "habitat": "bestiary.wizards_and_beasts.chinese_fireball.habitat",
+  "size": "ENORMOUS",
+  "shortLore": "bestiary.wizards_and_beasts.chinese_fireball.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.chinese_fireball.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.chinese_fireball.ability.1",
+    "bestiary.wizards_and_beasts.chinese_fireball.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.chinese_fireball.threat.1",
+    "bestiary.wizards_and_beasts.chinese_fireball.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.chinese_fireball.weakness.1",
+    "bestiary.wizards_and_beasts.chinese_fireball.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/chinese_fireball.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/chinese_fireball.png",
+  "sortOrder": 3
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/outer_stairs",
+  "textures": {
+    "bottom": "wizards_and_beasts:block/ministry_gilded_black_marble",
+    "side": "wizards_and_beasts:block/ministry_gilded_black_marble",
+    "top": "wizards_and_beasts:block/ministry_gilded_black_marble"
+  }
+}

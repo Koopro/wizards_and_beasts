@@ -1,0 +1,147 @@
+package at.koopro.wizardsandbeasts.client.wand.gui;
+
+import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
+import at.koopro.wizardsandbeasts.network.wand.SetFlexibilityPayload;
+import at.koopro.wizardsandbeasts.wand.WandComponents;
+import at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
+
+import java.util.List;
+
+/**
+ * Bench UI: procedural background (artist texture {@code textures/gui/wandmakers_bench.png} described in project docs).
+ */
+public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBenchMenu> {
+
+    public WandmakersBenchScreen(WandmakersBenchMenu menu, Inventory playerInventory, Component title) {
+        super(menu, playerInventory, title);
+        this.imageWidth = 176;
+        this.imageHeight = 196;
+        this.inventoryLabelY = this.imageHeight - 94;
+    }
+
+    @Override
+    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
+        int x = (this.width - this.imageWidth) / 2;
+        int y = (this.height - this.imageHeight) / 2;
+        graphics.fill(x, y, x + this.imageWidth, y + this.imageHeight, 0xC0101010);
+        graphics.fill(x + 4, y + 4, x + this.imageWidth - 4, y + this.imageHeight - 4, 0xFF2a2520);
+
+        int tier = menu.getTierScoreScaled();
+        float t = Math.min(1.0f, tier / 300.0f);
+        int barColor = t < 0.5f
+                ? interpolateColor(0xFF888888, 0xFFd4a020, t * 2.0f)
+                : interpolateColor(0xFFd4a020, 0xFF8040c0, (t - 0.5f) * 2.0f);
+        int bx = x + 16;
+        int by = y + this.imageHeight - 28;
+        int bw = this.imageWidth - 32;
+        graphics.fill(bx, by, bx + bw, by + 6, 0xFF000000);
+        graphics.fill(bx + 1, by + 1, bx + 1 + (int) ((bw - 2) * t), by + 5, barColor);
+
+        WandFlexibility[] values = WandFlexibility.values();
+        int fx = x + this.imageWidth / 2 - (values.length * 16) / 2;
+        int fy = y + 72;
+        for (int i = 0; i < values.length; i++) {
+            int bx0 = fx + i * 22;
+            boolean sel = menu.getFlexibilityOrdinal() == i;
+            graphics.fill(bx0, fy, bx0 + 20, fy + 14, sel ? 0xFF6b5a40 : 0xFF3a3530);
+            graphics.drawString(font, String.valueOf(i + 1), bx0 + 6, fy + 3, 0xFFe0c080, false);
+        }
+
+        var inv = menu.getBench().getInventory();
+        int outCount = (int) inv.getAmountAsLong(2);
+        ItemStack out = outCount > 0 ? inv.getResource(2).toStack(outCount) : ItemStack.EMPTY;
+        if (!out.isEmpty()) {
+            int px = x + this.imageWidth / 2 - 60;
+            int py = y + 16;
+            graphics.drawString(font, Component.translatable("wandcraft.gui.preview"), px, py, 0xFFddccaa, false);
+            Identifier wood = WandComponents.getWood(out);
+            Identifier core = WandComponents.getCore(out);
+            WandFlexibility flex = WandComponents.getFlexibility(out);
+            Float len = WandComponents.getLength(out);
+            py += 12;
+            graphics.drawString(font,
+                    Component.translatable("wandcraft.tooltip.wood", wood == null ? "-" : wood.toString()),
+                    px, py, 0xFFc9a227, false);
+            py += 10;
+            graphics.drawString(font,
+                    Component.translatable("wandcraft.tooltip.core", core == null ? "-" : core.toString()),
+                    px, py, 0xFFc080e0, false);
+            py += 10;
+            graphics.drawString(font,
+                    Component.translatable("wandcraft.tooltip.flexibility",
+                            flex == null ? "-" : flex.getSerializedName()),
+                    px, py, 0xFFaaaaaa, false);
+            py += 10;
+            graphics.drawString(font,
+                    Component.translatable("wandcraft.tooltip.integrity", WandComponents.getIntegrity(out)),
+                    px, py, 0xFF88cc88, false);
+            py += 10;
+            graphics.drawString(font,
+                    Component.translatable("wandcraft.tooltip.length_in", len == null ? 0.0f : len),
+                    px, py, 0xFFaaccee, false);
+        }
+    }
+
+    private static int interpolateColor(int a, int b, float t) {
+        t = Math.max(0, Math.min(1, t));
+        int ar = (a >> 16) & 0xFF, ag = (a >> 8) & 0xFF, ab = a & 0xFF;
+        int br = (b >> 16) & 0xFF, bg = (b >> 8) & 0xFF, bb = b & 0xFF;
+        int r = (int) (ar + (br - ar) * t);
+        int g = (int) (ag + (bg - ag) * t);
+        int bl = (int) (ab + (bb - ab) * t);
+        return 0xFF000000 | (r << 16) | (g << 8) | bl;
+    }
+
+    @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.render(graphics, mouseX, mouseY, partialTick);
+        renderTooltip(graphics, mouseX, mouseY);
+        int x = (this.width - this.imageWidth) / 2;
+        int y = (this.height - this.imageHeight) / 2;
+        int tier = menu.getTierScoreScaled();
+        int bx = x + 16;
+        int by = y + this.imageHeight - 28;
+        int bw = this.imageWidth - 32;
+        if (mouseX >= bx && mouseX < bx + bw && mouseY >= by && mouseY < by + 6) {
+            List<Identifier> enh = menu.getEnhancerBlockIds();
+            String line1 = Component.translatable("wandcraft.gui.tier_score", tier / 100.0f).getString();
+            String line2 = Component.translatable("wandcraft.gui.enhancers", enh.size()).getString();
+            int tipX = mouseX + 8;
+            int tipY = mouseY - 24;
+            int tipW = Math.max(font.width(line1), font.width(line2)) + 8;
+            graphics.fill(tipX - 2, tipY - 2, tipX + tipW, tipY + 22, 0xE0100010);
+            graphics.drawString(font, line1, tipX, tipY, 0xFFFFFFFF, false);
+            graphics.drawString(font, line2, tipX, tipY + 10, 0xFFCCCCCC, false);
+        }
+    }
+
+    @Override
+    public boolean mouseClicked(MouseButtonEvent event, boolean isDoubleClick) {
+        if (event.button() != 0) {
+            return super.mouseClicked(event, isDoubleClick);
+        }
+        double mouseX = event.x();
+        double mouseY = event.y();
+        int x = (this.width - this.imageWidth) / 2;
+        int y = (this.height - this.imageHeight) / 2;
+        WandFlexibility[] values = WandFlexibility.values();
+        int fx = x + this.imageWidth / 2 - (values.length * 16) / 2;
+        int fy = y + 72;
+        for (int i = 0; i < values.length; i++) {
+            int bx0 = fx + i * 22;
+            if (mouseX >= bx0 && mouseX < bx0 + 20 && mouseY >= fy && mouseY < fy + 14) {
+                ClientPacketDistributor.sendToServer(new SetFlexibilityPayload(menu.containerId, i));
+                return true;
+            }
+        }
+        return super.mouseClicked(event, isDoubleClick);
+    }
+}

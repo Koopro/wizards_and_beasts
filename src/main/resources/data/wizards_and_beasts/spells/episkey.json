@@ -1,0 +1,21 @@
+{
+  "displayName": "Episkey",
+  "category": "defense",
+  "cooldownTicks": 140,
+  "color": -1118482,
+  "castType": "self",
+  "selfEffects": [],
+  "sound": {
+    "id": "minecraft:entity.allay.hurt",
+    "volume": 0.4,
+    "pitch": 1.3
+  },
+  "requirement": {
+    "type": "knows",
+    "prerequisiteId": "reparo"
+  },
+  "learning": {
+    "masterySpellId": "reparo",
+    "minMasteryTier": "proficient"
+  }
+}

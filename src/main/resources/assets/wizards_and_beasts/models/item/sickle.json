@@ -1,0 +1,79 @@
+{
+  "credit": "Made with Blockbench",
+  "parent": "builtin/entity",
+  "texture_size": [
+    32,
+    32
+  ],
+  "display": {
+    "thirdperson_righthand": {
+      "scale": [
+        0.1,
+        0.1,
+        0.25
+      ]
+    },
+    "thirdperson_lefthand": {
+      "scale": [
+        0.1,
+        0.1,
+        0.25
+      ]
+    },
+    "firstperson_righthand": {
+      "scale": [
+        0.1,
+        0.1,
+        0.25
+      ]
+    },
+    "firstperson_lefthand": {
+      "scale": [
+        0.1,
+        0.1,
+        0.25
+      ]
+    },
+    "ground": {
+      "scale": [
+        0.1,
+        0.1,
+        0.25
+      ]
+    },
+    "gui": {
+      "rotation": [
+        -33.05000000000018,
+        27.15000000000009,
+        16.519999999999982
+      ],
+      "translation": [
+        1.25,
+        -6,
+        0
+      ]
+    },
+    "head": {
+      "translation": [
+        0,
+        -6,
+        -7
+      ]
+    },
+    "on_shelf": {
+      "translation": [
+        0,
+        0,
+        -4
+      ],
+      "scale": [
+        0.5,
+        0.5,
+        0.25
+      ]
+    }
+  },
+  "textures": {
+    "particle": "wizards_and_beasts:item/sickle"
+  }
+}

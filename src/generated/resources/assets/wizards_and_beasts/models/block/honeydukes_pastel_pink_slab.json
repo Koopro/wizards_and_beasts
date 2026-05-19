@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "wizards_and_beasts:block/honeydukes_pastel_pink",
+    "side": "wizards_and_beasts:block/honeydukes_pastel_pink",
+    "top": "wizards_and_beasts:block/honeydukes_pastel_pink"
+  }
+}

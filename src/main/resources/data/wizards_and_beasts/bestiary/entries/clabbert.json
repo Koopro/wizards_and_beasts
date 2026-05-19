@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:clabbert",
+  "displayName": "bestiary.wizards_and_beasts.clabbert.name",
+  "category": "SMALL_CREATURE",
+  "mmRating": 2,
+  "habitat": "bestiary.wizards_and_beasts.clabbert.habitat",
+  "size": "SMALL",
+  "shortLore": "bestiary.wizards_and_beasts.clabbert.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.clabbert.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.clabbert.ability.1",
+    "bestiary.wizards_and_beasts.clabbert.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.clabbert.threat.1",
+    "bestiary.wizards_and_beasts.clabbert.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.clabbert.weakness.1",
+    "bestiary.wizards_and_beasts.clabbert.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/clabbert.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/clabbert.png",
+  "sortOrder": 38
+}

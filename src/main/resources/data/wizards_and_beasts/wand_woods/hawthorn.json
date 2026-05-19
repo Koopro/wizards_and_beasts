@@ -1,0 +1,13 @@
+{
+  "display_name": {
+    "translate": "wand_wood.wizards_and_beasts.hawthorn"
+  },
+  "affinity_tags": ["combat", "dark"],
+  "spell_modifiers": {
+    "combat": 0.14,
+    "curse_breaking": 0.1
+  },
+  "personality_affinity": ["complex", "resolute", "intense"],
+  "rarity": "uncommon",
+  "refuse_threshold": 0.2
+}

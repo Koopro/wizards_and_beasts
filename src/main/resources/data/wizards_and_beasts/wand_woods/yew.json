@@ -1,0 +1,13 @@
+{
+  "display_name": {
+    "translate": "wand_wood.wizards_and_beasts.yew"
+  },
+  "affinity_tags": ["dark", "rare", "combat"],
+  "spell_modifiers": {
+    "dark_arts": 0.2,
+    "dueling": 0.12
+  },
+  "personality_affinity": ["ambitious", "unyielding", "fated"],
+  "rarity": "rare",
+  "refuse_threshold": 0.15
+}

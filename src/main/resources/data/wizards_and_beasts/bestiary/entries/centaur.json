@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:centaur",
+  "displayName": "bestiary.wizards_and_beasts.centaur.name",
+  "category": "EQUINE",
+  "mmRating": 3,
+  "habitat": "bestiary.wizards_and_beasts.centaur.habitat",
+  "size": "LARGE",
+  "shortLore": "bestiary.wizards_and_beasts.centaur.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.centaur.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.centaur.ability.1",
+    "bestiary.wizards_and_beasts.centaur.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.centaur.threat.1",
+    "bestiary.wizards_and_beasts.centaur.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.centaur.weakness.1",
+    "bestiary.wizards_and_beasts.centaur.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/centaur.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/centaur.png",
+  "sortOrder": 16
+}

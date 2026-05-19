@@ -1,0 +1,13 @@
+{
+  "display_name": {
+    "translate": "wand_wood.wizards_and_beasts.blackthorn"
+  },
+  "affinity_tags": ["combat", "dark", "rare"],
+  "spell_modifiers": {
+    "combat": 0.16,
+    "hex": 0.12
+  },
+  "personality_affinity": ["survivor", "unyielding", "hardened"],
+  "rarity": "rare",
+  "refuse_threshold": 0.16
+}

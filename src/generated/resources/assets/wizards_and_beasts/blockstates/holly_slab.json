@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "wizards_and_beasts:block/holly_slab"
+    },
+    "type=double": {
+      "model": "wizards_and_beasts:block/holly_planks"
+    },
+    "type=top": {
+      "model": "wizards_and_beasts:block/holly_slab_top"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "wizards_and_beasts:block/diagon_cobblestone_slab"
+    },
+    "type=double": {
+      "model": "wizards_and_beasts:block/diagon_cobblestone"
+    },
+    "type=top": {
+      "model": "wizards_and_beasts:block/diagon_cobblestone_slab_top"
+    }
+  }
+}

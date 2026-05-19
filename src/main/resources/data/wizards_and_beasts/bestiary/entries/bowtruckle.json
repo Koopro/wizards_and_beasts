@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:bowtruckle",
+  "displayName": "bestiary.wizards_and_beasts.bowtruckle.name",
+  "category": "SMALL_CREATURE",
+  "mmRating": 1,
+  "habitat": "bestiary.wizards_and_beasts.bowtruckle.habitat",
+  "size": "TINY",
+  "shortLore": "bestiary.wizards_and_beasts.bowtruckle.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.bowtruckle.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.bowtruckle.ability.1",
+    "bestiary.wizards_and_beasts.bowtruckle.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.bowtruckle.threat.1",
+    "bestiary.wizards_and_beasts.bowtruckle.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.bowtruckle.weakness.1",
+    "bestiary.wizards_and_beasts.bowtruckle.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/bowtruckle.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/bowtruckle.png",
+  "sortOrder": 31
+}

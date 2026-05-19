@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "wizards_and_beasts:block/diagon_shopfront_wood_slab"
+    },
+    "type=double": {
+      "model": "wizards_and_beasts:block/diagon_shopfront_wood"
+    },
+    "type=top": {
+      "model": "wizards_and_beasts:block/diagon_shopfront_wood_slab_top"
+    }
+  }
+}

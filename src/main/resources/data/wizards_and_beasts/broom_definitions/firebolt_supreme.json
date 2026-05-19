@@ -1,0 +1,24 @@
+{
+  "id": "wizards_and_beasts:firebolt_supreme",
+  "displayName": {"translate": "item.wizards_and_beasts.firebolt_supreme"},
+  "tier": "LEGENDARY",
+  "maxSpeed": 1.05,
+  "acceleration": 0.110,
+  "deceleration": 0.006,
+  "boostMultiplier": 2.50,
+  "boostDurationTicks": 140,
+  "boostCooldownTicks": 90,
+  "weakGravity": 0.005,
+  "lerpFactor": 0.22,
+  "turnSpeed": 1.50,
+  "ascentSpeed": 0.36,
+  "descentSpeed": 0.36,
+  "handlingRating": 0.95,
+  "stabilityRating": 0.60,
+  "durability": 700,
+  "repairMaterial": "#wizards_and_beasts:broom_repair_material_elite",
+  "loreLines": [
+    {"translate": "broom_lore.wizards_and_beasts.firebolt_supreme.1"},
+    {"translate": "broom_lore.wizards_and_beasts.firebolt_supreme.2"}
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": "minecraft:oak_planks",
+    "B": "minecraft:book"
+  },
+  "pattern": [
+    "PPP",
+    " B ",
+    "PPP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "wizards_and_beasts:spell_teacher"
+  }
+}

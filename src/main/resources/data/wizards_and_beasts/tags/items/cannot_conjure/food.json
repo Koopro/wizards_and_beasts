@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:food",
+    "#minecraft:meat",
+    "#minecraft:fish",
+    "#minecraft:crops",
+    {
+      "id": "wizards_and_beasts:butterbeer",
+      "required": false
+    },
+    {
+      "id": "wizards_and_beasts:pumpkin_pasty",
+      "required": false
+    },
+    {
+      "id": "wizards_and_beasts:chocolate_frog",
+      "required": false
+    },
+    {
+      "id": "wizards_and_beasts:bertie_botts_beans",
+      "required": false
+    }
+  ]
+}

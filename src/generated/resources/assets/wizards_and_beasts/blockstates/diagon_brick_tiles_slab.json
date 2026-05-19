@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "wizards_and_beasts:block/diagon_brick_tiles_slab"
+    },
+    "type=double": {
+      "model": "wizards_and_beasts:block/diagon_brick_tiles"
+    },
+    "type=top": {
+      "model": "wizards_and_beasts:block/diagon_brick_tiles_slab_top"
+    }
+  }
+}

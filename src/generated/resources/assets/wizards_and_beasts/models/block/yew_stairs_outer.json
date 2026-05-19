@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/outer_stairs",
+  "textures": {
+    "bottom": "wizards_and_beasts:block/yew_planks",
+    "side": "wizards_and_beasts:block/yew_planks",
+    "top": "wizards_and_beasts:block/yew_planks"
+  }
+}

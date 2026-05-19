@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:manticore",
+  "displayName": "bestiary.wizards_and_beasts.manticore.name",
+  "category": "LARGE_BEAST",
+  "mmRating": 5,
+  "habitat": "bestiary.wizards_and_beasts.manticore.habitat",
+  "size": "LARGE",
+  "shortLore": "bestiary.wizards_and_beasts.manticore.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.manticore.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.manticore.ability.1",
+    "bestiary.wizards_and_beasts.manticore.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.manticore.threat.1",
+    "bestiary.wizards_and_beasts.manticore.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.manticore.weakness.1",
+    "bestiary.wizards_and_beasts.manticore.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/manticore.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/manticore.png",
+  "sortOrder": 19
+}

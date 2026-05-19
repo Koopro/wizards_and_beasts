@@ -1,0 +1,22 @@
+{
+  "displayName": "Levicorpus",
+  "category": "utility",
+  "cooldownTicks": 100,
+  "color": -3375105,
+  "castType": "targeted",
+  "range": 20.0,
+  "targetEffects": [],
+  "sound": {
+    "id": "minecraft:entity.ender_pearl.throw",
+    "volume": 0.6,
+    "pitch": 1.35
+  },
+  "requirement": {
+    "type": "knows",
+    "prerequisiteId": "wingardium_leviosa"
+  },
+  "learning": {
+    "masterySpellId": "wingardium_leviosa",
+    "minMasteryTier": "proficient"
+  }
+}

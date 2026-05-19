@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "wizards_and_beasts:block/gringotts_vault_bricks",
+    "side": "wizards_and_beasts:block/gringotts_vault_bricks",
+    "top": "wizards_and_beasts:block/gringotts_vault_bricks"
+  }
+}

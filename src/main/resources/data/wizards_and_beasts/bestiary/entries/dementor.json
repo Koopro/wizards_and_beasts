@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:dementor",
+  "displayName": "bestiary.wizards_and_beasts.dementor.name",
+  "category": "SPECTRAL",
+  "mmRating": 5,
+  "habitat": "bestiary.wizards_and_beasts.dementor.habitat",
+  "size": "LARGE",
+  "shortLore": "bestiary.wizards_and_beasts.dementor.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.dementor.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.dementor.ability.1",
+    "bestiary.wizards_and_beasts.dementor.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.dementor.threat.1",
+    "bestiary.wizards_and_beasts.dementor.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.dementor.weakness.1",
+    "bestiary.wizards_and_beasts.dementor.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/dementor.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/dementor.png",
+  "sortOrder": 47
+}

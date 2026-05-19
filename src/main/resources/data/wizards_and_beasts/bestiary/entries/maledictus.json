@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:maledictus",
+  "displayName": "bestiary.wizards_and_beasts.maledictus.name",
+  "category": "CURSED_BEING",
+  "mmRating": 3,
+  "habitat": "bestiary.wizards_and_beasts.maledictus.habitat",
+  "size": "MEDIUM",
+  "shortLore": "bestiary.wizards_and_beasts.maledictus.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.maledictus.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.maledictus.ability.1",
+    "bestiary.wizards_and_beasts.maledictus.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.maledictus.threat.1",
+    "bestiary.wizards_and_beasts.maledictus.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.maledictus.weakness.1",
+    "bestiary.wizards_and_beasts.maledictus.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/maledictus.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/maledictus.png",
+  "sortOrder": 50
+}

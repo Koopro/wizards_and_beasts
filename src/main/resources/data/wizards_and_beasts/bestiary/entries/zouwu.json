@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:zouwu",
+  "displayName": "bestiary.wizards_and_beasts.zouwu.name",
+  "category": "FELINE",
+  "mmRating": 3,
+  "habitat": "bestiary.wizards_and_beasts.zouwu.habitat",
+  "size": "ENORMOUS",
+  "shortLore": "bestiary.wizards_and_beasts.zouwu.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.zouwu.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.zouwu.ability.1",
+    "bestiary.wizards_and_beasts.zouwu.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.zouwu.threat.1",
+    "bestiary.wizards_and_beasts.zouwu.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.zouwu.weakness.1",
+    "bestiary.wizards_and_beasts.zouwu.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/zouwu.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/zouwu.png",
+  "sortOrder": 56
+}

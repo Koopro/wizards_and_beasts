@@ -1,0 +1,23 @@
+{
+  "id": "wizards_and_beasts:comet_260",
+  "displayName": {"translate": "item.wizards_and_beasts.comet_260"},
+  "tier": "STANDARD",
+  "maxSpeed": 0.47,
+  "acceleration": 0.065,
+  "deceleration": 0.010,
+  "boostMultiplier": 1.5,
+  "boostDurationTicks": 60,
+  "boostCooldownTicks": 160,
+  "weakGravity": 0.010,
+  "lerpFactor": 0.12,
+  "turnSpeed": 0.90,
+  "ascentSpeed": 0.18,
+  "descentSpeed": 0.22,
+  "handlingRating": 0.55,
+  "stabilityRating": 0.75,
+  "durability": 200,
+  "repairMaterial": "#minecraft:planks",
+  "loreLines": [
+    {"translate": "broom_lore.wizards_and_beasts.comet_260.1"}
+  ]
+}

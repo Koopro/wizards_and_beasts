@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:graphorn",
+  "displayName": "bestiary.wizards_and_beasts.graphorn.name",
+  "category": "LARGE_BEAST",
+  "mmRating": 5,
+  "habitat": "bestiary.wizards_and_beasts.graphorn.habitat",
+  "size": "LARGE",
+  "shortLore": "bestiary.wizards_and_beasts.graphorn.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.graphorn.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.graphorn.ability.1",
+    "bestiary.wizards_and_beasts.graphorn.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.graphorn.threat.1",
+    "bestiary.wizards_and_beasts.graphorn.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.graphorn.weakness.1",
+    "bestiary.wizards_and_beasts.graphorn.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/graphorn.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/graphorn.png",
+  "sortOrder": 17
+}

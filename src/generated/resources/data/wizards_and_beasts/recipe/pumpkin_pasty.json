@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:pumpkin",
+    "minecraft:wheat",
+    "minecraft:sugar"
+  ],
+  "result": {
+    "count": 2,
+    "id": "wizards_and_beasts:pumpkin_pasty"
+  }
+}

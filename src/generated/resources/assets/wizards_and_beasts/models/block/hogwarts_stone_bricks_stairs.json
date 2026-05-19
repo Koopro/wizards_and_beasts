@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/stairs",
+  "textures": {
+    "bottom": "wizards_and_beasts:block/hogwarts_stone_bricks",
+    "side": "wizards_and_beasts:block/hogwarts_stone_bricks",
+    "top": "wizards_and_beasts:block/hogwarts_stone_bricks"
+  }
+}

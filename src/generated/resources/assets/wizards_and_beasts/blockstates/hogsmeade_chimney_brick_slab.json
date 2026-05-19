@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "wizards_and_beasts:block/hogsmeade_chimney_brick_slab"
+    },
+    "type=double": {
+      "model": "wizards_and_beasts:block/hogsmeade_chimney_brick"
+    },
+    "type=top": {
+      "model": "wizards_and_beasts:block/hogsmeade_chimney_brick_slab_top"
+    }
+  }
+}

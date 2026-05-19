@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:plimpy",
+  "displayName": "bestiary.wizards_and_beasts.plimpy.name",
+  "category": "AQUATIC",
+  "mmRating": 1,
+  "habitat": "bestiary.wizards_and_beasts.plimpy.habitat",
+  "size": "SMALL",
+  "shortLore": "bestiary.wizards_and_beasts.plimpy.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.plimpy.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.plimpy.ability.1",
+    "bestiary.wizards_and_beasts.plimpy.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.plimpy.threat.1",
+    "bestiary.wizards_and_beasts.plimpy.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.plimpy.weakness.1",
+    "bestiary.wizards_and_beasts.plimpy.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/plimpy.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/plimpy.png",
+  "sortOrder": 54
+}

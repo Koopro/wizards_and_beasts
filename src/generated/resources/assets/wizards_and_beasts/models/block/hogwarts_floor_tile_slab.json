@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "wizards_and_beasts:block/hogwarts_floor_tile",
+    "side": "wizards_and_beasts:block/hogwarts_floor_tile",
+    "top": "wizards_and_beasts:block/hogwarts_floor_tile"
+  }
+}

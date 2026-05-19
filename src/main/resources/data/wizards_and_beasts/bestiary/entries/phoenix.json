@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:phoenix",
+  "displayName": "bestiary.wizards_and_beasts.phoenix.name",
+  "category": "MAGICAL_BIRD",
+  "mmRating": 1,
+  "habitat": "bestiary.wizards_and_beasts.phoenix.habitat",
+  "size": "MEDIUM",
+  "shortLore": "bestiary.wizards_and_beasts.phoenix.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.phoenix.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.phoenix.ability.1",
+    "bestiary.wizards_and_beasts.phoenix.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.phoenix.threat.1",
+    "bestiary.wizards_and_beasts.phoenix.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.phoenix.weakness.1",
+    "bestiary.wizards_and_beasts.phoenix.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/phoenix.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/phoenix.png",
+  "sortOrder": 26
+}

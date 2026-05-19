@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:oakshaft_79",
+  "displayName": {"translate": "item.wizards_and_beasts.oakshaft_79"},
+  "tier": "LEGENDARY",
+  "maxSpeed": 0.50,
+  "acceleration": 0.048,
+  "deceleration": 0.006,
+  "boostMultiplier": 1.4,
+  "boostDurationTicks": 200,
+  "boostCooldownTicks": 240,
+  "weakGravity": 0.004,
+  "lerpFactor": 0.08,
+  "turnSpeed": 0.70,
+  "ascentSpeed": 0.16,
+  "descentSpeed": 0.20,
+  "handlingRating": 0.35,
+  "stabilityRating": 1.00,
+  "durability": 2000,
+  "repairMaterial": "#wizards_and_beasts:broom_repair_material_elite",
+  "loreLines": [
+    {"translate": "broom_lore.wizards_and_beasts.oakshaft_79.1"},
+    {"translate": "broom_lore.wizards_and_beasts.oakshaft_79.2"},
+    {"translate": "broom_lore.wizards_and_beasts.oakshaft_79.3"},
+    {"translate": "broom_lore.wizards_and_beasts.oakshaft_79.4"}
+  ]
+}

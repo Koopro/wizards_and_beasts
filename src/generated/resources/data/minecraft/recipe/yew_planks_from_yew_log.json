@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "planks",
+  "ingredients": [
+    "wizards_and_beasts:yew_log"
+  ],
+  "result": {
+    "count": 4,
+    "id": "wizards_and_beasts:yew_planks"
+  }
+}

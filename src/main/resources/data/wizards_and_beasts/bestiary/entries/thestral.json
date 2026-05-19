@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:thestral",
+  "displayName": "bestiary.wizards_and_beasts.thestral.name",
+  "category": "WINGED_BEAST",
+  "mmRating": 2,
+  "habitat": "bestiary.wizards_and_beasts.thestral.habitat",
+  "size": "LARGE",
+  "shortLore": "bestiary.wizards_and_beasts.thestral.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.thestral.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.thestral.ability.1",
+    "bestiary.wizards_and_beasts.thestral.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.thestral.threat.1",
+    "bestiary.wizards_and_beasts.thestral.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.thestral.weakness.1",
+    "bestiary.wizards_and_beasts.thestral.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/thestral.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/thestral.png",
+  "sortOrder": 11
+}

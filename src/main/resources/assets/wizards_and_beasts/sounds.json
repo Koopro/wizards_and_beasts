@@ -1,0 +1,249 @@
+{
+  "broom_crash": {
+    "subtitle": "subtitles.wizards_and_beasts.broom_crash",
+    "sounds": [
+      {
+        "name": "minecraft:random/explode1",
+        "volume": 0.7,
+        "pitch": 1.2
+      },
+      {
+        "name": "minecraft:random/explode2",
+        "volume": 0.7,
+        "pitch": 1.3
+      }
+    ]
+  },
+
+  "spell_cast_generic": {
+    "sounds": [
+      { "name": "minecraft:mob/evoker/prepare_summon", "volume": 0.75, "pitch": 1.15 }
+    ]
+  },
+
+  "spell_cast_dark": {
+    "sounds": [
+      { "name": "minecraft:mob/blaze/death", "volume": 0.45, "pitch": 0.55 }
+    ]
+  },
+
+  "spell_cast_charm": {
+    "sounds": [
+      { "name": "minecraft:mob/allay/idle_with_item1", "volume": 0.55, "pitch": 1.35 }
+    ]
+  },
+
+  "spell_impact_generic": {
+    "sounds": [
+      { "name": "minecraft:block/amethyst_cluster/break", "volume": 0.6, "pitch": 1.25 }
+    ]
+  },
+
+  "spell_impact_expelliarmus": {
+    "sounds": [
+      { "name": "minecraft:mob/player/attack/strong", "volume": 0.5, "pitch": 1.15 }
+    ]
+  },
+
+  "spell_impact_stupefy": {
+    "sounds": [
+      { "name": "minecraft:block/copper_bulb/turn_off", "volume": 0.85, "pitch": 1.45 }
+    ]
+  },
+
+  "spell_impact_avada": {
+    "sounds": [
+      { "name": "minecraft:mob/evoker/prepare_summon", "volume": 0.8, "pitch": 0.5 }
+    ]
+  },
+
+  "spell_fizzle": {
+    "sounds": [
+      { "name": "minecraft:block/fire/extinguish", "volume": 0.55, "pitch": 1.55 }
+    ]
+  },
+
+  "wand_equip": {
+    "sounds": [
+      { "name": "minecraft:item/armor/equip_leather1", "volume": 0.85, "pitch": 1.15 }
+    ]
+  },
+
+  "wand_unequip": {
+    "sounds": [
+      { "name": "minecraft:block/bamboo_wood_fence_gate/open", "volume": 0.65, "pitch": 1.08 }
+    ]
+  },
+
+  "wand_swing": {
+    "sounds": [
+      { "name": "minecraft:entity/player/attack/sweep", "volume": 0.5, "pitch": 1.2 }
+    ]
+  },
+
+  "patronus_summon": {
+    "sounds": [
+      { "name": "minecraft:mob/allay/celebrate", "volume": 0.8, "pitch": 1.1 },
+      { "name": "minecraft:mob/evoker/prepare_summon", "volume": 0.5, "pitch": 1.35 }
+    ]
+  },
+
+  "protego_raise": {
+    "sounds": [
+      { "name": "minecraft:block/enchantment_table/enchant", "volume": 0.7, "pitch": 1.25 }
+    ]
+  },
+
+  "protego_block": {
+    "sounds": [
+      { "name": "minecraft:enchant/thorns/hit_metal", "volume": 0.75, "pitch": 1.12 }
+    ]
+  },
+  "protego_shatter": {
+    "sounds": [
+      { "name": "minecraft:block/glass/break", "volume": 1.0, "pitch": 0.8 }
+    ]
+  },
+  "protego_horribilis_absorb": {
+    "sounds": [
+      { "name": "minecraft:block/respawn_anchor/charge", "volume": 0.95, "pitch": 0.7 }
+    ]
+  },
+  "protego_totalum_raise": {
+    "sounds": [
+      { "name": "minecraft:block/beacon/activate", "volume": 0.9, "pitch": 1.0 }
+    ]
+  },
+  "protego_maxima_raise": {
+    "sounds": [
+      { "name": "minecraft:block/beacon/power_select", "volume": 1.0, "pitch": 0.9 }
+    ]
+  },
+
+  "spell_clash": {
+    "sounds": [
+      { "name": "minecraft:block/amethyst_cluster/break", "volume": 0.65, "pitch": 1.45 },
+      { "name": "minecraft:block/copper_bulb/turn_off", "volume": 0.5, "pitch": 1.2 }
+    ]
+  },
+
+  "entity.niffler.ambient": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.niffler.ambient",
+    "sounds": [
+      { "name": "minecraft:entity/fox/screech", "volume": 0.4, "pitch": 1.6 }
+    ]
+  },
+  "entity.niffler.hurt": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.niffler.hurt",
+    "sounds": [
+      { "name": "minecraft:entity/fox/hurt", "volume": 0.6, "pitch": 1.4 }
+    ]
+  },
+  "entity.niffler.death": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.niffler.death",
+    "sounds": [
+      { "name": "minecraft:entity/fox/death", "volume": 0.7, "pitch": 1.3 }
+    ]
+  },
+  "entity.niffler.eat": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.niffler.eat",
+    "sounds": [
+      { "name": "minecraft:entity/fox/eat", "volume": 0.8, "pitch": 1.2 }
+    ]
+  },
+  "entity.niffler.happy": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.niffler.happy",
+    "sounds": [
+      { "name": "minecraft:entity/fox/screech", "volume": 0.5, "pitch": 1.8 }
+    ]
+  },
+  "entity.niffler.hiss": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.niffler.hiss",
+    "sounds": [
+      { "name": "minecraft:entity/cat/hiss", "volume": 0.6, "pitch": 1.5 }
+    ]
+  },
+  "entity.niffler.dig": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.niffler.dig",
+    "sounds": [
+      { "name": "minecraft:block/gravel/dig1", "volume": 0.5, "pitch": 1.3 }
+    ]
+  },
+  "entity.niffler.squirm": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.niffler.squirm",
+    "sounds": [
+      { "name": "minecraft:entity/fox/screech", "volume": 0.7, "pitch": 1.5 }
+    ]
+  },
+  "entity.baby_niffler.ambient": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.baby_niffler.ambient",
+    "sounds": [
+      { "name": "minecraft:entity/fox/screech", "volume": 0.3, "pitch": 2.0 }
+    ]
+  },
+
+  "floo_whoosh": {
+    "sounds": [
+      { "name": "minecraft:block/portal/portal", "volume": 0.8, "pitch": 1.3 }
+    ]
+  },
+
+  "floo_ignite": {
+    "sounds": [
+      { "name": "minecraft:block/fire/fire", "volume": 0.7, "pitch": 0.9 },
+      { "name": "minecraft:block/respawn_anchor/charge", "volume": 0.5, "pitch": 1.1 }
+    ]
+  },
+
+  "floo_land": {
+    "sounds": [
+      { "name": "minecraft:block/fire/extinguish", "volume": 0.8, "pitch": 1.2 },
+      { "name": "minecraft:entity/player/hurt", "volume": 0.3, "pitch": 1.5 }
+    ]
+  },
+
+  "deluminator_absorb": {
+    "subtitle": "subtitles.wizards_and_beasts.deluminator_absorb",
+    "sounds": []
+  },
+
+  "deluminator_restore": {
+    "subtitle": "subtitles.wizards_and_beasts.deluminator_restore",
+    "sounds": []
+  },
+
+  "mirror_connect": {
+    "subtitle": "subtitles.wizards_and_beasts.mirror_connect",
+    "sounds": []
+  },
+
+  "horcrux_shatter": {
+    "subtitle": "subtitles.wizards_and_beasts.horcrux_shatter",
+    "sounds": []
+  },
+
+  "resurrection_stone_turn": {
+    "subtitle": "subtitles.wizards_and_beasts.resurrection_stone_turn",
+    "sounds": []
+  },
+
+  "blood_pact_offer": {
+    "subtitle": "subtitles.wizards_and_beasts.blood_pact_offer",
+    "sounds": []
+  },
+
+  "blood_pact_seal": {
+    "subtitle": "subtitles.wizards_and_beasts.blood_pact_seal",
+    "sounds": []
+  },
+
+  "blood_pact_shatter": {
+    "subtitle": "subtitles.wizards_and_beasts.blood_pact_shatter",
+    "sounds": []
+  },
+
+  "blood_pact_block": {
+    "subtitle": "subtitles.wizards_and_beasts.blood_pact_block",
+    "sounds": []
+  }
+}

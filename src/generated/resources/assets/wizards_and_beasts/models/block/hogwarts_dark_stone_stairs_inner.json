@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "bottom": "wizards_and_beasts:block/hogwarts_dark_stone",
+    "side": "wizards_and_beasts:block/hogwarts_dark_stone",
+    "top": "wizards_and_beasts:block/hogwarts_dark_stone"
+  }
+}

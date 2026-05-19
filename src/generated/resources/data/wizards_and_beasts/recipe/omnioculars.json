@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "A": "minecraft:amethyst_shard",
+    "L": "minecraft:leather",
+    "S": "minecraft:spyglass"
+  },
+  "pattern": [
+    "ALA",
+    "ASA",
+    "AAA"
+  ],
+  "result": {
+    "count": 1,
+    "id": "wizards_and_beasts:omnioculars"
+  }
+}

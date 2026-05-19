@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:werewolf",
+  "displayName": "bestiary.wizards_and_beasts.werewolf.name",
+  "category": "CURSED_BEING",
+  "mmRating": 5,
+  "habitat": "bestiary.wizards_and_beasts.werewolf.habitat",
+  "size": "LARGE",
+  "shortLore": "bestiary.wizards_and_beasts.werewolf.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.werewolf.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.werewolf.ability.1",
+    "bestiary.wizards_and_beasts.werewolf.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.werewolf.threat.1",
+    "bestiary.wizards_and_beasts.werewolf.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.werewolf.weakness.1",
+    "bestiary.wizards_and_beasts.werewolf.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/werewolf.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/werewolf.png",
+  "sortOrder": 49
+}

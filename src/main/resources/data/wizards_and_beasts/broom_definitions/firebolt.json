@@ -1,0 +1,25 @@
+{
+  "id": "wizards_and_beasts:firebolt",
+  "displayName": {"translate": "item.wizards_and_beasts.firebolt"},
+  "tier": "ELITE",
+  "maxSpeed": 0.92,
+  "acceleration": 0.100,
+  "deceleration": 0.007,
+  "boostMultiplier": 2.20,
+  "boostDurationTicks": 120,
+  "boostCooldownTicks": 100,
+  "weakGravity": 0.006,
+  "lerpFactor": 0.20,
+  "turnSpeed": 1.35,
+  "ascentSpeed": 0.32,
+  "descentSpeed": 0.34,
+  "handlingRating": 0.90,
+  "stabilityRating": 0.65,
+  "durability": 520,
+  "repairMaterial": "#wizards_and_beasts:broom_repair_material_elite",
+  "loreLines": [
+    {"translate": "broom_lore.wizards_and_beasts.firebolt.1"},
+    {"translate": "broom_lore.wizards_and_beasts.firebolt.2"},
+    {"translate": "broom_lore.wizards_and_beasts.firebolt.3"}
+  ]
+}

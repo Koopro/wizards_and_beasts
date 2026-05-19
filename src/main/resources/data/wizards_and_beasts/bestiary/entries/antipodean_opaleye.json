@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:antipodean_opaleye",
+  "displayName": "bestiary.wizards_and_beasts.antipodean_opaleye.name",
+  "category": "DRAGON",
+  "mmRating": 3,
+  "habitat": "bestiary.wizards_and_beasts.antipodean_opaleye.habitat",
+  "size": "ENORMOUS",
+  "shortLore": "bestiary.wizards_and_beasts.antipodean_opaleye.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.antipodean_opaleye.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.antipodean_opaleye.ability.1",
+    "bestiary.wizards_and_beasts.antipodean_opaleye.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.antipodean_opaleye.threat.1",
+    "bestiary.wizards_and_beasts.antipodean_opaleye.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.antipodean_opaleye.weakness.1",
+    "bestiary.wizards_and_beasts.antipodean_opaleye.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/antipodean_opaleye.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/antipodean_opaleye.png",
+  "sortOrder": 5
+}

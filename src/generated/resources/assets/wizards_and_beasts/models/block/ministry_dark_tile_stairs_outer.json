@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/outer_stairs",
+  "textures": {
+    "bottom": "wizards_and_beasts:block/ministry_dark_tile",
+    "side": "wizards_and_beasts:block/ministry_dark_tile",
+    "top": "wizards_and_beasts:block/ministry_dark_tile"
+  }
+}

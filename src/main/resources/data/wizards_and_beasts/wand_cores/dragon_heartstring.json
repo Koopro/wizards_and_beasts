@@ -1,0 +1,12 @@
+{
+  "display_name": {
+    "translate": "wand_core.wizards_and_beasts.dragon_heartstring"
+  },
+  "source_key": "hungarian_horntail",
+  "raw_power": 1.8,
+  "consistency": 0.68,
+  "loyalty": 0.62,
+  "dark_affinity": 0.72,
+  "initiative": 0.7,
+  "allegiance_transfer_resistance": 0.75
+}

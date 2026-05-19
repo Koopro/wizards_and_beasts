@@ -1,0 +1,16 @@
+{
+  "displayName": "Capacious Extremis",
+  "category": "utility",
+  "cooldownTicks": 200,
+  "color": -65485,
+  "castType": "self",
+  "selfEffects": [],
+  "sound": {
+    "id": "minecraft:block.end_portal_frame.fill",
+    "volume": 0.5,
+    "pitch": 1.1
+  },
+  "learning": {
+    "requiredSkillId": "wizards_and_beasts:arcane_mastery"
+  }
+}

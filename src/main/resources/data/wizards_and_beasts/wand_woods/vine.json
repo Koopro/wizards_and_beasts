@@ -1,0 +1,13 @@
+{
+  "display_name": {
+    "translate": "wand_wood.wizards_and_beasts.vine"
+  },
+  "affinity_tags": ["divination", "rare"],
+  "spell_modifiers": {
+    "divination": 0.2,
+    "charms": 0.08
+  },
+  "personality_affinity": ["visionary", "curious", "seeker"],
+  "rarity": "uncommon",
+  "refuse_threshold": 0.3
+}

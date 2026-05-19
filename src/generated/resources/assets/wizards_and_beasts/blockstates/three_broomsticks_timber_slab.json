@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "wizards_and_beasts:block/three_broomsticks_timber_slab"
+    },
+    "type=double": {
+      "model": "wizards_and_beasts:block/three_broomsticks_timber"
+    },
+    "type=top": {
+      "model": "wizards_and_beasts:block/three_broomsticks_timber_slab_top"
+    }
+  }
+}

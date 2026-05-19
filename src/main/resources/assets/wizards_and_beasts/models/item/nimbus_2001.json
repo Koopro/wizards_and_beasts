@@ -1,0 +1,4 @@
+{
+  "_comment": "TODO: distinct model per variant",
+  "parent": "wizards_and_beasts:item/broom"
+}      

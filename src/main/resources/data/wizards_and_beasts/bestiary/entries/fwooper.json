@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:fwooper",
+  "displayName": "bestiary.wizards_and_beasts.fwooper.name",
+  "category": "MAGICAL_BIRD",
+  "mmRating": 2,
+  "habitat": "bestiary.wizards_and_beasts.fwooper.habitat",
+  "size": "SMALL",
+  "shortLore": "bestiary.wizards_and_beasts.fwooper.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.fwooper.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.fwooper.ability.1",
+    "bestiary.wizards_and_beasts.fwooper.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.fwooper.threat.1",
+    "bestiary.wizards_and_beasts.fwooper.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.fwooper.weakness.1",
+    "bestiary.wizards_and_beasts.fwooper.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/fwooper.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/fwooper.png",
+  "sortOrder": 28
+}

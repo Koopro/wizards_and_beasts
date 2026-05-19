@@ -1,0 +1,13 @@
+{
+  "display_name": {
+    "translate": "wand_wood.wizards_and_beasts.willow"
+  },
+  "affinity_tags": ["healing", "protective"],
+  "spell_modifiers": {
+    "healing": 0.14,
+    "protection": 0.1
+  },
+  "personality_affinity": ["adaptable", "patient", "nurturing"],
+  "rarity": "common",
+  "refuse_threshold": 0.28
+}
