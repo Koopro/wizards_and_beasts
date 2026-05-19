@@ -19,6 +19,7 @@ public final class BroomItemRegistry {
     public static final DeferredItem<SimpleTooltipItem> ENCHANTED_TWIG_BUNDLE =
             RegistryUtils.registerTooltipItem("enchanted_twig_bundle", "item.wizards_and_beasts.enchanted_twig_bundle.tooltip", 8);
 
-    private BroomItemRegistry() {
-    }
+    private BroomItemRegistry() {}
+
+    public static void init() {}
 }

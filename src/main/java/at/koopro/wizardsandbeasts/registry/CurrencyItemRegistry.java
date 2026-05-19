@@ -22,4 +22,6 @@ public final class CurrencyItemRegistry {
             ModItems.ITEMS.registerSimpleItem("dragot");
 
     private CurrencyItemRegistry() {}
+
+    public static void init() {}
 }

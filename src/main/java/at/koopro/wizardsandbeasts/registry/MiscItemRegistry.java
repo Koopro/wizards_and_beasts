@@ -38,4 +38,6 @@ public final class MiscItemRegistry {
                     properties -> new SpawnEggItem(properties.spawnEgg(ModEntities.NIFFLER.get())));
 
     private MiscItemRegistry() {}
+
+    public static void init() {}
 }

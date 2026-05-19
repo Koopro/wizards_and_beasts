@@ -63,4 +63,6 @@ public final class DarkArtefactItemRegistry {
             ModItems.ITEMS.registerItem("moodys_trunk", props -> new MoodysTrunkItem(props.stacksTo(1)));
 
     private DarkArtefactItemRegistry() {}
+
+    public static void init() {}
 }

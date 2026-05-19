@@ -57,4 +57,6 @@ public final class TrinketItemRegistry {
             ModItems.ITEMS.registerItem("decoy_detonator", props -> new WizardingProjectileItem(props.stacksTo(16)));
 
     private TrinketItemRegistry() {}
+
+    public static void init() {}
 }

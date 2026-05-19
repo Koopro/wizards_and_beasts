@@ -111,4 +111,6 @@ public final class ConsumableItemRegistry {
             ModItems.ITEMS.registerSimpleItem("white_river_monster_spine");
 
     private ConsumableItemRegistry() {}
+
+    public static void init() {}
 }
