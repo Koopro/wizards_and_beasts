@@ -18,7 +18,7 @@ public final class Skill {
     private final int pointCost;
     private final List<String> prerequisites;
     private final List<SkillEffect> effects;
-    private final List<SkillNodeEffect> nodeEffects;
+    private List<SkillNodeEffect> nodeEffects; // null = not yet derived (lazy, requires MC bootstrap)
     private final int tier;
     private final int column;
 
@@ -31,7 +31,8 @@ public final class Skill {
         this.pointCost = builder.pointCost;
         this.prerequisites = Collections.unmodifiableList(new ArrayList<>(builder.prerequisites));
         this.effects = Collections.unmodifiableList(new ArrayList<>(builder.effects));
-        this.nodeEffects = Collections.unmodifiableList(new ArrayList<>(builder.nodeEffects));
+        this.nodeEffects = builder.nodeEffects.isEmpty() ? null
+                : Collections.unmodifiableList(new ArrayList<>(builder.nodeEffects));
         this.tier = builder.tier;
         this.column = builder.column;
     }
@@ -44,7 +45,44 @@ public final class Skill {
     public int getPointCost() { return pointCost; }
     public List<String> getPrerequisites() { return prerequisites; }
     public List<SkillEffect> getEffects() { return effects; }
-    public List<SkillNodeEffect> getNodeEffects() { return nodeEffects; }
+    public List<SkillNodeEffect> getNodeEffects() {
+        if (nodeEffects == null) {
+            nodeEffects = deriveNodeEffects();
+        }
+        return nodeEffects;
+    }
+
+    private List<SkillNodeEffect> deriveNodeEffects() {
+        List<SkillNodeEffect> derived = new ArrayList<>();
+        for (SkillEffect effect : effects) {
+            if (effect instanceof SkillEffect.CategoryCooldownReduction reduction) {
+                derived.add(new SkillNodeEffect.SpellCooldownMultiplier(
+                        reduction.category(),
+                        Math.max(0.1f, 1.0f - reduction.reductionPerLevel())));
+            } else if (effect instanceof SkillEffect.CategoryDamageBonus bonus) {
+                derived.add(new SkillNodeEffect.SpellDamageMultiplier(
+                        bonus.category(),
+                        1.0f + bonus.bonusPerLevel()));
+            } else if (effect instanceof SkillEffect.PassiveAttribute passive) {
+                var attribute = switch (passive.attributeId()) {
+                    case "max_health" -> net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH;
+                    case "movement_speed" -> net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED;
+                    case "armor" -> net.minecraft.world.entity.ai.attributes.Attributes.ARMOR;
+                    default -> null;
+                };
+                if (attribute != null) {
+                    derived.add(new SkillNodeEffect.AttributeBoost(
+                            attribute,
+                            passive.amountPerLevel(),
+                            net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE,
+                            net.minecraft.resources.Identifier.fromNamespaceAndPath(
+                                    "wizards_and_beasts",
+                                    "skill/" + tree.getId() + "/" + id + "/" + passive.attributeId())));
+                }
+            }
+        }
+        return Collections.unmodifiableList(derived);
+    }
     public int getTier() { return tier; }
     public int getColumn() { return column; }
 
@@ -113,40 +151,7 @@ public final class Skill {
 
         public Skill build() {
             if (tree == null) throw new IllegalStateException("Skill '" + id + "' must have a tree");
-            if (nodeEffects.isEmpty()) {
-                deriveNodeEffectsFromLegacyEffects();
-            }
             return new Skill(this);
-        }
-
-        private void deriveNodeEffectsFromLegacyEffects() {
-            for (SkillEffect effect : effects) {
-                if (effect instanceof SkillEffect.CategoryCooldownReduction reduction) {
-                    nodeEffects.add(new SkillNodeEffect.SpellCooldownMultiplier(
-                            reduction.category(),
-                            Math.max(0.1f, 1.0f - reduction.reductionPerLevel())));
-                } else if (effect instanceof SkillEffect.CategoryDamageBonus bonus) {
-                    nodeEffects.add(new SkillNodeEffect.SpellDamageMultiplier(
-                            bonus.category(),
-                            1.0f + bonus.bonusPerLevel()));
-                } else if (effect instanceof SkillEffect.PassiveAttribute passive) {
-                    var attribute = switch (passive.attributeId()) {
-                        case "max_health" -> net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH;
-                        case "movement_speed" -> net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED;
-                        case "armor" -> net.minecraft.world.entity.ai.attributes.Attributes.ARMOR;
-                        default -> null;
-                    };
-                    if (attribute != null) {
-                        nodeEffects.add(new SkillNodeEffect.AttributeBoost(
-                                attribute,
-                                passive.amountPerLevel(),
-                                net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE,
-                                net.minecraft.resources.Identifier.fromNamespaceAndPath(
-                                        "wizards_and_beasts",
-                                        "skill/" + tree.getId() + "/" + id + "/" + passive.attributeId())));
-                    }
-                }
-            }
         }
     }
 }
