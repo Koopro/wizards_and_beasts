@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.broom;
 
-import at.koopro.wizardsandbeasts.broom.event.BroomDefinitionsLoadedEvent;
+import at.koopro.wizardsandbeasts.event.broom.BroomDefinitionsLoadedEvent;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;

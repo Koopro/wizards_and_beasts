@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.trunk;
 
-import at.koopro.wizardsandbeasts.trunk.event.PocketDimensionEvents;
-import at.koopro.wizardsandbeasts.trunk.network.PocketStatusS2CPayload;
+import at.koopro.wizardsandbeasts.event.trunk.PocketDimensionEvents;
+import at.koopro.wizardsandbeasts.network.trunk.PocketStatusS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModDimensions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.wand.bench;
 
-import at.koopro.wizardsandbeasts.wand.item.WandModuleHooks;
+import at.koopro.wizardsandbeasts.item.wand.WandModuleHooks;
 import at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;

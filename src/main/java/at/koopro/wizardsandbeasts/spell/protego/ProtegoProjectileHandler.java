@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.spell.protego;
 
-import at.koopro.wizardsandbeasts.spell.entity.SpellProjectileEntity;
+import at.koopro.wizardsandbeasts.entity.spell.SpellProjectileEntity;
 import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
 import at.koopro.wizardsandbeasts.skill.SkillTreeId;
 import at.koopro.wizardsandbeasts.spell.core.Spells;

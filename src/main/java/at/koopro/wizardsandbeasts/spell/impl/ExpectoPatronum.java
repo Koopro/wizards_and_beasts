@@ -1,11 +1,11 @@
 package at.koopro.wizardsandbeasts.spell.impl;
 
-import at.koopro.wizardsandbeasts.spell.event.ExpectoPatronumAuraHandler;
-import at.koopro.wizardsandbeasts.spell.network.PatronusFormSetS2CPayload;
+import at.koopro.wizardsandbeasts.event.spell.ExpectoPatronumAuraHandler;
+import at.koopro.wizardsandbeasts.network.spell.PatronusFormSetS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
 import at.koopro.wizardsandbeasts.spell.core.*;
-import at.koopro.wizardsandbeasts.spell.entity.PatronusEntity;
+import at.koopro.wizardsandbeasts.entity.spell.PatronusEntity;
 import at.koopro.wizardsandbeasts.spell.cast.*;
 import at.koopro.wizardsandbeasts.spell.lib.*;
 import at.koopro.wizardsandbeasts.spell.beam.*;
@@ -78,6 +78,6 @@ public class ExpectoPatronum extends Spell {
                 caster.setData(ModAttachments.PATRONUS_FORM.get(), determined);
             }
         }
-        at.koopro.wizardsandbeasts.spell.entity.PatronusEntity.trySpawn(level, caster, patronusPower, getProficiencyScalar(caster));
+        at.koopro.wizardsandbeasts.entity.spell.PatronusEntity.trySpawn(level, caster, patronusPower, getProficiencyScalar(caster));
     }
 }

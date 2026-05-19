@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.wand.allegiance;
 
 import at.koopro.wizardsandbeasts.wand.elder.ElderWandEventHandler;
-import at.koopro.wizardsandbeasts.wand.item.WandItem;
+import at.koopro.wizardsandbeasts.item.wand.WandItem;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;

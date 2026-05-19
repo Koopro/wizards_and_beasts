@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.command;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.wand.client.BeamSettings;
+import at.koopro.wizardsandbeasts.client.wand.BeamSettings;
 import at.koopro.wizardsandbeasts.azkaban.command.AzkabanCommands;
 import at.koopro.wizardsandbeasts.bestiary.command.BestiaryCommands;
 import at.koopro.wizardsandbeasts.bloodpact.command.PactCommands;
@@ -17,15 +17,14 @@ import at.koopro.wizardsandbeasts.currency.command.VaultCommands;
 import at.koopro.wizardsandbeasts.wand.command.WandCommands;
 import at.koopro.wizardsandbeasts.command.WorldCommands;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
-import at.koopro.wizardsandbeasts.wand.item.DebugWandState;
-import at.koopro.wizardsandbeasts.wand.item.WandItem;
+import at.koopro.wizardsandbeasts.item.wand.DebugWandState;
+import at.koopro.wizardsandbeasts.item.wand.WandItem;
 import at.koopro.wizardsandbeasts.wand.stat.WandCore;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import at.koopro.wizardsandbeasts.wand.stat.WandLength;
 import at.koopro.wizardsandbeasts.wand.stat.WandWood;
 import at.koopro.wizardsandbeasts.network.debug.BeamDebugOpenS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
-import at.koopro.wizardsandbeasts.registry.ModItems;
 import at.koopro.wizardsandbeasts.util.GlowDebugTags;
 import at.koopro.wizardsandbeasts.util.RgbHex;
 import at.koopro.wizardsandbeasts.wand.cast.WandStats;
@@ -44,6 +43,7 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 import java.util.Set;
+import at.koopro.wizardsandbeasts.registry.WandItemRegistry;
 
 /**
  * Root command registrar for {@code /wandb} and its deprecated alias {@code /wizardsandbeasts}.
@@ -228,7 +228,7 @@ public final class WandbCommands {
     }
 
     private static int giveDebugWand(ServerPlayer player, String treeType) {
-        ItemStack wand = new ItemStack(ModItems.DEBUG_WAND.get());
+        ItemStack wand = new ItemStack(WandItemRegistry.DEBUG_WAND.get());
         player.getInventory().add(wand);
 
         if (treeType != null && TREE_TYPES.contains(treeType)) {

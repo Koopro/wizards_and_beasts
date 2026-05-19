@@ -1,7 +1,6 @@
 package at.koopro.wizardsandbeasts.item.trinket;
 
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
-import at.koopro.wizardsandbeasts.registry.ModItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
@@ -13,6 +12,7 @@ import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 
 import java.util.function.Consumer;
+import at.koopro.wizardsandbeasts.registry.ConsumableItemRegistry;
 
 public class FamousWizardCardItem extends Item {
 
@@ -32,7 +32,7 @@ public class FamousWizardCardItem extends Item {
     }
 
     public static ItemStack randomCard(RandomSource random) {
-        ItemStack stack = new ItemStack(ModItems.FAMOUS_WIZARD_CARD.get());
+        ItemStack stack = new ItemStack(ConsumableItemRegistry.FAMOUS_WIZARD_CARD.get());
         stack.set(ModDataComponents.WIZARD_CARD_ID.get(), CARD_IDS[random.nextInt(CARD_IDS.length)]);
         return stack;
     }

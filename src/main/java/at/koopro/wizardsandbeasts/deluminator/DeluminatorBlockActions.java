@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.deluminator;
 
-import at.koopro.wizardsandbeasts.deluminator.item.DeluminatorItem;
+import at.koopro.wizardsandbeasts.item.deluminator.DeluminatorItem;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;

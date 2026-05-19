@@ -2,7 +2,7 @@ package at.koopro.wizardsandbeasts.spell.protego;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
-import at.koopro.wizardsandbeasts.spell.entity.ProtegoShieldEntity;
+import at.koopro.wizardsandbeasts.entity.spell.ProtegoShieldEntity;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.neoforged.bus.api.SubscribeEvent;

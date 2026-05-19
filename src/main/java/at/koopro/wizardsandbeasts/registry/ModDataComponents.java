@@ -1,13 +1,13 @@
 package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.wand.item.WandItem;
+import at.koopro.wizardsandbeasts.item.wand.WandItem;
 import at.koopro.wizardsandbeasts.wand.stat.WandCore;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import net.minecraft.core.BlockPos;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import at.koopro.wizardsandbeasts.wand.stat.WandLength;
-import at.koopro.wizardsandbeasts.wand.item.ExpelliarmusDropTag;
+import at.koopro.wizardsandbeasts.item.wand.ExpelliarmusDropTag;
 import at.koopro.wizardsandbeasts.wand.stat.WandWood;
 import at.koopro.wizardsandbeasts.trunk.TrunkAccessMode;
 import at.koopro.wizardsandbeasts.trunk.TrunkArchetype;

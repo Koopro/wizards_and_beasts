@@ -1,9 +1,9 @@
 package at.koopro.wizardsandbeasts.client.hud;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.heritage.client.hud.ObscurialDarkPanelRenderer;
-import at.koopro.wizardsandbeasts.heritage.client.hud.ObscurialHumanPanelRenderer;
-import at.koopro.wizardsandbeasts.heritage.client.state.ClientHeritageDataState;
+import at.koopro.wizardsandbeasts.client.heritage.hud.ObscurialDarkPanelRenderer;
+import at.koopro.wizardsandbeasts.client.heritage.hud.ObscurialHumanPanelRenderer;
+import at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageDataState;
 import at.koopro.wizardsandbeasts.client.ui.HudVisibilityPolicy;
 import at.koopro.wizardsandbeasts.client.ui.ObscurialUiModel;
 import at.koopro.wizardsandbeasts.client.ui.UiStateProjection;

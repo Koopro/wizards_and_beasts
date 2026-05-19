@@ -2,8 +2,8 @@ package at.koopro.wizardsandbeasts.spell.impl;
 
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.effect.ProtegoShieldEffect;
-import at.koopro.wizardsandbeasts.spell.entity.ProtegoShieldEntity;
-import at.koopro.wizardsandbeasts.spell.network.ProtegoSpawnS2CPayload;
+import at.koopro.wizardsandbeasts.entity.spell.ProtegoShieldEntity;
+import at.koopro.wizardsandbeasts.network.spell.ProtegoSpawnS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
 import at.koopro.wizardsandbeasts.spell.core.*;
 import at.koopro.wizardsandbeasts.spell.cast.*;

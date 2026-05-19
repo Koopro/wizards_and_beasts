@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.wand.resonance;
 
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
-import at.koopro.wizardsandbeasts.wand.item.WandModuleHooks;
+import at.koopro.wizardsandbeasts.item.wand.WandModuleHooks;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
@@ -27,7 +27,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Pure logic for wand–wizard resonance. Invoked from {@link at.koopro.wizardsandbeasts.wand.item.WandItem}
+ * Pure logic for wand–wizard resonance. Invoked from {@link at.koopro.wizardsandbeasts.item.wand.WandItem}
  * and Ollivander trial GUI — no automatic event subscriptions.
  */
 public final class WandResonanceSystem {

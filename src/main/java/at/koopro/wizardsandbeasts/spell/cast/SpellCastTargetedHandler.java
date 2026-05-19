@@ -8,7 +8,7 @@ import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.effect.FiniteImmuneEffects;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
-import at.koopro.wizardsandbeasts.spell.network.SpellImpactBurstS2CPayload;
+import at.koopro.wizardsandbeasts.network.spell.SpellImpactBurstS2CPayload;
 import at.koopro.wizardsandbeasts.spell.imperio.ImperioServerLogic;
 import at.koopro.wizardsandbeasts.spell.proficiency.SpellScalingProfile;
 import at.koopro.wizardsandbeasts.wand.cast.WandStats;

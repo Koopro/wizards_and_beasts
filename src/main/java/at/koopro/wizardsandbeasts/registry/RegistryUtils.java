@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.broom.item.BroomItem;
+import at.koopro.wizardsandbeasts.item.broom.BroomItem;
 import at.koopro.wizardsandbeasts.item.SimpleTooltipItem;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BlockItem;

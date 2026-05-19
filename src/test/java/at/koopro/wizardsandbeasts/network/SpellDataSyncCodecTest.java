@@ -1,8 +1,8 @@
 package at.koopro.wizardsandbeasts.network;
 
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
-import at.koopro.wizardsandbeasts.spell.network.SpellDataDeltaS2CPayload;
-import at.koopro.wizardsandbeasts.spell.network.SpellDataSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.spell.SpellDataDeltaS2CPayload;
+import at.koopro.wizardsandbeasts.network.spell.SpellDataSyncS2CPayload;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.jupiter.api.Test;

@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.network;
 
-import at.koopro.wizardsandbeasts.heritage.network.HeritageDataSyncS2CPayload;
-import at.koopro.wizardsandbeasts.skill.network.SkillDataSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.heritage.HeritageDataSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.skill.SkillDataSyncS2CPayload;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.jupiter.api.Test;

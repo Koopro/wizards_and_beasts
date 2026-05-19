@@ -4,7 +4,7 @@ import at.koopro.wizardsandbeasts.ability.PlayerAbilityHelper;
 import at.koopro.wizardsandbeasts.apparition.ApparitionWard;
 import at.koopro.wizardsandbeasts.apparition.ApparitionWardRegistry;
 import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
-import at.koopro.wizardsandbeasts.apparition.network.ApparitionWardsSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.apparition.ApparitionWardsSyncS2CPayload;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;

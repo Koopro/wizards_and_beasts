@@ -6,7 +6,7 @@ import at.koopro.wizardsandbeasts.Config;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.command.debug.DebugHooks;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
-import at.koopro.wizardsandbeasts.spell.network.SpellDataDeltaS2CPayload;
+import at.koopro.wizardsandbeasts.network.spell.SpellDataDeltaS2CPayload;
 import at.koopro.wizardsandbeasts.network.SpellNetworkGuards;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.effect.ModEffects;

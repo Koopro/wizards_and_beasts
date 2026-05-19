@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.network;
 
-import at.koopro.wizardsandbeasts.broom.network.BroomInputC2SPayload;
+import at.koopro.wizardsandbeasts.network.broom.BroomInputC2SPayload;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.jupiter.api.Test;

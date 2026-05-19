@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.command.debug;
 
-import at.koopro.wizardsandbeasts.broom.entity.BroomEntity;
+import at.koopro.wizardsandbeasts.entity.broom.BroomEntity;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;

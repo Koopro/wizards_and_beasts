@@ -2,9 +2,9 @@ package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.block.ExaminationDeskBlock;
-import at.koopro.wizardsandbeasts.floo.block.FlooFireplaceBlock;
+import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlock;
 import at.koopro.wizardsandbeasts.block.MandrakeCropBlock;
-import at.koopro.wizardsandbeasts.trunk.block.PocketConfiguratorBlock;
+import at.koopro.wizardsandbeasts.block.trunk.PocketConfiguratorBlock;
 import at.koopro.wizardsandbeasts.block.WardingStoneBlock;
 import at.koopro.wizardsandbeasts.block.location.DiagonAlleyBlocks;
 import at.koopro.wizardsandbeasts.block.location.GringottsBlocks;

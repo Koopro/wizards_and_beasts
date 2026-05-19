@@ -1,9 +1,9 @@
 package at.koopro.wizardsandbeasts.form;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.form.event.FormEvents;
-import at.koopro.wizardsandbeasts.form.network.TransitionEndS2CPayload;
-import at.koopro.wizardsandbeasts.form.network.TransitionStartS2CPayload;
+import at.koopro.wizardsandbeasts.event.form.FormEvents;
+import at.koopro.wizardsandbeasts.network.form.TransitionEndS2CPayload;
+import at.koopro.wizardsandbeasts.network.form.TransitionStartS2CPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;

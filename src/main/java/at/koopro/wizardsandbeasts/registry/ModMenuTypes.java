@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.bestiary.creature.niffler.NifflerPouchMenu;
+import at.koopro.wizardsandbeasts.entity.niffler.NifflerPouchMenu;
 import at.koopro.wizardsandbeasts.trunk.gui.PocketConfiguratorMenu;
 import at.koopro.wizardsandbeasts.wand.gui.OllivanderTrialMenu;
 import at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu;

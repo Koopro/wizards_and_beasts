@@ -3,7 +3,7 @@ package at.koopro.wizardsandbeasts.legilimency;
 import at.koopro.wizardsandbeasts.ability.PlayerAbilityHelper;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
-import at.koopro.wizardsandbeasts.legilimency.network.LegilimencyVisionS2CPayload;
+import at.koopro.wizardsandbeasts.network.legilimency.LegilimencyVisionS2CPayload;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;

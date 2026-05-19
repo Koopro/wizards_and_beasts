@@ -1,9 +1,9 @@
 package at.koopro.wizardsandbeasts.client.gui;
 
 import at.koopro.wizardsandbeasts.form.FormRegistry;
-import at.koopro.wizardsandbeasts.form.client.state.ClientFormDataState;
-import at.koopro.wizardsandbeasts.form.network.FormChangeRequestC2SPayload;
-import at.koopro.wizardsandbeasts.form.network.SizeOverrideC2SPayload;
+import at.koopro.wizardsandbeasts.client.form.state.ClientFormDataState;
+import at.koopro.wizardsandbeasts.network.form.FormChangeRequestC2SPayload;
+import at.koopro.wizardsandbeasts.network.form.SizeOverrideC2SPayload;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;

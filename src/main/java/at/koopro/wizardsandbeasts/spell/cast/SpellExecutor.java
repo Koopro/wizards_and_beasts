@@ -5,7 +5,7 @@ import at.koopro.wizardsandbeasts.spell.lib.*;
 import at.koopro.wizardsandbeasts.spell.proficiency.*;
 
 import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
-import at.koopro.wizardsandbeasts.wand.item.WandItem;
+import at.koopro.wizardsandbeasts.item.wand.WandItem;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
@@ -18,7 +18,7 @@ import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialCombatRules;
 import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialRules;
 import at.koopro.wizardsandbeasts.wand.corruption.WandCorruptionSystem;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
-import at.koopro.wizardsandbeasts.spell.network.SpellDataSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.spell.SpellDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;

@@ -1,12 +1,12 @@
 package at.koopro.wizardsandbeasts.client;
 
-import at.koopro.wizardsandbeasts.broom.client.BroomRenderer;
+import at.koopro.wizardsandbeasts.client.broom.BroomRenderer;
 import at.koopro.wizardsandbeasts.client.entity.DementorRenderer;
-import at.koopro.wizardsandbeasts.bestiary.creature.niffler.client.NifflerPocketLayer;
+import at.koopro.wizardsandbeasts.client.bestiary.niffler.NifflerPocketLayer;
 import at.koopro.wizardsandbeasts.client.entity.ProtegoShieldRenderer;
-import at.koopro.wizardsandbeasts.form.client.FormMannequinRenderer;
-import at.koopro.wizardsandbeasts.spell.client.PatronusRenderer;
-import at.koopro.wizardsandbeasts.spell.client.SpellProjectileRenderer;
+import at.koopro.wizardsandbeasts.client.form.FormMannequinRenderer;
+import at.koopro.wizardsandbeasts.client.spell.PatronusRenderer;
+import at.koopro.wizardsandbeasts.client.spell.SpellProjectileRenderer;
 import at.koopro.wizardsandbeasts.registry.ModEntities;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;

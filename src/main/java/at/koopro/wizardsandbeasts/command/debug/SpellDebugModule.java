@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.command.debug;
 
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
-import at.koopro.wizardsandbeasts.spell.network.SpellDataSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.spell.SpellDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.spell.core.Spells;
 import at.koopro.wizardsandbeasts.spell.cast.SpellRejectCodes;

@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.item.projectile;
 
-import at.koopro.wizardsandbeasts.spell.entity.WizardingThrownEntity;
+import at.koopro.wizardsandbeasts.entity.spell.WizardingThrownEntity;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;

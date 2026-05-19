@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.floo.command;
 
-import at.koopro.wizardsandbeasts.floo.block.FlooFireplaceBlock;
-import at.koopro.wizardsandbeasts.floo.block.FlooFireplaceBlockEntity;
+import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlock;
+import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlockEntity;
 import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
 import at.koopro.wizardsandbeasts.floo.FlooNetworkManager;
 import at.koopro.wizardsandbeasts.floo.FlooRegistryEntry;

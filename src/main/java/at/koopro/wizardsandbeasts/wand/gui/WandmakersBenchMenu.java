@@ -1,11 +1,10 @@
 package at.koopro.wizardsandbeasts.wand.gui;
 
-import at.koopro.wizardsandbeasts.wand.item.WandBlankItem;
-import at.koopro.wizardsandbeasts.wand.item.WandCoreMaterialItem;
+import at.koopro.wizardsandbeasts.item.wand.WandBlankItem;
+import at.koopro.wizardsandbeasts.item.wand.WandCoreMaterialItem;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
-import at.koopro.wizardsandbeasts.registry.ModItems;
 import at.koopro.wizardsandbeasts.registry.ModMenuTypes;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.bench.WandmakersBenchBlockEntity;
@@ -31,6 +30,7 @@ import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import at.koopro.wizardsandbeasts.registry.WandItemRegistry;
 
 public class WandmakersBenchMenu extends AbstractContainerMenu {
     private final WandmakersBenchBlockEntity bench;
@@ -181,7 +181,7 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
         WandFlexibility flex = WandFlexibility.values()[bench.getSelectedFlexibilityOrdinal()];
         float len = recipe.resultLengthMin()
                 + level.random.nextFloat() * (recipe.resultLengthMax() - recipe.resultLengthMin());
-        ItemStack wand = new ItemStack(ModItems.WAND.get());
+        ItemStack wand = new ItemStack(WandItemRegistry.WAND.get());
         wand.set(WandComponents.WAND_WOOD.get(), wood);
         wand.set(WandComponents.WAND_CORE.get(), coreId);
         wand.set(WandComponents.WAND_FLEXIBILITY.get(), flex);

@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.command.debug;
 
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
-import at.koopro.wizardsandbeasts.form.network.DebugOverlayToggleS2CPayload;
+import at.koopro.wizardsandbeasts.network.form.DebugOverlayToggleS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.ChatFormatting;

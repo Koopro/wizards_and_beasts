@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.spell.teacher;
 
-import at.koopro.wizardsandbeasts.spell.teacher.network.SpellTeacherLearnC2SPayload;
-import at.koopro.wizardsandbeasts.spell.teacher.network.SpellTeacherOpenS2CPayload;
+import at.koopro.wizardsandbeasts.network.spell.teacher.SpellTeacherLearnC2SPayload;
+import at.koopro.wizardsandbeasts.network.spell.teacher.SpellTeacherOpenS2CPayload;
 
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 

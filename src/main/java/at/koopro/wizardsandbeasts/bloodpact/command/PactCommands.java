@@ -2,8 +2,8 @@ package at.koopro.wizardsandbeasts.bloodpact.command;
 
 import at.koopro.wizardsandbeasts.bloodpact.BloodPactRecord;
 import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
-import at.koopro.wizardsandbeasts.bloodpact.item.BloodPactVialItem;
-import at.koopro.wizardsandbeasts.bloodpact.network.SBreakPactPayload;
+import at.koopro.wizardsandbeasts.item.bloodpact.BloodPactVialItem;
+import at.koopro.wizardsandbeasts.network.bloodpact.SBreakPactPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;

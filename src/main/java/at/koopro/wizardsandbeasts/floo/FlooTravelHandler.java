@@ -1,12 +1,12 @@
 package at.koopro.wizardsandbeasts.floo;
 
-import at.koopro.wizardsandbeasts.floo.block.FlooFireplaceBlock;
-import at.koopro.wizardsandbeasts.floo.block.FlooFireplaceBlockEntity;
+import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlock;
+import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlockEntity;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
-import at.koopro.wizardsandbeasts.floo.network.FlooArrivalEffectsS2CPayload;
-import at.koopro.wizardsandbeasts.floo.network.FlooBlockSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.floo.FlooArrivalEffectsS2CPayload;
+import at.koopro.wizardsandbeasts.network.floo.FlooBlockSyncS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
 import at.koopro.wizardsandbeasts.registry.ModSounds;

@@ -16,6 +16,13 @@ import at.koopro.wizardsandbeasts.block.location.HogsmeadeBlocks;
 import at.koopro.wizardsandbeasts.block.location.MinistryBlocks;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
+import at.koopro.wizardsandbeasts.registry.BroomItemRegistry;
+import at.koopro.wizardsandbeasts.registry.ConsumableItemRegistry;
+import at.koopro.wizardsandbeasts.registry.CurrencyItemRegistry;
+import at.koopro.wizardsandbeasts.registry.DarkArtefactItemRegistry;
+import at.koopro.wizardsandbeasts.registry.MiscItemRegistry;
+import at.koopro.wizardsandbeasts.registry.TrinketItemRegistry;
+import at.koopro.wizardsandbeasts.registry.WandItemRegistry;
 
 public class ModCreativeTabs {
     public static final DeferredRegister<CreativeModeTab> TABS =
@@ -25,123 +32,123 @@ public class ModCreativeTabs {
             TABS.register("main", () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup." + WizardsAndBeastsMod.MODID + ".main"))
                     .withTabsBefore(CreativeModeTabs.SPAWN_EGGS)
-                    .icon(() -> new ItemStack(ModItems.WAND.get()))
+                    .icon(() -> new ItemStack(WandItemRegistry.WAND.get()))
                     .withSearchBar()
                     .displayItems((parameters, output) -> {
                         // Debug tools
-                        output.accept(ModItems.DEBUG_WAND.get());
-                        output.accept(ModItems.MORPH_WAND.get());
+                        output.accept(WandItemRegistry.DEBUG_WAND.get());
+                        output.accept(WandItemRegistry.MORPH_WAND.get());
 
                         // Magical Tools
-                        output.accept(ModItems.WAND.get());
+                        output.accept(WandItemRegistry.WAND.get());
                         if (ModuleManager.isEnabled(Module.BROOM_FLIGHT)) {
-                            output.accept(ModItems.BROOM_ITEM.get());
-                            output.accept(ModItems.CLEANSWEEP_SEVEN.get());
-                            output.accept(ModItems.COMET_260.get());
-                            output.accept(ModItems.NIMBUS_2000.get());
-                            output.accept(ModItems.NIMBUS_2001.get());
-                            output.accept(ModItems.FIREBOLT.get());
-                            output.accept(ModItems.FIREBOLT_SUPREME.get());
-                            output.accept(ModItems.OAKSHAFT_79.get());
-                            output.accept(ModItems.BROOM_POLISH.get());
-                            output.accept(ModItems.ENCHANTED_TWIG_BUNDLE.get());
+                            output.accept(BroomItemRegistry.BROOM_ITEM.get());
+                            output.accept(BroomItemRegistry.CLEANSWEEP_SEVEN.get());
+                            output.accept(BroomItemRegistry.COMET_260.get());
+                            output.accept(BroomItemRegistry.NIMBUS_2000.get());
+                            output.accept(BroomItemRegistry.NIMBUS_2001.get());
+                            output.accept(BroomItemRegistry.FIREBOLT.get());
+                            output.accept(BroomItemRegistry.FIREBOLT_SUPREME.get());
+                            output.accept(BroomItemRegistry.OAKSHAFT_79.get());
+                            output.accept(BroomItemRegistry.BROOM_POLISH.get());
+                            output.accept(BroomItemRegistry.ENCHANTED_TWIG_BUNDLE.get());
                         }
-                        output.accept(ModItems.MARAUDERS_MAP.get());
-                        output.accept(ModItems.BESTIARY.get());
+                        output.accept(MiscItemRegistry.MARAUDERS_MAP.get());
+                        output.accept(MiscItemRegistry.BESTIARY.get());
 
                         // Wand Cores
-                        output.accept(ModItems.PHOENIX_FEATHER.get());
-                        output.accept(ModItems.DRAGON_HEARTSTRING.get());
-                        output.accept(ModItems.UNICORN_HAIR.get());
-                        output.accept(ModItems.THESTRAL_TAIL_HAIR.get());
+                        output.accept(WandItemRegistry.PHOENIX_FEATHER.get());
+                        output.accept(WandItemRegistry.DRAGON_HEARTSTRING.get());
+                        output.accept(WandItemRegistry.UNICORN_HAIR.get());
+                        output.accept(WandItemRegistry.THESTRAL_TAIL_HAIR.get());
 
                         // Crafting Materials
-                        output.accept(ModItems.PARCHMENT.get());
-                        output.accept(ModItems.INK_BOTTLE.get());
+                        output.accept(MiscItemRegistry.PARCHMENT.get());
+                        output.accept(MiscItemRegistry.INK_BOTTLE.get());
 
                         // Currency
-                        output.accept(ModItems.GALLEON.get());
-                        output.accept(ModItems.SICKLE.get());
-                        output.accept(ModItems.KNUT.get());
-                        output.accept(ModItems.DRAGOT.get());
-                        output.accept(ModItems.LEPRECHAUN_GOLD.get());
+                        output.accept(CurrencyItemRegistry.GALLEON.get());
+                        output.accept(CurrencyItemRegistry.SICKLE.get());
+                        output.accept(CurrencyItemRegistry.KNUT.get());
+                        output.accept(CurrencyItemRegistry.DRAGOT.get());
+                        output.accept(CurrencyItemRegistry.LEPRECHAUN_GOLD.get());
 
                         // Spawn Eggs
-                        output.accept(ModItems.GOBLIN_TELLER_SPAWN_EGG.get());
-                        output.accept(ModItems.NIFFLER_SPAWN_EGG.get());
+                        output.accept(MiscItemRegistry.GOBLIN_TELLER_SPAWN_EGG.get());
+                        output.accept(MiscItemRegistry.NIFFLER_SPAWN_EGG.get());
 
                         // Wizarding World — food & drink
-                        output.accept(ModItems.BUTTERBEER.get());
-                        output.accept(ModItems.PUMPKIN_JUICE.get());
-                        output.accept(ModItems.CHOCOLATE_FROG.get());
-                        output.accept(ModItems.FAMOUS_WIZARD_CARD.get());
-                        output.accept(ModItems.BERTIE_BOTTS_EVERY_FLAVOUR_BEANS.get());
-                        output.accept(ModItems.DROOBLES_BEST_BLOWING_GUM.get());
-                        output.accept(ModItems.FIREWHISKY.get());
-                        output.accept(ModItems.GILLYWEED.get());
-                        output.accept(ModItems.DIRIGIBLE_PLUM.get());
-                        output.accept(ModItems.TREACLE_TART.get());
-                        output.accept(ModItems.PUMPKIN_PASTY.get());
-                        output.accept(ModItems.FIZZING_WHIZZBEE.get());
-                        output.accept(ModItems.PEPPERMINT_TOAD.get());
-                        output.accept(ModItems.DITTANY.get());
+                        output.accept(ConsumableItemRegistry.BUTTERBEER.get());
+                        output.accept(ConsumableItemRegistry.PUMPKIN_JUICE.get());
+                        output.accept(ConsumableItemRegistry.CHOCOLATE_FROG.get());
+                        output.accept(ConsumableItemRegistry.FAMOUS_WIZARD_CARD.get());
+                        output.accept(ConsumableItemRegistry.BERTIE_BOTTS_EVERY_FLAVOUR_BEANS.get());
+                        output.accept(ConsumableItemRegistry.DROOBLES_BEST_BLOWING_GUM.get());
+                        output.accept(ConsumableItemRegistry.FIREWHISKY.get());
+                        output.accept(ConsumableItemRegistry.GILLYWEED.get());
+                        output.accept(ConsumableItemRegistry.DIRIGIBLE_PLUM.get());
+                        output.accept(ConsumableItemRegistry.TREACLE_TART.get());
+                        output.accept(ConsumableItemRegistry.PUMPKIN_PASTY.get());
+                        output.accept(ConsumableItemRegistry.FIZZING_WHIZZBEE.get());
+                        output.accept(ConsumableItemRegistry.PEPPERMINT_TOAD.get());
+                        output.accept(ConsumableItemRegistry.DITTANY.get());
                         // Magizoology & materials
-                        output.accept(ModItems.OCCAMY_EGGSHELL.get());
-                        output.accept(ModItems.BEZOAR.get());
-                        output.accept(ModItems.DEMIGUISE_HAIR.get());
-                        output.accept(ModItems.MOONCALF_DUNG.get());
-                        output.accept(ModItems.ERUMPENT_HORN.get());
-                        output.accept(ModItems.MANDRAKE.get());
+                        output.accept(ConsumableItemRegistry.OCCAMY_EGGSHELL.get());
+                        output.accept(ConsumableItemRegistry.BEZOAR.get());
+                        output.accept(ConsumableItemRegistry.DEMIGUISE_HAIR.get());
+                        output.accept(ConsumableItemRegistry.MOONCALF_DUNG.get());
+                        output.accept(ConsumableItemRegistry.ERUMPENT_HORN.get());
+                        output.accept(ConsumableItemRegistry.MANDRAKE.get());
                         output.accept(ModBlocks.MANDRAKE_SEEDS.get());
                         // Gear & misc
-                        output.accept(ModItems.REMEMBRALL.get());
-                        output.accept(ModItems.OMNI_OCULARS.get());
-                        output.accept(ModItems.DELUMINATOR.get());
-                        output.accept(ModItems.TIME_TURNER.get());
-                        output.accept(ModItems.INVISIBILITY_CLOAK.get());
-                        output.accept(ModItems.DEATHLY_HALLOW_CLOAK.get());
-                        output.accept(ModItems.SNEAKOSCOPE.get());
-                        output.accept(ModItems.PORTKEY.get());
+                        output.accept(TrinketItemRegistry.REMEMBRALL.get());
+                        output.accept(TrinketItemRegistry.OMNI_OCULARS.get());
+                        output.accept(MiscItemRegistry.DELUMINATOR.get());
+                        output.accept(TrinketItemRegistry.TIME_TURNER.get());
+                        output.accept(DarkArtefactItemRegistry.INVISIBILITY_CLOAK.get());
+                        output.accept(DarkArtefactItemRegistry.DEATHLY_HALLOW_CLOAK.get());
+                        output.accept(TrinketItemRegistry.SNEAKOSCOPE.get());
+                        output.accept(TrinketItemRegistry.PORTKEY.get());
                         if (ModuleManager.isEnabled(Module.WANDS_AND_SPELLS)) {
-                            output.accept(ModItems.ENCHANTED_TRUNK.get());
-                            output.accept(ModItems.EXPANDED_TRUNK.get());
-                            output.accept(ModItems.MASTERS_TRUNK.get());
-                            output.accept(ModItems.MINISTRY_LICENSE_SCROLL.get());
+                            output.accept(DarkArtefactItemRegistry.ENCHANTED_TRUNK.get());
+                            output.accept(DarkArtefactItemRegistry.EXPANDED_TRUNK.get());
+                            output.accept(DarkArtefactItemRegistry.MASTERS_TRUNK.get());
+                            output.accept(TrinketItemRegistry.MINISTRY_LICENSE_SCROLL.get());
                         }
-                        output.accept(ModItems.PERUVIAN_DARKNESS_POWDER.get());
-                        output.accept(ModItems.DECOY_DETONATOR.get());
-                        output.accept(ModItems.EXTENDABLE_EARS.get());
-                        output.accept(ModItems.FLOO_POWDER.get());
-                        output.accept(ModItems.BREW.get());
+                        output.accept(TrinketItemRegistry.PERUVIAN_DARKNESS_POWDER.get());
+                        output.accept(TrinketItemRegistry.DECOY_DETONATOR.get());
+                        output.accept(TrinketItemRegistry.EXTENDABLE_EARS.get());
+                        output.accept(MiscItemRegistry.FLOO_POWDER.get());
+                        output.accept(ConsumableItemRegistry.BREW.get());
 
                         // ── Deathly Hallows ──────────────────────────────────────────
                         if (ModuleManager.isEnabled(Module.WANDS)) {
-                            output.accept(ModItems.RESURRECTION_STONE.get());
+                            output.accept(DarkArtefactItemRegistry.RESURRECTION_STONE.get());
                         }
 
                         // ── Horcrux Vessels ──────────────────────────────────────────
                         if (ModuleManager.isEnabled(Module.DARK_ARTS)) {
-                            output.accept(ModItems.RIDDLES_DIARY.get());
-                            output.accept(ModItems.MARVOLO_GAUNTS_RING.get());
-                            output.accept(ModItems.SLYTHERINS_LOCKET.get());
-                            output.accept(ModItems.HUFFLEPUFFS_CUP.get());
-                            output.accept(ModItems.RAVENCLAWS_DIADEM.get());
+                            output.accept(DarkArtefactItemRegistry.RIDDLES_DIARY.get());
+                            output.accept(DarkArtefactItemRegistry.MARVOLO_GAUNTS_RING.get());
+                            output.accept(DarkArtefactItemRegistry.SLYTHERINS_LOCKET.get());
+                            output.accept(DarkArtefactItemRegistry.HUFFLEPUFFS_CUP.get());
+                            output.accept(DarkArtefactItemRegistry.RAVENCLAWS_DIADEM.get());
                         }
 
                         // ── Unique Artefacts ─────────────────────────────────────────
                         if (ModuleManager.isEnabled(Module.WANDS)) {
-                            output.accept(ModItems.PHILOSOPHERS_STONE.get());
-                            output.accept(ModItems.PENSIEVE.get());
-                            output.accept(ModItems.TWO_WAY_MIRROR.get());
-                            output.accept(ModItems.MOODYS_TRUNK.get());
-                            output.accept(ModItems.HERMIONES_BEADED_BAG.get());
-                            output.accept(ModItems.FOE_GLASS.get());
-                            output.accept(ModItems.NEWTS_CASE_ITEM.get());
+                            output.accept(DarkArtefactItemRegistry.PHILOSOPHERS_STONE.get());
+                            output.accept(TrinketItemRegistry.PENSIEVE.get());
+                            output.accept(TrinketItemRegistry.TWO_WAY_MIRROR.get());
+                            output.accept(DarkArtefactItemRegistry.MOODYS_TRUNK.get());
+                            output.accept(TrinketItemRegistry.HERMIONES_BEADED_BAG.get());
+                            output.accept(TrinketItemRegistry.FOE_GLASS.get());
+                            output.accept(TrinketItemRegistry.NEWTS_CASE_ITEM.get());
                         }
                         if (ModuleManager.isEnabled(Module.DARK_ARTS)) {
-                            output.accept(ModItems.HAND_OF_GLORY.get());
-                            output.accept(ModItems.DARK_MARK_BRAND.get());
-                            output.accept(ModItems.BLOOD_PACT_VIAL.get());
+                            output.accept(TrinketItemRegistry.HAND_OF_GLORY.get());
+                            output.accept(TrinketItemRegistry.DARK_MARK_BRAND.get());
+                            output.accept(TrinketItemRegistry.BLOOD_PACT_VIAL.get());
                         }
 
                         // Wizarding blocks

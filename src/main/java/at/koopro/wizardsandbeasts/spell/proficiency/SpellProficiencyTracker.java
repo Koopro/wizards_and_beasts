@@ -3,9 +3,9 @@ package at.koopro.wizardsandbeasts.spell.proficiency;
 import at.koopro.wizardsandbeasts.spell.core.*;
 
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
-import at.koopro.wizardsandbeasts.skill.event.SkillEvents;
-import at.koopro.wizardsandbeasts.spell.network.SpellDataDeltaS2CPayload;
-import at.koopro.wizardsandbeasts.spell.network.SpellProficiencySyncS2CPayload;
+import at.koopro.wizardsandbeasts.event.skill.SkillEvents;
+import at.koopro.wizardsandbeasts.network.spell.SpellDataDeltaS2CPayload;
+import at.koopro.wizardsandbeasts.network.spell.SpellProficiencySyncS2CPayload;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;

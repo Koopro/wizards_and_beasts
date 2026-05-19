@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.registry;
 
-import at.koopro.wizardsandbeasts.deluminator.block.DeluminatorLightBlock;
+import at.koopro.wizardsandbeasts.block.deluminator.DeluminatorLightBlock;
 import at.koopro.wizardsandbeasts.block.UnlitTorchBlock;
 import at.koopro.wizardsandbeasts.block.UnlitWallTorchBlock;
 import net.minecraft.core.particles.ParticleTypes;

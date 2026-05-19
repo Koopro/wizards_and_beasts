@@ -4,9 +4,8 @@ import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
 import at.koopro.wizardsandbeasts.broom.BroomDefinition;
 import at.koopro.wizardsandbeasts.broom.BroomDefinitionRegistry;
-import at.koopro.wizardsandbeasts.broom.entity.BroomEntity;
+import at.koopro.wizardsandbeasts.entity.broom.BroomEntity;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
-import at.koopro.wizardsandbeasts.registry.ModItems;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -24,6 +23,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 import java.util.List;
+import at.koopro.wizardsandbeasts.registry.BroomItemRegistry;
 
 @EventBusSubscriber(modid = WizardsAndBeastsMod.MODID)
 public final class BroomCommands {
@@ -57,7 +57,7 @@ public final class BroomCommands {
     private static int give(CommandContext<CommandSourceStack> context) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
         ServerPlayer player = EntityArgument.getPlayer(context, "player");
         Identifier id = Identifier.parse(StringArgumentType.getString(context, "variant_id"));
-        ItemStack stack = new ItemStack(ModItems.BROOM_ITEM.get());
+        ItemStack stack = new ItemStack(BroomItemRegistry.BROOM_ITEM.get());
         stack.set(ModDataComponents.BROOM_DEFINITION.get(), id);
         player.getInventory().add(stack);
         context.getSource().sendSuccess(() -> Component.literal("Gave broom variant: " + id), true);

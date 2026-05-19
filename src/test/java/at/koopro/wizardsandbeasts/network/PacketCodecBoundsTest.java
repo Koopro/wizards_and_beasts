@@ -1,16 +1,16 @@
 package at.koopro.wizardsandbeasts.network;
 
-import at.koopro.wizardsandbeasts.form.network.FormChangeRequestC2SPayload;
-import at.koopro.wizardsandbeasts.form.network.TransitionEndS2CPayload;
-import at.koopro.wizardsandbeasts.form.network.TransitionStartS2CPayload;
-import at.koopro.wizardsandbeasts.heritage.network.HeritageDataSyncS2CPayload;
-import at.koopro.wizardsandbeasts.heritage.network.HeritageSelectC2SPayload;
-import at.koopro.wizardsandbeasts.map.network.MapSyncS2CPayload;
-import at.koopro.wizardsandbeasts.skill.network.SkillDataSyncS2CPayload;
-import at.koopro.wizardsandbeasts.skill.network.SkillUnlockC2SPayload;
-import at.koopro.wizardsandbeasts.spell.network.ObscurialAbilityUseC2SPayload;
-import at.koopro.wizardsandbeasts.spell.network.SpellAssignC2SPayload;
-import at.koopro.wizardsandbeasts.spell.network.SpellDataSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.form.FormChangeRequestC2SPayload;
+import at.koopro.wizardsandbeasts.network.form.TransitionEndS2CPayload;
+import at.koopro.wizardsandbeasts.network.form.TransitionStartS2CPayload;
+import at.koopro.wizardsandbeasts.network.heritage.HeritageDataSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.heritage.HeritageSelectC2SPayload;
+import at.koopro.wizardsandbeasts.network.map.MapSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.skill.SkillDataSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.skill.SkillUnlockC2SPayload;
+import at.koopro.wizardsandbeasts.network.spell.ObscurialAbilityUseC2SPayload;
+import at.koopro.wizardsandbeasts.network.spell.SpellAssignC2SPayload;
+import at.koopro.wizardsandbeasts.network.spell.SpellDataSyncS2CPayload;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.jupiter.api.Test;

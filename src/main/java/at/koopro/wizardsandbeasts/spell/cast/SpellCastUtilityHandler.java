@@ -5,7 +5,7 @@ import at.koopro.wizardsandbeasts.spell.lib.*;
 
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.registry.ModDimensions;
-import at.koopro.wizardsandbeasts.trunk.item.EnchantedTrunkItem;
+import at.koopro.wizardsandbeasts.item.trunk.EnchantedTrunkItem;
 import at.koopro.wizardsandbeasts.trunk.TrunkAccessMode;
 import at.koopro.wizardsandbeasts.trunk.TrunkArchetype;
 import at.koopro.wizardsandbeasts.trunk.ExtensionCharmService;

@@ -1,8 +1,8 @@
 package at.koopro.wizardsandbeasts.spell.expelliarmus;
 
 import at.koopro.wizardsandbeasts.effect.ModEffects;
-import at.koopro.wizardsandbeasts.wand.item.ExpelliarmusDropTag;
-import at.koopro.wizardsandbeasts.wand.event.DisarmLogState;
+import at.koopro.wizardsandbeasts.item.wand.ExpelliarmusDropTag;
+import at.koopro.wizardsandbeasts.event.wand.DisarmLogState;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.util.WandHelper;

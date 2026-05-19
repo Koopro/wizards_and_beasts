@@ -1,8 +1,8 @@
 package at.koopro.wizardsandbeasts.mixin.client;
 
-import at.koopro.wizardsandbeasts.form.client.FormModelRenderer;
-import at.koopro.wizardsandbeasts.form.client.FormRenderStateModifier;
-import at.koopro.wizardsandbeasts.form.client.SizeLerpTracker;
+import at.koopro.wizardsandbeasts.client.form.FormModelRenderer;
+import at.koopro.wizardsandbeasts.client.form.FormRenderStateModifier;
+import at.koopro.wizardsandbeasts.client.form.SizeLerpTracker;
 import at.koopro.wizardsandbeasts.form.ModelType;
 import at.koopro.wizardsandbeasts.form.SizeProfile;
 import com.mojang.blaze3d.vertex.PoseStack;

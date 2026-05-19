@@ -12,13 +12,14 @@ import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 
 import at.koopro.wizardsandbeasts.azkaban.structure.AzkabanStructures;
+import at.koopro.wizardsandbeasts.azkaban.worldgen.AzkabanWorldgenRegistries;
 import at.koopro.wizardsandbeasts.brew.def.BrewReloadListener;
 import at.koopro.wizardsandbeasts.brew.def.BrewingRecipeReloadListener;
 import at.koopro.wizardsandbeasts.broom.BroomDefinitionLoader;
 import at.koopro.wizardsandbeasts.wand.customization.WandModuleLoader;
 import at.koopro.wizardsandbeasts.wand.customization.WandModuleRegistry;
-import at.koopro.wizardsandbeasts.brew.event.RegisterBrewsEvent;
-import at.koopro.wizardsandbeasts.spell.event.RegisterSpellsEvent;
+import at.koopro.wizardsandbeasts.event.brew.RegisterBrewsEvent;
+import at.koopro.wizardsandbeasts.event.spell.RegisterSpellsEvent;
 import at.koopro.wizardsandbeasts.bestiary.BestiaryEntryLoader;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.network.ModNetwork;
@@ -37,6 +38,7 @@ import at.koopro.wizardsandbeasts.registry.ModFeatures;
 import at.koopro.wizardsandbeasts.registry.ModBlockEntities;
 import at.koopro.wizardsandbeasts.registry.ModMenuTypes;
 import at.koopro.wizardsandbeasts.registry.ModItems;
+import at.koopro.wizardsandbeasts.registry.WandItemRegistry;
 import at.koopro.wizardsandbeasts.registry.ModParticles;
 import at.koopro.wizardsandbeasts.registry.ModVillager;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
@@ -59,6 +61,7 @@ public class WizardsAndBeastsMod {
     public WizardsAndBeastsMod(IEventBus modEventBus, ModContainer modContainer) {
         ModBlocks.BLOCKS.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
+        WandItemRegistry.init();
         ModEntities.ENTITY_TYPES.register(modEventBus);
         ModCreativeTabs.TABS.register(modEventBus);
         ModFeatures.FEATURES.register(modEventBus);
@@ -77,12 +80,13 @@ public class WizardsAndBeastsMod {
         ModEffects.MOB_EFFECTS.register(modEventBus);
         AzkabanStructures.STRUCTURE_TYPES.register(modEventBus);
         AzkabanStructures.STRUCTURE_PIECE_TYPES.register(modEventBus);
+        AzkabanWorldgenRegistries.STRUCTURE_PLACEMENT_TYPES.register(modEventBus);
         WandmakingRecipeType.RECIPE_TYPES.register(modEventBus);
         WandmakingRecipeSerializer.RECIPE_SERIALIZERS.register(modEventBus);
 
         modEventBus.addListener(ModNetwork::register);
         modEventBus.addListener(EntityAttributeBindings::registerAll);
-        modEventBus.addListener(at.koopro.wizardsandbeasts.bestiary.creature.niffler.event.NifflerSpawnHandler::registerSpawnPlacements);
+        modEventBus.addListener(at.koopro.wizardsandbeasts.event.bestiary.niffler.NifflerSpawnHandler::registerSpawnPlacements);
         modEventBus.addListener(WandDatapackRegistries::registerDatapackRegistries);
 
         // Defer Spells.init() until FMLCommonSetupEvent so addon mods get a

@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.spell.patronus;
 
-import at.koopro.wizardsandbeasts.spell.entity.PatronusEntity;
+import at.koopro.wizardsandbeasts.entity.spell.PatronusEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;

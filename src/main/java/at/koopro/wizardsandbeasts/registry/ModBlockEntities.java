@@ -2,7 +2,7 @@ package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.block.ExpansionFocusBlockEntity;
-import at.koopro.wizardsandbeasts.floo.block.FlooFireplaceBlockEntity;
+import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlockEntity;
 import at.koopro.wizardsandbeasts.wand.bench.WandmakersBenchBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;

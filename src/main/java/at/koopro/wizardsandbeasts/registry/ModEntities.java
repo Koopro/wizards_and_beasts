@@ -1,16 +1,16 @@
 package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.azkaban.entity.DementorEntity;
-import at.koopro.wizardsandbeasts.broom.entity.BroomEntity;
-import at.koopro.wizardsandbeasts.form.entity.FormMannequinEntity;
-import at.koopro.wizardsandbeasts.bestiary.creature.goblin.GoblinTellerEntity;
-import at.koopro.wizardsandbeasts.bestiary.creature.niffler.BabyNifflerEntity;
-import at.koopro.wizardsandbeasts.bestiary.creature.niffler.NifflerEntity;
-import at.koopro.wizardsandbeasts.spell.entity.PatronusEntity;
-import at.koopro.wizardsandbeasts.spell.entity.ProtegoShieldEntity;
-import at.koopro.wizardsandbeasts.spell.entity.SpellProjectileEntity;
-import at.koopro.wizardsandbeasts.spell.entity.WizardingThrownEntity;
+import at.koopro.wizardsandbeasts.entity.azkaban.DementorEntity;
+import at.koopro.wizardsandbeasts.entity.broom.BroomEntity;
+import at.koopro.wizardsandbeasts.entity.form.FormMannequinEntity;
+import at.koopro.wizardsandbeasts.entity.goblin.GoblinTellerEntity;
+import at.koopro.wizardsandbeasts.entity.niffler.BabyNifflerEntity;
+import at.koopro.wizardsandbeasts.entity.niffler.NifflerEntity;
+import at.koopro.wizardsandbeasts.entity.spell.PatronusEntity;
+import at.koopro.wizardsandbeasts.entity.spell.ProtegoShieldEntity;
+import at.koopro.wizardsandbeasts.entity.spell.SpellProjectileEntity;
+import at.koopro.wizardsandbeasts.entity.spell.WizardingThrownEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;

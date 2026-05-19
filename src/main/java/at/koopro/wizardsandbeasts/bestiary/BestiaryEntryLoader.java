@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.bestiary;
 
-import at.koopro.wizardsandbeasts.bestiary.event.BestiaryEntriesLoadedEvent;
+import at.koopro.wizardsandbeasts.event.bestiary.BestiaryEntriesLoadedEvent;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;

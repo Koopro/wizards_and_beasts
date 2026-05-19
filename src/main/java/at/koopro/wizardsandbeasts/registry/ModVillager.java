@@ -12,6 +12,7 @@ import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import at.koopro.wizardsandbeasts.registry.WandItemRegistry;
 
 public final class ModVillager {
     public static final DeferredRegister<PoiType> POI_TYPES =
@@ -37,10 +38,10 @@ public final class ModVillager {
                     h -> h.is(OLLIVANDERS_BENCH_KEY),
                     h -> h.is(OLLIVANDERS_BENCH_KEY),
                     ImmutableSet.of(
-                            ModItems.PHOENIX_FEATHER.get(),
-                            ModItems.DRAGON_HEARTSTRING.get(),
-                            ModItems.UNICORN_HAIR.get(),
-                            ModItems.WAND_BLANK.get()),
+                            WandItemRegistry.PHOENIX_FEATHER.get(),
+                            WandItemRegistry.DRAGON_HEARTSTRING.get(),
+                            WandItemRegistry.UNICORN_HAIR.get(),
+                            WandItemRegistry.WAND_BLANK.get()),
                     ImmutableSet.of(),
                     SoundEvents.VILLAGER_WORK_LIBRARIAN));
 

@@ -3,7 +3,7 @@ package at.koopro.wizardsandbeasts.heritage.command;
 import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
 import at.koopro.wizardsandbeasts.form.FormSystemAPI;
 import at.koopro.wizardsandbeasts.form.PlayerForm;
-import at.koopro.wizardsandbeasts.form.network.FormSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.form.FormSyncS2CPayload;
 import at.koopro.wizardsandbeasts.form.SizeProfile;
 import at.koopro.wizardsandbeasts.form.SizeProfileRegistry;
 import at.koopro.wizardsandbeasts.form.SizeSystemAPI;

@@ -1,8 +1,8 @@
 package at.koopro.wizardsandbeasts.form;
 
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
-import at.koopro.wizardsandbeasts.form.event.FormEvents;
-import at.koopro.wizardsandbeasts.form.network.FormSyncS2CPayload;
+import at.koopro.wizardsandbeasts.event.form.FormEvents;
+import at.koopro.wizardsandbeasts.network.form.FormSyncS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.heritage.HeritageFormBridge;
 import at.koopro.wizardsandbeasts.heritage.Heritage;

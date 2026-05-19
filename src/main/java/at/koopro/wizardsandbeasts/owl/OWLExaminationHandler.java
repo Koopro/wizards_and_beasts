@@ -2,8 +2,8 @@ package at.koopro.wizardsandbeasts.owl;
 
 import at.koopro.wizardsandbeasts.owl.data.PlayerOWLData;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerProfessionData;
-import at.koopro.wizardsandbeasts.owl.network.OWLDataSyncPayload;
-import at.koopro.wizardsandbeasts.owl.network.ProfessionSyncPayload;
+import at.koopro.wizardsandbeasts.network.owl.OWLDataSyncPayload;
+import at.koopro.wizardsandbeasts.network.owl.ProfessionSyncPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;

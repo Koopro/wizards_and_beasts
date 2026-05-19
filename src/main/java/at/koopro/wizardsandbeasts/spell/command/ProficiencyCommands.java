@@ -2,8 +2,8 @@ package at.koopro.wizardsandbeasts.spell.command;
 
 import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
-import at.koopro.wizardsandbeasts.spell.network.SpellDataSyncS2CPayload;
-import at.koopro.wizardsandbeasts.spell.network.SpellProficiencySyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.spell.SpellDataSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.spell.SpellProficiencySyncS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.core.Spells;

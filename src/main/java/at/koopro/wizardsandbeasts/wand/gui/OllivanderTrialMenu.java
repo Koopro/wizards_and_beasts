@@ -1,9 +1,8 @@
 package at.koopro.wizardsandbeasts.wand.gui;
 
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
-import at.koopro.wizardsandbeasts.wand.network.SyncTrialResonancePayload;
+import at.koopro.wizardsandbeasts.network.wand.SyncTrialResonancePayload;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
-import at.koopro.wizardsandbeasts.registry.ModItems;
 import at.koopro.wizardsandbeasts.registry.ModMenuTypes;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.ollivander.OllivanderPoolEntry;
@@ -23,6 +22,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import at.koopro.wizardsandbeasts.registry.WandItemRegistry;
 
 public class OllivanderTrialMenu extends AbstractContainerMenu {
 
@@ -108,7 +108,7 @@ public class OllivanderTrialMenu extends AbstractContainerMenu {
 
     private static ItemStack buildProbeStack(Player player, OllivanderPoolEntry e) {
         WandFlexibility flex = parseFlex(e.flexibility());
-        ItemStack stack = new ItemStack(ModItems.WAND.get());
+        ItemStack stack = new ItemStack(WandItemRegistry.WAND.get());
         stack.set(WandComponents.WAND_WOOD.get(), e.woodKey());
         stack.set(WandComponents.WAND_CORE.get(), e.coreKey());
         stack.set(WandComponents.WAND_FLEXIBILITY.get(), flex);
@@ -162,7 +162,7 @@ public class OllivanderTrialMenu extends AbstractContainerMenu {
     public ItemStack createTrialStack(int index, boolean forGift) {
         OllivanderPoolEntry e = trials.get(index);
         WandFlexibility flex = parseFlex(e.flexibility());
-        ItemStack stack = new ItemStack(ModItems.WAND.get());
+        ItemStack stack = new ItemStack(WandItemRegistry.WAND.get());
         stack.set(WandComponents.WAND_WOOD.get(), e.woodKey());
         stack.set(WandComponents.WAND_CORE.get(), e.coreKey());
         stack.set(WandComponents.WAND_FLEXIBILITY.get(), flex);

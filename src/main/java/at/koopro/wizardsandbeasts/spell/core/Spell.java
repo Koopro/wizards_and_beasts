@@ -7,7 +7,7 @@ import at.koopro.wizardsandbeasts.registry.ModSounds;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.spell.proficiency.SpellScalingProfile;
-import at.koopro.wizardsandbeasts.spell.entity.SpellProjectileEntity;
+import at.koopro.wizardsandbeasts.entity.spell.SpellProjectileEntity;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
 import at.koopro.wizardsandbeasts.wand.cast.WandStats;

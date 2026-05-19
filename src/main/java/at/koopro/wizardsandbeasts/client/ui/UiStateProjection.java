@@ -1,8 +1,8 @@
 package at.koopro.wizardsandbeasts.client.ui;
 
-import at.koopro.wizardsandbeasts.spell.client.state.ClientSpellDataState;
-import at.koopro.wizardsandbeasts.spell.client.ui.SpellHudUiModel;
-import at.koopro.wizardsandbeasts.heritage.client.state.ClientHeritageDataState;
+import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellDataState;
+import at.koopro.wizardsandbeasts.client.spell.ui.SpellHudUiModel;
+import at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageDataState;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.heritage.Heritage;

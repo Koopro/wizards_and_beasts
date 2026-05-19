@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.spell.teacher;
 
-import at.koopro.wizardsandbeasts.spell.teacher.network.SpellTeacherOpenS2CPayload;
+import at.koopro.wizardsandbeasts.network.spell.teacher.SpellTeacherOpenS2CPayload;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;

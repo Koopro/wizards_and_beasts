@@ -1,8 +1,8 @@
 package at.koopro.wizardsandbeasts.client.entity;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.azkaban.entity.DementorEntity;
-import at.koopro.wizardsandbeasts.heritage.client.state.ClientHeritageDataState;
+import at.koopro.wizardsandbeasts.entity.azkaban.DementorEntity;
+import at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageDataState;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;

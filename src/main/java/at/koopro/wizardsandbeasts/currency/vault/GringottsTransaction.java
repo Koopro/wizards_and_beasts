@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.currency.vault;
 
-import at.koopro.wizardsandbeasts.registry.ModItems;
 import net.minecraft.world.item.ItemStack;
+import at.koopro.wizardsandbeasts.registry.CurrencyItemRegistry;
 
 public final class GringottsTransaction {
     private GringottsTransaction() {}
@@ -10,7 +10,7 @@ public final class GringottsTransaction {
         if (stack.isEmpty()) {
             return false;
         }
-        if (stack.is(ModItems.COUNTERFEIT_GALLEON.get())) {
+        if (stack.is(CurrencyItemRegistry.COUNTERFEIT_GALLEON.get())) {
             return false;
         }
         return CurrencyHelper.isCanonicalCoin(stack);

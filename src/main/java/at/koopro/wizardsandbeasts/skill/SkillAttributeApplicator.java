@@ -8,7 +8,7 @@ Audit answers:
 4) Skill tree nodes are Java-defined (SkillTrees + *Skills classes), while bestiary/spells are datapack-driven.
 */
 
-import at.koopro.wizardsandbeasts.skill.network.SkillBonusSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.skill.SkillBonusSyncS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.skill.SkillNodeEffect.AttributeBoost;
 import at.koopro.wizardsandbeasts.skill.SkillNodeEffect.BestiaryXpMultiplier;

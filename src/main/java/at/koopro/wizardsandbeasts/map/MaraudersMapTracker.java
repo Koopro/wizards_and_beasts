@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.map;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.map.network.MapSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.map.MapSyncS2CPayload;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;

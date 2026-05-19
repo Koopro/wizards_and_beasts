@@ -1,13 +1,13 @@
 package at.koopro.wizardsandbeasts.sync;
 
 import at.koopro.wizardsandbeasts.form.FormSystemAPI;
-import at.koopro.wizardsandbeasts.form.network.FormSyncS2CPayload;
-import at.koopro.wizardsandbeasts.heritage.network.HeritageDataSyncS2CPayload;
-import at.koopro.wizardsandbeasts.skill.network.SkillDataSyncS2CPayload;
-import at.koopro.wizardsandbeasts.spell.network.SpellDataSyncS2CPayload;
-import at.koopro.wizardsandbeasts.currency.network.VaultSyncS2CPayload;
-import at.koopro.wizardsandbeasts.ability.network.AbilityDataSyncPayload;
-import at.koopro.wizardsandbeasts.apparition.network.ApparitionWardsSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.form.FormSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.heritage.HeritageDataSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.skill.SkillDataSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.spell.SpellDataSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.currency.VaultSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.ability.AbilityDataSyncPayload;
+import at.koopro.wizardsandbeasts.network.apparition.ApparitionWardsSyncS2CPayload;
 import at.koopro.wizardsandbeasts.skill.SkillAttributeApplicator;
 import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
 import net.minecraft.server.level.ServerPlayer;

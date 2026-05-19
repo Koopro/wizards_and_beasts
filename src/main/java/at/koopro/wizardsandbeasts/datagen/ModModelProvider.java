@@ -19,8 +19,14 @@ import at.koopro.wizardsandbeasts.block.location.HogsmeadeBlocks;
 import at.koopro.wizardsandbeasts.block.location.LocationBlockHelper;
 import at.koopro.wizardsandbeasts.block.location.MinistryBlocks;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
-import at.koopro.wizardsandbeasts.registry.ModItems;
 import at.koopro.wizardsandbeasts.registry.WoodSet;
+import at.koopro.wizardsandbeasts.registry.BroomItemRegistry;
+import at.koopro.wizardsandbeasts.registry.ConsumableItemRegistry;
+import at.koopro.wizardsandbeasts.registry.CurrencyItemRegistry;
+import at.koopro.wizardsandbeasts.registry.DarkArtefactItemRegistry;
+import at.koopro.wizardsandbeasts.registry.MiscItemRegistry;
+import at.koopro.wizardsandbeasts.registry.TrinketItemRegistry;
+import at.koopro.wizardsandbeasts.registry.WandItemRegistry;
 
 public class ModModelProvider extends ModelProvider {
 
@@ -30,69 +36,69 @@ public class ModModelProvider extends ModelProvider {
 
     @Override
     protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
-        itemModels.declareCustomModelItem(ModItems.DEBUG_WAND.get());
-        itemModels.declareCustomModelItem(ModItems.MORPH_WAND.get());
-        itemModels.declareCustomModelItem(ModItems.WAND.get());
-        itemModels.declareCustomModelItem(ModItems.BROOM_ITEM.get());
-        itemModels.declareCustomModelItem(ModItems.CLEANSWEEP_SEVEN.get());
-        itemModels.declareCustomModelItem(ModItems.COMET_260.get());
-        itemModels.declareCustomModelItem(ModItems.NIMBUS_2000.get());
-        itemModels.declareCustomModelItem(ModItems.NIMBUS_2001.get());
-        itemModels.declareCustomModelItem(ModItems.FIREBOLT.get());
-        itemModels.declareCustomModelItem(ModItems.FIREBOLT_SUPREME.get());
-        itemModels.declareCustomModelItem(ModItems.OAKSHAFT_79.get());
-        itemModels.declareCustomModelItem(ModItems.BROOM_POLISH.get());
-        itemModels.declareCustomModelItem(ModItems.ENCHANTED_TWIG_BUNDLE.get());
-        itemModels.declareCustomModelItem(ModItems.MARAUDERS_MAP.get());
-        itemModels.declareCustomModelItem(ModItems.DELUMINATOR.get());
-        itemModels.declareCustomModelItem(ModItems.ENCHANTED_TRUNK.get());
-        itemModels.declareCustomModelItem(ModItems.EXPANDED_TRUNK.get());
-        itemModels.declareCustomModelItem(ModItems.MASTERS_TRUNK.get());
+        itemModels.declareCustomModelItem(WandItemRegistry.DEBUG_WAND.get());
+        itemModels.declareCustomModelItem(WandItemRegistry.MORPH_WAND.get());
+        itemModels.declareCustomModelItem(WandItemRegistry.WAND.get());
+        itemModels.declareCustomModelItem(BroomItemRegistry.BROOM_ITEM.get());
+        itemModels.declareCustomModelItem(BroomItemRegistry.CLEANSWEEP_SEVEN.get());
+        itemModels.declareCustomModelItem(BroomItemRegistry.COMET_260.get());
+        itemModels.declareCustomModelItem(BroomItemRegistry.NIMBUS_2000.get());
+        itemModels.declareCustomModelItem(BroomItemRegistry.NIMBUS_2001.get());
+        itemModels.declareCustomModelItem(BroomItemRegistry.FIREBOLT.get());
+        itemModels.declareCustomModelItem(BroomItemRegistry.FIREBOLT_SUPREME.get());
+        itemModels.declareCustomModelItem(BroomItemRegistry.OAKSHAFT_79.get());
+        itemModels.declareCustomModelItem(BroomItemRegistry.BROOM_POLISH.get());
+        itemModels.declareCustomModelItem(BroomItemRegistry.ENCHANTED_TWIG_BUNDLE.get());
+        itemModels.declareCustomModelItem(MiscItemRegistry.MARAUDERS_MAP.get());
+        itemModels.declareCustomModelItem(MiscItemRegistry.DELUMINATOR.get());
+        itemModels.declareCustomModelItem(DarkArtefactItemRegistry.ENCHANTED_TRUNK.get());
+        itemModels.declareCustomModelItem(DarkArtefactItemRegistry.EXPANDED_TRUNK.get());
+        itemModels.declareCustomModelItem(DarkArtefactItemRegistry.MASTERS_TRUNK.get());
 
-        itemModels.declareCustomModelItem(ModItems.PHOENIX_FEATHER.get());
-        itemModels.declareCustomModelItem(ModItems.DRAGON_HEARTSTRING.get());
-        itemModels.declareCustomModelItem(ModItems.UNICORN_HAIR.get());
-        itemModels.declareCustomModelItem(ModItems.THESTRAL_TAIL_HAIR.get());
-        itemModels.declareCustomModelItem(ModItems.VEELA_HAIR.get());
-        itemModels.declareCustomModelItem(ModItems.TROLL_WHISKER.get());
-        itemModels.declareCustomModelItem(ModItems.WAMPUS_CAT_HAIR.get());
-        itemModels.declareCustomModelItem(ModItems.THUNDERBIRD_TAIL_FEATHER.get());
-        itemModels.declareCustomModelItem(ModItems.ROUGAROU_HAIR.get());
-        itemModels.declareCustomModelItem(ModItems.WHITE_RIVER_MONSTER_SPINE.get());
+        itemModels.declareCustomModelItem(WandItemRegistry.PHOENIX_FEATHER.get());
+        itemModels.declareCustomModelItem(WandItemRegistry.DRAGON_HEARTSTRING.get());
+        itemModels.declareCustomModelItem(WandItemRegistry.UNICORN_HAIR.get());
+        itemModels.declareCustomModelItem(WandItemRegistry.THESTRAL_TAIL_HAIR.get());
+        itemModels.declareCustomModelItem(WandItemRegistry.VEELA_HAIR.get());
+        itemModels.declareCustomModelItem(WandItemRegistry.TROLL_WHISKER.get());
+        itemModels.declareCustomModelItem(WandItemRegistry.WAMPUS_CAT_HAIR.get());
+        itemModels.declareCustomModelItem(WandItemRegistry.THUNDERBIRD_TAIL_FEATHER.get());
+        itemModels.declareCustomModelItem(ConsumableItemRegistry.ROUGAROU_HAIR.get());
+        itemModels.declareCustomModelItem(ConsumableItemRegistry.WHITE_RIVER_MONSTER_SPINE.get());
 
-        itemModels.declareCustomModelItem(ModItems.PARCHMENT.get());
-        itemModels.declareCustomModelItem(ModItems.INK_BOTTLE.get());
+        itemModels.declareCustomModelItem(MiscItemRegistry.PARCHMENT.get());
+        itemModels.declareCustomModelItem(MiscItemRegistry.INK_BOTTLE.get());
 
-        itemModels.declareCustomModelItem(ModItems.GOBLIN_TELLER_SPAWN_EGG.get());
-        itemModels.declareCustomModelItem(ModItems.NIFFLER_SPAWN_EGG.get());
+        itemModels.declareCustomModelItem(MiscItemRegistry.GOBLIN_TELLER_SPAWN_EGG.get());
+        itemModels.declareCustomModelItem(MiscItemRegistry.NIFFLER_SPAWN_EGG.get());
 
-        itemModels.declareCustomModelItem(ModItems.KNUT.get());
-        itemModels.declareCustomModelItem(ModItems.SICKLE.get());
-        itemModels.declareCustomModelItem(ModItems.GALLEON.get());
-        itemModels.generateFlatItem(ModItems.LEPRECHAUN_GOLD.get(), net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
-        itemModels.generateFlatItem(ModItems.DRAGOT.get(), net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
+        itemModels.declareCustomModelItem(CurrencyItemRegistry.KNUT.get());
+        itemModels.declareCustomModelItem(CurrencyItemRegistry.SICKLE.get());
+        itemModels.declareCustomModelItem(CurrencyItemRegistry.GALLEON.get());
+        itemModels.generateFlatItem(CurrencyItemRegistry.LEPRECHAUN_GOLD.get(), net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(CurrencyItemRegistry.DRAGOT.get(), net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
 
-        itemModels.declareCustomModelItem(ModItems.WAND_BLANK.get());
-        itemModels.declareCustomModelItem(ModItems.BESTIARY.get());
-        itemModels.generateFlatItem(ModItems.COUNTERFEIT_GALLEON.get(), net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
-        itemModels.generateFlatItem(ModItems.CONJURED_SPOILED_FOOD.get(), net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
-        itemModels.generateFlatItem(ModItems.MINISTRY_LICENSE_SCROLL.get(), net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
-        itemModels.declareCustomModelItem(ModItems.RESURRECTION_STONE.get());
-        itemModels.declareCustomModelItem(ModItems.RIDDLES_DIARY.get());
-        itemModels.declareCustomModelItem(ModItems.MARVOLO_GAUNTS_RING.get());
-        itemModels.declareCustomModelItem(ModItems.SLYTHERINS_LOCKET.get());
-        itemModels.declareCustomModelItem(ModItems.HUFFLEPUFFS_CUP.get());
-        itemModels.declareCustomModelItem(ModItems.RAVENCLAWS_DIADEM.get());
-        itemModels.declareCustomModelItem(ModItems.PHILOSOPHERS_STONE.get());
-        itemModels.declareCustomModelItem(ModItems.PENSIEVE.get());
-        itemModels.declareCustomModelItem(ModItems.TWO_WAY_MIRROR.get());
-        itemModels.declareCustomModelItem(ModItems.HAND_OF_GLORY.get());
-        itemModels.declareCustomModelItem(ModItems.DARK_MARK_BRAND.get());
-        itemModels.declareCustomModelItem(ModItems.MOODYS_TRUNK.get());
-        itemModels.declareCustomModelItem(ModItems.HERMIONES_BEADED_BAG.get());
-        itemModels.declareCustomModelItem(ModItems.FOE_GLASS.get());
-        itemModels.declareCustomModelItem(ModItems.BLOOD_PACT_VIAL.get());
-        itemModels.declareCustomModelItem(ModItems.NEWTS_CASE_ITEM.get());
+        itemModels.declareCustomModelItem(WandItemRegistry.WAND_BLANK.get());
+        itemModels.declareCustomModelItem(MiscItemRegistry.BESTIARY.get());
+        itemModels.generateFlatItem(CurrencyItemRegistry.COUNTERFEIT_GALLEON.get(), net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(ConsumableItemRegistry.CONJURED_SPOILED_FOOD.get(), net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(TrinketItemRegistry.MINISTRY_LICENSE_SCROLL.get(), net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
+        itemModels.declareCustomModelItem(DarkArtefactItemRegistry.RESURRECTION_STONE.get());
+        itemModels.declareCustomModelItem(DarkArtefactItemRegistry.RIDDLES_DIARY.get());
+        itemModels.declareCustomModelItem(DarkArtefactItemRegistry.MARVOLO_GAUNTS_RING.get());
+        itemModels.declareCustomModelItem(DarkArtefactItemRegistry.SLYTHERINS_LOCKET.get());
+        itemModels.declareCustomModelItem(DarkArtefactItemRegistry.HUFFLEPUFFS_CUP.get());
+        itemModels.declareCustomModelItem(DarkArtefactItemRegistry.RAVENCLAWS_DIADEM.get());
+        itemModels.declareCustomModelItem(DarkArtefactItemRegistry.PHILOSOPHERS_STONE.get());
+        itemModels.declareCustomModelItem(TrinketItemRegistry.PENSIEVE.get());
+        itemModels.declareCustomModelItem(TrinketItemRegistry.TWO_WAY_MIRROR.get());
+        itemModels.declareCustomModelItem(TrinketItemRegistry.HAND_OF_GLORY.get());
+        itemModels.declareCustomModelItem(TrinketItemRegistry.DARK_MARK_BRAND.get());
+        itemModels.declareCustomModelItem(DarkArtefactItemRegistry.MOODYS_TRUNK.get());
+        itemModels.declareCustomModelItem(TrinketItemRegistry.HERMIONES_BEADED_BAG.get());
+        itemModels.declareCustomModelItem(TrinketItemRegistry.FOE_GLASS.get());
+        itemModels.declareCustomModelItem(TrinketItemRegistry.BLOOD_PACT_VIAL.get());
+        itemModels.declareCustomModelItem(TrinketItemRegistry.NEWTS_CASE_ITEM.get());
 
         for (WoodSet woodSet : ModBlocks.ALL_WOOD_SETS) {
             generateWoodSet(blockModels, woodSet);
@@ -138,33 +144,33 @@ public class ModModelProvider extends ModelProvider {
         blockModels.createTrivialBlock(ModBlocks.SPELL_TEACHER.get(), TexturedModel.LEAVES);
 
         java.util.List<net.minecraft.world.item.Item> wizardingItems = java.util.List.of(
-                ModItems.FAMOUS_WIZARD_CARD.get(), ModItems.DITTANY.get(), ModItems.OCCAMY_EGGSHELL.get(),
-                ModItems.BEZOAR.get(), ModItems.DEMIGUISE_HAIR.get(), ModItems.MOONCALF_DUNG.get(),
-                ModItems.ERUMPENT_HORN.get(), ModItems.MANDRAKE.get(), ModItems.REMEMBRALL.get(),
-                ModItems.OMNI_OCULARS.get(), ModItems.SNEAKOSCOPE.get(),
-                ModItems.PORTKEY.get(), ModItems.PERUVIAN_DARKNESS_POWDER.get(), ModItems.DECOY_DETONATOR.get(),
-                ModItems.EXTENDABLE_EARS.get(), ModItems.FLOO_POWDER.get());
+                ConsumableItemRegistry.FAMOUS_WIZARD_CARD.get(), ConsumableItemRegistry.DITTANY.get(), ConsumableItemRegistry.OCCAMY_EGGSHELL.get(),
+                ConsumableItemRegistry.BEZOAR.get(), ConsumableItemRegistry.DEMIGUISE_HAIR.get(), ConsumableItemRegistry.MOONCALF_DUNG.get(),
+                ConsumableItemRegistry.ERUMPENT_HORN.get(), ConsumableItemRegistry.MANDRAKE.get(), TrinketItemRegistry.REMEMBRALL.get(),
+                TrinketItemRegistry.OMNI_OCULARS.get(), TrinketItemRegistry.SNEAKOSCOPE.get(),
+                TrinketItemRegistry.PORTKEY.get(), TrinketItemRegistry.PERUVIAN_DARKNESS_POWDER.get(), TrinketItemRegistry.DECOY_DETONATOR.get(),
+                TrinketItemRegistry.EXTENDABLE_EARS.get(), MiscItemRegistry.FLOO_POWDER.get());
         for (net.minecraft.world.item.Item item : wizardingItems) {
             itemModels.generateFlatItem(item, ModelTemplates.FLAT_ITEM);
         }
 
         // Consumables use custom item models so they can point at vanilla textures while art is pending.
-        itemModels.declareCustomModelItem(ModItems.BREW.get());
-        itemModels.declareCustomModelItem(ModItems.BUTTERBEER.get());
-        itemModels.declareCustomModelItem(ModItems.PUMPKIN_JUICE.get());
-        itemModels.declareCustomModelItem(ModItems.CHOCOLATE_FROG.get());
-        itemModels.declareCustomModelItem(ModItems.BERTIE_BOTTS_EVERY_FLAVOUR_BEANS.get());
-        itemModels.declareCustomModelItem(ModItems.DROOBLES_BEST_BLOWING_GUM.get());
-        itemModels.declareCustomModelItem(ModItems.FIREWHISKY.get());
-        itemModels.declareCustomModelItem(ModItems.GILLYWEED.get());
-        itemModels.declareCustomModelItem(ModItems.DIRIGIBLE_PLUM.get());
-        itemModels.declareCustomModelItem(ModItems.TREACLE_TART.get());
-        itemModels.declareCustomModelItem(ModItems.PUMPKIN_PASTY.get());
-        itemModels.declareCustomModelItem(ModItems.FIZZING_WHIZZBEE.get());
-        itemModels.declareCustomModelItem(ModItems.PEPPERMINT_TOAD.get());
-        itemModels.declareCustomModelItem(ModItems.INVISIBILITY_CLOAK.get());
-        itemModels.declareCustomModelItem(ModItems.DEATHLY_HALLOW_CLOAK.get());
-        itemModels.declareCustomModelItem(ModItems.TIME_TURNER.get());
+        itemModels.declareCustomModelItem(ConsumableItemRegistry.BREW.get());
+        itemModels.declareCustomModelItem(ConsumableItemRegistry.BUTTERBEER.get());
+        itemModels.declareCustomModelItem(ConsumableItemRegistry.PUMPKIN_JUICE.get());
+        itemModels.declareCustomModelItem(ConsumableItemRegistry.CHOCOLATE_FROG.get());
+        itemModels.declareCustomModelItem(ConsumableItemRegistry.BERTIE_BOTTS_EVERY_FLAVOUR_BEANS.get());
+        itemModels.declareCustomModelItem(ConsumableItemRegistry.DROOBLES_BEST_BLOWING_GUM.get());
+        itemModels.declareCustomModelItem(ConsumableItemRegistry.FIREWHISKY.get());
+        itemModels.declareCustomModelItem(ConsumableItemRegistry.GILLYWEED.get());
+        itemModels.declareCustomModelItem(ConsumableItemRegistry.DIRIGIBLE_PLUM.get());
+        itemModels.declareCustomModelItem(ConsumableItemRegistry.TREACLE_TART.get());
+        itemModels.declareCustomModelItem(ConsumableItemRegistry.PUMPKIN_PASTY.get());
+        itemModels.declareCustomModelItem(ConsumableItemRegistry.FIZZING_WHIZZBEE.get());
+        itemModels.declareCustomModelItem(ConsumableItemRegistry.PEPPERMINT_TOAD.get());
+        itemModels.declareCustomModelItem(DarkArtefactItemRegistry.INVISIBILITY_CLOAK.get());
+        itemModels.declareCustomModelItem(DarkArtefactItemRegistry.DEATHLY_HALLOW_CLOAK.get());
+        itemModels.declareCustomModelItem(TrinketItemRegistry.TIME_TURNER.get());
 
         blockModels.createTrivialBlock(ModBlocks.UNLIT_LANTERN.get(), TexturedModel.LEAVES);
         blockModels.createTrivialBlock(ModBlocks.UNLIT_SOUL_LANTERN.get(), TexturedModel.LEAVES);

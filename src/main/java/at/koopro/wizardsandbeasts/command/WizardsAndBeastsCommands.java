@@ -3,7 +3,7 @@ package at.koopro.wizardsandbeasts.command;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.effect.LumosFieldEffect;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
-import at.koopro.wizardsandbeasts.wand.item.DebugWandState;
+import at.koopro.wizardsandbeasts.item.wand.DebugWandState;
 import at.koopro.wizardsandbeasts.owl.OWLExaminationHandler;
 import at.koopro.wizardsandbeasts.spell.beam.WandBeamChannelLogic;
 import at.koopro.wizardsandbeasts.sync.PlayerStateSyncService;
