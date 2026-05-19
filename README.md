@@ -43,5 +43,5 @@ If the same resource path exists in both `src/main/resources` and `src/generated
 
 ## Local Hygiene
 
-- Local/generated runtime outputs (`build/`, `bin/`, and `.cursor/plans/`) are not committed.
+- Local/generated runtime outputs (`build/`, `bin/`) are not committed.
 - Before tagging alpha builds, follow the release gate checklist in `ALPHA_TESTING.md` (same CI order).
