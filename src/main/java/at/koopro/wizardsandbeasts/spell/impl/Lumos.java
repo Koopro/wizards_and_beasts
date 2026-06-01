@@ -35,9 +35,9 @@ public class Lumos extends Spell {
     }
 
     @Override
-    public void execute(ServerLevel level, ServerPlayer caster, ItemStack wandStack) {
-        super.execute(level, caster, wandStack);
-        SpellHelper.spawnBurst(level, this, caster.getEyePosition(), 14, 0.24);
+    public void executeCast(CastContext ctx, ServerLevel level) {
+        super.executeCast(ctx, level);
+        SpellHelper.spawnBurst(level, this, ctx.caster().getEyePosition(), 14, 0.24);
     }
 
     @Override

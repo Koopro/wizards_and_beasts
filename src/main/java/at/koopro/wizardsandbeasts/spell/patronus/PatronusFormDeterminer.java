@@ -2,66 +2,54 @@ package at.koopro.wizardsandbeasts.spell.patronus;
 
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
+import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
 
-/**
- * Maps heritage to a vanilla entity model id string for Patronus rendering.
- */
+import java.util.EnumMap;
+import java.util.Map;
+
 public final class PatronusFormDeterminer {
+
+    // TODO(patronus-rare): populate with canonical rare Patronus forms per heritage once designs are settled
+    private static final Map<Heritage, Identifier> RARE_FORMS = new EnumMap<>(Heritage.class);
 
     private PatronusFormDeterminer() {}
 
-    public static String determine(@Nullable Heritage heritage, @Nullable HeritageVariant variant, float happiness) {
+    public static @Nullable Identifier determine(@Nullable Heritage heritage, @Nullable HeritageVariant variant, float happiness) {
         if (heritage == null) {
-            return raritySuffix("minecraft:cow", happiness);
+            return wizardkindForm(null);
         }
-        String base = switch (heritage) {
+        return switch (heritage) {
             case WIZARDKIND -> wizardkindForm(variant);
-            case WEREWOLF -> "minecraft:wolf";
-            case OBSCURIAL -> "minecraft:bat";
-            case VAMPIRE -> vampireForm(variant);
-            case VEELA -> "minecraft:parrot";
-            case CENTAUR -> "minecraft:horse";
-            case MERPEOPLE -> "minecraft:salmon";
-            case GIANT -> giantForm(variant);
-            case GOBLIN -> "minecraft:silverfish";
-            case HOUSE_ELF -> "minecraft:cat";
-            default -> "minecraft:cow"; // TODO(scope): replace with custom Patronus deer model
+            case WEREWOLF   -> mc("wolf");
+            case OBSCURIAL  -> mc("bat");
+            case VAMPIRE    -> vampireForm(variant);
+            case VEELA      -> mc("parrot");
+            default         -> null;
         };
-        return raritySuffix(base, happiness);
     }
 
-    private static String wizardkindForm(@Nullable HeritageVariant variant) {
+    private static Identifier wizardkindForm(@Nullable HeritageVariant variant) {
         if (variant == HeritageVariant.PURE_BLOOD) {
-            return "minecraft:wolf";
+            return mc("wolf");
         }
         if (variant == HeritageVariant.HALF_BLOOD) {
-            return "minecraft:fox";
+            return mc("fox");
         }
         if (variant == HeritageVariant.MUGGLE_BORN) {
-            return "minecraft:rabbit";
+            return mc("rabbit");
         }
-        return "minecraft:cow";
+        return mc("cow"); // TODO(scope): replace with custom Patronus deer model
     }
 
-    private static String vampireForm(@Nullable HeritageVariant variant) {
+    private static Identifier vampireForm(@Nullable HeritageVariant variant) {
         if (variant == HeritageVariant.VAMPIRE_BORN) {
-            return "minecraft:phantom";
+            return mc("phantom");
         }
-        return "minecraft:bat";
+        return mc("bat");
     }
 
-    private static String giantForm(@Nullable HeritageVariant variant) {
-        if (variant == HeritageVariant.GIANT_FULL) {
-            return "minecraft:polar_bear";
-        }
-        return "minecraft:cow";
-    }
-
-    private static String raritySuffix(String id, float happiness) {
-        if (happiness >= 90.0f) {
-            return id + "_rare";
-        }
-        return id;
+    private static Identifier mc(String path) {
+        return Identifier.fromNamespaceAndPath("minecraft", path);
     }
 }

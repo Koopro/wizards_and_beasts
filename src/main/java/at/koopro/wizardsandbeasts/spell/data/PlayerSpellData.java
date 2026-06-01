@@ -42,6 +42,7 @@ public class PlayerSpellData implements ModAttachments.NbtSerializable {
     private int syncCorrections;
     // NEW FIELD — OWL DEFENCE_AGAINST_DARK_ARTS: spells cast against hostile mobs
     private int combatSpellCasts;
+    private long globalCooldownEndTick = 0L;
 
     public Set<String> getKnownSpells() {
         return Collections.unmodifiableSet(knownSpells);
@@ -74,6 +75,7 @@ public class PlayerSpellData implements ModAttachments.NbtSerializable {
         spellProficiencies.clear();
         rejectCounts.clear();
         syncCorrections = 0;
+        globalCooldownEndTick = 0L;
     }
 
     @Nullable
@@ -123,6 +125,18 @@ public class PlayerSpellData implements ModAttachments.NbtSerializable {
 
     public long getCooldownExpiry(String spellId) {
         return cooldowns.getOrDefault(spellId, 0L);
+    }
+
+    public long getGlobalCooldownEndTick() {
+        return globalCooldownEndTick;
+    }
+
+    public void setGlobalCooldownEndTick(long tick) {
+        globalCooldownEndTick = tick;
+    }
+
+    public boolean isGlobalCooldownActive(long currentTick) {
+        return currentTick < globalCooldownEndTick;
     }
 
     public int getCastCount(String spellId) {
@@ -273,6 +287,7 @@ public class PlayerSpellData implements ModAttachments.NbtSerializable {
         NbtHelper.saveStringIntMap(tag, "RejectCount", rejectCounts);
         tag.putInt("SyncCorrections", syncCorrections);
         tag.putInt("CombatSpellCasts", combatSpellCasts);
+        tag.putLong("GlobalCooldownEndTick", globalCooldownEndTick);
         return tag;
     }
 
@@ -313,6 +328,7 @@ public class PlayerSpellData implements ModAttachments.NbtSerializable {
         rejectCounts.putAll(NbtHelper.loadStringIntMap(tag, "RejectCount"));
         syncCorrections = tag.getInt("SyncCorrections").orElse(0);
         combatSpellCasts = tag.getInt("CombatSpellCasts").orElse(0);
+        globalCooldownEndTick = tag.getLong("GlobalCooldownEndTick").orElse(0L);
     }
 
     public PlayerSpellData copy() {

@@ -45,6 +45,7 @@ public final class SpellProficiencyTracker {
                 spellId,
                 data.getCooldownExpiry(spellId),
                 data.getCastCount(spellId),
-                newHits);
+                newHits,
+                data.getGlobalCooldownEndTick());
     }
 }

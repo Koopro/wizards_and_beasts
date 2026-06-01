@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.network.spell;
 
 import at.koopro.wizardsandbeasts.network.spell.AvadaBlastS2CPayload;
+import at.koopro.wizardsandbeasts.network.spell.SpellDeniedS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.CrucioIntentFeedbackS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.ImperioCommandC2SPayload;
 import at.koopro.wizardsandbeasts.network.spell.ImperioControlS2CPayload;
@@ -65,6 +66,11 @@ public final class ModNetworkSpells {
                 SpellProficiencySyncS2CPayload.TYPE,
                 SpellProficiencySyncS2CPayload.STREAM_CODEC,
                 SpellProficiencySyncS2CPayload::handleClient);
+
+        registrar.playToClient(
+                SpellDeniedS2CPayload.TYPE,
+                SpellDeniedS2CPayload.STREAM_CODEC,
+                SpellDeniedS2CPayload::handleClient);
 
         registrar.playToClient(
                 AvadaBlastS2CPayload.TYPE,

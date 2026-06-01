@@ -16,5 +16,7 @@ public enum Module {
     POCKET_DIMENSIONS,
     OWLS,
     FLOO_NETWORK,
-    AZKABAN
+    AZKABAN,
+    CHARACTER_SHEET,
+    PLAYER_STATS
 }

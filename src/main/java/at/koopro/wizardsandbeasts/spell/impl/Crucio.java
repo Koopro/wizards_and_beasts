@@ -23,13 +23,14 @@ public class Crucio extends Spell {
     }
 
     @Override
-    public void execute(ServerLevel level, ServerPlayer caster, ItemStack wandStack) {
+    public void executeCast(CastContext ctx, ServerLevel level) {
+        ServerPlayer caster = ctx.caster();
         if (!ModuleManager.isEnabled(Module.DARK_ARTS)) {
             level.playSound(null, caster.blockPosition(), ModSounds.SPELL_FIZZLE.get(), SoundSource.PLAYERS, 0.5f, 1.0f);
             caster.displayClientMessage(Component.literal("\u00A78That power is sealed away."), true);
             return;
         }
-        super.execute(level, caster, wandStack);
+        super.executeCast(ctx, level);
     }
 
     @Override

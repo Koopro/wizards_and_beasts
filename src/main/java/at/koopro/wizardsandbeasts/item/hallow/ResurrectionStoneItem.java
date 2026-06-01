@@ -38,7 +38,7 @@ public class ResurrectionStoneItem extends Item implements IHallowItem {
 
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
-        if (!ModuleManager.isEnabled(Module.WANDS)) {
+        if (!ModuleManager.isEnabled(Module.DARK_ARTS)) {
             return InteractionResult.FAIL;
         }
         // TODO: [heritage] summon shade effect — requires HeritageAPI integration

@@ -100,7 +100,8 @@ public record ObscurialAbilityUseC2SPayload(String abilityId) implements CustomP
                     spell.getId(),
                     expiryTick,
                     oldCount + 1,
-                    spellData.getSuccessfulHits(spell.getId()));
+                    spellData.getSuccessfulHits(spell.getId()),
+                    spellData.getGlobalCooldownEndTick());
             if (ObscurialRules.getStressTier(ObscurialResourceManager.getStress(player)) == ObscurialRules.StressTier.VOLATILE) {
                 player.displayClientMessage(Component.literal("\u00A75Volatile stress is prolonging your ability cooldowns."), true);
             }

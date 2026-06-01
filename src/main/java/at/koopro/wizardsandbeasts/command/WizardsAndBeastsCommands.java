@@ -8,6 +8,7 @@ import at.koopro.wizardsandbeasts.owl.OWLExaminationHandler;
 import at.koopro.wizardsandbeasts.spell.beam.WandBeamChannelLogic;
 import at.koopro.wizardsandbeasts.sync.PlayerStateSyncService;
 import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
+import at.koopro.wizardsandbeasts.network.stats.PlayerStatsSyncPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -42,6 +43,7 @@ public class WizardsAndBeastsCommands {
             boolean needsSelection = !HeritageAPI.hasHeritageSelected(player);
             PlayerStateSyncService.syncFullLoginState(player, needsSelection);
             OWLExaminationHandler.syncToPlayer(player);
+            PlayerStatsSyncPayload.syncToPlayer(player);
         }
     }
 
@@ -50,6 +52,7 @@ public class WizardsAndBeastsCommands {
         if (event.getEntity() instanceof ServerPlayer player) {
             WandBeamChannelLogic.endChannel(player);
             PlayerStateSyncService.syncFullLoginState(player, false);
+            PlayerStatsSyncPayload.syncToPlayer(player);
         }
     }
 
@@ -67,6 +70,7 @@ public class WizardsAndBeastsCommands {
         if (event.getEntity() instanceof ServerPlayer player) {
             WandBeamChannelLogic.endChannel(player);
             PlayerStateSyncService.syncFullLoginState(player, false);
+            PlayerStatsSyncPayload.syncToPlayer(player);
         }
     }
 }

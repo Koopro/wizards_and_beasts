@@ -12,6 +12,7 @@ import at.koopro.wizardsandbeasts.spell.beam.*;
 import at.koopro.wizardsandbeasts.spell.patronus.PatronusFormDeterminer;
 import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -41,7 +42,8 @@ public class ExpectoPatronum extends Spell {
     }
 
     @Override
-    public void execute(ServerLevel level, ServerPlayer caster, ItemStack wandStack) {
+    public void executeCast(CastContext ctx, ServerLevel level) {
+        ServerPlayer caster = ctx.caster();
         float happiness = caster.getData(ModAttachments.HAPPINESS.get());
         int happyMemoryCount = 0;
         // TODO(memories): count HAPPY MemoryEntry in MEMORIES attachment when implemented
@@ -57,7 +59,7 @@ public class ExpectoPatronum extends Spell {
             // Failed Patronus must not apply cooldown (lore: retry when memory is brighter).
             return;
         }
-        super.execute(level, caster, wandStack);
+        super.executeCast(ctx, level);
         int bonus = switch (getProficiency(caster)) {
             case MASTERED -> 80;
             case PROFICIENT -> 30;
@@ -67,15 +69,23 @@ public class ExpectoPatronum extends Spell {
 
         String storedForm = caster.getData(ModAttachments.PATRONUS_FORM.get());
         if (storedForm == null || storedForm.isEmpty()) {
-            String determined = PatronusFormDeterminer.determine(
+            Identifier determined = PatronusFormDeterminer.determine(
                     HeritageAPI.getPlayerHeritage(caster),
                     HeritageAPI.getPlayerHeritageVariant(caster),
                     happiness);
+            if (determined == null) {
+                level.playSound(null, caster.blockPosition(), ModSounds.SPELL_FIZZLE.get(), SoundSource.PLAYERS, 0.55f, 1.0f);
+                caster.displayClientMessage(
+                        Component.translatable("spell.wizards_and_beasts.expecto_patronum.reject.heritage")
+                                .withStyle(net.minecraft.ChatFormatting.GRAY),
+                        true);
+                return;
+            }
             if (patronusPower >= 15.0f) {
-                PacketDistributor.sendToPlayer(caster, new PatronusFormSetS2CPayload(determined));
+                PacketDistributor.sendToPlayer(caster, new PatronusFormSetS2CPayload(determined.toString()));
             }
             if (patronusPower >= 40.0f) {
-                caster.setData(ModAttachments.PATRONUS_FORM.get(), determined);
+                caster.setData(ModAttachments.PATRONUS_FORM.get(), determined.toString());
             }
         }
         at.koopro.wizardsandbeasts.entity.spell.PatronusEntity.trySpawn(level, caster, patronusPower, getProficiencyScalar(caster));

@@ -37,7 +37,7 @@ public class HermionesBagItem extends Item {
 
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
-        if (!ModuleManager.isEnabled(Module.WANDS)) {
+        if (!ModuleManager.isEnabled(Module.DARK_ARTS)) {
             return InteractionResult.FAIL;
         }
         // TODO: [storage] open portable inventory GUI — 54-slot inventory backed by HERMIONES_BAG_INVENTORY

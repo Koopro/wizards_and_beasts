@@ -29,11 +29,6 @@ public class Nox extends Spell {
         return SpellRequirement.knows(Spells.LUMOS);
     }
 
-    @Override
-    public void execute(ServerLevel level, ServerPlayer caster, ItemStack wandStack) {
-        playSound(level, caster);
-        caster.removeEffect(ModEffects.LUMOS_FIELD);
-        Vec3 p = caster.getEyePosition();
-        SpellHelper.spawnBurst(level, this, p, 14, 0.22);
-    }
+    // No executeCast override: the generic "nox" SELF-utility rule handles the toggle
+    // (removes LUMOS_FIELD, swaps the loadout slot back to lumos, syncs to client).
 }

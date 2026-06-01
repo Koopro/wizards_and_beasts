@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.command;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.client.wand.BeamSettings;
 import at.koopro.wizardsandbeasts.azkaban.command.AzkabanCommands;
+import at.koopro.wizardsandbeasts.command.CharacterCommands;
 import at.koopro.wizardsandbeasts.bestiary.command.BestiaryCommands;
 import at.koopro.wizardsandbeasts.bloodpact.command.PactCommands;
 import at.koopro.wizardsandbeasts.command.debug.DebugModuleRegistry;
@@ -121,7 +122,9 @@ public final class WandbCommands {
                 .then(ModuleCommands.register())
                 .then(MinistryCommands.register())
                 .then(WorldCommands.register())
-                .then(AzkabanCommands.register());
+                .then(AzkabanCommands.register())
+                .then(CharacterCommands.register())
+                .then(StatsCommands.register());
     }
 
     private static int toggleBeamDebug(CommandSourceStack source) {

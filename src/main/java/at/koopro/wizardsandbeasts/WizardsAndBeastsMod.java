@@ -6,9 +6,15 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
 import net.minecraft.resources.Identifier;
+import at.koopro.wizardsandbeasts.azkaban.data.AzkabanWorldData;
+import at.koopro.wizardsandbeasts.azkaban.worldgen.AzkabanFixedPlacement;
 import org.slf4j.Logger;
 
 import at.koopro.wizardsandbeasts.azkaban.structure.AzkabanStructures;
@@ -90,9 +96,9 @@ public class WizardsAndBeastsMod {
         ModVillager.PROFESSIONS.register(modEventBus);
         ModParticles.PARTICLE_TYPES.register(modEventBus);
         ModEffects.MOB_EFFECTS.register(modEventBus);
+        AzkabanWorldgenRegistries.STRUCTURE_PLACEMENT_TYPES.register(modEventBus);
         AzkabanStructures.STRUCTURE_TYPES.register(modEventBus);
         AzkabanStructures.STRUCTURE_PIECE_TYPES.register(modEventBus);
-        AzkabanWorldgenRegistries.STRUCTURE_PLACEMENT_TYPES.register(modEventBus);
         WandmakingRecipeType.RECIPE_TYPES.register(modEventBus);
         WandmakingRecipeSerializer.RECIPE_SERIALIZERS.register(modEventBus);
 
@@ -110,6 +116,27 @@ public class WizardsAndBeastsMod {
             modEventBus.post(new RegisterSpellsEvent());
             Spells.init();
             modEventBus.post(new RegisterBrewsEvent());
+        });
+
+        // On overworld load, force Azkaban Fortress chunk generation if not yet generated
+        NeoForge.EVENT_BUS.addListener((LevelEvent.Load event) -> {
+            if (!(event.getLevel() instanceof ServerLevel level)) return;
+            if (level.dimension() != Level.OVERWORLD) return;
+            var server = level.getServer();
+            if (server == null) return;
+            server.execute(() -> {
+                AzkabanWorldData data = AzkabanWorldData.get(level);
+                if (data.isGenerated()) return;
+                ChunkPos target = AzkabanFixedPlacement.computeTargetChunk(level.getSeed());
+                LOGGER.info("[WizardsAndBeasts] Generating Azkaban Fortress at chunk {}", target);
+                for (int dx = -1; dx <= 2; dx++) {
+                    for (int dz = -1; dz <= 2; dz++) {
+                        level.getChunk(target.x + dx, target.z + dz);
+                    }
+                }
+                // Center and generated flag are set by AzkabanFortressPiece.postProcess()
+                // after blocks are actually placed — do not set them here prematurely.
+            });
         });
 
         // Datapack-driven JSON content: spells, brews, and brewing recipes

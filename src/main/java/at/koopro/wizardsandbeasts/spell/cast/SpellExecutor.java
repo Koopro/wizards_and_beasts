@@ -96,18 +96,23 @@ public final class SpellExecutor {
             return;
         }
 
-        // TODO(skill_tree): keep damage stacking as base * proficiency * skill-tree multipliers.
-        float scaledDamageMult = ctx.modifiers().finalDamage() * ctx.scalingProfile().damageMult();
-        executeGeneric(ctx, spell, level, caster, wandStack, wand, scaledDamageMult);
+        // Dispatch via the spell's overridable cast hook so subclass overrides (entity spawns, etc.)
+        // run on a normal wand cast with the fully-enriched context. Default hook -> dispatchGeneric.
+        spell.executeCast(ctx, level);
     }
 
-    private static void executeGeneric(CastContext ctx,
-                                       Spell spell,
-                                       ServerLevel level,
-                                       ServerPlayer caster,
-                                       ItemStack wandStack,
-                                       WandStats wand,
-                                       float damageMultiplier) {
+    /**
+     * Generic {@code castType} dispatch. Public so {@link Spell#executeCast} (and overrides via
+     * {@code super.executeCast}) can invoke the default behavior. Expects {@code ctx} to already
+     * carry the finalized modifier pipeline output.
+     */
+    public static void dispatchGeneric(CastContext ctx, ServerLevel level) {
+        Spell spell = ctx.spell();
+        ServerPlayer caster = ctx.caster();
+        ItemStack wandStack = ctx.wandStack();
+        WandStats wand = ctx.wandStats();
+        // TODO(skill_tree): keep damage stacking as base * proficiency * skill-tree multipliers.
+        float damageMultiplier = ctx.modifiers().finalDamage() * ctx.scalingProfile().damageMult();
         SpellProperties props = spell.getProperties();
         if (props == null) return;
 

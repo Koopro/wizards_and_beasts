@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.azkaban.command;
 import at.koopro.wizardsandbeasts.azkaban.AzkabanDamageTypes;
 import at.koopro.wizardsandbeasts.azkaban.attachment.AzkabanTrespasserData;
 import at.koopro.wizardsandbeasts.azkaban.data.AzkabanWorldData;
+import at.koopro.wizardsandbeasts.azkaban.structure.AzkabanFortressPiece;
 import at.koopro.wizardsandbeasts.azkaban.structure.AzkabanStructures;
 import at.koopro.wizardsandbeasts.azkaban.worldgen.AzkabanFixedPlacement;
 import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
@@ -95,19 +96,23 @@ public final class AzkabanCommands {
         ServerPlayer player = src.getPlayerOrException();
         ServerLevel level = (ServerLevel) player.level();
         BlockPos center = getFortressCenter(level);
-        player.teleportTo(center.getX() + 0.5, center.getY() + 50.0, center.getZ() + 0.5);
+        double aboveY = AzkabanFortressPiece.ISLAND_SURFACE_Y + AzkabanFortressPiece.FORT_H + 20.0;
+        player.teleportTo(center.getX() + 0.5, aboveY, center.getZ() + 0.5);
         src.sendSuccess(() -> Component.literal("Teleported above Azkaban Fortress."), true);
         return 1;
     }
 
     private static int forceGenerate(CommandSourceStack src) {
         ServerLevel level = src.getLevel();
-        BlockPos center = getFortressCenter(level);
-        ChunkPos chunkPos = new ChunkPos(center);
-        // getChunk triggers generation if the chunk hasn't been generated yet
-        level.getChunk(chunkPos.x, chunkPos.z);
+        ChunkPos target = AzkabanFixedPlacement.computeTargetChunk(level.getSeed());
+        // Force full generation of all chunks the 36×36 fortress footprint spans (up to 4×4 chunks)
+        for (int dx = -1; dx <= 2; dx++) {
+            for (int dz = -1; dz <= 2; dz++) {
+                level.getChunk(target.x + dx, target.z + dz);
+            }
+        }
         src.sendSuccess(() -> Component.literal(
-                "Forced generation of chunk [" + chunkPos.x + ", " + chunkPos.z + "]."), true);
+                "Forced generation of chunks around Azkaban target " + target), true);
         return 1;
     }
 

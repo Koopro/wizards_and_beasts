@@ -46,7 +46,7 @@ public class NewtsCaseItem extends Item {
 
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
-        if (!ModuleManager.isEnabled(Module.WANDS)) {
+        if (!ModuleManager.isEnabled(Module.POCKET_DIMENSIONS)) {
             return InteractionResult.FAIL;
         }
         ItemStack stack = player.getItemInHand(hand);

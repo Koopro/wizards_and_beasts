@@ -12,6 +12,22 @@ public class SpellKeyBindings {
     private static final KeyMapping.Category CATEGORY =
             new KeyMapping.Category(Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "spells"));
 
+    /**
+     * Default: KEY_NONE — GLFW_KEY_K is already bound to {@link #SKILL_MENU}.
+     * Players can rebind in Controls settings.
+     */
+    public static final KeyMapping CHARACTER_SHEET = new KeyMapping(
+            "key." + WizardsAndBeastsMod.MODID + ".character_sheet",
+            InputConstants.UNKNOWN.getValue(), CATEGORY);
+
+    /**
+     * Default: KEY_NONE — GLFW_KEY_K is already bound to {@link #SKILL_MENU}.
+     * Players can rebind in Controls settings.
+     */
+    public static final KeyMapping TOGGLE_STAT_HUD = new KeyMapping(
+            "key." + WizardsAndBeastsMod.MODID + ".toggle_stat_hud",
+            InputConstants.UNKNOWN.getValue(), CATEGORY);
+
     public static final KeyMapping SPELL_UP = new KeyMapping(
             "key." + WizardsAndBeastsMod.MODID + ".spell_up",
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UP, CATEGORY);
@@ -50,6 +66,8 @@ public class SpellKeyBindings {
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_M, CATEGORY);
 
     public static void register(RegisterKeyMappingsEvent event) {
+        event.register(CHARACTER_SHEET);
+        event.register(TOGGLE_STAT_HUD);
         event.register(SPELL_UP);
         event.register(SPELL_RIGHT);
         event.register(SPELL_DOWN);

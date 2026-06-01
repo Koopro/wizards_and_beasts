@@ -1,0 +1,9 @@
+package at.koopro.wizardsandbeasts.stats;
+
+public enum MilestoneType {
+    FIRST_PATRONUS_CORPOREAL,
+    FIRST_IMPERIUS_RESISTED,
+    FIRST_OCCLUMENCY_DEFENCE_SUCCESS,
+    FIRST_ANIMAGUS_TRANSFORMATION,
+    NEAR_DEATH_SURVIVED
+}

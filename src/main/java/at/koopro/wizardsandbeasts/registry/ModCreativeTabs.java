@@ -121,11 +121,6 @@ public class ModCreativeTabs {
                         output.accept(MiscItemRegistry.FLOO_POWDER.get());
                         output.accept(ConsumableItemRegistry.BREW.get());
 
-                        // ── Deathly Hallows ──────────────────────────────────────────
-                        if (ModuleManager.isEnabled(Module.WANDS)) {
-                            output.accept(DarkArtefactItemRegistry.RESURRECTION_STONE.get());
-                        }
-
                         // ── Horcrux Vessels ──────────────────────────────────────────
                         if (ModuleManager.isEnabled(Module.DARK_ARTS)) {
                             output.accept(DarkArtefactItemRegistry.RIDDLES_DIARY.get());
@@ -135,20 +130,21 @@ public class ModCreativeTabs {
                             output.accept(DarkArtefactItemRegistry.RAVENCLAWS_DIADEM.get());
                         }
 
-                        // ── Unique Artefacts ─────────────────────────────────────────
-                        if (ModuleManager.isEnabled(Module.WANDS)) {
+                        // ── Stub Artefacts (gated until modules are implemented) ──────
+                        if (ModuleManager.isEnabled(Module.DARK_ARTS)) {
+                            output.accept(DarkArtefactItemRegistry.RESURRECTION_STONE.get());
                             output.accept(DarkArtefactItemRegistry.PHILOSOPHERS_STONE.get());
                             output.accept(TrinketItemRegistry.PENSIEVE.get());
                             output.accept(TrinketItemRegistry.TWO_WAY_MIRROR.get());
-                            output.accept(DarkArtefactItemRegistry.MOODYS_TRUNK.get());
                             output.accept(TrinketItemRegistry.HERMIONES_BEADED_BAG.get());
                             output.accept(TrinketItemRegistry.FOE_GLASS.get());
-                            output.accept(TrinketItemRegistry.NEWTS_CASE_ITEM.get());
-                        }
-                        if (ModuleManager.isEnabled(Module.DARK_ARTS)) {
                             output.accept(TrinketItemRegistry.HAND_OF_GLORY.get());
                             output.accept(TrinketItemRegistry.DARK_MARK_BRAND.get());
                             output.accept(TrinketItemRegistry.BLOOD_PACT_VIAL.get());
+                        }
+                        if (ModuleManager.isEnabled(Module.POCKET_DIMENSIONS)) {
+                            output.accept(DarkArtefactItemRegistry.MOODYS_TRUNK.get());
+                            output.accept(TrinketItemRegistry.NEWTS_CASE_ITEM.get());
                         }
 
                         // Wizarding blocks

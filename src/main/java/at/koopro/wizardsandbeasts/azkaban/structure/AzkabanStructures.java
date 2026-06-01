@@ -7,8 +7,8 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.levelgen.structure.Structure;
-import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.StructureType;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jspecify.annotations.Nullable;
@@ -21,12 +21,13 @@ public final class AzkabanStructures {
     public static final DeferredRegister<StructurePieceType> STRUCTURE_PIECE_TYPES =
             DeferredRegister.create(Registries.STRUCTURE_PIECE, WizardsAndBeastsMod.MODID);
 
-    public static final DeferredHolder<StructureType<?>, StructureType<AzkabanFortressStructure>> AZKABAN_FORTRESS =
-            STRUCTURE_TYPES.register("azkaban_fortress", () -> () -> AzkabanFortressStructure.CODEC);
+    public static final DeferredHolder<StructureType<?>, StructureType<AzkabanFortressStructure>>
+            AZKABAN_FORTRESS = STRUCTURE_TYPES.register(
+                    "azkaban_fortress", () -> () -> AzkabanFortressStructure.CODEC);
 
-    public static final DeferredHolder<StructurePieceType, StructurePieceType> AZKABAN_FORTRESS_PIECE =
-            STRUCTURE_PIECE_TYPES.register("azkaban_fortress_piece",
-                    () -> AzkabanFortressPiece::load);
+    public static final DeferredHolder<StructurePieceType, StructurePieceType>
+            AZKABAN_FORTRESS_PIECE = STRUCTURE_PIECE_TYPES.register(
+                    "azkaban_fortress_piece", () -> AzkabanFortressPiece::load);
 
     public static final ResourceKey<Structure> AZKABAN_FORTRESS_KEY = ResourceKey.create(
             Registries.STRUCTURE,

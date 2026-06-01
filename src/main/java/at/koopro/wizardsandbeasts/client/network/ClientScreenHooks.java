@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.client.network;
 
 import at.koopro.wizardsandbeasts.client.spell.gui.BeamDebugScreen;
 import at.koopro.wizardsandbeasts.client.bestiary.gui.BestiaryScreen;
+import at.koopro.wizardsandbeasts.client.gui.character.CharacterSheetScreen;
 import at.koopro.wizardsandbeasts.client.currency.gui.GringottsScreen;
 import at.koopro.wizardsandbeasts.client.skill.gui.SkillScreenRouter;
 import at.koopro.wizardsandbeasts.client.spell.gui.SpellTeacherScreen;
@@ -34,5 +35,9 @@ public final class ClientScreenHooks {
 
     public static void openBestiaryScreen() {
         Minecraft.getInstance().setScreen(new BestiaryScreen());
+    }
+
+    public static void openCharacterSheetScreen() {
+        Minecraft.getInstance().setScreen(new CharacterSheetScreen());
     }
 }

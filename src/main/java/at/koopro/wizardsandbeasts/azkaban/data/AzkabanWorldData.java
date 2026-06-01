@@ -44,7 +44,7 @@ public final class AzkabanWorldData extends SavedData {
     public @NonNull BlockPos getOrComputeCenter(@NonNull ServerLevel level) {
         if (fortressCenter != null) return fortressCenter;
         ChunkPos chunk = AzkabanFixedPlacement.computeTargetChunk(level.getSeed());
-        return new BlockPos(chunk.getMiddleBlockX(), 63, chunk.getMiddleBlockZ());
+        return new BlockPos(chunk.getMiddleBlockX(), 65, chunk.getMiddleBlockZ());
     }
 
     public void setFortressCenter(@NonNull BlockPos center) {

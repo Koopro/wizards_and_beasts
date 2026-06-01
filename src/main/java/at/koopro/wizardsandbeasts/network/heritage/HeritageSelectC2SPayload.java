@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.network.heritage;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
+import at.koopro.wizardsandbeasts.stats.PlayerStatsAPI;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
@@ -86,6 +87,9 @@ public record HeritageSelectC2SPayload(String typeId, String subtypeId) implemen
             data.setLocked(true);
             data.resetProfessionProgress();
             data.addProfessionPoints(3);
+
+            // Roll initial Power for the chosen Heritage variant (idempotent — skips if stats already initialised).
+            PlayerStatsAPI.initializeStatsForNewPlayer(player, variant, player.getRandom());
 
             // Apply stat modifiers
             HeritageAPI.applyStats(player);

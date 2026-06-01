@@ -21,7 +21,9 @@ public final class ClientOWLCache {
     private ClientOWLCache() {}
 
     public static void setOWLData(@NonNull Map<OWLSubject, OWLGrade> newGrades, boolean taken) {
-        grades = Collections.unmodifiableMap(new EnumMap<>(newGrades.isEmpty() ? Map.of() : newGrades));
+        EnumMap<OWLSubject, OWLGrade> map = new EnumMap<>(OWLSubject.class);
+        map.putAll(newGrades);
+        grades = Collections.unmodifiableMap(map);
         examTaken = taken;
     }
 

@@ -2,7 +2,7 @@
   "id": "wizards_and_beasts:niffler",
   "displayName": "bestiary.wizards_and_beasts.niffler.name",
   "category": "SMALL_CREATURE",
-  "mmRating": 1,
+  "mmRating": 3,
   "habitat": "bestiary.wizards_and_beasts.niffler.habitat",
   "size": "SMALL",
   "shortLore": "bestiary.wizards_and_beasts.niffler.short_lore",

@@ -52,6 +52,7 @@ public final class ClientSpellDataState {
         INSTANCE.setCooldown(pkt.spellId(), pkt.cooldownExpiryTick());
         INSTANCE.setCastCount(pkt.spellId(), pkt.newCastCount());
         INSTANCE.setSuccessfulHits(pkt.spellId(), pkt.newSuccessfulHits());
+        INSTANCE.setGlobalCooldownEndTick(pkt.globalCooldownEndTick());
     }
 
     public static void applyProficiencyDelta(SpellProficiencySyncS2CPayload pkt) {

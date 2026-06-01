@@ -25,6 +25,9 @@ import at.koopro.wizardsandbeasts.client.hud.ObscurusOverlay;
 import at.koopro.wizardsandbeasts.client.spell.hud.SpellDiamondOverlay;
 import at.koopro.wizardsandbeasts.client.debug.DebugHudRenderer;
 import at.koopro.wizardsandbeasts.client.debug.DebugKeyBindings;
+import at.koopro.wizardsandbeasts.client.event.InventoryScreenInjector;
+import at.koopro.wizardsandbeasts.client.hud.stats.StatHudOverlay;
+import at.koopro.wizardsandbeasts.client.spell.CharacterSheetKeyHandler;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -63,6 +66,9 @@ public class WizardsAndBeastsClient {
         NeoForge.EVENT_BUS.addListener(LegilimencyVisionRenderer::onRenderLevel);
         NeoForge.EVENT_BUS.addListener(ObscurialClientViewHandler::onRenderHand);
         NeoForge.EVENT_BUS.addListener(ObscurialClientViewHandler::onRenderGuiLayer);
+        NeoForge.EVENT_BUS.addListener(InventoryScreenInjector::onScreenInit);
+        NeoForge.EVENT_BUS.addListener(CharacterSheetKeyHandler::onClientTick);
+        NeoForge.EVENT_BUS.addListener(StatHudOverlay::onClientTick);
     }
 
     private static void registerMenus(RegisterMenuScreensEvent event) {
@@ -78,6 +84,7 @@ public class WizardsAndBeastsClient {
         event.registerAboveAll(MobEffectFullscreenOverlays.ID, MobEffectFullscreenOverlays::render);
         event.registerAboveAll(CrucioScreenRenderer.ID, CrucioScreenRenderer::render);
         event.registerAboveAll(TransitionEffectRenderer.ID, TransitionEffectRenderer::render);
+        event.registerAboveAll(StatHudOverlay.ID, StatHudOverlay::render);
         if (Config.enableDebugTools) {
             event.registerAboveAll(FormDebugOverlay.ID, FormDebugOverlay::render);
             event.registerAboveAll(DebugHudRenderer.ID, DebugHudRenderer::render);

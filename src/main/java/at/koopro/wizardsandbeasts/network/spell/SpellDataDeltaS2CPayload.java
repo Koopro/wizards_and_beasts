@@ -22,7 +22,8 @@ public record SpellDataDeltaS2CPayload(
         String spellId,
         long cooldownExpiryTick,
         int newCastCount,
-        int newSuccessfulHits) implements CustomPacketPayload {
+        int newSuccessfulHits,
+        long globalCooldownEndTick) implements CustomPacketPayload {
 
     public static final Type<SpellDataDeltaS2CPayload> TYPE = new Type<>(
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "spell_data_delta"));
@@ -34,7 +35,8 @@ public record SpellDataDeltaS2CPayload(
             long expiry = buf.readLong();
             int casts = buf.readInt();
             int successfulHits = buf.readInt();
-            return new SpellDataDeltaS2CPayload(id, expiry, casts, successfulHits);
+            long globalCooldown = buf.readLong();
+            return new SpellDataDeltaS2CPayload(id, expiry, casts, successfulHits, globalCooldown);
         }
 
         @Override
@@ -43,6 +45,7 @@ public record SpellDataDeltaS2CPayload(
             buf.writeLong(pkt.cooldownExpiryTick);
             buf.writeInt(pkt.newCastCount);
             buf.writeInt(pkt.newSuccessfulHits);
+            buf.writeLong(pkt.globalCooldownEndTick);
         }
     };
 
@@ -59,11 +62,13 @@ public record SpellDataDeltaS2CPayload(
                               String spellId,
                               long expiryTick,
                               int newCastCount,
-                              int newSuccessfulHits) {
+                              int newSuccessfulHits,
+                              long globalCooldownEndTick) {
         PacketDistributor.sendToPlayer(player, new SpellDataDeltaS2CPayload(
                 spellId,
                 expiryTick,
                 newCastCount,
-                newSuccessfulHits));
+                newSuccessfulHits,
+                globalCooldownEndTick));
     }
 }

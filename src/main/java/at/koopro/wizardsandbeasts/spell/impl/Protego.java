@@ -37,7 +37,8 @@ public class Protego extends Spell {
     }
 
     @Override
-    public void execute(ServerLevel level, ServerPlayer caster, ItemStack wandStack) {
+    public void executeCast(CastContext ctx, ServerLevel level) {
+        ServerPlayer caster = ctx.caster();
         int heldTicks = WandCastTiming.consumeLastHoldTicks(caster);
         int tier = ProtegoProjectileHandler.resolveTier(caster, heldTicks);
         int duration = 60 + (int) (getProficiencyScalar(caster) * 100);

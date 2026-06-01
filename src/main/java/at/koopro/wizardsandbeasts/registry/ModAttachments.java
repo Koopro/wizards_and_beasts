@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.azkaban.attachment.AzkabanTrespasserData;
+import at.koopro.wizardsandbeasts.stats.PlayerStatsData;
 import at.koopro.wizardsandbeasts.bloodpact.BloodPactRecord;
 import at.koopro.wizardsandbeasts.entity.niffler.CarriedNifflerAttachment;
 import at.koopro.wizardsandbeasts.event.wand.DisarmLogState;
@@ -160,6 +161,12 @@ public class ModAttachments {
                             .serialize(AzkabanTrespasserData.CODEC.fieldOf("data"))
                             .copyOnDeath()
                             .build());
+
+    public static final Supplier<AttachmentType<PlayerStatsData>> PLAYER_STATS =
+            ATTACHMENTS.register("player_stats", () -> AttachmentType.builder(() -> PlayerStatsData.EMPTY)
+                    .serialize(PlayerStatsData.CODEC.fieldOf("data"))
+                    .copyOnDeath()
+                    .build());
 
     public static final Supplier<AttachmentType<Set<String>>> FLOO_VISITED_DESTINATIONS =
             ATTACHMENTS.register("floo_visited_destinations", () ->

@@ -28,7 +28,10 @@ public final class ModuleManager {
         STATES.put(Module.BROOM_FLIGHT, State.ENABLED);
         STATES.put(Module.POCKET_DIMENSIONS, State.ENABLED);
         STATES.put(Module.OWLS, State.PREVIEW);
+        STATES.put(Module.AZKABAN, State.ENABLED);
         STATES.put(Module.FLOO_NETWORK, State.DISABLED);
+        STATES.put(Module.CHARACTER_SHEET, State.ENABLED);
+        STATES.put(Module.PLAYER_STATS, State.PREVIEW);
     }
 
     private ModuleManager() {

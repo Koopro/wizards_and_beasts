@@ -4,6 +4,9 @@ import at.koopro.wizardsandbeasts.spell.core.*;
 
 import at.koopro.wizardsandbeasts.Config;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.module.Module;
+import at.koopro.wizardsandbeasts.module.ModuleManager;
+import at.koopro.wizardsandbeasts.network.spell.SpellDeniedS2CPayload;
 import at.koopro.wizardsandbeasts.command.debug.DebugHooks;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.network.spell.SpellDataDeltaS2CPayload;
@@ -32,6 +35,9 @@ import org.slf4j.Logger;
 public final class SpellCastService {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final String FLAG_COLLAPSE_CAST_INSTABILITY_UNTIL = "obscurial_collapse_cast_instability_until_tick";
+
+    /** GCD applied after every successful cast. Tuning constant. */
+    public static final int GLOBAL_COOLDOWN_TICKS = 5;
 
     private SpellCastService() {}
 
@@ -123,14 +129,16 @@ public final class SpellCastService {
         long currentTick = serverLevel.getGameTime();
         if (data.isOnCooldown(spellId, currentTick)) {
             rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.COOLDOWN_ACTIVE, spellId));
-            float remainingSec = (data.getCooldownExpiry(spellId) - currentTick) / 20f;
-            player.displayClientMessage(
-                    Component.literal("")
-                            .append(Component.literal(spell.getDisplayName()).withStyle(ChatFormatting.GOLD))
-                            .append(Component.literal(" recharging ").withStyle(ChatFormatting.DARK_GRAY))
-                            .append(Component.literal(String.format("%.1fs", Math.max(0f, remainingSec)))
-                                    .withStyle(ChatFormatting.RED)),
-                    true);
+            if (ModuleManager.isEnabled(Module.WANDS_AND_SPELLS)) {
+                SpellDeniedS2CPayload.sendTo(player);
+            }
+            return CastResult.REJECTED;
+        }
+        if (data.isGlobalCooldownActive(currentTick)) {
+            rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.COOLDOWN_ACTIVE, "global_cooldown"));
+            if (ModuleManager.isEnabled(Module.WANDS_AND_SPELLS)) {
+                SpellDeniedS2CPayload.sendTo(player);
+            }
             return CastResult.REJECTED;
         }
 
@@ -163,6 +171,9 @@ public final class SpellCastService {
                 }
                 debugReject(player, SpellRejectCodes.withDetail(SpellRejectCodes.COLLAPSE_INSTABILITY_FIZZLE, spellId));
                 player.displayClientMessage(Component.literal("\u00A75Residual obscurus instability disrupts your spell."), true);
+                if (ModuleManager.isEnabled(Module.WANDS_AND_SPELLS)) {
+                    SpellDeniedS2CPayload.sendTo(player);
+                }
                 return CastResult.REJECTED;
             }
         }
@@ -176,6 +187,9 @@ public final class SpellCastService {
             }
             ObscurialCombatRules.consumeCastSpike(player);
             player.displayClientMessage(Component.literal("\u00A74Your obscurus destabilizes the cast and backlashes."), true);
+            if (ModuleManager.isEnabled(Module.WANDS_AND_SPELLS)) {
+                SpellDeniedS2CPayload.sendTo(player);
+            }
             return CastResult.REJECTED;
         }
 
@@ -186,6 +200,9 @@ public final class SpellCastService {
                 if (violation.isHardReject()) {
                     player.displayClientMessage(violation.loreMessage().copy().withStyle(ChatFormatting.GOLD), true);
                     DebugHooks.logSpellCast(player, "cast_gamp_reject", violation.domain().name());
+                    if (ModuleManager.isEnabled(Module.WANDS_AND_SPELLS)) {
+                        SpellDeniedS2CPayload.sendTo(player);
+                    }
                     return CastResult.GAMP_REJECTED;
                 }
                 player.displayClientMessage(
@@ -215,9 +232,11 @@ public final class SpellCastService {
         data.setCooldown(spellId, expiryTick);
         data.incrementCastCount(spellId);
         int newCount = data.getCastCount(spellId);
+        long gcdEndTick = currentTick + GLOBAL_COOLDOWN_TICKS;
+        data.setGlobalCooldownEndTick(gcdEndTick);
         ObscurialCombatRules.consumeCastSpike(player);
 
-        SpellDataDeltaS2CPayload.sendTo(player, spellId, expiryTick, newCount, data.getSuccessfulHits(spellId));
+        SpellDataDeltaS2CPayload.sendTo(player, spellId, expiryTick, newCount, data.getSuccessfulHits(spellId), gcdEndTick);
         return CastResult.SUCCESS;
     }
 

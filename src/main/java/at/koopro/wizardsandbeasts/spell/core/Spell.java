@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.spell.core;
 
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
+import at.koopro.wizardsandbeasts.spell.cast.CastContext;
 import at.koopro.wizardsandbeasts.spell.cast.SpellExecutor;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
@@ -64,6 +65,16 @@ public abstract class Spell {
      */
     public void execute(ServerLevel level, ServerPlayer caster, ItemStack wandStack) {
         SpellExecutor.executeGeneric(this, level, caster, wandStack);
+    }
+
+    /**
+     * Cast-dispatch hook, invoked by {@link SpellExecutor#executeGeneric(CastContext, ServerLevel)}
+     * AFTER the modifier pipeline (corruption, misfire, Gamp, scaling) has run. The default performs
+     * the generic {@code castType} dispatch. Override for custom behavior (entity spawns, etc.) so it
+     * runs on a normal wand cast with the fully-enriched {@link CastContext}.
+     */
+    public void executeCast(CastContext ctx, ServerLevel level) {
+        SpellExecutor.dispatchGeneric(ctx, level);
     }
 
     // ── Getters ─────────────────────────────────────────────────────────

@@ -30,7 +30,7 @@ public class FoeGlassItem extends Item {
 
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
-        if (!ModuleManager.isEnabled(Module.WANDS)) {
+        if (!ModuleManager.isEnabled(Module.DARK_ARTS)) {
             return InteractionResult.FAIL;
         }
         // TODO: [detection] open Foe-Glass GUI showing hostile players sorted by proximity
