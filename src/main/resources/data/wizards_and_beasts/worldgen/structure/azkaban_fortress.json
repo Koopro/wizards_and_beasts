@@ -1,19 +1,14 @@
 {
   "type": "wizards_and_beasts:azkaban_fortress",
-  "biomes": "#minecraft:is_overworld",
+  "biomes": "#wizards_and_beasts:has_structure/azkaban",
   "step": "surface_structures",
   "terrain_adaptation": "none",
-  "spawn_overrides": {
-    "monster": {
-      "bounding_box": "piece",
-      "spawns": [
-        {
-          "type": "wizards_and_beasts:dementor",
-          "weight": 100,
-          "minCount": 1,
-          "maxCount": 2
-        }
-      ]
-    }
+  "template": "wizards_and_beasts:azkaban",
+  "crag_height": 10,
+  "platform_margin": 3,
+  "palette": {
+    "body": "minecraft:stone",
+    "lower": "minecraft:deepslate",
+    "accent": "minecraft:gravel"
   }
 }

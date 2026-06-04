@@ -10,6 +10,11 @@ group = mod_group_id
 
 repositories {
     mavenLocal()
+    // TerraBlender (biome-source injection) is published to the Forge maven.
+    maven {
+        name = 'MinecraftForge'
+        url = 'https://maven.minecraftforge.net/'
+    }
     exclusiveContent {
         forRepository {
             maven {
@@ -117,6 +122,9 @@ tasks.named('test', Test).configure {
 
 dependencies {
     implementation "software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}"
+
+    // TerraBlender: injects the azkaban_sea biome into the overworld biome source.
+    implementation "com.github.glitchfiend:TerraBlender-neoforge:${terrablender_version}"
 
     testImplementation platform('org.junit:junit-bom:5.11.4')
     testImplementation 'org.junit.jupiter:junit-jupiter'

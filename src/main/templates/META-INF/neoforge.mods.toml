@@ -72,6 +72,15 @@ versionRange = "${minecraft_version_range}"
 ordering = "NONE"
 side = "BOTH"
 
+# TerraBlender provides the biome-source injection for the azkaban_sea biome.
+# Must load BEFORE this mod so the region is registered when our initializer runs.
+[[dependencies."${mod_id}"]]
+modId = "terrablender"
+type = "required"
+versionRange = "[21.11,)"
+ordering = "AFTER"
+side = "BOTH"
+
 # Features are specific properties of the game environment, that you may want to declare you require. This example declares
 # that your mod requires GL version 3.2 or higher. Other features will be added. They are side aware so declaring this won't
 # stop your mod loading on the server for example.

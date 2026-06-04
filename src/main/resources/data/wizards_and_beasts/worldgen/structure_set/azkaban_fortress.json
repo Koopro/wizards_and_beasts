@@ -6,7 +6,9 @@
     }
   ],
   "placement": {
-    "type": "wizards_and_beasts:azkaban_fixed",
-    "salt": 0
+    "type": "minecraft:random_spread",
+    "spacing": 256,
+    "separation": 64,
+    "salt": 41259043
   }
 }

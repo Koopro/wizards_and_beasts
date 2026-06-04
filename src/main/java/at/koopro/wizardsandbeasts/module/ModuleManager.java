@@ -28,7 +28,10 @@ public final class ModuleManager {
         STATES.put(Module.BROOM_FLIGHT, State.ENABLED);
         STATES.put(Module.POCKET_DIMENSIONS, State.ENABLED);
         STATES.put(Module.OWLS, State.PREVIEW);
-        STATES.put(Module.AZKABAN, State.ENABLED);
+        // Azkaban worldgen (crag + NBT-template fortress) is a Beta v0.3 feature.
+        // PREVIEW keeps it generating + flagged at alpha; set DISABLED to stop
+        // generation entirely (registration of type/biome/structure is unaffected).
+        STATES.put(Module.AZKABAN, State.PREVIEW);
         STATES.put(Module.FLOO_NETWORK, State.DISABLED);
         STATES.put(Module.CHARACTER_SHEET, State.ENABLED);
         STATES.put(Module.PLAYER_STATS, State.PREVIEW);

@@ -2,10 +2,7 @@ package at.koopro.wizardsandbeasts.azkaban.command;
 
 import at.koopro.wizardsandbeasts.azkaban.AzkabanDamageTypes;
 import at.koopro.wizardsandbeasts.azkaban.attachment.AzkabanTrespasserData;
-import at.koopro.wizardsandbeasts.azkaban.data.AzkabanWorldData;
-import at.koopro.wizardsandbeasts.azkaban.structure.AzkabanFortressPiece;
 import at.koopro.wizardsandbeasts.azkaban.structure.AzkabanStructures;
-import at.koopro.wizardsandbeasts.azkaban.worldgen.AzkabanFixedPlacement;
 import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.entity.azkaban.DementorEntity;
@@ -18,6 +15,11 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import org.jspecify.annotations.Nullable;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -85,7 +87,11 @@ public final class AzkabanCommands {
 
     private static int locate(CommandSourceStack src) {
         ServerLevel level = src.getLevel();
-        BlockPos center = getFortressCenter(level);
+        BlockPos center = findCenter(level, BlockPos.containing(src.getPosition()));
+        if (center == null) {
+            src.sendFailure(Component.literal("No Azkaban Fortress found within search range."));
+            return 0;
+        }
         src.sendSuccess(() -> Component.literal(
                 "Azkaban Fortress: " + center.getX() + ", " + center.getY() + ", " + center.getZ()), false);
         return 1;
@@ -95,8 +101,12 @@ public final class AzkabanCommands {
             throws com.mojang.brigadier.exceptions.CommandSyntaxException {
         ServerPlayer player = src.getPlayerOrException();
         ServerLevel level = (ServerLevel) player.level();
-        BlockPos center = getFortressCenter(level);
-        double aboveY = AzkabanFortressPiece.ISLAND_SURFACE_Y + AzkabanFortressPiece.FORT_H + 20.0;
+        BlockPos center = findCenter(level, player.blockPosition());
+        if (center == null) {
+            src.sendFailure(Component.literal("No Azkaban Fortress found within search range."));
+            return 0;
+        }
+        double aboveY = center.getY() + 40.0;
         player.teleportTo(center.getX() + 0.5, aboveY, center.getZ() + 0.5);
         src.sendSuccess(() -> Component.literal("Teleported above Azkaban Fortress."), true);
         return 1;
@@ -104,21 +114,30 @@ public final class AzkabanCommands {
 
     private static int forceGenerate(CommandSourceStack src) {
         ServerLevel level = src.getLevel();
-        ChunkPos target = AzkabanFixedPlacement.computeTargetChunk(level.getSeed());
-        // Force full generation of all chunks the 36×36 fortress footprint spans (up to 4×4 chunks)
-        for (int dx = -1; dx <= 2; dx++) {
-            for (int dz = -1; dz <= 2; dz++) {
+        BlockPos center = locateNearest(level, BlockPos.containing(src.getPosition()));
+        if (center == null) {
+            src.sendFailure(Component.literal("No Azkaban Fortress found within search range to force-generate."));
+            return 0;
+        }
+        ChunkPos target = new ChunkPos(center);
+        // Load the chunks the crag/template span so postProcess runs and blocks place.
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dz = -2; dz <= 2; dz++) {
                 level.getChunk(target.x + dx, target.z + dz);
             }
         }
         src.sendSuccess(() -> Component.literal(
-                "Forced generation of chunks around Azkaban target " + target), true);
+                "Forced generation around Azkaban at chunk " + target), true);
         return 1;
     }
 
     private static int dumpInfo(CommandSourceStack src) {
         ServerLevel level = src.getLevel();
-        BlockPos center = getFortressCenter(level);
+        BlockPos center = findCenter(level, BlockPos.containing(src.getPosition()));
+        if (center == null) {
+            src.sendFailure(Component.literal("No Azkaban Fortress found within search range."));
+            return 0;
+        }
         ChunkPos chunkPos = new ChunkPos(center);
         int seaLevel = level.getSeaLevel();
         int seabedY = level.getChunk(chunkPos.x, chunkPos.z)
@@ -144,10 +163,25 @@ public final class AzkabanCommands {
         return 1;
     }
 
-    /** Returns the fortress center; if not yet generated, computes from seed. */
-    private static BlockPos getFortressCenter(ServerLevel level) {
-        AzkabanWorldData data = AzkabanWorldData.get(level);
-        return data.getOrComputeCenter(level);
+    /**
+     * Returns the Azkaban center: the cached/saved center if the structure has
+     * generated, otherwise the nearest placement found via a structure search
+     * (random-spread placement has no seed-derivable location). May be null.
+     */
+    private static @Nullable BlockPos findCenter(ServerLevel level, BlockPos from) {
+        BlockPos cached = AzkabanStructures.getCenter(level);
+        if (cached != null) return cached;
+        return locateNearest(level, from);
+    }
+
+    /** Structure search for the nearest Azkaban Fortress placement. */
+    private static @Nullable BlockPos locateNearest(ServerLevel level, BlockPos from) {
+        Holder.Reference<Structure> holder = level.registryAccess()
+                .lookupOrThrow(Registries.STRUCTURE)
+                .getOrThrow(AzkabanStructures.AZKABAN_FORTRESS_KEY);
+        var result = level.getChunkSource().getGenerator().findNearestMapStructure(
+                level, HolderSet.direct(holder), from, 200, false);
+        return result != null ? result.getFirst() : null;
     }
 
     // -------------------------------------------------------------------------

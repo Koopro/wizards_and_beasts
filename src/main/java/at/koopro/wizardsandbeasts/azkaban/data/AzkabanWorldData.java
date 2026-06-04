@@ -1,12 +1,10 @@
 package at.koopro.wizardsandbeasts.azkaban.data;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.azkaban.worldgen.AzkabanFixedPlacement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
 import org.jspecify.annotations.NonNull;
@@ -41,10 +39,13 @@ public final class AzkabanWorldData extends SavedData {
         return level.getServer().overworld().getDataStorage().computeIfAbsent(TYPE);
     }
 
-    public @NonNull BlockPos getOrComputeCenter(@NonNull ServerLevel level) {
-        if (fortressCenter != null) return fortressCenter;
-        ChunkPos chunk = AzkabanFixedPlacement.computeTargetChunk(level.getSeed());
-        return new BlockPos(chunk.getMiddleBlockX(), 65, chunk.getMiddleBlockZ());
+    /**
+     * Cached fortress center, or {@code null} if the structure has not generated
+     * yet. With random-spread placement there is no seed-derivable location — use
+     * {@code /locate} (a structure search) to find an instance.
+     */
+    public @Nullable BlockPos getCenter() {
+        return fortressCenter;
     }
 
     public void setFortressCenter(@NonNull BlockPos center) {
