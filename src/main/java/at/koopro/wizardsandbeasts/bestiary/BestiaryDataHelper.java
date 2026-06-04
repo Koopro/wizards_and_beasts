@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.bestiary;
 import at.koopro.wizardsandbeasts.bestiary.data.PlayerBestiaryData;
 import at.koopro.wizardsandbeasts.event.bestiary.BestiaryTierAdvancedEvent;
 import at.koopro.wizardsandbeasts.network.bestiary.BestiaryDataSyncPayload;
+import at.koopro.wizardsandbeasts.network.stats.PlayerStatsSyncPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
@@ -37,6 +38,7 @@ public final class BestiaryDataHelper {
         player.setData(ModAttachments.BESTIARY_DATA.get(), new PlayerBestiaryData(map));
         if (player instanceof ServerPlayer sp) {
             BestiaryDataSyncPayload.syncToPlayer(sp);
+            PlayerStatsSyncPayload.syncToPlayer(sp); // KNOWLEDGE derives from bestiary discoveries
         }
     }
 
@@ -58,6 +60,7 @@ public final class BestiaryDataHelper {
         player.setData(ModAttachments.BESTIARY_DATA.get(), new PlayerBestiaryData(map));
         if (player instanceof ServerPlayer sp) {
             BestiaryDataSyncPayload.syncToPlayer(sp);
+            PlayerStatsSyncPayload.syncToPlayer(sp); // KNOWLEDGE derives from bestiary discoveries
         }
     }
 

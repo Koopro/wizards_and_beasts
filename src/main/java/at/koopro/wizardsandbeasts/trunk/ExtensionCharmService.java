@@ -30,11 +30,16 @@ import net.minecraft.world.level.levelgen.DensityFunctions;
 import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 public final class ExtensionCharmService {
+
+    private static final Logger LOGGER = LogManager.getLogger(ExtensionCharmService.class);
 
     static final int GRID_SPACING = 512;
     static final int FLOOR_Y = 64;
@@ -132,7 +137,10 @@ public final class ExtensionCharmService {
                     returnLevel = candidate;
                     returnPos = savedPos;
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ex) {
+                LOGGER.warn("[WizardsAndBeasts] Failed to parse saved return dimension '{}' for {} — falling back to overworld spawn",
+                        dimStr, player.getUUID(), ex);
+            }
         }
         data.clearReturnData(player.getUUID());
         PocketDimensionEvents.cancelLadderSound(player.getUUID());
@@ -165,7 +173,10 @@ public final class ExtensionCharmService {
                     returnLevel = candidate;
                     returnPos = savedPos;
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ex) {
+                LOGGER.warn("[WizardsAndBeasts] Failed to parse saved return dimension '{}' for {} — falling back to overworld spawn",
+                        dimStr, player.getUUID(), ex);
+            }
         }
         data.clearReturnData(player.getUUID());
         PocketDimensionEvents.cancelLadderSound(player.getUUID());

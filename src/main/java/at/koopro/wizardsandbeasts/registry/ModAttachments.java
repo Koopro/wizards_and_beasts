@@ -12,6 +12,7 @@ import at.koopro.wizardsandbeasts.ability.data.PlayerAbilityData;
 import at.koopro.wizardsandbeasts.bestiary.data.PlayerBestiaryData;
 import at.koopro.wizardsandbeasts.owl.data.PlayerOWLData;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerProfessionData;
+import at.koopro.wizardsandbeasts.memory.PlayerMemoryData;
 import at.koopro.wizardsandbeasts.skill.data.PlayerSkillData;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
@@ -176,6 +177,12 @@ public class ModAttachments {
                                     .fieldOf("visited"))
                             .copyOnDeath()
                             .build());
+
+    public static final Supplier<AttachmentType<PlayerMemoryData>> MEMORIES =
+            ATTACHMENTS.register("memories", () -> AttachmentType.builder(PlayerMemoryData::new)
+                    .serialize(PlayerMemoryData.CODEC.fieldOf("data"))
+                    .copyOnDeath()
+                    .build());
 
     private ModAttachments() {
     }

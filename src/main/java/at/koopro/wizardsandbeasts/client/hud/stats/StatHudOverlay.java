@@ -59,7 +59,7 @@ public final class StatHudOverlay {
         String precRow   = "Precision: " + data.precision();
         String willRow   = "Willpower: " + data.willpower();
         String reflRow   = "Reflexes: " + data.reflexes();
-        String knowRow   = "Knowledge: 0"; // TODO: derive from registries
+        String knowRow   = "Knowledge: " + data.knowledge();
 
         String[] rows = { powerBase + (data.isProdigy() ? " ☆" : ""), precRow, willRow, reflRow, knowRow };
 

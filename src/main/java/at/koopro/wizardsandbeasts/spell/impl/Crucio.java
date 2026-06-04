@@ -35,8 +35,11 @@ public class Crucio extends Spell {
 
     @Override
     protected SpellProperties buildProperties() {
+        // Cruciatus inflicts extreme pain and incapacitation — not necrotic decay.
+        // Modelled as weakness + disorientation + slowness rather than the lore-wrong WITHER.
         return SpellProperties.beamChannel(50.0f)
-                .targetEffect(() -> new MobEffectInstance(MobEffects.WITHER, 40, 0, false, true, true))
+                .targetEffect(() -> new MobEffectInstance(MobEffects.WEAKNESS, 40, 1, false, true, true))
+                .targetEffect(() -> new MobEffectInstance(MobEffects.NAUSEA, 40, 0, false, true, true))
                 .targetEffect(() -> new MobEffectInstance(MobEffects.SLOWNESS, 40, 1, false, true, true))
                 .sound(SoundEvents.BLAZE_SHOOT, 1.0f, 0.8f)
                 .build();

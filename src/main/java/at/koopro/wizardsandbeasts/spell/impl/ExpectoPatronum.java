@@ -45,11 +45,11 @@ public class ExpectoPatronum extends Spell {
     public void executeCast(CastContext ctx, ServerLevel level) {
         ServerPlayer caster = ctx.caster();
         float happiness = caster.getData(ModAttachments.HAPPINESS.get());
-        int happyMemoryCount = 0;
-        // TODO(memories): count HAPPY MemoryEntry in MEMORIES attachment when implemented
+        // Akkumulierte HAPPY-Memories: intensity-gewichtet + gedeckelt (MemoryService.MAX_MEMORY_BONUS).
+        float memoryBonus = at.koopro.wizardsandbeasts.memory.MemoryService.patronusMemoryBonus(caster);
         float darkCorruption = caster.getData(ModAttachments.DARK_CORRUPTION.get());
         float patronusPower = Mth.clamp(
-                happiness * 0.4f + happyMemoryCount * 3.0f + getProficiencyScalar(caster) * 20.0f - darkCorruption * 0.3f,
+                happiness * 0.4f + memoryBonus + getProficiencyScalar(caster) * 20.0f - darkCorruption * 0.3f,
                 0.0f, 100.0f);
         if (patronusPower < 15.0f) {
             level.playSound(null, caster.blockPosition(), ModSounds.SPELL_FIZZLE.get(), SoundSource.PLAYERS, 0.55f, 1.0f);
@@ -89,5 +89,11 @@ public class ExpectoPatronum extends Spell {
             }
         }
         at.koopro.wizardsandbeasts.entity.spell.PatronusEntity.trySpawn(level, caster, patronusPower, getProficiencyScalar(caster));
+
+        // A Patronus that holds a defined animal form (power >= 40) is corporeal — the milestone.
+        if (patronusPower >= 40.0f) {
+            at.koopro.wizardsandbeasts.stats.StatMilestones.onMilestoneTriggered(
+                    caster, at.koopro.wizardsandbeasts.stats.MilestoneType.FIRST_PATRONUS_CORPOREAL);
+        }
     }
 }

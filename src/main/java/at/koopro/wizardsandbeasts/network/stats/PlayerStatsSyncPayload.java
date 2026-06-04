@@ -5,6 +5,7 @@ import at.koopro.wizardsandbeasts.client.stats.ClientStatsState;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.stats.PlayerStat;
+import at.koopro.wizardsandbeasts.stats.PlayerStatsAPI;
 import at.koopro.wizardsandbeasts.stats.PlayerStatsData;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -43,9 +44,11 @@ public record PlayerStatsSyncPayload(PlayerStatsData data) implements CustomPack
                 }
             }
 
+            int knowledge = PacketCodecUtils.clampNonNegative(buf.readInt());
+
             PlayerStatsData decoded = new PlayerStatsData(
                     power, precision, willpower, reflexes,
-                    isProdigy, powerGrowthAccumulated, training);
+                    isProdigy, powerGrowthAccumulated, training, knowledge);
             return new PlayerStatsSyncPayload(decoded);
         }
 
@@ -65,6 +68,8 @@ public record PlayerStatsSyncPayload(PlayerStatsData data) implements CustomPack
                 PacketCodecUtils.writeString(buf, stat.getId());
                 buf.writeFloat(progress);
             });
+
+            buf.writeInt(d.knowledge());
         }
     };
 
@@ -78,7 +83,8 @@ public record PlayerStatsSyncPayload(PlayerStatsData data) implements CustomPack
     }
 
     public static void syncToPlayer(ServerPlayer player) {
-        PlayerStatsData data = player.getData(ModAttachments.PLAYER_STATS.get());
+        PlayerStatsData data = player.getData(ModAttachments.PLAYER_STATS.get())
+                .withKnowledge(PlayerStatsAPI.computeKnowledge(player));
         PacketDistributor.sendToPlayer(player, new PlayerStatsSyncPayload(data));
     }
 }

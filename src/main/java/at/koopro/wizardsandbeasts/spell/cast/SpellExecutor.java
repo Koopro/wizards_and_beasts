@@ -33,12 +33,16 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Default spell execution logic. Individual spells delegate here via {@link Spell#execute}.
  * Spells can override execute() entirely for custom behavior.
  */
 public final class SpellExecutor {
+
+    private static final Logger LOGGER = LogManager.getLogger(SpellExecutor.class);
 
     private SpellExecutor() {}
 
@@ -64,6 +68,8 @@ public final class SpellExecutor {
             try {
                 spellKey = Identifier.parse(spell.getId());
             } catch (Exception ex) {
+                LOGGER.warn("[WizardsAndBeasts] Malformed spell id '{}' — using sanitized fallback key. Fix the spell registration.",
+                        spell.getId(), ex);
                 spellKey = Identifier.fromNamespaceAndPath(at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID,
                         spell.getId().replace(":", "_").replace(".", "_"));
             }

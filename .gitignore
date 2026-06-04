@@ -130,3 +130,7 @@ src/generated/resources/.cache/
 
 # Accidental vanilla sources copied at repo root — do not commit
 /net/
+
+# graphify tool output (regenerable)
+graphify-out/
+src/main/graphify-out/

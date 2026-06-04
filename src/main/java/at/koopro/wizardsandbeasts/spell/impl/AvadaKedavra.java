@@ -14,8 +14,9 @@ public class AvadaKedavra extends Spell {
 
     @Override
     protected SpellProperties buildProperties() {
+        // "A jet of green light" — a cold magical incantation, not a fiery blaze shot.
         return SpellProperties.beamLethal(50.0f)
-                .sound(SoundEvents.BLAZE_SHOOT, 1.0f, 0.5f)
+                .sound(SoundEvents.EVOKER_CAST_SPELL, 1.0f, 0.5f)
                 .build();
     }
 

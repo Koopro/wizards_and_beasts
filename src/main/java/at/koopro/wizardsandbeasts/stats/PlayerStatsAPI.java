@@ -25,11 +25,16 @@ public final class PlayerStatsAPI {
     // Read
     // -------------------------------------------------------------------------
 
-    /** Returns the current value of the given stat for the player. KNOWLEDGE always returns 0 (TODO: derive). */
+    /**
+     * Returns the current value of the given stat for the player. KNOWLEDGE is derived: on the
+     * server it is computed live from learning sources; on the client it reads the last synced
+     * snapshot ({@link PlayerStatsData#knowledge()}).
+     */
     public static int getStat(@NonNull Player player, @NonNull PlayerStat stat) {
-        if (stat.isDerived()) {
-            // TODO: derive from registries (spells learned + bestiary discoveries + skill nodes + books read)
-            return 0;
+        if (stat == PlayerStat.KNOWLEDGE) {
+            return player.level().isClientSide()
+                    ? getData(player).knowledge()
+                    : computeKnowledge(player);
         }
         PlayerStatsData data = getData(player);
         return switch (stat) {
@@ -37,8 +42,23 @@ public final class PlayerStatsAPI {
             case PRECISION -> data.precision();
             case WILLPOWER -> data.willpower();
             case REFLEXES  -> data.reflexes();
-            case KNOWLEDGE -> 0;
+            case KNOWLEDGE -> data.knowledge(); // unreachable — handled above
         };
+    }
+
+    /**
+     * Derives the KNOWLEDGE stat from the player's accumulated learning: spells known, bestiary
+     * entries discovered, skill nodes unlocked, and lore books read. Server-authoritative — reads
+     * the source attachments directly. Safe to call client-side too (attachments mirror via sync),
+     * but prefer the synced snapshot for display.
+     */
+    public static int computeKnowledge(@NonNull Player player) {
+        int spells   = player.getData(ModAttachments.SPELL_DATA.get()).getKnownSpells().size();
+        int bestiary = player.getData(ModAttachments.BESTIARY_DATA.get()).tiers().size();
+        var skill    = player.getData(ModAttachments.SKILL_DATA.get());
+        int nodes    = skill.getUnlockedSkills().size();
+        int books    = skill.getLoreItemsRead();
+        return KnowledgeFormula.compute(spells, bestiary, nodes, books);
     }
 
     /** Returns the current Power ceiling: initial rolled Power + accumulated growth, capped at the Heritage band max. */

@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.client.spell.hud;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.client.ModTextures;
+import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellDataState;
 import at.koopro.wizardsandbeasts.client.spell.ui.SpellHudUiModel;
 import at.koopro.wizardsandbeasts.client.ui.UiStateProjection;
 import at.koopro.wizardsandbeasts.spell.cast.SpellCastService;
@@ -86,8 +87,11 @@ public class SpellDiamondOverlay {
         // Per-slot cooldown sweeps: drawn above spell icons, below gold trim.
         // Uses diamond-shaped scanline fill so overlay never bleeds outside the slot polygon.
         if (ModuleManager.isEnabled(Module.WANDS_AND_SPELLS)) {
-            long gameTick = mc.level.getGameTime();
-            float partial = delta.getGameTimeDeltaPartialTick(false);
+            long rawTick = mc.level.getGameTime();
+            long gameTick = ClientSpellDataState.monotonicTick(rawTick);
+            // Drop the partial-tick interpolation while the clock is clamped (server stalled and snapped
+            // gameTime backward) so the sweep holds steady instead of springing back to full.
+            float partial = rawTick >= gameTick ? delta.getGameTimeDeltaPartialTick(false) : 0f;
             int iconSize = scalePx(ICON_TEX_SIZE);
             for (int i = 0; i < 4; i++) {
                 String spellId = data.getLoadoutSpell(i);
@@ -96,7 +100,11 @@ public class SpellDiamondOverlay {
                 if (expiryTick <= gameTick) continue;
                 Spell spell = Spells.byId(spellId);
                 int baseCooldown = spell != null ? Math.max(1, spell.getBaseCooldownTicks()) : 20;
-                float remaining = Mth.clamp((expiryTick - (gameTick + partial)) / baseCooldown, 0f, 1f);
+                // Divide by the cooldown's actual applied span, not baseCooldown: modifiers can scale
+                // the real duration up to ×3, which would otherwise clamp the sweep at "full" and make
+                // it look frozen. ClientSpellDataState captures the true span when the cooldown starts.
+                long spanTicks = ClientSpellDataState.getCooldownSpanTicks(spellId, baseCooldown);
+                float remaining = Mth.clamp((expiryTick - (gameTick + partial)) / (float) spanTicks, 0f, 1f);
                 int cx = hudX + scalePx(SLOT_CENTERS[i][0]);
                 int cy = hudY + scalePx(SLOT_CENTERS[i][1]);
                 renderDiamondSweep(graphics, cx, cy, iconSize / 2, remaining);
@@ -154,8 +162,9 @@ public class SpellDiamondOverlay {
         // Seconds readout: integer seconds above the icon, visible above trim.
         // Displayed when remaining cooldown > 1s.
         if (ModuleManager.isEnabled(Module.WANDS_AND_SPELLS)) {
-            long gameTick = mc.level.getGameTime();
-            float partial = delta.getGameTimeDeltaPartialTick(false);
+            long rawTick = mc.level.getGameTime();
+            long gameTick = ClientSpellDataState.monotonicTick(rawTick);
+            float partial = rawTick >= gameTick ? delta.getGameTimeDeltaPartialTick(false) : 0f;
             for (int i = 0; i < 4; i++) {
                 String spellId = data.getLoadoutSpell(i);
                 if (spellId == null) continue;

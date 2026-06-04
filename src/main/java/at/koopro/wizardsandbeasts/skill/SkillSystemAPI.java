@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.skill;
 import at.koopro.wizardsandbeasts.skill.data.PlayerSkillData;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
+import at.koopro.wizardsandbeasts.network.stats.PlayerStatsSyncPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
@@ -126,6 +127,10 @@ public final class SkillSystemAPI {
 
         applyImmediateEffects(skill);
         SkillAttributeApplicator.applyAll(player);
+        PlayerStatsSyncPayload.syncToPlayer(player); // KNOWLEDGE derives from skill nodes unlocked
+        // Mastering a new node is a formative achievement → happy memory.
+        at.koopro.wizardsandbeasts.memory.MemoryService.tryFormMemory(
+                player, at.koopro.wizardsandbeasts.memory.MemoryType.HAPPY, 0.5f, "skill_unlock", 1200L);
         return true;
     }
 
@@ -141,6 +146,7 @@ public final class SkillSystemAPI {
         data.setSkillLevel(skillId, skill.getMaxLevel());
         applyImmediateEffects(skill);
         SkillAttributeApplicator.applyAll(player);
+        PlayerStatsSyncPayload.syncToPlayer(player); // KNOWLEDGE derives from skill nodes unlocked
     }
 
     // ── Point Management ──

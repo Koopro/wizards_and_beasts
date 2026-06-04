@@ -44,7 +44,12 @@ public record SpellSelectC2SPayload(int slotIndex) implements CustomPacketPayloa
                 return;
             }
             data.setActiveSlot(pkt.slotIndex);
-            SpellDataSyncS2CPayload.syncToPlayer(player);
+            // The client already set this slot optimistically before sending (SpellInputController), so
+            // only push a correction if the server landed on a DIFFERENT slot. A routine full sync here
+            // runs resetAll() on the client and snaps every cooldown sweep back to full on each switch.
+            if (data.getActiveSlot() != pkt.slotIndex) {
+                SpellDataSyncS2CPayload.syncToPlayer(player);
+            }
         });
     }
 }

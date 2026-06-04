@@ -870,6 +870,19 @@
   "item.wizards_and_beasts.galleon": "Galleon",
   "item.wizards_and_beasts.goblin_teller_spawn_egg": "Goblin Teller Spawn Egg",
 
+  "item.wizards_and_beasts.a_history_of_magic": "A History of Magic",
+  "item.wizards_and_beasts.hogwarts_a_history": "Hogwarts: A History",
+  "item.wizards_and_beasts.rise_and_fall_of_the_dark_arts": "The Rise and Fall of the Dark Arts",
+  "item.wizards_and_beasts.lore_tome.tooltip": "Use to study — deepens your magical Knowledge",
+  "message.wizards_and_beasts.lore_tome.studied": "You study %s. Your Knowledge deepens.",
+  "message.wizards_and_beasts.lore_tome.already_studied": "You already know the contents of %s.",
+
+  "message.wizards_and_beasts.milestone.first_patronus_corporeal": "Milestone — your first corporeal Patronus! +%2$d %1$s.",
+  "message.wizards_and_beasts.milestone.first_imperius_resisted": "Milestone — you threw off the Imperius Curse! +%2$d %1$s.",
+  "message.wizards_and_beasts.milestone.first_occlumency_defence_success": "Milestone — you repelled a Legilimens! +%2$d %1$s.",
+  "message.wizards_and_beasts.milestone.first_animagus_transformation": "Milestone — your first Animagus transformation! +%2$d %1$s.",
+  "message.wizards_and_beasts.milestone.near_death_survived": "Milestone — you survived a brush with death! +%2$d %1$s.",
+
   "entity.wizards_and_beasts.goblin_teller": "Goblin Teller",
 
   "block.wizards_and_beasts.warding_stone": "Warding Stone",

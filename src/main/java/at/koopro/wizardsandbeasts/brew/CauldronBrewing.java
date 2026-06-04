@@ -1,9 +1,12 @@
 package at.koopro.wizardsandbeasts.brew;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
 import at.koopro.wizardsandbeasts.item.brew.BrewItem;
+import at.koopro.wizardsandbeasts.skill.data.PlayerSkillData;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -25,6 +28,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Timed cauldron-brewing flow. This keeps a lightweight in-memory brew queue per
@@ -39,7 +43,10 @@ import java.util.Map;
 public final class CauldronBrewing {
     private static final int MAX_ACTIVE_BREWS = 512;
     private record BrewSite(ResourceKey<Level> dimension, BlockPos pos) {}
-    private record ActiveBrew(String brewId, int remainingTicks) {}
+    // brewerId + brewPoints captured at start: the brew detaches from the player while it heats, so
+    // the Potions OWL credit (complexity-weighted by cauldron tier) is awarded on completion to the
+    // original brewer if still online.
+    private record ActiveBrew(String brewId, int remainingTicks, UUID brewerId, int brewPoints) {}
     private static final Map<BrewSite, ActiveBrew> ACTIVE_BREWS = new HashMap<>();
 
     private CauldronBrewing() {}
@@ -101,7 +108,8 @@ public final class CauldronBrewing {
 
         recipe.consumeFrom(player.getInventory());
         held.shrink(1);
-        ACTIVE_BREWS.put(site, new ActiveBrew(brew.id(), Math.max(1, recipe.heatTimeTicks())));
+        ACTIVE_BREWS.put(site, new ActiveBrew(brew.id(), Math.max(1, recipe.heatTimeTicks()),
+                player.getUUID(), brewPointsFor(tier)));
 
         level.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS,
                 0.8f, 1.0f);
@@ -134,7 +142,7 @@ public final class CauldronBrewing {
             ActiveBrew active = entry.getValue();
             int next = active.remainingTicks - 1;
             if (next > 0) {
-                entry.setValue(new ActiveBrew(active.brewId, next));
+                entry.setValue(new ActiveBrew(active.brewId, next, active.brewerId, active.brewPoints));
                 continue;
             }
 
@@ -143,9 +151,32 @@ public final class CauldronBrewing {
                 ItemStack result = BrewItem.of(brew);
                 Block.popResource(level, pos.above(), result);
                 level.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 0.8f, 1.1f);
+                awardBrewPoints(level, active);
             }
             iterator.remove();
         }
+    }
+
+    /** Complexity weight of a successful brew, by cauldron tier — feeds the Potions OWL grade. */
+    private static int brewPointsFor(CauldronTier tier) {
+        return switch (tier) {
+            case BRASS -> 1;
+            case COPPER -> 2;
+            case PEWTER -> 3;
+        };
+    }
+
+    /** Credits the original brewer's Potions progress on completion, if they are still online. */
+    private static void awardBrewPoints(Level level, ActiveBrew active) {
+        if (active.brewPoints() <= 0 || level.getServer() == null) {
+            return;
+        }
+        ServerPlayer brewer = level.getServer().getPlayerList().getPlayer(active.brewerId());
+        if (brewer == null) {
+            return;
+        }
+        PlayerSkillData skillData = brewer.getData(ModAttachments.SKILL_DATA.get());
+        skillData.addPotionBrewPoints(active.brewPoints());
     }
 
     private static CauldronTier tierOf(Block block) {

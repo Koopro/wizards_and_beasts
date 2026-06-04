@@ -47,6 +47,7 @@ import at.koopro.wizardsandbeasts.registry.BroomItemRegistry;
 import at.koopro.wizardsandbeasts.registry.ConsumableItemRegistry;
 import at.koopro.wizardsandbeasts.registry.CurrencyItemRegistry;
 import at.koopro.wizardsandbeasts.registry.DarkArtefactItemRegistry;
+import at.koopro.wizardsandbeasts.registry.LoreItemRegistry;
 import at.koopro.wizardsandbeasts.registry.MiscItemRegistry;
 import at.koopro.wizardsandbeasts.registry.ModItems;
 import at.koopro.wizardsandbeasts.registry.TrinketItemRegistry;
@@ -79,6 +80,7 @@ public class WizardsAndBeastsMod {
         CurrencyItemRegistry.init();
         DarkArtefactItemRegistry.init();
         MiscItemRegistry.init();
+        LoreItemRegistry.init();
         TrinketItemRegistry.init();
         ModEntities.ENTITY_TYPES.register(modEventBus);
         ModCreativeTabs.TABS.register(modEventBus);

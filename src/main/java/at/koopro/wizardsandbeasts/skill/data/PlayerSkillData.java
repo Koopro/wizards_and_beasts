@@ -8,7 +8,9 @@ import net.minecraft.nbt.CompoundTag;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class PlayerSkillData implements ModAttachments.NbtSerializable {
     public static final String VERSION_KEY = "DataVersion";
@@ -25,7 +27,13 @@ public class PlayerSkillData implements ModAttachments.NbtSerializable {
     private int arithmancyInteractions; // ARITHMANCY: rune/puzzle interactions in worldgen structures
     private int runicInteractions;    // ANCIENT_RUNES: runic item interactions
     private int divinationEvents;     // DIVINATION: correct moon predictions + crystal ball uses
-    private int loreItemsRead;        // HISTORY_OF_MAGIC: lore plaques and books read
+    // HISTORY_OF_MAGIC: ids of lore tomes/plaques the player has studied. A Set (not a counter) so
+    // re-reading the same book can't farm KNOWLEDGE or the History of Magic OWL grade — each unique
+    // source counts exactly once. getLoreItemsRead() exposes the size for the existing readers.
+    private final Set<String> loreEntriesRead = new LinkedHashSet<>();
+    // One-shot milestone ledger: names of MilestoneType achievements already granted, so each
+    // first-time stat bump fires exactly once even though the gameplay trigger may recur.
+    private final Set<String> milestonesAchieved = new LinkedHashSet<>();
     private int astronomyEvents;      // ASTRONOMY: nights observing + moon phase tracking events
     private int muggleItems;          // MUGGLE_STUDIES: muggle items crafted or traded
 
@@ -128,9 +136,21 @@ public class PlayerSkillData implements ModAttachments.NbtSerializable {
     public void incrementDivinationEvents() { divinationEvents = Math.max(0, divinationEvents + 1); }
     public void setDivinationEvents(int v) { divinationEvents = Math.max(0, v); }
 
-    public int getLoreItemsRead() { return loreItemsRead; }
-    public void incrementLoreItemsRead() { loreItemsRead = Math.max(0, loreItemsRead + 1); }
-    public void setLoreItemsRead(int v) { loreItemsRead = Math.max(0, v); }
+    /** Number of distinct lore tomes/plaques studied — feeds KNOWLEDGE and the History of Magic OWL grade. */
+    public int getLoreItemsRead() { return loreEntriesRead.size(); }
+    /** True if this lore source has already been studied (no further credit on re-read). */
+    public boolean hasReadLoreEntry(String loreId) { return loreEntriesRead.contains(loreId); }
+    /** Records a lore source as studied; returns true only the first time (i.e. when it actually counts). */
+    public boolean markLoreEntryRead(String loreId) {
+        return loreId != null && !loreId.isBlank() && loreEntriesRead.add(loreId);
+    }
+
+    /** True if this milestone has already been granted (one-shot guard). */
+    public boolean hasAchievedMilestone(String milestoneId) { return milestonesAchieved.contains(milestoneId); }
+    /** Records a milestone as achieved; returns true only the first time (i.e. when the bump should fire). */
+    public boolean markMilestoneAchieved(String milestoneId) {
+        return milestoneId != null && !milestoneId.isBlank() && milestonesAchieved.add(milestoneId);
+    }
 
     public int getAstronomyEvents() { return astronomyEvents; }
     public void incrementAstronomyEvents() { astronomyEvents = Math.max(0, astronomyEvents + 1); }
@@ -168,7 +188,8 @@ public class PlayerSkillData implements ModAttachments.NbtSerializable {
         tag.putInt("ArithmancyInteractions", arithmancyInteractions);
         tag.putInt("RunicInteractions", runicInteractions);
         tag.putInt("DivinationEvents", divinationEvents);
-        tag.putInt("LoreItemsRead", loreItemsRead);
+        NbtHelper.saveStringSet(tag, "LoreEntriesRead", loreEntriesRead);
+        NbtHelper.saveStringSet(tag, "MilestonesAchieved", milestonesAchieved);
         tag.putInt("AstronomyEvents", astronomyEvents);
         tag.putInt("MuggleItems", muggleItems);
         return tag;
@@ -187,7 +208,10 @@ public class PlayerSkillData implements ModAttachments.NbtSerializable {
         arithmancyInteractions = tag.getInt("ArithmancyInteractions").orElse(0);
         runicInteractions = tag.getInt("RunicInteractions").orElse(0);
         divinationEvents = tag.getInt("DivinationEvents").orElse(0);
-        loreItemsRead = tag.getInt("LoreItemsRead").orElse(0);
+        loreEntriesRead.clear();
+        loreEntriesRead.addAll(NbtHelper.loadStringSet(tag, "LoreEntriesRead"));
+        milestonesAchieved.clear();
+        milestonesAchieved.addAll(NbtHelper.loadStringSet(tag, "MilestonesAchieved"));
         astronomyEvents = tag.getInt("AstronomyEvents").orElse(0);
         muggleItems = tag.getInt("MuggleItems").orElse(0);
     }

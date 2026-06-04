@@ -4,6 +4,7 @@ import at.koopro.wizardsandbeasts.Config;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.currency.vault.PlayerVaultData;
 import at.koopro.wizardsandbeasts.network.spell.SpellDataSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.stats.PlayerStatsSyncPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.core.Spells;
@@ -72,6 +73,7 @@ public final class SpellLearningService {
 
         data.learnSpell(spell.getId());
         SpellDataSyncS2CPayload.syncToPlayer(player);
+        PlayerStatsSyncPayload.syncToPlayer(player); // KNOWLEDGE derives from spells learned
         return LearnResult.success(spell.getDisplayName());
     }
 

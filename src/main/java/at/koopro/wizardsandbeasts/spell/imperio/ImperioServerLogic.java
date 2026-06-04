@@ -116,6 +116,8 @@ public final class ImperioServerLogic {
                     victim.displayClientMessage(
                             Component.literal("You throw off the Imperius Curse!").withStyle(ChatFormatting.GOLD), true);
                     PacketDistributor.sendToPlayer(victim, new ImperioResistS2CPayload(true, 1f));
+                    at.koopro.wizardsandbeasts.stats.StatMilestones.onMilestoneTriggered(
+                            victim, at.koopro.wizardsandbeasts.stats.MilestoneType.FIRST_IMPERIUS_RESISTED);
                 } else {
                     victim.setData(ModAttachments.WILLPOWER.get(), Math.max(0f, will - 15f));
                     victim.addEffect(new MobEffectInstance(ModEffects.IMPERIO_RESISTING, 20, 0, false, true, true));

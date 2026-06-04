@@ -86,7 +86,7 @@ class SpellDataSyncCodecTest {
 
     @Test
     void delta_roundTrip_preservesFields() {
-        SpellDataDeltaS2CPayload original = new SpellDataDeltaS2CPayload("stupefy", 12345L, 7, 4);
+        SpellDataDeltaS2CPayload original = new SpellDataDeltaS2CPayload("stupefy", 12345L, 7, 4, 12300L);
 
         ByteBuf buf = Unpooled.buffer();
         try {
@@ -97,6 +97,7 @@ class SpellDataSyncCodecTest {
             assertEquals(original.cooldownExpiryTick(), decoded.cooldownExpiryTick());
             assertEquals(original.newCastCount(), decoded.newCastCount());
             assertEquals(original.newSuccessfulHits(), decoded.newSuccessfulHits());
+            assertEquals(original.globalCooldownEndTick(), decoded.globalCooldownEndTick());
         } finally {
             buf.release();
         }

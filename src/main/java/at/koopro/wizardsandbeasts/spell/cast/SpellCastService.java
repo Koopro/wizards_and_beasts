@@ -126,6 +126,11 @@ public final class SpellCastService {
             return CastResult.REJECTED;
         }
 
+        // Cooldown clock invariant: ALWAYS use getGameTime() (monotonic, shared across every dimension
+        // via DerivedLevelData — getDayTime()/fixed_time do NOT affect it). Cooldowns are stored as
+        // absolute expiry ticks and persist across relog/death/dimension, so the stamp here and every
+        // reader (isOnCooldown, the HUD) must read the same clock. Never substitute getDayTime() or a
+        // System-millis clock, and never reset/re-stamp an active cooldown.
         long currentTick = serverLevel.getGameTime();
         if (data.isOnCooldown(spellId, currentTick)) {
             rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.COOLDOWN_ACTIVE, spellId));

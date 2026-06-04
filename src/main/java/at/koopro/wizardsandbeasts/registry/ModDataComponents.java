@@ -286,6 +286,13 @@ public class ModDataComponents {
                             .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.VAR_INT)
                             .build());
 
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<UUID>> MOODYS_TRUNK_BASE_ID =
+            DATA_COMPONENTS.register("moodys_trunk_base_id", () ->
+                    DataComponentType.<UUID>builder()
+                            .persistent(net.minecraft.core.UUIDUtil.CODEC)
+                            .networkSynchronized(net.minecraft.core.UUIDUtil.STREAM_CODEC)
+                            .build());
+
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<CompoundTag>> HERMIONES_BAG_INVENTORY =
             DATA_COMPONENTS.register("hermiones_bag_inventory", () ->
                     DataComponentType.<CompoundTag>builder()

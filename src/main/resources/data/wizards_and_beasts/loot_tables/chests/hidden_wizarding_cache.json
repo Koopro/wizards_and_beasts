@@ -1,5 +1,4 @@
 {
-  "_comment": "TODO: add other chest loot. Oakshaft 79 is intentionally loot-only.",
   "type": "minecraft:chest",
   "pools": [
     {
@@ -17,6 +16,49 @@
               }
             }
           ]
+        }
+      ]
+    },
+    {
+      "rolls": { "type": "minecraft:uniform", "min": 1, "max": 3 },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "wizards_and_beasts:knut",
+          "weight": 10,
+          "functions": [
+            { "function": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 3, "max": 17 } }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "wizards_and_beasts:sickle",
+          "weight": 5,
+          "functions": [
+            { "function": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 1, "max": 6 } }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "wizards_and_beasts:galleon",
+          "weight": 2,
+          "functions": [
+            { "function": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 1, "max": 2 } }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "wizards_and_beasts:wand_blank",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 5
         }
       ]
     }

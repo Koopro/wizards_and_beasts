@@ -45,6 +45,8 @@ public final class LegilimencyServerLogic {
                 targetPlayer.displayClientMessage(Component.literal("You felt a presence attempting to enter your mind — and repelled it.").withStyle(ChatFormatting.AQUA), false);
                 caster.displayClientMessage(Component.literal("Their mind resisted your intrusion.").withStyle(ChatFormatting.YELLOW), false);
                 PlayerAbilityHelper.setLegilimencyCooldownTicks(caster, 600);
+                at.koopro.wizardsandbeasts.stats.StatMilestones.onMilestoneTriggered(
+                        targetPlayer, at.koopro.wizardsandbeasts.stats.MilestoneType.FIRST_OCCLUMENCY_DEFENCE_SUCCESS);
                 return;
             }
             targetPlayer.displayClientMessage(Component.literal("You felt someone enter your mind.").withStyle(ChatFormatting.DARK_PURPLE), false);
