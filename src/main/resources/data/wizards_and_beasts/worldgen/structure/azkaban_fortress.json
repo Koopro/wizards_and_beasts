@@ -3,6 +3,7 @@
   "biomes": "#wizards_and_beasts:has_structure/azkaban",
   "step": "surface_structures",
   "terrain_adaptation": "none",
+  "spawn_overrides": {},
   "template": "wizards_and_beasts:azkaban",
   "crag_height": 10,
   "platform_margin": 3,
