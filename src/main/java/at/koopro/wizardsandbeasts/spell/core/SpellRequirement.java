@@ -32,6 +32,20 @@ public class SpellRequirement {
         return new SpellRequirement(spell.getId(), prof);
     }
 
+    /**
+     * Id-based prerequisite. Use when the prerequisite is a JSON/datapack spell that has no Java
+     * {@code Spells.*} constant (e.g. a migrated spell). Resolved lazily at {@link #isMet} time via
+     * the player's known-spell set, so the prerequisite need not be loaded when this is constructed.
+     */
+    public static SpellRequirement knows(String prerequisiteId) {
+        return new SpellRequirement(prerequisiteId, null);
+    }
+
+    /** Id-based proficiency prerequisite; see {@link #knows(String)}. */
+    public static SpellRequirement proficiency(String prerequisiteId, Proficiency prof) {
+        return new SpellRequirement(prerequisiteId, prof);
+    }
+
     public boolean isMet(PlayerSpellData data) {
         return isMet(null, data);
     }

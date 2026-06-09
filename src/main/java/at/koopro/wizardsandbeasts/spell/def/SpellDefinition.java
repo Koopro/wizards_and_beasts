@@ -6,6 +6,7 @@ import at.koopro.wizardsandbeasts.spell.core.Proficiency;
 import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 import at.koopro.wizardsandbeasts.spell.core.SpellFamily;
 import at.koopro.wizardsandbeasts.spell.cast.CastContext;
+import at.koopro.wizardsandbeasts.spell.effect.SpellEffectComponent;
 import at.koopro.wizardsandbeasts.spell.gamp.GampDomain;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
@@ -67,7 +68,14 @@ public record SpellDefinition(
         LearningDef learning,
         boolean unblockable,
         Optional<SpellFamily> spellFamily,
-        Set<GampDomain> gampDomains) {
+        Set<GampDomain> gampDomains,
+
+        /**
+         * Composable, data-driven effect primitives (Step 2). Optional and defaulted to empty so all
+         * pre-existing JSON spells deserialize unchanged. <b>Not yet executed</b> by the cast pipeline —
+         * this carries the authored vocabulary until impact-site wiring is approved.
+         */
+        List<SpellEffectComponent> effectComponents) {
 
     /** Embedded "explode" block. */
     public record ExplosionDef(float power, boolean breaksBlocks) {
@@ -256,7 +264,8 @@ public record SpellDefinition(
             LearningDef learning,
             boolean unblockable,
             Optional<SpellFamily> spellFamily,
-            Set<GampDomain> gampDomains) {
+            Set<GampDomain> gampDomains,
+            List<SpellEffectComponent> effectComponents) {
 
         static final MapCodec<SpellDefinitionFieldsB> MAP_CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
                 ExplosionDef.CODEC.optionalFieldOf("explode").forGetter(SpellDefinitionFieldsB::explode),
@@ -280,7 +289,10 @@ public record SpellDefinition(
                 GampDomain.CODEC.listOf()
                         .xmap(Set::copyOf, List::copyOf)
                         .optionalFieldOf("gampDomains", Set.of())
-                        .forGetter(SpellDefinitionFieldsB::gampDomains)
+                        .forGetter(SpellDefinitionFieldsB::gampDomains),
+                SpellEffectComponent.CODEC.listOf()
+                        .optionalFieldOf("effects", List.of())
+                        .forGetter(SpellDefinitionFieldsB::effectComponents)
         ).apply(inst, SpellDefinitionFieldsB::new));
     }
 
@@ -312,7 +324,8 @@ public record SpellDefinition(
                     pair.getSecond().learning(),
                     pair.getSecond().unblockable(),
                     pair.getSecond().spellFamily(),
-                    pair.getSecond().gampDomains()),
+                    pair.getSecond().gampDomains(),
+                    pair.getSecond().effectComponents()),
             def -> Pair.of(
                     new SpellDefinitionFieldsA(
                             def.displayName(),
@@ -339,7 +352,8 @@ public record SpellDefinition(
                             def.learning(),
                             def.unblockable(),
                             def.spellFamily(),
-                            def.gampDomains())));
+                            def.gampDomains(),
+                            def.effectComponents())));
 
     public boolean wouldConjureFood(CastContext ctx) {
         return false;

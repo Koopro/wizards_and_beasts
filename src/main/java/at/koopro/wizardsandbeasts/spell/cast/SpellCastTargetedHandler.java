@@ -6,6 +6,8 @@ import at.koopro.wizardsandbeasts.spell.proficiency.*;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.effect.FiniteImmuneEffects;
+import at.koopro.wizardsandbeasts.spell.effect.SpellEffectContext;
+import at.koopro.wizardsandbeasts.spell.effect.SpellEffectRunner;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.network.spell.SpellImpactBurstS2CPayload;
@@ -81,6 +83,10 @@ final class SpellCastTargetedHandler {
 
             spell.applyTargetEffects(target, scalingProfile.durationMult());
             successful = true;
+
+            // Data-driven effect components (Step 3): run the authored effect list against the target.
+            // No-op for spells without an effects list (all Java spells today).
+            SpellEffectRunner.run(spell, SpellEffectContext.ofTarget(caster, target, level));
 
             if (props.levitatesTarget()) {
                 target.addEffect(new MobEffectInstance(MobEffects.LEVITATION,

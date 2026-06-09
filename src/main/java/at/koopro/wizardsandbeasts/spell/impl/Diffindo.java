@@ -21,6 +21,6 @@ public class Diffindo extends Spell {
 
     @Override
     protected SpellRequirement buildRequirement() {
-        return SpellRequirement.proficiency(Spells.STUPEFY, Proficiency.PROFICIENT);
+        return SpellRequirement.proficiency("stupefy", Proficiency.PROFICIENT);
     }
 }

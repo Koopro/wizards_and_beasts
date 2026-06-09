@@ -22,6 +22,6 @@ public class Reparo extends Spell {
 
     @Override
     protected SpellRequirement buildRequirement() {
-        return SpellRequirement.knows(Spells.LUMOS);
+        return SpellRequirement.knows("lumos");
     }
 }

@@ -22,6 +22,6 @@ public class Imperio extends Spell {
 
     @Override
     protected SpellRequirement buildRequirement() {
-        return SpellRequirement.proficiency(Spells.STUPEFY, Proficiency.MASTERED);
+        return SpellRequirement.proficiency("stupefy", Proficiency.MASTERED);
     }
 }

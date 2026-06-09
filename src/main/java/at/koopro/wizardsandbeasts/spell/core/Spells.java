@@ -43,7 +43,7 @@ public final class Spells {
     private static boolean bootstrapped = false;
 
     // Combat
-    public static final Stupefy STUPEFY = register(new Stupefy());
+    // stupefy migrated to JSON (data/wizards_and_beasts/spells/stupefy.json) in Step 3 — no Java class.
     public static final Expelliarmus EXPELLIARMUS = register(new Expelliarmus());
     public static final Incendio INCENDIO = register(new Incendio());
     public static final Diffindo DIFFINDO = register(new Diffindo());
@@ -54,7 +54,7 @@ public final class Spells {
     public static final Depulso DEPULSO = register(new Depulso());
 
     // Utility
-    public static final Lumos LUMOS = register(new Lumos());
+    // lumos migrated to JSON (data/wizards_and_beasts/spells/lumos.json) in Step 3 — no Java class.
     public static final Nox NOX = register(new Nox());
     public static final Accio ACCIO = register(new Accio());
     public static final Reparo REPARO = register(new Reparo());

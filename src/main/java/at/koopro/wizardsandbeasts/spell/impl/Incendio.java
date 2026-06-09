@@ -23,7 +23,7 @@ public class Incendio extends Spell {
     @Override
     protected SpellRequirement buildRequirement() {
         // TODO(effects): Apply ModEffects.SECTUMSEMPRA_BLEED from the future Sectumsempra spell.
-        return SpellRequirement.proficiency(Spells.STUPEFY, Proficiency.PROFICIENT);
+        return SpellRequirement.proficiency("stupefy", Proficiency.PROFICIENT);
     }
 
     @Override

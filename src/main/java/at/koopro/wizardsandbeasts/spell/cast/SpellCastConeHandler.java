@@ -4,6 +4,8 @@ import at.koopro.wizardsandbeasts.spell.core.*;
 import at.koopro.wizardsandbeasts.spell.lib.*;
 import at.koopro.wizardsandbeasts.spell.proficiency.*;
 
+import at.koopro.wizardsandbeasts.spell.effect.SpellEffectContext;
+import at.koopro.wizardsandbeasts.spell.effect.SpellEffectRunner;
 import at.koopro.wizardsandbeasts.spell.proficiency.SpellScalingProfile;
 import at.koopro.wizardsandbeasts.wand.cast.WandStats;
 import net.minecraft.server.level.ServerLevel;
@@ -72,6 +74,10 @@ final class SpellCastConeHandler {
 
                 spell.applyTargetEffects(living, scalingProfile.durationMult());
                 successful = true;
+
+                // Data-driven effect components (Step 3): per-target run of the authored effect list.
+                // No-op for spells without an effects list (all Java spells today).
+                SpellEffectRunner.run(spell, SpellEffectContext.ofTarget(caster, living, level));
 
                 if (props.ignites()) {
                     SpellHelper.ignite(entity, props.getIgniteDurationSeconds());

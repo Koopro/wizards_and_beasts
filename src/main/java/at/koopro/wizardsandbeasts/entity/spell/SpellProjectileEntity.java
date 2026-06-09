@@ -14,6 +14,8 @@ import at.koopro.wizardsandbeasts.spell.core.SpellFamilies;
 import at.koopro.wizardsandbeasts.spell.proficiency.SpellProficiencyTracker;
 import at.koopro.wizardsandbeasts.spell.core.Spells;
 import at.koopro.wizardsandbeasts.spell.lib.SpellHelper;
+import at.koopro.wizardsandbeasts.spell.effect.SpellEffectContext;
+import at.koopro.wizardsandbeasts.spell.effect.SpellEffectRunner;
 import at.koopro.wizardsandbeasts.spell.core.SpellProperties;
 import at.koopro.wizardsandbeasts.spell.proficiency.SpellScalingProfile;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -93,6 +95,12 @@ public class SpellProjectileEntity extends ThrowableProjectile {
 
         if (props != null && hit instanceof LivingEntity living) {
             cachedSpell.applyTargetEffects(living, scalingProfile.durationMult());
+
+            // Data-driven effect components (Step 3): run the spell's authored effect list against the
+            // hit target. No-op for spells without an effects list (all Java spells today).
+            if (owner instanceof ServerPlayer casterPlayer && level() instanceof ServerLevel effectLevel) {
+                SpellEffectRunner.run(cachedSpell, SpellEffectContext.ofTarget(casterPlayer, living, effectLevel));
+            }
 
             // Disarm (Expelliarmus)
             if (props.disarms()) {

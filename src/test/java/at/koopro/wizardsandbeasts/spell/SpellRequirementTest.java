@@ -38,62 +38,62 @@ class SpellRequirementTest {
 
     @Test
     void knows_requiresPrerequisiteSpell() {
-        SpellRequirement req = SpellRequirement.knows(Spells.LUMOS);
+        SpellRequirement req = SpellRequirement.knows(Spells.FLIPENDO);
         PlayerSpellData data = new PlayerSpellData();
 
-        assertFalse(req.isMet(data), "Player who has not learned Lumos must not satisfy knows(Lumos).");
+        assertFalse(req.isMet(data), "Player who has not learned Flipendo must not satisfy knows(Flipendo).");
 
-        data.learnSpell("lumos");
-        assertTrue(req.isMet(data), "After learning Lumos the requirement must be satisfied.");
-        assertEquals("lumos", req.getPrerequisiteId());
+        data.learnSpell("flipendo");
+        assertTrue(req.isMet(data), "After learning Flipendo the requirement must be satisfied.");
+        assertEquals("flipendo", req.getPrerequisiteId());
         assertNull(req.getMinProficiency(), "knows(...) must not impose a proficiency floor.");
     }
 
     @Test
     void proficiency_requiresKnowledgeAndSuccessfulHits() {
-        SpellRequirement req = SpellRequirement.proficiency(Spells.STUPEFY, Proficiency.PROFICIENT);
+        SpellRequirement req = SpellRequirement.proficiency(Spells.FLIPENDO, Proficiency.PROFICIENT);
         PlayerSpellData data = new PlayerSpellData();
 
         assertFalse(req.isMet(data), "No knowledge -> not met.");
 
-        data.learnSpell("stupefy");
+        data.learnSpell("flipendo");
         assertFalse(req.isMet(data),
                 "Learning the spell alone is not enough; needs PROFICIENT successful hits.");
 
         for (int i = 0; i < Proficiency.PROFICIENT.getCastsRequired() - 1; i++) {
-            data.incrementSuccessfulHits("stupefy");
+            data.incrementSuccessfulHits("flipendo");
         }
         assertFalse(req.isMet(data),
                 "Just below the PROFICIENT threshold must not satisfy the requirement.");
 
-        data.incrementSuccessfulHits("stupefy");
+        data.incrementSuccessfulHits("flipendo");
         assertTrue(req.isMet(data),
                 "Reaching the PROFICIENT successful-hit threshold must satisfy the requirement.");
     }
 
     @Test
     void proficiency_masteredImpliesProficient() {
-        SpellRequirement req = SpellRequirement.proficiency(Spells.STUPEFY, Proficiency.MASTERED);
+        SpellRequirement req = SpellRequirement.proficiency(Spells.FLIPENDO, Proficiency.MASTERED);
         PlayerSpellData data = new PlayerSpellData();
-        data.learnSpell("stupefy");
+        data.learnSpell("flipendo");
         for (int i = 0; i < Proficiency.MASTERED.getCastsRequired(); i++) {
-            data.incrementSuccessfulHits("stupefy");
+            data.incrementSuccessfulHits("flipendo");
         }
         assertTrue(req.isMet(data));
     }
 
     @Test
     void description_includesPrerequisiteName() {
-        String knowsDesc = SpellRequirement.knows(Spells.LUMOS).getDescription();
-        assertTrue(knowsDesc.contains("Lumos"),
-                "knows(Lumos) description should mention Lumos. Got: " + knowsDesc);
+        String knowsDesc = SpellRequirement.knows(Spells.FLIPENDO).getDescription();
+        assertTrue(knowsDesc.contains("Flipendo"),
+                "knows(Flipendo) description should mention Flipendo. Got: " + knowsDesc);
 
         String profDesc = SpellRequirement
-                .proficiency(Spells.STUPEFY, Proficiency.MASTERED)
+                .proficiency(Spells.FLIPENDO, Proficiency.MASTERED)
                 .getDescription();
         assertTrue(profDesc.toLowerCase().contains("master"),
                 "proficiency(MASTERED) description should mention mastery. Got: " + profDesc);
-        assertTrue(profDesc.contains("Stupefy"),
-                "proficiency(Stupefy) description should mention Stupefy. Got: " + profDesc);
+        assertTrue(profDesc.contains("Flipendo"),
+                "proficiency(Flipendo) description should mention Flipendo. Got: " + profDesc);
     }
 }

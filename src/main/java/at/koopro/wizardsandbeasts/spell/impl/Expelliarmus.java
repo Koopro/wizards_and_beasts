@@ -20,7 +20,7 @@ public class Expelliarmus extends Spell {
 
     @Override
     protected SpellRequirement buildRequirement() {
-        return SpellRequirement.knows(Spells.STUPEFY);
+        return SpellRequirement.knows("stupefy");
     }
 
     @Override

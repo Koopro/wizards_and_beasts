@@ -10,6 +10,9 @@ import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.spell.cast.CastContext;
+import at.koopro.wizardsandbeasts.spell.effect.SpellEffectComponent;
+import at.koopro.wizardsandbeasts.spell.effect.SpellEffectContext;
+import at.koopro.wizardsandbeasts.spell.effect.SpellEffectRunner;
 import at.koopro.wizardsandbeasts.spell.proficiency.SpellScalingProfile;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.cast.WandStats;
@@ -27,6 +30,7 @@ import at.koopro.wizardsandbeasts.registry.ModSounds;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.world.level.ClipContext;
@@ -155,6 +159,14 @@ public final class SpellExecutor {
                 if (!props.getSelfEffects().isEmpty()) {
                     successful = true;
                 }
+                // Data-driven effect components (Step 3): run the spell's authored effect list with the
+                // caster as subject, at the same SELF cast-time point legacy self-effects run. No-op for
+                // spells without an effects list (all Java spells today).
+                List<SpellEffectComponent> selfComponents = SpellEffectRunner.effectsOf(spell);
+                if (!selfComponents.isEmpty()) {
+                    SpellEffectRunner.run(selfComponents, SpellEffectContext.ofSelf(caster, level));
+                    successful = true;
+                }
                 if (successful) {
                     SpellProficiencyTracker.recordSuccessfulHit(caster, spell.getId());
                 }
@@ -176,14 +188,9 @@ public final class SpellExecutor {
     }
 
     private static final SelfUtilityRule[] SELF_UTILITY_RULES = new SelfUtilityRule[] {
-            new SelfUtilityRule("lumos", (level, caster, spell) -> {
-                SpellHelper.spawnBurst(level, spell, caster.getEyePosition(), 16, 0.28);
-                PlayerSpellData lumosData = caster.getData(ModAttachments.SPELL_DATA.get());
-                lumosData.learnSpell("nox");
-                lumosData.setLoadoutSpell(lumosData.getActiveSlot(), "nox");
-                SpellDataSyncS2CPayload.syncToPlayer(caster);
-                return true;
-            }),
+            // NOTE: the "lumos" branch was removed in Step 3 — lumos is now a JSON spell whose light is
+            // applied via the `apply_effect` effect component. The legacy lumos->nox learn + loadout-swap
+            // toggle was an accepted behavior delta of that migration (no component expresses it yet).
             new SelfUtilityRule("nox", (level, caster, spell) -> {
                 caster.removeEffect(ModEffects.LUMOS_FIELD);
                 SpellHelper.spawnBurst(level, spell, caster.getEyePosition(), 12, 0.22);
