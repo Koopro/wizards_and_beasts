@@ -32,23 +32,18 @@ final class SpellCastUtilityHandler {
     }
 
     static boolean handleEpiskeySelf(ServerPlayer caster) {
+        // Residual tail (Step 4): only the HP-conditional Regeneration stays in Java; the flat heal and
+        // the poison/wither/blindness/nausea cleanse moved to JSON `heal` + `dispel` components. This runs
+        // before the effect runner in the SELF arm, so missing-HP (the 120-vs-80 gate) is read pre-heal.
         float missing = caster.getMaxHealth() - caster.getHealth();
-        if (missing > 0.0f) {
-            caster.heal(Math.min(4.0f, missing));
-        }
-        caster.removeEffect(MobEffects.POISON);
-        caster.removeEffect(MobEffects.WITHER);
-        caster.removeEffect(MobEffects.BLINDNESS);
-        caster.removeEffect(MobEffects.NAUSEA);
         int regenDuration = missing >= 8.0f ? 120 : 80;
         caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, regenDuration, 0, false, true, true));
         return true;
     }
 
     static boolean handleFrigoraSelf(ServerLevel level, ServerPlayer caster, Spell spell) {
-        caster.clearFire();
-        caster.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 220, 0, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, 120, 0, false, true, true));
+        // Residual tail (Step 4): only the Glacius-style block interaction stays in Java; clearFire +
+        // fire_resistance + water_breathing moved to JSON `clear_fire` + `apply_effect` components.
         Vec3 start = caster.getEyePosition();
         Vec3 end = start.add(caster.getLookAngle().scale(4.0));
         BlockHitResult blockHit = level.clip(new ClipContext(
@@ -57,6 +52,27 @@ final class SpellCastUtilityHandler {
             SpellHelper.tryGlaciusBlockInteraction(level, blockHit, spell);
         }
         return true;
+    }
+
+    static boolean handleReparoSelf(ServerLevel level, ServerPlayer caster, Spell spell) {
+        // Residual tail (Step 4): reparo's full-repair + wand-aware selection + ElderWand guard live in
+        // handleRepair, which the `repair` component can't reproduce; kept here. Block-repair fallback is
+        // preserved but its range is no longer wand-scaled (was 5.0 * wand.rangeFor) — logged delta.
+        ItemStack wandStack = WandHelper.getWandStack(caster);
+        boolean repaired = handleRepair(caster, wandStack);
+        if (!repaired) {
+            Vec3 start = caster.getEyePosition();
+            Vec3 end = start.add(caster.getLookAngle().scale(5.0));
+            BlockHitResult blockHit = level.clip(new ClipContext(
+                    start, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, caster));
+            if (blockHit.getType() == HitResult.Type.BLOCK) {
+                repaired = SpellHelper.tryReparoRepairBlock(level, blockHit.getBlockPos(), spell);
+            }
+        }
+        if (repaired) {
+            SpellHelper.spawnBurst(level, spell, caster.getEyePosition(), 12, 0.2);
+        }
+        return repaired;
     }
 
     static boolean handleRepair(ServerPlayer caster, ItemStack wandStack) {

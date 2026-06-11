@@ -36,6 +36,10 @@ final class SpellCastHandlers {
         return SpellCastUtilityHandler.handleRepair(caster, wandStack);
     }
 
+    static boolean handleReparoSelf(ServerLevel level, ServerPlayer caster, Spell spell) {
+        return SpellCastUtilityHandler.handleReparoSelf(level, caster, spell);
+    }
+
     static boolean handlePocketIngress(ServerPlayer caster) {
         return SpellCastUtilityHandler.handlePocketIngress(caster);
     }

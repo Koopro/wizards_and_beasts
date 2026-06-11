@@ -1,0 +1,10 @@
+{
+  "displayName": "Diffindo",
+  "category": "combat",
+  "cooldownTicks": 50,
+  "baseDamage": 6.0,
+  "color": -3407872,
+  "castType": "projectile",
+  "sound": { "id": "minecraft:entity.blaze.shoot", "volume": 0.8, "pitch": 1.5 },
+  "requirement": { "type": "proficiency", "prerequisiteId": "stupefy", "minProficiency": "proficient" }
+}

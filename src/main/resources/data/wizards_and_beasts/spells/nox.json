@@ -1,0 +1,12 @@
+{
+  "displayName": "Nox",
+  "category": "utility",
+  "cooldownTicks": 20,
+  "color": -14540220,
+  "castType": "self",
+  "sound": { "id": "minecraft:block.fire.extinguish", "volume": 0.5, "pitch": 1.5 },
+  "requirement": { "type": "knows", "prerequisiteId": "lumos" },
+  "effects": [
+    { "type": "dispel", "scope": "specific", "effects": ["wizards_and_beasts:lumos_field"], "respect_immunity": false }
+  ]
+}

@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.spell.effect;
 
+import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.effect.FiniteImmuneEffects;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.spell.lib.SpellHelper;
@@ -23,6 +25,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 
@@ -34,20 +37,22 @@ import java.util.Optional;
  * Composable, data-driven spell effect primitive. A spell's behavior is (eventually) a
  * {@code List<SpellEffectComponent>} declared in JSON and applied through {@link #apply(SpellEffectContext)}.
  *
- * <p>Mirrors the {@code SkillNodeEffect} pattern exactly: a sealed interface, a {@link Type} enum that
- * pairs a {@code type} discriminator string with the variant's {@link MapCodec}, and a top-level
- * {@link #CODEC} built via {@code Type.CODEC.dispatch(...)}.
+ * <p>Mirrors the {@code SkillNodeEffect} pattern: a sealed interface, a {@link Type} enum that pairs a
+ * {@code type} discriminator with the variant's {@link MapCodec}, and a top-level {@link #CODEC} built
+ * via {@code Type.CODEC.dispatch(...)}.
  *
- * <p><b>v1 vocabulary (9 components):</b> {@code apply_effect}, {@code damage}, {@code ignite},
- * {@code impulse}, {@code heal}, {@code dispel}, {@code light}, {@code repair}, {@code explosion}.
+ * <p><b>Scaling (F1).</b> {@code damage}, {@code apply_effect}, and {@code impulse} scale by the
+ * {@link SpellEffectContext}'s {@code damageMult}/{@code durationMult}/{@code controlMult} so they
+ * reproduce the legacy proficiency/wand/skill scaling. <b>Primary projectile/melee damage still rides
+ * the scaled {@code baseDamage} legacy path</b> (which also folds in skill+wand via
+ * {@code Spell.getDamageForCaster}); the {@code damage} component is for <i>adjunct / secondary</i>
+ * damage and scales by the context's {@code damageMult} only.
  *
  * <p><b>Module gating (§4).</b> Every {@code apply(...)} no-ops unless {@link Module#WANDS_AND_SPELLS}
- * is enabled, matching the effect-site gate in {@code Spell.canApplyEffect}. {@link ApplyEffect} also
- * accepts a {@code darkArts} flag so a dark component no-ops unless {@link Module#DARK_ARTS} is enabled
- * (relevant to spells like Crucio when/if migrated). This keeps components honoring the existing
- * gating model rather than introducing a new path.
+ * is enabled; {@link ApplyEffect} accepts a {@code darkArts} flag to gate on {@link Module#DARK_ARTS}.
  *
- * <p><b>Status: not wired.</b> No spell constructs or runs these yet — see {@link SpellEffectContext}.
+ * <p><b>Status: not wired to spells.</b> No spell ships an {@code effects} list except the step-3
+ * pilots (lumos, stupefy). This pass only enriches the vocabulary; migration is the revised Step 4.
  */
 public sealed interface SpellEffectComponent permits
         SpellEffectComponent.ApplyEffect,
@@ -56,9 +61,11 @@ public sealed interface SpellEffectComponent permits
         SpellEffectComponent.Impulse,
         SpellEffectComponent.Heal,
         SpellEffectComponent.Dispel,
+        SpellEffectComponent.ClearFire,
         SpellEffectComponent.Light,
         SpellEffectComponent.Repair,
-        SpellEffectComponent.Explosion {
+        SpellEffectComponent.Explosion,
+        SpellEffectComponent.AoeApply {
 
     Logger LOGGER = LogUtils.getLogger();
 
@@ -77,6 +84,11 @@ public sealed interface SpellEffectComponent permits
         return ModuleManager.isEnabled(Module.WANDS_AND_SPELLS);
     }
 
+    /** Legacy duration-scaling rule: negative (infinite) durations pass through unscaled. */
+    private static int scaleDuration(int rawDuration, float durationMult) {
+        return rawDuration < 0 ? rawDuration : Math.max(1, Math.round(rawDuration * durationMult));
+    }
+
     private static Holder<MobEffect> resolveMobEffect(Identifier id) {
         MobEffect effect = BuiltInRegistries.MOB_EFFECT.getValue(id);
         if (effect == null) {
@@ -93,9 +105,11 @@ public sealed interface SpellEffectComponent permits
         IMPULSE("impulse", Impulse.CODEC),
         HEAL("heal", Heal.CODEC),
         DISPEL("dispel", Dispel.CODEC),
+        CLEAR_FIRE("clear_fire", ClearFire.CODEC),
         LIGHT("light", Light.CODEC),
         REPAIR("repair", Repair.CODEC),
-        EXPLOSION("explosion", Explosion.CODEC);
+        EXPLOSION("explosion", Explosion.CODEC),
+        AOE_APPLY("aoe_apply", AoeApply.CODEC);
 
         public static final Codec<Type> CODEC = StringRepresentable.fromValues(Type::values);
 
@@ -137,12 +151,36 @@ public sealed interface SpellEffectComponent permits
         }
     }
 
+    /** Which effects {@link Dispel} removes. */
+    enum DispelScope implements StringRepresentable {
+        /** Every active effect. */
+        ALL("all"),
+        /** Only effects registered under this mod's namespace (Finite Incantatem's behavior). */
+        MOD_NAMESPACED("mod_namespaced"),
+        /** Only the explicitly listed effect ids. */
+        SPECIFIC("specific");
+
+        public static final Codec<DispelScope> CODEC = StringRepresentable.fromValues(DispelScope::values);
+
+        private final String serializedName;
+
+        DispelScope(String serializedName) {
+            this.serializedName = serializedName;
+        }
+
+        @Override
+        public String getSerializedName() {
+            return serializedName;
+        }
+    }
+
     // ── Components ──────────────────────────────────────────────────────
 
     /**
      * Applies a mob effect. {@code target=false} (default) affects the caster (self effect);
-     * {@code target=true} affects the impact target (falling back to the caster). {@code darkArts=true}
-     * gates the effect behind {@link Module#DARK_ARTS} instead of {@link Module#WANDS_AND_SPELLS}.
+     * {@code target=true} affects the impact target (falling back to the caster). Duration is scaled by
+     * the context's {@code durationMult} (negative/infinite durations pass through). {@code darkArts=true}
+     * gates on {@link Module#DARK_ARTS} instead of {@link Module#WANDS_AND_SPELLS}.
      */
     record ApplyEffect(Identifier effect, int duration, int amplifier, boolean target, boolean darkArts)
             implements SpellEffectComponent {
@@ -166,13 +204,15 @@ public sealed interface SpellEffectComponent permits
             Holder<MobEffect> holder = resolveMobEffect(effect);
             if (holder == null) return;
             LivingEntity who = target ? ctx.subject() : ctx.caster();
-            who.addEffect(new MobEffectInstance(holder, duration, amplifier, false, true, true));
+            who.addEffect(new MobEffectInstance(holder, scaleDuration(duration, ctx.durationMult()),
+                    amplifier, false, true, true));
         }
     }
 
     /**
-     * Magic (or typed) damage to the impact target. No-ops without a target. {@code damageType} is an
-     * optional {@link DamageType} {@link Identifier}; absent → vanilla magic damage.
+     * Adjunct/secondary magic (or typed) damage to the impact target, scaled by the context's
+     * {@code damageMult}. No-ops without a target. Primary projectile/melee damage stays on the legacy
+     * scaled {@code baseDamage} path; do not use this to express a spell's primary damage.
      */
     record Damage(float amount, Optional<Identifier> damageType) implements SpellEffectComponent {
         public static final MapCodec<Damage> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
@@ -190,7 +230,7 @@ public sealed interface SpellEffectComponent permits
             if (!standardEnabled() || amount <= 0f) return;
             LivingEntity target = ctx.target();
             if (target == null) return;
-            target.hurt(resolveDamageSource(ctx), amount);
+            target.hurt(resolveDamageSource(ctx), amount * ctx.damageMult());
         }
 
         private DamageSource resolveDamageSource(SpellEffectContext ctx) {
@@ -227,8 +267,8 @@ public sealed interface SpellEffectComponent permits
     }
 
     /**
-     * Pushes/pulls the subject. {@code PUSH} drives away from the caster, {@code PULL} toward the caster,
-     * {@code UP} lifts vertically. Uses the same capped knockback helper as combat spells.
+     * Pushes/pulls the subject, scaled by the context's {@code controlMult}. {@code PUSH} drives away
+     * from the caster, {@code PULL} toward the caster, {@code UP} lifts vertically.
      */
     record Impulse(float strength, ImpulseDirection direction) implements SpellEffectComponent {
         public static final MapCodec<Impulse> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
@@ -244,9 +284,10 @@ public sealed interface SpellEffectComponent permits
         @Override
         public void apply(SpellEffectContext ctx) {
             if (!standardEnabled() || strength == 0f) return;
+            float scaled = strength * ctx.controlMult();
             LivingEntity subject = ctx.subject();
             if (direction == ImpulseDirection.UP) {
-                subject.push(0.0, Math.min(2.0f, strength), 0.0);
+                subject.push(0.0, Math.min(2.0f, scaled), 0.0);
                 subject.hurtMarked = true;
                 return;
             }
@@ -258,11 +299,11 @@ public sealed interface SpellEffectComponent permits
             if (dir.lengthSqr() < 1.0e-4) {
                 dir = ctx.caster().getLookAngle();
             }
-            SpellHelper.applyKnockback(subject, dir, strength);
+            SpellHelper.applyKnockback(subject, dir, scaled);
         }
     }
 
-    /** Heals the subject (impact target, else caster). */
+    /** Heals the subject (impact target, else caster). Flat amount (matches legacy heal). */
     record Heal(float amount) implements SpellEffectComponent {
         public static final MapCodec<Heal> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
                 Codec.FLOAT.fieldOf("amount").forGetter(Heal::amount)
@@ -281,12 +322,16 @@ public sealed interface SpellEffectComponent permits
     }
 
     /**
-     * Removes mob effects from the subject. When {@code effects} is present, only those ids are removed;
-     * when absent/empty, all active effects are removed.
+     * Removes mob effects from the subject. {@code scope} selects {@code all}, {@code mod_namespaced}
+     * (only this mod's effects — Finite Incantatem), or {@code specific} (only the listed ids).
+     * {@code respect_immunity} (default true) skips effects flagged by {@link FiniteImmuneEffects}.
      */
-    record Dispel(Optional<List<Identifier>> effects) implements SpellEffectComponent {
+    record Dispel(DispelScope scope, List<Identifier> effects, boolean respectImmunity)
+            implements SpellEffectComponent {
         public static final MapCodec<Dispel> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
-                Identifier.CODEC.listOf().optionalFieldOf("effects").forGetter(Dispel::effects)
+                DispelScope.CODEC.optionalFieldOf("scope", DispelScope.ALL).forGetter(Dispel::scope),
+                Identifier.CODEC.listOf().optionalFieldOf("effects", List.of()).forGetter(Dispel::effects),
+                Codec.BOOL.optionalFieldOf("respect_immunity", true).forGetter(Dispel::respectImmunity)
         ).apply(inst, Dispel::new));
 
         @Override
@@ -298,14 +343,44 @@ public sealed interface SpellEffectComponent permits
         public void apply(SpellEffectContext ctx) {
             if (!standardEnabled()) return;
             LivingEntity subject = ctx.subject();
-            if (effects.isEmpty() || effects.get().isEmpty()) {
-                subject.removeAllEffects();
+            if (scope == DispelScope.SPECIFIC) {
+                for (Identifier id : effects) {
+                    Holder<MobEffect> holder = resolveMobEffect(id);
+                    if (holder == null) continue;
+                    if (respectImmunity && FiniteImmuneEffects.isImmune(holder.value())) continue;
+                    subject.removeEffect(holder);
+                }
                 return;
             }
-            for (Identifier id : effects.get()) {
-                Holder<MobEffect> holder = resolveMobEffect(id);
-                if (holder != null) subject.removeEffect(holder);
+            List<Holder<MobEffect>> toRemove = new ArrayList<>();
+            for (MobEffectInstance inst : subject.getActiveEffects()) {
+                Holder<MobEffect> holder = inst.getEffect();
+                if (respectImmunity && FiniteImmuneEffects.isImmune(holder.value())) continue;
+                if (scope == DispelScope.MOD_NAMESPACED) {
+                    Identifier id = BuiltInRegistries.MOB_EFFECT.getKey(holder.value());
+                    if (id == null || !WizardsAndBeastsMod.MODID.equals(id.getNamespace())) continue;
+                }
+                toRemove.add(holder);
             }
+            for (Holder<MobEffect> holder : toRemove) {
+                subject.removeEffect(holder);
+            }
+        }
+    }
+
+    /** Extinguishes the subject (compose resistances via separate {@code apply_effect} components). */
+    record ClearFire() implements SpellEffectComponent {
+        public static final MapCodec<ClearFire> CODEC = MapCodec.unit(ClearFire::new);
+
+        @Override
+        public Type type() {
+            return Type.CLEAR_FIRE;
+        }
+
+        @Override
+        public void apply(SpellEffectContext ctx) {
+            if (!standardEnabled()) return;
+            ctx.subject().clearFire();
         }
     }
 
@@ -384,6 +459,36 @@ public sealed interface SpellEffectComponent permits
                     ? Level.ExplosionInteraction.TNT
                     : Level.ExplosionInteraction.MOB;
             ctx.level().explode(ctx.caster(), pos.x, pos.y, pos.z, radius, fire, interaction);
+        }
+    }
+
+    /**
+     * Applies a nested component list to every living entity (excluding the caster) within {@code radius}
+     * of the application position. Each entity is run as a fresh subject through the runner, preserving
+     * the parent context's scaling. Composes recursively; the nested codec is lazily initialized to break
+     * the self-reference on {@link #CODEC}.
+     */
+    record AoeApply(float radius, List<SpellEffectComponent> components) implements SpellEffectComponent {
+        public static final MapCodec<AoeApply> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+                Codec.FLOAT.fieldOf("radius").forGetter(AoeApply::radius),
+                Codec.lazyInitialized(() -> SpellEffectComponent.CODEC).listOf()
+                        .fieldOf("effects").forGetter(AoeApply::components)
+        ).apply(inst, AoeApply::new));
+
+        @Override
+        public Type type() {
+            return Type.AOE_APPLY;
+        }
+
+        @Override
+        public void apply(SpellEffectContext ctx) {
+            if (!standardEnabled() || radius <= 0f || components.isEmpty()) return;
+            AABB area = new AABB(ctx.position(), ctx.position()).inflate(radius);
+            List<LivingEntity> targets = ctx.level().getEntitiesOfClass(LivingEntity.class, area,
+                    e -> e.isAlive() && e != ctx.caster());
+            for (LivingEntity entity : targets) {
+                SpellEffectRunner.run(components, ctx.forTarget(entity));
+            }
         }
     }
 }

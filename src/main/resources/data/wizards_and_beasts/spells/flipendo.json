@@ -1,0 +1,11 @@
+{
+  "displayName": "Flipendo",
+  "category": "combat",
+  "cooldownTicks": 38,
+  "baseDamage": 2.0,
+  "color": -16724737,
+  "castType": "projectile",
+  "knockback": 3.0,
+  "sound": { "id": "minecraft:entity.blaze.shoot", "volume": 0.8, "pitch": 1.5 },
+  "requirement": { "type": "none" }
+}

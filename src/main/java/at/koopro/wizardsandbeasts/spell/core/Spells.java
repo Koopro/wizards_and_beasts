@@ -43,27 +43,17 @@ public final class Spells {
     private static boolean bootstrapped = false;
 
     // Combat
-    // stupefy migrated to JSON (data/wizards_and_beasts/spells/stupefy.json) in Step 3 — no Java class.
+    // Step 3/4: stupefy, incendio, diffindo, bombarda, confringo, flipendo, glacius, depulso
+    // migrated to JSON (data/wizards_and_beasts/spells/*.json) — no Java classes.
     public static final Expelliarmus EXPELLIARMUS = register(new Expelliarmus());
-    public static final Incendio INCENDIO = register(new Incendio());
-    public static final Diffindo DIFFINDO = register(new Diffindo());
-    public static final Bombarda BOMBARDA = register(new Bombarda());
-    public static final Confringo CONFRINGO = register(new Confringo());
-    public static final Flipendo FLIPENDO = register(new Flipendo());
-    public static final Glacius GLACIUS = register(new Glacius());
-    public static final Depulso DEPULSO = register(new Depulso());
 
     // Utility
-    // lumos migrated to JSON (data/wizards_and_beasts/spells/lumos.json) in Step 3 — no Java class.
-    public static final Nox NOX = register(new Nox());
+    // Step 3/4: lumos, nox, reparo, liberacorpus, arresto_momentum migrated to JSON — no Java classes.
     public static final Accio ACCIO = register(new Accio());
-    public static final Reparo REPARO = register(new Reparo());
     public static final WingardiumLeviosa WINGARDIUM_LEVIOSA = register(new WingardiumLeviosa());
     public static final Alohomora ALOHOMORA = register(new Alohomora());
     public static final Colloportus COLLOPORTUS = register(new Colloportus());
-    public static final Liberacorpus LIBERACORPUS = register(new Liberacorpus());
     public static final Riddikulus RIDDIKULUS = register(new Riddikulus());
-    public static final ArrestoMomentum ARRESTO_MOMENTUM = register(new ArrestoMomentum());
     public static final Aguamenti AGUAMENTI = register(new Aguamenti());
 
     // Defense

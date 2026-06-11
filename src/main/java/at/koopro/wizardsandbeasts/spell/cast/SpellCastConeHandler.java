@@ -77,7 +77,8 @@ final class SpellCastConeHandler {
 
                 // Data-driven effect components (Step 3): per-target run of the authored effect list.
                 // No-op for spells without an effects list (all Java spells today).
-                SpellEffectRunner.run(spell, SpellEffectContext.ofTarget(caster, living, level));
+                SpellEffectRunner.run(spell, SpellEffectContext.ofTarget(caster, living, level)
+                        .withScaling(damageMultiplier, scalingProfile.durationMult(), scalingProfile.controlMult()));
 
                 if (props.ignites()) {
                     SpellHelper.ignite(entity, props.getIgniteDurationSeconds());

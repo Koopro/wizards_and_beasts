@@ -1,0 +1,12 @@
+{
+  "displayName": "Bombarda",
+  "category": "combat",
+  "cooldownTicks": 140,
+  "baseDamage": 7.0,
+  "color": -30720,
+  "castType": "targeted",
+  "range": 20.0,
+  "explode": { "power": 2.5, "breaksBlocks": false },
+  "sound": { "id": "minecraft:entity.blaze.shoot", "volume": 1.0, "pitch": 0.7 },
+  "requirement": { "type": "knows", "prerequisiteId": "diffindo" }
+}

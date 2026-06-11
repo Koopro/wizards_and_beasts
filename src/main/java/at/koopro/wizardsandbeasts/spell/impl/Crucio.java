@@ -47,6 +47,6 @@ public class Crucio extends Spell {
 
     @Override
     protected SpellRequirement buildRequirement() {
-        return SpellRequirement.proficiency(Spells.INCENDIO, Proficiency.MASTERED);
+        return SpellRequirement.proficiency("incendio", Proficiency.MASTERED);
     }
 }

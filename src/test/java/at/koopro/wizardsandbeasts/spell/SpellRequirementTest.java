@@ -38,62 +38,62 @@ class SpellRequirementTest {
 
     @Test
     void knows_requiresPrerequisiteSpell() {
-        SpellRequirement req = SpellRequirement.knows(Spells.FLIPENDO);
+        SpellRequirement req = SpellRequirement.knows(Spells.EXPELLIARMUS);
         PlayerSpellData data = new PlayerSpellData();
 
-        assertFalse(req.isMet(data), "Player who has not learned Flipendo must not satisfy knows(Flipendo).");
+        assertFalse(req.isMet(data), "Player who has not learned Expelliarmus must not satisfy knows(Expelliarmus).");
 
-        data.learnSpell("flipendo");
-        assertTrue(req.isMet(data), "After learning Flipendo the requirement must be satisfied.");
-        assertEquals("flipendo", req.getPrerequisiteId());
+        data.learnSpell("expelliarmus");
+        assertTrue(req.isMet(data), "After learning Expelliarmus the requirement must be satisfied.");
+        assertEquals("expelliarmus", req.getPrerequisiteId());
         assertNull(req.getMinProficiency(), "knows(...) must not impose a proficiency floor.");
     }
 
     @Test
     void proficiency_requiresKnowledgeAndSuccessfulHits() {
-        SpellRequirement req = SpellRequirement.proficiency(Spells.FLIPENDO, Proficiency.PROFICIENT);
+        SpellRequirement req = SpellRequirement.proficiency(Spells.EXPELLIARMUS, Proficiency.PROFICIENT);
         PlayerSpellData data = new PlayerSpellData();
 
         assertFalse(req.isMet(data), "No knowledge -> not met.");
 
-        data.learnSpell("flipendo");
+        data.learnSpell("expelliarmus");
         assertFalse(req.isMet(data),
                 "Learning the spell alone is not enough; needs PROFICIENT successful hits.");
 
         for (int i = 0; i < Proficiency.PROFICIENT.getCastsRequired() - 1; i++) {
-            data.incrementSuccessfulHits("flipendo");
+            data.incrementSuccessfulHits("expelliarmus");
         }
         assertFalse(req.isMet(data),
                 "Just below the PROFICIENT threshold must not satisfy the requirement.");
 
-        data.incrementSuccessfulHits("flipendo");
+        data.incrementSuccessfulHits("expelliarmus");
         assertTrue(req.isMet(data),
                 "Reaching the PROFICIENT successful-hit threshold must satisfy the requirement.");
     }
 
     @Test
     void proficiency_masteredImpliesProficient() {
-        SpellRequirement req = SpellRequirement.proficiency(Spells.FLIPENDO, Proficiency.MASTERED);
+        SpellRequirement req = SpellRequirement.proficiency(Spells.EXPELLIARMUS, Proficiency.MASTERED);
         PlayerSpellData data = new PlayerSpellData();
-        data.learnSpell("flipendo");
+        data.learnSpell("expelliarmus");
         for (int i = 0; i < Proficiency.MASTERED.getCastsRequired(); i++) {
-            data.incrementSuccessfulHits("flipendo");
+            data.incrementSuccessfulHits("expelliarmus");
         }
         assertTrue(req.isMet(data));
     }
 
     @Test
     void description_includesPrerequisiteName() {
-        String knowsDesc = SpellRequirement.knows(Spells.FLIPENDO).getDescription();
-        assertTrue(knowsDesc.contains("Flipendo"),
-                "knows(Flipendo) description should mention Flipendo. Got: " + knowsDesc);
+        String knowsDesc = SpellRequirement.knows(Spells.EXPELLIARMUS).getDescription();
+        assertTrue(knowsDesc.contains("Expelliarmus"),
+                "knows(Expelliarmus) description should mention Expelliarmus. Got: " + knowsDesc);
 
         String profDesc = SpellRequirement
-                .proficiency(Spells.FLIPENDO, Proficiency.MASTERED)
+                .proficiency(Spells.EXPELLIARMUS, Proficiency.MASTERED)
                 .getDescription();
         assertTrue(profDesc.toLowerCase().contains("master"),
                 "proficiency(MASTERED) description should mention mastery. Got: " + profDesc);
-        assertTrue(profDesc.contains("Flipendo"),
-                "proficiency(Flipendo) description should mention Flipendo. Got: " + profDesc);
+        assertTrue(profDesc.contains("Expelliarmus"),
+                "proficiency(Expelliarmus) description should mention Expelliarmus. Got: " + profDesc);
     }
 }

@@ -52,11 +52,12 @@ final class SpellCastTargetedHandler {
     static boolean handle(ServerLevel level, ServerPlayer caster,
                           Spell spell, SpellProperties props,
                           float damageMultiplier, WandStats wand, SpellScalingProfile scalingProfile) {
+        // Step 4: liberacorpus migrated to JSON — its dispel(specific:[levitation]) runs through the
+        // generic target path below (early-return removed). finite_incantatem keeps its handler (self-cast
+        // cleanse has no entity target, which the generic path can't serve), and levicorpus keeps its
+        // handler (its effects were raw/unscaled; an apply_effect component would add duration scaling).
         if (SpellCastSupport.isFiniteIncantatem(spell)) {
             return handleFiniteIncantatem(level, caster, spell, props, wand);
-        }
-        if (SpellCastSupport.isLiberacorpus(spell)) {
-            return handleLiberacorpus(level, caster, spell, props, wand);
         }
         if (SpellCastSupport.isLevicorpus(spell)) {
             return handleLevicorpus(level, caster, spell, props, wand);
@@ -86,7 +87,8 @@ final class SpellCastTargetedHandler {
 
             // Data-driven effect components (Step 3): run the authored effect list against the target.
             // No-op for spells without an effects list (all Java spells today).
-            SpellEffectRunner.run(spell, SpellEffectContext.ofTarget(caster, target, level));
+            SpellEffectRunner.run(spell, SpellEffectContext.ofTarget(caster, target, level)
+                    .withScaling(damageMultiplier, scalingProfile.durationMult(), scalingProfile.controlMult()));
 
             if (props.levitatesTarget()) {
                 target.addEffect(new MobEffectInstance(MobEffects.LEVITATION,
@@ -239,27 +241,6 @@ final class SpellCastTargetedHandler {
                 6,
                 0.08f);
         return true;
-    }
-
-    private static boolean handleLiberacorpus(ServerLevel level, ServerPlayer caster,
-                                              Spell spell, SpellProperties props,
-                                              WandStats wand) {
-        Vec3 start = caster.getEyePosition();
-        float effectiveRange = props.getRange() * wand.rangeFor(spell);
-        LivingEntity target = SpellTargetHelper.findTargetedEntity(level, caster, effectiveRange);
-        if (target == null) {
-            return false;
-        }
-        boolean hadLevitation = target.hasEffect(MobEffects.LEVITATION);
-        target.removeEffect(MobEffects.LEVITATION);
-        if (hadLevitation) {
-            SpellHelper.spawnBurst(level, spell, target.getBoundingBox().getCenter(), 14, 0.22);
-            SpellHelper.spawnBeam(level, spell, start, target.getBoundingBox().getCenter());
-            return true;
-        }
-        level.playSound(null, caster.blockPosition(), SoundEvents.FIRE_EXTINGUISH,
-                SoundSource.PLAYERS, 0.35f, 1.55f);
-        return false;
     }
 
     private static boolean handleLevicorpus(ServerLevel level, ServerPlayer caster,

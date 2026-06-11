@@ -1,0 +1,12 @@
+{
+  "displayName": "Arresto Momentum",
+  "category": "utility",
+  "cooldownTicks": 80,
+  "color": -7820545,
+  "castType": "self",
+  "sound": { "id": "minecraft:entity.ender_pearl.throw", "volume": 0.7, "pitch": 0.5 },
+  "requirement": { "type": "knows", "prerequisiteId": "wingardium_leviosa" },
+  "effects": [
+    { "type": "apply_effect", "effect": "minecraft:slow_falling", "duration": 220, "amplifier": 0 }
+  ]
+}

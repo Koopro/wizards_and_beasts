@@ -99,7 +99,9 @@ public class SpellProjectileEntity extends ThrowableProjectile {
             // Data-driven effect components (Step 3): run the spell's authored effect list against the
             // hit target. No-op for spells without an effects list (all Java spells today).
             if (owner instanceof ServerPlayer casterPlayer && level() instanceof ServerLevel effectLevel) {
-                SpellEffectRunner.run(cachedSpell, SpellEffectContext.ofTarget(casterPlayer, living, effectLevel));
+                SpellEffectRunner.run(cachedSpell, SpellEffectContext.ofTarget(casterPlayer, living, effectLevel)
+                        .withScaling(scalingProfile.damageMult(), scalingProfile.durationMult(),
+                                scalingProfile.controlMult()));
             }
 
             // Disarm (Expelliarmus)

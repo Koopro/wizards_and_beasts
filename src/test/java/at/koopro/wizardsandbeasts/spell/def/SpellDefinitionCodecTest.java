@@ -177,6 +177,26 @@ class SpellDefinitionCodecTest {
         assertTrue(finiteIncantatem.sound().isPresent());
     }
 
+    @Test
+    void allDatapackSpells_parseAndMigratedHaveComponents() throws IOException {
+        Path dir = Path.of("src/main/resources/data/wizards_and_beasts/spells");
+        try (var stream = Files.list(dir)) {
+            for (Path f : stream.filter(p -> p.toString().endsWith(".json")).toList()) {
+                SpellDefinition def = parse(Files.readString(f)); // throws on any codec error
+                assertFalse(def.displayName().isBlank(), "blank displayName in " + f);
+            }
+        }
+        // Spot-check the Step-4 component migrations decode their effect lists.
+        assertEquals(1, parseFile("src/main/resources/data/wizards_and_beasts/spells/nox.json")
+                .effectComponents().size(), "nox should carry one dispel component");
+        assertEquals(2, parseFile("src/main/resources/data/wizards_and_beasts/spells/episkey.json")
+                .effectComponents().size(), "episkey should carry heal + dispel components");
+        assertEquals(3, parseFile("src/main/resources/data/wizards_and_beasts/spells/frigora.json")
+                .effectComponents().size(), "frigora should carry clear_fire + 2 apply_effect components");
+        assertEquals(Optional.of(5), parseFile("src/main/resources/data/wizards_and_beasts/spells/incendio.json")
+                .igniteSeconds(), "incendio keeps igniteSeconds in props");
+    }
+
     private static SpellDefinition parse(String json) {
         JsonElement element = GSON.fromJson(json, JsonElement.class);
         var result = SpellDefinition.CODEC.parse(JsonOps.INSTANCE, element);

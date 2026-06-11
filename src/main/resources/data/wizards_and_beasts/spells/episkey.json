@@ -5,6 +5,12 @@
   "color": -1118482,
   "castType": "self",
   "selfEffects": [],
+  "effects": [
+    { "type": "heal", "amount": 4.0 },
+    { "type": "dispel", "scope": "specific",
+      "effects": ["minecraft:poison", "minecraft:wither", "minecraft:blindness", "minecraft:nausea"],
+      "respect_immunity": false }
+  ],
   "sound": {
     "id": "minecraft:entity.allay.hurt",
     "volume": 0.4,

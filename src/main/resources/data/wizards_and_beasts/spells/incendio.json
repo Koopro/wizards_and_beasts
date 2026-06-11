@@ -1,0 +1,13 @@
+{
+  "displayName": "Incendio",
+  "category": "combat",
+  "cooldownTicks": 80,
+  "baseDamage": 3.0,
+  "color": -48128,
+  "baseEffectDurationTicks": 100,
+  "castType": "cone",
+  "range": 4.0,
+  "igniteSeconds": 5,
+  "sound": { "id": "minecraft:item.firecharge.use", "volume": 1.0, "pitch": 1.0 },
+  "requirement": { "type": "proficiency", "prerequisiteId": "stupefy", "minProficiency": "proficient" }
+}

@@ -164,7 +164,9 @@ public final class SpellExecutor {
                 // spells without an effects list (all Java spells today).
                 List<SpellEffectComponent> selfComponents = SpellEffectRunner.effectsOf(spell);
                 if (!selfComponents.isEmpty()) {
-                    SpellEffectRunner.run(selfComponents, SpellEffectContext.ofSelf(caster, level));
+                    SpellEffectRunner.run(selfComponents, SpellEffectContext.ofSelf(caster, level)
+                            .withScaling(ctx.modifiers().finalDamage() * scalingProfile.damageMult(),
+                                    scalingProfile.durationMult(), scalingProfile.controlMult()));
                     successful = true;
                 }
                 if (successful) {
@@ -188,17 +190,18 @@ public final class SpellExecutor {
     }
 
     private static final SelfUtilityRule[] SELF_UTILITY_RULES = new SelfUtilityRule[] {
-            // NOTE: the "lumos" branch was removed in Step 3 — lumos is now a JSON spell whose light is
-            // applied via the `apply_effect` effect component. The legacy lumos->nox learn + loadout-swap
-            // toggle was an accepted behavior delta of that migration (no component expresses it yet).
-            new SelfUtilityRule("nox", (level, caster, spell) -> {
-                caster.removeEffect(ModEffects.LUMOS_FIELD);
-                SpellHelper.spawnBurst(level, spell, caster.getEyePosition(), 12, 0.22);
-                PlayerSpellData noxData = caster.getData(ModAttachments.SPELL_DATA.get());
-                noxData.setLoadoutSpell(noxData.getActiveSlot(), "lumos");
-                SpellDataSyncS2CPayload.syncToPlayer(caster);
-                return true;
-            }),
+            // Step 3/4 migration notes:
+            //  - lumos (S3) & nox (S4) are JSON spells; their light/dispel ride effect components. The
+            //    legacy lumos<->nox learn + loadout-swap toggle was shed (no component expresses it).
+            //  - reparo (S4): residual tail. SpellDefinition has no repairsItem field and the `repair`
+            //    component can't match full-repair / wand-aware selection / ElderWand guard, so reparo's
+            //    behavior stays here (block-repair range no longer wand-scaled — logged delta).
+            //  - arresto_momentum (S4): residual tail for the AoE stabilize (velocity dampen has no
+            //    component); its self slow-fall rides an apply_effect component in JSON.
+            //  - episkey/frigora (S4): handlers trimmed to the residual bit only (regen / block-interaction);
+            //    heal+cleanse / clear-fire+resistances ride components in JSON.
+            new SelfUtilityRule("reparo", (level, caster, spell) ->
+                    SpellCastHandlers.handleReparoSelf(level, caster, spell)),
             new SelfUtilityRule("protego", (level, caster, spell) -> {
                 SpellHelper.applyProtegoCastPulse(level, caster, spell);
                 return true;
