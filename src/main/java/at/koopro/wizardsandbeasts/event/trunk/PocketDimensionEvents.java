@@ -49,6 +49,13 @@ public class PocketDimensionEvents {
     // playerId → ticks remaining before LADDER_STEP plays after entry
     private static final Map<UUID, Integer> pendingLadderSounds = new HashMap<>();
 
+    /** Ticks between per-player unsecured-latch proximity scans. */
+    private static final int LATCH_WARNING_SCAN_INTERVAL_TICKS = 10;
+    /** Ticks between level-wide unsecured-trunk scans for creature escape. */
+    private static final int ESCAPE_SCAN_INTERVAL_TICKS = 20;
+    /** 1-in-N escape chance per scan — equals the former 1-in-200 per tick in expectation. */
+    private static final int ESCAPE_CHANCE_PER_SCAN = 10;
+
     // Forward-compat entity tag for mod creatures (inert until creatures are added and tagged).
     private static final TagKey<EntityType<?>> MAGICAL_CREATURE_TAG =
             TagKey.create(Registries.ENTITY_TYPE,
@@ -118,7 +125,10 @@ public class PocketDimensionEvents {
         }
 
         // Latch warning: warn player if they are within 4 blocks of an unsecured trunk on the ground.
+        // Scanned every 10 ticks — the overlay message persists ~60 ticks, so the warning
+        // stays continuously visible while saving 90% of the entity scans.
         if (!ModuleManager.isEnabled(Module.POCKET_DIMENSIONS)) return;
+        if (player.tickCount % LATCH_WARNING_SCAN_INTERVAL_TICKS != 0) return;
         List<ItemEntity> nearby = serverLevel.getEntitiesOfClass(
                 ItemEntity.class,
                 player.getBoundingBox().inflate(4.0),
@@ -141,6 +151,10 @@ public class PocketDimensionEvents {
         // Creature escape is suppressed in PREVIEW mode (requires actual creature entities).
         if (ModuleManager.isPreview(Module.POCKET_DIMENSIONS)) return;
 
+        // Level-wide ItemEntity scan is expensive: run it every 20 ticks and roll a
+        // compensated 1-in-10 escape chance (same expected rate as 1-in-200 per tick).
+        if (level.getGameTime() % ESCAPE_SCAN_INTERVAL_TICKS != 0) return;
+
         var border = level.getWorldBorder();
         AABB borderBox = new AABB(border.getMinX(), -64, border.getMinZ(), border.getMaxX(), 320, border.getMaxZ());
         List<ItemEntity> unsecured = level.getEntitiesOfClass(
@@ -148,17 +162,17 @@ public class PocketDimensionEvents {
                 borderBox,
                 ie -> ie.getItem().has(ModDataComponents.POCKET_CASE_ID.get())
                         && !ie.getItem().getOrDefault(ModDataComponents.POCKET_LATCH_SECURED.get(), true));
+        if (unsecured.isEmpty()) return;
 
+        TrunkRegistryData data = TrunkRegistryData.get(level);
         for (ItemEntity trunkEntity : unsecured) {
             UUID caseId = trunkEntity.getItem().get(ModDataComponents.POCKET_CASE_ID.get());
             if (caseId == null) continue;
 
-            TrunkRegistryData data = TrunkRegistryData.get(level);
             TrunkRecord record = data.getCasePocket(caseId).orElse(null);
             if (record == null) continue;
 
-            // 1-in-200 chance per tick that a nearby magical creature escapes into the trunk.
-            if (level.random.nextInt(200) != 0) continue;
+            if (level.random.nextInt(ESCAPE_CHANCE_PER_SCAN) != 0) continue;
 
             List<Entity> creatures = level.getEntitiesOfClass(
                     Entity.class,

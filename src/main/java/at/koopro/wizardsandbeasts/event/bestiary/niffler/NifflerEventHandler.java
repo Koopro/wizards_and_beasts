@@ -13,15 +13,17 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @EventBusSubscriber(modid = WizardsAndBeastsMod.MODID)
 public final class NifflerEventHandler {
 
-    private static final Map<String, Long> PROX_COOLDOWNS = new HashMap<>();
+    private static final Map<UUID, Long> PROX_COOLDOWNS = new HashMap<>();
 
     private NifflerEventHandler() {}
 
@@ -40,12 +42,16 @@ public final class NifflerEventHandler {
                     player.getBoundingBox().inflate(12), EntitySelector.ENTITY_STILL_ALIVE);
             if (nearby.isEmpty()) continue;
 
-            String cooldownKey = player.getUUID() + "|sighted";
-            long last = PROX_COOLDOWNS.getOrDefault(cooldownKey, -200L);
+            long last = PROX_COOLDOWNS.getOrDefault(player.getUUID(), -200L);
             if (gameTime - last < 100) continue;
-            PROX_COOLDOWNS.put(cooldownKey, gameTime);
+            PROX_COOLDOWNS.put(player.getUUID(), gameTime);
             BestiaryDataHelper.setTier(player, NifflerEntity.BESTIARY_ID, DiscoveryTier.SIGHTED);
         }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+        PROX_COOLDOWNS.remove(event.getEntity().getUUID());
     }
 
     // ─── Bestiary: kill (ENCOUNTERED) ────────────────────────────────────────

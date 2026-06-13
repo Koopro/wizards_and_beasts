@@ -33,14 +33,15 @@ public class CloakEffectsHandler {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Set<UUID> DEATHLY_HIDDEN_PLAYERS = new HashSet<>();
     private static final Set<UUID> CLOAK_INVISIBLE_PLAYERS = new HashSet<>();
+    /** Deathly-cloaked players whose equipment changed this tick — vanilla re-sent real
+     *  equipment, so the mask must be re-broadcast after the level tick. */
+    private static final Set<UUID> EQUIPMENT_REMASK_QUEUE = new HashSet<>();
 
     private CloakEffectsHandler() {
     }
 
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
-        Set<UUID> currentlyHidden = new HashSet<>();
-        Set<UUID> currentlyCloakInvisible = new HashSet<>();
         List<ServerPlayer> allPlayers = event.getServer().getPlayerList().getPlayers();
 
         for (ServerPlayer player : allPlayers) {
@@ -49,40 +50,39 @@ public class CloakEffectsHandler {
             UUID playerId = player.getUUID();
 
             if (!cloaked) {
-                if (DEATHLY_HIDDEN_PLAYERS.contains(player.getUUID())) {
+                if (DEATHLY_HIDDEN_PLAYERS.remove(playerId)) {
                     broadcastEquipment(allPlayers, player, false);
                     logCloak("restore equipment visibility", player);
                 }
-                if (CLOAK_INVISIBLE_PLAYERS.contains(playerId)) {
+                if (CLOAK_INVISIBLE_PLAYERS.remove(playerId)) {
                     player.setInvisible(false);
                     logCloak("restore entity visibility", player);
                 }
                 continue;
             }
 
+            // Re-applied every tick: vanilla LivingEntity resets the invisible flag from
+            // the potion effect each aiStep, and this cloak uses no potion effect.
             player.setInvisible(true);
-            currentlyCloakInvisible.add(playerId);
-            if (!CLOAK_INVISIBLE_PLAYERS.contains(playerId)) {
+            if (CLOAK_INVISIBLE_PLAYERS.add(playerId)) {
                 logCloak("apply cloak invisibility (no potion effect)", player);
                 clearMobTargets(player);
             }
 
             if (deathlyCloaked) {
-                currentlyHidden.add(playerId);
-                broadcastEquipment(allPlayers, player, true);
-                if (!DEATHLY_HIDDEN_PLAYERS.contains(playerId)) {
+                boolean justHidden = DEATHLY_HIDDEN_PLAYERS.add(playerId);
+                if (justHidden || EQUIPMENT_REMASK_QUEUE.contains(playerId)) {
+                    broadcastEquipment(allPlayers, player, true);
+                }
+                if (justHidden) {
                     logCloak("deathly cloak: mask all equipment slots for observers", player);
                 }
-            } else if (DEATHLY_HIDDEN_PLAYERS.contains(playerId)) {
+            } else if (DEATHLY_HIDDEN_PLAYERS.remove(playerId)) {
                 broadcastEquipment(allPlayers, player, false);
                 logCloak("normal cloak: unmask equipment slots", player);
             }
         }
-
-        DEATHLY_HIDDEN_PLAYERS.clear();
-        DEATHLY_HIDDEN_PLAYERS.addAll(currentlyHidden);
-        CLOAK_INVISIBLE_PLAYERS.clear();
-        CLOAK_INVISIBLE_PLAYERS.addAll(currentlyCloakInvisible);
+        EQUIPMENT_REMASK_QUEUE.clear();
     }
 
     @SubscribeEvent
@@ -130,14 +130,20 @@ public class CloakEffectsHandler {
         }
         DEATHLY_HIDDEN_PLAYERS.remove(player.getUUID());
         CLOAK_INVISIBLE_PLAYERS.remove(player.getUUID());
+        EQUIPMENT_REMASK_QUEUE.remove(player.getUUID());
     }
 
     @SubscribeEvent
     public static void onLivingEquipmentChanged(LivingEquipmentChangeEvent event) {
-        if (event.getSlot() != EquipmentSlot.CHEST) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            // Vanilla broadcasts the real equipment for this change during the level tick;
+            // queue a same-tick re-mask so the deathly cloak concealment always wins.
+            if (DEATHLY_HIDDEN_PLAYERS.contains(player.getUUID())) {
+                EQUIPMENT_REMASK_QUEUE.add(player.getUUID());
+            }
             return;
         }
-        if (event.getEntity() instanceof ServerPlayer) {
+        if (event.getSlot() != EquipmentSlot.CHEST) {
             return;
         }
 
