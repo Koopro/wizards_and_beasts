@@ -1,10 +1,7 @@
 package at.koopro.wizardsandbeasts.network.floo;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlock;
-import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlockEntity;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -12,9 +9,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jspecify.annotations.NonNull;
 
 public record FlooBlockSyncS2CPayload(@NonNull BlockPos pos, boolean isLit,
@@ -49,19 +44,5 @@ public record FlooBlockSyncS2CPayload(@NonNull BlockPos pos, boolean isLit,
                 PacketDistributor.sendToPlayer(nearby, packet);
             }
         }
-    }
-
-    public static void handleClient(@NonNull FlooBlockSyncS2CPayload packet, @NonNull IPayloadContext context) {
-        context.enqueueWork(() -> {
-            Minecraft mc = Minecraft.getInstance();
-            if (mc.level == null) return;
-            if (mc.level.getBlockEntity(packet.pos) instanceof FlooFireplaceBlockEntity be) {
-                be.setLitTicksRemaining(packet.litTicksRemaining);
-            }
-            BlockState state = mc.level.getBlockState(packet.pos);
-            if (state.hasProperty(FlooFireplaceBlock.LIT) && state.getValue(FlooFireplaceBlock.LIT) != packet.isLit) {
-                mc.level.setBlock(packet.pos, state.setValue(FlooFireplaceBlock.LIT, packet.isLit), 11);
-            }
-        });
     }
 }

@@ -2,14 +2,12 @@ package at.koopro.wizardsandbeasts.network.spell;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellDataState;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * Hot-path spell-data delta sent on every successful cast. Carries only the
@@ -52,10 +50,6 @@ public record SpellDataDeltaS2CPayload(
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
-    }
-
-    public static void handleClient(SpellDataDeltaS2CPayload pkt, IPayloadContext ctx) {
-        ctx.enqueueWork(() -> ClientSpellDataState.applyDelta(pkt));
     }
 
     public static void sendTo(ServerPlayer player,

@@ -1,13 +1,9 @@
 package at.koopro.wizardsandbeasts.network.heritage;
-import at.koopro.wizardsandbeasts.network.ClientScreenHooksInvoker;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageDataState;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
-import at.koopro.wizardsandbeasts.heritage.Heritage;
-import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import at.koopro.wizardsandbeasts.heritage.TransformationState;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -15,9 +11,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -107,47 +101,6 @@ public record HeritageDataSyncS2CPayload(
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
-    }
-
-    public static void handleClient(HeritageDataSyncS2CPayload pkt, IPayloadContext ctx) {
-        ctx.enqueueWork(() -> {
-            Heritage heritage = resolveHeritage(pkt.heritageId);
-            HeritageVariant variant = resolveVariant(pkt.variantId);
-            TransformationState state = resolveState(pkt.transformationState);
-            String activeForm = pkt.activeFormId == null || pkt.activeFormId.isBlank() ? null : pkt.activeFormId;
-            String selectedProfessionId = pkt.selectedProfessionId == null || pkt.selectedProfessionId.isBlank()
-                    ? null : pkt.selectedProfessionId;
-            ClientHeritageDataState.applySync(pkt.syncVersion, heritage, variant, pkt.locked, state, activeForm, pkt.debugOverlay, pkt.customFlags,
-                    pkt.professionPoints, pkt.totalProfessionPointsEarned, pkt.unlockedProfessions, selectedProfessionId);
-            if (pkt.openSelector) {
-                openClientScreenSafe();
-            }
-        });
-    }
-
-    @Nullable
-    private static Heritage resolveHeritage(String heritageId) {
-        return heritageId == null || heritageId.isBlank() ? null : Heritage.byId(heritageId);
-    }
-
-    @Nullable
-    private static HeritageVariant resolveVariant(String variantId) {
-        return variantId == null || variantId.isBlank() ? null : HeritageVariant.byId(variantId);
-    }
-
-    private static TransformationState resolveState(String state) {
-        if (state == null || state.isBlank()) {
-            return TransformationState.NORMAL;
-        }
-        try {
-            return TransformationState.valueOf(state);
-        } catch (IllegalArgumentException ignored) {
-            return TransformationState.NORMAL;
-        }
-    }
-
-    private static void openClientScreenSafe() {
-        ClientScreenHooksInvoker.invoke("openHeritageSelectionScreen");
     }
 
     public static void syncToPlayer(ServerPlayer player, boolean openSelector) {

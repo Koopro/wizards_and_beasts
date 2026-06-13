@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.network.skill;
 
+import at.koopro.wizardsandbeasts.client.network.ClientPayloadHandlers;
 import at.koopro.wizardsandbeasts.network.skill.SkillBonusSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.skill.SkillDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.skill.SkillUnlockC2SPayload;
@@ -14,11 +15,11 @@ public final class ModNetworkSkills {
         registrar.playToClient(
                 SkillDataSyncS2CPayload.TYPE,
                 SkillDataSyncS2CPayload.STREAM_CODEC,
-                SkillDataSyncS2CPayload::handleClient);
+                ClientPayloadHandlers::handleSkillDataSync);
         registrar.playToClient(
                 SkillBonusSyncS2CPayload.TYPE,
                 SkillBonusSyncS2CPayload.STREAM_CODEC,
-                SkillBonusSyncS2CPayload::handleClient);
+                ClientPayloadHandlers::handleSkillBonusSync);
 
         registrar.playToServer(
                 SkillUnlockC2SPayload.TYPE,

@@ -2,7 +2,6 @@ package at.koopro.wizardsandbeasts.network.spell;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellDataState;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import io.netty.buffer.ByteBuf;
@@ -11,7 +10,6 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -187,10 +185,6 @@ public record SpellDataSyncS2CPayload(
                 new HashMap<>(data.getSpellProficiencies()),
                 new HashMap<>(data.getRejectCounts()),
                 data.getSyncCorrections());
-    }
-
-    public static void handleClient(SpellDataSyncS2CPayload pkt, IPayloadContext ctx) {
-        ctx.enqueueWork(() -> ClientSpellDataState.applyFullSync(pkt));
     }
 
     public static void syncToPlayer(ServerPlayer player) {

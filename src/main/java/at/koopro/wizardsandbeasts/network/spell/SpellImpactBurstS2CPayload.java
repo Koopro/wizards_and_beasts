@@ -1,7 +1,6 @@
 package at.koopro.wizardsandbeasts.network.spell;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.client.spell.SpellVfxClient;
 import at.koopro.wizardsandbeasts.spell.core.SpellFamily;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -12,7 +11,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * Server-authoritative impact burst; renders tinted particles on tracking clients only.
@@ -58,14 +56,6 @@ public record SpellImpactBurstS2CPayload(
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
-    }
-
-    public static void handleClient(SpellImpactBurstS2CPayload pkt, IPayloadContext ctx) {
-        ctx.enqueueWork(() -> {
-            Vec3 pos = new Vec3(pkt.x, pkt.y, pkt.z);
-            SpellFamily family = SpellFamily.byOrdinal(pkt.familyOrdinal);
-            SpellVfxClient.spawnTintBurst(pos, family, pkt.argb, Math.max(1, pkt.count), pkt.spread);
-        });
     }
 
     public static void sendToTracking(Entity anchor, Vec3 pos, SpellFamily family, int argb, int count, float spread) {

@@ -9,7 +9,6 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import org.jspecify.annotations.Nullable;
 
@@ -44,16 +43,6 @@ public record NifflerCarrySyncS2CPayload(@Nullable UUID nifflerUUID) implements 
 
     @Override
     public Type<? extends CustomPacketPayload> type() { return TYPE; }
-
-    public static void handleClient(NifflerCarrySyncS2CPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
-            var mc = net.minecraft.client.Minecraft.getInstance();
-            if (mc.player != null) {
-                mc.player.setData(ModAttachments.CARRIED_NIFFLER.get(),
-                        new CarriedNifflerAttachment(payload.nifflerUUID));
-            }
-        });
-    }
 
     public static void sendToPlayer(ServerPlayer player) {
         CarriedNifflerAttachment att = player.getData(ModAttachments.CARRIED_NIFFLER.get());

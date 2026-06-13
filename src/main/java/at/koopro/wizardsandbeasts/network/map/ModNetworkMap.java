@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.network.map;
 
+import at.koopro.wizardsandbeasts.client.network.ClientPayloadHandlers;
 import at.koopro.wizardsandbeasts.network.map.MapCloseC2SPayload;
 import at.koopro.wizardsandbeasts.network.map.MapOpenS2CPayload;
 import at.koopro.wizardsandbeasts.network.map.MapSyncS2CPayload;
@@ -14,12 +15,12 @@ public final class ModNetworkMap {
         registrar.playToClient(
                 MapOpenS2CPayload.TYPE,
                 MapOpenS2CPayload.STREAM_CODEC,
-                MapOpenS2CPayload::handleClient);
+                ClientPayloadHandlers::handleMapOpen);
 
         registrar.playToClient(
                 MapSyncS2CPayload.TYPE,
                 MapSyncS2CPayload.STREAM_CODEC,
-                MapSyncS2CPayload::handleClient);
+                ClientPayloadHandlers::handleMapSync);
 
         registrar.playToServer(
                 MapCloseC2SPayload.TYPE,

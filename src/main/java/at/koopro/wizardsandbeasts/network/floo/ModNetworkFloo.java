@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.network.floo;
 
+import at.koopro.wizardsandbeasts.client.network.ClientPayloadHandlers;
 import at.koopro.wizardsandbeasts.network.floo.FlooArrivalEffectsS2CPayload;
 import at.koopro.wizardsandbeasts.network.floo.FlooBlockSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.floo.FlooTravelRequestC2SPayload;
@@ -15,7 +16,7 @@ public final class ModNetworkFloo {
         registrar.playToClient(
                 OpenFlooGuiS2CPayload.TYPE,
                 OpenFlooGuiS2CPayload.STREAM_CODEC,
-                OpenFlooGuiS2CPayload::handleClient);
+                ClientPayloadHandlers::handleOpenFlooGui);
         registrar.playToServer(
                 FlooTravelRequestC2SPayload.TYPE,
                 FlooTravelRequestC2SPayload.STREAM_CODEC,
@@ -23,10 +24,10 @@ public final class ModNetworkFloo {
         registrar.playToClient(
                 FlooArrivalEffectsS2CPayload.TYPE,
                 FlooArrivalEffectsS2CPayload.STREAM_CODEC,
-                FlooArrivalEffectsS2CPayload::handleClient);
+                ClientPayloadHandlers::handleFlooArrivalEffects);
         registrar.playToClient(
                 FlooBlockSyncS2CPayload.TYPE,
                 FlooBlockSyncS2CPayload.STREAM_CODEC,
-                FlooBlockSyncS2CPayload::handleClient);
+                ClientPayloadHandlers::handleFlooBlockSync);
     }
 }

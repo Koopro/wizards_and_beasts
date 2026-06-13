@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.network.bloodpact;
 
+import at.koopro.wizardsandbeasts.client.network.ClientPayloadHandlers;
 import at.koopro.wizardsandbeasts.network.bloodpact.SBreakPactPayload;
 import at.koopro.wizardsandbeasts.network.bloodpact.SUpdateVialPayload;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
@@ -12,10 +13,10 @@ public final class ModNetworkBloodPact {
         registrar.playToClient(
                 SBreakPactPayload.TYPE,
                 SBreakPactPayload.STREAM_CODEC,
-                SBreakPactPayload::handleClient);
+                ClientPayloadHandlers::handleSBreakPact);
         registrar.playToClient(
                 SUpdateVialPayload.TYPE,
                 SUpdateVialPayload.STREAM_CODEC,
-                SUpdateVialPayload::handleClient);
+                ClientPayloadHandlers::handleSUpdateVial);
     }
 }

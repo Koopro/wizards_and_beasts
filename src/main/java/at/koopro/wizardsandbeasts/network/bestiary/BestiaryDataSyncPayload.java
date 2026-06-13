@@ -3,7 +3,6 @@ import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.bestiary.DiscoveryTier;
-import at.koopro.wizardsandbeasts.client.bestiary.ClientBestiaryCache;
 import at.koopro.wizardsandbeasts.bestiary.data.PlayerBestiaryData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import io.netty.buffer.ByteBuf;
@@ -15,7 +14,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,10 +44,6 @@ public record BestiaryDataSyncPayload(PlayerBestiaryData data) implements Custom
 
     @Override
     public Type<? extends CustomPacketPayload> type() { return TYPE; }
-
-    public static void handleClient(BestiaryDataSyncPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> ClientBestiaryCache.set(payload.data));
-    }
 
     public static void syncToPlayer(ServerPlayer player) {
         PacketDistributor.sendToPlayer(player, new BestiaryDataSyncPayload(player.getData(ModAttachments.BESTIARY_DATA.get())));

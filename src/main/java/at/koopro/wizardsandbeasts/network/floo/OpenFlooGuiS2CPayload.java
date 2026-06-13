@@ -1,16 +1,13 @@
 package at.koopro.wizardsandbeasts.network.floo;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.client.floo.gui.FlooNetworkScreen;
 import at.koopro.wizardsandbeasts.floo.FlooDestinationDto;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jspecify.annotations.NonNull;
 
 import java.util.List;
@@ -32,9 +29,5 @@ public record OpenFlooGuiS2CPayload(@NonNull List<FlooDestinationDto> destinatio
 
     public static void send(@NonNull ServerPlayer player, @NonNull List<FlooDestinationDto> destinations) {
         PacketDistributor.sendToPlayer(player, new OpenFlooGuiS2CPayload(destinations));
-    }
-
-    public static void handleClient(@NonNull OpenFlooGuiS2CPayload packet, @NonNull IPayloadContext context) {
-        context.enqueueWork(() -> Minecraft.getInstance().setScreen(new FlooNetworkScreen(packet.destinations)));
     }
 }

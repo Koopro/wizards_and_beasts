@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.network.trunk;
 
+import at.koopro.wizardsandbeasts.client.network.ClientPayloadHandlers;
 import at.koopro.wizardsandbeasts.network.trunk.PocketConfigC2SPayload;
 import at.koopro.wizardsandbeasts.network.trunk.PocketStatusS2CPayload;
 
@@ -13,7 +14,7 @@ public final class ModNetworkPocket {
         registrar.playToClient(
                 PocketStatusS2CPayload.TYPE,
                 PocketStatusS2CPayload.STREAM_CODEC,
-                PocketStatusS2CPayload::handleClient);
+                ClientPayloadHandlers::handlePocketStatus);
         registrar.playToServer(
                 PocketConfigC2SPayload.TYPE,
                 PocketConfigC2SPayload.STREAM_CODEC,

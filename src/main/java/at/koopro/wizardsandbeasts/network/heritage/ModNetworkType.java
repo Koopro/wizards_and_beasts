@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.network.heritage;
 
+import at.koopro.wizardsandbeasts.client.network.ClientPayloadHandlers;
 import at.koopro.wizardsandbeasts.network.heritage.HeritageDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.heritage.HeritageSelectC2SPayload;
 import at.koopro.wizardsandbeasts.network.heritage.ProfessionSelectC2SPayload;
@@ -15,7 +16,7 @@ public final class ModNetworkType {
         registrar.playToClient(
                 HeritageDataSyncS2CPayload.TYPE,
                 HeritageDataSyncS2CPayload.STREAM_CODEC,
-                HeritageDataSyncS2CPayload::handleClient);
+                ClientPayloadHandlers::handleHeritageDataSync);
 
         registrar.playToServer(
                 HeritageSelectC2SPayload.TYPE,

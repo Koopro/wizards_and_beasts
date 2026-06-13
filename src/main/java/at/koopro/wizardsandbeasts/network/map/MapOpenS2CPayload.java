@@ -2,13 +2,11 @@ package at.koopro.wizardsandbeasts.network.map;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.client.map.MapClientHandler;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record MapOpenS2CPayload(
         BlockPos center,
@@ -48,9 +46,5 @@ public record MapOpenS2CPayload(
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
-    }
-
-    public static void handleClient(MapOpenS2CPayload pkt, IPayloadContext ctx) {
-        MapClientHandler.handleMapOpen(pkt, ctx);
     }
 }

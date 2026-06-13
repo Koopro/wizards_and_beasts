@@ -1,14 +1,10 @@
 package at.koopro.wizardsandbeasts.network.azkaban;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.azkaban.attachment.AzkabanTrespasserData;
-import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jspecify.annotations.NonNull;
 
 public record AzkabanTrespasserSyncPayload(boolean tagged) implements CustomPacketPayload {
@@ -32,14 +28,5 @@ public record AzkabanTrespasserSyncPayload(boolean tagged) implements CustomPack
     @Override
     public @NonNull Type<? extends CustomPacketPayload> type() {
         return TYPE;
-    }
-
-    public static void handleClient(AzkabanTrespasserSyncPayload pkt, IPayloadContext ctx) {
-        ctx.enqueueWork(() -> {
-            var player = Minecraft.getInstance().player;
-            if (player == null) return;
-            player.setData(ModAttachments.AZKABAN_TRESPASSER_TAG.get(),
-                    new AzkabanTrespasserData(pkt.tagged));
-        });
     }
 }

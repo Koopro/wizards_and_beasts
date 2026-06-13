@@ -2,14 +2,12 @@ package at.koopro.wizardsandbeasts.network.spell;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellDataState;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record SpellProficiencySyncS2CPayload(
         String spellId,
@@ -34,10 +32,6 @@ public record SpellProficiencySyncS2CPayload(
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
-    }
-
-    public static void handleClient(SpellProficiencySyncS2CPayload pkt, IPayloadContext ctx) {
-        ctx.enqueueWork(() -> ClientSpellDataState.applyProficiencyDelta(pkt));
     }
 
     public static void sendTo(ServerPlayer player, String spellId, float proficiency) {

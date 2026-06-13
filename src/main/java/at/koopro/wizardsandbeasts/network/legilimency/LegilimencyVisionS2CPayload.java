@@ -1,7 +1,6 @@
 package at.koopro.wizardsandbeasts.network.legilimency;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.client.legilimency.state.ClientLegilimencyVisionState;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.StreamCodec;
@@ -32,10 +31,6 @@ public record LegilimencyVisionS2CPayload(BlockPos markerPos, int durationTicks)
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
-    }
-
-    public static void handleClient(LegilimencyVisionS2CPayload payload, net.neoforged.neoforge.network.handling.IPayloadContext context) {
-        context.enqueueWork(() -> ClientLegilimencyVisionState.set(payload.markerPos, payload.durationTicks));
     }
 
     public static void sendTo(ServerPlayer player, BlockPos pos, int durationTicks) {

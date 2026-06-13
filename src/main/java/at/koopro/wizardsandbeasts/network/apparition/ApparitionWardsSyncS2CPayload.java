@@ -4,7 +4,6 @@ import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.apparition.ApparitionWard;
 import at.koopro.wizardsandbeasts.apparition.ApparitionWardRegistry;
-import at.koopro.wizardsandbeasts.client.apparition.state.ClientApparitionWardState;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -62,15 +61,6 @@ public record ApparitionWardsSyncS2CPayload(List<WardData> wards) implements Cus
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
-    }
-
-    public static void handleClient(ApparitionWardsSyncS2CPayload payload, net.neoforged.neoforge.network.handling.IPayloadContext context) {
-        context.enqueueWork(() -> {
-            List<ClientApparitionWardState.WardBox> mapped = payload.wards.stream()
-                    .map(w -> new ClientApparitionWardState.WardBox(w.dimensionId, w.bounds, w.message))
-                    .toList();
-            ClientApparitionWardState.setAll(mapped);
-        });
     }
 
     public static void syncToPlayer(ServerPlayer player) {

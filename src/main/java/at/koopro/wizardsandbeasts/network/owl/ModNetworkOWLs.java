@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.network.owl;
 
+import at.koopro.wizardsandbeasts.client.network.ClientPayloadHandlers;
 import at.koopro.wizardsandbeasts.network.owl.ChooseProfessionPacket;
 import at.koopro.wizardsandbeasts.network.owl.OWLDataSyncPayload;
 import at.koopro.wizardsandbeasts.network.owl.ProfessionSyncPayload;
@@ -12,8 +13,8 @@ public final class ModNetworkOWLs {
 
     public static void register(PayloadRegistrar registrar) {
         registrar.playToServer(RequestOWLExamPacket.TYPE, RequestOWLExamPacket.STREAM_CODEC, RequestOWLExamPacket::handleServer);
-        registrar.playToClient(OWLDataSyncPayload.TYPE, OWLDataSyncPayload.STREAM_CODEC, OWLDataSyncPayload::handleClient);
+        registrar.playToClient(OWLDataSyncPayload.TYPE, OWLDataSyncPayload.STREAM_CODEC, ClientPayloadHandlers::handleOWLDataSync);
         registrar.playToServer(ChooseProfessionPacket.TYPE, ChooseProfessionPacket.STREAM_CODEC, ChooseProfessionPacket::handleServer);
-        registrar.playToClient(ProfessionSyncPayload.TYPE, ProfessionSyncPayload.STREAM_CODEC, ProfessionSyncPayload::handleClient);
+        registrar.playToClient(ProfessionSyncPayload.TYPE, ProfessionSyncPayload.STREAM_CODEC, ClientPayloadHandlers::handleProfessionSync);
     }
 }

@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.network.form;
 
+import at.koopro.wizardsandbeasts.client.network.ClientPayloadHandlers;
 import at.koopro.wizardsandbeasts.network.form.DebugOverlayToggleS2CPayload;
 import at.koopro.wizardsandbeasts.network.form.FormChangeRequestC2SPayload;
 import at.koopro.wizardsandbeasts.network.form.FormSyncS2CPayload;
@@ -19,7 +20,7 @@ public final class ModNetworkForm {
         registrar.playToClient(
                 FormSyncS2CPayload.TYPE,
                 FormSyncS2CPayload.STREAM_CODEC,
-                FormSyncS2CPayload::handleClient);
+                ClientPayloadHandlers::handleFormSync);
 
         registrar.playToServer(
                 FormChangeRequestC2SPayload.TYPE,
@@ -44,16 +45,16 @@ public final class ModNetworkForm {
         registrar.playToClient(
                 TransitionStartS2CPayload.TYPE,
                 TransitionStartS2CPayload.STREAM_CODEC,
-                TransitionStartS2CPayload::handleClient);
+                ClientPayloadHandlers::handleTransitionStart);
 
         registrar.playToClient(
                 TransitionEndS2CPayload.TYPE,
                 TransitionEndS2CPayload.STREAM_CODEC,
-                TransitionEndS2CPayload::handleClient);
+                ClientPayloadHandlers::handleTransitionEnd);
 
         registrar.playToClient(
                 DebugOverlayToggleS2CPayload.TYPE,
                 DebugOverlayToggleS2CPayload.STREAM_CODEC,
-                DebugOverlayToggleS2CPayload::handleClient);
+                ClientPayloadHandlers::handleDebugOverlayToggle);
     }
 }

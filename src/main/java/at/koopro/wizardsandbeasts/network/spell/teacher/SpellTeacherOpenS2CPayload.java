@@ -1,9 +1,7 @@
 package at.koopro.wizardsandbeasts.network.spell.teacher;
-import at.koopro.wizardsandbeasts.network.ClientScreenHooksInvoker;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellTeacherState;
 import at.koopro.wizardsandbeasts.spell.learning.SpellLearningService;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -11,7 +9,6 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,17 +53,6 @@ public record SpellTeacherOpenS2CPayload(List<SpellLearningService.SpellOffer> o
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
-    }
-
-    public static void handleClient(SpellTeacherOpenS2CPayload pkt, IPayloadContext ctx) {
-        ctx.enqueueWork(() -> {
-            ClientSpellTeacherState.setOffers(pkt.offers);
-            openClientScreenSafe();
-        });
-    }
-
-    private static void openClientScreenSafe() {
-        ClientScreenHooksInvoker.invoke("openSpellTeacherScreen");
     }
 
     public static void sendToPlayer(ServerPlayer player) {

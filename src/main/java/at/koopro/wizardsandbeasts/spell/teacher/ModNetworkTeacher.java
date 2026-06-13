@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.spell.teacher;
 
+import at.koopro.wizardsandbeasts.client.spell.network.SpellClientPayloadHandlers;
 import at.koopro.wizardsandbeasts.network.spell.teacher.SpellTeacherLearnC2SPayload;
 import at.koopro.wizardsandbeasts.network.spell.teacher.SpellTeacherOpenS2CPayload;
 
@@ -14,7 +15,7 @@ public final class ModNetworkTeacher {
         registrar.playToClient(
                 SpellTeacherOpenS2CPayload.TYPE,
                 SpellTeacherOpenS2CPayload.STREAM_CODEC,
-                SpellTeacherOpenS2CPayload::handleClient);
+                SpellClientPayloadHandlers::handleSpellTeacherOpen);
 
         registrar.playToServer(
                 SpellTeacherLearnC2SPayload.TYPE,

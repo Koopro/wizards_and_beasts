@@ -1,13 +1,11 @@
 package at.koopro.wizardsandbeasts.network.owl;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.client.owl.ClientOWLCache;
 import at.koopro.wizardsandbeasts.owl.Profession;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jspecify.annotations.Nullable;
 
 /** S→C: syncs the player's chosen profession (or null if none chosen yet). */
@@ -34,8 +32,4 @@ public record ProfessionSyncPayload(@Nullable Profession profession) implements 
 
     @Override
     public Type<? extends CustomPacketPayload> type() { return TYPE; }
-
-    public static void handleClient(ProfessionSyncPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> ClientOWLCache.setProfession(payload.profession()));
-    }
 }

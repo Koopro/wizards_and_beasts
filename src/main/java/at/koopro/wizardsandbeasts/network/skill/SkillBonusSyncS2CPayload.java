@@ -2,13 +2,11 @@ package at.koopro.wizardsandbeasts.network.skill;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.client.skill.state.ClientSkillBonusCache;
 import at.koopro.wizardsandbeasts.skill.PlayerSkillBonusData;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record SkillBonusSyncS2CPayload(PlayerSkillBonusData bonusData) implements CustomPacketPayload {
     public static final Type<SkillBonusSyncS2CPayload> TYPE = new Type<>(
@@ -38,9 +36,5 @@ public record SkillBonusSyncS2CPayload(PlayerSkillBonusData bonusData) implement
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
-    }
-
-    public static void handleClient(SkillBonusSyncS2CPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> ClientSkillBonusCache.set(payload.bonusData));
     }
 }

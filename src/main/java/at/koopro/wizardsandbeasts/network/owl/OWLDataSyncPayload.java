@@ -1,14 +1,12 @@
 package at.koopro.wizardsandbeasts.network.owl;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.client.owl.ClientOWLCache;
 import at.koopro.wizardsandbeasts.owl.OWLGrade;
 import at.koopro.wizardsandbeasts.owl.OWLSubject;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jspecify.annotations.NonNull;
 
 import java.util.EnumMap;
@@ -55,8 +53,4 @@ public record OWLDataSyncPayload(
 
     @Override
     public Type<? extends CustomPacketPayload> type() { return TYPE; }
-
-    public static void handleClient(OWLDataSyncPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> ClientOWLCache.setOWLData(payload.grades(), payload.examTaken()));
-    }
 }

@@ -1,14 +1,12 @@
 package at.koopro.wizardsandbeasts.network.form;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.client.form.state.ClientFormDataState;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * Server → Client: toggles the form debug overlay on the client.
@@ -33,12 +31,6 @@ public record DebugOverlayToggleS2CPayload(boolean enabled) implements CustomPac
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
-    }
-
-    public static void handleClient(DebugOverlayToggleS2CPayload pkt, IPayloadContext ctx) {
-        ctx.enqueueWork(() -> {
-            ClientFormDataState.setDebugOverlay(pkt.enabled);
-        });
     }
 
     public static void sendToPlayer(ServerPlayer player, boolean enabled) {

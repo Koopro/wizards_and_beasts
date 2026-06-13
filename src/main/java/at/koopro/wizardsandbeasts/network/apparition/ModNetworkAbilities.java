@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.network.apparition;
 
+import at.koopro.wizardsandbeasts.client.network.ClientPayloadHandlers;
 import at.koopro.wizardsandbeasts.network.ability.AbilityDataSyncPayload;
 import at.koopro.wizardsandbeasts.network.apparition.ApparitionRequestPayload;
 import at.koopro.wizardsandbeasts.network.apparition.ApparitionWardsSyncS2CPayload;
@@ -16,11 +17,11 @@ public final class ModNetworkAbilities {
         registrar.playToClient(
                 AbilityDataSyncPayload.TYPE,
                 AbilityDataSyncPayload.STREAM_CODEC,
-                AbilityDataSyncPayload::handleClient);
+                ClientPayloadHandlers::handleAbilityDataSync);
         registrar.playToClient(
                 ApparitionWardsSyncS2CPayload.TYPE,
                 ApparitionWardsSyncS2CPayload.STREAM_CODEC,
-                ApparitionWardsSyncS2CPayload::handleClient);
+                ClientPayloadHandlers::handleApparitionWardsSync);
         registrar.playToServer(
                 ApparitionRequestPayload.TYPE,
                 ApparitionRequestPayload.STREAM_CODEC,
@@ -32,6 +33,6 @@ public final class ModNetworkAbilities {
         registrar.playToClient(
                 LegilimencyVisionS2CPayload.TYPE,
                 LegilimencyVisionS2CPayload.STREAM_CODEC,
-                LegilimencyVisionS2CPayload::handleClient);
+                ClientPayloadHandlers::handleLegilimencyVision);
     }
 }

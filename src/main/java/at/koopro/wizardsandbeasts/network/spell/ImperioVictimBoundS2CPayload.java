@@ -1,14 +1,11 @@
 package at.koopro.wizardsandbeasts.network.spell;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.client.spell.state.ClientSignatureSpellState;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jspecify.annotations.NonNull;
 
 import java.util.UUID;
@@ -26,13 +23,5 @@ public record ImperioVictimBoundS2CPayload(UUID victimUuid) implements CustomPac
     @Override
     public @NonNull Type<? extends CustomPacketPayload> type() {
         return TYPE;
-    }
-
-    public static void handleClient(ImperioVictimBoundS2CPayload pkt, IPayloadContext ctx) {
-        ctx.enqueueWork(() -> {
-            if (Minecraft.getInstance().player != null) {
-                ClientSignatureSpellState.setImperioBoundVictim(pkt.victimUuid());
-            }
-        });
     }
 }

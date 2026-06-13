@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.network.currency;
 
+import at.koopro.wizardsandbeasts.client.network.ClientPayloadHandlers;
 import at.koopro.wizardsandbeasts.network.currency.GringottsOpenS2CPayload;
 import at.koopro.wizardsandbeasts.network.currency.VaultActionC2SPayload;
 import at.koopro.wizardsandbeasts.network.currency.VaultSyncS2CPayload;
@@ -14,7 +15,7 @@ public final class ModNetworkVault {
         registrar.playToClient(
                 GringottsOpenS2CPayload.TYPE,
                 GringottsOpenS2CPayload.STREAM_CODEC,
-                GringottsOpenS2CPayload::handleClient);
+                ClientPayloadHandlers::handleGringottsOpen);
 
         registrar.playToServer(
                 VaultActionC2SPayload.TYPE,
@@ -24,6 +25,6 @@ public final class ModNetworkVault {
         registrar.playToClient(
                 VaultSyncS2CPayload.TYPE,
                 VaultSyncS2CPayload.STREAM_CODEC,
-                VaultSyncS2CPayload::handleClient);
+                ClientPayloadHandlers::handleVaultSync);
     }
 }

@@ -2,12 +2,10 @@ package at.koopro.wizardsandbeasts.network.spell;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.client.spell.network.ProtegoClientPacketHandlers;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jspecify.annotations.NonNull;
 
 import java.util.UUID;
@@ -49,9 +47,5 @@ public record ProtegoSpawnS2CPayload(
     @Override
     public @NonNull Type<? extends CustomPacketPayload> type() {
         return TYPE;
-    }
-
-    public static void handleClient(ProtegoSpawnS2CPayload pkt, IPayloadContext ctx) {
-        ctx.enqueueWork(() -> ProtegoClientPacketHandlers.handleSpawn(pkt));
     }
 }

@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.network;
 
+import at.koopro.wizardsandbeasts.client.network.ClientPayloadHandlers;
 import at.koopro.wizardsandbeasts.network.azkaban.AzkabanTrespasserSyncPayload;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
@@ -11,6 +12,6 @@ public final class ModNetworkAzkaban {
         registrar.playToClient(
                 AzkabanTrespasserSyncPayload.TYPE,
                 AzkabanTrespasserSyncPayload.STREAM_CODEC,
-                AzkabanTrespasserSyncPayload::handleClient);
+                ClientPayloadHandlers::handleAzkabanTrespasserSync);
     }
 }

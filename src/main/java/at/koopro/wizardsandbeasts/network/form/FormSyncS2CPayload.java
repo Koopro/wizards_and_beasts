@@ -2,12 +2,9 @@ package at.koopro.wizardsandbeasts.network.form;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.client.form.state.ClientFormDataState;
-import at.koopro.wizardsandbeasts.client.form.SizeLerpTracker;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.form.FormRegistry;
 import at.koopro.wizardsandbeasts.form.PlayerForm;
-import at.koopro.wizardsandbeasts.form.RenderFlag;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.form.SizeProfile;
 import at.koopro.wizardsandbeasts.form.SizeProfileRegistry;
@@ -17,7 +14,6 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.UUID;
 
@@ -81,19 +77,6 @@ public record FormSyncS2CPayload(
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
-    }
-
-    public static void handleClient(FormSyncS2CPayload pkt, IPayloadContext ctx) {
-        ctx.enqueueWork(() -> {
-            SizeProfile profile = new SizeProfile(
-                    pkt.formId,
-                    pkt.hitboxWidth, pkt.hitboxHeight,
-                    pkt.modelScale, pkt.modelAspectX, pkt.modelAspectZ,
-                    pkt.reachBonus, pkt.knockbackResistance, pkt.stepHeight);
-            ClientFormDataState.update(pkt.playerUUID, pkt.formId, profile,
-                    RenderFlag.fromBitmask(pkt.renderFlagMask));
-            SizeLerpTracker.onScaleChanged(pkt.playerUUID, pkt.modelScale);
-        });
     }
 
     /**

@@ -2,14 +2,12 @@ package at.koopro.wizardsandbeasts.network.form;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.client.form.state.ClientTransitionTracker;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.UUID;
 
@@ -39,12 +37,6 @@ public record TransitionEndS2CPayload(UUID playerUUID, String newFormId) impleme
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
-    }
-
-    public static void handleClient(TransitionEndS2CPayload pkt, IPayloadContext ctx) {
-        ctx.enqueueWork(() -> {
-            ClientTransitionTracker.endTransition(pkt.playerUUID);
-        });
     }
 
     public static void sendToTracking(ServerPlayer player, String newFormId) {

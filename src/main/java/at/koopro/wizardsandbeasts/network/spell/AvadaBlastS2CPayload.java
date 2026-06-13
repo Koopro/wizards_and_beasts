@@ -1,17 +1,13 @@
 package at.koopro.wizardsandbeasts.network.spell;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.client.spell.SpellVfxClient;
-import at.koopro.wizardsandbeasts.spell.core.SpellFamily;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * Server -> Client one-shot Avada visual blast.
@@ -25,7 +21,6 @@ public record AvadaBlastS2CPayload(
         double endY,
         double endZ) implements CustomPacketPayload {
 
-    private static final int AVADA_ARGB = 0xFF00FF00;
     public static final Type<AvadaBlastS2CPayload> TYPE = new Type<>(
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "avada_blast"));
 
@@ -51,20 +46,6 @@ public record AvadaBlastS2CPayload(
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
-    }
-
-    public static void handleClient(AvadaBlastS2CPayload pkt, IPayloadContext ctx) {
-        ctx.enqueueWork(() -> {
-            Minecraft mc = Minecraft.getInstance();
-            if (mc.level == null) {
-                return;
-            }
-
-            Vec3 from = new Vec3(pkt.startX, pkt.startY, pkt.startZ);
-            Vec3 to = new Vec3(pkt.endX, pkt.endY, pkt.endZ);
-            SpellVfxClient.spawnTintBeam(from, to, SpellFamily.DARK, AVADA_ARGB);
-            SpellVfxClient.spawnTintBurst(to, SpellFamily.DARK, AVADA_ARGB, 20, 0.4f);
-        });
     }
 
     public static void sendToTracking(ServerPlayer caster, Vec3 from, Vec3 to) {

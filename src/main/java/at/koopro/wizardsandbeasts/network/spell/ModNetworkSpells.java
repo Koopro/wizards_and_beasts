@@ -21,6 +21,7 @@ import at.koopro.wizardsandbeasts.network.spell.SpellLeviosaAdjustC2SPayload;
 import at.koopro.wizardsandbeasts.network.spell.SpellProficiencySyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.SpellSelectC2SPayload;
 
+import at.koopro.wizardsandbeasts.client.spell.network.SpellClientPayloadHandlers;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public final class ModNetworkSpells {
@@ -56,60 +57,60 @@ public final class ModNetworkSpells {
         registrar.playToClient(
                 SpellDataSyncS2CPayload.TYPE,
                 SpellDataSyncS2CPayload.STREAM_CODEC,
-                SpellDataSyncS2CPayload::handleClient);
+                SpellClientPayloadHandlers::handleSpellDataSync);
 
         registrar.playToClient(
                 SpellDataDeltaS2CPayload.TYPE,
                 SpellDataDeltaS2CPayload.STREAM_CODEC,
-                SpellDataDeltaS2CPayload::handleClient);
+                SpellClientPayloadHandlers::handleSpellDataDelta);
         registrar.playToClient(
                 SpellProficiencySyncS2CPayload.TYPE,
                 SpellProficiencySyncS2CPayload.STREAM_CODEC,
-                SpellProficiencySyncS2CPayload::handleClient);
+                SpellClientPayloadHandlers::handleSpellProficiencySync);
 
         registrar.playToClient(
                 SpellDeniedS2CPayload.TYPE,
                 SpellDeniedS2CPayload.STREAM_CODEC,
-                SpellDeniedS2CPayload::handleClient);
+                SpellClientPayloadHandlers::handleSpellDenied);
 
         registrar.playToClient(
                 AvadaBlastS2CPayload.TYPE,
                 AvadaBlastS2CPayload.STREAM_CODEC,
-                AvadaBlastS2CPayload::handleClient);
+                SpellClientPayloadHandlers::handleAvadaBlast);
 
         registrar.playToClient(
                 SpellImpactBurstS2CPayload.TYPE,
                 SpellImpactBurstS2CPayload.STREAM_CODEC,
-                SpellImpactBurstS2CPayload::handleClient);
+                SpellClientPayloadHandlers::handleSpellImpactBurst);
         registrar.playToClient(
                 ProtegoSpawnS2CPayload.TYPE,
                 ProtegoSpawnS2CPayload.STREAM_CODEC,
-                ProtegoSpawnS2CPayload::handleClient);
+                SpellClientPayloadHandlers::handleProtegoSpawn);
         registrar.playToClient(
                 ProtegoAnimationS2CPayload.TYPE,
                 ProtegoAnimationS2CPayload.STREAM_CODEC,
-                ProtegoAnimationS2CPayload::handleClient);
+                SpellClientPayloadHandlers::handleProtegoAnimation);
 
         registrar.playToClient(
                 PatronusFormSetS2CPayload.TYPE,
                 PatronusFormSetS2CPayload.STREAM_CODEC,
-                PatronusFormSetS2CPayload::handleClient);
+                SpellClientPayloadHandlers::handlePatronusFormSet);
         registrar.playToClient(
                 ImperioControlS2CPayload.TYPE,
                 ImperioControlS2CPayload.STREAM_CODEC,
-                ImperioControlS2CPayload::handleClient);
+                SpellClientPayloadHandlers::handleImperioControl);
         registrar.playToClient(
                 ImperioResistS2CPayload.TYPE,
                 ImperioResistS2CPayload.STREAM_CODEC,
-                ImperioResistS2CPayload::handleClient);
+                SpellClientPayloadHandlers::handleImperioResist);
         registrar.playToClient(
                 ImperioVictimBoundS2CPayload.TYPE,
                 ImperioVictimBoundS2CPayload.STREAM_CODEC,
-                ImperioVictimBoundS2CPayload::handleClient);
+                SpellClientPayloadHandlers::handleImperioVictimBound);
         registrar.playToClient(
                 CrucioIntentFeedbackS2CPayload.TYPE,
                 CrucioIntentFeedbackS2CPayload.STREAM_CODEC,
-                CrucioIntentFeedbackS2CPayload::handleClient);
+                SpellClientPayloadHandlers::handleCrucioIntentFeedback);
 
         registrar.playToServer(
                 ImperioCommandC2SPayload.TYPE,

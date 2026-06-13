@@ -2,7 +2,6 @@ package at.koopro.wizardsandbeasts.network.skill;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.client.skill.state.ClientSkillDataState;
 import at.koopro.wizardsandbeasts.skill.data.PlayerSkillData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import io.netty.buffer.ByteBuf;
@@ -11,7 +10,6 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -61,11 +59,6 @@ public record SkillDataSyncS2CPayload(
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
-    }
-
-    public static void handleClient(SkillDataSyncS2CPayload pkt, IPayloadContext ctx) {
-        ctx.enqueueWork(() -> ClientSkillDataState.applySync(
-                pkt.syncVersion, pkt.skillPoints, pkt.totalPointsEarned, pkt.unlockedSkills));
     }
 
     public static void syncToPlayer(ServerPlayer player) {

@@ -2,7 +2,6 @@ package at.koopro.wizardsandbeasts.network.ability;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.client.ability.state.ClientAbilityCache;
 import at.koopro.wizardsandbeasts.ability.data.PlayerAbilityData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import io.netty.buffer.ByteBuf;
@@ -11,7 +10,6 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record AbilityDataSyncPayload(PlayerAbilityData data) implements CustomPacketPayload {
     public static final Type<AbilityDataSyncPayload> TYPE = new Type<>(
@@ -96,10 +94,6 @@ public record AbilityDataSyncPayload(PlayerAbilityData data) implements CustomPa
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
-    }
-
-    public static void handleClient(AbilityDataSyncPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> ClientAbilityCache.set(payload.data));
     }
 
     public static void syncToPlayer(ServerPlayer player) {
