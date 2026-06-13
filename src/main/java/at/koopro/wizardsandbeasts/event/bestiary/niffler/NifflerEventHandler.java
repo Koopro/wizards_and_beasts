@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.event.bestiary.niffler;
 
+import org.jspecify.annotations.NullMarked;
+
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.bestiary.BestiaryDataHelper;
 import at.koopro.wizardsandbeasts.bestiary.DiscoveryTier;
@@ -21,6 +23,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @EventBusSubscriber(modid = WizardsAndBeastsMod.MODID)
+@NullMarked
 public final class NifflerEventHandler {
 
     private static final Map<UUID, Long> PROX_COOLDOWNS = new HashMap<>();

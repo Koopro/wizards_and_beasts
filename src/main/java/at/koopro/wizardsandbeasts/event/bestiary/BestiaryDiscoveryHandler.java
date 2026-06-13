@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.event.bestiary;
 
+import org.jspecify.annotations.NullMarked;
+
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.bestiary.*;
 import at.koopro.wizardsandbeasts.module.Module;
@@ -24,6 +26,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @EventBusSubscriber(modid = WizardsAndBeastsMod.MODID)
+@NullMarked
 public final class BestiaryDiscoveryHandler {
     /** Proximity-sighting cooldowns, evicted on logout. */
     private static final Map<ProximityCooldownKey, Long> PROX_COOLDOWNS = new HashMap<>();

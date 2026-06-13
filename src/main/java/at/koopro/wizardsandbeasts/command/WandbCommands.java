@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.command;
 
+import org.jspecify.annotations.NullMarked;
+
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.azkaban.command.AzkabanCommands;
 import at.koopro.wizardsandbeasts.command.CharacterCommands;
@@ -44,6 +46,7 @@ import at.koopro.wizardsandbeasts.registry.WandItemRegistry;
  *
  * <p>Call {@link #register(RegisterCommandsEvent)} from the {@code RegisterCommandsEvent} subscriber.
  */
+@NullMarked
 public final class WandbCommands {
 
     private static final Set<String> TREE_TYPES = Set.of("elder", "yew", "holly", "rowan");

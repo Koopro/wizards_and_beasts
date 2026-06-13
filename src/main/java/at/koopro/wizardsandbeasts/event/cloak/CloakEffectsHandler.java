@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.event.cloak;
 
+import org.jspecify.annotations.NullMarked;
+
 import at.koopro.wizardsandbeasts.Config;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.item.cloak.CloakItem;
@@ -29,6 +31,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @EventBusSubscriber(modid = WizardsAndBeastsMod.MODID)
+@NullMarked
 public class CloakEffectsHandler {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Set<UUID> DEATHLY_HIDDEN_PLAYERS = new HashSet<>();

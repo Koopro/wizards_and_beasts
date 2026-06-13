@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.event.trunk;
 
+import org.jspecify.annotations.NullMarked;
+
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
@@ -42,6 +44,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @EventBusSubscriber(modid = WizardsAndBeastsMod.MODID)
+@NullMarked
 public class PocketDimensionEvents {
 
     private static final Logger LOGGER = LogUtils.getLogger();

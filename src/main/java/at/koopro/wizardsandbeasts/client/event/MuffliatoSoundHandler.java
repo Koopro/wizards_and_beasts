@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.client.event;
 
+import org.jspecify.annotations.NullMarked;
+
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import net.minecraft.client.Minecraft;
@@ -10,6 +12,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.sound.PlaySoundEvent;
 
 @EventBusSubscriber(modid = WizardsAndBeastsMod.MODID, value = Dist.CLIENT)
+@NullMarked
 public final class MuffliatoSoundHandler {
     private MuffliatoSoundHandler() {
     }
