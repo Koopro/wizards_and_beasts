@@ -6,7 +6,6 @@ import at.koopro.wizardsandbeasts.wand.stat.WandCore;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import at.koopro.wizardsandbeasts.wand.stat.WandLength;
 import at.koopro.wizardsandbeasts.wand.stat.WandWood;
-import at.koopro.wizardsandbeasts.network.spell.SpellCastC2SPayload;
 import at.koopro.wizardsandbeasts.spell.cast.WandCastTiming;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.spell.beam.WandBeamChannelLogic;
@@ -27,7 +26,6 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 import net.minecraft.resources.Identifier;
-import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import software.bernie.geckolib.animatable.client.GeoRenderProvider;
 import software.bernie.geckolib.animatable.manager.AnimatableManager;
 import software.bernie.geckolib.animation.AnimationController;
@@ -122,11 +120,9 @@ public class WandItem extends GeoItemBase {
             WandBeamChannelLogic.endChannel(sp);
         }
         if (level.isClientSide()) {
-            if (!ClientClassBridge.callStaticBoolean(
+            ClientClassBridge.callStaticBoolean(
                     "at.koopro.wizardsandbeasts.client.wand.WandCastClient",
-                    "tryOpenImperioCommandMenu")) {
-                ClientPacketDistributor.sendToServer(new SpellCastC2SPayload());
-            }
+                    "castOrOpenImperioMenu");
         }
         return true;
     }

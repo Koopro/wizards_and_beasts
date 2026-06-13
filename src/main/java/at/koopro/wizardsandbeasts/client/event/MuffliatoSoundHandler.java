@@ -1,4 +1,4 @@
-package at.koopro.wizardsandbeasts.event.spell;
+package at.koopro.wizardsandbeasts.client.event;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.effect.ModEffects;

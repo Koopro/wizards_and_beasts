@@ -1,7 +1,6 @@
 package at.koopro.wizardsandbeasts.command;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.client.wand.BeamSettings;
 import at.koopro.wizardsandbeasts.azkaban.command.AzkabanCommands;
 import at.koopro.wizardsandbeasts.command.CharacterCommands;
 import at.koopro.wizardsandbeasts.bestiary.command.BestiaryCommands;
@@ -21,6 +20,7 @@ import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.item.wand.DebugWandState;
 import at.koopro.wizardsandbeasts.item.wand.WandItem;
 import at.koopro.wizardsandbeasts.network.debug.BeamDebugOpenS2CPayload;
+import at.koopro.wizardsandbeasts.network.debug.BeamPresetS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.util.GlowDebugTags;
 import at.koopro.wizardsandbeasts.util.RgbHex;
@@ -92,9 +92,9 @@ public final class WandbCommands {
                                 .executes(ctx -> openBeamEditor(ctx.getSource().getPlayerOrException()))
                         )
                         .then(Commands.literal("preset")
-                                .then(Commands.literal("low").executes(ctx -> setBeamPreset(ctx.getSource(), BeamSettings.PerformancePreset.LOW)))
-                                .then(Commands.literal("medium").executes(ctx -> setBeamPreset(ctx.getSource(), BeamSettings.PerformancePreset.MEDIUM)))
-                                .then(Commands.literal("high").executes(ctx -> setBeamPreset(ctx.getSource(), BeamSettings.PerformancePreset.HIGH)))
+                                .then(Commands.literal("low").executes(ctx -> setBeamPreset(ctx.getSource(), "LOW")))
+                                .then(Commands.literal("medium").executes(ctx -> setBeamPreset(ctx.getSource(), "MEDIUM")))
+                                .then(Commands.literal("high").executes(ctx -> setBeamPreset(ctx.getSource(), "HIGH")))
                         )
                 )
                 .then(Commands.literal("stats")
@@ -170,11 +170,18 @@ public final class WandbCommands {
         return 1;
     }
 
-    private static int setBeamPreset(CommandSourceStack source, BeamSettings.PerformancePreset preset) {
-        BeamSettings.applyPerformancePreset(preset);
+    private static int setBeamPreset(CommandSourceStack source, String presetName) {
+        ServerPlayer player;
+        try {
+            player = source.getPlayerOrException();
+        } catch (com.mojang.brigadier.exceptions.CommandSyntaxException ex) {
+            source.sendFailure(Component.literal("Beam presets are client settings — run as a player."));
+            return 0;
+        }
+        BeamPresetS2CPayload.sendToPlayer(player, presetName);
         source.sendSuccess(() -> Component.literal("Beam preset set to ")
                 .withStyle(ChatFormatting.GRAY)
-                .append(Component.literal(preset.name().toLowerCase()).withStyle(ChatFormatting.GREEN)), false);
+                .append(Component.literal(presetName.toLowerCase()).withStyle(ChatFormatting.GREEN)), false);
         return 1;
     }
 
