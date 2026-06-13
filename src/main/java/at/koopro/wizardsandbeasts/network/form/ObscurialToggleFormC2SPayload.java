@@ -6,7 +6,6 @@ import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.form.TransitionManager;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialResourceManager;
-import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialRules;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.chat.Component;

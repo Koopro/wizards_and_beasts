@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.owl.screen;
 
+import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.owl.OWLGrade;
 import at.koopro.wizardsandbeasts.owl.OWLSubject;
 import at.koopro.wizardsandbeasts.owl.Profession;
@@ -21,10 +22,18 @@ public class OWLResultsReadOnlyScreen extends Screen {
 
     private static final int BG_WIDTH = 280;
     private static final int BG_HEIGHT = 240;
+    /** The Done button bottom sits 14px below the parchment panel by design. */
+    private static final int CONTENT_OVERHANG = 14;
 
     private final Map<OWLSubject, OWLGrade> grades;
     @Nullable
     private final Profession profession;
+
+    private float guiScale = 1.0f;
+    private int originX;
+    private int originY;
+    private int designLeft;
+    private int designTop;
 
     public OWLResultsReadOnlyScreen(
             @NonNull Map<OWLSubject, OWLGrade> grades,
@@ -34,9 +43,29 @@ public class OWLResultsReadOnlyScreen extends Screen {
         this.profession = profession;
     }
 
+    /** Map an unscaled design-space x (relative to current width/height) to screen space. */
+    private int sx(int designX) {
+        return originX + Math.round((designX - designLeft) * guiScale);
+    }
+
+    private int sy(int designY) {
+        return originY + Math.round((designY - designTop) * guiScale);
+    }
+
+    private int sw(int size) {
+        return Math.max(1, Math.round(size * guiScale));
+    }
+
     @Override
     protected void init() {
         super.init();
+        guiScale = GuiScaleHelper.computeScale(BG_WIDTH, BG_HEIGHT + CONTENT_OVERHANG,
+                width, height, GuiScaleHelper.DEFAULT_MARGIN);
+        designLeft = width / 2 - BG_WIDTH / 2;
+        designTop = height / 2 - BG_HEIGHT / 2;
+        originX = GuiScaleHelper.clampedLeft(Math.round(BG_WIDTH * guiScale), width, GuiScaleHelper.DEFAULT_MARGIN);
+        originY = GuiScaleHelper.clampedTop(Math.round((BG_HEIGHT + CONTENT_OVERHANG) * guiScale),
+                height, GuiScaleHelper.DEFAULT_MARGIN);
         int cx = width / 2;
         int cy = height / 2;
 
@@ -47,16 +76,16 @@ public class OWLResultsReadOnlyScreen extends Screen {
                         assert minecraft != null;
                         minecraft.setScreen(new ProfessionSelectionScreen(grades));
                     })
-                    .pos(cx - 75, cy + BG_HEIGHT / 2 - 28)
-                    .size(150, 20)
+                    .pos(sx(cx - 75), sy(cy + BG_HEIGHT / 2 - 28))
+                    .size(sw(150), sw(20))
                     .build());
         }
 
         addRenderableWidget(Button.builder(
                 Component.translatable("gui.done"),
                 btn -> onClose())
-                .pos(cx - 50, cy + BG_HEIGHT / 2 - 6)
-                .size(100, 20)
+                .pos(sx(cx - 50), sy(cy + BG_HEIGHT / 2 - 6))
+                .size(sw(100), sw(20))
                 .build());
     }
 
@@ -65,6 +94,11 @@ public class OWLResultsReadOnlyScreen extends Screen {
         renderBackground(graphics, mouseX, mouseY, partialTick);
         int cx = width / 2;
         int cy = height / 2;
+
+        var pose = graphics.pose();
+        pose.pushMatrix();
+        pose.translate(originX - designLeft * guiScale, originY - designTop * guiScale);
+        pose.scale(guiScale, guiScale);
 
         graphics.fill(cx - BG_WIDTH / 2, cy - BG_HEIGHT / 2, cx + BG_WIDTH / 2, cy + BG_HEIGHT / 2, 0xEEF5E6C8);
         graphics.drawCenteredString(font,
@@ -89,6 +123,8 @@ public class OWLResultsReadOnlyScreen extends Screen {
                             Component.translatable(profession.translationKey())).withStyle(ChatFormatting.GOLD),
                     cx, rowY, 0xCC8800);
         }
+
+        pose.popMatrix();
 
         super.render(graphics, mouseX, mouseY, partialTick);
     }

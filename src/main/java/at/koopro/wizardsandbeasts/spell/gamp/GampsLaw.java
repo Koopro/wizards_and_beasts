@@ -38,7 +38,7 @@ public final class GampsLaw {
         }
 
         ItemStack produced = definition.previewProducedItem(ctx);
-        if (!produced.isEmpty()) {
+        if (produced != null && !produced.isEmpty()) {
             if (produced.is(CANNOT_CONJURE_FOOD)) {
                 return new Violation(
                         GampDomain.FOOD_CONJURATION,

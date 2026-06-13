@@ -4,7 +4,9 @@ import at.koopro.wizardsandbeasts.client.currency.state.ClientVaultDataState;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.item.wand.WandItem;
 import at.koopro.wizardsandbeasts.registry.ModAttributes;
+import at.koopro.wizardsandbeasts.util.WandHelper;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
+import at.koopro.wizardsandbeasts.wand.WandEligibility;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -12,6 +14,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
@@ -20,7 +23,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.Locale;
 
-/** Attributes tab: 6 attribute cards, wand panel, currency panel. */
+/** Attributes tab: 6 attribute cards, wand panel, wand affinity panel, currency panel. */
 public final class AttributesTab implements CharacterTab {
 
     private static final int COLOR_SECTION  = 0xFFDDB97A;
@@ -29,9 +32,20 @@ public final class AttributesTab implements CharacterTab {
     private static final int COLOR_SHADOW   = 0xFF0A0500;
     private static final int COLOR_LABEL    = 0xFF887766;
     private static final int COLOR_VALUE    = 0xFFEEDDBB;
+    private static final int COLOR_ELIGIBLE   = 0xFF55FF55;
+    private static final int COLOR_INELIGIBLE = 0xFFFF5555;
+    private static final int COLOR_REASON     = 0xFFAA0000;
+    private static final int COLOR_DETAIL     = 0xFFAAAAAA;
+    private static final int COLOR_WAND_NAME  = 0xFFFFFFFF;
     private static final int CARD_W         = 88;
     private static final int CARD_H         = 26;
     private static final int CARD_GAP       = 3;
+    private static final int SCROLLBAR_W    = 4;
+    private static final int COLOR_SCROLL_TRACK = 0xFF1A1005;
+    private static final int COLOR_SCROLL_THUMB = 0xFF886622;
+
+    private float scrollOffset = 0f; // pixels scrolled from top
+    private int lastTotalH = 0;      // content height measured last frame
 
     @Override
     public @NonNull String translationKey() {
@@ -44,8 +58,14 @@ public final class AttributesTab implements CharacterTab {
         if (!(mc.player instanceof LocalPlayer player)) return;
         Font font = mc.font;
 
+        float maxScroll = Math.max(0, lastTotalH - h);
+        scrollOffset = Mth.clamp(scrollOffset, 0f, maxScroll);
+
+        g.enableScissor(x, y, x + w, y + h);
+
         int cx = x + 2;
-        int cy = y + 2;
+        int cy = y + 2 - (int) scrollOffset;
+        int top = cy;
 
         // ── 6 attribute cards in a 2-column grid ──────────────────────────
         g.drawString(font, "Attributes", cx, cy, COLOR_SECTION, false);
@@ -60,8 +80,32 @@ public final class AttributesTab implements CharacterTab {
             cy = drawWandPanel(g, font, cx, cy, w - 4, heldStack);
         }
 
+        // ── Wand affinity panel ───────────────────────────────────────────
+        cy = drawWandAffinityPanel(g, font, cx, cy, w - 4, player);
+
         // ── Currency panel ────────────────────────────────────────────────
         drawCurrencyPanel(g, font, cx, cy, w - 4);
+        cy += 10 + 9 * 3;
+
+        g.disableScissor();
+
+        lastTotalH = cy - top + 4;
+
+        // Scrollbar (overlaid on the right edge, only when content overflows)
+        if (lastTotalH > h) {
+            int sbX = x + w - SCROLLBAR_W;
+            g.fill(sbX, y, sbX + SCROLLBAR_W, y + h, COLOR_SCROLL_TRACK);
+            float thumbPct = (float) h / lastTotalH;
+            int thumbH = Math.max(8, (int) (h * thumbPct));
+            int thumbY = y + (int) ((scrollOffset / Math.max(1f, lastTotalH - h)) * (h - thumbH));
+            g.fill(sbX, thumbY, sbX + SCROLLBAR_W, thumbY + thumbH, COLOR_SCROLL_THUMB);
+        }
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+        scrollOffset -= (float) (delta * 10.0);
+        return true;
     }
 
     // ── private helpers ───────────────────────────────────────────────────
@@ -141,6 +185,46 @@ public final class AttributesTab implements CharacterTab {
         drawKV(g, font, x, y,      w, "Integrity",   String.format("%.0f%%", integrity * 100f));  y += 9;
         drawKV(g, font, x, y,      w, "Allegiance",  String.format("%.0f%%", allegiance * 100f)); y += 11;
         return y;
+    }
+
+    private int drawWandAffinityPanel(@NonNull GuiGraphics g, @NonNull Font font,
+                                      int x, int y, int w, @NonNull LocalPlayer player) {
+        g.drawString(font, "Wand Affinity", x, y, COLOR_SECTION, false);
+        y += 10;
+
+        ItemStack wand = WandHelper.getWandStack(player);
+        if (wand.isEmpty()) {
+            g.drawString(font, Component.translatable("wandcraft.eligibility.no_wand").getString(),
+                    x, y, COLOR_LABEL, false);
+            return y + 11;
+        }
+
+        WandEligibility.Result result = WandEligibility.evaluate(player, wand);
+
+        String name = font.plainSubstrByWidth(wand.getHoverName().getString(), w);
+        g.drawString(font, name, x, y, COLOR_WAND_NAME, false);
+        y += 9;
+
+        String statusKey = result.eligible()
+                ? "wandcraft.eligibility.can_use" : "wandcraft.eligibility.cannot_use";
+        int statusColor = result.eligible() ? COLOR_ELIGIBLE : COLOR_INELIGIBLE;
+        g.drawString(font, Component.translatable(statusKey).getString(), x, y, statusColor, false);
+        y += 9;
+
+        if (!result.eligible() && result.reason() != null) {
+            g.drawString(font, font.plainSubstrByWidth(result.reason().getString(), w),
+                    x, y, COLOR_REASON, false);
+            y += 9;
+        }
+
+        for (@Nullable Component detail : new Component[]{
+                result.detailLine1(), result.detailLine2(), result.detailLine3()}) {
+            if (detail == null) continue;
+            g.drawString(font, font.plainSubstrByWidth(detail.getString(), w),
+                    x, y, COLOR_DETAIL, false);
+            y += 9;
+        }
+        return y + 2;
     }
 
     private void drawCurrencyPanel(@NonNull GuiGraphics g, @NonNull Font font,

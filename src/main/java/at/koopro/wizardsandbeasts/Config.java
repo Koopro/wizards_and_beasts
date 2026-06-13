@@ -49,7 +49,7 @@ public class Config {
             .comment("If true, wand allegiance compatibility, binding, and transfer mechanics are active.")
             .define("enableWandAllegiance", true);
 
-    static final ModConfigSpec SPEC = BUILDER.build();
+    public static final ModConfigSpec SPEC = BUILDER.build();
 
     public static boolean enforceSpellRequirements;
     public static boolean debugLogSpellGateReasons;

@@ -1,6 +1,5 @@
 package at.koopro.wizardsandbeasts.spell.def;
 
-import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.spell.core.JsonSpell;
 import at.koopro.wizardsandbeasts.spell.core.Spells;
 import com.mojang.logging.LogUtils;
@@ -14,7 +13,7 @@ import org.slf4j.Logger;
 import java.util.Map;
 
 /**
- * Loads {@link SpellDefinition}s from {@code data/<namespace>/<modId>/spells/*.json}
+ * Loads {@link SpellDefinition}s from {@code data/<namespace>/spells/*.json}
  * on every datapack reload, registering each as a {@link JsonSpell}. Java
  * spells are not touched; only the JSON-contributed slice of the registry is
  * cleared and rebuilt per reload, so this is safe to invoke at runtime.
@@ -32,7 +31,7 @@ public class SpellReloadListener extends SimpleJsonResourceReloadListener<SpellD
     private static final Logger LOGGER = LogUtils.getLogger();
 
     /** Datapack folder under {@code data/<ns>/<DIRECTORY>/...}. */
-    public static final String DIRECTORY = WizardsAndBeastsMod.MODID + "/spells";
+    public static final String DIRECTORY = "spells";
 
     public SpellReloadListener() {
         super(SpellDefinition.CODEC, FileToIdConverter.json(DIRECTORY));

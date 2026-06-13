@@ -26,7 +26,6 @@ import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.Map;
-import java.util.List;
 
 /**
  * Static helpers for spell implementations.

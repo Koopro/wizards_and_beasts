@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.client.bestiary.gui;
 
 import at.koopro.wizardsandbeasts.bestiary.*;
 import at.koopro.wizardsandbeasts.client.bestiary.ClientBestiaryCache;
+import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
@@ -46,6 +47,7 @@ public final class BestiaryScreen extends Screen {
 
     private int x;
     private int y;
+    private float guiScale = 1.0f;
     private EditBox search;
     private final List<BestiaryEntry> entries = new ArrayList<>();
     private final List<Row> rows = new ArrayList<>();
@@ -62,9 +64,13 @@ public final class BestiaryScreen extends Screen {
 
     @Override
     protected void init() {
-        x = (width - W) / 2;
-        y = (height - H) / 2;
-        search = new EditBox(font, x + 6, y + 6, 108, 16, Component.translatable("gui.wizards_and_beasts.bestiary.search"));
+        guiScale = GuiScaleHelper.computeScale(W, H, width, height, GuiScaleHelper.DEFAULT_MARGIN);
+        x = GuiScaleHelper.clampedLeft(Math.round(W * guiScale), width, GuiScaleHelper.DEFAULT_MARGIN);
+        y = GuiScaleHelper.clampedTop(Math.round(H * guiScale), height, GuiScaleHelper.DEFAULT_MARGIN);
+        // Widget lives in screen space (outside the scaled pose), so its bounds scale here.
+        search = new EditBox(font, x + Math.round(6 * guiScale), y + Math.round(6 * guiScale),
+                Math.round(108 * guiScale), Math.round(16 * guiScale),
+                Component.translatable("gui.wizards_and_beasts.bestiary.search"));
         search.setResponder(value -> rebuildRows());
         addRenderableWidget(search);
         refreshList();
@@ -180,9 +186,24 @@ public final class BestiaryScreen extends Screen {
                 : TEX_ENTRY_PLACEHOLDER;
     }
 
+    /** Map a screen-space coordinate into the unscaled design space anchored at (x, y). */
+    private double toDesignX(double screenX) {
+        return x + (screenX - x) / guiScale;
+    }
+
+    private double toDesignY(double screenY) {
+        return y + (screenY - y) / guiScale;
+    }
+
     @Override
     public void render(GuiGraphics gg, int mouseX, int mouseY, float partialTick) {
         this.renderMenuBackground(gg);
+        // Design-space drawing anchors at (x, y); this transform keeps that point
+        // fixed while shrinking, so the draw code below stays unchanged.
+        var pose = gg.pose();
+        pose.pushMatrix();
+        pose.translate(x * (1.0f - guiScale), y * (1.0f - guiScale));
+        pose.scale(guiScale, guiScale);
         drawStretched(gg, TEX_SCREEN, x, y, W, H, W, H);
         drawStretched(gg, TEX_LEFT_PANEL, x + 4, y + 28, 120, H - 32, 120, 168);
         drawStretched(gg, TEX_RIGHT_PANEL, x + 126, y + 4, W - 130, H - 8, 190, 190);
@@ -227,8 +248,12 @@ public final class BestiaryScreen extends Screen {
             renderDetail(gg, selectedEntry);
         }
 
-        if (mouseX >= x + 6 && mouseX <= listRowsRight() && mouseY >= listTop && mouseY <= listBottom) {
-            int hovered = (mouseY - listTop) / ROW_STEP + start;
+        pose.popMatrix();
+
+        int dmx = (int) toDesignX(mouseX);
+        int dmy = (int) toDesignY(mouseY);
+        if (dmx >= x + 6 && dmx <= listRowsRight() && dmy >= listTop && dmy <= listBottom) {
+            int hovered = (dmy - listTop) / ROW_STEP + start;
             if (hovered >= 0 && hovered < rows.size()) {
                 Row row = rows.get(hovered);
                 if (row.entry != null) {
@@ -290,8 +315,8 @@ public final class BestiaryScreen extends Screen {
             return super.mouseClicked(event, isDoubleClick);
         }
 
-        double mouseX = event.x();
-        double mouseY = event.y();
+        double mouseX = toDesignX(event.x());
+        double mouseY = toDesignY(event.y());
         if (mouseX >= x + 6 && mouseX <= listRowsRight() && mouseY >= y + LIST_START_Y && mouseY <= y + H - 18) {
             int idx = (int) ((mouseY - (y + LIST_START_Y)) / ROW_STEP) + scrollOffset;
             if (idx >= 0 && idx < rows.size()) {
@@ -311,7 +336,9 @@ public final class BestiaryScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        if (mouseX >= x + 4 && mouseX <= x + 124 && mouseY >= y + 28 && mouseY <= y + H - 4) {
+        double dmx = toDesignX(mouseX);
+        double dmy = toDesignY(mouseY);
+        if (dmx >= x + 4 && dmx <= x + 124 && dmy >= y + 28 && dmy <= y + H - 4) {
             scrollOffset -= (int) Math.signum(scrollY);
             if (scrollOffset < 0) {
                 scrollOffset = 0;

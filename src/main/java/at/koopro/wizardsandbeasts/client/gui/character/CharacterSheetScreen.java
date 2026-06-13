@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.client.gui.character;
 
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
+import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.client.gui.character.tab.AttributesTab;
 import at.koopro.wizardsandbeasts.client.gui.character.tab.CharacterTab;
 import at.koopro.wizardsandbeasts.client.gui.character.tab.SkillsTab;
@@ -11,7 +12,6 @@ import at.koopro.wizardsandbeasts.client.gui.character.widget.VitalsBarWidget;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import com.mojang.logging.LogUtils;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -20,7 +20,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffectInstance;
 import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -95,8 +94,9 @@ public final class CharacterSheetScreen extends Screen {
     // Viewport widget
     private final PlayerModelViewport viewport = new PlayerModelViewport();
 
-    // Cached screen origin
+    // Cached screen origin (clamped) and shrink factor for small screens
     private int bgX, bgY;
+    private float guiScale = 1.0f;
 
     // One-time PREVIEW debug log flag
     private boolean previewLogged;
@@ -107,8 +107,9 @@ public final class CharacterSheetScreen extends Screen {
 
     @Override
     protected void init() {
-        bgX = (width  - BG_W) / 2;
-        bgY = (height - BG_H) / 2;
+        guiScale = GuiScaleHelper.computeScale(BG_W, BG_H, width, height, GuiScaleHelper.DEFAULT_MARGIN);
+        bgX = GuiScaleHelper.clampedLeft(Math.round(BG_W * guiScale), width, GuiScaleHelper.DEFAULT_MARGIN);
+        bgY = GuiScaleHelper.clampedTop(Math.round(BG_H * guiScale), height, GuiScaleHelper.DEFAULT_MARGIN);
 
         if (ModuleManager.isPreview(Module.CHARACTER_SHEET) && !previewLogged) {
             LOGGER.debug("[W&B] CharacterSheetScreen opened in PREVIEW mode.");
@@ -120,6 +121,13 @@ public final class CharacterSheetScreen extends Screen {
     public void render(@NonNull GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         // Dim background
         renderBackground(g, mouseX, mouseY, partialTick);
+
+        // All panel drawing anchors at (bgX, bgY), so a transform that keeps that
+        // point fixed while scaling lets the existing design-space code run unchanged.
+        var pose = g.pose();
+        pose.pushMatrix();
+        pose.translate(bgX * (1.0f - guiScale), bgY * (1.0f - guiScale));
+        pose.scale(guiScale, guiScale);
 
         // Main panel
         McStylePanel.drawPanel(g, bgX, bgY, BG_W, BG_H, COLOR_BG, COLOR_BG_HI, COLOR_BG_SH);
@@ -133,10 +141,21 @@ public final class CharacterSheetScreen extends Screen {
         // Left column
         renderLeftColumn(g, partialTick);
 
-        // Right column
-        renderRightColumn(g, mouseX, mouseY, partialTick);
+        // Right column (hover tests run in design space)
+        renderRightColumn(g, (int) toDesignX(mouseX), (int) toDesignY(mouseY), partialTick);
+
+        pose.popMatrix();
 
         super.render(g, mouseX, mouseY, partialTick);
+    }
+
+    /** Map a screen-space coordinate into the unscaled design space anchored at (bgX, bgY). */
+    private double toDesignX(double screenX) {
+        return bgX + (screenX - bgX) / guiScale;
+    }
+
+    private double toDesignY(double screenY) {
+        return bgY + (screenY - bgY) / guiScale;
     }
 
     // ── Title bar ──────────────────────────────────────────────────────────
@@ -272,8 +291,8 @@ public final class CharacterSheetScreen extends Screen {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean isDoubleClick) {
-        double mouseX = event.x();
-        double mouseY = event.y();
+        double mouseX = toDesignX(event.x());
+        double mouseY = toDesignY(event.y());
         int button = event.button();
 
         // Check tab buttons
@@ -303,30 +322,33 @@ public final class CharacterSheetScreen extends Screen {
 
     @Override
     public boolean mouseReleased(MouseButtonEvent event) {
-        if (viewport.mouseReleased(event.x(), event.y(), event.button())) return true;
+        if (viewport.mouseReleased(toDesignX(event.x()), toDesignY(event.y()), event.button())) return true;
         return super.mouseReleased(event);
     }
 
     @Override
     public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
-        if (viewport.mouseDragged(event.x(), event.y(), event.button(), deltaX, deltaY)) return true;
+        if (viewport.mouseDragged(toDesignX(event.x()), toDesignY(event.y()), event.button(), deltaX, deltaY)) return true;
         return super.mouseDragged(event, deltaX, deltaY);
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY,
                                  double scrollX, double scrollY) {
+        double dmx = toDesignX(mouseX);
+        double dmy = toDesignY(mouseY);
+
         // Viewport zoom
-        if (viewport.mouseScrolled(mouseX, mouseY, scrollY)) return true;
+        if (viewport.mouseScrolled(dmx, dmy, scrollY)) return true;
 
         // Tab content scroll
         int contentX = bgX + LEFT_W + 3;
         int contentY = bgY + TITLE_H + TAB_H + 2;
         int contentW = BG_W - LEFT_W - 5;
         int contentH = BG_H - TITLE_H - TAB_H - 4;
-        if (mouseX >= contentX && mouseX < contentX + contentW
-                && mouseY >= contentY && mouseY < contentY + contentH) {
-            return activeTabRenderer().mouseScrolled(mouseX, mouseY, scrollY);
+        if (dmx >= contentX && dmx < contentX + contentW
+                && dmy >= contentY && dmy < contentY + contentH) {
+            return activeTabRenderer().mouseScrolled(dmx, dmy, scrollY);
         }
         return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }

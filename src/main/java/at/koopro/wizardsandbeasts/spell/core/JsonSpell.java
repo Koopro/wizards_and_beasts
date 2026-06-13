@@ -78,6 +78,8 @@ public class JsonSpell extends Spell {
         def.igniteSeconds().ifPresent(b::ignites);
         def.explode().ifPresent(e -> b.explodes(e.power(), e.breaksBlocks()));
         if (def.disarms()) b.disarms();
+        if (def.opensBlocks()) b.opensBlocks();
+        if (def.pullStrength() != 0.0f) b.pullsTarget(def.pullStrength());
 
         for (SpellDefinition.MobEffectDef e : def.selfEffects()) {
             Holder<MobEffect> holder = resolveMobEffect(e.id());
@@ -108,24 +110,41 @@ public class JsonSpell extends Spell {
         return switch (req.type()) {
             case NONE -> SpellRequirement.none();
             case KNOWS -> req.prerequisiteId()
-                    .map(Spells::byId)
-                    .map(SpellRequirement::knows)
+                    .map(raw -> SpellRequirement.knows(resolvePrerequisiteId(raw)))
                     .orElseGet(() -> {
-                        LOGGER.warn("JsonSpell '{}' requirement.type=knows but prerequisite '{}' not found; treating as NONE",
-                                getId(), req.prerequisiteId().orElse("<missing>"));
+                        LOGGER.warn("JsonSpell '{}' requirement.type=knows but prerequisiteId missing; treating as NONE",
+                                getId());
                         return SpellRequirement.none();
                     });
             case PROFICIENCY -> {
-                Spell pre = req.prerequisiteId().map(Spells::byId).orElse(null);
                 Proficiency prof = req.minProficiency().orElse(Proficiency.NOVICE);
-                if (pre == null) {
-                    LOGGER.warn("JsonSpell '{}' requirement.type=proficiency but prerequisite '{}' not found; treating as NONE",
-                            getId(), req.prerequisiteId().orElse("<missing>"));
-                    yield SpellRequirement.none();
-                }
-                yield SpellRequirement.proficiency(pre, prof);
+                yield req.prerequisiteId()
+                        .map(raw -> SpellRequirement.proficiency(resolvePrerequisiteId(raw), prof))
+                        .orElseGet(() -> {
+                            LOGGER.warn("JsonSpell '{}' requirement.type=proficiency but prerequisiteId missing; treating as NONE",
+                                    getId());
+                            return SpellRequirement.none();
+                        });
             }
         };
+    }
+
+    /**
+     * Resolves a requirement's prerequisite id to the registered spell's full id when the spell is
+     * already present, else falls back to the mod-namespaced form of the raw id. JSON spells register
+     * one-by-one during a reload sweep (each inits immediately), so a JSON→JSON prerequisite may not
+     * be registered yet when this spell builds its requirement — {@link SpellRequirement}'s id-string
+     * form resolves lazily at {@code isMet} time, so the requirement still enforces correctly instead
+     * of degrading to NONE on unfavorable load order.
+     */
+    private static String resolvePrerequisiteId(String raw) {
+        Spell resolved = Spells.byId(raw);
+        if (resolved != null) {
+            return resolved.getId();
+        }
+        return raw.contains(":")
+                ? raw
+                : at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID + ":" + raw;
     }
 
     private static Holder<MobEffect> resolveMobEffect(Identifier id) {

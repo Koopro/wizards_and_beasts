@@ -6,9 +6,10 @@
     }
   ],
   "placement": {
-    "type": "minecraft:random_spread",
-    "spacing": 256,
-    "separation": 64,
-    "salt": 41259043
+    "type": "wizards_and_beasts:one_per_world",
+    "salt": 41259043,
+    "target_biomes": "#minecraft:is_deep_ocean",
+    "min_chunk_radius": 64,
+    "max_chunk_radius": 160
   }
 }

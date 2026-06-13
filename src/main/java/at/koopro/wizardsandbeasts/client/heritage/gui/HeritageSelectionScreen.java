@@ -64,8 +64,9 @@ public class HeritageSelectionScreen extends Screen {
         int arrowW = layout.s(WizardsAndBeastsUiTokens.HeritageSelection.ARROW_BUTTON_W);
         int arrowH = layout.s(WizardsAndBeastsUiTokens.HeritageSelection.ARROW_BUTTON_H);
         int arrowGap = layout.s(WizardsAndBeastsUiTokens.HeritageSelection.ARROW_GAP);
-        int leftX = px - arrowW - arrowGap;
-        int rightX = px + layout.panelW() + arrowGap;
+        // Arrows sit outside the panel; clamp so they never leave the screen on narrow windows.
+        int leftX = Math.max(2, px - arrowW - arrowGap);
+        int rightX = Math.min(width - arrowW - 2, px + layout.panelW() + arrowGap);
 
         addRenderableWidget(Button.builder(
                 Component.literal("<"),

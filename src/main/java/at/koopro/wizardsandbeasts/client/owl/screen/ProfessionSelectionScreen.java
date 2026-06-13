@@ -1,12 +1,10 @@
 package at.koopro.wizardsandbeasts.client.owl.screen;
 
-import at.koopro.wizardsandbeasts.client.owl.ClientOWLCache;
+import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.network.owl.ChooseProfessionPacket;
 import at.koopro.wizardsandbeasts.owl.OWLGrade;
 import at.koopro.wizardsandbeasts.owl.OWLSubject;
 import at.koopro.wizardsandbeasts.owl.Profession;
-import at.koopro.wizardsandbeasts.owl.ProfessionEligibility;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmScreen;
@@ -26,14 +24,38 @@ public class ProfessionSelectionScreen extends Screen {
     private final Map<OWLSubject, OWLGrade> grades;
     private int scrollOffset = 0;
 
+    private float guiScale = 1.0f;
+    private int originX;
+    private int originY;
+    private int designLeft;
+    private int designTop;
+
     public ProfessionSelectionScreen(@NonNull Map<OWLSubject, OWLGrade> grades) {
         super(Component.translatable("owls.screen.profession_title"));
         this.grades = grades;
     }
 
+    /** Map an unscaled design-space x (relative to current width/height) to screen space. */
+    private int sx(int designX) {
+        return originX + Math.round((designX - designLeft) * guiScale);
+    }
+
+    private int sy(int designY) {
+        return originY + Math.round((designY - designTop) * guiScale);
+    }
+
+    private int sw(int size) {
+        return Math.max(1, Math.round(size * guiScale));
+    }
+
     @Override
     protected void init() {
         super.init();
+        guiScale = GuiScaleHelper.computeScale(BG_WIDTH, BG_HEIGHT, width, height, GuiScaleHelper.DEFAULT_MARGIN);
+        designLeft = width / 2 - BG_WIDTH / 2;
+        designTop = height / 2 - BG_HEIGHT / 2;
+        originX = GuiScaleHelper.clampedLeft(Math.round(BG_WIDTH * guiScale), width, GuiScaleHelper.DEFAULT_MARGIN);
+        originY = GuiScaleHelper.clampedTop(Math.round(BG_HEIGHT * guiScale), height, GuiScaleHelper.DEFAULT_MARGIN);
         rebuildButtons();
     }
 
@@ -54,8 +76,8 @@ public class ProfessionSelectionScreen extends Screen {
                 addRenderableWidget(Button.builder(
                         Component.translatable("owls.button.choose"),
                         btn -> confirmChoose(finalProf))
-                        .pos(cx + BG_WIDTH / 2 - 50, rowY)
-                        .size(44, 12)
+                        .pos(sx(cx + BG_WIDTH / 2 - 50), sy(rowY))
+                        .size(sw(44), sw(12))
                         .build());
             }
         }
@@ -63,14 +85,14 @@ public class ProfessionSelectionScreen extends Screen {
         addRenderableWidget(Button.builder(
                 Component.literal("▲"),
                 btn -> { scrollOffset = Math.max(0, scrollOffset - ROW_HEIGHT * 2); rebuildButtons(); })
-                .pos(width / 2 + BG_WIDTH / 2 - 14, height / 2 - BG_HEIGHT / 2 + 8)
-                .size(12, 12)
+                .pos(sx(width / 2 + BG_WIDTH / 2 - 14), sy(height / 2 - BG_HEIGHT / 2 + 8))
+                .size(sw(12), sw(12))
                 .build());
         addRenderableWidget(Button.builder(
                 Component.literal("▼"),
                 btn -> { scrollOffset += ROW_HEIGHT * 2; rebuildButtons(); })
-                .pos(width / 2 + BG_WIDTH / 2 - 14, height / 2 + BG_HEIGHT / 2 - 22)
-                .size(12, 12)
+                .pos(sx(width / 2 + BG_WIDTH / 2 - 14), sy(height / 2 + BG_HEIGHT / 2 - 22))
+                .size(sw(12), sw(12))
                 .build());
     }
 
@@ -152,6 +174,11 @@ public class ProfessionSelectionScreen extends Screen {
         int cx = width / 2;
         int cy = height / 2;
 
+        var pose = graphics.pose();
+        pose.pushMatrix();
+        pose.translate(originX - designLeft * guiScale, originY - designTop * guiScale);
+        pose.scale(guiScale, guiScale);
+
         graphics.fill(cx - BG_WIDTH / 2, cy - BG_HEIGHT / 2, cx + BG_WIDTH / 2, cy + BG_HEIGHT / 2, 0xEEF5E6C8);
         graphics.drawCenteredString(font,
                 Component.translatable("owls.screen.profession_title").withColor(0x5C3317),
@@ -166,6 +193,8 @@ public class ProfessionSelectionScreen extends Screen {
             int nameColor = eligible ? 0xCC8800 : 0x888888;
             graphics.drawString(font, Component.translatable(prof.translationKey()), cx - BG_WIDTH / 2 + 10, rowY, nameColor, false);
         }
+
+        pose.popMatrix();
 
         super.render(graphics, mouseX, mouseY, partialTick);
     }

@@ -1,7 +1,6 @@
 package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.item.bloodpact.BloodPactVialItem;
-import at.koopro.wizardsandbeasts.item.cloak.CloakItem;
 import at.koopro.wizardsandbeasts.item.projectile.WizardingProjectileItem;
 import at.koopro.wizardsandbeasts.item.trinket.DarkMarkItem;
 import at.koopro.wizardsandbeasts.item.trinket.ExtendableEarsItem;
@@ -15,7 +14,6 @@ import at.koopro.wizardsandbeasts.item.trinket.PortkeyItem;
 import at.koopro.wizardsandbeasts.item.trinket.RemembrallItem;
 import at.koopro.wizardsandbeasts.item.trinket.TimeTurnerItem;
 import at.koopro.wizardsandbeasts.item.trinket.TwoWayMirrorItem;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.registries.DeferredItem;
 

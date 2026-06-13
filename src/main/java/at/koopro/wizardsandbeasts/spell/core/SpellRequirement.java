@@ -52,9 +52,12 @@ public class SpellRequirement {
 
     public boolean isMet(@Nullable ServerPlayer player, PlayerSpellData data) {
         if (prerequisiteId == null) return true;
-        if (!data.knowsSpell(prerequisiteId)) return false;
+        // Known-spell sets and stat maps are keyed by the registered spell's exact id (namespaced for
+        // JSON spells), so an authored bare id must be canonicalized before lookup.
+        String lookupId = canonicalPrerequisiteId();
+        if (!data.knowsSpell(lookupId)) return false;
         if (minProficiency != null) {
-            int casts = data.getSuccessfulHits(prerequisiteId);
+            int casts = data.getSuccessfulHits(lookupId);
             int requiredCasts = minProficiency.getCastsRequired();
             if (player != null) {
                 Identifier key = prerequisiteId.contains(":")
@@ -70,6 +73,12 @@ public class SpellRequirement {
     @Nullable
     public String getPrerequisiteId() {
         return prerequisiteId;
+    }
+
+    /** The prerequisite's registered id when it resolves, else the authored id verbatim. */
+    private String canonicalPrerequisiteId() {
+        Spell prereq = Spells.byId(prerequisiteId);
+        return prereq != null ? prereq.getId() : prerequisiteId;
     }
 
     @Nullable

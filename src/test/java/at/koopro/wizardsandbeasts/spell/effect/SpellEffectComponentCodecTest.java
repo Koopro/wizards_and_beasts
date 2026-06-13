@@ -105,4 +105,75 @@ class SpellEffectComponentCodecTest {
         List<SpellEffectComponent> list = result.result().orElseThrow();
         assertEquals(2, list.size());
     }
+
+    // ── F2: cadence-tagged entries ──────────────────────────────────────
+
+    private static SpellEffectEntry parseEntry(String json) {
+        JsonElement el = GSON.fromJson(json, JsonElement.class);
+        var result = SpellEffectEntry.CODEC.parse(JsonOps.INSTANCE, el);
+        if (result.error().isPresent()) {
+            throw new AssertionError("entry parse failed: " + result.error().get().message());
+        }
+        return result.result().orElseThrow();
+    }
+
+    @Test
+    void entry_withoutCadence_defaultsToTick_backCompat() {
+        // Pre-cadence component JSON must parse unchanged as an entry.
+        SpellEffectEntry entry = parseEntry("""
+                { "type": "apply_effect", "effect": "minecraft:glowing", "duration": 100 }
+                """);
+        assertEquals(EffectCadence.TICK, entry.cadence());
+        assertInstanceOf(SpellEffectComponent.ApplyEffect.class, entry.component());
+    }
+
+    @Test
+    void entry_cadenceVariants_parseAndRoundTrip() {
+        SpellEffectEntry start = parseEntry("""
+                { "type": "heal", "amount": 2.0, "cadence": "start" }
+                """);
+        assertEquals(EffectCadence.START, start.cadence());
+
+        SpellEffectEntry end = parseEntry("""
+                { "type": "clear_fire", "cadence": "end" }
+                """);
+        assertEquals(EffectCadence.END, end.cadence());
+
+        JsonElement encoded = SpellEffectEntry.CODEC.encodeStart(JsonOps.INSTANCE, end).result().orElseThrow();
+        SpellEffectEntry back = SpellEffectEntry.CODEC.parse(JsonOps.INSTANCE, encoded).result().orElseThrow();
+        assertEquals(end, back, "entry encode -> decode must be lossless (incl. cadence)");
+    }
+
+    @Test
+    void entry_cadenceIsTopLevelOnly_nestedAoeChildrenStayPlainComponents() {
+        SpellEffectEntry entry = parseEntry("""
+                {
+                  "type": "aoe_apply",
+                  "radius": 3.0,
+                  "cadence": "end",
+                  "effects": [
+                    { "type": "ignite", "seconds": 2 }
+                  ]
+                }
+                """);
+        assertEquals(EffectCadence.END, entry.cadence());
+        SpellEffectComponent.AoeApply aoe = assertInstanceOf(SpellEffectComponent.AoeApply.class, entry.component());
+        // Children are SpellEffectComponent, not entries — they fire when the parent fires.
+        assertInstanceOf(SpellEffectComponent.Ignite.class, aoe.components().get(0));
+    }
+
+    @Test
+    void entryList_mixedCadences_parse() {
+        var result = SpellEffectEntry.CODEC.listOf().parse(JsonOps.INSTANCE,
+                GSON.fromJson("""
+                        [ { "type": "heal", "amount": 1.0, "cadence": "start" },
+                          { "type": "ignite", "seconds": 4 },
+                          { "type": "clear_fire", "cadence": "end" } ]
+                        """, JsonElement.class));
+        List<SpellEffectEntry> list = result.result().orElseThrow();
+        assertEquals(3, list.size());
+        assertEquals(EffectCadence.START, list.get(0).cadence());
+        assertEquals(EffectCadence.TICK, list.get(1).cadence());
+        assertEquals(EffectCadence.END, list.get(2).cadence());
+    }
 }

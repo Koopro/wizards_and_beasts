@@ -21,20 +21,20 @@ class SpellLearningServiceTest {
     @Test
     void buildOffers_excludesAlreadyKnownSpells() {
         PlayerSpellData data = new PlayerSpellData();
-        data.learnSpell(Spells.EXPELLIARMUS.getId());
+        data.learnSpell(Spells.PROTEGO.getId());
 
         List<SpellLearningService.SpellOffer> offers = SpellLearningService.buildOffers(data);
 
-        assertFalse(offers.stream().anyMatch(o -> o.spellId().equals(Spells.EXPELLIARMUS.getId())),
+        assertFalse(offers.stream().anyMatch(o -> o.spellId().equals(Spells.PROTEGO.getId())),
                 "Known spells should not appear in teacher offers.");
     }
 
     @Test
     void validateLearnAttempt_rejectsAlreadyKnownSpell() {
         PlayerSpellData data = new PlayerSpellData();
-        data.learnSpell(Spells.EXPELLIARMUS.getId());
+        data.learnSpell(Spells.PROTEGO.getId());
 
-        SpellLearningService.LearnResult result = SpellLearningService.validateLearnAttempt(Spells.EXPELLIARMUS, data);
+        SpellLearningService.LearnResult result = SpellLearningService.validateLearnAttempt(Spells.PROTEGO, data);
 
         assertFalse(result.success());
         assertTrue(result.message().toLowerCase().contains("already"));
@@ -78,7 +78,7 @@ class SpellLearningServiceTest {
 
         @Override
         protected SpellRequirement buildRequirement() {
-            return SpellRequirement.knows(Spells.EXPELLIARMUS);
+            return SpellRequirement.knows(Spells.PROTEGO);
         }
     }
 }

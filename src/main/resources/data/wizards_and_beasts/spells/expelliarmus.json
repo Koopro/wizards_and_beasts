@@ -1,0 +1,11 @@
+{
+  "displayName": "Expelliarmus",
+  "category": "combat",
+  "cooldownTicks": 50,
+  "color": -39424,
+  "castType": "projectile",
+  "projectileSpeed": 1.6,
+  "projectileSpread": 0.02,
+  "disarms": true,
+  "requirement": { "type": "knows", "prerequisiteId": "stupefy" }
+}

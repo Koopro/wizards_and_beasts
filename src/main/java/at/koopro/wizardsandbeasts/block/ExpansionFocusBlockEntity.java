@@ -2,7 +2,6 @@ package at.koopro.wizardsandbeasts.block;
 
 import at.koopro.wizardsandbeasts.trunk.gui.PocketConfiguratorMenu;
 import at.koopro.wizardsandbeasts.registry.ModBlockEntities;
-import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.chat.Component;

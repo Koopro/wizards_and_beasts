@@ -3,7 +3,6 @@ package at.koopro.wizardsandbeasts.wand.customization;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;

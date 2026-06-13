@@ -8,9 +8,8 @@ import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
 import at.koopro.wizardsandbeasts.item.wand.WandItem;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
-import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.spell.cast.CastContext;
-import at.koopro.wizardsandbeasts.spell.effect.SpellEffectComponent;
+import at.koopro.wizardsandbeasts.spell.effect.SpellEffectEntry;
 import at.koopro.wizardsandbeasts.spell.effect.SpellEffectContext;
 import at.koopro.wizardsandbeasts.spell.effect.SpellEffectRunner;
 import at.koopro.wizardsandbeasts.spell.proficiency.SpellScalingProfile;
@@ -18,10 +17,7 @@ import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.cast.WandStats;
 import at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver;
 import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialCombatRules;
-import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialRules;
 import at.koopro.wizardsandbeasts.wand.corruption.WandCorruptionSystem;
-import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
-import at.koopro.wizardsandbeasts.network.spell.SpellDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -37,8 +33,8 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.mojang.logging.LogUtils;
+import org.slf4j.Logger;
 
 /**
  * Default spell execution logic. Individual spells delegate here via {@link Spell#execute}.
@@ -46,7 +42,7 @@ import org.apache.logging.log4j.Logger;
  */
 public final class SpellExecutor {
 
-    private static final Logger LOGGER = LogManager.getLogger(SpellExecutor.class);
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     private SpellExecutor() {}
 
@@ -162,7 +158,7 @@ public final class SpellExecutor {
                 // Data-driven effect components (Step 3): run the spell's authored effect list with the
                 // caster as subject, at the same SELF cast-time point legacy self-effects run. No-op for
                 // spells without an effects list (all Java spells today).
-                List<SpellEffectComponent> selfComponents = SpellEffectRunner.effectsOf(spell);
+                List<SpellEffectEntry> selfComponents = SpellEffectRunner.effectsOf(spell);
                 if (!selfComponents.isEmpty()) {
                     SpellEffectRunner.run(selfComponents, SpellEffectContext.ofSelf(caster, level)
                             .withScaling(ctx.modifiers().finalDamage() * scalingProfile.damageMult(),
@@ -191,8 +187,8 @@ public final class SpellExecutor {
 
     private static final SelfUtilityRule[] SELF_UTILITY_RULES = new SelfUtilityRule[] {
             // Step 3/4 migration notes:
-            //  - lumos (S3) & nox (S4) are JSON spells; their light/dispel ride effect components. The
-            //    legacy lumos<->nox learn + loadout-swap toggle was shed (no component expresses it).
+            //  - lumos (S3) & nox (S4) are JSON spells; their light/dispel ride effect components, and
+            //    the lumos<->nox learn + loadout-swap toggle rides a swap_active_spell component.
             //  - reparo (S4): residual tail. SpellDefinition has no repairsItem field and the `repair`
             //    component can't match full-repair / wand-aware selection / ElderWand guard, so reparo's
             //    behavior stays here (block-repair range no longer wand-scaled — logged delta).

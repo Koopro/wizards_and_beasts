@@ -3,6 +3,8 @@ package at.koopro.wizardsandbeasts.spell.def;
 import at.koopro.wizardsandbeasts.spell.core.CastType;
 import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 import at.koopro.wizardsandbeasts.spell.core.SpellFamily;
+import at.koopro.wizardsandbeasts.spell.effect.EffectCadence;
+import at.koopro.wizardsandbeasts.spell.effect.SpellEffectComponent;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
@@ -187,14 +189,50 @@ class SpellDefinitionCodecTest {
             }
         }
         // Spot-check the Step-4 component migrations decode their effect lists.
-        assertEquals(1, parseFile("src/main/resources/data/wizards_and_beasts/spells/nox.json")
-                .effectComponents().size(), "nox should carry one dispel component");
+        SpellDefinition nox = parseFile("src/main/resources/data/wizards_and_beasts/spells/nox.json");
+        assertEquals(2, nox.effectComponents().size(), "nox should carry dispel + swap_active_spell components");
+        SpellEffectComponent.SwapActiveSpell noxSwap = (SpellEffectComponent.SwapActiveSpell)
+                nox.effectComponents().get(1).component();
+        assertEquals("lumos", noxSwap.spell(), "nox swaps the active slot back to lumos");
+        assertFalse(noxSwap.learn(), "nox does not need to teach lumos");
+        SpellDefinition lumos = parseFile("src/main/resources/data/wizards_and_beasts/spells/lumos.json");
+        SpellEffectComponent.SwapActiveSpell lumosSwap = (SpellEffectComponent.SwapActiveSpell)
+                lumos.effectComponents().get(1).component();
+        assertEquals("nox", lumosSwap.spell(), "lumos swaps the active slot to nox");
+        assertTrue(lumosSwap.learn(), "lumos teaches nox before swapping");
         assertEquals(2, parseFile("src/main/resources/data/wizards_and_beasts/spells/episkey.json")
                 .effectComponents().size(), "episkey should carry heal + dispel components");
         assertEquals(3, parseFile("src/main/resources/data/wizards_and_beasts/spells/frigora.json")
                 .effectComponents().size(), "frigora should carry clear_fire + 2 apply_effect components");
         assertEquals(Optional.of(5), parseFile("src/main/resources/data/wizards_and_beasts/spells/incendio.json")
                 .igniteSeconds(), "incendio keeps igniteSeconds in props");
+        // Step-5 hybrid props.
+        assertTrue(parseFile("src/main/resources/data/wizards_and_beasts/spells/alohomora.json").opensBlocks(),
+                "alohomora routes through the opensBlocks targeted branch");
+        assertTrue(parseFile("src/main/resources/data/wizards_and_beasts/spells/colloportus.json").opensBlocks(),
+                "colloportus routes through the opensBlocks targeted branch");
+        assertEquals(2.0f, parseFile("src/main/resources/data/wizards_and_beasts/spells/accio.json").pullStrength(),
+                "accio carries its pull strength prop");
+        assertTrue(parseFile("src/main/resources/data/wizards_and_beasts/spells/expelliarmus.json").disarms(),
+                "expelliarmus keeps the disarms prop");
+        assertEquals(CastType.BEAM_CHANNEL,
+                parseFile("src/main/resources/data/wizards_and_beasts/spells/aguamenti.json").castType(),
+                "aguamenti stays a beam channel");
+        // F2: the two migrated beam-channel spells.
+        SpellDefinition crucio = parseFile("src/main/resources/data/wizards_and_beasts/spells/crucio.json");
+        assertEquals(CastType.BEAM_CHANNEL, crucio.castType(), "crucio is a beam channel");
+        assertEquals(1, crucio.effectComponents().size(), "crucio carries the tick-cadence pain entry");
+        assertEquals(EffectCadence.TICK, crucio.effectComponents().get(0).cadence());
+        SpellEffectComponent.ApplyEffect pain = (SpellEffectComponent.ApplyEffect)
+                crucio.effectComponents().get(0).component();
+        assertTrue(pain.darkArts(), "crucio's pain component gates on DARK_ARTS");
+        assertTrue(pain.target(), "crucio's pain applies to the beam target");
+        SpellDefinition wingardium =
+                parseFile("src/main/resources/data/wizards_and_beasts/spells/wingardium_leviosa.json");
+        assertEquals(CastType.BEAM_CHANNEL, wingardium.castType(), "wingardium_leviosa is a beam channel");
+        assertEquals(0, wingardium.effectComponents().size(),
+                "wingardium's direct-motion lift stays an id-keyed Java tail (no component expresses it)");
+        assertEquals(0.0f, wingardium.projectileSpeed(), "wingardium keeps projectileSpeed 0");
     }
 
     private static SpellDefinition parse(String json) {

@@ -3,7 +3,6 @@ package at.koopro.wizardsandbeasts.wand.customization;
 import com.mojang.serialization.Codec;
 import net.minecraft.util.StringRepresentable;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 

@@ -1,0 +1,11 @@
+{
+  "displayName": "Accio",
+  "category": "utility",
+  "cooldownTicks": 40,
+  "color": -7798904,
+  "castType": "cone",
+  "range": 16.0,
+  "pullStrength": 2.0,
+  "sound": { "id": "minecraft:entity.ender_pearl.throw", "volume": 0.7, "pitch": 1.2 },
+  "requirement": { "type": "knows", "prerequisiteId": "wingardium_leviosa" }
+}

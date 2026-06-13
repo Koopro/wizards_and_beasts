@@ -9,7 +9,6 @@ import at.koopro.wizardsandbeasts.spell.lib.SpellHelper;
 import at.koopro.wizardsandbeasts.spell.core.Spells;
 import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialCombatRules;
 import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialResourceManager;
-import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialRules;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;

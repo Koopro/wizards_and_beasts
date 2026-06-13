@@ -38,62 +38,62 @@ class SpellRequirementTest {
 
     @Test
     void knows_requiresPrerequisiteSpell() {
-        SpellRequirement req = SpellRequirement.knows(Spells.EXPELLIARMUS);
+        SpellRequirement req = SpellRequirement.knows(Spells.PROTEGO);
         PlayerSpellData data = new PlayerSpellData();
 
-        assertFalse(req.isMet(data), "Player who has not learned Expelliarmus must not satisfy knows(Expelliarmus).");
+        assertFalse(req.isMet(data), "Player who has not learned Protego must not satisfy knows(Protego).");
 
-        data.learnSpell("expelliarmus");
-        assertTrue(req.isMet(data), "After learning Expelliarmus the requirement must be satisfied.");
-        assertEquals("expelliarmus", req.getPrerequisiteId());
+        data.learnSpell("protego");
+        assertTrue(req.isMet(data), "After learning Protego the requirement must be satisfied.");
+        assertEquals("protego", req.getPrerequisiteId());
         assertNull(req.getMinProficiency(), "knows(...) must not impose a proficiency floor.");
     }
 
     @Test
     void proficiency_requiresKnowledgeAndSuccessfulHits() {
-        SpellRequirement req = SpellRequirement.proficiency(Spells.EXPELLIARMUS, Proficiency.PROFICIENT);
+        SpellRequirement req = SpellRequirement.proficiency(Spells.PROTEGO, Proficiency.PROFICIENT);
         PlayerSpellData data = new PlayerSpellData();
 
         assertFalse(req.isMet(data), "No knowledge -> not met.");
 
-        data.learnSpell("expelliarmus");
+        data.learnSpell("protego");
         assertFalse(req.isMet(data),
                 "Learning the spell alone is not enough; needs PROFICIENT successful hits.");
 
         for (int i = 0; i < Proficiency.PROFICIENT.getCastsRequired() - 1; i++) {
-            data.incrementSuccessfulHits("expelliarmus");
+            data.incrementSuccessfulHits("protego");
         }
         assertFalse(req.isMet(data),
                 "Just below the PROFICIENT threshold must not satisfy the requirement.");
 
-        data.incrementSuccessfulHits("expelliarmus");
+        data.incrementSuccessfulHits("protego");
         assertTrue(req.isMet(data),
                 "Reaching the PROFICIENT successful-hit threshold must satisfy the requirement.");
     }
 
     @Test
     void proficiency_masteredImpliesProficient() {
-        SpellRequirement req = SpellRequirement.proficiency(Spells.EXPELLIARMUS, Proficiency.MASTERED);
+        SpellRequirement req = SpellRequirement.proficiency(Spells.PROTEGO, Proficiency.MASTERED);
         PlayerSpellData data = new PlayerSpellData();
-        data.learnSpell("expelliarmus");
+        data.learnSpell("protego");
         for (int i = 0; i < Proficiency.MASTERED.getCastsRequired(); i++) {
-            data.incrementSuccessfulHits("expelliarmus");
+            data.incrementSuccessfulHits("protego");
         }
         assertTrue(req.isMet(data));
     }
 
     @Test
     void description_includesPrerequisiteName() {
-        String knowsDesc = SpellRequirement.knows(Spells.EXPELLIARMUS).getDescription();
-        assertTrue(knowsDesc.contains("Expelliarmus"),
-                "knows(Expelliarmus) description should mention Expelliarmus. Got: " + knowsDesc);
+        String knowsDesc = SpellRequirement.knows(Spells.PROTEGO).getDescription();
+        assertTrue(knowsDesc.contains("Protego"),
+                "knows(Protego) description should mention Protego. Got: " + knowsDesc);
 
         String profDesc = SpellRequirement
-                .proficiency(Spells.EXPELLIARMUS, Proficiency.MASTERED)
+                .proficiency(Spells.PROTEGO, Proficiency.MASTERED)
                 .getDescription();
         assertTrue(profDesc.toLowerCase().contains("master"),
                 "proficiency(MASTERED) description should mention mastery. Got: " + profDesc);
-        assertTrue(profDesc.contains("Expelliarmus"),
-                "proficiency(Expelliarmus) description should mention Expelliarmus. Got: " + profDesc);
+        assertTrue(profDesc.contains("Protego"),
+                "proficiency(Protego) description should mention Protego. Got: " + profDesc);
     }
 }

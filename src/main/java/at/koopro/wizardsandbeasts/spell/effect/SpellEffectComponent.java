@@ -4,6 +4,11 @@ import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.effect.FiniteImmuneEffects;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
+import at.koopro.wizardsandbeasts.network.spell.SpellDataSyncS2CPayload;
+import at.koopro.wizardsandbeasts.registry.ModAttachments;
+import at.koopro.wizardsandbeasts.spell.core.Spell;
+import at.koopro.wizardsandbeasts.spell.core.Spells;
+import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.spell.lib.SpellHelper;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
@@ -65,11 +70,18 @@ public sealed interface SpellEffectComponent permits
         SpellEffectComponent.Light,
         SpellEffectComponent.Repair,
         SpellEffectComponent.Explosion,
-        SpellEffectComponent.AoeApply {
+        SpellEffectComponent.AoeApply,
+        SpellEffectComponent.SwapActiveSpell {
 
     Logger LOGGER = LogUtils.getLogger();
 
     Codec<SpellEffectComponent> CODEC = Type.CODEC.dispatch(SpellEffectComponent::type, Type::codec);
+
+    /**
+     * Map form of {@link #CODEC}; lets {@link SpellEffectEntry} merge the optional top-level
+     * {@code cadence} field into the same flat JSON object without touching any variant codec.
+     */
+    MapCodec<SpellEffectComponent> MAP_CODEC = Type.CODEC.dispatchMap(SpellEffectComponent::type, Type::codec);
 
     /** Discriminator. */
     Type type();
@@ -109,7 +121,8 @@ public sealed interface SpellEffectComponent permits
         LIGHT("light", Light.CODEC),
         REPAIR("repair", Repair.CODEC),
         EXPLOSION("explosion", Explosion.CODEC),
-        AOE_APPLY("aoe_apply", AoeApply.CODEC);
+        AOE_APPLY("aoe_apply", AoeApply.CODEC),
+        SWAP_ACTIVE_SPELL("swap_active_spell", SwapActiveSpell.CODEC);
 
         public static final Codec<Type> CODEC = StringRepresentable.fromValues(Type::values);
 
@@ -487,8 +500,48 @@ public sealed interface SpellEffectComponent permits
             List<LivingEntity> targets = ctx.level().getEntitiesOfClass(LivingEntity.class, area,
                     e -> e.isAlive() && e != ctx.caster());
             for (LivingEntity entity : targets) {
-                SpellEffectRunner.run(components, ctx.forTarget(entity));
+                SpellEffectRunner.runComponents(components, ctx.forTarget(entity));
             }
+        }
+    }
+
+    /**
+     * Swaps the caster's active loadout slot to {@code spell} (bare or namespaced id) and syncs the
+     * change to the client. {@code learn=true} additionally teaches the spell first, so the swap target
+     * is always usable. Expresses paired toggle spells (lumos→nox, nox→lumos) that the legacy
+     * SELF-utility rules used to hardcode.
+     *
+     * <p>The id is canonicalized through the registry ({@code Spells.byId(...).getId()}) before being
+     * stored: {@code knowsSpell}/loadout lookups are exact-string, and JSON spells register under
+     * namespaced ids, so storing the authored bare id verbatim would strand the slot on an id the
+     * learning paths never wrote.
+     */
+    record SwapActiveSpell(String spell, boolean learn) implements SpellEffectComponent {
+        public static final MapCodec<SwapActiveSpell> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+                Codec.STRING.fieldOf("spell").forGetter(SwapActiveSpell::spell),
+                Codec.BOOL.optionalFieldOf("learn", false).forGetter(SwapActiveSpell::learn)
+        ).apply(inst, SwapActiveSpell::new));
+
+        @Override
+        public Type type() {
+            return Type.SWAP_ACTIVE_SPELL;
+        }
+
+        @Override
+        public void apply(SpellEffectContext ctx) {
+            if (!standardEnabled()) return;
+            Spell swapTarget = Spells.byId(spell);
+            if (swapTarget == null) {
+                LOGGER.warn("swap_active_spell: unknown spell id '{}'", spell);
+                return;
+            }
+            String canonicalId = swapTarget.getId();
+            PlayerSpellData data = ctx.caster().getData(ModAttachments.SPELL_DATA.get());
+            if (learn) {
+                data.learnSpell(canonicalId);
+            }
+            data.setLoadoutSpell(data.getActiveSlot(), canonicalId);
+            SpellDataSyncS2CPayload.syncToPlayer(ctx.caster());
         }
     }
 }

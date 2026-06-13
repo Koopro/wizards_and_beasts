@@ -1,6 +1,5 @@
 package at.koopro.wizardsandbeasts.spell.imperio;
 
-import org.jspecify.annotations.Nullable;
 
 public enum ImperioCommand {
     FOLLOW_CASTER,

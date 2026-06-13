@@ -1,10 +1,10 @@
 package at.koopro.wizardsandbeasts.client.owl.screen;
 
+import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.client.owl.ClientOWLCache;
 import at.koopro.wizardsandbeasts.network.owl.RequestOWLExamPacket;
 import at.koopro.wizardsandbeasts.owl.OWLGrade;
 import at.koopro.wizardsandbeasts.owl.OWLSubject;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -26,13 +26,37 @@ public class OWLExamScreen extends Screen {
 
     private boolean examConfirmed = false;
 
+    private float guiScale = 1.0f;
+    private int originX;
+    private int originY;
+    private int designLeft;
+    private int designTop;
+
     public OWLExamScreen() {
         super(Component.translatable("owls.screen.title"));
+    }
+
+    /** Map an unscaled design-space x (relative to current width/height) to screen space. */
+    private int sx(int designX) {
+        return originX + Math.round((designX - designLeft) * guiScale);
+    }
+
+    private int sy(int designY) {
+        return originY + Math.round((designY - designTop) * guiScale);
+    }
+
+    private int sw(int size) {
+        return Math.max(1, Math.round(size * guiScale));
     }
 
     @Override
     protected void init() {
         super.init();
+        guiScale = GuiScaleHelper.computeScale(BG_WIDTH, BG_HEIGHT, width, height, GuiScaleHelper.DEFAULT_MARGIN);
+        designLeft = width / 2 - BG_WIDTH / 2;
+        designTop = height / 2 - BG_HEIGHT / 2;
+        originX = GuiScaleHelper.clampedLeft(Math.round(BG_WIDTH * guiScale), width, GuiScaleHelper.DEFAULT_MARGIN);
+        originY = GuiScaleHelper.clampedTop(Math.round(BG_HEIGHT * guiScale), height, GuiScaleHelper.DEFAULT_MARGIN);
         if (!examConfirmed) {
             initConfirmPhase();
         } else {
@@ -46,14 +70,14 @@ public class OWLExamScreen extends Screen {
         addRenderableWidget(Button.builder(
                 Component.translatable("owls.button.ready"),
                 btn -> sendExamRequest())
-                .pos(cx - 100, cy + 20)
-                .size(96, 20)
+                .pos(sx(cx - 100), sy(cy + 20))
+                .size(sw(96), sw(20))
                 .build());
         addRenderableWidget(Button.builder(
                 Component.translatable("owls.button.notyet"),
                 btn -> onClose())
-                .pos(cx + 4, cy + 20)
-                .size(96, 20)
+                .pos(sx(cx + 4), sy(cy + 20))
+                .size(sw(96), sw(20))
                 .build());
     }
 
@@ -65,8 +89,8 @@ public class OWLExamScreen extends Screen {
                     assert minecraft != null;
                     minecraft.setScreen(new ProfessionSelectionScreen(ClientOWLCache.getGrades()));
                 })
-                .pos(cx - 75, height / 2 + 70)
-                .size(150, 20)
+                .pos(sx(cx - 75), sy(height / 2 + 70))
+                .size(sw(150), sw(20))
                 .build());
     }
 
@@ -83,6 +107,11 @@ public class OWLExamScreen extends Screen {
         int cx = width / 2;
         int cy = height / 2;
 
+        var pose = graphics.pose();
+        pose.pushMatrix();
+        pose.translate(originX - designLeft * guiScale, originY - designTop * guiScale);
+        pose.scale(guiScale, guiScale);
+
         graphics.fill(cx - BG_WIDTH / 2, cy - BG_HEIGHT / 2, cx + BG_WIDTH / 2, cy + BG_HEIGHT / 2, 0xEEF5E6C8);
 
         if (!examConfirmed) {
@@ -90,6 +119,8 @@ public class OWLExamScreen extends Screen {
         } else {
             renderResultsPhase(graphics, cx, cy);
         }
+
+        pose.popMatrix();
 
         super.render(graphics, mouseX, mouseY, partialTick);
     }

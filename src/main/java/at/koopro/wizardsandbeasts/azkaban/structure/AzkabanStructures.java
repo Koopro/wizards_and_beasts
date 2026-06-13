@@ -9,6 +9,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
+import net.minecraft.world.level.levelgen.structure.placement.StructurePlacementType;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jspecify.annotations.Nullable;
@@ -21,9 +22,17 @@ public final class AzkabanStructures {
     public static final DeferredRegister<StructurePieceType> STRUCTURE_PIECE_TYPES =
             DeferredRegister.create(Registries.STRUCTURE_PIECE, WizardsAndBeastsMod.MODID);
 
+    public static final DeferredRegister<StructurePlacementType<?>> STRUCTURE_PLACEMENT_TYPES =
+            DeferredRegister.create(Registries.STRUCTURE_PLACEMENT, WizardsAndBeastsMod.MODID);
+
     public static final DeferredHolder<StructureType<?>, StructureType<AzkabanStructure>>
             AZKABAN_FORTRESS = STRUCTURE_TYPES.register(
                     "azkaban_fortress", () -> () -> AzkabanStructure.CODEC);
+
+    /** Exactly one instance per world, pinned to an ocean (stronghold-style). */
+    public static final DeferredHolder<StructurePlacementType<?>, StructurePlacementType<OnePerWorldPlacement>>
+            ONE_PER_WORLD_PLACEMENT = STRUCTURE_PLACEMENT_TYPES.register(
+                    "one_per_world", () -> () -> OnePerWorldPlacement.CODEC);
 
     /** Procedural crag + auto-sized platform. */
     public static final DeferredHolder<StructurePieceType, StructurePieceType>

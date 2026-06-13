@@ -19,7 +19,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 public class Protego extends Spell {
@@ -77,7 +76,7 @@ public class Protego extends Spell {
 
     @Override
     protected SpellRequirement buildRequirement() {
-        return SpellRequirement.knows(Spells.EXPELLIARMUS);
+        return SpellRequirement.knows("expelliarmus");
     }
 
     @Override

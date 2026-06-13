@@ -90,6 +90,10 @@ public final class SpellCastService {
             rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.UNKNOWN_SPELL, spellId));
             return CastResult.REJECTED;
         }
+        // Canonicalize: known-spell/cooldown/stat maps are keyed by the registered id, which for JSON
+        // spells is namespaced. A bare id in the loadout slot (older saves, authored swap targets)
+        // resolves to the same spell but would miss every keyed lookup below.
+        spellId = spell.getId();
 
         if (!data.knowsSpell(spellId)) {
             rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.SPELL_NOT_KNOWN, spellId));

@@ -43,26 +43,21 @@ public final class Spells {
     private static boolean bootstrapped = false;
 
     // Combat
-    // Step 3/4: stupefy, incendio, diffindo, bombarda, confringo, flipendo, glacius, depulso
-    // migrated to JSON (data/wizards_and_beasts/spells/*.json) — no Java classes.
-    public static final Expelliarmus EXPELLIARMUS = register(new Expelliarmus());
+    // Step 3/4/5: stupefy, incendio, diffindo, bombarda, confringo, flipendo, glacius, depulso,
+    // expelliarmus migrated to JSON (data/wizards_and_beasts/spells/*.json) — no Java classes.
 
     // Utility
-    // Step 3/4: lumos, nox, reparo, liberacorpus, arresto_momentum migrated to JSON — no Java classes.
-    public static final Accio ACCIO = register(new Accio());
-    public static final WingardiumLeviosa WINGARDIUM_LEVIOSA = register(new WingardiumLeviosa());
-    public static final Alohomora ALOHOMORA = register(new Alohomora());
-    public static final Colloportus COLLOPORTUS = register(new Colloportus());
+    // Step 3/4/5 + F2: lumos, nox, reparo, liberacorpus, arresto_momentum, accio, alohomora,
+    // colloportus, aguamenti, wingardium_leviosa migrated to JSON — no Java classes.
     public static final Riddikulus RIDDIKULUS = register(new Riddikulus());
-    public static final Aguamenti AGUAMENTI = register(new Aguamenti());
 
     // Defense
     public static final Protego PROTEGO = register(new Protego());
     public static final ExpectoPatronum EXPECTO_PATRONUM = register(new ExpectoPatronum());
 
     // Dark Arts
+    // F2: crucio migrated to JSON — no Java class.
     public static final AvadaKedavra AVADA_KEDAVRA = register(new AvadaKedavra());
-    public static final Crucio CRUCIO = register(new Crucio());
     public static final Imperio IMPERIO = register(new Imperio());
     public static final ObscurusSurge OBSCURUS_SURGE = register(new ObscurusSurge());
     public static final ObscurusGrasp OBSCURUS_GRASP = register(new ObscurusGrasp());

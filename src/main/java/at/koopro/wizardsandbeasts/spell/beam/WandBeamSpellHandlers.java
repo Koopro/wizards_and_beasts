@@ -23,7 +23,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -179,8 +178,9 @@ final class WandBeamSpellHandlers {
             caster.setData(ModAttachments.DARK_CORRUPTION.get(), Math.min(100f, corruption + 5.0f * intent));
             target.removeEffect(MobEffects.WITHER);
             target.removeEffect(MobEffects.SLOWNESS);
-            int painTicks = Math.max(20, (int) (60 / intent));
-            target.addEffect(new MobEffectInstance(ModEffects.CRUCIATUS_PAIN, painTicks, 0, false, true, true));
+            // F2: CRUCIATUS_PAIN now rides crucio.json's tick-cadence apply_effect component
+            // (WandBeamChannelLogic.runChannelEffects). This tail keeps the unexpressible bits:
+            // intent feedback, corruption accrual, legacy-effect cleanup, ramp damage below.
             recordBeamProficiencyHit(caster, spell.getId(), s, 20);
         }
         if (s.beamTicks >= 40 && s.beamTicks % 20 == 0) {

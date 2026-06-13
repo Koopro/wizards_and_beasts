@@ -1,0 +1,21 @@
+{
+  "displayName": "Crucio",
+  "category": "dark_arts",
+  "cooldownTicks": 220,
+  "baseDamage": 2.0,
+  "color": -65468,
+  "castType": "beam_channel",
+  "range": 50.0,
+  "sound": { "id": "minecraft:entity.blaze.shoot", "volume": 1.0, "pitch": 0.8 },
+  "requirement": { "type": "proficiency", "prerequisiteId": "incendio", "minProficiency": "mastered" },
+  "effects": [
+    {
+      "type": "apply_effect",
+      "effect": "wizards_and_beasts:cruciatus_pain",
+      "duration": 60,
+      "target": true,
+      "darkArts": true,
+      "cadence": "tick"
+    }
+  ]
+}

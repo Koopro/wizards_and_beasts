@@ -6,9 +6,7 @@ import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 import at.koopro.wizardsandbeasts.spell.lib.SpellHelper;
 import at.koopro.wizardsandbeasts.spell.core.SpellProperties;
 import at.koopro.wizardsandbeasts.spell.core.SpellRequirement;
-import at.koopro.wizardsandbeasts.spell.core.Spells;
 import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialCombatRules;
-import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialRules;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -37,7 +35,8 @@ public class ObscurusSurge extends Spell {
 
     @Override
     protected SpellRequirement buildRequirement() {
-        return SpellRequirement.proficiency(Spells.CRUCIO, Proficiency.PROFICIENT);
+        // F2: crucio is a JSON spell now — id-string requirement (resolved lazily at isMet time).
+        return SpellRequirement.proficiency("crucio", Proficiency.PROFICIENT);
     }
 
     @Override

@@ -8,7 +8,6 @@ import at.koopro.wizardsandbeasts.floo.FlooRegistryEntry;
 import at.koopro.wizardsandbeasts.floo.FlooTravelHandler;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
-import at.koopro.wizardsandbeasts.registry.ModBlocks;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.ChatFormatting;

@@ -22,7 +22,8 @@ public class AvadaKedavra extends Spell {
 
     @Override
     protected SpellRequirement buildRequirement() {
-        return SpellRequirement.proficiency(Spells.CRUCIO, Proficiency.MASTERED);
+        // F2: crucio is a JSON spell now — id-string requirement (resolved lazily at isMet time).
+        return SpellRequirement.proficiency("crucio", Proficiency.MASTERED);
     }
 
     @Override

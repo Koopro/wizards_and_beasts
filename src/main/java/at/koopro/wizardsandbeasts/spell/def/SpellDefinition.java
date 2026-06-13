@@ -6,7 +6,7 @@ import at.koopro.wizardsandbeasts.spell.core.Proficiency;
 import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 import at.koopro.wizardsandbeasts.spell.core.SpellFamily;
 import at.koopro.wizardsandbeasts.spell.cast.CastContext;
-import at.koopro.wizardsandbeasts.spell.effect.SpellEffectComponent;
+import at.koopro.wizardsandbeasts.spell.effect.SpellEffectEntry;
 import at.koopro.wizardsandbeasts.spell.gamp.GampDomain;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
@@ -71,11 +71,20 @@ public record SpellDefinition(
         Set<GampDomain> gampDomains,
 
         /**
-         * Composable, data-driven effect primitives (Step 2). Optional and defaulted to empty so all
-         * pre-existing JSON spells deserialize unchanged. <b>Not yet executed</b> by the cast pipeline —
-         * this carries the authored vocabulary until impact-site wiring is approved.
+         * Composable, data-driven effect primitives (Step 2), each wrapped with an optional F2
+         * {@code cadence} tag (default {@code tick}; honored only by BEAM_CHANNEL dispatch). Optional
+         * and defaulted to empty so all pre-existing JSON spells deserialize unchanged.
          */
-        List<SpellEffectComponent> effectComponents) {
+        List<SpellEffectEntry> effectComponents,
+
+        /**
+         * Step 5 hybrid props. {@code opensBlocks} routes the targeted handler's lock/unlock branch
+         * (alohomora/colloportus); {@code pullStrength} feeds the cone handler's pull logic (accio).
+         * Both map onto the existing {@link at.koopro.wizardsandbeasts.spell.core.SpellProperties}
+         * builder flags — the rich behavior stays in the id-keyed handlers.
+         */
+        boolean opensBlocks,
+        float pullStrength) {
 
     /** Embedded "explode" block. */
     public record ExplosionDef(float power, boolean breaksBlocks) {
@@ -265,7 +274,9 @@ public record SpellDefinition(
             boolean unblockable,
             Optional<SpellFamily> spellFamily,
             Set<GampDomain> gampDomains,
-            List<SpellEffectComponent> effectComponents) {
+            List<SpellEffectEntry> effectComponents,
+            boolean opensBlocks,
+            float pullStrength) {
 
         static final MapCodec<SpellDefinitionFieldsB> MAP_CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
                 ExplosionDef.CODEC.optionalFieldOf("explode").forGetter(SpellDefinitionFieldsB::explode),
@@ -290,9 +301,11 @@ public record SpellDefinition(
                         .xmap(Set::copyOf, List::copyOf)
                         .optionalFieldOf("gampDomains", Set.of())
                         .forGetter(SpellDefinitionFieldsB::gampDomains),
-                SpellEffectComponent.CODEC.listOf()
+                SpellEffectEntry.CODEC.listOf()
                         .optionalFieldOf("effects", List.of())
-                        .forGetter(SpellDefinitionFieldsB::effectComponents)
+                        .forGetter(SpellDefinitionFieldsB::effectComponents),
+                Codec.BOOL.optionalFieldOf("opensBlocks", false).forGetter(SpellDefinitionFieldsB::opensBlocks),
+                Codec.FLOAT.optionalFieldOf("pullStrength", 0.0f).forGetter(SpellDefinitionFieldsB::pullStrength)
         ).apply(inst, SpellDefinitionFieldsB::new));
     }
 
@@ -325,7 +338,9 @@ public record SpellDefinition(
                     pair.getSecond().unblockable(),
                     pair.getSecond().spellFamily(),
                     pair.getSecond().gampDomains(),
-                    pair.getSecond().effectComponents()),
+                    pair.getSecond().effectComponents(),
+                    pair.getSecond().opensBlocks(),
+                    pair.getSecond().pullStrength()),
             def -> Pair.of(
                     new SpellDefinitionFieldsA(
                             def.displayName(),
@@ -353,7 +368,9 @@ public record SpellDefinition(
                             def.unblockable(),
                             def.spellFamily(),
                             def.gampDomains(),
-                            def.effectComponents())));
+                            def.effectComponents(),
+                            def.opensBlocks(),
+                            def.pullStrength())));
 
     public boolean wouldConjureFood(CastContext ctx) {
         return false;

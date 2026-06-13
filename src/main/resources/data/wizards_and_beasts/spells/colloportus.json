@@ -1,0 +1,11 @@
+{
+  "displayName": "Colloportus",
+  "category": "utility",
+  "cooldownTicks": 45,
+  "color": -10057524,
+  "castType": "targeted",
+  "range": 5.0,
+  "opensBlocks": true,
+  "sound": { "id": "minecraft:block.iron_door.close", "volume": 0.75, "pitch": 1.15 },
+  "requirement": { "type": "knows", "prerequisiteId": "alohomora" }
+}

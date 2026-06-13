@@ -41,8 +41,8 @@ public final class AzkabanWorldData extends SavedData {
 
     /**
      * Cached fortress center, or {@code null} if the structure has not generated
-     * yet. With random-spread placement there is no seed-derivable location — use
-     * {@code /locate} (a structure search) to find an instance.
+     * yet. Placement is one-per-world ({@code OnePerWorldPlacement}), so
+     * {@code /locate structure} resolves the single instance deterministically.
      */
     public @Nullable BlockPos getCenter() {
         return fortressCenter;
