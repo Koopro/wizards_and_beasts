@@ -6,12 +6,12 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.mojang.logging.LogUtils;
+import org.slf4j.Logger;
 
 public final class StatMilestones {
 
-    private static final Logger LOGGER = LogManager.getLogger(StatMilestones.class);
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     private StatMilestones() {}
 

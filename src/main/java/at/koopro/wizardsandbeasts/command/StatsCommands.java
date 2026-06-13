@@ -16,15 +16,11 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
 public final class StatsCommands {
-
-    private static final Logger LOGGER = LogManager.getLogger(StatsCommands.class);
 
     private static final Iterable<String> STAT_SUGGESTIONS =
             Arrays.stream(PlayerStat.values())

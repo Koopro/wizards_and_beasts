@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class SpellProjectileEntity extends ThrowableProjectile {
+    private static final org.slf4j.Logger LOGGER = com.mojang.logging.LogUtils.getLogger();
     private static final int BASE_PARTICLE_RATE = 1;
 
     private static final EntityDataAccessor<String> DATA_SPELL_ID =
@@ -306,7 +307,8 @@ public class SpellProjectileEntity extends ThrowableProjectile {
         if (!uuid.isEmpty()) {
             try {
                 casterUuid = UUID.fromString(uuid);
-            } catch (IllegalArgumentException ignored) {
+            } catch (IllegalArgumentException e) {
+                LOGGER.warn("[WizardsAndBeasts] Discarding malformed CasterUUID '{}' in spell projectile save data", uuid);
             }
         }
     }

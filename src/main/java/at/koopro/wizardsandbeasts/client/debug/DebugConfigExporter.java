@@ -10,7 +10,7 @@ import net.neoforged.fml.loading.FMLPaths;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.mojang.logging.LogUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -24,7 +24,7 @@ import java.util.Map;
  */
 public final class DebugConfigExporter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DebugConfigExporter.class);
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final Path CONFIG_PATH = FMLPaths.CONFIGDIR.get()
             .resolve(WizardsAndBeastsMod.MODID + "/creature_transforms.json");
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();

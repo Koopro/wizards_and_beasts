@@ -33,6 +33,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 public class MaraudersMapItem extends GeoItemBase {
+    private static final org.slf4j.Logger LOGGER = com.mojang.logging.LogUtils.getLogger();
 
     public static final int DEFAULT_RADIUS = 128;
 
@@ -140,7 +141,9 @@ public class MaraudersMapItem extends GeoItemBase {
         for (int i = 0; i < trusted.size(); i++) {
             try {
                 result.add(UUID.fromString(trusted.getString(i).orElse("")));
-            } catch (IllegalArgumentException ignored) {
+            } catch (IllegalArgumentException e) {
+                LOGGER.warn("[WizardsAndBeasts] Skipping malformed trusted-player UUID '{}' on Marauder's Map",
+                        trusted.getString(i).orElse(""));
             }
         }
         return result;

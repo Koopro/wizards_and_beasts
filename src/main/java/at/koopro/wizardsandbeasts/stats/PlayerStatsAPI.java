@@ -7,8 +7,8 @@ import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.mojang.logging.LogUtils;
+import org.slf4j.Logger;
 import org.jspecify.annotations.NonNull;
 
 import java.util.EnumMap;
@@ -17,7 +17,7 @@ import java.util.Map;
 
 public final class PlayerStatsAPI {
 
-    private static final Logger LOGGER = LogManager.getLogger(PlayerStatsAPI.class);
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     private PlayerStatsAPI() {}
 

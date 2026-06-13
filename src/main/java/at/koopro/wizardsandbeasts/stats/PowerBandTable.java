@@ -2,8 +2,8 @@ package at.koopro.wizardsandbeasts.stats;
 
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import net.minecraft.util.RandomSource;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.mojang.logging.LogUtils;
+import org.slf4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +21,7 @@ import java.util.Map;
  */
 public final class PowerBandTable {
 
-    private static final Logger LOGGER = LogManager.getLogger(PowerBandTable.class);
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     private static final float PRODIGY_CHANCE = 0.015f;
     private static final PowerBand PRODIGY_BAND = new PowerBand(70, 95, 15);

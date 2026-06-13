@@ -14,11 +14,9 @@ import at.koopro.wizardsandbeasts.spell.patronus.PatronusDetection;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityType;
@@ -238,15 +236,9 @@ public class DementorEntity extends Monster implements GeoEntity {
     // -------------------------------------------------------------------------
 
     private void clientTick() {
-        var localPlayer = Minecraft.getInstance().player;
-        if (localPlayer == null || !localPlayer.hasEffect(ModEffects.DEMENTOR_CHILL)) return;
-        if (voiceCooldown-- <= 0) {
-            voiceCooldown = 80 + random.nextInt(120);
-            // TODO: replace with custom whisper sounds in future audio prompt
-            level().playLocalSound(localPlayer.getX(), localPlayer.getY(), localPlayer.getZ(),
-                    SoundEvents.AMBIENT_CAVE.value(), getSoundSource(), 0.15f,
-                    0.4f + random.nextFloat() * 0.2f, false);
-        }
+        // Client-only ambience lives in DementorVoiceClient; this call only executes
+        // on the client (guarded in aiStep), so the client class never loads on a server.
+        voiceCooldown = at.koopro.wizardsandbeasts.client.entity.DementorVoiceClient.tickVoice(this, voiceCooldown);
     }
 
     // -------------------------------------------------------------------------
