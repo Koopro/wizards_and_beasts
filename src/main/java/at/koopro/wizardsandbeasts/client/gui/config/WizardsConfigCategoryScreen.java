@@ -71,7 +71,7 @@ public class WizardsConfigCategoryScreen extends Screen {
         inkReveal.update();
 
         String roman = ordinal >= 1 && ordinal <= ROMAN.length ? ROMAN[ordinal - 1] : String.valueOf(ordinal);
-        graphics.drawCenteredString(font, "Chapter " + roman + " — " + category.name(),
+        ConfigWidgets.drawCenteredNoShadow(graphics, font, "Chapter " + roman + " — " + category.name(),
                 width / 2, 18, ConfigWidgets.INK);
         graphics.hLine(CONTENT_LEFT, width - CONTENT_RIGHT, 32, ConfigWidgets.INK);
 
@@ -80,7 +80,7 @@ public class WizardsConfigCategoryScreen extends Screen {
                 continue;
             }
             int rowY = rowsTop + i * ROW_HEIGHT;
-            graphics.drawString(font, rowLabels.get(i), CONTENT_LEFT, rowY + (ROW_HEIGHT - 8) / 2, ConfigWidgets.INK);
+            graphics.drawString(font, rowLabels.get(i), CONTENT_LEFT, rowY + (ROW_HEIGHT - 8) / 2, ConfigWidgets.INK, false);
             graphics.hLine(CONTENT_LEFT, width - CONTENT_RIGHT, rowY + ROW_HEIGHT - 1, ConfigWidgets.INK_FADED);
         }
 
@@ -115,7 +115,7 @@ public class WizardsConfigCategoryScreen extends Screen {
 
         @Override
         protected void renderContents(@NonNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-            graphics.drawString(font, getMessage().getString(), getX() + 2, getY() + 2, ConfigWidgets.INK);
+            graphics.drawString(font, getMessage().getString(), getX() + 2, getY() + 2, ConfigWidgets.INK, false);
             if (isHovered()) {
                 graphics.hLine(getX() + 2, getX() + getWidth() - 3, getY() + getHeight() - 1, ConfigWidgets.INK);
             }

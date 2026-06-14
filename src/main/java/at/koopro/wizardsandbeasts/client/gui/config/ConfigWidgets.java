@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.client.gui.config;
 import java.util.List;
 import java.util.Locale;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractSliderButton;
@@ -36,6 +37,16 @@ public final class ConfigWidgets {
     private static final int TOGGLE_ON_TEXT = 0xFFEFFFE9;
 
     private ConfigWidgets() {}
+
+    /**
+     * Centered text without a drop shadow. Vanilla {@code drawCenteredString} always draws a
+     * 1px-offset shadow; against the config screens' light parchment the dark ink shadow reads
+     * as a doubled/ghosted glyph, so all config ink text is drawn shadow-free.
+     */
+    public static void drawCenteredNoShadow(@NonNull GuiGraphics graphics, @NonNull Font font,
+                                            @NonNull String text, int centerX, int y, int color) {
+        graphics.drawString(font, text, centerX - font.width(text) / 2, y, color, false);
+    }
 
     /**
      * Creates the themed widget for one config entry, or null if the value type is unsupported.
@@ -166,7 +177,7 @@ public final class ConfigWidgets {
             int fill = state ? TOGGLE_ON_FILL : (isHovered() ? WIDGET_FILL_HOVER : WIDGET_FILL);
             drawThemedBox(graphics, this, fill);
             int textColor = state ? TOGGLE_ON_TEXT : INK;
-            graphics.drawCenteredString(Minecraft.getInstance().font, getMessage().getString(),
+            drawCenteredNoShadow(graphics, Minecraft.getInstance().font, getMessage().getString(),
                     getX() + getWidth() / 2, getY() + (getHeight() - 8) / 2, textColor);
         }
 
@@ -200,7 +211,7 @@ public final class ConfigWidgets {
         @Override
         protected void renderContents(@NonNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
             drawThemedBox(graphics, this, isHovered() ? WIDGET_FILL_HOVER : WIDGET_FILL);
-            graphics.drawCenteredString(Minecraft.getInstance().font, getMessage().getString(),
+            drawCenteredNoShadow(graphics, Minecraft.getInstance().font, getMessage().getString(),
                     getX() + getWidth() / 2, getY() + (getHeight() - 8) / 2, INK);
         }
 

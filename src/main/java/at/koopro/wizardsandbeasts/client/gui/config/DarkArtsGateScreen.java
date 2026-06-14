@@ -89,11 +89,11 @@ public class DarkArtsGateScreen extends Screen {
         graphics.fill(boxX - 2, boxY - 2, boxX + MODAL_WIDTH + 2, boxY + MODAL_HEIGHT + 2, MODAL_BORDER);
         graphics.fill(boxX, boxY, boxX + MODAL_WIDTH, boxY + MODAL_HEIGHT, MODAL_FILL);
 
-        graphics.drawCenteredString(font, "UNFORGIVABLE ARTS — RESTRICTED ACCESS",
+        ConfigWidgets.drawCenteredNoShadow(graphics, font, "UNFORGIVABLE ARTS — RESTRICTED ACCESS",
                 width / 2, boxY + 12, MODAL_BORDER);
-        graphics.drawCenteredString(font, "\"By entering your name you acknowledge full magical responsibility.\"",
+        ConfigWidgets.drawCenteredNoShadow(graphics, font, "\"By entering your name you acknowledge full magical responsibility.\"",
                 width / 2, boxY + 34, BODY_TEXT);
-        graphics.drawCenteredString(font, "\"The Ministry has been notified.\"",
+        ConfigWidgets.drawCenteredNoShadow(graphics, font, "\"The Ministry has been notified.\"",
                 width / 2, boxY + 48, BODY_TEXT);
 
         super.render(graphics, mouseX, mouseY, partialTick);
@@ -119,7 +119,7 @@ public class DarkArtsGateScreen extends Screen {
             int color = random.nextBoolean() ? 0xCC8B0000 : 0xCCB01010;
             graphics.fill(x, y, x + w, y + h, color);
         }
-        graphics.drawCenteredString(font, "That is not your name.",
+        ConfigWidgets.drawCenteredNoShadow(graphics, font, "That is not your name.",
                 width / 2, fieldY + fieldH + 6, ERROR_TEXT);
     }
 
