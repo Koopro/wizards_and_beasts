@@ -3,12 +3,23 @@ package at.koopro.wizardsandbeasts.client.spell;
 import at.koopro.wizardsandbeasts.registry.ModParticles;
 import at.koopro.wizardsandbeasts.spell.core.SpellFamily;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
 
 public final class SpellVfxClient {
 
     private SpellVfxClient() {}
+
+    /** Low-pitched bass note — audible cast-denied feedback, no world position. */
+    public static void playDeniedFeedback() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) {
+            return;
+        }
+        mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_BASS.value(), 0.5f));
+    }
 
     public static void spawnTintBurst(Vec3 pos, SpellFamily family, int argb, int count, float spread) {
         Minecraft mc = Minecraft.getInstance();

@@ -21,9 +21,7 @@ import at.koopro.wizardsandbeasts.network.spell.SpellProficiencySyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.teacher.SpellTeacherOpenS2CPayload;
 import at.koopro.wizardsandbeasts.spell.core.SpellFamily;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
@@ -112,12 +110,10 @@ public final class SpellClientPayloadHandlers {
     }
 
     public static void handleSpellDenied(SpellDeniedS2CPayload pkt, IPayloadContext ctx) {
-        ctx.enqueueWork(() -> {
-            Minecraft mc = Minecraft.getInstance();
-            if (mc.player == null) return;
-            // Low-pitched bass note — audible denied feedback, no world position
-            mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_BASS.value(), 0.5f));
-        });
+        // Routed through SpellVfxClient (not an inline SoundManager.play) so this class —
+        // loaded server-side when the registrar resolves the method ref — never forces
+        // verification-time loading of the client-only SoundInstance type.
+        ctx.enqueueWork(SpellVfxClient::playDeniedFeedback);
     }
 
     public static void handleSpellImpactBurst(SpellImpactBurstS2CPayload pkt, IPayloadContext ctx) {

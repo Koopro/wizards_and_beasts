@@ -7,7 +7,6 @@ import at.koopro.wizardsandbeasts.client.ability.state.ClientAbilityCache;
 import at.koopro.wizardsandbeasts.client.apparition.state.ClientApparitionWardState;
 import at.koopro.wizardsandbeasts.client.bestiary.ClientBestiaryCache;
 import at.koopro.wizardsandbeasts.client.currency.state.ClientVaultDataState;
-import at.koopro.wizardsandbeasts.client.floo.gui.FlooNetworkScreen;
 import at.koopro.wizardsandbeasts.client.form.SizeLerpTracker;
 import at.koopro.wizardsandbeasts.client.form.state.ClientFormDataState;
 import at.koopro.wizardsandbeasts.client.form.state.ClientTransitionTracker;
@@ -206,7 +205,11 @@ public final class ClientPayloadHandlers {
     }
 
     public static void handleOpenFlooGui(OpenFlooGuiS2CPayload packet, IPayloadContext context) {
-        context.enqueueWork(() -> Minecraft.getInstance().setScreen(new FlooNetworkScreen(packet.destinations())));
+        // Routed through the reflection invoker (not a direct `new FlooNetworkScreen`) so this
+        // class — loaded server-side when the registrar resolves the method ref — never forces
+        // verification-time loading of the client-only FlooNetworkScreen / Screen types.
+        context.enqueueWork(() ->
+                ClientScreenHooksInvoker.invoke("openFlooNetworkScreen", List.class, packet.destinations()));
     }
 
     // --- form ---

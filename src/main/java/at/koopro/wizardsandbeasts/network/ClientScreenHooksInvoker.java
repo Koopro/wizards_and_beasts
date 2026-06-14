@@ -19,4 +19,18 @@ public final class ClientScreenHooksInvoker {
             LOGGER.warn("[WizardsAndBeasts] Client screen hook '{}' failed to invoke", methodName, e);
         }
     }
+
+    /**
+     * Invokes a single-argument client screen hook. The argument type must be a common
+     * (dist-shared) class so the call site never references a client-only type — the
+     * client hook resolves the screen class only when executed client-side.
+     */
+    public static void invoke(String methodName, Class<?> paramType, Object arg) {
+        try {
+            Class<?> hooks = Class.forName(CLIENT_HOOKS_CLASS);
+            hooks.getMethod(methodName, paramType).invoke(null, arg);
+        } catch (ReflectiveOperationException e) {
+            LOGGER.warn("[WizardsAndBeasts] Client screen hook '{}' failed to invoke", methodName, e);
+        }
+    }
 }
