@@ -153,7 +153,7 @@ public class WizardsConfigScreen extends Screen {
         drawHeader(graphics);   // drawn after background fill, on top of widgets
         drawStamp(graphics);
         if (categories.isEmpty()) {
-            graphics.drawCenteredString(font, "Configuration file is not loaded — no settings to display.",
+            drawCenteredNoShadow(graphics, "Configuration file is not loaded — no settings to display.",
                     width / 2, height / 2 - 4, ConfigWidgets.INK);
         }
     }
@@ -163,10 +163,19 @@ public class WizardsConfigScreen extends Screen {
         graphics.fill(0, 0, width, height, ConfigWidgets.PARCHMENT);
     }
 
+    /**
+     * Centered text without a drop shadow. Vanilla {@code drawCenteredString} always draws a
+     * 1px-offset shadow; against this screen's light parchment the dark ink shadow reads as a
+     * doubled/ghosted glyph, so all ink text on this screen is drawn shadow-free.
+     */
+    private void drawCenteredNoShadow(GuiGraphics graphics, String text, int centerX, int y, int color) {
+        graphics.drawString(font, text, centerX - font.width(text) / 2, y, color, false);
+    }
+
     private void drawHeader(GuiGraphics graphics) {
         String spaced = letterSpaced(HEADER);
         String drawn = font.width(spaced) <= width - 24 ? spaced : HEADER;
-        graphics.drawCenteredString(font, drawn, width / 2, 16, ConfigWidgets.INK);
+        drawCenteredNoShadow(graphics, drawn, width / 2, 16, ConfigWidgets.INK);
         int ruleHalf = Math.min(font.width(drawn) / 2 + 8, width / 2 - 12);
         graphics.hLine(width / 2 - ruleHalf, width / 2 + ruleHalf, 28, ConfigWidgets.INK);
         graphics.hLine(width / 2 - ruleHalf, width / 2 + ruleHalf, 30, ConfigWidgets.INK);
@@ -190,8 +199,8 @@ public class WizardsConfigScreen extends Screen {
         pose.pushMatrix();
         pose.translate(x0 + 4, y0 + 4);
         pose.scale(scale, scale);
-        graphics.drawString(font, line1, (int) ((innerWidth - 8 - font.width(line1) * scale) / 2 / scale), 0, ConfigWidgets.STAMP_RED);
-        graphics.drawString(font, line2, 0, 12, ConfigWidgets.STAMP_RED);
+        graphics.drawString(font, line1, (int) ((innerWidth - 8 - font.width(line1) * scale) / 2 / scale), 0, ConfigWidgets.STAMP_RED, false);
+        graphics.drawString(font, line2, 0, 12, ConfigWidgets.STAMP_RED, false);
         pose.popMatrix();
     }
 
@@ -252,8 +261,8 @@ public class WizardsConfigScreen extends Screen {
             if (font.width(glyph) <= 0) {
                 glyph = category.abbrev();
             }
-            graphics.drawCenteredString(font, glyph, x0 + getWidth() / 2, y0 + 16, text);
-            graphics.drawCenteredString(font, category.name(), x0 + getWidth() / 2, y1 - 22, text);
+            drawCenteredNoShadow(graphics, glyph, x0 + getWidth() / 2, y0 + 16, text);
+            drawCenteredNoShadow(graphics, category.name(), x0 + getWidth() / 2, y1 - 22, text);
         }
 
         @Override
