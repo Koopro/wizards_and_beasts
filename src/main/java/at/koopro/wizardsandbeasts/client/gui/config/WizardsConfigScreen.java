@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Button;
@@ -148,13 +149,13 @@ public class WizardsConfigScreen extends Screen {
     @Override
     public void render(@NonNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         inkReveal.update();
-        drawHeader(graphics);
+        super.render(graphics, mouseX, mouseY, partialTick); // triggers renderBackground → widgets → Done button
+        drawHeader(graphics);   // drawn after background fill, on top of widgets
         drawStamp(graphics);
         if (categories.isEmpty()) {
             graphics.drawCenteredString(font, "Configuration file is not loaded — no settings to display.",
                     width / 2, height / 2 - 4, ConfigWidgets.INK);
         }
-        super.render(graphics, mouseX, mouseY, partialTick);
     }
 
     @Override
@@ -253,6 +254,12 @@ public class WizardsConfigScreen extends Screen {
             }
             graphics.drawCenteredString(font, glyph, x0 + getWidth() / 2, y0 + 16, text);
             graphics.drawCenteredString(font, category.name(), x0 + getWidth() / 2, y1 - 22, text);
+        }
+
+        @Override
+        protected void renderDefaultLabel(@NonNull ActiveTextCollector collector) {
+            // Label (category name) is drawn in renderContents() — suppress AbstractButton's
+            // default message label so it is not drawn a second time over the contents.
         }
 
         @Override
