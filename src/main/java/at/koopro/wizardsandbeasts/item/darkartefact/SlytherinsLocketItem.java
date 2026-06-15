@@ -53,7 +53,8 @@ public class SlytherinsLocketItem extends Item implements IHorcruxVessel {
         if (!ModuleManager.isEnabled(Module.DARK_ARTS)) {
             return InteractionResult.FAIL;
         }
-        // TODO: [dark_arts] passive aura — amplifies nearby players' negative emotions while worn
+        // Passive: the dread aura (mental-stability drain + corruption creep) is applied while
+        // the horcrux is carried by HorcruxBearerTickHandler — no active use behaviour.
         return InteractionResult.PASS;
     }
 }

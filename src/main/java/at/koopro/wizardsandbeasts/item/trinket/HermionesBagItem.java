@@ -4,8 +4,11 @@ import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -40,7 +43,15 @@ public class HermionesBagItem extends Item {
         if (!ModuleManager.isEnabled(Module.DARK_ARTS)) {
             return InteractionResult.FAIL;
         }
-        // TODO: [storage] open portable inventory GUI — 54-slot inventory backed by HERMIONES_BAG_INVENTORY
-        return InteractionResult.PASS;
+        if (level.isClientSide()) {
+            return InteractionResult.SUCCESS;
+        }
+        if (player instanceof ServerPlayer serverPlayer) {
+            MenuProvider provider = new SimpleMenuProvider(
+                    (id, inv, p) -> new HermionesBagMenu(id, inv, hand),
+                    Component.translatable("container.wizards_and_beasts.hermiones_bag"));
+            serverPlayer.openMenu(provider, buf -> buf.writeEnum(hand));
+        }
+        return InteractionResult.SUCCESS;
     }
 }

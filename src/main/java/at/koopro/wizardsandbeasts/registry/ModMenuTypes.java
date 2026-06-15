@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.entity.niffler.NifflerPouchMenu;
+import at.koopro.wizardsandbeasts.item.trinket.HermionesBagMenu;
 import at.koopro.wizardsandbeasts.trunk.gui.PocketConfiguratorMenu;
 import at.koopro.wizardsandbeasts.wand.gui.OllivanderTrialMenu;
 import at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu;
@@ -26,6 +27,9 @@ public final class ModMenuTypes {
 
     public static final DeferredHolder<MenuType<?>, MenuType<NifflerPouchMenu>> NIFFLER_POUCH =
             MENUS.register("niffler_pouch", () -> IMenuTypeExtension.create(NifflerPouchMenu::fromNetwork));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<HermionesBagMenu>> HERMIONES_BAG =
+            MENUS.register("hermiones_bag", () -> IMenuTypeExtension.create(HermionesBagMenu::fromNetwork));
 
     private ModMenuTypes() {
     }

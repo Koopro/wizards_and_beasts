@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts;
 import at.koopro.wizardsandbeasts.client.ClientSetup;
 import at.koopro.wizardsandbeasts.client.apparition.ApparitionClientController;
 import at.koopro.wizardsandbeasts.client.bestiary.niffler.NifflerPouchScreen;
+import at.koopro.wizardsandbeasts.client.item.HermionesBagScreen;
 import at.koopro.wizardsandbeasts.client.legilimency.LegilimencyVisionRenderer;
 import at.koopro.wizardsandbeasts.client.trunk.gui.PocketConfiguratorScreen;
 import at.koopro.wizardsandbeasts.client.wand.gui.OllivanderTrialScreen;
@@ -76,6 +77,7 @@ public class WizardsAndBeastsClient {
         event.register(ModMenuTypes.OLLIVANDER_TRIAL.get(), OllivanderTrialScreen::new);
         event.register(ModMenuTypes.POCKET_CONFIGURATOR.get(), PocketConfiguratorScreen::new);
         event.register(ModMenuTypes.NIFFLER_POUCH.get(), NifflerPouchScreen::new);
+        event.register(ModMenuTypes.HERMIONES_BAG.get(), HermionesBagScreen::new);
     }
 
     private void registerGuiLayers(RegisterGuiLayersEvent event) {

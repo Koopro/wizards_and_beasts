@@ -24,6 +24,7 @@ import at.koopro.wizardsandbeasts.registry.BroomItemRegistry;
 import at.koopro.wizardsandbeasts.registry.ConsumableItemRegistry;
 import at.koopro.wizardsandbeasts.registry.CurrencyItemRegistry;
 import at.koopro.wizardsandbeasts.registry.DarkArtefactItemRegistry;
+import at.koopro.wizardsandbeasts.registry.LoreItemRegistry;
 import at.koopro.wizardsandbeasts.registry.MiscItemRegistry;
 import at.koopro.wizardsandbeasts.registry.TrinketItemRegistry;
 import at.koopro.wizardsandbeasts.registry.WandItemRegistry;
@@ -99,6 +100,11 @@ public class ModModelProvider extends ModelProvider {
         itemModels.declareCustomModelItem(TrinketItemRegistry.FOE_GLASS.get());
         itemModels.declareCustomModelItem(TrinketItemRegistry.BLOOD_PACT_VIAL.get());
         itemModels.declareCustomModelItem(TrinketItemRegistry.NEWTS_CASE_ITEM.get());
+
+        // Lore tomes — hand-authored item models exist; declare so datagen validation passes.
+        itemModels.declareCustomModelItem(LoreItemRegistry.A_HISTORY_OF_MAGIC.get());
+        itemModels.declareCustomModelItem(LoreItemRegistry.HOGWARTS_A_HISTORY.get());
+        itemModels.declareCustomModelItem(LoreItemRegistry.RISE_AND_FALL_OF_THE_DARK_ARTS.get());
 
         for (WoodSet woodSet : ModBlocks.ALL_WOOD_SETS) {
             generateWoodSet(blockModels, woodSet);

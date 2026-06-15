@@ -47,10 +47,11 @@ public class HandOfGloryItem extends Item {
         ItemStack stack = player.getItemInHand(hand);
         boolean lit = stack.getOrDefault(ModDataComponents.HAND_OF_GLORY_CANDLE_LIT.get(), false);
         stack.set(ModDataComponents.HAND_OF_GLORY_CANDLE_LIT.get(), !lit);
-        if (!lit) {
-            // TODO: [dark_arts] apply night-vision to holder; apply blindness to all other players in radius 16
-        } else {
-            // TODO: remove night-vision and blindness effects
+        // While lit, HandOfGloryTickHandler grants the holder night vision and blinds nearby
+        // players; snuffing the candle simply lets those short-lived effects lapse.
+        if (!level.isClientSide()) {
+            player.displayClientMessage(Component.literal(lit ? "The candle gutters out." : "The candle flares to life.")
+                    .withStyle(lit ? ChatFormatting.DARK_GRAY : ChatFormatting.GOLD), true);
         }
         return InteractionResult.SUCCESS;
     }

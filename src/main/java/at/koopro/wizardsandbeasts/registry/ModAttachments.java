@@ -96,6 +96,13 @@ public class ModAttachments {
                     .copyOnDeath()
                     .build());
 
+    /** True once a wizard bears the Dark Mark — a branded Death Eater, callable through the Mark. */
+    public static final Supplier<AttachmentType<Boolean>> DARK_MARK =
+            ATTACHMENTS.register("dark_mark", () -> AttachmentType.builder(() -> false)
+                    .serialize(Codec.BOOL.fieldOf("marked"))
+                    .copyOnDeath()
+                    .build());
+
     /** Cognitive integrity; regenerates when not under harmful mental effects. */
     public static final Supplier<AttachmentType<Float>> MENTAL_STABILITY =
             ATTACHMENTS.register("mental_stability", () -> AttachmentType.builder(() -> 100.0f)

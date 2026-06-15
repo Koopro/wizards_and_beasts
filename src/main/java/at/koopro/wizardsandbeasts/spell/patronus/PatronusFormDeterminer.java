@@ -10,12 +10,22 @@ import java.util.Map;
 
 public final class PatronusFormDeterminer {
 
-    // TODO(patronus-rare): populate with canonical rare Patronus forms per heritage once designs are settled
+    /** Happiness at/above which a heritage's rare Patronus form is used instead of the common one. */
+    private static final float RARE_FORM_THRESHOLD = 90.0f;
+
+    // TODO(patronus-rare): populate with canonical rare Patronus forms per heritage once designs are settled.
+    // While empty, determine() transparently falls through to the common form — no behavior change.
     private static final Map<Heritage, Identifier> RARE_FORMS = new EnumMap<>(Heritage.class);
 
     private PatronusFormDeterminer() {}
 
     public static @Nullable Identifier determine(@Nullable Heritage heritage, @Nullable HeritageVariant variant, float happiness) {
+        if (heritage != null && happiness >= RARE_FORM_THRESHOLD) {
+            Identifier rare = RARE_FORMS.get(heritage);
+            if (rare != null) {
+                return rare;
+            }
+        }
         if (heritage == null) {
             return wizardkindForm(null);
         }

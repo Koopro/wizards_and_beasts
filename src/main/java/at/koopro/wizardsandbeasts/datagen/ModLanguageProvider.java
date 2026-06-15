@@ -121,6 +121,9 @@ public class ModLanguageProvider extends LanguageProvider {
         add("screen.wizards_and_beasts.elf_skills.section_threads", "Binding Threads");
         add("screen.wizards_and_beasts.elf_skills.hint", "Service, household wards, and quiet magic disciplines.");
 
+        // Container titles
+        add("container.wizards_and_beasts.hermiones_bag", "Hermione's Bag");
+
         // Debug editor keybindings
         add("key.categories.wizards_and_beasts.debug", "Wizards & Beasts Debug");
         add("key.wizards_and_beasts.debug_toggle", "Toggle Model Debug Editor");
