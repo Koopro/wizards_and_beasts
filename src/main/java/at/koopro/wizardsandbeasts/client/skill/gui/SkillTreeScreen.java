@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.client.skill.gui;
 
 import at.koopro.wizardsandbeasts.client.gui.ScreenLayoutScaler;
 import at.koopro.wizardsandbeasts.client.gui.WizardsAndBeastsUiTokens;
+import at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageDataState;
 import at.koopro.wizardsandbeasts.client.skill.state.ClientSkillDataState;
 import at.koopro.wizardsandbeasts.skill.data.PlayerSkillData;
 import at.koopro.wizardsandbeasts.network.skill.SkillUnlockC2SPayload;
@@ -21,6 +22,7 @@ import java.util.Map;
 public class SkillTreeScreen extends Screen {
 
     private SkillTreeId activeTree = SkillTreeId.SPELL_MASTERY;
+    private final List<SkillTreeId> availableTrees = new ArrayList<>();
     private final List<TabBounds> tabs = new ArrayList<>();
     private final List<Skill> visibleSkills = new ArrayList<>();
     private final List<NodeBounds> visibleNodes = new ArrayList<>();
@@ -64,16 +66,32 @@ public class SkillTreeScreen extends Screen {
         viewportH = layout.s(WizardsAndBeastsUiTokens.SkillTree.VIEWPORT_HEIGHT);
         viewportX = panelX + layout.s(WizardsAndBeastsUiTokens.SkillTree.VIEWPORT_X);
         viewportY = panelY + layout.s(WizardsAndBeastsUiTokens.SkillTree.VIEWPORT_Y);
+        resolveAvailableTrees();
         buildTabs();
         centerGraphInViewport();
         rebuildTree();
+    }
+
+    /** Restrict the visible tabs to the trees the viewer's heritage may access. */
+    private void resolveAvailableTrees() {
+        SkillTreeId.Audience audience =
+                SkillTreeId.audienceForHeritage(ClientHeritageDataState.get().getSelectedHeritage());
+        availableTrees.clear();
+        for (SkillTreeId tree : SkillTreeId.values()) {
+            if (tree.getAudience() == audience) {
+                availableTrees.add(tree);
+            }
+        }
+        if (!availableTrees.contains(activeTree)) {
+            activeTree = availableTrees.isEmpty() ? SkillTreeId.SPELL_MASTERY : availableTrees.get(0);
+        }
     }
 
     private void buildTabs() {
         tabs.clear();
         int x = panelX + layout.s(WizardsAndBeastsUiTokens.SkillTree.TABS_X);
         int y = panelY + layout.s(WizardsAndBeastsUiTokens.SkillTree.TABS_Y);
-        for (SkillTreeId tree : SkillTreeId.values()) {
+        for (SkillTreeId tree : availableTrees) {
             tabs.add(new TabBounds(tree, x, y, layout.s(WizardsAndBeastsUiTokens.SkillTree.TAB_WIDTH), layout.s(WizardsAndBeastsUiTokens.SkillTree.TAB_HEIGHT)));
             x += layout.s(WizardsAndBeastsUiTokens.SkillTree.TAB_WIDTH + WizardsAndBeastsUiTokens.SkillTree.TAB_GAP);
         }

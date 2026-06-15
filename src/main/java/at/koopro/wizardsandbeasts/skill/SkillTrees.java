@@ -58,6 +58,20 @@ public final class SkillTrees {
     public static final Skill HARVEST_BOUNTY = HerbologySkills.HARVEST_BOUNTY;
     public static final Skill NATURAL_REMEDY = HerbologySkills.NATURAL_REMEDY;
 
+    // Goblin — Guild Ledger
+    public static final Skill GOBLIN_APPRAISAL = GoblinSkills.APPRAISAL;
+    public static final Skill GOBLIN_FORGE_SENSE = GoblinSkills.FORGE_SENSE;
+    public static final Skill GOBLIN_VAULT_STEP = GoblinSkills.VAULT_STEP;
+    public static final Skill GOBLIN_LEDGER = GoblinSkills.LEDGER;
+    public static final Skill GOBLIN_STEELHEART = GoblinSkills.STEELHEART;
+
+    // House-elf — Binding Threads
+    public static final Skill ELF_SILENT_STEP = ElfSkills.SILENT_STEP;
+    public static final Skill ELF_DEVOTION = ElfSkills.DEVOTION;
+    public static final Skill ELF_NIMBLE_FINGERS = ElfSkills.NIMBLE_FINGERS;
+    public static final Skill ELF_APPARITION = ElfSkills.ELF_APPARITION;
+    public static final Skill ELF_FREE = ElfSkills.FREE_ELF;
+
     private SkillTrees() {}
 
     static Skill register(Skill skill) {

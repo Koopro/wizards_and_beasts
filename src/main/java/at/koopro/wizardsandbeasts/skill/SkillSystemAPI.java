@@ -97,13 +97,17 @@ public final class SkillSystemAPI {
     }
 
     /**
-     * Checks if a skill tree is available for the player's Heritage.
-     * Wandlore requires canUseWand. All others are universally available.
+     * Checks if a skill tree is available for the player's Heritage. A tree is gated to its
+     * {@link SkillTreeId.Audience}: goblins see only goblin trees, house-elves only elf trees, and all
+     * wand-using heritages see the wizard trees. Wandlore additionally requires a usable wand.
      */
     public static boolean isTreeAvailable(ServerPlayer player, SkillTreeId tree) {
+        Heritage type = HeritageAPI.getPlayerHeritage(player);
+        HeritageVariant subtype = HeritageAPI.getPlayerHeritageVariant(player);
+        if (tree.getAudience() != SkillTreeId.audienceForHeritage(type)) {
+            return false;
+        }
         if (tree == SkillTreeId.WANDLORE) {
-            Heritage type = HeritageAPI.getPlayerHeritage(player);
-            HeritageVariant subtype = HeritageAPI.getPlayerHeritageVariant(player);
             return type != null && type.canUseWand() && (subtype == null || !subtype.hasTag("no_wand"));
         }
         return true;

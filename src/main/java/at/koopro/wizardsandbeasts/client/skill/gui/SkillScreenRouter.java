@@ -28,13 +28,10 @@ public final class SkillScreenRouter {
                 return;
             }
 
-            if (type == Heritage.GOBLIN) {
-                mc.setScreen(new GoblinSkillScreen());
-                return;
-            }
-
-            if (type == Heritage.HOUSE_ELF) {
-                mc.setScreen(new ElfSkillScreen());
+            // Goblins and house-elves have their own heritage trees (gated by audience inside the
+            // screen); route them to the real tree screen before the wand/muggle gate below.
+            if (type == Heritage.GOBLIN || type == Heritage.HOUSE_ELF) {
+                mc.setScreen(new SkillTreeScreen());
                 return;
             }
 
