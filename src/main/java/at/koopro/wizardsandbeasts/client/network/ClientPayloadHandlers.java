@@ -340,6 +340,16 @@ public final class ClientPayloadHandlers {
         ctx.enqueueWork(() -> ClientStatsState.applySync(pkt.data()));
     }
 
+    // --- trinket ---
+
+    public static void handlePensieveOpen(at.koopro.wizardsandbeasts.network.trinket.PensieveOpenS2CPayload pkt,
+                                          IPayloadContext ctx) {
+        // Routed through the reflection invoker so this common-side class never forces verification-time
+        // loading of the client-only PensieveScreen.
+        ctx.enqueueWork(() ->
+                ClientScreenHooksInvoker.invoke("openPensieveScreen", List.class, pkt.memories()));
+    }
+
     // --- trunk ---
 
     public static void handlePocketStatus(PocketStatusS2CPayload packet, IPayloadContext context) {

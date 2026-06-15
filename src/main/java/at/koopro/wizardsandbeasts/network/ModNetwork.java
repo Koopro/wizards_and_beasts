@@ -21,6 +21,7 @@ import at.koopro.wizardsandbeasts.spell.beam.ModNetworkBeamDebug;
 import at.koopro.wizardsandbeasts.network.wand.ModNetworkWand;
 import at.koopro.wizardsandbeasts.network.character.ModNetworkCharacter;
 import at.koopro.wizardsandbeasts.network.stats.ModNetworkStats;
+import at.koopro.wizardsandbeasts.network.trinket.ModNetworkTrinkets;
 
 public class ModNetwork {
 
@@ -47,5 +48,6 @@ public class ModNetwork {
         ModNetworkAzkaban.register(registrar);
         ModNetworkCharacter.register(registrar);
         ModNetworkStats.register(registrar);
+        ModNetworkTrinkets.register(registrar);
     }
 }

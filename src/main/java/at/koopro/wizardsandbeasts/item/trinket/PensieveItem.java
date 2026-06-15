@@ -37,7 +37,9 @@ public class PensieveItem extends Item {
         if (!ModuleManager.isEnabled(Module.DARK_ARTS)) {
             return InteractionResult.FAIL;
         }
-        // TODO: [memory] open Pensieve GUI — memory management system, future phase
-        return InteractionResult.PASS;
+        if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+            at.koopro.wizardsandbeasts.network.trinket.PensieveOpenS2CPayload.open(serverPlayer);
+        }
+        return InteractionResult.SUCCESS;
     }
 }

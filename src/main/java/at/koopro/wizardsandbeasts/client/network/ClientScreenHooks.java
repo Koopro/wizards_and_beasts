@@ -8,7 +8,9 @@ import at.koopro.wizardsandbeasts.client.currency.gui.GringottsScreen;
 import at.koopro.wizardsandbeasts.client.skill.gui.SkillScreenRouter;
 import at.koopro.wizardsandbeasts.client.spell.gui.SpellTeacherScreen;
 import at.koopro.wizardsandbeasts.client.heritage.gui.HeritageSelectionScreen;
+import at.koopro.wizardsandbeasts.client.trinket.gui.PensieveScreen;
 import at.koopro.wizardsandbeasts.floo.FlooDestinationDto;
+import at.koopro.wizardsandbeasts.memory.MemoryEntry;
 import net.minecraft.client.Minecraft;
 
 import java.util.List;
@@ -50,5 +52,9 @@ public final class ClientScreenHooks {
 
     public static void openCharacterSheetScreen() {
         Minecraft.getInstance().setScreen(new CharacterSheetScreen());
+    }
+
+    public static void openPensieveScreen(List<MemoryEntry> memories) {
+        Minecraft.getInstance().setScreen(new PensieveScreen(memories));
     }
 }
