@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_hogsmeade_worn_stone": {
+      "conditions": {
+        "items": [
+          {
+            "items": "wizards_and_beasts:hogsmeade_worn_stone"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "wizards_and_beasts:stonecutting/hogsmeade_worn_stone_stairs_from_hogsmeade_worn_stone"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_hogsmeade_worn_stone"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "wizards_and_beasts:stonecutting/hogsmeade_worn_stone_stairs_from_hogsmeade_worn_stone"
+    ]
+  }
+}

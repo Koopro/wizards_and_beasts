@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "minecraft:gold_ingot",
+    "wizards_and_beasts:gringotts_white_marble"
+  ],
+  "result": {
+    "count": 1,
+    "id": "wizards_and_beasts:gringotts_gold_trim"
+  }
+}

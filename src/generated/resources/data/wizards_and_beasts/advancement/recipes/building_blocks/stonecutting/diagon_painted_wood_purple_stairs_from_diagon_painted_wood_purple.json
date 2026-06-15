@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_diagon_painted_wood_purple": {
+      "conditions": {
+        "items": [
+          {
+            "items": "wizards_and_beasts:diagon_painted_wood_purple"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "wizards_and_beasts:stonecutting/diagon_painted_wood_purple_stairs_from_diagon_painted_wood_purple"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_diagon_painted_wood_purple"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "wizards_and_beasts:stonecutting/diagon_painted_wood_purple_stairs_from_diagon_painted_wood_purple"
+    ]
+  }
+}

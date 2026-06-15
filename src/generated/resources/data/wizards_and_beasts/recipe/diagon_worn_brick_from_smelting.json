@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:smelting",
+  "category": "blocks",
+  "cookingtime": 200,
+  "experience": 0.1,
+  "ingredient": "wizards_and_beasts:diagon_brick",
+  "result": {
+    "count": 1,
+    "id": "wizards_and_beasts:diagon_worn_brick"
+  }
+}

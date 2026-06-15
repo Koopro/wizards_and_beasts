@@ -22,8 +22,12 @@ public class AvadaKedavra extends Spell {
 
     @Override
     protected SpellRequirement buildRequirement() {
-        // F2: crucio is a JSON spell now — id-string requirement (resolved lazily at isMet time).
-        return SpellRequirement.proficiency("crucio", Proficiency.MASTERED);
+        // Canon: the three Unforgivable Curses are independent — none is mastered as a prerequisite of
+        // another. Gate the Killing Curse behind command of the other two Unforgivables instead.
+        // crucio is a JSON spell now — id-string requirement (resolved lazily at isMet time).
+        return SpellRequirement.allOf(
+                SpellRequirement.proficiency(Spells.IMPERIO, Proficiency.PROFICIENT),
+                SpellRequirement.proficiency("crucio", Proficiency.PROFICIENT));
     }
 
     @Override

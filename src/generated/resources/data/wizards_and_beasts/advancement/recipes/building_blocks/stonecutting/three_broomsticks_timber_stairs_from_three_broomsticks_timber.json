@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "wizards_and_beasts:stonecutting/three_broomsticks_timber_stairs_from_three_broomsticks_timber"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_three_broomsticks_timber": {
+      "conditions": {
+        "items": [
+          {
+            "items": "wizards_and_beasts:three_broomsticks_timber"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_three_broomsticks_timber"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "wizards_and_beasts:stonecutting/three_broomsticks_timber_stairs_from_three_broomsticks_timber"
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "wizards_and_beasts:hogwarts_stone_bricks",
+    "minecraft:vine"
+  ],
+  "result": {
+    "count": 1,
+    "id": "wizards_and_beasts:hogwarts_mossy_stone_bricks"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "A": "minecraft:quartz_block",
+    "B": "wizards_and_beasts:hogwarts_stone"
+  },
+  "pattern": [
+    "AB",
+    "BA"
+  ],
+  "result": {
+    "count": 4,
+    "id": "wizards_and_beasts:hogwarts_floor_tile"
+  }
+}

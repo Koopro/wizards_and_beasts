@@ -15,6 +15,7 @@ public class ModLanguageProvider extends LanguageProvider {
     protected void addTranslations() {
         // Creative tab
         add("itemGroup." + WizardsAndBeastsMod.MODID + ".main", "Wizards & Beasts");
+        add("itemGroup." + WizardsAndBeastsMod.MODID + ".decorative_blocks", "Wizards & Beasts: Decorative Blocks");
 
         // Debug tools
         add("item.wizards_and_beasts.debug_wand", "Debug Wand");

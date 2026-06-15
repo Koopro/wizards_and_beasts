@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "A": "minecraft:calcite",
+    "B": "minecraft:diorite"
+  },
+  "pattern": [
+    "AB",
+    "BA"
+  ],
+  "result": {
+    "count": 4,
+    "id": "wizards_and_beasts:gringotts_pale_marble"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "#": "wizards_and_beasts:gringotts_iron_vault_stone"
+  },
+  "pattern": [
+    "###"
+  ],
+  "result": {
+    "count": 6,
+    "id": "wizards_and_beasts:gringotts_iron_vault_stone_slab"
+  }
+}

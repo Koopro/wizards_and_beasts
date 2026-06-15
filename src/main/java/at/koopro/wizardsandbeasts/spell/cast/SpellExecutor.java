@@ -95,12 +95,14 @@ public final class SpellExecutor {
 
         if (ctx.modifiers().finalMisfireChance() > 0.0f
                 && level.random.nextFloat() < ctx.modifiers().finalMisfireChance()) {
+            SpellCastTelemetry.recordCast(caster, true);
             level.playSound(null, caster.blockPosition(),
                     ModSounds.SPELL_FIZZLE.get(), SoundSource.PLAYERS, 0.5f, 1.05f + level.random.nextFloat() * 0.25f);
             caster.displayClientMessage(
                     Component.literal("\u00A77Your wand fizzles."), true);
             return;
         }
+        SpellCastTelemetry.recordCast(caster, false);
 
         // Dispatch via the spell's overridable cast hook so subclass overrides (entity spawns, etc.)
         // run on a normal wand cast with the fully-enriched context. Default hook -> dispatchGeneric.

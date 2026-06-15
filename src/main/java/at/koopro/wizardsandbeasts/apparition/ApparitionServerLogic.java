@@ -5,6 +5,7 @@ import at.koopro.wizardsandbeasts.apparition.ApparitionWard;
 import at.koopro.wizardsandbeasts.apparition.ApparitionWardRegistry;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
+import at.koopro.wizardsandbeasts.spell.cast.SpellCastTelemetry;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
@@ -121,7 +122,7 @@ public final class ApparitionServerLogic {
 
     private static float computeFocusLevel(ServerPlayer player) {
         float occlumency = PlayerAbilityHelper.getOcclumencyLevel(player);
-        float recentFailureRate = 0.5f; // TODO: wire to spell failure telemetry attachment
+        float recentFailureRate = SpellCastTelemetry.recentFailureRate(player);
         return Math.max(0.0f, Math.min(1.0f, (occlumency * 0.4f) + ((1.0f - recentFailureRate) * 0.3f) + 0.3f));
     }
 

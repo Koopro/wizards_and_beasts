@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_diagon_cobblestone": {
+      "conditions": {
+        "items": [
+          {
+            "items": "wizards_and_beasts:diagon_cobblestone"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "wizards_and_beasts:diagon_cobblestone_stairs"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_diagon_cobblestone"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "wizards_and_beasts:diagon_cobblestone_stairs"
+    ]
+  }
+}

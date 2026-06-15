@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "#": "wizards_and_beasts:diagon_street_stone"
+  },
+  "pattern": [
+    "##"
+  ],
+  "result": {
+    "count": 1,
+    "id": "wizards_and_beasts:diagon_street_stone_pressure_plate"
+  }
+}

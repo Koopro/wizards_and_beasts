@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "wizards_and_beasts:ministry_floor_tile",
+  "result": {
+    "count": 2,
+    "id": "wizards_and_beasts:ministry_floor_tile_slab"
+  }
+}

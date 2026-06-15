@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "#": "wizards_and_beasts:diagon_painted_wood_purple"
+  },
+  "pattern": [
+    "###"
+  ],
+  "result": {
+    "count": 6,
+    "id": "wizards_and_beasts:diagon_painted_wood_purple_slab"
+  }
+}

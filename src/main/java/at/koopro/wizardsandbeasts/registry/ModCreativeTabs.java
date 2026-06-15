@@ -167,8 +167,29 @@ public class ModCreativeTabs {
                         output.accept(ModBlocks.FLOO_FIREPLACE.get());
                         output.accept(ModBlocks.SPELL_TEACHER.get());
 
-                        // Location decorative blocks
-                        // TODO: move to dedicated DECORATIVE_BLOCKS creative tab
+                        // Wood Sets
+                        for (WoodSet ws : ModBlocks.ALL_WOOD_SETS) {
+                            output.accept(ws.logItem().get());
+                            output.accept(ws.strippedLogItem().get());
+                            output.accept(ws.woodItem().get());
+                            output.accept(ws.strippedWoodItem().get());
+                            output.accept(ws.planksItem().get());
+                            output.accept(ws.slabItem().get());
+                            output.accept(ws.stairsItem().get());
+                            output.accept(ws.leavesItem().get());
+                            output.accept(ws.saplingItem().get());
+                        }
+                    })
+                    .build());
+
+    /** Location/build-set decorative blocks (Diagon, Gringotts, Hogwarts, Hogsmeade, Ministry). */
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> DECORATIVE_BLOCKS =
+            TABS.register("decorative_blocks", () -> CreativeModeTab.builder()
+                    .title(Component.translatable("itemGroup." + WizardsAndBeastsMod.MODID + ".decorative_blocks"))
+                    .withTabsBefore(CreativeModeTabs.SPAWN_EGGS)
+                    .icon(() -> new ItemStack(HogwartsBlocks.HOGWARTS_STONE_BRICKS.baseItem().get()))
+                    .withSearchBar()
+                    .displayItems((parameters, output) -> {
                         // Ministry of Magic
                         output.accept(MinistryBlocks.MINISTRY_BLACK_MARBLE.baseItem().get());
                         output.accept(MinistryBlocks.MINISTRY_BLACK_MARBLE.slabItem().get());
@@ -304,19 +325,6 @@ public class ModCreativeTabs {
                         output.accept(GringottsBlocks.GRINGOTTS_GOBLIN_STONEWORK.wallItem().get());
                         output.accept(GringottsBlocks.GRINGOTTS_COUNTING_FLOOR.baseItem().get());
                         output.accept(GringottsBlocks.GRINGOTTS_COUNTING_FLOOR.slabItem().get());
-
-                        // Wood Sets
-                        for (WoodSet ws : ModBlocks.ALL_WOOD_SETS) {
-                            output.accept(ws.logItem().get());
-                            output.accept(ws.strippedLogItem().get());
-                            output.accept(ws.woodItem().get());
-                            output.accept(ws.strippedWoodItem().get());
-                            output.accept(ws.planksItem().get());
-                            output.accept(ws.slabItem().get());
-                            output.accept(ws.stairsItem().get());
-                            output.accept(ws.leavesItem().get());
-                            output.accept(ws.saplingItem().get());
-                        }
                     })
                     .build());
 

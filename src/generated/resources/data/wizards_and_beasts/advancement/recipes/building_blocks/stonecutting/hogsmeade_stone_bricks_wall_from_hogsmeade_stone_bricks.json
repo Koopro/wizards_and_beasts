@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_hogsmeade_stone_bricks": {
+      "conditions": {
+        "items": [
+          {
+            "items": "wizards_and_beasts:hogsmeade_stone_bricks"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "wizards_and_beasts:stonecutting/hogsmeade_stone_bricks_wall_from_hogsmeade_stone_bricks"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_hogsmeade_stone_bricks"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "wizards_and_beasts:stonecutting/hogsmeade_stone_bricks_wall_from_hogsmeade_stone_bricks"
+    ]
+  }
+}

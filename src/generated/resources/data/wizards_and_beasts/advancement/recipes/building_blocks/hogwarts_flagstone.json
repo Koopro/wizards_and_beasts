@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_hogwarts_stone": {
+      "conditions": {
+        "items": [
+          {
+            "items": "wizards_and_beasts:hogwarts_stone"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "wizards_and_beasts:hogwarts_flagstone"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_hogwarts_stone"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "wizards_and_beasts:hogwarts_flagstone"
+    ]
+  }
+}

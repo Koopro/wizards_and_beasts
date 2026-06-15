@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "wizards_and_beasts:gringotts_white_marble_tiles",
+  "result": {
+    "count": 1,
+    "id": "wizards_and_beasts:gringotts_white_marble_tiles_stairs"
+  }
+}

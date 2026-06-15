@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "A": "wizards_and_beasts:gringotts_white_marble",
+    "B": "minecraft:gold_ingot"
+  },
+  "pattern": [
+    "AB",
+    "BA"
+  ],
+  "result": {
+    "count": 4,
+    "id": "wizards_and_beasts:gringotts_counting_floor"
+  }
+}

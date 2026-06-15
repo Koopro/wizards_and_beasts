@@ -109,6 +109,25 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 tasks.named('processResources', ProcessResources).configure {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    // Single source of truth for en_us: ship the union of the hand-authored main file and the
+    // datagen-produced file. DuplicatesStrategy alone would drop one whole file (silently losing any
+    // keys present only in the generated copy), so merge them key-wise and let main override on clash.
+    def langPath = 'assets/wizards_and_beasts/lang/en_us.json'
+    def mainLang = file("src/main/resources/${langPath}")
+    def genLang = file("src/generated/resources/${langPath}")
+    inputs.files(mainLang, genLang)
+    doLast {
+        if (mainLang.exists() && genLang.exists()) {
+            def slurper = new groovy.json.JsonSlurper()
+            def merged = new LinkedHashMap()
+            merged.putAll(slurper.parse(genLang))   // generated keys provide the base
+            merged.putAll(slurper.parse(mainLang))  // hand-authored main wins on conflict
+            def outFile = new File(destinationDir, langPath)
+            outFile.parentFile.mkdirs()
+            outFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(merged))
+        }
+    }
 }
 
 tasks.named('test', Test).configure {

@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_honeydukes_pastel_yellow": {
+      "conditions": {
+        "items": [
+          {
+            "items": "wizards_and_beasts:honeydukes_pastel_yellow"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "wizards_and_beasts:stonecutting/honeydukes_pastel_yellow_slab_from_honeydukes_pastel_yellow"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_honeydukes_pastel_yellow"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "wizards_and_beasts:stonecutting/honeydukes_pastel_yellow_slab_from_honeydukes_pastel_yellow"
+    ]
+  }
+}
