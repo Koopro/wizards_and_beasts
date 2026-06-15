@@ -59,7 +59,19 @@ public class RiddlesDiaryItem extends Item implements IHorcruxVessel {
         if (!ModuleManager.isEnabled(Module.DARK_ARTS)) {
             return InteractionResult.FAIL;
         }
-        // TODO: [dark_arts] possession mechanic — write into diary opens dialogue channel
-        return InteractionResult.PASS;
+        ItemStack stack = player.getItemInHand(hand);
+        if (!isSoulIntact(stack)) {
+            if (!level.isClientSide()) {
+                player.displayClientMessage(Component.literal("The diary is ruined — no voice answers.")
+                        .withStyle(ChatFormatting.DARK_GRAY), true);
+            }
+            return InteractionResult.SUCCESS;
+        }
+        if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+            at.koopro.wizardsandbeasts.diary.DiaryService.tryOpen(serverPlayer, stack);
+        } else if (level.isClientSide()) {
+            at.koopro.wizardsandbeasts.network.ClientScreenHooksInvoker.invoke("openDiaryWriteScreen");
+        }
+        return InteractionResult.SUCCESS;
     }
 }

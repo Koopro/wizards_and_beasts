@@ -367,6 +367,17 @@ public final class ClientPayloadHandlers {
         ctx.enqueueWork(() -> ClientScreenHooksInvoker.invoke("closeMirror", String.class, pkt.reason()));
     }
 
+    public static void handleDiaryReply(at.koopro.wizardsandbeasts.network.trinket.DiaryReplyS2CPayload pkt,
+                                        IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
+            if (pkt.possess()) {
+                ClientScreenHooksInvoker.invoke("openDiaryPossession", String.class, pkt.line());
+            } else {
+                ClientScreenHooksInvoker.invoke("appendDiaryReply", String.class, pkt.line(), int.class, pkt.tier());
+            }
+        });
+    }
+
     // --- trunk ---
 
     public static void handlePocketStatus(PocketStatusS2CPayload packet, IPayloadContext context) {

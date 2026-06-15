@@ -35,5 +35,15 @@ public final class ModNetworkTrinkets {
                 MirrorCloseC2SPayload.TYPE,
                 MirrorCloseC2SPayload.STREAM_CODEC,
                 MirrorCloseC2SPayload::handle);
+
+        // Riddle's Diary
+        registrar.playToClient(
+                DiaryReplyS2CPayload.TYPE,
+                DiaryReplyS2CPayload.STREAM_CODEC,
+                ClientPayloadHandlers::handleDiaryReply);
+        registrar.playToServer(
+                DiaryWriteC2SPayload.TYPE,
+                DiaryWriteC2SPayload.STREAM_CODEC,
+                DiaryWriteC2SPayload::handle);
     }
 }

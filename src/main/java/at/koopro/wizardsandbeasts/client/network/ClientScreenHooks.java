@@ -8,6 +8,8 @@ import at.koopro.wizardsandbeasts.client.currency.gui.GringottsScreen;
 import at.koopro.wizardsandbeasts.client.skill.gui.SkillScreenRouter;
 import at.koopro.wizardsandbeasts.client.spell.gui.SpellTeacherScreen;
 import at.koopro.wizardsandbeasts.client.heritage.gui.HeritageSelectionScreen;
+import at.koopro.wizardsandbeasts.client.trinket.gui.DiaryPossessionScreen;
+import at.koopro.wizardsandbeasts.client.trinket.gui.DiaryWriteScreen;
 import at.koopro.wizardsandbeasts.client.trinket.gui.MirrorCallScreen;
 import at.koopro.wizardsandbeasts.client.trinket.gui.MirrorViewScreen;
 import at.koopro.wizardsandbeasts.client.trinket.gui.PensieveScreen;
@@ -75,5 +77,17 @@ public final class ClientScreenHooks {
 
     public static void closeMirror(String reason) {
         MirrorViewScreen.closeFromServer(reason);
+    }
+
+    public static void openDiaryWriteScreen() {
+        Minecraft.getInstance().setScreen(new DiaryWriteScreen());
+    }
+
+    public static void appendDiaryReply(String line, int tier) {
+        DiaryWriteScreen.appendReply(line, tier);
+    }
+
+    public static void openDiaryPossession(String line) {
+        Minecraft.getInstance().setScreen(new DiaryPossessionScreen(line));
     }
 }
