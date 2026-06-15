@@ -46,7 +46,30 @@ public class TwoWayMirrorItem extends Item {
         if (!ModuleManager.isEnabled(Module.DARK_ARTS)) {
             return InteractionResult.FAIL;
         }
-        // TODO: [communication] open mirror channel — requires paired UUID and online recipient
-        return InteractionResult.PASS;
+        ItemStack stack = player.getItemInHand(hand);
+
+        // Sneak-use attunes/links the pair (server-authoritative).
+        if (player.isShiftKeyDown()) {
+            if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+                at.koopro.wizardsandbeasts.mirror.MirrorPairing.attune(serverPlayer, stack, level.getGameTime());
+            }
+            return InteractionResult.SUCCESS;
+        }
+
+        Optional<UUID> pairId = stack.getOrDefault(ModDataComponents.MIRROR_PAIR_ID.get(), Optional.empty());
+        if (pairId.isEmpty()) {
+            if (!level.isClientSide()) {
+                player.displayClientMessage(Component.literal("This mirror has no twin yet. Sneak-use to attune it.")
+                        .withStyle(ChatFormatting.DARK_GRAY), true);
+            }
+            return InteractionResult.SUCCESS;
+        }
+
+        // Open the "speak the name" prompt locally; the connection itself is server-validated.
+        if (level.isClientSide()) {
+            at.koopro.wizardsandbeasts.network.ClientScreenHooksInvoker.invoke(
+                    "openMirrorCallScreen", UUID.class, pairId.get());
+        }
+        return InteractionResult.SUCCESS;
     }
 }

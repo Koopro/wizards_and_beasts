@@ -350,6 +350,23 @@ public final class ClientPayloadHandlers {
                 ClientScreenHooksInvoker.invoke("openPensieveScreen", List.class, pkt.memories()));
     }
 
+    public static void handleMirrorOpen(at.koopro.wizardsandbeasts.network.trinket.MirrorOpenS2CPayload pkt,
+                                        IPayloadContext ctx) {
+        ctx.enqueueWork(() -> ClientScreenHooksInvoker.invoke("openMirrorViewScreen",
+                java.util.UUID.class, pkt.otherUuid(), String.class, pkt.otherName()));
+    }
+
+    public static void handleMirrorPresence(at.koopro.wizardsandbeasts.network.trinket.MirrorPresenceS2CPayload pkt,
+                                            IPayloadContext ctx) {
+        ctx.enqueueWork(() -> ClientScreenHooksInvoker.invoke("updateMirrorPresence",
+                float.class, pkt.yaw(), float.class, pkt.pitch()));
+    }
+
+    public static void handleMirrorClose(at.koopro.wizardsandbeasts.network.trinket.MirrorCloseS2CPayload pkt,
+                                         IPayloadContext ctx) {
+        ctx.enqueueWork(() -> ClientScreenHooksInvoker.invoke("closeMirror", String.class, pkt.reason()));
+    }
+
     // --- trunk ---
 
     public static void handlePocketStatus(PocketStatusS2CPayload packet, IPayloadContext context) {

@@ -13,5 +13,27 @@ public final class ModNetworkTrinkets {
                 PensieveOpenS2CPayload.TYPE,
                 PensieveOpenS2CPayload.STREAM_CODEC,
                 ClientPayloadHandlers::handlePensieveOpen);
+
+        // Two-Way Mirror
+        registrar.playToClient(
+                MirrorOpenS2CPayload.TYPE,
+                MirrorOpenS2CPayload.STREAM_CODEC,
+                ClientPayloadHandlers::handleMirrorOpen);
+        registrar.playToClient(
+                MirrorPresenceS2CPayload.TYPE,
+                MirrorPresenceS2CPayload.STREAM_CODEC,
+                ClientPayloadHandlers::handleMirrorPresence);
+        registrar.playToClient(
+                MirrorCloseS2CPayload.TYPE,
+                MirrorCloseS2CPayload.STREAM_CODEC,
+                ClientPayloadHandlers::handleMirrorClose);
+        registrar.playToServer(
+                MirrorConnectC2SPayload.TYPE,
+                MirrorConnectC2SPayload.STREAM_CODEC,
+                MirrorConnectC2SPayload::handle);
+        registrar.playToServer(
+                MirrorCloseC2SPayload.TYPE,
+                MirrorCloseC2SPayload.STREAM_CODEC,
+                MirrorCloseC2SPayload::handle);
     }
 }

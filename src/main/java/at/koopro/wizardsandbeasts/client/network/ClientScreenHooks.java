@@ -8,12 +8,15 @@ import at.koopro.wizardsandbeasts.client.currency.gui.GringottsScreen;
 import at.koopro.wizardsandbeasts.client.skill.gui.SkillScreenRouter;
 import at.koopro.wizardsandbeasts.client.spell.gui.SpellTeacherScreen;
 import at.koopro.wizardsandbeasts.client.heritage.gui.HeritageSelectionScreen;
+import at.koopro.wizardsandbeasts.client.trinket.gui.MirrorCallScreen;
+import at.koopro.wizardsandbeasts.client.trinket.gui.MirrorViewScreen;
 import at.koopro.wizardsandbeasts.client.trinket.gui.PensieveScreen;
 import at.koopro.wizardsandbeasts.floo.FlooDestinationDto;
 import at.koopro.wizardsandbeasts.memory.MemoryEntry;
 import net.minecraft.client.Minecraft;
 
 import java.util.List;
+import java.util.UUID;
 
 public final class ClientScreenHooks {
     private ClientScreenHooks() {
@@ -56,5 +59,21 @@ public final class ClientScreenHooks {
 
     public static void openPensieveScreen(List<MemoryEntry> memories) {
         Minecraft.getInstance().setScreen(new PensieveScreen(memories));
+    }
+
+    public static void openMirrorCallScreen(UUID pairId) {
+        Minecraft.getInstance().setScreen(new MirrorCallScreen(pairId));
+    }
+
+    public static void openMirrorViewScreen(UUID otherUuid, String otherName) {
+        Minecraft.getInstance().setScreen(new MirrorViewScreen(otherUuid, otherName));
+    }
+
+    public static void updateMirrorPresence(float yaw, float pitch) {
+        MirrorViewScreen.updatePresence(yaw, pitch);
+    }
+
+    public static void closeMirror(String reason) {
+        MirrorViewScreen.closeFromServer(reason);
     }
 }
