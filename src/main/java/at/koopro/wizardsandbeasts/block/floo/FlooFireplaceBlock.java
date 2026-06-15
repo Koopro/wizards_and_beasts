@@ -119,7 +119,8 @@ public class FlooFireplaceBlock extends BaseEntityBlock {
                             .map(e -> new FlooDestinationDto(e.networkAddress(),
                                     e.dimension().toString(), e.isEnabled()))
                             .toList();
-                    OpenFlooGuiS2CPayload.send(sp, destinations);
+                    // Sneak-use = "head in the fire" call; normal use = travel.
+                    OpenFlooGuiS2CPayload.send(sp, destinations, sp.isShiftKeyDown());
                 }
             }
             return InteractionResult.SUCCESS;
@@ -132,17 +133,36 @@ public class FlooFireplaceBlock extends BaseEntityBlock {
     }
 
     @Override
+    protected void affectNeighborsAfterRemoval(@NonNull BlockState state, @NonNull ServerLevel level,
+                                               @NonNull BlockPos pos, boolean movedByPiston) {
+        super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
+        // Purge the network entry when the fireplace is gone (mined, blown up, pushed).
+        if (!level.getBlockState(pos).is(this)) {
+            FlooNetworkManager.get(level).unregisterByPos(level.dimension().identifier(), pos);
+        }
+    }
+
+    @Override
     public void animateTick(@NonNull BlockState state, @NonNull Level level,
                              @NonNull BlockPos pos, @NonNull RandomSource random) {
         if (!state.getValue(LIT)) return;
-        // VISUAL: dust particle approximation — replace with custom floo flame particle when available
-        DustParticleOptions greenDust = new DustParticleOptions(0xFF21B342, 1.2f);
-        int count = 4 + random.nextInt(3);
+        // VISUAL: emerald flame column that rises and roars (lore: "flames rose higher").
+        DustParticleOptions greenDust = new DustParticleOptions(0xFF21B342, 1.3f);
+        int count = 6 + random.nextInt(4);
         for (int i = 0; i < count; i++) {
-            double cx = pos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.6;
-            double cy = pos.getY() + 0.2 + random.nextDouble() * 0.4;
-            double cz = pos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.6;
-            level.addParticle(greenDust, cx, cy, cz, 0, 0.04, 0);
+            double cx = pos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.55;
+            double cy = pos.getY() + 0.15 + random.nextDouble() * 1.0;
+            double cz = pos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.55;
+            // Upward velocity sells the "rising" column.
+            level.addParticle(greenDust, cx, cy, cz, 0, 0.06 + random.nextDouble() * 0.05, 0);
+        }
+        // Occasional ember flicker for the roaring look.
+        if (random.nextInt(3) == 0) {
+            level.addParticle(net.minecraft.core.particles.ParticleTypes.SOUL_FIRE_FLAME,
+                    pos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.3,
+                    pos.getY() + 0.3 + random.nextDouble() * 0.6,
+                    pos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.3,
+                    0, 0.03, 0);
         }
     }
 }

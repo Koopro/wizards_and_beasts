@@ -190,6 +190,12 @@ public final class ClientPayloadHandlers {
         });
     }
 
+    public static void handleFlooTransit(at.koopro.wizardsandbeasts.network.floo.FlooTransitS2CPayload packet,
+                                         IPayloadContext context) {
+        context.enqueueWork(() ->
+                at.koopro.wizardsandbeasts.client.floo.FlooTransitOverlay.trigger(packet.durationTicks()));
+    }
+
     public static void handleFlooBlockSync(FlooBlockSyncS2CPayload packet, IPayloadContext context) {
         context.enqueueWork(() -> {
             Minecraft mc = Minecraft.getInstance();
@@ -209,7 +215,8 @@ public final class ClientPayloadHandlers {
         // class — loaded server-side when the registrar resolves the method ref — never forces
         // verification-time loading of the client-only FlooNetworkScreen / Screen types.
         context.enqueueWork(() ->
-                ClientScreenHooksInvoker.invoke("openFlooNetworkScreen", List.class, packet.destinations()));
+                ClientScreenHooksInvoker.invoke("openFlooNetworkScreen",
+                        List.class, packet.destinations(), boolean.class, packet.callMode()));
     }
 
     // --- form ---

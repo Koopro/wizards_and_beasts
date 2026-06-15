@@ -20,8 +20,8 @@ public final class ClientScreenHooks {
     /** Opens the Floo network screen. Reflectively invoked from common code via
      *  {@link at.koopro.wizardsandbeasts.network.ClientScreenHooksInvoker}, so the
      *  {@code FlooNetworkScreen} reference never loads server-side. */
-    public static void openFlooNetworkScreen(List<FlooDestinationDto> destinations) {
-        Minecraft.getInstance().setScreen(new FlooNetworkScreen(destinations));
+    public static void openFlooNetworkScreen(List<FlooDestinationDto> destinations, boolean callMode) {
+        Minecraft.getInstance().setScreen(new FlooNetworkScreen(destinations, callMode));
     }
 
     public static void openGringottsScreen() {

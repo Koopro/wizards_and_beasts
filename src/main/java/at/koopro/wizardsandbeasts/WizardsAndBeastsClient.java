@@ -84,6 +84,8 @@ public class WizardsAndBeastsClient {
         event.registerAboveAll(MobEffectFullscreenOverlays.ID, MobEffectFullscreenOverlays::render);
         event.registerAboveAll(CrucioScreenRenderer.ID, CrucioScreenRenderer::render);
         event.registerAboveAll(TransitionEffectRenderer.ID, TransitionEffectRenderer::render);
+        event.registerAboveAll(at.koopro.wizardsandbeasts.client.floo.FlooTransitOverlay.ID,
+                at.koopro.wizardsandbeasts.client.floo.FlooTransitOverlay::render);
         event.registerAboveAll(StatHudOverlay.ID, StatHudOverlay::render);
         if (Config.enableDebugTools) {
             event.registerAboveAll(FormDebugOverlay.ID, FormDebugOverlay::render);

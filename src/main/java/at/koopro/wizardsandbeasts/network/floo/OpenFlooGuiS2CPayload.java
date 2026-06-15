@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.network.floo;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.floo.FlooDestinationDto;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
@@ -12,14 +13,21 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 
-public record OpenFlooGuiS2CPayload(@NonNull List<FlooDestinationDto> destinations) implements CustomPacketPayload {
+/** Opens the Floo screen. {@code callMode} = "head in the fire" call picker vs. travel picker. */
+public record OpenFlooGuiS2CPayload(@NonNull List<FlooDestinationDto> destinations,
+                                    boolean callMode) implements CustomPacketPayload {
 
     public static final Type<OpenFlooGuiS2CPayload> TYPE = new Type<>(
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "open_floo_gui_s2c"));
 
     public static final StreamCodec<ByteBuf, OpenFlooGuiS2CPayload> STREAM_CODEC = StreamCodec.of(
-            (buf, pkt) -> FlooDestinationDto.LIST_STREAM_CODEC.encode(buf, pkt.destinations),
-            buf -> new OpenFlooGuiS2CPayload(FlooDestinationDto.LIST_STREAM_CODEC.decode(buf))
+            (buf, pkt) -> {
+                FlooDestinationDto.LIST_STREAM_CODEC.encode(buf, pkt.destinations);
+                ByteBufCodecs.BOOL.encode(buf, pkt.callMode);
+            },
+            buf -> new OpenFlooGuiS2CPayload(
+                    FlooDestinationDto.LIST_STREAM_CODEC.decode(buf),
+                    ByteBufCodecs.BOOL.decode(buf))
     );
 
     @Override
@@ -27,7 +35,8 @@ public record OpenFlooGuiS2CPayload(@NonNull List<FlooDestinationDto> destinatio
         return TYPE;
     }
 
-    public static void send(@NonNull ServerPlayer player, @NonNull List<FlooDestinationDto> destinations) {
-        PacketDistributor.sendToPlayer(player, new OpenFlooGuiS2CPayload(destinations));
+    public static void send(@NonNull ServerPlayer player, @NonNull List<FlooDestinationDto> destinations,
+                            boolean callMode) {
+        PacketDistributor.sendToPlayer(player, new OpenFlooGuiS2CPayload(destinations, callMode));
     }
 }

@@ -77,6 +77,25 @@ public final class FlooNetworkManager extends SavedData {
         }
     }
 
+    /**
+     * Removes any entry registered at the given block position, returning its address.
+     * Used to purge the network when a registered fireplace is destroyed.
+     */
+    @Nullable
+    public String unregisterByPos(@NonNull Identifier dimension, @NonNull BlockPos pos) {
+        var it = entries.entrySet().iterator();
+        while (it.hasNext()) {
+            FlooRegistryEntry entry = it.next().getValue();
+            if (entry.dimension().equals(dimension) && entry.blockPos().equals(pos)) {
+                String address = entry.networkAddress();
+                it.remove();
+                setDirty();
+                return address;
+            }
+        }
+        return null;
+    }
+
     @Nullable
     public FlooRegistryEntry getEntry(@NonNull String address) {
         return entries.get(address.strip().toLowerCase(Locale.ROOT));

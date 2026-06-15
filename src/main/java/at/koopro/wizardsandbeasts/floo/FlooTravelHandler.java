@@ -3,10 +3,13 @@ package at.koopro.wizardsandbeasts.floo;
 import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlock;
 import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlockEntity;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
+import at.koopro.wizardsandbeasts.floo.call.FlooCallService;
+import at.koopro.wizardsandbeasts.registry.MiscItemRegistry;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.network.floo.FlooArrivalEffectsS2CPayload;
 import at.koopro.wizardsandbeasts.network.floo.FlooBlockSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.floo.FlooTransitS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
@@ -45,6 +48,12 @@ public final class FlooTravelHandler {
     public static void handleTravel(@NonNull ServerPlayer player, @NonNull String targetAddress) {
         if (!ModuleManager.isEnabled(Module.FLOO_NETWORK)) return;
 
+        if (FlooCallService.isInCall(player.getUUID())) {
+            player.displayClientMessage(
+                    Component.literal("You are mid-Floo-call. Pull your head out of the fire first."), true);
+            return;
+        }
+
         FlooFireplaceBlockEntity origin = findNearbyLitFireplace(player);
         if (origin == null) return;
 
@@ -58,12 +67,24 @@ public final class FlooTravelHandler {
             return;
         }
 
-        resetOriginFireplace((ServerLevel) player.level(), origin);
-
         ServerLevel destLevel = resolveLevel(player, dest.dimension());
         if (destLevel == null) return;
 
-        BlockPos destPos = dest.blockPos().above();
+        BlockPos destPos = findSafeArrival(destLevel, dest.blockPos());
+        if (destPos == null) {
+            player.displayClientMessage(
+                    Component.literal("The grate at the far end is blocked — you cannot step through."), true);
+            return;
+        }
+
+        // Throw a pinch of Floo Powder to travel (free in creative).
+        if (!consumeOnePowder(player)) {
+            player.displayClientMessage(Component.literal("You have no Floo Powder."), true);
+            return;
+        }
+
+        resetOriginFireplace((ServerLevel) player.level(), origin);
+
         TeleportTransition transition = new TeleportTransition(
                 destLevel,
                 Vec3.atCenterOf(destPos),
@@ -76,6 +97,9 @@ public final class FlooTravelHandler {
 
         player.addEffect(new MobEffectInstance(ModEffects.DISORIENTED, 100, 0, false, true, true));
 
+        boolean wasMisfire = !actualAddress.equalsIgnoreCase(targetAddress);
+        applyTravelSickness(player, destLevel, destPos, wasMisfire);
+
         BlockState destBlockState = destLevel.getBlockState(dest.blockPos());
         if (destBlockState.hasProperty(FlooFireplaceBlock.LIT)
                 && !destBlockState.getValue(FlooFireplaceBlock.LIT)
@@ -85,7 +109,6 @@ public final class FlooTravelHandler {
             FlooBlockSyncS2CPayload.sendToNear(destLevel, dest.blockPos(), true, 100);
         }
 
-        boolean wasMisfire = !actualAddress.equalsIgnoreCase(targetAddress);
         if (wasMisfire) {
             player.sendSystemMessage(
                     Component.literal("You meant to say ").withStyle(ChatFormatting.GRAY)
@@ -139,8 +162,69 @@ public final class FlooTravelHandler {
         manager.logTravel(player, "(forced)", address);
     }
 
+    /**
+     * Floo travel is famously unpleasant: spinning, dizzy, and out covered in soot.
+     * Sends the spin overlay, dusts the arrival in ash, and rolls a stumble.
+     */
+    private static void applyTravelSickness(@NonNull ServerPlayer player, @NonNull ServerLevel destLevel,
+                                            @NonNull BlockPos destPos, boolean wasMisfire) {
+        FlooTransitS2CPayload.send(player, wasMisfire ? 26 : 18);
+
+        int slowTicks = wasMisfire ? 80 : 50;
+        player.addEffect(new MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOWNESS,
+                slowTicks, 0, false, false, true));
+
+        // Soot/ash cloud around the arriving traveller.
+        destLevel.sendParticles(ParticleTypes.SMOKE,
+                player.getX(), player.getY() + 0.6, player.getZ(),
+                wasMisfire ? 30 : 16, 0.3, 0.5, 0.3, 0.02);
+        destLevel.sendParticles(ParticleTypes.ASH,
+                player.getX(), player.getY() + 0.4, player.getZ(),
+                wasMisfire ? 24 : 12, 0.3, 0.4, 0.3, 0.01);
+
+        // Stumble: clumsier travellers (and misfires) lurch out of the grate.
+        float stumbleChance = wasMisfire ? 0.6f : 0.2f;
+        if (player.getRandom().nextFloat() < stumbleChance) {
+            double yaw = Math.toRadians(player.getYRot());
+            player.push(-Math.sin(yaw) * 0.35, 0.05, Math.cos(yaw) * 0.35);
+            player.hurtMarked = true;
+            player.sendSystemMessage(Component.literal("You tumble out of the grate in a heap of soot.")
+                    .withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        }
+    }
+
+    /** Finds the lowest unobstructed 2-block-tall standing spot above the destination grate. */
     @Nullable
-    private static FlooFireplaceBlockEntity findNearbyLitFireplace(@NonNull ServerPlayer player) {
+    private static BlockPos findSafeArrival(@NonNull ServerLevel level, @NonNull BlockPos firePos) {
+        for (int dy = 1; dy <= 3; dy++) {
+            BlockPos feet = firePos.above(dy);
+            if (isPassable(level, feet) && isPassable(level, feet.above())) {
+                return feet;
+            }
+        }
+        return null;
+    }
+
+    private static boolean isPassable(@NonNull ServerLevel level, @NonNull BlockPos pos) {
+        return level.getBlockState(pos).getCollisionShape(level, pos).isEmpty();
+    }
+
+    /** Consumes one Floo Powder from the player's inventory; true if paid (or creative). */
+    private static boolean consumeOnePowder(@NonNull ServerPlayer player) {
+        if (player.getAbilities().instabuild) return true;
+        var inv = player.getInventory();
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            var stack = inv.getItem(i);
+            if (stack.is(MiscItemRegistry.FLOO_POWDER.get())) {
+                stack.shrink(1);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Nullable
+    public static FlooFireplaceBlockEntity findNearbyLitFireplace(@NonNull ServerPlayer player) {
         BlockPos center = player.blockPosition();
         for (int dx = -1; dx <= 1; dx++) {
             for (int dy = -1; dy <= 1; dy++) {
@@ -173,10 +257,35 @@ public final class FlooTravelHandler {
 
         if (alternatives.isEmpty()) return intendedAddress;
 
-        FlooRegistryEntry misfireTarget = alternatives.get(player.getRandom().nextInt(alternatives.size()));
+        // LORE: a mumbled destination tends to spit you out somewhere unsavoury
+        // (Harry's "Diagonally" → Knockturn Alley). Weight dark addresses heavier.
+        FlooRegistryEntry misfireTarget = pickWeightedMisfire(player, alternatives);
         LOGGER.info("[FlooNetwork] {} misfired — intended \"{}\" landed at \"{}\"",
                 player.getName().getString(), intendedAddress, misfireTarget.networkAddress());
         return misfireTarget.networkAddress();
+    }
+
+    private static final List<String> DARK_ADDRESS_KEYWORDS =
+            List.of("knockturn", "borgin", "burkes", "azkaban", "riddle", "malfoy", "spinner");
+
+    private static boolean isDarkAddress(@NonNull FlooRegistryEntry entry) {
+        String addr = entry.networkAddress().toLowerCase(Locale.ROOT);
+        return DARK_ADDRESS_KEYWORDS.stream().anyMatch(addr::contains);
+    }
+
+    @NonNull
+    private static FlooRegistryEntry pickWeightedMisfire(@NonNull ServerPlayer player,
+                                                         @NonNull List<FlooRegistryEntry> alternatives) {
+        int totalWeight = 0;
+        for (FlooRegistryEntry e : alternatives) {
+            totalWeight += isDarkAddress(e) ? 4 : 1;
+        }
+        int roll = player.getRandom().nextInt(totalWeight);
+        for (FlooRegistryEntry e : alternatives) {
+            roll -= isDarkAddress(e) ? 4 : 1;
+            if (roll < 0) return e;
+        }
+        return alternatives.getLast();
     }
 
     private static void resetOriginFireplace(@NonNull ServerLevel level, @NonNull FlooFireplaceBlockEntity be) {

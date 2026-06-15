@@ -33,4 +33,14 @@ public final class ClientScreenHooksInvoker {
             LOGGER.warn("[WizardsAndBeasts] Client screen hook '{}' failed to invoke", methodName, e);
         }
     }
+
+    /** Two-argument variant of {@link #invoke(String, Class, Object)}. */
+    public static void invoke(String methodName, Class<?> p1, Object a1, Class<?> p2, Object a2) {
+        try {
+            Class<?> hooks = Class.forName(CLIENT_HOOKS_CLASS);
+            hooks.getMethod(methodName, p1, p2).invoke(null, a1, a2);
+        } catch (ReflectiveOperationException e) {
+            LOGGER.warn("[WizardsAndBeasts] Client screen hook '{}' failed to invoke", methodName, e);
+        }
+    }
 }

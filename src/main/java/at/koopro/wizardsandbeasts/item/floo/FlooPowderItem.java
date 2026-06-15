@@ -5,9 +5,9 @@ import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlockEntity;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
-import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -45,63 +45,15 @@ public class FlooPowderItem extends Item {
                     if (level.getBlockEntity(pos) instanceof FlooFireplaceBlockEntity be) {
                         be.setLitTicksRemaining(FlooFireplaceBlockEntity.LIT_TIMEOUT_TICKS);
                     }
-                    level.playSound(null, pos, ModSounds.FLOO_IGNITE.get(), SoundSource.BLOCKS, 0.8f, 1.0f);
+                    // LORE: the flames roar up and turn emerald green.
+                    level.playSound(null, pos, ModSounds.FLOO_IGNITE.get(), SoundSource.BLOCKS, 1.0f, 0.9f);
+                    level.playSound(null, pos, ModSounds.FLOO_WHOOSH.get(), SoundSource.BLOCKS, 0.9f, 0.8f);
+                    if (level instanceof ServerLevel server) {
+                        spawnEmeraldRoar(server, pos);
+                    }
                 }
             } else if (!level.isClientSide()) {
                 player.displayClientMessage(Component.literal("The fireplace is already burning."), true);
-            }
-            return InteractionResult.SUCCESS;
-        }
-
-        if (state.is(ModBlocks.FLOO_GRATE.get())) {
-            if (player.isShiftKeyDown()) {
-                stack.set(ModDataComponents.PORTKEY_TARGET.get(), pos.immutable());
-                if (!level.isClientSide()) {
-                    player.displayClientMessage(Component.literal("\u00A7aFloo destination set."), true);
-                    level.playSound(null, pos, SoundEvents.RESPAWN_ANCHOR_CHARGE, SoundSource.BLOCKS, 0.7f, 1.2f);
-                }
-                return InteractionResult.SUCCESS;
-            }
-
-            BlockPos target = stack.get(ModDataComponents.PORTKEY_TARGET.get());
-            if (target == null) {
-                if (!level.isClientSide()) {
-                    player.displayClientMessage(Component.literal("\u00A7eSneak-use on a Floo Grate to bind destination."), true);
-                }
-                return InteractionResult.FAIL;
-            }
-            if (target.equals(pos)) {
-                if (!level.isClientSide()) {
-                    player.displayClientMessage(Component.literal("\u00A7eBound destination is this grate."), true);
-                }
-                return InteractionResult.FAIL;
-            }
-            if (!level.getBlockState(target).is(ModBlocks.FLOO_GRATE.get())) {
-                if (!level.isClientSide()) {
-                    player.displayClientMessage(Component.literal("\u00A7cBound destination grate is missing."), true);
-                }
-                return InteractionResult.FAIL;
-            }
-
-            BlockPos arrival = target.above();
-            if (!level.getBlockState(arrival).canBeReplaced() || !level.getBlockState(arrival.above()).canBeReplaced()) {
-                if (!level.isClientSide()) {
-                    player.displayClientMessage(Component.literal("\u00A7cDestination is obstructed."), true);
-                }
-                return InteractionResult.FAIL;
-            }
-
-            if (!level.isClientSide()) {
-                player.teleportTo(arrival.getX() + 0.5, arrival.getY(), arrival.getZ() + 0.5);
-                stack.shrink(1);
-                level.playSound(null, pos, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.8f, 1.2f);
-                level.playSound(null, target, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.8f, 1.2f);
-                if (level instanceof ServerLevel server) {
-                    server.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
-                            36, 0.4, 0.3, 0.4, 0.02);
-                    server.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, target.getX() + 0.5, target.getY() + 0.5, target.getZ() + 0.5,
-                            36, 0.4, 0.3, 0.4, 0.02);
-                }
             }
             return InteractionResult.SUCCESS;
         }
@@ -139,5 +91,24 @@ public class FlooPowderItem extends Item {
         }
 
         return InteractionResult.PASS;
+    }
+
+    /** Emerald-green flame column roaring upward when a fireplace is lit for Floo. */
+    private static void spawnEmeraldRoar(ServerLevel server, BlockPos pos) {
+        DustParticleOptions emerald = new DustParticleOptions(0xFF21B342, 1.6f);
+        double cx = pos.getX() + 0.5;
+        double cz = pos.getZ() + 0.5;
+        // Rising emerald column (taller than the idle flicker).
+        for (int i = 0; i < 40; i++) {
+            double ox = (server.random.nextDouble() - 0.5) * 0.7;
+            double oz = (server.random.nextDouble() - 0.5) * 0.7;
+            double y = pos.getY() + 0.1 + server.random.nextDouble() * 1.6;
+            server.sendParticles(emerald, cx + ox, y, cz + oz, 1, 0, 0, 0, 0);
+        }
+        // Ember burst + soul-flame core for the roar.
+        server.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, cx, pos.getY() + 0.4, cz,
+                18, 0.25, 0.5, 0.25, 0.08);
+        server.sendParticles(ParticleTypes.LAVA, cx, pos.getY() + 0.3, cz,
+                4, 0.2, 0.2, 0.2, 0.0);
     }
 }

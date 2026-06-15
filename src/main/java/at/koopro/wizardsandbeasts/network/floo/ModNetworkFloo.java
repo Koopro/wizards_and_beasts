@@ -29,5 +29,13 @@ public final class ModNetworkFloo {
                 FlooBlockSyncS2CPayload.TYPE,
                 FlooBlockSyncS2CPayload.STREAM_CODEC,
                 ClientPayloadHandlers::handleFlooBlockSync);
+        registrar.playToClient(
+                FlooTransitS2CPayload.TYPE,
+                FlooTransitS2CPayload.STREAM_CODEC,
+                ClientPayloadHandlers::handleFlooTransit);
+        registrar.playToServer(
+                FlooCallRequestC2SPayload.TYPE,
+                FlooCallRequestC2SPayload.STREAM_CODEC,
+                FlooCallRequestC2SPayload::handleServer);
     }
 }

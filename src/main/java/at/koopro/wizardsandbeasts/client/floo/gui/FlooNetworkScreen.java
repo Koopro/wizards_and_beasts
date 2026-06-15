@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.client.floo.gui;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.ScreenLayoutScaler;
 import at.koopro.wizardsandbeasts.floo.FlooDestinationDto;
+import at.koopro.wizardsandbeasts.network.floo.FlooCallRequestC2SPayload;
 import at.koopro.wizardsandbeasts.network.floo.FlooTravelRequestC2SPayload;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -32,14 +33,16 @@ public class FlooNetworkScreen extends Screen {
     private static final int COL_DIVIDER = 0xFF444466;
 
     private final List<FlooDestinationDto> destinations;
+    private final boolean callMode;
     private int selectedIndex = -1;
     private int scrollOffset = 0;
     private Button travelButton;
     private ScreenLayoutScaler layout;
 
-    public FlooNetworkScreen(@NonNull List<FlooDestinationDto> destinations) {
-        super(Component.literal("Floo Network"));
+    public FlooNetworkScreen(@NonNull List<FlooDestinationDto> destinations, boolean callMode) {
+        super(Component.literal(callMode ? "Floo Call" : "Floo Network"));
         this.destinations = destinations;
+        this.callMode = callMode;
     }
 
     @Override
@@ -55,7 +58,7 @@ public class FlooNetworkScreen extends Screen {
         int btnW = layout.s(80);
 
         travelButton = addRenderableWidget(
-                Button.builder(Component.literal("Travel"), b -> onTravelClicked())
+                Button.builder(Component.literal(callMode ? "Call" : "Travel"), b -> onTravelClicked())
                         .bounds(px + panelW / 2 - btnW - layout.s(4), btnY, btnW, layout.s(18))
                         .build());
         travelButton.active = false;
@@ -76,7 +79,8 @@ public class FlooNetworkScreen extends Screen {
 
         McStylePanel.drawTexturedPanel(graphics, px, py, panelW, panelH);
 
-        graphics.drawCenteredString(font, "Floo Network", px + panelW / 2, py + layout.s(8), COL_TITLE);
+        graphics.drawCenteredString(font, callMode ? "Floo Call" : "Floo Network",
+                px + panelW / 2, py + layout.s(8), COL_TITLE);
         graphics.fill(px + layout.s(5), py + layout.s(22), px + panelW - layout.s(5), py + layout.s(23), COL_DIVIDER);
 
         if (destinations.isEmpty()) {
@@ -224,7 +228,11 @@ public class FlooNetworkScreen extends Screen {
         if (selectedIndex < 0 || selectedIndex >= destinations.size()) return;
         FlooDestinationDto dto = destinations.get(selectedIndex);
         if (!dto.isEnabled()) return;
-        ClientPacketDistributor.sendToServer(new FlooTravelRequestC2SPayload(dto.networkAddress()));
+        if (callMode) {
+            ClientPacketDistributor.sendToServer(new FlooCallRequestC2SPayload(dto.networkAddress()));
+        } else {
+            ClientPacketDistributor.sendToServer(new FlooTravelRequestC2SPayload(dto.networkAddress()));
+        }
         onClose();
     }
 
