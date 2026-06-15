@@ -67,7 +67,6 @@ public class Protego extends Spell {
         } else if (tier >= 2) {
             level.playSound(null, caster.blockPosition(), ModSounds.PROTEGO_MAXIMA_RAISE.get(), SoundSource.PLAYERS, 1.0f, 0.95f);
         }
-        // TODO(protego-tiers): wire tier selection from ProtegoSpell if/when this class is migrated.
         SpellHelper.applyProtegoCastPulse(level, caster, this);
         if (getProficiency(caster) == Proficiency.MASTERED) {
             caster.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 60, 2, false, true, true));

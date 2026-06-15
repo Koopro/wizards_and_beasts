@@ -193,11 +193,50 @@ final class SpellCastTargetedHandler {
         if (!ModuleManager.isEnabled(Module.WANDS_AND_SPELLS)) {
             return false;
         }
-        // TODO(finite): amplifier 1 = Finite Incantatem Totalum (area clear) — not implemented
         float effectiveRange = props.getRange() * wand.rangeFor(spell);
+
+        // A charged cast (long wand hold) by a competent caster is Finite Incantatem Totalum:
+        // it lifts mod effects from every living thing nearby instead of a single target.
+        int heldTicks = WandCastTiming.consumeLastHoldTicks(caster);
+        boolean totalum = heldTicks > 15 && spell.getProficiencyScalar(caster) >= 0.3f;
+
+        if (totalum) {
+            int affected = 0;
+            for (LivingEntity nearby : level.getEntitiesOfClass(LivingEntity.class,
+                    caster.getBoundingBox().inflate(8.0), LivingEntity::isAlive)) {
+                if (clearModEffects(nearby, spell) > 0) {
+                    affected++;
+                }
+            }
+            caster.displayClientMessage(
+                    Component.literal("Finite Incantatem Totalum").withStyle(ChatFormatting.AQUA), true);
+            level.playSound(null, caster.blockPosition(), SoundEvents.FIRE_EXTINGUISH,
+                    SoundSource.PLAYERS, 0.5f, 1.2f);
+            SpellImpactBurstS2CPayload.sendToTracking(caster, caster.getEyePosition(1.0f),
+                    SpellFamily.LIGHT, spell.getColor(), 18, 0.2f);
+            return true;
+        }
+
         LivingEntity lookedAt = SpellTargetHelper.findTargetedEntity(level, caster, effectiveRange);
         LivingEntity target = lookedAt != null ? lookedAt : caster;
+        if (clearModEffects(target, spell) > 0) {
+            return true;
+        }
 
+        level.playSound(null, caster.blockPosition(), SoundEvents.FIRE_EXTINGUISH,
+                SoundSource.PLAYERS, 0.35f, 1.55f);
+        SpellImpactBurstS2CPayload.sendToTracking(
+                caster,
+                caster.getEyePosition(1.0f),
+                SpellFamily.LIGHT,
+                spell.getColor(),
+                6,
+                0.08f);
+        return true;
+    }
+
+    /** Removes all mod-namespaced, non-immune effects from one target; bursts on success; returns count. */
+    private static int clearModEffects(LivingEntity target, Spell spell) {
         List<Holder<MobEffect>> toRemove = new ArrayList<>();
         for (MobEffectInstance inst : target.getActiveEffects()) {
             Holder<MobEffect> holder = inst.getEffect();
@@ -220,27 +259,15 @@ final class SpellCastTargetedHandler {
         }
 
         if (removed > 0) {
-            Vec3 burstPos = target.getBoundingBox().getCenter();
             SpellImpactBurstS2CPayload.sendToTracking(
                     target,
-                    burstPos,
+                    target.getBoundingBox().getCenter(),
                     SpellFamilies.of(spell),
                     spell.getColor(),
                     14,
                     0.14f);
-            return true;
         }
-
-        level.playSound(null, caster.blockPosition(), SoundEvents.FIRE_EXTINGUISH,
-                SoundSource.PLAYERS, 0.35f, 1.55f);
-        SpellImpactBurstS2CPayload.sendToTracking(
-                caster,
-                caster.getEyePosition(1.0f),
-                SpellFamily.LIGHT,
-                spell.getColor(),
-                6,
-                0.08f);
-        return true;
+        return removed;
     }
 
     private static boolean handleLevicorpus(ServerLevel level, ServerPlayer caster,
