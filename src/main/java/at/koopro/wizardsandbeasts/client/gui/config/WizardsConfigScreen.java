@@ -1,6 +1,8 @@
 package at.koopro.wizardsandbeasts.client.gui.config;
 
 import at.koopro.wizardsandbeasts.Config;
+import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import com.mojang.logging.LogUtils;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -14,6 +16,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.client.gui.screens.Screen;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.jspecify.annotations.NonNull;
@@ -28,6 +31,13 @@ public class WizardsConfigScreen extends Screen {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private static final String HEADER = "MINISTRY OF MAGIC — AUTHORISED CONFIGURATION FORM";
+    private static final Identifier PARCHMENT_TEX = Identifier.fromNamespaceAndPath(
+            WizardsAndBeastsMod.MODID, "textures/gui/config/parchment.png");
+    static final Identifier CARD_TEX = Identifier.fromNamespaceAndPath(
+            WizardsAndBeastsMod.MODID, "textures/gui/config/card.png");
+    static final Identifier CARD_DARK_TEX = Identifier.fromNamespaceAndPath(
+            WizardsAndBeastsMod.MODID, "textures/gui/config/card_dark.png");
+    private static final int PARCHMENT_TILE = 64;
     private static final int CARD_WIDTH = 84;
     private static final int CARD_HEIGHT = 64;
     private static final int CARD_GAP = 12;
@@ -161,6 +171,7 @@ public class WizardsConfigScreen extends Screen {
     @Override
     public void renderBackground(@NonNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         graphics.fill(0, 0, width, height, ConfigWidgets.PARCHMENT);
+        McStylePanel.drawTiled(graphics, PARCHMENT_TEX, 0, 0, width, height, PARCHMENT_TILE);
     }
 
     /**
@@ -239,23 +250,17 @@ public class WizardsConfigScreen extends Screen {
         @Override
         protected void renderContents(@NonNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
             boolean darkArts = "Dark Arts".equals(category.name());
-            int fill = darkArts ? 0xFF2B1414 : (isHovered() ? 0xFFEFE3C4 : 0xFFF0E7CC);
-            int border = darkArts ? ConfigWidgets.STAMP_RED : ConfigWidgets.INK;
             int text = darkArts ? 0xFFE0B0B0 : ConfigWidgets.INK;
             int x0 = getX();
             int y0 = getY();
             int x1 = x0 + getWidth();
             int y1 = y0 + getHeight();
-            graphics.fill(x0 + 1, y0 + 1, x1 - 1, y1 - 1, fill);
-            // Four-corner rounded border simulation: edge strips inset by 1px at the corners.
-            graphics.hLine(x0 + 2, x1 - 3, y0, border);
-            graphics.hLine(x0 + 2, x1 - 3, y1 - 1, border);
-            graphics.vLine(x0, y0 + 2, y1 - 3, border);
-            graphics.vLine(x1 - 1, y0 + 2, y1 - 3, border);
-            graphics.fill(x0 + 1, y0 + 1, x0 + 2, y0 + 2, border);
-            graphics.fill(x1 - 2, y0 + 1, x1 - 1, y0 + 2, border);
-            graphics.fill(x0 + 1, y1 - 2, x0 + 2, y1 - 1, border);
-            graphics.fill(x1 - 2, y1 - 2, x1 - 1, y1 - 1, border);
+            // Textured memo card (parchment / dark-arts variant); border + paper drawn in the art.
+            McStylePanel.drawTexture(graphics, darkArts ? CARD_DARK_TEX : CARD_TEX,
+                    x0, y0, getWidth(), getHeight(), CARD_WIDTH, CARD_HEIGHT);
+            if (isHovered()) {
+                graphics.fill(x0 + 1, y0 + 1, x1 - 1, y1 - 1, darkArts ? 0x18FF8080 : 0x22FFFFFF);
+            }
 
             String glyph = category.glyph();
             if (font.width(glyph) <= 0) {

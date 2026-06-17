@@ -129,8 +129,8 @@ public final class CharacterSheetScreen extends Screen {
         pose.translate(bgX * (1.0f - guiScale), bgY * (1.0f - guiScale));
         pose.scale(guiScale, guiScale);
 
-        // Main panel
-        McStylePanel.drawPanel(g, bgX, bgY, BG_W, BG_H, COLOR_BG, COLOR_BG_HI, COLOR_BG_SH);
+        // Main panel — themed leather/parchment background art
+        McStylePanel.drawTexture(g, CharacterSheetTextures.BACKGROUND, bgX, bgY, BG_W, BG_H, BG_W, BG_H);
 
         // Title bar
         renderTitleBar(g);
@@ -222,8 +222,8 @@ public final class CharacterSheetScreen extends Screen {
             String name = font.plainSubstrByWidth(
                     Component.translatable(fx.getEffect().value().getDescriptionId()).getString(),
                     w - 2);
-            McStylePanel.drawPanel(g, x, y + i * (EFFECT_CHIP_H + 1),
-                    w, EFFECT_CHIP_H, COLOR_EFFECT_BG, COLOR_DIVIDER, COLOR_BG_SH);
+            McStylePanel.drawNineSlice(g, CharacterSheetTextures.PANEL, x, y + i * (EFFECT_CHIP_H + 1),
+                    w, EFFECT_CHIP_H, CharacterSheetTextures.PANEL_SIZE, CharacterSheetTextures.PANEL_BORDER);
             g.drawString(font, name, x + 2, y + i * (EFFECT_CHIP_H + 1) + 1,
                     COLOR_EFFECT_TXT, false);
         }
@@ -268,9 +268,8 @@ public final class CharacterSheetScreen extends Screen {
             boolean hovered = mouseX >= tx && mouseX < tx + tw
                            && mouseY >= y && mouseY < y + TAB_H;
 
-            int bgColor = active ? COLOR_TAB_ACT : (hovered ? COLOR_TAB_INACT : COLOR_TAB_INACT);
-            int hiColor = (active || hovered) ? COLOR_TAB_HI : COLOR_TAB_INACT;
-            McStylePanel.drawPanel(g, tx, y, tw, TAB_H, bgColor, hiColor, COLOR_TAB_SH);
+            McStylePanel.drawNineSlice(g, (active || hovered) ? CharacterSheetTextures.PANEL_SEL : CharacterSheetTextures.PANEL,
+                    tx, y, tw, TAB_H, CharacterSheetTextures.PANEL_SIZE, CharacterSheetTextures.PANEL_BORDER);
 
             String label = Component.translatable(tab.key).getString();
             int lw = font.width(label);

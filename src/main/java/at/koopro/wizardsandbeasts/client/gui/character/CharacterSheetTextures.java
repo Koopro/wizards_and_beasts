@@ -25,5 +25,16 @@ public final class CharacterSheetTextures {
     public static final Identifier ICON_TAB = Identifier.fromNamespaceAndPath(
             WizardsAndBeastsMod.MODID, "textures/gui/character_sheet/icon_tab.png");
 
+    /** 24×24 nine-slice (3px corners) sub-panel for tabs/effect chips — inactive state. */
+    public static final Identifier PANEL = Identifier.fromNamespaceAndPath(
+            WizardsAndBeastsMod.MODID, "textures/gui/character_sheet/panel.png");
+
+    /** 24×24 nine-slice (3px corners) sub-panel — active/hover state. */
+    public static final Identifier PANEL_SEL = Identifier.fromNamespaceAndPath(
+            WizardsAndBeastsMod.MODID, "textures/gui/character_sheet/panel_sel.png");
+
+    public static final int PANEL_SIZE = 24;
+    public static final int PANEL_BORDER = 3;
+
     private CharacterSheetTextures() {}
 }
