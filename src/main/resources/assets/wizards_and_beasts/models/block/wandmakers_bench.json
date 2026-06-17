@@ -1,12 +1,12 @@
 {
   "parent": "minecraft:block/cube",
   "textures": {
-    "particle": "minecraft:block/crafting_table_front",
-    "north": "minecraft:block/crafting_table_front",
-    "south": "minecraft:block/crafting_table_side",
-    "east": "minecraft:block/crafting_table_side",
-    "west": "minecraft:block/crafting_table_side",
-    "up": "minecraft:block/crafting_table_top",
-    "down": "minecraft:block/dark_oak_planks"
+    "particle": "wizards_and_beasts:block/wandmakers_bench_front",
+    "north": "wizards_and_beasts:block/wandmakers_bench_front",
+    "south": "wizards_and_beasts:block/wandmakers_bench_side",
+    "east": "wizards_and_beasts:block/wandmakers_bench_side",
+    "west": "wizards_and_beasts:block/wandmakers_bench_side",
+    "up": "wizards_and_beasts:block/wandmakers_bench_top",
+    "down": "wizards_and_beasts:block/wandmakers_bench_side"
   }
 }

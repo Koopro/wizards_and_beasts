@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "minecraft:item/beetroot_seeds"
+    "layer0": "wizards_and_beasts:item/bertie_botts_every_flavour_beans"
   }
 }
