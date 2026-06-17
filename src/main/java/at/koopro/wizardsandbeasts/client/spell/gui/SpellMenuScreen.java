@@ -30,6 +30,11 @@ import java.util.List;
 
 public class SpellMenuScreen extends Screen {
 
+    private static final Identifier SLOT_TEX = Identifier.fromNamespaceAndPath(
+            "wizards_and_beasts", "textures/gui/spell_menu/slot.png");
+    private static final Identifier SLOT_ACTIVE_TEX = Identifier.fromNamespaceAndPath(
+            "wizards_and_beasts", "textures/gui/spell_menu/slot_active.png");
+
     private static final int PANEL_W = WizardsAndBeastsUiTokens.SpellMenu.PANEL_WIDTH;
     private static final int PANEL_H = WizardsAndBeastsUiTokens.SpellMenu.PANEL_HEIGHT;
     private static final int LEFT_W = WizardsAndBeastsUiTokens.SpellMenu.LEFT_WIDTH;
@@ -235,6 +240,8 @@ public class SpellMenuScreen extends Screen {
             int sy = slotPositions[i][1];
             String spellId = data.getLoadoutSpell(i);
             String name = labels[i];
+            // Rune-socket frame drawn over the (invisible) button background.
+            graphics.blit(RenderPipelines.GUI_TEXTURED, SLOT_TEX, sx, sy, 0f, 0f, slotBtnSize, slotBtnSize, 40, 40, 40, 40);
             if (spellId != null) {
                 Spell spell = Spells.byId(spellId);
                 if (spell != null) name = spell.getDisplayName();
@@ -242,6 +249,7 @@ public class SpellMenuScreen extends Screen {
                 int ix = sx + (slotBtnSize - iconSize) / 2;
                 int iy = sy + (slotBtnSize - iconSize) / 2;
                 graphics.blit(RenderPipelines.GUI_TEXTURED, icon, ix, iy, 0f, 0f, iconSize, iconSize, 92, 92, 92, 92);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, SLOT_ACTIVE_TEX, sx, sy, 0f, 0f, slotBtnSize, slotBtnSize, 40, 40, 40, 40);
             }
             int nameX = sx + slotBtnSize / 2 - font.width(name) / 2;
             graphics.drawString(font, name, nameX, sy - font.lineHeight - 1, 0xFFFFFFFF, true);

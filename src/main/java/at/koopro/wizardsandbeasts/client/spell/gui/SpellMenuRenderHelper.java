@@ -21,6 +21,10 @@ import java.util.List;
  */
 public final class SpellMenuRenderHelper {
 
+    private static final net.minecraft.resources.Identifier PANEL_TEX =
+            net.minecraft.resources.Identifier.fromNamespaceAndPath(
+                    at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID, "textures/gui/spell_menu/panel.png");
+
     private SpellMenuRenderHelper() {}
 
     public static void renderFrame(GuiGraphics graphics, Font font, int width, int height,
@@ -31,7 +35,8 @@ public final class SpellMenuRenderHelper {
         panelH = layout.panelH();
         leftW = layout.s(leftW);
 
-        McStylePanel.drawTexturedPanel(graphics, panelX, panelY, panelW, panelH);
+        McStylePanel.drawTiled(graphics, PANEL_TEX, panelX, panelY, panelW, panelH, 64);
+        McStylePanel.drawBorder(graphics, panelX, panelY, panelW, panelH, 0xFF6A5A90, 0xFF1A1626);
         graphics.drawCenteredString(font, "Spell Menu", panelX + panelW / 2,
                 panelY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.HEADER_Y_OFFSET), WizardsAndBeastsUiTokens.SpellMenu.TITLE_COLOR);
         graphics.fill(panelX + leftW, panelY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.DIVIDER_Y_OFFSET),
