@@ -1,0 +1,94 @@
+{
+  "format_version": "1.8.0",
+  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "animations": {
+    "animation.chinese_fireball.idle": {
+      "loop": true,
+      "animation_length": 3.0,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.0": [
+              0,
+              0,
+              0
+            ],
+            "1.5": [
+              0,
+              6,
+              0
+            ],
+            "3.0": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "root": {
+          "position": {
+            "0.0": [
+              0,
+              0,
+              0
+            ],
+            "1.5": [
+              0,
+              0.4,
+              0
+            ],
+            "3.0": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.chinese_fireball.fly": {
+      "loop": true,
+      "animation_length": 0.5,
+      "bones": {
+        "wing_left": {
+          "rotation": {
+            "0.0": [
+              0,
+              0,
+              35
+            ],
+            "0.25": [
+              0,
+              0,
+              -20
+            ],
+            "0.5": [
+              0,
+              0,
+              35
+            ]
+          }
+        },
+        "wing_right": {
+          "rotation": {
+            "0.0": [
+              0,
+              0,
+              -35
+            ],
+            "0.25": [
+              0,
+              0,
+              20
+            ],
+            "0.5": [
+              0,
+              0,
+              -35
+            ]
+          }
+        }
+      }
+    }
+  }
+}

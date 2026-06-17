@@ -1,0 +1,151 @@
+{
+  "format_version": "1.8.0",
+  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "animations": {
+    "animation.manticore.idle": {
+      "loop": true,
+      "animation_length": 3.0,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.0": [
+              0,
+              0,
+              0
+            ],
+            "1.5": [
+              0,
+              6,
+              0
+            ],
+            "3.0": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "root": {
+          "position": {
+            "0.0": [
+              0,
+              0,
+              0
+            ],
+            "1.5": [
+              0,
+              0.4,
+              0
+            ],
+            "3.0": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.manticore.walk": {
+      "loop": true,
+      "animation_length": 0.9,
+      "bones": {
+        "foreleg_left": {
+          "rotation": {
+            "0.0": [
+              28,
+              0,
+              0
+            ],
+            "0.45": [
+              -28,
+              0,
+              0
+            ],
+            "0.9": [
+              28,
+              0,
+              0
+            ]
+          }
+        },
+        "foreleg_right": {
+          "rotation": {
+            "0.0": [
+              -28,
+              0,
+              0
+            ],
+            "0.45": [
+              28,
+              0,
+              0
+            ],
+            "0.9": [
+              -28,
+              0,
+              0
+            ]
+          }
+        },
+        "hindleg_left": {
+          "rotation": {
+            "0.0": [
+              28,
+              0,
+              0
+            ],
+            "0.45": [
+              -28,
+              0,
+              0
+            ],
+            "0.9": [
+              28,
+              0,
+              0
+            ]
+          }
+        },
+        "hindleg_right": {
+          "rotation": {
+            "0.0": [
+              -28,
+              0,
+              0
+            ],
+            "0.45": [
+              28,
+              0,
+              0
+            ],
+            "0.9": [
+              -28,
+              0,
+              0
+            ]
+          }
+        },
+        "root": {
+          "position": {
+            "0.0": [
+              0,
+              0,
+              0
+            ],
+            "0.45": [
+              0,
+              0.4,
+              0
+            ],
+            "0.9": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    }
+  }
+}

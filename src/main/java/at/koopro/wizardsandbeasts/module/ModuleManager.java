@@ -23,7 +23,9 @@ public final class ModuleManager {
         STATES.put(Module.PROFICIENCY, State.PREVIEW);
         STATES.put(Module.DARK_ARTS, State.DISABLED);
         STATES.put(Module.PLAYER_ABILITIES, State.PREVIEW);
-        STATES.put(Module.CREATURES, State.DISABLED);
+        // Generic data-driven creatures (placeholder GeckoLib mobs). PREVIEW = registered + summonable
+        // for verification; access (summon command / spawn-egg) is gated on this, registration is not.
+        STATES.put(Module.CREATURES, State.PREVIEW);
         STATES.put(Module.BESTIARY, State.PREVIEW);
         STATES.put(Module.BROOM_FLIGHT, State.ENABLED);
         STATES.put(Module.POCKET_DIMENSIONS, State.ENABLED);
@@ -35,6 +37,8 @@ public final class ModuleManager {
         STATES.put(Module.FLOO_NETWORK, State.DISABLED);
         STATES.put(Module.CHARACTER_SHEET, State.ENABLED);
         STATES.put(Module.PLAYER_STATS, State.PREVIEW);
+        // Location decorative blocks ship craftable by default; set DISABLED to hide their recipes.
+        STATES.put(Module.STRUCTURES, State.ENABLED);
     }
 
     private ModuleManager() {

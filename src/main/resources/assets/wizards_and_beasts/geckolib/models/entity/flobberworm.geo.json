@@ -1,0 +1,191 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.flobberworm",
+        "texture_width": 64,
+        "texture_height": 64,
+        "visible_bounds_width": 2.0,
+        "visible_bounds_height": 2.0,
+        "visible_bounds_offset": [
+          0,
+          1,
+          0
+        ]
+      },
+      "bones": [
+        {
+          "name": "root",
+          "pivot": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "seg_01",
+          "pivot": [
+            0,
+            1.2,
+            0.0
+          ],
+          "parent": "root",
+          "cubes": [
+            {
+              "origin": [
+                -1.2,
+                0.3,
+                0.0
+              ],
+              "size": [
+                2.4,
+                1.2,
+                2.4
+              ],
+              "uv": [
+                0,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "seg_02",
+          "pivot": [
+            0,
+            1.2,
+            2.4
+          ],
+          "parent": "seg_01",
+          "cubes": [
+            {
+              "origin": [
+                -1.2,
+                0.3,
+                2.4
+              ],
+              "size": [
+                2.4,
+                1.2,
+                2.4
+              ],
+              "uv": [
+                0,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "seg_03",
+          "pivot": [
+            0,
+            1.2,
+            4.8
+          ],
+          "parent": "seg_02",
+          "cubes": [
+            {
+              "origin": [
+                -1.2,
+                0.3,
+                4.8
+              ],
+              "size": [
+                2.4,
+                1.2,
+                2.4
+              ],
+              "uv": [
+                0,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "seg_04",
+          "pivot": [
+            0,
+            1.2,
+            7.2
+          ],
+          "parent": "seg_03",
+          "cubes": [
+            {
+              "origin": [
+                -1.2,
+                0.3,
+                7.2
+              ],
+              "size": [
+                2.4,
+                1.2,
+                2.4
+              ],
+              "uv": [
+                0,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "seg_05",
+          "pivot": [
+            0,
+            1.2,
+            9.6
+          ],
+          "parent": "seg_04",
+          "cubes": [
+            {
+              "origin": [
+                -1.2,
+                0.3,
+                9.6
+              ],
+              "size": [
+                2.4,
+                1.2,
+                2.4
+              ],
+              "uv": [
+                0,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "seg_06",
+          "pivot": [
+            0,
+            1.2,
+            12.0
+          ],
+          "parent": "seg_05",
+          "cubes": [
+            {
+              "origin": [
+                -1.2,
+                0.3,
+                12.0
+              ],
+              "size": [
+                2.4,
+                1.2,
+                2.4
+              ],
+              "uv": [
+                0,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

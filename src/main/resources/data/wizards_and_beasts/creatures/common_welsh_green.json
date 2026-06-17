@@ -1,0 +1,16 @@
+{
+  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "id": "wizards_and_beasts:common_welsh_green",
+  "bodyPlan": "WINGED_QUADRUPED",
+  "locomotion": "FLYING",
+  "temperament": "NEUTRAL",
+  "width": 2.7,
+  "height": 2.9,
+  "maxHealth": 90.0,
+  "movementSpeed": 0.2,
+  "flyingSpeed": 0.5,
+  "followRange": 16.0,
+  "model": "wizards_and_beasts:entity/common_welsh_green",
+  "texture": "wizards_and_beasts:textures/entity/common_welsh_green.png",
+  "animation": "wizards_and_beasts:geckolib/animations/entity/common_welsh_green.animation.json"
+}

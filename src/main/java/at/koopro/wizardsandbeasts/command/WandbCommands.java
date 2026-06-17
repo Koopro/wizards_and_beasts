@@ -6,6 +6,7 @@ import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.azkaban.command.AzkabanCommands;
 import at.koopro.wizardsandbeasts.command.CharacterCommands;
 import at.koopro.wizardsandbeasts.bestiary.command.BestiaryCommands;
+import at.koopro.wizardsandbeasts.creature.command.CreatureCommands;
 import at.koopro.wizardsandbeasts.bloodpact.command.PactCommands;
 import at.koopro.wizardsandbeasts.command.debug.DebugModuleRegistry;
 import at.koopro.wizardsandbeasts.command.debug.DebugTreeCommand;
@@ -112,6 +113,7 @@ public final class WandbCommands {
                 .then(PactCommands.register())
                 .then(HeritageCommands.register())
                 .then(BestiaryCommands.register())
+                .then(CreatureCommands.register())
                 .then(VaultCommands.register())
                 .then(SkillCommands.register())
                 .then(WandCommands.register())
@@ -120,6 +122,7 @@ public final class WandbCommands {
                 .then(WorldCommands.register())
                 .then(AzkabanCommands.register())
                 .then(CharacterCommands.register())
+                .then(AnimagusCommands.register())
                 .then(StatsCommands.register());
     }
 

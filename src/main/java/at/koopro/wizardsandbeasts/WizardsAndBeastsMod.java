@@ -20,6 +20,8 @@ import at.koopro.wizardsandbeasts.wand.customization.WandModuleRegistry;
 import at.koopro.wizardsandbeasts.event.brew.RegisterBrewsEvent;
 import at.koopro.wizardsandbeasts.event.spell.RegisterSpellsEvent;
 import at.koopro.wizardsandbeasts.bestiary.BestiaryEntryLoader;
+import at.koopro.wizardsandbeasts.creature.CreatureDefinitionLoader;
+import at.koopro.wizardsandbeasts.registry.ModCreatures;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.network.ModNetwork;
 import at.koopro.wizardsandbeasts.module.condition.ModConditions;
@@ -75,6 +77,8 @@ public class WizardsAndBeastsMod {
         MiscItemRegistry.init();
         LoreItemRegistry.init();
         TrinketItemRegistry.init();
+        ModCreatures.register();
+        ModCreatures.registerSpawnEggs();
         ModEntities.ENTITY_TYPES.register(modEventBus);
         ModCreativeTabs.TABS.register(modEventBus);
         ModFeatures.FEATURES.register(modEventBus);
@@ -100,6 +104,7 @@ public class WizardsAndBeastsMod {
         modEventBus.addListener(ModNetwork::register);
         modEventBus.addListener(EntityAttributeBindings::registerAll);
         modEventBus.addListener(at.koopro.wizardsandbeasts.event.bestiary.niffler.NifflerSpawnHandler::registerSpawnPlacements);
+        modEventBus.addListener(at.koopro.wizardsandbeasts.entity.beast.BeastSpawnHandler::registerSpawnPlacements);
         modEventBus.addListener(WandDatapackRegistries::registerDatapackRegistries);
 
         // Defer Spells.init() until FMLCommonSetupEvent so addon mods get a
@@ -134,6 +139,9 @@ public class WizardsAndBeastsMod {
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "broom_definition_reload_listener"),
                     new BroomDefinitionLoader());
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "creature_definition_reload_listener"),
+                    new CreatureDefinitionLoader());
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "wand_module_reload_listener"),
                     new WandModuleLoader());

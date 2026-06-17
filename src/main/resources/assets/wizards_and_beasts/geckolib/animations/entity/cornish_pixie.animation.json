@@ -1,0 +1,58 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.cornish_pixie.idle": {
+      "loop": true,
+      "animation_length": 0.4,
+      "bones": {
+        "body": {
+          "position": {
+            "0.0": [0, 0, 0],
+            "0.2": [0, 0.5, 0],
+            "0.4": [0, 0, 0]
+          }
+        },
+        "wing_l": {
+          "rotation": {
+            "0.0": [0, -35, 0],
+            "0.2": [0, 35, 0],
+            "0.4": [0, -35, 0]
+          }
+        },
+        "wing_r": {
+          "rotation": {
+            "0.0": [0, 35, 0],
+            "0.2": [0, -35, 0],
+            "0.4": [0, 35, 0]
+          }
+        }
+      }
+    },
+    "animation.cornish_pixie.fly": {
+      "loop": true,
+      "animation_length": 0.25,
+      "bones": {
+        "wing_l": {
+          "rotation": {
+            "0.0": [0, -50, 10],
+            "0.125": [0, 50, 10],
+            "0.25": [0, -50, 10]
+          }
+        },
+        "wing_r": {
+          "rotation": {
+            "0.0": [0, 50, -10],
+            "0.125": [0, -50, -10],
+            "0.25": [0, 50, -10]
+          }
+        },
+        "leg_l": {
+          "rotation": {"0.0": [20, 0, 0]}
+        },
+        "leg_r": {
+          "rotation": {"0.0": [20, 0, 0]}
+        }
+      }
+    }
+  }
+}

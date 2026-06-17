@@ -26,6 +26,21 @@ public class ClientSetup {
         event.registerEntityRenderer(ModEntities.FORM_MANNEQUIN.get(), FormMannequinRenderer::new);
         event.registerEntityRenderer(ModEntities.WIZARDING_THROWN.get(), ThrownItemRenderer::new);
         event.registerEntityRenderer(ModEntities.DEMENTOR.get(), DementorRenderer::new);
+        event.registerEntityRenderer(ModEntities.BOWTRUCKLE.get(), GeoRendererHelper.simple("bowtruckle"));
+        event.registerEntityRenderer(ModEntities.CORNISH_PIXIE.get(), GeoRendererHelper.simple("cornish_pixie"));
+        event.registerEntityRenderer(ModEntities.THESTRAL.get(), GeoRendererHelper.simple("thestral"));
+        event.registerEntityRenderer(ModEntities.PHOENIX.get(), GeoRendererHelper.simple("phoenix"));
+        event.registerEntityRenderer(ModEntities.AUGUREY.get(), GeoRendererHelper.simple("augurey"));
+        event.registerEntityRenderer(ModEntities.MOONCALF.get(), GeoRendererHelper.simple("mooncalf"));
+        event.registerEntityRenderer(ModEntities.STREELER.get(), GeoRendererHelper.simple("streeler"));
+
+        // Generic data-driven creatures: one simple GeckoLib renderer per creature, keyed by id.
+        for (at.koopro.wizardsandbeasts.registry.ModCreatures.Spec spec
+                : at.koopro.wizardsandbeasts.registry.ModCreatures.MANIFEST) {
+            event.registerEntityRenderer(
+                    at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get(spec.id()).get(),
+                    GeoRendererHelper.simple(spec.id()));
+        }
     }
 
     public static void registerLayers(EntityRenderersEvent.AddLayers event) {

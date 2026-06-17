@@ -1,0 +1,16 @@
+{
+  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "id": "wizards_and_beasts:swooping_evil",
+  "bodyPlan": "INSECTOID_FLYER",
+  "locomotion": "FLYING",
+  "temperament": "NEUTRAL",
+  "width": 0.95,
+  "height": 1.25,
+  "maxHealth": 16.0,
+  "movementSpeed": 0.25,
+  "flyingSpeed": 0.5,
+  "followRange": 16.0,
+  "model": "wizards_and_beasts:entity/swooping_evil",
+  "texture": "wizards_and_beasts:textures/entity/swooping_evil.png",
+  "animation": "wizards_and_beasts:geckolib/animations/entity/swooping_evil.animation.json"
+}

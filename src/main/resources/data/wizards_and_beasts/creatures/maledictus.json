@@ -1,0 +1,16 @@
+{
+  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "id": "wizards_and_beasts:maledictus",
+  "bodyPlan": "BIPED_HUMANOID",
+  "locomotion": "GROUND",
+  "temperament": "NEUTRAL",
+  "width": 0.95,
+  "height": 1.25,
+  "maxHealth": 16.0,
+  "movementSpeed": 0.25,
+  "flyingSpeed": 0.0,
+  "followRange": 16.0,
+  "model": "wizards_and_beasts:entity/maledictus",
+  "texture": "wizards_and_beasts:textures/entity/maledictus.png",
+  "animation": "wizards_and_beasts:geckolib/animations/entity/maledictus.animation.json"
+}
