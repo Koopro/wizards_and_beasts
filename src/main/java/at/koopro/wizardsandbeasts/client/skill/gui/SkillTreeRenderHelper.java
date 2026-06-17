@@ -26,8 +26,12 @@ public final class SkillTreeRenderHelper {
     private SkillTreeRenderHelper() {
     }
 
+    private static final Identifier PANEL_TEX = Identifier.fromNamespaceAndPath(
+            at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID, "textures/gui/skill_tree/panel.png");
+
     public static void renderWindowFrame(GuiGraphics graphics, Font font, int panelX, int panelY, int panelW, int panelH, String title) {
-        McStylePanel.drawTexturedPanel(graphics, panelX, panelY, panelW, panelH);
+        McStylePanel.drawTiled(graphics, PANEL_TEX, panelX, panelY, panelW, panelH, 64);
+        McStylePanel.drawBorder(graphics, panelX, panelY, panelW, panelH, 0xFF6A5A90, 0xFF1A1626);
 
         graphics.drawCenteredString(font, title, panelX + panelW / 2, panelY + WizardsAndBeastsUiTokens.SkillTree.TITLE_Y, WizardsAndBeastsUiTokens.SkillTree.TITLE_COLOR);
     }
