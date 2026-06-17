@@ -138,8 +138,8 @@ public final class CharacterSheetScreen extends Screen {
         // Vertical divider between columns
         g.fill(bgX + LEFT_W, bgY + TITLE_H, bgX + LEFT_W + 1, bgY + BG_H, COLOR_DIVIDER);
 
-        // Left column
-        renderLeftColumn(g, partialTick);
+        // Left column (viewport look-at uses design-space mouse)
+        renderLeftColumn(g, partialTick, (float) toDesignX(mouseX), (float) toDesignY(mouseY));
 
         // Right column (hover tests run in design space)
         renderRightColumn(g, (int) toDesignX(mouseX), (int) toDesignY(mouseY), partialTick);
@@ -175,7 +175,7 @@ public final class CharacterSheetScreen extends Screen {
 
     // ── Left column ────────────────────────────────────────────────────────
 
-    private void renderLeftColumn(@NonNull GuiGraphics g, float partialTick) {
+    private void renderLeftColumn(@NonNull GuiGraphics g, float partialTick, float mouseX, float mouseY) {
         int colX = bgX;
         int colY = bgY + TITLE_H;
         int colW = LEFT_W;
@@ -189,7 +189,7 @@ public final class CharacterSheetScreen extends Screen {
         int vpY = colY + 4;
         int vpW = colW - 12;
         int vpH = 112;
-        viewport.render(g, vpX, vpY, vpW, vpH, partialTick, lp);
+        viewport.render(g, vpX, vpY, vpW, vpH, partialTick, lp, mouseX, mouseY);
 
         // Heritage block
         int hbY = colY + vpH + 6;
@@ -313,22 +313,7 @@ public final class CharacterSheetScreen extends Screen {
             }
         }
 
-        // Viewport drag start
-        if (viewport.mouseClicked(mouseX, mouseY, button)) return true;
-
         return super.mouseClicked(event, isDoubleClick);
-    }
-
-    @Override
-    public boolean mouseReleased(MouseButtonEvent event) {
-        if (viewport.mouseReleased(toDesignX(event.x()), toDesignY(event.y()), event.button())) return true;
-        return super.mouseReleased(event);
-    }
-
-    @Override
-    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
-        if (viewport.mouseDragged(toDesignX(event.x()), toDesignY(event.y()), event.button(), deltaX, deltaY)) return true;
-        return super.mouseDragged(event, deltaX, deltaY);
     }
 
     @Override

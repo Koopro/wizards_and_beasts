@@ -9,11 +9,10 @@ import org.jspecify.annotations.NonNull;
 
 /**
  * Renders the local player's 3D model in a fixed viewport rectangle.
- * Supports drag-rotate (left mouse) and scroll-zoom.
+ * The model looks toward the cursor (like the vanilla inventory) and supports scroll-zoom.
  */
 public final class PlayerModelViewport {
 
-    private static final float PITCH_MAX   = 60.0f;
     private static final float ZOOM_MIN    = 0.6f;
     private static final float ZOOM_MAX    = 2.5f;
     private static final float DEFAULT_ZOOM = 1.0f;
@@ -23,32 +22,29 @@ public final class PlayerModelViewport {
     private static final int COLOR_HI     = 0xFF3A2A14;
     private static final int COLOR_SHADOW = 0xFF0A0603;
 
-    private float modelYaw   = 20.0f;
-    private float modelPitch = 5.0f;
-    private float zoom       = DEFAULT_ZOOM;
-
-    private boolean dragging;
-    private double  dragLastX;
-    private double  dragLastY;
+    private float zoom = DEFAULT_ZOOM;
 
     private int vx, vy, vw, vh;
 
+    /**
+     * @param mouseX,mouseY cursor position in the same (design) coordinate space as {@code x,y,w,h}
+     *        so the look-at angle matches what the player sees, even when the sheet is GUI-scaled.
+     */
     public void render(@NonNull GuiGraphics g, int x, int y, int w, int h,
-                       float partialTick, @NonNull LocalPlayer player) {
+                       float partialTick, @NonNull LocalPlayer player, float mouseX, float mouseY) {
         this.vx = x; this.vy = y; this.vw = w; this.vh = h;
 
         McStylePanel.drawPanel(g, x, y, w, h, COLOR_FILL, COLOR_HI, COLOR_SHADOW);
 
-        // renderEntityInInventoryFollowsAngle multiplies angle params by 20 internally,
-        // so divide modelYaw/modelPitch by 20 to recover the original rotation.
         int scale = Math.round(BASE_SCALE * zoom);
-        InventoryScreen.renderEntityInInventoryFollowsAngle(
+        // Vanilla helper: entity head/body track the cursor relative to the viewport rect.
+        InventoryScreen.renderEntityInInventoryFollowsMouse(
                 g,
                 x, y, x + w, y + h,
                 scale,
-                0.0f,
-                modelYaw   / 20.0f,
-                modelPitch / 20.0f,
+                0.0625f,
+                mouseX,
+                mouseY,
                 player
         );
     }
@@ -56,33 +52,6 @@ public final class PlayerModelViewport {
     /** @return true if the (sx,sy) screen coordinate is inside the viewport. */
     public boolean isInsideViewport(double sx, double sy) {
         return sx >= vx && sx < vx + vw && sy >= vy && sy < vy + vh;
-    }
-
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0 && isInsideViewport(mouseX, mouseY)) {
-            dragging  = true;
-            dragLastX = mouseX;
-            dragLastY = mouseY;
-            return true;
-        }
-        return false;
-    }
-
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (button == 0 && dragging) {
-            dragging = false;
-            return true;
-        }
-        return false;
-    }
-
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (!dragging || button != 0) return false;
-        modelYaw   += (float) (mouseX - dragLastX) * 0.75f;
-        modelPitch  = Mth.clamp(modelPitch + (float) (mouseY - dragLastY) * 0.5f, -PITCH_MAX, PITCH_MAX);
-        dragLastX   = mouseX;
-        dragLastY   = mouseY;
-        return true;
     }
 
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {

@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.client.wand.gui;
 
+import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import at.koopro.wizardsandbeasts.network.wand.SetFlexibilityPayload;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
@@ -20,6 +22,9 @@ import java.util.List;
  */
 public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBenchMenu> {
 
+    private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(
+            WizardsAndBeastsMod.MODID, "textures/gui/wandmakers_bench.png");
+
     public WandmakersBenchScreen(WandmakersBenchMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
         this.imageWidth = 176;
@@ -31,8 +36,8 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         int x = (this.width - this.imageWidth) / 2;
         int y = (this.height - this.imageHeight) / 2;
-        graphics.fill(x, y, x + this.imageWidth, y + this.imageHeight, 0xC0101010);
-        graphics.fill(x + 4, y + 4, x + this.imageWidth - 4, y + this.imageHeight - 4, 0xFF2a2520);
+        McStylePanel.drawTexture(graphics, TEXTURE, x, y, this.imageWidth, this.imageHeight,
+                this.imageWidth, this.imageHeight);
 
         int tier = menu.getTierScoreScaled();
         float t = Math.min(1.0f, tier / 300.0f);

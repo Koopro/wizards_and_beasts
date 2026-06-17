@@ -1,13 +1,18 @@
 package at.koopro.wizardsandbeasts.client.event;
 
+import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.character.CharacterSheetScreen;
+import at.koopro.wizardsandbeasts.client.gui.character.CharacterSheetTextures;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.client.event.ScreenEvent;
+import org.jspecify.annotations.NonNull;
 /**
  * Adds a "Character Sheet" button to the vanilla Inventory screen
  * via {@link ScreenEvent.Init.Post}.
@@ -35,14 +40,28 @@ public final class InventoryScreenInjector {
         int bx = guiLeft - 97;
         int by = guiTop  + 25; // 3px gap + recipe-book height (20) + 2px
 
-        Button btn = Button.builder(
-                        Component.translatable("gui.wizards_and_beasts.character_sheet.tooltip"),
-                        b -> Minecraft.getInstance().setScreen(new CharacterSheetScreen()))
-                .bounds(bx, by, BUTTON_W, BUTTON_H)
-                .tooltip(net.minecraft.client.gui.components.Tooltip.create(
-                        Component.translatable("gui.wizards_and_beasts.character_sheet.tooltip")))
-                .build();
+        CharacterTabButton btn = new CharacterTabButton(bx, by, BUTTON_W, BUTTON_H,
+                b -> Minecraft.getInstance().setScreen(new CharacterSheetScreen()));
+        btn.setTooltip(Tooltip.create(
+                Component.translatable("gui.wizards_and_beasts.character_sheet.tooltip")));
 
         event.addListener(btn);
+    }
+
+    /** Vanilla button frame with the character-sheet icon centered on it. */
+    private static final class CharacterTabButton extends Button {
+        private static final int ICON = 16;
+
+        CharacterTabButton(int x, int y, int w, int h, OnPress onPress) {
+            super(x, y, w, h, Component.empty(), onPress, DEFAULT_NARRATION);
+        }
+
+        @Override
+        protected void renderContents(@NonNull GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+            // Vanilla button frame already drawn by AbstractButton#renderWidget; draw icon, no label.
+            int ix = getX() + (getWidth() - ICON) / 2;
+            int iy = getY() + (getHeight() - ICON) / 2;
+            McStylePanel.drawTexture(g, CharacterSheetTextures.ICON_TAB, ix, iy, ICON, ICON, ICON, ICON);
+        }
     }
 }
