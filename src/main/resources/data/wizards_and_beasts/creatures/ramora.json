@@ -3,7 +3,7 @@
   "id": "wizards_and_beasts:ramora",
   "bodyPlan": "AQUATIC",
   "locomotion": "AQUATIC",
-  "temperament": "NEUTRAL",
+  "temperament": "PASSIVE",
   "width": 0.95,
   "height": 1.25,
   "maxHealth": 16.0,
@@ -12,5 +12,9 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/ramora",
   "texture": "wizards_and_beasts:textures/entity/ramora.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/ramora.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/ramora.animation.json",
+  "attackDamage": 1.0,
+  "traits": [
+    "AMPHIBIOUS"
+  ]
 }

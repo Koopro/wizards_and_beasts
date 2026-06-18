@@ -3,7 +3,7 @@
   "id": "wizards_and_beasts:runespoor",
   "bodyPlan": "SERPENTINE",
   "locomotion": "GROUND",
-  "temperament": "NEUTRAL",
+  "temperament": "HOSTILE",
   "width": 0.95,
   "height": 1.25,
   "maxHealth": 16.0,
@@ -12,5 +12,9 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/runespoor",
   "texture": "wizards_and_beasts:textures/entity/runespoor.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/runespoor.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/runespoor.animation.json",
+  "attackDamage": 5.0,
+  "traits": [
+    "POISON_ATTACK"
+  ]
 }

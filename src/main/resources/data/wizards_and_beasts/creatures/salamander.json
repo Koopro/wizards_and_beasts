@@ -12,5 +12,10 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/salamander",
   "texture": "wizards_and_beasts:textures/entity/salamander.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/salamander.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/salamander.animation.json",
+  "attackDamage": 2.0,
+  "traits": [
+    "FIRE_IMMUNE",
+    "FIRE_ATTACK"
+  ]
 }

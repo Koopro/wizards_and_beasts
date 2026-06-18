@@ -4,6 +4,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.Identifier;
 
+import java.util.List;
+
 /**
  * Datapack-driven creature definition, mirroring {@code BestiaryEntry}/{@code BroomDefinition}.
  * Loaded from {@code data/wizards_and_beasts/creatures/<id>.json} by {@link CreatureDefinitionLoader}.
@@ -24,6 +26,8 @@ public record CreatureDefinition(
         double movementSpeed,
         double flyingSpeed,
         double followRange,
+        double attackDamage,
+        List<Trait> traits,
         Identifier model,
         Identifier texture,
         Identifier animation) {
@@ -43,6 +47,8 @@ public record CreatureDefinition(
             Codec.DOUBLE.fieldOf("movementSpeed").forGetter(CreatureDefinition::movementSpeed),
             Codec.DOUBLE.optionalFieldOf("flyingSpeed", 0.0).forGetter(CreatureDefinition::flyingSpeed),
             Codec.DOUBLE.optionalFieldOf("followRange", 16.0).forGetter(CreatureDefinition::followRange),
+            Codec.DOUBLE.optionalFieldOf("attackDamage", 0.0).forGetter(CreatureDefinition::attackDamage),
+            enumCodec(Trait.class).listOf().optionalFieldOf("traits", List.of()).forGetter(CreatureDefinition::traits),
             Identifier.CODEC.fieldOf("model").forGetter(CreatureDefinition::model),
             Identifier.CODEC.fieldOf("texture").forGetter(CreatureDefinition::texture),
             Identifier.CODEC.fieldOf("animation").forGetter(CreatureDefinition::animation)

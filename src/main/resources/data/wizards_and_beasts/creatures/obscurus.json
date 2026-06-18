@@ -3,7 +3,7 @@
   "id": "wizards_and_beasts:obscurus",
   "bodyPlan": "BLOB_SPHERE",
   "locomotion": "FLYING",
-  "temperament": "NEUTRAL",
+  "temperament": "HOSTILE",
   "width": 0.95,
   "height": 1.25,
   "maxHealth": 16.0,
@@ -12,5 +12,7 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/obscurus",
   "texture": "wizards_and_beasts:textures/entity/obscurus.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/obscurus.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/obscurus.animation.json",
+  "attackDamage": 6.0,
+  "traits": []
 }

@@ -27,8 +27,7 @@ public class GenericFlyingBeastEntity extends GenericBeastEntity {
     }
 
     @Override
-    protected void registerGoals() {
-        registerCommonGoals();
+    protected void addMovementGoals() {
         goalSelector.addGoal(5, new WaterAvoidingRandomFlyingGoal(this, 1.0));
     }
 

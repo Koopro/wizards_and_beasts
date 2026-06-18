@@ -3,7 +3,7 @@
   "id": "wizards_and_beasts:hippocampus",
   "bodyPlan": "AQUATIC",
   "locomotion": "AQUATIC",
-  "temperament": "NEUTRAL",
+  "temperament": "PASSIVE",
   "width": 1.7,
   "height": 1.9,
   "maxHealth": 40.0,
@@ -12,5 +12,9 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/hippocampus",
   "texture": "wizards_and_beasts:textures/entity/hippocampus.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/hippocampus.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/hippocampus.animation.json",
+  "attackDamage": 2.0,
+  "traits": [
+    "AMPHIBIOUS"
+  ]
 }

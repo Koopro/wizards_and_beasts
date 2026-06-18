@@ -3,7 +3,7 @@
   "id": "wizards_and_beasts:kappa",
   "bodyPlan": "AQUATIC",
   "locomotion": "AQUATIC",
-  "temperament": "NEUTRAL",
+  "temperament": "HOSTILE",
   "width": 0.95,
   "height": 1.25,
   "maxHealth": 16.0,
@@ -12,5 +12,9 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/kappa",
   "texture": "wizards_and_beasts:textures/entity/kappa.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/kappa.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/kappa.animation.json",
+  "attackDamage": 4.0,
+  "traits": [
+    "AMPHIBIOUS"
+  ]
 }

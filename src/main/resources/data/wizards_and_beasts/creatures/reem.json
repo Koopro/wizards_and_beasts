@@ -12,5 +12,10 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/reem",
   "texture": "wizards_and_beasts:textures/entity/reem.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/reem.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/reem.animation.json",
+  "attackDamage": 7.0,
+  "traits": [
+    "CHARGE",
+    "KNOCKBACK"
+  ]
 }

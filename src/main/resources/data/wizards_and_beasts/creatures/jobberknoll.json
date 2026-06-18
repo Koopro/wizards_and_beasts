@@ -3,7 +3,7 @@
   "id": "wizards_and_beasts:jobberknoll",
   "bodyPlan": "AVIAN",
   "locomotion": "FLYING",
-  "temperament": "NEUTRAL",
+  "temperament": "PASSIVE",
   "width": 0.45,
   "height": 0.45,
   "maxHealth": 4.0,
@@ -12,5 +12,9 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/jobberknoll",
   "texture": "wizards_and_beasts:textures/entity/jobberknoll.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/jobberknoll.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/jobberknoll.animation.json",
+  "attackDamage": 0.0,
+  "traits": [
+    "FEARFUL"
+  ]
 }

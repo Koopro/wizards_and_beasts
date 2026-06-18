@@ -3,7 +3,7 @@
   "id": "wizards_and_beasts:pogrebin",
   "bodyPlan": "BLOB_SPHERE",
   "locomotion": "GROUND",
-  "temperament": "NEUTRAL",
+  "temperament": "HOSTILE",
   "width": 0.65,
   "height": 0.75,
   "maxHealth": 8.0,
@@ -12,5 +12,7 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/pogrebin",
   "texture": "wizards_and_beasts:textures/entity/pogrebin.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/pogrebin.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/pogrebin.animation.json",
+  "attackDamage": 3.0,
+  "traits": []
 }

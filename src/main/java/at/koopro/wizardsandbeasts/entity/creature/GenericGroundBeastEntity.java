@@ -15,8 +15,7 @@ public class GenericGroundBeastEntity extends GenericBeastEntity {
     }
 
     @Override
-    protected void registerGoals() {
-        registerCommonGoals();
+    protected void addMovementGoals() {
         goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 0.8));
     }
 

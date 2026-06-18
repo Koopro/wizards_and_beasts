@@ -12,5 +12,7 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/porlock",
   "texture": "wizards_and_beasts:textures/entity/porlock.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/porlock.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/porlock.animation.json",
+  "attackDamage": 2.0,
+  "traits": []
 }

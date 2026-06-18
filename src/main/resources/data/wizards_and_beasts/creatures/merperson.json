@@ -12,5 +12,9 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/merperson",
   "texture": "wizards_and_beasts:textures/entity/merperson.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/merperson.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/merperson.animation.json",
+  "attackDamage": 3.0,
+  "traits": [
+    "AMPHIBIOUS"
+  ]
 }

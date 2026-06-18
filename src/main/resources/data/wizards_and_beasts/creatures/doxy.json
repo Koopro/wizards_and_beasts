@@ -12,5 +12,9 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/doxy",
   "texture": "wizards_and_beasts:textures/entity/doxy.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/doxy.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/doxy.animation.json",
+  "attackDamage": 1.0,
+  "traits": [
+    "POISON_ATTACK"
+  ]
 }

@@ -12,5 +12,7 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/sphinx",
   "texture": "wizards_and_beasts:textures/entity/sphinx.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/sphinx.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/sphinx.animation.json",
+  "attackDamage": 6.0,
+  "traits": []
 }

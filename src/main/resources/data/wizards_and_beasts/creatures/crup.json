@@ -3,7 +3,7 @@
   "id": "wizards_and_beasts:crup",
   "bodyPlan": "QUADRUPED",
   "locomotion": "GROUND",
-  "temperament": "NEUTRAL",
+  "temperament": "PASSIVE",
   "width": 0.65,
   "height": 0.75,
   "maxHealth": 8.0,
@@ -12,5 +12,7 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/crup",
   "texture": "wizards_and_beasts:textures/entity/crup.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/crup.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/crup.animation.json",
+  "attackDamage": 2.0,
+  "traits": []
 }

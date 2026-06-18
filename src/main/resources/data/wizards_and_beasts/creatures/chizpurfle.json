@@ -12,5 +12,9 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/chizpurfle",
   "texture": "wizards_and_beasts:textures/entity/chizpurfle.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/chizpurfle.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/chizpurfle.animation.json",
+  "attackDamage": 1.0,
+  "traits": [
+    "PACK"
+  ]
 }

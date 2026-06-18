@@ -12,5 +12,9 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/plimpy",
   "texture": "wizards_and_beasts:textures/entity/plimpy.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/plimpy.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/plimpy.animation.json",
+  "attackDamage": 2.0,
+  "traits": [
+    "AMPHIBIOUS"
+  ]
 }

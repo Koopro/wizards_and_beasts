@@ -3,7 +3,7 @@
   "id": "wizards_and_beasts:manticore",
   "bodyPlan": "WINGED_QUADRUPED",
   "locomotion": "GROUND",
-  "temperament": "NEUTRAL",
+  "temperament": "HOSTILE",
   "width": 1.7,
   "height": 1.9,
   "maxHealth": 40.0,
@@ -12,5 +12,10 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/manticore",
   "texture": "wizards_and_beasts:textures/entity/manticore.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/manticore.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/manticore.animation.json",
+  "attackDamage": 8.0,
+  "traits": [
+    "POISON_ATTACK",
+    "FIRE_IMMUNE"
+  ]
 }

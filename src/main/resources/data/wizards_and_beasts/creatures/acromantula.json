@@ -3,7 +3,7 @@
   "id": "wizards_and_beasts:acromantula",
   "bodyPlan": "ARTHROPOD_MULTILEG",
   "locomotion": "GROUND",
-  "temperament": "NEUTRAL",
+  "temperament": "HOSTILE",
   "width": 1.7,
   "height": 1.9,
   "maxHealth": 40.0,
@@ -12,5 +12,10 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/acromantula",
   "texture": "wizards_and_beasts:textures/entity/acromantula.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/acromantula.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/acromantula.animation.json",
+  "attackDamage": 6.0,
+  "traits": [
+    "POISON_ATTACK",
+    "PACK"
+  ]
 }

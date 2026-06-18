@@ -3,7 +3,7 @@
   "id": "wizards_and_beasts:blast_ended_skrewt",
   "bodyPlan": "ARTHROPOD_MULTILEG",
   "locomotion": "GROUND",
-  "temperament": "NEUTRAL",
+  "temperament": "HOSTILE",
   "width": 1.7,
   "height": 1.9,
   "maxHealth": 40.0,
@@ -12,5 +12,10 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/blast_ended_skrewt",
   "texture": "wizards_and_beasts:textures/entity/blast_ended_skrewt.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/blast_ended_skrewt.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/blast_ended_skrewt.animation.json",
+  "attackDamage": 6.0,
+  "traits": [
+    "FIRE_ATTACK",
+    "EXPLODE_ON_DEATH"
+  ]
 }

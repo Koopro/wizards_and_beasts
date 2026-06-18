@@ -3,7 +3,7 @@
   "id": "wizards_and_beasts:knarl",
   "bodyPlan": "QUADRUPED",
   "locomotion": "GROUND",
-  "temperament": "NEUTRAL",
+  "temperament": "PASSIVE",
   "width": 0.65,
   "height": 0.75,
   "maxHealth": 8.0,
@@ -12,5 +12,9 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/knarl",
   "texture": "wizards_and_beasts:textures/entity/knarl.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/knarl.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/knarl.animation.json",
+  "attackDamage": 0.0,
+  "traits": [
+    "FEARFUL"
+  ]
 }

@@ -3,7 +3,7 @@
   "id": "wizards_and_beasts:werewolf",
   "bodyPlan": "BIPED_HUMANOID",
   "locomotion": "GROUND",
-  "temperament": "NEUTRAL",
+  "temperament": "HOSTILE",
   "width": 1.7,
   "height": 1.9,
   "maxHealth": 40.0,
@@ -12,5 +12,7 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/werewolf",
   "texture": "wizards_and_beasts:textures/entity/werewolf.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/werewolf.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/werewolf.animation.json",
+  "attackDamage": 7.0,
+  "traits": []
 }

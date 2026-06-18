@@ -3,7 +3,7 @@
   "id": "wizards_and_beasts:zouwu",
   "bodyPlan": "QUADRUPED",
   "locomotion": "GROUND",
-  "temperament": "NEUTRAL",
+  "temperament": "HOSTILE",
   "width": 2.7,
   "height": 2.9,
   "maxHealth": 90.0,
@@ -12,5 +12,7 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/zouwu",
   "texture": "wizards_and_beasts:textures/entity/zouwu.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/zouwu.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/zouwu.animation.json",
+  "attackDamage": 8.0,
+  "traits": []
 }

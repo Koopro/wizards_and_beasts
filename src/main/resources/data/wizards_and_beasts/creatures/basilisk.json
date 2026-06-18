@@ -3,7 +3,7 @@
   "id": "wizards_and_beasts:basilisk",
   "bodyPlan": "SERPENTINE",
   "locomotion": "GROUND",
-  "temperament": "NEUTRAL",
+  "temperament": "HOSTILE",
   "width": 2.7,
   "height": 2.9,
   "maxHealth": 90.0,
@@ -12,5 +12,10 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/basilisk",
   "texture": "wizards_and_beasts:textures/entity/basilisk.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/basilisk.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/basilisk.animation.json",
+  "attackDamage": 10.0,
+  "traits": [
+    "POISON_ATTACK",
+    "PETRIFY"
+  ]
 }

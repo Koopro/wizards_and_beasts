@@ -3,7 +3,7 @@
   "id": "wizards_and_beasts:kelpie",
   "bodyPlan": "AQUATIC",
   "locomotion": "AQUATIC",
-  "temperament": "NEUTRAL",
+  "temperament": "HOSTILE",
   "width": 1.7,
   "height": 1.9,
   "maxHealth": 40.0,
@@ -12,5 +12,10 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/kelpie",
   "texture": "wizards_and_beasts:textures/entity/kelpie.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/kelpie.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/kelpie.animation.json",
+  "attackDamage": 6.0,
+  "traits": [
+    "AMPHIBIOUS",
+    "KNOCKBACK"
+  ]
 }

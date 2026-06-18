@@ -3,7 +3,7 @@
   "id": "wizards_and_beasts:chinese_fireball",
   "bodyPlan": "WINGED_QUADRUPED",
   "locomotion": "FLYING",
-  "temperament": "NEUTRAL",
+  "temperament": "HOSTILE",
   "width": 2.7,
   "height": 2.9,
   "maxHealth": 90.0,
@@ -12,5 +12,11 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/chinese_fireball",
   "texture": "wizards_and_beasts:textures/entity/chinese_fireball.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/chinese_fireball.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/chinese_fireball.animation.json",
+  "attackDamage": 8.0,
+  "traits": [
+    "FIRE_IMMUNE",
+    "FIRE_ATTACK",
+    "KNOCKBACK"
+  ]
 }

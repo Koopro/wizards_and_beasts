@@ -28,8 +28,7 @@ public class GenericAquaticBeastEntity extends GenericBeastEntity {
     }
 
     @Override
-    protected void registerGoals() {
-        registerCommonGoals();
+    protected void addMovementGoals() {
         goalSelector.addGoal(5, new RandomSwimmingGoal(this, 1.0, 20));
     }
 

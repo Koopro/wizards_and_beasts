@@ -3,7 +3,7 @@
   "id": "wizards_and_beasts:griffin",
   "bodyPlan": "WINGED_QUADRUPED",
   "locomotion": "FLYING",
-  "temperament": "NEUTRAL",
+  "temperament": "HOSTILE",
   "width": 1.7,
   "height": 1.9,
   "maxHealth": 40.0,
@@ -12,5 +12,9 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/griffin",
   "texture": "wizards_and_beasts:textures/entity/griffin.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/griffin.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/griffin.animation.json",
+  "attackDamage": 7.0,
+  "traits": [
+    "KNOCKBACK"
+  ]
 }

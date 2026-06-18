@@ -3,7 +3,7 @@
   "id": "wizards_and_beasts:dugbog",
   "bodyPlan": "QUADRUPED",
   "locomotion": "GROUND",
-  "temperament": "NEUTRAL",
+  "temperament": "HOSTILE",
   "width": 0.95,
   "height": 1.25,
   "maxHealth": 16.0,
@@ -12,5 +12,9 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/dugbog",
   "texture": "wizards_and_beasts:textures/entity/dugbog.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/dugbog.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/dugbog.animation.json",
+  "attackDamage": 4.0,
+  "traits": [
+    "AMPHIBIOUS"
+  ]
 }

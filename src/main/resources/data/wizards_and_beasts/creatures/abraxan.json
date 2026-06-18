@@ -12,5 +12,7 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/abraxan",
   "texture": "wizards_and_beasts:textures/entity/abraxan.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/abraxan.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/abraxan.animation.json",
+  "attackDamage": 5.0,
+  "traits": []
 }

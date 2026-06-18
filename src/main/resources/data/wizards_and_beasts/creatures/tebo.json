@@ -12,5 +12,9 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/tebo",
   "texture": "wizards_and_beasts:textures/entity/tebo.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/tebo.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/tebo.animation.json",
+  "attackDamage": 5.0,
+  "traits": [
+    "CHARGE"
+  ]
 }

@@ -14,8 +14,8 @@ public class GenericSessileBeastEntity extends GenericBeastEntity {
     }
 
     @Override
-    protected void registerGoals() {
-        registerCommonGoals();
+    protected void addMovementGoals() {
+        // Sessile: no wander goal.
     }
 
     @Override

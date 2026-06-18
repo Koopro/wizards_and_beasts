@@ -12,5 +12,9 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/centaur",
   "texture": "wizards_and_beasts:textures/entity/centaur.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/centaur.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/centaur.animation.json",
+  "attackDamage": 6.0,
+  "traits": [
+    "KNOCKBACK"
+  ]
 }

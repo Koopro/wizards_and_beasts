@@ -12,5 +12,7 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/billywig",
   "texture": "wizards_and_beasts:textures/entity/billywig.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/billywig.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/billywig.animation.json",
+  "attackDamage": 1.0,
+  "traits": []
 }

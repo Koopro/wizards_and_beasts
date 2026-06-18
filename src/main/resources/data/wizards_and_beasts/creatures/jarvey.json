@@ -12,5 +12,9 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/jarvey",
   "texture": "wizards_and_beasts:textures/entity/jarvey.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/jarvey.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/jarvey.animation.json",
+  "attackDamage": 2.0,
+  "traits": [
+    "THIEF"
+  ]
 }

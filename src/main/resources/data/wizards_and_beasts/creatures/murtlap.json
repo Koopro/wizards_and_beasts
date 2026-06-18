@@ -12,5 +12,7 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/murtlap",
   "texture": "wizards_and_beasts:textures/entity/murtlap.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/murtlap.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/murtlap.animation.json",
+  "attackDamage": 1.0,
+  "traits": []
 }

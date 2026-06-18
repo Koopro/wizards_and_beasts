@@ -3,7 +3,7 @@
   "id": "wizards_and_beasts:unicorn",
   "bodyPlan": "QUADRUPED",
   "locomotion": "GROUND",
-  "temperament": "NEUTRAL",
+  "temperament": "PASSIVE",
   "width": 0.95,
   "height": 1.25,
   "maxHealth": 16.0,
@@ -12,5 +12,10 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/unicorn",
   "texture": "wizards_and_beasts:textures/entity/unicorn.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/unicorn.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/unicorn.animation.json",
+  "attackDamage": 0.0,
+  "traits": [
+    "FEARFUL",
+    "REGEN"
+  ]
 }

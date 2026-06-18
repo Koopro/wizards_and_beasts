@@ -3,7 +3,7 @@
   "id": "wizards_and_beasts:snallygaster",
   "bodyPlan": "WINGED_QUADRUPED",
   "locomotion": "FLYING",
-  "temperament": "NEUTRAL",
+  "temperament": "HOSTILE",
   "width": 1.7,
   "height": 1.9,
   "maxHealth": 40.0,
@@ -12,5 +12,7 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/snallygaster",
   "texture": "wizards_and_beasts:textures/entity/snallygaster.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/snallygaster.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/snallygaster.animation.json",
+  "attackDamage": 6.0,
+  "traits": []
 }

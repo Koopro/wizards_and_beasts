@@ -3,7 +3,7 @@
   "id": "wizards_and_beasts:shrake",
   "bodyPlan": "AQUATIC",
   "locomotion": "AQUATIC",
-  "temperament": "NEUTRAL",
+  "temperament": "HOSTILE",
   "width": 0.95,
   "height": 1.25,
   "maxHealth": 16.0,
@@ -12,5 +12,9 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/shrake",
   "texture": "wizards_and_beasts:textures/entity/shrake.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/shrake.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/shrake.animation.json",
+  "attackDamage": 3.0,
+  "traits": [
+    "AMPHIBIOUS"
+  ]
 }

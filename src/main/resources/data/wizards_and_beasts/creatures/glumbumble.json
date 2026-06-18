@@ -12,5 +12,7 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/glumbumble",
   "texture": "wizards_and_beasts:textures/entity/glumbumble.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/glumbumble.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/glumbumble.animation.json",
+  "attackDamage": 1.0,
+  "traits": []
 }

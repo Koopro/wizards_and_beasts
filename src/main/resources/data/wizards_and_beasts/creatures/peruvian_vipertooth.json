@@ -3,7 +3,7 @@
   "id": "wizards_and_beasts:peruvian_vipertooth",
   "bodyPlan": "WINGED_QUADRUPED",
   "locomotion": "FLYING",
-  "temperament": "NEUTRAL",
+  "temperament": "HOSTILE",
   "width": 1.7,
   "height": 1.9,
   "maxHealth": 40.0,
@@ -12,5 +12,11 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/peruvian_vipertooth",
   "texture": "wizards_and_beasts:textures/entity/peruvian_vipertooth.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/peruvian_vipertooth.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/peruvian_vipertooth.animation.json",
+  "attackDamage": 8.0,
+  "traits": [
+    "FIRE_IMMUNE",
+    "FIRE_ATTACK",
+    "KNOCKBACK"
+  ]
 }

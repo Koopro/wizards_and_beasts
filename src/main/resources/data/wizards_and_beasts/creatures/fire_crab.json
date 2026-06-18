@@ -12,5 +12,10 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/fire_crab",
   "texture": "wizards_and_beasts:textures/entity/fire_crab.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/fire_crab.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/fire_crab.animation.json",
+  "attackDamage": 3.0,
+  "traits": [
+    "FIRE_IMMUNE",
+    "FIRE_ATTACK"
+  ]
 }

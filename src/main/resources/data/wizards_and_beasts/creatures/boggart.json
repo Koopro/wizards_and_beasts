@@ -12,5 +12,7 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/boggart",
   "texture": "wizards_and_beasts:textures/entity/boggart.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/boggart.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/boggart.animation.json",
+  "attackDamage": 2.0,
+  "traits": []
 }

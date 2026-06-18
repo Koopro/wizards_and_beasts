@@ -12,5 +12,7 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/thunderbird",
   "texture": "wizards_and_beasts:textures/entity/thunderbird.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/thunderbird.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/thunderbird.animation.json",
+  "attackDamage": 4.0,
+  "traits": []
 }

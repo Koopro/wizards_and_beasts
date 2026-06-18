@@ -12,5 +12,11 @@
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/erumpent",
   "texture": "wizards_and_beasts:textures/entity/erumpent.png",
-  "animation": "wizards_and_beasts:geckolib/animations/entity/erumpent.animation.json"
+  "animation": "wizards_and_beasts:geckolib/animations/entity/erumpent.animation.json",
+  "attackDamage": 8.0,
+  "traits": [
+    "CHARGE",
+    "KNOCKBACK",
+    "EXPLODE_ON_DEATH"
+  ]
 }

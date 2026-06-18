@@ -165,7 +165,11 @@ public final class ModCreatures {
         AttributeSupplier.Builder builder = Mob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 10.0)
                 .add(Attributes.MOVEMENT_SPEED, 0.25)
-                .add(Attributes.FOLLOW_RANGE, 16.0);
+                .add(Attributes.FOLLOW_RANGE, 16.0)
+                // ATTACK_DAMAGE is not part of createMobAttributes(); generic creatures need it so the
+                // trait-driven melee/combat layer can set a real value per CreatureDefinition on spawn.
+                .add(Attributes.ATTACK_DAMAGE, 2.0)
+                .add(Attributes.ATTACK_KNOCKBACK, 0.0);
         if (loco == Locomotion.FLYING) {
             builder.add(Attributes.FLYING_SPEED, 0.5);
         }
