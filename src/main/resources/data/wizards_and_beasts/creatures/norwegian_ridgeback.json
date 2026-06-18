@@ -17,6 +17,7 @@
   "traits": [
     "FIRE_IMMUNE",
     "FIRE_ATTACK",
+    "FIRE_BREATH",
     "KNOCKBACK"
   ]
 }

@@ -14,6 +14,8 @@ public enum Trait {
     FIRE_IMMUNE,
     /** Melee hits set the target alight. */
     FIRE_ATTACK,
+    /** Ranged fire-breath: spits fireballs at the attack target on a cooldown. */
+    FIRE_BREATH,
     /** Melee hits apply Poison. */
     POISON_ATTACK,
     /** Melee hits apply a heavy slow + blindness ("petrify-lite"). */

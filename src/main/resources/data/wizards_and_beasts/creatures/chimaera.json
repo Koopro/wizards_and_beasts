@@ -14,5 +14,7 @@
   "texture": "wizards_and_beasts:textures/entity/chimaera.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/chimaera.animation.json",
   "attackDamage": 8.0,
-  "traits": []
+  "traits": [
+    "FIRE_BREATH"
+  ]
 }

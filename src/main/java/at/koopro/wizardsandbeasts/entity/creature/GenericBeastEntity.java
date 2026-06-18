@@ -142,6 +142,9 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
         if (has(Trait.FEARFUL)) {
             goalSelector.addGoal(2, new AvoidEntityGoal<>(this, Player.class, 8.0f, 1.0, 1.3));
         }
+        if (has(Trait.FIRE_BREATH)) {
+            goalSelector.addGoal(3, new at.koopro.wizardsandbeasts.entity.creature.ai.BreatheFireGoal(this));
+        }
         if (canMelee && temperament != Temperament.PASSIVE) {
             goalSelector.addGoal(4, new MeleeAttackGoal(this, charge ? 1.45 : 1.2, true));
             HurtByTargetGoal retaliate = new HurtByTargetGoal(this);
