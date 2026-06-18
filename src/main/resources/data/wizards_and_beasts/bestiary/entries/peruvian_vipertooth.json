@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/peruvian_vipertooth.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/peruvian_vipertooth.png",
-  "sortOrder": 7
+  "sortOrder": 7,
+  "entityType": "wizards_and_beasts:peruvian_vipertooth"
 }

@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/reem.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/reem.png",
-  "sortOrder": 21
+  "sortOrder": 21,
+  "entityType": "wizards_and_beasts:reem"
 }

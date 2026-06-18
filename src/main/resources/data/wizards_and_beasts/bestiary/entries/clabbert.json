@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/clabbert.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/clabbert.png",
-  "sortOrder": 38
+  "sortOrder": 38,
+  "entityType": "wizards_and_beasts:clabbert"
 }

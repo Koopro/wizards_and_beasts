@@ -1,0 +1,27 @@
+{
+  "id": "wizards_and_beasts:pogrebin",
+  "displayName": "bestiary.wizards_and_beasts.pogrebin.name",
+  "category": "CURSED_BEING",
+  "mmRating": 2,
+  "habitat": "bestiary.wizards_and_beasts.pogrebin.habitat",
+  "size": "SMALL",
+  "shortLore": "bestiary.wizards_and_beasts.pogrebin.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.pogrebin.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.pogrebin.ability.1",
+    "bestiary.wizards_and_beasts.pogrebin.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.pogrebin.threat.1",
+    "bestiary.wizards_and_beasts.pogrebin.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.pogrebin.weakness.1",
+    "bestiary.wizards_and_beasts.pogrebin.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "entityType": "wizards_and_beasts:pogrebin",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/pogrebin.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/pogrebin.png",
+  "sortOrder": 92
+}

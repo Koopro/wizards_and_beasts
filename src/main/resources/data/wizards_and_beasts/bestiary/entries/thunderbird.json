@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/thunderbird.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/thunderbird.png",
-  "sortOrder": 12
+  "sortOrder": 12,
+  "entityType": "wizards_and_beasts:thunderbird"
 }

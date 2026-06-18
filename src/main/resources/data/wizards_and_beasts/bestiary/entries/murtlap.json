@@ -1,0 +1,27 @@
+{
+  "id": "wizards_and_beasts:murtlap",
+  "displayName": "bestiary.wizards_and_beasts.murtlap.name",
+  "category": "SMALL_CREATURE",
+  "mmRating": 2,
+  "habitat": "bestiary.wizards_and_beasts.murtlap.habitat",
+  "size": "SMALL",
+  "shortLore": "bestiary.wizards_and_beasts.murtlap.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.murtlap.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.murtlap.ability.1",
+    "bestiary.wizards_and_beasts.murtlap.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.murtlap.threat.1",
+    "bestiary.wizards_and_beasts.murtlap.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.murtlap.weakness.1",
+    "bestiary.wizards_and_beasts.murtlap.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "entityType": "wizards_and_beasts:murtlap",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/murtlap.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/murtlap.png",
+  "sortOrder": 73
+}

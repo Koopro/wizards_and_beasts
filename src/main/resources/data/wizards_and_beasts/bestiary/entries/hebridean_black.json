@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/hebridean_black.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/hebridean_black.png",
-  "sortOrder": 9
+  "sortOrder": 9,
+  "entityType": "wizards_and_beasts:hebridean_black"
 }

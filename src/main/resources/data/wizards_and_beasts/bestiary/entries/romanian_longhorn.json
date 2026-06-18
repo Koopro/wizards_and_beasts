@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/romanian_longhorn.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/romanian_longhorn.png",
-  "sortOrder": 2
+  "sortOrder": 2,
+  "entityType": "wizards_and_beasts:romanian_longhorn"
 }

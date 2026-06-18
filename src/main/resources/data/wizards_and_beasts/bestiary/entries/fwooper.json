@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/fwooper.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/fwooper.png",
-  "sortOrder": 28
+  "sortOrder": 28,
+  "entityType": "wizards_and_beasts:fwooper"
 }

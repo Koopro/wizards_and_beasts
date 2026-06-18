@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/manticore.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/manticore.png",
-  "sortOrder": 19
+  "sortOrder": 19,
+  "entityType": "wizards_and_beasts:manticore"
 }

@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/zouwu.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/zouwu.png",
-  "sortOrder": 56
+  "sortOrder": 56,
+  "entityType": "wizards_and_beasts:zouwu"
 }

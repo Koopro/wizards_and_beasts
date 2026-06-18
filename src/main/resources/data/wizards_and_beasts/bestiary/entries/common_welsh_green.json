@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/common_welsh_green.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/common_welsh_green.png",
-  "sortOrder": 4
+  "sortOrder": 4,
+  "entityType": "wizards_and_beasts:common_welsh_green"
 }

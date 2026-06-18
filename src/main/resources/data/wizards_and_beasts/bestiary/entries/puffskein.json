@@ -1,0 +1,27 @@
+{
+  "id": "wizards_and_beasts:puffskein",
+  "displayName": "bestiary.wizards_and_beasts.puffskein.name",
+  "category": "SMALL_CREATURE",
+  "mmRating": 1,
+  "habitat": "bestiary.wizards_and_beasts.puffskein.habitat",
+  "size": "TINY",
+  "shortLore": "bestiary.wizards_and_beasts.puffskein.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.puffskein.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.puffskein.ability.1",
+    "bestiary.wizards_and_beasts.puffskein.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.puffskein.threat.1",
+    "bestiary.wizards_and_beasts.puffskein.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.puffskein.weakness.1",
+    "bestiary.wizards_and_beasts.puffskein.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "entityType": "wizards_and_beasts:puffskein",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/puffskein.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/puffskein.png",
+  "sortOrder": 64
+}

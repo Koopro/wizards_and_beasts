@@ -1,0 +1,27 @@
+{
+  "id": "wizards_and_beasts:salamander",
+  "displayName": "bestiary.wizards_and_beasts.salamander.name",
+  "category": "MAGICAL_CREATURE",
+  "mmRating": 2,
+  "habitat": "bestiary.wizards_and_beasts.salamander.habitat",
+  "size": "SMALL",
+  "shortLore": "bestiary.wizards_and_beasts.salamander.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.salamander.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.salamander.ability.1",
+    "bestiary.wizards_and_beasts.salamander.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.salamander.threat.1",
+    "bestiary.wizards_and_beasts.salamander.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.salamander.weakness.1",
+    "bestiary.wizards_and_beasts.salamander.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "entityType": "wizards_and_beasts:salamander",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/salamander.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/salamander.png",
+  "sortOrder": 72
+}

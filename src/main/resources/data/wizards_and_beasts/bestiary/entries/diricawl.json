@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/diricawl.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/diricawl.png",
-  "sortOrder": 30
+  "sortOrder": 30,
+  "entityType": "wizards_and_beasts:diricawl"
 }

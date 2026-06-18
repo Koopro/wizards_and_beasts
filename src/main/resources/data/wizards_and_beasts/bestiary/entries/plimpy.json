@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/plimpy.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/plimpy.png",
-  "sortOrder": 54
+  "sortOrder": 54,
+  "entityType": "wizards_and_beasts:plimpy"
 }

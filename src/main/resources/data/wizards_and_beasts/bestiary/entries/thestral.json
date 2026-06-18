@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/thestral.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/thestral.png",
-  "sortOrder": 11
+  "sortOrder": 11,
+  "entityType": "wizards_and_beasts:thestral"
 }

@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/troll.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/troll.png",
-  "sortOrder": 22
+  "sortOrder": 22,
+  "entityType": "wizards_and_beasts:troll"
 }

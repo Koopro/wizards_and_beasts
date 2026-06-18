@@ -1,0 +1,27 @@
+{
+  "id": "wizards_and_beasts:chizpurfle",
+  "displayName": "bestiary.wizards_and_beasts.chizpurfle.name",
+  "category": "ARACHNID",
+  "mmRating": 1,
+  "habitat": "bestiary.wizards_and_beasts.chizpurfle.habitat",
+  "size": "TINY",
+  "shortLore": "bestiary.wizards_and_beasts.chizpurfle.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.chizpurfle.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.chizpurfle.ability.1",
+    "bestiary.wizards_and_beasts.chizpurfle.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.chizpurfle.threat.1",
+    "bestiary.wizards_and_beasts.chizpurfle.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.chizpurfle.weakness.1",
+    "bestiary.wizards_and_beasts.chizpurfle.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "entityType": "wizards_and_beasts:chizpurfle",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/chizpurfle.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/chizpurfle.png",
+  "sortOrder": 66
+}

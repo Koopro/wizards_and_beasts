@@ -1,0 +1,27 @@
+{
+  "id": "wizards_and_beasts:dugbog",
+  "displayName": "bestiary.wizards_and_beasts.dugbog.name",
+  "category": "AQUATIC",
+  "mmRating": 4,
+  "habitat": "bestiary.wizards_and_beasts.dugbog.habitat",
+  "size": "MEDIUM",
+  "shortLore": "bestiary.wizards_and_beasts.dugbog.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.dugbog.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.dugbog.ability.1",
+    "bestiary.wizards_and_beasts.dugbog.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.dugbog.threat.1",
+    "bestiary.wizards_and_beasts.dugbog.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.dugbog.weakness.1",
+    "bestiary.wizards_and_beasts.dugbog.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "entityType": "wizards_and_beasts:dugbog",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/dugbog.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/dugbog.png",
+  "sortOrder": 84
+}

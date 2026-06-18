@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/lethifold.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/lethifold.png",
-  "sortOrder": 48
+  "sortOrder": 48,
+  "entityType": "wizards_and_beasts:lethifold"
 }

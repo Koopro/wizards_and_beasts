@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/hippogriff.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/hippogriff.png",
-  "sortOrder": 10
+  "sortOrder": 10,
+  "entityType": "wizards_and_beasts:hippogriff"
 }

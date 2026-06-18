@@ -1,0 +1,16 @@
+{
+  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "id": "wizards_and_beasts:pygmy_puff",
+  "bodyPlan": "BLOB_SPHERE",
+  "locomotion": "GROUND",
+  "temperament": "NEUTRAL",
+  "width": 0.45,
+  "height": 0.45,
+  "maxHealth": 4.0,
+  "movementSpeed": 0.28,
+  "flyingSpeed": 0.0,
+  "followRange": 16.0,
+  "model": "wizards_and_beasts:entity/pygmy_puff",
+  "texture": "wizards_and_beasts:textures/entity/pygmy_puff.png",
+  "animation": "wizards_and_beasts:geckolib/animations/entity/pygmy_puff.animation.json"
+}

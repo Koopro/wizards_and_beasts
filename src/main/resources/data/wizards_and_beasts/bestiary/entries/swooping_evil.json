@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/swooping_evil.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/swooping_evil.png",
-  "sortOrder": 58
+  "sortOrder": 58,
+  "entityType": "wizards_and_beasts:swooping_evil"
 }

@@ -1,0 +1,27 @@
+{
+  "id": "wizards_and_beasts:erkling",
+  "displayName": "bestiary.wizards_and_beasts.erkling.name",
+  "category": "CURSED_BEING",
+  "mmRating": 2,
+  "habitat": "bestiary.wizards_and_beasts.erkling.habitat",
+  "size": "SMALL",
+  "shortLore": "bestiary.wizards_and_beasts.erkling.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.erkling.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.erkling.ability.1",
+    "bestiary.wizards_and_beasts.erkling.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.erkling.threat.1",
+    "bestiary.wizards_and_beasts.erkling.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.erkling.weakness.1",
+    "bestiary.wizards_and_beasts.erkling.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "entityType": "wizards_and_beasts:erkling",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/erkling.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/erkling.png",
+  "sortOrder": 69
+}

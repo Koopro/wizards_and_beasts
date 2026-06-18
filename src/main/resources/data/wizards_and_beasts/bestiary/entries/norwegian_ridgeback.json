@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/norwegian_ridgeback.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/norwegian_ridgeback.png",
-  "sortOrder": 1
+  "sortOrder": 1,
+  "entityType": "wizards_and_beasts:norwegian_ridgeback"
 }

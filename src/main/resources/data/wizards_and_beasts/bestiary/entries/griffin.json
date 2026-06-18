@@ -1,0 +1,27 @@
+{
+  "id": "wizards_and_beasts:griffin",
+  "displayName": "bestiary.wizards_and_beasts.griffin.name",
+  "category": "WINGED_BEAST",
+  "mmRating": 6,
+  "habitat": "bestiary.wizards_and_beasts.griffin.habitat",
+  "size": "LARGE",
+  "shortLore": "bestiary.wizards_and_beasts.griffin.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.griffin.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.griffin.ability.1",
+    "bestiary.wizards_and_beasts.griffin.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.griffin.threat.1",
+    "bestiary.wizards_and_beasts.griffin.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.griffin.weakness.1",
+    "bestiary.wizards_and_beasts.griffin.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "entityType": "wizards_and_beasts:griffin",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/griffin.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/griffin.png",
+  "sortOrder": 62
+}

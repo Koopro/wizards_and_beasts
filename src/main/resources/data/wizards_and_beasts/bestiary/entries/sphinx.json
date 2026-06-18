@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/sphinx.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/sphinx.png",
-  "sortOrder": 24
+  "sortOrder": 24,
+  "entityType": "wizards_and_beasts:sphinx"
 }

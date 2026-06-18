@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/swedish_short_snout.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/swedish_short_snout.png",
-  "sortOrder": 8
+  "sortOrder": 8,
+  "entityType": "wizards_and_beasts:swedish_short_snout"
 }

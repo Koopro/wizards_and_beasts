@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/maledictus.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/maledictus.png",
-  "sortOrder": 50
+  "sortOrder": 50,
+  "entityType": "wizards_and_beasts:maledictus"
 }

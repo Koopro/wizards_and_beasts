@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/ukrainian_ironbelly.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/ukrainian_ironbelly.png",
-  "sortOrder": 6
+  "sortOrder": 6,
+  "entityType": "wizards_and_beasts:ukrainian_ironbelly"
 }

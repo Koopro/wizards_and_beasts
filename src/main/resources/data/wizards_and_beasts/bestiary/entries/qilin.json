@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/qilin.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/qilin.png",
-  "sortOrder": 59
+  "sortOrder": 59,
+  "entityType": "wizards_and_beasts:qilin"
 }

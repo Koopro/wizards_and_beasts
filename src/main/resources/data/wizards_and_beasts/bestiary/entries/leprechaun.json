@@ -1,0 +1,27 @@
+{
+  "id": "wizards_and_beasts:leprechaun",
+  "displayName": "bestiary.wizards_and_beasts.leprechaun.name",
+  "category": "MAGICAL_CREATURE",
+  "mmRating": 2,
+  "habitat": "bestiary.wizards_and_beasts.leprechaun.habitat",
+  "size": "SMALL",
+  "shortLore": "bestiary.wizards_and_beasts.leprechaun.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.leprechaun.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.leprechaun.ability.1",
+    "bestiary.wizards_and_beasts.leprechaun.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.leprechaun.threat.1",
+    "bestiary.wizards_and_beasts.leprechaun.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.leprechaun.weakness.1",
+    "bestiary.wizards_and_beasts.leprechaun.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "entityType": "wizards_and_beasts:leprechaun",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/leprechaun.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/leprechaun.png",
+  "sortOrder": 70
+}

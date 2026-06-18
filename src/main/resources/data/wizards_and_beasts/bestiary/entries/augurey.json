@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/augurey.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/augurey.png",
-  "sortOrder": 27
+  "sortOrder": 27,
+  "entityType": "wizards_and_beasts:augurey"
 }

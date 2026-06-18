@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/kneazle.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/kneazle.png",
-  "sortOrder": 55
+  "sortOrder": 55,
+  "entityType": "wizards_and_beasts:kneazle"
 }

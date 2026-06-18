@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/dementor.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/dementor.png",
-  "sortOrder": 47
+  "sortOrder": 47,
+  "entityType": "wizards_and_beasts:dementor"
 }

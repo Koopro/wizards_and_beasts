@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/phoenix.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/phoenix.png",
-  "sortOrder": 26
+  "sortOrder": 26,
+  "entityType": "wizards_and_beasts:phoenix"
 }

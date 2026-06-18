@@ -1,0 +1,27 @@
+{
+  "id": "wizards_and_beasts:red_cap",
+  "displayName": "bestiary.wizards_and_beasts.red_cap.name",
+  "category": "CURSED_BEING",
+  "mmRating": 2,
+  "habitat": "bestiary.wizards_and_beasts.red_cap.habitat",
+  "size": "SMALL",
+  "shortLore": "bestiary.wizards_and_beasts.red_cap.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.red_cap.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.red_cap.ability.1",
+    "bestiary.wizards_and_beasts.red_cap.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.red_cap.threat.1",
+    "bestiary.wizards_and_beasts.red_cap.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.red_cap.weakness.1",
+    "bestiary.wizards_and_beasts.red_cap.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "entityType": "wizards_and_beasts:red_cap",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/red_cap.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/red_cap.png",
+  "sortOrder": 68
+}

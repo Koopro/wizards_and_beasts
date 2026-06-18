@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/giant.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/giant.png",
-  "sortOrder": 23
+  "sortOrder": 23,
+  "entityType": "wizards_and_beasts:giant"
 }

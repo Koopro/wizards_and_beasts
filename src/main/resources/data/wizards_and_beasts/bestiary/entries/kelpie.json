@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/kelpie.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/kelpie.png",
-  "sortOrder": 53
+  "sortOrder": 53,
+  "entityType": "wizards_and_beasts:kelpie"
 }

@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/bowtruckle.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/bowtruckle.png",
-  "sortOrder": 31
+  "sortOrder": 31,
+  "entityType": "wizards_and_beasts:bowtruckle"
 }

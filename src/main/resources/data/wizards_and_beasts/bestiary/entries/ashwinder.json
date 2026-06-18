@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/ashwinder.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/ashwinder.png",
-  "sortOrder": 43
+  "sortOrder": 43,
+  "entityType": "wizards_and_beasts:ashwinder"
 }

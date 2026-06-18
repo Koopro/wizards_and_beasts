@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/aethonan.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/aethonan.png",
-  "sortOrder": 14
+  "sortOrder": 14,
+  "entityType": "wizards_and_beasts:aethonan"
 }

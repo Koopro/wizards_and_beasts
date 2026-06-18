@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/basilisk.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/basilisk.png",
-  "sortOrder": 41
+  "sortOrder": 41,
+  "entityType": "wizards_and_beasts:basilisk"
 }

@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/flobberworm.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/flobberworm.png",
-  "sortOrder": 37
+  "sortOrder": 37,
+  "entityType": "wizards_and_beasts:flobberworm"
 }

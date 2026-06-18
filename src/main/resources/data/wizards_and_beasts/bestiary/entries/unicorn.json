@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/unicorn.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/unicorn.png",
-  "sortOrder": 15
+  "sortOrder": 15,
+  "entityType": "wizards_and_beasts:unicorn"
 }

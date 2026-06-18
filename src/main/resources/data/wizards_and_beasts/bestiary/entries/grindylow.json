@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/grindylow.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/grindylow.png",
-  "sortOrder": 52
+  "sortOrder": 52,
+  "entityType": "wizards_and_beasts:grindylow"
 }

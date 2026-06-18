@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/hungarian_horntail.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/hungarian_horntail.png",
-  "sortOrder": 0
+  "sortOrder": 0,
+  "entityType": "wizards_and_beasts:hungarian_horntail"
 }

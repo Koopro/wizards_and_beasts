@@ -1,0 +1,27 @@
+{
+  "id": "wizards_and_beasts:kappa",
+  "displayName": "bestiary.wizards_and_beasts.kappa.name",
+  "category": "AQUATIC",
+  "mmRating": 4,
+  "habitat": "bestiary.wizards_and_beasts.kappa.habitat",
+  "size": "MEDIUM",
+  "shortLore": "bestiary.wizards_and_beasts.kappa.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.kappa.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.kappa.ability.1",
+    "bestiary.wizards_and_beasts.kappa.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.kappa.threat.1",
+    "bestiary.wizards_and_beasts.kappa.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.kappa.weakness.1",
+    "bestiary.wizards_and_beasts.kappa.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "entityType": "wizards_and_beasts:kappa",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/kappa.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/kappa.png",
+  "sortOrder": 76
+}

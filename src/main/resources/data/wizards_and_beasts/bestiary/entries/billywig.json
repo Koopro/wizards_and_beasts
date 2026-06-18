@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/billywig.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/billywig.png",
-  "sortOrder": 35
+  "sortOrder": 35,
+  "entityType": "wizards_and_beasts:billywig"
 }

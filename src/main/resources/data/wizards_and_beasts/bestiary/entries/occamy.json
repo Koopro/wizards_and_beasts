@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/occamy.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/occamy.png",
-  "sortOrder": 40
+  "sortOrder": 40,
+  "entityType": "wizards_and_beasts:occamy"
 }

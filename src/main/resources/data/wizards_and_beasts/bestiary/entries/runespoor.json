@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/runespoor.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/runespoor.png",
-  "sortOrder": 42
+  "sortOrder": 42,
+  "entityType": "wizards_and_beasts:runespoor"
 }

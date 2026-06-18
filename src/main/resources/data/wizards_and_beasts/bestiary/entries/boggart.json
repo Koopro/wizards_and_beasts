@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/boggart.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/boggart.png",
-  "sortOrder": 46
+  "sortOrder": 46,
+  "entityType": "wizards_and_beasts:boggart"
 }

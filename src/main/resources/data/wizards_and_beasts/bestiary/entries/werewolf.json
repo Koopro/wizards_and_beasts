@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/werewolf.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/werewolf.png",
-  "sortOrder": 49
+  "sortOrder": 49,
+  "entityType": "wizards_and_beasts:werewolf"
 }

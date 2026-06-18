@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/obscurus.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/obscurus.png",
-  "sortOrder": 60
+  "sortOrder": 60,
+  "entityType": "wizards_and_beasts:obscurus"
 }

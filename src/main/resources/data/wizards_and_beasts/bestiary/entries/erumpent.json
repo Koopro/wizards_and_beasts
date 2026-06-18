@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/erumpent.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/erumpent.png",
-  "sortOrder": 18
+  "sortOrder": 18,
+  "entityType": "wizards_and_beasts:erumpent"
 }

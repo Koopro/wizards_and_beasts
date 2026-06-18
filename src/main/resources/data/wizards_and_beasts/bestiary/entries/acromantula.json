@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/acromantula.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/acromantula.png",
-  "sortOrder": 44
+  "sortOrder": 44,
+  "entityType": "wizards_and_beasts:acromantula"
 }

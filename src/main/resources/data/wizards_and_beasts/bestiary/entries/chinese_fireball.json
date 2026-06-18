@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/chinese_fireball.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/chinese_fireball.png",
-  "sortOrder": 3
+  "sortOrder": 3,
+  "entityType": "wizards_and_beasts:chinese_fireball"
 }

@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/graphorn.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/graphorn.png",
-  "sortOrder": 17
+  "sortOrder": 17,
+  "entityType": "wizards_and_beasts:graphorn"
 }

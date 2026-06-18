@@ -1,0 +1,27 @@
+{
+  "id": "wizards_and_beasts:porlock",
+  "displayName": "bestiary.wizards_and_beasts.porlock.name",
+  "category": "MAGICAL_CREATURE",
+  "mmRating": 2,
+  "habitat": "bestiary.wizards_and_beasts.porlock.habitat",
+  "size": "SMALL",
+  "shortLore": "bestiary.wizards_and_beasts.porlock.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.porlock.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.porlock.ability.1",
+    "bestiary.wizards_and_beasts.porlock.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.porlock.threat.1",
+    "bestiary.wizards_and_beasts.porlock.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.porlock.weakness.1",
+    "bestiary.wizards_and_beasts.porlock.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "entityType": "wizards_and_beasts:porlock",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/porlock.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/porlock.png",
+  "sortOrder": 82
+}

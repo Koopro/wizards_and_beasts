@@ -1,0 +1,27 @@
+{
+  "id": "wizards_and_beasts:pygmy_puff",
+  "displayName": "bestiary.wizards_and_beasts.pygmy_puff.name",
+  "category": "SMALL_CREATURE",
+  "mmRating": 1,
+  "habitat": "bestiary.wizards_and_beasts.pygmy_puff.habitat",
+  "size": "TINY",
+  "shortLore": "bestiary.wizards_and_beasts.pygmy_puff.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.pygmy_puff.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.pygmy_puff.ability.1",
+    "bestiary.wizards_and_beasts.pygmy_puff.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.pygmy_puff.threat.1",
+    "bestiary.wizards_and_beasts.pygmy_puff.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.pygmy_puff.weakness.1",
+    "bestiary.wizards_and_beasts.pygmy_puff.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "entityType": "wizards_and_beasts:pygmy_puff",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/pygmy_puff.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/pygmy_puff.png",
+  "sortOrder": 65
+}

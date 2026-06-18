@@ -1,0 +1,16 @@
+{
+  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "id": "wizards_and_beasts:leprechaun",
+  "bodyPlan": "BIPED_HUMANOID",
+  "locomotion": "GROUND",
+  "temperament": "NEUTRAL",
+  "width": 0.65,
+  "height": 0.75,
+  "maxHealth": 8.0,
+  "movementSpeed": 0.26,
+  "flyingSpeed": 0.0,
+  "followRange": 16.0,
+  "model": "wizards_and_beasts:entity/leprechaun",
+  "texture": "wizards_and_beasts:textures/entity/leprechaun.png",
+  "animation": "wizards_and_beasts:geckolib/animations/entity/leprechaun.animation.json"
+}

@@ -1,0 +1,27 @@
+{
+  "id": "wizards_and_beasts:fire_crab",
+  "displayName": "bestiary.wizards_and_beasts.fire_crab.name",
+  "category": "MAGICAL_CREATURE",
+  "mmRating": 2,
+  "habitat": "bestiary.wizards_and_beasts.fire_crab.habitat",
+  "size": "SMALL",
+  "shortLore": "bestiary.wizards_and_beasts.fire_crab.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.fire_crab.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.fire_crab.ability.1",
+    "bestiary.wizards_and_beasts.fire_crab.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.fire_crab.threat.1",
+    "bestiary.wizards_and_beasts.fire_crab.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.fire_crab.weakness.1",
+    "bestiary.wizards_and_beasts.fire_crab.weakness.2"
+  ],
+  "encounterTrigger": "MANUAL",
+  "entityType": "wizards_and_beasts:fire_crab",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/fire_crab.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/fire_crab.png",
+  "sortOrder": 80
+}

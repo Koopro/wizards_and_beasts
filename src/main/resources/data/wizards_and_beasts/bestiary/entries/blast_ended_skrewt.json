@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/blast_ended_skrewt.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/blast_ended_skrewt.png",
-  "sortOrder": 20
+  "sortOrder": 20,
+  "entityType": "wizards_and_beasts:blast_ended_skrewt"
 }

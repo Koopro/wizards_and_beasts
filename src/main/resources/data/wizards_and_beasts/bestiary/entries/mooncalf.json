@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/mooncalf.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/mooncalf.png",
-  "sortOrder": 34
+  "sortOrder": 34,
+  "entityType": "wizards_and_beasts:mooncalf"
 }

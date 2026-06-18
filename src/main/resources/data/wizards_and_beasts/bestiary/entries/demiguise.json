@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/demiguise.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/demiguise.png",
-  "sortOrder": 33
+  "sortOrder": 33,
+  "entityType": "wizards_and_beasts:demiguise"
 }

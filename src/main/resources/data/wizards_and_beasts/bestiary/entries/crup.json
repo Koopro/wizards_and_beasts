@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/crup.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/crup.png",
-  "sortOrder": 36
+  "sortOrder": 36,
+  "entityType": "wizards_and_beasts:crup"
 }

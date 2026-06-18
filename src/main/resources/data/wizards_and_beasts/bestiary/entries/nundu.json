@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/nundu.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/nundu.png",
-  "sortOrder": 57
+  "sortOrder": 57,
+  "entityType": "wizards_and_beasts:nundu"
 }

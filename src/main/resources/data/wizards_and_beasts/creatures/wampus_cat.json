@@ -1,0 +1,16 @@
+{
+  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "id": "wizards_and_beasts:wampus_cat",
+  "bodyPlan": "QUADRUPED",
+  "locomotion": "GROUND",
+  "temperament": "NEUTRAL",
+  "width": 1.7,
+  "height": 1.9,
+  "maxHealth": 40.0,
+  "movementSpeed": 0.23,
+  "flyingSpeed": 0.0,
+  "followRange": 16.0,
+  "model": "wizards_and_beasts:entity/wampus_cat",
+  "texture": "wizards_and_beasts:textures/entity/wampus_cat.png",
+  "animation": "wizards_and_beasts:geckolib/animations/entity/wampus_cat.animation.json"
+}

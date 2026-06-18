@@ -22,5 +22,6 @@
   "encounterTrigger": "MANUAL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/centaur.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/centaur.png",
-  "sortOrder": 16
+  "sortOrder": 16,
+  "entityType": "wizards_and_beasts:centaur"
 }
