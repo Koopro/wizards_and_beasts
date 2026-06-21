@@ -20,6 +20,8 @@ public enum Trait {
     POISON_ATTACK,
     /** Melee hits apply a heavy slow + blindness ("petrify-lite"). */
     PETRIFY,
+    /** Basilisk-style stare: petrifies nearby players, lethal to any meeting the creature's gaze. */
+    DEATH_GAZE,
     /** Faster pursuit and stronger knockback when attacking (charger). */
     CHARGE,
     /** Extra knockback on melee. */

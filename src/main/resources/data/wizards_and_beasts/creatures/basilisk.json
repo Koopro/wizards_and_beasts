@@ -16,6 +16,7 @@
   "attackDamage": 10.0,
   "traits": [
     "POISON_ATTACK",
-    "PETRIFY"
+    "PETRIFY",
+    "DEATH_GAZE"
   ]
 }
