@@ -30,6 +30,8 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -45,6 +47,10 @@ import java.util.Set;
  * subclass exists — only the four locomotion subclasses, which supply movement goals + animation.
  */
 public abstract class GenericBeastEntity extends GeoEntityBase {
+
+    /** Niffler-grade theft: stacks lifted from players, carried until the beast dies. */
+    private static final int MAX_CARRIED = 8;
+    private final List<ItemStack> carried = new ArrayList<>();
 
     @Nullable
     private Set<Trait> cachedTraits;
@@ -209,11 +215,44 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
         }
         int slot = filled.get(this.getRandom().nextInt(filled.size()));
         ItemStack stolen = player.getInventory().removeItem(slot, 1);
-        if (!stolen.isEmpty()) {
-            player.drop(stolen, false, false);
-            addEffect(new MobEffectInstance(MobEffects.SPEED, 100, 1));
-            setTarget(null);
+        if (stolen.isEmpty()) {
+            return;
         }
+        // Niffler-grade: pocket the loot and bolt; overflow falls to the ground.
+        if (carried.size() < MAX_CARRIED) {
+            carried.add(stolen);
+        } else {
+            player.drop(stolen, false, false);
+        }
+        addEffect(new MobEffectInstance(MobEffects.SPEED, 100, 1));
+        setTarget(null);
+    }
+
+    private void dropCarried() {
+        if (carried.isEmpty() || !(level() instanceof ServerLevel serverLevel)) {
+            return;
+        }
+        for (ItemStack stack : carried) {
+            if (!stack.isEmpty()) {
+                spawnAtLocation(serverLevel, stack);
+            }
+        }
+        carried.clear();
+    }
+
+    @Override
+    protected void addAdditionalSaveData(ValueOutput output) {
+        super.addAdditionalSaveData(output);
+        if (!carried.isEmpty()) {
+            output.store("CarriedLoot", ItemStack.CODEC.listOf(), List.copyOf(carried));
+        }
+    }
+
+    @Override
+    protected void readAdditionalSaveData(ValueInput input) {
+        super.readAdditionalSaveData(input);
+        carried.clear();
+        carried.addAll(input.read("CarriedLoot", ItemStack.CODEC.listOf()).orElse(List.of()));
     }
 
     @Override
@@ -227,8 +266,11 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
 
     @Override
     public void die(DamageSource cause) {
-        if (!level().isClientSide() && has(Trait.EXPLODE_ON_DEATH)) {
-            level().explode(this, getX(), getY(), getZ(), 2.0f, Level.ExplosionInteraction.MOB);
+        if (!level().isClientSide()) {
+            dropCarried();
+            if (has(Trait.EXPLODE_ON_DEATH)) {
+                level().explode(this, getX(), getY(), getZ(), 2.0f, Level.ExplosionInteraction.MOB);
+            }
         }
         super.die(cause);
     }
