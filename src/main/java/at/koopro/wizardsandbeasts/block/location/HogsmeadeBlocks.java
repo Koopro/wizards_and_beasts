@@ -7,7 +7,7 @@ import net.minecraft.world.level.material.MapColor;
 import at.koopro.wizardsandbeasts.block.location.LocationBlockHelper.StairSet;
 import at.koopro.wizardsandbeasts.block.location.LocationBlockHelper.VariantSet;
 
-// TODO: gate behind STRUCTURES module when added
+// Blocks register unconditionally; their crafting recipes are gated behind Module.STRUCTURES (ModRecipeProvider).
 public final class HogsmeadeBlocks {
     private HogsmeadeBlocks() {}
 
@@ -27,47 +27,47 @@ public final class HogsmeadeBlocks {
     }
 
     // ASSET: hogsmeade_stone, hogsmeade_stone_slab, hogsmeade_stone_stairs, hogsmeade_stone_wall
-    // TODO: crafting recipe — stone + andesite
+    // Recipe (gated by Module.STRUCTURES, see ModRecipeProvider) —stone + andesite
     public static final VariantSet HOGSMEADE_STONE =
             LocationBlockHelper.withVariants("hogsmeade_stone", stone(MapColor.COLOR_GRAY));
 
     // ASSET: hogsmeade_stone_bricks, hogsmeade_stone_bricks_slab, hogsmeade_stone_bricks_stairs, hogsmeade_stone_bricks_wall
-    // TODO: crafting recipe — hogsmeade_stone
+    // Recipe (gated by Module.STRUCTURES, see ModRecipeProvider) —hogsmeade_stone
     public static final VariantSet HOGSMEADE_STONE_BRICKS =
             LocationBlockHelper.withVariants("hogsmeade_stone_bricks", stone(MapColor.COLOR_GRAY));
 
     // ASSET: hogsmeade_worn_stone, hogsmeade_worn_stone_slab, hogsmeade_worn_stone_stairs, hogsmeade_worn_stone_wall
-    // TODO: crafting recipe — hogsmeade_stone (smelt/weather)
+    // Recipe (gated by Module.STRUCTURES, see ModRecipeProvider) —hogsmeade_stone (smelt/weather)
     public static final VariantSet HOGSMEADE_WORN_STONE =
             LocationBlockHelper.withVariants("hogsmeade_worn_stone", stone(MapColor.COLOR_LIGHT_GRAY));
 
     // ASSET: three_broomsticks_timber, three_broomsticks_timber_slab, three_broomsticks_timber_stairs
-    // TODO: crafting recipe — dark oak log + iron nugget
+    // Recipe (gated by Module.STRUCTURES, see ModRecipeProvider) —dark oak log + iron nugget
     public static final StairSet THREE_BROOMSTICKS_TIMBER =
             LocationBlockHelper.withSlabStair("three_broomsticks_timber", wood(MapColor.COLOR_BROWN));
 
     // ASSET: three_broomsticks_planks, three_broomsticks_planks_slab, three_broomsticks_planks_stairs
-    // TODO: crafting recipe — dark oak planks
+    // Recipe (gated by Module.STRUCTURES, see ModRecipeProvider) —dark oak planks
     public static final StairSet THREE_BROOMSTICKS_PLANKS =
             LocationBlockHelper.withSlabStair("three_broomsticks_planks", wood(MapColor.COLOR_BROWN));
 
     // ASSET: honeydukes_pastel_pink, honeydukes_pastel_pink_slab, honeydukes_pastel_pink_stairs
-    // TODO: crafting recipe — quartz + pink dye
+    // Recipe (gated by Module.STRUCTURES, see ModRecipeProvider) —quartz + pink dye
     public static final StairSet HONEYDUKES_PASTEL_PINK =
             LocationBlockHelper.withSlabStair("honeydukes_pastel_pink", stone(MapColor.COLOR_PINK));
 
     // ASSET: honeydukes_pastel_yellow, honeydukes_pastel_yellow_slab, honeydukes_pastel_yellow_stairs
-    // TODO: crafting recipe — quartz + yellow dye
+    // Recipe (gated by Module.STRUCTURES, see ModRecipeProvider) —quartz + yellow dye
     public static final StairSet HONEYDUKES_PASTEL_YELLOW =
             LocationBlockHelper.withSlabStair("honeydukes_pastel_yellow", stone(MapColor.COLOR_YELLOW));
 
     // ASSET: hogsmeade_roof_tile, hogsmeade_roof_tile_slab, hogsmeade_roof_tile_stairs
-    // TODO: crafting recipe — stone + cobblestone slab
+    // Recipe (gated by Module.STRUCTURES, see ModRecipeProvider) —stone + cobblestone slab
     public static final StairSet HOGSMEADE_ROOF_TILE =
             LocationBlockHelper.withSlabStair("hogsmeade_roof_tile", stone(MapColor.COLOR_GRAY));
 
     // ASSET: hogsmeade_chimney_brick, hogsmeade_chimney_brick_slab, hogsmeade_chimney_brick_stairs, hogsmeade_chimney_brick_wall
-    // TODO: crafting recipe — brick + red terracotta
+    // Recipe (gated by Module.STRUCTURES, see ModRecipeProvider) —brick + red terracotta
     public static final VariantSet HOGSMEADE_CHIMNEY_BRICK =
             LocationBlockHelper.withVariants("hogsmeade_chimney_brick", stone(MapColor.TERRACOTTA_RED));
 

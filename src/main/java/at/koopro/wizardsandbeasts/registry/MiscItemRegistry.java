@@ -37,6 +37,34 @@ public final class MiscItemRegistry {
             ModItems.ITEMS.registerItem("niffler_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(ModEntities.NIFFLER.get())));
 
+    public static final DeferredItem<SpawnEggItem> BOWTRUCKLE_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("bowtruckle_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(ModEntities.BOWTRUCKLE.get())));
+
+    public static final DeferredItem<SpawnEggItem> CORNISH_PIXIE_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("cornish_pixie_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(ModEntities.CORNISH_PIXIE.get())));
+
+    public static final DeferredItem<SpawnEggItem> THESTRAL_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("thestral_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(ModEntities.THESTRAL.get())));
+
+    public static final DeferredItem<SpawnEggItem> PHOENIX_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("phoenix_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(ModEntities.PHOENIX.get())));
+
+    public static final DeferredItem<SpawnEggItem> AUGUREY_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("augurey_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(ModEntities.AUGUREY.get())));
+
+    public static final DeferredItem<SpawnEggItem> MOONCALF_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("mooncalf_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(ModEntities.MOONCALF.get())));
+
+    public static final DeferredItem<SpawnEggItem> STREELER_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("streeler_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(ModEntities.STREELER.get())));
+
     private MiscItemRegistry() {}
 
     public static void init() {}

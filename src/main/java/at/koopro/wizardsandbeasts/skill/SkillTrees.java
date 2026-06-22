@@ -51,6 +51,7 @@ public final class SkillTrees {
     public static final Skill NIFFLER_FRIEND = MagizoologySkills.NIFFLER_FRIEND;
     public static final Skill BEAST_HANDLER = MagizoologySkills.BEAST_HANDLER;
     public static final Skill CREATURE_BOND = MagizoologySkills.CREATURE_BOND;
+    public static final Skill ANIMAGUS_STUDY = MagizoologySkills.ANIMAGUS_STUDY;
 
     // Herbology
     public static final Skill GREEN_THUMB = HerbologySkills.GREEN_THUMB;

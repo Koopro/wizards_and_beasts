@@ -52,7 +52,7 @@ public class LivingEntityRendererMixin {
         poseStack.scale(sx, sy, sz);
 
         // Render custom model through the proper render pipeline
-        FormModelRenderer.renderToCollector(poseStack, collector, formData);
+        FormModelRenderer.renderToCollector(poseStack, collector, formData, state);
 
         poseStack.popPose();
         FormRenderStateModifier.removeFormData(state);

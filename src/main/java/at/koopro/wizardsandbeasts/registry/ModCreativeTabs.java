@@ -81,6 +81,13 @@ public class ModCreativeTabs {
                         // Spawn Eggs
                         output.accept(MiscItemRegistry.GOBLIN_TELLER_SPAWN_EGG.get());
                         output.accept(MiscItemRegistry.NIFFLER_SPAWN_EGG.get());
+                        output.accept(MiscItemRegistry.BOWTRUCKLE_SPAWN_EGG.get());
+                        output.accept(MiscItemRegistry.CORNISH_PIXIE_SPAWN_EGG.get());
+                        output.accept(MiscItemRegistry.THESTRAL_SPAWN_EGG.get());
+                        output.accept(MiscItemRegistry.PHOENIX_SPAWN_EGG.get());
+                        output.accept(MiscItemRegistry.AUGUREY_SPAWN_EGG.get());
+                        output.accept(MiscItemRegistry.MOONCALF_SPAWN_EGG.get());
+                        output.accept(MiscItemRegistry.STREELER_SPAWN_EGG.get());
 
                         // Wizarding World — food & drink
                         output.accept(ConsumableItemRegistry.BUTTERBEER.get());

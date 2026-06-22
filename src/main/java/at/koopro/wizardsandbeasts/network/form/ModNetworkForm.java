@@ -38,6 +38,16 @@ public final class ModNetworkForm {
                 ObscurialStressVentC2SPayload::handle);
 
         registrar.playToServer(
+                AnimagusTransformC2SPayload.TYPE,
+                AnimagusTransformC2SPayload.STREAM_CODEC,
+                AnimagusTransformC2SPayload::handle);
+
+        registrar.playToServer(
+                AnimagusAbilityC2SPayload.TYPE,
+                AnimagusAbilityC2SPayload.STREAM_CODEC,
+                AnimagusAbilityC2SPayload::handle);
+
+        registrar.playToServer(
                 SizeOverrideC2SPayload.TYPE,
                 SizeOverrideC2SPayload.STREAM_CODEC,
                 SizeOverrideC2SPayload::handle);

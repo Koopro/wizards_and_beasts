@@ -1,4 +1,10 @@
 {
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "STRUCTURES"
+    }
+  ],
   "parent": "minecraft:recipes/root",
   "criteria": {
     "has_ministry_floor_tile": {

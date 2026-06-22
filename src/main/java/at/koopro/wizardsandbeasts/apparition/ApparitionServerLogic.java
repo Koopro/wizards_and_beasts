@@ -5,6 +5,7 @@ import at.koopro.wizardsandbeasts.apparition.ApparitionWard;
 import at.koopro.wizardsandbeasts.apparition.ApparitionWardRegistry;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
+import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
 import at.koopro.wizardsandbeasts.spell.cast.SpellCastTelemetry;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
@@ -30,17 +31,22 @@ public final class ApparitionServerLogic {
         if (!ModuleManager.isEnabled(Module.PLAYER_ABILITIES)) {
             return;
         }
-        if (!PlayerAbilityHelper.isApparitionUnlocked(caster)) {
-            fail(caster, "You have not passed your Apparition test.");
-            return;
-        }
-        if (!PlayerAbilityHelper.isApparitionLicensed(caster)) {
-            fail(caster, "You are not licensed to Apparate.");
-            return;
-        }
-        if (!isAllowedHeritage(caster)) {
-            fail(caster, "Your heritage cannot Apparate.");
-            return;
+        // Elf-Apparition: bound elf-magic Apparates without a test, licence, or wizard-heritage
+        // restriction, and slips past wards that bind wizards. Splinch and cooldown still apply.
+        boolean elfApparition = SkillSystemAPI.hasAbility(caster, "elf_apparition");
+        if (!elfApparition) {
+            if (!PlayerAbilityHelper.isApparitionUnlocked(caster)) {
+                fail(caster, "You have not passed your Apparition test.");
+                return;
+            }
+            if (!PlayerAbilityHelper.isApparitionLicensed(caster)) {
+                fail(caster, "You are not licensed to Apparate.");
+                return;
+            }
+            if (!isAllowedHeritage(caster)) {
+                fail(caster, "Your heritage cannot Apparate.");
+                return;
+            }
         }
         if (PlayerAbilityHelper.getSplinchSeverity(caster) > 0) {
             fail(caster, "You are too splinched to Apparate.");
@@ -57,12 +63,14 @@ public final class ApparitionServerLogic {
         ServerLevel level = (ServerLevel) caster.level();
         Vec3 clamped = clampTarget(caster.position(), targetPosition, 32.0);
         AABB atDestination = caster.getBoundingBox().move(clamped.x - caster.getX(), clamped.y - caster.getY(), clamped.z - caster.getZ());
-        ApparitionWard ward = ApparitionWardRegistry.findBlockingWard(level, caster.createCommandSourceStack(), atDestination);
-        if (ward != null) {
-            fail(caster, ward.blockMessage().getString().isBlank()
-                    ? "Something prevents you from Apparating here."
-                    : ward.blockMessage().getString());
-            return;
+        if (!elfApparition) {
+            ApparitionWard ward = ApparitionWardRegistry.findBlockingWard(level, caster.createCommandSourceStack(), atDestination);
+            if (ward != null) {
+                fail(caster, ward.blockMessage().getString().isBlank()
+                        ? "Something prevents you from Apparating here."
+                        : ward.blockMessage().getString());
+                return;
+            }
         }
 
         Vec3 origin = caster.position();

@@ -27,6 +27,8 @@ import at.koopro.wizardsandbeasts.block.location.LocationBlockHelper.SlabSet;
 import at.koopro.wizardsandbeasts.block.location.LocationBlockHelper.StairSet;
 import at.koopro.wizardsandbeasts.block.location.LocationBlockHelper.VariantSet;
 import at.koopro.wizardsandbeasts.block.location.MinistryBlocks;
+import at.koopro.wizardsandbeasts.module.Module;
+import at.koopro.wizardsandbeasts.module.condition.ModuleEnabledCondition;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
 import at.koopro.wizardsandbeasts.registry.WoodSet;
 import at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper;
@@ -39,6 +41,13 @@ import at.koopro.wizardsandbeasts.registry.TrinketItemRegistry;
 
 public class ModRecipeProvider extends RecipeProvider {
 
+    /**
+     * Conditional output for location-block recipes — gated behind {@link Module#STRUCTURES}.
+     * Set before {@link #generateLocationBlockRecipes()} runs; the location-only helpers below
+     * save through this so the whole decorative set toggles with the module.
+     */
+    private RecipeOutput structureSink;
+
     public ModRecipeProvider(HolderLookup.Provider registries, RecipeOutput output) {
         super(registries, output);
     }
@@ -49,6 +58,7 @@ public class ModRecipeProvider extends RecipeProvider {
             generateWoodRecipes(woodSet);
         }
         generateConsumableRecipes();
+        structureSink = output.withConditions(new ModuleEnabledCondition(Module.STRUCTURES));
         generateLocationBlockRecipes();
     }
 
@@ -227,9 +237,9 @@ public class ModRecipeProvider extends RecipeProvider {
         tinted(DiagonAlleyBlocks.DIAGON_PAINTED_WOOD_PURPLE.base().get(), 8, Items.PURPLE_DYE, Items.OAK_PLANKS);
         craftStairSet(DiagonAlleyBlocks.DIAGON_PAINTED_WOOD_PURPLE);
         alt2x2(DiagonAlleyBlocks.DIAGON_STREET_STONE.get(), 4, Items.STONE_BRICKS, Items.GRAVEL);
-        slab(RecipeCategory.BUILDING_BLOCKS, DiagonAlleyBlocks.DIAGON_STREET_STONE_SLAB.get(), DiagonAlleyBlocks.DIAGON_STREET_STONE.get());
+        slabFrom(DiagonAlleyBlocks.DIAGON_STREET_STONE_SLAB.get(), DiagonAlleyBlocks.DIAGON_STREET_STONE.get());
         stonecut(DiagonAlleyBlocks.DIAGON_STREET_STONE_SLAB.get(), 2, DiagonAlleyBlocks.DIAGON_STREET_STONE.get());
-        pressurePlate(DiagonAlleyBlocks.DIAGON_STREET_STONE_PRESSURE_PLATE.get(), DiagonAlleyBlocks.DIAGON_STREET_STONE.get());
+        pressurePlateFrom(DiagonAlleyBlocks.DIAGON_STREET_STONE_PRESSURE_PLATE.get(), DiagonAlleyBlocks.DIAGON_STREET_STONE.get());
 
         // ── Hogsmeade ──
         alt2x2(HogsmeadeBlocks.HOGSMEADE_STONE.base().get(), 4, Items.STONE, Items.ANDESITE);
@@ -281,8 +291,8 @@ public class ModRecipeProvider extends RecipeProvider {
         Block slab = set.slab().get();
         Block stairs = set.stairs().get();
         Block wall = set.wall().get();
-        slab(RecipeCategory.BUILDING_BLOCKS, slab, base);
-        stairBuilder(stairs, Ingredient.of(base)).unlockedBy("has_" + path(base), has(base)).save(output);
+        slabFrom(slab, base);
+        stairBuilder(stairs, Ingredient.of(base)).unlockedBy("has_" + path(base), has(base)).save(structureSink);
         wallShaped(wall, base);
         stonecut(slab, 2, base);
         stonecut(stairs, 1, base);
@@ -293,8 +303,8 @@ public class ModRecipeProvider extends RecipeProvider {
         Block base = set.base().get();
         Block slab = set.slab().get();
         Block stairs = set.stairs().get();
-        slab(RecipeCategory.BUILDING_BLOCKS, slab, base);
-        stairBuilder(stairs, Ingredient.of(base)).unlockedBy("has_" + path(base), has(base)).save(output);
+        slabFrom(slab, base);
+        stairBuilder(stairs, Ingredient.of(base)).unlockedBy("has_" + path(base), has(base)).save(structureSink);
         stonecut(slab, 2, base);
         stonecut(stairs, 1, base);
     }
@@ -302,8 +312,26 @@ public class ModRecipeProvider extends RecipeProvider {
     private void craftSlabSet(SlabSet set) {
         Block base = set.base().get();
         Block slab = set.slab().get();
-        slab(RecipeCategory.BUILDING_BLOCKS, slab, base);
+        slabFrom(slab, base);
         stonecut(slab, 2, base);
+    }
+
+    /** Gated slab recipe (3-wide → 6), replacing the builtin {@code slab()} so output routes through the module sink. */
+    private void slabFrom(ItemLike slab, ItemLike base) {
+        ShapedRecipeBuilder.shaped(items(), RecipeCategory.BUILDING_BLOCKS, slab, 6)
+                .pattern("###")
+                .define('#', base)
+                .unlockedBy("has_" + path(base), has(base))
+                .save(structureSink);
+    }
+
+    /** Gated pressure-plate recipe (two-wide → 1), routed through the module sink. */
+    private void pressurePlateFrom(ItemLike plate, ItemLike base) {
+        ShapedRecipeBuilder.shaped(items(), RecipeCategory.REDSTONE, plate, 1)
+                .pattern("##")
+                .define('#', base)
+                .unlockedBy("has_" + path(base), has(base))
+                .save(structureSink);
     }
 
     // --- primitive recipe builders ---
@@ -317,7 +345,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .define('#', surround)
                 .define('X', accent)
                 .unlockedBy("has_" + path(surround), has(surround))
-                .save(output);
+                .save(structureSink);
     }
 
     /** 2x2 checker of {@code a}/{@code b} → {@code count} result. */
@@ -328,7 +356,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .define('A', a)
                 .define('B', b)
                 .unlockedBy("has_" + path(a), has(a))
-                .save(output);
+                .save(structureSink);
     }
 
     /** 2x2 of one ingredient → 4 result (the brick/tile densification pattern). */
@@ -338,7 +366,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("##")
                 .define('#', from)
                 .unlockedBy("has_" + path(from), has(from))
-                .save(output);
+                .save(structureSink);
     }
 
     /** Two stacked ingredients → 2 pillar. */
@@ -348,7 +376,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("#")
                 .define('#', from)
                 .unlockedBy("has_" + path(from), has(from))
-                .save(output);
+                .save(structureSink);
     }
 
     /** Six-wall shaped recipe (two rows of three). */
@@ -358,7 +386,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("###")
                 .define('#', from)
                 .unlockedBy("has_" + path(from), has(from))
-                .save(output);
+                .save(structureSink);
     }
 
     private void combine(ItemLike result, int count, ItemLike a, ItemLike b) {
@@ -366,7 +394,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .requires(a)
                 .requires(b)
                 .unlockedBy("has_" + path(a), has(a))
-                .save(output);
+                .save(structureSink);
     }
 
     private void mossy(ItemLike result, ItemLike base, ItemLike moss) {
@@ -374,19 +402,19 @@ public class ModRecipeProvider extends RecipeProvider {
                 .requires(base)
                 .requires(moss)
                 .unlockedBy("has_" + path(base), has(base))
-                .save(output);
+                .save(structureSink);
     }
 
     private void smelt(ItemLike result, ItemLike from) {
         SimpleCookingRecipeBuilder.smelting(Ingredient.of(from), RecipeCategory.BUILDING_BLOCKS, result, 0.1f, 200)
                 .unlockedBy("has_" + path(from), has(from))
-                .save(output, recipeId(path(result) + "_from_smelting"));
+                .save(structureSink, recipeId(path(result) + "_from_smelting"));
     }
 
     private void stonecut(ItemLike result, int count, ItemLike from) {
         SingleItemRecipeBuilder.stonecutting(Ingredient.of(from), RecipeCategory.BUILDING_BLOCKS, result, count)
                 .unlockedBy("has_" + path(from), has(from))
-                .save(output, recipeId("stonecutting/" + path(result) + "_from_" + path(from)));
+                .save(structureSink, recipeId("stonecutting/" + path(result) + "_from_" + path(from)));
     }
 
     private HolderGetter<Item> items() {

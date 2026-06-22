@@ -78,6 +78,22 @@ public final class FormRegistry {
         register(form("merfolk_water", "Merfolk (Water)", ModelType.SWIMMING,
                 "entity/form/merfolk", "merpeople_water",
                 EnumSet.of(RenderFlag.TAIL_LAYER, RenderFlag.PARTICLE_AURA)));
+
+        // ── Animagus beast forms ──
+        // These are not tied to any heritage; they are assumed via the Animagus ability.
+        // Textures fall back to the form placeholder until dedicated art is produced.
+        register(form("animagus_cat", "Animagus (Cat)", ModelType.QUADRUPED,
+                "entity/form/animagus_cat", "animagus_cat", EnumSet.of(RenderFlag.TAIL_LAYER)));
+        register(form("animagus_dog", "Animagus (Dog)", ModelType.QUADRUPED,
+                "entity/form/animagus_dog", "animagus_dog", EnumSet.of(RenderFlag.TAIL_LAYER)));
+        register(form("animagus_stag", "Animagus (Stag)", ModelType.QUADRUPED,
+                "entity/form/animagus_stag", "animagus_stag", EnumSet.of(RenderFlag.TAIL_LAYER)));
+        register(form("animagus_hawk", "Animagus (Hawk)", ModelType.FLYING,
+                "entity/form/animagus_hawk", "animagus_hawk", EnumSet.of(RenderFlag.WING_LAYER)));
+        register(form("animagus_hare", "Animagus (Hare)", ModelType.QUADRUPED,
+                "entity/form/animagus_hare", "animagus_hare", EnumSet.of(RenderFlag.TAIL_LAYER)));
+        register(form("animagus_beetle", "Animagus (Beetle)", ModelType.SMALL_HUMANOID,
+                "entity/form/animagus_beetle", "animagus_beetle", EnumSet.noneOf(RenderFlag.class)));
     }
 
     private static PlayerForm form(String id, String displayName, ModelType modelType,

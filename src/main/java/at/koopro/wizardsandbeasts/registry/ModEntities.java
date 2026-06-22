@@ -2,6 +2,13 @@ package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.entity.azkaban.DementorEntity;
+import at.koopro.wizardsandbeasts.entity.beast.AugureyEntity;
+import at.koopro.wizardsandbeasts.entity.beast.BowtruckleEntity;
+import at.koopro.wizardsandbeasts.entity.beast.CornishPixieEntity;
+import at.koopro.wizardsandbeasts.entity.beast.MooncalfEntity;
+import at.koopro.wizardsandbeasts.entity.beast.PhoenixEntity;
+import at.koopro.wizardsandbeasts.entity.beast.StreelerEntity;
+import at.koopro.wizardsandbeasts.entity.beast.ThestralEntity;
 import at.koopro.wizardsandbeasts.entity.broom.BroomEntity;
 import at.koopro.wizardsandbeasts.entity.form.FormMannequinEntity;
 import at.koopro.wizardsandbeasts.entity.goblin.GoblinTellerEntity;
@@ -59,4 +66,32 @@ public class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<DementorEntity>> DEMENTOR =
             EntityHelper.register(ENTITY_TYPES, "dementor", DementorEntity::new, MobCategory.MONSTER, 0.9f, 3.2f, 10, 3);
     static { EntityAttributeBindings.queue(DEMENTOR, DementorEntity::createAttributes); }
+
+    public static final DeferredHolder<EntityType<?>, EntityType<BowtruckleEntity>> BOWTRUCKLE =
+            EntityHelper.register(ENTITY_TYPES, "bowtruckle", BowtruckleEntity::new, MobCategory.CREATURE, 0.4f, 0.8f);
+    static { EntityAttributeBindings.queue(BOWTRUCKLE, BowtruckleEntity::createAttributes); }
+
+    public static final DeferredHolder<EntityType<?>, EntityType<CornishPixieEntity>> CORNISH_PIXIE =
+            EntityHelper.register(ENTITY_TYPES, "cornish_pixie", CornishPixieEntity::new, MobCategory.CREATURE, 0.4f, 0.6f);
+    static { EntityAttributeBindings.queue(CORNISH_PIXIE, CornishPixieEntity::createAttributes); }
+
+    public static final DeferredHolder<EntityType<?>, EntityType<ThestralEntity>> THESTRAL =
+            EntityHelper.register(ENTITY_TYPES, "thestral", ThestralEntity::new, MobCategory.CREATURE, 1.4f, 1.8f);
+    static { EntityAttributeBindings.queue(THESTRAL, ThestralEntity::createAttributes); }
+
+    public static final DeferredHolder<EntityType<?>, EntityType<PhoenixEntity>> PHOENIX =
+            EntityHelper.register(ENTITY_TYPES, "phoenix", PhoenixEntity::new, MobCategory.CREATURE, 0.7f, 1.0f);
+    static { EntityAttributeBindings.queue(PHOENIX, PhoenixEntity::createAttributes); }
+
+    public static final DeferredHolder<EntityType<?>, EntityType<AugureyEntity>> AUGUREY =
+            EntityHelper.register(ENTITY_TYPES, "augurey", AugureyEntity::new, MobCategory.CREATURE, 0.5f, 0.7f);
+    static { EntityAttributeBindings.queue(AUGUREY, AugureyEntity::createAttributes); }
+
+    public static final DeferredHolder<EntityType<?>, EntityType<MooncalfEntity>> MOONCALF =
+            EntityHelper.register(ENTITY_TYPES, "mooncalf", MooncalfEntity::new, MobCategory.CREATURE, 0.7f, 1.2f);
+    static { EntityAttributeBindings.queue(MOONCALF, MooncalfEntity::createAttributes); }
+
+    public static final DeferredHolder<EntityType<?>, EntityType<StreelerEntity>> STREELER =
+            EntityHelper.register(ENTITY_TYPES, "streeler", StreelerEntity::new, MobCategory.CREATURE, 0.7f, 0.7f);
+    static { EntityAttributeBindings.queue(STREELER, StreelerEntity::createAttributes); }
 }

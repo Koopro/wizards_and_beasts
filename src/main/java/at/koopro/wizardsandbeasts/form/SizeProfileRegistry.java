@@ -119,6 +119,44 @@ public final class SizeProfileRegistry {
                 0.54f, 1.62f,   // 0.9× human height
                 0.9f, 1.111f, 1.111f,
                 0.5f, 0.1f, 0.0f));
+
+        // ── Animagus beast forms ──
+        // Cat: vanilla CatModel (already 0.8-scaled by its baked layer) — keep uniform
+        // proportions at true scale; aspect 1.0 so the borrowed model isn't distorted.
+        register(new SizeProfile("animagus_cat",
+                0.50f, 0.50f,   // 0.28× human height
+                1.0f, 1.0f, 1.0f,
+                -0.8f, 0.0f, 0.5f));
+
+        // Dog: vanilla WolfModel — uniform proportions at true wolf scale.
+        register(new SizeProfile("animagus_dog",
+                0.60f, 0.85f,   // 0.47× human height
+                1.0f, 1.0f, 1.0f,
+                -0.4f, 0.1f, 0.5f));
+
+        // Stag: tall and broad, antlers handled by render
+        register(new SizeProfile("animagus_stag",
+                0.90f, 1.95f,   // ~1.08× human height
+                1.1f, 0.95f, 1.4f,
+                0.4f, 0.3f, 1.0f));
+
+        // Hawk: tiny flying form, wings via WING_LAYER
+        register(new SizeProfile("animagus_hawk",
+                0.30f, 0.45f,   // 0.25× human height
+                0.30f, 1.4f, 1.4f,
+                -1.0f, 0.0f, 0.0f));
+
+        // Hare: very small, compact
+        register(new SizeProfile("animagus_hare",
+                0.35f, 0.45f,   // 0.25× human height
+                0.35f, 1.3f, 1.4f,
+                -0.9f, 0.0f, 0.5f));
+
+        // Beetle: minuscule
+        register(new SizeProfile("animagus_beetle",
+                0.25f, 0.30f,   // 0.17× human height
+                0.20f, 1.5f, 1.6f,
+                -1.0f, 0.0f, 0.0f));
     }
 
     public static void register(SizeProfile profile) {

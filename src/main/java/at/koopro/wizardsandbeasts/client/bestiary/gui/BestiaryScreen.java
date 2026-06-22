@@ -7,17 +7,26 @@ import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 public final class BestiaryScreen extends Screen {
     private static final int W = 320;
@@ -54,6 +63,11 @@ public final class BestiaryScreen extends Screen {
     private final Map<BestiaryCategory, Boolean> collapsed = new EnumMap<>(BestiaryCategory.class);
     private Identifier selected;
     private int scrollOffset = 0;
+
+    /** Cached client-side entity instances for live detail-panel rendering. */
+    private final Map<Identifier, LivingEntity> renderEntities = new HashMap<>();
+    /** Entity-type ids that failed to resolve to a LivingEntity — don't retry each frame. */
+    private final Set<Identifier> renderEntityMisses = new HashSet<>();
 
     public BestiaryScreen() {
         super(Component.translatable("gui.wizards_and_beasts.bestiary.title"));
@@ -186,6 +200,52 @@ public final class BestiaryScreen extends Screen {
                 : TEX_ENTRY_PLACEHOLDER;
     }
 
+    /**
+     * Resolve (and cache) a client-side LivingEntity instance for an entry's declared
+     * entityType, used for live rendering in the detail panel. Returns {@code null} when
+     * the entry has no entityType, the type is unknown, or it is not a LivingEntity.
+     */
+    private LivingEntity getRenderEntity(BestiaryEntry entry) {
+        if (entry.entityType().isEmpty() || minecraft == null || minecraft.level == null) {
+            return null;
+        }
+        Identifier typeId = entry.entityType().get();
+        if (renderEntityMisses.contains(typeId)) {
+            return null;
+        }
+        LivingEntity cached = renderEntities.get(typeId);
+        if (cached != null) {
+            return cached;
+        }
+        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getValue(typeId);
+        if (type == null) {
+            renderEntityMisses.add(typeId);
+            return null;
+        }
+        Entity created = type.create(minecraft.level, EntitySpawnReason.LOAD);
+        if (created instanceof LivingEntity living) {
+            renderEntities.put(typeId, living);
+            return living;
+        }
+        renderEntityMisses.add(typeId);
+        return null;
+    }
+
+    /** Draw the live entity into the detail-panel portrait box (screen space, post-scale). */
+    private void renderBestiaryEntity(GuiGraphics gg, LivingEntity entity, int mouseX, int mouseY) {
+        int pX = x + 132;
+        int pY = y + 22;
+        int pSize = 32;
+        int sx1 = Math.round(x + (pX - x) * guiScale);
+        int sy1 = Math.round(y + (pY - y) * guiScale);
+        int sx2 = Math.round(x + (pX + pSize - x) * guiScale);
+        int sy2 = Math.round(y + (pY + pSize - y) * guiScale);
+        float bbHeight = Math.max(0.5f, entity.getBbHeight());
+        int renderScale = Math.max(4, (int) ((sy2 - sy1) * 0.55f / bbHeight));
+        InventoryScreen.renderEntityInInventoryFollowsMouse(
+                gg, sx1, sy1, sx2, sy2, renderScale, 0.0625f, mouseX, mouseY, entity);
+    }
+
     /** Map a screen-space coordinate into the unscaled design space anchored at (x, y). */
     private double toDesignX(double screenX) {
         return x + (screenX - x) / guiScale;
@@ -250,6 +310,19 @@ public final class BestiaryScreen extends Screen {
 
         pose.popMatrix();
 
+        // Live entity render happens in screen space (outside the design-scale matrix), since
+        // the entity helper sets up its own projection/scissor from raw screen coordinates.
+        if (selectedEntry != null) {
+            DiscoveryTier detailTier = ClientBestiaryCache.get().tiers()
+                    .getOrDefault(selectedEntry.id(), DiscoveryTier.UNDISCOVERED);
+            if (detailTier != DiscoveryTier.UNDISCOVERED) {
+                LivingEntity living = getRenderEntity(selectedEntry);
+                if (living != null) {
+                    renderBestiaryEntity(gg, living, mouseX, mouseY);
+                }
+            }
+        }
+
         int dmx = (int) toDesignX(mouseX);
         int dmy = (int) toDesignY(mouseY);
         if (dmx >= x + 6 && dmx <= listRowsRight() && dmy >= listTop && dmy <= listBottom) {
@@ -279,7 +352,12 @@ public final class BestiaryScreen extends Screen {
         int portraitX = dx;
         int portraitY = dy;
         int portraitSize = 32;
-        drawStretched(gg, resolveEntryPortrait(entry, tier), portraitX, portraitY, portraitSize, portraitSize, 32, 32);
+        // When the entry has a live entity, it is drawn later in screen space (post-scale);
+        // only fall back to the static portrait texture when no entity is available.
+        boolean liveEntity = tier != DiscoveryTier.UNDISCOVERED && getRenderEntity(entry) != null;
+        if (!liveEntity) {
+            drawStretched(gg, resolveEntryPortrait(entry, tier), portraitX, portraitY, portraitSize, portraitSize, 32, 32);
+        }
         gg.fill(portraitX, portraitY + portraitSize, portraitX + portraitSize, portraitY + portraitSize + 1, 0x664F5B72);
         gg.fill(portraitX + portraitSize, portraitY, portraitX + portraitSize + 1, portraitY + portraitSize, 0x664F5B72);
 

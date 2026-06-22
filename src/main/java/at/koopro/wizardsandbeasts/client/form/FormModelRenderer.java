@@ -10,8 +10,17 @@ import at.koopro.wizardsandbeasts.form.ModelType;
 import at.koopro.wizardsandbeasts.form.RenderFlag;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.animal.feline.CatModel;
+import net.minecraft.client.model.animal.wolf.WolfModel;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.state.CatRenderState;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.entity.state.WolfRenderState;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -19,18 +28,32 @@ import net.minecraft.resources.Identifier;
 
 /**
  * Dispatches rendering of custom (non-HUMANOID) player form models.
- * Each {@link ModelType} maps to a placeholder model with simple cube geometry.
+ * <p>
+ * Animagus cat/dog forms borrow the vanilla {@link CatModel}/{@link WolfModel} —
+ * including their walk, sit and idle animations — by populating a vanilla render
+ * state from the player's own {@link LivingEntityRenderState} each frame. All other
+ * forms fall back to placeholder cube geometry keyed on {@link ModelType}.
  */
 public final class FormModelRenderer {
 
     private static final Identifier PLACEHOLDER_TEXTURE =
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "textures/entity/form/placeholder.png");
 
+    private static final Identifier CAT_TEXTURE =
+            Identifier.withDefaultNamespace("textures/entity/cat/tabby.png");
+    private static final Identifier WOLF_TEXTURE =
+            Identifier.withDefaultNamespace("textures/entity/wolf/wolf.png");
+
+    /** Standard vanilla entity-model vertical offset (origin sits at the top of the model). */
+    private static final float MODEL_Y_OFFSET = -1.501f;
+
     private static WerewolfModel werewolfModel;
     private static CentaurModel centaurModel;
     private static GoblinFormModel goblinModel;
     private static BatFormModel batModel;
     private static MerfolkSwimModel merfolkModel;
+    private static CatModel catModel;
+    private static WolfModel wolfModel;
 
     private FormModelRenderer() {}
 
@@ -73,9 +96,35 @@ public final class FormModelRenderer {
      * Renders a custom form model using the new SubmitNodeCollector pipeline.
      * Called from {@link at.koopro.wizardsandbeasts.mixin.client.LivingEntityRendererMixin}
      * where the PoseStack already has form scale applied.
+     *
+     * @param src the player's own render state, used to drive vanilla beast-model animation
      */
     public static void renderToCollector(PoseStack poseStack, SubmitNodeCollector collector,
-                                          FormRenderStateModifier.FormRenderData formData) {
+                                          FormRenderStateModifier.FormRenderData formData,
+                                          LivingEntityRenderState src) {
+        // Animagus cat/dog forms use animated vanilla models.
+        switch (formData.formId()) {
+            case "animagus_cat" -> {
+                renderVanilla(poseStack, collector, CAT_TEXTURE, src, () -> {
+                    CatModel model = getCatModel();
+                    model.resetPose();
+                    model.setupAnim(buildCatState(formData, src));
+                    return model;
+                });
+                return;
+            }
+            case "animagus_dog" -> {
+                renderVanilla(poseStack, collector, WOLF_TEXTURE, src, () -> {
+                    WolfModel model = getWolfModel();
+                    model.resetPose();
+                    model.setupAnim(buildWolfState(formData, src));
+                    return model;
+                });
+                return;
+            }
+            default -> { /* fall through to placeholder geometry */ }
+        }
+
         Identifier texture = formData.texturePath() != null ? formData.texturePath() : PLACEHOLDER_TEXTURE;
 
         boolean translucent = formData.renderFlags().contains(RenderFlag.TRANSLUCENT);
@@ -106,6 +155,86 @@ public final class FormModelRenderer {
         });
     }
 
+    /**
+     * Renders a vanilla {@link net.minecraft.client.model.Model} in entity space. The model is
+     * authored Y-down with its origin at the top, so we mirror the body-yaw rotation and the
+     * {@code scale(-1,-1,1)} / {@link #MODEL_Y_OFFSET} flip that the vanilla renderer would apply —
+     * the form-scale already sits on the incoming PoseStack from the mixin.
+     */
+    private static void renderVanilla(PoseStack poseStack, SubmitNodeCollector collector,
+                                       Identifier texture, LivingEntityRenderState src,
+                                       java.util.function.Supplier<net.minecraft.client.model.Model> animated) {
+        RenderType renderType = RenderTypes.entityCutoutNoCull(texture);
+        float bodyRot = src != null ? src.bodyRot : 0.0f;
+        collector.submitCustomGeometry(poseStack, renderType, (pose, consumer) -> {
+            PoseStack tempStack = new PoseStack();
+            tempStack.last().pose().set(pose.pose());
+            tempStack.last().normal().set(pose.normal());
+
+            tempStack.mulPose(Axis.YP.rotationDegrees(180.0f - bodyRot));
+            tempStack.scale(-1.0f, -1.0f, 1.0f);
+            tempStack.translate(0.0f, MODEL_Y_OFFSET, 0.0f);
+
+            net.minecraft.client.model.Model model = animated.get();
+            model.renderToBuffer(tempStack, consumer, 0xF000F0, OverlayTexture.NO_OVERLAY, -1);
+        });
+    }
+
+    private static WolfRenderState buildWolfState(FormRenderStateModifier.FormRenderData formData,
+                                                  LivingEntityRenderState src) {
+        WolfRenderState s = new WolfRenderState();
+        boolean sitting = isSitPose(formData, src);
+        s.ageScale = 1.0f;
+        s.walkAnimationPos = src != null ? src.walkAnimationPos : 0.0f;
+        s.walkAnimationSpeed = sitting ? 0.0f : clampSwing(src);
+        s.yRot = netHeadYaw(src);
+        s.xRot = src != null ? src.xRot : 0.0f;
+        s.isSitting = sitting;
+        return s;
+    }
+
+    private static CatRenderState buildCatState(FormRenderStateModifier.FormRenderData formData,
+                                                LivingEntityRenderState src) {
+        CatRenderState s = new CatRenderState();
+        boolean sitting = isSitPose(formData, src);
+        AbstractClientPlayer player = livePlayer(formData);
+        s.ageScale = 1.0f;
+        s.walkAnimationPos = src != null ? src.walkAnimationPos : 0.0f;
+        s.walkAnimationSpeed = sitting ? 0.0f : clampSwing(src);
+        s.yRot = netHeadYaw(src);
+        s.xRot = src != null ? src.xRot : 0.0f;
+        s.isSitting = sitting;
+        s.isSprinting = player != null && player.isSprinting();
+        s.isCrouching = false; // sneak is mapped to the sit pose for beast forms
+        return s;
+    }
+
+    /**
+     * Net head yaw in degrees. {@link LivingEntityRenderState#yRot} is already the head yaw with
+     * the body yaw subtracted (see LivingEntityRenderer#extractRenderState), so it is used as-is —
+     * subtracting bodyRot again would double-count and mis-aim the head.
+     */
+    private static float netHeadYaw(LivingEntityRenderState src) {
+        return src != null ? src.yRot : 0.0f;
+    }
+
+    private static float clampSwing(LivingEntityRenderState src) {
+        return src != null ? Math.min(1.0f, src.walkAnimationSpeed) : 0.0f;
+    }
+
+    /** Beast sits when the player sneaks while standing still; sneak-walking keeps the walk cycle. */
+    private static boolean isSitPose(FormRenderStateModifier.FormRenderData formData, LivingEntityRenderState src) {
+        AbstractClientPlayer player = livePlayer(formData);
+        boolean sneaking = player != null && player.isShiftKeyDown();
+        return sneaking && clampSwing(src) <= 0.05f;
+    }
+
+    private static AbstractClientPlayer livePlayer(FormRenderStateModifier.FormRenderData formData) {
+        if (Minecraft.getInstance().level == null) return null;
+        return Minecraft.getInstance().level.getPlayerByUUID(formData.playerUUID()) instanceof AbstractClientPlayer p
+                ? p : null;
+    }
+
     private static WerewolfModel getWerewolfModel() {
         if (werewolfModel == null) werewolfModel = new WerewolfModel();
         return werewolfModel;
@@ -129,6 +258,20 @@ public final class FormModelRenderer {
     private static MerfolkSwimModel getMerfolkModel() {
         if (merfolkModel == null) merfolkModel = new MerfolkSwimModel();
         return merfolkModel;
+    }
+
+    private static CatModel getCatModel() {
+        if (catModel == null) {
+            catModel = new CatModel(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.CAT));
+        }
+        return catModel;
+    }
+
+    private static WolfModel getWolfModel() {
+        if (wolfModel == null) {
+            wolfModel = new WolfModel(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.WOLF));
+        }
+        return wolfModel;
     }
 
 }

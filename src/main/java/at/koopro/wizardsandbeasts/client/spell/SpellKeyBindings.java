@@ -65,6 +65,16 @@ public class SpellKeyBindings {
             "key." + WizardsAndBeastsMod.MODID + ".obscurial_ability_secondary",
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_M, CATEGORY);
 
+    /** Default: unbound — toggles the Animagus beast form. Bind in Controls settings. */
+    public static final KeyMapping ANIMAGUS_TRANSFORM = new KeyMapping(
+            "key." + WizardsAndBeastsMod.MODID + ".animagus_transform",
+            InputConstants.UNKNOWN.getValue(), CATEGORY);
+
+    /** Default: unbound — triggers the active ability of the current beast form. Bind in Controls settings. */
+    public static final KeyMapping ANIMAGUS_ABILITY = new KeyMapping(
+            "key." + WizardsAndBeastsMod.MODID + ".animagus_ability",
+            InputConstants.UNKNOWN.getValue(), CATEGORY);
+
     public static void register(RegisterKeyMappingsEvent event) {
         event.register(CHARACTER_SHEET);
         event.register(TOGGLE_STAT_HUD);
@@ -80,6 +90,8 @@ public class SpellKeyBindings {
         event.register(LEGILIMENCY);
         event.register(OBSCURIAL_ABILITY_PRIMARY);
         event.register(OBSCURIAL_ABILITY_SECONDARY);
+        event.register(ANIMAGUS_TRANSFORM);
+        event.register(ANIMAGUS_ABILITY);
     }
 
     private SpellKeyBindings() {

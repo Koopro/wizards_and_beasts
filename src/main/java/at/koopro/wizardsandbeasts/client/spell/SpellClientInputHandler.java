@@ -10,6 +10,8 @@ import at.koopro.wizardsandbeasts.client.heritage.ObscurialInputController;
 import at.koopro.wizardsandbeasts.client.spell.input.SpellInputController;
 import at.koopro.wizardsandbeasts.client.ui.HudVisibilityPolicy;
 import at.koopro.wizardsandbeasts.client.ui.InputPolicy;
+import at.koopro.wizardsandbeasts.network.form.AnimagusAbilityC2SPayload;
+import at.koopro.wizardsandbeasts.network.form.AnimagusTransformC2SPayload;
 import at.koopro.wizardsandbeasts.network.spell.ImperioResistC2SPayload;
 import at.koopro.wizardsandbeasts.network.spell.SpellLeviosaAdjustC2SPayload;
 import at.koopro.wizardsandbeasts.spell.core.CastType;
@@ -31,6 +33,12 @@ public class SpellClientInputHandler {
         boolean canUseWandMagic = HudVisibilityPolicy.canUseWandMagic(typeData);
         SpellInputController.handleGameplayBindings(mc, canUseWandMagic);
         ObscurialInputController.handleGameplayBindings(typeData);
+        if (SpellKeyBindings.ANIMAGUS_TRANSFORM.consumeClick()) {
+            ClientPacketDistributor.sendToServer(new AnimagusTransformC2SPayload());
+        }
+        if (SpellKeyBindings.ANIMAGUS_ABILITY.consumeClick()) {
+            ClientPacketDistributor.sendToServer(new AnimagusAbilityC2SPayload());
+        }
         ApparitionClientController.onClientTick(mc);
         LegilimencyClientController.onClientTick(mc);
         ClientLegilimencyVisionState.tick();

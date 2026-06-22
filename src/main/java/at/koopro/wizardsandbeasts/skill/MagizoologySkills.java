@@ -38,4 +38,12 @@ final class MagizoologySkills {
             .effect(new SkillEffect.PassiveAttribute("max_health", 2.0))
             .position(2, 1)
             .build());
+
+    static final Skill ANIMAGUS_STUDY = SkillTrees.register(Skill.builder("animagus_study", "Animagus Study")
+            .tree(SkillTreeId.MAGIZOOLOGY).cost(3)
+            .description("Learn the Animagus discipline. Complete the mandrake-leaf ritual during a thunderstorm to assume a beast form.")
+            .prerequisite("creature_bond")
+            .effect(new SkillEffect.UnlockAbility("animagus"))
+            .position(3, 1)
+            .build());
 }

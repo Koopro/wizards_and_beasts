@@ -18,5 +18,7 @@ public enum Module {
     FLOO_NETWORK,
     AZKABAN,
     CHARACTER_SHEET,
-    PLAYER_STATS
+    PLAYER_STATS,
+    /** Decorative location blocks (Hogwarts, Hogsmeade, Diagon Alley, Gringotts, Ministry) and their crafting recipes. */
+    STRUCTURES
 }
