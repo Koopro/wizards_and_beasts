@@ -1,0 +1,7 @@
+{
+  "__comment": "PLACEHOLDER texture — replace textures/item/ministry_handbook.png with final art.",
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "wizards_and_beasts:item/ministry_handbook"
+  }
+}

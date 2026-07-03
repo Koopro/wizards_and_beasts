@@ -18,6 +18,9 @@ public class ModLootTableProvider {
                 List.of(new LootTableProvider.SubProviderEntry(
                         ModBlockLootTableProvider::new,
                         LootContextParamSets.BLOCK
+                ), new LootTableProvider.SubProviderEntry(
+                        ModEntityLootTableProvider::new,
+                        LootContextParamSets.ENTITY
                 )),
                 lookupProvider
         );

@@ -52,9 +52,8 @@ public class ModModelProvider extends ModelProvider {
         itemModels.declareCustomModelItem(BroomItemRegistry.ENCHANTED_TWIG_BUNDLE.get());
         itemModels.declareCustomModelItem(MiscItemRegistry.MARAUDERS_MAP.get());
         itemModels.declareCustomModelItem(MiscItemRegistry.DELUMINATOR.get());
-        itemModels.declareCustomModelItem(DarkArtefactItemRegistry.ENCHANTED_TRUNK.get());
-        itemModels.declareCustomModelItem(DarkArtefactItemRegistry.EXPANDED_TRUNK.get());
-        itemModels.declareCustomModelItem(DarkArtefactItemRegistry.MASTERS_TRUNK.get());
+        // All trunks + Newt's Case are now blocks — their item models come from the block-model
+        // generation in generateWizardingWorld().
 
         itemModels.declareCustomModelItem(WandItemRegistry.PHOENIX_FEATHER.get());
         itemModels.declareCustomModelItem(WandItemRegistry.DRAGON_HEARTSTRING.get());
@@ -70,8 +69,21 @@ public class ModModelProvider extends ModelProvider {
         itemModels.declareCustomModelItem(MiscItemRegistry.PARCHMENT.get());
         itemModels.declareCustomModelItem(MiscItemRegistry.INK_BOTTLE.get());
 
-        itemModels.declareCustomModelItem(MiscItemRegistry.GOBLIN_TELLER_SPAWN_EGG.get());
-        itemModels.declareCustomModelItem(MiscItemRegistry.NIFFLER_SPAWN_EGG.get());
+        // Spawn eggs: 1.21.10 removed minecraft:item/template_spawn_egg, so every egg is a plain
+        // flat item with its own generated texture (textures/item/<id>_spawn_egg.png).
+        itemModels.generateFlatItem(MiscItemRegistry.GOBLIN_TELLER_SPAWN_EGG.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(MiscItemRegistry.NIFFLER_SPAWN_EGG.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(MiscItemRegistry.BOWTRUCKLE_SPAWN_EGG.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(MiscItemRegistry.CORNISH_PIXIE_SPAWN_EGG.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(MiscItemRegistry.THESTRAL_SPAWN_EGG.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(MiscItemRegistry.PHOENIX_SPAWN_EGG.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(MiscItemRegistry.AUGUREY_SPAWN_EGG.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(MiscItemRegistry.MOONCALF_SPAWN_EGG.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(MiscItemRegistry.STREELER_SPAWN_EGG.get(), ModelTemplates.FLAT_ITEM);
+        for (var egg : at.koopro.wizardsandbeasts.registry.ModCreatures.SPAWN_EGGS.values()) {
+            itemModels.generateFlatItem(egg.get(), ModelTemplates.FLAT_ITEM);
+        }
+        itemModels.declareCustomModelItem(MiscItemRegistry.MINISTRY_HANDBOOK.get());
 
         itemModels.declareCustomModelItem(CurrencyItemRegistry.KNUT.get());
         itemModels.declareCustomModelItem(CurrencyItemRegistry.SICKLE.get());
@@ -95,11 +107,9 @@ public class ModModelProvider extends ModelProvider {
         itemModels.declareCustomModelItem(TrinketItemRegistry.TWO_WAY_MIRROR.get());
         itemModels.declareCustomModelItem(TrinketItemRegistry.HAND_OF_GLORY.get());
         itemModels.declareCustomModelItem(TrinketItemRegistry.DARK_MARK_BRAND.get());
-        itemModels.declareCustomModelItem(DarkArtefactItemRegistry.MOODYS_TRUNK.get());
         itemModels.declareCustomModelItem(TrinketItemRegistry.HERMIONES_BEADED_BAG.get());
         itemModels.declareCustomModelItem(TrinketItemRegistry.FOE_GLASS.get());
         itemModels.declareCustomModelItem(TrinketItemRegistry.BLOOD_PACT_VIAL.get());
-        itemModels.declareCustomModelItem(TrinketItemRegistry.NEWTS_CASE_ITEM.get());
 
         // Lore tomes — hand-authored item models exist; declare so datagen validation passes.
         itemModels.declareCustomModelItem(LoreItemRegistry.A_HISTORY_OF_MAGIC.get());
@@ -185,6 +195,13 @@ public class ModModelProvider extends ModelProvider {
 
         blockModels.createTrivialBlock(ModBlocks.WARDING_STONE.get(), TexturedModel.CUBE);
         blockModels.createTrivialBlock(ModBlocks.POCKET_CONFIGURATOR.get(), TexturedModel.CUBE);
+
+        // Placed trunks — placeholder cube models + item models until bespoke trunk art lands.
+        blockModels.createTrivialBlock(ModBlocks.ENCHANTED_TRUNK.get(), TexturedModel.CUBE);
+        blockModels.createTrivialBlock(ModBlocks.EXPANDED_TRUNK.get(), TexturedModel.CUBE);
+        blockModels.createTrivialBlock(ModBlocks.MASTERS_TRUNK.get(), TexturedModel.CUBE);
+        blockModels.createTrivialBlock(ModBlocks.MOODYS_TRUNK.get(), TexturedModel.CUBE);
+        blockModels.createTrivialBlock(ModBlocks.NEWTS_CASE.get(), TexturedModel.CUBE);
 
         blockModels.createTrivialBlock(ModBlocks.WANDMAKERS_BENCH.get(), TexturedModel.LEAVES);
         blockModels.createTrivialBlock(ModBlocks.FLOO_FIREPLACE.get(), TexturedModel.LEAVES);
