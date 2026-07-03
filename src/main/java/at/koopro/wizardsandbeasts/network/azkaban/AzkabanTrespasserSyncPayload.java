@@ -1,7 +1,10 @@
 package at.koopro.wizardsandbeasts.network.azkaban;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
@@ -28,5 +31,11 @@ public record AzkabanTrespasserSyncPayload(boolean tagged) implements CustomPack
     @Override
     public @NonNull Type<? extends CustomPacketPayload> type() {
         return TYPE;
+    }
+
+    /** Pushes the player's persisted trespasser flag to their client (login/respawn/dimension change). */
+    public static void syncToPlayer(@NonNull ServerPlayer player) {
+        boolean tagged = player.getData(ModAttachments.AZKABAN_TRESPASSER_TAG.get()).tagged();
+        PacketDistributor.sendToPlayer(player, new AzkabanTrespasserSyncPayload(tagged));
     }
 }

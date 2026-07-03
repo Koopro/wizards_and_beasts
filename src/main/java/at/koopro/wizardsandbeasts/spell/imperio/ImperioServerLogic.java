@@ -21,6 +21,10 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.Vec3;
+import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jspecify.annotations.Nullable;
 
@@ -151,15 +155,30 @@ public final class ImperioServerLogic {
         if (victim instanceof ServerPlayer pl) {
             PacketDistributor.sendToPlayer(pl, new ImperioControlS2CPayload(false, pl.getUUID()));
         }
+        CASTER_TO_VICTIM.remove(controllerUuid, victim.getUUID());
         ServerPlayer controller = level.getServer().getPlayerList().getPlayer(controllerUuid);
         if (controller != null) {
-            CASTER_TO_VICTIM.remove(controllerUuid, victim.getUUID());
             PacketDistributor.sendToPlayer(controller, new ImperioVictimBoundS2CPayload(new UUID(0L, 0L)));
         }
+    }
+
+    /** Drops transient per-player state when a player disconnects, both as caster and as victim. */
+    public static void onPlayerDisconnect(UUID playerId) {
+        CASTER_TO_VICTIM.remove(playerId);
+        CASTER_TO_VICTIM.values().removeIf(playerId::equals);
+        LAST_RESIST_PACKET_TICK.remove(playerId);
     }
 
     private static @Nullable LivingEntity findLiving(ServerLevel sl, UUID id) {
         net.minecraft.world.entity.Entity e = sl.getEntity(id);
         return e instanceof LivingEntity ? (LivingEntity) e : null;
+    }
+
+    @EventBusSubscriber(modid = WizardsAndBeastsMod.MODID)
+    public static final class LogoutCleanup {
+        @SubscribeEvent
+        public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+            onPlayerDisconnect(event.getEntity().getUUID());
+        }
     }
 }
