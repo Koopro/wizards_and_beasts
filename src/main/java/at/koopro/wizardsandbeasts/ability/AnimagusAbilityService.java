@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.ability;
 
+import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
@@ -15,6 +16,9 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,7 +64,9 @@ public final class AnimagusAbilityService {
         }
         APPLIED.put(id, applied);
 
-        if ("animagus_cat".equals(formId)) {
+        // Scare radius (8) far exceeds creeper walking distance per 10 ticks, so a
+        // throttled scan is indistinguishable in-game and drops 90% of the AABB queries.
+        if ("animagus_cat".equals(formId) && player.tickCount % 10 == 0) {
             scareCreepers(player);
         }
     }
@@ -189,5 +195,16 @@ public final class AnimagusAbilityService {
 
     private static void feedback(ServerPlayer player, String message, ChatFormatting color) {
         player.displayClientMessage(Component.literal(message).withStyle(color), true);
+    }
+
+    /** Players who log out mid-form never hit clearPassives, so drop their entries here. */
+    @EventBusSubscriber(modid = WizardsAndBeastsMod.MODID)
+    public static final class LogoutCleanup {
+        @SubscribeEvent
+        public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+            UUID id = event.getEntity().getUUID();
+            APPLIED.remove(id);
+            COOLDOWN.remove(id);
+        }
     }
 }

@@ -35,6 +35,9 @@ public final class ExpectoPatronumAuraHandler {
 
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
+        if (AURA_UNTIL.isEmpty()) {
+            return;
+        }
         long now = event.getServer().overworld().getGameTime();
         AURA_UNTIL.entrySet().removeIf(e -> now >= e.getValue());
 
