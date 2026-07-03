@@ -12,11 +12,11 @@
     "PTP"
   ],
   "key": {
-    "G": {"item": "minecraft:gold_ingot"},
-    "S": {"item": "minecraft:stick"},
-    "I": {"item": "wizards_and_beasts:nimbus_2000"},
-    "P": {"item": "wizards_and_beasts:broom_polish"},
-    "T": {"tag": "minecraft:leaves"}
+    "G": "minecraft:gold_ingot",
+    "S": "minecraft:stick",
+    "I": "wizards_and_beasts:nimbus_2000",
+    "P": "wizards_and_beasts:broom_polish",
+    "T": "#minecraft:leaves"
   },
   "result": {
     "id": "wizards_and_beasts:nimbus_2001",

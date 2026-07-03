@@ -12,10 +12,10 @@
     "WTW"
   ],
   "key": {
-    "W": {"tag": "minecraft:planks"},
-    "S": {"item": "minecraft:stick"},
-    "T": {"tag": "minecraft:leaves"},
-    "I": {"item": "minecraft:iron_ingot"}
+    "W": "#minecraft:planks",
+    "S": "minecraft:stick",
+    "T": "#minecraft:leaves",
+    "I": "minecraft:iron_ingot"
   },
   "result": {
     "id": "wizards_and_beasts:comet_260",

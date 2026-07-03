@@ -12,11 +12,11 @@
     "ETE"
   ],
   "key": {
-    "D": {"item": "minecraft:diamond"},
-    "S": {"item": "minecraft:stick"},
-    "G": {"item": "minecraft:gold_ingot"},
-    "E": {"item": "wizards_and_beasts:enchanted_twig_bundle"},
-    "T": {"tag": "minecraft:leaves"}
+    "D": "minecraft:diamond",
+    "S": "minecraft:stick",
+    "G": "minecraft:gold_ingot",
+    "E": "wizards_and_beasts:enchanted_twig_bundle",
+    "T": "#minecraft:leaves"
   },
   "result": {
     "id": "wizards_and_beasts:firebolt",

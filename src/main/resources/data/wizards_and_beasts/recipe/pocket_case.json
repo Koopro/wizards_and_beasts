@@ -7,15 +7,9 @@
     "LPL"
   ],
   "key": {
-    "L": {
-      "item": "minecraft:leather"
-    },
-    "P": {
-      "item": "wizards_and_beasts:parchment"
-    },
-    "B": {
-      "item": "minecraft:ender_chest"
-    }
+    "L": "minecraft:leather",
+    "P": "wizards_and_beasts:parchment",
+    "B": "minecraft:ender_chest"
   },
   "result": {
     "id": "wizards_and_beasts:enchanted_trunk",

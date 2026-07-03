@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "LPI",
+    "PFP",
+    "IPL"
+  ],
+  "key": {
+    "L": "minecraft:leather",
+    "P": "minecraft:paper",
+    "I": "minecraft:ink_sac",
+    "F": "minecraft:feather"
+  },
+  "result": {
+    "id": "wizards_and_beasts:bestiary",
+    "count": 1
+  }
+}

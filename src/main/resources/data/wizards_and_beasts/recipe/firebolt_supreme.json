@@ -12,11 +12,11 @@
     "ETE"
   ],
   "key": {
-    "N": {"item": "minecraft:nether_star"},
-    "D": {"item": "minecraft:diamond"},
-    "S": {"item": "minecraft:stick"},
-    "E": {"item": "wizards_and_beasts:enchanted_twig_bundle"},
-    "T": {"tag": "minecraft:leaves"}
+    "N": "minecraft:nether_star",
+    "D": "minecraft:diamond",
+    "S": "minecraft:stick",
+    "E": "wizards_and_beasts:enchanted_twig_bundle",
+    "T": "#minecraft:leaves"
   },
   "result": {
     "id": "wizards_and_beasts:firebolt_supreme",

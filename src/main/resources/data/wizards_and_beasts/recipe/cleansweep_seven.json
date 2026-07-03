@@ -12,9 +12,9 @@
     "WTW"
   ],
   "key": {
-    "W": {"tag": "minecraft:planks"},
-    "S": {"item": "minecraft:stick"},
-    "T": {"tag": "minecraft:leaves"}
+    "W": "#minecraft:planks",
+    "S": "minecraft:stick",
+    "T": "#minecraft:leaves"
   },
   "result": {
     "id": "wizards_and_beasts:cleansweep_seven",
