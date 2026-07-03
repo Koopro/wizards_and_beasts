@@ -1,12 +1,13 @@
 {
   "type": "minecraft:crafting_shapeless",
+  "category": "misc",
   "ingredients": [
     "minecraft:blaze_powder",
     "minecraft:gray_dye",
     "minecraft:glowstone_dust"
   ],
   "result": {
-    "id": "wizards_and_beasts:floo_powder",
-    "count": 8
+    "count": 8,
+    "id": "wizards_and_beasts:floo_powder"
   }
 }

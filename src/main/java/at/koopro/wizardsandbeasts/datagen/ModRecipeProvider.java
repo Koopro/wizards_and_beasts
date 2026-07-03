@@ -130,9 +130,10 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_cocoa_beans", has(Items.COCOA_BEANS))
                 .save(output);
 
-        ShapelessRecipeBuilder.shapeless(registries.lookupOrThrow(Registries.ITEM), RecipeCategory.MISC, MiscItemRegistry.FLOO_POWDER.get(), 2)
-                .requires(Items.GUNPOWDER)
+        ShapelessRecipeBuilder.shapeless(registries.lookupOrThrow(Registries.ITEM), RecipeCategory.MISC, MiscItemRegistry.FLOO_POWDER.get(), 8)
                 .requires(Items.BLAZE_POWDER)
+                .requires(Items.GRAY_DYE)
+                .requires(Items.GLOWSTONE_DUST)
                 .unlockedBy("has_blaze_powder", has(Items.BLAZE_POWDER))
                 .save(output);
 

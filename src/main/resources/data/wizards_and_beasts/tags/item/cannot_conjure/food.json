@@ -1,0 +1,26 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:bread",
+    "minecraft:apple",
+    "minecraft:golden_apple",
+    "minecraft:enchanted_golden_apple",
+    "minecraft:cake",
+    "minecraft:cooked_beef",
+    "minecraft:cooked_porkchop",
+    "minecraft:cooked_chicken",
+    "minecraft:cooked_mutton",
+    "minecraft:cooked_rabbit",
+    "minecraft:cooked_cod",
+    "minecraft:cooked_salmon",
+    "minecraft:baked_potato",
+    "wizards_and_beasts:butterbeer",
+    "wizards_and_beasts:treacle_tart",
+    "wizards_and_beasts:pumpkin_pasty",
+    "wizards_and_beasts:pumpkin_juice",
+    "wizards_and_beasts:chocolate_frog",
+    "wizards_and_beasts:peppermint_toad",
+    "wizards_and_beasts:fizzing_whizzbee",
+    "wizards_and_beasts:bertie_botts_every_flavour_beans"
+  ]
+}

@@ -85,6 +85,7 @@ public final class SpellExecutor {
         SkillSystemAPI.applyCooldownModifiers(ctx.modifiers(), caster, spell);
         WandStatsResolver.applyToStack(ctx.modifiers(), wand, spell);
         ObscurialCombatRules.applyCastModifiers(ctx.modifiers(), caster);
+        at.koopro.wizardsandbeasts.skill.vocation.VocationAbilityHooks.applyCastModifiers(ctx.modifiers(), caster, spell);
 
         float corruption = caster.getData(ModAttachments.DARK_CORRUPTION.get());
         if (corruption >= 90.0f

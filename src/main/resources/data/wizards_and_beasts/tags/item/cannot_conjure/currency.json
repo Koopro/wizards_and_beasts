@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "wizards_and_beasts:galleon",
+    "wizards_and_beasts:sickle",
+    "wizards_and_beasts:knut",
+    "wizards_and_beasts:dragot",
+    "minecraft:gold_ingot",
+    "minecraft:gold_nugget",
+    "minecraft:emerald",
+    "minecraft:diamond"
+  ]
+}

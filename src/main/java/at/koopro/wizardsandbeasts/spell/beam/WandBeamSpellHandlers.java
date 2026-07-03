@@ -175,7 +175,8 @@ final class WandBeamSpellHandlers {
             float intent = crucioIntentMultiplier(caster, spell);
             PacketDistributor.sendToPlayer(caster, new CrucioIntentFeedbackS2CPayload(intent));
             float corruption = caster.getData(ModAttachments.DARK_CORRUPTION.get());
-            caster.setData(ModAttachments.DARK_CORRUPTION.get(), Math.min(100f, corruption + 5.0f * intent));
+            caster.setData(ModAttachments.DARK_CORRUPTION.get(), Math.min(100f, corruption
+                    + at.koopro.wizardsandbeasts.skill.vocation.VocationAbilityHooks.scaleCorruptionGain(caster, 5.0f * intent)));
             target.removeEffect(MobEffects.WITHER);
             target.removeEffect(MobEffects.SLOWNESS);
             // F2: CRUCIATUS_PAIN now rides crucio.json's tick-cadence apply_effect component

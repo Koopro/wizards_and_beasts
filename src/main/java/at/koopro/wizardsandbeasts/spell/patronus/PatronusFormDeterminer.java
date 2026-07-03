@@ -13,9 +13,19 @@ public final class PatronusFormDeterminer {
     /** Happiness at/above which a heritage's rare Patronus form is used instead of the common one. */
     private static final float RARE_FORM_THRESHOLD = 90.0f;
 
-    // TODO(patronus-rare): populate with canonical rare Patronus forms per heritage once designs are settled.
-    // While empty, determine() transparently falls through to the common form — no behavior change.
+    /**
+     * Rare Patronus forms, earned at {@link #RARE_FORM_THRESHOLD}+ happiness. Vanilla stand-in
+     * models, same pipeline as the common forms; heritages absent here fall through to common.
+     */
     private static final Map<Heritage, Identifier> RARE_FORMS = new EnumMap<>(Heritage.class);
+
+    static {
+        RARE_FORMS.put(Heritage.WIZARDKIND, mc("horse"));     // noble steed — stag stand-in
+        RARE_FORMS.put(Heritage.WEREWOLF, mc("polar_bear"));  // the wolf mastered, not denied
+        RARE_FORMS.put(Heritage.OBSCURIAL, mc("phantom"));    // the shadow given wings
+        RARE_FORMS.put(Heritage.VAMPIRE, mc("cat"));          // a warm-blooded companion
+        RARE_FORMS.put(Heritage.VEELA, mc("allay"));          // radiant spirit of the dance
+    }
 
     private PatronusFormDeterminer() {}
 
@@ -49,7 +59,7 @@ public final class PatronusFormDeterminer {
         if (variant == HeritageVariant.MUGGLE_BORN) {
             return mc("rabbit");
         }
-        return mc("cow"); // TODO(scope): replace with custom Patronus deer model
+        return mc("goat"); // closest vanilla stand-in for the classic deer until a custom model ships
     }
 
     private static Identifier vampireForm(@Nullable HeritageVariant variant) {

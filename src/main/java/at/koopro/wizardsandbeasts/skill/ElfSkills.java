@@ -5,7 +5,8 @@ package at.koopro.wizardsandbeasts.skill;
  *
  * <p>Starter set. {@link SkillEffect.PassiveAttribute} nodes apply immediately; {@link
  * SkillEffect.UnlockAbility} nodes set a queryable flag whose gameplay consumers (ward-piercing
- * apparition, item handling, free-elf status) are not yet wired. See TODOs.
+ * apparition, item handling, free-elf status) live in event.skill.ElfAbilityHandler
+ * and ApparitionServerLogic.
  */
 final class ElfSkills {
 
@@ -30,7 +31,6 @@ final class ElfSkills {
             .tree(SkillTreeId.ELF_BOND).cost(2)
             .description("Deft hands for any household task.")
             .prerequisite("elf_silent_step")
-            // TODO(elf): consume "elf_nimble_fingers" flag for item-handling / crafting perks.
             .effect(new SkillEffect.UnlockAbility("elf_nimble_fingers"))
             .position(1, 2)
             .build());
@@ -39,7 +39,6 @@ final class ElfSkills {
             .tree(SkillTreeId.ELF_BOND).cost(3)
             .description("Elf-magic slips past wards that bind wizards.")
             .prerequisite("elf_devotion")
-            // TODO(elf): consume "elf_apparition" flag for ward-piercing / wandless apparition.
             .effect(new SkillEffect.UnlockAbility("elf_apparition"))
             .position(2, 1)
             .build());
@@ -50,7 +49,6 @@ final class ElfSkills {
             .prerequisite("elf_apparition")
             .prerequisite("elf_nimble_fingers")
             .effect(new SkillEffect.PassiveAttribute("movement_speed", 0.01))
-            // TODO(elf): consume "free_elf" flag for liberation-state mechanics.
             .effect(new SkillEffect.UnlockAbility("free_elf"))
             .position(3, 1)
             .build());

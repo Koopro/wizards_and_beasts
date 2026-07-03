@@ -5,7 +5,7 @@ package at.koopro.wizardsandbeasts.skill;
  *
  * <p>Starter set. {@link SkillEffect.PassiveAttribute} nodes apply immediately via the shared bonus
  * pipeline; {@link SkillEffect.UnlockAbility} nodes only set a queryable flag — their gameplay
- * consumers (trade discounts, contract binding, etc.) are not yet wired. See TODOs.
+ * consumers live in event.skill.GoblinAbilityHandler.
  */
 final class GoblinSkills {
 
@@ -14,7 +14,6 @@ final class GoblinSkills {
     static final Skill APPRAISAL = SkillTrees.register(Skill.builder("goblin_appraisal", "Appraisal")
             .tree(SkillTreeId.GOBLIN_CRAFT).cost(1)
             .description("Read the true worth of coin and ore at a glance.")
-            // TODO(goblin): consume "goblin_appraisal" flag for better trades / value readouts.
             .effect(new SkillEffect.UnlockAbility("goblin_appraisal"))
             .position(0, 1)
             .build());
@@ -39,7 +38,6 @@ final class GoblinSkills {
             .tree(SkillTreeId.GOBLIN_CRAFT).cost(3)
             .description("Bind your dealings in goblin contract-law.")
             .prerequisite("goblin_forge_sense")
-            // TODO(goblin): consume "goblin_ledger" flag for contract / ownership mechanics.
             .effect(new SkillEffect.UnlockAbility("goblin_ledger"))
             .position(2, 1)
             .build());
@@ -50,7 +48,6 @@ final class GoblinSkills {
             .prerequisite("goblin_ledger")
             .prerequisite("goblin_vault_step")
             .effect(new SkillEffect.PassiveAttribute("max_health", 2.0))
-            // TODO(goblin): consume "goblin_steelheart" flag for goblin-forged equipment perks.
             .effect(new SkillEffect.UnlockAbility("goblin_steelheart"))
             .position(3, 1)
             .build());

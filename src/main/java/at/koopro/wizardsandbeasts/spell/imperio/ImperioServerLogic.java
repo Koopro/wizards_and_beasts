@@ -54,7 +54,8 @@ public final class ImperioServerLogic {
             mob.setTarget(null);
         }
         float corruption = caster.getData(ModAttachments.DARK_CORRUPTION.get());
-        caster.setData(ModAttachments.DARK_CORRUPTION.get(), Math.min(100f, corruption + 8f));
+        caster.setData(ModAttachments.DARK_CORRUPTION.get(), Math.min(100f,
+                corruption + at.koopro.wizardsandbeasts.skill.vocation.VocationAbilityHooks.scaleCorruptionGain(caster, 8f)));
         level.playSound(null, target.blockPosition(), ModSounds.SPELL_CAST_DARK.get(), SoundSource.PLAYERS, 0.75f, 1.1f);
         Vec3 p = target.getBoundingBox().getCenter();
         level.sendParticles(ParticleTypes.HAPPY_VILLAGER, p.x, p.y + 1.0, p.z, 20, 0.35, 0.2, 0.35, 0.02);

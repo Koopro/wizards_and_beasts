@@ -372,26 +372,36 @@ public record SpellDefinition(
                             def.opensBlocks(),
                             def.pullStrength())));
 
+    // Gamp's Law checks. GampsLaw.validate() only consults these for domains the spell DECLARES
+    // in its `gampDomains` JSON list, so declaring a domain marks every cast as a violation by
+    // default. Bespoke spells may override with context-sensitive logic (e.g. only when the
+    // target stack is food).
+
     public boolean wouldConjureFood(CastContext ctx) {
-        return false;
+        return gampDomains().contains(at.koopro.wizardsandbeasts.spell.gamp.GampDomain.FOOD_CONJURATION);
     }
 
     public boolean wouldConjureCurrency(CastContext ctx) {
-        return false;
+        return gampDomains().contains(at.koopro.wizardsandbeasts.spell.gamp.GampDomain.CURRENCY_CONJURATION);
     }
 
     public boolean wouldCreateLife(CastContext ctx) {
-        return false;
+        return gampDomains().contains(at.koopro.wizardsandbeasts.spell.gamp.GampDomain.LIFE_CREATION);
     }
 
     public boolean wouldConjureLove(CastContext ctx) {
-        return false;
+        return gampDomains().contains(at.koopro.wizardsandbeasts.spell.gamp.GampDomain.LOVE_CONJURATION);
     }
 
     public boolean wouldGenesisInformation(CastContext ctx) {
-        return false;
+        return gampDomains().contains(at.koopro.wizardsandbeasts.spell.gamp.GampDomain.INFORMATION_GENESIS);
     }
 
+    /**
+     * The item a cast would materialize, if any. Consulted by GampsLaw for the tag-driven
+     * {@code cannot_conjure/food} and {@code cannot_conjure/currency} soft penalties; base
+     * spells produce nothing, conjuration overrides supply their output stack.
+     */
     public @Nullable ItemStack previewProducedItem(CastContext ctx) {
         return null;
     }

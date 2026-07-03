@@ -185,10 +185,20 @@ public class PocketDimensionEvents {
             if (creatures.isEmpty()) continue;
 
             Entity creature = creatures.get(0);
-            // Teleport wired when creature entities are implemented.
-            LOGGER.info("Creature {} eligible to enter unsecured trunk {} (teleport pending implementation)",
-                    creature.getName().getString(), record.pocketId());
+            slipIntoTrunk(level, trunkEntity, record, creature);
         }
+    }
+
+    /** A curious magical creature slips through the unsecured latch into the trunk's pocket. */
+    private static void slipIntoTrunk(ServerLevel level, ItemEntity trunkEntity, TrunkRecord record, Entity creature) {
+        Entity moved = ExtensionCharmService.teleportCreatureIntoPocket(level, creature, record);
+        if (moved == null) return;
+
+        level.playSound(null, trunkEntity.blockPosition(), SoundEvents.IRON_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 0.8f, 1.2f);
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.POOF,
+                trunkEntity.getX(), trunkEntity.getY() + 0.4, trunkEntity.getZ(), 8, 0.2, 0.2, 0.2, 0.02);
+        LOGGER.debug("Creature {} slipped into unsecured trunk pocket {}",
+                creature.getName().getString(), record.pocketId());
     }
 
     // -------------------------------------------------------------------------

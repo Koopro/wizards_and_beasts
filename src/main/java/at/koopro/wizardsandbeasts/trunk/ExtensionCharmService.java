@@ -17,6 +17,7 @@ import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
 
 import com.mojang.logging.LogUtils;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.Set;
@@ -64,10 +65,39 @@ public final class ExtensionCharmService {
     }
 
     public static void enterPocket(ServerPlayer player, TrunkRecord record) {
+        enterPocket(player, record, null, null);
+    }
+
+    /**
+     * Moves a non-player entity into the record's pocket at its spawn point, generating the
+     * shell if needed. Used by the creature-escape mechanic (an unsecured trunk latch lets a
+     * curious magical creature slip inside). Returns the teleported entity, or null on failure.
+     */
+    public static net.minecraft.world.entity.@Nullable Entity teleportCreatureIntoPocket(
+            ServerLevel sourceLevel, net.minecraft.world.entity.Entity creature, TrunkRecord record) {
+        ServerLevel pocket = sourceLevel.getServer().getLevel(ModDimensions.EXTENSION_REALM);
+        if (pocket == null) {
+            return null;
+        }
+        PocketShellGenerator.ensurePocketShell(pocket, record, TrunkRegistryData.get(sourceLevel));
+        return creature.teleport(new TeleportTransition(
+                pocket, Vec3.atCenterOf(record.spawnPos()), Vec3.ZERO, 0.0f, 0.0f, Set.of(), entity -> {}));
+    }
+
+    /**
+     * Enters {@code record}'s pocket, saving an explicit overworld return anchor.
+     * Used by the placed {@code TrunkBlock} so exiting climbs back out at the trunk
+     * rather than wherever the player happened to be standing. Pass {@code null}
+     * for both anchor args to fall back to the player's current position.
+     */
+    public static void enterPocket(ServerPlayer player, TrunkRecord record,
+                                   @Nullable ServerLevel returnLevel, @Nullable BlockPos returnPos) {
         if (!(player.level() instanceof ServerLevel sourceLevel)) return;
 
         TrunkRegistryData data = TrunkRegistryData.get(sourceLevel);
-        data.saveReturnPosition(player.getUUID(), player.blockPosition(), sourceLevel.dimension());
+        ServerLevel anchorLevel = returnLevel != null ? returnLevel : sourceLevel;
+        BlockPos anchorPos = returnPos != null ? returnPos : player.blockPosition();
+        data.saveReturnPosition(player.getUUID(), anchorPos, anchorLevel.dimension());
 
         ServerLevel target = sourceLevel.getServer().getLevel(ModDimensions.EXTENSION_REALM);
         if (target == null) {
@@ -176,7 +206,7 @@ public final class ExtensionCharmService {
         PocketStatusS2CPayload.send(player, "Released from extension realm");
     }
 
-    /** Sets latchSecured on all EnchantedTrunkItem stacks in the player's inventory. */
+    /** Sets latchSecured on all packed trunk stacks (carrying POCKET_CASE_ID) in the player's inventory. */
     static void setInventoryLatchSecured(ServerPlayer player, boolean secured) {
         for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
             net.minecraft.world.item.ItemStack stack = player.getInventory().getItem(i);
