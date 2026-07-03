@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "wizards_and_beasts:item/romanian_longhorn_spawn_egg"
+  }
+}

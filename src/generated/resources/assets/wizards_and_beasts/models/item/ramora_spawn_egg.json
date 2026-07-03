@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "wizards_and_beasts:item/ramora_spawn_egg"
+  }
+}
