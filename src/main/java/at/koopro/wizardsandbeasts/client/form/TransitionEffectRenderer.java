@@ -22,6 +22,7 @@ public final class TransitionEffectRenderer {
     private TransitionEffectRenderer() {}
 
     public static void render(GuiGraphics graphics, DeltaTracker delta) {
+        if (at.koopro.wizardsandbeasts.Config.reduceScreenEffects) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
         renderLowControlOverlay(graphics, mc);

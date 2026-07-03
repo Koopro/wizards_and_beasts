@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.apparition;
 
+import at.koopro.wizardsandbeasts.Config;
 import at.koopro.wizardsandbeasts.ability.PlayerAbilityHelper;
 import at.koopro.wizardsandbeasts.apparition.ApparitionWard;
 import at.koopro.wizardsandbeasts.apparition.ApparitionWardRegistry;
@@ -61,7 +62,7 @@ public final class ApparitionServerLogic {
             return;
         }
         ServerLevel level = (ServerLevel) caster.level();
-        Vec3 clamped = clampTarget(caster.position(), targetPosition, 32.0);
+        Vec3 clamped = clampTarget(caster.position(), targetPosition, Config.apparitionRangeBlocks);
         AABB atDestination = caster.getBoundingBox().move(clamped.x - caster.getX(), clamped.y - caster.getY(), clamped.z - caster.getZ());
         if (!elfApparition) {
             ApparitionWard ward = ApparitionWardRegistry.findBlockingWard(level, caster.createCommandSourceStack(), atDestination);
@@ -83,7 +84,7 @@ public final class ApparitionServerLogic {
         level.playSound(null, net.minecraft.core.BlockPos.containing(clamped), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.8f, 1.0f);
         spawnBurst(level, origin);
         spawnBurst(level, clamped);
-        PlayerAbilityHelper.setApparitionCooldownTicks(caster, 60);
+        PlayerAbilityHelper.setApparitionCooldownTicks(caster, Config.apparitionCooldownTicks);
     }
 
     public static void tick(ServerPlayer player) {
@@ -102,7 +103,8 @@ public final class ApparitionServerLogic {
 
     private static void performApparition(ServerPlayer player, Vec3 targetPosition, boolean sideAlong) {
         float focusLevel = computeFocusLevel(player);
-        float splinchChance = Math.max(0.0f, 0.35f - (focusLevel * 0.35f));
+        float baseChance = Config.apparitionSplinchBaseChance;
+        float splinchChance = Math.max(0.0f, baseChance - (focusLevel * baseChance));
         if (sideAlong) {
             splinchChance *= 1.4f;
         }

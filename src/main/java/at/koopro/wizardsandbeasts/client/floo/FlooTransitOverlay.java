@@ -30,6 +30,7 @@ public final class FlooTransitOverlay {
     }
 
     public static void render(GuiGraphics graphics, DeltaTracker delta) {
+        if (at.koopro.wizardsandbeasts.Config.reduceScreenEffects) return;
         long now = System.currentTimeMillis();
         if (now >= endMs) return;
         Minecraft mc = Minecraft.getInstance();

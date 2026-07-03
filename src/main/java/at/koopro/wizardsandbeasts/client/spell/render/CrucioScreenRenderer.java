@@ -21,6 +21,7 @@ public final class CrucioScreenRenderer {
     private CrucioScreenRenderer() {}
 
     public static void render(GuiGraphics graphics, DeltaTracker delta) {
+        if (at.koopro.wizardsandbeasts.Config.reduceScreenEffects) return;
         Minecraft mc = Minecraft.getInstance();
         Player player = mc.player;
         if (player == null || mc.level == null) {

@@ -37,6 +37,7 @@ public class SpellDiamondOverlay {
     };
 
     public static void render(GuiGraphics graphics, DeltaTracker delta) {
+        if (!at.koopro.wizardsandbeasts.Config.showSpellHudOverlay) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) return;
         SpellHudUiModel spellHudUi = UiStateProjection.spellHud(mc);

@@ -48,6 +48,22 @@ public class Config {
     private static final ModConfigSpec.BooleanValue ENABLE_WAND_ALLEGIANCE = BUILDER
             .comment("If true, wand allegiance compatibility, binding, and transfer mechanics are active.")
             .define("enableWandAllegiance", true);
+    private static final ModConfigSpec.BooleanValue SHOW_SPELL_HUD_OVERLAY = BUILDER
+            .comment("If true, the spell diamond HUD overlay is drawn.")
+            .define("showSpellHudOverlay", true);
+    private static final ModConfigSpec.BooleanValue REDUCE_SCREEN_EFFECTS = BUILDER
+            .comment("If true, fullscreen effect overlays (mob-effect vignettes, Crucio, form transition,",
+                    "Floo transit spin) are suppressed. Accessibility option; gameplay is unaffected.")
+            .define("reduceScreenEffects", false);
+    private static final ModConfigSpec.IntValue APPARITION_RANGE_BLOCKS = BUILDER
+            .comment("Maximum Apparition distance in blocks; longer targets are clamped to this radius.")
+            .defineInRange("apparitionRangeBlocks", 32, 4, 256);
+    private static final ModConfigSpec.IntValue APPARITION_COOLDOWN_TICKS = BUILDER
+            .comment("Cooldown in ticks after a successful Apparition.")
+            .defineInRange("apparitionCooldownTicks", 60, 0, 20 * 300);
+    private static final ModConfigSpec.DoubleValue APPARITION_SPLINCH_BASE_CHANCE = BUILDER
+            .comment("Base splinch chance at zero focus; a fully focused caster reduces it to zero.")
+            .defineInRange("apparitionSplinchBaseChance", 0.35, 0.0, 1.0);
 
     public static final ModConfigSpec SPEC = BUILDER.build();
 
@@ -63,6 +79,11 @@ public class Config {
     public static int beamTargetScanIntervalTicks;
     public static int beamChannelEffectIntervalTicks;
     public static boolean enableWandAllegiance;
+    public static boolean showSpellHudOverlay;
+    public static boolean reduceScreenEffects;
+    public static int apparitionRangeBlocks;
+    public static int apparitionCooldownTicks;
+    public static float apparitionSplinchBaseChance;
 
     public enum PerfProfile {
         LOW,
@@ -84,5 +105,10 @@ public class Config {
         beamTargetScanIntervalTicks = BEAM_TARGET_SCAN_INTERVAL_TICKS.get();
         beamChannelEffectIntervalTicks = BEAM_CHANNEL_EFFECT_INTERVAL_TICKS.get();
         enableWandAllegiance = ENABLE_WAND_ALLEGIANCE.get();
+        showSpellHudOverlay = SHOW_SPELL_HUD_OVERLAY.get();
+        reduceScreenEffects = REDUCE_SCREEN_EFFECTS.get();
+        apparitionRangeBlocks = APPARITION_RANGE_BLOCKS.get();
+        apparitionCooldownTicks = APPARITION_COOLDOWN_TICKS.get();
+        apparitionSplinchBaseChance = APPARITION_SPLINCH_BASE_CHANCE.get().floatValue();
     }
 }
