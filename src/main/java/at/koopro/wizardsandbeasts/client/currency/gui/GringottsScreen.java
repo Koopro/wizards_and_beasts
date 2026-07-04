@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.client.currency.gui;
 
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
-import at.koopro.wizardsandbeasts.client.gui.ScreenLayoutScaler;
+import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.client.currency.state.ClientVaultDataState;
 import at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper;
 import at.koopro.wizardsandbeasts.currency.vault.PlayerVaultData;
@@ -24,7 +24,7 @@ public class GringottsScreen extends Screen {
     private static final int COL_GOLD = 0xFFD4AF37;
     private static final int COL_SILVER = 0xFFC0C0C0;
     private static final int COL_BRONZE = 0xFFCD7F32;
-    private ScreenLayoutScaler layout;
+    private GuiScaleHelper.Layout layout;
 
     public GringottsScreen() {
         super(Component.literal("Gringotts Wizarding Bank"));
@@ -33,7 +33,7 @@ public class GringottsScreen extends Screen {
     @Override
     protected void init() {
         super.init();
-        layout = ScreenLayoutScaler.forScreen(width, height, PANEL_W, PANEL_H);
+        layout = GuiScaleHelper.Layout.panel(width, height, PANEL_W, PANEL_H);
         rebuildButtons();
     }
 

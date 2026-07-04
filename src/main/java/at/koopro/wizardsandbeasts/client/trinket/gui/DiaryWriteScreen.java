@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.trinket.gui;
 
+import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.network.trinket.DiaryWriteC2SPayload;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -24,6 +25,7 @@ public class DiaryWriteScreen extends Screen {
 
     private final List<String> transcript = new ArrayList<>();
     private EditBox input;
+    private GuiScaleHelper.Layout layout;
     private int panelX;
     private int panelY;
 
@@ -55,15 +57,19 @@ public class DiaryWriteScreen extends Screen {
     protected void init() {
         super.init();
         active = this;
-        panelX = (width - PANEL_W) / 2;
-        panelY = (height - PANEL_H) / 2;
-        input = new EditBox(font, panelX + 10, panelY + PANEL_H - 28, PANEL_W - 90, 18, Component.literal("write"));
+        layout = GuiScaleHelper.Layout.fit(width, height, PANEL_W, PANEL_H);
+        panelX = layout.panelX();
+        panelY = layout.panelY();
+        // Widgets live in screen space, so their bounds are scaled to line up
+        // with the pose-scaled panel art drawn in render().
+        input = new EditBox(font, layout.x(10), layout.y(PANEL_H - 28),
+                layout.s(PANEL_W - 90), layout.s(18), Component.literal("write"));
         input.setMaxLength(80);
         input.setHint(Component.literal("write a line…"));
         addRenderableWidget(input);
         setInitialFocus(input);
         addRenderableWidget(Button.builder(Component.literal("Write"), b -> submit())
-                .bounds(panelX + PANEL_W - 74, panelY + PANEL_H - 28, 64, 18).build());
+                .bounds(layout.x(PANEL_W - 74), layout.y(PANEL_H - 28), layout.s(64), layout.s(18)).build());
     }
 
     private void submit() {
@@ -96,6 +102,7 @@ public class DiaryWriteScreen extends Screen {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         this.renderMenuBackground(graphics);
+        layout.applyScale(graphics);
         graphics.fill(panelX, panelY, panelX + PANEL_W, panelY + PANEL_H, 0xE6120D08);
         graphics.renderOutline(panelX, panelY, PANEL_W, PANEL_H, 0xFF4A3A22);
         graphics.drawString(font, "§eA half-blank diary, dated 1943", panelX + 10, panelY + 8, 0xFFFFFF, false);
@@ -111,6 +118,7 @@ public class DiaryWriteScreen extends Screen {
             y += lineH;
         }
 
+        graphics.pose().popMatrix();
         super.render(graphics, mouseX, mouseY, partialTick);
     }
 

@@ -8,7 +8,7 @@ import at.koopro.wizardsandbeasts.spell.core.SpellRequirement;
 import at.koopro.wizardsandbeasts.spell.core.Spells;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import at.koopro.wizardsandbeasts.client.gui.ScreenLayoutScaler;
+import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsAndBeastsUiTokens;
 import net.minecraft.client.gui.GuiGraphics;
@@ -28,7 +28,7 @@ public final class SpellMenuRenderHelper {
     private SpellMenuRenderHelper() {}
 
     public static void renderFrame(GuiGraphics graphics, Font font, int width, int height,
-                                   int panelW, int panelH, int leftW, ScreenLayoutScaler layout) {
+                                   int panelW, int panelH, int leftW, GuiScaleHelper.Layout layout) {
         int panelX = layout.panelX();
         int panelY = layout.panelY();
         panelW = layout.panelW();
@@ -48,13 +48,13 @@ public final class SpellMenuRenderHelper {
                                          int panelW, int panelH, int leftW, int maxVisible,
                                          List<SpellMenuScreen.SpellEntry> spellEntries,
                                          @Nullable String selectedSpellId, int scrollOffset) {
-        renderSpellList(graphics, font, width, height, panelW, panelH, leftW, maxVisible, spellEntries, selectedSpellId, scrollOffset, ScreenLayoutScaler.forScreen(width, height, panelW, panelH));
+        renderSpellList(graphics, font, width, height, panelW, panelH, leftW, maxVisible, spellEntries, selectedSpellId, scrollOffset, GuiScaleHelper.Layout.panel(width, height, panelW, panelH));
     }
 
     public static void renderSpellList(GuiGraphics graphics, Font font, int width, int height,
                                        int panelW, int panelH, int leftW, int maxVisible,
                                        List<SpellMenuScreen.SpellEntry> spellEntries,
-                                       @Nullable String selectedSpellId, int scrollOffset, ScreenLayoutScaler layout) {
+                                       @Nullable String selectedSpellId, int scrollOffset, GuiScaleHelper.Layout layout) {
         int panelX = layout.panelX();
         int panelY = layout.panelY();
         panelW = layout.panelW();
@@ -134,12 +134,12 @@ public final class SpellMenuRenderHelper {
     public static void renderSelectedSpellPanel(GuiGraphics graphics, Font font, int width, int height,
                                                 int panelW, int panelH, int leftW,
                                                 @Nullable String selectedSpellId) {
-        renderSelectedSpellPanel(graphics, font, width, height, panelW, panelH, leftW, selectedSpellId, ScreenLayoutScaler.forScreen(width, height, panelW, panelH));
+        renderSelectedSpellPanel(graphics, font, width, height, panelW, panelH, leftW, selectedSpellId, GuiScaleHelper.Layout.panel(width, height, panelW, panelH));
     }
 
     public static void renderSelectedSpellPanel(GuiGraphics graphics, Font font, int width, int height,
                                                 int panelW, int panelH, int leftW,
-                                                @Nullable String selectedSpellId, ScreenLayoutScaler layout) {
+                                                @Nullable String selectedSpellId, GuiScaleHelper.Layout layout) {
         int panelX = layout.panelX();
         int panelY = layout.panelY();
         panelW = layout.panelW();

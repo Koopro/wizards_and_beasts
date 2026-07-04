@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.client.gui;
 
 import at.koopro.wizardsandbeasts.form.FormRegistry;
 import at.koopro.wizardsandbeasts.client.form.state.ClientFormDataState;
+import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.network.form.FormChangeRequestC2SPayload;
 import at.koopro.wizardsandbeasts.network.form.SizeOverrideC2SPayload;
 import net.minecraft.client.gui.GuiGraphics;
@@ -31,7 +32,7 @@ public class MorphDebugScreen extends Screen {
 
     @Nullable private String selectedFormId;
     private int scrollOffset = 0;
-    private ScreenLayoutScaler layout;
+    private GuiScaleHelper.Layout layout;
 
     public MorphDebugScreen() {
         super(Component.literal("Morph Debug"));
@@ -40,7 +41,7 @@ public class MorphDebugScreen extends Screen {
     @Override
     protected void init() {
         super.init();
-        layout = ScreenLayoutScaler.forScreen(width, height, PANEL_W, PANEL_H);
+        layout = GuiScaleHelper.Layout.panel(width, height, PANEL_W, PANEL_H);
         rebuild();
     }
 

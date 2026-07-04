@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.client.map;
 
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
-import at.koopro.wizardsandbeasts.client.gui.ScreenLayoutScaler;
+import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.map.TrackedEntityEntry;
 import at.koopro.wizardsandbeasts.network.map.MapCloseC2SPayload;
 import net.minecraft.client.Minecraft;
@@ -35,7 +35,7 @@ public class MaraudersMapScreen extends Screen {
     private final UUID selfUuid;
 
     private int mapLeft, mapTop, mapSize, contentTop, contentSize;
-    private ScreenLayoutScaler layout;
+    private GuiScaleHelper.Layout layout;
 
     public MaraudersMapScreen(BlockPos center, int radius, Identifier dimension) {
         super(Component.literal("Marauder's Map"));
@@ -51,7 +51,7 @@ public class MaraudersMapScreen extends Screen {
     protected void init() {
         super.init();
         int baseSize = Math.min(width, height) - 60;
-        layout = ScreenLayoutScaler.forScreen(width, height, baseSize, baseSize);
+        layout = GuiScaleHelper.Layout.panel(width, height, baseSize, baseSize);
         mapSize = Math.min(layout.panelW(), layout.panelH());
         mapLeft = (width - mapSize) / 2;
         mapTop = (height - mapSize) / 2;

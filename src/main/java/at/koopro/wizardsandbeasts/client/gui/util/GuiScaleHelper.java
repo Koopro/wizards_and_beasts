@@ -46,4 +46,119 @@ public final class GuiScaleHelper {
     private static int clamp(int value, int min, int max) {
         return Math.max(min, Math.min(value, max));
     }
+
+    private static float clamp(float value, float min, float max) {
+        return Math.max(min, Math.min(value, max));
+    }
+
+    /**
+     * Immutable scaled-panel layout: a uniform scale plus a centred, on-screen
+     * origin and panel rectangle. Use {@link #fit} for fixed-art panels that
+     * must never upscale (avoids texture blur) and {@link #panel} for
+     * procedurally drawn panels that may grow to fill large screens.
+     */
+    public static final class Layout {
+        private final float scale;
+        private final int panelX;
+        private final int panelY;
+        private final int panelW;
+        private final int panelH;
+
+        private Layout(float scale, int panelX, int panelY, int panelW, int panelH) {
+            this.scale = scale;
+            this.panelX = panelX;
+            this.panelY = panelY;
+            this.panelW = panelW;
+            this.panelH = panelH;
+        }
+
+        /**
+         * Downscale-only layout for fixed-art panels. Never upscales (so
+         * textures stay crisp); shrinks to fit within {@link #DEFAULT_MARGIN}
+         * on every edge of small screens.
+         */
+        public static Layout fit(int screenW, int screenH, int baseW, int baseH) {
+            float scale = computeScale(baseW, baseH, screenW, screenH, DEFAULT_MARGIN);
+            int panelW = Math.round(baseW * scale);
+            int panelH = Math.round(baseH * scale);
+            int panelX = clampedLeft(panelW, screenW, DEFAULT_MARGIN);
+            int panelY = clampedTop(panelH, screenH, DEFAULT_MARGIN);
+            return new Layout(scale, panelX, panelY, panelW, panelH);
+        }
+
+        /**
+         * Up-and-down scaling layout for procedurally drawn panels (no texture
+         * to blur), clamped to a readable range so the panel neither overflows
+         * tiny screens nor floats lost on huge ones.
+         */
+        public static Layout panel(int screenW, int screenH, int baseW, int baseH) {
+            float sx = (screenW - 24.0F) / (float) baseW;
+            float sy = (screenH - 36.0F) / (float) baseH;
+            float scale = clamp(Math.min(sx, sy), 0.72F, 1.35F);
+            int panelW = Math.max(120, Math.round(baseW * scale));
+            int panelH = Math.max(90, Math.round(baseH * scale));
+            int panelX = (screenW - panelW) / 2;
+            int panelY = (screenH - panelH) / 2;
+            return new Layout(scale, panelX, panelY, panelW, panelH);
+        }
+
+        public float scale() {
+            return scale;
+        }
+
+        public int panelX() {
+            return panelX;
+        }
+
+        public int panelY() {
+            return panelY;
+        }
+
+        public int panelW() {
+            return panelW;
+        }
+
+        public int panelH() {
+            return panelH;
+        }
+
+        /** Scale a design-space length to screen-space (minimum 1px). */
+        public int s(int value) {
+            return Math.max(1, Math.round(value * scale));
+        }
+
+        /** Scale a design-space X offset and shift it onto the panel origin. */
+        public int x(int designX) {
+            return panelX + s(designX);
+        }
+
+        /** Scale a design-space Y offset and shift it onto the panel origin. */
+        public int y(int designY) {
+            return panelY + s(designY);
+        }
+
+        /**
+         * Push a transform that scales subsequent drawing about the panel
+         * origin, so draw code may use raw design-space coordinates
+         * ({@code panelX + offset}) and still shrink to fit. Pair with a
+         * {@code graphics.pose().popMatrix()} after drawing. Mouse coordinates
+         * fed back in must pass through {@link #unmapX}/{@link #unmapY}.
+         */
+        public void applyScale(net.minecraft.client.gui.GuiGraphics graphics) {
+            var pose = graphics.pose();
+            pose.pushMatrix();
+            pose.translate(panelX * (1.0F - scale), panelY * (1.0F - scale));
+            pose.scale(scale, scale);
+        }
+
+        /** Map a screen-space mouse X back into the unscaled design space. */
+        public double unmapX(double screenX) {
+            return panelX + (screenX - panelX) / scale;
+        }
+
+        /** Map a screen-space mouse Y back into the unscaled design space. */
+        public double unmapY(double screenY) {
+            return panelY + (screenY - panelY) / scale;
+        }
+    }
 }

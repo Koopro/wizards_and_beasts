@@ -3,7 +3,7 @@ package at.koopro.wizardsandbeasts.client.spell.gui;
 import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellTeacherState;
 import at.koopro.wizardsandbeasts.network.spell.teacher.SpellTeacherLearnC2SPayload;
 import at.koopro.wizardsandbeasts.spell.learning.SpellLearningService;
-import at.koopro.wizardsandbeasts.client.gui.ScreenLayoutScaler;
+import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -21,7 +21,7 @@ public class SpellTeacherScreen extends Screen {
 
     private final List<SpellLearningService.SpellOffer> offers = new ArrayList<>();
     private int scrollOffset = 0;
-    private ScreenLayoutScaler layout;
+    private GuiScaleHelper.Layout layout;
 
     public SpellTeacherScreen() {
         super(Component.literal("Spell Teacher"));
@@ -30,7 +30,7 @@ public class SpellTeacherScreen extends Screen {
     @Override
     protected void init() {
         super.init();
-        layout = ScreenLayoutScaler.forScreen(width, height, PANEL_W, PANEL_H);
+        layout = GuiScaleHelper.Layout.panel(width, height, PANEL_W, PANEL_H);
         offers.clear();
         offers.addAll(ClientSpellTeacherState.offers());
         rebuildButtons();

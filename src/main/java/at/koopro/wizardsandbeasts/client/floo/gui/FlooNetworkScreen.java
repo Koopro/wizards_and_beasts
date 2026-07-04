@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.client.floo.gui;
 
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
-import at.koopro.wizardsandbeasts.client.gui.ScreenLayoutScaler;
+import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.floo.FlooDestinationDto;
 import at.koopro.wizardsandbeasts.network.floo.FlooCallRequestC2SPayload;
 import at.koopro.wizardsandbeasts.network.floo.FlooTravelRequestC2SPayload;
@@ -37,7 +37,7 @@ public class FlooNetworkScreen extends Screen {
     private int selectedIndex = -1;
     private int scrollOffset = 0;
     private Button travelButton;
-    private ScreenLayoutScaler layout;
+    private GuiScaleHelper.Layout layout;
 
     public FlooNetworkScreen(@NonNull List<FlooDestinationDto> destinations, boolean callMode) {
         super(Component.literal(callMode ? "Floo Call" : "Floo Network"));
@@ -48,7 +48,7 @@ public class FlooNetworkScreen extends Screen {
     @Override
     protected void init() {
         super.init();
-        layout = ScreenLayoutScaler.forScreen(width, height, PANEL_W, PANEL_H);
+        layout = GuiScaleHelper.Layout.panel(width, height, PANEL_W, PANEL_H);
         int px = layout.panelX();
         int py = layout.panelY();
         int panelW = layout.panelW();

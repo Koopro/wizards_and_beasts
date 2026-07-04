@@ -13,7 +13,7 @@ import at.koopro.wizardsandbeasts.client.skill.gui.SkillScreenRouter;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.util.MathUtils;
 import net.minecraft.client.Minecraft;
-import at.koopro.wizardsandbeasts.client.gui.ScreenLayoutScaler;
+import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.client.gui.WizardsAndBeastsUiTokens;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -44,7 +44,7 @@ public class SpellMenuScreen extends Screen {
     private final List<SpellEntry> spellEntries = new ArrayList<>();
     private int scrollOffset = 0;
     private String searchQuery = "";
-    private ScreenLayoutScaler layout;
+    private GuiScaleHelper.Layout layout;
     private final int[][] slotPositions = new int[4][2];
     private int slotBtnSize;
 
@@ -55,7 +55,7 @@ public class SpellMenuScreen extends Screen {
     @Override
     protected void init() {
         super.init();
-        layout = ScreenLayoutScaler.forScreen(width, height, PANEL_W, PANEL_H);
+        layout = GuiScaleHelper.Layout.panel(width, height, PANEL_W, PANEL_H);
         rebuildSpellList();
         rebuildSlotButtons();
     }

@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.trinket.gui;
 
+import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.memory.MemoryEntry;
 import at.koopro.wizardsandbeasts.memory.MemoryType;
 import net.minecraft.client.Minecraft;
@@ -23,6 +24,7 @@ public class PensieveScreen extends Screen {
     private static final int HEADER_H = 26;
 
     private final List<MemoryEntry> memories;
+    private GuiScaleHelper.Layout layout;
     private int panelX;
     private int panelY;
     private int listTop;
@@ -39,8 +41,11 @@ public class PensieveScreen extends Screen {
     @Override
     protected void init() {
         super.init();
-        panelX = (width - PANEL_W) / 2;
-        panelY = (height - PANEL_H) / 2;
+        layout = GuiScaleHelper.Layout.fit(width, height, PANEL_W, PANEL_H);
+        // Origin is the scaled panel corner; inner offsets stay in design space
+        // and are scaled by the pose pushed in render().
+        panelX = layout.panelX();
+        panelY = layout.panelY();
         listTop = panelY + HEADER_H;
         listBottom = panelY + PANEL_H - 14;
     }
@@ -61,8 +66,8 @@ public class PensieveScreen extends Screen {
 
     @Override
     public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean isDoubleClick) {
-        double mouseX = event.x();
-        double mouseY = event.y();
+        double mouseX = layout.unmapX(event.x());
+        double mouseY = layout.unmapY(event.y());
         if (event.button() == 0
                 && mouseX >= panelX && mouseX <= panelX + PANEL_W && mouseY >= listTop && mouseY < listBottom) {
             int row = (int) ((mouseY - listTop) / ROW_H) + scroll;
@@ -78,6 +83,11 @@ public class PensieveScreen extends Screen {
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         this.renderMenuBackground(graphics);
 
+        // Draw the fixed-size panel in design space; the pose shrinks it to fit.
+        layout.applyScale(graphics);
+        double mx = layout.unmapX(mouseX);
+        double my = layout.unmapY(mouseY);
+
         // Panel
         graphics.fill(panelX, panelY, panelX + PANEL_W, panelY + PANEL_H, 0xE6100A1A);
         graphics.renderOutline(panelX, panelY, PANEL_W, PANEL_H, 0xFF5B4B8A);
@@ -87,6 +97,7 @@ public class PensieveScreen extends Screen {
         if (memories.isEmpty()) {
             graphics.drawCenteredString(font, "§8The basin is still. No memories drawn.",
                     panelX + PANEL_W / 2, panelY + PANEL_H / 2 - 4, 0xFFFFFF);
+            graphics.pose().popMatrix();
             super.render(graphics, mouseX, mouseY, partialTick);
             return;
         }
@@ -100,8 +111,8 @@ public class PensieveScreen extends Screen {
             }
             int rowY = listTop + i * ROW_H;
             boolean isSel = index == selected;
-            boolean hover = mouseX >= panelX + 4 && mouseX <= panelX + PANEL_W - 4
-                    && mouseY >= rowY && mouseY < rowY + ROW_H;
+            boolean hover = mx >= panelX + 4 && mx <= panelX + PANEL_W - 4
+                    && my >= rowY && my < rowY + ROW_H;
             if (isSel || hover) {
                 graphics.fill(panelX + 4, rowY, panelX + PANEL_W - 4, rowY + ROW_H - 2,
                         isSel ? 0x66B388FF : 0x33FFFFFF);
@@ -118,6 +129,7 @@ public class PensieveScreen extends Screen {
                         + (maxScroll() > 0 ? "  ·  scroll to browse" : ""),
                 panelX + 10, panelY + PANEL_H - 11, 0xFFFFFF, false);
 
+        graphics.pose().popMatrix();
         super.render(graphics, mouseX, mouseY, partialTick);
     }
 

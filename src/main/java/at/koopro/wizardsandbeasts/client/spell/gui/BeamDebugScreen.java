@@ -4,7 +4,7 @@ import at.koopro.wizardsandbeasts.client.wand.BeamSettings;
 import at.koopro.wizardsandbeasts.spell.cast.BeamRayResolver;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.core.Spells;
-import at.koopro.wizardsandbeasts.client.gui.ScreenLayoutScaler;
+import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsAndBeastsUiTokens;
 import net.minecraft.client.gui.GuiGraphics;
@@ -40,7 +40,7 @@ public class BeamDebugScreen extends Screen {
     private ExtendedSlider sliderSpeed;
     private ExtendedSlider sliderSegments;
     private ExtendedSlider sliderExtension;
-    private ScreenLayoutScaler layout;
+    private GuiScaleHelper.Layout layout;
 
     public BeamDebugScreen() {
         super(Component.literal("Beam Debug Editor"));
@@ -49,7 +49,7 @@ public class BeamDebugScreen extends Screen {
     @Override
     protected void init() {
         super.init();
-        layout = ScreenLayoutScaler.forScreen(width, height,
+        layout = GuiScaleHelper.Layout.panel(width, height,
                 WizardsAndBeastsUiTokens.BeamDebug.PANEL_WIDTH,
                 WizardsAndBeastsUiTokens.BeamDebug.PANEL_HEIGHT);
         rebuild();
