@@ -38,6 +38,10 @@ public class FormRenderHandler {
     public static void onClientTick(ClientTickEvent.Post event) {
         SizeLerpTracker.tick();
         ClientTransitionTracker.tick();
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            WetShakeTracker.tick(mc.level);
+        }
         spawnObscurialSmokeTrail();
     }
 

@@ -13,18 +13,26 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.animal.feline.CatModel;
+import net.minecraft.client.model.animal.parrot.ParrotModel;
+import net.minecraft.client.model.animal.rabbit.RabbitModel;
 import net.minecraft.client.model.animal.wolf.WolfModel;
+import net.minecraft.client.model.monster.silverfish.SilverfishModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.state.CatRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.entity.state.ParrotRenderState;
+import net.minecraft.client.renderer.entity.state.RabbitRenderState;
 import net.minecraft.client.renderer.entity.state.WolfRenderState;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
+
+import java.util.UUID;
 
 /**
  * Dispatches rendering of custom (non-HUMANOID) player form models.
@@ -43,6 +51,15 @@ public final class FormModelRenderer {
             Identifier.withDefaultNamespace("textures/entity/cat/tabby.png");
     private static final Identifier WOLF_TEXTURE =
             Identifier.withDefaultNamespace("textures/entity/wolf/wolf.png");
+    private static final Identifier RABBIT_TEXTURE =
+            Identifier.withDefaultNamespace("textures/entity/rabbit/brown.png");
+    private static final Identifier PARROT_TEXTURE =
+            Identifier.withDefaultNamespace("textures/entity/parrot/parrot_grey.png");
+    private static final Identifier SILVERFISH_TEXTURE =
+            Identifier.withDefaultNamespace("textures/entity/silverfish.png");
+
+    /** Solid white tint — no recolour applied to the borrowed model. */
+    private static final int NO_TINT = -1;
 
     /** Standard vanilla entity-model vertical offset (origin sits at the top of the model). */
     private static final float MODEL_Y_OFFSET = -1.501f;
@@ -54,6 +71,9 @@ public final class FormModelRenderer {
     private static MerfolkSwimModel merfolkModel;
     private static CatModel catModel;
     private static WolfModel wolfModel;
+    private static RabbitModel rabbitModel;
+    private static ParrotModel parrotModel;
+    private static SilverfishModel silverfishModel;
 
     private FormModelRenderer() {}
 
@@ -102,10 +122,10 @@ public final class FormModelRenderer {
     public static void renderToCollector(PoseStack poseStack, SubmitNodeCollector collector,
                                           FormRenderStateModifier.FormRenderData formData,
                                           LivingEntityRenderState src) {
-        // Animagus cat/dog forms use animated vanilla models.
+        // Animagus forms borrow a real vanilla entity model (animation + proportions + texture).
         switch (formData.formId()) {
             case "animagus_cat" -> {
-                renderVanilla(poseStack, collector, CAT_TEXTURE, src, () -> {
+                renderVanilla(poseStack, collector, CAT_TEXTURE, src, NO_TINT, () -> {
                     CatModel model = getCatModel();
                     model.resetPose();
                     model.setupAnim(buildCatState(formData, src));
@@ -114,7 +134,9 @@ public final class FormModelRenderer {
                 return;
             }
             case "animagus_dog" -> {
-                renderVanilla(poseStack, collector, WOLF_TEXTURE, src, () -> {
+                UUID uuid = formData.playerUUID();
+                int wetTint = wetTint(WetShakeTracker.wetShade(uuid));
+                renderVanilla(poseStack, collector, WOLF_TEXTURE, src, wetTint, () -> {
                     WolfModel model = getWolfModel();
                     model.resetPose();
                     model.setupAnim(buildWolfState(formData, src));
@@ -122,7 +144,34 @@ public final class FormModelRenderer {
                 });
                 return;
             }
-            default -> { /* fall through to placeholder geometry */ }
+            case "animagus_hare" -> {
+                renderVanilla(poseStack, collector, RABBIT_TEXTURE, src, NO_TINT, () -> {
+                    RabbitModel model = getRabbitModel();
+                    model.resetPose();
+                    model.setupAnim(buildRabbitState(src));
+                    return model;
+                });
+                return;
+            }
+            case "animagus_hawk" -> {
+                renderVanilla(poseStack, collector, PARROT_TEXTURE, src, NO_TINT, () -> {
+                    ParrotModel model = getParrotModel();
+                    model.resetPose();
+                    model.setupAnim(buildParrotState(formData, src));
+                    return model;
+                });
+                return;
+            }
+            case "animagus_beetle" -> {
+                renderVanilla(poseStack, collector, SILVERFISH_TEXTURE, src, NO_TINT, () -> {
+                    SilverfishModel model = getSilverfishModel();
+                    model.resetPose();
+                    model.setupAnim(src); // reads only ageInTicks from the (living) render state
+                    return model;
+                });
+                return;
+            }
+            default -> { /* stag has no vanilla analog — fall through to placeholder geometry */ }
         }
 
         Identifier texture = formData.texturePath() != null ? formData.texturePath() : PLACEHOLDER_TEXTURE;
@@ -162,7 +211,7 @@ public final class FormModelRenderer {
      * the form-scale already sits on the incoming PoseStack from the mixin.
      */
     private static void renderVanilla(PoseStack poseStack, SubmitNodeCollector collector,
-                                       Identifier texture, LivingEntityRenderState src,
+                                       Identifier texture, LivingEntityRenderState src, int color,
                                        java.util.function.Supplier<net.minecraft.client.model.Model> animated) {
         RenderType renderType = RenderTypes.entityCutoutNoCull(texture);
         float bodyRot = src != null ? src.bodyRot : 0.0f;
@@ -176,8 +225,22 @@ public final class FormModelRenderer {
             tempStack.translate(0.0f, MODEL_Y_OFFSET, 0.0f);
 
             net.minecraft.client.model.Model model = animated.get();
-            model.renderToBuffer(tempStack, consumer, 0xF000F0, OverlayTexture.NO_OVERLAY, -1);
+            model.renderToBuffer(tempStack, consumer, 0xF000F0, OverlayTexture.NO_OVERLAY, color);
         });
+    }
+
+    /** Packs a wet-coat shade ({@code 1.0} dry .. darker) into an opaque ARGB tint for the wolf model. */
+    private static int wetTint(float shade) {
+        int v = Math.round(255.0f * Mth.clamp(shade, 0.0f, 1.0f));
+        return 0xFF000000 | (v << 16) | (v << 8) | v;
+    }
+
+    /** Ever-advancing client animation clock (game time + partial tick) for idle flap/wiggle. */
+    private static float animTime() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) return 0.0f;
+        return (float) mc.level.getGameTime()
+                + mc.getDeltaTracker().getGameTimeDeltaPartialTick(false);
     }
 
     private static WolfRenderState buildWolfState(FormRenderStateModifier.FormRenderData formData,
@@ -190,6 +253,35 @@ public final class FormModelRenderer {
         s.yRot = netHeadYaw(src);
         s.xRot = src != null ? src.xRot : 0.0f;
         s.isSitting = sitting;
+        // Wet-dog shake: a non-zero shakeAnim makes the model body-roll wiggle (and dry off).
+        s.shakeAnim = WetShakeTracker.shakeAnim(formData.playerUUID());
+        return s;
+    }
+
+    private static RabbitRenderState buildRabbitState(LivingEntityRenderState src) {
+        RabbitRenderState s = new RabbitRenderState();
+        s.ageScale = 1.0f;
+        s.walkAnimationPos = src != null ? src.walkAnimationPos : 0.0f;
+        s.walkAnimationSpeed = clampSwing(src);
+        s.yRot = netHeadYaw(src);
+        s.xRot = src != null ? src.xRot : 0.0f;
+        // Hop crouch peaks mid-stride while moving; resting rabbits stay flat.
+        s.jumpCompletion = Math.min(1.0f, s.walkAnimationSpeed) * Math.abs(Mth.sin(s.walkAnimationPos * 0.5f));
+        return s;
+    }
+
+    private static ParrotRenderState buildParrotState(FormRenderStateModifier.FormRenderData formData,
+                                                      LivingEntityRenderState src) {
+        ParrotRenderState s = new ParrotRenderState();
+        AbstractClientPlayer player = livePlayer(formData);
+        s.ageScale = 1.0f;
+        s.walkAnimationPos = src != null ? src.walkAnimationPos : 0.0f;
+        s.walkAnimationSpeed = clampSwing(src);
+        s.yRot = netHeadYaw(src);
+        s.xRot = src != null ? src.xRot : 0.0f;
+        boolean airborne = player != null && !player.onGround();
+        s.pose = airborne ? ParrotModel.Pose.FLYING : ParrotModel.Pose.STANDING;
+        s.flapAngle = Mth.cos(animTime() * 0.3f); // gentle idle bob; FLYING pose spreads the wings
         return s;
     }
 
@@ -272,6 +364,27 @@ public final class FormModelRenderer {
             wolfModel = new WolfModel(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.WOLF));
         }
         return wolfModel;
+    }
+
+    private static RabbitModel getRabbitModel() {
+        if (rabbitModel == null) {
+            rabbitModel = new RabbitModel(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.RABBIT));
+        }
+        return rabbitModel;
+    }
+
+    private static ParrotModel getParrotModel() {
+        if (parrotModel == null) {
+            parrotModel = new ParrotModel(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.PARROT));
+        }
+        return parrotModel;
+    }
+
+    private static SilverfishModel getSilverfishModel() {
+        if (silverfishModel == null) {
+            silverfishModel = new SilverfishModel(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.SILVERFISH));
+        }
+        return silverfishModel;
     }
 
 }

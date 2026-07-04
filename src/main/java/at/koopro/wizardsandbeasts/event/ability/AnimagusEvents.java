@@ -20,7 +20,6 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
-import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
@@ -30,8 +29,8 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
  *   <li>The mandrake-leaf ritual: a wizard who has learned the Animagus discipline
  *       right-clicks a mandrake during a thunderstorm to complete the transformation
  *       and gain the ability to assume a beast form.</li>
- *   <li>While in beast form, the player cannot use items, interact with blocks, or
- *       attack — a beast holds no wand.</li>
+ *   <li>While in beast form, the player cannot use items or interact with blocks
+ *       (a beast holds no wand), but may still melee — claw and bite.</li>
  *   <li>Death forces a revert out of beast form.</li>
  * </ul>
  */
@@ -108,13 +107,6 @@ public final class AnimagusEvents {
         if (event.getEntity() instanceof ServerPlayer player && isLockedBeastForm(player)) {
             event.setCanceled(true);
             event.setCancellationResult(InteractionResult.FAIL);
-        }
-    }
-
-    @SubscribeEvent
-    public static void onAttackEntity(AttackEntityEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player && isLockedBeastForm(player)) {
-            event.setCanceled(true);
         }
     }
 

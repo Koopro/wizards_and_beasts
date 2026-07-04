@@ -121,41 +121,45 @@ public final class SizeProfileRegistry {
                 0.5f, 0.1f, 0.0f));
 
         // ── Animagus beast forms ──
-        // Cat: vanilla CatModel (already 0.8-scaled by its baked layer) — keep uniform
-        // proportions at true scale; aspect 1.0 so the borrowed model isn't distorted.
+        // Each borrows a real vanilla entity model authored at true scale, so modelScale and
+        // aspect ratios stay 1.0 (no distortion of the borrowed model). The hitbox W×H below is
+        // applied verbatim by FormHitboxHandler (EntityEvent.Size) — independent of Attributes.SCALE
+        // — so the collision box matches the real animal instead of a uniformly-shrunk player box.
+
+        // Cat: vanilla CatModel — box matches an adult cat.
         register(new SizeProfile("animagus_cat",
-                0.50f, 0.50f,   // 0.28× human height
+                0.60f, 0.70f,
                 1.0f, 1.0f, 1.0f,
                 -0.8f, 0.0f, 0.5f));
 
-        // Dog: vanilla WolfModel — uniform proportions at true wolf scale.
+        // Dog: vanilla WolfModel — box matches a wolf.
         register(new SizeProfile("animagus_dog",
-                0.60f, 0.85f,   // 0.47× human height
+                0.60f, 0.85f,
                 1.0f, 1.0f, 1.0f,
                 -0.4f, 0.1f, 0.5f));
 
-        // Stag: tall and broad, antlers handled by render
+        // Stag: no vanilla analog — placeholder geometry, tall and broad.
         register(new SizeProfile("animagus_stag",
-                0.90f, 1.95f,   // ~1.08× human height
+                0.90f, 1.60f,
                 1.1f, 0.95f, 1.4f,
                 0.4f, 0.3f, 1.0f));
 
-        // Hawk: tiny flying form, wings via WING_LAYER
+        // Hawk: vanilla ParrotModel — small perched-bird box.
         register(new SizeProfile("animagus_hawk",
-                0.30f, 0.45f,   // 0.25× human height
-                0.30f, 1.4f, 1.4f,
+                0.50f, 0.50f,
+                1.0f, 1.0f, 1.0f,
                 -1.0f, 0.0f, 0.0f));
 
-        // Hare: very small, compact
+        // Hare: vanilla RabbitModel — small rabbit box.
         register(new SizeProfile("animagus_hare",
-                0.35f, 0.45f,   // 0.25× human height
-                0.35f, 1.3f, 1.4f,
+                0.40f, 0.50f,
+                1.0f, 1.0f, 1.0f,
                 -0.9f, 0.0f, 0.5f));
 
-        // Beetle: minuscule
+        // Beetle: vanilla SilverfishModel — minuscule low box.
         register(new SizeProfile("animagus_beetle",
-                0.25f, 0.30f,   // 0.17× human height
-                0.20f, 1.5f, 1.6f,
+                0.40f, 0.30f,
+                1.0f, 1.0f, 1.0f,
                 -1.0f, 0.0f, 0.0f));
     }
 
