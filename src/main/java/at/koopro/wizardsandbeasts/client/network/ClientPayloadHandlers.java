@@ -29,7 +29,9 @@ import at.koopro.wizardsandbeasts.network.ClientScreenHooksInvoker;
 import at.koopro.wizardsandbeasts.network.ability.AbilityDataSyncPayload;
 import at.koopro.wizardsandbeasts.network.apparition.ApparitionWardsSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.azkaban.AzkabanTrespasserSyncPayload;
+import at.koopro.wizardsandbeasts.bestiary.BestiaryEntryRegistry;
 import at.koopro.wizardsandbeasts.network.bestiary.BestiaryDataSyncPayload;
+import at.koopro.wizardsandbeasts.network.bestiary.SyncBestiaryEntriesPayload;
 import at.koopro.wizardsandbeasts.network.bestiary.niffler.NifflerCarrySyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.handbook.SyncHandbookPayload;
 import at.koopro.wizardsandbeasts.handbook.HandbookChapterManager;
@@ -119,6 +121,10 @@ public final class ClientPayloadHandlers {
 
     public static void handleBestiaryDataSync(BestiaryDataSyncPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> ClientBestiaryCache.set(payload.data()));
+    }
+
+    public static void handleSyncBestiaryEntries(SyncBestiaryEntriesPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> BestiaryEntryRegistry.setClientEntries(payload.entries()));
     }
 
     public static void handleSyncHandbook(SyncHandbookPayload payload, IPayloadContext context) {

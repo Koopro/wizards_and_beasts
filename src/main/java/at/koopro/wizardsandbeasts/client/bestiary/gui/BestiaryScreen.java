@@ -92,7 +92,7 @@ public final class BestiaryScreen extends Screen {
 
     private void refreshList() {
         entries.clear();
-        entries.addAll(BestiaryEntryRegistry.getAll());
+        entries.addAll(BestiaryEntryRegistry.clientGetAll());
         entries.sort(Comparator.comparing((BestiaryEntry e) -> e.category().name()).thenComparingInt(BestiaryEntry::sortOrder));
         rebuildRows();
     }
@@ -303,7 +303,7 @@ public final class BestiaryScreen extends Screen {
         }
         renderListScrollbar(gg, listTop, listBottom);
 
-        BestiaryEntry selectedEntry = selected == null ? null : BestiaryEntryRegistry.get(selected);
+        BestiaryEntry selectedEntry = selected == null ? null : BestiaryEntryRegistry.clientGet(selected);
         if (selectedEntry != null) {
             renderDetail(gg, selectedEntry);
         }

@@ -10,5 +10,6 @@ public final class ModNetworkBestiary {
 
     public static void register(PayloadRegistrar registrar) {
         registrar.playToClient(BestiaryDataSyncPayload.TYPE, BestiaryDataSyncPayload.STREAM_CODEC, ClientPayloadHandlers::handleBestiaryDataSync);
+        registrar.playToClient(SyncBestiaryEntriesPayload.TYPE, SyncBestiaryEntriesPayload.STREAM_CODEC, ClientPayloadHandlers::handleSyncBestiaryEntries);
     }
 }
