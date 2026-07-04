@@ -69,6 +69,14 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.FLOO_FIREPLACE.get());
         dropSelf(ModBlocks.EXAMINATION_DESK.get());
 
+        // Placed trunks drop nothing via loot — TrunkBlock.playerWillDestroy hand-drops the BlockItem
+        // with its packed POCKET_CASE_ID component (dropSelf would drop a plain item AND double up).
+        add(ModBlocks.ENCHANTED_TRUNK.get(), noDrop());
+        add(ModBlocks.EXPANDED_TRUNK.get(), noDrop());
+        add(ModBlocks.MASTERS_TRUNK.get(), noDrop());
+        add(ModBlocks.MOODYS_TRUNK.get(), noDrop());
+        add(ModBlocks.NEWTS_CASE.get(), noDrop());
+
         generateLocationBlocksLoot();
     }
 

@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "wizards_and_beasts:item/moodys_trunk"
+    "model": "wizards_and_beasts:block/moodys_trunk"
   }
 }

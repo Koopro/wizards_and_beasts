@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.block.ExpansionFocusBlockEntity;
+import at.koopro.wizardsandbeasts.block.trunk.TrunkBlockEntity;
 import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlockEntity;
 import at.koopro.wizardsandbeasts.wand.bench.WandmakersBenchBlockEntity;
 import net.minecraft.core.registries.Registries;
@@ -26,6 +27,15 @@ public final class ModBlockEntities {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FlooFireplaceBlockEntity>> FLOO_FIREPLACE =
             BLOCK_ENTITY_TYPES.register("floo_fireplace", () ->
                     new BlockEntityType<>(FlooFireplaceBlockEntity::new, Set.of(ModBlocks.FLOO_FIREPLACE.get())));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TrunkBlockEntity>> TRUNK =
+            BLOCK_ENTITY_TYPES.register("trunk", () ->
+                    new BlockEntityType<>(TrunkBlockEntity::new, Set.of(
+                            ModBlocks.ENCHANTED_TRUNK.get(),
+                            ModBlocks.EXPANDED_TRUNK.get(),
+                            ModBlocks.MASTERS_TRUNK.get(),
+                            ModBlocks.MOODYS_TRUNK.get(),
+                            ModBlocks.NEWTS_CASE.get())));
 
     private ModBlockEntities() {
     }

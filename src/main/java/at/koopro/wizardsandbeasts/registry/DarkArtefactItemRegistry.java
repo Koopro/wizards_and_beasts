@@ -8,9 +8,6 @@ import at.koopro.wizardsandbeasts.item.darkartefact.RavenclawsDiademItem;
 import at.koopro.wizardsandbeasts.item.darkartefact.RiddlesDiaryItem;
 import at.koopro.wizardsandbeasts.item.darkartefact.SlytherinsLocketItem;
 import at.koopro.wizardsandbeasts.item.hallow.ResurrectionStoneItem;
-import at.koopro.wizardsandbeasts.item.trunk.EnchantedTrunkItem;
-import at.koopro.wizardsandbeasts.item.trunk.MoodysTrunkItem;
-import at.koopro.wizardsandbeasts.trunk.TrunkTier;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.neoforged.neoforge.registries.DeferredItem;
 
@@ -51,16 +48,9 @@ public final class DarkArtefactItemRegistry {
                     props -> new CloakItem(props.stacksTo(1).equippable(EquipmentSlot.CHEST), true));
 
     // ── Containers ───────────────────────────────────────────────
-
-    public static final DeferredItem<EnchantedTrunkItem> ENCHANTED_TRUNK =
-            ModItems.ITEMS.registerItem("enchanted_trunk", props -> new EnchantedTrunkItem(TrunkTier.TIER_1, props.stacksTo(1)));
-    public static final DeferredItem<EnchantedTrunkItem> EXPANDED_TRUNK =
-            ModItems.ITEMS.registerItem("expanded_trunk", props -> new EnchantedTrunkItem(TrunkTier.TIER_2, props.stacksTo(1)));
-    public static final DeferredItem<EnchantedTrunkItem> MASTERS_TRUNK =
-            ModItems.ITEMS.registerItem("masters_trunk", props -> new EnchantedTrunkItem(TrunkTier.TIER_3, props.stacksTo(1)));
-
-    public static final DeferredItem<MoodysTrunkItem> MOODYS_TRUNK =
-            ModItems.ITEMS.registerItem("moodys_trunk", props -> new MoodysTrunkItem(props.stacksTo(1)));
+    // All trunks (Traveller's / Expanded / Master's / Moody's) and Newt's Case are now placed blocks,
+    // registered in ModBlocks as TrunkBlock (enchanted_trunk / expanded_trunk / masters_trunk /
+    // moodys_trunk / newts_case_item). You set them down and climb in — no held reach-in trunk remains.
 
     private DarkArtefactItemRegistry() {}
 

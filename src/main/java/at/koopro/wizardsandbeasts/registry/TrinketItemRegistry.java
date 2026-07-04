@@ -7,7 +7,6 @@ import at.koopro.wizardsandbeasts.item.trinket.ExtendableEarsItem;
 import at.koopro.wizardsandbeasts.item.trinket.FoeGlassItem;
 import at.koopro.wizardsandbeasts.item.trinket.HandOfGloryItem;
 import at.koopro.wizardsandbeasts.item.trinket.HermionesBagItem;
-import at.koopro.wizardsandbeasts.item.trinket.NewtsCaseItem;
 import at.koopro.wizardsandbeasts.item.trinket.OmniocularsItem;
 import at.koopro.wizardsandbeasts.item.trinket.PensieveItem;
 import at.koopro.wizardsandbeasts.item.trinket.PortkeyItem;
@@ -47,8 +46,7 @@ public final class TrinketItemRegistry {
             ModItems.ITEMS.registerItem("hermiones_beaded_bag", props -> new HermionesBagItem(props.stacksTo(1)));
     public static final DeferredItem<BloodPactVialItem> BLOOD_PACT_VIAL =
             ModItems.ITEMS.registerItem("blood_pact_vial", props -> new BloodPactVialItem(props.stacksTo(1)));
-    public static final DeferredItem<NewtsCaseItem> NEWTS_CASE_ITEM =
-            ModItems.ITEMS.registerItem("newts_case_item", props -> new NewtsCaseItem(props.stacksTo(1)));
+    // Newt's Case is now a placed block — see ModBlocks.NEWTS_CASE / NEWTS_CASE_ITEM.
     public static final DeferredItem<WizardingProjectileItem> PERUVIAN_DARKNESS_POWDER =
             ModItems.ITEMS.registerItem("peruvian_instant_darkness_powder", props -> new WizardingProjectileItem(props.stacksTo(16)));
     public static final DeferredItem<WizardingProjectileItem> DECOY_DETONATOR =

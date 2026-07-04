@@ -5,13 +5,12 @@ import at.koopro.wizardsandbeasts.spell.lib.*;
 
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.registry.ModDimensions;
-import at.koopro.wizardsandbeasts.item.trunk.EnchantedTrunkItem;
+import at.koopro.wizardsandbeasts.block.trunk.TrunkBlock;
 import at.koopro.wizardsandbeasts.trunk.TrunkAccessMode;
-import at.koopro.wizardsandbeasts.trunk.TrunkArchetype;
 import at.koopro.wizardsandbeasts.trunk.ExtensionCharmService;
 import at.koopro.wizardsandbeasts.trunk.TrunkRecord;
-import at.koopro.wizardsandbeasts.trunk.TrunkTier;
 import at.koopro.wizardsandbeasts.util.WandHelper;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -99,19 +98,27 @@ final class SpellCastUtilityHandler {
 
     static boolean handlePocketIngress(ServerPlayer caster) {
         ItemStack caseStack = findPocketCase(caster);
-        if (caseStack.isEmpty()) {
-            caster.displayClientMessage(Component.literal("You need an Enchanted Trunk to cast this spell.")
+        if (caseStack.isEmpty()
+                || !(caseStack.getItem() instanceof BlockItem blockItem)
+                || !(blockItem.getBlock() instanceof TrunkBlock trunk)) {
+            caster.displayClientMessage(Component.literal("You need a trunk to cast this spell.")
                     .withStyle(ChatFormatting.RED), true);
             return false;
         }
-        UUID caseId = ensureCaseId(caseStack);
-        TrunkArchetype archetype = caseStack.getOrDefault(ModDataComponents.POCKET_ARCHETYPE.get(), TrunkArchetype.FIELD_CAMP);
-        TrunkAccessMode accessMode = caseStack.getOrDefault(ModDataComponents.POCKET_ACCESS_MODE.get(), TrunkAccessMode.SEALED);
-        TrunkTier tier = caseStack.getItem() instanceof EnchantedTrunkItem trunkItem ? trunkItem.tier() : TrunkTier.TIER_1;
-        TrunkRecord pocket = ExtensionCharmService.getOrCreatePocket(caster, caseId, archetype,
-                caseStack.getOrDefault(ModDataComponents.POCKET_TEMPLATE_ID.get(), "blank_shell"),
-                accessMode, false, false, tier);
+        // Enter the same lock-1 compartment the placed block descends into, so the spell and the
+        // block share one space per trunk.
+        UUID base = ensureCaseId(caseStack);
+        UUID compartmentId = TrunkBlock.lockCaseId(base, 1);
+        boolean muggleWorthy = caseStack.getOrDefault(ModDataComponents.POCKET_MUGGLE_WORTHY.get(), false);
+        TrunkRecord pocket = ExtensionCharmService.getOrCreatePocket(caster, compartmentId, trunk.archetype(),
+                "trunk_lock_1", TrunkAccessMode.SEALED, muggleWorthy, false, trunk.radiusTier());
         caseStack.set(ModDataComponents.POCKET_ID.get(), pocket.pocketId());
+        // Muggle-Worthy blocks non-owner entry; the owner always gets in.
+        if (pocket.muggleWorthy() && !pocket.owner().equals(caster.getUUID())) {
+            caster.displayClientMessage(
+                    Component.literal("The case appears to contain only travel supplies."), true);
+            return false;
+        }
         ExtensionCharmService.enterPocket(caster, pocket);
         return true;
     }
@@ -128,7 +135,7 @@ final class SpellCastUtilityHandler {
         int size = player.getInventory().getContainerSize();
         for (int slot = 0; slot < size; slot++) {
             ItemStack stack = player.getInventory().getItem(slot);
-            if (stack.getItem() instanceof EnchantedTrunkItem) {
+            if (stack.getItem() instanceof BlockItem blockItem && blockItem.getBlock() instanceof TrunkBlock) {
                 return stack;
             }
         }

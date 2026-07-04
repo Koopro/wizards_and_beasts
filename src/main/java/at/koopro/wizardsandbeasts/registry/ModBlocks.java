@@ -5,6 +5,9 @@ import at.koopro.wizardsandbeasts.block.ExaminationDeskBlock;
 import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlock;
 import at.koopro.wizardsandbeasts.block.MandrakeCropBlock;
 import at.koopro.wizardsandbeasts.block.trunk.PocketConfiguratorBlock;
+import at.koopro.wizardsandbeasts.block.trunk.TrunkBlock;
+import at.koopro.wizardsandbeasts.trunk.TrunkArchetype;
+import at.koopro.wizardsandbeasts.trunk.TrunkTier;
 import at.koopro.wizardsandbeasts.block.WardingStoneBlock;
 import at.koopro.wizardsandbeasts.block.location.DiagonAlleyBlocks;
 import at.koopro.wizardsandbeasts.block.location.GringottsBlocks;
@@ -164,6 +167,53 @@ public class ModBlocks {
 
     public static final DeferredItem<BlockItem> POCKET_CONFIGURATOR_ITEM =
             ModItems.ITEMS.registerSimpleBlockItem("pocket_configurator", POCKET_CONFIGURATOR);
+
+    // --- Placed trunks (all tiers) ---
+    // Lore: you set the trunk down and climb in. Right-click descends; sneak-click cycles the lock
+    // (multi-lock) or toggles Muggle-Worthy (single-lock). Broken/picked, the BlockItem carries the
+    // packed pocket reference (POCKET_CASE_ID) so re-placing re-links the same compartments.
+    // Signature: TrunkBlock(radiusTier, lockCount, archetype). lockCount is independent of size.
+
+    public static final DeferredBlock<TrunkBlock> ENCHANTED_TRUNK =
+            BLOCKS.registerBlock("enchanted_trunk",
+                    props -> new TrunkBlock(TrunkTier.TIER_1, 1, TrunkArchetype.FIELD_CAMP, props),
+                    () -> BlockBehaviour.Properties.of().strength(2.0f).sound(SoundType.WOOD).requiresCorrectToolForDrops());
+
+    public static final DeferredItem<BlockItem> ENCHANTED_TRUNK_ITEM =
+            ModItems.ITEMS.registerItem("enchanted_trunk", props -> new BlockItem(ENCHANTED_TRUNK.get(), props.stacksTo(1)));
+
+    public static final DeferredBlock<TrunkBlock> EXPANDED_TRUNK =
+            BLOCKS.registerBlock("expanded_trunk",
+                    props -> new TrunkBlock(TrunkTier.TIER_2, 3, TrunkArchetype.MINISTRY_STANDARD, props),
+                    () -> BlockBehaviour.Properties.of().strength(2.5f).sound(SoundType.WOOD).requiresCorrectToolForDrops());
+
+    public static final DeferredItem<BlockItem> EXPANDED_TRUNK_ITEM =
+            ModItems.ITEMS.registerItem("expanded_trunk", props -> new BlockItem(EXPANDED_TRUNK.get(), props.stacksTo(1)));
+
+    public static final DeferredBlock<TrunkBlock> MASTERS_TRUNK =
+            BLOCKS.registerBlock("masters_trunk",
+                    props -> new TrunkBlock(TrunkTier.TIER_3, 7, TrunkArchetype.MINISTRY_STANDARD, props),
+                    () -> BlockBehaviour.Properties.of().strength(3.0f).sound(SoundType.WOOD).requiresCorrectToolForDrops());
+
+    public static final DeferredItem<BlockItem> MASTERS_TRUNK_ITEM =
+            ModItems.ITEMS.registerItem("masters_trunk", props -> new BlockItem(MASTERS_TRUNK.get(), props.stacksTo(1)));
+
+    public static final DeferredBlock<TrunkBlock> MOODYS_TRUNK =
+            BLOCKS.registerBlock("moodys_trunk",
+                    props -> new TrunkBlock(TrunkTier.TIER_3, 7, TrunkArchetype.SAFEHOUSE, props),
+                    () -> BlockBehaviour.Properties.of().strength(3.0f).sound(SoundType.METAL).requiresCorrectToolForDrops());
+
+    public static final DeferredItem<BlockItem> MOODYS_TRUNK_ITEM =
+            ModItems.ITEMS.registerItem("moodys_trunk", props -> new BlockItem(MOODYS_TRUNK.get(), props.stacksTo(1)));
+
+    // Newt's Case — single large Scamander habitat, Muggle-Worthy toggle on the lock (single-lock).
+    public static final DeferredBlock<TrunkBlock> NEWTS_CASE =
+            BLOCKS.registerBlock("newts_case_item",
+                    props -> new TrunkBlock(TrunkTier.TIER_3, 1, TrunkArchetype.SCAMANDER_SANCTUARY, props),
+                    () -> BlockBehaviour.Properties.of().strength(2.0f).sound(SoundType.WOOD).requiresCorrectToolForDrops());
+
+    public static final DeferredItem<BlockItem> NEWTS_CASE_ITEM =
+            ModItems.ITEMS.registerItem("newts_case_item", props -> new BlockItem(NEWTS_CASE.get(), props.stacksTo(1)));
 
     // --- Floo Network ---
 

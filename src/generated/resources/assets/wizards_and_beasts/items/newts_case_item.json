@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "wizards_and_beasts:item/newts_case_item"
+    "model": "wizards_and_beasts:block/newts_case_item"
   }
 }
