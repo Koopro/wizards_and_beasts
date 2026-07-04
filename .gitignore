@@ -134,3 +134,6 @@ src/generated/resources/.cache/
 # graphify tool output (regenerable)
 graphify-out/
 src/main/graphify-out/
+
+# Python tooling cache
+tools/__pycache__/
