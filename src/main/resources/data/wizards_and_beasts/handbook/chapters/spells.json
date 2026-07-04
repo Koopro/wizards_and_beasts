@@ -1,0 +1,33 @@
+{
+  "id": "wizards_and_beasts:spells",
+  "title": "Part III — Spell Licensing & Casting",
+  "icon": "wizards_and_beasts:wand",
+  "sort_index": 30,
+  "pages": [
+    {
+      "type": "text",
+      "heading": "Licensed Spells",
+      "body": "Most spells are freely licensable by any registered witch or wizard in good standing. The registrant learns spells through the skill tree, as set out in Part V.\n\nCertain spells require additional licensing. These are addressed under Restricted Spells below."
+    },
+    {
+      "type": "text",
+      "heading": "Casting",
+      "body": "A spell is cast by holding a wand and performing the casting gesture. Casting proficiency improves with practice, as detailed in Part V.\n\nSeveral spells produce tiered effects according to the registrant's proficiency level. A spell cast poorly remains the registrant's responsibility."
+    },
+    {
+      "type": "text",
+      "heading": "Gamp's Law of Elemental Transfiguration",
+      "body": "Five Principal Exceptions govern that which magic cannot conjure. The registrant is referred to Part VII for the full statement.\n\nAttempts to conjure food, money, or life by magic produce substandard or non-functional results, and may constitute fraud under the Wizengamot Act of 1707."
+    },
+    {
+      "type": "text",
+      "heading": "Restricted Spells",
+      "body": "The three Unforgivable Curses — Avada Kedavra, the Cruciatus Curse, and the Imperius Curse — are illegal save under Ministry warrant.\n\nUse of any Unforgivable without warrant carries an automatic sentence of life imprisonment in Azkaban. These spells are available only where the Dark Arts provisions are in force. Their mechanics are not described in this Handbook, and the Department declines to elaborate."
+    },
+    {
+      "type": "text",
+      "heading": "Protego & Shield Charms",
+      "body": "The Shield Charm, Protego, raises a magical barrier that absorbs incoming spells. Shield strength scales with the caster's proficiency, and presents in four visual tiers of intensity.\n\nThe registrant is cautioned that a shield does not block all curses. The Unforgivables bypass standard Protego — Avada Kedavra produces a shield flash rather than absorption, which is to say it is not stopped at all."
+    }
+  ]
+}

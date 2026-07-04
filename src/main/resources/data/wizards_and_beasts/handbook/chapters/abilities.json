@@ -1,0 +1,58 @@
+{
+  "id": "wizards_and_beasts:abilities",
+  "title": "Part VI — Special Magical Abilities",
+  "icon": "minecraft:ender_pearl",
+  "sort_index": 60,
+  "pages": [
+    {
+      "type": "text",
+      "heading": "Apparition",
+      "body": "Apparition is instantaneous magical travel, governed by the Three Ds: Destination, Determination, and Deliberation. Failure to maintain all three risks Splinching, the involuntary separation of the registrant from a portion of the registrant.\n\nApparition requires a licence, obtained by way of the Ministry Apparition Test. Anti-Apparition Wards prevent its use in certain locations. Side-Along Apparition is available to licensed witches and wizards, who do so entirely at their passenger's risk."
+    },
+    {
+      "type": "text",
+      "heading": "Animagus Transformation",
+      "body": "An Animagus may transform into a single animal form. Registration proceeds in three stages: the preliminary ritual, the lightning-phase transformation, and registration with the Ministry.\n\nThe animal form is fixed at the moment of first transformation and may not be exchanged. Unregistered Animagi are subject to prosecution under the Animagus Registry Act. The Department notes that the form chosen is not, in fact, chosen."
+    },
+    {
+      "type": "text",
+      "heading": "Metamorphmagus",
+      "body": "A Metamorphmagus may alter their physical appearance at will. This is a rare innate ability and cannot be learned, taught, or purchased.\n\nThe ability is available only to registrants of the appropriate Heritage Variant. Impersonation of a Ministry official by this or any means remains an offence."
+    },
+    {
+      "type": "text",
+      "heading": "Parseltongue",
+      "body": "Parseltongue is the ability to converse with serpents. It is innate and Heritage-linked. Communication in Parseltongue is prefixed in chat with $$.\n\nThe registrant is advised that the use of Parseltongue in public may attract unwanted attention, much of it from persons drawing unflattering conclusions."
+    },
+    {
+      "type": "text",
+      "heading": "Legilimency & Occlumency",
+      "body": "Legilimency is the magical penetration of another's mind. Occlumency is the art of magical defence against such intrusion. Both require Heritage eligibility and significant skill investment.\n\nThe registrant is reminded that the use of Legilimency upon another without consent is a serious offence. The defence that one was merely browsing has not succeeded before the Wizengamot."
+    },
+    {
+      "type": "text",
+      "heading": "Wandless Casting",
+      "body": "A witch or wizard of sufficient proficiency may cast certain spells without a wand. This is a Heritage-gated ability and is markedly harder than wand-assisted casting.\n\nThe Ministry recommends that registrants maintain a registered wand at all times regardless, if only to have something to register."
+    },
+    {
+      "type": "text",
+      "heading": "Werewolf Condition",
+      "body": "A werewolf undergoes forced transformation at the full moon. The Wolfsbane Potion permits the afflicted to retain their mind throughout, and is strongly encouraged.\n\nRegistration with the Werewolf Registry is mandatory. Moon-phase transformation follows the server's lunar cycle, which the Ministry does not control and declines to be blamed for."
+    },
+    {
+      "type": "text",
+      "heading": "Vampire Registry",
+      "body": "Vampires are required to register with the Beast Division. Heritage-specific passive abilities apply.\n\nMechanics are not detailed here. The registrant is directed to the relevant Variant entry on their certificate."
+    },
+    {
+      "type": "text",
+      "heading": "Veela",
+      "body": "Veela are beings of considerable magical allure. A Heritage-specific passive effect, the Veela allure, applies to registrants of this Heritage.\n\nThe particulars of the effect are not detailed here. The Department asks only that it not be cited in mitigation of poor judgement."
+    },
+    {
+      "type": "text",
+      "heading": "Centaur Divination",
+      "body": "Centaurs practise a form of divination grounded in celestial observation. Access is Heritage-gated.\n\nThe registrant is reminded that Centaurs find the term half-breed deeply offensive, and that the Ministry does not condone its use. The Department's own historical record on this matter is under separate review."
+    }
+  ]
+}

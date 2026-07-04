@@ -20,5 +20,7 @@ public enum Module {
     CHARACTER_SHEET,
     PLAYER_STATS,
     /** Decorative location blocks (Hogwarts, Hogsmeade, Diagon Alley, Gringotts, Ministry) and their crafting recipes. */
-    STRUCTURES
+    STRUCTURES,
+    /** Ministry of Magic handbook item + datapack-driven chapter/page GUI. */
+    HANDBOOK
 }

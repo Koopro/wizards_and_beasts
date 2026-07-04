@@ -1,0 +1,23 @@
+{
+  "id": "wizards_and_beasts:heritage",
+  "title": "Part I — Magical Heritage & Classification",
+  "icon": "minecraft:nether_star",
+  "sort_index": 10,
+  "pages": [
+    {
+      "type": "text",
+      "heading": "What Is Heritage?",
+      "body": "Heritage denotes the registrant's innate magical nature, declared at the point of registration by way of the Heritage selection process.\n\nThe recognised Heritage categories are: Wizard-born, Muggle-born, Half-blood, Pure-blood, Veela, Goblin-kin, Centaur, Werewolf, Vampire, and Metamorphmagus.\n\nHeritage is permanent. It may not be altered after registration save by submission of a Ministry variance (Form 17B), which is rarely granted and never on a Tuesday."
+    },
+    {
+      "type": "text",
+      "heading": "Heritage Variants",
+      "body": "Each Heritage carries one or more Variants, denoting a specific sub-classification within the category.\n\nVariants determine the registrant's passive magical bonuses and the conditions under which certain abilities become available.\n\nThe witch or wizard in question is directed to consult their registration certificate for their assigned Variant. The Ministry does not issue replacement certificates by owl."
+    },
+    {
+      "type": "text",
+      "heading": "Restrictions by Heritage",
+      "body": "Certain spells, abilities, and locations are accessible only to registrants of the appropriate Heritage. Specifics are set out in the relevant chapters of this Handbook.\n\nAny attempt to circumvent a Heritage restriction is a Level 3 Misuse of Magic Offence, and will be treated as such irrespective of the registrant's stated intentions."
+    }
+  ]
+}

@@ -14,6 +14,7 @@ import at.koopro.wizardsandbeasts.network.form.ModNetworkForm;
 import at.koopro.wizardsandbeasts.network.skill.ModNetworkSkills;
 import at.koopro.wizardsandbeasts.network.heritage.ModNetworkType;
 import at.koopro.wizardsandbeasts.network.bestiary.ModNetworkBestiary;
+import at.koopro.wizardsandbeasts.network.handbook.ModNetworkHandbook;
 import at.koopro.wizardsandbeasts.network.bestiary.niffler.ModNetworkNiffler;
 import at.koopro.wizardsandbeasts.network.spell.ModNetworkSpells;
 import at.koopro.wizardsandbeasts.spell.teacher.ModNetworkTeacher;
@@ -40,6 +41,7 @@ public class ModNetwork {
         ModNetworkTeacher.register(registrar);
         ModNetworkWand.register(registrar);
         ModNetworkBestiary.register(registrar);
+        ModNetworkHandbook.register(registrar);
         ModNetworkPocket.register(registrar);
         ModNetworkNiffler.register(registrar);
         ModNetworkOWLs.register(registrar);

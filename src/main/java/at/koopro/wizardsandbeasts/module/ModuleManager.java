@@ -39,6 +39,7 @@ public final class ModuleManager {
         STATES.put(Module.PLAYER_STATS, State.PREVIEW);
         // Location decorative blocks ship craftable by default; set DISABLED to hide their recipes.
         STATES.put(Module.STRUCTURES, State.ENABLED);
+        STATES.put(Module.HANDBOOK, State.ENABLED);
     }
 
     private ModuleManager() {

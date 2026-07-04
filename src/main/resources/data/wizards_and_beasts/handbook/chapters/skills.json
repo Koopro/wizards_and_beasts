@@ -1,0 +1,23 @@
+{
+  "id": "wizards_and_beasts:skills",
+  "title": "Part V — Magical Development & Proficiency",
+  "icon": "minecraft:experience_bottle",
+  "sort_index": 50,
+  "pages": [
+    {
+      "type": "text",
+      "heading": "The Skill Tree",
+      "body": "Magical development is tracked across five skill trees. The registrant spends skill points to unlock nodes within them.\n\nNodes are permanent once unlocked. The witch or wizard in question is advised to plan their development with care, as the Ministry does not issue refunds and the Wizengamot has twice declined to compel one."
+    },
+    {
+      "type": "text",
+      "heading": "Proficiency",
+      "body": "Proficiency measures the registrant's casting experience in a given spell or ability. It increases through repeated successful casting.\n\nProficiency follows an S-curve: early gains come quickly, while true mastery is slow to achieve. The proficiency pip row on the heads-up display indicates the registrant's current tier."
+    },
+    {
+      "type": "text",
+      "heading": "Proficiency Tiers",
+      "body": "There are five tiers: Novice, Apprentice, Adept, Expert, and Master.\n\nEach tier unlocks stronger spell variants or reduced casting costs. Numeric thresholds are not published. The Department finds that registrants informed of the exact figure tend to stop one cast short of it."
+    }
+  ]
+}

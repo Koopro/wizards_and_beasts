@@ -1,0 +1,28 @@
+{
+  "id": "wizards_and_beasts:wands",
+  "title": "Part II — Wand Registration & Use",
+  "icon": "wizards_and_beasts:wand",
+  "sort_index": 20,
+  "pages": [
+    {
+      "type": "text",
+      "heading": "Wand Registration",
+      "body": "All wands must be registered with the Wand Registry. The wand's components — wood, core, length, and flexibility — are recorded at the time of acquisition.\n\nThe registrant is reminded that use of an unregistered wand is a Level 1 Misuse of Magic Offence. The Ministry traces wands, not intentions."
+    },
+    {
+      "type": "text",
+      "heading": "Wand Configuration",
+      "body": "A wand's components influence its casting behaviour. The registrant may inspect their wand's configuration by way of the wand inspection interface.\n\nThe particulars of how configuration affects casting are not detailed here. The witch or wizard in question is referred to Part III (Spells) for the applicable rules."
+    },
+    {
+      "type": "text",
+      "heading": "The Ollivander Principle",
+      "body": "While any witch or wizard may attempt to use any wand, a wand that has chosen its witch or wizard will perform considerably better. The reverse is also true, and frequently embarrassing.\n\nThe registrant is advised against prolonged use of another's wand save in emergencies. See Ministry v. Brocklehurst (1993), in which the defendant's reliance on a borrowed wand was held to aggravate, rather than excuse, the resulting damage to a public fountain."
+    },
+    {
+      "type": "text",
+      "heading": "Acquisition of Wands",
+      "body": "No standard crafting procedure for a base wand is presently filed with this Handbook. Wands are obtained through the established channels of acquisition rather than by ordinary assembly.\n\nThe registrant should not attempt to fashion a wand from materials of convenience. The results are uniformly disappointing and occasionally combustible."
+    }
+  ]
+}

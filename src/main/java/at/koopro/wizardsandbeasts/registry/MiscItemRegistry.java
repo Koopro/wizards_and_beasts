@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.item.bestiary.BestiaryItem;
+import at.koopro.wizardsandbeasts.item.MinistryHandbookItem;
 import at.koopro.wizardsandbeasts.item.InkItem;
 import at.koopro.wizardsandbeasts.item.ParchmentItem;
 import at.koopro.wizardsandbeasts.item.deluminator.DeluminatorItem;
@@ -13,6 +14,9 @@ public final class MiscItemRegistry {
 
     public static final DeferredItem<BestiaryItem> BESTIARY =
             ModItems.ITEMS.registerItem("bestiary", props -> new BestiaryItem(props.stacksTo(1)));
+
+    public static final DeferredItem<MinistryHandbookItem> MINISTRY_HANDBOOK =
+            ModItems.ITEMS.registerItem("ministry_handbook", props -> new MinistryHandbookItem(props.stacksTo(1)));
 
     public static final DeferredItem<ParchmentItem> PARCHMENT =
             ModItems.ITEMS.registerItem("parchment", ParchmentItem::new);

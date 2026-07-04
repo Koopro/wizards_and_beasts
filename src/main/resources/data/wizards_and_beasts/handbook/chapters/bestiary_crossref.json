@@ -1,0 +1,23 @@
+{
+  "id": "wizards_and_beasts:bestiary_crossref",
+  "title": "Part X — Magical Creatures (Cross-Reference)",
+  "icon": "minecraft:book",
+  "sort_index": 100,
+  "pages": [
+    {
+      "type": "text",
+      "heading": "Ministry Beast Classification",
+      "body": "The Ministry classifies magical creatures across five tiers, from X to XXXXX, denoting the degree of danger and the difficulty of handling.\n\nFull creature entries are maintained in the Wizarding Bestiary. The registrant is reminded that interaction with XXXX and XXXXX creatures without Ministry authorisation is a serious offence, and that the creature is unlikely to check the registrant's paperwork first."
+    },
+    {
+      "type": "cross_ref",
+      "target_type": "bestiary",
+      "entry_id": "wizards_and_beasts:niffler"
+    },
+    {
+      "type": "text",
+      "heading": "A Note on Interactions",
+      "body": "The registrant is advised to consult the Bestiary before approaching any unfamiliar magical creature. Bestiary entries are discovery-gated and must be unlocked through observation; the entry will not precede the encounter.\n\nThe registrant is further reminded that dragons are classified XXXXX in all cases, regardless of apparent disposition, tameness, or name given to them by their keeper."
+    }
+  ]
+}

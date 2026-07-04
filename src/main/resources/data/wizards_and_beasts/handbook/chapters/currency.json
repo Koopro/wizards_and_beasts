@@ -1,0 +1,23 @@
+{
+  "id": "wizards_and_beasts:currency",
+  "title": "Part IX — Wizarding Currency & Gringotts",
+  "icon": "wizards_and_beasts:galleon",
+  "sort_index": 90,
+  "pages": [
+    {
+      "type": "text",
+      "heading": "The Wizarding Currency System",
+      "body": "Wizarding currency comprises three denominations: the Galleon, the Sickle, and the Knut. There are seventeen Sickles to a Galleon and twenty-nine Knuts to a Sickle.\n\nThe registrant will observe that these figures are not decimal. This is deliberate. Currency is minted by Gringotts Wizarding Bank and is the sole legal tender for wizarding commerce."
+    },
+    {
+      "type": "text",
+      "heading": "Gringotts Vaults",
+      "body": "Gringotts vaults provide secure storage, accessible by way of a vault key. Vault access is Heritage-neutral; any registered witch or wizard may hold a Gringotts account.\n\nThe registrant is reminded that Gringotts is operated by goblins, and that goblin banking law supersedes Ministry regulation in all matters of vault security. The Department recommends courtesy."
+    },
+    {
+      "type": "text",
+      "heading": "Counterfeit Currency",
+      "body": "Counterfeit Galleons are addressed under Gamp's Law, in Part VII of this Handbook.\n\nThis content is not duplicated here. The registrant is directed there, and reminded that Gringotts, not the Ministry, attends to the matter."
+    }
+  ]
+}
