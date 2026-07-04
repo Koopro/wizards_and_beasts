@@ -16,6 +16,7 @@ import at.koopro.wizardsandbeasts.client.map.MapClientHandler;
 import at.koopro.wizardsandbeasts.client.owl.ClientOWLCache;
 import at.koopro.wizardsandbeasts.client.skill.state.ClientSkillBonusCache;
 import at.koopro.wizardsandbeasts.client.skill.state.ClientSkillDataState;
+import at.koopro.wizardsandbeasts.client.skill.state.ClientVocationCache;
 import at.koopro.wizardsandbeasts.client.stats.ClientStatsState;
 import at.koopro.wizardsandbeasts.entity.niffler.CarriedNifflerAttachment;
 import at.koopro.wizardsandbeasts.form.RenderFlag;
@@ -30,6 +31,8 @@ import at.koopro.wizardsandbeasts.network.apparition.ApparitionWardsSyncS2CPaylo
 import at.koopro.wizardsandbeasts.network.azkaban.AzkabanTrespasserSyncPayload;
 import at.koopro.wizardsandbeasts.network.bestiary.BestiaryDataSyncPayload;
 import at.koopro.wizardsandbeasts.network.bestiary.niffler.NifflerCarrySyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.handbook.SyncHandbookPayload;
+import at.koopro.wizardsandbeasts.handbook.HandbookChapterManager;
 import at.koopro.wizardsandbeasts.network.bloodpact.SBreakPactPayload;
 import at.koopro.wizardsandbeasts.network.bloodpact.SUpdateVialPayload;
 import at.koopro.wizardsandbeasts.network.currency.GringottsOpenS2CPayload;
@@ -49,6 +52,7 @@ import at.koopro.wizardsandbeasts.network.owl.OWLDataSyncPayload;
 import at.koopro.wizardsandbeasts.network.owl.ProfessionSyncPayload;
 import at.koopro.wizardsandbeasts.network.skill.SkillBonusSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.skill.SkillDataSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.skill.VocationDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.stats.PlayerStatsSyncPayload;
 import at.koopro.wizardsandbeasts.network.trunk.PocketStatusS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
@@ -115,6 +119,10 @@ public final class ClientPayloadHandlers {
 
     public static void handleBestiaryDataSync(BestiaryDataSyncPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> ClientBestiaryCache.set(payload.data()));
+    }
+
+    public static void handleSyncHandbook(SyncHandbookPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> HandbookChapterManager.setClientChapters(payload.chapters()));
     }
 
     public static void handleNifflerCarrySync(NifflerCarrySyncS2CPayload payload, IPayloadContext context) {
@@ -332,6 +340,11 @@ public final class ClientPayloadHandlers {
     public static void handleSkillDataSync(SkillDataSyncS2CPayload pkt, IPayloadContext ctx) {
         ctx.enqueueWork(() -> ClientSkillDataState.applySync(
                 pkt.syncVersion(), pkt.skillPoints(), pkt.totalPointsEarned(), pkt.unlockedSkills()));
+    }
+
+    public static void handleVocationDataSync(VocationDataSyncS2CPayload pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> ClientVocationCache.applySync(
+                pkt.syncVersion(), pkt.primary(), pkt.secondary()));
     }
 
     // --- stats ---

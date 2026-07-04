@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.client.network;
 import at.koopro.wizardsandbeasts.client.floo.gui.FlooNetworkScreen;
 import at.koopro.wizardsandbeasts.client.spell.gui.BeamDebugScreen;
 import at.koopro.wizardsandbeasts.client.bestiary.gui.BestiaryScreen;
+import at.koopro.wizardsandbeasts.client.handbook.HandbookScreen;
 import at.koopro.wizardsandbeasts.client.gui.character.CharacterSheetScreen;
 import at.koopro.wizardsandbeasts.client.currency.gui.GringottsScreen;
 import at.koopro.wizardsandbeasts.client.skill.gui.SkillScreenRouter;
@@ -53,6 +54,10 @@ public final class ClientScreenHooks {
 
     public static void openBestiaryScreen() {
         Minecraft.getInstance().setScreen(new BestiaryScreen());
+    }
+
+    public static void openHandbookScreen() {
+        Minecraft.getInstance().setScreen(new HandbookScreen());
     }
 
     public static void openCharacterSheetScreen() {

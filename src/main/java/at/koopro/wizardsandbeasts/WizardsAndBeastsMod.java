@@ -20,6 +20,7 @@ import at.koopro.wizardsandbeasts.wand.customization.WandModuleRegistry;
 import at.koopro.wizardsandbeasts.event.brew.RegisterBrewsEvent;
 import at.koopro.wizardsandbeasts.event.spell.RegisterSpellsEvent;
 import at.koopro.wizardsandbeasts.bestiary.BestiaryEntryLoader;
+import at.koopro.wizardsandbeasts.handbook.HandbookChapterManager;
 import at.koopro.wizardsandbeasts.creature.CreatureDefinitionLoader;
 import at.koopro.wizardsandbeasts.registry.ModCreatures;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
@@ -137,6 +138,9 @@ public class WizardsAndBeastsMod {
                     Identifier.fromNamespaceAndPath(MODID, "bestiary_entry_reload_listener"),
                     new BestiaryEntryLoader());
             event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "handbook_chapter_reload_listener"),
+                    new HandbookChapterManager());
+            event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "broom_definition_reload_listener"),
                     new BroomDefinitionLoader());
             event.addListener(
@@ -145,6 +149,9 @@ public class WizardsAndBeastsMod {
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "wand_module_reload_listener"),
                     new WandModuleLoader());
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "vocation_reload_listener"),
+                    new at.koopro.wizardsandbeasts.skill.vocation.VocationLoader());
         });
 
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);

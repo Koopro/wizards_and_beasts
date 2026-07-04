@@ -55,6 +55,9 @@ public class ModCreativeTabs {
                         }
                         output.accept(MiscItemRegistry.MARAUDERS_MAP.get());
                         output.accept(MiscItemRegistry.BESTIARY.get());
+                        if (ModuleManager.isEnabled(Module.HANDBOOK)) {
+                            output.accept(MiscItemRegistry.MINISTRY_HANDBOOK.get());
+                        }
 
                         // Wand Cores
                         output.accept(WandItemRegistry.PHOENIX_FEATHER.get());
@@ -122,9 +125,9 @@ public class ModCreativeTabs {
                         output.accept(TrinketItemRegistry.SNEAKOSCOPE.get());
                         output.accept(TrinketItemRegistry.PORTKEY.get());
                         if (ModuleManager.isEnabled(Module.WANDS_AND_SPELLS)) {
-                            output.accept(DarkArtefactItemRegistry.ENCHANTED_TRUNK.get());
-                            output.accept(DarkArtefactItemRegistry.EXPANDED_TRUNK.get());
-                            output.accept(DarkArtefactItemRegistry.MASTERS_TRUNK.get());
+                            output.accept(ModBlocks.ENCHANTED_TRUNK_ITEM.get());
+                            output.accept(ModBlocks.EXPANDED_TRUNK_ITEM.get());
+                            output.accept(ModBlocks.MASTERS_TRUNK_ITEM.get());
                             output.accept(TrinketItemRegistry.MINISTRY_LICENSE_SCROLL.get());
                         }
                         output.accept(TrinketItemRegistry.PERUVIAN_DARKNESS_POWDER.get());
@@ -155,8 +158,8 @@ public class ModCreativeTabs {
                             output.accept(TrinketItemRegistry.BLOOD_PACT_VIAL.get());
                         }
                         if (ModuleManager.isEnabled(Module.POCKET_DIMENSIONS)) {
-                            output.accept(DarkArtefactItemRegistry.MOODYS_TRUNK.get());
-                            output.accept(TrinketItemRegistry.NEWTS_CASE_ITEM.get());
+                            output.accept(ModBlocks.MOODYS_TRUNK_ITEM.get());
+                            output.accept(ModBlocks.NEWTS_CASE_ITEM.get());
                         }
 
                         // Wizarding blocks

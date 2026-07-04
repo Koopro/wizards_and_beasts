@@ -11,6 +11,7 @@ import at.koopro.wizardsandbeasts.client.wand.gui.WandmakersBenchScreen;
 import at.koopro.wizardsandbeasts.registry.ModMenuTypes;
 import at.koopro.wizardsandbeasts.client.broom.BroomRiderRenderer;
 import at.koopro.wizardsandbeasts.client.form.FormRenderStateModifier;
+import at.koopro.wizardsandbeasts.client.form.AnimagusClientViewHandler;
 import at.koopro.wizardsandbeasts.client.form.ObscurialClientViewHandler;
 import at.koopro.wizardsandbeasts.client.form.TransitionEffectRenderer;
 import at.koopro.wizardsandbeasts.client.spell.ColoredGlowRenderer;
@@ -67,6 +68,8 @@ public class WizardsAndBeastsClient {
         NeoForge.EVENT_BUS.addListener(LegilimencyVisionRenderer::onRenderLevel);
         NeoForge.EVENT_BUS.addListener(ObscurialClientViewHandler::onRenderHand);
         NeoForge.EVENT_BUS.addListener(ObscurialClientViewHandler::onRenderGuiLayer);
+        NeoForge.EVENT_BUS.addListener(AnimagusClientViewHandler::onRenderHand);
+        NeoForge.EVENT_BUS.addListener(AnimagusClientViewHandler::onRenderNameTag);
         NeoForge.EVENT_BUS.addListener(InventoryScreenInjector::onScreenInit);
         NeoForge.EVENT_BUS.addListener(CharacterSheetKeyHandler::onClientTick);
         NeoForge.EVENT_BUS.addListener(StatHudOverlay::onClientTick);

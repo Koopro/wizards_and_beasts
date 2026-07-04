@@ -163,6 +163,12 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.wizards_and_beasts.niffler_spawn_egg", "Niffler Spawn Egg");
         add("item.wizards_and_beasts.goblin_teller_spawn_egg.desc", "Spawns a Goblin Teller for testing and encounters.");
         add("item.wizards_and_beasts.niffler_spawn_egg.desc", "Spawns a mischievous Niffler.");
+        // Every data-configured creature: entity name derived from the manifest id.
+        // Bestiary display names live in the hand-authored en_us; these cover name tags,
+        // death messages and spawn-egg fallbacks.
+        for (var spec : at.koopro.wizardsandbeasts.registry.ModCreatures.MANIFEST) {
+            add("entity.wizards_and_beasts." + spec.id(), titleCase(spec.id()));
+        }
 
         // Rowan
         add("block.wizards_and_beasts.rowan_log", "Rowan Log");
@@ -245,9 +251,12 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.wizards_and_beasts.portkey.desc", "Linked transport item. Sneak-use on a block to bind destination.");
         add("item.wizards_and_beasts.portkey.unlinked", "Sneak-use on a block to link a destination.");
         add("item.wizards_and_beasts.portkey.linked", "Linked: %s, %s, %s");
-        add("item.wizards_and_beasts.enchanted_trunk", "Enchanted Trunk");
-        add("item.wizards_and_beasts.expanded_trunk", "Expanded Trunk");
-        add("item.wizards_and_beasts.masters_trunk", "Master's Trunk");
+        // All trunks + Newt's Case are placed blocks now — block.* keys.
+        add("block.wizards_and_beasts.enchanted_trunk", "Enchanted Trunk");
+        add("block.wizards_and_beasts.expanded_trunk", "Expanded Trunk");
+        add("block.wizards_and_beasts.masters_trunk", "Master's Trunk");
+        add("block.wizards_and_beasts.moodys_trunk", "Moody's Seven-Lock Trunk");
+        add("block.wizards_and_beasts.newts_case_item", "Newt's Case");
         add("item.wizards_and_beasts.ministry_license_scroll", "Ministry License Scroll");
         add("item.wizards_and_beasts.trunk_access_mode.sealed", "Sealed to the owner. None may enter uninvited.");
         add("item.wizards_and_beasts.trunk_access_mode.keyed", "Entry granted to those holding a Sympathetic Key.");
@@ -487,6 +496,18 @@ public class ModLanguageProvider extends LanguageProvider {
         add("block.wizards_and_beasts.gringotts_goblin_stonework_wall", "Goblin Stonework Wall");
         add("block.wizards_and_beasts.gringotts_counting_floor", "Counting House Floor");
         add("block.wizards_and_beasts.gringotts_counting_floor_slab", "Counting House Floor Slab");
+    }
+
+    /** "hungarian_horntail" -> "Hungarian Horntail". */
+    private static String titleCase(String id) {
+        StringBuilder out = new StringBuilder(id.length());
+        for (String word : id.split("_")) {
+            if (!out.isEmpty()) {
+                out.append(' ');
+            }
+            out.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1));
+        }
+        return out.toString();
     }
 }
 
