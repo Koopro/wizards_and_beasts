@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.client.skill.gui;
 
-import at.koopro.wizardsandbeasts.client.gui.ScreenLayoutScaler;
+import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.client.gui.WizardsAndBeastsUiTokens;
 import at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageDataState;
 import at.koopro.wizardsandbeasts.client.skill.state.ClientSkillDataState;
@@ -42,7 +42,7 @@ public class SkillTreeScreen extends Screen {
     private NodeBounds hoveredNode;
     private NodeBounds selectedNode;
     private String resolvedTitle = "Skills";
-    private ScreenLayoutScaler layout;
+    private GuiScaleHelper.Layout layout;
     private int panelW;
     private int panelH;
     private int viewportW;
@@ -57,7 +57,7 @@ public class SkillTreeScreen extends Screen {
         super.init();
         String titleText = Component.translatable("screen.wizards_and_beasts.skill_tree.title").getString();
         resolvedTitle = titleText.startsWith("screen.") ? "Skills" : titleText;
-        layout = ScreenLayoutScaler.forScreen(width, height, WizardsAndBeastsUiTokens.SkillTree.PANEL_WIDTH, WizardsAndBeastsUiTokens.SkillTree.PANEL_HEIGHT);
+        layout = GuiScaleHelper.Layout.panel(width, height, WizardsAndBeastsUiTokens.SkillTree.PANEL_WIDTH, WizardsAndBeastsUiTokens.SkillTree.PANEL_HEIGHT);
         panelW = layout.panelW();
         panelH = layout.panelH();
         panelX = layout.panelX();
@@ -89,11 +89,22 @@ public class SkillTreeScreen extends Screen {
 
     private void buildTabs() {
         tabs.clear();
-        int x = panelX + layout.s(WizardsAndBeastsUiTokens.SkillTree.TABS_X);
+        int tabsX = layout.s(WizardsAndBeastsUiTokens.SkillTree.TABS_X);
+        int x = panelX + tabsX;
         int y = panelY + layout.s(WizardsAndBeastsUiTokens.SkillTree.TABS_Y);
+        int gap = layout.s(WizardsAndBeastsUiTokens.SkillTree.TAB_GAP);
+        int height = layout.s(WizardsAndBeastsUiTokens.SkillTree.TAB_HEIGHT);
+        // Shrink tabs from their nominal width so every heritage-available tree fits one row.
+        int width = layout.s(WizardsAndBeastsUiTokens.SkillTree.TAB_WIDTH);
+        int count = availableTrees.size();
+        if (count > 0) {
+            int avail = panelW - tabsX * 2;
+            int maxWidth = (avail - gap * (count - 1)) / count;
+            width = Math.max(1, Math.min(width, maxWidth));
+        }
         for (SkillTreeId tree : availableTrees) {
-            tabs.add(new TabBounds(tree, x, y, layout.s(WizardsAndBeastsUiTokens.SkillTree.TAB_WIDTH), layout.s(WizardsAndBeastsUiTokens.SkillTree.TAB_HEIGHT)));
-            x += layout.s(WizardsAndBeastsUiTokens.SkillTree.TAB_WIDTH + WizardsAndBeastsUiTokens.SkillTree.TAB_GAP);
+            tabs.add(new TabBounds(tree, x, y, width, height));
+            x += width + gap;
         }
     }
 

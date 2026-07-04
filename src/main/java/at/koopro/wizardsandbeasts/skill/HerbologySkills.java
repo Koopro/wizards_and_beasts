@@ -24,9 +24,9 @@ final class HerbologySkills {
 
     static final Skill HARVEST_BOUNTY = SkillTrees.register(Skill.builder("harvest_bounty", "Harvest Bounty")
             .tree(SkillTreeId.HERBOLOGY).maxLevel(2).cost(2)
-            .description("Chance for bonus crop drops per level.")
+            .description("+15% chance for bonus crop drops per level.")
             .prerequisite("green_thumb")
-            .effect(new SkillEffect.UnlockAbility("harvest_bounty"))
+            .effect(new SkillEffect.GameplayBonus(GameplayStat.HARVEST_BONUS_CHANCE, 0.15f))
             .position(1, 2)
             .build());
 
@@ -37,5 +37,21 @@ final class HerbologySkills {
             .prerequisite("harvest_bounty")
             .effect(new SkillEffect.UnlockAbility("natural_remedy"))
             .position(2, 1)
+            .build());
+
+    static final Skill BOUNTIFUL_HARVEST = SkillTrees.register(Skill.builder("bountiful_harvest", "Bountiful Harvest")
+            .tree(SkillTreeId.HERBOLOGY).cost(3)
+            .description("Mastery of the soil. +10% bonus crop drop chance.")
+            .prerequisite("harvest_bounty")
+            .effect(new SkillEffect.GameplayBonus(GameplayStat.HARVEST_BONUS_CHANCE, 0.10f))
+            .position(2, 2)
+            .build());
+
+    static final Skill HERBAL_VITALITY = SkillTrees.register(Skill.builder("herbal_vitality", "Herbal Vitality")
+            .tree(SkillTreeId.HERBOLOGY).maxLevel(2).cost(3)
+            .description("Restorative tonics fortify the body. +2 max health per level.")
+            .prerequisite("natural_remedy")
+            .effect(new SkillEffect.PassiveAttribute("max_health", 2.0))
+            .position(3, 1)
             .build());
 }

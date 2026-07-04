@@ -16,17 +16,20 @@ public final class SkillEffectCache {
     private final Map<SpellCategory, Float> categoryDamageBonuses;
     private final Map<SpellCategory, Float> categoryCooldownReductions;
     private final Set<String> unlockedAbilities;
+    private final Map<GameplayStat, Float> gameplayBonuses;
 
     private SkillEffectCache(Map<String, Float> spellDamageBonuses,
                              Map<String, Float> spellCooldownReductions,
                              Map<SpellCategory, Float> categoryDamageBonuses,
                              Map<SpellCategory, Float> categoryCooldownReductions,
-                             Set<String> unlockedAbilities) {
+                             Set<String> unlockedAbilities,
+                             Map<GameplayStat, Float> gameplayBonuses) {
         this.spellDamageBonuses = spellDamageBonuses;
         this.spellCooldownReductions = spellCooldownReductions;
         this.categoryDamageBonuses = categoryDamageBonuses;
         this.categoryCooldownReductions = categoryCooldownReductions;
         this.unlockedAbilities = unlockedAbilities;
+        this.gameplayBonuses = gameplayBonuses;
     }
 
     /**
@@ -38,6 +41,7 @@ public final class SkillEffectCache {
         Map<SpellCategory, Float> catDmg = new EnumMap<>(SpellCategory.class);
         Map<SpellCategory, Float> catCd = new EnumMap<>(SpellCategory.class);
         Set<String> abilities = new HashSet<>();
+        Map<GameplayStat, Float> gameplay = new EnumMap<>(GameplayStat.class);
 
         for (Map.Entry<String, Integer> entry : data.getUnlockedSkills().entrySet()) {
             Skill skill = SkillTrees.byId(entry.getKey());
@@ -56,13 +60,15 @@ public final class SkillEffectCache {
                             catCd.merge(e.category(), e.reductionPerLevel() * level, Float::sum);
                     case SkillEffect.UnlockAbility e ->
                             abilities.add(e.abilityId());
+                    case SkillEffect.GameplayBonus e ->
+                            gameplay.merge(e.stat(), e.perLevel() * level, Float::sum);
                     case SkillEffect.LearnSpell ignored -> {} // no-op: spell learning is handled outside skill trees
                     case SkillEffect.PassiveAttribute ignored -> {} // handled at unlock time
                 }
             }
         }
 
-        return new SkillEffectCache(spellDmg, spellCd, catDmg, catCd, abilities);
+        return new SkillEffectCache(spellDmg, spellCd, catDmg, catCd, abilities, gameplay);
     }
 
     /**
@@ -95,10 +101,17 @@ public final class SkillEffectCache {
     }
 
     /**
+     * Returns the summed value of a scalar gameplay bonus, or {@code 0} if none applies.
+     */
+    public float getGameplayBonus(GameplayStat stat) {
+        return gameplayBonuses.getOrDefault(stat, 0f);
+    }
+
+    /**
      * Empty cache with no bonuses.
      */
     public static final SkillEffectCache EMPTY = new SkillEffectCache(
             Collections.emptyMap(), Collections.emptyMap(),
             Collections.emptyMap(), Collections.emptyMap(),
-            Collections.emptySet());
+            Collections.emptySet(), Collections.emptyMap());
 }

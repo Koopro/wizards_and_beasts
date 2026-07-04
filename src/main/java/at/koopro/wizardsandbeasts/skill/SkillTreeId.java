@@ -13,6 +13,7 @@ public enum SkillTreeId {
     MAGIZOOLOGY("magizoology", "Magizoology", 0xFF44CC88, Audience.WIZARD),
     WANDLORE("wandlore", "Wandlore", 0xFFBB8833, Audience.WIZARD),
     HERBOLOGY("herbology", "Herbology", 0xFF44BB44, Audience.WIZARD),
+    ALCHEMY("alchemy", "Alchemy", 0xFF66CCCC, Audience.WIZARD),
     // Goblin tree — Gringotts guild craft.
     GOBLIN_CRAFT("goblin_craft", "Guild Ledger", 0xFFD4AF37, Audience.GOBLIN),
     // House-elf tree — bound elf-magic.

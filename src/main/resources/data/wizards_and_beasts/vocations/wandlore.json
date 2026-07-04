@@ -1,0 +1,17 @@
+{
+  "id": "wizards_and_beasts:wandlore",
+  "tree": "wandlore",
+  "displayName": "vocation.wizards_and_beasts.wandlore.name",
+  "description": "vocation.wizards_and_beasts.wandlore.desc",
+  "pillar": "vocation.wizards_and_beasts.wandlore.pillar",
+  "foundationMaxTier": 1,
+  "commitmentEffects": [
+    {
+      "type": "attribute_boost",
+      "attribute": "wizards_and_beasts:wand_affinity",
+      "value": 0.1,
+      "operation": "add_value",
+      "modifier_id": "wizards_and_beasts:vocation/wandlore/wand_affinity"
+    }
+  ]
+}

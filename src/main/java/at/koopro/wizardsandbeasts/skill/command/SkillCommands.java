@@ -1,6 +1,8 @@
 package at.koopro.wizardsandbeasts.skill.command;
 
 import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
+import at.koopro.wizardsandbeasts.module.Module;
+import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.skill.data.PlayerSkillData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.skill.Skill;
@@ -8,19 +10,27 @@ import at.koopro.wizardsandbeasts.skill.SkillEffect;
 import at.koopro.wizardsandbeasts.skill.SkillTreeId;
 import at.koopro.wizardsandbeasts.skill.SkillTrees;
 import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
+import at.koopro.wizardsandbeasts.skill.vocation.VocationDefinition;
+import at.koopro.wizardsandbeasts.skill.vocation.VocationHelper;
+import at.koopro.wizardsandbeasts.skill.vocation.VocationManager;
+import at.koopro.wizardsandbeasts.skill.vocation.VocationRegistry;
 import at.koopro.wizardsandbeasts.sync.PlayerStateSyncService;
 import at.koopro.wizardsandbeasts.util.ChatHelper;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public final class SkillCommands {
 
@@ -69,6 +79,8 @@ public final class SkillCommands {
                                         .executes(ctx -> resetSkill(
                                                 EntityArgument.getPlayer(ctx, "player"),
                                                 StringArgumentType.getString(ctx, "skill"))))))
+                .then(Commands.literal("respec")
+                        .executes(ctx -> respec(ctx.getSource().getPlayerOrException())))
                 .then(Commands.literal("info")
                         .then(Commands.argument("skill", StringArgumentType.word())
                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
@@ -83,7 +95,144 @@ public final class SkillCommands {
                                         Arrays.stream(SkillTreeId.values()).map(SkillTreeId::getId), builder))
                                 .executes(ctx -> listTree(
                                         ctx.getSource().getPlayerOrException(),
-                                        StringArgumentType.getString(ctx, "tree")))));
+                                        StringArgumentType.getString(ctx, "tree")))))
+                .then(vocationCommand());
+    }
+
+    // ── Vocation specialization sub-tree (Skill System v2) ──
+
+    private static LiteralArgumentBuilder<CommandSourceStack> vocationCommand() {
+        return Commands.literal("vocation")
+                .then(Commands.literal("info")
+                        .executes(ctx -> vocationInfo(ctx.getSource().getPlayerOrException())))
+                .then(Commands.literal("set")
+                        .then(Commands.literal("primary")
+                                .then(Commands.argument("vocation", StringArgumentType.string())
+                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
+                                                vocationIdSuggestions(), builder))
+                                        .executes(ctx -> setVocation(
+                                                ctx.getSource().getPlayerOrException(),
+                                                VocationManager.Slot.PRIMARY,
+                                                StringArgumentType.getString(ctx, "vocation")))))
+                        .then(Commands.literal("secondary")
+                                .then(Commands.argument("vocation", StringArgumentType.string())
+                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
+                                                vocationIdSuggestions(), builder))
+                                        .executes(ctx -> setVocation(
+                                                ctx.getSource().getPlayerOrException(),
+                                                VocationManager.Slot.SECONDARY,
+                                                StringArgumentType.getString(ctx, "vocation"))))))
+                .then(Commands.literal("clear")
+                        .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                        .executes(ctx -> clearVocation(ctx.getSource().getPlayerOrException()))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> clearVocation(EntityArgument.getPlayer(ctx, "player")))));
+    }
+
+    private static Iterable<String> vocationIdSuggestions() {
+        return VocationRegistry.all().stream().map(def -> def.id().toString()).toList();
+    }
+
+    private static Identifier parseVocationId(String raw) {
+        int colon = raw.indexOf(':');
+        if (colon < 0) {
+            return Identifier.fromNamespaceAndPath("wizards_and_beasts", raw);
+        }
+        return Identifier.fromNamespaceAndPath(raw.substring(0, colon), raw.substring(colon + 1));
+    }
+
+    private static final String L = "command.wizards_and_beasts.skill.vocation.";
+
+    private static boolean requireSkillTrees(ServerPlayer player) {
+        if (!ModuleManager.isEnabled(Module.SKILL_TREES)) {
+            ChatHelper.send(player, Component.translatable(L + "module_disabled").withStyle(ChatFormatting.RED));
+            return false;
+        }
+        return true;
+    }
+
+    private static int vocationInfo(ServerPlayer player) {
+        if (!requireSkillTrees(player)) {
+            return 0;
+        }
+        ChatHelper.send(player, Component.translatable(L + "info.header").withStyle(ChatFormatting.GOLD));
+
+        printSlot(player, L + "info.primary", VocationManager.Slot.PRIMARY);
+        printSlot(player, L + "info.secondary", VocationManager.Slot.SECONDARY);
+
+        // Available Mastery: the committed primary (full) and the secondary's first Mastery tier.
+        VocationDefinition primary = VocationManager.committed(player, VocationManager.Slot.PRIMARY);
+        if (primary != null) {
+            ChatHelper.send(player, Component.translatable(L + "info.mastery_full", primary.displayName())
+                    .withStyle(ChatFormatting.GRAY));
+        }
+        VocationDefinition secondary = VocationManager.committed(player, VocationManager.Slot.SECONDARY);
+        if (secondary != null) {
+            ChatHelper.send(player, Component.translatable(L + "info.mastery_secondary", secondary.displayName())
+                    .withStyle(ChatFormatting.GRAY));
+        }
+
+        // Foreclosed: any Vocation opposed to a committed slot.
+        Optional<Identifier> pp = VocationHelper.getPrimary(player);
+        Optional<Identifier> ps = VocationHelper.getSecondary(player);
+        for (VocationDefinition def : VocationRegistry.all()) {
+            boolean opposed = pp.map(id -> VocationRegistry.areOpposed(def.id(), id)).orElse(false)
+                    || ps.map(id -> VocationRegistry.areOpposed(def.id(), id)).orElse(false);
+            if (opposed) {
+                ChatHelper.send(player, Component.translatable(L + "info.foreclosed_opposed", def.displayName())
+                        .withStyle(ChatFormatting.RED));
+            }
+        }
+        return 1;
+    }
+
+    private static void printSlot(ServerPlayer player, String labelKey, VocationManager.Slot slot) {
+        VocationDefinition committed = VocationManager.committed(player, slot);
+        Component value = committed != null
+                ? committed.displayName()
+                : Component.translatable(L + "info.none");
+        ChatHelper.send(player, Component.translatable(labelKey, value).withStyle(ChatFormatting.GRAY));
+    }
+
+    private static int setVocation(ServerPlayer player, VocationManager.Slot slot, String rawId) {
+        if (!requireSkillTrees(player)) {
+            return 0;
+        }
+        Identifier id = parseVocationId(rawId);
+        VocationManager.CommitResult result = VocationManager.commit(player, slot, id);
+        String slotKey = slot == VocationManager.Slot.PRIMARY ? "primary" : "secondary";
+        switch (result) {
+            case OK -> {
+                ChatHelper.send(player, Component.translatable(L + "set." + slotKey + "_ok", localizedOrId(id))
+                        .withStyle(ChatFormatting.GREEN));
+                return 1;
+            }
+            case MODULE_DISABLED -> ChatHelper.send(player,
+                    Component.translatable(L + "module_disabled").withStyle(ChatFormatting.RED));
+            case UNKNOWN_VOCATION -> ChatHelper.send(player,
+                    Component.translatable(L + "set.unknown", id.toString()).withStyle(ChatFormatting.RED));
+            case SAME_AS_OTHER_SLOT -> ChatHelper.send(player,
+                    Component.translatable(L + "set.same_slot").withStyle(ChatFormatting.RED));
+            case OPPOSED -> ChatHelper.send(player,
+                    Component.translatable(L + "set.opposed").withStyle(ChatFormatting.RED));
+            case DARK_ARTS_DISABLED -> ChatHelper.send(player,
+                    Component.translatable(L + "set.dark_arts_disabled").withStyle(ChatFormatting.RED));
+            case RESPEC_REQUIRED -> ChatHelper.send(player,
+                    Component.translatable(L + "set.respec_required").withStyle(ChatFormatting.RED));
+        }
+        return 0;
+    }
+
+    private static Component localizedOrId(Identifier id) {
+        VocationDefinition def = VocationRegistry.get(id);
+        return def != null ? def.displayName() : Component.literal(id.toString());
+    }
+
+    private static int clearVocation(ServerPlayer player) {
+        VocationManager.clear(player);
+        ChatHelper.send(player, Component.translatable(L + "clear.ok", player.getName())
+                .withStyle(ChatFormatting.GREEN));
+        return 1;
     }
 
     private static int tryUnlockSkill(ServerPlayer player, String skillId) {
@@ -147,6 +296,20 @@ public final class SkillCommands {
         SkillSystemAPI.reconcileDerivedEffects(player);
         PlayerStateSyncService.syncSkills(player);
         ChatHelper.sendSuccess(player, "All skills reset. Points refunded.");
+        return 1;
+    }
+
+    /** Self-serve respec: any player may refund and clear their own skills. */
+    private static int respec(ServerPlayer player) {
+        PlayerSkillData data = player.getData(ModAttachments.SKILL_DATA.get());
+        if (data.getUnlockedSkills().isEmpty()) {
+            ChatHelper.sendError(player, "You have no skills to respec.");
+            return 0;
+        }
+        data.resetAll();
+        SkillSystemAPI.reconcileDerivedEffects(player);
+        PlayerStateSyncService.syncSkills(player);
+        ChatHelper.sendSuccess(player, "Skills respecced — all points refunded.");
         return 1;
     }
 
@@ -276,6 +439,9 @@ public final class SkillCommands {
             case SkillEffect.PassiveAttribute e ->
                     String.format("+%.0f %s per level", e.amountPerLevel(), e.attributeId());
             case SkillEffect.UnlockAbility e -> "Unlocks ability: " + e.abilityId();
+            case SkillEffect.GameplayBonus e ->
+                    String.format("+%.0f%% %s per level", e.perLevel() * 100,
+                            e.stat().name().replace('_', ' ').toLowerCase());
         };
     }
 }

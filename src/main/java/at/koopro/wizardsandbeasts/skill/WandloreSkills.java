@@ -46,6 +46,14 @@ final class WandloreSkills {
             .position(2, 0)
             .build());
 
+    static final Skill ARCANE_RESERVE = SkillTrees.register(Skill.builder("arcane_reserve", "Arcane Reserve")
+            .tree(SkillTreeId.WANDLORE).maxLevel(2).cost(2)
+            .description("Deeper wandwork eases utility casting. -8% utility cooldown per level.")
+            .prerequisite("wand_precision")
+            .effect(new SkillEffect.CategoryCooldownReduction(SpellCategory.UTILITY, 0.08f))
+            .position(2, 2)
+            .build());
+
     static final Skill WAND_MASTERY = SkillTrees.register(Skill.builder("wand_mastery", "Wand Mastery")
             .tree(SkillTreeId.WANDLORE).cost(4)
             .description("Achieve true mastery over your wand.")

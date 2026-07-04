@@ -20,6 +20,10 @@ public final class ModNetworkSkills {
                 SkillBonusSyncS2CPayload.TYPE,
                 SkillBonusSyncS2CPayload.STREAM_CODEC,
                 ClientPayloadHandlers::handleSkillBonusSync);
+        registrar.playToClient(
+                VocationDataSyncS2CPayload.TYPE,
+                VocationDataSyncS2CPayload.STREAM_CODEC,
+                ClientPayloadHandlers::handleVocationDataSync);
 
         registrar.playToServer(
                 SkillUnlockC2SPayload.TYPE,

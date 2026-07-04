@@ -28,4 +28,7 @@ public sealed interface SkillEffect {
 
     /** Unlocks a named ability flag (checked via SkillEffectCache.hasAbility). */
     record UnlockAbility(String abilityId) implements SkillEffect {}
+
+    /** Adds a per-level scalar gameplay bonus (e.g. beast resistance, harvest luck). */
+    record GameplayBonus(GameplayStat stat, float perLevel) implements SkillEffect {}
 }

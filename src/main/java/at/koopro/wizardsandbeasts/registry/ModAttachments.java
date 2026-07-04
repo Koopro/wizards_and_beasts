@@ -14,6 +14,7 @@ import at.koopro.wizardsandbeasts.owl.data.PlayerOWLData;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerProfessionData;
 import at.koopro.wizardsandbeasts.memory.PlayerMemoryData;
 import at.koopro.wizardsandbeasts.skill.data.PlayerSkillData;
+import at.koopro.wizardsandbeasts.skill.vocation.PlayerVocationData;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.currency.vault.PlayerVaultData;
@@ -52,6 +53,13 @@ public class ModAttachments {
 
     public static final Supplier<AttachmentType<PlayerSkillData>> SKILL_DATA =
             registerData("skill_data", PlayerSkillData::new);
+
+    /** Committed Vocation slots — separate from SKILL_DATA; absent on existing players → both empty. */
+    public static final Supplier<AttachmentType<PlayerVocationData>> VOCATION_DATA =
+            ATTACHMENTS.register("vocation_data", () -> AttachmentType.builder(() -> PlayerVocationData.EMPTY)
+                    .serialize(PlayerVocationData.CODEC.fieldOf("data"))
+                    .copyOnDeath()
+                    .build());
 
     public static final Supplier<AttachmentType<PlayerSkillBonusData>> SKILL_BONUS_DATA =
             ATTACHMENTS.register("skill_bonus_data", () -> AttachmentType.builder(() -> PlayerSkillBonusData.DEFAULT)

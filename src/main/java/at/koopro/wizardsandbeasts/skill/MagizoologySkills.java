@@ -26,7 +26,7 @@ final class MagizoologySkills {
             .tree(SkillTreeId.MAGIZOOLOGY).maxLevel(2).cost(2)
             .description("Creatures deal less damage to you. -10% per level.")
             .prerequisite("creature_knowledge")
-            .effect(new SkillEffect.UnlockAbility("beast_handler"))
+            .effect(new SkillEffect.GameplayBonus(GameplayStat.BEAST_DAMAGE_RESISTANCE, 0.10f))
             .position(1, 2)
             .build());
 
@@ -37,6 +37,22 @@ final class MagizoologySkills {
             .prerequisite("beast_handler")
             .effect(new SkillEffect.PassiveAttribute("max_health", 2.0))
             .position(2, 1)
+            .build());
+
+    static final Skill DRAGON_TAMER = SkillTrees.register(Skill.builder("dragon_tamer", "Dragon Tamer")
+            .tree(SkillTreeId.MAGIZOOLOGY).maxLevel(2).cost(3)
+            .description("Hard-won composure around the largest beasts. -10% creature damage per level.")
+            .prerequisite("beast_handler")
+            .effect(new SkillEffect.GameplayBonus(GameplayStat.BEAST_DAMAGE_RESISTANCE, 0.10f))
+            .position(2, 2)
+            .build());
+
+    static final Skill KEEPER_VIGOR = SkillTrees.register(Skill.builder("keeper_vigor", "Keeper's Hide")
+            .tree(SkillTreeId.MAGIZOOLOGY).maxLevel(2).cost(2)
+            .description("A handler's toughened hide. +1 armor per level.")
+            .prerequisite("creature_bond")
+            .effect(new SkillEffect.PassiveAttribute("armor", 1.0))
+            .position(2, 0)
             .build());
 
     static final Skill ANIMAGUS_STUDY = SkillTrees.register(Skill.builder("animagus_study", "Animagus Study")

@@ -1,0 +1,15 @@
+{
+  "id": "wizards_and_beasts:dark_arts",
+  "tree": "dark_arts",
+  "displayName": "vocation.wizards_and_beasts.dark_arts.name",
+  "description": "vocation.wizards_and_beasts.dark_arts.desc",
+  "pillar": "vocation.wizards_and_beasts.dark_arts.pillar",
+  "foundationMaxTier": 1,
+  "oppositions": [
+    "wizards_and_beasts:healer"
+  ],
+  "grantedAbilities": [
+    "curse_power",
+    "dark_corruption_accrual"
+  ]
+}

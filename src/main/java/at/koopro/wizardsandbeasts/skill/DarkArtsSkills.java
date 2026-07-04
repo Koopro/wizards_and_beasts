@@ -49,6 +49,22 @@ final class DarkArtsSkills {
             .position(2, 2)
             .build());
 
+    static final Skill LEGILIMENCY = SkillTrees.register(Skill.builder("legilimency", "Legilimency")
+            .tree(SkillTreeId.DARK_ARTS).maxLevel(2).cost(2)
+            .description("Pierce the mind's defenses. +5% Dark Arts damage per level.")
+            .prerequisite("dark_knowledge")
+            .effect(new SkillEffect.CategoryDamageBonus(SpellCategory.DARK_ARTS, 0.05f))
+            .position(1, 1)
+            .build());
+
+    static final Skill CURSE_MASTERY = SkillTrees.register(Skill.builder("curse_mastery", "Curse Mastery")
+            .tree(SkillTreeId.DARK_ARTS).maxLevel(2).cost(3)
+            .description("Curses come quicker to a hardened mind. -8% Dark Arts cooldown per level.")
+            .prerequisite("dark_resilience")
+            .effect(new SkillEffect.CategoryCooldownReduction(SpellCategory.DARK_ARTS, 0.08f))
+            .position(3, 2)
+            .build());
+
     static final Skill AVADA_KEDAVRA_UNLOCK = SkillTrees.register(Skill.builder("avada_kedavra_unlock", "Killing Curse Mastery")
             .tree(SkillTreeId.DARK_ARTS).cost(6)
             .description("Pursue forbidden mastery of lethal dark-arts channeling.")

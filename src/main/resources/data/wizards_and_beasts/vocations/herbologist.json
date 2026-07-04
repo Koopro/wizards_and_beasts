@@ -1,0 +1,11 @@
+{
+  "id": "wizards_and_beasts:herbologist",
+  "tree": "herbology",
+  "displayName": "vocation.wizards_and_beasts.herbologist.name",
+  "description": "vocation.wizards_and_beasts.herbologist.desc",
+  "pillar": "vocation.wizards_and_beasts.herbologist.pillar",
+  "foundationMaxTier": 1,
+  "grantedAbilities": [
+    "crop_yield"
+  ]
+}

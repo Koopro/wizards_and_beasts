@@ -2,6 +2,8 @@ package at.koopro.wizardsandbeasts.entity.niffler.ai;
 
 import at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper;
 import at.koopro.wizardsandbeasts.entity.niffler.NifflerEntity;
+import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -88,10 +90,17 @@ public class NifflerStealFromPlayerGoal extends Goal {
     private Player findNearestPlayerWithCoins() {
         AABB area = niffler.getBoundingBox().inflate(stealRange + 4);
         List<Player> players = niffler.level().getEntitiesOfClass(Player.class, area,
-                player -> player.isAlive() && !player.isCreative() && !player.isSpectator() && hasCoins(player));
+                player -> player.isAlive() && !player.isCreative() && !player.isSpectator()
+                        && !isNifflerFriend(player) && hasCoins(player));
         return players.stream()
                 .min(Comparator.comparingDouble(niffler::distanceToSqr))
                 .orElse(null);
+    }
+
+    /** Magizoology's "Niffler Friend" node: nifflers won't pickpocket a known friend. */
+    private boolean isNifflerFriend(Player player) {
+        return player instanceof ServerPlayer serverPlayer
+                && SkillSystemAPI.hasAbility(serverPlayer, "niffler_friend");
     }
 
     private boolean hasCoins(Player player) {

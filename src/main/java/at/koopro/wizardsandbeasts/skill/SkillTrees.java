@@ -37,6 +37,8 @@ public final class SkillTrees {
     public static final Skill DARK_DAMAGE = DarkArtsSkills.DARK_DAMAGE;
     public static final Skill IMPERIO_UNLOCK = DarkArtsSkills.IMPERIO_UNLOCK;
     public static final Skill DARK_RESILIENCE = DarkArtsSkills.DARK_RESILIENCE;
+    public static final Skill LEGILIMENCY = DarkArtsSkills.LEGILIMENCY;
+    public static final Skill CURSE_MASTERY = DarkArtsSkills.CURSE_MASTERY;
     public static final Skill AVADA_KEDAVRA_UNLOCK = DarkArtsSkills.AVADA_KEDAVRA_UNLOCK;
 
     // Wandlore
@@ -44,13 +46,17 @@ public final class SkillTrees {
     public static final Skill QUICK_CAST = WandloreSkills.QUICK_CAST;
     public static final Skill WAND_PRECISION = WandloreSkills.WAND_PRECISION;
     public static final Skill SPELL_EFFICIENCY = WandloreSkills.SPELL_EFFICIENCY;
+    public static final Skill ARCANE_RESERVE = WandloreSkills.ARCANE_RESERVE;
     public static final Skill WAND_MASTERY = WandloreSkills.WAND_MASTERY;
+    public static final Skill APPARITION_TRAINING = WandloreSkills.APPARITION_TRAINING;
 
     // Magizoology
     public static final Skill CREATURE_KNOWLEDGE = MagizoologySkills.CREATURE_KNOWLEDGE;
     public static final Skill NIFFLER_FRIEND = MagizoologySkills.NIFFLER_FRIEND;
     public static final Skill BEAST_HANDLER = MagizoologySkills.BEAST_HANDLER;
     public static final Skill CREATURE_BOND = MagizoologySkills.CREATURE_BOND;
+    public static final Skill KEEPER_VIGOR = MagizoologySkills.KEEPER_VIGOR;
+    public static final Skill DRAGON_TAMER = MagizoologySkills.DRAGON_TAMER;
     public static final Skill ANIMAGUS_STUDY = MagizoologySkills.ANIMAGUS_STUDY;
 
     // Herbology
@@ -58,6 +64,15 @@ public final class SkillTrees {
     public static final Skill POTION_POTENCY = HerbologySkills.POTION_POTENCY;
     public static final Skill HARVEST_BOUNTY = HerbologySkills.HARVEST_BOUNTY;
     public static final Skill NATURAL_REMEDY = HerbologySkills.NATURAL_REMEDY;
+    public static final Skill BOUNTIFUL_HARVEST = HerbologySkills.BOUNTIFUL_HARVEST;
+    public static final Skill HERBAL_VITALITY = HerbologySkills.HERBAL_VITALITY;
+
+    // Alchemy
+    public static final Skill ALCHEMICAL_VIGOR = AlchemySkills.ALCHEMICAL_VIGOR;
+    public static final Skill SWIFT_BREWER = AlchemySkills.SWIFT_BREWER;
+    public static final Skill HARDENED_SKIN = AlchemySkills.HARDENED_SKIN;
+    public static final Skill TRANSMUTE_FOCUS = AlchemySkills.TRANSMUTE_FOCUS;
+    public static final Skill PHILOSOPHERS_STONE = AlchemySkills.PHILOSOPHERS_STONE;
 
     // Goblin — Guild Ledger
     public static final Skill GOBLIN_APPRAISAL = GoblinSkills.APPRAISAL;
