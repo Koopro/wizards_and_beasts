@@ -79,7 +79,7 @@ public record BroomDefinition(
             }
         });
         DataResult<Float> maxSpeed = readRangedFloat(dynamic, "maxSpeed", 0.1f, 2.0f);
-        DataResult<Float> acceleration = readRangedFloat(dynamic, "acceleration", 0.005f, 0.05f);
+        DataResult<Float> acceleration = readRangedFloat(dynamic, "acceleration", 0.005f, 0.15f);
         DataResult<Float> deceleration = readRangedFloat(dynamic, "deceleration", 0.005f, 0.05f);
         DataResult<Float> boostMultiplier = readRangedFloat(dynamic, "boostMultiplier", 1.0f, 3.0f);
         DataResult<Integer> boostDurationTicks = readRangedInt(dynamic, "boostDurationTicks", 20, 200);
