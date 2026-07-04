@@ -1,21 +1,34 @@
 {
-  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:blast_ended_skrewt",
   "bodyPlan": "ARTHROPOD_MULTILEG",
   "locomotion": "GROUND",
-  "temperament": "HOSTILE",
+  "temperament": "NEUTRAL",
   "width": 1.7,
   "height": 1.9,
-  "maxHealth": 40.0,
+  "maxHealth": 29.0,
   "movementSpeed": 0.23,
   "flyingSpeed": 0.0,
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/blast_ended_skrewt",
   "texture": "wizards_and_beasts:textures/entity/blast_ended_skrewt.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/blast_ended_skrewt.animation.json",
-  "attackDamage": 6.0,
+  "attackDamage": 5.0,
   "traits": [
     "FIRE_ATTACK",
     "EXPLODE_ON_DEATH"
+  ],
+  "abilities": [
+    {
+      "type": "ranged_hex",
+      "range": 8.0,
+      "damage": 3.0,
+      "cooldown_ticks": 70,
+      "particle": "flame"
+    },
+    {
+      "type": "thorns",
+      "reflect_fraction": 0.4
+    }
   ]
 }

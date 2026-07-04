@@ -1,12 +1,12 @@
 {
-  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:puffskein",
   "bodyPlan": "BLOB_SPHERE",
   "locomotion": "GROUND",
   "temperament": "PASSIVE",
   "width": 0.45,
   "height": 0.45,
-  "maxHealth": 4.0,
+  "maxHealth": 2.0,
   "movementSpeed": 0.28,
   "flyingSpeed": 0.0,
   "followRange": 16.0,
@@ -14,5 +14,13 @@
   "texture": "wizards_and_beasts:textures/entity/puffskein.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/puffskein.animation.json",
   "attackDamage": 0.0,
-  "traits": []
+  "traits": [],
+  "abilities": [
+    {
+      "type": "bioluminescence",
+      "particle": "happy",
+      "interval": 12,
+      "glow_self": false
+    }
+  ]
 }

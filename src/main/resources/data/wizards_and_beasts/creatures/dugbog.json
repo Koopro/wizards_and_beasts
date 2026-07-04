@@ -1,20 +1,49 @@
 {
-  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:dugbog",
   "bodyPlan": "QUADRUPED",
   "locomotion": "GROUND",
   "temperament": "HOSTILE",
   "width": 0.95,
   "height": 1.25,
-  "maxHealth": 16.0,
+  "maxHealth": 13.0,
   "movementSpeed": 0.25,
   "flyingSpeed": 0.0,
-  "followRange": 16.0,
+  "followRange": 18.0,
   "model": "wizards_and_beasts:entity/dugbog",
   "texture": "wizards_and_beasts:textures/entity/dugbog.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/dugbog.animation.json",
   "attackDamage": 4.0,
   "traits": [
     "AMPHIBIOUS"
+  ],
+  "abilities": [
+    {
+      "type": "water_affinity",
+      "breathe_underwater": true,
+      "regen_in_water": 1.0,
+      "requires_water": false,
+      "seek_water_when_dry": false,
+      "slow_on_land": false,
+      "bubble_particles": false
+    },
+    {
+      "type": "leap",
+      "leap_velocity": 0.4
+    },
+    {
+      "type": "status_on_hit",
+      "effects": [
+        {
+          "effect": "minecraft:weakness",
+          "amplifier": 0,
+          "duration_ticks": 100
+        }
+      ]
+    },
+    {
+      "type": "camouflage",
+      "reveal_ticks": 60
+    }
   ]
 }

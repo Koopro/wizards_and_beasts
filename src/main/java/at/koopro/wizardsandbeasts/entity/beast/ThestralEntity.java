@@ -14,6 +14,7 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import software.bernie.geckolib.animatable.manager.AnimatableManager;
+import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.animation.RawAnimation;
 
 /**
@@ -25,6 +26,7 @@ public class ThestralEntity extends GeoEntityBase {
 
     private static final RawAnimation IDLE_ANIM = AnimHelper.loop("thestral", "idle");
     private static final RawAnimation WALK_ANIM = AnimHelper.loop("thestral", "walk");
+    private static final RawAnimation FLY_ANIM = AnimHelper.loop("thestral", "fly");
 
     public ThestralEntity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
@@ -47,6 +49,11 @@ public class ThestralEntity extends GeoEntityBase {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(AnimHelper.movementController("thestral", 5, IDLE_ANIM, WALK_ANIM));
+        controllers.add(new AnimationController<ThestralEntity>("thestral_movement", 5, test -> {
+            if (!onGround()) {
+                return test.setAndContinue(FLY_ANIM);
+            }
+            return test.setAndContinue(test.isMoving() ? WALK_ANIM : IDLE_ANIM);
+        }));
     }
 }

@@ -7,6 +7,7 @@ import net.minecraft.world.entity.Entity;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.model.DefaultedEntityGeoModel;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
+import software.bernie.geckolib.renderer.layer.builtin.AutoGlowingGeoLayer;
 
 /**
  * Factory for simple GeoEntityRenderers that use DefaultedEntityGeoModel
@@ -30,5 +31,20 @@ public final class GeoRendererHelper {
         return context -> new GeoEntityRenderer(context,
                 new DefaultedEntityGeoModel<>(
                         Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, modelName)));
+    }
+
+    /**
+     * Like {@link #simple}, but adds an {@link AutoGlowingGeoLayer} so emissive pixels
+     * (from {@code <modelName>_glowmask.png}) glow full-bright. Used for the Thestral's eyes.
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static <T extends Entity & GeoEntity> EntityRendererProvider<T> withGlow(String modelName) {
+        return context -> {
+            GeoEntityRenderer renderer = new GeoEntityRenderer(context,
+                    new DefaultedEntityGeoModel<>(
+                            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, modelName)));
+            renderer.withRenderLayer(new AutoGlowingGeoLayer(renderer));
+            return renderer;
+        };
     }
 }

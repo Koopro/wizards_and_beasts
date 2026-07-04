@@ -1,23 +1,40 @@
 {
-  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:antipodean_opaleye",
   "bodyPlan": "WINGED_QUADRUPED",
   "locomotion": "FLYING",
-  "temperament": "HOSTILE",
+  "temperament": "NEUTRAL",
   "width": 2.7,
   "height": 2.9,
-  "maxHealth": 90.0,
+  "maxHealth": 64.0,
   "movementSpeed": 0.2,
   "flyingSpeed": 0.5,
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/antipodean_opaleye",
   "texture": "wizards_and_beasts:textures/entity/antipodean_opaleye.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/antipodean_opaleye.animation.json",
-  "attackDamage": 8.0,
+  "attackDamage": 7.0,
   "traits": [
     "FIRE_IMMUNE",
     "FIRE_ATTACK",
-    "FIRE_BREATH",
     "KNOCKBACK"
+  ],
+  "dragon": {
+    "fire_range": 10,
+    "fire_color": 15087942,
+    "flame_shape": "STREAM",
+    "block_effect": "IGNITE",
+    "rideable": false,
+    "scale": 1.4
+  },
+  "_dragon_note": "fire_color=canon; fire_range=design-extrapolation (not canon). Ministry classification XXXXX (uniform). Breath ships via DragonEntity, not the FIRE_BREATH trait.",
+  "abilities": [
+    {
+      "type": "enrage",
+      "health_fraction": 0.4,
+      "speed_amplifier": 1,
+      "strength_amplifier": 2,
+      "duration_ticks": 300
+    }
   ]
 }

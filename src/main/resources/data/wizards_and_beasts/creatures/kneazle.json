@@ -1,18 +1,38 @@
 {
-  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:kneazle",
   "bodyPlan": "QUADRUPED",
   "locomotion": "GROUND",
   "temperament": "NEUTRAL",
   "width": 0.65,
   "height": 0.75,
-  "maxHealth": 8.0,
-  "movementSpeed": 0.26,
+  "maxHealth": 6.0,
+  "movementSpeed": 0.299,
   "flyingSpeed": 0.0,
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/kneazle",
   "texture": "wizards_and_beasts:textures/entity/kneazle.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/kneazle.animation.json",
   "attackDamage": 3.0,
-  "traits": []
+  "traits": [],
+  "abilities": [
+    {
+      "type": "leap",
+      "leap_velocity": 0.5
+    },
+    {
+      "type": "status_on_hit",
+      "effects": [
+        {
+          "effect": "minecraft:weakness",
+          "amplifier": 0,
+          "duration_ticks": 80
+        }
+      ]
+    },
+    {
+      "type": "danger_sense",
+      "radius": 12.0
+    }
+  ]
 }

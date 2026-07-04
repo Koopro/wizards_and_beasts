@@ -1,18 +1,50 @@
 {
-  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:wampus_cat",
   "bodyPlan": "QUADRUPED",
   "locomotion": "GROUND",
   "temperament": "HOSTILE",
   "width": 1.7,
   "height": 1.9,
-  "maxHealth": 40.0,
-  "movementSpeed": 0.23,
+  "maxHealth": 61.0,
+  "movementSpeed": 0.276,
   "flyingSpeed": 0.0,
-  "followRange": 16.0,
+  "followRange": 18.0,
   "model": "wizards_and_beasts:entity/wampus_cat",
   "texture": "wizards_and_beasts:textures/entity/wampus_cat.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/wampus_cat.animation.json",
-  "attackDamage": 5.0,
-  "traits": []
+  "attackDamage": 12.0,
+  "traits": [],
+  "abilities": [
+    {
+      "type": "leap",
+      "leap_velocity": 0.3
+    },
+    {
+      "type": "status_on_hit",
+      "effects": [
+        {
+          "effect": "minecraft:weakness",
+          "amplifier": 1,
+          "duration_ticks": 80
+        }
+      ]
+    },
+    {
+      "type": "enrage",
+      "health_fraction": 0.4,
+      "speed_amplifier": 1,
+      "strength_amplifier": 2,
+      "duration_ticks": 300
+    },
+    {
+      "type": "frenzy",
+      "max_stacks": 2,
+      "decay_ticks": 70
+    },
+    {
+      "type": "damage_reduction",
+      "amplifier": 1
+    }
+  ]
 }

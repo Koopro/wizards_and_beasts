@@ -1,18 +1,34 @@
 {
-  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:snallygaster",
   "bodyPlan": "WINGED_QUADRUPED",
   "locomotion": "FLYING",
-  "temperament": "HOSTILE",
+  "temperament": "NEUTRAL",
   "width": 1.7,
   "height": 1.9,
-  "maxHealth": 40.0,
+  "maxHealth": 47.0,
   "movementSpeed": 0.23,
   "flyingSpeed": 0.5,
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/snallygaster",
   "texture": "wizards_and_beasts:textures/entity/snallygaster.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/snallygaster.animation.json",
-  "attackDamage": 6.0,
-  "traits": []
+  "attackDamage": 9.0,
+  "traits": [
+    "FIRE_ATTACK",
+    "CHARGE"
+  ],
+  "abilities": [
+    {
+      "type": "ranged_hex",
+      "range": 12.0,
+      "damage": 4.0,
+      "cooldown_ticks": 60,
+      "particle": "smoke"
+    },
+    {
+      "type": "leap",
+      "leap_velocity": 0.3
+    }
+  ]
 }

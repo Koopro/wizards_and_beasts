@@ -1,18 +1,42 @@
 {
-  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:red_cap",
   "bodyPlan": "BIPED_HUMANOID",
   "locomotion": "GROUND",
   "temperament": "HOSTILE",
   "width": 0.65,
   "height": 0.75,
-  "maxHealth": 8.0,
+  "maxHealth": 6.0,
   "movementSpeed": 0.26,
   "flyingSpeed": 0.0,
-  "followRange": 16.0,
+  "followRange": 18.0,
   "model": "wizards_and_beasts:entity/red_cap",
   "texture": "wizards_and_beasts:textures/entity/red_cap.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/red_cap.animation.json",
-  "attackDamage": 4.0,
-  "traits": []
+  "attackDamage": 3.0,
+  "traits": [],
+  "abilities": [
+    {
+      "type": "status_on_hit",
+      "effects": [
+        {
+          "effect": "minecraft:wither",
+          "amplifier": 0,
+          "duration_ticks": 80
+        },
+        {
+          "effect": "minecraft:weakness",
+          "amplifier": 0,
+          "duration_ticks": 80
+        }
+      ]
+    },
+    {
+      "type": "enrage",
+      "health_fraction": 0.6,
+      "speed_amplifier": 2,
+      "strength_amplifier": 1,
+      "duration_ticks": 140
+    }
+  ]
 }

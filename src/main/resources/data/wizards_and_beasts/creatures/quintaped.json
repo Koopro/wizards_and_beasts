@@ -1,20 +1,44 @@
 {
-  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:quintaped",
   "bodyPlan": "ARTHROPOD_MULTILEG",
   "locomotion": "GROUND",
   "temperament": "HOSTILE",
   "width": 0.95,
   "height": 1.25,
-  "maxHealth": 16.0,
+  "maxHealth": 27.0,
   "movementSpeed": 0.25,
   "flyingSpeed": 0.0,
-  "followRange": 16.0,
+  "followRange": 18.0,
   "model": "wizards_and_beasts:entity/quintaped",
   "texture": "wizards_and_beasts:textures/entity/quintaped.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/quintaped.animation.json",
-  "attackDamage": 6.0,
+  "attackDamage": 11.0,
   "traits": [
-    "POISON_ATTACK"
+    "POISON_ATTACK",
+    "CHARGE",
+    "KNOCKBACK"
+  ],
+  "abilities": [
+    {
+      "type": "leap",
+      "leap_velocity": 0.4
+    },
+    {
+      "type": "enrage",
+      "health_fraction": 0.5,
+      "speed_amplifier": 1,
+      "strength_amplifier": 1,
+      "duration_ticks": 200
+    },
+    {
+      "type": "pack_tactics",
+      "radius": 8.0,
+      "max_amplifier": 2
+    },
+    {
+      "type": "spell_resist",
+      "resist_fraction": 0.4
+    }
   ]
 }

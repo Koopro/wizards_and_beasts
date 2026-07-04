@@ -1,18 +1,31 @@
 {
-  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:fwooper",
   "bodyPlan": "AVIAN",
   "locomotion": "FLYING",
   "temperament": "NEUTRAL",
   "width": 0.65,
   "height": 0.75,
-  "maxHealth": 8.0,
+  "maxHealth": 6.0,
   "movementSpeed": 0.26,
   "flyingSpeed": 0.5,
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/fwooper",
   "texture": "wizards_and_beasts:textures/entity/fwooper.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/fwooper.animation.json",
-  "attackDamage": 2.0,
-  "traits": []
+  "attackDamage": 3.0,
+  "traits": [],
+  "abilities": [
+    {
+      "type": "fwooper_song",
+      "radius": 8.0,
+      "duration_ticks": 100
+    },
+    {
+      "type": "bioluminescence",
+      "particle": "enchant",
+      "interval": 10,
+      "glow_self": false
+    }
+  ]
 }

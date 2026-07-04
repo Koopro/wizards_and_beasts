@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.creature.Locomotion;
+import at.koopro.wizardsandbeasts.entity.creature.DragonEntity;
 import at.koopro.wizardsandbeasts.entity.creature.GenericAquaticBeastEntity;
 import at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity;
 import at.koopro.wizardsandbeasts.entity.creature.GenericFlyingBeastEntity;
@@ -22,6 +23,7 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Data-configured generic creature roster. Mirrors the per-creature {@code CreatureDefinition} JSON
@@ -124,6 +126,16 @@ public final class ModCreatures {
             new Spec("quintaped", Locomotion.GROUND, 0.95f, 1.25f)
     );
 
+    /**
+     * The ten canonical dragon breeds. These bind to {@link DragonEntity} (shared fire/venom kit) instead
+     * of the plain {@link GenericFlyingBeastEntity}; they read their breath/venom tuning from the nested
+     * {@code dragon} block in their {@code CreatureDefinition}. Also drives the client renderer choice.
+     */
+    public static final Set<String> DRAGON_IDS = Set.of(
+            "antipodean_opaleye", "chinese_fireball", "common_welsh_green", "hebridean_black",
+            "hungarian_horntail", "norwegian_ridgeback", "peruvian_vipertooth", "romanian_longhorn",
+            "swedish_short_snout", "ukrainian_ironbelly");
+
     public static final Map<String, DeferredHolder<EntityType<?>, EntityType<GenericBeastEntity>>> ENTITIES =
             new LinkedHashMap<>();
     public static final Map<String, DeferredItem<SpawnEggItem>> SPAWN_EGGS = new LinkedHashMap<>();
@@ -134,7 +146,7 @@ public final class ModCreatures {
     public static void register() {
         for (Spec spec : MANIFEST) {
             DeferredHolder<EntityType<?>, EntityType<GenericBeastEntity>> holder =
-                    ModEntities.ENTITY_TYPES.register(spec.id(), () -> EntityType.Builder.of(factory(spec.loco()), MobCategory.CREATURE)
+                    ModEntities.ENTITY_TYPES.register(spec.id(), () -> EntityType.Builder.of(factory(spec), MobCategory.CREATURE)
                             .sized(spec.width(), spec.height())
                             .clientTrackingRange(10)
                             .updateInterval(3)
@@ -152,8 +164,11 @@ public final class ModCreatures {
         }
     }
 
-    private static EntityType.EntityFactory<GenericBeastEntity> factory(Locomotion loco) {
-        return switch (loco) {
+    private static EntityType.EntityFactory<GenericBeastEntity> factory(Spec spec) {
+        if (DRAGON_IDS.contains(spec.id())) {
+            return DragonEntity::new;
+        }
+        return switch (spec.loco()) {
             case FLYING -> GenericFlyingBeastEntity::new;
             case AQUATIC -> GenericAquaticBeastEntity::new;
             case SESSILE -> GenericSessileBeastEntity::new;

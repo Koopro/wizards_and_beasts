@@ -1,20 +1,33 @@
 {
-  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:tebo",
   "bodyPlan": "QUADRUPED",
   "locomotion": "GROUND",
   "temperament": "NEUTRAL",
   "width": 1.7,
   "height": 1.9,
-  "maxHealth": 40.0,
+  "maxHealth": 36.0,
   "movementSpeed": 0.23,
   "flyingSpeed": 0.0,
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/tebo",
   "texture": "wizards_and_beasts:textures/entity/tebo.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/tebo.animation.json",
-  "attackDamage": 5.0,
+  "attackDamage": 7.0,
   "traits": [
-    "CHARGE"
+    "FEARFUL"
+  ],
+  "abilities": [
+    {
+      "type": "camouflage",
+      "reveal_ticks": 60
+    },
+    {
+      "type": "enrage",
+      "health_fraction": 0.4,
+      "speed_amplifier": 1,
+      "strength_amplifier": 2,
+      "duration_ticks": 300
+    }
   ]
 }

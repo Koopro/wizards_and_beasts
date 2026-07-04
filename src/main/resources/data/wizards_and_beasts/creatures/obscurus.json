@@ -1,18 +1,56 @@
 {
-  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:obscurus",
   "bodyPlan": "BLOB_SPHERE",
   "locomotion": "FLYING",
   "temperament": "HOSTILE",
   "width": 0.95,
   "height": 1.25,
-  "maxHealth": 16.0,
+  "maxHealth": 21.0,
   "movementSpeed": 0.25,
   "flyingSpeed": 0.5,
-  "followRange": 16.0,
+  "followRange": 18.0,
   "model": "wizards_and_beasts:entity/obscurus",
   "texture": "wizards_and_beasts:textures/entity/obscurus.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/obscurus.animation.json",
-  "attackDamage": 6.0,
-  "traits": []
+  "attackDamage": 8.0,
+  "traits": [
+    "EXPLODE_ON_DEATH"
+  ],
+  "abilities": [
+    {
+      "type": "dread_aura",
+      "radius": 6.0,
+      "effects": [
+        {
+          "effect": "minecraft:darkness",
+          "amplifier": 0,
+          "duration_ticks": 100
+        },
+        {
+          "effect": "minecraft:slowness",
+          "amplifier": 0,
+          "duration_ticks": 100
+        }
+      ]
+    },
+    {
+      "type": "ranged_hex",
+      "range": 12.0,
+      "damage": 4.0,
+      "cooldown_ticks": 50,
+      "particle": "smoke"
+    },
+    {
+      "type": "enrage",
+      "health_fraction": 0.5,
+      "speed_amplifier": 1,
+      "strength_amplifier": 1,
+      "duration_ticks": 200
+    },
+    {
+      "type": "tint",
+      "color": "#3A2E55"
+    }
+  ]
 }

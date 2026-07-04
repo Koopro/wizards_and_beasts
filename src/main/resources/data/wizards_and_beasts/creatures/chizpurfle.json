@@ -1,20 +1,36 @@
 {
-  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:chizpurfle",
   "bodyPlan": "ARTHROPOD_MULTILEG",
   "locomotion": "GROUND",
   "temperament": "NEUTRAL",
   "width": 0.45,
   "height": 0.45,
-  "maxHealth": 4.0,
+  "maxHealth": 2.0,
   "movementSpeed": 0.28,
   "flyingSpeed": 0.0,
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/chizpurfle",
   "texture": "wizards_and_beasts:textures/entity/chizpurfle.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/chizpurfle.animation.json",
-  "attackDamage": 1.0,
+  "attackDamage": 0.0,
   "traits": [
     "PACK"
+  ],
+  "abilities": [
+    {
+      "type": "life_leech",
+      "heal_on_hit": 2.0
+    },
+    {
+      "type": "status_on_hit",
+      "effects": [
+        {
+          "effect": "minecraft:weakness",
+          "amplifier": 0,
+          "duration_ticks": 100
+        }
+      ]
+    }
   ]
 }

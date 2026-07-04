@@ -1,20 +1,45 @@
 {
-  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:occamy",
   "bodyPlan": "SERPENTINE",
   "locomotion": "GROUND",
   "temperament": "HOSTILE",
   "width": 1.7,
   "height": 1.9,
-  "maxHealth": 40.0,
+  "maxHealth": 47.0,
   "movementSpeed": 0.23,
   "flyingSpeed": 0.0,
-  "followRange": 16.0,
+  "followRange": 18.0,
   "model": "wizards_and_beasts:entity/occamy",
   "texture": "wizards_and_beasts:textures/entity/occamy.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/occamy.animation.json",
-  "attackDamage": 6.0,
+  "attackDamage": 9.0,
   "traits": [
+    "CHARGE",
     "KNOCKBACK"
+  ],
+  "abilities": [
+    {
+      "type": "constrict",
+      "hold_ticks": 100,
+      "pull_strength": 0.8
+    },
+    {
+      "type": "enrage",
+      "health_fraction": 0.4,
+      "speed_amplifier": 1,
+      "strength_amplifier": 2,
+      "duration_ticks": 300
+    },
+    {
+      "type": "occamy_choranaptyxis",
+      "min_scale": 0.6,
+      "max_scale": 1.7,
+      "rate": 0.05
+    },
+    {
+      "type": "tint",
+      "color": "#9FE0FF"
+    }
   ]
 }

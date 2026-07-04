@@ -1,21 +1,48 @@
 {
-  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:kelpie",
   "bodyPlan": "AQUATIC",
   "locomotion": "AQUATIC",
   "temperament": "HOSTILE",
   "width": 1.7,
   "height": 1.9,
-  "maxHealth": 40.0,
+  "maxHealth": 47.0,
   "movementSpeed": 0.23,
   "flyingSpeed": 0.0,
-  "followRange": 16.0,
+  "followRange": 18.0,
   "model": "wizards_and_beasts:entity/kelpie",
   "texture": "wizards_and_beasts:textures/entity/kelpie.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/kelpie.animation.json",
-  "attackDamage": 6.0,
+  "attackDamage": 9.0,
   "traits": [
     "AMPHIBIOUS",
+    "CHARGE",
     "KNOCKBACK"
+  ],
+  "abilities": [
+    {
+      "type": "water_affinity",
+      "breathe_underwater": true,
+      "regen_in_water": 1.0,
+      "requires_water": false,
+      "seek_water_when_dry": false,
+      "slow_on_land": false,
+      "bubble_particles": false
+    },
+    {
+      "type": "constrict",
+      "hold_ticks": 100,
+      "pull_strength": 0.8
+    },
+    {
+      "type": "status_on_hit",
+      "effects": [
+        {
+          "effect": "minecraft:slowness",
+          "amplifier": 1,
+          "duration_ticks": 100
+        }
+      ]
+    }
   ]
 }

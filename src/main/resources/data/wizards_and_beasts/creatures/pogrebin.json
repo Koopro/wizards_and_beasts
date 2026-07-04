@@ -1,5 +1,5 @@
 {
-  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:pogrebin",
   "bodyPlan": "BLOB_SPHERE",
   "locomotion": "GROUND",
@@ -9,10 +9,37 @@
   "maxHealth": 8.0,
   "movementSpeed": 0.26,
   "flyingSpeed": 0.0,
-  "followRange": 16.0,
+  "followRange": 18.0,
   "model": "wizards_and_beasts:entity/pogrebin",
   "texture": "wizards_and_beasts:textures/entity/pogrebin.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/pogrebin.animation.json",
-  "attackDamage": 3.0,
-  "traits": []
+  "attackDamage": 5.0,
+  "traits": [],
+  "abilities": [
+    {
+      "type": "dread_aura",
+      "radius": 6.0,
+      "effects": [
+        {
+          "effect": "minecraft:weakness",
+          "amplifier": 0,
+          "duration_ticks": 100
+        },
+        {
+          "effect": "minecraft:slowness",
+          "amplifier": 0,
+          "duration_ticks": 100
+        },
+        {
+          "effect": "minecraft:mining_fatigue",
+          "amplifier": 0,
+          "duration_ticks": 100
+        }
+      ]
+    },
+    {
+      "type": "camouflage",
+      "reveal_ticks": 60
+    }
+  ]
 }

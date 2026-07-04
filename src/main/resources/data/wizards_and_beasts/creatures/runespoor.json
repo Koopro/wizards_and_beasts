@@ -1,9 +1,9 @@
 {
-  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:runespoor",
   "bodyPlan": "SERPENTINE",
   "locomotion": "GROUND",
-  "temperament": "HOSTILE",
+  "temperament": "NEUTRAL",
   "width": 0.95,
   "height": 1.25,
   "maxHealth": 16.0,
@@ -13,8 +13,27 @@
   "model": "wizards_and_beasts:entity/runespoor",
   "texture": "wizards_and_beasts:textures/entity/runespoor.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/runespoor.animation.json",
-  "attackDamage": 5.0,
+  "attackDamage": 6.0,
   "traits": [
     "POISON_ATTACK"
+  ],
+  "abilities": [
+    {
+      "type": "constrict",
+      "hold_ticks": 60,
+      "pull_strength": 0.6
+    },
+    {
+      "type": "ranged_hex",
+      "range": 10.0,
+      "damage": 3.0,
+      "cooldown_ticks": 70,
+      "particle": "witch",
+      "effect": {
+        "effect": "minecraft:poison",
+        "amplifier": 0,
+        "duration_ticks": 100
+      }
+    }
   ]
 }

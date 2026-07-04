@@ -1,18 +1,59 @@
 {
-  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:sphinx",
   "bodyPlan": "QUADRUPED",
   "locomotion": "GROUND",
   "temperament": "NEUTRAL",
   "width": 1.7,
   "height": 1.9,
-  "maxHealth": 40.0,
+  "maxHealth": 47.0,
   "movementSpeed": 0.23,
   "flyingSpeed": 0.0,
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/sphinx",
   "texture": "wizards_and_beasts:textures/entity/sphinx.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/sphinx.animation.json",
-  "attackDamage": 6.0,
-  "traits": []
+  "attackDamage": 9.0,
+  "traits": [],
+  "abilities": [
+    {
+      "type": "status_on_hit",
+      "effects": [
+        {
+          "effect": "minecraft:blindness",
+          "amplifier": 0,
+          "duration_ticks": 80
+        }
+      ]
+    },
+    {
+      "type": "dread_aura",
+      "radius": 6.0,
+      "effects": [
+        {
+          "effect": "minecraft:weakness",
+          "amplifier": 0,
+          "duration_ticks": 100
+        },
+        {
+          "effect": "minecraft:mining_fatigue",
+          "amplifier": 0,
+          "duration_ticks": 100
+        }
+      ]
+    },
+    {
+      "type": "heal_aura",
+      "heal_per_second": 1.0,
+      "radius": 5.0,
+      "heal_allies": false,
+      "cleanse_self": false
+    },
+    {
+      "type": "sphinx_riddle",
+      "radius": 8.0,
+      "cooldown_ticks": 200,
+      "duration_ticks": 120
+    }
+  ]
 }

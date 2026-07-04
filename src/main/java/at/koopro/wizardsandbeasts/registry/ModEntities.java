@@ -10,6 +10,7 @@ import at.koopro.wizardsandbeasts.entity.beast.PhoenixEntity;
 import at.koopro.wizardsandbeasts.entity.beast.StreelerEntity;
 import at.koopro.wizardsandbeasts.entity.beast.ThestralEntity;
 import at.koopro.wizardsandbeasts.entity.broom.BroomEntity;
+import at.koopro.wizardsandbeasts.entity.creature.BeastHexProjectile;
 import at.koopro.wizardsandbeasts.entity.form.FormMannequinEntity;
 import at.koopro.wizardsandbeasts.entity.goblin.GoblinTellerEntity;
 import at.koopro.wizardsandbeasts.entity.niffler.BabyNifflerEntity;
@@ -35,6 +36,9 @@ public class ModEntities {
 
     public static final DeferredHolder<EntityType<?>, EntityType<SpellProjectileEntity>> SPELL_PROJECTILE =
             EntityHelper.register(ENTITY_TYPES, "spell_projectile", SpellProjectileEntity::new, MobCategory.MISC, 0.25f, 0.25f, 8, 2);
+
+    public static final DeferredHolder<EntityType<?>, EntityType<BeastHexProjectile>> BEAST_HEX_PROJECTILE =
+            EntityHelper.register(ENTITY_TYPES, "beast_hex_projectile", BeastHexProjectile::new, MobCategory.MISC, 0.25f, 0.25f, 8, 2);
 
     public static final DeferredHolder<EntityType<?>, EntityType<PatronusEntity>> PATRONUS =
             EntityHelper.register(ENTITY_TYPES, "patronus", PatronusEntity::new, MobCategory.MISC, 0.6f, 1.2f, 8, 2);

@@ -1,18 +1,51 @@
 {
-  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:swooping_evil",
   "bodyPlan": "INSECTOID_FLYER",
   "locomotion": "FLYING",
   "temperament": "HOSTILE",
   "width": 0.95,
   "height": 1.25,
-  "maxHealth": 16.0,
+  "maxHealth": 21.0,
   "movementSpeed": 0.25,
   "flyingSpeed": 0.5,
-  "followRange": 16.0,
+  "followRange": 18.0,
   "model": "wizards_and_beasts:entity/swooping_evil",
   "texture": "wizards_and_beasts:textures/entity/swooping_evil.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/swooping_evil.animation.json",
-  "attackDamage": 5.0,
-  "traits": []
+  "attackDamage": 8.0,
+  "traits": [
+    "FIRE_IMMUNE"
+  ],
+  "abilities": [
+    {
+      "type": "leap",
+      "leap_velocity": 0.4
+    },
+    {
+      "type": "life_leech",
+      "heal_on_hit": 3.0
+    },
+    {
+      "type": "status_on_hit",
+      "effects": [
+        {
+          "effect": "minecraft:weakness",
+          "amplifier": 0,
+          "duration_ticks": 80
+        },
+        {
+          "effect": "minecraft:nausea",
+          "amplifier": 0,
+          "duration_ticks": 80
+        }
+      ]
+    },
+    {
+      "type": "evasion",
+      "dodge_chance": 0.3,
+      "range": 6.0,
+      "cooldown_ticks": 60
+    }
+  ]
 }

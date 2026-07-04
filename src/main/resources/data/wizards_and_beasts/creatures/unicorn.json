@@ -1,13 +1,13 @@
 {
-  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:unicorn",
   "bodyPlan": "QUADRUPED",
   "locomotion": "GROUND",
   "temperament": "PASSIVE",
   "width": 0.95,
   "height": 1.25,
-  "maxHealth": 16.0,
-  "movementSpeed": 0.25,
+  "maxHealth": 13.0,
+  "movementSpeed": 0.287,
   "flyingSpeed": 0.0,
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/unicorn",
@@ -17,5 +17,29 @@
   "traits": [
     "FEARFUL",
     "REGEN"
+  ],
+  "abilities": [
+    {
+      "type": "heal_aura",
+      "heal_per_second": 2.0,
+      "radius": 8.0,
+      "heal_allies": true,
+      "cleanse_self": true
+    },
+    {
+      "type": "blink_away",
+      "trigger_health_fraction": 1.0,
+      "range": 8.0,
+      "cooldown_ticks": 100
+    },
+    {
+      "type": "thorns",
+      "reflect_fraction": 0.0,
+      "attacker_effect": {
+        "effect": "minecraft:bad_omen",
+        "amplifier": 0,
+        "duration_ticks": 600
+      }
+    }
   ]
 }

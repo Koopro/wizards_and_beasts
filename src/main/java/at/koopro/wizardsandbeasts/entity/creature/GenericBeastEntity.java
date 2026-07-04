@@ -4,9 +4,17 @@ import at.koopro.wizardsandbeasts.creature.CreatureDefinition;
 import at.koopro.wizardsandbeasts.creature.CreatureDefinitionRegistry;
 import at.koopro.wizardsandbeasts.creature.Temperament;
 import at.koopro.wizardsandbeasts.creature.Trait;
+import at.koopro.wizardsandbeasts.creature.ability.CreatureAbility;
+import at.koopro.wizardsandbeasts.creature.ability.FireAffinity;
 import at.koopro.wizardsandbeasts.entity.GeoEntityBase;
+import at.koopro.wizardsandbeasts.module.Module;
+import at.koopro.wizardsandbeasts.module.ModuleManager;
+import com.mojang.serialization.Codec;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
@@ -36,7 +44,10 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -55,11 +66,67 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
     @Nullable
     private Set<Trait> cachedTraits;
 
+    /**
+     * Per-entity scratch counters for the ability layer. {@code fireDryTicks}/{@code waterDryTicks} are the
+     * {@link FireAffinity}/{@code WaterAffinity} dry-out timers. Cooldown-gated abilities each own a private
+     * string key into {@link #abilityCooldowns} (blink, camouflage reveal, signature bursts) so multiple
+     * cooldown abilities on one beast never collide. Persisted via save data (mirroring {@code CarriedLoot});
+     * abilities own the read/write, the entity owns storage.
+     */
+    private int fireDryTicks;
+    private int waterDryTicks;
+    private final Map<String, Integer> abilityCooldowns = new HashMap<>();
+
+    /** Codec for the keyed cooldown map's save form ({@code {key:ticks}}). */
+    private static final Codec<Map<String, Integer>> COOLDOWNS_CODEC =
+            Codec.unboundedMap(Codec.STRING, Codec.INT);
+
+    /**
+     * Render-only model scale, synced to the client for the Occamy's choranaptyxic size-shift (and any
+     * future size ability). Default {@code 1.0} = no change; the hitbox stays registry-frozen (this never
+     * touches collision), surfaced to the renderer via render-state — never read live at render time.
+     */
+    private static final EntityDataAccessor<Float> DATA_RENDER_SCALE =
+            SynchedEntityData.defineId(GenericBeastEntity.class, EntityDataSerializers.FLOAT);
+
+    /**
+     * Render-only ARGB tint, synced to the client for {@code Tint}-style colour abilities (obscurus smoke,
+     * ashwinder ember-pulse). Default {@code 0xFFFFFFFF} (opaque white) = no tint; multiplied into the model
+     * colour by the renderer through render-state, never read live at render time.
+     */
+    private static final EntityDataAccessor<Integer> DATA_TINT =
+            SynchedEntityData.defineId(GenericBeastEntity.class, EntityDataSerializers.INT);
+
     protected GenericBeastEntity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
         if (!level.isClientSide()) {
             applyDefinition();
         }
+    }
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DATA_RENDER_SCALE, 1.0f);
+        builder.define(DATA_TINT, 0xFFFFFFFF);
+    }
+
+    /** Render-only model scale (1.0 = unscaled). Set server-side by size abilities, read on the client renderer. */
+    public float getRenderScale() {
+        return this.entityData.get(DATA_RENDER_SCALE);
+    }
+
+    public void setRenderScale(float scale) {
+        this.entityData.set(DATA_RENDER_SCALE, scale);
+    }
+
+    /** Render-only ARGB tint (0xFFFFFFFF = none). Set server-side by colour abilities, read on the renderer. */
+    public int getTint() {
+        return this.entityData.get(DATA_TINT);
+    }
+
+    public void setTint(int argb) {
+        this.entityData.set(DATA_TINT, argb);
     }
 
     /** The creature id == this entity type's registry key (e.g. {@code wizards_and_beasts:unicorn}). */
@@ -94,6 +161,49 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
 
     protected boolean has(Trait trait) {
         return traits().contains(trait);
+    }
+
+    // ── ability layer ─────────────────────────────────────────────────────────
+
+    /** This creature's datapack-declared abilities (empty when the definition is missing or omits them). */
+    protected List<CreatureAbility> abilities() {
+        CreatureDefinition def = definition();
+        return def != null ? def.abilities() : List.of();
+    }
+
+    /** {@link FireAffinity} dry-out counter accessor — owned here, mutated by the ability. */
+    public int getFireDryTicks() {
+        return fireDryTicks;
+    }
+
+    public void setFireDryTicks(int ticks) {
+        this.fireDryTicks = ticks;
+    }
+
+    /** {@code WaterAffinity} dry-out counter accessor. */
+    public int getWaterDryTicks() {
+        return waterDryTicks;
+    }
+
+    public void setWaterDryTicks(int ticks) {
+        this.waterDryTicks = ticks;
+    }
+
+    /**
+     * Remaining ticks on the named ability cooldown ({@code 0} when absent). Each cooldown-gated ability
+     * owns a private key so abilities on the same beast never share a timer. Decremented each server tick.
+     */
+    public int getCooldown(String key) {
+        return abilityCooldowns.getOrDefault(key, 0);
+    }
+
+    /** Arm (or clear, when {@code ticks <= 0}) the named ability cooldown. */
+    public void setCooldown(String key, int ticks) {
+        if (ticks > 0) {
+            abilityCooldowns.put(key, ticks);
+        } else {
+            abilityCooldowns.remove(key);
+        }
     }
 
     // ── attributes ──────────────────────────────────────────────────────────
@@ -132,6 +242,10 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
         wireBehaviourGoals();
         goalSelector.addGoal(9, new LookAtPlayerGoal(this, Player.class, 7.0f));
         goalSelector.addGoal(10, new RandomLookAroundGoal(this));
+        // Ability-contributed goals. Always registered; each goal self-gates on Module.CREATURES at canUse().
+        for (CreatureAbility ability : abilities()) {
+            ability.registerGoals(this, goalSelector);
+        }
     }
 
     /** Subclass hook: add the locomotion-specific wander goal (stroll / fly / swim). */
@@ -171,7 +285,17 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
 
     @Override
     public boolean fireImmune() {
-        return has(Trait.FIRE_IMMUNE) || super.fireImmune();
+        return has(Trait.FIRE_IMMUNE) || hasFireImmuneAbility() || super.fireImmune();
+    }
+
+    /** True if any {@link FireAffinity} ability declares fire immunity (so fire/lava damage is ignored). */
+    private boolean hasFireImmuneAbility() {
+        for (CreatureAbility ability : abilities()) {
+            if (ability instanceof FireAffinity fire && fire.fireImmune()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -179,8 +303,24 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
         boolean hit = super.doHurtTarget(level, target);
         if (hit && target instanceof LivingEntity victim) {
             applyHitTraits(victim);
+            if (ModuleManager.isEnabled(Module.CREATURES)) {
+                for (CreatureAbility ability : abilities()) {
+                    ability.onMeleeContact(this, victim);
+                }
+            }
         }
         return hit;
+    }
+
+    @Override
+    public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
+        boolean hurt = super.hurtServer(level, source, amount);
+        if (hurt && ModuleManager.isEnabled(Module.CREATURES)) {
+            for (CreatureAbility ability : abilities()) {
+                ability.onHurt(this, source, amount);
+            }
+        }
+        return hurt;
     }
 
     private void applyHitTraits(LivingEntity victim) {
@@ -246,6 +386,15 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
         if (!carried.isEmpty()) {
             output.store("CarriedLoot", ItemStack.CODEC.listOf(), List.copyOf(carried));
         }
+        if (fireDryTicks > 0) {
+            output.putInt("FireDryTicks", fireDryTicks);
+        }
+        if (waterDryTicks > 0) {
+            output.putInt("WaterDryTicks", waterDryTicks);
+        }
+        if (!abilityCooldowns.isEmpty()) {
+            output.store("AbilityCooldowns", COOLDOWNS_CODEC, Map.copyOf(abilityCooldowns));
+        }
     }
 
     @Override
@@ -253,6 +402,15 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
         super.readAdditionalSaveData(input);
         carried.clear();
         carried.addAll(input.read("CarriedLoot", ItemStack.CODEC.listOf()).orElse(List.of()));
+        fireDryTicks = input.getIntOr("FireDryTicks", 0);
+        waterDryTicks = input.getIntOr("WaterDryTicks", 0);
+        abilityCooldowns.clear();
+        abilityCooldowns.putAll(input.read("AbilityCooldowns", COOLDOWNS_CODEC).orElse(Map.of()));
+        // Back-compat: fold a legacy single-counter save into a generic key so old worlds don't desync.
+        int legacy = input.getIntOr("AbilityCooldown", 0);
+        if (legacy > 0) {
+            abilityCooldowns.put("legacy", legacy);
+        }
     }
 
     @Override
@@ -262,6 +420,24 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
                 && getHealth() < getMaxHealth() && isAlive()) {
             heal(1.0f);
         }
+        // Datapack-driven ability dispatch (server-side, gated on Module.CREATURES — access not registration).
+        if (!level().isClientSide() && isAlive() && ModuleManager.isEnabled(Module.CREATURES)) {
+            if (!abilityCooldowns.isEmpty()) {
+                Iterator<Map.Entry<String, Integer>> it = abilityCooldowns.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry<String, Integer> e = it.next();
+                    int next = e.getValue() - 1;
+                    if (next > 0) {
+                        e.setValue(next);
+                    } else {
+                        it.remove();
+                    }
+                }
+            }
+            for (CreatureAbility ability : abilities()) {
+                ability.tick(this);
+            }
+        }
     }
 
     @Override
@@ -270,6 +446,11 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
             dropCarried();
             if (has(Trait.EXPLODE_ON_DEATH)) {
                 level().explode(this, getX(), getY(), getZ(), 2.0f, Level.ExplosionInteraction.MOB);
+            }
+            if (ModuleManager.isEnabled(Module.CREATURES)) {
+                for (CreatureAbility ability : abilities()) {
+                    ability.onDeath(this);
+                }
             }
         }
         super.die(cause);

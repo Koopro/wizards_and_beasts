@@ -1,23 +1,40 @@
 {
-  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:chinese_fireball",
   "bodyPlan": "WINGED_QUADRUPED",
   "locomotion": "FLYING",
   "temperament": "HOSTILE",
   "width": 2.7,
   "height": 2.9,
-  "maxHealth": 90.0,
+  "maxHealth": 104.0,
   "movementSpeed": 0.2,
   "flyingSpeed": 0.5,
-  "followRange": 16.0,
+  "followRange": 18.0,
   "model": "wizards_and_beasts:entity/chinese_fireball",
   "texture": "wizards_and_beasts:textures/entity/chinese_fireball.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/chinese_fireball.animation.json",
-  "attackDamage": 8.0,
+  "attackDamage": 11.0,
   "traits": [
     "FIRE_IMMUNE",
     "FIRE_ATTACK",
-    "FIRE_BREATH",
     "KNOCKBACK"
+  ],
+  "dragon": {
+    "fire_range": 11,
+    "fire_color": 15881243,
+    "flame_shape": "BURST",
+    "block_effect": "IGNITE",
+    "rideable": false,
+    "scale": 1.8
+  },
+  "_dragon_note": "fire_color=canon; fire_range=design-extrapolation (not canon). Ministry classification XXXXX (uniform). Breath ships via DragonEntity, not the FIRE_BREATH trait.",
+  "abilities": [
+    {
+      "type": "enrage",
+      "health_fraction": 0.4,
+      "speed_amplifier": 1,
+      "strength_amplifier": 2,
+      "duration_ticks": 300
+    }
   ]
 }

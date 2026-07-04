@@ -1,20 +1,33 @@
 {
-  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:hippocampus",
   "bodyPlan": "AQUATIC",
   "locomotion": "AQUATIC",
   "temperament": "PASSIVE",
   "width": 1.7,
   "height": 1.9,
-  "maxHealth": 40.0,
+  "maxHealth": 22.0,
   "movementSpeed": 0.23,
   "flyingSpeed": 0.0,
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/hippocampus",
   "texture": "wizards_and_beasts:textures/entity/hippocampus.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/hippocampus.animation.json",
-  "attackDamage": 2.0,
+  "attackDamage": 0.0,
   "traits": [
     "AMPHIBIOUS"
+  ],
+  "abilities": [
+    {
+      "type": "water_affinity",
+      "breathe_underwater": true,
+      "regen_in_water": 1.0,
+      "requires_water": true,
+      "dry_grace_ticks": 200,
+      "dry_damage": 1.0,
+      "seek_water_when_dry": true,
+      "slow_on_land": true,
+      "bubble_particles": true
+    }
   ]
 }

@@ -1,23 +1,46 @@
 {
-  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:peruvian_vipertooth",
   "bodyPlan": "WINGED_QUADRUPED",
   "locomotion": "FLYING",
   "temperament": "HOSTILE",
   "width": 1.7,
   "height": 1.9,
-  "maxHealth": 40.0,
-  "movementSpeed": 0.23,
+  "maxHealth": 61.0,
+  "movementSpeed": 0.276,
   "flyingSpeed": 0.5,
-  "followRange": 16.0,
+  "followRange": 18.0,
   "model": "wizards_and_beasts:entity/peruvian_vipertooth",
   "texture": "wizards_and_beasts:textures/entity/peruvian_vipertooth.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/peruvian_vipertooth.animation.json",
-  "attackDamage": 8.0,
+  "attackDamage": 12.0,
   "traits": [
     "FIRE_IMMUNE",
     "FIRE_ATTACK",
-    "FIRE_BREATH",
-    "KNOCKBACK"
+    "KNOCKBACK",
+    "POISON_ATTACK"
+  ],
+  "dragon": {
+    "fire_range": 7,
+    "fire_color": 16347926,
+    "flame_shape": "STREAM",
+    "block_effect": "IGNITE",
+    "rideable": false,
+    "scale": 0.8,
+    "bite_venom": {
+      "effect": "minecraft:poison",
+      "amplifier": 0,
+      "duration_ticks": 120
+    }
+  },
+  "_dragon_note": "fire_color=design-extrapolation; fire_range=design-extrapolation (not canon). Ministry classification XXXXX (uniform). Breath ships via DragonEntity, not the FIRE_BREATH trait.",
+  "abilities": [
+    {
+      "type": "enrage",
+      "health_fraction": 0.4,
+      "speed_amplifier": 1,
+      "strength_amplifier": 2,
+      "duration_ticks": 300
+    }
   ]
 }

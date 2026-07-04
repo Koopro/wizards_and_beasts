@@ -1,18 +1,60 @@
 {
-  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:glumbumble",
   "bodyPlan": "INSECTOID_FLYER",
   "locomotion": "FLYING",
-  "temperament": "NEUTRAL",
+  "temperament": "PASSIVE",
   "width": 0.45,
   "height": 0.45,
-  "maxHealth": 4.0,
+  "maxHealth": 3.0,
   "movementSpeed": 0.28,
   "flyingSpeed": 0.5,
   "followRange": 16.0,
   "model": "wizards_and_beasts:entity/glumbumble",
   "texture": "wizards_and_beasts:textures/entity/glumbumble.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/glumbumble.animation.json",
-  "attackDamage": 1.0,
-  "traits": []
+  "attackDamage": 0.0,
+  "traits": [],
+  "abilities": [
+    {
+      "type": "dread_aura",
+      "radius": 6.0,
+      "effects": [
+        {
+          "effect": "minecraft:weakness",
+          "amplifier": 0,
+          "duration_ticks": 100
+        },
+        {
+          "effect": "minecraft:slowness",
+          "amplifier": 0,
+          "duration_ticks": 100
+        },
+        {
+          "effect": "minecraft:mining_fatigue",
+          "amplifier": 0,
+          "duration_ticks": 100
+        }
+      ]
+    },
+    {
+      "type": "bioluminescence",
+      "particle": "spore",
+      "interval": 12,
+      "glow_self": false
+    },
+    {
+      "type": "spore_cloud",
+      "interval": 70,
+      "radius": 4.0,
+      "effects": [
+        {
+          "effect": "minecraft:nausea",
+          "amplifier": 0,
+          "duration_ticks": 100
+        }
+      ],
+      "particle": "smoke"
+    }
+  ]
 }

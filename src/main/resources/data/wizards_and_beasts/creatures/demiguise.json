@@ -1,12 +1,12 @@
 {
-  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:demiguise",
   "bodyPlan": "BIPED_HUMANOID",
   "locomotion": "GROUND",
   "temperament": "PASSIVE",
   "width": 0.65,
   "height": 0.75,
-  "maxHealth": 8.0,
+  "maxHealth": 5.0,
   "movementSpeed": 0.26,
   "flyingSpeed": 0.0,
   "followRange": 16.0,
@@ -14,7 +14,17 @@
   "texture": "wizards_and_beasts:textures/entity/demiguise.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/demiguise.animation.json",
   "attackDamage": 0.0,
-  "traits": [
-    "FEARFUL"
+  "traits": [],
+  "abilities": [
+    {
+      "type": "camouflage",
+      "reveal_ticks": 60
+    },
+    {
+      "type": "evasion",
+      "dodge_chance": 0.6,
+      "range": 6.0,
+      "cooldown_ticks": 40
+    }
   ]
 }
