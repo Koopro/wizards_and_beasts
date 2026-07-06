@@ -152,6 +152,9 @@ public class WizardsAndBeastsMod {
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "vocation_reload_listener"),
                     new at.koopro.wizardsandbeasts.skill.vocation.VocationLoader());
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "pocket_template_reload_listener"),
+                    new at.koopro.wizardsandbeasts.trunk.template.PocketTemplateLoader());
         });
 
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);

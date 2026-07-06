@@ -2,6 +2,8 @@ package at.koopro.wizardsandbeasts.trunk;
 
 import at.koopro.wizardsandbeasts.event.trunk.PocketDimensionEvents;
 import at.koopro.wizardsandbeasts.network.trunk.PocketStatusS2CPayload;
+import at.koopro.wizardsandbeasts.trunk.template.PocketTemplate;
+import at.koopro.wizardsandbeasts.trunk.template.PocketTemplateRegistry;
 import at.koopro.wizardsandbeasts.registry.ModDimensions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
@@ -57,7 +59,14 @@ public final class ExtensionCharmService {
         }
 
         BlockPos spawn = computePocketSpawn(caseId);
-        TrunkRecord created = TrunkRecord.create(player.getUUID(), archetype, templateId, spawn, tier.maxRadius());
+        // Datapack template caps the pocket radius; synthetic template ids (trunk_lock_N,
+        // trunk_decoy) have no template file and take the tier radius unchanged.
+        int radius = tier.maxRadius();
+        PocketTemplate template = PocketTemplateRegistry.get(templateId);
+        if (template != null) {
+            radius = Math.min(radius, template.maxRadius());
+        }
+        TrunkRecord created = TrunkRecord.create(player.getUUID(), archetype, templateId, spawn, radius);
         created = created.withAccessMode(accessMode);
         data.putRecord(created);
         data.bindCase(caseId, created.pocketId());
