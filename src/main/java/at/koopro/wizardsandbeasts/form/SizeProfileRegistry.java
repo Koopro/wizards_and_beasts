@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.form;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;

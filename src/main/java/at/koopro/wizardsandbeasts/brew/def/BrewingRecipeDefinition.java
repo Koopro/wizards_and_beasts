@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.brew.def;
 
+import org.jspecify.annotations.Nullable;
+
 import at.koopro.wizardsandbeasts.brew.BrewingRecipe;
 import at.koopro.wizardsandbeasts.brew.CauldronTier;
 import com.mojang.serialization.Codec;
@@ -35,7 +37,7 @@ public record BrewingRecipeDefinition(
      * ingredient whose item id is unknown. Returns {@code null} if every
      * ingredient was dropped (a recipe with zero ingredients can never match).
      */
-    public BrewingRecipe toRecipe(String fullId) {
+    public @Nullable BrewingRecipe toRecipe(String fullId) {
         List<BrewingRecipe.Ingredient> resolved = ingredients.stream()
                 .map(IngredientEntry::resolve)
                 .filter(Objects::nonNull)

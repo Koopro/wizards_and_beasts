@@ -4,7 +4,7 @@ import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.core.Spells;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.Map;
 
 public record SpellHudUiModel(

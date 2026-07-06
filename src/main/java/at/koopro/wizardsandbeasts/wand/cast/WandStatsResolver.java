@@ -13,7 +13,7 @@ import at.koopro.wizardsandbeasts.wand.WandComponents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Resolves a wand's four soul attributes (wood, core, length, flexibility) into

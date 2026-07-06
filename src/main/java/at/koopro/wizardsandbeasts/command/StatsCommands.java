@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.command;
 
+import org.jspecify.annotations.Nullable;
+
 import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import at.koopro.wizardsandbeasts.stats.PlayerStat;
@@ -181,7 +183,7 @@ public final class StatsCommands {
         return 1;
     }
 
-    private static PlayerStat resolveStat(CommandSourceStack source, String statId) {
+    private static @Nullable PlayerStat resolveStat(CommandSourceStack source, String statId) {
         PlayerStat stat = PlayerStat.fromId(statId);
         if (stat == null) {
             source.sendFailure(Component.literal("Unknown stat '" + statId + "'. Valid: "

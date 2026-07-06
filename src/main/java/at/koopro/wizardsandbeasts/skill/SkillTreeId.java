@@ -2,7 +2,7 @@ package at.koopro.wizardsandbeasts.skill;
 
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 

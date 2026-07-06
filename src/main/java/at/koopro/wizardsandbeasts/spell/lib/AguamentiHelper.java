@@ -16,7 +16,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /** Aguamenti water-placement and cauldron-fill helpers. */
 public final class AguamentiHelper {

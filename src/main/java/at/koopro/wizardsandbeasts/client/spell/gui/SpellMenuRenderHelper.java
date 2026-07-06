@@ -13,7 +13,7 @@ import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsAndBeastsUiTokens;
 import net.minecraft.client.gui.GuiGraphics;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.List;
 
 /**

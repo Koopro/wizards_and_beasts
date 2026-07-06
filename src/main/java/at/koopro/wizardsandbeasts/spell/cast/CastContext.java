@@ -11,7 +11,7 @@ import at.koopro.wizardsandbeasts.wand.cast.WandStats;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +26,7 @@ public record CastContext(
         WandStats wandStats,
         Proficiency proficiency,
         @Nullable WandAllegiance allegiance,
-        @Nullable Compatibility.Score compatibility,
+        Compatibility.@Nullable Score compatibility,
         @Nullable GampDomain activePenalty,
         SpellScalingProfile scalingProfile,
         ModifierStack modifiers,
@@ -57,7 +57,7 @@ public record CastContext(
         return new CastContext(caster, wandStack, spell, definition, wandStats, proficiency, value, compatibility, activePenalty, scalingProfile, modifiers, rejections);
     }
 
-    public CastContext withCompatibility(@Nullable Compatibility.Score value) {
+    public CastContext withCompatibility(Compatibility.@Nullable Score value) {
         return new CastContext(caster, wandStack, spell, definition, wandStats, proficiency, allegiance, value, activePenalty, scalingProfile, modifiers, rejections);
     }
 

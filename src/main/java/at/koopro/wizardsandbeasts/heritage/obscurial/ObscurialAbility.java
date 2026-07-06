@@ -3,7 +3,7 @@ package at.koopro.wizardsandbeasts.heritage.obscurial;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.core.Spells;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public enum ObscurialAbility {
     SURGE("obscurus_surge", "Surge"),

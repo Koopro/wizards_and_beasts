@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.command.debug;
 
+import org.jspecify.annotations.Nullable;
+
 import at.koopro.wizardsandbeasts.wand.elder.ElderWandSavedData;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
@@ -96,7 +98,7 @@ public final class ElderWandDebugModule implements DebugModule {
         return 1;
     }
 
-    private static ItemStack elderWandInHand(ServerPlayer player) {
+    private static @Nullable ItemStack elderWandInHand(ServerPlayer player) {
         for (InteractionHand hand : InteractionHand.values()) {
             ItemStack stack = player.getItemInHand(hand);
             if (ModDataComponents.isElderWand(stack)) return stack;

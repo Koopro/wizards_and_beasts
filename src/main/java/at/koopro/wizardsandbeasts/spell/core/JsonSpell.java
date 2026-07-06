@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.spell.core;
 
+import org.jspecify.annotations.Nullable;
+
 import at.koopro.wizardsandbeasts.spell.def.SpellDefinition;
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.Holder;
@@ -147,7 +149,7 @@ public class JsonSpell extends Spell {
                 : at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID + ":" + raw;
     }
 
-    private static Holder<MobEffect> resolveMobEffect(Identifier id) {
+    private static @Nullable Holder<MobEffect> resolveMobEffect(Identifier id) {
         MobEffect effect = BuiltInRegistries.MOB_EFFECT.getValue(id);
         if (effect == null) {
             LOGGER.warn("Unknown mob effect id in spell definition: {}", id);

@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.item.wand;
 
+import org.jspecify.annotations.Nullable;
+
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
@@ -24,7 +26,7 @@ public class WandCoreMaterialItem extends Item {
         return coreKey;
     }
 
-    public static Identifier getCoreKey(ItemStack stack) {
+    public static @Nullable Identifier getCoreKey(ItemStack stack) {
         if (stack.getItem() instanceof WandCoreMaterialItem coreItem) {
             return coreItem.coreKey;
         }

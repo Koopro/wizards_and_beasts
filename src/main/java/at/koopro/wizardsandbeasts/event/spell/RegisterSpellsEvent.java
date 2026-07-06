@@ -7,7 +7,7 @@ import at.koopro.wizardsandbeasts.spell.def.SpellDefinition;
 import net.neoforged.bus.api.Event;
 import net.neoforged.fml.event.IModBusEvent;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Mod-bus event fired during common setup that lets <strong>third-party mods</strong>

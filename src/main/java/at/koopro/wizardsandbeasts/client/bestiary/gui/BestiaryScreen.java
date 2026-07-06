@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.client.bestiary.gui;
 
+import org.jspecify.annotations.Nullable;
+
 import at.koopro.wizardsandbeasts.bestiary.*;
 import at.koopro.wizardsandbeasts.client.bestiary.ClientBestiaryCache;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
@@ -205,7 +207,7 @@ public final class BestiaryScreen extends Screen {
      * entityType, used for live rendering in the detail panel. Returns {@code null} when
      * the entry has no entityType, the type is unknown, or it is not a LivingEntity.
      */
-    private LivingEntity getRenderEntity(BestiaryEntry entry) {
+    private @Nullable LivingEntity getRenderEntity(BestiaryEntry entry) {
         if (entry.entityType().isEmpty() || minecraft == null || minecraft.level == null) {
             return null;
         }

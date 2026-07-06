@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.wand.bench;
 
+import org.jspecify.annotations.Nullable;
+
 import at.koopro.wizardsandbeasts.item.wand.WandModuleHooks;
 import at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu;
 import net.minecraft.core.BlockPos;
@@ -101,7 +103,7 @@ public class WandmakersBenchBlock extends BaseEntityBlock implements EntityBlock
     }
 
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+    public <T extends BlockEntity> @Nullable BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
         if (!level.isClientSide()) {
             return null;
         }

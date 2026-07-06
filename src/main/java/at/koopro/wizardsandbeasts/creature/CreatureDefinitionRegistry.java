@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.creature;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import net.minecraft.resources.Identifier;
 
 import java.util.Collection;

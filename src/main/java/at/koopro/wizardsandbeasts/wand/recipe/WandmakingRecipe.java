@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.wand.recipe;
 
+import org.jspecify.annotations.Nullable;
+
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
@@ -51,7 +53,7 @@ public record WandmakingRecipe(
     }
 
     @Override
-    public RecipeBookCategory recipeBookCategory() {
+    public @Nullable RecipeBookCategory recipeBookCategory() {
         return null;
     }
 

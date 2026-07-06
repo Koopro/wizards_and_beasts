@@ -6,7 +6,7 @@ import at.koopro.wizardsandbeasts.util.NbtHelper;
 import at.koopro.wizardsandbeasts.util.NamespaceMigration;
 import net.minecraft.nbt.CompoundTag;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.*;
 
 import at.koopro.wizardsandbeasts.registry.ModAttachments;

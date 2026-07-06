@@ -14,7 +14,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.UUID;
 
 /**

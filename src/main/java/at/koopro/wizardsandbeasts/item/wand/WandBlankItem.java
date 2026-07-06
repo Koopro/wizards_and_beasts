@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.item.wand;
 
+import org.jspecify.annotations.Nullable;
+
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import net.minecraft.core.BlockPos;
@@ -54,7 +56,7 @@ public class WandBlankItem extends Item {
     /**
      * Maps vanilla log families to wand wood datapack ids (see {@code data/wizards_and_beasts/wizards_and_beasts/wand_woods}).
      */
-    private static Identifier wandWoodFromLogBlock(BlockState state) {
+    private static @Nullable Identifier wandWoodFromLogBlock(BlockState state) {
         if (state.is(BlockTags.OAK_LOGS)) {
             return Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "rowan");
         }

@@ -31,7 +31,7 @@ import software.bernie.geckolib.animation.object.PlayState;
 import software.bernie.geckolib.animation.state.AnimationTest;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import at.koopro.wizardsandbeasts.registry.BroomItemRegistry;

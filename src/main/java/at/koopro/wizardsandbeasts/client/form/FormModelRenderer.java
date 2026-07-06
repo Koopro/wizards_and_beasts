@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.client.form;
 
+import org.jspecify.annotations.Nullable;
+
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.client.model.WerewolfModel;
 import at.koopro.wizardsandbeasts.client.model.CentaurModel;
@@ -321,7 +323,7 @@ public final class FormModelRenderer {
         return sneaking && clampSwing(src) <= 0.05f;
     }
 
-    private static AbstractClientPlayer livePlayer(FormRenderStateModifier.FormRenderData formData) {
+    private static @Nullable AbstractClientPlayer livePlayer(FormRenderStateModifier.FormRenderData formData) {
         if (Minecraft.getInstance().level == null) return null;
         return Minecraft.getInstance().level.getPlayerByUUID(formData.playerUUID()) instanceof AbstractClientPlayer p
                 ? p : null;

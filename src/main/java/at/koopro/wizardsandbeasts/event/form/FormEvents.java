@@ -4,7 +4,7 @@ import at.koopro.wizardsandbeasts.form.PlayerForm;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.Event;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Events fired by the form system when a player's active form changes.

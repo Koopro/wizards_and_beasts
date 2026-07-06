@@ -22,7 +22,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.function.Supplier;
 
 public abstract class Spell {
@@ -285,8 +285,7 @@ public abstract class Spell {
         return null;
     }
 
-    @Nullable
-    public PlayerSpellData.MasteryTier getRequiredMasteryTier() {
+    public PlayerSpellData.@Nullable MasteryTier getRequiredMasteryTier() {
         return null;
     }
 }

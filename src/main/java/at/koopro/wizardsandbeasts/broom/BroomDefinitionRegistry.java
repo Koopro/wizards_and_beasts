@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.broom;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;

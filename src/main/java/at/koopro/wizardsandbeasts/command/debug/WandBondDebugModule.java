@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.command.debug;
 
+import org.jspecify.annotations.Nullable;
+
 import at.koopro.wizardsandbeasts.item.wand.WandItem;
 import at.koopro.wizardsandbeasts.util.WandHelper;
 import at.koopro.wizardsandbeasts.wand.WandAttachments;
@@ -53,7 +55,7 @@ public final class WandBondDebugModule implements DebugModule {
                         .executes(ctx -> inspect(ctx.getSource(), EntityArgument.getPlayer(ctx, "target"))));
     }
 
-    private static InteractionHand wandHand(ServerPlayer player) {
+    private static @Nullable InteractionHand wandHand(ServerPlayer player) {
         if (player.getMainHandItem().getItem() instanceof WandItem) {
             return InteractionHand.MAIN_HAND;
         }

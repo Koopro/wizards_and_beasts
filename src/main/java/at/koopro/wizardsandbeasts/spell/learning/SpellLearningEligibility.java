@@ -12,7 +12,7 @@ import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialRules;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import net.minecraft.server.level.ServerPlayer;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public final class SpellLearningEligibility {
     private SpellLearningEligibility() {

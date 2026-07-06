@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.client.spell;
 
+import org.jspecify.annotations.Nullable;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
@@ -84,7 +86,7 @@ public final class ColoredGlowRenderer {
         poseStack.popPose();
     }
 
-    private static Integer resolveColor(LivingEntity entity, float partialTick) {
+    private static @Nullable Integer resolveColor(LivingEntity entity, float partialTick) {
         for (GlowColorProvider provider : PROVIDERS) {
             Integer color = provider.getColor(entity, partialTick);
             if (color != null) {
@@ -99,7 +101,7 @@ public final class ColoredGlowRenderer {
      * - "neo_colored_glow" => deterministic color from UUID hash
      * - "neo_colored_glow_RRGGBB" => explicit color override
      */
-    private static Integer fromEntityGlowTags(LivingEntity entity, float partialTick) {
+    private static @Nullable Integer fromEntityGlowTags(LivingEntity entity, float partialTick) {
         if (entity.getTags().contains(HASH_COLOR_TAG)) {
             return colorFromUuid(entity);
         }

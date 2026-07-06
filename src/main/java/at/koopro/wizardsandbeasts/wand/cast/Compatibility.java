@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.wand.cast;
 
+import org.jspecify.annotations.Nullable;
+
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.wand.stat.WandCore;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
@@ -139,7 +141,7 @@ public final class Compatibility {
         return WandComponents.getFlexibility(wandStack);
     }
 
-    private static WandLength resolveLength(ItemStack wandStack) {
+    private static @Nullable WandLength resolveLength(ItemStack wandStack) {
         WandLength legacy = wandStack.get(WAND_LENGTH.get());
         if (legacy != null) {
             return legacy;

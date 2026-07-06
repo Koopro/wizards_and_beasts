@@ -2,7 +2,7 @@ package at.koopro.wizardsandbeasts.ability;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Catalogue of the beast forms an Animagus may assume. The form ids match

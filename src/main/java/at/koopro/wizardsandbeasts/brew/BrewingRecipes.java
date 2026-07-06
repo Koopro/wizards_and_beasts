@@ -4,7 +4,7 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.world.entity.player.Inventory;
 import org.slf4j.Logger;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;

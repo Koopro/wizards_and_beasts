@@ -3,7 +3,7 @@ package at.koopro.wizardsandbeasts.form;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import net.minecraft.resources.Identifier;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;

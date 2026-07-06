@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.brew;
 
+import org.jspecify.annotations.Nullable;
+
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
@@ -179,7 +181,7 @@ public final class CauldronBrewing {
         skillData.addPotionBrewPoints(active.brewPoints());
     }
 
-    private static CauldronTier tierOf(Block block) {
+    private static @Nullable CauldronTier tierOf(Block block) {
         if (block == ModBlocks.BRASS_CAULDRON.get()) return CauldronTier.BRASS;
         if (block == ModBlocks.WIZARDING_COPPER_CAULDRON.get()) return CauldronTier.COPPER;
         if (block == ModBlocks.PEWTER_CAULDRON.get()) return CauldronTier.PEWTER;

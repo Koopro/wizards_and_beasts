@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.apparition;
 
+import org.jspecify.annotations.Nullable;
+
 import at.koopro.wizardsandbeasts.Config;
 import at.koopro.wizardsandbeasts.ability.PlayerAbilityHelper;
 import at.koopro.wizardsandbeasts.apparition.ApparitionWard;
@@ -145,7 +147,7 @@ public final class ApparitionServerLogic {
         return variant != null && variant.hasTag("can_apparate");
     }
 
-    private static Player findSideAlongPassenger(ServerPlayer caster) {
+    private static @Nullable Player findSideAlongPassenger(ServerPlayer caster) {
         AABB area = caster.getBoundingBox().inflate(1.5);
         for (Player candidate : caster.level().getEntitiesOfClass(Player.class, area, p -> p != caster && p.isShiftKeyDown())) {
             return candidate;

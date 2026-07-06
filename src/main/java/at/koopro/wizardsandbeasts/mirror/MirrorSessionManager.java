@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.mirror;
 
+import org.jspecify.annotations.Nullable;
+
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.item.trinket.TwoWayMirrorItem;
 import at.koopro.wizardsandbeasts.network.trinket.MirrorCloseS2CPayload;
@@ -130,7 +132,7 @@ public final class MirrorSessionManager {
     }
 
     /** Both still hold a mirror keyed to the same pair id. Returns that id, or null. */
-    private static UUID sharedPairId(ServerPlayer a, ServerPlayer b) {
+    private static @Nullable UUID sharedPairId(ServerPlayer a, ServerPlayer b) {
         UUID idA = heldPairId(a);
         if (idA != null && idA.equals(heldPairId(b))) {
             return idA;
@@ -142,12 +144,12 @@ public final class MirrorSessionManager {
         return pairId.equals(heldPairId(player, pairId));
     }
 
-    private static UUID heldPairId(ServerPlayer player) {
+    private static @Nullable UUID heldPairId(ServerPlayer player) {
         return heldPairId(player, null);
     }
 
     /** First mirror pair id found in the player's inventory; if {@code want} is set, only matches it. */
-    private static UUID heldPairId(ServerPlayer player, UUID want) {
+    private static @Nullable UUID heldPairId(ServerPlayer player, UUID want) {
         var inv = player.getInventory();
         for (int i = 0; i < inv.getContainerSize(); i++) {
             ItemStack stack = inv.getItem(i);
@@ -162,7 +164,7 @@ public final class MirrorSessionManager {
         return null;
     }
 
-    private static ServerPlayer findHolder(MinecraftServer server, UUID pairId, UUID exclude) {
+    private static @Nullable ServerPlayer findHolder(MinecraftServer server, UUID pairId, UUID exclude) {
         for (ServerPlayer candidate : server.getPlayerList().getPlayers()) {
             if (candidate.getUUID().equals(exclude)) {
                 continue;

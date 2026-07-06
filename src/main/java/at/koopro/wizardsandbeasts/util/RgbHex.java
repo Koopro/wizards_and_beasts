@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.util;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Normalizes user RGB hex input for glow debug and similar (6 hex digits, optional leading #).

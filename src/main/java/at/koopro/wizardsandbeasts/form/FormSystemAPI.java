@@ -9,7 +9,7 @@ import at.koopro.wizardsandbeasts.heritage.Heritage;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.common.NeoForge;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.List;
 
 /**

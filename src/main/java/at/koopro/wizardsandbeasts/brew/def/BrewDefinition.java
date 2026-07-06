@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.brew.def;
 
+import org.jspecify.annotations.Nullable;
+
 import at.koopro.wizardsandbeasts.brew.Brew;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -38,7 +40,7 @@ public record BrewDefinition(
      * every effect was dropped (a brew with zero effects is rejected; if
      * that's intentional, declare {@code [{ "id": "minecraft:luck", ... }]}).
      */
-    public Brew toBrew(String fullId) {
+    public @Nullable Brew toBrew(String fullId) {
         List<Brew.EffectSpec> specs = effects.stream()
                 .map(EffectEntry::resolve)
                 .filter(java.util.Objects::nonNull)

@@ -13,7 +13,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A real, travelling ranged "hex" bolt thrown by {@link at.koopro.wizardsandbeasts.creature.ability.RangedHex}
@@ -24,8 +24,7 @@ import javax.annotation.Nullable;
 public class BeastHexProjectile extends ThrowableItemProjectile {
 
     private float damage = 3.0f;
-    @Nullable
-    private AbilitySupport.EffectSpec effect;
+    private AbilitySupport.@Nullable EffectSpec effect;
     private AbilitySupport.Particle trail = AbilitySupport.Particle.WITCH;
 
     public BeastHexProjectile(EntityType<? extends ThrowableItemProjectile> type, Level level) {
@@ -33,7 +32,7 @@ public class BeastHexProjectile extends ThrowableItemProjectile {
     }
 
     public BeastHexProjectile(Level level, LivingEntity shooter, float damage,
-                              @Nullable AbilitySupport.EffectSpec effect, AbilitySupport.Particle trail) {
+                              AbilitySupport.@Nullable EffectSpec effect, AbilitySupport.Particle trail) {
         super(ModEntities.BEAST_HEX_PROJECTILE.get(), shooter, level, new ItemStack(Items.MAGMA_CREAM));
         this.damage = damage;
         this.effect = effect;

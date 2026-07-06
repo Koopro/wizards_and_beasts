@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.spell.effect;
 
+import org.jspecify.annotations.Nullable;
+
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.effect.FiniteImmuneEffects;
 import at.koopro.wizardsandbeasts.module.Module;
@@ -101,7 +103,7 @@ public sealed interface SpellEffectComponent permits
         return rawDuration < 0 ? rawDuration : Math.max(1, Math.round(rawDuration * durationMult));
     }
 
-    private static Holder<MobEffect> resolveMobEffect(Identifier id) {
+    private static @Nullable Holder<MobEffect> resolveMobEffect(Identifier id) {
         MobEffect effect = BuiltInRegistries.MOB_EFFECT.getValue(id);
         if (effect == null) {
             LOGGER.warn("Unknown mob effect id in spell effect component: {}", id);

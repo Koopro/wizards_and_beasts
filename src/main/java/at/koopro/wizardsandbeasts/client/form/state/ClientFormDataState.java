@@ -3,7 +3,7 @@ package at.koopro.wizardsandbeasts.client.form.state;
 import at.koopro.wizardsandbeasts.form.RenderFlag;
 import at.koopro.wizardsandbeasts.form.SizeProfile;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.UUID;
