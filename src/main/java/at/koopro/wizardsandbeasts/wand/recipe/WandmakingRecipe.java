@@ -43,6 +43,14 @@ public record WandmakingRecipe(
     }
 
     @Override
+    public boolean isSpecial() {
+        // Bench-resolved, no placeable ingredients — keeps RecipeManager from warning
+        // "can't be placed due to empty ingredients" at every load. The recipe stays in
+        // RecipeMap either way; only recipe-book placement is skipped.
+        return true;
+    }
+
+    @Override
     public RecipeBookCategory recipeBookCategory() {
         return null;
     }

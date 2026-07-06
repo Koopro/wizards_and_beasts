@@ -1,6 +1,5 @@
 package at.koopro.wizardsandbeasts.brew.def;
 
-import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.brew.BrewingRecipe;
 import at.koopro.wizardsandbeasts.brew.BrewingRecipes;
 import com.mojang.logging.LogUtils;
@@ -26,7 +25,9 @@ public class BrewingRecipeReloadListener extends SimpleJsonResourceReloadListene
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public static final String DIRECTORY = WizardsAndBeastsMod.MODID + "/brewing_recipes";
+    // Un-prefixed like every other listener; the MODID-prefixed value never matched the
+    // shipped data path, so datapack brewing recipes silently never loaded (AUD-D-002).
+    public static final String DIRECTORY = "brewing_recipes";
 
     public BrewingRecipeReloadListener() {
         super(BrewingRecipeDefinition.CODEC, FileToIdConverter.json(DIRECTORY));

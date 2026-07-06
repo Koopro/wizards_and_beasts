@@ -1,4 +1,5 @@
 {
+  "type": "wizards_and_beasts:wandmaking",
   "wood_key": "wizards_and_beasts:holly",
   "core_key": "wizards_and_beasts:phoenix_feather",
   "minimum_bench_tier": 2.5,

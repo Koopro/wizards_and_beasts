@@ -1,6 +1,5 @@
 package at.koopro.wizardsandbeasts.brew.def;
 
-import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.brew.Brew;
 import at.koopro.wizardsandbeasts.brew.Brews;
 import com.mojang.logging.LogUtils;
@@ -14,7 +13,7 @@ import org.slf4j.Logger;
 import java.util.Map;
 
 /**
- * Loads {@link BrewDefinition}s from {@code data/<ns>/<modId>/brews/*.json} on
+ * Loads {@link BrewDefinition}s from {@code data/<ns>/brews/*.json} on
  * every datapack reload. Mirrors
  * {@link at.koopro.wizardsandbeasts.spell.def.SpellReloadListener}.
  *
@@ -28,7 +27,10 @@ public class BrewReloadListener extends SimpleJsonResourceReloadListener<BrewDef
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public static final String DIRECTORY = WizardsAndBeastsMod.MODID + "/brews";
+    // Un-prefixed like every other listener (spells, creatures, broom_definitions, …).
+    // The old MODID-prefixed value scanned data/<ns>/wizards_and_beasts/brews/ — a dir that
+    // never existed, so datapack brews silently never loaded (AUD-D-002).
+    public static final String DIRECTORY = "brews";
 
     public BrewReloadListener() {
         super(BrewDefinition.CODEC, FileToIdConverter.json(DIRECTORY));
