@@ -105,6 +105,18 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
         boolean contextFirstPerson = perspective.firstPerson();
         if (cameraFirstPerson != contextFirstPerson) return;
 
+        // Master model: the visible tip anchor is <selected tip variant>_anchor (the fx subtree is
+        // skipRender'd, so fx_tip_anchor never yields a position). Elder-wand skin: dedicated
+        // wand_tip bone. Listen on both — only the bone present and visible in the active model fires.
+        WandConfiguration config = state.getOrDefaultGeckolibData(WAND_CONFIG, WandConfiguration.DEFAULT);
+        config.getModule(WandSlot.TIP)
+                .flatMap(WandModuleRegistry::get)
+                .map(module -> module.boneName() + "_anchor")
+                .ifPresent(anchorBone -> info.addBonePositionListener(anchorBone, (worldPos, modelPos, preRenderPos) -> {
+                    if (worldPos != null) {
+                        WandTipWorldCache.setWorldTip(worldPos);
+                    }
+                }));
         info.addBonePositionListener(WandTipWorldCache.WAND_TIP_BONE, (worldPos, modelPos, preRenderPos) -> {
             if (worldPos != null) {
                 WandTipWorldCache.setWorldTip(worldPos);
@@ -131,7 +143,10 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
 
         @Override
         public Identifier getAnimationResource(WandItem animatable) {
-            return null;
+            // WandItem registers a (STOP-state) controller, so a real — if empty — animation file
+            // must exist: a null here NPEs inside GeckoLib the moment any animation is triggered.
+            // Short form like getModelResource; GeckoLib expands to geckolib/animations/item/wand.animation.json.
+            return Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "item/wand");
         }
     }
 }

@@ -109,6 +109,11 @@ final class WandBeamSpellHandlers {
 
     static void handleAvada(ServerLevel level, ServerPlayer caster, String spellId,
                             @Nullable LivingEntity target, WandBeamSession s) {
+        // Same gate as handleCrucioChannel/ImperioServerLogic — the lethal path must not
+        // outlive the DARK_ARTS module switch.
+        if (!ModuleManager.isEnabled(Module.DARK_ARTS)) {
+            return;
+        }
         if (s.avadaConsumed || target == null) return;
         if (s.beamTicks < AVADA_MIN_CHARGE_TICKS) {
             if (s.beamTicks % 3 == 0) {

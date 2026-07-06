@@ -4,7 +4,10 @@ import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.skill.data.PlayerSkillData;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
+import at.koopro.wizardsandbeasts.module.Module;
+import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
+import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialRules;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import net.minecraft.server.level.ServerPlayer;
@@ -30,6 +33,10 @@ public final class SpellLearningEligibility {
         }
         if (ObscurialRules.isObscurialAbility(spell)) {
             return Result.deny("This is an Obscurial ability, not a learnable spell.");
+        }
+        if (spell.getCategory() == SpellCategory.DARK_ARTS
+                && !ModuleManager.isEnabled(Module.DARK_ARTS)) {
+            return Result.deny("The Dark Arts are sealed away.");
         }
         if (!ObscurialRules.canHeritageUseSpell(heritage, spell)) {
             return Result.deny("Only Obscurials can learn this spell.");

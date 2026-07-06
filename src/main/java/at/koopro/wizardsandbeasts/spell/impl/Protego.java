@@ -54,8 +54,11 @@ public class Protego extends Spell {
             default -> 5;
         };
         int amplifier = ProtegoShieldEffect.encodeAmplifier(tier, deflections);
-        caster.addEffect(new MobEffectInstance(ModEffects.PROTEGO_SHIELD, duration, amplifier, false, false, true));
+        // Shatter the previous shield BEFORE adding the new effect: beginShatter() removes the
+        // caster's PROTEGO_SHIELD effect, which would otherwise strip the effect added below and
+        // make the fresh shield self-shatter on its first tick (recast bug).
         ProtegoWardManager.shatterExistingIfPresent(caster);
+        caster.addEffect(new MobEffectInstance(ModEffects.PROTEGO_SHIELD, duration, amplifier, false, false, true));
         ProtegoShieldEntity shield = new ProtegoShieldEntity(level, caster, tier);
         level.addFreshEntity(shield);
         ProtegoWardManager.register(caster.getUUID(), shield.getId());
