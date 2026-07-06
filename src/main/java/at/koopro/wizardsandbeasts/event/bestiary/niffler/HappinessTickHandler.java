@@ -41,9 +41,8 @@ public final class HappinessTickHandler {
         if (happiness <= 10.0f) {
             player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 40, 0, false, true, true));
         }
-        if (happiness >= 80.0f) {
-            // TODO(effects): SpellPowerModifier.apply()
-        }
+        // >= HappinessSpellPower.THRESHOLD: spell-power bonus, consumed at cast time
+        // by HappinessSpellPower.applyCastModifiers (SpellExecutor hook block).
         player.setData(ModAttachments.HAPPINESS.get(), happiness);
     }
 }
