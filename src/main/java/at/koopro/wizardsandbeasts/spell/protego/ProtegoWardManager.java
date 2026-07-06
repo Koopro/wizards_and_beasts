@@ -8,6 +8,7 @@ import net.minecraft.world.entity.Entity;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import org.jspecify.annotations.NonNull;
 
@@ -67,5 +68,10 @@ public final class ProtegoWardManager {
     @SubscribeEvent
     public static void onLevelUnload(LevelEvent.Unload event) {
         CASTER_TO_ENTITY.clear();
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+        CASTER_TO_ENTITY.remove(event.getEntity().getUUID());
     }
 }

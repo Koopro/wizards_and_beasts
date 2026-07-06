@@ -242,7 +242,8 @@ public class ModBlocks {
     // --- Location decorative blocks ---
     // Static initializer forces class loading of each location registry,
     // which triggers DeferredRegister entries before the register event fires.
-    // TODO: gate behind STRUCTURES module when added
+    // Registration is intentionally unconditional ("gate, don't delete"); the STRUCTURES
+    // module gates their crafting recipes via ModuleEnabledCondition in ModRecipeProvider.
     static {
         MinistryBlocks.init();
         HogwartsBlocks.init();

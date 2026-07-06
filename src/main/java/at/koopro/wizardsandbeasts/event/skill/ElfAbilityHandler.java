@@ -27,6 +27,8 @@ public final class ElfAbilityHandler {
 
     private static final double MAGNET_RADIUS = 3.0;
     private static final double MAGNET_PULL = 0.12;
+    /** Entity-scan throttle — was the last unthrottled per-tick AABB scan (AUD-G-005). */
+    private static final int MAGNET_SCAN_INTERVAL_TICKS = 5;
 
     private ElfAbilityHandler() {}
 
@@ -40,7 +42,8 @@ public final class ElfAbilityHandler {
             player.removeEffect(MobEffects.WEAKNESS);
         }
 
-        if (SkillSystemAPI.hasAbility(player, "elf_nimble_fingers")) {
+        if (player.tickCount % MAGNET_SCAN_INTERVAL_TICKS == 0
+                && SkillSystemAPI.hasAbility(player, "elf_nimble_fingers")) {
             pullNearbyItems(player);
         }
     }

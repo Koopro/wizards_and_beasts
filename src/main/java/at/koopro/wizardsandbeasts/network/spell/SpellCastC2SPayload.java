@@ -55,6 +55,11 @@ public record SpellCastC2SPayload() implements CustomPacketPayload {
         IGNORE_RELEASE_UNTIL_GAME_TICK.put(player.getUUID(), gameTickInclusive);
     }
 
+    /** Logout cleanup — entries otherwise persist for the server's lifetime (AUD-G-004). */
+    public static void clearFor(UUID playerId) {
+        IGNORE_RELEASE_UNTIL_GAME_TICK.remove(playerId);
+    }
+
     /**
      * Applies the same release logic as a client {@link SpellCastC2SPayload} (execute, cooldown, cast count, sync).
      * Safe to call from server-only flows (e.g. Avada Kedavra ending the wand channel early).

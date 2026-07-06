@@ -6,7 +6,8 @@ import org.jspecify.annotations.Nullable;
 import java.util.*;
 
 public final class BestiaryEntryRegistry {
-    private static final Map<Identifier, BestiaryEntry> ENTRIES = new HashMap<>();
+    /** Volatile-swapped immutable map: readers never observe a mid-reload empty/partial registry. */
+    private static volatile Map<Identifier, BestiaryEntry> ENTRIES = Map.of();
 
     /** Client-side cache, populated on {@code SyncBestiaryEntriesPayload} receipt. Read only on the client. */
     private static volatile Map<Identifier, BestiaryEntry> CLIENT_ENTRIES = Map.of();
@@ -14,12 +15,11 @@ public final class BestiaryEntryRegistry {
     private BestiaryEntryRegistry() {}
 
     public static void replaceAll(Map<Identifier, BestiaryEntry> entries) {
-        ENTRIES.clear();
-        ENTRIES.putAll(entries);
+        ENTRIES = Map.copyOf(entries);
     }
 
     public static @Nullable BestiaryEntry get(Identifier id) { return ENTRIES.get(id); }
-    public static Collection<BestiaryEntry> getAll() { return Collections.unmodifiableCollection(ENTRIES.values()); }
+    public static Collection<BestiaryEntry> getAll() { return ENTRIES.values(); }
 
     /** Replace the client cache with the synced entry list. */
     public static void setClientEntries(List<BestiaryEntry> entries) {

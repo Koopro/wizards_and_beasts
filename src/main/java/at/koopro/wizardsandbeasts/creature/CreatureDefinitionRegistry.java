@@ -6,17 +6,16 @@ import net.minecraft.resources.Identifier;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /** Runtime store of loaded {@link CreatureDefinition}s, mirroring {@code BroomDefinitionRegistry}. */
 public final class CreatureDefinitionRegistry {
-    private static final Map<Identifier, CreatureDefinition> DEFINITIONS = new ConcurrentHashMap<>();
+    /** Volatile-swapped immutable map: readers never observe a mid-reload empty/partial registry. */
+    private static volatile Map<Identifier, CreatureDefinition> DEFINITIONS = Map.of();
 
     private CreatureDefinitionRegistry() {}
 
     public static void replaceAll(Map<Identifier, CreatureDefinition> loaded) {
-        DEFINITIONS.clear();
-        DEFINITIONS.putAll(loaded);
+        DEFINITIONS = Map.copyOf(loaded);
     }
 
     @Nullable

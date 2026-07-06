@@ -8,6 +8,7 @@ import at.koopro.wizardsandbeasts.owl.OWLExaminationHandler;
 import at.koopro.wizardsandbeasts.spell.beam.WandBeamChannelLogic;
 import at.koopro.wizardsandbeasts.sync.PlayerStateSyncService;
 import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
+import at.koopro.wizardsandbeasts.network.spell.SpellCastC2SPayload;
 import at.koopro.wizardsandbeasts.network.stats.PlayerStatsSyncPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -62,6 +63,7 @@ public class WizardsAndBeastsCommands {
             WandBeamChannelLogic.endChannel(player);
             DebugWandState.cleanup(player.getUUID(), (ServerLevel) player.level());
             LumosFieldEffect.removeLight(player);
+            SpellCastC2SPayload.clearFor(player.getUUID());
         }
     }
 

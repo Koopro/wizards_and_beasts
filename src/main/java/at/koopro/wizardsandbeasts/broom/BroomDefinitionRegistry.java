@@ -9,19 +9,18 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public final class BroomDefinitionRegistry {
     private static final Identifier FALLBACK_ID =
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "cleansweep_seven");
-    private static final Map<Identifier, BroomDefinition> DEFINITIONS = new ConcurrentHashMap<>();
+    /** Volatile-swapped immutable map: readers never observe a mid-reload empty/partial registry. */
+    private static volatile Map<Identifier, BroomDefinition> DEFINITIONS = Map.of();
 
     private BroomDefinitionRegistry() {
     }
 
     public static void replaceAll(Map<Identifier, BroomDefinition> loaded) {
-        DEFINITIONS.clear();
-        DEFINITIONS.putAll(loaded);
+        DEFINITIONS = Map.copyOf(loaded);
     }
 
     @Nullable
