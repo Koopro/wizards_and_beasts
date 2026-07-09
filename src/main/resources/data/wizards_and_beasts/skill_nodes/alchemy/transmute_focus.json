@@ -1,0 +1,19 @@
+{
+  "id": "transmute_focus",
+  "displayName": "Transmutation Focus",
+  "description": "Channel transmutive energy into your spellwork. +5% utility damage per level.",
+  "tree": "alchemy",
+  "maxLevel": 2,
+  "pointCost": 3,
+  "prerequisites": [
+    "swift_brewer"
+  ],
+  "effects": [
+    {
+      "category": "utility",
+      "bonusPerLevel": 0.05,
+      "type": "category_damage_bonus"
+    }
+  ],
+  "tier": 2
+}

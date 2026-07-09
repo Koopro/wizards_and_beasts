@@ -1,0 +1,19 @@
+{
+  "id": "keeper_vigor",
+  "displayName": "Keeper's Hide",
+  "description": "A handler's toughened hide. +1 armor per level.",
+  "tree": "magizoology",
+  "maxLevel": 2,
+  "pointCost": 2,
+  "prerequisites": [
+    "creature_bond"
+  ],
+  "effects": [
+    {
+      "attributeId": "armor",
+      "amountPerLevel": 1.0,
+      "type": "passive_attribute"
+    }
+  ],
+  "tier": 2
+}

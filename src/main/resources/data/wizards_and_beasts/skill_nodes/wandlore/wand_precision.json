@@ -1,0 +1,35 @@
+{
+  "id": "wand_precision",
+  "displayName": "Wand Precision",
+  "description": "+5% damage with all spells per level.",
+  "tree": "wandlore",
+  "maxLevel": 2,
+  "pointCost": 2,
+  "prerequisites": [
+    "wand_study"
+  ],
+  "effects": [
+    {
+      "category": "combat",
+      "bonusPerLevel": 0.05,
+      "type": "category_damage_bonus"
+    },
+    {
+      "category": "utility",
+      "bonusPerLevel": 0.05,
+      "type": "category_damage_bonus"
+    },
+    {
+      "category": "defense",
+      "bonusPerLevel": 0.05,
+      "type": "category_damage_bonus"
+    },
+    {
+      "category": "dark_arts",
+      "bonusPerLevel": 0.05,
+      "type": "category_damage_bonus"
+    }
+  ],
+  "tier": 1,
+  "column": 2
+}

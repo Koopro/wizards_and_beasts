@@ -1,0 +1,19 @@
+{
+  "id": "goblin_forge_sense",
+  "displayName": "Forge-Hardened",
+  "description": "Goblin metalcraft toughens your hide. +1 armor per level.",
+  "tree": "goblin_craft",
+  "maxLevel": 2,
+  "pointCost": 2,
+  "prerequisites": [
+    "goblin_appraisal"
+  ],
+  "effects": [
+    {
+      "attributeId": "armor",
+      "amountPerLevel": 1.0,
+      "type": "passive_attribute"
+    }
+  ],
+  "tier": 1
+}

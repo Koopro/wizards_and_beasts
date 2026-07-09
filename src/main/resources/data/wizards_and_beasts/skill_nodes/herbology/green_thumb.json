@@ -1,0 +1,13 @@
+{
+  "id": "green_thumb",
+  "displayName": "Green Thumb",
+  "description": "Begin studying magical plants.",
+  "tree": "herbology",
+  "effects": [
+    {
+      "abilityId": "green_thumb",
+      "type": "unlock_ability"
+    }
+  ],
+  "column": 1
+}

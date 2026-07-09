@@ -1,0 +1,20 @@
+{
+  "id": "beast_handler",
+  "displayName": "Beast Handler",
+  "description": "Creatures deal less damage to you. -10% per level.",
+  "tree": "magizoology",
+  "maxLevel": 2,
+  "pointCost": 2,
+  "prerequisites": [
+    "creature_knowledge"
+  ],
+  "effects": [
+    {
+      "stat": "beast_damage_resistance",
+      "perLevel": 0.1,
+      "type": "gameplay_bonus"
+    }
+  ],
+  "tier": 1,
+  "column": 2
+}

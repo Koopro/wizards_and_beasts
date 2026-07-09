@@ -1,0 +1,20 @@
+{
+  "id": "legilimency",
+  "displayName": "Legilimency",
+  "description": "Pierce the mind's defenses. +5% Dark Arts damage per level.",
+  "tree": "dark_arts",
+  "maxLevel": 2,
+  "pointCost": 2,
+  "prerequisites": [
+    "dark_knowledge"
+  ],
+  "effects": [
+    {
+      "category": "dark_arts",
+      "bonusPerLevel": 0.05,
+      "type": "category_damage_bonus"
+    }
+  ],
+  "tier": 1,
+  "column": 1
+}

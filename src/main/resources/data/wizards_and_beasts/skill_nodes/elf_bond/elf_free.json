@@ -1,0 +1,24 @@
+{
+  "id": "elf_free",
+  "displayName": "Free Elf",
+  "description": "Unbound at last. Swift and unyielding.",
+  "tree": "elf_bond",
+  "pointCost": 4,
+  "prerequisites": [
+    "elf_apparition",
+    "elf_nimble_fingers"
+  ],
+  "effects": [
+    {
+      "attributeId": "movement_speed",
+      "amountPerLevel": 0.01,
+      "type": "passive_attribute"
+    },
+    {
+      "abilityId": "free_elf",
+      "type": "unlock_ability"
+    }
+  ],
+  "tier": 3,
+  "column": 1
+}

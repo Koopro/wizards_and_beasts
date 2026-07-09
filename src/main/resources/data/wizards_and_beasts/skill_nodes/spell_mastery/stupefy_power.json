@@ -1,0 +1,18 @@
+{
+  "id": "stupefy_power",
+  "displayName": "Stupefy Power",
+  "description": "+10% Stupefy damage per level.",
+  "tree": "spell_mastery",
+  "maxLevel": 3,
+  "prerequisites": [
+    "stupefy_unlock"
+  ],
+  "effects": [
+    {
+      "spellId": "stupefy",
+      "bonusPerLevel": 0.1,
+      "type": "spell_damage_bonus"
+    }
+  ],
+  "tier": 2
+}

@@ -1,0 +1,19 @@
+{
+  "id": "elf_devotion",
+  "displayName": "Devotion",
+  "description": "A bound elf endures much. +1 heart per level.",
+  "tree": "elf_bond",
+  "maxLevel": 2,
+  "pointCost": 2,
+  "prerequisites": [
+    "elf_silent_step"
+  ],
+  "effects": [
+    {
+      "attributeId": "max_health",
+      "amountPerLevel": 2.0,
+      "type": "passive_attribute"
+    }
+  ],
+  "tier": 1
+}

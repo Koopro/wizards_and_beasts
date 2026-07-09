@@ -1,0 +1,24 @@
+{
+  "id": "goblin_steelheart",
+  "displayName": "Steelheart",
+  "description": "The resilience of the old guildmasters. +1 heart and goblin-steel resolve.",
+  "tree": "goblin_craft",
+  "pointCost": 4,
+  "prerequisites": [
+    "goblin_ledger",
+    "goblin_vault_step"
+  ],
+  "effects": [
+    {
+      "attributeId": "max_health",
+      "amountPerLevel": 2.0,
+      "type": "passive_attribute"
+    },
+    {
+      "abilityId": "goblin_steelheart",
+      "type": "unlock_ability"
+    }
+  ],
+  "tier": 3,
+  "column": 1
+}

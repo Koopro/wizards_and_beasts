@@ -1,0 +1,19 @@
+{
+  "id": "natural_remedy",
+  "displayName": "Natural Remedy",
+  "description": "Gain natural regeneration from your herbal knowledge.",
+  "tree": "herbology",
+  "pointCost": 3,
+  "prerequisites": [
+    "potion_potency",
+    "harvest_bounty"
+  ],
+  "effects": [
+    {
+      "abilityId": "natural_remedy",
+      "type": "unlock_ability"
+    }
+  ],
+  "tier": 2,
+  "column": 1
+}

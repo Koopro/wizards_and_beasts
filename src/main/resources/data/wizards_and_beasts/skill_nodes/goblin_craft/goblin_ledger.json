@@ -1,0 +1,18 @@
+{
+  "id": "goblin_ledger",
+  "displayName": "Guild Ledger",
+  "description": "Bind your dealings in goblin contract-law.",
+  "tree": "goblin_craft",
+  "pointCost": 3,
+  "prerequisites": [
+    "goblin_forge_sense"
+  ],
+  "effects": [
+    {
+      "abilityId": "goblin_ledger",
+      "type": "unlock_ability"
+    }
+  ],
+  "tier": 2,
+  "column": 1
+}

@@ -1,0 +1,20 @@
+{
+  "id": "utility_mastery",
+  "displayName": "Utility Mastery",
+  "description": "-10% cooldown on all utility spells per level.",
+  "tree": "spell_mastery",
+  "maxLevel": 3,
+  "pointCost": 2,
+  "prerequisites": [
+    "reparo_unlock"
+  ],
+  "effects": [
+    {
+      "category": "utility",
+      "reductionPerLevel": 0.1,
+      "type": "category_cooldown_reduction"
+    }
+  ],
+  "tier": 4,
+  "column": 2
+}

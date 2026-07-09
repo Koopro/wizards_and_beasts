@@ -1,0 +1,18 @@
+{
+  "id": "elf_apparition",
+  "displayName": "Elf-Apparition",
+  "description": "Elf-magic slips past wards that bind wizards.",
+  "tree": "elf_bond",
+  "pointCost": 3,
+  "prerequisites": [
+    "elf_devotion"
+  ],
+  "effects": [
+    {
+      "abilityId": "elf_apparition",
+      "type": "unlock_ability"
+    }
+  ],
+  "tier": 2,
+  "column": 1
+}

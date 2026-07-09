@@ -1,0 +1,20 @@
+{
+  "id": "dark_resilience",
+  "displayName": "Dark Resilience",
+  "description": "+2 max health per level from dark magic.",
+  "tree": "dark_arts",
+  "maxLevel": 2,
+  "pointCost": 2,
+  "prerequisites": [
+    "dark_damage"
+  ],
+  "effects": [
+    {
+      "attributeId": "max_health",
+      "amountPerLevel": 2.0,
+      "type": "passive_attribute"
+    }
+  ],
+  "tier": 2,
+  "column": 2
+}

@@ -1,0 +1,21 @@
+{
+  "id": "creature_bond",
+  "displayName": "Creature Bond",
+  "description": "+2 max health per level from creature companionship.",
+  "tree": "magizoology",
+  "maxLevel": 2,
+  "pointCost": 3,
+  "prerequisites": [
+    "niffler_friend",
+    "beast_handler"
+  ],
+  "effects": [
+    {
+      "attributeId": "max_health",
+      "amountPerLevel": 2.0,
+      "type": "passive_attribute"
+    }
+  ],
+  "tier": 2,
+  "column": 1
+}

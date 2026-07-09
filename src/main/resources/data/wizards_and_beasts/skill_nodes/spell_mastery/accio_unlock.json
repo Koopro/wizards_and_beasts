@@ -1,0 +1,19 @@
+{
+  "id": "accio_unlock",
+  "displayName": "Accio Technique",
+  "description": "Improve summoning form and pull control.",
+  "tree": "spell_mastery",
+  "pointCost": 2,
+  "prerequisites": [
+    "lumos_unlock"
+  ],
+  "effects": [
+    {
+      "spellId": "accio",
+      "reductionPerLevel": 0.1,
+      "type": "spell_cooldown_reduction"
+    }
+  ],
+  "tier": 2,
+  "column": 2
+}

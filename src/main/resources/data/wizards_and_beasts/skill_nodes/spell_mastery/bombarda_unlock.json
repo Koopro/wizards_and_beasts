@@ -1,0 +1,18 @@
+{
+  "id": "bombarda_unlock",
+  "displayName": "Bombarda Handling",
+  "description": "Focus on blast shaping and controlled detonation timing.",
+  "tree": "spell_mastery",
+  "pointCost": 3,
+  "prerequisites": [
+    "combat_focus"
+  ],
+  "effects": [
+    {
+      "spellId": "bombarda",
+      "bonusPerLevel": 0.1,
+      "type": "spell_damage_bonus"
+    }
+  ],
+  "tier": 5
+}

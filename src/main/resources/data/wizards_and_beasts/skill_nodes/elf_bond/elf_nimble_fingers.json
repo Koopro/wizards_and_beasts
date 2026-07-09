@@ -1,0 +1,18 @@
+{
+  "id": "elf_nimble_fingers",
+  "displayName": "Nimble Fingers",
+  "description": "Deft hands for any household task.",
+  "tree": "elf_bond",
+  "pointCost": 2,
+  "prerequisites": [
+    "elf_silent_step"
+  ],
+  "effects": [
+    {
+      "abilityId": "elf_nimble_fingers",
+      "type": "unlock_ability"
+    }
+  ],
+  "tier": 1,
+  "column": 2
+}

@@ -1,0 +1,18 @@
+{
+  "id": "lumos_unlock",
+  "displayName": "Lumos Attunement",
+  "description": "Refine your control over wand-light channeling.",
+  "tree": "spell_mastery",
+  "prerequisites": [
+    "basic_casting"
+  ],
+  "effects": [
+    {
+      "spellId": "lumos",
+      "reductionPerLevel": 0.15,
+      "type": "spell_cooldown_reduction"
+    }
+  ],
+  "tier": 1,
+  "column": 1
+}

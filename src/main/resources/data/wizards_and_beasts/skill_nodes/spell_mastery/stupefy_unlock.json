@@ -1,0 +1,18 @@
+{
+  "id": "stupefy_unlock",
+  "displayName": "Stupefy Attunement",
+  "description": "Attune your wandwork to Stupefy casting principles.",
+  "tree": "spell_mastery",
+  "pointCost": 2,
+  "prerequisites": [
+    "basic_casting"
+  ],
+  "effects": [
+    {
+      "spellId": "stupefy",
+      "bonusPerLevel": 0.08,
+      "type": "spell_damage_bonus"
+    }
+  ],
+  "tier": 1
+}

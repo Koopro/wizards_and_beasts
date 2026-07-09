@@ -1,0 +1,13 @@
+{
+  "id": "wand_study",
+  "displayName": "Wand Study",
+  "description": "Begin studying the secrets of wands.",
+  "tree": "wandlore",
+  "effects": [
+    {
+      "abilityId": "wand_study",
+      "type": "unlock_ability"
+    }
+  ],
+  "column": 1
+}

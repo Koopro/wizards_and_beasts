@@ -1,0 +1,20 @@
+{
+  "id": "dragon_tamer",
+  "displayName": "Dragon Tamer",
+  "description": "Hard-won composure around the largest beasts. -10% creature damage per level.",
+  "tree": "magizoology",
+  "maxLevel": 2,
+  "pointCost": 3,
+  "prerequisites": [
+    "beast_handler"
+  ],
+  "effects": [
+    {
+      "stat": "beast_damage_resistance",
+      "perLevel": 0.1,
+      "type": "gameplay_bonus"
+    }
+  ],
+  "tier": 2,
+  "column": 2
+}

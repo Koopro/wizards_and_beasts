@@ -127,6 +127,11 @@ public final class ClientPayloadHandlers {
         context.enqueueWork(() -> BestiaryEntryRegistry.setClientEntries(payload.entries()));
     }
 
+    public static void handleSyncSkillDefinitions(
+            at.koopro.wizardsandbeasts.network.skill.SyncSkillDefinitionsPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> at.koopro.wizardsandbeasts.skill.SkillTrees.setClientDefinitions(payload.skills()));
+    }
+
     public static void handleSyncHandbook(SyncHandbookPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> HandbookChapterManager.setClientChapters(payload.chapters()));
     }

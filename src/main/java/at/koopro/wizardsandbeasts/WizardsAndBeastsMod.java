@@ -29,7 +29,6 @@ import at.koopro.wizardsandbeasts.module.condition.ModConditions;
 import at.koopro.wizardsandbeasts.registry.EntityAttributeBindings;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModAttributes;
-import at.koopro.wizardsandbeasts.skill.SkillTrees;
 import at.koopro.wizardsandbeasts.spell.core.Spells;
 import at.koopro.wizardsandbeasts.spell.def.SpellReloadListener;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
@@ -155,12 +154,14 @@ public class WizardsAndBeastsMod {
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "pocket_template_reload_listener"),
                     new at.koopro.wizardsandbeasts.trunk.template.PocketTemplateLoader());
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "skill_node_reload_listener"),
+                    new at.koopro.wizardsandbeasts.skill.SkillNodeLoader());
         });
 
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 
         WandModuleRegistry.bootstrap();
-        SkillTrees.init();
 
         LOGGER.info("Initializing Wizards & Beasts mod.");
     }

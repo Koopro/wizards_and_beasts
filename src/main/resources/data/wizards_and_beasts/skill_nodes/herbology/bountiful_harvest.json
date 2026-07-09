@@ -1,0 +1,19 @@
+{
+  "id": "bountiful_harvest",
+  "displayName": "Bountiful Harvest",
+  "description": "Mastery of the soil. +10% bonus crop drop chance.",
+  "tree": "herbology",
+  "pointCost": 3,
+  "prerequisites": [
+    "harvest_bounty"
+  ],
+  "effects": [
+    {
+      "stat": "harvest_bonus_chance",
+      "perLevel": 0.1,
+      "type": "gameplay_bonus"
+    }
+  ],
+  "tier": 2,
+  "column": 2
+}

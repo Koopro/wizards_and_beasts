@@ -1,14 +1,43 @@
 package at.koopro.wizardsandbeasts.skill;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import org.jspecify.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 /**
  * An individual node in a skill tree. Immutable after construction.
- * Built via {@link #builder(String, String)}.
+ * Built via {@link #builder(String, String)} or parsed from datapack JSON via {@link #CODEC}.
  */
 public final class Skill {
+
+    /**
+     * Datapack codec mirroring the builder field set exactly. {@code nodeEffects} is lazily
+     * initialized so parsing/encoding nodes without explicit node effects (all current content)
+     * never touches {@link SkillNodeEffect}'s registry-backed codecs.
+     */
+    public static final Codec<Skill> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Codec.STRING.fieldOf("id").forGetter(Skill::getId),
+            Codec.STRING.fieldOf("displayName").forGetter(Skill::getDisplayName),
+            Codec.STRING.optionalFieldOf("description", "").forGetter(Skill::getDescription),
+            SkillTreeId.CODEC.fieldOf("tree").forGetter(Skill::getTree),
+            Codec.INT.optionalFieldOf("maxLevel", 1).forGetter(Skill::getMaxLevel),
+            Codec.INT.optionalFieldOf("pointCost", 1).forGetter(Skill::getPointCost),
+            Codec.STRING.listOf().optionalFieldOf("prerequisites", List.of()).forGetter(Skill::getPrerequisites),
+            SkillEffect.CODEC.listOf().optionalFieldOf("effects", List.of()).forGetter(Skill::getEffects),
+            Codec.lazyInitialized(() -> SkillNodeEffect.CODEC.listOf())
+                    .optionalFieldOf("nodeEffects", List.of()).forGetter(Skill::getExplicitNodeEffects),
+            Codec.INT.optionalFieldOf("tier", 0).forGetter(Skill::getTier),
+            Codec.INT.optionalFieldOf("column", 0).forGetter(Skill::getColumn)
+    ).apply(instance, Skill::fromCodec));
+
+    public static final StreamCodec<ByteBuf, Skill> STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);
 
     private final String id;
     private final String displayName;
@@ -18,7 +47,10 @@ public final class Skill {
     private final int pointCost;
     private final List<String> prerequisites;
     private final List<SkillEffect> effects;
-    private List<SkillNodeEffect> nodeEffects; // null = not yet derived (lazy, requires MC bootstrap)
+    /** Node effects declared explicitly (builder/JSON); empty for every current node. */
+    private final List<SkillNodeEffect> explicitNodeEffects;
+    /** Derived from {@link #effects} on first use when no explicit node effects exist (requires MC bootstrap). */
+    private @Nullable List<SkillNodeEffect> derivedNodeEffects;
     private final int tier;
     private final int column;
 
@@ -31,10 +63,25 @@ public final class Skill {
         this.pointCost = builder.pointCost;
         this.prerequisites = Collections.unmodifiableList(new ArrayList<>(builder.prerequisites));
         this.effects = Collections.unmodifiableList(new ArrayList<>(builder.effects));
-        this.nodeEffects = builder.nodeEffects.isEmpty() ? null
-                : Collections.unmodifiableList(new ArrayList<>(builder.nodeEffects));
+        this.explicitNodeEffects = Collections.unmodifiableList(new ArrayList<>(builder.nodeEffects));
         this.tier = builder.tier;
         this.column = builder.column;
+    }
+
+    private static Skill fromCodec(String id, String displayName, String description, SkillTreeId tree,
+                                   int maxLevel, int pointCost, List<String> prerequisites,
+                                   List<SkillEffect> effects, List<SkillNodeEffect> nodeEffects,
+                                   int tier, int column) {
+        Builder builder = builder(id, displayName)
+                .description(description)
+                .tree(tree)
+                .maxLevel(maxLevel)
+                .cost(pointCost)
+                .position(tier, column);
+        prerequisites.forEach(builder::prerequisite);
+        effects.forEach(builder::effect);
+        nodeEffects.forEach(builder::nodeEffect);
+        return builder.build();
     }
 
     public String getId() { return id; }
@@ -45,11 +92,18 @@ public final class Skill {
     public int getPointCost() { return pointCost; }
     public List<String> getPrerequisites() { return prerequisites; }
     public List<SkillEffect> getEffects() { return effects; }
+
+    /** Explicitly declared node effects only — never the derived ones. This is what serializes. */
+    public List<SkillNodeEffect> getExplicitNodeEffects() { return explicitNodeEffects; }
+
     public List<SkillNodeEffect> getNodeEffects() {
-        if (nodeEffects == null) {
-            nodeEffects = deriveNodeEffects();
+        if (!explicitNodeEffects.isEmpty()) {
+            return explicitNodeEffects;
         }
-        return nodeEffects;
+        if (derivedNodeEffects == null) {
+            derivedNodeEffects = deriveNodeEffects();
+        }
+        return derivedNodeEffects;
     }
 
     private List<SkillNodeEffect> deriveNodeEffects() {

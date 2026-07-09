@@ -1,0 +1,19 @@
+{
+  "id": "combat_focus",
+  "displayName": "Combat Focus",
+  "description": "+5% damage to all combat spells per level.",
+  "tree": "spell_mastery",
+  "maxLevel": 3,
+  "pointCost": 2,
+  "prerequisites": [
+    "incendio_unlock"
+  ],
+  "effects": [
+    {
+      "category": "combat",
+      "bonusPerLevel": 0.05,
+      "type": "category_damage_bonus"
+    }
+  ],
+  "tier": 4
+}

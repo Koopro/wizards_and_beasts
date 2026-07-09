@@ -22,6 +22,17 @@ public enum SkillTreeId {
     /** Which heritage group a tree belongs to; drives both UI tab visibility and server unlock gating. */
     public enum Audience { WIZARD, GOBLIN, HOUSE_ELF }
 
+    /** Serializes as the lowercase tree id (e.g. {@code "spell_mastery"}); unknown ids are a parse error. */
+    public static final com.mojang.serialization.Codec<SkillTreeId> CODEC =
+            com.mojang.serialization.Codec.STRING.comapFlatMap(
+                    raw -> {
+                        SkillTreeId tree = byId(raw);
+                        return tree != null
+                                ? com.mojang.serialization.DataResult.success(tree)
+                                : com.mojang.serialization.DataResult.error(() -> "Unknown skill tree id: " + raw);
+                    },
+                    SkillTreeId::getId);
+
     private static final Map<String, SkillTreeId> BY_ID = new HashMap<>();
 
     static {

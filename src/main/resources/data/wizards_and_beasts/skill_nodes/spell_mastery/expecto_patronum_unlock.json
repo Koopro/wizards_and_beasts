@@ -1,0 +1,19 @@
+{
+  "id": "expecto_patronum_unlock",
+  "displayName": "Patronus Focus",
+  "description": "Strengthen defensive focus and anti-dark channel stability.",
+  "tree": "spell_mastery",
+  "pointCost": 4,
+  "prerequisites": [
+    "protego_unlock"
+  ],
+  "effects": [
+    {
+      "spellId": "expecto_patronum",
+      "reductionPerLevel": 0.1,
+      "type": "spell_cooldown_reduction"
+    }
+  ],
+  "tier": 5,
+  "column": 2
+}

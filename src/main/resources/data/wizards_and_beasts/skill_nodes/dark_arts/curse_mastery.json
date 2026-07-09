@@ -1,0 +1,20 @@
+{
+  "id": "curse_mastery",
+  "displayName": "Curse Mastery",
+  "description": "Curses come quicker to a hardened mind. -8% Dark Arts cooldown per level.",
+  "tree": "dark_arts",
+  "maxLevel": 2,
+  "pointCost": 3,
+  "prerequisites": [
+    "dark_resilience"
+  ],
+  "effects": [
+    {
+      "category": "dark_arts",
+      "reductionPerLevel": 0.08,
+      "type": "category_cooldown_reduction"
+    }
+  ],
+  "tier": 3,
+  "column": 2
+}

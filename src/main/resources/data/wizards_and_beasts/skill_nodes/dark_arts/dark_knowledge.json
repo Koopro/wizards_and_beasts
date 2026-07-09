@@ -1,0 +1,19 @@
+{
+  "id": "dark_knowledge",
+  "displayName": "Dark Knowledge",
+  "description": "Delve into the forbidden arts.",
+  "tree": "dark_arts",
+  "pointCost": 2,
+  "effects": [
+    {
+      "abilityId": "dark_knowledge",
+      "type": "unlock_ability"
+    },
+    {
+      "category": "dark_arts",
+      "bonusPerLevel": 0.04,
+      "type": "category_damage_bonus"
+    }
+  ],
+  "column": 1
+}

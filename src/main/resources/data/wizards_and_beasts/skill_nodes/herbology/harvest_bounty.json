@@ -1,0 +1,20 @@
+{
+  "id": "harvest_bounty",
+  "displayName": "Harvest Bounty",
+  "description": "+15% chance for bonus crop drops per level.",
+  "tree": "herbology",
+  "maxLevel": 2,
+  "pointCost": 2,
+  "prerequisites": [
+    "green_thumb"
+  ],
+  "effects": [
+    {
+      "stat": "harvest_bonus_chance",
+      "perLevel": 0.15,
+      "type": "gameplay_bonus"
+    }
+  ],
+  "tier": 1,
+  "column": 2
+}

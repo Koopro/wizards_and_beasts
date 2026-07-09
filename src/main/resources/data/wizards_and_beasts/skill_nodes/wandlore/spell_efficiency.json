@@ -1,0 +1,19 @@
+{
+  "id": "spell_efficiency",
+  "displayName": "Spell Efficiency",
+  "description": "-8% cooldown on combat spells per level.",
+  "tree": "wandlore",
+  "maxLevel": 3,
+  "pointCost": 2,
+  "prerequisites": [
+    "quick_cast"
+  ],
+  "effects": [
+    {
+      "category": "combat",
+      "reductionPerLevel": 0.08,
+      "type": "category_cooldown_reduction"
+    }
+  ],
+  "tier": 2
+}

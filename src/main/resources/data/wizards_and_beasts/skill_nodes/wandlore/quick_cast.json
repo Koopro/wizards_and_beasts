@@ -1,0 +1,34 @@
+{
+  "id": "quick_cast",
+  "displayName": "Quick Cast",
+  "description": "-5% cooldown on all spells per level.",
+  "tree": "wandlore",
+  "maxLevel": 3,
+  "pointCost": 2,
+  "prerequisites": [
+    "wand_study"
+  ],
+  "effects": [
+    {
+      "category": "combat",
+      "reductionPerLevel": 0.05,
+      "type": "category_cooldown_reduction"
+    },
+    {
+      "category": "utility",
+      "reductionPerLevel": 0.05,
+      "type": "category_cooldown_reduction"
+    },
+    {
+      "category": "defense",
+      "reductionPerLevel": 0.05,
+      "type": "category_cooldown_reduction"
+    },
+    {
+      "category": "dark_arts",
+      "reductionPerLevel": 0.05,
+      "type": "category_cooldown_reduction"
+    }
+  ],
+  "tier": 1
+}

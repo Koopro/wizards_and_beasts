@@ -1,0 +1,19 @@
+{
+  "id": "flipendo_unlock",
+  "displayName": "Flipendo Handling",
+  "description": "Train impact timing for forceful knockback casts.",
+  "tree": "spell_mastery",
+  "pointCost": 2,
+  "prerequisites": [
+    "expelliarmus_unlock"
+  ],
+  "effects": [
+    {
+      "spellId": "flipendo",
+      "bonusPerLevel": 0.1,
+      "type": "spell_damage_bonus"
+    }
+  ],
+  "tier": 3,
+  "column": 1
+}

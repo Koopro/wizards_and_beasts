@@ -1,0 +1,19 @@
+{
+  "id": "swift_brewer",
+  "displayName": "Swift Brewer",
+  "description": "Practised hands speed your craft. -8% utility cooldown per level.",
+  "tree": "alchemy",
+  "maxLevel": 3,
+  "pointCost": 2,
+  "prerequisites": [
+    "alchemical_vigor"
+  ],
+  "effects": [
+    {
+      "category": "utility",
+      "reductionPerLevel": 0.08,
+      "type": "category_cooldown_reduction"
+    }
+  ],
+  "tier": 1
+}

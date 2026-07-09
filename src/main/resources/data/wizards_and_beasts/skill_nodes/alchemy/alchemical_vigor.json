@@ -1,0 +1,14 @@
+{
+  "id": "alchemical_vigor",
+  "displayName": "Alchemical Vigor",
+  "description": "Begin the alchemist's path. Tempered elixirs fortify the body. +2 max health.",
+  "tree": "alchemy",
+  "effects": [
+    {
+      "attributeId": "max_health",
+      "amountPerLevel": 2.0,
+      "type": "passive_attribute"
+    }
+  ],
+  "column": 1
+}

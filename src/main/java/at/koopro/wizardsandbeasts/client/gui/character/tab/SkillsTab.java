@@ -49,7 +49,7 @@ public final class SkillsTab implements CharacterTab {
         cy += 10;
 
         for (SkillTreeId treeId : SkillTreeId.values()) {
-            List<Skill> treeSkills = SkillTrees.getTree(treeId);
+            List<Skill> treeSkills = SkillTrees.clientGetTree(treeId);
             int total = treeSkills.size();
             int done  = (int) treeSkills.stream()
                     .filter(s -> unlocked.getOrDefault(s.getId(), 0) > 0)
@@ -71,7 +71,7 @@ public final class SkillsTab implements CharacterTab {
         List<String> nodeNames = new ArrayList<>();
         for (Map.Entry<String, Integer> entry : unlocked.entrySet()) {
             if (entry.getValue() <= 0) continue;
-            Skill skill = SkillTrees.byId(entry.getKey());
+            Skill skill = SkillTrees.clientById(entry.getKey());
             if (skill != null) nodeNames.add(skill.getDisplayName());
         }
         cy = drawChips(g, font, cx, cy, w - 4, h - (cy - y), nodeNames);

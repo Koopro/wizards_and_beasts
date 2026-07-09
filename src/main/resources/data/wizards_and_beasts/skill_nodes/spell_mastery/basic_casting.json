@@ -1,0 +1,13 @@
+{
+  "id": "basic_casting",
+  "displayName": "Basic Casting",
+  "description": "Begin your journey as a spellcaster.",
+  "tree": "spell_mastery",
+  "effects": [
+    {
+      "abilityId": "basic_casting",
+      "type": "unlock_ability"
+    }
+  ],
+  "column": 1
+}

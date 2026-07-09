@@ -1,0 +1,13 @@
+{
+  "id": "creature_knowledge",
+  "displayName": "Creature Knowledge",
+  "description": "Begin studying magical creatures.",
+  "tree": "magizoology",
+  "effects": [
+    {
+      "abilityId": "creature_knowledge",
+      "type": "unlock_ability"
+    }
+  ],
+  "column": 1
+}

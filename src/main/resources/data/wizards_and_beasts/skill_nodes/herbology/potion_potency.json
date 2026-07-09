@@ -1,0 +1,18 @@
+{
+  "id": "potion_potency",
+  "displayName": "Potion Potency",
+  "description": "+10% potion duration per level.",
+  "tree": "herbology",
+  "maxLevel": 3,
+  "pointCost": 2,
+  "prerequisites": [
+    "green_thumb"
+  ],
+  "effects": [
+    {
+      "abilityId": "potion_potency",
+      "type": "unlock_ability"
+    }
+  ],
+  "tier": 1
+}

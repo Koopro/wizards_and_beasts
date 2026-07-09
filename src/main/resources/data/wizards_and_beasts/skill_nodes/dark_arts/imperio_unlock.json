@@ -1,0 +1,18 @@
+{
+  "id": "imperio_unlock",
+  "displayName": "Imperio Discipline",
+  "description": "Practice coercive-control casting patterns and mental focus.",
+  "tree": "dark_arts",
+  "pointCost": 4,
+  "prerequisites": [
+    "crucio_unlock"
+  ],
+  "effects": [
+    {
+      "spellId": "imperio",
+      "reductionPerLevel": 0.1,
+      "type": "spell_cooldown_reduction"
+    }
+  ],
+  "tier": 2
+}

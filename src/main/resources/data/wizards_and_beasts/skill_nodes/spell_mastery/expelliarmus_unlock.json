@@ -1,0 +1,19 @@
+{
+  "id": "expelliarmus_unlock",
+  "displayName": "Expelliarmus Technique",
+  "description": "Practice precision disarm fundamentals.",
+  "tree": "spell_mastery",
+  "pointCost": 2,
+  "prerequisites": [
+    "stupefy_unlock"
+  ],
+  "effects": [
+    {
+      "spellId": "expelliarmus",
+      "reductionPerLevel": 0.1,
+      "type": "spell_cooldown_reduction"
+    }
+  ],
+  "tier": 2,
+  "column": 1
+}

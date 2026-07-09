@@ -1,0 +1,29 @@
+{
+  "id": "philosophers_stone",
+  "displayName": "Philosopher's Stone",
+  "description": "The alchemist's masterwork. +4 max health and -10% utility cooldown.",
+  "tree": "alchemy",
+  "pointCost": 5,
+  "prerequisites": [
+    "transmute_focus",
+    "hardened_skin"
+  ],
+  "effects": [
+    {
+      "attributeId": "max_health",
+      "amountPerLevel": 4.0,
+      "type": "passive_attribute"
+    },
+    {
+      "category": "utility",
+      "reductionPerLevel": 0.1,
+      "type": "category_cooldown_reduction"
+    },
+    {
+      "abilityId": "philosophers_stone",
+      "type": "unlock_ability"
+    }
+  ],
+  "tier": 3,
+  "column": 1
+}

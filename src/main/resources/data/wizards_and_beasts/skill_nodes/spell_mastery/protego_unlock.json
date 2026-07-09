@@ -1,0 +1,19 @@
+{
+  "id": "protego_unlock",
+  "displayName": "Protego Discipline",
+  "description": "Study the timing and structure of defensive casting.",
+  "tree": "spell_mastery",
+  "pointCost": 2,
+  "prerequisites": [
+    "basic_casting"
+  ],
+  "effects": [
+    {
+      "spellId": "protego",
+      "reductionPerLevel": 0.08,
+      "type": "spell_cooldown_reduction"
+    }
+  ],
+  "tier": 1,
+  "column": 2
+}

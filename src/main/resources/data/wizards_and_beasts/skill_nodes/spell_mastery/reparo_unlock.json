@@ -1,0 +1,19 @@
+{
+  "id": "reparo_unlock",
+  "displayName": "Reparo Craft",
+  "description": "Practice restoration structure and controlled repair flow.",
+  "tree": "spell_mastery",
+  "pointCost": 2,
+  "prerequisites": [
+    "accio_unlock"
+  ],
+  "effects": [
+    {
+      "spellId": "reparo",
+      "reductionPerLevel": 0.15,
+      "type": "spell_cooldown_reduction"
+    }
+  ],
+  "tier": 3,
+  "column": 2
+}

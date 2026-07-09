@@ -1,0 +1,20 @@
+{
+  "id": "hardened_skin",
+  "displayName": "Hardened Skin",
+  "description": "Alchemical reagents toughen the flesh. +1 armor per level.",
+  "tree": "alchemy",
+  "maxLevel": 2,
+  "pointCost": 2,
+  "prerequisites": [
+    "alchemical_vigor"
+  ],
+  "effects": [
+    {
+      "attributeId": "armor",
+      "amountPerLevel": 1.0,
+      "type": "passive_attribute"
+    }
+  ],
+  "tier": 1,
+  "column": 2
+}

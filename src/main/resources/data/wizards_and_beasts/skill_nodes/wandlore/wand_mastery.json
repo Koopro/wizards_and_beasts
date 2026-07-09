@@ -1,0 +1,29 @@
+{
+  "id": "wand_mastery",
+  "displayName": "Wand Mastery",
+  "description": "Achieve true mastery over your wand.",
+  "tree": "wandlore",
+  "pointCost": 4,
+  "prerequisites": [
+    "spell_efficiency",
+    "wand_precision"
+  ],
+  "effects": [
+    {
+      "abilityId": "wand_mastery",
+      "type": "unlock_ability"
+    },
+    {
+      "category": "combat",
+      "bonusPerLevel": 0.1,
+      "type": "category_damage_bonus"
+    },
+    {
+      "category": "combat",
+      "reductionPerLevel": 0.1,
+      "type": "category_cooldown_reduction"
+    }
+  ],
+  "tier": 3,
+  "column": 1
+}

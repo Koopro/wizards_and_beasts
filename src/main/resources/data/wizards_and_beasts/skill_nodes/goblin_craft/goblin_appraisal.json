@@ -1,0 +1,13 @@
+{
+  "id": "goblin_appraisal",
+  "displayName": "Appraisal",
+  "description": "Read the true worth of coin and ore at a glance.",
+  "tree": "goblin_craft",
+  "effects": [
+    {
+      "abilityId": "goblin_appraisal",
+      "type": "unlock_ability"
+    }
+  ],
+  "column": 1
+}

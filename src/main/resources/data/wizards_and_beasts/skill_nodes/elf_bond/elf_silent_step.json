@@ -1,0 +1,15 @@
+{
+  "id": "elf_silent_step",
+  "displayName": "Silent Step",
+  "description": "Move unseen and unheard. +movement speed per level.",
+  "tree": "elf_bond",
+  "maxLevel": 2,
+  "effects": [
+    {
+      "attributeId": "movement_speed",
+      "amountPerLevel": 0.01,
+      "type": "passive_attribute"
+    }
+  ],
+  "column": 1
+}

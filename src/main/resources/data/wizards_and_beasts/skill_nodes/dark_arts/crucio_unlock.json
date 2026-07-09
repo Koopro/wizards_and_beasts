@@ -1,0 +1,18 @@
+{
+  "id": "crucio_unlock",
+  "displayName": "Crucio Discipline",
+  "description": "Study the discipline and control needed for Cruciatus casting.",
+  "tree": "dark_arts",
+  "pointCost": 4,
+  "prerequisites": [
+    "dark_knowledge"
+  ],
+  "effects": [
+    {
+      "spellId": "crucio",
+      "bonusPerLevel": 0.06,
+      "type": "spell_damage_bonus"
+    }
+  ],
+  "tier": 1
+}

@@ -1,0 +1,18 @@
+{
+  "id": "incendio_unlock",
+  "displayName": "Incendio Handling",
+  "description": "Build safer ignition control and heat projection.",
+  "tree": "spell_mastery",
+  "pointCost": 3,
+  "prerequisites": [
+    "stupefy_power"
+  ],
+  "effects": [
+    {
+      "spellId": "incendio",
+      "bonusPerLevel": 0.08,
+      "type": "spell_damage_bonus"
+    }
+  ],
+  "tier": 3
+}

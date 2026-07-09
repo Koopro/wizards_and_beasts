@@ -1,0 +1,20 @@
+{
+  "id": "avada_kedavra_unlock",
+  "displayName": "Killing Curse Mastery",
+  "description": "Pursue forbidden mastery of lethal dark-arts channeling.",
+  "tree": "dark_arts",
+  "pointCost": 6,
+  "prerequisites": [
+    "imperio_unlock",
+    "dark_resilience"
+  ],
+  "effects": [
+    {
+      "spellId": "avada_kedavra",
+      "reductionPerLevel": 0.08,
+      "type": "spell_cooldown_reduction"
+    }
+  ],
+  "tier": 3,
+  "column": 1
+}

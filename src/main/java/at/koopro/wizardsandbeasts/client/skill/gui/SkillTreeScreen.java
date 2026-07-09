@@ -111,7 +111,7 @@ public class SkillTreeScreen extends Screen {
     private void rebuildTree() {
         visibleSkills.clear();
         visibleNodes.clear();
-        List<Skill> treeSkills = SkillTrees.getTree(activeTree);
+        List<Skill> treeSkills = SkillTrees.clientGetTree(activeTree);
         visibleSkills.addAll(treeSkills);
         recalculateGraphBounds(treeSkills);
         for (Skill skill : treeSkills) {
@@ -271,7 +271,7 @@ public class SkillTreeScreen extends Screen {
     }
 
     private void centerGraphInViewport() {
-        List<Skill> treeSkills = SkillTrees.getTree(activeTree);
+        List<Skill> treeSkills = SkillTrees.clientGetTree(activeTree);
         recalculateGraphBounds(treeSkills);
         int graphCenterX = (graphMinX + graphMaxX) / 2;
         int graphCenterY = (graphMinY + graphMaxY) / 2;
