@@ -353,18 +353,22 @@ public final class SkillCommands {
         ChatHelper.send(player, ChatHelper.info("Level: ").append(
                 ChatHelper.white(level + "/" + skill.getMaxLevel())));
 
-        if (!skill.getPrerequisites().isEmpty()) {
-            StringBuilder prereqs = new StringBuilder();
-            for (String prereqId : skill.getPrerequisites()) {
-                Skill prereq = SkillTrees.byId(prereqId);
-                boolean met = data.isMaxed(prereqId);
-                prereqs.append(met ? "§a" : "§c");
-                prereqs.append(prereq != null ? prereq.getDisplayName() : prereqId);
-                prereqs.append("§7, ");
+        var neighbors = SkillTrees.neighbors(skillId);
+        if (!neighbors.isEmpty()) {
+            StringBuilder connected = new StringBuilder();
+            for (String neighborId : neighbors) {
+                Skill neighbor = SkillTrees.byId(neighborId);
+                boolean allocated = data.hasSkill(neighborId);
+                connected.append(allocated ? "§a" : "§c");
+                connected.append(neighbor != null ? neighbor.getDisplayName() : neighborId);
+                connected.append("§7, ");
             }
-            if (prereqs.length() > 4) prereqs.setLength(prereqs.length() - 4);
-            ChatHelper.send(player, ChatHelper.info("Prerequisites: ").append(
-                    ChatHelper.colored(prereqs.toString())));
+            if (connected.length() > 4) connected.setLength(connected.length() - 4);
+            ChatHelper.send(player, ChatHelper.info("Connected: ").append(
+                    ChatHelper.colored(connected.toString())));
+        }
+        if (skill.isRoot()) {
+            ChatHelper.send(player, ChatHelper.dim("  Web root — always allocatable."));
         }
 
         for (SkillEffect effect : skill.getEffects()) {

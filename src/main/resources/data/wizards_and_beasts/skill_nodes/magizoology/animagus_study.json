@@ -4,9 +4,6 @@
   "description": "Learn the Animagus discipline. Complete the mandrake-leaf ritual during a thunderstorm to assume a beast form.",
   "tree": "magizoology",
   "pointCost": 3,
-  "prerequisites": [
-    "creature_bond"
-  ],
   "effects": [
     {
       "abilityId": "animagus",
@@ -14,5 +11,9 @@
     }
   ],
   "tier": 3,
-  "column": 1
+  "x": -22.2,
+  "y": 254.0,
+  "edges": [
+    "creature_bond"
+  ]
 }

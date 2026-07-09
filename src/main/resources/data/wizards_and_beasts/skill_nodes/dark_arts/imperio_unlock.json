@@ -4,9 +4,6 @@
   "description": "Practice coercive-control casting patterns and mental focus.",
   "tree": "dark_arts",
   "pointCost": 4,
-  "prerequisites": [
-    "crucio_unlock"
-  ],
   "effects": [
     {
       "spellId": "imperio",
@@ -14,5 +11,10 @@
       "type": "spell_cooldown_reduction"
     }
   ],
-  "tier": 2
+  "tier": 2,
+  "x": 17.4,
+  "y": 199.2,
+  "edges": [
+    "crucio_unlock"
+  ]
 }

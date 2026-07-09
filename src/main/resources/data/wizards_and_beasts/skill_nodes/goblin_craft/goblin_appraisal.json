@@ -9,5 +9,7 @@
       "type": "unlock_ability"
     }
   ],
-  "column": 1
+  "x": 0.0,
+  "y": 0.0,
+  "root": true
 }

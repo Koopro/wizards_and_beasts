@@ -4,9 +4,6 @@
   "description": "Practice precision disarm fundamentals.",
   "tree": "spell_mastery",
   "pointCost": 2,
-  "prerequisites": [
-    "stupefy_unlock"
-  ],
   "effects": [
     {
       "spellId": "expelliarmus",
@@ -15,5 +12,9 @@
     }
   ],
   "tier": 2,
-  "column": 1
+  "x": 200.0,
+  "y": 0.0,
+  "edges": [
+    "stupefy_unlock"
+  ]
 }

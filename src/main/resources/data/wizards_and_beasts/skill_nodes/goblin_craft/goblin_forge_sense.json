@@ -5,9 +5,6 @@
   "tree": "goblin_craft",
   "maxLevel": 2,
   "pointCost": 2,
-  "prerequisites": [
-    "goblin_appraisal"
-  ],
   "effects": [
     {
       "attributeId": "armor",
@@ -15,5 +12,10 @@
       "type": "passive_attribute"
     }
   ],
-  "tier": 1
+  "tier": 1,
+  "x": 70.0,
+  "y": 0.0,
+  "edges": [
+    "goblin_appraisal"
+  ]
 }

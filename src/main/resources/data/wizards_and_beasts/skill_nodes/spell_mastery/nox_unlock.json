@@ -3,9 +3,6 @@
   "displayName": "Nox Control",
   "description": "Train clean cancellation of wand-light channeling.",
   "tree": "spell_mastery",
-  "prerequisites": [
-    "lumos_unlock"
-  ],
   "effects": [
     {
       "spellId": "nox",
@@ -14,5 +11,9 @@
     }
   ],
   "tier": 2,
-  "column": 3
+  "x": 195.3,
+  "y": 43.3,
+  "edges": [
+    "lumos_unlock"
+  ]
 }

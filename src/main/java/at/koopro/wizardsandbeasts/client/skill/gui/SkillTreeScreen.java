@@ -10,43 +10,55 @@ import at.koopro.wizardsandbeasts.skill.Skill;
 import at.koopro.wizardsandbeasts.skill.SkillTreeId;
 import at.koopro.wizardsandbeasts.skill.SkillTrees;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
+import org.jspecify.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
+/**
+ * Pan/zoom canvas over the player's audience skill web (Phase 2 infrastructure — plain shapes;
+ * the star-chart visual treatment is Phase 3). Nodes render at datapack {@code x}/{@code y}
+ * coordinates; drag to pan, scroll to zoom toward the cursor, click an allocatable node to send
+ * the {@link SkillUnlockC2SPayload} roundtrip (state applies on the server's sync response).
+ */
 public class SkillTreeScreen extends Screen {
 
-    private SkillTreeId activeTree = SkillTreeId.SPELL_MASTERY;
-    private final List<SkillTreeId> availableTrees = new ArrayList<>();
-    private final List<TabBounds> tabs = new ArrayList<>();
-    private final List<Skill> visibleSkills = new ArrayList<>();
-    private final List<NodeBounds> visibleNodes = new ArrayList<>();
+    private static final double MIN_ZOOM = 0.25;
+    private static final double MAX_ZOOM = 2.0;
+
+    // Node visual states (plain shapes until Phase 3).
+    private static final int COLOR_ALLOCATED = 0xFFE8C24A;
+    private static final int COLOR_ALLOCATED_RIM = 0xFFFFF0B0;
+    private static final int COLOR_ALLOCATABLE = 0xFF6FA8DC;
+    private static final int COLOR_ALLOCATABLE_RIM = 0xFFB8D8F8;
+    private static final int COLOR_LOCKED = 0xFF4A4A55;
+    private static final int COLOR_LOCKED_RIM = 0xFF6A6A78;
+    private static final int COLOR_EDGE_DIM = 0xFF3A3A48;
+    private static final int COLOR_EDGE_LIT = 0xFFD8C070;
+    private static final int COLOR_ROOT_CORE = 0xFF2A2A36;
+
+    private SkillTreeId.@Nullable Audience audience;
+    private List<Skill> webNodes = List.of();
+
+    private double panX;
+    private double panY;
+    private double zoom = 1.0;
+    private boolean panned; // suppress click-allocate after a drag
 
     private int panelX;
     private int panelY;
-    private int viewportX;
-    private int viewportY;
-
-    private int panX = 0;
-    private int panY = 0;
-    private int graphMinX = 0;
-    private int graphMaxX = 0;
-    private int graphMinY = 0;
-    private int graphMaxY = 0;
-
-    private NodeBounds hoveredNode;
-    private NodeBounds selectedNode;
-    private String resolvedTitle = "Skills";
-    private GuiScaleHelper.Layout layout;
     private int panelW;
     private int panelH;
+    private int viewportX;
+    private int viewportY;
     private int viewportW;
     private int viewportH;
+    private String resolvedTitle = "Skills";
+    private GuiScaleHelper.Layout layout;
+
+    private @Nullable Skill hoveredNode;
 
     public SkillTreeScreen() {
         super(Component.translatable("screen.wizards_and_beasts.skill_tree.title"));
@@ -57,7 +69,8 @@ public class SkillTreeScreen extends Screen {
         super.init();
         String titleText = Component.translatable("screen.wizards_and_beasts.skill_tree.title").getString();
         resolvedTitle = titleText.startsWith("screen.") ? "Skills" : titleText;
-        layout = GuiScaleHelper.Layout.panel(width, height, WizardsAndBeastsUiTokens.SkillTree.PANEL_WIDTH, WizardsAndBeastsUiTokens.SkillTree.PANEL_HEIGHT);
+        layout = GuiScaleHelper.Layout.panel(width, height,
+                WizardsAndBeastsUiTokens.SkillTree.PANEL_WIDTH, WizardsAndBeastsUiTokens.SkillTree.PANEL_HEIGHT);
         panelW = layout.panelW();
         panelH = layout.panelH();
         panelX = layout.panelX();
@@ -66,275 +79,213 @@ public class SkillTreeScreen extends Screen {
         viewportH = layout.s(WizardsAndBeastsUiTokens.SkillTree.VIEWPORT_HEIGHT);
         viewportX = panelX + layout.s(WizardsAndBeastsUiTokens.SkillTree.VIEWPORT_X);
         viewportY = panelY + layout.s(WizardsAndBeastsUiTokens.SkillTree.VIEWPORT_Y);
-        resolveAvailableTrees();
-        buildTabs();
-        centerGraphInViewport();
-        rebuildTree();
-    }
 
-    /** Restrict the visible tabs to the trees the viewer's heritage may access. */
-    private void resolveAvailableTrees() {
-        SkillTreeId.Audience audience =
-                SkillTreeId.audienceForHeritage(ClientHeritageDataState.get().getSelectedHeritage());
-        availableTrees.clear();
-        for (SkillTreeId tree : SkillTreeId.values()) {
-            if (tree.getAudience() == audience) {
-                availableTrees.add(tree);
-            }
-        }
-        if (!availableTrees.contains(activeTree)) {
-            activeTree = availableTrees.isEmpty() ? SkillTreeId.SPELL_MASTERY : availableTrees.get(0);
+        SkillTreeId.Audience previous = audience;
+        audience = SkillTreeId.audienceForHeritage(ClientHeritageDataState.get().getSelectedHeritage());
+        webNodes = SkillTrees.clientWebNodes(audience);
+        if (previous == null) {
+            centerOnWeb();
         }
     }
 
-    private void buildTabs() {
-        tabs.clear();
-        int tabsX = layout.s(WizardsAndBeastsUiTokens.SkillTree.TABS_X);
-        int x = panelX + tabsX;
-        int y = panelY + layout.s(WizardsAndBeastsUiTokens.SkillTree.TABS_Y);
-        int gap = layout.s(WizardsAndBeastsUiTokens.SkillTree.TAB_GAP);
-        int height = layout.s(WizardsAndBeastsUiTokens.SkillTree.TAB_HEIGHT);
-        // Shrink tabs from their nominal width so every heritage-available tree fits one row.
-        int width = layout.s(WizardsAndBeastsUiTokens.SkillTree.TAB_WIDTH);
-        int count = availableTrees.size();
-        if (count > 0) {
-            int avail = panelW - tabsX * 2;
-            int maxWidth = (avail - gap * (count - 1)) / count;
-            width = Math.max(1, Math.min(width, maxWidth));
+    /** Start centered on the web's bounding box (the wizard web centers on its root at 0,0). */
+    private void centerOnWeb() {
+        if (webNodes.isEmpty()) {
+            panX = 0;
+            panY = 0;
+            return;
         }
-        for (SkillTreeId tree : availableTrees) {
-            tabs.add(new TabBounds(tree, x, y, width, height));
-            x += width + gap;
+        double minX = Double.MAX_VALUE, maxX = -Double.MAX_VALUE;
+        double minY = Double.MAX_VALUE, maxY = -Double.MAX_VALUE;
+        for (Skill node : webNodes) {
+            minX = Math.min(minX, node.getX());
+            maxX = Math.max(maxX, node.getX());
+            minY = Math.min(minY, node.getY());
+            maxY = Math.max(maxY, node.getY());
         }
+        panX = (minX + maxX) / 2.0;
+        panY = (minY + maxY) / 2.0;
+        zoom = 1.0;
     }
 
-    private void rebuildTree() {
-        visibleSkills.clear();
-        visibleNodes.clear();
-        List<Skill> treeSkills = SkillTrees.clientGetTree(activeTree);
-        visibleSkills.addAll(treeSkills);
-        recalculateGraphBounds(treeSkills);
-        for (Skill skill : treeSkills) {
-            int graphX = skill.getColumn() * layout.s(WizardsAndBeastsUiTokens.SkillTree.NODE_X_SPACING);
-            int graphY = skill.getTier() * layout.s(WizardsAndBeastsUiTokens.SkillTree.NODE_Y_SPACING);
-            int screenX = viewportX + panX + graphX;
-            int screenY = viewportY + panY + graphY;
-            int nodeSize = layout.s(WizardsAndBeastsUiTokens.SkillTree.NODE_SIZE);
-            visibleNodes.add(new NodeBounds(skill, screenX, screenY, nodeSize, nodeSize, graphX, graphY));
-        }
-        rebuildInteractiveWidgets();
+    // ── World ↔ screen transform: screen = (world − pan) × zoom + viewportCenter ──
+
+    private double toScreenX(double worldX) {
+        return (worldX - panX) * zoom + viewportX + viewportW / 2.0;
     }
 
-    private void rebuildInteractiveWidgets() {
-        clearWidgets();
-        for (TabBounds tab : tabs) {
-            Button tabButton = Button.builder(Component.literal(tab.tree().getDisplayName()), b -> {
-                activeTree = tab.tree();
-                selectedNode = null;
-                centerGraphInViewport();
-                rebuildTree();
-            }).bounds(tab.x(), tab.y(), tab.width(), tab.height()).build();
-            tabButton.setAlpha(0.0F);
-            addRenderableWidget(tabButton);
-        }
+    private double toScreenY(double worldY) {
+        return (worldY - panY) * zoom + viewportY + viewportH / 2.0;
+    }
 
-        for (NodeBounds node : visibleNodes) {
-            if (!insideViewport(node.x() + 1, node.y() + 1)) {
-                continue;
-            }
-            Button nodeButton = Button.builder(Component.literal(""), b -> {
-                selectedNode = node;
-                tryUnlockNode(node);
-            }).bounds(node.x(), node.y(), node.width(), node.height()).build();
-            nodeButton.setAlpha(0.0F);
-            addRenderableWidget(nodeButton);
+    private double toWorldX(double screenX) {
+        return (screenX - viewportX - viewportW / 2.0) / zoom + panX;
+    }
+
+    private double toWorldY(double screenY) {
+        return (screenY - viewportY - viewportH / 2.0) / zoom + panY;
+    }
+
+    private static int nodeRadius(Skill node) {
+        return switch (node.getSize()) {
+            case SMALL -> 4;
+            case NOTABLE -> 6;
+            case KEYSTONE -> 9;
+        };
+    }
+
+    // ── Input ──
+
+    @Override
+    public boolean mouseDragged(net.minecraft.client.input.MouseButtonEvent event, double dragX, double dragY) {
+        if (event.button() == 0 && insideViewport(event.x(), event.y())) {
+            panX -= dragX / zoom;
+            panY -= dragY / zoom;
+            panned = true;
+            return true;
         }
+        return super.mouseDragged(event, dragX, dragY);
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        panY += (int) (scrollY * layout.s(WizardsAndBeastsUiTokens.SkillTree.SCROLL_PAN_STEP));
-        clampPanToBounds();
-        rebuildTree();
+        if (!insideViewport(mouseX, mouseY)) {
+            return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        }
+        // Zoom toward the cursor: the world point under the mouse stays under the mouse.
+        double worldX = toWorldX(mouseX);
+        double worldY = toWorldY(mouseY);
+        zoom = Math.clamp(zoom * (scrollY > 0 ? 1.15 : 1.0 / 1.15), MIN_ZOOM, MAX_ZOOM);
+        panX = worldX - (mouseX - viewportX - viewportW / 2.0) / zoom;
+        panY = worldY - (mouseY - viewportY - viewportH / 2.0) / zoom;
         return true;
     }
 
     @Override
+    public boolean mouseReleased(net.minecraft.client.input.MouseButtonEvent event) {
+        if (event.button() == 0) {
+            boolean wasPan = panned;
+            panned = false;
+            if (!wasPan && hoveredNode != null) {
+                tryAllocate(hoveredNode);
+                return true;
+            }
+        }
+        return super.mouseReleased(event);
+    }
+
+    /**
+     * Client-side pre-check is cosmetic UX only — the server re-validates everything
+     * (adjacency, cap, affordability, audience) in {@code SkillSystemAPI.evaluateUnlock}.
+     */
+    private void tryAllocate(Skill node) {
+        PlayerSkillData data = ClientSkillDataState.get();
+        if (data.getSkillLevel(node.getId()) >= node.getMaxLevel()) {
+            return;
+        }
+        ClientPacketDistributor.sendToServer(new SkillUnlockC2SPayload(node.getId()));
+    }
+
+    private boolean insideViewport(double mouseX, double mouseY) {
+        return mouseX >= viewportX && mouseX <= viewportX + viewportW
+                && mouseY >= viewportY && mouseY <= viewportY + viewportH;
+    }
+
+    // ── Render ──
+
+    @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         this.renderMenuBackground(graphics);
+        // Re-fetch each frame so a /reload definition resync hot-swaps the open canvas.
+        if (audience != null) {
+            webNodes = SkillTrees.clientWebNodes(audience);
+        }
         PlayerSkillData data = ClientSkillDataState.get();
         SkillTreeRenderHelper.renderWindowFrame(graphics, font, panelX, panelY, panelW, panelH, resolvedTitle);
-        SkillTreeRenderHelper.renderTabs(graphics, font, panelX, panelY, activeTree, tabs, mouseX, mouseY);
 
-        hoveredNode = null;
-        for (NodeBounds node : visibleNodes) {
-            if (node.contains(mouseX, mouseY)) {
-                hoveredNode = node;
-                break;
+        graphics.enableScissor(viewportX, viewportY, viewportX + viewportW, viewportY + viewportH);
+        graphics.fill(viewportX, viewportY, viewportX + viewportW, viewportY + viewportH,
+                WizardsAndBeastsUiTokens.SkillTree.VIEWPORT_BG);
+
+        // Edges below nodes; an edge is lit when both endpoints are at level ≥ 1.
+        for (Skill node : webNodes) {
+            int fromX = (int) Math.round(toScreenX(node.getX()));
+            int fromY = (int) Math.round(toScreenY(node.getY()));
+            for (String neighborId : SkillTrees.clientNeighbors(node.getId())) {
+                if (neighborId.compareTo(node.getId()) <= 0) {
+                    continue; // draw each symmetric edge once
+                }
+                Skill neighbor = SkillTrees.clientById(neighborId);
+                if (neighbor == null) {
+                    continue;
+                }
+                boolean lit = data.getSkillLevel(node.getId()) >= 1 && data.getSkillLevel(neighborId) >= 1;
+                SkillTreeRenderHelper.drawLine(graphics, fromX, fromY,
+                        (int) Math.round(toScreenX(neighbor.getX())), (int) Math.round(toScreenY(neighbor.getY())),
+                        lit ? COLOR_EDGE_LIT : COLOR_EDGE_DIM, lit ? 2 : 1);
             }
         }
 
-        SkillTreeRenderHelper.renderViewportAndGraph(
-                graphics,
-                viewportX,
-                viewportY,
-                viewportW,
-                viewportH,
-                visibleSkills,
-                indexNodes(),
-                hoveredNode,
-                selectedNode,
-                panX,
-                panY,
-                data.getUnlockedSkills(),
-                data.getSkillPoints()
-        );
+        hoveredNode = null;
+        for (Skill node : webNodes) {
+            int cx = (int) Math.round(toScreenX(node.getX()));
+            int cy = (int) Math.round(toScreenY(node.getY()));
+            int r = Math.max(2, (int) Math.round(nodeRadius(node) * zoom));
 
-        SkillTreeRenderHelper.renderFooter(graphics, font, panelX, panelY, panelW,
-                panelH, data.getSkillPoints(), data.getTotalPointsEarned(),
-                visibleSkills, data);
+            int level = data.getSkillLevel(node.getId());
+            boolean allocated = level >= 1;
+            boolean allocatable = !allocated && (node.isRoot() || hasAllocatedNeighbor(data, node));
+
+            int fill = allocated ? COLOR_ALLOCATED : allocatable ? COLOR_ALLOCATABLE : COLOR_LOCKED;
+            int rim = allocated ? COLOR_ALLOCATED_RIM : allocatable ? COLOR_ALLOCATABLE_RIM : COLOR_LOCKED_RIM;
+            SkillTreeRenderHelper.drawCircle(graphics, cx, cy, r, rim);
+            SkillTreeRenderHelper.drawCircle(graphics, cx, cy, Math.max(1, r - 1), fill);
+            if (node.isRoot()) {
+                SkillTreeRenderHelper.drawCircle(graphics, cx, cy, Math.max(1, r / 3), COLOR_ROOT_CORE);
+            }
+
+            // Level pips on multi-level nodes.
+            if (node.getMaxLevel() > 1 && zoom >= 0.5) {
+                String pips = level + "/" + node.getMaxLevel();
+                graphics.drawCenteredString(font, pips, cx, cy + r + 2,
+                        allocated ? COLOR_ALLOCATED : 0xFFAAAAAA);
+            }
+
+            if (hoveredNode == null && insideViewport(mouseX, mouseY)) {
+                double dx = mouseX - cx;
+                double dy = mouseY - cy;
+                if (dx * dx + dy * dy <= (double) (r + 2) * (r + 2)) {
+                    hoveredNode = node;
+                }
+            }
+        }
+
+        graphics.disableScissor();
+        SkillTreeRenderHelper.drawBorderRect(graphics, viewportX, viewportY, viewportW, viewportH,
+                WizardsAndBeastsUiTokens.SkillTree.BORDER_COLOR);
+
+        SkillTreeRenderHelper.renderFooter(graphics, font, panelX, panelY, panelW, panelH, data);
 
         super.render(graphics, mouseX, mouseY, partialTick);
 
         if (hoveredNode != null) {
-            Skill hoveredSkill = hoveredNode.skill();
-            int level = data.getSkillLevel(hoveredSkill.getId());
-            SkillTreeRenderHelper.renderTooltipCard(graphics, font, hoveredSkill, hoveredNode, mouseX, mouseY, level,
-                    data.getSkillPoints(), prerequisitesMet(data, hoveredSkill));
+            boolean adjacencyOpen = hoveredNode.isRoot() || hasAllocatedNeighbor(data, hoveredNode);
+            SkillTreeRenderHelper.renderTooltipCard(graphics, font, hoveredNode, mouseX, mouseY,
+                    data.getSkillLevel(hoveredNode.getId()), data.getSkillPoints(), adjacencyOpen);
         }
     }
 
-    private Map<String, NodeBounds> indexNodes() {
-        java.util.LinkedHashMap<String, NodeBounds> index = new java.util.LinkedHashMap<>();
-        for (NodeBounds node : visibleNodes) {
-            index.put(node.skill().getId(), node);
-        }
-        return index;
-    }
-
-    private void tryUnlockNode(NodeBounds node) {
-        PlayerSkillData data = ClientSkillDataState.get();
-        Skill skill = node.skill();
-        int level = data.getSkillLevel(skill.getId());
-        if (level >= skill.getMaxLevel()) {
-            return;
-        }
-        if (!prerequisitesMet(data, skill)) {
-            return;
-        }
-        if (data.getSkillPoints() < skill.getPointCost()) {
-            return;
-        }
-        ClientPacketDistributor.sendToServer(new SkillUnlockC2SPayload(skill.getId()));
-    }
-
-    private boolean prerequisitesMet(PlayerSkillData data, Skill skill) {
-        for (String prereqId : skill.getPrerequisites()) {
-            if (!data.hasSkill(prereqId)) {
-                return false;
+    private static boolean hasAllocatedNeighbor(PlayerSkillData data, Skill node) {
+        for (String neighborId : SkillTrees.clientNeighbors(node.getId())) {
+            if (data.getSkillLevel(neighborId) >= 1) {
+                return true;
             }
         }
-        return true;
-    }
-
-    private boolean insideViewport(double mouseX, double mouseY) {
-        return mouseX >= viewportX
-                && mouseX <= viewportX + viewportW
-                && mouseY >= viewportY
-                && mouseY <= viewportY + viewportH;
-    }
-
-    private static int clamp(int value, int min, int max) {
-        return Math.max(min, Math.min(max, value));
-    }
-
-    private void recalculateGraphBounds(List<Skill> skills) {
-        if (skills.isEmpty()) {
-            graphMinX = 0;
-            graphMaxX = layout.s(WizardsAndBeastsUiTokens.SkillTree.NODE_SIZE);
-            graphMinY = 0;
-            graphMaxY = layout.s(WizardsAndBeastsUiTokens.SkillTree.NODE_SIZE);
-            return;
-        }
-        graphMinX = Integer.MAX_VALUE;
-        graphMaxX = Integer.MIN_VALUE;
-        graphMinY = Integer.MAX_VALUE;
-        graphMaxY = Integer.MIN_VALUE;
-        for (Skill skill : skills) {
-            int graphX = skill.getColumn() * layout.s(WizardsAndBeastsUiTokens.SkillTree.NODE_X_SPACING);
-            int graphY = skill.getTier() * layout.s(WizardsAndBeastsUiTokens.SkillTree.NODE_Y_SPACING);
-            graphMinX = Math.min(graphMinX, graphX);
-            graphMaxX = Math.max(graphMaxX, graphX + layout.s(WizardsAndBeastsUiTokens.SkillTree.NODE_SIZE));
-            graphMinY = Math.min(graphMinY, graphY);
-            graphMaxY = Math.max(graphMaxY, graphY + layout.s(WizardsAndBeastsUiTokens.SkillTree.NODE_SIZE));
-        }
-    }
-
-    private void centerGraphInViewport() {
-        List<Skill> treeSkills = SkillTrees.clientGetTree(activeTree);
-        recalculateGraphBounds(treeSkills);
-        int graphCenterX = (graphMinX + graphMaxX) / 2;
-        int graphCenterY = (graphMinY + graphMaxY) / 2;
-        panX = (viewportW / 2) - graphCenterX;
-        panY = (viewportH / 2) - graphCenterY;
-        clampPanToBounds();
-    }
-
-    private void clampPanToBounds() {
-        int contentWidth = Math.max(layout.s(WizardsAndBeastsUiTokens.SkillTree.NODE_SIZE), graphMaxX - graphMinX);
-        int contentHeight = Math.max(layout.s(WizardsAndBeastsUiTokens.SkillTree.NODE_SIZE), graphMaxY - graphMinY);
-
-        int minX = WizardsAndBeastsUiTokens.SkillTree.PAN_MIN_X;
-        int maxX = WizardsAndBeastsUiTokens.SkillTree.PAN_MAX_X;
-        int minY = WizardsAndBeastsUiTokens.SkillTree.PAN_MIN_Y;
-        int maxY = WizardsAndBeastsUiTokens.SkillTree.PAN_MAX_Y;
-
-        if (contentWidth > viewportW) {
-            minX = Math.max(minX, viewportW - graphMaxX);
-            maxX = Math.min(maxX, -graphMinX);
-        }
-        if (contentHeight > viewportH) {
-            minY = Math.max(minY, viewportH - graphMaxY);
-            maxY = Math.min(maxY, -graphMinY);
-        }
-
-        if (minX > maxX) {
-            int centeredX = (minX + maxX) / 2;
-            minX = centeredX;
-            maxX = centeredX;
-        }
-        if (minY > maxY) {
-            int centeredY = (minY + maxY) / 2;
-            minY = centeredY;
-            maxY = centeredY;
-        }
-
-        panX = clamp(panX, minX, maxX);
-        panY = clamp(panY, minY, maxY);
+        return false;
     }
 
     @Override
     public boolean isPauseScreen() {
         return false;
-    }
-
-    public record TabBounds(SkillTreeId tree, int x, int y, int width, int height) {
-        public boolean contains(double mouseX, double mouseY) {
-            return mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height;
-        }
-    }
-
-    public record NodeBounds(Skill skill, int x, int y, int width, int height, int graphX, int graphY) {
-        public boolean contains(double mouseX, double mouseY) {
-            return mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height;
-        }
-
-        public int centerX() {
-            return x + (width / 2);
-        }
-
-        public int centerY() {
-            return y + (height / 2);
-        }
     }
 }

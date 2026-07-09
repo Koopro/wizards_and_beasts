@@ -5,9 +5,6 @@
   "tree": "dark_arts",
   "maxLevel": 2,
   "pointCost": 2,
-  "prerequisites": [
-    "dark_damage"
-  ],
   "effects": [
     {
       "attributeId": "max_health",
@@ -16,5 +13,9 @@
     }
   ],
   "tier": 2,
-  "column": 2
+  "x": 163.8,
+  "y": 114.7,
+  "edges": [
+    "dark_damage"
+  ]
 }

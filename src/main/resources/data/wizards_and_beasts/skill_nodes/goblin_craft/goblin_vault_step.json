@@ -5,9 +5,6 @@
   "tree": "goblin_craft",
   "maxLevel": 2,
   "pointCost": 2,
-  "prerequisites": [
-    "goblin_appraisal"
-  ],
   "effects": [
     {
       "attributeId": "movement_speed",
@@ -16,5 +13,9 @@
     }
   ],
   "tier": 1,
-  "column": 2
+  "x": -70.0,
+  "y": 0.0,
+  "edges": [
+    "goblin_appraisal"
+  ]
 }

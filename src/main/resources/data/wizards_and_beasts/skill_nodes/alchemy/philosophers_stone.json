@@ -4,10 +4,6 @@
   "description": "The alchemist's masterwork. +4 max health and -10% utility cooldown.",
   "tree": "alchemy",
   "pointCost": 5,
-  "prerequisites": [
-    "transmute_focus",
-    "hardened_skin"
-  ],
   "effects": [
     {
       "attributeId": "max_health",
@@ -25,5 +21,10 @@
     }
   ],
   "tier": 3,
-  "column": 1
+  "x": 17.4,
+  "y": -199.2,
+  "edges": [
+    "transmute_focus",
+    "hardened_skin"
+  ]
 }

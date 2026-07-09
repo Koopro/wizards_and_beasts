@@ -4,9 +4,6 @@
   "description": "Practice restoration structure and controlled repair flow.",
   "tree": "spell_mastery",
   "pointCost": 2,
-  "prerequisites": [
-    "accio_unlock"
-  ],
   "effects": [
     {
       "spellId": "reparo",
@@ -15,5 +12,9 @@
     }
   ],
   "tier": 3,
-  "column": 2
+  "x": 231.1,
+  "y": 107.8,
+  "edges": [
+    "accio_unlock"
+  ]
 }

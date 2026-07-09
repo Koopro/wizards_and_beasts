@@ -4,9 +4,6 @@
   "description": "Strengthen defensive focus and anti-dark channel stability.",
   "tree": "spell_mastery",
   "pointCost": 4,
-  "prerequisites": [
-    "protego_unlock"
-  ],
   "effects": [
     {
       "spellId": "expecto_patronum",
@@ -15,5 +12,9 @@
     }
   ],
   "tier": 5,
-  "column": 2
+  "x": 195.3,
+  "y": -43.3,
+  "edges": [
+    "protego_unlock"
+  ]
 }

@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/** Skills tab: 5 tree bars, unlocked node chips, unspent points. */
+/** Skills tab: one progress bar per region (all 8 {@link SkillTreeId}s), unlocked node chips, unspent points. */
 public final class SkillsTab implements CharacterTab {
 
     private static final int COLOR_SECTION = 0xFFDDB97A;

@@ -21,6 +21,9 @@ import java.util.Locale;
  * Combines proficiency bonuses with skill tree bonuses.
  */
 public final class SkillSystemAPI {
+    /** Hard cap on total earnable skill points; routing under this budget is the web's core decision. */
+    public static final int MAX_SKILL_POINTS = 60; // TUNE
+
     public record UnlockCheck(boolean allowed, String reason) {}
 
     private SkillSystemAPI() {}
@@ -71,7 +74,7 @@ public final class SkillSystemAPI {
 
     /**
      * Checks if a player can unlock (or level up) a skill.
-     * Validates: skill exists, not maxed, enough points, prereqs met, type allowed.
+     * Validates: skill exists, not maxed, enough points, adjacency, type allowed.
      */
     public static boolean canUnlock(ServerPlayer player, Skill skill) {
         return evaluateUnlock(player, skill).allowed();
@@ -80,6 +83,11 @@ public final class SkillSystemAPI {
     /**
      * Returns a structured unlock check so packet handlers can show specific
      * rejection feedback instead of a generic "cannot unlock" message.
+     *
+     * <p>Web semantics (Phase 2): a node's <b>first</b> level is allocatable iff it is a
+     * {@code root} node or ANY edge-neighbor is at level ≥ 1. Further levels of an
+     * already-started node need only affordability and {@code < maxLevel} — maxing is optional
+     * depth, never a gate.
      */
     public static UnlockCheck evaluateUnlock(ServerPlayer player, Skill skill) {
         if (!ModuleManager.isEnabled(Module.SKILL_TREES)) {
@@ -89,8 +97,8 @@ public final class SkillSystemAPI {
         if (data.isMaxed(skill.getId())) return new UnlockCheck(false, "maxed");
         if (data.getSkillPoints() < skill.getPointCost()) return new UnlockCheck(false, "not_enough_points");
 
-        for (String prereqId : skill.getPrerequisites()) {
-            if (!data.isMaxed(prereqId)) return new UnlockCheck(false, "missing_prerequisite:" + prereqId);
+        if (data.getSkillLevel(skill.getId()) == 0 && !skill.isRoot() && !hasAllocatedNeighbor(data, skill)) {
+            return new UnlockCheck(false, "not_adjacent");
         }
 
         if (!isTreeAvailable(player, skill.getTree())) {
@@ -163,8 +171,22 @@ public final class SkillSystemAPI {
         PlayerStatsSyncPayload.syncToPlayer(player); // KNOWLEDGE derives from skill nodes unlocked
     }
 
+    /** True if any edge-neighbor of {@code skill} is at level ≥ 1. */
+    private static boolean hasAllocatedNeighbor(PlayerSkillData data, Skill skill) {
+        for (String neighborId : SkillTrees.neighbors(skill.getId())) {
+            if (data.getSkillLevel(neighborId) >= 1) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // ── Point Management ──
 
+    /**
+     * Awards skill points, clamped so total earned never exceeds {@link #MAX_SKILL_POINTS}.
+     * At the cap this is a no-op (XP-threshold earning silently stops).
+     */
     public static void awardPoints(ServerPlayer player, int amount) {
         getSkillData(player).addSkillPoints(amount);
     }

@@ -4,10 +4,6 @@
   "description": "Gain natural regeneration from your herbal knowledge.",
   "tree": "herbology",
   "pointCost": 3,
-  "prerequisites": [
-    "potion_potency",
-    "harvest_bounty"
-  ],
   "effects": [
     {
       "abilityId": "natural_remedy",
@@ -15,5 +11,10 @@
     }
   ],
   "tier": 2,
-  "column": 1
+  "x": -17.4,
+  "y": -199.2,
+  "edges": [
+    "potion_potency",
+    "harvest_bounty"
+  ]
 }

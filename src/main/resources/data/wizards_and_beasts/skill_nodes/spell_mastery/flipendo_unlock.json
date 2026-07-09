@@ -4,9 +4,6 @@
   "description": "Train impact timing for forceful knockback casts.",
   "tree": "spell_mastery",
   "pointCost": 2,
-  "prerequisites": [
-    "expelliarmus_unlock"
-  ],
   "effects": [
     {
       "spellId": "flipendo",
@@ -15,5 +12,9 @@
     }
   ],
   "tier": 3,
-  "column": 1
+  "x": 231.1,
+  "y": -107.8,
+  "edges": [
+    "expelliarmus_unlock"
+  ]
 }

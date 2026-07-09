@@ -5,9 +5,6 @@
   "tree": "dark_arts",
   "maxLevel": 2,
   "pointCost": 2,
-  "prerequisites": [
-    "dark_knowledge"
-  ],
   "effects": [
     {
       "category": "dark_arts",
@@ -16,5 +13,9 @@
     }
   ],
   "tier": 1,
-  "column": 1
+  "x": 12.6,
+  "y": 144.4,
+  "edges": [
+    "dark_knowledge"
+  ]
 }

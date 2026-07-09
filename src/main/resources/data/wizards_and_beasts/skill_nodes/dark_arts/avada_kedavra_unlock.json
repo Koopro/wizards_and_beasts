@@ -4,10 +4,6 @@
   "description": "Pursue forbidden mastery of lethal dark-arts channeling.",
   "tree": "dark_arts",
   "pointCost": 6,
-  "prerequisites": [
-    "imperio_unlock",
-    "dark_resilience"
-  ],
   "effects": [
     {
       "spellId": "avada_kedavra",
@@ -16,5 +12,10 @@
     }
   ],
   "tier": 3,
-  "column": 1
+  "x": 208.9,
+  "y": 146.3,
+  "edges": [
+    "imperio_unlock",
+    "dark_resilience"
+  ]
 }

@@ -4,10 +4,6 @@
   "description": "Unbound at last. Swift and unyielding.",
   "tree": "elf_bond",
   "pointCost": 4,
-  "prerequisites": [
-    "elf_apparition",
-    "elf_nimble_fingers"
-  ],
   "effects": [
     {
       "attributeId": "movement_speed",
@@ -20,5 +16,10 @@
     }
   ],
   "tier": 3,
-  "column": 1
+  "x": -140.0,
+  "y": 0.0,
+  "edges": [
+    "elf_apparition",
+    "elf_nimble_fingers"
+  ]
 }

@@ -4,9 +4,6 @@
   "description": "Undergo formal apparition training and gain license-level control.",
   "tree": "wandlore",
   "pointCost": 5,
-  "prerequisites": [
-    "wand_mastery"
-  ],
   "effects": [
     {
       "abilityId": "apparition_training",
@@ -19,5 +16,9 @@
     }
   ],
   "tier": 4,
-  "column": 1
+  "x": -255.0,
+  "y": 0.0,
+  "edges": [
+    "wand_mastery"
+  ]
 }

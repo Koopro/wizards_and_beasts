@@ -4,9 +4,6 @@
   "description": "Study the timing and structure of defensive casting.",
   "tree": "spell_mastery",
   "pointCost": 2,
-  "prerequisites": [
-    "basic_casting"
-  ],
   "effects": [
     {
       "spellId": "protego",
@@ -15,5 +12,9 @@
     }
   ],
   "tier": 1,
-  "column": 2
+  "x": 145.0,
+  "y": 0.0,
+  "edges": [
+    "basic_casting"
+  ]
 }

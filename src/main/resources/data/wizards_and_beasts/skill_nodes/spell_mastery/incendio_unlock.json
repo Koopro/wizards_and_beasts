@@ -4,9 +4,6 @@
   "description": "Build safer ignition control and heat projection.",
   "tree": "spell_mastery",
   "pointCost": 3,
-  "prerequisites": [
-    "stupefy_power"
-  ],
   "effects": [
     {
       "spellId": "incendio",
@@ -14,5 +11,10 @@
       "type": "spell_damage_bonus"
     }
   ],
-  "tier": 3
+  "tier": 3,
+  "x": 255.0,
+  "y": 0.0,
+  "edges": [
+    "stupefy_power"
+  ]
 }

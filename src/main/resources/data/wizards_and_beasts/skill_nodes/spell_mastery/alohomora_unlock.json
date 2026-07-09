@@ -4,9 +4,6 @@
   "description": "Refine lock-manipulation intent and casting precision.",
   "tree": "spell_mastery",
   "pointCost": 2,
-  "prerequisites": [
-    "wingardium_unlock"
-  ],
   "effects": [
     {
       "spellId": "alohomora",
@@ -15,5 +12,9 @@
     }
   ],
   "tier": 5,
-  "column": 1
+  "x": 330.8,
+  "y": -154.3,
+  "edges": [
+    "wingardium_unlock"
+  ]
 }

@@ -4,14 +4,16 @@
   "description": "Nifflers no longer steal from you.",
   "tree": "magizoology",
   "pointCost": 2,
-  "prerequisites": [
-    "creature_knowledge"
-  ],
   "effects": [
     {
       "abilityId": "niffler_friend",
       "type": "unlock_ability"
     }
   ],
-  "tier": 1
+  "tier": 1,
+  "x": -118.8,
+  "y": 83.2,
+  "edges": [
+    "creature_knowledge"
+  ]
 }

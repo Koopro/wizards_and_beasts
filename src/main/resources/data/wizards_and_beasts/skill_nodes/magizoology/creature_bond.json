@@ -5,10 +5,6 @@
   "tree": "magizoology",
   "maxLevel": 2,
   "pointCost": 3,
-  "prerequisites": [
-    "niffler_friend",
-    "beast_handler"
-  ],
   "effects": [
     {
       "attributeId": "max_health",
@@ -17,5 +13,10 @@
     }
   ],
   "tier": 2,
-  "column": 1
+  "x": -17.4,
+  "y": 199.2,
+  "edges": [
+    "niffler_friend",
+    "beast_handler"
+  ]
 }

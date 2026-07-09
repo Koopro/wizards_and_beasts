@@ -37,7 +37,7 @@ class VocationUnlockStateTest {
     }
 
     private static Skill node(SkillTreeId tree, int tier) {
-        return Skill.builder("n" + tree.name() + tier, "n").tree(tree).position(tier, 0).build();
+        return Skill.builder("n" + tree.name() + tier, "n").tree(tree).tier(tier).build();
     }
 
     @BeforeEach

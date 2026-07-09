@@ -5,9 +5,6 @@
   "tree": "herbology",
   "maxLevel": 2,
   "pointCost": 2,
-  "prerequisites": [
-    "green_thumb"
-  ],
   "effects": [
     {
       "stat": "harvest_bonus_chance",
@@ -16,5 +13,9 @@
     }
   ],
   "tier": 1,
-  "column": 2
+  "x": -118.8,
+  "y": -83.2,
+  "edges": [
+    "green_thumb"
+  ]
 }

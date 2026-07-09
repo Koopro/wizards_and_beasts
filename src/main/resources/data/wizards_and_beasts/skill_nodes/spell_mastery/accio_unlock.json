@@ -4,9 +4,6 @@
   "description": "Improve summoning form and pull control.",
   "tree": "spell_mastery",
   "pointCost": 2,
-  "prerequisites": [
-    "lumos_unlock"
-  ],
   "effects": [
     {
       "spellId": "accio",
@@ -15,5 +12,9 @@
     }
   ],
   "tier": 2,
-  "column": 2
+  "x": 181.3,
+  "y": -84.5,
+  "edges": [
+    "lumos_unlock"
+  ]
 }

@@ -5,9 +5,6 @@
   "tree": "dark_arts",
   "maxLevel": 2,
   "pointCost": 3,
-  "prerequisites": [
-    "dark_resilience"
-  ],
   "effects": [
     {
       "category": "dark_arts",
@@ -16,5 +13,9 @@
     }
   ],
   "tier": 3,
-  "column": 2
+  "x": 22.2,
+  "y": 254.0,
+  "edges": [
+    "dark_resilience"
+  ]
 }

@@ -4,9 +4,6 @@
   "description": "Attune your wandwork to Stupefy casting principles.",
   "tree": "spell_mastery",
   "pointCost": 2,
-  "prerequisites": [
-    "basic_casting"
-  ],
   "effects": [
     {
       "spellId": "stupefy",
@@ -14,5 +11,10 @@
       "type": "spell_damage_bonus"
     }
   ],
-  "tier": 1
+  "tier": 1,
+  "x": 131.4,
+  "y": 61.3,
+  "edges": [
+    "basic_casting"
+  ]
 }

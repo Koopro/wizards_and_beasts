@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.skill.data;
 
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.skill.Skill;
+import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
 import at.koopro.wizardsandbeasts.skill.SkillTrees;
 import at.koopro.wizardsandbeasts.util.NbtHelper;
 import net.minecraft.nbt.CompoundTag;
@@ -14,8 +15,15 @@ import java.util.Set;
 
 public class PlayerSkillData implements ModAttachments.NbtSerializable {
     public static final String VERSION_KEY = "DataVersion";
-    public static final int CURRENT_VERSION = 1;
+    /** v2 = web rework: adjacency allocation, 60-point cap, one-time full refund (see {@link #applyWebMigration}). */
+    public static final int CURRENT_VERSION = 2;
 
+    /**
+     * Schema version of the data this instance was loaded from. Fresh instances (new players)
+     * start at {@link #CURRENT_VERSION}; loading pre-rework NBT leaves this at the stored value
+     * until the login-time web migration runs and stamps it forward.
+     */
+    private int dataVersion = CURRENT_VERSION;
     private int skillPoints;
     private int totalPointsEarned;
     private final Map<String, Integer> unlockedSkills = new LinkedHashMap<>();
@@ -41,9 +49,40 @@ public class PlayerSkillData implements ModAttachments.NbtSerializable {
         return skillPoints;
     }
 
+    /**
+     * Adds earned points, clamped so {@code totalPointsEarned} never exceeds
+     * {@link SkillSystemAPI#MAX_SKILL_POINTS}. No-op once the cap is reached.
+     */
     public void addSkillPoints(int amount) {
-        skillPoints += amount;
-        totalPointsEarned += amount;
+        int grant = Math.min(amount, Math.max(0, SkillSystemAPI.MAX_SKILL_POINTS - totalPointsEarned));
+        if (grant <= 0) {
+            return;
+        }
+        skillPoints += grant;
+        totalPointsEarned += grant;
+    }
+
+    // ── Web migration (schema v1 → v2) ──
+
+    /** True if this data predates the web rework and still needs the one-time full refund. */
+    public boolean needsWebMigration() {
+        return dataVersion < 2;
+    }
+
+    /**
+     * One-time web rework migration: clears every allocation, refunds unconditionally by setting
+     * unspent = earned, and clamps earned to {@link SkillSystemAPI#MAX_SKILL_POINTS} (pre-cap
+     * players may exceed it). Stamps the schema version so relogs never re-fire.
+     *
+     * @return the number of cleared allocation entries
+     */
+    public int applyWebMigration() {
+        int cleared = unlockedSkills.size();
+        unlockedSkills.clear();
+        totalPointsEarned = Math.min(totalPointsEarned, SkillSystemAPI.MAX_SKILL_POINTS);
+        skillPoints = totalPointsEarned;
+        dataVersion = CURRENT_VERSION;
+        return cleared;
     }
 
     public boolean spendSkillPoints(int amount) {
@@ -178,7 +217,9 @@ public class PlayerSkillData implements ModAttachments.NbtSerializable {
     @Override
     public CompoundTag save() {
         CompoundTag tag = new CompoundTag();
-        tag.putInt(VERSION_KEY, CURRENT_VERSION);
+        // The instance's version, NOT the constant: pre-migration data must keep its old stamp so
+        // the login-time web migration still fires after an intermediate save.
+        tag.putInt(VERSION_KEY, dataVersion);
         tag.putInt("SkillPoints", skillPoints);
         tag.putInt("TotalPointsEarned", totalPointsEarned);
         NbtHelper.saveStringIntMap(tag, "UnlockedSkills", unlockedSkills);
@@ -198,6 +239,7 @@ public class PlayerSkillData implements ModAttachments.NbtSerializable {
     @Override
     public void load(CompoundTag tag) {
         PlayerSkillDataMigrator.migrate(tag);
+        dataVersion = tag.getInt(VERSION_KEY).orElse(CURRENT_VERSION);
         skillPoints = tag.getInt("SkillPoints").orElse(0);
         totalPointsEarned = tag.getInt("TotalPointsEarned").orElse(0);
         unlockedSkills.clear();

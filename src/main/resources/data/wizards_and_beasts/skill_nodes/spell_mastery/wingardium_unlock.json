@@ -4,9 +4,6 @@
   "description": "Develop steady levitation form and lift precision.",
   "tree": "spell_mastery",
   "pointCost": 2,
-  "prerequisites": [
-    "flipendo_unlock"
-  ],
   "effects": [
     {
       "spellId": "wingardium_leviosa",
@@ -15,5 +12,9 @@
     }
   ],
   "tier": 4,
-  "column": 1
+  "x": 281.0,
+  "y": 131.0,
+  "edges": [
+    "flipendo_unlock"
+  ]
 }

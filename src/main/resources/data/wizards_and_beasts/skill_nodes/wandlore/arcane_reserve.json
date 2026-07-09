@@ -5,9 +5,6 @@
   "tree": "wandlore",
   "maxLevel": 2,
   "pointCost": 2,
-  "prerequisites": [
-    "wand_precision"
-  ],
   "effects": [
     {
       "category": "utility",
@@ -16,5 +13,9 @@
     }
   ],
   "tier": 2,
-  "column": 2
+  "x": -181.3,
+  "y": 84.5,
+  "edges": [
+    "wand_precision"
+  ]
 }

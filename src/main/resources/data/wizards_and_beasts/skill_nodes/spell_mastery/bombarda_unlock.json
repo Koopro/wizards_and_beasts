@@ -4,9 +4,6 @@
   "description": "Focus on blast shaping and controlled detonation timing.",
   "tree": "spell_mastery",
   "pointCost": 3,
-  "prerequisites": [
-    "combat_focus"
-  ],
   "effects": [
     {
       "spellId": "bombarda",
@@ -14,5 +11,10 @@
       "type": "spell_damage_bonus"
     }
   ],
-  "tier": 5
+  "tier": 5,
+  "x": 330.8,
+  "y": 154.3,
+  "edges": [
+    "combat_focus"
+  ]
 }

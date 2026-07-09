@@ -4,10 +4,6 @@
   "description": "The resilience of the old guildmasters. +1 heart and goblin-steel resolve.",
   "tree": "goblin_craft",
   "pointCost": 4,
-  "prerequisites": [
-    "goblin_ledger",
-    "goblin_vault_step"
-  ],
   "effects": [
     {
       "attributeId": "max_health",
@@ -20,5 +16,10 @@
     }
   ],
   "tier": 3,
-  "column": 1
+  "x": -140.0,
+  "y": 0.0,
+  "edges": [
+    "goblin_ledger",
+    "goblin_vault_step"
+  ]
 }

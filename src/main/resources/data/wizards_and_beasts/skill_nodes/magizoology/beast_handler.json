@@ -5,9 +5,6 @@
   "tree": "magizoology",
   "maxLevel": 2,
   "pointCost": 2,
-  "prerequisites": [
-    "creature_knowledge"
-  ],
   "effects": [
     {
       "stat": "beast_damage_resistance",
@@ -16,5 +13,9 @@
     }
   ],
   "tier": 1,
-  "column": 2
+  "x": -12.6,
+  "y": 144.4,
+  "edges": [
+    "creature_knowledge"
+  ]
 }

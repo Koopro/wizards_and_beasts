@@ -56,9 +56,9 @@ public record SkillUnlockC2SPayload(String skillId) implements CustomPacketPaylo
                     ChatHelper.sendError(player, skill.getDisplayName() + " is already maxed.");
                 } else if ("not_enough_points".equals(check.reason())) {
                     ChatHelper.sendError(player, "Not enough skill points for " + skill.getDisplayName() + ".");
-                } else if (check.reason().startsWith("missing_prerequisite:")) {
-                    String prereq = check.reason().substring("missing_prerequisite:".length());
-                    ChatHelper.sendError(player, "Missing prerequisite: " + prereq + ".");
+                } else if ("not_adjacent".equals(check.reason())) {
+                    ChatHelper.sendError(player, skill.getDisplayName()
+                            + " is not connected to your allocated nodes.");
                 } else if ("tree_unavailable".equals(check.reason())) {
                     ChatHelper.sendError(player, "Your heritage cannot unlock this tree.");
                 } else {

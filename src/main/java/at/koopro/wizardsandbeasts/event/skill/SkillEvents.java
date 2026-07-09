@@ -9,15 +9,40 @@ import at.koopro.wizardsandbeasts.util.ChatHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerXpEvent;
 
 /**
- * Handles automatic skill point awarding from gameplay events.
+ * Handles automatic skill point awarding from gameplay events, plus the one-time
+ * web rework migration (schema v1 → v2) at login.
  */
 @EventBusSubscriber(modid = WizardsAndBeastsMod.MODID)
 public class SkillEvents {
 
+    private static final org.slf4j.Logger LOGGER = com.mojang.logging.LogUtils.getLogger();
+
     private SkillEvents() {}
+
+    /**
+     * Web rework migration (v1 → v2): unconditional full refund + earned clamp to
+     * {@link SkillSystemAPI#MAX_SKILL_POINTS}, exactly once per pre-rework player. The version
+     * stamp is persisted with the attachment, so relogs never re-fire.
+     */
+    @SubscribeEvent
+    public static void onLoginMigrateToWeb(PlayerEvent.PlayerLoggedInEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        var data = SkillSystemAPI.getSkillData(player);
+        if (!data.needsWebMigration()) return;
+
+        int cleared = data.applyWebMigration();
+        SkillSystemAPI.reconcileDerivedEffects(player); // strips attribute modifiers from cleared nodes
+        SkillDataSyncS2CPayload.syncToPlayer(player);
+        LOGGER.info(
+                "Skill web migration for {}: cleared {} allocations, refunded to {} points (earned clamped to cap {})",
+                player.getName().getString(), cleared, data.getSkillPoints(), SkillSystemAPI.MAX_SKILL_POINTS);
+        ChatHelper.send(player, "§6Skill trees have been reworked into a web — your "
+                + data.getSkillPoints() + " skill points were refunded. Open the skill screen to re-allocate.");
+    }
 
     /**
      * Award skill points when a player gains an XP level.

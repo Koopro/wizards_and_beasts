@@ -4,9 +4,6 @@
   "description": "Study the discipline and control needed for Cruciatus casting.",
   "tree": "dark_arts",
   "pointCost": 4,
-  "prerequisites": [
-    "dark_knowledge"
-  ],
   "effects": [
     {
       "spellId": "crucio",
@@ -14,5 +11,10 @@
       "type": "spell_damage_bonus"
     }
   ],
-  "tier": 1
+  "tier": 1,
+  "x": 118.8,
+  "y": 83.2,
+  "edges": [
+    "dark_knowledge"
+  ]
 }

@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.StringRepresentable;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -12,15 +13,41 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * An individual node in a skill tree. Immutable after construction.
+ * An individual node in a skill web. Immutable after construction.
  * Built via {@link #builder(String, String)} or parsed from datapack JSON via {@link #CODEC}.
+ *
+ * <p>Web model (Phase 2): nodes live at datapack-defined {@code x}/{@code y} layout coordinates
+ * (arbitrary per-web units, y-down) and connect via logically bidirectional {@code edges}
+ * (declared on either endpoint; symmetrized at load into {@link SkillTrees}). A node's first level
+ * is allocatable iff it is a {@code root} node or any edge-neighbor is at level ≥ 1 — see
+ * {@link SkillSystemAPI#evaluateUnlock}.
  */
 public final class Skill {
 
+    /** Visual weight of a node on the canvas. Gameplay-inert in Phase 2. */
+    public enum Size implements StringRepresentable {
+        SMALL("small"),
+        NOTABLE("notable"),
+        KEYSTONE("keystone");
+
+        public static final Codec<Size> CODEC = StringRepresentable.fromValues(Size::values);
+
+        private final String serializedName;
+
+        Size(String serializedName) {
+            this.serializedName = serializedName;
+        }
+
+        @Override
+        public String getSerializedName() {
+            return serializedName;
+        }
+    }
+
     /**
-     * Datapack codec mirroring the builder field set exactly. {@code nodeEffects} is lazily
-     * initialized so parsing/encoding nodes without explicit node effects (all current content)
-     * never touches {@link SkillNodeEffect}'s registry-backed codecs.
+     * Datapack codec. {@code nodeEffects} is lazily initialized so parsing/encoding nodes without
+     * explicit node effects (all current content) never touches {@link SkillNodeEffect}'s
+     * registry-backed codecs.
      */
     public static final Codec<Skill> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.fieldOf("id").forGetter(Skill::getId),
@@ -29,12 +56,15 @@ public final class Skill {
             SkillTreeId.CODEC.fieldOf("tree").forGetter(Skill::getTree),
             Codec.INT.optionalFieldOf("maxLevel", 1).forGetter(Skill::getMaxLevel),
             Codec.INT.optionalFieldOf("pointCost", 1).forGetter(Skill::getPointCost),
-            Codec.STRING.listOf().optionalFieldOf("prerequisites", List.of()).forGetter(Skill::getPrerequisites),
             SkillEffect.CODEC.listOf().optionalFieldOf("effects", List.of()).forGetter(Skill::getEffects),
             Codec.lazyInitialized(() -> SkillNodeEffect.CODEC.listOf())
                     .optionalFieldOf("nodeEffects", List.of()).forGetter(Skill::getExplicitNodeEffects),
             Codec.INT.optionalFieldOf("tier", 0).forGetter(Skill::getTier),
-            Codec.INT.optionalFieldOf("column", 0).forGetter(Skill::getColumn)
+            Codec.DOUBLE.optionalFieldOf("x", 0.0).forGetter(Skill::getX),
+            Codec.DOUBLE.optionalFieldOf("y", 0.0).forGetter(Skill::getY),
+            Codec.STRING.listOf().optionalFieldOf("edges", List.of()).forGetter(Skill::getEdges),
+            Size.CODEC.optionalFieldOf("size", Size.NOTABLE).forGetter(Skill::getSize),
+            Codec.BOOL.optionalFieldOf("root", false).forGetter(Skill::isRoot)
     ).apply(instance, Skill::fromCodec));
 
     public static final StreamCodec<ByteBuf, Skill> STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);
@@ -45,14 +75,25 @@ public final class Skill {
     private final SkillTreeId tree;
     private final int maxLevel;
     private final int pointCost;
-    private final List<String> prerequisites;
     private final List<SkillEffect> effects;
     /** Node effects declared explicitly (builder/JSON); empty for every current node. */
     private final List<SkillNodeEffect> explicitNodeEffects;
     /** Derived from {@link #effects} on first use when no explicit node effects exist (requires MC bootstrap). */
     private @Nullable List<SkillNodeEffect> derivedNodeEffects;
+    /**
+     * Vocation band index — {@link at.koopro.wizardsandbeasts.skill.vocation.VocationHelper}'s
+     * input only ({@code tier <= foundationMaxTier} = Foundation). Has zero meaning for layout or
+     * adjacency since the Phase 2 web rework; scheduled for deletion in the Vocation reframe.
+     */
     private final int tier;
-    private final int column;
+    /** Web layout coordinates: arbitrary per-web units, y-down. Placeholder values until Phase 3. */
+    private final double x;
+    private final double y;
+    /** Edge-neighbor node ids. Logically bidirectional; either endpoint may declare the edge. */
+    private final List<String> edges;
+    private final Size size;
+    /** Web entry point: allocatable without any allocated neighbor. */
+    private final boolean root;
 
     private Skill(Builder builder) {
         this.id = builder.id;
@@ -61,26 +102,32 @@ public final class Skill {
         this.tree = builder.tree;
         this.maxLevel = builder.maxLevel;
         this.pointCost = builder.pointCost;
-        this.prerequisites = Collections.unmodifiableList(new ArrayList<>(builder.prerequisites));
         this.effects = Collections.unmodifiableList(new ArrayList<>(builder.effects));
         this.explicitNodeEffects = Collections.unmodifiableList(new ArrayList<>(builder.nodeEffects));
         this.tier = builder.tier;
-        this.column = builder.column;
+        this.x = builder.x;
+        this.y = builder.y;
+        this.edges = Collections.unmodifiableList(new ArrayList<>(builder.edges));
+        this.size = builder.size;
+        this.root = builder.root;
     }
 
     private static Skill fromCodec(String id, String displayName, String description, SkillTreeId tree,
-                                   int maxLevel, int pointCost, List<String> prerequisites,
-                                   List<SkillEffect> effects, List<SkillNodeEffect> nodeEffects,
-                                   int tier, int column) {
+                                   int maxLevel, int pointCost, List<SkillEffect> effects,
+                                   List<SkillNodeEffect> nodeEffects, int tier,
+                                   double x, double y, List<String> edges, Size size, boolean root) {
         Builder builder = builder(id, displayName)
                 .description(description)
                 .tree(tree)
                 .maxLevel(maxLevel)
                 .cost(pointCost)
-                .position(tier, column);
-        prerequisites.forEach(builder::prerequisite);
+                .tier(tier)
+                .position(x, y)
+                .size(size)
+                .root(root);
         effects.forEach(builder::effect);
         nodeEffects.forEach(builder::nodeEffect);
+        edges.forEach(builder::edge);
         return builder.build();
     }
 
@@ -90,7 +137,6 @@ public final class Skill {
     public SkillTreeId getTree() { return tree; }
     public int getMaxLevel() { return maxLevel; }
     public int getPointCost() { return pointCost; }
-    public List<String> getPrerequisites() { return prerequisites; }
     public List<SkillEffect> getEffects() { return effects; }
 
     /** Explicitly declared node effects only — never the derived ones. This is what serializes. */
@@ -137,8 +183,14 @@ public final class Skill {
         }
         return Collections.unmodifiableList(derived);
     }
+
+    /** Vocation band index only — see the field doc. Not a layout or adjacency input. */
     public int getTier() { return tier; }
-    public int getColumn() { return column; }
+    public double getX() { return x; }
+    public double getY() { return y; }
+    public List<String> getEdges() { return edges; }
+    public Size getSize() { return size; }
+    public boolean isRoot() { return root; }
 
     public static Builder builder(String id, String displayName) {
         return new Builder(id, displayName);
@@ -151,11 +203,14 @@ public final class Skill {
         private SkillTreeId tree;
         private int maxLevel = 1;
         private int pointCost = 1;
-        private final List<String> prerequisites = new ArrayList<>();
         private final List<SkillEffect> effects = new ArrayList<>();
         private final List<SkillNodeEffect> nodeEffects = new ArrayList<>();
         private int tier;
-        private int column;
+        private double x;
+        private double y;
+        private final List<String> edges = new ArrayList<>();
+        private Size size = Size.NOTABLE;
+        private boolean root;
 
         private Builder(String id, String displayName) {
             this.id = id;
@@ -182,11 +237,6 @@ public final class Skill {
             return this;
         }
 
-        public Builder prerequisite(String skillId) {
-            this.prerequisites.add(skillId);
-            return this;
-        }
-
         public Builder effect(SkillEffect effect) {
             this.effects.add(effect);
             return this;
@@ -197,9 +247,30 @@ public final class Skill {
             return this;
         }
 
-        public Builder position(int tier, int column) {
+        /** Vocation band index — see {@link Skill#getTier()}. */
+        public Builder tier(int tier) {
             this.tier = tier;
-            this.column = column;
+            return this;
+        }
+
+        public Builder position(double x, double y) {
+            this.x = x;
+            this.y = y;
+            return this;
+        }
+
+        public Builder edge(String neighborId) {
+            this.edges.add(neighborId);
+            return this;
+        }
+
+        public Builder size(Size size) {
+            this.size = size;
+            return this;
+        }
+
+        public Builder root(boolean root) {
+            this.root = root;
             return this;
         }
 

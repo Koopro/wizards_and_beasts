@@ -5,14 +5,16 @@
   "tree": "herbology",
   "maxLevel": 3,
   "pointCost": 2,
-  "prerequisites": [
-    "green_thumb"
-  ],
   "effects": [
     {
       "abilityId": "potion_potency",
       "type": "unlock_ability"
     }
   ],
-  "tier": 1
+  "tier": 1,
+  "x": -12.6,
+  "y": -144.4,
+  "edges": [
+    "green_thumb"
+  ]
 }

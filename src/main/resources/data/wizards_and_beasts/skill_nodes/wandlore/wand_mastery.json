@@ -4,10 +4,6 @@
   "description": "Achieve true mastery over your wand.",
   "tree": "wandlore",
   "pointCost": 4,
-  "prerequisites": [
-    "spell_efficiency",
-    "wand_precision"
-  ],
   "effects": [
     {
       "abilityId": "wand_mastery",
@@ -25,5 +21,10 @@
     }
   ],
   "tier": 3,
-  "column": 1
+  "x": -181.3,
+  "y": -84.5,
+  "edges": [
+    "spell_efficiency",
+    "wand_precision"
+  ]
 }

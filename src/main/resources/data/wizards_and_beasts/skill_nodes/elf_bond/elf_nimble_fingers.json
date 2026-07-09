@@ -4,9 +4,6 @@
   "description": "Deft hands for any household task.",
   "tree": "elf_bond",
   "pointCost": 2,
-  "prerequisites": [
-    "elf_silent_step"
-  ],
   "effects": [
     {
       "abilityId": "elf_nimble_fingers",
@@ -14,5 +11,9 @@
     }
   ],
   "tier": 1,
-  "column": 2
+  "x": -70.0,
+  "y": 0.0,
+  "edges": [
+    "elf_silent_step"
+  ]
 }

@@ -5,9 +5,6 @@
   "tree": "magizoology",
   "maxLevel": 2,
   "pointCost": 3,
-  "prerequisites": [
-    "beast_handler"
-  ],
   "effects": [
     {
       "stat": "beast_damage_resistance",
@@ -16,5 +13,9 @@
     }
   ],
   "tier": 2,
-  "column": 2
+  "x": -163.8,
+  "y": 114.7,
+  "edges": [
+    "beast_handler"
+  ]
 }
