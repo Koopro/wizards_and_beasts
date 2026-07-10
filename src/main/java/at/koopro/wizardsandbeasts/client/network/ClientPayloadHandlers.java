@@ -354,8 +354,7 @@ public final class ClientPayloadHandlers {
     }
 
     public static void handleVocationDataSync(VocationDataSyncS2CPayload pkt, IPayloadContext ctx) {
-        ctx.enqueueWork(() -> ClientVocationCache.applySync(
-                pkt.syncVersion(), pkt.primary(), pkt.secondary()));
+        ctx.enqueueWork(() -> ClientVocationCache.applySync(pkt.syncVersion(), pkt.primary()));
     }
 
     // --- stats ---

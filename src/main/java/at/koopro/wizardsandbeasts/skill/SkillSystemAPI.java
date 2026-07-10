@@ -1,7 +1,6 @@
 package at.koopro.wizardsandbeasts.skill;
 
 import at.koopro.wizardsandbeasts.skill.data.PlayerSkillData;
-import at.koopro.wizardsandbeasts.skill.vocation.VocationHelper;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.network.stats.PlayerStatsSyncPayload;
@@ -13,8 +12,6 @@ import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import net.minecraft.server.level.ServerPlayer;
 import at.koopro.wizardsandbeasts.spell.cast.ModifierStack;
-
-import java.util.Locale;
 
 /**
  * Public API for querying and modifying skill data.
@@ -105,12 +102,8 @@ public final class SkillSystemAPI {
             return new UnlockCheck(false, "tree_unavailable");
         }
 
-        // Vocation Mastery-cap + opposition lockout. Reaching here means SKILL_TREES is ENABLED (the guard
-        // above short-circuits when disabled), so the gate is implicitly skipped while the module is off.
-        VocationHelper.UnlockState vocationState = VocationHelper.unlockState(player, skill);
-        if (vocationState != VocationHelper.UnlockState.ALLOWED) {
-            return new UnlockCheck(false, "vocation_locked:" + vocationState.name().toLowerCase(Locale.ROOT));
-        }
+        // Vocation is declarative identity only (web rework Phase 3): the web's travel cost under the
+        // point cap does the differentiation the old mastery-band/opposition gate used to enforce.
         return new UnlockCheck(true, "ok");
     }
 

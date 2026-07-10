@@ -4,7 +4,6 @@
   "displayName": "vocation.wizards_and_beasts.duelist.name",
   "description": "vocation.wizards_and_beasts.duelist.desc",
   "pillar": "vocation.wizards_and_beasts.duelist.pillar",
-  "foundationMaxTier": 1,
   "grantedAbilities": [
     "duelist_spell_power",
     "duelist_cast_speed"

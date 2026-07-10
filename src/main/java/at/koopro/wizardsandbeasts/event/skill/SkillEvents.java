@@ -45,6 +45,30 @@ public class SkillEvents {
     }
 
     /**
+     * Vocation reframe migration: the secondary slot no longer exists in the schema. The codec
+     * reads a legacy {@code secondary} key into a transient marker; here (player identity in hand)
+     * we log the clear once, rebuild the declared profile without the secondary's modifiers, and
+     * persist the marker-free state — the key is gone on the next save, so this never re-fires.
+     */
+    @SubscribeEvent
+    public static void onLoginClearLegacySecondaryVocation(PlayerEvent.PlayerLoggedInEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        var data = at.koopro.wizardsandbeasts.skill.vocation.VocationHelper.getData(player);
+        if (!data.legacySecondaryPresent()) return;
+
+        player.setData(at.koopro.wizardsandbeasts.registry.ModAttachments.VOCATION_DATA.get(),
+                data.withoutLegacySecondary());
+        // Strip all vocation modifiers (including the old secondary's scaled profile) and
+        // re-apply only the surviving primary declaration.
+        at.koopro.wizardsandbeasts.skill.vocation.VocationEffectApplicator.removeAll(player);
+        data.primary().map(at.koopro.wizardsandbeasts.skill.vocation.VocationRegistry::get)
+                .ifPresent(v -> at.koopro.wizardsandbeasts.skill.vocation.VocationEffectApplicator.apply(player, v));
+        at.koopro.wizardsandbeasts.sync.PlayerStateSyncService.syncVocations(player);
+        LOGGER.info("Vocation reframe migration for {}: cleared legacy secondary vocation declaration",
+                player.getName().getString());
+    }
+
+    /**
      * Award skill points when a player gains an XP level.
      * 1 SP per level gained.
      */

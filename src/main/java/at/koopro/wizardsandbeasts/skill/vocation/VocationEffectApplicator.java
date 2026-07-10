@@ -24,17 +24,8 @@ public final class VocationEffectApplicator {
 
     private VocationEffectApplicator() {}
 
-    /** Primary commitment: full-strength profile. */
+    /** Applies the declared Vocation's commitment profile (idempotent via addOrReplace). */
     public static void apply(ServerPlayer player, VocationDefinition vocation) {
-        apply(player, vocation, 1.0);
-    }
-
-    /**
-     * Applies the commitment profile at the given strength. The secondary slot uses a reduced
-     * scale — commitment without primacy. Modifier ids are vocation-scoped, so a primary and a
-     * (different) secondary Vocation never collide.
-     */
-    public static void apply(ServerPlayer player, VocationDefinition vocation, double scale) {
         for (SkillNodeEffect effect : vocation.commitmentEffects()) {
             if (effect instanceof SkillNodeEffect.AttributeBoost boost) {
                 AttributeInstance instance = player.getAttribute(boost.attribute());
@@ -42,7 +33,7 @@ public final class VocationEffectApplicator {
                     continue;
                 }
                 instance.addOrReplacePermanentModifier(new AttributeModifier(
-                        boost.modifierId(), boost.value() * scale, boost.operation()));
+                        boost.modifierId(), boost.value(), boost.operation()));
             }
         }
     }

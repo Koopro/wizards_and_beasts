@@ -44,6 +44,7 @@ class SkillNodeJsonTest {
                 JsonObject obj = json.getAsJsonObject();
                 assertFalse(obj.has("prerequisites"), file + ": removed field 'prerequisites' still present");
                 assertFalse(obj.has("column"), file + ": removed field 'column' still present");
+                assertFalse(obj.has("tier"), file + ": removed field 'tier' still present");
                 assertTrue(obj.has("x") && obj.has("y"), file + ": missing web coordinates");
 
                 Skill skill = Skill.CODEC.parse(JsonOps.INSTANCE, json)
@@ -107,7 +108,6 @@ class SkillNodeJsonTest {
                 .tree(SkillTreeId.SPELL_MASTERY)
                 .maxLevel(3)
                 .cost(2)
-                .tier(2)
                 .position(-60.5, 285.0)
                 .edge("basic_casting")
                 .size(Skill.Size.KEYSTONE)
@@ -129,7 +129,6 @@ class SkillNodeJsonTest {
         assertEquals(original.getPointCost(), reparsed.getPointCost());
         assertEquals(original.getEffects(), reparsed.getEffects());
         assertEquals(original.getExplicitNodeEffects(), reparsed.getExplicitNodeEffects());
-        assertEquals(original.getTier(), reparsed.getTier());
         assertEquals(original.getX(), reparsed.getX());
         assertEquals(original.getY(), reparsed.getY());
         assertEquals(original.getEdges(), reparsed.getEdges());

@@ -112,15 +112,6 @@ public final class SkillCommands {
                                                 vocationIdSuggestions(), builder))
                                         .executes(ctx -> setVocation(
                                                 ctx.getSource().getPlayerOrException(),
-                                                VocationManager.Slot.PRIMARY,
-                                                StringArgumentType.getString(ctx, "vocation")))))
-                        .then(Commands.literal("secondary")
-                                .then(Commands.argument("vocation", StringArgumentType.string())
-                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
-                                                vocationIdSuggestions(), builder))
-                                        .executes(ctx -> setVocation(
-                                                ctx.getSource().getPlayerOrException(),
-                                                VocationManager.Slot.SECONDARY,
                                                 StringArgumentType.getString(ctx, "vocation"))))))
                 .then(Commands.literal("clear")
                         .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
@@ -157,53 +148,23 @@ public final class SkillCommands {
         }
         ChatHelper.send(player, Component.translatable(L + "info.header").withStyle(ChatFormatting.GOLD));
 
-        printSlot(player, L + "info.primary", VocationManager.Slot.PRIMARY);
-        printSlot(player, L + "info.secondary", VocationManager.Slot.SECONDARY);
-
-        // Available Mastery: the committed primary (full) and the secondary's first Mastery tier.
-        VocationDefinition primary = VocationManager.committed(player, VocationManager.Slot.PRIMARY);
-        if (primary != null) {
-            ChatHelper.send(player, Component.translatable(L + "info.mastery_full", primary.displayName())
-                    .withStyle(ChatFormatting.GRAY));
-        }
-        VocationDefinition secondary = VocationManager.committed(player, VocationManager.Slot.SECONDARY);
-        if (secondary != null) {
-            ChatHelper.send(player, Component.translatable(L + "info.mastery_secondary", secondary.displayName())
-                    .withStyle(ChatFormatting.GRAY));
-        }
-
-        // Foreclosed: any Vocation opposed to a committed slot.
-        Optional<Identifier> pp = VocationHelper.getPrimary(player);
-        Optional<Identifier> ps = VocationHelper.getSecondary(player);
-        for (VocationDefinition def : VocationRegistry.all()) {
-            boolean opposed = pp.map(id -> VocationRegistry.areOpposed(def.id(), id)).orElse(false)
-                    || ps.map(id -> VocationRegistry.areOpposed(def.id(), id)).orElse(false);
-            if (opposed) {
-                ChatHelper.send(player, Component.translatable(L + "info.foreclosed_opposed", def.displayName())
-                        .withStyle(ChatFormatting.RED));
-            }
-        }
+        VocationDefinition declared = VocationManager.committed(player);
+        Component value = declared != null
+                ? declared.displayName()
+                : Component.translatable(L + "info.none");
+        ChatHelper.send(player, Component.translatable(L + "info.primary", value).withStyle(ChatFormatting.GRAY));
         return 1;
     }
 
-    private static void printSlot(ServerPlayer player, String labelKey, VocationManager.Slot slot) {
-        VocationDefinition committed = VocationManager.committed(player, slot);
-        Component value = committed != null
-                ? committed.displayName()
-                : Component.translatable(L + "info.none");
-        ChatHelper.send(player, Component.translatable(labelKey, value).withStyle(ChatFormatting.GRAY));
-    }
-
-    private static int setVocation(ServerPlayer player, VocationManager.Slot slot, String rawId) {
+    private static int setVocation(ServerPlayer player, String rawId) {
         if (!requireSkillTrees(player)) {
             return 0;
         }
         Identifier id = parseVocationId(rawId);
-        VocationManager.CommitResult result = VocationManager.commit(player, slot, id);
-        String slotKey = slot == VocationManager.Slot.PRIMARY ? "primary" : "secondary";
+        VocationManager.CommitResult result = VocationManager.commit(player, id);
         switch (result) {
             case OK -> {
-                ChatHelper.send(player, Component.translatable(L + "set." + slotKey + "_ok", localizedOrId(id))
+                ChatHelper.send(player, Component.translatable(L + "set.primary_ok", localizedOrId(id))
                         .withStyle(ChatFormatting.GREEN));
                 return 1;
             }
@@ -211,14 +172,8 @@ public final class SkillCommands {
                     Component.translatable(L + "module_disabled").withStyle(ChatFormatting.RED));
             case UNKNOWN_VOCATION -> ChatHelper.send(player,
                     Component.translatable(L + "set.unknown", id.toString()).withStyle(ChatFormatting.RED));
-            case SAME_AS_OTHER_SLOT -> ChatHelper.send(player,
-                    Component.translatable(L + "set.same_slot").withStyle(ChatFormatting.RED));
-            case OPPOSED -> ChatHelper.send(player,
-                    Component.translatable(L + "set.opposed").withStyle(ChatFormatting.RED));
             case DARK_ARTS_DISABLED -> ChatHelper.send(player,
                     Component.translatable(L + "set.dark_arts_disabled").withStyle(ChatFormatting.RED));
-            case RESPEC_REQUIRED -> ChatHelper.send(player,
-                    Component.translatable(L + "set.respec_required").withStyle(ChatFormatting.RED));
         }
         return 0;
     }

@@ -4,7 +4,6 @@
   "displayName": "vocation.wizards_and_beasts.magizoologist.name",
   "description": "vocation.wizards_and_beasts.magizoologist.desc",
   "pillar": "vocation.wizards_and_beasts.magizoologist.pillar",
-  "foundationMaxTier": 1,
   "grantedAbilities": [
     "beast_capacity",
     "mount_loyalty"

@@ -59,7 +59,6 @@ public final class Skill {
             SkillEffect.CODEC.listOf().optionalFieldOf("effects", List.of()).forGetter(Skill::getEffects),
             Codec.lazyInitialized(() -> SkillNodeEffect.CODEC.listOf())
                     .optionalFieldOf("nodeEffects", List.of()).forGetter(Skill::getExplicitNodeEffects),
-            Codec.INT.optionalFieldOf("tier", 0).forGetter(Skill::getTier),
             Codec.DOUBLE.optionalFieldOf("x", 0.0).forGetter(Skill::getX),
             Codec.DOUBLE.optionalFieldOf("y", 0.0).forGetter(Skill::getY),
             Codec.STRING.listOf().optionalFieldOf("edges", List.of()).forGetter(Skill::getEdges),
@@ -80,13 +79,7 @@ public final class Skill {
     private final List<SkillNodeEffect> explicitNodeEffects;
     /** Derived from {@link #effects} on first use when no explicit node effects exist (requires MC bootstrap). */
     private @Nullable List<SkillNodeEffect> derivedNodeEffects;
-    /**
-     * Vocation band index — {@link at.koopro.wizardsandbeasts.skill.vocation.VocationHelper}'s
-     * input only ({@code tier <= foundationMaxTier} = Foundation). Has zero meaning for layout or
-     * adjacency since the Phase 2 web rework; scheduled for deletion in the Vocation reframe.
-     */
-    private final int tier;
-    /** Web layout coordinates: arbitrary per-web units, y-down. Placeholder values until Phase 3. */
+    /** Web layout coordinates: arbitrary per-web units, y-down. Placeholder values until the layout pass. */
     private final double x;
     private final double y;
     /** Edge-neighbor node ids. Logically bidirectional; either endpoint may declare the edge. */
@@ -104,7 +97,6 @@ public final class Skill {
         this.pointCost = builder.pointCost;
         this.effects = Collections.unmodifiableList(new ArrayList<>(builder.effects));
         this.explicitNodeEffects = Collections.unmodifiableList(new ArrayList<>(builder.nodeEffects));
-        this.tier = builder.tier;
         this.x = builder.x;
         this.y = builder.y;
         this.edges = Collections.unmodifiableList(new ArrayList<>(builder.edges));
@@ -114,14 +106,13 @@ public final class Skill {
 
     private static Skill fromCodec(String id, String displayName, String description, SkillTreeId tree,
                                    int maxLevel, int pointCost, List<SkillEffect> effects,
-                                   List<SkillNodeEffect> nodeEffects, int tier,
+                                   List<SkillNodeEffect> nodeEffects,
                                    double x, double y, List<String> edges, Size size, boolean root) {
         Builder builder = builder(id, displayName)
                 .description(description)
                 .tree(tree)
                 .maxLevel(maxLevel)
                 .cost(pointCost)
-                .tier(tier)
                 .position(x, y)
                 .size(size)
                 .root(root);
@@ -184,8 +175,6 @@ public final class Skill {
         return Collections.unmodifiableList(derived);
     }
 
-    /** Vocation band index only — see the field doc. Not a layout or adjacency input. */
-    public int getTier() { return tier; }
     public double getX() { return x; }
     public double getY() { return y; }
     public List<String> getEdges() { return edges; }
@@ -205,7 +194,6 @@ public final class Skill {
         private int pointCost = 1;
         private final List<SkillEffect> effects = new ArrayList<>();
         private final List<SkillNodeEffect> nodeEffects = new ArrayList<>();
-        private int tier;
         private double x;
         private double y;
         private final List<String> edges = new ArrayList<>();
@@ -244,12 +232,6 @@ public final class Skill {
 
         public Builder nodeEffect(SkillNodeEffect effect) {
             this.nodeEffects.add(effect);
-            return this;
-        }
-
-        /** Vocation band index — see {@link Skill#getTier()}. */
-        public Builder tier(int tier) {
-            this.tier = tier;
             return this;
         }
 

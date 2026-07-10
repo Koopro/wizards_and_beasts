@@ -44,15 +44,4 @@ public final class VocationRegistry {
     public static Collection<VocationDefinition> all() {
         return Collections.unmodifiableCollection(BY_ID.values());
     }
-
-    /** Symmetric opposition: true if either side lists the other. Absent ids never oppose. */
-    public static boolean areOpposed(Identifier a, Identifier b) {
-        if (a.equals(b)) {
-            return false;
-        }
-        VocationDefinition da = BY_ID.get(a);
-        VocationDefinition db = BY_ID.get(b);
-        return (da != null && da.oppositions().contains(b))
-                || (db != null && db.oppositions().contains(a));
-    }
 }

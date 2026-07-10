@@ -4,7 +4,6 @@
   "displayName": "vocation.wizards_and_beasts.wandlore.name",
   "description": "vocation.wizards_and_beasts.wandlore.desc",
   "pillar": "vocation.wizards_and_beasts.wandlore.pillar",
-  "foundationMaxTier": 1,
   "commitmentEffects": [
     {
       "type": "attribute_boost",
