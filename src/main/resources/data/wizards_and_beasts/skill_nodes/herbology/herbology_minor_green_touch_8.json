@@ -1,0 +1,18 @@
+{
+  "id": "herbology_minor_green_touch_8",
+  "displayName": "skill.wizards_and_beasts.filler.minor_green_touch",
+  "tree": "herbology",
+  "effects": [
+    {
+      "type": "gameplay_bonus",
+      "stat": "harvest_bonus_chance",
+      "perLevel": 0.03
+    }
+  ],
+  "x": -10.1,
+  "y": -147.1,
+  "edges": [
+    "herbology_minor_vitality_10"
+  ],
+  "size": "small"
+}

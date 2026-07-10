@@ -27,9 +27,9 @@
       "type": "category_damage_bonus"
     }
   ],
-  "x": -131.4,
-  "y": -61.3,
+  "x": -94.9,
+  "y": -130.7,
   "edges": [
-    "wand_study"
+    "wandlore_minor_precision_9"
   ]
 }

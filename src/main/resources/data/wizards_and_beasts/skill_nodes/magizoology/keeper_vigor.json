@@ -12,9 +12,9 @@
       "type": "passive_attribute"
     }
   ],
-  "x": -208.9,
-  "y": 146.3,
+  "x": 281.1,
+  "y": -21.9,
   "edges": [
-    "creature_bond"
+    "magizoology_minor_beast_ward_2"
   ]
 }

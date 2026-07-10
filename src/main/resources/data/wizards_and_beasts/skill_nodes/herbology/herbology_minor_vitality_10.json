@@ -1,0 +1,18 @@
+{
+  "id": "herbology_minor_vitality_10",
+  "displayName": "skill.wizards_and_beasts.filler.minor_vitality",
+  "tree": "herbology",
+  "effects": [
+    {
+      "type": "passive_attribute",
+      "attributeId": "max_health",
+      "amountPerLevel": 0.5
+    }
+  ],
+  "x": -46.5,
+  "y": -155.2,
+  "edges": [
+    "harvest_bounty"
+  ],
+  "size": "small"
+}

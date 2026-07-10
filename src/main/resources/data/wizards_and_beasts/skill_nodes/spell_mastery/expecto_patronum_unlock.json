@@ -11,8 +11,8 @@
       "type": "spell_cooldown_reduction"
     }
   ],
-  "x": 195.3,
-  "y": -43.3,
+  "x": 181.2,
+  "y": 43.6,
   "edges": [
     "protego_unlock"
   ]

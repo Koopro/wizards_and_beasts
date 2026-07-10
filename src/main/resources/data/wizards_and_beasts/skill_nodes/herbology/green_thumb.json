@@ -9,6 +9,9 @@
       "type": "unlock_ability"
     }
   ],
-  "x": -45.0,
-  "y": -77.9
+  "x": -6.1,
+  "y": -117.8,
+  "edges": [
+    "herbology_minor_vitality_2"
+  ]
 }

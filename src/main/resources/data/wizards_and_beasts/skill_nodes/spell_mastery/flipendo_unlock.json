@@ -11,9 +11,9 @@
       "type": "spell_damage_bonus"
     }
   ],
-  "x": 231.1,
-  "y": -107.8,
+  "x": 220.0,
+  "y": 7.7,
   "edges": [
-    "expelliarmus_unlock"
+    "spell_mastery_minor_focus_10"
   ]
 }

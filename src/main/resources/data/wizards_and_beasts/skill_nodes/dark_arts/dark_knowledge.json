@@ -15,6 +15,9 @@
       "type": "category_damage_bonus"
     }
   ],
-  "x": 45.0,
-  "y": 77.9
+  "x": -17.2,
+  "y": 116.7,
+  "edges": [
+    "dark_arts_minor_resilience_2"
+  ]
 }

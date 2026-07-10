@@ -11,9 +11,9 @@
       "type": "spell_cooldown_reduction"
     }
   ],
-  "x": 330.8,
-  "y": -154.3,
+  "x": 277.2,
+  "y": 9.7,
   "edges": [
-    "wingardium_unlock"
+    "spell_mastery_minor_focus_4"
   ]
 }

@@ -11,9 +11,9 @@
       "type": "spell_damage_bonus"
     }
   ],
-  "x": 118.8,
-  "y": 83.2,
+  "x": 77.1,
+  "y": 155.1,
   "edges": [
-    "dark_knowledge"
+    "dark_arts_minor_resilience_7"
   ]
 }

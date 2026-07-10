@@ -12,9 +12,10 @@
       "type": "gameplay_bonus"
     }
   ],
-  "x": -12.6,
-  "y": 144.4,
+  "x": 100.3,
+  "y": -145.5,
   "edges": [
-    "creature_knowledge"
+    "magizoology_minor_beast_ward_5",
+    "magizoology_minor_beast_ward_6"
   ]
 }

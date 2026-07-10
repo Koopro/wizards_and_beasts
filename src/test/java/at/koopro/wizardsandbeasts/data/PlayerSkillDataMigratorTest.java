@@ -34,6 +34,23 @@ class PlayerSkillDataMigratorTest {
     }
 
     @Test
+    void v2Data_needsV3ContentMigration() {
+        CompoundTag tag = new CompoundTag();
+        tag.putInt(PlayerSkillData.VERSION_KEY, 2);
+        tag.putInt("SkillPoints", 10);
+        tag.putInt("TotalPointsEarned", 30);
+        PlayerSkillData data = new PlayerSkillData();
+        data.load(tag);
+        data.setSkillLevel("basic_casting", 1);
+
+        assertTrue(data.needsWebMigration(), "v2 saves must re-migrate for the Phase 4 graph reshape");
+        data.applyWebMigration();
+        assertTrue(data.getUnlockedSkills().isEmpty());
+        assertEquals(30, data.getSkillPoints(), "under-cap earned refunds without clamping");
+        assertFalse(data.needsWebMigration());
+    }
+
+    @Test
     void webMigration_refundsClears_andClampsEarnedToCap() {
         CompoundTag tag = new CompoundTag();
         tag.putInt(PlayerSkillData.VERSION_KEY, 1);

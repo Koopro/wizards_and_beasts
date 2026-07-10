@@ -12,9 +12,9 @@
       "type": "passive_attribute"
     }
   ],
-  "x": -127.5,
-  "y": -220.8,
+  "x": -17.8,
+  "y": -281.4,
   "edges": [
-    "natural_remedy"
+    "herbology_minor_green_touch_3"
   ]
 }

@@ -10,9 +10,9 @@
       "type": "unlock_ability"
     }
   ],
-  "x": -22.2,
-  "y": 254.0,
+  "x": 149.4,
+  "y": -239.1,
   "edges": [
-    "creature_bond"
+    "magizoology_minor_hide_8"
   ]
 }

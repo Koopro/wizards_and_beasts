@@ -12,9 +12,9 @@
       "type": "category_cooldown_reduction"
     }
   ],
-  "x": -181.3,
-  "y": 84.5,
+  "x": -219.4,
+  "y": -7.7,
   "edges": [
-    "wand_precision"
+    "wandlore_minor_quickcast_2"
   ]
 }

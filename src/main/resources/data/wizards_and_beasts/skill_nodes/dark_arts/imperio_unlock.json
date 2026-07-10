@@ -11,9 +11,9 @@
       "type": "spell_cooldown_reduction"
     }
   ],
-  "x": 17.4,
-  "y": 199.2,
+  "x": -99.5,
+  "y": 199.8,
   "edges": [
-    "crucio_unlock"
+    "dark_arts_minor_dark_power_4"
   ]
 }

@@ -1,17 +1,16 @@
 {
   "id": "wizard_core",
-  "displayName": "Wizard Core [PLACEHOLDER — Phase 3 names this]",
-  "description": "PLACEHOLDER center of the wizard web. Phase 3 replaces this node's text and position.",
+  "displayName": "skill.wizards_and_beasts.node.polaris",
+  "description": "",
   "tree": "spell_mastery",
   "x": 0.0,
   "y": 0.0,
-  "edges": [
-    "basic_casting",
-    "dark_knowledge",
-    "creature_knowledge",
-    "wand_study",
-    "green_thumb",
-    "alchemical_vigor"
-  ],
-  "root": true
+  "root": true,
+  "effects": [
+    {
+      "type": "passive_attribute",
+      "attributeId": "max_health",
+      "amountPerLevel": 0.5
+    }
+  ]
 }

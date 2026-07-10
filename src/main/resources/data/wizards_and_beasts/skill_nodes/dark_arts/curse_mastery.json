@@ -12,9 +12,9 @@
       "type": "category_cooldown_reduction"
     }
   ],
-  "x": 22.2,
-  "y": 254.0,
+  "x": -109.0,
+  "y": 260.1,
   "edges": [
-    "dark_resilience"
+    "dark_arts_minor_dark_power_2"
   ]
 }

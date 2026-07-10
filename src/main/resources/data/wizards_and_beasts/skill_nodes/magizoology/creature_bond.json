@@ -12,10 +12,10 @@
       "type": "passive_attribute"
     }
   ],
-  "x": -17.4,
-  "y": 199.2,
+  "x": 120.4,
+  "y": -192.8,
   "edges": [
-    "niffler_friend",
-    "beast_handler"
+    "magizoology_minor_beast_ward_3",
+    "magizoology_minor_hide_9"
   ]
 }

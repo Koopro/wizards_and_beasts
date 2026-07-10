@@ -10,8 +10,8 @@
       "type": "spell_cooldown_reduction"
     }
   ],
-  "x": 131.4,
-  "y": -61.3,
+  "x": 141.5,
+  "y": 15.4,
   "edges": [
     "basic_casting"
   ]

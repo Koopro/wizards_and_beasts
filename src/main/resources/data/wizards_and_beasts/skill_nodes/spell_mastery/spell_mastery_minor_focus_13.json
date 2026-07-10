@@ -1,0 +1,18 @@
+{
+  "id": "spell_mastery_minor_focus_13",
+  "displayName": "skill.wizards_and_beasts.filler.minor_focus",
+  "tree": "spell_mastery",
+  "effects": [
+    {
+      "type": "category_cooldown_reduction",
+      "category": "utility",
+      "reductionPerLevel": 0.025
+    }
+  ],
+  "x": 91.8,
+  "y": 81.9,
+  "edges": [
+    "basic_casting"
+  ],
+  "size": "small"
+}

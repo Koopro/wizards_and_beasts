@@ -12,9 +12,9 @@
       "type": "gameplay_bonus"
     }
   ],
-  "x": -163.8,
-  "y": 114.7,
+  "x": 218.0,
+  "y": -17.7,
   "edges": [
-    "beast_handler"
+    "magizoology_minor_beast_ward_4"
   ]
 }

@@ -12,9 +12,9 @@
       "type": "passive_attribute"
     }
   ],
-  "x": 12.6,
-  "y": -144.4,
+  "x": -125.2,
+  "y": 170.8,
   "edges": [
-    "alchemical_vigor"
+    "alchemy_minor_iron_skin_3"
   ]
 }

@@ -12,9 +12,9 @@
       "type": "category_cooldown_reduction"
     }
   ],
-  "x": 118.8,
-  "y": -83.2,
+  "x": -203.0,
+  "y": 16.3,
   "edges": [
-    "alchemical_vigor"
+    "alchemy_minor_iron_skin_4"
   ]
 }

@@ -1,0 +1,18 @@
+{
+  "id": "alchemy_minor_efficiency_1",
+  "displayName": "skill.wizards_and_beasts.filler.minor_efficiency",
+  "tree": "alchemy",
+  "effects": [
+    {
+      "type": "category_cooldown_reduction",
+      "category": "utility",
+      "reductionPerLevel": 0.02
+    }
+  ],
+  "x": -57.7,
+  "y": 29.0,
+  "edges": [
+    "wizard_core"
+  ],
+  "size": "small"
+}

@@ -11,9 +11,9 @@
       "type": "spell_damage_bonus"
     }
   ],
-  "x": 255.0,
-  "y": 0.0,
+  "x": 174.3,
+  "y": 111.2,
   "edges": [
-    "stupefy_power"
+    "spell_mastery_minor_focus_11"
   ]
 }

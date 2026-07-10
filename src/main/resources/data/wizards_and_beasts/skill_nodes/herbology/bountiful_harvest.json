@@ -11,9 +11,9 @@
       "type": "gameplay_bonus"
     }
   ],
-  "x": -163.8,
-  "y": -114.7,
+  "x": -100.9,
+  "y": -196.8,
   "edges": [
-    "harvest_bounty"
+    "herbology_minor_green_touch_6"
   ]
 }

@@ -11,10 +11,10 @@
       "type": "spell_cooldown_reduction"
     }
   ],
-  "x": 208.9,
-  "y": 146.3,
+  "x": 110.2,
+  "y": 250.8,
   "edges": [
-    "imperio_unlock",
-    "dark_resilience"
+    "dark_arts_minor_dark_power_3",
+    "dark_arts_minor_resilience_10"
   ]
 }

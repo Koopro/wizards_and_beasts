@@ -12,9 +12,9 @@
       "type": "category_damage_bonus"
     }
   ],
-  "x": 281.0,
-  "y": -131.0,
+  "x": 257.8,
+  "y": 24.8,
   "edges": [
-    "incendio_unlock"
+    "spell_mastery_minor_focus_8"
   ]
 }

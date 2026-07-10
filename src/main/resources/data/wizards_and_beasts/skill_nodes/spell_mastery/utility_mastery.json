@@ -12,9 +12,9 @@
       "type": "category_cooldown_reduction"
     }
   ],
-  "x": 310.0,
-  "y": 0.0,
+  "x": 222.9,
+  "y": 115.8,
   "edges": [
-    "reparo_unlock"
+    "spell_mastery_minor_focus_7"
   ]
 }

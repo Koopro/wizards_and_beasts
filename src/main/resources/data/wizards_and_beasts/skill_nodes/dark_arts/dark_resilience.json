@@ -12,9 +12,9 @@
       "type": "passive_attribute"
     }
   ],
-  "x": 163.8,
-  "y": 114.7,
+  "x": 100.9,
+  "y": 205.6,
   "edges": [
-    "dark_damage"
+    "dark_arts_minor_resilience_6"
   ]
 }

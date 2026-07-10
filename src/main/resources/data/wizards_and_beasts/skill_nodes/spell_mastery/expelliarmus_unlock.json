@@ -11,9 +11,9 @@
       "type": "spell_cooldown_reduction"
     }
   ],
-  "x": 200.0,
-  "y": 0.0,
+  "x": 157.4,
+  "y": 104.7,
   "edges": [
-    "stupefy_unlock"
+    "spell_mastery_minor_focus_12"
   ]
 }

@@ -1,0 +1,18 @@
+{
+  "id": "wandlore_minor_quickcast_4",
+  "displayName": "skill.wizards_and_beasts.filler.minor_quickcast",
+  "tree": "wandlore",
+  "effects": [
+    {
+      "type": "category_cooldown_reduction",
+      "category": "combat",
+      "reductionPerLevel": 0.015
+    }
+  ],
+  "x": -197.2,
+  "y": -81.3,
+  "edges": [
+    "wandlore_minor_precision_5"
+  ],
+  "size": "small"
+}

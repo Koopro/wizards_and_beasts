@@ -15,8 +15,12 @@ import java.util.Set;
 
 public class PlayerSkillData implements ModAttachments.NbtSerializable {
     public static final String VERSION_KEY = "DataVersion";
-    /** v2 = web rework: adjacency allocation, 60-point cap, one-time full refund (see {@link #applyWebMigration}). */
-    public static final int CURRENT_VERSION = 2;
+    /**
+     * v2 = web rework (adjacency allocation, 60-point cap, full refund);
+     * v3 = wizard web content pass (geometry + fillers reshaped the graph → full refund again).
+     * Any bump re-runs {@link #applyWebMigration} at login.
+     */
+    public static final int CURRENT_VERSION = 3;
 
     /**
      * Schema version of the data this instance was loaded from. Fresh instances (new players)
@@ -64,9 +68,9 @@ public class PlayerSkillData implements ModAttachments.NbtSerializable {
 
     // ── Web migration (schema v1 → v2) ──
 
-    /** True if this data predates the web rework and still needs the one-time full refund. */
+    /** True if this data predates the current web schema and still needs the one-time full refund. */
     public boolean needsWebMigration() {
-        return dataVersion < 2;
+        return dataVersion < CURRENT_VERSION;
     }
 
     /**

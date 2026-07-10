@@ -20,10 +20,10 @@
       "type": "unlock_ability"
     }
   ],
-  "x": 17.4,
-  "y": -199.2,
+  "x": -164.6,
+  "y": 216.6,
   "edges": [
-    "transmute_focus",
-    "hardened_skin"
+    "alchemy_minor_efficiency_4",
+    "alchemy_minor_iron_skin_6"
   ]
 }

@@ -9,6 +9,9 @@
       "type": "unlock_ability"
     }
   ],
-  "x": 90.0,
-  "y": 0.0
+  "x": 114.0,
+  "y": 56.6,
+  "edges": [
+    "spell_mastery_minor_focus_2"
+  ]
 }

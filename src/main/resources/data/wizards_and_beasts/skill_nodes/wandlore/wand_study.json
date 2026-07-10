@@ -9,6 +9,9 @@
       "type": "unlock_ability"
     }
   ],
-  "x": -90.0,
-  "y": 0.0
+  "x": -113.8,
+  "y": -66.2,
+  "edges": [
+    "wandlore_minor_precision_2"
+  ]
 }

@@ -1,0 +1,18 @@
+{
+  "id": "magizoology_minor_hide_5",
+  "displayName": "skill.wizards_and_beasts.filler.minor_hide",
+  "tree": "magizoology",
+  "effects": [
+    {
+      "type": "passive_attribute",
+      "attributeId": "armor",
+      "amountPerLevel": 0.5
+    }
+  ],
+  "x": 137.5,
+  "y": -101.0,
+  "edges": [
+    "beast_handler"
+  ],
+  "size": "small"
+}

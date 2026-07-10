@@ -10,9 +10,9 @@
       "type": "spell_cooldown_reduction"
     }
   ],
-  "x": 195.3,
-  "y": 43.3,
+  "x": 139.5,
+  "y": 134.9,
   "edges": [
-    "lumos_unlock"
+    "spell_mastery_minor_focus_9"
   ]
 }

@@ -27,9 +27,10 @@
       "type": "category_cooldown_reduction"
     }
   ],
-  "x": -131.4,
-  "y": 61.3,
+  "x": -170.8,
+  "y": -17.4,
   "edges": [
-    "wand_study"
+    "wandlore_minor_precision_8",
+    "wandlore_minor_quickcast_7"
   ]
 }

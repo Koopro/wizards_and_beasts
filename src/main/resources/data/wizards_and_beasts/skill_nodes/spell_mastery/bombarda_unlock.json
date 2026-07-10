@@ -11,9 +11,9 @@
       "type": "spell_damage_bonus"
     }
   ],
-  "x": 330.8,
-  "y": 154.3,
+  "x": 157.7,
+  "y": 233.8,
   "edges": [
-    "combat_focus"
+    "spell_mastery_minor_focus_3"
   ]
 }

@@ -1,0 +1,18 @@
+{
+  "id": "dark_arts_minor_resilience_5",
+  "displayName": "skill.wizards_and_beasts.filler.minor_resilience",
+  "tree": "dark_arts",
+  "effects": [
+    {
+      "type": "passive_attribute",
+      "attributeId": "max_health",
+      "amountPerLevel": 0.5
+    }
+  ],
+  "x": 19.5,
+  "y": 175.0,
+  "edges": [
+    "crucio_unlock"
+  ],
+  "size": "small"
+}

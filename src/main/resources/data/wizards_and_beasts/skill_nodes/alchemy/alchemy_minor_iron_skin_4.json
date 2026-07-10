@@ -1,0 +1,18 @@
+{
+  "id": "alchemy_minor_iron_skin_4",
+  "displayName": "skill.wizards_and_beasts.filler.minor_iron_skin",
+  "tree": "alchemy",
+  "effects": [
+    {
+      "type": "passive_attribute",
+      "attributeId": "armor",
+      "amountPerLevel": 0.5
+    }
+  ],
+  "x": -174.1,
+  "y": 33.2,
+  "edges": [
+    "alchemy_minor_efficiency_6"
+  ],
+  "size": "small"
+}

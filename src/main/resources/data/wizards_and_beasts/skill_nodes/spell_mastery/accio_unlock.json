@@ -11,8 +11,8 @@
       "type": "spell_cooldown_reduction"
     }
   ],
-  "x": 181.3,
-  "y": -84.5,
+  "x": 185.1,
+  "y": 9.8,
   "edges": [
     "lumos_unlock"
   ]

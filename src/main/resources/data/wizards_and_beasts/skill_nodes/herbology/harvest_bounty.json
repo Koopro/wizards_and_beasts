@@ -12,9 +12,9 @@
       "type": "gameplay_bonus"
     }
   ],
-  "x": -118.8,
-  "y": -83.2,
+  "x": -83.3,
+  "y": -156.6,
   "edges": [
-    "green_thumb"
+    "herbology_minor_green_touch_5"
   ]
 }

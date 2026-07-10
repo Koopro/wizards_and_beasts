@@ -1,0 +1,18 @@
+{
+  "id": "wandlore_minor_precision_4",
+  "displayName": "skill.wizards_and_beasts.filler.minor_precision",
+  "tree": "wandlore",
+  "effects": [
+    {
+      "type": "category_damage_bonus",
+      "category": "combat",
+      "bonusPerLevel": 0.015
+    }
+  ],
+  "x": -171.2,
+  "y": -165.5,
+  "edges": [
+    "wand_mastery"
+  ],
+  "size": "small"
+}

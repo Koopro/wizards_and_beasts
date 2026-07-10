@@ -10,10 +10,10 @@
       "type": "unlock_ability"
     }
   ],
-  "x": -17.4,
-  "y": -199.2,
+  "x": 104.5,
+  "y": -196.6,
   "edges": [
-    "potion_potency",
-    "harvest_bounty"
+    "herbology_minor_green_touch_2",
+    "herbology_minor_vitality_8"
   ]
 }
