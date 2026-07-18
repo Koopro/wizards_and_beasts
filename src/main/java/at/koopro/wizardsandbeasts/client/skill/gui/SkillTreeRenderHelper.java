@@ -7,14 +7,14 @@ import at.koopro.wizardsandbeasts.skill.Skill;
 import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.Identifier;
 
 import java.util.List;
 
 /**
- * Drawing helpers for the {@link SkillTreeScreen} web canvas: window frame, footer counter,
- * hover tooltip, and the plain-shape primitives (line, circle) the Phase 2 canvas uses.
+ * Drawing helpers for the {@link SkillTreeScreen} star chart: window frame, gold-on-night footer,
+ * hover tooltip, display-name resolution (translate-with-fallback), and the shape primitives.
  */
 public final class SkillTreeRenderHelper {
 
@@ -24,6 +24,14 @@ public final class SkillTreeRenderHelper {
     private static final Identifier PANEL_TEX = Identifier.fromNamespaceAndPath(
             at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID, "textures/gui/skill_tree/panel.png");
 
+    /**
+     * Resolves a node display name: lang keys (Phase 4 fillers, Polaris) translate; legacy
+     * inline-English strings pass through unchanged (the fallback IS the literal).
+     */
+    public static String resolveDisplayName(String raw) {
+        return I18n.exists(raw) ? I18n.get(raw) : raw;
+    }
+
     public static void renderWindowFrame(GuiGraphics graphics, Font font, int panelX, int panelY, int panelW, int panelH, String title) {
         McStylePanel.drawTiled(graphics, PANEL_TEX, panelX, panelY, panelW, panelH, 64);
         McStylePanel.drawBorder(graphics, panelX, panelY, panelW, panelH, 0xFF6A5A90, 0xFF1A1626);
@@ -32,12 +40,13 @@ public final class SkillTreeRenderHelper {
                 panelY + WizardsAndBeastsUiTokens.SkillTree.TITLE_Y, WizardsAndBeastsUiTokens.SkillTree.TITLE_COLOR);
     }
 
-    /** Earned / spent / cap counter — the web's core budget readout. */
+    /** Earned / spent / cap counter, gold-on-night to match the chart plate. */
     public static void renderFooter(GuiGraphics graphics, Font font, int panelX, int panelY, int panelW, int panelH,
                                     PlayerSkillData data) {
         int footerY = panelY + panelH - WizardsAndBeastsUiTokens.SkillTree.FOOTER_HEIGHT;
-        graphics.fill(panelX, footerY, panelX + panelW, panelY + panelH, WizardsAndBeastsUiTokens.SkillTree.HEADER_FILL);
-        graphics.fill(panelX, footerY, panelX + panelW, footerY + 1, WizardsAndBeastsUiTokens.SkillTree.BORDER_COLOR);
+        graphics.fill(panelX, footerY, panelX + panelW, panelY + panelH, SkillTreeChartTextures.NIGHT_BG);
+        graphics.fill(panelX, footerY, panelX + panelW, footerY + 1,
+                SkillTreeChartTextures.withAlpha(SkillTreeChartTextures.GOLD, 110));
 
         int earned = data.getTotalPointsEarned();
         int unspent = data.getSkillPoints();
@@ -49,14 +58,14 @@ public final class SkillTreeRenderHelper {
 
         int textY = footerY + WizardsAndBeastsUiTokens.SkillTree.FOOTER_TEXT_Y;
         graphics.drawString(font, left, panelX + WizardsAndBeastsUiTokens.SkillTree.FOOTER_LEFT_X, textY,
-                WizardsAndBeastsUiTokens.SkillTree.FOOTER_PRIMARY_COLOR, false);
+                SkillTreeChartTextures.GOLD, false);
         int rightX = panelX + panelW - WizardsAndBeastsUiTokens.SkillTree.FOOTER_RIGHT_PAD - font.width(right);
         if (rightX > panelX + WizardsAndBeastsUiTokens.SkillTree.FOOTER_LEFT_X + font.width(left) + WizardsAndBeastsUiTokens.SkillTree.FOOTER_MIN_GAP) {
-            graphics.drawString(font, right, rightX, textY, WizardsAndBeastsUiTokens.SkillTree.FOOTER_SECONDARY_COLOR, false);
+            graphics.drawString(font, right, rightX, textY, SkillTreeChartTextures.NIGHT_TEXT_DIM, false);
         }
     }
 
-    /** Hover card reusing the node's existing display info; the prereq line is now an adjacency line. */
+    /** Hover card in the plate aesthetic; the title resolves lang-key names with literal fallback. */
     public static void renderTooltipCard(GuiGraphics graphics, Font font, Skill skill, int mouseX, int mouseY,
                                          int level, int points, boolean adjacencyOpen) {
         int w = WizardsAndBeastsUiTokens.SkillTree.TOOLTIP_WIDTH;
@@ -66,50 +75,55 @@ public final class SkillTreeRenderHelper {
         int tooltipY = Math.min(mouseY + WizardsAndBeastsUiTokens.SkillTree.TOOLTIP_OFFSET_Y,
                 net.minecraft.client.Minecraft.getInstance().getWindow().getGuiScaledHeight() - h - 8);
 
-        graphics.fill(tooltipX, tooltipY, tooltipX + w, tooltipY + h, WizardsAndBeastsUiTokens.SkillTree.TOOLTIP_BG);
-        drawBorderRect(graphics, tooltipX, tooltipY, w, h, skill.getTree().getColor());
+        int regionTint = SkillTreeChartTextures.regionTint(skill.getTree());
+        boolean maxed = level >= skill.getMaxLevel();
+        boolean started = level > 0;
+        int borderTint = started ? SkillTreeChartTextures.GOLD : regionTint;
 
-        graphics.drawString(font, skill.getDisplayName(), tooltipX + 8, tooltipY + 7, skill.getTree().getColor(), false);
+        graphics.fill(tooltipX, tooltipY, tooltipX + w, tooltipY + h, SkillTreeChartTextures.NIGHT_BG);
+        drawBorderRect(graphics, tooltipX, tooltipY, w, h, borderTint);
+
+        graphics.drawString(font, resolveDisplayName(skill.getDisplayName()),
+                tooltipX + 8, tooltipY + 7, borderTint, false);
         List<String> descLines = wrap(font, safeText(skill.getDescription(), "No description."), w - 16, 2);
         int descY = tooltipY + 21;
         for (String line : descLines) {
-            graphics.drawString(font, line, tooltipX + 8, descY, WizardsAndBeastsUiTokens.SkillTree.TOOLTIP_TEXT, false);
+            graphics.drawString(font, line, tooltipX + 8, descY, 0xFFCED3E4, false);
             descY += 10;
         }
 
         int statsY = tooltipY + 45;
         graphics.drawString(font, "Level: " + level + "/" + skill.getMaxLevel(),
-                tooltipX + 8, statsY, WizardsAndBeastsUiTokens.SkillTree.TOOLTIP_TEXT, false);
+                tooltipX + 8, statsY, SkillTreeChartTextures.NIGHT_TEXT_DIM, false);
         graphics.drawString(font, "Cost: " + skill.getPointCost() + " SP",
-                tooltipX + 8, statsY + 10, WizardsAndBeastsUiTokens.SkillTree.TOOLTIP_TEXT, false);
-        String regionLine = "Region: " + skill.getTree().getDisplayName();
-        graphics.drawString(font, regionLine, tooltipX + 8, statsY + 20,
-                WizardsAndBeastsUiTokens.SkillTree.TOOLTIP_TEXT, false);
+                tooltipX + 8, statsY + 10, SkillTreeChartTextures.NIGHT_TEXT_DIM, false);
+        String constellation = I18n.get("skilltree.region." + skill.getTree().getId() + ".constellation");
+        graphics.drawString(font, "Region: " + skill.getTree().getDisplayName()
+                        + (constellation.startsWith("skilltree.") ? "" : " (" + constellation + ")"),
+                tooltipX + 8, statsY + 20, SkillTreeChartTextures.withAlpha(regionTint, 220), false);
 
-        boolean maxed = level >= skill.getMaxLevel();
-        boolean started = level > 0;
         boolean affordable = points >= skill.getPointCost();
         String actionLine;
         int actionColor;
         if (maxed) {
             actionLine = "Maxed";
-            actionColor = WizardsAndBeastsUiTokens.SkillTree.STATUS_OK;
+            actionColor = SkillTreeChartTextures.GOLD;
         } else if (started || adjacencyOpen) {
             if (affordable) {
                 actionLine = started ? "Click to level up" : "Click to allocate";
-                actionColor = WizardsAndBeastsUiTokens.SkillTree.STATUS_OK;
+                actionColor = SkillTreeChartTextures.GOLD;
             } else {
                 actionLine = "Need " + (skill.getPointCost() - points) + " more SP";
                 actionColor = WizardsAndBeastsUiTokens.SkillTree.STATUS_WARN;
             }
         } else {
-            actionLine = "Locked — allocate a connected node first";
+            actionLine = "Locked — allocate a connected star first";
             actionColor = WizardsAndBeastsUiTokens.SkillTree.STATUS_WARN;
         }
         graphics.drawString(font, actionLine, tooltipX + 8, tooltipY + h - 14, actionColor, false);
     }
 
-    // ── Plain-shape primitives ──
+    // ── Shape primitives ──
 
     public static void drawLine(GuiGraphics graphics, int x1, int y1, int x2, int y2, int color, int stroke) {
         int dx = Math.abs(x2 - x1);
@@ -137,12 +151,35 @@ public final class SkillTreeRenderHelper {
         }
     }
 
-    /** Filled circle via horizontal scanline spans. */
-    public static void drawCircle(GuiGraphics graphics, int cx, int cy, int radius, int color) {
-        for (int dy = -radius; dy <= radius; dy++) {
-            int span = (int) Math.floor(Math.sqrt((double) radius * radius - (double) dy * dy));
-            graphics.fill(cx - span, cy + dy, cx + span + 1, cy + dy + 1, color);
+    /** One-pixel midpoint-circle outline — the survey rings. */
+    public static void drawCircleOutline(GuiGraphics graphics, int cx, int cy, int radius, int color) {
+        if (radius <= 0) {
+            return;
         }
+        int x = radius;
+        int y = 0;
+        int err = 1 - radius;
+        while (x >= y) {
+            plot8(graphics, cx, cy, x, y, color);
+            y++;
+            if (err < 0) {
+                err += 2 * y + 1;
+            } else {
+                x--;
+                err += 2 * (y - x) + 1;
+            }
+        }
+    }
+
+    private static void plot8(GuiGraphics graphics, int cx, int cy, int x, int y, int color) {
+        graphics.fill(cx + x, cy + y, cx + x + 1, cy + y + 1, color);
+        graphics.fill(cx - x, cy + y, cx - x + 1, cy + y + 1, color);
+        graphics.fill(cx + x, cy - y, cx + x + 1, cy - y + 1, color);
+        graphics.fill(cx - x, cy - y, cx - x + 1, cy - y + 1, color);
+        graphics.fill(cx + y, cy + x, cx + y + 1, cy + x + 1, color);
+        graphics.fill(cx - y, cy + x, cx - y + 1, cy + x + 1, color);
+        graphics.fill(cx + y, cy - x, cx + y + 1, cy - x + 1, color);
+        graphics.fill(cx - y, cy - x, cx - y + 1, cy - x + 1, color);
     }
 
     public static void drawBorderRect(GuiGraphics graphics, int x, int y, int w, int h, int color) {

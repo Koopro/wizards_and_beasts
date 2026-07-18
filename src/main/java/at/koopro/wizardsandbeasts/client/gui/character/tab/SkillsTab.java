@@ -72,7 +72,10 @@ public final class SkillsTab implements CharacterTab {
         for (Map.Entry<String, Integer> entry : unlocked.entrySet()) {
             if (entry.getValue() <= 0) continue;
             Skill skill = SkillTrees.clientById(entry.getKey());
-            if (skill != null) nodeNames.add(skill.getDisplayName());
+            if (skill != null) {
+                nodeNames.add(at.koopro.wizardsandbeasts.client.skill.gui.SkillTreeRenderHelper
+                        .resolveDisplayName(skill.getDisplayName()));
+            }
         }
         cy = drawChips(g, font, cx, cy, w - 4, h - (cy - y), nodeNames);
         cy += 4;
