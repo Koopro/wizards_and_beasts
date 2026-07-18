@@ -250,6 +250,7 @@ public final class SkillCommands {
         data.resetAll();
         SkillSystemAPI.reconcileDerivedEffects(player);
         PlayerStateSyncService.syncSkills(player);
+        PlayerStateSyncService.syncAbilityGrants(player); // refund strips SKILL_NODE-source grants
         ChatHelper.sendSuccess(player, "All skills reset. Points refunded.");
         return 1;
     }
@@ -264,6 +265,7 @@ public final class SkillCommands {
         data.resetAll();
         SkillSystemAPI.reconcileDerivedEffects(player);
         PlayerStateSyncService.syncSkills(player);
+        PlayerStateSyncService.syncAbilityGrants(player); // refund strips SKILL_NODE-source grants
         ChatHelper.sendSuccess(player, "Skills respecced — all points refunded.");
         return 1;
     }
@@ -284,6 +286,7 @@ public final class SkillCommands {
         data.resetSkill(skillId);
         SkillSystemAPI.reconcileDerivedEffects(player);
         PlayerStateSyncService.syncSkills(player);
+        PlayerStateSyncService.syncAbilityGrants(player); // refund strips SKILL_NODE-source grants
         ChatHelper.sendSuccess(player, "Reset " + skill.getDisplayName() + ". Points refunded.");
         return 1;
     }
@@ -401,6 +404,10 @@ public final class SkillCommands {
             case SkillEffect.GameplayBonus e ->
                     String.format("+%.0f%% %s per level", e.perLevel() * 100,
                             e.stat().name().replace('_', ' ').toLowerCase());
+            case SkillEffect.GrantAbility e -> "Grants ability: " + e.ability().id();
+            case SkillEffect.AbilityRefinement e ->
+                    String.format("Refines %s (%s) +%.2f per level",
+                            e.ability().id(), e.axis().getSerializedName(), e.magnitudePerLevel());
         };
     }
 }

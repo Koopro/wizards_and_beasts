@@ -58,7 +58,17 @@ public class PlayerSkillData implements ModAttachments.NbtSerializable {
      * {@link SkillSystemAPI#MAX_SKILL_POINTS}. No-op once the cap is reached.
      */
     public void addSkillPoints(int amount) {
-        int grant = Math.min(amount, Math.max(0, SkillSystemAPI.MAX_SKILL_POINTS - totalPointsEarned));
+        addSkillPoints(amount, SkillSystemAPI.MAX_SKILL_POINTS);
+    }
+
+    /**
+     * Adds earned points, clamped so {@code totalPointsEarned} never exceeds {@code cap}. No-op once the
+     * cap is reached. Callers pass the player's per-audience cap (see {@link SkillSystemAPI#pointCapFor});
+     * every audience shares {@link SkillSystemAPI#MAX_SKILL_POINTS} today, so this behaves identically to
+     * the constant-clamped path.
+     */
+    public void addSkillPoints(int amount, int cap) {
+        int grant = Math.min(amount, Math.max(0, cap - totalPointsEarned));
         if (grant <= 0) {
             return;
         }

@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.network.skill;
 
+import at.koopro.wizardsandbeasts.client.ability.state.ClientAbilityGrantState;
 import at.koopro.wizardsandbeasts.client.network.ClientPayloadHandlers;
 import at.koopro.wizardsandbeasts.network.skill.SkillBonusSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.skill.SkillDataSyncS2CPayload;
@@ -28,6 +29,12 @@ public final class ModNetworkSkills {
                 SyncSkillDefinitionsPayload.TYPE,
                 SyncSkillDefinitionsPayload.STREAM_CODEC,
                 ClientPayloadHandlers::handleSyncSkillDefinitions);
+        // Derived ability-grant snapshot. Handled by its own client mirror (not ClientPayloadHandlers) so
+        // this stays a standalone, tangle-free diff; the mirror is class-init-safe for dedicated servers.
+        registrar.playToClient(
+                AbilityGrantsSyncS2CPayload.TYPE,
+                AbilityGrantsSyncS2CPayload.STREAM_CODEC,
+                ClientAbilityGrantState::handle);
 
         registrar.playToServer(
                 SkillUnlockC2SPayload.TYPE,

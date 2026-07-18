@@ -64,6 +64,9 @@ public final class SkillEffectCache {
                             gameplay.merge(e.stat(), e.perLevel() * level, Float::sum);
                     case SkillEffect.LearnSpell ignored -> {} // no-op: spell learning is handled outside skill trees
                     case SkillEffect.PassiveAttribute ignored -> {} // handled at unlock time
+                    // Grant/refinement flow through the source-tracked AbilityGrants layer, not this cache.
+                    case SkillEffect.GrantAbility ignored -> {}
+                    case SkillEffect.AbilityRefinement ignored -> {}
                 }
             }
         }

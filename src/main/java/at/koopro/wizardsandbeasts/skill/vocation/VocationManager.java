@@ -56,6 +56,7 @@ public final class VocationManager {
                 .ifPresent(v -> VocationEffectApplicator.apply(player, v));
 
         PlayerStateSyncService.syncVocations(player);
+        PlayerStateSyncService.syncAbilityGrants(player); // declaration adds VOCATION-source grants
         return CommitResult.OK;
     }
 
@@ -64,6 +65,7 @@ public final class VocationManager {
         VocationEffectApplicator.removeAll(player);
         player.setData(ModAttachments.VOCATION_DATA.get(), PlayerVocationData.EMPTY);
         PlayerStateSyncService.syncVocations(player);
+        PlayerStateSyncService.syncAbilityGrants(player); // clear strips exactly the VOCATION-source grants
     }
 
     /** The declared Vocation (definition), or null if none / undefined. */

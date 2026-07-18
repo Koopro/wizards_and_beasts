@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.sync;
 import at.koopro.wizardsandbeasts.form.FormSystemAPI;
 import at.koopro.wizardsandbeasts.network.form.FormSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.heritage.HeritageDataSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.skill.AbilityGrantsSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.skill.SkillDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.skill.VocationDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.SpellDataSyncS2CPayload;
@@ -36,12 +37,19 @@ public final class PlayerStateSyncService {
         ApparitionWardsSyncS2CPayload.syncToPlayer(player);
     }
 
+    /** Pushes the derived source-tracked ability-grant snapshot (heritage/vocation/skill-node). */
+    public static void syncAbilityGrants(ServerPlayer player) {
+        AbilityGrantsSyncS2CPayload.syncToPlayer(player);
+    }
+
     public static void syncFullLoginState(ServerPlayer player, boolean openTypeSelector) {
         SkillAttributeApplicator.applyAll(player);
         syncSpells(player);
         syncSkills(player);
         syncVocations(player);
         syncAbilities(player);
+        syncAbilityGrants(player); // derived from heritage+vocation+skills, all synced above; relog-safe
+
         HeritageDataSyncS2CPayload.syncToPlayer(player, openTypeSelector);
         VaultSyncS2CPayload.syncToPlayer(player);
         AzkabanTrespasserSyncPayload.syncToPlayer(player);

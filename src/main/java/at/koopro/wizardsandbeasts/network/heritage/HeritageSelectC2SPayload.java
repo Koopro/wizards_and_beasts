@@ -96,6 +96,8 @@ public record HeritageSelectC2SPayload(String typeId, String subtypeId) implemen
 
             // Sync back to client
             HeritageDataSyncS2CPayload.syncToPlayer(player, false);
+            // Committing a heritage sets the variant tags that back HERITAGE-source ability grants.
+            at.koopro.wizardsandbeasts.sync.PlayerStateSyncService.syncAbilityGrants(player);
 
             // Fire event
             NeoForge.EVENT_BUS.post(new HeritageEvents.PlayerHeritageSelectedEvent(player, heritage, variant));

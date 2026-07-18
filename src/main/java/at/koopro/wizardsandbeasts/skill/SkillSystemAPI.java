@@ -21,6 +21,25 @@ public final class SkillSystemAPI {
     /** Hard cap on total earnable skill points; routing under this budget is the web's core decision. */
     public static final int MAX_SKILL_POINTS = 60; // TUNE
 
+    /**
+     * Per-audience earnable-point cap, branched at the {@link #awardPoints} seam. All audiences share
+     * {@link #MAX_SKILL_POINTS} today, so the hook is a no-op — a future era can give a heritage a
+     * larger or smaller budget without touching the earn plumbing.
+     */
+    private static final java.util.EnumMap<SkillTreeId.Audience, Integer> AUDIENCE_POINT_CAP =
+            new java.util.EnumMap<>(SkillTreeId.Audience.class);
+
+    static {
+        for (SkillTreeId.Audience audience : SkillTreeId.Audience.values()) {
+            AUDIENCE_POINT_CAP.put(audience, MAX_SKILL_POINTS); // TUNE
+        }
+    }
+
+    /** Total earnable skill points for a player's audience (all {@link #MAX_SKILL_POINTS} today). */
+    public static int pointCapFor(SkillTreeId.Audience audience) {
+        return AUDIENCE_POINT_CAP.getOrDefault(audience, MAX_SKILL_POINTS);
+    }
+
     public record UnlockCheck(boolean allowed, String reason) {}
 
     private SkillSystemAPI() {}
@@ -102,26 +121,31 @@ public final class SkillSystemAPI {
             return new UnlockCheck(false, "tree_unavailable");
         }
 
+        // Region capability requirement — ordered strictly after the audience check. A sealed region
+        // (e.g. wandlore for a squib, spell_mastery for an obscurial) is visible in the chart but cannot
+        // be allocated. Rejects crafted payloads for sealed regions server-side.
+        Heritage heritage = HeritageAPI.getPlayerHeritage(player);
+        HeritageVariant variant = HeritageAPI.getPlayerHeritageVariant(player);
+        if (!SkillTreeId.meetsRequirement(skill.getTree().getRequirement(), heritage, variant)) {
+            return new UnlockCheck(false, "requirement_unmet");
+        }
+
         // Vocation is declarative identity only (web rework Phase 3): the web's travel cost under the
         // point cap does the differentiation the old mastery-band/opposition gate used to enforce.
         return new UnlockCheck(true, "ok");
     }
 
     /**
-     * Checks if a skill tree is available for the player's Heritage. A tree is gated to its
-     * {@link SkillTreeId.Audience}: goblins see only goblin trees, house-elves only elf trees, and all
-     * wand-using heritages see the wizard trees. Wandlore additionally requires a usable wand.
+     * Checks whether a tree's <b>audience</b> matches the player's tradition of origin: goblins see only
+     * goblin trees, house-elves only elf trees, and the wizard-audience heritages (wizardkind incl. squib,
+     * werewolf, obscurial, vampire, half/quarter-veela, half-giant) see the wizard trees. Capability
+     * requirements (wand/casting) are a separate, in-web gate handled in {@link #evaluateUnlock} — the old
+     * hardcoded WANDLORE wand check was migrated into {@link SkillTreeId.Requirement#WAND}.
      */
     public static boolean isTreeAvailable(ServerPlayer player, SkillTreeId tree) {
         Heritage type = HeritageAPI.getPlayerHeritage(player);
         HeritageVariant subtype = HeritageAPI.getPlayerHeritageVariant(player);
-        if (tree.getAudience() != SkillTreeId.audienceForHeritage(type)) {
-            return false;
-        }
-        if (tree == SkillTreeId.WANDLORE) {
-            return type != null && type.canUseWand() && (subtype == null || !subtype.hasTag("no_wand"));
-        }
-        return true;
+        return tree.getAudience() == SkillTreeId.audienceForHeritage(type, subtype);
     }
 
     // ── Unlock Flow ──
@@ -143,6 +167,9 @@ public final class SkillSystemAPI {
         applyImmediateEffects(skill);
         SkillAttributeApplicator.applyAll(player);
         PlayerStatsSyncPayload.syncToPlayer(player); // KNOWLEDGE derives from skill nodes unlocked
+        // A newly allocated node may grant an ability (legacy unlock_ability or grant_ability) → refresh
+        // the source-tracked snapshot so the client mirror reflects the new SKILL_NODE grant.
+        at.koopro.wizardsandbeasts.network.skill.AbilityGrantsSyncS2CPayload.syncToPlayer(player);
         // Mastering a new node is a formative achievement → happy memory.
         at.koopro.wizardsandbeasts.memory.MemoryService.tryFormMemory(
                 player, at.koopro.wizardsandbeasts.memory.MemoryType.HAPPY, 0.5f, "skill_unlock", 1200L);
@@ -162,6 +189,7 @@ public final class SkillSystemAPI {
         applyImmediateEffects(skill);
         SkillAttributeApplicator.applyAll(player);
         PlayerStatsSyncPayload.syncToPlayer(player); // KNOWLEDGE derives from skill nodes unlocked
+        at.koopro.wizardsandbeasts.network.skill.AbilityGrantsSyncS2CPayload.syncToPlayer(player);
     }
 
     /** True if any edge-neighbor of {@code skill} is at level ≥ 1. */
@@ -181,7 +209,9 @@ public final class SkillSystemAPI {
      * At the cap this is a no-op (XP-threshold earning silently stops).
      */
     public static void awardPoints(ServerPlayer player, int amount) {
-        getSkillData(player).addSkillPoints(amount);
+        SkillTreeId.Audience audience = SkillTreeId.audienceForHeritage(
+                HeritageAPI.getPlayerHeritage(player), HeritageAPI.getPlayerHeritageVariant(player));
+        getSkillData(player).addSkillPoints(amount, pointCapFor(audience));
     }
 
     // ── Ability Checks ──

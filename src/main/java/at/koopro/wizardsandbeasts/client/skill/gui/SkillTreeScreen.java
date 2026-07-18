@@ -4,6 +4,8 @@ import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.client.gui.WizardsAndBeastsUiTokens;
 import at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageDataState;
 import at.koopro.wizardsandbeasts.client.skill.state.ClientSkillDataState;
+import at.koopro.wizardsandbeasts.heritage.Heritage;
+import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import at.koopro.wizardsandbeasts.skill.data.PlayerSkillData;
 import at.koopro.wizardsandbeasts.network.skill.SkillUnlockC2SPayload;
 import at.koopro.wizardsandbeasts.skill.Skill;
@@ -19,8 +21,10 @@ import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.jspecify.annotations.Nullable;
 
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Star-chart canvas over the player's audience skill web (Phase 5 skin): night-sky starfield with
@@ -40,6 +44,11 @@ public class SkillTreeScreen extends Screen {
     private static final int SURVEY_RING_COLOR = 0x1E9FB8E8;
 
     private SkillTreeId.@Nullable Audience audience;
+    /** Player heritage/variant, synced truth — drives audience selection and which regions are sealed. */
+    private @Nullable Heritage heritage;
+    private @Nullable HeritageVariant variant;
+    /** Regions the player's capability tags seal shut: rendered permanently-locked, non-interactive. */
+    private final Set<SkillTreeId> sealedTrees = EnumSet.noneOf(SkillTreeId.class);
     private List<Skill> webNodes = List.of();
     /** Constellation label cache: recomputed only when the node list instance changes. */
     private final Map<SkillTreeId, double[]> labelCentroids = new EnumMap<>(SkillTreeId.class);
@@ -84,10 +93,24 @@ public class SkillTreeScreen extends Screen {
         viewportY = panelY + layout.s(WizardsAndBeastsUiTokens.SkillTree.VIEWPORT_Y);
 
         SkillTreeId.Audience previous = audience;
-        audience = SkillTreeId.audienceForHeritage(ClientHeritageDataState.get().getSelectedHeritage());
+        heritage = ClientHeritageDataState.get().getSelectedHeritage();
+        variant = ClientHeritageDataState.get().getSelectedHeritageVariant();
+        audience = SkillTreeId.audienceForHeritage(heritage, variant);
+        recomputeSealedRegions();
         refreshWeb();
         if (previous == null) {
             centerOnWeb();
+        }
+    }
+
+    /** Seals every region in this audience whose capability requirement the player doesn't meet. */
+    private void recomputeSealedRegions() {
+        sealedTrees.clear();
+        for (SkillTreeId tree : SkillTreeId.values()) {
+            if (tree.getAudience() == audience
+                    && !SkillTreeId.meetsRequirement(tree.getRequirement(), heritage, variant)) {
+                sealedTrees.add(tree);
+            }
         }
     }
 
@@ -216,6 +239,9 @@ public class SkillTreeScreen extends Screen {
      * (adjacency, cap, affordability, audience) in {@code SkillSystemAPI.evaluateUnlock}.
      */
     private void tryAllocate(Skill node) {
+        if (sealedTrees.contains(node.getTree())) {
+            return; // sealed region: non-interactive (server would reject the payload anyway)
+        }
         PlayerSkillData data = ClientSkillDataState.get();
         if (data.getSkillLevel(node.getId()) >= node.getMaxLevel()) {
             return;
@@ -258,8 +284,9 @@ public class SkillTreeScreen extends Screen {
 
         if (hoveredNode != null) {
             boolean adjacencyOpen = hoveredNode.isRoot() || hasAllocatedNeighbor(data, hoveredNode);
+            boolean sealed = sealedTrees.contains(hoveredNode.getTree());
             SkillTreeRenderHelper.renderTooltipCard(graphics, font, hoveredNode, mouseX, mouseY,
-                    data.getSkillLevel(hoveredNode.getId()), data.getSkillPoints(), adjacencyOpen);
+                    data.getSkillLevel(hoveredNode.getId()), data.getSkillPoints(), adjacencyOpen, sealed);
         }
     }
 
@@ -343,7 +370,10 @@ public class SkillTreeScreen extends Screen {
             int size = Math.max(6, (int) Math.round(baseSpritePx(node, polaris) * zoom));
             int level = data.getSkillLevel(node.getId());
             boolean allocated = level >= 1;
-            boolean allocatable = !allocated && (node.isRoot() || hasAllocatedNeighbor(data, node));
+            // A sealed region is permanently non-allocatable regardless of adjacency; it falls through to
+            // the locked ember branch (reused, not a distinct sprite — the seal cue lives in the tooltip).
+            boolean sealed = sealedTrees.contains(node.getTree());
+            boolean allocatable = !allocated && !sealed && (node.isRoot() || hasAllocatedNeighbor(data, node));
 
             if (polaris) {
                 // Polaris: brightest object on the chart; gold once taken, ice-white before.

@@ -61,6 +61,8 @@ public record SkillUnlockC2SPayload(String skillId) implements CustomPacketPaylo
                             + " is not connected to your allocated nodes.");
                 } else if ("tree_unavailable".equals(check.reason())) {
                     ChatHelper.sendError(player, "Your heritage cannot unlock this tree.");
+                } else if ("requirement_unmet".equals(check.reason())) {
+                    ChatHelper.sendError(player, "This region is sealed for your heritage.");
                 } else {
                     ChatHelper.sendError(player, "Cannot unlock " + skill.getDisplayName() + ".");
                 }

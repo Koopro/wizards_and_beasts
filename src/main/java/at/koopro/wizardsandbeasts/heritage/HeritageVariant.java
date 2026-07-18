@@ -27,7 +27,7 @@ public enum HeritageVariant {
             "Raised among cauldrons and cantrips yet unable to kindle a single spark, they occupy a lonely margin of the magical world. "
                     + "Still, many see what wizards overlook — from kneazles in alleys to winged horses others insist cannot exist.",
             0, 0, 0, 0xFF8F7FA0,
-            Set.of("no_wand", "nature_speech")),
+            Set.of("no_wand", "no_casting", "nature_speech")),
     ADOPTED_MAGICAL("adopted_magical", Heritage.WIZARDKIND, "Wizard-Raised",
             "Their birth certificate may be Muggle, magical, or missing entirely — what matters is that cauldrons and bedtime stories were always wizarding. "
                     + "Hogwarts letters find them the same as any other child; only the parlour portraits argue about whose fault the nose is.",
@@ -56,12 +56,12 @@ public enum HeritageVariant {
             "The Obscurus coils beneath the ribs like a held breath — present, hungry, but not yet tearing the world apart. "
                     + "Credence Barebone walked this knife-edge for years before New York learned his name.",
             0, 0, 0, 0xFF6B4879,
-            Set.of("obscurus_form", "dark_resistance")),
+            Set.of("obscurus_form", "no_casting", "dark_resistance")),
     UNLEASHED("unleashed", Heritage.OBSCURIAL, "Unleashed",
             "The parasite and host have braided so tightly that windows shatter when they simply lose composure. "
                     + "Power on this scale seldom leaves room for old age — only ash, headlines, and the memory of a child who was told not to be magical.",
             -2, 0.008, 0, 0xFF3F244D,
-            Set.of("obscurus_form", "transformation")),
+            Set.of("obscurus_form", "no_casting", "transformation")),
 
     // Goblin
     GOBLIN_COMMON("common", Heritage.GOBLIN, "Common",

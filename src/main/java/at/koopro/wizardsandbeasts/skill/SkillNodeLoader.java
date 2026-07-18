@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.skill;
 
+import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.Identifier;
@@ -111,6 +112,22 @@ public final class SkillNodeLoader extends SimpleJsonResourceReloadListener<Skil
                             skill.getId(), audience);
                     unreachable++;
                 }
+            }
+        }
+
+        // Empty-web tripwire: a heritage a player can actually commit to must resolve to an audience that
+        // has content. Node-less audiences are expected and inert for coming-soon heritages (veela, giant,
+        // centaur, merpeople) — but a committable heritage pointing at an empty web is a shipping bug.
+        // Warn loudly; never crash (a datapack that strips the wizard web shouldn't kill the server).
+        for (HeritageVariant variant : HeritageVariant.values()) {
+            if (!variant.getParentHeritage().isAlphaAvailable()) {
+                continue;
+            }
+            SkillTreeId.Audience audience = SkillTreeId.audienceForVariant(variant);
+            if (webSizes.getOrDefault(audience, 0) == 0) {
+                LOGGER.warn("Committable heritage '{}/{}' resolves to audience {} which has ZERO skill nodes "
+                                + "— players of this heritage would open an empty chart",
+                        variant.getParentHeritage().getId(), variant.getId(), audience);
             }
         }
 

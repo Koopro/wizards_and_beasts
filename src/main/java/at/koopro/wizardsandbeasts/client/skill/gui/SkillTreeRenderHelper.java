@@ -65,9 +65,12 @@ public final class SkillTreeRenderHelper {
         }
     }
 
+    /** Placeholder key for the sealed-region tooltip line (flavor text authored later; raw fallback shown). */
+    private static final String SEALED_TOOLTIP_KEY = "skilltree.region.sealed.tooltip";
+
     /** Hover card in the plate aesthetic; the title resolves lang-key names with literal fallback. */
     public static void renderTooltipCard(GuiGraphics graphics, Font font, Skill skill, int mouseX, int mouseY,
-                                         int level, int points, boolean adjacencyOpen) {
+                                         int level, int points, boolean adjacencyOpen, boolean sealed) {
         int w = WizardsAndBeastsUiTokens.SkillTree.TOOLTIP_WIDTH;
         int h = WizardsAndBeastsUiTokens.SkillTree.TOOLTIP_HEIGHT;
         int tooltipX = Math.min(mouseX + WizardsAndBeastsUiTokens.SkillTree.TOOLTIP_OFFSET_X,
@@ -105,7 +108,12 @@ public final class SkillTreeRenderHelper {
         boolean affordable = points >= skill.getPointCost();
         String actionLine;
         int actionColor;
-        if (maxed) {
+        if (sealed) {
+            // Sealed region: capability tag denies this whole region. Distinct from adjacency-locked only
+            // in wording; the flavor text is a placeholder lang key (raw-key fallback if unauthored).
+            actionLine = I18n.exists(SEALED_TOOLTIP_KEY) ? I18n.get(SEALED_TOOLTIP_KEY) : "Sealed";
+            actionColor = WizardsAndBeastsUiTokens.SkillTree.STATUS_WARN;
+        } else if (maxed) {
             actionLine = "Maxed";
             actionColor = SkillTreeChartTextures.GOLD;
         } else if (started || adjacencyOpen) {

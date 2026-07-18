@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.skill;
 
+import at.koopro.wizardsandbeasts.ability.grant.AbilityKey;
+import at.koopro.wizardsandbeasts.ability.grant.AbilityModifierAxis;
 import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -32,7 +34,9 @@ public sealed interface SkillEffect {
         CATEGORY_COOLDOWN_REDUCTION("category_cooldown_reduction", CategoryCooldownReduction.CODEC),
         PASSIVE_ATTRIBUTE("passive_attribute", PassiveAttribute.CODEC),
         UNLOCK_ABILITY("unlock_ability", UnlockAbility.CODEC),
-        GAMEPLAY_BONUS("gameplay_bonus", GameplayBonus.CODEC);
+        GAMEPLAY_BONUS("gameplay_bonus", GameplayBonus.CODEC),
+        GRANT_ABILITY("grant_ability", GrantAbility.CODEC),
+        ABILITY_REFINEMENT("ability_refinement", AbilityRefinement.CODEC);
 
         public static final Codec<Type> CODEC = StringRepresentable.fromValues(Type::values);
 
@@ -153,6 +157,43 @@ public sealed interface SkillEffect {
         @Override
         public Type type() {
             return Type.GAMEPLAY_BONUS;
+        }
+    }
+
+    /**
+     * Grants an {@link AbilityKey} through the source-tracked
+     * {@link at.koopro.wizardsandbeasts.ability.grant.AbilityGrants} layer (source = SKILL_NODE), so the
+     * grant strips automatically when the node is refunded. The clean forward path for node ability grants;
+     * the legacy free-string {@link UnlockAbility} still feeds {@link SkillEffectCache} and is bridged into
+     * the grant layer too. Ships with zero nodes using it.
+     */
+    record GrantAbility(AbilityKey ability) implements SkillEffect {
+        public static final MapCodec<GrantAbility> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                AbilityKey.CODEC.fieldOf("ability").forGetter(GrantAbility::ability)
+        ).apply(instance, GrantAbility::new));
+
+        @Override
+        public Type type() {
+            return Type.GRANT_ABILITY;
+        }
+    }
+
+    /**
+     * A refinement scoped to a granted ability: a per-level magnitude on one {@link AbilityModifierAxis},
+     * readable via {@link at.koopro.wizardsandbeasts.ability.grant.AbilityModifiers}. Pure scoping mechanism
+     * — ships with zero authored nodes and zero consumers; wiring a consumer is content-era work.
+     */
+    record AbilityRefinement(AbilityKey ability, AbilityModifierAxis axis, float magnitudePerLevel)
+            implements SkillEffect {
+        public static final MapCodec<AbilityRefinement> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                AbilityKey.CODEC.fieldOf("ability").forGetter(AbilityRefinement::ability),
+                AbilityModifierAxis.CODEC.fieldOf("axis").forGetter(AbilityRefinement::axis),
+                Codec.FLOAT.fieldOf("magnitudePerLevel").forGetter(AbilityRefinement::magnitudePerLevel)
+        ).apply(instance, AbilityRefinement::new));
+
+        @Override
+        public Type type() {
+            return Type.ABILITY_REFINEMENT;
         }
     }
 }
