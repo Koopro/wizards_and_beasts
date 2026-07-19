@@ -9,6 +9,7 @@ import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.core.SpellProperties;
 import at.koopro.wizardsandbeasts.spell.cast.BeamRay;
 import at.koopro.wizardsandbeasts.spell.cast.BeamRayResolver;
+import at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
@@ -36,6 +37,8 @@ public final class WandBeamRenderer {
 
     private static boolean wasActive = false;
     private static int beamStartTick = 0;
+    /** Last spell colour pushed into {@link BeamSettings}; {@code -1} = none applied yet. */
+    private static int lastAppliedColor = -1;
     /** Stable while the beam is active so the bolt does not swim frame-to-frame. */
     private static long beamPathSeed = 0L;
 
@@ -94,22 +97,15 @@ public final class WandBeamRenderer {
         Vec3 cachedTip = WandTipWorldCache.getWorldTipOrNull();
         Vec3 beamStart = cachedTip != null ? cachedTip : wandTipWorldPos(mc, player, partialTick, camera);
 
-        float range = BeamSettings.range;
-        // Single source of truth: same resolver server-side WandBeamChannelLogic uses.
-        // Includes entity hits so the visual end matches what the server actually damages.
-        BeamRay ray = BeamRayResolver.resolve(player, partialTick, range, BeamRayResolver.LIVING_FILTER);
-        Vec3 fullEnd = ray.end();
-
+        // Mirror WandBeamChannelLogic exactly: clamp the range first, then resolve against the clamped
+        // reach. Resolving against a fixed 50-block client setting and truncating afterwards made the
+        // visual overshoot whatever the server actually hit.
         float elapsed = (player.tickCount - beamStartTick) + partialTick;
-        float maxReach = elapsed * BeamRayResolver.extensionBlocksPerTick();
-        double fullDist = beamStart.distanceTo(fullEnd);
-        Vec3 beamEnd;
-        if (maxReach >= fullDist) {
-            beamEnd = fullEnd;
-        } else {
-            Vec3 dir = fullEnd.subtract(beamStart).normalize();
-            beamEnd = beamStart.add(dir.scale(maxReach));
-        }
+        float range = resolveBeamRange(player);
+        float maxReach = Math.min(range, elapsed * BeamRayResolver.extensionBlocksPerTick());
+        BeamRay ray = BeamRayResolver.resolve(player, partialTick, maxReach, BeamRayResolver.LIVING_FILTER);
+        Vec3 beamEnd = ray.end();
+        double fullDist = beamStart.distanceTo(beamEnd);
 
         PoseStack poseStack = event.getPoseStack();
         poseStack.pushPose();
@@ -117,8 +113,11 @@ public final class WandBeamRenderer {
 
         if (!WizardsAndBeastsMod.debugForceBeam) {
             Spell activeSpell = ClientSpellDataState.get().getActiveSpell();
-            if (activeSpell != null) {
-                BeamSettings.applySpellColor(activeSpell.getColor());
+            // Only on change: applySpellColor writes the shared layer settings, so doing it every frame
+            // stomped whatever the player had dialled in via the beam debug screen.
+            if (activeSpell != null && activeSpell.getColor() != lastAppliedColor) {
+                lastAppliedColor = activeSpell.getColor();
+                BeamSettings.applySpellColor(lastAppliedColor);
             }
         }
 
@@ -168,6 +167,24 @@ public final class WandBeamRenderer {
 
         bufferSource.endBatch();
         poseStack.popPose();
+    }
+
+    /**
+     * The beam's max length, resolved the way {@code WandBeamChannelLogic} resolves it server-side:
+     * the spell's range scaled by the wand's range stat, falling back to 32 blocks. Only the debug
+     * force-beam path uses the free-floating {@link BeamSettings#range} slider, since it has no spell.
+     */
+    private static float resolveBeamRange(Player player) {
+        if (WizardsAndBeastsMod.debugForceBeam) {
+            return BeamSettings.range;
+        }
+        Spell spell = ClientSpellDataState.get().getActiveSpell();
+        SpellProperties props = spell == null ? null : spell.getProperties();
+        if (props == null) {
+            return 32f;
+        }
+        float range = props.getRange() * WandStatsResolver.resolve(player.getUseItem()).rangeFor(spell);
+        return range <= 0f ? 32f : range;
     }
 
     /**

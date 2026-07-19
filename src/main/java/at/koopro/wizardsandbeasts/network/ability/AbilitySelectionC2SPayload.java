@@ -20,12 +20,18 @@ public record AbilitySelectionC2SPayload(Action action, Identifier target) imple
 
     /**
      * Wheel gestures: {@code CONFIRM} = arm/flip hovered, {@code QUICK_SLOT} = cycle hovered through the
-     * quick slots and back out, {@code TOGGLE} = flip.
+     * quick slots and back out, {@code TOGGLE} = flip, {@code SELECT} = arm only.
+     *
+     * <p>{@code SELECT} exists because the wheel arms whatever the cursor hovers, with no click: {@code
+     * CONFIRM} would <b>flip</b> a TOGGLE, so merely sweeping the cursor past the Animagus or obscurus entry
+     * would transform the player. {@code SELECT} only moves the armed slot. New constants are appended so
+     * ordinals stay stable on the wire.
      */
     public enum Action {
         CONFIRM,
         QUICK_SLOT,
-        TOGGLE;
+        TOGGLE,
+        SELECT;
 
         private static final Action[] VALUES = values();
 
@@ -64,6 +70,7 @@ public record AbilitySelectionC2SPayload(Action action, Identifier target) imple
                     case CONFIRM -> AbilityTriggerHandler.confirmSelection(player, target);
                     case QUICK_SLOT -> AbilityTriggerHandler.cycleQuickSlot(player, target);
                     case TOGGLE -> AbilityTriggerHandler.toggle(player, target);
+                    case SELECT -> AbilityTriggerHandler.arm(player, target);
                 }
             }
         });

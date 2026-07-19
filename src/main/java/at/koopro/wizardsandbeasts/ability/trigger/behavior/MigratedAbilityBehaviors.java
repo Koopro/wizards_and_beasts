@@ -18,6 +18,7 @@ public final class MigratedAbilityBehaviors {
 
     public static void bootstrap() {
         AbilityBehaviors.register(AbilityIds.APPARITION, ApparitionAbilityBehavior.INSTANCE);
+        AbilityBehaviors.register(AbilityIds.APPARITION_TRAVEL, ApparitionTravelAbilityBehavior.INSTANCE);
         AbilityBehaviors.register(AbilityIds.LEGILIMENCY, LegilimencyAbilityBehavior.INSTANCE);
         AbilityBehaviors.register(AbilityIds.ANIMAGUS_FORM, AnimagusFormAbilityBehavior.INSTANCE);
         AbilityBehaviors.register(AbilityIds.ANIMAGUS_BEAST_ABILITY,

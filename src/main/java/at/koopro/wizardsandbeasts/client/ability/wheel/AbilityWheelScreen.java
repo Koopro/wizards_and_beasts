@@ -5,10 +5,10 @@ import at.koopro.wizardsandbeasts.ability.def.AbilityDefinition;
 import at.koopro.wizardsandbeasts.ability.def.AbilityDefinitionRegistry;
 import at.koopro.wizardsandbeasts.ability.def.AbilityType;
 import at.koopro.wizardsandbeasts.client.ability.AbilityFrameworkKeyBindings;
+import at.koopro.wizardsandbeasts.client.ability.AbilityWheelController;
 import at.koopro.wizardsandbeasts.client.ability.state.ClientAbilitySelectionState;
 import at.koopro.wizardsandbeasts.network.ability.AbilitySelectionC2SPayload;
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -19,6 +19,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,8 +48,22 @@ public final class AbilityWheelScreen extends Screen {
     private static final int COLOR_TEXT = 0xFFE8E8E8;
     private static final int COLOR_COOLDOWN = 0xB0000000;
 
+    /**
+     * Ticks the wheel key must stay held for this to count as a hold. Released sooner and it was a tap, so
+     * the wheel latches open instead of slamming shut in the same frame the way hold-only did.
+     */
+    private static final int HOLD_THRESHOLD_TICKS = 4;
+
     private final List<AbilityDefinition> entries = new ArrayList<>();
     private int hovered = -1;
+
+    private int ticksOpen;
+    /** Null until the gesture is classified; true = hold (confirm on release), false = tap (stay open). */
+    @Nullable
+    private Boolean holdGesture;
+    /** Last id sent by the hover auto-arm, so a stationary cursor does not re-send every frame. */
+    @Nullable
+    private Identifier armed;
 
     public AbilityWheelScreen() {
         super(Component.translatable("screen." + WizardsAndBeastsMod.MODID + ".ability_wheel"));
@@ -57,6 +72,19 @@ public final class AbilityWheelScreen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    @Override
+    public void tick() {
+        ticksOpen++;
+        if (holdGesture != null) {
+            return;
+        }
+        if (!isWheelKeyDown()) {
+            holdGesture = Boolean.FALSE; // released early — a tap; latch open
+        } else if (ticksOpen >= HOLD_THRESHOLD_TICKS) {
+            holdGesture = Boolean.TRUE;  // still held — a hold; confirm when it is released
+        }
     }
 
     private void rebuildEntries() {
@@ -93,6 +121,7 @@ public final class AbilityWheelScreen extends Screen {
         int cx = this.width / 2;
         int cy = this.height / 2;
         hovered = computeHovered(mouseX, mouseY, cx, cy);
+        autoArmHovered();
 
         // Faint backing disc (square approximation — no texture dependency).
         g.fill(cx - RADIUS - SLOT, cy - RADIUS - SLOT, cx + RADIUS + SLOT, cy + RADIUS + SLOT, COLOR_BG);
@@ -164,20 +193,54 @@ public final class AbilityWheelScreen extends Screen {
         g.fill(x1 - 1, y0, x1, y1, color);
     }
 
-    /** Closes and confirms when the (keyboard-bound) wheel key is physically released. */
-    private void maybeCloseOnRelease() {
+    /** True while the wheel key is physically held. False for a mouse-bound or unbound key. */
+    private boolean isWheelKeyDown() {
         if (this.minecraft == null) {
-            return;
+            return false;
         }
         InputConstants.Key key = AbilityFrameworkKeyBindings.ABILITY_WHEEL.getKey();
         if (key.getType() != InputConstants.Type.KEYSYM || key.getValue() == InputConstants.UNKNOWN.getValue()) {
-            return; // mouse-bound or unbound: rely on click to confirm/close
+            return false; // mouse-bound or unbound: rely on click to confirm/close
         }
-        Window window = this.minecraft.getWindow();
-        if (!InputConstants.isKeyDown(window, key.getValue())) {
+        return InputConstants.isKeyDown(this.minecraft.getWindow(), key.getValue());
+    }
+
+    /** Hold gesture only: releasing the wheel key confirms the hovered entry and closes. */
+    private void maybeCloseOnRelease() {
+        if (!Boolean.TRUE.equals(holdGesture) || isWheelKeyDown()) {
+            return;
+        }
+        confirmHovered();
+        onClose();
+    }
+
+    /**
+     * Arms whatever the cursor is over, with no click. Uses {@code SELECT} rather than {@code CONFIRM} so
+     * sweeping past a TOGGLE cannot flip it (see {@link AbilitySelectionC2SPayload.Action}).
+     */
+    private void autoArmHovered() {
+        if (hovered < 0 || hovered >= entries.size()) {
+            return;
+        }
+        Identifier id = entries.get(hovered).id();
+        if (id.equals(armed)) {
+            return;
+        }
+        armed = id;
+        send(AbilitySelectionC2SPayload.Action.SELECT, id);
+    }
+
+    @Override
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        InputConstants.Key key = AbilityFrameworkKeyBindings.ABILITY_WHEEL.getKey();
+        if (key.getType() == InputConstants.Type.KEYSYM && event.key() == key.getValue()) {
+            // Tapping the wheel key again closes a latched wheel; suppress the reopen while it stays held.
+            AbilityWheelController.suppressOpenUntilRelease();
             confirmHovered();
             onClose();
+            return true;
         }
+        return super.keyPressed(event);
     }
 
     @Override

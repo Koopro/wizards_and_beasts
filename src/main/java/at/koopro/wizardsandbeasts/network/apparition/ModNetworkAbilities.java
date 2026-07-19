@@ -26,6 +26,18 @@ public final class ModNetworkAbilities {
                 ApparitionWardsSyncS2CPayload.STREAM_CODEC,
                 ClientPayloadHandlers::handleApparitionWardsSync);
         registrar.playToClient(
+                ApparitionPointsSyncS2CPayload.TYPE,
+                ApparitionPointsSyncS2CPayload.STREAM_CODEC,
+                ApparitionPointsSyncS2CPayload::handle);
+        registrar.playToClient(
+                OpenApparitionSelectorS2CPayload.TYPE,
+                OpenApparitionSelectorS2CPayload.STREAM_CODEC,
+                OpenApparitionSelectorS2CPayload::handle);
+        registrar.playToServer(
+                ApparitionTravelC2SPayload.TYPE,
+                ApparitionTravelC2SPayload.STREAM_CODEC,
+                ApparitionTravelC2SPayload::handle);
+        registrar.playToClient(
                 LegilimencyVisionS2CPayload.TYPE,
                 LegilimencyVisionS2CPayload.STREAM_CODEC,
                 ClientPayloadHandlers::handleLegilimencyVision);

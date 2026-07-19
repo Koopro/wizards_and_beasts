@@ -1,0 +1,10 @@
+{
+  "_comment": "Destination Apparition: opens the selector of memorised points. Same gating as apparition (canApparate); cooldownTicks 0 because ApparitionServerLogic owns the shared Apparition cooldown, charged only when a jump actually happens.",
+  "type": "active",
+  "icon": "wizards_and_beasts:textures/ability/placeholder.png",
+  "nameKey": "ability.wizards_and_beasts.apparition_travel",
+  "descriptionKey": "ability.wizards_and_beasts.apparition_travel.desc",
+  "module": "wizards_and_beasts:player_abilities",
+  "cooldownTicks": 0,
+  "sortOrder": 9
+}

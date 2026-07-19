@@ -10,6 +10,7 @@ import at.koopro.wizardsandbeasts.entity.niffler.HappinessAttachment;
 import at.koopro.wizardsandbeasts.spell.imperio.ImperioControlState;
 import at.koopro.wizardsandbeasts.ability.data.PlayerAbilityData;
 import at.koopro.wizardsandbeasts.ability.select.AbilitySelectionState;
+import at.koopro.wizardsandbeasts.apparition.PlayerApparitionPoints;
 import at.koopro.wizardsandbeasts.bestiary.data.PlayerBestiaryData;
 import at.koopro.wizardsandbeasts.owl.data.PlayerOWLData;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerProfessionData;
@@ -88,6 +89,16 @@ public class ModAttachments {
     public static final Supplier<AttachmentType<AbilitySelectionState>> ABILITY_SELECTION =
             ATTACHMENTS.register("ability_selection", () -> AttachmentType.builder(() -> AbilitySelectionState.EMPTY)
                     .serialize(AbilitySelectionState.CODEC.fieldOf("data"))
+                    .build());
+
+    /**
+     * Destinations the player has memorised for Apparition. {@code copyOnDeath}: dying does not make a
+     * wizard forget where places are.
+     */
+    public static final Supplier<AttachmentType<PlayerApparitionPoints>> APPARITION_POINTS =
+            ATTACHMENTS.register("apparition_points", () -> AttachmentType.builder(() -> PlayerApparitionPoints.EMPTY)
+                    .serialize(PlayerApparitionPoints.CODEC.fieldOf("data"))
+                    .copyOnDeath()
                     .build());
 
     public static final Supplier<AttachmentType<PlayerOWLData>> OWL_DATA =

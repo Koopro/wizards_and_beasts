@@ -41,6 +41,17 @@ public final class AbilityTriggerHandler {
     }
 
     /**
+     * Arms {@code id} without acting on it — the hover gesture. Unlike {@link #confirmSelection} this never
+     * flips a TOGGLE, so sweeping the cursor across the wheel cannot transform the player; it only moves
+     * which ability the use key will fire.
+     */
+    public static void arm(ServerPlayer player, Identifier id) {
+        if (validateWheel(player, id) != null) {
+            AbilitySelectionHelper.select(player, id);
+        }
+    }
+
+    /**
      * Pin gesture on the hovered entry: cycles it through the quick slots and back out —
      * unbound → slot 0 → slot 1 → … → unbound. One gesture reaches every slot, so the wheel needs no
      * modifier keys or extra UI.

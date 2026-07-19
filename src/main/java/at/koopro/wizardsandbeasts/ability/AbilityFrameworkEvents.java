@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.ability;
 import at.koopro.wizardsandbeasts.ability.select.AbilitySelectionState;
 import at.koopro.wizardsandbeasts.network.ability.AbilityDefinitionsSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.ability.AbilitySelectionSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.apparition.ApparitionPointsSyncS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -48,11 +49,14 @@ public final class AbilityFrameworkEvents {
     public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             AbilitySelectionSyncS2CPayload.syncToPlayer(player);
+            ApparitionPointsSyncS2CPayload.syncToPlayer(player);
         }
     }
 
     private static void syncTo(ServerPlayer player) {
         AbilityDefinitionsSyncS2CPayload.syncToPlayer(player);
         AbilitySelectionSyncS2CPayload.syncToPlayer(player);
+        // The Apparition selector reads its list client-side, so it rides the same sync seam.
+        ApparitionPointsSyncS2CPayload.syncToPlayer(player);
     }
 }

@@ -124,7 +124,8 @@ public final class WandbCommands {
                 .then(CharacterCommands.register())
                 .then(AnimagusCommands.register())
                 .then(StatsCommands.register())
-                .then(AbilityFrameworkCommands.register());
+                .then(AbilityFrameworkCommands.register())
+                .then(at.koopro.wizardsandbeasts.apparition.command.ApparitionPointCommands.register());
     }
 
     private static int toggleBeamDebug(CommandSourceStack source) {

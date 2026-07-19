@@ -36,6 +36,7 @@ public final class PlayerStatusAbilityGrantSource implements AbilityGrantSource 
         List<String> out = new ArrayList<>(8);
         if (ApparitionServerLogic.canApparate(player)) {
             out.add(AbilityIds.APPARITION.toString());
+            out.add(AbilityIds.APPARITION_TRAVEL.toString());
         }
         if (LegilimencyServerLogic.canLegilimise(player)) {
             out.add(AbilityIds.LEGILIMENCY.toString());

@@ -9,6 +9,7 @@ import at.koopro.wizardsandbeasts.client.ability.state.ClientAbilityChargeState;
 import at.koopro.wizardsandbeasts.client.ability.state.ClientAbilitySelectionState;
 import at.koopro.wizardsandbeasts.client.ability.wheel.AbilityWheelScreen;
 import at.koopro.wizardsandbeasts.network.ability.AbilityUseC2SPayload;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -24,8 +25,9 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Client input driver for the ability framework. Opens the {@link AbilityWheelScreen} while the wheel key is
- * held, and drives the use/quick keys according to the armed ability's {@link AbilityInput}:
+ * Client input driver for the ability framework. Opens the {@link AbilityWheelScreen} on a press of the
+ * wheel key — tap to latch it open, or keep holding to confirm on release (the wheel classifies the gesture
+ * itself) — and drives the use/quick keys according to the armed ability's {@link AbilityInput}:
  *
  * <ul>
  *   <li>no charge, no target — fire on key press (the original framework behavior);</li>
@@ -44,10 +46,30 @@ public final class AbilityWheelController {
     private static int chargingSlot = AbilitySelectionState.SLOT_SELECTED;
     private static boolean charging;
 
+    /** Physical wheel-key state last tick — the wheel opens on the rising edge, never while merely held. */
+    private static boolean wheelWasDown;
+    /** Set when the wheel closes on its own key, so the still-held key cannot immediately reopen it. */
+    private static boolean suppressOpenUntilRelease;
+
     private AbilityWheelController() {}
+
+    /** Called by the wheel when the wheel key itself closed it. */
+    public static void suppressOpenUntilRelease() {
+        suppressOpenUntilRelease = true;
+    }
 
     public static void onClientTick(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
+
+        // Polled raw, and before the screen check, so the edge stays accurate while the wheel is open
+        // (KeyMapping.isDown() does not report keys held across a Screen).
+        boolean wheelDown = isWheelKeyDown(mc);
+        boolean rising = wheelDown && !wheelWasDown && !suppressOpenUntilRelease;
+        wheelWasDown = wheelDown;
+        if (!wheelDown) {
+            suppressOpenUntilRelease = false;
+        }
+
         if (mc.player == null || mc.screen != null) {
             cancelCharge();
             return;
@@ -58,11 +80,18 @@ public final class AbilityWheelController {
             drive(mc.player, AbilityFrameworkKeyBindings.QUICK_SLOTS[slot], slot);
         }
 
-        if (!AbilityFrameworkKeyBindings.ABILITY_WHEEL.isUnbound()
-                && AbilityFrameworkKeyBindings.ABILITY_WHEEL.isDown()) {
+        if (rising) {
             cancelCharge();
             mc.setScreen(new AbilityWheelScreen());
         }
+    }
+
+    private static boolean isWheelKeyDown(Minecraft mc) {
+        InputConstants.Key key = AbilityFrameworkKeyBindings.ABILITY_WHEEL.getKey();
+        if (key.getType() != InputConstants.Type.KEYSYM || key.getValue() == InputConstants.UNKNOWN.getValue()) {
+            return false;
+        }
+        return InputConstants.isKeyDown(mc.getWindow(), key.getValue());
     }
 
     private static void drive(LocalPlayer player, KeyMapping key, int slot) {

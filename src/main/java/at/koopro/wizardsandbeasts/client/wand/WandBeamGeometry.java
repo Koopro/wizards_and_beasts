@@ -15,6 +15,9 @@ final class WandBeamGeometry {
 
     private WandBeamGeometry() {}
 
+    /** Lateral wobble per unit of {@code noiseAmp}, in blocks. Absolute so the bolt does not scale with reach. */
+    private static final float LATERAL_NOISE_BLOCKS = 0.10f;
+
     static Vec3[] buildBeamPath(Vec3 start, Vec3 end, long seed, float noiseAmp) {
         Vec3 delta = end.subtract(start);
         double length = delta.length();
@@ -24,10 +27,13 @@ final class WandBeamGeometry {
 
         Vec3 dir = delta.scale(1.0 / length);
 
-        Vec3 up = new Vec3(0, 1, 0);
-        Vec3 perp1 = dir.cross(up);
+        // Pick the reference axis the beam direction is *least* aligned with, so the perpendicular basis
+        // stays continuous instead of snapping through 90° as the aim passes vertical — that snap was a
+        // large part of why the bolt appeared to thrash while looking up or down.
+        Vec3 reference = Math.abs(dir.y) < 0.9 ? new Vec3(0, 1, 0) : new Vec3(1, 0, 0);
+        Vec3 perp1 = dir.cross(reference);
         if (perp1.lengthSqr() < 1e-8) {
-            perp1 = dir.cross(new Vec3(1, 0, 0));
+            perp1 = dir.cross(new Vec3(0, 0, 1));
         }
         perp1 = perp1.normalize();
         Vec3 perp2 = dir.cross(perp1).normalize();
@@ -43,7 +49,10 @@ final class WandBeamGeometry {
         float[] oy = new float[n];
         fillDetrendedWalk(random, n, ox, oy);
 
-        float lateralScale = (float) length * noiseAmp * 0.014f;
+        // Fixed width in blocks, NOT proportional to the live beam length: the beam grows toward its target
+        // and its length changes with every aim twitch, so a length-proportional amplitude made the whole
+        // bolt breathe and swim frame to frame even though the random walk itself is seed-stable.
+        float lateralScale = noiseAmp * LATERAL_NOISE_BLOCKS;
 
         Vec3[] points = new Vec3[n];
         for (int i = 0; i < n; i++) {

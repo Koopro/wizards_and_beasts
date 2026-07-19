@@ -59,8 +59,13 @@ public final class BeamSettings {
     }
 
     /**
-     * Derives 3-layer beam colors from a single spell color (ARGB int).
-     * Core gets the pure color, mid/outer are washed toward white for glow.
+     * Derives 3-layer beam colors from a single spell color (ARGB int). The core stays the pure spell
+     * colour; mid and outer brighten it for glow.
+     *
+     * <p>These used to lerp hard toward white (outer was {@code c * 0.35 + 0.65}), which on an additive
+     * render type meant the two widest, most visible layers were nearly white regardless of the spell —
+     * every beam read as a pale wash with a thin coloured thread inside. They now keep their hue and only
+     * lift brightness, so a red spell renders as a red beam.
      */
     public static void applySpellColor(int color) {
         float r = ((color >> 16) & 0xFF) / 255.0f;
@@ -72,15 +77,20 @@ public final class BeamSettings {
         layers[CORE].g = g;
         layers[CORE].b = b;
 
-        // Mid: lerp toward white for inner glow
-        layers[MID].r = r * 0.6f + 0.4f;
-        layers[MID].g = g * 0.6f + 0.4f;
-        layers[MID].b = b * 0.6f + 0.4f;
+        // Mid: same hue, lifted
+        layers[MID].r = brighten(r, 0.20f);
+        layers[MID].g = brighten(g, 0.20f);
+        layers[MID].b = brighten(b, 0.20f);
 
-        // Outer: further washed toward white for diffuse glow
-        layers[OUTER].r = r * 0.35f + 0.65f;
-        layers[OUTER].g = g * 0.35f + 0.65f;
-        layers[OUTER].b = b * 0.35f + 0.65f;
+        // Outer: same hue, lifted a little further for a diffuse halo
+        layers[OUTER].r = brighten(r, 0.32f);
+        layers[OUTER].g = brighten(g, 0.32f);
+        layers[OUTER].b = brighten(b, 0.32f);
+    }
+
+    /** Lifts a channel toward full without dragging it toward grey, preserving the spell's hue. */
+    private static float brighten(float channel, float amount) {
+        return Math.min(1.0f, channel + (1.0f - channel) * amount * channel + amount * 0.15f);
     }
 
     public static void resetAll() {

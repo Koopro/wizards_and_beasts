@@ -13,6 +13,7 @@ import org.jspecify.annotations.NullMarked;
 public final class AbilityIds {
 
     public static final Identifier APPARITION = id("apparition");
+    public static final Identifier APPARITION_TRAVEL = id("apparition_travel");
     public static final Identifier LEGILIMENCY = id("legilimency");
     public static final Identifier ANIMAGUS_FORM = id("animagus_form");
     public static final Identifier ANIMAGUS_BEAST_ABILITY = id("animagus_beast_ability");
