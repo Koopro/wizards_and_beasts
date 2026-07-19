@@ -1,0 +1,75 @@
+{
+  "format_version": "1.8.0",
+  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
+  "animations": {
+    "animation.horned_serpent.idle": {
+      "loop": true,
+      "animation_length": 3.0,
+      "bones": {
+        "seg_01": {
+          "rotation": {
+            "0.0": [
+              0,
+              0,
+              0
+            ],
+            "1.5": [
+              0,
+              6,
+              0
+            ],
+            "3.0": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "root": {
+          "position": {
+            "0.0": [
+              0,
+              0,
+              0
+            ],
+            "1.5": [
+              0,
+              0.4,
+              0
+            ],
+            "3.0": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.horned_serpent.swim": {
+      "loop": true,
+      "animation_length": 1.0,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.0": [
+              0,
+              8,
+              0
+            ],
+            "0.5": [
+              0,
+              -8,
+              0
+            ],
+            "1.0": [
+              0,
+              8,
+              0
+            ]
+          }
+        }
+      }
+    }
+  }
+}
