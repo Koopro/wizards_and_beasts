@@ -75,7 +75,14 @@ public final class SpellHelper {
     /**
      * Lights the first block along the look ray (where flint & steel could place fire).
      */
-    public static void tryIgniteBlockAlongLook(ServerLevel level, ServerPlayer caster, float maxRange) {
+    /**
+     * Fires the caster's look ray and tries to set the struck surface alight.
+     *
+     * @param impactColor particle colour for the scorch shown when a surface is struck but cannot hold fire
+     * @return {@code true} only if fire was actually placed
+     */
+    public static boolean tryIgniteBlockAlongLook(ServerLevel level, ServerPlayer caster, float maxRange,
+                                                  int impactColor) {
         Vec3 start = caster.getEyePosition();
         Vec3 end = start.add(caster.getLookAngle().scale(maxRange));
         BlockHitResult blockHit = level.clip(new ClipContext(
@@ -84,26 +91,38 @@ public final class SpellHelper {
                 ClipContext.Fluid.NONE,
                 caster));
         if (blockHit.getType() != HitResult.Type.BLOCK) {
-            return;
+            return false;
         }
-        tryIgniteAdjacentToBlockHit(level, blockHit);
+        if (tryIgniteAdjacentToBlockHit(level, blockHit)) {
+            return true;
+        }
+        // A surface was struck but fire cannot survive there — a bare wall face, a wet or unsupported spot.
+        // Scorch it anyway: without this the spell looked like it simply had not fired, which is most of
+        // why fire spells read as "working only sometimes".
+        playSpellImpact(level, blockHit.getLocation(), impactColor);
+        return false;
     }
 
-    /** Places fire in the air block adjacent to the hit face (flint-and-steel style). */
-    public static void tryIgniteAdjacentToBlockHit(ServerLevel level, BlockHitResult blockHit) {
+    /**
+     * Places fire in the air block adjacent to the hit face (flint-and-steel style).
+     *
+     * @return {@code true} if fire was placed; {@code false} when the spot cannot hold it
+     */
+    public static boolean tryIgniteAdjacentToBlockHit(ServerLevel level, BlockHitResult blockHit) {
         if (blockHit.getType() != HitResult.Type.BLOCK) {
-            return;
+            return false;
         }
         BlockPos pos = blockHit.getBlockPos().relative(blockHit.getDirection());
         if (!BaseFireBlock.canBePlacedAt(level, pos, blockHit.getDirection().getOpposite())) {
-            return;
+            return false;
         }
         BlockState fire = BaseFireBlock.getState(level, pos);
         if (fire == null) {
-            return;
+            return false;
         }
         level.setBlockAndUpdate(pos, fire);
         level.playSound(null, pos, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.35f, 0.8f);
+        return true;
     }
 
     /** Common impact burst + soft impact sound for world interactions. */

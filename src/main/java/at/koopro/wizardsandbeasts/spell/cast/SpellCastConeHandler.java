@@ -96,7 +96,9 @@ final class SpellCastConeHandler {
         }
 
         if (props.ignites()) {
-            SpellHelper.tryIgniteBlockAlongLook(level, caster, effectiveRange);
+            // Counted as a hit: igniting the world is the whole point of a fire spell aimed at scenery, and
+            // discarding this result meant such casts never scored a success or advanced proficiency.
+            successful |= SpellHelper.tryIgniteBlockAlongLook(level, caster, effectiveRange, spell.getColor());
         }
         if (SpellCastSupport.isGlacius(spell)) {
             Vec3 end = casterEye.add(look.scale(effectiveRange));
