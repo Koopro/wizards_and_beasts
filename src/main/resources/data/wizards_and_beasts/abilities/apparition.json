@@ -1,0 +1,15 @@
+{
+  "_comment": "Migrated off the dedicated APPARATE keybind. Gating, cooldown and every gameplay rule stay in ApparitionServerLogic; cooldownTicks is 0 because Apparition already owns a persisted cooldown.",
+  "type": "active",
+  "icon": "wizards_and_beasts:textures/ability/placeholder.png",
+  "nameKey": "ability.wizards_and_beasts.apparition",
+  "descriptionKey": "ability.wizards_and_beasts.apparition.desc",
+  "module": "wizards_and_beasts:player_abilities",
+  "cooldownTicks": 0,
+  "sortOrder": 10,
+  "input": {
+    "targeting": "block",
+    "chargeTicks": 20,
+    "range": 32.0
+  }
+}

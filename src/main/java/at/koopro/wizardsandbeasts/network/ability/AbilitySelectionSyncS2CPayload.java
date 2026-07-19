@@ -110,7 +110,7 @@ public record AbilitySelectionSyncS2CPayload(List<Identifier> usable,
                 AbilityResolver.usableWheelIds(player),
                 state.selected(),
                 state.pinned(),
-                List.copyOf(state.toggles()),
+                AbilityResolver.activeToggles(player, state),
                 state.cooldowns()));
     }
 }

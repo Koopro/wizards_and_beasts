@@ -74,7 +74,12 @@ public final class LegilimencyServerLogic {
         LegilimencyVisionS2CPayload.sendTo(caster, marker, 200);
     }
 
-    private static boolean canLegilimise(ServerPlayer player) {
+    /**
+     * Whether the player may use Legilimency at all (heritage rule only — no cooldown, no target).
+     * Read-only; also consulted by the ability grant layer for wheel visibility.
+     * {@link #handleRequest} remains the authority and re-runs it itself.
+     */
+    public static boolean canLegilimise(ServerPlayer player) {
         Heritage heritage = HeritageAPI.getPlayerHeritage(player);
         HeritageVariant variant = HeritageAPI.getPlayerHeritageVariant(player);
         if (heritage != Heritage.WIZARDKIND) {

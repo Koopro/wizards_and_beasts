@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Registry of {@link AbilityGrantSource}s that {@link AbilityGrantService} iterates. Built-ins (heritage,
+ * Registry of {@link AbilityGrantSource}s that {@link AbilityGrantService} iterates. Built-ins (status,
  * vocation, skill-node, debug) are registered on class-init; future grantors call {@link #register}. Sources
  * are pure reads, so registration order only affects nothing but the (already source-bucketed) merge order.
  */
@@ -16,7 +16,7 @@ public final class AbilityGrantSources {
     private static final List<AbilityGrantSource> SOURCES = new CopyOnWriteArrayList<>();
 
     static {
-        register(new HeritageAbilityGrantSource());
+        register(new PlayerStatusAbilityGrantSource());
         register(new VocationAbilityGrantSource());
         register(new SkillNodeAbilityGrantSource());
         register(DebugAbilityGrantSource.INSTANCE);

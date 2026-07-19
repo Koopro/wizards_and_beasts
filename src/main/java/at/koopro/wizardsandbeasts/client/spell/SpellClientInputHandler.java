@@ -1,7 +1,5 @@
 package at.koopro.wizardsandbeasts.client.spell;
 
-import at.koopro.wizardsandbeasts.client.apparition.ApparitionClientController;
-import at.koopro.wizardsandbeasts.client.legilimency.LegilimencyClientController;
 import at.koopro.wizardsandbeasts.client.legilimency.state.ClientLegilimencyVisionState;
 import at.koopro.wizardsandbeasts.client.spell.state.ClientSignatureSpellState;
 import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellDataState;
@@ -11,7 +9,6 @@ import at.koopro.wizardsandbeasts.client.spell.input.SpellInputController;
 import at.koopro.wizardsandbeasts.client.ui.HudVisibilityPolicy;
 import at.koopro.wizardsandbeasts.client.ui.InputPolicy;
 import at.koopro.wizardsandbeasts.network.form.AnimagusAbilityC2SPayload;
-import at.koopro.wizardsandbeasts.network.form.AnimagusTransformC2SPayload;
 import at.koopro.wizardsandbeasts.network.spell.ImperioResistC2SPayload;
 import at.koopro.wizardsandbeasts.network.spell.SpellLeviosaAdjustC2SPayload;
 import at.koopro.wizardsandbeasts.spell.core.CastType;
@@ -33,14 +30,11 @@ public class SpellClientInputHandler {
         boolean canUseWandMagic = HudVisibilityPolicy.canUseWandMagic(typeData);
         SpellInputController.handleGameplayBindings(mc, canUseWandMagic);
         ObscurialInputController.handleGameplayBindings(typeData);
-        if (SpellKeyBindings.ANIMAGUS_TRANSFORM.consumeClick()) {
-            ClientPacketDistributor.sendToServer(new AnimagusTransformC2SPayload());
-        }
+        // Apparition / Legilimency / Animagus form now trigger through the ability wheel
+        // (AbilityWheelController); only the per-form beast ability keeps a dedicated bind.
         if (SpellKeyBindings.ANIMAGUS_ABILITY.consumeClick()) {
             ClientPacketDistributor.sendToServer(new AnimagusAbilityC2SPayload());
         }
-        ApparitionClientController.onClientTick(mc);
-        LegilimencyClientController.onClientTick(mc);
         ClientLegilimencyVisionState.tick();
         if (mc.player != null && mc.screen == null
                 && ClientSignatureSpellState.isImperioControlled()

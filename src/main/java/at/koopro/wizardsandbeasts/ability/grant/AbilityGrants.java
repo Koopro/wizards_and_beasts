@@ -25,9 +25,15 @@ public final class AbilityGrants {
     /**
      * Where a grant comes from. Enum with room to grow (e.g. ITEM, RITUAL) without touching callers.
      * {@code DEBUG} is the command-driven override source ({@code /wandb ability grant|revoke}); its grants
-     * are flagged so debug tooling can distinguish them from earned grants.
+     * are flagged so debug tooling can distinguish them from earned grants. {@code STATUS} covers abilities
+     * earned as player state (Apparition licence, Animagus ritual) — see
+     * {@link PlayerStatusAbilityGrantSource}.
+     *
+     * <p>{@code HERITAGE} has no built-in source any more: the heritage-tag path never matched an ability id
+     * and was removed. The constant is retained so ordinals stay stable for the serialized/synced buckets and
+     * so a future heritage-declared ability list has a home.
      */
-    public enum Source { HERITAGE, VOCATION, SKILL_NODE, DEBUG }
+    public enum Source { HERITAGE, VOCATION, SKILL_NODE, DEBUG, STATUS }
 
     public static final AbilityGrants EMPTY = new AbilityGrants(Map.of());
 

@@ -1,0 +1,10 @@
+{
+  "_comment": "Migrated off the dedicated ANIMAGUS_TRANSFORM keybind. Toggle state is owned by PlayerAbilityHelper.isCurrentlyTransformed, not by the framework; ritual gates stay in AnimagusTransformService. No cooldown today.",
+  "type": "toggle",
+  "icon": "wizards_and_beasts:textures/ability/placeholder.png",
+  "nameKey": "ability.wizards_and_beasts.animagus_form",
+  "descriptionKey": "ability.wizards_and_beasts.animagus_form.desc",
+  "module": "wizards_and_beasts:player_abilities",
+  "cooldownTicks": 0,
+  "sortOrder": 12
+}

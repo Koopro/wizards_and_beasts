@@ -2,9 +2,13 @@ package at.koopro.wizardsandbeasts.ability;
 
 import at.koopro.wizardsandbeasts.ability.def.AbilityDefinition;
 import at.koopro.wizardsandbeasts.ability.def.AbilityDefinitionRegistry;
+import at.koopro.wizardsandbeasts.ability.def.AbilityType;
 import at.koopro.wizardsandbeasts.ability.grant.AbilityGrantService;
 import at.koopro.wizardsandbeasts.ability.grant.AbilityGrants;
 import at.koopro.wizardsandbeasts.ability.grant.AbilityKey;
+import at.koopro.wizardsandbeasts.ability.select.AbilitySelectionState;
+import at.koopro.wizardsandbeasts.ability.trigger.AbilityBehavior;
+import at.koopro.wizardsandbeasts.ability.trigger.AbilityBehaviors;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import net.minecraft.resources.Identifier;
@@ -69,6 +73,26 @@ public final class AbilityResolver {
         for (AbilityDefinition def : AbilityDefinitionRegistry.wheelEligibleSorted()) {
             if (moduleAllows(def) && grants.has(keyOf(def))) {
                 out.add(def);
+            }
+        }
+        return out;
+    }
+
+    /**
+     * Every TOGGLE id currently ON for the player — the framework-owned bits in {@code state} plus, for
+     * behaviors that {@linkplain AbilityBehavior#ownsToggleState() own their state elsewhere}, a live read of
+     * that owner. <b>Derived, never stored</b>: the owner stays the single source of truth and this list is
+     * recomputed for each sync, exactly like the grant snapshot.
+     */
+    public static List<Identifier> activeToggles(ServerPlayer player, AbilitySelectionState state) {
+        List<Identifier> out = new ArrayList<>(state.toggles());
+        for (AbilityDefinition def : AbilityDefinitionRegistry.wheelEligibleSorted()) {
+            if (def.type() != AbilityType.TOGGLE) {
+                continue;
+            }
+            AbilityBehavior behavior = AbilityBehaviors.get(def.id());
+            if (behavior.ownsToggleState() && behavior.isToggledOn(player, def) && !out.contains(def.id())) {
+                out.add(def.id());
             }
         }
         return out;

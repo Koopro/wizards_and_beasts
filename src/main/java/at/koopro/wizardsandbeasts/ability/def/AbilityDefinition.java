@@ -26,6 +26,7 @@ import java.util.Optional;
  * @param module         optional {@code ModuleManager} module gating usability/visibility; {@code null} = always accessible
  * @param cooldownTicks  framework-tracked cooldown; ACTIVE/TOGGLE only; clamped {@code >= 0}
  * @param sortOrder      stable wheel ordering key (ascending), ties broken by id
+ * @param input          hold-to-charge / target-pick contract; {@link AbilityInput#NONE} = press to fire
  */
 @NullMarked
 public record AbilityDefinition(
@@ -36,7 +37,8 @@ public record AbilityDefinition(
         String descriptionKey,
         @Nullable Identifier module,
         int cooldownTicks,
-        int sortOrder) {
+        int sortOrder,
+        AbilityInput input) {
 
     /** Placeholder used by {@link #CODEC} before the loader stamps the real file id via {@link #withId}. */
     private static final Identifier UNSET_ID = Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "unset");
@@ -52,14 +54,16 @@ public record AbilityDefinition(
             Codec.STRING.fieldOf("descriptionKey").forGetter(AbilityDefinition::descriptionKey),
             Identifier.CODEC.optionalFieldOf("module").forGetter(d -> Optional.ofNullable(d.module())),
             Codec.INT.optionalFieldOf("cooldownTicks", 0).forGetter(AbilityDefinition::cooldownTicks),
-            Codec.INT.optionalFieldOf("sortOrder", 0).forGetter(AbilityDefinition::sortOrder)
-    ).apply(instance, (type, icon, nameKey, descriptionKey, module, cooldownTicks, sortOrder) ->
+            Codec.INT.optionalFieldOf("sortOrder", 0).forGetter(AbilityDefinition::sortOrder),
+            AbilityInput.CODEC.optionalFieldOf("input", AbilityInput.NONE).forGetter(AbilityDefinition::input)
+    ).apply(instance, (type, icon, nameKey, descriptionKey, module, cooldownTicks, sortOrder, input) ->
             new AbilityDefinition(UNSET_ID, type, icon, nameKey, descriptionKey,
-                    module.orElse(null), cooldownTicks, sortOrder)));
+                    module.orElse(null), cooldownTicks, sortOrder, input)));
 
     /** Returns a copy with {@code id} stamped from the datapack file path. */
     public AbilityDefinition withId(Identifier fileId) {
-        return new AbilityDefinition(fileId, type, icon, nameKey, descriptionKey, module, cooldownTicks, sortOrder);
+        return new AbilityDefinition(fileId, type, icon, nameKey, descriptionKey, module, cooldownTicks,
+                sortOrder, input);
     }
 
     /** True for ACTIVE/TOGGLE — the only types shown in and driven from the wheel. */

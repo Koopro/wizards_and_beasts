@@ -165,6 +165,7 @@ public class WizardsAndBeastsMod {
         // Ability framework: server-side sync/clone/cooldown lifecycle + debug behavior wiring.
         NeoForge.EVENT_BUS.register(at.koopro.wizardsandbeasts.ability.AbilityFrameworkEvents.class);
         at.koopro.wizardsandbeasts.ability.trigger.AbilityDebugBehaviors.bootstrap();
+        at.koopro.wizardsandbeasts.ability.trigger.behavior.MigratedAbilityBehaviors.bootstrap();
 
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 

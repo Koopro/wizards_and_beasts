@@ -52,23 +52,12 @@ public class SpellKeyBindings {
     public static final KeyMapping OBSCURIAL_STRESS_VENT = new KeyMapping(
             "key." + WizardsAndBeastsMod.MODID + ".obscurial_stress_vent",
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_B, CATEGORY);
-    public static final KeyMapping APPARATE = new KeyMapping(
-            "key." + WizardsAndBeastsMod.MODID + ".apparate",
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, CATEGORY);
-    public static final KeyMapping LEGILIMENCY = new KeyMapping(
-            "key." + WizardsAndBeastsMod.MODID + ".legilimency",
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_H, CATEGORY);
     public static final KeyMapping OBSCURIAL_ABILITY_PRIMARY = new KeyMapping(
             "key." + WizardsAndBeastsMod.MODID + ".obscurial_ability_primary",
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_N, CATEGORY);
     public static final KeyMapping OBSCURIAL_ABILITY_SECONDARY = new KeyMapping(
             "key." + WizardsAndBeastsMod.MODID + ".obscurial_ability_secondary",
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_M, CATEGORY);
-
-    /** Default: unbound — toggles the Animagus beast form. Bind in Controls settings. */
-    public static final KeyMapping ANIMAGUS_TRANSFORM = new KeyMapping(
-            "key." + WizardsAndBeastsMod.MODID + ".animagus_transform",
-            InputConstants.UNKNOWN.getValue(), CATEGORY);
 
     /** Default: unbound — triggers the active ability of the current beast form. Bind in Controls settings. */
     public static final KeyMapping ANIMAGUS_ABILITY = new KeyMapping(
@@ -86,11 +75,8 @@ public class SpellKeyBindings {
         event.register(SKILL_MENU);
         event.register(OBSCURIAL_TOGGLE);
         event.register(OBSCURIAL_STRESS_VENT);
-        event.register(APPARATE);
-        event.register(LEGILIMENCY);
         event.register(OBSCURIAL_ABILITY_PRIMARY);
         event.register(OBSCURIAL_ABILITY_SECONDARY);
-        event.register(ANIMAGUS_TRANSFORM);
         event.register(ANIMAGUS_ABILITY);
     }
 

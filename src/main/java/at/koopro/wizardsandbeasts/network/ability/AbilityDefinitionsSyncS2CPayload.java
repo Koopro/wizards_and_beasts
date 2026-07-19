@@ -3,6 +3,8 @@ package at.koopro.wizardsandbeasts.network.ability;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.ability.def.AbilityDefinition;
 import at.koopro.wizardsandbeasts.ability.def.AbilityDefinitionRegistry;
+import at.koopro.wizardsandbeasts.ability.def.AbilityInput;
+import at.koopro.wizardsandbeasts.ability.def.AbilityTargeting;
 import at.koopro.wizardsandbeasts.ability.def.AbilityType;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
 import io.netty.buffer.ByteBuf;
@@ -46,7 +48,12 @@ public record AbilityDefinitionsSyncS2CPayload(List<AbilityDefinition> definitio
                 Identifier module = moduleRaw.isBlank() ? null : Identifier.parse(moduleRaw);
                 int cooldownTicks = PacketCodecUtils.clampNonNegative(buf.readInt());
                 int sortOrder = buf.readInt();
-                defs.add(new AbilityDefinition(id, type, icon, nameKey, descriptionKey, module, cooldownTicks, sortOrder));
+                AbilityInput input = new AbilityInput(
+                        targetingByName(PacketCodecUtils.readString(buf)),
+                        PacketCodecUtils.clampNonNegative(buf.readInt()),
+                        buf.readDouble());
+                defs.add(new AbilityDefinition(id, type, icon, nameKey, descriptionKey, module, cooldownTicks,
+                        sortOrder, input));
             }
             return new AbilityDefinitionsSyncS2CPayload(defs);
         }
@@ -66,6 +73,10 @@ public record AbilityDefinitionsSyncS2CPayload(List<AbilityDefinition> definitio
                 PacketCodecUtils.writeString(buf, module == null ? "" : module.toString());
                 buf.writeInt(Math.max(0, def.cooldownTicks()));
                 buf.writeInt(def.sortOrder());
+                AbilityInput input = def.input();
+                PacketCodecUtils.writeString(buf, input.targeting().getSerializedName());
+                buf.writeInt(Math.max(0, input.chargeTicks()));
+                buf.writeDouble(input.range());
             }
         }
     };
@@ -96,5 +107,14 @@ public record AbilityDefinitionsSyncS2CPayload(List<AbilityDefinition> definitio
             }
         }
         return AbilityType.PASSIVE;
+    }
+
+    private static AbilityTargeting targetingByName(String name) {
+        for (AbilityTargeting targeting : AbilityTargeting.values()) {
+            if (targeting.getSerializedName().equals(name)) {
+                return targeting;
+            }
+        }
+        return AbilityTargeting.NONE;
     }
 }

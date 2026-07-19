@@ -30,6 +30,21 @@ public final class ApparitionServerLogic {
     private ApparitionServerLogic() {
     }
 
+    /**
+     * Whether the player is <i>permitted</i> to Apparate at all — the same licence/test/heritage rule
+     * {@link #handleRequest} enforces, minus the transient checks (splinch, cooldown, wards) and minus the
+     * per-reason feedback. Read-only; used by the ability grant layer to decide wheel visibility.
+     * {@code handleRequest} remains the authority and re-runs every check itself.
+     */
+    public static boolean canApparate(ServerPlayer player) {
+        if (SkillSystemAPI.hasAbility(player, "elf_apparition")) {
+            return true;
+        }
+        return PlayerAbilityHelper.isApparitionUnlocked(player)
+                && PlayerAbilityHelper.isApparitionLicensed(player)
+                && isAllowedHeritage(player);
+    }
+
     public static void handleRequest(ServerPlayer caster, net.minecraft.core.BlockPos targetBlockPos, Vec3 targetPosition) {
         if (!ModuleManager.isEnabled(Module.PLAYER_ABILITIES)) {
             return;

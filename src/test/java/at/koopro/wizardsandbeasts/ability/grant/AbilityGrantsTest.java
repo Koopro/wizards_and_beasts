@@ -3,9 +3,11 @@ package at.koopro.wizardsandbeasts.ability.grant;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -106,6 +108,55 @@ class AbilityGrantsTest {
         assertTrue(after.has(AbilityKey.of("dual")));
         assertTrue(after.hasFrom(AbilityKey.of("dual"), AbilityGrants.Source.HERITAGE));
         assertFalse(after.hasFrom(AbilityKey.of("dual"), AbilityGrants.Source.SKILL_NODE));
+    }
+
+    // ── Status source (replaces the heritage-tag grant path) ──
+
+    /** Namespaced ids, exactly as {@code AbilityIds.*.toString()} and the resolver's key both spell them. */
+    private static final String APPARITION = "wizards_and_beasts:apparition";
+    private static final String LEGILIMENCY = "wizards_and_beasts:legilimency";
+    private static final String ANIMAGUS_FORM = "wizards_and_beasts:animagus_form";
+
+    @Test
+    void statusSourceCarriesTheMigratedAbilityIds() {
+        AbilityGrants g = AbilityGrants.ofSources(Map.of(
+                AbilityGrants.Source.STATUS, List.of(APPARITION, LEGILIMENCY, ANIMAGUS_FORM)));
+
+        for (String id : List.of(APPARITION, LEGILIMENCY, ANIMAGUS_FORM)) {
+            assertTrue(g.hasFrom(AbilityKey.of(id), AbilityGrants.Source.STATUS), id);
+        }
+        assertEquals(3, g.keysFrom(AbilityGrants.Source.STATUS).size());
+    }
+
+    @Test
+    void losingStatusStripsExactlyStatusGrants() {
+        // Licence revoked / ritual state cleared → recompute yields nothing from STATUS, others untouched.
+        AbilityGrants after = AbilityGrants.ofSources(Map.of(
+                AbilityGrants.Source.STATUS, List.of(),
+                AbilityGrants.Source.VOCATION, DUELIST,
+                AbilityGrants.Source.SKILL_NODE, NODE_ABILITIES));
+
+        assertFalse(after.has(AbilityKey.of(APPARITION)));
+        assertTrue(after.hasFrom(AbilityKey.of("duelist_spell_power"), AbilityGrants.Source.VOCATION));
+        assertTrue(after.hasFrom(AbilityKey.of("niffler_friend"), AbilityGrants.Source.SKILL_NODE));
+    }
+
+    /**
+     * The migration's premise: heritage tags are bare strings and ability keys are namespaced ids, so no tag
+     * has ever resolved to an ability. Locks that the two key spaces stay disjoint, so nobody "restores" the
+     * tag grant path expecting it to work.
+     */
+    @Test
+    void heritageTagsDoNotResolveToAbilityIds() {
+        List<String> shippedTags = List.of("innate_apparition", "transformation", "no_wand", "nature_speech",
+                "enhanced_bond", "dark_resistance", "obscurus_form", "divination_sight");
+        AbilityGrants g = AbilityGrants.ofSources(Map.of(AbilityGrants.Source.HERITAGE, shippedTags));
+
+        for (String id : List.of(APPARITION, LEGILIMENCY, ANIMAGUS_FORM)) {
+            assertFalse(g.has(AbilityKey.of(id)), id + " must not come from a heritage tag");
+        }
+        // The closest tag by name is still a different key entirely.
+        assertNotEquals(AbilityKey.of(APPARITION), AbilityKey.of("innate_apparition"));
     }
 
     // ── Key normalization + empties ──

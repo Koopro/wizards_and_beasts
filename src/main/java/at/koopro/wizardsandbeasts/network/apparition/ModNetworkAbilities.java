@@ -2,13 +2,16 @@ package at.koopro.wizardsandbeasts.network.apparition;
 
 import at.koopro.wizardsandbeasts.client.network.ClientPayloadHandlers;
 import at.koopro.wizardsandbeasts.network.ability.AbilityDataSyncPayload;
-import at.koopro.wizardsandbeasts.network.apparition.ApparitionRequestPayload;
 import at.koopro.wizardsandbeasts.network.apparition.ApparitionWardsSyncS2CPayload;
-import at.koopro.wizardsandbeasts.network.legilimency.LegilimencyRequestPayload;
 import at.koopro.wizardsandbeasts.network.legilimency.LegilimencyVisionS2CPayload;
 
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
+/**
+ * Apparition / Legilimency payloads. The two C2S request payloads are gone — both abilities now trigger
+ * through the ability framework's {@code AbilityUseC2SPayload}, which carries the target; only the S2C
+ * ward/vision syncs remain.
+ */
 public final class ModNetworkAbilities {
     private ModNetworkAbilities() {
     }
@@ -22,14 +25,6 @@ public final class ModNetworkAbilities {
                 ApparitionWardsSyncS2CPayload.TYPE,
                 ApparitionWardsSyncS2CPayload.STREAM_CODEC,
                 ClientPayloadHandlers::handleApparitionWardsSync);
-        registrar.playToServer(
-                ApparitionRequestPayload.TYPE,
-                ApparitionRequestPayload.STREAM_CODEC,
-                ApparitionRequestPayload::handle);
-        registrar.playToServer(
-                LegilimencyRequestPayload.TYPE,
-                LegilimencyRequestPayload.STREAM_CODEC,
-                LegilimencyRequestPayload::handle);
         registrar.playToClient(
                 LegilimencyVisionS2CPayload.TYPE,
                 LegilimencyVisionS2CPayload.STREAM_CODEC,

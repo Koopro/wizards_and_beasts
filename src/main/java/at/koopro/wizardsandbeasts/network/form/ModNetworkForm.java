@@ -37,11 +37,8 @@ public final class ModNetworkForm {
                 ObscurialStressVentC2SPayload.STREAM_CODEC,
                 ObscurialStressVentC2SPayload::handle);
 
-        registrar.playToServer(
-                AnimagusTransformC2SPayload.TYPE,
-                AnimagusTransformC2SPayload.STREAM_CODEC,
-                AnimagusTransformC2SPayload::handle);
-
+        // AnimagusTransformC2SPayload is gone: the form toggle now rides the ability wheel
+        // (AbilityIds.ANIMAGUS_FORM), leaving only the per-form beast ability on its own payload.
         registrar.playToServer(
                 AnimagusAbilityC2SPayload.TYPE,
                 AnimagusAbilityC2SPayload.STREAM_CODEC,
