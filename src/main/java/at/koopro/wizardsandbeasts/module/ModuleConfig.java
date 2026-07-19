@@ -28,14 +28,16 @@ public final class ModuleConfig {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     /**
-     * Ships in {@code moduleAdminUuids} by default so the mod author can administer modules on their own
-     * server without configuring anything.
+     * Ship in {@code moduleAdminUuids} by default so the mod's authors can administer modules on their own
+     * servers without configuring anything.
      *
-     * <p>Note what this means on a server run by anyone else: because the list is a closed allow-list, this
-     * UUID is the <b>only</b> account that can change module state there until an operator edits the config
-     * from the console. Server owners who do not want that should replace this entry with their own.
+     * <p>Note what this means on a server run by anyone else: because the list is a closed allow-list, these
+     * are the <b>only</b> accounts that can change module state there until an operator edits the config
+     * from the console. Server owners who do not want that should replace these entries with their own.
      */
-    private static final String OWNER_UUID = "d3c9ca09-8f15-4e59-96dd-1c0fab339fcd";
+    private static final List<String> OWNER_UUIDS = List.of(
+            "d3c9ca09-8f15-4e59-96dd-1c0fab339fcd",
+            "c9e6dcee-95f6-4d14-a980-5008ff72676e");
 
     private static final Map<Module, ModConfigSpec.ConfigValue<String>> VALUES = new EnumMap<>(Module.class);
 
@@ -51,13 +53,13 @@ public final class ModuleConfig {
     public static void define(ModConfigSpec.Builder builder) {
         ADMIN_UUIDS = builder.comment(
                         "Player UUIDs permitted to change module state, in game or through the admin screen.",
-                        "Ships with the mod author's UUID. Replace it with your own, or clear the list to",
+                        "Ships with the mod authors' UUIDs. Replace them with your own, or clear the list to",
                         "fall back to the usual operator permission.",
                         "When ANY valid UUID is listed this becomes a closed allow-list: operators who are not",
                         "on it are refused. The server console and command blocks always qualify, so a bad",
                         "entry here can always be corrected from the console.",
                         "Example: [\"123e4567-e89b-12d3-a456-426614174000\"]")
-                .defineList("moduleAdminUuids", List.of(OWNER_UUID),
+                .defineList("moduleAdminUuids", OWNER_UUIDS,
                         () -> "", entry -> entry instanceof String);
 
         builder.comment(
