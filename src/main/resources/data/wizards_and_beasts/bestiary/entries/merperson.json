@@ -19,7 +19,7 @@
     "bestiary.wizards_and_beasts.merperson.weakness.1",
     "bestiary.wizards_and_beasts.merperson.weakness.2"
   ],
-  "encounterTrigger": "MANUAL",
+  "encounterTrigger": "KILL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/merperson.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/merperson.png",
   "sortOrder": 51,

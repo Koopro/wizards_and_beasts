@@ -14,6 +14,8 @@ import at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageDataState;
 import at.koopro.wizardsandbeasts.client.legilimency.state.ClientLegilimencyVisionState;
 import at.koopro.wizardsandbeasts.client.map.MapClientHandler;
 import at.koopro.wizardsandbeasts.client.owl.ClientOWLCache;
+import at.koopro.wizardsandbeasts.client.petrify.state.ClientPetrifyState;
+import at.koopro.wizardsandbeasts.network.petrify.PetrifiedStateSyncS2CPayload;
 import at.koopro.wizardsandbeasts.client.skill.state.ClientSkillBonusCache;
 import at.koopro.wizardsandbeasts.client.skill.state.ClientSkillDataState;
 import at.koopro.wizardsandbeasts.client.skill.state.ClientVocationCache;
@@ -257,6 +259,10 @@ public final class ClientPayloadHandlers {
                     RenderFlag.fromBitmask(pkt.renderFlagMask()));
             SizeLerpTracker.onScaleChanged(pkt.playerUUID(), pkt.modelScale());
         });
+    }
+
+    public static void handlePetrifiedStateSync(PetrifiedStateSyncS2CPayload pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> ClientPetrifyState.set(pkt.playerUUID(), pkt.isPetrified()));
     }
 
     public static void handleTransitionEnd(TransitionEndS2CPayload pkt, IPayloadContext ctx) {

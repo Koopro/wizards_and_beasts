@@ -19,7 +19,7 @@
     "bestiary.wizards_and_beasts.imp.weakness.1",
     "bestiary.wizards_and_beasts.imp.weakness.2"
   ],
-  "encounterTrigger": "MANUAL",
+  "encounterTrigger": "KILL",
   "entityType": "wizards_and_beasts:imp",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/imp.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/imp.png",

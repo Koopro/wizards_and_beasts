@@ -4,6 +4,7 @@ import at.koopro.wizardsandbeasts.item.wand.WandItem;
 import at.koopro.wizardsandbeasts.item.wand.WandModuleHooks;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
+import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.registry.WandDatapackRegistries;
 import at.koopro.wizardsandbeasts.wand.registry.WandWoodDefinition;
@@ -20,19 +21,18 @@ import java.util.Optional;
 
 /**
  * Corruption accumulation on the wand. Spell dispatch should call {@link #onSpellCast} once per cast.
- * // Spell system (future): replace {@link #isDarkSpell} / {@link #isLightSpell} heuristics with datapack tags.
  */
 public final class WandCorruptionSystem {
 
     private WandCorruptionSystem() {
     }
 
-    public static void onSpellCast(Player player, ItemStack wand, Identifier spellKey) {
+    public static void onSpellCast(Player player, ItemStack wand, SpellCategory category) {
         if (!ModuleManager.isEnabled(Module.WANDS) || !(wand.getItem() instanceof WandItem)) {
             return;
         }
         // Spell system integration: read corruption_increment from spell definition when available.
-        float increment = isDarkSpell(spellKey) ? 0.02f : 0.0f;
+        float increment = category == SpellCategory.DARK_ARTS ? 0.02f : 0.0f;
         if (increment <= 0.0f) {
             return;
         }
@@ -50,26 +50,16 @@ public final class WandCorruptionSystem {
         }
     }
 
-    /** Temporary: Dark spells identified by path segment — spell system will use proper tags. */
-    public static boolean isDarkSpell(Identifier spellKey) {
-        return spellKey.getPath().contains("dark_");
-    }
-
-    /** Temporary: Light spells identified by path segment — spell system will use proper tags. */
-    public static boolean isLightSpell(Identifier spellKey) {
-        return spellKey.getPath().contains("light_");
-    }
-
-    public static float getEffectivePowerMultiplier(ItemStack wand, Identifier spellKey, RegistryAccess registryAccess) {
+    public static float getEffectivePowerMultiplier(ItemStack wand, SpellCategory category, RegistryAccess registryAccess) {
         float integrity = WandComponents.getIntegrity(wand);
         float corruption = WandComponents.getCorruption(wand);
         float mult = integrity;
         float darkBonusThreshold = WandResonanceConfigLoader.getConfig(registryAccess).corruptionDarkBonusThreshold();
-        if (corruption > darkBonusThreshold && isDarkSpell(spellKey)) {
+        if (corruption > darkBonusThreshold && category == SpellCategory.DARK_ARTS) {
             mult *= 1.0f + (corruption - darkBonusThreshold);
         }
         Identifier woodId = WandComponents.getWood(wand);
-        if (woodId != null && corruption > darkBonusThreshold && isLightSpell(spellKey)) {
+        if (woodId != null && corruption > darkBonusThreshold && category == SpellCategory.DEFENSE) {
             Optional<Holder.Reference<WandWoodDefinition>> wood =
                     registryAccess.lookupOrThrow(WandDatapackRegistries.WAND_WOOD_REGISTRY).get(woodId);
             if (wood.isPresent() && wood.get().value().affinityTags().contains("healing")) {

@@ -19,7 +19,7 @@
     "bestiary.wizards_and_beasts.kelpie.weakness.1",
     "bestiary.wizards_and_beasts.kelpie.weakness.2"
   ],
-  "encounterTrigger": "MANUAL",
+  "encounterTrigger": "KILL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/kelpie.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/kelpie.png",
   "sortOrder": 53,

@@ -109,6 +109,24 @@ public final class ConsumableItemRegistry {
             ModItems.ITEMS.registerSimpleItem("rougarou_hair");
     public static final DeferredItem<Item> WHITE_RIVER_MONSTER_SPINE =
             ModItems.ITEMS.registerSimpleItem("white_river_monster_spine");
+    public static final DeferredItem<Item> HIDEBEHIND_SHADOW_ESSENCE =
+            ModItems.ITEMS.registerSimpleItem("hidebehind_shadow_essence");
+    public static final DeferredItem<Item> HIDEBEHIND_CLAW =
+            ModItems.ITEMS.registerSimpleItem("hidebehind_claw");
+    public static final DeferredItem<Item> GHOUL_SLIME =
+            ModItems.ITEMS.registerSimpleItem("ghoul_slime");
+    public static final DeferredItem<Item> GOLDEN_SNIDGET_FEATHER =
+            ModItems.ITEMS.registerSimpleItem("golden_snidget_feather");
+    public static final DeferredItem<Item> GRANIAN_HAIR =
+            ModItems.ITEMS.registerSimpleItem("granian_hair");
+    public static final DeferredItem<Item> HORNED_SERPENT_GEM =
+            ModItems.ITEMS.registerSimpleItem("horned_serpent_gem");
+    public static final DeferredItem<Item> PUKWUDGIE_VENOM_SAC =
+            ModItems.ITEMS.registerSimpleItem("pukwudgie_venom_sac");
+    public static final DeferredItem<Item> YETI_FUR =
+            ModItems.ITEMS.registerSimpleItem("yeti_fur");
+    public static final DeferredItem<Item> MATAGOT_ESSENCE =
+            ModItems.ITEMS.registerSimpleItem("matagot_essence");
 
     private ConsumableItemRegistry() {}
 

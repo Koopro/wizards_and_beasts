@@ -46,6 +46,9 @@ public class ModEntityLootTableProvider extends EntityLootSubProvider {
         addCovered(ModEntities.THESTRAL.get(), simple(Items.LEATHER, 0, 2));
         addCovered(ModEntities.AUGUREY.get(), simple(Items.FEATHER, 1, 2));
         addCovered(ModEntities.BOWTRUCKLE.get(), simple(Items.STICK, 0, 2));
+        addCovered(ModEntities.RUNESPOOR.get(), simple(Items.SPIDER_EYE, 0, 2));
+        addCovered(ModEntities.HIDEBEHIND.get(),
+                two(modItem("hidebehind_shadow_essence"), 0, 2, modItem("hidebehind_claw"), 0, 1));
     }
 
     private LootTable.Builder tableFor(String id) {
@@ -66,7 +69,17 @@ public class ModEntityLootTableProvider extends EntityLootSubProvider {
             // venomous / arthropod
             case "acromantula" -> two(Items.STRING, 1, 3, Items.SPIDER_EYE, 0, 1);
             case "basilisk" -> two(Items.BONE, 1, 3, Items.SPIDER_EYE, 0, 2);
-            case "runespoor" -> simple(Items.SPIDER_EYE, 0, 2);
+            // Phase 3 additions
+            case "ghoul" -> two(modItem("ghoul_slime"), 0, 2, Items.BONE, 0, 1);
+            case "golden_snidget" -> withRare(Items.FEATHER, 0, 1, modItem("golden_snidget_feather"), 0.40f);
+            case "granian" -> two(modItem("granian_hair"), 0, 2, Items.LEATHER, 0, 2);
+            case "horned_serpent" -> withRare(Items.PRISMARINE_SHARD, 0, 2, modItem("horned_serpent_gem"), 0.25f);
+            case "pukwudgie" -> two(Items.ARROW, 0, 2, modItem("pukwudgie_venom_sac"), 0, 1);
+            case "yeti" -> two(modItem("yeti_fur"), 0, 2, Items.BONE, 0, 1);
+            case "rougarou" -> two(modItem("rougarou_hair"), 0, 1, Items.LEATHER, 0, 2);
+            case "matagot" -> two(modItem("matagot_essence"), 0, 1, Items.PHANTOM_MEMBRANE, 0, 1);
+            case "bundimun" -> simple(Items.SLIME_BALL, 0, 2);
+            case "lobalug" -> simple(Items.INK_SAC, 0, 2);
             // aquatic
             case "kelpie", "kappa" -> simple(Items.KELP, 1, 3);
             case "grindylow" -> two(Items.KELP, 0, 2, Items.STRING, 0, 1);

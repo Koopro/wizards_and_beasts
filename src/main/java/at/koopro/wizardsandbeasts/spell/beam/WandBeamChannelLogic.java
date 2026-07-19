@@ -124,7 +124,8 @@ public final class WandBeamChannelLogic {
                 }
             }
             if (leviosaTarget == null || s.beamTicks % targetScanInterval == 0) {
-                Entity scanned = WandBeamSpellHandlers.findLeviosaTargetAlongCrosshair(player, maxReach);
+                Entity scanned = WandBeamSpellHandlers.findLeviosaTargetAlongCrosshair(
+                        player, maxReach, leviosaTarget == null);
                 if (scanned != null) {
                     leviosaTarget = scanned;
                 }

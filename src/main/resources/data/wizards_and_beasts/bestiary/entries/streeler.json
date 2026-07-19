@@ -19,7 +19,7 @@
     "bestiary.wizards_and_beasts.streeler.weakness.1",
     "bestiary.wizards_and_beasts.streeler.weakness.2"
   ],
-  "encounterTrigger": "MANUAL",
+  "encounterTrigger": "PROXIMITY",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/streeler.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/streeler.png",
   "sortOrder": 39,

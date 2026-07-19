@@ -24,6 +24,9 @@ public final class WandModuleRegistry {
     private static final Map<Identifier, WandModule> BUILT_INS = new LinkedHashMap<>();
     private static final Map<Identifier, WandModule> DATAPACK = new LinkedHashMap<>();
 
+    /** Per-slot view cache for {@link #getAllForSlot}, invalidated on any registry write. */
+    private static volatile @Nullable Map<WandSlot, List<WandModule>> slotViewCache;
+
     private WandModuleRegistry() {}
 
     // ── Tier 1: built-in registration ────────────────────────────────────────
@@ -69,6 +72,7 @@ public final class WandModuleRegistry {
     private static void register(WandSlot slot, String variant) {
         Identifier id = Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, variant);
         BUILT_INS.put(id, WandModule.builtin(id, slot, variant));
+        slotViewCache = null;
     }
 
     // ── Tier 2: datapack operations ──────────────────────────────────────────
@@ -76,6 +80,7 @@ public final class WandModuleRegistry {
     /** Called by WandModuleLoader at the start of each reload cycle. */
     static void clearDatapack() {
         DATAPACK.clear();
+        slotViewCache = null;
     }
 
     /** Called by WandModuleLoader for each successfully parsed datapack module. */
@@ -84,6 +89,7 @@ public final class WandModuleRegistry {
             LOGGER.warn("[W&B] Datapack wand module '{}' overrides a built-in module.", id);
         }
         DATAPACK.put(id, module);
+        slotViewCache = null;
     }
 
     // ── Lookup API ────────────────────────────────────────────────────────────
@@ -99,16 +105,32 @@ public final class WandModuleRegistry {
      * Returns all modules registered for the given slot.
      * Includes built-ins, with any datapack overrides applied.
      * Datapack-only modules for this slot are appended at the end.
+     *
+     * <p>Result is cached per slot and rebuilt only when the registry changes (bootstrap/reload),
+     * since this is called from the per-frame wand render path — never rebuild on every call.
      */
     public static List<WandModule> getAllForSlot(@NonNull WandSlot slot) {
-        Map<Identifier, WandModule> combined = new LinkedHashMap<>();
+        Map<WandSlot, List<WandModule>> cache = slotViewCache;
+        if (cache == null) {
+            cache = buildSlotViewCache();
+            slotViewCache = cache;
+        }
+        return cache.getOrDefault(slot, List.of());
+    }
+
+    private static Map<WandSlot, List<WandModule>> buildSlotViewCache() {
+        Map<WandSlot, Map<Identifier, WandModule>> bySlot = new EnumMap<>(WandSlot.class);
         for (WandModule m : BUILT_INS.values()) {
-            if (m.slot() == slot) combined.put(m.id(), m);
+            bySlot.computeIfAbsent(m.slot(), s -> new LinkedHashMap<>()).put(m.id(), m);
         }
         for (WandModule m : DATAPACK.values()) {
-            if (m.slot() == slot) combined.put(m.id(), m); // overrides same-id built-in
+            bySlot.computeIfAbsent(m.slot(), s -> new LinkedHashMap<>()).put(m.id(), m); // overrides same-id built-in
         }
-        return List.copyOf(combined.values());
+        Map<WandSlot, List<WandModule>> result = new EnumMap<>(WandSlot.class);
+        for (Map.Entry<WandSlot, Map<Identifier, WandModule>> entry : bySlot.entrySet()) {
+            result.put(entry.getKey(), List.copyOf(entry.getValue().values()));
+        }
+        return result;
     }
 
     /**

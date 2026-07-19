@@ -19,7 +19,7 @@
     "bestiary.wizards_and_beasts.fwooper.weakness.1",
     "bestiary.wizards_and_beasts.fwooper.weakness.2"
   ],
-  "encounterTrigger": "MANUAL",
+  "encounterTrigger": "KILL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/fwooper.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/fwooper.png",
   "sortOrder": 28,

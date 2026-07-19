@@ -19,7 +19,7 @@
     "bestiary.wizards_and_beasts.jobberknoll.weakness.1",
     "bestiary.wizards_and_beasts.jobberknoll.weakness.2"
   ],
-  "encounterTrigger": "MANUAL",
+  "encounterTrigger": "PROXIMITY",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/jobberknoll.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/jobberknoll.png",
   "sortOrder": 29,

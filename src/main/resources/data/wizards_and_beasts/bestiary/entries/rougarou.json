@@ -1,0 +1,24 @@
+{
+  "id": "wizards_and_beasts:rougarou",
+  "displayName": "bestiary.wizards_and_beasts.rougarou.name",
+  "category": "CURSED_BEING",
+  "mmRating": 4,
+  "habitat": "bestiary.wizards_and_beasts.rougarou.habitat",
+  "size": "LARGE",
+  "shortLore": "bestiary.wizards_and_beasts.rougarou.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.rougarou.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.rougarou.ability.1"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.rougarou.threat.1"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.rougarou.weakness.1"
+  ],
+  "encounterTrigger": "KILL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/rougarou.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/rougarou.png",
+  "sortOrder": 207,
+  "entityType": "wizards_and_beasts:rougarou"
+}

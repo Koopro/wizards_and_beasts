@@ -7,6 +7,8 @@ import at.koopro.wizardsandbeasts.item.ParchmentItem;
 import at.koopro.wizardsandbeasts.item.deluminator.DeluminatorItem;
 import at.koopro.wizardsandbeasts.item.floo.FlooPowderItem;
 import at.koopro.wizardsandbeasts.item.map.MaraudersMapItem;
+import at.koopro.wizardsandbeasts.item.wearable.BlindfoldItem;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.SpawnEggItem;
 import net.neoforged.neoforge.registries.DeferredItem;
 
@@ -14,6 +16,9 @@ public final class MiscItemRegistry {
 
     public static final DeferredItem<BestiaryItem> BESTIARY =
             ModItems.ITEMS.registerItem("bestiary", props -> new BestiaryItem(props.stacksTo(1)));
+
+    public static final DeferredItem<BlindfoldItem> BLINDFOLD =
+            ModItems.ITEMS.registerItem("blindfold", props -> new BlindfoldItem(props.stacksTo(1).equippable(EquipmentSlot.HEAD)));
 
     public static final DeferredItem<MinistryHandbookItem> MINISTRY_HANDBOOK =
             ModItems.ITEMS.registerItem("ministry_handbook", props -> new MinistryHandbookItem(props.stacksTo(1)));
@@ -56,6 +61,14 @@ public final class MiscItemRegistry {
     public static final DeferredItem<SpawnEggItem> PHOENIX_SPAWN_EGG =
             ModItems.ITEMS.registerItem("phoenix_spawn_egg",
                     properties -> new SpawnEggItem(properties.spawnEgg(ModEntities.PHOENIX.get())));
+
+    public static final DeferredItem<SpawnEggItem> RUNESPOOR_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("runespoor_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(ModEntities.RUNESPOOR.get())));
+
+    public static final DeferredItem<SpawnEggItem> HIDEBEHIND_SPAWN_EGG =
+            ModItems.ITEMS.registerItem("hidebehind_spawn_egg",
+                    properties -> new SpawnEggItem(properties.spawnEgg(ModEntities.HIDEBEHIND.get())));
 
     public static final DeferredItem<SpawnEggItem> AUGUREY_SPAWN_EGG =
             ModItems.ITEMS.registerItem("augurey_spawn_egg",

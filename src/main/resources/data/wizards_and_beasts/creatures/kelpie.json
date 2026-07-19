@@ -3,7 +3,7 @@
   "id": "wizards_and_beasts:kelpie",
   "bodyPlan": "AQUATIC",
   "locomotion": "AQUATIC",
-  "temperament": "HOSTILE",
+  "temperament": "NEUTRAL",
   "width": 1.7,
   "height": 1.9,
   "maxHealth": 47.0,
@@ -20,6 +20,12 @@
     "KNOCKBACK"
   ],
   "abilities": [
+    {
+      "type": "lure_disguise",
+      "reveal_after_mount_ticks": 60,
+      "drag_speed": 1.3,
+      "water_search_radius": 16
+    },
     {
       "type": "water_affinity",
       "breathe_underwater": true,

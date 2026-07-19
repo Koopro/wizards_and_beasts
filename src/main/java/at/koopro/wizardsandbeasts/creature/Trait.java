@@ -22,6 +22,10 @@ public enum Trait {
     PETRIFY,
     /** Basilisk-style stare: petrifies nearby players, lethal to any meeting the creature's gaze. */
     DEATH_GAZE,
+    /** Upgrades DEATH_GAZE from a debuff to the full canon split: meeting the gaze kills outright, a glancing gaze petrifies. */
+    LETHAL_GAZE,
+    /** A crowing rooster nearby at dawn is instantly fatal (basilisk-only canon weakness). */
+    COCKCROW_WEAKNESS,
     /** Faster pursuit and stronger knockback when attacking (charger). */
     CHARGE,
     /** Extra knockback on melee. */

@@ -1,0 +1,8 @@
+{
+  "displayName": "Mandrake Restoration Draught",
+  "color": -8355840,
+  "flavorText": "Brewed from mature Mandrake root — restores a petrified victim to flesh.",
+  "effects": [
+    { "id": "wizards_and_beasts:mandrake_restoration", "duration": 1, "amplifier": 0 }
+  ]
+}

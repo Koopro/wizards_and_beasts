@@ -33,7 +33,7 @@ public sealed interface CreatureAbility permits
         SpellResist, ExplosiveHorn, DeathCry, Anchor,
         OccamyChoranaptyxis, FlameBurst, EmberTrail, DangerSense,
         Tint, Evasion, PackTactics, DamageReduction, SporeCloud, Frenzy, DiveBomb,
-        JarveyJinx, SphinxRiddle {
+        JarveyJinx, SphinxRiddle, LureDisguise, Duplication, BlockDecay {
 
     /** Dispatch codec keyed by the variant's {@link Type}, mirroring {@code SkillNodeEffect.CODEC}. */
     Codec<CreatureAbility> CODEC = Type.CODEC.dispatch(CreatureAbility::type, Type::codec);
@@ -103,7 +103,10 @@ public sealed interface CreatureAbility permits
         FRENZY("frenzy", Frenzy.CODEC),
         DIVE_BOMB("dive_bomb", DiveBomb.CODEC),
         JARVEY_JINX("jarvey_jinx", JarveyJinx.CODEC),
-        SPHINX_RIDDLE("sphinx_riddle", SphinxRiddle.CODEC);
+        SPHINX_RIDDLE("sphinx_riddle", SphinxRiddle.CODEC),
+        LURE_DISGUISE("lure_disguise", LureDisguise.CODEC),
+        DUPLICATION("duplication", Duplication.CODEC),
+        BLOCK_DECAY("block_decay", BlockDecay.CODEC);
 
         public static final Codec<Type> CODEC = StringRepresentable.fromValues(Type::values);
 

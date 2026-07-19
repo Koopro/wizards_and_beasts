@@ -1,0 +1,9 @@
+{
+  "ingredients": [
+    { "item": "wizards_and_beasts:mandrake", "count": 2 },
+    { "item": "minecraft:sugar", "count": 1 }
+  ],
+  "cauldronTier": "pewter",
+  "heatTimeTicks": 400,
+  "outputBrewId": "wizards_and_beasts:mandrake_restoration_draught"
+}

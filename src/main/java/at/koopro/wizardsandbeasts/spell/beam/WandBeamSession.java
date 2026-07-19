@@ -19,6 +19,8 @@ final class WandBeamSession {
     @Nullable Boolean lastLeviosaHadNoGravity;
     int leviosaMissTicks;
     float leviosaHoldDistance = 6.0f;
+    float leviosaLastCommandedSpeed;
+    int lastLeviosaSlamTick = -9999;
     int lastProficiencyHitTick;
     @Nullable UUID cachedTarget;
     @Nullable BlockPos aguamentiWaterAim;
@@ -34,6 +36,8 @@ final class WandBeamSession {
             lastLeviosaHadNoGravity = null;
             leviosaMissTicks = 0;
             leviosaHoldDistance = 6.0f;
+            leviosaLastCommandedSpeed = 0f;
+            lastLeviosaSlamTick = -9999;
             lastProficiencyHitTick = -9999;
             cachedTarget = null;
             aguamentiWaterAim = null;

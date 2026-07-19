@@ -19,7 +19,7 @@
     "bestiary.wizards_and_beasts.nundu.weakness.1",
     "bestiary.wizards_and_beasts.nundu.weakness.2"
   ],
-  "encounterTrigger": "MANUAL",
+  "encounterTrigger": "KILL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/nundu.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/nundu.png",
   "sortOrder": 57,

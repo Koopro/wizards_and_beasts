@@ -1,0 +1,9 @@
+{
+  "type": "wizards_and_beasts:wandmaking",
+  "wood_key": "wizards_and_beasts:hawthorn",
+  "core_key": "wizards_and_beasts:unicorn_hair",
+  "minimum_bench_tier": 2.3,
+  "result_length_min": 9.0,
+  "result_length_max": 12.0,
+  "result_integrity": 0.99
+}

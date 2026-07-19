@@ -4,6 +4,7 @@ import at.koopro.wizardsandbeasts.client.broom.BroomRenderer;
 import at.koopro.wizardsandbeasts.client.entity.DementorRenderer;
 import at.koopro.wizardsandbeasts.client.entity.DragonRenderer;
 import at.koopro.wizardsandbeasts.client.bestiary.niffler.NifflerPocketLayer;
+import at.koopro.wizardsandbeasts.client.petrify.PetrifyStoneLayer;
 import at.koopro.wizardsandbeasts.client.entity.ProtegoShieldRenderer;
 import at.koopro.wizardsandbeasts.client.form.FormMannequinRenderer;
 import at.koopro.wizardsandbeasts.client.spell.PatronusRenderer;
@@ -35,6 +36,8 @@ public class ClientSetup {
         event.registerEntityRenderer(ModEntities.AUGUREY.get(), GeoRendererHelper.simple("augurey"));
         event.registerEntityRenderer(ModEntities.MOONCALF.get(), GeoRendererHelper.simple("mooncalf"));
         event.registerEntityRenderer(ModEntities.STREELER.get(), GeoRendererHelper.simple("streeler"));
+        event.registerEntityRenderer(ModEntities.RUNESPOOR.get(), GeoRendererHelper.simple("runespoor"));
+        event.registerEntityRenderer(ModEntities.HIDEBEHIND.get(), GeoRendererHelper.simple("hidebehind"));
 
         // Generic data-driven creatures: one simple GeckoLib renderer per creature, keyed by id.
         // The ten dragon breeds get the breed-aware DragonRenderer (render-state scale + flame tint).
@@ -43,6 +46,10 @@ public class ClientSetup {
             var type = at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get(spec.id()).get();
             if (at.koopro.wizardsandbeasts.registry.ModCreatures.DRAGON_IDS.contains(spec.id())) {
                 event.registerEntityRenderer(type, DragonRenderer.provider(spec.id()));
+            } else if ("kelpie".equals(spec.id())) {
+                // LureDisguise: swaps model + texture between the tame-horse guise and the true form.
+                event.registerEntityRenderer(type,
+                        at.koopro.wizardsandbeasts.client.entity.DisguisableBeastRenderer.provider("kelpie", "kelpie_disguise"));
             } else {
                 // Scale-aware renderer (honours the synced render-scale; 1.0 = identical to simple).
                 event.registerEntityRenderer(type,
@@ -56,6 +63,7 @@ public class ClientSetup {
             AvatarRenderer<AbstractClientPlayer> renderer = event.getPlayerRenderer(skin);
             if (renderer != null) {
                 renderer.addLayer(new NifflerPocketLayer(renderer));
+                renderer.addLayer(new PetrifyStoneLayer(renderer));
             }
         }
     }

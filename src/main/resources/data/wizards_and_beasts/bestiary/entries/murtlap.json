@@ -19,7 +19,7 @@
     "bestiary.wizards_and_beasts.murtlap.weakness.1",
     "bestiary.wizards_and_beasts.murtlap.weakness.2"
   ],
-  "encounterTrigger": "MANUAL",
+  "encounterTrigger": "KILL",
   "entityType": "wizards_and_beasts:murtlap",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/murtlap.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/murtlap.png",

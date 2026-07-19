@@ -19,7 +19,7 @@
     "bestiary.wizards_and_beasts.fire_crab.weakness.1",
     "bestiary.wizards_and_beasts.fire_crab.weakness.2"
   ],
-  "encounterTrigger": "MANUAL",
+  "encounterTrigger": "KILL",
   "entityType": "wizards_and_beasts:fire_crab",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/fire_crab.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/fire_crab.png",

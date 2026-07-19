@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.item.consumable;
 
+import at.koopro.wizardsandbeasts.spell.petrify.PetrifyServerLogic;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -38,6 +40,9 @@ public class BezoarItem extends Item {
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
         if (!level.isClientSide() && entity instanceof Player player) {
             player.removeAllEffects();
+            if (level instanceof ServerLevel serverLevel) {
+                PetrifyServerLogic.partialCure(serverLevel, player);
+            }
             stack.consume(1, player);
             player.getCooldowns().addCooldown(stack, 200);
         }

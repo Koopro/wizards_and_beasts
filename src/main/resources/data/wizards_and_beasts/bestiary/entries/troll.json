@@ -19,7 +19,7 @@
     "bestiary.wizards_and_beasts.troll.weakness.1",
     "bestiary.wizards_and_beasts.troll.weakness.2"
   ],
-  "encounterTrigger": "MANUAL",
+  "encounterTrigger": "KILL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/troll.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/troll.png",
   "sortOrder": 22,

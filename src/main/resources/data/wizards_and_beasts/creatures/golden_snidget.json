@@ -1,0 +1,26 @@
+{
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
+  "id": "wizards_and_beasts:golden_snidget",
+  "bodyPlan": "AVIAN",
+  "locomotion": "FLYING",
+  "temperament": "PASSIVE",
+  "width": 0.35,
+  "height": 0.35,
+  "maxHealth": 4.0,
+  "movementSpeed": 0.35,
+  "flyingSpeed": 0.6,
+  "followRange": 16.0,
+  "model": "wizards_and_beasts:entity/golden_snidget",
+  "texture": "wizards_and_beasts:textures/entity/golden_snidget.png",
+  "animation": "wizards_and_beasts:geckolib/animations/entity/golden_snidget.animation.json",
+  "attackDamage": 0.0,
+  "traits": [ "FEARFUL" ],
+  "abilities": [
+    {
+      "type": "evasion",
+      "dodge_chance": 0.7,
+      "range": 6.0,
+      "cooldown_ticks": 20
+    }
+  ]
+}

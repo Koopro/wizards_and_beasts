@@ -1,0 +1,24 @@
+{
+  "id": "wizards_and_beasts:yeti",
+  "displayName": "bestiary.wizards_and_beasts.yeti.name",
+  "category": "LARGE_BEAST",
+  "mmRating": 4,
+  "habitat": "bestiary.wizards_and_beasts.yeti.habitat",
+  "size": "LARGE",
+  "shortLore": "bestiary.wizards_and_beasts.yeti.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.yeti.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.yeti.ability.1"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.yeti.threat.1"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.yeti.weakness.1"
+  ],
+  "encounterTrigger": "KILL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/yeti.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/yeti.png",
+  "sortOrder": 206,
+  "entityType": "wizards_and_beasts:yeti"
+}

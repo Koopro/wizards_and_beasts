@@ -66,5 +66,19 @@ public final class MobEffectFullscreenOverlays {
             int pulse = (int)(Math.sin(tick * 0.03) * 8 + 24);
             graphics.fill(0, 0, w, h, (pulse << 24) | 0xE0E0E0);
         }
+
+        var gazeLock = player.getEffect(ModEffects.BASILISK_GAZE_LOCK);
+        if (gazeLock != null) {
+            boolean meetsGaze = gazeLock.getAmplifier() >= 1;
+            float progress = 1.0f - Math.min(1.0f, Math.max(0.0f,
+                    gazeLock.getDuration() / (float) at.koopro.wizardsandbeasts.effect.BasiliskGazeLockEffect.WINDUP_TICKS));
+            int edge = (int) (60 + progress * 120);
+            int pulse = (int) (Math.sin(tick * 0.6) * 0x20 + 0x60 + progress * 0x60);
+            int color = meetsGaze ? ((pulse << 24) | 0x8B0000) : ((pulse << 24) | 0x707070);
+            graphics.fill(0, 0, w, edge, color);
+            graphics.fill(0, h - edge, w, h, color);
+            graphics.fill(0, edge, edge, h - edge, color);
+            graphics.fill(w - edge, edge, w, h - edge, color);
+        }
     }
 }

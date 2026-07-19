@@ -91,6 +91,8 @@ public class ModCreativeTabs {
                         output.accept(MiscItemRegistry.AUGUREY_SPAWN_EGG.get());
                         output.accept(MiscItemRegistry.MOONCALF_SPAWN_EGG.get());
                         output.accept(MiscItemRegistry.STREELER_SPAWN_EGG.get());
+                        output.accept(MiscItemRegistry.RUNESPOOR_SPAWN_EGG.get());
+                        output.accept(MiscItemRegistry.HIDEBEHIND_SPAWN_EGG.get());
 
                         // Wizarding World — food & drink
                         output.accept(ConsumableItemRegistry.BUTTERBEER.get());
@@ -109,6 +111,15 @@ public class ModCreativeTabs {
                         output.accept(ConsumableItemRegistry.DITTANY.get());
                         // Magizoology & materials
                         output.accept(ConsumableItemRegistry.OCCAMY_EGGSHELL.get());
+                        output.accept(ConsumableItemRegistry.HIDEBEHIND_SHADOW_ESSENCE.get());
+                        output.accept(ConsumableItemRegistry.HIDEBEHIND_CLAW.get());
+                        output.accept(ConsumableItemRegistry.GHOUL_SLIME.get());
+                        output.accept(ConsumableItemRegistry.GOLDEN_SNIDGET_FEATHER.get());
+                        output.accept(ConsumableItemRegistry.GRANIAN_HAIR.get());
+                        output.accept(ConsumableItemRegistry.HORNED_SERPENT_GEM.get());
+                        output.accept(ConsumableItemRegistry.PUKWUDGIE_VENOM_SAC.get());
+                        output.accept(ConsumableItemRegistry.YETI_FUR.get());
+                        output.accept(ConsumableItemRegistry.MATAGOT_ESSENCE.get());
                         output.accept(ConsumableItemRegistry.BEZOAR.get());
                         output.accept(ConsumableItemRegistry.DEMIGUISE_HAIR.get());
                         output.accept(ConsumableItemRegistry.MOONCALF_DUNG.get());

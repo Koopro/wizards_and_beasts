@@ -1,0 +1,26 @@
+{
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
+  "id": "wizards_and_beasts:horned_serpent",
+  "bodyPlan": "SERPENTINE",
+  "locomotion": "AQUATIC",
+  "temperament": "NEUTRAL",
+  "width": 1.5,
+  "height": 1.3,
+  "maxHealth": 55.0,
+  "movementSpeed": 0.25,
+  "flyingSpeed": 0.0,
+  "followRange": 16.0,
+  "model": "wizards_and_beasts:entity/horned_serpent",
+  "texture": "wizards_and_beasts:textures/entity/horned_serpent.png",
+  "animation": "wizards_and_beasts:geckolib/animations/entity/horned_serpent.animation.json",
+  "attackDamage": 6.0,
+  "traits": [],
+  "abilities": [
+    {
+      "type": "bioluminescence",
+      "particle": "glow",
+      "interval": 15,
+      "glow_self": false
+    }
+  ]
+}

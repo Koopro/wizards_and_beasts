@@ -1,0 +1,24 @@
+{
+  "id": "wizards_and_beasts:bundimun",
+  "displayName": "bestiary.wizards_and_beasts.bundimun.name",
+  "category": "SMALL_CREATURE",
+  "mmRating": 3,
+  "habitat": "bestiary.wizards_and_beasts.bundimun.habitat",
+  "size": "SMALL",
+  "shortLore": "bestiary.wizards_and_beasts.bundimun.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.bundimun.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.bundimun.ability.1"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.bundimun.threat.1"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.bundimun.weakness.1"
+  ],
+  "encounterTrigger": "PROXIMITY",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/bundimun.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/bundimun.png",
+  "sortOrder": 209,
+  "entityType": "wizards_and_beasts:bundimun"
+}

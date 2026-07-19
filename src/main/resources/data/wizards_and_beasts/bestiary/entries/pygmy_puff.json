@@ -19,7 +19,7 @@
     "bestiary.wizards_and_beasts.pygmy_puff.weakness.1",
     "bestiary.wizards_and_beasts.pygmy_puff.weakness.2"
   ],
-  "encounterTrigger": "MANUAL",
+  "encounterTrigger": "PROXIMITY",
   "entityType": "wizards_and_beasts:pygmy_puff",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/pygmy_puff.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/pygmy_puff.png",

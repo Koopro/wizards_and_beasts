@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.entity.spell;
 
 import at.koopro.wizardsandbeasts.Config;
+import at.koopro.wizardsandbeasts.creature.LethalGazeBossResistance;
 import at.koopro.wizardsandbeasts.spell.core.SpellIds;
 import at.koopro.wizardsandbeasts.spell.expelliarmus.ExpelliarmusDisarmHandler;
 import at.koopro.wizardsandbeasts.event.spell.SpellCombatControlHandler;
@@ -90,6 +91,11 @@ public class SpellProjectileEntity extends ThrowableProjectile {
         if (owner instanceof ServerPlayer player) {
             damage = cachedSpell.getDamageForCaster(player);
         }
+        // A lethal-gaze boss (the basilisk) resists the Killing Curse down to fixed damage rather
+        // than its default near-instant-kill damage — see LethalGazeBossResistance.
+        if (SpellIds.matches(cachedSpell.getId(), "avada_kedavra")) {
+            damage = LethalGazeBossResistance.resolveAvadaKedavraDamage(damage, LethalGazeBossResistance.isBossTarget(hit));
+        }
         if (damage > 0 && hit instanceof LivingEntity living) {
             living.hurt(level().damageSources().magic(), damage * scalingProfile.damageMult());
         }
@@ -98,15 +104,23 @@ public class SpellProjectileEntity extends ThrowableProjectile {
             cachedSpell.applyTargetEffects(living, scalingProfile.durationMult());
 
             // Data-driven effect components (Step 3): run the spell's authored effect list against the
-            // hit target. No-op for spells without an effects list (all Java spells today).
+            // hit target. No-op for spells without an effects list (all Java spells today). Stupefy
+            // only has a coin-flip chance to slow a lethal-gaze boss (the basilisk) rather than always
+            // landing — see LethalGazeBossResistance.
             if (owner instanceof ServerPlayer casterPlayer && level() instanceof ServerLevel effectLevel) {
-                SpellEffectRunner.run(cachedSpell, SpellEffectContext.ofTarget(casterPlayer, living, effectLevel)
-                        .withScaling(scalingProfile.damageMult(), scalingProfile.durationMult(),
-                                scalingProfile.controlMult()));
+                boolean allowEffect = !SpellIds.matches(cachedSpell.getId(), "stupefy")
+                        || LethalGazeBossResistance.allowsStupefyEffect(effectLevel.getRandom(), LethalGazeBossResistance.isBossTarget(living));
+                if (allowEffect) {
+                    SpellEffectRunner.run(cachedSpell, SpellEffectContext.ofTarget(casterPlayer, living, effectLevel)
+                            .withScaling(scalingProfile.damageMult(), scalingProfile.durationMult(),
+                                    scalingProfile.controlMult()));
+                }
             }
 
-            // Disarm (Expelliarmus)
-            if (props.disarms()) {
+            // Disarm (Expelliarmus) — already a no-op against the basilisk today (it's never equipped
+            // and expelliarmus.json sets no damage/knockback), but guarded explicitly so a future
+            // equipment change to beasts can't silently regress a lethal-gaze boss's canon immunity.
+            if (props.disarms() && !LethalGazeBossResistance.isBossTarget(living)) {
                 ServerLevel projectileLevel = (ServerLevel) level();
                 if (SpellIds.matches(cachedSpell.getId(), "expelliarmus")
                         && owner instanceof ServerPlayer attacker) {

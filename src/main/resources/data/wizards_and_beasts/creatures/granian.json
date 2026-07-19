@@ -1,0 +1,19 @@
+{
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
+  "id": "wizards_and_beasts:granian",
+  "bodyPlan": "WINGED_QUADRUPED",
+  "locomotion": "FLYING",
+  "temperament": "NEUTRAL",
+  "width": 1.7,
+  "height": 1.9,
+  "maxHealth": 40.0,
+  "movementSpeed": 0.3,
+  "flyingSpeed": 0.55,
+  "followRange": 18.0,
+  "model": "wizards_and_beasts:entity/granian",
+  "texture": "wizards_and_beasts:textures/entity/granian.png",
+  "animation": "wizards_and_beasts:geckolib/animations/entity/granian.animation.json",
+  "attackDamage": 0.0,
+  "traits": [],
+  "abilities": []
+}

@@ -1,0 +1,24 @@
+{
+  "id": "wizards_and_beasts:matagot",
+  "displayName": "bestiary.wizards_and_beasts.matagot.name",
+  "category": "FELINE",
+  "mmRating": 3,
+  "habitat": "bestiary.wizards_and_beasts.matagot.habitat",
+  "size": "SMALL",
+  "shortLore": "bestiary.wizards_and_beasts.matagot.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.matagot.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.matagot.ability.1"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.matagot.threat.1"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.matagot.weakness.1"
+  ],
+  "encounterTrigger": "PROXIMITY",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/matagot.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/matagot.png",
+  "sortOrder": 208,
+  "entityType": "wizards_and_beasts:matagot"
+}

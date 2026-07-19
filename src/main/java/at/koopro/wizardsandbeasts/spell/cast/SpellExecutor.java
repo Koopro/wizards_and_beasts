@@ -24,7 +24,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import java.util.List;
 import java.util.Optional;
@@ -33,16 +32,12 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import com.mojang.logging.LogUtils;
-import org.slf4j.Logger;
 
 /**
  * Default spell execution logic. Individual spells delegate here via {@link Spell#execute}.
  * Spells can override execute() entirely for custom behavior.
  */
 public final class SpellExecutor {
-
-    private static final Logger LOGGER = LogUtils.getLogger();
 
     private SpellExecutor() {}
 
@@ -64,17 +59,8 @@ public final class SpellExecutor {
         ItemStack wandStack = ctx.wandStack();
         WandStats wand = ctx.wandStats();
         if (ModuleManager.isEnabled(Module.WANDS) && wandStack.getItem() instanceof WandItem) {
-            Identifier spellKey;
-            try {
-                spellKey = Identifier.parse(spell.getId());
-            } catch (Exception ex) {
-                LOGGER.warn("[WizardsAndBeasts] Malformed spell id '{}' — using sanitized fallback key. Fix the spell registration.",
-                        spell.getId(), ex);
-                spellKey = Identifier.fromNamespaceAndPath(at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID,
-                        spell.getId().replace(":", "_").replace(".", "_"));
-            }
-            WandCorruptionSystem.onSpellCast(caster, wandStack, spellKey);
-            float corruptIntegrity = WandCorruptionSystem.getEffectivePowerMultiplier(wandStack, spellKey, level.registryAccess());
+            WandCorruptionSystem.onSpellCast(caster, wandStack, spell.getCategory());
+            float corruptIntegrity = WandCorruptionSystem.getEffectivePowerMultiplier(wandStack, spell.getCategory(), level.registryAccess());
             ctx.modifiers().multiplyDamage(corruptIntegrity, "wand_corruption_integrity");
             Optional<UUID> master = WandComponents.getMaster(wandStack);
             if (master.isPresent() && !master.get().equals(caster.getUUID())) {

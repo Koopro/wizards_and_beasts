@@ -97,6 +97,14 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
     private static final EntityDataAccessor<Integer> DATA_TINT =
             SynchedEntityData.defineId(GenericBeastEntity.class, EntityDataSerializers.INT);
 
+    /**
+     * Render-only disguise flag, synced to the client, for {@code LureDisguise}-style abilities (the
+     * Kelpie's tame-horse guise). Default {@code false} = true form. Also gates {@link #mobInteract} —
+     * while disguised and riderless, interacting mounts the player, matching a normal rideable mob.
+     */
+    private static final EntityDataAccessor<Boolean> DATA_DISGUISED =
+            SynchedEntityData.defineId(GenericBeastEntity.class, EntityDataSerializers.BOOLEAN);
+
     protected GenericBeastEntity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
         if (!level.isClientSide()) {
@@ -109,6 +117,7 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
         super.defineSynchedData(builder);
         builder.define(DATA_RENDER_SCALE, 1.0f);
         builder.define(DATA_TINT, 0xFFFFFFFF);
+        builder.define(DATA_DISGUISED, false);
     }
 
     /** Render-only model scale (1.0 = unscaled). Set server-side by size abilities, read on the client renderer. */
@@ -127,6 +136,24 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
 
     public void setTint(int argb) {
         this.entityData.set(DATA_TINT, argb);
+    }
+
+    /** True while a {@code LureDisguise} ability has this beast hiding as something harmless. */
+    public boolean isDisguised() {
+        return this.entityData.get(DATA_DISGUISED);
+    }
+
+    public void setDisguised(boolean disguised) {
+        this.entityData.set(DATA_DISGUISED, disguised);
+    }
+
+    @Override
+    protected net.minecraft.world.InteractionResult mobInteract(Player player, net.minecraft.world.InteractionHand hand) {
+        if (isDisguised() && getPassengers().isEmpty() && !level().isClientSide()) {
+            player.startRiding(this);
+            return net.minecraft.world.InteractionResult.SUCCESS;
+        }
+        return super.mobInteract(player, hand);
     }
 
     /** The creature id == this entity type's registry key (e.g. {@code wizards_and_beasts:unicorn}). */
@@ -159,7 +186,7 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
         return cachedTraits;
     }
 
-    protected boolean has(Trait trait) {
+    public boolean has(Trait trait) {
         return traits().contains(trait);
     }
 
@@ -267,6 +294,9 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
         }
         if (has(Trait.DEATH_GAZE)) {
             goalSelector.addGoal(3, new at.koopro.wizardsandbeasts.entity.creature.ai.DeathGazeGoal(this));
+        }
+        if (has(Trait.COCKCROW_WEAKNESS)) {
+            goalSelector.addGoal(3, new at.koopro.wizardsandbeasts.entity.creature.ai.RoosterCrowWeaknessGoal(this));
         }
         if (canMelee && temperament != Temperament.PASSIVE) {
             goalSelector.addGoal(4, new MeleeAttackGoal(this, charge ? 1.45 : 1.2, true));

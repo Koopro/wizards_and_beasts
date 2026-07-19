@@ -43,6 +43,7 @@ public final class ModCreatures {
             new Spec("antipodean_opaleye", Locomotion.FLYING, 2.7f, 2.9f),
             new Spec("ashwinder", Locomotion.GROUND, 0.65f, 0.75f),
             new Spec("basilisk", Locomotion.GROUND, 2.7f, 2.9f),
+            new Spec("toad", Locomotion.GROUND, 0.45f, 0.45f),
             new Spec("billywig", Locomotion.FLYING, 0.45f, 0.45f),
             new Spec("blast_ended_skrewt", Locomotion.GROUND, 1.7f, 1.9f),
             new Spec("boggart", Locomotion.GROUND, 0.95f, 1.25f),
@@ -80,7 +81,6 @@ public final class ModCreatures {
             new Spec("qilin", Locomotion.GROUND, 0.95f, 1.25f),
             new Spec("reem", Locomotion.GROUND, 2.7f, 2.9f),
             new Spec("romanian_longhorn", Locomotion.FLYING, 2.7f, 2.9f),
-            new Spec("runespoor", Locomotion.GROUND, 0.95f, 1.25f),
             new Spec("sphinx", Locomotion.GROUND, 1.7f, 1.9f),
             new Spec("swedish_short_snout", Locomotion.FLYING, 2.7f, 2.9f),
             new Spec("swooping_evil", Locomotion.FLYING, 0.95f, 1.25f),
@@ -123,7 +123,18 @@ public final class ModCreatures {
             new Spec("snallygaster", Locomotion.FLYING, 1.7f, 1.9f),
             new Spec("glumbumble", Locomotion.FLYING, 0.45f, 0.45f),
             new Spec("pogrebin", Locomotion.GROUND, 0.65f, 0.75f),
-            new Spec("quintaped", Locomotion.GROUND, 0.95f, 1.25f)
+            new Spec("quintaped", Locomotion.GROUND, 0.95f, 1.25f),
+            // --- Phase 3: lore cross-reference additions ---
+            new Spec("ghoul", Locomotion.GROUND, 0.7f, 1.9f),
+            new Spec("golden_snidget", Locomotion.FLYING, 0.35f, 0.35f),
+            new Spec("granian", Locomotion.FLYING, 1.7f, 1.9f),
+            new Spec("horned_serpent", Locomotion.AQUATIC, 1.5f, 1.3f),
+            new Spec("pukwudgie", Locomotion.GROUND, 0.5f, 1.0f),
+            new Spec("yeti", Locomotion.GROUND, 1.7f, 2.3f),
+            new Spec("rougarou", Locomotion.GROUND, 1.2f, 1.9f),
+            new Spec("matagot", Locomotion.GROUND, 0.6f, 0.7f),
+            new Spec("bundimun", Locomotion.GROUND, 0.5f, 0.4f),
+            new Spec("lobalug", Locomotion.AQUATIC, 0.7f, 0.7f)
     );
 
     /**

@@ -26,9 +26,12 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -41,7 +44,7 @@ import java.util.UUID;
 final class WandBeamSpellHandlers {
 
     static final int LEVIOSA_EFFECT_INTERVAL_TICKS = 1;
-    static final int LEVIOSA_TARGET_GRACE_MISS_TICKS = 4;
+    static final int LEVIOSA_TARGET_GRACE_MISS_TICKS = 7;
     static final int LEVIOSA_PARTICLE_COLOR = 0xFFB266FF;
     static final float LEVIOSA_MIN_DISTANCE = 2.0f;
     static final float LEVIOSA_MAX_DISTANCE = 24.0f;
@@ -50,6 +53,9 @@ final class WandBeamSpellHandlers {
     private static final double LEVIOSA_MAX_SPEED = 0.9;
     private static final double LEVIOSA_MAX_SPEED_CHARGED = 1.15;
     private static final double LEVIOSA_SPRING_STRENGTH_CHARGED = 0.62;
+    private static final double LEVIOSA_SLAM_MIN_SPEED = 0.55;
+    private static final float LEVIOSA_SLAM_MAX_DAMAGE = 8.0f;
+    private static final int LEVIOSA_SLAM_COOLDOWN_TICKS = 20;
 
     private WandBeamSpellHandlers() {}
 
@@ -266,22 +272,40 @@ final class WandBeamSpellHandlers {
     }
 
     @Nullable
-    static Entity findLeviosaTargetAlongCrosshair(ServerPlayer caster, float maxRange) {
+    static Entity findLeviosaTargetAlongCrosshair(ServerPlayer caster, float maxRange, boolean allowBlockLift) {
         if (maxRange <= 0f) return null;
         BeamRay ray = BeamRayResolver.resolve(caster, 1.0f, maxRange, BeamRayResolver.LEVIOSA_FILTER);
         if (ray.hit() instanceof net.minecraft.world.phys.EntityHitResult ehr) {
             Entity hit = ehr.getEntity();
             return isValidLeviosaTarget(caster, hit) ? hit : null;
         }
+        // Only convert a block into a liftable entity on a genuine re-acquire (no target already
+        // held) -- otherwise a periodic freshness rescan that briefly clips a wall behind an
+        // already-held mob would rip that wall block out and hijack the target away from it.
+        if (allowBlockLift && ray.hit() instanceof BlockHitResult bhr && bhr.getType() == HitResult.Type.BLOCK
+                && caster.level() instanceof ServerLevel level) {
+            BlockPos pos = bhr.getBlockPos();
+            BlockState state = level.getBlockState(pos);
+            if (isLiftableBlock(level, pos, state)) {
+                return FallingBlockEntity.fall(level, pos, state);
+            }
+        }
         return null;
     }
 
     static boolean isValidLeviosaTarget(ServerPlayer caster, Entity entity) {
         if (entity == null || entity == caster) return false;
-        if (entity instanceof ItemEntity) return true;
+        if (entity instanceof ItemEntity || entity instanceof FallingBlockEntity) return true;
         return entity.isPickable()
                 && (entity instanceof LivingEntity
                 || entity instanceof ArmorStand);
+    }
+
+    private static boolean isLiftableBlock(ServerLevel level, BlockPos pos, BlockState state) {
+        return !state.isAir()
+                && state.getFluidState().isEmpty()
+                && state.getDestroySpeed(level, pos) >= 0
+                && !state.hasBlockEntity();
     }
 
     static int getTargetScanIntervalTicks() {
@@ -301,9 +325,25 @@ final class WandBeamSpellHandlers {
     }
 
     private static void applyLeviosaEffects(ServerPlayer caster, Entity target, WandBeamSession s, float maxReach) {
+        if (!(caster.level() instanceof ServerLevel level)) return;
+
+        // Check fallout from the velocity we commanded last tick before we overwrite it below.
+        applyLeviosaSlamDamageIfColliding(level, target, s);
+
         float allowedMax = Mth.clamp(maxReach, LEVIOSA_MIN_DISTANCE, LEVIOSA_MAX_DISTANCE);
         s.leviosaHoldDistance = Mth.clamp(s.leviosaHoldDistance, LEVIOSA_MIN_DISTANCE, allowedMax);
-        Vec3 anchor = caster.getEyePosition().add(caster.getLookAngle().scale(s.leviosaHoldDistance));
+        Vec3 eye = caster.getEyePosition();
+        Vec3 look = caster.getLookAngle();
+        Vec3 wantedAnchor = eye.add(look.scale(s.leviosaHoldDistance));
+
+        // Don't command the target into solid geometry: clamp the anchor to just short of any
+        // block in the way, otherwise the spring re-pushes into the wall every tick (stutter loop).
+        BlockHitResult wallHit = level.clip(new ClipContext(eye, wantedAnchor,
+                ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, caster));
+        Vec3 anchor = wallHit.getType() == HitResult.Type.BLOCK
+                ? eye.add(look.scale(Math.max(LEVIOSA_MIN_DISTANCE, eye.distanceTo(wallHit.getLocation()) - 0.5)))
+                : wantedAnchor;
+
         Vec3 currentCenter = target.getBoundingBox().getCenter();
         Vec3 deltaToAnchor = anchor.subtract(currentCenter);
         double holdFactor = Mth.clamp(s.beamTicks / 80.0, 0.0, 1.0);
@@ -315,15 +355,39 @@ final class WandBeamSpellHandlers {
         }
         // Blend with current motion to reduce jitter near walls while still feeling responsive.
         Vec3 blendedVelocity = target.getDeltaMovement().scale(0.25).add(desiredVelocity.scale(0.75));
+
+        if (target instanceof Mob mob) {
+            // Stop the mob's own pathfinding/moveControl from fighting the spring pull.
+            mob.getNavigation().stop();
+            mob.setJumping(false);
+        }
+        if (target instanceof FallingBlockEntity fbe) {
+            // Vanilla auto-discards (drops as an item) after 600 airborne ticks regardless of
+            // position; a long Leviosa hold must not trip that safety timeout.
+            fbe.time = 0;
+        }
+
         target.setDeltaMovement(blendedVelocity);
         target.setNoGravity(true);
         target.setOnGround(false);
         target.hurtMarked = true;
         target.fallDistance = 0f;
-        if (caster.level() instanceof ServerLevel) {
-            SpellImpactBurstS2CPayload.sendToTracking(caster, target.getBoundingBox().getCenter(),
-                    SpellFamily.ARCANE, LEVIOSA_PARTICLE_COLOR, 6, 0.18f);
-        }
+        s.leviosaLastCommandedSpeed = (float) blendedVelocity.length();
+
+        SpellImpactBurstS2CPayload.sendToTracking(caster, target.getBoundingBox().getCenter(),
+                SpellFamily.ARCANE, LEVIOSA_PARTICLE_COLOR, 6, 0.18f);
+    }
+
+    /** Mirrors {@code BroomImpacts.calculateImpactSeverity}: speed ratio against a wall/ground hit becomes damage. */
+    private static void applyLeviosaSlamDamageIfColliding(ServerLevel level, Entity target, WandBeamSession s) {
+        if (!(target instanceof LivingEntity living)) return;
+        if (!(target.horizontalCollision || target.verticalCollision)) return;
+        if (s.leviosaLastCommandedSpeed < LEVIOSA_SLAM_MIN_SPEED) return;
+        if (s.beamTicks - s.lastLeviosaSlamTick < LEVIOSA_SLAM_COOLDOWN_TICKS) return;
+
+        s.lastLeviosaSlamTick = s.beamTicks;
+        float severity = Mth.clamp((float) (s.leviosaLastCommandedSpeed / LEVIOSA_MAX_SPEED_CHARGED), 0f, 1f);
+        living.hurtServer(level, level.damageSources().flyIntoWall(), severity * LEVIOSA_SLAM_MAX_DAMAGE);
     }
 
     static void clearLeviosaEffects(Entity target, @Nullable Boolean hadNoGravityBeforeChannel) {

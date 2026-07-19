@@ -6,6 +6,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
@@ -51,7 +52,7 @@ public final class BeamRayResolver {
     /** Wider predicate that also picks up armor stands and items, mirroring {@code findLeviosaTargetAlongCrosshair}. */
     public static final Predicate<Entity> LEVIOSA_FILTER = e -> {
         if (e == null) return false;
-        if (e instanceof ItemEntity) return true;
+        if (e instanceof ItemEntity || e instanceof FallingBlockEntity) return true;
         if (!e.isPickable() || e.isSpectator()) return false;
         return e instanceof LivingEntity || e instanceof ArmorStand;
     };

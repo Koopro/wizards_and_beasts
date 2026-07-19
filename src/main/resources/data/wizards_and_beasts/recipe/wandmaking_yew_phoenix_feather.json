@@ -1,0 +1,9 @@
+{
+  "type": "wizards_and_beasts:wandmaking",
+  "wood_key": "wizards_and_beasts:yew",
+  "core_key": "wizards_and_beasts:phoenix_feather",
+  "minimum_bench_tier": 3.7,
+  "result_length_min": 10.0,
+  "result_length_max": 13.5,
+  "result_integrity": 0.98
+}

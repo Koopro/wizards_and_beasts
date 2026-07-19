@@ -1,0 +1,31 @@
+{
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
+  "id": "wizards_and_beasts:yeti",
+  "bodyPlan": "LARGE_HUMANOID",
+  "locomotion": "GROUND",
+  "temperament": "HOSTILE",
+  "width": 1.7,
+  "height": 2.3,
+  "maxHealth": 70.0,
+  "movementSpeed": 0.25,
+  "flyingSpeed": 0.0,
+  "followRange": 20.0,
+  "model": "wizards_and_beasts:entity/yeti",
+  "texture": "wizards_and_beasts:textures/entity/yeti.png",
+  "animation": "wizards_and_beasts:geckolib/animations/entity/yeti.animation.json",
+  "attackDamage": 8.0,
+  "traits": [ "KNOCKBACK" ],
+  "abilities": [
+    {
+      "type": "spore_cloud",
+      "interval": 80,
+      "radius": 5.0,
+      "effects": [ { "effect": "minecraft:slowness", "amplifier": 2, "duration_ticks": 100 } ],
+      "particle": "smoke"
+    },
+    {
+      "type": "camouflage",
+      "reveal_ticks": 80
+    }
+  ]
+}

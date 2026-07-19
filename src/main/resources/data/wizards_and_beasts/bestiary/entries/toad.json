@@ -1,0 +1,23 @@
+{
+  "id": "wizards_and_beasts:toad",
+  "displayName": "bestiary.wizards_and_beasts.toad.name",
+  "category": "SMALL_CREATURE",
+  "mmRating": 0,
+  "habitat": "bestiary.wizards_and_beasts.toad.habitat",
+  "size": "TINY",
+  "shortLore": "bestiary.wizards_and_beasts.toad.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.toad.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.toad.ability.1"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.toad.threat.1"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.toad.weakness.1"
+  ],
+  "encounterTrigger": "PROXIMITY",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/toad.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/toad.png",
+  "sortOrder": 107
+}

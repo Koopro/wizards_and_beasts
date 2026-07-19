@@ -19,7 +19,7 @@
     "bestiary.wizards_and_beasts.ashwinder.weakness.1",
     "bestiary.wizards_and_beasts.ashwinder.weakness.2"
   ],
-  "encounterTrigger": "MANUAL",
+  "encounterTrigger": "KILL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/ashwinder.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/ashwinder.png",
   "sortOrder": 43,

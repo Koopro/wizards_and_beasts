@@ -1,0 +1,24 @@
+{
+  "id": "wizards_and_beasts:hidebehind",
+  "displayName": "bestiary.wizards_and_beasts.hidebehind.name",
+  "category": "MAGICAL_CREATURE",
+  "mmRating": 4,
+  "habitat": "bestiary.wizards_and_beasts.hidebehind.habitat",
+  "size": "LARGE",
+  "shortLore": "bestiary.wizards_and_beasts.hidebehind.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.hidebehind.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.hidebehind.ability.1"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.hidebehind.threat.1"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.hidebehind.weakness.1"
+  ],
+  "encounterTrigger": "KILL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/hidebehind.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/hidebehind.png",
+  "sortOrder": 211,
+  "entityType": "wizards_and_beasts:hidebehind"
+}

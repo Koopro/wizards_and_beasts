@@ -1,0 +1,24 @@
+{
+  "id": "wizards_and_beasts:granian",
+  "displayName": "bestiary.wizards_and_beasts.granian.name",
+  "category": "WINGED_BEAST",
+  "mmRating": 4,
+  "habitat": "bestiary.wizards_and_beasts.granian.habitat",
+  "size": "LARGE",
+  "shortLore": "bestiary.wizards_and_beasts.granian.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.granian.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.granian.ability.1"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.granian.threat.1"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.granian.weakness.1"
+  ],
+  "encounterTrigger": "PROXIMITY",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/granian.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/granian.png",
+  "sortOrder": 203,
+  "entityType": "wizards_and_beasts:granian"
+}

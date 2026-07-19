@@ -169,6 +169,10 @@ public class ModLanguageProvider extends LanguageProvider {
         for (var spec : at.koopro.wizardsandbeasts.registry.ModCreatures.MANIFEST) {
             add("entity.wizards_and_beasts." + spec.id(), titleCase(spec.id()));
         }
+        // Bespoke (not manifest-driven): three-headed multi-part entity, see RunespoorEntity.
+        add("entity.wizards_and_beasts.runespoor", "Runespoor");
+        // Bespoke (not manifest-driven): per-viewer facing-based visibility, see HidebehindEntity.
+        add("entity.wizards_and_beasts.hidebehind", "Hidebehind");
 
         // Rowan
         add("block.wizards_and_beasts.rowan_log", "Rowan Log");
@@ -225,6 +229,24 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.wizards_and_beasts.dittany.desc", "Healing herb used in restorative remedies.");
         add("item.wizards_and_beasts.occamy_eggshell", "Occamy Eggshell");
         add("item.wizards_and_beasts.occamy_eggshell.desc", "Rare alchemical material from magical creatures.");
+        add("item.wizards_and_beasts.hidebehind_shadow_essence", "Hidebehind Shadow Essence");
+        add("item.wizards_and_beasts.hidebehind_shadow_essence.desc", "A wisp of the creature's own concealment.");
+        add("item.wizards_and_beasts.hidebehind_claw", "Hidebehind Claw");
+        add("item.wizards_and_beasts.hidebehind_claw.desc", "Curved and vicious, built for a strike from behind.");
+        add("item.wizards_and_beasts.ghoul_slime", "Ghoul Slime");
+        add("item.wizards_and_beasts.ghoul_slime.desc", "Faintly damp residue from an attic-dwelling ghoul.");
+        add("item.wizards_and_beasts.golden_snidget_feather", "Golden Snidget Feather");
+        add("item.wizards_and_beasts.golden_snidget_feather.desc", "From a near-extinct, exquisitely fast bird.");
+        add("item.wizards_and_beasts.granian_hair", "Granian Hair");
+        add("item.wizards_and_beasts.granian_hair.desc", "Coarse hair from the fastest winged horse breed.");
+        add("item.wizards_and_beasts.horned_serpent_gem", "Horned Serpent Gem");
+        add("item.wizards_and_beasts.horned_serpent_gem.desc", "A softly glowing gem, once set in a serpent's brow.");
+        add("item.wizards_and_beasts.pukwudgie_venom_sac", "Pukwudgie Venom Sac");
+        add("item.wizards_and_beasts.pukwudgie_venom_sac.desc", "Potent poison, harvested with great care.");
+        add("item.wizards_and_beasts.yeti_fur", "Yeti Fur");
+        add("item.wizards_and_beasts.yeti_fur.desc", "Thick, frost-white fur from the Himalayan Yeti.");
+        add("item.wizards_and_beasts.matagot_essence", "Matagot Essence");
+        add("item.wizards_and_beasts.matagot_essence.desc", "A shimmering trace left behind by a splitting Matagot.");
         add("item.wizards_and_beasts.bezoar", "Bezoar");
         add("item.wizards_and_beasts.bezoar.desc", "A powerful antidote against many poisons.");
         add("item.wizards_and_beasts.demiguise_hair", "Demiguise Hair");

@@ -102,8 +102,10 @@ public final class BestiaryDiscoveryHandler {
     public static void onDrops(LivingDropsEvent event) {
         if (!ModuleManager.isEnabled(Module.BESTIARY)) return;
         if (!(event.getSource().getEntity() instanceof Player player)) return;
+        Identifier droppedType = event.getEntity().getType().builtInRegistryHolder().key().identifier();
         for (BestiaryEntry entry : BestiaryEntryRegistry.getAll()) {
-            if (entry.encounterTrigger() == EncounterTrigger.LOOT) {
+            if (entry.encounterTrigger() != EncounterTrigger.LOOT) continue;
+            if (entry.entityType().isPresent() && entry.entityType().get().equals(droppedType)) {
                 BestiaryDataHelper.setTier(player, entry.id(), DiscoveryTier.ENCOUNTERED);
             }
         }

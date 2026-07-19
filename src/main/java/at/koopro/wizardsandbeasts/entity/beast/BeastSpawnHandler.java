@@ -29,9 +29,23 @@ public final class BeastSpawnHandler {
         daySpawn(event, ModEntities.AUGUREY);
         daySpawn(event, ModEntities.PHOENIX);
         daySpawn(event, ModEntities.STREELER);
+        daySpawn(event, ModEntities.RUNESPOOR);
         // Nocturnal / dim dwellers.
         nightSpawn(event, ModEntities.MOONCALF);
         nightSpawn(event, ModEntities.THESTRAL);
+        nightSpawn(event, ModEntities.HIDEBEHIND);
+
+        // Phase 3 additions (generic CreatureDefinition pipeline).
+        daySpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("golden_snidget"));
+        daySpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("granian"));
+        daySpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("horned_serpent"));
+        daySpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("yeti"));
+        daySpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("lobalug"));
+        nightSpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("ghoul"));
+        nightSpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("pukwudgie"));
+        nightSpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("rougarou"));
+        nightSpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("matagot"));
+        nightSpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("bundimun"));
     }
 
     private static void daySpawn(RegisterSpawnPlacementsEvent event,

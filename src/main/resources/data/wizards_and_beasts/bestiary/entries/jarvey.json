@@ -19,7 +19,7 @@
     "bestiary.wizards_and_beasts.jarvey.weakness.1",
     "bestiary.wizards_and_beasts.jarvey.weakness.2"
   ],
-  "encounterTrigger": "MANUAL",
+  "encounterTrigger": "KILL",
   "entityType": "wizards_and_beasts:jarvey",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/jarvey.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/jarvey.png",

@@ -19,7 +19,7 @@
     "bestiary.wizards_and_beasts.chimaera.weakness.1",
     "bestiary.wizards_and_beasts.chimaera.weakness.2"
   ],
-  "encounterTrigger": "MANUAL",
+  "encounterTrigger": "KILL",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/chimaera.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/chimaera.png",
   "sortOrder": 25,

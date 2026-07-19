@@ -33,6 +33,11 @@ public class ScaledBeastRenderer<R extends EntityRenderState & GeoRenderState>
                 Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, modelName)));
     }
 
+    /** For subclasses (e.g. {@code DisguisableBeastRenderer}) that need a custom model, not the default one built from a name. */
+    protected ScaledBeastRenderer(EntityRendererProvider.Context context, DefaultedEntityGeoModel<GenericBeastEntity> model) {
+        super(context, model);
+    }
+
     @Override
     public void addRenderData(@NonNull GenericBeastEntity beast, Void unused,
                              @NonNull R renderState, float partialTick) {

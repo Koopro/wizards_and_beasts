@@ -15,6 +15,8 @@ public final class ModEffects {
             MOB_EFFECTS.register("stupefy", StupefyEffect::new);
     public static final DeferredHolder<MobEffect, PetrificusTotalusEffect> PETRIFICUS_TOTALUS =
             MOB_EFFECTS.register("petrificus_totalus", PetrificusTotalusEffect::new);
+    public static final DeferredHolder<MobEffect, MandrakeRestorationEffect> MANDRAKE_RESTORATION =
+            MOB_EFFECTS.register("mandrake_restoration", MandrakeRestorationEffect::new);
     public static final DeferredHolder<MobEffect, ImpedimentaEffect> IMPEDIMENTA =
             MOB_EFFECTS.register("impedimenta", ImpedimentaEffect::new);
     public static final DeferredHolder<MobEffect, TarantallegraEffect> TARANTALLEGRA =
@@ -62,6 +64,9 @@ public final class ModEffects {
 
     public static final DeferredHolder<MobEffect, SoulDrainedEffect> SOUL_DRAINED =
             MOB_EFFECTS.register("soul_drained", SoulDrainedEffect::new);
+
+    public static final DeferredHolder<MobEffect, BasiliskGazeLockEffect> BASILISK_GAZE_LOCK =
+            MOB_EFFECTS.register("basilisk_gaze_lock", BasiliskGazeLockEffect::new);
 
     private ModEffects() {
     }

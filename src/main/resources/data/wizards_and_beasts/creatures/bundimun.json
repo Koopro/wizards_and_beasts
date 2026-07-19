@@ -1,0 +1,26 @@
+{
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
+  "id": "wizards_and_beasts:bundimun",
+  "bodyPlan": "BLOB_SPHERE",
+  "locomotion": "GROUND",
+  "temperament": "PASSIVE",
+  "width": 0.5,
+  "height": 0.4,
+  "maxHealth": 12.0,
+  "movementSpeed": 0.1,
+  "flyingSpeed": 0.0,
+  "followRange": 8.0,
+  "model": "wizards_and_beasts:entity/bundimun",
+  "texture": "wizards_and_beasts:textures/entity/bundimun.png",
+  "animation": "wizards_and_beasts:geckolib/animations/entity/bundimun.animation.json",
+  "attackDamage": 0.0,
+  "traits": [ "FEARFUL" ],
+  "abilities": [
+    {
+      "type": "block_decay",
+      "interval": 120,
+      "radius": 3,
+      "chance": 0.12
+    }
+  ]
+}

@@ -19,7 +19,7 @@
     "bestiary.wizards_and_beasts.mackled_malaclaw.weakness.1",
     "bestiary.wizards_and_beasts.mackled_malaclaw.weakness.2"
   ],
-  "encounterTrigger": "MANUAL",
+  "encounterTrigger": "KILL",
   "entityType": "wizards_and_beasts:mackled_malaclaw",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/mackled_malaclaw.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/mackled_malaclaw.png",

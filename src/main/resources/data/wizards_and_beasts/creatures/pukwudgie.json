@@ -1,0 +1,41 @@
+{
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
+  "id": "wizards_and_beasts:pukwudgie",
+  "bodyPlan": "BIPED_HUMANOID",
+  "locomotion": "GROUND",
+  "temperament": "HOSTILE",
+  "width": 0.5,
+  "height": 1.0,
+  "maxHealth": 14.0,
+  "movementSpeed": 0.28,
+  "flyingSpeed": 0.0,
+  "followRange": 14.0,
+  "model": "wizards_and_beasts:entity/pukwudgie",
+  "texture": "wizards_and_beasts:textures/entity/pukwudgie.png",
+  "animation": "wizards_and_beasts:geckolib/animations/entity/pukwudgie.animation.json",
+  "attackDamage": 3.0,
+  "traits": [],
+  "abilities": [
+    {
+      "type": "blink_away",
+      "trigger_health_fraction": 1.0,
+      "range": 6.0,
+      "cooldown_ticks": 80
+    },
+    {
+      "type": "heal_aura",
+      "heal_per_second": 1.0,
+      "radius": 5.0,
+      "heal_allies": true,
+      "cleanse_self": false
+    },
+    {
+      "type": "ranged_hex",
+      "range": 10.0,
+      "damage": 3.0,
+      "effect": { "effect": "minecraft:poison", "amplifier": 0, "duration_ticks": 100 },
+      "cooldown_ticks": 70,
+      "particle": "witch"
+    }
+  ]
+}

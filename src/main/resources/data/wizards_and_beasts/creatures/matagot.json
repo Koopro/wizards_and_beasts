@@ -1,0 +1,32 @@
+{
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
+  "id": "wizards_and_beasts:matagot",
+  "bodyPlan": "QUADRUPED",
+  "locomotion": "GROUND",
+  "temperament": "NEUTRAL",
+  "width": 0.6,
+  "height": 0.7,
+  "maxHealth": 20.0,
+  "movementSpeed": 0.3,
+  "flyingSpeed": 0.0,
+  "followRange": 14.0,
+  "model": "wizards_and_beasts:entity/matagot",
+  "texture": "wizards_and_beasts:textures/entity/matagot.png",
+  "animation": "wizards_and_beasts:geckolib/animations/entity/matagot.animation.json",
+  "attackDamage": 4.0,
+  "traits": [],
+  "abilities": [
+    {
+      "type": "damage_reduction",
+      "amplifier": 1
+    },
+    {
+      "type": "duplication",
+      "chance": 0.4,
+      "min_clones": 1,
+      "max_clones": 2,
+      "clone_health_fraction": 0.5,
+      "reentry_guard_ticks": 200
+    }
+  ]
+}

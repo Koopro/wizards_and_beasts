@@ -1,0 +1,19 @@
+{
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
+  "id": "wizards_and_beasts:ghoul",
+  "bodyPlan": "BIPED_HUMANOID",
+  "locomotion": "GROUND",
+  "temperament": "NEUTRAL",
+  "width": 0.7,
+  "height": 1.9,
+  "maxHealth": 16.0,
+  "movementSpeed": 0.18,
+  "flyingSpeed": 0.0,
+  "followRange": 12.0,
+  "model": "wizards_and_beasts:entity/ghoul",
+  "texture": "wizards_and_beasts:textures/entity/ghoul.png",
+  "animation": "wizards_and_beasts:geckolib/animations/entity/ghoul.animation.json",
+  "attackDamage": 2.0,
+  "traits": [ "FEARFUL" ],
+  "abilities": []
+}

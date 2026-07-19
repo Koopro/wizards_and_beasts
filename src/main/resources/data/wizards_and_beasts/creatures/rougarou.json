@@ -1,0 +1,29 @@
+{
+  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
+  "id": "wizards_and_beasts:rougarou",
+  "bodyPlan": "BIPED_HUMANOID",
+  "locomotion": "GROUND",
+  "temperament": "HOSTILE",
+  "width": 1.2,
+  "height": 1.9,
+  "maxHealth": 45.0,
+  "movementSpeed": 0.32,
+  "flyingSpeed": 0.0,
+  "followRange": 18.0,
+  "model": "wizards_and_beasts:entity/rougarou",
+  "texture": "wizards_and_beasts:textures/entity/rougarou.png",
+  "animation": "wizards_and_beasts:geckolib/animations/entity/rougarou.animation.json",
+  "attackDamage": 7.0,
+  "traits": [ "PACK" ],
+  "abilities": [
+    {
+      "type": "status_on_hit",
+      "effects": [ { "effect": "minecraft:nausea", "amplifier": 0, "duration_ticks": 100 } ],
+      "chance": 0.1
+    },
+    {
+      "type": "camouflage",
+      "reveal_ticks": 60
+    }
+  ]
+}

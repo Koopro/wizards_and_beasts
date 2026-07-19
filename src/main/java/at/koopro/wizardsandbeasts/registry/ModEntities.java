@@ -5,8 +5,10 @@ import at.koopro.wizardsandbeasts.entity.azkaban.DementorEntity;
 import at.koopro.wizardsandbeasts.entity.beast.AugureyEntity;
 import at.koopro.wizardsandbeasts.entity.beast.BowtruckleEntity;
 import at.koopro.wizardsandbeasts.entity.beast.CornishPixieEntity;
+import at.koopro.wizardsandbeasts.entity.beast.HidebehindEntity;
 import at.koopro.wizardsandbeasts.entity.beast.MooncalfEntity;
 import at.koopro.wizardsandbeasts.entity.beast.PhoenixEntity;
+import at.koopro.wizardsandbeasts.entity.beast.RunespoorEntity;
 import at.koopro.wizardsandbeasts.entity.beast.StreelerEntity;
 import at.koopro.wizardsandbeasts.entity.beast.ThestralEntity;
 import at.koopro.wizardsandbeasts.entity.broom.BroomEntity;
@@ -82,6 +84,16 @@ public class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<ThestralEntity>> THESTRAL =
             EntityHelper.register(ENTITY_TYPES, "thestral", ThestralEntity::new, MobCategory.CREATURE, 1.4f, 1.8f);
     static { EntityAttributeBindings.queue(THESTRAL, ThestralEntity::createAttributes); }
+
+    /** Bespoke — not part of the generic {@code CreatureDefinition} pipeline; see {@link RunespoorEntity}. */
+    public static final DeferredHolder<EntityType<?>, EntityType<RunespoorEntity>> RUNESPOOR =
+            EntityHelper.register(ENTITY_TYPES, "runespoor", RunespoorEntity::new, MobCategory.CREATURE, 0.95f, 1.25f);
+    static { EntityAttributeBindings.queue(RUNESPOOR, RunespoorEntity::createAttributes); }
+
+    /** Bespoke — not part of the generic {@code CreatureDefinition} pipeline; see {@link HidebehindEntity}. */
+    public static final DeferredHolder<EntityType<?>, EntityType<HidebehindEntity>> HIDEBEHIND =
+            EntityHelper.register(ENTITY_TYPES, "hidebehind", HidebehindEntity::new, MobCategory.CREATURE, 0.9f, 1.9f);
+    static { EntityAttributeBindings.queue(HIDEBEHIND, HidebehindEntity::createAttributes); }
 
     public static final DeferredHolder<EntityType<?>, EntityType<PhoenixEntity>> PHOENIX =
             EntityHelper.register(ENTITY_TYPES, "phoenix", PhoenixEntity::new, MobCategory.CREATURE, 0.7f, 1.0f);

@@ -1,0 +1,9 @@
+{
+  "type": "wizards_and_beasts:wandmaking",
+  "wood_key": "wizards_and_beasts:elder",
+  "core_key": "wizards_and_beasts:phoenix_feather",
+  "minimum_bench_tier": 7.2,
+  "result_length_min": 13.5,
+  "result_length_max": 14.5,
+  "result_integrity": 0.93
+}

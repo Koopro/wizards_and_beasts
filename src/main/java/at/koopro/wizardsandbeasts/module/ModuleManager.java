@@ -31,15 +31,19 @@ public final class ModuleManager {
         STATES.put(Module.POCKET_DIMENSIONS, State.ENABLED);
         STATES.put(Module.OWLS, State.PREVIEW);
         // Azkaban worldgen (crag + NBT-template fortress) is a Beta v0.3 feature.
-        // PREVIEW keeps it generating + flagged at alpha; set DISABLED to stop
-        // generation entirely (registration of type/biome/structure is unaffected).
-        STATES.put(Module.AZKABAN, State.PREVIEW);
+        // DISABLED until the real fortress NBT + Dementor spawn table + loot land: the
+        // shipped template is a near-empty 225-byte placeholder with no reachable content
+        // (see ALPHA_IMPROVEMENT_AUDIT.md §7.1) — set PREVIEW/ENABLED once that's in.
+        STATES.put(Module.AZKABAN, State.DISABLED);
         STATES.put(Module.FLOO_NETWORK, State.DISABLED);
         STATES.put(Module.CHARACTER_SHEET, State.ENABLED);
         STATES.put(Module.PLAYER_STATS, State.PREVIEW);
         // Location decorative blocks ship craftable by default; set DISABLED to hide their recipes.
         STATES.put(Module.STRUCTURES, State.ENABLED);
         STATES.put(Module.HANDBOOK, State.ENABLED);
+        // Chamber of Secrets worldgen: DISABLED until the real chamber NBT lands (currently a
+        // near-empty placeholder template, same caution as Module.AZKABAN above).
+        STATES.put(Module.CHAMBER_OF_SECRETS, State.DISABLED);
     }
 
     private ModuleManager() {

@@ -1,0 +1,24 @@
+{
+  "id": "wizards_and_beasts:lobalug",
+  "displayName": "bestiary.wizards_and_beasts.lobalug.name",
+  "category": "AQUATIC",
+  "mmRating": 3,
+  "habitat": "bestiary.wizards_and_beasts.lobalug.habitat",
+  "size": "SMALL",
+  "shortLore": "bestiary.wizards_and_beasts.lobalug.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.lobalug.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.lobalug.ability.1"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.lobalug.threat.1"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.lobalug.weakness.1"
+  ],
+  "encounterTrigger": "PROXIMITY",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/lobalug.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/lobalug.png",
+  "sortOrder": 210,
+  "entityType": "wizards_and_beasts:lobalug"
+}

@@ -1,0 +1,24 @@
+{
+  "id": "wizards_and_beasts:horned_serpent",
+  "displayName": "bestiary.wizards_and_beasts.horned_serpent.name",
+  "category": "SERPENTINE",
+  "mmRating": 4,
+  "habitat": "bestiary.wizards_and_beasts.horned_serpent.habitat",
+  "size": "LARGE",
+  "shortLore": "bestiary.wizards_and_beasts.horned_serpent.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.horned_serpent.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.horned_serpent.ability.1"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.horned_serpent.threat.1"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.horned_serpent.weakness.1"
+  ],
+  "encounterTrigger": "KILL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/horned_serpent.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/horned_serpent.png",
+  "sortOrder": 204,
+  "entityType": "wizards_and_beasts:horned_serpent"
+}

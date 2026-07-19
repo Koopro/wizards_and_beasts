@@ -1,0 +1,24 @@
+{
+  "id": "wizards_and_beasts:ghoul",
+  "displayName": "bestiary.wizards_and_beasts.ghoul.name",
+  "category": "SMALL_CREATURE",
+  "mmRating": 2,
+  "habitat": "bestiary.wizards_and_beasts.ghoul.habitat",
+  "size": "SMALL",
+  "shortLore": "bestiary.wizards_and_beasts.ghoul.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.ghoul.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.ghoul.ability.1"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.ghoul.threat.1"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.ghoul.weakness.1"
+  ],
+  "encounterTrigger": "PROXIMITY",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/ghoul.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/ghoul.png",
+  "sortOrder": 201,
+  "entityType": "wizards_and_beasts:ghoul"
+}

@@ -1,0 +1,25 @@
+{
+  "id": "wizards_and_beasts:pukwudgie",
+  "displayName": "bestiary.wizards_and_beasts.pukwudgie.name",
+  "category": "SMALL_CREATURE",
+  "mmRating": 3,
+  "habitat": "bestiary.wizards_and_beasts.pukwudgie.habitat",
+  "size": "SMALL",
+  "shortLore": "bestiary.wizards_and_beasts.pukwudgie.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.pukwudgie.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.pukwudgie.ability.1",
+    "bestiary.wizards_and_beasts.pukwudgie.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.pukwudgie.threat.1"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.pukwudgie.weakness.1"
+  ],
+  "encounterTrigger": "KILL",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/pukwudgie.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/pukwudgie.png",
+  "sortOrder": 205,
+  "entityType": "wizards_and_beasts:pukwudgie"
+}

@@ -19,7 +19,7 @@
     "bestiary.wizards_and_beasts.phoenix.weakness.1",
     "bestiary.wizards_and_beasts.phoenix.weakness.2"
   ],
-  "encounterTrigger": "MANUAL",
+  "encounterTrigger": "PROXIMITY",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/phoenix.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/phoenix.png",
   "sortOrder": 26,

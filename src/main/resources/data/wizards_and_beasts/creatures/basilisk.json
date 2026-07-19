@@ -17,7 +17,9 @@
   "traits": [
     "POISON_ATTACK",
     "PETRIFY",
-    "DEATH_GAZE"
+    "DEATH_GAZE",
+    "LETHAL_GAZE",
+    "COCKCROW_WEAKNESS"
   ],
   "abilities": [
     {

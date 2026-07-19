@@ -19,7 +19,7 @@
     "bestiary.wizards_and_beasts.glumbumble.weakness.1",
     "bestiary.wizards_and_beasts.glumbumble.weakness.2"
   ],
-  "encounterTrigger": "MANUAL",
+  "encounterTrigger": "PROXIMITY",
   "entityType": "wizards_and_beasts:glumbumble",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/glumbumble.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/glumbumble.png",

@@ -1,0 +1,9 @@
+{
+  "type": "wizards_and_beasts:wandmaking",
+  "wood_key": "wizards_and_beasts:blackthorn",
+  "core_key": "wizards_and_beasts:dragon_heartstring",
+  "minimum_bench_tier": 5.2,
+  "result_length_min": 11.5,
+  "result_length_max": 14.8,
+  "result_integrity": 0.93
+}

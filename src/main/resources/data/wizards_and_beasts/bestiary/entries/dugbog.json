@@ -19,7 +19,7 @@
     "bestiary.wizards_and_beasts.dugbog.weakness.1",
     "bestiary.wizards_and_beasts.dugbog.weakness.2"
   ],
-  "encounterTrigger": "MANUAL",
+  "encounterTrigger": "KILL",
   "entityType": "wizards_and_beasts:dugbog",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/dugbog.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/dugbog.png",

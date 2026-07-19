@@ -19,7 +19,7 @@
     "bestiary.wizards_and_beasts.griffin.weakness.1",
     "bestiary.wizards_and_beasts.griffin.weakness.2"
   ],
-  "encounterTrigger": "MANUAL",
+  "encounterTrigger": "KILL",
   "entityType": "wizards_and_beasts:griffin",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/griffin.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/griffin.png",

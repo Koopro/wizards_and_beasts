@@ -1,0 +1,5 @@
+{
+  "type": "neoforge:add_spawns",
+  "biomes": [ "minecraft:river", "minecraft:swamp" ],
+  "spawners": { "type": "wizards_and_beasts:horned_serpent", "weight": 3, "minCount": 1, "maxCount": 1 }
+}

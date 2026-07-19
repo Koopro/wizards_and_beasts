@@ -19,7 +19,7 @@
     "bestiary.wizards_and_beasts.diricawl.weakness.1",
     "bestiary.wizards_and_beasts.diricawl.weakness.2"
   ],
-  "encounterTrigger": "MANUAL",
+  "encounterTrigger": "PROXIMITY",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/diricawl.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/diricawl.png",
   "sortOrder": 30,

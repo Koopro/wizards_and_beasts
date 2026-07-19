@@ -52,6 +52,7 @@ public class ModModelProvider extends ModelProvider {
         itemModels.declareCustomModelItem(BroomItemRegistry.ENCHANTED_TWIG_BUNDLE.get());
         itemModels.declareCustomModelItem(MiscItemRegistry.MARAUDERS_MAP.get());
         itemModels.declareCustomModelItem(MiscItemRegistry.DELUMINATOR.get());
+        itemModels.generateFlatItem(MiscItemRegistry.BLINDFOLD.get(), ModelTemplates.FLAT_ITEM);
         // All trunks + Newt's Case are now blocks — their item models come from the block-model
         // generation in generateWizardingWorld().
 
@@ -65,6 +66,15 @@ public class ModModelProvider extends ModelProvider {
         itemModels.declareCustomModelItem(WandItemRegistry.THUNDERBIRD_TAIL_FEATHER.get());
         itemModels.declareCustomModelItem(ConsumableItemRegistry.ROUGAROU_HAIR.get());
         itemModels.declareCustomModelItem(ConsumableItemRegistry.WHITE_RIVER_MONSTER_SPINE.get());
+        itemModels.declareCustomModelItem(ConsumableItemRegistry.HIDEBEHIND_SHADOW_ESSENCE.get());
+        itemModels.declareCustomModelItem(ConsumableItemRegistry.HIDEBEHIND_CLAW.get());
+        itemModels.declareCustomModelItem(ConsumableItemRegistry.GHOUL_SLIME.get());
+        itemModels.declareCustomModelItem(ConsumableItemRegistry.GOLDEN_SNIDGET_FEATHER.get());
+        itemModels.declareCustomModelItem(ConsumableItemRegistry.GRANIAN_HAIR.get());
+        itemModels.declareCustomModelItem(ConsumableItemRegistry.HORNED_SERPENT_GEM.get());
+        itemModels.declareCustomModelItem(ConsumableItemRegistry.PUKWUDGIE_VENOM_SAC.get());
+        itemModels.declareCustomModelItem(ConsumableItemRegistry.YETI_FUR.get());
+        itemModels.declareCustomModelItem(ConsumableItemRegistry.MATAGOT_ESSENCE.get());
 
         itemModels.declareCustomModelItem(MiscItemRegistry.PARCHMENT.get());
         itemModels.declareCustomModelItem(MiscItemRegistry.INK_BOTTLE.get());
@@ -80,6 +90,8 @@ public class ModModelProvider extends ModelProvider {
         itemModels.generateFlatItem(MiscItemRegistry.AUGUREY_SPAWN_EGG.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(MiscItemRegistry.MOONCALF_SPAWN_EGG.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(MiscItemRegistry.STREELER_SPAWN_EGG.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(MiscItemRegistry.RUNESPOOR_SPAWN_EGG.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(MiscItemRegistry.HIDEBEHIND_SPAWN_EGG.get(), ModelTemplates.FLAT_ITEM);
         for (var egg : at.koopro.wizardsandbeasts.registry.ModCreatures.SPAWN_EGGS.values()) {
             itemModels.generateFlatItem(egg.get(), ModelTemplates.FLAT_ITEM);
         }

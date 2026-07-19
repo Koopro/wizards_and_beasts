@@ -1,0 +1,24 @@
+{
+  "id": "wizards_and_beasts:golden_snidget",
+  "displayName": "bestiary.wizards_and_beasts.golden_snidget.name",
+  "category": "MAGICAL_BIRD",
+  "mmRating": 3,
+  "habitat": "bestiary.wizards_and_beasts.golden_snidget.habitat",
+  "size": "SMALL",
+  "shortLore": "bestiary.wizards_and_beasts.golden_snidget.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.golden_snidget.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.golden_snidget.ability.1"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.golden_snidget.threat.1"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.golden_snidget.weakness.1"
+  ],
+  "encounterTrigger": "PROXIMITY",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/golden_snidget.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/golden_snidget.png",
+  "sortOrder": 202,
+  "entityType": "wizards_and_beasts:golden_snidget"
+}

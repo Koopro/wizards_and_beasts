@@ -1,0 +1,15 @@
+{
+  "name": "wizards_and_beasts:chamber_of_secrets/start_pool",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "wizards_and_beasts:chamber_of_secrets/chamber",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      }
+    }
+  ]
+}
