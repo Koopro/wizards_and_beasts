@@ -75,8 +75,9 @@ public final class DiaryService {
         }
         diary.set(ModDataComponents.DIARY_POSSESSING.get(), Optional.of(player.getUUID()));
 
-        float corruption = Math.min(100f, player.getData(ModAttachments.DARK_CORRUPTION.get()) + WRITE_GAIN);
-        player.setData(ModAttachments.DARK_CORRUPTION.get(), corruption);
+        // Was the one corruption site that skipped the vocation scaling hook; routed through the service
+        // so all four sources behave the same.
+        float corruption = at.koopro.wizardsandbeasts.corruption.DarkCorruptionService.accrue(player, WRITE_GAIN);
 
         int tier = tierFor(corruption);
         boolean possess = corruption >= POSSESS_THRESHOLD;

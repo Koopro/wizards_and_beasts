@@ -47,11 +47,7 @@ public final class HorcruxBearerTickHandler {
         if (mental > 0f) {
             bearer.setData(ModAttachments.MENTAL_STABILITY.get(), Math.max(0f, mental - MENTAL_DRAIN_PER_APPLY));
         }
-        float corruption = bearer.getData(ModAttachments.DARK_CORRUPTION.get());
-        if (corruption < 100f) {
-            bearer.setData(ModAttachments.DARK_CORRUPTION.get(), Math.min(100f, corruption
-                    + at.koopro.wizardsandbeasts.skill.vocation.VocationAbilityHooks.scaleCorruptionGain(bearer, CORRUPTION_GAIN_PER_APPLY)));
-        }
+        at.koopro.wizardsandbeasts.corruption.DarkCorruptionService.accrue(bearer, CORRUPTION_GAIN_PER_APPLY);
 
         if (bearer.tickCount % WHISPER_INTERVAL == 0) {
             bearer.displayClientMessage(

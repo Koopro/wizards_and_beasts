@@ -240,6 +240,9 @@ public final class SpellCastService {
         long expiryTick = currentTick + cooldown;
         data.setCooldown(spellId, expiryTick);
         data.incrementCastCount(spellId);
+        // The Unforgivables are the corrupting acts in the lore; until now only dark artefacts stained the
+        // caster. No-op for every other spell.
+        at.koopro.wizardsandbeasts.corruption.UnforgivableToll.onCast(player, spellId);
         int newCount = data.getCastCount(spellId);
         long gcdEndTick = currentTick + GLOBAL_COOLDOWN_TICKS;
         data.setGlobalCooldownEndTick(gcdEndTick);

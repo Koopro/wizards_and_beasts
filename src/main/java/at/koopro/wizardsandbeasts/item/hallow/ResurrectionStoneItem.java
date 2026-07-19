@@ -91,9 +91,7 @@ public class ResurrectionStoneItem extends Item implements IHallowItem {
         // The company of the dead steadies the mind, but meddling with death stains the soul.
         float mental = caster.getData(ModAttachments.MENTAL_STABILITY.get());
         caster.setData(ModAttachments.MENTAL_STABILITY.get(), Math.min(100f, mental + 15f));
-        float corruption = caster.getData(ModAttachments.DARK_CORRUPTION.get());
-        caster.setData(ModAttachments.DARK_CORRUPTION.get(), Math.min(100f,
-                corruption + at.koopro.wizardsandbeasts.skill.vocation.VocationAbilityHooks.scaleCorruptionGain(caster, 3f)));
+        at.koopro.wizardsandbeasts.corruption.DarkCorruptionService.accrue(caster, 3f);
 
         caster.getCooldowns().addCooldown(stack, COOLDOWN_TICKS);
         caster.displayClientMessage(Component.literal("Shades of the dead gather around you.")
