@@ -11,6 +11,7 @@ import at.koopro.wizardsandbeasts.spell.imperio.ImperioControlState;
 import at.koopro.wizardsandbeasts.ability.data.PlayerAbilityData;
 import at.koopro.wizardsandbeasts.ability.select.AbilitySelectionState;
 import at.koopro.wizardsandbeasts.apparition.PlayerApparitionPoints;
+import at.koopro.wizardsandbeasts.ministry.data.PlayerMinistryRecord;
 import at.koopro.wizardsandbeasts.bestiary.data.PlayerBestiaryData;
 import at.koopro.wizardsandbeasts.owl.data.PlayerOWLData;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerProfessionData;
@@ -89,6 +90,16 @@ public class ModAttachments {
     public static final Supplier<AttachmentType<AbilitySelectionState>> ABILITY_SELECTION =
             ATTACHMENTS.register("ability_selection", () -> AttachmentType.builder(() -> AbilitySelectionState.EMPTY)
                     .serialize(AbilitySelectionState.CODEC.fieldOf("data"))
+                    .build());
+
+    /**
+     * The player's Ministry record: notoriety, criminal file, sentence, rank. {@code copyOnDeath} — the
+     * Ministry does not lose your file because you died.
+     */
+    public static final Supplier<AttachmentType<PlayerMinistryRecord>> MINISTRY_RECORD =
+            ATTACHMENTS.register("ministry_record", () -> AttachmentType.builder(() -> PlayerMinistryRecord.DEFAULT)
+                    .serialize(PlayerMinistryRecord.CODEC.fieldOf("data"))
+                    .copyOnDeath()
                     .build());
 
     /**

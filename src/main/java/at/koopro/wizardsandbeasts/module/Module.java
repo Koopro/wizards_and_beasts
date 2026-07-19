@@ -24,6 +24,12 @@ public enum Module {
     /** Ministry of Magic handbook item + datapack-driven chapter/page GUI. */
     HANDBOOK,
     /**
+     * Ministry of Magic law enforcement: the Trace on illegal magic, notoriety and criminal records,
+     * Auror dispatch, Azkaban sentencing, the licence/registration registry and Ministry ranks.
+     * Disabling it makes magic legal again — nothing is detected, no one is sent, no sentence ticks.
+     */
+    MINISTRY,
+    /**
      * Chamber of Secrets structure + basilisk dark-breeding ritual. Mirrors {@code Module.AZKABAN}'s
      * caution: the structure's start_pool currently points at a near-empty placeholder NBT template
      * with no reachable content, so this is documentation/config surface only for now — the raw

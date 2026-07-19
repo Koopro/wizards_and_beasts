@@ -71,6 +71,11 @@ public final class AnimagusTransformService {
             return;
         }
         PlayerAbilityHelper.setCurrentlyTransformed(player, true);
+        // Transforming without being on the Animagus Registry is an offence — paperwork, not a manhunt.
+        if (!PlayerAbilityHelper.isAnimagusRegistered(player)) {
+            at.koopro.wizardsandbeasts.ministry.law.TraceService.report(
+                    player, at.koopro.wizardsandbeasts.ministry.law.MagicalOffence.UNREGISTERED_ANIMAGUS);
+        }
     }
 
     /** Reverts the player to their default form. Safe to call when not transformed. */

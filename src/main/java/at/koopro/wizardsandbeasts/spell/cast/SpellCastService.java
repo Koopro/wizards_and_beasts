@@ -243,6 +243,12 @@ public final class SpellCastService {
         // The Unforgivables are the corrupting acts in the lore; until now only dark artefacts stained the
         // caster. No-op for every other spell.
         at.koopro.wizardsandbeasts.corruption.UnforgivableToll.onCast(player, spellId);
+        // The Trace: the Ministry registers illegal magic the instant it is worked.
+        at.koopro.wizardsandbeasts.ministry.law.MagicalOffence offence =
+                at.koopro.wizardsandbeasts.ministry.law.MagicalOffence.forSpell(spellId);
+        if (offence != null) {
+            at.koopro.wizardsandbeasts.ministry.law.TraceService.report(player, offence);
+        }
         int newCount = data.getCastCount(spellId);
         long gcdEndTick = currentTick + GLOBAL_COOLDOWN_TICKS;
         data.setGlobalCooldownEndTick(gcdEndTick);
