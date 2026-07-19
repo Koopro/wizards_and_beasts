@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.client.ability;
 import at.koopro.wizardsandbeasts.ability.def.AbilityDefinition;
 import at.koopro.wizardsandbeasts.ability.def.AbilityDefinitionRegistry;
 import at.koopro.wizardsandbeasts.ability.def.AbilityInput;
+import at.koopro.wizardsandbeasts.ability.select.AbilitySelectionState;
 import at.koopro.wizardsandbeasts.ability.trigger.AbilityTarget;
 import at.koopro.wizardsandbeasts.client.ability.state.ClientAbilityChargeState;
 import at.koopro.wizardsandbeasts.client.ability.state.ClientAbilitySelectionState;
@@ -39,8 +40,8 @@ import org.jspecify.annotations.Nullable;
 @NullMarked
 public final class AbilityWheelController {
 
-    /** Which key owns the current charge, so the two keys can never charge at once. */
-    private static boolean chargingQuick;
+    /** Which slot owns the current charge, so no two keys can charge at once. */
+    private static int chargingSlot = AbilitySelectionState.SLOT_SELECTED;
     private static boolean charging;
 
     private AbilityWheelController() {}
@@ -52,8 +53,10 @@ public final class AbilityWheelController {
             return;
         }
 
-        drive(mc.player, AbilityFrameworkKeyBindings.ABILITY_USE, false);
-        drive(mc.player, AbilityFrameworkKeyBindings.ABILITY_QUICK, true);
+        drive(mc.player, AbilityFrameworkKeyBindings.ABILITY_USE, AbilitySelectionState.SLOT_SELECTED);
+        for (int slot = 0; slot < AbilityFrameworkKeyBindings.QUICK_SLOTS.length; slot++) {
+            drive(mc.player, AbilityFrameworkKeyBindings.QUICK_SLOTS[slot], slot);
+        }
 
         if (!AbilityFrameworkKeyBindings.ABILITY_WHEEL.isUnbound()
                 && AbilityFrameworkKeyBindings.ABILITY_WHEEL.isDown()) {
@@ -62,11 +65,11 @@ public final class AbilityWheelController {
         }
     }
 
-    private static void drive(LocalPlayer player, KeyMapping key, boolean quick) {
-        AbilityDefinition def = armed(quick);
+    private static void drive(LocalPlayer player, KeyMapping key, int slot) {
+        AbilityDefinition def = armed(slot);
         if (def == null) {
             drain(key);
-            releaseIfOwner(quick);
+            releaseIfOwner(slot);
             return;
         }
         AbilityInput input = def.input();
@@ -75,7 +78,7 @@ public final class AbilityWheelController {
             while (key.consumeClick()) {
                 AbilityTarget target = pick(player, input);
                 if (!input.requiresTarget() || target != AbilityTarget.NONE) {
-                    send(quick, target);
+                    send(slot, target);
                 }
             }
             return;
@@ -83,9 +86,9 @@ public final class AbilityWheelController {
 
         boolean down = !key.isUnbound() && key.isDown();
         if (down) {
-            if (!charging || chargingQuick != quick) {
+            if (!charging || chargingSlot != slot) {
                 charging = true;
-                chargingQuick = quick;
+                chargingSlot = slot;
                 ClientAbilityChargeState.begin(def.id(), input.chargeTicks());
             }
             ClientAbilityChargeState.tick();
@@ -93,11 +96,11 @@ public final class AbilityWheelController {
                 AbilityTarget target = pick(player, input);
                 store(target);
             }
-        } else if (charging && chargingQuick == quick) {
+        } else if (charging && chargingSlot == slot) {
             if (ClientAbilityChargeState.isCharged()) {
                 AbilityTarget target = stored();
                 if (!input.requiresTarget() || target != AbilityTarget.NONE) {
-                    send(quick, target);
+                    send(slot, target);
                 }
             }
             cancelCharge();
@@ -106,8 +109,10 @@ public final class AbilityWheelController {
     }
 
     @Nullable
-    private static AbilityDefinition armed(boolean quick) {
-        Identifier id = quick ? ClientAbilitySelectionState.pinned() : ClientAbilitySelectionState.selected();
+    private static AbilityDefinition armed(int slot) {
+        Identifier id = slot == AbilitySelectionState.SLOT_SELECTED
+                ? ClientAbilitySelectionState.selected()
+                : ClientAbilitySelectionState.quickSlot(slot);
         if (id == null || !ClientAbilitySelectionState.isUsable(id)) {
             return null;
         }
@@ -160,14 +165,15 @@ public final class AbilityWheelController {
         return entityId == 0 ? AbilityTarget.NONE : AbilityTarget.ofEntity(entityId);
     }
 
-    private static void releaseIfOwner(boolean quick) {
-        if (charging && chargingQuick == quick) {
+    private static void releaseIfOwner(int slot) {
+        if (charging && chargingSlot == slot) {
             cancelCharge();
         }
     }
 
     private static void cancelCharge() {
         charging = false;
+        chargingSlot = AbilitySelectionState.SLOT_SELECTED;
         ClientAbilityChargeState.clear();
     }
 
@@ -178,7 +184,7 @@ public final class AbilityWheelController {
         }
     }
 
-    private static void send(boolean quick, AbilityTarget target) {
-        ClientPacketDistributor.sendToServer(new AbilityUseC2SPayload(quick, target));
+    private static void send(int slot, AbilityTarget target) {
+        ClientPacketDistributor.sendToServer(new AbilityUseC2SPayload(slot, target));
     }
 }

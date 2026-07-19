@@ -4,8 +4,6 @@ import at.koopro.wizardsandbeasts.client.network.ClientPayloadHandlers;
 import at.koopro.wizardsandbeasts.network.form.DebugOverlayToggleS2CPayload;
 import at.koopro.wizardsandbeasts.network.form.FormChangeRequestC2SPayload;
 import at.koopro.wizardsandbeasts.network.form.FormSyncS2CPayload;
-import at.koopro.wizardsandbeasts.network.form.ObscurialStressVentC2SPayload;
-import at.koopro.wizardsandbeasts.network.form.ObscurialToggleFormC2SPayload;
 import at.koopro.wizardsandbeasts.network.form.SizeOverrideC2SPayload;
 import at.koopro.wizardsandbeasts.network.form.TransitionEndS2CPayload;
 import at.koopro.wizardsandbeasts.network.form.TransitionStartS2CPayload;
@@ -27,22 +25,8 @@ public final class ModNetworkForm {
                 FormChangeRequestC2SPayload.STREAM_CODEC,
                 FormChangeRequestC2SPayload::handle);
 
-        registrar.playToServer(
-                ObscurialToggleFormC2SPayload.TYPE,
-                ObscurialToggleFormC2SPayload.STREAM_CODEC,
-                ObscurialToggleFormC2SPayload::handle);
-
-        registrar.playToServer(
-                ObscurialStressVentC2SPayload.TYPE,
-                ObscurialStressVentC2SPayload.STREAM_CODEC,
-                ObscurialStressVentC2SPayload::handle);
-
-        // AnimagusTransformC2SPayload is gone: the form toggle now rides the ability wheel
-        // (AbilityIds.ANIMAGUS_FORM), leaving only the per-form beast ability on its own payload.
-        registrar.playToServer(
-                AnimagusAbilityC2SPayload.TYPE,
-                AnimagusAbilityC2SPayload.STREAM_CODEC,
-                AnimagusAbilityC2SPayload::handle);
+        // The Obscurial form toggle / stress vent and both Animagus payloads are gone: those abilities
+        // now trigger through the ability framework's AbilityUseC2SPayload (see AbilityIds).
 
         registrar.playToServer(
                 SizeOverrideC2SPayload.TYPE,

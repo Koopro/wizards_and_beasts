@@ -26,7 +26,8 @@ import java.util.List;
 /**
  * Hold-to-open radial ability wheel. Shows only usable ACTIVE/TOGGLE abilities (server-resolved via
  * {@link ClientAbilitySelectionState}, so grant + module filtering — including debug grants — is already
- * applied). Release the wheel key or left-click to confirm the hovered entry; right-click pins/unpins it.
+ * applied). Release the wheel key or left-click to confirm the hovered entry; right-click cycles it through
+ * the quick slots (1 → 2 → 3 → unbound), each of which has its own one-press keybind.
  * A transient non-pausing overlay Screen (chosen over a bare HUD layer so hover + pin + cursor work
  * correctly); all state changes go through server-validated C2S payloads.
  */
@@ -107,7 +108,6 @@ public final class AbilityWheelScreen extends Screen {
         long gameTime = this.minecraft != null && this.minecraft.level != null
                 ? this.minecraft.level.getGameTime() : 0L;
         Identifier selected = ClientAbilitySelectionState.selected();
-        Identifier pinned = ClientAbilitySelectionState.pinned();
 
         int n = entries.size();
         for (int i = 0; i < n; i++) {
@@ -131,8 +131,10 @@ public final class AbilityWheelScreen extends Screen {
             if (def.id().equals(selected)) {
                 drawBorder(g, x0 - 1, y0 - 1, x1 + 1, y1 + 1, COLOR_SELECTED);
             }
-            if (def.id().equals(pinned)) {
-                g.drawString(font, "P", x1 - 6, y0 - 1, COLOR_PIN, false);
+            // Quick-slot badge: the number of the key that fires this ability directly.
+            int quickSlot = ClientAbilitySelectionState.slotOf(def.id());
+            if (quickSlot >= 0) {
+                g.drawString(font, String.valueOf(quickSlot + 1), x1 - 6, y0 - 1, COLOR_PIN, false);
             }
 
             // Placeholder icon (missing-texture is acceptable per spec).
@@ -187,9 +189,9 @@ public final class AbilityWheelScreen extends Screen {
             onClose();
             return true;
         }
-        if (event.button() == 1) { // right = pin/unpin hovered
+        if (event.button() == 1) { // right = cycle hovered through the quick slots
             if (hovered >= 0) {
-                send(AbilitySelectionC2SPayload.Action.PIN, entries.get(hovered).id());
+                send(AbilitySelectionC2SPayload.Action.QUICK_SLOT, entries.get(hovered).id());
             }
             return true;
         }

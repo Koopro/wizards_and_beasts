@@ -4,11 +4,9 @@ import at.koopro.wizardsandbeasts.client.legilimency.state.ClientLegilimencyVisi
 import at.koopro.wizardsandbeasts.client.spell.state.ClientSignatureSpellState;
 import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellDataState;
 import at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageDataState;
-import at.koopro.wizardsandbeasts.client.heritage.ObscurialInputController;
 import at.koopro.wizardsandbeasts.client.spell.input.SpellInputController;
 import at.koopro.wizardsandbeasts.client.ui.HudVisibilityPolicy;
 import at.koopro.wizardsandbeasts.client.ui.InputPolicy;
-import at.koopro.wizardsandbeasts.network.form.AnimagusAbilityC2SPayload;
 import at.koopro.wizardsandbeasts.network.spell.ImperioResistC2SPayload;
 import at.koopro.wizardsandbeasts.network.spell.SpellLeviosaAdjustC2SPayload;
 import at.koopro.wizardsandbeasts.spell.core.CastType;
@@ -29,12 +27,8 @@ public class SpellClientInputHandler {
         var typeData = ClientHeritageDataState.get();
         boolean canUseWandMagic = HudVisibilityPolicy.canUseWandMagic(typeData);
         SpellInputController.handleGameplayBindings(mc, canUseWandMagic);
-        ObscurialInputController.handleGameplayBindings(typeData);
-        // Apparition / Legilimency / Animagus form now trigger through the ability wheel
-        // (AbilityWheelController); only the per-form beast ability keeps a dedicated bind.
-        if (SpellKeyBindings.ANIMAGUS_ABILITY.consumeClick()) {
-            ClientPacketDistributor.sendToServer(new AnimagusAbilityC2SPayload());
-        }
+        // Apparition, Legilimency, both Animagus abilities and all four Obscurial abilities now trigger
+        // through the ability wheel and its quick slots (AbilityWheelController).
         ClientLegilimencyVisionState.tick();
         if (mc.player != null && mc.screen == null
                 && ClientSignatureSpellState.isImperioControlled()

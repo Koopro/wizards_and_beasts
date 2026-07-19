@@ -7,6 +7,8 @@ import at.koopro.wizardsandbeasts.ability.def.AbilityType;
 import at.koopro.wizardsandbeasts.ability.trigger.behavior.AnimagusFormAbilityBehavior;
 import at.koopro.wizardsandbeasts.ability.trigger.behavior.ApparitionAbilityBehavior;
 import at.koopro.wizardsandbeasts.ability.trigger.behavior.LegilimencyAbilityBehavior;
+import at.koopro.wizardsandbeasts.ability.trigger.behavior.ObscurialFormAbilityBehavior;
+import at.koopro.wizardsandbeasts.ability.trigger.behavior.SimpleAbilityBehavior;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
@@ -151,6 +153,47 @@ class MigratedAbilityBehaviorSeamTest {
 
         behavior.onToggle(null, def, true);
         assertFalse(behavior.isToggledOn(null, def), "a refused toggle must not read back as on");
+    }
+
+    // ── Obscurial form (second external toggle owner) ──
+
+    @Test
+    void obscurialFormOwnsItsToggleStateAndReadsItLive() {
+        boolean[] dark = {false};
+        ObscurialFormAbilityBehavior behavior = new ObscurialFormAbilityBehavior(new ObscurialFormAbilityBehavior.Invoker() {
+            @Override
+            public void toggleForm(ServerPlayer player) {
+                dark[0] = !dark[0];
+            }
+
+            @Override
+            public boolean isDarkForm(ServerPlayer player) {
+                return dark[0];
+            }
+        });
+        AbilityDefinition def = def("obscurial_form", AbilityType.TOGGLE, AbilityTargeting.NONE, 0.0);
+
+        assertTrue(behavior.ownsToggleState(), "the active form id stays the only copy of this bit");
+        assertFalse(behavior.isToggledOn(null, def));
+
+        behavior.onToggle(null, def, true);
+        assertTrue(behavior.isToggledOn(null, def));
+
+        behavior.onToggle(null, def, false);
+        assertFalse(behavior.isToggledOn(null, def));
+    }
+
+    // ── Untargeted adapters (beast burst, stress vent, Surge, Grasp) ──
+
+    @Test
+    void simpleBehaviorForwardsToItsServerEntryPointAndConsumesCooldown() {
+        AtomicInteger calls = new AtomicInteger();
+        SimpleAbilityBehavior behavior = new SimpleAbilityBehavior(player -> calls.incrementAndGet());
+        AbilityDefinition def = def("obscurus_surge", AbilityType.ACTIVE, AbilityTargeting.NONE, 0.0);
+
+        assertTrue(behavior.onActivate(null, def));
+        assertTrue(behavior.onActivate(null, def, AbilityTarget.NONE), "the targeted overload defaults through");
+        assertEquals(2, calls.get());
     }
 
     // ── Target value semantics the trigger path relies on ──

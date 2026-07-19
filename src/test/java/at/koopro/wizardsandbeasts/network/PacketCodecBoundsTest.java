@@ -8,13 +8,16 @@ import at.koopro.wizardsandbeasts.network.heritage.HeritageSelectC2SPayload;
 import at.koopro.wizardsandbeasts.network.map.MapSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.skill.SkillDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.skill.SkillUnlockC2SPayload;
-import at.koopro.wizardsandbeasts.network.spell.ObscurialAbilityUseC2SPayload;
+import at.koopro.wizardsandbeasts.ability.select.AbilitySelectionState;
+import at.koopro.wizardsandbeasts.ability.trigger.AbilityTarget;
+import at.koopro.wizardsandbeasts.network.ability.AbilityUseC2SPayload;
 import at.koopro.wizardsandbeasts.network.spell.SpellAssignC2SPayload;
 import at.koopro.wizardsandbeasts.network.spell.SpellDataSyncS2CPayload;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PacketCodecBoundsTest {
@@ -147,14 +150,39 @@ class PacketCodecBoundsTest {
         }
     }
 
+    /**
+     * Successor to the old {@code ObscurialAbilityUseC2SPayload} oversized-ability-id bound. The Obscurial
+     * abilities now fire through the ability framework, which sends a <b>slot byte</b> rather than a
+     * client-supplied ability id — so the string is not attacker-reachable at all any more, and the bound
+     * that matters is that a bogus slot cannot address anything outside the quick slots.
+     */
     @Test
-    void obscurialAbilityUse_decode_rejectsOversizedAbilityId() {
-        ByteBuf buf = Unpooled.buffer();
-        try {
-            writeOversizedString(buf);
-            assertThrows(IllegalArgumentException.class, () -> ObscurialAbilityUseC2SPayload.STREAM_CODEC.decode(buf));
-        } finally {
-            buf.release();
+    void abilityUse_decode_clampsOutOfRangeSlotToTheArmedSelection() {
+        for (int bogus : new int[] {AbilitySelectionState.QUICK_SLOT_COUNT, 99, -7}) {
+            ByteBuf buf = Unpooled.buffer();
+            try {
+                buf.writeByte(bogus);
+                buf.writeByte(AbilityTarget.Kind.NONE.ordinal());
+                assertEquals(AbilitySelectionState.SLOT_SELECTED,
+                        AbilityUseC2SPayload.STREAM_CODEC.decode(buf).slot(),
+                        "slot " + bogus + " must not address a quick slot");
+            } finally {
+                buf.release();
+            }
+        }
+    }
+
+    @Test
+    void abilityUse_decode_keepsValidQuickSlots() {
+        for (int slot = 0; slot < AbilitySelectionState.QUICK_SLOT_COUNT; slot++) {
+            ByteBuf buf = Unpooled.buffer();
+            try {
+                buf.writeByte(slot);
+                buf.writeByte(AbilityTarget.Kind.NONE.ordinal());
+                assertEquals(slot, AbilityUseC2SPayload.STREAM_CODEC.decode(buf).slot());
+            } finally {
+                buf.release();
+            }
         }
     }
 

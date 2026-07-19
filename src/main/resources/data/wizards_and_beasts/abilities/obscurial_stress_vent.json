@@ -1,0 +1,9 @@
+{
+  "_comment": "Migrated off the dedicated OBSCURIAL_STRESS_VENT keybind (B). ObscurialResourceManager owns the vent cooldown, so cooldownTicks is 0.",
+  "type": "active",
+  "icon": "wizards_and_beasts:textures/ability/placeholder.png",
+  "nameKey": "ability.wizards_and_beasts.obscurial_stress_vent",
+  "descriptionKey": "ability.wizards_and_beasts.obscurial_stress_vent.desc",
+  "cooldownTicks": 0,
+  "sortOrder": 21
+}

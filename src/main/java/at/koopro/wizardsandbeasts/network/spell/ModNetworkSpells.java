@@ -8,7 +8,6 @@ import at.koopro.wizardsandbeasts.network.spell.ImperioControlS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.ImperioResistC2SPayload;
 import at.koopro.wizardsandbeasts.network.spell.ImperioResistS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.ImperioVictimBoundS2CPayload;
-import at.koopro.wizardsandbeasts.network.spell.ObscurialAbilityUseC2SPayload;
 import at.koopro.wizardsandbeasts.network.spell.PatronusFormSetS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.ProtegoAnimationS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.ProtegoSpawnS2CPayload;
@@ -48,11 +47,6 @@ public final class ModNetworkSpells {
                 SpellLeviosaAdjustC2SPayload.TYPE,
                 SpellLeviosaAdjustC2SPayload.STREAM_CODEC,
                 SpellLeviosaAdjustC2SPayload::handle);
-
-        registrar.playToServer(
-                ObscurialAbilityUseC2SPayload.TYPE,
-                ObscurialAbilityUseC2SPayload.STREAM_CODEC,
-                ObscurialAbilityUseC2SPayload::handle);
 
         registrar.playToClient(
                 SpellDataSyncS2CPayload.TYPE,

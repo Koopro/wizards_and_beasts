@@ -46,23 +46,6 @@ public class SpellKeyBindings {
     public static final KeyMapping SKILL_MENU = new KeyMapping(
             "key." + WizardsAndBeastsMod.MODID + ".skill_menu",
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_K, CATEGORY);
-    public static final KeyMapping OBSCURIAL_TOGGLE = new KeyMapping(
-            "key." + WizardsAndBeastsMod.MODID + ".obscurial_toggle",
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, CATEGORY);
-    public static final KeyMapping OBSCURIAL_STRESS_VENT = new KeyMapping(
-            "key." + WizardsAndBeastsMod.MODID + ".obscurial_stress_vent",
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_B, CATEGORY);
-    public static final KeyMapping OBSCURIAL_ABILITY_PRIMARY = new KeyMapping(
-            "key." + WizardsAndBeastsMod.MODID + ".obscurial_ability_primary",
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_N, CATEGORY);
-    public static final KeyMapping OBSCURIAL_ABILITY_SECONDARY = new KeyMapping(
-            "key." + WizardsAndBeastsMod.MODID + ".obscurial_ability_secondary",
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_M, CATEGORY);
-
-    /** Default: unbound — triggers the active ability of the current beast form. Bind in Controls settings. */
-    public static final KeyMapping ANIMAGUS_ABILITY = new KeyMapping(
-            "key." + WizardsAndBeastsMod.MODID + ".animagus_ability",
-            InputConstants.UNKNOWN.getValue(), CATEGORY);
 
     public static void register(RegisterKeyMappingsEvent event) {
         event.register(CHARACTER_SHEET);
@@ -73,11 +56,6 @@ public class SpellKeyBindings {
         event.register(SPELL_LEFT);
         event.register(SPELL_MENU);
         event.register(SKILL_MENU);
-        event.register(OBSCURIAL_TOGGLE);
-        event.register(OBSCURIAL_STRESS_VENT);
-        event.register(OBSCURIAL_ABILITY_PRIMARY);
-        event.register(OBSCURIAL_ABILITY_SECONDARY);
-        event.register(ANIMAGUS_ABILITY);
     }
 
     private SpellKeyBindings() {

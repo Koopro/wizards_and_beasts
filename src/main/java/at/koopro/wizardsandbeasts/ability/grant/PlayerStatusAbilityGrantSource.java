@@ -1,8 +1,10 @@
 package at.koopro.wizardsandbeasts.ability.grant;
 
 import at.koopro.wizardsandbeasts.ability.AbilityIds;
+import at.koopro.wizardsandbeasts.ability.AnimagusAbilityService;
 import at.koopro.wizardsandbeasts.ability.AnimagusTransformService;
 import at.koopro.wizardsandbeasts.apparition.ApparitionServerLogic;
+import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialServerLogic;
 import at.koopro.wizardsandbeasts.legilimency.LegilimencyServerLogic;
 import net.minecraft.server.level.ServerPlayer;
 import org.jspecify.annotations.NullMarked;
@@ -31,7 +33,7 @@ public final class PlayerStatusAbilityGrantSource implements AbilityGrantSource 
 
     @Override
     public List<String> grantsFor(ServerPlayer player) {
-        List<String> out = new ArrayList<>(3);
+        List<String> out = new ArrayList<>(8);
         if (ApparitionServerLogic.canApparate(player)) {
             out.add(AbilityIds.APPARITION.toString());
         }
@@ -40,6 +42,21 @@ public final class PlayerStatusAbilityGrantSource implements AbilityGrantSource 
         }
         if (AnimagusTransformService.canTransform(player)) {
             out.add(AbilityIds.ANIMAGUS_FORM.toString());
+        }
+        // Form-scoped entries: they appear in the wheel only while the form is held, mirroring the
+        // dedicated binds, which silently did nothing outside it.
+        if (AnimagusAbilityService.canUseActive(player)) {
+            out.add(AbilityIds.ANIMAGUS_BEAST_ABILITY.toString());
+        }
+        if (ObscurialServerLogic.canToggleForm(player)) {
+            out.add(AbilityIds.OBSCURIAL_FORM.toString());
+        }
+        if (ObscurialServerLogic.canStressVent(player)) {
+            out.add(AbilityIds.OBSCURIAL_STRESS_VENT.toString());
+        }
+        if (ObscurialServerLogic.canUseAbilities(player)) {
+            out.add(AbilityIds.OBSCURUS_SURGE.toString());
+            out.add(AbilityIds.OBSCURUS_GRASP.toString());
         }
         return out;
     }

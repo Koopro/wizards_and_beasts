@@ -40,30 +40,41 @@ public final class AbilityTriggerHandler {
         }
     }
 
-    /** Pin gesture on the hovered entry: pins it, or unpins if it is already the pinned ability. */
-    public static void togglePin(ServerPlayer player, Identifier id) {
+    /**
+     * Pin gesture on the hovered entry: cycles it through the quick slots and back out —
+     * unbound → slot 0 → slot 1 → … → unbound. One gesture reaches every slot, so the wheel needs no
+     * modifier keys or extra UI.
+     */
+    public static void cycleQuickSlot(ServerPlayer player, Identifier id) {
         AbilityDefinition def = validateWheel(player, id);
         if (def == null) {
             return;
         }
         AbilitySelectionState state = AbilitySelectionHelper.get(player);
-        boolean alreadyPinned = id.equals(state.pinned());
-        AbilitySelectionHelper.pin(player, alreadyPinned ? null : id);
+        int next = state.slotOf(id) + 1; // SLOT_SELECTED (-1) → 0
+        if (AbilitySelectionState.isValidSlot(next)) {
+            AbilitySelectionHelper.setQuickSlot(player, next, id);
+        } else {
+            AbilitySelectionHelper.setQuickSlot(player, state.slotOf(id), null);
+        }
     }
 
-    /** Untargeted use — equivalent to {@link #use(ServerPlayer, boolean, AbilityTarget)} with no pick. */
-    public static void use(ServerPlayer player, boolean quick) {
-        use(player, quick, AbilityTarget.NONE);
+    /** Untargeted use — equivalent to {@link #use(ServerPlayer, int, AbilityTarget)} with no pick. */
+    public static void use(ServerPlayer player, int slot) {
+        use(player, slot, AbilityTarget.NONE);
     }
 
     /**
-     * Use key: fire the armed selection. Quick key: fire the pinned ability. TOGGLE targets flip instead.
+     * Fires one ability: {@code slot} is {@link AbilitySelectionState#SLOT_SELECTED} for the use key (the
+     * wheel's armed selection) or a quick-slot index for one of the quick keys. TOGGLE targets flip instead.
      * {@code target} is the client's pick and is re-validated here against the definition's
      * {@code input} — wrong kind or out-of-range drops the request rather than approximating it.
      */
-    public static void use(ServerPlayer player, boolean quick, AbilityTarget target) {
+    public static void use(ServerPlayer player, int slot, AbilityTarget target) {
         AbilitySelectionState state = AbilitySelectionHelper.get(player);
-        Identifier armed = quick ? state.pinned() : state.selected();
+        Identifier armed = slot == AbilitySelectionState.SLOT_SELECTED
+                ? state.selected()
+                : state.quickSlot(slot);
         if (armed == null) {
             return;
         }

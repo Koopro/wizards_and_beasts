@@ -88,6 +88,26 @@ public final class AnimagusAbilityService {
         return "animagus_cat".equals(formId);
     }
 
+    /**
+     * True if the player is in a valid Animagus beast form — the standing requirement for the per-form
+     * active ability, used by the ability grant layer for wheel visibility.
+     */
+    public static boolean canUseActive(ServerPlayer player) {
+        return PlayerAbilityHelper.isCurrentlyTransformed(player)
+                && AnimagusForms.isAnimagusForm(PlayerAbilityHelper.getAnimagusFormId(player));
+    }
+
+    /**
+     * Triggers the current beast form's active ability, re-checking the transformed state itself. The
+     * form-guard was lifted verbatim from the C2S payload handler when this moved onto the ability wheel.
+     */
+    public static void useActive(ServerPlayer player) {
+        if (!canUseActive(player)) {
+            return;
+        }
+        useActive(player, PlayerAbilityHelper.getAnimagusFormId(player));
+    }
+
     /** Triggers the active ability for the player's current beast form. */
     public static void useActive(ServerPlayer player, String formId) {
         UUID id = player.getUUID();

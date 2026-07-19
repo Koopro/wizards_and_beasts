@@ -15,6 +15,11 @@ public final class AbilityIds {
     public static final Identifier APPARITION = id("apparition");
     public static final Identifier LEGILIMENCY = id("legilimency");
     public static final Identifier ANIMAGUS_FORM = id("animagus_form");
+    public static final Identifier ANIMAGUS_BEAST_ABILITY = id("animagus_beast_ability");
+    public static final Identifier OBSCURIAL_FORM = id("obscurial_form");
+    public static final Identifier OBSCURIAL_STRESS_VENT = id("obscurial_stress_vent");
+    public static final Identifier OBSCURUS_SURGE = id("obscurus_surge");
+    public static final Identifier OBSCURUS_GRASP = id("obscurus_grasp");
 
     private AbilityIds() {}
 

@@ -1,0 +1,9 @@
+{
+  "_comment": "Migrated off the dedicated OBSCURIAL_TOGGLE keybind (V). Toggle state is owned by the player's active form id in PlayerHeritageData, not by the framework. Lockout/drain gates stay in ObscurialServerLogic. No module gate — the deleted bind had none.",
+  "type": "toggle",
+  "icon": "wizards_and_beasts:textures/ability/placeholder.png",
+  "nameKey": "ability.wizards_and_beasts.obscurial_form",
+  "descriptionKey": "ability.wizards_and_beasts.obscurial_form.desc",
+  "cooldownTicks": 0,
+  "sortOrder": 20
+}

@@ -1,0 +1,9 @@
+{
+  "_comment": "Migrated off the dedicated OBSCURIAL_ABILITY_SECONDARY keybind (M). Backed by the obscurus_grasp spell; PlayerSpellData owns the cooldown, so cooldownTicks is 0. Bind a quick slot to keep it one-press in combat.",
+  "type": "active",
+  "icon": "wizards_and_beasts:textures/ability/placeholder.png",
+  "nameKey": "ability.wizards_and_beasts.obscurus_grasp",
+  "descriptionKey": "ability.wizards_and_beasts.obscurus_grasp.desc",
+  "cooldownTicks": 0,
+  "sortOrder": 23
+}

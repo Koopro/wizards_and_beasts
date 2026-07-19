@@ -1,0 +1,9 @@
+{
+  "_comment": "Migrated off the dedicated OBSCURIAL_ABILITY_PRIMARY keybind (N). Backed by the obscurus_surge spell; PlayerSpellData owns the cooldown, so cooldownTicks is 0. Bind a quick slot to keep it one-press in combat.",
+  "type": "active",
+  "icon": "wizards_and_beasts:textures/ability/placeholder.png",
+  "nameKey": "ability.wizards_and_beasts.obscurus_surge",
+  "descriptionKey": "ability.wizards_and_beasts.obscurus_surge.desc",
+  "cooldownTicks": 0,
+  "sortOrder": 22
+}

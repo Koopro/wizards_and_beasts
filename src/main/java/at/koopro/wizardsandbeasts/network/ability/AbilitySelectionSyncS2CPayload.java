@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.network.ability;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.ability.AbilityResolver;
 import at.koopro.wizardsandbeasts.ability.select.AbilitySelectionState;
+// quickSlots carries nulls for unbound slots; the surrounding @NullMarked applies to the payload API only.
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import io.netty.buffer.ByteBuf;
@@ -21,14 +22,17 @@ import java.util.Map;
 
 /**
  * Per-player wheel state pushed to the owning client: the server-resolved usable ability id set (already
- * grant- and module-filtered, so debug grants are included) plus the current selection/pin/toggles/cooldowns.
- * The wheel renders straight off this — it never re-derives grants client-side, keeping the client purely
- * presentational (§2.4).
+ * grant- and module-filtered, so debug grants are included) plus the current selection, quick slots, toggles
+ * and cooldowns. The wheel renders straight off this — it never re-derives grants client-side, keeping the
+ * client purely presentational (§2.4).
+ *
+ * <p>{@code quickSlots} is a fixed-length vector of {@link AbilitySelectionState#QUICK_SLOT_COUNT} entries
+ * indexed by slot; an entry is {@code null} when that slot is unbound.
  */
 @NullMarked
 public record AbilitySelectionSyncS2CPayload(List<Identifier> usable,
                                              @Nullable Identifier selected,
-                                             @Nullable Identifier pinned,
+                                             List<Identifier> quickSlots,
                                              List<Identifier> toggles,
                                              Map<Identifier, Long> cooldowns) implements CustomPacketPayload {
 
@@ -42,7 +46,11 @@ public record AbilitySelectionSyncS2CPayload(List<Identifier> usable,
         public AbilitySelectionSyncS2CPayload decode(ByteBuf buf) {
             List<Identifier> usable = decodeIdList(buf);
             Identifier selected = decodeNullableId(buf);
-            Identifier pinned = decodeNullableId(buf);
+            // Fixed-length quick-slot vector; an empty string marks an unbound slot.
+            List<Identifier> quickSlots = new ArrayList<>(AbilitySelectionState.QUICK_SLOT_COUNT);
+            for (int i = 0; i < AbilitySelectionState.QUICK_SLOT_COUNT; i++) {
+                quickSlots.add(decodeNullableId(buf));
+            }
             List<Identifier> toggles = decodeIdList(buf);
             int cdCount = PacketCodecUtils.readBoundedCount(buf, MAX_ENTRIES, "ability-cooldowns");
             Map<Identifier, Long> cooldowns = new LinkedHashMap<>(Math.max(4, cdCount));
@@ -50,14 +58,16 @@ public record AbilitySelectionSyncS2CPayload(List<Identifier> usable,
                 Identifier id = Identifier.parse(PacketCodecUtils.readString(buf));
                 cooldowns.put(id, buf.readLong());
             }
-            return new AbilitySelectionSyncS2CPayload(usable, selected, pinned, toggles, cooldowns);
+            return new AbilitySelectionSyncS2CPayload(usable, selected, quickSlots, toggles, cooldowns);
         }
 
         @Override
         public void encode(ByteBuf buf, AbilitySelectionSyncS2CPayload payload) {
             encodeIdList(buf, payload.usable);
             encodeNullableId(buf, payload.selected);
-            encodeNullableId(buf, payload.pinned);
+            for (int i = 0; i < AbilitySelectionState.QUICK_SLOT_COUNT; i++) {
+                encodeNullableId(buf, i < payload.quickSlots.size() ? payload.quickSlots.get(i) : null);
+            }
             encodeIdList(buf, payload.toggles);
             int cdCount = Math.min(payload.cooldowns.size(), MAX_ENTRIES);
             buf.writeInt(cdCount);
@@ -106,10 +116,14 @@ public record AbilitySelectionSyncS2CPayload(List<Identifier> usable,
 
     public static void syncToPlayer(ServerPlayer player) {
         AbilitySelectionState state = player.getData(ModAttachments.ABILITY_SELECTION.get());
+        List<Identifier> quickSlots = new ArrayList<>(AbilitySelectionState.QUICK_SLOT_COUNT);
+        for (int i = 0; i < AbilitySelectionState.QUICK_SLOT_COUNT; i++) {
+            quickSlots.add(state.quickSlot(i));
+        }
         PacketDistributor.sendToPlayer(player, new AbilitySelectionSyncS2CPayload(
                 AbilityResolver.usableWheelIds(player),
                 state.selected(),
-                state.pinned(),
+                quickSlots,
                 AbilityResolver.activeToggles(player, state),
                 state.cooldowns()));
     }

@@ -18,10 +18,13 @@ import org.jspecify.annotations.NullMarked;
 @NullMarked
 public record AbilitySelectionC2SPayload(Action action, Identifier target) implements CustomPacketPayload {
 
-    /** Wheel gestures: {@code CONFIRM} = arm/flip hovered, {@code PIN} = pin/unpin hovered, {@code TOGGLE} = flip. */
+    /**
+     * Wheel gestures: {@code CONFIRM} = arm/flip hovered, {@code QUICK_SLOT} = cycle hovered through the
+     * quick slots and back out, {@code TOGGLE} = flip.
+     */
     public enum Action {
         CONFIRM,
-        PIN,
+        QUICK_SLOT,
         TOGGLE;
 
         private static final Action[] VALUES = values();
@@ -59,7 +62,7 @@ public record AbilitySelectionC2SPayload(Action action, Identifier target) imple
             if (context.player() instanceof ServerPlayer player) {
                 switch (action) {
                     case CONFIRM -> AbilityTriggerHandler.confirmSelection(player, target);
-                    case PIN -> AbilityTriggerHandler.togglePin(player, target);
+                    case QUICK_SLOT -> AbilityTriggerHandler.cycleQuickSlot(player, target);
                     case TOGGLE -> AbilityTriggerHandler.toggle(player, target);
                 }
             }

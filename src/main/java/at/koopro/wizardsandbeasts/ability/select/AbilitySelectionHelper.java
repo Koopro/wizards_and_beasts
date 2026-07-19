@@ -26,8 +26,8 @@ public final class AbilitySelectionHelper {
         mutate(player, state -> state.withSelected(id));
     }
 
-    public static void pin(ServerPlayer player, @Nullable Identifier id) {
-        mutate(player, state -> state.withPinned(id));
+    public static void setQuickSlot(ServerPlayer player, int slot, @Nullable Identifier id) {
+        mutate(player, state -> state.withQuickSlot(slot, id));
     }
 
     public static void setToggle(ServerPlayer player, Identifier id, boolean on) {

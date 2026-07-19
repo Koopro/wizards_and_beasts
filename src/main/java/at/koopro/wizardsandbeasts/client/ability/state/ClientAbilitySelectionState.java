@@ -6,8 +6,10 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -22,8 +24,8 @@ public final class ClientAbilitySelectionState {
     private static volatile Set<Identifier> usable = Set.of();
     @Nullable
     private static volatile Identifier selected;
-    @Nullable
-    private static volatile Identifier pinned;
+    /** Fixed-length by slot index; a {@code null} entry is an unbound slot. */
+    private static volatile List<Identifier> quickSlots = List.of();
     private static volatile Set<Identifier> toggles = Set.of();
     private static volatile Map<Identifier, Long> cooldowns = Map.of();
 
@@ -36,7 +38,7 @@ public final class ClientAbilitySelectionState {
     private static void apply(AbilitySelectionSyncS2CPayload payload) {
         usable = new LinkedHashSet<>(payload.usable());
         selected = payload.selected();
-        pinned = payload.pinned();
+        quickSlots = new ArrayList<>(payload.quickSlots());
         toggles = new LinkedHashSet<>(payload.toggles());
         cooldowns = new LinkedHashMap<>(payload.cooldowns());
     }
@@ -54,9 +56,22 @@ public final class ClientAbilitySelectionState {
         return selected;
     }
 
+    /** The ability bound to quick slot {@code slot}, or {@code null} if unbound / out of range. */
     @Nullable
-    public static Identifier pinned() {
-        return pinned;
+    public static Identifier quickSlot(int slot) {
+        List<Identifier> slots = quickSlots;
+        return slot >= 0 && slot < slots.size() ? slots.get(slot) : null;
+    }
+
+    /** The slot {@code id} occupies, or {@code -1} — drives the wheel's slot-number badge. */
+    public static int slotOf(Identifier id) {
+        List<Identifier> slots = quickSlots;
+        for (int i = 0; i < slots.size(); i++) {
+            if (id.equals(slots.get(i))) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     public static boolean isToggled(Identifier id) {
@@ -84,7 +99,7 @@ public final class ClientAbilitySelectionState {
     public static void clear() {
         usable = Set.of();
         selected = null;
-        pinned = null;
+        quickSlots = List.of();
         toggles = Set.of();
         cooldowns = Map.of();
     }

@@ -1,0 +1,9 @@
+{
+  "_comment": "Migrated off the dedicated ANIMAGUS_ABILITY keybind. Per-form burst; AnimagusAbilityService owns the form guard and its own cooldown map, so cooldownTicks is 0. No module gate — the deleted bind had none either.",
+  "type": "active",
+  "icon": "wizards_and_beasts:textures/ability/placeholder.png",
+  "nameKey": "ability.wizards_and_beasts.animagus_beast_ability",
+  "descriptionKey": "ability.wizards_and_beasts.animagus_beast_ability.desc",
+  "cooldownTicks": 0,
+  "sortOrder": 13
+}
