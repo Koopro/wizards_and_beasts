@@ -121,9 +121,11 @@ runs/
 bin/
 .eclipse/
 
-# Local AI / editor state (not shared)
-.claude/
-.cursor/
+# Local AI / editor / tool state (not shared) — ignore ALL dot-directories,
+# keeping only the ones that are legitimately tracked (.github, .vscode).
+.*/
+!.github/
+!.vscode/
 
 # Datagen cache (non-source noise)
 src/generated/resources/.cache/
