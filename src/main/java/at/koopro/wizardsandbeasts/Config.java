@@ -5,6 +5,8 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
+import java.util.List;
+
 @EventBusSubscriber(modid = WizardsAndBeastsMod.MODID)
 public class Config {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
@@ -64,6 +66,36 @@ public class Config {
     private static final ModConfigSpec.DoubleValue APPARITION_SPLINCH_BASE_CHANCE = BUILDER
             .comment("Base splinch chance at zero focus; a fully focused caster reduces it to zero.")
             .defineInRange("apparitionSplinchBaseChance", 0.35, 0.0, 1.0);
+
+    /**
+     * Accounts permitted to use the mod's administrative commands and the module admin surface.
+     *
+     * <p>Ships with the authors' personal and dev accounts. Because a populated list is a closed
+     * allow-list, on any other server these are the only accounts that may administer the mod until an
+     * operator edits this from the console. Replace them with your own, or clear the list to fall back to
+     * ordinary operator permission.
+     */
+    private static final List<String> DEFAULT_ADMIN_UUIDS = List.of(
+            "d3c9ca09-8f15-4e59-96dd-1c0fab339fcd",
+            "c9e6dcee-95f6-4d14-a980-5008ff72676e");
+
+    private static final ModConfigSpec.ConfigValue<List<? extends String>> ADMIN_UUIDS = BUILDER
+            .comment("Player UUIDs permitted to use this mod's admin commands and change module state.",
+                    "Ships with the mod authors' UUIDs. Replace them with your own, or clear the list to",
+                    "fall back to ordinary operator permission.",
+                    "When ANY valid UUID is listed this is a closed allow-list: operators not on it are",
+                    "refused. The server console and command blocks always qualify, so a bad entry here",
+                    "can always be corrected from the console.")
+            .defineList("adminUuids", DEFAULT_ADMIN_UUIDS, () -> "", entry -> entry instanceof String);
+
+    /** Configured admin UUIDs; empty before the config has loaded, which reads as "unconfigured". */
+    public static List<? extends String> adminUuids() {
+        try {
+            return ADMIN_UUIDS.get();
+        } catch (IllegalStateException ex) {
+            return List.of();
+        }
+    }
 
     static {
         // Seed state per module, consulted only when a world is first created.

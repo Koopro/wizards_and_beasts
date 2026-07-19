@@ -33,7 +33,7 @@ public final class BroomCommands {
     @SubscribeEvent
     public static void onRegister(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal("broom")
-                .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                 .then(Commands.literal("give")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("variant_id", StringArgumentType.string())

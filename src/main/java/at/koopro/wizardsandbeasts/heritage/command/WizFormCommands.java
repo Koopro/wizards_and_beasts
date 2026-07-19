@@ -23,7 +23,7 @@ public final class WizFormCommands {
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("form")
                 .then(Commands.literal("set")
-                        .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("form", StringArgumentType.word())
                                         .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
@@ -33,7 +33,7 @@ public final class WizFormCommands {
                                                 EntityArgument.getPlayer(ctx, "player"),
                                                 StringArgumentType.getString(ctx, "form"))))))
                 .then(Commands.literal("reset")
-                        .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(ctx -> resetForm(
                                         ctx.getSource(),

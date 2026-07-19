@@ -24,7 +24,7 @@ public final class WizSizeCommands {
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("size")
-                .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                 .then(Commands.literal("set")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("hitboxHeight", FloatArgumentType.floatArg(0.1f, 9.0f))

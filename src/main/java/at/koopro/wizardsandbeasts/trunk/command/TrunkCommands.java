@@ -19,7 +19,7 @@ public final class TrunkCommands {
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("trunk")
-                .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                 .then(Commands.literal("impound")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(ctx -> setImpounded(

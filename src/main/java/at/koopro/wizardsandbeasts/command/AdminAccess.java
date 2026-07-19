@@ -1,6 +1,5 @@
-package at.koopro.wizardsandbeasts.module;
+package at.koopro.wizardsandbeasts.command;
 
-import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
 import org.jspecify.annotations.NullMarked;
@@ -12,12 +11,13 @@ import java.util.UUID;
 import java.util.function.Predicate;
 
 /**
- * Who may change module state.
+ * Who may administer this mod: its {@code /wandb} command tree and the module admin surface.
  *
- * <p>Operator permission alone is not enough when an allow-list is configured: module state decides which
- * features of the mod exist at all, so a server can restrict it to specific people rather than to everyone
- * with {@code /gamemode}. When {@code moduleAdminUuids} lists any UUID, <b>only</b> those players qualify —
- * an operator who is not on the list is refused exactly like anyone else.
+ * <p>Operator permission alone is not enough when an allow-list is configured. These commands reshape the
+ * mod itself — which features exist, what a player has learned, what a wand is — so a server can restrict
+ * them to specific people rather than to everyone holding {@code /gamemode}. When {@code adminUuids} lists
+ * any UUID, <b>only</b> those players qualify; an operator who is not on the list is refused exactly like
+ * anyone else.
  *
  * <p>Two deliberate escape hatches, both about not being able to lock yourself out permanently:
  * <ul>
@@ -27,20 +27,23 @@ import java.util.function.Predicate;
  *       the behaviour they had.</li>
  * </ul>
  *
- * <p>This is enforced on the command tree <i>and</i> on the network handler. A screen that does not open is
- * a courtesy; the packet check is the boundary.
+ * <p>Enforced on every command tree <i>and</i> on the module network handler. A screen that does not open
+ * is a courtesy; the server-side check is the boundary.
+ *
+ * <p>Deliberately <b>not</b> applied to in-fiction authority: {@code MinistryPermissions} still grants an
+ * Auror the right to make an arrest by rank, because that is roleplay, not administration.
  */
 @NullMarked
-public final class ModuleAdminAccess {
+public final class AdminAccess {
 
-    private ModuleAdminAccess() {}
+    private AdminAccess() {}
 
-    /** Predicate for {@code .requires(…)} on the module command tree. */
+    /** Predicate for {@code .requires(…)} on a command tree. */
     public static Predicate<CommandSourceStack> requirement() {
-        return ModuleAdminAccess::allows;
+        return AdminAccess::allows;
     }
 
-    /** Whether {@code source} may administer modules. */
+    /** Whether {@code source} may administer the mod. */
     public static boolean allows(CommandSourceStack source) {
         ServerPlayer player = source.getPlayer();
         if (player == null) {
@@ -50,9 +53,9 @@ public final class ModuleAdminAccess {
                 WizardsAndBeastsCommandPermissions.GAMEMASTER.test(source));
     }
 
-    /** Whether {@code player} may administer modules, given whether they hold operator permission. */
+    /** Whether {@code player} may administer the mod, given whether they hold operator permission. */
     public static boolean allows(UUID playerId, boolean hasOperatorPermission) {
-        return decide(playerId, ModuleConfig.adminUuids(), hasOperatorPermission);
+        return decide(playerId, at.koopro.wizardsandbeasts.Config.adminUuids(), hasOperatorPermission);
     }
 
     /**
@@ -80,7 +83,7 @@ public final class ModuleAdminAccess {
 
     /** True when an allow-list is actually in force, for diagnostics and command feedback. */
     public static boolean isRestricted() {
-        for (String raw : ModuleConfig.adminUuids()) {
+        for (String raw : at.koopro.wizardsandbeasts.Config.adminUuids()) {
             if (parse(raw) != null) {
                 return true;
             }

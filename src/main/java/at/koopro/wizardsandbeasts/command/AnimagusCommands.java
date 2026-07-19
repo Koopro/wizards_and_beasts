@@ -37,12 +37,12 @@ public final class AnimagusCommands {
                                         ctx.getSource().getPlayerOrException(),
                                         StringArgumentType.getString(ctx, "beast")))))
                 .then(Commands.literal("unlock")
-                        .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .executes(ctx -> opUnlock(ctx.getSource().getPlayerOrException()))
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(ctx -> opUnlock(EntityArgument.getPlayer(ctx, "player")))))
                 .then(Commands.literal("reset")
-                        .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .executes(ctx -> opReset(ctx.getSource().getPlayerOrException()))
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(ctx -> opReset(EntityArgument.getPlayer(ctx, "player")))));

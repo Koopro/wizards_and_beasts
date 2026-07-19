@@ -37,7 +37,7 @@ public final class AzkabanCommands {
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("azkaban")
-                .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
 
                 .then(Commands.literal("locate")
                         .executes(ctx -> locate(ctx.getSource())))

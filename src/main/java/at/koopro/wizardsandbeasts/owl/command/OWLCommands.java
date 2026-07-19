@@ -32,15 +32,15 @@ public final class OWLCommands {
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("owls")
                 .then(Commands.literal("results")
-                        .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(ctx -> printResults(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
                 .then(Commands.literal("reset")
-                        .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(ctx -> resetExam(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
                 .then(Commands.literal("setprofession")
-                        .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("profession", StringArgumentType.word())
                                         .suggests((ctx, b) -> SharedSuggestionProvider.suggest(
@@ -50,7 +50,7 @@ public final class OWLCommands {
                                                 EntityArgument.getPlayer(ctx, "player"),
                                                 StringArgumentType.getString(ctx, "profession"))))))
                 .then(Commands.literal("setgrade")
-                        .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("subject", StringArgumentType.word())
                                         .suggests((ctx, b) -> SharedSuggestionProvider.suggest(

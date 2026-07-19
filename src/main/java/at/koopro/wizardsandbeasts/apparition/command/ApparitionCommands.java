@@ -25,7 +25,7 @@ public final class ApparitionCommands {
 
     public static LiteralArgumentBuilder<CommandSourceStack> registerWard() {
         return Commands.literal("apparitionward")
-                .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                 .then(Commands.literal("add")
                         .then(Commands.argument("id", StringArgumentType.string())
                                 .then(Commands.argument("from", BlockPosArgument.blockPos())
@@ -48,7 +48,7 @@ public final class ApparitionCommands {
 
     public static LiteralArgumentBuilder<CommandSourceStack> registerTest() {
         return Commands.literal("apparitiontest")
-                .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                 .then(Commands.argument("player", EntityArgument.player())
                         .executes(ctx -> passTest(ctx.getSource(), EntityArgument.getPlayer(ctx, "player"))));
     }

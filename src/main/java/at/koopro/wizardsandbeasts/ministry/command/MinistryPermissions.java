@@ -28,6 +28,8 @@ public final class MinistryPermissions {
     }
 
     public static boolean holds(CommandSourceStack source, MinistryRank required) {
+        // Deliberately still plain operator permission, not the admin allow-list: in-world rank is roleplay
+        // authority, and a server's own staff should be able to act as the Ministry without being a mod admin.
         if (WizardsAndBeastsCommandPermissions.GAMEMASTER.test(source)) {
             return true;
         }
@@ -35,8 +37,11 @@ public final class MinistryPermissions {
         return player != null && MinistryRecords.get(player).rank().atLeast(required);
     }
 
-    /** Debug/administrative surface — operator only, never reachable by rank. */
+    /**
+     * Debug/administrative surface — never reachable by rank. Gated on mod administration rather than plain
+     * operator permission: driving someone's notoriety directly is authoring, not policing.
+     */
     public static Predicate<CommandSourceStack> operatorOnly() {
-        return WizardsAndBeastsCommandPermissions.GAMEMASTER;
+        return WizardsAndBeastsCommandPermissions.ADMIN;
     }
 }

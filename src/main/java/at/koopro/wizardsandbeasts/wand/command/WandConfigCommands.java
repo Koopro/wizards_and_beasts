@@ -29,7 +29,7 @@ public final class WandConfigCommands {
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("config")
-                .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                 .then(buildGet())
                 .then(buildSet())
                 .then(buildClear())

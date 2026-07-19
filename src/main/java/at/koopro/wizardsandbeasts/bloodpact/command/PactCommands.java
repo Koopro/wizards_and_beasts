@@ -28,7 +28,7 @@ public final class PactCommands {
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("pact")
                 .then(Commands.literal("break")
-                        .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(ctx -> breakPact(
                                         ctx.getSource(),

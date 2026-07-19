@@ -35,7 +35,7 @@ public final class FlooCommands {
 
     public static @NonNull LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("floo")
-                .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                 .then(Commands.literal("register")
                         .then(Commands.argument("address", StringArgumentType.string())
                                 .executes(ctx -> registerFireplace(ctx.getSource(),

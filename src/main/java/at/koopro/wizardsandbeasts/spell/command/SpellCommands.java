@@ -61,16 +61,16 @@ public final class SpellCommands {
                                         ctx.getSource().getPlayerOrException(),
                                         StringArgumentType.getString(ctx, "spell")))))
                 .then(Commands.literal("reset")
-                        .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .executes(ctx -> resetSpells(ctx.getSource().getPlayerOrException())))
                 .then(Commands.literal("learnall")
-                        .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .executes(ctx -> learnAllSpells(ctx.getSource().getPlayerOrException())));
     }
 
     public static LiteralArgumentBuilder<CommandSourceStack> registerGiveCommand() {
         return Commands.literal("give")
-                .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                 .then(Commands.argument("wood", StringArgumentType.word())
                         .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
                                 Arrays.stream(WandWood.values()).map(WandWood::getSerializedName), builder))

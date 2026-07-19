@@ -41,7 +41,7 @@ public final class HeritageCommands {
                                         ctx.getSource(),
                                         EntityArgument.getPlayer(ctx, "player")))))
                 .then(Commands.literal("set")
-                        .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("type", StringArgumentType.word())
                                         .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
@@ -65,12 +65,12 @@ public final class HeritageCommands {
                         .then(Commands.literal("list")
                                 .executes(ctx -> professionList(ctx.getSource(), ctx.getSource().getPlayerOrException()))
                                 .then(Commands.argument("player", EntityArgument.player())
-                                        .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                                         .executes(ctx -> professionList(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
                         .then(Commands.literal("info")
                                 .executes(ctx -> professionInfo(ctx.getSource(), ctx.getSource().getPlayerOrException()))
                                 .then(Commands.argument("player", EntityArgument.player())
-                                        .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                                         .executes(ctx -> professionInfo(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
                         .then(Commands.literal("unlock")
                                 .then(Commands.argument("profession", StringArgumentType.word())
@@ -89,7 +89,7 @@ public final class HeritageCommands {
                         .then(Commands.literal("points")
                                 .executes(ctx -> professionPoints(ctx.getSource(), ctx.getSource().getPlayerOrException()))
                                 .then(Commands.argument("player", EntityArgument.player())
-                                        .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                                         .executes(ctx -> professionPoints(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))
                                         .then(Commands.literal("add")
                                                 .then(Commands.argument("amount", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1))
@@ -104,13 +104,13 @@ public final class HeritageCommands {
                                                                 EntityArgument.getPlayer(ctx, "player"),
                                                                 com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "amount")))))))
                         .then(Commands.literal("reset")
-                                .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                                 .then(Commands.argument("player", EntityArgument.player())
                                         .executes(ctx -> professionReset(
                                                 ctx.getSource(),
                                                 EntityArgument.getPlayer(ctx, "player"))))))
                 .then(Commands.literal("reset")
-                        .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(ctx -> reset(
                                         ctx.getSource(),

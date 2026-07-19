@@ -63,7 +63,7 @@ public final class WandbCommands {
 
     private static LiteralArgumentBuilder<CommandSourceStack> buildRoot(String rootLiteral) {
         LiteralArgumentBuilder<CommandSourceStack> debugRoot = Commands.literal("debug")
-                .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                 .then(DebugTreeCommand.register())
                 .then(Commands.literal("glow")
                         .then(Commands.argument("player", EntityArgument.player())

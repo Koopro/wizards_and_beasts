@@ -35,7 +35,7 @@ public final class ModuleCommands {
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("module")
                 // Operator permission is not enough once an admin allow-list is configured.
-                .requires(at.koopro.wizardsandbeasts.module.ModuleAdminAccess.requirement())
+                .requires(at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions.ADMIN)
                 .executes(ctx -> listModules(ctx.getSource()))
                 .then(Commands.literal("list")
                         .executes(ctx -> listModules(ctx.getSource())))

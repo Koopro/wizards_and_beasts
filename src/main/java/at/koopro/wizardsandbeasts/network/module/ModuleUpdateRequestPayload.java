@@ -3,7 +3,7 @@ package at.koopro.wizardsandbeasts.network.module;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleIds;
-import at.koopro.wizardsandbeasts.module.ModuleAdminAccess;
+import at.koopro.wizardsandbeasts.command.AdminAccess;
 import at.koopro.wizardsandbeasts.module.ModuleState;
 import at.koopro.wizardsandbeasts.module.ModuleStateService;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
@@ -89,7 +89,7 @@ public record ModuleUpdateRequestPayload(Kind kind,
             }
             // The real boundary. Same rule the command tree uses: an admin allow-list if one is
             // configured, operator permission otherwise. A screen that refuses to open is only a courtesy.
-            if (!ModuleAdminAccess.allows(player.createCommandSourceStack())) {
+            if (!AdminAccess.allows(player.createCommandSourceStack())) {
                 LOGGER.warn("[Modules] Dropped module update from unauthorised player {} ({})",
                         player.getName().getString(), player.getUUID());
                 return;

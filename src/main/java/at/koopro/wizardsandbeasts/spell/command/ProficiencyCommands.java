@@ -25,7 +25,7 @@ public final class ProficiencyCommands {
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("proficiency")
-                .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                 .then(Commands.literal("get")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("spell_id", StringArgumentType.word())

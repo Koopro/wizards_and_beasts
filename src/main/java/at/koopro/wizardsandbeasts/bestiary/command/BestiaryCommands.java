@@ -25,7 +25,7 @@ public final class BestiaryCommands {
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("bestiary")
-                .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                 .then(Commands.literal("unlock")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("entry_id", StringArgumentType.word())

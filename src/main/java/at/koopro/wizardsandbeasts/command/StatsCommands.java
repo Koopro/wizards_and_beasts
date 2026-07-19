@@ -33,7 +33,7 @@ public final class StatsCommands {
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("stats")
-                .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
 
                 // /wandb stats get <player>
                 .then(Commands.literal("get")

@@ -41,7 +41,7 @@ public final class SkillCommands {
                 .then(Commands.literal("points")
                         .executes(ctx -> showPoints(ctx.getSource().getPlayerOrException()))
                         .then(Commands.argument("player", EntityArgument.player())
-                                .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                                 .executes(ctx -> showPoints(EntityArgument.getPlayer(ctx, "player")))
                                 .then(Commands.literal("add")
                                         .then(Commands.argument("amount", IntegerArgumentType.integer(1))
@@ -61,7 +61,7 @@ public final class SkillCommands {
                                         ctx.getSource().getPlayerOrException(),
                                         StringArgumentType.getString(ctx, "skill")))))
                 .then(Commands.literal("forceunlock")
-                        .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("skill", StringArgumentType.word())
                                         .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
@@ -70,7 +70,7 @@ public final class SkillCommands {
                                                 EntityArgument.getPlayer(ctx, "player"),
                                                 StringArgumentType.getString(ctx, "skill"))))))
                 .then(Commands.literal("reset")
-                        .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(ctx -> resetAll(EntityArgument.getPlayer(ctx, "player")))
                                 .then(Commands.argument("skill", StringArgumentType.word())
@@ -114,7 +114,7 @@ public final class SkillCommands {
                                                 ctx.getSource().getPlayerOrException(),
                                                 StringArgumentType.getString(ctx, "vocation"))))))
                 .then(Commands.literal("clear")
-                        .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .executes(ctx -> clearVocation(ctx.getSource().getPlayerOrException()))
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(ctx -> clearVocation(EntityArgument.getPlayer(ctx, "player")))));
