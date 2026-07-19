@@ -39,6 +39,8 @@ public final class ModEffects {
             MOB_EFFECTS.register("cruciatus_pain", CruciatusPainEffect::new);
     public static final DeferredHolder<MobEffect, DementorChillEffect> DEMENTOR_CHILL =
             MOB_EFFECTS.register("dementor_chill", DementorChillEffect::new);
+    public static final DeferredHolder<MobEffect, SplinchedEffect> SPLINCHED =
+            MOB_EFFECTS.register("splinched", SplinchedEffect::new);
     public static final DeferredHolder<MobEffect, SectumsempraBleedEffect> SECTUMSEMPRA_BLEED =
             MOB_EFFECTS.register("sectumsempra_bleed", SectumsempraBleedEffect::new);
     public static final DeferredHolder<MobEffect, FurnunculusEffect> FURNUNCULUS =

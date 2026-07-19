@@ -4,6 +4,7 @@ import org.jspecify.annotations.Nullable;
 
 import at.koopro.wizardsandbeasts.Config;
 import at.koopro.wizardsandbeasts.ability.PlayerAbilityHelper;
+import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.apparition.ApparitionWard;
 import at.koopro.wizardsandbeasts.apparition.ApparitionWardRegistry;
 import at.koopro.wizardsandbeasts.module.Module;
@@ -72,7 +73,7 @@ public final class ApparitionServerLogic {
                 return;
             }
         }
-        if (PlayerAbilityHelper.getSplinchSeverity(caster) > 0) {
+        if (isSplinched(caster)) {
             fail(caster, "You are too splinched to Apparate.");
             return;
         }
@@ -141,7 +142,7 @@ public final class ApparitionServerLogic {
                 return;
             }
         }
-        if (PlayerAbilityHelper.getSplinchSeverity(caster) > 0) {
+        if (isSplinched(caster)) {
             fail(caster, "You are too splinched to Apparate.");
             return;
         }
@@ -200,13 +201,16 @@ public final class ApparitionServerLogic {
         if (cooldown > 0) {
             PlayerAbilityHelper.setApparitionCooldownTicks(player, cooldown - 1);
         }
-        int splinchRemaining = PlayerAbilityHelper.getSplinchTicksRemaining(player);
-        if (splinchRemaining > 0) {
-            PlayerAbilityHelper.setSplinchTicksRemaining(player, splinchRemaining - 1);
-            if (splinchRemaining - 1 == 0) {
-                PlayerAbilityHelper.setSplinchSeverity(player, 0);
-            }
-        }
+        // Splinching no longer needs a hand-rolled countdown here: the SPLINCHED mob effect owns its own
+        // duration, so it expires, shows on the potion HUD and is curable like any other effect.
+    }
+
+    /**
+     * Whether the player is currently splinched. Reads the {@code SPLINCHED} effect directly — that effect
+     * is the single source of truth, so this can never disagree with what the player sees on their HUD.
+     */
+    public static boolean isSplinched(ServerPlayer player) {
+        return player.hasEffect(ModEffects.SPLINCHED);
     }
 
     private static void performApparition(ServerPlayer player, Vec3 targetPosition, boolean sideAlong) {
@@ -230,11 +234,12 @@ public final class ApparitionServerLogic {
         if (!splinched) {
             return;
         }
-        PlayerAbilityHelper.setSplinchSeverity(player, severity);
-        PlayerAbilityHelper.setSplinchTicksRemaining(player, severity == 2 ? 1200 : 400);
-        player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, severity == 2 ? 1200 : 400, 0, false, true, true));
-        if (severity == 2) {
-            player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 1200, 0, false, true, true));
+        // One effect carries the whole condition: the bleed, the slow, the weakened swing and the duration.
+        // Amplifier is severity (0 = clean tear, 1 = severe), so the wound scales itself.
+        boolean severe = severity == 2;
+        player.addEffect(new MobEffectInstance(ModEffects.SPLINCHED, severe ? 1200 : 400,
+                severe ? 1 : 0, false, true, true));
+        if (severe) {
             DamageSource source = player.damageSources().magic();
             player.hurt(source, 3.0f);
             player.displayClientMessage(Component.literal("You splinched badly. Seek a Healer.").withStyle(ChatFormatting.RED), false);

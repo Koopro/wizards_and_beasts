@@ -171,4 +171,83 @@ public record PlayerAbilityData(
     private static float clamp01(float value) {
         return Math.max(0.0f, Math.min(1.0f, value));
     }
+
+    // ── Withers ──
+    // One per component, each changing exactly one field. Callers used to re-list all 18
+    // constructor arguments positionally for every mutation; with four adjacent booleans and
+    // three adjacent ints in the layout, a single transposed argument compiled cleanly and
+    // silently corrupted persisted player data. These are generated from the component list so
+    // the positional order is written correctly exactly once.
+
+    public PlayerAbilityData withApparitionUnlocked(boolean value) {
+        return new PlayerAbilityData(value, apparitionLicensed(), apparitionCooldownTicks(), splinchSeverity(), splinchTicksRemaining(), occlumencyLevel(), legilimencyCooldownTicks(), animagusUnlocked(), animagusFormId(), animagusRegistered(), currentlyTransformed(), wolfsbaneActive(), parseltongueSpeaker(), parseltongueSource(), metamorphmagus(), currentDisguiseFormId(), wandlessCastingLevel(), abilityFlags());
+    }
+
+    public PlayerAbilityData withApparitionLicensed(boolean value) {
+        return new PlayerAbilityData(apparitionUnlocked(), value, apparitionCooldownTicks(), splinchSeverity(), splinchTicksRemaining(), occlumencyLevel(), legilimencyCooldownTicks(), animagusUnlocked(), animagusFormId(), animagusRegistered(), currentlyTransformed(), wolfsbaneActive(), parseltongueSpeaker(), parseltongueSource(), metamorphmagus(), currentDisguiseFormId(), wandlessCastingLevel(), abilityFlags());
+    }
+
+    public PlayerAbilityData withApparitionCooldownTicks(int value) {
+        return new PlayerAbilityData(apparitionUnlocked(), apparitionLicensed(), value, splinchSeverity(), splinchTicksRemaining(), occlumencyLevel(), legilimencyCooldownTicks(), animagusUnlocked(), animagusFormId(), animagusRegistered(), currentlyTransformed(), wolfsbaneActive(), parseltongueSpeaker(), parseltongueSource(), metamorphmagus(), currentDisguiseFormId(), wandlessCastingLevel(), abilityFlags());
+    }
+
+    public PlayerAbilityData withSplinchSeverity(int value) {
+        return new PlayerAbilityData(apparitionUnlocked(), apparitionLicensed(), apparitionCooldownTicks(), value, splinchTicksRemaining(), occlumencyLevel(), legilimencyCooldownTicks(), animagusUnlocked(), animagusFormId(), animagusRegistered(), currentlyTransformed(), wolfsbaneActive(), parseltongueSpeaker(), parseltongueSource(), metamorphmagus(), currentDisguiseFormId(), wandlessCastingLevel(), abilityFlags());
+    }
+
+    public PlayerAbilityData withSplinchTicksRemaining(int value) {
+        return new PlayerAbilityData(apparitionUnlocked(), apparitionLicensed(), apparitionCooldownTicks(), splinchSeverity(), value, occlumencyLevel(), legilimencyCooldownTicks(), animagusUnlocked(), animagusFormId(), animagusRegistered(), currentlyTransformed(), wolfsbaneActive(), parseltongueSpeaker(), parseltongueSource(), metamorphmagus(), currentDisguiseFormId(), wandlessCastingLevel(), abilityFlags());
+    }
+
+    public PlayerAbilityData withOcclumencyLevel(float value) {
+        return new PlayerAbilityData(apparitionUnlocked(), apparitionLicensed(), apparitionCooldownTicks(), splinchSeverity(), splinchTicksRemaining(), value, legilimencyCooldownTicks(), animagusUnlocked(), animagusFormId(), animagusRegistered(), currentlyTransformed(), wolfsbaneActive(), parseltongueSpeaker(), parseltongueSource(), metamorphmagus(), currentDisguiseFormId(), wandlessCastingLevel(), abilityFlags());
+    }
+
+    public PlayerAbilityData withLegilimencyCooldownTicks(int value) {
+        return new PlayerAbilityData(apparitionUnlocked(), apparitionLicensed(), apparitionCooldownTicks(), splinchSeverity(), splinchTicksRemaining(), occlumencyLevel(), value, animagusUnlocked(), animagusFormId(), animagusRegistered(), currentlyTransformed(), wolfsbaneActive(), parseltongueSpeaker(), parseltongueSource(), metamorphmagus(), currentDisguiseFormId(), wandlessCastingLevel(), abilityFlags());
+    }
+
+    public PlayerAbilityData withAnimagusUnlocked(boolean value) {
+        return new PlayerAbilityData(apparitionUnlocked(), apparitionLicensed(), apparitionCooldownTicks(), splinchSeverity(), splinchTicksRemaining(), occlumencyLevel(), legilimencyCooldownTicks(), value, animagusFormId(), animagusRegistered(), currentlyTransformed(), wolfsbaneActive(), parseltongueSpeaker(), parseltongueSource(), metamorphmagus(), currentDisguiseFormId(), wandlessCastingLevel(), abilityFlags());
+    }
+
+    public PlayerAbilityData withAnimagusFormId(@Nullable String value) {
+        return new PlayerAbilityData(apparitionUnlocked(), apparitionLicensed(), apparitionCooldownTicks(), splinchSeverity(), splinchTicksRemaining(), occlumencyLevel(), legilimencyCooldownTicks(), animagusUnlocked(), value, animagusRegistered(), currentlyTransformed(), wolfsbaneActive(), parseltongueSpeaker(), parseltongueSource(), metamorphmagus(), currentDisguiseFormId(), wandlessCastingLevel(), abilityFlags());
+    }
+
+    public PlayerAbilityData withAnimagusRegistered(boolean value) {
+        return new PlayerAbilityData(apparitionUnlocked(), apparitionLicensed(), apparitionCooldownTicks(), splinchSeverity(), splinchTicksRemaining(), occlumencyLevel(), legilimencyCooldownTicks(), animagusUnlocked(), animagusFormId(), value, currentlyTransformed(), wolfsbaneActive(), parseltongueSpeaker(), parseltongueSource(), metamorphmagus(), currentDisguiseFormId(), wandlessCastingLevel(), abilityFlags());
+    }
+
+    public PlayerAbilityData withCurrentlyTransformed(boolean value) {
+        return new PlayerAbilityData(apparitionUnlocked(), apparitionLicensed(), apparitionCooldownTicks(), splinchSeverity(), splinchTicksRemaining(), occlumencyLevel(), legilimencyCooldownTicks(), animagusUnlocked(), animagusFormId(), animagusRegistered(), value, wolfsbaneActive(), parseltongueSpeaker(), parseltongueSource(), metamorphmagus(), currentDisguiseFormId(), wandlessCastingLevel(), abilityFlags());
+    }
+
+    public PlayerAbilityData withWolfsbaneActive(boolean value) {
+        return new PlayerAbilityData(apparitionUnlocked(), apparitionLicensed(), apparitionCooldownTicks(), splinchSeverity(), splinchTicksRemaining(), occlumencyLevel(), legilimencyCooldownTicks(), animagusUnlocked(), animagusFormId(), animagusRegistered(), currentlyTransformed(), value, parseltongueSpeaker(), parseltongueSource(), metamorphmagus(), currentDisguiseFormId(), wandlessCastingLevel(), abilityFlags());
+    }
+
+    public PlayerAbilityData withParseltongueSpeaker(boolean value) {
+        return new PlayerAbilityData(apparitionUnlocked(), apparitionLicensed(), apparitionCooldownTicks(), splinchSeverity(), splinchTicksRemaining(), occlumencyLevel(), legilimencyCooldownTicks(), animagusUnlocked(), animagusFormId(), animagusRegistered(), currentlyTransformed(), wolfsbaneActive(), value, parseltongueSource(), metamorphmagus(), currentDisguiseFormId(), wandlessCastingLevel(), abilityFlags());
+    }
+
+    public PlayerAbilityData withParseltongueSource(@Nullable String value) {
+        return new PlayerAbilityData(apparitionUnlocked(), apparitionLicensed(), apparitionCooldownTicks(), splinchSeverity(), splinchTicksRemaining(), occlumencyLevel(), legilimencyCooldownTicks(), animagusUnlocked(), animagusFormId(), animagusRegistered(), currentlyTransformed(), wolfsbaneActive(), parseltongueSpeaker(), value, metamorphmagus(), currentDisguiseFormId(), wandlessCastingLevel(), abilityFlags());
+    }
+
+    public PlayerAbilityData withMetamorphmagus(boolean value) {
+        return new PlayerAbilityData(apparitionUnlocked(), apparitionLicensed(), apparitionCooldownTicks(), splinchSeverity(), splinchTicksRemaining(), occlumencyLevel(), legilimencyCooldownTicks(), animagusUnlocked(), animagusFormId(), animagusRegistered(), currentlyTransformed(), wolfsbaneActive(), parseltongueSpeaker(), parseltongueSource(), value, currentDisguiseFormId(), wandlessCastingLevel(), abilityFlags());
+    }
+
+    public PlayerAbilityData withCurrentDisguiseFormId(@Nullable String value) {
+        return new PlayerAbilityData(apparitionUnlocked(), apparitionLicensed(), apparitionCooldownTicks(), splinchSeverity(), splinchTicksRemaining(), occlumencyLevel(), legilimencyCooldownTicks(), animagusUnlocked(), animagusFormId(), animagusRegistered(), currentlyTransformed(), wolfsbaneActive(), parseltongueSpeaker(), parseltongueSource(), metamorphmagus(), value, wandlessCastingLevel(), abilityFlags());
+    }
+
+    public PlayerAbilityData withWandlessCastingLevel(float value) {
+        return new PlayerAbilityData(apparitionUnlocked(), apparitionLicensed(), apparitionCooldownTicks(), splinchSeverity(), splinchTicksRemaining(), occlumencyLevel(), legilimencyCooldownTicks(), animagusUnlocked(), animagusFormId(), animagusRegistered(), currentlyTransformed(), wolfsbaneActive(), parseltongueSpeaker(), parseltongueSource(), metamorphmagus(), currentDisguiseFormId(), value, abilityFlags());
+    }
+
+    public PlayerAbilityData withAbilityFlags(Set<String> value) {
+        return new PlayerAbilityData(apparitionUnlocked(), apparitionLicensed(), apparitionCooldownTicks(), splinchSeverity(), splinchTicksRemaining(), occlumencyLevel(), legilimencyCooldownTicks(), animagusUnlocked(), animagusFormId(), animagusRegistered(), currentlyTransformed(), wolfsbaneActive(), parseltongueSpeaker(), parseltongueSource(), metamorphmagus(), currentDisguiseFormId(), wandlessCastingLevel(), value);
+    }
 }
