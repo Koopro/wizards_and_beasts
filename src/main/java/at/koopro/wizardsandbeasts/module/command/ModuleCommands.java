@@ -1,6 +1,5 @@
 package at.koopro.wizardsandbeasts.module.command;
 
-import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleIds;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
@@ -35,7 +34,8 @@ public final class ModuleCommands {
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("module")
-                .requires(WizardsAndBeastsCommandPermissions.GAMEMASTER)
+                // Operator permission is not enough once an admin allow-list is configured.
+                .requires(at.koopro.wizardsandbeasts.module.ModuleAdminAccess.requirement())
                 .executes(ctx -> listModules(ctx.getSource()))
                 .then(Commands.literal("list")
                         .executes(ctx -> listModules(ctx.getSource())))

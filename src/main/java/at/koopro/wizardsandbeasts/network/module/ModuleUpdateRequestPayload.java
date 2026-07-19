@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.network.module;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleIds;
+import at.koopro.wizardsandbeasts.module.ModuleAdminAccess;
 import at.koopro.wizardsandbeasts.module.ModuleState;
 import at.koopro.wizardsandbeasts.module.ModuleStateService;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
@@ -12,7 +13,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.permissions.Permissions;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
@@ -87,11 +87,11 @@ public record ModuleUpdateRequestPayload(Kind kind,
             if (!(context.player() instanceof ServerPlayer player)) {
                 return;
             }
-            // Same permission node the /wandb command tree uses — one definition of "operator".
-            if (!player.createCommandSourceStack().permissions()
-                    .hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
-                LOGGER.warn("[Modules] Dropped module update from non-operator {}",
-                        player.getName().getString());
+            // The real boundary. Same rule the command tree uses: an admin allow-list if one is
+            // configured, operator permission otherwise. A screen that refuses to open is only a courtesy.
+            if (!ModuleAdminAccess.allows(player.createCommandSourceStack())) {
+                LOGGER.warn("[Modules] Dropped module update from unauthorised player {} ({})",
+                        player.getName().getString(), player.getUUID());
                 return;
             }
             Module module = ModuleIds.byId(payload.moduleId);
