@@ -65,6 +65,11 @@ public class Config {
             .comment("Base splinch chance at zero focus; a fully focused caster reduces it to zero.")
             .defineInRange("apparitionSplinchBaseChance", 0.35, 0.0, 1.0);
 
+    static {
+        // Seed state per module, consulted only when a world is first created.
+        at.koopro.wizardsandbeasts.module.ModuleConfig.define(BUILDER);
+    }
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     public static boolean enforceSpellRequirements;

@@ -1,64 +1,105 @@
 package at.koopro.wizardsandbeasts.module;
 
+import at.koopro.wizardsandbeasts.module.settings.ModuleSettingsValues;
+import org.jspecify.annotations.NullMarked;
+
 import java.util.EnumMap;
 import java.util.Map;
 
 /**
- * Central enable/preview flags for gameplay modules. WANDS defaults to enabled;
- * PREVIEW adds a {@code [Preview]} prefix to select player feedback (see wand resonance helpers).
+ * The gate every feature asks before letting a player reach it. Registration is never gated — content
+ * always registers; this controls access only.
+ *
+ * <p><b>Authority lives in the world, not here.</b> On a server the truth is {@code ModuleStateData} on the
+ * overworld; on a client it is whatever the last sync said. This class is a fast read cache in front of
+ * that, because the gate call sites include per-tick paths that must not do a level lookup. Nothing writes
+ * to it except {@code ModuleStateService} (server, after persisting) and the sync payload handler (client).
+ *
+ * <p>{@code State} is retained as a deprecated alias of {@link ModuleState} so pre-existing references to
+ * {@code ModuleManager.State} keep compiling; new code should use {@link ModuleState}.
  */
+@NullMarked
 public final class ModuleManager {
+
+    /** @deprecated use {@link ModuleState}. Kept so existing references still resolve. */
+    @Deprecated
     public enum State {
         DISABLED,
         ENABLED,
-        PREVIEW
+        PREVIEW;
+
+        public ModuleState toModuleState() {
+            return switch (this) {
+                case DISABLED -> ModuleState.DISABLED;
+                case ENABLED -> ModuleState.ENABLED;
+                case PREVIEW -> ModuleState.PREVIEW;
+            };
+        }
     }
 
-    private static final Map<Module, State> STATES = new EnumMap<>(Module.class);
+    private static final Map<Module, ModuleState> CACHE = new EnumMap<>(Module.class);
+    private static final Map<Module, ModuleSettingsValues> SETTINGS_CACHE = new EnumMap<>(Module.class);
 
     static {
-        STATES.put(Module.WANDS, State.ENABLED);
-        STATES.put(Module.WANDS_AND_SPELLS, State.ENABLED);
-        STATES.put(Module.SKILL_TREES, State.ENABLED);
-        STATES.put(Module.PROFICIENCY, State.PREVIEW);
-        STATES.put(Module.DARK_ARTS, State.DISABLED);
-        STATES.put(Module.PLAYER_ABILITIES, State.PREVIEW);
-        // Generic data-driven creatures (placeholder GeckoLib mobs). PREVIEW = registered + summonable
-        // for verification; access (summon command / spawn-egg) is gated on this, registration is not.
-        STATES.put(Module.CREATURES, State.PREVIEW);
-        STATES.put(Module.BESTIARY, State.PREVIEW);
-        STATES.put(Module.BROOM_FLIGHT, State.ENABLED);
-        STATES.put(Module.POCKET_DIMENSIONS, State.ENABLED);
-        STATES.put(Module.OWLS, State.PREVIEW);
-        // Azkaban worldgen (crag + NBT-template fortress) is a Beta v0.3 feature.
-        // DISABLED until the real fortress NBT + Dementor spawn table + loot land: the
-        // shipped template is a near-empty 225-byte placeholder with no reachable content
-        // (see ALPHA_IMPROVEMENT_AUDIT.md §7.1) — set PREVIEW/ENABLED once that's in.
-        STATES.put(Module.AZKABAN, State.DISABLED);
-        STATES.put(Module.FLOO_NETWORK, State.DISABLED);
-        STATES.put(Module.CHARACTER_SHEET, State.ENABLED);
-        STATES.put(Module.PLAYER_STATS, State.PREVIEW);
-        // Location decorative blocks ship craftable by default; set DISABLED to hide their recipes.
-        STATES.put(Module.STRUCTURES, State.ENABLED);
-        STATES.put(Module.HANDBOOK, State.ENABLED);
-        // Chamber of Secrets worldgen: DISABLED until the real chamber NBT lands (currently a
-        // near-empty placeholder template, same caution as Module.AZKABAN above).
-        STATES.put(Module.CHAMBER_OF_SECRETS, State.DISABLED);
+        // Before a world loads (or a sync arrives) fall back to the build's own defaults, so main-menu code
+        // and unit tests see something sane rather than every feature switched off.
+        for (Module module : Module.values()) {
+            CACHE.put(module, ModuleDefaults.shipped(module));
+        }
     }
 
     private ModuleManager() {
     }
 
-    public static void setState(Module module, State state) {
-        STATES.put(module, state == null ? State.DISABLED : state);
-    }
+    // ── reads: signatures unchanged, every existing gate call site depends on these ──
 
+    /** True when the module is reachable — {@code ENABLED} or {@code PREVIEW}. */
     public static boolean isEnabled(Module module) {
-        State s = STATES.getOrDefault(module, State.DISABLED);
-        return s == State.ENABLED || s == State.PREVIEW;
+        return state(module).grantsAccess();
     }
 
+    /** True only for {@code PREVIEW}, which adds the {@code [Preview]} marker to player-facing copy. */
     public static boolean isPreview(Module module) {
-        return STATES.getOrDefault(module, State.DISABLED) == State.PREVIEW;
+        return state(module) == ModuleState.PREVIEW;
+    }
+
+    public static ModuleState state(Module module) {
+        return CACHE.getOrDefault(module, ModuleState.DISABLED);
+    }
+
+    public static Map<Module, ModuleState> snapshot() {
+        return new EnumMap<>(CACHE);
+    }
+
+    public static ModuleSettingsValues settings(Module module) {
+        return SETTINGS_CACHE.getOrDefault(module, ModuleSettingsValues.EMPTY);
+    }
+
+    // ── cache maintenance: not a public mutation API ──
+
+    /**
+     * Replaces the cached states wholesale. Called by {@code ModuleStateService} after the authoritative
+     * world data changes, and by the client sync handler. Not a way to change module state — a write here
+     * without a matching persist is silently reverted on the next refresh.
+     */
+    public static void acceptAuthoritative(Map<Module, ModuleState> states) {
+        for (Module module : Module.values()) {
+            CACHE.put(module, states.getOrDefault(module, ModuleState.DISABLED));
+        }
+    }
+
+    public static void acceptAuthoritativeSettings(Map<Module, ModuleSettingsValues> settings) {
+        SETTINGS_CACHE.clear();
+        SETTINGS_CACHE.putAll(settings);
+    }
+
+    /**
+     * @deprecated The mutation path is {@code ModuleStateService.setState}, which validates, persists and
+     *     broadcasts. This writes the cache only and will not survive a refresh; retained because it was
+     *     public API before module state became world-owned.
+     */
+    @Deprecated
+    public static void setState(Module module, State state) {
+        CACHE.put(module, state == null ? ModuleState.DISABLED : state.toModuleState());
     }
 }

@@ -2,7 +2,13 @@ package at.koopro.wizardsandbeasts.module.command;
 
 import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
 import at.koopro.wizardsandbeasts.module.Module;
+import at.koopro.wizardsandbeasts.module.ModuleIds;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
+import at.koopro.wizardsandbeasts.module.ModuleState;
+import at.koopro.wizardsandbeasts.module.ModuleStateService;
+import at.koopro.wizardsandbeasts.module.settings.ModuleSettingsSchema;
+import at.koopro.wizardsandbeasts.module.settings.ModuleSettingsValues;
+import at.koopro.wizardsandbeasts.module.settings.SettingDefinition;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.ChatFormatting;
@@ -10,10 +16,19 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.Locale;
 
+/**
+ * {@code /wandb module …} — the admin surface for module state until the screen lands.
+ *
+ * <p>Every mutation goes through {@link ModuleStateService}, the same method the network packet uses, so
+ * the two entry points cannot drift: whatever the packet refuses, the command refuses identically.
+ */
+@NullMarked
 public final class ModuleCommands {
 
     private ModuleCommands() {}
@@ -24,61 +39,132 @@ public final class ModuleCommands {
                 .executes(ctx -> listModules(ctx.getSource()))
                 .then(Commands.literal("list")
                         .executes(ctx -> listModules(ctx.getSource())))
-                .then(Commands.argument("module", StringArgumentType.word())
-                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
-                                Arrays.stream(Module.values()).map(Enum::name), builder))
-                        .then(Commands.argument("state", StringArgumentType.word())
-                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
-                                        List.of("DISABLED", "ENABLED", "PREVIEW"), builder))
-                                .executes(ctx -> setModuleState(
-                                        ctx.getSource(),
-                                        StringArgumentType.getString(ctx, "module"),
-                                        StringArgumentType.getString(ctx, "state")))));
+
+                .then(Commands.literal("set")
+                        .then(Commands.argument("module", StringArgumentType.word())
+                                .suggests((ctx, b) -> SharedSuggestionProvider.suggest(
+                                        Arrays.stream(Module.values())
+                                                .map(m -> m.name().toLowerCase(Locale.ROOT)), b))
+                                .then(Commands.argument("state", StringArgumentType.word())
+                                        .suggests((ctx, b) -> SharedSuggestionProvider.suggest(
+                                                Arrays.stream(ModuleState.values())
+                                                        .map(ModuleState::getSerializedName), b))
+                                        .executes(ctx -> setState(ctx.getSource(),
+                                                StringArgumentType.getString(ctx, "module"),
+                                                StringArgumentType.getString(ctx, "state"))))))
+
+                .then(Commands.literal("setting")
+                        .then(Commands.argument("module", StringArgumentType.word())
+                                .suggests((ctx, b) -> SharedSuggestionProvider.suggest(
+                                        Arrays.stream(Module.values())
+                                                .map(m -> m.name().toLowerCase(Locale.ROOT)), b))
+                                .then(Commands.argument("key", StringArgumentType.word())
+                                        .suggests((ctx, b) -> {
+                                            Module module = ModuleIds.parse(
+                                                    StringArgumentType.getString(ctx, "module"));
+                                            if (module != null) {
+                                                ModuleSettingsSchema.of(module).definitions()
+                                                        .forEach(d -> b.suggest(d.key().getPath()));
+                                            }
+                                            return b.buildFuture();
+                                        })
+                                        .then(Commands.argument("value", StringArgumentType.greedyString())
+                                                .executes(ctx -> setSetting(ctx.getSource(),
+                                                        StringArgumentType.getString(ctx, "module"),
+                                                        StringArgumentType.getString(ctx, "key"),
+                                                        StringArgumentType.getString(ctx, "value")))))));
     }
 
     private static int listModules(CommandSourceStack source) {
         source.sendSuccess(() -> Component.literal("=== Module States ===").withStyle(ChatFormatting.GOLD), false);
         for (Module module : Module.values()) {
-            String stateName;
-            ChatFormatting stateColor;
-            if (ModuleManager.isPreview(module)) {
-                stateName = "PREVIEW";
-                stateColor = ChatFormatting.YELLOW;
-            } else if (ModuleManager.isEnabled(module)) {
-                stateName = "ENABLED";
-                stateColor = ChatFormatting.GREEN;
-            } else {
-                stateName = "DISABLED";
-                stateColor = ChatFormatting.RED;
+            ModuleState state = ModuleManager.state(module);
+            ChatFormatting color = switch (state) {
+                case ENABLED -> ChatFormatting.GREEN;
+                case PREVIEW -> ChatFormatting.YELLOW;
+                case COMING_SOON -> ChatFormatting.AQUA;
+                case DISABLED -> ChatFormatting.RED;
+            };
+            source.sendSuccess(() -> Component.literal("  " + module.name().toLowerCase(Locale.ROOT) + ": ")
+                    .withStyle(ChatFormatting.GRAY)
+                    .append(Component.literal(state.getSerializedName()).withStyle(color))
+                    .append(state == ModuleState.COMING_SOON
+                            ? Component.literal("  (locked)").withStyle(ChatFormatting.DARK_GRAY)
+                            : Component.empty()), false);
+
+            ModuleSettingsSchema schema = ModuleSettingsSchema.of(module);
+            if (schema.isEmpty()) {
+                continue;
             }
-            source.sendSuccess(() -> Component.literal("  " + module.name() + ": ").withStyle(ChatFormatting.GRAY)
-                    .append(Component.literal(stateName).withStyle(stateColor)), false);
+            ModuleSettingsValues values = ModuleManager.settings(module);
+            for (SettingDefinition<?> definition : schema.definitions()) {
+                source.sendSuccess(() -> Component.literal("      " + definition.key().getPath() + " = ")
+                        .withStyle(ChatFormatting.DARK_GRAY)
+                        .append(Component.literal(String.valueOf(values.get(definition)))
+                                .withStyle(ChatFormatting.WHITE)), false);
+            }
         }
         return 1;
     }
 
-    private static int setModuleState(CommandSourceStack source, String moduleName, String stateName) {
-        Module module;
-        try {
-            module = Module.valueOf(moduleName.toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            source.sendFailure(Component.literal("Unknown module: " + moduleName).withStyle(ChatFormatting.RED));
+    private static int setState(CommandSourceStack source, String rawModule, String rawState) {
+        Module module = ModuleIds.parse(rawModule);
+        if (module == null) {
+            source.sendFailure(Component.literal("Unknown module: " + rawModule).withStyle(ChatFormatting.RED));
             return 0;
         }
-        ModuleManager.State state;
-        try {
-            state = ModuleManager.State.valueOf(stateName.toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            source.sendFailure(Component.literal("Unknown state: " + stateName
-                    + " (use DISABLED, ENABLED, or PREVIEW).").withStyle(ChatFormatting.RED));
+        ModuleState state = ModuleState.parse(rawState);
+        if (state == null) {
+            source.sendFailure(Component.literal("Unknown state: " + rawState
+                    + " (disabled, enabled, preview, coming_soon).").withStyle(ChatFormatting.RED));
             return 0;
         }
-        ModuleManager.setState(module, state);
-        source.sendSuccess(() -> Component.literal("Module ")
-                .withStyle(ChatFormatting.GRAY)
-                .append(Component.literal(module.name()).withStyle(ChatFormatting.AQUA))
+        ModuleStateService.Result result = ModuleStateService.setState(source.getServer(), module, state);
+        return report(source, result, () -> Component.literal("Module ").withStyle(ChatFormatting.GRAY)
+                .append(Component.literal(module.name().toLowerCase(Locale.ROOT)).withStyle(ChatFormatting.AQUA))
                 .append(Component.literal(" → ").withStyle(ChatFormatting.DARK_GRAY))
-                .append(Component.literal(state.name()).withStyle(ChatFormatting.GREEN)), true);
-        return 1;
+                .append(Component.literal(state.getSerializedName()).withStyle(ChatFormatting.GREEN)));
+    }
+
+    private static int setSetting(CommandSourceStack source, String rawModule, String rawKey, String rawValue) {
+        Module module = ModuleIds.parse(rawModule);
+        if (module == null) {
+            source.sendFailure(Component.literal("Unknown module: " + rawModule).withStyle(ChatFormatting.RED));
+            return 0;
+        }
+        Identifier key = rawKey.contains(":")
+                ? Identifier.tryParse(rawKey)
+                : Identifier.fromNamespaceAndPath(
+                        at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID, rawKey.toLowerCase(Locale.ROOT));
+        if (key == null) {
+            source.sendFailure(Component.literal("Unusable setting key: " + rawKey).withStyle(ChatFormatting.RED));
+            return 0;
+        }
+        ModuleStateService.Result result =
+                ModuleStateService.setSetting(source.getServer(), module, key, rawValue);
+        return report(source, result, () -> Component.literal("Set ").withStyle(ChatFormatting.GRAY)
+                .append(Component.literal(module.name().toLowerCase(Locale.ROOT)).withStyle(ChatFormatting.AQUA))
+                .append(Component.literal(" " + key.getPath() + " = ").withStyle(ChatFormatting.DARK_GRAY))
+                .append(Component.literal(rawValue).withStyle(ChatFormatting.GREEN)));
+    }
+
+    private static int report(CommandSourceStack source, ModuleStateService.Result result,
+                              java.util.function.Supplier<Component> success) {
+        switch (result) {
+            case OK -> {
+                source.sendSuccess(success, true);
+                return 1;
+            }
+            case COMING_SOON_LOCKED -> source.sendFailure(Component.literal(
+                    "That module is marked coming soon — a roadmap marker, not a switch. Change it in the "
+                            + "config defaults or in code.").withStyle(ChatFormatting.RED));
+            case UNKNOWN_SETTING -> source.sendFailure(Component.literal(
+                    "That module has no such setting.").withStyle(ChatFormatting.RED));
+            case BAD_VALUE -> source.sendFailure(Component.literal(
+                    "That value is not valid for this setting.").withStyle(ChatFormatting.RED));
+            case UNAVAILABLE -> source.sendFailure(Component.literal(
+                    "Module state is unavailable right now.").withStyle(ChatFormatting.RED));
+        }
+        return 0;
     }
 }
