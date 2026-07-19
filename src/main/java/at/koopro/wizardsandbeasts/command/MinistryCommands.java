@@ -1,21 +1,18 @@
 package at.koopro.wizardsandbeasts.command;
 
+import at.koopro.wizardsandbeasts.ministry.command.MinistryCommandsImpl;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.Component;
 
+/**
+ * Thin delegate kept at the existing registration site; the tree itself lives with the rest of the Ministry
+ * in {@code ministry.command}.
+ */
 public final class MinistryCommands {
 
     private MinistryCommands() {}
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
-        return Commands.literal("ministry")
-                .executes(ctx -> {
-                    ctx.getSource().sendSuccess(() -> Component.literal(
-                            "No Ministry commands are currently implemented.").withStyle(ChatFormatting.GRAY), false);
-                    return 0;
-                });
+        return MinistryCommandsImpl.register();
     }
 }
