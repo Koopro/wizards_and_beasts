@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.form;
 
+import at.koopro.wizardsandbeasts.util.PlayerScopedState;
+
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.event.form.FormEvents;
 import at.koopro.wizardsandbeasts.network.form.TransitionEndS2CPayload;
@@ -11,9 +13,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Server-side manager for transformation transitions.
@@ -25,7 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class TransitionManager {
 
     private static final int MAX_DURATION_TICKS = 30;
-    private static final Map<UUID, ActiveTransition> ACTIVE = new ConcurrentHashMap<>();
+    private static final PlayerScopedState<ActiveTransition> ACTIVE =
+            PlayerScopedState.create("form-transitions");
 
     /**
      * Starts a transformation transition for a player.
@@ -36,7 +37,7 @@ public final class TransitionManager {
      */
     public static boolean startTransition(ServerPlayer player, String toFormId) {
         UUID uuid = player.getUUID();
-        if (ACTIVE.containsKey(uuid)) return false;
+        if (ACTIVE.contains(uuid)) return false;
 
         String fromFormId = FormSystemAPI.getPlayerFormId(player);
         if (fromFormId == null) fromFormId = "human_default";
@@ -82,14 +83,14 @@ public final class TransitionManager {
      * Returns whether a player is currently transitioning.
      */
     public static boolean isTransitioning(UUID playerUUID) {
-        return ACTIVE.containsKey(playerUUID);
+        return ACTIVE.contains(playerUUID);
     }
 
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
         if (ACTIVE.isEmpty()) return;
 
-        var it = ACTIVE.entrySet().iterator();
+        var it = ACTIVE.view().entrySet().iterator();
         while (it.hasNext()) {
             var entry = it.next();
             UUID uuid = entry.getKey();

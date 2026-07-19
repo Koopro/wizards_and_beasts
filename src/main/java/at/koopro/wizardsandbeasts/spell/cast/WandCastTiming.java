@@ -1,18 +1,19 @@
 package at.koopro.wizardsandbeasts.spell.cast;
 
+import at.koopro.wizardsandbeasts.util.PlayerScopedState;
+
 import at.koopro.wizardsandbeasts.spell.core.*;
 
 import net.minecraft.server.level.ServerPlayer;
 
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Server-only: wand hold duration for the most recent {@code releaseUsing} (e.g. Protego tier).
  */
 public final class WandCastTiming {
-    private static final Map<UUID, Integer> LAST_HOLD_TICKS = new ConcurrentHashMap<>();
+    private static final PlayerScopedState<Integer> LAST_HOLD_TICKS =
+            PlayerScopedState.create("wand-cast-hold-ticks");
 
     private WandCastTiming() {}
 

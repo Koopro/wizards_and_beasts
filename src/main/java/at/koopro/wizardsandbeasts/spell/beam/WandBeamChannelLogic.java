@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.spell.beam;
 
+import at.koopro.wizardsandbeasts.util.PlayerScopedState;
+
 import at.koopro.wizardsandbeasts.spell.core.*;
 
 import at.koopro.wizardsandbeasts.Config;
@@ -27,10 +29,8 @@ import net.minecraft.world.item.ItemStack;
 
 import org.jspecify.annotations.Nullable;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Server-side held-beam spells while {@link WandItem} is in use.
@@ -39,7 +39,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class WandBeamChannelLogic {
 
-    private static final Map<UUID, WandBeamSession> SESSIONS = new ConcurrentHashMap<>();
+    private static final PlayerScopedState<WandBeamSession> SESSIONS =
+            PlayerScopedState.create("wand-beam-sessions");
 
     private WandBeamChannelLogic() {}
 

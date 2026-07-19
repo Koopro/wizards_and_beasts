@@ -85,6 +85,13 @@ public final class LegilimencyServerLogic {
         if (heritage != Heritage.WIZARDKIND) {
             return false;
         }
-        return variant == null || variant.hasTag("can_legilimise");
+        // Was `variant.hasTag("can_legilimise")` — a tag no HeritageVariant has ever declared, so this
+        // returned false for every player (every wizard has a non-null variant) and the whole ability was
+        // unreachable. Gated on the mod's existing capability vocabulary instead: any wizard who can work
+        // magic at all, which excludes the Squib. `can_legilimise` still grants it explicitly, so a
+        // datapack or future variant can opt in without touching this code.
+        return variant == null
+                || variant.hasTag("can_legilimise")
+                || !variant.hasTag("no_casting");
     }
 }

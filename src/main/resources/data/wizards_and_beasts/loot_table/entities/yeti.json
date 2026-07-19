@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": { "type": "minecraft:uniform", "min": 1, "max": 3 },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "wizards_and_beasts:yeti_fur"
+        }
+      ],
+      "functions": [
+        {
+          "function": "minecraft:looting_enchant",
+          "count": { "type": "minecraft:uniform", "min": 0, "max": 1 }
+        }
+      ]
+    }
+  ]
+}

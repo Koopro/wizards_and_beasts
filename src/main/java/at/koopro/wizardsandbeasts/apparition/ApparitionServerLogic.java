@@ -260,7 +260,14 @@ public final class ApparitionServerLogic {
         if (heritage == Heritage.WIZARDKIND) {
             return true;
         }
-        return variant != null && variant.hasTag("can_apparate");
+        if (variant == null) {
+            return false;
+        }
+        // `can_apparate` is declared by no shipped variant, so this used to permit WIZARDKIND and nothing
+        // else. House-elves already carry `innate_apparition` — the same concept the `elf_apparition` skill
+        // ability is built around — so they qualify on their own tag. `can_apparate` is kept as the explicit
+        // opt-in for anything else that should be able to.
+        return variant.hasTag("can_apparate") || variant.hasTag("innate_apparition");
     }
 
     private static @Nullable Player findSideAlongPassenger(ServerPlayer caster) {

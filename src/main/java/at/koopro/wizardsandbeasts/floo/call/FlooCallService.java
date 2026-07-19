@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.floo.call;
 
+import at.koopro.wizardsandbeasts.util.PlayerScopedState;
+
 import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlock;
 import at.koopro.wizardsandbeasts.floo.FlooNetworkManager;
 import at.koopro.wizardsandbeasts.floo.FlooRegistryEntry;
@@ -24,9 +26,7 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages live "head in the fire" Floo calls. The caller kneels at a lit grate, names a
@@ -39,7 +39,8 @@ public final class FlooCallService {
     private static final double LEASH_RANGE_SQ = 2.5 * 2.5;
     private static final double REMOTE_HEAR_RANGE_SQ = 6.0 * 6.0;
 
-    private static final Map<UUID, FlooCall> SESSIONS = new ConcurrentHashMap<>();
+    private static final PlayerScopedState<FlooCall> SESSIONS =
+            PlayerScopedState.create("floo-calls");
 
     private FlooCallService() {
     }
@@ -149,7 +150,7 @@ public final class FlooCallService {
         }
 
         // Someone near a remote grate -> the caller on the other end hears.
-        for (FlooCall call : SESSIONS.values()) {
+        for (FlooCall call : SESSIONS.view().values()) {
             if (!speaker.level().dimension().identifier().equals(call.targetDim)) continue;
             if (speaker.distanceToSqr(call.targetPos.getX() + 0.5,
                     call.targetPos.getY() + 0.5, call.targetPos.getZ() + 0.5) > REMOTE_HEAR_RANGE_SQ) {
@@ -181,7 +182,7 @@ public final class FlooCallService {
     }
 
     public static boolean isInCall(@NonNull UUID callerUuid) {
-        return SESSIONS.containsKey(callerUuid);
+        return SESSIONS.contains(callerUuid);
     }
 
     public static void clearAll() {
