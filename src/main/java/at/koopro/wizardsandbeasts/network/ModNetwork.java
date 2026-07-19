@@ -23,6 +23,8 @@ import at.koopro.wizardsandbeasts.network.wand.ModNetworkWand;
 import at.koopro.wizardsandbeasts.network.character.ModNetworkCharacter;
 import at.koopro.wizardsandbeasts.network.stats.ModNetworkStats;
 import at.koopro.wizardsandbeasts.network.trinket.ModNetworkTrinkets;
+import at.koopro.wizardsandbeasts.network.petrify.ModNetworkPetrify;
+import at.koopro.wizardsandbeasts.network.ability.ModNetworkAbilityFramework;
 
 public class ModNetwork {
 
@@ -51,5 +53,7 @@ public class ModNetwork {
         ModNetworkCharacter.register(registrar);
         ModNetworkStats.register(registrar);
         ModNetworkTrinkets.register(registrar);
+        ModNetworkPetrify.register(registrar);
+        ModNetworkAbilityFramework.register(registrar);
     }
 }

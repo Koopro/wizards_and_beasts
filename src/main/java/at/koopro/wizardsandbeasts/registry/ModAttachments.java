@@ -9,6 +9,7 @@ import at.koopro.wizardsandbeasts.event.wand.DisarmLogState;
 import at.koopro.wizardsandbeasts.entity.niffler.HappinessAttachment;
 import at.koopro.wizardsandbeasts.spell.imperio.ImperioControlState;
 import at.koopro.wizardsandbeasts.ability.data.PlayerAbilityData;
+import at.koopro.wizardsandbeasts.ability.select.AbilitySelectionState;
 import at.koopro.wizardsandbeasts.bestiary.data.PlayerBestiaryData;
 import at.koopro.wizardsandbeasts.owl.data.PlayerOWLData;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerProfessionData;
@@ -79,6 +80,16 @@ public class ModAttachments {
                     .copyOnDeath()
                     .build());
 
+    /**
+     * Generic ability-wheel/selection state (selected/pinned/toggles/cooldowns). Deliberately NOT
+     * {@code copyOnDeath}: {@code AbilityFrameworkEvents.onPlayerClone} copies selection/pin/toggles and
+     * drops cooldowns on death (§2.2). Disk persistence is via the serialize codec, independent of clone.
+     */
+    public static final Supplier<AttachmentType<AbilitySelectionState>> ABILITY_SELECTION =
+            ATTACHMENTS.register("ability_selection", () -> AttachmentType.builder(() -> AbilitySelectionState.EMPTY)
+                    .serialize(AbilitySelectionState.CODEC.fieldOf("data"))
+                    .build());
+
     public static final Supplier<AttachmentType<PlayerOWLData>> OWL_DATA =
             ATTACHMENTS.register("owl_data", () -> AttachmentType.builder(() -> PlayerOWLData.DEFAULT)
                     .serialize(PlayerOWLData.CODEC.fieldOf("data"))
@@ -122,6 +133,12 @@ public class ModAttachments {
             ATTACHMENTS.register("imperio_control_state", () -> AttachmentType.builder(() -> ImperioControlState.DEFAULT)
                     .serialize(ImperioControlState.CODEC.fieldOf("state"))
                     .copyOnDeath()
+                    .build());
+
+    /** Basilisk-gaze petrification. Not copied on death — dying naturally breaks the curse. */
+    public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.spell.petrify.PetrifiedState>> PETRIFIED_STATE =
+            ATTACHMENTS.register("petrified_state", () -> AttachmentType.builder(() -> at.koopro.wizardsandbeasts.spell.petrify.PetrifiedState.DEFAULT)
+                    .serialize(at.koopro.wizardsandbeasts.spell.petrify.PetrifiedState.CODEC.fieldOf("state"))
                     .build());
 
     public static final Supplier<AttachmentType<Float>> WILLPOWER =

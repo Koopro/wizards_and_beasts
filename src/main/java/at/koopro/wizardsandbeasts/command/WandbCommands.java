@@ -123,7 +123,8 @@ public final class WandbCommands {
                 .then(AzkabanCommands.register())
                 .then(CharacterCommands.register())
                 .then(AnimagusCommands.register())
-                .then(StatsCommands.register());
+                .then(StatsCommands.register())
+                .then(AbilityFrameworkCommands.register());
     }
 
     private static int toggleBeamDebug(CommandSourceStack source) {

@@ -1,0 +1,9 @@
+{
+  "_comment": "DEBUG test ability (framework verification only). Auto-granted while enableDebugTools=true; log-only behavior.",
+  "type": "active",
+  "icon": "wizards_and_beasts:textures/ability/placeholder.png",
+  "nameKey": "ability.wizards_and_beasts.debug_active",
+  "descriptionKey": "ability.wizards_and_beasts.debug_active.desc",
+  "cooldownTicks": 40,
+  "sortOrder": 0
+}

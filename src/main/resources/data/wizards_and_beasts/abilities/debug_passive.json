@@ -1,0 +1,8 @@
+{
+  "_comment": "DEBUG test ability (framework verification only). PASSIVE: resolver-visible, never in the wheel, never triggered.",
+  "type": "passive",
+  "icon": "wizards_and_beasts:textures/ability/placeholder.png",
+  "nameKey": "ability.wizards_and_beasts.debug_passive",
+  "descriptionKey": "ability.wizards_and_beasts.debug_passive.desc",
+  "sortOrder": 2
+}

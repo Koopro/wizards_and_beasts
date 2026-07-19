@@ -83,5 +83,8 @@ public record AbilityGrantsSyncS2CPayload(int syncVersion,
                 grants.keysFrom(AbilityGrants.Source.HERITAGE),
                 grants.keysFrom(AbilityGrants.Source.VOCATION),
                 grants.keysFrom(AbilityGrants.Source.SKILL_NODE)));
+        // Keep the ability-framework wheel state in step with grant changes: any seam that re-pushes the
+        // derived grant snapshot also refreshes the wheel's server-resolved usable set on the same client.
+        at.koopro.wizardsandbeasts.network.ability.AbilitySelectionSyncS2CPayload.syncToPlayer(player);
     }
 }

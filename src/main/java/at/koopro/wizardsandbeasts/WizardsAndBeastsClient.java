@@ -53,6 +53,7 @@ public class WizardsAndBeastsClient {
         modEventBus.addListener(BroomRiderRenderer::registerModifiers);
         modEventBus.addListener(FormRenderStateModifier::registerModifiers);
         modEventBus.addListener(SpellKeyBindings::register);
+        modEventBus.addListener(at.koopro.wizardsandbeasts.client.ability.AbilityFrameworkKeyBindings::register);
         modEventBus.addListener(this::registerGuiLayers);
         modEventBus.addListener(WizardsAndBeastsClient::registerMenus);
         if (Config.enableDebugTools) {
@@ -73,6 +74,7 @@ public class WizardsAndBeastsClient {
         NeoForge.EVENT_BUS.addListener(InventoryScreenInjector::onScreenInit);
         NeoForge.EVENT_BUS.addListener(CharacterSheetKeyHandler::onClientTick);
         NeoForge.EVENT_BUS.addListener(StatHudOverlay::onClientTick);
+        NeoForge.EVENT_BUS.addListener(at.koopro.wizardsandbeasts.client.ability.AbilityWheelController::onClientTick);
     }
 
     private static void registerMenus(RegisterMenuScreensEvent event) {

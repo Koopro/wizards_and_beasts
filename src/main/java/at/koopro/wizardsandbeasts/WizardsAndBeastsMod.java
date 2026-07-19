@@ -157,7 +157,14 @@ public class WizardsAndBeastsMod {
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "skill_node_reload_listener"),
                     new at.koopro.wizardsandbeasts.skill.SkillNodeLoader());
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "ability_definition_reload_listener"),
+                    new at.koopro.wizardsandbeasts.ability.def.AbilityDefinitionLoader());
         });
+
+        // Ability framework: server-side sync/clone/cooldown lifecycle + debug behavior wiring.
+        NeoForge.EVENT_BUS.register(at.koopro.wizardsandbeasts.ability.AbilityFrameworkEvents.class);
+        at.koopro.wizardsandbeasts.ability.trigger.AbilityDebugBehaviors.bootstrap();
 
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 

@@ -22,8 +22,12 @@ import java.util.Set;
 @NullMarked
 public final class AbilityGrants {
 
-    /** Where a grant comes from. Enum with room to grow (e.g. ITEM, RITUAL) without touching callers. */
-    public enum Source { HERITAGE, VOCATION, SKILL_NODE }
+    /**
+     * Where a grant comes from. Enum with room to grow (e.g. ITEM, RITUAL) without touching callers.
+     * {@code DEBUG} is the command-driven override source ({@code /wandb ability grant|revoke}); its grants
+     * are flagged so debug tooling can distinguish them from earned grants.
+     */
+    public enum Source { HERITAGE, VOCATION, SKILL_NODE, DEBUG }
 
     public static final AbilityGrants EMPTY = new AbilityGrants(Map.of());
 
@@ -41,10 +45,26 @@ public final class AbilityGrants {
     public static AbilityGrants of(Collection<String> heritageTags,
                                    Collection<String> vocationFlags,
                                    Collection<String> skillNodeAbilities) {
+        Map<Source, Collection<String>> bySource = new java.util.EnumMap<>(Source.class);
+        bySource.put(Source.HERITAGE, heritageTags);
+        bySource.put(Source.VOCATION, vocationFlags);
+        bySource.put(Source.SKILL_NODE, skillNodeAbilities);
+        return ofSources(bySource);
+    }
+
+    /**
+     * Generic builder over an arbitrary set of grant sources — the extensible entry point used by
+     * {@link AbilityGrantService} once sources are pluggable. Iterates {@link Source#values()} for a
+     * deterministic merge/serialization order regardless of map insertion order.
+     */
+    public static AbilityGrants ofSources(Map<Source, ? extends Collection<String>> bySource) {
         Map<AbilityKey, EnumSet<Source>> map = new LinkedHashMap<>();
-        add(map, heritageTags, Source.HERITAGE);
-        add(map, vocationFlags, Source.VOCATION);
-        add(map, skillNodeAbilities, Source.SKILL_NODE);
+        for (Source source : Source.values()) {
+            Collection<String> raws = bySource.get(source);
+            if (raws != null) {
+                add(map, raws, source);
+            }
+        }
         return map.isEmpty() ? EMPTY : new AbilityGrants(map);
     }
 
