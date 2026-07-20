@@ -59,12 +59,27 @@ public class WizardsConfigScreen extends Screen {
             Map.entry("enableWandAllegiance", "Gameplay"),
             Map.entry("enableCloakSelfViewRestrictions", "Gameplay"),
             Map.entry("cloakSelfViewRestrictionsDeathlyOnly", "Gameplay"),
+            Map.entry("showSpellHudOverlay", "Gameplay"),
+            Map.entry("reduceScreenEffects", "Gameplay"),
+            Map.entry("apparitionRangeBlocks", "Gameplay"),
+            Map.entry("apparitionCooldownTicks", "Gameplay"),
+            Map.entry("apparitionSplinchBaseChance", "Gameplay"),
             Map.entry("perfProfile", "Performance"),
             Map.entry("beamTargetScanIntervalTicks", "Performance"),
             Map.entry("beamChannelEffectIntervalTicks", "Performance"),
             Map.entry("enableDebugTools", "Debug"),
             Map.entry("debugLogSpellGateReasons", "Debug"),
             Map.entry("debugLogCloakVisibility", "Debug"));
+    /**
+     * Keys this screen must never show, even under the "Gameplay" fallback bucket. Both are administrative
+     * rather than gameplay concerns: {@code adminUuids} is a security allow-list, and the module state fed
+     * by {@link at.koopro.wizardsandbeasts.module.ModuleConfig} only seeds a brand-new world — turning a
+     * module's dial here would silently do nothing on every world that already exists. Both have a real
+     * home ({@code /wandb module}), just not this one.
+     */
+    private static final java.util.Set<String> EXCLUDED_KEYS = java.util.Set.of("adminUuids");
+    private static final String EXCLUDED_KEY_PREFIX = "moduleDefaults";
+
     private static final List<String> CATEGORY_ORDER = List.of("Gameplay", "Performance", "Debug", "Dark Arts");
     private static final Map<String, String> GLYPH_BY_CATEGORY = Map.of(
             "Gameplay", "⚗",
@@ -96,6 +111,9 @@ public class WizardsConfigScreen extends Screen {
         Map<String, List<ConfigEntry>> buckets = new LinkedHashMap<>();
         CATEGORY_ORDER.forEach(name -> buckets.put(name, new ArrayList<>()));
         for (Map.Entry<String, Object> entry : Config.SPEC.getValues().valueMap().entrySet()) {
+            if (EXCLUDED_KEYS.contains(entry.getKey()) || entry.getKey().startsWith(EXCLUDED_KEY_PREFIX)) {
+                continue; // administrative, not gameplay — see EXCLUDED_KEYS javadoc
+            }
             if (!(entry.getValue() instanceof ModConfigSpec.ConfigValue<?> configValue)) {
                 continue;
             }

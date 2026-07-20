@@ -1,0 +1,38 @@
+{
+  "id": "wizards_and_beasts:ministry_law",
+  "title": "Part XI — The Trace, Notoriety & the Register",
+  "icon": "minecraft:iron_bars",
+  "sort_index": 105,
+  "pages": [
+    {
+      "type": "text",
+      "heading": "The Trace",
+      "body": "The Killing Curse, the Cruciatus Curse, and the Imperius Curse are registered by the Ministry the instant they are cast, anywhere, regardless of witness. There is no line of sight to avoid and no distance to outrun.\n\nThe registrant is reminded that ignorance of the Trace's reach has never once succeeded as a defence before the Wizengamot."
+    },
+    {
+      "type": "text",
+      "heading": "Notoriety and the Permanent Record",
+      "body": "The Ministry keeps two separate accounts. Notoriety is present interest: it cools with time provided the registrant is neither actively sought nor a fugitive. The Record is the registrant's file, and does not cool. A quiet season lowers notoriety; it does not remove a single entry from the Record.\n\nRepeated offences of the same kind are treated progressively more severely, in light of the Record. The Department considers this only fair to first-time offenders."
+    },
+    {
+      "type": "text",
+      "heading": "Wanted Status",
+      "body": "Notoriety is banded: of no current interest, a Person of Interest, Wanted, Wanted and Dangerous, and Undesirable No. 1. Crossing into Wanted or above is communicated to the registrant by official Ministry notice.\n\nWhat becomes of a registrant at each band is a matter for the Department of Magical Law Enforcement, and is not detailed here."
+    },
+    {
+      "type": "text",
+      "heading": "Pardon",
+      "body": "A pardon, where granted, clears outstanding notoriety and any fugitive status. It does not, and by statute cannot, remove the underlying entries from the Record.\n\nThe registrant should not mistake a pardon for an acquittal. The Ministry forgives; it does not forget."
+    },
+    {
+      "type": "text",
+      "heading": "Ministry Ranks",
+      "body": "Ministry employment proceeds by rank: Obliviator, Auror, Magical Law Enforcement, and Minister for Magic, each carrying the authority of every rank below it. A rank is a Ministry appointment and confers no protection from the law it enforces.\n\nImpersonation of Ministry rank by a registrant not so appointed is, notwithstanding the entry under Metamorphmagus elsewhere in this Handbook, an offence in its own right."
+    },
+    {
+      "type": "text",
+      "heading": "Registration and Licensing",
+      "body": "Apparition requires a licence; the Animagus transformation requires registration; a wand, in due course, will require the same. These are Ministry records, held apart from the Record of offences, and may be granted or revoked independently of it.\n\nThe registrant is reminded that a revoked licence is a paperwork matter, not a pardon, and that the two should not be confused in correspondence with the Department."
+    }
+  ]
+}
