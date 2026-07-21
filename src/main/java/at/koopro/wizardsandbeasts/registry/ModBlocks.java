@@ -5,6 +5,8 @@ import at.koopro.wizardsandbeasts.block.ExaminationDeskBlock;
 import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlock;
 import at.koopro.wizardsandbeasts.block.MandrakeCropBlock;
 import at.koopro.wizardsandbeasts.block.trunk.PocketConfiguratorBlock;
+import at.koopro.wizardsandbeasts.block.trunk.TentCanvasBlock;
+import at.koopro.wizardsandbeasts.block.trunk.TentGrandBlock;
 import at.koopro.wizardsandbeasts.block.trunk.TrunkBlock;
 import at.koopro.wizardsandbeasts.trunk.TrunkArchetype;
 import at.koopro.wizardsandbeasts.trunk.TrunkTier;
@@ -214,6 +216,17 @@ public class ModBlocks {
 
     public static final DeferredItem<BlockItem> NEWTS_CASE_ITEM =
             ModItems.ITEMS.registerItem("newts_case_item", props -> new BlockItem(NEWTS_CASE.get(), props.stacksTo(1)));
+
+    // --- Tent preview harness (exterior GeckoLib geometry only — see AUDIT_PUNCHLIST.md "Tent Models") ---
+    // Deliberately no BlockItem: this is a /setblock-only scaffold for viewing the two models in-world.
+    // Real item forms, crafting and pocket-space wiring are explicitly out of scope for this pass.
+    public static final DeferredBlock<TentCanvasBlock> TENT_CANVAS =
+            BLOCKS.registerBlock("tent_canvas", TentCanvasBlock::new,
+                    () -> BlockBehaviour.Properties.of().strength(1.0f).sound(SoundType.WOOL).noOcclusion());
+
+    public static final DeferredBlock<TentGrandBlock> TENT_GRAND =
+            BLOCKS.registerBlock("tent_grand", TentGrandBlock::new,
+                    () -> BlockBehaviour.Properties.of().strength(1.0f).sound(SoundType.WOOL).noOcclusion());
 
     // --- Floo Network ---
 

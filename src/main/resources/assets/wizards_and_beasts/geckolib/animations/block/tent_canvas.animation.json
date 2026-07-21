@@ -1,0 +1,31 @@
+{
+  "format_version": "1.8.0",
+  "_comment": "Exterior-geometry preview rig — idle is a hold pose; flap_open is stubbed for a future trigger and is never fired from Java in this pass.",
+  "animations": {
+    "animation.tent_canvas.idle": {
+      "loop": true,
+      "animation_length": 4.0,
+      "bones": {
+        "canvas_body": {
+          "position": {
+            "0.0": [0, 0, 0],
+            "2.0": [0, 0.15, 0],
+            "4.0": [0, 0, 0]
+          }
+        }
+      }
+    },
+    "animation.tent_canvas.flap_open": {
+      "loop": false,
+      "animation_length": 1.0,
+      "bones": {
+        "entrance_flap": {
+          "rotation": {
+            "0.0": [0, 0, 0],
+            "1.0": [-80, 0, 0]
+          }
+        }
+      }
+    }
+  }
+}

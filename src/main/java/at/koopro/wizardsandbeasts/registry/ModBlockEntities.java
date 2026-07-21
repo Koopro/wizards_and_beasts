@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.block.ExpansionFocusBlockEntity;
+import at.koopro.wizardsandbeasts.block.trunk.TentBlockEntity;
 import at.koopro.wizardsandbeasts.block.trunk.TrunkBlockEntity;
 import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlockEntity;
 import at.koopro.wizardsandbeasts.wand.bench.WandmakersBenchBlockEntity;
@@ -36,6 +37,18 @@ public final class ModBlockEntities {
                             ModBlocks.MASTERS_TRUNK.get(),
                             ModBlocks.MOODYS_TRUNK.get(),
                             ModBlocks.NEWTS_CASE.get())));
+
+    // Tent preview harness — one type per block (model choice lives at the renderer factory, see
+    // GeoRendererHelper.simpleBlock), not one shared type across both like TRUNK above.
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TentBlockEntity>> TENT_CANVAS =
+            BLOCK_ENTITY_TYPES.register("tent_canvas", () ->
+                    new BlockEntityType<>((pos, state) -> new TentBlockEntity(ModBlockEntities.TENT_CANVAS.get(), pos, state),
+                            Set.of(ModBlocks.TENT_CANVAS.get())));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TentBlockEntity>> TENT_GRAND =
+            BLOCK_ENTITY_TYPES.register("tent_grand", () ->
+                    new BlockEntityType<>((pos, state) -> new TentBlockEntity(ModBlockEntities.TENT_GRAND.get(), pos, state),
+                            Set.of(ModBlocks.TENT_GRAND.get())));
 
     private ModBlockEntities() {
     }

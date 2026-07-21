@@ -39,6 +39,13 @@ public class ClientSetup {
         event.registerEntityRenderer(ModEntities.RUNESPOOR.get(), GeoRendererHelper.simple("runespoor"));
         event.registerEntityRenderer(ModEntities.HIDEBEHIND.get(), GeoRendererHelper.simple("hidebehind"));
 
+        // Tent preview harness — exterior geometry only, see AUDIT_PUNCHLIST.md "Tent Models".
+        // Margins are generous cubes around the anchor block; grand tent gets more for its turret/flagpole height.
+        event.registerBlockEntityRenderer(at.koopro.wizardsandbeasts.registry.ModBlockEntities.TENT_CANVAS.get(),
+                GeoRendererHelper.simpleBlock("tent_canvas", 2.5));
+        event.registerBlockEntityRenderer(at.koopro.wizardsandbeasts.registry.ModBlockEntities.TENT_GRAND.get(),
+                GeoRendererHelper.simpleBlock("tent_grand", 4.0));
+
         // Generic data-driven creatures: one simple GeckoLib renderer per creature, keyed by id.
         // The ten dragon breeds get the breed-aware DragonRenderer (render-state scale + flame tint).
         for (at.koopro.wizardsandbeasts.registry.ModCreatures.Spec spec

@@ -1,0 +1,40 @@
+{
+  "format_version": "1.8.0",
+  "_comment": "Exterior-geometry preview rig — idle is a hold pose (banner flutter + gentle sway); flap_open is stubbed for a future trigger and is never fired from Java in this pass.",
+  "animations": {
+    "animation.tent_grand.idle": {
+      "loop": true,
+      "animation_length": 4.0,
+      "bones": {
+        "canvas_body": {
+          "position": {
+            "0.0": [0, 0, 0],
+            "2.0": [0, 0.15, 0],
+            "4.0": [0, 0, 0]
+          }
+        },
+        "banner": {
+          "rotation": {
+            "0.0": [0, 0, 0],
+            "1.0": [0, 8, 0],
+            "2.0": [0, 0, 0],
+            "3.0": [0, -8, 0],
+            "4.0": [0, 0, 0]
+          }
+        }
+      }
+    },
+    "animation.tent_grand.flap_open": {
+      "loop": false,
+      "animation_length": 1.0,
+      "bones": {
+        "entrance_flap": {
+          "rotation": {
+            "0.0": [0, 0, 0],
+            "1.0": [-80, 0, 0]
+          }
+        }
+      }
+    }
+  }
+}

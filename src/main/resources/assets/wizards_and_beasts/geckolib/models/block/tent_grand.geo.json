@@ -1,0 +1,226 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.tent_grand",
+        "texture_width": 64,
+        "texture_height": 64,
+        "visible_bounds_width": 4.5,
+        "visible_bounds_height": 4,
+        "visible_bounds_offset": [
+          0,
+          1.5,
+          0
+        ]
+      },
+      "bones": [
+        {
+          "name": "tent_root",
+          "pivot": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "canvas_body",
+          "pivot": [
+            0,
+            0,
+            0
+          ],
+          "parent": "tent_root",
+          "cubes": [
+            {
+              "origin": [-24, 0, -24],
+              "size": [48, 10, 48],
+              "uv": [0, 0]
+            },
+            {
+              "origin": [-18, 10, -18],
+              "size": [36, 10, 36],
+              "uv": [0, 0]
+            },
+            {
+              "origin": [-12, 20, -12],
+              "size": [24, 10, 24],
+              "uv": [0, 0]
+            },
+            {
+              "origin": [-6, 30, -6],
+              "size": [12, 10, 12],
+              "uv": [0, 0]
+            }
+          ]
+        },
+        {
+          "name": "entrance_flap",
+          "pivot": [
+            0,
+            20,
+            -24
+          ],
+          "parent": "canvas_body",
+          "cubes": [
+            {
+              "origin": [-6, 0, -25],
+              "size": [12, 20, 1],
+              "uv": [0, 0]
+            }
+          ]
+        },
+        {
+          "name": "chimney",
+          "pivot": [
+            16,
+            30,
+            10
+          ],
+          "parent": "canvas_body",
+          "cubes": [
+            {
+              "origin": [14, 30, 8],
+              "size": [4, 14, 4],
+              "uv": [0, 0]
+            }
+          ]
+        },
+        {
+          "name": "flagpole",
+          "pivot": [
+            0,
+            40,
+            0
+          ],
+          "parent": "canvas_body",
+          "cubes": [
+            {
+              "origin": [-1, 40, -1],
+              "size": [2, 20, 2],
+              "uv": [0, 0]
+            }
+          ]
+        },
+        {
+          "name": "banner",
+          "pivot": [
+            0,
+            56,
+            0
+          ],
+          "parent": "flagpole",
+          "cubes": [
+            {
+              "origin": [1, 50, -4],
+              "size": [1, 8, 8],
+              "uv": [0, 0]
+            }
+          ]
+        },
+        {
+          "name": "turret_front_left",
+          "pivot": [
+            -24,
+            0,
+            -24
+          ],
+          "parent": "canvas_body",
+          "cubes": [
+            {
+              "origin": [-27, 0, -27],
+              "size": [6, 30, 6],
+              "uv": [0, 0]
+            },
+            {
+              "origin": [-26, 30, -26],
+              "size": [4, 6, 4],
+              "uv": [0, 0]
+            }
+          ]
+        },
+        {
+          "name": "turret_front_right",
+          "pivot": [
+            24,
+            0,
+            -24
+          ],
+          "parent": "canvas_body",
+          "cubes": [
+            {
+              "origin": [21, 0, -27],
+              "size": [6, 30, 6],
+              "uv": [0, 0]
+            },
+            {
+              "origin": [22, 30, -26],
+              "size": [4, 6, 4],
+              "uv": [0, 0]
+            }
+          ]
+        },
+        {
+          "name": "turret_back_left",
+          "pivot": [
+            -24,
+            0,
+            24
+          ],
+          "parent": "canvas_body",
+          "cubes": [
+            {
+              "origin": [-27, 0, 21],
+              "size": [6, 30, 6],
+              "uv": [0, 0]
+            },
+            {
+              "origin": [-26, 30, 22],
+              "size": [4, 6, 4],
+              "uv": [0, 0]
+            }
+          ]
+        },
+        {
+          "name": "turret_back_right",
+          "pivot": [
+            24,
+            0,
+            24
+          ],
+          "parent": "canvas_body",
+          "cubes": [
+            {
+              "origin": [21, 0, 21],
+              "size": [6, 30, 6],
+              "uv": [0, 0]
+            },
+            {
+              "origin": [22, 30, 22],
+              "size": [4, 6, 4],
+              "uv": [0, 0]
+            }
+          ]
+        },
+        {
+          "name": "fx_entrance",
+          "pivot": [
+            0,
+            10,
+            -25
+          ],
+          "parent": "tent_root"
+        },
+        {
+          "name": "fx_ridge",
+          "pivot": [
+            0,
+            40,
+            0
+          ],
+          "parent": "canvas_body"
+        }
+      ]
+    }
+  ]
+}
