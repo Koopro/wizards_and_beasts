@@ -167,6 +167,11 @@ public class BroomEntity extends Entity implements GeoEntity {
     protected void removePassenger(Entity passenger) {
         writeDurabilityBackToStack();
         super.removePassenger(passenger);
+        // Reset the per-rider input-sequence baseline. Without this, the previous rider's last accepted
+        // sequence -- or a crafted Integer.MAX_VALUE -- would reject every input from the next rider,
+        // permanently jamming the broom. The monotonic guard only needs to hold within one rider's session.
+        lastInputSequence = -1;
+        lastInputGameTick = Long.MIN_VALUE;
     }
 
     @Override
