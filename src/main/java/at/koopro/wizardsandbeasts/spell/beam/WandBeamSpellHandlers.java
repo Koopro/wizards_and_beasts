@@ -99,18 +99,36 @@ final class WandBeamSpellHandlers {
     }
 
     static void clearSessionEffects(ServerPlayer player, WandBeamSession s) {
-        if (s.lastCrucioTarget != null) {
-            LivingEntity prev = findLivingInLevel(player, s.lastCrucioTarget);
-            if (prev != null) {
-                stripCrucioEffects(prev);
-            }
+        UUID casterId = player.getUUID();
+        releaseCrucioTarget(player, s, casterId);
+        releaseLeviosaTarget(player, s, casterId);
+    }
+
+    /** Strips this caster's Crucio effects from its held target and drops the claim, if any. */
+    private static void releaseCrucioTarget(ServerPlayer caster, WandBeamSession s, UUID casterId) {
+        if (s.lastCrucioTarget == null) {
+            return;
         }
-        if (s.lastLeviosaTarget != null) {
-            Entity prevLeviosa = findEntityInLevel(player, s.lastLeviosaTarget);
-            if (prevLeviosa != null) {
-                clearLeviosaEffects(prevLeviosa, s.lastLeviosaHadNoGravity);
-            }
+        LivingEntity prev = findLivingInLevel(caster, s.lastCrucioTarget);
+        if (prev != null) {
+            stripCrucioEffects(prev);
         }
+        BeamTargetClaims.release(s.lastCrucioTarget, casterId);
+        s.lastCrucioTarget = null;
+    }
+
+    /** Restores this caster's Leviosa target's gravity and drops the claim, if any. */
+    private static void releaseLeviosaTarget(ServerPlayer caster, WandBeamSession s, UUID casterId) {
+        if (s.lastLeviosaTarget == null) {
+            return;
+        }
+        Entity prev = findEntityInLevel(caster, s.lastLeviosaTarget);
+        if (prev != null) {
+            clearLeviosaEffects(prev, s.lastLeviosaHadNoGravity);
+        }
+        BeamTargetClaims.release(s.lastLeviosaTarget, casterId);
+        s.lastLeviosaTarget = null;
+        s.lastLeviosaHadNoGravity = null;
     }
 
     static void handleAvada(ServerLevel level, ServerPlayer caster, String spellId,
@@ -161,23 +179,21 @@ final class WandBeamSpellHandlers {
         if (!ModuleManager.isEnabled(Module.DARK_ARTS)) {
             return;
         }
+        UUID casterId = caster.getUUID();
         if (target == null) {
-            if (s.lastCrucioTarget != null) {
-                LivingEntity prev = findLivingInLevel(caster, s.lastCrucioTarget);
-                if (prev != null) {
-                    stripCrucioEffects(prev);
-                }
-                s.lastCrucioTarget = null;
-            }
+            releaseCrucioTarget(caster, s, casterId);
             return;
         }
 
         UUID tid = target.getUUID();
         if (s.lastCrucioTarget != null && !s.lastCrucioTarget.equals(tid)) {
-            LivingEntity prev = findLivingInLevel(caster, s.lastCrucioTarget);
-            if (prev != null) {
-                stripCrucioEffects(prev);
-            }
+            releaseCrucioTarget(caster, s, casterId);
+        }
+
+        // Another wizard already holds this target under their beam: a second Crucio is contested and
+        // applies nothing, so neither caster's cleanup can strip the other's active curse.
+        if (!BeamTargetClaims.claim(tid, casterId)) {
+            return;
         }
 
         s.lastCrucioTarget = tid;
@@ -213,29 +229,25 @@ final class WandBeamSpellHandlers {
 
     static void handleLeviosaChannel(ServerPlayer caster, String spellId, @Nullable Entity target,
                                      WandBeamSession s, float maxReach) {
+        UUID casterId = caster.getUUID();
         if (target == null) {
             s.leviosaMissTicks++;
             if (s.leviosaMissTicks <= LEVIOSA_TARGET_GRACE_MISS_TICKS) {
                 return;
             }
-            if (s.lastLeviosaTarget != null) {
-                Entity previous = findEntityInLevel(caster, s.lastLeviosaTarget);
-                if (previous != null) {
-                    clearLeviosaEffects(previous, s.lastLeviosaHadNoGravity);
-                }
-                s.lastLeviosaTarget = null;
-                s.lastLeviosaHadNoGravity = null;
-            }
+            releaseLeviosaTarget(caster, s, casterId);
             return;
         }
         s.leviosaMissTicks = 0;
 
         UUID tid = target.getUUID();
         if (s.lastLeviosaTarget != null && !s.lastLeviosaTarget.equals(tid)) {
-            Entity previous = findEntityInLevel(caster, s.lastLeviosaTarget);
-            if (previous != null) {
-                clearLeviosaEffects(previous, s.lastLeviosaHadNoGravity);
-            }
+            releaseLeviosaTarget(caster, s, casterId);
+        }
+
+        // Another wizard already holds this target: don't fight over its velocity (last-tick-wins tug).
+        if (!BeamTargetClaims.claim(tid, casterId)) {
+            return;
         }
 
         if (!tid.equals(s.lastLeviosaTarget)) {
