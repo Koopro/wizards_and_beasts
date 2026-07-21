@@ -43,6 +43,13 @@ public final class ImperioServerLogic {
         if (!ModuleManager.isEnabled(Module.DARK_ARTS)) {
             return;
         }
+        // If the target is already under another wizard's Imperius, wrest control cleanly: detach and
+        // notify the displaced caster rather than leaving them issuing commands that silently no-op
+        // (their stale CASTER_TO_VICTIM entry would point at a victim that no longer answers to them).
+        ImperioControlState prior = target.getData(ModAttachments.IMPERIO_CONTROL_STATE.get());
+        if (prior.isControlled() && !prior.controllerUUID().equals(caster.getUUID())) {
+            detachController(level, prior.controllerUUID(), target.getUUID());
+        }
         ImperioControlState state = new ImperioControlState(true, caster.getUUID(), durationTicks, 0f,
                 ImperioCommand.FOLLOW_CASTER.ordinal(), false);
         target.setData(ModAttachments.IMPERIO_CONTROL_STATE.get(), state);
@@ -160,6 +167,22 @@ public final class ImperioServerLogic {
         ServerPlayer controller = level.getServer().getPlayerList().getPlayer(controllerUuid);
         if (controller != null) {
             PacketDistributor.sendToPlayer(controller, new ImperioVictimBoundS2CPayload(new UUID(0L, 0L)));
+        }
+    }
+
+    /**
+     * Detaches a displaced caster's Imperius bookkeeping when their victim is taken over by another
+     * caster, so the old controller stops "owning" a victim that no longer obeys them and their HUD
+     * clears. Does not touch the victim's control state — the new caster overwrites that immediately.
+     */
+    private static void detachController(ServerLevel level, UUID controllerUuid, UUID victimUuid) {
+        CASTER_TO_VICTIM.remove(controllerUuid, victimUuid);
+        ServerPlayer controller = level.getServer().getPlayerList().getPlayer(controllerUuid);
+        if (controller != null) {
+            PacketDistributor.sendToPlayer(controller, new ImperioVictimBoundS2CPayload(new UUID(0L, 0L)));
+            controller.displayClientMessage(
+                    Component.literal("Your hold on the Imperius Curse is broken.").withStyle(ChatFormatting.DARK_RED),
+                    true);
         }
     }
 
