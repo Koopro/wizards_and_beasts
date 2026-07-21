@@ -79,56 +79,15 @@ public final class SpellCastService {
             applyHumanFailedCastStress(player);
             return CastResult.REJECTED;
         }
-        String spellId = data.getActiveSpellId();
-        if (spellId == null) {
-            rejectWithHumanStress(player, SpellRejectCodes.NO_ACTIVE_SPELL);
-            return CastResult.REJECTED;
-        }
-
-        Spell spell = Spells.byId(spellId);
-        if (spell == null) {
-            rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.UNKNOWN_SPELL, spellId));
-            return CastResult.REJECTED;
-        }
+        String activeSpellId = data.getActiveSpellId();
+        Spell spell = activeSpellId == null ? null : Spells.byId(activeSpellId);
         // Canonicalize: known-spell/cooldown/stat maps are keyed by the registered id, which for JSON
         // spells is namespaced. A bare id in the loadout slot (older saves, authored swap targets)
-        // resolves to the same spell but would miss every keyed lookup below.
-        spellId = spell.getId();
-
-        if (!data.knowsSpell(spellId)) {
-            rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.SPELL_NOT_KNOWN, spellId));
-            return CastResult.REJECTED;
-        }
-        if (ObscurialRules.isObscurialAbility(spell)) {
-            rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.ABILITY_REQUIRES_ABILITY_INPUT, spellId));
-            player.displayClientMessage(Component.literal("\u00A75Use Obscurial ability keys (N/M) while in obscurus form."), true);
-            return CastResult.REJECTED;
-        }
-
-        if (Config.enforceSpellRequirements && !spell.getRequirement().isMet(player, data)) {
-            rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.REQUIREMENTS_UNMET, spellId));
-            player.displayClientMessage(
-                    Component.literal("\u00A7c" + spell.getRequirement().getDescription()),
-                    true);
-            return CastResult.REJECTED;
-        }
+        // resolves to the same spell but would miss every keyed lookup below. Falls back to the raw id
+        // when the spell doesn't resolve (the UNKNOWN_SPELL gate then fires with that raw id).
+        String spellId = spell != null ? spell.getId() : activeSpellId;
 
         boolean obscurialDark = ObscurialRules.isDarkForm(player.getData(ModAttachments.HERITAGE_DATA.get()));
-        if (ObscurialRules.isDarkFormOnlySpell(spell) && !obscurialDark) {
-            rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.OBSCURIAL_DARK_ONLY_OUTSIDE_FORM, spellId));
-            player.displayClientMessage(Component.literal("\u00A75This obscurus ability can only be cast in dark form."), true);
-            return CastResult.REJECTED;
-        }
-
-        if (obscurialDark && !ObscurialRules.isSpellAllowedInDarkForm(spell)) {
-            ObscurialCombatRules.applyBlockedCastStressSpike(player);
-            ObscurialCombatRules.applyBlockedCastPressureBacklash(player);
-            debugReject(player, SpellRejectCodes.withDetail(SpellRejectCodes.OBSCURIAL_DARK_RESTRICTED, spellId));
-            player.displayClientMessage(
-                    Component.literal("\u00A75Obscurus rejects that spell and lashes back."),
-                    true);
-            return CastResult.REJECTED;
-        }
 
         // Cooldown clock invariant: ALWAYS use getGameTime() (monotonic, shared across every dimension
         // via DerivedLevelData — getDayTime()/fixed_time do NOT affect it). Cooldowns are stored as
@@ -136,12 +95,54 @@ public final class SpellCastService {
         // reader (isOnCooldown, the HUD) must read the same clock. Never substitute getDayTime() or a
         // System-millis clock, and never reset/re-stamp an active cooldown.
         long currentTick = serverLevel.getGameTime();
-        if (data.isOnCooldown(spellId, currentTick)) {
-            rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.COOLDOWN_ACTIVE, spellId));
-            return CastResult.REJECTED;
-        }
-        if (data.isGlobalCooldownActive(currentTick)) {
-            rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.COOLDOWN_ACTIVE, "global_cooldown"));
+        // Deterministic reject precedence (no-active-spell -> global cooldown) is decided purely in
+        // SpellCastGate; the switch reproduces each gate's exact player feedback. The bond and
+        // canUseWand guards above, and the random misfires below, stay inline (side-effecting/ordered).
+        SpellCastGate gate = SpellCastGate.evaluate(new SpellCastGate.Inputs(
+                activeSpellId != null,
+                spell != null,
+                spell != null && data.knowsSpell(spellId),
+                spell != null && ObscurialRules.isObscurialAbility(spell),
+                spell == null || !Config.enforceSpellRequirements || spell.getRequirement().isMet(player, data),
+                spell != null && ObscurialRules.isDarkFormOnlySpell(spell) && !obscurialDark,
+                spell != null && obscurialDark && !ObscurialRules.isSpellAllowedInDarkForm(spell),
+                data.isOnCooldown(spellId, currentTick),
+                data.isGlobalCooldownActive(currentTick)));
+        if (gate != null) {
+            switch (gate) {
+                case NO_ACTIVE_SPELL ->
+                        rejectWithHumanStress(player, SpellRejectCodes.NO_ACTIVE_SPELL);
+                case UNKNOWN_SPELL ->
+                        rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.UNKNOWN_SPELL, activeSpellId));
+                case SPELL_NOT_KNOWN ->
+                        rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.SPELL_NOT_KNOWN, spellId));
+                case OBSCURIAL_ABILITY_INPUT -> {
+                    rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.ABILITY_REQUIRES_ABILITY_INPUT, spellId));
+                    player.displayClientMessage(Component.literal("§5Use Obscurial ability keys (N/M) while in obscurus form."), true);
+                }
+                case REQUIREMENTS_UNMET -> {
+                    rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.REQUIREMENTS_UNMET, spellId));
+                    player.displayClientMessage(
+                            Component.literal("§c" + spell.getRequirement().getDescription()),
+                            true);
+                }
+                case OBSCURIAL_DARK_ONLY -> {
+                    rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.OBSCURIAL_DARK_ONLY_OUTSIDE_FORM, spellId));
+                    player.displayClientMessage(Component.literal("§5This obscurus ability can only be cast in dark form."), true);
+                }
+                case OBSCURIAL_DARK_RESTRICTED -> {
+                    ObscurialCombatRules.applyBlockedCastStressSpike(player);
+                    ObscurialCombatRules.applyBlockedCastPressureBacklash(player);
+                    debugReject(player, SpellRejectCodes.withDetail(SpellRejectCodes.OBSCURIAL_DARK_RESTRICTED, spellId));
+                    player.displayClientMessage(
+                            Component.literal("§5Obscurus rejects that spell and lashes back."),
+                            true);
+                }
+                case ON_COOLDOWN ->
+                        rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.COOLDOWN_ACTIVE, spellId));
+                case GLOBAL_COOLDOWN ->
+                        rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.COOLDOWN_ACTIVE, "global_cooldown"));
+            }
             return CastResult.REJECTED;
         }
 
@@ -221,10 +222,7 @@ public final class SpellCastService {
 
         float cooldownMult = castContext.modifiers().finalCooldown();
         cooldownMult *= castContext.scalingProfile().cooldownMult();
-        int baseCooldown = spell.getBaseCooldownTicks();
-        int cooldown = Math.max(1, Math.round(baseCooldown * cooldownMult));
-        int reductionFloor = Math.max(1, Math.round(baseCooldown * 0.5f));
-        cooldown = Math.max(cooldown, reductionFloor);
+        int cooldown = SpellCastGate.resolveCooldownTicks(spell.getBaseCooldownTicks(), cooldownMult);
         long expiryTick = currentTick + cooldown;
         data.setCooldown(spellId, expiryTick);
         data.incrementCastCount(spellId);
