@@ -16,6 +16,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
@@ -47,6 +48,16 @@ public class WizardsAndBeastsCommands {
             OWLExaminationHandler.syncToPlayer(player);
             PlayerStatsSyncPayload.syncToPlayer(player);
             DarkCorruptionService.syncDisplay(player);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onLivingDeath(LivingDeathEvent event) {
+        // Vanilla's stopUsingItem() on death halts WandItem.onUseTick without routing through any hook
+        // this mod listens to, so a held beam channel (Imperio control, Crucio, Leviosa, ...) would keep
+        // its victim under the effect for as long as the caster sits on the death screen. End it here.
+        if (event.getEntity() instanceof ServerPlayer player) {
+            WandBeamChannelLogic.endChannel(player);
         }
     }
 
