@@ -139,6 +139,9 @@ dependencies {
 
     testImplementation platform('org.junit:junit-bom:5.11.4')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    // Gradle 9 no longer puts the JUnit Platform launcher on the test runtime
+    // classpath automatically (Gradle 8 did). Version comes from the BOM above.
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // Example mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
