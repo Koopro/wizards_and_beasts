@@ -9,6 +9,7 @@ import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.network.spell.SpellDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
+import at.koopro.wizardsandbeasts.spell.core.SpellFamily;
 import at.koopro.wizardsandbeasts.spell.core.Spells;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.spell.lib.SpellHelper;
@@ -73,7 +74,8 @@ public sealed interface SpellEffectComponent permits
         SpellEffectComponent.Repair,
         SpellEffectComponent.Explosion,
         SpellEffectComponent.AoeApply,
-        SpellEffectComponent.SwapActiveSpell {
+        SpellEffectComponent.SwapActiveSpell,
+        SpellEffectComponent.ParticleBurst {
 
     Logger LOGGER = LogUtils.getLogger();
 
@@ -124,7 +126,8 @@ public sealed interface SpellEffectComponent permits
         REPAIR("repair", Repair.CODEC),
         EXPLOSION("explosion", Explosion.CODEC),
         AOE_APPLY("aoe_apply", AoeApply.CODEC),
-        SWAP_ACTIVE_SPELL("swap_active_spell", SwapActiveSpell.CODEC);
+        SWAP_ACTIVE_SPELL("swap_active_spell", SwapActiveSpell.CODEC),
+        PARTICLE_BURST("particle_burst", ParticleBurst.CODEC);
 
         public static final Codec<Type> CODEC = StringRepresentable.fromValues(Type::values);
 
@@ -544,6 +547,34 @@ public sealed interface SpellEffectComponent permits
             }
             data.setLoadoutSpell(data.getActiveSlot(), canonicalId);
             SpellDataSyncS2CPayload.syncToPlayer(ctx.caster());
+        }
+    }
+
+    /**
+     * Emits a cosmetic tinted particle burst at the application position (self = caster's eye, impact =
+     * target/point). {@code family} picks the FX particle, {@code color} its ARGB tint; {@code count} and
+     * {@code spread} shape the puff. Purely visual — server-spawned so every nearby client sees it — this
+     * is the data-driven form of the legacy id-keyed cast bursts (e.g. Riddikulus).
+     */
+    record ParticleBurst(SpellFamily family, int color, int count, double spread)
+            implements SpellEffectComponent {
+        private static final Codec<SpellFamily> FAMILY_CODEC = StringRepresentable.fromValues(SpellFamily::values);
+        public static final MapCodec<ParticleBurst> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+                FAMILY_CODEC.optionalFieldOf("family", SpellFamily.ARCANE).forGetter(ParticleBurst::family),
+                Codec.INT.fieldOf("color").forGetter(ParticleBurst::color),
+                Codec.INT.optionalFieldOf("count", 12).forGetter(ParticleBurst::count),
+                Codec.DOUBLE.optionalFieldOf("spread", 0.2).forGetter(ParticleBurst::spread)
+        ).apply(inst, ParticleBurst::new));
+
+        @Override
+        public Type type() {
+            return Type.PARTICLE_BURST;
+        }
+
+        @Override
+        public void apply(SpellEffectContext ctx) {
+            if (!standardEnabled() || count <= 0) return;
+            SpellHelper.spawnBurst(ctx.level(), family, color, ctx.position(), count, spread);
         }
     }
 }

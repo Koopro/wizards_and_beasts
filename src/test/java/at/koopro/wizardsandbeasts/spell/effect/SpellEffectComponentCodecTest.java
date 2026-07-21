@@ -96,6 +96,27 @@ class SpellEffectComponentCodecTest {
     }
 
     @Test
+    void particleBurst_defaultsAndRoundTrip() {
+        // Only color required; family/count/spread default (matches the migrated Riddikulus authoring).
+        SpellEffectComponent c = parse("{ \"type\": \"particle_burst\", \"color\": -13210 }");
+        SpellEffectComponent.ParticleBurst pb = assertInstanceOf(SpellEffectComponent.ParticleBurst.class, c);
+        assertEquals(at.koopro.wizardsandbeasts.spell.core.SpellFamily.ARCANE, pb.family());
+        assertEquals(-13210, pb.color());
+        assertEquals(12, pb.count());
+        assertEquals(0.2, pb.spread(), 1e-9);
+        assertRoundTrip(c);
+
+        SpellEffectComponent full = parse("""
+                { "type": "particle_burst", "family": "fire", "color": 255, "count": 30, "spread": 0.5 }
+                """);
+        SpellEffectComponent.ParticleBurst pf = assertInstanceOf(SpellEffectComponent.ParticleBurst.class, full);
+        assertEquals(at.koopro.wizardsandbeasts.spell.core.SpellFamily.FIRE, pf.family());
+        assertEquals(30, pf.count());
+        assertEquals(0.5, pf.spread(), 1e-9);
+        assertRoundTrip(full);
+    }
+
+    @Test
     void componentList_parsesAsField() {
         var result = SpellEffectComponent.CODEC.listOf().parse(JsonOps.INSTANCE,
                 GSON.fromJson("""
