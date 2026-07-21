@@ -138,16 +138,10 @@ public final class SpellCastService {
         long currentTick = serverLevel.getGameTime();
         if (data.isOnCooldown(spellId, currentTick)) {
             rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.COOLDOWN_ACTIVE, spellId));
-            if (ModuleManager.isEnabled(Module.WANDS_AND_SPELLS)) {
-                SpellDeniedS2CPayload.sendTo(player);
-            }
             return CastResult.REJECTED;
         }
         if (data.isGlobalCooldownActive(currentTick)) {
             rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.COOLDOWN_ACTIVE, "global_cooldown"));
-            if (ModuleManager.isEnabled(Module.WANDS_AND_SPELLS)) {
-                SpellDeniedS2CPayload.sendTo(player);
-            }
             return CastResult.REJECTED;
         }
 
@@ -180,9 +174,6 @@ public final class SpellCastService {
                 }
                 debugReject(player, SpellRejectCodes.withDetail(SpellRejectCodes.COLLAPSE_INSTABILITY_FIZZLE, spellId));
                 player.displayClientMessage(Component.literal("\u00A75Residual obscurus instability disrupts your spell."), true);
-                if (ModuleManager.isEnabled(Module.WANDS_AND_SPELLS)) {
-                    SpellDeniedS2CPayload.sendTo(player);
-                }
                 return CastResult.REJECTED;
             }
         }
@@ -196,9 +187,6 @@ public final class SpellCastService {
             }
             ObscurialCombatRules.consumeCastSpike(player);
             player.displayClientMessage(Component.literal("\u00A74Your obscurus destabilizes the cast and backlashes."), true);
-            if (ModuleManager.isEnabled(Module.WANDS_AND_SPELLS)) {
-                SpellDeniedS2CPayload.sendTo(player);
-            }
             return CastResult.REJECTED;
         }
 
@@ -263,6 +251,17 @@ public final class SpellCastService {
         DebugHooks.logSpellCast(player, "cast_reject", reason);
         if (Config.debugLogSpellGateReasons) {
             LOGGER.debug("SpellCast rejected for '{}' reason={}", player.getName().getString(), reason);
+        }
+        // Central player feedback for every reject routed through here: the denied sound always, plus a
+        // short action-bar reason for the codes that don't carry their own (richer) message. Rich sites
+        // (bond, requirements, Obscurial, Gamp) map to null here, so their bespoke text is never doubled.
+        if (ModuleManager.isEnabled(Module.WANDS_AND_SPELLS)) {
+            SpellDeniedS2CPayload.sendTo(player);
+            String messageKey = SpellRejectCodes.castRejectMessageKey(reason);
+            if (messageKey != null) {
+                player.displayClientMessage(
+                        Component.translatable(messageKey).withStyle(ChatFormatting.GRAY), true);
+            }
         }
     }
 
