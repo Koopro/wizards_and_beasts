@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.command;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.corruption.DarkCorruptionService;
 import at.koopro.wizardsandbeasts.effect.LumosFieldEffect;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.item.wand.DebugWandState;
@@ -45,6 +46,7 @@ public class WizardsAndBeastsCommands {
             PlayerStateSyncService.syncFullLoginState(player, needsSelection);
             OWLExaminationHandler.syncToPlayer(player);
             PlayerStatsSyncPayload.syncToPlayer(player);
+            DarkCorruptionService.syncDisplay(player);
         }
     }
 
@@ -54,6 +56,7 @@ public class WizardsAndBeastsCommands {
             WandBeamChannelLogic.endChannel(player);
             PlayerStateSyncService.syncFullLoginState(player, false);
             PlayerStatsSyncPayload.syncToPlayer(player);
+            DarkCorruptionService.syncDisplay(player);
         }
     }
 

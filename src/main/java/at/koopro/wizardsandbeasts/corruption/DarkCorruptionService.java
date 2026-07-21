@@ -1,8 +1,10 @@
 package at.koopro.wizardsandbeasts.corruption;
 
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
+import at.koopro.wizardsandbeasts.registry.ModAttributes;
 import at.koopro.wizardsandbeasts.skill.vocation.VocationAbilityHooks;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.NullMarked;
 
@@ -35,14 +37,36 @@ public final class DarkCorruptionService {
         }
         float scaled = VocationAbilityHooks.scaleCorruptionGain(player, baseAmount);
         float next = Math.max(0.0f, Math.min(MAX, current + scaled));
-        player.setData(ModAttachments.DARK_CORRUPTION.get(), next);
+        apply(player, next);
         return next;
     }
 
     /** Relieves corruption (cleansing rites, remorse). Clamped at zero; never vocation-scaled. */
     public static float relieve(ServerPlayer player, float amount) {
         float next = Math.max(0.0f, get(player) - Math.max(0.0f, amount));
-        player.setData(ModAttachments.DARK_CORRUPTION.get(), next);
+        apply(player, next);
         return next;
+    }
+
+    /**
+     * Pushes the persisted attachment value onto the display {@link ModAttributes#DARK_CORRUPTION}
+     * Attribute. The attachment is the source of truth; the syncable Attribute is only a client-visible
+     * mirror the character sheet reads. Call on login and respawn, since a freshly spawned player entity
+     * starts the Attribute at its default (0) while {@code copyOnDeath} carries the real value across.
+     */
+    public static void syncDisplay(ServerPlayer player) {
+        mirrorToAttribute(player, get(player));
+    }
+
+    private static void apply(ServerPlayer player, float value) {
+        player.setData(ModAttachments.DARK_CORRUPTION.get(), value);
+        mirrorToAttribute(player, value);
+    }
+
+    private static void mirrorToAttribute(ServerPlayer player, float value) {
+        AttributeInstance instance = player.getAttribute(ModAttributes.DARK_CORRUPTION);
+        if (instance != null) {
+            instance.setBaseValue(value);
+        }
     }
 }

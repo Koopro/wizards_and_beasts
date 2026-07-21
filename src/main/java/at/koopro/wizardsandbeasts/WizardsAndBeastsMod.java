@@ -103,6 +103,7 @@ public class WizardsAndBeastsMod {
 
         modEventBus.addListener(ModNetwork::register);
         modEventBus.addListener(EntityAttributeBindings::registerAll);
+        modEventBus.addListener(ModAttributes::addPlayerAttributes);
         modEventBus.addListener(at.koopro.wizardsandbeasts.event.bestiary.niffler.NifflerSpawnHandler::registerSpawnPlacements);
         modEventBus.addListener(at.koopro.wizardsandbeasts.entity.beast.BeastSpawnHandler::registerSpawnPlacements);
         modEventBus.addListener(WandDatapackRegistries::registerDatapackRegistries);
