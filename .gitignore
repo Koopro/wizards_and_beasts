@@ -114,6 +114,9 @@ gradle-app.setting
 run/
 runs/
 
+# Game run logs (including rotated .log.gz archives)
+logs/
+
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
 
