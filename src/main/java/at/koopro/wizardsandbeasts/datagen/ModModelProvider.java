@@ -215,6 +215,12 @@ public class ModModelProvider extends ModelProvider {
         blockModels.createTrivialBlock(ModBlocks.MOODYS_TRUNK.get(), TexturedModel.CUBE);
         blockModels.createTrivialBlock(ModBlocks.NEWTS_CASE.get(), TexturedModel.CUBE);
 
+        // Tents render entirely through GeoBlockRenderer (RenderShape.INVISIBLE), so these models are never
+        // drawn — they exist so the blocks have a blockstate at all (no "Missing model for variant" spam)
+        // and so break/step particles pick up the tent texture.
+        blockModels.createTrivialBlock(ModBlocks.TENT_CANVAS.get(), TexturedModel.LEAVES);
+        blockModels.createTrivialBlock(ModBlocks.TENT_GRAND.get(), TexturedModel.LEAVES);
+
         blockModels.createTrivialBlock(ModBlocks.WANDMAKERS_BENCH.get(), TexturedModel.LEAVES);
         blockModels.createTrivialBlock(ModBlocks.FLOO_FIREPLACE.get(), TexturedModel.LEAVES);
         blockModels.createTrivialBlock(ModBlocks.EXAMINATION_DESK.get(), TexturedModel.LEAVES);
