@@ -10,6 +10,7 @@
   "castType": "projectile",
   "requirement": { "type": "knows", "prerequisiteId": "flipendo" },
   "effects": [
-    { "type": "apply_effect", "effect": "wizards_and_beasts:stupefy", "duration": 100, "amplifier": 0, "target": true }
+    { "type": "apply_effect", "effect": "wizards_and_beasts:stupefy", "duration": 100, "amplifier": 0, "target": true },
+    { "type": "interrupt_cast", "lock_ticks": 30 }
   ]
 }

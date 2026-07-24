@@ -75,6 +75,7 @@ public sealed interface SpellEffectComponent permits
         SpellEffectComponent.Explosion,
         SpellEffectComponent.AoeApply,
         SpellEffectComponent.SwapActiveSpell,
+        SpellEffectComponent.InterruptCast,
         SpellEffectComponent.ParticleBurst {
 
     Logger LOGGER = LogUtils.getLogger();
@@ -127,6 +128,7 @@ public sealed interface SpellEffectComponent permits
         EXPLOSION("explosion", Explosion.CODEC),
         AOE_APPLY("aoe_apply", AoeApply.CODEC),
         SWAP_ACTIVE_SPELL("swap_active_spell", SwapActiveSpell.CODEC),
+        INTERRUPT_CAST("interrupt_cast", InterruptCast.CODEC),
         PARTICLE_BURST("particle_burst", ParticleBurst.CODEC);
 
         public static final Codec<Type> CODEC = StringRepresentable.fromValues(Type::values);
@@ -583,6 +585,35 @@ public sealed interface SpellEffectComponent permits
             }
             data.setLoadoutSpell(data.getActiveSlot(), canonicalId);
             SpellDataSyncS2CPayload.syncToPlayer(ctx.caster());
+        }
+    }
+
+    /**
+     * Interrupts the impact target's spellcasting: cancels an in-progress wand beam channel (players
+     * only) and langlocks them for {@code lock_ticks} so they can't immediately re-cast. No-ops on the
+     * caster. The anti-caster payload for Stupefy / Finite Incantatem.
+     */
+    record InterruptCast(int lockTicks) implements SpellEffectComponent {
+        public static final MapCodec<InterruptCast> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+                Codec.INT.optionalFieldOf("lock_ticks", 30).forGetter(InterruptCast::lockTicks)
+        ).apply(inst, InterruptCast::new));
+
+        @Override
+        public Type type() {
+            return Type.INTERRUPT_CAST;
+        }
+
+        @Override
+        public void apply(SpellEffectContext ctx) {
+            if (!standardEnabled()) return;
+            LivingEntity subject = ctx.subject();
+            if (subject == ctx.caster()) return;
+            if (subject instanceof net.minecraft.server.level.ServerPlayer target) {
+                at.koopro.wizardsandbeasts.spell.beam.WandBeamChannelLogic.endChannel(target);
+            }
+            subject.addEffect(new MobEffectInstance(
+                    at.koopro.wizardsandbeasts.effect.ModEffects.LANGLOCK,
+                    Math.max(1, lockTicks), 0, false, true, true));
         }
     }
 
