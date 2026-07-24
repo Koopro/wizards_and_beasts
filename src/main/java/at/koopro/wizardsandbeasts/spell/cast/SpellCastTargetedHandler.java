@@ -344,9 +344,19 @@ final class SpellCastTargetedHandler {
     static boolean handleAlohomora(ServerLevel level, BlockPos pos, ServerPlayer caster, Spell spell) {
         BlockState state = level.getBlockState(pos);
         if (ColloportusLockStore.isLocked(level, pos)) {
+            // Break the seal — but only a proficient caster can undo a Colloportus barricade.
+            Proficiency sealProf = spell.getProficiency(caster);
+            if (sealProf == Proficiency.PROFICIENT || sealProf == Proficiency.MASTERED) {
+                ColloportusLockStore.unlock(level, pos);
+                level.playSound(null, pos, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.PLAYERS, 0.6f, 1.2f);
+                caster.displayClientMessage(
+                        Component.literal("Alohomora breaks the seal.").withStyle(ChatFormatting.AQUA), true);
+                return true;
+            }
             level.playSound(null, pos, SoundEvents.VILLAGER_NO, SoundSource.PLAYERS, 0.55f, 1.0f);
             caster.displayClientMessage(
-                    Component.literal("Colloportus holds — Alohomora cannot open this.").withStyle(ChatFormatting.DARK_RED),
+                    Component.literal("Colloportus holds — you aren't skilled enough to break it.")
+                            .withStyle(ChatFormatting.DARK_RED),
                     true);
             return false;
         }

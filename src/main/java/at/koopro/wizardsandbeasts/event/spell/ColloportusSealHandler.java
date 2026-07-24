@@ -18,6 +18,10 @@ public final class ColloportusSealHandler {
         if (!(event.getLevel() instanceof ServerLevel level)) {
             return;
         }
-        ColloportusLockStore.unlock(level, event.getPos());
+        // Barricade: a sealed block cannot be broken while the Colloportus lock holds. It is undone by
+        // Alohomora (at proficiency) or when the lock expires — not by brute force.
+        if (ColloportusLockStore.isLocked(level, event.getPos())) {
+            event.setCanceled(true);
+        }
     }
 }
