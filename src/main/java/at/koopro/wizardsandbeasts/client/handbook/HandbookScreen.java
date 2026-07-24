@@ -157,7 +157,9 @@ public final class HandbookScreen extends Screen {
 
         // Ministry "M" emblem crest, centred above the title.
         int em = 26;
-        gg.blit(RenderPipelines.GUI_TEXTURED, TEX_EMBLEM, lcx - em / 2, ly, 0.0F, 0.0F, em, em, 72, 72);
+        // Scale the whole 72×72 crest down into em×em (12-arg blit). The 10-arg overload would sample
+        // only a 26×26 corner of the source, cropping the emblem to its top-left quarter.
+        gg.blit(RenderPipelines.GUI_TEXTURED, TEX_EMBLEM, lcx - em / 2, ly, 0.0F, 0.0F, em, em, 72, 72, 72, 72);
         ly += em + 4;
 
         titleBox(gg, lcx, lx0, lx1, ly, Component.translatable("gui.wizards_and_beasts.handbook.title"));

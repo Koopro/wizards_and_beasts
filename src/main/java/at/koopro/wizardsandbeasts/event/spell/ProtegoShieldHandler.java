@@ -28,6 +28,12 @@ public final class ProtegoShieldHandler {
         player.addTag(PROTEGO_ACTIVE_TAG);
     }
 
+    /** Ends the incoming-damage ward early — called when the shield entity shatters before expiry. */
+    public static void deactivate(ServerPlayer player) {
+        PROTEGO_EXPIRY_TICKS.remove(player.getUUID());
+        player.removeTag(PROTEGO_ACTIVE_TAG);
+    }
+
     @SubscribeEvent
     public static void onIncomingDamage(LivingIncomingDamageEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;

@@ -15,7 +15,6 @@ import at.koopro.wizardsandbeasts.client.form.AnimagusClientViewHandler;
 import at.koopro.wizardsandbeasts.client.form.ObscurialClientViewHandler;
 import at.koopro.wizardsandbeasts.client.form.TransitionEffectRenderer;
 import at.koopro.wizardsandbeasts.client.spell.ColoredGlowRenderer;
-import at.koopro.wizardsandbeasts.client.spell.ProtegoCubeRenderer;
 import at.koopro.wizardsandbeasts.client.spell.SpellClientInputHandler;
 import at.koopro.wizardsandbeasts.client.spell.SpellKeyBindings;
 import at.koopro.wizardsandbeasts.client.particle.ModParticleProviders;
@@ -64,7 +63,6 @@ public class WizardsAndBeastsClient {
         NeoForge.EVENT_BUS.addListener(SpellClientInputHandler::onScroll);
         NeoForge.EVENT_BUS.addListener(WandBeamRenderer::onRenderLevel);
         NeoForge.EVENT_BUS.addListener(ColoredGlowRenderer::onRenderLevel);
-        NeoForge.EVENT_BUS.addListener(ProtegoCubeRenderer::onRenderLevel);
         NeoForge.EVENT_BUS.addListener(ApparitionClientController::onRenderLevel);
         NeoForge.EVENT_BUS.addListener(LegilimencyVisionRenderer::onRenderLevel);
         NeoForge.EVENT_BUS.addListener(ObscurialClientViewHandler::onRenderHand);
