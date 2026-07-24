@@ -10,6 +10,7 @@ import at.koopro.wizardsandbeasts.trunk.TrunkAccessMode;
 import at.koopro.wizardsandbeasts.trunk.ExtensionCharmService;
 import at.koopro.wizardsandbeasts.trunk.TrunkRecord;
 import at.koopro.wizardsandbeasts.util.WandHelper;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -65,7 +66,16 @@ final class SpellCastUtilityHandler {
             BlockHitResult blockHit = level.clip(new ClipContext(
                     start, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, caster));
             if (blockHit.getType() == HitResult.Type.BLOCK) {
-                repaired = SpellHelper.tryReparoRepairBlock(level, blockHit.getBlockPos(), spell);
+                // Area rebuild: mend every repairable block in a small radius around the aim point, so one
+                // cast patches a cracked wall instead of a single block.
+                BlockPos center = blockHit.getBlockPos();
+                int radius = 3;
+                for (BlockPos p : BlockPos.betweenClosed(
+                        center.offset(-radius, -radius, -radius), center.offset(radius, radius, radius))) {
+                    if (SpellHelper.tryReparoRepairBlock(level, p.immutable(), spell)) {
+                        repaired = true;
+                    }
+                }
             }
         }
         if (repaired) {

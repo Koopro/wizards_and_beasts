@@ -100,6 +100,17 @@ final class SpellCastConeHandler {
             // discarding this result meant such casts never scored a success or advanced proficiency.
             successful |= SpellHelper.tryIgniteBlockAlongLook(level, caster, effectiveRange, spell.getColor());
         }
+        if (props.ignites() && SpellCastSupport.isIncendio(spell)) {
+            // Lingering flames: lay down a patch of ground fire where the cone lands so it keeps burning
+            // anything that crosses it, not just whatever was in the cone at cast time.
+            Vec3 end = casterEye.add(look.scale(effectiveRange));
+            BlockHitResult hit = SpellHelper.raycastFromCaster(level, caster, casterEye, end,
+                    ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE);
+            Vec3 firePoint = hit.getType() == HitResult.Type.BLOCK ? hit.getLocation() : end;
+            if (SpellHelper.scatterGroundFire(level, firePoint, 5, 1.8) > 0) {
+                successful = true;
+            }
+        }
         if (SpellCastSupport.isGlacius(spell)) {
             Vec3 end = casterEye.add(look.scale(effectiveRange));
             BlockHitResult hit = SpellHelper.raycastFromCaster(level, caster, casterEye, end,

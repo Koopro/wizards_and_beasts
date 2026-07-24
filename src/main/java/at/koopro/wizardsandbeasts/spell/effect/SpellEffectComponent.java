@@ -486,11 +486,14 @@ public sealed interface SpellEffectComponent permits
      * the parent context's scaling. Composes recursively; the nested codec is lazily initialized to break
      * the self-reference on {@link #CODEC}.
      */
-    record AoeApply(float radius, List<SpellEffectComponent> components) implements SpellEffectComponent {
+    record AoeApply(float radius, List<SpellEffectComponent> components, boolean playersOnly,
+                    boolean includeCaster) implements SpellEffectComponent {
         public static final MapCodec<AoeApply> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
                 Codec.FLOAT.fieldOf("radius").forGetter(AoeApply::radius),
                 Codec.lazyInitialized(() -> SpellEffectComponent.CODEC).listOf()
-                        .fieldOf("effects").forGetter(AoeApply::components)
+                        .fieldOf("effects").forGetter(AoeApply::components),
+                Codec.BOOL.optionalFieldOf("players_only", false).forGetter(AoeApply::playersOnly),
+                Codec.BOOL.optionalFieldOf("include_caster", false).forGetter(AoeApply::includeCaster)
         ).apply(inst, AoeApply::new));
 
         @Override
@@ -503,7 +506,9 @@ public sealed interface SpellEffectComponent permits
             if (!standardEnabled() || radius <= 0f || components.isEmpty()) return;
             AABB area = new AABB(ctx.position(), ctx.position()).inflate(radius);
             List<LivingEntity> targets = ctx.level().getEntitiesOfClass(LivingEntity.class, area,
-                    e -> e.isAlive() && e != ctx.caster());
+                    e -> e.isAlive()
+                            && (includeCaster || e != ctx.caster())
+                            && (!playersOnly || e instanceof net.minecraft.world.entity.player.Player));
             for (LivingEntity entity : targets) {
                 SpellEffectRunner.runComponents(components, ctx.forTarget(entity));
             }

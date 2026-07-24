@@ -125,6 +125,41 @@ public final class SpellHelper {
         return true;
     }
 
+    /**
+     * Scatters fire across valid ground within {@code radius} of {@code center} — the lingering
+     * flame-patch (Incendio) / fire-shrapnel (Confringo) area-denial. Only places fire where vanilla
+     * permits it (air with a supporting face), so it self-limits on open, wet or unsupported terrain.
+     *
+     * @return the number of fire blocks actually placed
+     */
+    public static int scatterGroundFire(ServerLevel level, Vec3 center, int attempts, double radius) {
+        int placed = 0;
+        for (int i = 0; i < attempts; i++) {
+            double angle = level.random.nextDouble() * Math.PI * 2.0;
+            double dist = level.random.nextDouble() * radius;
+            double x = center.x + Math.cos(angle) * dist;
+            double z = center.z + Math.sin(angle) * dist;
+            for (int dy = 1; dy >= -2; dy--) {
+                BlockPos p = BlockPos.containing(x, center.y + dy, z);
+                if (!level.getBlockState(p).isAir()) {
+                    continue;
+                }
+                if (!BaseFireBlock.canBePlacedAt(level, p, net.minecraft.core.Direction.UP)) {
+                    continue;
+                }
+                BlockState fire = BaseFireBlock.getState(level, p);
+                if (fire != null) {
+                    level.setBlockAndUpdate(p, fire);
+                    placed++;
+                }
+                break;
+            }
+        }
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.LAVA, center.x, center.y + 0.3, center.z,
+                Math.max(4, attempts), radius * 0.5, 0.1, radius * 0.5, 0.0);
+        return placed;
+    }
+
     /** Common impact burst + soft impact sound for world interactions. */
     public static void playSpellImpact(ServerLevel level, Vec3 pos, int color) {
         spawnBurst(level, pos, color, 10, 0.18);
@@ -248,6 +283,8 @@ public final class SpellHelper {
             level.setBlockAndUpdate(p, Blocks.WATER.defaultBlockState());
         }
         createExplosion(level, null, Vec3.atCenterOf(hit.getBlockPos()), explosionPower, breaksBlocks);
+        // Fire shrapnel: the blast scatters embers that leave a ring of lingering fire for area denial.
+        scatterGroundFire(level, Vec3.atCenterOf(hit.getBlockPos()), 6, 2.2);
     }
 
     public static void applyProtegoCastPulse(ServerLevel level, ServerPlayer caster, Spell spell) {
