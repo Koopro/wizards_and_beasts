@@ -8,6 +8,7 @@ import at.koopro.wizardsandbeasts.registry.ModDimensions;
 import at.koopro.wizardsandbeasts.block.trunk.TrunkBlock;
 import at.koopro.wizardsandbeasts.trunk.TrunkAccessMode;
 import at.koopro.wizardsandbeasts.trunk.ExtensionCharmService;
+import at.koopro.wizardsandbeasts.trunk.ShareEntranceService;
 import at.koopro.wizardsandbeasts.trunk.TrunkRecord;
 import at.koopro.wizardsandbeasts.util.WandHelper;
 import net.minecraft.core.BlockPos;
@@ -142,6 +143,14 @@ final class SpellCastUtilityHandler {
     }
 
     static boolean handlePocketIngress(ServerPlayer caster) {
+        // Step through a nearby ally's shared doorway — no trunk of your own required.
+        if (!caster.isShiftKeyDown()) {
+            ShareEntranceService.Doorway invite = ShareEntranceService.findUsable(caster);
+            if (invite != null) {
+                ExtensionCharmService.enterPocket(caster, invite.pocket());
+                return true;
+            }
+        }
         ItemStack caseStack = findPocketCase(caster);
         if (caseStack.isEmpty()
                 || !(caseStack.getItem() instanceof BlockItem blockItem)
@@ -163,6 +172,14 @@ final class SpellCastUtilityHandler {
             caster.displayClientMessage(
                     Component.literal("The case appears to contain only travel supplies."), true);
             return false;
+        }
+        // Sneak-cast opens a temporary shared doorway for allies instead of entering yourself.
+        if (caster.isShiftKeyDown()) {
+            ShareEntranceService.open(caster, pocket);
+            caster.displayClientMessage(
+                    Component.literal("You open a shared entrance to your trunk (30s).")
+                            .withStyle(ChatFormatting.AQUA), true);
+            return true;
         }
         ExtensionCharmService.enterPocket(caster, pocket);
         return true;
