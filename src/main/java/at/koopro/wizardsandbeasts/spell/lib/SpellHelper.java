@@ -213,6 +213,13 @@ public final class SpellHelper {
             return true;
         }
 
+        // Freeze a small terrain patch: water sheets over to slippery ice, lava sets into obsidian/stone.
+        if (freezeTerrainPatch(level, hitPos, 2)) {
+            level.playSound(null, hitPos, SoundEvents.POWDER_SNOW_PLACE, SoundSource.PLAYERS, 0.5f, 0.9f);
+            playSpellImpact(level, hit.getLocation(), spell.getColor());
+            return true;
+        }
+
         BlockPos placePos = hitPos.relative(hit.getDirection());
         BlockState placeState = level.getBlockState(placePos);
         if ((placeState.isAir() || placeState.canBeReplaced())
@@ -222,6 +229,32 @@ public final class SpellHelper {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Freezes fluid blocks within {@code radius} of {@code center}: water becomes slippery ice, lava
+     * sources set into obsidian (flowing lava into cobblestone). Only pure fluid blocks are touched so
+     * waterlogged/decorated blocks are left intact.
+     *
+     * @return true if at least one block was frozen
+     */
+    private static boolean freezeTerrainPatch(ServerLevel level, BlockPos center, int radius) {
+        boolean any = false;
+        for (BlockPos p : BlockPos.betweenClosed(
+                center.offset(-radius, -1, -radius), center.offset(radius, 1, radius))) {
+            BlockState s = level.getBlockState(p);
+            if (s.is(Blocks.WATER)) {
+                level.setBlockAndUpdate(p.immutable(), Blocks.ICE.defaultBlockState());
+                any = true;
+            } else if (s.is(Blocks.LAVA)) {
+                BlockState frozen = s.getFluidState().isSource()
+                        ? Blocks.OBSIDIAN.defaultBlockState()
+                        : Blocks.COBBLESTONE.defaultBlockState();
+                level.setBlockAndUpdate(p.immutable(), frozen);
+                any = true;
+            }
+        }
+        return any;
     }
 
     public static int pushNearbyLightweightEntities(ServerLevel level, @Nullable Entity caster,
