@@ -23,6 +23,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -182,12 +183,14 @@ final class WandBeamSpellHandlers {
         UUID casterId = caster.getUUID();
         if (target == null) {
             releaseCrucioTarget(caster, s, casterId);
+            s.crucioHoldTicks = 0;
             return;
         }
 
         UUID tid = target.getUUID();
         if (s.lastCrucioTarget != null && !s.lastCrucioTarget.equals(tid)) {
             releaseCrucioTarget(caster, s, casterId);
+            s.crucioHoldTicks = 0;
         }
 
         // Another wizard already holds this target under their beam: a second Crucio is contested and
@@ -197,6 +200,7 @@ final class WandBeamSpellHandlers {
         }
 
         s.lastCrucioTarget = tid;
+        s.crucioHoldTicks++;
         int effectInterval = Math.max(1, (int) (channelEffectInterval / Math.max(0.5f, crucioIntentMultiplier(caster, spell))));
         if (s.beamTicks % effectInterval == 0) {
             float intent = crucioIntentMultiplier(caster, spell);
@@ -211,10 +215,16 @@ final class WandBeamSpellHandlers {
             // intent feedback, corruption accrual, legacy-effect cleanup, ramp damage below.
             recordBeamProficiencyHit(caster, spell.getId(), s, 20);
         }
-        if (s.beamTicks >= 40 && s.beamTicks % 20 == 0) {
+        // Escalating agony: both the ramp damage and the pain intensity climb the longer the curse
+        // holds ONE victim (crucioHoldTicks resets when the beam moves to a new target).
+        if (s.crucioHoldTicks >= 30 && s.crucioHoldTicks % 20 == 0) {
             float intent = crucioIntentMultiplier(caster, spell);
-            float rampDamage = Math.min(1.5f, 0.4f + (s.beamTicks / 120f)) * intent;
+            float rampDamage = Math.min(2.5f, 0.4f + (s.crucioHoldTicks / 80f)) * intent;
             target.hurt(caster.level().damageSources().magic(), rampDamage);
+            int painAmp = Math.min(3, s.crucioHoldTicks / 40);
+            if (painAmp > 0) {
+                target.addEffect(new MobEffectInstance(ModEffects.CRUCIATUS_PAIN, 40, painAmp, false, false, true));
+            }
             recordBeamProficiencyHit(caster, spell.getId(), s, 20);
         }
     }
