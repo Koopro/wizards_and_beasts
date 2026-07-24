@@ -120,7 +120,22 @@ public final class SpellExecutor {
         spell.applySelfEffects(caster, scalingProfile.durationMult());
 
         switch (castType) {
-            case PROJECTILE -> spell.spawnProjectile(level, caster, scalingProfile);
+            case PROJECTILE -> {
+                SpellScalingProfile projectileProfile = scalingProfile;
+                if (SpellCastSupport.isFlipendo(spell)) {
+                    // Flipendo charges: a longer wand-hold grows the shove (control) and adds a little
+                    // damage, up to ~2x at full charge.
+                    int held = WandCastTiming.consumeLastHoldTicks(caster);
+                    float chargeMult = 1.0f + Math.min(1.0f, held / 20.0f);
+                    projectileProfile = new SpellScalingProfile(
+                            scalingProfile.damageMult() * chargeMult,
+                            scalingProfile.cooldownMult(),
+                            scalingProfile.durationMult(),
+                            scalingProfile.controlMult() * chargeMult,
+                            scalingProfile.accuracyMult());
+                }
+                spell.spawnProjectile(level, caster, projectileProfile);
+            }
             case SELF -> {
                 boolean successful = false;
                 if (props.repairsItem()) {

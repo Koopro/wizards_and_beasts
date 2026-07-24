@@ -157,13 +157,26 @@ final class SpellCastTargetedHandler {
                 }
 
                 if (props.explodes()) {
+                    // Bombarda charges: a longer wand-hold grows the blast, up to Bombarda Maxima at full charge.
+                    float chargeMult = 1.0f;
+                    boolean maxima = false;
+                    if (SpellCastSupport.isBombarda(spell)) {
+                        int held = WandCastTiming.consumeLastHoldTicks(caster);
+                        chargeMult = 1.0f + Math.min(1.0f, held / 20.0f);
+                        maxima = chargeMult >= 1.8f;
+                    }
                     SpellHelper.createExplosion(level, caster,
-                            Vec3.atCenterOf(pos), props.getExplosionPower(),
+                            Vec3.atCenterOf(pos), props.getExplosionPower() * chargeMult,
                             props.explosionBreaksBlocks());
                     successful = true;
                     if (SpellCastSupport.isBombarda(spell)) {
+                        if (maxima) {
+                            caster.displayClientMessage(
+                                    Component.literal("Bombarda Maxima").withStyle(ChatFormatting.RED), true);
+                        }
                         SpellHelper.playSpellImpact(level, blockHit.getLocation(), spell.getColor());
-                        SpellHelper.pushNearbyLightweightEntities(level, caster, blockHit.getLocation(), look, 1.3f, 3.0);
+                        SpellHelper.pushNearbyLightweightEntities(level, caster, blockHit.getLocation(),
+                                look, 1.3f * chargeMult, 3.0 * chargeMult);
                     }
                 }
                 if (SpellCastSupport.isImperio(spell) && ModuleManager.isEnabled(Module.DARK_ARTS)) {

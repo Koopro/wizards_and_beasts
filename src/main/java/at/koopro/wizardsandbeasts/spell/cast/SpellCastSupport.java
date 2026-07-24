@@ -35,6 +35,7 @@ final class SpellCastSupport {
     static boolean isAccio(Spell spell) { return SpellIds.matches(spell.getId(), "accio"); }
     static boolean isGlacius(Spell spell) { return SpellIds.matches(spell.getId(), "glacius"); }
     static boolean isIncendio(Spell spell) { return SpellIds.matches(spell.getId(), "incendio"); }
+    static boolean isFlipendo(Spell spell) { return SpellIds.matches(spell.getId(), "flipendo"); }
     static boolean isImperio(Spell spell) { return SpellIds.matches(spell.getId(), "imperio"); }
     static boolean isBombarda(Spell spell) { return SpellIds.matches(spell.getId(), "bombarda"); }
     static boolean isExpectoPatronum(Spell spell) { return SpellIds.matches(spell.getId(), "expecto_patronum"); }
