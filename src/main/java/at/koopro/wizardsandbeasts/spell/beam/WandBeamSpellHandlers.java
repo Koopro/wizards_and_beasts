@@ -33,6 +33,7 @@ import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -49,7 +50,7 @@ final class WandBeamSpellHandlers {
     static final int LEVIOSA_PARTICLE_COLOR = 0xFFB266FF;
     static final float LEVIOSA_MIN_DISTANCE = 2.0f;
     static final float LEVIOSA_MAX_DISTANCE = 24.0f;
-    static final int AVADA_MIN_CHARGE_TICKS = 12;
+    static final int AVADA_MIN_CHARGE_TICKS = 24;
     private static final double LEVIOSA_SPRING_STRENGTH = 0.45;
     private static final double LEVIOSA_MAX_SPEED = 0.9;
     private static final double LEVIOSA_MAX_SPEED_CHARGED = 1.15;
@@ -64,6 +65,25 @@ final class WandBeamSpellHandlers {
                                        WandBeamSession s, float maxReach) {
         Vec3 start = player.getEyePosition();
         Vec3 look = player.getLookAngle();
+        // Pressure jet: shove living things caught in the stream, douse anything burning, and hurt
+        // fire-immune creatures (blazes, magma cubes) the way a blast of water should.
+        if (s.beamTicks % 4 == 0) {
+            Vec3 jetEnd = start.add(look.scale(Math.min(maxReach, 8.0)));
+            AABB jetBox = new AABB(start, jetEnd).inflate(1.2);
+            for (LivingEntity le : level.getEntitiesOfClass(LivingEntity.class, jetBox,
+                    e -> e != player && e.isAlive())) {
+                Vec3 to = le.getBoundingBox().getCenter().subtract(start);
+                if (to.lengthSqr() < 1.0e-4 || to.normalize().dot(look) < 0.3) {
+                    continue;
+                }
+                at.koopro.wizardsandbeasts.spell.lib.SpellHelper.applyKnockback(le, look, 0.55f);
+                le.hurtMarked = true;
+                le.clearFire();
+                if (le.fireImmune()) {
+                    le.hurt(level.damageSources().magic(), 2.0f);
+                }
+            }
+        }
         BlockHitResult blockHit = level.clip(new ClipContext(
                 start, start.add(look.scale(maxReach)),
                 ClipContext.Block.OUTLINE,
@@ -141,9 +161,11 @@ final class WandBeamSpellHandlers {
         }
         if (s.avadaConsumed || target == null) return;
         if (s.beamTicks < AVADA_MIN_CHARGE_TICKS) {
-            if (s.beamTicks % 3 == 0) {
+            // Longer, louder wind-up so the curse is dodgeable: gathering green light on the target
+            // every other tick telegraphs the kill, and breaking line of sight (checked below) cancels it.
+            if (s.beamTicks % 2 == 0) {
                 SpellImpactBurstS2CPayload.sendToTracking(caster, target.getBoundingBox().getCenter(),
-                        SpellFamily.DARK, 0xFF00FF00, 4, 0.08f);
+                        SpellFamily.DARK, 0xFF00FF00, 8, 0.14f);
             }
             return;
         }
