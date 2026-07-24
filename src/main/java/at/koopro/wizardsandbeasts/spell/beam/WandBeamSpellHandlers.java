@@ -122,7 +122,7 @@ final class WandBeamSpellHandlers {
     static void clearSessionEffects(ServerPlayer player, WandBeamSession s) {
         UUID casterId = player.getUUID();
         releaseCrucioTarget(player, s, casterId);
-        releaseLeviosaTarget(player, s, casterId);
+        releaseLeviosaTarget(player, s, casterId, true);
     }
 
     /** Strips this caster's Crucio effects from its held target and drops the claim, if any. */
@@ -139,13 +139,23 @@ final class WandBeamSpellHandlers {
     }
 
     /** Restores this caster's Leviosa target's gravity and drops the claim, if any. */
-    private static void releaseLeviosaTarget(ServerPlayer caster, WandBeamSession s, UUID casterId) {
+    private static void releaseLeviosaTarget(ServerPlayer caster, WandBeamSession s, UUID casterId, boolean fling) {
         if (s.lastLeviosaTarget == null) {
             return;
         }
         Entity prev = findEntityInLevel(caster, s.lastLeviosaTarget);
         if (prev != null) {
             clearLeviosaEffects(prev, s.lastLeviosaHadNoGravity);
+            if (fling) {
+                // Wingardium throw: releasing the beam flings the held object/mob where the caster aims.
+                Vec3 dir = caster.getLookAngle();
+                double force = 1.6;
+                prev.setDeltaMovement(dir.x * force, dir.y * force + 0.2, dir.z * force);
+                prev.hurtMarked = true;
+                prev.fallDistance = 0f;
+                SpellImpactBurstS2CPayload.sendToTracking(caster, prev.getBoundingBox().getCenter(),
+                        SpellFamily.ARCANE, LEVIOSA_PARTICLE_COLOR, 8, 0.2f);
+            }
         }
         BeamTargetClaims.release(s.lastLeviosaTarget, casterId);
         s.lastLeviosaTarget = null;
@@ -267,14 +277,14 @@ final class WandBeamSpellHandlers {
             if (s.leviosaMissTicks <= LEVIOSA_TARGET_GRACE_MISS_TICKS) {
                 return;
             }
-            releaseLeviosaTarget(caster, s, casterId);
+            releaseLeviosaTarget(caster, s, casterId, false);
             return;
         }
         s.leviosaMissTicks = 0;
 
         UUID tid = target.getUUID();
         if (s.lastLeviosaTarget != null && !s.lastLeviosaTarget.equals(tid)) {
-            releaseLeviosaTarget(caster, s, casterId);
+            releaseLeviosaTarget(caster, s, casterId, false);
         }
 
         // Another wizard already holds this target: don't fight over its velocity (last-tick-wins tug).

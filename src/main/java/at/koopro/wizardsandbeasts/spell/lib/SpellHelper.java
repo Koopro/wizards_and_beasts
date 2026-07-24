@@ -342,14 +342,23 @@ public final class SpellHelper {
     }
 
     public static void applyArrestoAreaStabilize(ServerLevel level, ServerPlayer caster, Spell spell) {
-        AABB area = caster.getBoundingBox().inflate(3.5, 2.5, 3.5);
+        AABB area = caster.getBoundingBox().inflate(4.0, 3.0, 4.0);
+        // Time-stop bubble: everything but the caster is caught. Living things are slow-fallen, near-frozen
+        // in place (velocity killed + heavy slowness), and projectiles have their flight halted.
         for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, area, e -> e.isAlive() && e != caster)) {
             living.addEffect(new net.minecraft.world.effect.MobEffectInstance(
                     net.minecraft.world.effect.MobEffects.SLOW_FALLING, 90, 0, false, true, true));
+            living.addEffect(new net.minecraft.world.effect.MobEffectInstance(
+                    net.minecraft.world.effect.MobEffects.SLOWNESS, 40, 6, false, true, true));
             living.fallDistance = 0f;
-            Vec3 damped = living.getDeltaMovement().multiply(0.65, 0.45, 0.65);
-            living.setDeltaMovement(damped);
+            living.setDeltaMovement(living.getDeltaMovement().multiply(0.0, 0.2, 0.0));
             living.hurtMarked = true;
+        }
+        for (net.minecraft.world.entity.projectile.Projectile proj :
+                level.getEntitiesOfClass(net.minecraft.world.entity.projectile.Projectile.class, area,
+                        p -> p.isAlive() && p.getOwner() != caster)) {
+            proj.setDeltaMovement(Vec3.ZERO);
+            proj.hurtMarked = true;
         }
         playSpellImpact(level, caster.getBoundingBox().getCenter(), spell.getColor());
     }
