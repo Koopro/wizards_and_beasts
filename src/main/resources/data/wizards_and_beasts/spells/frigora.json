@@ -7,8 +7,8 @@
   "selfEffects": [],
   "effects": [
     { "type": "clear_fire" },
-    { "type": "apply_effect", "effect": "minecraft:fire_resistance", "duration": 220, "amplifier": 0 },
-    { "type": "apply_effect", "effect": "minecraft:water_breathing", "duration": 120, "amplifier": 0 }
+    { "type": "apply_effect", "effect": "minecraft:fire_resistance", "duration": 400, "amplifier": 0 },
+    { "type": "apply_effect", "effect": "minecraft:water_breathing", "duration": 300, "amplifier": 0 }
   ],
   "sound": {
     "id": "minecraft:block.powder_snow.place",
