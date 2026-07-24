@@ -8,7 +8,7 @@
   "requirement": { "type": "none" },
   "effects": [
     { "type": "particle_burst", "family": "arcane", "color": -13210, "count": 18, "spread": 0.32 },
-    { "type": "aoe_apply", "radius": 6.0, "players_only": true, "include_caster": true,
+    { "type": "aoe_apply", "radius": 6.0, "filter": "players", "include_caster": true,
       "effects": [
         { "type": "apply_effect", "effect": "minecraft:resistance", "duration": 160, "amplifier": 0, "target": true },
         { "type": "dispel", "scope": "specific",

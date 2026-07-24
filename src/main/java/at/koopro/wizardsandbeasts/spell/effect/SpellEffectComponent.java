@@ -169,6 +169,37 @@ public sealed interface SpellEffectComponent permits
         }
     }
 
+    /** Which entities an {@link AoeApply} touches. */
+    enum AoeTarget implements StringRepresentable {
+        /** Every living entity (the caster is added separately via {@code include_caster}). */
+        ALL("all"),
+        /** Only players. */
+        PLAYERS("players"),
+        /** Only hostiles ({@link net.minecraft.world.entity.monster.Enemy}). */
+        MONSTERS("monsters");
+
+        public static final Codec<AoeTarget> CODEC = StringRepresentable.fromValues(AoeTarget::values);
+
+        private final String serializedName;
+
+        AoeTarget(String serializedName) {
+            this.serializedName = serializedName;
+        }
+
+        @Override
+        public String getSerializedName() {
+            return serializedName;
+        }
+
+        boolean matches(LivingEntity e) {
+            return switch (this) {
+                case ALL -> true;
+                case PLAYERS -> e instanceof net.minecraft.world.entity.player.Player;
+                case MONSTERS -> e instanceof net.minecraft.world.entity.monster.Enemy;
+            };
+        }
+    }
+
     /** Which effects {@link Dispel} removes. */
     enum DispelScope implements StringRepresentable {
         /** Every active effect. */
@@ -486,13 +517,13 @@ public sealed interface SpellEffectComponent permits
      * the parent context's scaling. Composes recursively; the nested codec is lazily initialized to break
      * the self-reference on {@link #CODEC}.
      */
-    record AoeApply(float radius, List<SpellEffectComponent> components, boolean playersOnly,
+    record AoeApply(float radius, List<SpellEffectComponent> components, AoeTarget filter,
                     boolean includeCaster) implements SpellEffectComponent {
         public static final MapCodec<AoeApply> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
                 Codec.FLOAT.fieldOf("radius").forGetter(AoeApply::radius),
                 Codec.lazyInitialized(() -> SpellEffectComponent.CODEC).listOf()
                         .fieldOf("effects").forGetter(AoeApply::components),
-                Codec.BOOL.optionalFieldOf("players_only", false).forGetter(AoeApply::playersOnly),
+                AoeTarget.CODEC.optionalFieldOf("filter", AoeTarget.ALL).forGetter(AoeApply::filter),
                 Codec.BOOL.optionalFieldOf("include_caster", false).forGetter(AoeApply::includeCaster)
         ).apply(inst, AoeApply::new));
 
@@ -508,7 +539,7 @@ public sealed interface SpellEffectComponent permits
             List<LivingEntity> targets = ctx.level().getEntitiesOfClass(LivingEntity.class, area,
                     e -> e.isAlive()
                             && (includeCaster || e != ctx.caster())
-                            && (!playersOnly || e instanceof net.minecraft.world.entity.player.Player));
+                            && filter.matches(e));
             for (LivingEntity entity : targets) {
                 SpellEffectRunner.runComponents(components, ctx.forTarget(entity));
             }
