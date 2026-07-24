@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:paper",
+    "minecraft:leather"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:parchment",
+    "count": 2
+  }
+}

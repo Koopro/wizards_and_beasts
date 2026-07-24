@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "minecraft:ink_sac"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:ink_bottle",
+    "count": 1
+  }
+}

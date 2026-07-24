@@ -12,12 +12,12 @@
               "count": {
                 "type": "minecraft:uniform",
                 "max": 2.0,
-                "min": 0.0
+                "min": 1.0
               },
               "function": "minecraft:set_count"
             }
           ],
-          "name": "minecraft:leather"
+          "name": "minecraft:feather"
         }
       ],
       "rolls": 1.0
@@ -26,18 +26,18 @@
       "bonus_rolls": 0.0,
       "conditions": [
         {
-          "chance": 0.4,
+          "chance": 0.5,
           "condition": "minecraft:random_chance"
         }
       ],
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "wizards_and_beasts:wampus_cat_hair"
+          "name": "wizards_and_beasts:phoenix_feather"
         }
       ],
       "rolls": 1.0
     }
   ],
-  "random_sequence": "wizards_and_beasts:entities/wampus_cat"
+  "random_sequence": "wizards_and_beasts:entities/phoenix"
 }
