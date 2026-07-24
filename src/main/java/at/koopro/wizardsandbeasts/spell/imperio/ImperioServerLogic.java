@@ -88,6 +88,76 @@ public final class ImperioServerLogic {
                         cmd.ordinal(), st.sneakAttemptSinceLastResistTick()));
     }
 
+    /**
+     * Drives controlled MOBS to act on their current command (players are driven by {@link #tickVictim}).
+     * Runs every few ticks: ATTACK_NEAREST turns the puppet on the nearest living thing — including its
+     * own former allies — which is the point of the curse.
+     */
+    @SubscribeEvent
+    public static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (!ModuleManager.isEnabled(Module.DARK_ARTS)) {
+            return;
+        }
+        if (event.getServer().getTickCount() % 5 != 0) {
+            return;
+        }
+        for (Map.Entry<UUID, UUID> e : CASTER_TO_VICTIM.entrySet()) {
+            ServerPlayer controller = event.getServer().getPlayerList().getPlayer(e.getKey());
+            if (controller == null || !(controller.level() instanceof ServerLevel sl)) {
+                continue;
+            }
+            LivingEntity victim = findLiving(sl, e.getValue());
+            if (!(victim instanceof Mob mob)) {
+                continue; // player victims are handled by tickVictim
+            }
+            ImperioControlState st = mob.getData(ModAttachments.IMPERIO_CONTROL_STATE.get());
+            if (!st.isControlled() || !st.controllerUUID().equals(controller.getUUID())) {
+                continue;
+            }
+            executeMobCommand(sl, mob, controller, ImperioCommand.byOrdinal(st.imperioCommandOrdinal()));
+        }
+    }
+
+    private static void executeMobCommand(ServerLevel level, Mob mob, ServerPlayer controller, ImperioCommand cmd) {
+        switch (cmd) {
+            case ATTACK_NEAREST -> {
+                LivingEntity nearest = level.getEntitiesOfClass(LivingEntity.class,
+                                mob.getBoundingBox().inflate(16.0),
+                                other -> other.isAlive() && other != mob && other != controller)
+                        .stream()
+                        .min(java.util.Comparator.comparingDouble(mob::distanceToSqr))
+                        .orElse(null);
+                if (nearest != null) {
+                    mob.setTarget(nearest);
+                }
+            }
+            case STAND_STILL -> {
+                mob.setTarget(null);
+                mob.getNavigation().stop();
+            }
+            case FOLLOW_CASTER -> {
+                mob.setTarget(null);
+                if (mob.distanceToSqr(controller) > 9.0) {
+                    mob.getNavigation().moveTo(controller, 1.1);
+                }
+            }
+            case RETREAT -> {
+                mob.setTarget(null);
+                mob.getNavigation().moveTo(controller, 1.3); // regroup on the caster
+            }
+            case DROP_HELD_ITEM -> {
+                net.minecraft.world.item.ItemStack held = mob.getMainHandItem();
+                if (!held.isEmpty()) {
+                    net.minecraft.world.entity.item.ItemEntity drop = new net.minecraft.world.entity.item.ItemEntity(
+                            level, mob.getX(), mob.getY() + 0.5, mob.getZ(), held.copy());
+                    level.addFreshEntity(drop);
+                    mob.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND,
+                            net.minecraft.world.item.ItemStack.EMPTY);
+                }
+            }
+        }
+    }
+
     public static void onSneakResistAttempt(ServerPlayer victim) {
         if (!(victim.level() instanceof ServerLevel sl)) {
             return;
