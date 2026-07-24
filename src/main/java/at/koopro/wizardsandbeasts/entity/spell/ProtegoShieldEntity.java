@@ -248,6 +248,11 @@ public class ProtegoShieldEntity extends Entity implements GeoEntity {
         return this.entityData.get(DATA_TIER);
     }
 
+    /** Radius this shield physically covers — used to extend the ward to allies inside a dome. */
+    public double coverRadius() {
+        return interceptRadius(getTier());
+    }
+
     public boolean isShattering() {
         return this.entityData.get(DATA_IS_SHATTERING);
     }

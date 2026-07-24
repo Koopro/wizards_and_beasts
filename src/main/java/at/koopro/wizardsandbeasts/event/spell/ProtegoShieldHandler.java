@@ -37,7 +37,11 @@ public final class ProtegoShieldHandler {
     @SubscribeEvent
     public static void onIncomingDamage(LivingIncomingDamageEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        if (!player.getTags().contains(PROTEGO_ACTIVE_TAG)) return;
+        // Protected by your own ward, or sheltering inside an ally's dome.
+        boolean ownWard = player.getTags().contains(PROTEGO_ACTIVE_TAG);
+        if (!ownWard && !at.koopro.wizardsandbeasts.spell.protego.ProtegoWardManager.isInsideAllyDome(player)) {
+            return;
+        }
         if (SpellProtegoRules.bypassesProtego(event)) {
             return;
         }
