@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " C ",
+    "CVC",
+    " C "
+  ],
+  "key": {
+    "C": "minecraft:copper_ingot",
+    "V": "minecraft:cauldron"
+  },
+  "result": {
+    "id": "wizards_and_beasts:brass_cauldron",
+    "count": 1
+  }
+}
