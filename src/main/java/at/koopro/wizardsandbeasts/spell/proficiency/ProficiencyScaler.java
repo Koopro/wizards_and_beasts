@@ -48,19 +48,21 @@ public final class ProficiencyScaler {
     public static SpellScalingProfile computeProfile(float proficiency) {
         float p = clamp01(proficiency);
 
-        // Damage: smoothstep S-curve.
+        // Damage: smoothstep S-curve. Floor raised so a freshly-learned spell no longer lands at half
+        // power (felt limp); mastered ceiling (1.50x) is unchanged.
         float damageT = p * p * (3.0f - 2.0f * p);
-        float damageMult = 0.50f + damageT;
+        float damageMult = 0.65f + 0.85f * damageT;
 
         // Cooldown: power curve with stronger early rewards.
         float cooldownT = (float) Math.pow(p, 0.7f);
         float cooldownMult = 1.40f - (cooldownT * 0.70f);
 
-        // Duration: linear.
-        float durationMult = 0.60f + (p * 0.80f);
+        // Duration: linear. Floor raised (0.60->0.75) so fresh-spell effect durations aren't clipped short;
+        // mastered ceiling (1.40x) unchanged.
+        float durationMult = 0.75f + (p * 0.65f);
 
-        // Control: linear floor->ceiling.
-        float controlMult = 0.70f + (p * 0.60f);
+        // Control: linear floor->ceiling. Floor raised (0.70->0.82); ceiling (1.30x) unchanged.
+        float controlMult = 0.82f + (p * 0.48f);
 
         // Accuracy multiplier (lower spread with mastery).
         float accuracyMult = 1.00f - (p * 0.20f);

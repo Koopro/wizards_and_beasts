@@ -41,15 +41,15 @@ public final class BeamSettings {
     public static final String[] LAYER_NAMES = {"Outer Glow", "Mid Glow", "Core"};
 
     public static final LayerSettings[] layers = {
-            new LayerSettings(0.15f, 1.0f, 0.25f, 0.08f, 0.20f, 1.5f),   // outer
-            new LayerSettings(0.08f, 1.0f, 0.55f, 0.15f, 0.40f, 1.0f),   // mid
-            new LayerSettings(0.03f, 1.0f, 0.95f, 0.90f, 0.85f, 0.35f),  // core
+            new LayerSettings(0.22f, 1.0f, 0.25f, 0.08f, 0.24f, 0.70f),   // outer
+            new LayerSettings(0.12f, 1.0f, 0.55f, 0.15f, 0.45f, 0.45f),   // mid
+            new LayerSettings(0.055f, 1.0f, 0.95f, 0.90f, 0.95f, 0.20f),  // core
     };
 
     private static final LayerSettings[] DEFAULTS = {
-            new LayerSettings(0.15f, 1.0f, 0.25f, 0.08f, 0.20f, 1.5f),
-            new LayerSettings(0.08f, 1.0f, 0.55f, 0.15f, 0.40f, 1.0f),
-            new LayerSettings(0.03f, 1.0f, 0.95f, 0.90f, 0.85f, 0.35f),
+            new LayerSettings(0.22f, 1.0f, 0.25f, 0.08f, 0.24f, 0.70f),
+            new LayerSettings(0.12f, 1.0f, 0.55f, 0.15f, 0.45f, 0.45f),
+            new LayerSettings(0.055f, 1.0f, 0.95f, 0.90f, 0.95f, 0.20f),
     };
 
     private static PerformancePreset activePreset = PerformancePreset.MEDIUM;

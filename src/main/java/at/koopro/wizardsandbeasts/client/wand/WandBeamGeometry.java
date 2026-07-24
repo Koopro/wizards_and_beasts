@@ -16,7 +16,7 @@ final class WandBeamGeometry {
     private WandBeamGeometry() {}
 
     /** Lateral wobble per unit of {@code noiseAmp}, in blocks. Absolute so the bolt does not scale with reach. */
-    private static final float LATERAL_NOISE_BLOCKS = 0.10f;
+    private static final float LATERAL_NOISE_BLOCKS = 0.06f;
 
     static Vec3[] buildBeamPath(Vec3 start, Vec3 end, long seed, float noiseAmp) {
         Vec3 delta = end.subtract(start);
@@ -293,9 +293,11 @@ final class WandBeamGeometry {
         outY[0] = 0f;
         float cx = 0f;
         float cy = 0f;
+        // Gentler per-step deltas (±2 vs the old ±5): the wide step made the bolt a high-frequency zig-zag
+        // that read as jagged lightning rather than a clean magical beam.
         for (int i = 1; i < n; i++) {
-            cx += random.nextInt(11) - 5;
-            cy += random.nextInt(11) - 5;
+            cx += random.nextInt(5) - 2;
+            cy += random.nextInt(5) - 2;
             outX[i] = cx;
             outY[i] = cy;
         }
