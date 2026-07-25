@@ -1,5 +1,6 @@
 {
   "displayName": "Depulso",
+  "canonTier": "expanded",
   "category": "combat",
   "cooldownTicks": 40,
   "baseDamage": 1.0,

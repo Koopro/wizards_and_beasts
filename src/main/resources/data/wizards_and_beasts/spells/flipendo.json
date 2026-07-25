@@ -1,5 +1,6 @@
 {
   "displayName": "Flipendo",
+  "canonTier": "expanded",
   "category": "combat",
   "cooldownTicks": 38,
   "baseDamage": 2.0,

@@ -84,7 +84,15 @@ public record SpellDefinition(
          * builder flags — the rich behavior stays in the id-keyed handlers.
          */
         boolean opensBlocks,
-        float pullStrength) {
+        float pullStrength,
+
+        /**
+         * Where this spell's incantation is attested. Metadata only — no cast, learning, or
+         * validation path reads it. Defaults to {@link SpellCanonTier#EXPANDED} so an unannotated
+         * spell reads as "bottom of the canon hierarchy until triaged" rather than silently
+         * claiming book provenance.
+         */
+        SpellCanonTier canonTier) {
 
     /** Embedded "explode" block. */
     public record ExplosionDef(float power, boolean breaksBlocks) {
@@ -276,7 +284,8 @@ public record SpellDefinition(
             Set<GampDomain> gampDomains,
             List<SpellEffectEntry> effectComponents,
             boolean opensBlocks,
-            float pullStrength) {
+            float pullStrength,
+            SpellCanonTier canonTier) {
 
         static final MapCodec<SpellDefinitionFieldsB> MAP_CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
                 ExplosionDef.CODEC.optionalFieldOf("explode").forGetter(SpellDefinitionFieldsB::explode),
@@ -305,7 +314,9 @@ public record SpellDefinition(
                         .optionalFieldOf("effects", List.of())
                         .forGetter(SpellDefinitionFieldsB::effectComponents),
                 Codec.BOOL.optionalFieldOf("opensBlocks", false).forGetter(SpellDefinitionFieldsB::opensBlocks),
-                Codec.FLOAT.optionalFieldOf("pullStrength", 0.0f).forGetter(SpellDefinitionFieldsB::pullStrength)
+                Codec.FLOAT.optionalFieldOf("pullStrength", 0.0f).forGetter(SpellDefinitionFieldsB::pullStrength),
+                SpellCanonTier.CODEC.optionalFieldOf("canonTier", SpellCanonTier.EXPANDED)
+                        .forGetter(SpellDefinitionFieldsB::canonTier)
         ).apply(inst, SpellDefinitionFieldsB::new));
     }
 
@@ -340,7 +351,8 @@ public record SpellDefinition(
                     pair.getSecond().gampDomains(),
                     pair.getSecond().effectComponents(),
                     pair.getSecond().opensBlocks(),
-                    pair.getSecond().pullStrength()),
+                    pair.getSecond().pullStrength(),
+                    pair.getSecond().canonTier()),
             def -> Pair.of(
                     new SpellDefinitionFieldsA(
                             def.displayName(),
@@ -370,7 +382,8 @@ public record SpellDefinition(
                             def.gampDomains(),
                             def.effectComponents(),
                             def.opensBlocks(),
-                            def.pullStrength())));
+                            def.pullStrength(),
+                            def.canonTier())));
 
     // Gamp's Law checks. GampsLaw.validate() only consults these for domains the spell DECLARES
     // in its `gampDomains` JSON list, so declaring a domain marks every cast as a violation by

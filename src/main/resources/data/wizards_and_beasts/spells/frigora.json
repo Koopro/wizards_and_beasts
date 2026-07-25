@@ -1,5 +1,6 @@
 {
   "displayName": "Frigora",
+  "canonTier": "original",
   "category": "utility",
   "cooldownTicks": 80,
   "color": -7864321,
