@@ -12,6 +12,9 @@ import org.jspecify.annotations.NonNull;
  * validation reads this — it exists so a lore-purist server operator and future contributors can
  * tell a book incantation from a video-game one, which is otherwise invisible in the datapack.
  *
+ * <p>There is deliberately no "unknown" constant: an untriaged spell omits {@code canonTier}
+ * entirely, so absence carries that meaning without a value that could be mistaken for a ruling.
+ *
  * @see SpellDefinition#canonTier()
  */
 public enum SpellCanonTier implements StringRepresentable {

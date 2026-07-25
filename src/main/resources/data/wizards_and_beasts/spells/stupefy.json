@@ -1,5 +1,6 @@
 {
   "displayName": "Stupefy",
+  "canonTier": "books",
   "category": "combat",
   "cooldownTicks": 40,
   "baseDamage": 4.0,

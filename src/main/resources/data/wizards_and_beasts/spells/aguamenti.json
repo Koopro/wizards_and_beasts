@@ -1,5 +1,6 @@
 {
   "displayName": "Aguamenti",
+  "canonTier": "books",
   "category": "utility",
   "cooldownTicks": 100,
   "color": -13391105,

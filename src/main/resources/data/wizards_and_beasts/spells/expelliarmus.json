@@ -1,5 +1,6 @@
 {
   "displayName": "Expelliarmus",
+  "canonTier": "books",
   "category": "combat",
   "cooldownTicks": 50,
   "color": -39424,

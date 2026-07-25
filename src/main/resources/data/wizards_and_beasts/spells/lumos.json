@@ -1,5 +1,6 @@
 {
   "displayName": "Lumos",
+  "canonTier": "books",
   "category": "utility",
   "cooldownTicks": 200,
   "color": -120,

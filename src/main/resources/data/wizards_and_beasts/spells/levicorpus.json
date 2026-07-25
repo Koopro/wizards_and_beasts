@@ -1,5 +1,6 @@
 {
   "displayName": "Levicorpus",
+  "canonTier": "books",
   "category": "utility",
   "cooldownTicks": 100,
   "color": -3375105,

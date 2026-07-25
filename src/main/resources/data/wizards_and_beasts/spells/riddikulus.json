@@ -1,5 +1,6 @@
 {
   "displayName": "Riddikulus",
+  "canonTier": "books",
   "category": "defense",
   "cooldownTicks": 60,
   "color": -13210,

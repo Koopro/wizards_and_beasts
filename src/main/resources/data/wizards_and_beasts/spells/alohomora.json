@@ -1,5 +1,6 @@
 {
   "displayName": "Alohomora",
+  "canonTier": "books",
   "category": "utility",
   "cooldownTicks": 40,
   "color": -5570680,

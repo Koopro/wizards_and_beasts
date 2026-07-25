@@ -1,5 +1,6 @@
 {
   "displayName": "Bombarda",
+  "canonTier": "film",
   "category": "combat",
   "cooldownTicks": 140,
   "baseDamage": 7.0,

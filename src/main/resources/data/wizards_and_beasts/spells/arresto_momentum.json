@@ -1,5 +1,6 @@
 {
   "displayName": "Arresto Momentum",
+  "canonTier": "film",
   "category": "utility",
   "cooldownTicks": 80,
   "color": -7820545,

@@ -1,5 +1,6 @@
 {
   "displayName": "Liberacorpus",
+  "canonTier": "books",
   "category": "utility",
   "cooldownTicks": 35,
   "color": -7811841,

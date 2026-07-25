@@ -1,5 +1,6 @@
 {
   "displayName": "Episkey",
+  "canonTier": "books",
   "category": "defense",
   "cooldownTicks": 140,
   "color": -1118482,

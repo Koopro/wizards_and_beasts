@@ -1,5 +1,6 @@
 {
   "displayName": "Reparo",
+  "canonTier": "books",
   "category": "utility",
   "cooldownTicks": 80,
   "color": -7798836,

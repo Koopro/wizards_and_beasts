@@ -1,5 +1,6 @@
 {
   "displayName": "Wingardium Leviosa",
+  "canonTier": "books",
   "category": "utility",
   "cooldownTicks": 60,
   "color": -7811841,

@@ -1,5 +1,6 @@
 {
   "displayName": "Diffindo",
+  "canonTier": "books",
   "category": "combat",
   "cooldownTicks": 50,
   "baseDamage": 6.0,

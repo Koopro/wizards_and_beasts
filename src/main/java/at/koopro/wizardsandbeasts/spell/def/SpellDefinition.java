@@ -88,11 +88,15 @@ public record SpellDefinition(
 
         /**
          * Where this spell's incantation is attested. Metadata only — no cast, learning, or
-         * validation path reads it. Defaults to {@link SpellCanonTier#EXPANDED} so an unannotated
-         * spell reads as "bottom of the canon hierarchy until triaged" rather than silently
-         * claiming book provenance.
+         * validation path reads it.
+         *
+         * <p>Genuinely optional, with no default: absence means <em>not yet triaged</em> and is
+         * distinguishable from an explicit {@link SpellCanonTier#EXPANDED}. A default would
+         * collapse those two states, which matters because at least one shipped spell
+         * ({@code capacious_extremis}) is deliberately unassigned pending sourcing. Mirrors the
+         * optional {@code mmRating} on {@link at.koopro.wizardsandbeasts.bestiary.BestiaryEntry}.
          */
-        SpellCanonTier canonTier) {
+        Optional<SpellCanonTier> canonTier) {
 
     /** Embedded "explode" block. */
     public record ExplosionDef(float power, boolean breaksBlocks) {
@@ -285,7 +289,7 @@ public record SpellDefinition(
             List<SpellEffectEntry> effectComponents,
             boolean opensBlocks,
             float pullStrength,
-            SpellCanonTier canonTier) {
+            Optional<SpellCanonTier> canonTier) {
 
         static final MapCodec<SpellDefinitionFieldsB> MAP_CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
                 ExplosionDef.CODEC.optionalFieldOf("explode").forGetter(SpellDefinitionFieldsB::explode),
@@ -315,7 +319,7 @@ public record SpellDefinition(
                         .forGetter(SpellDefinitionFieldsB::effectComponents),
                 Codec.BOOL.optionalFieldOf("opensBlocks", false).forGetter(SpellDefinitionFieldsB::opensBlocks),
                 Codec.FLOAT.optionalFieldOf("pullStrength", 0.0f).forGetter(SpellDefinitionFieldsB::pullStrength),
-                SpellCanonTier.CODEC.optionalFieldOf("canonTier", SpellCanonTier.EXPANDED)
+                SpellCanonTier.CODEC.optionalFieldOf("canonTier")
                         .forGetter(SpellDefinitionFieldsB::canonTier)
         ).apply(inst, SpellDefinitionFieldsB::new));
     }

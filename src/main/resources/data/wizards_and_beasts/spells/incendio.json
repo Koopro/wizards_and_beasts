@@ -1,5 +1,6 @@
 {
   "displayName": "Incendio",
+  "canonTier": "books",
   "category": "combat",
   "cooldownTicks": 80,
   "baseDamage": 3.0,

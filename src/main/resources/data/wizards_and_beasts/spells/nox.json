@@ -1,5 +1,6 @@
 {
   "displayName": "Nox",
+  "canonTier": "books",
   "category": "utility",
   "cooldownTicks": 20,
   "color": -14540220,
