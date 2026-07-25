@@ -369,7 +369,7 @@ public final class BestiaryScreen extends Screen {
             gg.drawWordWrap(font, Component.literal(tier.unlockHint()), textX, portraitY, textW, BestiaryColors.TEXT_DIM);
             return;
         }
-        gg.drawString(font, Component.literal("MM Rating: " + entry.mmRating()), textX, portraitY, BestiaryColors.TEXT_DIM);
+        gg.drawString(font, Component.literal("MM Rating: " + ministryGrade(entry.mmRating())), textX, portraitY, BestiaryColors.TEXT_DIM);
         int loreY = portraitY + 12;
         if (tier.ordinal() >= DiscoveryTier.ENCOUNTERED.ordinal()) {
             gg.drawWordWrap(font, entry.shortLore(), textX, loreY, textW, BestiaryColors.TEXT);
@@ -387,6 +387,16 @@ public final class BestiaryScreen extends Screen {
         if (tier.ordinal() >= DiscoveryTier.STUDIED.ordinal()) {
             gg.drawWordWrap(font, entry.fullLore(), dx, dy, 176, BestiaryColors.TEXT);
         }
+    }
+
+    /**
+     * Renders a Ministry of Magic classification the way every canon source writes it — as
+     * repeated {@code X} glyphs (X … XXXXX) rather than a bare integer. Values outside the
+     * five-grade scale are clamped rather than thrown on, so a malformed third-party datapack
+     * degrades the tooltip instead of crashing the screen.
+     */
+    private static String ministryGrade(int mmRating) {
+        return "X".repeat(Math.clamp(mmRating, 0, 5));
     }
 
     @Override

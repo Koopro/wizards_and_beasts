@@ -2,7 +2,7 @@
   "id": "wizards_and_beasts:demiguise",
   "displayName": "bestiary.wizards_and_beasts.demiguise.name",
   "category": "SMALL_CREATURE",
-  "mmRating": 1,
+  "mmRating": 4,
   "habitat": "bestiary.wizards_and_beasts.demiguise.habitat",
   "size": "SMALL",
   "shortLore": "bestiary.wizards_and_beasts.demiguise.short_lore",
