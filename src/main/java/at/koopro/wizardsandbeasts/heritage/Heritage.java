@@ -14,7 +14,7 @@ public enum Heritage {
             true, MagicSource.WAND, 0, 0, 0, SizeCategory.NORMAL, 0xFFAA88FF, true),
 
     WEREWOLF("werewolf", "Werewolf",
-            "Humans afflicted or born with lycanthropy, gaining predatory strength beneath the moon while wrestling with a condition the wizarding world often misunderstands. "
+            "Humans afflicted with lycanthropy, gaining predatory strength beneath the moon while wrestling with a condition the wizarding world often misunderstands. "
                     + "Wolfsbane Potion can restore their reason, yet the wolf still answers when the moon is full.",
             true, MagicSource.HYBRID, 4, 0.01, 1, SizeCategory.NORMAL, 0xFF884422, true),
 
