@@ -241,8 +241,8 @@ public final class HeritageCommands {
 
             for (HeritageVariant sub : type.getSubtypes()) {
                 source.sendSuccess(() -> Component.literal(
-                        "   " + sub.getDisplayName() + " (" + sub.getId() + ")"
-                                + " — " + sub.getDescription())
+                        "   " + sub.getDisplayName() + " (" + sub.getId() + ")" + " — ")
+                        .append(Component.translatable(sub.getDescriptionTranslationKey()))
                         .withStyle(ChatFormatting.GRAY), false);
             }
         }

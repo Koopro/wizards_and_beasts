@@ -216,7 +216,16 @@ public enum HeritageVariant {
     public String getId() { return id; }
     public Heritage getParentHeritage() { return parentHeritage; }
     public String getDisplayName() { return displayName; }
+
+    /**
+     * Authoring-time English prose. This is the source {@link
+     * at.koopro.wizardsandbeasts.datagen.ModLanguageProvider} emits as the value of
+     * {@link #getDescriptionTranslationKey()}; runtime consumers must resolve the key instead so
+     * the text stays translatable. Mirrors
+     * {@link at.koopro.wizardsandbeasts.heritage.profession.ProfessionNode#getDescription()}.
+     */
     public String getDescription() { return description; }
+
     public double getHealthMod() { return healthMod; }
     public double getSpeedMod() { return speedMod; }
     public double getArmorMod() { return armorMod; }
@@ -229,6 +238,11 @@ public enum HeritageVariant {
 
     public String getTranslationKey() {
         return "subtype.WizardsAndBeastsMod." + parentHeritage.getId() + "." + id;
+    }
+
+    /** Lang key holding {@link #getDescription()}; same {@code .desc} shape as {@code ProfessionNode}. */
+    public String getDescriptionTranslationKey() {
+        return getTranslationKey() + ".desc";
     }
 
     public double getTotalHealth() {
