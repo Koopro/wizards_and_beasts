@@ -351,6 +351,9 @@ public class ModLanguageProvider extends LanguageProvider {
         add("painting.wizards_and_beasts.portrait_sir_cadogan.title", "Sir Cadogan");
         add("painting.wizards_and_beasts.portrait_sir_cadogan.author", "Hogwarts");
 
+        // Shown in place of the X-glyph grade for creatures with no Ministry classification.
+        add("bestiary.wizards_and_beasts.rating.unclassified", "Unclassified");
+
         // Heritage lore. The enums stay the authoring surface; the runtime resolves these keys.
         for (Heritage heritage : Heritage.values()) {
             add(heritage.getDescriptionTranslationKey(), heritage.getDescription());

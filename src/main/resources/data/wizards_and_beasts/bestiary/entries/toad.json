@@ -2,7 +2,6 @@
   "id": "wizards_and_beasts:toad",
   "displayName": "bestiary.wizards_and_beasts.toad.name",
   "category": "SMALL_CREATURE",
-  "mmRating": 0,
   "habitat": "bestiary.wizards_and_beasts.toad.habitat",
   "size": "TINY",
   "shortLore": "bestiary.wizards_and_beasts.toad.short_lore",
