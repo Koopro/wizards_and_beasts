@@ -11,5 +11,5 @@
     { "type": "impulse", "strength": 3.0, "direction": "push" }
   ],
   "sound": { "id": "minecraft:entity.blaze.shoot", "volume": 0.8, "pitch": 0.9 },
-  "requirement": { "type": "proficiency", "prerequisiteId": "flipendo", "minProficiency": "proficient" }
+  "requirement": { "type": "proficiency", "prerequisiteId": "accio", "minProficiency": "proficient" }
 }

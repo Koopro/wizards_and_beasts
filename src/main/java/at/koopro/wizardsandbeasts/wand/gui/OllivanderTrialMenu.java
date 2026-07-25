@@ -18,6 +18,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -184,9 +185,18 @@ public class OllivanderTrialMenu extends AbstractContainerMenu {
                 return f;
             }
         }
-        return WandFlexibility.SOLID;
+        return WandFlexibility.PLIANT;
     }
 
+    /**
+     * Three wands to try, always including the one that suits this wizard best.
+     *
+     * <p>Ollivander's is the mod's only guaranteed wand: a purely random draw could offer three wands
+     * that all score under the match threshold, and the trial has no reroll — the wizard would leave
+     * empty-handed with no way to ask again except by walking away and re-opening. Seeding the draw
+     * with the best-scoring eligible entry keeps the visit terminal while the other two slots stay
+     * random, so the choice is still a choice.
+     */
     public static List<OllivanderPoolEntry> pickTrials(Player player) {
         List<OllivanderPoolEntry> pool = new ArrayList<>(OllivanderPoolLoader.getPool(player.level().registryAccess()));
         List<OllivanderPoolEntry> eligible = new ArrayList<>();
@@ -204,7 +214,7 @@ public class OllivanderTrialMenu extends AbstractContainerMenu {
                     new OllivanderPoolEntry(1,
                             Identifier.fromNamespaceAndPath("wizards_and_beasts", "rowan"),
                             Identifier.fromNamespaceAndPath("wizards_and_beasts", "unicorn_hair"),
-                            "solid", 0),
+                            "pliant", 0),
                     new OllivanderPoolEntry(1,
                             Identifier.fromNamespaceAndPath("wizards_and_beasts", "ash"),
                             Identifier.fromNamespaceAndPath("wizards_and_beasts", "phoenix_feather"),
@@ -212,7 +222,12 @@ public class OllivanderTrialMenu extends AbstractContainerMenu {
         }
         List<OllivanderPoolEntry> bag = new ArrayList<>(eligible);
         List<OllivanderPoolEntry> picks = new ArrayList<>();
-        for (int n = 0; n < 3 && !bag.isEmpty(); n++) {
+        OllivanderPoolEntry best = bestMatch(player, eligible);
+        if (best != null) {
+            picks.add(best);
+            bag.remove(best);
+        }
+        while (picks.size() < 3 && !bag.isEmpty()) {
             float total = 0.0f;
             for (OllivanderPoolEntry e : bag) {
                 total += e.weight();
@@ -231,7 +246,28 @@ public class OllivanderTrialMenu extends AbstractContainerMenu {
         while (picks.size() < 3 && !eligible.isEmpty()) {
             picks.add(eligible.get(player.getRandom().nextInt(eligible.size())));
         }
+        // The best match must not always be the leftmost tray, or the choice reads as a formality.
+        for (int i = picks.size() - 1; i > 0; i--) {
+            int j = player.getRandom().nextInt(i + 1);
+            OllivanderPoolEntry swap = picks.get(i);
+            picks.set(i, picks.get(j));
+            picks.set(j, swap);
+        }
         return picks;
+    }
+
+    private static @Nullable OllivanderPoolEntry bestMatch(Player player, List<OllivanderPoolEntry> eligible) {
+        OllivanderPoolEntry best = null;
+        float bestScore = -1.0f;
+        for (OllivanderPoolEntry entry : eligible) {
+            float score = WandResonanceSystem.computeResonance(
+                    player, buildProbeStack(player, entry), player.level().registryAccess());
+            if (score > bestScore) {
+                bestScore = score;
+                best = entry;
+            }
+        }
+        return best;
     }
 
     @Override

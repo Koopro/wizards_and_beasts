@@ -4,7 +4,6 @@
   },
   "affinity_tags": ["rare", "combat"],
   "spell_modifiers": {
-    "dark_arts": 0.3,
     "combat": 0.18,
     "transfiguration": 0.1
   },

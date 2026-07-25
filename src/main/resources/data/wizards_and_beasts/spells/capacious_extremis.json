@@ -1,5 +1,6 @@
 {
   "displayName": "Capacious Extremis",
+  "canonTier": "pottermore",
   "category": "utility",
   "cooldownTicks": 200,
   "color": -65485,
