@@ -117,6 +117,19 @@ class SpellEffectComponentCodecTest {
     }
 
     @Test
+    void boggartBanish_defaultRadiusAndRoundTrip() {
+        SpellEffectComponent c = parse("{ \"type\": \"boggart_banish\" }");
+        SpellEffectComponent.BoggartBanish bb =
+                assertInstanceOf(SpellEffectComponent.BoggartBanish.class, c);
+        assertEquals(8.0f, bb.radius(), "radius defaults to 8.0");
+        assertRoundTrip(c);
+
+        SpellEffectComponent explicit = parse("{ \"type\": \"boggart_banish\", \"radius\": 5.5 }");
+        assertEquals(5.5f, assertInstanceOf(SpellEffectComponent.BoggartBanish.class, explicit).radius());
+        assertRoundTrip(explicit);
+    }
+
+    @Test
     void componentList_parsesAsField() {
         var result = SpellEffectComponent.CODEC.listOf().parse(JsonOps.INSTANCE,
                 GSON.fromJson("""

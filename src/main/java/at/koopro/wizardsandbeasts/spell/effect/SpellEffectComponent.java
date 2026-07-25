@@ -4,6 +4,7 @@ import org.jspecify.annotations.Nullable;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.effect.FiniteImmuneEffects;
+import at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.network.spell.SpellDataSyncS2CPayload;
@@ -26,8 +27,11 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -76,7 +80,8 @@ public sealed interface SpellEffectComponent permits
         SpellEffectComponent.AoeApply,
         SpellEffectComponent.SwapActiveSpell,
         SpellEffectComponent.InterruptCast,
-        SpellEffectComponent.ParticleBurst {
+        SpellEffectComponent.ParticleBurst,
+        SpellEffectComponent.BoggartBanish {
 
     Logger LOGGER = LogUtils.getLogger();
 
@@ -129,7 +134,8 @@ public sealed interface SpellEffectComponent permits
         AOE_APPLY("aoe_apply", AoeApply.CODEC),
         SWAP_ACTIVE_SPELL("swap_active_spell", SwapActiveSpell.CODEC),
         INTERRUPT_CAST("interrupt_cast", InterruptCast.CODEC),
-        PARTICLE_BURST("particle_burst", ParticleBurst.CODEC);
+        PARTICLE_BURST("particle_burst", ParticleBurst.CODEC),
+        BOGGART_BANISH("boggart_banish", BoggartBanish.CODEC);
 
         public static final Codec<Type> CODEC = StringRepresentable.fromValues(Type::values);
 
@@ -642,6 +648,46 @@ public sealed interface SpellEffectComponent permits
         public void apply(SpellEffectContext ctx) {
             if (!standardEnabled() || count <= 0) return;
             SpellHelper.spawnBurst(ctx.level(), family, color, ctx.position(), count, spread);
+        }
+    }
+
+    /**
+     * The anti-Boggart charm. Scans {@code radius} around the application point for Boggart creatures
+     * ({@code wizards_and_beasts:boggart}) and banishes each with a burst of colour and a comic pop —
+     * the laughter that finishes a Boggart forced into a ridiculous shape. Reveals a hidden (Invisible)
+     * Boggart before defeating it. No-ops when no Boggart is near, so Riddikulus stays a harmless
+     * courage-steadying cast against ordinary fear. This is what makes Riddikulus the anti-Boggart
+     * charm rather than a generic buff — the Boggart is the only thing it targets.
+     */
+    record BoggartBanish(float radius) implements SpellEffectComponent {
+        private static final Identifier BOGGART_ID =
+                Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "boggart");
+
+        public static final MapCodec<BoggartBanish> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+                Codec.FLOAT.optionalFieldOf("radius", 8.0f).forGetter(BoggartBanish::radius)
+        ).apply(inst, BoggartBanish::new));
+
+        @Override
+        public Type type() {
+            return Type.BOGGART_BANISH;
+        }
+
+        @Override
+        public void apply(SpellEffectContext ctx) {
+            if (!standardEnabled() || radius <= 0f) return;
+            AABB area = new AABB(ctx.position(), ctx.position()).inflate(radius);
+            List<GenericBeastEntity> boggarts = ctx.level().getEntitiesOfClass(GenericBeastEntity.class, area,
+                    e -> e.isAlive() && BOGGART_ID.equals(e.creatureId()));
+            if (boggarts.isEmpty()) return;
+            DamageSource laughter = ctx.level().damageSources().magic();
+            for (GenericBeastEntity boggart : boggarts) {
+                boggart.removeEffect(MobEffects.INVISIBILITY);
+                SpellHelper.spawnBurst(ctx.level(), SpellFamily.ARCANE, 0xFFFFF0A0,
+                        boggart.getBoundingBox().getCenter(), 24, 0.45);
+                ctx.level().playSound(null, boggart.getX(), boggart.getY(), boggart.getZ(),
+                        SoundEvents.FIREWORK_ROCKET_BLAST, SoundSource.PLAYERS, 0.7f, 1.6f);
+                boggart.hurt(laughter, 1000.0f);
+            }
         }
     }
 }
