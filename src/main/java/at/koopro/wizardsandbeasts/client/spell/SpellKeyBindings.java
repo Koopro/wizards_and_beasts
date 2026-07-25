@@ -13,12 +13,13 @@ public class SpellKeyBindings {
             new KeyMapping.Category(Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "spells"));
 
     /**
-     * Default: KEY_NONE — GLFW_KEY_K is already bound to {@link #SKILL_MENU}.
-     * Players can rebind in Controls settings.
+     * Default: C ("Character"). GLFW_KEY_K is taken by {@link #SKILL_MENU}, so the character sheet —
+     * the mod's second pillar — gets its own reachable default instead of shipping unbound. Vanilla
+     * has no default C binding; players can rebind in Controls settings.
      */
     public static final KeyMapping CHARACTER_SHEET = new KeyMapping(
             "key." + WizardsAndBeastsMod.MODID + ".character_sheet",
-            InputConstants.UNKNOWN.getValue(), CATEGORY);
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_C, CATEGORY);
 
     /**
      * Default: KEY_NONE — GLFW_KEY_K is already bound to {@link #SKILL_MENU}.
