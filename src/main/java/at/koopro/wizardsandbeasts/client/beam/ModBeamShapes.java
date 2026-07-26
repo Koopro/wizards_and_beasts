@@ -49,5 +49,8 @@ public final class ModBeamShapes {
     public static void init(IEventBus modEventBus) {
         modEventBus.addListener((NewRegistryEvent event) -> event.register(REGISTRY));
         SHAPES.register(modEventBus);
+        // Piggy-backs on the one hook the beam package already owns, so wiring up the derived
+        // beam pipeline does not need a second call site in the client mod constructor.
+        modEventBus.addListener(BeamRenderTypes::registerPipelines);
     }
 }
