@@ -30,6 +30,17 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
     public static final DataTicket<Boolean> IS_ELDER_WAND =
             DataTicket.create("is_elder_wand", Boolean.class);
 
+    /**
+     * Whether this render is the local player's own held wand.
+     *
+     * <p>An item render state carries no holder, so in third person every nearby player's wand is
+     * indistinguishable from ours — and the beam anchor has to know whose tip it just saw. Stack
+     * identity settles it: the held stack is the same object instance the player's inventory holds,
+     * and no other player's stack can be that instance.
+     */
+    public static final DataTicket<Boolean> IS_LOCAL_HELD =
+            DataTicket.create("is_local_held", Boolean.class);
+
     public WandRenderer() {
         super(new WandModel());
     }
@@ -47,6 +58,9 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
                 WandComponents.WAND_CONFIGURATION.get(), WandConfiguration.DEFAULT);
         renderState.addGeckolibData(WAND_CONFIG, config);
         renderState.addGeckolibData(IS_ELDER_WAND, ModDataComponents.isElderWand(stack));
+        var localPlayer = Minecraft.getInstance().player;
+        renderState.addGeckolibData(IS_LOCAL_HELD, localPlayer != null
+                && (stack == localPlayer.getMainHandItem() || stack == localPlayer.getOffhandItem()));
     }
 
     // ── Bone visibility (render thread) ─────────────────────────────────────
@@ -108,6 +122,13 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
         // Master model: the visible tip anchor is <selected tip variant>_anchor (the fx subtree is
         // skipRender'd, so fx_tip_anchor never yields a position). Elder-wand skin: dedicated
         // wand_tip bone. Listen on both — only the bone present and visible in the active model fires.
+        // Only a wand actually held in a hand anchors a beam. Without this an inventory/GUI render
+        // slips through the perspective gate above whenever the camera is in third person.
+        boolean heldInHand = perspective.firstPerson()
+                || perspective == ItemDisplayContext.THIRD_PERSON_LEFT_HAND
+                || perspective == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND;
+        boolean ownWand = heldInHand && state.getOrDefaultGeckolibData(IS_LOCAL_HELD, false);
+
         WandConfiguration config = state.getOrDefaultGeckolibData(WAND_CONFIG, WandConfiguration.DEFAULT);
         config.getModule(WandSlot.TIP)
                 .flatMap(WandModuleRegistry::get)
@@ -115,31 +136,28 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
                 .ifPresent(anchorBone -> info.addBonePositionListener(anchorBone, (worldPos, modelPos, preRenderPos) -> {
                     if (worldPos != null) {
                         WandTipWorldCache.setWorldTip(worldPos);
-                        captureBeamAnchor(mc, worldPos);
+                        captureBeamAnchor(mc, worldPos, ownWand);
                     }
                 }));
         info.addBonePositionListener(WandTipWorldCache.WAND_TIP_BONE, (worldPos, modelPos, preRenderPos) -> {
             if (worldPos != null) {
                 WandTipWorldCache.setWorldTip(worldPos);
-                captureBeamAnchor(mc, worldPos);
+                captureBeamAnchor(mc, worldPos, ownWand);
             }
         });
     }
 
     /**
-     * Feeds the same bone position to the beam system's per-caster anchor cache.
+     * Feeds the same bone position to the beam system's per-caster anchor cache, but only for our
+     * own wand — see {@link #IS_LOCAL_HELD}. Booking every rendered wand onto the local player
+     * would make our beam start at whichever wand happened to draw last.
      *
-     * <p>An item render state carries no owner, so there is no way to tell <em>whose</em> wand just
-     * rendered. In third person every nearby player's wand comes through here too, and booking all
-     * of them onto the local player would make the local beam start at whichever wand was drawn
-     * last. So only capture in first person, where the wand on screen is necessarily our own.
-     *
-     * <p>Other casters fall back to {@code WandTipTracker.resolve}'s body-rotation approximation.
-     * At the distance you see someone else's beam from, tip-exact and shoulder-approximate are
-     * indistinguishable — a wrong anchor on your own beam is not.
+     * <p>Other casters get {@code WandTipTracker}'s hand approximation instead. At the distance you
+     * see someone else's beam from, tip-exact and hand-approximate are indistinguishable — a wrong
+     * anchor on your own beam is not.
      */
-    private static void captureBeamAnchor(Minecraft mc, net.minecraft.world.phys.Vec3 worldPos) {
-        if (mc.player != null && mc.options.getCameraType().isFirstPerson()) {
+    private static void captureBeamAnchor(Minecraft mc, net.minecraft.world.phys.Vec3 worldPos, boolean ownWand) {
+        if (ownWand && mc.player != null) {
             at.koopro.wizardsandbeasts.client.beam.WandTipTracker.capture(mc.player.getId(), worldPos);
         }
     }

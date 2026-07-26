@@ -58,13 +58,23 @@ public final class WandTipTracker {
         ANCHORS.remove(casterId);
     }
 
-    /** Eye height, shoulder-side offset by main arm, a little forward. */
+    /**
+     * Where the wand hand roughly is, for casters we never captured a bone position from — anyone
+     * but the local player, plus the local player on the first frame of a channel.
+     *
+     * <p>Anchored at the shoulder rather than the eye. Starting a beam at eye height reads as if it
+     * came out of the caster's face; these are the constants the legacy renderer used for exactly
+     * this case and they sit convincingly at the hand.
+     */
     private static Vec3 fallback(LivingEntity caster, float partialTick) {
-        Vec3 eye = caster.getEyePosition(partialTick);
-        Vec3 look = caster.getViewVector(partialTick);
-        Vec3 right = look.cross(new Vec3(0, 1, 0));
+        Vec3 aim = caster.getViewVector(partialTick);
+        Vec3 right = aim.cross(new Vec3(0, 1, 0));
         right = right.lengthSqr() < 1e-8 ? new Vec3(1, 0, 0) : right.normalize();
-        double side = caster.getMainArm() == HumanoidArm.RIGHT ? 0.3 : -0.3;
-        return eye.add(look.scale(0.6)).add(right.scale(side)).add(0, -0.1, 0);
+        double side = caster.getMainArm() == HumanoidArm.RIGHT ? 0.32 : -0.32;
+
+        Vec3 base = caster.getPosition(partialTick);
+        Vec3 shoulder = new Vec3(base.x, base.y + caster.getBbHeight() * 0.86, base.z)
+                .add(right.scale(side));
+        return shoulder.add(aim.scale(0.58)).add(0, -0.12, 0);
     }
 }
