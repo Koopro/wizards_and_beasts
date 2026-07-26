@@ -76,7 +76,12 @@ public final class BeamGeometry {
         }
     }
 
-    /** Draws only the 4 lateral faces of the box — the two end caps are never visible on a beam. */
+    /**
+     * Draws all 6 faces of the box. The caps matter under additive blending: without them a segment
+     * end is the one place where light does not accumulate, so segment ends read darker than the
+     * middle — visible as a dark notch at every joint of a {@link Lightning} chain and as a blunt,
+     * unlit stub at the muzzle and impact point of a {@link Laser}.
+     */
     private static void emitBox(Matrix4f m, VertexConsumer c, AABB b, int rgb, float alpha) {
         float a = Mth.clamp(alpha, 0f, 1f);
         if (a <= 0f) {
@@ -99,6 +104,9 @@ public final class BeamGeometry {
         quad(m, c, r, g, bl, a, x0, y0, z1, x0, y1, z1, x0, y1, z0, x0, y0, z0); // -X
         quad(m, c, r, g, bl, a, x1, y0, z1, x1, y1, z1, x0, y1, z1, x0, y0, z1); // +Z
         quad(m, c, r, g, bl, a, x0, y0, z0, x0, y1, z0, x1, y1, z0, x1, y0, z0); // -Z
+        // Caps. Local +Y is the beam direction, so these are the far and near ends of the segment.
+        quad(m, c, r, g, bl, a, x0, y1, z0, x0, y1, z1, x1, y1, z1, x1, y1, z0); // +Y
+        quad(m, c, r, g, bl, a, x0, y0, z0, x1, y0, z0, x1, y0, z1, x0, y0, z1); // -Y
     }
 
     private static void quad(Matrix4f m, VertexConsumer c, float r, float g, float b, float a,
