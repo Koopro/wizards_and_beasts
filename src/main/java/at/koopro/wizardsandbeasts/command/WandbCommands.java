@@ -24,6 +24,7 @@ import at.koopro.wizardsandbeasts.item.wand.DebugWandState;
 import at.koopro.wizardsandbeasts.item.wand.WandItem;
 import at.koopro.wizardsandbeasts.network.debug.BeamDebugOpenS2CPayload;
 import at.koopro.wizardsandbeasts.network.debug.BeamPresetS2CPayload;
+import at.koopro.wizardsandbeasts.network.debug.BeamSystemS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.util.GlowDebugTags;
 import at.koopro.wizardsandbeasts.util.RgbHex;
@@ -99,6 +100,12 @@ public final class WandbCommands {
                                 .then(Commands.literal("low").executes(ctx -> setBeamPreset(ctx.getSource(), "LOW")))
                                 .then(Commands.literal("medium").executes(ctx -> setBeamPreset(ctx.getSource(), "MEDIUM")))
                                 .then(Commands.literal("high").executes(ctx -> setBeamPreset(ctx.getSource(), "HIGH")))
+                        )
+                        .then(Commands.literal("system")
+                                .then(Commands.literal("new")
+                                        .executes(ctx -> setBeamSystem(ctx.getSource().getPlayerOrException(), true)))
+                                .then(Commands.literal("old")
+                                        .executes(ctx -> setBeamSystem(ctx.getSource().getPlayerOrException(), false)))
                         )
                 )
                 .then(Commands.literal("stats")
@@ -190,6 +197,18 @@ public final class WandbCommands {
         source.sendSuccess(() -> Component.literal("Beam preset set to ")
                 .withStyle(ChatFormatting.GRAY)
                 .append(Component.literal(presetName.toLowerCase()).withStyle(ChatFormatting.GREEN)), false);
+        return 1;
+    }
+
+    /** Picks the beam renderer on the invoking player's client. Both stay wired; no restart needed. */
+    private static int setBeamSystem(ServerPlayer player, boolean useNew) {
+        BeamSystemS2CPayload.sendToPlayer(player, useNew);
+        player.displayClientMessage(
+                Component.literal("Beam renderer: ")
+                        .withStyle(ChatFormatting.GRAY)
+                        .append(Component.literal(useNew ? "new (entity)" : "legacy")
+                                .withStyle(useNew ? ChatFormatting.GREEN : ChatFormatting.YELLOW)),
+                false);
         return 1;
     }
 

@@ -5,6 +5,7 @@ import org.jspecify.annotations.NullMarked;
 import at.koopro.wizardsandbeasts.client.wand.BeamClientPayloadHandlers;
 import at.koopro.wizardsandbeasts.network.debug.BeamDebugOpenS2CPayload;
 import at.koopro.wizardsandbeasts.network.debug.BeamPresetS2CPayload;
+import at.koopro.wizardsandbeasts.network.debug.BeamSystemS2CPayload;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 @NullMarked
@@ -21,5 +22,9 @@ public final class ModNetworkBeamDebug {
                 BeamPresetS2CPayload.TYPE,
                 BeamPresetS2CPayload.STREAM_CODEC,
                 BeamClientPayloadHandlers::handleBeamPreset);
+        registrar.playToClient(
+                BeamSystemS2CPayload.TYPE,
+                BeamSystemS2CPayload.STREAM_CODEC,
+                BeamClientPayloadHandlers::handleBeamSystem);
     }
 }

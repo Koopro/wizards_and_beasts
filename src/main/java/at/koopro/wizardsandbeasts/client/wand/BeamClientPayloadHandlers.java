@@ -1,6 +1,9 @@
 package at.koopro.wizardsandbeasts.client.wand;
 
+import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.client.beam.BeamChannelClient;
 import at.koopro.wizardsandbeasts.network.debug.BeamPresetS2CPayload;
+import at.koopro.wizardsandbeasts.network.debug.BeamSystemS2CPayload;
 import com.mojang.logging.LogUtils;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jspecify.annotations.NullMarked;
@@ -27,6 +30,18 @@ public final class BeamClientPayloadHandlers {
                 return;
             }
             BeamSettings.applyPerformancePreset(preset);
+        });
+    }
+
+    /**
+     * Switches between the entity-based beam system and the legacy renderer. Any beams already in
+     * flight are dropped on the way out — the new system's entities would otherwise keep drawing
+     * alongside the legacy renderer until their casters stopped channelling.
+     */
+    public static void handleBeamSystem(BeamSystemS2CPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            WizardsAndBeastsMod.useNewBeamSystem = payload.useNewSystem();
+            BeamChannelClient.clear();
         });
     }
 }
