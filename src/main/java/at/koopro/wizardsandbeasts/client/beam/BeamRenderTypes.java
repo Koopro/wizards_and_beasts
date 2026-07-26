@@ -32,10 +32,20 @@ public final class BeamRenderTypes {
      *
      * <p>Vanilla does the same thing one pipeline further down — {@code DRAGON_RAYS} is the identical
      * lightning shader with {@code withDepthWrite(false)}, for exactly this class of volumetric ray.
+     *
+     * <p>Culling is off for the same reason. {@code LIGHTNING} leaves {@code cull} at its default of
+     * {@code true}, which is right for a vanilla bolt — a hard, surface-like shape. A beam is meant
+     * to read as a glowing <em>volume</em>, and under additive blending every face adds light, so
+     * drawing the far wall of the tube as well as the near one is what makes the light look like it
+     * passes through the whole rod rather than sitting on a flat ribbon.
+     *
+     * <p>Only the additive type does this. {@link #BEAM_TRANSLUCENT} stays culled: alpha blending is
+     * order-dependent, so compositing the far faces under the near ones would just double-darken.
      */
     public static final RenderPipeline BEAM_ADDITIVE_PIPELINE = RenderPipelines.LIGHTNING.toBuilder()
             .withLocation(Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "pipeline/beam_additive"))
             .withDepthWrite(false)
+            .withCull(false)
             .build();
 
     /**

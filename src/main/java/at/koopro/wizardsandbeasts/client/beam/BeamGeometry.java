@@ -93,7 +93,8 @@ public final class BeamGeometry {
         float y1 = (float) b.maxY;
         float z1 = (float) b.maxZ;
 
-        // Outward-CCW winding (default pipeline culls back faces): near faces draw, far faces cull.
+        // Outward-CCW winding. The additive pipeline draws both sides (see BeamRenderTypes), so the
+        // far wall of the tube adds light too; the translucent one still culls back faces.
         quad(m, c, r, g, bl, a, x1, y0, z0, x1, y1, z0, x1, y1, z1, x1, y0, z1); // +X
         quad(m, c, r, g, bl, a, x0, y0, z1, x0, y1, z1, x0, y1, z0, x0, y0, z0); // -X
         quad(m, c, r, g, bl, a, x1, y0, z1, x1, y1, z1, x0, y1, z1, x0, y0, z1); // +Z
