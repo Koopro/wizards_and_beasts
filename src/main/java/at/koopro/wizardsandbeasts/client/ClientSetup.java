@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client;
 
+import at.koopro.wizardsandbeasts.client.beam.BeamEntityRenderer;
 import at.koopro.wizardsandbeasts.client.broom.BroomRenderer;
 import at.koopro.wizardsandbeasts.client.entity.DementorRenderer;
 import at.koopro.wizardsandbeasts.client.entity.DragonRenderer;
@@ -20,6 +21,7 @@ public class ClientSetup {
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.BROOM.get(), BroomRenderer::new);
         event.registerEntityRenderer(ModEntities.SPELL_PROJECTILE.get(), SpellProjectileRenderer::new);
+        event.registerEntityRenderer(ModEntities.BEAM.get(), BeamEntityRenderer::new);
         event.registerEntityRenderer(ModEntities.BEAST_HEX_PROJECTILE.get(), ThrownItemRenderer::new);
         event.registerEntityRenderer(ModEntities.PATRONUS.get(), PatronusRenderer::new);
         event.registerEntityRenderer(ModEntities.PROTEGO_SHIELD.get(), ProtegoShieldRenderer::new);

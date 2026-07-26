@@ -115,13 +115,28 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
                 .ifPresent(anchorBone -> info.addBonePositionListener(anchorBone, (worldPos, modelPos, preRenderPos) -> {
                     if (worldPos != null) {
                         WandTipWorldCache.setWorldTip(worldPos);
+                        captureBeamAnchor(mc, worldPos);
                     }
                 }));
         info.addBonePositionListener(WandTipWorldCache.WAND_TIP_BONE, (worldPos, modelPos, preRenderPos) -> {
             if (worldPos != null) {
                 WandTipWorldCache.setWorldTip(worldPos);
+                captureBeamAnchor(mc, worldPos);
             }
         });
+    }
+
+    /**
+     * Feeds the same bone position to the beam system's per-caster anchor cache.
+     *
+     * <p>Attributed to the local player: an item render state carries no owner, and the
+     * perspective gate above already restricts this to the locally-viewed held wand — which is
+     * also why {@link WandTipWorldCache} gets away with a single global slot.
+     */
+    private static void captureBeamAnchor(Minecraft mc, net.minecraft.world.phys.Vec3 worldPos) {
+        if (mc.player != null) {
+            at.koopro.wizardsandbeasts.client.beam.WandTipTracker.capture(mc.player.getId(), worldPos);
+        }
     }
 
     // ── GeoModel ──────────────────────────────────────────────────────────────

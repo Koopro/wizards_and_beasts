@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.client.beam.BeamEntity;
 import at.koopro.wizardsandbeasts.entity.azkaban.DementorEntity;
 import at.koopro.wizardsandbeasts.entity.beast.AugureyEntity;
 import at.koopro.wizardsandbeasts.entity.beast.BowtruckleEntity;
@@ -110,4 +111,13 @@ public class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<StreelerEntity>> STREELER =
             EntityHelper.register(ENTITY_TYPES, "streeler", StreelerEntity::new, MobCategory.CREATURE, 0.7f, 0.7f);
     static { EntityAttributeBindings.queue(STREELER, StreelerEntity::createAttributes); }
+
+    /**
+     * Client-only beam carrier — never spawned or synced by the server, hence tracking range 0 and
+     * a tracking interval that effectively never fires. The type is registered on both sides only
+     * because the entity renderer needs something to key off.
+     */
+    public static final DeferredHolder<EntityType<?>, EntityType<BeamEntity>> BEAM =
+            EntityHelper.registerMisc(ENTITY_TYPES, "beam", BeamEntity::new, 0.1f, 0.1f,
+                    0, Integer.MAX_VALUE);
 }

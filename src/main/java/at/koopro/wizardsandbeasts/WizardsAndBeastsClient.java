@@ -2,6 +2,8 @@ package at.koopro.wizardsandbeasts;
 
 import at.koopro.wizardsandbeasts.client.ClientSetup;
 import at.koopro.wizardsandbeasts.client.apparition.ApparitionClientController;
+import at.koopro.wizardsandbeasts.client.beam.BeamClientEvents;
+import at.koopro.wizardsandbeasts.client.beam.ModBeamShapes;
 import at.koopro.wizardsandbeasts.client.bestiary.niffler.NifflerPouchScreen;
 import at.koopro.wizardsandbeasts.client.item.HermionesBagScreen;
 import at.koopro.wizardsandbeasts.client.legilimency.LegilimencyVisionRenderer;
@@ -47,6 +49,9 @@ public class WizardsAndBeastsClient {
         modContainer.registerExtensionPoint(IConfigScreenFactory.class,
                 (container, modListScreen) -> new WizardsConfigScreen(modListScreen));
 
+        // Beam shapes are a client-only visual concern, so the registry lives on the client bus.
+        ModBeamShapes.init(modEventBus);
+
         modEventBus.addListener(ClientSetup::registerRenderers);
         modEventBus.addListener(ClientSetup::registerLayers);
         modEventBus.addListener(ModParticleProviders::register);
@@ -63,6 +68,8 @@ public class WizardsAndBeastsClient {
         NeoForge.EVENT_BUS.addListener(SpellClientInputHandler::onClientTick);
         NeoForge.EVENT_BUS.addListener(SpellClientInputHandler::onScroll);
         NeoForge.EVENT_BUS.addListener(WandBeamRenderer::onRenderLevel);
+        NeoForge.EVENT_BUS.addListener(BeamClientEvents::onLoggingOut);
+        NeoForge.EVENT_BUS.addListener(BeamClientEvents::onEntityLeaveLevel);
         NeoForge.EVENT_BUS.addListener(ColoredGlowRenderer::onRenderLevel);
         NeoForge.EVENT_BUS.addListener(ProtegoCubeRenderer::onRenderLevel);
         NeoForge.EVENT_BUS.addListener(ApparitionClientController::onRenderLevel);
