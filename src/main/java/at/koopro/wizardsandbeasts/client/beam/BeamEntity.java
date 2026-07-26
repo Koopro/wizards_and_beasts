@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.beam;
 
+import at.koopro.wizardsandbeasts.spell.cast.BeamRayResolver;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
@@ -34,6 +35,10 @@ public class BeamEntity extends Entity {
     private BeamStyle style = BeamStyle.laser(0x44CCFF);
     private BeamShape shape = new Laser();
     private Vec3 target = Vec3.ZERO;
+    /** Which spell is being channelled, so a re-announcement can tell "same beam" from "new beam". */
+    private String spellId = "";
+    /** Reach in blocks as the server resolved it (spell range x wand range stat). */
+    private float range = 32f;
 
     private float progress;
     private float progressPrev;
@@ -101,6 +106,33 @@ public class BeamEntity extends Entity {
 
     public void setTarget(Vec3 target) {
         this.target = target;
+    }
+
+    public String getSpellId() {
+        return spellId;
+    }
+
+    public void setSpellId(String spellId) {
+        this.spellId = spellId;
+    }
+
+    public float getRange() {
+        return range;
+    }
+
+    public void setRange(float range) {
+        this.range = range;
+    }
+
+    /**
+     * How far the beam currently reaches, mirroring the server's ramp in
+     * {@code WandBeamChannelLogic}: it grows at a fixed number of blocks per tick until it hits the
+     * spell's range. Drawing anything else would put the visible end somewhere other than where
+     * damage resolves.
+     */
+    public float currentReach(float partialTick) {
+        float elapsed = tickCount + partialTick;
+        return Math.min(range, elapsed * BeamRayResolver.extensionBlocksPerTick());
     }
 
     public int getCasterId() {

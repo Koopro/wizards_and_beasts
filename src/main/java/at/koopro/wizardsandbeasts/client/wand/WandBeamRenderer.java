@@ -45,6 +45,12 @@ public final class WandBeamRenderer {
     private WandBeamRenderer() {}
 
     public static void onRenderLevel(RenderLevelStageEvent.AfterTranslucentBlocks event) {
+        // The entity-based beam system draws instead. Gated here rather than by unregistering the
+        // event so the two can be compared in-game without a restart.
+        if (WizardsAndBeastsMod.useNewBeamSystem) {
+            wasActive = false;
+            return;
+        }
         Minecraft mc = Minecraft.getInstance();
         Player player = mc.player;
         if (player == null) {

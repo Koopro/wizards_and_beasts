@@ -64,6 +64,13 @@ public class WizardsAndBeastsMod {
     /** Debug flag: force beam rendering without holding right-click. */
     public static volatile boolean debugForceBeam = false;
 
+    /**
+     * Which beam renderer draws: the entity-based {@code client.beam} system, or the legacy
+     * immediate-mode {@code WandBeamRenderer}. Both stay wired so they can be compared in-game
+     * without a restart; the legacy one is still the default until the new one has had a visual pass.
+     */
+    public static volatile boolean useNewBeamSystem = false;
+
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public WizardsAndBeastsMod(IEventBus modEventBus, ModContainer modContainer) {
