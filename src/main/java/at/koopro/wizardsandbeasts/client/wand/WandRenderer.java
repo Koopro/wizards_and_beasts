@@ -129,12 +129,17 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
     /**
      * Feeds the same bone position to the beam system's per-caster anchor cache.
      *
-     * <p>Attributed to the local player: an item render state carries no owner, and the
-     * perspective gate above already restricts this to the locally-viewed held wand — which is
-     * also why {@link WandTipWorldCache} gets away with a single global slot.
+     * <p>An item render state carries no owner, so there is no way to tell <em>whose</em> wand just
+     * rendered. In third person every nearby player's wand comes through here too, and booking all
+     * of them onto the local player would make the local beam start at whichever wand was drawn
+     * last. So only capture in first person, where the wand on screen is necessarily our own.
+     *
+     * <p>Other casters fall back to {@code WandTipTracker.resolve}'s body-rotation approximation.
+     * At the distance you see someone else's beam from, tip-exact and shoulder-approximate are
+     * indistinguishable — a wrong anchor on your own beam is not.
      */
     private static void captureBeamAnchor(Minecraft mc, net.minecraft.world.phys.Vec3 worldPos) {
-        if (mc.player != null) {
+        if (mc.player != null && mc.options.getCameraType().isFirstPerson()) {
             at.koopro.wizardsandbeasts.client.beam.WandTipTracker.capture(mc.player.getId(), worldPos);
         }
     }
