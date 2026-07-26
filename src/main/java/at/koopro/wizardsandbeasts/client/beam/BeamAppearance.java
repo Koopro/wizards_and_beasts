@@ -51,10 +51,12 @@ public final class BeamAppearance {
                     new Lightning(6, 4f, 2)));
         }
         if (SpellIds.matches(id, AVADA)) {
-            // Additive blending can only brighten, so the killing curse gets the alpha-blended
-            // style — otherwise a green-black bolt washes out against a bright sky.
+            // "A jet of green light" — the spell's own doc. Dark magic, but not a dark colour, so
+            // the alpha-blended dark style was wrong: at core opacity 1 it drew a flat, opaque
+            // green bar with no glow at all. Additive with a pale green core and a saturated green
+            // halo, wider than a normal beam because this one is supposed to be frightening.
             return Optional.of(new Appearance(
-                    BeamStyle.dark(color, glowFor(color)),
+                    new BeamStyle(3.0f, 3.0f, 0xCCFFCC, color, 0.9f, 0.6f, 4, 0f, true),
                     new Laser()));
         }
         if (SpellIds.matches(id, AGUAMENTI)) {
