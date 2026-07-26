@@ -12,8 +12,8 @@ import net.minecraft.world.phys.Vec3;
  *
  * <p>{@code render} opens exactly one {@code SubmitNodeCollector.submitCustomGeometry} for the
  * whole beam — one render type per style — and drives {@link BeamGeometry#segment} inside the
- * callback. See BEAM_API_NOTES deviation #1 for why this replaces the prompt's
- * {@code MultiBufferSource} parameter.
+ * callback. Since 1.21.11 entity rendering submits through a collector rather than pulling a
+ * buffer from a {@code MultiBufferSource}, which is why the collector is passed down here.
  */
 public interface BeamShape {
 

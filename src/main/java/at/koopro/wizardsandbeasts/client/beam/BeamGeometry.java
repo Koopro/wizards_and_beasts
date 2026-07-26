@@ -14,8 +14,8 @@ import org.joml.Matrix4f;
  *
  * <p>Because {@code SubmitNodeCollector.submitCustomGeometry} hands back an immutable
  * {@link com.mojang.blaze3d.vertex.PoseStack.Pose} rather than a push/poppable {@code PoseStack},
- * orientation is applied to a fresh {@link Matrix4f} copy of the base pose per segment (see
- * BEAM_API_NOTES deviation #2) instead of {@code poseStack.mulPose(...)}. The math is identical.
+ * orientation is applied to a fresh {@link Matrix4f} copy of the base pose per segment instead of
+ * {@code poseStack.mulPose(...)}. The rotation sequence — and therefore the math — is identical.
  */
 public final class BeamGeometry {
 

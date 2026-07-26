@@ -14,8 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>GeckoLib bone positions only exist during the model's render pass, so they cannot be queried
  * on demand — they are grabbed in passing. GeckoLib 5 exposes exactly the right hook
  * ({@code RenderPassInfo.addBonePositionListener}), which {@code WandRenderer} already uses; the
- * wand renderer feeds {@link #capture} the world position GeckoLib resolved (BEAM_API_NOTES #9),
- * so no PoseStack transform is done here.
+ * wand renderer feeds {@link #capture} the world position GeckoLib already resolved, so no
+ * PoseStack transform is done here.
  *
  * <p><strong>One frame of latency is accepted and intended.</strong> Item and entity rendering run
  * in the same frame with no guaranteed order, so the beam may read the tip captured on the previous
