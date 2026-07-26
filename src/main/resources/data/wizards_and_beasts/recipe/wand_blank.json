@@ -1,0 +1,23 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "WANDS"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "  S",
+    " S ",
+    "K  "
+  ],
+  "key": {
+    "S": "minecraft:stick",
+    "K": "minecraft:iron_nugget"
+  },
+  "result": {
+    "id": "wizards_and_beasts:wand_blank",
+    "count": 1
+  }
+}

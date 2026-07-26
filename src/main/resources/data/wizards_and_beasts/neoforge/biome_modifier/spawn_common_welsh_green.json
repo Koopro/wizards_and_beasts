@@ -1,0 +1,5 @@
+{
+  "type": "neoforge:add_spawns",
+  "biomes": [ "minecraft:windswept_hills", "minecraft:windswept_gravelly_hills", "minecraft:windswept_forest", "minecraft:jagged_peaks", "minecraft:stony_peaks" ],
+  "spawners": { "type": "wizards_and_beasts:common_welsh_green", "weight": 1, "minCount": 1, "maxCount": 1 }
+}

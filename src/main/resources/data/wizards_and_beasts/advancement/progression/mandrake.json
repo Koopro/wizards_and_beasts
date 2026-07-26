@@ -1,0 +1,34 @@
+{
+  "parent": "wizards_and_beasts:progression/cauldron",
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "wizards_and_beasts:mandrake"
+    },
+    "title": {
+      "translate": "advancements.wizards_and_beasts.progression.mandrake.title"
+    },
+    "description": {
+      "translate": "advancements.wizards_and_beasts.progression.mandrake.description"
+    },
+    "show_toast": true,
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "mandrake": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "wizards_and_beasts:mandrake"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "mandrake"
+    ]
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "parent": "wizards_and_beasts:progression/root",
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "wizards_and_beasts:wandmakers_bench"
+    },
+    "title": {
+      "translate": "advancements.wizards_and_beasts.progression.wandmakers_bench.title"
+    },
+    "description": {
+      "translate": "advancements.wizards_and_beasts.progression.wandmakers_bench.description"
+    },
+    "show_toast": true,
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "bench": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "wizards_and_beasts:wandmakers_bench"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "bench"
+    ]
+  ]
+}

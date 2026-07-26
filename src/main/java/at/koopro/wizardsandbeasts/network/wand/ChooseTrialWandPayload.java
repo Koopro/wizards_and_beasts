@@ -5,6 +5,7 @@ import at.koopro.wizardsandbeasts.wand.gui.OllivanderTrialMenu;
 import at.koopro.wizardsandbeasts.wand.resonance.WandResonanceConfigLoader;
 import at.koopro.wizardsandbeasts.wand.resonance.WandResonanceSystem;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -41,6 +42,8 @@ public record ChooseTrialWandPayload(int containerId, int slotIndex) implements 
             }
             float thresh = WandResonanceConfigLoader.getConfig(player.registryAccess()).matchThreshold();
             if (menu.getResonanceScore(pkt.slotIndex) < thresh) {
+                // Silence here read as a dead button. Say which way the trial went.
+                player.displayClientMessage(Component.translatable("wandcraft.trial.rejected"), true);
                 return;
             }
             ItemStack wand = menu.createTrialStack(pkt.slotIndex, true);

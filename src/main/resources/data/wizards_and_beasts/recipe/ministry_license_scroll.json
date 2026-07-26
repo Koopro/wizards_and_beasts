@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "wizards_and_beasts:parchment",
+    "wizards_and_beasts:parchment",
+    "wizards_and_beasts:ink_bottle",
+    "minecraft:gold_nugget"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:ministry_license_scroll",
+    "count": 2
+  }
+}

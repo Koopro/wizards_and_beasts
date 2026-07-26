@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "tools",
+  "ingredients": [
+    "minecraft:gunpowder",
+    "minecraft:copper_ingot",
+    "wizards_and_beasts:ghoul_slime"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:decoy_detonator",
+    "count": 2
+  }
+}

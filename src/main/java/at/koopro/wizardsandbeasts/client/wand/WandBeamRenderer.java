@@ -15,8 +15,8 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
@@ -25,20 +25,24 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
 
 /**
- * Renders a multi-layered magical beam from the wand tip to the target
- * while the player holds right-click with a wand.
- * <p>
- * Path and tube geometry follow the same idea as {@link net.minecraft.client.renderer.entity.LightningBoltRenderer}:
- * seeded cumulative random offsets (detrended so both ends stay on the ray) and four quads per segment
- * forming a square tube, rather than a single camera-facing ribbon.
+ * Renders a multi-layered magical beam from the wand tip to the target while the player holds
+ * right-click with a wand.
+ *
+ * <p>This class is the plumbing only: it decides <em>whether</em> a beam is up, where it starts and
+ * ends, and which shape frame the animation is on. Everything about how the beam <em>looks</em> comes
+ * from the channelled spell's {@link BeamStyle} (see {@link BeamStyles}), and everything about how it
+ * is turned into triangles lives in {@link WandBeamGeometry}. Adding a beam to a new spell needs no
+ * change here.
+ *
+ * <p>All server-owned state — whether the spell is active, who is casting, the target, damage — is
+ * read, never written. See {@link WandBeamPipelines} for why the render type is additive rather than
+ * alpha-blended.
  */
 public final class WandBeamRenderer {
     private static final String LEVIOSA_ID = "wingardium_leviosa";
 
     private static boolean wasActive = false;
     private static int beamStartTick = 0;
-    /** Last spell colour pushed into {@link BeamSettings}; {@code -1} = none applied yet. */
-    private static int lastAppliedColor = -1;
     /** Stable while the beam is active so the bolt does not swim frame-to-frame. */
     private static long beamPathSeed = 0L;
 
@@ -111,62 +115,101 @@ public final class WandBeamRenderer {
         poseStack.pushPose();
         poseStack.translate(-camPos.x, -camPos.y, -camPos.z);
 
-        if (!WizardsAndBeastsMod.debugForceBeam) {
-            Spell activeSpell = ClientSpellDataState.get().getActiveSpell();
-            // Only on change: applySpellColor writes the shared layer settings, so doing it every frame
-            // stomped whatever the player had dialled in via the beam debug screen.
-            if (activeSpell != null && activeSpell.getColor() != lastAppliedColor) {
-                lastAppliedColor = activeSpell.getColor();
-                BeamSettings.applySpellColor(lastAppliedColor);
-            }
-        }
+        // The spell contributes a style; this client's quality budget (and the debug screen, while it
+        // has control) is layered on top. The renderer below reads nothing else about the spell.
+        Spell activeSpell = WizardsAndBeastsMod.debugForceBeam
+                ? null
+                : ClientSpellDataState.get().getActiveSpell();
+        BeamStyle style = BeamSettings.resolve(BeamStyles.forSpell(activeSpell));
+        BeamStyle.Path pathStyle = style.path();
+        BeamStyle.Pulse pulse = style.pulse();
 
-        float flicker = 0.88f + 0.12f * Mth.sin((player.tickCount + partialTick) * BeamSettings.speed * 18f);
+        // Shape keyframes on a fixed tick cadence. Every node offset is independent of the previous
+        // frame's, so at morph 0 the whole bolt snaps to a fresh shape — that discontinuity is what
+        // reads as electrical crackle. At morph 1 the two frames are interpolated instead, which is
+        // how a curse writhes and a water jet flows rather than strobes.
+        float beamTime = player.tickCount + partialTick;
+        double frames = beamTime / Math.max(1, pathStyle.reseedTicks());
+        long frameIndex = (long) Math.floor(frames);
+        float frac = (float) (frames - frameIndex);
+        long seedA = shapeSeed(frameIndex);
+        long seedB = shapeSeed(frameIndex + 1);
+        float blend = keyframeBlend(frac, pathStyle.morph());
 
-        float pathNoise = Math.max(
-                BeamSettings.layers[BeamSettings.OUTER].noiseAmp,
-                Math.max(
-                        BeamSettings.layers[BeamSettings.MID].noiseAmp,
-                        BeamSettings.layers[BeamSettings.CORE].noiseAmp));
+        // Per-strike brightness on top of the continuous shimmer: real arcs are not equally bright
+        // from one discharge to the next. Interpolated alongside the shape so a morphing style does
+        // not pop at the keyframe boundary.
+        float amount = Mth.clamp(pulse.amount(), 0f, 1f);
+        float gain = Mth.lerp(blend, strikeGain(seedA, amount), strikeGain(seedB, amount));
+        float shimmer = 1f - amount + amount * (0.5f + 0.5f * Mth.sin(beamTime * pulse.speed()));
+        float flicker = gain * shimmer;
 
-        Vec3[] path = WandBeamGeometry.buildBeamPath(beamStart, beamEnd, beamPathSeed, pathNoise);
-        if (path == null) {
+        WandBeamGeometry.Bolt bolt =
+                WandBeamGeometry.buildBolt(beamStart, beamEnd, seedA, seedB, blend, style);
+        if (bolt == null) {
             poseStack.popPose();
             return;
         }
 
-        float beamScrollU = (player.tickCount + partialTick) * BeamSettings.speed * 2.0f;
-        boolean textured = BeamSettings.useTextured;
+        float scrollU = beamTime * pulse.scrollSpeed();
 
         MultiBufferSource.BufferSource bufferSource = mc.renderBuffers().bufferSource();
-        VertexConsumer tubeConsumer =
-                textured ? null : bufferSource.getBuffer(RenderTypes.lightning());
-        VertexConsumer stripConsumer =
-                textured ? bufferSource.getBuffer(WandBeamRenderType.beamStrip()) : null;
-
+        VertexConsumer stripConsumer = bufferSource.getBuffer(WandBeamRenderType.beamStrip());
         Matrix4f matrix = poseStack.last().pose();
 
-        WandBeamGeometry.renderLayers(matrix, tubeConsumer, stripConsumer, camPos, path, flicker,
-                beamScrollU, textured);
+        WandBeamGeometry.renderBolt(matrix, stripConsumer, camPos, bolt, style, flicker, scrollU);
 
-        if (textured && stripConsumer != null) {
-            BeamSettings.LayerSettings core = BeamSettings.layers[BeamSettings.CORE];
-            float mu = core.width * 2.1f;
-            WandBeamGeometry.renderMuzzleFlash(matrix, stripConsumer, camPos, beamStart, mu,
-                    core.r, core.g, core.b, Mth.clamp(core.alpha * 1.15f * flicker, 0f, 1f), beamScrollU);
+        if (BeamSettings.endpointFlashes) {
+            VertexConsumer glowConsumer = bufferSource.getBuffer(WandBeamRenderType.beamGlow());
+            BeamStyle.Layer halo = style.outer();
+            BeamStyle.Flash flash = style.flash();
+            float glowAlpha = style.core().alpha();
+
+            WandBeamGeometry.renderMuzzleFlash(matrix, glowConsumer, camPos, beamStart,
+                    Math.max(0.10f, halo.width() * flash.muzzleScale()),
+                    halo.r(), halo.g(), halo.b(), Mth.clamp(glowAlpha * 0.85f * flicker, 0f, 1f));
 
             double reachTol = 0.06;
             boolean reachedTarget = maxReach + reachTol >= fullDist;
             if (reachedTarget && ray.hitsAnything()) {
-                WandBeamGeometry.renderImpactFlash(matrix, stripConsumer, camPos, beamEnd,
-                        Math.max(0.09f, core.width * 2.4f),
-                        core.r, core.g, core.b, Mth.clamp(core.alpha * 1.05f * flicker, 0f, 1f),
-                        beamScrollU, ray.hitsEntity());
+                WandBeamGeometry.renderImpactFlash(matrix, glowConsumer, camPos, beamEnd,
+                        Math.max(0.16f, halo.width() * flash.impactScale()),
+                        halo.r(), halo.g(), halo.b(), Mth.clamp(glowAlpha * 0.9f * flicker, 0f, 1f),
+                        ray.hitsEntity(), flash.impactSparks(), seedA);
             }
         }
 
         bufferSource.endBatch();
         poseStack.popPose();
+    }
+
+    /** Deterministic per-cast, per-keyframe seed: the same frame always rebuilds the same shape. */
+    private static long shapeSeed(long frameIndex) {
+        return beamPathSeed * 31L + frameIndex;
+    }
+
+    private static float strikeGain(long seed, float amount) {
+        return 1f - amount + 2f * amount * RandomSource.create(seed).nextFloat();
+    }
+
+    /**
+     * How far through the current shape keyframe the beam has interpolated.
+     *
+     * <p>{@code morph} controls <em>when</em> the transition happens inside the window, not how far it
+     * gets: the shape holds for the first {@code 1 - morph} of the window and then eases the rest of
+     * the way. So {@code morph 0} holds the whole window and snaps at the boundary (crackle),
+     * {@code morph 1} eases across the entire window (a continuous writhe), and everything between
+     * holds then moves. Scaling the blend by {@code morph} instead — the obvious reading — would leave
+     * every intermediate style short of the next keyframe and pop by the remainder each time it rolled
+     * over.
+     */
+    private static float keyframeBlend(float frac, float morph) {
+        float m = Mth.clamp(morph, 0f, 1f);
+        if (m < 1e-4f) {
+            return 0f;
+        }
+        float t = Mth.clamp((frac - (1f - m)) / m, 0f, 1f);
+        return t * t * (3f - 2f * t);
     }
 
     /**

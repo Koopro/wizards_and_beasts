@@ -36,9 +36,18 @@ public final class ModNetworkSkills {
                 AbilityGrantsSyncS2CPayload.STREAM_CODEC,
                 ClientAbilityGrantState::handle);
 
+        registrar.playToClient(
+                SyncVocationDefinitionsPayload.TYPE,
+                SyncVocationDefinitionsPayload.STREAM_CODEC,
+                ClientPayloadHandlers::handleSyncVocationDefinitions);
+
         registrar.playToServer(
                 SkillUnlockC2SPayload.TYPE,
                 SkillUnlockC2SPayload.STREAM_CODEC,
                 SkillUnlockC2SPayload::handle);
+        registrar.playToServer(
+                VocationCommitC2SPayload.TYPE,
+                VocationCommitC2SPayload.STREAM_CODEC,
+                VocationCommitC2SPayload::handle);
     }
 }

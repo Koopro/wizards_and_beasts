@@ -1,0 +1,34 @@
+{
+  "parent": "wizards_and_beasts:progression/root",
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "wizards_and_beasts:floo_powder"
+    },
+    "title": {
+      "translate": "advancements.wizards_and_beasts.progression.floo.title"
+    },
+    "description": {
+      "translate": "advancements.wizards_and_beasts.progression.floo.description"
+    },
+    "show_toast": true,
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "floo": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "wizards_and_beasts:floo_powder"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "floo"
+    ]
+  ]
+}

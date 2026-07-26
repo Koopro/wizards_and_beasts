@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "tools",
+  "pattern": [
+    "III",
+    "IGI",
+    "III"
+  ],
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "G": "minecraft:glass_pane"
+  },
+  "result": {
+    "id": "wizards_and_beasts:foe_glass",
+    "count": 1
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "tools",
+  "pattern": [
+    " C ",
+    "BCB",
+    " B "
+  ],
+  "key": {
+    "C": "minecraft:candle",
+    "B": "minecraft:bone"
+  },
+  "result": {
+    "id": "wizards_and_beasts:hand_of_glory",
+    "count": 1
+  }
+}

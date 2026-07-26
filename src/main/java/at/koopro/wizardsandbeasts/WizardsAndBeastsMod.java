@@ -100,12 +100,14 @@ public class WizardsAndBeastsMod {
         AzkabanStructures.STRUCTURE_PLACEMENT_TYPES.register(modEventBus);
         WandmakingRecipeType.RECIPE_TYPES.register(modEventBus);
         WandmakingRecipeSerializer.RECIPE_SERIALIZERS.register(modEventBus);
+        at.koopro.wizardsandbeasts.loot.ModLootModifiers.GLOBAL_LOOT_MODIFIER_SERIALIZERS.register(modEventBus);
 
         modEventBus.addListener(ModNetwork::register);
         modEventBus.addListener(EntityAttributeBindings::registerAll);
         modEventBus.addListener(ModAttributes::addPlayerAttributes);
         modEventBus.addListener(at.koopro.wizardsandbeasts.event.bestiary.niffler.NifflerSpawnHandler::registerSpawnPlacements);
         modEventBus.addListener(at.koopro.wizardsandbeasts.entity.beast.BeastSpawnHandler::registerSpawnPlacements);
+        modEventBus.addListener(at.koopro.wizardsandbeasts.entity.goblin.GoblinTellerSpawnHandler::registerSpawnPlacements);
         modEventBus.addListener(WandDatapackRegistries::registerDatapackRegistries);
 
         // Defer Spells.init() until FMLCommonSetupEvent so addon mods get a

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "food",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "minecraft:blaze_powder",
+    "minecraft:sugar_cane",
+    "minecraft:sugar_cane"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:firewhisky",
+    "count": 1
+  }
+}

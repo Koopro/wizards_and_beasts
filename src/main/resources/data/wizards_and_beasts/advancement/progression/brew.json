@@ -1,0 +1,35 @@
+{
+  "parent": "wizards_and_beasts:progression/cauldron",
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "wizards_and_beasts:brew"
+    },
+    "title": {
+      "translate": "advancements.wizards_and_beasts.progression.brew.title"
+    },
+    "description": {
+      "translate": "advancements.wizards_and_beasts.progression.brew.description"
+    },
+    "show_toast": true,
+    "announce_to_chat": false,
+    "frame": "goal"
+  },
+  "criteria": {
+    "brew": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "wizards_and_beasts:brew"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "brew"
+    ]
+  ]
+}

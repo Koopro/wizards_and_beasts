@@ -1,0 +1,19 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "BROOM_FLIGHT"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "tools",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "minecraft:honeycomb",
+    "minecraft:slime_ball"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:broom_polish",
+    "count": 2
+  }
+}

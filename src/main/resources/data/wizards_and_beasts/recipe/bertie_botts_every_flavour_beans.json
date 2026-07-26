@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "food",
+  "ingredients": [
+    "minecraft:sugar",
+    "minecraft:cocoa_beans",
+    "minecraft:sweet_berries",
+    "wizards_and_beasts:mooncalf_dung"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:bertie_botts_every_flavour_beans",
+    "count": 4
+  }
+}

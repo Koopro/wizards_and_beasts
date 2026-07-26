@@ -1,0 +1,24 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "BROOM_FLIGHT"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "tools",
+  "pattern": [
+    "TTT",
+    "GSG",
+    "TTT"
+  ],
+  "key": {
+    "T": "minecraft:stick",
+    "G": "minecraft:gold_nugget",
+    "S": "minecraft:string"
+  },
+  "result": {
+    "id": "wizards_and_beasts:enchanted_twig_bundle",
+    "count": 1
+  }
+}

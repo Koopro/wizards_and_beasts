@@ -87,10 +87,11 @@ public class ModEntityLootTableProvider extends EntityLootSubProvider {
             case "troll" -> withRare(Items.BONE, 1, 2, modItem("troll_whisker"), 0.40f);
             case "matagot" -> two(modItem("matagot_essence"), 0, 1, Items.PHANTOM_MEMBRANE, 0, 1);
             case "bundimun" -> simple(Items.SLIME_BALL, 0, 2);
-            case "lobalug" -> simple(Items.INK_SAC, 0, 2);
-            // aquatic
-            case "kelpie", "kappa" -> simple(Items.KELP, 1, 3);
-            case "grindylow" -> two(Items.KELP, 0, 2, Items.STRING, 0, 1);
+            case "lobalug" -> withRare(Items.INK_SAC, 0, 2, modItem("gillyweed"), 0.35f);
+            // aquatic. Gillyweed is a water plant with no world feature behind it, so the merfolk-water
+            // beasts carry it — without a source the item was creative-only.
+            case "kelpie", "kappa" -> withRare(Items.KELP, 1, 3, modItem("gillyweed"), 0.25f);
+            case "grindylow" -> two(Items.KELP, 0, 2, modItem("gillyweed"), 0, 1);
             case "plimpy", "ramora" -> simple(Items.COD, 1, 1);
             case "shrake" -> simple(Items.PRISMARINE_SHARD, 0, 1);
             case "sea_serpent" -> simple(Items.PRISMARINE_SHARD, 1, 3);

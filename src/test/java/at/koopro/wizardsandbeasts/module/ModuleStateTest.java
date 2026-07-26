@@ -126,7 +126,10 @@ class ModuleStateTest {
         assertEquals(ModuleState.ENABLED, ModuleDefaults.shipped(Module.POCKET_DIMENSIONS));
         assertEquals(ModuleState.PREVIEW, ModuleDefaults.shipped(Module.OWLS));
         assertEquals(ModuleState.DISABLED, ModuleDefaults.shipped(Module.AZKABAN));
-        assertEquals(ModuleState.DISABLED, ModuleDefaults.shipped(Module.FLOO_NETWORK));
+        // Deliberate divergence from the pre-refactor table: Floo is complete and craftable end to end
+        // (fireplace, grate, powder), so it now ships ENABLED. While it was DISABLED those recipes led
+        // nowhere for any player without an operator to flip the module.
+        assertEquals(ModuleState.ENABLED, ModuleDefaults.shipped(Module.FLOO_NETWORK));
         assertEquals(ModuleState.ENABLED, ModuleDefaults.shipped(Module.CHARACTER_SHEET));
         assertEquals(ModuleState.PREVIEW, ModuleDefaults.shipped(Module.PLAYER_STATS));
         assertEquals(ModuleState.ENABLED, ModuleDefaults.shipped(Module.STRUCTURES));

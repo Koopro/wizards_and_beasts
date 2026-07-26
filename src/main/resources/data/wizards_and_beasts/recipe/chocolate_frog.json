@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "food",
+  "ingredients": [
+    "minecraft:cocoa_beans",
+    "minecraft:cocoa_beans",
+    "minecraft:slime_ball"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:chocolate_frog",
+    "count": 1
+  }
+}

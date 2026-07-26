@@ -47,6 +47,13 @@ public class OllivanderTrialScreen extends AbstractContainerScreen<OllivanderTri
                     score >= thresh ? 0xFF44ff88 : 0xFF6688aa);
             if (score >= thresh) {
                 graphics.drawString(font, Component.translatable("wandcraft.gui.choose_wand"), cx + 4, cy + 72, 0xFF88ffaa, false);
+            } else {
+                // Without this the tray just sits there inert and the wizard cannot tell why.
+                int hintY = cy + 72;
+                for (var line : font.split(Component.translatable("wandcraft.gui.wand_refuses", thresh), 62)) {
+                    graphics.drawString(font, line, cx + 4, hintY, 0xFF9a8fa8, false);
+                    hintY += 10;
+                }
             }
         }
     }

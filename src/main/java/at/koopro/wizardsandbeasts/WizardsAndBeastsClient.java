@@ -46,6 +46,7 @@ public class WizardsAndBeastsClient {
         modContainer.registerExtensionPoint(IConfigScreenFactory.class,
                 (container, modListScreen) -> new WizardsConfigScreen(modListScreen));
 
+        modEventBus.addListener(at.koopro.wizardsandbeasts.client.wand.WandBeamPipelines::register);
         modEventBus.addListener(ClientSetup::registerRenderers);
         modEventBus.addListener(ClientSetup::registerLayers);
         modEventBus.addListener(ModParticleProviders::register);

@@ -1,0 +1,38 @@
+{
+  "parent": "wizards_and_beasts:progression/root",
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "wizards_and_beasts:brass_cauldron"
+    },
+    "title": {
+      "translate": "advancements.wizards_and_beasts.progression.cauldron.title"
+    },
+    "description": {
+      "translate": "advancements.wizards_and_beasts.progression.cauldron.description"
+    },
+    "show_toast": true,
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "cauldron": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "wizards_and_beasts:brass_cauldron",
+              "wizards_and_beasts:wizarding_copper_cauldron",
+              "wizards_and_beasts:pewter_cauldron"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "cauldron"
+    ]
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "tools",
+  "pattern": [
+    " G ",
+    "GRG",
+    " G "
+  ],
+  "key": {
+    "G": "minecraft:glass",
+    "R": "minecraft:redstone"
+  },
+  "result": {
+    "id": "wizards_and_beasts:sneakoscope",
+    "count": 1
+  }
+}

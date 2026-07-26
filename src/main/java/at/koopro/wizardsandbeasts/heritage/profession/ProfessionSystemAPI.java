@@ -88,7 +88,18 @@ public final class ProfessionSystemAPI {
         return true;
     }
 
+    /**
+     * Grants career progress and pushes it to the client.
+     *
+     * <p>Syncing here rather than at each call site is what makes this usable from gameplay: the client
+     * profession screen reads its point total from {@code HeritageDataSyncS2CPayload}, so an unsynced
+     * award is invisible until the next unrelated heritage sync.
+     */
     public static void awardPoints(ServerPlayer player, int amount) {
+        if (amount <= 0) {
+            return;
+        }
         getData(player).addProfessionPoints(amount);
+        at.koopro.wizardsandbeasts.network.heritage.HeritageDataSyncS2CPayload.syncToPlayer(player, false);
     }
 }

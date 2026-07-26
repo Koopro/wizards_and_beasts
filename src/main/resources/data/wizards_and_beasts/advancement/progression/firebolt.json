@@ -1,0 +1,38 @@
+{
+  "parent": "wizards_and_beasts:progression/broom",
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "wizards_and_beasts:firebolt"
+    },
+    "title": {
+      "translate": "advancements.wizards_and_beasts.progression.firebolt.title"
+    },
+    "description": {
+      "translate": "advancements.wizards_and_beasts.progression.firebolt.description"
+    },
+    "show_toast": true,
+    "announce_to_chat": true,
+    "frame": "challenge"
+  },
+  "criteria": {
+    "firebolt": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "wizards_and_beasts:firebolt",
+              "wizards_and_beasts:firebolt_supreme"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "firebolt"
+    ]
+  ]
+}

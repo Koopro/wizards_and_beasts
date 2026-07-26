@@ -42,7 +42,8 @@ public class ImperioCommandScreen extends Screen {
 
     @Override
     public void render(@NonNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics, mouseX, mouseY, partialTick);
+        // No renderBackground() here: Screen.renderWithTooltipAndSubtitles already ran it for
+        // this frame, and a second call blurs twice ("Can only blur once per frame").
         graphics.drawCenteredString(font, title, width / 2, height / 6, 0xFFFFFF);
         super.render(graphics, mouseX, mouseY, partialTick);
     }

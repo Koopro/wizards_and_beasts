@@ -101,6 +101,29 @@ public class SkillTreeScreen extends Screen {
         if (previous == null) {
             centerOnWeb();
         }
+        addVocationButton();
+    }
+
+    /**
+     * The only in-game way into {@link VocationSelectionScreen}. Vocations were command-only, so on a world
+     * without cheats the specialization layer could not be reached at all.
+     */
+    private void addVocationButton() {
+        int buttonW = layout.s(96);
+        int buttonH = layout.s(16);
+        Component label = at.koopro.wizardsandbeasts.client.skill.state.ClientVocationCache.primary()
+                .map(at.koopro.wizardsandbeasts.skill.vocation.VocationRegistry::get)
+                .map(vocation -> Component.translatable("screen.wizards_and_beasts.vocation.button.set",
+                        vocation.displayName()))
+                .orElse(Component.translatable("screen.wizards_and_beasts.vocation.button.none"));
+        addRenderableWidget(net.minecraft.client.gui.components.Button.builder(label,
+                        b -> {
+                            if (minecraft != null) {
+                                minecraft.setScreen(new VocationSelectionScreen(this));
+                            }
+                        })
+                .bounds(panelX + panelW - layout.s(8) - buttonW, panelY + layout.s(4), buttonW, buttonH)
+                .build());
     }
 
     /** Seals every region in this audience whose capability requirement the player doesn't meet. */

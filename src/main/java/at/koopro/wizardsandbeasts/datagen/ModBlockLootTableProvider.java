@@ -1,9 +1,21 @@
 package at.koopro.wizardsandbeasts.datagen;
 
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CropBlock;
+import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.predicates.BonusLevelTableCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePropertyCondition;
+import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
+import net.minecraft.advancements.criterion.StatePropertiesPredicate;
 import net.minecraft.data.loot.BlockLootSubProvider;
 
 import at.koopro.wizardsandbeasts.block.location.DiagonAlleyBlocks;
@@ -12,8 +24,11 @@ import at.koopro.wizardsandbeasts.block.location.HogwartsBlocks;
 import at.koopro.wizardsandbeasts.block.location.HogsmeadeBlocks;
 import at.koopro.wizardsandbeasts.block.location.LocationBlockHelper;
 import at.koopro.wizardsandbeasts.block.location.MinistryBlocks;
+import at.koopro.wizardsandbeasts.registry.ConsumableItemRegistry;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
 import at.koopro.wizardsandbeasts.registry.WoodSet;
+
+import org.jspecify.annotations.Nullable;
 
 import java.util.Set;
 
@@ -34,10 +49,19 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
     @Override
     protected void generate() {
         for (WoodSet woodSet : ModBlocks.ALL_WOOD_SETS) {
-            generateWoodSetLoot(woodSet);
+            generateWoodSetLoot(woodSet, herbFor(woodSet));
         }
 
-        dropOther(ModBlocks.MANDRAKE_CROP.get(), ModBlocks.MANDRAKE_SEEDS.get());
+        // Vanilla crop drops: the Mandrake itself only when fully grown, seeds otherwise. Dropping seeds
+        // at every age (the previous dropOther) left the Mandrake item unobtainable in survival, which
+        // took the Mandrake Restoration Draught and the Animagus ritual with it.
+        add(ModBlocks.MANDRAKE_CROP.get(), block -> createCropDrops(
+                block,
+                ConsumableItemRegistry.MANDRAKE.get(),
+                ModBlocks.MANDRAKE_SEEDS.get(),
+                LootItemBlockStatePropertyCondition.hasBlockStateProperties(block)
+                        .setProperties(StatePropertiesPredicate.Builder.properties()
+                                .hasProperty(CropBlock.AGE, ModBlocks.MANDRAKE_CROP.get().getMaxAge()))));
         dropSelf(ModBlocks.DEVILS_SNARE.get());
         dropSelf(ModBlocks.MALLOWSWEET.get());
         dropSelf(ModBlocks.GRYFFINDOR_BANNER.get());
@@ -68,6 +92,11 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.POCKET_CONFIGURATOR.get());
         dropSelf(ModBlocks.FLOO_FIREPLACE.get());
         dropSelf(ModBlocks.EXAMINATION_DESK.get());
+        // Both tents were registered without a loot entry, which hard-failed the whole datagen run
+        // ("Missing loottable ... for wizards_and_beasts:tent_canvas"). They are a /setblock-only preview
+        // scaffold with no BlockItem, so the honest table is an empty one — dropSelf would serialize air.
+        add(ModBlocks.TENT_CANVAS.get(), noDrop());
+        add(ModBlocks.TENT_GRAND.get(), noDrop());
 
         // Placed trunks drop nothing via loot — TrunkBlock.playerWillDestroy hand-drops the BlockItem
         // with its packed POCKET_CASE_ID component (dropSelf would drop a plain item AND double up).
@@ -156,7 +185,7 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         add(s.slab().get(), this::createSlabItemTable);
     }
 
-    private void generateWoodSetLoot(WoodSet woodSet) {
+    private void generateWoodSetLoot(WoodSet woodSet, @Nullable Item herb) {
         dropSelf(woodSet.log().get());
         dropSelf(woodSet.strippedLog().get());
         dropSelf(woodSet.wood().get());
@@ -164,7 +193,36 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropSelf(woodSet.planks().get());
         add(woodSet.slab().get(), this::createSlabItemTable);
         dropSelf(woodSet.stairs().get());
-        add(woodSet.leaves().get(), block -> createLeavesDrops(block, woodSet.sapling().get(), NORMAL_LEAVES_SAPLING_CHANCES));
+        add(woodSet.leaves().get(), block -> createMagicalLeavesDrops(block, woodSet.sapling().get(), herb));
         dropSelf(woodSet.sapling().get());
+    }
+
+    /**
+     * The herb a wood set's foliage yields, or {@code null} for none. Dittany and Dirigible Plums were
+     * registered as brewing/consumable items with no survival source anywhere, which is what left the
+     * Wiggenweld Potion uncraftable; magical foliage is the source that needs no new block or feature.
+     */
+    private static @Nullable Item herbFor(WoodSet woodSet) {
+        return switch (woodSet.name()) {
+            case "rowan", "holly" -> ConsumableItemRegistry.DITTANY.get();
+            case "elder", "yew" -> ConsumableItemRegistry.DIRIGIBLE_PLUM.get();
+            default -> null;
+        };
+    }
+
+    /** Standard leaves drops, plus an apple-rate herb pool when the set carries one. */
+    private LootTable.Builder createMagicalLeavesDrops(Block leaves, Block sapling, @Nullable Item herb) {
+        LootTable.Builder table = createLeavesDrops(leaves, sapling, NORMAL_LEAVES_SAPLING_CHANCES);
+        if (herb == null) {
+            return table;
+        }
+        HolderLookup.RegistryLookup<Enchantment> enchantments = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
+        return table.withPool(LootPool.lootPool()
+                .setRolls(ConstantValue.exactly(1.0F))
+                .when(this.doesNotHaveSilkTouch())
+                .add(this.applyExplosionCondition(leaves, LootItem.lootTableItem(herb))
+                        .when(BonusLevelTableCondition.bonusLevelFlatChance(
+                                enchantments.getOrThrow(Enchantments.FORTUNE),
+                                0.02F, 0.022222223F, 0.025F, 0.033333335F, 0.1F))));
     }
 }

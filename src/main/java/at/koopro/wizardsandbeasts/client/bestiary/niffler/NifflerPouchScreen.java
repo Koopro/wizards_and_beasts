@@ -36,7 +36,7 @@ public class NifflerPouchScreen extends AbstractContainerScreen<NifflerPouchMenu
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(graphics, mouseX, mouseY, partialTick);
+        // No renderBackground() here: the screen framework already ran it for this frame.
         super.render(graphics, mouseX, mouseY, partialTick);
         this.renderTooltip(graphics, mouseX, mouseY);
     }

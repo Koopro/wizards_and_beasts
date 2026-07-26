@@ -74,14 +74,22 @@ public class Config {
      * allow-list, on any other server these are the only accounts that may administer the mod until an
      * operator edits this from the console. Replace them with your own, or clear the list to fall back to
      * ordinary operator permission.
+     *
+     * <p>The third entry is the offline-mode UUID of the {@code Dev} player the Gradle {@code runClient}
+     * task logs in as, so the mod's own admin commands work in the development workspace without editing
+     * config after every wipe of {@code run/}. It is derived, not secret — {@code UUID.nameUUIDFromBytes(
+     * "OfflinePlayer:Dev")} — and can never match an authenticated account, since Mojang only issues
+     * version-4 UUIDs and this is version 3.
      */
     private static final List<String> DEFAULT_ADMIN_UUIDS = List.of(
             "d3c9ca09-8f15-4e59-96dd-1c0fab339fcd",
-            "c9e6dcee-95f6-4d14-a980-5008ff72676e");
+            "c9e6dcee-95f6-4d14-a980-5008ff72676e",
+            "380df991-f603-344c-a090-369bad2a924a");
 
     private static final ModConfigSpec.ConfigValue<List<? extends String>> ADMIN_UUIDS = BUILDER
             .comment("Player UUIDs permitted to use this mod's admin commands and change module state.",
-                    "Ships with the mod authors' UUIDs. Replace them with your own, or clear the list to",
+                    "Ships with the mod authors' UUIDs plus the offline 'Dev' account used by the",
+                    "development workspace. Replace them with your own, or clear the list to",
                     "fall back to ordinary operator permission.",
                     "When ANY valid UUID is listed this is a closed allow-list: operators not on it are",
                     "refused. The server console and command blocks always qualify, so a bad entry here",

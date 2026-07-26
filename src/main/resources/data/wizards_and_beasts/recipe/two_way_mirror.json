@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "tools",
+  "pattern": [
+    "GGG",
+    "GAG",
+    "GGG"
+  ],
+  "key": {
+    "G": "minecraft:glass_pane",
+    "A": "minecraft:amethyst_shard"
+  },
+  "result": {
+    "id": "wizards_and_beasts:two_way_mirror",
+    "count": 1
+  }
+}

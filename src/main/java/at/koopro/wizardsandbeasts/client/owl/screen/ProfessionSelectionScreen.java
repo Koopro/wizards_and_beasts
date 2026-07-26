@@ -170,7 +170,7 @@ public class ProfessionSelectionScreen extends Screen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics, mouseX, mouseY, partialTick);
+        // No renderBackground() here: the screen framework already ran it for this frame.
         int cx = width / 2;
         int cy = height / 2;
 
