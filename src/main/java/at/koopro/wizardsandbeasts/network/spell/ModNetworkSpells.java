@@ -77,6 +77,10 @@ public final class ModNetworkSpells {
                 SpellImpactBurstS2CPayload.STREAM_CODEC,
                 SpellClientPayloadHandlers::handleSpellImpactBurst);
         registrar.playToClient(
+                BeamChannelS2CPayload.TYPE,
+                BeamChannelS2CPayload.STREAM_CODEC,
+                SpellClientPayloadHandlers::handleBeamChannel);
+        registrar.playToClient(
                 ProtegoSpawnS2CPayload.TYPE,
                 ProtegoSpawnS2CPayload.STREAM_CODEC,
                 SpellClientPayloadHandlers::handleProtegoSpawn);

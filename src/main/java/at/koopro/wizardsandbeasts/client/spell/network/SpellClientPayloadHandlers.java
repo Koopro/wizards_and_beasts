@@ -5,7 +5,9 @@ import at.koopro.wizardsandbeasts.client.spell.state.ClientSignatureSpellState;
 import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellDataState;
 import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellTeacherState;
 import at.koopro.wizardsandbeasts.network.ClientScreenHooksInvoker;
+import at.koopro.wizardsandbeasts.client.beam.BeamChannelClient;
 import at.koopro.wizardsandbeasts.network.spell.AvadaBlastS2CPayload;
+import at.koopro.wizardsandbeasts.network.spell.BeamChannelS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.CrucioIntentFeedbackS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.ImperioControlS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.ImperioResistS2CPayload;
@@ -34,6 +36,17 @@ public final class SpellClientPayloadHandlers {
     private SpellClientPayloadHandlers() {}
 
     private static final int AVADA_ARGB = 0xFF00FF00;
+
+    /** A wand beam channel started, is still running, or stopped for one caster. */
+    public static void handleBeamChannel(BeamChannelS2CPayload pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
+            if (pkt.active()) {
+                BeamChannelClient.start(pkt.casterId(), pkt.spellId(), pkt.range());
+            } else {
+                BeamChannelClient.stop(pkt.casterId());
+            }
+        });
+    }
 
     public static void handleAvadaBlast(AvadaBlastS2CPayload pkt, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {

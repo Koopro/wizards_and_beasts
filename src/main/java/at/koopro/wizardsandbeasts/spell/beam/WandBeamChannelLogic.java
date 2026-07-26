@@ -8,6 +8,7 @@ import at.koopro.wizardsandbeasts.Config;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.item.wand.WandItem;
+import at.koopro.wizardsandbeasts.network.spell.BeamChannelS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.spell.cast.BeamRay;
 import at.koopro.wizardsandbeasts.spell.cast.BeamRayResolver;
@@ -41,6 +42,9 @@ public final class WandBeamChannelLogic {
 
     private static final PlayerScopedState<WandBeamSession> SESSIONS =
             PlayerScopedState.create("wand-beam-sessions");
+
+    /** How often a running channel re-announces itself, so late trackers pick the beam up. */
+    private static final int BEAM_ANNOUNCE_INTERVAL_TICKS = 20;
 
     private WandBeamChannelLogic() {}
 
@@ -109,6 +113,14 @@ public final class WandBeamChannelLogic {
         s.syncSpell(spellId);
         s.beamTicks++;
 
+        // Tell everyone who can see the caster that a beam is running. Re-announced on an interval
+        // rather than only on the first tick so a player who starts tracking the caster mid-channel
+        // still gets one; the client ignores a repeat for a beam it already draws. A spell switch
+        // re-fires this for free — syncSpell resets beamTicks to 0.
+        if (s.beamTicks == 1 || s.beamTicks % BEAM_ANNOUNCE_INTERVAL_TICKS == 0) {
+            BeamChannelS2CPayload.sendStart(player, spellId, range);
+        }
+
         int targetScanInterval = WandBeamSpellHandlers.getTargetScanIntervalTicks();
         int channelEffectInterval = WandBeamSpellHandlers.getChannelEffectIntervalTicks();
 
@@ -164,6 +176,9 @@ public final class WandBeamChannelLogic {
     public static void endChannel(ServerPlayer player) {
         WandBeamSession s = SESSIONS.remove(player.getUUID());
         if (s == null) return;
+        // Every abort path funnels through here — guard failure, release, death, respawn, logout,
+        // dimension change — so this is the one place the beam has to be called off.
+        BeamChannelS2CPayload.sendEnd(player);
         runChannelEndEffects(player, s);
         WandBeamSpellHandlers.clearSessionEffects(player, s);
     }
