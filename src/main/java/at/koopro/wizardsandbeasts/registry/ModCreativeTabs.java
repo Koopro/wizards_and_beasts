@@ -14,8 +14,7 @@ import at.koopro.wizardsandbeasts.block.location.GringottsBlocks;
 import at.koopro.wizardsandbeasts.block.location.HogwartsBlocks;
 import at.koopro.wizardsandbeasts.block.location.HogsmeadeBlocks;
 import at.koopro.wizardsandbeasts.block.location.MinistryBlocks;
-import at.koopro.wizardsandbeasts.module.Module;
-import at.koopro.wizardsandbeasts.module.ModuleManager;
+import at.koopro.wizardsandbeasts.module.ModuleContentIndex;
 import at.koopro.wizardsandbeasts.registry.BroomItemRegistry;
 import at.koopro.wizardsandbeasts.registry.ConsumableItemRegistry;
 import at.koopro.wizardsandbeasts.registry.CurrencyItemRegistry;
@@ -34,7 +33,8 @@ public class ModCreativeTabs {
                     .withTabsBefore(CreativeModeTabs.SPAWN_EGGS)
                     .icon(() -> new ItemStack(WandItemRegistry.WAND.get()))
                     .withSearchBar()
-                    .displayItems((parameters, output) -> {
+                    .displayItems((parameters, rawOutput) -> {
+                        CreativeModeTab.Output output = gated(rawOutput);
                         // Debug tools
                         output.accept(WandItemRegistry.DEBUG_WAND.get());
                         output.accept(WandItemRegistry.MORPH_WAND.get());
@@ -44,23 +44,19 @@ public class ModCreativeTabs {
                         output.accept(WandItemRegistry.WAND_BLANK.get());
                         // Wandmaker's bench: the Wandmaker villager's workstation and the wandmaking station.
                         output.accept(ModBlocks.WANDMAKERS_BENCH_ITEM.get());
-                        if (ModuleManager.isEnabled(Module.BROOM_FLIGHT)) {
-                            output.accept(BroomItemRegistry.BROOM_ITEM.get());
-                            output.accept(BroomItemRegistry.CLEANSWEEP_SEVEN.get());
-                            output.accept(BroomItemRegistry.COMET_260.get());
-                            output.accept(BroomItemRegistry.NIMBUS_2000.get());
-                            output.accept(BroomItemRegistry.NIMBUS_2001.get());
-                            output.accept(BroomItemRegistry.FIREBOLT.get());
-                            output.accept(BroomItemRegistry.FIREBOLT_SUPREME.get());
-                            output.accept(BroomItemRegistry.OAKSHAFT_79.get());
-                            output.accept(BroomItemRegistry.BROOM_POLISH.get());
-                            output.accept(BroomItemRegistry.ENCHANTED_TWIG_BUNDLE.get());
-                        }
+                        output.accept(BroomItemRegistry.BROOM_ITEM.get());
+                        output.accept(BroomItemRegistry.CLEANSWEEP_SEVEN.get());
+                        output.accept(BroomItemRegistry.COMET_260.get());
+                        output.accept(BroomItemRegistry.NIMBUS_2000.get());
+                        output.accept(BroomItemRegistry.NIMBUS_2001.get());
+                        output.accept(BroomItemRegistry.FIREBOLT.get());
+                        output.accept(BroomItemRegistry.FIREBOLT_SUPREME.get());
+                        output.accept(BroomItemRegistry.OAKSHAFT_79.get());
+                        output.accept(BroomItemRegistry.BROOM_POLISH.get());
+                        output.accept(BroomItemRegistry.ENCHANTED_TWIG_BUNDLE.get());
                         output.accept(MiscItemRegistry.MARAUDERS_MAP.get());
                         output.accept(MiscItemRegistry.BESTIARY.get());
-                        if (ModuleManager.isEnabled(Module.HANDBOOK)) {
-                            output.accept(MiscItemRegistry.MINISTRY_HANDBOOK.get());
-                        }
+                        output.accept(MiscItemRegistry.MINISTRY_HANDBOOK.get());
 
                         // Wand Cores
                         output.accept(WandItemRegistry.PHOENIX_FEATHER.get());
@@ -146,12 +142,10 @@ public class ModCreativeTabs {
                         output.accept(DarkArtefactItemRegistry.DEATHLY_HALLOW_CLOAK.get());
                         output.accept(TrinketItemRegistry.SNEAKOSCOPE.get());
                         output.accept(TrinketItemRegistry.PORTKEY.get());
-                        if (ModuleManager.isEnabled(Module.WANDS_AND_SPELLS)) {
-                            output.accept(ModBlocks.ENCHANTED_TRUNK_ITEM.get());
-                            output.accept(ModBlocks.EXPANDED_TRUNK_ITEM.get());
-                            output.accept(ModBlocks.MASTERS_TRUNK_ITEM.get());
-                            output.accept(TrinketItemRegistry.MINISTRY_LICENSE_SCROLL.get());
-                        }
+                        output.accept(ModBlocks.ENCHANTED_TRUNK_ITEM.get());
+                        output.accept(ModBlocks.EXPANDED_TRUNK_ITEM.get());
+                        output.accept(ModBlocks.MASTERS_TRUNK_ITEM.get());
+                        output.accept(TrinketItemRegistry.MINISTRY_LICENSE_SCROLL.get());
                         output.accept(MiscItemRegistry.BLINDFOLD.get());
                         output.accept(TrinketItemRegistry.PERUVIAN_DARKNESS_POWDER.get());
                         output.accept(TrinketItemRegistry.DECOY_DETONATOR.get());
@@ -160,30 +154,24 @@ public class ModCreativeTabs {
                         output.accept(ConsumableItemRegistry.BREW.get());
 
                         // ── Horcrux Vessels ──────────────────────────────────────────
-                        if (ModuleManager.isEnabled(Module.DARK_ARTS)) {
-                            output.accept(DarkArtefactItemRegistry.RIDDLES_DIARY.get());
-                            output.accept(DarkArtefactItemRegistry.MARVOLO_GAUNTS_RING.get());
-                            output.accept(DarkArtefactItemRegistry.SLYTHERINS_LOCKET.get());
-                            output.accept(DarkArtefactItemRegistry.HUFFLEPUFFS_CUP.get());
-                            output.accept(DarkArtefactItemRegistry.RAVENCLAWS_DIADEM.get());
-                        }
+                        output.accept(DarkArtefactItemRegistry.RIDDLES_DIARY.get());
+                        output.accept(DarkArtefactItemRegistry.MARVOLO_GAUNTS_RING.get());
+                        output.accept(DarkArtefactItemRegistry.SLYTHERINS_LOCKET.get());
+                        output.accept(DarkArtefactItemRegistry.HUFFLEPUFFS_CUP.get());
+                        output.accept(DarkArtefactItemRegistry.RAVENCLAWS_DIADEM.get());
 
-                        // ── Stub Artefacts (gated until modules are implemented) ──────
-                        if (ModuleManager.isEnabled(Module.DARK_ARTS)) {
-                            output.accept(DarkArtefactItemRegistry.RESURRECTION_STONE.get());
-                            output.accept(DarkArtefactItemRegistry.PHILOSOPHERS_STONE.get());
-                            output.accept(TrinketItemRegistry.PENSIEVE.get());
-                            output.accept(TrinketItemRegistry.TWO_WAY_MIRROR.get());
-                            output.accept(TrinketItemRegistry.HERMIONES_BEADED_BAG.get());
-                            output.accept(TrinketItemRegistry.FOE_GLASS.get());
-                            output.accept(TrinketItemRegistry.HAND_OF_GLORY.get());
-                            output.accept(TrinketItemRegistry.DARK_MARK_BRAND.get());
-                            output.accept(TrinketItemRegistry.BLOOD_PACT_VIAL.get());
-                        }
-                        if (ModuleManager.isEnabled(Module.POCKET_DIMENSIONS)) {
-                            output.accept(ModBlocks.MOODYS_TRUNK_ITEM.get());
-                            output.accept(ModBlocks.NEWTS_CASE_ITEM.get());
-                        }
+                        // ── Dark artefacts ───────────────────────────────────────────
+                        output.accept(DarkArtefactItemRegistry.RESURRECTION_STONE.get());
+                        output.accept(DarkArtefactItemRegistry.PHILOSOPHERS_STONE.get());
+                        output.accept(TrinketItemRegistry.PENSIEVE.get());
+                        output.accept(TrinketItemRegistry.TWO_WAY_MIRROR.get());
+                        output.accept(TrinketItemRegistry.HERMIONES_BEADED_BAG.get());
+                        output.accept(TrinketItemRegistry.FOE_GLASS.get());
+                        output.accept(TrinketItemRegistry.HAND_OF_GLORY.get());
+                        output.accept(TrinketItemRegistry.DARK_MARK_BRAND.get());
+                        output.accept(TrinketItemRegistry.BLOOD_PACT_VIAL.get());
+                        output.accept(ModBlocks.MOODYS_TRUNK_ITEM.get());
+                        output.accept(ModBlocks.NEWTS_CASE_ITEM.get());
 
                         // Wizarding blocks
                         output.accept(ModBlocks.WARDING_STONE_ITEM.get());
@@ -225,7 +213,8 @@ public class ModCreativeTabs {
                     .withTabsBefore(CreativeModeTabs.SPAWN_EGGS)
                     .icon(() -> new ItemStack(HogwartsBlocks.HOGWARTS_STONE_BRICKS.baseItem().get()))
                     .withSearchBar()
-                    .displayItems((parameters, output) -> {
+                    .displayItems((parameters, rawOutput) -> {
+                        CreativeModeTab.Output output = gated(rawOutput);
                         // Ministry of Magic
                         output.accept(MinistryBlocks.MINISTRY_BLACK_MARBLE.baseItem().get());
                         output.accept(MinistryBlocks.MINISTRY_BLACK_MARBLE.slabItem().get());
@@ -363,6 +352,24 @@ public class ModCreativeTabs {
                         output.accept(GringottsBlocks.GRINGOTTS_COUNTING_FLOOR.slabItem().get());
                     })
                     .build());
+
+    /**
+     * Wraps a tab's output so entries whose module is switched off are dropped on the way in.
+     *
+     * <p>Both tabs run their whole listing through this instead of guarding entries by hand. The hand
+     * guards this replaced covered five modules out of nineteen and had to be remembered on every new
+     * line; ownership now comes from the {@code module/*} tags, so an item is filtered because of what it
+     * <em>is</em>, not because someone wrapped its line in an {@code if}.
+     *
+     * <p>Untagged content passes through — see {@link ModuleContentIndex} on failing open.
+     */
+    private static CreativeModeTab.Output gated(CreativeModeTab.Output output) {
+        return (stack, visibility) -> {
+            if (ModuleContentIndex.isAccessible(stack.getItem())) {
+                output.accept(stack, visibility);
+            }
+        };
+    }
 
     private ModCreativeTabs() {
     }

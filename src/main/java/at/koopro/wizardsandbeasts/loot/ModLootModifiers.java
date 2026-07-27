@@ -21,5 +21,8 @@ public final class ModLootModifiers {
     public static final Supplier<MapCodec<AddItemLootModifier>> ADD_ITEM =
             GLOBAL_LOOT_MODIFIER_SERIALIZERS.register("add_item", () -> AddItemLootModifier.CODEC);
 
+    public static final Supplier<MapCodec<ModuleGatedLootModifier>> MODULE_GATED =
+            GLOBAL_LOOT_MODIFIER_SERIALIZERS.register("module_gated", () -> ModuleGatedLootModifier.CODEC);
+
     private ModLootModifiers() {}
 }
