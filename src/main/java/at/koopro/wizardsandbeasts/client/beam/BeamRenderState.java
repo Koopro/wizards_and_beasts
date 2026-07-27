@@ -14,7 +14,9 @@ public class BeamRenderState extends EntityRenderState {
     public float progress;
     public int seed;
     public int ticks;
-    public float partialTick;
+    // No partialTick field here on purpose: EntityRenderState already declares one, and redeclaring
+    // it shadows the parent's rather than overriding it. Two fields, one name, and which one you get
+    // depends on the static type of the reference — it only worked because both were set alike.
     /** False when the caster could not be resolved to a living entity — skip drawing. */
     public boolean valid;
 }
