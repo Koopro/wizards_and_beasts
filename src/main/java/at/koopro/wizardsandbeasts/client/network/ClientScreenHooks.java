@@ -40,6 +40,12 @@ public final class ClientScreenHooks {
         Minecraft.getInstance().setScreen(new BeamDebugScreen());
     }
 
+    /** Editor for the entity-based beam system; the legacy renderer has its own above. */
+    public static void openBeamStyleScreen() {
+        Minecraft.getInstance().setScreen(
+                new at.koopro.wizardsandbeasts.client.spell.gui.BeamStyleScreen());
+    }
+
     public static void openHeritageSelectionScreen() {
         Minecraft.getInstance().setScreen(new HeritageSelectionScreen());
     }

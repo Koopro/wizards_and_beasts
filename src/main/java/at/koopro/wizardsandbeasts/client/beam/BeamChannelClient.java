@@ -23,6 +23,9 @@ public final class BeamChannelClient {
     /** Caster entity id -> its beam. */
     private static final Map<Integer, BeamEntity> BEAMS = new ConcurrentHashMap<>();
 
+    /** The editor's stand-in beam, kept out of {@link #BEAMS} so no channel packet can evict it. */
+    private static BeamEntity PREVIEW;
+
     private BeamChannelClient() {}
 
     /**
@@ -71,6 +74,41 @@ public final class BeamChannelClient {
         BEAMS.put(casterId, beam);
     }
 
+    /**
+     * Spawns a beam on the local player that is not tied to a channel, so the editor has something
+     * to look at. Uses the editor's own values directly rather than a spell's, and its own range —
+     * there is no server session behind it to ramp against.
+     */
+    public static void startPreview() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null || mc.player == null) {
+            return;
+        }
+        stopPreview();
+        BeamEntity beam = new BeamEntity(ModEntities.BEAM.get(), mc.level);
+        beam.setId(BeamEntity.nextClientId());
+        beam.setPos(mc.player.getX(), mc.player.getY(), mc.player.getZ());
+        beam.configure(mc.player.getId(), BeamStyleEditor.style(), BeamStyleEditor.shape(), 0f);
+        beam.setRange(BeamStyleEditor.previewRange);
+        mc.level.addEntity(beam);
+        PREVIEW = beam;
+    }
+
+    /** Drops the editor's preview beam. Real channel beams are untouched. */
+    public static void stopPreview() {
+        if (PREVIEW != null) {
+            PREVIEW.discard();
+            PREVIEW = null;
+        }
+    }
+
+    /** Keeps the preview's reach in step with the editor's range slider. */
+    public static void syncPreviewRange() {
+        if (PREVIEW != null) {
+            PREVIEW.setRange(BeamStyleEditor.previewRange);
+        }
+    }
+
     /** The channel ended — let the beam fade out and drop it. */
     public static void stop(int casterId) {
         BeamEntity beam = BEAMS.remove(casterId);
@@ -91,5 +129,6 @@ public final class BeamChannelClient {
     public static void clear() {
         BEAMS.values().forEach(BeamEntity::discard);
         BEAMS.clear();
+        stopPreview();
     }
 }

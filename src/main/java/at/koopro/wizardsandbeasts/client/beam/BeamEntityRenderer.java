@@ -43,8 +43,12 @@ public class BeamEntityRenderer extends EntityRenderer<BeamEntity, BeamRenderSta
     @Override
     public void extractRenderState(BeamEntity beam, BeamRenderState state, float partialTick) {
         super.extractRenderState(beam, state, partialTick);
-        state.style = beam.getStyle();
-        state.shape = beam.getShape();
+        // The editor wins while it is open, so a slider drag shows on the next frame instead of
+        // needing a recast. Read here rather than written into the entity: the entity keeps the
+        // spell's real look, so closing the editor restores it without re-resolving anything.
+        boolean edit = BeamStyleEditor.active;
+        state.style = edit ? BeamStyleEditor.style() : beam.getStyle();
+        state.shape = edit ? BeamStyleEditor.shape() : beam.getShape();
         state.seed = beam.getCasterId();
         state.ticks = beam.tickCount;
         state.partialTick = partialTick;
