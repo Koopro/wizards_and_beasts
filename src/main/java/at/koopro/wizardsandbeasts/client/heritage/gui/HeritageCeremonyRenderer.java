@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.client.heritage.gui;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.client.gui.WizardsAndBeastsUiTokens.HeritageSelection;
+import at.koopro.wizardsandbeasts.client.gui.util.UiContrast;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import at.koopro.wizardsandbeasts.stats.PowerBandTable;
@@ -69,20 +70,30 @@ public final class HeritageCeremonyRenderer {
     // ── Backdrop ─────────────────────────────────────────────────────────
 
     /**
-     * Dark vignette ground + warm candlelight radial glow centred on the active rail entry.
+     * Dark vignette ground + a warm candlelight wash that follows the active rail entry.
      * {@code pulse} (0..1) softly breathes the glow alpha so the candlelight feels alive.
+     *
+     * <p>This used to stack six concentric {@code fill} squares of the same alpha, which compounded into
+     * a hard-edged bright blob in the middle of the screen — an "orb", not candlelight. Everything here is
+     * a true gradient now, so the falloff has no visible step at any GUI scale.</p>
      */
     public static void renderBackdrop(@NonNull GuiGraphics g, int screenW, int screenH,
-                                      int glowCx, int glowCy, float pulse) {
+                                      int glowCy, float pulse) {
         g.fill(0, 0, screenW, screenH, BACKDROP);
-        // Breathe the glow alpha between ~0x18 and ~0x30 with the candlelight pulse.
-        int alpha = 0x18 + Math.round(Math.max(0.0F, Math.min(1.0F, pulse)) * 0x18);
-        int glow = (alpha << 24) | (GLOW_WARM & 0x00FFFFFF);
-        // Layered translucent rings fake a soft radial candlelight; larger + fainter outward.
-        for (int i = 6; i >= 1; i--) {
-            int r = i * Math.max(screenW, screenH) / 14;
-            g.fill(glowCx - r, glowCy - r, glowCx + r, glowCy + r, glow);
-        }
+
+        // Warm wash: two opposed gradients meeting at the active entry's row, so the light fades out
+        // smoothly above and below it instead of terminating on an edge.
+        int alpha = 0x14 + Math.round(Math.max(0.0F, Math.min(1.0F, pulse)) * 0x10);
+        int warm = (alpha << 24) | (GLOW_WARM & 0x00FFFFFF);
+        int clear = GLOW_WARM & 0x00FFFFFF;
+        int reach = Math.max(48, screenH / 3);
+        g.fillGradient(0, glowCy - reach, screenW, glowCy, clear, warm);
+        g.fillGradient(0, glowCy, screenW, glowCy + reach, warm, clear);
+
+        // Vignette: pull the top and bottom edges down so the ceremony sits in a pool of light.
+        int vignette = Math.max(24, screenH / 5);
+        g.fillGradient(0, 0, screenW, vignette, 0x99000000, 0x00000000);
+        g.fillGradient(0, screenH - vignette, screenW, screenH, 0x00000000, 0x99000000);
     }
 
     // ── Parchment panel (torn/deckled edge) ──────────────────────────────
@@ -129,8 +140,11 @@ public final class HeritageCeremonyRenderer {
         int tx = x + pad;
         int innerW = w - pad * 2;
 
-        // Header — heritage name in its signature colour, serif vanilla font with drop shadow.
-        g.drawString(font, heritage.getDisplayName(), tx, nameY, heritage.getColor() | 0xFF000000, true);
+        // Header — heritage name in its signature colour, clamped against the parchment: the pale
+        // heritages (Veela, Wizard, House-elf) are near-white and were reading as blank paper here,
+        // even though the same colour is correct as a rail sigil. No shadow — see drawOnParchment.
+        drawOnParchment(g, font, Component.literal(heritage.getDisplayName()), tx, nameY,
+                inkOn(heritage.getColor(), PANEL_BRIGHT));
         int dividerY = nameY + font.lineHeight + 3;
         g.fill(tx, dividerY, x + w - pad, dividerY + 1, DIVIDER);
 
@@ -189,7 +203,8 @@ public final class HeritageCeremonyRenderer {
 
     /** Small stacked-chevron hint that more rail entries exist above/below the viewport. */
     public static void drawScrollChevron(@NonNull GuiGraphics g, int cx, int cy, boolean down) {
-        int color = 0xCCB89A5A;
+        // Gold-on-parchment measured 1.69:1 — the "more heritages below" affordance was invisible.
+        int color = 0xCC4A3418;
         for (int i = 0; i < 3; i++) {
             int yy = cy + (down ? i : -i);
             int half = 3 - i;
@@ -233,11 +248,11 @@ public final class HeritageCeremonyRenderer {
 
         int cx = panelX + panelW / 2;
         int ty = panelY + 12;
-        drawCentered(g, font, Component.translatable("gui.wizards_and_beasts.heritage.confirm_title"), cx, ty, INK, true);
+        drawCentered(g, font, Component.translatable("gui.wizards_and_beasts.heritage.confirm_title"), cx, ty, INK);
         ty += font.lineHeight + 6;
 
         Component choice = Component.literal(heritage.getDisplayName() + " — " + variant.getDisplayName());
-        drawCentered(g, font, choice, cx, ty, heritage.getColor() | 0xFF000000, true);
+        drawCentered(g, font, choice, cx, ty, inkOn(heritage.getColor(), PANEL_BRIGHT));
         ty += font.lineHeight + 8;
 
         List<FormattedCharSequence> body = font.split(
@@ -248,13 +263,37 @@ public final class HeritageCeremonyRenderer {
         }
         ty += 4;
         drawCentered(g, font, Component.translatable("gui.wizards_and_beasts.heritage.confirm_final"),
-                cx, ty, RED, true);
+                cx, ty, RED);
 
         // Wax seal pressed above the buttons.
         drawWaxSeal(g, cx, panelY + panelH - 30, 9);
     }
 
     // ── Primitives ───────────────────────────────────────────────────────
+
+    /**
+     * Draws ink on the parchment with the drop shadow <em>off</em>.
+     *
+     * <p>Vanilla's shadow is a second copy of the glyph, offset a pixel and multiplied to about a quarter
+     * brightness — near-black for any ink colour. That is right for light text on a dark HUD, and wrong
+     * here: on parchment it puts a black ghost against a dark glyph, which reads as doubled, smeared text
+     * rather than as depth. Everything painted on a parchment ground goes through this.</p>
+     */
+    private static void drawOnParchment(GuiGraphics g, Font font, Component text, int x, int y, int color) {
+        g.drawString(font, text, x, y, color, false);
+    }
+
+    /**
+     * A signature colour made legible as ink on {@code ground}.
+     *
+     * <p>The drop shadow tempts you to settle for {@link UiContrast#AA_LARGE} here, but this font is drawn
+     * at native size inside a panel that scales up, so the glyphs stay small however big the screen is —
+     * and the shadow muddies thin strokes rather than sharpening them. {@link UiContrast#AA_TEXT} is the
+     * target that actually reads: Wizardkind lands on {@code 5E4B8C}, still plainly violet.</p>
+     */
+    private static int inkOn(int signature, int ground) {
+        return UiContrast.readableOn(signature, ground, UiContrast.AA_TEXT);
+    }
 
     private static void outline(GuiGraphics g, int x, int y, int w, int h, int topLeft, int bottomRight) {
         g.fill(x, y, x + w, y + 1, topLeft);
@@ -279,8 +318,8 @@ public final class HeritageCeremonyRenderer {
         }
     }
 
-    private static void drawCentered(GuiGraphics g, Font font, Component text, int cx, int y, int color, boolean shadow) {
-        g.drawString(font, text, cx - font.width(text) / 2, y, color, shadow);
+    private static void drawCentered(GuiGraphics g, Font font, Component text, int cx, int y, int color) {
+        drawOnParchment(g, font, text, cx - font.width(text) / 2, y, color);
     }
 
     private static void drawCenteredSeq(GuiGraphics g, Font font, FormattedCharSequence seq, int cx, int y, int color) {

@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.heritage.gui;
 
+import at.koopro.wizardsandbeasts.client.gui.util.UiContrast;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ActiveTextCollector;
@@ -19,6 +20,9 @@ import java.util.function.Consumer;
  * gains an accent outline in the variant's signature colour. Every heritage uses these uniformly.
  */
 public final class HeritageVariantChip extends AbstractButton {
+
+    private static final int SELECTED_FILL = 0xE83A2B17;
+    private static final int UNSELECTED_FILL = 0xC8C6AB74;
 
     private final HeritageVariant variant;
     private final BooleanSupplier isSelected;
@@ -53,14 +57,16 @@ public final class HeritageVariantChip extends AbstractButton {
         boolean selected = isSelected.getAsBoolean();
         int accent = variant.getUiColor() | 0xFF000000;
 
-        g.fill(x0, y0, x1, y1, selected ? 0xE83A2B17 : 0xC8C6AB74);
+        g.fill(x0, y0, x1, y1, selected ? SELECTED_FILL : UNSELECTED_FILL);
         if (selected) {
             outline(g, x0, y0, getWidth(), getHeight(), accent, accent);
         } else if (isHovered()) {
             outline(g, x0, y0, getWidth(), getHeight(), 0xFFE3C88B, 0xFF3C2A14);
         }
 
-        int color = selected ? accent : 0xFF2A2013;
+        // Selected chips flip to a dark ground, which swallowed the dark lineage tints whole
+        // (Pure-blood 0x220042, Metamorphmagus 0x3F244D). Keep the hue, lift it until it reads.
+        int color = selected ? UiContrast.readableOn(accent, SELECTED_FILL) : 0xFF2A2013;
         String label = variant.getDisplayName();
         int tx = x0 + (getWidth() - font.width(label)) / 2;
         int ty = y0 + (getHeight() - font.lineHeight) / 2;

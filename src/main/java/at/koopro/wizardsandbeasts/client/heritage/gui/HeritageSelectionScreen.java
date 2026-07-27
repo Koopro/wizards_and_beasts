@@ -274,12 +274,19 @@ public class HeritageSelectionScreen extends Screen {
         // Candlelight glow tracks the selected entry's on-screen row (clamped to the viewport).
         int selectedIndex = selectedHeritage == null ? 0 : selectedHeritage.ordinal();
         int visibleRow = selectedIndex - railScroll;
-        int glowCx = railX + railW / 2;
         int glowCy = (visibleRow < 0 || visibleRow >= railVisible)
                 ? railTop + railVisible * (entryH + entryGap) / 2
                 : railTop + visibleRow * (entryH + entryGap) + entryH / 2;
         float pulse = 0.5F + 0.5F * (float) Math.sin((System.currentTimeMillis() % 4000L) / 4000.0 * 2.0 * Math.PI);
-        HeritageCeremonyRenderer.renderBackdrop(g, width, height, glowCx, glowCy, pulse);
+        HeritageCeremonyRenderer.renderBackdrop(g, width, height, glowCy, pulse);
+
+        if (confirmOpen) {
+            // Browse chrome is not drawn behind the confirm overlay. It used to be, dimmed to ~20% by
+            // OVERLAY_DIM, which left a second wax seal and a layer of ghost lore text crowding the panel
+            // — text too dark to read but too present to ignore. The overlay owns the screen.
+            renderConfirm(g, mouseX, mouseY, partialTick);
+            return;
+        }
 
         // Rail panel + title.
         int railPanelH = (entryH + entryGap) * railVisible + s(24);
@@ -308,13 +315,17 @@ public class HeritageSelectionScreen extends Screen {
             HeritageCeremonyRenderer.drawWaxSeal(g, confirmX - s(12), confirmY + confirmH / 2, s(8));
         }
 
-        if (confirmOpen && selectedHeritage != null && selectedVariant != null) {
+        super.render(g, mouseX, mouseY, partialTick);
+        renderHoverTooltips(g, mouseX, mouseY);
+    }
+
+    /** The confirm overlay and its two buttons, over the bare backdrop. */
+    private void renderConfirm(@NonNull GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        if (selectedHeritage != null && selectedVariant != null) {
             HeritageCeremonyRenderer.drawConfirmOverlay(g, font, width, height, selectedHeritage, selectedVariant,
                     overlayX, overlayY, overlayW, overlayH);
         }
-
         super.render(g, mouseX, mouseY, partialTick);
-        renderHoverTooltips(g, mouseX, mouseY);
     }
 
     /** Hover hints: why a locked heritage can't be picked, and each variant's power band. */

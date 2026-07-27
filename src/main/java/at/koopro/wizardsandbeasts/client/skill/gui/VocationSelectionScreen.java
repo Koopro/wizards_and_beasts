@@ -30,7 +30,14 @@ public class VocationSelectionScreen extends Screen {
 
     private final @Nullable Screen parent;
     private final List<VocationDefinition> vocations = new ArrayList<>();
+    private final List<Button> vocationButtons = new ArrayList<>();
     private @Nullable VocationDefinition focused;
+    /**
+     * Optimistic declaration: the id sent to the server whose {@code VocationDataSyncS2CPayload} has not
+     * come back yet. Without it the highlight would only catch up on the <em>next</em> interaction, which
+     * read in-game as "every button needs a double click".
+     */
+    private @Nullable Identifier pending;
     private GuiScaleHelper.Layout layout;
 
     public VocationSelectionScreen(@Nullable Screen parent) {
@@ -43,25 +50,22 @@ public class VocationSelectionScreen extends Screen {
         super.init();
         vocations.clear();
         vocations.addAll(VocationRegistry.all());
+        vocationButtons.clear();
 
         layout = GuiScaleHelper.Layout.panel(width, height,
                 WizardsAndBeastsUiTokens.SkillTree.PANEL_WIDTH, WizardsAndBeastsUiTokens.SkillTree.PANEL_HEIGHT);
 
-        Optional<Identifier> declared = ClientVocationCache.primary();
         int buttonW = layout.s(150);
         int buttonH = layout.s(20);
         int x = layout.panelX() + layout.s(16);
         int y = layout.panelY() + layout.s(40);
 
         for (VocationDefinition vocation : vocations) {
-            boolean current = declared.filter(id -> id.equals(vocation.id())).isPresent();
-            Component label = current
-                    ? vocation.displayName().copy().withStyle(ChatFormatting.GOLD)
-                    : vocation.displayName();
-            Button button = Button.builder(label, b -> declare(vocation))
+            Button button = Button.builder(vocation.displayName(), b -> declare(vocation))
                     .bounds(x, y, buttonW, buttonH)
                     .build();
             addRenderableWidget(button);
+            vocationButtons.add(button);
             y += buttonH + layout.s(4);
         }
 
@@ -70,18 +74,49 @@ public class VocationSelectionScreen extends Screen {
                         layout.panelY() + layout.panelH() - layout.s(28), layout.s(80), buttonH)
                 .build());
 
-        focused = declared.map(VocationRegistry::get).orElse(vocations.isEmpty() ? null : vocations.get(0));
+        Identifier active = activeVocation();
+        focused = active != null ? VocationRegistry.get(active)
+                : (vocations.isEmpty() ? null : vocations.get(0));
+        refreshLabels();
     }
 
     private void declare(VocationDefinition vocation) {
         ClientPacketDistributor.sendToServer(new VocationCommitC2SPayload(vocation.id().toString()));
         focused = vocation;
-        // The server answers with a fresh VocationDataSyncS2CPayload; re-init picks up the gold highlight.
-        rebuildWidgets();
+        // Highlight immediately off the optimistic id; refreshLabels() hands back over to the cache
+        // once the server's VocationDataSyncS2CPayload confirms it, so a rejected commit self-corrects.
+        pending = vocation.id();
+        refreshLabels();
+    }
+
+    /** The declaration to highlight: the un-acknowledged optimistic id, else the synced one. */
+    private @Nullable Identifier activeVocation() {
+        Optional<Identifier> synced = ClientVocationCache.primary();
+        if (pending != null && synced.filter(pending::equals).isPresent()) {
+            pending = null;
+        }
+        return pending != null ? pending : synced.orElse(null);
+    }
+
+    /**
+     * Re-colours the declared vocation's label in place. Done every frame rather than by rebuilding the
+     * widgets on click: the sync answer lands a tick or more after the packet leaves, so a rebuild fired
+     * from the press handler still reads the stale cache.
+     */
+    private void refreshLabels() {
+        Identifier active = activeVocation();
+        for (int i = 0; i < vocationButtons.size(); i++) {
+            VocationDefinition vocation = vocations.get(i);
+            boolean current = vocation.id().equals(active);
+            vocationButtons.get(i).setMessage(current
+                    ? vocation.displayName().copy().withStyle(ChatFormatting.GOLD)
+                    : vocation.displayName());
+        }
     }
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        refreshLabels();
         // No renderBackground() here: the screen framework already ran it for this frame.
         graphics.fill(layout.panelX(), layout.panelY(),
                 layout.panelX() + layout.panelW(), layout.panelY() + layout.panelH(),

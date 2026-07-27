@@ -9,6 +9,7 @@ import at.koopro.wizardsandbeasts.spell.core.Spells;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
+import at.koopro.wizardsandbeasts.client.gui.util.UiContrast;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsAndBeastsUiTokens;
 import net.minecraft.client.gui.GuiGraphics;
@@ -24,6 +25,9 @@ public final class SpellMenuRenderHelper {
     private static final net.minecraft.resources.Identifier PANEL_TEX =
             net.minecraft.resources.Identifier.fromNamespaceAndPath(
                     at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID, "textures/gui/spell_menu/panel.png");
+
+    /** Average ink of {@code panel.png} — the ground every label on this screen is read against. */
+    private static final int PANEL_INK = 0xFF1E1A32;
 
     private SpellMenuRenderHelper() {}
 
@@ -76,10 +80,12 @@ public final class SpellMenuRenderHelper {
 
                 if (entry.spell() == null) {
                     String catName = entry.category().name().replace('_', ' ');
+                    // DARK_ARTS' 0x8B00FF is darker than the navy panel it sits on — that header row was
+                    // effectively invisible. Contrast-clamped, so the category hue survives but reads.
                     graphics.drawString(font, catName,
                             listX + WizardsAndBeastsUiTokens.SpellMenu.CATEGORY_X_OFFSET,
                             entryY + WizardsAndBeastsUiTokens.SpellMenu.ENTRY_TEXT_Y_OFFSET,
-                            entry.category().getColor(), false);
+                            UiContrast.readableOn(entry.category().getColor(), PANEL_INK), false);
                 } else {
                     if (selectedSpellId != null && selectedSpellId.equals(entry.spell().getId())) {
                     graphics.fill(listX - layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECT_HIGHLIGHT_LEFT_OFFSET),
@@ -154,7 +160,7 @@ public final class SpellMenuRenderHelper {
                 int infoY = panelY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_INFO_BASE_Y);
 
                 graphics.drawString(font, sel.getDisplayName(), infoX, infoY,
-                        sel.getCategory().getColor(), false);
+                        UiContrast.readableOn(sel.getCategory().getColor(), PANEL_INK), false);
 
                 String catName = sel.getCategory().name().replace('_', ' ');
                 graphics.drawString(font, catName, infoX,
