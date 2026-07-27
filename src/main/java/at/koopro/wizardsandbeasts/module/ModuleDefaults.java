@@ -55,6 +55,18 @@ public final class ModuleDefaults {
         // DISABLED. Preserved exactly — see MIGRATION_DELTAS.md, this means the Ministry system is off
         // until an operator turns it on.
         SHIPPED.put(Module.MINISTRY, ModuleState.DISABLED);
+        // ── Content-classification modules ───────────────────────────────────────────────────────
+        // These exist so that content which previously belonged to no module can be gated at all. Every
+        // one of them ships ENABLED on purpose: each covers content that is reachable today, and any
+        // other default would silently take it away from existing worlds. They are switches an operator
+        // can now reach, not a change to what a fresh world looks like.
+        SHIPPED.put(Module.GRINGOTTS, ModuleState.ENABLED);
+        SHIPPED.put(Module.WANDWOOD, ModuleState.ENABLED);
+        SHIPPED.put(Module.MAGIZOOLOGY, ModuleState.ENABLED);
+        SHIPPED.put(Module.WIZARDING_FOOD, ModuleState.ENABLED);
+        SHIPPED.put(Module.ARTEFACTS, ModuleState.ENABLED);
+        SHIPPED.put(Module.FURNISHINGS, ModuleState.ENABLED);
+        SHIPPED.put(Module.SCHOLARSHIP, ModuleState.ENABLED);
     }
 
     private ModuleDefaults() {}
