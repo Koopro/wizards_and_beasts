@@ -46,6 +46,22 @@ public record BrewingRecipeDefinition(
         return new BrewingRecipe(fullId, resolved, cauldronTier, heatTimeTicks, outputBrewId);
     }
 
+    /**
+     * The inverse of {@link #toRecipe(String)}, for the same reason {@code BrewDefinition.fromBrew}
+     * exists: the sync payload carries definitions so the JSON codec doubles as the wire format.
+     * The recipe's own id is not carried here — it is the map key in the payload, because it comes from
+     * the file path rather than the file body.
+     */
+    public static BrewingRecipeDefinition fromRecipe(BrewingRecipe recipe) {
+        List<IngredientEntry> entries = recipe.ingredients().stream()
+                .map(ingredient -> new IngredientEntry(
+                        BuiltInRegistries.ITEM.getKey(ingredient.item()),
+                        ingredient.count()))
+                .toList();
+        return new BrewingRecipeDefinition(entries, recipe.cauldronTier(),
+                recipe.heatTimeTicks(), recipe.outputBrewId());
+    }
+
     /** Single ingredient entry: namespaced item id + count. */
     public record IngredientEntry(Identifier item, int count) {
 

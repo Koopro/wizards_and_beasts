@@ -56,5 +56,6 @@ public class ModNetwork {
         ModNetworkPetrify.register(registrar);
         ModNetworkAbilityFramework.register(registrar);
         at.koopro.wizardsandbeasts.network.module.ModNetworkModules.register(registrar);
+        at.koopro.wizardsandbeasts.network.brew.ModNetworkBrew.register(registrar);
     }
 }

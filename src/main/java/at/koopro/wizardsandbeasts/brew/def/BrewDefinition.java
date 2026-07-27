@@ -49,6 +49,26 @@ public record BrewDefinition(
         return new Brew(fullId, displayName, color, specs, flavorText.orElse(null));
     }
 
+    /**
+     * The inverse of {@link #toBrew(String)}: turns a loaded brew back into its definition form.
+     *
+     * <p>Needed because the reload listener keeps only the baked {@link Brew} and the sync payload sends
+     * definitions — reusing the JSON codec on the wire rather than maintaining a second encoding of the
+     * same data. Effects that failed to resolve at load time are already gone, so what this produces is
+     * what the server actually has, not what the JSON asked for.
+     */
+    public static BrewDefinition fromBrew(Brew brew) {
+        List<EffectEntry> entries = brew.effects().stream()
+                .map(spec -> new EffectEntry(
+                        BuiltInRegistries.MOB_EFFECT.getKey(spec.effect().value()),
+                        spec.baseDuration(),
+                        spec.amplifier(),
+                        spec.ambient()))
+                .toList();
+        return new BrewDefinition(brew.displayName(), brew.color(), entries,
+                Optional.ofNullable(brew.flavorText()));
+    }
+
     /** Single mob-effect entry on a brew. */
     public record EffectEntry(Identifier id, int duration, int amplifier, boolean ambient) {
 
