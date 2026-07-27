@@ -4,6 +4,7 @@ import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import org.jspecify.annotations.NullMarked;
@@ -32,5 +33,16 @@ public final class ModuleLifecycleEvents {
         if (event.getEntity() instanceof ServerPlayer player) {
             ModuleStateService.syncTo(player);
         }
+    }
+
+    /**
+     * Rebuilds the content index whenever tags are (re)bound — datapack load, {@code /reload}, and the
+     * client receiving the tag sync. Both causes are handled rather than only the server one: on a
+     * dedicated server the client never sees {@code SERVER_DATA_LOAD}, and the client needs the index for
+     * creative tabs.
+     */
+    @SubscribeEvent
+    public static void onTagsUpdated(TagsUpdatedEvent event) {
+        ModuleContentIndex.rebuild(event.getLookupProvider());
     }
 }

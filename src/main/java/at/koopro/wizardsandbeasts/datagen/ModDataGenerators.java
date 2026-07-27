@@ -15,6 +15,7 @@ public class ModDataGenerators {
         event.createProvider(ModLanguageProvider::new);
 
         event.createBlockAndItemTags(ModBlockTagsProvider::new, ModItemTagsProvider::new);
+        event.createProvider(ModEntityTypeTagsProvider::new);
 
         event.createProvider(ModLootTableProvider::create);
         event.createProvider(ModRecipeProvider.Runner::new);

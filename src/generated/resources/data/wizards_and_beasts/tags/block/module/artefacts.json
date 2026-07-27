@@ -1,0 +1,15 @@
+{
+  "values": [
+    "wizards_and_beasts:deluminator_light",
+    "wizards_and_beasts:unlit_torch",
+    "wizards_and_beasts:unlit_wall_torch",
+    "wizards_and_beasts:unlit_soul_torch",
+    "wizards_and_beasts:unlit_soul_wall_torch",
+    "wizards_and_beasts:unlit_copper_torch",
+    "wizards_and_beasts:unlit_copper_wall_torch",
+    "wizards_and_beasts:unlit_lantern",
+    "wizards_and_beasts:unlit_soul_lantern",
+    "wizards_and_beasts:unlit_copper_lantern",
+    "wizards_and_beasts:unlit_glowstone"
+  ]
+}
