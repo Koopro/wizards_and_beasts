@@ -5,7 +5,6 @@ import at.koopro.wizardsandbeasts.client.broom.BroomRenderer;
 import at.koopro.wizardsandbeasts.client.entity.DementorRenderer;
 import at.koopro.wizardsandbeasts.client.entity.DragonRenderer;
 import at.koopro.wizardsandbeasts.client.bestiary.niffler.NifflerPocketLayer;
-import at.koopro.wizardsandbeasts.client.petrify.PetrifyStoneLayer;
 import at.koopro.wizardsandbeasts.client.entity.ProtegoShieldRenderer;
 import at.koopro.wizardsandbeasts.client.form.FormMannequinRenderer;
 import at.koopro.wizardsandbeasts.client.spell.PatronusRenderer;
@@ -72,7 +71,6 @@ public class ClientSetup {
             AvatarRenderer<AbstractClientPlayer> renderer = event.getPlayerRenderer(skin);
             if (renderer != null) {
                 renderer.addLayer(new NifflerPocketLayer(renderer));
-                renderer.addLayer(new PetrifyStoneLayer(renderer));
             }
         }
     }

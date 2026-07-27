@@ -1,26 +1,35 @@
 package at.koopro.wizardsandbeasts.mixin.client;
 
-import at.koopro.wizardsandbeasts.client.debug.DebugTransformData;
-import at.koopro.wizardsandbeasts.client.debug.ModelDebugEditor;
-import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.geom.ModelPart;
+import at.koopro.wizardsandbeasts.client.debug.ModelDebugPartTransforms;
+import at.koopro.wizardsandbeasts.client.petrify.PetrifyRenderHandler;
 import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Injects at the TAIL of {@link PlayerModel#setupAnim(AvatarRenderState)}
- * to apply per-part debug transforms AFTER vanilla animation has set all values.
- * <p>
- * Scale is multiplicative; offset and rotation are additive.
- * <p>
- * Fields like head, body, leftArm etc. live on HumanoidModel (superclass),
- * so we access them by casting rather than @Shadow (which only finds fields
- * declared directly on the target class).
+ * Injects at the TAIL of {@link PlayerModel#setupAnim(AvatarRenderState)} — the one point where the
+ * vanilla player pose is fully computed and not yet consumed. {@code PlayerModel.setupAnim} calls
+ * {@code super.setupAnim} as its last statement, so TAIL is genuinely after every limb rotation
+ * {@link net.minecraft.client.model.HumanoidModel} sets, including the passenger crouch.
+ *
+ * <p><b>Why a mixin and not an event.</b> NeoForge exposes no hook between a humanoid model finishing
+ * its animation and the renderer submitting it. {@code RenderLivingEvent.Pre} fires before
+ * {@code setupAnim} runs, so anything written there is immediately overwritten;
+ * {@code RegisterRenderStateModifiersEvent} sees the render state but never the {@code ModelPart}s,
+ * which is where a pose lives. Overriding pose therefore requires this injection point. This mixin
+ * predates the petrification work, which extends it rather than adding a second hook onto the same
+ * call.
+ *
+ * <p><b>No logic here.</b> Every case delegates to an ordinary handler class, which is also where the
+ * module gates live, so the gating stays testable.
+ *
+ * <p><b>If this silently stops firing:</b> petrified players animate normally under their stone skin
+ * instead of standing frozen, and the {@code /wandb} model debug editor's part sliders do nothing.
+ * Nothing crashes and nothing else regresses. The mixin config sets {@code injectors.defaultRequire: 1},
+ * so a failure to resolve is a hard crash at load rather than a silent miss.
  */
 @Mixin(PlayerModel.class)
 public class PlayerModelMixin {
@@ -29,45 +38,11 @@ public class PlayerModelMixin {
         method = "setupAnim(Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;)V",
         at = @At("TAIL")
     )
-    private void WizardsAndBeastsMod$applyDebugPartTransforms(AvatarRenderState state, CallbackInfo ci) {
-        ModelDebugEditor editor = ModelDebugEditor.get();
-        if (!editor.isActive()) return;
-        if (editor.getModelMode() != ModelDebugEditor.ModelMode.VANILLA) return;
-
+    private void WizardsAndBeastsMod$applyPartTransforms(AvatarRenderState state, CallbackInfo ci) {
         PlayerModel model = (PlayerModel) (Object) this;
-        HumanoidModel<?> humanoid = model;
-
-        // HumanoidModel parts
-        WizardsAndBeastsMod$applyToModelPart(editor, humanoid.head,     "head");
-        WizardsAndBeastsMod$applyToModelPart(editor, humanoid.hat,      "hat");
-        WizardsAndBeastsMod$applyToModelPart(editor, humanoid.body,     "body");
-        WizardsAndBeastsMod$applyToModelPart(editor, humanoid.leftArm,  "left_arm");
-        WizardsAndBeastsMod$applyToModelPart(editor, humanoid.rightArm, "right_arm");
-        WizardsAndBeastsMod$applyToModelPart(editor, humanoid.leftLeg,  "left_leg");
-        WizardsAndBeastsMod$applyToModelPart(editor, humanoid.rightLeg, "right_leg");
-
-        // PlayerModel parts
-        WizardsAndBeastsMod$applyToModelPart(editor, model.jacket,      "jacket");
-        WizardsAndBeastsMod$applyToModelPart(editor, model.leftSleeve,  "left_sleeve");
-        WizardsAndBeastsMod$applyToModelPart(editor, model.rightSleeve, "right_sleeve");
-        WizardsAndBeastsMod$applyToModelPart(editor, model.leftPants,   "left_pants");
-        WizardsAndBeastsMod$applyToModelPart(editor, model.rightPants,  "right_pants");
-    }
-
-    @Unique
-    private static void WizardsAndBeastsMod$applyToModelPart(ModelDebugEditor editor, ModelPart part, String name) {
-        DebugTransformData d = editor.getData(name);
-        if (d.isDefault()) return;
-        // Scale: multiplicative — don't overwrite vanilla
-        part.xScale *= d.scaleX;
-        part.yScale *= d.scaleY;
-        part.zScale *= d.scaleZ;
-        // Offset and rotation: additive
-        part.x += d.offX;
-        part.y += d.offY;
-        part.z += d.offZ;
-        part.xRot += d.rotX;
-        part.yRot += d.rotY;
-        part.zRot += d.rotZ;
+        // The debug editor runs last because it is additive on top of whatever survived, which is
+        // what makes it useful for tuning the cases above it.
+        PetrifyRenderHandler.applyFrozenPose(model, state);
+        ModelDebugPartTransforms.apply(model);
     }
 }
