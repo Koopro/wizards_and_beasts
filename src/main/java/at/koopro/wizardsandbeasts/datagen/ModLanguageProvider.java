@@ -47,6 +47,7 @@ public class ModLanguageProvider extends LanguageProvider {
         hogsmeade();
         gringottsBank();
         modules();
+        recipeViewer();
     }
 
     private void creativeTabs() {
@@ -677,6 +678,19 @@ public class ModLanguageProvider extends LanguageProvider {
      * hand-maintained en_us. They belong here: datagen is the convention for keys this mod introduces,
      * and it keeps them next to the enum they describe.</p>
      */
+    /**
+     * Recipe-viewer category text.
+     *
+     * <p>The Wandmaker's Bench category reuses the block's own name rather than coining a second one. Only
+     * brewing needs a title of its own, and it carries Wizarding World terminology, so the English value
+     * is a marked placeholder for Christian rather than something invented here. The tier line beneath it
+     * is mechanical UI and is written normally.</p>
+     */
+    private void recipeViewer() {
+        add("gui.wizards_and_beasts.jei.cauldron_brewing", "[PLACEHOLDER] Cauldron Brewing");
+        add("gui.wizards_and_beasts.jei.cauldron_brewing.tier", "Requires: %s");
+    }
+
     private void modules() {
         add("message.wizards_and_beasts.module.content_disabled", "%s is switched off here.");
         add("module.wizards_and_beasts.wands.name", "Wands");

@@ -304,6 +304,8 @@
   "gamps_law.wizards_and_beasts.information_genesis": "Magic cannot conjure knowledge that has no source in the world.",
   "gamps_law.wizards_and_beasts.life_creation": "To create life is beyond the reach of magic. Even the darkest wizard cannot overrule this law.",
   "gamps_law.wizards_and_beasts.love_conjuration": "Love cannot be conjured. What this magic can imitate is obsession, and obsession is not love.",
+  "gui.wizards_and_beasts.jei.cauldron_brewing": "[PLACEHOLDER] Cauldron Brewing",
+  "gui.wizards_and_beasts.jei.cauldron_brewing.tier": "Requires: %s",
   "gui.wizards_and_beasts.pocket_configurator.apply": "Apply",
   "gui.wizards_and_beasts.pocket_configurator.biome": "Biome",
   "gui.wizards_and_beasts.pocket_configurator.size": "Size",
