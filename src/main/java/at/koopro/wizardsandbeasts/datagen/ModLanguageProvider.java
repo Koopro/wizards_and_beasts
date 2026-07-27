@@ -15,16 +15,57 @@ public class ModLanguageProvider extends LanguageProvider {
 
     @Override
     protected void addTranslations() {
+        creativeTabs();
+        debugTools();
+        elder();
+        yew();
+        holly();
+        wand();
+        keybindings();
+        containerTitles();
+        debugEditorKeys();
+        maraudersMapItems();
+        currency();
+        entities();
+        dataConfiguredCreatures();
+        bespokeCreatures();
+        rowan();
+        wizardingItems();
+        trunkBlocks();
+        wizardingBlocks();
+        paintingVariants();
+        unclassifiedCreatureGrade();
+        heritageLore();
+        professionTree();
+        trunkArchetypes();
+        trunkTiers();
+        pocketDimensionBlocks();
+        pocketConfiguratorGui();
+        ministryOfMagic();
+        hogwartsCastle();
+        diagonAlley();
+        hogsmeade();
+        gringottsBank();
+        modules();
+    }
+
+    private void creativeTabs() {
         // Creative tab
         add("itemGroup." + WizardsAndBeastsMod.MODID + ".main", "Wizards & Beasts");
         add("itemGroup." + WizardsAndBeastsMod.MODID + ".decorative_blocks", "Wizards & Beasts: Decorative Blocks");
 
+    }
+
+    private void debugTools() {
         // Debug tools
         add("item.wizards_and_beasts.debug_wand", "Debug Wand");
         add("item.wizards_and_beasts.morph_wand", "Morphologist's Wand");
         add("item.wizards_and_beasts.debug_wand.desc", "Developer testing wand for debug actions.");
         add("item.wizards_and_beasts.morph_wand.desc", "Prototype wand for morph and form testing.");
 
+    }
+
+    private void elder() {
         // Elder
         add("block.wizards_and_beasts.elder_log", "Elder Log");
         add("block.wizards_and_beasts.stripped_elder_log", "Stripped Elder Log");
@@ -36,6 +77,9 @@ public class ModLanguageProvider extends LanguageProvider {
         add("block.wizards_and_beasts.elder_leaves", "Elder Leaves");
         add("block.wizards_and_beasts.elder_sapling", "Elder Sapling");
 
+    }
+
+    private void yew() {
         // Yew
         add("block.wizards_and_beasts.yew_log", "Yew Log");
         add("block.wizards_and_beasts.stripped_yew_log", "Stripped Yew Log");
@@ -47,6 +91,9 @@ public class ModLanguageProvider extends LanguageProvider {
         add("block.wizards_and_beasts.yew_leaves", "Yew Leaves");
         add("block.wizards_and_beasts.yew_sapling", "Yew Sapling");
 
+    }
+
+    private void holly() {
         // Holly
         add("block.wizards_and_beasts.holly_log", "Holly Log");
         add("block.wizards_and_beasts.stripped_holly_log", "Stripped Holly Log");
@@ -58,6 +105,9 @@ public class ModLanguageProvider extends LanguageProvider {
         add("block.wizards_and_beasts.holly_leaves", "Holly Leaves");
         add("block.wizards_and_beasts.holly_sapling", "Holly Sapling");
 
+    }
+
+    private void wand() {
         // Wand
         add("item.wizards_and_beasts.wand", "Wand");
         add("item.wizards_and_beasts.wand.desc", "Channel and cast your selected spell.");
@@ -82,6 +132,9 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.wizards_and_beasts.white_river_monster_spine", "White River Monster Spine");
         add("item.wizards_and_beasts.white_river_monster_spine.desc", "Rare spine core balancing reach and heavy spell output.");
 
+    }
+
+    private void keybindings() {
         // Keybindings
         add("key.categories.wizards_and_beasts.spells", "Wizards & Beasts Spells");
         add("key.wizards_and_beasts.spell_up", "Spell Slot Up");
@@ -124,15 +177,24 @@ public class ModLanguageProvider extends LanguageProvider {
         add("screen.wizards_and_beasts.elf_skills.section_threads", "Binding Threads");
         add("screen.wizards_and_beasts.elf_skills.hint", "Service, household wards, and quiet magic disciplines.");
 
+    }
+
+    private void containerTitles() {
         // Container titles
         add("container.wizards_and_beasts.hermiones_bag", "Hermione's Bag");
 
+    }
+
+    private void debugEditorKeys() {
         // Debug editor keybindings
         add("key.categories.wizards_and_beasts.debug", "Wizards & Beasts Debug");
         add("key.wizards_and_beasts.debug_toggle", "Toggle Model Debug Editor");
         add("key.wizards_and_beasts.debug_export", "Export Debug Transforms");
         add("key.wizards_and_beasts.debug_model_mode", "Switch Vanilla/GeckoLib Mode");
 
+    }
+
+    private void maraudersMapItems() {
         // Marauder's Map items
         add("item.wizards_and_beasts.marauders_map", "Marauder's Map");
         add("item.wizards_and_beasts.marauders_map.desc", "A magical map that can track nearby movement.");
@@ -143,6 +205,9 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.wizards_and_beasts.broom", "Broom");
         add("item.wizards_and_beasts.broom.desc", "A flying broom for quick travel through the skies.");
 
+    }
+
+    private void currency() {
         // Currency
         add("item.wizards_and_beasts.knut", "Knut");
         add("item.wizards_and_beasts.knut.desc", "A small bronze wizarding coin.");
@@ -157,6 +222,9 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.wizards_and_beasts.dragot", "Dragot");
         add("item.wizards_and_beasts.dragot.desc", "An alternative wizarding currency for regional trade.");
 
+    }
+
+    private void entities() {
         // Entities
         add("entity.wizards_and_beasts.goblin_teller", "Goblin Teller");
         add("entity.wizards_and_beasts.niffler", "Niffler");
@@ -165,6 +233,9 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.wizards_and_beasts.niffler_spawn_egg", "Niffler Spawn Egg");
         add("item.wizards_and_beasts.goblin_teller_spawn_egg.desc", "Spawns a Goblin Teller for testing and encounters.");
         add("item.wizards_and_beasts.niffler_spawn_egg.desc", "Spawns a mischievous Niffler.");
+    }
+
+    private void dataConfiguredCreatures() {
         // Every data-configured creature: entity name derived from the manifest id.
         // Bestiary display names live in the hand-authored en_us; these cover name tags,
         // death messages and spawn-egg fallbacks.
@@ -173,9 +244,15 @@ public class ModLanguageProvider extends LanguageProvider {
         }
         // Bespoke (not manifest-driven): three-headed multi-part entity, see RunespoorEntity.
         add("entity.wizards_and_beasts.runespoor", "Runespoor");
+    }
+
+    private void bespokeCreatures() {
         // Bespoke (not manifest-driven): per-viewer facing-based visibility, see HidebehindEntity.
         add("entity.wizards_and_beasts.hidebehind", "Hidebehind");
 
+    }
+
+    private void rowan() {
         // Rowan
         add("block.wizards_and_beasts.rowan_log", "Rowan Log");
         add("block.wizards_and_beasts.stripped_rowan_log", "Stripped Rowan Log");
@@ -187,6 +264,9 @@ public class ModLanguageProvider extends LanguageProvider {
         add("block.wizards_and_beasts.rowan_leaves", "Rowan Leaves");
         add("block.wizards_and_beasts.rowan_sapling", "Rowan Sapling");
 
+    }
+
+    private void wizardingItems() {
         // Wizarding World — items
         add("item.wizards_and_beasts.brew", "Brew");
         add("item.wizards_and_beasts.brew.desc", "A bottled brew infused with custom potion effects.");
@@ -275,6 +355,9 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.wizards_and_beasts.portkey.desc", "Linked transport item. Sneak-use on a block to bind destination.");
         add("item.wizards_and_beasts.portkey.unlinked", "Sneak-use on a block to link a destination.");
         add("item.wizards_and_beasts.portkey.linked", "Linked: %s, %s, %s");
+    }
+
+    private void trunkBlocks() {
         // All trunks + Newt's Case are placed blocks now — block.* keys.
         add("block.wizards_and_beasts.enchanted_trunk", "Enchanted Trunk");
         add("block.wizards_and_beasts.expanded_trunk", "Expanded Trunk");
@@ -305,6 +388,9 @@ public class ModLanguageProvider extends LanguageProvider {
         add("gamps_law.wizards_and_beasts.love_conjuration", "Love cannot be conjured. What this magic can imitate is obsession, and obsession is not love.");
         add("gamps_law.wizards_and_beasts.information_genesis", "Magic cannot conjure knowledge that has no source in the world.");
 
+    }
+
+    private void wizardingBlocks() {
         // Wizarding World — blocks
         add("block.wizards_and_beasts.devils_snare", "Devil's Snare");
         add("block.wizards_and_beasts.mandrake_crop", "Mandrake");
@@ -335,6 +421,9 @@ public class ModLanguageProvider extends LanguageProvider {
         add("ui.wizards_and_beasts.type_selection.coming_soon", "Coming Soon (Alpha)");
         add("message.wizards_and_beasts.type_selection.coming_soon", "\u00A7cThis type is coming soon in alpha.");
 
+    }
+
+    private void paintingVariants() {
         // Moving portraits (painting variants)
         add("painting.wizards_and_beasts.portrait_fat_lady.title", "The Fat Lady");
         add("painting.wizards_and_beasts.portrait_fat_lady.author", "Hogwarts");
@@ -351,9 +440,15 @@ public class ModLanguageProvider extends LanguageProvider {
         add("painting.wizards_and_beasts.portrait_sir_cadogan.title", "Sir Cadogan");
         add("painting.wizards_and_beasts.portrait_sir_cadogan.author", "Hogwarts");
 
+    }
+
+    private void unclassifiedCreatureGrade() {
         // Shown in place of the X-glyph grade for creatures with no Ministry classification.
         add("bestiary.wizards_and_beasts.rating.unclassified", "Unclassified");
 
+    }
+
+    private void heritageLore() {
         // Heritage lore. The enums stay the authoring surface; the runtime resolves these keys.
         for (Heritage heritage : Heritage.values()) {
             add(heritage.getDescriptionTranslationKey(), heritage.getDescription());
@@ -362,6 +457,9 @@ public class ModLanguageProvider extends LanguageProvider {
             add(variant.getDescriptionTranslationKey(), variant.getDescription());
         }
 
+    }
+
+    private void professionTree() {
         // Profession tree
         for (ProfessionNode node : ProfessionNode.values()) {
             add(node.getTranslationKey(), node.getDisplayName());
@@ -370,6 +468,9 @@ public class ModLanguageProvider extends LanguageProvider {
         add("screen.wizards_and_beasts.profession_tree.title", "Professions");
         add("screen.wizards_and_beasts.profession_tree.points", "Profession Points");
 
+    }
+
+    private void trunkArchetypes() {
         // Trunk archetypes
         add("trunk.archetype.wizards_and_beasts.scamander_sanctuary", "Scamander's Sanctuary");
         add("trunk.archetype.wizards_and_beasts.field_camp", "Field Camp");
@@ -377,21 +478,33 @@ public class ModLanguageProvider extends LanguageProvider {
         add("trunk.archetype.wizards_and_beasts.safehouse", "Safehouse");
         add("trunk.archetype.wizards_and_beasts.astronomers_retreat", "Astronomer's Retreat");
 
+    }
+
+    private void trunkTiers() {
         // Trunk tiers
         add("trunk.tier.wizards_and_beasts.tier_1", "Standard Extension");
         add("trunk.tier.wizards_and_beasts.tier_2", "Greater Extension");
         add("trunk.tier.wizards_and_beasts.tier_3", "Archmaster Extension");
 
+    }
+
+    private void pocketDimensionBlocks() {
         // Pocket dimension blocks
         add("block.wizards_and_beasts.warding_stone", "Warding Stone");
         add("block.wizards_and_beasts.pocket_configurator", "Expansion Focus");
 
+    }
+
+    private void pocketConfiguratorGui() {
         // Pocket configurator GUI
         add("gui.wizards_and_beasts.pocket_configurator.title", "Expansion Focus");
         add("gui.wizards_and_beasts.pocket_configurator.size", "Size");
         add("gui.wizards_and_beasts.pocket_configurator.biome", "Biome");
         add("gui.wizards_and_beasts.pocket_configurator.apply", "Apply");
 
+    }
+
+    private void ministryOfMagic() {
         // Ministry of Magic
         add("block.wizards_and_beasts.ministry_black_marble", "Ministry Black Marble");
         add("block.wizards_and_beasts.ministry_black_marble_slab", "Ministry Black Marble Slab");
@@ -413,6 +526,9 @@ public class ModLanguageProvider extends LanguageProvider {
         add("block.wizards_and_beasts.ministry_floor_tile_slab", "Ministry Floor Tile Slab");
         add("block.wizards_and_beasts.ministry_wall_panel", "Ministry Wall Panel");
 
+    }
+
+    private void hogwartsCastle() {
         // Hogwarts Castle
         add("block.wizards_and_beasts.hogwarts_stone", "Hogwarts Stone");
         add("block.wizards_and_beasts.hogwarts_stone_slab", "Hogwarts Stone Slab");
@@ -438,6 +554,9 @@ public class ModLanguageProvider extends LanguageProvider {
         add("block.wizards_and_beasts.hogwarts_floor_tile_slab", "Hogwarts Floor Tile Slab");
         add("block.wizards_and_beasts.enchanted_ceiling_tile", "Enchanted Ceiling Tile");
 
+    }
+
+    private void diagonAlley() {
         // Diagon Alley
         add("block.wizards_and_beasts.diagon_brick", "Diagon Alley Brick");
         add("block.wizards_and_beasts.diagon_brick_slab", "Diagon Alley Brick Slab");
@@ -470,6 +589,9 @@ public class ModLanguageProvider extends LanguageProvider {
         add("block.wizards_and_beasts.diagon_street_stone_slab", "Diagon Street Stone Slab");
         add("block.wizards_and_beasts.diagon_street_stone_pressure_plate", "Diagon Street Stone Pressure Plate");
 
+    }
+
+    private void hogsmeade() {
         // Hogsmeade
         add("block.wizards_and_beasts.hogsmeade_stone", "Hogsmeade Stone");
         add("block.wizards_and_beasts.hogsmeade_stone_slab", "Hogsmeade Stone Slab");
@@ -503,6 +625,9 @@ public class ModLanguageProvider extends LanguageProvider {
         add("block.wizards_and_beasts.hogsmeade_chimney_brick_stairs", "Hogsmeade Chimney Brick Stairs");
         add("block.wizards_and_beasts.hogsmeade_chimney_brick_wall", "Hogsmeade Chimney Brick Wall");
 
+    }
+
+    private void gringottsBank() {
         // Gringotts Bank
         add("block.wizards_and_beasts.gringotts_white_marble", "Gringotts White Marble");
         add("block.wizards_and_beasts.gringotts_white_marble_slab", "Gringotts White Marble Slab");
@@ -543,6 +668,50 @@ public class ModLanguageProvider extends LanguageProvider {
             out.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1));
         }
         return out.toString();
+    }
+
+    /**
+     * Module display names and the message shown when a switched-off module's content is used.
+     *
+     * <p>These arrived with the module content gating pass and were written straight into the
+     * hand-maintained en_us. They belong here: datagen is the convention for keys this mod introduces,
+     * and it keeps them next to the enum they describe.</p>
+     */
+    private void modules() {
+        add("message.wizards_and_beasts.module.content_disabled", "%s is switched off here.");
+        add("module.wizards_and_beasts.wands.name", "Wands");
+        add("module.wizards_and_beasts.wands_and_spells.name", "Wands & Spells");
+        add("module.wizards_and_beasts.skill_trees.name", "Skill Trees");
+        add("module.wizards_and_beasts.proficiency.name", "Spell Proficiency");
+        add("module.wizards_and_beasts.dark_arts.name", "The Dark Arts");
+        add("module.wizards_and_beasts.player_abilities.name", "Player Abilities");
+        add("module.wizards_and_beasts.creatures.name", "Magical Creatures");
+        add("module.wizards_and_beasts.bestiary.name", "Bestiary");
+        add("module.wizards_and_beasts.broom_flight.name", "Broom Flight");
+        add("module.wizards_and_beasts.pocket_dimensions.name", "Pocket Dimensions");
+        add("module.wizards_and_beasts.owls.name", "O.W.L.s");
+        add("module.wizards_and_beasts.floo_network.name", "Floo Network");
+        add("module.wizards_and_beasts.azkaban.name", "Azkaban");
+        add("module.wizards_and_beasts.character_sheet.name", "Character Sheet");
+        add("module.wizards_and_beasts.player_stats.name", "Player Stats");
+        add("module.wizards_and_beasts.structures.name", "Structures");
+        add("module.wizards_and_beasts.handbook.name", "Ministry Handbook");
+        add("module.wizards_and_beasts.ministry.name", "Ministry of Magic");
+        add("module.wizards_and_beasts.chamber_of_secrets.name", "Chamber of Secrets");
+        add("module.wizards_and_beasts.gringotts.name", "Gringotts");
+        add("module.wizards_and_beasts.gringotts.desc", "Wizarding currency, vault balances and the vault commands. The decorative bank blocks belong to Structures.");
+        add("module.wizards_and_beasts.wandwood.name", "Wandwood");
+        add("module.wizards_and_beasts.wandwood.desc", "The elder, holly, rowan and yew trees and every block cut from them.");
+        add("module.wizards_and_beasts.magizoology.name", "Magizoology");
+        add("module.wizards_and_beasts.magizoology.desc", "Beast drops, magical herbs and brewed potions — what the creatures leave behind, rather than the creatures themselves.");
+        add("module.wizards_and_beasts.wizarding_food.name", "Wizarding Food");
+        add("module.wizards_and_beasts.wizarding_food.desc", "Butterbeer, Chocolate Frogs, Every Flavour Beans and the rest of the sweet trolley.");
+        add("module.wizards_and_beasts.artefacts.name", "Magical Artefacts");
+        add("module.wizards_and_beasts.artefacts.desc", "Portable gear that is neither wand nor broom nor Dark artefact: the Marauder's Map, Time-Turner, cloaks and the Deluminator.");
+        add("module.wizards_and_beasts.furnishings.name", "Furnishings");
+        add("module.wizards_and_beasts.furnishings.desc", "House banners, cauldrons, floating candles and magical plants.");
+        add("module.wizards_and_beasts.scholarship.name", "Scholarship");
+        add("module.wizards_and_beasts.scholarship.desc", "Parchment, ink and the lore tomes that grant Knowledge and O.W.L. credit.");
     }
 }
 
