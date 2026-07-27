@@ -60,9 +60,8 @@ public enum Module {
     /**
      * Chamber of Secrets structure + basilisk dark-breeding ritual. Mirrors {@code Module.AZKABAN}'s
      * caution: the structure's start_pool currently points at a near-empty placeholder NBT template
-     * with no reachable content, so this is documentation/config surface only for now — the raw
-     * vanilla jigsaw structure generation itself is data-driven and is not actually gated by this flag
-     * (no bespoke Java {@code Structure} subclass exists to consult it, unlike Azkaban's).
+     * with no reachable content, which is why it ships {@code DISABLED}. Generation is gated on this
+     * flag by {@code ChamberOfSecretsStructure}, so a default install places no chamber at all.
      */
     CHAMBER_OF_SECRETS
 }

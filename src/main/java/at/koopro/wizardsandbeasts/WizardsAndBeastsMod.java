@@ -12,6 +12,7 @@ import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 
 import at.koopro.wizardsandbeasts.azkaban.structure.AzkabanStructures;
+import at.koopro.wizardsandbeasts.chamber.structure.ChamberOfSecretsStructures;
 import at.koopro.wizardsandbeasts.brew.def.BrewReloadListener;
 import at.koopro.wizardsandbeasts.brew.def.BrewingRecipeReloadListener;
 import at.koopro.wizardsandbeasts.broom.BroomDefinitionLoader;
@@ -105,6 +106,7 @@ public class WizardsAndBeastsMod {
         AzkabanStructures.STRUCTURE_TYPES.register(modEventBus);
         AzkabanStructures.STRUCTURE_PIECE_TYPES.register(modEventBus);
         AzkabanStructures.STRUCTURE_PLACEMENT_TYPES.register(modEventBus);
+        ChamberOfSecretsStructures.STRUCTURE_TYPES.register(modEventBus);
         WandmakingRecipeType.RECIPE_TYPES.register(modEventBus);
         WandmakingRecipeSerializer.RECIPE_SERIALIZERS.register(modEventBus);
         at.koopro.wizardsandbeasts.loot.ModLootModifiers.GLOBAL_LOOT_MODIFIER_SERIALIZERS.register(modEventBus);
