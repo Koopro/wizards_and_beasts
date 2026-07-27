@@ -114,6 +114,9 @@ gradle-app.setting
 run/
 runs/
 
+# FML config written by the JUnit harness, which runs from the project root
+config/
+
 # Game run logs (including rotated .log.gz archives)
 logs/
 
