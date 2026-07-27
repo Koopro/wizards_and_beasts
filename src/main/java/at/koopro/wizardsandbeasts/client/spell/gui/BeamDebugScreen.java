@@ -49,6 +49,11 @@ public class BeamDebugScreen extends Screen {
     @Override
     protected void init() {
         super.init();
+        // Take control of the beam's look. Without this the sliders would edit values the renderer
+        // never reads, since a real cast otherwise renders the spell's own BeamStyle. The override
+        // survives closing the screen on purpose — tune, close, look — and "Reset All" hands the
+        // beam back to the per-spell styles.
+        BeamSettings.debugOverride = true;
         layout = GuiScaleHelper.Layout.panel(width, height,
                 WizardsAndBeastsUiTokens.BeamDebug.PANEL_WIDTH,
                 WizardsAndBeastsUiTokens.BeamDebug.PANEL_HEIGHT);

@@ -1,5 +1,6 @@
 {
   "displayName": "Expelliarmus",
+  "canonTier": "books",
   "category": "combat",
   "cooldownTicks": 50,
   "color": -39424,
@@ -7,5 +8,8 @@
   "projectileSpeed": 1.6,
   "projectileSpread": 0.02,
   "disarms": true,
+  "effects": [
+    { "type": "impulse", "strength": 1.4, "direction": "push" }
+  ],
   "requirement": { "type": "knows", "prerequisiteId": "stupefy" }
 }

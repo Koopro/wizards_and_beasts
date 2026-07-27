@@ -2,7 +2,7 @@
   "id": "wizards_and_beasts:billywig",
   "displayName": "bestiary.wizards_and_beasts.billywig.name",
   "category": "SMALL_CREATURE",
-  "mmRating": 2,
+  "mmRating": 3,
   "habitat": "bestiary.wizards_and_beasts.billywig.habitat",
   "size": "TINY",
   "shortLore": "bestiary.wizards_and_beasts.billywig.short_lore",

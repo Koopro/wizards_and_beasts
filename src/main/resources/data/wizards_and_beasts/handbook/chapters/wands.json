@@ -21,8 +21,23 @@
     },
     {
       "type": "text",
-      "heading": "Acquisition of Wands",
-      "body": "No standard crafting procedure for a base wand is presently filed with this Handbook. Wands are obtained through the established channels of acquisition rather than by ordinary assembly.\n\nThe registrant should not attempt to fashion a wand from materials of convenience. The results are uniformly disappointing and occasionally combustible."
+      "heading": "Acquisition — Licensed Wandmakers",
+      "body": "The ordinary channel is a licensed wandmaker. Any settlement may support one: a villager who takes up an unclaimed wandmaker's bench is registered to the trade by the Department, and thereafter keeps stock.\n\nPresent yourself and three wands are laid out for trial. The Handbook notes without comment that the wandmaker always seems to have anticipated which three. A wand that answers may be taken at no charge; a wand that does not will sit dead in the hand, and no amount of insistence improves matters.\n\nWands are stocked to the applicant. A wizard of modest accomplishment will not be offered a dragon heartstring, and should not ask."
+    },
+    {
+      "type": "text",
+      "heading": "Acquisition — Private Manufacture",
+      "body": "Private manufacture is lawful, registration obligations unaffected.\n\nA wand blank is assembled from two lengths of wood about an iron nugget. The blank is unseasoned and will not take a core until struck against a living wood — press it to a log and it takes that wood's character. Oak reads as rowan, spruce as holly, birch as hawthorn, and so on down the Registry's table of equivalents.\n\nThe seasoned blank and a core are then joined at a wandmaker's bench. Cores are not manufactured: unicorn hair, phoenix feather and dragon heartstring are harvested from the creature, with all that implies. The registrant is reminded that the harvesting of a unicorn carries consequences the Ministry does not administer."
+    },
+    {
+      "type": "text",
+      "heading": "The Wandmaker's Bench",
+      "body": "A bench standing alone will produce nothing. Wandmaking requires a furnished workshop, and the bench weighs its surroundings within five paces: bookshelves, floating candles, a pewter cauldron, a spell teacher. Every fitting adds to the bench's tier, and every pairing of wood and core demands a minimum.\n\nA bench that refuses to work will say what it wants of you. The registrant is advised to read it rather than to strike it."
+    },
+    {
+      "type": "text",
+      "heading": "Resonance and Bonding",
+      "body": "A wand judges four things: its wood against the wizard's character, its core against their accomplishment, and its length and flexibility against how they carry themselves. The verdict is a single figure, and the wand bonds only above the threshold.\n\nA wand taken at a wandmaker's bonds at once. A wand of private manufacture is judged on first use, and here the registrant should take care: a wand that finds you merely unsuitable will sulk, while a wand that finds you unfit will discharge into the hand that holds it.\n\nCharacter is not fixed at birth alone. Heritage is recorded at registration and weighs heaviest; accomplishment accrues with experience, and a core that would not answer a first-year may answer them later."
     }
   ]
 }

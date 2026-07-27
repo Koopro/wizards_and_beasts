@@ -2,7 +2,7 @@
   "id": "wizards_and_beasts:imp",
   "displayName": "bestiary.wizards_and_beasts.imp.name",
   "category": "CURSED_BEING",
-  "mmRating": 1,
+  "mmRating": 2,
   "habitat": "bestiary.wizards_and_beasts.imp.habitat",
   "size": "TINY",
   "shortLore": "bestiary.wizards_and_beasts.imp.short_lore",

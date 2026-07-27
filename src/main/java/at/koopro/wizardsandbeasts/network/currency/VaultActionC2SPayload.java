@@ -7,15 +7,22 @@ import at.koopro.wizardsandbeasts.currency.vault.GringottsTransaction;
 import at.koopro.wizardsandbeasts.currency.vault.PlayerVaultData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import org.jspecify.annotations.Nullable;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import at.koopro.wizardsandbeasts.registry.CurrencyItemRegistry;
 
 public record VaultActionC2SPayload(int actionOrdinal, int amount) implements CustomPacketPayload {
     private static final int MAX_TRANSACTION_AMOUNT = 4096;
+
+    private static final String REJECT_NO_COINS = "gringotts.wizards_and_beasts.reject.no_coins";
+    private static final String REJECT_INSUFFICIENT = "gringotts.wizards_and_beasts.reject.insufficient";
+    private static final String REJECT_EXCHANGE = "gringotts.wizards_and_beasts.reject.exchange";
 
     public static final Type<VaultActionC2SPayload> TYPE = new Type<>(
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "vault_action"));
@@ -47,6 +54,10 @@ public record VaultActionC2SPayload(int actionOrdinal, int amount) implements Cu
             Action action = Action.values()[pkt.actionOrdinal];
             PlayerVaultData vault = player.getData(ModAttachments.VAULT_DATA.get());
 
+            // Reject reason for a no-op action, so a failed click gives feedback instead of a silent
+            // nothing. null = the action moved coins; non-null = an action-bar line explaining why not.
+            @Nullable String failKey = null;
+
             switch (action) {
                 case DEPOSIT_KNUT -> {
                     if (!GringottsTransaction.isAcceptedCoin(new net.minecraft.world.item.ItemStack(CurrencyItemRegistry.KNUT.get()))) return;
@@ -54,6 +65,8 @@ public record VaultActionC2SPayload(int actionOrdinal, int amount) implements Cu
                     int toDeposit = Math.min(pkt.amount, have);
                     if (toDeposit > 0 && CurrencyHelper.removeItems(player.getInventory(), CurrencyItemRegistry.KNUT.get(), toDeposit)) {
                         vault.depositKnuts(toDeposit);
+                    } else {
+                        failKey = REJECT_NO_COINS;
                     }
                 }
                 case DEPOSIT_SICKLE -> {
@@ -62,6 +75,8 @@ public record VaultActionC2SPayload(int actionOrdinal, int amount) implements Cu
                     int toDeposit = Math.min(pkt.amount, have);
                     if (toDeposit > 0 && CurrencyHelper.removeItems(player.getInventory(), CurrencyItemRegistry.SICKLE.get(), toDeposit)) {
                         vault.depositSickles(toDeposit);
+                    } else {
+                        failKey = REJECT_NO_COINS;
                     }
                 }
                 case DEPOSIT_GALLEON -> {
@@ -70,6 +85,8 @@ public record VaultActionC2SPayload(int actionOrdinal, int amount) implements Cu
                     int toDeposit = Math.min(pkt.amount, have);
                     if (toDeposit > 0 && CurrencyHelper.removeItems(player.getInventory(), CurrencyItemRegistry.GALLEON.get(), toDeposit)) {
                         vault.depositGalleons(toDeposit);
+                    } else {
+                        failKey = REJECT_NO_COINS;
                     }
                 }
                 case DEPOSIT_ALL -> {
@@ -93,12 +110,17 @@ public record VaultActionC2SPayload(int actionOrdinal, int amount) implements Cu
                         CurrencyHelper.removeItems(player.getInventory(), CurrencyItemRegistry.GALLEON.get(), haveG);
                         vault.depositGalleons(haveG);
                     }
+                    if (haveK == 0 && haveS == 0 && haveG == 0) {
+                        failKey = REJECT_NO_COINS;
+                    }
                 }
                 case WITHDRAW_KNUT -> {
                     // Smart withdraw: auto-breaks sickles/galleons if not enough knuts
                     long withdrawn = vault.withdrawSmartKnuts(pkt.amount);
                     if (withdrawn > 0) {
                         CurrencyHelper.giveItems(player.getInventory(), CurrencyItemRegistry.KNUT.get(), (int) withdrawn);
+                    } else {
+                        failKey = REJECT_INSUFFICIENT;
                     }
                 }
                 case WITHDRAW_SICKLE -> {
@@ -106,12 +128,16 @@ public record VaultActionC2SPayload(int actionOrdinal, int amount) implements Cu
                     long withdrawn = vault.withdrawSmartSickles(pkt.amount);
                     if (withdrawn > 0) {
                         CurrencyHelper.giveItems(player.getInventory(), CurrencyItemRegistry.SICKLE.get(), (int) withdrawn);
+                    } else {
+                        failKey = REJECT_INSUFFICIENT;
                     }
                 }
                 case WITHDRAW_GALLEON -> {
                     int toWithdraw = (int) Math.min(pkt.amount, vault.getGalleons());
                     if (toWithdraw > 0 && vault.withdrawGalleons(toWithdraw)) {
                         CurrencyHelper.giveItems(player.getInventory(), CurrencyItemRegistry.GALLEON.get(), toWithdraw);
+                    } else {
+                        failKey = REJECT_INSUFFICIENT;
                     }
                 }
                 case WITHDRAW_ALL -> {
@@ -121,14 +147,20 @@ public record VaultActionC2SPayload(int actionOrdinal, int amount) implements Cu
                     if (k > 0) { vault.withdrawKnuts(k); CurrencyHelper.giveItems(player.getInventory(), CurrencyItemRegistry.KNUT.get(), (int) k); }
                     if (s > 0) { vault.withdrawSickles(s); CurrencyHelper.giveItems(player.getInventory(), CurrencyItemRegistry.SICKLE.get(), (int) s); }
                     if (g > 0) { vault.withdrawGalleons(g); CurrencyHelper.giveItems(player.getInventory(), CurrencyItemRegistry.GALLEON.get(), (int) g); }
+                    if (k == 0 && s == 0 && g == 0) {
+                        failKey = REJECT_INSUFFICIENT;
+                    }
                 }
-                case EXCHANGE_KNUTS_TO_SICKLE -> vault.exchangeKnutsToSickle();
-                case EXCHANGE_SICKLE_TO_KNUTS -> vault.exchangeSickleToKnuts();
-                case EXCHANGE_SICKLES_TO_GALLEON -> vault.exchangeSicklesToGalleon();
-                case EXCHANGE_GALLEON_TO_SICKLES -> vault.exchangeGalleonToSickles();
+                case EXCHANGE_KNUTS_TO_SICKLE -> { if (!vault.exchangeKnutsToSickle()) failKey = REJECT_EXCHANGE; }
+                case EXCHANGE_SICKLE_TO_KNUTS -> { if (!vault.exchangeSickleToKnuts()) failKey = REJECT_EXCHANGE; }
+                case EXCHANGE_SICKLES_TO_GALLEON -> { if (!vault.exchangeSicklesToGalleon()) failKey = REJECT_EXCHANGE; }
+                case EXCHANGE_GALLEON_TO_SICKLES -> { if (!vault.exchangeGalleonToSickles()) failKey = REJECT_EXCHANGE; }
             }
             DebugHooks.logVault(player, action.name(), pkt.amount, vault.getKnuts(), vault.getSickles(), vault.getGalleons());
 
+            if (failKey != null) {
+                player.displayClientMessage(Component.translatable(failKey).withStyle(ChatFormatting.RED), true);
+            }
             GringottsOpenS2CPayload.sendToPlayer(player);
         });
     }

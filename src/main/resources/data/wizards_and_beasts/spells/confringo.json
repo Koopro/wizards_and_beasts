@@ -1,5 +1,6 @@
 {
   "displayName": "Confringo",
+  "canonTier": "books",
   "category": "combat",
   "cooldownTicks": 80,
   "baseDamage": 6.0,
@@ -8,5 +9,5 @@
   "igniteSeconds": 3,
   "explode": { "power": 2.0, "breaksBlocks": false },
   "sound": { "id": "minecraft:item.firecharge.use", "volume": 1.0, "pitch": 0.8 },
-  "requirement": { "type": "knows", "prerequisiteId": "incendio" }
+  "requirement": { "type": "proficiency", "prerequisiteId": "incendio", "minProficiency": "proficient" }
 }

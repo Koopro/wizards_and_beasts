@@ -23,6 +23,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -32,6 +33,7 @@ import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -48,7 +50,7 @@ final class WandBeamSpellHandlers {
     static final int LEVIOSA_PARTICLE_COLOR = 0xFFB266FF;
     static final float LEVIOSA_MIN_DISTANCE = 2.0f;
     static final float LEVIOSA_MAX_DISTANCE = 24.0f;
-    static final int AVADA_MIN_CHARGE_TICKS = 12;
+    static final int AVADA_MIN_CHARGE_TICKS = 24;
     private static final double LEVIOSA_SPRING_STRENGTH = 0.45;
     private static final double LEVIOSA_MAX_SPEED = 0.9;
     private static final double LEVIOSA_MAX_SPEED_CHARGED = 1.15;
@@ -63,6 +65,25 @@ final class WandBeamSpellHandlers {
                                        WandBeamSession s, float maxReach) {
         Vec3 start = player.getEyePosition();
         Vec3 look = player.getLookAngle();
+        // Pressure jet: shove living things caught in the stream, douse anything burning, and hurt
+        // fire-immune creatures (blazes, magma cubes) the way a blast of water should.
+        if (s.beamTicks % 4 == 0) {
+            Vec3 jetEnd = start.add(look.scale(Math.min(maxReach, 8.0)));
+            AABB jetBox = new AABB(start, jetEnd).inflate(1.2);
+            for (LivingEntity le : level.getEntitiesOfClass(LivingEntity.class, jetBox,
+                    e -> e != player && e.isAlive())) {
+                Vec3 to = le.getBoundingBox().getCenter().subtract(start);
+                if (to.lengthSqr() < 1.0e-4 || to.normalize().dot(look) < 0.3) {
+                    continue;
+                }
+                at.koopro.wizardsandbeasts.spell.lib.SpellHelper.applyKnockback(le, look, 0.55f);
+                le.hurtMarked = true;
+                le.clearFire();
+                if (le.fireImmune()) {
+                    le.hurt(level.damageSources().magic(), 2.0f);
+                }
+            }
+        }
         BlockHitResult blockHit = level.clip(new ClipContext(
                 start, start.add(look.scale(maxReach)),
                 ClipContext.Block.OUTLINE,
@@ -101,7 +122,7 @@ final class WandBeamSpellHandlers {
     static void clearSessionEffects(ServerPlayer player, WandBeamSession s) {
         UUID casterId = player.getUUID();
         releaseCrucioTarget(player, s, casterId);
-        releaseLeviosaTarget(player, s, casterId);
+        releaseLeviosaTarget(player, s, casterId, true);
     }
 
     /** Strips this caster's Crucio effects from its held target and drops the claim, if any. */
@@ -118,13 +139,23 @@ final class WandBeamSpellHandlers {
     }
 
     /** Restores this caster's Leviosa target's gravity and drops the claim, if any. */
-    private static void releaseLeviosaTarget(ServerPlayer caster, WandBeamSession s, UUID casterId) {
+    private static void releaseLeviosaTarget(ServerPlayer caster, WandBeamSession s, UUID casterId, boolean fling) {
         if (s.lastLeviosaTarget == null) {
             return;
         }
         Entity prev = findEntityInLevel(caster, s.lastLeviosaTarget);
         if (prev != null) {
             clearLeviosaEffects(prev, s.lastLeviosaHadNoGravity);
+            if (fling) {
+                // Wingardium throw: releasing the beam flings the held object/mob where the caster aims.
+                Vec3 dir = caster.getLookAngle();
+                double force = 1.6;
+                prev.setDeltaMovement(dir.x * force, dir.y * force + 0.2, dir.z * force);
+                prev.hurtMarked = true;
+                prev.fallDistance = 0f;
+                SpellImpactBurstS2CPayload.sendToTracking(caster, prev.getBoundingBox().getCenter(),
+                        SpellFamily.ARCANE, LEVIOSA_PARTICLE_COLOR, 8, 0.2f);
+            }
         }
         BeamTargetClaims.release(s.lastLeviosaTarget, casterId);
         s.lastLeviosaTarget = null;
@@ -140,9 +171,11 @@ final class WandBeamSpellHandlers {
         }
         if (s.avadaConsumed || target == null) return;
         if (s.beamTicks < AVADA_MIN_CHARGE_TICKS) {
-            if (s.beamTicks % 3 == 0) {
+            // Longer, louder wind-up so the curse is dodgeable: gathering green light on the target
+            // every other tick telegraphs the kill, and breaking line of sight (checked below) cancels it.
+            if (s.beamTicks % 2 == 0) {
                 SpellImpactBurstS2CPayload.sendToTracking(caster, target.getBoundingBox().getCenter(),
-                        SpellFamily.DARK, 0xFF00FF00, 4, 0.08f);
+                        SpellFamily.DARK, 0xFF00FF00, 8, 0.14f);
             }
             return;
         }
@@ -182,12 +215,14 @@ final class WandBeamSpellHandlers {
         UUID casterId = caster.getUUID();
         if (target == null) {
             releaseCrucioTarget(caster, s, casterId);
+            s.crucioHoldTicks = 0;
             return;
         }
 
         UUID tid = target.getUUID();
         if (s.lastCrucioTarget != null && !s.lastCrucioTarget.equals(tid)) {
             releaseCrucioTarget(caster, s, casterId);
+            s.crucioHoldTicks = 0;
         }
 
         // Another wizard already holds this target under their beam: a second Crucio is contested and
@@ -197,6 +232,7 @@ final class WandBeamSpellHandlers {
         }
 
         s.lastCrucioTarget = tid;
+        s.crucioHoldTicks++;
         int effectInterval = Math.max(1, (int) (channelEffectInterval / Math.max(0.5f, crucioIntentMultiplier(caster, spell))));
         if (s.beamTicks % effectInterval == 0) {
             float intent = crucioIntentMultiplier(caster, spell);
@@ -211,10 +247,16 @@ final class WandBeamSpellHandlers {
             // intent feedback, corruption accrual, legacy-effect cleanup, ramp damage below.
             recordBeamProficiencyHit(caster, spell.getId(), s, 20);
         }
-        if (s.beamTicks >= 40 && s.beamTicks % 20 == 0) {
+        // Escalating agony: both the ramp damage and the pain intensity climb the longer the curse
+        // holds ONE victim (crucioHoldTicks resets when the beam moves to a new target).
+        if (s.crucioHoldTicks >= 30 && s.crucioHoldTicks % 20 == 0) {
             float intent = crucioIntentMultiplier(caster, spell);
-            float rampDamage = Math.min(1.5f, 0.4f + (s.beamTicks / 120f)) * intent;
+            float rampDamage = Math.min(2.5f, 0.4f + (s.crucioHoldTicks / 80f)) * intent;
             target.hurt(caster.level().damageSources().magic(), rampDamage);
+            int painAmp = Math.min(3, s.crucioHoldTicks / 40);
+            if (painAmp > 0) {
+                target.addEffect(new MobEffectInstance(ModEffects.CRUCIATUS_PAIN, 40, painAmp, false, false, true));
+            }
             recordBeamProficiencyHit(caster, spell.getId(), s, 20);
         }
     }
@@ -235,14 +277,14 @@ final class WandBeamSpellHandlers {
             if (s.leviosaMissTicks <= LEVIOSA_TARGET_GRACE_MISS_TICKS) {
                 return;
             }
-            releaseLeviosaTarget(caster, s, casterId);
+            releaseLeviosaTarget(caster, s, casterId, false);
             return;
         }
         s.leviosaMissTicks = 0;
 
         UUID tid = target.getUUID();
         if (s.lastLeviosaTarget != null && !s.lastLeviosaTarget.equals(tid)) {
-            releaseLeviosaTarget(caster, s, casterId);
+            releaseLeviosaTarget(caster, s, casterId, false);
         }
 
         // Another wizard already holds this target: don't fight over its velocity (last-tick-wins tug).

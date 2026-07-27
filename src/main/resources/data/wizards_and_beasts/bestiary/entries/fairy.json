@@ -2,7 +2,7 @@
   "id": "wizards_and_beasts:fairy",
   "displayName": "bestiary.wizards_and_beasts.fairy.name",
   "category": "MAGICAL_CREATURE",
-  "mmRating": 1,
+  "mmRating": 2,
   "habitat": "bestiary.wizards_and_beasts.fairy.habitat",
   "size": "TINY",
   "shortLore": "bestiary.wizards_and_beasts.fairy.short_lore",

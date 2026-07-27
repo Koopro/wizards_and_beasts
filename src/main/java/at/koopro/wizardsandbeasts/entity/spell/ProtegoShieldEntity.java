@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.entity.spell;
 
 import at.koopro.wizardsandbeasts.effect.ModEffects;
+import at.koopro.wizardsandbeasts.event.spell.ProtegoShieldHandler;
 import at.koopro.wizardsandbeasts.network.spell.ProtegoAnimationS2CPayload;
 import at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions;
 import at.koopro.wizardsandbeasts.registry.ModEntities;
@@ -81,9 +82,6 @@ public class ProtegoShieldEntity extends Entity implements GeoEntity {
         this.entityData.set(DATA_ANCHOR_POS, caster.blockPosition());
         this.maxLifetime = computeMaxLifetime(clampedTier, Spells.PROTEGO.getProficiencyScalar(caster));
         this.setPos(caster.position());
-        if (clampedTier >= 2) {
-            this.setPos(Vec3.atCenterOf(caster.blockPosition()));
-        }
     }
 
     @Override
@@ -125,22 +123,23 @@ public class ProtegoShieldEntity extends Entity implements GeoEntity {
     }
 
     private boolean updatePositionFromTier(ServerLevel serverLevel) {
-        int tier = getTier();
-        if (tier >= 2) {
-            setPos(Vec3.atCenterOf(getAnchorPos()));
-            return true;
-        }
         ServerPlayer caster = getCaster(serverLevel);
         if (caster == null || !caster.isAlive() || caster.getEffect(ModEffects.PROTEGO_SHIELD) == null) {
             return false;
         }
-        if (tier == 0) {
-            Vec3 front = caster.getEyePosition().add(caster.getLookAngle().scale(0.9));
-            setPos(front);
+        if (getTier() == 0) {
+            // Basic Protego: an aimed disc planted just in front of the caster at torso height. Track
+            // yaw only (ignore pitch) so the disc never dives into the ground or floats overhead when
+            // the caster looks up/down. The renderer stands the disc upright to face this aim.
+            Vec3 look = caster.getLookAngle();
+            Vec3 aim = new Vec3(look.x, 0.0, look.z);
+            aim = aim.lengthSqr() < 1.0e-6 ? new Vec3(0.0, 0.0, 1.0) : aim.normalize();
+            setPos(caster.getX() + aim.x * 1.2, caster.getY(), caster.getZ() + aim.z * 1.2);
             setYRot(caster.getYRot());
-            setXRot(caster.getXRot());
             return true;
         }
+        // Upgrades (Totalum / Maxima / Horribilis): a dome centred on the caster that follows them,
+        // rather than anchoring to the cast-time block position.
         setPos(caster.position().add(0.0, 0.5, 0.0));
         return true;
     }
@@ -226,9 +225,13 @@ public class ProtegoShieldEntity extends Entity implements GeoEntity {
             serverLevel.playSound(null, blockPosition(), ModSounds.PROTEGO_SHATTER.get(),
                     SoundSource.PLAYERS, 1.2f, 0.8f + (getTier() * 0.05f));
             ServerPlayer caster = getCaster(serverLevel);
-            if (caster != null && caster.getEffect(ModEffects.PROTEGO_SHIELD) != null) {
-                caster.removeEffect(ModEffects.PROTEGO_SHIELD);
+            if (caster != null) {
+                if (caster.getEffect(ModEffects.PROTEGO_SHIELD) != null) {
+                    caster.removeEffect(ModEffects.PROTEGO_SHIELD);
+                }
                 ProtegoWardManager.remove(caster.getUUID());
+                // End the incoming-damage ward together with the visible shield.
+                ProtegoShieldHandler.deactivate(caster);
             }
             ProtegoAnimationS2CPayload.sendToTracking(this, "shatter");
         }
@@ -243,6 +246,11 @@ public class ProtegoShieldEntity extends Entity implements GeoEntity {
 
     public int getTier() {
         return this.entityData.get(DATA_TIER);
+    }
+
+    /** Radius this shield physically covers — used to extend the ward to allies inside a dome. */
+    public double coverRadius() {
+        return interceptRadius(getTier());
     }
 
     public boolean isShattering() {

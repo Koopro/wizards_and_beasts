@@ -2,7 +2,7 @@
   "id": "wizards_and_beasts:moke",
   "displayName": "bestiary.wizards_and_beasts.moke.name",
   "category": "SMALL_CREATURE",
-  "mmRating": 2,
+  "mmRating": 3,
   "habitat": "bestiary.wizards_and_beasts.moke.habitat",
   "size": "SMALL",
   "shortLore": "bestiary.wizards_and_beasts.moke.short_lore",

@@ -1,0 +1,18 @@
+{
+  "type": "wizards_and_beasts:add_item",
+  "conditions": [
+    {
+      "condition": "minecraft:any_of",
+      "terms": [
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/village/village_cartographer" },
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/village/village_toolsmith" },
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/village/village_weaponsmith" },
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/abandoned_mineshaft" }
+      ]
+    }
+  ],
+  "item": "wizards_and_beasts:knut",
+  "min_count": 3,
+  "max_count": 16,
+  "chance": 0.5
+}

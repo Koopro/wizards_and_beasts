@@ -1,5 +1,6 @@
 {
   "displayName": "Finite Incantatem",
+  "canonTier": "books",
   "category": "utility",
   "cooldownTicks": 40,
   "color": -921025,

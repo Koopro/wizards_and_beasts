@@ -125,6 +125,41 @@ public final class SpellHelper {
         return true;
     }
 
+    /**
+     * Scatters fire across valid ground within {@code radius} of {@code center} — the lingering
+     * flame-patch (Incendio) / fire-shrapnel (Confringo) area-denial. Only places fire where vanilla
+     * permits it (air with a supporting face), so it self-limits on open, wet or unsupported terrain.
+     *
+     * @return the number of fire blocks actually placed
+     */
+    public static int scatterGroundFire(ServerLevel level, Vec3 center, int attempts, double radius) {
+        int placed = 0;
+        for (int i = 0; i < attempts; i++) {
+            double angle = level.random.nextDouble() * Math.PI * 2.0;
+            double dist = level.random.nextDouble() * radius;
+            double x = center.x + Math.cos(angle) * dist;
+            double z = center.z + Math.sin(angle) * dist;
+            for (int dy = 1; dy >= -2; dy--) {
+                BlockPos p = BlockPos.containing(x, center.y + dy, z);
+                if (!level.getBlockState(p).isAir()) {
+                    continue;
+                }
+                if (!BaseFireBlock.canBePlacedAt(level, p, net.minecraft.core.Direction.UP)) {
+                    continue;
+                }
+                BlockState fire = BaseFireBlock.getState(level, p);
+                if (fire != null) {
+                    level.setBlockAndUpdate(p, fire);
+                    placed++;
+                }
+                break;
+            }
+        }
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.LAVA, center.x, center.y + 0.3, center.z,
+                Math.max(4, attempts), radius * 0.5, 0.1, radius * 0.5, 0.0);
+        return placed;
+    }
+
     /** Common impact burst + soft impact sound for world interactions. */
     public static void playSpellImpact(ServerLevel level, Vec3 pos, int color) {
         spawnBurst(level, pos, color, 10, 0.18);
@@ -178,6 +213,13 @@ public final class SpellHelper {
             return true;
         }
 
+        // Freeze a small terrain patch: water sheets over to slippery ice, lava sets into obsidian/stone.
+        if (freezeTerrainPatch(level, hitPos, 2)) {
+            level.playSound(null, hitPos, SoundEvents.POWDER_SNOW_PLACE, SoundSource.PLAYERS, 0.5f, 0.9f);
+            playSpellImpact(level, hit.getLocation(), spell.getColor());
+            return true;
+        }
+
         BlockPos placePos = hitPos.relative(hit.getDirection());
         BlockState placeState = level.getBlockState(placePos);
         if ((placeState.isAir() || placeState.canBeReplaced())
@@ -187,6 +229,32 @@ public final class SpellHelper {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Freezes fluid blocks within {@code radius} of {@code center}: water becomes slippery ice, lava
+     * sources set into obsidian (flowing lava into cobblestone). Only pure fluid blocks are touched so
+     * waterlogged/decorated blocks are left intact.
+     *
+     * @return true if at least one block was frozen
+     */
+    private static boolean freezeTerrainPatch(ServerLevel level, BlockPos center, int radius) {
+        boolean any = false;
+        for (BlockPos p : BlockPos.betweenClosed(
+                center.offset(-radius, -1, -radius), center.offset(radius, 1, radius))) {
+            BlockState s = level.getBlockState(p);
+            if (s.is(Blocks.WATER)) {
+                level.setBlockAndUpdate(p.immutable(), Blocks.ICE.defaultBlockState());
+                any = true;
+            } else if (s.is(Blocks.LAVA)) {
+                BlockState frozen = s.getFluidState().isSource()
+                        ? Blocks.OBSIDIAN.defaultBlockState()
+                        : Blocks.COBBLESTONE.defaultBlockState();
+                level.setBlockAndUpdate(p.immutable(), frozen);
+                any = true;
+            }
+        }
+        return any;
     }
 
     public static int pushNearbyLightweightEntities(ServerLevel level, @Nullable Entity caster,
@@ -248,6 +316,8 @@ public final class SpellHelper {
             level.setBlockAndUpdate(p, Blocks.WATER.defaultBlockState());
         }
         createExplosion(level, null, Vec3.atCenterOf(hit.getBlockPos()), explosionPower, breaksBlocks);
+        // Fire shrapnel: the blast scatters embers that leave a ring of lingering fire for area denial.
+        scatterGroundFire(level, Vec3.atCenterOf(hit.getBlockPos()), 6, 2.2);
     }
 
     public static void applyProtegoCastPulse(ServerLevel level, ServerPlayer caster, Spell spell) {
@@ -272,14 +342,23 @@ public final class SpellHelper {
     }
 
     public static void applyArrestoAreaStabilize(ServerLevel level, ServerPlayer caster, Spell spell) {
-        AABB area = caster.getBoundingBox().inflate(3.5, 2.5, 3.5);
+        AABB area = caster.getBoundingBox().inflate(4.0, 3.0, 4.0);
+        // Time-stop bubble: everything but the caster is caught. Living things are slow-fallen, near-frozen
+        // in place (velocity killed + heavy slowness), and projectiles have their flight halted.
         for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, area, e -> e.isAlive() && e != caster)) {
             living.addEffect(new net.minecraft.world.effect.MobEffectInstance(
                     net.minecraft.world.effect.MobEffects.SLOW_FALLING, 90, 0, false, true, true));
+            living.addEffect(new net.minecraft.world.effect.MobEffectInstance(
+                    net.minecraft.world.effect.MobEffects.SLOWNESS, 40, 6, false, true, true));
             living.fallDistance = 0f;
-            Vec3 damped = living.getDeltaMovement().multiply(0.65, 0.45, 0.65);
-            living.setDeltaMovement(damped);
+            living.setDeltaMovement(living.getDeltaMovement().multiply(0.0, 0.2, 0.0));
             living.hurtMarked = true;
+        }
+        for (net.minecraft.world.entity.projectile.Projectile proj :
+                level.getEntitiesOfClass(net.minecraft.world.entity.projectile.Projectile.class, area,
+                        p -> p.isAlive() && p.getOwner() != caster)) {
+            proj.setDeltaMovement(Vec3.ZERO);
+            proj.hurtMarked = true;
         }
         playSpellImpact(level, caster.getBoundingBox().getCenter(), spell.getColor());
     }

@@ -8,10 +8,15 @@ import at.koopro.wizardsandbeasts.registry.ModDimensions;
 import at.koopro.wizardsandbeasts.block.trunk.TrunkBlock;
 import at.koopro.wizardsandbeasts.trunk.TrunkAccessMode;
 import at.koopro.wizardsandbeasts.trunk.ExtensionCharmService;
+import at.koopro.wizardsandbeasts.trunk.ShareEntranceService;
 import at.koopro.wizardsandbeasts.trunk.TrunkRecord;
 import at.koopro.wizardsandbeasts.util.WandHelper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.ChatFormatting;
+import org.jspecify.annotations.Nullable;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -37,7 +42,39 @@ final class SpellCastUtilityHandler {
         float missing = caster.getMaxHealth() - caster.getHealth();
         int regenDuration = missing >= 8.0f ? 120 : 80;
         caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, regenDuration, 0, false, true, true));
+        // Heal an ally: if the caster is facing a nearby player, mend + cleanse them too, so Episkey works
+        // as a support spell instead of only patching the caster. (Self heal/cleanse stays on JSON.)
+        Player ally = findFacedAllyPlayer(caster, 8.0);
+        if (ally != null) {
+            ally.heal(4.0f);
+            ally.removeEffect(MobEffects.POISON);
+            ally.removeEffect(MobEffects.WITHER);
+            ally.removeEffect(MobEffects.BLINDNESS);
+            ally.removeEffect(MobEffects.NAUSEA);
+            ally.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 80, 0, false, true, true));
+        }
         return true;
+    }
+
+    /** Nearest player inside a tight look-cone in front of the caster, within {@code reach}, else null. */
+    private static @Nullable Player findFacedAllyPlayer(ServerPlayer caster, double reach) {
+        Vec3 eye = caster.getEyePosition();
+        Vec3 look = caster.getLookAngle();
+        Player best = null;
+        double bestDot = 0.96; // ~16° cone
+        AABB box = caster.getBoundingBox().inflate(reach);
+        for (Player p : caster.level().getEntitiesOfClass(Player.class, box, other -> other != caster && other.isAlive())) {
+            Vec3 to = p.getBoundingBox().getCenter().subtract(eye);
+            if (to.lengthSqr() > reach * reach || to.lengthSqr() < 1.0e-4) {
+                continue;
+            }
+            double dot = to.normalize().dot(look);
+            if (dot > bestDot) {
+                bestDot = dot;
+                best = p;
+            }
+        }
+        return best;
     }
 
     static boolean handleFrigoraSelf(ServerLevel level, ServerPlayer caster, Spell spell) {
@@ -65,7 +102,16 @@ final class SpellCastUtilityHandler {
             BlockHitResult blockHit = level.clip(new ClipContext(
                     start, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, caster));
             if (blockHit.getType() == HitResult.Type.BLOCK) {
-                repaired = SpellHelper.tryReparoRepairBlock(level, blockHit.getBlockPos(), spell);
+                // Area rebuild: mend every repairable block in a small radius around the aim point, so one
+                // cast patches a cracked wall instead of a single block.
+                BlockPos center = blockHit.getBlockPos();
+                int radius = 3;
+                for (BlockPos p : BlockPos.betweenClosed(
+                        center.offset(-radius, -radius, -radius), center.offset(radius, radius, radius))) {
+                    if (SpellHelper.tryReparoRepairBlock(level, p.immutable(), spell)) {
+                        repaired = true;
+                    }
+                }
             }
         }
         if (repaired) {
@@ -97,6 +143,14 @@ final class SpellCastUtilityHandler {
     }
 
     static boolean handlePocketIngress(ServerPlayer caster) {
+        // Step through a nearby ally's shared doorway — no trunk of your own required.
+        if (!caster.isShiftKeyDown()) {
+            ShareEntranceService.Doorway invite = ShareEntranceService.findUsable(caster);
+            if (invite != null) {
+                ExtensionCharmService.enterPocket(caster, invite.pocket());
+                return true;
+            }
+        }
         ItemStack caseStack = findPocketCase(caster);
         if (caseStack.isEmpty()
                 || !(caseStack.getItem() instanceof BlockItem blockItem)
@@ -118,6 +172,14 @@ final class SpellCastUtilityHandler {
             caster.displayClientMessage(
                     Component.literal("The case appears to contain only travel supplies."), true);
             return false;
+        }
+        // Sneak-cast opens a temporary shared doorway for allies instead of entering yourself.
+        if (caster.isShiftKeyDown()) {
+            ShareEntranceService.open(caster, pocket);
+            caster.displayClientMessage(
+                    Component.literal("You open a shared entrance to your trunk (30s).")
+                            .withStyle(ChatFormatting.AQUA), true);
+            return true;
         }
         ExtensionCharmService.enterPocket(caster, pocket);
         return true;

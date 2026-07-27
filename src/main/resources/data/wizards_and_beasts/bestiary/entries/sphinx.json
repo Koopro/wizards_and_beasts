@@ -2,7 +2,7 @@
   "id": "wizards_and_beasts:sphinx",
   "displayName": "bestiary.wizards_and_beasts.sphinx.name",
   "category": "LARGE_BEAST",
-  "mmRating": 3,
+  "mmRating": 4,
   "habitat": "bestiary.wizards_and_beasts.sphinx.habitat",
   "size": "LARGE",
   "shortLore": "bestiary.wizards_and_beasts.sphinx.short_lore",

@@ -1,0 +1,26 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "BROOM_FLIGHT"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "WS ",
+    "WS ",
+    "WT "
+  ],
+  "key": {
+    "W": "#minecraft:planks",
+    "S": "minecraft:stick",
+    "T": "#minecraft:leaves"
+  },
+  "result": {
+    "id": "wizards_and_beasts:oakshaft_79",
+    "count": 1,
+    "components": {
+      "wizards_and_beasts:broom_definition": "wizards_and_beasts:oakshaft_79"
+    }
+  }
+}

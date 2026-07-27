@@ -5,8 +5,9 @@
   "tree": "spell_mastery",
   "effects": [
     {
-      "abilityId": "basic_casting",
-      "type": "unlock_ability"
+      "type": "category_cooldown_reduction",
+      "category": "combat",
+      "reductionPerLevel": 0.02
     }
   ],
   "x": 114.0,

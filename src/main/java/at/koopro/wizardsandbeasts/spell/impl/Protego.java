@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.spell.impl;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.effect.ProtegoShieldEffect;
 import at.koopro.wizardsandbeasts.entity.spell.ProtegoShieldEntity;
+import at.koopro.wizardsandbeasts.event.spell.ProtegoShieldHandler;
 import at.koopro.wizardsandbeasts.network.spell.ProtegoSpawnS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
 import at.koopro.wizardsandbeasts.spell.core.*;
@@ -59,6 +60,10 @@ public class Protego extends Spell {
         // make the fresh shield self-shatter on its first tick (recast bug).
         ProtegoWardManager.shatterExistingIfPresent(caster);
         caster.addEffect(new MobEffectInstance(ModEffects.PROTEGO_SHIELD, duration, amplifier, false, false, true));
+        // Activate the incoming-damage ward for the shield's lifetime. Without this the shield only
+        // deflected spell projectiles and left the caster fully exposed to melee/arrows/etc.
+        // SpellProtegoRules lets the Killing Curse through; everything else is cancelled while up.
+        ProtegoShieldHandler.activate(caster, level.getGameTime() + duration);
         ProtegoShieldEntity shield = new ProtegoShieldEntity(level, caster, tier);
         level.addFreshEntity(shield);
         ProtegoWardManager.register(caster.getUUID(), shield.getId());

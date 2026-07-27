@@ -1,0 +1,34 @@
+{
+  "parent": "wizards_and_beasts:progression/root",
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "wizards_and_beasts:bestiary"
+    },
+    "title": {
+      "translate": "advancements.wizards_and_beasts.progression.bestiary.title"
+    },
+    "description": {
+      "translate": "advancements.wizards_and_beasts.progression.bestiary.description"
+    },
+    "show_toast": true,
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "bestiary": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "wizards_and_beasts:bestiary"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "bestiary"
+    ]
+  ]
+}

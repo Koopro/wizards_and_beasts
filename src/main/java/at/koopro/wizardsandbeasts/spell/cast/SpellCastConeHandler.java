@@ -100,6 +100,17 @@ final class SpellCastConeHandler {
             // discarding this result meant such casts never scored a success or advanced proficiency.
             successful |= SpellHelper.tryIgniteBlockAlongLook(level, caster, effectiveRange, spell.getColor());
         }
+        if (props.ignites() && SpellCastSupport.isIncendio(spell)) {
+            // Lingering flames: lay down a patch of ground fire where the cone lands so it keeps burning
+            // anything that crosses it, not just whatever was in the cone at cast time.
+            Vec3 end = casterEye.add(look.scale(effectiveRange));
+            BlockHitResult hit = SpellHelper.raycastFromCaster(level, caster, casterEye, end,
+                    ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE);
+            Vec3 firePoint = hit.getType() == HitResult.Type.BLOCK ? hit.getLocation() : end;
+            if (SpellHelper.scatterGroundFire(level, firePoint, 5, 1.8) > 0) {
+                successful = true;
+            }
+        }
         if (SpellCastSupport.isGlacius(spell)) {
             Vec3 end = casterEye.add(look.scale(effectiveRange));
             BlockHitResult hit = SpellHelper.raycastFromCaster(level, caster, casterEye, end,
@@ -157,14 +168,17 @@ final class SpellCastConeHandler {
             }
 
             Vec3 toCaster = casterEye.subtract(targetCenter);
-            double distance = Math.max(0.1, toCaster.length());
-            Vec3 desired = toCaster.normalize().scale(Math.min(1.15, props.getPullStrength() * 0.48 + (distance * 0.045)));
-            Vec3 current = entity.getDeltaMovement();
-            Vec3 smooth = new Vec3(
-                    Mth.lerp(0.65, current.x(), desired.x()),
-                    Mth.lerp(0.55, current.y(), desired.y() * 0.45 + 0.06 * Math.signum(desired.y())),
-                    Mth.lerp(0.65, current.z(), desired.z()));
-            entity.setDeltaMovement(smooth);
+            double distance = toCaster.length();
+            if (distance < 0.6) {
+                // Arrived — kill momentum so items settle at the caster instead of overshooting.
+                entity.setDeltaMovement(Vec3.ZERO);
+            } else {
+                // Straight-line pull along the full 3D vector to the caster: this lifts items up off
+                // blocks (not just skimming the floor) and flies them directly in. The cast-time LoS
+                // clip above already refuses to pull anything through a wall.
+                double speed = Math.min(1.4, props.getPullStrength() * 0.5 + distance * 0.06);
+                entity.setDeltaMovement(toCaster.scale(speed / distance));
+            }
             entity.hurtMarked = true;
             entity.fallDistance = 0.0f;
             successful = true;

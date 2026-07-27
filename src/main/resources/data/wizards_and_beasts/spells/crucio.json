@@ -1,5 +1,6 @@
 {
   "displayName": "Crucio",
+  "canonTier": "books",
   "category": "dark_arts",
   "cooldownTicks": 220,
   "baseDamage": 2.0,

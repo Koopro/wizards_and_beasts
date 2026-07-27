@@ -40,7 +40,10 @@ public final class ModuleDefaults {
         // NOTE: COMING_SOON would arguably fit better, but that would take it out of an operator's reach —
         // a behaviour change this prompt does not authorise. Left exactly as it shipped.
         SHIPPED.put(Module.AZKABAN, ModuleState.DISABLED);
-        SHIPPED.put(Module.FLOO_NETWORK, ModuleState.DISABLED);
+        // Floo is complete and now craftable end to end (fireplace, grate, powder), so it ships on.
+        // While it was DISABLED those recipes led nowhere and no player could reach the network without
+        // an operator flipping the module first.
+        SHIPPED.put(Module.FLOO_NETWORK, ModuleState.ENABLED);
         SHIPPED.put(Module.CHARACTER_SHEET, ModuleState.ENABLED);
         SHIPPED.put(Module.PLAYER_STATS, ModuleState.PREVIEW);
         // Location decorative blocks ship craftable by default; set DISABLED to hide their recipes.

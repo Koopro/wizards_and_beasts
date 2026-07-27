@@ -2,7 +2,7 @@
   "id": "wizards_and_beasts:demiguise",
   "displayName": "bestiary.wizards_and_beasts.demiguise.name",
   "category": "SMALL_CREATURE",
-  "mmRating": 1,
+  "mmRating": 4,
   "habitat": "bestiary.wizards_and_beasts.demiguise.habitat",
   "size": "SMALL",
   "shortLore": "bestiary.wizards_and_beasts.demiguise.short_lore",
@@ -22,6 +22,6 @@
   "encounterTrigger": "PROXIMITY",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/demiguise.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/demiguise.png",
-  "sortOrder": 33,
+  "sortOrder": 94,
   "entityType": "wizards_and_beasts:demiguise"
 }

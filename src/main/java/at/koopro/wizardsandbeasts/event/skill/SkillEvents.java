@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.event.skill;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.network.skill.SkillDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.event.heritage.HeritageEvents;
+import at.koopro.wizardsandbeasts.heritage.profession.ProfessionSystemAPI;
 import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
 import at.koopro.wizardsandbeasts.spell.core.Proficiency;
 import at.koopro.wizardsandbeasts.util.ChatHelper;
@@ -110,6 +111,13 @@ public class SkillEvents {
                 SkillDataSyncS2CPayload.syncToPlayer(player);
                 ChatHelper.sendActionBar(player,
                         "\u00A76+" + points + " SP \u00A77(reached " + newProf.name().toLowerCase() + ")");
+            }
+            // Career progress. Profession points were granted once \u2014 3 at heritage selection \u2014 and by no
+            // other path, so a profession tree (8 points to fill) could never be finished in survival.
+            // Mastering a spell is the natural earn: proven practice is what a career is built on.
+            if (newProf == Proficiency.MASTERED) {
+                ProfessionSystemAPI.awardPoints(player, 1);
+                ChatHelper.sendActionBar(player, "\u00A7d+1 Profession Point \u00A77(spell mastered)");
             }
         }
     }

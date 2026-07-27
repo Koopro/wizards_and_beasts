@@ -2,7 +2,7 @@
   "id": "wizards_and_beasts:mooncalf",
   "displayName": "bestiary.wizards_and_beasts.mooncalf.name",
   "category": "SMALL_CREATURE",
-  "mmRating": 1,
+  "mmRating": 2,
   "habitat": "bestiary.wizards_and_beasts.mooncalf.habitat",
   "size": "SMALL",
   "shortLore": "bestiary.wizards_and_beasts.mooncalf.short_lore",

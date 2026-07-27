@@ -14,6 +14,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -63,7 +64,19 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
         var inv = menu.getBench().getInventory();
         int outCount = (int) inv.getAmountAsLong(2);
         ItemStack out = outCount > 0 ? inv.getResource(2).toStack(outCount) : ItemStack.EMPTY;
-        if (!out.isEmpty()) {
+        if (out.isEmpty()) {
+            // An empty output slot used to be the bench's only answer to every failure.
+            Component reason = statusMessage();
+            if (reason != null) {
+                int px = x + 10;
+                int py = y + 16;
+                // Two lines is what fits above the ingredient slots; the strings are written to it.
+                for (var line : font.split(reason, this.imageWidth - 20).stream().limit(2).toList()) {
+                    graphics.drawString(font, line, px, py, 0xFFbba07a, false);
+                    py += 10;
+                }
+            }
+        } else {
             int px = x + this.imageWidth / 2 - 60;
             int py = y + 16;
             graphics.drawString(font, Component.translatable("wandcraft.gui.preview"), px, py, 0xFFddccaa, false);
@@ -95,6 +108,22 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
         }
     }
 
+    /** What the bench is waiting for, or {@code null} while it has nothing to say. */
+    private @Nullable Component statusMessage() {
+        return switch (menu.getStatus()) {
+            case WandmakersBenchMenu.STATUS_MISSING_INPUT ->
+                    Component.translatable("wandcraft.bench.needs_input");
+            case WandmakersBenchMenu.STATUS_BLANK_UNSHAPED ->
+                    Component.translatable("wandcraft.bench.blank_unshaped");
+            case WandmakersBenchMenu.STATUS_NO_RECIPE ->
+                    Component.translatable("wandcraft.bench.no_recipe");
+            case WandmakersBenchMenu.STATUS_BENCH_TOO_PLAIN ->
+                    Component.translatable("wandcraft.bench.tier_too_low",
+                            menu.getRequiredTierScaled() / 100.0f, menu.getTierScoreScaled() / 100.0f);
+            default -> null;
+        };
+    }
+
     private static int interpolateColor(int a, int b, float t) {
         t = Math.max(0, Math.min(1, t));
         int ar = (a >> 16) & 0xFF, ag = (a >> 8) & 0xFF, ab = a & 0xFF;
@@ -119,12 +148,14 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
             List<Identifier> enh = menu.getEnhancerBlockIds();
             String line1 = Component.translatable("wandcraft.gui.tier_score", tier / 100.0f).getString();
             String line2 = Component.translatable("wandcraft.gui.enhancers", enh.size()).getString();
+            String line3 = Component.translatable("wandcraft.gui.tier_hint").getString();
             int tipX = mouseX + 8;
-            int tipY = mouseY - 24;
-            int tipW = Math.max(font.width(line1), font.width(line2)) + 8;
-            graphics.fill(tipX - 2, tipY - 2, tipX + tipW, tipY + 22, 0xE0100010);
+            int tipY = mouseY - 34;
+            int tipW = Math.max(font.width(line1), Math.max(font.width(line2), font.width(line3))) + 8;
+            graphics.fill(tipX - 2, tipY - 2, tipX + tipW, tipY + 32, 0xE0100010);
             graphics.drawString(font, line1, tipX, tipY, 0xFFFFFFFF, false);
             graphics.drawString(font, line2, tipX, tipY + 10, 0xFFCCCCCC, false);
+            graphics.drawString(font, line3, tipX, tipY + 20, 0xFF9a8fa8, false);
         }
     }
 

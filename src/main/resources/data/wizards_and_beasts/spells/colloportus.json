@@ -1,5 +1,6 @@
 {
   "displayName": "Colloportus",
+  "canonTier": "books",
   "category": "utility",
   "cooldownTicks": 45,
   "color": -10057524,

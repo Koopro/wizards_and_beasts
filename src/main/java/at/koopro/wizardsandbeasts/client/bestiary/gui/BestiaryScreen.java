@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public final class BestiaryScreen extends Screen {
@@ -369,7 +370,7 @@ public final class BestiaryScreen extends Screen {
             gg.drawWordWrap(font, Component.literal(tier.unlockHint()), textX, portraitY, textW, BestiaryColors.TEXT_DIM);
             return;
         }
-        gg.drawString(font, Component.literal("MM Rating: " + entry.mmRating()), textX, portraitY, BestiaryColors.TEXT_DIM);
+        gg.drawString(font, Component.literal("MM Rating: ").append(ministryGrade(entry.mmRating())), textX, portraitY, BestiaryColors.TEXT_DIM);
         int loreY = portraitY + 12;
         if (tier.ordinal() >= DiscoveryTier.ENCOUNTERED.ordinal()) {
             gg.drawWordWrap(font, entry.shortLore(), textX, loreY, textW, BestiaryColors.TEXT);
@@ -387,6 +388,23 @@ public final class BestiaryScreen extends Screen {
         if (tier.ordinal() >= DiscoveryTier.STUDIED.ordinal()) {
             gg.drawWordWrap(font, entry.fullLore(), dx, dy, 176, BestiaryColors.TEXT);
         }
+    }
+
+    /**
+     * Renders a Ministry of Magic classification the way every canon source writes it — as
+     * repeated {@code X} glyphs (X … XXXXX) rather than a bare integer.
+     *
+     * <p>An absent rating means the creature holds no Ministry grade at all (see
+     * {@link BestiaryEntry#mmRating()}) and renders as a translated placeholder, not as an empty
+     * string. The clamp is kept although the codec now rejects out-of-range values at load: a
+     * client can still reach this method with a stale {@link ClientBestiaryCache} entry synced by
+     * an older server.
+     */
+    private static Component ministryGrade(Optional<Integer> mmRating) {
+        if (mmRating.isEmpty()) {
+            return Component.translatable("bestiary.wizards_and_beasts.rating.unclassified");
+        }
+        return Component.literal("X".repeat(Math.clamp(mmRating.get(), 0, 5)));
     }
 
     @Override

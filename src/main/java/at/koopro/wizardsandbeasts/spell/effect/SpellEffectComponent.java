@@ -4,11 +4,13 @@ import org.jspecify.annotations.Nullable;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.effect.FiniteImmuneEffects;
+import at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.network.spell.SpellDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
+import at.koopro.wizardsandbeasts.spell.core.SpellFamily;
 import at.koopro.wizardsandbeasts.spell.core.Spells;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.spell.lib.SpellHelper;
@@ -25,8 +27,11 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -73,7 +78,10 @@ public sealed interface SpellEffectComponent permits
         SpellEffectComponent.Repair,
         SpellEffectComponent.Explosion,
         SpellEffectComponent.AoeApply,
-        SpellEffectComponent.SwapActiveSpell {
+        SpellEffectComponent.SwapActiveSpell,
+        SpellEffectComponent.InterruptCast,
+        SpellEffectComponent.ParticleBurst,
+        SpellEffectComponent.BoggartBanish {
 
     Logger LOGGER = LogUtils.getLogger();
 
@@ -124,7 +132,10 @@ public sealed interface SpellEffectComponent permits
         REPAIR("repair", Repair.CODEC),
         EXPLOSION("explosion", Explosion.CODEC),
         AOE_APPLY("aoe_apply", AoeApply.CODEC),
-        SWAP_ACTIVE_SPELL("swap_active_spell", SwapActiveSpell.CODEC);
+        SWAP_ACTIVE_SPELL("swap_active_spell", SwapActiveSpell.CODEC),
+        INTERRUPT_CAST("interrupt_cast", InterruptCast.CODEC),
+        PARTICLE_BURST("particle_burst", ParticleBurst.CODEC),
+        BOGGART_BANISH("boggart_banish", BoggartBanish.CODEC);
 
         public static final Codec<Type> CODEC = StringRepresentable.fromValues(Type::values);
 
@@ -163,6 +174,37 @@ public sealed interface SpellEffectComponent permits
         @Override
         public String getSerializedName() {
             return serializedName;
+        }
+    }
+
+    /** Which entities an {@link AoeApply} touches. */
+    enum AoeTarget implements StringRepresentable {
+        /** Every living entity (the caster is added separately via {@code include_caster}). */
+        ALL("all"),
+        /** Only players. */
+        PLAYERS("players"),
+        /** Only hostiles ({@link net.minecraft.world.entity.monster.Enemy}). */
+        MONSTERS("monsters");
+
+        public static final Codec<AoeTarget> CODEC = StringRepresentable.fromValues(AoeTarget::values);
+
+        private final String serializedName;
+
+        AoeTarget(String serializedName) {
+            this.serializedName = serializedName;
+        }
+
+        @Override
+        public String getSerializedName() {
+            return serializedName;
+        }
+
+        boolean matches(LivingEntity e) {
+            return switch (this) {
+                case ALL -> true;
+                case PLAYERS -> e instanceof net.minecraft.world.entity.player.Player;
+                case MONSTERS -> e instanceof net.minecraft.world.entity.monster.Enemy;
+            };
         }
     }
 
@@ -483,11 +525,14 @@ public sealed interface SpellEffectComponent permits
      * the parent context's scaling. Composes recursively; the nested codec is lazily initialized to break
      * the self-reference on {@link #CODEC}.
      */
-    record AoeApply(float radius, List<SpellEffectComponent> components) implements SpellEffectComponent {
+    record AoeApply(float radius, List<SpellEffectComponent> components, AoeTarget filter,
+                    boolean includeCaster) implements SpellEffectComponent {
         public static final MapCodec<AoeApply> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
                 Codec.FLOAT.fieldOf("radius").forGetter(AoeApply::radius),
                 Codec.lazyInitialized(() -> SpellEffectComponent.CODEC).listOf()
-                        .fieldOf("effects").forGetter(AoeApply::components)
+                        .fieldOf("effects").forGetter(AoeApply::components),
+                AoeTarget.CODEC.optionalFieldOf("filter", AoeTarget.ALL).forGetter(AoeApply::filter),
+                Codec.BOOL.optionalFieldOf("include_caster", false).forGetter(AoeApply::includeCaster)
         ).apply(inst, AoeApply::new));
 
         @Override
@@ -500,7 +545,9 @@ public sealed interface SpellEffectComponent permits
             if (!standardEnabled() || radius <= 0f || components.isEmpty()) return;
             AABB area = new AABB(ctx.position(), ctx.position()).inflate(radius);
             List<LivingEntity> targets = ctx.level().getEntitiesOfClass(LivingEntity.class, area,
-                    e -> e.isAlive() && e != ctx.caster());
+                    e -> e.isAlive()
+                            && (includeCaster || e != ctx.caster())
+                            && filter.matches(e));
             for (LivingEntity entity : targets) {
                 SpellEffectRunner.runComponents(components, ctx.forTarget(entity));
             }
@@ -544,6 +591,103 @@ public sealed interface SpellEffectComponent permits
             }
             data.setLoadoutSpell(data.getActiveSlot(), canonicalId);
             SpellDataSyncS2CPayload.syncToPlayer(ctx.caster());
+        }
+    }
+
+    /**
+     * Interrupts the impact target's spellcasting: cancels an in-progress wand beam channel (players
+     * only) and langlocks them for {@code lock_ticks} so they can't immediately re-cast. No-ops on the
+     * caster. The anti-caster payload for Stupefy / Finite Incantatem.
+     */
+    record InterruptCast(int lockTicks) implements SpellEffectComponent {
+        public static final MapCodec<InterruptCast> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+                Codec.INT.optionalFieldOf("lock_ticks", 30).forGetter(InterruptCast::lockTicks)
+        ).apply(inst, InterruptCast::new));
+
+        @Override
+        public Type type() {
+            return Type.INTERRUPT_CAST;
+        }
+
+        @Override
+        public void apply(SpellEffectContext ctx) {
+            if (!standardEnabled()) return;
+            LivingEntity subject = ctx.subject();
+            if (subject == ctx.caster()) return;
+            if (subject instanceof net.minecraft.server.level.ServerPlayer target) {
+                at.koopro.wizardsandbeasts.spell.beam.WandBeamChannelLogic.endChannel(target);
+            }
+            subject.addEffect(new MobEffectInstance(
+                    at.koopro.wizardsandbeasts.effect.ModEffects.LANGLOCK,
+                    Math.max(1, lockTicks), 0, false, true, true));
+        }
+    }
+
+    /**
+     * Emits a cosmetic tinted particle burst at the application position (self = caster's eye, impact =
+     * target/point). {@code family} picks the FX particle, {@code color} its ARGB tint; {@code count} and
+     * {@code spread} shape the puff. Purely visual — server-spawned so every nearby client sees it — this
+     * is the data-driven form of the legacy id-keyed cast bursts (e.g. Riddikulus).
+     */
+    record ParticleBurst(SpellFamily family, int color, int count, double spread)
+            implements SpellEffectComponent {
+        private static final Codec<SpellFamily> FAMILY_CODEC = StringRepresentable.fromValues(SpellFamily::values);
+        public static final MapCodec<ParticleBurst> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+                FAMILY_CODEC.optionalFieldOf("family", SpellFamily.ARCANE).forGetter(ParticleBurst::family),
+                Codec.INT.fieldOf("color").forGetter(ParticleBurst::color),
+                Codec.INT.optionalFieldOf("count", 12).forGetter(ParticleBurst::count),
+                Codec.DOUBLE.optionalFieldOf("spread", 0.2).forGetter(ParticleBurst::spread)
+        ).apply(inst, ParticleBurst::new));
+
+        @Override
+        public Type type() {
+            return Type.PARTICLE_BURST;
+        }
+
+        @Override
+        public void apply(SpellEffectContext ctx) {
+            if (!standardEnabled() || count <= 0) return;
+            SpellHelper.spawnBurst(ctx.level(), family, color, ctx.position(), count, spread);
+        }
+    }
+
+    /**
+     * The anti-Boggart charm. Scans {@code radius} around the application point for Boggart creatures
+     * ({@code wizards_and_beasts:boggart}) and banishes each with a burst of colour and a comic pop —
+     * the laughter that finishes a Boggart forced into a ridiculous shape. Reveals a hidden (Invisible)
+     * Boggart before defeating it. No-ops when no Boggart is near, so Riddikulus stays a harmless
+     * courage-steadying cast against ordinary fear. This is what makes Riddikulus the anti-Boggart
+     * charm rather than a generic buff — the Boggart is the only thing it targets.
+     */
+    record BoggartBanish(float radius) implements SpellEffectComponent {
+        private static final Identifier BOGGART_ID =
+                Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "boggart");
+
+        public static final MapCodec<BoggartBanish> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+                Codec.FLOAT.optionalFieldOf("radius", 8.0f).forGetter(BoggartBanish::radius)
+        ).apply(inst, BoggartBanish::new));
+
+        @Override
+        public Type type() {
+            return Type.BOGGART_BANISH;
+        }
+
+        @Override
+        public void apply(SpellEffectContext ctx) {
+            if (!standardEnabled() || radius <= 0f) return;
+            AABB area = new AABB(ctx.position(), ctx.position()).inflate(radius);
+            List<GenericBeastEntity> boggarts = ctx.level().getEntitiesOfClass(GenericBeastEntity.class, area,
+                    e -> e.isAlive() && BOGGART_ID.equals(e.creatureId()));
+            if (boggarts.isEmpty()) return;
+            DamageSource laughter = ctx.level().damageSources().magic();
+            for (GenericBeastEntity boggart : boggarts) {
+                boggart.removeEffect(MobEffects.INVISIBILITY);
+                SpellHelper.spawnBurst(ctx.level(), SpellFamily.ARCANE, 0xFFFFF0A0,
+                        boggart.getBoundingBox().getCenter(), 24, 0.45);
+                ctx.level().playSound(null, boggart.getX(), boggart.getY(), boggart.getZ(),
+                        SoundEvents.FIREWORK_ROCKET_BLAST, SoundSource.PLAYERS, 0.7f, 1.6f);
+                boggart.hurt(laughter, 1000.0f);
+            }
         }
     }
 }

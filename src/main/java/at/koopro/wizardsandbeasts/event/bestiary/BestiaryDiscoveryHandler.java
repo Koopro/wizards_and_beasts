@@ -7,6 +7,8 @@ import at.koopro.wizardsandbeasts.bestiary.*;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.skill.PlayerSkillBonusData;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -48,8 +50,10 @@ public final class BestiaryDiscoveryHandler {
         for (BestiaryEntry entry : BestiaryEntryRegistry.getAll()) {
             if (entry.encounterTrigger() != EncounterTrigger.KILL) continue;
             if (entry.entityType().isPresent() && entry.entityType().get().equals(killedType)) {
-                DiscoveryTier tier = BestiaryDataHelper.getTier(player, entry.id());
-                BestiaryDataHelper.setTier(player, entry.id(), tier == DiscoveryTier.SIGHTED ? DiscoveryTier.ENCOUNTERED : DiscoveryTier.SIGHTED);
+                DiscoveryTier oldTier = BestiaryDataHelper.getTier(player, entry.id());
+                DiscoveryTier newTier = oldTier == DiscoveryTier.SIGHTED ? DiscoveryTier.ENCOUNTERED : DiscoveryTier.SIGHTED;
+                BestiaryDataHelper.setTier(player, entry.id(), newTier);
+                announceDiscovery(player, entry, oldTier, newTier);
             }
         }
     }
@@ -87,9 +91,24 @@ public final class BestiaryDiscoveryHandler {
                 PROX_COOLDOWNS.put(cooldownKey, now);
                 if (BestiaryDataHelper.getTier(player, entry.id()) == DiscoveryTier.UNDISCOVERED) {
                     BestiaryDataHelper.setTier(player, entry.id(), DiscoveryTier.SIGHTED);
+                    announceDiscovery(player, entry, DiscoveryTier.UNDISCOVERED, DiscoveryTier.SIGHTED);
                 }
             }
         }
+    }
+
+    /**
+     * Action-bar notice when a creature's bestiary tier first rises, so discovery isn't silent — the
+     * player learns an entry was logged without opening the screen and diffing it. Fires only on a
+     * genuine increase, never on the re-kill downgrade path.
+     */
+    private static void announceDiscovery(Player player, BestiaryEntry entry,
+                                          DiscoveryTier oldTier, DiscoveryTier newTier) {
+        if (newTier.ordinal() <= oldTier.ordinal()) return;
+        player.displayClientMessage(
+                Component.translatable("bestiary.wizards_and_beasts.discovered", entry.displayName())
+                        .withStyle(ChatFormatting.GREEN),
+                true);
     }
 
     @SubscribeEvent
@@ -106,7 +125,9 @@ public final class BestiaryDiscoveryHandler {
         for (BestiaryEntry entry : BestiaryEntryRegistry.getAll()) {
             if (entry.encounterTrigger() != EncounterTrigger.LOOT) continue;
             if (entry.entityType().isPresent() && entry.entityType().get().equals(droppedType)) {
+                DiscoveryTier oldTier = BestiaryDataHelper.getTier(player, entry.id());
                 BestiaryDataHelper.setTier(player, entry.id(), DiscoveryTier.ENCOUNTERED);
+                announceDiscovery(player, entry, oldTier, DiscoveryTier.ENCOUNTERED);
             }
         }
     }

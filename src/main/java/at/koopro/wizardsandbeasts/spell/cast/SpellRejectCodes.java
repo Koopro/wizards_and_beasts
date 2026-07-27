@@ -2,7 +2,10 @@ package at.koopro.wizardsandbeasts.spell.cast;
 
 import at.koopro.wizardsandbeasts.spell.core.*;
 
+import java.util.Map;
 import java.util.Set;
+
+import org.jspecify.annotations.Nullable;
 
 public final class SpellRejectCodes {
     public static final String NOT_SERVER_LEVEL = "not_server_level";
@@ -67,7 +70,32 @@ public final class SpellRejectCodes {
             ABILITY_REQUIREMENTS_UNMET,
             ABILITY_EXECUTE_FAILED);
 
+    /**
+     * Player-facing action-bar message key for each reject code that a cast site does NOT already
+     * report with its own (richer) message. Codes with bespoke feedback — bond, requirements, the
+     * Obscurial rejects, Gamp — are deliberately absent so the central reject choke point never
+     * doubles their text. {@code cooldown_active} covers both the per-spell cooldown and the 5-tick
+     * global cooldown (its {@code :global_cooldown} detail collapses to the same "recharging" line).
+     */
+    private static final Map<String, String> CAST_REJECT_MESSAGE_KEYS = Map.of(
+            NOT_HOLDING_WAND, "wandcraft.cast.reject.no_wand",
+            LANGLOCKED, "wandcraft.cast.reject.langlocked",
+            NO_ACTIVE_SPELL, "wandcraft.cast.reject.no_active_spell",
+            UNKNOWN_SPELL, "wandcraft.cast.reject.unknown_spell",
+            SPELL_NOT_KNOWN, "wandcraft.cast.reject.not_known",
+            COOLDOWN_ACTIVE, "wandcraft.cast.reject.cooldown");
+
     private SpellRejectCodes() {}
+
+    /**
+     * Player-facing action-bar lang key for a stored reject key, or {@code null} when the reject site
+     * shows its own message (so the caller stays silent and avoids double-messaging). The {@code :detail}
+     * suffix is stripped via {@link #baseReason} before lookup.
+     */
+    @Nullable
+    public static String castRejectMessageKey(String storedKey) {
+        return CAST_REJECT_MESSAGE_KEYS.get(baseReason(storedKey));
+    }
 
     /**
      * Strip {@code :detail} suffix from keys produced by {@link #withDetail(String, String)}.

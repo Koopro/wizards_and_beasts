@@ -28,10 +28,20 @@ public final class ProtegoShieldHandler {
         player.addTag(PROTEGO_ACTIVE_TAG);
     }
 
+    /** Ends the incoming-damage ward early — called when the shield entity shatters before expiry. */
+    public static void deactivate(ServerPlayer player) {
+        PROTEGO_EXPIRY_TICKS.remove(player.getUUID());
+        player.removeTag(PROTEGO_ACTIVE_TAG);
+    }
+
     @SubscribeEvent
     public static void onIncomingDamage(LivingIncomingDamageEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        if (!player.getTags().contains(PROTEGO_ACTIVE_TAG)) return;
+        // Protected by your own ward, or sheltering inside an ally's dome.
+        boolean ownWard = player.getTags().contains(PROTEGO_ACTIVE_TAG);
+        if (!ownWard && !at.koopro.wizardsandbeasts.spell.protego.ProtegoWardManager.isInsideAllyDome(player)) {
+            return;
+        }
         if (SpellProtegoRules.bypassesProtego(event)) {
             return;
         }

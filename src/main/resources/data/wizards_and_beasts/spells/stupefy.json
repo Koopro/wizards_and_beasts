@@ -1,5 +1,6 @@
 {
   "displayName": "Stupefy",
+  "canonTier": "books",
   "category": "combat",
   "cooldownTicks": 40,
   "baseDamage": 4.0,
@@ -8,8 +9,9 @@
   "projectileSpeed": 1.8,
   "projectileSpread": 0.04,
   "castType": "projectile",
-  "requirement": { "type": "knows", "prerequisiteId": "flipendo" },
+  "requirement": { "type": "none" },
   "effects": [
-    { "type": "apply_effect", "effect": "wizards_and_beasts:stupefy", "duration": 100, "amplifier": 0, "target": true }
+    { "type": "apply_effect", "effect": "wizards_and_beasts:stupefy", "duration": 100, "amplifier": 0, "target": true },
+    { "type": "interrupt_cast", "lock_ticks": 30 }
   ]
 }

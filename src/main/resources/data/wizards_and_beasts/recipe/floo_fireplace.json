@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "BBB",
+    "B B",
+    "BNB"
+  ],
+  "key": {
+    "B": "minecraft:bricks",
+    "N": "minecraft:netherrack"
+  },
+  "result": {
+    "id": "wizards_and_beasts:floo_fireplace",
+    "count": 1
+  }
+}

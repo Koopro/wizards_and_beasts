@@ -43,7 +43,10 @@ public class ModEntityLootTableProvider extends EntityLootSubProvider {
             addCovered(entry.getValue().get(), tableFor(entry.getKey()));
         }
         addCovered(ModEntities.MOONCALF.get(), simple(modItem("mooncalf_dung"), 0, 2));
-        addCovered(ModEntities.THESTRAL.get(), simple(Items.LEATHER, 0, 2));
+        addCovered(ModEntities.THESTRAL.get(),
+                withRare(Items.LEATHER, 0, 2, modItem("thestral_tail_hair"), 0.35f));
+        addCovered(ModEntities.PHOENIX.get(),
+                withRare(Items.FEATHER, 1, 2, modItem("phoenix_feather"), 0.50f));
         addCovered(ModEntities.AUGUREY.get(), simple(Items.FEATHER, 1, 2));
         addCovered(ModEntities.BOWTRUCKLE.get(), simple(Items.STICK, 0, 2));
         addCovered(ModEntities.RUNESPOOR.get(), simple(Items.SPIDER_EYE, 0, 2));
@@ -77,12 +80,18 @@ public class ModEntityLootTableProvider extends EntityLootSubProvider {
             case "pukwudgie" -> two(Items.ARROW, 0, 2, modItem("pukwudgie_venom_sac"), 0, 1);
             case "yeti" -> two(modItem("yeti_fur"), 0, 2, Items.BONE, 0, 1);
             case "rougarou" -> two(modItem("rougarou_hair"), 0, 1, Items.LEATHER, 0, 2);
+            // Wand-core bearers: these cores had no survival source, leaving the wandmaker's bench
+            // usable only with unicorn hair.
+            case "thunderbird" -> withRare(Items.FEATHER, 1, 2, modItem("thunderbird_tail_feather"), 0.35f);
+            case "wampus_cat" -> withRare(Items.LEATHER, 0, 2, modItem("wampus_cat_hair"), 0.40f);
+            case "troll" -> withRare(Items.BONE, 1, 2, modItem("troll_whisker"), 0.40f);
             case "matagot" -> two(modItem("matagot_essence"), 0, 1, Items.PHANTOM_MEMBRANE, 0, 1);
             case "bundimun" -> simple(Items.SLIME_BALL, 0, 2);
-            case "lobalug" -> simple(Items.INK_SAC, 0, 2);
-            // aquatic
-            case "kelpie", "kappa" -> simple(Items.KELP, 1, 3);
-            case "grindylow" -> two(Items.KELP, 0, 2, Items.STRING, 0, 1);
+            case "lobalug" -> withRare(Items.INK_SAC, 0, 2, modItem("gillyweed"), 0.35f);
+            // aquatic. Gillyweed is a water plant with no world feature behind it, so the merfolk-water
+            // beasts carry it — without a source the item was creative-only.
+            case "kelpie", "kappa" -> withRare(Items.KELP, 1, 3, modItem("gillyweed"), 0.25f);
+            case "grindylow" -> two(Items.KELP, 0, 2, modItem("gillyweed"), 0, 1);
             case "plimpy", "ramora" -> simple(Items.COD, 1, 1);
             case "shrake" -> simple(Items.PRISMARINE_SHARD, 0, 1);
             case "sea_serpent" -> simple(Items.PRISMARINE_SHARD, 1, 3);
@@ -91,14 +100,14 @@ public class ModEntityLootTableProvider extends EntityLootSubProvider {
             case "fwooper", "jobberknoll", "diricawl" -> simple(Items.FEATHER, 1, 2);
             // winged mounts and raptors
             case "abraxan", "aethonan" -> two(Items.LEATHER, 1, 2, Items.FEATHER, 0, 2);
-            case "hippogriff", "griffin", "thunderbird", "snallygaster" ->
+            case "hippogriff", "griffin", "snallygaster" ->
                     two(Items.FEATHER, 1, 2, Items.LEATHER, 0, 2);
             // shadow-stuff
             case "lethifold" -> simple(Items.PHANTOM_MEMBRANE, 0, 2);
             case "swooping_evil" -> simple(Items.PHANTOM_MEMBRANE, 0, 1);
             // big hides
             case "graphorn", "nundu", "tebo", "reem", "zouwu", "hodag", "quintaped",
-                 "manticore", "chimaera", "wampus_cat", "sphinx" -> simple(Items.LEATHER, 1, 3);
+                 "manticore", "chimaera", "sphinx" -> simple(Items.LEATHER, 1, 3);
             case "qilin" -> simple(Items.GOLD_NUGGET, 0, 1);
             // small critters
             case "kneazle", "crup", "jarvey", "knarl", "moke", "nogtail", "clabbert",

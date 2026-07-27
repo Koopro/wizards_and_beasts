@@ -15,6 +15,8 @@ final class WandBeamSession {
     int beamTicks;
     boolean avadaConsumed;
     @Nullable UUID lastCrucioTarget;
+    /** Ticks the current Crucio beam has held its present victim; resets when the target changes. */
+    int crucioHoldTicks;
     @Nullable UUID lastLeviosaTarget;
     @Nullable Boolean lastLeviosaHadNoGravity;
     int leviosaMissTicks;
@@ -32,6 +34,7 @@ final class WandBeamSession {
             beamTicks = 0;
             avadaConsumed = false;
             lastCrucioTarget = null;
+            crucioHoldTicks = 0;
             lastLeviosaTarget = null;
             lastLeviosaHadNoGravity = null;
             leviosaMissTicks = 0;

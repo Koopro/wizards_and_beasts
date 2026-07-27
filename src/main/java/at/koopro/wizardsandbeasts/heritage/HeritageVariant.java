@@ -40,9 +40,9 @@ public enum HeritageVariant {
                     + "Remus Lupin's dignity in the face of stigma remains the measure of how such a life can still be lived with honour.",
             0, 0, 0, 0xFF7B3C1F,
             Set.of("moon_sensitive", "transformation")),
-    WEREWOLF_BORN("born", Heritage.WEREWOLF, "Born",
-            "Carried lycanthropy from the womb when a werewolf parent passed the condition on — rarer, stranger, and sometimes more acclimated to the wolf within. "
-                    + "They still hear the moon, yet legends hint their transformations may answer to a different rhythm than a bitten victim's.",
+    WEREWOLF_BORN("born", Heritage.WEREWOLF, "Cradle-Bitten",
+            "Bitten so young that the wolf is the oldest thing they remember — Remus Lupin was only four when Fenrir Greyback marked him. "
+                    + "Lycanthropy is never inherited, but a child who has never known a life before the moon grows stranger and more acclimated to the wolf than a victim taken as an adult ever will.",
             2, 0.005, 0, 0xFF9C5A36,
             Set.of("moon_sensitive", "transformation", "dark_resistance")),
     WEREWOLF_SAVAGE("savage_bite", Heritage.WEREWOLF, "Savage-Bitten",
@@ -216,7 +216,16 @@ public enum HeritageVariant {
     public String getId() { return id; }
     public Heritage getParentHeritage() { return parentHeritage; }
     public String getDisplayName() { return displayName; }
+
+    /**
+     * Authoring-time English prose. This is the source {@link
+     * at.koopro.wizardsandbeasts.datagen.ModLanguageProvider} emits as the value of
+     * {@link #getDescriptionTranslationKey()}; runtime consumers must resolve the key instead so
+     * the text stays translatable. Mirrors
+     * {@link at.koopro.wizardsandbeasts.heritage.profession.ProfessionNode#getDescription()}.
+     */
     public String getDescription() { return description; }
+
     public double getHealthMod() { return healthMod; }
     public double getSpeedMod() { return speedMod; }
     public double getArmorMod() { return armorMod; }
@@ -229,6 +238,11 @@ public enum HeritageVariant {
 
     public String getTranslationKey() {
         return "subtype.WizardsAndBeastsMod." + parentHeritage.getId() + "." + id;
+    }
+
+    /** Lang key holding {@link #getDescription()}; same {@code .desc} shape as {@code ProfessionNode}. */
+    public String getDescriptionTranslationKey() {
+        return getTranslationKey() + ".desc";
     }
 
     public double getTotalHealth() {

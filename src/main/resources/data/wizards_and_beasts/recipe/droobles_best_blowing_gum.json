@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "food",
+  "ingredients": [
+    "minecraft:sugar",
+    "minecraft:slime_ball",
+    "wizards_and_beasts:mallowsweet"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:droobles_best_blowing_gum",
+    "count": 2
+  }
+}

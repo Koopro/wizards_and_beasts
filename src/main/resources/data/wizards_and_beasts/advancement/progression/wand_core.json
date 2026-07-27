@@ -1,0 +1,39 @@
+{
+  "parent": "wizards_and_beasts:progression/wand",
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "wizards_and_beasts:phoenix_feather"
+    },
+    "title": {
+      "translate": "advancements.wizards_and_beasts.progression.wand_core.title"
+    },
+    "description": {
+      "translate": "advancements.wizards_and_beasts.progression.wand_core.description"
+    },
+    "show_toast": true,
+    "announce_to_chat": false,
+    "frame": "goal"
+  },
+  "criteria": {
+    "core": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "wizards_and_beasts:phoenix_feather",
+              "wizards_and_beasts:unicorn_hair",
+              "wizards_and_beasts:dragon_heartstring"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "core"
+    ]
+  ]
+}

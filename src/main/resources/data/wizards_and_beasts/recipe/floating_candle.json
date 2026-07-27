@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "G",
+    "C",
+    "F"
+  ],
+  "key": {
+    "G": "minecraft:glowstone_dust",
+    "C": "minecraft:candle",
+    "F": "minecraft:feather"
+  },
+  "result": {
+    "id": "wizards_and_beasts:floating_candle",
+    "count": 1
+  }
+}

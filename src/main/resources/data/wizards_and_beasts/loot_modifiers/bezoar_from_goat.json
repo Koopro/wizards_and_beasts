@@ -1,0 +1,13 @@
+{
+  "type": "wizards_and_beasts:add_item",
+  "conditions": [
+    {
+      "condition": "neoforge:loot_table_id",
+      "loot_table_id": "minecraft:entities/goat"
+    }
+  ],
+  "item": "wizards_and_beasts:bezoar",
+  "min_count": 1,
+  "max_count": 1,
+  "chance": 0.25
+}

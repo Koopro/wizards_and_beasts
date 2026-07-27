@@ -12,7 +12,14 @@ public record BestiaryEntry(
         Identifier id,
         String displayNameKey,
         BestiaryCategory category,
-        int mmRating,
+        /**
+         * Ministry of Magic classification, 1–5 (X…XXXXX). Absent means <em>unclassified</em>:
+         * Scamander's A–Z lists only creatures that exist exclusively in the magical world, so an
+         * ordinary animal with magical uses — a toad, an owl, a cat — holds no grade at all rather
+         * than a low one. {@code X} is a real grade held by real magical beasts (Flobberworm,
+         * Horklump); asserting it for a toad would invent a classification canon does not make.
+         */
+        Optional<Integer> mmRating,
         String habitatKey,
         BestiarySize size,
         String shortLoreKey,
@@ -30,7 +37,7 @@ public record BestiaryEntry(
             Identifier.CODEC.fieldOf("id").forGetter(BestiaryEntry::id),
             Codec.STRING.fieldOf("displayName").forGetter(BestiaryEntry::displayNameKey),
             BestiaryCategory.CODEC.fieldOf("category").forGetter(BestiaryEntry::category),
-            Codec.INT.fieldOf("mmRating").forGetter(BestiaryEntry::mmRating),
+            Codec.intRange(1, 5).optionalFieldOf("mmRating").forGetter(BestiaryEntry::mmRating),
             Codec.STRING.fieldOf("habitat").forGetter(BestiaryEntry::habitatKey),
             BestiarySize.CODEC.fieldOf("size").forGetter(BestiaryEntry::size),
             Codec.STRING.fieldOf("shortLore").forGetter(BestiaryEntry::shortLoreKey),

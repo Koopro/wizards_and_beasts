@@ -38,7 +38,7 @@
               "function": "minecraft:set_count"
             }
           ],
-          "name": "minecraft:string"
+          "name": "wizards_and_beasts:gillyweed"
         }
       ],
       "rolls": 1.0

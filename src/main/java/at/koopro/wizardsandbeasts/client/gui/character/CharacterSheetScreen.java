@@ -119,8 +119,8 @@ public final class CharacterSheetScreen extends Screen {
 
     @Override
     public void render(@NonNull GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        // Dim background
-        renderBackground(g, mouseX, mouseY, partialTick);
+        // Dim background is drawn by the framework's own renderBackground() call (overridden
+        // below); calling it again here would draw twice.
 
         // All panel drawing anchors at (bgX, bgY), so a transform that keeps that
         // point fixed while scaling lets the existing design-space code run unchanged.
@@ -342,7 +342,8 @@ public final class CharacterSheetScreen extends Screen {
 
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        // Skip processBlurEffect — limited to once per frame. Draw only the dim overlay.
+        // Deliberately no blur pass: the parchment sheet reads better over a crisp world.
+        // Dim overlay only.
         renderMenuBackground(g);
     }
 

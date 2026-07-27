@@ -1,0 +1,35 @@
+{
+  "parent": "wizards_and_beasts:progression/wandmakers_bench",
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "wizards_and_beasts:wand"
+    },
+    "title": {
+      "translate": "advancements.wizards_and_beasts.progression.wand.title"
+    },
+    "description": {
+      "translate": "advancements.wizards_and_beasts.progression.wand.description"
+    },
+    "show_toast": true,
+    "announce_to_chat": true,
+    "frame": "goal"
+  },
+  "criteria": {
+    "wand": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "#wizards_and_beasts:wands"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "wand"
+    ]
+  ]
+}

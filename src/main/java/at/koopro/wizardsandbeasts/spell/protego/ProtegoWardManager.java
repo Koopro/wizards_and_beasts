@@ -34,6 +34,24 @@ public final class ProtegoWardManager {
         CASTER_TO_ENTITY.remove(casterUUID);
     }
 
+    /**
+     * True if {@code victim} stands inside an active dome shield (tier 2/3) cast by anyone — so the
+     * dome's damage ward covers allies sheltering under it, not just its caster.
+     */
+    public static boolean isInsideAllyDome(@NonNull ServerPlayer victim) {
+        for (Integer entityId : CASTER_TO_ENTITY.values()) {
+            Entity entity = victim.level().getEntity(entityId);
+            if (entity instanceof ProtegoShieldEntity shield
+                    && shield.getTier() >= 2 && !shield.isShattering()) {
+                double r = shield.coverRadius();
+                if (shield.position().distanceToSqr(victim.position()) <= r * r) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public static void shatterExistingIfPresent(@NonNull ServerPlayer caster) {
         int existingId = getEntityId(caster.getUUID());
         if (existingId < 0) {

@@ -87,21 +87,22 @@ public class PatronusEntity extends Mob {
             return;
         }
 
-        LivingEntity dementor = findNearestDementor(sl, owner, 20.0);
-        if (dementor != null) {
-            Vec3 to = dementor.getEyePosition().subtract(getEyePosition());
+        LivingEntity darkMob = findNearestDarkMob(sl, owner, 20.0);
+        if (darkMob != null) {
+            Vec3 to = darkMob.getEyePosition().subtract(getEyePosition());
             double dist = to.length();
             if (dist > 1e-4) {
                 Vec3 dir = to.scale(1.0 / dist);
                 setDeltaMovement(dir.scale(Math.min(2.2, 0.35 + patronusPower * 0.012)));
                 move(net.minecraft.world.entity.MoverType.SELF, getDeltaMovement());
             }
-            if (distanceToSqr(dementor) < 2.25) {
-                dementor.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 200, 1, false, true, true));
-                dementor.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 200, 2, false, true, true));
-                Vec3 kb = dementor.position().subtract(owner.position()).normalize().scale(8.0);
-                dementor.setDeltaMovement(dementor.getDeltaMovement().add(kb.x, 0.45, kb.z));
-                dementor.hurtMarked = true;
+            if (distanceToSqr(darkMob) < 2.25) {
+                darkMob.hurt(sl.damageSources().magic(), 2.0f + patronusPower * 0.03f);
+                darkMob.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 200, 1, false, true, true));
+                darkMob.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 200, 2, false, true, true));
+                Vec3 kb = darkMob.position().subtract(owner.position()).normalize().scale(8.0);
+                darkMob.setDeltaMovement(darkMob.getDeltaMovement().add(kb.x, 0.45, kb.z));
+                darkMob.hurtMarked = true;
             }
         } else {
             orbitAngle += 0.8 + proficiencyScalar * 0.4;
@@ -130,12 +131,13 @@ public class PatronusEntity extends Mob {
         return e instanceof LivingEntity ? (LivingEntity) e : null;
     }
 
-    private static @Nullable LivingEntity findNearestDementor(ServerLevel sl, LivingEntity owner, double range) {
+    private static @Nullable LivingEntity findNearestDarkMob(ServerLevel sl, LivingEntity owner, double range) {
         LivingEntity best = null;
         double bestD = range * range;
         for (LivingEntity le : sl.getEntitiesOfClass(LivingEntity.class,
                 owner.getBoundingBox().inflate(range), LivingEntity::isAlive)) {
-            if (!le.getType().is(DEMENTORS_TAG)) {
+            // Dementors and any dark-aligned/undead creature (takes harm from healing) are fair game.
+            if (le == owner || !(le.getType().is(DEMENTORS_TAG) || le.isInvertedHealAndHarm())) {
                 continue;
             }
             double d = owner.distanceToSqr(le);

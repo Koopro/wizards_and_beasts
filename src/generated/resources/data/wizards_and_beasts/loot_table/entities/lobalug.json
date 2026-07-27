@@ -21,6 +21,22 @@
         }
       ],
       "rolls": 1.0
+    },
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "chance": 0.35,
+          "condition": "minecraft:random_chance"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "wizards_and_beasts:gillyweed"
+        }
+      ],
+      "rolls": 1.0
     }
   ],
   "random_sequence": "wizards_and_beasts:entities/lobalug"

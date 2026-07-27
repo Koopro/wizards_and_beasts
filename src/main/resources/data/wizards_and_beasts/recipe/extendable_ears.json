@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "tools",
+  "pattern": [
+    "S S",
+    "SFS",
+    " W "
+  ],
+  "key": {
+    "S": "minecraft:string",
+    "F": "wizards_and_beasts:demiguise_hair",
+    "W": "#minecraft:wool"
+  },
+  "result": {
+    "id": "wizards_and_beasts:extendable_ears",
+    "count": 1
+  }
+}

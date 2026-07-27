@@ -1,11 +1,15 @@
 {
   "displayName": "Depulso",
+  "canonTier": "expanded",
   "category": "combat",
   "cooldownTicks": 40,
   "baseDamage": 1.0,
   "color": -16742145,
-  "castType": "projectile",
-  "knockback": 5.0,
+  "castType": "cone",
+  "range": 6.0,
+  "effects": [
+    { "type": "impulse", "strength": 3.0, "direction": "push" }
+  ],
   "sound": { "id": "minecraft:entity.blaze.shoot", "volume": 0.8, "pitch": 0.9 },
-  "requirement": { "type": "proficiency", "prerequisiteId": "flipendo", "minProficiency": "proficient" }
+  "requirement": { "type": "proficiency", "prerequisiteId": "accio", "minProficiency": "proficient" }
 }

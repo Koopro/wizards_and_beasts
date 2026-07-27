@@ -46,6 +46,11 @@ public final class BeastSpawnHandler {
         nightSpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("rougarou"));
         nightSpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("matagot"));
         nightSpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("bundimun"));
+
+        // Wand-core sources. Two of the three cores had no wild source at all, which left the
+        // Wandmaker's Bench unusable even once it became craftable: only phoenix feathers dropped.
+        daySpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("unicorn"));
+        daySpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("common_welsh_green"));
     }
 
     private static void daySpawn(RegisterSpawnPlacementsEvent event,

@@ -363,6 +363,12 @@ public final class ClientPayloadHandlers {
         ctx.enqueueWork(() -> ClientVocationCache.applySync(pkt.syncVersion(), pkt.primary()));
     }
 
+    public static void handleSyncVocationDefinitions(
+            at.koopro.wizardsandbeasts.network.skill.SyncVocationDefinitionsPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> at.koopro.wizardsandbeasts.skill.vocation.VocationRegistry
+                .setClientDefinitions(payload.vocations()));
+    }
+
     // --- stats ---
 
     public static void handlePlayerStatsSync(PlayerStatsSyncPayload pkt, IPayloadContext ctx) {

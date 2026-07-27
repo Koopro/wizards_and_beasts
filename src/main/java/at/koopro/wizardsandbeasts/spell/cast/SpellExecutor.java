@@ -120,7 +120,22 @@ public final class SpellExecutor {
         spell.applySelfEffects(caster, scalingProfile.durationMult());
 
         switch (castType) {
-            case PROJECTILE -> spell.spawnProjectile(level, caster, scalingProfile);
+            case PROJECTILE -> {
+                SpellScalingProfile projectileProfile = scalingProfile;
+                if (SpellCastSupport.isFlipendo(spell)) {
+                    // Flipendo charges: a longer wand-hold grows the shove (control) and adds a little
+                    // damage, up to ~2x at full charge.
+                    int held = WandCastTiming.consumeLastHoldTicks(caster);
+                    float chargeMult = 1.0f + Math.min(1.0f, held / 20.0f);
+                    projectileProfile = new SpellScalingProfile(
+                            scalingProfile.damageMult() * chargeMult,
+                            scalingProfile.cooldownMult(),
+                            scalingProfile.durationMult(),
+                            scalingProfile.controlMult() * chargeMult,
+                            scalingProfile.accuracyMult());
+                }
+                spell.spawnProjectile(level, caster, projectileProfile);
+            }
             case SELF -> {
                 boolean successful = false;
                 if (props.repairsItem()) {
@@ -199,11 +214,7 @@ public final class SpellExecutor {
             new SelfUtilityRule("episkey", (level, caster, spell) -> SpellCastHandlers.handleEpiskeySelf(caster, spell)),
             new SelfUtilityRule("frigora", (level, caster, spell) -> SpellCastHandlers.handleFrigoraSelf(level, caster, spell)),
             new SelfUtilityRule("capacious_extremis", (level, caster, spell) -> SpellCastHandlers.handlePocketIngress(caster)),
-            new SelfUtilityRule("claustra_reverto", (level, caster, spell) -> SpellCastHandlers.handlePocketEgress(caster)),
-            new SelfUtilityRule("riddikulus", (level, caster, spell) -> {
-                SpellHelper.spawnBurst(level, spell, caster.getEyePosition(), 18, 0.32);
-                return true;
-            })
+            new SelfUtilityRule("claustra_reverto", (level, caster, spell) -> SpellCastHandlers.handlePocketEgress(caster))
     };
 
     private static boolean handleSelfUtilitySpell(ServerLevel level, ServerPlayer caster, Spell spell) {

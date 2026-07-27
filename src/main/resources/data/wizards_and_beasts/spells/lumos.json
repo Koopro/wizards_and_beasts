@@ -1,5 +1,6 @@
 {
   "displayName": "Lumos",
+  "canonTier": "books",
   "category": "utility",
   "cooldownTicks": 200,
   "color": -120,
@@ -9,6 +10,13 @@
   "requirement": { "type": "none" },
   "effects": [
     { "type": "apply_effect", "effect": "wizards_and_beasts:lumos_field", "duration": -1, "amplifier": 0 },
-    { "type": "swap_active_spell", "spell": "nox", "learn": true }
+    { "type": "swap_active_spell", "spell": "nox", "learn": true },
+    { "type": "aoe_apply", "radius": 5.0, "filter": "monsters",
+      "effects": [
+        { "type": "apply_effect", "effect": "minecraft:blindness", "duration": 80, "amplifier": 0, "target": true },
+        { "type": "apply_effect", "effect": "minecraft:glowing", "duration": 120, "amplifier": 0, "target": true },
+        { "type": "damage", "amount": 2.5 }
+      ]
+    }
   ]
 }

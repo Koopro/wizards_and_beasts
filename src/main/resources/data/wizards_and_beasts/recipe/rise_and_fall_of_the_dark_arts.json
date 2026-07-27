@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PPP",
+    "IBI",
+    "OOO"
+  ],
+  "key": {
+    "P": "wizards_and_beasts:parchment",
+    "I": "wizards_and_beasts:ink_bottle",
+    "B": "minecraft:book",
+    "O": "minecraft:obsidian"
+  },
+  "result": {
+    "id": "wizards_and_beasts:rise_and_fall_of_the_dark_arts",
+    "count": 1
+  }
+}

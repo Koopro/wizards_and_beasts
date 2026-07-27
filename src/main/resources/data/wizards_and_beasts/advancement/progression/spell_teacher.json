@@ -1,0 +1,34 @@
+{
+  "parent": "wizards_and_beasts:progression/wand",
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "wizards_and_beasts:spell_teacher"
+    },
+    "title": {
+      "translate": "advancements.wizards_and_beasts.progression.spell_teacher.title"
+    },
+    "description": {
+      "translate": "advancements.wizards_and_beasts.progression.spell_teacher.description"
+    },
+    "show_toast": true,
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "teacher": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "wizards_and_beasts:spell_teacher"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "teacher"
+    ]
+  ]
+}

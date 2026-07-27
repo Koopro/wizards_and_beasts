@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "food",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "minecraft:pumpkin",
+    "minecraft:sugar"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:pumpkin_juice",
+    "count": 2
+  }
+}

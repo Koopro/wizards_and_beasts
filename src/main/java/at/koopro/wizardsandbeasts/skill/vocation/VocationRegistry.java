@@ -33,6 +33,20 @@ public final class VocationRegistry {
         }
     }
 
+    /**
+     * Client-side ingest of the catalogue synced by {@code SyncVocationDefinitionsPayload}. A dedicated
+     * server's client never runs {@link VocationLoader}, so without this the selection screen has nothing
+     * to list. In single-player both sides share this map and the synced content is identical, which makes
+     * the write a no-op in practice.
+     */
+    public static void setClientDefinitions(java.util.List<VocationDefinition> definitions) {
+        Map<Identifier, VocationDefinition> byId = new LinkedHashMap<>();
+        for (VocationDefinition def : definitions) {
+            byId.put(def.id(), def);
+        }
+        replaceAll(byId);
+    }
+
     public static @Nullable VocationDefinition get(Identifier id) {
         return BY_ID.get(id);
     }

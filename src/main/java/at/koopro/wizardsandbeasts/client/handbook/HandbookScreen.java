@@ -157,23 +157,30 @@ public final class HandbookScreen extends Screen {
 
         // Ministry "M" emblem crest, centred above the title.
         int em = 26;
-        gg.blit(RenderPipelines.GUI_TEXTURED, TEX_EMBLEM, lcx - em / 2, ly, 0.0F, 0.0F, em, em, 72, 72);
+        // Scale the whole 72×72 crest down into em×em (12-arg blit). The 10-arg overload would sample
+        // only a 26×26 corner of the source, cropping the emblem to its top-left quarter.
+        gg.blit(RenderPipelines.GUI_TEXTURED, TEX_EMBLEM, lcx - em / 2, ly, 0.0F, 0.0F, em, em, 72, 72, 72, 72);
         ly += em + 4;
 
-        titleBox(gg, lcx, lx0, lx1, ly, Component.translatable("gui.wizards_and_beasts.handbook.title"));
-        ly += 30;
+        ly += titleBox(gg, lcx, lx0, lx1, ly, Component.translatable("gui.wizards_and_beasts.handbook.title")) + 12;
         ly = body(gg, Component.translatable("gui.wizards_and_beasts.handbook.landing.body"), lx0, ly, lx1 - lx0);
         ly += 6;
         body(gg, Component.literal("§o").append(Component.translatable("gui.wizards_and_beasts.handbook.landing.flavor")),
                 lx0, ly, lx1 - lx0, INK_GREY);
 
-        // progress bar pinned to the bottom of the left page
+        // progress bar pinned to the bottom of the left page; the caption wraps upwards so a long
+        // translation grows into the page instead of bleeding over the spine.
         int total = chapters().size();
-        int barY = y + H - FRAME - 24;
+        Component unlocked = Component.translatable("gui.wizards_and_beasts.handbook.unlocked", total, total);
+        List<FormattedCharSequence> unlockedLines = font.split(unlocked, lx1 - lx0);
+        int barY = y + H - FRAME - 24 - (unlockedLines.size() - 1) * LINE_H;
         divider(gg, lx0, lx1, barY - 6);
-        gg.drawString(font, Component.translatable("gui.wizards_and_beasts.handbook.unlocked", total, total),
-                lx0, barY, INK);
-        progressBar(gg, lx0, barY + 11, lx1 - lx0, total == 0 ? 0f : 1f);
+        int cy = barY;
+        for (FormattedCharSequence line : unlockedLines) {
+            ink(gg, line, lx0, cy, INK);
+            cy += LINE_H;
+        }
+        progressBar(gg, lx0, y + H - FRAME - 13, lx1 - lx0, total == 0 ? 0f : 1f);
 
         // ── Right page: category icon grid ──
         int rx0 = centerX + GUTTER + PAD;
@@ -222,16 +229,14 @@ public final class HandbookScreen extends Screen {
         int lcx = (lx0 + lx1) / 2;
         int ly = y + FRAME + 14;
 
-        titleBox(gg, lcx, lx0, lx1, ly, Component.literal(chapter.title()));
-        ly += 30;
+        ly += titleBox(gg, lcx, lx0, lx1, ly, Component.literal(chapter.title())) + 12;
 
         // ── Left page body (confined to the parchment, scrolls on overflow) ──
         int contentBottom = y + H - FRAME - 22;
         int sbX = lx1 + 4;
         if (page instanceof HandbookPage.Text text) {
             if (text.heading().isPresent()) {
-                gg.drawString(font, Component.literal(text.heading().get()), lx0, ly, INK_TITLE);
-                ly += 13;
+                ly += heading(gg, Component.literal(text.heading().get()), lx0, ly, lx1 - lx0);
             }
             scrollableBody(gg, Component.literal(text.body()), lx0, ly, lx1 - lx0, contentBottom, sbX, INK);
         } else if (page instanceof HandbookPage.CrossRef ref) {
@@ -245,7 +250,7 @@ public final class HandbookScreen extends Screen {
         int rx1 = x + W - FRAME - PAD;
         int ry = y + FRAME + 14;
         if (page instanceof HandbookPage.Recipe recipe) {
-            renderRecipe(gg, recipe, rx0, ry);
+            renderRecipe(gg, recipe, rx0, ry, rx1 - rx0);
         } else if (page instanceof HandbookPage.Image image) {
             renderImage(gg, image, rx0, ry, rx1 - rx0);
         } else if (page instanceof HandbookPage.CrossRef ref && "bestiary".equals(ref.targetType())) {
@@ -269,7 +274,39 @@ public final class HandbookScreen extends Screen {
         if (!hasNext) nextRect = null;
 
         Component indicator = Component.translatable("gui.wizards_and_beasts.handbook.page_indicator", pageIndex + 1, total);
-        gg.drawString(font, indicator, (rx0 + rx1) / 2 - font.width(indicator) / 2, navY, INK_GREY);
+        ink(gg, indicator, (rx0 + rx1) / 2 - font.width(indicator) / 2, navY, INK_GREY);
+    }
+
+    // ── Text drawing ─────────────────────────────────────────────────────────
+    // Every glyph in the book sits on parchment. Vanilla's drop shadow is drawn one design pixel
+    // down-right of the glyph, which at GUI scale 3–4 reads as a second, offset copy of the text
+    // ("double render") rather than as depth, so all page text is drawn flat.
+
+    private void ink(GuiGraphics gg, Component text, int x0, int yy, int color) {
+        gg.drawString(font, text, x0, yy, color, false);
+    }
+
+    private void ink(GuiGraphics gg, FormattedCharSequence line, int x0, int yy, int color) {
+        gg.drawString(font, line, x0, yy, color, false);
+    }
+
+    private void ink(GuiGraphics gg, String text, int x0, int yy, int color) {
+        gg.drawString(font, text, x0, yy, color, false);
+    }
+
+    /**
+     * A page sub-heading. Wraps to the parchment column: headings are free-form datapack strings
+     * ("This Document Is Ministry Property" is wider than the half-page column), and drawn unwrapped
+     * they ran straight over the spine onto the facing page. Returns the height consumed.
+     */
+    private int heading(GuiGraphics gg, Component text, int x0, int yy, int wrap) {
+        List<FormattedCharSequence> lines = font.split(text, wrap);
+        int drawn = yy;
+        for (FormattedCharSequence line : lines) {
+            ink(gg, line, x0, drawn, INK_TITLE);
+            drawn += LINE_H;
+        }
+        return lines.size() * LINE_H + 3;
     }
 
     // ── Page-element helpers ──────────────────────────────────────────────────
@@ -279,20 +316,31 @@ public final class HandbookScreen extends Screen {
         return new ItemStack(icon == Items.AIR ? Items.BOOK : icon);
     }
 
-    private void titleBox(GuiGraphics gg, int cx, int x0, int x1, int yy, Component text) {
-        int h = 18;
+    /**
+     * The plate at the head of a page. Titles wrap rather than being cut: every chapter is named
+     * "Part N — Something Or Other", which is far wider than the half-page plate, and the old
+     * single-line clip chopped them mid-word with nothing to show that it had ({@code plainSubstrByWidth}
+     * adds no ellipsis). Returns the plate height so callers can place what follows.
+     */
+    private int titleBox(GuiGraphics gg, int cx, int x0, int x1, int yy, Component text) {
+        List<FormattedCharSequence> lines = font.split(text, x1 - x0 - 22);
+        int h = Math.max(18, 8 + lines.size() * LINE_H);
         gg.fill(x0 + 6, yy, x1 - 6, yy + h, PAGE_SHADE);
         gg.fill(x0 + 6, yy, x1 - 6, yy + 1, DIVIDER);
         gg.fill(x0 + 6, yy + h - 1, x1 - 6, yy + h, DIVIDER);
         // bracket caps
         gg.fill(x0 + 6, yy - 1, x0 + 8, yy + h + 1, DIVIDER_SH);
         gg.fill(x1 - 8, yy - 1, x1 - 6, yy + h + 1, DIVIDER_SH);
-        String clipped = font.plainSubstrByWidth(text.getString(), x1 - x0 - 22);
-        gg.drawString(font, clipped, cx - font.width(clipped) / 2, yy + 5, INK_TITLE);
+        int ty = yy + (h - lines.size() * LINE_H) / 2 + 1;
+        for (FormattedCharSequence line : lines) {
+            ink(gg, line, cx - font.width(line) / 2, ty, INK_TITLE);
+            ty += LINE_H;
+        }
+        return h;
     }
 
     private void header(GuiGraphics gg, int cx, int x0, int x1, int yy, Component text) {
-        gg.drawString(font, text, cx - font.width(text) / 2, yy, INK_TITLE);
+        ink(gg, text, cx - font.width(text) / 2, yy, INK_TITLE);
         int lineY = yy + 12;
         int half = font.width(text) / 2;
         divider(gg, x0, cx - half - 6, lineY);
@@ -328,8 +376,8 @@ public final class HandbookScreen extends Screen {
             if (yy > y + H - FRAME - 30) {
                 break;
             }
-            gg.drawString(font, line, x0, yy, color);
-            yy += 10;
+            ink(gg, line, x0, yy, color);
+            yy += LINE_H;
         }
         return yy;
     }
@@ -339,24 +387,30 @@ public final class HandbookScreen extends Screen {
      * text is taller than the window it scrolls by whole lines: a scrollbar is drawn at {@code sbX},
      * a chevron hints there is more below, and {@link #pageMaxScroll} is published so the wheel
      * handler knows the clamp. No partial lines spill onto the cover.
+     *
+     * <p>An overflowing page gives up its last text line to the chevron: drawn at {@code yBottom}
+     * the glyph hung below the window and collided with the navigation row underneath it.
      */
     private void scrollableBody(GuiGraphics gg, Component text, int x0, int yTop, int wrap,
                                int yBottom, int sbX, int color) {
         List<FormattedCharSequence> lines = font.split(text, wrap);
-        int maxLines = Math.max(1, (yBottom - yTop) / LINE_H);
+        int windowLines = Math.max(1, (yBottom - yTop) / LINE_H);
+        boolean overflows = lines.size() > windowLines;
+        int maxLines = overflows ? Math.max(1, windowLines - 1) : windowLines;
         int maxScroll = Math.max(0, lines.size() - maxLines);
         pageMaxScroll = maxScroll;
         textScroll = Math.max(0, Math.min(textScroll, maxScroll));
 
         int yy = yTop;
         for (int i = textScroll; i < Math.min(lines.size(), textScroll + maxLines); i++) {
-            gg.drawString(font, lines.get(i), x0, yy, color);
+            ink(gg, lines.get(i), x0, yy, color);
             yy += LINE_H;
         }
         if (maxScroll > 0) {
             drawScrollbar(gg, sbX, yTop, maxLines * LINE_H, maxLines, lines.size(), textScroll);
             if (textScroll < maxScroll) {
-                gg.drawString(font, "▾", x0 + wrap / 2 - 3, yBottom, INK_GREY); // more-below hint
+                // more-below hint, on the reserved line inside the window
+                ink(gg, "▾", x0 + wrap / 2 - 3, yTop + maxLines * LINE_H, INK_GREY);
             }
         }
     }
@@ -372,8 +426,8 @@ public final class HandbookScreen extends Screen {
     }
 
     /** Structural crafting-grid render (recipe slots are populated in a later content pass). */
-    private void renderRecipe(GuiGraphics gg, HandbookPage.Recipe recipe, int rx, int ry) {
-        gg.drawString(font, Component.translatable("gui.wizards_and_beasts.handbook.recipe"), rx, ry, INK_TITLE);
+    private void renderRecipe(GuiGraphics gg, HandbookPage.Recipe recipe, int rx, int ry, int w) {
+        ink(gg, Component.translatable("gui.wizards_and_beasts.handbook.recipe"), rx, ry, INK_TITLE);
         int gx = rx + 6;
         int gy = ry + 16;
         for (int row = 0; row < 3; row++) {
@@ -386,27 +440,37 @@ public final class HandbookScreen extends Screen {
         }
         int arrowX = gx + 64;
         int arrowY = gy + 22;
-        gg.drawString(font, "→", arrowX, arrowY, INK);
+        ink(gg, "→", arrowX, arrowY, INK);
         int resX = arrowX + 14;
         gg.fill(resX, arrowY - 5, resX + 18, arrowY + 13, PAGE_SHADE);
         gg.renderOutline(resX, arrowY - 5, 18, 18, DIVIDER_SH);
-        gg.drawString(font, Component.literal("§8" + recipe.recipeId().getPath()), gx, gy + 64, INK_GREY);
+        // recipe ids are datapack-supplied and routinely wider than the half page
+        int cy = gy + 64;
+        for (FormattedCharSequence line : font.split(Component.literal("§8" + recipe.recipeId().getPath()), w)) {
+            ink(gg, line, gx, cy, INK_GREY);
+            cy += LINE_H;
+        }
     }
 
     private void renderImage(GuiGraphics gg, HandbookPage.Image image, int rx, int ry, int w) {
         int size = Math.min(w, 96);
         gg.blit(RenderPipelines.GUI_TEXTURED, image.texture(), rx, ry, 0.0F, 0.0F, size, size, size, size, size, size);
         image.caption().ifPresent(caption ->
-                gg.drawWordWrap(font, Component.literal(caption), rx, ry + size + 4, w, INK_GREY));
+                gg.drawWordWrap(font, Component.literal(caption), rx, ry + size + 4, w, INK_GREY, false));
     }
 
     /** A pressable banner (used for cross_ref). Returns its bounds for hit-testing. */
     private int[] banner(GuiGraphics gg, int x0, int yy, int w, int mouseX, int mouseY, Component label) {
-        int h = 22;
+        List<FormattedCharSequence> lines = font.split(label, w - 8);
+        int h = Math.max(22, 10 + lines.size() * LINE_H);
         boolean hot = mouseX >= x0 && mouseX < x0 + w && mouseY >= yy && mouseY < yy + h;
         gg.fill(x0, yy, x0 + w, yy + h, hot ? PAGE_SHADE : PAGE);
         gg.renderOutline(x0, yy, w, h, hot ? COVER_HI : DIVIDER_SH);
-        gg.drawString(font, label, x0 + (w - font.width(label)) / 2, yy + 7, hot ? INK_TITLE : INK);
+        int ty = yy + (h - lines.size() * LINE_H) / 2 + 1;
+        for (FormattedCharSequence line : lines) {
+            ink(gg, line, x0 + (w - font.width(line)) / 2, ty, hot ? INK_TITLE : INK);
+            ty += LINE_H;
+        }
         return new int[]{x0, yy, x0 + w, yy + h, 0};
     }
 
@@ -414,14 +478,14 @@ public final class HandbookScreen extends Screen {
         int w = font.width(glyph) + 6;
         int h = 12;
         boolean hot = active && mouseX >= x0 && mouseX < x0 + w && mouseY >= yy && mouseY < yy + h;
-        gg.drawString(font, glyph, x0 + 3, yy + 2, !active ? ARROW_OFF : hot ? COVER_HI : ARROW);
+        ink(gg, glyph, x0 + 3, yy + 2, !active ? ARROW_OFF : hot ? COVER_HI : ARROW);
         return new int[]{x0, yy, x0 + w, yy + h, 0};
     }
 
     private int[] textHotspot(GuiGraphics gg, int x0, int yy, String text, int mouseX, int mouseY) {
         int w = font.width(text);
         boolean hot = mouseX >= x0 && mouseX < x0 + w && mouseY >= yy && mouseY < yy + 10;
-        gg.drawString(font, text, x0, yy, hot ? INK_TITLE : INK_GREY);
+        ink(gg, text, x0, yy, hot ? INK_TITLE : INK_GREY);
         return new int[]{x0, yy, x0 + w, yy + 10, 0};
     }
 

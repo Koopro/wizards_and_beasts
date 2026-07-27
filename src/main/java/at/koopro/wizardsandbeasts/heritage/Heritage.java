@@ -14,7 +14,7 @@ public enum Heritage {
             true, MagicSource.WAND, 0, 0, 0, SizeCategory.NORMAL, 0xFFAA88FF, true),
 
     WEREWOLF("werewolf", "Werewolf",
-            "Humans afflicted or born with lycanthropy, gaining predatory strength beneath the moon while wrestling with a condition the wizarding world often misunderstands. "
+            "Humans afflicted with lycanthropy, gaining predatory strength beneath the moon while wrestling with a condition the wizarding world often misunderstands. "
                     + "Wolfsbane Potion can restore their reason, yet the wolf still answers when the moon is full.",
             true, MagicSource.HYBRID, 4, 0.01, 1, SizeCategory.NORMAL, 0xFF884422, true),
 
@@ -98,7 +98,16 @@ public enum Heritage {
 
     public String getId() { return id; }
     public String getDisplayName() { return displayName; }
+
+    /**
+     * Authoring-time English prose. This is the source {@link
+     * at.koopro.wizardsandbeasts.datagen.ModLanguageProvider} emits as the value of
+     * {@link #getDescriptionTranslationKey()}; runtime consumers must resolve the key instead so
+     * the text stays translatable. Mirrors
+     * {@link at.koopro.wizardsandbeasts.heritage.profession.ProfessionNode#getDescription()}.
+     */
     public String getDescription() { return description; }
+
     public boolean canUseWand() { return canUseWand; }
     public MagicSource getMagicSource() { return magicSource; }
     public double getBaseHealth() { return baseHealth; }
@@ -110,6 +119,11 @@ public enum Heritage {
 
     public String getTranslationKey() {
         return "type.WizardsAndBeastsMod." + id;
+    }
+
+    /** Lang key holding {@link #getDescription()}; same {@code .desc} shape as {@code ProfessionNode}. */
+    public String getDescriptionTranslationKey() {
+        return getTranslationKey() + ".desc";
     }
 
     public List<HeritageVariant> getSubtypes() {

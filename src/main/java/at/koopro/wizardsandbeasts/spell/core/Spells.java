@@ -49,7 +49,7 @@ public final class Spells {
     // Utility
     // Step 3/4/5 + F2: lumos, nox, reparo, liberacorpus, arresto_momentum, accio, alohomora,
     // colloportus, aguamenti, wingardium_leviosa migrated to JSON — no Java classes.
-    public static final Riddikulus RIDDIKULUS = register(new Riddikulus());
+    // F6: riddikulus migrated to JSON; its cast burst rides a particle_burst effect component.
 
     // Defense
     public static final Protego PROTEGO = register(new Protego());

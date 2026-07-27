@@ -157,13 +157,26 @@ final class SpellCastTargetedHandler {
                 }
 
                 if (props.explodes()) {
+                    // Bombarda charges: a longer wand-hold grows the blast, up to Bombarda Maxima at full charge.
+                    float chargeMult = 1.0f;
+                    boolean maxima = false;
+                    if (SpellCastSupport.isBombarda(spell)) {
+                        int held = WandCastTiming.consumeLastHoldTicks(caster);
+                        chargeMult = 1.0f + Math.min(1.0f, held / 20.0f);
+                        maxima = chargeMult >= 1.8f;
+                    }
                     SpellHelper.createExplosion(level, caster,
-                            Vec3.atCenterOf(pos), props.getExplosionPower(),
+                            Vec3.atCenterOf(pos), props.getExplosionPower() * chargeMult,
                             props.explosionBreaksBlocks());
                     successful = true;
                     if (SpellCastSupport.isBombarda(spell)) {
+                        if (maxima) {
+                            caster.displayClientMessage(
+                                    Component.literal("Bombarda Maxima").withStyle(ChatFormatting.RED), true);
+                        }
                         SpellHelper.playSpellImpact(level, blockHit.getLocation(), spell.getColor());
-                        SpellHelper.pushNearbyLightweightEntities(level, caster, blockHit.getLocation(), look, 1.3f, 3.0);
+                        SpellHelper.pushNearbyLightweightEntities(level, caster, blockHit.getLocation(),
+                                look, 1.3f * chargeMult, 3.0 * chargeMult);
                     }
                 }
                 if (SpellCastSupport.isImperio(spell) && ModuleManager.isEnabled(Module.DARK_ARTS)) {
@@ -204,6 +217,9 @@ final class SpellCastTargetedHandler {
             int affected = 0;
             for (LivingEntity nearby : level.getEntitiesOfClass(LivingEntity.class,
                     caster.getBoundingBox().inflate(8.0), LivingEntity::isAlive)) {
+                if (nearby != caster) {
+                    interruptCasting(nearby);
+                }
                 if (clearModEffects(nearby, spell) > 0) {
                     affected++;
                 }
@@ -218,6 +234,9 @@ final class SpellCastTargetedHandler {
         }
 
         LivingEntity lookedAt = SpellTargetHelper.findTargetedEntity(level, caster, effectiveRange);
+        if (lookedAt != null) {
+            interruptCasting(lookedAt);
+        }
         LivingEntity target = lookedAt != null ? lookedAt : caster;
         if (clearModEffects(target, spell) > 0) {
             return true;
@@ -233,6 +252,15 @@ final class SpellCastTargetedHandler {
                 6,
                 0.08f);
         return true;
+    }
+
+    /** Cancels a target's wand-beam channel (players) and langlocks them briefly so they can't re-cast. */
+    private static void interruptCasting(LivingEntity target) {
+        if (target instanceof ServerPlayer p) {
+            at.koopro.wizardsandbeasts.spell.beam.WandBeamChannelLogic.endChannel(p);
+        }
+        target.addEffect(new MobEffectInstance(
+                at.koopro.wizardsandbeasts.effect.ModEffects.LANGLOCK, 30, 0, false, true, true));
     }
 
     /** Removes all mod-namespaced, non-immune effects from one target; bursts on success; returns count. */
@@ -282,6 +310,8 @@ final class SpellCastTargetedHandler {
         target.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 90, 1, false, true, true));
         target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 60, 2, false, true, true));
         target.fallDistance = 0.0f;
+        // Slam on release: tag the target so it crashes down for fall damage when the lift ends.
+        target.addTag(at.koopro.wizardsandbeasts.event.spell.LevicorpusSlamHandler.SLAM_TAG);
         if (target instanceof Mob mob) {
             mob.setTarget(null);
         }
@@ -314,9 +344,19 @@ final class SpellCastTargetedHandler {
     static boolean handleAlohomora(ServerLevel level, BlockPos pos, ServerPlayer caster, Spell spell) {
         BlockState state = level.getBlockState(pos);
         if (ColloportusLockStore.isLocked(level, pos)) {
+            // Break the seal — but only a proficient caster can undo a Colloportus barricade.
+            Proficiency sealProf = spell.getProficiency(caster);
+            if (sealProf == Proficiency.PROFICIENT || sealProf == Proficiency.MASTERED) {
+                ColloportusLockStore.unlock(level, pos);
+                level.playSound(null, pos, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.PLAYERS, 0.6f, 1.2f);
+                caster.displayClientMessage(
+                        Component.literal("Alohomora breaks the seal.").withStyle(ChatFormatting.AQUA), true);
+                return true;
+            }
             level.playSound(null, pos, SoundEvents.VILLAGER_NO, SoundSource.PLAYERS, 0.55f, 1.0f);
             caster.displayClientMessage(
-                    Component.literal("Colloportus holds — Alohomora cannot open this.").withStyle(ChatFormatting.DARK_RED),
+                    Component.literal("Colloportus holds — you aren't skilled enough to break it.")
+                            .withStyle(ChatFormatting.DARK_RED),
                     true);
             return false;
         }

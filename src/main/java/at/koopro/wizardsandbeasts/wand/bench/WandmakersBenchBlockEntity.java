@@ -25,7 +25,7 @@ public class WandmakersBenchBlockEntity extends BlockEntity {
     private final ItemStacksResourceHandler inventory = new ItemStacksResourceHandler(3);
     private float cachedTierScore = 0.0f;
     private List<BlockPos> detectedEnhancers = new ArrayList<>();
-    private int selectedFlexibilityOrdinal = WandFlexibility.SOLID.ordinal();
+    private int selectedFlexibilityOrdinal = WandFlexibility.PLIANT.ordinal();
 
     public WandmakersBenchBlockEntity(BlockPos pos, BlockState blockState) {
         super(ModBlockEntities.WANDMAKERS_BENCH.get(), pos, blockState);
@@ -85,7 +85,7 @@ public class WandmakersBenchBlockEntity extends BlockEntity {
     @Override
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
-        selectedFlexibilityOrdinal = input.read("flexibility_ordinal", Codec.INT).orElse(WandFlexibility.SOLID.ordinal());
+        selectedFlexibilityOrdinal = input.read("flexibility_ordinal", Codec.INT).orElse(WandFlexibility.PLIANT.ordinal());
         for (int i = 0; i < 3; i++) {
             setSlotStack(i, input.read("slot_" + i, ItemStack.CODEC).orElse(ItemStack.EMPTY));
         }

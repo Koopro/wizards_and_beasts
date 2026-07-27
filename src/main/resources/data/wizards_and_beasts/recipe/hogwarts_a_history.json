@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PPP",
+    "IBI",
+    "SSS"
+  ],
+  "key": {
+    "P": "wizards_and_beasts:parchment",
+    "I": "wizards_and_beasts:ink_bottle",
+    "B": "minecraft:book",
+    "S": "minecraft:stone_bricks"
+  },
+  "result": {
+    "id": "wizards_and_beasts:hogwarts_a_history",
+    "count": 1
+  }
+}

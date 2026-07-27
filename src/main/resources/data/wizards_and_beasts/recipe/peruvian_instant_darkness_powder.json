@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "tools",
+  "ingredients": [
+    "minecraft:gunpowder",
+    "minecraft:black_dye",
+    "wizards_and_beasts:hidebehind_shadow_essence"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:peruvian_instant_darkness_powder",
+    "count": 2
+  }
+}

@@ -38,28 +38,39 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
     private final ContainerLevelAccess access;
     private final List<Identifier> enhancerBlockIds;
 
+    /** Why the output slot is empty, mirrored to the client so the bench can say so. */
+    public static final int STATUS_READY = 0;
+    public static final int STATUS_MISSING_INPUT = 1;
+    public static final int STATUS_BLANK_UNSHAPED = 2;
+    public static final int STATUS_NO_RECIPE = 3;
+    public static final int STATUS_BENCH_TOO_PLAIN = 4;
+
+    private static final int DATA_TIER = 0;
+    private static final int DATA_FLEXIBILITY = 1;
+    private static final int DATA_STATUS = 2;
+    private static final int DATA_REQUIRED_TIER = 3;
+
+    /**
+     * Backing store for the synced values. These used to be read straight off the block entity, which
+     * only works on the server: {@code recalcTierScore} returns early client-side, so the bench always
+     * drew a tier of 0.00 no matter how many enhancers surrounded it.
+     */
+    private final int[] dataBacking = new int[4];
+
     private final ContainerData dataAccess = new ContainerData() {
         @Override
         public int get(int index) {
-            return switch (index) {
-                case 0 -> (int) (bench.getCachedTierScore() * 100.0f);
-                case 1 -> bench.getSelectedFlexibilityOrdinal();
-                default -> 0;
-            };
+            return dataBacking[index];
         }
 
         @Override
         public void set(int index, int value) {
-            if (index == 1) {
-                bench.setSelectedFlexibilityOrdinal(value);
-                updateCraftingResult();
-                broadcastChanges();
-            }
+            dataBacking[index] = value;
         }
 
         @Override
         public int getCount() {
-            return 2;
+            return dataBacking.length;
         }
     };
 
@@ -119,11 +130,21 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
     }
 
     public int getTierScoreScaled() {
-        return dataAccess.get(0);
+        return dataBacking[DATA_TIER];
     }
 
     public int getFlexibilityOrdinal() {
-        return dataAccess.get(1);
+        return dataBacking[DATA_FLEXIBILITY];
+    }
+
+    /** One of the {@code STATUS_*} constants: what the bench would tell you about the empty slot. */
+    public int getStatus() {
+        return dataBacking[DATA_STATUS];
+    }
+
+    /** Bench tier the pending recipe demands, ×100. Meaningful with {@link #STATUS_BENCH_TOO_PLAIN}. */
+    public int getRequiredTierScaled() {
+        return dataBacking[DATA_REQUIRED_TIER];
     }
 
     public void setFlexibilityOrdinalFromServer(int ordinal) {
@@ -152,6 +173,9 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
         if (level.isClientSide()) {
             return;
         }
+        dataBacking[DATA_TIER] = (int) (bench.getCachedTierScore() * 100.0f);
+        dataBacking[DATA_FLEXIBILITY] = bench.getSelectedFlexibilityOrdinal();
+        dataBacking[DATA_REQUIRED_TIER] = 0;
         ItemStacksResourceHandler handler = bench.getInventory();
         ItemStack blank = slotToStack(handler, 0);
         ItemStack coreStack = slotToStack(handler, 1);
@@ -160,24 +184,30 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
             if (!out.isEmpty()) {
                 handler.set(2, ItemResource.of(ItemStack.EMPTY), 0);
             }
+            dataBacking[DATA_STATUS] = STATUS_MISSING_INPUT;
             return;
         }
         Identifier wood = WandComponents.getWood(blank);
         Identifier coreId = WandCoreMaterialItem.getCoreKey(coreStack);
         if (wood == null || coreId == null) {
             handler.set(2, ItemResource.of(ItemStack.EMPTY), 0);
+            dataBacking[DATA_STATUS] = wood == null ? STATUS_BLANK_UNSHAPED : STATUS_NO_RECIPE;
             return;
         }
         Optional<WandmakingRecipe> recipeOpt = findRecipe(wood, coreId);
         if (recipeOpt.isEmpty()) {
             handler.set(2, ItemResource.of(ItemStack.EMPTY), 0);
+            dataBacking[DATA_STATUS] = STATUS_NO_RECIPE;
             return;
         }
         WandmakingRecipe recipe = recipeOpt.get();
         if (bench.getCachedTierScore() < recipe.minimumBenchTier()) {
             handler.set(2, ItemResource.of(ItemStack.EMPTY), 0);
+            dataBacking[DATA_STATUS] = STATUS_BENCH_TOO_PLAIN;
+            dataBacking[DATA_REQUIRED_TIER] = (int) (recipe.minimumBenchTier() * 100.0f);
             return;
         }
+        dataBacking[DATA_STATUS] = STATUS_READY;
         WandFlexibility flex = WandFlexibility.values()[bench.getSelectedFlexibilityOrdinal()];
         float len = recipe.resultLengthMin()
                 + level.random.nextFloat() * (recipe.resultLengthMax() - recipe.resultLengthMin());

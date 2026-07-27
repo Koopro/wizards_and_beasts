@@ -64,6 +64,9 @@ public final class ModEffects {
     public static final DeferredHolder<MobEffect, DisorientedEffect> DISORIENTED =
             MOB_EFFECTS.register("disoriented", DisorientedEffect::new);
 
+    public static final DeferredHolder<MobEffect, SunderedEffect> SUNDERED =
+            MOB_EFFECTS.register("sundered", SunderedEffect::new);
+
     public static final DeferredHolder<MobEffect, SoulDrainedEffect> SOUL_DRAINED =
             MOB_EFFECTS.register("soul_drained", SoulDrainedEffect::new);
 

@@ -135,7 +135,7 @@ public final class WandStatsResolver {
         switch (flex) {
             case UNYIELDING -> b.addFizzle(-0.03f).mulDamage(1.04f);
             case RIGID -> b.addFizzle(-0.02f).mulDamage(1.03f);
-            case SOLID -> b.addFizzle(-0.01f);
+            case PLIANT -> b.addFizzle(-0.01f);
             case SUPPLE -> b.mulCooldown(0.95f);
             case SPRINGY -> b.addFizzle(0.02f).mulCooldown(0.92f);
         }

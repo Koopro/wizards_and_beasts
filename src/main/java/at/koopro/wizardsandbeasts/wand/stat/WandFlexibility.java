@@ -10,7 +10,7 @@ import java.util.Locale;
 public enum WandFlexibility implements StringRepresentable {
     UNYIELDING(0.7f),
     RIGID(0.85f),
-    SOLID(1.0f),
+    PLIANT(1.0f),
     SUPPLE(1.1f),
     SPRINGY(1.2f);
 
@@ -22,7 +22,9 @@ public enum WandFlexibility implements StringRepresentable {
                         return flexibility;
                     }
                 }
-                return SOLID;
+                // Back-compat: "solid" was the pre-canon name for this slot (not an Ollivander term).
+                // Old saved wands and datapacks decode to PLIANT rather than failing.
+                return PLIANT;
             });
 
     public static final StreamCodec<ByteBuf, WandFlexibility> STREAM_CODEC = StreamCodec.of(

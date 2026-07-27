@@ -41,6 +41,9 @@ public class ModCreativeTabs {
 
                         // Magical Tools
                         output.accept(WandItemRegistry.WAND.get());
+                        output.accept(WandItemRegistry.WAND_BLANK.get());
+                        // Wandmaker's bench: the Wandmaker villager's workstation and the wandmaking station.
+                        output.accept(ModBlocks.WANDMAKERS_BENCH_ITEM.get());
                         if (ModuleManager.isEnabled(Module.BROOM_FLIGHT)) {
                             output.accept(BroomItemRegistry.BROOM_ITEM.get());
                             output.accept(BroomItemRegistry.CLEANSWEEP_SEVEN.get());
@@ -63,6 +66,13 @@ public class ModCreativeTabs {
                         output.accept(WandItemRegistry.PHOENIX_FEATHER.get());
                         output.accept(WandItemRegistry.DRAGON_HEARTSTRING.get());
                         output.accept(WandItemRegistry.UNICORN_HAIR.get());
+                        // Rarer cores — registered but previously unreachable from any tab.
+                        output.accept(WandItemRegistry.THUNDERBIRD_TAIL_FEATHER.get());
+                        output.accept(WandItemRegistry.TROLL_WHISKER.get());
+                        output.accept(WandItemRegistry.VEELA_HAIR.get());
+                        output.accept(WandItemRegistry.WAMPUS_CAT_HAIR.get());
+                        output.accept(ConsumableItemRegistry.ROUGAROU_HAIR.get());
+                        output.accept(ConsumableItemRegistry.WHITE_RIVER_MONSTER_SPINE.get());
                         output.accept(WandItemRegistry.THESTRAL_TAIL_HAIR.get());
 
                         // Crafting Materials
@@ -80,6 +90,7 @@ public class ModCreativeTabs {
                         output.accept(CurrencyItemRegistry.KNUT.get());
                         output.accept(CurrencyItemRegistry.DRAGOT.get());
                         output.accept(CurrencyItemRegistry.LEPRECHAUN_GOLD.get());
+                        output.accept(CurrencyItemRegistry.COUNTERFEIT_GALLEON.get());
 
                         // Spawn Eggs
                         output.accept(MiscItemRegistry.GOBLIN_TELLER_SPAWN_EGG.get());
@@ -141,6 +152,7 @@ public class ModCreativeTabs {
                             output.accept(ModBlocks.MASTERS_TRUNK_ITEM.get());
                             output.accept(TrinketItemRegistry.MINISTRY_LICENSE_SCROLL.get());
                         }
+                        output.accept(MiscItemRegistry.BLINDFOLD.get());
                         output.accept(TrinketItemRegistry.PERUVIAN_DARKNESS_POWDER.get());
                         output.accept(TrinketItemRegistry.DECOY_DETONATOR.get());
                         output.accept(TrinketItemRegistry.EXTENDABLE_EARS.get());
@@ -174,6 +186,9 @@ public class ModCreativeTabs {
                         }
 
                         // Wizarding blocks
+                        output.accept(ModBlocks.WARDING_STONE_ITEM.get());
+                        output.accept(ModBlocks.EXAMINATION_DESK_ITEM.get());
+                        output.accept(ModBlocks.POCKET_CONFIGURATOR_ITEM.get());
                         output.accept(ModBlocks.DEVILS_SNARE.get());
                         output.accept(ModBlocks.MALLOWSWEET.get());
                         output.accept(ModBlocks.GRYFFINDOR_BANNER.get());

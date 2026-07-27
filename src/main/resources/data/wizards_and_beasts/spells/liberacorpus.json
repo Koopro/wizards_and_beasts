@@ -1,5 +1,6 @@
 {
   "displayName": "Liberacorpus",
+  "canonTier": "books",
   "category": "utility",
   "cooldownTicks": 35,
   "color": -7811841,
@@ -8,6 +9,7 @@
   "sound": { "id": "minecraft:entity.experience_orb.pickup", "volume": 0.55, "pitch": 1.35 },
   "requirement": { "type": "knows", "prerequisiteId": "wingardium_leviosa" },
   "effects": [
-    { "type": "dispel", "scope": "specific", "effects": ["minecraft:levitation"] }
+    { "type": "dispel", "scope": "specific",
+      "effects": ["minecraft:levitation", "minecraft:slowness", "minecraft:weakness"] }
   ]
 }

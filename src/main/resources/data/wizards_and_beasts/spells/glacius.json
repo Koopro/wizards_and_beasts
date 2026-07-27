@@ -1,5 +1,6 @@
 {
   "displayName": "Glacius",
+  "canonTier": "expanded",
   "category": "combat",
   "cooldownTicks": 70,
   "baseDamage": 2.0,

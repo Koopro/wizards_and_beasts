@@ -5,8 +5,9 @@
   "tree": "wandlore",
   "effects": [
     {
-      "abilityId": "wand_study",
-      "type": "unlock_ability"
+      "type": "category_damage_bonus",
+      "category": "combat",
+      "bonusPerLevel": 0.02
     }
   ],
   "x": -113.8,
