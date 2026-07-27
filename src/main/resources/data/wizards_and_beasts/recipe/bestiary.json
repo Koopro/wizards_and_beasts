@@ -1,4 +1,10 @@
 {
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "BESTIARY"
+    }
+  ],
   "type": "minecraft:crafting_shaped",
   "pattern": [
     "LPI",

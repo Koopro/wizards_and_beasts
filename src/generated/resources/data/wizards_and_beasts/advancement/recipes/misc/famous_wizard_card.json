@@ -1,4 +1,10 @@
 {
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "WIZARDING_FOOD"
+    }
+  ],
   "parent": "minecraft:recipes/root",
   "criteria": {
     "has_paper": {

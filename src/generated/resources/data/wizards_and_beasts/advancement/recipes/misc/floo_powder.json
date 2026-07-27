@@ -1,4 +1,10 @@
 {
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "FLOO_NETWORK"
+    }
+  ],
   "parent": "minecraft:recipes/root",
   "criteria": {
     "has_blaze_powder": {

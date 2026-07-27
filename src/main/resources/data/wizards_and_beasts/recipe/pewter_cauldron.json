@@ -1,4 +1,10 @@
 {
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "FURNISHINGS"
+    }
+  ],
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "pattern": [

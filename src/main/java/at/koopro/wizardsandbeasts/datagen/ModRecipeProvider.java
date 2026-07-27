@@ -33,6 +33,8 @@ import at.koopro.wizardsandbeasts.registry.ModBlocks;
 import at.koopro.wizardsandbeasts.registry.WoodSet;
 import at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper;
 
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import at.koopro.wizardsandbeasts.registry.ConsumableItemRegistry;
 import at.koopro.wizardsandbeasts.registry.CurrencyItemRegistry;
@@ -48,8 +50,19 @@ public class ModRecipeProvider extends RecipeProvider {
      */
     private RecipeOutput structureSink;
 
+    /**
+     * One conditional {@link RecipeOutput} per module, built on demand. A recipe saved through
+     * {@code sink(module)} carries a {@link ModuleEnabledCondition}, so switching the module off removes
+     * the recipe from the book instead of leaving a craft that produces unreachable content.
+     */
+    private final Map<Module, RecipeOutput> sinks = new EnumMap<>(Module.class);
+
     public ModRecipeProvider(HolderLookup.Provider registries, RecipeOutput output) {
         super(registries, output);
+    }
+
+    private RecipeOutput sink(Module module) {
+        return sinks.computeIfAbsent(module, m -> output.withConditions(new ModuleEnabledCondition(m)));
     }
 
     @Override
@@ -70,19 +83,35 @@ public class ModRecipeProvider extends RecipeProvider {
         Block planks = woodSet.planks().get();
         Block slab = woodSet.slab().get();
         Block stairs = woodSet.stairs().get();
+        RecipeOutput sink = sink(Module.WANDWOOD);
 
         planksFromLog(planks, log);
         planksFromLog(planks, strippedLog);
         planksFromLog(planks, woodBlock);
         planksFromLog(planks, strippedWood);
 
-        woodFromLogs(woodBlock, log);
-        woodFromLogs(strippedWood, strippedLog);
+        // Inlined rather than calling the inherited woodFromLogs/slab helpers: those save straight to
+        // this.output, which is the ungated sink. Bodies match vanilla exactly so the recipes are unchanged
+        // apart from carrying the condition.
+        woodFromLogs(woodBlock, log, sink);
+        woodFromLogs(strippedWood, strippedLog, sink);
 
-        slab(RecipeCategory.BUILDING_BLOCKS, slab, planks);
+        slabBuilder(RecipeCategory.BUILDING_BLOCKS, slab, Ingredient.of(planks))
+                .unlockedBy(getHasName(planks), has(planks))
+                .save(sink);
         stairBuilder(stairs, Ingredient.of(planks))
                 .unlockedBy("has_planks", has(planks))
-                .save(output);
+                .save(sink);
+    }
+
+    private void woodFromLogs(Block result, Block log, RecipeOutput sink) {
+        shaped(RecipeCategory.BUILDING_BLOCKS, result, 3)
+                .define('#', log)
+                .pattern("##")
+                .pattern("##")
+                .group("bark")
+                .unlockedBy("has_log", has(log))
+                .save(sink);
     }
 
     private void planksFromLog(Block planks, Block log) {
@@ -90,52 +119,52 @@ public class ModRecipeProvider extends RecipeProvider {
                 .requires(log)
                 .group("planks")
                 .unlockedBy("has_log", has(log))
-                .save(output, getConversionRecipeName(planks, log));
+                .save(sink(Module.WANDWOOD), getConversionRecipeName(planks, log));
     }
 
     private void generateConsumableRecipes() {
         ShapelessRecipeBuilder.shapeless(registries.lookupOrThrow(Registries.ITEM), RecipeCategory.MISC, CurrencyItemRegistry.SICKLE.get(), CurrencyHelper.SICKLES_PER_GALLEON)
                 .requires(CurrencyItemRegistry.GALLEON.get())
                 .unlockedBy("has_galleon", has(CurrencyItemRegistry.GALLEON.get()))
-                .save(output, "wizards_and_beasts:currency/galleon_to_sickle");
+                .save(sink(Module.GRINGOTTS), "wizards_and_beasts:currency/galleon_to_sickle");
 
         ShapelessRecipeBuilder.shapeless(registries.lookupOrThrow(Registries.ITEM), RecipeCategory.MISC, CurrencyItemRegistry.KNUT.get(), CurrencyHelper.KNUTS_PER_SICKLE)
                 .requires(CurrencyItemRegistry.SICKLE.get())
                 .unlockedBy("has_sickle", has(CurrencyItemRegistry.SICKLE.get()))
-                .save(output, "wizards_and_beasts:currency/sickle_to_knut");
+                .save(sink(Module.GRINGOTTS), "wizards_and_beasts:currency/sickle_to_knut");
 
         ShapelessRecipeBuilder.shapeless(registries.lookupOrThrow(Registries.ITEM), RecipeCategory.FOOD, ConsumableItemRegistry.TREACLE_TART.get())
                 .requires(Items.WHEAT)
                 .requires(Items.SUGAR)
                 .requires(Items.EGG)
                 .unlockedBy("has_sugar", has(Items.SUGAR))
-                .save(output);
+                .save(sink(Module.WIZARDING_FOOD));
 
         ShapelessRecipeBuilder.shapeless(registries.lookupOrThrow(Registries.ITEM), RecipeCategory.FOOD, ConsumableItemRegistry.PUMPKIN_PASTY.get(), 2)
                 .requires(Items.PUMPKIN)
                 .requires(Items.WHEAT)
                 .requires(Items.SUGAR)
                 .unlockedBy("has_pumpkin", has(Items.PUMPKIN))
-                .save(output);
+                .save(sink(Module.WIZARDING_FOOD));
 
         ShapelessRecipeBuilder.shapeless(registries.lookupOrThrow(Registries.ITEM), RecipeCategory.FOOD, ConsumableItemRegistry.FIZZING_WHIZZBEE.get(), 2)
                 .requires(Items.HONEYCOMB)
                 .requires(Items.SUGAR)
                 .unlockedBy("has_honeycomb", has(Items.HONEYCOMB))
-                .save(output);
+                .save(sink(Module.WIZARDING_FOOD));
 
         ShapelessRecipeBuilder.shapeless(registries.lookupOrThrow(Registries.ITEM), RecipeCategory.FOOD, ConsumableItemRegistry.PEPPERMINT_TOAD.get(), 2)
                 .requires(Items.COCOA_BEANS)
                 .requires(Items.SUGAR)
                 .unlockedBy("has_cocoa_beans", has(Items.COCOA_BEANS))
-                .save(output);
+                .save(sink(Module.WIZARDING_FOOD));
 
         ShapelessRecipeBuilder.shapeless(registries.lookupOrThrow(Registries.ITEM), RecipeCategory.MISC, MiscItemRegistry.FLOO_POWDER.get(), 8)
                 .requires(Items.BLAZE_POWDER)
                 .requires(Items.GRAY_DYE)
                 .requires(Items.GLOWSTONE_DUST)
                 .unlockedBy("has_blaze_powder", has(Items.BLAZE_POWDER))
-                .save(output);
+                .save(sink(Module.FLOO_NETWORK));
 
         ShapedRecipeBuilder.shaped(registries.lookupOrThrow(Registries.ITEM), RecipeCategory.TOOLS, MiscItemRegistry.DELUMINATOR.get())
                 .pattern(" IT")
@@ -145,7 +174,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .define('T', Items.TORCH)
                 .define('R', Items.REDSTONE)
                 .unlockedBy("has_redstone", has(Items.REDSTONE))
-                .save(output);
+                .save(sink(Module.ARTEFACTS));
 
         ShapedRecipeBuilder.shaped(registries.lookupOrThrow(Registries.ITEM), RecipeCategory.TOOLS, TrinketItemRegistry.REMEMBRALL.get())
                 .pattern(" G ")
@@ -154,7 +183,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .define('G', Items.GLASS)
                 .define('R', Items.REDSTONE)
                 .unlockedBy("has_redstone", has(Items.REDSTONE))
-                .save(output);
+                .save(sink(Module.ARTEFACTS));
 
         ShapedRecipeBuilder.shaped(registries.lookupOrThrow(Registries.ITEM), RecipeCategory.TOOLS, TrinketItemRegistry.OMNI_OCULARS.get())
                 .pattern("ALA")
@@ -164,7 +193,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .define('L', Items.LEATHER)
                 .define('S', Items.SPYGLASS)
                 .unlockedBy("has_spyglass", has(Items.SPYGLASS))
-                .save(output);
+                .save(sink(Module.ARTEFACTS));
 
         ShapedRecipeBuilder.shaped(registries.lookupOrThrow(Registries.ITEM), RecipeCategory.MISC, ConsumableItemRegistry.FAMOUS_WIZARD_CARD.get(), 2)
                 .pattern("PI")
@@ -173,7 +202,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .define('I', MiscItemRegistry.INK_BOTTLE.get())
                 .define('G', CurrencyItemRegistry.KNUT.get())
                 .unlockedBy("has_paper", has(Items.PAPER))
-                .save(output);
+                .save(sink(Module.WIZARDING_FOOD));
     }
 
     // ─── Location decorative blocks ─────────────────────────────────────────────

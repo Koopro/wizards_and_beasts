@@ -1,4 +1,10 @@
 {
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "WANDWOOD"
+    }
+  ],
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
