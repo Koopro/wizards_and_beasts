@@ -31,27 +31,43 @@ public class WandBlankItem extends Item {
     @Override
     public InteractionResult useOn(UseOnContext context) {
         ItemStack stack = context.getItemInHand();
+        Level level = context.getLevel();
+        Player player = context.getPlayer();
+        // TEMPORARY diagnostics — every branch reports which side reached it, because the server path is
+        // proven working in isolation and the failing case has to be found in a real session.
+        trace(level, player, "useOn entered");
         if (WandComponents.getWood(stack) != null) {
+            trace(level, player, "PASS: already shaped (" + WandComponents.getWood(stack) + ")");
             return InteractionResult.PASS;
         }
-        Level level = context.getLevel();
         BlockPos pos = context.getClickedPos();
         BlockState state = level.getBlockState(pos);
         Identifier wood = wandWoodFromLogBlock(state);
         if (wood == null) {
+            trace(level, player, "PASS: " + state.getBlock() + " is not a wand wood log");
             return InteractionResult.PASS;
         }
-        Player player = context.getPlayer();
         if (player == null) {
             return InteractionResult.PASS;
         }
         if (level.isClientSide()) {
+            trace(level, player, "client side, deferring to server");
             return InteractionResult.SUCCESS;
         }
         stack.set(WandComponents.WAND_WOOD.get(), wood);
         player.setItemInHand(context.getHand(), stack);
         level.playSound(null, pos, SoundEvents.BAMBOO_WOOD_HIT, SoundSource.PLAYERS, 0.5f, 1.35f);
+        trace(level, player, "shaped to " + wood);
         return InteractionResult.SUCCESS;
+    }
+
+    /** TEMPORARY. Prints to the action bar on whichever side reached the call. */
+    private static void trace(Level level, @Nullable Player player, String message) {
+        if (player == null) {
+            return;
+        }
+        player.displayClientMessage(Component.literal(
+                (level.isClientSide() ? "[blank/client] " : "[blank/server] ") + message), false);
     }
 
     /**

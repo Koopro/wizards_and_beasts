@@ -26,9 +26,29 @@ import net.neoforged.neoforge.common.util.FakePlayerFactory;
  * TEMPORARY. Drives the wand blank's shaping path headlessly so a dedicated server can say where it
  * fails, without needing a human at a keyboard. Delete once the answer is known.
  */
+@net.neoforged.fml.common.EventBusSubscriber(modid = at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID)
 public final class BlankShapingSelfTest {
 
     private BlankShapingSelfTest() {}
+
+    /**
+     * TEMPORARY. Fires on both sides for a right-click made while holding a blank, so a single click says
+     * whether the interaction event even happens, and on which side, before the item is consulted.
+     */
+    @net.neoforged.bus.api.SubscribeEvent(priority = net.neoforged.bus.api.EventPriority.LOWEST)
+    public static void onRightClickBlock(
+            net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock event) {
+        if (!(event.getItemStack().getItem() instanceof at.koopro.wizardsandbeasts.item.wand.WandBlankItem)) {
+            return;
+        }
+        boolean client = event.getLevel().isClientSide();
+        event.getEntity().displayClientMessage(Component.literal(
+                (client ? "[probe/client] " : "[probe/server] ")
+                        + "RightClickBlock on " + event.getLevel().getBlockState(event.getPos()).getBlock()
+                        + " canceled=" + event.isCanceled()
+                        + " useItem=" + event.getUseItem()
+                        + " useBlock=" + event.getUseBlock()), false);
+    }
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("blanktest").requires(at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions.ADMIN).executes(ctx -> run(ctx.getSource()));
