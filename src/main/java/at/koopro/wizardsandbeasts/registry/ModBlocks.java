@@ -114,15 +114,15 @@ public class ModBlocks {
     public static final DeferredBlock<? extends Block> RAVENCLAW_BANNER = WizardingWorldBlockRegistry.RAVENCLAW_BANNER;
     public static final DeferredBlock<? extends Block> HUFFLEPUFF_BANNER = WizardingWorldBlockRegistry.HUFFLEPUFF_BANNER;
     public static final DeferredBlock<? extends Block> FLOATING_CANDLE = WizardingWorldBlockRegistry.FLOATING_CANDLE;
-    public static final DeferredBlock<Block> BRASS_CAULDRON = WizardingWorldBlockRegistry.BRASS_CAULDRON;
-    public static final DeferredBlock<Block> WIZARDING_COPPER_CAULDRON = WizardingWorldBlockRegistry.WIZARDING_COPPER_CAULDRON;
-    public static final DeferredBlock<Block> PEWTER_CAULDRON = WizardingWorldBlockRegistry.PEWTER_CAULDRON;
+    public static final DeferredBlock<? extends Block> BRASS_CAULDRON = WizardingWorldBlockRegistry.BRASS_CAULDRON;
+    public static final DeferredBlock<? extends Block> WIZARDING_COPPER_CAULDRON = WizardingWorldBlockRegistry.WIZARDING_COPPER_CAULDRON;
+    public static final DeferredBlock<? extends Block> PEWTER_CAULDRON = WizardingWorldBlockRegistry.PEWTER_CAULDRON;
     /**
      * @deprecated Decorative prop only — no travel logic. Use {@link #FLOO_FIREPLACE}.
      *             Will be removed in beta.
      */
     @Deprecated
-    public static final DeferredBlock<Block> FLOO_GRATE = WizardingWorldBlockRegistry.FLOO_GRATE;
+    public static final DeferredBlock<? extends Block> FLOO_GRATE = WizardingWorldBlockRegistry.FLOO_GRATE;
     public static final DeferredBlock<? extends Block> SPELL_TEACHER = WizardingWorldBlockRegistry.SPELL_TEACHER;
     public static final DeferredBlock<? extends Block> WANDMAKERS_BENCH = WizardingWorldBlockRegistry.WANDMAKERS_BENCH;
 
