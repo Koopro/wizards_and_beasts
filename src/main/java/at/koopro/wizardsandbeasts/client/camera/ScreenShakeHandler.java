@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.client.camera;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -32,12 +33,13 @@ import org.jspecify.annotations.NullMarked;
 public final class ScreenShakeHandler {
 
     /** Ticks a single impact shake runs for. Short: this is a jolt, not a rumble. */
-    private static final float DURATION_TICKS = 7.0F;
-    /** Pitch runs a quarter-cycle behind yaw so the view arcs instead of sliding on one diagonal. */
-    private static final float PITCH_PHASE = 1.57F;
+    private static final float DURATION_TICKS = 6.0F;
 
     private static float amplitude;
     private static float elapsedTicks;
+    /** Per-impact axis weights, so consecutive hits do not shake along the same line. */
+    private static float yawDirection = 1.0F;
+    private static float pitchDirection = 1.0F;
 
     private ScreenShakeHandler() {}
 
@@ -63,12 +65,21 @@ public final class ScreenShakeHandler {
         }
         amplitude = peak;
         elapsedTicks = 0.0F;
+        // A fixed axis pairing makes every impact shake the same way, which the eye learns after
+        // about three casts and then reads as a glitch. Randomising the weights keeps each hit
+        // feeling like its own event; pitch stays the weaker axis because vertical camera movement
+        // is the part players notice as nausea.
+        float angle = (float) (mc.level != null ? mc.level.random.nextFloat() : 0.5f) * Mth.TWO_PI;
+        yawDirection = Mth.cos(angle);
+        pitchDirection = Mth.sin(angle) * 0.6F;
     }
 
     /** Clears any running shake — used when the world changes out from under the camera. */
     public static void reset() {
         amplitude = 0.0F;
         elapsedTicks = 0.0F;
+        yawDirection = 1.0F;
+        pitchDirection = 1.0F;
     }
 
     @SubscribeEvent
@@ -100,7 +111,10 @@ public final class ScreenShakeHandler {
         if (current <= 0.0F) {
             return;
         }
-        event.setYaw(event.getYaw() + ScreenShakeMath.offset(current, time, 0.0F));
-        event.setPitch(event.getPitch() + ScreenShakeMath.offset(current, time, PITCH_PHASE));
+        event.setYaw(event.getYaw()
+                + ScreenShakeMath.offset(current, time, 1.0F, yawDirection));
+        event.setPitch(event.getPitch()
+                + ScreenShakeMath.offset(current, time, ScreenShakeMath.PITCH_FREQUENCY_RATIO,
+                        pitchDirection));
     }
 }

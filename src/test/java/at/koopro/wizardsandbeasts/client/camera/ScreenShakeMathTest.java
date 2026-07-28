@@ -77,7 +77,7 @@ class ScreenShakeMathTest {
     @Test
     void offset_isBoundedByTheCurrentAmplitude() {
         for (float t = 0.0F; t < 20.0F; t += 0.13F) {
-            float o = ScreenShakeMath.offset(1.5F, t, 0.0F);
+            float o = ScreenShakeMath.offset(1.5F, t, 1.0F, 1.0F);
             assertTrue(Math.abs(o) <= 1.5F + EPS,
                     "offset must stay within the amplitude; got " + o + " at t=" + t);
         }
@@ -85,6 +85,42 @@ class ScreenShakeMathTest {
 
     @Test
     void offset_isZeroOnceTheShakeIsSpent() {
-        assertEquals(0.0F, ScreenShakeMath.offset(0.0F, 3.7F, 0.0F), EPS);
+        assertEquals(0.0F, ScreenShakeMath.offset(0.0F, 3.7F, 1.0F, 1.0F), EPS);
+    }
+
+    @Test
+    void offset_startsAtZeroOnEveryAxis() {
+        // The regression this exists for: pitch used to carry a quarter-cycle phase offset, so it
+        // evaluated to full amplitude on the very first frame. The camera snapped the instant a
+        // spell landed — a pop, not a shake. Both axes must begin exactly where the player left
+        // the view.
+        assertEquals(0.0F, ScreenShakeMath.offset(2.0F, 0.0F, 1.0F, 1.0F), EPS,
+                "yaw must start undeflected");
+        assertEquals(0.0F,
+                ScreenShakeMath.offset(2.0F, 0.0F, ScreenShakeMath.PITCH_FREQUENCY_RATIO, 1.0F), EPS,
+                "pitch must start undeflected");
+    }
+
+    @Test
+    void axes_doNotTraceACircle() {
+        // Equal frequencies a quarter-cycle apart orbit the aim point, which reads as vertigo. With
+        // distinct rates the two axes must drift out of any fixed relationship.
+        float worstAgreement = 0.0F;
+        for (float t = 0.5F; t < 12.0F; t += 0.25F) {
+            float yaw = ScreenShakeMath.offset(1.0F, t, 1.0F, 1.0F);
+            float pitch = ScreenShakeMath.offset(1.0F, t, ScreenShakeMath.PITCH_FREQUENCY_RATIO, 1.0F);
+            worstAgreement = Math.max(worstAgreement, Math.abs(yaw * yaw + pitch * pitch - 1.0F));
+        }
+        assertTrue(worstAgreement > 0.25F,
+                "yaw^2 + pitch^2 stayed near constant, so the view is orbiting rather than shaking");
+    }
+
+    @Test
+    void direction_mirrorsCleanly() {
+        float positive = ScreenShakeMath.offset(1.0F, 2.0F, 1.0F, 1.0F);
+        float negative = ScreenShakeMath.offset(1.0F, 2.0F, 1.0F, -1.0F);
+
+        assertEquals(-positive, negative, EPS,
+                "flipping the per-impact direction must mirror the shake, not reshape it");
     }
 }

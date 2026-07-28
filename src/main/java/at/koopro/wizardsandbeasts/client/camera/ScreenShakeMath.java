@@ -17,7 +17,7 @@ import org.jspecify.annotations.NullMarked;
 public final class ScreenShakeMath {
 
     /** Hard cap on shake amplitude in degrees. Past roughly this the view stops reading as impact. */
-    static final float MAX_AMPLITUDE_DEG = 2.4F;
+    static final float MAX_AMPLITUDE_DEG = 1.3F;
     /** Blocks past which an impact is not felt at all. */
     static final float FALLOFF_RANGE = 24.0F;
     /** Impacts closer than this are all felt at full strength, so standing on top of one is not a spike. */
@@ -26,6 +26,14 @@ public final class ScreenShakeMath {
     static final float SETTLED_EPSILON = 0.02F;
     /** Radians per tick of the shake oscillation. Fast enough to read as a jolt, not a wobble. */
     static final float FREQUENCY = 2.9F;
+    /**
+     * Pitch runs at a different rate to yaw, not merely a different phase.
+     *
+     * <p>Equal frequencies a quarter-cycle apart trace a circle, and a camera orbiting its own
+     * aim point reads as vertigo rather than as being hit. An irrational-ish ratio keeps the two
+     * axes from ever repeating the same figure, so the motion stays unpredictable and short.
+     */
+    static final float PITCH_FREQUENCY_RATIO = 0.68F;
 
     private ScreenShakeMath() {}
 
@@ -70,13 +78,20 @@ public final class ScreenShakeMath {
     }
 
     /**
-     * Angular offset in degrees at {@code timeTicks} for a shake of the given current amplitude.
+     * Angular offset in degrees at {@code timeTicks} for one axis of a shake.
      *
-     * <p>{@code phase} separates the axes: yaw and pitch are driven at different offsets so the view
-     * traces a rough figure-of-eight rather than sliding along one diagonal, which is what makes it
-     * read as a jolt instead of a nudge.
+     * <p><b>Always starts at zero.</b> An earlier version gave pitch a quarter-cycle phase offset,
+     * which meant {@code sin} evaluated to 1 on the very first frame — the camera snapped to full
+     * deflection the instant a spell landed, and the "shake" was really a pop followed by a wobble.
+     * Driving both axes from {@code sin(0) = 0} means the view is exactly where the player left it
+     * at the moment of impact and moves off from there.
+     *
+     * <p>{@code frequencyScale} separates the axes instead: see {@link #PITCH_FREQUENCY_RATIO}.
+     * {@code direction} is the per-impact sign and weight for this axis, so two impacts in a row do
+     * not shake along the same line.
      */
-    public static float offset(float currentAmplitude, float timeTicks, float phase) {
-        return currentAmplitude * Mth.sin(timeTicks * FREQUENCY + phase);
+    public static float offset(float currentAmplitude, float timeTicks, float frequencyScale,
+                               float direction) {
+        return currentAmplitude * direction * Mth.sin(timeTicks * FREQUENCY * frequencyScale);
     }
 }
