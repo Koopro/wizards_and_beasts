@@ -96,13 +96,23 @@ public class WandBlankItem extends Item {
         return null;
     }
 
+    /**
+     * <p><b>{@code wood.toString()} is load-bearing, not cosmetic.</b> {@code TranslatableContents}
+     * accepts only a {@code Component}, {@code Number}, {@code Boolean} or {@code String} as an argument,
+     * and in a development runtime its constructor <em>throws</em> on anything else rather than falling
+     * back to {@code toString()} the way a packaged build does. Passing the raw {@link Identifier} here
+     * meant that the moment a blank was shaped, hovering it — in the inventory, or in JEI's wandmaking
+     * entry, which builds a shaped blank of its own — threw out of the tooltip build and took the client
+     * with it. The blank looked like it could not accept a wood type at all. {@code WandmakersBenchScreen}
+     * already passes the id this way.
+     */
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltipAdder, TooltipFlag flag) {
         Identifier wood = WandComponents.getWood(stack);
         if (wood == null) {
             tooltipAdder.accept(Component.translatable("item.wizards_and_beasts.wand_blank.tooltip.no_wood"));
         } else {
-            tooltipAdder.accept(Component.translatable("item.wizards_and_beasts.wand_blank.tooltip.wood", wood));
+            tooltipAdder.accept(Component.translatable("item.wizards_and_beasts.wand_blank.tooltip.wood", wood.toString()));
         }
     }
 }
