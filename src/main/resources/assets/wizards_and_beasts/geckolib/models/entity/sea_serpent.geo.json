@@ -5,7 +5,7 @@
       "description": {
         "identifier": "geometry.sea_serpent",
         "texture_width": 64,
-        "texture_height": 64,
+        "texture_height": 104,
         "visible_bounds_width": 6.75,
         "visible_bounds_height": 6.75,
         "visible_bounds_offset": [
@@ -44,8 +44,8 @@
                 8.0
               ],
               "uv": [
-                0,
-                0
+                1,
+                1
               ]
             }
           ]
@@ -71,8 +71,8 @@
                 8.0
               ],
               "uv": [
-                0,
-                0
+                1,
+                18
               ]
             }
           ]
@@ -98,8 +98,8 @@
                 8.0
               ],
               "uv": [
-                0,
-                0
+                1,
+                32
               ]
             }
           ]
@@ -125,8 +125,8 @@
                 8.0
               ],
               "uv": [
-                0,
-                0
+                1,
+                46
               ]
             }
           ]
@@ -152,8 +152,8 @@
                 8.0
               ],
               "uv": [
-                0,
-                0
+                1,
+                60
               ]
             }
           ]
@@ -179,8 +179,8 @@
                 8.0
               ],
               "uv": [
-                0,
-                0
+                1,
+                74
               ]
             }
           ]
@@ -206,8 +206,8 @@
                 8.0
               ],
               "uv": [
-                0,
-                0
+                1,
+                88
               ]
             }
           ]

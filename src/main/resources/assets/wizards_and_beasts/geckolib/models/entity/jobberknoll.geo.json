@@ -4,8 +4,8 @@
     {
       "description": {
         "identifier": "geometry.jobberknoll",
-        "texture_width": 64,
-        "texture_height": 64,
+        "texture_width": 32,
+        "texture_height": 32,
         "visible_bounds_width": 2.0,
         "visible_bounds_height": 2.0,
         "visible_bounds_offset": [
@@ -44,8 +44,8 @@
                 3.6
               ],
               "uv": [
-                0,
-                0
+                1,
+                1
               ]
             }
           ]
@@ -71,8 +71,8 @@
                 2.4
               ],
               "uv": [
-                0,
-                0
+                18,
+                16
               ]
             }
           ]
@@ -98,8 +98,8 @@
                 3.6
               ],
               "uv": [
-                0,
-                0
+                1,
+                10
               ]
             }
           ]
@@ -125,8 +125,8 @@
                 3.6
               ],
               "uv": [
-                0,
-                0
+                1,
+                16
               ]
             }
           ]
@@ -152,8 +152,8 @@
                 0.6
               ],
               "uv": [
-                0,
-                0
+                1,
+                22
               ]
             }
           ]
@@ -179,8 +179,8 @@
                 0.6
               ],
               "uv": [
-                0,
-                0
+                5,
+                22
               ]
             }
           ]
@@ -206,8 +206,8 @@
                 2.4
               ],
               "uv": [
-                0,
-                0
+                9,
+                22
               ]
             }
           ]

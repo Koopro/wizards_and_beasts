@@ -4,8 +4,8 @@
     {
       "description": {
         "identifier": "geometry.plimpy",
-        "texture_width": 64,
-        "texture_height": 64,
+        "texture_width": 32,
+        "texture_height": 32,
         "visible_bounds_width": 2.0,
         "visible_bounds_height": 2.0,
         "visible_bounds_offset": [
@@ -44,8 +44,8 @@
                 6.4
               ],
               "uv": [
-                0,
-                0
+                1,
+                1
               ]
             }
           ]
@@ -71,8 +71,8 @@
                 2.4
               ],
               "uv": [
-                0,
-                0
+                1,
+                13
               ]
             }
           ]
@@ -98,8 +98,8 @@
                 3.2
               ],
               "uv": [
-                0,
-                0
+                14,
+                13
               ]
             }
           ]
@@ -125,8 +125,8 @@
                 3.2
               ],
               "uv": [
-                0,
-                0
+                1,
+                20
               ]
             }
           ]
@@ -152,8 +152,8 @@
                 3.2
               ],
               "uv": [
-                0,
-                0
+                23,
+                1
               ]
             }
           ]

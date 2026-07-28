@@ -4,8 +4,8 @@
     {
       "description": {
         "identifier": "geometry.ramora",
-        "texture_width": 64,
-        "texture_height": 64,
+        "texture_width": 32,
+        "texture_height": 40,
         "visible_bounds_width": 2.375,
         "visible_bounds_height": 2.375,
         "visible_bounds_offset": [
@@ -44,8 +44,8 @@
                 8.0
               ],
               "uv": [
-                0,
-                0
+                1,
+                1
               ]
             }
           ]
@@ -71,8 +71,8 @@
                 3.0
               ],
               "uv": [
-                0,
-                0
+                12,
+                15
               ]
             }
           ]
@@ -98,8 +98,8 @@
                 4.0
               ],
               "uv": [
-                0,
-                0
+                1,
+                24
               ]
             }
           ]
@@ -125,8 +125,8 @@
                 4.0
               ],
               "uv": [
-                0,
-                0
+                1,
+                30
               ]
             }
           ]
@@ -152,8 +152,8 @@
                 4.0
               ],
               "uv": [
-                0,
-                0
+                1,
+                15
               ]
             }
           ]

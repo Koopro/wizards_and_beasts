@@ -69,6 +69,7 @@ public class ScaledBeastRenderer<R extends EntityRenderState & GeoRenderState>
     /** Provider mirroring {@code GeoRendererHelper.simple}/{@code DragonRenderer.provider} for the manifest loop. */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T extends Entity & GeoEntity> EntityRendererProvider<T> provider(String modelName) {
-        return context -> new ScaledBeastRenderer(context, modelName);
+        return context -> at.koopro.wizardsandbeasts.client.GeoRendererHelper.applyGlowIfPresent(
+                new ScaledBeastRenderer(context, modelName), modelName);
     }
 }

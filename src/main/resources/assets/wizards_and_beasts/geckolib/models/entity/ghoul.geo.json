@@ -4,8 +4,8 @@
     {
       "description": {
         "identifier": "geometry.ghoul",
-        "texture_width": 64,
-        "texture_height": 64,
+        "texture_width": 32,
+        "texture_height": 32,
         "visible_bounds_width": 2.0,
         "visible_bounds_height": 2.0,
         "visible_bounds_offset": [
@@ -44,8 +44,8 @@
                 3.2
               ],
               "uv": [
-                0,
-                0
+                1,
+                1
               ]
             }
           ]
@@ -71,8 +71,8 @@
                 4.0
               ],
               "uv": [
-                0,
-                0
+                1,
+                12
               ]
             }
           ]
@@ -98,8 +98,8 @@
                 1.6
               ],
               "uv": [
-                0,
-                0
+                18,
+                12
               ]
             }
           ]
@@ -125,8 +125,8 @@
                 1.6
               ],
               "uv": [
-                0,
-                0
+                1,
+                21
               ]
             }
           ]
@@ -152,8 +152,8 @@
                 1.6
               ],
               "uv": [
-                0,
-                0
+                9,
+                21
               ]
             }
           ]
@@ -179,8 +179,8 @@
                 1.6
               ],
               "uv": [
-                0,
-                0
+                17,
+                21
               ]
             }
           ]

@@ -72,6 +72,7 @@ public class DragonRenderer<R extends EntityRenderState & GeoRenderState>
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T extends Entity & GeoEntity> EntityRendererProvider<T> provider(String modelName) {
-        return context -> new DragonRenderer(context, modelName);
+        return context -> at.koopro.wizardsandbeasts.client.GeoRendererHelper.applyGlowIfPresent(
+                new DragonRenderer(context, modelName), modelName);
     }
 }

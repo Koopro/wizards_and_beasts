@@ -32,7 +32,7 @@ public class ClientSetup {
         event.registerEntityRenderer(ModEntities.DEMENTOR.get(), DementorRenderer::new);
         event.registerEntityRenderer(ModEntities.BOWTRUCKLE.get(), GeoRendererHelper.simple("bowtruckle"));
         event.registerEntityRenderer(ModEntities.CORNISH_PIXIE.get(), GeoRendererHelper.simple("cornish_pixie"));
-        event.registerEntityRenderer(ModEntities.THESTRAL.get(), GeoRendererHelper.withGlow("thestral"));
+        event.registerEntityRenderer(ModEntities.THESTRAL.get(), GeoRendererHelper.simple("thestral"));
         event.registerEntityRenderer(ModEntities.PHOENIX.get(), GeoRendererHelper.simple("phoenix"));
         event.registerEntityRenderer(ModEntities.AUGUREY.get(), GeoRendererHelper.simple("augurey"));
         event.registerEntityRenderer(ModEntities.MOONCALF.get(), GeoRendererHelper.simple("mooncalf"));

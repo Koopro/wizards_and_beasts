@@ -4,8 +4,8 @@
     {
       "description": {
         "identifier": "geometry.fairy",
-        "texture_width": 64,
-        "texture_height": 64,
+        "texture_width": 32,
+        "texture_height": 16,
         "visible_bounds_width": 2.0,
         "visible_bounds_height": 2.0,
         "visible_bounds_offset": [
@@ -44,8 +44,8 @@
                 3.0
               ],
               "uv": [
-                0,
-                0
+                1,
+                1
               ]
             }
           ]
@@ -71,8 +71,8 @@
                 1.2
               ],
               "uv": [
-                0,
-                0
+                22,
+                7
               ]
             }
           ]
@@ -98,8 +98,8 @@
                 3.0
               ],
               "uv": [
-                0,
-                0
+                12,
+                1
               ]
             }
           ]
@@ -125,8 +125,8 @@
                 3.0
               ],
               "uv": [
-                0,
-                0
+                1,
+                7
               ]
             }
           ]
@@ -152,8 +152,8 @@
                 0.3
               ],
               "uv": [
-                0,
-                0
+                16,
+                7
               ]
             }
           ]
@@ -179,8 +179,8 @@
                 0.3
               ],
               "uv": [
-                0,
-                0
+                19,
+                7
               ]
             }
           ]

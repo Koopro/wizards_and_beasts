@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.client;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -35,24 +36,37 @@ public final class GeoRendererHelper {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T extends Entity & GeoEntity> EntityRendererProvider<T> simple(String modelName) {
-        return context -> new GeoEntityRenderer(context,
+        return context -> applyGlowIfPresent(new GeoEntityRenderer(context,
                 new DefaultedEntityGeoModel<>(
-                        Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, modelName)));
+                        Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, modelName))),
+                modelName);
     }
 
     /**
-     * Like {@link #simple}, but adds an {@link AutoGlowingGeoLayer} so emissive pixels
-     * (from {@code <modelName>_glowmask.png}) glow full-bright. Used for the Thestral's eyes.
+     * Attaches an {@link AutoGlowingGeoLayer} iff {@code textures/entity/<modelName>_glowmask.png} is
+     * actually present in the loaded resource packs, so emissive pixels (eyes, fire vents, unicorn horn)
+     * render full-bright.
+     *
+     * <p>The presence check matters: {@code AutoGlowingGeoLayer} does not fall back gracefully — with no
+     * glowmask on disk it resolves the missing-texture placeholder and paints a full-bright magenta
+     * checker over the mob. Probing the resource manager instead of keeping a hand-maintained id list
+     * means adding a glowmask PNG is the only step needed to light a creature up; nothing here has to be
+     * edited in lockstep. Renderer providers run during the {@code EntityRenderDispatcher} resource
+     * reload, so the resource manager is populated by the time this executes.
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public static <T extends Entity & GeoEntity> EntityRendererProvider<T> withGlow(String modelName) {
-        return context -> {
-            GeoEntityRenderer renderer = new GeoEntityRenderer(context,
-                    new DefaultedEntityGeoModel<>(
-                            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, modelName)));
+    public static <R extends GeoEntityRenderer> R applyGlowIfPresent(R renderer, String modelName) {
+        if (hasGlowmask(modelName)) {
             renderer.withRenderLayer(new AutoGlowingGeoLayer(renderer));
-            return renderer;
-        };
+        }
+        return renderer;
+    }
+
+    /** True when this model ships an emissive mask texture. */
+    public static boolean hasGlowmask(String modelName) {
+        Identifier mask = Identifier.fromNamespaceAndPath(
+                WizardsAndBeastsMod.MODID, "textures/entity/" + modelName + "_glowmask.png");
+        return Minecraft.getInstance().getResourceManager().getResource(mask).isPresent();
     }
 
     /**

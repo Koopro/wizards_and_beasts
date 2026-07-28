@@ -4,8 +4,8 @@
     {
       "description": {
         "identifier": "geometry.horklump",
-        "texture_width": 64,
-        "texture_height": 64,
+        "texture_width": 32,
+        "texture_height": 16,
         "visible_bounds_width": 2.0,
         "visible_bounds_height": 2.0,
         "visible_bounds_offset": [
@@ -44,8 +44,8 @@
                 4.8
               ],
               "uv": [
-                0,
-                0
+                1,
+                1
               ]
             }
           ]
@@ -71,8 +71,8 @@
                 0.4
               ],
               "uv": [
-                0,
-                0
+                22,
+                1
               ]
             }
           ]
@@ -98,8 +98,8 @@
                 0.4
               ],
               "uv": [
-                0,
-                0
+                25,
+                1
               ]
             }
           ]
@@ -125,8 +125,8 @@
                 0.4
               ],
               "uv": [
-                0,
-                0
+                28,
+                1
               ]
             }
           ]
@@ -152,8 +152,8 @@
                 0.4
               ],
               "uv": [
-                0,
-                0
+                1,
+                10
               ]
             }
           ]

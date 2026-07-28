@@ -4,8 +4,8 @@
     {
       "description": {
         "identifier": "geometry.maledictus",
-        "texture_width": 64,
-        "texture_height": 64,
+        "texture_width": 32,
+        "texture_height": 40,
         "visible_bounds_width": 2.375,
         "visible_bounds_height": 2.375,
         "visible_bounds_offset": [
@@ -44,8 +44,8 @@
                 4.0
               ],
               "uv": [
-                0,
-                0
+                1,
+                1
               ]
             }
           ]
@@ -71,8 +71,8 @@
                 5.0
               ],
               "uv": [
-                0,
-                0
+                1,
+                14
               ]
             }
           ]
@@ -98,8 +98,8 @@
                 2.0
               ],
               "uv": [
-                0,
-                0
+                22,
+                14
               ]
             }
           ]
@@ -125,8 +125,8 @@
                 2.0
               ],
               "uv": [
-                0,
-                0
+                1,
+                25
               ]
             }
           ]
@@ -152,8 +152,8 @@
                 2.0
               ],
               "uv": [
-                0,
-                0
+                10,
+                25
               ]
             }
           ]
@@ -179,8 +179,8 @@
                 2.0
               ],
               "uv": [
-                0,
-                0
+                19,
+                25
               ]
             }
           ]
