@@ -26,6 +26,20 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
     private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(
             WizardsAndBeastsMod.MODID, "textures/gui/wandmakers_bench.png");
 
+    /** Flexibility picker geometry. The stride is what gets drawn, so it is what the centring must use. */
+    private static final int FLEX_BUTTON_W = 20;
+    private static final int FLEX_BUTTON_H = 14;
+    private static final int FLEX_BUTTON_STRIDE = 22;
+    private static final int FLEX_ROW_Y = 72;
+
+    /**
+     * Tier bar geometry. The bar sits in the strip of bare panel below the hotbar — the artwork's last
+     * slot row ends at y 186 and the panel's own border starts at y 194, leaving 187-193 free.
+     */
+    private static final int BAR_H = 6;
+    private static final int BAR_INSET_X = 16;
+    private static final int BAR_BOTTOM_MARGIN = 9;
+
     public WandmakersBenchScreen(WandmakersBenchMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
         this.imageWidth = 176;
@@ -45,19 +59,19 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
         int barColor = t < 0.5f
                 ? interpolateColor(0xFF888888, 0xFFd4a020, t * 2.0f)
                 : interpolateColor(0xFFd4a020, 0xFF8040c0, (t - 0.5f) * 2.0f);
-        int bx = x + 16;
-        int by = y + this.imageHeight - 28;
-        int bw = this.imageWidth - 32;
-        graphics.fill(bx, by, bx + bw, by + 6, 0xFF000000);
-        graphics.fill(bx + 1, by + 1, bx + 1 + (int) ((bw - 2) * t), by + 5, barColor);
+        int bx = x + BAR_INSET_X;
+        int by = barTop(y);
+        int bw = barWidth();
+        graphics.fill(bx, by, bx + bw, by + BAR_H, 0xFF000000);
+        graphics.fill(bx + 1, by + 1, bx + 1 + (int) ((bw - 2) * t), by + BAR_H - 1, barColor);
 
         WandFlexibility[] values = WandFlexibility.values();
-        int fx = x + this.imageWidth / 2 - (values.length * 16) / 2;
-        int fy = y + 72;
+        int fx = flexRowLeft(x, values.length);
+        int fy = y + FLEX_ROW_Y;
         for (int i = 0; i < values.length; i++) {
-            int bx0 = fx + i * 22;
+            int bx0 = fx + i * FLEX_BUTTON_STRIDE;
             boolean sel = menu.getFlexibilityOrdinal() == i;
-            graphics.fill(bx0, fy, bx0 + 20, fy + 14, sel ? 0xFF6b5a40 : 0xFF3a3530);
+            graphics.fill(bx0, fy, bx0 + FLEX_BUTTON_W, fy + FLEX_BUTTON_H, sel ? 0xFF6b5a40 : 0xFF3a3530);
             graphics.drawString(font, String.valueOf(i + 1), bx0 + 6, fy + 3, 0xFFe0c080, false);
         }
 
@@ -108,6 +122,40 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
         }
     }
 
+    /**
+     * Top edge of the tier bar. Shared by the drawing pass and the hover test so the two cannot drift:
+     * they were separate copies of the same arithmetic, and the bar was drawn straight through the top of
+     * the hotbar slots.
+     */
+    private int barTop(int panelTop) {
+        return panelTop + this.imageHeight - BAR_BOTTOM_MARGIN;
+    }
+
+    private int barWidth() {
+        return this.imageWidth - 2 * BAR_INSET_X;
+    }
+
+    /** Left edge of the flexibility picker, centred using the stride the buttons are actually drawn at. */
+    private int flexRowLeft(int panelLeft, int buttonCount) {
+        int span = (buttonCount - 1) * FLEX_BUTTON_STRIDE + FLEX_BUTTON_W;
+        return panelLeft + (this.imageWidth - span) / 2;
+    }
+
+    /**
+     * Both labels, in this panel's own palette.
+     *
+     * <p>Vanilla draws them in {@code #404040}. The artwork behind them is {@code (35,31,27)} at the title
+     * and {@code (43,37,32)} at the inventory line — a contrast ratio of 1.58 : 1, which is not readable at
+     * any GUI scale. Overridden here rather than in a shared helper: every other screen has its own
+     * background and its own answer.
+     */
+    @Override
+    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
+        graphics.drawString(font, this.title, this.titleLabelX, this.titleLabelY, 0xFFddccaa, false);
+        graphics.drawString(font, this.playerInventoryTitle,
+                this.inventoryLabelX, this.inventoryLabelY, 0xFFbba07a, false);
+    }
+
     /** What the bench is waiting for, or {@code null} while it has nothing to say. */
     private @Nullable Component statusMessage() {
         return switch (menu.getStatus()) {
@@ -141,17 +189,20 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
         int x = (this.width - this.imageWidth) / 2;
         int y = (this.height - this.imageHeight) / 2;
         int tier = menu.getTierScoreScaled();
-        int bx = x + 16;
-        int by = y + this.imageHeight - 28;
-        int bw = this.imageWidth - 32;
-        if (mouseX >= bx && mouseX < bx + bw && mouseY >= by && mouseY < by + 6) {
+        int bx = x + BAR_INSET_X;
+        int by = barTop(y);
+        int bw = barWidth();
+        if (mouseX >= bx && mouseX < bx + bw && mouseY >= by && mouseY < by + BAR_H) {
             List<Identifier> enh = menu.getEnhancerBlockIds();
             String line1 = Component.translatable("wandcraft.gui.tier_score", tier / 100.0f).getString();
             String line2 = Component.translatable("wandcraft.gui.enhancers", enh.size()).getString();
             String line3 = Component.translatable("wandcraft.gui.tier_hint").getString();
-            int tipX = mouseX + 8;
-            int tipY = mouseY - 34;
             int tipW = Math.max(font.width(line1), Math.max(font.width(line2), font.width(line3))) + 8;
+            // The bar sits near the bottom of the panel, so mouseY - 34 is fine there — but the box is
+            // also drawn unclamped, and on a short window the panel rides high enough to push it off the
+            // top and right edges. Clamp both rather than assume where the panel landed.
+            int tipX = Math.max(2, Math.min(mouseX + 8, this.width - tipW - 2));
+            int tipY = Math.max(2, mouseY - 34);
             graphics.fill(tipX - 2, tipY - 2, tipX + tipW, tipY + 32, 0xE0100010);
             graphics.drawString(font, line1, tipX, tipY, 0xFFFFFFFF, false);
             graphics.drawString(font, line2, tipX, tipY + 10, 0xFFCCCCCC, false);
@@ -169,11 +220,11 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
         int x = (this.width - this.imageWidth) / 2;
         int y = (this.height - this.imageHeight) / 2;
         WandFlexibility[] values = WandFlexibility.values();
-        int fx = x + this.imageWidth / 2 - (values.length * 16) / 2;
-        int fy = y + 72;
+        int fx = flexRowLeft(x, values.length);
+        int fy = y + FLEX_ROW_Y;
         for (int i = 0; i < values.length; i++) {
-            int bx0 = fx + i * 22;
-            if (mouseX >= bx0 && mouseX < bx0 + 20 && mouseY >= fy && mouseY < fy + 14) {
+            int bx0 = fx + i * FLEX_BUTTON_STRIDE;
+            if (mouseX >= bx0 && mouseX < bx0 + FLEX_BUTTON_W && mouseY >= fy && mouseY < fy + FLEX_BUTTON_H) {
                 ClientPacketDistributor.sendToServer(new SetFlexibilityPayload(menu.containerId, i));
                 return true;
             }
