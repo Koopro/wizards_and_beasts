@@ -175,7 +175,7 @@ public class ModModelProvider extends ModelProvider {
         blockModels.createTrivialBlock(ModBlocks.SPELL_TEACHER.get(), TexturedModel.LEAVES);
 
         java.util.List<net.minecraft.world.item.Item> wizardingItems = java.util.List.of(
-                ConsumableItemRegistry.FAMOUS_WIZARD_CARD.get(), ConsumableItemRegistry.DITTANY.get(), ConsumableItemRegistry.OCCAMY_EGGSHELL.get(),
+                ConsumableItemRegistry.OCCAMY_EGGSHELL.get(),
                 ConsumableItemRegistry.BEZOAR.get(), ConsumableItemRegistry.DEMIGUISE_HAIR.get(), ConsumableItemRegistry.MOONCALF_DUNG.get(),
                 ConsumableItemRegistry.ERUMPENT_HORN.get(), ConsumableItemRegistry.MANDRAKE.get(), TrinketItemRegistry.REMEMBRALL.get(),
                 TrinketItemRegistry.OMNI_OCULARS.get(), TrinketItemRegistry.SNEAKOSCOPE.get(),
@@ -184,6 +184,12 @@ public class ModModelProvider extends ModelProvider {
         for (net.minecraft.world.item.Item item : wizardingItems) {
             itemModels.generateFlatItem(item, ModelTemplates.FLAT_ITEM);
         }
+
+        // Dittany and the wizard card moved off generateFlatItem: both now ship a hand-written
+        // cuboid model from tools/item_models_3d.py, and leaving them in the flat list would emit
+        // a second, competing models/item/<id>.json into the generated pack.
+        itemModels.declareCustomModelItem(ConsumableItemRegistry.DITTANY.get());
+        itemModels.declareCustomModelItem(ConsumableItemRegistry.FAMOUS_WIZARD_CARD.get());
 
         // Consumables use custom item models so they can point at vanilla textures while art is pending.
         itemModels.declareCustomModelItem(ConsumableItemRegistry.BREW.get());
