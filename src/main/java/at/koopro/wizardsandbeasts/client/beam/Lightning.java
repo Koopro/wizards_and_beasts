@@ -43,11 +43,7 @@ public record Lightning(int segments, float spread, int frequency) implements Be
             // at 120fps. The division freezes the shape for `frequency` ticks — it holds still, then
             // snaps to a new shape. Because the seed is only caster-id + tick, every client draws the
             // same bolt with zero network traffic.
-            int freq = Math.max(1, frequency);
-            RandomSource random = RandomSource.create(seed + (long) (ticks / freq));
-
-            Vec3 step = target.subtract(origin).scale(1.0 / segments);
-            Vec3 cursor = origin;
+            Vec3[] path = joints(origin, target, seed, ticks);
 
             for (int i = 0; i < segments; i++) {
                 float segStart = (float) i / segments;
@@ -61,19 +57,40 @@ public record Lightning(int segments, float spread, int frequency) implements Be
                     break;
                 }
 
-                // Last segment lands exactly on target so the optics don't wobble beside the point
-                // where damage actually resolves.
-                Vec3 end = (i == segments - 1)
-                        ? target
-                        : origin.add(step.scale(i + 1)).add(jitter(random, spread * PX));
-
-                BeamGeometry.segment(style, cursor, end, segProgress, base, consumer, ticks, partialTick);
-                cursor = end;
+                BeamGeometry.segment(style, path[i], path[i + 1], segProgress, base, consumer, ticks, partialTick);
             }
         });
     }
 
-    /** One shared {@code RandomSource} across all segments — the stream runs through, each joint differs. */
+    /**
+     * The bolt's joint path: {@code segments + 1} points from {@code origin} to {@code target}.
+     *
+     * <p>Split out of {@link #render} so the properties that are invisible in a screenshot and
+     * obvious in motion — a bolt that misses its own endpoints, or a shape that swims because it
+     * re-rolls between render passes — can be asserted without a render context. Same split
+     * {@code ScreenShakeMath} and {@code BroomCameraMath} use.
+     *
+     * <p>The seed uses integer division on ticks: re-rolling every frame would be unusable noise at
+     * 120fps, so the shape freezes for {@code frequency} ticks and then snaps. Because the seed is
+     * only caster id plus tick, every client draws the same bolt with zero network traffic.
+     */
+    Vec3[] joints(Vec3 origin, Vec3 target, int seed, int ticks) {
+        int freq = Math.max(1, frequency);
+        RandomSource random = RandomSource.create(seed + (long) (ticks / freq));
+
+        Vec3 step = target.subtract(origin).scale(1.0 / segments);
+        Vec3[] path = new Vec3[segments + 1];
+        path[0] = origin;
+        for (int i = 1; i < segments; i++) {
+            path[i] = origin.add(step.scale(i)).add(jitter(random, spread * PX));
+        }
+        // The final joint is the target itself, so the optics never wobble beside the point where
+        // damage actually resolves.
+        path[segments] = target;
+        return path;
+    }
+
+    /** One shared {@code RandomSource} across all joints — the stream runs through, each joint differs. */
     private static Vec3 jitter(RandomSource random, float amp) {
         return new Vec3(
                 (random.nextFloat() - 0.5f) * 2f * amp,

@@ -1,6 +1,5 @@
 package at.koopro.wizardsandbeasts.client.beam;
 
-import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.registry.ModEntities;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.core.Spells;
@@ -34,9 +33,6 @@ public final class BeamChannelClient {
      * on an interval for the benefit of players who only just started tracking the caster.
      */
     public static void start(int casterId, String spellId, float range) {
-        if (!WizardsAndBeastsMod.useNewBeamSystem) {
-            return;
-        }
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) {
             return;

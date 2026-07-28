@@ -135,13 +135,11 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
                 .map(module -> module.boneName() + "_anchor")
                 .ifPresent(anchorBone -> info.addBonePositionListener(anchorBone, (worldPos, modelPos, preRenderPos) -> {
                     if (worldPos != null) {
-                        WandTipWorldCache.setWorldTip(worldPos);
                         captureBeamAnchor(mc, worldPos, ownWand);
                     }
                 }));
-        info.addBonePositionListener(WandTipWorldCache.WAND_TIP_BONE, (worldPos, modelPos, preRenderPos) -> {
+        info.addBonePositionListener(WAND_TIP_BONE, (worldPos, modelPos, preRenderPos) -> {
             if (worldPos != null) {
-                WandTipWorldCache.setWorldTip(worldPos);
                 captureBeamAnchor(mc, worldPos, ownWand);
             }
         });
@@ -156,6 +154,9 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
      * see someone else's beam from, tip-exact and hand-approximate are indistinguishable — a wrong
      * anchor on your own beam is not.
      */
+    /** GeckoLib bone that marks the wand tip. Lives here now that the legacy tip cache is gone. */
+    private static final String WAND_TIP_BONE = "wand_tip";
+
     private static void captureBeamAnchor(Minecraft mc, net.minecraft.world.phys.Vec3 worldPos, boolean ownWand) {
         if (ownWand && mc.player != null) {
             at.koopro.wizardsandbeasts.client.beam.WandTipTracker.capture(mc.player.getId(), worldPos);

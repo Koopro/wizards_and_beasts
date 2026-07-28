@@ -31,14 +31,9 @@ public record BeamDebugOpenS2CPayload() implements CustomPacketPayload {
         ctx.enqueueWork(BeamDebugOpenS2CPayload::openClientScreenSafe);
     }
 
-    /**
-     * Which editor opens follows which renderer is drawing, and that is a client-side choice — so
-     * the decision is made here, on the receiving client, not by the sending command.
-     */
+    /** Opens the beam style editor. Kept behind the invoker so this class stays dist-safe. */
     private static void openClientScreenSafe() {
-        ClientScreenHooksInvoker.invoke(WizardsAndBeastsMod.useNewBeamSystem
-                ? "openBeamStyleScreen"
-                : "openBeamDebugScreen");
+        ClientScreenHooksInvoker.invoke("openBeamStyleScreen");
     }
 
     public static void sendToPlayer(ServerPlayer player) {

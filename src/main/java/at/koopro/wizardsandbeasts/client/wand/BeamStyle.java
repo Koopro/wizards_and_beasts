@@ -6,10 +6,10 @@ import net.minecraft.util.Mth;
  * The complete visual identity of one beam: three nested layers plus the path, pulse and endpoint
  * behaviour that drive them. Immutable — a style is art direction, not state.
  *
- * <p>{@link WandBeamGeometry} owns the <em>technique</em> (procedural jagged path, forks, volumetric
- * quads, layering); a style owns everything that makes one spell's beam look unlike another's. That
- * split is what lets Avada Kedavra read as a curse and Aguamenti as a water jet without either spell
- * touching the renderer.
+ * <p>The {@code client.beam} shapes own the <em>technique</em> (jagged path, volumetric quads,
+ * layering); a style owns everything that makes one spell's beam look unlike another's. That split is
+ * what lets Avada Kedavra read as a curse and Aguamenti as a water jet without either spell touching
+ * the renderer.
  *
  * <p>Layer colours are derived from a single spell hue via {@link #withHue(int)} rather than authored
  * per layer. Each layer stores a {@code whiteness} instead: the wide halo keeps the spell's hue at

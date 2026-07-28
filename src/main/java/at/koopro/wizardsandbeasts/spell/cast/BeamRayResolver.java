@@ -22,7 +22,7 @@ import java.util.function.Predicate;
 /**
  * Single source of truth for "where does a wand beam start, end, and hit?".
  * <p>
- * Used by both the client renderer ({@code WandBeamRenderer}) and server channel logic
+ * Used by both the client beam renderer ({@code client.beam}) and server channel logic
  * ({@code WandBeamChannelLogic}) so the visual end and the gameplay hit point always agree.
  * <p>
  * The ray is anchored at the player's eye on both sides; the renderer is free to draw the

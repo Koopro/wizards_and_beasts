@@ -20,7 +20,6 @@ import at.koopro.wizardsandbeasts.client.spell.ColoredGlowRenderer;
 import at.koopro.wizardsandbeasts.client.spell.SpellClientInputHandler;
 import at.koopro.wizardsandbeasts.client.spell.SpellKeyBindings;
 import at.koopro.wizardsandbeasts.client.particle.ModParticleProviders;
-import at.koopro.wizardsandbeasts.client.wand.WandBeamRenderer;
 import at.koopro.wizardsandbeasts.client.form.hud.FormDebugOverlay;
 import at.koopro.wizardsandbeasts.client.hud.MobEffectFullscreenOverlays;
 import at.koopro.wizardsandbeasts.client.spell.render.CrucioScreenRenderer;
@@ -51,7 +50,6 @@ public class WizardsAndBeastsClient {
         // Beam shapes are a client-only visual concern, so the registry lives on the client bus.
         ModBeamShapes.init(modEventBus);
 
-        modEventBus.addListener(at.koopro.wizardsandbeasts.client.wand.WandBeamPipelines::register);
         modEventBus.addListener(ClientSetup::registerRenderers);
         modEventBus.addListener(ClientSetup::registerLayers);
         modEventBus.addListener(ModParticleProviders::register);
@@ -68,7 +66,6 @@ public class WizardsAndBeastsClient {
 
         NeoForge.EVENT_BUS.addListener(SpellClientInputHandler::onClientTick);
         NeoForge.EVENT_BUS.addListener(SpellClientInputHandler::onScroll);
-        NeoForge.EVENT_BUS.addListener(WandBeamRenderer::onRenderLevel);
         NeoForge.EVENT_BUS.addListener(BeamClientEvents::onLoggingOut);
         NeoForge.EVENT_BUS.addListener(BeamClientEvents::onEntityLeaveLevel);
         NeoForge.EVENT_BUS.addListener(ColoredGlowRenderer::onRenderLevel);
