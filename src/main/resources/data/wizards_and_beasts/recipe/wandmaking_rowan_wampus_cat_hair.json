@@ -1,0 +1,15 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "WANDS"
+    }
+  ],
+  "type": "wizards_and_beasts:wandmaking",
+  "wood_key": "wizards_and_beasts:rowan",
+  "core_key": "wizards_and_beasts:wampus_cat_hair",
+  "minimum_bench_tier": 3.4,
+  "result_length_min": 9.9,
+  "result_length_max": 12.9,
+  "result_integrity": 1.0
+}

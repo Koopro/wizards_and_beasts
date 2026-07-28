@@ -1,0 +1,12 @@
+{
+  "display_name": {
+    "translate": "wand_core.wizards_and_beasts.veela_hair"
+  },
+  "source_key": "veela",
+  "raw_power": 1.5,
+  "consistency": 0.55,
+  "loyalty": 0.55,
+  "dark_affinity": 0.4,
+  "initiative": 1.0,
+  "allegiance_transfer_resistance": 0.6
+}

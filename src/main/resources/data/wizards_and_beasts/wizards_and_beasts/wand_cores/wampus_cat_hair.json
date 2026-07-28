@@ -1,0 +1,12 @@
+{
+  "display_name": {
+    "translate": "wand_core.wizards_and_beasts.wampus_cat_hair"
+  },
+  "source_key": "wampus_cat",
+  "raw_power": 1.6,
+  "consistency": 0.8,
+  "loyalty": 0.72,
+  "dark_affinity": 0.35,
+  "initiative": 0.88,
+  "allegiance_transfer_resistance": 0.85
+}

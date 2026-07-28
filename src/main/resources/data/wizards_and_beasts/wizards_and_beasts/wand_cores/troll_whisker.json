@@ -1,0 +1,12 @@
+{
+  "display_name": {
+    "translate": "wand_core.wizards_and_beasts.troll_whisker"
+  },
+  "source_key": "mountain_troll",
+  "raw_power": 1.35,
+  "consistency": 0.45,
+  "loyalty": 0.5,
+  "dark_affinity": 0.55,
+  "initiative": 0.55,
+  "allegiance_transfer_resistance": 0.55
+}

@@ -1,0 +1,15 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "WANDS"
+    }
+  ],
+  "type": "wizards_and_beasts:wandmaking",
+  "wood_key": "wizards_and_beasts:elder",
+  "core_key": "wizards_and_beasts:veela_hair",
+  "minimum_bench_tier": 7.4,
+  "result_length_min": 13.7,
+  "result_length_max": 14.7,
+  "result_integrity": 0.87
+}

@@ -1,0 +1,12 @@
+{
+  "display_name": {
+    "translate": "wand_core.wizards_and_beasts.thunderbird_tail_feather"
+  },
+  "source_key": "thunderbird",
+  "raw_power": 1.7,
+  "consistency": 0.74,
+  "loyalty": 0.68,
+  "dark_affinity": 0.3,
+  "initiative": 0.92,
+  "allegiance_transfer_resistance": 0.8
+}

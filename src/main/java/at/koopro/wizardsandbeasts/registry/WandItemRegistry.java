@@ -43,16 +43,25 @@ public final class WandItemRegistry {
             ModItems.ITEMS.registerItem("unicorn_hair", props -> new WandCoreMaterialItem(props,
                     Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "unicorn_hair"),
                     Component.literal("Fragile core material. Handle with care.")));
-    public static final DeferredItem<Item> THESTRAL_TAIL_HAIR =
-            ModItems.ITEMS.registerSimpleItem("thestral_tail_hair");
-    public static final DeferredItem<Item> VEELA_HAIR =
-            ModItems.ITEMS.registerSimpleItem("veela_hair");
-    public static final DeferredItem<Item> TROLL_WHISKER =
-            ModItems.ITEMS.registerSimpleItem("troll_whisker");
-    public static final DeferredItem<Item> WAMPUS_CAT_HAIR =
-            ModItems.ITEMS.registerSimpleItem("wampus_cat_hair");
-    public static final DeferredItem<Item> THUNDERBIRD_TAIL_FEATHER =
-            ModItems.ITEMS.registerSimpleItem("thunderbird_tail_feather");
+    // These five were plain Items, which meant they carried no core key — so the bench refused them and
+    // JEI never listed them, even though they are tagged into WANDS and filed under "Wand Cores" in the
+    // creative menu. They take no bespoke tooltip: each already has a `.desc` lang line, which
+    // ItemDescriptionTooltipHandler renders for every item in this namespace.
+    public static final DeferredItem<WandCoreMaterialItem> THESTRAL_TAIL_HAIR =
+            ModItems.ITEMS.registerItem("thestral_tail_hair", props -> new WandCoreMaterialItem(props,
+                    Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "thestral_tail_hair")));
+    public static final DeferredItem<WandCoreMaterialItem> VEELA_HAIR =
+            ModItems.ITEMS.registerItem("veela_hair", props -> new WandCoreMaterialItem(props,
+                    Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "veela_hair")));
+    public static final DeferredItem<WandCoreMaterialItem> TROLL_WHISKER =
+            ModItems.ITEMS.registerItem("troll_whisker", props -> new WandCoreMaterialItem(props,
+                    Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "troll_whisker")));
+    public static final DeferredItem<WandCoreMaterialItem> WAMPUS_CAT_HAIR =
+            ModItems.ITEMS.registerItem("wampus_cat_hair", props -> new WandCoreMaterialItem(props,
+                    Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "wampus_cat_hair")));
+    public static final DeferredItem<WandCoreMaterialItem> THUNDERBIRD_TAIL_FEATHER =
+            ModItems.ITEMS.registerItem("thunderbird_tail_feather", props -> new WandCoreMaterialItem(props,
+                    Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "thunderbird_tail_feather")));
 
     public static void init() {}
 

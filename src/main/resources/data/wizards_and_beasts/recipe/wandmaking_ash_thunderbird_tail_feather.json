@@ -1,0 +1,15 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "WANDS"
+    }
+  ],
+  "type": "wizards_and_beasts:wandmaking",
+  "wood_key": "wizards_and_beasts:ash",
+  "core_key": "wizards_and_beasts:thunderbird_tail_feather",
+  "minimum_bench_tier": 4.1,
+  "result_length_min": 11.0,
+  "result_length_max": 14.5,
+  "result_integrity": 0.94
+}

@@ -1,0 +1,15 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "WANDS"
+    }
+  ],
+  "type": "wizards_and_beasts:wandmaking",
+  "wood_key": "wizards_and_beasts:rowan",
+  "core_key": "wizards_and_beasts:thestral_tail_hair",
+  "minimum_bench_tier": 4.1,
+  "result_length_min": 10.0,
+  "result_length_max": 13.0,
+  "result_integrity": 0.97
+}
