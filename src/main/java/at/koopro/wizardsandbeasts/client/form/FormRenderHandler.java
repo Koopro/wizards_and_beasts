@@ -77,8 +77,7 @@ public class FormRenderHandler {
         if (size.isNonUniform()) {
             event.getPoseStack().popPose();
         }
-
-        FormRenderStateModifier.removeFormData(state);
+        // Nothing to clear: the form data lives on the render state, which is reallocated every frame.
     }
 
     private static void spawnObscurialSmokeTrail() {

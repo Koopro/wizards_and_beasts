@@ -6,30 +6,38 @@ import at.koopro.wizardsandbeasts.form.ModelType;
 import at.koopro.wizardsandbeasts.form.PlayerForm;
 import at.koopro.wizardsandbeasts.form.RenderFlag;
 import at.koopro.wizardsandbeasts.form.SizeProfile;
+import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.client.renderstate.RegisterRenderStateModifiersEvent;
+import org.jspecify.annotations.Nullable;
 
 import java.util.EnumSet;
-import java.util.IdentityHashMap;
-import java.util.Map;
 
 /**
  * Attaches form metadata to player render states, following the same pattern
- * as {@link BroomRiderRenderer}. This data is consumed by {@link FormRenderHandler}.
+ * as {@link at.koopro.wizardsandbeasts.client.broom.BroomRiderRenderer}. This data is consumed by
+ * {@link FormRenderHandler} and by {@code LivingEntityRendererMixin}.
+ *
+ * <p>The data rides on the render state via {@link net.minecraft.client.renderer.entity.state.EntityRenderState#setRenderData},
+ * not in a side map keyed by state. It used to be an {@code IdentityHashMap<Object, FormRenderData>}
+ * cleared only after a successful non-humanoid render, which meant every HUMANOID form and every early
+ * return stranded an entry — and because {@code EntityRenderer.createRenderState} allocates a fresh state
+ * each frame, those entries accumulated for the lifetime of the session. There is now nothing to clear:
+ * a state with no entry is simply a player who is not in a form.
  */
 public class FormRenderStateModifier {
 
-    private static final Map<Object, FormRenderData> FORM_DATA_MAP = new IdentityHashMap<>();
+    /** Present on the render state of a player in a form; absent otherwise. */
+    public static final ContextKey<FormRenderData> FORM_DATA =
+            new ContextKey<>(Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "player_form"));
 
-    public static FormRenderData getFormData(LivingEntityRenderState state) {
-        return FORM_DATA_MAP.get(state);
-    }
-
-    public static void removeFormData(LivingEntityRenderState state) {
-        FORM_DATA_MAP.remove(state);
+    public static @Nullable FormRenderData getFormData(LivingEntityRenderState state) {
+        return state.getRenderData(FORM_DATA);
     }
 
     @SuppressWarnings("unchecked")
@@ -46,7 +54,7 @@ public class FormRenderStateModifier {
                         PlayerForm form = FormRegistry.get(data.formId());
                         if (form == null) return;
 
-                        FORM_DATA_MAP.put(renderState, new FormRenderData(
+                        livingState.setRenderData(FORM_DATA, new FormRenderData(
                                 player.getUUID(),
                                 data.formId(),
                                 form.modelType(),

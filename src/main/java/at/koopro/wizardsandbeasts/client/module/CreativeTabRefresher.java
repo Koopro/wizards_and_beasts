@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.client.module;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.registry.ModCreativeTabs;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.SessionSearchTrees;
 import net.minecraft.client.player.LocalPlayer;
@@ -32,8 +33,7 @@ import java.util.List;
  * <p>Only this mod's tabs are rebuilt. Another mod's tab holding our items is that mod's to refresh, and
  * silently re-running someone else's generator is a good way to duplicate their entries.
  *
- * <p>A creative screen that is already open keeps the contents it built with; reopening it picks up the
- * new listing. Flipping a module while staring at the inventory is not worth reaching into an open screen.
+ * <p>An open creative screen is refreshed in place — see {@link #refreshOpenCreativeScreen}.
  */
 @NullMarked
 @EventBusSubscriber(modid = WizardsAndBeastsMod.MODID, value = Dist.CLIENT)
@@ -70,6 +70,26 @@ public final class CreativeTabRefresher {
         for (var tab : List.of(ModCreativeTabs.MAIN.get(), ModCreativeTabs.DECORATIVE_BLOCKS.get())) {
             tab.buildContents(parameters);
             updateSearchTrees(minecraft, parameters, tab);
+        }
+        refreshOpenCreativeScreen(minecraft);
+    }
+
+    /**
+     * Makes an already-open creative screen show the listing that was just rebuilt.
+     *
+     * <p>The screen copies a tab's contents when it selects that tab, so rebuilding the tab underneath it
+     * changed nothing on screen until the player closed and reopened the inventory — an operator flipping a
+     * module while looking at it saw the gate do nothing.
+     *
+     * <p>{@code resize} rather than a fresh screen: it re-runs {@code init}, which re-selects the current
+     * tab and so re-reads the contents, while keeping the search text and the scroll position the player
+     * had. Reopening the screen would lose both, and closing it would send a container-close packet for a
+     * screen nobody asked to close.
+     */
+    private static void refreshOpenCreativeScreen(Minecraft minecraft) {
+        if (minecraft.screen instanceof CreativeModeInventoryScreen screen) {
+            screen.resize(minecraft.getWindow().getGuiScaledWidth(),
+                    minecraft.getWindow().getGuiScaledHeight());
         }
     }
 

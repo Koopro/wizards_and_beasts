@@ -55,6 +55,5 @@ public class LivingEntityRendererMixin {
         FormModelRenderer.renderToCollector(poseStack, collector, formData, state);
 
         poseStack.popPose();
-        FormRenderStateModifier.removeFormData(state);
     }
 }

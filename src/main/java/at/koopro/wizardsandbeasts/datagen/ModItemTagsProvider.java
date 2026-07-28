@@ -30,6 +30,19 @@ import at.koopro.wizardsandbeasts.registry.WoodSet;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * The generated half of this mod's tags.
+ *
+ * <p><b>Not all of this mod's tags live here.</b> {@code src/main/resources/data/wizards_and_beasts/tags}
+ * holds the hand-authored ones — {@code brooms}, {@code wands}, {@code coins}, {@code niffler_shiny},
+ * {@code cannot_conjure/*}, the biome and structure tags. That split is by kind, not by accident:
+ * membership a human decides ("is this shiny enough for a Niffler") is written down, membership code
+ * derives (every item belonging to a module, every block a location helper registered) is generated, so
+ * that adding an item cannot silently drop it out of its module tag.
+ *
+ * <p>If you came here looking for a tag and did not find it, look in the other tree before adding it to
+ * one of them twice.
+ */
 public class ModItemTagsProvider extends BlockTagCopyingItemTagProvider {
 
     public ModItemTagsProvider(PackOutput output,
