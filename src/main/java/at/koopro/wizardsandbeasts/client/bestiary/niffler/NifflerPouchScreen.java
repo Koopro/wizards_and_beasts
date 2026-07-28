@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.client.bestiary.niffler;
 import at.koopro.wizardsandbeasts.entity.niffler.NifflerPouchMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
@@ -26,12 +27,25 @@ public class NifflerPouchScreen extends AbstractContainerScreen<NifflerPouchMenu
         this.inventoryLabelY = this.imageHeight - 94;
     }
 
+    /** Both pouch sheets are 256×256 with the panel in the top-left corner, so one blit of that region. */
+    private static final int SHEET = 256;
+
+    /**
+     * <p>This used to be a single {@code blit(texture, x, y, 0, 0, imageWidth, imageHeight, 256, 256)}.
+     * That is the 1.21.1 signature, and it no longer exists: the only pipeline-less overload in 1.21.11 is
+     * {@code blit(Identifier, x0, y0, x1, y1, u0, u1, v0, v1)} with float UVs, which the old call bound to
+     * silently because ints widen to floats. It resolved to a quad from the panel's corner back to the
+     * screen origin with reversed, out-of-range UVs — the background did not merely sit wrong, it was
+     * structurally meaningless. The pipeline overload below takes the destination size and the sheet size
+     * separately, which is what this draw always meant.
+     */
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         Identifier texture = menu.isBabyPouch() ? BABY_TEXTURE : ADULT_TEXTURE;
         int x = (this.width - this.imageWidth) / 2;
         int y = (this.height - this.imageHeight) / 2;
-        graphics.blit(texture, x, y, 0, 0, this.imageWidth, this.imageHeight, 256, 256);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, texture,
+                x, y, 0.0F, 0.0F, this.imageWidth, this.imageHeight, SHEET, SHEET);
     }
 
     @Override

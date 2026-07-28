@@ -58,6 +58,20 @@ public class OllivanderTrialScreen extends AbstractContainerScreen<OllivanderTri
         }
     }
 
+    /**
+     * The title only, in a colour that survives this screen's background.
+     *
+     * <p>Two defects in the inherited version. Vanilla draws both labels in {@code #404040}, which against
+     * the {@code 0xFF1e1a28} panel is a contrast ratio of about 1.5 : 1 — the title was effectively
+     * invisible. And the second label is {@code playerInventoryTitle}, drawn at {@code imageHeight - 94}
+     * = y 106: {@link OllivanderTrialMenu} has no slots at all, so that was a heading for an inventory
+     * this screen does not show, printed straight across the middle trial card.
+     */
+    @Override
+    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
+        graphics.drawString(font, this.title, this.titleLabelX, this.titleLabelY, 0xFFddbb77, false);
+    }
+
     private static String shorten(String s) {
         return s.length() > 12 ? s.substring(0, 10) + "…" : s;
     }
