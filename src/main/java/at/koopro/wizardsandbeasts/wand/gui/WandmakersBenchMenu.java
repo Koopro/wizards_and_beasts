@@ -4,7 +4,6 @@ import at.koopro.wizardsandbeasts.item.wand.WandBlankItem;
 import at.koopro.wizardsandbeasts.item.wand.WandCoreMaterialItem;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
-import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.registry.ModMenuTypes;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.bench.WandmakersBenchBlockEntity;
@@ -26,11 +25,11 @@ import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
 import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import at.koopro.wizardsandbeasts.registry.WandItemRegistry;
 
 public class WandmakersBenchMenu extends AbstractContainerMenu {
     private final WandmakersBenchBlockEntity bench;
@@ -184,6 +183,11 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
             if (!out.isEmpty()) {
                 handler.set(2, ItemResource.of(ItemStack.EMPTY), 0);
             }
+            // The cheapest thing this wood can become, so the bench can mention its tier before both
+            // slots are filled. Until now STATUS_BENCH_TOO_PLAIN was the only place the tier system was
+            // ever named, and it cannot fire until a blank *and* a core are seated — a player could build
+            // the bench, put a blank in and never learn that the surrounding blocks matter at all.
+            dataBacking[DATA_REQUIRED_TIER] = cheapestTierForWood(WandComponents.getWood(blank));
             dataBacking[DATA_STATUS] = STATUS_MISSING_INPUT;
             return;
         }
@@ -209,18 +213,26 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
         }
         dataBacking[DATA_STATUS] = STATUS_READY;
         WandFlexibility flex = WandFlexibility.values()[bench.getSelectedFlexibilityOrdinal()];
-        float len = recipe.resultLengthMin()
-                + level.random.nextFloat() * (recipe.resultLengthMax() - recipe.resultLengthMin());
-        ItemStack wand = new ItemStack(WandItemRegistry.WAND.get());
-        wand.set(WandComponents.WAND_WOOD.get(), wood);
-        wand.set(WandComponents.WAND_CORE.get(), coreId);
-        wand.set(WandComponents.WAND_FLEXIBILITY.get(), flex);
-        wand.set(WandComponents.WAND_LENGTH.get(), len);
-        wand.set(WandComponents.WAND_INTEGRITY.get(), recipe.resultIntegrity());
-        wand.set(WandComponents.WAND_MASTER.get(), Optional.empty());
-        ModDataComponents.refreshElderWandMarker(wand);
+        ItemStack wand = recipe.createWand(flex, recipe.rollLength(level.random));
         handler.set(2, ItemResource.of(wand), wand.getCount());
         bench.setChanged();
+    }
+
+    /**
+     * The lowest bench tier any recipe for this wood asks for, ×100, or {@code 0} when the wood is unknown
+     * (an unshaped or absent blank) or nothing is made from it.
+     */
+    private int cheapestTierForWood(@Nullable Identifier wood) {
+        if (wood == null || !(level instanceof ServerLevel serverLevel)) {
+            return 0;
+        }
+        float cheapest = Float.MAX_VALUE;
+        for (RecipeHolder<?> holder : serverLevel.getServer().getRecipeManager().getRecipes()) {
+            if (holder.value() instanceof WandmakingRecipe r && r.woodKey().equals(wood)) {
+                cheapest = Math.min(cheapest, r.minimumBenchTier());
+            }
+        }
+        return cheapest == Float.MAX_VALUE ? 0 : (int) (cheapest * 100.0f);
     }
 
     private Optional<WandmakingRecipe> findRecipe(Identifier wood, Identifier core) {

@@ -100,13 +100,13 @@ public class WandmakingCategory implements IRecipeCategory<WandmakingRecipe> {
                 .toList();
     }
 
+    /**
+     * No flexibility, and the low end of the length range: both are chosen or rolled at the bench, and a
+     * viewer that implied a fixed value would be lying. The stack itself comes from the recipe now — this
+     * category used to build its own and had drifted, missing the elder-wand marker.
+     */
     private static ItemStack resultFor(WandmakingRecipe recipe) {
-        ItemStack wand = new ItemStack(WandItemRegistry.WAND.get());
-        wand.set(WandComponents.WAND_WOOD.get(), recipe.woodKey());
-        wand.set(WandComponents.WAND_CORE.get(), recipe.coreKey());
-        wand.set(WandComponents.WAND_LENGTH.get(), recipe.resultLengthMin());
-        wand.set(WandComponents.WAND_INTEGRITY.get(), recipe.resultIntegrity());
-        return wand;
+        return recipe.createWand(null, recipe.resultLengthMin());
     }
 
     /** The stacks this recipe names, for the hiding pass. */

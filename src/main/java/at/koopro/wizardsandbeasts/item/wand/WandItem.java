@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.item.wand;
 import at.koopro.wizardsandbeasts.item.GeoItemBase;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.wand.stat.WandCore;
+import at.koopro.wizardsandbeasts.wand.WandLoreNames;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import at.koopro.wizardsandbeasts.wand.stat.WandLength;
 import at.koopro.wizardsandbeasts.wand.stat.WandWood;
@@ -139,8 +140,10 @@ public class WandItem extends GeoItemBase {
         WandFlexibility flexibility = WandComponents.getFlexibility(stack);
         Optional<UUID> master = WandComponents.getMaster(stack);
 
-        tooltipAdder.accept(Component.translatable("wandcraft.tooltip.wood", readableId(wood)).withStyle(ChatFormatting.GOLD));
-        tooltipAdder.accept(Component.translatable("wandcraft.tooltip.core", readableId(core)).withStyle(ChatFormatting.LIGHT_PURPLE));
+        tooltipAdder.accept(Component.translatable("wandcraft.tooltip.wood",
+                WandLoreNames.wood(context.registries(), wood)).withStyle(ChatFormatting.GOLD));
+        tooltipAdder.accept(Component.translatable("wandcraft.tooltip.core",
+                WandLoreNames.core(context.registries(), core)).withStyle(ChatFormatting.LIGHT_PURPLE));
         tooltipAdder.accept(Component.translatable("wandcraft.tooltip.flexibility",
                 flexibility == null ? "?" : flexibility.getSerializedName()).withStyle(ChatFormatting.GRAY));
         if (master.isPresent()) {
@@ -156,10 +159,6 @@ public class WandItem extends GeoItemBase {
                 .withStyle(ChatFormatting.BLUE));
         tooltipAdder.accept(Component.translatable("wandcraft.tooltip.allegiance", WandComponents.getAllegianceScore(stack))
                 .withStyle(ChatFormatting.DARK_GREEN));
-    }
-
-    private static String readableId(Identifier id) {
-        return id == null ? "unknown" : id.toString();
     }
 
     public static ItemStack createWand(WandWood wood, WandCore core, WandLength length, WandFlexibility flexibility) {

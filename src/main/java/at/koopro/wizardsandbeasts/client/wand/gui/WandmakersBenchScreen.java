@@ -132,8 +132,12 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
     /** What the bench is waiting for, or {@code null} while it has nothing to say. */
     private @Nullable Component statusMessage() {
         return switch (menu.getStatus()) {
-            case WandmakersBenchMenu.STATUS_MISSING_INPUT ->
-                    Component.translatable("wandcraft.bench.needs_input");
+            // With a shaped blank seated the bench knows the cheapest thing that wood can become, so it
+            // can name the tier system before the player has found both ingredients.
+            case WandmakersBenchMenu.STATUS_MISSING_INPUT -> menu.getRequiredTierScaled() > 0
+                    ? Component.translatable("wandcraft.bench.needs_core",
+                            menu.getRequiredTierScaled() / 100.0f, menu.getTierScoreScaled() / 100.0f)
+                    : Component.translatable("wandcraft.bench.needs_input");
             case WandmakersBenchMenu.STATUS_BLANK_UNSHAPED ->
                     Component.translatable("wandcraft.bench.blank_unshaped");
             case WandmakersBenchMenu.STATUS_NO_RECIPE ->
