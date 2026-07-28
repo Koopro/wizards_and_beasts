@@ -13,6 +13,8 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
+import java.util.Map;
+
 /**
  * The one place module state changes. The command tree and the network packet are two doors into this
  * method — validation, persistence, cache refresh and broadcast all happen here, so neither entry point can
@@ -45,9 +47,13 @@ public final class ModuleStateService {
     /** Pushes the authoritative world state into the read cache and out to every client. */
     public static void refreshAndBroadcast(MinecraftServer server) {
         ModuleStateData data = ModuleStateData.get(server.overworld());
+        Map<Module, ModuleState> before = ModuleManager.snapshot();
         ModuleManager.acceptAuthoritative(data.allStates());
         ModuleManager.acceptAuthoritativeSettings(data.allSettings());
         ModuleStateSyncPayload.broadcast(server);
+        if (!before.equals(ModuleManager.snapshot())) {
+            reloadDatapacks(server);
+        }
     }
 
     /** Sends the current snapshot to one player — used on join. */
@@ -73,31 +79,35 @@ public final class ModuleStateService {
 
         data.setState(module, target);
         refreshAndBroadcast(server);
-        reloadDatapacks(server, module, target);
         LOGGER.info("[Modules] {} {} -> {}", module.name(), current.getSerializedName(), target.getSerializedName());
         return Result.OK;
     }
 
     /**
-     * Re-reads the datapacks so recipes gated by {@code wizards_and_beasts:module_enabled} match the state
-     * that was just set.
+     * Re-reads the datapacks so recipes gated by {@code wizards_and_beasts:module_enabled} match the states
+     * now in the cache.
      *
-     * <p>{@code ICondition}s are evaluated once, while a datapack is being read, and the result is baked
-     * into the recipe manager. Without this the mod's own gate was half-live: {@link ModuleManager}'s cache
-     * updated immediately, JEI's viewer filter re-ran on the sync packet and hid or showed entries — but the
-     * recipes themselves kept whatever answer the condition gave at world load. Enabling a module left its
-     * recipes uncraftable until the next {@code /reload}, and disabling one left them craftable, with the
-     * viewer confidently disagreeing with the crafting table in both directions.
+     * <p>{@code ICondition}s are evaluated once, while a datapack is being read, and the answer is baked
+     * into the recipe manager. Without this the gate was half-live: {@link ModuleManager}'s cache updated at
+     * once and JEI's viewer filter re-ran on the sync packet, but the recipes kept whatever the condition
+     * said when the pack was last read. Enabling a module left its recipes uncraftable until the next
+     * {@code /reload} and disabling one left them craftable, with the viewer confidently disagreeing with
+     * the crafting table both ways.
      *
-     * <p>Only on a state change. Settings cannot appear in a condition, so
-     * {@link #setSetting} deliberately does not pay this cost.
+     * <p><b>This matters at startup too, not just for operator commands.</b> Datapacks are read before
+     * {@code ServerStartedEvent}, which is where world state first reaches the cache — so a world whose
+     * stored state differs from the build's shipped defaults loaded its recipes against the defaults.
+     * Driving the reload off "did any state actually change" covers both, and costs nothing on the common
+     * path where a world agrees with the build.
+     *
+     * <p>Settings cannot appear in a condition, so a settings-only change never reaches here.
      */
-    private static void reloadDatapacks(MinecraftServer server, Module module, ModuleState target) {
+    private static void reloadDatapacks(MinecraftServer server) {
         server.reloadResources(server.getPackRepository().getSelectedIds()).exceptionally(throwable -> {
             // A failed reload leaves the previous resources in place, which is the safe direction: the
-            // module flag itself is already stored and broadcast, so only recipe visibility lags.
-            LOGGER.error("[Modules] Datapack reload after {} -> {} failed; recipe conditions still reflect "
-                    + "the previous state until /reload", module.name(), target.getSerializedName(), throwable);
+            // module flags are already stored and broadcast, so only recipe availability lags.
+            LOGGER.error("[Modules] Datapack reload failed; recipe conditions still reflect the previous "
+                    + "module states until /reload", throwable);
             return null;
         });
     }
