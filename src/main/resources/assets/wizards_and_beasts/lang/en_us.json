@@ -611,7 +611,6 @@
   "wandcraft.allegiance.stolen_warning": "You hold another's wand. It will not perform at its best.",
   "wandcraft.corruption.threshold_warning": "Your wand darkens. It hungers for darker magic.",
   "wandcraft.corruption.fully_corrupted": "Your wand has fully embraced the Dark Arts.",
-  "wandcraft.gui.preview": "Preview",
   "wandcraft.gui.tier_score": "Bench tier: %.2f",
   "wandcraft.gui.enhancers": "Enhancer blocks detected: %s",
   "wandcraft.gui.resonance_fmt": "Resonance: %.2f",

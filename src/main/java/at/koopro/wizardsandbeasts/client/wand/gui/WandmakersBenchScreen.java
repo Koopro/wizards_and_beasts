@@ -4,7 +4,6 @@ import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import at.koopro.wizardsandbeasts.network.wand.SetFlexibilityPayload;
-import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -12,7 +11,6 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.jspecify.annotations.Nullable;
 
@@ -75,50 +73,25 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
             graphics.drawString(font, String.valueOf(i + 1), bx0 + 6, fy + 3, 0xFFe0c080, false);
         }
 
-        var inv = menu.getBench().getInventory();
-        int outCount = (int) inv.getAmountAsLong(2);
-        ItemStack out = outCount > 0 ? inv.getResource(2).toStack(outCount) : ItemStack.EMPTY;
-        if (out.isEmpty()) {
-            // An empty output slot used to be the bench's only answer to every failure.
-            Component reason = statusMessage();
-            if (reason != null) {
-                int px = x + 10;
-                int py = y + 16;
-                // Two lines is what fits above the ingredient slots; the strings are written to it.
-                for (var line : font.split(reason, this.imageWidth - 20).stream().limit(2).toList()) {
-                    graphics.drawString(font, line, px, py, 0xFFbba07a, false);
-                    py += 10;
-                }
-            }
-        } else {
-            int px = x + this.imageWidth / 2 - 60;
+        // The bench only speaks when it has nothing to hand over. There used to be a six-line preview of
+        // the finished wand here, drawn from y+16 in 10-12px steps — straight through the slot artwork,
+        // which puts the blank, arrow and output frames at y 35-50. It was also redundant: the stack
+        // sitting in the output slot is the wand, and WandItem's own tooltip already lists wood, core,
+        // flexibility, integrity, corruption, length and allegiance. Deleted rather than relocated; the
+        // panel has no free band tall enough to hold it, and nothing was lost by removing it.
+        if (menu.getBench().getInventory().getAmountAsLong(2) > 0) {
+            return;
+        }
+        // An empty output slot used to be the bench's only answer to every failure.
+        Component reason = statusMessage();
+        if (reason != null) {
+            int px = x + 10;
             int py = y + 16;
-            graphics.drawString(font, Component.translatable("wandcraft.gui.preview"), px, py, 0xFFddccaa, false);
-            Identifier wood = WandComponents.getWood(out);
-            Identifier core = WandComponents.getCore(out);
-            WandFlexibility flex = WandComponents.getFlexibility(out);
-            Float len = WandComponents.getLength(out);
-            py += 12;
-            graphics.drawString(font,
-                    Component.translatable("wandcraft.tooltip.wood", wood == null ? "-" : wood.toString()),
-                    px, py, 0xFFc9a227, false);
-            py += 10;
-            graphics.drawString(font,
-                    Component.translatable("wandcraft.tooltip.core", core == null ? "-" : core.toString()),
-                    px, py, 0xFFc080e0, false);
-            py += 10;
-            graphics.drawString(font,
-                    Component.translatable("wandcraft.tooltip.flexibility",
-                            flex == null ? "-" : flex.getSerializedName()),
-                    px, py, 0xFFaaaaaa, false);
-            py += 10;
-            graphics.drawString(font,
-                    Component.translatable("wandcraft.tooltip.integrity", WandComponents.getIntegrity(out)),
-                    px, py, 0xFF88cc88, false);
-            py += 10;
-            graphics.drawString(font,
-                    Component.translatable("wandcraft.tooltip.length_in", len == null ? 0.0f : len),
-                    px, py, 0xFFaaccee, false);
+            // Two lines is what fits above the ingredient slots; the strings are written to it.
+            for (var line : font.split(reason, this.imageWidth - 20).stream().limit(2).toList()) {
+                graphics.drawString(font, line, px, py, 0xFFbba07a, false);
+                py += 10;
+            }
         }
     }
 
