@@ -155,14 +155,13 @@ public class ModModelProvider extends ModelProvider {
         blockModels.createCrossBlockWithDefaultItem(ModBlocks.FLOATING_CANDLE.get(),
                 BlockModelGenerators.PlantType.NOT_TINTED, torchCross);
         blockModels.createCrossBlock(ModBlocks.DELUMINATOR_LIGHT.get(), BlockModelGenerators.PlantType.NOT_TINTED, torchCross);
-        // Keep these in datagen so validation does not fail when new torch variants are present.
-        // Runtime visuals still come from custom model json where provided.
-        blockModels.createTrivialBlock(ModBlocks.UNLIT_TORCH.get(), TexturedModel.LEAVES);
-        blockModels.createTrivialBlock(ModBlocks.UNLIT_WALL_TORCH.get(), TexturedModel.LEAVES);
-        blockModels.createTrivialBlock(ModBlocks.UNLIT_SOUL_TORCH.get(), TexturedModel.LEAVES);
-        blockModels.createTrivialBlock(ModBlocks.UNLIT_SOUL_WALL_TORCH.get(), TexturedModel.LEAVES);
-        blockModels.createTrivialBlock(ModBlocks.UNLIT_COPPER_TORCH.get(), TexturedModel.LEAVES);
-        blockModels.createTrivialBlock(ModBlocks.UNLIT_COPPER_WALL_TORCH.get(), TexturedModel.LEAVES);
+        // These were emitting TexturedModel.LEAVES — a full cube — so every unlit torch
+        // rendered as a solid block with the torch sprite tiled over all six faces.
+        // createNormalTorch emits the real torch/wall-torch models (and the flat item
+        // model) from the same texture, exactly as vanilla does for its own torches.
+        blockModels.createNormalTorch(ModBlocks.UNLIT_TORCH.get(), ModBlocks.UNLIT_WALL_TORCH.get());
+        blockModels.createNormalTorch(ModBlocks.UNLIT_SOUL_TORCH.get(), ModBlocks.UNLIT_SOUL_WALL_TORCH.get());
+        blockModels.createNormalTorch(ModBlocks.UNLIT_COPPER_TORCH.get(), ModBlocks.UNLIT_COPPER_WALL_TORCH.get());
 
         blockModels.createTrivialBlock(ModBlocks.BRASS_CAULDRON.get(), TexturedModel.LEAVES);
         blockModels.createTrivialBlock(ModBlocks.WIZARDING_COPPER_CAULDRON.get(), TexturedModel.LEAVES);
@@ -200,9 +199,12 @@ public class ModModelProvider extends ModelProvider {
         itemModels.declareCustomModelItem(DarkArtefactItemRegistry.DEATHLY_HALLOW_CLOAK.get());
         itemModels.declareCustomModelItem(TrinketItemRegistry.TIME_TURNER.get());
 
-        blockModels.createTrivialBlock(ModBlocks.UNLIT_LANTERN.get(), TexturedModel.LEAVES);
-        blockModels.createTrivialBlock(ModBlocks.UNLIT_SOUL_LANTERN.get(), TexturedModel.LEAVES);
-        blockModels.createTrivialBlock(ModBlocks.UNLIT_COPPER_LANTERN.get(), TexturedModel.LEAVES);
+        // Same cube problem as the torches. All three are real LanternBlocks, so they
+        // carry the HANGING property to dispatch on, and get both the standing and
+        // hanging variants built from the 16x48 lantern texture layout.
+        createLanternWithoutItem(blockModels, ModBlocks.UNLIT_LANTERN.get());
+        createLanternWithoutItem(blockModels, ModBlocks.UNLIT_SOUL_LANTERN.get());
+        createLanternWithoutItem(blockModels, ModBlocks.UNLIT_COPPER_LANTERN.get());
         blockModels.createTrivialBlock(ModBlocks.UNLIT_GLOWSTONE.get(), TexturedModel.LEAVES);
 
         blockModels.createTrivialBlock(ModBlocks.WARDING_STONE.get(), TexturedModel.CUBE);
@@ -330,5 +332,25 @@ public class ModModelProvider extends ModelProvider {
         blockModels.createTrivialBlock(leaves, TexturedModel.LEAVES);
 
         blockModels.createCrossBlockWithDefaultItem(sapling, BlockModelGenerators.PlantType.NOT_TINTED);
+    }
+
+    /**
+     * {@code BlockModelGenerators.createLantern} minus its flat-item-model step.
+     *
+     * <p>The unlit lanterns are placed by the Deluminator and never held, so they are registered as
+     * blocks with no {@code BlockItem}. Vanilla's helper calls {@code registerSimpleFlatItemModel} on
+     * {@code block.asItem()}, which for an item-less block resolves to {@code minecraft:air} — the
+     * first lantern silently emits a model for {@code item/air} and the second one dies with
+     * "Duplicate model definition". Everything else it does is reproduced here verbatim.
+     */
+    private static void createLanternWithoutItem(BlockModelGenerators blockModels, Block lantern) {
+        var standing = BlockModelGenerators.plainVariant(
+                TexturedModel.LANTERN.create(lantern, blockModels.modelOutput));
+        var hanging = BlockModelGenerators.plainVariant(
+                TexturedModel.HANGING_LANTERN.create(lantern, blockModels.modelOutput));
+        blockModels.blockStateOutput.accept(
+                net.minecraft.client.data.models.blockstates.MultiVariantGenerator.dispatch(lantern)
+                        .with(BlockModelGenerators.createBooleanModelDispatch(
+                                BlockStateProperties.HANGING, hanging, standing)));
     }
 }

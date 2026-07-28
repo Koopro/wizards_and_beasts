@@ -1,6 +1,6 @@
 {
-  "parent": "minecraft:block/leaves",
+  "parent": "minecraft:block/template_lantern",
   "textures": {
-    "all": "wizards_and_beasts:block/unlit_copper_lantern"
+    "lantern": "wizards_and_beasts:block/unlit_copper_lantern"
   }
 }

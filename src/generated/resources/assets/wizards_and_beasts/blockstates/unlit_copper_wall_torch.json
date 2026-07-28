@@ -1,8 +1,19 @@
 {
   "variants": {
-    "facing=north": { "model": "wizards_and_beasts:block/unlit_copper_wall_torch", "y": 270 },
-    "facing=south": { "model": "wizards_and_beasts:block/unlit_copper_wall_torch", "y": 90 },
-    "facing=west": { "model": "wizards_and_beasts:block/unlit_copper_wall_torch", "y": 180 },
-    "facing=east": { "model": "wizards_and_beasts:block/unlit_copper_wall_torch" }
+    "facing=east": {
+      "model": "wizards_and_beasts:block/unlit_copper_wall_torch"
+    },
+    "facing=north": {
+      "model": "wizards_and_beasts:block/unlit_copper_wall_torch",
+      "y": 270
+    },
+    "facing=south": {
+      "model": "wizards_and_beasts:block/unlit_copper_wall_torch",
+      "y": 90
+    },
+    "facing=west": {
+      "model": "wizards_and_beasts:block/unlit_copper_wall_torch",
+      "y": 180
+    }
   }
 }

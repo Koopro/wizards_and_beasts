@@ -1,7 +1,10 @@
 {
   "variants": {
-    "": {
+    "hanging=false": {
       "model": "wizards_and_beasts:block/unlit_soul_lantern"
+    },
+    "hanging=true": {
+      "model": "wizards_and_beasts:block/unlit_soul_lantern_hanging"
     }
   }
 }

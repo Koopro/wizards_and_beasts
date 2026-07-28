@@ -1,6 +1,6 @@
 {
-  "parent": "minecraft:block/leaves",
+  "parent": "minecraft:block/template_torch_wall",
   "textures": {
-    "all": "wizards_and_beasts:block/unlit_wall_torch"
+    "torch": "wizards_and_beasts:block/unlit_torch"
   }
 }
