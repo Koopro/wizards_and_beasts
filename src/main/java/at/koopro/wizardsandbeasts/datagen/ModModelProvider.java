@@ -152,8 +152,12 @@ public class ModModelProvider extends ModelProvider {
         blockModels.createTrivialBlock(ModBlocks.HUFFLEPUFF_BANNER.get(), TexturedModel.LEAVES);
 
         TextureMapping torchCross = TextureMapping.cross(Identifier.withDefaultNamespace("block/torch"));
+        // The placed candle used to draw the vanilla torch cross, so the block in the world
+        // was a plain torch and floating_candle.png only ever showed up on the item.
         blockModels.createCrossBlockWithDefaultItem(ModBlocks.FLOATING_CANDLE.get(),
-                BlockModelGenerators.PlantType.NOT_TINTED, torchCross);
+                BlockModelGenerators.PlantType.NOT_TINTED,
+                TextureMapping.cross(Identifier.fromNamespaceAndPath(
+                        WizardsAndBeastsMod.MODID, "block/floating_candle")));
         blockModels.createCrossBlock(ModBlocks.DELUMINATOR_LIGHT.get(), BlockModelGenerators.PlantType.NOT_TINTED, torchCross);
         // These were emitting TexturedModel.LEAVES — a full cube — so every unlit torch
         // rendered as a solid block with the torch sprite tiled over all six faces.
