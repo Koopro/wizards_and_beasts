@@ -18,6 +18,7 @@ import at.koopro.wizardsandbeasts.network.spell.ProtegoSpawnS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.SpellDataDeltaS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.SpellDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.SpellDeniedS2CPayload;
+import at.koopro.wizardsandbeasts.client.camera.ScreenShakeHandler;
 import at.koopro.wizardsandbeasts.network.spell.SpellImpactBurstS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.SpellProficiencySyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.teacher.SpellTeacherOpenS2CPayload;
@@ -133,7 +134,12 @@ public final class SpellClientPayloadHandlers {
         ctx.enqueueWork(() -> {
             Vec3 pos = new Vec3(pkt.x(), pkt.y(), pkt.z());
             SpellFamily family = SpellFamily.byOrdinal(pkt.familyOrdinal());
-            SpellVfxClient.spawnTintBurst(pos, family, pkt.argb(), Math.max(1, pkt.count()), pkt.spread());
+            int count = Math.max(1, pkt.count());
+            SpellVfxClient.spawnTintBurst(pos, family, pkt.argb(), count, pkt.spread());
+            // This payload already reaches everyone tracking the impact and already carries where
+            // it landed and how big it was, so the camera kick rides along on it — no extra packet,
+            // and every existing impact call site gets one without being touched.
+            ScreenShakeHandler.impact(pos, count);
         });
     }
 
