@@ -57,12 +57,8 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
         tag(ModuleTags.blocks(Module.STRUCTURES)).add(LocationBlockHelper.allBlocks().stream()
                 .map(block -> (Block) block.get())
                 .toArray(Block[]::new));
-        // Diagon's street stone registers straight into ModBlocks rather than through the helper, so it
-        // is not in allBlocks() and has to be named here alongside its items.
-        tag(ModuleTags.blocks(Module.STRUCTURES)).add(
-                DiagonAlleyBlocks.DIAGON_STREET_STONE.get(),
-                DiagonAlleyBlocks.DIAGON_STREET_STONE_SLAB.get(),
-                DiagonAlleyBlocks.DIAGON_STREET_STONE_PRESSURE_PLATE.get());
+        // Diagon's street stone used to be named here too — it now goes through
+        // LocationBlockHelper.withSlabAndStonePlate, so allBlocks() already covers it.
 
         tag(ModuleTags.blocks(Module.POCKET_DIMENSIONS)).add(
                 ModBlocks.ENCHANTED_TRUNK.get(), ModBlocks.EXPANDED_TRUNK.get(),

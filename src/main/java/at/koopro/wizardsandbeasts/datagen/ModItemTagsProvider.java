@@ -66,10 +66,8 @@ public class ModItemTagsProvider extends BlockTagCopyingItemTagProvider {
         module(Module.STRUCTURES).add(LocationBlockHelper.allItems().stream()
                 .map(item -> (Item) item.get())
                 .toArray(Item[]::new));
-        add(Module.STRUCTURES,
-                DiagonAlleyBlocks.DIAGON_STREET_STONE_ITEM.get(),
-                DiagonAlleyBlocks.DIAGON_STREET_STONE_SLAB_ITEM.get(),
-                DiagonAlleyBlocks.DIAGON_STREET_STONE_PRESSURE_PLATE_ITEM.get());
+        // Diagon's street stone items used to be named here; withSlabAndStonePlate tracks them, so
+        // allItems() above already covers them.
 
         for (WoodSet woodSet : ModBlocks.ALL_WOOD_SETS) {
             add(Module.WANDWOOD,

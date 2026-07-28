@@ -80,6 +80,14 @@ public final class LocationBlockHelper {
             DeferredItem<BlockItem> slabItem,
             DeferredItem<BlockItem> stairsItem) {}
 
+    public record PlateSet(
+            DeferredBlock<Block> base,
+            DeferredBlock<SlabBlock> slab,
+            DeferredBlock<PressurePlateBlock> plate,
+            DeferredItem<BlockItem> baseItem,
+            DeferredItem<BlockItem> slabItem,
+            DeferredItem<BlockItem> plateItem) {}
+
     public record VariantSet(
             DeferredBlock<Block> base,
             DeferredBlock<SlabBlock> slab,
@@ -137,8 +145,22 @@ public final class LocationBlockHelper {
                 trackItem(ModItems.ITEMS.registerSimpleBlockItem(wall)));
     }
 
-    /** Stone pressure plate registered separately (only needed for diagon_street_stone). */
-    static DeferredBlock<PressurePlateBlock> stonePressurePlate(String id, BlockBehaviour.Properties props) {
-        return track(ModBlocks.BLOCKS.registerBlock(id, p -> new PressurePlateBlock(BlockSetType.STONE, p), () -> props));
+    /**
+     * Base, slab and stone pressure plate — no stairs, no wall. Diagon's street stone is the only set
+     * with this shape, and it used to be registered by hand straight into {@link ModBlocks} to avoid the
+     * stairs and wall that {@link #withVariants} would have added. That kept it out of
+     * {@link #allBlocks()}, so every datagen provider had to name its three blocks and three items
+     * again by hand. Going through the helper is what puts it back in the tracked set.
+     */
+    public static PlateSet withSlabAndStonePlate(String id, BlockBehaviour.Properties props) {
+        var base = track(ModBlocks.BLOCKS.registerBlock(id, Block::new, () -> props));
+        var slab = track(ModBlocks.BLOCKS.registerBlock(id + "_slab", SlabBlock::new, () -> props));
+        var plate = track(ModBlocks.BLOCKS.registerBlock(id + "_pressure_plate",
+                p -> new PressurePlateBlock(BlockSetType.STONE, p), () -> props));
+        return new PlateSet(
+                base, slab, plate,
+                trackItem(ModItems.ITEMS.registerSimpleBlockItem(base)),
+                trackItem(ModItems.ITEMS.registerSimpleBlockItem(slab)),
+                trackItem(ModItems.ITEMS.registerSimpleBlockItem(plate)));
     }
 }

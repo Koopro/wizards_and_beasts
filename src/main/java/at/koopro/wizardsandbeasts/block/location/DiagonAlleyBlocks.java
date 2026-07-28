@@ -76,26 +76,23 @@ public final class DiagonAlleyBlocks {
             LocationBlockHelper.withSlabStair("diagon_painted_wood_purple", wood(MapColor.COLOR_PURPLE));
 
     // Diagon Street Stone — base + slab + pressure plate (no stairs, no wall)
-    // Registered manually to avoid double-registration from helper calls.
     // ASSET: diagon_street_stone, diagon_street_stone_slab, diagon_street_stone_pressure_plate
     // Recipe (gated by Module.STRUCTURES, see ModRecipeProvider) —stone bricks + gravel
     private static final BlockBehaviour.Properties STREET_PROPS =
             stone(MapColor.COLOR_LIGHT_GRAY);
 
-    public static final DeferredBlock<Block> DIAGON_STREET_STONE =
-            ModBlocks.BLOCKS.registerBlock("diagon_street_stone", Block::new, () -> STREET_PROPS);
-    public static final DeferredBlock<SlabBlock> DIAGON_STREET_STONE_SLAB =
-            ModBlocks.BLOCKS.registerBlock("diagon_street_stone_slab", SlabBlock::new, () -> STREET_PROPS);
-    public static final DeferredBlock<PressurePlateBlock> DIAGON_STREET_STONE_PRESSURE_PLATE =
-            ModBlocks.BLOCKS.registerBlock("diagon_street_stone_pressure_plate",
-                    p -> new PressurePlateBlock(BlockSetType.STONE, p), () -> STREET_PROPS);
+    private static final LocationBlockHelper.PlateSet STREET_STONE =
+            LocationBlockHelper.withSlabAndStonePlate("diagon_street_stone", STREET_PROPS);
 
-    public static final DeferredItem<BlockItem> DIAGON_STREET_STONE_ITEM =
-            ModItems.ITEMS.registerSimpleBlockItem(DIAGON_STREET_STONE);
-    public static final DeferredItem<BlockItem> DIAGON_STREET_STONE_SLAB_ITEM =
-            ModItems.ITEMS.registerSimpleBlockItem(DIAGON_STREET_STONE_SLAB);
+    public static final DeferredBlock<Block> DIAGON_STREET_STONE = STREET_STONE.base();
+    public static final DeferredBlock<SlabBlock> DIAGON_STREET_STONE_SLAB = STREET_STONE.slab();
+    public static final DeferredBlock<PressurePlateBlock> DIAGON_STREET_STONE_PRESSURE_PLATE =
+            STREET_STONE.plate();
+
+    public static final DeferredItem<BlockItem> DIAGON_STREET_STONE_ITEM = STREET_STONE.baseItem();
+    public static final DeferredItem<BlockItem> DIAGON_STREET_STONE_SLAB_ITEM = STREET_STONE.slabItem();
     public static final DeferredItem<BlockItem> DIAGON_STREET_STONE_PRESSURE_PLATE_ITEM =
-            ModItems.ITEMS.registerSimpleBlockItem(DIAGON_STREET_STONE_PRESSURE_PLATE);
+            STREET_STONE.plateItem();
 
     public static void init() { /* force class load, triggering static field registration */ }
 }

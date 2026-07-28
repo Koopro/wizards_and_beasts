@@ -73,8 +73,33 @@ public final class ModuleStateService {
 
         data.setState(module, target);
         refreshAndBroadcast(server);
+        reloadDatapacks(server, module, target);
         LOGGER.info("[Modules] {} {} -> {}", module.name(), current.getSerializedName(), target.getSerializedName());
         return Result.OK;
+    }
+
+    /**
+     * Re-reads the datapacks so recipes gated by {@code wizards_and_beasts:module_enabled} match the state
+     * that was just set.
+     *
+     * <p>{@code ICondition}s are evaluated once, while a datapack is being read, and the result is baked
+     * into the recipe manager. Without this the mod's own gate was half-live: {@link ModuleManager}'s cache
+     * updated immediately, JEI's viewer filter re-ran on the sync packet and hid or showed entries — but the
+     * recipes themselves kept whatever answer the condition gave at world load. Enabling a module left its
+     * recipes uncraftable until the next {@code /reload}, and disabling one left them craftable, with the
+     * viewer confidently disagreeing with the crafting table in both directions.
+     *
+     * <p>Only on a state change. Settings cannot appear in a condition, so
+     * {@link #setSetting} deliberately does not pay this cost.
+     */
+    private static void reloadDatapacks(MinecraftServer server, Module module, ModuleState target) {
+        server.reloadResources(server.getPackRepository().getSelectedIds()).exceptionally(throwable -> {
+            // A failed reload leaves the previous resources in place, which is the safe direction: the
+            // module flag itself is already stored and broadcast, so only recipe visibility lags.
+            LOGGER.error("[Modules] Datapack reload after {} -> {} failed; recipe conditions still reflect "
+                    + "the previous state until /reload", module.name(), target.getSerializedName(), throwable);
+            return null;
+        });
     }
 
     /**

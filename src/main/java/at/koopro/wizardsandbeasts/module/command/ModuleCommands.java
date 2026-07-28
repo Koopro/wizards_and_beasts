@@ -85,8 +85,12 @@ public final class ModuleCommands {
                 case COMING_SOON -> ChatFormatting.AQUA;
                 case DISABLED -> ChatFormatting.RED;
             };
-            source.sendSuccess(() -> Component.literal("  " + module.name().toLowerCase(Locale.ROOT) + ": ")
-                    .withStyle(ChatFormatting.GRAY)
+            // Name and id both: the name is what the module is called everywhere else in the game, the
+            // id is what you type back into `/wandb module set`. Printing only one of them loses.
+            source.sendSuccess(() -> Component.literal("  ").withStyle(ChatFormatting.GRAY)
+                    .append(ModuleIds.displayName(module).copy().withStyle(ChatFormatting.WHITE))
+                    .append(Component.literal(" (" + ModuleIds.of(module).getPath() + "): ")
+                            .withStyle(ChatFormatting.DARK_GRAY))
                     .append(Component.literal(state.getSerializedName()).withStyle(color))
                     .append(state == ModuleState.COMING_SOON
                             ? Component.literal("  (locked)").withStyle(ChatFormatting.DARK_GRAY)
@@ -121,7 +125,7 @@ public final class ModuleCommands {
         }
         ModuleStateService.Result result = ModuleStateService.setState(source.getServer(), module, state);
         return report(source, result, () -> Component.literal("Module ").withStyle(ChatFormatting.GRAY)
-                .append(Component.literal(module.name().toLowerCase(Locale.ROOT)).withStyle(ChatFormatting.AQUA))
+                .append(ModuleIds.displayName(module).copy().withStyle(ChatFormatting.AQUA))
                 .append(Component.literal(" → ").withStyle(ChatFormatting.DARK_GRAY))
                 .append(Component.literal(state.getSerializedName()).withStyle(ChatFormatting.GREEN)));
     }
@@ -143,7 +147,7 @@ public final class ModuleCommands {
         ModuleStateService.Result result =
                 ModuleStateService.setSetting(source.getServer(), module, key, rawValue);
         return report(source, result, () -> Component.literal("Set ").withStyle(ChatFormatting.GRAY)
-                .append(Component.literal(module.name().toLowerCase(Locale.ROOT)).withStyle(ChatFormatting.AQUA))
+                .append(ModuleIds.displayName(module).copy().withStyle(ChatFormatting.AQUA))
                 .append(Component.literal(" " + key.getPath() + " = ").withStyle(ChatFormatting.DARK_GRAY))
                 .append(Component.literal(rawValue).withStyle(ChatFormatting.GREEN)));
     }

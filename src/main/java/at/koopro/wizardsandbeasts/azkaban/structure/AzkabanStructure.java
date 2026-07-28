@@ -91,7 +91,8 @@ public final class AzkabanStructure extends Structure {
     @Override
     protected @NonNull Optional<GenerationStub> findGenerationPoint(@NonNull GenerationContext context) {
         // Registration is always present; the AZKABAN module gates *generation* only.
-        // Structures are a Beta v0.3 feature — see ModuleManager (AZKABAN = PREVIEW at alpha).
+        // ModuleDefaults ships AZKABAN as DISABLED, deliberately: the fortress NBT is still a 225-byte
+        // placeholder, so a generated Azkaban would be an empty box. An operator can switch it on.
         if (!ModuleManager.isEnabled(Module.AZKABAN)) {
             return Optional.empty();
         }

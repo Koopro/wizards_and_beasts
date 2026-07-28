@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.event.module;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleContentIndex;
+import at.koopro.wizardsandbeasts.module.ModuleIds;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -112,8 +113,7 @@ public final class ModuleContentGate {
         if (player instanceof ServerPlayer serverPlayer) {
             serverPlayer.displayClientMessage(
                     Component.translatable("message.wizards_and_beasts.module.content_disabled",
-                            Component.translatable("module.wizards_and_beasts."
-                                    + module.name().toLowerCase(java.util.Locale.ROOT) + ".name")),
+                            ModuleIds.displayName(module)),
                     true);
         }
     }
