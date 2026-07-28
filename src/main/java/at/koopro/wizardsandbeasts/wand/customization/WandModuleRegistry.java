@@ -40,6 +40,10 @@ public final class WandModuleRegistry {
         register(WandSlot.HANDLE, "twisted");
         register(WandSlot.HANDLE, "braided");
         register(WandSlot.HANDLE, "smooth");
+        register(WandSlot.HANDLE, "ribbed");
+        register(WandSlot.HANDLE, "bulbous");
+        register(WandSlot.HANDLE, "fluted");
+        register(WandSlot.HANDLE, "wrapped");
 
         // SHAFT variants
         register(WandSlot.SHAFT, "straight");
@@ -47,6 +51,9 @@ public final class WandModuleRegistry {
         register(WandSlot.SHAFT, "knotted");
         register(WandSlot.SHAFT, "tapered");
         register(WandSlot.SHAFT, "segmented");
+        register(WandSlot.SHAFT, "vine");
+        register(WandSlot.SHAFT, "bowed");
+        register(WandSlot.SHAFT, "reeded");
 
         // TIP variants
         register(WandSlot.TIP, "pointed");
@@ -54,6 +61,9 @@ public final class WandModuleRegistry {
         register(WandSlot.TIP, "split");
         register(WandSlot.TIP, "crystal");
         register(WandSlot.TIP, "blunt");
+        register(WandSlot.TIP, "needle");
+        register(WandSlot.TIP, "chisel");
+        register(WandSlot.TIP, "budded");
 
         // CORE variants
         register(WandSlot.CORE, "phoenix_feather");
@@ -67,6 +77,9 @@ public final class WandModuleRegistry {
         register(WandSlot.ORNAMENT, "gem_inlay");
         register(WandSlot.ORNAMENT, "metal_band");
         register(WandSlot.ORNAMENT, "engraving");
+        register(WandSlot.ORNAMENT, "wire_wrap");
+        register(WandSlot.ORNAMENT, "initial_plate");
+        register(WandSlot.ORNAMENT, "spiral_inlay");
     }
 
     private static void register(WandSlot slot, String variant) {
