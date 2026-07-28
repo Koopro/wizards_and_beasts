@@ -15,6 +15,7 @@ public final class WandCommands {
                 .then(SpellCommands.registerSpellCommand())
                 .then(ProficiencyCommands.register())
                 .then(SpellCommands.registerGiveCommand())
-                .then(WandConfigCommands.register());
+                .then(WandConfigCommands.register())
+                .then(BlankShapingSelfTest.register());
     }
 }
