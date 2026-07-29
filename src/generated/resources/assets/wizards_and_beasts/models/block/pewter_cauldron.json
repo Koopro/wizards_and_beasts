@@ -1,6 +1,7 @@
 {
-  "parent": "minecraft:block/leaves",
+  "parent": "minecraft:block/cube_top",
   "textures": {
-    "all": "wizards_and_beasts:block/pewter_cauldron"
+    "side": "wizards_and_beasts:block/pewter_cauldron_side",
+    "top": "wizards_and_beasts:block/pewter_cauldron_top"
   }
 }

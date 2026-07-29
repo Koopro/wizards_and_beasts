@@ -167,9 +167,12 @@ public class ModModelProvider extends ModelProvider {
         blockModels.createNormalTorch(ModBlocks.UNLIT_SOUL_TORCH.get(), ModBlocks.UNLIT_SOUL_WALL_TORCH.get());
         blockModels.createNormalTorch(ModBlocks.UNLIT_COPPER_TORCH.get(), ModBlocks.UNLIT_COPPER_WALL_TORCH.get());
 
-        blockModels.createTrivialBlock(ModBlocks.BRASS_CAULDRON.get(), TexturedModel.LEAVES);
-        blockModels.createTrivialBlock(ModBlocks.WIZARDING_COPPER_CAULDRON.get(), TexturedModel.LEAVES);
-        blockModels.createTrivialBlock(ModBlocks.PEWTER_CAULDRON.get(), TexturedModel.LEAVES);
+        // CUBE_TOP, not LEAVES: a cauldron with the same metal texture on all six faces
+        // gives no sign there is anything in it, which is the entire point of a cauldron.
+        // The side stays the vessel; the top is the brew surface inside its rim.
+        blockModels.createTrivialBlock(ModBlocks.BRASS_CAULDRON.get(), TexturedModel.CUBE_TOP);
+        blockModels.createTrivialBlock(ModBlocks.WIZARDING_COPPER_CAULDRON.get(), TexturedModel.CUBE_TOP);
+        blockModels.createTrivialBlock(ModBlocks.PEWTER_CAULDRON.get(), TexturedModel.CUBE_TOP);
 
         blockModels.createTrivialBlock(ModBlocks.FLOO_GRATE.get(), TexturedModel.LEAVES);
         blockModels.createTrivialBlock(ModBlocks.SPELL_TEACHER.get(), TexturedModel.LEAVES);
