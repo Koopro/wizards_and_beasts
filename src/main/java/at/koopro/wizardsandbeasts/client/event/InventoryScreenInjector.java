@@ -17,15 +17,20 @@ import org.jspecify.annotations.NonNull;
  * Adds a "Character Sheet" button to the vanilla Inventory screen
  * via {@link ScreenEvent.Init.Post}.
  *
- * <p>Button is positioned below the recipe-book button (top-left of inventory panel).
- * Skipped when {@link Module#CHARACTER_SHEET} is disabled.
+ * <p>The button sits immediately to the right of the vanilla recipe-book button and
+ * tracks it. Skipped when {@link Module#CHARACTER_SHEET} is disabled.
  */
 public final class InventoryScreenInjector {
 
-    // Vanilla InventoryScreen background is 176 × 166; recipe book at leftPos-97, topPos+3.
-    // We sit directly below it: leftPos-97, topPos+25.
+    /** Recipe-book button geometry, from {@code InventoryScreen#getRecipeBookButtonPosition}. */
+    private static final int RECIPE_BUTTON_X = 104;
+    private static final int RECIPE_BUTTON_Y_FROM_MIDDLE = -22;
+    private static final int RECIPE_BUTTON_W = 20;
+
+    private static final int GAP = 2;
     private static final int BUTTON_W = 20;
-    private static final int BUTTON_H = 20;
+    /** Matches the recipe-book button's 18px height so the pair reads as one row. */
+    private static final int BUTTON_H = 18;
 
     private InventoryScreenInjector() {}
 
@@ -33,14 +38,7 @@ public final class InventoryScreenInjector {
         if (!ModuleManager.isEnabled(Module.CHARACTER_SHEET)) return;
         if (!(event.getScreen() instanceof InventoryScreen inv)) return;
 
-        // Compute inventory origin (background 176×166, centered)
-        int guiLeft = (inv.width  - 176) / 2;
-        int guiTop  = (inv.height - 166) / 2;
-
-        int bx = guiLeft - 97;
-        int by = guiTop  + 25; // 3px gap + recipe-book height (20) + 2px
-
-        CharacterTabButton btn = new CharacterTabButton(bx, by, BUTTON_W, BUTTON_H,
+        CharacterTabButton btn = new CharacterTabButton(inv,
                 b -> Minecraft.getInstance().setScreen(new CharacterSheetScreen()));
         btn.setTooltip(Tooltip.create(
                 Component.translatable("gui.wizards_and_beasts.character_sheet.tooltip")));
@@ -52,13 +50,34 @@ public final class InventoryScreenInjector {
     private static final class CharacterTabButton extends Button {
         private static final int ICON = 16;
 
-        CharacterTabButton(int x, int y, int w, int h, OnPress onPress) {
-            super(x, y, w, h, Component.empty(), onPress, DEFAULT_NARRATION);
+        private final InventoryScreen screen;
+
+        CharacterTabButton(InventoryScreen screen, OnPress onPress) {
+            super(0, 0, BUTTON_W, BUTTON_H, Component.empty(), onPress, DEFAULT_NARRATION);
+            this.screen = screen;
+            anchor();
+        }
+
+        /**
+         * Re-anchors beside the recipe-book button.
+         *
+         * <p>Re-applied per frame rather than set once at init because opening the recipe
+         * book moves the inventory: {@code AbstractRecipeBookScreen}'s toggle handler
+         * reassigns {@code leftPos} and repositions its own button by hand, without
+         * re-running {@code init()}. A button placed once would be left behind the moment
+         * the book was opened.
+         */
+        private void anchor() {
+            setX(screen.getGuiLeft() + RECIPE_BUTTON_X + RECIPE_BUTTON_W + GAP);
+            setY(screen.height / 2 + RECIPE_BUTTON_Y_FROM_MIDDLE);
         }
 
         @Override
         protected void renderContents(@NonNull GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-            // Vanilla button frame already drawn by AbstractButton#renderWidget; draw icon, no label.
+            // AbstractButton#renderWidget is final and does nothing but call this, so this is
+            // the whole render pass: re-anchor, draw the frame, then the icon in place of a label.
+            anchor();
+            renderDefaultSprite(g);
             int ix = getX() + (getWidth() - ICON) / 2;
             int iy = getY() + (getHeight() - ICON) / 2;
             McStylePanel.drawTexture(g, CharacterSheetTextures.ICON_TAB, ix, iy, ICON, ICON, ICON, ICON);
