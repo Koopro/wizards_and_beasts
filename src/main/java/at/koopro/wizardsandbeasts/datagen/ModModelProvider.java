@@ -146,10 +146,13 @@ public class ModModelProvider extends ModelProvider {
 
         blockModels.createCrossBlockWithDefaultItem(ModBlocks.MALLOWSWEET.get(), BlockModelGenerators.PlantType.NOT_TINTED);
 
-        blockModels.createTrivialBlock(ModBlocks.GRYFFINDOR_BANNER.get(), TexturedModel.LEAVES);
-        blockModels.createTrivialBlock(ModBlocks.SLYTHERIN_BANNER.get(), TexturedModel.LEAVES);
-        blockModels.createTrivialBlock(ModBlocks.RAVENCLAW_BANNER.get(), TexturedModel.LEAVES);
-        blockModels.createTrivialBlock(ModBlocks.HUFFLEPUFF_BANNER.get(), TexturedModel.LEAVES);
+        // House banners hang as a crossed cloth pennant (readable from every side with no facing
+        // property), not the solid leaves cube they used to render as — that fat cube also clashed
+        // with the block's slim collision box. Default texture resolves to block/<house>_banner.
+        blockModels.createCrossBlockWithDefaultItem(ModBlocks.GRYFFINDOR_BANNER.get(), BlockModelGenerators.PlantType.NOT_TINTED);
+        blockModels.createCrossBlockWithDefaultItem(ModBlocks.SLYTHERIN_BANNER.get(), BlockModelGenerators.PlantType.NOT_TINTED);
+        blockModels.createCrossBlockWithDefaultItem(ModBlocks.RAVENCLAW_BANNER.get(), BlockModelGenerators.PlantType.NOT_TINTED);
+        blockModels.createCrossBlockWithDefaultItem(ModBlocks.HUFFLEPUFF_BANNER.get(), BlockModelGenerators.PlantType.NOT_TINTED);
 
         TextureMapping torchCross = TextureMapping.cross(Identifier.withDefaultNamespace("block/torch"));
         // The placed candle used to draw the vanilla torch cross, so the block in the world

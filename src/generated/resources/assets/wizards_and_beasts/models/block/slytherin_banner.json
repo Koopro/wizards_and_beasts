@@ -1,6 +1,6 @@
 {
-  "parent": "minecraft:block/leaves",
+  "parent": "minecraft:block/cross",
   "textures": {
-    "all": "wizards_and_beasts:block/slytherin_banner"
+    "cross": "wizards_and_beasts:block/slytherin_banner"
   }
 }

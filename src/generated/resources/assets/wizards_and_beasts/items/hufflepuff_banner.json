@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "wizards_and_beasts:block/hufflepuff_banner"
+    "model": "wizards_and_beasts:item/hufflepuff_banner"
   }
 }
