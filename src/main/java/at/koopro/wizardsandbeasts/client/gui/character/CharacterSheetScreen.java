@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.client.gui.character;
 
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
+import at.koopro.wizardsandbeasts.client.gui.util.GuiText;
 import at.koopro.wizardsandbeasts.client.gui.character.tab.AttributesTab;
 import at.koopro.wizardsandbeasts.client.gui.character.tab.CharacterTab;
 import at.koopro.wizardsandbeasts.client.gui.character.tab.SkillsTab;
@@ -241,13 +242,13 @@ public final class CharacterSheetScreen extends Screen {
 
         for (int i = 0; i < shown; i++) {
             MobEffectInstance fx = list.get(i);
-            String name = font.plainSubstrByWidth(
-                    Component.translatable(fx.getEffect().value().getDescriptionId()).getString(),
-                    w - 2);
+            String name = Component.translatable(fx.getEffect().value().getDescriptionId()).getString();
             McStylePanel.drawNineSlice(g, CharacterSheetTextures.PANEL, x, y + i * (EFFECT_CHIP_H + 1),
                     w, EFFECT_CHIP_H, CharacterSheetTextures.PANEL_SIZE, CharacterSheetTextures.PANEL_BORDER);
-            g.drawString(font, name, x + 2, y + i * (EFFECT_CHIP_H + 1) + 1,
-                    COLOR_EFFECT_TXT, false);
+            // Shrunk to fit instead of chopped mid-word, which is what plainSubstrByWidth did
+            // to every effect name longer than the chip ("Fire Resistan").
+            GuiText.drawFitted(g, font, name, x + 2, y + i * (EFFECT_CHIP_H + 1) + 1,
+                    w - 4, COLOR_EFFECT_TXT);
         }
         if (list.size() > MAX_EFFECTS_SHOWN) {
             int remainder = list.size() - MAX_EFFECTS_SHOWN;
@@ -293,9 +294,10 @@ public final class CharacterSheetScreen extends Screen {
             McStylePanel.drawNineSlice(g, (active || hovered) ? CharacterSheetTextures.PANEL_SEL : CharacterSheetTextures.PANEL,
                     tx, y, tw, TAB_H, CharacterSheetTextures.PANEL_SIZE, CharacterSheetTextures.PANEL_BORDER);
 
+            // Shrink rather than spill: three tabs share the right column, so a longer
+            // translation of "Attributes" would otherwise run out over its neighbours.
             String label = Component.translatable(tab.key).getString();
-            int lw = font.width(label);
-            g.drawString(font, label, tx + (tw - lw) / 2, y + 3, COLOR_TAB_TXT, false);
+            GuiText.drawFittedCentered(g, font, label, tx + 2, y + 3, tw - 4, COLOR_TAB_TXT);
         }
     }
 
