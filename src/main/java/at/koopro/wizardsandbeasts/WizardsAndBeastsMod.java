@@ -175,6 +175,9 @@ public class WizardsAndBeastsMod {
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 
         WandModuleRegistry.bootstrap();
+        // After the modules: every preset is a combination of them and is validated
+        // against the registry as it is built.
+        at.koopro.wizardsandbeasts.wand.customization.WandPresetRegistry.bootstrap();
 
         LOGGER.info("Initializing Wizards & Beasts mod.");
     }

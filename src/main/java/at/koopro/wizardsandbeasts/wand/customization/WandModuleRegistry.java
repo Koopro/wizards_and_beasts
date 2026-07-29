@@ -31,8 +31,18 @@ public final class WandModuleRegistry {
 
     // ── Tier 1: built-in registration ────────────────────────────────────────
 
-    /** Called from WizardsAndBeastsMod constructor (FMLCommonSetupEvent) to seed built-ins. */
+    /**
+     * Called from WizardsAndBeastsMod constructor (FMLCommonSetupEvent) to seed built-ins.
+     *
+     * <p>Clears first, so calling it twice re-seeds rather than colliding with itself. The
+     * duplicate-id guard in {@link #register} exists to catch two <em>different</em> modules
+     * claiming one id, and it cannot tell that apart from a second bootstrap unless the table
+     * starts empty.
+     */
     public static void bootstrap() {
+        BUILT_INS.clear();
+        slotViewCache = null;
+
         // HANDLE variants
         register(WandSlot.HANDLE, "classic");
         register(WandSlot.HANDLE, "gnarled");
@@ -56,7 +66,7 @@ public final class WandModuleRegistry {
         register(WandSlot.SHAFT, "knotted");
         register(WandSlot.SHAFT, "tapered");
         register(WandSlot.SHAFT, "segmented");
-        register(WandSlot.SHAFT, "vine");
+        register(WandSlot.SHAFT, "twining");
         register(WandSlot.SHAFT, "bowed");
         register(WandSlot.SHAFT, "reeded");
         register(WandSlot.SHAFT, "nodular");
@@ -96,6 +106,16 @@ public final class WandModuleRegistry {
 
     private static void register(WandSlot slot, String variant) {
         Identifier id = Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, variant);
+        // A module id carries no slot, so two slots using the same variant name collide on one
+        // Identifier and the second silently replaces the first — the module simply stops
+        // existing, with nothing in the log and an empty slot at render time. Caught once
+        // already, by a "vine" handle and a "vine" shaft.
+        WandModule clash = BUILT_INS.get(id);
+        if (clash != null) {
+            throw new IllegalStateException("Duplicate wand module id '" + id + "': slot '"
+                    + clash.slot().slotId() + "' already registered it, slot '" + slot.slotId()
+                    + "' is trying to reuse it. Module ids must be unique across all slots.");
+        }
         BUILT_INS.put(id, WandModule.builtin(id, slot, variant));
         slotViewCache = null;
     }

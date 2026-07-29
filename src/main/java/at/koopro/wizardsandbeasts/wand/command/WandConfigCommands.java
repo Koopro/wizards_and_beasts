@@ -6,6 +6,8 @@ import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.customization.WandConfiguration;
 import at.koopro.wizardsandbeasts.wand.customization.WandModule;
 import at.koopro.wizardsandbeasts.wand.customization.WandModuleRegistry;
+import at.koopro.wizardsandbeasts.wand.customization.WandPreset;
+import at.koopro.wizardsandbeasts.wand.customization.WandPresetRegistry;
 import at.koopro.wizardsandbeasts.wand.customization.WandSlot;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -34,7 +36,9 @@ public final class WandConfigCommands {
                 .then(buildSet())
                 .then(buildClear())
                 .then(buildReset())
-                .then(buildList());
+                .then(buildList())
+                .then(buildPreset())
+                .then(buildPresets());
     }
 
     private static LiteralArgumentBuilder<CommandSourceStack> buildGet() {
@@ -198,6 +202,55 @@ public final class WandConfigCommands {
         for (WandModule m : modules) {
             player.displayClientMessage(
                     Component.literal("  " + m.id()).withStyle(ChatFormatting.AQUA),
+                    false);
+        }
+        return 1;
+    }
+
+
+    private static LiteralArgumentBuilder<CommandSourceStack> buildPreset() {
+        return Commands.literal("preset")
+                .then(Commands.argument("preset_id", IdentifierArgument.id())
+                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
+                                WandPresetRegistry.all().stream().map(p -> p.id().toString()),
+                                builder))
+                        .executes(ctx -> executePreset(
+                                ctx.getSource().getPlayerOrException(),
+                                IdentifierArgument.getId(ctx, "preset_id"))));
+    }
+
+    private static int executePreset(ServerPlayer player, Identifier presetId) {
+        ItemStack stack = player.getMainHandItem();
+        if (!(stack.getItem() instanceof WandItem)) {
+            player.displayClientMessage(error("Hold a wand in your main hand."), false);
+            return 0;
+        }
+        WandPreset preset = WandPresetRegistry.get(presetId).orElse(null);
+        if (preset == null) {
+            player.displayClientMessage(error("Unknown preset: " + presetId), false);
+            return 0;
+        }
+        // A preset replaces the whole configuration rather than merging into it: half of a
+        // recognisable wand plus half of whatever was there before is neither.
+        stack.set(WandComponents.WAND_CONFIGURATION.get(), preset.configuration());
+        player.containerMenu.broadcastChanges();
+        player.displayClientMessage(success("Applied preset: " + preset.displayName()), false);
+        return 1;
+    }
+
+    private static LiteralArgumentBuilder<CommandSourceStack> buildPresets() {
+        return Commands.literal("presets")
+                .executes(ctx -> executePresets(ctx.getSource().getPlayerOrException()));
+    }
+
+    private static int executePresets(ServerPlayer player) {
+        List<WandPreset> presets = WandPresetRegistry.all();
+        player.displayClientMessage(header("Wand presets (" + presets.size() + "):"), false);
+        for (WandPreset preset : presets) {
+            player.displayClientMessage(
+                    Component.literal("  " + preset.id().getPath()).withStyle(ChatFormatting.AQUA)
+                            .append(Component.literal("  " + preset.displayName())
+                                    .withStyle(ChatFormatting.GRAY)),
                     false);
         }
         return 1;
