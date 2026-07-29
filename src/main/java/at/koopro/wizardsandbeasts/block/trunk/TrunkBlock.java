@@ -25,6 +25,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
@@ -38,6 +39,8 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -139,6 +142,15 @@ public class TrunkBlock extends BaseEntityBlock {
     @Override
     protected @NonNull RenderShape getRenderShape(@NonNull BlockState state) {
         return RenderShape.MODEL;
+    }
+
+    /** Body plus lid, inset one pixel all round — the chest the model actually draws. */
+    private static final VoxelShape SHAPE = Block.box(1, 0, 1, 15, 14, 15);
+
+    @Override
+    protected @NonNull VoxelShape getShape(@NonNull BlockState state, @NonNull BlockGetter level,
+                                           @NonNull BlockPos pos, @NonNull CollisionContext context) {
+        return SHAPE;
     }
 
     @Override

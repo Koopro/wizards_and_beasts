@@ -1,6 +1,202 @@
 {
-  "parent": "minecraft:block/cube_top",
+  "parent": "minecraft:block/block",
+  "elements": [
+    {
+      "faces": {
+        "down": {
+          "cullface": "down",
+          "texture": "#side"
+        },
+        "east": {
+          "texture": "#side"
+        },
+        "north": {
+          "texture": "#side"
+        },
+        "south": {
+          "texture": "#side"
+        },
+        "up": {
+          "texture": "#side"
+        },
+        "west": {
+          "texture": "#side"
+        }
+      },
+      "from": [
+        5,
+        0,
+        5
+      ],
+      "to": [
+        11,
+        3,
+        11
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#side"
+        },
+        "east": {
+          "texture": "#side"
+        },
+        "north": {
+          "texture": "#side"
+        },
+        "south": {
+          "texture": "#side"
+        },
+        "up": {
+          "texture": "#top"
+        },
+        "west": {
+          "texture": "#side"
+        }
+      },
+      "from": [
+        2,
+        3,
+        2
+      ],
+      "to": [
+        14,
+        12,
+        14
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#side"
+        },
+        "east": {
+          "texture": "#side"
+        },
+        "north": {
+          "texture": "#side"
+        },
+        "south": {
+          "texture": "#side"
+        },
+        "up": {
+          "texture": "#side"
+        },
+        "west": {
+          "texture": "#side"
+        }
+      },
+      "from": [
+        1,
+        12,
+        1
+      ],
+      "to": [
+        15,
+        14,
+        2
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#side"
+        },
+        "east": {
+          "texture": "#side"
+        },
+        "north": {
+          "texture": "#side"
+        },
+        "south": {
+          "texture": "#side"
+        },
+        "up": {
+          "texture": "#side"
+        },
+        "west": {
+          "texture": "#side"
+        }
+      },
+      "from": [
+        1,
+        12,
+        14
+      ],
+      "to": [
+        15,
+        14,
+        15
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#side"
+        },
+        "east": {
+          "texture": "#side"
+        },
+        "north": {
+          "texture": "#side"
+        },
+        "south": {
+          "texture": "#side"
+        },
+        "up": {
+          "texture": "#side"
+        },
+        "west": {
+          "texture": "#side"
+        }
+      },
+      "from": [
+        1,
+        12,
+        2
+      ],
+      "to": [
+        2,
+        14,
+        14
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#side"
+        },
+        "east": {
+          "texture": "#side"
+        },
+        "north": {
+          "texture": "#side"
+        },
+        "south": {
+          "texture": "#side"
+        },
+        "up": {
+          "texture": "#side"
+        },
+        "west": {
+          "texture": "#side"
+        }
+      },
+      "from": [
+        14,
+        12,
+        2
+      ],
+      "to": [
+        15,
+        14,
+        14
+      ]
+    }
+  ],
   "textures": {
+    "particle": "wizards_and_beasts:block/wizarding_copper_cauldron_side",
     "side": "wizards_and_beasts:block/wizarding_copper_cauldron_side",
     "top": "wizards_and_beasts:block/wizarding_copper_cauldron_top"
   }

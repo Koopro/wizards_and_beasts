@@ -1,7 +1,19 @@
 {
   "variants": {
-    "": {
+    "facing=east": {
+      "model": "wizards_and_beasts:block/masters_trunk",
+      "y": 90
+    },
+    "facing=north": {
       "model": "wizards_and_beasts:block/masters_trunk"
+    },
+    "facing=south": {
+      "model": "wizards_and_beasts:block/masters_trunk",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "wizards_and_beasts:block/masters_trunk",
+      "y": 270
     }
   }
 }

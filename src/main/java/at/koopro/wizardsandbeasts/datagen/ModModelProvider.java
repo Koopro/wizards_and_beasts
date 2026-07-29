@@ -3,13 +3,18 @@ package at.koopro.wizardsandbeasts.datagen;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.ModelProvider;
+import net.minecraft.client.data.models.blockstates.MultiVariantGenerator;
 import net.minecraft.client.data.models.model.ModelTemplates;
 import net.minecraft.client.data.models.model.TextureMapping;
+import net.minecraft.client.data.models.model.TextureSlot;
 import net.minecraft.client.data.models.model.TexturedModel;
+import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.neoforged.neoforge.client.model.generators.template.ExtendedModelTemplate;
+import net.neoforged.neoforge.client.model.generators.template.ExtendedModelTemplateBuilder;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.block.location.DiagonAlleyBlocks;
@@ -170,15 +175,18 @@ public class ModModelProvider extends ModelProvider {
         blockModels.createNormalTorch(ModBlocks.UNLIT_SOUL_TORCH.get(), ModBlocks.UNLIT_SOUL_WALL_TORCH.get());
         blockModels.createNormalTorch(ModBlocks.UNLIT_COPPER_TORCH.get(), ModBlocks.UNLIT_COPPER_WALL_TORCH.get());
 
-        // CUBE_TOP, not LEAVES: a cauldron with the same metal texture on all six faces
-        // gives no sign there is anything in it, which is the entire point of a cauldron.
-        // The side stays the vessel; the top is the brew surface inside its rim.
-        blockModels.createTrivialBlock(ModBlocks.BRASS_CAULDRON.get(), TexturedModel.CUBE_TOP);
-        blockModels.createTrivialBlock(ModBlocks.WIZARDING_COPPER_CAULDRON.get(), TexturedModel.CUBE_TOP);
-        blockModels.createTrivialBlock(ModBlocks.PEWTER_CAULDRON.get(), TexturedModel.CUBE_TOP);
+        // A cube-shaped cauldron gave no sign there was anything in it, which is the entire
+        // point of a cauldron. These get a real footed vessel with an open rim, so the brew
+        // surface is visible down inside it.
+        ExtendedModelTemplate cauldron = cauldronModel();
+        for (Block pot : java.util.List.of(ModBlocks.BRASS_CAULDRON.get(),
+                ModBlocks.WIZARDING_COPPER_CAULDRON.get(), ModBlocks.PEWTER_CAULDRON.get())) {
+            propBlock(blockModels, pot, cauldron, sideTop(pot, "_side"), false);
+        }
 
         blockModels.createTrivialBlock(ModBlocks.FLOO_GRATE.get(), TexturedModel.LEAVES);
-        blockModels.createTrivialBlock(ModBlocks.SPELL_TEACHER.get(), TexturedModel.LEAVES);
+        propBlock(blockModels, ModBlocks.SPELL_TEACHER.get(), lecternModel(),
+                sideTop(ModBlocks.SPELL_TEACHER.get(), ""), false);
 
         java.util.List<net.minecraft.world.item.Item> wizardingItems = java.util.List.of(
                 ConsumableItemRegistry.OCCAMY_EGGSHELL.get(),
@@ -226,12 +234,14 @@ public class ModModelProvider extends ModelProvider {
         blockModels.createTrivialBlock(ModBlocks.WARDING_STONE.get(), TexturedModel.CUBE);
         blockModels.createTrivialBlock(ModBlocks.POCKET_CONFIGURATOR.get(), TexturedModel.CUBE);
 
-        // Placed trunks — placeholder cube models + item models until bespoke trunk art lands.
-        blockModels.createTrivialBlock(ModBlocks.ENCHANTED_TRUNK.get(), TexturedModel.CUBE);
-        blockModels.createTrivialBlock(ModBlocks.EXPANDED_TRUNK.get(), TexturedModel.CUBE);
-        blockModels.createTrivialBlock(ModBlocks.MASTERS_TRUNK.get(), TexturedModel.CUBE);
-        blockModels.createTrivialBlock(ModBlocks.MOODYS_TRUNK.get(), TexturedModel.CUBE);
-        blockModels.createTrivialBlock(ModBlocks.NEWTS_CASE.get(), TexturedModel.CUBE);
+        // Placed trunks. TrunkBlock has carried a FACING property all along, but with one
+        // sprite on all six faces there was nothing to orient — the lid and the lock now
+        // give it meaning.
+        ExtendedModelTemplate trunk = trunkModel();
+        for (Block chest : java.util.List.of(ModBlocks.ENCHANTED_TRUNK.get(), ModBlocks.EXPANDED_TRUNK.get(),
+                ModBlocks.MASTERS_TRUNK.get(), ModBlocks.MOODYS_TRUNK.get(), ModBlocks.NEWTS_CASE.get())) {
+            propBlock(blockModels, chest, trunk, sideFrontTop(chest), true);
+        }
 
         // Tents render entirely through GeoBlockRenderer (RenderShape.INVISIBLE), so these models are never
         // drawn — they exist so the blocks have a blockstate at all (no "Missing model for variant" spam)
@@ -240,8 +250,9 @@ public class ModModelProvider extends ModelProvider {
         blockModels.createTrivialBlock(ModBlocks.TENT_GRAND.get(), TexturedModel.LEAVES);
 
         blockModels.createTrivialBlock(ModBlocks.WANDMAKERS_BENCH.get(), TexturedModel.LEAVES);
-        blockModels.createTrivialBlock(ModBlocks.FLOO_FIREPLACE.get(), TexturedModel.LEAVES);
-        blockModels.createTrivialBlock(ModBlocks.EXAMINATION_DESK.get(), TexturedModel.LEAVES);
+        createFlooFireplace(blockModels, ModBlocks.FLOO_FIREPLACE.get());
+        propBlock(blockModels, ModBlocks.EXAMINATION_DESK.get(), deskModel(),
+                sideTop(ModBlocks.EXAMINATION_DESK.get(), ""), false);
     }
 
     // --- Location decorative block datagen ---
@@ -348,6 +359,201 @@ public class ModModelProvider extends ModelProvider {
         blockModels.createTrivialBlock(leaves, TexturedModel.LEAVES);
 
         blockModels.createCrossBlockWithDefaultItem(sapling, BlockModelGenerators.PlantType.NOT_TINTED);
+    }
+
+    // --- Prop geometry -------------------------------------------------------------
+    //
+    // These blocks are furniture, but every one of them used to render as a plain 16-cubed
+    // cube with a single sprite on all six faces — a trunk's flank was stretched over its
+    // lid, and the fireplace's hearth opening appeared on the back. The geometry is built
+    // here rather than hand-written as JSON on purpose: a hand-authored model in
+    // src/main/resources silently *wins* over the generated one (build.gradle:136 adds
+    // src/generated as a second resource root and :139 excludes duplicates, main first),
+    // while ModelProvider still demands a generated blockstate for every block. Keeping
+    // both sides in datagen leaves exactly one source of truth.
+    //
+    // Faces with no explicit uv() inherit vanilla's automatic, world-aligned UVs, so each
+    // element samples the part of the texture that sits at its own height.
+
+    private static ExtendedModelTemplateBuilder prop(TextureSlot... slots) {
+        ExtendedModelTemplateBuilder builder = ExtendedModelTemplateBuilder.builder()
+                .parent(Identifier.withDefaultNamespace("block/block"));
+        for (TextureSlot slot : slots) {
+            builder.requiredTextureSlot(slot);
+        }
+        return builder;
+    }
+
+    /** Body plus a slightly inset lid, with the lock plate on the front face. */
+    private static ExtendedModelTemplate trunkModel() {
+        return prop(TextureSlot.PARTICLE, TextureSlot.SIDE, TextureSlot.FRONT, TextureSlot.TOP)
+                .element(e -> e.from(1, 0, 1).to(15, 9, 15)
+                        .textureAll(TextureSlot.SIDE)
+                        .face(Direction.NORTH, f -> f.texture(TextureSlot.FRONT))
+                        .face(Direction.DOWN, f -> f.texture(TextureSlot.SIDE).cullface(Direction.DOWN)))
+                .element(e -> e.from(1, 9, 1).to(15, 14, 15)
+                        .textureAll(TextureSlot.SIDE)
+                        .face(Direction.NORTH, f -> f.texture(TextureSlot.FRONT))
+                        .face(Direction.UP, f -> f.texture(TextureSlot.TOP)))
+                .build();
+    }
+
+    /** Footed vessel with a raised rim, left open so the brew surface reads from above. */
+    private static ExtendedModelTemplate cauldronModel() {
+        ExtendedModelTemplateBuilder builder =
+                prop(TextureSlot.PARTICLE, TextureSlot.SIDE, TextureSlot.TOP)
+                        .element(e -> e.from(5, 0, 5).to(11, 3, 11)
+                                .textureAll(TextureSlot.SIDE)
+                                .face(Direction.DOWN, f -> f.texture(TextureSlot.SIDE).cullface(Direction.DOWN)))
+                        .element(e -> e.from(2, 3, 2).to(14, 12, 14)
+                                .textureAll(TextureSlot.SIDE)
+                                .face(Direction.UP, f -> f.texture(TextureSlot.TOP)));
+        // Rim as four walls rather than a slab: a slab would cap the pot and hide the brew.
+        float[][] rim = {
+                { 1, 1, 15, 2 },   // north
+                { 1, 14, 15, 15 }, // south
+                { 1, 2, 2, 14 },   // west
+                { 14, 2, 15, 14 }, // east
+        };
+        for (float[] r : rim) {
+            builder.element(e -> e.from(r[0], 12, r[1]).to(r[2], 14, r[3])
+                    .textureAll(TextureSlot.SIDE));
+        }
+        return builder.build();
+    }
+
+    /** Table: a top slab on four corner legs. */
+    private static ExtendedModelTemplate deskModel() {
+        ExtendedModelTemplateBuilder builder =
+                prop(TextureSlot.PARTICLE, TextureSlot.SIDE, TextureSlot.TOP)
+                        .element(e -> e.from(0, 12, 0).to(16, 15, 16)
+                                .textureAll(TextureSlot.SIDE)
+                                .face(Direction.UP, f -> f.texture(TextureSlot.TOP)));
+        float[][] legs = { { 1, 1 }, { 12, 1 }, { 1, 12 }, { 12, 12 } };
+        for (float[] leg : legs) {
+            builder.element(e -> e.from(leg[0], 0, leg[1]).to(leg[0] + 3, 12, leg[1] + 3)
+                    .textureAll(TextureSlot.SIDE)
+                    .face(Direction.DOWN, f -> f.texture(TextureSlot.SIDE).cullface(Direction.DOWN)));
+        }
+        return builder.build();
+    }
+
+    /** Lectern: footed column under a reading surface tilted toward the reader. */
+    private static ExtendedModelTemplate lecternModel() {
+        return prop(TextureSlot.PARTICLE, TextureSlot.SIDE, TextureSlot.TOP)
+                .element(e -> e.from(3, 0, 3).to(13, 2, 13)
+                        .textureAll(TextureSlot.SIDE)
+                        .face(Direction.DOWN, f -> f.texture(TextureSlot.SIDE).cullface(Direction.DOWN)))
+                .element(e -> e.from(5, 2, 5).to(11, 10, 11)
+                        .textureAll(TextureSlot.SIDE))
+                .element(e -> e.from(2, 10, 2).to(14, 13, 14)
+                        .rotation(r -> r.singleAxis(Direction.Axis.X, 22.5F).origin(8, 11, 8))
+                        .textureAll(TextureSlot.SIDE)
+                        .face(Direction.UP, f -> f.texture(TextureSlot.TOP)))
+                .build();
+    }
+
+    /**
+     * Hearth you can see into: back wall, two jambs, a lintel and a raised floor, leaving a
+     * recess open to the north. The model's front is north because that is the face
+     * {@link BlockModelGenerators#ROTATION_HORIZONTAL_FACING} treats as unrotated.
+     */
+    private static ExtendedModelTemplate fireplaceModel() {
+        return prop(TextureSlot.PARTICLE, TextureSlot.SIDE, TextureSlot.FRONT, TextureSlot.TOP)
+                .element(e -> e.from(0, 0, 13).to(16, 16, 16)
+                        .textureAll(TextureSlot.SIDE)
+                        // The inner face of the back wall is the fire you look at.
+                        .face(Direction.NORTH, f -> f.texture(TextureSlot.FRONT))
+                        .face(Direction.SOUTH, f -> f.texture(TextureSlot.SIDE).cullface(Direction.SOUTH)))
+                .element(e -> e.from(0, 0, 0).to(3, 16, 13)
+                        .textureAll(TextureSlot.SIDE)
+                        .face(Direction.WEST, f -> f.texture(TextureSlot.SIDE).cullface(Direction.WEST)))
+                .element(e -> e.from(13, 0, 0).to(16, 16, 13)
+                        .textureAll(TextureSlot.SIDE)
+                        .face(Direction.EAST, f -> f.texture(TextureSlot.SIDE).cullface(Direction.EAST)))
+                .element(e -> e.from(3, 13, 0).to(13, 16, 13)
+                        .textureAll(TextureSlot.SIDE)
+                        .face(Direction.UP, f -> f.texture(TextureSlot.TOP).cullface(Direction.UP)))
+                .element(e -> e.from(3, 0, 0).to(13, 2, 13)
+                        .textureAll(TextureSlot.SIDE)
+                        .face(Direction.DOWN, f -> f.texture(TextureSlot.SIDE).cullface(Direction.DOWN)))
+                .build();
+    }
+
+    /**
+     * Emits a custom-geometry model, its blockstate (rotated to follow HORIZONTAL_FACING
+     * when the block has that property) and the matching item model.
+     *
+     * <p>Unlike {@code createTrivialBlock}, neither {@code createHorizontallyRotatedBlock}
+     * nor a raw {@link MultiVariantGenerator} registers an item model, and every block here
+     * has a {@code BlockItem} — without the explicit call datagen fails with
+     * "Missing item model definitions for: [...]".
+     */
+    private void propBlock(BlockModelGenerators blockModels, Block block,
+                           ExtendedModelTemplate template, TextureMapping mapping, boolean rotated) {
+        Identifier model = template.create(block, mapping, blockModels.modelOutput);
+        MultiVariantGenerator generator =
+                MultiVariantGenerator.dispatch(block, BlockModelGenerators.plainVariant(model));
+        blockModels.blockStateOutput.accept(
+                rotated ? generator.with(BlockModelGenerators.ROTATION_HORIZONTAL_FACING) : generator);
+        blockModels.registerSimpleItemModel(block, model);
+    }
+
+    /**
+     * The hearth, dispatched on LIT and HORIZONTAL_FACING.
+     *
+     * <p>Deliberately not vanilla's {@code createFurnace}, which is otherwise the same
+     * shape: that helper hardcodes a {@code <block>_front_on} texture name, while the lit
+     * hearth already ships as {@code floo_fireplace_lit.png} — an eight-frame animated
+     * strip owned by {@code tools/animate_textures.py}. Pointing at it directly keeps the
+     * animation rather than renaming an asset another generator regenerates.
+     */
+    private void createFlooFireplace(BlockModelGenerators blockModels, Block block) {
+        ExtendedModelTemplate template = fireplaceModel();
+        Identifier surround = TextureMapping.getBlockTexture(block, "_side");
+        TextureMapping unlit = new TextureMapping()
+                .put(TextureSlot.PARTICLE, surround)
+                .put(TextureSlot.SIDE, surround)
+                .put(TextureSlot.FRONT, TextureMapping.getBlockTexture(block))
+                .put(TextureSlot.TOP, TextureMapping.getBlockTexture(block, "_top"));
+
+        Identifier off = template.create(block, unlit, blockModels.modelOutput);
+        Identifier on = template.createWithSuffix(block, "_lit",
+                unlit.copyAndUpdate(TextureSlot.FRONT, TextureMapping.getBlockTexture(block, "_lit")),
+                blockModels.modelOutput);
+
+        blockModels.blockStateOutput.accept(
+                MultiVariantGenerator.dispatch(block)
+                        .with(BlockModelGenerators.createBooleanModelDispatch(
+                                BlockStateProperties.LIT,
+                                BlockModelGenerators.plainVariant(on),
+                                BlockModelGenerators.plainVariant(off)))
+                        .with(BlockModelGenerators.ROTATION_HORIZONTAL_FACING));
+        blockModels.registerSimpleItemModel(block, off);
+    }
+
+    /** side/front/top mapping off {@code <block>}, {@code <block>_front} and {@code <block>_top}. */
+    private static TextureMapping sideFrontTop(Block block) {
+        return new TextureMapping()
+                .put(TextureSlot.PARTICLE, TextureMapping.getBlockTexture(block))
+                .put(TextureSlot.SIDE, TextureMapping.getBlockTexture(block))
+                .put(TextureSlot.FRONT, TextureMapping.getBlockTexture(block, "_front"))
+                .put(TextureSlot.TOP, TextureMapping.getBlockTexture(block, "_top"));
+    }
+
+    /**
+     * side/top mapping off {@code <block><sideSuffix>} and {@code <block>_top}. The suffix is
+     * a parameter because the cauldrons already ship their flank as {@code _side}, while the
+     * desk and lectern keep theirs under the bare block name.
+     */
+    private static TextureMapping sideTop(Block block, String sideSuffix) {
+        Identifier side = sideSuffix.isEmpty()
+                ? TextureMapping.getBlockTexture(block)
+                : TextureMapping.getBlockTexture(block, sideSuffix);
+        return new TextureMapping()
+                .put(TextureSlot.PARTICLE, side)
+                .put(TextureSlot.SIDE, side)
+                .put(TextureSlot.TOP, TextureMapping.getBlockTexture(block, "_top"));
     }
 
     /**

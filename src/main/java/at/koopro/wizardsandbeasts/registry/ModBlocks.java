@@ -179,7 +179,7 @@ public class ModBlocks {
     public static final DeferredBlock<TrunkBlock> ENCHANTED_TRUNK =
             BLOCKS.registerBlock("enchanted_trunk",
                     props -> new TrunkBlock(TrunkTier.TIER_1, 1, TrunkArchetype.FIELD_CAMP, props),
-                    () -> BlockBehaviour.Properties.of().strength(2.0f).sound(SoundType.WOOD).requiresCorrectToolForDrops());
+                    () -> BlockBehaviour.Properties.of().strength(2.0f).sound(SoundType.WOOD).requiresCorrectToolForDrops().noOcclusion());
 
     public static final DeferredItem<BlockItem> ENCHANTED_TRUNK_ITEM =
             ModItems.ITEMS.registerItem("enchanted_trunk", props -> new BlockItem(ENCHANTED_TRUNK.get(), props.stacksTo(1)));
@@ -187,7 +187,7 @@ public class ModBlocks {
     public static final DeferredBlock<TrunkBlock> EXPANDED_TRUNK =
             BLOCKS.registerBlock("expanded_trunk",
                     props -> new TrunkBlock(TrunkTier.TIER_2, 3, TrunkArchetype.MINISTRY_STANDARD, props),
-                    () -> BlockBehaviour.Properties.of().strength(2.5f).sound(SoundType.WOOD).requiresCorrectToolForDrops());
+                    () -> BlockBehaviour.Properties.of().strength(2.5f).sound(SoundType.WOOD).requiresCorrectToolForDrops().noOcclusion());
 
     public static final DeferredItem<BlockItem> EXPANDED_TRUNK_ITEM =
             ModItems.ITEMS.registerItem("expanded_trunk", props -> new BlockItem(EXPANDED_TRUNK.get(), props.stacksTo(1)));
@@ -195,7 +195,7 @@ public class ModBlocks {
     public static final DeferredBlock<TrunkBlock> MASTERS_TRUNK =
             BLOCKS.registerBlock("masters_trunk",
                     props -> new TrunkBlock(TrunkTier.TIER_3, 7, TrunkArchetype.MINISTRY_STANDARD, props),
-                    () -> BlockBehaviour.Properties.of().strength(3.0f).sound(SoundType.WOOD).requiresCorrectToolForDrops());
+                    () -> BlockBehaviour.Properties.of().strength(3.0f).sound(SoundType.WOOD).requiresCorrectToolForDrops().noOcclusion());
 
     public static final DeferredItem<BlockItem> MASTERS_TRUNK_ITEM =
             ModItems.ITEMS.registerItem("masters_trunk", props -> new BlockItem(MASTERS_TRUNK.get(), props.stacksTo(1)));
@@ -203,7 +203,7 @@ public class ModBlocks {
     public static final DeferredBlock<TrunkBlock> MOODYS_TRUNK =
             BLOCKS.registerBlock("moodys_trunk",
                     props -> new TrunkBlock(TrunkTier.TIER_3, 7, TrunkArchetype.SAFEHOUSE, props),
-                    () -> BlockBehaviour.Properties.of().strength(3.0f).sound(SoundType.METAL).requiresCorrectToolForDrops());
+                    () -> BlockBehaviour.Properties.of().strength(3.0f).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion());
 
     public static final DeferredItem<BlockItem> MOODYS_TRUNK_ITEM =
             ModItems.ITEMS.registerItem("moodys_trunk", props -> new BlockItem(MOODYS_TRUNK.get(), props.stacksTo(1)));
@@ -212,7 +212,7 @@ public class ModBlocks {
     public static final DeferredBlock<TrunkBlock> NEWTS_CASE =
             BLOCKS.registerBlock("newts_case_item",
                     props -> new TrunkBlock(TrunkTier.TIER_3, 1, TrunkArchetype.SCAMANDER_SANCTUARY, props),
-                    () -> BlockBehaviour.Properties.of().strength(2.0f).sound(SoundType.WOOD).requiresCorrectToolForDrops());
+                    () -> BlockBehaviour.Properties.of().strength(2.0f).sound(SoundType.WOOD).requiresCorrectToolForDrops().noOcclusion());
 
     public static final DeferredItem<BlockItem> NEWTS_CASE_ITEM =
             ModItems.ITEMS.registerItem("newts_case_item", props -> new BlockItem(NEWTS_CASE.get(), props.stacksTo(1)));
@@ -235,6 +235,7 @@ public class ModBlocks {
             BLOCKS.registerBlock("floo_fireplace", FlooFireplaceBlock::new,
                     () -> BlockBehaviour.Properties.of().strength(3.5f, 10.0f).sound(SoundType.STONE)
                             .requiresCorrectToolForDrops()
+                            .noOcclusion()
                             .lightLevel(state -> state.getValue(BlockStateProperties.LIT) ? 10 : 0));
 
     public static final DeferredItem<BlockItem> FLOO_FIREPLACE_ITEM =
@@ -245,7 +246,7 @@ public class ModBlocks {
     /** Placed inside Hogwarts worldgen structure template. Block tag: data/wizards_and_beasts/tags/block/hogwarts_structure_blocks.json */
     public static final DeferredBlock<ExaminationDeskBlock> EXAMINATION_DESK =
             BLOCKS.registerBlock("examination_desk", ExaminationDeskBlock::new,
-                    () -> BlockBehaviour.Properties.of().strength(2.5f).sound(SoundType.WOOD).requiresCorrectToolForDrops());
+                    () -> BlockBehaviour.Properties.of().strength(2.5f).sound(SoundType.WOOD).requiresCorrectToolForDrops().noOcclusion());
 
     public static final DeferredItem<BlockItem> EXAMINATION_DESK_ITEM =
             ModItems.ITEMS.registerSimpleBlockItem("examination_desk", EXAMINATION_DESK);

@@ -87,7 +87,7 @@ final class WizardingWorldBlockRegistry {
 
     static final DeferredBlock<SpellTeacherBlock> SPELL_TEACHER =
             ModBlocks.BLOCKS.registerBlock("spell_teacher", SpellTeacherBlock::new,
-                    () -> BlockBehaviour.Properties.of().strength(2.5f).sound(SoundType.WOOD));
+                    () -> BlockBehaviour.Properties.of().strength(2.5f).sound(SoundType.WOOD).noOcclusion());
     static final DeferredBlock<WandmakersBenchBlock> WANDMAKERS_BENCH =
             ModBlocks.BLOCKS.registerBlock("wandmakers_bench", WandmakersBenchBlock::new,
                     () -> BlockBehaviour.Properties.of().strength(2.5f).sound(SoundType.WOOD));

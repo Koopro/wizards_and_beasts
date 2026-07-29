@@ -1,6 +1,76 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/block",
+  "elements": [
+    {
+      "faces": {
+        "down": {
+          "cullface": "down",
+          "texture": "#side"
+        },
+        "east": {
+          "texture": "#side"
+        },
+        "north": {
+          "texture": "#front"
+        },
+        "south": {
+          "texture": "#side"
+        },
+        "up": {
+          "texture": "#side"
+        },
+        "west": {
+          "texture": "#side"
+        }
+      },
+      "from": [
+        1,
+        0,
+        1
+      ],
+      "to": [
+        15,
+        9,
+        15
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#side"
+        },
+        "east": {
+          "texture": "#side"
+        },
+        "north": {
+          "texture": "#front"
+        },
+        "south": {
+          "texture": "#side"
+        },
+        "up": {
+          "texture": "#top"
+        },
+        "west": {
+          "texture": "#side"
+        }
+      },
+      "from": [
+        1,
+        9,
+        1
+      ],
+      "to": [
+        15,
+        14,
+        15
+      ]
+    }
+  ],
   "textures": {
-    "all": "wizards_and_beasts:block/masters_trunk"
+    "front": "wizards_and_beasts:block/masters_trunk_front",
+    "particle": "wizards_and_beasts:block/masters_trunk",
+    "side": "wizards_and_beasts:block/masters_trunk",
+    "top": "wizards_and_beasts:block/masters_trunk_top"
   }
 }
