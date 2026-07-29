@@ -38,8 +38,10 @@ public final class InventoryScreenInjector {
         if (!ModuleManager.isEnabled(Module.CHARACTER_SHEET)) return;
         if (!(event.getScreen() instanceof InventoryScreen inv)) return;
 
+        // Hand the inventory over as the return target, so pressing the inventory key inside
+        // the sheet steps back to it rather than closing out to the world.
         CharacterTabButton btn = new CharacterTabButton(inv,
-                b -> Minecraft.getInstance().setScreen(new CharacterSheetScreen()));
+                b -> Minecraft.getInstance().setScreen(new CharacterSheetScreen(inv)));
         btn.setTooltip(Tooltip.create(
                 Component.translatable("gui.wizards_and_beasts.character_sheet.tooltip")));
 

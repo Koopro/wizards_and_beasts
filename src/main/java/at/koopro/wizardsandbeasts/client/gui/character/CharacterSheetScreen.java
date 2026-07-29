@@ -11,15 +11,18 @@ import at.koopro.wizardsandbeasts.client.gui.character.widget.PlayerModelViewpor
 import at.koopro.wizardsandbeasts.client.gui.character.widget.VitalsBarWidget;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffectInstance;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -86,6 +89,14 @@ public final class CharacterSheetScreen extends Screen {
 
     private Tab activeTab = Tab.ATTRIBUTES;
 
+    /**
+     * Screen to hand back to when the inventory key is pressed, or null when the sheet was
+     * opened some other way (the {@code C} keybind, a server packet). Only set when the
+     * sheet was reached from the inventory, so {@code E} returns you exactly where you were
+     * instead of dumping you into the world.
+     */
+    private final @Nullable Screen returnTo;
+
     // Tab instances (content renderers)
     private final CharacterTab attributesTab = new AttributesTab();
     private final CharacterTab skillsTab     = new SkillsTab();
@@ -102,14 +113,25 @@ public final class CharacterSheetScreen extends Screen {
     private boolean previewLogged;
 
     public CharacterSheetScreen() {
+        this(null);
+    }
+
+    /** @param returnTo screen the inventory key hands back to, or null to just close. */
+    public CharacterSheetScreen(@Nullable Screen returnTo) {
         super(Component.translatable("gui.wizards_and_beasts.character_sheet.title"));
+        this.returnTo = returnTo;
     }
 
     @Override
     protected void init() {
-        guiScale = GuiScaleHelper.computeScale(BG_W, BG_H, width, height, GuiScaleHelper.DEFAULT_MARGIN);
-        bgX = GuiScaleHelper.clampedLeft(Math.round(BG_W * guiScale), width, GuiScaleHelper.DEFAULT_MARGIN);
-        bgY = GuiScaleHelper.clampedTop(Math.round(BG_H * guiScale), height, GuiScaleHelper.DEFAULT_MARGIN);
+        // Layout.panel, not the downscale-only computeScale this used to call: that capped
+        // the sheet at 1.0 forever, so on anything above a small window the 320x240 panel sat
+        // marooned in the middle of the screen. panel() grows it to fill the space (to 1.35x)
+        // and still shrinks it to fit small windows.
+        GuiScaleHelper.Layout layout = GuiScaleHelper.Layout.panel(width, height, BG_W, BG_H);
+        guiScale = layout.scale();
+        bgX = layout.panelX();
+        bgY = layout.panelY();
 
         if (ModuleManager.isPreview(Module.CHARACTER_SHEET) && !previewLogged) {
             LOGGER.debug("[W&B] CharacterSheetScreen opened in PREVIEW mode.");
@@ -314,6 +336,27 @@ public final class CharacterSheetScreen extends Screen {
         }
 
         return super.mouseClicked(event, isDoubleClick);
+    }
+
+    /**
+     * Closes on the inventory key as well as Escape, mirroring
+     * {@code AbstractContainerScreen#keyPressed}. Reached from the inventory, {@code E} hands
+     * you back to it rather than closing out to the world — the sheet is a tab off the
+     * inventory, so the key that opened it should also step back out of it.
+     */
+    @Override
+    public boolean keyPressed(@NonNull KeyEvent event) {
+        if (super.keyPressed(event)) return true;
+        if (minecraft != null
+                && minecraft.options.keyInventory.isActiveAndMatches(InputConstants.getKey(event))) {
+            if (returnTo != null) {
+                minecraft.setScreen(returnTo);
+            } else {
+                onClose();
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override
