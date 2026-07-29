@@ -44,6 +44,11 @@ public final class WandModuleRegistry {
         register(WandSlot.HANDLE, "bulbous");
         register(WandSlot.HANDLE, "fluted");
         register(WandSlot.HANDLE, "wrapped");
+        // Shaped after the wands as they appear on screen.
+        register(WandSlot.HANDLE, "vine");
+        register(WandSlot.HANDLE, "bone");
+        register(WandSlot.HANDLE, "talon");
+        register(WandSlot.HANDLE, "flared");
 
         // SHAFT variants
         register(WandSlot.SHAFT, "straight");
@@ -54,6 +59,8 @@ public final class WandModuleRegistry {
         register(WandSlot.SHAFT, "vine");
         register(WandSlot.SHAFT, "bowed");
         register(WandSlot.SHAFT, "reeded");
+        register(WandSlot.SHAFT, "nodular");
+        register(WandSlot.SHAFT, "barked");
 
         // TIP variants
         register(WandSlot.TIP, "pointed");
@@ -64,6 +71,9 @@ public final class WandModuleRegistry {
         register(WandSlot.TIP, "needle");
         register(WandSlot.TIP, "chisel");
         register(WandSlot.TIP, "budded");
+        register(WandSlot.TIP, "claw");
+        register(WandSlot.TIP, "serpent");
+        register(WandSlot.TIP, "spiralled");
 
         // CORE variants
         register(WandSlot.CORE, "phoenix_feather");
@@ -80,6 +90,8 @@ public final class WandModuleRegistry {
         register(WandSlot.ORNAMENT, "wire_wrap");
         register(WandSlot.ORNAMENT, "initial_plate");
         register(WandSlot.ORNAMENT, "spiral_inlay");
+        register(WandSlot.ORNAMENT, "vine_wrap");
+        register(WandSlot.ORNAMENT, "serpent_coil");
     }
 
     private static void register(WandSlot slot, String variant) {
