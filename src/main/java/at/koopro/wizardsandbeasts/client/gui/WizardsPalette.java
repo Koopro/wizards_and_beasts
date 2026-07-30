@@ -54,6 +54,30 @@ public final class WizardsPalette {
     public static final int PIP_ON = 0xFFF5E4B0;
     public static final int PIP_OFF = 0xFF5E3A2E;
 
+    // ── Ministry of Magic ──────────────────────────────────────────────────
+    //
+    // The mod's *second* brand, and a deliberate one. {@link #MINISTRY} is sampled straight
+    // off handbook/emblem.png — it is that file's dominant colour to the byte — so anything
+    // speaking for the Ministry wears purple on parchment rather than the wand HUD's
+    // leather. The Ministry Handbook is the reference.
+    //
+    // Listed here so it reads as a brand rather than as drift: a hue audit that only knows
+    // about the leather family flags these as strays and invites someone to "correct" them.
+
+    /** The emblem's own purple. */
+    public static final int MINISTRY = 0xFF3E1F47;
+    /** Binding and cover edge. */
+    public static final int MINISTRY_DARK = 0xFF221328;
+    /** Lit edge of the cover. */
+    public static final int MINISTRY_LIGHT = 0xFF5C3E66;
+
+    /** Aged page stock the Ministry prints on. */
+    public static final int PARCHMENT = 0xFFEFE7CF;
+    /** Its shaded side, for the gutter and page edges. */
+    public static final int PARCHMENT_SHADE = 0xFFE6DCBE;
+    /** Body text on parchment — brown, never black. */
+    public static final int PARCHMENT_INK = 0xFF3A2E24;
+
     private WizardsPalette() {
     }
 }

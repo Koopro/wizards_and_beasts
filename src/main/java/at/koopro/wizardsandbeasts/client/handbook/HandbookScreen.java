@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.client.handbook;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.client.network.ClientScreenHooks;
 import at.koopro.wizardsandbeasts.handbook.HandbookChapter;
@@ -52,19 +53,26 @@ public final class HandbookScreen extends Screen {
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "textures/gui/handbook/emblem.png");
 
     // ── Palette (Ministry: aubergine cover, sepia ink, plum titles) ──────────
-    private static final int COVER_OUTER = 0xFF221328;
-    private static final int COVER_HI = 0xFF5C3E66;
-    private static final int PAGE = 0xFFEFE7CF;
-    private static final int PAGE_SHADE = 0xFFE6DCBE;
-    private static final int INK = 0xFF3A2E24;
-    private static final int INK_TITLE = 0xFF3E1F47;
+    //
+    // Purple on parchment, not the wand HUD's leather, and deliberately so: this book
+    // speaks for the Ministry, and INK_TITLE is emblem.png's own dominant colour to the
+    // byte. The shared constants now live in WizardsPalette under "Ministry of Magic" so a
+    // palette audit reads them as the mod's second brand rather than as this screen having
+    // drifted. Only the values with no counterpart there stay local.
+    private static final int COVER_OUTER = WizardsPalette.MINISTRY_DARK;
+    private static final int COVER_HI = WizardsPalette.MINISTRY_LIGHT;
+    private static final int PAGE = WizardsPalette.PARCHMENT;
+    private static final int PAGE_SHADE = WizardsPalette.PARCHMENT_SHADE;
+    private static final int INK = WizardsPalette.PARCHMENT_INK;
+    private static final int INK_TITLE = WizardsPalette.MINISTRY;
     private static final int INK_GREY = 0xFF9A8E74;
     private static final int DIVIDER = 0xFFCDBD97;
     private static final int DIVIDER_SH = 0xFF9C8B66;
     private static final int BAR_TRACK = 0xFF2E1B34;
     private static final int BAR_FILL = 0xFFB08E4A;
-    private static final int HOVER = 0x333E1F47;
-    private static final int ARROW = 0xFF3E1F47;
+    /** The Ministry purple at 20% — a wash over a hovered row, not a fill. */
+    private static final int HOVER = 0x33000000 | (WizardsPalette.MINISTRY & 0x00FFFFFF);
+    private static final int ARROW = WizardsPalette.MINISTRY;
     private static final int ARROW_OFF = 0xFFBCB096;
 
     private enum Mode { INDEX, CHAPTER }
