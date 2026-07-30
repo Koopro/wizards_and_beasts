@@ -9,13 +9,17 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 
 /**
- * Screen for Hermione's Bag. Reuses the vanilla {@code generic_54} double-chest texture so no
- * bespoke art asset is required.
+ * Screen for Hermione's Bag.
+ *
+ * <p>This used to blit vanilla's {@code generic_54} directly, so one of the mod's signature
+ * artefacts opened as a plain double chest. The sheet it draws now is that same panel
+ * recoloured into the mod's leather and gold by {@code tools/gui_chrome.py}, with beads
+ * along the title band — same geometry, so every slot still lands where the menu puts it.
  */
 public class HermionesBagScreen extends AbstractContainerScreen<HermionesBagMenu> {
 
-    private static final Identifier TEXTURE =
-            Identifier.fromNamespaceAndPath("minecraft", "textures/gui/container/generic_54.png");
+    private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(
+            "wizards_and_beasts", "textures/gui/container/hermiones_bag.png");
 
     /** Height of the chest half of the sheet: the rows plus the panel's own top border. */
     private static final int CHEST_H = HermionesBagMenu.ROWS * 18 + 17;
