@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.bestiary.gui;
 
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import org.jspecify.annotations.Nullable;
 
 import at.koopro.wizardsandbeasts.bestiary.*;
@@ -270,7 +271,7 @@ public final class BestiaryScreen extends Screen {
         drawStretched(gg, TEX_SCREEN, x, y, W, H, W, H);
         drawStretched(gg, TEX_LEFT_PANEL, x + 4, y + 28, 120, H - 32, 120, 168);
         drawStretched(gg, TEX_RIGHT_PANEL, x + 126, y + 4, W - 130, H - 8, 190, 190);
-        gg.drawString(font, title, x + 8, y - 10, BestiaryColors.TEXT);
+        gg.drawString(font, title, x + 8, y - 10, WizardsPalette.TEXT);
 
         int listTop = y + LIST_START_Y;
         int listBottom = y + H - 18;
@@ -284,7 +285,7 @@ public final class BestiaryScreen extends Screen {
                 drawStretched(gg, TEX_HEADER, x + 6, rowY, LIST_ROWS_W, ROW_HEIGHT, 112, 14);
                 boolean isCollapsed = collapsed.getOrDefault(row.header, Boolean.FALSE);
                 String arrow = isCollapsed ? "\u25b6 " : "\u25bc ";
-                gg.drawString(font, Component.literal(arrow + formatCategoryLabel(row.header)), x + 8, rowY + 3, BestiaryColors.TEXT);
+                gg.drawString(font, Component.literal(arrow + formatCategoryLabel(row.header)), x + 8, rowY + 3, WizardsPalette.TEXT);
             } else if (row.entry != null) {
                 BestiaryEntry e = row.entry;
                 boolean isSel = e.id().equals(selected);
@@ -296,9 +297,9 @@ public final class BestiaryScreen extends Screen {
                 Component name = tier == DiscoveryTier.UNDISCOVERED ? Component.literal("???") : e.displayName();
                 int nameMaxWidth = 72;
                 String clipped = font.plainSubstrByWidth(name.getString(), nameMaxWidth);
-                gg.drawString(font, Component.literal(clipped), x + 8, rowY + 3, tier == DiscoveryTier.UNDISCOVERED ? BestiaryColors.TEXT_DIM : BestiaryColors.TEXT);
+                gg.drawString(font, Component.literal(clipped), x + 8, rowY + 3, tier == DiscoveryTier.UNDISCOVERED ? WizardsPalette.TEXT_DIM : WizardsPalette.TEXT);
                 for (int i = 0; i < 5; i++) {
-                    int c = i <= tier.tierIndex() ? BestiaryColors.PIP_ON : BestiaryColors.PIP_OFF;
+                    int c = i <= tier.tierIndex() ? WizardsPalette.PIP_ON : WizardsPalette.PIP_OFF;
                     gg.fill(x + 82 + i * 5, rowY + 5, x + 85 + i * 5, rowY + 8, c);
                 }
             }
@@ -349,7 +350,7 @@ public final class BestiaryScreen extends Screen {
         int dy = y + 10;
         DiscoveryTier tier = ClientBestiaryCache.get().tiers().getOrDefault(entry.id(), DiscoveryTier.UNDISCOVERED);
         Component name = tier == DiscoveryTier.UNDISCOVERED ? Component.literal("???") : entry.displayName();
-        gg.drawString(font, name, dx, dy, BestiaryColors.TEXT);
+        gg.drawString(font, name, dx, dy, WizardsPalette.TEXT);
         dy += 12;
 
         int portraitX = dx;
@@ -367,26 +368,26 @@ public final class BestiaryScreen extends Screen {
         int textX = portraitX + portraitSize + 8;
         int textW = 176 - (portraitSize + 8);
         if (tier == DiscoveryTier.UNDISCOVERED) {
-            gg.drawWordWrap(font, Component.literal(tier.unlockHint()), textX, portraitY, textW, BestiaryColors.TEXT_DIM);
+            gg.drawWordWrap(font, Component.literal(tier.unlockHint()), textX, portraitY, textW, WizardsPalette.TEXT_DIM);
             return;
         }
-        gg.drawString(font, Component.literal("MM Rating: ").append(ministryGrade(entry.mmRating())), textX, portraitY, BestiaryColors.TEXT_DIM);
+        gg.drawString(font, Component.literal("MM Rating: ").append(ministryGrade(entry.mmRating())), textX, portraitY, WizardsPalette.TEXT_DIM);
         int loreY = portraitY + 12;
         if (tier.ordinal() >= DiscoveryTier.ENCOUNTERED.ordinal()) {
-            gg.drawWordWrap(font, entry.shortLore(), textX, loreY, textW, BestiaryColors.TEXT);
+            gg.drawWordWrap(font, entry.shortLore(), textX, loreY, textW, WizardsPalette.TEXT);
             loreY += font.wordWrapHeight(entry.shortLore(), textW) + 4;
         }
         dy = Math.max(portraitY + portraitSize + 6, loreY);
         if (tier.ordinal() >= DiscoveryTier.ENCOUNTERED.ordinal()) {
             Component habitatLine = Component.literal("Habitat: ").append(entry.habitat());
-            gg.drawWordWrap(font, habitatLine, dx, dy, 176, BestiaryColors.TEXT_DIM);
+            gg.drawWordWrap(font, habitatLine, dx, dy, 176, WizardsPalette.TEXT_DIM);
             dy += font.wordWrapHeight(habitatLine, 176) + 2;
             Component sizeLine = Component.literal("Size: " + entry.size());
-            gg.drawWordWrap(font, sizeLine, dx, dy, 176, BestiaryColors.TEXT_DIM);
+            gg.drawWordWrap(font, sizeLine, dx, dy, 176, WizardsPalette.TEXT_DIM);
             dy += font.wordWrapHeight(sizeLine, 176) + 2;
         }
         if (tier.ordinal() >= DiscoveryTier.STUDIED.ordinal()) {
-            gg.drawWordWrap(font, entry.fullLore(), dx, dy, 176, BestiaryColors.TEXT);
+            gg.drawWordWrap(font, entry.fullLore(), dx, dy, 176, WizardsPalette.TEXT);
         }
     }
 

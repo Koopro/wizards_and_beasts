@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.client.wand.gui;
 
+import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.network.wand.ChooseTrialWandPayload;
 import at.koopro.wizardsandbeasts.network.wand.SelectTrialWandPayload;
 import at.koopro.wizardsandbeasts.wand.gui.OllivanderTrialMenu;
@@ -21,12 +23,26 @@ public class OllivanderTrialScreen extends AbstractContainerScreen<OllivanderTri
         this.imageWidth = 256;
     }
 
+    /**
+     * Ollivander's tray, in the mod's leather and gold.
+     *
+     * <p>This screen used to draw itself in a cold blue-lavender scheme of its own — panel
+     * {@code #1e1a28}, cards {@code #2a2535}, lavender and cyan text — that shared no hue with
+     * any other screen in the mod, on what is one of the first things a new wizard sees. Every
+     * colour here now comes from {@link WizardsPalette}.
+     *
+     * <p>Resonance still reads at a glance without a green/blue signal colour: a wand that
+     * answers you fills its bar in bright brass, one that does not stays dim leather.
+     */
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         int x = (this.width - this.imageWidth) / 2;
         int y = (this.height - this.imageHeight) / 2;
-        graphics.fill(x, y, x + imageWidth, y + imageHeight, 0xD0101010);
-        graphics.fill(x + 6, y + 6, x + imageWidth - 6, y + imageHeight - 6, 0xFF1e1a28);
+        graphics.fill(x, y, x + imageWidth, y + imageHeight, 0xD0000000);
+        McStylePanel.drawPanel(graphics, x + 6, y + 6, imageWidth - 12, imageHeight - 12,
+                WizardsPalette.PLATE, WizardsPalette.EDGE_HI, WizardsPalette.INK);
+        McStylePanel.drawBorder(graphics, x + 8, y + 8, imageWidth - 16, imageHeight - 16,
+                WizardsPalette.BRASS, WizardsPalette.LINE);
 
         List<OllivanderPoolEntry> trials = menu.getTrials();
         float thresh = menu.getMatchThreshold();
@@ -34,24 +50,37 @@ public class OllivanderTrialScreen extends AbstractContainerScreen<OllivanderTri
             int cx = x + 20 + i * 78;
             int cy = y + 40;
             boolean sel = menu.getSelectedIndex() == i;
-            graphics.fill(cx, cy, cx + 70, cy + 120, sel ? 0xFF3a3548 : 0xFF2a2535);
+            McStylePanel.drawPanel(graphics, cx, cy, 70, 120,
+                    sel ? WizardsPalette.SELECT : WizardsPalette.WELL,
+                    sel ? WizardsPalette.BRASS : WizardsPalette.RAIL,
+                    WizardsPalette.INK);
+
             OllivanderPoolEntry e = trials.get(i);
-            graphics.drawString(font, shorten(e.woodKey().getPath()), cx + 4, cy + 6, 0xFFddbb77, false);
-            graphics.drawString(font, shorten(e.coreKey().getPath()), cx + 4, cy + 18, 0xFFcc99ee, false);
-            graphics.drawString(font, e.flexibility(), cx + 4, cy + 30, 0xFFaaaaaa, false);
+            graphics.drawString(font, shorten(e.woodKey().getPath()), cx + 4, cy + 6,
+                    WizardsPalette.BRASS_HI, false);
+            graphics.drawString(font, shorten(e.coreKey().getPath()), cx + 4, cy + 18,
+                    WizardsPalette.TEXT, false);
+            graphics.drawString(font, e.flexibility(), cx + 4, cy + 30,
+                    WizardsPalette.TEXT_DIM, false);
+
             float score = menu.getResonanceScore(i);
-            graphics.drawString(font, Component.translatable("wandcraft.gui.resonance_fmt", score), cx + 4, cy + 44, 0xFF88eeff, false);
+            graphics.drawString(font, Component.translatable("wandcraft.gui.resonance_fmt", score),
+                    cx + 4, cy + 44, WizardsPalette.BRASS, false);
+
             int barW = 62;
-            graphics.fill(cx + 4, cy + 58, cx + 4 + barW, cy + 64, 0xFF000000);
+            boolean answers = score >= thresh;
+            graphics.fill(cx + 4, cy + 58, cx + 4 + barW, cy + 64, WizardsPalette.INK);
             graphics.fill(cx + 5, cy + 59, cx + 5 + (int) ((barW - 2) * Math.min(1, score)), cy + 63,
-                    score >= thresh ? 0xFF44ff88 : 0xFF6688aa);
-            if (score >= thresh) {
-                graphics.drawString(font, Component.translatable("wandcraft.gui.choose_wand"), cx + 4, cy + 72, 0xFF88ffaa, false);
+                    answers ? WizardsPalette.BRASS_HI : WizardsPalette.RAIL);
+
+            if (answers) {
+                graphics.drawString(font, Component.translatable("wandcraft.gui.choose_wand"),
+                        cx + 4, cy + 72, WizardsPalette.BRASS_HI, false);
             } else {
                 // Without this the tray just sits there inert and the wizard cannot tell why.
                 int hintY = cy + 72;
                 for (var line : font.split(Component.translatable("wandcraft.gui.wand_refuses", thresh), 62)) {
-                    graphics.drawString(font, line, cx + 4, hintY, 0xFF9a8fa8, false);
+                    graphics.drawString(font, line, cx + 4, hintY, WizardsPalette.TEXT_DIM, false);
                     hintY += 10;
                 }
             }
@@ -62,14 +91,14 @@ public class OllivanderTrialScreen extends AbstractContainerScreen<OllivanderTri
      * The title only, in a colour that survives this screen's background.
      *
      * <p>Two defects in the inherited version. Vanilla draws both labels in {@code #404040}, which against
-     * the {@code 0xFF1e1a28} panel is a contrast ratio of about 1.5 : 1 — the title was effectively
+     * the old cold-lavender panel is a contrast ratio of about 1.5 : 1 — the title was effectively
      * invisible. And the second label is {@code playerInventoryTitle}, drawn at {@code imageHeight - 94}
      * = y 106: {@link OllivanderTrialMenu} has no slots at all, so that was a heading for an inventory
      * this screen does not show, printed straight across the middle trial card.
      */
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(font, this.title, this.titleLabelX, this.titleLabelY, 0xFFddbb77, false);
+        graphics.drawString(font, this.title, this.titleLabelX, this.titleLabelY, WizardsPalette.BRASS_HI, false);
     }
 
     private static String shorten(String s) {
