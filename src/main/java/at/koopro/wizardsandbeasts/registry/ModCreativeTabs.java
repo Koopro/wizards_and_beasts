@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.registry;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
@@ -27,12 +28,46 @@ public class ModCreativeTabs {
     public static final DeferredRegister<CreativeModeTab> TABS =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, WizardsAndBeastsMod.MODID);
 
+    // --- Tab branding ---------------------------------------------------------------
+    //
+    // Both panels are vanilla's creative background recoloured into the mod's own palette
+    // by tools/gui_chrome.py, plus a filigree rule top and bottom. The spellcasting tab
+    // wears the wand HUD's leather and brass; the building-block tab reads as the masonry
+    // it dispenses, so the two are told apart by more than their icon.
+    //
+    // Both are derived from vanilla's *search* layout because both tabs call withSearchBar()
+    // and the search field is baked into this texture rather than being a separate widget.
+    //
+    // Not themable: the little tab buttons in the strip are sprite-atlas entries in the
+    // minecraft namespace (container/creative_inventory/tab_top_selected_N), so they cannot
+    // be restyled per tab from here. CreativeModeTab.Builder#withTabsImage looks like it
+    // would do it, but getTabsImage() has no reader anywhere in 1.21.11 — it is a dead
+    // accessor, and setting it does nothing.
+
+    private static Identifier background(String name) {
+        return Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID,
+                "textures/gui/container/creative_inventory/tab_" + name + ".png");
+    }
+
+    /** Parchment cream. Vanilla's default label is near-black, invisible on dark leather. */
+    private static final int LABEL_LEATHER = 0xFFF5E4B0;
+    /** Cool white, matching the stone panel's own highlight. */
+    private static final int LABEL_STONE = 0xFFE8E2EC;
+    /** Warm slot tint in place of vanilla's flat white, so hovers sit in the same family. */
+    private static final int SLOT_LEATHER = 0x80DBA86D;
+    private static final int SLOT_STONE = 0x80C0B9C4;
+
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> MAIN =
             TABS.register("main", () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup." + WizardsAndBeastsMod.MODID + ".main"))
                     .withTabsBefore(CreativeModeTabs.SPAWN_EGGS)
                     .icon(() -> new ItemStack(WandItemRegistry.WAND.get()))
                     .withSearchBar()
+                    // After withSearchBar(): that call only swaps in the vanilla search
+                    // background while the texture is still the default one.
+                    .backgroundTexture(background("main"))
+                    .withLabelColor(LABEL_LEATHER)
+                    .withSlotColor(SLOT_LEATHER)
                     .displayItems((parameters, rawOutput) -> {
                         CreativeModeTab.Output output = gated(rawOutput);
                         // Debug tools
@@ -213,6 +248,9 @@ public class ModCreativeTabs {
                     .withTabsBefore(CreativeModeTabs.SPAWN_EGGS)
                     .icon(() -> new ItemStack(HogwartsBlocks.HOGWARTS_STONE_BRICKS.baseItem().get()))
                     .withSearchBar()
+                    .backgroundTexture(background("decorative"))
+                    .withLabelColor(LABEL_STONE)
+                    .withSlotColor(SLOT_STONE)
                     .displayItems((parameters, rawOutput) -> {
                         CreativeModeTab.Output output = gated(rawOutput);
                         // Ministry of Magic
