@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.wand.gui;
 
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
@@ -69,8 +70,8 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
         for (int i = 0; i < values.length; i++) {
             int bx0 = fx + i * FLEX_BUTTON_STRIDE;
             boolean sel = menu.getFlexibilityOrdinal() == i;
-            graphics.fill(bx0, fy, bx0 + FLEX_BUTTON_W, fy + FLEX_BUTTON_H, sel ? 0xFF6b5a40 : 0xFF3a3530);
-            graphics.drawString(font, String.valueOf(i + 1), bx0 + 6, fy + 3, 0xFFe0c080, false);
+            graphics.fill(bx0, fy, bx0 + FLEX_BUTTON_W, fy + FLEX_BUTTON_H, sel ? WizardsPalette.SELECT : WizardsPalette.WELL);
+            graphics.drawString(font, String.valueOf(i + 1), bx0 + 6, fy + 3, WizardsPalette.BRASS_HI, false);
         }
 
         // The bench only speaks when it has nothing to hand over. There used to be a six-line preview of
@@ -89,7 +90,7 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
             int py = y + 16;
             // Two lines is what fits above the ingredient slots; the strings are written to it.
             for (var line : font.split(reason, this.imageWidth - 20).stream().limit(2).toList()) {
-                graphics.drawString(font, line, px, py, 0xFFbba07a, false);
+                graphics.drawString(font, line, px, py, WizardsPalette.TEXT_DIM, false);
                 py += 10;
             }
         }
@@ -124,9 +125,9 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
      */
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(font, this.title, this.titleLabelX, this.titleLabelY, 0xFFddccaa, false);
+        graphics.drawString(font, this.title, this.titleLabelX, this.titleLabelY, WizardsPalette.TEXT, false);
         graphics.drawString(font, this.playerInventoryTitle,
-                this.inventoryLabelX, this.inventoryLabelY, 0xFFbba07a, false);
+                this.inventoryLabelX, this.inventoryLabelY, WizardsPalette.TEXT_DIM, false);
     }
 
     /** What the bench is waiting for, or {@code null} while it has nothing to say. */
@@ -183,7 +184,7 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
             graphics.fill(tipX - 2, tipY - 2, tipX + tipW, tipY + 32, 0xE0100010);
             graphics.drawString(font, line1, tipX, tipY, 0xFFFFFFFF, false);
             graphics.drawString(font, line2, tipX, tipY + 10, 0xFFCCCCCC, false);
-            graphics.drawString(font, line3, tipX, tipY + 20, 0xFF9a8fa8, false);
+            graphics.drawString(font, line3, tipX, tipY + 20, WizardsPalette.TEXT_DIM, false);
         }
     }
 

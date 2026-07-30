@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.client.trunk.gui;
 
 import at.koopro.wizardsandbeasts.network.trunk.PocketConfigC2SPayload;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.trunk.PocketBiomes;
 import at.koopro.wizardsandbeasts.trunk.gui.PocketConfiguratorMenu;
 import net.minecraft.client.gui.GuiGraphics;
@@ -61,8 +62,8 @@ public class PocketConfiguratorScreen extends AbstractContainerScreen<PocketConf
     protected void renderBg(GuiGraphics g, float partial, int mx, int my) {
         int x = (this.width - this.imageWidth) / 2;
         int y = (this.height - this.imageHeight) / 2;
-        g.fill(x, y, x + imageWidth, y + imageHeight, 0xC0101018);
-        g.fill(x + 4, y + 4, x + imageWidth - 4, y + imageHeight - 4, 0xFF16141e);
+        g.fill(x, y, x + imageWidth, y + imageHeight, 0xC0000000 | (WizardsPalette.INK & 0x00FFFFFF));
+        g.fill(x + 4, y + 4, x + imageWidth - 4, y + imageHeight - 4, WizardsPalette.PLATE);
     }
 
     @Override
@@ -73,18 +74,18 @@ public class PocketConfiguratorScreen extends AbstractContainerScreen<PocketConf
 
         g.drawCenteredString(font,
                 Component.translatable("gui.wizards_and_beasts.pocket_configurator.title"),
-                x + imageWidth / 2, y + 10, 0xFFd4b8ff);
+                x + imageWidth / 2, y + 10, WizardsPalette.BRASS_HI);
 
         g.drawString(font,
                 Component.translatable("gui.wizards_and_beasts.pocket_configurator.size"),
-                x + 12, y + 22, 0xFFaaaaaa, false);
-        g.drawCenteredString(font, String.valueOf(localRadius), x + 64, y + 34, 0xFFe8e0ff);
+                x + 12, y + 22, WizardsPalette.TEXT_DIM, false);
+        g.drawCenteredString(font, String.valueOf(localRadius), x + 64, y + 34, WizardsPalette.TEXT);
 
         g.drawString(font,
                 Component.translatable("gui.wizards_and_beasts.pocket_configurator.biome"),
-                x + 12, y + 48, 0xFFaaaaaa, false);
+                x + 12, y + 48, WizardsPalette.TEXT_DIM, false);
         String biomeName = PocketBiomes.displayName(PocketBiomes.SELECTABLE.get(localBiomeIndex));
-        g.drawCenteredString(font, biomeName, x + imageWidth / 2, y + 62, 0xFF90d0f0);
+        g.drawCenteredString(font, biomeName, x + imageWidth / 2, y + 62, WizardsPalette.BRASS);
     }
 
     @Override

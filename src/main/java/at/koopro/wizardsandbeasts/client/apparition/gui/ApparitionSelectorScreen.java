@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.client.apparition.gui;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.apparition.ApparitionPoint;
 import at.koopro.wizardsandbeasts.client.apparition.state.ClientApparitionPointsState;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.network.apparition.ApparitionTravelC2SPayload;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -30,12 +31,16 @@ public final class ApparitionSelectorScreen extends Screen {
     private static final int PANEL_WIDTH = 220;
     private static final int PADDING = 6;
 
-    private static final int COLOR_PANEL = 0xD0101018;
-    private static final int COLOR_ROW = 0xC0303040;
-    private static final int COLOR_ROW_HOVER = 0xF0585870;
+    // Chrome from the shared palette. This screen is documented as matching the ability
+    // wheel, so it moves with it; both used to draw the same cold blue-greys.
+    private static final int COLOR_PANEL = 0xD0000000 | (WizardsPalette.INK & 0x00FFFFFF);
+    private static final int COLOR_ROW = 0xC0000000 | (WizardsPalette.WELL & 0x00FFFFFF);
+    private static final int COLOR_ROW_HOVER = 0xF0000000 | (WizardsPalette.RAIL & 0x00FFFFFF);
+    private static final int COLOR_TEXT = WizardsPalette.TEXT;
+    private static final int COLOR_SUBTEXT = WizardsPalette.TEXT_DIM;
+
+    // "You cannot Apparate there" is a reason, not a theme — it stays red.
     private static final int COLOR_ROW_BLOCKED = 0xC0402030;
-    private static final int COLOR_TEXT = 0xFFE8E8E8;
-    private static final int COLOR_SUBTEXT = 0xFF9A9AA8;
     private static final int COLOR_BLOCKED_TEXT = 0xFFE08080;
 
     private int hovered = -1;

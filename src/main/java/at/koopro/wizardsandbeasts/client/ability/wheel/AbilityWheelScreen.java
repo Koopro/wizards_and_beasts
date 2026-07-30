@@ -7,6 +7,7 @@ import at.koopro.wizardsandbeasts.ability.def.AbilityType;
 import at.koopro.wizardsandbeasts.client.ability.AbilityFrameworkKeyBindings;
 import at.koopro.wizardsandbeasts.client.ability.AbilityWheelController;
 import at.koopro.wizardsandbeasts.client.ability.state.ClientAbilitySelectionState;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.network.ability.AbilitySelectionC2SPayload;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.gui.Font;
@@ -39,13 +40,18 @@ public final class AbilityWheelScreen extends Screen {
     private static final int SLOT = 22;
     private static final int DEADZONE = 18;
 
-    private static final int COLOR_BG = 0xC0101018;
-    private static final int COLOR_SLOT = 0xD0303040;
-    private static final int COLOR_SLOT_HOVER = 0xF0585870;
+    // Chrome from the shared palette — the wheel used to draw its own cold blue-greys. Alpha
+    // is kept separate from the hue so these stay translucent over the world.
+    private static final int COLOR_BG = 0xC0000000 | (WizardsPalette.INK & 0x00FFFFFF);
+    private static final int COLOR_SLOT = 0xD0000000 | (WizardsPalette.WELL & 0x00FFFFFF);
+    private static final int COLOR_SLOT_HOVER = 0xF0000000 | (WizardsPalette.RAIL & 0x00FFFFFF);
+    private static final int COLOR_TEXT = WizardsPalette.TEXT;
+
+    // State, not theme, so deliberately not palette colours: toggled / selected / pinned have
+    // to stay distinguishable at a glance, and painting all three brass would merge them.
     private static final int COLOR_TOGGLE_RING = 0xFF56D364;
     private static final int COLOR_SELECTED = 0xFFFFD24A;
     private static final int COLOR_PIN = 0xFF6AB7FF;
-    private static final int COLOR_TEXT = 0xFFE8E8E8;
     private static final int COLOR_COOLDOWN = 0xB0000000;
 
     /**
