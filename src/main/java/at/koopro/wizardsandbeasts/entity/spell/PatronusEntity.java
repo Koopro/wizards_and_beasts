@@ -3,6 +3,9 @@ package at.koopro.wizardsandbeasts.entity.spell;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.registry.ModEntities;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -30,6 +33,20 @@ public class PatronusEntity extends Mob {
     public static final TagKey<EntityType<?>> DEMENTORS_TAG =
             TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "dementors"));
 
+    /** Power at/above which the Patronus takes a defined animal form (corporeal); below it is mist. */
+    public static final float CORPOREAL_POWER = 40.0f;
+
+    /** True once the Patronus has settled into a corporeal animal; false = a non-corporeal silver mist. */
+    private static final EntityDataAccessor<Boolean> DATA_CORPOREAL =
+            SynchedEntityData.defineId(PatronusEntity.class, EntityDataSerializers.BOOLEAN);
+    /** Resolved form id (e.g. {@code minecraft:wolf}); drives which model the client renders. */
+    private static final EntityDataAccessor<String> DATA_FORM_ID =
+            SynchedEntityData.defineId(PatronusEntity.class, EntityDataSerializers.STRING);
+
+    /** A non-corporeal mist fades faster than a full corporeal Patronus. */
+    private static final int CORPOREAL_LIFESPAN = 600;
+    private static final int MIST_LIFESPAN = 300;
+
     private UUID ownerUuid = new UUID(0L, 0L);
     private float patronusPower;
     private float proficiencyScalar;
@@ -40,6 +57,21 @@ public class PatronusEntity extends Mob {
         this.setNoGravity(true);
     }
 
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DATA_CORPOREAL, false);
+        builder.define(DATA_FORM_ID, "");
+    }
+
+    public boolean isCorporeal() {
+        return this.entityData.get(DATA_CORPOREAL);
+    }
+
+    public String getFormId() {
+        return this.entityData.get(DATA_FORM_ID);
+    }
+
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 40.0).add(Attributes.MOVEMENT_SPEED, 0.35);
     }
@@ -48,7 +80,8 @@ public class PatronusEntity extends Mob {
         return ownerUuid;
     }
 
-    public static void trySpawn(ServerLevel level, ServerPlayer caster, float patronusPower, float proficiencyScalar) {
+    public static void trySpawn(ServerLevel level, ServerPlayer caster, float patronusPower,
+                                float proficiencyScalar, String formId) {
         for (PatronusEntity existing : level.getEntitiesOfClass(PatronusEntity.class, caster.getBoundingBox().inflate(96))) {
             if (caster.getUUID().equals(existing.getOwnerUuid())) {
                 existing.discard();
@@ -58,6 +91,9 @@ public class PatronusEntity extends Mob {
         e.ownerUuid = caster.getUUID();
         e.patronusPower = patronusPower;
         e.proficiencyScalar = proficiencyScalar;
+        boolean corporeal = patronusPower >= CORPOREAL_POWER;
+        e.entityData.set(DATA_CORPOREAL, corporeal);
+        e.entityData.set(DATA_FORM_ID, corporeal && formId != null ? formId : "");
         e.setPos(caster.getX(), caster.getY() + 1.0, caster.getZ());
         level.addFreshEntity(e);
     }
@@ -87,7 +123,10 @@ public class PatronusEntity extends Mob {
             return;
         }
 
-        LivingEntity darkMob = findNearestDarkMob(sl, owner, 20.0);
+        // A non-corporeal Patronus is a silver mist: it guards its caster but cannot hunt down a
+        // Dementor the way a corporeal form does. It still *exists* nearby, so PatronusDetection
+        // keeps holding off the Kiss (lore: even a wisp buys a moment). It just hovers and wards.
+        LivingEntity darkMob = isCorporeal() ? findNearestDarkMob(sl, owner, 20.0) : null;
         if (darkMob != null) {
             Vec3 to = darkMob.getEyePosition().subtract(getEyePosition());
             double dist = to.length();
@@ -121,7 +160,7 @@ public class PatronusEntity extends Mob {
             }
         }
 
-        if (tickCount > 600) {
+        if (tickCount > (isCorporeal() ? CORPOREAL_LIFESPAN : MIST_LIFESPAN)) {
             discard();
         }
     }

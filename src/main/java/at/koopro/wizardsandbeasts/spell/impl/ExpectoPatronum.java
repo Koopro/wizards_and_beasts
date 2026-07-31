@@ -58,17 +58,14 @@ public class ExpectoPatronum extends Spell {
             // Failed Patronus must not apply cooldown (lore: retry when memory is brighter).
             return;
         }
-        super.executeCast(ctx, level);
-        int bonus = switch (getProficiency(caster)) {
-            case MASTERED -> 80;
-            case PROFICIENT -> 30;
-            default -> 0;
-        };
-        ExpectoPatronumAuraHandler.activate(caster, level.getGameTime() + AURA_DURATION_TICKS + bonus);
-
+        // Resolve the form up front. A stored form is reused; otherwise it is determined from
+        // heritage. A heritage that cannot conjure a Patronus rejects here — before super.executeCast
+        // pays any cost/cooldown, the same courtesy the faint-memory fizzle above already grants.
         String storedForm = caster.getData(ModAttachments.PATRONUS_FORM.get());
-        if (storedForm == null || storedForm.isEmpty()) {
-            Identifier determined = PatronusFormDeterminer.determine(
+        boolean firstForm = storedForm == null || storedForm.isEmpty();
+        Identifier determined = null;
+        if (firstForm) {
+            determined = PatronusFormDeterminer.determine(
                     HeritageAPI.getPlayerHeritage(caster),
                     HeritageAPI.getPlayerHeritageVariant(caster),
                     happiness);
@@ -80,19 +77,58 @@ public class ExpectoPatronum extends Spell {
                         true);
                 return;
             }
-            if (patronusPower >= 15.0f) {
-                PacketDistributor.sendToPlayer(caster, new PatronusFormSetS2CPayload(determined.toString()));
-            }
-            if (patronusPower >= 40.0f) {
-                caster.setData(ModAttachments.PATRONUS_FORM.get(), determined.toString());
+        }
+        String formId = firstForm ? determined.toString() : storedForm;
+
+        super.executeCast(ctx, level);
+        int bonus = switch (getProficiency(caster)) {
+            case MASTERED -> 80;
+            case PROFICIENT -> 30;
+            default -> 0;
+        };
+        ExpectoPatronumAuraHandler.activate(caster, level.getGameTime() + AURA_DURATION_TICKS + bonus);
+
+        boolean corporeal = patronusPower >= at.koopro.wizardsandbeasts.entity.spell.PatronusEntity.CORPOREAL_POWER;
+        if (firstForm) {
+            // A faint memory (>=15) still glimpses the form on the caster's own client, but only a
+            // strong one (>=40) commits it — that is the moment the Patronus takes corporeal shape.
+            PacketDistributor.sendToPlayer(caster, new PatronusFormSetS2CPayload(formId));
+            if (corporeal) {
+                caster.setData(ModAttachments.PATRONUS_FORM.get(), formId);
+                caster.displayClientMessage(
+                        Component.translatable("spell.wizards_and_beasts.expecto_patronum.form_revealed",
+                                        formDisplayName(determined))
+                                .withStyle(net.minecraft.ChatFormatting.AQUA),
+                        false);
             }
         }
-        at.koopro.wizardsandbeasts.entity.spell.PatronusEntity.trySpawn(level, caster, patronusPower, getProficiencyScalar(caster));
+        if (!corporeal) {
+            caster.displayClientMessage(
+                    Component.translatable("spell.wizards_and_beasts.expecto_patronum.mist")
+                            .withStyle(net.minecraft.ChatFormatting.GRAY),
+                    true);
+        }
+
+        at.koopro.wizardsandbeasts.entity.spell.PatronusEntity.trySpawn(
+                level, caster, patronusPower, getProficiencyScalar(caster), formId);
 
         // A Patronus that holds a defined animal form (power >= 40) is corporeal — the milestone.
-        if (patronusPower >= 40.0f) {
+        if (corporeal) {
             at.koopro.wizardsandbeasts.stats.StatMilestones.onMilestoneTriggered(
                     caster, at.koopro.wizardsandbeasts.stats.MilestoneType.FIRST_PATRONUS_CORPOREAL);
         }
+    }
+
+    /** Turns a form id ({@code minecraft:polar_bear}) into a display label ({@code Polar Bear}). */
+    private static Component formDisplayName(Identifier formId) {
+        String raw = formId.getPath();
+        String[] words = raw.split("_");
+        StringBuilder sb = new StringBuilder();
+        for (String w : words) {
+            if (w.isEmpty()) continue;
+            if (sb.length() > 0) sb.append(' ');
+            sb.append(Character.toUpperCase(w.charAt(0))).append(w.substring(1));
+        }
+        return Component.literal(sb.toString());
     }
 }

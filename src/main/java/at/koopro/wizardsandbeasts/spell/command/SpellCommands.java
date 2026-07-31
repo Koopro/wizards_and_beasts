@@ -60,6 +60,12 @@ public final class SpellCommands {
                                 .executes(ctx -> spellInfo(
                                         ctx.getSource().getPlayerOrException(),
                                         StringArgumentType.getString(ctx, "spell")))))
+                .then(Commands.literal("patronus")
+                        .then(Commands.literal("form")
+                                .then(Commands.literal("reveal")
+                                        .executes(ctx -> revealPatronusForm(ctx.getSource().getPlayerOrException())))
+                                .then(Commands.literal("clear")
+                                        .executes(ctx -> clearPatronusForm(ctx.getSource().getPlayerOrException())))))
                 .then(Commands.literal("reset")
                         .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .executes(ctx -> resetSpells(ctx.getSource().getPlayerOrException())))
@@ -238,6 +244,54 @@ public final class SpellCommands {
         }
 
         return 1;
+    }
+
+    private static int revealPatronusForm(ServerPlayer player) {
+        float happiness = player.getData(ModAttachments.HAPPINESS.get());
+        net.minecraft.resources.Identifier form =
+                at.koopro.wizardsandbeasts.spell.patronus.PatronusFormDeterminer.determine(
+                        at.koopro.wizardsandbeasts.heritage.HeritageAPI.getPlayerHeritage(player),
+                        at.koopro.wizardsandbeasts.heritage.HeritageAPI.getPlayerHeritageVariant(player),
+                        happiness);
+        if (form == null) {
+            player.displayClientMessage(
+                    Component.translatable("spell.wizards_and_beasts.expecto_patronum.reject.heritage")
+                            .withStyle(ChatFormatting.GRAY),
+                    false);
+            return 0;
+        }
+        String formId = form.toString();
+        player.setData(ModAttachments.PATRONUS_FORM.get(), formId);
+        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
+                new at.koopro.wizardsandbeasts.network.spell.PatronusFormSetS2CPayload(formId));
+        player.displayClientMessage(
+                Component.translatable("spell.wizards_and_beasts.expecto_patronum.form_revealed",
+                                formLabel(form)).withStyle(ChatFormatting.AQUA),
+                false);
+        return 1;
+    }
+
+    private static int clearPatronusForm(ServerPlayer player) {
+        player.setData(ModAttachments.PATRONUS_FORM.get(), "");
+        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
+                new at.koopro.wizardsandbeasts.network.spell.PatronusFormSetS2CPayload(""));
+        player.displayClientMessage(
+                Component.translatable("spell.wizards_and_beasts.expecto_patronum.form_cleared")
+                        .withStyle(ChatFormatting.YELLOW),
+                false);
+        return 1;
+    }
+
+    /** {@code minecraft:polar_bear} → {@code Polar Bear} for chat display. */
+    private static Component formLabel(net.minecraft.resources.Identifier form) {
+        String[] words = form.getPath().split("_");
+        StringBuilder sb = new StringBuilder();
+        for (String w : words) {
+            if (w.isEmpty()) continue;
+            if (sb.length() > 0) sb.append(' ');
+            sb.append(Character.toUpperCase(w.charAt(0))).append(w.substring(1));
+        }
+        return Component.literal(sb.toString());
     }
 
     private static int resetSpells(ServerPlayer player) {
