@@ -4,6 +4,8 @@ import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.entity.spell.ProtegoShieldEntity;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.resources.Identifier;
 import software.bernie.geckolib.constant.dataticket.DataTicket;
 import software.bernie.geckolib.model.DefaultedEntityGeoModel;
@@ -19,6 +21,15 @@ public class ProtegoShieldRenderer<R extends EntityRenderState & GeoRenderState>
     public ProtegoShieldRenderer(EntityRendererProvider.Context context) {
         super(context, new DefaultedEntityGeoModel<>(
                 Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "protego_shield")));
+    }
+
+    // The shield is a magic barrier, not a solid mob: render it as a full-bright translucent
+    // surface so the hex/rune texture glows and layers over the world, instead of GeckoLib's
+    // default opaque entityCutoutNoCull (which drew the geo as a grey box). Emissive is what
+    // makes it read as a ward at night; the texture bakes the shimmer into vertex alpha.
+    @Override
+    public RenderType getRenderType(R renderState, Identifier texture) {
+        return RenderTypes.entityTranslucentEmissive(texture);
     }
 
     @Override
