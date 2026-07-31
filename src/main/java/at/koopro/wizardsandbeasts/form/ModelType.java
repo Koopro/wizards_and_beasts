@@ -13,7 +13,13 @@ public enum ModelType {
     SMALL_HUMANOID("Small Humanoid"),
     FLYING("Flying"),
     SWIMMING("Swimming"),
-    SHADOW("Shadow");
+    SHADOW("Shadow"),
+    /**
+     * Antlered deer. Added last on purpose: anything syncing this enum by ordinal keeps its
+     * existing numbering. The stag used to be {@link #QUADRUPED}, which renders the centaur
+     * body — a stag Animagus came out as a horse-bodied biped.
+     */
+    STAG("Stag");
 
     private final String displayName;
 

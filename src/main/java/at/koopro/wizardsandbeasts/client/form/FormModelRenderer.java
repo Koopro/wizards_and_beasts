@@ -5,6 +5,7 @@ import org.jspecify.annotations.Nullable;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.client.model.WerewolfModel;
 import at.koopro.wizardsandbeasts.client.model.CentaurModel;
+import at.koopro.wizardsandbeasts.client.model.PatronusStagModel;
 import at.koopro.wizardsandbeasts.client.model.MerfolkSwimModel;
 import at.koopro.wizardsandbeasts.client.form.model.BatFormModel;
 import at.koopro.wizardsandbeasts.client.skill.gui.GoblinFormModel;
@@ -68,6 +69,7 @@ public final class FormModelRenderer {
 
     private static WerewolfModel werewolfModel;
     private static CentaurModel centaurModel;
+    private static PatronusStagModel stagModel;
     private static GoblinFormModel goblinModel;
     private static BatFormModel batModel;
     private static MerfolkSwimModel merfolkModel;
@@ -104,6 +106,7 @@ public final class FormModelRenderer {
         switch (formData.modelType()) {
             case CUSTOM_BIPED -> getWerewolfModel().render(poseStack, consumer, packedLight, overlay);
             case QUADRUPED -> getCentaurModel().render(poseStack, consumer, packedLight, overlay);
+            case STAG -> getStagModel().render(poseStack, consumer, packedLight, overlay, NO_TINT);
             case SMALL_HUMANOID -> getGoblinModel().render(poseStack, consumer, packedLight, overlay);
             case FLYING -> getBatModel().render(poseStack, consumer, packedLight, overlay);
             case SWIMMING -> getMerfolkModel().render(poseStack, consumer, packedLight, overlay);
@@ -195,6 +198,7 @@ public final class FormModelRenderer {
             switch (formData.modelType()) {
                 case CUSTOM_BIPED -> getWerewolfModel().render(tempStack, consumer, light, overlay);
                 case QUADRUPED -> getCentaurModel().render(tempStack, consumer, light, overlay);
+                case STAG -> getStagModel().render(tempStack, consumer, light, overlay, NO_TINT);
                 case SMALL_HUMANOID -> getGoblinModel().render(tempStack, consumer, light, overlay);
                 case FLYING -> getBatModel().render(tempStack, consumer, light, overlay);
                 case SWIMMING -> getMerfolkModel().render(tempStack, consumer, light, overlay);
@@ -347,6 +351,16 @@ public final class FormModelRenderer {
     private static BatFormModel getBatModel() {
         if (batModel == null) batModel = new BatFormModel();
         return batModel;
+    }
+
+    /**
+     * The stag shares the Patronus's geometry — it is the same animal, and the alternative was
+     * the centaur body. Its cubes all sit at texOffs(0,0), so the texture is read as one hide
+     * rather than a per-part layout.
+     */
+    private static PatronusStagModel getStagModel() {
+        if (stagModel == null) stagModel = new PatronusStagModel();
+        return stagModel;
     }
 
     private static MerfolkSwimModel getMerfolkModel() {
