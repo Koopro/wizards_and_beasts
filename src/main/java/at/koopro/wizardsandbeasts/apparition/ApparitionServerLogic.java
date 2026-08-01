@@ -38,6 +38,19 @@ public final class ApparitionServerLogic {
     }
 
     /**
+     * Whether the player has passed their Apparition test — the "unlocked" half of the wizard gate.
+     * Two OR'd sources, never one replacing the other: the {@code apparition_training} wandlore skill
+     * node (the survival path — a purchased node that read nowhere was a dead end for a capped point),
+     * and {@link PlayerAbilityHelper#isApparitionUnlocked} set by the debug/admin command
+     * ({@code ApparitionCommands}), which stays a working affordance. Licence and heritage remain
+     * separate gates, unchanged.
+     */
+    private static boolean hasApparitionUnlock(ServerPlayer player) {
+        return PlayerAbilityHelper.isApparitionUnlocked(player)
+                || SkillSystemAPI.hasAbility(player, "apparition_training");
+    }
+
+    /**
      * Whether the player is <i>permitted</i> to Apparate at all — the same licence/test/heritage rule
      * {@link #handleRequest} enforces, minus the transient checks (splinch, cooldown, wards) and minus the
      * per-reason feedback. Read-only; used by the ability grant layer to decide wheel visibility.
@@ -47,7 +60,7 @@ public final class ApparitionServerLogic {
         if (SkillSystemAPI.hasAbility(player, "elf_apparition")) {
             return true;
         }
-        return PlayerAbilityHelper.isApparitionUnlocked(player)
+        return hasApparitionUnlock(player)
                 && PlayerAbilityHelper.isApparitionLicensed(player)
                 && isAllowedHeritage(player);
     }
@@ -60,7 +73,7 @@ public final class ApparitionServerLogic {
         // restriction, and slips past wards that bind wizards. Splinch and cooldown still apply.
         boolean elfApparition = SkillSystemAPI.hasAbility(caster, "elf_apparition");
         if (!elfApparition) {
-            if (!PlayerAbilityHelper.isApparitionUnlocked(caster)) {
+            if (!hasApparitionUnlock(caster)) {
                 fail(caster, "You have not passed your Apparition test.");
                 return;
             }
@@ -129,7 +142,7 @@ public final class ApparitionServerLogic {
         }
         boolean elfApparition = SkillSystemAPI.hasAbility(caster, "elf_apparition");
         if (!elfApparition) {
-            if (!PlayerAbilityHelper.isApparitionUnlocked(caster)) {
+            if (!hasApparitionUnlock(caster)) {
                 fail(caster, "You have not passed your Apparition test.");
                 return;
             }
