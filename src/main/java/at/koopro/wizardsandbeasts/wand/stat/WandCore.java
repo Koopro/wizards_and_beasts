@@ -30,6 +30,13 @@ public enum WandCore implements StringRepresentable {
 
     static {
         for (WandCore c : values()) BY_NAME.put(c.name, c);
+        // The core material item, the datapack definition, every wandmaking recipe and the lang key
+        // all spell this core "thestral_tail_hair"; only this enum shortened it. Since wands store
+        // the item's id and the cast path looks the core up by that id, a Thestral wand resolved to
+        // null and silently contributed no core modifier at all. Alias instead of renaming the
+        // constant: getSerializedName() backs the persistent wand_core_legacy codec, so the stored
+        // "thestral_tail" form still has to parse.
+        BY_NAME.put("thestral_tail_hair", THESTRAL_TAIL);
     }
 
     private final String name;
