@@ -9,5 +9,9 @@
   },
   "personality_affinity": ["conqueror", "destined", "exceptional"],
   "rarity": "legendary",
-  "refuse_threshold": 0.1
+  "refuse_threshold": 0.1,
+  "cast_modifiers": {
+    "damage": 1.05,
+    "cooldown": 0.95
+  }
 }

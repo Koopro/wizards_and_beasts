@@ -122,7 +122,7 @@ public abstract class Spell {
      * Calculates skill-, proficiency-, and wand-adjusted damage for this spell.
      */
     public float getDamageForCaster(ServerPlayer caster, ItemStack wandStack) {
-        WandStats wand = WandStatsResolver.resolve(wandStack);
+        WandStats wand = WandStatsResolver.resolve(wandStack, caster.registryAccess());
         return baseDamage
                 * SkillSystemAPI.getDamageMultiplier(caster, this)
                 * wand.damageFor(this);

@@ -10,5 +10,10 @@
   },
   "personality_affinity": ["defender", "selfless", "steadfast"],
   "rarity": "uncommon",
-  "refuse_threshold": 0.25
+  "refuse_threshold": 0.25,
+  "cast_modifiers": {
+    "category_damage_bonus": {
+      "combat": 0.05
+    }
+  }
 }

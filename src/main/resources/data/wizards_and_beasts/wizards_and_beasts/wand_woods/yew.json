@@ -9,5 +9,10 @@
   },
   "personality_affinity": ["ambitious", "unyielding", "fated"],
   "rarity": "rare",
-  "refuse_threshold": 0.15
+  "refuse_threshold": 0.15,
+  "cast_modifiers": {
+    "category_damage_bonus": {
+      "dark_arts": 0.05
+    }
+  }
 }

@@ -102,7 +102,8 @@ public final class WandBeamChannelLogic {
             return;
         }
 
-        float range = props.getRange() * WandStatsResolver.resolve(wandStack).rangeFor(spell);
+        float range = props.getRange()
+                * WandStatsResolver.resolve(wandStack, player.registryAccess()).rangeFor(spell);
         if (range <= 0) range = 32f;
 
         WandBeamSession s = SESSIONS.computeIfAbsent(player.getUUID(), u -> new WandBeamSession());
@@ -270,7 +271,8 @@ public final class WandBeamChannelLogic {
                 return;
             }
         }
-        float range = spell.getProperties().getRange() * WandStatsResolver.resolve(wand).rangeFor(spell);
+        float range = spell.getProperties().getRange()
+                * WandStatsResolver.resolve(wand, player.registryAccess()).rangeFor(spell);
         if (range <= 0f) range = 32f;
         float maxReach = Math.min(range, s.beamTicks * BeamRayResolver.extensionBlocksPerTick());
         float cap = Math.max(WandBeamSpellHandlers.LEVIOSA_MIN_DISTANCE,

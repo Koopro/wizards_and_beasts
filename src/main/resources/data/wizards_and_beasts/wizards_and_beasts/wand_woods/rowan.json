@@ -9,5 +9,11 @@
   },
   "personality_affinity": ["gentle", "guardian", "empathetic"],
   "rarity": "common",
-  "refuse_threshold": 0.65
+  "refuse_threshold": 0.65,
+  "cast_modifiers": {
+    "fizzle": -0.02,
+    "category_damage_bonus": {
+      "defense": 0.05
+    }
+  }
 }

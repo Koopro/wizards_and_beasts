@@ -147,7 +147,7 @@ public final class SpellCastService {
         }
 
         var wandStack = WandHelper.getWandStack(player);
-        WandStats wandStats = WandStatsResolver.resolve(wandStack);
+        WandStats wandStats = WandStatsResolver.resolve(wandStack, player.registryAccess());
         CastContext castContext = CastContext.create(
                 player,
                 wandStack,

@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.wand.cast;
 
+import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.item.wand.WandItem;
 import at.koopro.wizardsandbeasts.wand.stat.WandCore;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
@@ -10,10 +11,21 @@ import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.cast.ModifierStack;
 import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
+import at.koopro.wizardsandbeasts.wand.registry.WandCastModifiers;
+import at.koopro.wizardsandbeasts.wand.registry.WandDatapackRegistries;
+import at.koopro.wizardsandbeasts.wand.registry.WandWoodDefinition;
+import com.mojang.logging.LogUtils;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
+import org.slf4j.Logger;
 
 import org.jspecify.annotations.Nullable;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Resolves a wand's four soul attributes (wood, core, length, flexibility) into
@@ -21,11 +33,19 @@ import org.jspecify.annotations.Nullable;
  * tunable in one place and intentionally moderate so that no single component
  * dominates the math (the pillar that does the heavy lifting is the core).
  *
- * <p>To make these JSON-driven later (Stage 4 or beyond), replace the per-enum
- * {@code apply*} methods with a {@code Map<E, WandStatsContribution>} loaded
- * from a datapack.
+ * <p>Wood is the one pillar that is fully datapack-driven: its contribution comes
+ * from {@link WandWoodDefinition#castModifiers()}. Cores, length and flexibility
+ * are still per-enum tables here.
  */
 public final class WandStatsResolver {
+
+    private static final Logger LOGGER = LogUtils.getLogger();
+
+    /**
+     * Ids already reported as undefined. {@link #resolve} runs once per cast and once per beam
+     * tick, so an unguarded warning would flood the log for as long as the wand is held.
+     */
+    private static final Set<Identifier> WARNED_MISSING_WOODS = ConcurrentHashMap.newKeySet();
 
     private WandStatsResolver() {}
 
@@ -33,15 +53,18 @@ public final class WandStatsResolver {
      * Returns the combined {@link WandStats} for a wand stack. If the stack is
      * not a wand or has missing attributes, the missing pieces fall back to
      * neutral contributions so the result is always usable in math.
+     *
+     * @param registries needed to read wood definitions. When {@code null} the wood contributes
+     *                   nothing — callers without a registry get the other three pillars, not a crash.
      */
-    public static WandStats resolve(@Nullable ItemStack wandStack) {
+    public static WandStats resolve(@Nullable ItemStack wandStack, HolderLookup.@Nullable Provider registries) {
         if (wandStack == null || wandStack.isEmpty() || !(wandStack.getItem() instanceof WandItem)) {
             return WandStats.NEUTRAL;
         }
 
         WandStats.Builder b = WandStats.builder();
         applyCore(b, resolveCore(wandStack));
-        applyWood(b, resolveWood(wandStack));
+        applyWood(b, resolveWoodId(wandStack), registries);
         applyLength(b, resolveLength(wandStack));
         applyFlexibility(b, resolveFlexibility(wandStack));
         return b.build();
@@ -98,20 +121,37 @@ public final class WandStatsResolver {
         }
     }
 
-    // ── Woods: smaller modifiers, often category-flavored ────────────────
+    // ── Woods: datapack-driven ───────────────────────────────────────────
 
-    private static void applyWood(WandStats.Builder b, @Nullable WandWood wood) {
-        if (wood == null) return;
-        switch (wood) {
-            case ELDER -> b
-                    .mulDamage(1.05f)
-                    .mulCooldown(0.95f);
-            case YEW -> b.addCategoryDamageBonus(SpellCategory.DARK_ARTS, 0.05f);
-            case HOLLY -> b.addCategoryDamageBonus(SpellCategory.COMBAT, 0.05f);
-            case ROWAN -> b
-                    .addCategoryDamageBonus(SpellCategory.DEFENSE, 0.05f)
-                    .addFizzle(-0.02f);
+    private static void applyWood(WandStats.Builder b, @Nullable Identifier woodId,
+                                  HolderLookup.@Nullable Provider registries) {
+        if (woodId == null || registries == null) return;
+        WandCastModifiers mods = castModifiersFor(woodId, registries);
+        if (mods.isNeutral()) return;
+        b.mulDamage(mods.damage())
+                .mulCooldown(mods.cooldown())
+                .mulRange(mods.range())
+                .addFizzle(mods.fizzle());
+        mods.categoryDamageBonus().forEach(b::addCategoryDamageBonus);
+    }
+
+    /**
+     * A wood with no definition contributes nothing rather than throwing: an incomplete datapack
+     * should not break casting. Uses the nullable {@code lookup} rather than {@code lookupOrThrow}
+     * for the same reason — this runs on the cast path.
+     */
+    private static WandCastModifiers castModifiersFor(Identifier woodId, HolderLookup.Provider registries) {
+        Optional<Holder.Reference<WandWoodDefinition>> holder =
+                registries.lookup(WandDatapackRegistries.WAND_WOOD_REGISTRY)
+                        .flatMap(lookup -> lookup.get(
+                                ResourceKey.create(WandDatapackRegistries.WAND_WOOD_REGISTRY, woodId)));
+        if (holder.isEmpty()) {
+            if (WARNED_MISSING_WOODS.add(woodId)) {
+                LOGGER.warn("Wand wood '{}' has no definition; it contributes nothing to casts.", woodId);
+            }
+            return WandCastModifiers.NEUTRAL;
         }
+        return holder.get().value().castModifiers();
     }
 
     // ── Length: range / damage / cooldown trade ──────────────────────────
@@ -150,13 +190,18 @@ public final class WandStatsResolver {
         return id == null ? null : WandCore.byName(id.getPath());
     }
 
-    private static WandWood resolveWood(ItemStack wandStack) {
+    /**
+     * The legacy enum component still wins over the modern {@code Identifier} one, exactly as it did
+     * when wood was resolved to an enum. Stacks written before that migration carry only the legacy
+     * component, and dropping this branch would silently make them neutral.
+     */
+    @Nullable
+    private static Identifier resolveWoodId(ItemStack wandStack) {
         WandWood legacy = wandStack.get(ModDataComponents.WAND_WOOD.get());
         if (legacy != null) {
-            return legacy;
+            return Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, legacy.getSerializedName());
         }
-        Identifier id = WandComponents.getWood(wandStack);
-        return id == null ? null : WandWood.byName(id.getPath());
+        return WandComponents.getWood(wandStack);
     }
 
     private static WandLength resolveLength(ItemStack wandStack) {

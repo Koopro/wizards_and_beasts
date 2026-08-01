@@ -75,6 +75,6 @@ class WandStatsTest {
 
     @Test
     void resolver_nullStack_returnsNeutral() {
-        assertEquals(WandStats.NEUTRAL, WandStatsResolver.resolve(null));
+        assertEquals(WandStats.NEUTRAL, WandStatsResolver.resolve(null, null));
     }
 }

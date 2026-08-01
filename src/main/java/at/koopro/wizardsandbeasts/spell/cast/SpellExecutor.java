@@ -42,7 +42,7 @@ public final class SpellExecutor {
     private SpellExecutor() {}
 
     public static void executeGeneric(Spell spell, ServerLevel level, ServerPlayer caster, ItemStack wandStack) {
-        WandStats wandStats = WandStatsResolver.resolve(wandStack);
+        WandStats wandStats = WandStatsResolver.resolve(wandStack, level.registryAccess());
         CastContext ctx = CastContext.create(
                 caster,
                 wandStack,
