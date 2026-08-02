@@ -1383,7 +1383,7 @@
   "gringotts.wizards_and_beasts.reject.insufficient": "Your vault does not hold enough for that.",
   "gringotts.wizards_and_beasts.reject.exchange": "Not enough coin to make that exchange.",
   "bestiary.wizards_and_beasts.discovered": "Bestiary updated: %s",
-  "subtype.WizardsAndBeastsMod.werewolf.born.desc": "Bitten so young that the wolf is the oldest thing they remember — Remus Lupin was only four when Fenrir Greyback marked him. Lycanthropy is never inherited, but a child who has never known a life before the moon grows stranger and more acclimated to the wolf than a victim taken as an adult ever will.",
+  "subtype.wizards_and_beasts.werewolf.born.desc": "Bitten so young that the wolf is the oldest thing they remember — Remus Lupin was only four when Fenrir Greyback marked him. Lycanthropy is never inherited, but a child who has never known a life before the moon grows stranger and more acclimated to the wolf than a victim taken as an adult ever will.",
   "gamps_law.wizards_and_beasts.life_creation": "To create life is beyond the reach of magic. Even the darkest wizard cannot overrule this law.",
   "gamps_law.wizards_and_beasts.love_conjuration": "Love cannot be conjured. What this magic can imitate is obsession, and obsession is not love.",
   "gamps_law.wizards_and_beasts.information_genesis": "Magic cannot conjure knowledge that has no source in the world.",

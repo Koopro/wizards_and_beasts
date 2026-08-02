@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.heritage;
 
+import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -118,7 +120,7 @@ public enum Heritage {
     public boolean isAlphaAvailable() { return alphaAvailable; }
 
     public String getTranslationKey() {
-        return "type.WizardsAndBeastsMod." + id;
+        return "type." + WizardsAndBeastsMod.MODID + "." + id;
     }
 
     /** Lang key holding {@link #getDescription()}; same {@code .desc} shape as {@code ProfessionNode}. */

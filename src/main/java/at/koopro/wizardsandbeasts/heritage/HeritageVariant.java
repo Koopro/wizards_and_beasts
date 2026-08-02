@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.heritage;
 
+import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+
 import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
@@ -237,7 +239,7 @@ public enum HeritageVariant {
     }
 
     public String getTranslationKey() {
-        return "subtype.WizardsAndBeastsMod." + parentHeritage.getId() + "." + id;
+        return "subtype." + WizardsAndBeastsMod.MODID + "." + parentHeritage.getId() + "." + id;
     }
 
     /** Lang key holding {@link #getDescription()}; same {@code .desc} shape as {@code ProfessionNode}. */
