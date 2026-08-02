@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:block/cross",
-  "textures": {
-    "cross": "wizards_and_beasts:block/slytherin_banner"
-  }
-}

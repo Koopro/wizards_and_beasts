@@ -4,6 +4,7 @@ import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.ModelProvider;
 import net.minecraft.client.data.models.blockstates.MultiVariantGenerator;
+import net.minecraft.client.data.models.blockstates.PropertyDispatch;
 import net.minecraft.client.data.models.model.ModelTemplates;
 import net.minecraft.client.data.models.model.TextureMapping;
 import net.minecraft.client.data.models.model.TextureSlot;
@@ -13,6 +14,7 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.neoforged.neoforge.client.model.generators.template.ExtendedModelTemplate;
 import net.neoforged.neoforge.client.model.generators.template.ExtendedModelTemplateBuilder;
 
@@ -151,13 +153,10 @@ public class ModModelProvider extends ModelProvider {
 
         blockModels.createCrossBlockWithDefaultItem(ModBlocks.MALLOWSWEET.get(), BlockModelGenerators.PlantType.NOT_TINTED);
 
-        // House banners hang as a crossed cloth pennant (readable from every side with no facing
-        // property), not the solid leaves cube they used to render as — that fat cube also clashed
-        // with the block's slim collision box. Default texture resolves to block/<house>_banner.
-        blockModels.createCrossBlockWithDefaultItem(ModBlocks.GRYFFINDOR_BANNER.get(), BlockModelGenerators.PlantType.NOT_TINTED);
-        blockModels.createCrossBlockWithDefaultItem(ModBlocks.SLYTHERIN_BANNER.get(), BlockModelGenerators.PlantType.NOT_TINTED);
-        blockModels.createCrossBlockWithDefaultItem(ModBlocks.RAVENCLAW_BANNER.get(), BlockModelGenerators.PlantType.NOT_TINTED);
-        blockModels.createCrossBlockWithDefaultItem(ModBlocks.HUFFLEPUFF_BANNER.get(), BlockModelGenerators.PlantType.NOT_TINTED);
+        createHouseBanner(blockModels, ModBlocks.GRYFFINDOR_BANNER.get());
+        createHouseBanner(blockModels, ModBlocks.SLYTHERIN_BANNER.get());
+        createHouseBanner(blockModels, ModBlocks.RAVENCLAW_BANNER.get());
+        createHouseBanner(blockModels, ModBlocks.HUFFLEPUFF_BANNER.get());
 
         TextureMapping torchCross = TextureMapping.cross(Identifier.withDefaultNamespace("block/torch"));
         // The placed candle used to draw the vanilla torch cross, so the block in the world
@@ -497,6 +496,58 @@ public class ModModelProvider extends ModelProvider {
         blockModels.blockStateOutput.accept(
                 rotated ? generator.with(BlockModelGenerators.ROTATION_HORIZONTAL_FACING) : generator);
         blockModels.registerSimpleItemModel(block, model);
+    }
+
+    /**
+     * One half of a hanging banner: a single quad a half-pixel off the back face.
+     *
+     * <p>The cloth's outline — inset sides, swallowtail hem, the gap either side of the
+     * hanging rod — is alpha in the texture, not geometry, so this stays one element and the
+     * model needs {@code render_type: cutout} to honour it. The quad spans the full block
+     * width because the texture's own transparent margins do the insetting; narrowing the
+     * element instead would squeeze the sprite and bend the emblem.
+     *
+     * <p>Authored facing north, the face {@link BlockModelGenerators#ROTATION_HORIZONTAL_FACING}
+     * leaves unrotated, which also matches the identity entry of {@code Shapes.rotateHorizontal}
+     * used for the block's shape.
+     */
+    private static ExtendedModelTemplate bannerHalfModel() {
+        return prop(TextureSlot.PARTICLE, TextureSlot.TEXTURE)
+                .renderType("minecraft:cutout")
+                .element(e -> e.from(0, 0, 15.5F).to(16, 16, 16)
+                        .textureAll(TextureSlot.TEXTURE))
+                .build();
+    }
+
+    /**
+     * Banners are two blocks tall, so the halves are separate models chosen by
+     * {@code DOUBLE_BLOCK_HALF} and then rotated as one by facing — chaining the two
+     * dispatches gives the full 4x2 product.
+     *
+     * <p>The item is a flat sprite rather than the block model: half a banner in the hand
+     * would be meaningless, so {@code <block>_item} is a whole banner drawn small.
+     */
+    private void createHouseBanner(BlockModelGenerators blockModels, Block block) {
+        Identifier upper = bannerHalfModel().createWithSuffix(block, "_top",
+                bannerTexture(block, "_top"), blockModels.modelOutput);
+        Identifier lower = bannerHalfModel().createWithSuffix(block, "_bottom",
+                bannerTexture(block, "_bottom"), blockModels.modelOutput);
+
+        blockModels.blockStateOutput.accept(MultiVariantGenerator.dispatch(block)
+                .with(PropertyDispatch.initial(BlockStateProperties.DOUBLE_BLOCK_HALF)
+                        .select(DoubleBlockHalf.LOWER, BlockModelGenerators.plainVariant(lower))
+                        .select(DoubleBlockHalf.UPPER, BlockModelGenerators.plainVariant(upper)))
+                .with(BlockModelGenerators.ROTATION_HORIZONTAL_FACING));
+
+        blockModels.registerSimpleItemModel(block,
+                blockModels.createFlatItemModelWithBlockTexture(block.asItem(), block, "_item"));
+    }
+
+    private static TextureMapping bannerTexture(Block block, String suffix) {
+        Identifier texture = TextureMapping.getBlockTexture(block, suffix);
+        return new TextureMapping()
+                .put(TextureSlot.TEXTURE, texture)
+                .put(TextureSlot.PARTICLE, texture);
     }
 
     /**

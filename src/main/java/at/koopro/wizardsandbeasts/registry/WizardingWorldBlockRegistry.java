@@ -32,18 +32,32 @@ final class WizardingWorldBlockRegistry {
                             .offsetType(BlockBehaviour.OffsetType.XZ)
                             .pushReaction(PushReaction.DESTROY));
 
+    /**
+     * Cloth, so nothing to walk into; and DESTROY rather than the default NORMAL because a
+     * piston pushing a two-block banner one half at a time would otherwise tear the pair apart.
+     */
+    private static BlockBehaviour.Properties bannerProps(MapColor colour) {
+        return BlockBehaviour.Properties.of()
+                .mapColor(colour)
+                .noCollision()
+                .instabreak()
+                .sound(SoundType.WOOL)
+                .noOcclusion()
+                .pushReaction(PushReaction.DESTROY);
+    }
+
     static final DeferredBlock<HouseBannerBlock> GRYFFINDOR_BANNER =
             ModBlocks.BLOCKS.registerBlock("gryffindor_banner", HouseBannerBlock::new,
-                    () -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).instabreak().sound(SoundType.WOOL).noOcclusion());
+                    () -> bannerProps(MapColor.COLOR_RED));
     static final DeferredBlock<HouseBannerBlock> SLYTHERIN_BANNER =
             ModBlocks.BLOCKS.registerBlock("slytherin_banner", HouseBannerBlock::new,
-                    () -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GREEN).instabreak().sound(SoundType.WOOL).noOcclusion());
+                    () -> bannerProps(MapColor.COLOR_GREEN));
     static final DeferredBlock<HouseBannerBlock> RAVENCLAW_BANNER =
             ModBlocks.BLOCKS.registerBlock("ravenclaw_banner", HouseBannerBlock::new,
-                    () -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE).instabreak().sound(SoundType.WOOL).noOcclusion());
+                    () -> bannerProps(MapColor.COLOR_BLUE));
     static final DeferredBlock<HouseBannerBlock> HUFFLEPUFF_BANNER =
             ModBlocks.BLOCKS.registerBlock("hufflepuff_banner", HouseBannerBlock::new,
-                    () -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_YELLOW).instabreak().sound(SoundType.WOOL).noOcclusion());
+                    () -> bannerProps(MapColor.COLOR_YELLOW));
 
     static final DeferredBlock<FloatingCandleBlock> FLOATING_CANDLE =
             ModBlocks.BLOCKS.registerBlock("floating_candle", FloatingCandleBlock::new,

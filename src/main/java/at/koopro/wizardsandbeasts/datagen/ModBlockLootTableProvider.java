@@ -64,10 +64,13 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
                                 .hasProperty(CropBlock.AGE, ModBlocks.MANDRAKE_CROP.get().getMaxAge()))));
         dropSelf(ModBlocks.DEVILS_SNARE.get());
         dropSelf(ModBlocks.MALLOWSWEET.get());
-        dropSelf(ModBlocks.GRYFFINDOR_BANNER.get());
-        dropSelf(ModBlocks.SLYTHERIN_BANNER.get());
-        dropSelf(ModBlocks.RAVENCLAW_BANNER.get());
-        dropSelf(ModBlocks.HUFFLEPUFF_BANNER.get());
+        // Banners are two blocks tall. createDoorTable pays out from the lower half only, so
+        // breaking either end yields exactly one banner rather than two (dropSelf) or, once
+        // the other half is cleared by updateShape, none.
+        add(ModBlocks.GRYFFINDOR_BANNER.get(), this::createDoorTable);
+        add(ModBlocks.SLYTHERIN_BANNER.get(), this::createDoorTable);
+        add(ModBlocks.RAVENCLAW_BANNER.get(), this::createDoorTable);
+        add(ModBlocks.HUFFLEPUFF_BANNER.get(), this::createDoorTable);
         dropSelf(ModBlocks.FLOATING_CANDLE.get());
         dropSelf(ModBlocks.BRASS_CAULDRON.get());
         dropSelf(ModBlocks.WIZARDING_COPPER_CAULDRON.get());

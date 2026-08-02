@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "wizards_and_beasts:block/ravenclaw_banner"
+    "layer0": "wizards_and_beasts:block/ravenclaw_banner_item"
   }
 }
