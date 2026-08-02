@@ -35,6 +35,7 @@ public abstract class Spell {
     private final int color;
     private SpellProperties properties;
     private SpellRequirement requirement;
+    private @Nullable String requiredSkillId;
 
     protected Spell(String id, String displayName, SpellCategory category,
                     int baseCooldownTicks, float baseDamage, int color) {
@@ -272,7 +273,24 @@ public abstract class Spell {
      */
     @Nullable
     public String getRequiredSkillId() {
-        return null;
+        return requiredSkillId;
+    }
+
+    /**
+     * Declares the skill node a player must hold before a teacher will sell this spell — the same
+     * gate a datapack spell expresses through {@code learning.requiredSkillId}. Bespoke Java spells
+     * had no way to express it at all, so their capability surface differed structurally from JSON
+     * spells for no reason; that asymmetry is what this closes.
+     *
+     * <p>Takes a <em>bare</em> node id (no namespace): the reader is
+     * {@code PlayerSkillData.getSkillLevel(String)}, which keys on bare ids, so a namespaced value
+     * would fail closed and silently make the spell unlearnable.
+     *
+     * <p>No shipped spell calls this. Which spells earn a node gate is a progression ruling that
+     * belongs to the skill-web design session, not to this seam.
+     */
+    protected void setRequiredSkillId(@Nullable String skillId) {
+        this.requiredSkillId = skillId;
     }
 
     @Nullable
