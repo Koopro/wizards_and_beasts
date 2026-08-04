@@ -26,7 +26,7 @@ public final class PlayerModelViewport {
      * large black box. Deriving the scale from the box means the framing holds if the
      * viewport is ever resized.
      */
-    private static final float FILL_FRACTION = 0.80f;
+    private static final float FILL_FRACTION = 0.88f;
     private static final float PLAYER_UNITS  = 1.8f;
 
     private static final int COLOR_FILL   = 0xFF0D0905;

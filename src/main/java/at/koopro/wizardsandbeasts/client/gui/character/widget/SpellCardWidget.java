@@ -11,8 +11,11 @@ import org.jspecify.annotations.NonNull;
 /** Renders a single spell card in the Spells tab grid. */
 public final class SpellCardWidget {
 
+    /** Preferred card width — the grid uses it to choose a column count, not to size cards. */
     public static final int CARD_W = 88;
     public static final int CARD_H = 28;
+    /** Three 4px pips on a 6px pitch. */
+    private static final int PIP_BLOCK_W = 16;
 
     private static final int COLOR_BG_CARD    = 0xFF1E1408;
     private static final int COLOR_HI         = 0xFF3A2A14;
@@ -29,29 +32,37 @@ public final class SpellCardWidget {
     private SpellCardWidget() {}
 
     /**
-     * Draws a spell card at (x, y). Width and height are CARD_W × CARD_H.
+     * Draws a spell card at (x, y), {@code w} wide and {@link #CARD_H} tall.
+     *
+     * <p>The width is a parameter rather than {@link #CARD_W} because the card used to be
+     * a fixed 88px in a column that is usually wider. That left the name clipped to 66px —
+     * "Arresto Momentum" rendered as "Arresto Mom", "Avada Kedavra" as "Avada Kedav" —
+     * while empty panel sat to the right of every card. {@code CARD_W} is now only the
+     * *preferred* width the grid uses to pick a column count; the card fills whatever
+     * column it lands in.
      *
      * @param g          GuiGraphics context
      * @param x          left edge
      * @param y          top edge
+     * @param w          card width
      * @param spell      spell definition
      * @param proficiency player's proficiency for this spell
      */
-    public static void draw(@NonNull GuiGraphics g, int x, int y,
+    public static void draw(@NonNull GuiGraphics g, int x, int y, int w,
                             @NonNull Spell spell, @NonNull Proficiency proficiency) {
         Font font = Minecraft.getInstance().font;
 
         // Card background
         at.koopro.wizardsandbeasts.client.gui.McStylePanel.drawPanel(
-                g, x, y, CARD_W, CARD_H, COLOR_BG_CARD, COLOR_HI, COLOR_SHADOW);
+                g, x, y, w, CARD_H, COLOR_BG_CARD, COLOR_HI, COLOR_SHADOW);
 
-        // Spell name (truncated to fit)
-        int maxNameW = CARD_W - 4 - 18; // leave space for 3 pips (6px each)
+        // Spell name, truncated only if it genuinely will not fit beside the pips.
+        int maxNameW = w - 4 - PIP_BLOCK_W - 2;
         String name = font.plainSubstrByWidth(spell.getDisplayName(), maxNameW);
         g.drawString(font, name, x + 3, y + 3, COLOR_NAME, false);
 
         // Mastery pips (3 dots on the right side)
-        drawPips(g, x + CARD_W - 19, y + 4, proficiency);
+        drawPips(g, x + w - 3 - PIP_BLOCK_W, y + 4, proficiency);
 
         // Category label
         String catLabel = formatCategory(spell.getCategory());
@@ -61,7 +72,7 @@ public final class SpellCardWidget {
         String tierLabel = proficiency.name().charAt(0)
                 + proficiency.name().substring(1).toLowerCase();
         int tierW = font.width(tierLabel);
-        g.drawString(font, tierLabel, x + CARD_W - 3 - tierW, y + 13, tierLabelColor(proficiency), false);
+        g.drawString(font, tierLabel, x + w - 3 - tierW, y + 13, tierLabelColor(proficiency), false);
     }
 
     // ── internals ──────────────────────────────────────────────────────────

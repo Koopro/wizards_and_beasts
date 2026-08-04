@@ -66,6 +66,8 @@ public final class CharacterSheetScreen extends Screen {
     private static final int FRAME_PAD = 7;
     /** Clearance from the internal column divider, which is a single rule rather than a frame. */
     private static final int DIVIDER_PAD = 4;
+    /** Side inset of the model viewport, which narrows it toward the figure's own aspect. */
+    private static final int VIEWPORT_SIDE_INSET = 20;
 
     // Palette
     private static final int COLOR_BG       = 0xFF2A1E0F;
@@ -215,11 +217,16 @@ public final class CharacterSheetScreen extends Screen {
         LocalPlayer player = minecraft.player;
         if (!(player instanceof LocalPlayer lp)) return;
 
-        // 3D viewport: x=colX+6, y=colY+4, w=colW-12, h=112
-        int vpX = colX + 6;
+        // 3D viewport, portrait aspect and centred in the column.
+        //
+        // It used to be colW-12 by 112 — near square, 108x112 — around a figure that is
+        // 0.6 blocks wide by 1.8 tall. Even filling the height, a player only covers about
+        // a third of that width, so most of the box read as empty black. A portrait box
+        // wastes far less of itself on a standing figure.
+        int vpW = colW - VIEWPORT_SIDE_INSET * 2;
+        int vpH = 124;
+        int vpX = colX + VIEWPORT_SIDE_INSET;
         int vpY = colY + 4;
-        int vpW = colW - 12;
-        int vpH = 112;
         viewport.render(g, vpX, vpY, vpW, vpH, partialTick, lp, mouseX, mouseY);
 
         // Heritage block

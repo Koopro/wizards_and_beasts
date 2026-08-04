@@ -46,6 +46,9 @@ public final class SpellsTab implements CharacterTab {
 
         int gridW = w - SCROLLBAR_W - 3;
         int cols  = Math.max(1, gridW / (SpellCardWidget.CARD_W + CARD_GAP));
+        // Cards fill their column instead of sitting at a fixed 88px inside it. With one
+        // column that is the difference between "Arresto Mom" and "Arresto Momentum".
+        int cardW = (gridW - (cols - 1) * CARD_GAP) / cols;
         int rows  = (entries.size() + cols - 1) / cols;
         int totalH = rows * (SpellCardWidget.CARD_H + CARD_GAP);
 
@@ -60,13 +63,13 @@ public final class SpellsTab implements CharacterTab {
         for (int i = 0; i < entries.size(); i++) {
             int col = i % cols;
             int row = i / cols;
-            int cx  = x + col * (SpellCardWidget.CARD_W + CARD_GAP);
+            int cx  = x + col * (cardW + CARD_GAP);
             int cy  = cardOY + row * (SpellCardWidget.CARD_H + CARD_GAP);
 
             // skip cards fully outside the viewport
             if (cy + SpellCardWidget.CARD_H < y || cy > y + h) continue;
 
-            SpellCardWidget.draw(g, cx, cy, entries.get(i).spell(), entries.get(i).proficiency());
+            SpellCardWidget.draw(g, cx, cy, cardW, entries.get(i).spell(), entries.get(i).proficiency());
         }
 
         g.disableScissor();
