@@ -32,6 +32,13 @@ public final class AttributesTab implements CharacterTab {
     private static final int COLOR_SHADOW   = 0xFF0A0500;
     private static final int COLOR_LABEL    = 0xFF887766;
     private static final int COLOR_VALUE    = 0xFFEEDDBB;
+    /** Empty-bar track. Was {@code 0xFF0D0905}, near-black on {@link #COLOR_ATTR_BG} — an
+     *  attribute sitting at zero looked like a card with no bar at all rather than an
+     *  empty one, which is why Armor / Wand Affinity / Beast Resistance read as unfinished. */
+    private static final int COLOR_BAR_TRACK = 0xFF3B2A16;
+    private static final int COLOR_BAR_FILL  = 0xFF886622;
+    /** Clear space kept between a truncated label and its right-aligned value. */
+    private static final int LABEL_VALUE_GAP = 4;
     private static final int COLOR_ELIGIBLE   = 0xFF55FF55;
     private static final int COLOR_INELIGIBLE = 0xFFFF5555;
     private static final int COLOR_REASON     = 0xFFAA0000;
@@ -146,24 +153,27 @@ public final class AttributesTab implements CharacterTab {
         Font font = Minecraft.getInstance().font;
         McStylePanel.drawPanel(g, x, y, w, h, COLOR_ATTR_BG, COLOR_HI, COLOR_SHADOW);
 
-        String nameTrunc = font.plainSubstrByWidth(name, w - 4);
+        // The value is measured first because the label has to be truncated around it.
+        // Truncating to the full card width instead let "Dark Corruption" and "Beast
+        // Resistance" run under the right-aligned value and render as "Dark Corrupti100"
+        // and "Beast Resistanc0" -- the four shorter labels fit, so nothing caught it.
+        String valStr = formatAttr(value);
+        int valW = font.width(valStr);
+
+        String nameTrunc = font.plainSubstrByWidth(name, w - 6 - valW - LABEL_VALUE_GAP);
         g.drawString(font, nameTrunc, x + 3, y + 3, COLOR_LABEL, false);
+        g.drawString(font, valStr, x + w - 3 - valW, y + 3, COLOR_VALUE, false);
 
         // progress bar
         int barY = y + 13;
         int barW = w - 6;
-        g.fill(x + 3, barY, x + 3 + barW, barY + 4, 0xFF0D0905);
+        g.fill(x + 3, barY, x + 3 + barW, barY + 4, COLOR_BAR_TRACK);
         double range = max - min;
         if (range > 0) {
             int filled = (int)((value - min) / range * barW);
             filled = Math.max(0, Math.min(filled, barW));
-            g.fill(x + 3, barY, x + 3 + filled, barY + 4, 0xFF886622);
+            g.fill(x + 3, barY, x + 3 + filled, barY + 4, COLOR_BAR_FILL);
         }
-
-        // value text (right-aligned)
-        String valStr = formatAttr(value);
-        int valW = font.width(valStr);
-        g.drawString(font, valStr, x + w - 3 - valW, y + 3, COLOR_VALUE, false);
     }
 
     private int drawWandPanel(@NonNull GuiGraphics g, @NonNull Font font,
