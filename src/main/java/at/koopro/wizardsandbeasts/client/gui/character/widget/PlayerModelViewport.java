@@ -16,7 +16,18 @@ public final class PlayerModelViewport {
     private static final float ZOOM_MIN    = 0.6f;
     private static final float ZOOM_MAX    = 2.5f;
     private static final float DEFAULT_ZOOM = 1.0f;
-    private static final float BASE_SCALE  = 30.0f;
+    /**
+     * Fraction of the viewport's height the player should occupy at 1x zoom, and the
+     * player's height in entity units.
+     *
+     * <p>This used to be a flat {@code BASE_SCALE = 30}, which is vanilla's number for the
+     * inventory's ~54px doll. In a 112px-tall viewport that drew the player at under half
+     * the height available, which is why the sheet showed a small figure marooned in a
+     * large black box. Deriving the scale from the box means the framing holds if the
+     * viewport is ever resized.
+     */
+    private static final float FILL_FRACTION = 0.80f;
+    private static final float PLAYER_UNITS  = 1.8f;
 
     private static final int COLOR_FILL   = 0xFF0D0905;
     private static final int COLOR_HI     = 0xFF3A2A14;
@@ -36,7 +47,7 @@ public final class PlayerModelViewport {
 
         McStylePanel.drawPanel(g, x, y, w, h, COLOR_FILL, COLOR_HI, COLOR_SHADOW);
 
-        int scale = Math.round(BASE_SCALE * zoom);
+        int scale = Math.max(1, Math.round(h * FILL_FRACTION / PLAYER_UNITS * zoom));
         // Vanilla helper: entity head/body track the cursor relative to the viewport rect.
         InventoryScreen.renderEntityInInventoryFollowsMouse(
                 g,

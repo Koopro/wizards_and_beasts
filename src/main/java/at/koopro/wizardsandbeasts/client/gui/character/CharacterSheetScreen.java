@@ -58,6 +58,14 @@ public final class CharacterSheetScreen extends Screen {
     private static final int LEFT_W  = 120;
     private static final int TITLE_H = 14;
     private static final int TAB_H   = 14;
+    /**
+     * Clearance from the sheet's outer edge. {@code gui_chrome.dossier_backdrop} paints the
+     * frame — an inked border, two brass rules and the corner brackets — out to 6px, so
+     * anything drawn inside 7px of the edge sits on top of it.
+     */
+    private static final int FRAME_PAD = 7;
+    /** Clearance from the internal column divider, which is a single rule rather than a frame. */
+    private static final int DIVIDER_PAD = 4;
 
     // Palette
     private static final int COLOR_BG       = 0xFF2A1E0F;
@@ -260,6 +268,26 @@ public final class CharacterSheetScreen extends Screen {
 
     // ── Right column ───────────────────────────────────────────────────────
 
+    /**
+     * The active tab's content rect, as {@code {x, y, w, h}}.
+     *
+     * <p>Rendering and the scroll hit-test each computed this themselves and had already
+     * drifted apart — the hit-test used {@code bgX + LEFT_W + 3} against a render origin of
+     * {@code bgX + LEFT_W + 5} — so the top two pixels of the content scrolled the sheet
+     * rather than the tab. One definition now serves both.
+     */
+    private int[] contentRect() {
+        int colX = bgX + LEFT_W + 1;
+        int colY = bgY + TITLE_H;
+        int colW = BG_W - LEFT_W - 1;
+        return new int[] {
+            colX + DIVIDER_PAD,
+            colY + TAB_H + DIVIDER_PAD,
+            colW - DIVIDER_PAD - FRAME_PAD,
+            BG_H - TITLE_H - TAB_H - DIVIDER_PAD - FRAME_PAD,
+        };
+    }
+
     private void renderRightColumn(@NonNull GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         int colX = bgX + LEFT_W + 1;
         int colY = bgY + TITLE_H;
@@ -268,13 +296,15 @@ public final class CharacterSheetScreen extends Screen {
         // Tab buttons row
         renderTabButtons(g, colX, colY, colW, mouseX, mouseY);
 
-        // Content area below tabs
-        int contentX = colX + 2;
-        int contentY = colY + TAB_H + 2;
-        int contentW = colW - 4;
-        int contentH = BG_H - TITLE_H - TAB_H - 4;
-
-        activeTabRenderer().render(g, contentX, contentY, contentW, contentH, partialTick);
+        // Content area below tabs.
+        //
+        // The 2px inset this used to carry was narrower than the backdrop's own frame:
+        // `gui_chrome.dossier_backdrop` draws its rules and corner brackets out to 6px from
+        // the sheet edge, so attribute cards and their text landed on top of the border and
+        // the right-hand column read as clipped. The outer edges now clear the frame; the
+        // inner edge only has to clear the column divider, so it stays tighter.
+        int[] r = contentRect();
+        activeTabRenderer().render(g, r[0], r[1], r[2], r[3], partialTick);
     }
 
     private void renderTabButtons(@NonNull GuiGraphics g, int x, int y, int w,
@@ -371,10 +401,8 @@ public final class CharacterSheetScreen extends Screen {
         if (viewport.mouseScrolled(dmx, dmy, scrollY)) return true;
 
         // Tab content scroll
-        int contentX = bgX + LEFT_W + 3;
-        int contentY = bgY + TITLE_H + TAB_H + 2;
-        int contentW = BG_W - LEFT_W - 5;
-        int contentH = BG_H - TITLE_H - TAB_H - 4;
+        int[] r = contentRect();
+        int contentX = r[0], contentY = r[1], contentW = r[2], contentH = r[3];
         if (dmx >= contentX && dmx < contentX + contentW
                 && dmy >= contentY && dmy < contentY + contentH) {
             return activeTabRenderer().mouseScrolled(dmx, dmy, scrollY);
