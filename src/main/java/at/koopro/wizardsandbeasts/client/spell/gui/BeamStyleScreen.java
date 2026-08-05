@@ -155,7 +155,7 @@ public class BeamStyleScreen extends Screen {
                 continue;
             }
             addRenderableWidget(Button.builder(
-                    Component.literal(spell.getDisplayName()),
+                    Component.translatable(spell.getDisplayName()),
                     btn -> {
                         BeamStyleEditor.loadFromSpell(spell);
                         rebuild();

@@ -1,5 +1,5 @@
 {
-  "displayName": "Glacius",
+  "displayName": "spell.wizards_and_beasts.glacius.name",
   "canonTier": "expanded",
   "category": "combat",
   "cooldownTicks": 70,
@@ -8,8 +8,20 @@
   "castType": "cone",
   "range": 4.0,
   "targetEffects": [
-    { "id": "wizards_and_beasts:petrificus_totalus", "duration": 40, "amplifier": 0 }
+    {
+      "id": "wizards_and_beasts:petrificus_totalus",
+      "duration": 40,
+      "amplifier": 0
+    }
   ],
-  "sound": { "id": "minecraft:entity.ender_pearl.throw", "volume": 1.0, "pitch": 1.8 },
-  "requirement": { "type": "proficiency", "prerequisiteId": "flipendo", "minProficiency": "proficient" }
+  "sound": {
+    "id": "minecraft:entity.ender_pearl.throw",
+    "volume": 1.0,
+    "pitch": 1.8
+  },
+  "requirement": {
+    "type": "proficiency",
+    "prerequisiteId": "flipendo",
+    "minProficiency": "proficient"
+  }
 }

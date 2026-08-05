@@ -159,7 +159,7 @@ public final class SpellMenuRenderHelper {
                 PlayerSpellData data = ClientSpellDataState.get();
                 int infoY = panelY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_INFO_BASE_Y);
 
-                graphics.drawString(font, sel.getDisplayName(), infoX, infoY,
+                graphics.drawString(font, at.koopro.wizardsandbeasts.client.gui.util.GuiText.resolve(sel.getDisplayName()), infoX, infoY,
                         UiContrast.readableOn(sel.getCategory().getColor(), PANEL_INK), false);
 
                 String catName = sel.getCategory().name().replace('_', ' ');
@@ -213,7 +213,7 @@ public final class SpellMenuRenderHelper {
 
                 SpellRequirement req = sel.getRequirement();
                 if (req != null && req != SpellRequirement.NONE) {
-                    graphics.drawString(font, "Req: " + req.getDescription(),
+                    graphics.drawString(font, req.describe().getString(),
                             infoX, profY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_REQ_Y),
                             WizardsAndBeastsUiTokens.SpellMenu.REQUIREMENT_TEXT, false);
                 }

@@ -1,5 +1,5 @@
 {
-  "displayName": "Crucio",
+  "displayName": "spell.wizards_and_beasts.crucio.name",
   "canonTier": "books",
   "category": "dark_arts",
   "cooldownTicks": 220,
@@ -7,8 +7,16 @@
   "color": -65468,
   "castType": "beam_channel",
   "range": 50.0,
-  "sound": { "id": "minecraft:entity.blaze.shoot", "volume": 1.0, "pitch": 0.8 },
-  "requirement": { "type": "proficiency", "prerequisiteId": "incendio", "minProficiency": "mastered" },
+  "sound": {
+    "id": "minecraft:entity.blaze.shoot",
+    "volume": 1.0,
+    "pitch": 0.8
+  },
+  "requirement": {
+    "type": "proficiency",
+    "prerequisiteId": "incendio",
+    "minProficiency": "mastered"
+  },
   "effects": [
     {
       "type": "apply_effect",

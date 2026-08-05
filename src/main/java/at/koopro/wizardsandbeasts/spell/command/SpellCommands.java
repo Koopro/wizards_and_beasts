@@ -98,13 +98,13 @@ public final class SpellCommands {
 
         PlayerSpellData data = player.getData(ModAttachments.SPELL_DATA.get());
         if (data.knowsSpell(spellId)) {
-            player.displayClientMessage(Component.literal("You already know " + spell.getDisplayName() + ".").withStyle(ChatFormatting.YELLOW), false);
+            player.displayClientMessage(Component.translatable("spell.wizards_and_beasts.cmd.already_known", Component.translatable(spell.getDisplayName())).withStyle(ChatFormatting.YELLOW), false);
             return 0;
         }
 
         data.learnSpell(spellId);
         PlayerStateSyncService.syncSpells(player);
-        player.displayClientMessage(Component.literal("Learned " + spell.getDisplayName() + "!").withStyle(ChatFormatting.GREEN), false);
+        player.displayClientMessage(Component.translatable("spell.wizards_and_beasts.cmd.learned", Component.translatable(spell.getDisplayName())).withStyle(ChatFormatting.GREEN), false);
         return 1;
     }
 
@@ -118,7 +118,7 @@ public final class SpellCommands {
         PlayerSpellData data = player.getData(ModAttachments.SPELL_DATA.get());
         data.forgetSpell(spellId);
         PlayerStateSyncService.syncSpells(player);
-        player.displayClientMessage(Component.literal("Forgot " + spell.getDisplayName() + ".").withStyle(ChatFormatting.YELLOW), false);
+        player.displayClientMessage(Component.translatable("spell.wizards_and_beasts.cmd.forgot", Component.translatable(spell.getDisplayName())).withStyle(ChatFormatting.YELLOW), false);
         return 1;
     }
 
@@ -155,7 +155,7 @@ public final class SpellCommands {
             ChatFormatting statusColor = spell.getProperties() != null ? ChatFormatting.GREEN : ChatFormatting.DARK_GRAY;
             player.displayClientMessage(
                     Component.literal("  " + profIcon + " ").withStyle(profColor)
-                            .append(Component.literal(spell.getDisplayName()).withStyle(statusColor))
+                            .append(Component.translatable(spell.getDisplayName()).withStyle(statusColor))
                             .append(Component.literal(" (" + casts + " casts)").withStyle(ChatFormatting.DARK_GRAY)),
                     false);
         }
@@ -172,7 +172,7 @@ public final class SpellCommands {
         PlayerSpellData data = player.getData(ModAttachments.SPELL_DATA.get());
         boolean known = data.knowsSpell(spellId);
 
-        player.displayClientMessage(Component.literal("--- " + spell.getDisplayName() + " ---").withStyle(ChatFormatting.GOLD), false);
+        player.displayClientMessage(Component.translatable("spell.wizards_and_beasts.cmd.header", Component.translatable(spell.getDisplayName())).withStyle(ChatFormatting.GOLD), false);
         player.displayClientMessage(Component.literal("Category: ").withStyle(ChatFormatting.GRAY)
                 .append(Component.literal(spell.getCategory().name().replace('_', ' ')).withStyle(ChatFormatting.WHITE)), false);
         player.displayClientMessage(Component.literal("Cooldown: ").withStyle(ChatFormatting.GRAY)
@@ -215,7 +215,7 @@ public final class SpellCommands {
         if (req != null && req != SpellRequirement.NONE) {
             boolean met = req.isMet(player, data);
             player.displayClientMessage(Component.literal("Requirement: ").withStyle(ChatFormatting.GRAY)
-                    .append(Component.literal(req.getDescription()).withStyle(met ? ChatFormatting.GREEN : ChatFormatting.RED)), false);
+                    .append(req.describe().copy().withStyle(met ? ChatFormatting.GREEN : ChatFormatting.RED)), false);
         }
 
         ItemStack wandStack = WandHelper.getWandStack(player);

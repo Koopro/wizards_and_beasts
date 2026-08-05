@@ -132,18 +132,41 @@ public class SpellRequirement {
         return minProficiency;
     }
 
-    public String getDescription() {
+    /**
+     * The requirement as a translatable {@link net.minecraft.network.chat.Component}.
+     *
+     * <p>This used to build an English sentence by concatenation -- "Requires " + name,
+     * "Proficient in " + name, clauses joined with " and ". That made the *sentence*
+     * untranslatable, and once a spell's name became a lang key it would also have spliced
+     * the raw key into the middle of it. Both halves are keys now, and the name is passed
+     * as an argument so the client assembles it in its own language.
+     */
+    public net.minecraft.network.chat.Component describe() {
         if (!clauses.isEmpty()) {
-            return clauses.stream().map(SpellRequirement::getDescription).collect(Collectors.joining(" and "));
+            net.minecraft.network.chat.MutableComponent out = null;
+            for (SpellRequirement c : clauses) {
+                out = out == null ? c.describe().copy()
+                        : out.append(net.minecraft.network.chat.Component
+                                .translatable("spell.wizards_and_beasts.req.and"))
+                             .append(c.describe());
+            }
+            return out;
         }
-        if (prerequisiteId == null) return "No requirements";
+        if (prerequisiteId == null) {
+            return net.minecraft.network.chat.Component.translatable("spell.wizards_and_beasts.req.none");
+        }
         Spell prereq = Spells.byId(prerequisiteId);
-        String name = prereq != null ? prereq.getDisplayName() : prerequisiteId;
+        net.minecraft.network.chat.Component name = prereq != null
+                ? net.minecraft.network.chat.Component.translatable(prereq.getDisplayName())
+                : net.minecraft.network.chat.Component.literal(prerequisiteId);
         if (minProficiency != null) {
-            String profName = minProficiency.name().charAt(0)
-                    + minProficiency.name().substring(1).toLowerCase();
-            return profName + " in " + name;
+            return net.minecraft.network.chat.Component.translatable(
+                    "spell.wizards_and_beasts.req.proficiency",
+                    net.minecraft.network.chat.Component.translatable(
+                            "spell.wizards_and_beasts.proficiency."
+                                    + minProficiency.name().toLowerCase(java.util.Locale.ROOT)),
+                    name);
         }
-        return "Requires " + name;
+        return net.minecraft.network.chat.Component.translatable("spell.wizards_and_beasts.req.requires", name);
     }
 }

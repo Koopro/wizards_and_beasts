@@ -152,7 +152,7 @@ public final class ObscurialServerLogic {
         }
         if (Config.enforceSpellRequirements && !spell.getRequirement().isMet(player, spellData)) {
             spellData.incrementRejectReason(SpellRejectCodes.ABILITY_REQUIREMENTS_UNMET);
-            player.displayClientMessage(Component.literal("§c" + spell.getRequirement().getDescription()), true);
+            player.displayClientMessage(Component.literal("§c").append(spell.getRequirement().describe()), true);
             return;
         }
 

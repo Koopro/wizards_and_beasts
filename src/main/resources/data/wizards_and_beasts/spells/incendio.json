@@ -1,5 +1,5 @@
 {
-  "displayName": "Incendio",
+  "displayName": "spell.wizards_and_beasts.incendio.name",
   "canonTier": "books",
   "category": "combat",
   "cooldownTicks": 80,
@@ -9,6 +9,14 @@
   "castType": "cone",
   "range": 6.0,
   "igniteSeconds": 5,
-  "sound": { "id": "minecraft:item.firecharge.use", "volume": 1.0, "pitch": 1.0 },
-  "requirement": { "type": "proficiency", "prerequisiteId": "stupefy", "minProficiency": "proficient" }
+  "sound": {
+    "id": "minecraft:item.firecharge.use",
+    "volume": 1.0,
+    "pitch": 1.0
+  },
+  "requirement": {
+    "type": "proficiency",
+    "prerequisiteId": "stupefy",
+    "minProficiency": "proficient"
+  }
 }

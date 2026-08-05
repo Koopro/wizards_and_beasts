@@ -1,10 +1,17 @@
 {
-  "displayName": "Reparo",
+  "displayName": "spell.wizards_and_beasts.reparo.name",
   "canonTier": "books",
   "category": "utility",
   "cooldownTicks": 80,
   "color": -7798836,
   "castType": "self",
-  "sound": { "id": "minecraft:entity.experience_orb.pickup", "volume": 0.5, "pitch": 1.0 },
-  "requirement": { "type": "knows", "prerequisiteId": "lumos" }
+  "sound": {
+    "id": "minecraft:entity.experience_orb.pickup",
+    "volume": 0.5,
+    "pitch": 1.0
+  },
+  "requirement": {
+    "type": "knows",
+    "prerequisiteId": "lumos"
+  }
 }

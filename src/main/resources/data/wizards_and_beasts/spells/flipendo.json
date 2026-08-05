@@ -1,5 +1,5 @@
 {
-  "displayName": "Flipendo",
+  "displayName": "spell.wizards_and_beasts.flipendo.name",
   "canonTier": "expanded",
   "category": "combat",
   "cooldownTicks": 38,
@@ -7,6 +7,12 @@
   "color": -16724737,
   "castType": "projectile",
   "knockback": 3.0,
-  "sound": { "id": "minecraft:entity.blaze.shoot", "volume": 0.8, "pitch": 1.5 },
-  "requirement": { "type": "none" }
+  "sound": {
+    "id": "minecraft:entity.blaze.shoot",
+    "volume": 0.8,
+    "pitch": 1.5
+  },
+  "requirement": {
+    "type": "none"
+  }
 }

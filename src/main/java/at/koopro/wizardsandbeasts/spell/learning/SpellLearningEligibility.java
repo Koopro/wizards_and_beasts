@@ -45,7 +45,7 @@ public final class SpellLearningEligibility {
             return Result.deny("You already know this spell.");
         }
         if (!spell.getRequirement().isMet(player, spellData)) {
-            return Result.deny(spell.getRequirement().getDescription());
+            return Result.deny(spell.getRequirement().describe().getString());
         }
         if (player != null) {
             String requiredSkillId = spell.getRequiredSkillId();

@@ -1,5 +1,5 @@
 {
-  "displayName": "Alohomora",
+  "displayName": "spell.wizards_and_beasts.alohomora.name",
   "canonTier": "books",
   "category": "utility",
   "cooldownTicks": 40,
@@ -7,6 +7,12 @@
   "castType": "targeted",
   "range": 5.0,
   "opensBlocks": true,
-  "sound": { "id": "minecraft:entity.experience_orb.pickup", "volume": 0.8, "pitch": 1.5 },
-  "requirement": { "type": "none" }
+  "sound": {
+    "id": "minecraft:entity.experience_orb.pickup",
+    "volume": 0.8,
+    "pitch": 1.5
+  },
+  "requirement": {
+    "type": "none"
+  }
 }

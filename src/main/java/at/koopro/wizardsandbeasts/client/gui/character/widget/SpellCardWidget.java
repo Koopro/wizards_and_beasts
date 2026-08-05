@@ -58,7 +58,8 @@ public final class SpellCardWidget {
 
         // Spell name, truncated only if it genuinely will not fit beside the pips.
         int maxNameW = w - 4 - PIP_BLOCK_W - 2;
-        String name = font.plainSubstrByWidth(spell.getDisplayName(), maxNameW);
+        String name = font.plainSubstrByWidth(
+                at.koopro.wizardsandbeasts.client.gui.util.GuiText.resolve(spell.getDisplayName()), maxNameW);
         g.drawString(font, name, x + 3, y + 3, COLOR_NAME, false);
 
         // Mastery pips (3 dots on the right side)

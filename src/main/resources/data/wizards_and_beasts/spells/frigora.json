@@ -1,5 +1,5 @@
 {
-  "displayName": "Frigora",
+  "displayName": "spell.wizards_and_beasts.frigora.name",
   "canonTier": "original",
   "category": "utility",
   "cooldownTicks": 80,
@@ -7,9 +7,21 @@
   "castType": "self",
   "selfEffects": [],
   "effects": [
-    { "type": "clear_fire" },
-    { "type": "apply_effect", "effect": "minecraft:fire_resistance", "duration": 400, "amplifier": 0 },
-    { "type": "apply_effect", "effect": "minecraft:water_breathing", "duration": 300, "amplifier": 0 }
+    {
+      "type": "clear_fire"
+    },
+    {
+      "type": "apply_effect",
+      "effect": "minecraft:fire_resistance",
+      "duration": 400,
+      "amplifier": 0
+    },
+    {
+      "type": "apply_effect",
+      "effect": "minecraft:water_breathing",
+      "duration": 300,
+      "amplifier": 0
+    }
   ],
   "sound": {
     "id": "minecraft:block.powder_snow.place",

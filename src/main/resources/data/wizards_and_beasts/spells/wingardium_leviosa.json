@@ -1,5 +1,5 @@
 {
-  "displayName": "Wingardium Leviosa",
+  "displayName": "spell.wizards_and_beasts.wingardium_leviosa.name",
   "canonTier": "books",
   "category": "utility",
   "cooldownTicks": 60,
@@ -7,6 +7,13 @@
   "castType": "beam_channel",
   "range": 16.0,
   "projectileSpeed": 0.0,
-  "sound": { "id": "minecraft:entity.ender_pearl.throw", "volume": 0.7, "pitch": 1.0 },
-  "requirement": { "type": "knows", "prerequisiteId": "lumos" }
+  "sound": {
+    "id": "minecraft:entity.ender_pearl.throw",
+    "volume": 0.7,
+    "pitch": 1.0
+  },
+  "requirement": {
+    "type": "knows",
+    "prerequisiteId": "lumos"
+  }
 }

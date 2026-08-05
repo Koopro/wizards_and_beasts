@@ -112,7 +112,7 @@ public final class SpellsTab implements CharacterTab {
             case MASTERED   -> 0;
             case PROFICIENT -> 1;
             case NOVICE     -> 2;
-        }).thenComparing(e -> e.spell().getDisplayName()));
+        }).thenComparing(e -> at.koopro.wizardsandbeasts.client.gui.util.GuiText.resolve(e.spell().getDisplayName())));
         return list;
     }
 }

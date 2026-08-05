@@ -1,5 +1,5 @@
 {
-  "displayName": "Expelliarmus",
+  "displayName": "spell.wizards_and_beasts.expelliarmus.name",
   "canonTier": "books",
   "category": "combat",
   "cooldownTicks": 50,
@@ -9,7 +9,14 @@
   "projectileSpread": 0.02,
   "disarms": true,
   "effects": [
-    { "type": "impulse", "strength": 1.4, "direction": "push" }
+    {
+      "type": "impulse",
+      "strength": 1.4,
+      "direction": "push"
+    }
   ],
-  "requirement": { "type": "knows", "prerequisiteId": "stupefy" }
+  "requirement": {
+    "type": "knows",
+    "prerequisiteId": "stupefy"
+  }
 }

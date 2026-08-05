@@ -1,5 +1,5 @@
 {
-  "displayName": "Confringo",
+  "displayName": "spell.wizards_and_beasts.confringo.name",
   "canonTier": "books",
   "category": "combat",
   "cooldownTicks": 80,
@@ -7,7 +7,18 @@
   "color": -43776,
   "castType": "projectile",
   "igniteSeconds": 3,
-  "explode": { "power": 2.0, "breaksBlocks": false },
-  "sound": { "id": "minecraft:item.firecharge.use", "volume": 1.0, "pitch": 0.8 },
-  "requirement": { "type": "proficiency", "prerequisiteId": "incendio", "minProficiency": "proficient" }
+  "explode": {
+    "power": 2.0,
+    "breaksBlocks": false
+  },
+  "sound": {
+    "id": "minecraft:item.firecharge.use",
+    "volume": 1.0,
+    "pitch": 0.8
+  },
+  "requirement": {
+    "type": "proficiency",
+    "prerequisiteId": "incendio",
+    "minProficiency": "proficient"
+  }
 }

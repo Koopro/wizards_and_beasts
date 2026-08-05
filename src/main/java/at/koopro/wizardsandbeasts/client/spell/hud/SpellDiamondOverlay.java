@@ -189,7 +189,9 @@ public class SpellDiamondOverlay {
         if (activeSpellId != null) {
             Spell activeSpell = Spells.byId(activeSpellId);
             if (activeSpell != null) {
-                String name = clampTextToWidth(mc.font, activeSpell.getDisplayName(), HUD_ON_SCREEN_SIZE + 24);
+                String name = clampTextToWidth(mc.font,
+                at.koopro.wizardsandbeasts.client.gui.util.GuiText.resolve(activeSpell.getDisplayName()),
+                HUD_ON_SCREEN_SIZE + 24);
                 int textWidth = mc.font.width(name);
                 int textX = Mth.clamp(
                         hudX + HUD_ON_SCREEN_SIZE / 2 - textWidth / 2,

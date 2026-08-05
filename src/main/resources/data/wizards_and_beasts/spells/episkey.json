@@ -1,5 +1,5 @@
 {
-  "displayName": "Episkey",
+  "displayName": "spell.wizards_and_beasts.episkey.name",
   "canonTier": "books",
   "category": "defense",
   "cooldownTicks": 140,
@@ -7,10 +7,21 @@
   "castType": "self",
   "selfEffects": [],
   "effects": [
-    { "type": "heal", "amount": 4.0 },
-    { "type": "dispel", "scope": "specific",
-      "effects": ["minecraft:poison", "minecraft:wither", "minecraft:blindness", "minecraft:nausea"],
-      "respect_immunity": false }
+    {
+      "type": "heal",
+      "amount": 4.0
+    },
+    {
+      "type": "dispel",
+      "scope": "specific",
+      "effects": [
+        "minecraft:poison",
+        "minecraft:wither",
+        "minecraft:blindness",
+        "minecraft:nausea"
+      ],
+      "respect_immunity": false
+    }
   ],
   "sound": {
     "id": "minecraft:entity.allay.hurt",

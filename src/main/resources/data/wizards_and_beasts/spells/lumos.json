@@ -1,21 +1,54 @@
 {
-  "displayName": "Lumos",
+  "displayName": "spell.wizards_and_beasts.lumos.name",
   "canonTier": "books",
   "category": "utility",
   "cooldownTicks": 200,
   "color": -120,
   "baseEffectDurationTicks": 600,
   "castType": "self",
-  "sound": { "id": "minecraft:entity.experience_orb.pickup", "volume": 0.5, "pitch": 1.5 },
-  "requirement": { "type": "none" },
+  "sound": {
+    "id": "minecraft:entity.experience_orb.pickup",
+    "volume": 0.5,
+    "pitch": 1.5
+  },
+  "requirement": {
+    "type": "none"
+  },
   "effects": [
-    { "type": "apply_effect", "effect": "wizards_and_beasts:lumos_field", "duration": -1, "amplifier": 0 },
-    { "type": "swap_active_spell", "spell": "nox", "learn": true },
-    { "type": "aoe_apply", "radius": 5.0, "filter": "monsters",
+    {
+      "type": "apply_effect",
+      "effect": "wizards_and_beasts:lumos_field",
+      "duration": -1,
+      "amplifier": 0
+    },
+    {
+      "type": "swap_active_spell",
+      "spell": "nox",
+      "learn": true
+    },
+    {
+      "type": "aoe_apply",
+      "radius": 5.0,
+      "filter": "monsters",
       "effects": [
-        { "type": "apply_effect", "effect": "minecraft:blindness", "duration": 80, "amplifier": 0, "target": true },
-        { "type": "apply_effect", "effect": "minecraft:glowing", "duration": 120, "amplifier": 0, "target": true },
-        { "type": "damage", "amount": 2.5 }
+        {
+          "type": "apply_effect",
+          "effect": "minecraft:blindness",
+          "duration": 80,
+          "amplifier": 0,
+          "target": true
+        },
+        {
+          "type": "apply_effect",
+          "effect": "minecraft:glowing",
+          "duration": 120,
+          "amplifier": 0,
+          "target": true
+        },
+        {
+          "type": "damage",
+          "amount": 2.5
+        }
       ]
     }
   ]

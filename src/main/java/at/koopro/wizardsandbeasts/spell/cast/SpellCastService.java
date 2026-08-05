@@ -123,7 +123,7 @@ public final class SpellCastService {
                 case REQUIREMENTS_UNMET -> {
                     rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.REQUIREMENTS_UNMET, spellId));
                     player.displayClientMessage(
-                            Component.literal("§c" + spell.getRequirement().getDescription()),
+                            Component.literal("§c").append(spell.getRequirement().describe()),
                             true);
                 }
                 case OBSCURIAL_DARK_ONLY -> {

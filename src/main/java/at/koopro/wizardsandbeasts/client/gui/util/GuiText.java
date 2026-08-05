@@ -19,6 +19,21 @@ import net.minecraft.client.gui.GuiGraphics;
 public final class GuiText {
 
     /**
+     * Resolves a display string that may be either a lang key or literal prose.
+     *
+     * <p>Datapack text is mid-migration: some fields hold keys, some still hold English.
+     * {@code I18n.exists} decides, and a literal falls through unchanged, so one call
+     * handles both. Anything that *searches or sorts* display text must go through here --
+     * comparing raw fields would match and order by key rather than by what the player
+     * reads, in every language including English.
+     */
+    public static String resolve(String keyOrLiteral) {
+        return keyOrLiteral != null && net.minecraft.client.resources.language.I18n.exists(keyOrLiteral)
+                ? net.minecraft.client.resources.language.I18n.get(keyOrLiteral)
+                : keyOrLiteral;
+    }
+
+    /**
      * Below this the text is too small to read, so it is left at this scale and allowed to
      * clip. A label needing to shrink past ~65% signals a layout problem, not a text problem.
      */

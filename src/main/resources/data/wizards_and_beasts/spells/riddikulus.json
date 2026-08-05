@@ -1,18 +1,48 @@
 {
-  "displayName": "Riddikulus",
+  "displayName": "spell.wizards_and_beasts.riddikulus.name",
   "canonTier": "books",
   "category": "defense",
   "cooldownTicks": 60,
   "color": -13210,
   "castType": "self",
-  "sound": { "id": "wizards_and_beasts:spell_cast_charm", "volume": 0.65, "pitch": 1.25 },
-  "requirement": { "type": "none" },
+  "sound": {
+    "id": "wizards_and_beasts:spell_cast_charm",
+    "volume": 0.65,
+    "pitch": 1.25
+  },
+  "requirement": {
+    "type": "none"
+  },
   "effects": [
-    { "type": "particle_burst", "family": "arcane", "color": -13210, "count": 18, "spread": 0.32 },
-    { "type": "boggart_banish", "radius": 8.0 },
-    { "type": "apply_effect", "effect": "minecraft:resistance", "duration": 160, "amplifier": 0, "target": false },
-    { "type": "dispel", "scope": "specific",
-      "effects": ["minecraft:darkness", "minecraft:slowness", "minecraft:weakness", "minecraft:nausea", "wizards_and_beasts:disoriented"],
-      "respect_immunity": false }
+    {
+      "type": "particle_burst",
+      "family": "arcane",
+      "color": -13210,
+      "count": 18,
+      "spread": 0.32
+    },
+    {
+      "type": "boggart_banish",
+      "radius": 8.0
+    },
+    {
+      "type": "apply_effect",
+      "effect": "minecraft:resistance",
+      "duration": 160,
+      "amplifier": 0,
+      "target": false
+    },
+    {
+      "type": "dispel",
+      "scope": "specific",
+      "effects": [
+        "minecraft:darkness",
+        "minecraft:slowness",
+        "minecraft:weakness",
+        "minecraft:nausea",
+        "wizards_and_beasts:disoriented"
+      ],
+      "respect_immunity": false
+    }
   ]
 }

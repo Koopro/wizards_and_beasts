@@ -75,7 +75,7 @@ public class SpellMenuScreen extends Screen {
                         && !ObscurialRules.isObscurialAbility(spell)
                         && ObscurialRules.canHeritageUseSpell(type, spell)) {
                     boolean matches = q.isEmpty()
-                            || spell.getDisplayName().toLowerCase().contains(q)
+                            || at.koopro.wizardsandbeasts.client.gui.util.GuiText.resolve(spell.getDisplayName()).toLowerCase().contains(q)
                             || spell.getId().toLowerCase().contains(q);
                     if (!matches) {
                         continue;
@@ -172,7 +172,7 @@ public class SpellMenuScreen extends Screen {
             if (entry.spell != null) {
                 final Spell spell = entry.spell;
                 addRenderableWidget(Button.builder(
-                        Component.literal(spell.getDisplayName()),
+                        Component.translatable(spell.getDisplayName()),
                         btn -> selectedSpellId = spell.getId()
                 ).bounds(listX, entryY,
                         leftW - layout.s(WizardsAndBeastsUiTokens.SpellMenu.LIST_BUTTON_SIDE_PADDING),
@@ -244,7 +244,7 @@ public class SpellMenuScreen extends Screen {
             graphics.blit(RenderPipelines.GUI_TEXTURED, SLOT_TEX, sx, sy, 0f, 0f, slotBtnSize, slotBtnSize, 40, 40, 40, 40);
             if (spellId != null) {
                 Spell spell = Spells.byId(spellId);
-                if (spell != null) name = spell.getDisplayName();
+                if (spell != null) name = at.koopro.wizardsandbeasts.client.gui.util.GuiText.resolve(spell.getDisplayName());
                 Identifier icon = ModTextures.resolveWandHudSpellIcon(mc.getResourceManager(), spellId);
                 int ix = sx + (slotBtnSize - iconSize) / 2;
                 int iy = sy + (slotBtnSize - iconSize) / 2;

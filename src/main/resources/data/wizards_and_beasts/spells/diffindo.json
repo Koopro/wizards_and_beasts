@@ -1,5 +1,5 @@
 {
-  "displayName": "Diffindo",
+  "displayName": "spell.wizards_and_beasts.diffindo.name",
   "canonTier": "books",
   "category": "combat",
   "cooldownTicks": 50,
@@ -7,8 +7,22 @@
   "color": -3407872,
   "castType": "projectile",
   "effects": [
-    { "type": "apply_effect", "effect": "wizards_and_beasts:sundered", "duration": 100, "amplifier": 0, "target": true }
+    {
+      "type": "apply_effect",
+      "effect": "wizards_and_beasts:sundered",
+      "duration": 100,
+      "amplifier": 0,
+      "target": true
+    }
   ],
-  "sound": { "id": "minecraft:entity.blaze.shoot", "volume": 0.8, "pitch": 1.5 },
-  "requirement": { "type": "proficiency", "prerequisiteId": "stupefy", "minProficiency": "proficient" }
+  "sound": {
+    "id": "minecraft:entity.blaze.shoot",
+    "volume": 0.8,
+    "pitch": 1.5
+  },
+  "requirement": {
+    "type": "proficiency",
+    "prerequisiteId": "stupefy",
+    "minProficiency": "proficient"
+  }
 }

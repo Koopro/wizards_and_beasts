@@ -80,7 +80,7 @@ public class BeamDebugScreen extends Screen {
             final Spell s = spell;
             int btnY = presetY + i * layout.s(WizardsAndBeastsUiTokens.BeamDebug.PRESET_BUTTON_Y_SPACING);
             addRenderableWidget(Button.builder(
-                    Component.literal(spell.getDisplayName()),
+                    Component.translatable(spell.getDisplayName()),
                     btn -> {
                         BeamSettings.applySpellColor(s.getColor());
                         rebuild();

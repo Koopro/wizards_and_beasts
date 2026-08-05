@@ -1,5 +1,5 @@
 {
-  "displayName": "Finite Incantatem",
+  "displayName": "spell.wizards_and_beasts.finite_incantatem.name",
   "canonTier": "books",
   "category": "utility",
   "cooldownTicks": 40,
