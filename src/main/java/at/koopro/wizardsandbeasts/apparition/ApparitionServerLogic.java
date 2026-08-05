@@ -288,6 +288,9 @@ public final class ApparitionServerLogic {
             return;
         }
         double distance = origin.distanceTo(destination);
+        if (distance < PROFICIENCY_MIN_DISTANCE) {
+            return;
+        }
         float scaled = (float) Math.min(PROFICIENCY_GRANT_CAP, distance * PROFICIENCY_PER_BLOCK);
         AbilityProficiency.add(player, AbilityIds.APPARITION, scaled * share);
     }
@@ -311,6 +314,13 @@ public final class ApparitionServerLogic {
     private static final float PROFICIENCY_PER_BLOCK = 0.00005f;
     /** Most a single jump can teach, so one cross-continent trip is not a whole career. */
     private static final float PROFICIENCY_GRANT_CAP = 0.01f;
+    /**
+     * Shorter than this and the jump teaches nothing at all. Without the floor, hopping a wizard's own
+     * length on a forty-tick cooldown reached mastery about five times faster than anchored travel, which
+     * inverts the intent — the slow, interruptible, expensive jump is meant to be how a wizard gets good,
+     * not the cheap one. A blink still earns; it has to be a real blink.
+     */
+    public static final double PROFICIENCY_MIN_DISTANCE = 15.0;
 
     // ── ticking ──
 
