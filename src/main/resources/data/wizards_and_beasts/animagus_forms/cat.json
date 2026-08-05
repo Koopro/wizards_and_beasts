@@ -1,0 +1,24 @@
+{
+  "canon_tier": "book",
+  "model": "wizards_and_beasts:geckolib/models/entity/form/cat.geo.json",
+  "texture": "wizards_and_beasts:textures/entity/form/cat.png",
+  "animations": "wizards_and_beasts:geckolib/animations/entity/form/cat.animation.json",
+  "animation_map": {
+    "idle": "animation.cat.idle",
+    "walk": "animation.cat.walk",
+    "run": "animation.cat.run",
+    "jump": "animation.cat.jump",
+    "hurt": "animation.cat.hurt"
+  },
+  "hitbox": {
+    "width": 0.6,
+    "height": 0.7,
+    "eye_height": 0.55
+  },
+  "attributes": {
+    "minecraft:movement_speed": 0.15,
+    "minecraft:scale": 0.55,
+    "minecraft:safe_fall_distance": 8.0
+  },
+  "capabilities": ["CLIMB", "SAFE_LANDING", "NIGHT_VISION"]
+}

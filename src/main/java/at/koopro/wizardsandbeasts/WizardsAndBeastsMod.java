@@ -145,6 +145,9 @@ public class WizardsAndBeastsMod {
                     Identifier.fromNamespaceAndPath(MODID, "handbook_chapter_reload_listener"),
                     new HandbookChapterManager());
             event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "animagus_form_reload_listener"),
+                    new at.koopro.wizardsandbeasts.animagus.AnimagusFormLoader());
+            event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "broom_definition_reload_listener"),
                     new BroomDefinitionLoader());
             event.addListener(

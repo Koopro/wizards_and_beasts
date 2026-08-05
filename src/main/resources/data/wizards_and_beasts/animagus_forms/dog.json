@@ -1,0 +1,25 @@
+{
+  "canon_tier": "book",
+  "model": "wizards_and_beasts:geckolib/models/entity/form/dog.geo.json",
+  "texture": "wizards_and_beasts:textures/entity/form/dog.png",
+  "animations": "wizards_and_beasts:geckolib/animations/entity/form/dog.animation.json",
+  "animation_map": {
+    "idle": "animation.dog.idle",
+    "walk": "animation.dog.walk",
+    "run": "animation.dog.run",
+    "jump": "animation.dog.jump",
+    "hurt": "animation.dog.hurt"
+  },
+  "hitbox": {
+    "width": 0.8,
+    "height": 0.9,
+    "eye_height": 0.75
+  },
+  "attributes": {
+    "minecraft:movement_speed": 0.2,
+    "minecraft:scale": 0.9,
+    "minecraft:step_height": 0.4,
+    "minecraft:max_health": -4.0
+  },
+  "capabilities": ["SCENT_TRACK", "SAFE_LANDING"]
+}
