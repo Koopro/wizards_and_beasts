@@ -22,6 +22,15 @@ public final class ClientApparitionWardState {
         WARDS.addAll(wards);
     }
 
+    /**
+     * Forgets every ward. Called on disconnect: wards are per-world server state, and a client that kept
+     * them would carry one server's Hogwarts into the next server's overworld and paint the ring red over
+     * ground that is perfectly safe.
+     */
+    public static void clear() {
+        WARDS.clear();
+    }
+
     public static boolean isWarded(Identifier dimensionId, Vec3 position) {
         for (WardBox ward : WARDS) {
             if (ward.dimensionId().equals(dimensionId) && ward.bounds().contains(position)) {
