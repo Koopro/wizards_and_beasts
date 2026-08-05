@@ -9,6 +9,7 @@ import at.koopro.wizardsandbeasts.event.wand.DisarmLogState;
 import at.koopro.wizardsandbeasts.entity.niffler.HappinessAttachment;
 import at.koopro.wizardsandbeasts.spell.imperio.ImperioControlState;
 import at.koopro.wizardsandbeasts.ability.data.PlayerAbilityData;
+import at.koopro.wizardsandbeasts.ability.data.PlayerAbilityProficiency;
 import at.koopro.wizardsandbeasts.ability.select.AbilitySelectionState;
 import at.koopro.wizardsandbeasts.apparition.PlayerApparitionPoints;
 import at.koopro.wizardsandbeasts.ministry.data.PlayerMinistryRecord;
@@ -90,6 +91,17 @@ public class ModAttachments {
     public static final Supplier<AttachmentType<AbilitySelectionState>> ABILITY_SELECTION =
             ATTACHMENTS.register("ability_selection", () -> AttachmentType.builder(() -> AbilitySelectionState.EMPTY)
                     .serialize(AbilitySelectionState.CODEC.fieldOf("data"))
+                    .build());
+
+    /**
+     * Per-ability practice, keyed by ability {@link net.minecraft.resources.Identifier}. {@code copyOnDeath}:
+     * dying costs you your gear, not your training. Separate from the per-spell proficiency on
+     * {@code SPELL_DATA}, which only spell hits can write and {@code Module.PROFICIENCY} can switch off.
+     */
+    public static final Supplier<AttachmentType<PlayerAbilityProficiency>> ABILITY_PROFICIENCY =
+            ATTACHMENTS.register("ability_proficiency", () -> AttachmentType.builder(() -> PlayerAbilityProficiency.EMPTY)
+                    .serialize(PlayerAbilityProficiency.CODEC.fieldOf("data"))
+                    .copyOnDeath()
                     .build());
 
     /**
