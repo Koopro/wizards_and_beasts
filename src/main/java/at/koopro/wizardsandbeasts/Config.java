@@ -57,15 +57,6 @@ public class Config {
             .comment("If true, fullscreen effect overlays (mob-effect vignettes, Crucio, form transition,",
                     "Floo transit spin) are suppressed. Accessibility option; gameplay is unaffected.")
             .define("reduceScreenEffects", false);
-    private static final ModConfigSpec.IntValue APPARITION_RANGE_BLOCKS = BUILDER
-            .comment("Maximum Apparition distance in blocks; longer targets are clamped to this radius.")
-            .defineInRange("apparitionRangeBlocks", 32, 4, 256);
-    private static final ModConfigSpec.IntValue APPARITION_COOLDOWN_TICKS = BUILDER
-            .comment("Cooldown in ticks after a successful Apparition.")
-            .defineInRange("apparitionCooldownTicks", 60, 0, 20 * 300);
-    private static final ModConfigSpec.DoubleValue APPARITION_SPLINCH_BASE_CHANCE = BUILDER
-            .comment("Base splinch chance at zero focus; a fully focused caster reduces it to zero.")
-            .defineInRange("apparitionSplinchBaseChance", 0.35, 0.0, 1.0);
 
     /**
      * Accounts permitted to use the mod's administrative commands and the module admin surface.
@@ -126,9 +117,6 @@ public class Config {
     public static boolean enableWandAllegiance;
     public static boolean showSpellHudOverlay;
     public static boolean reduceScreenEffects;
-    public static int apparitionRangeBlocks;
-    public static int apparitionCooldownTicks;
-    public static float apparitionSplinchBaseChance;
 
     public enum PerfProfile {
         LOW,
@@ -152,8 +140,5 @@ public class Config {
         enableWandAllegiance = ENABLE_WAND_ALLEGIANCE.get();
         showSpellHudOverlay = SHOW_SPELL_HUD_OVERLAY.get();
         reduceScreenEffects = REDUCE_SCREEN_EFFECTS.get();
-        apparitionRangeBlocks = APPARITION_RANGE_BLOCKS.get();
-        apparitionCooldownTicks = APPARITION_COOLDOWN_TICKS.get();
-        apparitionSplinchBaseChance = APPARITION_SPLINCH_BASE_CHANCE.get().floatValue();
     }
 }
