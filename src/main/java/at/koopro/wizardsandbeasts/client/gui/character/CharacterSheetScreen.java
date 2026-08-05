@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.client.gui.character;
 
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
+import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiText;
 import at.koopro.wizardsandbeasts.client.gui.character.tab.AttributesTab;
@@ -58,16 +59,16 @@ public final class CharacterSheetScreen extends Screen {
     private static final int LEFT_W  = 120;
     private static final int TITLE_H = 14;
     private static final int TAB_H   = 14;
-    /**
-     * Clearance from the sheet's outer edge. {@code gui_chrome.dossier_backdrop} paints the
-     * frame — an inked border, two brass rules and the corner brackets — out to 6px, so
-     * anything drawn inside 7px of the edge sits on top of it.
-     */
-    private static final int FRAME_PAD = 7;
+    // Spacing comes from WizardsMetrics rather than this file. The three values here were 7, 4
+    // and 20 -- two of them off any grid, and the 7 in particular was reverse-engineered from
+    // `gui_chrome.dossier_backdrop` painting its frame out to 6px. SPACE_M still clears that.
+
+    /** Clearance from the sheet's outer edge, which the backdrop's own frame occupies to 6px. */
+    private static final int FRAME_PAD = WizardsMetrics.SPACE_M;
     /** Clearance from the internal column divider, which is a single rule rather than a frame. */
-    private static final int DIVIDER_PAD = 4;
+    private static final int DIVIDER_PAD = WizardsMetrics.SPACE_S;
     /** Side inset of the model viewport, which narrows it toward the figure's own aspect. */
-    private static final int VIEWPORT_SIDE_INSET = 20;
+    private static final int VIEWPORT_SIDE_INSET = WizardsMetrics.SPACE_XL;
 
     // Palette
     private static final int COLOR_BG       = 0xFF2A1E0F;
@@ -224,7 +225,7 @@ public final class CharacterSheetScreen extends Screen {
         // a third of that width, so most of the box read as empty black. A portrait box
         // wastes far less of itself on a standing figure.
         int vpW = colW - VIEWPORT_SIDE_INSET * 2;
-        int vpH = 124;
+        int vpH = 124;   // ~2x LINE_TITLE stack; the figure is 1.8 blocks tall
         int vpX = colX + VIEWPORT_SIDE_INSET;
         int vpY = colY + 4;
         viewport.render(g, vpX, vpY, vpW, vpH, partialTick, lp, mouseX, mouseY);

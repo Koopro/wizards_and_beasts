@@ -45,7 +45,10 @@ public final class PlayerModelViewport {
                        float partialTick, @NonNull LocalPlayer player, float mouseX, float mouseY) {
         this.vx = x; this.vy = y; this.vw = w; this.vh = h;
 
-        McStylePanel.drawPanel(g, x, y, w, h, COLOR_FILL, COLOR_HI, COLOR_SHADOW);
+        // Themed inset rather than a hand-mixed bevel: this is a recessed well, and the
+        // `gui/theme/` sprites are the shared vocabulary for one. The three COLOR_ constants it
+        // used were a private approximation of the same thing.
+        McStylePanel.drawThemedInset(g, x, y, w, h);
 
         int scale = Math.max(1, Math.round(h * FILL_FRACTION / PLAYER_UNITS * zoom));
         // Vanilla helper: entity head/body track the cursor relative to the viewport rect.

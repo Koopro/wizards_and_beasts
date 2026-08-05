@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.bestiary.gui;
 
+import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import org.jspecify.annotations.Nullable;
 
@@ -51,10 +52,21 @@ public final class BestiaryScreen extends Screen {
      */
     private static final int SELECTED_ROW_TINT = 0x33000000 | (WizardsPalette.SELECT & 0x00FFFFFF);
     private static final int PORTRAIT_EDGE     = 0x66000000 | (WizardsPalette.LINE & 0x00FFFFFF);
-    private static final int ROW_STEP = 16;
-    private static final int LIST_START_Y = 32;
+    // On the shared scale rather than local literals: both already happened to land on it, so
+    // this is traceability rather than a visual change. The one value that does not is
+    // SCROLLBAR_W = 3 -- see the note there.
+    private static final int ROW_STEP = WizardsMetrics.ROW_H;
+    private static final int LIST_START_Y = WizardsMetrics.SPACE_XXXL;
     /** Right edge of list row content (scrollbar sits just to the right). */
     private static final int LIST_ROWS_W = 112;
+    /**
+     * Bespoke 3px scrollbar, kept for now.
+     *
+     * <p>Off the 4pt scale, and the shared {@code McStylePanel.drawScrollbar} is 8px wide over the
+     * `gui/theme/` sprites. Swapping it is the right end state but widens the bar by 5px, which
+     * eats the gap before the detail column — a layout shift that wants a visual check first
+     * rather than a blind edit.
+     */
     private static final int SCROLLBAR_W = 3;
     private static final Identifier TEX_SCREEN =
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "textures/gui/bestiary/screen.png");
