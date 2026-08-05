@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.bestiary.gui;
 
+import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import org.jspecify.annotations.Nullable;
@@ -59,15 +60,8 @@ public final class BestiaryScreen extends Screen {
     private static final int LIST_START_Y = WizardsMetrics.SPACE_XXXL;
     /** Right edge of list row content (scrollbar sits just to the right). */
     private static final int LIST_ROWS_W = 112;
-    /**
-     * Bespoke 3px scrollbar, kept for now.
-     *
-     * <p>Off the 4pt scale, and the shared {@code McStylePanel.drawScrollbar} is 8px wide over the
-     * `gui/theme/` sprites. Swapping it is the right end state but widens the bar by 5px, which
-     * eats the gap before the detail column — a layout shift that wants a visual check first
-     * rather than a blind edit.
-     */
-    private static final int SCROLLBAR_W = 3;
+    /** Width of the shared themed scrollbar. */
+    private static final int SCROLLBAR_W = WizardsMetrics.SCROLLBAR_W;
     private static final Identifier TEX_SCREEN =
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "textures/gui/bestiary/screen.png");
     private static final Identifier TEX_LEFT_PANEL =
@@ -173,8 +167,16 @@ public final class BestiaryScreen extends Screen {
         return x + 6 + LIST_ROWS_W;
     }
 
+    /**
+     * Left edge of the list scrollbar.
+     *
+     * <p>Flush against the rows rather than a pixel clear of them, because the shared 8px bar has
+     * to fit between the list and the detail panel: rows end at {@code x+118} and the panel starts
+     * at {@code x+126}, so 8px starting at 119 would have overlapped the panel by one. At 118 it
+     * abuts both exactly.
+     */
     private int scrollbarLeft() {
-        return listRowsRight() + 1;
+        return listRowsRight();
     }
 
     private static String formatCategoryLabel(BestiaryCategory category) {
@@ -196,18 +198,24 @@ public final class BestiaryScreen extends Screen {
         return out.toString();
     }
 
+    /**
+     * The list scrollbar, on the shared themed sprites rather than the Bestiary's own 3px pair.
+     *
+     * <p>Its private textures were 3x120 and 3x24 -- a fixed thumb length that smears when
+     * stretched, which is the flaw the shared columnar thumb exists to avoid.
+     */
     private void renderListScrollbar(GuiGraphics gg, int trackTop, int trackBottom) {
         int trackLeft = scrollbarLeft();
-        drawStretched(gg, TEX_SCROLL_TRACK, trackLeft, trackTop, SCROLLBAR_W, trackBottom - trackTop, SCROLLBAR_W, 120);
+        int trackH = trackBottom - trackTop;
         int max = maxScroll();
         if (max <= 0 || rows.isEmpty()) {
+            McStylePanel.drawScrollbar(gg, trackLeft, trackTop, trackH, trackTop, 0);
             return;
         }
-        int trackH = trackBottom - trackTop;
-        int thumbH = Math.max(6, trackH * visibleRowCount() / rows.size());
+        int thumbH = Math.max(WizardsMetrics.SPACE_M, trackH * visibleRowCount() / rows.size());
         int travel = Math.max(0, trackH - thumbH);
         int thumbY = trackTop + (travel == 0 ? 0 : scrollOffset * travel / max);
-        drawStretched(gg, TEX_SCROLL_THUMB, trackLeft, thumbY, SCROLLBAR_W, thumbH, SCROLLBAR_W, 24);
+        McStylePanel.drawScrollbar(gg, trackLeft, trackTop, trackH, thumbY, thumbH);
     }
 
     private static void drawStretched(GuiGraphics gg, Identifier texture, int x, int y, int w, int h, int texW, int texH) {
