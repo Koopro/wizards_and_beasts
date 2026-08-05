@@ -27,6 +27,12 @@ public enum MagicalOffence implements StringRepresentable {
     IMPERIO("imperio", 28.0f, true),
     /** Transforming while unregistered — a fine and a file, not a manhunt. */
     UNREGISTERED_ANIMAGUS("unregistered_animagus", 6.0f, false),
+    /**
+     * Apparating without a licence. Illegal, not impossible — the trio do it all through
+     * <i>Deathly Hallows</i> — so it goes on the file and nothing is dispatched. Rated below unregistered
+     * Animagi: a lapsed licence is a smaller thing to hide than an unregistered second shape.
+     */
+    UNLICENSED_APPARITION("unlicensed_apparition", 4.0f, false),
     /** Being somewhere in Azkaban you have no business being. */
     AZKABAN_TRESPASS("azkaban_trespass", 15.0f, true),
     /** Walking out of a sentence. Raises the stakes rather than settling them. */

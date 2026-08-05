@@ -13,6 +13,8 @@ import at.koopro.wizardsandbeasts.apparition.splinch.SplinchDamageTypes;
 import at.koopro.wizardsandbeasts.apparition.splinch.SplinchResolver;
 import at.koopro.wizardsandbeasts.apparition.splinch.SplinchTier;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
+import at.koopro.wizardsandbeasts.ministry.law.MagicalOffence;
+import at.koopro.wizardsandbeasts.ministry.law.TraceService;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
@@ -199,6 +201,7 @@ public final class ApparitionServerLogic {
         PlayerAbilityHelper.setApparitionCooldownTicks(caster,
                 Math.max(charge.tier().cooldownTicks(), tier.lockoutTicks()));
         recordProficiency(caster, tier, origin, destination);
+        reportUnlicensed(caster);
         ApparitionBroadcast.get().onResolved(caster, charge.tier(), tier, origin,
                 tier.arrives() ? destination : null);
     }
@@ -278,6 +281,21 @@ public final class ApparitionServerLogic {
         double distance = origin.distanceTo(destination);
         float scaled = (float) Math.min(PROFICIENCY_GRANT_CAP, distance * PROFICIENCY_PER_BLOCK);
         AbilityProficiency.add(player, AbilityIds.APPARITION, scaled * share);
+    }
+
+    /**
+     * Files an unlicensed jump with the Ministry.
+     *
+     * <p>The whole enforcement half of this is deliberately absent: no fine, no summons, no patrol, no way to
+     * sit the test. The record entry is a landing site for a later prompt, and until then the only thing
+     * being unlicensed costs you is the miss multiplier. Elf-magic is outside the licensing regime entirely,
+     * and {@code TraceService} itself goes quiet when the Ministry module is off.
+     */
+    private static void reportUnlicensed(ServerPlayer caster) {
+        if (isLicensed(caster) || isElfApparition(caster)) {
+            return;
+        }
+        TraceService.report(caster, MagicalOffence.UNLICENSED_APPARITION);
     }
 
     /** Proficiency earned per block travelled, before the per-grant cap. */
