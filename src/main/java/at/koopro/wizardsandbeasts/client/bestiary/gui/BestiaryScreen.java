@@ -36,6 +36,21 @@ public final class BestiaryScreen extends Screen {
     private static final int W = 320;
     private static final int H = 200;
     private static final int ROW_HEIGHT = 14;
+
+    /**
+     * Selected-row tint and portrait edge, in the mod's leather/brass family.
+     *
+     * <p>These three fills were the last of the cold blue-lavender scheme {@link WizardsPalette}'s
+     * own javadoc describes the mod having drifted into before the palette existed — 0x335A84C5 and
+     * 0x664F5B72. They survived the Bestiary's retheme because they are alpha-composited fills
+     * drawn over the panel art rather than part of it, so recolouring the textures never touched
+     * them.
+     *
+     * <p>Alpha is composed separately from the hue so the fills stay translucent: taking a palette
+     * constant wholesale would drag its opaque 0xFF alpha along and paint over the row beneath.
+     */
+    private static final int SELECTED_ROW_TINT = 0x33000000 | (WizardsPalette.SELECT & 0x00FFFFFF);
+    private static final int PORTRAIT_EDGE     = 0x66000000 | (WizardsPalette.LINE & 0x00FFFFFF);
     private static final int ROW_STEP = 16;
     private static final int LIST_START_Y = 32;
     /** Right edge of list row content (scrollbar sits just to the right). */
@@ -291,7 +306,7 @@ public final class BestiaryScreen extends Screen {
                 boolean isSel = e.id().equals(selected);
                 drawStretched(gg, TEX_ROW, x + 6, rowY, LIST_ROWS_W, ROW_HEIGHT, 112, 14);
                 if (isSel) {
-                    gg.fill(x + 6, rowY, rowRight, rowY + ROW_HEIGHT, 0x335A84C5);
+                    gg.fill(x + 6, rowY, rowRight, rowY + ROW_HEIGHT, SELECTED_ROW_TINT);
                 }
                 DiscoveryTier tier = ClientBestiaryCache.get().tiers().getOrDefault(e.id(), DiscoveryTier.UNDISCOVERED);
                 Component name = tier == DiscoveryTier.UNDISCOVERED ? Component.literal("???") : e.displayName();
@@ -362,8 +377,8 @@ public final class BestiaryScreen extends Screen {
         if (!liveEntity) {
             drawStretched(gg, resolveEntryPortrait(entry, tier), portraitX, portraitY, portraitSize, portraitSize, 32, 32);
         }
-        gg.fill(portraitX, portraitY + portraitSize, portraitX + portraitSize, portraitY + portraitSize + 1, 0x664F5B72);
-        gg.fill(portraitX + portraitSize, portraitY, portraitX + portraitSize + 1, portraitY + portraitSize, 0x664F5B72);
+        gg.fill(portraitX, portraitY + portraitSize, portraitX + portraitSize, portraitY + portraitSize + 1, PORTRAIT_EDGE);
+        gg.fill(portraitX + portraitSize, portraitY, portraitX + portraitSize + 1, portraitY + portraitSize, PORTRAIT_EDGE);
 
         int textX = portraitX + portraitSize + 8;
         int textW = 176 - (portraitSize + 8);
