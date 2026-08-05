@@ -122,6 +122,9 @@ public final class AnimagusEvents {
     public static void onPlayerTick(PlayerTickEvent.Post event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (!isLockedBeastForm(player)) return;
+        // Switching the module off mid-session must not leave a beast stranded in its body waiting
+        // for a key press that is itself gated. Their chosen form id survives the revert.
+        if (AnimagusTransformService.revertIfModuleDisabled(player)) return;
         AnimagusAbilityService.tick(player, PlayerAbilityHelper.getAnimagusFormId(player));
     }
 

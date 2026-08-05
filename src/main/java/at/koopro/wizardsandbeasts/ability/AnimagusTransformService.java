@@ -43,6 +43,9 @@ public final class AnimagusTransformService {
      */
     public static void toggleTransform(ServerPlayer player) {
         if (!ModuleManager.isEnabled(Module.PLAYER_ABILITIES)) {
+            // Disabling the module must not trap anyone mid-form: reverting is still allowed, only
+            // transforming is blocked. Returning unconditionally here soft-locked a beast into its body.
+            revertIfModuleDisabled(player);
             return;
         }
         if (TransitionManager.isTransitioning(player.getUUID())) {
@@ -76,6 +79,23 @@ public final class AnimagusTransformService {
             at.koopro.wizardsandbeasts.ministry.law.TraceService.report(
                     player, at.koopro.wizardsandbeasts.ministry.law.MagicalOffence.UNREGISTERED_ANIMAGUS);
         }
+    }
+
+    /**
+     * Drops the player out of beast form because the module went away, keeping their chosen
+     * {@code animagusFormId} so re-enabling the module restores them intact. Returns true if a
+     * revert happened. Safe to call every tick — it is a no-op unless the module is off <em>and</em>
+     * the player is transformed.
+     */
+    public static boolean revertIfModuleDisabled(ServerPlayer player) {
+        if (ModuleManager.isEnabled(Module.PLAYER_ABILITIES)) {
+            return false;
+        }
+        if (!PlayerAbilityHelper.isCurrentlyTransformed(player)) {
+            return false;
+        }
+        revert(player);
+        return true;
     }
 
     /** Reverts the player to their default form. Safe to call when not transformed. */
