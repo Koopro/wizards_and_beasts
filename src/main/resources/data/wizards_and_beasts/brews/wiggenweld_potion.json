@@ -1,9 +1,17 @@
 {
-  "displayName": "Wiggenweld Potion",
+  "displayName": "brew.wizards_and_beasts.wiggenweld_potion.name",
   "color": -16728081,
   "flavorText": "A healing draught used by witches and wizards to mend wounds.",
   "effects": [
-    { "id": "minecraft:regeneration", "duration": 200, "amplifier": 1 },
-    { "id": "minecraft:absorption", "duration": 600, "amplifier": 0 }
+    {
+      "id": "minecraft:regeneration",
+      "duration": 200,
+      "amplifier": 1
+    },
+    {
+      "id": "minecraft:absorption",
+      "duration": 600,
+      "amplifier": 0
+    }
   ]
 }

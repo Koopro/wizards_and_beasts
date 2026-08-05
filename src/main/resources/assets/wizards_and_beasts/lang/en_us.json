@@ -2423,5 +2423,8 @@
   "skill.wizards_and_beasts.node.wand_precision.name": "Wand Precision",
   "skill.wizards_and_beasts.node.wand_precision.desc": "+5% damage with all spells per level.",
   "skill.wizards_and_beasts.node.wand_study.name": "Wand Study",
-  "skill.wizards_and_beasts.node.wand_study.desc": "Begin studying the secrets of wands."
+  "skill.wizards_and_beasts.node.wand_study.desc": "Begin studying the secrets of wands.",
+  "brew.wizards_and_beasts.started": "Started brewing: %s (§f%st§a)",
+  "brew.wizards_and_beasts.mandrake_restoration_draught.name": "Mandrake Restoration Draught",
+  "brew.wizards_and_beasts.wiggenweld_potion.name": "Wiggenweld Potion"
 }

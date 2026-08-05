@@ -115,9 +115,14 @@ public final class CauldronBrewing {
 
         level.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS,
                 0.8f, 1.0f);
+        // Both halves are keyed: the sentence, and the brew's own name. Concatenating the
+        // name into a literal could only ever produce English, and once the name became a
+        // lang key it would have put the raw key in the toast.
         player.displayClientMessage(
-                Component.literal("\u00A7aStarted brewing: " + brew.displayName()
-                        + " (\u00A7f" + recipe.heatTimeTicks() + "t\u00A7a)"), true);
+                Component.literal("\u00A7a").append(Component.translatable(
+                        "brew.wizards_and_beasts.started",
+                        Component.translatable(brew.displayName()),
+                        recipe.heatTimeTicks())), true);
 
         event.cancelWithResult(InteractionResult.CONSUME);
     }
