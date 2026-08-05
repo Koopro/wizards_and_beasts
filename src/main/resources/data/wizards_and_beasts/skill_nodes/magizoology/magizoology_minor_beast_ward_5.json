@@ -1,6 +1,7 @@
 {
   "id": "magizoology_minor_beast_ward_5",
   "displayName": "skill.wizards_and_beasts.filler.minor_beast_ward",
+  "description": "Handlers learn which end bites. +2.5% resistance to beast damage.",
   "tree": "magizoology",
   "effects": [
     {

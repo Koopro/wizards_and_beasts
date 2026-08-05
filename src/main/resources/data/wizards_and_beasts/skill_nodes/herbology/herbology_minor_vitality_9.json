@@ -1,6 +1,7 @@
 {
   "id": "herbology_minor_vitality_9",
   "displayName": "skill.wizards_and_beasts.filler.minor_vitality",
+  "description": "Sound roots, sound body. +0.5 max health.",
   "tree": "herbology",
   "effects": [
     {

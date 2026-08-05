@@ -1,6 +1,7 @@
 {
   "id": "herbology_minor_green_touch_6",
   "displayName": "skill.wizards_and_beasts.filler.minor_green_touch",
+  "description": "Greenhouse hours pay out at the harvest. +3% chance of a bonus yield.",
   "tree": "herbology",
   "effects": [
     {

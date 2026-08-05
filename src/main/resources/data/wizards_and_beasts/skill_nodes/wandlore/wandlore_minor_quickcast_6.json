@@ -1,6 +1,7 @@
 {
   "id": "wandlore_minor_quickcast_6",
   "displayName": "skill.wizards_and_beasts.filler.minor_quickcast",
+  "description": "A wand answers a familiar hand faster. -1.5% combat spell cooldown.",
   "tree": "wandlore",
   "effects": [
     {

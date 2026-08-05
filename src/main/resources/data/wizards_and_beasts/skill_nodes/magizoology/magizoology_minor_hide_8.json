@@ -1,6 +1,7 @@
 {
   "id": "magizoology_minor_hide_8",
   "displayName": "skill.wizards_and_beasts.filler.minor_hide",
+  "description": "Hide, scale and quill, worn as the beasts wear them. +0.5 armour.",
   "tree": "magizoology",
   "effects": [
     {

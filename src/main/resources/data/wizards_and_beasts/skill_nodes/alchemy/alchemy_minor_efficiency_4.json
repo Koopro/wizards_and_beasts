@@ -1,6 +1,7 @@
 {
   "id": "alchemy_minor_efficiency_4",
   "displayName": "skill.wizards_and_beasts.filler.minor_efficiency",
+  "description": "Measure twice, waste nothing. -2% utility spell cooldown.",
   "tree": "alchemy",
   "effects": [
     {
