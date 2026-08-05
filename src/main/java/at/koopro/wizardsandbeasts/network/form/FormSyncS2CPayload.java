@@ -83,21 +83,32 @@ public record FormSyncS2CPayload(
      * Builds and sends a FormSyncS2CPayload for the given player to all tracking players + self.
      */
     public static void syncToTracking(ServerPlayer player) {
+        PacketDistributor.sendToPlayersTrackingEntityAndSelf(player, of(player));
+    }
+
+    /**
+     * Sends {@code target}'s form to a single observer. Used when an observer first learns about the
+     * target ({@code PlayerEvent.StartTracking}) — a broadcast would be correct but re-tells every
+     * other tracker something they already know.
+     */
+    public static void syncTo(ServerPlayer observer, ServerPlayer target) {
+        PacketDistributor.sendToPlayer(observer, of(target));
+    }
+
+    /** Snapshots the player's active form + size profile into a payload. */
+    private static FormSyncS2CPayload of(ServerPlayer player) {
         PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
         String formId = data.getActiveFormId();
         if (formId == null) formId = "human_default";
 
         PlayerForm form = FormRegistry.getOrDefault(formId);
         SizeProfile size = SizeProfileRegistry.getOrDefault(form.sizeProfileId());
-        int flagMask = form.renderFlagBitmask();
 
-        FormSyncS2CPayload pkt = new FormSyncS2CPayload(
+        return new FormSyncS2CPayload(
                 player.getUUID(), formId,
                 size.hitboxWidth(), size.hitboxHeight(),
                 size.modelScale(), size.modelAspectX(), size.modelAspectZ(),
                 size.reachBonus(), size.knockbackResistance(), size.stepHeight(),
-                flagMask);
-
-        PacketDistributor.sendToPlayersTrackingEntityAndSelf(player, pkt);
+                form.renderFlagBitmask());
     }
 }
