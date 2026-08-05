@@ -67,6 +67,17 @@ public final class CharacterSheetScreen extends Screen {
     private static final int FRAME_PAD = WizardsMetrics.SPACE_M;
     /** Clearance from the internal column divider, which is a single rule rather than a frame. */
     private static final int DIVIDER_PAD = WizardsMetrics.SPACE_S;
+    /**
+     * Usable width of the left column: clear of the sheet frame on the outside, clear of the
+     * column divider on the inside.
+     *
+     * <p>The left column was drawing at {@code colX + 4} with width {@code colW - 8}, which put it
+     * inside the backdrop's own frame — that art carries rules at 0, 2 and 3 plus an inner rule and
+     * corner brackets at 6. Only the right column had been migrated, so the sheet cleared its frame
+     * on one side and sat on it on the other.
+     */
+    private static final int LEFT_CONTENT_W = LEFT_W - FRAME_PAD - DIVIDER_PAD;
+
     /** Side inset of the model viewport, which narrows it toward the figure's own aspect. */
     private static final int VIEWPORT_SIDE_INSET = WizardsMetrics.SPACE_XL;
 
@@ -232,19 +243,19 @@ public final class CharacterSheetScreen extends Screen {
 
         // Heritage block
         int hbY = colY + vpH + 6;
-        HeritageBlockWidget.draw(g, colX + 4, hbY, colW - 8);
+        HeritageBlockWidget.draw(g, colX + FRAME_PAD, hbY, LEFT_CONTENT_W);
 
         // Vitals (health + xp)
         int vitY = hbY + HeritageBlockWidget.height() + 4;
-        int barW = colW - 8;
-        VitalsBarWidget.drawHealth(g, colX + 4, vitY, barW,
+        int barW = LEFT_CONTENT_W;
+        VitalsBarWidget.drawHealth(g, colX + FRAME_PAD, vitY, barW,
                 lp.getHealth(), lp.getMaxHealth());
-        VitalsBarWidget.drawXp(g, colX + 4, vitY + 16, barW,
+        VitalsBarWidget.drawXp(g, colX + FRAME_PAD, vitY + WizardsMetrics.LINE_SECTION, barW,
                 lp.experienceLevel, lp.experienceProgress);
 
         // Active effects
         int efY = vitY + 32 + 4;
-        renderActiveEffects(g, colX + 4, efY, colW - 8);
+        renderActiveEffects(g, colX + FRAME_PAD, efY, LEFT_CONTENT_W);
     }
 
     private void renderActiveEffects(@NonNull GuiGraphics g, int x, int y, int w) {
