@@ -1,18 +1,18 @@
 {
   "id": "wizards_and_beasts:welcome",
-  "title": "Foreword — Department of Magical Law Enforcement",
+  "title": "handbook.wizards_and_beasts.welcome.title",
   "icon": "wizards_and_beasts:ministry_handbook",
   "sort_index": 0,
   "pages": [
     {
       "type": "text",
-      "heading": "Issued by the Ministry of Magic",
-      "body": "The registrant is in receipt of this Handbook by order of the Department of Magical Law Enforcement. Its reading is mandatory and is presumed complete upon first opening.\n\nFailure to comply with any regulation set out herein may result in a Level 2 Misuse of Magic Offence, or such higher classification as the circumstances warrant.\n\nThe registrant is reminded that ignorance of the law is not a defence recognised by the Wizengamot."
+      "heading": "handbook.wizards_and_beasts.welcome.page1.heading",
+      "body": "handbook.wizards_and_beasts.welcome.page1.body"
     },
     {
       "type": "text",
-      "heading": "A Note on Accuracy",
-      "body": "The contents of this Handbook are correct as of the current revision. Magical law is subject to amendment without notice, and frequently is.\n\nThe witch or wizard in question is advised to consult the Ministry noticeboard regularly. The Department accepts no liability for compliance with a clause that has since been struck out."
+      "heading": "handbook.wizards_and_beasts.welcome.page2.heading",
+      "body": "handbook.wizards_and_beasts.welcome.page2.body"
     }
   ]
 }

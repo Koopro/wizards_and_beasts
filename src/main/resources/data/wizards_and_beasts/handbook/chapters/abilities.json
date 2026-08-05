@@ -1,58 +1,58 @@
 {
   "id": "wizards_and_beasts:abilities",
-  "title": "Part VI — Special Magical Abilities",
+  "title": "handbook.wizards_and_beasts.abilities.title",
   "icon": "minecraft:ender_pearl",
   "sort_index": 60,
   "pages": [
     {
       "type": "text",
-      "heading": "Apparition",
-      "body": "Apparition is instantaneous magical travel, governed by the Three Ds: Destination, Determination, and Deliberation. Failure to maintain all three risks Splinching, the involuntary separation of the registrant from a portion of the registrant.\n\nApparition requires a licence, obtained by way of the Ministry Apparition Test. Anti-Apparition Wards prevent its use in certain locations. Side-Along Apparition is available to licensed witches and wizards, who do so entirely at their passenger's risk."
+      "heading": "handbook.wizards_and_beasts.abilities.page1.heading",
+      "body": "handbook.wizards_and_beasts.abilities.page1.body"
     },
     {
       "type": "text",
-      "heading": "Animagus Transformation",
-      "body": "An Animagus may transform into a single animal form. Registration proceeds in three stages: the preliminary ritual, the lightning-phase transformation, and registration with the Ministry.\n\nThe animal form is fixed at the moment of first transformation and may not be exchanged. Unregistered Animagi are subject to prosecution under the Animagus Registry Act. The Department notes that the form chosen is not, in fact, chosen."
+      "heading": "handbook.wizards_and_beasts.abilities.page2.heading",
+      "body": "handbook.wizards_and_beasts.abilities.page2.body"
     },
     {
       "type": "text",
-      "heading": "Metamorphmagus",
-      "body": "A Metamorphmagus may alter their physical appearance at will. This is a rare innate ability and cannot be learned, taught, or purchased, nor is it conferred by any recognised Heritage Variant — a fact the Department attributes to the trait's stubborn refusal to be filed.\n\nRegistrants who believe themselves so gifted are directed to the Department for assessment. Impersonation of a Ministry official by this or any means remains an offence."
+      "heading": "handbook.wizards_and_beasts.abilities.page3.heading",
+      "body": "handbook.wizards_and_beasts.abilities.page3.body"
     },
     {
       "type": "text",
-      "heading": "Parseltongue",
-      "body": "Parseltongue is the ability to converse with serpents. It is innate, exceedingly rare, and — the Department stresses — not currently issued through any Heritage registration whatsoever.\n\nThe registrant is advised that the use of Parseltongue in public may attract unwanted attention, much of it from persons drawing unflattering conclusions."
+      "heading": "handbook.wizards_and_beasts.abilities.page4.heading",
+      "body": "handbook.wizards_and_beasts.abilities.page4.body"
     },
     {
       "type": "text",
-      "heading": "Legilimency & Occlumency",
-      "body": "Legilimency is the magical penetration of another's mind. Occlumency is the art of magical defence against such intrusion. Both require Heritage eligibility and significant skill investment.\n\nThe registrant is reminded that the use of Legilimency upon another without consent is a serious offence. The defence that one was merely browsing has not succeeded before the Wizengamot."
+      "heading": "handbook.wizards_and_beasts.abilities.page5.heading",
+      "body": "handbook.wizards_and_beasts.abilities.page5.body"
     },
     {
       "type": "text",
-      "heading": "Wandless Casting",
-      "body": "A witch or wizard of sufficient proficiency may, in principle, cast certain spells without a wand. No such registrant has yet been recorded, and the Department reserves comment on when one might be.\n\nThe Ministry recommends that registrants maintain a registered wand at all times regardless, if only to have something to register."
+      "heading": "handbook.wizards_and_beasts.abilities.page6.heading",
+      "body": "handbook.wizards_and_beasts.abilities.page6.body"
     },
     {
       "type": "text",
-      "heading": "Werewolf Condition",
-      "body": "A werewolf is, canonically, subject to forced transformation at the full moon, restrainable only by the Wolfsbane Potion. Neither the transformation nor the Potion is presently enforced by this Handbook's issuing authority — a state of affairs the Department finds no less irregular than the registrant does.\n\nRegistration with the Werewolf Registry remains, notionally, mandatory."
+      "heading": "handbook.wizards_and_beasts.abilities.page7.heading",
+      "body": "handbook.wizards_and_beasts.abilities.page7.body"
     },
     {
       "type": "text",
-      "heading": "Vampire Registry",
-      "body": "Vampires are required to register with the Beast Division. Heritage-specific passive abilities apply.\n\nMechanics are not detailed here. The registrant is directed to the relevant Variant entry on their certificate."
+      "heading": "handbook.wizards_and_beasts.abilities.page8.heading",
+      "body": "handbook.wizards_and_beasts.abilities.page8.body"
     },
     {
       "type": "text",
-      "heading": "Veela",
-      "body": "Veela are beings of considerable magical allure. A Heritage-specific passive effect, the Veela allure, applies to registrants of this Heritage.\n\nThe particulars of the effect are not detailed here. The Department asks only that it not be cited in mitigation of poor judgement."
+      "heading": "handbook.wizards_and_beasts.abilities.page9.heading",
+      "body": "handbook.wizards_and_beasts.abilities.page9.body"
     },
     {
       "type": "text",
-      "heading": "Centaur Divination",
-      "body": "Centaurs practise a form of divination grounded in celestial observation. Access is Heritage-gated.\n\nThe registrant is reminded that Centaurs find the term half-breed deeply offensive, and that the Ministry does not condone its use. The Department's own historical record on this matter is under separate review."
+      "heading": "handbook.wizards_and_beasts.abilities.page10.heading",
+      "body": "handbook.wizards_and_beasts.abilities.page10.body"
     }
   ]
 }

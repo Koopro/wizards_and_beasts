@@ -1,33 +1,33 @@
 {
   "id": "wizards_and_beasts:spells",
-  "title": "Part III — Spell Licensing & Casting",
+  "title": "handbook.wizards_and_beasts.spells.title",
   "icon": "wizards_and_beasts:wand",
   "sort_index": 30,
   "pages": [
     {
       "type": "text",
-      "heading": "Licensed Spells",
-      "body": "Most spells are freely licensable by any registered witch or wizard in good standing. The registrant learns spells through the skill tree, as set out in Part V.\n\nCertain spells require additional licensing. These are addressed under Restricted Spells below."
+      "heading": "handbook.wizards_and_beasts.spells.page1.heading",
+      "body": "handbook.wizards_and_beasts.spells.page1.body"
     },
     {
       "type": "text",
-      "heading": "Casting",
-      "body": "A spell is cast by holding a wand and performing the casting gesture. Casting proficiency improves with practice, as detailed in Part V.\n\nSeveral spells produce tiered effects according to the registrant's proficiency level. A spell cast poorly remains the registrant's responsibility."
+      "heading": "handbook.wizards_and_beasts.spells.page2.heading",
+      "body": "handbook.wizards_and_beasts.spells.page2.body"
     },
     {
       "type": "text",
-      "heading": "Conjuration Limits — see Part VII",
-      "body": "Five Principal Exceptions govern that which magic cannot conjure. The registrant is referred to Part VII for the full statement.\n\nAttempts to conjure food, money, or life by magic produce substandard or non-functional results, and may constitute fraud under the Wizengamot Act of 1707."
+      "heading": "handbook.wizards_and_beasts.spells.page3.heading",
+      "body": "handbook.wizards_and_beasts.spells.page3.body"
     },
     {
       "type": "text",
-      "heading": "Restricted Spells",
-      "body": "The three Unforgivable Curses — Avada Kedavra, the Cruciatus Curse, and the Imperius Curse — are illegal save under Ministry warrant.\n\nUse of any Unforgivable without warrant is registered by the Trace the instant it is cast and entered upon the registrant's permanent Record. The registrant is referred to Part XI for the applicable procedure. These spells are available only where the Dark Arts provisions are in force."
+      "heading": "handbook.wizards_and_beasts.spells.page4.heading",
+      "body": "handbook.wizards_and_beasts.spells.page4.body"
     },
     {
       "type": "text",
-      "heading": "Protego & Shield Charms",
-      "body": "The Shield Charm, Protego, raises a magical barrier that absorbs incoming spells. Shield strength scales with the caster's proficiency, and presents in four visual tiers of intensity.\n\nThe registrant is cautioned that a shield does not block all curses. The Unforgivables bypass standard Protego — Avada Kedavra produces a shield flash rather than absorption, which is to say it is not stopped at all."
+      "heading": "handbook.wizards_and_beasts.spells.page5.heading",
+      "body": "handbook.wizards_and_beasts.spells.page5.body"
     }
   ]
 }

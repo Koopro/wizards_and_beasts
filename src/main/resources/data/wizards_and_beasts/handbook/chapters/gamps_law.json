@@ -1,28 +1,28 @@
 {
   "id": "wizards_and_beasts:gamps_law",
-  "title": "Part VII — Gamp's Law of Elemental Transfiguration",
+  "title": "handbook.wizards_and_beasts.gamps_law.title",
   "icon": "minecraft:barrier",
   "sort_index": 70,
   "pages": [
     {
       "type": "text",
-      "heading": "The Five Principal Exceptions",
-      "body": "Magic cannot conjure from nothing within five domains: Food, Money, Life, Love, and Knowledge. Attempts yield either nothing at all or a degraded and non-functional result.\n\nThe principle is codified as Gamp's Law in the Wizengamot Statute of 1707. The Knowledge domain remains under active research, and the Department will publish its findings in due course, or possibly not."
+      "heading": "handbook.wizards_and_beasts.gamps_law.page1.heading",
+      "body": "handbook.wizards_and_beasts.gamps_law.page1.body"
     },
     {
       "type": "text",
-      "heading": "Conjured Food",
-      "body": "Food conjured by magic is nutritionally void and spoils with unusual speed. The registrant will find it filling in the manner of a rumour.\n\nThe sale of conjured food as the genuine article constitutes fraud under the 1707 Statute. Proper cooking and the Summoning Charm remain the approved methods of food acquisition."
+      "heading": "handbook.wizards_and_beasts.gamps_law.page2.heading",
+      "body": "handbook.wizards_and_beasts.gamps_law.page2.body"
     },
     {
       "type": "text",
-      "heading": "Counterfeit Currency",
-      "body": "Galleons conjured by magic are detectable on Gringotts assay and are non-redeemable. They are, in short, money only to the credulous.\n\nThe circulation of counterfeit Galleons is a Gringotts-level offence. The Ministry does not become involved; Gringotts handles enforcement directly, and does so without appeal. This sentence appears underlined in the original Ministry document."
+      "heading": "handbook.wizards_and_beasts.gamps_law.page3.heading",
+      "body": "handbook.wizards_and_beasts.gamps_law.page3.body"
     },
     {
       "type": "text",
-      "heading": "Permitted Transfiguration",
-      "body": "Gamp's Law prohibits conjuration from nothing, not the Transfiguration of existing matter. Responsible Transfiguration is encouraged.\n\nWhere a domain interaction is ambiguous, certain spell effects apply a soft penalty rather than a hard prohibition. The registrant should not interpret the absence of a hard block as the presence of permission."
+      "heading": "handbook.wizards_and_beasts.gamps_law.page4.heading",
+      "body": "handbook.wizards_and_beasts.gamps_law.page4.body"
     }
   ]
 }

@@ -1,43 +1,43 @@
 {
   "id": "wizards_and_beasts:wands",
-  "title": "Part II — Wand Registration & Use",
+  "title": "handbook.wizards_and_beasts.wands.title",
   "icon": "wizards_and_beasts:wand",
   "sort_index": 20,
   "pages": [
     {
       "type": "text",
-      "heading": "Wand Registration",
-      "body": "All wands must be registered with the Wand Registry. The wand's components — wood, core, length, and flexibility — are recorded at the time of acquisition.\n\nThe registrant is reminded that use of an unregistered wand is a Level 1 Misuse of Magic Offence. The Ministry traces wands, not intentions."
+      "heading": "handbook.wizards_and_beasts.wands.page1.heading",
+      "body": "handbook.wizards_and_beasts.wands.page1.body"
     },
     {
       "type": "text",
-      "heading": "Wand Configuration",
-      "body": "A wand's components influence its casting behaviour. The registrant may inspect their wand's configuration by way of the wand inspection interface.\n\nThe particulars of how configuration affects casting are not detailed here. The witch or wizard in question is referred to Part III (Spells) for the applicable rules."
+      "heading": "handbook.wizards_and_beasts.wands.page2.heading",
+      "body": "handbook.wizards_and_beasts.wands.page2.body"
     },
     {
       "type": "text",
-      "heading": "The Ollivander Principle",
-      "body": "While any witch or wizard may attempt to use any wand, a wand that has chosen its witch or wizard will perform considerably better. The reverse is also true, and frequently embarrassing.\n\nThe registrant is advised against prolonged use of another's wand save in emergencies. See Ministry v. Brocklehurst (1993), in which the defendant's reliance on a borrowed wand was held to aggravate, rather than excuse, the resulting damage to a public fountain."
+      "heading": "handbook.wizards_and_beasts.wands.page3.heading",
+      "body": "handbook.wizards_and_beasts.wands.page3.body"
     },
     {
       "type": "text",
-      "heading": "Acquisition — Licensed Wandmakers",
-      "body": "The ordinary channel is a licensed wandmaker. Any settlement may support one: a villager who takes up an unclaimed wandmaker's bench is registered to the trade by the Department, and thereafter keeps stock.\n\nPresent yourself and three wands are laid out for trial. The Handbook notes without comment that the wandmaker always seems to have anticipated which three. A wand that answers may be taken at no charge; a wand that does not will sit dead in the hand, and no amount of insistence improves matters.\n\nWands are stocked to the applicant. A wizard of modest accomplishment will not be offered a dragon heartstring, and should not ask."
+      "heading": "handbook.wizards_and_beasts.wands.page4.heading",
+      "body": "handbook.wizards_and_beasts.wands.page4.body"
     },
     {
       "type": "text",
-      "heading": "Acquisition — Private Manufacture",
-      "body": "Private manufacture is lawful, registration obligations unaffected.\n\nA wand blank is assembled from two lengths of wood about an iron nugget. The blank is unseasoned and will not take a core until struck against a living wood — press it to a log and it takes that wood's character. Oak reads as rowan, spruce as holly, birch as hawthorn, and so on down the Registry's table of equivalents.\n\nThe seasoned blank and a core are then joined at a wandmaker's bench. Cores are not manufactured: unicorn hair, phoenix feather and dragon heartstring are harvested from the creature, with all that implies. The registrant is reminded that the harvesting of a unicorn carries consequences the Ministry does not administer."
+      "heading": "handbook.wizards_and_beasts.wands.page5.heading",
+      "body": "handbook.wizards_and_beasts.wands.page5.body"
     },
     {
       "type": "text",
-      "heading": "The Wandmaker's Bench",
-      "body": "A bench standing alone will produce nothing. Wandmaking requires a furnished workshop, and the bench weighs its surroundings within five paces: bookshelves, floating candles, a pewter cauldron, a spell teacher. Every fitting adds to the bench's tier, and every pairing of wood and core demands a minimum.\n\nA bench that refuses to work will say what it wants of you. The registrant is advised to read it rather than to strike it."
+      "heading": "handbook.wizards_and_beasts.wands.page6.heading",
+      "body": "handbook.wizards_and_beasts.wands.page6.body"
     },
     {
       "type": "text",
-      "heading": "Resonance and Bonding",
-      "body": "A wand judges four things: its wood against the wizard's character, its core against their accomplishment, and its length and flexibility against how they carry themselves. The verdict is a single figure, and the wand bonds only above the threshold.\n\nA wand taken at a wandmaker's bonds at once. A wand of private manufacture is judged on first use, and here the registrant should take care: a wand that finds you merely unsuitable will sulk, while a wand that finds you unfit will discharge into the hand that holds it.\n\nCharacter is not fixed at birth alone. Heritage is recorded at registration and weighs heaviest; accomplishment accrues with experience, and a core that would not answer a first-year may answer them later."
+      "heading": "handbook.wizards_and_beasts.wands.page7.heading",
+      "body": "handbook.wizards_and_beasts.wands.page7.body"
     }
   ]
 }

@@ -1,28 +1,28 @@
 {
   "id": "wizards_and_beasts:trunks",
-  "title": "Part VIII — Extendable Trunk Regulation",
+  "title": "handbook.wizards_and_beasts.trunks.title",
   "icon": "wizards_and_beasts:enchanted_trunk",
   "sort_index": 80,
   "pages": [
     {
       "type": "text",
-      "heading": "Extension Charm Legality",
-      "body": "The Extension Charm, applied to trunks, is legal for personal use. The registrant is reminded that its application to Muggle-visible containers in Muggle areas remains a Statute of Secrecy concern.\n\nFurther guidance appears in the Ministry's Guidelines for the Treatment of Non-Magical Parts and Beings, a document of some length and little charm."
+      "heading": "handbook.wizards_and_beasts.trunks.page1.heading",
+      "body": "handbook.wizards_and_beasts.trunks.page1.body"
     },
     {
       "type": "text",
-      "heading": "Trunk Archetypes",
-      "body": "Three trunk archetypes are available to registrants: the Traveller's Trunk (one compartment), the Expanded Trunk (three compartments), and the Master's Trunk (seven compartments, after the pattern of Moody's trunk).\n\nThe compartment count governs how many pocket dimensions are accessible by way of the lock mechanism. The registrant is advised to remember which lock corresponds to which compartment."
+      "heading": "handbook.wizards_and_beasts.trunks.page2.heading",
+      "body": "handbook.wizards_and_beasts.trunks.page2.body"
     },
     {
       "type": "text",
-      "heading": "Scamander's Sanctuary",
-      "body": "The Sanctuary archetype is a habitable, multi-biome pocket dimension. It comprises a shed entry zone, a Thunderbird desert as the dominant habitat, a bamboo forest, a concealed snowy zone, floating terrain, cliff faces, and open water.\n\nThe archetype is intended for magizoological fieldwork. Lore note: the Sanctuary is inspired by Newt Scamander's suitcase as depicted in Fantastic Beasts and Where to Find Them (2016). The registrant is asked not to lose anything alive inside it."
+      "heading": "handbook.wizards_and_beasts.trunks.page3.heading",
+      "body": "handbook.wizards_and_beasts.trunks.page3.body"
     },
     {
       "type": "text",
-      "heading": "Acquisition of Trunks",
-      "body": "No standard crafting procedure for a Traveller's Trunk is presently filed with this Handbook. Trunks are obtained through the established channels rather than by ordinary assembly.\n\nThe registrant should not attempt to apply an Extension Charm to an ordinary chest without instruction. The Department has seen the results, and the results have seen the Department."
+      "heading": "handbook.wizards_and_beasts.trunks.page4.heading",
+      "body": "handbook.wizards_and_beasts.trunks.page4.body"
     }
   ]
 }

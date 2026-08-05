@@ -1,28 +1,28 @@
 {
   "id": "wizards_and_beasts:brooms",
-  "title": "Part IV — Broom Registration & Flight Regulations",
+  "title": "handbook.wizards_and_beasts.brooms.title",
   "icon": "wizards_and_beasts:broom",
   "sort_index": 40,
   "pages": [
     {
       "type": "text",
-      "heading": "Broom Registration",
-      "body": "All flying broomsticks must be registered with the Department of Magical Transportation. Ministry-approved models are recorded in the Broom Registry.\n\nThe registrant is reminded that flight over Muggle-populated areas requires Disillusionment. Omission is a Level 2 violation, and the Muggle in question is not a defence."
+      "heading": "handbook.wizards_and_beasts.brooms.page1.heading",
+      "body": "handbook.wizards_and_beasts.brooms.page1.body"
     },
     {
       "type": "text",
-      "heading": "Canonical Broom Models",
-      "body": "Seven canonical models are available to registrants: the Cleansweep 11, the Comet 260, the Nimbus 2000, the Nimbus 2001, the Firebolt, the Firebolt Supreme, and the Oakshaft 79.\n\nThe Oakshaft 79 is a collector's item and is not available through standard channels. Enquiries regarding its acquisition will be noted and ignored."
+      "heading": "handbook.wizards_and_beasts.brooms.page2.heading",
+      "body": "handbook.wizards_and_beasts.brooms.page2.body"
     },
     {
       "type": "text",
-      "heading": "Flight Physics",
-      "body": "Broomsticks possess physical properties — speed, acceleration, handling, and hover stability — defined by model. These values are governed by the registrant's broom definition.\n\nThe registrant is advised that dismounting at altitude is inadvisable and is not covered by Ministry insurance, nor by any insurer of sound mind."
+      "heading": "handbook.wizards_and_beasts.brooms.page3.heading",
+      "body": "handbook.wizards_and_beasts.brooms.page3.body"
     },
     {
       "type": "text",
-      "heading": "Quidditch & Recreational Flight",
-      "body": "Recreational flight is permitted in designated areas. Quidditch is the registrant's own affair, and the Department wishes to be kept out of it.\n\nRacing brooms in the vicinity of protected Muggle sites is a Level 3 violation, irrespective of the registrant's lap time."
+      "heading": "handbook.wizards_and_beasts.brooms.page4.heading",
+      "body": "handbook.wizards_and_beasts.brooms.page4.body"
     }
   ]
 }

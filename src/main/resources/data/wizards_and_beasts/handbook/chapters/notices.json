@@ -1,23 +1,23 @@
 {
   "id": "wizards_and_beasts:notices",
-  "title": "Closing Notices & Legal Disclaimers",
+  "title": "handbook.wizards_and_beasts.notices.title",
   "icon": "minecraft:paper",
   "sort_index": 110,
   "pages": [
     {
       "type": "text",
-      "heading": "Amendment History",
-      "body": "Amendment 7, Clause 3: Revised guidelines on the use of Lumos in non-residential structures. Effective 14th October.\n\nAmendment 11, Clause 1: The Hover Charm is no longer to be demonstrated at Ministry open days following the incident with the Permanent Secretary's hat. Effective immediately and retroactively.\n\nAmendment 14, Schedule B: The word reasonable, wherever it appears in this Handbook, is to be read as reasonable in the opinion of the Department. Effective on a date to be confirmed."
+      "heading": "handbook.wizards_and_beasts.notices.page1.heading",
+      "body": "handbook.wizards_and_beasts.notices.page1.body"
     },
     {
       "type": "text",
-      "heading": "Contact the Ministry",
-      "body": "Enquiries should be directed to the relevant Department.\n\nThe Department of Magical Law Enforcement attends to offences and warrants. The Department of Magical Transportation governs brooms, Floo, Portkeys, and Apparition. The Department for the Regulation and Control of Magical Creatures handles beasts, beings, and spirits. The Department of Magical Accidents and Catastrophes manages incidents the other Departments would prefer not to discuss. The Department of Mysteries does not accept enquiries and would thank you not to ask.\n\nThe Ministry does not accept owl post on weekends or during Quidditch season."
+      "heading": "handbook.wizards_and_beasts.notices.page2.heading",
+      "body": "handbook.wizards_and_beasts.notices.page2.body"
     },
     {
       "type": "text",
-      "heading": "This Document Is Ministry Property",
-      "body": "This Handbook is the property of the Ministry of Magic, issued to the registrant on a non-transferable basis.\n\nDefacement, resale, or use of this Handbook as a projectile is prohibited. The loss of the Handbook does not excuse the registrant from compliance with its contents, which the registrant is deemed to have read in full, including this sentence."
+      "heading": "handbook.wizards_and_beasts.notices.page3.heading",
+      "body": "handbook.wizards_and_beasts.notices.page3.body"
     }
   ]
 }

@@ -220,7 +220,7 @@ public final class HandbookScreen extends Screen {
             catCells.add(new int[]{cx0, cy0, cx0 + CELL, cy0 + CELL, i});
         }
         if (hovered != null) {
-            gg.setTooltipForNextFrame(font, Component.literal(hovered.title()), mouseX, mouseY);
+            gg.setTooltipForNextFrame(font, Component.translatable(hovered.title()), mouseX, mouseY);
         }
     }
 
@@ -237,16 +237,16 @@ public final class HandbookScreen extends Screen {
         int lcx = (lx0 + lx1) / 2;
         int ly = y + FRAME + 14;
 
-        ly += titleBox(gg, lcx, lx0, lx1, ly, Component.literal(chapter.title())) + 12;
+        ly += titleBox(gg, lcx, lx0, lx1, ly, Component.translatable(chapter.title())) + 12;
 
         // ── Left page body (confined to the parchment, scrolls on overflow) ──
         int contentBottom = y + H - FRAME - 22;
         int sbX = lx1 + 4;
         if (page instanceof HandbookPage.Text text) {
             if (text.heading().isPresent()) {
-                ly += heading(gg, Component.literal(text.heading().get()), lx0, ly, lx1 - lx0);
+                ly += heading(gg, Component.translatable(text.heading().get()), lx0, ly, lx1 - lx0);
             }
-            scrollableBody(gg, Component.literal(text.body()), lx0, ly, lx1 - lx0, contentBottom, sbX, INK);
+            scrollableBody(gg, Component.translatable(text.body()), lx0, ly, lx1 - lx0, contentBottom, sbX, INK);
         } else if (page instanceof HandbookPage.CrossRef ref) {
             scrollableBody(gg, Component.literal("§o" + ref.entryId().getPath()), lx0, ly, lx1 - lx0, contentBottom, sbX, INK_GREY);
         } else if (page instanceof HandbookPage.Recipe || page instanceof HandbookPage.Image) {
