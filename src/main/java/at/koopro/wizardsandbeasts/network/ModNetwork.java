@@ -43,6 +43,7 @@ public class ModNetwork {
         ModNetworkTeacher.register(registrar);
         ModNetworkWand.register(registrar);
         ModNetworkBestiary.register(registrar);
+        at.koopro.wizardsandbeasts.network.animagus.ModNetworkAnimagus.register(registrar);
         ModNetworkHandbook.register(registrar);
         ModNetworkPocket.register(registrar);
         ModNetworkNiffler.register(registrar);

@@ -3,6 +3,11 @@ package at.koopro.wizardsandbeasts.command;
 import at.koopro.wizardsandbeasts.ability.AnimagusForms;
 import at.koopro.wizardsandbeasts.ability.AnimagusTransformService;
 import at.koopro.wizardsandbeasts.ability.PlayerAbilityHelper;
+import at.koopro.wizardsandbeasts.animagus.AnimagusFormBinding;
+import at.koopro.wizardsandbeasts.animagus.AnimagusFormRegistry;
+import net.minecraft.resources.Identifier;
+
+import java.util.List;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.ChatFormatting;
@@ -45,7 +50,27 @@ public final class AnimagusCommands {
                         .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .executes(ctx -> opReset(ctx.getSource().getPlayerOrException()))
                         .then(Commands.argument("player", EntityArgument.player())
-                                .executes(ctx -> opReset(EntityArgument.getPlayer(ctx, "player")))));
+                                .executes(ctx -> opReset(EntityArgument.getPlayer(ctx, "player")))))
+                .then(Commands.literal("set")
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .then(Commands.argument("form", StringArgumentType.word())
+                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
+                                                definedFormNames(), builder))
+                                        .executes(ctx -> opSet(
+                                                ctx.getSource(),
+                                                EntityArgument.getPlayer(ctx, "player"),
+                                                StringArgumentType.getString(ctx, "form"))))))
+                .then(Commands.literal("clear")
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> opClear(
+                                        ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
+                .then(Commands.literal("query")
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> opQuery(
+                                        ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))));
     }
 
     private static int info(ServerPlayer player) {
@@ -120,6 +145,71 @@ public final class AnimagusCommands {
         PlayerAbilityHelper.setAnimagusRegistered(player, false);
         PlayerAbilityHelper.setAnimagusFormId(player, null);
         send(player, "[op] Animagus state reset for " + player.getName().getString() + ".", ChatFormatting.YELLOW);
+        return 1;
+    }
+
+    /** Form names the datapack registry actually defines, for {@code set} suggestions. */
+    private static List<String> definedFormNames() {
+        return AnimagusFormRegistry.ids().stream()
+                .map(Identifier::getPath)
+                .sorted()
+                .toList();
+    }
+
+    /**
+     * Assigns a beast form from the datapack registry. Admin-only: form assignment is permanent per
+     * save and has no player-facing reroll, so this is the override, not a feature.
+     */
+    private static int opSet(CommandSourceStack source, ServerPlayer target, String form) {
+        Identifier key = AnimagusFormBinding.toFormKey(form).orElse(null);
+        if (key == null || !AnimagusFormRegistry.contains(key)) {
+            source.sendFailure(Component.literal(
+                    "No such Animagus form: " + form + " (known: " + String.join(", ", definedFormNames()) + ")"));
+            return 0;
+        }
+
+        // Changing form under a transformed player would leave their old hitbox and attributes
+        // applied against the new definition, so drop them to human first.
+        if (PlayerAbilityHelper.isCurrentlyTransformed(target)) {
+            AnimagusTransformService.revert(target);
+        }
+
+        PlayerAbilityHelper.setAnimagusUnlocked(target, true);
+        PlayerAbilityHelper.setAnimagusFormId(target, AnimagusFormBinding.toStoredId(key));
+        source.sendSuccess(() -> Component.literal(
+                "[op] " + target.getName().getString() + "'s Animagus form set to " + key), true);
+        return 1;
+    }
+
+    private static int opClear(CommandSourceStack source, ServerPlayer target) {
+        if (PlayerAbilityHelper.isCurrentlyTransformed(target)) {
+            AnimagusTransformService.revert(target);
+        }
+        PlayerAbilityHelper.setAnimagusFormId(target, null);
+        source.sendSuccess(() -> Component.literal(
+                "[op] Cleared " + target.getName().getString() + "'s Animagus form."), true);
+        return 1;
+    }
+
+    private static int opQuery(CommandSourceStack source, ServerPlayer target) {
+        String stored = PlayerAbilityHelper.getAnimagusFormId(target);
+        Identifier key = AnimagusFormBinding.toFormKey(stored).orElse(null);
+        boolean defined = key != null && AnimagusFormRegistry.contains(key);
+
+        source.sendSuccess(() -> Component.literal(
+                "— Animagus: " + target.getName().getString() + " —").withStyle(ChatFormatting.GOLD), false);
+        source.sendSuccess(() -> Component.literal(
+                "  unlocked=" + PlayerAbilityHelper.isAnimagusUnlocked(target)
+                        + " registered=" + PlayerAbilityHelper.isAnimagusRegistered(target)
+                        + " transformed=" + PlayerAbilityHelper.isCurrentlyTransformed(target))
+                .withStyle(ChatFormatting.GRAY), false);
+        source.sendSuccess(() -> Component.literal(
+                "  stored form: " + (stored != null ? stored : "(none)")).withStyle(ChatFormatting.GRAY), false);
+        // Worth calling out: a stored id with no definition is the shape a save takes after a
+        // datapack drops a form out from under a player who already had it.
+        source.sendSuccess(() -> Component.literal(
+                "  datapack definition: " + (defined ? key.toString() : "(none)"))
+                .withStyle(defined ? ChatFormatting.GRAY : ChatFormatting.RED), false);
         return 1;
     }
 
