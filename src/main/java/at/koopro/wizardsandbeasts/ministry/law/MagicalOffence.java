@@ -29,10 +29,12 @@ public enum MagicalOffence implements StringRepresentable {
     UNREGISTERED_ANIMAGUS("unregistered_animagus", 6.0f, false),
     /**
      * Apparating without a licence. Illegal, not impossible — the trio do it all through
-     * <i>Deathly Hallows</i> — so it goes on the file and nothing is dispatched. Rated below unregistered
-     * Animagi: a lapsed licence is a smaller thing to hide than an unregistered second shape.
+     * <i>Deathly Hallows</i> — so it goes on the file and nothing is dispatched. Rated a third of
+     * unregistered Animagi because the two are different kinds of offence, not different sizes of one:
+     * an unregistered Animagus is concealing a capability, while an unlicensed Apparator has merely
+     * skipped the paperwork for one everybody knows they have. A fine, not Azkaban.
      */
-    UNLICENSED_APPARITION("unlicensed_apparition", 4.0f, false),
+    UNLICENSED_APPARITION("unlicensed_apparition", 2.0f, false),
     /** Being somewhere in Azkaban you have no business being. */
     AZKABAN_TRESPASS("azkaban_trespass", 15.0f, true),
     /** Walking out of a sentence. Raises the stakes rather than settling them. */
