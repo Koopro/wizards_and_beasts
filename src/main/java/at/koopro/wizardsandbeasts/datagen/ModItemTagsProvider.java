@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.data.BlockTagCopyingItemTagProvider;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.apparition.splinch.SplinchTags;
 import at.koopro.wizardsandbeasts.block.location.DiagonAlleyBlocks;
 import at.koopro.wizardsandbeasts.block.location.LocationBlockHelper;
 import at.koopro.wizardsandbeasts.module.Module;
@@ -194,6 +195,10 @@ public class ModItemTagsProvider extends BlockTagCopyingItemTagProvider {
                 ModBlocks.HUFFLEPUFF_BANNER_ITEM.get(), ModBlocks.FLOATING_CANDLE_ITEM.get(),
                 ModBlocks.BRASS_CAULDRON_ITEM.get(), ModBlocks.WIZARDING_COPPER_CAULDRON_ITEM.get(),
                 ModBlocks.PEWTER_CAULDRON_ITEM.get(), ModBlocks.SPELL_TEACHER_ITEM.get());
+
+        // Generated rather than hand-authored: membership here is "does eating this mend a splinch", which
+        // is a property of the item's own behaviour, not a judgement call a human makes per entry.
+        tag(SplinchTags.CURES_SPLINCH).add(ConsumableItemRegistry.DITTANY.get());
     }
 
     private void add(Module module, ItemLike... contents) {
