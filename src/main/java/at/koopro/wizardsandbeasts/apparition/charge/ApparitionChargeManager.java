@@ -78,6 +78,16 @@ public final class ApparitionChargeManager {
         return charge == null ? ApparitionPhase.IDLE : charge.phase();
     }
 
+    /**
+     * Where this player's in-flight attempt would currently put them, or {@code null} when there is no
+     * attempt or the aim is not viable. Read-only; the presentation layer uses it so the destination ring
+     * marks the spot the <i>server</i> resolved rather than the client's own guess at the same raycast.
+     */
+    public static @Nullable Vec3 destinationOf(ServerPlayer player) {
+        ApparitionCharge charge = CHARGES.get(player);
+        return charge == null ? null : charge.destination();
+    }
+
     /** Drops the attempt with no cooldown, no exhaustion and no splinch. */
     public static void abort(ServerPlayer player) {
         ApparitionCharge charge = CHARGES.remove(player);

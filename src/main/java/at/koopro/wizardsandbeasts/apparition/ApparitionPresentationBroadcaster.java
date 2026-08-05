@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.apparition;
 import at.koopro.wizardsandbeasts.ability.AbilityIds;
 import at.koopro.wizardsandbeasts.ability.AbilityProficiency;
 import at.koopro.wizardsandbeasts.ability.PlayerAbilityHelper;
+import at.koopro.wizardsandbeasts.apparition.charge.ApparitionChargeManager;
 import at.koopro.wizardsandbeasts.apparition.splinch.SplinchTier;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
@@ -132,8 +133,11 @@ public final class ApparitionPresentationBroadcaster implements ApparitionEventB
      */
     private static void sendCharge(ServerPlayer player, ApparitionTier tier, ApparitionPhase phase,
                                    int elapsed, int windowOpen, int windowClose) {
+        // The destination the server resolved, not the client's own guess at the same raycast. Without it the
+        // ring can be perfectly on time and still be drawn in the wrong place.
+        Vec3 destination = ApparitionChargeManager.destinationOf(player);
         PacketDistributor.sendToPlayersTrackingEntityAndSelf(player, new ApparitionPresentationS2CPayload(
                 player.getId(), tier, phase, elapsed, windowOpen, windowClose,
-                null, player.position(), null, crackRadius(player), crackVariant(player)));
+                null, player.position(), destination, crackRadius(player), crackVariant(player)));
     }
 }

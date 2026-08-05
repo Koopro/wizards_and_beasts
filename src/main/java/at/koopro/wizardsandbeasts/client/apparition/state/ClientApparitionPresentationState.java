@@ -32,14 +32,20 @@ public final class ClientApparitionPresentationState {
     /** Hard ceiling on queued resolutions, so a hostile or broken server cannot grow this without bound. */
     private static final int MAX_EVENTS = 64;
 
-    /** One in-flight attempt as the server last described it. */
+    /**
+     * One in-flight attempt as the server last described it.
+     *
+     * @param destination the spot the <i>server</i> resolved this tick, or {@code null} when the aim is not
+     *                    currently viable — an unviable aim draws no ring rather than a hopeful one
+     */
     public record Charge(
             ApparitionTier tier,
             ApparitionPhase phase,
             int elapsed,
             int windowOpen,
             int windowClose,
-            Vec3 origin) {
+            Vec3 origin,
+            @Nullable Vec3 destination) {
 
         /** Charge progress in {@code [0, 1]} — how full the Determination bar is. */
         public float determinationProgress() {
@@ -103,7 +109,7 @@ public final class ClientApparitionPresentationState {
         }
         CHARGES.put(payload.casterId(), new Charge(
                 payload.tier(), payload.phase(), payload.elapsed(),
-                payload.windowOpen(), payload.windowClose(), payload.origin()));
+                payload.windowOpen(), payload.windowClose(), payload.origin(), payload.destination()));
     }
 
     /** The attempt {@code casterId} is currently making, or {@code null}. */
