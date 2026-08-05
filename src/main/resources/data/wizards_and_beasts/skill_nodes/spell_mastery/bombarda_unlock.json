@@ -1,7 +1,7 @@
 {
   "id": "bombarda_unlock",
-  "displayName": "Bombarda Handling",
-  "description": "Focus on blast shaping and controlled detonation timing.",
+  "displayName": "skill.wizards_and_beasts.node.bombarda_unlock.name",
+  "description": "skill.wizards_and_beasts.node.bombarda_unlock.desc",
   "tree": "spell_mastery",
   "pointCost": 3,
   "effects": [

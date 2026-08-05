@@ -1,7 +1,7 @@
 {
   "id": "quick_cast",
-  "displayName": "Quick Cast",
-  "description": "-5% cooldown on all spells per level.",
+  "displayName": "skill.wizards_and_beasts.node.quick_cast.name",
+  "description": "skill.wizards_and_beasts.node.quick_cast.desc",
   "tree": "wandlore",
   "maxLevel": 3,
   "pointCost": 2,

@@ -1,7 +1,7 @@
 {
   "id": "reparo_unlock",
-  "displayName": "Reparo Craft",
-  "description": "Practice restoration structure and controlled repair flow.",
+  "displayName": "skill.wizards_and_beasts.node.reparo_unlock.name",
+  "description": "skill.wizards_and_beasts.node.reparo_unlock.desc",
   "tree": "spell_mastery",
   "pointCost": 2,
   "effects": [

@@ -1,7 +1,7 @@
 {
   "id": "potion_potency",
-  "displayName": "Potion Potency",
-  "description": "+10% potion duration per level.",
+  "displayName": "skill.wizards_and_beasts.node.potion_potency.name",
+  "description": "skill.wizards_and_beasts.node.potion_potency.desc",
   "tree": "herbology",
   "maxLevel": 3,
   "pointCost": 2,

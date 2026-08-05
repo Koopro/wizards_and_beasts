@@ -1,7 +1,7 @@
 {
   "id": "alohomora_unlock",
-  "displayName": "Alohomora Technique",
-  "description": "Refine lock-manipulation intent and casting precision.",
+  "displayName": "skill.wizards_and_beasts.node.alohomora_unlock.name",
+  "description": "skill.wizards_and_beasts.node.alohomora_unlock.desc",
   "tree": "spell_mastery",
   "pointCost": 2,
   "effects": [

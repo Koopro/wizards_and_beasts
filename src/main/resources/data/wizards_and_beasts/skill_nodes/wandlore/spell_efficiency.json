@@ -1,7 +1,7 @@
 {
   "id": "spell_efficiency",
-  "displayName": "Spell Efficiency",
-  "description": "-8% cooldown on combat spells per level.",
+  "displayName": "skill.wizards_and_beasts.node.spell_efficiency.name",
+  "description": "skill.wizards_and_beasts.node.spell_efficiency.desc",
   "tree": "wandlore",
   "maxLevel": 3,
   "pointCost": 2,

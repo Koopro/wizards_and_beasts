@@ -1,7 +1,7 @@
 {
   "id": "dark_damage",
-  "displayName": "Dark Power",
-  "description": "+8% damage to all Dark Arts spells per level.",
+  "displayName": "skill.wizards_and_beasts.node.dark_damage.name",
+  "description": "skill.wizards_and_beasts.node.dark_damage.desc",
   "tree": "dark_arts",
   "maxLevel": 3,
   "pointCost": 2,

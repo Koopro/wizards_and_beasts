@@ -1,7 +1,7 @@
 {
   "id": "arcane_reserve",
-  "displayName": "Arcane Reserve",
-  "description": "Deeper wandwork eases utility casting. -8% utility cooldown per level.",
+  "displayName": "skill.wizards_and_beasts.node.arcane_reserve.name",
+  "description": "skill.wizards_and_beasts.node.arcane_reserve.desc",
   "tree": "wandlore",
   "maxLevel": 2,
   "pointCost": 2,

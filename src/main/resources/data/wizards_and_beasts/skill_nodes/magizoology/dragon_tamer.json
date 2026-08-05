@@ -1,7 +1,7 @@
 {
   "id": "dragon_tamer",
-  "displayName": "Dragon Tamer",
-  "description": "Hard-won composure around the largest beasts. -10% creature damage per level.",
+  "displayName": "skill.wizards_and_beasts.node.dragon_tamer.name",
+  "description": "skill.wizards_and_beasts.node.dragon_tamer.desc",
   "tree": "magizoology",
   "maxLevel": 2,
   "pointCost": 3,

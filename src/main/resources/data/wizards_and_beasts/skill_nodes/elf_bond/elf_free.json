@@ -1,7 +1,7 @@
 {
   "id": "elf_free",
-  "displayName": "Free Elf",
-  "description": "Unbound at last. Swift and unyielding.",
+  "displayName": "skill.wizards_and_beasts.node.elf_free.name",
+  "description": "skill.wizards_and_beasts.node.elf_free.desc",
   "tree": "elf_bond",
   "pointCost": 4,
   "effects": [

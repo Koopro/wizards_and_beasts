@@ -1,7 +1,7 @@
 {
   "id": "utility_mastery",
-  "displayName": "Utility Mastery",
-  "description": "-10% cooldown on all utility spells per level.",
+  "displayName": "skill.wizards_and_beasts.node.utility_mastery.name",
+  "description": "skill.wizards_and_beasts.node.utility_mastery.desc",
   "tree": "spell_mastery",
   "maxLevel": 3,
   "pointCost": 2,

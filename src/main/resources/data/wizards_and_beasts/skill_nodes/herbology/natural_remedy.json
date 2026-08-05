@@ -1,7 +1,7 @@
 {
   "id": "natural_remedy",
-  "displayName": "Natural Remedy",
-  "description": "Gain natural regeneration from your herbal knowledge.",
+  "displayName": "skill.wizards_and_beasts.node.natural_remedy.name",
+  "description": "skill.wizards_and_beasts.node.natural_remedy.desc",
   "tree": "herbology",
   "pointCost": 3,
   "effects": [

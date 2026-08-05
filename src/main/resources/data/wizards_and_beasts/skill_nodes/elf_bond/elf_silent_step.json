@@ -1,7 +1,7 @@
 {
   "id": "elf_silent_step",
-  "displayName": "Silent Step",
-  "description": "Move unseen and unheard. +movement speed per level.",
+  "displayName": "skill.wizards_and_beasts.node.elf_silent_step.name",
+  "description": "skill.wizards_and_beasts.node.elf_silent_step.desc",
   "tree": "elf_bond",
   "maxLevel": 2,
   "effects": [

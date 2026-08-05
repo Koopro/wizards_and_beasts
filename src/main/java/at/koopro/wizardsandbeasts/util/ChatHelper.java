@@ -107,4 +107,21 @@ public final class ChatHelper {
     public static void sendSuccess(Player player, String text) {
         send(player, success(text));
     }
+
+    // ── Translatable variants ───────────────────────────────────────────
+    //
+    // The String overloads above can only carry literal English, because they wrap the text
+    // in `Component.literal`. Server-side messages that name a piece of content -- a skill,
+    // a spell -- have to be built as a Component so the *client* resolves both the sentence
+    // and the name in its own language. These prepend the same colour and send.
+
+    /** Error message built from a {@link Component}, so it can be translated client-side. */
+    public static void sendError(Player player, Component message) {
+        send(player, Component.literal(RED).append(message));
+    }
+
+    /** Success message built from a {@link Component}, so it can be translated client-side. */
+    public static void sendSuccess(Player player, Component message) {
+        send(player, Component.literal(GREEN).append(message));
+    }
 }

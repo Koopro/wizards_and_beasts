@@ -198,7 +198,9 @@ public final class SkillCommands {
         }
 
         if (SkillSystemAPI.tryUnlock(player, skillId)) {
-            ChatHelper.sendSuccess(player, "Unlocked " + skill.getDisplayName() + "!");
+            ChatHelper.sendSuccess(player, net.minecraft.network.chat.Component.translatable(
+                    "skill.wizards_and_beasts.unlock.success",
+                    net.minecraft.network.chat.Component.translatable(skill.getDisplayName())));
             PlayerStateSyncService.syncSkills(player);
             return 1;
         }

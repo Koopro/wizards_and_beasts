@@ -1,7 +1,7 @@
 {
   "id": "protego_unlock",
-  "displayName": "Protego Discipline",
-  "description": "Study the timing and structure of defensive casting.",
+  "displayName": "skill.wizards_and_beasts.node.protego_unlock.name",
+  "description": "skill.wizards_and_beasts.node.protego_unlock.desc",
   "tree": "spell_mastery",
   "pointCost": 2,
   "effects": [

@@ -1,7 +1,7 @@
 {
   "id": "philosophers_stone",
-  "displayName": "Philosopher's Stone",
-  "description": "The alchemist's masterwork. +4 max health and -10% utility cooldown.",
+  "displayName": "skill.wizards_and_beasts.node.philosophers_stone.name",
+  "description": "skill.wizards_and_beasts.node.philosophers_stone.desc",
   "tree": "alchemy",
   "pointCost": 5,
   "effects": [

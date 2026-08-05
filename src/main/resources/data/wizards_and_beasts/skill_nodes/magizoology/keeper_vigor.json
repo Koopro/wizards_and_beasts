@@ -1,7 +1,7 @@
 {
   "id": "keeper_vigor",
-  "displayName": "Keeper's Hide",
-  "description": "A handler's toughened hide. +1 armor per level.",
+  "displayName": "skill.wizards_and_beasts.node.keeper_vigor.name",
+  "description": "skill.wizards_and_beasts.node.keeper_vigor.desc",
   "tree": "magizoology",
   "maxLevel": 2,
   "pointCost": 2,

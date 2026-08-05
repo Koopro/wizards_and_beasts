@@ -1,7 +1,7 @@
 {
   "id": "green_thumb",
-  "displayName": "Green Thumb",
-  "description": "Begin studying magical plants.",
+  "displayName": "skill.wizards_and_beasts.node.green_thumb.name",
+  "description": "skill.wizards_and_beasts.node.green_thumb.desc",
   "tree": "herbology",
   "effects": [
     {

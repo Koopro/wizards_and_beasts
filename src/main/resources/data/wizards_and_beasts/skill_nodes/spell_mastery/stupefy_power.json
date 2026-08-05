@@ -1,7 +1,7 @@
 {
   "id": "stupefy_power",
-  "displayName": "Stupefy Power",
-  "description": "+10% Stupefy damage per level.",
+  "displayName": "skill.wizards_and_beasts.node.stupefy_power.name",
+  "description": "skill.wizards_and_beasts.node.stupefy_power.desc",
   "tree": "spell_mastery",
   "maxLevel": 3,
   "effects": [

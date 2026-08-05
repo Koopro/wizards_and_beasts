@@ -1,7 +1,7 @@
 {
   "id": "elf_nimble_fingers",
-  "displayName": "Nimble Fingers",
-  "description": "Deft hands for any household task.",
+  "displayName": "skill.wizards_and_beasts.node.elf_nimble_fingers.name",
+  "description": "skill.wizards_and_beasts.node.elf_nimble_fingers.desc",
   "tree": "elf_bond",
   "pointCost": 2,
   "effects": [

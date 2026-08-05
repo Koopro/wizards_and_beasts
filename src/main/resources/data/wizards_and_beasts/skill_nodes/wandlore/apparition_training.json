@@ -1,7 +1,7 @@
 {
   "id": "apparition_training",
-  "displayName": "Apparition Training",
-  "description": "Undergo formal apparition training and gain license-level control.",
+  "displayName": "skill.wizards_and_beasts.node.apparition_training.name",
+  "description": "skill.wizards_and_beasts.node.apparition_training.desc",
   "tree": "wandlore",
   "pointCost": 5,
   "effects": [

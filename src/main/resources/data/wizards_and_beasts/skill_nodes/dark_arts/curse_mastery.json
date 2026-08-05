@@ -1,7 +1,7 @@
 {
   "id": "curse_mastery",
-  "displayName": "Curse Mastery",
-  "description": "Curses come quicker to a hardened mind. -8% Dark Arts cooldown per level.",
+  "displayName": "skill.wizards_and_beasts.node.curse_mastery.name",
+  "description": "skill.wizards_and_beasts.node.curse_mastery.desc",
   "tree": "dark_arts",
   "maxLevel": 2,
   "pointCost": 3,

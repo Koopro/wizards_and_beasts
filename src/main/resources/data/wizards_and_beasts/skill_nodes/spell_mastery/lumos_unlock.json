@@ -1,7 +1,7 @@
 {
   "id": "lumos_unlock",
-  "displayName": "Lumos Attunement",
-  "description": "Refine your control over wand-light channeling.",
+  "displayName": "skill.wizards_and_beasts.node.lumos_unlock.name",
+  "description": "skill.wizards_and_beasts.node.lumos_unlock.desc",
   "tree": "spell_mastery",
   "effects": [
     {

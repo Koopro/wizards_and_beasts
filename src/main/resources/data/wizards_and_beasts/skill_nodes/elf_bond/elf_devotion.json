@@ -1,7 +1,7 @@
 {
   "id": "elf_devotion",
-  "displayName": "Devotion",
-  "description": "A bound elf endures much. +1 heart per level.",
+  "displayName": "skill.wizards_and_beasts.node.elf_devotion.name",
+  "description": "skill.wizards_and_beasts.node.elf_devotion.desc",
   "tree": "elf_bond",
   "maxLevel": 2,
   "pointCost": 2,

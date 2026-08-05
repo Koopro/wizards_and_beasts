@@ -1,7 +1,7 @@
 {
   "id": "dark_knowledge",
-  "displayName": "Dark Knowledge",
-  "description": "Delve into the forbidden arts.",
+  "displayName": "skill.wizards_and_beasts.node.dark_knowledge.name",
+  "description": "skill.wizards_and_beasts.node.dark_knowledge.desc",
   "tree": "dark_arts",
   "pointCost": 2,
   "effects": [

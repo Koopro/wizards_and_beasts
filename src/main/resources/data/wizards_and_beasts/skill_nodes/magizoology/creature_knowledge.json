@@ -1,7 +1,7 @@
 {
   "id": "creature_knowledge",
-  "displayName": "Creature Knowledge",
-  "description": "Begin studying magical creatures.",
+  "displayName": "skill.wizards_and_beasts.node.creature_knowledge.name",
+  "description": "skill.wizards_and_beasts.node.creature_knowledge.desc",
   "tree": "magizoology",
   "effects": [
     {

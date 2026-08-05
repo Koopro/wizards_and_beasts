@@ -1,7 +1,7 @@
 {
   "id": "elf_apparition",
-  "displayName": "Elf-Apparition",
-  "description": "Elf-magic slips past wards that bind wizards.",
+  "displayName": "skill.wizards_and_beasts.node.elf_apparition.name",
+  "description": "skill.wizards_and_beasts.node.elf_apparition.desc",
   "tree": "elf_bond",
   "pointCost": 3,
   "effects": [

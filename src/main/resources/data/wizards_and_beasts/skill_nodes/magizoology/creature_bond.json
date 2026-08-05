@@ -1,7 +1,7 @@
 {
   "id": "creature_bond",
-  "displayName": "Creature Bond",
-  "description": "+2 max health per level from creature companionship.",
+  "displayName": "skill.wizards_and_beasts.node.creature_bond.name",
+  "description": "skill.wizards_and_beasts.node.creature_bond.desc",
   "tree": "magizoology",
   "maxLevel": 2,
   "pointCost": 3,

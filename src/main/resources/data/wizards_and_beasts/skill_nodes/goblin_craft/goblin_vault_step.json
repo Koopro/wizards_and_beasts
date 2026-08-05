@@ -1,7 +1,7 @@
 {
   "id": "goblin_vault_step",
-  "displayName": "Vault-Step",
-  "description": "Sure-footed in the deep tunnels. +movement speed per level.",
+  "displayName": "skill.wizards_and_beasts.node.goblin_vault_step.name",
+  "description": "skill.wizards_and_beasts.node.goblin_vault_step.desc",
   "tree": "goblin_craft",
   "maxLevel": 2,
   "pointCost": 2,

@@ -1,7 +1,7 @@
 {
   "id": "wand_study",
-  "displayName": "Wand Study",
-  "description": "Begin studying the secrets of wands.",
+  "displayName": "skill.wizards_and_beasts.node.wand_study.name",
+  "description": "skill.wizards_and_beasts.node.wand_study.desc",
   "tree": "wandlore",
   "effects": [
     {

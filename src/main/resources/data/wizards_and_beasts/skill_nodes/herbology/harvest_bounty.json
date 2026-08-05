@@ -1,7 +1,7 @@
 {
   "id": "harvest_bounty",
-  "displayName": "Harvest Bounty",
-  "description": "+15% chance for bonus crop drops per level.",
+  "displayName": "skill.wizards_and_beasts.node.harvest_bounty.name",
+  "description": "skill.wizards_and_beasts.node.harvest_bounty.desc",
   "tree": "herbology",
   "maxLevel": 2,
   "pointCost": 2,

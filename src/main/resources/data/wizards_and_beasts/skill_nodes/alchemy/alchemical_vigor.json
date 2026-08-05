@@ -1,7 +1,7 @@
 {
   "id": "alchemical_vigor",
-  "displayName": "Alchemical Vigor",
-  "description": "Begin the alchemist's path. Tempered elixirs fortify the body. +2 max health.",
+  "displayName": "skill.wizards_and_beasts.node.alchemical_vigor.name",
+  "description": "skill.wizards_and_beasts.node.alchemical_vigor.desc",
   "tree": "alchemy",
   "effects": [
     {

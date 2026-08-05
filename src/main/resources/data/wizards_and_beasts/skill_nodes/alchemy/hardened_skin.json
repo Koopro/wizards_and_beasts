@@ -1,7 +1,7 @@
 {
   "id": "hardened_skin",
-  "displayName": "Hardened Skin",
-  "description": "Alchemical reagents toughen the flesh. +1 armor per level.",
+  "displayName": "skill.wizards_and_beasts.node.hardened_skin.name",
+  "description": "skill.wizards_and_beasts.node.hardened_skin.desc",
   "tree": "alchemy",
   "maxLevel": 2,
   "pointCost": 2,

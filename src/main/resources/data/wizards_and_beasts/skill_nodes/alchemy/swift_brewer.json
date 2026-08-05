@@ -1,7 +1,7 @@
 {
   "id": "swift_brewer",
-  "displayName": "Swift Brewer",
-  "description": "Practised hands speed your craft. -8% utility cooldown per level.",
+  "displayName": "skill.wizards_and_beasts.node.swift_brewer.name",
+  "description": "skill.wizards_and_beasts.node.swift_brewer.desc",
   "tree": "alchemy",
   "maxLevel": 3,
   "pointCost": 2,

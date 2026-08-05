@@ -1,7 +1,7 @@
 {
   "id": "wingardium_unlock",
-  "displayName": "Wingardium Technique",
-  "description": "Develop steady levitation form and lift precision.",
+  "displayName": "skill.wizards_and_beasts.node.wingardium_unlock.name",
+  "description": "skill.wizards_and_beasts.node.wingardium_unlock.desc",
   "tree": "spell_mastery",
   "pointCost": 2,
   "effects": [

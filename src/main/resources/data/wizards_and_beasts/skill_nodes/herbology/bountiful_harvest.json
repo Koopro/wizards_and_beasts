@@ -1,7 +1,7 @@
 {
   "id": "bountiful_harvest",
-  "displayName": "Bountiful Harvest",
-  "description": "Mastery of the soil. +10% bonus crop drop chance.",
+  "displayName": "skill.wizards_and_beasts.node.bountiful_harvest.name",
+  "description": "skill.wizards_and_beasts.node.bountiful_harvest.desc",
   "tree": "herbology",
   "pointCost": 3,
   "effects": [

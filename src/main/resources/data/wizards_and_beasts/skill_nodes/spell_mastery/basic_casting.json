@@ -1,7 +1,7 @@
 {
   "id": "basic_casting",
-  "displayName": "Basic Casting",
-  "description": "Begin your journey as a spellcaster.",
+  "displayName": "skill.wizards_and_beasts.node.basic_casting.name",
+  "description": "skill.wizards_and_beasts.node.basic_casting.desc",
   "tree": "spell_mastery",
   "effects": [
     {

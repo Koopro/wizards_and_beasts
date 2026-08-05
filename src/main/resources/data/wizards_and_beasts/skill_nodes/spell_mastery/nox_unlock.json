@@ -1,7 +1,7 @@
 {
   "id": "nox_unlock",
-  "displayName": "Nox Control",
-  "description": "Train clean cancellation of wand-light channeling.",
+  "displayName": "skill.wizards_and_beasts.node.nox_unlock.name",
+  "description": "skill.wizards_and_beasts.node.nox_unlock.desc",
   "tree": "spell_mastery",
   "effects": [
     {

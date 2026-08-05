@@ -1,7 +1,7 @@
 {
   "id": "imperio_unlock",
-  "displayName": "Imperio Discipline",
-  "description": "Practice coercive-control casting patterns and mental focus.",
+  "displayName": "skill.wizards_and_beasts.node.imperio_unlock.name",
+  "description": "skill.wizards_and_beasts.node.imperio_unlock.desc",
   "tree": "dark_arts",
   "pointCost": 4,
   "effects": [

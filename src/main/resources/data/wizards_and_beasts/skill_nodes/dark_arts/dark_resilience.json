@@ -1,7 +1,7 @@
 {
   "id": "dark_resilience",
-  "displayName": "Dark Resilience",
-  "description": "+2 max health per level from dark magic.",
+  "displayName": "skill.wizards_and_beasts.node.dark_resilience.name",
+  "description": "skill.wizards_and_beasts.node.dark_resilience.desc",
   "tree": "dark_arts",
   "maxLevel": 2,
   "pointCost": 2,

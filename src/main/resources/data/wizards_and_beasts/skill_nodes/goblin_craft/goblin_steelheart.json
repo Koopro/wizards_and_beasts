@@ -1,7 +1,7 @@
 {
   "id": "goblin_steelheart",
-  "displayName": "Steelheart",
-  "description": "The resilience of the old guildmasters. +1 heart and goblin-steel resolve.",
+  "displayName": "skill.wizards_and_beasts.node.goblin_steelheart.name",
+  "description": "skill.wizards_and_beasts.node.goblin_steelheart.desc",
   "tree": "goblin_craft",
   "pointCost": 4,
   "effects": [

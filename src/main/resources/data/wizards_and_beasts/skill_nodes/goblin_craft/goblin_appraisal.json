@@ -1,7 +1,7 @@
 {
   "id": "goblin_appraisal",
-  "displayName": "Appraisal",
-  "description": "Read the true worth of coin and ore at a glance.",
+  "displayName": "skill.wizards_and_beasts.node.goblin_appraisal.name",
+  "description": "skill.wizards_and_beasts.node.goblin_appraisal.desc",
   "tree": "goblin_craft",
   "effects": [
     {

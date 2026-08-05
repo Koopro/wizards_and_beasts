@@ -1,7 +1,7 @@
 {
   "id": "combat_focus",
-  "displayName": "Combat Focus",
-  "description": "+5% damage to all combat spells per level.",
+  "displayName": "skill.wizards_and_beasts.node.combat_focus.name",
+  "description": "skill.wizards_and_beasts.node.combat_focus.desc",
   "tree": "spell_mastery",
   "maxLevel": 3,
   "pointCost": 2,

@@ -1,7 +1,7 @@
 {
   "id": "wand_precision",
-  "displayName": "Wand Precision",
-  "description": "+5% damage with all spells per level.",
+  "displayName": "skill.wizards_and_beasts.node.wand_precision.name",
+  "description": "skill.wizards_and_beasts.node.wand_precision.desc",
   "tree": "wandlore",
   "maxLevel": 2,
   "pointCost": 2,

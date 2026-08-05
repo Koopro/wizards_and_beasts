@@ -1,7 +1,7 @@
 {
   "id": "herbal_vitality",
-  "displayName": "Herbal Vitality",
-  "description": "Restorative tonics fortify the body. +2 max health per level.",
+  "displayName": "skill.wizards_and_beasts.node.herbal_vitality.name",
+  "description": "skill.wizards_and_beasts.node.herbal_vitality.desc",
   "tree": "herbology",
   "maxLevel": 2,
   "pointCost": 3,

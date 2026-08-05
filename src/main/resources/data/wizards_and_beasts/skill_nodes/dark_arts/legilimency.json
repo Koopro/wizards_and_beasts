@@ -1,7 +1,7 @@
 {
   "id": "legilimency",
-  "displayName": "Legilimency",
-  "description": "Pierce the mind's defenses. +5% Dark Arts damage per level.",
+  "displayName": "skill.wizards_and_beasts.node.legilimency.name",
+  "description": "skill.wizards_and_beasts.node.legilimency.desc",
   "tree": "dark_arts",
   "maxLevel": 2,
   "pointCost": 2,

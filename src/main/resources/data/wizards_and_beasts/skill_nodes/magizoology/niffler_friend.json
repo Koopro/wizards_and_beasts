@@ -1,7 +1,7 @@
 {
   "id": "niffler_friend",
-  "displayName": "Niffler Friend",
-  "description": "Nifflers no longer steal from you.",
+  "displayName": "skill.wizards_and_beasts.node.niffler_friend.name",
+  "description": "skill.wizards_and_beasts.node.niffler_friend.desc",
   "tree": "magizoology",
   "pointCost": 2,
   "effects": [
