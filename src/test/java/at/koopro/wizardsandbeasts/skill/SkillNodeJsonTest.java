@@ -122,7 +122,8 @@ class SkillNodeJsonTest {
 
     @Test
     void nodeCountsMatchGeneratedLayout() {
-        assertEquals(161, BY_ID.size(), "60 legacy notables + wizard_core + 100 fillers + 10 goblin/elf");
+        assertEquals(163, BY_ID.size(),
+                "60 legacy notables + wizard_core + 100 fillers + 10 goblin/elf + 2 Apparition forks");
         long fillers = BY_ID.values().stream().filter(s -> s.getSize() == Skill.Size.SMALL).count();
         assertEquals(100, fillers, "expected exactly 100 filler nodes");
     }

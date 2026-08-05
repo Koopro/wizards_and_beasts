@@ -1,0 +1,18 @@
+{
+  "id": "apparition_deliberation",
+  "displayName": "skill.wizards_and_beasts.node.apparition_deliberation.name",
+  "description": "skill.wizards_and_beasts.node.apparition_deliberation.desc",
+  "tree": "wandlore",
+  "pointCost": 5,
+  "effects": [
+    {
+      "abilityId": "apparition_deliberation",
+      "type": "unlock_ability"
+    }
+  ],
+  "x": -320.0,
+  "y": -90.0,
+  "edges": [
+    "apparition_training"
+  ]
+}

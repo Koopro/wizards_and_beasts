@@ -124,12 +124,18 @@ public final class ApparitionServerLogic {
         return true;
     }
 
+    /** Ticks the {@code apparition_deliberation} node adds to the window floor. */
+    private static final int DELIBERATION_NODE_TICKS = 3;
+
     /**
-     * The floor on the Deliberation window. Proficiency widens the window from here; a skill node can raise
-     * the floor itself, so a trained-but-unpractised wizard still gets a usable moment to let go in.
+     * The floor on the Deliberation window. Proficiency widens the window from here; the
+     * {@code apparition_deliberation} node raises the floor itself, which is the one thing proficiency cannot
+     * do — it buys a novice a usable moment to let go in rather than a faster climb toward one.
      */
     public static int windowFloorTicks(ServerPlayer player) {
-        return ApparitionWindow.BASE_FLOOR_TICKS;
+        return SkillSystemAPI.hasAbility(player, "apparition_deliberation")
+                ? ApparitionWindow.BASE_FLOOR_TICKS + DELIBERATION_NODE_TICKS
+                : ApparitionWindow.BASE_FLOOR_TICKS;
     }
 
     // ── entry points ──
