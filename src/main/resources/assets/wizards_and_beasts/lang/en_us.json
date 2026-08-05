@@ -2159,5 +2159,17 @@
   "advancements.wizards_and_beasts.progression.coins.title": "Wizarding Standard",
   "advancements.wizards_and_beasts.progression.coins.description": "Come by knuts, sickles or a galleon.",
   "advancements.wizards_and_beasts.progression.firebolt.title": "Racing Class",
-  "advancements.wizards_and_beasts.progression.firebolt.description": "Build a Firebolt — the fastest broom ever put to a Quidditch pitch."
+  "advancements.wizards_and_beasts.progression.firebolt.description": "Build a Firebolt — the fastest broom ever put to a Quidditch pitch.",
+  "skill.wizards_and_beasts.filler.minor_efficiency.desc": "Measure twice, waste nothing. -2% utility spell cooldown.",
+  "skill.wizards_and_beasts.filler.minor_iron_skin.desc": "A tempering draught thickens the skin. +0.5 armour.",
+  "skill.wizards_and_beasts.filler.minor_dark_power.desc": "The curse comes easier the second time. +1.5% Dark Arts spell damage.",
+  "skill.wizards_and_beasts.filler.minor_resilience.desc": "What does not kill you leaves you harder to kill. +0.5 max health.",
+  "skill.wizards_and_beasts.filler.minor_green_touch.desc": "Greenhouse hours pay out at the harvest. +3% chance of a bonus yield.",
+  "skill.wizards_and_beasts.filler.minor_vitality.desc": "Sound roots, sound body. +0.5 max health.",
+  "skill.wizards_and_beasts.filler.minor_beast_ward.desc": "Handlers learn which end bites. +2.5% resistance to beast damage.",
+  "skill.wizards_and_beasts.filler.minor_hide.desc": "Hide, scale and quill, worn as the beasts wear them. +0.5 armour.",
+  "skill.wizards_and_beasts.filler.minor_combat_power.desc": "Drill the wand movement until it needs no thought. +1.5% combat spell damage.",
+  "skill.wizards_and_beasts.filler.minor_focus.desc": "A steadier mind recovers quicker between castings. -2.5% utility spell cooldown.",
+  "skill.wizards_and_beasts.filler.minor_precision.desc": "Know the wand's grain and the spell lands truer. +1.5% combat spell damage.",
+  "skill.wizards_and_beasts.filler.minor_quickcast.desc": "A wand answers a familiar hand faster. -1.5% combat spell cooldown."
 }

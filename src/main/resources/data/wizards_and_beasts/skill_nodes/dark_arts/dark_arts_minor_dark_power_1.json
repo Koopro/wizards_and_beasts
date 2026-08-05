@@ -1,7 +1,7 @@
 {
   "id": "dark_arts_minor_dark_power_1",
   "displayName": "skill.wizards_and_beasts.filler.minor_dark_power",
-  "description": "The curse comes easier the second time. +1.5% Dark Arts spell damage.",
+  "description": "skill.wizards_and_beasts.filler.minor_dark_power.desc",
   "tree": "dark_arts",
   "effects": [
     {

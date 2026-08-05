@@ -1,7 +1,7 @@
 {
   "id": "spell_mastery_minor_focus_6",
   "displayName": "skill.wizards_and_beasts.filler.minor_focus",
-  "description": "A steadier mind recovers quicker between castings. -2.5% utility spell cooldown.",
+  "description": "skill.wizards_and_beasts.filler.minor_focus.desc",
   "tree": "spell_mastery",
   "effects": [
     {

@@ -1,7 +1,7 @@
 {
   "id": "alchemy_minor_iron_skin_3",
   "displayName": "skill.wizards_and_beasts.filler.minor_iron_skin",
-  "description": "A tempering draught thickens the skin. +0.5 armour.",
+  "description": "skill.wizards_and_beasts.filler.minor_iron_skin.desc",
   "tree": "alchemy",
   "effects": [
     {

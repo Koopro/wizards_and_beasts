@@ -1,7 +1,7 @@
 {
   "id": "wandlore_minor_precision_2",
   "displayName": "skill.wizards_and_beasts.filler.minor_precision",
-  "description": "Know the wand's grain and the spell lands truer. +1.5% combat spell damage.",
+  "description": "skill.wizards_and_beasts.filler.minor_precision.desc",
   "tree": "wandlore",
   "effects": [
     {

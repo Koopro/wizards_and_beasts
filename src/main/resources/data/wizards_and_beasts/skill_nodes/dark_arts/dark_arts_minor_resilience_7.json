@@ -1,7 +1,7 @@
 {
   "id": "dark_arts_minor_resilience_7",
   "displayName": "skill.wizards_and_beasts.filler.minor_resilience",
-  "description": "What does not kill you leaves you harder to kill. +0.5 max health.",
+  "description": "skill.wizards_and_beasts.filler.minor_resilience.desc",
   "tree": "dark_arts",
   "effects": [
     {

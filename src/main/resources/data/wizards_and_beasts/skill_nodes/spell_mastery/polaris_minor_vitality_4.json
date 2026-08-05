@@ -1,7 +1,7 @@
 {
   "id": "polaris_minor_vitality_4",
   "displayName": "skill.wizards_and_beasts.filler.minor_vitality",
-  "description": "Sound roots, sound body. +0.5 max health.",
+  "description": "skill.wizards_and_beasts.filler.minor_vitality.desc",
   "tree": "spell_mastery",
   "effects": [
     {

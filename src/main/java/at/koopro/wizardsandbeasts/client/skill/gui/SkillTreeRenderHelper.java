@@ -197,11 +197,20 @@ public final class SkillTreeRenderHelper {
         graphics.fill(x + w - 1, y, x + w, y + h, color);
     }
 
+    /**
+     * Resolves a node's description for display.
+     *
+     * <p>This used to hand the raw field straight to the renderer, so a description could
+     * only ever be literal English — untranslatable. It now goes through the same
+     * {@link #resolveDisplayName} lookup the node's name does: a lang key is translated, and
+     * anything with no matching key falls through unchanged. That keeps the nodes still
+     * carrying literal prose working while new ones can be keyed.
+     */
     private static String safeText(String value, String fallback) {
         if (value == null || value.isBlank() || value.startsWith("screen.")) {
             return fallback;
         }
-        return value;
+        return resolveDisplayName(value);
     }
 
     private static List<String> wrap(Font font, String text, int maxWidth, int maxLines) {
