@@ -42,7 +42,8 @@ class MigratedAbilityBehaviorSeamTest {
                 Identifier.fromNamespaceAndPath("wizards_and_beasts", "player_abilities"),
                 0,
                 0,
-                new AbilityInput(targeting, 20, range));
+                new AbilityInput(targeting, 20, range),
+                false);
     }
 
     // ── Apparition ──
@@ -221,7 +222,7 @@ class MigratedAbilityBehaviorSeamTest {
                 Identifier.fromNamespaceAndPath("wizards_and_beasts", "debug_active"),
                 AbilityType.ACTIVE,
                 Identifier.fromNamespaceAndPath("wizards_and_beasts", "textures/ability/placeholder.png"),
-                "n", "d", null, 40, 0, AbilityInput.NONE);
+                "n", "d", null, 40, 0, AbilityInput.NONE, false);
 
         assertFalse(def.input().requiresCharge());
         assertFalse(def.input().requiresTarget());

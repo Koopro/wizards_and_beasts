@@ -2,15 +2,20 @@ package at.koopro.wizardsandbeasts.apparition;
 
 import org.jspecify.annotations.Nullable;
 
-import at.koopro.wizardsandbeasts.Config;
+import at.koopro.wizardsandbeasts.ability.AbilityIds;
+import at.koopro.wizardsandbeasts.ability.AbilityProficiency;
 import at.koopro.wizardsandbeasts.ability.PlayerAbilityHelper;
+import at.koopro.wizardsandbeasts.apparition.charge.ApparitionCharge;
+import at.koopro.wizardsandbeasts.apparition.charge.ApparitionChargeManager;
+import at.koopro.wizardsandbeasts.apparition.charge.ApparitionWindow;
+import at.koopro.wizardsandbeasts.apparition.charge.Destabilization;
+import at.koopro.wizardsandbeasts.apparition.splinch.SplinchDamageTypes;
+import at.koopro.wizardsandbeasts.apparition.splinch.SplinchResolver;
+import at.koopro.wizardsandbeasts.apparition.splinch.SplinchTier;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
-import at.koopro.wizardsandbeasts.apparition.ApparitionWard;
-import at.koopro.wizardsandbeasts.apparition.ApparitionWardRegistry;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
-import at.koopro.wizardsandbeasts.spell.cast.SpellCastTelemetry;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
@@ -20,30 +25,40 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * The rules of Apparition. Owns the gates, the outcome of an attempt and the arrival; the timing itself lives
+ * in {@link ApparitionChargeManager}, which is the server's own clock.
+ *
+ * <p>Splinching is no longer a die roll. A wizard who lets go at the right moment arrives whole every time,
+ * and one who panics is torn by exactly as much as they panicked — see {@link SplinchResolver}.
+ */
 public final class ApparitionServerLogic {
 
-    /** Blocks of over-range travel that add one full unit of extra splinch risk. */
-    private static final double DISTANCE_RISK_BLOCKS = 900.0;
-    /** Ceiling on the distance risk multiplier, so a very long jump stays survivable. */
-    private static final double MAX_DISTANCE_RISK = 3.0;
+    /** Extra ticks a torn-loose item survives on the ground, so a jump gone wrong is recoverable. */
+    private static final int RESIDUE_LIFETIME_TICKS = 6000;
 
     private ApparitionServerLogic() {
     }
+
+    // ── gates ──
 
     /**
      * Whether the player has passed their Apparition test — the "unlocked" half of the wizard gate.
      * Two OR'd sources, never one replacing the other: the {@code apparition_training} wandlore skill
      * node (the survival path — a purchased node that read nowhere was a dead end for a capped point),
      * and {@link PlayerAbilityHelper#isApparitionUnlocked} set by the debug/admin command
-     * ({@code ApparitionCommands}), which stays a working affordance. Licence and heritage remain
-     * separate gates, unchanged.
+     * ({@code ApparitionCommands}), which stays a working affordance.
      */
     private static boolean hasApparitionUnlock(ServerPlayer player) {
         return PlayerAbilityHelper.isApparitionUnlocked(player)
@@ -51,171 +66,235 @@ public final class ApparitionServerLogic {
     }
 
     /**
-     * Whether the player is <i>permitted</i> to Apparate at all — the same licence/test/heritage rule
-     * {@link #handleRequest} enforces, minus the transient checks (splinch, cooldown, wards) and minus the
-     * per-reason feedback. Read-only; used by the ability grant layer to decide wheel visibility.
-     * {@code handleRequest} remains the authority and re-runs every check itself.
+     * Whether the player holds a Ministry licence.
+     *
+     * <p>Not a gate. Unlicensed Apparition is illegal, not impossible — Harry, Ron and Hermione do it
+     * throughout <i>Deathly Hallows</i> — so this feeds the miss multiplier and the Trace, and refuses
+     * nothing. See {@code SplinchResolver.UNLICENSED_MULTIPLIER}.
      */
-    public static boolean canApparate(ServerPlayer player) {
-        if (SkillSystemAPI.hasAbility(player, "elf_apparition")) {
-            return true;
-        }
-        return hasApparitionUnlock(player)
-                && PlayerAbilityHelper.isApparitionLicensed(player)
-                && isAllowedHeritage(player);
+    public static boolean isLicensed(ServerPlayer player) {
+        return PlayerAbilityHelper.isApparitionLicensed(player);
     }
 
-    public static void handleRequest(ServerPlayer caster, net.minecraft.core.BlockPos targetBlockPos, Vec3 targetPosition) {
-        if (!ModuleManager.isEnabled(Module.PLAYER_ABILITIES)) {
-            return;
-        }
-        // Elf-Apparition: bound elf-magic Apparates without a test, licence, or wizard-heritage
-        // restriction, and slips past wards that bind wizards. Splinch and cooldown still apply.
-        boolean elfApparition = SkillSystemAPI.hasAbility(caster, "elf_apparition");
-        if (!elfApparition) {
-            if (!hasApparitionUnlock(caster)) {
-                fail(caster, "You have not passed your Apparition test.");
-                return;
-            }
-            if (!PlayerAbilityHelper.isApparitionLicensed(caster)) {
-                fail(caster, "You are not licensed to Apparate.");
-                return;
-            }
-            if (!isAllowedHeritage(caster)) {
-                fail(caster, "Your heritage cannot Apparate.");
-                return;
-            }
-        }
-        if (isSplinched(caster)) {
-            fail(caster, "You are too splinched to Apparate.");
-            return;
-        }
-        int cooldown = PlayerAbilityHelper.getApparitionCooldownTicks(caster);
-        if (cooldown > 0) {
-            fail(caster, "Apparition is on cooldown (" + Math.max(1, cooldown / 20) + "s).");
-            return;
-        }
-        if (!(caster.level() instanceof ServerLevel)) {
-            return;
-        }
-        ServerLevel level = (ServerLevel) caster.level();
-        Vec3 clamped = clampTarget(caster.position(), targetPosition, Config.apparitionRangeBlocks);
-        AABB atDestination = caster.getBoundingBox().move(clamped.x - caster.getX(), clamped.y - caster.getY(), clamped.z - caster.getZ());
-        if (!elfApparition) {
-            ApparitionWard ward = ApparitionWardRegistry.findBlockingWard(level, caster.createCommandSourceStack(), atDestination);
-            if (ward != null) {
-                fail(caster, ward.blockMessage().getString().isBlank()
-                        ? "Something prevents you from Apparating here."
-                        : ward.blockMessage().getString());
-                return;
-            }
-        }
-
-        Vec3 origin = caster.position();
-        performApparition(caster, clamped, false);
-        Player passenger = findSideAlongPassenger(caster);
-        if (passenger instanceof ServerPlayer) {
-            performApparition((ServerPlayer) passenger, clamped, true);
-        }
-        level.playSound(null, caster.blockPosition(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.8f, 0.9f);
-        level.playSound(null, net.minecraft.core.BlockPos.containing(clamped), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.8f, 1.0f);
-        spawnBurst(level, origin);
-        spawnBurst(level, clamped);
-        PlayerAbilityHelper.setApparitionCooldownTicks(caster, Config.apparitionCooldownTicks);
+    /** Elf-magic Apparates without a test, a licence, a wizard heritage, or regard for wards that bind wizards. */
+    private static boolean isElfApparition(ServerPlayer player) {
+        return SkillSystemAPI.hasAbility(player, "elf_apparition");
     }
 
     /**
-     * Apparates to a memorised {@link ApparitionPoint}. Runs the same gauntlet as the aimed request —
-     * module, licence/test/heritage, splinch, cooldown, destination wards — and differs only where a known
-     * destination genuinely differs from a line-of-sight hop:
-     *
-     * <ul>
-     *   <li>no range clamp, because the whole point of a remembered destination is that it is far away;</li>
-     *   <li>same dimension only — Apparition does not cross worlds;</li>
-     *   <li>splinch risk grows with distance, so cross-continent jumps stay respectably dangerous;</li>
-     *   <li>the saved facing is restored, so you do not arrive spun around.</li>
-     * </ul>
+     * Whether the player is <i>permitted</i> to Apparate at all. Read-only; used by the ability grant layer to
+     * decide wheel visibility. {@link #canBeginAttempt} remains the authority and re-runs every check.
+     */
+    public static boolean canApparate(ServerPlayer player) {
+        return isElfApparition(player) || (hasApparitionUnlock(player) && isAllowedHeritage(player));
+    }
+
+    /**
+     * The full gate, transient checks included. Called once when an attempt begins; a ward, a cooldown or an
+     * existing splinch stops it here, before any charge exists to burn.
+     */
+    public static boolean canBeginAttempt(ServerPlayer player) {
+        if (!ModuleManager.isEnabled(Module.PLAYER_ABILITIES)) {
+            return false;
+        }
+        if (!canApparate(player)) {
+            fail(player, "apparition.wizards_and_beasts.fail.untrained");
+            return false;
+        }
+        if (isSplinched(player)) {
+            fail(player, "apparition.wizards_and_beasts.fail.splinched");
+            return false;
+        }
+        int cooldown = PlayerAbilityHelper.getApparitionCooldownTicks(player);
+        if (cooldown > 0) {
+            fail(player, "apparition.wizards_and_beasts.fail.cooldown");
+            return false;
+        }
+        if (!(player.level() instanceof ServerLevel level)) {
+            return false;
+        }
+        // Origin ward. A ward at either end fails the attempt cleanly — no cooldown, no splinch.
+        if (isWarded(level, player, player.getBoundingBox())) {
+            fail(player, "apparition.wizards_and_beasts.fail.warded_origin");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * The floor on the Deliberation window. Proficiency widens the window from here; a skill node can raise
+     * the floor itself, so a trained-but-unpractised wizard still gets a usable moment to let go in.
+     */
+    public static int windowFloorTicks(ServerPlayer player) {
+        return ApparitionWindow.BASE_FLOOR_TICKS;
+    }
+
+    // ── entry points ──
+
+    /**
+     * Aimed, line-of-sight Apparition. Begins a {@link ApparitionTier#BLINK} charge; the destination is
+     * whatever the server's own raycast resolves at the moment of release, so the position the client aimed
+     * at is a preview and never an instruction.
+     */
+    public static void handleRequest(ServerPlayer caster, net.minecraft.core.BlockPos targetBlockPos,
+                                     Vec3 targetPosition) {
+        ApparitionChargeManager.begin(caster, ApparitionTier.BLINK, null);
+    }
+
+    /**
+     * Apparition to a memorised {@link ApparitionPoint}. Begins a {@link ApparitionTier#ANCHORED} charge —
+     * seventy ticks the wizard has to hold together, which is why a known destination is a journey and a
+     * blink is a step.
      */
     public static void travelTo(ServerPlayer caster, ApparitionPoint point) {
-        if (!ModuleManager.isEnabled(Module.PLAYER_ABILITIES)) {
-            return;
-        }
-        boolean elfApparition = SkillSystemAPI.hasAbility(caster, "elf_apparition");
-        if (!elfApparition) {
-            if (!hasApparitionUnlock(caster)) {
-                fail(caster, "You have not passed your Apparition test.");
-                return;
-            }
-            if (!PlayerAbilityHelper.isApparitionLicensed(caster)) {
-                fail(caster, "You are not licensed to Apparate.");
-                return;
-            }
-            if (!isAllowedHeritage(caster)) {
-                fail(caster, "Your heritage cannot Apparate.");
-                return;
-            }
-        }
-        if (isSplinched(caster)) {
-            fail(caster, "You are too splinched to Apparate.");
-            return;
-        }
-        int cooldown = PlayerAbilityHelper.getApparitionCooldownTicks(caster);
-        if (cooldown > 0) {
-            fail(caster, "Apparition is on cooldown (" + Math.max(1, cooldown / 20) + "s).");
-            return;
-        }
         if (!(caster.level() instanceof ServerLevel level)) {
             return;
         }
         if (!level.dimension().equals(point.dimension())) {
-            fail(caster, "You cannot Apparate to another world.");
+            fail(caster, "apparition.wizards_and_beasts.fail.other_world");
+            return;
+        }
+        ApparitionChargeManager.begin(caster, ApparitionTier.ANCHORED, point);
+    }
+
+    // ── resolution ──
+
+    /**
+     * Applies the outcome of a finished attempt: the ladder, the arrival or the failure to arrive, the wound,
+     * what was left behind, and the cost.
+     *
+     * @param missTicks raw miss from the release, before {@link SplinchResolver#inflate} sees it
+     */
+    public static void completeAttempt(ServerPlayer caster, ApparitionCharge charge, int missTicks,
+                                       Destabilization destabilization) {
+        if (!(caster.level() instanceof ServerLevel level)) {
+            return;
+        }
+        Vec3 origin = caster.position();
+        Vec3 destination = charge.destination();
+
+        // An attempt that never found a viable spot simply never happened: nothing to arrive at, nothing to
+        // be torn by. Invalid targets do not lock, so they cannot splinch you either.
+        if (destination == null) {
+            fail(caster, "apparition.wizards_and_beasts.fail.no_destination");
+            return;
+        }
+        if (!isElfApparition(caster)
+                && isWarded(level, caster, boundsAt(caster, destination))) {
+            fail(caster, "apparition.wizards_and_beasts.fail.warded_destination");
             return;
         }
 
-        Vec3 destination = point.position();
-        AABB atDestination = caster.getBoundingBox().move(
-                destination.x - caster.getX(), destination.y - caster.getY(), destination.z - caster.getZ());
-        if (!elfApparition) {
-            ApparitionWard ward = ApparitionWardRegistry.findBlockingWard(level, caster.createCommandSourceStack(), atDestination);
-            if (ward != null) {
-                fail(caster, ward.blockMessage().getString().isBlank()
-                        ? "Something prevents you from Apparating here."
-                        : ward.blockMessage().getString());
-                return;
-            }
+        @Nullable Player passenger = findSideAlongPassenger(caster);
+        Destabilization effective = passenger == null ? destabilization : destabilization.asSideAlong();
+        SplinchTier tier = SplinchResolver.resolve(missTicks, effective);
+
+        applyOutcome(caster, level, charge, tier, origin, destination);
+        if (passenger instanceof ServerPlayer sideAlong) {
+            // Both parties splinch at the same tier — Yaxley does not get a gentler landing than Hermione.
+            applyOutcome(sideAlong, level, charge, tier, sideAlong.position(), destination);
         }
 
-        Vec3 origin = caster.position();
-        performApparition(caster, destination, false, distanceRiskMultiplier(origin.distanceTo(destination)));
-        Player passenger = findSideAlongPassenger(caster);
-        if (passenger instanceof ServerPlayer) {
-            performApparition((ServerPlayer) passenger, destination, true,
-                    distanceRiskMultiplier(origin.distanceTo(destination)));
+        caster.causeFoodExhaustion(charge.tier().exhaustion());
+        PlayerAbilityHelper.setApparitionCooldownTicks(caster,
+                Math.max(charge.tier().cooldownTicks(), tier.lockoutTicks()));
+        recordProficiency(caster, tier, origin, destination);
+        ApparitionBroadcast.get().onResolved(caster, charge.tier(), tier, origin,
+                tier.arrives() ? destination : null);
+    }
+
+    private static void applyOutcome(ServerPlayer player, ServerLevel level, ApparitionCharge charge,
+                                     SplinchTier tier, Vec3 origin, Vec3 destination) {
+        if (tier.arrives()) {
+            player.teleportTo(destination.x, destination.y, destination.z);
+            ApparitionPoint anchor = charge.anchor();
+            if (anchor != null) {
+                // The saved facing, so a long journey does not end with the wizard spun around.
+                player.setYRot(anchor.yaw());
+            }
         }
-        caster.setYRot(point.yaw());
-        level.playSound(null, net.minecraft.core.BlockPos.containing(origin), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.8f, 0.9f);
-        level.playSound(null, net.minecraft.core.BlockPos.containing(destination), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.8f, 1.0f);
-        spawnBurst(level, origin);
-        spawnBurst(level, destination);
-        PlayerAbilityHelper.setApparitionCooldownTicks(caster, Config.apparitionCooldownTicks);
+        playArrival(level, origin, tier.arrives() ? destination : origin);
+
+        if (!tier.isSplinch()) {
+            return;
+        }
+        if (tier.damage() > 0.0f) {
+            player.hurt(level.damageSources().source(SplinchDamageTypes.SPLINCH), tier.damage());
+        }
+        if (tier.appliesEffect()) {
+            player.addEffect(new MobEffectInstance(ModEffects.SPLINCHED, tier.effectTicks(),
+                    tier.effectAmplifier(), false, true, true));
+        }
+        dropResidue(player, level, tier, origin);
+        ApparitionBroadcast.get().onResidue(player, origin, tier);
     }
 
     /**
-     * Extra splinch risk for a long jump: 1× at the aimed-hop range, rising to a hard ceiling so a very
-     * long trip is dangerous without being a coin flip.
+     * Leaves part of what the wizard was carrying where they started. Ordinary item entities with an extended
+     * life, so a bad jump is a scramble back rather than a deletion.
      */
-    private static float distanceRiskMultiplier(double distance) {
-        double beyond = Math.max(0.0, distance - Config.apparitionRangeBlocks);
-        return (float) Math.min(MAX_DISTANCE_RISK, 1.0 + beyond / DISTANCE_RISK_BLOCKS);
+    private static void dropResidue(ServerPlayer player, ServerLevel level, SplinchTier tier, Vec3 origin) {
+        List<Integer> occupied = new ArrayList<>();
+        int size = player.getInventory().getContainerSize();
+        for (int slot = 0; slot < size; slot++) {
+            if (!player.getInventory().getItem(slot).isEmpty()) {
+                occupied.add(slot);
+            }
+        }
+        if (occupied.isEmpty()) {
+            return;
+        }
+        Collections.shuffle(occupied, new java.util.Random(player.getRandom().nextLong()));
+
+        int count = tier.fixedItemDrops() > 0
+                ? Math.min(tier.fixedItemDrops(), occupied.size())
+                : (int) Math.ceil(occupied.size() * tier.inventoryFraction());
+        for (int i = 0; i < count; i++) {
+            ItemStack stack = player.getInventory().removeItemNoUpdate(occupied.get(i));
+            if (stack.isEmpty()) {
+                continue;
+            }
+            ItemEntity entity = new ItemEntity(level, origin.x, origin.y + 0.5, origin.z, stack);
+            entity.setExtendedLifetime();
+            entity.setDeltaMovement(Vec3.ZERO);
+            level.addFreshEntity(entity);
+        }
     }
+
+    /**
+     * Practice. A clean arrival teaches the most, a minor tear teaches a little, and being badly torn teaches
+     * nothing at all — the increment scales with how far the wizard actually moved, so a long journey is
+     * worth more than a hop.
+     */
+    private static void recordProficiency(ServerPlayer player, SplinchTier tier, Vec3 origin, Vec3 destination) {
+        float share = switch (tier) {
+            case CLEAN -> 1.0f;
+            case MINOR -> 0.25f;
+            case MAJOR, CATASTROPHIC -> 0.0f;
+        };
+        if (share <= 0.0f) {
+            return;
+        }
+        double distance = origin.distanceTo(destination);
+        float scaled = (float) Math.min(PROFICIENCY_GRANT_CAP, distance * PROFICIENCY_PER_BLOCK);
+        AbilityProficiency.add(player, AbilityIds.APPARITION, scaled * share);
+    }
+
+    /** Proficiency earned per block travelled, before the per-grant cap. */
+    private static final float PROFICIENCY_PER_BLOCK = 0.00005f;
+    /** Most a single jump can teach, so one cross-continent trip is not a whole career. */
+    private static final float PROFICIENCY_GRANT_CAP = 0.01f;
+
+    // ── ticking ──
 
     public static void tick(ServerPlayer player) {
         int cooldown = PlayerAbilityHelper.getApparitionCooldownTicks(player);
         if (cooldown > 0) {
             PlayerAbilityHelper.setApparitionCooldownTicks(player, cooldown - 1);
         }
-        // Splinching no longer needs a hand-rolled countdown here: the SPLINCHED mob effect owns its own
-        // duration, so it expires, shows on the potion HUD and is curable like any other effect.
+        ApparitionChargeManager.tick(player);
+        // Splinching needs no countdown here: the SPLINCHED mob effect owns its own duration, so it expires,
+        // shows on the potion HUD and is curable like any other effect.
     }
 
     /**
@@ -226,45 +305,18 @@ public final class ApparitionServerLogic {
         return player.hasEffect(ModEffects.SPLINCHED);
     }
 
-    private static void performApparition(ServerPlayer player, Vec3 targetPosition, boolean sideAlong) {
-        performApparition(player, targetPosition, sideAlong, 1.0f);
+    // ── helpers ──
+
+    private static boolean isWarded(ServerLevel level, ServerPlayer player, AABB bounds) {
+        if (isElfApparition(player)) {
+            return false;
+        }
+        return ApparitionWardRegistry.findBlockingWard(level, player.createCommandSourceStack(), bounds) != null;
     }
 
-    private static void performApparition(ServerPlayer player, Vec3 targetPosition, boolean sideAlong,
-                                          float riskMultiplier) {
-        float focusLevel = computeFocusLevel(player);
-        float baseChance = Config.apparitionSplinchBaseChance;
-        float splinchChance = Math.max(0.0f, baseChance - (focusLevel * baseChance)) * riskMultiplier;
-        if (sideAlong) {
-            splinchChance *= 1.4f;
-        }
-        boolean splinched = player.getRandom().nextFloat() < splinchChance;
-        int severity = 0;
-        if (splinched) {
-            severity = player.getRandom().nextFloat() < 0.25f ? 2 : 1;
-        }
-        player.teleportTo(targetPosition.x, targetPosition.y, targetPosition.z);
-        if (!splinched) {
-            return;
-        }
-        // One effect carries the whole condition: the bleed, the slow, the weakened swing and the duration.
-        // Amplifier is severity (0 = clean tear, 1 = severe), so the wound scales itself.
-        boolean severe = severity == 2;
-        player.addEffect(new MobEffectInstance(ModEffects.SPLINCHED, severe ? 1200 : 400,
-                severe ? 1 : 0, false, true, true));
-        if (severe) {
-            DamageSource source = player.damageSources().magic();
-            player.hurt(source, 3.0f);
-            player.displayClientMessage(Component.literal("You splinched badly. Seek a Healer.").withStyle(ChatFormatting.RED), false);
-        } else {
-            player.displayClientMessage(Component.literal("You splinched yourself — part of you was left behind.").withStyle(ChatFormatting.YELLOW), false);
-        }
-    }
-
-    private static float computeFocusLevel(ServerPlayer player) {
-        float occlumency = PlayerAbilityHelper.getOcclumencyLevel(player);
-        float recentFailureRate = SpellCastTelemetry.recentFailureRate(player);
-        return Math.max(0.0f, Math.min(1.0f, (occlumency * 0.4f) + ((1.0f - recentFailureRate) * 0.3f) + 0.3f));
+    private static AABB boundsAt(ServerPlayer player, Vec3 position) {
+        return player.getBoundingBox().move(
+                position.x - player.getX(), position.y - player.getY(), position.z - player.getZ());
     }
 
     private static boolean isAllowedHeritage(ServerPlayer player) {
@@ -276,36 +328,38 @@ public final class ApparitionServerLogic {
         if (variant == null) {
             return false;
         }
-        // `can_apparate` is declared by no shipped variant, so this used to permit WIZARDKIND and nothing
-        // else. House-elves already carry `innate_apparition` — the same concept the `elf_apparition` skill
-        // ability is built around — so they qualify on their own tag. `can_apparate` is kept as the explicit
-        // opt-in for anything else that should be able to.
+        // House-elves carry `innate_apparition` — the same concept the `elf_apparition` skill ability is built
+        // around. `can_apparate` is the explicit opt-in for anything else that should be able to.
         return variant.hasTag("can_apparate") || variant.hasTag("innate_apparition");
     }
 
     private static @Nullable Player findSideAlongPassenger(ServerPlayer caster) {
         AABB area = caster.getBoundingBox().inflate(1.5);
-        for (Player candidate : caster.level().getEntitiesOfClass(Player.class, area, p -> p != caster && p.isShiftKeyDown())) {
+        for (Player candidate : caster.level().getEntitiesOfClass(Player.class, area,
+                p -> p != caster && p.isShiftKeyDown())) {
             return candidate;
         }
         return null;
     }
 
-    private static Vec3 clampTarget(Vec3 origin, Vec3 target, double maxDistance) {
-        Vec3 delta = target.subtract(origin);
-        double len = delta.length();
-        if (len <= maxDistance) {
-            return target;
-        }
-        return origin.add(delta.normalize().scale(maxDistance));
+    private static void fail(ServerPlayer player, String translationKey) {
+        player.displayClientMessage(
+                Component.translatable(translationKey).withStyle(ChatFormatting.RED), true);
     }
 
-    private static void fail(ServerPlayer player, String message) {
-        player.displayClientMessage(Component.literal(message).withStyle(ChatFormatting.RED), true);
+    private static void playArrival(ServerLevel level, Vec3 origin, Vec3 destination) {
+        level.playSound(null, net.minecraft.core.BlockPos.containing(origin),
+                SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.8f, 0.9f);
+        level.playSound(null, net.minecraft.core.BlockPos.containing(destination),
+                SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.8f, 1.0f);
+        spawnBurst(level, origin);
+        spawnBurst(level, destination);
     }
 
     private static void spawnBurst(ServerLevel level, Vec3 pos) {
-        level.sendParticles(net.minecraft.core.particles.ParticleTypes.PORTAL, pos.x, pos.y + 1.0, pos.z, 40, 0.3, 0.5, 0.3, 0.1);
-        level.sendParticles(net.minecraft.core.particles.ParticleTypes.SMOKE, pos.x, pos.y + 1.0, pos.z, 15, 0.25, 0.25, 0.25, 0.01);
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.PORTAL,
+                pos.x, pos.y + 1.0, pos.z, 40, 0.3, 0.5, 0.3, 0.1);
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.SMOKE,
+                pos.x, pos.y + 1.0, pos.z, 15, 0.25, 0.25, 0.25, 0.01);
     }
 }

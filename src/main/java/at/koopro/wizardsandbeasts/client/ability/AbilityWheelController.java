@@ -9,6 +9,7 @@ import at.koopro.wizardsandbeasts.client.ability.state.ClientAbilityChargeState;
 import at.koopro.wizardsandbeasts.client.ability.state.ClientAbilitySelectionState;
 import at.koopro.wizardsandbeasts.client.ability.wheel.AbilityWheelScreen;
 import at.koopro.wizardsandbeasts.network.ability.AbilityUseC2SPayload;
+import at.koopro.wizardsandbeasts.network.apparition.ApparitionChargeReleaseC2SPayload;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -102,6 +103,10 @@ public final class AbilityWheelController {
             return;
         }
         AbilityInput input = def.input();
+        if (def.serverCharge()) {
+            driveServerCharged(player, key, slot, def, input);
+            return;
+        }
         if (!input.requiresCharge()) {
             // Press-to-fire: pick at the moment of the press, if this ability wants a target at all.
             while (key.consumeClick()) {
@@ -132,6 +137,35 @@ public final class AbilityWheelController {
                     send(slot, target);
                 }
             }
+            cancelCharge();
+        }
+        drain(key);
+    }
+
+    /**
+     * Input for an ability whose charge the <b>server</b> times. The press opens the attempt through the
+     * ordinary use payload and the release sends {@link ApparitionChargeReleaseC2SPayload}; between the two
+     * this client reports nothing, because a client that could report its own release tick could always claim
+     * a perfect one.
+     *
+     * <p>The local {@link ClientAbilityChargeState} still runs, but only to keep the existing charge-up ring
+     * drawing. It is a preview: if it disagrees with the server's clock by a tick, the server is right.
+     */
+    private static void driveServerCharged(LocalPlayer player, KeyMapping key, int slot,
+                                           AbilityDefinition def, AbilityInput input) {
+        boolean down = !key.isUnbound() && key.isDown();
+        if (down) {
+            if (!charging || chargingSlot != slot) {
+                charging = true;
+                chargingSlot = slot;
+                ClientAbilityChargeState.begin(def.id(), input.chargeTicks());
+                send(slot, pick(player, input));
+            } else {
+                ClientAbilityChargeState.tick();
+                store(pick(player, input));
+            }
+        } else if (charging && chargingSlot == slot) {
+            ClientPacketDistributor.sendToServer(ApparitionChargeReleaseC2SPayload.INSTANCE);
             cancelCharge();
         }
         drain(key);

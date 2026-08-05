@@ -1,5 +1,5 @@
 {
-  "_comment": "Migrated off the dedicated APPARATE keybind. Gating, cooldown and every gameplay rule stay in ApparitionServerLogic; cooldownTicks is 0 because Apparition already owns a persisted cooldown.",
+  "_comment": "Server-charged: the press opens the attempt, the release payload ends it, and ApparitionChargeManager owns the tick counter and the Deliberation window. input.chargeTicks is kept only to drive the client-side charge-up ring, set to BLINK's chargeDuration so the ring completes as the window opens. cooldownTicks is 0 because ApparitionServerLogic stamps the per-tier cooldown itself.",
   "type": "active",
   "icon": "wizards_and_beasts:textures/ability/placeholder.png",
   "nameKey": "ability.wizards_and_beasts.apparition",
@@ -7,9 +7,10 @@
   "module": "wizards_and_beasts:player_abilities",
   "cooldownTicks": 0,
   "sortOrder": 10,
+  "serverCharge": true,
   "input": {
     "targeting": "block",
-    "chargeTicks": 20,
+    "chargeTicks": 10,
     "range": 32.0
   }
 }

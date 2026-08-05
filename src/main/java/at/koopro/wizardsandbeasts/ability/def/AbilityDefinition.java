@@ -27,6 +27,10 @@ import java.util.Optional;
  * @param cooldownTicks  framework-tracked cooldown; ACTIVE/TOGGLE only; clamped {@code >= 0}
  * @param sortOrder      stable wheel ordering key (ascending), ties broken by id
  * @param input          hold-to-charge / target-pick contract; {@link AbilityInput#NONE} = press to fire
+ * @param serverCharge   the server owns this ability's charge timing; the client reports press and release
+ *                       only. Default {@code false}, so every other ability keeps riding {@code input}
+ *                       exactly as before. Set only where a mistimed release must be able to cost something
+ *                       — Apparition's Deliberation window is the reason this exists.
  */
 @NullMarked
 public record AbilityDefinition(
@@ -38,7 +42,8 @@ public record AbilityDefinition(
         @Nullable Identifier module,
         int cooldownTicks,
         int sortOrder,
-        AbilityInput input) {
+        AbilityInput input,
+        boolean serverCharge) {
 
     /** Placeholder used by {@link #CODEC} before the loader stamps the real file id via {@link #withId}. */
     private static final Identifier UNSET_ID = Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "unset");
@@ -55,15 +60,16 @@ public record AbilityDefinition(
             Identifier.CODEC.optionalFieldOf("module").forGetter(d -> Optional.ofNullable(d.module())),
             Codec.INT.optionalFieldOf("cooldownTicks", 0).forGetter(AbilityDefinition::cooldownTicks),
             Codec.INT.optionalFieldOf("sortOrder", 0).forGetter(AbilityDefinition::sortOrder),
-            AbilityInput.CODEC.optionalFieldOf("input", AbilityInput.NONE).forGetter(AbilityDefinition::input)
-    ).apply(instance, (type, icon, nameKey, descriptionKey, module, cooldownTicks, sortOrder, input) ->
+            AbilityInput.CODEC.optionalFieldOf("input", AbilityInput.NONE).forGetter(AbilityDefinition::input),
+            Codec.BOOL.optionalFieldOf("serverCharge", false).forGetter(AbilityDefinition::serverCharge)
+    ).apply(instance, (type, icon, nameKey, descriptionKey, module, cooldownTicks, sortOrder, input, serverCharge) ->
             new AbilityDefinition(UNSET_ID, type, icon, nameKey, descriptionKey,
-                    module.orElse(null), cooldownTicks, sortOrder, input)));
+                    module.orElse(null), cooldownTicks, sortOrder, input, serverCharge)));
 
     /** Returns a copy with {@code id} stamped from the datapack file path. */
     public AbilityDefinition withId(Identifier fileId) {
         return new AbilityDefinition(fileId, type, icon, nameKey, descriptionKey, module, cooldownTicks,
-                sortOrder, input);
+                sortOrder, input, serverCharge);
     }
 
     /** True for ACTIVE/TOGGLE — the only types shown in and driven from the wheel. */

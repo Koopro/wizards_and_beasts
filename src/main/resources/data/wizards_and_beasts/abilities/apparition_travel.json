@@ -1,10 +1,11 @@
 {
-  "_comment": "Destination Apparition: opens the selector of memorised points. Same gating as apparition (canApparate); cooldownTicks 0 because ApparitionServerLogic owns the shared Apparition cooldown, charged only when a jump actually happens.",
+  "_comment": "Destination Apparition: the press opens the selector of memorised points, and picking one begins an ANCHORED charge. serverCharge is true so the same key's release ends that charge — otherwise a jump started from a GUI would have no way to be let go of. Pressing again while a charge is in flight is a no-op, not a second selector. cooldownTicks 0 because ApparitionServerLogic owns the shared Apparition cooldown, charged only when a jump actually happens.",
   "type": "active",
   "icon": "wizards_and_beasts:textures/ability/placeholder.png",
   "nameKey": "ability.wizards_and_beasts.apparition_travel",
   "descriptionKey": "ability.wizards_and_beasts.apparition_travel.desc",
   "module": "wizards_and_beasts:player_abilities",
   "cooldownTicks": 0,
-  "sortOrder": 9
+  "sortOrder": 9,
+  "serverCharge": true
 }

@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.effect;
 
+import at.koopro.wizardsandbeasts.apparition.splinch.SplinchDamageTypes;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -15,10 +16,11 @@ import org.jspecify.annotations.NonNull;
  * Left part of yourself behind. The mark of a botched Apparition: you keep bleeding until someone puts you
  * back together, and you cannot Apparate again while a piece of you is still elsewhere.
  *
- * <p>Amplifier is the <b>severity</b> — 0 is a clean tear, 1 is a bad one — and it scales everything:
- * how fast the wound bleeds, how much it slows and weakens you, and whether the bleeding can kill.
- * This effect is the single source of truth for "is this player splinched"; nothing stores a parallel
- * severity or countdown, so it cannot desync from the potion HUD the way a shadow copy would.
+ * <p>Amplifier is the <b>severity</b> — 0 is a clean tear, 1 is a bad one — and it scales how fast the wound
+ * bleeds and how much it slows and weakens you. It no longer scales lethality: neither amplifier can kill,
+ * because the bleed runs through the clamped splinch damage type. This effect is the single source of truth
+ * for "is this player splinched"; nothing stores a parallel severity or countdown, so it cannot desync from
+ * the potion HUD the way a shadow copy would.
  */
 public final class SplinchedEffect extends MobEffect {
 
@@ -30,8 +32,12 @@ public final class SplinchedEffect extends MobEffect {
     private static final float BLEED_DAMAGE = 1.0f;
 
     /**
-     * A clean splinch will not finish you off — it floors at half a heart — because dying to a delayed
-     * bleed you cannot see coming is miserable. A severe splinch has no such mercy.
+     * Amplifier at which the wound is a bad one: it bleeds twice as fast and twice as often.
+     *
+     * <p>It is no longer <i>lethal</i>. Splinching is bloody and agonising in the books and never fatal on
+     * the page, so the bleed now runs through {@code SplinchDamageTypes.SPLINCH}, which
+     * {@code SplinchDamageHandler} clamps at half a heart for both amplifiers. Anything else that hits you
+     * while you are lying there at one heart still kills you perfectly well.
      */
     private static final float SEVERE_AMPLIFIER = 1;
 
@@ -52,13 +58,9 @@ public final class SplinchedEffect extends MobEffect {
         boolean severe = amplifier >= SEVERE_AMPLIFIER;
         float damage = BLEED_DAMAGE * (severe ? 2.0f : 1.0f);
 
-        // A clean splinch bleeds you down but never out.
-        if (!severe && entity.getHealth() - damage < 1.0f) {
-            damage = Math.max(0.0f, entity.getHealth() - 1.0f);
-        }
-        if (damage > 0.0f) {
-            entity.hurt(level.damageSources().magic(), damage);
-        }
+        // No floor here: the splinch damage type is clamped at half a heart for every amplifier, in one place,
+        // so the bleed and the arrival wound cannot disagree about how survivable a splinch is.
+        entity.hurt(level.damageSources().source(SplinchDamageTypes.SPLINCH), damage);
 
         level.sendParticles(ParticleTypes.DAMAGE_INDICATOR,
                 entity.getX(), entity.getY() + entity.getBbHeight() * 0.6, entity.getZ(),

@@ -52,8 +52,11 @@ public record AbilityDefinitionsSyncS2CPayload(List<AbilityDefinition> definitio
                         targetingByName(PacketCodecUtils.readString(buf)),
                         PacketCodecUtils.clampNonNegative(buf.readInt()),
                         buf.readDouble());
+                // Synced because the client input driver reads it: a server-charged ability is driven by
+                // press/release payloads instead of the local charge timer.
+                boolean serverCharge = buf.readBoolean();
                 defs.add(new AbilityDefinition(id, type, icon, nameKey, descriptionKey, module, cooldownTicks,
-                        sortOrder, input));
+                        sortOrder, input, serverCharge));
             }
             return new AbilityDefinitionsSyncS2CPayload(defs);
         }
@@ -77,6 +80,7 @@ public record AbilityDefinitionsSyncS2CPayload(List<AbilityDefinition> definitio
                 PacketCodecUtils.writeString(buf, input.targeting().getSerializedName());
                 buf.writeInt(Math.max(0, input.chargeTicks()));
                 buf.writeDouble(input.range());
+                buf.writeBoolean(def.serverCharge());
             }
         }
     };
