@@ -121,6 +121,10 @@ public class WizardsAndBeastsMod {
             modEventBus.post(new RegisterSpellsEvent());
             Spells.init();
             modEventBus.post(new RegisterBrewsEvent());
+            // Apparition mechanics broadcast through a no-op by default. Installing the real listener here
+            // is what turns those calls into packets; nothing about the mechanics changes either way.
+            at.koopro.wizardsandbeasts.apparition.ApparitionBroadcast.install(
+                    at.koopro.wizardsandbeasts.apparition.ApparitionPresentationBroadcaster.INSTANCE);
         });
 
         // Datapack-driven JSON content: spells, brews, and brewing recipes

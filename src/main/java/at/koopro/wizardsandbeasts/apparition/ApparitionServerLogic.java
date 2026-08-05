@@ -212,7 +212,9 @@ public final class ApparitionServerLogic {
         // A side-along is one journey, not a standing arrangement.
         SideAlongService.clearPartner(caster);
         ApparitionBroadcast.get().onResolved(caster, charge.tier(), tier, origin,
-                tier.arrives() ? destination : null);
+                tier.arrives() ? destination : null,
+                ApparitionPresentationBroadcaster.crackRadius(caster),
+                ApparitionPresentationBroadcaster.crackVariant(caster));
     }
 
     private static void applyOutcome(ServerPlayer player, ServerLevel level, ApparitionCharge charge,

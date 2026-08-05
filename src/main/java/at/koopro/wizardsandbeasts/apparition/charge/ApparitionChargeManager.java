@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.apparition.charge;
 
 import at.koopro.wizardsandbeasts.ability.AbilityIds;
 import at.koopro.wizardsandbeasts.ability.AbilityProficiency;
+import at.koopro.wizardsandbeasts.apparition.ApparitionBroadcast;
 import at.koopro.wizardsandbeasts.apparition.ApparitionPhase;
 import at.koopro.wizardsandbeasts.apparition.ApparitionPoint;
 import at.koopro.wizardsandbeasts.apparition.ApparitionServerLogic;
@@ -60,8 +61,11 @@ public final class ApparitionChargeManager {
             return false;
         }
         float proficiency = AbilityProficiency.get(player, AbilityIds.APPARITION);
-        CHARGES.put(player, new ApparitionCharge(tier, proficiency,
-                ApparitionServerLogic.windowFloorTicks(player), anchor));
+        ApparitionCharge charge = new ApparitionCharge(tier, proficiency,
+                ApparitionServerLogic.windowFloorTicks(player), anchor);
+        CHARGES.put(player, charge);
+        ApparitionBroadcast.get().onChargeBegin(player, tier, charge.phase(),
+                charge.windowOpen(), charge.windowClose());
         return true;
     }
 
@@ -76,7 +80,13 @@ public final class ApparitionChargeManager {
 
     /** Drops the attempt with no cooldown, no exhaustion and no splinch. */
     public static void abort(ServerPlayer player) {
-        CHARGES.remove(player);
+        ApparitionCharge charge = CHARGES.remove(player);
+        if (charge != null) {
+            // IDLE tells the presentation layer to tear down its motes; without it they would hang until the
+            // client happened to receive something else about this player.
+            ApparitionBroadcast.get().onPhaseChange(player, charge.tier(), ApparitionPhase.IDLE,
+                    charge.elapsed(), charge.windowOpen(), charge.windowClose());
+        }
     }
 
     /**
@@ -92,12 +102,23 @@ public final class ApparitionChargeManager {
             abort(player);
             return;
         }
+        ApparitionPhase before = charge.phase();
         charge.advance();
         if (charge.tier() == ApparitionTier.BLINK) {
             charge.setDestination(aim(level, player));
         }
         if (charge.isOverdue()) {
             resolve(player, charge, ApparitionWindow.FORCED_DISCHARGE);
+            return;
+        }
+
+        ApparitionPhase after = charge.phase();
+        if (after != before) {
+            ApparitionBroadcast.get().onPhaseChange(player, charge.tier(), after,
+                    charge.elapsed(), charge.windowOpen(), charge.windowClose());
+        } else {
+            ApparitionBroadcast.get().onChargeTick(player, charge.tier(), after,
+                    charge.elapsed(), charge.windowOpen(), charge.windowClose());
         }
     }
 
