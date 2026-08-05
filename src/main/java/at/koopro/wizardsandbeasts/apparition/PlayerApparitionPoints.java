@@ -17,7 +17,12 @@ import java.util.List;
 @NullMarked
 public record PlayerApparitionPoints(List<ApparitionPoint> points) {
 
-    /** Cap on saved destinations, so the list stays a menu rather than a database. */
+    /**
+     * Absolute ceiling on saved destinations, so the list stays a menu rather than a database. The cap a
+     * given wizard is actually held to is lower and grows with practice — see
+     * {@code ApparitionAnchors.capacity} — and reaches exactly this number at mastery, so nobody who already
+     * filled a list under the old flat cap loses anything.
+     */
     public static final int MAX_POINTS = 12;
 
     public static final PlayerApparitionPoints EMPTY = new PlayerApparitionPoints(List.of());
@@ -50,11 +55,25 @@ public record PlayerApparitionPoints(List<ApparitionPoint> points) {
         return index >= 0 && index < points.size() ? points.get(index) : null;
     }
 
+    /** True when {@code capacity} destinations are already held. */
+    public boolean isFull(int capacity) {
+        return points.size() >= Math.min(capacity, MAX_POINTS);
+    }
+
     /** Adds {@code point}, replacing any existing point with the same name. Returns {@code this} if full. */
     public PlayerApparitionPoints with(ApparitionPoint point) {
+        return with(point, MAX_POINTS);
+    }
+
+    /**
+     * Adds {@code point} against a per-wizard {@code capacity}, replacing any existing point with the same
+     * name. Naming an existing destination is how you replace one at a full set; a new name into a full set
+     * returns {@code this} unchanged.
+     */
+    public PlayerApparitionPoints with(ApparitionPoint point, int capacity) {
         List<ApparitionPoint> next = new ArrayList<>(points);
         next.removeIf(existing -> existing.matches(point.name()));
-        if (next.size() >= MAX_POINTS) {
+        if (next.size() >= Math.min(capacity, MAX_POINTS)) {
             return this;
         }
         next.add(point);

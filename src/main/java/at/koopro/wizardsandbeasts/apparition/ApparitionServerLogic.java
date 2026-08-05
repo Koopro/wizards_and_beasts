@@ -9,6 +9,7 @@ import at.koopro.wizardsandbeasts.apparition.charge.ApparitionCharge;
 import at.koopro.wizardsandbeasts.apparition.charge.ApparitionChargeManager;
 import at.koopro.wizardsandbeasts.apparition.charge.ApparitionWindow;
 import at.koopro.wizardsandbeasts.apparition.charge.Destabilization;
+import at.koopro.wizardsandbeasts.apparition.sidealong.SideAlongService;
 import at.koopro.wizardsandbeasts.apparition.splinch.SplinchDamageTypes;
 import at.koopro.wizardsandbeasts.apparition.splinch.SplinchResolver;
 import at.koopro.wizardsandbeasts.apparition.splinch.SplinchTier;
@@ -202,6 +203,8 @@ public final class ApparitionServerLogic {
                 Math.max(charge.tier().cooldownTicks(), tier.lockoutTicks()));
         recordProficiency(caster, tier, origin, destination);
         reportUnlicensed(caster);
+        // A side-along is one journey, not a standing arrangement.
+        SideAlongService.clearPartner(caster);
         ApparitionBroadcast.get().onResolved(caster, charge.tier(), tier, origin,
                 tier.arrives() ? destination : null);
     }
@@ -351,8 +354,22 @@ public final class ApparitionServerLogic {
         return variant.hasTag("can_apparate") || variant.hasTag("innate_apparition");
     }
 
+    /**
+     * Who is coming too. Two flavours, both resolved at the moment of release and both landing on the same
+     * splinch rung as the caster:
+     *
+     * <ul>
+     *   <li>a wizard who accepted an offer and is still standing close enough to be taken;</li>
+     *   <li>anyone else in reach who is holding on — the hostile grab, unchanged. Yaxley seizes Hermione
+     *       mid-Disapparition in <i>Deathly Hallows</i>, and she is not asked first.</li>
+     * </ul>
+     */
     private static @Nullable Player findSideAlongPassenger(ServerPlayer caster) {
         AABB area = caster.getBoundingBox().inflate(1.5);
+        ServerPlayer partner = SideAlongService.partnerOf(caster);
+        if (partner != null && partner.getBoundingBox().intersects(area)) {
+            return partner;
+        }
         for (Player candidate : caster.level().getEntitiesOfClass(Player.class, area,
                 p -> p != caster && p.isShiftKeyDown())) {
             return candidate;

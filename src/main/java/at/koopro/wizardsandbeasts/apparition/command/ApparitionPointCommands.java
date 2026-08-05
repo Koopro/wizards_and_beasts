@@ -1,8 +1,10 @@
 package at.koopro.wizardsandbeasts.apparition.command;
 
+import at.koopro.wizardsandbeasts.apparition.ApparitionAnchors;
 import at.koopro.wizardsandbeasts.apparition.ApparitionPoint;
 import at.koopro.wizardsandbeasts.apparition.ApparitionServerLogic;
 import at.koopro.wizardsandbeasts.apparition.PlayerApparitionPoints;
+import at.koopro.wizardsandbeasts.apparition.sidealong.SideAlongService;
 import at.koopro.wizardsandbeasts.network.apparition.ApparitionPointsSyncS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -34,7 +36,21 @@ public final class ApparitionPointCommands {
                         .then(Commands.argument("name", StringArgumentType.greedyString())
                                 .executes(ctx -> forget(ctx.getSource(), StringArgumentType.getString(ctx, "name")))))
                 .then(Commands.literal("list")
-                        .executes(ctx -> list(ctx.getSource())));
+                        .executes(ctx -> list(ctx.getSource())))
+                .then(Commands.literal("accept")
+                        .executes(ctx -> accept(ctx.getSource())));
+    }
+
+    /**
+     * Takes up a standing side-along offer. A chat affordance for what
+     * {@code ApparitionSideAlongAcceptC2SPayload} will do from a prompt UI once one exists.
+     */
+    private static int accept(CommandSourceStack source) {
+        ServerPlayer player = source.getPlayer();
+        if (player == null) {
+            return 0;
+        }
+        return SideAlongService.accept(player) ? 1 : 0;
     }
 
     private static int mark(CommandSourceStack source, String rawName) {
@@ -53,15 +69,17 @@ public final class ApparitionPointCommands {
         }
 
         PlayerApparitionPoints points = points(player);
+        int capacity = ApparitionAnchors.capacity(player);
         boolean replacing = points.byName(name) != null;
-        if (!replacing && points.isFull()) {
-            feedback(source, "You can only hold " + PlayerApparitionPoints.MAX_POINTS
-                    + " destinations in mind. Forget one first.", ChatFormatting.RED);
+        if (!replacing && points.isFull(capacity)) {
+            feedback(source, "You can only hold " + capacity
+                    + " destinations in mind. Forget one, or re-use the name of the one you are replacing.",
+                    ChatFormatting.RED);
             return 0;
         }
 
         ApparitionPoint point = new ApparitionPoint(name, player.level().dimension(), player.position(), player.getYRot());
-        setPoints(player, points.with(point));
+        setPoints(player, points.with(point, capacity));
         feedback(source, (replacing ? "Re-memorised " : "Memorised ") + name + ".", ChatFormatting.LIGHT_PURPLE);
         return 1;
     }

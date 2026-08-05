@@ -41,6 +41,10 @@ public final class ModNetworkAbilities {
                 ApparitionChargeReleaseC2SPayload.TYPE,
                 ApparitionChargeReleaseC2SPayload.STREAM_CODEC,
                 ApparitionChargeReleaseC2SPayload::handle);
+        registrar.playToServer(
+                ApparitionSideAlongAcceptC2SPayload.TYPE,
+                ApparitionSideAlongAcceptC2SPayload.STREAM_CODEC,
+                ApparitionSideAlongAcceptC2SPayload::handle);
         registrar.playToClient(
                 LegilimencyVisionS2CPayload.TYPE,
                 LegilimencyVisionS2CPayload.STREAM_CODEC,
