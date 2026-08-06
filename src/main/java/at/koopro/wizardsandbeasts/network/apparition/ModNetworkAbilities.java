@@ -42,6 +42,10 @@ public final class ModNetworkAbilities {
                 ApparitionChargeReleaseC2SPayload.STREAM_CODEC,
                 ApparitionChargeReleaseC2SPayload::handle);
         registrar.playToServer(
+                ApparitionChargeAbortC2SPayload.TYPE,
+                ApparitionChargeAbortC2SPayload.STREAM_CODEC,
+                ApparitionChargeAbortC2SPayload::handle);
+        registrar.playToServer(
                 ApparitionSideAlongAcceptC2SPayload.TYPE,
                 ApparitionSideAlongAcceptC2SPayload.STREAM_CODEC,
                 ApparitionSideAlongAcceptC2SPayload::handle);

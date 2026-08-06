@@ -9,6 +9,7 @@ import at.koopro.wizardsandbeasts.client.ability.state.ClientAbilityChargeState;
 import at.koopro.wizardsandbeasts.client.ability.state.ClientAbilitySelectionState;
 import at.koopro.wizardsandbeasts.client.ability.wheel.AbilityWheelScreen;
 import at.koopro.wizardsandbeasts.network.ability.AbilityUseC2SPayload;
+import at.koopro.wizardsandbeasts.network.apparition.ApparitionChargeAbortC2SPayload;
 import at.koopro.wizardsandbeasts.network.apparition.ApparitionChargeReleaseC2SPayload;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
@@ -46,6 +47,12 @@ public final class AbilityWheelController {
     /** Which slot owns the current charge, so no two keys can charge at once. */
     private static int chargingSlot = AbilitySelectionState.SLOT_SELECTED;
     private static boolean charging;
+    /**
+     * Whether the charge in progress is timed by the server. Tracked separately from the definition because
+     * {@link #cancelCharge()} runs from paths that no longer have one in hand, and a server-timed charge that
+     * is dropped locally has to be withdrawn on the server too or it will discharge itself.
+     */
+    private static boolean chargingServerSide;
 
     /** Physical wheel-key state last tick — the wheel opens on the rising edge, never while merely held. */
     private static boolean wheelWasDown;
@@ -157,6 +164,7 @@ public final class AbilityWheelController {
         if (down) {
             if (!charging || chargingSlot != slot) {
                 charging = true;
+                chargingServerSide = true;
                 chargingSlot = slot;
                 ClientAbilityChargeState.begin(def.id(), input.chargeTicks());
                 send(slot, pick(player, input));
@@ -165,7 +173,10 @@ public final class AbilityWheelController {
                 store(pick(player, input));
             }
         } else if (charging && chargingSlot == slot) {
+            // A release is a commitment and is judged against the window, so it must not go out through
+            // cancelCharge's withdrawal path.
             ClientPacketDistributor.sendToServer(ApparitionChargeReleaseC2SPayload.INSTANCE);
+            chargingServerSide = false;
             cancelCharge();
         }
         drain(key);
@@ -234,8 +245,20 @@ public final class AbilityWheelController {
         }
     }
 
+    /**
+     * Drops the charge locally, and withdraws it on the server when the server was the one timing it.
+     *
+     * <p>The withdrawal is the whole point. Opening a screen or having the armed ability change used to clear
+     * client state and say nothing, leaving the server holding an attempt nobody would ever release — which
+     * then discharged into a catastrophic splinch out of a clear sky. An abort costs nothing, which is
+     * correct: the player did not let go, they were interrupted.
+     */
     private static void cancelCharge() {
+        if (chargingServerSide && charging) {
+            ClientPacketDistributor.sendToServer(ApparitionChargeAbortC2SPayload.INSTANCE);
+        }
         charging = false;
+        chargingServerSide = false;
         chargingSlot = AbilitySelectionState.SLOT_SELECTED;
         ClientAbilityChargeState.clear();
     }
