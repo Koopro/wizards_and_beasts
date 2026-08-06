@@ -1,12 +1,18 @@
 package at.koopro.wizardsandbeasts.client.gui;
 
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GuiSkin;
+import at.koopro.wizardsandbeasts.module.ModuleState;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * Vanilla-style GUI panels: stretched {@link VanillaGuiTextures#DEMO_BACKGROUND_TEXTURE} or flat beveled fills.
  */
+@NullMarked
 public final class McStylePanel {
 
     private McStylePanel() {}
@@ -155,7 +161,204 @@ public final class McStylePanel {
      */
     public static void drawRow(GuiGraphics g, int x, int y, int w, int h, boolean selected) {
         if (selected) {
-            g.fill(x, y, x + w, y + h, 0x33000000 | (WizardsPalette.SELECT & 0x00FFFFFF));
+            g.fill(x, y, x + w, y + h, WizardsPalette.withAlpha(WizardsPalette.SELECT, ROW_SELECT_ALPHA));
         }
+    }
+
+    // ── Skinned components ─────────────────────────────────────────────────
+    //
+    // The same five shapes as above in five materials, plus the five widgets the mod never
+    // had. The unskinned methods stay exactly as they are: they are the mod's leather-and-
+    // brass default and two live call sites depend on them.
+    //
+    // Surfaces come off the GUI atlas, widgets come off tokens. That split is deliberate.
+    // A panel's border carries drawn detail that has to nine-slice, so it has to be a sprite
+    // and vanilla only nine-slices atlas sprites. A button is a filled rect with a one-pixel
+    // bevel and four states; as art that is 4 states x 5 skins = 20 sprites for what two
+    // `fill` calls and a shade factor express exactly, and every one of those 20 would have
+    // to be redrawn to change one colour. Tokens also make the states *derived* -- hovered is
+    // lit, pressed is the bevel inverted -- rather than four files that can drift apart.
+
+    /** Selection tint strength. Alpha is composed rather than taken from the token, which is opaque. */
+    private static final int ROW_SELECT_ALPHA = 0x33;
+    /** The state badge is an 8x8 corner mark. */
+    private static final int BADGE = 8;
+    /** Slots are vanilla's 18x18 including their one-pixel well edge. */
+    private static final int SLOT = 18;
+
+    /** Multiply {@code token}'s RGB by {@code f}, keeping its alpha. */
+    private static int shade(int token, float f) {
+        int a = token & 0xFF000000;
+        int r = Math.clamp((int) (((token >> 16) & 0xFF) * f), 0, 255);
+        int g = Math.clamp((int) (((token >> 8) & 0xFF) * f), 0, 255);
+        int b = Math.clamp((int) ((token & 0xFF) * f), 0, 255);
+        return a | (r << 16) | (g << 8) | b;
+    }
+
+    /** The default panel in a skin. */
+    public static void drawThemedPanel(GuiGraphics g, GuiSkin skin, int x, int y, int w, int h) {
+        g.blitSprite(RenderPipelines.GUI_TEXTURED, skin.sprite("panel"), x, y, w, h);
+    }
+
+    /** The recessed variant, for lists, viewports and wells. Its bevel is inverted, not merely darker. */
+    public static void drawThemedInset(GuiGraphics g, GuiSkin skin, int x, int y, int w, int h) {
+        g.blitSprite(RenderPipelines.GUI_TEXTURED, skin.sprite("panel_inset"), x, y, w, h);
+    }
+
+    /** A horizontal rule, stretched to {@code w}. */
+    public static void drawDivider(GuiGraphics g, GuiSkin skin, int x, int y, int w) {
+        g.blitSprite(RenderPipelines.GUI_TEXTURED, skin.sprite("divider"), x, y, w, WizardsMetrics.DIVIDER_H);
+    }
+
+    /** Track plus thumb. Pass {@code thumbH <= 0} for a track with nothing to scroll. */
+    public static void drawScrollbar(GuiGraphics g, GuiSkin skin, int x, int y,
+                                     int trackH, int thumbY, int thumbH) {
+        int w = WizardsMetrics.SCROLLBAR_W;
+        g.blitSprite(RenderPipelines.GUI_TEXTURED, skin.sprite("scrollbar_track"), x, y, w, trackH);
+        if (thumbH > 0) {
+            g.blitSprite(RenderPipelines.GUI_TEXTURED, skin.sprite("scrollbar_thumb"), x, thumbY, w, thumbH);
+        }
+    }
+
+    /** A list row, with the skin's selection tint composed over it when selected. */
+    public static void drawRow(GuiGraphics g, GuiSkin skin, int x, int y, int w, int h, boolean selected) {
+        if (selected) {
+            g.fill(x, y, x + w, y + h, WizardsPalette.withAlpha(skin.accent(), ROW_SELECT_ALPHA));
+        }
+    }
+
+    /**
+     * The skin's corner motif, at a panel's top-left.
+     *
+     * <p>The one decoration the system permits, and it earns the exemption by carrying the
+     * material: a strap tab reads as canvas, an ink stamp as the Ministry, a scorch as a bench.
+     * Drawn at native 16x16 — a seal that stretches with its panel stops looking struck.
+     */
+    public static void drawSeal(GuiGraphics g, GuiSkin skin, int panelX, int panelY) {
+        g.blitSprite(RenderPipelines.GUI_TEXTURED, skin.sprite("seal"),
+                panelX + WizardsMetrics.SPACE_XS, panelY + WizardsMetrics.SPACE_XS, 16, 16);
+    }
+
+    /**
+     * A title bar: the panel's top band, its title, and the rule under it.
+     *
+     * <p>Returns the y the caller's content starts at, so a screen never spells the sum of a
+     * line height and a divider itself. Text is drawn at {@link WizardsMetrics#LINE_TITLE}'s
+     * baseline rather than centred in the band: centring a 9px glyph in a 20px bar puts it a
+     * half-pixel off at odd GUI scales, which is where the mod's title jitter came from.
+     */
+    public static int drawHeader(GuiGraphics g, GuiSkin skin, Font font, Component title,
+                                 int x, int y, int w) {
+        int textY = y + (WizardsMetrics.LINE_TITLE - font.lineHeight) / 2;
+        g.drawString(font, title, x + WizardsMetrics.SPACE_M, textY, skin.ink(), false);
+        drawDivider(g, skin, x + WizardsMetrics.SPACE_S, y + WizardsMetrics.LINE_TITLE,
+                w - 2 * WizardsMetrics.SPACE_S);
+        return y + WizardsMetrics.LINE_TITLE + WizardsMetrics.DIVIDER_H;
+    }
+
+    /** The four states a {@link #drawButton} can be in. */
+    public enum ButtonState {
+        NORMAL,
+        HOVERED,
+        PRESSED,
+        DISABLED
+    }
+
+    /**
+     * A button, derived from the skin's tokens rather than four sprites per skin.
+     *
+     * <p>Hovered is the face lit, pressed is the same face with its bevel inverted and its
+     * content nudged, disabled is the face flattened toward the frame. Deriving them means the
+     * four states cannot drift out of step with each other or with the skin.
+     */
+    public static void drawButton(GuiGraphics g, GuiSkin skin, int x, int y, int w, int h,
+                                  ButtonState state) {
+        int face = switch (state) {
+            case NORMAL -> shade(skin.base(), 0.86f);
+            case HOVERED -> shade(skin.base(), 1.0f);
+            case PRESSED -> shade(skin.base(), 0.74f);
+            case DISABLED -> shade(skin.base(), 0.62f);
+        };
+        int lit = state == ButtonState.DISABLED ? shade(skin.frame(), 1.1f) : skin.accent();
+        int dark = shade(skin.frame(), 0.8f);
+        g.fill(x, y, x + w, y + h, face);
+        if (state == ButtonState.PRESSED) {
+            drawBorder(g, x, y, w, h, dark, lit);
+        } else {
+            drawBorder(g, x, y, w, h, lit, dark);
+        }
+    }
+
+    /**
+     * A tab. Active tabs sit flush with the panel below them; inactive ones are set back.
+     *
+     * <p>The bottom edge is deliberately not drawn on an active tab — that is what makes it
+     * read as continuous with its panel rather than as a button parked above one.
+     */
+    public static void drawTab(GuiGraphics g, GuiSkin skin, int x, int y, int w, int h, boolean active) {
+        g.fill(x, y, x + w, y + h, active ? skin.base() : shade(skin.base(), 0.72f));
+        int lit = active ? skin.accent() : shade(skin.frame(), 1.05f);
+        int dark = shade(skin.frame(), 0.8f);
+        g.fill(x, y, x + w, y + 1, lit);
+        g.fill(x, y, x + 1, y + h, lit);
+        g.fill(x + w - 1, y, x + w, y + h, dark);
+        if (!active) {
+            g.fill(x, y + h - 1, x + w, y + h, dark);
+        }
+    }
+
+    /**
+     * A container slot's well, drawn beneath the vanilla item render.
+     *
+     * <p>Belongs in {@code renderBg}: {@code AbstractContainerScreen} runs that strictly before
+     * {@code renderSlots}, and vanilla draws no slot background of its own — slot wells are
+     * painted into the container sheet — so nothing is being overdrawn. Nothing here reads or
+     * writes {@code Slot} bounds, so hit detection is untouched by construction.
+     *
+     * @param slotX {@code Slot#x}, the item's top-left; the well is drawn one pixel out from it
+     */
+    public static void drawSlot(GuiGraphics g, GuiSkin skin, int slotX, int slotY) {
+        int x = slotX - 1;
+        int y = slotY - 1;
+        g.fill(x, y, x + SLOT, y + SLOT, shade(skin.base(), 0.66f));
+        drawBorder(g, x, y, SLOT, SLOT, shade(skin.frame(), 0.8f), shade(skin.base(), 1.05f));
+    }
+
+    /**
+     * How a content tile should be tinted for a module's access state.
+     *
+     * <p>Returned rather than applied because a silhouette cannot be produced after the fact:
+     * it is the content's own draw multiplied by a flat colour, so the caller has to pass this
+     * into its {@code blitSprite}. {@code -1} is white — an unmodified draw.
+     *
+     * <p>{@code COMING_SOON} and {@code DISABLED} stay distinct on purpose. Coming-soon is
+     * opaque skin frame, so the shape survives and the detail does not: <em>not yet</em>.
+     * Disabled is a dimmed neutral: <em>switched off</em>. Collapsing them loses the difference
+     * between a roadmap marker and an operator's toggle, which is the one thing
+     * {@link ModuleState} is careful to keep apart.
+     */
+    public static int contentTint(GuiSkin skin, ModuleState state) {
+        return switch (state) {
+            case ENABLED, PREVIEW -> -1;
+            case COMING_SOON -> 0xFF000000 | (skin.frame() & 0x00FFFFFF);
+            case DISABLED -> WizardsPalette.withAlpha(shade(skin.muted(), 0.9f), 0x88);
+        };
+    }
+
+    /**
+     * The corner badge marking a content tile's access state. A no-op for {@code ENABLED}.
+     *
+     * <p>One 8x8 sprite for all four states and all five skins, tinted here. Preview wears the
+     * skin's accent because it is reachable; the two unreachable states wear its muted tone.
+     * Twenty near-identical triangles on the atlas would say nothing this does not.
+     */
+    public static void drawStateBadge(GuiGraphics g, GuiSkin skin, ModuleState state,
+                                      int tileX, int tileY, int tileW) {
+        if (state == ModuleState.ENABLED) {
+            return;
+        }
+        int tint = state == ModuleState.PREVIEW ? skin.accent() : skin.muted();
+        g.blitSprite(RenderPipelines.GUI_TEXTURED, WizardsPalette.STATE_BADGE,
+                tileX + tileW - BADGE, tileY, BADGE, BADGE, tint);
     }
 }
