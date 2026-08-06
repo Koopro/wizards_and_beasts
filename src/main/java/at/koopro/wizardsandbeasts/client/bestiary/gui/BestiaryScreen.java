@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.client.bestiary.gui;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GuiSkin;
 import org.jspecify.annotations.Nullable;
 
 import at.koopro.wizardsandbeasts.bestiary.*;
@@ -40,42 +41,30 @@ public final class BestiaryScreen extends Screen {
     private static final int ROW_HEIGHT = 14;
 
     /**
-     * Selected-row tint and portrait edge, in the mod's leather/brass family.
+     * Scamander's case notes: kraft paper on an oiled canvas board, pencil, a leather strap.
      *
-     * <p>These three fills were the last of the cold blue-lavender scheme {@link WizardsPalette}'s
-     * own javadoc describes the mod having drifted into before the palette existed — 0x335A84C5 and
-     * 0x664F5B72. They survived the Bestiary's retheme because they are alpha-composited fills
-     * drawn over the panel art rather than part of it, so recolouring the textures never touched
-     * them.
-     *
-     * <p>Alpha is composed separately from the hue so the fills stay translucent: taking a palette
-     * constant wholesale would drag its opaque 0xFF alpha along and paint over the row beneath.
+     * <p>Every colour and every piece of chrome on this screen comes from here. The three fills
+     * this class used to compose by hand were the last of the cold blue-lavender scheme
+     * {@link WizardsPalette}'s own javadoc describes the mod having drifted into — they survived
+     * the Bestiary's earlier retheme because they were alpha-composited over the panel art rather
+     * than part of it, so recolouring the textures never reached them. Going through the skin is
+     * what finally does.
      */
-    private static final int SELECTED_ROW_TINT = 0x33000000 | (WizardsPalette.SELECT & 0x00FFFFFF);
-    private static final int PORTRAIT_EDGE     = 0x66000000 | (WizardsPalette.LINE & 0x00FFFFFF);
+    private static final GuiSkin SKIN = GuiSkin.FIELD_NOTEBOOK;
     // On the shared scale rather than local literals: both already happened to land on it, so
-    // this is traceability rather than a visual change. The one value that does not is
-    // SCROLLBAR_W = 3 -- see the note there.
+    // this is traceability rather than a visual change.
     private static final int ROW_STEP = WizardsMetrics.ROW_H;
     private static final int LIST_START_Y = WizardsMetrics.SPACE_XXXL;
     /** Right edge of list row content (scrollbar sits just to the right). */
     private static final int LIST_ROWS_W = 112;
-    /** Width of the shared themed scrollbar. */
-    private static final int SCROLLBAR_W = WizardsMetrics.SCROLLBAR_W;
-    private static final Identifier TEX_SCREEN =
-            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "textures/gui/bestiary/screen.png");
-    private static final Identifier TEX_LEFT_PANEL =
-            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "textures/gui/bestiary/left_panel.png");
-    private static final Identifier TEX_RIGHT_PANEL =
-            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "textures/gui/bestiary/right_panel.png");
-    private static final Identifier TEX_ROW =
-            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "textures/gui/bestiary/row.png");
-    private static final Identifier TEX_HEADER =
-            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "textures/gui/bestiary/header.png");
-    private static final Identifier TEX_SCROLL_TRACK =
-            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "textures/gui/bestiary/scroll_track.png");
-    private static final Identifier TEX_SCROLL_THUMB =
-            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "textures/gui/bestiary/scroll_thumb.png");
+    /** How many discovery pips a row shows. */
+    private static final int PIP_COUNT = 5;
+    /**
+     * The entry portrait's fallback, and the only texture this screen still names.
+     *
+     * <p>It is content, not chrome: a creature's likeness is the thing the Bestiary is for.
+     * {@code §2.1}'s rule reaches the frame around it, not the picture inside.
+     */
     private static final Identifier TEX_ENTRY_PLACEHOLDER =
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "textures/gui/bestiary/entry_placeholder.png");
 
@@ -199,7 +188,7 @@ public final class BestiaryScreen extends Screen {
     }
 
     /**
-     * The list scrollbar, on the shared themed sprites rather than the Bestiary's own 3px pair.
+     * The list scrollbar, on the skin's sprites rather than the Bestiary's own 3px pair.
      *
      * <p>Its private textures were 3x120 and 3x24 -- a fixed thumb length that smears when
      * stretched, which is the flaw the shared columnar thumb exists to avoid.
@@ -209,15 +198,16 @@ public final class BestiaryScreen extends Screen {
         int trackH = trackBottom - trackTop;
         int max = maxScroll();
         if (max <= 0 || rows.isEmpty()) {
-            McStylePanel.drawScrollbar(gg, trackLeft, trackTop, trackH, trackTop, 0);
+            McStylePanel.drawScrollbar(gg, SKIN, trackLeft, trackTop, trackH, trackTop, 0);
             return;
         }
         int thumbH = Math.max(WizardsMetrics.SPACE_M, trackH * visibleRowCount() / rows.size());
         int travel = Math.max(0, trackH - thumbH);
         int thumbY = trackTop + (travel == 0 ? 0 : scrollOffset * travel / max);
-        McStylePanel.drawScrollbar(gg, trackLeft, trackTop, trackH, thumbY, thumbH);
+        McStylePanel.drawScrollbar(gg, SKIN, trackLeft, trackTop, trackH, thumbY, thumbH);
     }
 
+    /** Stretch a content texture (an entry portrait) to a rect. Chrome no longer comes through here. */
     private static void drawStretched(GuiGraphics gg, Identifier texture, int x, int y, int w, int h, int texW, int texH) {
         gg.blit(RenderPipelines.GUI_TEXTURED, texture,
                 x, y,
@@ -303,9 +293,13 @@ public final class BestiaryScreen extends Screen {
         pose.pushMatrix();
         pose.translate(x * (1.0f - guiScale), y * (1.0f - guiScale));
         pose.scale(guiScale, guiScale);
-        drawStretched(gg, TEX_SCREEN, x, y, W, H, W, H);
-        drawStretched(gg, TEX_LEFT_PANEL, x + 4, y + 28, 120, H - 32, 120, 168);
-        drawStretched(gg, TEX_RIGHT_PANEL, x + 126, y + 4, W - 130, H - 8, 190, 190);
+        McStylePanel.drawThemedPanel(gg, SKIN, x, y, W, H);
+        McStylePanel.drawThemedInset(gg, SKIN, x + 4, y + 28, 120, H - 32);
+        McStylePanel.drawThemedInset(gg, SKIN, x + 126, y + 4, W - 130, H - 8);
+        // The title sits above the panel on the dimmed menu backdrop, not inside a title bar, so
+        // it takes the shared light TEXT token rather than the skin's ink -- ink is for text on
+        // the skin's own base, and on this backdrop it would be unreadable. Moving the title
+        // inside a `drawHeader` bar would be a layout change, which this pass does not make.
         gg.drawString(font, title, x + 8, y - 10, WizardsPalette.TEXT);
 
         int listTop = y + LIST_START_Y;
@@ -317,30 +311,37 @@ public final class BestiaryScreen extends Screen {
         for (int idx = start; idx < end; idx++) {
             Row row = rows.get(idx);
             if (row.header != null) {
-                drawStretched(gg, TEX_HEADER, x + 6, rowY, LIST_ROWS_W, ROW_HEIGHT, 112, 14);
+                // A category header is a button -- clicking it collapses the group -- so it is
+                // drawn as one rather than as a plate that happens to be clickable.
+                McStylePanel.drawButton(gg, SKIN, x + 6, rowY, LIST_ROWS_W, ROW_HEIGHT,
+                        McStylePanel.ButtonState.NORMAL);
                 boolean isCollapsed = collapsed.getOrDefault(row.header, Boolean.FALSE);
                 String arrow = isCollapsed ? "\u25b6 " : "\u25bc ";
-                gg.drawString(font, Component.literal(arrow + formatCategoryLabel(row.header)), x + 8, rowY + 3, WizardsPalette.TEXT);
+                gg.drawString(font, Component.literal(arrow + formatCategoryLabel(row.header)), x + 8, rowY + 3, SKIN.ink());
             } else if (row.entry != null) {
                 BestiaryEntry e = row.entry;
-                boolean isSel = e.id().equals(selected);
-                drawStretched(gg, TEX_ROW, x + 6, rowY, LIST_ROWS_W, ROW_HEIGHT, 112, 14);
-                if (isSel) {
-                    gg.fill(x + 6, rowY, rowRight, rowY + ROW_HEIGHT, SELECTED_ROW_TINT);
-                }
                 DiscoveryTier tier = ClientBestiaryCache.get().tiers().getOrDefault(e.id(), DiscoveryTier.UNDISCOVERED);
+                // Rows sit directly on the list well now, with selection carried by the skin's
+                // tint. The per-row plate they used to blit was a second surface inside a surface.
+                McStylePanel.drawRow(gg, SKIN, x + 6, rowY, rowRight - (x + 6), ROW_HEIGHT,
+                        e.id().equals(selected));
                 Component name = tier == DiscoveryTier.UNDISCOVERED ? Component.literal("???") : e.displayName();
                 int nameMaxWidth = 72;
                 String clipped = font.plainSubstrByWidth(name.getString(), nameMaxWidth);
-                gg.drawString(font, Component.literal(clipped), x + 8, rowY + 3, tier == DiscoveryTier.UNDISCOVERED ? WizardsPalette.TEXT_DIM : WizardsPalette.TEXT);
-                for (int i = 0; i < 5; i++) {
-                    int c = i <= tier.tierIndex() ? WizardsPalette.PIP_ON : WizardsPalette.PIP_OFF;
+                gg.drawString(font, Component.literal(clipped), x + 8, rowY + 3,
+                        tier == DiscoveryTier.UNDISCOVERED ? SKIN.muted() : SKIN.ink());
+                for (int i = 0; i < PIP_COUNT; i++) {
+                    int c = i <= tier.tierIndex() ? SKIN.accent() : SKIN.muted();
                     gg.fill(x + 82 + i * 5, rowY + 5, x + 85 + i * 5, rowY + 8, c);
                 }
             }
             rowY += ROW_STEP;
         }
         renderListScrollbar(gg, listTop, listBottom);
+        // The skin's corner motif. \u00a72.4 puts it at the panel's top-left; here that is the search
+        // field, which predates this pass and does not move, so it sits at the foot of the list
+        // well -- the one place on this screen that is decoration-sized and empty at every scale.
+        McStylePanel.drawSeal(gg, SKIN, x + 4, y + H - 22);
 
         BestiaryEntry selectedEntry = selected == null ? null : BestiaryEntryRegistry.clientGet(selected);
         if (selectedEntry != null) {
@@ -385,7 +386,7 @@ public final class BestiaryScreen extends Screen {
         int dy = y + 10;
         DiscoveryTier tier = ClientBestiaryCache.get().tiers().getOrDefault(entry.id(), DiscoveryTier.UNDISCOVERED);
         Component name = tier == DiscoveryTier.UNDISCOVERED ? Component.literal("???") : entry.displayName();
-        gg.drawString(font, name, dx, dy, WizardsPalette.TEXT);
+        gg.drawString(font, name, dx, dy, SKIN.ink());
         dy += 12;
 
         int portraitX = dx;
@@ -397,32 +398,34 @@ public final class BestiaryScreen extends Screen {
         if (!liveEntity) {
             drawStretched(gg, resolveEntryPortrait(entry, tier), portraitX, portraitY, portraitSize, portraitSize, 32, 32);
         }
-        gg.fill(portraitX, portraitY + portraitSize, portraitX + portraitSize, portraitY + portraitSize + 1, PORTRAIT_EDGE);
-        gg.fill(portraitX + portraitSize, portraitY, portraitX + portraitSize + 1, portraitY + portraitSize, PORTRAIT_EDGE);
+        // The portrait's seat: an opaque hairline in the skin's frame, rather than the composed
+        // translucent fill this screen used to spell out of a palette token and an alpha mask.
+        McStylePanel.drawBorder(gg, portraitX, portraitY, portraitSize + 1, portraitSize + 1,
+                SKIN.frame(), SKIN.frame());
 
         int textX = portraitX + portraitSize + 8;
         int textW = 176 - (portraitSize + 8);
         if (tier == DiscoveryTier.UNDISCOVERED) {
-            gg.drawWordWrap(font, Component.literal(tier.unlockHint()), textX, portraitY, textW, WizardsPalette.TEXT_DIM);
+            gg.drawWordWrap(font, Component.literal(tier.unlockHint()), textX, portraitY, textW, SKIN.muted());
             return;
         }
-        gg.drawString(font, Component.literal("MM Rating: ").append(ministryGrade(entry.mmRating())), textX, portraitY, WizardsPalette.TEXT_DIM);
+        gg.drawString(font, Component.literal("MM Rating: ").append(ministryGrade(entry.mmRating())), textX, portraitY, SKIN.muted());
         int loreY = portraitY + 12;
         if (tier.ordinal() >= DiscoveryTier.ENCOUNTERED.ordinal()) {
-            gg.drawWordWrap(font, entry.shortLore(), textX, loreY, textW, WizardsPalette.TEXT);
+            gg.drawWordWrap(font, entry.shortLore(), textX, loreY, textW, SKIN.ink());
             loreY += font.wordWrapHeight(entry.shortLore(), textW) + 4;
         }
         dy = Math.max(portraitY + portraitSize + 6, loreY);
         if (tier.ordinal() >= DiscoveryTier.ENCOUNTERED.ordinal()) {
             Component habitatLine = Component.literal("Habitat: ").append(entry.habitat());
-            gg.drawWordWrap(font, habitatLine, dx, dy, 176, WizardsPalette.TEXT_DIM);
+            gg.drawWordWrap(font, habitatLine, dx, dy, 176, SKIN.muted());
             dy += font.wordWrapHeight(habitatLine, 176) + 2;
             Component sizeLine = Component.literal("Size: " + entry.size());
-            gg.drawWordWrap(font, sizeLine, dx, dy, 176, WizardsPalette.TEXT_DIM);
+            gg.drawWordWrap(font, sizeLine, dx, dy, 176, SKIN.muted());
             dy += font.wordWrapHeight(sizeLine, 176) + 2;
         }
         if (tier.ordinal() >= DiscoveryTier.STUDIED.ordinal()) {
-            gg.drawWordWrap(font, entry.fullLore(), dx, dy, 176, WizardsPalette.TEXT);
+            gg.drawWordWrap(font, entry.fullLore(), dx, dy, 176, SKIN.ink());
         }
     }
 
