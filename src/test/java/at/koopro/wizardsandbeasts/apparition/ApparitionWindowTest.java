@@ -11,15 +11,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ApparitionWindowTest {
 
     @Test
-    void theWindowWidensFromFiveTicksToTwelveAcrossTheCurve() {
-        assertEquals(5, ApparitionWindow.windowTicks(0.0f));
-        assertEquals(12, ApparitionWindow.windowTicks(1.0f));
+    void theWindowWidensFromTwelveTicksToNineteenAcrossTheCurve() {
+        assertEquals(12, ApparitionWindow.windowTicks(0.0f));
+        assertEquals(19, ApparitionWindow.windowTicks(1.0f));
+    }
+
+    @Test
+    void theNoviceWindowClearsHumanReactionTime() {
+        // Five ticks was a quarter of a second, at or below visual reaction latency, so the novice window
+        // could not be hit by reacting to the ring at all. This is the guard on that regression.
+        assertTrue(ApparitionWindow.windowTicks(0.0f) >= 10,
+                "a window under ~0.5s is unhittable by reaction and every honest attempt discharges");
     }
 
     @Test
     void proficiencyIsClampedRatherThanTrusted() {
-        assertEquals(5, ApparitionWindow.windowTicks(-3.0f));
-        assertEquals(12, ApparitionWindow.windowTicks(9.0f));
+        assertEquals(12, ApparitionWindow.windowTicks(-3.0f));
+        assertEquals(19, ApparitionWindow.windowTicks(9.0f));
     }
 
     @Test
@@ -37,7 +45,7 @@ class ApparitionWindowTest {
     @Test
     void releasingInsideTheWindowMissesByNothing() {
         int open = ApparitionWindow.windowOpen(ApparitionTier.BLINK);
-        int close = ApparitionWindow.windowClose(ApparitionTier.BLINK, 5);
+        int close = ApparitionWindow.windowClose(ApparitionTier.BLINK, 12);
 
         assertEquals(0, ApparitionWindow.missTicks(open, open, close));
         assertEquals(0, ApparitionWindow.missTicks(close, open, close));
@@ -47,21 +55,50 @@ class ApparitionWindowTest {
     @Test
     void releasingEarlyMissesByExactlyHowEarly() {
         int open = ApparitionWindow.windowOpen(ApparitionTier.BLINK);
-        int close = ApparitionWindow.windowClose(ApparitionTier.BLINK, 5);
+        int close = ApparitionWindow.windowClose(ApparitionTier.BLINK, 12);
 
         assertEquals(1, ApparitionWindow.missTicks(open - 1, open, close));
         assertEquals(10, ApparitionWindow.missTicks(0, open, close));
     }
 
     @Test
-    void holdingPastTheWindowDischarges() {
+    void releasingLateMissesByExactlyHowLate() {
         int open = ApparitionWindow.windowOpen(ApparitionTier.BLINK);
-        int close = ApparitionWindow.windowClose(ApparitionTier.BLINK, 5);
+        int close = ApparitionWindow.windowClose(ApparitionTier.BLINK, 12);
 
-        assertTrue(ApparitionWindow.isForcedDischarge(
+        assertEquals(1, ApparitionWindow.missTicks(close + 1, open, close));
+        assertEquals(9, ApparitionWindow.missTicks(close + 9, open, close));
+    }
+
+    @Test
+    void aLateReleaseIsAMissAndNotADischarge() {
+        int open = ApparitionWindow.windowOpen(ApparitionTier.BLINK);
+        int close = ApparitionWindow.windowClose(ApparitionTier.BLINK, 12);
+
+        // One tick late used to be punished identically to walking away mid-cast.
+        assertFalse(ApparitionWindow.isForcedDischarge(
                 ApparitionWindow.missTicks(close + 1, open, close)));
         assertFalse(ApparitionWindow.isForcedDischarge(
                 ApparitionWindow.missTicks(close, open, close)));
+    }
+
+    @Test
+    void theHardCapSitsWellPastTheWindow() {
+        int close = ApparitionWindow.windowClose(ApparitionTier.BLINK, 12);
+        assertEquals(close + ApparitionWindow.HARD_CAP_TICKS,
+                ApparitionWindow.hardCap(ApparitionTier.BLINK, 12));
+        assertTrue(ApparitionWindow.hardCap(ApparitionTier.BLINK, 12) > close + 30,
+                "the backstop must be far enough out that deliberating cannot reach it");
+    }
+
+    @Test
+    void missIsSymmetricAboutTheWindow() {
+        int open = ApparitionWindow.windowOpen(ApparitionTier.BLINK);
+        int close = ApparitionWindow.windowClose(ApparitionTier.BLINK, 12);
+
+        assertEquals(ApparitionWindow.missTicks(open - 4, open, close),
+                ApparitionWindow.missTicks(close + 4, open, close),
+                "four ticks early and four ticks late must cost the same");
     }
 
     @Test

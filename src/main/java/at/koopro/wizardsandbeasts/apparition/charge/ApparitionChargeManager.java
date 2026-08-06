@@ -113,10 +113,12 @@ public final class ApparitionChargeManager {
             return;
         }
         ApparitionPhase before = charge.phase();
-        charge.advance();
+        // Aim first, then advance. The clock only runs once a destination exists, so resolving the raycast
+        // after advancing would cost the player the very tick on which they found their spot.
         if (charge.tier() == ApparitionTier.BLINK) {
             charge.setDestination(aim(level, player));
         }
+        charge.advance();
         if (charge.isOverdue()) {
             resolve(player, charge, ApparitionWindow.FORCED_DISCHARGE);
             return;

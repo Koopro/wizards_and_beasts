@@ -23,10 +23,25 @@ import org.jspecify.annotations.NullMarked;
 @NullMarked
 public final class ApparitionWindow {
 
-    /** Window width at proficiency 0, before any skill node raises it. */
-    public static final int BASE_FLOOR_TICKS = 5;
+    /**
+     * Window width at proficiency 0, before any skill node raises it.
+     *
+     * <p>Was five, which is a quarter of a second — at or below the time it takes a human to react to a
+     * visual cue at all. A novice could not hit that window by reacting to the ring; they could only hit it
+     * by having memorised the rhythm, and every honest attempt discharged. Twelve ticks is 0.6s, comfortably
+     * reactable, and mastery still widens it to nineteen so the skill gradient survives.
+     */
+    public static final int BASE_FLOOR_TICKS = 12;
     /** Extra window width earned across the whole proficiency curve. */
     public static final int PROFICIENCY_TICKS = 7;
+
+    /**
+     * How long past the window an attempt is still held before it discharges itself.
+     *
+     * <p>Overshooting is now an ordinary miss that scales with how late you were, so this is no longer the
+     * punishment for hesitating — it is only the backstop for an attempt that is never released at all.
+     */
+    public static final int HARD_CAP_TICKS = 60;
 
     /**
      * Sentinel {@code missTicks} for an attempt that was never released. Deliberately {@code MAX_VALUE} so
@@ -65,6 +80,11 @@ public final class ApparitionWindow {
     /**
      * Raw miss for a release at {@code releaseTick}, before destabilization inflates it.
      *
+     * <p>Symmetric: you miss by exactly how early or how late you were. Overshooting used to jump straight to
+     * a forced discharge, which meant a player one tick past the window was punished identically to one who
+     * walked away mid-cast — and which made deliberating, the thing the phase is named for, the single most
+     * dangerous thing you could do.
+     *
      * @param releaseTick ticks elapsed since the charge began
      */
     public static int missTicks(int releaseTick, int windowOpen, int windowClose) {
@@ -72,9 +92,14 @@ public final class ApparitionWindow {
             return windowOpen - releaseTick;
         }
         if (releaseTick > windowClose) {
-            return FORCED_DISCHARGE;
+            return releaseTick - windowClose;
         }
         return 0;
+    }
+
+    /** The tick at which an unreleased attempt gives up on its own. */
+    public static int hardCap(ApparitionTier tier, int windowTicks) {
+        return windowClose(tier, windowTicks) + HARD_CAP_TICKS;
     }
 
     public static boolean isForcedDischarge(int missTicks) {

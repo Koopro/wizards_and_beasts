@@ -74,7 +74,18 @@ public final class ApparitionCharge {
         this.destination = value;
     }
 
+    /**
+     * Advances the Determination clock — but only once a destination exists.
+     *
+     * <p>The three Ds are taught in order, and this is that order made mechanical: Destination is fixed
+     * first, and only then does Determination begin to run. Practically it means aiming costs nothing. The
+     * clock and the aim used to be the same timer, so hunting for a spot burned the window you were hunting
+     * it for, and a player who looked around for a second was torn apart for it.
+     */
     public void advance() {
+        if (destination == null) {
+            return;
+        }
         elapsed++;
     }
 
@@ -86,9 +97,15 @@ public final class ApparitionCharge {
         return elapsed < windowOpen ? ApparitionPhase.DETERMINATION : ApparitionPhase.DELIBERATION;
     }
 
-    /** True once the window has closed unreleased — the attempt discharges itself. */
+    /**
+     * True once the attempt has been held so far past its window that it gives up on its own.
+     *
+     * <p>Well beyond {@code windowClose}, not one tick past it: a late release is now an ordinary miss that
+     * scales with lateness, so this is the backstop for an attempt nobody ever releases rather than the
+     * penalty for being slow.
+     */
     public boolean isOverdue() {
-        return elapsed > windowClose;
+        return elapsed > windowClose + ApparitionWindow.HARD_CAP_TICKS;
     }
 
     /** Raw miss for letting go right now, before destabilization inflates it. */
