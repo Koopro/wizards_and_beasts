@@ -41,6 +41,11 @@ public class HeritageSelectionScreen extends Screen {
     private static final int NAT_W = 416;
     private static final int NAT_H = 236;
     private static final int MARGIN = GuiScaleHelper.DEFAULT_MARGIN;
+    /**
+     * How far the layout may grow on a large viewport. Past this the vanilla font's own pixel grid
+     * becomes the thing you notice, and the dossier's line length grows past comfortable reading.
+     */
+    private static final float MAX_SCALE = 2.25F;
 
     /** Column widths in design space: 8 | 104 | 6 | 180 | 6 | 104 | 8. */
     private static final int COL_SIDE_W = 104;
@@ -88,7 +93,9 @@ public class HeritageSelectionScreen extends Screen {
     }
 
     private void computeLayout() {
-        scale = GuiScaleHelper.computeScale(NAT_W, NAT_H, width, height, MARGIN);
+        // Grows as well as shrinks: this screen owns the whole viewport and is drawn procedurally,
+        // so there is no art to blur and no reason to sit at 1.0 in the middle of a wide monitor.
+        scale = GuiScaleHelper.computeFullscreenScale(NAT_W, NAT_H, width, height, MARGIN, MAX_SCALE);
         scaledW = Math.round(NAT_W * scale);
         scaledH = Math.round(NAT_H * scale);
         left = GuiScaleHelper.clampedLeft(scaledW, width, MARGIN);

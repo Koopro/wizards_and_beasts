@@ -28,6 +28,26 @@ public final class GuiScaleHelper {
     }
 
     /**
+     * Like {@link #computeScale} but allowed to grow, for a procedurally drawn surface that owns the
+     * whole screen rather than floating on it.
+     *
+     * <p>{@link #computeScale} caps at 1.0 because upscaling fixed art blurs it. A screen drawn
+     * entirely from nine-slices, fills and text has no texture to blur, and capping it at 1.0 leaves
+     * a 416px design stranded as a small island in the middle of a 1700px viewport — technically
+     * centred, visually abandoned. {@link Layout#panel} solves the same problem for floating panels
+     * but clamps at 1.35, which is right for a dialog and too timid for a full-screen takeover.
+     *
+     * @param maxScale upper bound; past roughly 2.5 the font's own pixel grid starts to show.
+     */
+    public static float computeFullscreenScale(int naturalW, int naturalH,
+                                               int screenW, int screenH,
+                                               int margin, float maxScale) {
+        float sx = (screenW - 2.0F * margin) / (float) naturalW;
+        float sy = (screenH - 2.0F * margin) / (float) naturalH;
+        return Math.min(maxScale, Math.min(sx, sy));
+    }
+
+    /**
      * Left origin that centres a panel of {@code scaledW} within the screen,
      * clamped so no edge goes outside {@code [margin, screenW - margin]}.
      */

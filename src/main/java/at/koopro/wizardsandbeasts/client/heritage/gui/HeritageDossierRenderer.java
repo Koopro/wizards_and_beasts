@@ -1,7 +1,9 @@
 package at.koopro.wizardsandbeasts.client.heritage.gui;
 
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
+import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
+import at.koopro.wizardsandbeasts.client.gui.util.UiContrast;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import at.koopro.wizardsandbeasts.stats.PowerBandTable;
@@ -61,8 +63,11 @@ public final class HeritageDossierRenderer {
         int innerW = w - PAD * 2;
         int cursorY = y + PAD;
 
+        // The signature colour is chosen to work as a sigil, not as ink. Lifted onto the panel field
+        // so the dark ones (Pure-blood purple, Obscurial) stop sinking into the leather and the pale
+        // ones (Veela, House-Elf) stop glaring off it.
         g.drawString(font, heritage.getDisplayName(), tx, cursorY,
-                heritage.getColor() | 0xFF000000, false);
+                UiContrast.readableOn(heritage.getColor(), WizardsPalette.PLATE, UiContrast.AA_LARGE), false);
         cursorY += font.lineHeight + 2;
 
         if (variant != null) {
@@ -70,20 +75,35 @@ public final class HeritageDossierRenderer {
             cursorY += font.lineHeight + 3;
         }
 
+        // The divider sprite is DIVIDER_H tall, not a 1px rule. Advancing by less than its own
+        // height printed it straight through the signature line beneath it.
         McStylePanel.drawDivider(g, tx, cursorY, innerW);
-        cursorY += 5;
+        cursorY += WizardsMetrics.DIVIDER_H;
 
-        // Signature trait — the one line that says what this heritage *does*.
-        g.drawString(font, Component.translatable("gui.wizards_and_beasts.heritage.signature_trait",
+        // Signature trait — the one line that says what this heritage *does*. Wrapped, not drawn
+        // flat: it is a translated string composed from a per-heritage key, so its width is not ours
+        // to assume, and "Wandcraft & spellcasting" already overran the panel.
+        List<FormattedCharSequence> signature = font.split(
+                Component.translatable("gui.wizards_and_beasts.heritage.signature_trait",
                         Component.translatable("heritage.wizards_and_beasts." + heritage.getId() + ".trait")),
-                tx, cursorY, WizardsPalette.BRASS, false);
-        cursorY += font.lineHeight + 4;
+                innerW);
+        for (FormattedCharSequence line : signature) {
+            g.drawString(font, line, tx, cursorY, WizardsPalette.BRASS, false);
+            cursorY += font.lineHeight;
+        }
+        cursorY += 4;
 
-        // Lore. Bounded by the space actually left above the flavour line rather than a fixed line
-        // count, so a long blurb truncates instead of running out through the panel floor.
-        int flavourH = font.lineHeight * 2 + 4;
-        int loreBudget = (y + h - PAD - flavourH) - cursorY;
-        int maxLines = Math.max(0, loreBudget / font.lineHeight);
+        // Flavour sits in a footer above its own rule, so the space between lore and flavour reads
+        // as a deliberate margin rather than as the panel having run out of things to say.
+        List<FormattedCharSequence> flavour = font.split(
+                Component.translatable("heritage.wizards_and_beasts." + heritage.getId() + ".flavor")
+                        .withStyle(style -> style.withItalic(true)), innerW);
+        int flavourLines = Math.min(2, flavour.size());
+        int footerY = y + h - PAD - font.lineHeight * flavourLines;
+
+        // Lore. Bounded by the space actually left above the footer rather than a fixed line count,
+        // so a long blurb truncates instead of running out through the panel floor.
+        int maxLines = Math.max(0, (footerY - 6 - cursorY) / font.lineHeight);
         List<FormattedCharSequence> lore = font.split(
                 Component.translatable("heritage.wizards_and_beasts." + heritage.getId() + ".lore"), innerW);
         for (int i = 0; i < Math.min(maxLines, lore.size()); i++) {
@@ -91,14 +111,12 @@ public final class HeritageDossierRenderer {
             cursorY += font.lineHeight;
         }
 
-        // Flavour line, pinned to the panel floor so it does not float mid-panel for short lore.
-        List<FormattedCharSequence> flavour = font.split(
-                Component.translatable("heritage.wizards_and_beasts." + heritage.getId() + ".flavor")
-                        .withStyle(style -> style.withItalic(true)), innerW);
-        int flavourY = y + h - PAD - font.lineHeight * Math.min(2, flavour.size());
-        for (int i = 0; i < Math.min(2, flavour.size()); i++) {
-            g.drawString(font, flavour.get(i), tx, flavourY, WizardsPalette.TEXT_DIM, false);
-            flavourY += font.lineHeight;
+        if (flavourLines > 0) {
+            McStylePanel.drawDivider(g, tx, footerY - WizardsMetrics.DIVIDER_H - 1, innerW);
+            for (int i = 0; i < flavourLines; i++) {
+                g.drawString(font, flavour.get(i), tx, footerY, WizardsPalette.TEXT_DIM, false);
+                footerY += font.lineHeight;
+            }
         }
 
         if (locked) {
@@ -183,7 +201,7 @@ public final class HeritageDossierRenderer {
         ty += font.lineHeight + 6;
 
         centered(g, font, Component.literal(heritage.getDisplayName() + " — " + variant.getDisplayName()),
-                cx, ty, heritage.getColor() | 0xFF000000);
+                cx, ty, UiContrast.readableOn(heritage.getColor(), WizardsPalette.PLATE, UiContrast.AA_LARGE));
         ty += font.lineHeight + 8;
 
         for (FormattedCharSequence line : font.split(
