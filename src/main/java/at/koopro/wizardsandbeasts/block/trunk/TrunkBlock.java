@@ -5,7 +5,7 @@ import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.trunk.ExtensionCharmService;
 import at.koopro.wizardsandbeasts.trunk.TrunkAccessMode;
-import at.koopro.wizardsandbeasts.trunk.TrunkArchetype;
+import at.koopro.wizardsandbeasts.trunk.PocketArchetype;
 import at.koopro.wizardsandbeasts.trunk.TrunkRecord;
 import at.koopro.wizardsandbeasts.trunk.TrunkRegistryData;
 import at.koopro.wizardsandbeasts.trunk.TrunkTier;
@@ -69,15 +69,15 @@ public class TrunkBlock extends BaseEntityBlock {
     public static final MapCodec<TrunkBlock> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             TrunkTier.CODEC.fieldOf("radiusTier").forGetter(block -> block.radiusTier),
             Codec.INT.fieldOf("lockCount").forGetter(block -> block.lockCount),
-            TrunkArchetype.CODEC.fieldOf("archetype").forGetter(block -> block.archetype),
+            PocketArchetype.CODEC.fieldOf("archetype").forGetter(block -> block.archetype),
             propertiesCodec()
     ).apply(instance, TrunkBlock::new));
 
     private final TrunkTier radiusTier;
     private final int lockCount;
-    private final TrunkArchetype archetype;
+    private final PocketArchetype archetype;
 
-    public TrunkBlock(@NonNull TrunkTier radiusTier, int lockCount, @NonNull TrunkArchetype archetype,
+    public TrunkBlock(@NonNull TrunkTier radiusTier, int lockCount, @NonNull PocketArchetype archetype,
                       BlockBehaviour.@NonNull Properties properties) {
         super(properties);
         this.radiusTier = radiusTier;
@@ -90,7 +90,7 @@ public class TrunkBlock extends BaseEntityBlock {
         return radiusTier;
     }
 
-    public @NonNull TrunkArchetype archetype() {
+    public @NonNull PocketArchetype archetype() {
         return archetype;
     }
 
@@ -218,7 +218,7 @@ public class TrunkBlock extends BaseEntityBlock {
         boolean muggleWorthy = trunkEntity.isMuggleWorthy();
 
         UUID compartmentId = lockCaseId(base, lock);
-        TrunkArchetype compartmentArchetype = decoy ? TrunkArchetype.FIELD_CAMP : archetype;
+        PocketArchetype compartmentArchetype = decoy ? PocketArchetype.FIELD_CAMP : archetype;
         String templateId = decoy ? "trunk_decoy" : "trunk_lock_" + lock;
         // Decoy is a small, plain shell (smallest preset); real compartments use this trunk's radius tier.
         TrunkTier spaceTier = decoy ? TrunkTier.TIER_1 : radiusTier;

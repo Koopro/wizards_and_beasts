@@ -9,19 +9,19 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 import java.util.List;
 
-public enum TrunkArchetype implements StringRepresentable {
+public enum PocketArchetype implements StringRepresentable {
     SCAMANDER_SANCTUARY("scamander_sanctuary"),
     FIELD_CAMP("field_camp"),
     MINISTRY_STANDARD("ministry_standard"),
     SAFEHOUSE("safehouse"),
     ASTRONOMERS_RETREAT("astronomers_retreat");
 
-    public static final Codec<TrunkArchetype> CODEC =
-            StringRepresentable.fromValues(TrunkArchetype::values);
+    public static final Codec<PocketArchetype> CODEC =
+            StringRepresentable.fromValues(PocketArchetype::values);
 
     private final String serializedName;
 
-    TrunkArchetype(String serializedName) {
+    PocketArchetype(String serializedName) {
         this.serializedName = serializedName;
     }
 
@@ -34,8 +34,8 @@ public enum TrunkArchetype implements StringRepresentable {
         return "trunk.archetype.wizards_and_beasts." + serializedName;
     }
 
-    public TrunkArchetype next() {
-        TrunkArchetype[] values = values();
+    public PocketArchetype next() {
+        PocketArchetype[] values = values();
         return values[(ordinal() + 1) % values.length];
     }
 

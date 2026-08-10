@@ -36,7 +36,7 @@ public final class ExtensionCharmService {
 
     public static TrunkRecord getOrCreatePocket(ServerPlayer player,
                                                 UUID caseId,
-                                                TrunkArchetype archetype,
+                                                PocketArchetype archetype,
                                                 String templateId,
                                                 TrunkAccessMode accessMode,
                                                 boolean muggleWorthy,
@@ -121,7 +121,7 @@ public final class ExtensionCharmService {
         PocketShellGenerator.ensurePocketShell(target, record, data);
 
         // SCAMANDER: spawn on shed roof trapdoor (cy+5); others: floor trapdoor (cy).
-        BlockPos spawn = record.archetype() == TrunkArchetype.SCAMANDER_SANCTUARY
+        BlockPos spawn = record.archetype() == PocketArchetype.SCAMANDER_SANCTUARY
                 ? new BlockPos(record.spawnPos().getX(), record.spawnPos().getY() + 5, record.spawnPos().getZ())
                 : record.spawnPos();
         TeleportTransition transition = new TeleportTransition(

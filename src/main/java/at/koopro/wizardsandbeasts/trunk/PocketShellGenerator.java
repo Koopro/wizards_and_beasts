@@ -46,13 +46,13 @@ final class PocketShellGenerator {
 
         BlockPos center = record.spawnPos();
         int radius = record.pocketRadius();
-        TrunkArchetype archetype = record.archetype();
+        PocketArchetype archetype = record.archetype();
         boolean circular = archetype.isCircular();
         long seed = record.seed();
         BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
 
         // Floor — SCAMANDER_SANCTUARY uses zone-based habitat floors
-        if (archetype == TrunkArchetype.SCAMANDER_SANCTUARY) {
+        if (archetype == PocketArchetype.SCAMANDER_SANCTUARY) {
             PocketSanctuaryFurnisher.placeSanctuaryFloor(level, center, radius, seed);
         } else {
             BlockState floor = switch (archetype) {
@@ -70,7 +70,7 @@ final class PocketShellGenerator {
                 }
             }
             // FIELD_CAMP: scatter occasional dirt and rooted dirt patches
-            if (archetype == TrunkArchetype.FIELD_CAMP) {
+            if (archetype == PocketArchetype.FIELD_CAMP) {
                 for (int x = -radius; x <= radius; x++) {
                     for (int z = -radius; z <= radius; z++) {
                         if (x * x + z * z > radius * radius) continue;
@@ -114,9 +114,9 @@ final class PocketShellGenerator {
         }
 
         // SCAMANDER_SANCTUARY: irregular lantern clusters per habitat zone spec
-        if (archetype == TrunkArchetype.SCAMANDER_SANCTUARY) {
+        if (archetype == PocketArchetype.SCAMANDER_SANCTUARY) {
             PocketSanctuaryFurnisher.placeSanctuaryCeilingLights(level, center, radius, wallTop);
-        } else if (archetype == TrunkArchetype.MINISTRY_STANDARD) {
+        } else if (archetype == PocketArchetype.MINISTRY_STANDARD) {
             for (int x = -radius; x <= radius; x++) {
                 for (int z = -radius; z <= radius; z++) {
                     cursor.set(center.getX() + x, wallTop + 1, center.getZ() + z);
@@ -149,7 +149,7 @@ final class PocketShellGenerator {
             PocketSanctuaryFurnisher.placeSanctuaryZoneFeatures(level, center, radius, seed, wallTop);
         }
 
-        if (archetype == TrunkArchetype.SCAMANDER_SANCTUARY) {
+        if (archetype == PocketArchetype.SCAMANDER_SANCTUARY) {
             // Shed already placed its own exit trapdoor and south door; no generic markers.
         } else {
             placeEntryExitMarkers(level, center, wallTop);

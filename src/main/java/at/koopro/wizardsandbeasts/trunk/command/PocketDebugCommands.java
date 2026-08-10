@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.trunk.command;
 
 import at.koopro.wizardsandbeasts.trunk.TrunkAccessMode;
-import at.koopro.wizardsandbeasts.trunk.TrunkArchetype;
+import at.koopro.wizardsandbeasts.trunk.PocketArchetype;
 import at.koopro.wizardsandbeasts.trunk.ExtensionCharmService;
 import at.koopro.wizardsandbeasts.trunk.TrunkRecord;
 import at.koopro.wizardsandbeasts.trunk.TrunkTier;
@@ -30,7 +30,7 @@ public final class PocketDebugCommands {
                 .then(Commands.literal("enter")
                         .then(Commands.argument("archetype", StringArgumentType.word())
                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
-                                        Arrays.stream(TrunkArchetype.values()).map(TrunkArchetype::getSerializedName), builder))
+                                        Arrays.stream(PocketArchetype.values()).map(PocketArchetype::getSerializedName), builder))
                                 .executes(ctx -> enterPocket(
                                         ctx.getSource().getPlayerOrException(),
                                         StringArgumentType.getString(ctx, "archetype")))))
@@ -44,12 +44,12 @@ public final class PocketDebugCommands {
                         .executes(ctx -> listPockets(ctx.getSource().getPlayerOrException())));
     }
 
-    private static UUID debugCaseId(ServerPlayer player, TrunkArchetype archetype) {
+    private static UUID debugCaseId(ServerPlayer player, PocketArchetype archetype) {
         return UUID.nameUUIDFromBytes((player.getUUID().toString() + archetype.getSerializedName()).getBytes());
     }
 
     private static int enterPocket(ServerPlayer player, String archetypeName) {
-        TrunkArchetype archetype = Arrays.stream(TrunkArchetype.values())
+        PocketArchetype archetype = Arrays.stream(PocketArchetype.values())
                 .filter(a -> a.getSerializedName().equals(archetypeName))
                 .findFirst()
                 .orElse(null);

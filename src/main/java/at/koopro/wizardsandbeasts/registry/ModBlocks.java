@@ -8,7 +8,7 @@ import at.koopro.wizardsandbeasts.block.trunk.PocketConfiguratorBlock;
 import at.koopro.wizardsandbeasts.block.trunk.TentCanvasBlock;
 import at.koopro.wizardsandbeasts.block.trunk.TentGrandBlock;
 import at.koopro.wizardsandbeasts.block.trunk.TrunkBlock;
-import at.koopro.wizardsandbeasts.trunk.TrunkArchetype;
+import at.koopro.wizardsandbeasts.trunk.PocketArchetype;
 import at.koopro.wizardsandbeasts.trunk.TrunkTier;
 import at.koopro.wizardsandbeasts.block.WardingStoneBlock;
 import at.koopro.wizardsandbeasts.block.location.DiagonAlleyBlocks;
@@ -178,7 +178,7 @@ public class ModBlocks {
 
     public static final DeferredBlock<TrunkBlock> ENCHANTED_TRUNK =
             BLOCKS.registerBlock("enchanted_trunk",
-                    props -> new TrunkBlock(TrunkTier.TIER_1, 1, TrunkArchetype.FIELD_CAMP, props),
+                    props -> new TrunkBlock(TrunkTier.TIER_1, 1, PocketArchetype.FIELD_CAMP, props),
                     () -> BlockBehaviour.Properties.of().strength(2.0f).sound(SoundType.WOOD).requiresCorrectToolForDrops().noOcclusion());
 
     public static final DeferredItem<BlockItem> ENCHANTED_TRUNK_ITEM =
@@ -186,7 +186,7 @@ public class ModBlocks {
 
     public static final DeferredBlock<TrunkBlock> EXPANDED_TRUNK =
             BLOCKS.registerBlock("expanded_trunk",
-                    props -> new TrunkBlock(TrunkTier.TIER_2, 3, TrunkArchetype.MINISTRY_STANDARD, props),
+                    props -> new TrunkBlock(TrunkTier.TIER_2, 3, PocketArchetype.MINISTRY_STANDARD, props),
                     () -> BlockBehaviour.Properties.of().strength(2.5f).sound(SoundType.WOOD).requiresCorrectToolForDrops().noOcclusion());
 
     public static final DeferredItem<BlockItem> EXPANDED_TRUNK_ITEM =
@@ -194,7 +194,7 @@ public class ModBlocks {
 
     public static final DeferredBlock<TrunkBlock> MASTERS_TRUNK =
             BLOCKS.registerBlock("masters_trunk",
-                    props -> new TrunkBlock(TrunkTier.TIER_3, 7, TrunkArchetype.MINISTRY_STANDARD, props),
+                    props -> new TrunkBlock(TrunkTier.TIER_3, 7, PocketArchetype.MINISTRY_STANDARD, props),
                     () -> BlockBehaviour.Properties.of().strength(3.0f).sound(SoundType.WOOD).requiresCorrectToolForDrops().noOcclusion());
 
     public static final DeferredItem<BlockItem> MASTERS_TRUNK_ITEM =
@@ -202,7 +202,7 @@ public class ModBlocks {
 
     public static final DeferredBlock<TrunkBlock> MOODYS_TRUNK =
             BLOCKS.registerBlock("moodys_trunk",
-                    props -> new TrunkBlock(TrunkTier.TIER_3, 7, TrunkArchetype.SAFEHOUSE, props),
+                    props -> new TrunkBlock(TrunkTier.TIER_3, 7, PocketArchetype.SAFEHOUSE, props),
                     () -> BlockBehaviour.Properties.of().strength(3.0f).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion());
 
     public static final DeferredItem<BlockItem> MOODYS_TRUNK_ITEM =
@@ -211,7 +211,7 @@ public class ModBlocks {
     // Newt's Case — single large Scamander habitat, Muggle-Worthy toggle on the lock (single-lock).
     public static final DeferredBlock<TrunkBlock> NEWTS_CASE =
             BLOCKS.registerBlock("newts_case_item",
-                    props -> new TrunkBlock(TrunkTier.TIER_3, 1, TrunkArchetype.SCAMANDER_SANCTUARY, props),
+                    props -> new TrunkBlock(TrunkTier.TIER_3, 1, PocketArchetype.SCAMANDER_SANCTUARY, props),
                     () -> BlockBehaviour.Properties.of().strength(2.0f).sound(SoundType.WOOD).requiresCorrectToolForDrops().noOcclusion());
 
     public static final DeferredItem<BlockItem> NEWTS_CASE_ITEM =

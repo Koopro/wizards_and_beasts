@@ -10,7 +10,7 @@ import at.koopro.wizardsandbeasts.wand.stat.WandLength;
 import at.koopro.wizardsandbeasts.item.wand.ExpelliarmusDropTag;
 import at.koopro.wizardsandbeasts.wand.stat.WandWood;
 import at.koopro.wizardsandbeasts.trunk.TrunkAccessMode;
-import at.koopro.wizardsandbeasts.trunk.TrunkArchetype;
+import at.koopro.wizardsandbeasts.trunk.PocketArchetype;
 import at.koopro.wizardsandbeasts.wand.cast.WandAllegiance;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
@@ -136,13 +136,13 @@ public class ModDataComponents {
                             .networkSynchronized(net.minecraft.core.UUIDUtil.STREAM_CODEC)
                             .build());
 
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<TrunkArchetype>> POCKET_ARCHETYPE =
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<PocketArchetype>> POCKET_ARCHETYPE =
             DATA_COMPONENTS.register("pocket_archetype", () ->
-                    DataComponentType.<TrunkArchetype>builder()
-                            .persistent(TrunkArchetype.CODEC)
+                    DataComponentType.<PocketArchetype>builder()
+                            .persistent(PocketArchetype.CODEC)
                             .networkSynchronized(ByteBufCodecs.STRING_UTF8.map(
-                                    value -> TrunkArchetype.valueOf(value.toUpperCase(java.util.Locale.ROOT)),
-                                    TrunkArchetype::getSerializedName))
+                                    value -> PocketArchetype.valueOf(value.toUpperCase(java.util.Locale.ROOT)),
+                                    PocketArchetype::getSerializedName))
                             .build());
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<TrunkAccessMode>> POCKET_ACCESS_MODE =

@@ -7,7 +7,7 @@ import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.trunk.ExtensionCharmService;
 import at.koopro.wizardsandbeasts.trunk.TrunkRecord;
-import at.koopro.wizardsandbeasts.trunk.TrunkArchetype;
+import at.koopro.wizardsandbeasts.trunk.PocketArchetype;
 import at.koopro.wizardsandbeasts.trunk.TrunkRegistryData;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.registry.ModDimensions;
@@ -222,7 +222,7 @@ public class PocketDimensionEvents {
         // SCAMANDER: exit via shed roof trapdoor (cy+5) or shed south door (cy, cz+2)
         final BlockPos ceilingHatch;
         final BlockPos doorLower;
-        if (record.archetype() == TrunkArchetype.SCAMANDER_SANCTUARY) {
+        if (record.archetype() == PocketArchetype.SCAMANDER_SANCTUARY) {
             ceilingHatch = new BlockPos(center.getX(), center.getY() + 5, center.getZ());
             doorLower    = new BlockPos(center.getX(), center.getY(), center.getZ() + 2);
         } else {

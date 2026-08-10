@@ -14,7 +14,7 @@ public record TrunkRecord(
         UUID owner,
         String pocketName,
         TrunkAccessMode accessMode,
-        TrunkArchetype archetype,
+        PocketArchetype archetype,
         String templateId,
         long createdAtEpochSeconds,
         long seed,
@@ -30,7 +30,7 @@ public record TrunkRecord(
             UUIDUtil.CODEC.fieldOf("owner").forGetter(TrunkRecord::owner),
             Codec.STRING.optionalFieldOf("pocketName", "Unnamed Pocket").forGetter(TrunkRecord::pocketName),
             TrunkAccessMode.CODEC.optionalFieldOf("accessMode", TrunkAccessMode.SEALED).forGetter(TrunkRecord::accessMode),
-            TrunkArchetype.CODEC.optionalFieldOf("archetype", TrunkArchetype.FIELD_CAMP).forGetter(TrunkRecord::archetype),
+            PocketArchetype.CODEC.optionalFieldOf("archetype", PocketArchetype.FIELD_CAMP).forGetter(TrunkRecord::archetype),
             Codec.STRING.optionalFieldOf("templateId", "blank_shell").forGetter(TrunkRecord::templateId),
             Codec.LONG.optionalFieldOf("createdAtEpochSeconds", 0L).forGetter(TrunkRecord::createdAtEpochSeconds),
             Codec.LONG.optionalFieldOf("seed", 0L).forGetter(TrunkRecord::seed),
@@ -42,7 +42,7 @@ public record TrunkRecord(
             Codec.BOOL.optionalFieldOf("lockedExternally", false).forGetter(TrunkRecord::lockedExternally)
     ).apply(instance, TrunkRecord::new));
 
-    public static TrunkRecord create(UUID owner, TrunkArchetype archetype, String templateId, BlockPos spawnPos, int maxRadius) {
+    public static TrunkRecord create(UUID owner, PocketArchetype archetype, String templateId, BlockPos spawnPos, int maxRadius) {
         UUID pocketId = UUID.randomUUID();
         HashSet<UUID> members = new HashSet<>();
         members.add(owner);
@@ -80,7 +80,7 @@ public record TrunkRecord(
                 createdAtEpochSeconds, seed, spawnPos, members, pocketRadius, biomeZones, muggleWorthy, lockedExternally);
     }
 
-    public TrunkRecord withArchetype(TrunkArchetype nextArchetype) {
+    public TrunkRecord withArchetype(PocketArchetype nextArchetype) {
         return new TrunkRecord(pocketId, owner, pocketName, accessMode, nextArchetype, templateId,
                 createdAtEpochSeconds, seed, spawnPos, members, pocketRadius, biomeZones, muggleWorthy, lockedExternally);
     }
