@@ -5,6 +5,9 @@ import at.koopro.wizardsandbeasts.spell.imperio.ImperioControlState;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.spell.imperio.ImperioServerLogic;
+import at.koopro.wizardsandbeasts.stats.PlayerStat;
+import at.koopro.wizardsandbeasts.stats.PlayerStatsAPI;
+import at.koopro.wizardsandbeasts.stats.StatEffects;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -25,10 +28,16 @@ public final class SignatureSpellPlayerTickHandler {
         }
         ImperioServerLogic.tickVictim(player);
 
+        // Resolve regenerates out of control, up to the ceiling the WILLPOWER trait allows. Both the
+        // ceiling and the rate scale with the trait, so training Willpower widens the pool and
+        // refills it faster rather than only helping on the roll itself.
         ImperioControlState st = player.getData(ModAttachments.IMPERIO_CONTROL_STATE.get());
-        float will = player.getData(ModAttachments.WILLPOWER.get());
-        if (!st.isControlled() && will < 100f) {
-            player.setData(ModAttachments.WILLPOWER.get(), Math.min(100f, will + 1.0f / 20f));
+        int willTrait = PlayerStatsAPI.getStat(player, PlayerStat.WILLPOWER);
+        float maxResolve = StatEffects.maxResolve(willTrait);
+        float resolve = player.getData(ModAttachments.RESOLVE.get());
+        if (!st.isControlled() && resolve < maxResolve) {
+            player.setData(ModAttachments.RESOLVE.get(),
+                    Math.min(maxResolve, resolve + StatEffects.resolveRegenPerTick(willTrait)));
         }
 
         float mental = player.getData(ModAttachments.MENTAL_STABILITY.get());

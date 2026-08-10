@@ -178,9 +178,21 @@ public class ProtegoShieldEntity extends Entity implements GeoEntity {
                 level.playSound(null, blockPosition(), ModSounds.PROTEGO_HORRIBILIS_ABSORB.get(),
                         SoundSource.PLAYERS, 0.85f, 0.92f);
                 ProtegoAnimationS2CPayload.sendToTracking(this, "absorb");
+                trainCasterReflexes(getCaster(level));
                 continue;
             }
             deflect(level, projectile);
+        }
+    }
+
+    /**
+     * Credits the shield's owner with a stopped spell. Both outcomes count — a Horribilis absorb is
+     * as much a successful block as a deflection, and training only the bounce would quietly punish
+     * the higher tier.
+     */
+    private void trainCasterReflexes(@Nullable ServerPlayer caster) {
+        if (caster != null) {
+            at.koopro.wizardsandbeasts.stats.StatTraining.onSpellDeflected(caster);
         }
     }
 
@@ -196,6 +208,7 @@ public class ProtegoShieldEntity extends Entity implements GeoEntity {
         if (caster != null) {
             projectile.setOwner(caster);
         }
+        trainCasterReflexes(caster);
         int tint = getTier() == 3 ? 0xFF6A0DAD : 0xFF4169E1;
         SpellTintParticleOptions options = new SpellTintParticleOptions(ModParticles.PROTEGO_DEFLECT.get(), tint);
         level.sendParticles(options, projectile.getX(), projectile.getY(), projectile.getZ(),

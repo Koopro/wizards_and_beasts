@@ -175,7 +175,17 @@ public class ModAttachments {
                     .serialize(at.koopro.wizardsandbeasts.spell.petrify.PetrifiedState.CODEC.fieldOf("state"))
                     .build());
 
-    public static final Supplier<AttachmentType<Float>> WILLPOWER =
+    /**
+     * The player's <em>current</em> Resolve: a depleting pool that mind magic drains and that
+     * regenerates out of combat. Distinct from {@link at.koopro.wizardsandbeasts.stats.PlayerStat#WILLPOWER},
+     * which is the permanent trait — the trait sets this pool's ceiling and regen rate via
+     * {@link at.koopro.wizardsandbeasts.stats.StatEffects}. Trait is capacity, this is charge.
+     *
+     * <p>The registered id stays {@code "willpower"} even though the constant was renamed: it is the
+     * NBT key every existing save already wrote, and changing it would silently reset the pool for
+     * every player on update.
+     */
+    public static final Supplier<AttachmentType<Float>> RESOLVE =
             ATTACHMENTS.register("willpower", () -> AttachmentType.builder(() -> 50.0f)
                     .serialize(Codec.floatRange(0f, 100f).fieldOf("value"))
                     .copyOnDeath()

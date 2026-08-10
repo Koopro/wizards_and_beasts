@@ -36,6 +36,9 @@ public final class SpellProficiencyTracker {
             SpellProficiencySyncS2CPayload.sendTo(player, spellId, updated);
         }
         SkillEvents.checkProficiencyMilestone(player, spellId, oldHits, newHits);
+        // Landing spells is what trains PRECISION. Hooked here rather than at the six call sites
+        // that reach this method, so every path that counts as a hit counts as practice.
+        at.koopro.wizardsandbeasts.stats.StatTraining.onSpellHit(player);
         ItemStack wandStack = at.koopro.wizardsandbeasts.util.WandHelper.getWandStack(player);
         if (!wandStack.isEmpty() && player.level() instanceof net.minecraft.server.level.ServerLevel level) {
             WandCastingAllegianceSystem.onSuccessfulCast(player, wandStack, level);

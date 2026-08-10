@@ -73,6 +73,7 @@ public final class SpellExecutor {
         ObscurialCombatRules.applyCastModifiers(ctx.modifiers(), caster);
         at.koopro.wizardsandbeasts.skill.vocation.VocationAbilityHooks.applyCastModifiers(ctx.modifiers(), caster, spell);
         at.koopro.wizardsandbeasts.entity.niffler.HappinessSpellPower.applyCastModifiers(ctx.modifiers(), caster);
+        at.koopro.wizardsandbeasts.stats.StatCastModifiers.applyCastModifiers(ctx.modifiers(), caster);
 
         float corruption = caster.getData(ModAttachments.DARK_CORRUPTION.get());
         if (corruption >= 90.0f

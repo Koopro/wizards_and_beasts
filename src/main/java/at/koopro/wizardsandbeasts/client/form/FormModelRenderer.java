@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.client.form;
 import org.jspecify.annotations.Nullable;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.client.model.ObscurialDarkModel;
 import at.koopro.wizardsandbeasts.client.model.WerewolfModel;
 import at.koopro.wizardsandbeasts.client.model.CentaurModel;
 import at.koopro.wizardsandbeasts.client.model.PatronusStagModel;
@@ -68,6 +69,7 @@ public final class FormModelRenderer {
     private static final float MODEL_Y_OFFSET = -1.501f;
 
     private static WerewolfModel werewolfModel;
+    private static ObscurialDarkModel darkModel;
     private static CentaurModel centaurModel;
     private static PatronusStagModel stagModel;
     private static GoblinFormModel goblinModel;
@@ -110,9 +112,7 @@ public final class FormModelRenderer {
             case SMALL_HUMANOID -> getGoblinModel().render(poseStack, consumer, packedLight, overlay);
             case FLYING -> getBatModel().render(poseStack, consumer, packedLight, overlay);
             case SWIMMING -> getMerfolkModel().render(poseStack, consumer, packedLight, overlay);
-            case SHADOW -> {
-                // Obscurial dark form is represented by particles and overlays, not solid geometry.
-            }
+            case SHADOW -> getDarkModel().render(poseStack, consumer, packedLight, overlay, clientTime());
             default -> {} // HUMANOID handled by vanilla — should never reach here
         }
     }
@@ -202,9 +202,10 @@ public final class FormModelRenderer {
                 case SMALL_HUMANOID -> getGoblinModel().render(tempStack, consumer, light, overlay);
                 case FLYING -> getBatModel().render(tempStack, consumer, light, overlay);
                 case SWIMMING -> getMerfolkModel().render(tempStack, consumer, light, overlay);
-                case SHADOW -> {
-                    // Obscurial dark form uses particle cloud rendering only.
-                }
+                // The obscurial's smoke churns off the player's own age, so two transformed
+                // players next to each other are not in lockstep.
+                case SHADOW -> getDarkModel().render(tempStack, consumer, light, overlay,
+                        src != null ? src.ageInTicks : clientTime());
                 default -> {}
             }
         });
@@ -336,6 +337,17 @@ public final class FormModelRenderer {
     private static WerewolfModel getWerewolfModel() {
         if (werewolfModel == null) werewolfModel = new WerewolfModel();
         return werewolfModel;
+    }
+
+    private static ObscurialDarkModel getDarkModel() {
+        if (darkModel == null) darkModel = new ObscurialDarkModel();
+        return darkModel;
+    }
+
+    /** Fallback animation clock for call sites with no render state to read {@code ageInTicks} from. */
+    private static float clientTime() {
+        Minecraft mc = Minecraft.getInstance();
+        return mc.level == null ? 0.0f : (float) (mc.level.getGameTime() % 100000L);
     }
 
     private static CentaurModel getCentaurModel() {

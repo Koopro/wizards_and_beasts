@@ -2,8 +2,13 @@ package at.koopro.wizardsandbeasts.client.gui.character.tab;
 
 import at.koopro.wizardsandbeasts.client.currency.state.ClientVaultDataState;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
+import at.koopro.wizardsandbeasts.client.stats.ClientStatsState;
 import at.koopro.wizardsandbeasts.item.wand.WandItem;
+import at.koopro.wizardsandbeasts.module.Module;
+import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.registry.ModAttributes;
+import at.koopro.wizardsandbeasts.stats.PlayerStat;
+import at.koopro.wizardsandbeasts.stats.PlayerStatsData;
 import at.koopro.wizardsandbeasts.util.WandHelper;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.WandEligibility;
@@ -37,6 +42,10 @@ public final class AttributesTab implements CharacterTab {
      *  empty one, which is why Armor / Wand Affinity / Beast Resistance read as unfinished. */
     private static final int COLOR_BAR_TRACK = 0xFF3B2A16;
     private static final int COLOR_BAR_FILL  = 0xFF886622;
+    /** Training hairline. Deliberately dimmer than {@link #COLOR_BAR_FILL} so the point a player
+     *  has earned stays visually louder than the fraction they are working towards. */
+    private static final int COLOR_TRAINING_FILL = 0xFF5E4A22;
+    private static final int COLOR_PRODIGY   = 0xFFFFD700;
     /** Clear space kept between a truncated label and its right-aligned value. */
     private static final int LABEL_VALUE_GAP = 4;
     private static final int COLOR_ELIGIBLE   = 0xFF55FF55;
@@ -73,6 +82,13 @@ public final class AttributesTab implements CharacterTab {
         int cx = x + 2;
         int cy = y + 2 - (int) scrollOffset;
         int top = cy;
+
+        // ── 5 player stats in a 2-column grid ─────────────────────────────
+        // Above the attributes on purpose: these are the character's own numbers, where the block
+        // below is the sum of everything currently modifying them.
+        if (ModuleManager.isEnabled(Module.PLAYER_STATS) && ClientStatsState.hasData()) {
+            cy = drawStatsSection(g, font, cx, cy, w - 4);
+        }
 
         // ── 6 attribute cards in a 2-column grid ──────────────────────────
         g.drawString(font, "Attributes", cx, cy, COLOR_SECTION, false);
@@ -116,6 +132,70 @@ public final class AttributesTab implements CharacterTab {
     }
 
     // ── private helpers ───────────────────────────────────────────────────
+
+    /**
+     * Paints the five {@link PlayerStat} values and returns the new content cursor.
+     *
+     * <p>Card layout, palette and truncation are {@link #drawAttrCard}'s — a stat card is an
+     * attribute card on a fixed 0–100 scale plus, for the three trainable stats, a hairline showing
+     * how far into the next point the player is. Without that second bar the main bar sits still for
+     * hundreds of casts and training reads as broken.
+     *
+     * <p>Section header is a bare literal to match "Attributes", "Wand" and "Currency" below it; the
+     * stat <em>names</em> go through {@link PlayerStat#displayName()}, whose keys already ship.
+     */
+    private int drawStatsSection(@NonNull GuiGraphics g, @NonNull Font font, int x, int y, int w) {
+        PlayerStatsData stats = ClientStatsState.get();
+
+        g.drawString(font, "Stats", x, y, COLOR_SECTION, false);
+        if (stats.isProdigy()) {
+            String tag = "♦ Prodigy";
+            g.drawString(font, tag, x + w - font.width(tag), y, COLOR_PRODIGY, false);
+        }
+        y += 10;
+
+        PlayerStat[] order = {
+            PlayerStat.POWER, PlayerStat.PRECISION,
+            PlayerStat.WILLPOWER, PlayerStat.REFLEXES,
+            PlayerStat.KNOWLEDGE,
+        };
+
+        int cardW = (w - CARD_GAP) / 2;
+        for (int i = 0; i < order.length; i++) {
+            PlayerStat stat = order[i];
+            int cardX = x + (i % 2) * (cardW + CARD_GAP);
+            int cardY = y + (i / 2) * (CARD_H + CARD_GAP);
+            drawStatCard(g, cardX, cardY, cardW, stat, valueOf(stats, stat),
+                         stat.isTrainable() ? stats.trainingProgress().getOrDefault(stat, 0f) : -1f);
+        }
+
+        int rows = (order.length + 1) / 2;
+        return y + rows * (CARD_H + CARD_GAP) + 2;
+    }
+
+    /** @param trainingProgress fraction into the next point, or a negative value to omit the hairline. */
+    private void drawStatCard(@NonNull GuiGraphics g, int x, int y, int w,
+                              @NonNull PlayerStat stat, int value, float trainingProgress) {
+        drawAttrCard(g, x, y, w, CARD_H, stat.displayName().getString(), value, 0, 100);
+
+        if (trainingProgress < 0f) return;
+        int barY = y + 19;
+        int barW = w - 6;
+        g.fill(x + 3, barY, x + 3 + barW, barY + 2, COLOR_BAR_TRACK);
+        int filled = Math.max(0, Math.min(barW, (int) (trainingProgress * barW)));
+        g.fill(x + 3, barY, x + 3 + filled, barY + 2, COLOR_TRAINING_FILL);
+    }
+
+    /** KNOWLEDGE is derived server-side; the client reads the last synced snapshot for all five. */
+    private static int valueOf(@NonNull PlayerStatsData stats, @NonNull PlayerStat stat) {
+        return switch (stat) {
+            case POWER     -> stats.power();
+            case PRECISION -> stats.precision();
+            case WILLPOWER -> stats.willpower();
+            case REFLEXES  -> stats.reflexes();
+            case KNOWLEDGE -> stats.knowledge();
+        };
+    }
 
     private void drawAttributeCards(@NonNull GuiGraphics g, @NonNull LocalPlayer player,
                                     int x, int y, int w) {

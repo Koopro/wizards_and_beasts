@@ -40,11 +40,17 @@ public final class LegilimencyServerLogic {
 
         if (target instanceof ServerPlayer) {
             ServerPlayer targetPlayer = (ServerPlayer) target;
-            float resistChance = PlayerAbilityHelper.getOcclumencyLevel(targetPlayer) * 0.8f;
+            // Occlumency training decides whether a defence exists at all; Willpower decides how well
+            // it holds. Scaling rather than adding keeps an untrained Occlumens at zero.
+            int willTrait = at.koopro.wizardsandbeasts.stats.PlayerStatsAPI.getStat(
+                    targetPlayer, at.koopro.wizardsandbeasts.stats.PlayerStat.WILLPOWER);
+            float resistChance = PlayerAbilityHelper.getOcclumencyLevel(targetPlayer) * 0.8f
+                    * at.koopro.wizardsandbeasts.stats.StatEffects.resistScalar(willTrait);
             if (targetPlayer.getRandom().nextFloat() < resistChance) {
                 targetPlayer.displayClientMessage(Component.literal("You felt a presence attempting to enter your mind — and repelled it.").withStyle(ChatFormatting.AQUA), false);
                 caster.displayClientMessage(Component.literal("Their mind resisted your intrusion.").withStyle(ChatFormatting.YELLOW), false);
                 PlayerAbilityHelper.setLegilimencyCooldownTicks(caster, 600);
+                at.koopro.wizardsandbeasts.stats.StatTraining.onMindDefended(targetPlayer);
                 at.koopro.wizardsandbeasts.stats.StatMilestones.onMilestoneTriggered(
                         targetPlayer, at.koopro.wizardsandbeasts.stats.MilestoneType.FIRST_OCCLUMENCY_DEFENCE_SUCCESS);
                 return;

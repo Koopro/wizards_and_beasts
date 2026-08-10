@@ -55,6 +55,18 @@ public final class PowerBandTable {
         return band != null ? band.max() : DEFAULT_BAND.max();
     }
 
+    /**
+     * Returns the lowest Power this variant can roll (band min). Unknown variants use 20.
+     *
+     * <p>Only the five Wizardkind variants have their own band, so every other heritage's lineages
+     * resolve to {@link #DEFAULT_BAND} and report the same 20–70. That is pre-existing behaviour
+     * that the selection screen's band readout now makes visible rather than something it changes.
+     */
+    public static int getBandMin(HeritageVariant variant) {
+        PowerBand band = BANDS.get(variant.getId());
+        return band != null ? band.min() : DEFAULT_BAND.min();
+    }
+
     public static PowerRollResult rollInitialPower(HeritageVariant variant, RandomSource random) {
         PowerBand band = BANDS.get(variant.getId());
 

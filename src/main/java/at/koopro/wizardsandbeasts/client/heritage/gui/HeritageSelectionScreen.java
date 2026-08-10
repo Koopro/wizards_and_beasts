@@ -1,56 +1,75 @@
 package at.koopro.wizardsandbeasts.client.heritage.gui;
 
-import at.koopro.wizardsandbeasts.client.gui.config.InkRevealRenderer;
+import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
+import at.koopro.wizardsandbeasts.client.gui.character.widget.PlayerModelViewport;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
+import at.koopro.wizardsandbeasts.client.gui.widget.CyclerWidget;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import at.koopro.wizardsandbeasts.network.heritage.HeritageSelectC2SPayload;
-import at.koopro.wizardsandbeasts.stats.PowerBandTable;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.RandomSource;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
- * First-join Heritage selection — a ceremonial master-detail "character-creation" surface:
- * a left rail of all ten heritages (available vs locked-but-browsable) and a right detail panel
- * with lore, an identity card, and a variant selector, sealed by a final-confirm overlay.
+ * First-join Heritage selection: two cyclers on the left, a dossier in the middle, and the player
+ * you are about to become on the right.
+ *
+ * <p>This replaced a scrolling rail of ten heritages plus a wrap-around grid of lineage chips. The
+ * rail meant the identity you were choosing competed for space with the list you were choosing it
+ * from; collapsing both lists into {@code ◀ label ▶} cyclers hands that space to the dossier and the
+ * live preview, which are the things a player is actually reading.
  *
  * <p><b>Gate mode (unchanged):</b> this screen is the hard first-join gate. {@link #shouldCloseOnEsc()}
  * is {@code false}, {@link #isPauseScreen()} is {@code false}, and ESC is swallowed at the root — the
  * only exit is committing an available heritage (or, while the confirm overlay is open, ESC steps back
- * to browsing). Opened server-side via {@code HeritageDataSyncS2CPayload.openSelector()}; the
- * parameterless constructor and these overrides preserve the existing gate contract exactly.</p>
+ * to browsing). Opened server-side via {@code HeritageDataSyncS2CPayload.openSelector()}.
  */
 public class HeritageSelectionScreen extends Screen {
 
-    private static final int NAT_W = 400;
-    private static final int NAT_H = 232;
+    private static final int NAT_W = 416;
+    private static final int NAT_H = 236;
     private static final int MARGIN = GuiScaleHelper.DEFAULT_MARGIN;
-    private static final int CHIP_STAGGER_MS = 55;
 
-    private final InkRevealRenderer inkReveal = new InkRevealRenderer();
+    /** Column widths in design space: 8 | 104 | 6 | 180 | 6 | 104 | 8. */
+    private static final int COL_SIDE_W = 104;
+    private static final int COL_MID_W = 180;
+    private static final int COL_GAP = 6;
+    private static final int EDGE = 8;
+
+    /**
+     * Cosmetic only — this picks what the screen <em>shows</em>. The Power roll that actually
+     * matters happens server-side in {@code PlayerStatsAPI.initializeStatsForNewPlayer} off the
+     * player's own {@code RandomSource}, so nothing here can influence a committed character.
+     */
+    private static final RandomSource RANDOM = RandomSource.create();
+
+    private final PlayerModelViewport viewport = new PlayerModelViewport();
 
     @Nullable private Heritage selectedHeritage;
     @Nullable private HeritageVariant selectedVariant;
     private boolean confirmOpen;
 
+    @Nullable private CyclerWidget<Heritage> heritageCycler;
+    @Nullable private CyclerWidget<HeritageVariant> variantCycler;
+
     // ── Layout (recomputed in init) ──────────────────────────────────────
     private float scale = 1.0F;
     private int left, top, scaledW, scaledH;
-    private int railX, railTop, railW, entryH, entryGap;
-    private int railVisible;          // rail entries that fit the viewport
-    private int railScroll;           // index of the first visible rail entry
-    private int detailX, detailTop, detailW;
-    private int nameY, loreY, cardX, cardY, cardW, cardH, variantHeaderY, chipsY;
-    private int chipW, chipH, chipGapX, chipGapY;
-    private int confirmX, confirmY, confirmW, confirmH;
+    private int leftColX, midColX, rightColX, contentTop, contentBottom;
+    private int cyclerH;
+    private int previewY, previewH, traitsY;
     private int overlayX, overlayY, overlayW, overlayH;
 
     public HeritageSelectionScreen() {
@@ -65,7 +84,6 @@ public class HeritageSelectionScreen extends Screen {
             selectedHeritage = Heritage.values()[0];
             selectedVariant = selectedHeritage.getSubtypes().get(0);
         }
-        inkReveal.reset();
         rebuild();
     }
 
@@ -76,43 +94,18 @@ public class HeritageSelectionScreen extends Screen {
         left = GuiScaleHelper.clampedLeft(scaledW, width, MARGIN);
         top = GuiScaleHelper.clampedTop(scaledH, height, MARGIN);
 
-        int line = font.lineHeight;
+        leftColX = left + s(EDGE);
+        midColX = leftColX + s(COL_SIDE_W) + s(COL_GAP);
+        rightColX = midColX + s(COL_MID_W) + s(COL_GAP);
 
-        railX = left + s(8);
-        railTop = top + s(26);
-        railW = s(116);
-        entryH = s(15);
-        entryGap = s(2);
+        contentTop = top + s(28);
+        contentBottom = top + scaledH - s(EDGE);
 
-        // How many whole rail entries fit between railTop and the panel's bottom margin.
-        int railViewH = scaledH - (railTop - top) - s(10);
-        railVisible = Math.max(1, (railViewH + entryGap) / (entryH + entryGap));
-        railVisible = Math.min(railVisible, Heritage.values().length);
-        clampRailScroll();
+        cyclerH = Math.max(font.lineHeight + 4, s(15));
 
-        detailX = left + s(132);
-        detailTop = top + s(26);
-        int detailRight = left + scaledW - s(8);
-        detailW = detailRight - detailX;
-
-        nameY = detailTop + s(2);
-        loreY = nameY + line + s(8);
-        cardX = detailX + s(8);
-        cardY = loreY + line * 3 + s(6);
-        cardW = detailW - s(16);
-        cardH = line * 4 + s(14);
-        variantHeaderY = cardY + cardH + s(6);
-        chipsY = variantHeaderY + line + s(3);
-
-        chipW = s(58);
-        chipH = Math.max(line + 4, s(13));
-        chipGapX = s(4);
-        chipGapY = s(3);
-
-        confirmW = s(104);
-        confirmH = s(18);
-        confirmX = detailX + (detailW - confirmW) / 2;
-        confirmY = top + scaledH - s(22);
+        previewY = contentTop;
+        previewH = s(84);
+        traitsY = previewY + previewH + s(6);
 
         overlayW = s(228);
         overlayH = s(122);
@@ -136,42 +129,41 @@ public class HeritageSelectionScreen extends Screen {
     }
 
     private void buildBrowse() {
-        clampRailScroll();
-        Heritage[] heritages = Heritage.values();
-        int end = Math.min(heritages.length, railScroll + railVisible);
-        for (int i = railScroll; i < end; i++) {
-            final Heritage h = heritages[i];
-            boolean locked = !h.isAlphaAvailable();
-            int y = railTop + (i - railScroll) * (entryH + entryGap);
-            addRenderableWidget(new HeritageRailEntry(railX, y, railW, entryH, h, locked,
-                    () -> h == selectedHeritage, this::selectHeritage));
+        if (selectedHeritage == null) {
+            return;
+        }
+        int colW = s(COL_SIDE_W);
+
+        heritageCycler = new CyclerWidget<>(
+                Arrays.asList(Heritage.values()), selectedHeritage,
+                Heritage::getDisplayName, this::selectHeritage);
+        heritageCycler.setBounds(leftColX, contentTop, colW, cyclerH);
+        heritageCycler.buttons().forEach(this::addRenderableWidget);
+
+        List<HeritageVariant> variants = selectedHeritage.getSubtypes();
+        if (selectedVariant != null && !variants.isEmpty()) {
+            variantCycler = new CyclerWidget<>(
+                    variants, selectedVariant,
+                    HeritageVariant::getDisplayName, this::selectVariant);
+            variantCycler.setBounds(leftColX, contentTop + cyclerH + s(8), colW, cyclerH);
+            variantCycler.buttons().forEach(this::addRenderableWidget);
+        } else {
+            variantCycler = null;
         }
 
-        if (selectedHeritage != null) {
-            List<HeritageVariant> variants = selectedHeritage.getSubtypes();
-            int cx = detailX + s(8);
-            int cy = chipsY;
-            int detailRight = detailX + detailW - s(8);
-            for (int i = 0; i < variants.size(); i++) {
-                final HeritageVariant v = variants.get(i);
-                if (cx + chipW > detailRight) {
-                    cx = detailX + s(8);
-                    cy += chipH + chipGapY;
-                }
-                HeritageVariantChip chip = new HeritageVariantChip(cx, cy, chipW, chipH, v,
-                        () -> v == selectedVariant, this::selectVariant);
-                addRenderableWidget(chip);
-                inkReveal.register(chip, i + 2, CHIP_STAGGER_MS);
-                cx += chipW + chipGapX;
-            }
+        // Randomise sits at the foot of the left column, opposite Confirm on the right, so the two
+        // "commit something" actions bracket the dossier rather than crowding each other.
+        addRenderableWidget(Button.builder(
+                        Component.translatable("gui.wizards_and_beasts.heritage.randomise"),
+                        b -> randomise())
+                .bounds(leftColX, contentBottom - s(18), colW, s(18)).build());
 
-            Button confirm = Button.builder(
-                    Component.translatable("gui.wizards_and_beasts.heritage.confirm"),
-                    b -> openConfirm())
-                    .bounds(confirmX, confirmY, confirmW, confirmH).build();
-            confirm.active = selectedHeritage.isAlphaAvailable() && selectedVariant != null;
-            addRenderableWidget(confirm);
-        }
+        Button confirm = Button.builder(
+                        Component.translatable("gui.wizards_and_beasts.heritage.confirm"),
+                        b -> openConfirm())
+                .bounds(rightColX, contentBottom - s(18), s(COL_SIDE_W), s(18)).build();
+        confirm.active = selectedHeritage.isAlphaAvailable() && selectedVariant != null;
+        addRenderableWidget(confirm);
     }
 
     private void buildConfirmOverlay() {
@@ -180,12 +172,12 @@ public class HeritageSelectionScreen extends Screen {
         int by = overlayY + overlayH - s(24);
         int gap = s(8);
         addRenderableWidget(Button.builder(
-                Component.translatable("gui.wizards_and_beasts.heritage.confirm_cancel"),
-                b -> closeConfirm())
+                        Component.translatable("gui.wizards_and_beasts.heritage.confirm_cancel"),
+                        b -> closeConfirm())
                 .bounds(overlayX + overlayW / 2 - bw - gap / 2, by, bw, bh).build());
         addRenderableWidget(Button.builder(
-                Component.translatable("gui.wizards_and_beasts.heritage.confirm_yes"),
-                b -> commit())
+                        Component.translatable("gui.wizards_and_beasts.heritage.confirm_yes"),
+                        b -> commit())
                 .bounds(overlayX + overlayW / 2 + gap / 2, by, bw, bh).build());
     }
 
@@ -196,9 +188,7 @@ public class HeritageSelectionScreen extends Screen {
             return;
         }
         selectedHeritage = heritage;
-        selectedVariant = heritage.getSubtypes().get(0);
-        inkReveal.reset();
-        ensureSelectedVisible();
+        selectedVariant = heritage.getSubtypes().isEmpty() ? null : heritage.getSubtypes().get(0);
         rebuild();
     }
 
@@ -207,14 +197,33 @@ public class HeritageSelectionScreen extends Screen {
         rebuild();
     }
 
-    /** Move the rail selection by {@code dir} (±1), wrapping, and scroll it into view. */
+    /**
+     * Rolls a random <em>selectable</em> heritage and lineage. Locked heritages are excluded: a
+     * randomiser that can land on something you are not allowed to confirm is a dead end.
+     */
+    private void randomise() {
+        List<Heritage> available = Arrays.stream(Heritage.values())
+                .filter(Heritage::isAlphaAvailable)
+                .filter(h -> !h.getSubtypes().isEmpty())
+                .toList();
+        if (available.isEmpty()) {
+            return;
+        }
+        Heritage heritage = available.get(RANDOM.nextInt(available.size()));
+        List<HeritageVariant> variants = heritage.getSubtypes();
+        selectedHeritage = heritage;
+        selectedVariant = variants.get(RANDOM.nextInt(variants.size()));
+        rebuild();
+    }
+
+    /** Move the heritage selection by {@code dir} (±1), wrapping. */
     private void cycleHeritage(int dir) {
         Heritage[] vals = Heritage.values();
         int idx = selectedHeritage == null ? 0 : selectedHeritage.ordinal();
         selectHeritage(vals[Math.floorMod(idx + dir, vals.length)]);
     }
 
-    /** Move the variant selection by {@code dir} (±1), wrapping within the heritage's lineages. */
+    /** Move the lineage selection by {@code dir} (±1), wrapping within the heritage's lineages. */
     private void cycleVariant(int dir) {
         if (selectedHeritage == null) {
             return;
@@ -228,21 +237,6 @@ public class HeritageSelectionScreen extends Screen {
             idx = 0;
         }
         selectVariant(variants.get(Math.floorMod(idx + dir, variants.size())));
-    }
-
-    private void clampRailScroll() {
-        int max = Math.max(0, Heritage.values().length - railVisible);
-        railScroll = Math.max(0, Math.min(railScroll, max));
-    }
-
-    private void ensureSelectedVisible() {
-        int idx = selectedHeritage == null ? 0 : selectedHeritage.ordinal();
-        if (idx < railScroll) {
-            railScroll = idx;
-        } else if (idx >= railScroll + railVisible) {
-            railScroll = idx - railVisible + 1;
-        }
-        clampRailScroll();
     }
 
     private void openConfirm() {
@@ -269,83 +263,70 @@ public class HeritageSelectionScreen extends Screen {
 
     @Override
     public void render(@NonNull GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        inkReveal.update();
-
-        // Candlelight glow tracks the selected entry's on-screen row (clamped to the viewport).
-        int selectedIndex = selectedHeritage == null ? 0 : selectedHeritage.ordinal();
-        int visibleRow = selectedIndex - railScroll;
-        int glowCy = (visibleRow < 0 || visibleRow >= railVisible)
-                ? railTop + railVisible * (entryH + entryGap) / 2
-                : railTop + visibleRow * (entryH + entryGap) + entryH / 2;
-        float pulse = 0.5F + 0.5F * (float) Math.sin((System.currentTimeMillis() % 4000L) / 4000.0 * 2.0 * Math.PI);
-        HeritageCeremonyRenderer.renderBackdrop(g, width, height, glowCy, pulse);
+        g.fill(0, 0, width, height, WizardsPalette.INK);
 
         if (confirmOpen) {
-            // Browse chrome is not drawn behind the confirm overlay. It used to be, dimmed to ~20% by
-            // OVERLAY_DIM, which left a second wax seal and a layer of ghost lore text crowding the panel
-            // — text too dark to read but too present to ignore. The overlay owns the screen.
-            renderConfirm(g, mouseX, mouseY, partialTick);
+            // Browse chrome is not drawn behind the confirm overlay — the overlay owns the screen.
+            if (selectedHeritage != null && selectedVariant != null) {
+                HeritageDossierRenderer.drawConfirmOverlay(g, font, width, height,
+                        selectedHeritage, selectedVariant, overlayX, overlayY, overlayW, overlayH);
+            }
+            super.render(g, mouseX, mouseY, partialTick);
             return;
         }
 
-        // Rail panel + title.
-        int railPanelH = (entryH + entryGap) * railVisible + s(24);
-        HeritageCeremonyRenderer.drawParchmentPanel(g, railX - s(4), railTop - s(20), railW + s(8), railPanelH);
-        g.drawCenteredString(font, getTitle(), left + scaledW / 2, top + s(8), 0xFFF3E2C0);
+        g.drawCenteredString(font, getTitle(), left + scaledW / 2, top + s(10), WizardsPalette.BRASS_HI);
 
-        // Scroll chevrons when the rail overflows its viewport.
-        int chevronCx = railX + railW / 2;
-        if (railScroll > 0) {
-            HeritageCeremonyRenderer.drawScrollChevron(g, chevronCx, railTop - s(6), false);
-        }
-        if (railScroll + railVisible < Heritage.values().length) {
-            HeritageCeremonyRenderer.drawScrollChevron(g, chevronCx,
-                    railTop + railVisible * (entryH + entryGap) - entryGap + s(2), true);
+        if (selectedHeritage != null) {
+            HeritageDossierRenderer.drawDossier(g, font, midColX, contentTop,
+                    s(COL_MID_W), contentBottom - contentTop,
+                    selectedHeritage, selectedVariant, !selectedHeritage.isAlphaAvailable());
         }
 
-        // Detail panel + content.
-        int detailPanelH = scaledH - (detailTop - top) - s(6);
-        HeritageCeremonyRenderer.drawParchmentPanel(g, detailX - s(4), detailTop - s(4), detailW + s(8), detailPanelH);
+        // Right column: who you will be, then what that costs and grants.
+        if (minecraft != null && minecraft.player instanceof LocalPlayer player) {
+            viewport.render(g, rightColX, previewY, s(COL_SIDE_W), previewH,
+                    partialTick, player, mouseX, mouseY);
+        } else {
+            McStylePanel.drawThemedInset(g, rightColX, previewY, s(COL_SIDE_W), previewH);
+        }
+        if (selectedHeritage != null) {
+            HeritageDossierRenderer.drawTraits(g, font, rightColX, traitsY, s(COL_SIDE_W),
+                    selectedHeritage, selectedVariant);
+        }
 
-        if (selectedHeritage != null && inkReveal.isRevealed(1, CHIP_STAGGER_MS)) {
-            HeritageCeremonyRenderer.drawDetail(g, font, detailX, detailW, selectedHeritage, selectedVariant,
-                    !selectedHeritage.isAlphaAvailable(),
-                    nameY, loreY, 3, cardX, cardY, cardW, cardH, variantHeaderY);
-            // Wax-seal motif beside the Confirm button.
-            HeritageCeremonyRenderer.drawWaxSeal(g, confirmX - s(12), confirmY + confirmH / 2, s(8));
+        // Cycler label panels. The arrows are registered widgets and draw themselves in super.render.
+        if (heritageCycler != null) {
+            heritageCycler.renderLabel(g);
+        }
+        if (variantCycler != null) {
+            variantCycler.renderLabel(g);
+        }
+
+        // Nav hint lives in the left column's dead space under the cyclers. Centred on the screen it
+        // would sit inside the dossier panel (which spans the whole middle column) and overprint the
+        // flavour line.
+        int hintY = contentTop + cyclerH * 2 + s(20);
+        for (var line : font.split(Component.translatable("gui.wizards_and_beasts.heritage.nav_hint"),
+                s(COL_SIDE_W))) {
+            g.drawString(font, line, leftColX, hintY, WizardsPalette.TEXT_DIM, false);
+            hintY += font.lineHeight;
         }
 
         super.render(g, mouseX, mouseY, partialTick);
-        renderHoverTooltips(g, mouseX, mouseY);
+        renderLockedTooltip(g, mouseX, mouseY);
     }
 
-    /** The confirm overlay and its two buttons, over the bare backdrop. */
-    private void renderConfirm(@NonNull GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        if (selectedHeritage != null && selectedVariant != null) {
-            HeritageCeremonyRenderer.drawConfirmOverlay(g, font, width, height, selectedHeritage, selectedVariant,
-                    overlayX, overlayY, overlayW, overlayH);
-        }
-        super.render(g, mouseX, mouseY, partialTick);
-    }
-
-    /** Hover hints: why a locked heritage can't be picked, and each variant's power band. */
-    private void renderHoverTooltips(@NonNull GuiGraphics g, int mouseX, int mouseY) {
-        if (confirmOpen) {
+    /** Explains why Confirm is dead when a browse-only heritage is on screen. */
+    private void renderLockedTooltip(@NonNull GuiGraphics g, int mouseX, int mouseY) {
+        if (confirmOpen || selectedHeritage == null || selectedHeritage.isAlphaAvailable()) {
             return;
         }
-        for (var child : children()) {
-            if (child instanceof HeritageRailEntry entry && entry.isHovered() && entry.isLockedEntry()) {
-                g.setTooltipForNextFrame(font,
-                        Component.translatable("gui.wizards_and_beasts.heritage.locked_tooltip"), mouseX, mouseY);
-                return;
-            }
-            if (child instanceof HeritageVariantChip chip && chip.isHovered()) {
-                HeritageVariant v = chip.variantValue();
-                g.setTooltipForNextFrame(font,
-                        Component.translatable("gui.wizards_and_beasts.heritage.variant_tooltip",
-                                v.getDisplayName(), "≤ " + PowerBandTable.getBandMax(v)), mouseX, mouseY);
-                return;
-            }
+        int cw = s(COL_SIDE_W);
+        int by = contentBottom - s(18);
+        if (mouseX >= rightColX && mouseX < rightColX + cw && mouseY >= by && mouseY < by + s(18)) {
+            g.setTooltipForNextFrame(font,
+                    Component.translatable("gui.wizards_and_beasts.heritage.locked_tooltip"), mouseX, mouseY);
         }
     }
 
@@ -387,14 +368,9 @@ public class HeritageSelectionScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        if (!confirmOpen && scrollY != 0) {
-            int before = railScroll;
-            railScroll -= (int) Math.signum(scrollY);
-            clampRailScroll();
-            if (before != railScroll) {
-                rebuild();
-                return true;
-            }
+        // The rail this used to scroll is gone; the wheel now zooms the player preview.
+        if (!confirmOpen && viewport.mouseScrolled(mouseX, mouseY, scrollY)) {
+            return true;
         }
         return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }

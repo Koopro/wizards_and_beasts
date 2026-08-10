@@ -99,11 +99,21 @@ public final class FormRegistry {
                 "entity/form/animagus_beetle", "animagus_beetle", EnumSet.noneOf(RenderFlag.class)));
     }
 
+    /**
+     * @param texturePath asset path under {@code textures/}, without the extension —
+     *                    e.g. {@code "entity/form/werewolf"}
+     */
     private static PlayerForm form(String id, String displayName, ModelType modelType,
                                     String texturePath, String sizeProfileId,
                                     EnumSet<RenderFlag> flags) {
         return new PlayerForm(id, displayName, modelType,
-                Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, texturePath),
+                // The short path has to be expanded to a real texture location here. A render
+                // type resolves the identifier verbatim — `FormModelRenderer`'s own
+                // PLACEHOLDER_TEXTURE and CAT_TEXTURE constants are both written out in full —
+                // so registering `wizards_and_beasts:entity/form/werewolf` handed every custom
+                // form an id that resolves to nothing, and they all drew missing-texture magenta.
+                Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID,
+                        "textures/" + texturePath + ".png"),
                 sizeProfileId, flags, 1.0f);
     }
 

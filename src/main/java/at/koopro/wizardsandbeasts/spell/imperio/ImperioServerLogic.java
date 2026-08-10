@@ -184,24 +184,37 @@ public final class ImperioServerLogic {
             return;
         }
         if (victim.tickCount % 20 == 0 && st.sneakAttemptSinceLastResistTick()) {
-            float will = victim.getData(ModAttachments.WILLPOWER.get());
+            float resolve = victim.getData(ModAttachments.RESOLVE.get());
             ServerPlayer controller = sl.getServer().getPlayerList().getPlayer(st.controllerUUID());
-            if (will <= 0f) {
+            if (resolve <= 0f) {
                 victim.setData(ModAttachments.IMPERIO_CONTROL_STATE.get(), st.withSneakAttempt(false));
             } else {
+                // Two factors, deliberately separate: how much fight is left in the pool right now,
+                // and how much fight the player is capable of at all. Draining the pool is how the
+                // curse wears someone down; the trait is why a trained mind wears down slower.
+                int willTrait = at.koopro.wizardsandbeasts.stats.PlayerStatsAPI.getStat(
+                        victim, at.koopro.wizardsandbeasts.stats.PlayerStat.WILLPOWER);
+                float charge = resolve / at.koopro.wizardsandbeasts.stats.StatEffects.maxResolve(willTrait);
                 float imperioProf = Spells.IMPERIO.getProficiencyScalar(victim);
-                float resistChance = (will / 100f) * (imperioProf * 0.5f + 0.5f);
+                float resistChance = charge
+                        * (imperioProf * 0.5f + 0.5f)
+                        * at.koopro.wizardsandbeasts.stats.StatEffects.resistScalar(willTrait);
                 boolean success = sl.random.nextFloat() < resistChance;
                 if (success) {
                     clearControl(sl, victim, st.controllerUUID());
-                    victim.setData(ModAttachments.WILLPOWER.get(), Math.max(0f, will - 30f));
+                    victim.setData(ModAttachments.RESOLVE.get(), Math.max(0f,
+                            resolve - at.koopro.wizardsandbeasts.stats.StatEffects.resolveCostToBreakFree(willTrait)));
                     victim.displayClientMessage(
                             Component.literal("You throw off the Imperius Curse!").withStyle(ChatFormatting.GOLD), true);
                     PacketDistributor.sendToPlayer(victim, new ImperioResistS2CPayload(true, 1f));
                     at.koopro.wizardsandbeasts.stats.StatMilestones.onMilestoneTriggered(
                             victim, at.koopro.wizardsandbeasts.stats.MilestoneType.FIRST_IMPERIUS_RESISTED);
                 } else {
-                    victim.setData(ModAttachments.WILLPOWER.get(), Math.max(0f, will - 15f));
+                    victim.setData(ModAttachments.RESOLVE.get(), Math.max(0f,
+                            resolve - at.koopro.wizardsandbeasts.stats.StatEffects.resolveCostOfFailedAttempt(willTrait)));
+                    // Enduring the curse is how Willpower is trained — the attempt that fails still
+                    // teaches, which is the only reason a low-Willpower player can ever climb out.
+                    at.koopro.wizardsandbeasts.stats.StatTraining.onImperiusEndured(victim);
                     victim.addEffect(new MobEffectInstance(ModEffects.IMPERIO_RESISTING, 20, 0, false, true, true));
                     float prog = Math.min(1f, st.resistanceProgress() + 0.1f);
                     victim.setData(ModAttachments.IMPERIO_CONTROL_STATE.get(),

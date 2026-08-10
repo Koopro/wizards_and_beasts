@@ -4,6 +4,9 @@ import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialRules;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
+import at.koopro.wizardsandbeasts.stats.PlayerStat;
+import at.koopro.wizardsandbeasts.stats.PlayerStatsAPI;
+import at.koopro.wizardsandbeasts.stats.StatEffects;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -51,7 +54,11 @@ public final class HeritageAPI {
             return;
         }
 
-        float will = switch (heritage) {
+        // Species Resolve. This is the pool the player starts with, not its ceiling: the ceiling
+        // comes from the WILLPOWER trait, so a Vampire opens with more charge than a House-Elf but
+        // neither can hold more than their trained trait allows. Clamped rather than trusted,
+        // because every seed above 50 exceeds what an untrained trait can carry.
+        float seedResolve = switch (heritage) {
             case WIZARDKIND -> 50.0f;
             case WEREWOLF -> 70.0f;
             case GIANT -> 35.0f;
@@ -61,7 +68,9 @@ public final class HeritageAPI {
             case CENTAUR -> 75.0f;
             default -> 50.0f;
         };
-        player.setData(ModAttachments.WILLPOWER.get(), will);
+        float resolveCeiling = StatEffects.maxResolve(
+                PlayerStatsAPI.getStat(player, PlayerStat.WILLPOWER));
+        player.setData(ModAttachments.RESOLVE.get(), Math.min(seedResolve, resolveCeiling));
 
         double healthMod = heritage.getBaseHealth();
         double speedMod = heritage.getBaseSpeed();

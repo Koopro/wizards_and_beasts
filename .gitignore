@@ -128,10 +128,9 @@ bin/
 .eclipse/
 
 # Local AI / editor / tool state (not shared) — ignore ALL dot-directories,
-# keeping only the ones that are legitimately tracked (.github, .vscode).
+# keeping only the one that is legitimately tracked (.github).
 .*/
 !.github/
-!.vscode/
 
 # Datagen cache (non-source noise)
 src/generated/resources/.cache/
@@ -145,3 +144,13 @@ src/main/graphify-out/
 
 # Python tooling cache
 tools/__pycache__/
+
+# Local-only development scaffolding. These live on disk but are never published:
+# the art/audit generators, Blockbench sources, design notes, task lists and every
+# root-level working document except the README.
+/tools/
+/blockbench/
+/docs/
+/tasks/
+/*.md
+!/README.md
