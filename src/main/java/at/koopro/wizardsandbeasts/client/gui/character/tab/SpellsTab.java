@@ -23,7 +23,6 @@ public final class SpellsTab implements CharacterTab {
     private static final int SCROLLBAR_W = 4;
     private static final int COLOR_SCROLL_TRACK = 0xFF1A1005;
     private static final int COLOR_SCROLL_THUMB = 0xFF886622;
-    private static final int COLOR_SECTION      = 0xFFDDB97A;
     private static final int COLOR_NONE         = 0xFF776655;
 
     private float scrollOffset = 0f; // pixels scrolled from top

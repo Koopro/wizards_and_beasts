@@ -31,7 +31,6 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 /**
  * Server-side held-beam spells while {@link WandItem} is in use.

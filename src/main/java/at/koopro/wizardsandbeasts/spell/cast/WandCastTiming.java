@@ -6,7 +6,6 @@ import at.koopro.wizardsandbeasts.spell.core.*;
 
 import net.minecraft.server.level.ServerPlayer;
 
-import java.util.UUID;
 
 /**
  * Server-only: wand hold duration for the most recent {@code releaseUsing} (e.g. Protego tier).

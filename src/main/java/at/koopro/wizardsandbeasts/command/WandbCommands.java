@@ -21,7 +21,6 @@ import at.koopro.wizardsandbeasts.wand.command.WandCommands;
 import at.koopro.wizardsandbeasts.command.WorldCommands;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.item.wand.DebugWandState;
-import at.koopro.wizardsandbeasts.item.wand.WandItem;
 import at.koopro.wizardsandbeasts.network.debug.BeamDebugOpenS2CPayload;
 import at.koopro.wizardsandbeasts.network.debug.BeamPresetS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;

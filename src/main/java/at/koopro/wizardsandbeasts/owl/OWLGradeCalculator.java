@@ -1,6 +1,5 @@
 package at.koopro.wizardsandbeasts.owl;
 
-import at.koopro.wizardsandbeasts.bestiary.DiscoveryTier;
 import at.koopro.wizardsandbeasts.ability.data.PlayerAbilityData;
 import at.koopro.wizardsandbeasts.bestiary.data.PlayerBestiaryData;
 import at.koopro.wizardsandbeasts.owl.data.PlayerOWLData;

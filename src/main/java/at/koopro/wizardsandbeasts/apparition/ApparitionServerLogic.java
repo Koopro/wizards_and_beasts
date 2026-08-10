@@ -48,8 +48,6 @@ import java.util.List;
  */
 public final class ApparitionServerLogic {
 
-    /** Extra ticks a torn-loose item survives on the ground, so a jump gone wrong is recoverable. */
-    private static final int RESIDUE_LIFETIME_TICKS = 6000;
 
     private ApparitionServerLogic() {
     }

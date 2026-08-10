@@ -1,7 +1,5 @@
 package at.koopro.wizardsandbeasts.client.wand;
 
-import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.client.beam.BeamChannelClient;
 import at.koopro.wizardsandbeasts.network.debug.BeamPresetS2CPayload;
 import com.mojang.logging.LogUtils;
 import net.neoforged.neoforge.network.handling.IPayloadContext;

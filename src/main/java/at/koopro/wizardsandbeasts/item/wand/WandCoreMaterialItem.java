@@ -10,7 +10,6 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 
 import java.util.function.Consumer;
-import at.koopro.wizardsandbeasts.registry.WandItemRegistry;
 
 public class WandCoreMaterialItem extends Item {
     private final @Nullable Component tooltip;

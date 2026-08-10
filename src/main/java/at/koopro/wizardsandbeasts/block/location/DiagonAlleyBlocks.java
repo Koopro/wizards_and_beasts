@@ -6,15 +6,12 @@ import net.minecraft.world.level.block.PressurePlateBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.material.MapColor;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredItem;
 
 import at.koopro.wizardsandbeasts.block.location.LocationBlockHelper.StairSet;
 import at.koopro.wizardsandbeasts.block.location.LocationBlockHelper.VariantSet;
-import at.koopro.wizardsandbeasts.registry.ModBlocks;
-import at.koopro.wizardsandbeasts.registry.ModItems;
 
 // Blocks register unconditionally; their crafting recipes are gated behind Module.STRUCTURES (ModRecipeProvider).
 public final class DiagonAlleyBlocks {

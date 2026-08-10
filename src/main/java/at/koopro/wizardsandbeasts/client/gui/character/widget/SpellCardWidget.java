@@ -21,7 +21,6 @@ public final class SpellCardWidget {
     private static final int COLOR_HI         = 0xFF3A2A14;
     private static final int COLOR_SHADOW     = 0xFF0A0500;
     private static final int COLOR_NAME       = 0xFFEEDDBB;
-    private static final int COLOR_CATEGORY   = 0xFF998877;
 
     // Proficiency pip colors: NOVICE=grey, PROFICIENT=gold, MASTERED=red
     private static final int COLOR_PIP_NONE   = 0xFF443322;

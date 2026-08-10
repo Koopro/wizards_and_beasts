@@ -29,9 +29,6 @@ public final class PlayerModelViewport {
     private static final float FILL_FRACTION = 0.88f;
     private static final float PLAYER_UNITS  = 1.8f;
 
-    private static final int COLOR_FILL   = 0xFF0D0905;
-    private static final int COLOR_HI     = 0xFF3A2A14;
-    private static final int COLOR_SHADOW = 0xFF0A0603;
 
     private float zoom = DEFAULT_ZOOM;
 

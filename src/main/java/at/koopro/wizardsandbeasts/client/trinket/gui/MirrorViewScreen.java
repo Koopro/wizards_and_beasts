@@ -29,7 +29,6 @@ public class MirrorViewScreen extends Screen {
     private final UUID otherUuid;
     private final String otherName;
     private float otherYaw;
-    private float otherPitch;
     private boolean closingFromServer;
 
     public MirrorViewScreen(UUID otherUuid, String otherName) {
@@ -41,7 +40,6 @@ public class MirrorViewScreen extends Screen {
     public static void updatePresence(float yaw, float pitch) {
         if (active != null) {
             active.otherYaw = yaw;
-            active.otherPitch = pitch;
         }
     }
 

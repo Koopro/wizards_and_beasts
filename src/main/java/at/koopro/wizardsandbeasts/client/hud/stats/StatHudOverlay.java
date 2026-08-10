@@ -5,7 +5,6 @@ import at.koopro.wizardsandbeasts.client.spell.SpellKeyBindings;
 import at.koopro.wizardsandbeasts.client.stats.ClientStatsState;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
-import at.koopro.wizardsandbeasts.stats.PlayerStat;
 import at.koopro.wizardsandbeasts.stats.PlayerStatsData;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;

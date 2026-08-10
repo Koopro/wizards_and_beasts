@@ -12,7 +12,6 @@ import net.neoforged.neoforge.common.data.BlockTagCopyingItemTagProvider;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.apparition.splinch.SplinchTags;
-import at.koopro.wizardsandbeasts.block.location.DiagonAlleyBlocks;
 import at.koopro.wizardsandbeasts.block.location.LocationBlockHelper;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleTags;

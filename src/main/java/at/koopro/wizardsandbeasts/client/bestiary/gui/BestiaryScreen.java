@@ -72,10 +72,6 @@ public final class BestiaryScreen extends Screen {
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "textures/gui/bestiary/row.png");
     private static final Identifier TEX_HEADER =
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "textures/gui/bestiary/header.png");
-    private static final Identifier TEX_SCROLL_TRACK =
-            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "textures/gui/bestiary/scroll_track.png");
-    private static final Identifier TEX_SCROLL_THUMB =
-            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "textures/gui/bestiary/scroll_thumb.png");
     private static final Identifier TEX_ENTRY_PLACEHOLDER =
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "textures/gui/bestiary/entry_placeholder.png");
 

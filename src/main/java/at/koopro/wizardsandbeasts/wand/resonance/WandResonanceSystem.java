@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * Pure logic for wand–wizard resonance. Invoked from {@link at.koopro.wizardsandbeasts.item.wand.WandItem}

@@ -16,7 +16,6 @@ public final class ModifierStack {
     private float damage = 1.0f;
     private float cooldown = 1.0f;
     private float misfireChance = 0.0f;
-    private float power = 1.0f;
 
     private final List<String> provenance = new ArrayList<>();
 
@@ -30,11 +29,6 @@ public final class ModifierStack {
         provenance.add(source + ":cooldown*x" + factor);
     }
 
-    public void multiplyPower(float factor, String source) {
-        power *= factor;
-        provenance.add(source + ":power*x" + factor);
-    }
-
     public void addMisfireChance(float chance, String source) {
         misfireChance += chance;
         provenance.add(source + ":misfire+" + chance);
@@ -46,10 +40,6 @@ public final class ModifierStack {
 
     public float finalCooldown() {
         return clamp(cooldown);
-    }
-
-    public float finalPower() {
-        return clamp(power);
     }
 
     public float finalMisfireChance() {

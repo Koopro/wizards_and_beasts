@@ -53,7 +53,6 @@ public final class AttributesTab implements CharacterTab {
     private static final int COLOR_REASON     = 0xFFAA0000;
     private static final int COLOR_DETAIL     = 0xFFAAAAAA;
     private static final int COLOR_WAND_NAME  = 0xFFFFFFFF;
-    private static final int CARD_W         = 88;
     private static final int CARD_H         = 26;
     private static final int CARD_GAP       = 3;
     private static final int SCROLLBAR_W    = 4;

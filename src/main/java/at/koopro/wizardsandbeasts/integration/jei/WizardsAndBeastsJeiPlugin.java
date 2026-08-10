@@ -20,13 +20,11 @@ import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeHolder;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Exposes this mod's two bespoke crafting pipelines to JEI, and keeps JEI's view in step with module state.

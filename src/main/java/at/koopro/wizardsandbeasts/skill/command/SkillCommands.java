@@ -11,7 +11,6 @@ import at.koopro.wizardsandbeasts.skill.SkillTreeId;
 import at.koopro.wizardsandbeasts.skill.SkillTrees;
 import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
 import at.koopro.wizardsandbeasts.skill.vocation.VocationDefinition;
-import at.koopro.wizardsandbeasts.skill.vocation.VocationHelper;
 import at.koopro.wizardsandbeasts.skill.vocation.VocationManager;
 import at.koopro.wizardsandbeasts.skill.vocation.VocationRegistry;
 import at.koopro.wizardsandbeasts.sync.PlayerStateSyncService;
@@ -30,7 +29,6 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 public final class SkillCommands {
 

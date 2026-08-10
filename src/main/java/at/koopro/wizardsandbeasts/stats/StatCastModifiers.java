@@ -20,9 +20,9 @@ import net.minecraft.server.level.ServerPlayer;
  * and is read at the resist rolls in {@code ImperioServerLogic} and {@code LegilimencyServerLogic}.
  * {@link PlayerStat#KNOWLEDGE} is derived and purely informational.
  *
- * <p>POWER goes through {@code multiplyDamage} rather than {@code multiplyPower} because
- * {@code ModifierStack.finalPower()} has no consumers anywhere in the mod — writing to it would look
- * wired and do nothing.
+ * <p>POWER goes through {@code multiplyDamage} because {@code ModifierStack} has no power channel.
+ * It used to carry one, but nothing ever read the result, so the channel was deleted rather than
+ * left as a knob that looks wired and does nothing.
  *
  * <p>Called from {@code SpellExecutor.executeGeneric} alongside the other modifier sources, and
  * necessarily <em>before</em> the misfire roll so the PRECISION delta is in the total that is diced.

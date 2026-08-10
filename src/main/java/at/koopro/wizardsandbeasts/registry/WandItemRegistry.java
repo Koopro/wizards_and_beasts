@@ -10,7 +10,6 @@ import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.customization.WandConfiguration;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.registries.DeferredItem;
 
 public final class WandItemRegistry {

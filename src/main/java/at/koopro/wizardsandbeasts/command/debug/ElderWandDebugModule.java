@@ -15,7 +15,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public final class ElderWandDebugModule implements DebugModule {
 

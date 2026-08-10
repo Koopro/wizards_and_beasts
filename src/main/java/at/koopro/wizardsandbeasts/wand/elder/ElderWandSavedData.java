@@ -1,7 +1,6 @@
 package at.koopro.wizardsandbeasts.wand.elder;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.server.level.ServerLevel;

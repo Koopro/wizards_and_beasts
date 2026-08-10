@@ -82,18 +82,10 @@ public final class CharacterSheetScreen extends Screen {
     private static final int VIEWPORT_SIDE_INSET = WizardsMetrics.SPACE_XL;
 
     // Palette
-    private static final int COLOR_BG       = 0xFF2A1E0F;
-    private static final int COLOR_BG_HI    = 0xFF44321A;
-    private static final int COLOR_BG_SH    = 0xFF1A0F00;
     private static final int COLOR_DIVIDER  = 0xFF44321A;
     private static final int COLOR_TITLE    = 0xFFFFEECC;
     private static final int COLOR_TITLE_SUB = 0xFFAA9977;
-    private static final int COLOR_TAB_ACT  = 0xFF4A3A1A;
-    private static final int COLOR_TAB_INACT = 0xFF251A0A;
-    private static final int COLOR_TAB_HI  = 0xFF66501E;
-    private static final int COLOR_TAB_SH  = 0xFF150D00;
     private static final int COLOR_TAB_TXT = 0xFFCCBB99;
-    private static final int COLOR_EFFECT_BG = 0xFF1E1408;
     private static final int COLOR_EFFECT_TXT = 0xFFCCBB99;
     private static final int COLOR_EFFECT_MORE = 0xFF887766;
 

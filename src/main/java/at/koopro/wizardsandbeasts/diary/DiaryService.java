@@ -2,7 +2,6 @@ package at.koopro.wizardsandbeasts.diary;
 
 import at.koopro.wizardsandbeasts.item.darkartefact.RiddlesDiaryItem;
 import at.koopro.wizardsandbeasts.network.trinket.DiaryReplyS2CPayload;
-import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;

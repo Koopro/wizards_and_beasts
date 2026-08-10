@@ -41,8 +41,6 @@ public class MaraudersMapItem extends GeoItemBase {
             RawAnimation.begin().thenLoop("animation.marauders_map.folded_idle");
     private static final RawAnimation UNFOLDING =
             RawAnimation.begin().thenPlay("animation.marauders_map.unfolding");
-    private static final RawAnimation OPEN_IDLE =
-            RawAnimation.begin().thenLoop("animation.marauders_map.open_idle");
 
     private static final List<String> INSULTS = List.of(
             "Mr. Moony presents his compliments to %s, and begs them to keep their abnormally large nose out of other people's business.",

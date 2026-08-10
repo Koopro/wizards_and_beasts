@@ -11,7 +11,6 @@ public final class VitalsBarWidget {
     private static final int COLOR_LABEL    = 0xFFCCBB99;
     private static final int COLOR_TRACK    = 0xFF1A1005;
     private static final int COLOR_BAR_RED  = 0xFFCC3333;
-    private static final int COLOR_BAR_BLUE = 0xFF4488CC;
     private static final int COLOR_BAR_XP   = 0xFF55AA33;
 
     private VitalsBarWidget() {}

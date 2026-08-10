@@ -18,7 +18,6 @@ public final class DementorKissGoal extends Goal {
 
     private static final int WINDUP_TICKS   = 20; // ~1 s
     private static final int RESOLVE_TICKS  = 10; // ~0.5 s
-    private static final int COOLDOWN_TICKS = 300;
     private static final double KISS_REACH  = 1.5;
     private static final double PATRONUS_R  = 24.0;
     // Essentially permanent; use Integer.MAX_VALUE / 20 to stay within int range
