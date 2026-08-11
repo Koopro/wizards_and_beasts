@@ -11,6 +11,7 @@ import at.koopro.wizardsandbeasts.skill.data.PlayerSkillData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.util.Mth;
 import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
@@ -35,6 +36,9 @@ public final class SkillsTab implements CharacterTab {
         return "gui.wizards_and_beasts.character_sheet.tab.skills";
     }
 
+    private float scrollOffset = 0f; // pixels scrolled from top
+    private int lastTotalH = 0;      // content height measured last frame
+
     @Override
     public void render(@NonNull GuiGraphics g, int x, int y, int w, int h, float partialTick) {
         Font font = Minecraft.getInstance().font;
@@ -45,8 +49,12 @@ public final class SkillsTab implements CharacterTab {
         // drawn below the sheet entirely — floating over the world under the panel.
         g.enableScissor(x, y, x + w, y + h);
 
+        float maxScroll = Math.max(0, lastTotalH - h);
+        scrollOffset = Mth.clamp(scrollOffset, 0f, maxScroll);
+
         int cx = x + 2;
-        int cy = y + 2;
+        int cy = y + 2 - (int) scrollOffset;
+        int contentTop = cy;
 
         // ── Tree progress bars ────────────────────────────────────────────
         g.drawString(font, "Skill Trees", cx, cy, COLOR_SECTION, false);
@@ -87,9 +95,18 @@ public final class SkillsTab implements CharacterTab {
                         .resolveDisplayName(skill.getDisplayName()));
             }
         }
-        drawChips(g, font, cx, cy, w - 4, h - (cy - y), nodeNames);
+        // Chips get the height they need; the tab scrolls rather than dropping rows on the floor.
+        cy = drawChips(g, font, cx, cy, w - 4, Integer.MAX_VALUE, nodeNames);
 
         g.disableScissor();
+
+        lastTotalH = cy - contentTop + 4;
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+        scrollOffset -= (float) (delta * 10.0);
+        return true;
     }
 
     // ── helpers ───────────────────────────────────────────────────────────
@@ -111,7 +128,10 @@ public final class SkillsTab implements CharacterTab {
             if (rowX + chipW > x + w && rowX > x) {
                 rowX = x;
                 rowY += CHIP_H + 2;
-                if (rowY + CHIP_H > y + maxH) break; // out of vertical space
+                // Measured as a height from the top rather than an absolute y: callers pass
+                // Integer.MAX_VALUE for "unbounded", and `y + maxH` overflows to a negative
+                // number, which ends the loop after the first wrapped row.
+                if ((rowY - y) + CHIP_H > maxH) break; // out of vertical space
             }
             at.koopro.wizardsandbeasts.client.gui.McStylePanel.drawPanel(
                     g, rowX, rowY, chipW, CHIP_H,

@@ -175,11 +175,12 @@ public final class CharacterSheetScreen extends Screen {
 
     @Override
     protected void init() {
-        // Layout.panel, not the downscale-only computeScale this used to call: that capped
-        // the sheet at 1.0 forever, so on anything above a small window the 320x240 panel sat
-        // marooned in the middle of the screen. panel() grows it to fill the space (to 1.35x)
-        // and still shrinks it to fit small windows.
-        GuiScaleHelper.Layout layout = GuiScaleHelper.Layout.panel(width, height, BG_W, BG_H);
+        // Layout.fit, not Layout.panel. panel() magnifies to 1.35x on a large window, and since
+        // everything here is text that magnified the font too — the sheet's labels came out a third
+        // larger than the inventory's, which is the screen a player compares it against. fit()
+        // never upscales, so the text is exactly the size vanilla draws at, and still shrinks the
+        // sheet to fit a small window.
+        GuiScaleHelper.Layout layout = GuiScaleHelper.Layout.fit(width, height, BG_W, BG_H);
         guiScale = layout.scale();
         bgX = layout.panelX();
         bgY = layout.panelY();
@@ -459,8 +460,9 @@ public final class CharacterSheetScreen extends Screen {
         double dmx = toDesignX(mouseX);
         double dmy = toDesignY(mouseY);
 
-        // Viewport zoom
-        if (viewport.mouseScrolled(dmx, dmy, scrollY)) return true;
+        // The wheel scrolls tab content and nothing else. It used to zoom the player preview,
+        // which let the figure be resized out of the framing the columns are composed around —
+        // and put a zoom control on a read-only sheet where nothing else is adjustable.
 
         // Tab content scroll
         int[] r = contentRect();

@@ -4,7 +4,6 @@ import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.util.Mth;
 import org.jspecify.annotations.NonNull;
 
 /**
@@ -13,9 +12,6 @@ import org.jspecify.annotations.NonNull;
  */
 public final class PlayerModelViewport {
 
-    private static final float ZOOM_MIN    = 0.6f;
-    private static final float ZOOM_MAX    = 2.5f;
-    private static final float DEFAULT_ZOOM = 1.0f;
     /**
      * Fraction of the viewport's height the player should occupy at 1x zoom, and the
      * player's height in entity units.
@@ -29,8 +25,6 @@ public final class PlayerModelViewport {
     private static final float FILL_FRACTION = 0.88f;
     private static final float PLAYER_UNITS  = 1.8f;
 
-
-    private float zoom = DEFAULT_ZOOM;
 
     private int vx, vy, vw, vh;
 
@@ -47,7 +41,7 @@ public final class PlayerModelViewport {
         // used were a private approximation of the same thing.
         McStylePanel.drawThemedInset(g, x, y, w, h);
 
-        int scale = Math.max(1, Math.round(h * FILL_FRACTION / PLAYER_UNITS * zoom));
+        int scale = Math.max(1, Math.round(h * FILL_FRACTION / PLAYER_UNITS));
         // Vanilla helper: entity head/body track the cursor relative to the viewport rect.
         InventoryScreen.renderEntityInInventoryFollowsMouse(
                 g,
@@ -65,9 +59,4 @@ public final class PlayerModelViewport {
         return sx >= vx && sx < vx + vw && sy >= vy && sy < vy + vh;
     }
 
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        if (!isInsideViewport(mouseX, mouseY)) return false;
-        zoom = Mth.clamp(zoom + (float) (delta * 0.1), ZOOM_MIN, ZOOM_MAX);
-        return true;
-    }
 }
