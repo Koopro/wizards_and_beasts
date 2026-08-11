@@ -28,7 +28,7 @@ import java.util.List;
 
 public class BroomItem extends Item {
     private static final Identifier FALLBACK_ID =
-            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "cleansweep_seven");
+            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "broom");
 
     private final Identifier defaultDefinitionId;
 

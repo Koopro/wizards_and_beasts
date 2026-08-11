@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:broom",
+  "displayName": {"translate": "item.wizards_and_beasts.broom"},
+  "tier": "SCHOOL",
+  "maxSpeed": 0.35,
+  "acceleration": 0.050,
+  "deceleration": 0.012,
+  "boostMultiplier": 1.3,
+  "boostDurationTicks": 40,
+  "boostCooldownTicks": 200,
+  "weakGravity": 0.012,
+  "lerpFactor": 0.10,
+  "turnSpeed": 0.75,
+  "ascentSpeed": 0.14,
+  "descentSpeed": 0.18,
+  "handlingRating": 0.40,
+  "stabilityRating": 0.80,
+  "durability": 120,
+  "repairMaterial": "#minecraft:planks",
+  "model_slots": {
+    "shaft": "wizards_and_beasts:straight",
+    "tail_cap": "wizards_and_beasts:plain",
+    "binding": "wizards_and_beasts:cord",
+    "bristles": "wizards_and_beasts:birch"
+  }
+}

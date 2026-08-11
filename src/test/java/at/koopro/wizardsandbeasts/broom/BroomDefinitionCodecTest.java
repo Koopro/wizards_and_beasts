@@ -36,12 +36,19 @@ class BroomDefinitionCodecTest {
             assertFalse(jsons.isEmpty(), "expected broom definition JSONs on disk");
             for (Path json : jsons) {
                 String name = json.getFileName().toString();
-                BroomDefinition def = parse(Files.readString(json), name);
+                String raw = Files.readString(json);
+                BroomDefinition def = parse(raw, name);
 
-                assertEquals(BroomSlot.defaults(), def.modelSlots(),
-                        name + ": a JSON with no model_slots must fall back to the default silhouette");
-                assertEquals(BroomDefinition.UNTINTED, def.woodTint(),
-                        name + ": a JSON with no wood_tint must decode as untinted");
+                // Assert the fallback claim only where it is actually being exercised. broom.json
+                // authors both keys, so asserting defaults there would pass for the wrong reason.
+                if (!raw.contains("\"model_slots\"")) {
+                    assertEquals(BroomSlot.defaults(), def.modelSlots(),
+                            name + ": a JSON with no model_slots must fall back to the default silhouette");
+                }
+                if (!raw.contains("\"wood_tint\"")) {
+                    assertEquals(BroomDefinition.UNTINTED, def.woodTint(),
+                            name + ": a JSON with no wood_tint must decode as untinted");
+                }
             }
         }
     }
@@ -101,6 +108,45 @@ class BroomDefinitionCodecTest {
                 "a hex string of the wrong length must not decode");
         assertTrue(decode(withExtra("\"wood_tint\": \"#GGGGGG\"")).error().isPresent(),
                 "a non-hex string must not decode");
+    }
+
+    /**
+     * The in-code fallback and {@code broom_definitions/broom.json} describe the same broom. They
+     * have to: the JSON is what normally loads, the constant is what remains when a datapack deletes
+     * it, and a player should not be able to tell which one they are flying.
+     */
+    @Test
+    void codeDefault_matchesShippedBroomJson() throws IOException {
+        BroomDefinition json = parse(Files.readString(BROOM_DIR.resolve("broom.json")), "broom.json");
+        BroomDefinition code = BroomDefinitionRegistry.codeDefault();
+
+        assertEquals(json.id(), code.id());
+        assertEquals(json.tier(), code.tier());
+        assertEquals(json.maxSpeed(), code.maxSpeed(), 0.0f);
+        assertEquals(json.acceleration(), code.acceleration(), 0.0f);
+        assertEquals(json.deceleration(), code.deceleration(), 0.0f);
+        assertEquals(json.boostMultiplier(), code.boostMultiplier(), 0.0f);
+        assertEquals(json.boostDurationTicks(), code.boostDurationTicks());
+        assertEquals(json.boostCooldownTicks(), code.boostCooldownTicks());
+        assertEquals(json.weakGravity(), code.weakGravity(), 0.0f);
+        assertEquals(json.lerpFactor(), code.lerpFactor(), 0.0f);
+        assertEquals(json.turnSpeed(), code.turnSpeed(), 0.0f);
+        assertEquals(json.ascentSpeed(), code.ascentSpeed(), 0.0f);
+        assertEquals(json.descentSpeed(), code.descentSpeed(), 0.0f);
+        assertEquals(json.handlingRating(), code.handlingRating(), 0.0f);
+        assertEquals(json.stabilityRating(), code.stabilityRating(), 0.0f);
+        assertEquals(json.durability(), code.durability());
+        assertEquals(json.repairMaterial(), code.repairMaterial());
+        assertEquals(json.modelSlots(), code.modelSlots());
+        assertEquals(json.woodTint(), code.woodTint());
+    }
+
+    /** With nothing loaded, resolving a broom must still yield a broom rather than blowing up. */
+    @Test
+    void getFallback_degradesToCodeDefault_withNoDefinitionsLoaded() {
+        BroomDefinitionRegistry.replaceAll(java.util.Map.of());
+        assertSame(BroomDefinitionRegistry.codeDefault(), BroomDefinitionRegistry.getFallback(),
+                "an empty registry must degrade to the code default, not throw");
     }
 
     // ── helpers ──────────────────────────────────────────────────────────────
