@@ -3,7 +3,7 @@
   "displayName": {"translate": "item.wizards_and_beasts.firebolt_supreme"},
   "tier": "LEGENDARY",
   "maxSpeed": 1.05,
-  "acceleration": 0.110,
+  "acceleration": 0.150,
   "deceleration": 0.006,
   "boostMultiplier": 2.50,
   "boostDurationTicks": 140,

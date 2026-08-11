@@ -3,7 +3,7 @@
   "displayName": {"translate": "item.wizards_and_beasts.nimbus_2000"},
   "tier": "RACING",
   "maxSpeed": 0.66,
-  "acceleration": 0.080,
+  "acceleration": 0.1250,
   "deceleration": 0.009,
   "boostMultiplier": 1.8,
   "boostDurationTicks": 80,

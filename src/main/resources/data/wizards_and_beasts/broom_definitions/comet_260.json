@@ -3,7 +3,7 @@
   "displayName": {"translate": "item.wizards_and_beasts.comet_260"},
   "tier": "STANDARD",
   "maxSpeed": 0.47,
-  "acceleration": 0.065,
+  "acceleration": 0.11,
   "deceleration": 0.010,
   "boostMultiplier": 1.5,
   "boostDurationTicks": 60,

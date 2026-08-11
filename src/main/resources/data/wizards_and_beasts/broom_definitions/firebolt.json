@@ -3,7 +3,7 @@
   "displayName": {"translate": "item.wizards_and_beasts.firebolt"},
   "tier": "ELITE",
   "maxSpeed": 0.92,
-  "acceleration": 0.100,
+  "acceleration": 0.1400,
   "deceleration": 0.007,
   "boostMultiplier": 2.20,
   "boostDurationTicks": 120,

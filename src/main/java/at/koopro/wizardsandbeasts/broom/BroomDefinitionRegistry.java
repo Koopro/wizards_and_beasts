@@ -34,7 +34,7 @@ public final class BroomDefinitionRegistry {
             Component.translatable("item.wizards_and_beasts.broom"),
             BroomTier.SCHOOL,
             0.35f,   // maxSpeed
-            0.050f,  // acceleration
+            0.090f,  // acceleration
             0.012f,  // deceleration
             1.3f,    // boostMultiplier
             40,      // boostDurationTicks

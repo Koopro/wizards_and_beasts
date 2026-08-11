@@ -3,7 +3,7 @@
   "displayName": {"translate": "item.wizards_and_beasts.oakshaft_79"},
   "tier": "LEGENDARY",
   "maxSpeed": 0.50,
-  "acceleration": 0.048,
+  "acceleration": 0.085,
   "deceleration": 0.006,
   "boostMultiplier": 1.4,
   "boostDurationTicks": 200,
