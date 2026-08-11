@@ -50,7 +50,7 @@ public class BroomEntity extends Entity implements GeoEntity {
             SynchedEntityData.defineId(BroomEntity.class, EntityDataSerializers.INT);
 
     private static final RawAnimation IDLE_ANIM = RawAnimation.begin().thenLoop("animation.broom.idle");
-    private static final RawAnimation FLY_ANIM = RawAnimation.begin().thenLoop("animation.broom.fly");
+    private static final RawAnimation FLY_ANIM = RawAnimation.begin().thenLoop("animation.broom.fly_forward");
     private static final RawAnimation BOOST_ANIM = RawAnimation.begin().thenLoop("animation.broom.boost");
 
     boolean inputForward;
