@@ -26,17 +26,17 @@ import java.util.Optional;
  */
 public enum BroomSlot implements StringRepresentable {
     /** Handle profile, taper and length silhouette. */
-    SHAFT("shaft_", "shaft", true, "straight"),
+    SHAFT("shaft_", "shaft", true, "straight", List.of("straight", "tapered", "streamlined", "ribbed", "lacquered")),
     /** Butt-end finial or cap. */
-    TAIL_CAP("tail_cap_", "tail_cap", false, "plain"),
+    TAIL_CAP("tail_cap_", "tail_cap", false, "plain", List.of("plain", "brass_cap", "finial", "banded")),
     /** Cord or metal band at the bristle join. */
-    BINDING("binding_", "binding", false, "cord"),
+    BINDING("binding_", "binding", false, "cord", List.of("cord", "twine", "brass_band", "wire")),
     /** Twig bundle silhouette. */
-    BRISTLES("bristles_", "bristles", true, "birch"),
+    BRISTLES("bristles_", "bristles", true, "birch", List.of("birch", "blunt", "swept", "streamlined", "racing")),
     /** Present on Nimbus/Firebolt-tier brooms, absent on Cleansweep-tier. */
-    FOOTREST("footrest_", "footrest", false, null),
+    FOOTREST("footrest_", "footrest", false, null, List.of("brass", "wood", "forged")),
     /** Nameplate, lettering, registration mark. */
-    ACCENT("accent_", "accent", false, null);
+    ACCENT("accent_", "accent", false, null, List.of("nameplate", "lettering", "registration"));
 
     public static final Codec<BroomSlot> CODEC = StringRepresentable.fromEnum(BroomSlot::values);
 
@@ -54,12 +54,15 @@ public enum BroomSlot implements StringRepresentable {
     private final String slotId;
     private final boolean required;
     private final String defaultVariant;
+    private final List<String> variants;
 
-    BroomSlot(String bonePrefix, String slotId, boolean required, String defaultVariant) {
+    BroomSlot(String bonePrefix, String slotId, boolean required, String defaultVariant,
+              List<String> variants) {
         this.bonePrefix = bonePrefix;
         this.slotId = slotId;
         this.required = required;
         this.defaultVariant = defaultVariant;
+        this.variants = variants;
     }
 
     public String bonePrefix() {
@@ -82,6 +85,23 @@ public enum BroomSlot implements StringRepresentable {
     /** Bone name for a variant in this slot: {@code BRISTLES.boneName("birch")} → {@code bristles_birch}. */
     public String boneName(String variantPath) {
         return bonePrefix + variantPath;
+    }
+
+    /**
+     * Every variant this slot ships, and therefore every bone the renderer has to hide to show one.
+     *
+     * <p>This exists because GeckoLib's {@code BoneSnapshots} cannot be enumerated — it offers
+     * {@code get(String)} and {@code ifPresent(String, …)} and nothing else — so showing one variant
+     * means naming all the others to hide them. The wand solves the same problem with
+     * {@code WandModuleRegistry.getAllForSlot}; a broom variant is not a registry entry, so the list
+     * lives here instead.
+     *
+     * <p>It duplicates what {@code tools/broom_model.py} emits, which is a real risk: add a bone
+     * there and forget here and the new variant is invisible, because nothing ever unhides it.
+     * {@code BroomModelParityTest} holds the two against each other so the drift fails the build.
+     */
+    public List<String> variants() {
+        return variants;
     }
 
     /** The variant drawn when nothing is configured, or empty for a slot that defaults to absent. */

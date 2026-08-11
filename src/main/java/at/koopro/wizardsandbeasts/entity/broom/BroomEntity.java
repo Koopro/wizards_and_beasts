@@ -351,7 +351,7 @@ public class BroomEntity extends Entity implements GeoEntity {
         entityData.set(CURRENT_DURABILITY, Math.max(0, durability));
     }
 
-    BroomDefinition resolveDefinition() {
+    public BroomDefinition resolveDefinition() {
         if (currentDef != null) {
             return currentDef;
         }

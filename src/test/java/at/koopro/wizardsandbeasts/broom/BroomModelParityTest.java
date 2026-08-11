@@ -52,6 +52,33 @@ class BroomModelParityTest {
         }
     }
 
+    /**
+     * {@code BroomSlot.variants()} must name exactly the variant bones the rig ships.
+     *
+     * <p>This is the seam between a Java list and a Python generator, and it fails silently in the
+     * worst direction: the renderer shows one variant by hiding every other one it knows about, so a
+     * bone the list has never heard of is never hidden and draws on top of whatever was selected.
+     * A missing bone is the milder failure — a variant that simply cannot be chosen.
+     */
+    @Test
+    void slotVariantListsMatchTheRig() throws IOException {
+        Set<String> bones = boneNames();
+        for (BroomSlot slot : BroomSlot.values()) {
+            Set<String> declared = new HashSet<>();
+            slot.variants().forEach(v -> declared.add(slot.boneName(v)));
+
+            Set<String> inRig = new HashSet<>();
+            bones.stream()
+                    .filter(b -> b.startsWith(slot.bonePrefix()))
+                    .forEach(inRig::add);
+
+            assertEquals(inRig, declared,
+                    slot + ": BroomSlot.variants() and broom.geo.json disagree. Bones only in the "
+                            + "rig are never hidden and will draw over the selected variant; bones "
+                            + "only in the list cannot be selected.");
+        }
+    }
+
     /** The default silhouette must be drawable, or an unconfigured broom renders nothing. */
     @Test
     void defaultVariantBonesExist() throws IOException {
