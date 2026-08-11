@@ -101,6 +101,45 @@ public final class McStylePanel {
     public static final Identifier THEME_DIVIDER = theme("divider.png");
     public static final Identifier THEME_SCROLL_TRACK = theme("scrollbar_track.png");
     public static final Identifier THEME_SCROLL_THUMB = theme("scrollbar_thumb.png");
+    public static final Identifier THEME_ICON_RANDOMISE = theme("icon_randomise.png");
+
+    /** Cycler arrow art. 9x13, blitted at native size — see {@link #drawArrow}. */
+    public static final int ARROW_W = 9;
+    public static final int ARROW_H = 13;
+
+    /**
+     * Interaction state for the themed controls.
+     *
+     * <p>Three sprites per control rather than one tinted at draw time: the {@code blit} calls in
+     * this class carry no colour argument, and widening a shared drawing API for a cosmetic reason
+     * is the wrong trade.
+     */
+    public enum ControlState {
+        NORMAL(""), HOVER("_hover"), DISABLED("_off");
+
+        private final String suffix;
+
+        ControlState(String suffix) {
+            this.suffix = suffix;
+        }
+
+        /** Picks the state a widget is in, in the order a player perceives it. */
+        public static ControlState of(boolean active, boolean highlighted) {
+            return !active ? DISABLED : highlighted ? HOVER : NORMAL;
+        }
+    }
+
+    /** Draws a cycler arrow at its native 9x13. */
+    public static void drawArrow(GuiGraphics g, int x, int y, boolean pointsRight, ControlState state) {
+        drawTexture(g, theme((pointsRight ? "arrow_right" : "arrow_left") + state.suffix + ".png"),
+                x, y, ARROW_W, ARROW_H, ARROW_W, ARROW_H);
+    }
+
+    /** Draws a themed button face, nine-sliced on the same 32/8 frame as the panels. */
+    public static void drawThemedButton(GuiGraphics g, int x, int y, int w, int h, ControlState state) {
+        drawNineSlice(g, theme("button" + state.suffix + ".png"), x, y, w, h,
+                WizardsMetrics.PANEL_SPRITE_SIZE, WizardsMetrics.PANEL_SPRITE_BORDER);
+    }
 
     /** The default raised panel: leather field, brass rule, lit from the top-left. */
     public static void drawThemedPanel(GuiGraphics g, int x, int y, int w, int h) {

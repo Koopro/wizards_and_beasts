@@ -28,14 +28,15 @@ import java.util.function.Function;
  * changes through {@code onChange}, and the owning screen rebuilds. Generic because a screen
  * typically stacks several of these at different types.
  *
- * <p>Nothing here is textured beyond the shared {@code gui/theme/} panel sprites: the arrows are
- * drawn as triangles so the widget costs no new art and inherits {@link WizardsPalette} for free.
+ * <p>The arrows and the label panel are both {@code gui/theme/} art. They started as procedural
+ * triangles to avoid new art, which was cheap and looked it — a stepped diagonal at 9x13 with no
+ * bevel, next to a nine-sliced leather panel.
  */
 public final class CyclerWidget<T> {
 
-    /** Arrow hit-box. Tall enough to hit comfortably, narrow enough to leave the label room. */
-    public static final int ARROW_W = 9;
-    public static final int ARROW_H = 13;
+    /** Arrow hit-box: the art's own size, so the sprite blits 1:1 and never resamples. */
+    public static final int ARROW_W = McStylePanel.ARROW_W;
+    public static final int ARROW_H = McStylePanel.ARROW_H;
     /** Clear space between an arrow and the label panel. */
     private static final int GAP = 3;
 
@@ -141,25 +142,8 @@ public final class CyclerWidget<T> {
 
         @Override
         protected void renderContents(@NonNull GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-            int tint = !active ? WizardsPalette.PIP_OFF
-                    : (isHovered() || isFocused()) ? WizardsPalette.BRASS_HI
-                    : WizardsPalette.BRASS;
-            drawTriangle(g, getX(), getY(), getWidth(), getHeight(), pointsRight, tint);
-        }
-
-        /**
-         * A filled triangle, one vertical slice per column, tapering toward the point. Drawn rather
-         * than blitted so the widget carries no texture dependency.
-         */
-        private static void drawTriangle(GuiGraphics g, int x, int y, int w, int h,
-                                         boolean pointsRight, int color) {
-            int cy = y + h / 2;
-            for (int i = 0; i < w; i++) {
-                // Distance from the base column, so the slice shrinks as it approaches the tip.
-                int fromBase = pointsRight ? i : w - 1 - i;
-                int half = Math.max(1, (h / 2) - (fromBase * h) / (2 * w));
-                g.fill(x + i, cy - half, x + i + 1, cy + half, color);
-            }
+            McStylePanel.drawArrow(g, getX(), getY(), pointsRight,
+                    McStylePanel.ControlState.of(active, isHovered() || isFocused()));
         }
 
         @Override

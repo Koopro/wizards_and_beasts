@@ -5,11 +5,11 @@ import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.character.widget.PlayerModelViewport;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.client.gui.widget.CyclerWidget;
+import at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import at.koopro.wizardsandbeasts.network.heritage.HeritageSelectC2SPayload;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.player.LocalPlayer;
@@ -160,15 +160,15 @@ public class HeritageSelectionScreen extends Screen {
 
         // Randomise sits at the foot of the left column, opposite Confirm on the right, so the two
         // "commit something" actions bracket the dossier rather than crowding each other.
-        addRenderableWidget(Button.builder(
-                        Component.translatable("gui.wizards_and_beasts.heritage.randomise"),
-                        b -> randomise())
-                .bounds(leftColX, contentBottom - s(18), colW, s(18)).build());
+        addRenderableWidget(ThemedButton.randomise(
+                leftColX, contentBottom - s(18), colW, s(18),
+                Component.translatable("gui.wizards_and_beasts.heritage.randomise"),
+                this::randomise));
 
-        Button confirm = Button.builder(
-                        Component.translatable("gui.wizards_and_beasts.heritage.confirm"),
-                        b -> openConfirm())
-                .bounds(rightColX, contentBottom - s(18), s(COL_SIDE_W), s(18)).build();
+        ThemedButton confirm = new ThemedButton(
+                rightColX, contentBottom - s(18), s(COL_SIDE_W), s(18),
+                Component.translatable("gui.wizards_and_beasts.heritage.confirm"),
+                this::openConfirm);
         confirm.active = selectedHeritage.isAlphaAvailable() && selectedVariant != null;
         addRenderableWidget(confirm);
     }
@@ -178,14 +178,14 @@ public class HeritageSelectionScreen extends Screen {
         int bh = s(18);
         int by = overlayY + overlayH - s(24);
         int gap = s(8);
-        addRenderableWidget(Button.builder(
-                        Component.translatable("gui.wizards_and_beasts.heritage.confirm_cancel"),
-                        b -> closeConfirm())
-                .bounds(overlayX + overlayW / 2 - bw - gap / 2, by, bw, bh).build());
-        addRenderableWidget(Button.builder(
-                        Component.translatable("gui.wizards_and_beasts.heritage.confirm_yes"),
-                        b -> commit())
-                .bounds(overlayX + overlayW / 2 + gap / 2, by, bw, bh).build());
+        addRenderableWidget(new ThemedButton(
+                overlayX + overlayW / 2 - bw - gap / 2, by, bw, bh,
+                Component.translatable("gui.wizards_and_beasts.heritage.confirm_cancel"),
+                this::closeConfirm));
+        addRenderableWidget(new ThemedButton(
+                overlayX + overlayW / 2 + gap / 2, by, bw, bh,
+                Component.translatable("gui.wizards_and_beasts.heritage.confirm_yes"),
+                this::commit));
     }
 
     // ── Selection actions ────────────────────────────────────────────────
@@ -373,14 +373,10 @@ public class HeritageSelectionScreen extends Screen {
         return super.keyPressed(event);
     }
 
-    @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        // The rail this used to scroll is gone; the wheel now zooms the player preview.
-        if (!confirmOpen && viewport.mouseScrolled(mouseX, mouseY, scrollY)) {
-            return true;
-        }
-        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
-    }
+    // No mouseScrolled override. The wheel used to zoom the player preview here, which let the
+    // figure be resized out of the framing this screen is composed around — the gate is a fixed
+    // portrait, not an inspector. PlayerModelViewport keeps its zoom for the Character Sheet, which
+    // is a screen you are meant to poke at; this one simply never routes the wheel to it.
 
     @Override
     public boolean isPauseScreen() {
