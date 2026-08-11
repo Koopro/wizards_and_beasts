@@ -37,6 +37,9 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
 
 public record BroomDefinition(
         Identifier id,
@@ -57,11 +60,38 @@ public record BroomDefinition(
         float stabilityRating,
         int durability,
         TagKey<Item> repairMaterial,
-        List<Component> loreLines) {
+        List<Component> loreLines,
+        Map<BroomSlot, Identifier> modelSlots,
+        int woodTint) {
+
+    /** Tint that multiplies to no change — the value a broom carries when it authors no wood_tint. */
+    public static final int UNTINTED = 0xFFFFFFFF;
 
     public static final Codec<BroomDefinition> CODEC = Codec.of(
             BroomDefinition::encode,
             BroomDefinition::decode);
+
+    private static final Codec<BroomSlot> SLOT_KEY_CODEC = Codec.STRING.comapFlatMap(
+            id -> BroomSlot.byId(id)
+                    .map(DataResult::success)
+                    .orElseGet(() -> DataResult.error(() -> "Unknown broom slot: " + id)),
+            BroomSlot::slotId);
+
+    private static final Codec<Map<BroomSlot, Identifier>> MODEL_SLOTS_CODEC =
+            Codec.unboundedMap(SLOT_KEY_CODEC, Identifier.CODEC);
+
+    /**
+     * Hex-string colour, the convention the creature {@code tint} ability already uses:
+     * {@code "#RRGGBB"} is opaque, {@code "#AARRGGBB"} is taken as written.
+     */
+    private static final Codec<Integer> WOOD_TINT_CODEC = Codec.STRING.comapFlatMap(
+            BroomDefinition::parseHex,
+            argb -> String.format(Locale.ROOT, "#%08X", argb));
+
+    /** The variant chosen for {@code slot}, or empty when the slot is unset (so nothing is drawn). */
+    public Optional<Identifier> modelSlot(BroomSlot slot) {
+        return Optional.ofNullable(modelSlots.get(slot));
+    }
 
     private static <T> DataResult<Pair<BroomDefinition, T>> decode(DynamicOps<T> ops, T input) {
         Dynamic<T> dynamic = new Dynamic<>(ops, input);
@@ -98,6 +128,14 @@ public record BroomDefinition(
         DataResult<List<Component>> loreLines = dynamic.get("loreLines").result()
                 .map(node -> ComponentSerialization.CODEC.listOf().parse(ops, node.getValue()))
                 .orElse(DataResult.success(List.of()));
+        // Both optional: a broom JSON written before the master model existed still decodes, and
+        // gets the plain default silhouette with no tint rather than an empty model.
+        DataResult<Map<BroomSlot, Identifier>> modelSlots = dynamic.get("model_slots").result()
+                .map(node -> MODEL_SLOTS_CODEC.parse(ops, node.getValue()))
+                .orElse(DataResult.success(BroomSlot.defaults()));
+        DataResult<Integer> woodTint = dynamic.get("wood_tint").result()
+                .map(node -> WOOD_TINT_CODEC.parse(ops, node.getValue()))
+                .orElse(DataResult.success(UNTINTED));
 
         return id.flatMap(vId ->
                 displayName.flatMap(vDisplay ->
@@ -117,13 +155,16 @@ public record BroomDefinition(
                                                                                                                                 stabilityRating.flatMap(vStability ->
                                                                                                                                         durability.flatMap(vDurability ->
                                                                                                                                                 repairMaterial.flatMap(vRepair ->
-                                                                                                                                                        loreLines.map(vLore ->
-                                                                                                                                                                new BroomDefinition(vId, vDisplay, vTier,
-                                                                                                                                                                        vMaxSpeed, vAcceleration, vDeceleration,
-                                                                                                                                                                        vBoostMultiplier, vBoostDuration, vBoostCooldown,
-                                                                                                                                                                        vWeakGravity, vLerp, vTurn, vAscent, vDescent,
-                                                                                                                                                                        vHandling, vStability, vDurability, vRepair, vLore)
-                                                                                                                                                        ))))))))))))))))))).map(def -> Pair.of(def, input));
+                                                                                                                                                        loreLines.flatMap(vLore ->
+                                                                                                                                                                modelSlots.flatMap(vSlots ->
+                                                                                                                                                                        woodTint.map(vTint ->
+                                                                                                                                                                                new BroomDefinition(vId, vDisplay, vTier,
+                                                                                                                                                                                        vMaxSpeed, vAcceleration, vDeceleration,
+                                                                                                                                                                                        vBoostMultiplier, vBoostDuration, vBoostCooldown,
+                                                                                                                                                                                        vWeakGravity, vLerp, vTurn, vAscent, vDescent,
+                                                                                                                                                                                        vHandling, vStability, vDurability, vRepair, vLore,
+                                                                                                                                                                                        vSlots, vTint)
+                                                                                                                                                                        ))))))))))))))))))))).map(def -> Pair.of(def, input));
     }
 
     private static <T> DataResult<T> encode(BroomDefinition definition, DynamicOps<T> ops, T prefix) {
@@ -149,7 +190,29 @@ public record BroomDefinition(
         if (!definition.loreLines().isEmpty()) {
             builder.add("loreLines", ComponentSerialization.CODEC.listOf().encodeStart(ops, definition.loreLines()).result().orElseThrow());
         }
+        // Written only when they differ from the decode-time defaults, so re-encoding a broom that
+        // authored neither field does not inject keys its JSON never had.
+        if (!definition.modelSlots().equals(BroomSlot.defaults())) {
+            builder.add("model_slots", MODEL_SLOTS_CODEC.encodeStart(ops, definition.modelSlots()).result().orElseThrow());
+        }
+        if (definition.woodTint() != UNTINTED) {
+            builder.add("wood_tint", WOOD_TINT_CODEC.encodeStart(ops, definition.woodTint()).result().orElseThrow());
+        }
         return builder.build(prefix);
+    }
+
+    /** {@code "#RRGGBB"} → opaque ARGB, {@code "#AARRGGBB"} → as written. */
+    private static DataResult<Integer> parseHex(String raw) {
+        String body = raw.startsWith("#") ? raw.substring(1) : raw;
+        if (body.length() != 6 && body.length() != 8) {
+            return DataResult.error(() -> "wood_tint must be #RRGGBB or #AARRGGBB: " + raw);
+        }
+        try {
+            long value = Long.parseLong(body, 16);
+            return DataResult.success(body.length() == 6 ? (int) (value | 0xFF000000L) : (int) value);
+        } catch (NumberFormatException ex) {
+            return DataResult.error(() -> "Invalid wood_tint hex value: " + raw);
+        }
     }
 
     private static DataResult<Float> readRangedFloat(Dynamic<?> dynamic, String key, float min, float max) {
