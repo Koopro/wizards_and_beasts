@@ -1,7 +1,6 @@
 package at.koopro.wizardsandbeasts.client.gui.character.tab;
 
 import at.koopro.wizardsandbeasts.client.currency.state.ClientVaultDataState;
-import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.stats.ClientStatsState;
 import at.koopro.wizardsandbeasts.item.wand.WandItem;
 import at.koopro.wizardsandbeasts.module.Module;
@@ -28,18 +27,15 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.Locale;
 
-/** Attributes tab: 6 attribute cards, wand panel, wand affinity panel, currency panel. */
+/** Attributes tab: player stats, attributes, wand panel, wand affinity panel, currency panel. */
 public final class AttributesTab implements CharacterTab {
 
     private static final int COLOR_SECTION  = 0xFFDDB97A;
-    private static final int COLOR_ATTR_BG  = 0xFF1E1408;
-    private static final int COLOR_HI       = 0xFF3A2A14;
-    private static final int COLOR_SHADOW   = 0xFF0A0500;
     private static final int COLOR_LABEL    = 0xFF887766;
     private static final int COLOR_VALUE    = 0xFFEEDDBB;
-    /** Empty-bar track. Was {@code 0xFF0D0905}, near-black on {@link #COLOR_ATTR_BG} — an
-     *  attribute sitting at zero looked like a card with no bar at all rather than an
-     *  empty one, which is why Armor / Wand Affinity / Beast Resistance read as unfinished. */
+    /** Empty-bar track. Was {@code 0xFF0D0905}, near-black on the tile these rows replaced — an
+     *  attribute sitting at zero looked like a row with no bar at all rather than an empty one,
+     *  which is why Armor / Wand Affinity / Beast Resistance read as unfinished. */
     private static final int COLOR_BAR_TRACK = 0xFF3B2A16;
     private static final int COLOR_BAR_FILL  = 0xFF886622;
     /** Training hairline. Deliberately dimmer than {@link #COLOR_BAR_FILL} so the point a player
@@ -53,8 +49,10 @@ public final class AttributesTab implements CharacterTab {
     private static final int COLOR_REASON     = 0xFFAA0000;
     private static final int COLOR_DETAIL     = 0xFFAAAAAA;
     private static final int COLOR_WAND_NAME  = 0xFFFFFFFF;
-    private static final int CARD_H         = 26;
-    private static final int CARD_GAP       = 3;
+    /** One stat row: label line plus its bar and training hairline. */
+    private static final int STAT_ROW_H     = 12;
+    /** Label gutter, so every stat's bar starts at the same x and the eye tracks one edge. */
+    private static final int LABEL_COL_W    = 52;
     private static final int SCROLLBAR_W    = 4;
     private static final int COLOR_SCROLL_TRACK = 0xFF1A1005;
     private static final int COLOR_SCROLL_THUMB = 0xFF886622;
@@ -82,19 +80,19 @@ public final class AttributesTab implements CharacterTab {
         int cy = y + 2 - (int) scrollOffset;
         int top = cy;
 
-        // ── 5 player stats in a 2-column grid ─────────────────────────────
+        // ── The character's own five numbers ──────────────────────────────
         // Above the attributes on purpose: these are the character's own numbers, where the block
         // below is the sum of everything currently modifying them.
         if (ModuleManager.isEnabled(Module.PLAYER_STATS) && ClientStatsState.hasData()) {
             cy = drawStatsSection(g, font, cx, cy, w - 4);
         }
 
-        // ── 6 attribute cards in a 2-column grid ──────────────────────────
+        // ── Attributes: the sum of everything currently modifying the character ──
         g.drawString(font, "Attributes", cx, cy, COLOR_SECTION, false);
         cy += 10;
 
-        drawAttributeCards(g, player, cx, cy, w - 4);
-        cy += (CARD_H + CARD_GAP) * 3 + 2;
+        drawAttributeRows(g, player, cx, cy, w - 4);
+        cy += 6 * STAT_ROW_H + 2;
 
         // ── Wand panel ────────────────────────────────────────────────────
         ItemStack heldStack = player.getMainHandItem();
@@ -135,10 +133,9 @@ public final class AttributesTab implements CharacterTab {
     /**
      * Paints the five {@link PlayerStat} values and returns the new content cursor.
      *
-     * <p>Card layout, palette and truncation are {@link #drawAttrCard}'s — a stat card is an
-     * attribute card on a fixed 0–100 scale plus, for the three trainable stats, a hairline showing
-     * how far into the next point the player is. Without that second bar the main bar sits still for
-     * hundreds of casts and training reads as broken.
+     * <p>A stat row is an attribute row on a fixed 0–100 scale, plus — for the three trainable
+     * stats — a hairline showing how far into the next point the player is. Without that second bar
+     * the main bar sits still for hundreds of casts and training reads as broken.
      *
      * <p>Section header is a bare literal to match "Attributes", "Wand" and "Currency" below it; the
      * stat <em>names</em> go through {@link PlayerStat#displayName()}, whose keys already ship.
@@ -159,30 +156,49 @@ public final class AttributesTab implements CharacterTab {
             PlayerStat.KNOWLEDGE,
         };
 
-        int cardW = (w - CARD_GAP) / 2;
-        for (int i = 0; i < order.length; i++) {
-            PlayerStat stat = order[i];
-            int cardX = x + (i % 2) * (cardW + CARD_GAP);
-            int cardY = y + (i / 2) * (CARD_H + CARD_GAP);
-            drawStatCard(g, cardX, cardY, cardW, stat, valueOf(stats, stat),
-                         stat.isTrainable() ? stats.trainingProgress().getOrDefault(stat, 0f) : -1f);
+        for (PlayerStat stat : order) {
+            drawStatRow(g, font, x, y, w, stat, valueOf(stats, stat),
+                        stat.isTrainable() ? stats.trainingProgress().getOrDefault(stat, 0f) : -1f);
+            y += STAT_ROW_H;
         }
-
-        int rows = (order.length + 1) / 2;
-        return y + rows * (CARD_H + CARD_GAP) + 2;
+        return y + 2;
     }
 
-    /** @param trainingProgress fraction into the next point, or a negative value to omit the hairline. */
-    private void drawStatCard(@NonNull GuiGraphics g, int x, int y, int w,
-                              @NonNull PlayerStat stat, int value, float trainingProgress) {
-        drawAttrCard(g, x, y, w, CARD_H, stat.displayName().getString(), value, 0, 100);
+    /**
+     * One stat as a row: name, bar, value — read down a column of numbers rather than across a
+     * grid of lookalike tiles.
+     *
+     * <p>These were 2x3 cards of 26px each, which is what a 200px column could hold and no more.
+     * A row is 12px, so the same space carries the stats, their training progress and whatever the
+     * section below wants, and the values line up in one column instead of alternating sides.
+     *
+     * @param trainingProgress fraction into the next point, or a negative value to omit the hairline
+     */
+    private void drawStatRow(@NonNull GuiGraphics g, @NonNull Font font, int x, int y, int w,
+                             @NonNull PlayerStat stat, int value, float trainingProgress) {
+        String valStr = Integer.toString(value);
+        int valW = font.width(valStr);
+        int labelW = LABEL_COL_W;
+        int barX = x + labelW + LABEL_VALUE_GAP;
+        int barW = w - labelW - LABEL_VALUE_GAP * 2 - valW;
 
+        g.drawString(font, font.plainSubstrByWidth(stat.displayName().getString(), labelW),
+                x, y + 1, COLOR_LABEL, false);
+        g.drawString(font, valStr, x + w - valW, y + 1, COLOR_VALUE, false);
+
+        if (barW <= 0) return;
+        int barY = y + 2;
+        g.fill(barX, barY, barX + barW, barY + 4, COLOR_BAR_TRACK);
+        int filled = Math.max(0, Math.min(barW, value * barW / 100));
+        g.fill(barX, barY, barX + filled, barY + 4, COLOR_BAR_FILL);
+
+        // Training hairline under the main bar: without it the bar sits still for hundreds of
+        // casts and training reads as broken.
         if (trainingProgress < 0f) return;
-        int barY = y + 19;
-        int barW = w - 6;
-        g.fill(x + 3, barY, x + 3 + barW, barY + 2, COLOR_BAR_TRACK);
-        int filled = Math.max(0, Math.min(barW, (int) (trainingProgress * barW)));
-        g.fill(x + 3, barY, x + 3 + filled, barY + 2, COLOR_TRAINING_FILL);
+        int hairY = barY + 5;
+        g.fill(barX, hairY, barX + barW, hairY + 1, COLOR_BAR_TRACK);
+        int hair = Math.max(0, Math.min(barW, (int) (trainingProgress * barW)));
+        g.fill(barX, hairY, barX + hair, hairY + 1, COLOR_TRAINING_FILL);
     }
 
     /** KNOWLEDGE is derived server-side; the client reads the last synced snapshot for all five. */
@@ -196,9 +212,9 @@ public final class AttributesTab implements CharacterTab {
         };
     }
 
-    private void drawAttributeCards(@NonNull GuiGraphics g, @NonNull LocalPlayer player,
+    private void drawAttributeRows(@NonNull GuiGraphics g, @NonNull LocalPlayer player,
                                     int x, int y, int w) {
-        record AttrCard(String name, double value, double min, double max) {}
+        record AttrRow(String name, double value, double min, double max) {}
 
         AttributeInstance health  = player.getAttribute(Attributes.MAX_HEALTH);
         AttributeInstance armor   = player.getAttribute(Attributes.ARMOR);
@@ -207,51 +223,50 @@ public final class AttributesTab implements CharacterTab {
         AttributeInstance corrupt = player.getAttribute(ModAttributes.DARK_CORRUPTION);
         AttributeInstance beast   = player.getAttribute(ModAttributes.BEAST_RESISTANCE);
 
-        AttrCard[] cards = {
-            new AttrCard("Max Health",       val(health),  0,  40),
-            new AttrCard("Armor",            val(armor),   0,  30),
-            new AttrCard("Speed",            val(speed),   0,  1),
-            new AttrCard("Wand Affinity",    val(affin),   0.5, 2),
-            new AttrCard("Dark Corruption",  val(corrupt), 0,  100),
-            new AttrCard("Beast Resistance", val(beast),   0,  1),
+        AttrRow[] cards = {
+            new AttrRow("Max Health",       val(health),  0,  40),
+            new AttrRow("Armor",            val(armor),   0,  30),
+            new AttrRow("Speed",            val(speed),   0,  1),
+            new AttrRow("Wand Affinity",    val(affin),   0.5, 2),
+            new AttrRow("Dark Corruption",  val(corrupt), 0,  100),
+            new AttrRow("Beast Resistance", val(beast),   0,  1),
         };
 
-        int cardW = (w - CARD_GAP) / 2;
+        Font font = Minecraft.getInstance().font;
         for (int i = 0; i < cards.length; i++) {
-            int col = i % 2;
-            int row = i / 2;
-            int cx  = x + col * (cardW + CARD_GAP);
-            int cy  = y + row * (CARD_H + CARD_GAP);
-            drawAttrCard(g, cx, cy, cardW, CARD_H, cards[i].name(), cards[i].value(),
-                         cards[i].min(), cards[i].max());
+            drawAttrRow(g, font, x, y + i * STAT_ROW_H, w, cards[i].name(), cards[i].value(),
+                        cards[i].min(), cards[i].max());
         }
     }
 
-    private void drawAttrCard(@NonNull GuiGraphics g, int x, int y, int w, int h,
-                              String name, double value, double min, double max) {
-        Font font = Minecraft.getInstance().font;
-        McStylePanel.drawPanel(g, x, y, w, h, COLOR_ATTR_BG, COLOR_HI, COLOR_SHADOW);
-
-        // The value is measured first because the label has to be truncated around it.
-        // Truncating to the full card width instead let "Dark Corruption" and "Beast
-        // Resistance" run under the right-aligned value and render as "Dark Corrupti100"
-        // and "Beast Resistanc0" -- the four shorter labels fit, so nothing caught it.
+    /**
+     * One attribute as a row, sharing {@link #drawStatRow}'s gutter so stats and attributes line
+     * their bars and values up on the same two edges.
+     *
+     * <p>These were 26px tiles in a 2x3 grid, which is what a 200px column could hold and no more.
+     * The value is still measured before the label is truncated: truncating to the full row width
+     * instead let "Dark Corruption" and "Beast Resistance" run under the right-aligned value and
+     * render as "Dark Corrupti100" and "Beast Resistanc0" — the four shorter labels fit, so nothing
+     * caught it.
+     */
+    private void drawAttrRow(@NonNull GuiGraphics g, @NonNull Font font, int x, int y, int w,
+                             String name, double value, double min, double max) {
         String valStr = formatAttr(value);
         int valW = font.width(valStr);
+        int barX = x + LABEL_COL_W + LABEL_VALUE_GAP;
+        int barW = w - LABEL_COL_W - LABEL_VALUE_GAP * 2 - valW;
 
-        String nameTrunc = font.plainSubstrByWidth(name, w - 6 - valW - LABEL_VALUE_GAP);
-        g.drawString(font, nameTrunc, x + 3, y + 3, COLOR_LABEL, false);
-        g.drawString(font, valStr, x + w - 3 - valW, y + 3, COLOR_VALUE, false);
+        g.drawString(font, font.plainSubstrByWidth(name, LABEL_COL_W), x, y + 1, COLOR_LABEL, false);
+        g.drawString(font, valStr, x + w - valW, y + 1, COLOR_VALUE, false);
 
-        // progress bar
-        int barY = y + 13;
-        int barW = w - 6;
-        g.fill(x + 3, barY, x + 3 + barW, barY + 4, COLOR_BAR_TRACK);
+        if (barW <= 0) return;
+        int barY = y + 2;
+        g.fill(barX, barY, barX + barW, barY + 4, COLOR_BAR_TRACK);
         double range = max - min;
         if (range > 0) {
-            int filled = (int)((value - min) / range * barW);
+            int filled = (int) ((value - min) / range * barW);
             filled = Math.max(0, Math.min(filled, barW));
-            g.fill(x + 3, barY, x + 3 + filled, barY + 4, COLOR_BAR_FILL);
+            g.fill(barX, barY, barX + filled, barY + 4, COLOR_BAR_FILL);
         }
     }
 

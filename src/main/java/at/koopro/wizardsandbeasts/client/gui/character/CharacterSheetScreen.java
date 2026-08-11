@@ -52,13 +52,25 @@ public final class CharacterSheetScreen extends Screen {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     // Background dimensions
-    private static final int BG_W = 320;
-    private static final int BG_H = 240;
+    private static final int BG_W = 400;
+    private static final int BG_H = 220;
 
     // Column split
-    private static final int LEFT_W  = 120;
     private static final int TITLE_H = 14;
     private static final int TAB_H   = 14;
+
+    /**
+     * Three columns: the figure, the things that are true of the character whichever tab is open,
+     * and the tab content.
+     *
+     * <p>The two-column sheet put identity — heritage, lineage, wand, vocation, effects — in the
+     * same 120px rail as the model viewport, and gave the tabs everything else. That made the left
+     * rail a dumping ground and left identity competing with tab content for the reader's attention
+     * even though it never changes when a tab does.
+     */
+    private static final int FIGURE_W   = 96;
+    private static final int IDENTITY_W = 104;
+    private static final int COL_GAP    = 6;
     // Spacing comes from WizardsMetrics rather than this file. The three values here were 7, 4
     // and 20 -- two of them off any grid, and the 7 in particular was reverse-engineered from
     // `gui_chrome.dossier_backdrop` painting its frame out to 6px. SPACE_M still clears that.
@@ -76,7 +88,31 @@ public final class CharacterSheetScreen extends Screen {
      * corner brackets at 6. Only the right column had been migrated, so the sheet cleared its frame
      * on one side and sat on it on the other.
      */
-    private static final int LEFT_CONTENT_W = LEFT_W - FRAME_PAD - DIVIDER_PAD;
+    /** Left edge of each column, in design space. */
+    private int figureX() {
+        return bgX + FRAME_PAD;
+    }
+
+    private int identityX() {
+        return figureX() + FIGURE_W + COL_GAP;
+    }
+
+    private int contentX() {
+        return identityX() + IDENTITY_W + COL_GAP;
+    }
+
+    private int contentW() {
+        return bgX + BG_W - FRAME_PAD - contentX();
+    }
+
+    /** Top of the three columns, below the title bar. */
+    private int columnsTop() {
+        return bgY + TITLE_H + DIVIDER_PAD;
+    }
+
+    private int columnsBottom() {
+        return bgY + BG_H - FRAME_PAD;
+    }
 
     /** Side inset of the model viewport, which narrows it toward the figure's own aspect. */
     private static final int VIEWPORT_SIDE_INSET = WizardsMetrics.SPACE_XL;
@@ -166,19 +202,28 @@ public final class CharacterSheetScreen extends Screen {
         pose.translate(bgX * (1.0f - guiScale), bgY * (1.0f - guiScale));
         pose.scale(guiScale, guiScale);
 
-        // Main panel — themed leather/parchment background art
-        McStylePanel.drawTexture(g, CharacterSheetTextures.BACKGROUND, bgX, bgY, BG_W, BG_H, BG_W, BG_H);
+        // The sheet's background is the shared nine-sliced theme panel rather than the fixed
+        // 320x240 `character_sheet/background.png` it used to blit. That art could only ever be
+        // one size, so every change to the sheet's footprint meant regenerating it; the theme
+        // panel is cut from a 32px sprite and is exact at any size.
+        McStylePanel.drawThemedPanel(g, bgX, bgY, BG_W, BG_H);
 
         // Title bar
         renderTitleBar(g);
 
-        // Vertical divider between columns
-        g.fill(bgX + LEFT_W, bgY + TITLE_H, bgX + LEFT_W + 1, bgY + BG_H, COLOR_DIVIDER);
+        // Column rules
+        g.fill(identityX() - COL_GAP / 2, columnsTop(), identityX() - COL_GAP / 2 + 1,
+                columnsBottom(), COLOR_DIVIDER);
+        g.fill(contentX() - COL_GAP / 2, columnsTop(), contentX() - COL_GAP / 2 + 1,
+                columnsBottom(), COLOR_DIVIDER);
 
-        // Left column (viewport look-at uses design-space mouse)
-        renderLeftColumn(g, partialTick, (float) toDesignX(mouseX), (float) toDesignY(mouseY));
+        // Figure column (viewport look-at uses design-space mouse)
+        renderFigureColumn(g, partialTick, (float) toDesignX(mouseX), (float) toDesignY(mouseY));
 
-        // Right column (hover tests run in design space)
+        // Identity column — unchanging facts, so they never compete with the tabs
+        renderIdentityColumn(g);
+
+        // Content column (hover tests run in design space)
         renderRightColumn(g, (int) toDesignX(mouseX), (int) toDesignY(mouseY), partialTick);
 
         pose.popMatrix();
@@ -212,42 +257,45 @@ public final class CharacterSheetScreen extends Screen {
 
     // ── Left column ────────────────────────────────────────────────────────
 
-    private void renderLeftColumn(@NonNull GuiGraphics g, float partialTick, float mouseX, float mouseY) {
-        int colX = bgX;
-        int colY = bgY + TITLE_H;
-        int colW = LEFT_W;
-        int colH = BG_H - TITLE_H;
-
+    /**
+     * The figure and the two readouts that describe its condition right now.
+     *
+     * <p>Vitals live here rather than with the identity facts on purpose: health and XP are things
+     * about the body standing in the viewport, and they change while you watch. Heritage does not.
+     */
+    private void renderFigureColumn(@NonNull GuiGraphics g, float partialTick,
+                                    float mouseX, float mouseY) {
         LocalPlayer player = minecraft.player;
         if (!(player instanceof LocalPlayer lp)) return;
 
-        // 3D viewport, portrait aspect and centred in the column.
-        //
-        // It used to be colW-12 by 112 — near square, 108x112 — around a figure that is
-        // 0.6 blocks wide by 1.8 tall. Even filling the height, a player only covers about
-        // a third of that width, so most of the box read as empty black. A portrait box
-        // wastes far less of itself on a standing figure.
-        int vpW = colW - VIEWPORT_SIDE_INSET * 2;
-        int vpH = 124;   // ~2x LINE_TITLE stack; the figure is 1.8 blocks tall
-        int vpX = colX + VIEWPORT_SIDE_INSET;
-        int vpY = colY + 4;
-        viewport.render(g, vpX, vpY, vpW, vpH, partialTick, lp, mouseX, mouseY);
+        int colX = figureX();
+        int top = columnsTop();
 
-        // Heritage block
-        int hbY = colY + vpH + 6;
-        HeritageBlockWidget.draw(g, colX + FRAME_PAD, hbY, LEFT_CONTENT_W);
+        // Portrait aspect: a player is 0.6 blocks wide by 1.8 tall, so a near-square box spends
+        // most of itself on empty black either side of the figure.
+        int vpH = columnsBottom() - top - (WizardsMetrics.LINE_SECTION * 2) - DIVIDER_PAD * 2;
+        viewport.render(g, colX, top, FIGURE_W, vpH, partialTick, lp, mouseX, mouseY);
 
-        // Vitals (health + xp)
-        int vitY = hbY + HeritageBlockWidget.height() + 4;
-        int barW = LEFT_CONTENT_W;
-        VitalsBarWidget.drawHealth(g, colX + FRAME_PAD, vitY, barW,
-                lp.getHealth(), lp.getMaxHealth());
-        VitalsBarWidget.drawXp(g, colX + FRAME_PAD, vitY + WizardsMetrics.LINE_SECTION, barW,
+        int vitY = top + vpH + DIVIDER_PAD;
+        McStylePanel.drawDivider(g, colX, vitY, FIGURE_W);
+        vitY += WizardsMetrics.DIVIDER_H;
+        VitalsBarWidget.drawHealth(g, colX, vitY, FIGURE_W, lp.getHealth(), lp.getMaxHealth());
+        VitalsBarWidget.drawXp(g, colX, vitY + WizardsMetrics.LINE_SECTION, FIGURE_W,
                 lp.experienceLevel, lp.experienceProgress);
+    }
 
-        // Active effects
-        int efY = vitY + 32 + 4;
-        renderActiveEffects(g, colX + FRAME_PAD, efY, LEFT_CONTENT_W);
+    /** Heritage and the active effects: true of the character regardless of which tab is open. */
+    private void renderIdentityColumn(@NonNull GuiGraphics g) {
+        int colX = identityX();
+        int y = columnsTop();
+
+        HeritageBlockWidget.draw(g, colX, y, IDENTITY_W);
+        y += HeritageBlockWidget.height() + DIVIDER_PAD;
+
+        McStylePanel.drawDivider(g, colX, y, IDENTITY_W);
+        y += WizardsMetrics.DIVIDER_H;
+
+        renderActiveEffects(g, colX, y, IDENTITY_W);
     }
 
     private void renderActiveEffects(@NonNull GuiGraphics g, int x, int y, int w) {
@@ -288,24 +336,18 @@ public final class CharacterSheetScreen extends Screen {
      * rather than the tab. One definition now serves both.
      */
     private int[] contentRect() {
-        int colX = bgX + LEFT_W + 1;
-        int colY = bgY + TITLE_H;
-        int colW = BG_W - LEFT_W - 1;
+        int top = columnsTop() + TAB_H + DIVIDER_PAD;
         return new int[] {
-            colX + DIVIDER_PAD,
-            colY + TAB_H + DIVIDER_PAD,
-            colW - DIVIDER_PAD - FRAME_PAD,
-            BG_H - TITLE_H - TAB_H - DIVIDER_PAD - FRAME_PAD,
+            contentX(),
+            top,
+            contentW(),
+            columnsBottom() - top,
         };
     }
 
     private void renderRightColumn(@NonNull GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        int colX = bgX + LEFT_W + 1;
-        int colY = bgY + TITLE_H;
-        int colW = BG_W - LEFT_W - 1;
-
         // Tab buttons row
-        renderTabButtons(g, colX, colY, colW, mouseX, mouseY);
+        renderTabButtons(g, contentX(), columnsTop(), contentW(), mouseX, mouseY);
 
         // Content area below tabs.
         //
@@ -361,9 +403,9 @@ public final class CharacterSheetScreen extends Screen {
 
         // Check tab buttons
         if (button == 0) {
-            int colX = bgX + LEFT_W + 1;
-            int colY = bgY + TITLE_H;
-            int colW = BG_W - LEFT_W - 1;
+            int colX = contentX();
+            int colY = columnsTop();
+            int colW = contentW();
             Tab[] tabs = Tab.values();
             int tabW = colW / tabs.length;
 
