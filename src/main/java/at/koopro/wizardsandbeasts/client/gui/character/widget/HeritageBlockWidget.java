@@ -10,13 +10,15 @@ import net.minecraft.client.gui.GuiGraphics;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-/** Renders the heritage info block in the left column. */
+/** Renders the heritage info block in the sheet's identity column. */
 public final class HeritageBlockWidget {
 
     private static final int COLOR_HEADER = 0xFFDDB97A;
     private static final int COLOR_VALUE  = 0xFFEEDDBB;
     private static final int COLOR_NONE   = 0xFF776655;
     private static final int LINE_H       = 9;
+    /** A label line, its value line, and a blank one so the four rows read as separate. */
+    private static final int ROW_H        = LINE_H * 2 + 3;
 
     private HeritageBlockWidget() {}
 
@@ -43,28 +45,33 @@ public final class HeritageBlockWidget {
         String patronus   = resolvePatronus();
         String animagus   = resolveAnimagus();
 
-        drawRow(g, font, x, cy, w, "Type",    typeName);    cy += LINE_H;
-        drawRow(g, font, x, cy, w, "Variant", variantName); cy += LINE_H;
-        drawRow(g, font, x, cy, w, "Patronus", patronus);   cy += LINE_H;
+        drawRow(g, font, x, cy, w, "Type",     typeName);    cy += ROW_H;
+        drawRow(g, font, x, cy, w, "Variant",  variantName); cy += ROW_H;
+        drawRow(g, font, x, cy, w, "Patronus", patronus);    cy += ROW_H;
         drawRow(g, font, x, cy, w, "Animagus", animagus);
     }
 
     /** Total pixel height consumed by this block. */
     public static int height() {
-        return LINE_H * 5; // header + 4 rows
+        return LINE_H + ROW_H * 4; // header + 4 two-line rows
     }
 
     // ── internals ───────────────────────────────────────────────────────────
 
+    /**
+     * A label above its value rather than beside it.
+     *
+     * <p>Side by side, the label ate the width the value needed: in a 92px column "Variant:
+     * Pure-Blood" truncated to "Variant: Pure-Blo", and the values most worth reading — a heritage
+     * name, a patronus form — are exactly the long ones. Stacking spends height instead, which this
+     * column has in surplus, and lets the value use the full width.
+     */
     private static void drawRow(@NonNull GuiGraphics g, @NonNull Font font,
                                 int x, int y, int w,
                                 @NonNull String key, @NonNull String value) {
-        g.drawString(font, key + ":", x, y, COLOR_HEADER, false);
-        int keyW = font.width(key + ": ");
+        g.drawString(font, key, x, y, COLOR_HEADER, false);
         int valueColor = "—".equals(value) ? COLOR_NONE : COLOR_VALUE;
-        // truncate value if it overflows available width
-        String display = font.plainSubstrByWidth(value, w - keyW);
-        g.drawString(font, display, x + keyW, y, valueColor, false);
+        g.drawString(font, font.plainSubstrByWidth(value, w), x, y + LINE_H, valueColor, false);
     }
 
     @NonNull

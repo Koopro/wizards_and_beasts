@@ -300,10 +300,19 @@ public final class CharacterSheetScreen extends Screen {
 
     private void renderActiveEffects(@NonNull GuiGraphics g, int x, int y, int w) {
         if (minecraft.player == null) return;
-        Collection<MobEffectInstance> effects = minecraft.player.getActiveEffects();
-        if (effects.isEmpty()) return;
-
         Font font = minecraft.font;
+
+        g.drawString(font, "Effects", x, y, COLOR_EFFECT_TXT, false);
+        y += WizardsMetrics.LINE_BODY;
+
+        Collection<MobEffectInstance> effects = minecraft.player.getActiveEffects();
+        if (effects.isEmpty()) {
+            // Said explicitly rather than left blank: an empty region under a divider reads as a
+            // panel that failed to draw, not as a character who happens to have no effects.
+            g.drawString(font, "None", x, y, COLOR_EFFECT_MORE, false);
+            return;
+        }
+
         List<MobEffectInstance> list = new ArrayList<>(effects);
         int shown = Math.min(list.size(), MAX_EFFECTS_SHOWN);
 

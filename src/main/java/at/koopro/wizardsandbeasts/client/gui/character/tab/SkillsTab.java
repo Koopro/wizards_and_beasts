@@ -41,11 +41,21 @@ public final class SkillsTab implements CharacterTab {
         PlayerSkillData skillData = ClientSkillDataState.get();
         Map<String, Integer> unlocked = skillData.getUnlockedSkills();
 
+        // Nothing here clipped to the tab's rect, so on a full skill list "Unspent Points" was
+        // drawn below the sheet entirely — floating over the world under the panel.
+        g.enableScissor(x, y, x + w, y + h);
+
         int cx = x + 2;
         int cy = y + 2;
 
         // ── Tree progress bars ────────────────────────────────────────────
         g.drawString(font, "Skill Trees", cx, cy, COLOR_SECTION, false);
+
+        // Unspent points rides the section header rather than trailing the chips. It is the one
+        // actionable number on this tab, and at the bottom it was the first thing to fall off the
+        // end of a long list — the only readout here you would open the sheet specifically to check.
+        String pointsText = "Unspent: " + skillData.getSkillPoints();
+        g.drawString(font, pointsText, x + w - 2 - font.width(pointsText), cy, COLOR_VALUE, false);
         cy += 10;
 
         for (SkillTreeId treeId : SkillTreeId.values()) {
@@ -77,12 +87,9 @@ public final class SkillsTab implements CharacterTab {
                         .resolveDisplayName(skill.getDisplayName()));
             }
         }
-        cy = drawChips(g, font, cx, cy, w - 4, h - (cy - y), nodeNames);
-        cy += 4;
+        drawChips(g, font, cx, cy, w - 4, h - (cy - y), nodeNames);
 
-        // ── Unspent points ────────────────────────────────────────────────
-        String pointsText = "Unspent Points: " + skillData.getSkillPoints();
-        g.drawString(font, pointsText, cx, cy, COLOR_VALUE, false);
+        g.disableScissor();
     }
 
     // ── helpers ───────────────────────────────────────────────────────────
