@@ -81,8 +81,10 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
             snap.skipChildrenRender(true);
         });
 
-        // Variant bones are flat siblings in the model (not children of container bones).
-        // Enumerate via registry so we know every bone name; handle <name>_anchor siblings too.
+        // Variant bones are children of their slot's container bone — handle_gnarled under handle,
+        // tip_pointed under tip — and a tip variant's _anchor is a child of the variant itself.
+        // Addressing bones by name works regardless of that hierarchy, which is why this loop does
+        // not walk it: the registry is the only thing that knows every variant bone name.
         for (WandSlot slot : WandSlot.renderOrder()) {
             String selectedBoneName = config.getModule(slot)
                     .flatMap(WandModuleRegistry::get)
