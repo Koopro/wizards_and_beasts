@@ -270,7 +270,10 @@ public class HeritageSelectionScreen extends Screen {
 
     @Override
     public void render(@NonNull GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        g.fill(0, 0, width, height, WizardsPalette.INK);
+        // No opaque fill here. This used to paint the whole viewport with WizardsPalette.INK, which
+        // hid the world behind a flat black field — on the very first screen of a new character,
+        // before they have seen the place they are about to be a wizard in. The backdrop is now the
+        // dim overlay from renderBackground below, so the terrain reads through it.
 
         if (confirmOpen) {
             // Browse chrome is not drawn behind the confirm overlay — the overlay owns the screen.
@@ -377,6 +380,15 @@ public class HeritageSelectionScreen extends Screen {
     // figure be resized out of the framing this screen is composed around — the gate is a fixed
     // portrait, not an inspector. PlayerModelViewport keeps its zoom for the Character Sheet, which
     // is a screen you are meant to poke at; this one simply never routes the wheel to it.
+
+    @Override
+    public void renderBackground(@NonNull GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        // Dim only, no blur — same choice the Character Sheet makes. The world stays crisp behind
+        // the gate, and the dim is what keeps the title, cyclers and nav hint legible: they are
+        // drawn straight onto the backdrop with no panel of their own, so over bright terrain at
+        // midday they would otherwise be unreadable.
+        renderMenuBackground(g);
+    }
 
     @Override
     public boolean isPauseScreen() {
