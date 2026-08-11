@@ -69,7 +69,7 @@ public final class CharacterSheetScreen extends Screen {
      * even though it never changes when a tab does.
      */
     private static final int FIGURE_W   = 96;
-    private static final int IDENTITY_W = 104;
+    private static final int IDENTITY_W = 92;
     private static final int COL_GAP    = 6;
     // Spacing comes from WizardsMetrics rather than this file. The three values here were 7, 4
     // and 20 -- two of them off any grid, and the 7 in particular was reverse-engineered from

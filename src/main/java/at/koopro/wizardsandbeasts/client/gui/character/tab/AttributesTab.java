@@ -25,6 +25,8 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 /** Attributes tab: player stats, attributes, wand panel, wand affinity panel, currency panel. */
@@ -51,8 +53,6 @@ public final class AttributesTab implements CharacterTab {
     private static final int COLOR_WAND_NAME  = 0xFFFFFFFF;
     /** One stat row: label line plus its bar and training hairline. */
     private static final int STAT_ROW_H     = 12;
-    /** Label gutter, so every stat's bar starts at the same x and the eye tracks one edge. */
-    private static final int LABEL_COL_W    = 52;
     private static final int SCROLLBAR_W    = 4;
     private static final int COLOR_SCROLL_TRACK = 0xFF1A1005;
     private static final int COLOR_SCROLL_THUMB = 0xFF886622;
@@ -79,32 +79,35 @@ public final class AttributesTab implements CharacterTab {
         int cx = x + 2;
         int cy = y + 2 - (int) scrollOffset;
         int top = cy;
+        // The scrollbar is drawn over the right edge of this rect, so content is laid out inside
+        // a width that already excludes it. Right-aligned values used to run underneath it.
+        int innerW = w - 4 - SCROLLBAR_W;
 
         // ── The character's own five numbers ──────────────────────────────
         // Above the attributes on purpose: these are the character's own numbers, where the block
         // below is the sum of everything currently modifying them.
         if (ModuleManager.isEnabled(Module.PLAYER_STATS) && ClientStatsState.hasData()) {
-            cy = drawStatsSection(g, font, cx, cy, w - 4);
+            cy = drawStatsSection(g, font, cx, cy, innerW);
         }
 
         // ── Attributes: the sum of everything currently modifying the character ──
         g.drawString(font, "Attributes", cx, cy, COLOR_SECTION, false);
         cy += 10;
 
-        drawAttributeRows(g, player, cx, cy, w - 4);
+        drawAttributeRows(g, player, cx, cy, innerW);
         cy += 6 * STAT_ROW_H + 2;
 
         // ── Wand panel ────────────────────────────────────────────────────
         ItemStack heldStack = player.getMainHandItem();
         if (heldStack.getItem() instanceof WandItem) {
-            cy = drawWandPanel(g, font, cx, cy, w - 4, heldStack);
+            cy = drawWandPanel(g, font, cx, cy, innerW, heldStack);
         }
 
         // ── Wand affinity panel ───────────────────────────────────────────
-        cy = drawWandAffinityPanel(g, font, cx, cy, w - 4, player);
+        cy = drawWandAffinityPanel(g, font, cx, cy, innerW, player);
 
         // ── Currency panel ────────────────────────────────────────────────
-        drawCurrencyPanel(g, font, cx, cy, w - 4);
+        drawCurrencyPanel(g, font, cx, cy, innerW);
         cy += 10 + 9 * 3;
 
         g.disableScissor();
@@ -156,40 +159,78 @@ public final class AttributesTab implements CharacterTab {
             PlayerStat.KNOWLEDGE,
         };
 
+        List<String> labels = new ArrayList<>();
+        List<String> values = new ArrayList<>();
         for (PlayerStat stat : order) {
-            drawStatRow(g, font, x, y, w, stat, valueOf(stats, stat),
-                        stat.isTrainable() ? stats.trainingProgress().getOrDefault(stat, 0f) : -1f);
+            labels.add(stat.displayName().getString());
+            values.add(Integer.toString(valueOf(stats, stat)));
+        }
+        RowGutters gut = gutters(font, x, w, labels, values);
+
+        for (int i = 0; i < order.length; i++) {
+            PlayerStat stat = order[i];
+            drawMeterRow(g, font, x, y, w, gut, labels.get(i), values.get(i),
+                         valueOf(stats, stat) / 100.0,
+                         stat.isTrainable() ? stats.trainingProgress().getOrDefault(stat, 0f) : -1f);
             y += STAT_ROW_H;
         }
         return y + 2;
     }
 
     /**
-     * One stat as a row: name, bar, value — read down a column of numbers rather than across a
-     * grid of lookalike tiles.
+     * Column widths for a group of meter rows, measured from the strings the group will actually
+     * draw rather than assumed.
      *
-     * <p>These were 2x3 cards of 26px each, which is what a 200px column could hold and no more.
-     * A row is 12px, so the same space carries the stats, their training progress and whatever the
-     * section below wants, and the values line up in one column instead of alternating sides.
+     * <p>A fixed gutter was wrong twice over in the same frame: too narrow for the labels, so
+     * "Max Health" rendered as "Max Healt" and "Beast Resistance" as "Beast Resi", and too generous
+     * about the right edge, so "20.50" ran under the scrollbar and lost its last digit. Both gutters
+     * are now the widest string in the group, and the bar takes what is left.
+     *
+     * @param labelW widest label in the group, capped so a long label cannot eat the whole row
+     * @param barX   left edge of every bar in the group, so the eye tracks one vertical edge
+     * @param barW   space between the two gutters, or non-positive when there is no room for a bar
+     */
+    private record RowGutters(int labelW, int barX, int barW) {}
+
+    private static RowGutters gutters(@NonNull Font font, int x, int w,
+                                      @NonNull List<String> labels,
+                                      @NonNull List<String> values) {
+        int labelW = 0;
+        for (String s : labels) {
+            labelW = Math.max(labelW, font.width(s));
+        }
+        // 55%: the widest label the sheet ships is "Beast Resistance" at 96px, and the
+        // content column is 180px inside its padding. A tighter cap truncated it.
+        labelW = Math.min(labelW, w * 55 / 100);
+
+        int valueW = 0;
+        for (String s : values) {
+            valueW = Math.max(valueW, font.width(s));
+        }
+        int barX = x + labelW + LABEL_VALUE_GAP;
+        return new RowGutters(labelW, barX, w - labelW - LABEL_VALUE_GAP * 2 - valueW);
+    }
+
+    /**
+     * One meter row: label, bar, right-aligned value.
+     *
+     * <p>These were 26px tiles in a 2x3 grid, which is what a 200px column could hold and no more.
+     * A row is 12px, so the same space carries every stat and attribute plus the sections below.
      *
      * @param trainingProgress fraction into the next point, or a negative value to omit the hairline
      */
-    private void drawStatRow(@NonNull GuiGraphics g, @NonNull Font font, int x, int y, int w,
-                             @NonNull PlayerStat stat, int value, float trainingProgress) {
-        String valStr = Integer.toString(value);
-        int valW = font.width(valStr);
-        int labelW = LABEL_COL_W;
-        int barX = x + labelW + LABEL_VALUE_GAP;
-        int barW = w - labelW - LABEL_VALUE_GAP * 2 - valW;
+    private void drawMeterRow(@NonNull GuiGraphics g, @NonNull Font font, int x, int y, int w,
+                              @NonNull RowGutters gut, @NonNull String label, @NonNull String value,
+                              double fraction, float trainingProgress) {
+        g.drawString(font, font.plainSubstrByWidth(label, gut.labelW()), x, y + 1, COLOR_LABEL, false);
+        g.drawString(font, value, x + w - font.width(value), y + 1, COLOR_VALUE, false);
 
-        g.drawString(font, font.plainSubstrByWidth(stat.displayName().getString(), labelW),
-                x, y + 1, COLOR_LABEL, false);
-        g.drawString(font, valStr, x + w - valW, y + 1, COLOR_VALUE, false);
-
+        int barW = gut.barW();
         if (barW <= 0) return;
+        int barX = gut.barX();
         int barY = y + 2;
         g.fill(barX, barY, barX + barW, barY + 4, COLOR_BAR_TRACK);
-        int filled = Math.max(0, Math.min(barW, value * barW / 100));
+        int filled = Math.max(0, Math.min(barW, (int) (fraction * barW)));
         g.fill(barX, barY, barX + filled, barY + 4, COLOR_BAR_FILL);
 
         // Training hairline under the main bar: without it the bar sits still for hundreds of
@@ -233,40 +274,19 @@ public final class AttributesTab implements CharacterTab {
         };
 
         Font font = Minecraft.getInstance().font;
-        for (int i = 0; i < cards.length; i++) {
-            drawAttrRow(g, font, x, y + i * STAT_ROW_H, w, cards[i].name(), cards[i].value(),
-                        cards[i].min(), cards[i].max());
+        List<String> labels = new ArrayList<>();
+        List<String> values = new ArrayList<>();
+        for (AttrRow row : cards) {
+            labels.add(row.name());
+            values.add(formatAttr(row.value()));
         }
-    }
+        RowGutters gut = gutters(font, x, w, labels, values);
 
-    /**
-     * One attribute as a row, sharing {@link #drawStatRow}'s gutter so stats and attributes line
-     * their bars and values up on the same two edges.
-     *
-     * <p>These were 26px tiles in a 2x3 grid, which is what a 200px column could hold and no more.
-     * The value is still measured before the label is truncated: truncating to the full row width
-     * instead let "Dark Corruption" and "Beast Resistance" run under the right-aligned value and
-     * render as "Dark Corrupti100" and "Beast Resistanc0" — the four shorter labels fit, so nothing
-     * caught it.
-     */
-    private void drawAttrRow(@NonNull GuiGraphics g, @NonNull Font font, int x, int y, int w,
-                             String name, double value, double min, double max) {
-        String valStr = formatAttr(value);
-        int valW = font.width(valStr);
-        int barX = x + LABEL_COL_W + LABEL_VALUE_GAP;
-        int barW = w - LABEL_COL_W - LABEL_VALUE_GAP * 2 - valW;
-
-        g.drawString(font, font.plainSubstrByWidth(name, LABEL_COL_W), x, y + 1, COLOR_LABEL, false);
-        g.drawString(font, valStr, x + w - valW, y + 1, COLOR_VALUE, false);
-
-        if (barW <= 0) return;
-        int barY = y + 2;
-        g.fill(barX, barY, barX + barW, barY + 4, COLOR_BAR_TRACK);
-        double range = max - min;
-        if (range > 0) {
-            int filled = (int) ((value - min) / range * barW);
-            filled = Math.max(0, Math.min(filled, barW));
-            g.fill(barX, barY, barX + filled, barY + 4, COLOR_BAR_FILL);
+        for (int i = 0; i < cards.length; i++) {
+            double range = cards[i].max() - cards[i].min();
+            double frac = range > 0 ? (cards[i].value() - cards[i].min()) / range : 0;
+            drawMeterRow(g, font, x, y + i * STAT_ROW_H, w, gut,
+                         labels.get(i), values.get(i), frac, -1f);
         }
     }
 
