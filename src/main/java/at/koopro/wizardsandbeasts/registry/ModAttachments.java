@@ -22,6 +22,7 @@ import at.koopro.wizardsandbeasts.skill.vocation.PlayerVocationData;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.currency.vault.PlayerVaultData;
+import at.koopro.wizardsandbeasts.pose.PoseOverride;
 import at.koopro.wizardsandbeasts.skill.PlayerSkillBonusData;
 import net.minecraft.nbt.CompoundTag;
 import net.neoforged.neoforge.attachment.AttachmentType;
@@ -63,6 +64,18 @@ public class ModAttachments {
             ATTACHMENTS.register("vocation_data", () -> AttachmentType.builder(() -> PlayerVocationData.EMPTY)
                     .serialize(PlayerVocationData.CODEC.fieldOf("data"))
                     .copyOnDeath()
+                    .build());
+
+    /**
+     * The player's active pose override — see {@code PoseOverride}.
+     *
+     * <p>Deliberately NOT copyOnDeath: a forced flight pose is a debugging state, and having it
+     * survive a death into a respawn where the player is not flying would leave an override
+     * stored that renders nothing and that nobody remembers setting.
+     */
+    public static final Supplier<AttachmentType<PoseOverride>> POSE_OVERRIDE =
+            ATTACHMENTS.register("pose_override", () -> AttachmentType.builder(() -> PoseOverride.NONE)
+                    .serialize(PoseOverride.CODEC.fieldOf("data"))
                     .build());
 
     public static final Supplier<AttachmentType<PlayerSkillBonusData>> SKILL_BONUS_DATA =
