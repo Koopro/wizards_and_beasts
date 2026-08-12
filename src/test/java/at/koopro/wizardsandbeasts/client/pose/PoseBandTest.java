@@ -67,9 +67,30 @@ class PoseBandTest {
         assertEquals(4f, PoseOpType.ADD.apply(PoseTarget.X, 3f, 1f, 0f, 1f), 1e-6);
     }
 
+    /**
+     * RESET blends toward the captured vanilla value, not toward zero or a rest pose.
+     *
+     * <p>The distinction is the whole of schema rev 4. A blend-out means "hand this limb back to
+     * vanilla mid-stride"; if it targeted the authored rest pose, a pose releasing during a walk
+     * would snap the limb toward a T-pose for one frame before {@code setupAnim} put it back in the
+     * walk cycle. Here the captured value is 1.0 — a limb mid-swing — and a half-weight RESET lands
+     * halfway between the posed value and that, never at zero.
+     */
     @Test
-    void resetBlendsTowardTheSuppliedInitialPose() {
-        assertEquals(2f, PoseOpType.RESET.apply(PoseTarget.X_ROT, 4f, 0f, 0f, 0.5f), 1e-6);
+    void resetBlendsTowardTheCapturedVanillaValue() {
+        float posed = 4f;
+        float capturedVanilla = 1f;
+        assertEquals(2.5f, PoseOpType.RESET.apply(PoseTarget.X_ROT, posed, 0f, capturedVanilla, 0.5f), 1e-6);
+        assertEquals(capturedVanilla,
+                PoseOpType.RESET.apply(PoseTarget.X_ROT, posed, 0f, capturedVanilla, 1f), 1e-6,
+                "a full-weight RESET lands exactly on vanilla's value");
+    }
+
+    /** The operand is ignored by RESET — the destination is the captured value, not the value field. */
+    @Test
+    void resetIgnoresItsOperand() {
+        assertEquals(PoseOpType.RESET.apply(PoseTarget.X_ROT, 4f, 0f, 1f, 1f),
+                PoseOpType.RESET.apply(PoseTarget.X_ROT, 4f, 99f, 1f, 1f), 1e-6);
     }
 
     /**

@@ -39,6 +39,15 @@ public final class PlayerPoseLayer {
     /** Reused per frame. Cleared on entry to {@link #run}, never assumed clean. */
     private final PoseBuilder builder = new PoseBuilder();
     private final Map<PlayerModelPart, PoseStackResult> stackResults = new EnumMap<>(PlayerModelPart.class);
+    /** Vanilla's output per part, captured at layer entry. Reused between frames to avoid churn. */
+    private final Map<PlayerModelPart, float[]> captured = new EnumMap<>(PlayerModelPart.class);
+
+    /** The targets a {@code ModelPart} can actually hold, in capture order. */
+    private static final PoseTarget[] CAPTURED_TARGETS = {
+            PoseTarget.X, PoseTarget.Y, PoseTarget.Z,
+            PoseTarget.X_ROT, PoseTarget.Y_ROT, PoseTarget.Z_ROT,
+            PoseTarget.X_SCALE, PoseTarget.Y_SCALE, PoseTarget.Z_SCALE,
+    };
 
     private PlayerPoseLayer() {}
 
@@ -68,9 +77,8 @@ public final class PlayerPoseLayer {
      * Runs every pass and applies the result to the model.
      *
      * <p>Called from the existing {@code PlayerModelMixin} delegate chain, after vanilla has
-     * finished posing — see schema §3.7. Vanilla's own {@code setupAnim} is the reset: it rewrites
-     * every part from the model's initial pose each frame, so the layer starts from a clean pose
-     * without having to restore anything itself.
+     * finished posing — see schema §3.7. The incoming transforms are captured first, because they
+     * are vanilla's output for this frame and {@code RESET} blends back toward them.
      *
      * @return the whole-avatar transform, or null when nothing addressed {@link PlayerModelPart#BODY}
      */
@@ -82,6 +90,7 @@ public final class PlayerPoseLayer {
 
         PoseContext context = new PoseContext(model, state, firstPerson, partialTicks);
         stackResults.clear();
+        captureVanillaPose(model);
 
         for (PosePass pass : passes) {
             builder.clear();
@@ -94,7 +103,6 @@ public final class PlayerPoseLayer {
             }
         }
 
-        PlayerModelPart.copyOverlays(model);
         return stackResults.get(PlayerModelPart.BODY);
     }
 
@@ -110,10 +118,10 @@ public final class PlayerPoseLayer {
         if (target == null) {
             return;
         }
-        applyToModelPart(target, data);
+        applyToModelPart(part, target, data);
     }
 
-    private void applyToModelPart(ModelPart target, PartPoseData data) {
+    private void applyToModelPart(PlayerModelPart part, ModelPart target, PartPoseData data) {
         float multiplier = data.multiplier();
         for (PartPoseData.Op op : data.ops()) {
             if (op.target().isPostRotation()) {
@@ -124,9 +132,9 @@ public final class PlayerPoseLayer {
                 continue;
             }
             float current = read(target, op.target());
-            float initial = initial(target, op.target());
+            float captured = capturedValue(part, op.target());
             write(target, op.target(),
-                    op.type().apply(op.target(), current, op.value(), initial, multiplier));
+                    op.type().apply(op.target(), current, op.value(), captured, multiplier));
         }
     }
 
@@ -165,30 +173,54 @@ public final class PlayerPoseLayer {
             case Z_ROT -> part.zRot = value;
             case X_SCALE -> part.xScale = value;
             case Y_SCALE -> part.yScale = value;
+            case Z_SCALE -> part.zScale = value;
             case X2, Y2, Z2 -> { /* unreachable: filtered above */ }
         }
     }
 
     /**
-     * The part's pose as vanilla left it this frame.
+     * Records what vanilla left on every part, before any pass has touched it.
      *
-     * <p>{@code RESET} blends toward what {@code setupAnim} produced, not toward the model's
-     * authored rest pose. That is the useful meaning: "hand this limb back to vanilla" during a
-     * blend-out, so a pose releasing mid-stride returns to the walk cycle rather than snapping to a
-     * T-pose and then back into the walk.
+     * <p>The layer runs at {@code TAIL} of {@code setupAnim}, so the values sitting on the model at
+     * this moment <em>are</em> vanilla's authored output for this frame — the walk cycle, the swing,
+     * the crouch. Capturing them is what gives {@code RESET} something worth returning to.
+     *
+     * <p>The layer deliberately does <b>not</b> reset parts to their initial pose here. Doing that
+     * would discard vanilla's animation wholesale on every frame the layer runs, so a pose that
+     * touched only the arms would still freeze the legs mid-stride.
      */
-    private static float initial(ModelPart part, PoseTarget target) {
-        var initial = part.getInitialPose();
-        return switch (target) {
-            case X -> initial.x();
-            case Y -> initial.y();
-            case Z -> initial.z();
-            case X_ROT -> initial.xRot();
-            case Y_ROT -> initial.yRot();
-            case Z_ROT -> initial.zRot();
-            case X_SCALE, Y_SCALE, Z_SCALE -> 1.0f;
-            case X2, Y2, Z2 -> target.identity();
-        };
+    private void captureVanillaPose(PlayerModel model) {
+        for (PlayerModelPart part : PlayerModelPart.values()) {
+            ModelPart modelPart = part.resolve(model);
+            if (modelPart == null) {
+                continue;
+            }
+            float[] row = captured.computeIfAbsent(part, p -> new float[CAPTURED_TARGETS.length]);
+            for (int i = 0; i < CAPTURED_TARGETS.length; i++) {
+                row[i] = read(modelPart, CAPTURED_TARGETS[i]);
+            }
+        }
+    }
+
+    /**
+     * The value vanilla had on this target at layer entry — {@code RESET}'s destination.
+     *
+     * <p>Not {@code ModelPart.getInitialPose()}: that is the authored rest pose, near a T-pose, so
+     * blending toward it during a fade-out snaps the player upright before the next frame's
+     * {@code setupAnim} puts them back in the walk cycle. What a blend-out means is "hand this limb
+     * back to vanilla mid-stride", which is exactly the captured value.
+     */
+    private float capturedValue(PlayerModelPart part, PoseTarget target) {
+        float[] row = captured.get(part);
+        if (row == null) {
+            return target.identity();
+        }
+        for (int i = 0; i < CAPTURED_TARGETS.length; i++) {
+            if (CAPTURED_TARGETS[i] == target) {
+                return row[i];
+            }
+        }
+        return target.identity();
     }
 
     /** Debug-level, once per target, so a mistake is findable without spamming a render loop. */

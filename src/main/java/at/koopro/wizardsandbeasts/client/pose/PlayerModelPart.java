@@ -15,8 +15,11 @@ import org.jspecify.annotations.Nullable;
  * rather than the body's. The virtual part exists so a pass can say "pitch the whole avatar" in the
  * same op vocabulary as "raise the left arm".
  *
- * <p>Overlay parts — hat, jacket, sleeves, trouser layers — are never addressed. They copy from
- * their base part after every op has been applied, which is what {@link #copyOverlays} does.
+ * <p>Overlay parts — hat, jacket, sleeves, trouser layers — are never addressed, and need no copy
+ * step. In 1.21.11 they are <em>children</em> of their base part
+ * ({@code leftArm.getChild("left_sleeve")}, {@code body.getChild("jacket")}), so they inherit the
+ * transform through the hierarchy. Older versions built them as siblings and required an explicit
+ * copy; if a future version reverts to that, the copy belongs here.
  */
 @NullMarked
 public enum PlayerModelPart {
@@ -54,19 +57,4 @@ public enum PlayerModelPart {
         };
     }
 
-    /**
-     * Overlays need no copy step in 1.21.11.
-     *
-     * <p>The schema calls for copying each posed base part onto its overlay, which is what older
-     * versions required. This one builds them as <em>children</em> —
-     * {@code leftSleeve = leftArm.getChild("left_sleeve")}, {@code jacket = body.getChild("jacket")}
-     * — so an overlay inherits its parent's transform through the hierarchy and a copy would be
-     * redundant at best. Recorded here rather than left as an absence, because "the overlay step is
-     * missing" is exactly what a reader would otherwise conclude.
-     *
-     * <p>If a future version reverts to sibling overlays, this is where the copy goes.
-     */
-    public static void copyOverlays(PlayerModel model) {
-        // Intentionally empty — see above.
-    }
 }
