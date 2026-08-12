@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.mixin.client;
 
 import at.koopro.wizardsandbeasts.client.broom.BroomRiderPoseHandler;
 import at.koopro.wizardsandbeasts.client.debug.ModelDebugPartTransforms;
+import at.koopro.wizardsandbeasts.client.pose.PlayerPoseHandler;
 import at.koopro.wizardsandbeasts.client.petrify.PetrifyRenderHandler;
 import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
@@ -47,6 +48,11 @@ public class PlayerModelMixin {
         // it is additive on top of whatever survived, which is what makes it useful for tuning both.
         BroomRiderPoseHandler.applyRidingPose(model, state);
         PetrifyRenderHandler.applyFrozenPose(model, state);
+        // The pose layer runs after the three legacy handlers rather than replacing them. Migrating
+        // them into passes is tracked but deliberately out of wave 1: doing it here would mean
+        // rewriting riding and petrification poses in the same change that introduces the layer they
+        // would be rewritten onto.
+        PlayerPoseHandler.applyPose(model, state);
         ModelDebugPartTransforms.apply(model);
     }
 }

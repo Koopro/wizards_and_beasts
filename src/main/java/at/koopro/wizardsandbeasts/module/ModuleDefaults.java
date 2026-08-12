@@ -32,6 +32,9 @@ public final class ModuleDefaults {
         SHIPPED.put(Module.CREATURES, ModuleState.PREVIEW);
         SHIPPED.put(Module.BESTIARY, ModuleState.PREVIEW);
         SHIPPED.put(Module.BROOM_FLIGHT, ModuleState.ENABLED);
+        // Wave 1 ships the layer, a flight pass driven by a command, and one proving clip.
+        // PREVIEW: renders for verification, not presented as finished.
+        SHIPPED.put(Module.PLAYER_ANIMATION, ModuleState.PREVIEW);
         SHIPPED.put(Module.POCKET_DIMENSIONS, ModuleState.ENABLED);
         SHIPPED.put(Module.OWLS, ModuleState.PREVIEW);
         // Azkaban worldgen (crag + NBT-template fortress) is a Beta v0.3 feature. DISABLED until the real

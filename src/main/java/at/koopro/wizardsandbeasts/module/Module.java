@@ -13,6 +13,12 @@ public enum Module {
     CREATURES,
     BESTIARY,
     BROOM_FLIGHT,
+    /**
+     * The player pose layer: procedural and keyframe passes that pose the vanilla player model
+     * from live gameplay state. Gating suppresses the layer, never its registration — a disabled
+     * module leaves every pass registered and simply runs none of them.
+     */
+    PLAYER_ANIMATION,
     POCKET_DIMENSIONS,
     OWLS,
     FLOO_NETWORK,
