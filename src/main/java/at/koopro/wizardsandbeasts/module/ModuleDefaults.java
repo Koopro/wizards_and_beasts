@@ -39,7 +39,7 @@ public final class ModuleDefaults {
         SHIPPED.put(Module.OWLS, ModuleState.PREVIEW);
         // Azkaban worldgen (crag + NBT-template fortress) is a Beta v0.3 feature. DISABLED until the real
         // fortress NBT + Dementor spawn table + loot land: the shipped template is a near-empty 225-byte
-        // placeholder with no reachable content (see ALPHA_IMPROVEMENT_AUDIT.md §7.1).
+        // placeholder with no reachable content (see documentation/ALPHA_IMPROVEMENT_AUDIT.md §7.1).
         // NOTE: COMING_SOON would arguably fit better, but that would take it out of an operator's reach —
         // a behaviour change this prompt does not authorise. Left exactly as it shipped.
         SHIPPED.put(Module.AZKABAN, ModuleState.DISABLED);
@@ -55,7 +55,7 @@ public final class ModuleDefaults {
         // Same placeholder-template caution as AZKABAN; likewise left DISABLED rather than COMING_SOON.
         SHIPPED.put(Module.CHAMBER_OF_SECRETS, ModuleState.DISABLED);
         // MINISTRY was never present in the old static table, so it resolved through getOrDefault to
-        // DISABLED. Preserved exactly — see MIGRATION_DELTAS.md, this means the Ministry system is off
+        // DISABLED. Preserved exactly — see documentation/MIGRATION_DELTAS.md, this means the Ministry system is off
         // until an operator turns it on.
         SHIPPED.put(Module.MINISTRY, ModuleState.DISABLED);
         // ── Content-classification modules ───────────────────────────────────────────────────────

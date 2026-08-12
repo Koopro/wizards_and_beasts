@@ -37,7 +37,7 @@ import java.util.Map;
  * cleared afterwards.
  *
  * <p>The stone appearance is a deliberate placeholder — a flat grey skin — see
- * {@code AUDIT_PUNCHLIST.md}, "Petrification appearance".
+ * {@code documentation/AUDIT_PUNCHLIST.md}, "Petrification appearance".
  */
 @NullMarked
 public final class PetrifyRenderHandler {

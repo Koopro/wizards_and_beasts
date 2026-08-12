@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Pins the cooldown-resolution invariant extracted from {@code SpellCastService}: a cast's cooldown is
- * the modifier-scaled value but never below 50% of the spell's base cooldown (PIPELINE_AUDIT.md §5),
+ * the modifier-scaled value but never below 50% of the spell's base cooldown (documentation/PIPELINE_AUDIT.md §5),
  * with both terms clamped to at least one tick.
  */
 class SpellCastCooldownTest {

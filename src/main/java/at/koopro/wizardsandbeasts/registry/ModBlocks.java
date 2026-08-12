@@ -217,7 +217,7 @@ public class ModBlocks {
     public static final DeferredItem<BlockItem> NEWTS_CASE_ITEM =
             ModItems.ITEMS.registerItem("newts_case_item", props -> new BlockItem(NEWTS_CASE.get(), props.stacksTo(1)));
 
-    // --- Tent preview harness (exterior GeckoLib geometry only — see AUDIT_PUNCHLIST.md "Tent Models") ---
+    // --- Tent preview harness (exterior GeckoLib geometry only — see documentation/AUDIT_PUNCHLIST.md "Tent Models") ---
     // Deliberately no BlockItem: this is a /setblock-only scaffold for viewing the two models in-world.
     // Real item forms, crafting and pocket-space wiring are explicitly out of scope for this pass.
     public static final DeferredBlock<TentCanvasBlock> TENT_CANVAS =

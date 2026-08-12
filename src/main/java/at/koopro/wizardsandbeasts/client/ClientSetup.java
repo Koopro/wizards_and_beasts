@@ -40,7 +40,7 @@ public class ClientSetup {
         event.registerEntityRenderer(ModEntities.RUNESPOOR.get(), GeoRendererHelper.simple("runespoor"));
         event.registerEntityRenderer(ModEntities.HIDEBEHIND.get(), GeoRendererHelper.simple("hidebehind"));
 
-        // Tent preview harness — exterior geometry only, see AUDIT_PUNCHLIST.md "Tent Models".
+        // Tent preview harness — exterior geometry only, see documentation/AUDIT_PUNCHLIST.md "Tent Models".
         // Margins are generous cubes around the anchor block; grand tent gets more for its turret/flagpole height.
         event.registerBlockEntityRenderer(at.koopro.wizardsandbeasts.registry.ModBlockEntities.TENT_CANVAS.get(),
                 GeoRendererHelper.simpleBlock("tent_canvas", 2.5));

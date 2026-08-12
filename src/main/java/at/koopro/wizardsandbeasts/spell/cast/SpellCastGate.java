@@ -69,7 +69,7 @@ public enum SpellCastGate {
     /**
      * Final cooldown ticks for a cast: the modifier/scaling-adjusted value, floored at 50% of the base
      * so cooldown reductions can never drop a spell below half its listed cooldown (the invariant
-     * documented in {@code PIPELINE_AUDIT.md} §5). Both terms clamp to a minimum of 1 tick.
+     * documented in {@code documentation/PIPELINE_AUDIT.md} §5). Both terms clamp to a minimum of 1 tick.
      */
     public static int resolveCooldownTicks(int baseCooldown, float cooldownMult) {
         int scaled = Math.max(1, Math.round(baseCooldown * cooldownMult));

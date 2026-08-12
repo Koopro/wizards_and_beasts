@@ -72,7 +72,7 @@ public final class GeoRendererHelper {
     /**
      * Block-entity counterpart of {@link #simple}: a {@code GeoBlockRenderer} backed by a
      * {@code DefaultedBlockGeoModel}, no custom render logic. First user is the tent preview harness — see
-     * {@code AUDIT_PUNCHLIST.md} "Tent Models" for why this mirrors the entity factory exactly rather than
+     * {@code documentation/AUDIT_PUNCHLIST.md} "Tent Models" for why this mirrors the entity factory exactly rather than
      * inventing a different block-render convention.
      *
      * <p>{@code renderMargin} inflates the render bounding box by that many blocks in every direction, so a

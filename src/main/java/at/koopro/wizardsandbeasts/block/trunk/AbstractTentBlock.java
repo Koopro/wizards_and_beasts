@@ -37,7 +37,7 @@ import org.jspecify.annotations.Nullable;
  * costs zero extra code, the same way {@code TrunkBlock} does it. {@link #FACING} mirrors
  * {@code TrunkBlock.FACING}: the entrance flap faces the placer, matching {@code GeoBlockRenderer}'s
  * automatic {@code HORIZONTAL_FACING} rotation (no per-tent override needed — see
- * {@code AUDIT_PUNCHLIST.md}).
+ * {@code documentation/AUDIT_PUNCHLIST.md}).
  *
  * <p>{@link #getRenderShape} returns {@link RenderShape#INVISIBLE}, not {@code MODEL}: 100% of the visible
  * geometry comes from the GeckoLib {@code BlockEntityRenderer}, so there is deliberately no
