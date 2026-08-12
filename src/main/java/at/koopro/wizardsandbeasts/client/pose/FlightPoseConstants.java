@@ -7,130 +7,192 @@ import java.util.EnumMap;
 import java.util.Map;
 
 /**
- * Pose values for the three flight states.
+ * Authored pose values for the three flight states, filling schema §7.3.
  *
- * <p><b>THESE NUMBERS ARE PLACEHOLDERS AND ARE NOT AUTHORED ART.</b> Schema §7.3 requires every
- * rotation and offset to be authored against the vanilla player model and exported here as named
- * constants; those values do not exist yet. What is below is a deliberately coarse first
- * approximation whose only job is to make the plumbing visible in-game — the states differ enough to
- * tell apart, and nothing more. Tracked at BLOCKER in {@code AUDIT_PUNCHLIST.md}.
+ * <p>Transcribed from {@code FLIGHT_POSE_CONSTANTS.md}. A tuned starting point rather than a final
+ * set — they exist so in-game verification tests the blend instead of testing obviously-wrong
+ * placeholders — but they are authored, which the previous set explicitly was not.
  *
- * <p>They are written in whole and half degrees on purpose. Tuned pose values do not come out as
- * round numbers, so a table of them reads as provisional at a glance rather than being mistaken for
- * something somebody sat down and dialled in.
+ * <h2>Conventions</h2>
  *
- * <p>Everything lives in this one class so the authored set can replace it without a single edit to
- * {@link FlightPosePass}. That separation is the deliverable; the numbers are not.
+ * <p>Everything is degrees. Limb {@code xRot} positive pitches a limb backwards, negative swings it
+ * forward: an arm at {@code -90} points straight ahead. Arm {@code zRot} mirrors between sides and
+ * both sides are written out, because the legs are deliberately asymmetric and a pass that mirrored
+ * one side onto the other could not express them.
  *
- * <h2>Two sign conventions, and why the head field is a fraction</h2>
+ * <h2>The one value corrected from the source document</h2>
  *
- * <p>{@code bodyPitch} is applied to the <em>pose stack</em>, in {@code AvatarRenderer.setupRotations};
- * the limb rotations are applied to {@code ModelPart}s, which live on the far side of vanilla's
- * {@code scale(-1, -1, 1)}. That reflection negates the X and Y rotation axes, so the same visual
- * lean is a negative number in one frame and a positive number in the other.
+ * <p><b>{@code headPitch} is negated relative to the table.</b> The document gives {@code +2 / +22 /
+ * +58} and states the purpose: "so the player still looks where they are going rather than at the
+ * ground". In Minecraft that requires a negative number. Vanilla sets {@code head.xRot = state.xRot *
+ * DEG_TO_RAD} and entity pitch is positive looking <em>down</em>, so a positive head rotation tips
+ * the gaze further into the ground — on a body already pitched forward, doubling the problem the
+ * value is there to solve. The magnitudes are the author's; only the sign is changed, and it is
+ * changed to match what the document says the field is for.
  *
- * <p>Storing the head's counter-rotation as an angle meant storing it in the opposite sign to the
- * body pitch it cancels — which is exactly the mistake that shipped, and which read in-game as the
- * head cranking down instead of staying level. It is a fraction now: the pass multiplies it by the
- * pitch actually applied, so the two cannot drift apart and there is no sign left to get wrong.
+ * <p>The trap behind it is that {@code bodyPitch} and the limb rotations are in different frames:
+ * the body is a pose stack transform applied in {@code AvatarRenderer.setupRotations}, the limbs are
+ * {@code ModelPart}s on the far side of vanilla's {@code scale(-1, -1, 1)}, and that reflection
+ * negates the X rotation axis. A head compensation therefore carries the <em>same</em> sign as the
+ * body pitch it cancels, which reads as wrong every time.
  */
 @NullMarked
 public final class FlightPoseConstants {
 
     private FlightPoseConstants() {}
 
+    /** One part's rotation, in degrees. */
+    public record PartRotation(float xRot, float yRot, float zRot) {
+
+        public static final PartRotation NONE = new PartRotation(0f, 0f, 0f);
+
+        public PartRotation lerp(PartRotation to, float t) {
+            return new PartRotation(
+                    FlightPoseConstants.lerp(xRot, to.xRot, t),
+                    FlightPoseConstants.lerp(yRot, to.yRot, t),
+                    FlightPoseConstants.lerp(zRot, to.zRot, t));
+        }
+    }
+
     /**
-     * One state's pose.
+     * One state's third-person pose.
      *
-     * <p>Rotations are degrees. {@code pitchPivot} is <b>blocks</b>, not the sixteenths a
-     * {@code ModelPart} uses — it is applied to the pose stack, where one unit is one block.
-     *
-     * @param bodyPitch   whole-avatar pitch. Negative leans forward, matching vanilla's own elytra
-     *                    pitch; -90 would be fully prone
-     * @param pitchPivot  height above the feet that the body pitches about, in blocks. The pass
-     *                    emits it as a matched offset pair either side of the rotation, so a value
-     *                    of 0 pivots at the feet and ~1 pivots at the chest
-     * @param headCounter how much of the body pitch the head cancels: 1 keeps the player looking
-     *                    exactly where they aim, 0 lets the head go wherever the body puts it
-     * @param armPitch    both arms, forward from the shoulder. Negative raises them forward
-     * @param armSplay    both arms, outward — mirrored left/right by the pass
-     * @param legPitch    both legs, trailing back from the hip
-     * @param legSplay    both legs, outward — mirrored left/right by the pass
+     * @param bodyPitch  whole-avatar pitch. Negative leans forward; -90 would be fully prone
+     * @param pivot      height above the feet the body pitches about, in <b>blocks</b> — it is a pose
+     *                   stack offset, not the sixteenths a {@code ModelPart} uses. Emitted as a
+     *                   matched pair either side of the rotation
+     * @param headPitch  added to the player's real look pitch. Negative lifts the gaze; see the class
+     *                   note on why that is the compensating direction
+     * @param banks      whether this state banks into turns. HOVER does not
      */
     public record FlightPose(
-            float bodyPitch, float pitchPivot, float headCounter,
-            float armPitch, float armSplay,
-            float legPitch, float legSplay) {}
+            float bodyPitch, float pivot, float headPitch, boolean banks,
+            PartRotation chest,
+            PartRotation rightArm, PartRotation leftArm,
+            PartRotation rightLeg, PartRotation leftLeg) {}
 
-    // ── PLACEHOLDER third-person values ──────────────────────────────────────
+    /**
+     * One state's first-person arm, given for the right arm.
+     *
+     * <p>Not the third-person values: a shoulder rotation that reads correctly in third person puts
+     * the hand outside the viewport. {@code yRot} and {@code zRot} mirror for the off arm.
+     *
+     * @param yOffset drop applied as speed rises so the arm clears the crosshair, in <b>blocks</b>.
+     *                The source table gives -0.06 and -0.14, which are far too small to see as model
+     *                units; blocks is the only reading under which the field does what its note says
+     */
+    public record FirstPersonPose(float xRot, float yRot, float zRot, float yOffset) {
+
+        public FirstPersonPose lerp(FirstPersonPose to, float t) {
+            return new FirstPersonPose(
+                    FlightPoseConstants.lerp(xRot, to.xRot, t),
+                    FlightPoseConstants.lerp(yRot, to.yRot, t),
+                    FlightPoseConstants.lerp(zRot, to.zRot, t),
+                    FlightPoseConstants.lerp(yOffset, to.yOffset, t));
+        }
+    }
 
     private static final Map<FlightPoseState, FlightPose> THIRD_PERSON = new EnumMap<>(FlightPoseState.class);
-    private static final Map<FlightPoseState, FlightPose> FIRST_PERSON = new EnumMap<>(FlightPoseState.class);
-
-    /** Roughly chest height on a 1.8-block player: where a body plausibly pivots. */
-    private static final float CHEST = 1.0f;
+    private static final Map<FlightPoseState, FirstPersonPose> FIRST_PERSON = new EnumMap<>(FlightPoseState.class);
 
     static {
-        // Upright, arms low, legs together — barely different from standing, which is the point of
-        // a hover.
+        // Upright, treading air. The asymmetric legs are intentional: a perfectly symmetrical idle
+        // reads as a mannequin, and the offset makes it read as a person holding position.
         THIRD_PERSON.put(FlightPoseState.HOVER, new FlightPose(
-                -10f, CHEST, 1f, -20f, 5f, 5f, 3f));
+                -8f, 0.35f, -2f, false,
+                PartRotation.NONE,
+                new PartRotation(-12f, 0f, 18f),
+                new PartRotation(-12f, 0f, -18f),
+                new PartRotation(-14f, 0f, 4f),
+                new PartRotation(-4f, 0f, -4f)));
 
-        // Tilted into travel, arms forward, legs trailing.
+        // Leaning into travel, arms out.
         THIRD_PERSON.put(FlightPoseState.GLIDE, new FlightPose(
-                -35f, CHEST, 1f, -60f, 8f, 15f, 5f));
+                -35f, 0.75f, -22f, true,
+                new PartRotation(-6f, 0f, 0f),
+                new PartRotation(-38f, -12f, 52f),
+                new PartRotation(-38f, 12f, -52f),
+                new PartRotation(12f, 0f, 6f),
+                new PartRotation(16f, 0f, -6f)));
 
-        // Near-horizontal, arms extended ahead, legs straight back: the Quidditch dive. The head
-        // stops fully counter-rotating here — at this pitch a head held perfectly level reads as
-        // detached from the body rather than as looking where it is going.
-        THIRD_PERSON.put(FlightPoseState.PROPELLED, new FlightPose(
-                -70f, CHEST, 0.85f, -110f, 6f, 25f, 3f));
-
-        // ── PLACEHOLDER first-person values ─────────────────────────────────
+        // Swept back, committed. The arms go positive here — back along the body, not out front —
+        // and the legs run nearly straight and trailing.
         //
-        // A separate set rather than a reuse of the above, because §3.5 makes first person a
-        // required branch: a shoulder rotation that reads correctly in third person puts the held
-        // wand through the camera. The body fields are unused in first person — there is no torso on
-        // screen and the pose stack transform never runs for the hand — and are held at zero rather
-        // than omitted so the record shape stays one thing.
-        FIRST_PERSON.put(FlightPoseState.HOVER, new FlightPose(
-                0f, 0f, 0f, -8f, 3f, 0f, 0f));
-        FIRST_PERSON.put(FlightPoseState.GLIDE, new FlightPose(
-                0f, 0f, 0f, -18f, 5f, 0f, 0f));
-        FIRST_PERSON.put(FlightPoseState.PROPELLED, new FlightPose(
-                0f, 0f, 0f, -30f, 4f, 0f, 0f));
+        // -78 rather than -90 on purpose: a fully horizontal body reads as a rigid plank, and a few
+        // degrees short keeps the head leading and the silhouette alive.
+        THIRD_PERSON.put(FlightPoseState.PROPELLED, new FlightPose(
+                -78f, 0.75f, -58f, true,
+                new PartRotation(-10f, 0f, 0f),
+                new PartRotation(28f, -8f, 14f),
+                new PartRotation(28f, 8f, -14f),
+                new PartRotation(6f, 0f, 3f),
+                new PartRotation(9f, 0f, -3f)));
+
+        FIRST_PERSON.put(FlightPoseState.HOVER, new FirstPersonPose(-4f, 0f, 6f, 0f));
+        FIRST_PERSON.put(FlightPoseState.GLIDE, new FirstPersonPose(-15f, -6f, 22f, -0.06f));
+        FIRST_PERSON.put(FlightPoseState.PROPELLED, new FirstPersonPose(10f, -4f, 9f, -0.14f));
     }
 
-    public static FlightPose of(FlightPoseState state, boolean firstPerson) {
-        return (firstPerson ? FIRST_PERSON : THIRD_PERSON).get(state);
+    public static FlightPose thirdPerson(FlightPoseState state) {
+        return THIRD_PERSON.get(state);
     }
 
-    /** Blends two poses componentwise. Used for the from-state → to-state transition. */
+    public static FirstPersonPose firstPerson(FlightPoseState state) {
+        return FIRST_PERSON.get(state);
+    }
+
+    /** Blends two third-person poses componentwise, for the state transition. */
     public static FlightPose lerp(FlightPose from, FlightPose to, float t) {
         return new FlightPose(
                 lerp(from.bodyPitch(), to.bodyPitch(), t),
-                lerp(from.pitchPivot(), to.pitchPivot(), t),
-                lerp(from.headCounter(), to.headCounter(), t),
-                lerp(from.armPitch(), to.armPitch(), t),
-                lerp(from.armSplay(), to.armSplay(), t),
-                lerp(from.legPitch(), to.legPitch(), t),
-                lerp(from.legSplay(), to.legSplay(), t));
+                lerp(from.pivot(), to.pivot(), t),
+                lerp(from.headPitch(), to.headPitch(), t),
+                // Not blended: a boolean has no midpoint. The target state decides, so banking
+                // begins the moment a banking state is selected rather than fading in behind it.
+                to.banks(),
+                from.chest().lerp(to.chest(), t),
+                from.rightArm().lerp(to.rightArm(), t),
+                from.leftArm().lerp(to.leftArm(), t),
+                from.rightLeg().lerp(to.rightLeg(), t),
+                from.leftLeg().lerp(to.leftLeg(), t));
     }
 
-    private static float lerp(float a, float b, float t) {
+    static float lerp(float a, float b, float t) {
         return a + (b - a) * t;
     }
 
-    // ── tuning ───────────────────────────────────────────────────────────────
+    // ── blending (§6) ────────────────────────────────────────────────────────
 
-    /** Ticks to cross-fade between two flight states. */
+    /** Ticks to cross-fade between two flight states, eased in and out. */
     public static final int STATE_BLEND_TICKS = 6;
 
-    /** Ticks for the whole pose to ease in when the override activates, and out when it clears. */
-    public static final int FADE_TICKS = 8;
+    /** Ticks for the pose to ease in when the override activates. */
+    public static final int FADE_IN_TICKS = 8;
 
-    /** Ticks for propulsion to ramp while the sprint key is held in flight. */
-    public static final int PROPULSION_TICKS = 10;
+    /** Ticks to ease out again. Shorter than the fade in: releasing should feel quicker than committing. */
+    public static final int FADE_OUT_TICKS = 5;
+
+    // ── bank into turns (§4) ─────────────────────────────────────────────────
+
+    /** Degrees of bank per degree of yaw change per tick. */
+    public static final float BANK_PER_YAW = 2.6f;
+
+    /** Bank ceiling, either way. */
+    public static final float BANK_CLAMP = 30f;
+
+    /** Share of the bank added to the outer arm. */
+    public static final float BANK_OUTER_ARM = 0.35f;
+
+    /** Share of the bank taken off the inner arm. */
+    public static final float BANK_INNER_ARM = -0.20f;
+
+    /**
+     * Ticks of smoothing on the yaw delta before it drives the bank.
+     *
+     * <p>Mouse movement is not smooth at tick resolution. Driving the bank off the raw delta makes it
+     * strobe on ordinary aiming jitter.
+     */
+    public static final int BANK_SMOOTH_TICKS = 4;
 
     /**
      * How much of the flight pose the swinging arm keeps.
