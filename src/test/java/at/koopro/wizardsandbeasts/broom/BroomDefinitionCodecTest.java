@@ -62,30 +62,51 @@ class BroomDefinitionCodecTest {
                         slot + " is required, so it must have a default variant to fall back to");
             }
         }
-        assertFalse(defaults.containsKey(BroomSlot.FOOTREST),
-                "Cleansweep-tier brooms carry no footrest, so the default must not add one");
-        assertFalse(defaults.containsKey(BroomSlot.ACCENT),
-                "an accent plate is a hero-broom flourish, not a default");
+        assertTrue(defaults.containsKey(BroomSlot.FOOTSTRAP),
+                "the footstrap is default-present: reference shows the strap on training brooms too");
+        assertEquals(Identifier.fromNamespaceAndPath("wizards_and_beasts", "none"),
+                defaults.get(BroomSlot.ACCENT),
+                "no nameplate by default, expressed as the explicit 'none' variant rather than an "
+                        + "absent key, so the renderer needs no special case for an unset slot");
     }
 
     @Test
     void authoredModelSlotsAndWoodTint_decode() {
         BroomDefinition def = parse(withExtra("""
                   "model_slots": {
-                    "shaft": "wizards_and_beasts:tapered",
-                    "bristles": "wizards_and_beasts:birch",
-                    "footrest": "wizards_and_beasts:brass"
+                    "shaft": "wizards_and_beasts:swept",
+                    "bristles": "wizards_and_beasts:blade"
                   },
                   "wood_tint": "#7D5531"
                 """), "authored");
 
-        assertEquals(Identifier.fromNamespaceAndPath("wizards_and_beasts", "tapered"),
+        assertEquals(Identifier.fromNamespaceAndPath("wizards_and_beasts", "swept"),
                 def.modelSlot(BroomSlot.SHAFT).orElseThrow());
-        assertEquals(Identifier.fromNamespaceAndPath("wizards_and_beasts", "brass"),
-                def.modelSlot(BroomSlot.FOOTREST).orElseThrow());
+        assertEquals(Identifier.fromNamespaceAndPath("wizards_and_beasts", "blade"),
+                def.modelSlot(BroomSlot.BRISTLES).orElseThrow());
         assertTrue(def.modelSlot(BroomSlot.ACCENT).isEmpty(),
                 "a slot the JSON does not name stays unset, so nothing is drawn for it");
         assertEquals(0xFF7D5531, def.woodTint(), "#RRGGBB is opaque");
+    }
+
+    /**
+     * The pre-rename {@code footrest} key still decodes, onto {@link BroomSlot#FOOTSTRAP}.
+     *
+     * <p>The slot codec rejects unknown ids by design, so without the alias a datapack written
+     * against the old name would fail to load rather than degrade — the loudest possible break for
+     * a rename that changes no behaviour.
+     */
+    @Test
+    void legacyFootrestKey_stillDecodes() {
+        BroomDefinition def = parse(withExtra("""
+                  "model_slots": {
+                    "footrest": "wizards_and_beasts:leather"
+                  }
+                """), "legacy footrest key");
+
+        assertEquals(Identifier.fromNamespaceAndPath("wizards_and_beasts", "leather"),
+                def.modelSlot(BroomSlot.FOOTSTRAP).orElseThrow(),
+                "the old key must land on the renamed slot");
     }
 
     @Test

@@ -19,5 +19,13 @@
   "repairMaterial": "#minecraft:planks",
   "loreLines": [
     {"translate": "broom_lore.wizards_and_beasts.comet_260.1"}
-  ]
+  ],
+  "model_slots": {
+    "shaft": "wizards_and_beasts:plain",
+    "tail_cap": "wizards_and_beasts:plain",
+    "binding": "wizards_and_beasts:cord",
+    "bristles": "wizards_and_beasts:teardrop",
+    "footstrap": "wizards_and_beasts:leather",
+    "accent": "wizards_and_beasts:none"
+  }
 }

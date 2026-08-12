@@ -62,15 +62,15 @@ class BroomModelParityTest {
      */
     @Test
     void slotVariantListsMatchTheRig() throws IOException {
-        Set<String> bones = boneNames();
         for (BroomSlot slot : BroomSlot.values()) {
             Set<String> declared = new HashSet<>();
             slot.variants().forEach(v -> declared.add(slot.boneName(v)));
 
-            Set<String> inRig = new HashSet<>();
-            bones.stream()
-                    .filter(b -> b.startsWith(slot.bonePrefix()))
-                    .forEach(inRig::add);
+            // A variant is a *direct child of the slot container*, not merely a bone sharing the
+            // prefix. A shaft variant is the root of a three-bone chain — shaft_swept_mid and
+            // shaft_swept_grip carry the sweep and are hidden with their parent by
+            // skipChildrenRender, so they are not separately selectable and must not be listed.
+            Set<String> inRig = childrenOf(slot.slotId());
 
             assertEquals(inRig, declared,
                     slot + ": BroomSlot.variants() and broom.geo.json disagree. Bones only in the "
@@ -168,6 +168,18 @@ class BroomModelParityTest {
     private static JsonObject geometry() throws IOException {
         return GSON.fromJson(Files.readString(GEO), JsonObject.class)
                 .getAsJsonArray("minecraft:geometry").get(0).getAsJsonObject();
+    }
+
+    /** Names of the bones parented directly to {@code parent}. */
+    private static Set<String> childrenOf(String parent) throws IOException {
+        Set<String> names = new HashSet<>();
+        geometry().getAsJsonArray("bones").forEach(el -> {
+            JsonObject bone = el.getAsJsonObject();
+            if (bone.has("parent") && parent.equals(bone.get("parent").getAsString())) {
+                names.add(bone.get("name").getAsString());
+            }
+        });
+        return names;
     }
 
     private static Set<String> boneNames() throws IOException {

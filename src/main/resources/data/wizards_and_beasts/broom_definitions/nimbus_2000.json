@@ -20,5 +20,13 @@
   "loreLines": [
     {"translate": "broom_lore.wizards_and_beasts.nimbus_2000.1"},
     {"translate": "broom_lore.wizards_and_beasts.nimbus_2000.2"}
-  ]
+  ],
+  "model_slots": {
+    "shaft": "wizards_and_beasts:swept",
+    "tail_cap": "wizards_and_beasts:finial",
+    "binding": "wizards_and_beasts:brass_band",
+    "bristles": "wizards_and_beasts:teardrop",
+    "footstrap": "wizards_and_beasts:leather",
+    "accent": "wizards_and_beasts:nameplate"
+  }
 }

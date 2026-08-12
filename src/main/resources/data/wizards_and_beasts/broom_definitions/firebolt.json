@@ -21,5 +21,13 @@
     {"translate": "broom_lore.wizards_and_beasts.firebolt.1"},
     {"translate": "broom_lore.wizards_and_beasts.firebolt.2"},
     {"translate": "broom_lore.wizards_and_beasts.firebolt.3"}
-  ]
+  ],
+  "model_slots": {
+    "shaft": "wizards_and_beasts:racing",
+    "tail_cap": "wizards_and_beasts:plain",
+    "binding": "wizards_and_beasts:brass_band",
+    "bristles": "wizards_and_beasts:streamlined",
+    "footstrap": "wizards_and_beasts:leather",
+    "accent": "wizards_and_beasts:nameplate"
+  }
 }

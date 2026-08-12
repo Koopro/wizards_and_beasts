@@ -18,9 +18,11 @@
   "durability": 120,
   "repairMaterial": "#minecraft:planks",
   "model_slots": {
-    "shaft": "wizards_and_beasts:straight",
+    "shaft": "wizards_and_beasts:plain",
     "tail_cap": "wizards_and_beasts:plain",
     "binding": "wizards_and_beasts:cord",
-    "bristles": "wizards_and_beasts:birch"
+    "bristles": "wizards_and_beasts:ragged",
+    "footstrap": "wizards_and_beasts:leather",
+    "accent": "wizards_and_beasts:none"
   }
 }

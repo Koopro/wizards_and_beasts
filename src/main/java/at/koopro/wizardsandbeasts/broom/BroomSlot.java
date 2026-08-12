@@ -26,17 +26,20 @@ import java.util.Optional;
  */
 public enum BroomSlot implements StringRepresentable {
     /** Handle profile, taper and length silhouette. */
-    SHAFT("shaft_", "shaft", true, "straight", List.of("straight", "tapered", "streamlined", "ribbed", "lacquered")),
+    SHAFT("shaft_", "shaft", true, "plain", List.of("plain", "swept", "racing")),
     /** Butt-end finial or cap. */
-    TAIL_CAP("tail_cap_", "tail_cap", false, "plain", List.of("plain", "brass_cap", "finial", "banded")),
+    TAIL_CAP("tail_cap_", "tail_cap", false, "plain", List.of("plain", "finial")),
     /** Cord or metal band at the bristle join. */
-    BINDING("binding_", "binding", false, "cord", List.of("cord", "twine", "brass_band", "wire")),
+    BINDING("binding_", "binding", false, "cord", List.of("cord", "brass_band")),
     /** Twig bundle silhouette. */
-    BRISTLES("bristles_", "bristles", true, "birch", List.of("birch", "blunt", "swept", "streamlined", "racing")),
-    /** Present on Nimbus/Firebolt-tier brooms, absent on Cleansweep-tier. */
-    FOOTREST("footrest_", "footrest", false, null, List.of("brass", "wood", "forged")),
+    BRISTLES("bristles_", "bristles", true, "ragged", List.of("ragged", "teardrop", "blade", "streamlined")),
+    /**
+     * The hanging leather strap and toggle bead every prop carries, not a tier-gated
+     * platform. Default-present: the reference shows it on training brooms too.
+     */
+    FOOTSTRAP("footstrap_", "footstrap", false, "leather", List.of("leather")),
     /** Nameplate, lettering, registration mark. */
-    ACCENT("accent_", "accent", false, null, List.of("nameplate", "lettering", "registration"));
+    ACCENT("accent_", "accent", false, "none", List.of("none", "nameplate"));
 
     public static final Codec<BroomSlot> CODEC = StringRepresentable.fromEnum(BroomSlot::values);
 
@@ -110,7 +113,21 @@ public enum BroomSlot implements StringRepresentable {
                 .map(v -> Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, v));
     }
 
+    /** Slot id used by broom JSON before the rename, kept so existing datapacks still load. */
+    private static final String LEGACY_FOOTREST_ID = "footrest";
+
+    /**
+     * Resolves a {@code model_slots} key.
+     *
+     * <p>Accepts the pre-rename {@code footrest} key as an alias for {@link #FOOTSTRAP}. The slot
+     * was renamed because it models a hanging strap rather than a rigid platform, and a datapack
+     * written against the old name would otherwise fail to decode rather than degrade — the codec
+     * rejects unknown slot ids by design, so silence was never an option here.
+     */
     public static Optional<BroomSlot> byId(String id) {
+        if (LEGACY_FOOTREST_ID.equals(id)) {
+            return Optional.of(FOOTSTRAP);
+        }
         for (BroomSlot slot : values()) {
             if (slot.slotId.equals(id)) return Optional.of(slot);
         }
