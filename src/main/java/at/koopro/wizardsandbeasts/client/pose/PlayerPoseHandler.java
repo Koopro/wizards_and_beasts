@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.client.pose;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
@@ -47,14 +48,35 @@ public final class PlayerPoseHandler {
     }
 
     /**
-     * The whole-avatar transform for this render state, or null when nothing posed the body.
+     * Applies the whole-avatar transform, from the tail of {@code AvatarRenderer.setupRotations}.
      *
-     * <p><b>Nothing consumes this yet.</b> {@code setupRotations} runs before {@code setupAnim} in
-     * the render path, so the site that would apply a body transform has already gone by the time
-     * the layer computes one. Choosing and justifying that application site is its own audited hook
-     * — see schema §3.9 — and until it exists whole-body pitch does not render. Left visibly
-     * incomplete rather than faked.
+     * <p>That site is not a convenience — it is the only frame in which a whole-body pitch is
+     * meaningful. {@code setupRotations} has just yawed the pose stack to the player's facing with
+     * the origin at their feet, so an X rotation there pitches them about their own left-right axis.
+     * Applied any earlier, before that yaw, the same rotation is about the <em>world</em> X axis:
+     * a player flying north would pitch forward and one flying east would roll onto their side.
+     *
+     * <p>It is also where vanilla puts exactly this transform for its own two cases — the elytra
+     * pitch and the swimming pitch, both {@code Axis.XP} rotations at the tail of this method. The
+     * pre- and post-rotation offset pair follows the swim case's {@code translate}, and is what lets
+     * a pose pitch about the chest rather than about the feet.
+     *
+     * <p>No {@code pushPose} here: the whole method already runs between vanilla's push and pop, so
+     * the transform is scoped to this entity and nothing leaks to the next one.
+     *
+     * <p><b>Units differ from the limb half.</b> Offsets here are in blocks, not the sixteenths a
+     * {@code ModelPart} uses, because this is the pose stack rather than the model.
      */
+    public static void applyBodyTransform(AvatarRenderState state, PoseStack stack, PlayerModel model) {
+        PoseStackResult body = PlayerPoseLayer.get().runBody(model, state, partialTicks());
+        if (body == null || body.isIdentity()) {
+            return;
+        }
+        body.applyTo(stack);
+        state.setRenderData(BODY_TRANSFORM, body);
+    }
+
+    /** The whole-avatar transform for this render state, or null when nothing posed the body. */
     public static @Nullable PoseStackResult bodyTransform(EntityRenderState state) {
         return state.getRenderData(BODY_TRANSFORM);
     }

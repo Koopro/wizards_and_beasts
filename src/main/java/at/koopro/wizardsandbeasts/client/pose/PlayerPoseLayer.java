@@ -106,6 +106,48 @@ public final class PlayerPoseLayer {
         return stackResults.get(PlayerModelPart.BODY);
     }
 
+    /**
+     * Runs every pass and returns only the whole-avatar transform, touching no {@code ModelPart}.
+     *
+     * <p>A second entry point because the two halves of a pose are consumed at different moments.
+     * {@code setupRotations} runs <em>before</em> {@code setupAnim} — see the call order in
+     * {@code LivingEntityRenderer.submit} — and it is the only place the pose stack is in the frame a
+     * whole-body pitch needs: yawed to the player's facing, origin at their feet. The limb half
+     * cannot be computed there, because vanilla has not posed the model yet and there would be
+     * nothing to capture. So the body half is evaluated here and the limb half in {@link #run}.
+     *
+     * <p>Running the passes twice per frame is safe: {@code pose} is a pure function of the render
+     * state, the partial tick and each pass's own tick-advanced timers, none of which this touches.
+     * The timers advance on the client tick, never from a render pass, precisely so that a pose
+     * evaluated twice in one frame gives the same answer both times.
+     */
+    public @Nullable PoseStackResult runBody(PlayerModel model, AvatarRenderState state,
+                                             float partialTicks) {
+        if (!active() || passes.isEmpty()) {
+            return null;
+        }
+
+        PoseContext context = new PoseContext(model, state, FirstPersonContext.NONE, partialTicks);
+        stackResults.clear();
+
+        for (PosePass pass : passes) {
+            builder.clear();
+            pass.pose(builder, context);
+            if (builder.isEmpty()) {
+                continue;
+            }
+            for (Map.Entry<PlayerModelPart, PartPoseData> entry : builder.parts().entrySet()) {
+                // Virtual parts only. The limb ops in this same builder are deliberately dropped —
+                // they are applied by run(), and writing them here would apply them twice.
+                if (entry.getKey().isVirtual()) {
+                    applyToStackResult(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+
+        return stackResults.get(PlayerModelPart.BODY);
+    }
+
     private void applyPart(PlayerModel model, PlayerModelPart part, PartPoseData data) {
         if (data.isEmpty()) {
             return;

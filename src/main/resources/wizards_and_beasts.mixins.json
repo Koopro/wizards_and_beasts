@@ -6,6 +6,7 @@
   "mixins": [
   ],
   "client": [
+    "client.AvatarRendererMixin",
     "client.LivingEntityRendererMixin",
     "client.PlayerModelMixin"
   ],

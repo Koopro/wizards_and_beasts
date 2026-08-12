@@ -48,20 +48,39 @@ public final class FlightPosePass extends ProceduralPosePass {
         if (player == null) {
             return;
         }
+        tick(ClientPoseState.get(player.getUUID()),
+                player.getAbilities().flying,
+                minecraft.options.keySprint.isDown());
+    }
 
-        PoseOverride override = ClientPoseState.get(player.getUUID());
+    /**
+     * The state machine, with the client pulled out into arguments.
+     *
+     * <p>Split from {@link #tick()} so the fade and blend behaviour can be driven from a test. The
+     * landing bug this seam exists to pin was invisible to review and obvious in ten seconds of
+     * flying, which is the worst combination to leave untested.
+     */
+    void tick(PoseOverride override, boolean flying, boolean sprinting) {
         // Only a flying player is posed. A stored override on a grounded player is kept, not
         // cleared — the command accepts it deliberately and it takes effect when they take off.
-        boolean active = override.active() && player.getAbilities().flying;
+        boolean active = override.active() && flying;
 
         fade.tick(active);
-        propulsion.tick(active && minecraft.options.keySprint.isDown());
+        propulsion.tick(active && sprinting);
 
         FlightPoseState desired = override.state().orElse(null);
-        if (desired != toState) {
+        // A null desired state is a deactivation, not a state change. Clearing toState here is what
+        // made landing snap: pose() returns early on a null toState, so the fade timer wound down
+        // with nobody reading it and the pose vanished on the tick the player touched the ground
+        // instead of easing out over the eight it was given. The last state is held until the fade
+        // has actually finished.
+        if (desired != null && desired != toState) {
             fromState = toState != null ? toState : desired;
             toState = desired;
             stateBlend.set(0);
+        } else if (desired == null && fade.idle()) {
+            toState = null;
+            fromState = null;
         }
         stateBlend.tick(true);
     }
@@ -103,17 +122,25 @@ public final class FlightPosePass extends ProceduralPosePass {
         // in any state leans further into it.
         float pitch = pose.bodyPitch() * (1f + thrust * 0.25f);
 
+        // Up to the pivot, rotate, back down: that is what makes the body pitch about its chest
+        // rather than hinge at the ankles. The two offsets are one value with opposite signs by
+        // construction, so they cannot be left inconsistent.
         builder.get(PlayerModelPart.BODY)
                 .multiplier(weight)
+                .set(PoseTarget.Y, pose.pitchPivot())
                 .setRotDeg(PoseTarget.X_ROT, pitch)
-                .set(PoseTarget.Y, pose.bodyY())
-                .set(PoseTarget.Y2, pose.bodyY2());
+                .set(PoseTarget.Y2, -pose.pitchPivot());
 
         // The head counter-rotates against the body so the player still looks where the camera does.
         // Without this a lie-flat pose stares at the ground.
+        //
+        // It multiplies the pitch that was actually applied, propulsion included, rather than a
+        // stored angle. A stored angle has to be written in the opposite sign to the body pitch it
+        // cancels — ModelParts sit on the far side of vanilla's scale(-1, -1, 1) — and getting that
+        // backwards cranks the head down into the chest instead of holding it level.
         builder.get(PlayerModelPart.HEAD)
                 .multiplier(weight)
-                .addRotDeg(PoseTarget.X_ROT, pose.headPitch());
+                .addRotDeg(PoseTarget.X_ROT, pitch * pose.headCounter());
 
         HumanoidArm mainArm = context.state().mainArm;
         boolean swinging = context.state().attackArm != null;
