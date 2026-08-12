@@ -32,14 +32,25 @@ public final class FlightStateDeriver {
     private FlightStateDeriver() {}
 
     /**
-     * Measured from position, not {@code getDeltaMovement}.
+     * The smoothed horizontal speed, per player.
      *
-     * <p>A player-controlled entity's delta on the server is whatever the last movement packet
-     * happened to leave there, and for creative flight that is frequently stale. The distance the
-     * player actually covered between two ticks is the thing being asked about anyway.
+     * <p>Smoothing is not polish here, it is the difference between working and not. A player's
+     * movement reaches the server in packets rather than from simulation, so the raw per-tick figure
+     * is spiky: a tick that receives no movement packet reads as stationary and the next one reads as
+     * double speed. Classifying that directly made the state flip between HOVER and PROPELLED several
+     * times a second, and since every flip restarts the client's cross-fade, the pose visibly
+     * glitched the moment the player started moving.
      */
-    private static final PlayerScopedState<Vec3> LAST_POSITION =
-            PlayerScopedState.create("pose_last_position");
+    private static final PlayerScopedState<Double> SMOOTHED_SPEED =
+            PlayerScopedState.create("pose_smoothed_speed");
+
+    /**
+     * How much of each tick's reading to believe.
+     *
+     * <p>Low enough to swallow a dropped packet, high enough that the pose still answers the controls
+     * — roughly a three-tick time constant, well inside the six-tick cross-fade that follows it.
+     */
+    private static final double SMOOTHING = 0.3;
 
     /** Blocks per tick above which the player is travelling rather than holding station. */
     private static final double GLIDE_SPEED = 0.12;
@@ -50,8 +61,9 @@ public final class FlightStateDeriver {
     /**
      * Fraction of a threshold a player must fall back through before the state drops.
      *
-     * <p>Without this the two states flap every tick for anyone flying at exactly the threshold, and
-     * because each flip is a state change it is also a packet to every tracking client.
+     * <p>Smoothing removes the packet jitter; this removes the rest. Without it a player holding a
+     * steady speed that happens to sit on a threshold still flips every tick, and each flip is a
+     * packet to every tracking client.
      */
     private static final double HYSTERESIS = 0.75;
 
@@ -64,18 +76,24 @@ public final class FlightStateDeriver {
             return;
         }
 
-        Vec3 position = player.position();
-        Vec3 previous = LAST_POSITION.getOrDefault(player.getUUID(), position);
-        LAST_POSITION.put(player.getUUID(), position);
-
         if (!player.getAbilities().flying) {
+            SMOOTHED_SPEED.remove(player.getUUID());
             PoseOverrideService.derive(player, null);
             return;
         }
 
+        // getKnownMovement is the movement the client last reported, which is the question being
+        // asked. getDeltaMovement is not: for a player-controlled entity the server's copy is
+        // whatever the last packet left there, and for creative flight it is frequently stale.
+        Vec3 movement = player.getKnownMovement();
+
         // Horizontal only. A player dropping straight down at terminal velocity is not propelled,
         // and including Y would classify every dive as the fastest state there is.
-        double speed = Math.sqrt(sq(position.x - previous.x) + sq(position.z - previous.z));
+        double raw = Math.sqrt(movement.x * movement.x + movement.z * movement.z);
+        double previous = SMOOTHED_SPEED.getOrDefault(player.getUUID(), raw);
+        double speed = previous + (raw - previous) * SMOOTHING;
+        SMOOTHED_SPEED.put(player.getUUID(), speed);
+
         PoseOverrideService.derive(player, classify(speed, current(player)));
     }
 
@@ -84,7 +102,7 @@ public final class FlightStateDeriver {
      *
      * @param currentState the state already in force, or null when there is none
      */
-    private static FlightPoseState classify(double speed, @Nullable FlightPoseState currentState) {
+    static FlightPoseState classify(double speed, @Nullable FlightPoseState currentState) {
         double glideFloor = currentState == FlightPoseState.HOVER || currentState == null
                 ? GLIDE_SPEED : GLIDE_SPEED * HYSTERESIS;
         double propelledFloor = currentState == FlightPoseState.PROPELLED
@@ -99,11 +117,12 @@ public final class FlightStateDeriver {
         return FlightPoseState.HOVER;
     }
 
-    private static @Nullable FlightPoseState current(ServerPlayer player) {
-        return PoseOverrideService.get(player).state().orElse(null);
+    /** Exposed for the test: one smoothing step, so the filter can be driven over a tick series. */
+    static double smooth(double previous, double raw) {
+        return previous + (raw - previous) * SMOOTHING;
     }
 
-    private static double sq(double value) {
-        return value * value;
+    private static @Nullable FlightPoseState current(ServerPlayer player) {
+        return PoseOverrideService.get(player).state().orElse(null);
     }
 }

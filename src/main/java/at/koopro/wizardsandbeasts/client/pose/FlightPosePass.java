@@ -142,13 +142,17 @@ public final class FlightPosePass extends ProceduralPosePass {
                 .multiplier(weight)
                 .addRotDeg(PoseTarget.X_ROT, pitch * pose.headCounter());
 
-        HumanoidArm mainArm = context.state().mainArm;
-        boolean swinging = context.state().attackArm != null;
+        // attackTime, not attackArm. `attackArm` is never null — it defaults to RIGHT and only ever
+        // says *which* arm would swing, never whether one is swinging. Testing it for null left the
+        // main arm permanently at a fraction of the flight pose, so it kept two thirds of vanilla's
+        // walk swing the whole time the player was in the air.
+        boolean swinging = context.state().attackTime > 0f;
+        HumanoidArm attackArm = context.state().attackArm;
 
         poseArm(builder, PlayerModelPart.RIGHT_ARM, pose, weight, 1f,
-                swinging && context.state().attackArm == HumanoidArm.RIGHT);
+                swinging && attackArm == HumanoidArm.RIGHT);
         poseArm(builder, PlayerModelPart.LEFT_ARM, pose, weight, -1f,
-                swinging && context.state().attackArm == HumanoidArm.LEFT);
+                swinging && attackArm == HumanoidArm.LEFT);
 
         builder.get(PlayerModelPart.RIGHT_LEG)
                 .multiplier(weight)
