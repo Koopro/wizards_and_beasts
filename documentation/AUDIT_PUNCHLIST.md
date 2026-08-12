@@ -35,18 +35,37 @@ historical log of individual work passes — those are records of what was done,
   `KNOWN_ISSUES.md` anywhere in the repository — it was presumably purged and never recreated. Not
   fixed: choosing the replacement document is a call for the maintainer.
 
-- [LOW] **`FLIGHT_POSE_CONSTANTS.md` is referenced from source but is not in the repository.**
-  `client/pose/FlightPoseConstants.java` cites it as the source of its authored values. It was supplied
-  in conversation and never written to disk, so the citation points at nothing. Same class of problem
-  as the two schemas, which have now been added.
+- [x] **`FLIGHT_POSE_CONSTANTS.md` added — RESOLVED 2026-08-12.** `client/pose/FlightPoseConstants.java`
+  cited it as the source of its authored values while it existed only in conversation. Now at
+  `documentation/FLIGHT_POSE_CONSTANTS.md` and the javadoc citation points at the real path. It carries
+  an appended implementation-notes section recording the two deviations already logged here (the `HEAD`
+  sign, and §5's Y offset read as blocks) plus the unimplemented §6 continuous blend, so the authored
+  source and what shipped no longer disagree silently.
+- [x] **Design docs were invisible to git — FIXED 2026-08-12.** Every root `.md` and the whole of
+  `docs/` were gitignored by the 2026-08-10 history purge, so writes to `AUDIT_PUNCHLIST.md`,
+  `MIGRATION_DELTAS.md` and every design schema succeeded silently and were never tracked. 27 files,
+  ~1.4 MB, moved to `documentation/`, which no ignore rule matches. The ignore rule itself was NOT
+  weakened — note that the obvious fix does not work: `docs/` is itself covered
+  (`.gitignore:153:/docs/`), so moving there would have changed nothing.
 
-- [HIGH] **`PLAYER_POSE_LAYER_SCHEMA.md` and `WAND_CAST_POSE_SCHEMA.md` are not in the repository.**
-  Both are named as companion specs and both are absent from the root and from every subdirectory.
-  The work proceeded because the texts were supplied in conversation, but every future prompt that
-  cites them by section number is citing something no one can open. Note that all root `.md` files
-  are gitignored repo-wide from the history purge, so "add them" means adding them to disk AND
-  deciding whether the ignore rule should still cover design schemas.
+- [MEDIUM] **`tasks/` is still invisible to git.** `todo.md`, `lessons.md` and `ministry_plan.md` are
+  covered by `.gitignore:154:/tasks/` and were deliberately NOT moved: those exact paths are prescribed
+  by the user's global `CLAUDE.md` workflow ("write plan to `tasks/todo.md`", "update
+  `tasks/lessons.md`"), so relocating them would break a convention this migration had no mandate to
+  change. They have the same silent-discard failure mode as the docs did. Needs a ruling: relocate and
+  update `CLAUDE.md`, or un-ignore `/tasks/`.
 
+- [LOW] **CI references a file that does not exist.** `.github/workflows/ci.yml:42` prints "Update
+  KNOWN_ISSUES.md with reproducible failure details before retagging" on failure. There is no
+  `KNOWN_ISSUES.md` anywhere in the repository — it was presumably purged and never recreated. Not
+  fixed: choosing the replacement document is a call for the maintainer.
+
+- [x] **Companion schemas added — RESOLVED 2026-08-12.** `PLAYER_POSE_LAYER_SCHEMA.md` (rev 4) and
+  `WAND_CAST_POSE_SCHEMA.md` (rev 2, incl. §8b) existed only in conversation, which is what halted two
+  agent sessions with "the companion schema does not exist". Both now at `documentation/`, alongside
+  `FLIGHT_POSE_CONSTANTS.md`. Note the ignore rule still covers the repository root, so a schema
+  written there in future is silently discarded exactly as before — `documentation/` is the only
+  tracked home for these.
 - [NICE-TO-HAVE] **The slim-arm variant does not need a second rig.** Reported per the authoring-rig
   brief §3.3 rather than decided. `PlayerModel.createMesh(deformation, true)` changes the arm cube
   width from 4 to 3 and shifts the left arm cube's x offset, but leaves BOTH shoulder pivots at

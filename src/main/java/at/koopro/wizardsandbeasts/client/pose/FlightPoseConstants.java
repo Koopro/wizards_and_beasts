@@ -9,9 +9,9 @@ import java.util.Map;
 /**
  * Authored pose values for the three flight states, filling schema §7.3.
  *
- * <p>Transcribed from {@code FLIGHT_POSE_CONSTANTS.md}. A tuned starting point rather than a final
- * set — they exist so in-game verification tests the blend instead of testing obviously-wrong
- * placeholders — but they are authored, which the previous set explicitly was not.
+ * <p>Transcribed from {@code documentation/FLIGHT_POSE_CONSTANTS.md}. A tuned starting point rather
+ * than a final set — they exist so in-game verification tests the blend instead of testing
+ * obviously-wrong placeholders — but they are authored, which the previous set explicitly was not.
  *
  * <h2>Conventions</h2>
  *
