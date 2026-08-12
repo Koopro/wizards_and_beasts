@@ -2492,5 +2492,10 @@
   "spell.wizards_and_beasts.reparo.name": "Reparo",
   "spell.wizards_and_beasts.riddikulus.name": "Riddikulus",
   "spell.wizards_and_beasts.stupefy.name": "Stupefy",
-  "spell.wizards_and_beasts.wingardium_leviosa.name": "Wingardium Leviosa"
+  "spell.wizards_and_beasts.wingardium_leviosa.name": "Wingardium Leviosa",
+  "commands.wizards_and_beasts.pose.flight.set": "Flight pose of %s set to %s.",
+  "commands.wizards_and_beasts.pose.flight.set_grounded": "Flight pose of %s set to %s. Stored, but not rendered while grounded.",
+  "commands.wizards_and_beasts.pose.flight.cleared": "Flight pose override cleared for %s.",
+  "commands.wizards_and_beasts.pose.flight.auto": "Flight pose of %s set to auto.",
+  "commands.wizards_and_beasts.pose.module_disabled": "The player animation module is disabled."
 }

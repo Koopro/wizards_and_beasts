@@ -124,6 +124,7 @@ public final class WandbCommands {
                 .then(AnimagusCommands.register())
                 .then(StatsCommands.register())
                 .then(AbilityFrameworkCommands.register())
+                .then(at.koopro.wizardsandbeasts.pose.command.PoseCommands.register())
                 .then(at.koopro.wizardsandbeasts.apparition.command.ApparitionPointCommands.register());
     }
 
