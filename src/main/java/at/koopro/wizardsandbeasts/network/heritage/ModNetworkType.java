@@ -32,5 +32,10 @@ public final class ModNetworkType {
                 ProfessionSelectC2SPayload.TYPE,
                 ProfessionSelectC2SPayload.STREAM_CODEC,
                 ProfessionSelectC2SPayload::handle);
+
+        registrar.playToClient(
+                SyncHeritageAppearancePayload.TYPE,
+                SyncHeritageAppearancePayload.STREAM_CODEC,
+                ClientPayloadHandlers::handleSyncHeritageAppearance);
     }
 }
