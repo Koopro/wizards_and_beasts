@@ -57,10 +57,28 @@ historical log of individual work passes — those are records of what was done,
   a `BatFormModel`, wired to nothing. Either move it to the Animagus roster, where a bat form is
   canon-defensible, or delete it.
 
-- [NICE-TO-HAVE] **170 free-text `"PLACEHOLDER box rig"` markers (2026-08-13).** Up from the 93
-  recorded earlier. They are free-text `_comment` fields, so nothing can assert on them and nothing
-  fails when real art replaces the rig underneath one. New rigs should carry a structured,
-  machine-checkable marker instead.
+- [NICE-TO-HAVE] **170 free-text `"PLACEHOLDER box rig"` markers (2026-08-13, corrected).** Up from
+  the 93 recorded earlier. **They sit on the `.animation.json` files, not the `.geo.json` files** — a
+  first pass at this entry said otherwise. Each reads *"swap with a Blockbench model matching these
+  bone/texture/anim slots"*, which is an asset-swap contract, not merely a warning label, and is
+  better than the count alone suggests. What is still true: they are free-text `_comment` fields, so
+  nothing can assert on them and nothing fails when real art replaces the rig underneath one.
+
+- [BLOCKER] **Heritage player forms ignore the animated rigs the mod already ships (2026-08-13).**
+  `FormModelRenderer` draws hand-written `ModelPart` classes — `WerewolfModel` (8 boxes),
+  `CentaurModel` (10), `GoblinFormModel` (8), `MerfolkSwimModel` (7), `BatFormModel` (8). All have
+  flat hierarchies, every box at `texOffs(0, 0)`, **no `setupAnim` at all**, and a hardcoded `COLOR`
+  tint standing in for textures that do not exist — only `animagus_stag.png`, `obscurial_dark.png`
+  and `placeholder.png` are on disk under `textures/entity/form/`. So a transformed player is a
+  static, untextured box statue that slides around.
+
+  Meanwhile the mod ships properly parented, UV-mapped, animated GeckoLib rigs with real textures for
+  four of the five: `werewolf` (idle, walk), `centaur` (idle, walk), `goblin_teller` (idle),
+  `merperson` (idle, swim) — plus `obscurus` (idle, fly). They are wired as **mobs**; nothing routes
+  a player form to them. Missing entirely: house-elf and veela-harpy.
+
+  Root cause is that there is no GeckoLib-on-player render path — `FormModelRenderer` renders raw
+  `ModelPart`s inside the cancelled `LivingEntityRenderer.submit`.
 
 - [BLOCKER] **Cast pose values are placeholders (2026-08-12).** `client/pose/CastPoseConstants.java`
   carries three phase poses — `WINDUP`, `RELEASE`, `RECOVERY` — plus `FIRST_PERSON_SHARE` in

@@ -8,6 +8,7 @@ import at.koopro.wizardsandbeasts.client.model.WerewolfModel;
 import at.koopro.wizardsandbeasts.client.model.CentaurModel;
 import at.koopro.wizardsandbeasts.client.model.PatronusStagModel;
 import at.koopro.wizardsandbeasts.client.model.MerfolkSwimModel;
+import at.koopro.wizardsandbeasts.client.form.geo.PlayerFormGeoRenderer;
 import at.koopro.wizardsandbeasts.client.form.model.BatFormModel;
 import at.koopro.wizardsandbeasts.client.skill.gui.GoblinFormModel;
 import at.koopro.wizardsandbeasts.form.ModelType;
@@ -126,7 +127,8 @@ public final class FormModelRenderer {
      */
     public static void renderToCollector(PoseStack poseStack, SubmitNodeCollector collector,
                                           FormRenderStateModifier.FormRenderData formData,
-                                          LivingEntityRenderState src) {
+                                          LivingEntityRenderState src,
+                                          net.minecraft.client.renderer.state.@Nullable CameraRenderState camera) {
         // Animagus forms borrow a real vanilla entity model (animation + proportions + texture).
         switch (formData.formId()) {
             case "animagus_cat" -> {
@@ -177,6 +179,16 @@ public final class FormModelRenderer {
                 return;
             }
             default -> { /* stag has no vanilla analog — fall through to placeholder geometry */ }
+        }
+
+        // Forms whose GeckoLib rig ships (werewolf, centaur, goblin, merfolk, obscurial) draw the
+        // real animated art. Everything below this point is the placeholder path: static box
+        // geometry, no walk cycle, and a hardcoded tint standing in for a texture that was never
+        // authored. It stays only for house-elf and veela-harpy, which have no rig yet.
+        if (camera != null && src != null
+                && PlayerFormGeoRenderer.render(formData.formId(), formData.playerUUID(),
+                        src, poseStack, collector, camera)) {
+            return;
         }
 
         Identifier texture = formData.texturePath() != null ? formData.texturePath() : PLACEHOLDER_TEXTURE;
