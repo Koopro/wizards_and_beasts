@@ -172,6 +172,9 @@ public class WizardsAndBeastsMod {
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "ability_definition_reload_listener"),
                     new at.koopro.wizardsandbeasts.ability.def.AbilityDefinitionLoader());
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "heritage_appearance_reload_listener"),
+                    new at.koopro.wizardsandbeasts.heritage.appearance.HeritageAppearanceLoader());
         });
 
         // Ability framework: server-side sync/clone/cooldown lifecycle + debug behavior wiring.

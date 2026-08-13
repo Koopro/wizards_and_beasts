@@ -129,6 +129,13 @@ public final class ClientPayloadHandlers {
         context.enqueueWork(() -> BestiaryEntryRegistry.setClientEntries(payload.entries()));
     }
 
+    public static void handleSyncHeritageAppearance(
+            at.koopro.wizardsandbeasts.network.heritage.SyncHeritageAppearancePayload payload,
+            IPayloadContext context) {
+        context.enqueueWork(() -> at.koopro.wizardsandbeasts.heritage.appearance.HeritageAppearanceRegistry
+                .setClientEntries(payload.entries()));
+    }
+
     public static void handleSyncAnimagusForms(
             at.koopro.wizardsandbeasts.network.animagus.SyncAnimagusFormsPayload payload, IPayloadContext context) {
         context.enqueueWork(() ->
