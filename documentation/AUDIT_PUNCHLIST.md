@@ -16,24 +16,23 @@ historical log of individual work passes — those are records of what was done,
 
 ## Open findings (verified 2026-07-19)
 
-- [BLOCKER] **Cast animation is unbuildable as specced — WAND_CAST_POSE_SCHEMA §4 gate fires on BOTH
-  questions (audited 2026-08-12).** Nothing was built; the schema requires reporting first.
+- [~] **Cast timing declared and on the wire — PARTIAL 2026-08-12.** The §4 gate had fired on both
+  questions: no cast phases anywhere (no `CastManager`; `CastContext` carries no duration), and
+  `SpellCastC2SPayload` is an empty record. Christian ruled: add timing to the packet, which is an
+  explicit scope grant over `WAND_CAST_POSE_SCHEMA` §9's "do not change the spell pipeline".
 
-  *Q1, are there wind-up / release / recovery phases?* **No, and there is no `CastManager` either.**
-  The pipeline is `SpellCastService` / `SpellExecutor` / `CastContext`. `CastContext` is a 12-field
-  record carrying caster, wand, spell, stats, proficiency, allegiance, compatibility, modifiers and
-  rejections — and **no duration, no tick count, no phase**. `WandCastTiming` stores one integer, the
-  hold ticks of the last `releaseUsing`, server-side, consumed once. Casting is instant. Per §4 that
-  makes a three-phase clip against a single-tick cast "a spec error, not a tuning problem".
+  Shipped: `SpellDefinition.CastTiming` (optional; absent = instant, so every existing spell JSON is
+  unchanged), `SpellCastAnimationS2CPayload` broadcast to trackers and self on a successful cast, and
+  `ClientCastAnimationState` holding running casts keyed by entity id.
 
-  *Q2, does the cast packet carry timing?* **`SpellCastC2SPayload` is an empty record** —
-  `public record SpellCastC2SPayload()`. It carries no timing, no spell id, nothing. A pure fire
-  event. **D8 is therefore VOID** and, in the schema's words, the choice returns to Christian:
-  extend `PoseOverride`, or add timing to the cast packet. Explicitly NOT to be client-predicted.
+  **Still open, and both deliberate:** (a) NO spell JSON declares `castTiming` yet, so nothing
+  broadcasts — the field exists and is unused. (b) `KeyframePosePass` does not exist, so nothing
+  consumes the state. Casts arrive, are stored, expire, and are never drawn.
 
-  Also audited per §5, since prior phases found assumed rosters wrong every time: the live
-  `SpellCategory` roster is **four** values — `COMBAT`, `UTILITY`, `DEFENSE`, `DARK_ARTS`.
-
+  **Not done, and it is a real limitation:** the effect still fires on tick 0. The timing is
+  presentation only, so a clip's release window does not land on the effect unless it is authored at
+  the very start. Deferring resolution to the release phase is a gameplay change that was not chosen
+  (it was option 3 of the ruling) and was not made unilaterally.
 - [HIGH] **Broom animation state is never synced, so every observer sees the idle clip.**
   `BroomEntity.registerControllers` gates all three controllers on `currentSpeed` and
   `inputBoosting`. Both are **plain fields**; `defineSynchedData` carries `DEFINITION_ID`,

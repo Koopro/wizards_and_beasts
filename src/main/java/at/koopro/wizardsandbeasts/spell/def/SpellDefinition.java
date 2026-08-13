@@ -96,9 +96,54 @@ public record SpellDefinition(
          * ({@code capacious_extremis}) is deliberately unassigned pending sourcing. Mirrors the
          * optional {@code mmRating} on {@link at.koopro.wizardsandbeasts.bestiary.BestiaryEntry}.
          */
-        Optional<SpellCanonTier> canonTier) {
+        Optional<SpellCanonTier> canonTier,
+
+        /**
+         * Presentation timing for the cast animation. Absent means instant, which is every spell
+         * shipped before this field existed.
+         */
+        Optional<CastTiming> castTiming) {
 
     /** Embedded "explode" block. */
+    /**
+     * How long a cast visibly takes, and where its three phases fall.
+     *
+     * <p>Declared data, not a derived guess. Casting resolves in a single tick — the effect fires
+     * inside {@code SpellExecutor} the moment the gates pass — so a client has no way to infer a
+     * duration for an animation. This is the spell telling it one.
+     *
+     * <p><b>This does not delay the effect.</b> It is presentation timing only; the spell still
+     * resolves when it resolves, and nothing in the cast pipeline reads these numbers. Deferring the
+     * effect to the release phase would be a gameplay change and is deliberately not made here.
+     * Author the release window early if you want the visible release to sit near the effect.
+     *
+     * @param ticks     total visible duration. Absent timing means instant, which is the default and
+     *                  what every existing spell JSON gets
+     * @param windupEnd fraction at which wind-up gives way to release
+     * @param releaseEnd fraction at which release gives way to recovery; recovery runs to 1.0
+     */
+    public record CastTiming(int ticks, float windupEnd, float releaseEnd) {
+
+        public CastTiming {
+            // Two boundaries rather than three durations: three can disagree about their own total,
+            // and a phase table that does not sum to the whole is a bug nobody sees until the
+            // animation stutters at one specific spell.
+            if (ticks <= 0) {
+                throw new IllegalArgumentException("cast timing needs a positive tick count, got " + ticks);
+            }
+            if (windupEnd < 0f || releaseEnd > 1f || windupEnd > releaseEnd) {
+                throw new IllegalArgumentException(
+                        "cast phases must satisfy 0 <= windupEnd <= releaseEnd <= 1, got "
+                                + windupEnd + " and " + releaseEnd);
+            }
+        }
+
+        public static final Codec<CastTiming> CODEC = RecordCodecBuilder.create(inst -> inst.group(
+                Codec.INT.fieldOf("ticks").forGetter(CastTiming::ticks),
+                Codec.FLOAT.optionalFieldOf("windupEnd", 0.35f).forGetter(CastTiming::windupEnd),
+                Codec.FLOAT.optionalFieldOf("releaseEnd", 0.6f).forGetter(CastTiming::releaseEnd)
+        ).apply(inst, CastTiming::new));
+    }
     public record ExplosionDef(float power, boolean breaksBlocks) {
         public static final Codec<ExplosionDef> CODEC = RecordCodecBuilder.create(inst -> inst.group(
                 Codec.FLOAT.fieldOf("power").forGetter(ExplosionDef::power),
@@ -289,7 +334,8 @@ public record SpellDefinition(
             List<SpellEffectEntry> effectComponents,
             boolean opensBlocks,
             float pullStrength,
-            Optional<SpellCanonTier> canonTier) {
+            Optional<SpellCanonTier> canonTier,
+            Optional<CastTiming> castTiming) {
 
         static final MapCodec<SpellDefinitionFieldsB> MAP_CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
                 ExplosionDef.CODEC.optionalFieldOf("explode").forGetter(SpellDefinitionFieldsB::explode),
@@ -320,7 +366,9 @@ public record SpellDefinition(
                 Codec.BOOL.optionalFieldOf("opensBlocks", false).forGetter(SpellDefinitionFieldsB::opensBlocks),
                 Codec.FLOAT.optionalFieldOf("pullStrength", 0.0f).forGetter(SpellDefinitionFieldsB::pullStrength),
                 SpellCanonTier.CODEC.optionalFieldOf("canonTier")
-                        .forGetter(SpellDefinitionFieldsB::canonTier)
+                        .forGetter(SpellDefinitionFieldsB::canonTier),
+                CastTiming.CODEC.optionalFieldOf("castTiming")
+                        .forGetter(SpellDefinitionFieldsB::castTiming)
         ).apply(inst, SpellDefinitionFieldsB::new));
     }
 
@@ -356,7 +404,8 @@ public record SpellDefinition(
                     pair.getSecond().effectComponents(),
                     pair.getSecond().opensBlocks(),
                     pair.getSecond().pullStrength(),
-                    pair.getSecond().canonTier()),
+                    pair.getSecond().canonTier(),
+                    pair.getSecond().castTiming()),
             def -> Pair.of(
                     new SpellDefinitionFieldsA(
                             def.displayName(),
@@ -387,7 +436,8 @@ public record SpellDefinition(
                             def.effectComponents(),
                             def.opensBlocks(),
                             def.pullStrength(),
-                            def.canonTier())));
+                            def.canonTier(),
+                            def.castTiming())));
 
     // Gamp's Law checks. GampsLaw.validate() only consults these for domains the spell DECLARES
     // in its `gampDomains` JSON list, so declaring a domain marks every cast as a violation by

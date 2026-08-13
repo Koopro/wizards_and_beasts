@@ -19,6 +19,8 @@ import at.koopro.wizardsandbeasts.network.spell.SpellDataDeltaS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.SpellDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.SpellDeniedS2CPayload;
 import at.koopro.wizardsandbeasts.client.camera.ScreenShakeHandler;
+import at.koopro.wizardsandbeasts.client.pose.ClientCastAnimationState;
+import at.koopro.wizardsandbeasts.network.spell.SpellCastAnimationS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.SpellImpactBurstS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.SpellProficiencySyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.teacher.SpellTeacherOpenS2CPayload;
@@ -128,6 +130,16 @@ public final class SpellClientPayloadHandlers {
         // loaded server-side when the registrar resolves the method ref — never forces
         // verification-time loading of the client-only SoundInstance type.
         ctx.enqueueWork(SpellVfxClient::playDeniedFeedback);
+    }
+
+    /**
+     * Records a cast animation for the pose layer to draw.
+     *
+     * <p>Stored rather than played: the consumer is {@code KeyframePosePass}, which does not exist
+     * yet. Storing it now is what keeps the client from inventing its own timing later.
+     */
+    public static void handleSpellCastAnimation(SpellCastAnimationS2CPayload pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> ClientCastAnimationState.handle(pkt, ClientCastAnimationState.clientTick()));
     }
 
     public static void handleSpellImpactBurst(SpellImpactBurstS2CPayload pkt, IPayloadContext ctx) {

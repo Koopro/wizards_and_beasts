@@ -220,6 +220,14 @@ public final class SpellCastService {
             return CastResult.REJECTED;
         }
 
+        // Presentation only, and deliberately outside the try: the animation describes a cast that
+        // has already resolved, and a failure to describe it is not a failed cast. A spell with no
+        // declared timing broadcasts nothing at all.
+        if (castContext.definition() != null) {
+            at.koopro.wizardsandbeasts.network.spell.SpellCastAnimationS2CPayload
+                    .broadcast(player, spellId, castContext.definition());
+        }
+
         float cooldownMult = castContext.modifiers().finalCooldown();
         cooldownMult *= castContext.scalingProfile().cooldownMult();
         int cooldown = SpellCastGate.resolveCooldownTicks(spell.getBaseCooldownTicks(), cooldownMult);
