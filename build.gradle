@@ -32,6 +32,19 @@ repositories {
             includeGroup('mezz.jei')
         }
     }
+    // SPIKE ONLY -- Player Animation Library evaluation. Do not merge.
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'RedlanceMinecraft'
+                url = 'https://repo.redlance.org/public'
+            }
+        }
+        filter {
+            includeGroup('com.zigythebird.playeranim')
+            includeGroup('com.zigythebird')
+        }
+    }
 }
 
 base {
@@ -62,6 +75,10 @@ neoForge {
 
             // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+
+            // SPIKE ONLY -- dumps every mixin-transformed class to run/.mixin.out so the PAL spike can
+            // read the real injection order out of PlayerModel.setupAnim instead of inferring it.
+            systemProperty 'mixin.debug.export', 'true'
         }
 
         server {
@@ -181,6 +198,9 @@ tasks.named('test', Test).configure {
 
 dependencies {
     implementation "software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}"
+
+    // SPIKE ONLY -- Player Animation Library evaluation. Do not merge.
+    implementation "com.zigythebird.playeranim:PlayerAnimationLibNeo:${pal_version}"
 
     testImplementation platform('org.junit:junit-bom:5.11.4')
     testImplementation 'org.junit.jupiter:junit-jupiter'
