@@ -1,0 +1,8 @@
+{
+  "id": "wizards_and_beasts:obscurial",
+  "heritage": "obscurial",
+  "mechanisms": [
+    { "type": "form", "formId": "obscurial_dark", "trigger": "emotional_break" }
+  ],
+  "provenance": { "citation": "Fantastic Beasts and Where to Find Them (2016 film)" }
+}

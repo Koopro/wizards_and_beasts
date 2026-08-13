@@ -1,0 +1,15 @@
+{
+  "id": "wizards_and_beasts:vampire",
+  "heritage": "vampire",
+  "mechanisms": [
+    {
+      "type": "proportion",
+      "scale": 1.04,
+      "boneOffsets": {
+        "right_arm": { "x": -0.15 },
+        "left_arm": { "x": 0.15 }
+      }
+    }
+  ],
+  "provenance": { "citation": "Half-Blood Prince, ch. 15" }
+}

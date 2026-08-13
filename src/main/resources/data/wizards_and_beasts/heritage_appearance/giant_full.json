@@ -1,0 +1,16 @@
+{
+  "id": "wizards_and_beasts:giant_full",
+  "heritage": "giant",
+  "variant": "full_giant",
+  "mechanisms": [
+    {
+      "type": "proportion",
+      "scale": 3.5,
+      "boneOffsets": {
+        "right_arm": { "x": 1.0 },
+        "left_arm": { "x": -1.0 }
+      }
+    }
+  ],
+  "provenance": { "citation": "Order of the Phoenix, ch. 20" }
+}

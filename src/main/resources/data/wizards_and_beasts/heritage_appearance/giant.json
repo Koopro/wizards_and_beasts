@@ -1,0 +1,15 @@
+{
+  "id": "wizards_and_beasts:giant",
+  "heritage": "giant",
+  "mechanisms": [
+    {
+      "type": "proportion",
+      "scale": 1.6,
+      "boneOffsets": {
+        "right_arm": { "x": 0.5 },
+        "left_arm": { "x": -0.5 }
+      }
+    }
+  ],
+  "provenance": { "citation": "Goblet of Fire, ch. 23" }
+}

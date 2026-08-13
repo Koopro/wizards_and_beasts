@@ -96,6 +96,10 @@ public record HeritageSelectC2SPayload(String typeId, String subtypeId) implemen
 
             // Sync back to client
             HeritageDataSyncS2CPayload.syncToPlayer(player, false);
+            // ...and to everyone who can see them. The line above reaches only this player, which is
+            // enough for their own HUD and useless for rendering: a visible heritage is one other
+            // people can see.
+            HeritageIdentitySyncS2CPayload.syncToTracking(player);
             // Committing a heritage sets the variant tags that back HERITAGE-source ability grants.
             at.koopro.wizardsandbeasts.sync.PlayerStateSyncService.syncAbilityGrants(player);
 
