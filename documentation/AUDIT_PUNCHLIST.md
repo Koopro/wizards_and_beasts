@@ -16,6 +16,38 @@ historical log of individual work passes — those are records of what was done,
 
 ## Open findings (verified 2026-07-19)
 
+- [BLOCKER] **Cast animation is unbuildable as specced — WAND_CAST_POSE_SCHEMA §4 gate fires on BOTH
+  questions (audited 2026-08-12).** Nothing was built; the schema requires reporting first.
+
+  *Q1, are there wind-up / release / recovery phases?* **No, and there is no `CastManager` either.**
+  The pipeline is `SpellCastService` / `SpellExecutor` / `CastContext`. `CastContext` is a 12-field
+  record carrying caster, wand, spell, stats, proficiency, allegiance, compatibility, modifiers and
+  rejections — and **no duration, no tick count, no phase**. `WandCastTiming` stores one integer, the
+  hold ticks of the last `releaseUsing`, server-side, consumed once. Casting is instant. Per §4 that
+  makes a three-phase clip against a single-tick cast "a spec error, not a tuning problem".
+
+  *Q2, does the cast packet carry timing?* **`SpellCastC2SPayload` is an empty record** —
+  `public record SpellCastC2SPayload()`. It carries no timing, no spell id, nothing. A pure fire
+  event. **D8 is therefore VOID** and, in the schema's words, the choice returns to Christian:
+  extend `PoseOverride`, or add timing to the cast packet. Explicitly NOT to be client-predicted.
+
+  Also audited per §5, since prior phases found assumed rosters wrong every time: the live
+  `SpellCategory` roster is **four** values — `COMBAT`, `UTILITY`, `DEFENSE`, `DARK_ARTS`.
+
+- [HIGH] **Broom animation state is never synced, so every observer sees the idle clip.**
+  `BroomEntity.registerControllers` gates all three controllers on `currentSpeed` and
+  `inputBoosting`. Both are **plain fields**; `defineSynchedData` carries `DEFINITION_ID`,
+  `BOOST_TICKS_REMAINING`, `BOOST_COOLDOWN_TICKS` and `CURRENT_DURABILITY` but neither of these.
+  GeckoLib controllers run client-side, and `currentSpeed` is produced by `BroomMovement.tickMovement`
+  from the input flags, which are written by `setInputFromNetwork` — server-side. On any client that
+  is not the rider the inputs are all false, speed decays to zero, and `idleController` wins forever.
+
+- [MEDIUM] **Seven of the ten broom clips have no controller.** `broom.animation.json` ships
+  `idle`, `hover`, `fly_forward`, `lean_left`, `lean_right`, `boost`, `brake`, `mount`, `dismount`,
+  `summon`. Only `idle`, `fly_forward` and `boost` are referenced from Java. The other seven are
+  authored, shipped, and unreachable — `hover` and the two `lean` clips are the ones a flying broom
+  most obviously wants.
+
 - [x] **Design docs were invisible to git — FIXED 2026-08-12.** Every root `.md` and the whole of
   `docs/` were gitignored by the 2026-08-10 history purge, so writes to `AUDIT_PUNCHLIST.md`,
   `MIGRATION_DELTAS.md` and every design schema succeeded silently and were never tracked. 27 files,
