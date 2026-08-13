@@ -3070,3 +3070,51 @@ which is what `BroomModelParityTest` now asserts.
 **No behavioural delta.** `player.geo.json` is an authoring asset that nothing loads, registers or
 renders, and `PlayerGeoRigParityTest` is a test. Nothing in the running game reads either. Recorded
 here explicitly because the deliverable brief asks for a positive statement rather than silence.
+
+---
+
+# Heritage appearance (2026-08-13)
+
+Written against the `HeritageAppearance` override layer. Two of these are canon admissions and two
+are honest statements that something is declared but does not run.
+
+## Vampire appearance is under-sourced
+
+Everything the books give on what a vampire looks like is Sanguini in *Half-Blood Prince* ch. 15 —
+roughly two lines, gaunt and pale, at a party. There is no canon description of fangs, red eyes, a
+cape, or a bat. The `vampire` entry therefore carries **pallor and proportion only**, and its
+provenance cites those two lines rather than pretending to more. Anything beyond pallor added later
+should be labelled `fanExtrapolation`, not attributed to the citation.
+
+The shipped `vampire_human` form carries a `GLOWING_EYES` render flag. That is invented, and the
+appearance entry replaces it with a pallor overlay.
+
+## Human exertion flare is fan-extrapolation, and is deferred
+
+Canon is explicit that wizards are visually indistinguishable from Muggles — the Statute of Secrecy
+depends on it. A visible cast aura therefore has **no textual basis at all** and its entry must carry
+`fanExtrapolation: true`, never a citation. It is designed to read as "that wizard is powerful", never
+"that wizard is of house X"; a bloodline mark would contradict canon outright.
+
+It is also **not wired**, for a mechanical reason rather than a design one. `CastContext` is
+server-side. Client-side, `ClientSpellDataState` exposes proficiency for the local player only, and
+`SpellCastAnimationS2CPayload` — the one cast signal that reaches other clients — carries
+`spellId, ticks, windupEnd, releaseEnd, holdPhase` and **neither a proficiency tier nor a cost
+magnitude**. There is nothing to drive the flare with for a remote player. The `overlay` union arm is
+built and tested; no flare is declared. Adding the two fields to the payload is a small follow-up.
+
+## Forms declared with no trigger in code
+
+`veela_harpy`, `merfolk_water` and `vampire_bat` are registered forms with size profiles and models,
+reachable only through `/wandb` commands. `werewolf_wolf` is in the same position: the mod contains
+no moon-phase code whatsoever. These stay declared and unwired — the broom `brake`/`summon`
+precedent — rather than having a trigger invented for them, which the brief forbids outright.
+
+## Goblin uses form replacement, not a proportion pass
+
+The brief assigned goblins to the proportion pass on the reasoning that canon treats them as
+differently-proportioned humans, citing "part-goblin". **There is no part-goblin variant.** `goblin`
+is a whole heritage whose three variants (`common`, `warrior`, `rune`) are all full goblins — a
+separate species, not a human lineage. Form replacement is the correct mechanism and is what already
+ships. Same reasoning for `house_elf` and `centaur`, both of which are also fully playable heritages
+despite the brief asserting they were not.

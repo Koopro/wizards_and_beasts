@@ -16,6 +16,52 @@ historical log of individual work passes — those are records of what was done,
 
 ## Open findings (verified 2026-07-19)
 
+- [BLOCKER] **Form visual width has no hitbox counterpart (2026-08-13).** `SizeProfile.modelAspectX`
+  and `modelAspectZ` are visual-only multipliers applied on top of `modelScale`, and nothing derives
+  a hitbox from them — `hitboxWidth` is an independent field, and only `hitboxHeight` feeds
+  `Attributes.SCALE` through `scaleAttributeValue()`. Vertical scale and hitbox therefore agree on
+  every shipped profile; **horizontal does not**. Goblin: `hitboxWidth` 0.39 (= 0.6 × 0.65) against a
+  visual width of 0.65 × 1.231 ≈ 0.80 — the model is roughly twice as wide as what it collides with.
+  Centaur (`modelAspectZ` 1.385) and Obscurial dark form (1.786) are worse in depth. Found during the
+  heritage-appearance Phase 0 audit; out of scope there, because narrowing it is a behavioural change.
+
+- [BLOCKER] **`transformationState` is not synced to remote clients (2026-08-13).**
+  `ClientHeritageDataState` holds a *single* `PlayerHeritageData` instance and
+  `HeritageDataSyncS2CPayload.syncToPlayer` targets one player, so heritage, variant and
+  transformation state exist client-side **only for the local player**. `activeFormId` is the one
+  render-relevant field that does reach everyone, via `FormSyncS2CPayload.syncToTracking` into
+  `ClientFormDataState`'s per-UUID map. **Any render path keyed off `transformationState` works in
+  single-player and silently fails for every other player** — the exact failure a single-player test
+  cannot catch. New appearance code keys off `activeFormId` for this reason.
+
+- [POLISH] **Heritage and form content is gated by no module (2026-08-13).** `grep Module.` over
+  `heritage/`, `form/`, `client/form/`, `client/heritage/` and `event/heritage/` returns nothing.
+  There is no `Module.HERITAGE` constant among the 34 in `Module`; `PLAYER_ANIMATION` gates the pose
+  layer only. Every other comparable subsystem (creatures, bestiary, broom flight, handbook) has one.
+
+- [POLISH] **Four of five transformation triggers do not exist (2026-08-13).** Only the Obscurial has
+  real trigger logic (`ObscurialHeritageHandler`: HP thresholds, stress spikes, forced-dark duration).
+  **Werewolf moon-phase transformation is entirely absent** — `getMoonPhase`, `moonPhase` and
+  `isFullMoon` have zero hits across the whole source tree, so the mod's signature werewolf mechanic
+  has no implementation. Veela rage, merfolk water form and vampire bat form are likewise config-only:
+  `TransformationConfigRegistry` holds the transition pairs and nothing drives them. All five forms
+  are reachable today only through `/wandb` commands.
+
+- [NICE-TO-HAVE] **Whether a transformed player can cast is undecided (2026-08-13).** The Obscurial
+  dark form cancels item use, right-click item and right-click block. Werewolf, Veela, merfolk and
+  centaur forms do not, so a transformed werewolf can currently cast normally with a wand that is not
+  rendered. Neither behaviour was chosen; one was written and the others were not.
+
+- [NICE-TO-HAVE] **`vampire_bat` belongs to the Animagus roster (2026-08-13).** Canon gives vampires
+  no bat form; that is Stoker, not Rowling. The form ships in `FormRegistry` with a size profile and
+  a `BatFormModel`, wired to nothing. Either move it to the Animagus roster, where a bat form is
+  canon-defensible, or delete it.
+
+- [NICE-TO-HAVE] **170 free-text `"PLACEHOLDER box rig"` markers (2026-08-13).** Up from the 93
+  recorded earlier. They are free-text `_comment` fields, so nothing can assert on them and nothing
+  fails when real art replaces the rig underneath one. New rigs should carry a structured,
+  machine-checkable marker instead.
+
 - [BLOCKER] **Cast pose values are placeholders (2026-08-12).** `client/pose/CastPoseConstants.java`
   carries three phase poses — `WINDUP`, `RELEASE`, `RECOVERY` — plus `FIRST_PERSON_SHARE` in
   `CastPosePass`, and none of it is authored art. There is no cast-pose document: the flight values
