@@ -56,6 +56,8 @@ public class WizardsAndBeastsClient {
         modEventBus.addListener(BroomRiderRenderer::registerModifiers);
         modEventBus.addListener(FormRenderStateModifier::registerModifiers);
         modEventBus.addListener(at.koopro.wizardsandbeasts.client.petrify.PetrifyRenderHandler::registerModifiers);
+        modEventBus.addListener(
+                at.koopro.wizardsandbeasts.client.heritage.appearance.HeritageAppearanceRenderState::registerModifiers);
         modEventBus.addListener(SpellKeyBindings::register);
         modEventBus.addListener(at.koopro.wizardsandbeasts.client.ability.AbilityFrameworkKeyBindings::register);
         modEventBus.addListener(this::registerGuiLayers);

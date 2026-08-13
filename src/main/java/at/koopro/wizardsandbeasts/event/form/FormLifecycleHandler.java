@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.event.form;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.form.FormSystemAPI;
 import at.koopro.wizardsandbeasts.network.form.FormSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.heritage.HeritageIdentitySyncS2CPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -32,6 +33,7 @@ public final class FormLifecycleHandler {
         if (!(event.getEntity() instanceof ServerPlayer observer)) return;
         if (!(event.getTarget() instanceof ServerPlayer target)) return;
         FormSyncS2CPayload.syncTo(observer, target);
+        HeritageIdentitySyncS2CPayload.syncTo(observer, target);
     }
 
     /**
@@ -48,6 +50,7 @@ public final class FormLifecycleHandler {
         MinecraftServer server = level.getServer();
         for (ServerPlayer target : server.getPlayerList().getPlayers()) {
             FormSyncS2CPayload.syncTo(observer, target);
+            HeritageIdentitySyncS2CPayload.syncTo(observer, target);
         }
     }
 
@@ -57,6 +60,7 @@ public final class FormLifecycleHandler {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         FormSystemAPI.reapplyCurrentForm(player);
         FormSyncS2CPayload.syncToTracking(player);
+        HeritageIdentitySyncS2CPayload.syncToTracking(player);
     }
 
     /** Changing dimension re-creates the tracking set, so re-announce the form to it. */
@@ -65,5 +69,6 @@ public final class FormLifecycleHandler {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         FormSystemAPI.reapplyCurrentForm(player);
         FormSyncS2CPayload.syncToTracking(player);
+        HeritageIdentitySyncS2CPayload.syncToTracking(player);
     }
 }

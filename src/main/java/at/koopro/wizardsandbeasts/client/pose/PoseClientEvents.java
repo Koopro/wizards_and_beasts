@@ -25,6 +25,9 @@ public final class PoseClientEvents {
 
     private static final FlightPosePass FLIGHT = new FlightPosePass();
     private static final CastPosePass CAST = new CastPosePass();
+    private static final at.koopro.wizardsandbeasts.client.heritage.appearance.HeritageProportionPass
+            HERITAGE_PROPORTION =
+            new at.koopro.wizardsandbeasts.client.heritage.appearance.HeritageProportionPass();
 
     /**
      * Registered unconditionally, per the module contract: registration never branches on whether a
@@ -36,6 +39,7 @@ public final class PoseClientEvents {
         event.enqueueWork(() -> {
             PlayerPoseLayer.get().register(FLIGHT);
             PlayerPoseLayer.get().register(CAST);
+            PlayerPoseLayer.get().register(HERITAGE_PROPORTION);
         });
     }
 
@@ -66,6 +70,7 @@ public final class PoseClientEvents {
     public static void onLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
         ClientPoseState.clear();
         ClientCastAnimationState.clear();
+        at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageIdentityState.clear();
     }
 
     /** The live flight pass, for the debug readout. */

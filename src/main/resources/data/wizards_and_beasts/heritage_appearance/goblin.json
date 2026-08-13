@@ -1,0 +1,8 @@
+{
+  "id": "wizards_and_beasts:goblin",
+  "heritage": "goblin",
+  "mechanisms": [
+    { "type": "form", "formId": "goblin_default" }
+  ],
+  "provenance": { "citation": "Philosopher's Stone, ch. 5" }
+}

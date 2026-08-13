@@ -129,6 +129,14 @@ public final class ClientPayloadHandlers {
         context.enqueueWork(() -> BestiaryEntryRegistry.setClientEntries(payload.entries()));
     }
 
+    public static void handleHeritageIdentitySync(
+            at.koopro.wizardsandbeasts.network.heritage.HeritageIdentitySyncS2CPayload payload,
+            IPayloadContext context) {
+        context.enqueueWork(() ->
+                at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageIdentityState.update(
+                        payload.playerUUID(), payload.heritageId(), payload.variantId()));
+    }
+
     public static void handleSyncHeritageAppearance(
             at.koopro.wizardsandbeasts.network.heritage.SyncHeritageAppearancePayload payload,
             IPayloadContext context) {

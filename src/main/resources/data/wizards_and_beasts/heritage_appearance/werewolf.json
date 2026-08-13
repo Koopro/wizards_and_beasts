@@ -1,0 +1,8 @@
+{
+  "id": "wizards_and_beasts:werewolf",
+  "heritage": "werewolf",
+  "mechanisms": [
+    { "type": "form", "formId": "werewolf_wolf", "trigger": "full_moon" }
+  ],
+  "provenance": { "citation": "Prisoner of Azkaban, ch. 20" }
+}

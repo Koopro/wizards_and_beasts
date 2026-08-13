@@ -37,5 +37,10 @@ public final class ModNetworkType {
                 SyncHeritageAppearancePayload.TYPE,
                 SyncHeritageAppearancePayload.STREAM_CODEC,
                 ClientPayloadHandlers::handleSyncHeritageAppearance);
+
+        registrar.playToClient(
+                HeritageIdentitySyncS2CPayload.TYPE,
+                HeritageIdentitySyncS2CPayload.STREAM_CODEC,
+                ClientPayloadHandlers::handleHeritageIdentitySync);
     }
 }
