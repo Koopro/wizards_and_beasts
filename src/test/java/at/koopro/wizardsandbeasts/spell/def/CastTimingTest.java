@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.spell.def;
 
 import at.koopro.wizardsandbeasts.client.pose.ClientCastAnimationState;
+import at.koopro.wizardsandbeasts.network.spell.SpellCastAnimationS2CPayload;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 import org.junit.jupiter.api.Test;
@@ -56,7 +57,8 @@ class CastTimingTest {
     /** The three phases tile the whole cast: exactly one is mid-ramp at any progress. */
     @Test
     void phasesTileTheCastWithNoGap() {
-        var cast = new ClientCastAnimationState.ActiveCast("test", 20, 0.35f, 0.6f, 0L);
+        var cast = new ClientCastAnimationState.ActiveCast("test", 20, 0.35f, 0.6f, 0L,
+                SpellCastAnimationS2CPayload.NO_HOLD);
 
         assertEquals(0f, cast.windup(0f), 1e-5f);
         assertEquals(1f, cast.windup(0.35f), 1e-5f);
@@ -72,7 +74,8 @@ class CastTimingTest {
 
     @Test
     void progressRunsZeroToOneAcrossTheDeclaredDuration() {
-        var cast = new ClientCastAnimationState.ActiveCast("test", 20, 0.35f, 0.6f, 100L);
+        var cast = new ClientCastAnimationState.ActiveCast("test", 20, 0.35f, 0.6f, 100L,
+                SpellCastAnimationS2CPayload.NO_HOLD);
         assertEquals(0f, cast.progress(100L, 0f), 1e-5f);
         assertEquals(0.5f, cast.progress(110L, 0f), 1e-5f);
         assertEquals(1f, cast.progress(120L, 0f), 1e-5f);
@@ -82,13 +85,15 @@ class CastTimingTest {
     /** The partial tick interpolates, or a 20 tick cast steps twenty times however fast the frames run. */
     @Test
     void progressInterpolatesAcrossTheTickBoundary() {
-        var cast = new ClientCastAnimationState.ActiveCast("test", 20, 0.35f, 0.6f, 0L);
+        var cast = new ClientCastAnimationState.ActiveCast("test", 20, 0.35f, 0.6f, 0L,
+                SpellCastAnimationS2CPayload.NO_HOLD);
         assertEquals(0.525f, cast.progress(10L, 0.5f), 1e-5f);
     }
 
     @Test
     void expiresAtTheEndOfItsDuration() {
-        var cast = new ClientCastAnimationState.ActiveCast("test", 20, 0.35f, 0.6f, 0L);
+        var cast = new ClientCastAnimationState.ActiveCast("test", 20, 0.35f, 0.6f, 0L,
+                SpellCastAnimationS2CPayload.NO_HOLD);
         assertFalse(cast.expired(19L));
         assertTrue(cast.expired(20L));
     }

@@ -24,6 +24,7 @@ public final class PoseClientEvents {
     private PoseClientEvents() {}
 
     private static final FlightPosePass FLIGHT = new FlightPosePass();
+    private static final CastPosePass CAST = new CastPosePass();
 
     /**
      * Registered unconditionally, per the module contract: registration never branches on whether a
@@ -32,7 +33,10 @@ public final class PoseClientEvents {
      */
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
-        event.enqueueWork(() -> PlayerPoseLayer.get().register(FLIGHT));
+        event.enqueueWork(() -> {
+            PlayerPoseLayer.get().register(FLIGHT);
+            PlayerPoseLayer.get().register(CAST);
+        });
     }
 
     /**
@@ -46,6 +50,9 @@ public final class PoseClientEvents {
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
         FLIGHT.tick();
+        // The cast pass keeps no timers, but finished casts still have to be dropped: an entity that
+        // casts and then leaves render distance is never read again and would sit in the map.
+        ClientCastAnimationState.tick(ClientCastAnimationState.clientTick());
     }
 
     /**
@@ -58,6 +65,7 @@ public final class PoseClientEvents {
     @SubscribeEvent
     public static void onLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
         ClientPoseState.clear();
+        ClientCastAnimationState.clear();
     }
 
     /** The live flight pass, for the debug readout. */

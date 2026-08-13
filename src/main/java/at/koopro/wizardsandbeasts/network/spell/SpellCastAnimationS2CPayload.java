@@ -32,8 +32,12 @@ public record SpellCastAnimationS2CPayload(
         String spellId,
         int ticks,
         float windupEnd,
-        float releaseEnd
+        float releaseEnd,
+        int holdPhase
 ) implements CustomPacketPayload {
+
+    /** {@code holdPhase} value meaning "run normally". */
+    public static final int NO_HOLD = -1;
 
     public static final Type<SpellCastAnimationS2CPayload> TYPE = new Type<>(
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "spell_cast_animation"));
@@ -46,7 +50,8 @@ public record SpellCastAnimationS2CPayload(
                     ByteBufCodecs.STRING_UTF8.decode(buf),
                     ByteBufCodecs.VAR_INT.decode(buf),
                     buf.readFloat(),
-                    buf.readFloat());
+                    buf.readFloat(),
+                    buf.readInt());
         }
 
         @Override
@@ -56,6 +61,7 @@ public record SpellCastAnimationS2CPayload(
             ByteBufCodecs.VAR_INT.encode(buf, pkt.ticks());
             buf.writeFloat(pkt.windupEnd());
             buf.writeFloat(pkt.releaseEnd());
+            buf.writeInt(pkt.holdPhase());
         }
     };
 
@@ -74,9 +80,20 @@ public record SpellCastAnimationS2CPayload(
     public static void broadcast(ServerPlayer caster, String spellId, SpellDefinition definition) {
         definition.castTiming().ifPresent(timing -> {
             SpellCastAnimationS2CPayload payload = new SpellCastAnimationS2CPayload(
-                    caster.getId(), spellId, timing.ticks(), timing.windupEnd(), timing.releaseEnd());
-            PacketDistributor.sendToPlayersTrackingEntity(caster, payload);
-            PacketDistributor.sendToPlayer(caster, payload);
+                    caster.getId(), spellId, timing.ticks(),
+                    timing.windupEnd(), timing.releaseEnd(), NO_HOLD);
+            send(caster, payload);
         });
+    }
+
+    /**
+     * Sends an arbitrary cast animation. The debug command's entry point.
+     *
+     * <p>Deliberately the same payload and the same send path as a real cast, so the harness
+     * exercises production wiring rather than a parallel one that can drift from it.
+     */
+    public static void send(ServerPlayer caster, SpellCastAnimationS2CPayload payload) {
+        PacketDistributor.sendToPlayersTrackingEntity(caster, payload);
+        PacketDistributor.sendToPlayer(caster, payload);
     }
 }

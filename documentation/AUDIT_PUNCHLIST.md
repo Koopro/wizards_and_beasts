@@ -16,6 +16,21 @@ historical log of individual work passes — those are records of what was done,
 
 ## Open findings (verified 2026-07-19)
 
+- [BLOCKER] **Cast pose values are placeholders (2026-08-12).** `client/pose/CastPoseConstants.java`
+  carries three phase poses — `WINDUP`, `RELEASE`, `RECOVERY` — plus `FIRST_PERSON_SHARE` in
+  `CastPosePass`, and none of it is authored art. There is no cast-pose document: the flight values
+  arrived as `documentation/FLIGHT_POSE_CONSTANTS.md` and casting has no equivalent. Each pose is a
+  `castingArm` triple, a `chest` triple and a `headPitch` — 21 values — written in whole and half
+  degrees so the table reads as provisional. Confined to that one class so an authored set replaces
+  it without touching the pass. **Do not treat the current in-game look as the design.**
+
+- [MEDIUM] **`CastPosePass` is procedural, and schema R-1 says cast poses are keyframe.** R-1 rules
+  authored performances to be keyframe passes, retunable without a rebuild; this is a constants table
+  in Java. It is a deliberate stand-in so the phase machinery, the wire path and the command harness
+  could be verified before `KeyframePosePass` exists. The pass reads phases through
+  `PhaseTimer.between` either way, so swapping the value source for a sampled clip replaces
+  `CastPoseConstants` and leaves `CastPosePass` alone.
+
 - [~] **Cast timing declared and on the wire — PARTIAL 2026-08-12.** The §4 gate had fired on both
   questions: no cast phases anywhere (no `CastManager`; `CastContext` carries no duration), and
   `SpellCastC2SPayload` is an empty record. Christian ruled: add timing to the packet, which is an

@@ -30,16 +30,33 @@ public final class ClientCastAnimationState {
      *
      * @param startTick client tick the cast arrived on, used as the playhead origin
      */
-    public record ActiveCast(String spellId, int ticks, float windupEnd, float releaseEnd, long startTick) {
+    public record ActiveCast(String spellId, int ticks, float windupEnd, float releaseEnd,
+                            long startTick, int holdPhase) {
 
-        /** Progress 0..1 across the whole cast, interpolated across the tick boundary. */
+        /**
+         * Progress 0..1 across the whole cast, interpolated across the tick boundary.
+         *
+         * <p>A held cast pins progress to the midpoint of the held phase instead of advancing, so the
+         * debug command can park a pose and let it be looked at. Held casts never expire.
+         */
         public float progress(long nowTick, float partialTicks) {
+            if (held()) {
+                return switch (holdPhase) {
+                    case 0 -> windupEnd * 0.999f;
+                    case 1 -> (windupEnd + releaseEnd) * 0.5f;
+                    default -> (releaseEnd + 1f) * 0.5f;
+                };
+            }
             float elapsed = (nowTick - startTick) + partialTicks;
             return Math.min(1f, Math.max(0f, elapsed / ticks));
         }
 
+        public boolean held() {
+            return holdPhase >= 0;
+        }
+
         public boolean expired(long nowTick) {
-            return nowTick - startTick >= ticks;
+            return !held() && nowTick - startTick >= ticks;
         }
 
         /** Wind-up weight, 0..1, via the same sub-range remap every phase read uses. */
@@ -59,9 +76,14 @@ public final class ClientCastAnimationState {
     private static final Map<Integer, ActiveCast> ACTIVE = new HashMap<>();
 
     public static void handle(SpellCastAnimationS2CPayload payload, long clientTick) {
+        // A zero-tick payload is the command's "off": clear rather than store a degenerate cast.
+        if (payload.ticks() <= 0) {
+            ACTIVE.remove(payload.entityId());
+            return;
+        }
         ACTIVE.put(payload.entityId(), new ActiveCast(
                 payload.spellId(), payload.ticks(),
-                payload.windupEnd(), payload.releaseEnd(), clientTick));
+                payload.windupEnd(), payload.releaseEnd(), clientTick, payload.holdPhase()));
     }
 
     /** The running cast for an entity, or null. Expired entries are dropped on read. */
