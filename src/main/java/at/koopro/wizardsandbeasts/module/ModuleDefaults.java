@@ -13,7 +13,7 @@ import java.util.Map;
  * world is seeded with: the config's override if the server operator set one, otherwise the shipped value.
  *
  * <p>Consulted only when seeding a world that has no stored state. Editing the config afterwards does not
- * reach back into worlds that already exist — those are edited with {@code /wandb module set}.
+ * reach back into worlds that already exist — those are edited with {@code /wandb admin module set}.
  */
 @NullMarked
 public final class ModuleDefaults {
@@ -70,6 +70,9 @@ public final class ModuleDefaults {
         SHIPPED.put(Module.ARTEFACTS, ModuleState.ENABLED);
         SHIPPED.put(Module.FURNISHINGS, ModuleState.ENABLED);
         SHIPPED.put(Module.SCHOLARSHIP, ModuleState.ENABLED);
+        // Three of ten heritages are alpha-available and the transformation triggers for the rest do
+        // not exist yet, so PREVIEW rather than ENABLED: reachable, and not presented as finished.
+        SHIPPED.put(Module.HERITAGE, ModuleState.PREVIEW);
     }
 
     private ModuleDefaults() {}

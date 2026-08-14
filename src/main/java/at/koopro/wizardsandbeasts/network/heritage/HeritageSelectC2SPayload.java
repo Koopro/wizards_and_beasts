@@ -6,6 +6,7 @@ import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.event.heritage.HeritageEvents;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
+import at.koopro.wizardsandbeasts.form.FormSystemAPI;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
@@ -93,6 +94,13 @@ public record HeritageSelectC2SPayload(String typeId, String subtypeId) implemen
 
             // Apply stat modifiers
             HeritageAPI.applyStats(player);
+
+            // Give them the body that goes with the heritage. Without this the selection set a
+            // heritage, a variant and a stat spread and left activeFormId null — so the size profile
+            // never applied, no form render data was ever produced, and every heritage looked
+            // identical to every other. Ten heritages of authored proportion were unreachable
+            // outside the admin `/wandb player appearance form` command.
+            FormSystemAPI.resetToDefault(player);
 
             // Sync back to client
             HeritageDataSyncS2CPayload.syncToPlayer(player, false);

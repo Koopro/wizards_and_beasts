@@ -15,7 +15,6 @@ import at.koopro.wizardsandbeasts.form.ModelType;
 import at.koopro.wizardsandbeasts.form.RenderFlag;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.animal.feline.CatModel;
 import net.minecraft.client.model.animal.parrot.ParrotModel;
@@ -65,9 +64,6 @@ public final class FormModelRenderer {
 
     /** Solid white tint — no recolour applied to the borrowed model. */
     private static final int NO_TINT = -1;
-
-    /** Standard vanilla entity-model vertical offset (origin sits at the top of the model). */
-    private static final float MODEL_Y_OFFSET = -1.501f;
 
     private static WerewolfModel werewolfModel;
     private static ObscurialDarkModel darkModel;
@@ -226,7 +222,8 @@ public final class FormModelRenderer {
     /**
      * Renders a vanilla {@link net.minecraft.client.model.Model} in entity space. The model is
      * authored Y-down with its origin at the top, so we mirror the body-yaw rotation and the
-     * {@code scale(-1,-1,1)} / {@link #MODEL_Y_OFFSET} flip that the vanilla renderer would apply —
+     * {@code scale(-1,-1,1)} / origin-to-feet flip that the vanilla renderer would apply, via
+     * {@link FormEntitySpace} so the GeckoLib path cannot drift from it —
      * the form-scale already sits on the incoming PoseStack from the mixin.
      */
     private static void renderVanilla(PoseStack poseStack, SubmitNodeCollector collector,
@@ -239,9 +236,7 @@ public final class FormModelRenderer {
             tempStack.last().pose().set(pose.pose());
             tempStack.last().normal().set(pose.normal());
 
-            tempStack.mulPose(Axis.YP.rotationDegrees(180.0f - bodyRot));
-            tempStack.scale(-1.0f, -1.0f, 1.0f);
-            tempStack.translate(0.0f, MODEL_Y_OFFSET, 0.0f);
+            FormEntitySpace.apply(tempStack, bodyRot);
 
             net.minecraft.client.model.Model model = animated.get();
             model.renderToBuffer(tempStack, consumer, 0xF000F0, OverlayTexture.NO_OVERLAY, color);

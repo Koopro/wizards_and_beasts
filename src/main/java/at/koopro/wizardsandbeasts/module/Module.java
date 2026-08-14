@@ -69,5 +69,21 @@ public enum Module {
      * with no reachable content, which is why it ships {@code DISABLED}. Generation is gated on this
      * flag by {@code ChamberOfSecretsStructure}, so a default install places no chamber at all.
      */
-    CHAMBER_OF_SECRETS
+    CHAMBER_OF_SECRETS,
+    /**
+     * Heritage: the first-join selection ceremony and the visible expression of what a player is.
+     *
+     * <p>Added last on purpose, so anything keyed on this enum's ordering keeps its numbering.
+     *
+     * <p>Heritage was the one subsystem with no module at all, which meant the mod's own front door
+     * could not be switched off, could not be marked {@code PREVIEW}, and therefore presented itself
+     * as finished. Only three of the ten heritages are alpha-available, so {@code PREVIEW} is the
+     * honest state.
+     *
+     * <p><b>Gates access, never registration</b>, and deliberately gates only two things: whether the
+     * first-join ceremony is offered, and whether the appearance layer draws. Stats, size profiles
+     * and forms stay ungated on purpose — a player who committed a heritage should not silently lose
+     * their body and their stat spread because a server operator turned a flag off mid-save.
+     */
+    HERITAGE
 }

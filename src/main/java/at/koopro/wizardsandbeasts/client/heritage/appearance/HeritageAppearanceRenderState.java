@@ -7,6 +7,8 @@ import at.koopro.wizardsandbeasts.heritage.appearance.HeritageAppearance;
 import at.koopro.wizardsandbeasts.heritage.appearance.HeritageAppearanceRegistry;
 import at.koopro.wizardsandbeasts.heritage.appearance.OverlayAppearance;
 import at.koopro.wizardsandbeasts.heritage.appearance.Proportion;
+import at.koopro.wizardsandbeasts.module.Module;
+import at.koopro.wizardsandbeasts.module.ModuleManager;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
@@ -57,6 +59,12 @@ public final class HeritageAppearanceRenderState {
                             || !(renderState instanceof LivingEntityRenderState livingState)) {
                         return;
                     }
+                    // Gates access, never registration: the modifier is always registered and simply
+                    // contributes nothing while the module is off, so toggling it back on needs no
+                    // re-registration and leaves nothing half-wired.
+                    if (!ModuleManager.isEnabled(Module.HERITAGE)) {
+                        return;
+                    }
 
                     ClientHeritageIdentityState.Identity identity =
                             ClientHeritageIdentityState.get(player.getUUID());
@@ -92,8 +100,14 @@ public final class HeritageAppearanceRenderState {
      *
      * <p>Left alone, a half-giant with the {@code half_giant_default} form active would render at
      * 1.6 × 1.6 = 2.56. So the pass is handed {@code declared / formScale}, and the product lands on
-     * {@code declared}. In the common case there is no active form at all — heritage selection does
-     * not assign one — {@code formScale} is 1.0 and this is the identity.
+     * {@code declared}.
+     *
+     * <p>This is now the <b>normal</b> path, not an edge case: heritage selection assigns a form, so
+     * every player who has committed a heritage has a size profile in play. Where the datapack and
+     * the profile agree — as the shipped entries do, deliberately — the residual is exactly 1.0 and
+     * the pose stack contributes nothing, leaving vanilla's {@code state.scale} to do the work alone.
+     * A datapack that disagrees is what moves the difference onto the pose stack, which is the point:
+     * editing one JSON changes the rendered size without touching the hitbox.
      *
      * <p>Read from {@code ClientFormDataState} rather than from the form data on the render state:
      * render-state modifiers have no guaranteed order between them, and this is the same map that one

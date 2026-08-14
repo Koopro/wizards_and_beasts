@@ -34,10 +34,18 @@ historical log of individual work passes — those are records of what was done,
   single-player and silently fails for every other player** — the exact failure a single-player test
   cannot catch. New appearance code keys off `activeFormId` for this reason.
 
-- [POLISH] **Heritage and form content is gated by no module (2026-08-13).** `grep Module.` over
-  `heritage/`, `form/`, `client/form/`, `client/heritage/` and `event/heritage/` returns nothing.
-  There is no `Module.HERITAGE` constant among the 34 in `Module`; `PLAYER_ANIMATION` gates the pose
-  layer only. Every other comparable subsystem (creatures, bestiary, broom flight, handbook) has one.
+- [~] **Heritage and form content is gated by no module — FIXED 2026-08-14.** Was: `grep Module.` over
+  `heritage/`, `form/`, `client/form/`, `client/heritage/` and `event/heritage/` returned nothing, and
+  there was no `Module.HERITAGE` constant among the 34 in `Module`, while every comparable subsystem
+  (creatures, bestiary, broom flight, handbook) had one. The mod's own front door could not be
+  switched off, could not be marked `PREVIEW`, and therefore presented itself as finished.
+
+  `Module.HERITAGE` added — appended last, so anything keyed on the enum's ordering keeps its
+  numbering — and shipped `PREVIEW`: three of ten heritages are alpha-available and four of five
+  transformation triggers still do not exist, so `ENABLED` would overstate it. It gates exactly two
+  things: whether the first-join ceremony is offered, and whether the appearance layer draws.
+  **Stats, size profiles and forms stay ungated on purpose** — a player who has committed a heritage
+  must not silently lose their body and their stat spread because an operator flipped a flag mid-save.
 
 - [POLISH] **Four of five transformation triggers do not exist (2026-08-13).** Only the Obscurial has
   real trigger logic (`ObscurialHeritageHandler`: HP thresholds, stress spikes, forced-dark duration).
@@ -63,6 +71,41 @@ historical log of individual work passes — those are records of what was done,
   bone/texture/anim slots"*, which is an asset-swap contract, not merely a warning label, and is
   better than the count alone suggests. What is still true: they are free-text `_comment` fields, so
   nothing can assert on them and nothing fails when real art replaces the rig underneath one.
+
+- [POLISH] **The dev-client config watcher can spin forever (observed 2026-08-14, pre-existing).**
+  `ConfigWatcher` sees `wizards_and_beasts-common.toml` change, `ConfigTracker` re-validates, reports
+  *"is not correct. Correcting"*, rewrites the file — which the watcher sees as a change, and the
+  cycle repeats about once a second for as long as the client runs. Observed at 127+ and then 250+
+  corrections in one session.
+
+  **Not caused by the `Module.HERITAGE` addition**: an archived log from a run that predates it
+  (`run/logs/debug-2.log.gz`) already shows 246 corrections, while other runs show exactly 1. Adding a
+  module key causes one legitimate correction; the runaway is a separate watcher/corrector
+  interaction with some other trigger.
+
+  The client boots and plays through it — sound engine, atlases, mixins and JEI all come up normally —
+  so this is noise rather than a blocker. It is worth fixing anyway: it burns a thread, rewrites a
+  file every second, and drowns any real config warning in the log.
+
+- [~] **Heritage selection never assigned a form — FIXED 2026-08-14.** `HeritageSelectC2SPayload`
+  set the heritage, the variant and the stat spread and stopped, leaving `activeFormId` null. With it
+  null there is no size profile, no form render data and no visible heritage at all — so **all 22
+  shipped `SizeProfile`s had never applied to anyone in normal play**, and ten heritages of authored
+  proportion were reachable only through the admin `/wandb` form command. The render path was correct
+  the whole time; nothing ever reached it.
+
+  Selection now calls `FormSystemAPI.resetToDefault`. `reapplyCurrentForm` additionally backfills a
+  null form for any player who already has a heritage, because every existing save predates the fix
+  and would otherwise stay invisible forever. The backfill only fills a gap and never overrides a
+  form the player is actually in.
+
+- [~] **Heritage player forms ignore the animated rigs the mod already ships — RENDER PATH FIXED
+  2026-08-14, two rigs still missing.** `PlayerFormGeoRenderer` (GeckoLib `GeoObjectRenderer`) now
+  draws `werewolf_wolf`, `centaur_default`, `goblin_default`, `merfolk_water` and `obscurial_dark`
+  from their real animated rigs. Still open: **house-elf and veela-harpy have no rig authored** and
+  still take the legacy static-box path, and the shipped rigs are 6–7 bones at one box per limb —
+  functional, crude, and carrying an explicit Blockbench asset-swap contract in their animation files.
+  Original finding follows.
 
 - [BLOCKER] **Heritage player forms ignore the animated rigs the mod already ships (2026-08-13).**
   `FormModelRenderer` draws hand-written `ModelPart` classes — `WerewolfModel` (8 boxes),

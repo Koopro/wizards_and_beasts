@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.client.form.geo;
 
+import at.koopro.wizardsandbeasts.client.form.FormEntitySpace;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.state.CameraRenderState;
@@ -40,9 +40,6 @@ public final class PlayerFormGeoRenderer extends GeoObjectRenderer<PlayerFormAni
      */
     public static final DataTicket<Float> TICKET_BODY_YAW =
             DataTicket.create("player_form_body_yaw", Float.class);
-
-    /** Vanilla's entity-model vertical offset: these models are authored with the origin at the top. */
-    private static final float MODEL_Y_OFFSET = -1.501f;
 
     private static @Nullable PlayerFormGeoRenderer instance;
 
@@ -135,10 +132,7 @@ public final class PlayerFormGeoRenderer extends GeoObjectRenderer<PlayerFormAni
      */
     @Override
     public void adjustRenderPose(RenderPassInfo<GeoRenderState> info) {
-        PoseStack poseStack = info.poseStack();
-        float bodyYaw = info.getOrDefaultGeckolibData(TICKET_BODY_YAW, 0.0f);
-        poseStack.mulPose(Axis.YP.rotationDegrees(180.0f - bodyYaw));
-        poseStack.scale(-1.0f, -1.0f, 1.0f);
-        poseStack.translate(0.0f, MODEL_Y_OFFSET, 0.0f);
+        FormEntitySpace.apply(info.poseStack(),
+                info.getOrDefaultGeckolibData(TICKET_BODY_YAW, 0.0f));
     }
 }

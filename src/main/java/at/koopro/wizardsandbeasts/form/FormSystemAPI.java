@@ -118,16 +118,29 @@ public final class FormSystemAPI {
 
     /**
      * Re-applies the current form's size profile (e.g. after respawn/relog).
+     *
+     * <p>Also <b>backfills a missing form</b>. Heritage selection used to set the heritage, the
+     * variant and the stat modifiers and stop, so {@code activeFormId} stayed null for every player
+     * who had never run {@code /wandb player appearance form} by hand — and with it null there is no
+     * size profile, no render data and no visible heritage at all. Selection now assigns one, but every existing save
+     * predates that, so a player who committed a heritage before this change would stay invisible
+     * forever without this.
+     *
+     * <p>Only fills a gap; never overrides a form the player is actually in.
      */
     public static void reapplyCurrentForm(ServerPlayer player) {
         PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
         String formId = data.getActiveFormId();
-        if (formId != null) {
-            PlayerForm form = FormRegistry.get(formId);
-            if (form != null) {
-                SizeProfile profile = SizeProfileRegistry.getOrDefault(form.sizeProfileId());
-                SizeSystemAPI.applyProfile(player, profile);
+        if (formId == null) {
+            if (data.getSelectedHeritage() != null) {
+                resetToDefault(player);
             }
+            return;
+        }
+        PlayerForm form = FormRegistry.get(formId);
+        if (form != null) {
+            SizeProfile profile = SizeProfileRegistry.getOrDefault(form.sizeProfileId());
+            SizeSystemAPI.applyProfile(player, profile);
         }
     }
 }

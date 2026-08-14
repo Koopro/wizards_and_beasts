@@ -2,6 +2,8 @@ package at.koopro.wizardsandbeasts.event.heritage;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
+import at.koopro.wizardsandbeasts.module.Module;
+import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.network.heritage.HeritageDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.wand.WandAttachments;
@@ -17,7 +19,7 @@ import java.util.HashMap;
  *
  * <p>{@code HeritageSelectionScreen} was built as a hard first-join gate (ESC swallowed, not a pause
  * screen) but nothing ever opened it: the only caller of the {@code openSelector} flag was the admin
- * {@code /wandb heritage reset} command. Without a variant no wand can bond (see
+ * {@code /wandb player heritage reset} command. Without a variant no wand can bond (see
  * {@code WandResonanceSystem}) and no heritage ability can be granted, so a survival player was locked
  * out of the mod. The prompt repeats each login until a heritage is committed.
  */
@@ -26,10 +28,18 @@ public final class HeritageOnboarding {
 
     private HeritageOnboarding() {}
 
-    /** Opens the selection ceremony for any player who has not committed a heritage yet. */
+    /**
+     * Opens the selection ceremony for any player who has not committed a heritage yet.
+     *
+     * <p>Gated on {@link Module#HERITAGE}: the ceremony is a hard gate that swallows ESC, so a server
+     * that has switched heritage off must not open it — that would be an unclosable screen in front
+     * of a system with nothing behind it. A disabled module simply never prompts, and a player who
+     * already has a heritage keeps it.
+     */
     @SubscribeEvent
     public static void onLoginPromptSelection(PlayerEvent.PlayerLoggedInEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        if (!ModuleManager.isEnabled(Module.HERITAGE)) return;
         PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
         if (data.isLocked() || data.getSelectedHeritage() != null) return;
 
