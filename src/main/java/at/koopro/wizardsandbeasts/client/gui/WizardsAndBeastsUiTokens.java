@@ -70,6 +70,8 @@ public final class WizardsAndBeastsUiTokens {
 
         public static final int EMPTY_TEXT_COLOR = 0xFFAAAAAA;
         public static final int SELECT_HIGHLIGHT_COLOR = 0x55FFFFFF;
+        /** Fainter than the selection so a hovered row and the selected row stay distinguishable. */
+        public static final int HOVER_HIGHLIGHT_COLOR = 0x22FFFFFF;
         public static final int COOLDOWN_COLOR = 0xFFFFAA44;
         public static final int PROF_DEFAULT_DARK = 0xFF666666;
         public static final int PROF_NOVICE_TEXT = 0xFFAAAAAA;
