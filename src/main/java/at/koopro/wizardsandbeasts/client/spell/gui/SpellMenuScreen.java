@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.client.spell.gui;
 
 import at.koopro.wizardsandbeasts.client.ModTextures;
 import at.koopro.wizardsandbeasts.client.gui.WizardsAndBeastsUiTokens;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiText;
 import at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton;
@@ -98,6 +99,9 @@ public class SpellMenuScreen extends Screen {
     private String draggingSpellId = null;
     private double pressX;
     private double pressY;
+    /** Where the dragged spell was lifted from, so the trail has somewhere to start. */
+    private int dragOriginX;
+    private int dragOriginY;
     private boolean draggingScrollbar = false;
 
     public SpellMenuScreen() {
@@ -292,6 +296,8 @@ public class SpellMenuScreen extends Screen {
                     pressedSpellId = spell.getId();
                     pressX = mouseX;
                     pressY = mouseY;
+                    dragOriginX = (int) mouseX;
+                    dragOriginY = (int) mouseY;
                     return true;
                 }
             }
@@ -378,6 +384,7 @@ public class SpellMenuScreen extends Screen {
         renderList(graphics, mouseX, mouseY);
         renderScrollbar(graphics);
 
+        renderInfoCard(graphics);
         SpellMenuRenderHelper.renderSelectedSpellPanel(graphics, font, width, height, PANEL_W, PANEL_H,
                 LEFT_W, selectedSpellId, layout);
 
@@ -392,7 +399,7 @@ public class SpellMenuScreen extends Screen {
         if (spellEntries.isEmpty()) {
             graphics.drawString(font, Component.translatable("gui.wizards_and_beasts.spell_menu.empty"),
                     listX(), listTop() + WizardsAndBeastsUiTokens.SpellMenu.EMPTY_LIST_TEXT_Y_OFFSET,
-                    WizardsAndBeastsUiTokens.SpellMenu.EMPTY_TEXT_COLOR, false);
+                    WizardsPalette.TEXT_DIM, false);
             return;
         }
         int hovered = rowAt(mouseX, mouseY);
@@ -416,35 +423,47 @@ public class SpellMenuScreen extends Screen {
         int x = scrollbarX();
         int w = layout.s(SCROLLBAR_W);
         int track = trackH();
-        graphics.fill(x, listTop(), x + w, listTop() + track,
-                WizardsAndBeastsUiTokens.SpellMenu.DIVIDER_COLOR);
+        graphics.fill(x, listTop(), x + w, listTop() + track, WizardsPalette.WELL);
 
         int thumbH = Math.max(layout.s(8), track * maxVisible() / Math.max(1, spellEntries.size()));
         int thumbY = listTop() + (track - thumbH) * scrollOffset / max;
-        graphics.fill(x, thumbY, x + w, thumbY + thumbH,
-                WizardsAndBeastsUiTokens.SpellMenu.TITLE_COLOR);
+        graphics.fill(x, thumbY, x + w, thumbY + thumbH, WizardsPalette.THUMB);
     }
 
+    /**
+     * The rune-socket plate.
+     *
+     * <p>Engraving first, then the sockets on top of it, so the ley-lines tuck under the brass rather
+     * than crossing it.
+     */
     private void renderSlots(GuiGraphics graphics, int mouseX, int mouseY) {
         Minecraft mc = Minecraft.getInstance();
         PlayerSpellData data = ClientSpellDataState.get();
         int size = slotSize();
-        int iconSize = Math.max(8, size - 12);
+        int iconSize = Math.max(8, size - 14);
         int hoveredSlot = slotAt(mouseX, mouseY);
+        float age = mc.level == null ? 0f : mc.level.getGameTime() % 100000L;
+
+        int hubX = layout.panelX() + layout.s(LEFT_W)
+                + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SLOT_CENTER_X_OFFSET);
+        int hubY = layout.panelY() + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SLOT_CENTER_Y_OFFSET);
+
+        for (int i = 0; i < 4; i++) {
+            String spellId = data.getLoadoutSpell(i);
+            SpellSigilRenderer.leyLine(graphics, hubX, hubY,
+                    slotX(i) + size / 2, slotY(i) + size / 2,
+                    spellId != null, accentOf(spellId), age);
+        }
+        SpellSigilRenderer.hub(graphics, hubX, hubY, Math.max(3, size / 6), age);
 
         for (int i = 0; i < 4; i++) {
             int sx = slotX(i);
             int sy = slotY(i);
             String spellId = data.getLoadoutSpell(i);
+            boolean hovered = i == hoveredSlot;
 
-            graphics.blit(RenderPipelines.GUI_TEXTURED, SLOT_TEX, sx, sy, 0f, 0f, size, size, 40, 40, 40, 40);
-
-            // A slot lights up while a drag is over it, so a drop has a target you can see before you
-            // let go rather than after.
-            if (i == hoveredSlot && draggingSpellId != null) {
-                graphics.fill(sx, sy, sx + size, sy + size,
-                        WizardsAndBeastsUiTokens.SpellMenu.SELECT_HIGHLIGHT_COLOR);
-            }
+            SpellSigilRenderer.socket(graphics, sx, sy, size, spellId != null, hovered,
+                    hovered && draggingSpellId != null, accentOf(spellId), age);
 
             Component label = Component.translatable(
                     "gui.wizards_and_beasts.spell_menu.slot." + SLOT_KEYS[i]);
@@ -457,14 +476,54 @@ public class SpellMenuScreen extends Screen {
                 graphics.blit(RenderPipelines.GUI_TEXTURED, icon,
                         sx + (size - iconSize) / 2, sy + (size - iconSize) / 2,
                         0f, 0f, iconSize, iconSize, 92, 92, 92, 92);
-                graphics.blit(RenderPipelines.GUI_TEXTURED, SLOT_ACTIVE_TEX, sx, sy, 0f, 0f,
-                        size, size, 40, 40, 40, 40);
+                SpellSigilRenderer.proficiencyPips(graphics, sx, sy, size,
+                        proficiencyPipsFor(spellId));
             }
 
-            String text = label.getString();
+            // Clamped to the socket's own width plus a little. Spell names run long ("Expelliarmus"),
+            // and an unclamped centred label reaches into the ley-lines either side of it.
+            String text = font.plainSubstrByWidth(label.getString(), size + layout.s(8));
             graphics.drawString(font, text, sx + size / 2 - font.width(text) / 2,
-                    sy - font.lineHeight - 1, 0xFFFFFFFF, true);
+                    sy - font.lineHeight - 2,
+                    spellId != null ? WizardsPalette.TEXT : WizardsPalette.TEXT_DIM, true);
         }
+    }
+
+    /** A filled socket is read by hue; an empty one has no spell to take a hue from. */
+    private static int accentOf(@Nullable String spellId) {
+        if (spellId == null) {
+            return WizardsPalette.LINE;
+        }
+        Spell spell = Spells.byId(spellId);
+        return spell == null ? WizardsPalette.LINE : 0xFF000000 | spell.getCategory().getColor();
+    }
+
+    private static int proficiencyPipsFor(String spellId) {
+        return switch (at.koopro.wizardsandbeasts.spell.core.Proficiency.fromCastCount(
+                ClientSpellDataState.get().getSuccessfulHits(spellId))) {
+            case MASTERED -> 3;
+            case PROFICIENT -> 2;
+            default -> 1;
+        };
+    }
+
+    /**
+     * A recessed card under the detail text.
+     *
+     * <p>Without it the spell's name, cooldown and proficiency sat directly on the leather with
+     * nothing holding them, and the lower half of the right column read as unused panel rather than
+     * as a place information appears.
+     */
+    private void renderInfoCard(GuiGraphics graphics) {
+        int x = layout.panelX() + layout.s(LEFT_W) + layout.s(4);
+        int right = layout.panelX() + layout.panelW() - layout.s(4);
+        int top = layout.panelY() + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_INFO_BASE_Y)
+                - layout.s(6);
+        int bottom = layout.panelY() + layout.panelH()
+                - layout.s(WizardsAndBeastsUiTokens.SpellMenu.ASSIGN_HINT_BOTTOM_OFFSET)
+                - layout.s(4);
+        graphics.fill(x, top, right, bottom, WizardsPalette.WELL);
+        graphics.fill(x, top, right, top + 1, WizardsPalette.LINE);
     }
 
     /**
@@ -483,7 +542,7 @@ public class SpellMenuScreen extends Screen {
                         + layout.s(WizardsAndBeastsUiTokens.SpellMenu.ASSIGN_HINT_CENTER_X),
                 layout.panelY() + layout.panelH()
                         - layout.s(WizardsAndBeastsUiTokens.SpellMenu.ASSIGN_HINT_BOTTOM_OFFSET),
-                WizardsAndBeastsUiTokens.SpellMenu.ASSIGN_HINT_COLOR);
+                WizardsPalette.TEXT_DIM);
     }
 
     private void renderDragGhost(GuiGraphics graphics, int mouseX, int mouseY) {
@@ -491,6 +550,8 @@ public class SpellMenuScreen extends Screen {
             return;
         }
         Minecraft mc = Minecraft.getInstance();
+        int accent = accentOf(draggingSpellId);
+        SpellSigilRenderer.dragThread(graphics, dragOriginX, dragOriginY, mouseX, mouseY, accent);
         Identifier icon = ModTextures.resolveWandHudSpellIcon(mc.getResourceManager(), draggingSpellId);
         int s = LIST_ICON_SIZE + 4;
         graphics.blit(RenderPipelines.GUI_TEXTURED, icon, mouseX - s / 2, mouseY - s / 2,

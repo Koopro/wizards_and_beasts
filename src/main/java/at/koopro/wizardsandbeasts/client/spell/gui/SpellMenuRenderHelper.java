@@ -12,6 +12,7 @@ import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.client.gui.util.UiContrast;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsAndBeastsUiTokens;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiText;
@@ -33,21 +34,39 @@ public final class SpellMenuRenderHelper {
 
     private SpellMenuRenderHelper() {}
 
+    /**
+     * Leather plate, brass filigree, and a recessed well for the index.
+     *
+     * <p>This screen used to paint a navy panel with a pure-gold title, which matched nothing else in
+     * the mod — {@code WizardsPalette} is leather and brass and says so in its own javadoc. The frame
+     * is now built from it: {@code PLATE} for the face, {@code BRASS} for the rule, {@code WELL} for
+     * the sunken list.
+     */
     public static void renderFrame(GuiGraphics graphics, Font font, int width, int height,
                                    int panelW, int panelH, int leftW, GuiScaleHelper.Layout layout) {
-        int panelX = layout.panelX();
-        int panelY = layout.panelY();
-        panelW = layout.panelW();
-        panelH = layout.panelH();
-        leftW = layout.s(leftW);
+        int x = layout.panelX();
+        int y = layout.panelY();
+        int w = layout.panelW();
+        int h = layout.panelH();
+        int lw = layout.s(leftW);
 
-        McStylePanel.drawTiled(graphics, PANEL_TEX, panelX, panelY, panelW, panelH, 64);
-        McStylePanel.drawBorder(graphics, panelX, panelY, panelW, panelH, 0xFF6A5A90, 0xFF1A1626);
-        graphics.drawCenteredString(font, net.minecraft.network.chat.Component.translatable("gui.wizards_and_beasts.spell_menu.title"), panelX + panelW / 2,
-                panelY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.HEADER_Y_OFFSET), WizardsAndBeastsUiTokens.SpellMenu.TITLE_COLOR);
-        graphics.fill(panelX + leftW, panelY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.DIVIDER_Y_OFFSET),
-                panelX + leftW + 1, panelY + panelH - layout.s(WizardsAndBeastsUiTokens.SpellMenu.DIVIDER_BOTTOM_OFFSET),
-                WizardsAndBeastsUiTokens.SpellMenu.DIVIDER_COLOR);
+        graphics.fill(x, y, x + w, y + h, WizardsPalette.PLATE);
+        McStylePanel.drawBorder(graphics, x, y, w, h, WizardsPalette.BRASS, WizardsPalette.INK);
+
+        // Header band, seated on a brass rule.
+        int headerH = layout.s(WizardsAndBeastsUiTokens.SpellMenu.DIVIDER_Y_OFFSET);
+        graphics.fill(x + 1, y + 1, x + w - 1, y + headerH, WizardsPalette.RAIL);
+        graphics.fill(x + 1, y + headerH, x + w - 1, y + headerH + 1, WizardsPalette.LINE);
+
+        graphics.drawCenteredString(font,
+                net.minecraft.network.chat.Component.translatable("gui.wizards_and_beasts.spell_menu.title"),
+                x + w / 2, y + layout.s(WizardsAndBeastsUiTokens.SpellMenu.HEADER_Y_OFFSET),
+                WizardsPalette.BRASS_HI);
+
+        // The index sits in a recessed well; the plate to its right carries the sigil.
+        int wellTop = y + headerH + layout.s(WizardsAndBeastsUiTokens.SpellMenu.TOP_PADDING);
+        graphics.fill(x + layout.s(2), wellTop, x + lw, y + h - layout.s(2), WizardsPalette.WELL);
+        graphics.fill(x + lw, y + headerH + 1, x + lw + 1, y + h - layout.s(2), WizardsPalette.LINE);
     }
 
     /**
@@ -67,17 +86,17 @@ public final class SpellMenuRenderHelper {
             // effectively invisible. Contrast-clamped, so the category hue survives but reads.
             graphics.drawString(font, catName, x + WizardsAndBeastsUiTokens.SpellMenu.CATEGORY_X_OFFSET,
                     y + WizardsAndBeastsUiTokens.SpellMenu.ENTRY_TEXT_Y_OFFSET,
-                    UiContrast.readableOn(entry.category().getColor(), PANEL_INK), false);
+                    UiContrast.readableOn(entry.category().getColor(), WizardsPalette.WELL), false);
             return;
         }
 
         Spell spell = entry.spell();
+        // Rows are cards on the well, not text on a void: a seated row is what makes the index read
+        // as a list of things you can pick up rather than a paragraph.
+        graphics.fill(x - 1, y - 1, x + w, y + h,
+                selected ? WizardsPalette.SELECT : hovered ? WizardsPalette.PLATE_2 : WizardsPalette.PLATE);
         if (selected) {
-            graphics.fill(x - 1, y - 1, x + w, y + h,
-                    WizardsAndBeastsUiTokens.SpellMenu.SELECT_HIGHLIGHT_COLOR);
-        } else if (hovered) {
-            graphics.fill(x - 1, y - 1, x + w, y + h,
-                    WizardsAndBeastsUiTokens.SpellMenu.HOVER_HIGHLIGHT_COLOR);
+            graphics.fill(x - 1, y - 1, x + 1, y + h, WizardsPalette.BRASS);
         }
 
         Minecraft mc = Minecraft.getInstance();
@@ -89,7 +108,7 @@ public final class SpellMenuRenderHelper {
         graphics.drawString(font,
                 at.koopro.wizardsandbeasts.client.gui.util.GuiText.resolve(spell.getDisplayName()),
                 x + iconSize + 4, y + WizardsAndBeastsUiTokens.SpellMenu.ENTRY_TEXT_Y_OFFSET,
-                UiContrast.readableOn(spell.getCategory().getColor(), PANEL_INK), false);
+                UiContrast.readableOn(spell.getCategory().getColor(), WizardsPalette.PLATE), false);
 
         PlayerSpellData data = ClientSpellDataState.get();
         if (mc.level != null && data.isOnCooldown(spell.getId(), mc.level.getGameTime())) {
@@ -145,11 +164,11 @@ public final class SpellMenuRenderHelper {
         int infoY = panelY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_INFO_BASE_Y);
 
         graphics.drawString(font, GuiText.resolve(sel.getDisplayName()), infoX, infoY,
-                UiContrast.readableOn(sel.getCategory().getColor(), PANEL_INK), false);
+                UiContrast.readableOn(sel.getCategory().getColor(), WizardsPalette.PLATE), false);
 
         graphics.drawString(font, sel.getCategory().name().replace('_', ' '), infoX,
                 infoY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_CATEGORY_Y),
-                WizardsAndBeastsUiTokens.SpellMenu.CATEGORY_TEXT, false);
+                WizardsPalette.TEXT_DIM, false);
 
         Minecraft mc = Minecraft.getInstance();
         if (mc.level != null && data.isOnCooldown(sel.getId(), mc.level.getGameTime())) {
@@ -164,7 +183,7 @@ public final class SpellMenuRenderHelper {
                     Component.translatable("gui.wizards_and_beasts.spell_menu.cooldown",
                             String.format("%.1f", sel.getBaseCooldownTicks() / 20.0f)),
                     infoX, infoY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_COOLDOWN_Y),
-                    WizardsAndBeastsUiTokens.SpellMenu.EMPTY_TEXT_COLOR, false);
+                    WizardsPalette.TEXT_DIM, false);
         }
 
         if (sel.getBaseDamage() > 0) {
@@ -172,7 +191,7 @@ public final class SpellMenuRenderHelper {
                     Component.translatable("gui.wizards_and_beasts.spell_menu.damage",
                             String.format("%.1f", sel.getBaseDamage())),
                     infoX, infoY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_DAMAGE_Y),
-                    WizardsAndBeastsUiTokens.SpellMenu.EMPTY_TEXT_COLOR, false);
+                    WizardsPalette.TEXT_DIM, false);
         }
 
         int casts = data.getSuccessfulHits(sel.getId());
@@ -205,7 +224,7 @@ public final class SpellMenuRenderHelper {
         if (req != null && req != SpellRequirement.NONE) {
             graphics.drawString(font, req.describe(), infoX,
                     profY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_REQ_Y),
-                    WizardsAndBeastsUiTokens.SpellMenu.REQUIREMENT_TEXT, false);
+                    WizardsPalette.TEXT_DIM, false);
         }
     }
 }
