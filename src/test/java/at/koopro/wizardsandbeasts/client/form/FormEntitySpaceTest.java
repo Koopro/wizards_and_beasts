@@ -7,6 +7,7 @@ import org.joml.Vector4f;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -25,7 +26,7 @@ class FormEntitySpaceTest {
         return new Matrix4f(stack.last().pose());
     }
 
-    /** The literal sequence the borrowed-Animagus path used before both were routed through one method. */
+    /** The literal sequence the borrowed-Animagus path used before it was routed through one method. */
     private static Matrix4f legacyVanillaPath(float bodyYaw) {
         PoseStack stack = new PoseStack();
         stack.mulPose(Axis.YP.rotationDegrees(180.0f - bodyYaw));
@@ -38,19 +39,55 @@ class FormEntitySpaceTest {
     void matchesTheTransformTheBorrowedVanillaModelsAlreadyUsed() {
         for (float yaw : new float[]{0f, 45f, 90f, 180f, -90f, 359f}) {
             assertTrue(applied(yaw).equals(legacyVanillaPath(yaw), 1e-5f),
-                    "GeckoLib forms and borrowed vanilla models must be placed identically; "
-                            + "they differ at bodyYaw=" + yaw);
+                    "the borrowed-vanilla path must keep the transform it always had; "
+                            + "it differs at bodyYaw=" + yaw);
         }
+    }
+
+    /**
+     * <b>This transform is for vanilla models only.</b>
+     *
+     * <p>An earlier version of this class asserted that the GeckoLib player-form path had to produce
+     * the same matrix, on the reasoning that both draw a replacement player model. That was wrong, it
+     * shipped, and it put the werewolf upside down, inside out and buried a block and a half into the
+     * floor — three symptoms, one cause.
+     *
+     * <p>Vanilla models are authored origin-at-top with +Y running down, so they need the flip and the
+     * 1.501 drop. A GeckoLib baked model has already been converted by GeckoLib's loader and stands
+     * upright with its origin at the feet, which is why {@code GeoEntityRenderer.adjustRenderPose}
+     * applies a yaw and nothing else. The two conventions are the {@code scale(-1,-1,1)} versus
+     * {@code diag(1,-1,1)} pair the stack rules say in as many words not to mix.
+     *
+     * <p>So the two paths are pinned <em>apart</em> here, deliberately. If someone later routes
+     * {@code PlayerFormGeoRenderer} through {@link FormEntitySpace} to remove the apparent
+     * duplication, this fails and says why.
+     */
+    @Test
+    void theGeckoLibPathMustNotUseThisTransform() {
+        float yaw = 42f;
+
+        PoseStack geckolib = new PoseStack();
+        geckolib.mulPose(Axis.YP.rotationDegrees(180.0f - yaw));
+        geckolib.translate(0.0f, 0.01f, 0.0f);
+        Matrix4f geckolibMatrix = new Matrix4f(geckolib.last().pose());
+
+        assertFalse(applied(yaw).equals(geckolibMatrix, 1e-4f),
+                "the vanilla-model transform and the GeckoLib one are different conventions; "
+                        + "if these ever match, one of them has been broken to match the other");
+
+        // And specifically: no vertical flip on the GeckoLib side.
+        Vector4f up = geckolibMatrix.transform(new Vector4f(0f, 1f, 0f, 0f));
+        assertTrue(up.y > 0f, "a GeckoLib baked model is already upright; nothing may flip it");
     }
 
     /**
      * The model-space convention these transforms exist to undo.
      *
-     * <p>Both vanilla entity models and GeckoLib's baked models are authored <b>Y-down with the
-     * origin at the top</b>: {@code y = 0} is the neck, and {@code y} grows toward the feet, which sit
-     * near {@code +1.5} blocks (24 sixteenths). That is why the sequence ends in
-     * {@code translate(0, -1.501, 0)} — after the flip it puts the feet on the entity origin rather
-     * than the head.
+     * <p>Vanilla entity models are authored <b>Y-down with the origin at the top</b>: {@code y = 0} is
+     * the neck, and {@code y} grows toward the feet, which sit near {@code +1.5} blocks (24
+     * sixteenths). That is why the sequence ends in {@code translate(0, -1.501, 0)} — after the flip it
+     * puts the feet on the entity origin rather than the head. <b>GeckoLib baked models are not in this
+     * space</b>; see {@link #theGeckoLibPathMustNotUseThisTransform()}.
      *
      * <p>Spelled out because a first pass at this test asserted the opposite and the numbers caught
      * it. Getting the sign of this convention wrong is a whole-model displacement.

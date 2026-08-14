@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.client.form.geo;
 
-import at.koopro.wizardsandbeasts.client.form.FormEntitySpace;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.state.CameraRenderState;
@@ -123,16 +123,32 @@ public final class PlayerFormGeoRenderer extends GeoObjectRenderer<PlayerFormAni
      *
      * <p>{@code GeoObjectRenderer}'s own implementation translates by {@code (0.5, 0.51, 0.5)} —
      * correct for something drawn from a block corner, and half a block wrong in three axes for a
-     * player. What a player form needs is what every entity render does: yaw to face the body
-     * direction, flip to the Y-down convention the baked model is authored in, then drop the origin
-     * from the model's top to its feet.
+     * player. So it does have to be replaced. What replaces it is <b>only a yaw</b>.
      *
-     * <p>Identical to the transform {@code FormModelRenderer.renderVanilla} applies to the borrowed
-     * Animagus models, so the two paths place a model the same way.
+     * <p><b>Do not add vanilla's {@code scale(-1, -1, 1)} / {@code translate(0, -1.501, 0)} here.</b>
+     * That pair is the vanilla <em>model</em> convention — origin at the top, +Y running down toward
+     * the feet — and a GeckoLib baked model is not in that space. GeckoLib's loader has already
+     * converted the geometry on load, leaving the model upright with its origin at the feet, which is
+     * why {@code GeoEntityRenderer.adjustRenderPose} applies a yaw and a 0.01 nudge and nothing else.
+     * Applying the vanilla pair on top of an already-converted model flips it upside down, mirrors it
+     * inside out, and buries it a block and a half into the floor — all three at once, which is
+     * exactly what the first version of this method did.
+     *
+     * <p>This is the {@code diag(1,-1,1)} versus {@code scale(-1,-1,1)} trap the stack rules warn
+     * about in as many words: <i>do not mix them</i>. The borrowed-vanilla path in
+     * {@code FormModelRenderer.renderVanilla} genuinely does need the vanilla pair, because those
+     * really are vanilla models. The two paths must therefore <b>not</b> share a transform, however
+     * much they look like they should.
+     *
+     * <p>The yaw itself matches {@code GeoEntityRenderer.applyRotations} exactly:
+     * {@code YP.rotationDegrees(180 - bodyYaw)}. The trailing nudge is GeckoLib's own, and is there to
+     * keep the model off the surface it stands on.
      */
     @Override
     public void adjustRenderPose(RenderPassInfo<GeoRenderState> info) {
-        FormEntitySpace.apply(info.poseStack(),
-                info.getOrDefaultGeckolibData(TICKET_BODY_YAW, 0.0f));
+        PoseStack poseStack = info.poseStack();
+        float bodyYaw = info.getOrDefaultGeckolibData(TICKET_BODY_YAW, 0.0f);
+        poseStack.mulPose(Axis.YP.rotationDegrees(180.0f - bodyYaw));
+        poseStack.translate(0.0f, 0.01f, 0.0f);
     }
 }
