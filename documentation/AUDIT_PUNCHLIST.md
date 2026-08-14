@@ -47,6 +47,15 @@ historical log of individual work passes — those are records of what was done,
   **Stats, size profiles and forms stay ungated on purpose** — a player who has committed a heritage
   must not silently lose their body and their stat spread because an operator flipped a flag mid-save.
 
+- [~] **Werewolf moon transformation — FIXED 2026-08-14.** `WerewolfMoonHandler`: full moon, night,
+  and a dimension with a sky. A compulsion rather than a toggle (reverting by hand while the moon is
+  up is undone on the next scan), reverting at dawn / moonset / on leaving for a sky-less dimension.
+  Wolfsbane deliberately does **not** prevent it — canon is explicit that it preserves the mind, not
+  the shape — so it gates only the disorientation, becoming the first reader `wolfsbaneActive` has
+  ever had. Two 1.21.11 removals recorded in the class: `DimensionType.natural()` and
+  `Level.getMoonPhase()` are both gone; the phase is the day count modulo eight, full moon at 0.
+  **Veela rage, merfolk water and vampire bat remain unwired.** Original finding follows.
+
 - [POLISH] **Four of five transformation triggers do not exist (2026-08-13).** Only the Obscurial has
   real trigger logic (`ObscurialHeritageHandler`: HP thresholds, stress spikes, forced-dark duration).
   **Werewolf moon-phase transformation is entirely absent** — `getMoonPhase`, `moonPhase` and
