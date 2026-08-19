@@ -2,12 +2,29 @@
   "display_name": {
     "translate": "wand_wood.wizards_and_beasts.blackthorn"
   },
-  "affinity_tags": ["combat", "dark", "rare"],
+  "affinity_tags": [
+    "combat",
+    "dark",
+    "rare"
+  ],
   "spell_modifiers": {
     "combat": 0.16,
     "hex": 0.12
   },
-  "personality_affinity": ["survivor", "unyielding", "hardened"],
+  "personality_affinity": [
+    "survivor",
+    "unyielding",
+    "hardened"
+  ],
   "rarity": "rare",
-  "refuse_threshold": 0.16
+  "refuse_threshold": 0.16,
+  "cast_modifiers": {
+    "damage": 1.12,
+    "cooldown": 1.0,
+    "range": 1.0,
+    "fizzle": 0.01,
+    "category_damage_bonus": {
+      "defense": 0.1
+    }
+  }
 }

@@ -2,16 +2,25 @@
   "display_name": {
     "translate": "wand_wood.wizards_and_beasts.elder"
   },
-  "affinity_tags": ["rare", "combat"],
+  "affinity_tags": [
+    "rare",
+    "combat"
+  ],
   "spell_modifiers": {
     "combat": 0.18,
     "transfiguration": 0.1
   },
-  "personality_affinity": ["conqueror", "destined", "exceptional"],
+  "personality_affinity": [
+    "conqueror",
+    "destined",
+    "exceptional"
+  ],
   "rarity": "legendary",
   "refuse_threshold": 0.1,
   "cast_modifiers": {
-    "damage": 1.05,
-    "cooldown": 0.95
+    "damage": 1.2,
+    "cooldown": 0.85,
+    "range": 1.15,
+    "fizzle": -0.03
   }
 }

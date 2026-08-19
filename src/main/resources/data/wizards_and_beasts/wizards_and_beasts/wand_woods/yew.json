@@ -2,17 +2,29 @@
   "display_name": {
     "translate": "wand_wood.wizards_and_beasts.yew"
   },
-  "affinity_tags": ["dark", "rare", "combat"],
+  "affinity_tags": [
+    "dark",
+    "rare",
+    "combat"
+  ],
   "spell_modifiers": {
     "dark_arts": 0.2,
     "dueling": 0.12
   },
-  "personality_affinity": ["ambitious", "unyielding", "fated"],
+  "personality_affinity": [
+    "ambitious",
+    "unyielding",
+    "fated"
+  ],
   "rarity": "rare",
   "refuse_threshold": 0.15,
   "cast_modifiers": {
+    "damage": 1.18,
+    "cooldown": 1.0,
+    "range": 1.05,
+    "fizzle": 0.02,
     "category_damage_bonus": {
-      "dark_arts": 0.05
+      "dark_arts": 0.15
     }
   }
 }

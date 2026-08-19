@@ -2,12 +2,26 @@
   "display_name": {
     "translate": "wand_wood.wizards_and_beasts.walnut"
   },
-  "affinity_tags": ["divination", "protective", "rare"],
+  "affinity_tags": [
+    "divination",
+    "protective",
+    "rare"
+  ],
   "spell_modifiers": {
     "charms": 0.1,
     "divination": 0.12
   },
-  "personality_affinity": ["innovator", "inventive", "perceptive"],
+  "personality_affinity": [
+    "innovator",
+    "inventive",
+    "perceptive"
+  ],
   "rarity": "rare",
-  "refuse_threshold": 0.24
+  "refuse_threshold": 0.24,
+  "cast_modifiers": {
+    "damage": 1.08,
+    "cooldown": 0.95,
+    "range": 1.05,
+    "fizzle": 0.02
+  }
 }

@@ -2,12 +2,25 @@
   "display_name": {
     "translate": "wand_wood.wizards_and_beasts.ash"
   },
-  "affinity_tags": ["combat", "protective"],
+  "affinity_tags": [
+    "combat",
+    "protective"
+  ],
   "spell_modifiers": {
     "combat": 0.12,
     "warding": 0.08
   },
-  "personality_affinity": ["determined", "focused", "principled"],
+  "personality_affinity": [
+    "determined",
+    "focused",
+    "principled"
+  ],
   "rarity": "uncommon",
-  "refuse_threshold": 0.22
+  "refuse_threshold": 0.22,
+  "cast_modifiers": {
+    "damage": 1.0,
+    "cooldown": 0.95,
+    "range": 1.0,
+    "fizzle": -0.02
+  }
 }

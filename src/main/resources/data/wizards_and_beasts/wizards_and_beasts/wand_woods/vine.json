@@ -2,12 +2,25 @@
   "display_name": {
     "translate": "wand_wood.wizards_and_beasts.vine"
   },
-  "affinity_tags": ["divination", "rare"],
+  "affinity_tags": [
+    "divination",
+    "rare"
+  ],
   "spell_modifiers": {
     "divination": 0.2,
     "charms": 0.08
   },
-  "personality_affinity": ["visionary", "curious", "seeker"],
+  "personality_affinity": [
+    "visionary",
+    "curious",
+    "seeker"
+  ],
   "rarity": "uncommon",
-  "refuse_threshold": 0.3
+  "refuse_threshold": 0.3,
+  "cast_modifiers": {
+    "damage": 1.05,
+    "cooldown": 1.0,
+    "range": 1.1,
+    "fizzle": 0.0
+  }
 }

@@ -2,12 +2,28 @@
   "display_name": {
     "translate": "wand_wood.wizards_and_beasts.hawthorn"
   },
-  "affinity_tags": ["combat", "dark"],
+  "affinity_tags": [
+    "combat",
+    "dark"
+  ],
   "spell_modifiers": {
     "combat": 0.14,
     "curse_breaking": 0.1
   },
-  "personality_affinity": ["complex", "resolute", "intense"],
+  "personality_affinity": [
+    "complex",
+    "resolute",
+    "intense"
+  ],
   "rarity": "uncommon",
-  "refuse_threshold": 0.2
+  "refuse_threshold": 0.2,
+  "cast_modifiers": {
+    "damage": 1.1,
+    "cooldown": 1.0,
+    "range": 1.0,
+    "fizzle": 0.05,
+    "category_damage_bonus": {
+      "dark_arts": 0.15
+    }
+  }
 }

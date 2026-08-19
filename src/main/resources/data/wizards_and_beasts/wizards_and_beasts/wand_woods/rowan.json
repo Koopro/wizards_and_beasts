@@ -2,18 +2,29 @@
   "display_name": {
     "translate": "wand_wood.wizards_and_beasts.rowan"
   },
-  "affinity_tags": ["healing", "protective"],
+  "affinity_tags": [
+    "healing",
+    "protective"
+  ],
   "spell_modifiers": {
     "healing": 0.18,
     "protection": 0.14
   },
-  "personality_affinity": ["gentle", "guardian", "empathetic"],
+  "personality_affinity": [
+    "gentle",
+    "guardian",
+    "empathetic"
+  ],
   "rarity": "common",
   "refuse_threshold": 0.65,
   "cast_modifiers": {
-    "fizzle": -0.02,
+    "damage": 0.92,
+    "cooldown": 0.9,
+    "range": 1.0,
+    "fizzle": -0.04,
     "category_damage_bonus": {
-      "defense": 0.05
+      "dark_arts": -0.1,
+      "defense": 0.15
     }
   }
 }
