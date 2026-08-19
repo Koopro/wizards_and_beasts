@@ -9,9 +9,10 @@
       }
     },
     "foliage_placer": {
-      "type": "minecraft:blob_foliage_placer",
-      "height": 3,
-      "offset": 2,
+      "type": "minecraft:random_spread_foliage_placer",
+      "foliage_height": 3,
+      "leaf_placement_attempts": 50,
+      "offset": 1,
       "radius": 3
     },
     "foliage_provider": {

@@ -1,0 +1,12 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": [
+    "minecraft:forest",
+    "minecraft:birch_forest",
+    "minecraft:meadow"
+  ],
+  "features": [
+    "wizards_and_beasts:blackthorn_tree"
+  ],
+  "step": "vegetal_decoration"
+}

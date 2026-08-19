@@ -37,9 +37,15 @@ class WandwoodPlacementTest {
     private static final Path PLACED = Path.of("src", "main", "resources", "data",
             "wizards_and_beasts", "worldgen", "placed_feature");
 
-    /** species -> its preserved rarity. Retuning density is out of scope; this pins that it stayed put. */
-    private static final Map<String, Integer> SPECIES = Map.of(
-            "elder", 8, "holly", 5, "rowan", 7, "yew", 6);
+    /**
+     * species -> its rarity. The first four are <em>preserved</em> values and this pins that they
+     * stayed put; the five below them are new, because those species had no placement at all until
+     * their block families landed.
+     */
+    private static final Map<String, Integer> SPECIES = Map.ofEntries(
+            Map.entry("elder", 8), Map.entry("holly", 5), Map.entry("rowan", 7), Map.entry("yew", 6),
+            Map.entry("ash", 6), Map.entry("blackthorn", 7), Map.entry("hawthorn", 6),
+            Map.entry("walnut", 9), Map.entry("willow", 5));
 
     private static JsonArray placement(String species) throws IOException {
         Path file = PLACED.resolve(species + "_tree.json");

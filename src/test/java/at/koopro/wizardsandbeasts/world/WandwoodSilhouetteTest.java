@@ -32,7 +32,9 @@ class WandwoodSilhouetteTest {
     private static final Path CONFIGURED = Path.of("src", "main", "resources", "data",
             "wizards_and_beasts", "worldgen", "configured_feature");
 
-    private static final List<String> SPECIES = List.of("elder", "holly", "rowan", "yew");
+    private static final List<String> SPECIES = List.of(
+            "elder", "holly", "rowan", "yew",
+            "ash", "blackthorn", "hawthorn", "walnut", "willow");
 
     private static JsonObject config(String species) throws IOException {
         Path file = CONFIGURED.resolve(species + "_tree.json");
