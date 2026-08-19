@@ -5,6 +5,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import org.jspecify.annotations.NullMarked;
+import at.koopro.wizardsandbeasts.feedback.NoticeKind;
+import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 
 /**
  * The price of casting an Unforgivable Curse.
@@ -64,11 +66,13 @@ public final class UnforgivableToll {
         }
 
         if (before < SEVERE_THRESHOLD && after >= SEVERE_THRESHOLD) {
-            caster.displayClientMessage(Component.literal("Something in you has gone quiet, and does not stir again.")
-                    .withStyle(ChatFormatting.DARK_RED), false);
+            PlayerFeedback.toast(caster, NoticeKind.WARN,
+                    Component.translatable("corruption.wizards_and_beasts.hollow.title"),
+                    Component.translatable("corruption.wizards_and_beasts.hollow.body"));
         } else if (before < WARN_THRESHOLD && after >= WARN_THRESHOLD) {
-            caster.displayClientMessage(Component.literal("The curse leaves a residue you cannot wash off.")
-                    .withStyle(ChatFormatting.DARK_PURPLE), false);
+            PlayerFeedback.toast(caster, NoticeKind.WARN,
+                    Component.translatable("corruption.wizards_and_beasts.residue.title"),
+                    Component.translatable("corruption.wizards_and_beasts.residue.body"));
         }
     }
 }

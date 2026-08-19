@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.wand.corruption;
 
+import at.koopro.wizardsandbeasts.feedback.NoticeKind;
+import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 import at.koopro.wizardsandbeasts.item.wand.WandItem;
 import at.koopro.wizardsandbeasts.item.wand.WandModuleHooks;
 import at.koopro.wizardsandbeasts.module.Module;
@@ -43,10 +45,14 @@ public final class WandCorruptionSystem {
             return;
         }
         if (oldCorruption < 0.5f && newCorruption >= 0.5f) {
-            sp.displayClientMessage(prefixPreview(Component.translatable("wandcraft.corruption.threshold_warning")), false);
+            PlayerFeedback.toast(sp, NoticeKind.WARN,
+                    prefixPreview(Component.translatable("wandcraft.corruption.threshold_warning.title")),
+                    Component.translatable("wandcraft.corruption.threshold_warning"));
         }
         if (oldCorruption < 1.0f && newCorruption >= 1.0f) {
-            sp.displayClientMessage(prefixPreview(Component.translatable("wandcraft.corruption.fully_corrupted")), false);
+            PlayerFeedback.toast(sp, NoticeKind.WARN,
+                    prefixPreview(Component.translatable("wandcraft.corruption.fully_corrupted.title")),
+                    Component.translatable("wandcraft.corruption.fully_corrupted"));
         }
     }
 

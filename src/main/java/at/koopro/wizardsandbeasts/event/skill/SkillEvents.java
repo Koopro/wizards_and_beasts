@@ -6,7 +6,11 @@ import at.koopro.wizardsandbeasts.event.heritage.HeritageEvents;
 import at.koopro.wizardsandbeasts.heritage.profession.ProfessionSystemAPI;
 import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
 import at.koopro.wizardsandbeasts.spell.core.Proficiency;
-import at.koopro.wizardsandbeasts.util.ChatHelper;
+import at.koopro.wizardsandbeasts.feedback.NoticeKind;
+import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import java.util.Locale;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -41,8 +45,9 @@ public class SkillEvents {
         LOGGER.info(
                 "Skill web migration for {}: cleared {} allocations, refunded to {} points (earned clamped to cap {})",
                 player.getName().getString(), cleared, data.getSkillPoints(), SkillSystemAPI.MAX_SKILL_POINTS);
-        ChatHelper.send(player, "§6Skill trees have been reworked into a web — your "
-                + data.getSkillPoints() + " skill points were refunded. Open the skill screen to re-allocate.");
+        PlayerFeedback.toast(player, NoticeKind.WARN,
+                Component.translatable(L + "migration.title"),
+                Component.translatable(L + "migration.body", data.getSkillPoints()));
     }
 
     /**
@@ -81,7 +86,10 @@ public class SkillEvents {
 
         SkillSystemAPI.awardPoints(player, levels);
         SkillDataSyncS2CPayload.syncToPlayer(player);
-        ChatHelper.sendActionBar(player, "\u00A76+" + levels + " Skill Point" + (levels > 1 ? "s" : "") + "!");
+        // Action bar, not a toast: levelling happens constantly, and a floating panel per level would
+        // be the chat problem again in a new place.
+        PlayerFeedback.actionBar(player, Component.translatable(L + "points_awarded", levels)
+                .withStyle(ChatFormatting.GOLD));
     }
 
     /**
@@ -93,7 +101,21 @@ public class SkillEvents {
         ServerPlayer player = event.getPlayer();
         SkillSystemAPI.awardPoints(player, 3);
         SkillDataSyncS2CPayload.syncToPlayer(player);
-        ChatHelper.sendSuccess(player, "You received 3 Skill Points for choosing your path!");
+        PlayerFeedback.toast(player, NoticeKind.UNLOCK,
+                Component.translatable(L + "heritage_award.title"),
+                Component.translatable(L + "heritage_award.body", 3));
+    }
+
+    private static final String L = "skill.wizards_and_beasts.award.";
+
+    /** "+2 Skill Points" / "+1 Profession Point" / both, as one line. */
+    private static Component awardLine(int skillPoints, boolean professionPoint) {
+        if (skillPoints > 0 && professionPoint) {
+            return Component.translatable(L + "both", skillPoints);
+        }
+        return professionPoint
+                ? Component.translatable(L + "profession_point")
+                : Component.translatable(L + "skill_points", skillPoints);
     }
 
     public static void checkProficiencyMilestone(ServerPlayer player, String spellId, int oldCount, int newCount) {
@@ -109,15 +131,23 @@ public class SkillEvents {
             if (points > 0) {
                 SkillSystemAPI.awardPoints(player, points);
                 SkillDataSyncS2CPayload.syncToPlayer(player);
-                ChatHelper.sendActionBar(player,
-                        "\u00A76+" + points + " SP \u00A77(reached " + newProf.name().toLowerCase() + ")");
             }
             // Career progress. Profession points were granted once \u2014 3 at heritage selection \u2014 and by no
             // other path, so a profession tree (8 points to fill) could never be finished in survival.
             // Mastering a spell is the natural earn: proven practice is what a career is built on.
-            if (newProf == Proficiency.MASTERED) {
+            boolean mastered = newProf == Proficiency.MASTERED;
+            if (mastered) {
                 ProfessionSystemAPI.awardPoints(player, 1);
-                ChatHelper.sendActionBar(player, "\u00A7d+1 Profession Point \u00A77(spell mastered)");
+            }
+
+            // One toast, not two action-bar writes. Reaching MASTERED awards both a skill point and a
+            // profession point in the same tick, and the action bar has a single slot \u2014 the second
+            // message overwrote the first before it was ever drawn, so the profession point looked
+            // like it had not been granted.
+            if (points > 0 || mastered) {
+                PlayerFeedback.toast(player, NoticeKind.UNLOCK,
+                        Component.translatable(L + "milestone." + newProf.name().toLowerCase(Locale.ROOT)),
+                        awardLine(points, mastered));
             }
         }
     }

@@ -16,6 +16,8 @@ import net.minecraft.server.permissions.Permissions;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.UUID;
+import at.koopro.wizardsandbeasts.feedback.NoticeKind;
+import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 
 /**
  * Client → Server: debug size override from the Morph Debug GUI.
@@ -70,8 +72,9 @@ public record SizeOverrideC2SPayload(
             MinecraftServer server = serverLevel.getServer();
 
             if (!sender.createCommandSourceStack().permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
-                sender.displayClientMessage(
-                        Component.literal("§cNo permission."), false);
+                PlayerFeedback.refuse(sender,
+                        Component.translatable("form.wizards_and_beasts.change.refused"),
+                        Component.translatable("form.wizards_and_beasts.change.no_permission"));
                 return;
             }
 

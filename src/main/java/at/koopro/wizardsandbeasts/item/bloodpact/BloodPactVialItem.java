@@ -31,6 +31,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
+import at.koopro.wizardsandbeasts.feedback.NoticeKind;
+import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 
 public class BloodPactVialItem extends Item {
 
@@ -95,10 +97,9 @@ public class BloodPactVialItem extends Item {
                 }
             }
 
-            player.displayClientMessage(
-                    Component.literal("You shatter the blood pact. The covenant is broken.")
-                            .withStyle(ChatFormatting.DARK_RED),
-                    false);
+            PlayerFeedback.toast(player, NoticeKind.WARN,
+                    Component.translatable("bloodpact.wizards_and_beasts.shattered.title"),
+                    Component.translatable("bloodpact.wizards_and_beasts.shattered.body"));
             level.playSound(null, player.blockPosition(),
                     ModSounds.BLOOD_PACT_SHATTER.get(), SoundSource.PLAYERS, 1.2f, 0.8f);
             if (level instanceof ServerLevel serverLevel) {
@@ -132,10 +133,9 @@ public class BloodPactVialItem extends Item {
                 p -> !p.getUUID().equals(player.getUUID()));
 
         if (nearby.isEmpty()) {
-            player.displayClientMessage(
-                    Component.literal("No one is close enough. A blood pact requires two willing parties.")
-                            .withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC),
-                    false);
+            PlayerFeedback.refuse(player,
+                    Component.translatable("bloodpact.wizards_and_beasts.offer.refused"),
+                    Component.translatable("bloodpact.wizards_and_beasts.offer.no_one_near"));
             return InteractionResult.PASS;
         }
 
@@ -169,16 +169,14 @@ public class BloodPactVialItem extends Item {
         PENDING_PROPOSALS.put(targetPlayer.getUUID(),
                 new PendingPactProposal(player.getUUID(), targetPlayer.getUUID(), currentTick + 200));
 
-        player.displayClientMessage(
-                Component.literal("You offer the blood pact to " + targetPlayer.getScoreboardName()
-                        + ". They must right-click you within 10 seconds to seal it.")
-                        .withStyle(ChatFormatting.GOLD),
-                false);
-        targetPlayer.displayClientMessage(
-                Component.literal(player.getScoreboardName()
-                        + " offers you a blood pact. Right-click them within 10 seconds to seal it.")
-                        .withStyle(ChatFormatting.DARK_RED),
-                false);
+        PlayerFeedback.toast(player, NoticeKind.DISCOVERY,
+                Component.translatable("bloodpact.wizards_and_beasts.offer.sent.title"),
+                Component.translatable("bloodpact.wizards_and_beasts.offer.sent.body",
+                        targetPlayer.getScoreboardName()));
+        PlayerFeedback.toast(targetPlayer, NoticeKind.DISCOVERY,
+                Component.translatable("bloodpact.wizards_and_beasts.offer.received.title"),
+                Component.translatable("bloodpact.wizards_and_beasts.offer.received.body",
+                        player.getScoreboardName()));
         level.playSound(null, player.blockPosition(),
                 ModSounds.BLOOD_PACT_OFFER.get(), SoundSource.PLAYERS, 1.0f, 1.1f);
         return InteractionResult.SUCCESS;
@@ -220,11 +218,10 @@ public class BloodPactVialItem extends Item {
             SUpdateVialPayload.sendToPlayer(serverInitiator, pactUUID, acceptorUUID);
         }
 
-        Component sealMsg = Component.literal(
-                        "The blood pact is sealed. You may not harm each other while this covenant holds.")
-                .withStyle(ChatFormatting.DARK_PURPLE);
-        acceptor.displayClientMessage(sealMsg, false);
-        initiator.displayClientMessage(sealMsg, false);
+        Component sealTitle = Component.translatable("bloodpact.wizards_and_beasts.sealed.title");
+        Component sealBody = Component.translatable("bloodpact.wizards_and_beasts.sealed.body");
+        PlayerFeedback.toast(acceptor, NoticeKind.UNLOCK, sealTitle, sealBody);
+        PlayerFeedback.toast(initiator, NoticeKind.UNLOCK, sealTitle, sealBody);
 
         level.playSound(null, acceptor.blockPosition(),
                 ModSounds.BLOOD_PACT_SEAL.get(), SoundSource.PLAYERS, 1.0f, 1.0f);

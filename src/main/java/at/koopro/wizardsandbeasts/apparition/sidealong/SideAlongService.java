@@ -8,6 +8,8 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
+import at.koopro.wizardsandbeasts.feedback.NoticeKind;
+import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 
 /**
  * Consensual side-along: one wizard offers to take another, and the other has a hundred ticks to say yes.
@@ -37,9 +39,11 @@ public final class SideAlongService {
     /** Offers to take {@code invitee} along. Replaces any offer they were already sitting on. */
     public static void offer(ServerPlayer caster, ServerPlayer invitee) {
         OFFERS.put(invitee, new Offer(caster.getUUID(), invitee.tickCount + OFFER_TICKS));
-        invitee.displayClientMessage(Component.translatable(
-                        "apparition.wizards_and_beasts.sidealong.offered", caster.getDisplayName())
-                .withStyle(ChatFormatting.LIGHT_PURPLE), false);
+        // A timed offer the invitee has to act on, so it must not be something they can miss.
+        PlayerFeedback.toast(invitee, NoticeKind.DISCOVERY,
+                Component.translatable("apparition.wizards_and_beasts.sidealong.title"),
+                Component.translatable("apparition.wizards_and_beasts.sidealong.offered",
+                        caster.getDisplayName()));
         caster.displayClientMessage(Component.translatable(
                         "apparition.wizards_and_beasts.sidealong.offer_sent", invitee.getDisplayName())
                 .withStyle(ChatFormatting.GRAY), true);

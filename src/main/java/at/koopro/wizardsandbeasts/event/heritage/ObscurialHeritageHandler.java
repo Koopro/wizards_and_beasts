@@ -337,7 +337,10 @@ public final class ObscurialHeritageHandler {
                         false, true, true));
                 data.setFlag(FLAG_COLLAPSE_CAST_INSTABILITY_UNTIL,
                         String.valueOf(gameTime + ObscurialCombatRules.getCollapseCastInstabilityTicks()));
-                player.displayClientMessage(Component.literal("\u00A74Obscurus collapse. Dark form is now exhausted."), false);
+                at.koopro.wizardsandbeasts.feedback.PlayerFeedback.toast(player,
+                        at.koopro.wizardsandbeasts.feedback.NoticeKind.WARN,
+                        Component.translatable("obscurial.wizards_and_beasts.collapse.title"),
+                        Component.translatable("obscurial.wizards_and_beasts.collapse.body"));
             }
         }
 

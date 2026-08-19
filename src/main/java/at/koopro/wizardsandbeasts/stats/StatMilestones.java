@@ -8,6 +8,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import com.mojang.logging.LogUtils;
 import org.slf4j.Logger;
+import at.koopro.wizardsandbeasts.feedback.NoticeKind;
+import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 
 public final class StatMilestones {
 
@@ -46,11 +48,10 @@ public final class StatMilestones {
         PlayerStatsAPI.grantMilestoneBump(player, stat, amount);
 
         if (player instanceof ServerPlayer serverPlayer) {
-            serverPlayer.displayClientMessage(
+            PlayerFeedback.toast(serverPlayer, NoticeKind.UNLOCK,
+                    Component.translatable("message.wizards_and_beasts.milestone.title"),
                     Component.translatable("message.wizards_and_beasts.milestone." + type.name().toLowerCase(),
-                                    Component.translatable("stat.wizards_and_beasts." + stat.getId()), amount)
-                            .withStyle(ChatFormatting.GOLD),
-                    false);
+                            Component.translatable("stat.wizards_and_beasts." + stat.getId()), amount));
         }
     }
 }

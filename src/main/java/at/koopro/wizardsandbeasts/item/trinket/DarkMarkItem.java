@@ -17,6 +17,8 @@ import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 
 import java.util.function.Consumer;
+import at.koopro.wizardsandbeasts.feedback.NoticeKind;
+import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 
 /**
  * The Dark Mark brand. Use on yourself to take the Mark; use on another player to brand them;
@@ -59,8 +61,9 @@ public class DarkMarkItem extends Item {
                 return InteractionResult.SUCCESS;
             }
             victim.setData(ModAttachments.DARK_MARK.get(), true);
-            victim.displayClientMessage(Component.literal("The Dark Mark burns into your skin.")
-                    .withStyle(ChatFormatting.DARK_RED), false);
+            PlayerFeedback.toast(victim, NoticeKind.WARN,
+                    Component.translatable("item.wizards_and_beasts.dark_mark.branded.title"),
+                    Component.translatable("item.wizards_and_beasts.dark_mark.branded.body"));
             player.displayClientMessage(Component.literal("You brand " + victim.getName().getString() + " with the Dark Mark.")
                     .withStyle(ChatFormatting.DARK_RED), true);
             return InteractionResult.SUCCESS;
@@ -90,10 +93,11 @@ public class DarkMarkItem extends Item {
             int called = 0;
             for (ServerPlayer other : caster.level().getServer().getPlayerList().getPlayers()) {
                 if (other != caster && other.getData(ModAttachments.DARK_MARK.get())) {
-                    other.displayClientMessage(Component.literal("The Dark Mark burns — you are summoned. ("
-                            + caster.getName().getString() + " at "
-                            + caster.getBlockX() + ", " + caster.getBlockY() + ", " + caster.getBlockZ() + ")")
-                            .withStyle(ChatFormatting.DARK_RED), false);
+                    PlayerFeedback.toast(other, NoticeKind.WARN,
+                            Component.translatable("item.wizards_and_beasts.dark_mark.summoned.title"),
+                            Component.translatable("item.wizards_and_beasts.dark_mark.summoned.body",
+                                    caster.getName(),
+                                    caster.getBlockX() + ", " + caster.getBlockY() + ", " + caster.getBlockZ()));
                     called++;
                 }
             }
@@ -108,8 +112,9 @@ public class DarkMarkItem extends Item {
             return InteractionResult.SUCCESS;
         }
         caster.setData(ModAttachments.DARK_MARK.get(), true);
-        caster.displayClientMessage(Component.literal("You take the Dark Mark.")
-                .withStyle(ChatFormatting.DARK_RED), false);
+        PlayerFeedback.toast(caster, NoticeKind.WARN,
+                Component.translatable("item.wizards_and_beasts.dark_mark.taken.title"),
+                Component.translatable("item.wizards_and_beasts.dark_mark.taken.body"));
         return InteractionResult.SUCCESS;
     }
 }

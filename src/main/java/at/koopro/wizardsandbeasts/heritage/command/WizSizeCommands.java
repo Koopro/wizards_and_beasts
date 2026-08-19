@@ -17,6 +17,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import at.koopro.wizardsandbeasts.util.ChatReport;
 
 public final class WizSizeCommands {
 
@@ -89,8 +90,7 @@ public final class WizSizeCommands {
                 ? SizeProfileRegistry.getOrDefault(form.sizeProfileId())
                 : SizeProfile.DEFAULT;
 
-        source.sendSuccess(() -> Component.literal(
-                "--- " + target.getName().getString() + "'s Size ---").withStyle(ChatFormatting.GOLD), false);
+        ChatReport.of(target.getName().getString() + "'s Size").send(source);
         source.sendSuccess(() -> Component.literal("Form: ").withStyle(ChatFormatting.GRAY)
                 .append(Component.literal(formId).withStyle(ChatFormatting.WHITE)), false);
         source.sendSuccess(() -> Component.literal("Profile: ").withStyle(ChatFormatting.GRAY)

@@ -5,6 +5,9 @@ import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.event.heritage.HeritageEvents;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
+import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
+import at.koopro.wizardsandbeasts.feedback.NoticeKind;
+import at.koopro.wizardsandbeasts.heritage.profession.ProfessionFeedback;
 import at.koopro.wizardsandbeasts.heritage.profession.ProfessionNode;
 import at.koopro.wizardsandbeasts.heritage.profession.ProfessionSystemAPI;
 import io.netty.buffer.ByteBuf;
@@ -43,28 +46,29 @@ public record ProfessionSelectC2SPayload(String professionId) implements CustomP
                 return;
             }
             String safeProfessionId = PacketCodecUtils.normalizeIdentifier(pkt.professionId);
-            if (safeProfessionId.isBlank()) {
-                player.displayClientMessage(Component.literal("§cInvalid profession payload."), true);
-                return;
-            }
-            ProfessionNode node = ProfessionNode.byId(safeProfessionId);
+            ProfessionNode node = safeProfessionId.isBlank() ? null : ProfessionNode.byId(safeProfessionId);
             if (node == null) {
-                player.displayClientMessage(Component.literal("§cUnknown profession: " + safeProfessionId), true);
+                PlayerFeedback.refuse(player,
+                        Component.translatable("profession.wizards_and_beasts.select.refused"),
+                        Component.translatable("profession.wizards_and_beasts.reason.unknown"));
                 return;
             }
             ProfessionSystemAPI.UnlockCheck check = ProfessionSystemAPI.evaluateSelect(player, node);
             if (!check.allowed()) {
-                player.displayClientMessage(Component.literal("§cCannot select profession: " + check.reason()), true);
+                PlayerFeedback.refuse(player, Component.literal(node.getDisplayName()),
+                        ProfessionFeedback.reasonOf(check.reason()));
                 return;
             }
             if (!ProfessionSystemAPI.trySelect(player, node.getId())) {
-                player.displayClientMessage(Component.literal("§cFailed to select profession."), true);
+                PlayerFeedback.refuse(player, Component.literal(node.getDisplayName()),
+                        ProfessionFeedback.reasonOf("denied"));
                 return;
             }
             PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
             HeritageDataSyncS2CPayload.syncToPlayer(player, false);
             NeoForge.EVENT_BUS.post(new HeritageEvents.PlayerProfessionSelectedEvent(player, node, data.getProfessionPoints()));
-            player.displayClientMessage(Component.literal("§aActive profession: " + node.getDisplayName()), true);
+            PlayerFeedback.toast(player, NoticeKind.SUCCESS, Component.literal(node.getDisplayName()),
+                    Component.translatable("profession.wizards_and_beasts.select.ok"));
         });
     }
 }

@@ -75,6 +75,8 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
+import at.koopro.wizardsandbeasts.feedback.NoticeKind;
+import at.koopro.wizardsandbeasts.client.gui.toast.WizardsToasts;
 
 /**
  * Client-side S2C payload handlers.
@@ -175,10 +177,9 @@ public final class ClientPayloadHandlers {
         ctx.enqueueWork(() -> {
             Minecraft mc = Minecraft.getInstance();
             if (mc.player == null || mc.level == null) return;
-            mc.player.displayClientMessage(
-                    Component.literal("Your blood pact has been broken by the other party.")
-                            .withStyle(ChatFormatting.DARK_RED),
-                    false);
+            WizardsToasts.show(NoticeKind.WARN,
+                    Component.translatable("bloodpact.wizards_and_beasts.broken.title"),
+                    Component.translatable("bloodpact.wizards_and_beasts.broken.body"));
             mc.level.playLocalSound(
                     mc.player.getX(), mc.player.getY(), mc.player.getZ(),
                     ModSounds.BLOOD_PACT_SHATTER.get(), SoundSource.PLAYERS, 1.2f, 0.8f, false);

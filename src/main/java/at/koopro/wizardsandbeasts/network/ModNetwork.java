@@ -40,6 +40,7 @@ public class ModNetwork {
         at.koopro.wizardsandbeasts.network.pose.ModNetworkPose.register(registrar);
         ModNetworkAbilities.register(registrar);
         ModNetworkBeamDebug.register(registrar);
+        at.koopro.wizardsandbeasts.network.feedback.ModNetworkFeedback.register(registrar);
         ModNetworkSkills.register(registrar);
         ModNetworkTeacher.register(registrar);
         ModNetworkWand.register(registrar);

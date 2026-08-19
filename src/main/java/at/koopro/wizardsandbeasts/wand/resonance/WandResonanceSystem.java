@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.wand.resonance;
 
+import at.koopro.wizardsandbeasts.feedback.NoticeKind;
+import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.item.wand.WandModuleHooks;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
@@ -246,7 +248,9 @@ public final class WandResonanceSystem {
                 Component woodName = woodOpt.map(h -> h.value().displayName()).orElse(Component.literal(woodKey.toString()));
                 Component coreName = registryAccess.lookupOrThrow(WandDatapackRegistries.WAND_CORE_REGISTRY)
                         .get(coreKey).map(h -> h.value().displayName()).orElse(Component.literal(coreKey.toString()));
-                sp.displayClientMessage(prefixPreview(Component.translatable("wandcraft.resonance.matched", woodName, coreName)), false);
+                PlayerFeedback.toast(sp, NoticeKind.DISCOVERY,
+                        prefixPreview(Component.translatable("wandcraft.resonance.matched.title")),
+                        Component.translatable("wandcraft.resonance.matched", woodName, coreName));
             }
             return new ResonanceResult(true, score, woodKey, coreKey);
         }
@@ -254,7 +258,9 @@ public final class WandResonanceSystem {
         if (score >= refuseFloor) {
             if (player instanceof ServerPlayer sp) {
                 sp.level().playSound(null, sp.blockPosition(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.2f, 1.2f);
-                sp.displayClientMessage(prefixPreview(Component.translatable("wandcraft.resonance.mismatch")), false);
+                PlayerFeedback.toast(sp, NoticeKind.WARN,
+                        prefixPreview(Component.translatable("wandcraft.resonance.mismatch.title")),
+                        Component.translatable("wandcraft.resonance.mismatch"));
             }
             return new ResonanceResult(false, score, woodKey, coreKey);
         }
@@ -263,7 +269,9 @@ public final class WandResonanceSystem {
             sp.hurt(sp.damageSources().magic(), 4.0f);
             sp.level().playSound(null, sp.blockPosition(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 0.15f, 1.5f);
             sp.level().sendParticles(ParticleTypes.LARGE_SMOKE, sp.getX(), sp.getEyeY(), sp.getZ(), 12, 0.2, 0.2, 0.2, 0.01);
-            sp.displayClientMessage(prefixPreview(Component.translatable("wandcraft.resonance.refused")), false);
+            PlayerFeedback.toast(sp, NoticeKind.FAIL,
+                    prefixPreview(Component.translatable("wandcraft.resonance.refused.title")),
+                    Component.translatable("wandcraft.resonance.refused"));
         }
         return new ResonanceResult(false, score, woodKey, coreKey);
     }

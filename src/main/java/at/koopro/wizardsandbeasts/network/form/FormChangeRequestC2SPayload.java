@@ -1,4 +1,6 @@
 package at.koopro.wizardsandbeasts.network.form;
+import at.koopro.wizardsandbeasts.feedback.NoticeKind;
+import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
@@ -46,12 +48,15 @@ public record FormChangeRequestC2SPayload(UUID targetUUID, String formId) implem
         return TYPE;
     }
 
+    private static final String L = "form.wizards_and_beasts.change.";
+
     public static void handle(FormChangeRequestC2SPayload pkt, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
             if (!(ctx.player() instanceof ServerPlayer sender)) return;
             String safeFormId = PacketCodecUtils.normalizeIdentifier(pkt.formId);
+            Component refused = Component.translatable(L + "refused");
             if (safeFormId.isBlank()) {
-                sender.displayClientMessage(Component.literal("\u00A7cInvalid form id."), true);
+                PlayerFeedback.refuse(sender, refused, Component.translatable(L + "unknown_form"));
                 return;
             }
 
@@ -61,29 +66,25 @@ public record FormChangeRequestC2SPayload(UUID targetUUID, String formId) implem
 
             // Require operator permission
             if (!sender.createCommandSourceStack().permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
-                sender.displayClientMessage(
-                        Component.literal("\u00A7cYou don't have permission to change forms."), true);
+                PlayerFeedback.refuse(sender, refused, Component.translatable(L + "no_permission"));
                 return;
             }
 
             // Find target player
             ServerPlayer target = server.getPlayerList().getPlayer(pkt.targetUUID);
             if (target == null) {
-                sender.displayClientMessage(
-                        Component.literal("\u00A7cTarget player not found."), true);
+                PlayerFeedback.refuse(sender, refused, Component.translatable(L + "no_target"));
                 return;
             }
 
             if (FormRegistry.get(safeFormId) == null) {
-                sender.displayClientMessage(
-                        Component.literal("\u00A7cUnknown form: " + safeFormId), true);
+                PlayerFeedback.refuse(sender, refused, Component.translatable(L + "unknown_form"));
                 return;
             }
 
             FormSystemAPI.setPlayerForm(target, safeFormId);
-            sender.displayClientMessage(
-                    Component.literal("\u00A7aSet " + target.getName().getString()
-                            + " form to " + safeFormId), true);
+            PlayerFeedback.toast(sender, NoticeKind.SUCCESS, Component.literal(safeFormId),
+                    Component.translatable(L + "ok", target.getName()));
         });
     }
 }

@@ -22,6 +22,8 @@ import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import at.koopro.wizardsandbeasts.feedback.NoticeKind;
+import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 
 /**
  * Server-side Animagus lifecycle:
@@ -87,12 +89,11 @@ public final class AnimagusEvents {
                 30, 0.5, 0.6, 0.5, 0.05);
         level.playSound(null, player.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.8f, 0.6f);
 
-        player.displayClientMessage(Component.literal(
-                "The transformation takes hold. You are an Animagus — toggle your beast form with the Animagus key, or /wandb animagus transform.")
-                .withStyle(ChatFormatting.GOLD), false);
-        player.displayClientMessage(Component.literal(
-                "Register with the Ministry (/wandb animagus register) to keep it lawful.")
-                .withStyle(ChatFormatting.GRAY), false);
+        // One toast, not two chat lines: the second was a footnote to the first, and splitting them
+        // meant the Ministry hint scrolled away on its own.
+        PlayerFeedback.toast(player, NoticeKind.UNLOCK,
+                Component.translatable("animagus.wizards_and_beasts.achieved.title"),
+                Component.translatable("animagus.wizards_and_beasts.achieved.body"));
     }
 
     @SubscribeEvent

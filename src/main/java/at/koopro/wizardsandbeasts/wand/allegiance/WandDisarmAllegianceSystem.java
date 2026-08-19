@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.wand.allegiance;
 
+import at.koopro.wizardsandbeasts.feedback.NoticeKind;
+import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 import at.koopro.wizardsandbeasts.wand.elder.ElderWandEventHandler;
 import at.koopro.wizardsandbeasts.item.wand.WandItem;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
@@ -93,7 +95,9 @@ public final class WandDisarmAllegianceSystem {
         }
         WandCoreDefinition coreDef = coreOpt.get().value();
         if (attacker.getRandom().nextFloat() <= coreDef.allegianceTransferResistance()) {
-            attacker.displayClientMessage(Component.translatable("wandcraft.allegiance.resisted"), false);
+            PlayerFeedback.toast(attacker, NoticeKind.FAIL,
+                    Component.translatable("wandcraft.allegiance.title"),
+                    Component.translatable("wandcraft.allegiance.resisted"));
             return;
         }
         float allegiance = Math.max(0.0f, WandComponents.getAllegianceScore(wand) - 0.3f);
@@ -113,8 +117,12 @@ public final class WandDisarmAllegianceSystem {
                 victim.setData(WandAttachments.BONDED_WAND.get(), Optional.empty());
             }
         });
-        attacker.displayClientMessage(Component.translatable("wandcraft.allegiance.transferred"), false);
-        victim.displayClientMessage(Component.translatable("wandcraft.allegiance.lost"), false);
+        PlayerFeedback.toast(attacker, NoticeKind.UNLOCK,
+                Component.translatable("wandcraft.allegiance.title"),
+                Component.translatable("wandcraft.allegiance.transferred"));
+        PlayerFeedback.toast(victim, NoticeKind.WARN,
+                Component.translatable("wandcraft.allegiance.title"),
+                Component.translatable("wandcraft.allegiance.lost"));
     }
 
     public static void onItemPickupPre(ItemEntityPickupEvent.Pre event) {
@@ -130,6 +138,8 @@ public final class WandDisarmAllegianceSystem {
         if (master.isEmpty() || master.get().equals(player.getUUID())) {
             return;
         }
-        player.displayClientMessage(Component.translatable("wandcraft.allegiance.stolen_warning"), false);
+        PlayerFeedback.toast(player, NoticeKind.WARN,
+                Component.translatable("wandcraft.allegiance.title"),
+                Component.translatable("wandcraft.allegiance.stolen_warning"));
     }
 }

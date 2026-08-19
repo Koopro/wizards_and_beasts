@@ -18,6 +18,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.neoforged.neoforge.network.PacketDistributor;
+import at.koopro.wizardsandbeasts.feedback.NoticeKind;
+import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 
 public class ExpectoPatronum extends Spell {
     private static final int AURA_DURATION_TICKS = 140;
@@ -95,11 +97,10 @@ public class ExpectoPatronum extends Spell {
             PacketDistributor.sendToPlayer(caster, new PatronusFormSetS2CPayload(formId));
             if (corporeal) {
                 caster.setData(ModAttachments.PATRONUS_FORM.get(), formId);
-                caster.displayClientMessage(
+                PlayerFeedback.toast(caster, NoticeKind.DISCOVERY,
+                        Component.translatable("spell.wizards_and_beasts.expecto_patronum.form_revealed.title"),
                         Component.translatable("spell.wizards_and_beasts.expecto_patronum.form_revealed",
-                                        formDisplayName(determined))
-                                .withStyle(net.minecraft.ChatFormatting.AQUA),
-                        false);
+                                formDisplayName(determined)));
             }
         }
         if (!corporeal) {

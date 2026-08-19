@@ -15,6 +15,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import at.koopro.wizardsandbeasts.util.ChatReport;
 
 public final class WizFormCommands {
 
@@ -71,33 +72,30 @@ public final class WizFormCommands {
     }
 
     private static int listForms(CommandSourceStack source, String typeFilter) {
-        source.sendSuccess(() -> Component.literal("--- Forms ---").withStyle(ChatFormatting.GOLD), false);
+        if (typeFilter == null) {
+            ChatReport report = ChatReport.of("Forms");
+            for (PlayerForm form : FormRegistry.getAll().values()) {
+                report.item(form.formId() + " (" + form.modelType().getDisplayName()
+                        + ") — " + form.displayName() + " [" + form.sizeProfileId() + "]");
+            }
+            report.send(source);
+            return 1;
+        }
 
-        if (typeFilter != null) {
-            Heritage type = Heritage.byId(typeFilter);
-            if (type == null) {
-                source.sendFailure(Component.literal("Unknown type: " + typeFilter).withStyle(ChatFormatting.RED));
-                return 0;
-            }
-            source.sendSuccess(() -> Component.literal(
-                    "Forms for " + type.getDisplayName() + ":").withStyle(ChatFormatting.YELLOW), false);
-            for (String formId : HeritageFormBridge.getAvailableFormIds(type)) {
-                PlayerForm form = FormRegistry.get(formId);
-                if (form != null) {
-                    source.sendSuccess(() -> Component.literal(
-                            "  " + form.formId() + " (" + form.modelType().getDisplayName()
-                                    + ") - " + form.displayName()).withStyle(ChatFormatting.GRAY), false);
-                }
-            }
-        } else {
-            for (var entry : FormRegistry.getAll().entrySet()) {
-                PlayerForm form = entry.getValue();
-                source.sendSuccess(() -> Component.literal(
-                        "  " + form.formId() + " (" + form.modelType().getDisplayName()
-                                + ") - " + form.displayName()
-                                + " [" + form.sizeProfileId() + "]").withStyle(ChatFormatting.GRAY), false);
+        Heritage type = Heritage.byId(typeFilter);
+        if (type == null) {
+            source.sendFailure(Component.literal("Unknown type: " + typeFilter).withStyle(ChatFormatting.RED));
+            return 0;
+        }
+        ChatReport report = ChatReport.of("Forms · " + type.getDisplayName());
+        for (String formId : HeritageFormBridge.getAvailableFormIds(type)) {
+            PlayerForm form = FormRegistry.get(formId);
+            if (form != null) {
+                report.item(form.formId() + " (" + form.modelType().getDisplayName()
+                        + ") — " + form.displayName());
             }
         }
+        report.send(source);
         return 1;
     }
 }

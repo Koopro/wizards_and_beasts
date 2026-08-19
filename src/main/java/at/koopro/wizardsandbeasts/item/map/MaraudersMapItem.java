@@ -153,8 +153,10 @@ public class MaraudersMapItem extends GeoItemBase {
         String insult = String.format(
                 INSULTS.get(index % INSULTS.size()),
                 player.getName().getString());
-        player.displayClientMessage(
-                Component.literal("\u00A76\u00A7o" + insult), false);
+        at.koopro.wizardsandbeasts.feedback.PlayerFeedback.toast(player,
+                at.koopro.wizardsandbeasts.feedback.NoticeKind.FAIL,
+                Component.translatable("item.wizards_and_beasts.marauders_map.speaks"),
+                Component.literal(insult));
         tag.putInt("InsultIndex", (index + 1) % INSULTS.size());
         setCustomTag(stack, tag);
     }

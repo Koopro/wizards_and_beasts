@@ -20,6 +20,8 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.jspecify.annotations.Nullable;
 import java.util.Optional;
 import java.util.UUID;
+import at.koopro.wizardsandbeasts.feedback.NoticeKind;
+import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 
 @EventBusSubscriber(modid = WizardsAndBeastsMod.MODID)
 public final class ElderWandEventHandler {
@@ -128,9 +130,9 @@ public final class ElderWandEventHandler {
             if (data.getMaster() == null && WandComponents.getMaster(stack).isEmpty()) {
                 data.setMaster(player.getUUID());
                 stack.set(WandComponents.WAND_MASTER.get(), Optional.of(player.getUUID()));
-                player.displayClientMessage(
-                        Component.literal("The Elder Wand has chosen you.").withStyle(ChatFormatting.GOLD),
-                        false);
+                PlayerFeedback.toast(player, NoticeKind.UNLOCK,
+                        Component.translatable("wandcraft.elder.chosen.title"),
+                        Component.translatable("wandcraft.elder.chosen.body"));
             }
         }
     }

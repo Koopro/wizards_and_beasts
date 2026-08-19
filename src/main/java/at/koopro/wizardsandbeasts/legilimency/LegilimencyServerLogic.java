@@ -1,6 +1,8 @@
 package at.koopro.wizardsandbeasts.legilimency;
 
 import at.koopro.wizardsandbeasts.ability.PlayerAbilityHelper;
+import at.koopro.wizardsandbeasts.feedback.NoticeKind;
+import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.network.legilimency.LegilimencyVisionS2CPayload;
@@ -16,6 +18,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 
 public final class LegilimencyServerLogic {
+
+    private static final String L = "legilimency.wizards_and_beasts.";
     private LegilimencyServerLogic() {
     }
 
@@ -47,26 +51,37 @@ public final class LegilimencyServerLogic {
             float resistChance = PlayerAbilityHelper.getOcclumencyLevel(targetPlayer) * 0.8f
                     * at.koopro.wizardsandbeasts.stats.StatEffects.resistScalar(willTrait);
             if (targetPlayer.getRandom().nextFloat() < resistChance) {
-                targetPlayer.displayClientMessage(Component.literal("You felt a presence attempting to enter your mind — and repelled it.").withStyle(ChatFormatting.AQUA), false);
-                caster.displayClientMessage(Component.literal("Their mind resisted your intrusion.").withStyle(ChatFormatting.YELLOW), false);
+                PlayerFeedback.toast(targetPlayer, NoticeKind.WARN,
+                        Component.translatable(L + "defended.title"),
+                        Component.translatable(L + "defended.body"));
+                PlayerFeedback.toast(caster, NoticeKind.FAIL,
+                        targetPlayer.getName().copy(),
+                        Component.translatable(L + "resisted"));
                 PlayerAbilityHelper.setLegilimencyCooldownTicks(caster, 600);
                 at.koopro.wizardsandbeasts.stats.StatTraining.onMindDefended(targetPlayer);
                 at.koopro.wizardsandbeasts.stats.StatMilestones.onMilestoneTriggered(
                         targetPlayer, at.koopro.wizardsandbeasts.stats.MilestoneType.FIRST_OCCLUMENCY_DEFENCE_SUCCESS);
                 return;
             }
-            targetPlayer.displayClientMessage(Component.literal("You felt someone enter your mind.").withStyle(ChatFormatting.DARK_PURPLE), false);
-            caster.displayClientMessage(Component.literal("Ability flags: " + String.join(", ", PlayerAbilityHelper.getAbilityFlags(targetPlayer))).withStyle(ChatFormatting.GRAY), false);
+            PlayerFeedback.toast(targetPlayer, NoticeKind.WARN,
+                    Component.translatable(L + "breached.title"),
+                    Component.translatable(L + "breached.body"));
+            // The old line here dumped the target's raw internal ability flags to the caster's chat.
+            // That was developer output shipped as gameplay; what a Legilimens is meant to come away
+            // with is the vision below, not a list of feature toggles.
             applyVisionFromTarget(caster, targetPlayer);
         } else {
             LivingEntity mob = (LivingEntity) target;
-            if (mob instanceof Mob && ((Mob) mob).getTarget() != null) {
-                caster.displayClientMessage(Component.literal("Mob target entity id: " + ((Mob) mob).getTarget().getId()).withStyle(ChatFormatting.GRAY), false);
-            } else {
-                caster.displayClientMessage(Component.literal("Mob target entity id: none").withStyle(ChatFormatting.GRAY), false);
-            }
+            // Reworded from "Mob target entity id: 4711" / "Mob health: 62%". The reading itself is
+            // legitimate — knowing what a beast is hunting is the point of the spell — but an entity
+            // id is not something a player can act on, so it reports the quarry by name instead.
+            LivingEntity quarry = mob instanceof Mob m ? m.getTarget() : null;
             int hpPct = (int) Math.round((mob.getHealth() / Math.max(1.0f, mob.getMaxHealth())) * 100.0);
-            caster.displayClientMessage(Component.literal("Mob health: " + hpPct + "%").withStyle(ChatFormatting.GRAY), false);
+            PlayerFeedback.toast(caster, NoticeKind.DISCOVERY,
+                    mob.getName().copy(),
+                    quarry == null
+                            ? Component.translatable(L + "mob.calm", hpPct)
+                            : Component.translatable(L + "mob.hunting", quarry.getName(), hpPct));
             LegilimencyVisionS2CPayload.sendTo(caster, BlockPos.containing(mob.position()), 200);
         }
         PlayerAbilityHelper.setLegilimencyCooldownTicks(caster, 600);
