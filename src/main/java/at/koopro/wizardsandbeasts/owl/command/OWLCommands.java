@@ -39,7 +39,7 @@ public final class OWLCommands {
                         .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(ctx -> resetExam(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
-                .then(Commands.literal("setprofession")
+                .then(Commands.literal("set_profession")
                         .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("profession", StringArgumentType.word())
@@ -49,7 +49,7 @@ public final class OWLCommands {
                                                 ctx.getSource(),
                                                 EntityArgument.getPlayer(ctx, "player"),
                                                 StringArgumentType.getString(ctx, "profession"))))))
-                .then(Commands.literal("setgrade")
+                .then(Commands.literal("set_grade")
                         .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("subject", StringArgumentType.word())

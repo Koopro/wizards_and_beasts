@@ -35,12 +35,12 @@ public final class StatsCommands {
         return Commands.literal("stats")
                 .requires(WizardsAndBeastsCommandPermissions.ADMIN)
 
-                // /wandb stats get <player>
+                // /wandb player stats get <player>
                 .then(Commands.literal("get")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(ctx -> getAll(ctx.getSource(),
                                         EntityArgument.getPlayer(ctx, "player")))
-                                // /wandb stats get <player> <stat>
+                                // /wandb player stats get <player> <stat>
                                 .then(Commands.argument("stat", StringArgumentType.word())
                                         .suggests((ctx, builder) ->
                                                 SharedSuggestionProvider.suggest(STAT_SUGGESTIONS, builder))
@@ -48,7 +48,7 @@ public final class StatsCommands {
                                                 EntityArgument.getPlayer(ctx, "player"),
                                                 StringArgumentType.getString(ctx, "stat"))))))
 
-                // /wandb stats set <player> <stat> <value>
+                // /wandb player stats set <player> <stat> <value>
                 .then(Commands.literal("set")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("stat", StringArgumentType.word())
@@ -60,7 +60,7 @@ public final class StatsCommands {
                                                         StringArgumentType.getString(ctx, "stat"),
                                                         IntegerArgumentType.getInteger(ctx, "value")))))))
 
-                // /wandb stats grant_growth <player> <amount>
+                // /wandb player stats grant_growth <player> <amount>
                 .then(Commands.literal("grant_growth")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("amount", IntegerArgumentType.integer(1, 15))
@@ -68,13 +68,13 @@ public final class StatsCommands {
                                                 EntityArgument.getPlayer(ctx, "player"),
                                                 IntegerArgumentType.getInteger(ctx, "amount"))))))
 
-                // /wandb stats reroll_power <player>
+                // /wandb player stats reroll_power <player>
                 .then(Commands.literal("reroll_power")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(ctx -> rerollPower(ctx.getSource(),
                                         EntityArgument.getPlayer(ctx, "player")))))
 
-                // /wandb stats set_prodigy <player> <true|false>
+                // /wandb player stats set_prodigy <player> <true|false>
                 .then(Commands.literal("set_prodigy")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("value", BoolArgumentType.bool())
@@ -82,7 +82,7 @@ public final class StatsCommands {
                                                 EntityArgument.getPlayer(ctx, "player"),
                                                 BoolArgumentType.getBool(ctx, "value"))))))
 
-                // /wandb stats reset <player>
+                // /wandb player stats reset <player>
                 .then(Commands.literal("reset")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(ctx -> reset(ctx.getSource(),

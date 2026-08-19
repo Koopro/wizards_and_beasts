@@ -81,9 +81,9 @@ public class CauldronBrewingCategory implements IRecipeCategory<BrewingRecipe> {
             int x = 1 + (i % SLOTS_PER_ROW) * 18;
             int y = 1 + (i / SLOTS_PER_ROW) * 18;
             builder.addSlot(RecipeIngredientRole.INPUT, x, y)
-                    .addItemStack(new ItemStack(ingredient.item(), ingredient.count()));
+                    .add(new ItemStack(ingredient.item(), ingredient.count()));
         }
-        builder.addSlot(RecipeIngredientRole.OUTPUT, 110, 10).addItemStack(outputFor(recipe));
+        builder.addSlot(RecipeIngredientRole.OUTPUT, 110, 10).add(outputFor(recipe));
     }
 
     @Override

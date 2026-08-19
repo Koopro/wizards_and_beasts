@@ -15,20 +15,25 @@ public final class WizMorphCommands {
 
     private WizMorphCommands() {}
 
+    /**
+     * {@code /wandb debug morph <player> <on|off>} — the form/size debug overlay.
+     *
+     * <p>The inner {@code debug} literal is gone: the node already sits under {@code /wandb debug},
+     * so {@code debug morph debug <player>} was saying it twice.
+     */
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("morph")
-                .then(Commands.literal("debug")
-                        .then(Commands.argument("player", EntityArgument.player())
-                                .then(Commands.literal("on")
-                                        .executes(ctx -> toggleDebug(
-                                                ctx.getSource(),
-                                                EntityArgument.getPlayer(ctx, "player"),
-                                                true)))
-                                .then(Commands.literal("off")
-                                        .executes(ctx -> toggleDebug(
-                                                ctx.getSource(),
-                                                EntityArgument.getPlayer(ctx, "player"),
-                                                false)))));
+                .then(Commands.argument("player", EntityArgument.player())
+                        .then(Commands.literal("on")
+                                .executes(ctx -> toggleDebug(
+                                        ctx.getSource(),
+                                        EntityArgument.getPlayer(ctx, "player"),
+                                        true)))
+                        .then(Commands.literal("off")
+                                .executes(ctx -> toggleDebug(
+                                        ctx.getSource(),
+                                        EntityArgument.getPlayer(ctx, "player"),
+                                        false))));
     }
 
     private static int toggleDebug(CommandSourceStack source, ServerPlayer target, boolean enabled) {

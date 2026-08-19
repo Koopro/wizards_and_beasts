@@ -3,7 +3,6 @@ package at.koopro.wizardsandbeasts.apparition.command;
 import at.koopro.wizardsandbeasts.ability.PlayerAbilityHelper;
 import at.koopro.wizardsandbeasts.apparition.ApparitionWard;
 import at.koopro.wizardsandbeasts.apparition.ApparitionWardRegistry;
-import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
 import at.koopro.wizardsandbeasts.network.apparition.ApparitionWardsSyncS2CPayload;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -18,14 +17,21 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.AABB;
+import at.koopro.wizardsandbeasts.util.ChatReport;
 
 public final class ApparitionCommands {
     private ApparitionCommands() {
     }
 
+    /**
+     * {@code /wandb world ward …} — the no-Apparition regions painted into a world.
+     *
+     * <p>The literal is {@code ward}, not {@code apparitionward}: under {@code world} the word
+     * "apparition" was doing nothing but lengthening what you type, and a ward is a property of a
+     * place rather than of the spell that bounces off it.
+     */
     public static LiteralArgumentBuilder<CommandSourceStack> registerWard() {
-        return Commands.literal("apparitionward")
-                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
+        return Commands.literal("ward")
                 .then(Commands.literal("add")
                         .then(Commands.argument("id", StringArgumentType.string())
                                 .then(Commands.argument("from", BlockPosArgument.blockPos())
@@ -46,9 +52,14 @@ public final class ApparitionCommands {
                         .executes(ctx -> listWards(ctx.getSource())));
     }
 
+    /**
+     * {@code /wandb debug apparition <player>} — force-passes the Apparition test for a player.
+     *
+     * <p>Sits under {@code debug} rather than beside the wards: granting a licence by fiat is a
+     * diagnostic shortcut past the exam, not world administration.
+     */
     public static LiteralArgumentBuilder<CommandSourceStack> registerTest() {
-        return Commands.literal("apparitiontest")
-                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
+        return Commands.literal("apparition")
                 .then(Commands.argument("player", EntityArgument.player())
                         .executes(ctx -> passTest(ctx.getSource(), EntityArgument.getPlayer(ctx, "player"))));
     }
@@ -102,7 +113,7 @@ public final class ApparitionCommands {
     }
 
     private static int listWards(CommandSourceStack source) {
-        source.sendSuccess(() -> Component.literal("--- Apparition Wards ---").withStyle(ChatFormatting.GOLD), false);
+        ChatReport.of("Apparition Wards").send(source);
         for (ApparitionWard ward : ApparitionWardRegistry.all()) {
             final Component line = Component.literal("- " + ward.wardId() + " @ " + ward.dimensionId()
                     + " [" + ward.bounds().minX + "," + ward.bounds().minY + "," + ward.bounds().minZ

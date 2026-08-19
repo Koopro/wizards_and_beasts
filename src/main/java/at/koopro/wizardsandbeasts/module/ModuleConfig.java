@@ -13,7 +13,7 @@ import java.util.Map;
  * Config-declared seed state per module, appended to the mod's existing spec.
  *
  * <p>Read <b>only</b> when a world with no stored module state is first loaded. Editing it afterwards has
- * no effect on worlds that already exist — those are changed with {@code /wandb module set}, which is the
+ * no effect on worlds that already exist — those are changed with {@code /wandb admin module set}, which is the
  * behaviour the per-world design is for.
  *
  * <p>Values are stored as strings and parsed leniently: an unrecognised value logs a warning and falls back
@@ -35,7 +35,7 @@ public final class ModuleConfig {
     public static void define(ModConfigSpec.Builder builder) {
         builder.comment(
                         "Seed state for each gameplay module, applied ONLY when a world is first created.",
-                        "Existing worlds keep whatever they already have — change those with /wandb module set.",
+                        "Existing worlds keep whatever they already have — change those with /wandb admin module set.",
                         "Valid values: disabled, enabled, preview, coming_soon.",
                         "coming_soon marks a module as planned: it stays off and operators cannot switch it.")
                 .push("moduleDefaults");

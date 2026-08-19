@@ -3,7 +3,6 @@ package at.koopro.wizardsandbeasts.azkaban.command;
 import at.koopro.wizardsandbeasts.azkaban.AzkabanDamageTypes;
 import at.koopro.wizardsandbeasts.azkaban.attachment.AzkabanTrespasserData;
 import at.koopro.wizardsandbeasts.azkaban.structure.AzkabanStructures;
-import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.entity.azkaban.DementorEntity;
 import at.koopro.wizardsandbeasts.network.azkaban.AzkabanTrespasserSyncPayload;
@@ -37,7 +36,6 @@ public final class AzkabanCommands {
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("azkaban")
-                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
 
                 .then(Commands.literal("locate")
                         .executes(ctx -> locate(ctx.getSource())))
@@ -48,7 +46,7 @@ public final class AzkabanCommands {
                 .then(Commands.literal("force_generate")
                         .executes(ctx -> forceGenerate(ctx.getSource())))
 
-                .then(Commands.literal("dump_info")
+                .then(Commands.literal("info")
                         .executes(ctx -> dumpInfo(ctx.getSource())))
 
                 .then(Commands.literal("summon_dementor")

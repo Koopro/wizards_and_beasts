@@ -11,7 +11,7 @@ import org.jspecify.annotations.NullMarked;
  * Thin adapter over the existing Animagus form toggle. Declares {@link #ownsToggleState()} so the framework
  * never writes {@code AbilitySelectionState.toggles} for this ability: the single source of truth stays
  * {@code PlayerAbilityHelper.isCurrentlyTransformed}, which the ritual, the death force-revert,
- * {@code /wandb animagus transform}, the interaction locks and the renderers all already read. The wheel's
+ * {@code /wandb magic animagus transform}, the interaction locks and the renderers all already read. The wheel's
  * on-state is <b>derived</b> from that same bit at sync time (see {@code AbilityResolver.activeToggles}).
  *
  * <p>Consequently {@code nowOn} is only the requested direction —

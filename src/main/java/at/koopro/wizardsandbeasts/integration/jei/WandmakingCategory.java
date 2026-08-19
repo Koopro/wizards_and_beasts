@@ -75,11 +75,11 @@ public class WandmakingCategory implements IRecipeCategory<WandmakingRecipe> {
     public void setRecipe(IRecipeLayoutBuilder builder, WandmakingRecipe recipe, IFocusGroup focuses) {
         // Slot positions mirror WandmakersBenchMenu: blank, core, output.
         builder.addSlot(RecipeIngredientRole.INPUT, 1, 12)
-                .addItemStack(blankFor(recipe.woodKey()));
+                .add(blankFor(recipe.woodKey()));
         builder.addSlot(RecipeIngredientRole.INPUT, 37, 12)
                 .addItemStacks(coresFor(recipe.coreKey()));
         builder.addSlot(RecipeIngredientRole.OUTPUT, 91, 12)
-                .addItemStack(resultFor(recipe));
+                .add(resultFor(recipe));
     }
 
     private static ItemStack blankFor(Identifier woodKey) {

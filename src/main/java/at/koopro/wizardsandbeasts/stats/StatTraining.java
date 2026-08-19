@@ -17,7 +17,7 @@ import net.minecraft.server.level.ServerPlayer;
  * point dearer than the last. {@code StatTrainingReachabilityTest} pins the real event counts; the
  * figures quoted below come from it rather than from intuition. Because the scaler returns zero at
  * 100, the last stretch is asymptotic by design: the practical ceiling is somewhere near 85–90, and
- * 100 is reachable only through {@code /wandb stats set}.
+ * 100 is reachable only through {@code /wandb player stats set}.
  */
 public final class StatTraining {
 

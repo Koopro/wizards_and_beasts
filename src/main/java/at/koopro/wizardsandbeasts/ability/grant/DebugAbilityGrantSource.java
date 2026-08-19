@@ -10,7 +10,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Command-driven debug override source ({@code /wandb ability grant|revoke}). Holds a transient, in-memory
+ * Command-driven debug override source ({@code /wandb player ability grant|revoke}). Holds a transient, in-memory
  * per-player set of forced ability keys — deliberately NOT persisted (a debug convenience, cleared on
  * restart). Grants surface in the merged snapshot under {@link AbilityGrants.Source#DEBUG} so tooling can
  * tell them apart from earned grants. Singleton because the store is process-global server state.

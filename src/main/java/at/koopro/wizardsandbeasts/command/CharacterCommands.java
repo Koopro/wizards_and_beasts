@@ -9,12 +9,18 @@ import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
+/**
+ * {@code /wandb player sheet} — opens the character sheet.
+ *
+ * <p>The literal is {@code sheet} rather than {@code character}: under {@code player} the old name
+ * said the same word twice, and what this opens is the sheet specifically.
+ */
 public final class CharacterCommands {
 
     private CharacterCommands() {}
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
-        return Commands.literal("character")
+        return Commands.literal("sheet")
                 .executes(ctx -> openForPlayer(ctx.getSource().getPlayerOrException()));
     }
 

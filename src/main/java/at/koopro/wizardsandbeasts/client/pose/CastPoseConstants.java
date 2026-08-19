@@ -118,6 +118,6 @@ public final class CastPoseConstants {
     public static final int FADE_IN_TICKS = 2;
     public static final int FADE_OUT_TICKS = 3;
 
-    /** Default duration for {@code /wandb pose cast play} when none is given. */
+    /** Default duration for {@code /wandb debug pose cast play} when none is given. */
     public static final int DEFAULT_TEST_TICKS = 30;
 }

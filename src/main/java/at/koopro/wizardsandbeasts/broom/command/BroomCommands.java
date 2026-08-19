@@ -1,13 +1,12 @@
 package at.koopro.wizardsandbeasts.broom.command;
 
-import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
 import at.koopro.wizardsandbeasts.broom.BroomDefinition;
 import at.koopro.wizardsandbeasts.broom.BroomDefinitionRegistry;
 import at.koopro.wizardsandbeasts.entity.broom.BroomEntity;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -18,22 +17,23 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 import java.util.List;
 import at.koopro.wizardsandbeasts.registry.BroomItemRegistry;
 
-@EventBusSubscriber(modid = WizardsAndBeastsMod.MODID)
+/**
+ * {@code /wandb item broom …}
+ *
+ * <p>This used to register {@code /broom} as a dispatcher root of its own, which put a mod-specific
+ * admin tool in the same namespace as vanilla's commands and left it out of {@code /wandb} entirely.
+ * It is a child node now; the group above it carries the admin gate.
+ */
 public final class BroomCommands {
     private BroomCommands() {
     }
 
-    @SubscribeEvent
-    public static void onRegister(RegisterCommandsEvent event) {
-        event.getDispatcher().register(Commands.literal("broom")
-                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
+    public static LiteralArgumentBuilder<CommandSourceStack> register() {
+        return Commands.literal("broom")
                 .then(Commands.literal("give")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("variant_id", StringArgumentType.string())
@@ -48,10 +48,10 @@ public final class BroomCommands {
                         .then(Commands.argument("variant_id", StringArgumentType.string())
                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(getIds(), builder))
                                 .executes(BroomCommands::stats)))
-                .then(Commands.literal("setdurability")
+                .then(Commands.literal("set_durability")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("value", IntegerArgumentType.integer(0))
-                                        .executes(BroomCommands::setDurability)))));
+                                        .executes(BroomCommands::setDurability))));
     }
 
     private static int give(CommandContext<CommandSourceStack> context) throws com.mojang.brigadier.exceptions.CommandSyntaxException {

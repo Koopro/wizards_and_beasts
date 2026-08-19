@@ -1,6 +1,5 @@
 package at.koopro.wizardsandbeasts.trunk.command;
 
-import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
 import at.koopro.wizardsandbeasts.trunk.TrunkRecord;
 import at.koopro.wizardsandbeasts.trunk.TrunkRegistryData;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -19,7 +18,6 @@ public final class TrunkCommands {
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("trunk")
-                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                 .then(Commands.literal("impound")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(ctx -> setImpounded(

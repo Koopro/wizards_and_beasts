@@ -3,8 +3,6 @@ package at.koopro.wizardsandbeasts.bestiary.command;
 import at.koopro.wizardsandbeasts.bestiary.BestiaryDataHelper;
 import at.koopro.wizardsandbeasts.bestiary.BestiaryEntryRegistry;
 import at.koopro.wizardsandbeasts.bestiary.DiscoveryTier;
-import at.koopro.wizardsandbeasts.entity.niffler.command.NifflerCommands;
-import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
 import at.koopro.wizardsandbeasts.network.bestiary.BestiaryDataSyncPayload;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -25,7 +23,6 @@ public final class BestiaryCommands {
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("bestiary")
-                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                 .then(Commands.literal("unlock")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("entry_id", StringArgumentType.word())
@@ -70,8 +67,7 @@ public final class BestiaryCommands {
                                         .executes(ctx -> forceSyncAll(EntityArgument.getPlayers(ctx, "targets"), ctx.getSource()))))
                         .then(Commands.literal("list_all")
                                 .then(Commands.argument("targets", EntityArgument.players())
-                                        .executes(ctx -> forceListAll(EntityArgument.getPlayers(ctx, "targets"), ctx.getSource())))))
-                .then(NifflerCommands.register());
+                                        .executes(ctx -> forceListAll(EntityArgument.getPlayers(ctx, "targets"), ctx.getSource())))));
     }
 
     private static int setTier(ServerPlayer player, String id, DiscoveryTier tier) {

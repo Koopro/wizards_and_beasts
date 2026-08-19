@@ -18,7 +18,7 @@ import net.minecraft.util.Mth;
 import org.jspecify.annotations.NullMarked;
 
 /**
- * {@code /wandb apparate mark|forget|list} — how a player memorises the places they can Apparate to.
+ * {@code /wandb magic apparate mark|forget|list} — how a player memorises the places they can Apparate to.
  * Unlike the ward/test commands next door this is ordinary gameplay, so it is <b>not</b> permission-gated;
  * each subcommand only ever touches the caller's own saved list.
  */

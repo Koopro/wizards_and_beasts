@@ -42,7 +42,7 @@ import java.util.List;
  * the cold fireplace to light it, then step in and announce their destination.
  * Emits emerald-green dust particles and light level 10 when lit.
  * Managed by {@link at.koopro.wizardsandbeasts.floo.FlooNetworkManager} — must be
- * registered via {@code /wandb floo register} before it accepts travel.
+ * registered via {@code /wandb world floo register} before it accepts travel.
  */
 public class FlooFireplaceBlock extends BaseEntityBlock {
 

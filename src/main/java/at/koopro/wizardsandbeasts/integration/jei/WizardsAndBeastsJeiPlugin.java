@@ -70,15 +70,12 @@ public class WizardsAndBeastsJeiPlugin implements IModPlugin {
 
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
-        registration.addRecipeCatalyst(new ItemStack(WandmakingCategory.benchItem()),
-                WandmakingCategory.TYPE);
+        registration.addCraftingStation(WandmakingCategory.TYPE, WandmakingCategory.benchItem());
         // All three cauldrons brew; which one a given recipe needs is drawn on the recipe itself.
-        registration.addRecipeCatalyst(new ItemStack(ModBlocks.BRASS_CAULDRON_ITEM.get()),
-                CauldronBrewingCategory.TYPE);
-        registration.addRecipeCatalyst(new ItemStack(ModBlocks.WIZARDING_COPPER_CAULDRON_ITEM.get()),
-                CauldronBrewingCategory.TYPE);
-        registration.addRecipeCatalyst(new ItemStack(ModBlocks.PEWTER_CAULDRON_ITEM.get()),
-                CauldronBrewingCategory.TYPE);
+        registration.addCraftingStation(CauldronBrewingCategory.TYPE,
+                ModBlocks.BRASS_CAULDRON_ITEM.get(),
+                ModBlocks.WIZARDING_COPPER_CAULDRON_ITEM.get(),
+                ModBlocks.PEWTER_CAULDRON_ITEM.get());
     }
 
     @Override

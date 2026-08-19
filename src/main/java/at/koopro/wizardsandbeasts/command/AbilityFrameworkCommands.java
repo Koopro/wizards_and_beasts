@@ -22,10 +22,9 @@ import net.minecraft.server.level.ServerPlayer;
 import org.jspecify.annotations.NullMarked;
 
 /**
- * {@code /wandb ability list|grant|revoke} — debug surface for the ability framework (permission level 2).
+ * {@code /wandb player ability list|grant|revoke} — debug surface for the ability framework (permission level 2).
  * {@code grant}/{@code revoke} drive the {@link DebugAbilityGrantSource} override; {@code list} dumps the
- * player's resolved grant/type/module/cooldown state. Registered under {@code /wandb} (the mod's command
- * root; the prompt's {@code /wizardsandbeasts} is a deprecated alias of the same root).
+ * player's resolved grant/type/module/cooldown state.
  */
 @NullMarked
 public final class AbilityFrameworkCommands {

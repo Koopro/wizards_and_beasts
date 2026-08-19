@@ -1,7 +1,6 @@
 package at.koopro.wizardsandbeasts.creature.command;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
 import at.koopro.wizardsandbeasts.creature.CreatureDefinition;
 import at.koopro.wizardsandbeasts.creature.CreatureDefinitionRegistry;
 import at.koopro.wizardsandbeasts.module.Module;
@@ -23,7 +22,7 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 
 /**
- * {@code /wandb creature …} (gamemaster). Summons generic creatures by id and lists the build status.
+ * {@code /wandb beast creature …} (gamemaster). Summons generic creatures by id and lists the build status.
  * Access is gated by {@link Module#CREATURES}; registration is always present.
  */
 public final class CreatureCommands {
@@ -32,7 +31,6 @@ public final class CreatureCommands {
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("creature")
-                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                 .then(Commands.literal("summon")
                         .then(Commands.argument("id", StringArgumentType.word())
                                 .suggests((ctx, b) -> SharedSuggestionProvider.suggest(

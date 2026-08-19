@@ -2,7 +2,6 @@ package at.koopro.wizardsandbeasts.spell.command;
 
 import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
-import at.koopro.wizardsandbeasts.item.wand.WandItem;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.sync.PlayerStateSyncService;
 import at.koopro.wizardsandbeasts.spell.core.Proficiency;
@@ -14,10 +13,6 @@ import at.koopro.wizardsandbeasts.spell.core.Spells;
 import at.koopro.wizardsandbeasts.wand.cast.WandStats;
 import at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver;
 import at.koopro.wizardsandbeasts.util.WandHelper;
-import at.koopro.wizardsandbeasts.wand.stat.WandCore;
-import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
-import at.koopro.wizardsandbeasts.wand.stat.WandLength;
-import at.koopro.wizardsandbeasts.wand.stat.WandWood;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.ChatFormatting;
@@ -28,14 +23,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.Arrays;
-
 public final class SpellCommands {
 
     private SpellCommands() {
     }
 
-    public static LiteralArgumentBuilder<CommandSourceStack> registerSpellCommand() {
+    public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("spell")
                 .then(Commands.literal("learn")
                         .then(Commands.argument("spell", StringArgumentType.word())
@@ -60,33 +53,28 @@ public final class SpellCommands {
                                 .executes(ctx -> spellInfo(
                                         ctx.getSource().getPlayerOrException(),
                                         StringArgumentType.getString(ctx, "spell")))))
-                .then(Commands.literal("patronus")
-                        .then(Commands.literal("form")
-                                .then(Commands.literal("reveal")
-                                        .executes(ctx -> revealPatronusForm(ctx.getSource().getPlayerOrException())))
-                                .then(Commands.literal("clear")
-                                        .executes(ctx -> clearPatronusForm(ctx.getSource().getPlayerOrException())))))
                 .then(Commands.literal("reset")
                         .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .executes(ctx -> resetSpells(ctx.getSource().getPlayerOrException())))
-                .then(Commands.literal("learnall")
+                .then(Commands.literal("learn_all")
                         .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .executes(ctx -> learnAllSpells(ctx.getSource().getPlayerOrException())));
     }
 
-    public static LiteralArgumentBuilder<CommandSourceStack> registerGiveCommand() {
-        return Commands.literal("give")
-                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
-                .then(Commands.argument("wood", StringArgumentType.word())
-                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
-                                Arrays.stream(WandWood.values()).map(WandWood::getSerializedName), builder))
-                        .then(Commands.argument("core", StringArgumentType.word())
-                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
-                                        Arrays.stream(WandCore.values()).map(WandCore::getSerializedName), builder))
-                                .executes(ctx -> giveWand(
-                                        ctx.getSource().getPlayerOrException(),
-                                        StringArgumentType.getString(ctx, "wood"),
-                                        StringArgumentType.getString(ctx, "core")))));
+    /**
+     * The Patronus form pair, a sibling of {@code spell} rather than a child of it.
+     *
+     * <p>Revealing a Patronus is not an operation on the spell registry — it reads happiness and
+     * heritage and writes the {@code PATRONUS_FORM} attachment. Sitting it under {@code spell} made
+     * the only two commands that touch it four levels deep for no relationship that exists in code.
+     */
+    public static LiteralArgumentBuilder<CommandSourceStack> registerPatronus() {
+        return Commands.literal("patronus")
+                .then(Commands.literal("form")
+                        .then(Commands.literal("reveal")
+                                .executes(ctx -> revealPatronusForm(ctx.getSource().getPlayerOrException())))
+                        .then(Commands.literal("clear")
+                                .executes(ctx -> clearPatronusForm(ctx.getSource().getPlayerOrException()))));
     }
 
     private static int learnSpell(ServerPlayer player, String spellId) {
@@ -312,30 +300,4 @@ public final class SpellCommands {
         return 1;
     }
 
-    private static int giveWand(ServerPlayer player, String woodName, String coreName) {
-        WandWood wood = WandWood.byName(woodName);
-        WandCore core = WandCore.byName(coreName);
-
-        if (wood == null) {
-            player.displayClientMessage(Component.literal("Unknown wood: " + woodName).withStyle(ChatFormatting.RED), false);
-            return 0;
-        }
-        if (core == null) {
-            player.displayClientMessage(Component.literal("Unknown core: " + coreName).withStyle(ChatFormatting.RED), false);
-            return 0;
-        }
-
-        WandLength[] lengths = WandLength.values();
-        WandFlexibility[] flexes = WandFlexibility.values();
-        WandLength length = lengths[player.getRandom().nextInt(lengths.length)];
-        WandFlexibility flex = flexes[player.getRandom().nextInt(flexes.length)];
-
-        ItemStack wand = WandItem.createWand(wood, core, length, flex);
-        player.getInventory().add(wand);
-
-        player.displayClientMessage(Component.literal(
-                "Given " + wood.getDisplayName() + " wand with " + core.getDisplayName() + " core ("
-                        + length.getDisplayName() + ", " + flex.getDisplayName() + ")").withStyle(ChatFormatting.GREEN), false);
-        return 1;
-    }
 }

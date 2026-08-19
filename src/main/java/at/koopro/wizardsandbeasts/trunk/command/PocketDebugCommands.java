@@ -27,6 +27,10 @@ public final class PocketDebugCommands {
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("pocket")
+                // Stated here as well as on the group above: `enter` teleports into a pocket dimension
+                // and `reset` wipes one, and this node shipped with no gate at all — any player could
+                // run either. Keeping the check on the leaf means re-parenting cannot reopen the hole.
+                .requires(at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions.ADMIN)
                 .then(Commands.literal("enter")
                         .then(Commands.argument("archetype", StringArgumentType.word())
                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(

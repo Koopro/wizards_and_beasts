@@ -24,7 +24,7 @@ public final class AbilityGrants {
 
     /**
      * Where a grant comes from. Enum with room to grow (e.g. ITEM, RITUAL) without touching callers.
-     * {@code DEBUG} is the command-driven override source ({@code /wandb ability grant|revoke}); its grants
+     * {@code DEBUG} is the command-driven override source ({@code /wandb player ability grant|revoke}); its grants
      * are flagged so debug tooling can distinguish them from earned grants. {@code STATUS} covers abilities
      * earned as player state (Apparition licence, Animagus ritual) — see
      * {@link PlayerStatusAbilityGrantSource}.

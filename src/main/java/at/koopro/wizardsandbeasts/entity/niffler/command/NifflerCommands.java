@@ -1,6 +1,5 @@
 package at.koopro.wizardsandbeasts.entity.niffler.command;
 
-import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
 import at.koopro.wizardsandbeasts.entity.niffler.NifflerEntity;
 import at.koopro.wizardsandbeasts.registry.ModEntities;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -23,7 +22,6 @@ public final class NifflerCommands {
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("niffler")
-                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                 .then(Commands.literal("bond")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("value", IntegerArgumentType.integer(0, 100))
@@ -37,13 +35,13 @@ public final class NifflerCommands {
                                         ctx.getSource(),
                                         EntityArgument.getPlayer(ctx, "player"),
                                         false))))
-                .then(Commands.literal("spawnbaby")
+                .then(Commands.literal("spawn_baby")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(ctx -> spawnNiffler(
                                         ctx.getSource(),
                                         EntityArgument.getPlayer(ctx, "player"),
                                         true))))
-                .then(Commands.literal("pouchempty")
+                .then(Commands.literal("empty_pouch")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(ctx -> emptyPouch(
                                         ctx.getSource(),

@@ -2,7 +2,6 @@ package at.koopro.wizardsandbeasts.floo.command;
 
 import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlock;
 import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlockEntity;
-import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
 import at.koopro.wizardsandbeasts.floo.FlooNetworkManager;
 import at.koopro.wizardsandbeasts.floo.FlooRegistryEntry;
 import at.koopro.wizardsandbeasts.floo.FlooTravelHandler;
@@ -27,6 +26,7 @@ import net.minecraft.world.phys.HitResult;
 import org.jspecify.annotations.NonNull;
 
 import java.util.List;
+import at.koopro.wizardsandbeasts.util.ChatReport;
 
 public final class FlooCommands {
 
@@ -35,7 +35,6 @@ public final class FlooCommands {
 
     public static @NonNull LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("floo")
-                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                 .then(Commands.literal("register")
                         .then(Commands.argument("address", StringArgumentType.string())
                                 .executes(ctx -> registerFireplace(ctx.getSource(),
@@ -149,7 +148,7 @@ public final class FlooCommands {
             source.sendSuccess(() -> Component.literal("No fireplaces registered.").withStyle(ChatFormatting.GRAY), false);
             return 1;
         }
-        source.sendSuccess(() -> Component.literal("=== Floo Network ===").withStyle(ChatFormatting.GOLD), false);
+        ChatReport.of("Floo Network").send(source);
         for (FlooRegistryEntry e : all) {
             ChatFormatting stateColor = e.isEnabled() ? ChatFormatting.GREEN : ChatFormatting.RED;
             String state = e.isEnabled() ? "enabled" : "sealed";
@@ -221,7 +220,7 @@ public final class FlooCommands {
             source.sendSuccess(() -> Component.literal("No travel log entries.").withStyle(ChatFormatting.GRAY), false);
             return 1;
         }
-        source.sendSuccess(() -> Component.literal("=== Floo Travel Log (last 20) ===").withStyle(ChatFormatting.GOLD), false);
+        ChatReport.of("Floo Travel Log (last 20)").send(source);
         for (String entry : log) {
             source.sendSuccess(() -> Component.literal(entry).withStyle(ChatFormatting.GRAY), false);
         }

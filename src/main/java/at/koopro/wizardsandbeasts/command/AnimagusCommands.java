@@ -19,7 +19,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * {@code /wandb animagus} — survival actions (info / form / transform / register)
+ * {@code /wandb magic animagus} — survival actions (info / form / transform / register)
  * plus operator-only testing shortcuts (unlock / reset).
  */
 public final class AnimagusCommands {

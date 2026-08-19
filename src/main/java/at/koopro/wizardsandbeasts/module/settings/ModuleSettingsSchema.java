@@ -15,7 +15,7 @@ import java.util.Map;
 /**
  * The ordered set of settings a module exposes, declared in code beside the module itself.
  *
- * <p>Order is display order — the admin screen and {@code /wandb module list} both render a schema in the
+ * <p>Order is display order — the admin screen and {@code /wandb admin module list} both render a schema in the
  * sequence it was declared, so declaration order is a UI decision, not an accident.
  *
  * <p><b>Every schema is empty in this prompt.</b> The framework is deliberately shipped before any real

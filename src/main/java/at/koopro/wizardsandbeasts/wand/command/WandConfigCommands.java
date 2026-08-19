@@ -1,6 +1,5 @@
 package at.koopro.wizardsandbeasts.wand.command;
 
-import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
 import at.koopro.wizardsandbeasts.item.wand.WandItem;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.customization.WandConfiguration;
@@ -31,7 +30,6 @@ public final class WandConfigCommands {
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("config")
-                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                 .then(buildGet())
                 .then(buildSet())
                 .then(buildClear())

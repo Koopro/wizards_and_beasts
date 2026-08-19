@@ -1,6 +1,5 @@
 package at.koopro.wizardsandbeasts.pose.command;
 
-import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
 import at.koopro.wizardsandbeasts.network.spell.SpellCastAnimationS2CPayload;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
@@ -17,7 +16,7 @@ import net.minecraft.server.level.ServerPlayer;
 import org.jspecify.annotations.NullMarked;
 
 /**
- * {@code /wandb pose flight <off|auto|hover|glide|propelled> [player]}
+ * {@code /wandb debug pose flight <off|auto|hover|glide|propelled> [player]}
  *
  * <p>The wave 1 test harness. It writes the same {@code PoseOverride} attachment the broom system
  * will later write, so this is not scaffolding to be thrown away — it is the first caller of a
@@ -56,13 +55,12 @@ public final class PoseCommands {
         }
 
         return Commands.literal("pose")
-                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                 .then(flight)
                 .then(castTree());
     }
 
     /**
-     * {@code /wandb pose cast <off|play|windup|release|recovery> [ticks|player]}
+     * {@code /wandb debug pose cast <off|play|windup|release|recovery> [ticks|player]}
      *
      * <p>The cast equivalent of the flight harness, and it drives the <em>production</em> path: it
      * sends the same {@code SpellCastAnimationS2CPayload} a real cast sends, so what is inspected is

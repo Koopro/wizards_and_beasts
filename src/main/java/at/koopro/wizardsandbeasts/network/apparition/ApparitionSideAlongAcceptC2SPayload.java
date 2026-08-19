@@ -15,7 +15,7 @@ import org.jspecify.annotations.NullMarked;
  *
  * <p>Carries nothing: the offer being answered is whichever one this player is currently sitting on, which
  * the server already knows and the client cannot invent. Registered now so a prompt UI can send it without
- * touching the mechanics; {@code /wandb apparate accept} does the same thing from chat until one exists.
+ * touching the mechanics; {@code /wandb magic apparate accept} does the same thing from chat until one exists.
  */
 @NullMarked
 public record ApparitionSideAlongAcceptC2SPayload() implements CustomPacketPayload {

@@ -20,9 +20,10 @@ import org.jspecify.annotations.NullMarked;
 
 import java.util.Arrays;
 import java.util.Locale;
+import at.koopro.wizardsandbeasts.util.ChatReport;
 
 /**
- * {@code /wandb module …} — the admin surface for module state until the screen lands.
+ * {@code /wandb admin module …} — the admin surface for module state until the screen lands.
  *
  * <p>Every mutation goes through {@link ModuleStateService}, the same method the network packet uses, so
  * the two entry points cannot drift: whatever the packet refuses, the command refuses identically.
@@ -34,8 +35,8 @@ public final class ModuleCommands {
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("module")
-                // Operator permission is not enough once an admin allow-list is configured.
-                .requires(at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions.ADMIN)
+                // Admin gate lives on the `admin` group above; operator permission alone is not
+                // enough there once an allow-list is configured.
                 .executes(ctx -> listModules(ctx.getSource()))
                 .then(Commands.literal("list")
                         .executes(ctx -> listModules(ctx.getSource())))
@@ -76,7 +77,7 @@ public final class ModuleCommands {
     }
 
     private static int listModules(CommandSourceStack source) {
-        source.sendSuccess(() -> Component.literal("=== Module States ===").withStyle(ChatFormatting.GOLD), false);
+        ChatReport.of("Module States").send(source);
         for (Module module : Module.values()) {
             ModuleState state = ModuleManager.state(module);
             ChatFormatting color = switch (state) {
@@ -86,7 +87,7 @@ public final class ModuleCommands {
                 case DISABLED -> ChatFormatting.RED;
             };
             // Name and id both: the name is what the module is called everywhere else in the game, the
-            // id is what you type back into `/wandb module set`. Printing only one of them loses.
+            // id is what you type back into `/wandb admin module set`. Printing only one of them loses.
             source.sendSuccess(() -> Component.literal("  ").withStyle(ChatFormatting.GRAY)
                     .append(ModuleIds.displayName(module).copy().withStyle(ChatFormatting.WHITE))
                     .append(Component.literal(" (" + ModuleIds.of(module).getPath() + "): ")

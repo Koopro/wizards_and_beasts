@@ -51,7 +51,7 @@ public final class BlankShapingSelfTest {
     }
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
-        return Commands.literal("blanktest").requires(at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions.ADMIN).executes(ctx -> run(ctx.getSource()));
+        return Commands.literal("blank_test").executes(ctx -> run(ctx.getSource()));
     }
 
     private static int run(CommandSourceStack source) {

@@ -53,7 +53,7 @@ public final class ProficiencyCommands {
                                                 ctx.getSource(),
                                                 EntityArgument.getPlayer(ctx, "player"),
                                                 StringArgumentType.getString(ctx, "spell_id"))))))
-                .then(Commands.literal("setall")
+                .then(Commands.literal("set_all")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("value", FloatArgumentType.floatArg(0.0f, 1.0f))
                                         .executes(ctx -> setAll(

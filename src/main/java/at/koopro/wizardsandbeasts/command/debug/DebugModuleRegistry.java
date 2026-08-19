@@ -63,7 +63,7 @@ public final class DebugModuleRegistry {
         out.header("Debug Modules");
         out.kv("Registered", MODULES.size());
         out.kv("Global debug", DebugModeService.isGlobalEnabled() ? "ON" : "OFF");
-        out.info("Built-in: tree, glow, wandtool, beam, stats, morph, toggle, help");
+        out.info("Built-in: tree, glow, wandtool, beam, morph, pose, apparition, blank_test, toggle, help");
         MODULES.values().forEach(m -> out.kv(m.name(), m.summary().isEmpty() ? "—" : m.summary()));
         return 1;
     }

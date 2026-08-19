@@ -15,7 +15,7 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Derives a flight state from how a player is actually moving, for {@code /wandb pose flight auto}.
+ * Derives a flight state from how a player is actually moving, for {@code /wandb debug pose flight auto}.
  *
  * <p>Server-side, so every observer agrees on the state — a client-local derivation would give each
  * viewer a slightly different answer for the same player, and near a threshold two clients would

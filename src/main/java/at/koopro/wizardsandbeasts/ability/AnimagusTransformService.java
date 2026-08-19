@@ -64,7 +64,7 @@ public final class AnimagusTransformService {
         }
         String formId = PlayerAbilityHelper.getAnimagusFormId(player);
         if (!AnimagusForms.isAnimagusForm(formId)) {
-            feedback(player, "You have no Animagus form. Choose one with /wandb animagus form <beast>.", ChatFormatting.GRAY);
+            feedback(player, "You have no Animagus form. Choose one with /wandb magic animagus form <beast>.", ChatFormatting.GRAY);
             return;
         }
 

@@ -3,28 +3,16 @@ package at.koopro.wizardsandbeasts.command;
 import org.jspecify.annotations.NullMarked;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.azkaban.command.AzkabanCommands;
-import at.koopro.wizardsandbeasts.command.CharacterCommands;
-import at.koopro.wizardsandbeasts.bestiary.command.BestiaryCommands;
-import at.koopro.wizardsandbeasts.creature.command.CreatureCommands;
-import at.koopro.wizardsandbeasts.bloodpact.command.PactCommands;
+import at.koopro.wizardsandbeasts.apparition.command.ApparitionCommands;
 import at.koopro.wizardsandbeasts.command.debug.DebugModuleRegistry;
 import at.koopro.wizardsandbeasts.command.debug.DebugTreeCommand;
 import at.koopro.wizardsandbeasts.command.debug.WizMorphCommands;
-import at.koopro.wizardsandbeasts.floo.command.FlooCommands;
-import at.koopro.wizardsandbeasts.heritage.command.HeritageCommands;
-import at.koopro.wizardsandbeasts.command.MinistryCommands;
-import at.koopro.wizardsandbeasts.module.command.ModuleCommands;
-import at.koopro.wizardsandbeasts.skill.command.SkillCommands;
-import at.koopro.wizardsandbeasts.currency.command.VaultCommands;
-import at.koopro.wizardsandbeasts.wand.command.WandCommands;
-import at.koopro.wizardsandbeasts.command.WorldCommands;
-import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
+import at.koopro.wizardsandbeasts.pose.command.PoseCommands;
+import at.koopro.wizardsandbeasts.wand.command.BlankShapingSelfTest;
 import at.koopro.wizardsandbeasts.item.wand.DebugWandState;
 import at.koopro.wizardsandbeasts.network.debug.BeamDebugOpenS2CPayload;
 import at.koopro.wizardsandbeasts.network.debug.BeamPresetS2CPayload;
-import at.koopro.wizardsandbeasts.registry.ModAttachments;
-import at.koopro.wizardsandbeasts.util.GlowDebugTags;
+import at.koopro.wizardsandbeasts.render.outline.EntityOutlineService;
 import at.koopro.wizardsandbeasts.util.RgbHex;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -42,7 +30,17 @@ import java.util.Set;
 import at.koopro.wizardsandbeasts.registry.WandItemRegistry;
 
 /**
- * Root command registrar for {@code /wandb} and its deprecated alias {@code /wizardsandbeasts}.
+ * Root command registrar for {@code /wandb}.
+ *
+ * <p>The tree below this is eight <em>categories</em>, never a bare verb: {@code player},
+ * {@code magic}, {@code item}, {@code world}, {@code beast}, {@code ministry}, {@code admin},
+ * {@code debug}. It grew to nineteen flat top-level nodes one system at a time before that rule
+ * existed, so keep it — a new feature belongs inside whichever category already describes it, and
+ * a feature that fits none of them is a sign the category list needs revisiting, not that the top
+ * level needs a twentieth entry.
+ *
+ * <p>The {@code /wizardsandbeasts} alias root is gone. It registered the entire tree a second time,
+ * and the full command tree is serialised to every client that connects.
  *
  * <p>Call {@link #register(RegisterCommandsEvent)} from the {@code RegisterCommandsEvent} subscriber.
  */
@@ -56,11 +54,10 @@ public final class WandbCommands {
     public static void register(RegisterCommandsEvent event) {
         DebugModuleRegistry.bootstrap();
         event.getDispatcher().register(buildRoot("wandb"));
-        /** @deprecated Use /wandb. This alias will be removed in a future version. */
-        event.getDispatcher().register(buildRoot("wizardsandbeasts"));
     }
 
-    private static LiteralArgumentBuilder<CommandSourceStack> buildRoot(String rootLiteral) {
+    /** Visible for {@code CommandTreeShapeTest}, which asserts the category list above. */
+    static LiteralArgumentBuilder<CommandSourceStack> buildRoot(String rootLiteral) {
         LiteralArgumentBuilder<CommandSourceStack> debugRoot = Commands.literal("debug")
                 .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                 .then(DebugTreeCommand.register())
@@ -100,32 +97,25 @@ public final class WandbCommands {
                                 .then(Commands.literal("high").executes(ctx -> setBeamPreset(ctx.getSource(), "HIGH")))
                         )
                 )
-                .then(Commands.literal("stats")
-                        .executes(ctx -> showSpellTelemetry(ctx.getSource().getPlayerOrException())))
-                .then(WizMorphCommands.register());
+                // No `debug stats` node: it printed sync corrections and reject counters, which is
+                // the strict subset of `debug spell` / `debug spell rejects` that also collided by
+                // name with the player attribute tree now at `player stats`.
+                .then(WizMorphCommands.register())
+                .then(PoseCommands.register())
+                .then(ApparitionCommands.registerTest())
+                .then(BlankShapingSelfTest.register());
 
         DebugModuleRegistry.attachTo(debugRoot);
 
         return Commands.literal(rootLiteral)
-                .then(debugRoot)
-                .then(FlooCommands.register())
-                .then(PactCommands.register())
-                .then(HeritageCommands.register())
-                .then(BestiaryCommands.register())
-                .then(CreatureCommands.register())
-                .then(VaultCommands.register())
-                .then(SkillCommands.register())
-                .then(WandCommands.register())
-                .then(ModuleCommands.register())
-                .then(MinistryCommands.register())
+                .then(PlayerCommands.register())
+                .then(MagicCommands.register())
+                .then(ItemCommands.register())
                 .then(WorldCommands.register())
-                .then(AzkabanCommands.register())
-                .then(CharacterCommands.register())
-                .then(AnimagusCommands.register())
-                .then(StatsCommands.register())
-                .then(AbilityFrameworkCommands.register())
-                .then(at.koopro.wizardsandbeasts.pose.command.PoseCommands.register())
-                .then(at.koopro.wizardsandbeasts.apparition.command.ApparitionPointCommands.register());
+                .then(BeastCommands.register())
+                .then(MinistryCommands.register())
+                .then(AdminCommands.register())
+                .then(debugRoot);
     }
 
     private static int toggleBeamDebug(CommandSourceStack source) {
@@ -150,34 +140,6 @@ public final class WandbCommands {
         return 1;
     }
 
-    private static int showSpellTelemetry(ServerPlayer player) {
-        PlayerSpellData data = player.getData(ModAttachments.SPELL_DATA.get());
-        player.displayClientMessage(
-                Component.literal("[W&B]").withStyle(ChatFormatting.GOLD)
-                        .append(Component.literal(" Sync corrections: " + data.getSyncCorrections())
-                                .withStyle(ChatFormatting.RESET)),
-                false);
-        if (data.getRejectCounts().isEmpty()) {
-            player.displayClientMessage(
-                    Component.literal("No rejection telemetry recorded yet.").withStyle(ChatFormatting.GRAY), false);
-            return 1;
-        }
-        player.displayClientMessage(
-                Component.literal("[W&B]").withStyle(ChatFormatting.GOLD)
-                        .append(Component.literal(" Reject counters:").withStyle(ChatFormatting.RESET)),
-                false);
-        data.getRejectCounts().entrySet().stream()
-                .sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
-                .limit(8)
-                .forEach(e -> player.displayClientMessage(
-                        Component.literal("- " + e.getKey() + ": ")
-                                .withStyle(ChatFormatting.GRAY)
-                                .append(Component.literal(String.valueOf(e.getValue()))
-                                        .withStyle(ChatFormatting.WHITE)),
-                        false));
-        return 1;
-    }
-
     private static int setBeamPreset(CommandSourceStack source, String presetName) {
         ServerPlayer player;
         try {
@@ -196,7 +158,7 @@ public final class WandbCommands {
     /** Picks the beam renderer on the invoking player's client. Both stay wired; no restart needed. */
 
     private static int setGlowOff(CommandSourceStack source, ServerPlayer target) {
-        clearGlowTags(target);
+        EntityOutlineService.clear(target);
         source.sendSuccess(() -> Component.literal("Glow debug for ")
                 .withStyle(ChatFormatting.GRAY)
                 .append(target.getDisplayName().plainCopy().withStyle(ChatFormatting.WHITE))
@@ -206,8 +168,7 @@ public final class WandbCommands {
     }
 
     private static int setGlowHash(CommandSourceStack source, ServerPlayer target) {
-        clearGlowTags(target);
-        target.addTag(GlowDebugTags.HASH_COLOR_TAG);
+        EntityOutlineService.setHashColor(target);
         source.sendSuccess(() -> Component.literal("Glow debug for ")
                 .withStyle(ChatFormatting.GRAY)
                 .append(target.getDisplayName().plainCopy().withStyle(ChatFormatting.WHITE))
@@ -222,22 +183,13 @@ public final class WandbCommands {
             source.sendFailure(Component.literal("Invalid color. Use RRGGBB or #RRGGBB.").withStyle(ChatFormatting.RED));
             return 0;
         }
-        clearGlowTags(target);
-        target.addTag(GlowDebugTags.COLOR_TAG_PREFIX + hex);
+        EntityOutlineService.setColor(target, Integer.parseInt(hex, 16));
         source.sendSuccess(() -> Component.literal("Glow debug for ")
                 .withStyle(ChatFormatting.GRAY)
                 .append(target.getDisplayName().plainCopy().withStyle(ChatFormatting.WHITE))
                 .append(Component.literal(": ").withStyle(ChatFormatting.GRAY))
                 .append(Component.literal("#" + hex).withStyle(ChatFormatting.GREEN)), true);
         return 1;
-    }
-
-    private static void clearGlowTags(ServerPlayer target) {
-        target.removeTag(GlowDebugTags.HASH_COLOR_TAG);
-        target.getTags().stream()
-                .filter(tag -> tag.startsWith(GlowDebugTags.COLOR_TAG_PREFIX))
-                .toList()
-                .forEach(target::removeTag);
     }
 
     private static int giveDebugWand(ServerPlayer player, String treeType) {

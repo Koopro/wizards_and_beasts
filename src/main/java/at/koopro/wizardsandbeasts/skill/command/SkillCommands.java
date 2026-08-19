@@ -58,7 +58,7 @@ public final class SkillCommands {
                                 .executes(ctx -> tryUnlockSkill(
                                         ctx.getSource().getPlayerOrException(),
                                         StringArgumentType.getString(ctx, "skill")))))
-                .then(Commands.literal("forceunlock")
+                .then(Commands.literal("force_unlock")
                         .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("skill", StringArgumentType.word())
@@ -93,13 +93,14 @@ public final class SkillCommands {
                                         Arrays.stream(SkillTreeId.values()).map(SkillTreeId::getId), builder))
                                 .executes(ctx -> listTree(
                                         ctx.getSource().getPlayerOrException(),
-                                        StringArgumentType.getString(ctx, "tree")))))
-                .then(vocationCommand());
+                                        StringArgumentType.getString(ctx, "tree")))));
     }
 
     // ── Vocation specialization sub-tree (Skill System v2) ──
+    // A sibling of `skill`, not a child: a vocation is a lifelong declaration, not one more
+    // thing you spend skill points on, and burying it cost it a level of tab-completion depth.
 
-    private static LiteralArgumentBuilder<CommandSourceStack> vocationCommand() {
+    public static LiteralArgumentBuilder<CommandSourceStack> registerVocation() {
         return Commands.literal("vocation")
                 .then(Commands.literal("info")
                         .executes(ctx -> vocationInfo(ctx.getSource().getPlayerOrException())))
