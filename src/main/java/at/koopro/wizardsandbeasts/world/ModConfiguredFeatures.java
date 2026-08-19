@@ -10,17 +10,14 @@ import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 public class ModConfiguredFeatures {
 
     public static final ResourceKey<ConfiguredFeature<?, ?>> ELDER_TREE_KEY =
-            ResourceKey.create(Registries.CONFIGURED_FEATURE, Identifier.tryParse(WizardsAndBeastsMod.MODID + ":elder_tree"));
+            key("elder_tree");
     public static final ResourceKey<ConfiguredFeature<?, ?>> YEW_TREE_KEY =
-            ResourceKey.create(Registries.CONFIGURED_FEATURE, Identifier.tryParse(WizardsAndBeastsMod.MODID + ":yew_tree"));
+            key("yew_tree");
     public static final ResourceKey<ConfiguredFeature<?, ?>> HOLLY_TREE_KEY =
-            ResourceKey.create(Registries.CONFIGURED_FEATURE, Identifier.tryParse(WizardsAndBeastsMod.MODID + ":holly_tree"));
+            key("holly_tree");
     public static final ResourceKey<ConfiguredFeature<?, ?>> ROWAN_TREE_KEY =
-            ResourceKey.create(Registries.CONFIGURED_FEATURE, Identifier.tryParse(WizardsAndBeastsMod.MODID + ":rowan_tree"));
+            key("rowan_tree");
 
-    // New species use fromNamespaceAndPath rather than the tryParse above: tryParse is nullable and
-    // feeds straight into ResourceKey.create, so a malformed id NPEs at class-init instead of failing
-    // legibly. Converting the four existing keys is a separate mechanical pass (AUDIT_PUNCHLIST).
     public static final ResourceKey<ConfiguredFeature<?, ?>> ASH_TREE_KEY = key("ash_tree");
     public static final ResourceKey<ConfiguredFeature<?, ?>> BLACKTHORN_TREE_KEY = key("blackthorn_tree");
     public static final ResourceKey<ConfiguredFeature<?, ?>> HAWTHORN_TREE_KEY = key("hawthorn_tree");

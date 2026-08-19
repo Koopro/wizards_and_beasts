@@ -10,13 +10,18 @@ import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 public class ModPlacedFeatures {
 
     public static final ResourceKey<PlacedFeature> ELDER_TREE_KEY =
-            ResourceKey.create(Registries.PLACED_FEATURE, Identifier.tryParse(WizardsAndBeastsMod.MODID + ":elder_tree"));
+            key("elder_tree");
     public static final ResourceKey<PlacedFeature> YEW_TREE_KEY =
-            ResourceKey.create(Registries.PLACED_FEATURE, Identifier.tryParse(WizardsAndBeastsMod.MODID + ":yew_tree"));
+            key("yew_tree");
     public static final ResourceKey<PlacedFeature> HOLLY_TREE_KEY =
-            ResourceKey.create(Registries.PLACED_FEATURE, Identifier.tryParse(WizardsAndBeastsMod.MODID + ":holly_tree"));
+            key("holly_tree");
     public static final ResourceKey<PlacedFeature> ROWAN_TREE_KEY =
-            ResourceKey.create(Registries.PLACED_FEATURE, Identifier.tryParse(WizardsAndBeastsMod.MODID + ":rowan_tree"));
+            key("rowan_tree");
+
+    private static ResourceKey<PlacedFeature> key(String path) {
+        return ResourceKey.create(Registries.PLACED_FEATURE,
+                Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, path));
+    }
 
     private ModPlacedFeatures() {
     }
