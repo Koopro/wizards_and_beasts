@@ -1840,3 +1840,45 @@ fixed, except where noted.
 - [ ] **NICE-TO-HAVE — no atlas regions were orphaned by the collapse.** §6 asked for orphans to be
   left in place and reported. There are none: the texture is packed from the geometry every run, so
   removing variants re-lays-out the whole sheet rather than leaving holes in it.
+
+## Wand System Audit (2026-08-19) — found-but-untouched
+
+Read-only scoping pass for the tooltip and core-migration candidates; see
+`documentation/WAND_SYSTEM_AUDIT.md` for the full findings. Nothing below was fixed.
+
+- [ ] **POLISH — `/wandb magic spell info` prints an "Effective damage" the cast pipeline never
+  produces.** `SpellCommands.java:214` computes `spell.getBaseDamage() * skillDamageMult *
+  wand.damageFor(spell)`. That omits six modifier sources the real path applies — wand
+  corruption/integrity, foreign master, Obscurial, vocation, Niffler happiness and player stats
+  (`SpellExecutor.java:62-76`) — and bypasses the `ModifierStack` clamp (`HARD_CAP` 3.0 /
+  `HARD_FLOOR` 0.25) entirely. The multiplier line above it is accurate; only the derived figures
+  are wrong. Matters more than it looks, because it is the obvious thing to copy into a tooltip.
+
+- [ ] **NICE-TO-HAVE — `WandCore.STREAM_CODEC` is ordinal-based.** `WandCore.java:26-27` uses
+  `ByteBufCodecs.idMapper(i -> values()[i], WandCore::ordinal)`, so inserting, removing or reordering
+  a constant silently changes every later constant's wire id. The enum is still network-synchronised
+  through the `wand_core_legacy` component (`ModDataComponents.java:45-50`). `WandWood`,
+  `WandLength` and `WandFlexibility` share the pattern — worth checking together. A
+  `StringRepresentable`-backed stream codec would be immune; the persistent codec already is.
+
+- [ ] **NICE-TO-HAVE — two `WandCore` constants have no definition, no recipe and no way to obtain
+  them.** `ROUGAROU_HAIR` and `WHITE_RIVER_MONSTER_SPINE` exist only in the enum and its switch: no
+  JSON under `wand_cores/`, and none of the 80 wandmaking recipes names them. Their cast contribution
+  is real but unreachable. Retiring them is not free — see the ordinal note above. Design ruling, not
+  a fix: `WAND_SYSTEM_AUDIT.md` §4 decision 1.
+
+- [ ] **NICE-TO-HAVE — `spell_modifiers` is a required codec field that nothing reads.**
+  `WandWoodDefinition.java:29` declares it with `fieldOf`, not `optionalFieldOf`, so every wood JSON
+  must carry a block whose only consumer is its own javadoc. Deliberate per the comment (the schools
+  it is keyed by have no `SpellCategory` counterpart), but "deliberate and unread" and "mandatory"
+  are a poor pairing — making it optional costs nothing and stops new woods inheriting dead weight.
+
+- [ ] **NICE-TO-HAVE — 6 of 10 wand woods carry no `cast_modifiers`, so they contribute nothing to a
+  cast.** `ash`, `blackthorn`, `hawthorn`, `vine`, `walnut`, `willow`. The four that do — `elder`,
+  `holly`, `rowan`, `yew` — are exactly the four that also exist as trees. Whether that is the
+  intended balance or an authoring gap is a ruling, not a defect.
+
+- [ ] **POLISH — `AUDIT_PUNCHLIST.md` and prompt briefs still describe an uncommitted wand tangle
+  that no longer exists.** The obscurus / horntail / basilisk files and the ~24 wandmaking recipes
+  were committed on 2026-08-19 (`569be832`..`0e546a33`); the tree is clean and there are 80 recipes,
+  not 24. Any future prompt inheriting that framing will quarantine files that are already in git.
