@@ -3118,3 +3118,72 @@ is a whole heritage whose three variants (`common`, `warrior`, `rune`) are all f
 separate species, not a human lineage. Form replacement is the correct mechanism and is what already
 ships. Same reasoning for `house_elf` and `centaur`, both of which are also fully playable heritages
 despite the brief asserting they were not.
+
+## Wand cast modifiers: four woods deliberately re-tuned
+
+`elder`, `holly`, `rowan` and `yew` already carried a `cast_modifiers` block. Those values were
+transcribed verbatim out of `WandStatsResolver.applyWood`'s enum table when woods became
+datapack-driven, because that migration was required to be behaviour-neutral — they were never chosen,
+only preserved. They are now replaced by an authored tuning table.
+
+| wood | was | now |
+| --- | --- | --- |
+| elder | 1.05 dmg, 0.95 cd | 1.20 dmg, 0.85 cd, 1.15 range, −0.03 fizzle |
+| holly | neutral + COMBAT +0.05 | 0.95 dmg, 0.95 cd, −0.02 fizzle, DEFENSE +0.12 |
+| rowan | neutral + DEFENSE +0.05, −0.02 fizzle | 0.92 dmg, 0.90 cd, −0.04 fizzle, DEFENSE +0.15, DARK_ARTS −0.10 |
+| yew | neutral + DARK_ARTS +0.05 | 1.18 dmg, 1.05 range, +0.02 fizzle, DARK_ARTS +0.15 |
+
+The other six woods went from neutral to authored. `WandWoodCastModifierTest` was updated to pin the
+new table and now pins all ten, so a newly added wood cannot arrive untested.
+
+## Three category bonuses were specified against categories that do not exist
+
+`SpellCategory` has exactly four constants — `COMBAT`, `UTILITY`, `DEFENSE`, `DARK_ARTS`. The tuning
+table asked for **Healing** (hawthorn, willow), **Transfiguration** (thunderbird_tail_feather) and
+**Charms** (veela_hair). Each was **omitted**, not mapped onto a different category: substituting
+`UTILITY` for Healing would silently make a healing wand better at unlocking doors.
+
+Consequence: willow, thunderbird_tail_feather and veela_hair ship with multipliers and no category
+bonus at all. Hawthorn keeps its Dark Arts half and loses its Healing half.
+
+This is the same unresolved gap `spell_modifiers` has — the datapack speaks in magical schools and the
+cast path speaks in four categories, and nothing maps between them.
+
+## The `WandCore` enum switch was NOT deleted
+
+The plan was to delete it once every core read from the datapack. Three of the ten cores have no
+authored block and would have gone silently neutral:
+
+- `troll_whisker` — has a definition file, no values supplied for it
+- `rougarou_hair`, `white_river_monster_spine` — **no definition file at all**
+
+Authoring the latter two needs seven required fields each, and two of them are not decoration:
+`raw_power` feeds `WandResonanceSystem.coreTemperamentScore` (bonding) and
+`allegianceTransferResistance` feeds `WandDisarmAllegianceSystem` (whether a wand changes hands on a
+disarm). Those are balance decisions, so the values were not invented.
+
+The switch became `WandStatsResolver.applyCoreFallback`, marked temporary, consulted only when the
+datapack answers neutral. **This makes a neutral result mean "not authored" rather than "authored as
+neutral"** — a real conflation, and the reason the fallback is temporary rather than permanent. It
+goes when those three are authored; `ShippedWandDefinitionJsonTest.trollWhiskerRemainsUnauthored`
+fails loudly at that point to prompt the removal.
+
+The fallback also covers something the datapack cannot: a pre-migration stack whose legacy enum is
+`THESTRAL_TAIL` resolves to id `thestral_tail`, while the definition file is `thestral_tail_hair`. The
+lookup misses and the enum table answers correctly.
+
+## Tooltip shows contribution, never effective values
+
+`WandCastLines` renders deltas from neutral, not outcomes. A tooltip has no spell, no proficiency and
+no caster stats in scope, and `SpellExecutor` applies six further modifiers plus a bounded
+`ModifierStack` on top — so an "effective damage" figure computed at this layer would be wrong in a way
+no player could check. That is the defect `/wandb magic spell info` already carries (punchlisted).
+
+Two deviations worth recording:
+
+- **A net-negative misfire contribution renders no row.** `WandStats` clamps `fizzleChance` to [0, 1],
+  so elder's authored −0.03 really resolves to zero. Showing it as a benefit would put the tooltip and
+  the cast pipeline in disagreement, which is the one thing this feature must not do.
+- **The sign is an ASCII hyphen, not U+2212.** The typographic minus is outside Minecraft's bitmap font
+  providers and falls through to unifont, a separately downloaded asset — so it can render as a
+  missing-glyph box on the single character that says whether a number helps or hurts.

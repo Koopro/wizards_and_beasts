@@ -1882,3 +1882,39 @@ Read-only scoping pass for the tooltip and core-migration candidates; see
   that no longer exists.** The obscurus / horntail / basilisk files and the ~24 wandmaking recipes
   were committed on 2026-08-19 (`569be832`..`0e546a33`); the tree is clean and there are 80 recipes,
   not 24. Any future prompt inheriting that framing will quarantine files that are already in git.
+
+## Wand cast stats pass (2026-08-19) — found-but-untouched
+
+Implementation pass for the tooltip and the core datapack read. Scoping in
+`documentation/WAND_SYSTEM_AUDIT.md`; deviations in `documentation/MIGRATION_DELTAS.md`.
+
+- [ ] **BLOCKER — `rougarou_hair` and `white_river_monster_spine` have no definition file, so the
+  `WandCore` enum switch cannot be deleted.** Both are canon cores and explicitly not being retired,
+  but authoring them needs seven required fields each, two of which drive live systems: `raw_power`
+  (`WandResonanceSystem.coreTemperamentScore`, bonding) and `allegiance_transfer_resistance`
+  (`WandDisarmAllegianceSystem`, whether a wand changes hands on a disarm). Those are balance
+  decisions and were not invented. Until they exist, `WandStatsResolver.applyCoreFallback` has to
+  stay, which keeps a dual source of truth alive. Existing cores span `raw_power` 1.15–1.95 and
+  `allegiance_transfer_resistance` 0.40–1.25 for reference.
+
+- [ ] **BLOCKER — `troll_whisker` has a definition but no `cast_modifiers`.** No values were supplied
+  for it in the tuning table. It is the third core keeping the fallback alive. Its current
+  contribution, from the enum table, is ×1.10 damage / ×1.08 cooldown / +0.04 fizzle — deleting the
+  switch without authoring this takes it to neutral.
+
+- [ ] **POLISH — Healing, Transfiguration and Charms have no `SpellCategory` counterpart.** The wand
+  tuning table specified bonuses in all three; each was omitted rather than mapped onto a category
+  that means something else. Willow, `thunderbird_tail_feather` and `veela_hair` therefore ship with
+  no category bonus at all, and hawthorn keeps only half of what was specified. Same underlying gap as
+  the unread `spell_modifiers` field: the datapack speaks in magical schools, the cast path speaks in
+  four categories, and nothing maps between them. Either the categories grow or the schools get a
+  mapping — both are balance rulings.
+
+- [ ] **NICE-TO-HAVE — a neutral `cast_modifiers` result now means two different things for cores.**
+  `applyCore` reads neutral as "not authored" so it can fall back to the enum table, which makes
+  "authored as exactly neutral" unexpressible for a core. Harmless today because no core is authored
+  neutral, and it disappears with the fallback — but it is a real ambiguity while it lasts.
+
+Previously logged by the audit and still open, restated because this pass touched the same files:
+the ordinal-based `WandCore.STREAM_CODEC`, and `/wandb magic spell info`'s wrong derived-damage line
+plus its missing `.requires(ADMIN)`.
