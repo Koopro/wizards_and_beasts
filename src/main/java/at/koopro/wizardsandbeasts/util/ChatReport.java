@@ -168,15 +168,35 @@ public final class ChatReport {
     }
 
     /**
-     * A bar over a value that is not a proportion: {@code   Power ▰▰▰▰▰▱▱▱▱▱▱▱  42/100}.
+     * One row of a comparable set: {@code   █████░░░░░░░  42/100  Power}.
      *
-     * <p>Separate from {@link #bar} because printing "42%" for a stat scored out of a hundred quietly
-     * asserts it is a percentage of something, and the next stat scored out of ten would then read
-     * wrong in the same place.
+     * <p>Two differences from {@link #bar}, both deliberate.
+     *
+     * <p>It prints the value rather than a percentage, because calling 42 out of 100 "42%" asserts it
+     * is a proportion of something, and the next stat scored out of ten would read wrong in the same
+     * place.
+     *
+     * <p><b>The track comes first and the label last.</b> Minecraft's font is proportional, so a
+     * label-first row starts its track wherever that label happened to end — "Willpower" is wider than
+     * "Power", and a column of meters comes out ragged with no two bars beginning at the same x. The
+     * whole reason to draw a set of meters is to compare them at a glance, so the bars are what has to
+     * line up, and only a leading fixed-width track can. It reads slightly backwards for a single row,
+     * which is what {@link #bar} is for.
      */
     public ChatReport meter(String label, int value, int max, @Nullable Component hover) {
         float ratio = max <= 0 ? 0.0f : (float) value / max;
-        MutableComponent line = meterLine(label, ratio, value + "/" + max);
+        float clamped = Math.max(0.0f, Math.min(1.0f, ratio));
+        int filled = Math.round(clamped * BAR_CELLS);
+        String track = String.valueOf(BAR_FULL).repeat(filled)
+                + String.valueOf(BAR_EMPTY).repeat(BAR_CELLS - filled);
+        int tone = clamped >= 1.0f ? ChatPalette.OK : ChatPalette.ACCENT;
+
+        MutableComponent line = Component.literal(INDENT)
+                .append(Component.literal(track).withStyle(ChatPalette.color(tone)))
+                .append(Component.literal("  " + value + "/" + max)
+                        .withStyle(ChatPalette.color(ChatPalette.MUTED)))
+                .append(Component.literal("  " + label)
+                        .withStyle(ChatPalette.color(ChatPalette.LABEL)));
         if (hover != null) {
             line = line.withStyle(style -> style.withHoverEvent(new HoverEvent.ShowText(hover)));
         }

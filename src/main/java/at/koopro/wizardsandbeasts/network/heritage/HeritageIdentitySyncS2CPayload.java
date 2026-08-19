@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.network.heritage;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
+import at.koopro.wizardsandbeasts.heritage.TransformationState;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
@@ -24,9 +25,15 @@ import java.util.UUID;
  * heritage and nobody else's — which is fine for a HUD and useless for rendering, because the whole
  * point of a visible heritage is that other people see it.
  *
- * <p>Deliberately narrow: identity only, no profession points, no flags, no transformation state.
- * Everything here is already public knowledge the moment the player is visible, so broadcasting it
- * leaks nothing that looking at them would not.
+ * <p>Deliberately narrow: what a player <em>is</em> and what shape they are currently in. No
+ * profession points, no flags, no stat spread. Everything here is already public knowledge the moment
+ * the player is visible, so broadcasting it leaks nothing that looking at them would not.
+ *
+ * <p>{@code transformationState} was added for exactly that reason. It used to travel only on
+ * {@code HeritageDataSyncS2CPayload}, which is sent to one player, so a transformed werewolf knew they
+ * were transformed and nobody else on the server did. Any render path keyed off it worked in
+ * single-player and silently failed for every remote player — the one failure single-player testing
+ * cannot catch.
  *
  * <p>Mirrors {@code FormSyncS2CPayload} — same {@code syncToTracking} / {@code syncTo} pair, driven
  * from the same lifecycle quartet in {@code FormLifecycleHandler}.
@@ -34,11 +41,13 @@ import java.util.UUID;
  * @param playerUUID the player this describes
  * @param heritageId {@link Heritage#getId()}, or empty for a player who has not chosen yet
  * @param variantId  {@link HeritageVariant#getId()}, or empty
+ * @param transformationState {@link TransformationState#name()}; {@code NORMAL} when untransformed
  */
 public record HeritageIdentitySyncS2CPayload(
         UUID playerUUID,
         String heritageId,
-        String variantId
+        String variantId,
+        String transformationState
 ) implements CustomPacketPayload {
 
     public static final Type<HeritageIdentitySyncS2CPayload> TYPE = new Type<>(
@@ -50,7 +59,8 @@ public record HeritageIdentitySyncS2CPayload(
             UUID uuid = PacketCodecUtils.readUUID(buf);
             String heritageId = PacketCodecUtils.readString(buf);
             String variantId = PacketCodecUtils.readString(buf);
-            return new HeritageIdentitySyncS2CPayload(uuid, heritageId, variantId);
+            String transformationState = PacketCodecUtils.readString(buf);
+            return new HeritageIdentitySyncS2CPayload(uuid, heritageId, variantId, transformationState);
         }
 
         @Override
@@ -58,6 +68,7 @@ public record HeritageIdentitySyncS2CPayload(
             PacketCodecUtils.writeUUID(buf, pkt.playerUUID);
             PacketCodecUtils.writeString(buf, pkt.heritageId);
             PacketCodecUtils.writeString(buf, pkt.variantId);
+            PacketCodecUtils.writeString(buf, pkt.transformationState);
         }
     };
 
@@ -83,9 +94,11 @@ public record HeritageIdentitySyncS2CPayload(
         PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
         Heritage heritage = data.getSelectedHeritage();
         HeritageVariant variant = data.getSelectedHeritageVariant();
+        TransformationState state = data.getTransformationState();
         return new HeritageIdentitySyncS2CPayload(
                 player.getUUID(),
                 heritage == null ? "" : heritage.getId(),
-                variant == null ? "" : variant.getId());
+                variant == null ? "" : variant.getId(),
+                state == null ? TransformationState.NORMAL.name() : state.name());
     }
 }

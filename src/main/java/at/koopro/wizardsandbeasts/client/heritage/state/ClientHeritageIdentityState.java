@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.client.heritage.state;
 
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
+import at.koopro.wizardsandbeasts.heritage.TransformationState;
 
 import org.jspecify.annotations.Nullable;
 
@@ -19,6 +20,10 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * <p>Same shape as {@code ClientFormDataState}: a concurrent map, written from the payload handler
  * and read from the render thread.
+ *
+ * <p>Carries {@code transformationState} too. That used to live only on the local player's
+ * {@code PlayerHeritageData}, so anything keyed off it rendered correctly in single-player and did
+ * nothing for remote players — a failure mode no single-player test can reach.
  */
 public final class ClientHeritageIdentityState {
 
@@ -31,7 +36,8 @@ public final class ClientHeritageIdentityState {
      * null-ish one, so "has not chosen a heritage" and "we were never told" are the same state to a
      * reader — which they are.
      */
-    public static void update(UUID playerUUID, String heritageId, String variantId) {
+    public static void update(UUID playerUUID, String heritageId, String variantId,
+                              String transformationState) {
         Heritage heritage = Heritage.byId(heritageId);
         if (heritage == null) {
             IDENTITIES.remove(playerUUID);
@@ -42,7 +48,23 @@ public final class ClientHeritageIdentityState {
             // A variant from another heritage is a server-side bug, not something to render around.
             variant = null;
         }
-        IDENTITIES.put(playerUUID, new Identity(heritage, variant));
+        IDENTITIES.put(playerUUID, new Identity(heritage, variant, parseState(transformationState)));
+    }
+
+    /**
+     * An unrecognised state reads as {@code NORMAL} rather than throwing. A client on an older build
+     * than the server will meet states it has no constant for, and the right answer to "I do not know
+     * what shape they are in" is to draw them as themselves, not to drop the packet.
+     */
+    private static TransformationState parseState(@Nullable String raw) {
+        if (raw == null || raw.isBlank()) {
+            return TransformationState.NORMAL;
+        }
+        try {
+            return TransformationState.valueOf(raw);
+        } catch (IllegalArgumentException ignored) {
+            return TransformationState.NORMAL;
+        }
     }
 
     public static @Nullable Identity get(UUID playerUUID) {
@@ -65,5 +87,11 @@ public final class ClientHeritageIdentityState {
         return IDENTITIES.size();
     }
 
-    public record Identity(Heritage heritage, @Nullable HeritageVariant variant) {}
+    /**
+     * @param transformationState what shape this player is currently in. Present here rather than only
+     *                            on the local player's {@code PlayerHeritageData} because a renderer
+     *                            needs it for everyone in the room, which is the whole point.
+     */
+    public record Identity(Heritage heritage, @Nullable HeritageVariant variant,
+                           TransformationState transformationState) {}
 }

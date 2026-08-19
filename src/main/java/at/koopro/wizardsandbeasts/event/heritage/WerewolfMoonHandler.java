@@ -163,7 +163,7 @@ public final class WerewolfMoonHandler {
         }
         data.setTransformationState(TransformationState.TRANSFORMED);
         HeritageAPI.applyStats(player);
-        HeritageDataSyncS2CPayload.syncToPlayer(player, false);
+        HeritageAPI.syncTransformation(player);
 
         // Wolfsbane's one honest effect here. It does not stop the change — canon is explicit that it
         // never did — it stops the change from leaving the werewolf reeling. This is also the first
@@ -186,7 +186,7 @@ public final class WerewolfMoonHandler {
         }
         data.setTransformationState(TransformationState.NORMAL);
         HeritageAPI.applyStats(player);
-        HeritageDataSyncS2CPayload.syncToPlayer(player, false);
+        HeritageAPI.syncTransformation(player);
 
         player.displayClientMessage(
                 Component.translatable("message.wizards_and_beasts.werewolf.revert"), true);

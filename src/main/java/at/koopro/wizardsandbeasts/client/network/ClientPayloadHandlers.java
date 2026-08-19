@@ -136,7 +136,8 @@ public final class ClientPayloadHandlers {
             IPayloadContext context) {
         context.enqueueWork(() ->
                 at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageIdentityState.update(
-                        payload.playerUUID(), payload.heritageId(), payload.variantId()));
+                        payload.playerUUID(), payload.heritageId(), payload.variantId(),
+                        payload.transformationState()));
     }
 
     public static void handleSyncHeritageAppearance(

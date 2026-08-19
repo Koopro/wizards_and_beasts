@@ -3,6 +3,8 @@ package at.koopro.wizardsandbeasts.heritage;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialRules;
+import at.koopro.wizardsandbeasts.network.heritage.HeritageDataSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.heritage.HeritageIdentitySyncS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.stats.PlayerStat;
 import at.koopro.wizardsandbeasts.stats.PlayerStatsAPI;
@@ -42,6 +44,24 @@ public final class HeritageAPI {
 
     public static boolean isLocked(ServerPlayer player) {
         return getData(player).isLocked();
+    }
+
+    /**
+     * Publishes a transformation the player has just undergone: to themselves, and to everyone who can
+     * see them.
+     *
+     * <p>Both halves matter and they are easy to get half-right. {@code HeritageDataSyncS2CPayload}
+     * goes to one player, which is what the HUD needs; the identity payload goes to every tracker,
+     * which is what a renderer needs. Every site that changed {@code transformationState} used to send
+     * only the first, so a transformed werewolf knew they were a wolf and nobody else on the server
+     * did — correct in single-player, wrong the moment a second person is watching.
+     *
+     * <p>Call this instead of the payloads directly whenever the shape a player is in changes, so the
+     * next transformation trigger cannot repeat that.
+     */
+    public static void syncTransformation(ServerPlayer player) {
+        HeritageDataSyncS2CPayload.syncToPlayer(player, false);
+        HeritageIdentitySyncS2CPayload.syncToTracking(player);
     }
 
     public static void applyStats(ServerPlayer player) {

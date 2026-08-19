@@ -32,11 +32,16 @@ import java.util.Optional;
  * an asset swapped and a provenance corrected by editing one JSON and running {@code /reload}, rather
  * than by recompiling — which is also what makes the in-game verification matrix testable at all.
  *
- * <p><b>Resolution is by heritage and variant, but rendering keys off the active form id.</b> The
- * server syncs {@code activeFormId} to every tracking client ({@code FormSyncS2CPayload}) but syncs
- * {@code transformationState} only to the player it belongs to ({@code ClientHeritageDataState} holds
- * a single instance). Anything keyed off transformation state works in single-player and silently
- * fails for every remote player.
+ * <p><b>Resolution is by heritage and variant; rendering keys off the active form id.</b> The server
+ * syncs {@code activeFormId} to every tracking client ({@code FormSyncS2CPayload}), which is what makes
+ * a remote player's shape renderable at all.
+ *
+ * <p>{@code transformationState} now reaches every tracking client too, on
+ * {@code HeritageIdentitySyncS2CPayload}, and is readable per-UUID from
+ * {@code ClientHeritageIdentityState}. It previously travelled only to the player it belonged to, so
+ * anything keyed off it worked in single-player and silently failed for every remote player. Read it
+ * from the per-UUID map, never from {@code ClientHeritageDataState} — that still holds a single
+ * instance and still describes only the local player.
  *
  * @param id          the entry's own identifier, taken from its file path, mirroring
  *                    {@code BestiaryEntry.id}

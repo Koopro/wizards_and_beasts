@@ -65,7 +65,7 @@ public final class ObscurialHeritageHandler {
 
         if (event.getFromFormId().startsWith("obscurial_") || event.getToFormId().startsWith("obscurial_")) {
             data.setTransformationState(TransformationState.TRANSITIONING);
-            HeritageDataSyncS2CPayload.syncToPlayer(player, false);
+            HeritageAPI.syncTransformation(player);
         }
     }
 
@@ -184,7 +184,7 @@ public final class ObscurialHeritageHandler {
         if (data.getTransformationState() != derived || forceSync) {
             data.setTransformationState(derived);
             HeritageAPI.applyStats(player);
-            HeritageDataSyncS2CPayload.syncToPlayer(player, false);
+            HeritageAPI.syncTransformation(player);
         }
     }
 
@@ -348,6 +348,9 @@ public final class ObscurialHeritageHandler {
         long lastSync = ObscurialValueCodec.parseLong(data.getFlag(FLAG_LAST_RESOURCE_SYNC_TICK), 0L);
         if (gameTime - lastSync >= RESOURCE_SYNC_INTERVAL_TICKS) {
             data.setFlag(FLAG_LAST_RESOURCE_SYNC_TICK, String.valueOf(gameTime));
+            // Resource numbers for the local HUD only, on a timer. Deliberately not
+            // HeritageAPI.syncTransformation: nothing has changed shape, and broadcasting identity to
+            // every tracker on an interval is traffic for no one's benefit.
             HeritageDataSyncS2CPayload.syncToPlayer(player, false);
         }
     }
