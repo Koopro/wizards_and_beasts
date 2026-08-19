@@ -84,6 +84,21 @@ public final class ApparitionServerLogic {
     }
 
     /**
+     * Whether the wizard has been taught to Apparate — the "trained" half of the gate, without the
+     * heritage check {@link #canApparate} folds in. Read by
+     * {@code at.koopro.wizardsandbeasts.apparition.licence.ApparitionLicence}, which needs to tell an
+     * untrained wizard apart from one whose heritage bars them.
+     */
+    public static boolean hasTraining(ServerPlayer player) {
+        return hasApparitionUnlock(player);
+    }
+
+    /** Whether this player Apparates by elf-magic; see {@link #isElfApparition}. */
+    public static boolean isElfMagic(ServerPlayer player) {
+        return isElfApparition(player);
+    }
+
+    /**
      * Whether the player is <i>permitted</i> to Apparate at all. Read-only; used by the ability grant layer to
      * decide wheel visibility. {@link #canBeginAttempt} remains the authority and re-runs every check.
      */

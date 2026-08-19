@@ -2,9 +2,12 @@ package at.koopro.wizardsandbeasts.apparition.command;
 
 import at.koopro.wizardsandbeasts.apparition.ApparitionAnchors;
 import at.koopro.wizardsandbeasts.apparition.ApparitionPoint;
+import at.koopro.wizardsandbeasts.ability.PlayerAbilityHelper;
 import at.koopro.wizardsandbeasts.apparition.ApparitionServerLogic;
+import at.koopro.wizardsandbeasts.apparition.licence.ApparitionLicence;
 import at.koopro.wizardsandbeasts.apparition.PlayerApparitionPoints;
 import at.koopro.wizardsandbeasts.apparition.sidealong.SideAlongService;
+import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 import at.koopro.wizardsandbeasts.network.apparition.ApparitionPointsSyncS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -18,9 +21,11 @@ import net.minecraft.util.Mth;
 import org.jspecify.annotations.NullMarked;
 
 /**
- * {@code /wandb magic apparate mark|forget|list} — how a player memorises the places they can Apparate to.
- * Unlike the ward/test commands next door this is ordinary gameplay, so it is <b>not</b> permission-gated;
- * each subcommand only ever touches the caller's own saved list.
+ * {@code /wandb magic apparate …} — the player-facing half of Apparition: the places they have memorised,
+ * a standing side-along offer, and the Ministry test that earns them a licence.
+ *
+ * <p>Unlike the ward commands next door this is all ordinary gameplay, so it is <b>not</b>
+ * permission-gated; every subcommand only ever touches the caller's own record.
  */
 @NullMarked
 public final class ApparitionPointCommands {
@@ -38,7 +43,54 @@ public final class ApparitionPointCommands {
                 .then(Commands.literal("list")
                         .executes(ctx -> list(ctx.getSource())))
                 .then(Commands.literal("accept")
-                        .executes(ctx -> accept(ctx.getSource())));
+                        .executes(ctx -> accept(ctx.getSource())))
+                .then(Commands.literal("licence")
+                        .executes(ctx -> licence(ctx.getSource())))
+                .then(Commands.literal("test")
+                        .executes(ctx -> takeTest(ctx.getSource())));
+    }
+
+    /**
+     * Where the player stands on the way to a licence. Not decoration: the practice requirement is
+     * invisible otherwise — proficiency is server-side and unsynced — so without this a wizard has no
+     * way to know whether they are one jump from the test or fifty.
+     */
+    private static int licence(CommandSourceStack source) {
+        ServerPlayer player = source.getPlayer();
+        if (player == null) {
+            return 0;
+        }
+        if (PlayerAbilityHelper.isApparitionLicensed(player)) {
+            PlayerFeedback.chat(player, Component.translatable(
+                    "apparition.wizards_and_beasts.licence.held").withStyle(ChatFormatting.GREEN));
+            return 1;
+        }
+        ApparitionLicence.Eligibility verdict = ApparitionLicence.evaluate(player);
+        PlayerFeedback.chat(player, verdict.reason().copy()
+                .withStyle(verdict.eligible() ? ChatFormatting.GREEN : ChatFormatting.GRAY));
+        return verdict.eligible() ? 1 : 0;
+    }
+
+    /**
+     * Sits the Ministry Apparition Test. A pass is a discrete, once-per-character event, so it is a
+     * toast rather than the action bar; a refusal carries the reason that says what is still missing.
+     */
+    private static int takeTest(CommandSourceStack source) {
+        ServerPlayer player = source.getPlayer();
+        if (player == null) {
+            return 0;
+        }
+        ApparitionLicence.Eligibility verdict = ApparitionLicence.takeTest(player);
+        if (!verdict.eligible()) {
+            PlayerFeedback.refuse(player,
+                    Component.translatable("apparition.wizards_and_beasts.test.refused"),
+                    verdict.reason());
+            return 0;
+        }
+        PlayerFeedback.unlocked(player,
+                Component.translatable("apparition.wizards_and_beasts.test.passed"),
+                Component.translatable("apparition.wizards_and_beasts.test.passed.body"));
+        return 1;
     }
 
     /**
