@@ -231,15 +231,15 @@ public final class AttributesTab implements CharacterTab {
         g.fill(barX, hairY, barX + hair, hairY + 1, COLOR_TRAINING_FILL);
     }
 
-    /** KNOWLEDGE is derived server-side; the client reads the last synced snapshot for all five. */
+    /**
+     * KNOWLEDGE is derived server-side; the client reads the last synced snapshot for every stat alike.
+     *
+     * <p>This was a switch naming each constant, which made the character sheet one of the places a new
+     * stat had to be remembered — and the compiler only caught it because the switch was exhaustive. The
+     * stat block is keyed by {@link PlayerStat} now, so a new constant renders here on its own.
+     */
     private static int valueOf(@NonNull PlayerStatsData stats, @NonNull PlayerStat stat) {
-        return switch (stat) {
-            case POWER     -> stats.power();
-            case PRECISION -> stats.precision();
-            case WILLPOWER -> stats.willpower();
-            case REFLEXES  -> stats.reflexes();
-            case KNOWLEDGE -> stats.knowledge();
-        };
+        return stats.get(stat);
     }
 
     private void drawAttributeRows(@NonNull GuiGraphics g, @NonNull LocalPlayer player,

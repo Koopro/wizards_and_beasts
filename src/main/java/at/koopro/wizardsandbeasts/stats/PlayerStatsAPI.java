@@ -36,14 +36,7 @@ public final class PlayerStatsAPI {
                     ? getData(player).knowledge()
                     : computeKnowledge(player);
         }
-        PlayerStatsData data = getData(player);
-        return switch (stat) {
-            case POWER     -> data.power();
-            case PRECISION -> data.precision();
-            case WILLPOWER -> data.willpower();
-            case REFLEXES  -> data.reflexes();
-            case KNOWLEDGE -> data.knowledge(); // unreachable — handled above
-        };
+        return getData(player).get(stat);
     }
 
     /**
@@ -108,14 +101,8 @@ public final class PlayerStatsAPI {
                     stat.getId(), player.getName().getString());
             return;
         }
-        PlayerStatsData old = getData(player);
-        PlayerStatsData updated = switch (stat) {
-            case POWER     -> old.withPower(value);
-            case PRECISION -> old.withPrecision(value);
-            case WILLPOWER -> old.withWillpower(value);
-            case REFLEXES  -> old.withReflexes(value);
-            case KNOWLEDGE -> old;
-        };
+        // Derived stats returned above, so this is always a real write; the record clamps.
+        PlayerStatsData updated = getData(player).with(stat, value);
         LOGGER.info("[WizardsAndBeasts] setStat: {} {} = {}", player.getName().getString(), stat.getId(), value);
         setAndSync(player, updated);
     }
