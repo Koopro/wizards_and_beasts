@@ -1918,3 +1918,44 @@ Implementation pass for the tooltip and the core datapack read. Scoping in
 Previously logged by the audit and still open, restated because this pass touched the same files:
 the ordinal-based `WandCore.STREAM_CODEC`, and `/wandb magic spell info`'s wrong derived-damage line
 plus its missing `.requires(ADMIN)`.
+
+## Wandwood worldgen pass (2026-08-19) — found-but-untouched
+
+Placement correctness and silhouette rework. Deviations in `documentation/MIGRATION_DELTAS.md`.
+
+- [ ] **BLOCKER — `vine` has no block, so it cannot be given a patch feature.** The brief's Phase 3
+  called for a `RANDOM_PATCH` feature placing "the existing vine wandwood block". There is no such
+  block: no blockstate, no `WoodSet`, nothing. Only `wand_woods/vine.json`, which is a wand-material
+  definition. Creating a block family is hard out of scope, so vine was left entirely untouched — it
+  has no tree feature today either, so nothing regressed. Needs a ruling on whether vine wandwood
+  should exist as a placeable block at all, given it is a climber rather than a tree.
+
+- [ ] **BLOCKER — 6 of 10 wandwood species have no blocks.** `ash`, `blackthorn`, `hawthorn`, `vine`,
+  `walnut`, `willow` have no log, wood, planks, leaves or sapling. All ten have wand-wood definitions
+  and all ten appear in the 80 wandmaking recipes, so a player can craft an ash wand from a wood that
+  exists nowhere in the world. Only elder, holly, rowan and yew are complete. Building the six is a
+  prompt of its own.
+
+- [ ] **POLISH — `ModConfiguredFeatures` uses `Identifier.tryParse()` at four sites.** Direct
+  violation of the project's own stack rule, and `tryParse` is nullable — it feeds straight into
+  `ResourceKey.create` with no null check, so a malformed id would NPE at class-init rather than
+  fail legibly. **Ten sites repo-wide**: also `ApparitionCommands` (×2), `BroomEntity`,
+  `ModuleCommands`, `ModuleIds`, `MapOpenS2CPayload`, `VocationCommitC2SPayload`,
+  `WandConfigCommands`. Mechanical fix, but it touches command parsing so it wants its own pass.
+
+- [ ] **NICE-TO-HAVE — wandwood worldgen is not gated by any module.** No `Module` or
+  `ModuleManager` reference exists anywhere under `world/`. `Module.WANDWOOD` exists and ships
+  `ENABLED`, and it owns "the four wandwood trees and every block cut from them" per its own javadoc
+  — but turning it off does not stop the trees generating. Every comparable subsystem gates its
+  access; this one does not.
+
+- [ ] **NICE-TO-HAVE — the four bespoke tree `Feature` classes are now unreferenced.** 402 lines
+  across `ElderTreeFeature`, `HollyTreeFeature`, `RowanTreeFeature`, `YewTreeFeature`, still
+  registered in `ModFeatures` but pointed at by nothing after the conversion to `minecraft:tree`.
+  Kept deliberately — gate access, never delete registration — but if no datapack is ever going to
+  use them, they are dead weight and someone should say so.
+
+- [ ] **NICE-TO-HAVE — biome mappings were not reviewed against species ecology.** Out of scope this
+  pass. Current: elder → dark forest + old-growth taigas; holly → forest/flower forest/grove; rowan →
+  birch forests + windswept; yew → taigas. Nothing looked obviously wrong, but the brief's own
+  example of a wrong mapping (willow not near water) cannot arise, since willow has no blocks.

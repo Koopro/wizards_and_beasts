@@ -3187,3 +3187,50 @@ Two deviations worth recording:
 - **The sign is an ASCII hyphen, not U+2212.** The typographic minus is outside Minecraft's bitmap font
   providers and falls through to unifont, a separately downloaded asset — so it can render as a
   missing-glyph box on the single character that says whether a number helps or hurts.
+
+## Wandwood placement: worlds generate differently from here
+
+All four wandwood trees placed on `MOTION_BLOCKING`, which is the highest block that blocks motion
+**or contains a fluid**. Leaves block motion and water is a fluid, so trees on canopies and trees
+standing on lakes were the heightmap behaving as documented, not an edge case.
+
+The stack is now vanilla's own, in this order: `rarity_filter` → `in_square` →
+`surface_water_depth_filter(0)` → `heightmap OCEAN_FLOOR` → `biome` →
+`block_predicate_filter(would_survive(<species>_sapling))`.
+
+**Newly generated chunks will differ.** Existing chunks keep whatever already generated, including
+any trees currently standing in water. Densities are unchanged — elder 8, holly 5, rowan 7, yew 6.
+
+The survival filter is doing more work here than it does in vanilla. The bespoke tree features
+performed **no ground validation of their own** — no dirt check, no `origin.below()` test — so they
+placed a trunk wherever they were handed. There is no second line of defence behind that filter.
+
+## Wandwood trees are vanilla `minecraft:tree` features now
+
+The four species were bespoke `Feature<NoneFeatureConfiguration>` classes (402 lines) that placed
+blocks directly with `setBlock`. They had no trunk placer, no foliage placer and no `FeatureSize`, so
+there was nothing to differentiate — which is why all four read as vanilla oak in play.
+
+| species | trunk | foliage | size | silhouette |
+| --- | --- | --- | --- | --- |
+| elder | forking | blob r2 h2 | 1,0,1 | small multi-stem shrub — smallest on purpose, it is the rarest |
+| holly | straight (short) | spruce | 2,0,2 | dense evergreen cone |
+| rowan | straight (tall) | blob r2 h3 off1 | 1,0,2 | slender, lifted airy crown |
+| yew | upwards_branching | blob r4 h3 | 1,1,3 | squat, gnarled, wide low crown |
+
+**This changes sapling growth too**, because saplings resolve the same configured features through
+their `TreeGrower`. Crown radii are held at ≤4 so a planted tree does not overrun a 5×5 plot by more
+than vanilla does.
+
+The four bespoke `Feature` classes and their `ModFeatures` registrations are **left registered and
+unreferenced**, not deleted — gate access, never delete registration. A datapack can still point at
+them.
+
+### Deviation: yew has no root placer
+
+The brief specified `UpwardsBranchingTrunkPlacer` **plus a root placer** for yew's gnarled base.
+`mangrove_root_placer` is the only root placer that exists in 1.21.11, and it requires a dedicated
+roots block through `root_provider`. The mod has none and adding one is out of scope, so the brief's
+own fallback applies. The upwards-branching trunk carries the knotted read alone, with
+`can_grow_through: "#minecraft:leaves"` so branches push through the canopy, plus a light
+`leave_vine` decorator at 0.08 for the ancient look.
