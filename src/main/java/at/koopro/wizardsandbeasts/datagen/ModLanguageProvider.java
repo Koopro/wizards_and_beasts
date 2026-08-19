@@ -164,6 +164,17 @@ public class ModLanguageProvider extends LanguageProvider {
         add("screen.wizards_and_beasts.skill_tree.need_points", "Need");
         add("screen.wizards_and_beasts.skill_tree.unlocked", "Unlocked");
         add("screen.wizards_and_beasts.skill_tree.maxed", "Maxed");
+        add("screen.wizards_and_beasts.skill_tree.footer", "Points: %s unspent  •  Earned: %s/%s  •  Spent: %s");
+        add("screen.wizards_and_beasts.skill_tree.controls", "Drag: pan  Scroll: zoom  Click: allocate");
+        add("screen.wizards_and_beasts.skill_tree.control.zoom_in", "Zoom in");
+        add("screen.wizards_and_beasts.skill_tree.control.zoom_out", "Zoom out");
+        add("screen.wizards_and_beasts.skill_tree.control.recenter", "Recentre the chart");
+        // The goblin and elf webs wear the same star-chart skin as the wizard one, so their
+        // regions need constellation names too — without them the canvas drew the raw lang key
+        // over the cluster.
+        add("skilltree.region.goblin_craft.constellation", "Fornix");
+        add("skilltree.region.elf_bond.constellation", "Vinculum");
+        add("skilltree.region.sealed.tooltip", "Sealed — this constellation does not answer to your blood.");
         add("screen.wizards_and_beasts.skill_access_denied.title", "Skill Access Denied");
         add("screen.wizards_and_beasts.skill_access_denied.hint", "This path is not available for your lineage.");
         add("screen.wizards_and_beasts.skill_access_denied.no_type", "Choose your type first.");
@@ -227,7 +238,9 @@ public class ModLanguageProvider extends LanguageProvider {
 
     private void entities() {
         // Entities
-        add("entity.wizards_and_beasts.goblin_teller", "Goblin Teller");
+        // "Teller" is only one of the four Gringotts roles it now spawns as; the registry id stays
+        // goblin_teller because it is world-facing.
+        add("entity.wizards_and_beasts.goblin_teller", "Gringotts Goblin");
         add("entity.wizards_and_beasts.niffler", "Niffler");
         add("entity.wizards_and_beasts.form_mannequin", "Form Mannequin");
         add("item.wizards_and_beasts.goblin_teller_spawn_egg", "Goblin Teller Spawn Egg");
