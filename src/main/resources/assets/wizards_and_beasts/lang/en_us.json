@@ -2637,5 +2637,14 @@
   "command.wizards_and_beasts.stats.report.fixed": "Set at birth and by milestones, not by training.",
   "command.wizards_and_beasts.module.list.title": "Module States",
   "command.wizards_and_beasts.module.list.hover": "Click to prefill: /wandb admin module set %s",
-  "command.wizards_and_beasts.module.list.hover_locked": "A roadmap marker. Not switchable at runtime, not even by an operator."
+  "command.wizards_and_beasts.module.list.hover_locked": "A roadmap marker. Not switchable at runtime, not even by an operator.",
+  "wandcraft.tooltip.cast.damage": "%s damage",
+  "wandcraft.tooltip.cast.cooldown": "%s cooldown",
+  "wandcraft.tooltip.cast.range": "%s range",
+  "wandcraft.tooltip.cast.misfire": "%s misfire chance",
+  "wandcraft.tooltip.cast.category": "%1$s %2$s",
+  "spell_category.wizards_and_beasts.combat": "Combat",
+  "spell_category.wizards_and_beasts.utility": "Utility",
+  "spell_category.wizards_and_beasts.defense": "Defense",
+  "spell_category.wizards_and_beasts.dark_arts": "Dark Arts"
 }

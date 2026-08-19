@@ -11,6 +11,8 @@ import at.koopro.wizardsandbeasts.spell.cast.WandCastTiming;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.spell.beam.WandBeamChannelLogic;
 import at.koopro.wizardsandbeasts.util.ClientClassBridge;
+import at.koopro.wizardsandbeasts.wand.WandCastLines;
+import at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.resonance.WandResonanceSystem;
 import net.minecraft.ChatFormatting;
@@ -158,6 +160,12 @@ public class WandItem extends GeoItemBase {
                 .withStyle(ChatFormatting.BLUE));
         tooltipAdder.accept(Component.translatable("wandcraft.tooltip.allegiance", WandComponents.getAllegianceScore(stack))
                 .withStyle(ChatFormatting.DARK_GREEN));
+
+        // What the wand is worth, under what it is. Resolved through the same call the cast path makes,
+        // so the stated contribution cannot drift from the applied one. Silent when the wand contributes
+        // nothing, and silent when the registries are unavailable — resolve() answers NEUTRAL rather
+        // than throwing, and a neutral set produces no lines.
+        WandCastLines.append(WandStatsResolver.resolve(stack, context.registries()), tooltipAdder);
     }
 
     public static ItemStack createWand(WandWood wood, WandCore core, WandLength length, WandFlexibility flexibility) {
