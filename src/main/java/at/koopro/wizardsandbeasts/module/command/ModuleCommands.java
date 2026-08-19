@@ -8,6 +8,8 @@ import at.koopro.wizardsandbeasts.module.ModuleStateService;
 import at.koopro.wizardsandbeasts.module.settings.ModuleSettingsSchema;
 import at.koopro.wizardsandbeasts.module.settings.ModuleSettingsValues;
 import at.koopro.wizardsandbeasts.module.settings.SettingDefinition;
+import at.koopro.wizardsandbeasts.util.ChatPalette;
+import at.koopro.wizardsandbeasts.util.ChatReport;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.ChatFormatting;
@@ -19,8 +21,10 @@ import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.Locale;
-import at.koopro.wizardsandbeasts.util.ChatReport;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * {@code /wandb admin module …} — the admin surface for module state until the screen lands.
@@ -76,26 +80,42 @@ public final class ModuleCommands {
                                                         StringArgumentType.getString(ctx, "value")))))));
     }
 
+    /** The colour a state wears wherever it is reported. */
+    private static int tone(ModuleState state) {
+        return switch (state) {
+            case ENABLED -> ChatPalette.OK;
+            case PREVIEW -> ChatPalette.WARN;
+            case COMING_SOON -> ChatPalette.MUTED;
+            case DISABLED -> ChatPalette.BAD;
+        };
+    }
+
     private static int listModules(CommandSourceStack source) {
-        ChatReport.of("Module States").send(source);
+        Map<ModuleState, Integer> tally = new EnumMap<>(ModuleState.class);
+        for (Module module : Module.values()) {
+            tally.merge(ModuleManager.state(module), 1, Integer::sum);
+        }
+        // The tally answers the question the list is usually opened for — "how much of this build is
+        // actually on?" — without the operator counting twenty-eight rows by eye.
+        String summary = Arrays.stream(ModuleState.values())
+                .filter(state -> tally.getOrDefault(state, 0) > 0)
+                .map(state -> tally.get(state) + " " + state.getSerializedName())
+                .collect(Collectors.joining(" · "));
+
+        ChatReport report = ChatReport.of(Component.translatable("command.wizards_and_beasts.module.list.title"))
+                .subtitle(summary);
+
         for (Module module : Module.values()) {
             ModuleState state = ModuleManager.state(module);
-            ChatFormatting color = switch (state) {
-                case ENABLED -> ChatFormatting.GREEN;
-                case PREVIEW -> ChatFormatting.YELLOW;
-                case COMING_SOON -> ChatFormatting.AQUA;
-                case DISABLED -> ChatFormatting.RED;
-            };
+            String id = ModuleIds.of(module).getPath();
             // Name and id both: the name is what the module is called everywhere else in the game, the
             // id is what you type back into `/wandb admin module set`. Printing only one of them loses.
-            source.sendSuccess(() -> Component.literal("  ").withStyle(ChatFormatting.GRAY)
-                    .append(ModuleIds.displayName(module).copy().withStyle(ChatFormatting.WHITE))
-                    .append(Component.literal(" (" + ModuleIds.of(module).getPath() + "): ")
-                            .withStyle(ChatFormatting.DARK_GRAY))
-                    .append(Component.literal(state.getSerializedName()).withStyle(color))
-                    .append(state == ModuleState.COMING_SOON
-                            ? Component.literal("  (locked)").withStyle(ChatFormatting.DARK_GRAY)
-                            : Component.empty()), false);
+            Component hover = state.isOperatorSettable()
+                    ? Component.translatable("command.wizards_and_beasts.module.list.hover", id)
+                    : Component.translatable("command.wizards_and_beasts.module.list.hover_locked");
+            report.state(ModuleIds.displayName(module).getString() + " (" + id + ")",
+                    state.getSerializedName(), tone(state),
+                    "/wandb admin module set " + id + " ", hover);
 
             ModuleSettingsSchema schema = ModuleSettingsSchema.of(module);
             if (schema.isEmpty()) {
@@ -103,12 +123,10 @@ public final class ModuleCommands {
             }
             ModuleSettingsValues values = ModuleManager.settings(module);
             for (SettingDefinition<?> definition : schema.definitions()) {
-                source.sendSuccess(() -> Component.literal("      " + definition.key().getPath() + " = ")
-                        .withStyle(ChatFormatting.DARK_GRAY)
-                        .append(Component.literal(String.valueOf(values.get(definition)))
-                                .withStyle(ChatFormatting.WHITE)), false);
+                report.subItem(definition.key().getPath() + " = " + values.get(definition));
             }
         }
+        report.send(source);
         return 1;
     }
 

@@ -6,6 +6,7 @@ import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import at.koopro.wizardsandbeasts.stats.PlayerStat;
 import at.koopro.wizardsandbeasts.stats.PlayerStatsAPI;
+import at.koopro.wizardsandbeasts.util.ChatReport;
 import at.koopro.wizardsandbeasts.stats.PlayerStatsData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import com.mojang.brigadier.arguments.BoolArgumentType;
@@ -91,17 +92,31 @@ public final class StatsCommands {
 
     // -------------------------------------------------------------------------
 
+    /**
+     * The whole stat block as one report, a meter per stat.
+     *
+     * <p>Was one flat line each — {@code Steve · Power: 42} — which made a five-line answer that could
+     * not be compared at a glance, the one thing a stat block is for. The loop is over
+     * {@link PlayerStat#values()}, so a new stat appears here without this method being touched.
+     */
     private static int getAll(CommandSourceStack source, ServerPlayer target) {
-        String name = target.getName().getString();
-        for (PlayerStat stat : PlayerStat.values()) {
-            int value = PlayerStatsAPI.getStat(target, stat);
-            source.sendSuccess(() -> Component.translatable("command.wizards_and_beasts.stats.get_success",
-                    name, stat.displayName(), value), false);
-        }
+        ChatReport report = ChatReport.of(Component.translatable(
+                "command.wizards_and_beasts.stats.report.title", target.getName().getString()));
         if (PlayerStatsAPI.isProdigy(target)) {
-            source.sendSuccess(() -> Component.literal("[Prodigy]").withStyle(
-                    net.minecraft.ChatFormatting.GOLD), false);
+            report.subtitle(Component.translatable("command.wizards_and_beasts.stats.report.prodigy"));
         }
+        for (PlayerStat stat : PlayerStat.values()) {
+            // Derived stats have no training track and cannot be set, so say which kind this is on
+            // hover rather than leaving a player to wonder why Knowledge ignores /stats set.
+            Component hover = Component.translatable(stat.isDerived()
+                    ? "command.wizards_and_beasts.stats.report.derived"
+                    : stat.isTrainable()
+                            ? "command.wizards_and_beasts.stats.report.trainable"
+                            : "command.wizards_and_beasts.stats.report.fixed");
+            report.meter(stat.displayName().getString(), PlayerStatsAPI.getStat(target, stat),
+                    PlayerStatsData.MAX_VALUE, hover);
+        }
+        report.send(source);
         return 1;
     }
 

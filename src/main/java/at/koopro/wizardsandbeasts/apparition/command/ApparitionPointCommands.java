@@ -8,6 +8,7 @@ import at.koopro.wizardsandbeasts.apparition.licence.ApparitionLicence;
 import at.koopro.wizardsandbeasts.apparition.PlayerApparitionPoints;
 import at.koopro.wizardsandbeasts.apparition.sidealong.SideAlongService;
 import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
+import at.koopro.wizardsandbeasts.util.ChatReport;
 import at.koopro.wizardsandbeasts.network.apparition.ApparitionPointsSyncS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -60,14 +61,34 @@ public final class ApparitionPointCommands {
         if (player == null) {
             return 0;
         }
-        if (PlayerAbilityHelper.isApparitionLicensed(player)) {
-            PlayerFeedback.chat(player, Component.translatable(
-                    "apparition.wizards_and_beasts.licence.held").withStyle(ChatFormatting.GREEN));
+
+        boolean held = PlayerAbilityHelper.isApparitionLicensed(player);
+        ChatReport report = ChatReport.of(Component.translatable("apparition.wizards_and_beasts.licence.title"))
+                .subtitle(Component.translatable(held
+                        ? "apparition.wizards_and_beasts.licence.held"
+                        : "apparition.wizards_and_beasts.licence.not_held"));
+
+        if (held) {
+            report.send(source);
             return 1;
         }
+
+        // The two things standing between the player and a licence, in the order the gate applies them.
+        report.flag(Component.translatable("apparition.wizards_and_beasts.licence.row.training").getString(),
+                        ApparitionServerLogic.hasTraining(player))
+                .bar(Component.translatable("apparition.wizards_and_beasts.licence.row.practice").getString(),
+                        ApparitionLicence.progress(player));
+
         ApparitionLicence.Eligibility verdict = ApparitionLicence.evaluate(player);
-        PlayerFeedback.chat(player, verdict.reason().copy()
-                .withStyle(verdict.eligible() ? ChatFormatting.GREEN : ChatFormatting.GRAY));
+        report.divider();
+        if (verdict.eligible()) {
+            report.action(Component.translatable("apparition.wizards_and_beasts.licence.action").getString(),
+                    "/wandb magic apparate test",
+                    Component.translatable("apparition.wizards_and_beasts.licence.action.hover"));
+        } else {
+            report.note(verdict.reason());
+        }
+        report.send(source);
         return verdict.eligible() ? 1 : 0;
     }
 
