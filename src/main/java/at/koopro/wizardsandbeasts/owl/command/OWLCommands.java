@@ -13,6 +13,8 @@ import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.ChatFormatting;
+import at.koopro.wizardsandbeasts.util.ChatPalette;
+import at.koopro.wizardsandbeasts.util.ChatReport;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -75,29 +77,29 @@ public final class OWLCommands {
             return 0;
         }
 
-        source.sendSuccess(() -> Component.literal("OWL results for ")
-                .withStyle(ChatFormatting.GOLD)
-                .append(player.getDisplayName().plainCopy().withStyle(ChatFormatting.WHITE))
-                .append(Component.literal(":").withStyle(ChatFormatting.GOLD)), false);
+        long passed = Arrays.stream(OWLSubject.values())
+                .filter(subject -> data.grades().getOrDefault(subject, OWLGrade.T).passing)
+                .count();
+
+        ChatReport report = ChatReport.of(Component.literal("O.W.L. Results — ")
+                        .append(player.getDisplayName().plainCopy()))
+                .subtitle(passed + " of " + OWLSubject.values().length + " passed");
 
         for (OWLSubject subject : OWLSubject.values()) {
             OWLGrade grade = data.grades().getOrDefault(subject, OWLGrade.T);
-            ChatFormatting gradeColor = grade.passing ? ChatFormatting.YELLOW : ChatFormatting.GRAY;
-            source.sendSuccess(() -> Component.literal("  ")
-                    .append(Component.translatable(subject.translationKey()).withStyle(ChatFormatting.WHITE))
-                    .append(Component.literal(": ").withStyle(ChatFormatting.DARK_GRAY))
-                    .append(Component.literal(grade.name()).withStyle(gradeColor)), false);
+            // A grade is a status rather than a value, so it takes the state colour: passing grades
+            // read at a glance against the ones that need retaking.
+            report.state(Component.translatable(subject.translationKey()).getString(),
+                    grade.name(), grade.passing ? ChatPalette.OK : ChatPalette.MUTED);
         }
 
+        report.divider();
         if (profData.profession() != null) {
-            Profession prof = profData.profession();
-            source.sendSuccess(() -> Component.literal("Profession: ")
-                    .withStyle(ChatFormatting.GOLD)
-                    .append(Component.translatable(prof.translationKey()).withStyle(ChatFormatting.AQUA)), false);
+            report.row("Profession", Component.translatable(profData.profession().translationKey()));
         } else {
-            source.sendSuccess(() -> Component.literal("No profession chosen yet.")
-                    .withStyle(ChatFormatting.GRAY), false);
+            report.note("No profession chosen yet.");
         }
+        report.send(source);
 
         return 1;
     }

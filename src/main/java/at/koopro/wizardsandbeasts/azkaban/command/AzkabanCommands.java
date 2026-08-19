@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.azkaban.command;
 
 import at.koopro.wizardsandbeasts.azkaban.AzkabanDamageTypes;
+import at.koopro.wizardsandbeasts.util.ChatReport;
 import at.koopro.wizardsandbeasts.azkaban.attachment.AzkabanTrespasserData;
 import at.koopro.wizardsandbeasts.azkaban.structure.AzkabanStructures;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
@@ -149,14 +150,17 @@ public final class AzkabanCommands {
                 .map(net.minecraft.resources.ResourceKey::toString)
                 .orElse("unknown");
 
-        src.sendSuccess(() -> Component.literal(
-                "=== Azkaban Info ===\n" +
-                "Center: " + center.getX() + ", " + center.getY() + ", " + center.getZ() + "\n" +
-                "Chunk: [" + chunkPos.x + ", " + chunkPos.z + "]\n" +
-                "Biome: " + biomeName + "\n" +
-                "Sea level: " + seaLevel + "\n" +
-                "Seabed Y: " + seabedY + "\n" +
-                "Distance from spawn: " + (int) dist + " blocks"), false);
+        // One component with embedded newlines was the wrong shape twice over: it invented a third
+        // header style, and the chat log renders a multi-line component as one wrapped entry, so the
+        // columns it was drawing collapsed anyway.
+        ChatReport.of("Azkaban")
+                .row("Center", center.getX() + ", " + center.getY() + ", " + center.getZ())
+                .row("Chunk", "[" + chunkPos.x + ", " + chunkPos.z + "]")
+                .row("Biome", biomeName)
+                .row("Sea level", String.valueOf(seaLevel))
+                .row("Seabed Y", String.valueOf(seabedY))
+                .row("From spawn", (int) dist + " blocks")
+                .send(src);
         return 1;
     }
 
