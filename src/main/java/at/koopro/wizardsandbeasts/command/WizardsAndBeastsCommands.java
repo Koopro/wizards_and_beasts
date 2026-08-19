@@ -6,6 +6,7 @@ import at.koopro.wizardsandbeasts.effect.LumosFieldEffect;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.item.wand.DebugWandState;
 import at.koopro.wizardsandbeasts.owl.OWLExaminationHandler;
+import at.koopro.wizardsandbeasts.render.outline.EntityOutlineService;
 import at.koopro.wizardsandbeasts.spell.beam.WandBeamChannelLogic;
 import at.koopro.wizardsandbeasts.sync.PlayerStateSyncService;
 import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
@@ -48,6 +49,9 @@ public class WizardsAndBeastsCommands {
             OWLExaminationHandler.syncToPlayer(player);
             PlayerStatsSyncPayload.syncToPlayer(player);
             DarkCorruptionService.syncDisplay(player);
+            // Outlines are broadcast on change, so a player joining afterwards would otherwise never
+            // learn about anyone already outlined.
+            EntityOutlineService.syncToPlayer(player);
         }
     }
 

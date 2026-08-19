@@ -16,7 +16,8 @@ import at.koopro.wizardsandbeasts.client.form.FormRenderStateModifier;
 import at.koopro.wizardsandbeasts.client.form.AnimagusClientViewHandler;
 import at.koopro.wizardsandbeasts.client.form.ObscurialClientViewHandler;
 import at.koopro.wizardsandbeasts.client.form.TransitionEffectRenderer;
-import at.koopro.wizardsandbeasts.client.spell.ColoredGlowRenderer;
+import at.koopro.wizardsandbeasts.client.render.outline.ClientOutlineState;
+import at.koopro.wizardsandbeasts.client.render.outline.EntityOutlines;
 import at.koopro.wizardsandbeasts.client.spell.SpellClientInputHandler;
 import at.koopro.wizardsandbeasts.client.spell.SpellKeyBindings;
 import at.koopro.wizardsandbeasts.client.particle.ModParticleProviders;
@@ -55,6 +56,7 @@ public class WizardsAndBeastsClient {
         modEventBus.addListener(ModParticleProviders::register);
         modEventBus.addListener(BroomRiderRenderer::registerModifiers);
         modEventBus.addListener(FormRenderStateModifier::registerModifiers);
+        modEventBus.addListener(EntityOutlines::registerModifiers);
         modEventBus.addListener(at.koopro.wizardsandbeasts.client.petrify.PetrifyRenderHandler::registerModifiers);
         modEventBus.addListener(
                 at.koopro.wizardsandbeasts.client.heritage.appearance.HeritageAppearanceRenderState::registerModifiers);
@@ -70,7 +72,7 @@ public class WizardsAndBeastsClient {
         NeoForge.EVENT_BUS.addListener(SpellClientInputHandler::onScroll);
         NeoForge.EVENT_BUS.addListener(BeamClientEvents::onLoggingOut);
         NeoForge.EVENT_BUS.addListener(BeamClientEvents::onEntityLeaveLevel);
-        NeoForge.EVENT_BUS.addListener(ColoredGlowRenderer::onRenderLevel);
+        NeoForge.EVENT_BUS.addListener(ClientOutlineState::onLoggingOut);
         NeoForge.EVENT_BUS.addListener(ApparitionClientController::onRenderLevel);
         NeoForge.EVENT_BUS.addListener(LegilimencyVisionRenderer::onRenderLevel);
         NeoForge.EVENT_BUS.addListener(ObscurialClientViewHandler::onRenderHand);
