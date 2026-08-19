@@ -72,7 +72,7 @@ public class WizardsConfigScreen extends Screen {
      * rather than gameplay concerns: {@code adminUuids} is a security allow-list, and the module state fed
      * by {@link at.koopro.wizardsandbeasts.module.ModuleConfig} only seeds a brand-new world — turning a
      * module's dial here would silently do nothing on every world that already exists. Both have a real
-     * home ({@code /wandb module}), just not this one.
+     * home ({@code /wandb admin module}), just not this one.
      */
     private static final java.util.Set<String> EXCLUDED_KEYS = java.util.Set.of("adminUuids");
     private static final String EXCLUDED_KEY_PREFIX = "moduleDefaults";

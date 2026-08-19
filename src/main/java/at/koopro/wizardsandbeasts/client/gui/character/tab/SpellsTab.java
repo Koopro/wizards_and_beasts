@@ -20,10 +20,7 @@ import java.util.Set;
 public final class SpellsTab implements CharacterTab {
 
     private static final int CARD_GAP    = 3;
-    private static final int SCROLLBAR_W = 4;
-    private static final int COLOR_SCROLL_TRACK = 0xFF1A1005;
-    private static final int COLOR_SCROLL_THUMB = 0xFF886622;
-    private static final int COLOR_NONE         = 0xFF776655;
+    private static final int COLOR_NONE  = 0xFF776655;
 
     private float scrollOffset = 0f; // pixels scrolled from top
 
@@ -43,7 +40,7 @@ public final class SpellsTab implements CharacterTab {
             return;
         }
 
-        int gridW = w - SCROLLBAR_W - 3;
+        int gridW = w - TabScrollbar.WIDTH - 3;
         int cols  = Math.max(1, gridW / (SpellCardWidget.CARD_W + CARD_GAP));
         // Cards fill their column instead of sitting at a fixed 88px inside it. With one
         // column that is the difference between "Arresto Mom" and "Arresto Momentum".
@@ -73,16 +70,7 @@ public final class SpellsTab implements CharacterTab {
 
         g.disableScissor();
 
-        // Scrollbar
-        if (totalH > h) {
-            int sbX  = x + gridW + 2;
-            int sbH  = h;
-            g.fill(sbX, y, sbX + SCROLLBAR_W, y + sbH, COLOR_SCROLL_TRACK);
-            float thumbPct = (float) h / totalH;
-            int thumbH     = Math.max(8, (int)(sbH * thumbPct));
-            int thumbY     = y + (int)((scrollOffset / maxScroll) * (sbH - thumbH));
-            g.fill(sbX, thumbY, sbX + SCROLLBAR_W, thumbY + thumbH, COLOR_SCROLL_THUMB);
-        }
+        TabScrollbar.draw(g, x, y, w, h, scrollOffset, totalH);
     }
 
     @Override

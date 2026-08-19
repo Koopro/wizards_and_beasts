@@ -22,6 +22,7 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -124,9 +125,13 @@ public final class CharacterSheetScreen extends Screen {
     private static final int COLOR_TAB_TXT = 0xFFCCBB99;
     private static final int COLOR_EFFECT_TXT = 0xFFCCBB99;
     private static final int COLOR_EFFECT_MORE = 0xFF887766;
+    /** Kept off pure red/green: this column is warm parchment ink, not a status LED. */
+    private static final int COLOR_EFFECT_GOOD = 0xFF8FBF6A;
+    private static final int COLOR_EFFECT_BAD  = 0xFFCC7755;
 
     private static final int MAX_EFFECTS_SHOWN = 6;
-    private static final int EFFECT_CHIP_H     = 8;
+    /** One text line per effect, matching the heritage rows above. */
+    private static final int EFFECT_ROW_H      = WizardsMetrics.LINE_BODY;
 
     // Tabs
     private enum Tab {
@@ -318,21 +323,79 @@ public final class CharacterSheetScreen extends Screen {
         int shown = Math.min(list.size(), MAX_EFFECTS_SHOWN);
 
         for (int i = 0; i < shown; i++) {
-            MobEffectInstance fx = list.get(i);
-            String name = Component.translatable(fx.getEffect().value().getDescriptionId()).getString();
-            McStylePanel.drawNineSlice(g, CharacterSheetTextures.PANEL, x, y + i * (EFFECT_CHIP_H + 1),
-                    w, EFFECT_CHIP_H, CharacterSheetTextures.PANEL_SIZE, CharacterSheetTextures.PANEL_BORDER);
-            // Shrunk to fit instead of chopped mid-word, which is what plainSubstrByWidth did
-            // to every effect name longer than the chip ("Fire Resistan").
-            GuiText.drawFitted(g, font, name, x + 2, y + i * (EFFECT_CHIP_H + 1) + 1,
-                    w - 4, COLOR_EFFECT_TXT);
+            drawEffectRow(g, font, x, y + i * EFFECT_ROW_H, w, list.get(i));
         }
         if (list.size() > MAX_EFFECTS_SHOWN) {
             int remainder = list.size() - MAX_EFFECTS_SHOWN;
             g.drawString(font, "+" + remainder + " more",
-                    x, y + shown * (EFFECT_CHIP_H + 1),
+                    x, y + shown * EFFECT_ROW_H,
                     COLOR_EFFECT_MORE, false);
         }
+    }
+
+    /**
+     * One effect: its name, and how long is left.
+     *
+     * <p>These were nine-slice chips, which could not work at this size — {@code PANEL} carries a
+     * 3px border, so an 8px-tall chip is 6px of border around 2px of middle, and the label was drawn
+     * on top of the frame rather than inside it. The result read as an empty text field stretched
+     * across the column whatever the effect was called. Rows now match the heritage block directly
+     * above them, which is the same shape of information: flat text, no box.
+     *
+     * <p>Colour carries the one thing a chip never did — whether the effect is doing you a favour.
+     */
+    private void drawEffectRow(@NonNull GuiGraphics g, @NonNull Font font,
+                               int x, int y, int w, @NonNull MobEffectInstance fx) {
+        MobEffect effect = fx.getEffect().value();
+
+        String name = Component.translatable(effect.getDescriptionId()).getString();
+        if (fx.getAmplifier() > 0) {
+            name = name + " " + roman(fx.getAmplifier() + 1);
+        }
+
+        String duration = formatDuration(fx);
+        int durW = font.width(duration);
+
+        // Shrunk to fit rather than chopped mid-word, which is what plainSubstrByWidth did to
+        // every effect name longer than the column ("Fire Resistan").
+        GuiText.drawFitted(g, font, name, x, y, w - durW - 3, effectColor(effect));
+        g.drawString(font, duration, x + w - durW, y, COLOR_EFFECT_MORE, false);
+    }
+
+    /** Beneficial reads warm, harmful reads hot, neutral stays the column's own ink. */
+    private static int effectColor(@NonNull MobEffect effect) {
+        return switch (effect.getCategory()) {
+            case BENEFICIAL -> COLOR_EFFECT_GOOD;
+            case HARMFUL    -> COLOR_EFFECT_BAD;
+            case NEUTRAL    -> COLOR_EFFECT_TXT;
+        };
+    }
+
+    /** {@code m:ss}, or {@code ∞} for the effects that do not run out. */
+    @NonNull
+    private static String formatDuration(@NonNull MobEffectInstance fx) {
+        if (fx.isInfiniteDuration()) return "∞";
+        int seconds = fx.getDuration() / 20;
+        return seconds / 60 + ":" + String.format(java.util.Locale.ROOT, "%02d", seconds % 60);
+    }
+
+    /**
+     * Level numeral. Vanilla's {@code potion.potency.N} keys only ship for 1–5, and mod effects
+     * are not bound by that, so the numeral is built rather than looked up.
+     */
+    @NonNull
+    private static String roman(int value) {
+        if (value < 1 || value > 3999) return Integer.toString(value);
+        int[] nums = {1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1};
+        String[] sym = {"M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"};
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < nums.length; i++) {
+            while (value >= nums[i]) {
+                value -= nums[i];
+                out.append(sym[i]);
+            }
+        }
+        return out.toString();
     }
 
     // ── Right column ───────────────────────────────────────────────────────

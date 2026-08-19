@@ -1,6 +1,8 @@
 package at.koopro.wizardsandbeasts.client.skill.gui;
 
+import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
+import at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton;
 import at.koopro.wizardsandbeasts.client.gui.WizardsAndBeastsUiTokens;
 import at.koopro.wizardsandbeasts.client.skill.state.ClientVocationCache;
 import at.koopro.wizardsandbeasts.network.skill.VocationCommitC2SPayload;
@@ -8,7 +10,6 @@ import at.koopro.wizardsandbeasts.skill.vocation.VocationDefinition;
 import at.koopro.wizardsandbeasts.skill.vocation.VocationRegistry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -22,15 +23,18 @@ import java.util.Optional;
 /**
  * Declares a Vocation from the skill screen.
  *
- * <p>Declaration existed only as {@code /wandb skill vocation set primary <id>}, which is unreachable on a
- * world with cheats off — the whole specialization layer was invisible to a survival player. Deliberately
- * plain: vanilla widgets over the shared panel chrome, no new textures.
+ * <p>Declaration existed only as {@code /wandb player vocation set primary <id>}, which is unreachable on a
+ * world with cheats off — the whole specialization layer was invisible to a survival player.
+ *
+ * <p>Wears the {@code star_chart} skin, like the chart it opens from. It used to be vanilla widgets
+ * on two flat {@code fill}ed rectangles, which was defensible while the screen behind it was flat
+ * too and stopped being so the moment that one became night void and brass.
  */
 public class VocationSelectionScreen extends Screen {
 
     private final @Nullable Screen parent;
     private final List<VocationDefinition> vocations = new ArrayList<>();
-    private final List<Button> vocationButtons = new ArrayList<>();
+    private final List<ThemedButton> vocationButtons = new ArrayList<>();
     private @Nullable VocationDefinition focused;
     /**
      * Optimistic declaration: the id sent to the server whose {@code VocationDataSyncS2CPayload} has not
@@ -61,18 +65,17 @@ public class VocationSelectionScreen extends Screen {
         int y = layout.panelY() + layout.s(40);
 
         for (VocationDefinition vocation : vocations) {
-            Button button = Button.builder(vocation.displayName(), b -> declare(vocation))
-                    .bounds(x, y, buttonW, buttonH)
-                    .build();
+            ThemedButton button = chartButton(x, y, buttonW, buttonH, vocation.displayName(),
+                    () -> declare(vocation));
             addRenderableWidget(button);
             vocationButtons.add(button);
             y += buttonH + layout.s(4);
         }
 
-        addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose())
-                .bounds(layout.panelX() + layout.panelW() - layout.s(16) - layout.s(80),
-                        layout.panelY() + layout.panelH() - layout.s(28), layout.s(80), buttonH)
-                .build());
+        addRenderableWidget(chartButton(
+                layout.panelX() + layout.panelW() - layout.s(16) - layout.s(80),
+                layout.panelY() + layout.panelH() - layout.s(28), layout.s(80), buttonH,
+                Component.translatable("gui.done"), this::onClose));
 
         Identifier active = activeVocation();
         focused = active != null ? VocationRegistry.get(active)
@@ -98,6 +101,14 @@ public class VocationSelectionScreen extends Screen {
         return pending != null ? pending : synced.orElse(null);
     }
 
+    /** Every control on this screen is cut from the same material as the chart behind it. */
+    private static ThemedButton chartButton(int x, int y, int w, int h, Component label,
+                                            Runnable action) {
+        return ThemedButton.skinned(x, y, w, h, label, action,
+                McStylePanel.SKIN_STAR_CHART, null, 0,
+                SkillTreeChartTextures.CHART_INK, SkillTreeChartTextures.NIGHT_TEXT_DIM);
+    }
+
     /**
      * Re-colours the declared vocation's label in place. Done every frame rather than by rebuilding the
      * widgets on click: the sync answer lands a tick or more after the packet leaves, so a rebuild fired
@@ -118,13 +129,18 @@ public class VocationSelectionScreen extends Screen {
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         refreshLabels();
         // No renderBackground() here: the screen framework already ran it for this frame.
-        graphics.fill(layout.panelX(), layout.panelY(),
-                layout.panelX() + layout.panelW(), layout.panelY() + layout.panelH(),
-                WizardsAndBeastsUiTokens.SkillTree.PANEL_FILL);
-        graphics.fill(layout.panelX(), layout.panelY(),
-                layout.panelX() + layout.panelW(),
+        //
+        // Same `star_chart` skin as the chart this screen opens from. It was two flat `fill`ed
+        // rectangles, which read as a different mod's dialog the moment the screen behind it
+        // became night void and brass.
+        McStylePanel.drawSkinPanel(graphics,
+                McStylePanel.SKIN_STAR_CHART,
+                layout.panelX(), layout.panelY(), layout.panelW(), layout.panelH());
+        McStylePanel.drawSkinDivider(graphics,
+                McStylePanel.SKIN_STAR_CHART,
+                layout.panelX() + layout.s(8),
                 layout.panelY() + layout.s(WizardsAndBeastsUiTokens.SkillTree.HEADER_HEIGHT),
-                WizardsAndBeastsUiTokens.SkillTree.HEADER_FILL);
+                layout.panelW() - layout.s(16));
         graphics.drawString(font, title,
                 layout.panelX() + layout.s(16), layout.panelY() + layout.s(8),
                 WizardsAndBeastsUiTokens.SkillTree.TITLE_COLOR, false);

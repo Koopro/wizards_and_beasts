@@ -55,6 +55,9 @@ public final class SkillsTab implements CharacterTab {
         int cx = x + 2;
         int cy = y + 2 - (int) scrollOffset;
         int contentTop = cy;
+        // Scrollbar is overlaid on the right edge, so lay content out inside a width that
+        // already excludes it — "Unspent: N" is right-aligned and would run underneath.
+        int innerW = w - 4 - TabScrollbar.WIDTH;
 
         // ── Tree progress bars ────────────────────────────────────────────
         g.drawString(font, "Skill Trees", cx, cy, COLOR_SECTION, false);
@@ -63,7 +66,7 @@ public final class SkillsTab implements CharacterTab {
         // actionable number on this tab, and at the bottom it was the first thing to fall off the
         // end of a long list — the only readout here you would open the sheet specifically to check.
         String pointsText = "Unspent: " + skillData.getSkillPoints();
-        g.drawString(font, pointsText, x + w - 2 - font.width(pointsText), cy, COLOR_VALUE, false);
+        g.drawString(font, pointsText, cx + innerW - font.width(pointsText), cy, COLOR_VALUE, false);
         cy += 10;
 
         for (SkillTreeId treeId : SkillTreeId.values()) {
@@ -75,7 +78,7 @@ public final class SkillsTab implements CharacterTab {
             boolean locked = treeId == SkillTreeId.DARK_ARTS
                     && !ModuleManager.isEnabled(Module.DARK_ARTS);
 
-            SkillTreeBarWidget.draw(g, cx, cy, w - 4,
+            SkillTreeBarWidget.draw(g, cx, cy, innerW,
                     treeId.getDisplayName(), done, total,
                     treeId.getColor(), locked);
             cy += SkillTreeBarWidget.rowHeight();
@@ -96,11 +99,13 @@ public final class SkillsTab implements CharacterTab {
             }
         }
         // Chips get the height they need; the tab scrolls rather than dropping rows on the floor.
-        cy = drawChips(g, font, cx, cy, w - 4, Integer.MAX_VALUE, nodeNames);
+        cy = drawChips(g, font, cx, cy, innerW, Integer.MAX_VALUE, nodeNames);
 
         g.disableScissor();
 
         lastTotalH = cy - contentTop + 4;
+
+        TabScrollbar.draw(g, x, y, w, h, scrollOffset, lastTotalH);
     }
 
     @Override

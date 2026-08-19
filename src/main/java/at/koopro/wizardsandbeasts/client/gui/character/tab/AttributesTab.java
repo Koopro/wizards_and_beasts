@@ -53,9 +53,6 @@ public final class AttributesTab implements CharacterTab {
     private static final int COLOR_WAND_NAME  = 0xFFFFFFFF;
     /** One stat row: label line plus its bar and training hairline. */
     private static final int STAT_ROW_H     = 12;
-    private static final int SCROLLBAR_W    = 4;
-    private static final int COLOR_SCROLL_TRACK = 0xFF1A1005;
-    private static final int COLOR_SCROLL_THUMB = 0xFF886622;
 
     private float scrollOffset = 0f; // pixels scrolled from top
     private int lastTotalH = 0;      // content height measured last frame
@@ -81,7 +78,7 @@ public final class AttributesTab implements CharacterTab {
         int top = cy;
         // The scrollbar is drawn over the right edge of this rect, so content is laid out inside
         // a width that already excludes it. Right-aligned values used to run underneath it.
-        int innerW = w - 4 - SCROLLBAR_W;
+        int innerW = w - 4 - TabScrollbar.WIDTH;
 
         // ── The character's own five numbers ──────────────────────────────
         // Above the attributes on purpose: these are the character's own numbers, where the block
@@ -114,15 +111,7 @@ public final class AttributesTab implements CharacterTab {
 
         lastTotalH = cy - top + 4;
 
-        // Scrollbar (overlaid on the right edge, only when content overflows)
-        if (lastTotalH > h) {
-            int sbX = x + w - SCROLLBAR_W;
-            g.fill(sbX, y, sbX + SCROLLBAR_W, y + h, COLOR_SCROLL_TRACK);
-            float thumbPct = (float) h / lastTotalH;
-            int thumbH = Math.max(8, (int) (h * thumbPct));
-            int thumbY = y + (int) ((scrollOffset / Math.max(1f, lastTotalH - h)) * (h - thumbH));
-            g.fill(sbX, thumbY, sbX + SCROLLBAR_W, thumbY + thumbH, COLOR_SCROLL_THUMB);
-        }
+        TabScrollbar.draw(g, x, y, w, h, scrollOffset, lastTotalH);
     }
 
     @Override

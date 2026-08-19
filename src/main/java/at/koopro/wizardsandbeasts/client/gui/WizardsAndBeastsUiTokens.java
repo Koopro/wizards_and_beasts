@@ -283,9 +283,19 @@ public final class WizardsAndBeastsUiTokens {
         public static final int TAB_ACTIVE_PULSE = 0x33FFF2C4;
 
         public static final int VIEWPORT_X = 10;
-        public static final int VIEWPORT_Y = 48;
+        /**
+         * 34, not 48. The header carries a title, a rule at y=20 and the vocation button, all of
+         * which finish by y=28; the remaining 20px were a band of empty panel above the chart.
+         */
+        public static final int VIEWPORT_Y = 34;
         public static final int VIEWPORT_WIDTH = 392;
-        public static final int VIEWPORT_HEIGHT = 204;
+        /**
+         * The window is a nine-slice with an 8px frame now, and the footer is a recessed strip
+         * inset from that frame rather than a {@code fill} flush with the panel's bottom edge — at
+         * the old 204 the viewport's own frame ran underneath the footer. The budget down the
+         * panel is exact: 34 header + 208 viewport + 4 gap + 20 footer + 8 pad = 274.
+         */
+        public static final int VIEWPORT_HEIGHT = 208;
         public static final int VIEWPORT_BG = 0xEE201910;
 
         public static final int GRID_SPACING = 24;
@@ -354,5 +364,50 @@ public final class WizardsAndBeastsUiTokens {
         public static final int STATUS_OK = 0xFF91E89C;
         public static final int STATUS_WARN = 0xFFFFA586;
         public static final int STATUS_LABEL = 0xFFD7C49B;
+
+        // ── Star-chart skin ────────────────────────────────────────────────
+        //
+        // Added with the texture pass that ended this screen's hand-drawn chrome. The tokens
+        // above are the older leather palette; the chart wears `gui/sprites/star_chart/` and
+        // only reaches for the ones that still apply (TITLE_Y, VIEWPORT_*, TOOLTIP_*, STATUS_*).
+
+        /**
+         * Inset from the panel edge to the header rule and the footer strip.
+         *
+         * <p>8 because the nine-slice border is 8 — anything smaller draws content on top of the
+         * frame art rather than inside it.
+         */
+        public static final int CHROME_PAD = 8;
+        /** Header rule, sat under the title. */
+        public static final int HEADER_RULE_Y = 20;
+        /** Seal rivets: inset from each top corner of the panel. */
+        public static final int SEAL_INSET = 5;
+
+        /** Points bar in the footer: earned against the campaign cap. */
+        public static final int POINTS_BAR_HEIGHT = 4;
+        public static final int POINTS_BAR_WIDTH = 96;
+        public static final int POINTS_BAR_GAP = 8;
+
+        /** Viewport controls, bottom-right inside the well. Margin clears the well's own 8px frame. */
+        public static final int CONTROL_SIZE = 18;
+        public static final int CONTROL_GAP = 3;
+        public static final int CONTROL_MARGIN = 10;
+        /** Vocation button, top-right in the header band. Wide enough for "Vocation: Wandlore Master". */
+        public static final int VOCATION_BUTTON_W = 140;
+        public static final int VOCATION_BUTTON_H = 16;
+
+        /** Level pips under a multi-level node, and the zoom below which they are hidden. */
+        public static final int PIP_DRAW_SIZE = 5;
+        public static final int PIP_SPACING = 6;
+        public static final int PIP_GAP = 3;
+
+        /** Constellation label: glyph size and its clearance from the text. */
+        public static final int LABEL_GLYPH_SIZE = 12;
+        public static final int LABEL_GLYPH_GAP = 3;
+
+        /** Ley-line stroke weights, by edge state. */
+        public static final int LEY_ALLOCATED_STROKE = 3;
+        public static final int LEY_FRONTIER_STROKE = 2;
+        public static final int LEY_LOCKED_STROKE = 1;
     }
 }

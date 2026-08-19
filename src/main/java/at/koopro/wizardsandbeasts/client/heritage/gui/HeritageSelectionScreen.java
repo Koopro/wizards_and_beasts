@@ -165,10 +165,12 @@ public class HeritageSelectionScreen extends Screen {
                 Component.translatable("gui.wizards_and_beasts.heritage.randomise"),
                 this::randomise));
 
+        // Green, because it is the one control on this screen that starts something irreversible.
+        // Disabled state still comes from ControlState, so a locked heritage greys it out as before.
         ThemedButton confirm = new ThemedButton(
                 rightColX, contentBottom - s(18), s(COL_SIDE_W), s(18),
                 Component.translatable("gui.wizards_and_beasts.heritage.confirm"),
-                this::openConfirm);
+                this::openConfirm).tone(McStylePanel.ButtonTone.CONFIRM);
         confirm.active = selectedHeritage.isAlphaAvailable() && selectedVariant != null;
         addRenderableWidget(confirm);
     }
@@ -178,6 +180,8 @@ public class HeritageSelectionScreen extends Screen {
         int bh = s(18);
         int by = overlayY + overlayH - s(24);
         int gap = s(8);
+        // Back out stays neutral; sealing the character is green. Side by side in one colour, the
+        // overlay asked "are you sure?" and then offered two identical answers.
         addRenderableWidget(new ThemedButton(
                 overlayX + overlayW / 2 - bw - gap / 2, by, bw, bh,
                 Component.translatable("gui.wizards_and_beasts.heritage.confirm_cancel"),
@@ -185,7 +189,7 @@ public class HeritageSelectionScreen extends Screen {
         addRenderableWidget(new ThemedButton(
                 overlayX + overlayW / 2 + gap / 2, by, bw, bh,
                 Component.translatable("gui.wizards_and_beasts.heritage.confirm_yes"),
-                this::commit));
+                this::commit).tone(McStylePanel.ButtonTone.CONFIRM));
     }
 
     // ── Selection actions ────────────────────────────────────────────────

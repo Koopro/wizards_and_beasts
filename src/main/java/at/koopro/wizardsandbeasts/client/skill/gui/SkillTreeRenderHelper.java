@@ -2,27 +2,32 @@ package at.koopro.wizardsandbeasts.client.skill.gui;
 
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsAndBeastsUiTokens;
+import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.skill.data.PlayerSkillData;
 import at.koopro.wizardsandbeasts.skill.Skill;
 import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.resources.Identifier;
 
 import java.util.List;
 
 /**
- * Drawing helpers for the {@link SkillTreeScreen} star chart: window frame, gold-on-night footer,
- * hover tooltip, display-name resolution (translate-with-fallback), and the shape primitives.
+ * Chrome for the {@link SkillTreeScreen}: window frame, footer, hover tooltip and display-name
+ * resolution.
+ *
+ * <p>Every piece here is a sprite from the {@code star_chart} skin or the chart's own set. It used
+ * to be {@code fill()} rectangles and a hand-rolled border, which is why a screen whose stars were
+ * soft antialiased art sat inside hard flat boxes. The only thing this class draws directly is
+ * text.
  */
 public final class SkillTreeRenderHelper {
 
     private SkillTreeRenderHelper() {
     }
 
-    private static final Identifier PANEL_TEX = Identifier.fromNamespaceAndPath(
-            at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID, "textures/gui/skill_tree/panel.png");
+    /** The material the whole screen is cut from — night void, indigo frame, brass accent. */
+    private static final String SKIN = McStylePanel.SKIN_STAR_CHART;
 
     /**
      * Resolves a node display name: lang keys (Phase 4 fillers, Polaris) translate; legacy
@@ -32,43 +37,106 @@ public final class SkillTreeRenderHelper {
         return I18n.exists(raw) ? I18n.get(raw) : raw;
     }
 
-    public static void renderWindowFrame(GuiGraphics graphics, Font font, int panelX, int panelY, int panelW, int panelH, String title) {
-        McStylePanel.drawTiled(graphics, PANEL_TEX, panelX, panelY, panelW, panelH, 64);
-        McStylePanel.drawBorder(graphics, panelX, panelY, panelW, panelH, 0xFF6A5A90, 0xFF1A1626);
+    /**
+     * The window: a nine-sliced {@code star_chart} panel, a rule under the title, and a rivet in
+     * each top corner.
+     *
+     * <p>This used to tile a flat {@code skill_tree/panel.png} and stroke a two-colour border with
+     * four {@code fill}s. The skin it now wears was authored for exactly this screen by
+     * {@code tools/gui_chrome.py} and had no consumer in Java at all.
+     */
+    public static void renderWindowFrame(GuiGraphics graphics, Font font, GuiScaleHelper.Layout layout,
+                                         String title) {
+        int panelX = layout.panelX();
+        int panelY = layout.panelY();
+        int panelW = layout.panelW();
+        McStylePanel.drawSkinPanel(graphics, SKIN, panelX, panelY, panelW, layout.panelH());
+
+        int pad = layout.s(WizardsAndBeastsUiTokens.SkillTree.CHROME_PAD);
+        McStylePanel.drawSkinDivider(graphics, SKIN, panelX + pad,
+                panelY + layout.s(WizardsAndBeastsUiTokens.SkillTree.HEADER_RULE_Y), panelW - pad * 2);
+
+        int seal = layout.s(WizardsAndBeastsUiTokens.SkillTree.SEAL_INSET);
+        McStylePanel.drawSkinSeal(graphics, SKIN, panelX + seal, panelY + seal,
+                SkillTreeChartTextures.UNTINTED);
+        McStylePanel.drawSkinSeal(graphics, SKIN,
+                panelX + panelW - seal - McStylePanel.SEAL_SIZE, panelY + seal,
+                SkillTreeChartTextures.UNTINTED);
 
         graphics.drawCenteredString(font, title, panelX + panelW / 2,
-                panelY + WizardsAndBeastsUiTokens.SkillTree.TITLE_Y, WizardsAndBeastsUiTokens.SkillTree.TITLE_COLOR);
+                panelY + layout.s(WizardsAndBeastsUiTokens.SkillTree.TITLE_Y),
+                WizardsAndBeastsUiTokens.SkillTree.TITLE_COLOR);
     }
 
-    /** Earned / spent / cap counter, gold-on-night to match the chart plate. */
-    public static void renderFooter(GuiGraphics graphics, Font font, int panelX, int panelY, int panelW, int panelH,
+    /**
+     * Earned / spent / cap counter over a recessed strip, with the campaign progress as a bar.
+     *
+     * <p>The bar is the one piece of new information: "Earned 21/60" is a number a player has to
+     * read and divide, and the same fact as a filled track is read at a glance.
+     */
+    public static void renderFooter(GuiGraphics graphics, Font font, GuiScaleHelper.Layout layout,
                                     PlayerSkillData data) {
-        int footerY = panelY + panelH - WizardsAndBeastsUiTokens.SkillTree.FOOTER_HEIGHT;
-        graphics.fill(panelX, footerY, panelX + panelW, panelY + panelH, SkillTreeChartTextures.NIGHT_BG);
-        graphics.fill(panelX, footerY, panelX + panelW, footerY + 1,
-                SkillTreeChartTextures.withAlpha(SkillTreeChartTextures.GOLD, 110));
+        int pad = layout.s(WizardsAndBeastsUiTokens.SkillTree.CHROME_PAD);
+        int footerH = layout.s(WizardsAndBeastsUiTokens.SkillTree.FOOTER_HEIGHT);
+        int footerY = layout.panelY() + layout.panelH() - footerH - pad;
+        int footerX = layout.panelX() + pad;
+        int footerW = layout.panelW() - pad * 2;
+
+        McStylePanel.drawSkinInset(graphics, SKIN, footerX, footerY, footerW, footerH);
 
         int earned = data.getTotalPointsEarned();
         int unspent = data.getSkillPoints();
         int spent = Math.max(0, earned - unspent);
-        String left = "Points: " + unspent + " unspent"
-                + "  •  Earned: " + earned + "/" + SkillSystemAPI.MAX_SKILL_POINTS
-                + "  •  Spent: " + spent;
-        String right = "Drag: pan  Scroll: zoom  Click: allocate";
+        String left = I18n.get("screen.wizards_and_beasts.skill_tree.footer", unspent, earned,
+                SkillSystemAPI.MAX_SKILL_POINTS, spent);
+        String right = I18n.get("screen.wizards_and_beasts.skill_tree.controls");
 
-        int textY = footerY + WizardsAndBeastsUiTokens.SkillTree.FOOTER_TEXT_Y;
-        graphics.drawString(font, left, panelX + WizardsAndBeastsUiTokens.SkillTree.FOOTER_LEFT_X, textY,
-                SkillTreeChartTextures.GOLD, false);
-        int rightX = panelX + panelW - WizardsAndBeastsUiTokens.SkillTree.FOOTER_RIGHT_PAD - font.width(right);
-        if (rightX > panelX + WizardsAndBeastsUiTokens.SkillTree.FOOTER_LEFT_X + font.width(left) + WizardsAndBeastsUiTokens.SkillTree.FOOTER_MIN_GAP) {
-            graphics.drawString(font, right, rightX, textY, SkillTreeChartTextures.NIGHT_TEXT_DIM, false);
+        // Text is never scaled — the font has one legible size, and the panel scale exists to fit
+        // the chrome to the window, not to shrink prose out of readability.
+        int textY = footerY + (footerH - font.lineHeight) / 2;
+        int textX = footerX + WizardsAndBeastsUiTokens.SkillTree.FOOTER_TEXT_X;
+        graphics.drawString(font, left, textX, textY, SkillTreeChartTextures.GOLD, false);
+
+        int barW = WizardsAndBeastsUiTokens.SkillTree.POINTS_BAR_WIDTH;
+        int barX = textX + font.width(left) + WizardsAndBeastsUiTokens.SkillTree.POINTS_BAR_GAP;
+        int barH = WizardsAndBeastsUiTokens.SkillTree.POINTS_BAR_HEIGHT;
+        int barY = footerY + (footerH - barH) / 2;
+        int rightX = footerX + footerW - WizardsAndBeastsUiTokens.SkillTree.FOOTER_RIGHT_PAD
+                - font.width(right);
+
+        // The bar and the hint compete for the same run of footer; on a narrow window the hint
+        // goes first, because the bar restates a number that is already on screen.
+        if (barX + barW + WizardsAndBeastsUiTokens.SkillTree.FOOTER_MIN_GAP < rightX) {
+            drawPointsBar(graphics, barX, barY, barW, barH, earned);
+            graphics.drawString(font, right, rightX, textY,
+                    SkillTreeChartTextures.NIGHT_TEXT_DIM, false);
+        } else if (barX + barW < footerX + footerW - WizardsAndBeastsUiTokens.SkillTree.FOOTER_RIGHT_PAD) {
+            drawPointsBar(graphics, barX, barY, barW, barH, earned);
+        }
+    }
+
+    private static void drawPointsBar(GuiGraphics graphics, int x, int y, int w, int h, int earned) {
+        int sprite = SkillTreeChartTextures.BAR_SPRITE_SIZE;
+        McStylePanel.drawTintedTexture(graphics, SkillTreeChartTextures.BAR_TRACK, x, y, w, h,
+                sprite, sprite, SkillTreeChartTextures.CHART_INK);
+        int cap = Math.max(1, SkillSystemAPI.MAX_SKILL_POINTS);
+        int filled = (int) Math.round(w * Math.min(1.0, earned / (double) cap));
+        if (filled > 0) {
+            McStylePanel.drawTintedTexture(graphics, SkillTreeChartTextures.BAR_FILL, x, y, filled, h,
+                    sprite, sprite, SkillTreeChartTextures.GOLD);
         }
     }
 
     /** Placeholder key for the sealed-region tooltip line (flavor text authored later; raw fallback shown). */
     private static final String SEALED_TOOLTIP_KEY = "skilltree.region.sealed.tooltip";
 
-    /** Hover card in the plate aesthetic; the title resolves lang-key names with literal fallback. */
+    /**
+     * Hover card on a nine-sliced {@code star_chart} panel, tinted to the node's own state.
+     *
+     * <p>Tinting the panel rather than stroking a coloured border around a flat fill is what lets
+     * the whole card carry the state: gold once the node is started, the region's own colour
+     * before that.
+     */
     public static void renderTooltipCard(GuiGraphics graphics, Font font, Skill skill, int mouseX, int mouseY,
                                          int level, int points, boolean adjacencyOpen, boolean sealed) {
         int w = WizardsAndBeastsUiTokens.SkillTree.TOOLTIP_WIDTH;
@@ -81,36 +149,46 @@ public final class SkillTreeRenderHelper {
         int regionTint = SkillTreeChartTextures.regionTint(skill.getTree());
         boolean maxed = level >= skill.getMaxLevel();
         boolean started = level > 0;
-        int borderTint = started ? SkillTreeChartTextures.GOLD : regionTint;
+        int accent = started ? SkillTreeChartTextures.GOLD : regionTint;
 
-        graphics.fill(tooltipX, tooltipY, tooltipX + w, tooltipY + h, SkillTreeChartTextures.NIGHT_BG);
-        drawBorderRect(graphics, tooltipX, tooltipY, w, h, borderTint);
+        // The panel art is night void with an indigo frame; a light tint would wash it out, so it
+        // is only nudged toward the accent rather than painted with it.
+        McStylePanel.drawSkinPanel(graphics, SKIN, tooltipX, tooltipY, w, h);
+        // Inset by the panel's own 8px nine-slice border, so the rule sits in the card rather than
+        // across its frame.
+        McStylePanel.drawSkinDivider(graphics, SKIN, tooltipX + 8, tooltipY + 17, w - 16);
 
         graphics.drawString(font, resolveDisplayName(skill.getDisplayName()),
-                tooltipX + 8, tooltipY + 7, borderTint, false);
+                tooltipX + 8, tooltipY + 7, accent, false);
         List<String> descLines = wrap(font, safeText(skill.getDescription(), "No description."), w - 16, 2);
-        int descY = tooltipY + 21;
+        int descY = tooltipY + 24;
         for (String line : descLines) {
             graphics.drawString(font, line, tooltipX + 8, descY, 0xFFCED3E4, false);
             descY += 10;
         }
 
-        int statsY = tooltipY + 45;
+        int statsY = tooltipY + 48;
         graphics.drawString(font, "Level: " + level + "/" + skill.getMaxLevel(),
                 tooltipX + 8, statsY, SkillTreeChartTextures.NIGHT_TEXT_DIM, false);
         graphics.drawString(font, "Cost: " + skill.getPointCost() + " SP",
                 tooltipX + 8, statsY + 10, SkillTreeChartTextures.NIGHT_TEXT_DIM, false);
+
         String constellation = I18n.get("skilltree.region." + skill.getTree().getId() + ".constellation");
-        graphics.drawString(font, "Region: " + skill.getTree().getDisplayName()
-                        + (constellation.startsWith("skilltree.") ? "" : " (" + constellation + ")"),
-                tooltipX + 8, statsY + 20, SkillTreeChartTextures.withAlpha(regionTint, 220), false);
+        boolean namedConstellation = !constellation.startsWith("skilltree.");
+        McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.regionGlyph(skill.getTree()),
+                tooltipX + 8 + SkillTreeChartTextures.REGION_GLYPH_SIZE / 2, statsY + 24,
+                SkillTreeChartTextures.REGION_GLYPH_SIZE, SkillTreeChartTextures.withAlpha(regionTint, 220));
+        graphics.drawString(font, skill.getTree().getDisplayName()
+                        + (namedConstellation ? " (" + constellation + ")" : ""),
+                tooltipX + 10 + SkillTreeChartTextures.REGION_GLYPH_SIZE, statsY + 20,
+                SkillTreeChartTextures.withAlpha(regionTint, 220), false);
 
         boolean affordable = points >= skill.getPointCost();
         String actionLine;
         int actionColor;
         if (sealed) {
-            // Sealed region: capability tag denies this whole region. Distinct from adjacency-locked only
-            // in wording; the flavor text is a placeholder lang key (raw-key fallback if unauthored).
+            // Sealed region: capability tag denies this whole region. Distinct from adjacency-locked
+            // only in wording.
             actionLine = I18n.exists(SEALED_TOOLTIP_KEY) ? I18n.get(SEALED_TOOLTIP_KEY) : "Sealed";
             actionColor = WizardsAndBeastsUiTokens.SkillTree.STATUS_WARN;
         } else if (maxed) {
@@ -128,73 +206,7 @@ public final class SkillTreeRenderHelper {
             actionLine = "Locked — allocate a connected star first";
             actionColor = WizardsAndBeastsUiTokens.SkillTree.STATUS_WARN;
         }
-        graphics.drawString(font, actionLine, tooltipX + 8, tooltipY + h - 14, actionColor, false);
-    }
-
-    // ── Shape primitives ──
-
-    public static void drawLine(GuiGraphics graphics, int x1, int y1, int x2, int y2, int color, int stroke) {
-        int dx = Math.abs(x2 - x1);
-        int dy = Math.abs(y2 - y1);
-        int sx = x1 < x2 ? 1 : -1;
-        int sy = y1 < y2 ? 1 : -1;
-        int err = dx - dy;
-        int x = x1;
-        int y = y1;
-        int size = Math.max(1, stroke);
-        while (true) {
-            graphics.fill(x, y, x + size, y + size, color);
-            if (x == x2 && y == y2) {
-                break;
-            }
-            int e2 = 2 * err;
-            if (e2 > -dy) {
-                err -= dy;
-                x += sx;
-            }
-            if (e2 < dx) {
-                err += dx;
-                y += sy;
-            }
-        }
-    }
-
-    /** One-pixel midpoint-circle outline — the survey rings. */
-    public static void drawCircleOutline(GuiGraphics graphics, int cx, int cy, int radius, int color) {
-        if (radius <= 0) {
-            return;
-        }
-        int x = radius;
-        int y = 0;
-        int err = 1 - radius;
-        while (x >= y) {
-            plot8(graphics, cx, cy, x, y, color);
-            y++;
-            if (err < 0) {
-                err += 2 * y + 1;
-            } else {
-                x--;
-                err += 2 * (y - x) + 1;
-            }
-        }
-    }
-
-    private static void plot8(GuiGraphics graphics, int cx, int cy, int x, int y, int color) {
-        graphics.fill(cx + x, cy + y, cx + x + 1, cy + y + 1, color);
-        graphics.fill(cx - x, cy + y, cx - x + 1, cy + y + 1, color);
-        graphics.fill(cx + x, cy - y, cx + x + 1, cy - y + 1, color);
-        graphics.fill(cx - x, cy - y, cx - x + 1, cy - y + 1, color);
-        graphics.fill(cx + y, cy + x, cx + y + 1, cy + x + 1, color);
-        graphics.fill(cx - y, cy + x, cx - y + 1, cy + x + 1, color);
-        graphics.fill(cx + y, cy - x, cx + y + 1, cy - x + 1, color);
-        graphics.fill(cx - y, cy - x, cx - y + 1, cy - x + 1, color);
-    }
-
-    public static void drawBorderRect(GuiGraphics graphics, int x, int y, int w, int h, int color) {
-        graphics.fill(x, y, x + w, y + 1, color);
-        graphics.fill(x, y + h - 1, x + w, y + h, color);
-        graphics.fill(x, y, x + 1, y + h, color);
-        graphics.fill(x + w - 1, y, x + w, y + h, color);
+        graphics.drawString(font, actionLine, tooltipX + 8, tooltipY + h - 15, actionColor, false);
     }
 
     /**

@@ -1,7 +1,9 @@
 package at.koopro.wizardsandbeasts.client.skill.gui;
 
+import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.client.gui.WizardsAndBeastsUiTokens;
+import at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton;
 import at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageDataState;
 import at.koopro.wizardsandbeasts.client.skill.state.ClientSkillDataState;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
@@ -16,6 +18,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.jspecify.annotations.Nullable;
@@ -27,21 +30,39 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Star-chart canvas over the player's audience skill web (Phase 5 skin): night-sky starfield with
- * parallax, nodes as tinted star sprites (size = magnitude, state = brightness + shape), allocated
- * paths as gold ley-lines with a slow shimmer, constellation labels fading out as you zoom in.
- * Drag to pan, scroll to zoom toward the cursor, click an allocatable star to send the
- * {@link SkillUnlockC2SPayload} roundtrip (state applies on the server's sync response).
+ * Star-chart canvas over the player's audience skill web: a three-layer parallax night sky, nodes
+ * as tinted star sprites (size = magnitude, state = shape and brightness), connections as glowing
+ * ley-lines, constellation glyphs and names fading out as you zoom in to build. Drag to pan, scroll
+ * to zoom toward the cursor, click an allocatable star to send the {@link SkillUnlockC2SPayload}
+ * roundtrip (state applies on the server's sync response).
+ *
+ * <p>Nothing on this screen is drawn with a shape primitive. The rings were a midpoint circle of
+ * one-pixel {@code fill}s, the edges a Bresenham run, the pips two crossed rectangles and the
+ * chrome a set of flat boxes — all of it stair-stepped and flat under sprites that were neither.
+ * Every one of those is now a sprite from {@code tools/skill_chart_textures.py} or the
+ * {@code star_chart} skin, and the only thing this class draws directly is text.
  */
 public class SkillTreeScreen extends Screen {
 
     private static final double MIN_ZOOM = 0.25;
     private static final double MAX_ZOOM = 2.0;
-    private static final double PARALLAX = 0.3;
+    private static final double ZOOM_STEP = 1.25;
     private static final int CULL_PAD = 48;
+
+    /**
+     * Parallax factors for the three sky layers, back to front.
+     *
+     * <p>One tile cannot have depth. What reads as distance is the difference in how far each
+     * layer travels against the pan, which is why the far field barely moves and the near stars
+     * keep up with the chart.
+     */
+    private static final double PARALLAX_FAR = 0.10;
+    private static final double PARALLAX_NEBULA = 0.18;
+    private static final double PARALLAX_NEAR = 0.32;
+
     /** Survey rings (world units) centered on Polaris — the wizard notable band boundaries. */
     private static final int[] SURVEY_RINGS = {120, 200, 280};
-    private static final int SURVEY_RING_COLOR = 0x1E9FB8E8;
+    private static final int SURVEY_RING_COLOR = 0x2E9FB8E8;
 
     private SkillTreeId.@Nullable Audience audience;
     /** Player heritage/variant, synced truth — drives audience selection and which regions are sealed. */
@@ -59,14 +80,28 @@ public class SkillTreeScreen extends Screen {
     private double zoom = 1.0;
     private boolean panned; // suppress click-allocate after a drag
 
+    // Panel height is not cached: the chrome takes the whole layout now, and a field nothing reads
+    // is a knob that drifts.
     private int panelX;
     private int panelY;
     private int panelW;
-    private int panelH;
+    /** The well: the recessed frame the chart sits in, outer edge. */
     private int viewportX;
     private int viewportY;
     private int viewportW;
     private int viewportH;
+    /**
+     * The chart itself: the well inset by its own frame.
+     *
+     * <p>Separate from the well because the sky is opaque and would otherwise paint straight over
+     * the frame that is supposed to contain it — the well would be drawn, then hidden, every
+     * frame. The inset is the raw sprite border, not a scaled one: {@code drawNineSlice} keeps its
+     * corners at native size at any panel scale, which is what stops the frame from smearing.
+     */
+    private int chartX;
+    private int chartY;
+    private int chartW;
+    private int chartH;
     private String resolvedTitle = "Skills";
     private GuiScaleHelper.Layout layout;
 
@@ -84,13 +119,17 @@ public class SkillTreeScreen extends Screen {
         layout = GuiScaleHelper.Layout.panel(width, height,
                 WizardsAndBeastsUiTokens.SkillTree.PANEL_WIDTH, WizardsAndBeastsUiTokens.SkillTree.PANEL_HEIGHT);
         panelW = layout.panelW();
-        panelH = layout.panelH();
         panelX = layout.panelX();
         panelY = layout.panelY();
         viewportW = layout.s(WizardsAndBeastsUiTokens.SkillTree.VIEWPORT_WIDTH);
         viewportH = layout.s(WizardsAndBeastsUiTokens.SkillTree.VIEWPORT_HEIGHT);
         viewportX = panelX + layout.s(WizardsAndBeastsUiTokens.SkillTree.VIEWPORT_X);
         viewportY = panelY + layout.s(WizardsAndBeastsUiTokens.SkillTree.VIEWPORT_Y);
+        int frame = at.koopro.wizardsandbeasts.client.gui.WizardsMetrics.PANEL_SPRITE_BORDER;
+        chartX = viewportX + frame;
+        chartY = viewportY + frame;
+        chartW = Math.max(16, viewportW - frame * 2);
+        chartH = Math.max(16, viewportH - frame * 2);
 
         SkillTreeId.Audience previous = audience;
         heritage = ClientHeritageDataState.get().getSelectedHeritage();
@@ -102,28 +141,74 @@ public class SkillTreeScreen extends Screen {
             centerOnWeb();
         }
         addVocationButton();
+        addChartControls();
     }
 
     /**
-     * The only in-game way into {@link VocationSelectionScreen}. Vocations were command-only, so on a world
-     * without cheats the specialization layer could not be reached at all.
+     * The only in-game way into {@link VocationSelectionScreen}. Vocations were command-only, so on a
+     * world without cheats the specialization layer could not be reached at all.
      */
     private void addVocationButton() {
-        int buttonW = layout.s(96);
-        int buttonH = layout.s(16);
+        int buttonW = layout.s(WizardsAndBeastsUiTokens.SkillTree.VOCATION_BUTTON_W);
+        int buttonH = layout.s(WizardsAndBeastsUiTokens.SkillTree.VOCATION_BUTTON_H);
         Component label = at.koopro.wizardsandbeasts.client.skill.state.ClientVocationCache.primary()
                 .map(at.koopro.wizardsandbeasts.skill.vocation.VocationRegistry::get)
                 .map(vocation -> Component.translatable("screen.wizards_and_beasts.vocation.button.set",
                         vocation.displayName()))
                 .orElse(Component.translatable("screen.wizards_and_beasts.vocation.button.none"));
-        addRenderableWidget(net.minecraft.client.gui.components.Button.builder(label,
-                        b -> {
-                            if (minecraft != null) {
-                                minecraft.setScreen(new VocationSelectionScreen(this));
-                            }
-                        })
-                .bounds(panelX + panelW - layout.s(8) - buttonW, panelY + layout.s(4), buttonW, buttonH)
-                .build());
+        // Skinned rather than a vanilla Button: this was the one piece of Minecraft grey stone left
+        // on a screen made of night sky and brass.
+        addRenderableWidget(chartButton(
+                panelX + panelW - layout.s(WizardsAndBeastsUiTokens.SkillTree.SEAL_INSET
+                        + McStylePanel.SEAL_SIZE + 4) - buttonW,
+                panelY + layout.s(3), buttonW, buttonH, label, null,
+                () -> {
+                    if (minecraft != null) {
+                        minecraft.setScreen(new VocationSelectionScreen(this));
+                    }
+                }));
+    }
+
+    /**
+     * Zoom and recenter, bottom-right inside the well.
+     *
+     * <p>Scroll-to-zoom and drag-to-pan are still the fast path; these exist because a player who
+     * has panned off the web has no way back short of closing the screen, and a trackpad without
+     * a scroll wheel has no way to zoom at all.
+     */
+    private void addChartControls() {
+        int size = layout.s(WizardsAndBeastsUiTokens.SkillTree.CONTROL_SIZE);
+        int gap = layout.s(WizardsAndBeastsUiTokens.SkillTree.CONTROL_GAP);
+        int margin = layout.s(WizardsAndBeastsUiTokens.SkillTree.CONTROL_MARGIN);
+        int y = chartY + chartH - margin - size;
+        int x = chartX + chartW - margin - size;
+
+        addRenderableWidget(iconControl(x, y, size, SkillTreeChartTextures.ICON_RECENTER,
+                "recenter", this::centerOnWeb));
+        x -= size + gap;
+        addRenderableWidget(iconControl(x, y, size, SkillTreeChartTextures.ICON_ZOOM_IN,
+                "zoom_in", () -> zoomAboutChartCenter(ZOOM_STEP)));
+        x -= size + gap;
+        addRenderableWidget(iconControl(x, y, size, SkillTreeChartTextures.ICON_ZOOM_OUT,
+                "zoom_out", () -> zoomAboutChartCenter(1.0 / ZOOM_STEP)));
+    }
+
+    /**
+     * An icon-only control. The label is empty, so the name lives in the tooltip — which is also
+     * what the narrator reads, and a button announced as "" is a button a screen reader cannot use.
+     */
+    private ThemedButton iconControl(int x, int y, int size, Identifier icon, String key, Runnable action) {
+        Component name = Component.translatable("screen.wizards_and_beasts.skill_tree.control." + key);
+        ThemedButton button = chartButton(x, y, size, size, Component.empty(), icon, action);
+        button.setTooltip(net.minecraft.client.gui.components.Tooltip.create(name));
+        return button;
+    }
+
+    private ThemedButton chartButton(int x, int y, int w, int h, Component label,
+                                     @Nullable Identifier icon, Runnable action) {
+        return ThemedButton.skinned(x, y, w, h, label, action, McStylePanel.SKIN_STAR_CHART,
+                icon, SkillTreeChartTextures.ICON_SIZE,
+                SkillTreeChartTextures.CHART_INK, SkillTreeChartTextures.NIGHT_TEXT_DIM);
     }
 
     /** Seals every region in this audience whose capability requirement the player doesn't meet. */
@@ -182,22 +267,22 @@ public class SkillTreeScreen extends Screen {
         zoom = 1.0;
     }
 
-    // ── World ↔ screen transform: screen = (world − pan) × zoom + viewportCenter ──
+    // ── World ↔ screen transform: screen = (world − pan) × zoom + chartCenter ──
 
     private double toScreenX(double worldX) {
-        return (worldX - panX) * zoom + viewportX + viewportW / 2.0;
+        return (worldX - panX) * zoom + chartX + chartW / 2.0;
     }
 
     private double toScreenY(double worldY) {
-        return (worldY - panY) * zoom + viewportY + viewportH / 2.0;
+        return (worldY - panY) * zoom + chartY + chartH / 2.0;
     }
 
     private double toWorldX(double screenX) {
-        return (screenX - viewportX - viewportW / 2.0) / zoom + panX;
+        return (screenX - chartX - chartW / 2.0) / zoom + panX;
     }
 
     private double toWorldY(double screenY) {
-        return (screenY - viewportY - viewportH / 2.0) / zoom + panY;
+        return (screenY - chartY - chartH / 2.0) / zoom + panY;
     }
 
     /** Star sprite draw size (px) per node class before zoom. */
@@ -222,7 +307,7 @@ public class SkillTreeScreen extends Screen {
 
     @Override
     public boolean mouseDragged(net.minecraft.client.input.MouseButtonEvent event, double dragX, double dragY) {
-        if (event.button() == 0 && insideViewport(event.x(), event.y())) {
+        if (event.button() == 0 && insideChart(event.x(), event.y())) {
             panX -= dragX / zoom;
             panY -= dragY / zoom;
             panned = true;
@@ -233,15 +318,24 @@ public class SkillTreeScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        if (!insideViewport(mouseX, mouseY)) {
+        if (!insideChart(mouseX, mouseY)) {
             return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
         }
-        double worldX = toWorldX(mouseX);
-        double worldY = toWorldY(mouseY);
-        zoom = Math.clamp(zoom * (scrollY > 0 ? 1.15 : 1.0 / 1.15), MIN_ZOOM, MAX_ZOOM);
-        panX = worldX - (mouseX - viewportX - viewportW / 2.0) / zoom;
-        panY = worldY - (mouseY - viewportY - viewportH / 2.0) / zoom;
+        zoomAbout(mouseX, mouseY, scrollY > 0 ? 1.15 : 1.0 / 1.15);
         return true;
+    }
+
+    /** Zoom keeping the world point under {@code (anchorX, anchorY)} pinned there. */
+    private void zoomAbout(double anchorX, double anchorY, double factor) {
+        double worldX = toWorldX(anchorX);
+        double worldY = toWorldY(anchorY);
+        zoom = Math.clamp(zoom * factor, MIN_ZOOM, MAX_ZOOM);
+        panX = worldX - (anchorX - chartX - chartW / 2.0) / zoom;
+        panY = worldY - (anchorY - chartY - chartH / 2.0) / zoom;
+    }
+
+    private void zoomAboutChartCenter(double factor) {
+        zoomAbout(chartX + chartW / 2.0, chartY + chartH / 2.0, factor);
     }
 
     @Override
@@ -272,14 +366,14 @@ public class SkillTreeScreen extends Screen {
         ClientPacketDistributor.sendToServer(new SkillUnlockC2SPayload(node.getId()));
     }
 
-    private boolean insideViewport(double mouseX, double mouseY) {
-        return mouseX >= viewportX && mouseX <= viewportX + viewportW
-                && mouseY >= viewportY && mouseY <= viewportY + viewportH;
+    private boolean insideChart(double mouseX, double mouseY) {
+        return mouseX >= chartX && mouseX <= chartX + chartW
+                && mouseY >= chartY && mouseY <= chartY + chartH;
     }
 
     private boolean onCanvas(double screenX, double screenY) {
-        return screenX >= viewportX - CULL_PAD && screenX <= viewportX + viewportW + CULL_PAD
-                && screenY >= viewportY - CULL_PAD && screenY <= viewportY + viewportH + CULL_PAD;
+        return screenX >= chartX - CULL_PAD && screenX <= chartX + chartW + CULL_PAD
+                && screenY >= chartY - CULL_PAD && screenY <= chartY + chartH + CULL_PAD;
     }
 
     // ── Render ──
@@ -289,19 +383,22 @@ public class SkillTreeScreen extends Screen {
         this.renderMenuBackground(graphics);
         refreshWeb(); // hot-swap: a /reload definition resync replaces the cached list instance
         PlayerSkillData data = ClientSkillDataState.get();
-        SkillTreeRenderHelper.renderWindowFrame(graphics, font, panelX, panelY, panelW, panelH, resolvedTitle);
+        SkillTreeRenderHelper.renderWindowFrame(graphics, font, layout, resolvedTitle);
 
-        graphics.enableScissor(viewportX, viewportY, viewportX + viewportW, viewportY + viewportH);
-        drawStarfield(graphics);
+        // The well is drawn before the scissor so its own frame is not clipped away by it.
+        McStylePanel.drawSkinInset(graphics, McStylePanel.SKIN_STAR_CHART,
+                viewportX, viewportY, viewportW, viewportH);
+
+        graphics.enableScissor(chartX, chartY, chartX + chartW, chartY + chartH);
+        drawSky(graphics);
         drawSurveyRings(graphics);
         drawEdges(graphics, data);
         hoveredNode = drawNodes(graphics, data, mouseX, mouseY);
         drawConstellationLabels(graphics);
+        drawVignette(graphics);
         graphics.disableScissor();
 
-        SkillTreeRenderHelper.drawBorderRect(graphics, viewportX, viewportY, viewportW, viewportH,
-                WizardsAndBeastsUiTokens.SkillTree.BORDER_COLOR);
-        SkillTreeRenderHelper.renderFooter(graphics, font, panelX, panelY, panelW, panelH, data);
+        SkillTreeRenderHelper.renderFooter(graphics, font, layout, data);
 
         super.render(graphics, mouseX, mouseY, partialTick);
 
@@ -313,26 +410,44 @@ public class SkillTreeScreen extends Screen {
         }
     }
 
-    /** Deep-sky tile scrolled at ~0.3× pan for parallax; drawn 1:1 so the grain never swims with zoom. */
-    private void drawStarfield(GuiGraphics graphics) {
-        int tile = SkillTreeChartTextures.STARFIELD_SIZE;
-        int offX = Math.floorMod((int) Math.round(panX * PARALLAX * zoom), tile);
-        int offY = Math.floorMod((int) Math.round(panY * PARALLAX * zoom), tile);
-        for (int x = viewportX - offX; x < viewportX + viewportW; x += tile) {
-            for (int y = viewportY - offY; y < viewportY + viewportH; y += tile) {
-                graphics.blit(RenderPipelines.GUI_TEXTURED, SkillTreeChartTextures.STARFIELD,
-                        x, y, 0.0F, 0.0F, tile, tile, tile, tile);
+    /** The three sky layers, back to front, each scrolled at its own fraction of the pan. */
+    private void drawSky(GuiGraphics graphics) {
+        tileLayer(graphics, SkillTreeChartTextures.STARFIELD_FAR,
+                SkillTreeChartTextures.STARFIELD_SIZE, PARALLAX_FAR);
+        tileLayer(graphics, SkillTreeChartTextures.NEBULA,
+                SkillTreeChartTextures.NEBULA_SIZE, PARALLAX_NEBULA);
+        tileLayer(graphics, SkillTreeChartTextures.STARFIELD,
+                SkillTreeChartTextures.STARFIELD_SIZE, PARALLAX_NEAR);
+    }
+
+    /**
+     * One sky layer, tiled across the chart at 1:1.
+     *
+     * <p>Drawn at native size rather than scaled with the chart, so the grain never swims when the
+     * player zooms — a sky that zooms is a wallpaper, not a sky.
+     */
+    private void tileLayer(GuiGraphics graphics, Identifier tex, int tile, double parallax) {
+        int offX = Math.floorMod((int) Math.round(panX * parallax * zoom), tile);
+        int offY = Math.floorMod((int) Math.round(panY * parallax * zoom), tile);
+        for (int x = chartX - offX; x < chartX + chartW; x += tile) {
+            for (int y = chartY - offY; y < chartY + chartH; y += tile) {
+                graphics.blit(RenderPipelines.GUI_TEXTURED, tex, x, y, 0.0F, 0.0F,
+                        tile, tile, tile, tile);
             }
         }
     }
 
-    /** Faint concentric survey rings centered on Polaris — drawn, not textured. */
+    /** Faint concentric survey rings centered on Polaris, one stretched sprite each. */
     private void drawSurveyRings(GuiGraphics graphics) {
         int cx = (int) Math.round(toScreenX(0));
         int cy = (int) Math.round(toScreenY(0));
         for (int worldR : SURVEY_RINGS) {
-            SkillTreeRenderHelper.drawCircleOutline(graphics, cx, cy,
-                    (int) Math.round(worldR * zoom), SURVEY_RING_COLOR);
+            int diameter = (int) Math.round(worldR * 2 * zoom);
+            if (diameter < 8) {
+                continue;
+            }
+            McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.SURVEY_RING,
+                    cx, cy, diameter, SURVEY_RING_COLOR);
         }
     }
 
@@ -354,7 +469,7 @@ public class SkillTreeScreen extends Screen {
                 double bx = toScreenX(neighbor.getX());
                 double by = toScreenY(neighbor.getY());
                 if (!onCanvas(ax, ay) && !onCanvas(bx, by)) {
-                    continue; // cull: both endpoints off-viewport
+                    continue; // cull: both endpoints off-chart
                 }
                 boolean aLit = data.getSkillLevel(node.getId()) >= 1;
                 boolean bLit = data.getSkillLevel(neighborId) >= 1;
@@ -362,27 +477,31 @@ public class SkillTreeScreen extends Screen {
                 int stroke;
                 if (aLit && bLit) {
                     color = SkillTreeChartTextures.withAlpha(SkillTreeChartTextures.GOLD, allocatedAlpha);
-                    stroke = 2;
+                    stroke = WizardsAndBeastsUiTokens.SkillTree.LEY_ALLOCATED_STROKE;
                 } else if (aLit || bLit) {
                     // Frontier edge: slightly lifted, carrying the region tint when intra-region.
                     int tint = node.getTree() == neighbor.getTree()
                             ? SkillTreeChartTextures.regionTint(node.getTree())
                             : 0xFFB8C0D8;
-                    color = SkillTreeChartTextures.withAlpha(tint, 120);
-                    stroke = 1;
+                    color = SkillTreeChartTextures.withAlpha(tint, 150);
+                    stroke = WizardsAndBeastsUiTokens.SkillTree.LEY_FRONTIER_STROKE;
                 } else {
-                    color = SkillTreeChartTextures.EDGE_LOCKED;
-                    stroke = 1;
+                    color = SkillTreeChartTextures.withAlpha(SkillTreeChartTextures.EDGE_LOCKED, 220);
+                    stroke = WizardsAndBeastsUiTokens.SkillTree.LEY_LOCKED_STROKE;
                 }
-                SkillTreeRenderHelper.drawLine(graphics,
-                        (int) Math.round(ax), (int) Math.round(ay),
-                        (int) Math.round(bx), (int) Math.round(by), color, stroke);
+                McStylePanel.drawTexturedSegment(graphics, SkillTreeChartTextures.LEY_LINE,
+                        ax, ay, bx, by, stroke,
+                        SkillTreeChartTextures.LEY_LINE_W, SkillTreeChartTextures.LEY_LINE_H, color);
             }
         }
     }
 
     private @Nullable Skill drawNodes(GuiGraphics graphics, PlayerSkillData data, int mouseX, int mouseY) {
         Skill hovered = null;
+        // One phase for the whole chart, so every takeable star breathes together rather than
+        // flickering out of step with its neighbours.
+        float pulse = (float) (0.5 + 0.5 * Math.sin(System.currentTimeMillis() / 900.0 * Math.PI));
+
         for (Skill node : webNodes) {
             boolean polaris = isPolaris(node);
             int cx = (int) Math.round(toScreenX(node.getX()));
@@ -393,66 +512,105 @@ public class SkillTreeScreen extends Screen {
             int size = Math.max(6, (int) Math.round(baseSpritePx(node, polaris) * zoom));
             int level = data.getSkillLevel(node.getId());
             boolean allocated = level >= 1;
-            // A sealed region is permanently non-allocatable regardless of adjacency; it falls through to
-            // the locked ember branch (reused, not a distinct sprite — the seal cue lives in the tooltip).
+            // A sealed region is permanently non-allocatable regardless of adjacency; it falls
+            // through to the locked branch (reused, not a distinct sprite — the seal cue lives in
+            // the tooltip).
             boolean sealed = sealedTrees.contains(node.getTree());
             boolean allocatable = !allocated && !sealed && (node.isRoot() || hasAllocatedNeighbor(data, node));
+
+            boolean isHovered = hovered == null && insideChart(mouseX, mouseY)
+                    && withinHitRadius(node, polaris, cx, cy, mouseX, mouseY);
+
+            if (isHovered) {
+                // Halo under everything else: a hover cue that sits on top would hide the node it
+                // is pointing at.
+                McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.STAR_HALO,
+                        cx, cy, size * 3,
+                        SkillTreeChartTextures.withAlpha(
+                                allocated ? SkillTreeChartTextures.GOLD
+                                        : SkillTreeChartTextures.regionTint(node.getTree()), 170));
+            } else if (allocatable) {
+                McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.STAR_HALO,
+                        cx, cy, (int) (size * 2.2),
+                        SkillTreeChartTextures.withAlpha(
+                                SkillTreeChartTextures.regionTint(node.getTree()),
+                                60 + (int) (70 * pulse)));
+            }
 
             if (polaris) {
                 // Polaris: brightest object on the chart; gold once taken, ice-white before.
                 int tint = allocated ? SkillTreeChartTextures.GOLD : 0xFFEFF2FF;
-                blitCentered(graphics, SkillTreeChartTextures.STAR_POLARIS, cx, cy, size, tint);
+                McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.STAR_POLARIS,
+                        cx, cy, size, tint);
             } else if (allocated) {
                 // Shape + brightness cue: diffraction flare with a hot gold core.
-                blitCentered(graphics, SkillTreeChartTextures.flare(node.getSize()), cx, cy, size,
-                        SkillTreeChartTextures.GOLD);
-                blitCentered(graphics, SkillTreeChartTextures.core(node.getSize()), cx, cy,
-                        Math.max(4, size * 2 / 3), 0xFFFFF6DC);
+                McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.flare(node.getSize()),
+                        cx, cy, size, SkillTreeChartTextures.GOLD);
+                McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.core(node.getSize()),
+                        cx, cy, Math.max(4, size * 2 / 3), 0xFFFFF6DC);
             } else if (allocatable) {
                 // Soft white core with a region-tinted rim ring.
-                blitCentered(graphics, SkillTreeChartTextures.core(node.getSize()), cx, cy, size, 0xFFE8ECF8);
-                blitCentered(graphics, SkillTreeChartTextures.ring(node.getSize()), cx, cy, size,
-                        SkillTreeChartTextures.regionTint(node.getTree()));
+                McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.core(node.getSize()),
+                        cx, cy, size, 0xFFE8ECF8);
+                McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.ring(node.getSize()),
+                        cx, cy, size, SkillTreeChartTextures.regionTint(node.getTree()));
             } else {
-                // Locked: dim ember dot — brightness cue lives in the tint.
-                blitCentered(graphics, SkillTreeChartTextures.core(node.getSize()), cx, cy, size,
-                        SkillTreeChartTextures.withAlpha(SkillTreeChartTextures.EMBER, 195));
+                // Locked: an unlit socket. Its own shape, so "not yet" is legible without
+                // comparing two tints against a tinted sky.
+                McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.locked(node.getSize()),
+                        cx, cy, size,
+                        SkillTreeChartTextures.withAlpha(SkillTreeChartTextures.EMBER, 210));
             }
 
             if (node.getMaxLevel() > 1 && zoom >= 0.5) {
-                drawStarPips(graphics, cx, cy + size / 2 + 3, level, node.getMaxLevel());
+                drawStarPips(graphics, cx,
+                        cy + size / 2 + WizardsAndBeastsUiTokens.SkillTree.PIP_GAP,
+                        level, node.getMaxLevel());
             }
 
-            if (hovered == null && insideViewport(mouseX, mouseY)) {
-                int r = Math.max(4, hitRadius(node, polaris) * (int) Math.ceil(zoom)) + 2;
-                double dx = mouseX - cx;
-                double dy = mouseY - cy;
-                if (dx * dx + dy * dy <= (double) r * r) {
-                    hovered = node;
-                }
+            if (isHovered) {
+                hovered = node;
             }
         }
         return hovered;
     }
 
-    /** Level pips as a row of tiny stars: gold-filled up to {@code level}, slate for the rest. */
+    private boolean withinHitRadius(Skill node, boolean polaris, int cx, int cy, int mouseX, int mouseY) {
+        int r = Math.max(4, hitRadius(node, polaris) * (int) Math.ceil(zoom)) + 2;
+        double dx = mouseX - cx;
+        double dy = mouseY - cy;
+        return dx * dx + dy * dy <= (double) r * r;
+    }
+
+    /** Level pips as a row of tiny stars: lit up to {@code level}, hollow sockets for the rest. */
     private static void drawStarPips(GuiGraphics graphics, int cx, int y, int level, int maxLevel) {
-        int spacing = 5;
+        int pip = WizardsAndBeastsUiTokens.SkillTree.PIP_DRAW_SIZE;
+        int spacing = WizardsAndBeastsUiTokens.SkillTree.PIP_SPACING;
         int startX = cx - ((maxLevel - 1) * spacing) / 2;
         for (int i = 0; i < maxLevel; i++) {
-            int x = startX + i * spacing;
-            int color = i < level ? SkillTreeChartTextures.GOLD : 0xFF3A4258;
-            graphics.fill(x - 1, y, x + 2, y + 1, color);
-            graphics.fill(x, y - 1, x + 1, y + 2, color);
+            boolean lit = i < level;
+            McStylePanel.drawTintedCentered(graphics,
+                    lit ? SkillTreeChartTextures.PIP_ON : SkillTreeChartTextures.PIP_OFF,
+                    startX + i * spacing, y + pip / 2, pip,
+                    lit ? SkillTreeChartTextures.GOLD
+                            : SkillTreeChartTextures.withAlpha(SkillTreeChartTextures.NIGHT_TEXT_DIM, 170));
         }
     }
 
-    /** Constellation names hang faintly over their clusters; they fade out as you zoom in to build. */
+    /**
+     * Constellation glyph and name over each cluster; both fade out as the view closes in to build.
+     *
+     * <p>The glyph is the identity the names alone could not carry — "Fornax" tells a player
+     * nothing about which region they are looking at, and the asterism beside it is the same shape
+     * that appears on the node's tooltip.
+     */
     private void drawConstellationLabels(GuiGraphics graphics) {
         int alpha = labelAlpha();
         if (alpha < 10) {
             return;
         }
+        int glyph = WizardsAndBeastsUiTokens.SkillTree.LABEL_GLYPH_SIZE;
+        int gap = WizardsAndBeastsUiTokens.SkillTree.LABEL_GLYPH_GAP;
         for (Map.Entry<SkillTreeId, double[]> entry : labelCentroids.entrySet()) {
             Component text = labelText.get(entry.getKey());
             if (text == null) {
@@ -464,9 +622,25 @@ public class SkillTreeScreen extends Screen {
                 continue;
             }
             int tint = SkillTreeChartTextures.regionTint(entry.getKey());
-            graphics.drawCenteredString(font, text, cx, cy - font.lineHeight / 2,
-                    SkillTreeChartTextures.withAlpha(tint, alpha));
+            int textW = font.width(text);
+            int groupX = cx - (glyph + gap + textW) / 2;
+            McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.regionGlyph(entry.getKey()),
+                    groupX + glyph / 2, cy, glyph, SkillTreeChartTextures.withAlpha(tint, alpha));
+            graphics.drawString(font, text, groupX + glyph + gap, cy - font.lineHeight / 2,
+                    SkillTreeChartTextures.withAlpha(tint, alpha), false);
         }
+    }
+
+    /**
+     * Edge darkening over the chart, inside the scissor.
+     *
+     * <p>Drawn last of the canvas layers so it dims the sky, the ley-lines and the outer stars
+     * alike, which is what stops the web from looking pasted onto a rectangle of sky.
+     */
+    private void drawVignette(GuiGraphics graphics) {
+        int size = SkillTreeChartTextures.VIGNETTE_SIZE;
+        graphics.blit(RenderPipelines.GUI_TEXTURED, SkillTreeChartTextures.VIGNETTE,
+                chartX, chartY, 0.0F, 0.0F, chartW, chartH, size, size, size, size);
     }
 
     /** Full strength while zoomed out; fades to nothing as the view closes past ~0.9× for building. */
@@ -475,12 +649,6 @@ public class SkillTreeScreen extends Screen {
             return 150;
         }
         return (int) (150 * Mth.clamp(1.0 - (zoom - 0.9) / 0.35, 0.0, 1.0));
-    }
-
-    private static void blitCentered(GuiGraphics graphics, net.minecraft.resources.Identifier sprite,
-                                     int cx, int cy, int size, int tint) {
-        graphics.blit(RenderPipelines.GUI_TEXTURED, sprite,
-                cx - size / 2, cy - size / 2, 0.0F, 0.0F, size, size, size, size, tint);
     }
 
     private static boolean hasAllocatedNeighbor(PlayerSkillData data, Skill node) {
