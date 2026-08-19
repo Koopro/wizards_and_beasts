@@ -112,14 +112,40 @@ class PlayerFormRigTest {
         }
     }
 
+    /**
+     * The fallback is asserted against a rig built here rather than against whichever shipped rig
+     * currently lacks a walk clip. It used to point at {@code goblin_teller}, which really did ship
+     * an idle and nothing else — and then the goblin rig was remade with a walk, and a test of the
+     * null-handling started failing for a reason that had nothing to do with null handling. Every
+     * rig in the table having a movement clip is a good state to be in, and it must not be able to
+     * delete this test's subject.
+     */
     @Test
     void aRigWithNoMovementClipFallsBackToIdle() {
-        PlayerFormRig goblin = PlayerFormRig.forForm("goblin_default");
-        assertNotNull(goblin);
-        assertNull(goblin.movementClip(), "goblin_teller ships an idle and nothing else");
-        assertEquals(goblin.idleClip(), goblin.clipFor(true),
+        PlayerFormRig rig = new PlayerFormRig("example", "animation.example.idle", null, null, null);
+        assertNull(rig.movementClip());
+        assertEquals(rig.idleClip(), rig.clipFor(true),
                 "asking for a clip the file does not define throws mid-render; idle is the safe answer");
-        assertEquals(goblin.idleClip(), goblin.clipFor(false));
+        assertEquals(rig.idleClip(), rig.clipFor(false));
+        assertEquals(rig.idleClip(), rig.clipFor(true, true, true),
+                "a rig with no reaction art must fall all the way through, not name a missing clip");
+    }
+
+    /** Hurt beats attack beats movement beats idle, and each step falls through when unauthored. */
+    @Test
+    void reactionClipsTakePriorityOverMovement() {
+        PlayerFormRig full = PlayerFormRig.forForm("werewolf_wolf");
+        assertNotNull(full);
+        assertEquals("animation.werewolf.hit", full.clipFor(true, true, true));
+        assertEquals("animation.werewolf.attack", full.clipFor(true, true, false));
+        assertEquals("animation.werewolf.walk", full.clipFor(true, false, false));
+        assertEquals("animation.werewolf.idle", full.clipFor(false, false, false));
+
+        PlayerFormRig walkOnly = PlayerFormRig.forForm("centaur_default");
+        assertNotNull(walkOnly);
+        assertNull(walkOnly.attackClip());
+        assertEquals(walkOnly.movementClip(), walkOnly.clipFor(true, true, true),
+                "a rig with no reaction art keeps walking rather than naming a clip it lacks");
     }
 
     @Test

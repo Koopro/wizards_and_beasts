@@ -41,7 +41,8 @@ public record CreatureDefinition(
         Identifier texture,
         Identifier animation,
         Optional<DragonTraits> dragon,
-        List<CreatureAbility> abilities) {
+        List<CreatureAbility> abilities,
+        List<String> clips) {
 
     private static <E extends Enum<E>> Codec<E> enumCodec(Class<E> type) {
         return Codec.STRING.xmap(s -> Enum.valueOf(type, s), Enum::name);
@@ -68,10 +69,10 @@ public record CreatureDefinition(
         ).apply(instance, StatBlock::new));
     }
 
-    /** Second flat half: trait vocabulary, asset ids, the dragon sub-block, and the ability layer. */
+    /** Second flat half: trait vocabulary, asset ids, the dragon sub-block, abilities, and clips. */
     private record AssetBlock(
             List<Trait> traits, Identifier model, Identifier texture, Identifier animation,
-            Optional<DragonTraits> dragon, List<CreatureAbility> abilities) {
+            Optional<DragonTraits> dragon, List<CreatureAbility> abilities, List<String> clips) {
 
         static final MapCodec<AssetBlock> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 enumCodec(Trait.class).listOf().optionalFieldOf("traits", List.of()).forGetter(AssetBlock::traits),
@@ -80,7 +81,13 @@ public record CreatureDefinition(
                 Identifier.CODEC.fieldOf("animation").forGetter(AssetBlock::animation),
                 DragonTraits.CODEC.optionalFieldOf("dragon").forGetter(AssetBlock::dragon),
                 // Datapack-driven ability layer. Default empty so every existing creature JSON parses unchanged.
-                CreatureAbility.CODEC.listOf().optionalFieldOf("abilities", List.of()).forGetter(AssetBlock::abilities)
+                CreatureAbility.CODEC.listOf().optionalFieldOf("abilities", List.of()).forGetter(AssetBlock::abilities),
+                // Triggered animation clips this creature's `.animation.json` actually contains, beyond the
+                // idle/movement pair every locomotion class binds. GeckoLib throws mid-render when asked for
+                // a clip a file does not define, so a shared entity class cannot assume `attack` exists —
+                // it registers a triggerable only for what is declared here. Default empty, so the creatures
+                // that declare nothing register nothing and are untouched.
+                Codec.STRING.listOf().optionalFieldOf("clips", List.of()).forGetter(AssetBlock::clips)
         ).apply(instance, AssetBlock::new));
     }
 
@@ -91,12 +98,12 @@ public record CreatureDefinition(
                 return new CreatureDefinition(
                         s.id(), s.bodyPlan(), s.locomotion(), s.temperament(), s.width(), s.height(),
                         s.maxHealth(), s.movementSpeed(), s.flyingSpeed(), s.followRange(), s.attackDamage(),
-                        a.traits(), a.model(), a.texture(), a.animation(), a.dragon(), a.abilities());
+                        a.traits(), a.model(), a.texture(), a.animation(), a.dragon(), a.abilities(), a.clips());
             },
             def -> Pair.of(
                     new StatBlock(def.id(), def.bodyPlan(), def.locomotion(), def.temperament(), def.width(),
                             def.height(), def.maxHealth(), def.movementSpeed(), def.flyingSpeed(),
                             def.followRange(), def.attackDamage()),
                     new AssetBlock(def.traits(), def.model(), def.texture(), def.animation(), def.dragon(),
-                            def.abilities())));
+                            def.abilities(), def.clips())));
 }

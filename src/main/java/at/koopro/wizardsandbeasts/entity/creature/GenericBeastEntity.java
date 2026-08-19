@@ -9,6 +9,7 @@ import at.koopro.wizardsandbeasts.creature.ability.FireAffinity;
 import at.koopro.wizardsandbeasts.entity.GeoEntityBase;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
+import at.koopro.wizardsandbeasts.util.AnimHelper;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -41,6 +42,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.Nullable;
+import software.bernie.geckolib.animatable.manager.AnimatableManager;
+import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.object.PlayState;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -58,6 +62,19 @@ import java.util.Set;
  * subclass exists — only the four locomotion subclasses, which supply movement goals + animation.
  */
 public abstract class GenericBeastEntity extends GeoEntityBase {
+
+    /**
+     * Controller for one-shot reaction clips. Named distinctly from {@code dragon_action},
+     * {@code thestral_action} and {@code goblin_action} so a subclass that adds its own action
+     * controller does not collide with this one.
+     */
+    public static final String BEAST_ACTION_CONTROLLER = "beast_action";
+
+    /** Clip fired on landing a melee hit, when the creature declares it. */
+    private static final String CLIP_ATTACK = "attack";
+
+    /** Clip fired on taking damage, when the creature declares it. */
+    private static final String CLIP_HIT = "hit";
 
     /** Niffler-grade theft: stacks lifted from players, carried until the beast dies. */
     private static final int MAX_CARRIED = 8;
@@ -332,6 +349,7 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
     public boolean doHurtTarget(ServerLevel level, Entity target) {
         boolean hit = super.doHurtTarget(level, target);
         if (hit && target instanceof LivingEntity victim) {
+            triggerDeclared(CLIP_ATTACK);
             applyHitTraits(victim);
             if (ModuleManager.isEnabled(Module.CREATURES)) {
                 for (CreatureAbility ability : abilities()) {
@@ -345,6 +363,9 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
     @Override
     public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
         boolean hurt = super.hurtServer(level, source, amount);
+        if (hurt && isAlive()) {
+            triggerDeclared(CLIP_HIT);
+        }
         if (hurt && ModuleManager.isEnabled(Module.CREATURES)) {
             for (CreatureAbility ability : abilities()) {
                 ability.onHurt(this, source, amount);
@@ -484,5 +505,48 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
             }
         }
         super.die(cause);
+    }
+
+    // ── reaction clips ────────────────────────────────────────────────────────
+
+    /** The one-shot clips this creature's animation file declares, e.g. {@code ["attack", "hit"]}. */
+    protected List<String> declaredClips() {
+        CreatureDefinition def = definition();
+        return def != null ? def.clips() : List.of();
+    }
+
+    /**
+     * Fire a reaction clip, but only when this creature actually declares it.
+     *
+     * <p>The gate is the whole point. Around sixty creatures share these entity classes and almost
+     * none of them have an {@code attack} clip on disk; GeckoLib does not degrade when asked for a
+     * clip its file does not define, it throws inside the render pass. So the clip set is declared
+     * per creature in the datapack and nothing is ever triggered on faith.
+     */
+    protected void triggerDeclared(String clip) {
+        if (declaredClips().contains(clip)) {
+            triggerAnim(BEAST_ACTION_CONTROLLER, clip);
+        }
+    }
+
+    /**
+     * Registers a triggerable for each declared clip and nothing else.
+     *
+     * <p>Subclasses add their movement controller on top of this and must call {@code super} —
+     * {@code DragonEntity} already did, and the four locomotion classes now do too.
+     */
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        List<String> clips = declaredClips();
+        if (clips.isEmpty()) {
+            return;
+        }
+        AnimationController<GenericBeastEntity> action =
+                new AnimationController<>(BEAST_ACTION_CONTROLLER, 0, state -> PlayState.STOP);
+        String name = assetName();
+        for (String clip : clips) {
+            action.triggerableAnim(clip, AnimHelper.playOnce(name, clip));
+        }
+        controllers.add(action);
     }
 }

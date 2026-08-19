@@ -16,23 +16,34 @@ import java.util.Map;
  * in for a texture that was never authored. This table is the join that was missing.
  *
  * <p><b>Clip names are not assumed.</b> Each rig declares only the clips its {@code .animation.json}
- * really contains — {@code goblin_teller} has an idle and no walk, {@code merperson} swims rather
- * than walking, {@code obscurus} flies. Asking GeckoLib for a clip a file does not define throws at
- * render time, so a missing movement clip is modelled as {@code null} and the controller falls back
- * to idle rather than guessing a name.
+ * really contains — {@code merperson} swims rather than walking, {@code obscurus} flies. Asking
+ * GeckoLib for a clip a file does not define throws at render time, so a missing movement clip is
+ * modelled as {@code null} and the controller falls back to idle rather than guessing a name.
  *
  * @param asset        shared asset name under {@code geckolib/models/entity/},
  *                     {@code geckolib/animations/entity/} and {@code textures/entity/}
  * @param idleClip     the always-available clip
  * @param movementClip clip to play while moving, or null when the rig has none
+ * @param attackClip   clip to play while swinging, or null when the rig has none
+ * @param hurtClip     clip to play while taking damage, or null when the rig has none
  */
 @NullMarked
-public record PlayerFormRig(String asset, String idleClip, @Nullable String movementClip) {
+public record PlayerFormRig(String asset, String idleClip, @Nullable String movementClip,
+                            @Nullable String attackClip, @Nullable String hurtClip) {
 
     private static PlayerFormRig rig(String asset, @Nullable String movement) {
+        return rig(asset, movement, null, null);
+    }
+
+    private static PlayerFormRig rig(String asset, @Nullable String movement,
+                                     @Nullable String attack, @Nullable String hurt) {
         return new PlayerFormRig(asset,
                 "animation." + asset + ".idle",
-                movement == null ? null : "animation." + asset + "." + movement);
+                qualify(asset, movement), qualify(asset, attack), qualify(asset, hurt));
+    }
+
+    private static @Nullable String qualify(String asset, @Nullable String clip) {
+        return clip == null ? null : "animation." + asset + "." + clip;
     }
 
     /**
@@ -43,9 +54,9 @@ public record PlayerFormRig(String asset, String idleClip, @Nullable String move
      * entity models, which is better than any placeholder rig would be.
      */
     private static final Map<String, PlayerFormRig> BY_FORM_ID = Map.of(
-            "werewolf_wolf", rig("werewolf", "walk"),
+            "werewolf_wolf", rig("werewolf", "walk", "attack", "hit"),
             "centaur_default", rig("centaur", "walk"),
-            "goblin_default", rig("goblin_teller", null),
+            "goblin_default", rig("goblin_teller", "walk"),
             "merfolk_water", rig("merperson", "swim"),
             "obscurial_dark", rig("obscurus", "fly"));
 
@@ -83,6 +94,24 @@ public record PlayerFormRig(String asset, String idleClip, @Nullable String move
 
     /** The clip to play at this movement speed; idle whenever the rig has no movement clip. */
     public String clipFor(boolean moving) {
+        return clipFor(moving, false, false);
+    }
+
+    /**
+     * The clip to play right now, in priority order: hurt, then attack, then movement, then idle.
+     *
+     * <p>Hurt beats attack because being struck mid-swing should interrupt the swing — that is what
+     * a reaction is for. Every step falls through to the next when the rig does not declare that
+     * clip, so a form with no attack art simply keeps walking rather than naming a clip its file
+     * does not define, which throws inside the render pass.
+     */
+    public String clipFor(boolean moving, boolean attacking, boolean hurt) {
+        if (hurt && hurtClip != null) {
+            return hurtClip;
+        }
+        if (attacking && attackClip != null) {
+            return attackClip;
+        }
         return moving && movementClip != null ? movementClip : idleClip;
     }
 }

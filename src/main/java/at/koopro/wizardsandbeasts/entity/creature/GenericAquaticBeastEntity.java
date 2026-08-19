@@ -34,6 +34,7 @@ public class GenericAquaticBeastEntity extends GenericBeastEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        super.registerControllers(controllers); // declared reaction clips, if this creature has any
         String name = assetName();
         controllers.add(AnimHelper.movementController(name, 5,
                 AnimHelper.loop(name, "idle"), AnimHelper.loop(name, "swim")));

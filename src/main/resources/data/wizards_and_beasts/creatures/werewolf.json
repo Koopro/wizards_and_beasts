@@ -1,5 +1,4 @@
 {
-  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:werewolf",
   "bodyPlan": "BIPED_HUMANOID",
   "locomotion": "GROUND",
@@ -14,6 +13,7 @@
   "texture": "wizards_and_beasts:textures/entity/werewolf.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/werewolf.animation.json",
   "attackDamage": 9.0,
+  "clips": ["attack", "hit"],
   "traits": [
     "PACK"
   ],

@@ -4,6 +4,7 @@ import at.koopro.wizardsandbeasts.client.beam.BeamEntityRenderer;
 import at.koopro.wizardsandbeasts.client.broom.BroomRenderer;
 import at.koopro.wizardsandbeasts.client.entity.DementorRenderer;
 import at.koopro.wizardsandbeasts.client.entity.DragonRenderer;
+import at.koopro.wizardsandbeasts.client.entity.GoblinRenderer;
 import at.koopro.wizardsandbeasts.client.bestiary.niffler.NifflerPocketLayer;
 import at.koopro.wizardsandbeasts.client.entity.ProtegoShieldRenderer;
 import at.koopro.wizardsandbeasts.client.form.FormMannequinRenderer;
@@ -24,7 +25,8 @@ public class ClientSetup {
         event.registerEntityRenderer(ModEntities.BEAST_HEX_PROJECTILE.get(), ThrownItemRenderer::new);
         event.registerEntityRenderer(ModEntities.PATRONUS.get(), PatronusRenderer::new);
         event.registerEntityRenderer(ModEntities.PROTEGO_SHIELD.get(), ProtegoShieldRenderer::new);
-        event.registerEntityRenderer(ModEntities.GOBLIN_TELLER.get(), GeoRendererHelper.simple("goblin_teller"));
+        // Not `simple`: the goblin picks its geometry and texture from its synced Gringotts role.
+        event.registerEntityRenderer(ModEntities.GOBLIN_TELLER.get(), GoblinRenderer.provider("goblin_teller"));
         event.registerEntityRenderer(ModEntities.NIFFLER.get(), GeoRendererHelper.simple("niffler"));
         event.registerEntityRenderer(ModEntities.BABY_NIFFLER.get(), GeoRendererHelper.simple("niffler"));
         event.registerEntityRenderer(ModEntities.FORM_MANNEQUIN.get(), FormMannequinRenderer::new);

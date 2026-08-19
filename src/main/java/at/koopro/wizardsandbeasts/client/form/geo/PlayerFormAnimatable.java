@@ -61,6 +61,8 @@ public final class PlayerFormAnimatable implements GeoAnimatable {
 
     private PlayerFormRig rig;
     private boolean moving;
+    private boolean attacking;
+    private boolean hurt;
 
     private PlayerFormAnimatable(PlayerFormRig rig) {
         this.rig = rig;
@@ -68,10 +70,24 @@ public final class PlayerFormAnimatable implements GeoAnimatable {
 
     /** The animatable for a player, created on first sight and retargeted when their form changes. */
     public static PlayerFormAnimatable forPlayer(UUID playerUUID, PlayerFormRig rig, float walkSpeed) {
+        return forPlayer(playerUUID, rig, walkSpeed, false, false);
+    }
+
+    /**
+     * As above, plus the two reaction states.
+     *
+     * <p>Both are pushed in from the render path rather than synced, because both are already on the
+     * player's render state: {@code attackTime} is vanilla's swing progress and {@code hasRedOverlay}
+     * is its damage flash. Nothing new crosses the network for this.
+     */
+    public static PlayerFormAnimatable forPlayer(UUID playerUUID, PlayerFormRig rig, float walkSpeed,
+                                                 boolean attacking, boolean hurt) {
         PlayerFormAnimatable animatable =
                 INSTANCES.computeIfAbsent(playerUUID, uuid -> new PlayerFormAnimatable(rig));
         animatable.rig = rig;
         animatable.moving = walkSpeed > MOVEMENT_THRESHOLD;
+        animatable.attacking = attacking;
+        animatable.hurt = hurt;
         return animatable;
     }
 
@@ -96,9 +112,17 @@ public final class PlayerFormAnimatable implements GeoAnimatable {
         return moving;
     }
 
+    public boolean attacking() {
+        return attacking;
+    }
+
+    public boolean hurt() {
+        return hurt;
+    }
+
     /** The clip this animatable would play right now. Split out so a test can assert the choice. */
     public RawAnimation currentClip() {
-        return clip(rig.clipFor(moving));
+        return clip(rig.clipFor(moving, attacking, hurt));
     }
 
     private static RawAnimation clip(String name) {
@@ -109,8 +133,14 @@ public final class PlayerFormAnimatable implements GeoAnimatable {
      * One controller, because a form has one body doing one thing.
      *
      * <p>The clip is resolved through {@link PlayerFormRig#clipFor} rather than named here: not every
-     * rig has a movement clip — {@code goblin_teller} ships an idle and nothing else — and asking
-     * GeckoLib for a clip the file does not define throws at render time rather than degrading.
+     * rig has a movement, attack or hurt clip, and asking GeckoLib for a clip the file does not
+     * define throws at render time rather than degrading.
+     *
+     * <p>One controller still, even with reactions in the mix. {@code setAndContinue} is handed the
+     * cached {@link RawAnimation} for whichever clip wins, and the reaction states are timed by
+     * vanilla — a swing lasts about six ticks, a damage flash ten — so the clip holds for that
+     * window and falls back on its own. A second, triggered controller would need an edge detector
+     * and a playhead this class does not otherwise have to keep.
      */
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {

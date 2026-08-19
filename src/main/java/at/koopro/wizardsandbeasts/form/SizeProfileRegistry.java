@@ -51,10 +51,18 @@ public final class SizeProfileRegistry {
                 0.6f, 0.45f, 0.45f));
 
         // ── Goblin ──
-        // Short and stocky: hitbox ~1.17 blocks, model wider than tall
+        // Short and stocky: hitbox ~1.17 blocks.
+        //
+        // modelScale is 1.17 / 1.5 because the GeckoLib rig this form draws is authored to the
+        // goblin *mob's* box (ModEntities registers goblin_teller at 0.6 x 1.5), so the visual
+        // multiplier has to convert 1.5 blocks of rig into 1.17 blocks of player. The old 0.65
+        // was the ratio against a 1.8-block human placeholder and drew the rig at 0.98 blocks
+        // inside a 1.17 box. The 1.231 aspects came from the same placeholder — a proportional
+        // humanoid needed widening to look goblin-ish; this rig is already stocky, and stretching
+        // it a further 23% makes it barrel-shaped.
         register(new SizeProfile("goblin_default",
-                0.39f, 1.17f,   // 0.65× human height
-                0.65f, 1.231f, 1.231f,
+                0.39f, 1.17f,
+                0.78f, 1.0f, 1.0f,
                 -0.5f, 0.0f, 0.0f));
 
         // ── House-Elf ──

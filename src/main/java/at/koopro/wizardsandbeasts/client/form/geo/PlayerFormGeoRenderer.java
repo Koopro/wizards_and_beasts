@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.client.form.geo;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.state.ArmedEntityRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -70,16 +71,20 @@ public final class PlayerFormGeoRenderer extends GeoObjectRenderer<PlayerFormAni
      *
      * @param walkSpeed vanilla's limb-swing amplitude, which selects idle against the movement clip
      * @param bodyYaw   body rotation in degrees, applied in {@link #adjustRenderPose}
+     * @param attacking true while the player's swing is in progress
+     * @param hurt      true while the player is showing vanilla's damage flash
      * @return false when the form has no rig, so the caller can fall back to the legacy model
      */
     public static boolean render(String formId, UUID playerUUID, float walkSpeed, float bodyYaw,
+                                 boolean attacking, boolean hurt,
                                  PoseStack poseStack, SubmitNodeCollector collector,
                                  CameraRenderState camera, int packedLight) {
         PlayerFormRig rig = PlayerFormRig.forForm(formId);
         if (rig == null) {
             return false;
         }
-        PlayerFormAnimatable animatable = PlayerFormAnimatable.forPlayer(playerUUID, rig, walkSpeed);
+        PlayerFormAnimatable animatable =
+                PlayerFormAnimatable.forPlayer(playerUUID, rig, walkSpeed, attacking, hurt);
         BODY_YAW.set(bodyYaw);
         try {
             get().performRenderPass(animatable, null, poseStack, collector, camera,
@@ -90,11 +95,20 @@ public final class PlayerFormGeoRenderer extends GeoObjectRenderer<PlayerFormAni
         return true;
     }
 
-    /** Convenience overload reading motion, facing and light straight off a living render state. */
+    /**
+     * Convenience overload reading motion, facing, light <b>and both reaction states</b> straight off
+     * a living render state.
+     *
+     * <p>No new networking was needed for attack and hurt: {@code attackTime} is vanilla's own swing
+     * progress, carried on {@code ArmedEntityRenderState} which a player's state extends, and
+     * {@code hasRedOverlay} is its damage flash. Both are already computed and already here.
+     */
     public static boolean render(String formId, UUID playerUUID, LivingEntityRenderState state,
                                  PoseStack poseStack, SubmitNodeCollector collector,
                                  CameraRenderState camera) {
+        boolean attacking = state instanceof ArmedEntityRenderState armed && armed.attackTime > 0.0f;
         return render(formId, playerUUID, state.walkAnimationSpeed, state.bodyRot,
+                attacking, state.hasRedOverlay,
                 poseStack, collector, camera, state.lightCoords);
     }
 
