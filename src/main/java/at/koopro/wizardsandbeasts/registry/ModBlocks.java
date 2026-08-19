@@ -45,6 +45,18 @@ public class ModBlocks {
     private static final TreeGrower ROWAN_TREE_GROWER =
             new TreeGrower("rowan", Optional.empty(), Optional.of(ModConfiguredFeatures.ROWAN_TREE_KEY), Optional.empty());
 
+    // The five species that had wand-wood definitions and recipes but no blocks in the world.
+    private static final TreeGrower ASH_TREE_GROWER =
+            new TreeGrower("ash", Optional.empty(), Optional.of(ModConfiguredFeatures.ASH_TREE_KEY), Optional.empty());
+    private static final TreeGrower BLACKTHORN_TREE_GROWER =
+            new TreeGrower("blackthorn", Optional.empty(), Optional.of(ModConfiguredFeatures.BLACKTHORN_TREE_KEY), Optional.empty());
+    private static final TreeGrower HAWTHORN_TREE_GROWER =
+            new TreeGrower("hawthorn", Optional.empty(), Optional.of(ModConfiguredFeatures.HAWTHORN_TREE_KEY), Optional.empty());
+    private static final TreeGrower WALNUT_TREE_GROWER =
+            new TreeGrower("walnut", Optional.empty(), Optional.of(ModConfiguredFeatures.WALNUT_TREE_KEY), Optional.empty());
+    private static final TreeGrower WILLOW_TREE_GROWER =
+            new TreeGrower("willow", Optional.empty(), Optional.of(ModConfiguredFeatures.WILLOW_TREE_KEY), Optional.empty());
+
     private static BlockBehaviour.Properties logProps() {
         return BlockBehaviour.Properties.of()
                 .strength(2.0F)
@@ -104,6 +116,16 @@ public class ModBlocks {
             "holly", logProps(), planksProps(), leavesProps(), saplingProps(), HOLLY_TREE_GROWER);
     public static final WoodSet ROWAN = WoodSet.register(BLOCKS, ModItems.ITEMS,
             "rowan", logProps(), planksProps(), leavesProps(), saplingProps(), ROWAN_TREE_GROWER);
+    public static final WoodSet ASH = WoodSet.register(BLOCKS, ModItems.ITEMS,
+            "ash", logProps(), planksProps(), leavesProps(), saplingProps(), ASH_TREE_GROWER);
+    public static final WoodSet BLACKTHORN = WoodSet.register(BLOCKS, ModItems.ITEMS,
+            "blackthorn", logProps(), planksProps(), leavesProps(), saplingProps(), BLACKTHORN_TREE_GROWER);
+    public static final WoodSet HAWTHORN = WoodSet.register(BLOCKS, ModItems.ITEMS,
+            "hawthorn", logProps(), planksProps(), leavesProps(), saplingProps(), HAWTHORN_TREE_GROWER);
+    public static final WoodSet WALNUT = WoodSet.register(BLOCKS, ModItems.ITEMS,
+            "walnut", logProps(), planksProps(), leavesProps(), saplingProps(), WALNUT_TREE_GROWER);
+    public static final WoodSet WILLOW = WoodSet.register(BLOCKS, ModItems.ITEMS,
+            "willow", logProps(), planksProps(), leavesProps(), saplingProps(), WILLOW_TREE_GROWER);
 
     // --- Wizarding world ---
 
@@ -251,7 +273,8 @@ public class ModBlocks {
     public static final DeferredItem<BlockItem> EXAMINATION_DESK_ITEM =
             ModItems.ITEMS.registerSimpleBlockItem("examination_desk", EXAMINATION_DESK);
 
-    public static final WoodSet[] ALL_WOOD_SETS = { ELDER, YEW, HOLLY, ROWAN };
+    public static final WoodSet[] ALL_WOOD_SETS =
+            { ELDER, YEW, HOLLY, ROWAN, ASH, BLACKTHORN, HAWTHORN, WALNUT, WILLOW };
 
     // --- Location decorative blocks ---
     // Static initializer forces class loading of each location registry,

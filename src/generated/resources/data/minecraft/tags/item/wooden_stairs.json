@@ -3,6 +3,11 @@
     "wizards_and_beasts:elder_stairs",
     "wizards_and_beasts:yew_stairs",
     "wizards_and_beasts:holly_stairs",
-    "wizards_and_beasts:rowan_stairs"
+    "wizards_and_beasts:rowan_stairs",
+    "wizards_and_beasts:ash_stairs",
+    "wizards_and_beasts:blackthorn_stairs",
+    "wizards_and_beasts:hawthorn_stairs",
+    "wizards_and_beasts:walnut_stairs",
+    "wizards_and_beasts:willow_stairs"
   ]
-}    
+}

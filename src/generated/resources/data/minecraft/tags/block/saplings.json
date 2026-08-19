@@ -3,6 +3,11 @@
     "wizards_and_beasts:elder_sapling",
     "wizards_and_beasts:yew_sapling",
     "wizards_and_beasts:holly_sapling",
-    "wizards_and_beasts:rowan_sapling"
+    "wizards_and_beasts:rowan_sapling",
+    "wizards_and_beasts:ash_sapling",
+    "wizards_and_beasts:blackthorn_sapling",
+    "wizards_and_beasts:hawthorn_sapling",
+    "wizards_and_beasts:walnut_sapling",
+    "wizards_and_beasts:willow_sapling"
   ]
-} 
+}

@@ -20,6 +20,7 @@ public class ModLanguageProvider extends LanguageProvider {
         elder();
         yew();
         holly();
+        newWandwoods();
         wand();
         keybindings();
         containerTitles();
@@ -105,6 +106,69 @@ public class ModLanguageProvider extends LanguageProvider {
         add("block.wizards_and_beasts.holly_stairs", "Holly Stairs");
         add("block.wizards_and_beasts.holly_leaves", "Holly Leaves");
         add("block.wizards_and_beasts.holly_sapling", "Holly Sapling");
+
+    }
+
+
+    /**
+     * The five species that had wand-wood definitions and wandmaking recipes but no blocks.
+     * Written out rather than looped to match the four above it; these keys are worth grepping.
+     */
+    private void newWandwoods() {
+        // Ash
+        add("block.wizards_and_beasts.ash_log", "Ash Log");
+        add("block.wizards_and_beasts.stripped_ash_log", "Stripped Ash Log");
+        add("block.wizards_and_beasts.ash_wood", "Ash Wood");
+        add("block.wizards_and_beasts.stripped_ash_wood", "Stripped Ash Wood");
+        add("block.wizards_and_beasts.ash_planks", "Ash Planks");
+        add("block.wizards_and_beasts.ash_slab", "Ash Slab");
+        add("block.wizards_and_beasts.ash_stairs", "Ash Stairs");
+        add("block.wizards_and_beasts.ash_leaves", "Ash Leaves");
+        add("block.wizards_and_beasts.ash_sapling", "Ash Sapling");
+
+        // Blackthorn
+        add("block.wizards_and_beasts.blackthorn_log", "Blackthorn Log");
+        add("block.wizards_and_beasts.stripped_blackthorn_log", "Stripped Blackthorn Log");
+        add("block.wizards_and_beasts.blackthorn_wood", "Blackthorn Wood");
+        add("block.wizards_and_beasts.stripped_blackthorn_wood", "Stripped Blackthorn Wood");
+        add("block.wizards_and_beasts.blackthorn_planks", "Blackthorn Planks");
+        add("block.wizards_and_beasts.blackthorn_slab", "Blackthorn Slab");
+        add("block.wizards_and_beasts.blackthorn_stairs", "Blackthorn Stairs");
+        add("block.wizards_and_beasts.blackthorn_leaves", "Blackthorn Leaves");
+        add("block.wizards_and_beasts.blackthorn_sapling", "Blackthorn Sapling");
+
+        // Hawthorn
+        add("block.wizards_and_beasts.hawthorn_log", "Hawthorn Log");
+        add("block.wizards_and_beasts.stripped_hawthorn_log", "Stripped Hawthorn Log");
+        add("block.wizards_and_beasts.hawthorn_wood", "Hawthorn Wood");
+        add("block.wizards_and_beasts.stripped_hawthorn_wood", "Stripped Hawthorn Wood");
+        add("block.wizards_and_beasts.hawthorn_planks", "Hawthorn Planks");
+        add("block.wizards_and_beasts.hawthorn_slab", "Hawthorn Slab");
+        add("block.wizards_and_beasts.hawthorn_stairs", "Hawthorn Stairs");
+        add("block.wizards_and_beasts.hawthorn_leaves", "Hawthorn Leaves");
+        add("block.wizards_and_beasts.hawthorn_sapling", "Hawthorn Sapling");
+
+        // Walnut
+        add("block.wizards_and_beasts.walnut_log", "Walnut Log");
+        add("block.wizards_and_beasts.stripped_walnut_log", "Stripped Walnut Log");
+        add("block.wizards_and_beasts.walnut_wood", "Walnut Wood");
+        add("block.wizards_and_beasts.stripped_walnut_wood", "Stripped Walnut Wood");
+        add("block.wizards_and_beasts.walnut_planks", "Walnut Planks");
+        add("block.wizards_and_beasts.walnut_slab", "Walnut Slab");
+        add("block.wizards_and_beasts.walnut_stairs", "Walnut Stairs");
+        add("block.wizards_and_beasts.walnut_leaves", "Walnut Leaves");
+        add("block.wizards_and_beasts.walnut_sapling", "Walnut Sapling");
+
+        // Willow
+        add("block.wizards_and_beasts.willow_log", "Willow Log");
+        add("block.wizards_and_beasts.stripped_willow_log", "Stripped Willow Log");
+        add("block.wizards_and_beasts.willow_wood", "Willow Wood");
+        add("block.wizards_and_beasts.stripped_willow_wood", "Stripped Willow Wood");
+        add("block.wizards_and_beasts.willow_planks", "Willow Planks");
+        add("block.wizards_and_beasts.willow_slab", "Willow Slab");
+        add("block.wizards_and_beasts.willow_stairs", "Willow Stairs");
+        add("block.wizards_and_beasts.willow_leaves", "Willow Leaves");
+        add("block.wizards_and_beasts.willow_sapling", "Willow Sapling");
 
     }
 

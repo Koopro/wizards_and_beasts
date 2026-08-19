@@ -1,0 +1,18 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "WANDWOOD"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "planks",
+  "ingredients": [
+    "wizards_and_beasts:stripped_ash_wood"
+  ],
+  "result": {
+    "count": 4,
+    "id": "wizards_and_beasts:ash_planks"
+  }
+}

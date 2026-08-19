@@ -3,6 +3,11 @@
     "wizards_and_beasts:elder_slab",
     "wizards_and_beasts:yew_slab",
     "wizards_and_beasts:holly_slab",
-    "wizards_and_beasts:rowan_slab"
+    "wizards_and_beasts:rowan_slab",
+    "wizards_and_beasts:ash_slab",
+    "wizards_and_beasts:blackthorn_slab",
+    "wizards_and_beasts:hawthorn_slab",
+    "wizards_and_beasts:walnut_slab",
+    "wizards_and_beasts:willow_slab"
   ]
-} 
+}

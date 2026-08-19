@@ -3,6 +3,11 @@
     "wizards_and_beasts:elder_leaves",
     "wizards_and_beasts:yew_leaves",
     "wizards_and_beasts:holly_leaves",
-    "wizards_and_beasts:rowan_leaves"
+    "wizards_and_beasts:rowan_leaves",
+    "wizards_and_beasts:ash_leaves",
+    "wizards_and_beasts:blackthorn_leaves",
+    "wizards_and_beasts:hawthorn_leaves",
+    "wizards_and_beasts:walnut_leaves",
+    "wizards_and_beasts:willow_leaves"
   ]
-} 
+}
