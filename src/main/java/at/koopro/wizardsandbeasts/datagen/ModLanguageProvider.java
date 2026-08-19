@@ -700,7 +700,7 @@ public class ModLanguageProvider extends LanguageProvider {
      * is mechanical UI and is written normally.</p>
      */
     private void recipeViewer() {
-        add("gui.wizards_and_beasts.jei.cauldron_brewing", "[PLACEHOLDER] Cauldron Brewing");
+        add("gui.wizards_and_beasts.jei.cauldron_brewing", "Cauldron Brewing");
         add("gui.wizards_and_beasts.jei.cauldron_brewing.tier", "Requires: %s");
     }
 

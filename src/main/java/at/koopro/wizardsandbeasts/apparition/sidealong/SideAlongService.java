@@ -44,9 +44,11 @@ public final class SideAlongService {
                 Component.translatable("apparition.wizards_and_beasts.sidealong.title"),
                 Component.translatable("apparition.wizards_and_beasts.sidealong.offered",
                         caster.getDisplayName()));
-        caster.displayClientMessage(Component.translatable(
+        // The caster's own half is a confirmation of something they just did, so the action bar:
+        // worth saying now, worthless once they have looked away.
+        PlayerFeedback.actionBar(caster, Component.translatable(
                         "apparition.wizards_and_beasts.sidealong.offer_sent", invitee.getDisplayName())
-                .withStyle(ChatFormatting.GRAY), true);
+                .withStyle(ChatFormatting.GRAY));
     }
 
     /**
@@ -58,16 +60,16 @@ public final class SideAlongService {
         Offer offer = OFFERS.get(invitee);
         if (offer == null || invitee.tickCount > offer.expiresAtTick()) {
             OFFERS.remove(invitee);
-            invitee.displayClientMessage(Component.translatable(
+            PlayerFeedback.actionBar(invitee, Component.translatable(
                             "apparition.wizards_and_beasts.sidealong.no_offer")
-                    .withStyle(ChatFormatting.RED), true);
+                    .withStyle(ChatFormatting.RED));
             return false;
         }
         OFFERS.remove(invitee);
         PARTNERS.put(offer.casterId(), invitee.getUUID());
-        invitee.displayClientMessage(Component.translatable(
+        PlayerFeedback.actionBar(invitee, Component.translatable(
                         "apparition.wizards_and_beasts.sidealong.accepted")
-                .withStyle(ChatFormatting.LIGHT_PURPLE), true);
+                .withStyle(ChatFormatting.LIGHT_PURPLE));
         return true;
     }
 
@@ -76,9 +78,9 @@ public final class SideAlongService {
         Offer offer = OFFERS.get(player);
         if (offer != null && player.tickCount > offer.expiresAtTick()) {
             OFFERS.remove(player);
-            player.displayClientMessage(Component.translatable(
+            PlayerFeedback.actionBar(player, Component.translatable(
                             "apparition.wizards_and_beasts.sidealong.lapsed")
-                    .withStyle(ChatFormatting.GRAY), true);
+                    .withStyle(ChatFormatting.GRAY));
         }
     }
 

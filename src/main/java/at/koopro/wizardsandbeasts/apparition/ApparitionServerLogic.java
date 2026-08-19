@@ -14,6 +14,7 @@ import at.koopro.wizardsandbeasts.apparition.splinch.SplinchDamageTypes;
 import at.koopro.wizardsandbeasts.apparition.splinch.SplinchResolver;
 import at.koopro.wizardsandbeasts.apparition.splinch.SplinchTier;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
+import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 import at.koopro.wizardsandbeasts.ministry.law.MagicalOffence;
 import at.koopro.wizardsandbeasts.ministry.law.TraceService;
 import at.koopro.wizardsandbeasts.module.Module;
@@ -108,7 +109,7 @@ public final class ApparitionServerLogic {
         }
         int cooldown = PlayerAbilityHelper.getApparitionCooldownTicks(player);
         if (cooldown > 0) {
-            fail(player, "apparition.wizards_and_beasts.fail.cooldown");
+            failTransient(player, "apparition.wizards_and_beasts.fail.cooldown");
             return false;
         }
         if (!(player.level() instanceof ServerLevel level)) {
@@ -393,9 +394,24 @@ public final class ApparitionServerLogic {
         return null;
     }
 
-    private static void fail(ServerPlayer player, String translationKey) {
-        player.displayClientMessage(
-                Component.translatable(translationKey).withStyle(ChatFormatting.RED), true);
+    /**
+     * A refused attempt, told to the player with its reason.
+     *
+     * <p>A toast rather than the action bar, per {@link PlayerFeedback}'s split: every one of these is
+     * a refusal the player needs the <em>reason</em> for, and the action bar holds one line that the
+     * next thing to write overwrites. The exception is {@link #failTransient}, for the cooldown —
+     * that one is worth saying now and worthless a second later, which is what the action bar is for.
+     */
+    private static void fail(ServerPlayer player, String reasonKey) {
+        PlayerFeedback.refuse(player,
+                Component.translatable("apparition.wizards_and_beasts.fail.title"),
+                Component.translatable(reasonKey));
+    }
+
+    /** A refusal that resolves on its own in a moment; see {@link #fail}. */
+    private static void failTransient(ServerPlayer player, String reasonKey) {
+        PlayerFeedback.actionBar(player,
+                Component.translatable(reasonKey).withStyle(ChatFormatting.RED));
     }
 
     private static void playArrival(ServerLevel level, Vec3 origin, Vec3 destination) {
