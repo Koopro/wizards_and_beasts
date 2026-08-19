@@ -33,9 +33,12 @@ public final class SizeProfileRegistry {
                 0.0f, 0.1f, 0.0f));
 
         // Wolf form: bulkier and taller; model wider than it is tall
+        // modelScale converts the GeckoLib rig into the hitbox, not a fraction of a 1.8-block human:
+        // werewolf.geo.json is authored 2.08 blocks tall, so 2.34 / 2.08 = 1.125. The old 1.3 was the
+        // human-fraction reading and drew the wolf at 2.70 blocks inside a 2.34 box — head out of it.
         register(new SizeProfile("werewolf_wolf",
-                0.78f, 2.34f,   // 1.3× human height
-                1.3f, 0.923f, 0.923f,
+                0.78f, 2.34f,
+                1.125f, 0.923f, 0.923f,
                 0.5f, 0.3f, 0.5f));
 
         // ── Obscurial ──
@@ -44,10 +47,12 @@ public final class SizeProfileRegistry {
                 1.0f, 1.0f, 1.0f,
                 0.0f, 0.0f, 0.0f));
 
-        // Dark cloud form: compact hitbox (~1 block tall), elongated Z for cloud silhouette
+        // Dark cloud form: compact hitbox (~1 block tall), elongated Z for cloud silhouette.
+        // obscurus.geo.json is 1.66 blocks tall, so 1.01 / 1.66 = 0.608; the old 0.56 was the
+        // human-fraction reading and drew the cloud 8% short of its own box.
         register(new SizeProfile("obscurial_dark",
-                0.34f, 1.01f,   // 0.56× human height
-                0.56f, 1.0f, 1.786f,
+                0.34f, 1.01f,
+                0.608f, 1.0f, 1.786f,
                 0.6f, 0.45f, 0.45f));
 
         // ── Goblin ──
@@ -99,9 +104,11 @@ public final class SizeProfileRegistry {
 
         // ── Centaur ──
         // Horse-body shape: elongated Z (front-to-back), slightly wider X
+        // centaur.geo.json is 1.49 blocks tall, so 2.34 / 1.49 = 1.570. The old 1.3 was the
+        // human-fraction reading and drew the centaur at 1.93 blocks inside a 2.34 box — sunk into it.
         register(new SizeProfile("centaur_default",
-                0.78f, 2.34f,   // 1.3× human height
-                1.3f, 1.077f, 1.385f,
+                0.78f, 2.34f,
+                1.570f, 1.077f, 1.385f,
                 0.5f, 0.2f, 1.0f));
 
         // ── Vampire ──

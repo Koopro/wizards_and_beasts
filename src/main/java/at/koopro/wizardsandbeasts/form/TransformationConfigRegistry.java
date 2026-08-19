@@ -28,14 +28,14 @@ public final class TransformationConfigRegistry {
         register("veela_harpy", "veela_human",
                 new TransformationConfig(15, TransformationConfig.ScreenEffect.PARTICLE_BURST, true));
 
-        register("vampire_default", "vampire_bat",
+        register("vampire_human", "vampire_bat",
                 new TransformationConfig(10, TransformationConfig.ScreenEffect.SMOKE_CLOUD, false));
-        register("vampire_bat", "vampire_default",
+        register("vampire_bat", "vampire_human",
                 new TransformationConfig(10, TransformationConfig.ScreenEffect.SMOKE_CLOUD, false));
 
-        register("merpeople_land", "merpeople_water",
+        register("merfolk_land", "merfolk_water",
                 new TransformationConfig(15, TransformationConfig.ScreenEffect.PARTICLE_BURST, false));
-        register("merpeople_water", "merpeople_land",
+        register("merfolk_water", "merfolk_land",
                 new TransformationConfig(15, TransformationConfig.ScreenEffect.PARTICLE_BURST, false));
     }
 
