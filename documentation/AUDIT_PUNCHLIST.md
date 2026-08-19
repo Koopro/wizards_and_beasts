@@ -1959,3 +1959,43 @@ Placement correctness and silhouette rework. Deviations in `documentation/MIGRAT
   pass. Current: elder → dark forest + old-growth taigas; holly → forest/flower forest/grove; rowan →
   birch forests + windswept; yew → taigas. Nothing looked obviously wrong, but the brief's own
   example of a wrong mapping (willow not near water) cannot arise, since willow has no blocks.
+
+## Wandwood completion pass (2026-08-19) — resolutions and corrections
+
+- [x] **RESOLVED — the five new wandwoods now generate.** ash, blackthorn, hawthorn, walnut and
+  willow have placed features and biome modifiers on the corrected placement stack. The block
+  families were creative-only until this; the wandmaking recipes now have a survival source.
+  Rarities are new values (6/7/6/9/5), not retuned ones — those species had no placement to
+  preserve.
+
+- [x] **RESOLVED — all 28 mob effects have icons.** `basilisk_gaze_lock`,
+  `mandrake_restoration` and `sundered` were rendering as the missing-texture checkerboard.
+
+- [x] **RESOLVED — the four hand-drawn wandwood textures are regenerated.** They did not read as
+  Minecraft beside the derived ones. All nine now come off vanilla donors, one family each, with
+  berries on the six species whose fruit is legible at 16×16.
+
+- [x] **CORRECTED — the `Identifier.tryParse` entry overstated the problem.** It claimed ten
+  violating sites and warned the fix touches command parsing. Only **eight** were wrong, all in
+  `ModConfiguredFeatures` and `ModPlacedFeatures`, where constant literals fed a nullable result
+  straight into `ResourceKey.create`. Those are fixed. The other seven sites — apparition ward
+  ids, module ids, broom definition ids, the map and vocation payloads, wand config — all take
+  user or wire input and **all null-check correctly**. `tryParse` is the right call there; the
+  stack rule is about constructing ids known to be well-formed. No command parsing changed.
+
+- [x] **NOT REPRODUCING — the `ConfigWatcher` correction loop.** Diagnosed rather than fixed,
+  because it does not currently happen. The five `wizards_and_beasts-common-*.toml.bak` files all
+  date to 2026-08-14 and alternate between exactly two states: one carrying
+  `heritage = "preview"` plus an updated comment, one without. That is two writers disagreeing —
+  a client holding one spec while the file on disk carried another — during the session
+  `Module.HERITAGE` was being added. Once the module landed and the file settled into the new
+  form it stopped. Every server run on 2026-08-19 logged **zero** corrections, and the current
+  toml is in the correct form. The entry's claim that an archived log predating the HERITAGE
+  addition showed 246 corrections could not be reproduced either: all readable `debug-*.log.gz`
+  now grep to zero. Reopen with a fresh log if it recurs; do not chase it from the old entry.
+
+- [ ] **NICE-TO-HAVE — ash's silhouette changed to resolve a clash, and only a test caught it.**
+  Extending `WandwoodSilhouetteTest` from four species to nine failed immediately: ash and rowan
+  both used straight trunk + blob foliage and would have grown the same shape. Ash moved to
+  `random_spread`. The clash existed from the moment ash was authored; nothing else would have
+  found it. Worth remembering when a tenth species is added.
