@@ -26,6 +26,33 @@ public final class SpellRejectCodes {
     /** Held wand is bonded to another player. */
     public static final String WAND_WRONG_MASTER = "wand_wrong_master";
     public static final String LANGLOCKED = "langlocked";
+    /**
+     * Gamp's Law refused the cast outright. Not stored in the reject counters — the Gamp path predates
+     * them and reports through {@code DebugHooks} — so it exists purely so the denial packet can name a
+     * reason rather than send an empty one.
+     */
+    public static final String GAMP_HARD_REJECT = "gamp_hard_reject";
+    /**
+     * The cast passed every gate and then threw on its way through {@link SpellExecutor}.
+     *
+     * <p>This is a mod defect, not a player mistake, and it used to be the one refusal that said
+     * nothing at all: the exception was logged server-side and the method returned, so the player
+     * pressed cast, paid no cooldown, and got no sound, no text and no counter — indistinguishable
+     * from a dropped input. It is player-facing precisely <em>because</em> it is a bug; a player who
+     * can say "it fizzled with a message" reports something actionable.
+     *
+     * <p>No stress penalty is applied for it, unlike the gates above. Nothing the player did caused it.
+     */
+    public static final String CAST_FAILED = "cast_failed";
+
+    /**
+     * Suffixes for the two {@code SpellNetworkGuards} refusals. Both are stored with a caller prefix
+     * naming the packet that hit them ({@code cast_}, {@code assign_}, {@code select_},
+     * {@code leviosa_adjust_}), so they are matched by suffix rather than looked up whole — the same
+     * shape {@link #summaryBucket} already uses to bucket them.
+     */
+    public static final String SUFFIX_TYPE_CANNOT_USE_WAND = "_type_cannot_use_wand";
+    public static final String SUFFIX_INVALID_SLOT = "_invalid_slot";
 
     public static final String ASSIGN_UNKNOWN_SPELL = "assign_unknown_spell";
     public static final String ASSIGN_UNLEARNED_SPELL = "assign_unlearned_spell";
@@ -59,7 +86,8 @@ public final class SpellRejectCodes {
             DUPLICATE_RELEASE_GUARD,
             WAND_NOT_BONDED,
             WAND_WRONG_MASTER,
-            LANGLOCKED);
+            LANGLOCKED,
+            CAST_FAILED);
 
     /** Reasons from {@link at.koopro.wizardsandbeasts.network.ObscurialAbilityUseC2SPacket} only. */
     private static final Set<String> OBSCURUS_ABILITY_PACKET_BASES = Set.of(
@@ -71,30 +99,113 @@ public final class SpellRejectCodes {
             ABILITY_EXECUTE_FAILED);
 
     /**
-     * Player-facing action-bar message key for each reject code that a cast site does NOT already
-     * report with its own (richer) message. Codes with bespoke feedback — bond, requirements, the
-     * Obscurial rejects, Gamp — are deliberately absent so the central reject choke point never
-     * doubles their text. {@code cooldown_active} covers both the per-spell cooldown and the 5-tick
-     * global cooldown (its {@code :global_cooldown} detail collapses to the same "recharging" line).
+     * One distinct lang key per reject code — the whole player-facing vocabulary of refusal.
+     *
+     * <p>Two codes are absent on purpose and live in {@link #SITE_OWNED} instead: their text is
+     * <em>composed</em> at the reject site out of live state (the unmet requirement describing itself,
+     * Gamp's per-domain lore line), so a fixed key could only make the message vaguer.
+     *
+     * <p>Distinctness is the point. One "you can't cast that" covering six different reasons is the
+     * failure this map exists to prevent, and {@code CastRejectMessageKeyTest} asserts that no two
+     * codes share a key. Flavour colour lives in the lang <em>value</em> (a leading section-sign code
+     * on the Obscurial lines, matching what those sites used to hardcode in Java) so translators keep
+     * control of it and no Java class holds a colour for a sentence.
      */
-    private static final Map<String, String> CAST_REJECT_MESSAGE_KEYS = Map.of(
-            NOT_HOLDING_WAND, "wandcraft.cast.reject.no_wand",
-            LANGLOCKED, "wandcraft.cast.reject.langlocked",
-            NO_ACTIVE_SPELL, "wandcraft.cast.reject.no_active_spell",
-            UNKNOWN_SPELL, "wandcraft.cast.reject.unknown_spell",
-            SPELL_NOT_KNOWN, "wandcraft.cast.reject.not_known",
-            COOLDOWN_ACTIVE, "wandcraft.cast.reject.cooldown");
+    private static final Map<String, String> REJECT_MESSAGE_KEYS = Map.ofEntries(
+            Map.entry(NOT_HOLDING_WAND, "wandcraft.cast.reject.no_wand"),
+            Map.entry(LANGLOCKED, "wandcraft.cast.reject.langlocked"),
+            Map.entry(NO_ACTIVE_SPELL, "wandcraft.cast.reject.no_active_spell"),
+            Map.entry(UNKNOWN_SPELL, "wandcraft.cast.reject.unknown_spell"),
+            Map.entry(SPELL_NOT_KNOWN, "wandcraft.cast.reject.not_known"),
+            Map.entry(COOLDOWN_ACTIVE, "wandcraft.cast.reject.cooldown"),
+            Map.entry(WAND_NOT_BONDED, "wandcraft.cast.requires_bond"),
+            Map.entry(WAND_WRONG_MASTER, "wandcraft.cast.wrong_master"),
+            Map.entry(ABILITY_REQUIRES_ABILITY_INPUT, "wandcraft.cast.reject.ability_input"),
+            Map.entry(OBSCURIAL_DARK_ONLY_OUTSIDE_FORM, "wandcraft.cast.reject.dark_form_required"),
+            Map.entry(OBSCURIAL_DARK_RESTRICTED, "wandcraft.cast.reject.obscurus_rejects"),
+            Map.entry(COLLAPSE_INSTABILITY_FIZZLE, "wandcraft.cast.reject.collapse_fizzle"),
+            Map.entry(OBSCURIAL_INSTABILITY_FIZZLE, "wandcraft.cast.reject.obscurus_fizzle"),
+            Map.entry(CAST_FAILED, "wandcraft.cast.reject.cast_failed"),
+
+            Map.entry(ASSIGN_UNKNOWN_SPELL, "wandcraft.assign.reject.unknown_spell"),
+            Map.entry(ASSIGN_UNLEARNED_SPELL, "wandcraft.assign.reject.not_known"),
+            Map.entry(ASSIGN_OBSCURIAL_ABILITY, "wandcraft.assign.reject.obscurial_ability"),
+            Map.entry(ASSIGN_TYPE_RESTRICTED_SPELL, "wandcraft.assign.reject.heritage_restricted"),
+
+            Map.entry(ABILITY_NOT_IN_DARK_FORM, "wandcraft.ability.reject.dark_form_required"),
+            Map.entry(ABILITY_UNKNOWN, "wandcraft.ability.reject.unknown"),
+            Map.entry(ABILITY_SPELL_MISSING, "wandcraft.ability.reject.spell_missing"),
+            Map.entry(ABILITY_COOLDOWN_ACTIVE, "wandcraft.ability.reject.cooldown"),
+            Map.entry(ABILITY_REQUIREMENTS_UNMET, "wandcraft.ability.reject.requirements"),
+            Map.entry(ABILITY_EXECUTE_FAILED, "wandcraft.ability.reject.execute_failed"));
+
+    /**
+     * The prefixed guard codes, keyed by suffix. Same contract as {@link #REJECT_MESSAGE_KEYS} — one
+     * distinct key each, resolved on the client — but matched by suffix because the stored code carries
+     * the calling packet's name in front of it and there is no fixed set of prefixes to enumerate.
+     *
+     * <p>These two used to hold hardcoded English at the guard itself, which meant a French player was
+     * told "Your type cannot use wand spells." and no deny sound played, because the refusal never
+     * travelled as a packet at all.
+     */
+    private static final Map<String, String> SUFFIX_MESSAGE_KEYS = Map.of(
+            SUFFIX_TYPE_CANNOT_USE_WAND, "wandcraft.cast.reject.type_cannot_use_wand",
+            SUFFIX_INVALID_SLOT, "wandcraft.cast.reject.invalid_slot");
+
+    /**
+     * Codes whose player-facing text is written at the reject site because it is composed from live
+     * state. The denial still travels — the sound plays and the counter ticks — but the client renders
+     * no text of its own for these, so the site's richer sentence is never doubled by a generic one.
+     */
+    private static final Set<String> SITE_OWNED = Set.of(REQUIREMENTS_UNMET, GAMP_HARD_REJECT);
+
+    /**
+     * Codes never shown to a player at all: desync guards and impossible-state checks. They are
+     * diagnostics, and a player who reads "duplicate release guard" has learned nothing.
+     */
+    private static final Set<String> INTERNAL_ONLY = Set.of(NOT_SERVER_LEVEL, DUPLICATE_RELEASE_GUARD);
 
     private SpellRejectCodes() {}
 
     /**
-     * Player-facing action-bar lang key for a stored reject key, or {@code null} when the reject site
-     * shows its own message (so the caller stays silent and avoids double-messaging). The {@code :detail}
-     * suffix is stripped via {@link #baseReason} before lookup.
+     * The lang key the <b>client</b> should render for a stored reject key, or {@code null} when it
+     * should stay silent — either the site already said something better ({@link #SITE_OWNED}) or the
+     * code is a diagnostic no player should read ({@link #INTERNAL_ONLY}).
+     *
+     * <p>The {@code :detail} suffix is stripped via {@link #baseReason} before lookup.
      */
     @Nullable
     public static String castRejectMessageKey(String storedKey) {
-        return CAST_REJECT_MESSAGE_KEYS.get(baseReason(storedKey));
+        String base = baseReason(storedKey);
+        if (SITE_OWNED.contains(base) || INTERNAL_ONLY.contains(base)) {
+            return null;
+        }
+        String direct = REJECT_MESSAGE_KEYS.get(base);
+        if (direct != null) {
+            return direct;
+        }
+        for (Map.Entry<String, String> suffix : SUFFIX_MESSAGE_KEYS.entrySet()) {
+            if (base.endsWith(suffix.getKey())) {
+                return suffix.getValue();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * The suffix-matched half of the vocabulary, for the tests that assert every key resolves in lang.
+     * Keyed by suffix, not by a whole code — see {@link #SUFFIX_MESSAGE_KEYS}.
+     */
+    public static Map<String, String> suffixMessageKeys() {
+        return SUFFIX_MESSAGE_KEYS;
+    }
+
+    /**
+     * Every code that carries a key, for the tests that assert the vocabulary is complete and
+     * collision-free. Not a rendering path — use {@link #castRejectMessageKey} for that.
+     */
+    public static Map<String, String> messageKeys() {
+        return REJECT_MESSAGE_KEYS;
     }
 
     /**

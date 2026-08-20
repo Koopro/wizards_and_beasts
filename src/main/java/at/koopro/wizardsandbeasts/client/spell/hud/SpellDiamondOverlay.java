@@ -3,6 +3,8 @@ package at.koopro.wizardsandbeasts.client.spell.hud;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.client.ModTextures;
 import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellDataState;
+import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellRejectFeedback;
+import at.koopro.wizardsandbeasts.client.spell.ui.SpellCooldownDisplay;
 import at.koopro.wizardsandbeasts.client.spell.ui.SpellHudUiModel;
 import at.koopro.wizardsandbeasts.client.ui.UiStateProjection;
 import at.koopro.wizardsandbeasts.spell.cast.SpellCastService;
@@ -14,6 +16,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
@@ -28,6 +31,13 @@ public class SpellDiamondOverlay {
 
     /** Dark semi-transparent overlay color for cooldown and GCD rendering. */
     private static final int COOLDOWN_OVERLAY_COLOR = 0xCC202020;
+
+    /** Active spell name, drawn just above the plate. */
+    private static final int SPELL_NAME_COLOR = 0xFFE8D2B4;
+    /** Reject line, one row above the name. Warm red so a refusal never reads as the spell name. */
+    private static final int REJECT_LINE_RGB = 0xFF7A6A;
+    /** Widest a HUD caption may run before it is ellipsised, relative to the plate. */
+    private static final int CAPTION_MAX_EXTRA_WIDTH = 24;
 
     private static final int[][] SLOT_CENTERS = {
             {128, 80},
@@ -101,11 +111,9 @@ public class SpellDiamondOverlay {
                 if (expiryTick <= gameTick) continue;
                 Spell spell = Spells.byId(spellId);
                 int baseCooldown = spell != null ? Math.max(1, spell.getBaseCooldownTicks()) : 20;
-                // Divide by the cooldown's actual applied span, not baseCooldown: modifiers can scale
-                // the real duration up to ×3, which would otherwise clamp the sweep at "full" and make
-                // it look frozen. ClientSpellDataState captures the true span when the cooldown starts.
+                // Span, not baseCooldown — see SpellCooldownDisplay for why, and for the clamp.
                 long spanTicks = ClientSpellDataState.getCooldownSpanTicks(spellId, baseCooldown);
-                float remaining = Mth.clamp((expiryTick - (gameTick + partial)) / (float) spanTicks, 0f, 1f);
+                float remaining = SpellCooldownDisplay.remainingFraction(expiryTick, gameTick + partial, spanTicks);
                 int cx = hudX + scalePx(SLOT_CENTERS[i][0]);
                 int cy = hudY + scalePx(SLOT_CENTERS[i][1]);
                 renderDiamondSweep(graphics, cx, cy, iconSize / 2, remaining);
@@ -145,10 +153,16 @@ public class SpellDiamondOverlay {
         // Appears for GLOBAL_COOLDOWN_TICKS (5 ticks = 0.25s) after every successful cast.
         if (ModuleManager.isEnabled(Module.WANDS_AND_SPELLS)) {
             long gcdEndTick = data.getGlobalCooldownEndTick();
-            if (gcdEndTick > mc.level.getGameTime()) {
-                float partial = delta.getGameTimeDeltaPartialTick(false);
+            // Same monotonic clock the per-slot sweeps use. This read the raw game tick, so during a
+            // server stall the ring and the four sweeps drawn inches away disagreed about what time it
+            // was — the sweeps held while the ring sprang. Five ticks is short, but the inconsistency
+            // is the kind that reads as a rendering glitch.
+            long rawGcdTick = mc.level.getGameTime();
+            long gcdTick = ClientSpellDataState.monotonicTick(rawGcdTick);
+            if (gcdEndTick > gcdTick) {
+                float partial = rawGcdTick >= gcdTick ? delta.getGameTimeDeltaPartialTick(false) : 0f;
                 float gcdRemaining = Mth.clamp(
-                        (gcdEndTick - (mc.level.getGameTime() + partial)) / (float) SpellCastService.GLOBAL_COOLDOWN_TICKS,
+                        (gcdEndTick - (gcdTick + partial)) / (float) SpellCastService.GLOBAL_COOLDOWN_TICKS,
                         0f, 1f);
                 int iconSize = scalePx(ICON_TEX_SIZE);
                 // Outer diamond half-size = distance from plate center to outer slot edge
@@ -170,10 +184,9 @@ public class SpellDiamondOverlay {
                 String spellId = data.getLoadoutSpell(i);
                 if (spellId == null) continue;
                 long expiryTick = data.getCooldownExpiry(spellId);
-                float ticksLeft = expiryTick - (gameTick + partial);
-                if (ticksLeft > 20f) {
-                    int secs = (int) Math.ceil(ticksLeft / 20f);
-                    String text = String.valueOf(secs);
+                float now = gameTick + partial;
+                if (SpellCooldownDisplay.showsSecondsReadout(expiryTick, now)) {
+                    String text = String.valueOf(SpellCooldownDisplay.secondsRemaining(expiryTick, now));
                     int tw = mc.font.width(text);
                     int cx = hudX + scalePx(SLOT_CENTERS[i][0]);
                     int cy = hudY + scalePx(SLOT_CENTERS[i][1]);
@@ -189,23 +202,56 @@ public class SpellDiamondOverlay {
         if (activeSpellId != null) {
             Spell activeSpell = Spells.byId(activeSpellId);
             if (activeSpell != null) {
-                String name = clampTextToWidth(mc.font,
-                at.koopro.wizardsandbeasts.client.gui.util.GuiText.resolve(activeSpell.getDisplayName()),
-                HUD_ON_SCREEN_SIZE + 24);
-                int textWidth = mc.font.width(name);
-                int textX = Mth.clamp(
-                        hudX + HUD_ON_SCREEN_SIZE / 2 - textWidth / 2,
-                        EDGE_MARGIN,
-                        Math.max(EDGE_MARGIN, screenWidth - EDGE_MARGIN - textWidth));
-                graphics.drawString(mc.font, name,
-                        textX,
-                        hudY - 11,
-                        0xFFE8D2B4, true);
+                drawCaption(graphics, mc.font,
+                        at.koopro.wizardsandbeasts.client.gui.util.GuiText.resolve(activeSpell.getDisplayName()),
+                        hudX, hudY - 11, screenWidth, SPELL_NAME_COLOR);
             }
             if (ModuleManager.isEnabled(Module.PROFICIENCY)) {
                 renderProficiencyPips(graphics, hudX, hudY, data.getSpellProficiency(activeSpellId));
             }
         }
+
+        renderRejectLine(graphics, mc, hudX, hudY, screenWidth);
+    }
+
+    /**
+     * The short-lived reason for the last refused cast, one row above the active spell name.
+     *
+     * <p>Drawn here rather than on the action bar because this is where the player is already
+     * looking when a cast fails — the slot that just refused is directly below it. It appears only
+     * when {@link ClientSpellRejectFeedback} routed the line to the HUD; when the HUD is hidden that
+     * class puts the same sentence on the action bar instead, so a refusal is shown once and never
+     * twice.
+     */
+    private static void renderRejectLine(GuiGraphics graphics, Minecraft mc,
+                                         int hudX, int hudY, int screenWidth) {
+        Component reason = ClientSpellRejectFeedback.hudMessage();
+        if (reason == null) {
+            return;
+        }
+        int alpha = Math.round(ClientSpellRejectFeedback.hudAlpha() * 255f);
+        if (alpha <= 0) {
+            return;
+        }
+        // getString() rather than the Component: the line has to be measured and possibly ellipsised
+        // to the plate width, and drawString(String) is the overload that pairs with clampTextToWidth.
+        drawCaption(graphics, mc.font, reason.getString(), hudX, hudY - 22, screenWidth,
+                (alpha << 24) | REJECT_LINE_RGB);
+    }
+
+    /**
+     * Draws one line centred over the plate, ellipsised to fit and nudged back on-screen if centring
+     * would push it past either edge (the plate sits in the corner, so it often would).
+     */
+    private static void drawCaption(GuiGraphics graphics, Font font, String text,
+                                    int hudX, int y, int screenWidth, int argb) {
+        String clamped = clampTextToWidth(font, text, HUD_ON_SCREEN_SIZE + CAPTION_MAX_EXTRA_WIDTH);
+        int width = font.width(clamped);
+        int x = Mth.clamp(
+                hudX + HUD_ON_SCREEN_SIZE / 2 - width / 2,
+                EDGE_MARGIN,
+                Math.max(EDGE_MARGIN, screenWidth - EDGE_MARGIN - width));
+        graphics.drawString(font, clamped, x, y, argb, true);
     }
 
     private static void renderProficiencyPips(GuiGraphics graphics, int hudX, int hudY, float proficiency) {

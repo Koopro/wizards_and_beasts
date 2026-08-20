@@ -58,18 +58,20 @@ public final class SpellCastService {
         float mental = player.getData(ModAttachments.MENTAL_STABILITY.get());
         if (mental <= 10f && serverLevel.random.nextFloat() < 0.20f) {
             rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.REQUIREMENTS_UNMET, "mental_misfire"));
-            player.displayClientMessage(Component.literal("\u00A75Your mind falters; the spell misfires."), true);
+            // REQUIREMENTS_UNMET is site-owned, so the client renders nothing for it and this is
+            // the only line the player sees.
+            player.displayClientMessage(Component.translatable("wandcraft.cast.reject.mental_misfire"), true);
             return CastResult.REJECTED;
         }
 
         var bondCheckStack = WandHelper.getWandStack(player);
         if (!WandHelper.isWandBondedTo(player, bondCheckStack)) {
+            // Both codes map to their own lang key in SpellRejectCodes, so the client speaks and
+            // this site does not. Same two sentences, now resolved in the player's language.
             if (WandComponents.getMaster(bondCheckStack).isEmpty()) {
                 rejectWithHumanStress(player, SpellRejectCodes.WAND_NOT_BONDED);
-                player.displayClientMessage(Component.translatable("wandcraft.cast.requires_bond"), true);
             } else {
                 rejectWithHumanStress(player, SpellRejectCodes.WAND_WRONG_MASTER);
-                player.displayClientMessage(Component.translatable("wandcraft.cast.wrong_master"), true);
             }
             return CastResult.REJECTED;
         }
@@ -116,27 +118,23 @@ public final class SpellCastService {
                         rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.UNKNOWN_SPELL, activeSpellId));
                 case SPELL_NOT_KNOWN ->
                         rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.SPELL_NOT_KNOWN, spellId));
-                case OBSCURIAL_ABILITY_INPUT -> {
-                    rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.ABILITY_REQUIRES_ABILITY_INPUT, spellId));
-                    player.displayClientMessage(Component.literal("§5Use Obscurial ability keys (N/M) while in obscurus form."), true);
-                }
+                case OBSCURIAL_ABILITY_INPUT ->
+                        rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.ABILITY_REQUIRES_ABILITY_INPUT, spellId));
                 case REQUIREMENTS_UNMET -> {
                     rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.REQUIREMENTS_UNMET, spellId));
+                    // Site-owned: the requirement describes itself, which beats any fixed sentence
+                    // a lang key could hold ("Requires Stupefy at Adept", not "requirement unmet").
                     player.displayClientMessage(
-                            Component.literal("§c").append(spell.getRequirement().describe()),
+                            Component.empty().withStyle(ChatFormatting.RED)
+                                    .append(spell.getRequirement().describe()),
                             true);
                 }
-                case OBSCURIAL_DARK_ONLY -> {
-                    rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.OBSCURIAL_DARK_ONLY_OUTSIDE_FORM, spellId));
-                    player.displayClientMessage(Component.literal("§5This obscurus ability can only be cast in dark form."), true);
-                }
+                case OBSCURIAL_DARK_ONLY ->
+                        rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.OBSCURIAL_DARK_ONLY_OUTSIDE_FORM, spellId));
                 case OBSCURIAL_DARK_RESTRICTED -> {
                     ObscurialCombatRules.applyBlockedCastStressSpike(player);
                     ObscurialCombatRules.applyBlockedCastPressureBacklash(player);
                     debugReject(player, SpellRejectCodes.withDetail(SpellRejectCodes.OBSCURIAL_DARK_RESTRICTED, spellId));
-                    player.displayClientMessage(
-                            Component.literal("§5Obscurus rejects that spell and lashes back."),
-                            true);
                 }
                 case ON_COOLDOWN ->
                         rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.COOLDOWN_ACTIVE, spellId));
@@ -174,7 +172,6 @@ public final class SpellCastService {
                     player.hurt(serverLevel.damageSources().magic(), backlash);
                 }
                 debugReject(player, SpellRejectCodes.withDetail(SpellRejectCodes.COLLAPSE_INSTABILITY_FIZZLE, spellId));
-                player.displayClientMessage(Component.literal("\u00A75Residual obscurus instability disrupts your spell."), true);
                 return CastResult.REJECTED;
             }
         }
@@ -187,7 +184,6 @@ public final class SpellCastService {
                 player.hurt(serverLevel.damageSources().magic(), backlash);
             }
             ObscurialCombatRules.consumeCastSpike(player);
-            player.displayClientMessage(Component.literal("\u00A74Your obscurus destabilizes the cast and backlashes."), true);
             return CastResult.REJECTED;
         }
 
@@ -199,7 +195,8 @@ public final class SpellCastService {
                     player.displayClientMessage(violation.loreMessage().copy().withStyle(ChatFormatting.GOLD), true);
                     DebugHooks.logSpellCast(player, "cast_gamp_reject", violation.domain().name());
                     if (ModuleManager.isEnabled(Module.WANDS_AND_SPELLS)) {
-                        SpellDeniedS2CPayload.sendTo(player);
+                        // Site-owned: the violation lore line was shown immediately above.
+                        SpellDeniedS2CPayload.sendTo(player, SpellRejectCodes.GAMP_HARD_REJECT);
                     }
                     return CastResult.GAMP_REJECTED;
                 }
@@ -217,6 +214,11 @@ public final class SpellCastService {
         } catch (Exception ex) {
             LOGGER.error("Spell cast failed for player '{}' spell '{}'", player.getName().getString(), spellId, ex);
             DebugHooks.logSpellCast(player, "cast_exception", spellId);
+            // A thrown cast is the one refusal that used to be completely silent — no packet, no
+            // sound, no counter — so a mod defect was indistinguishable from a dropped keypress.
+            // It reports like any other reject now, minus the stress penalty: the player did nothing
+            // wrong, and no cooldown is stamped either, so the attempt costs them nothing.
+            debugReject(player, SpellRejectCodes.withDetail(SpellRejectCodes.CAST_FAILED, spellId));
             return CastResult.REJECTED;
         }
 
@@ -228,8 +230,10 @@ public final class SpellCastService {
                     .broadcast(player, spellId, castContext.definition());
         }
 
+        // Composed and clamped in ModifierStack; the proficiency channel is already in there. This
+        // used to multiply the scaling profile in again on top of a stack that had already had the
+        // Proficiency enum tier pushed into it, so practice was paid twice.
         float cooldownMult = castContext.modifiers().finalCooldown();
-        cooldownMult *= castContext.scalingProfile().cooldownMult();
         int cooldown = SpellCastGate.resolveCooldownTicks(spell.getBaseCooldownTicks(), cooldownMult);
         long expiryTick = currentTick + cooldown;
         data.setCooldown(spellId, expiryTick);
@@ -258,16 +262,13 @@ public final class SpellCastService {
         if (Config.debugLogSpellGateReasons) {
             LOGGER.debug("SpellCast rejected for '{}' reason={}", player.getName().getString(), reason);
         }
-        // Central player feedback for every reject routed through here: the denied sound always, plus a
-        // short action-bar reason for the codes that don't carry their own (richer) message. Rich sites
-        // (bond, requirements, Obscurial, Gamp) map to null here, so their bespoke text is never doubled.
+        // Central player feedback for every reject routed through here. The server sends the *code*
+        // and nothing else; the client resolves it to a lang key, chooses the channel (the spell HUD
+        // while it is up, the action bar otherwise) and plays the denied sound. Codes whose text is
+        // composed at the site — requirements, Gamp — resolve to null on the client, so the richer
+        // sentence those sites already wrote is never doubled by a generic one.
         if (ModuleManager.isEnabled(Module.WANDS_AND_SPELLS)) {
-            SpellDeniedS2CPayload.sendTo(player);
-            String messageKey = SpellRejectCodes.castRejectMessageKey(reason);
-            if (messageKey != null) {
-                player.displayClientMessage(
-                        Component.translatable(messageKey).withStyle(ChatFormatting.GRAY), true);
-            }
+            SpellDeniedS2CPayload.sendTo(player, reason);
         }
     }
 
