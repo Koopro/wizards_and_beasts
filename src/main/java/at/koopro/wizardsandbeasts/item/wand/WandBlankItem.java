@@ -3,6 +3,8 @@ package at.koopro.wizardsandbeasts.item.wand;
 import org.jspecify.annotations.Nullable;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.registry.ModBlocks;
+import at.koopro.wizardsandbeasts.registry.WoodSet;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.WandLoreNames;
 import net.minecraft.core.BlockPos;
@@ -33,47 +35,55 @@ public class WandBlankItem extends Item {
         ItemStack stack = context.getItemInHand();
         Level level = context.getLevel();
         Player player = context.getPlayer();
-        // TEMPORARY diagnostics — every branch reports which side reached it, because the server path is
-        // proven working in isolation and the failing case has to be found in a real session.
-        trace(level, player, "useOn entered");
         if (WandComponents.getWood(stack) != null) {
-            trace(level, player, "PASS: already shaped (" + WandComponents.getWood(stack) + ")");
             return InteractionResult.PASS;
         }
         BlockPos pos = context.getClickedPos();
         BlockState state = level.getBlockState(pos);
         Identifier wood = wandWoodFromLogBlock(state);
         if (wood == null) {
-            trace(level, player, "PASS: " + state.getBlock() + " is not a wand wood log");
             return InteractionResult.PASS;
         }
         if (player == null) {
             return InteractionResult.PASS;
         }
         if (level.isClientSide()) {
-            trace(level, player, "client side, deferring to server");
             return InteractionResult.SUCCESS;
         }
         stack.set(WandComponents.WAND_WOOD.get(), wood);
         player.setItemInHand(context.getHand(), stack);
         level.playSound(null, pos, SoundEvents.BAMBOO_WOOD_HIT, SoundSource.PLAYERS, 0.5f, 1.35f);
-        trace(level, player, "shaped to " + wood);
         return InteractionResult.SUCCESS;
     }
 
-    /** TEMPORARY. Prints to the action bar on whichever side reached the call. */
-    private static void trace(Level level, @Nullable Player player, String message) {
-        if (player == null) {
-            return;
-        }
-        player.displayClientMessage(Component.literal(
-                (level.isClientSide() ? "[blank/client] " : "[blank/server] ") + message), false);
-    }
-
     /**
-     * Maps vanilla log families to wand wood datapack ids (see {@code data/wizards_and_beasts/wizards_and_beasts/wand_woods}).
+     * Maps a log block to a wand wood datapack id (see
+     * {@code data/wizards_and_beasts/wizards_and_beasts/wand_woods}).
+     *
+     * <p><b>The mod's own wandwood logs are checked first.</b> They have to be: this method knew only
+     * vanilla tags, so every one of the nine species the mod actually grows fell straight through to
+     * {@code null} and a blackthorn log could not be shaped into a blackthorn wand. The species that
+     * the whole wandwood worldgen pass exists to plant were the only ones a blank refused.
+     *
+     * <p>Driven off {@link ModBlocks#ALL_WOOD_SETS} rather than a hand-written table, so a species
+     * added there is shapeable the day it registers — a hardcoded list is precisely what failed here.
+     * All four pillar variants count, because vanilla's {@code *_LOGS} tags already cover log, wood,
+     * stripped log and stripped wood, and matching fewer would make the mod's own timber pickier than
+     * the vanilla it stands in for.
+     *
+     * <p>The vanilla families below stay as they are: they are the fallback that lets a player shape a
+     * blank before finding a wandwood tree. Note their donor choices no longer line up with what the
+     * regenerated textures made each species look like (vanilla dark oak yields yew, while the log
+     * that now <em>looks</em> like dark oak is blackthorn) — deliberately left alone here, since
+     * retuning them changes what existing worlds produce.
      */
     private static @Nullable Identifier wandWoodFromLogBlock(BlockState state) {
+        for (WoodSet set : ModBlocks.ALL_WOOD_SETS) {
+            if (state.is(set.log().get()) || state.is(set.strippedLog().get())
+                    || state.is(set.wood().get()) || state.is(set.strippedWood().get())) {
+                return Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, set.name());
+            }
+        }
         if (state.is(BlockTags.OAK_LOGS)) {
             return Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "rowan");
         }

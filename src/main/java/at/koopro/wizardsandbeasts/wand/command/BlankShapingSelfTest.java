@@ -1,6 +1,8 @@
 package at.koopro.wizardsandbeasts.wand.command;
 
+import at.koopro.wizardsandbeasts.registry.ModBlocks;
 import at.koopro.wizardsandbeasts.registry.WandItemRegistry;
+import at.koopro.wizardsandbeasts.registry.WoodSet;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.ChatFormatting;
@@ -11,43 +13,53 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
- * TEMPORARY. Drives the wand blank's shaping path headlessly so a dedicated server can say where it
- * fails, without needing a human at a keyboard. Delete once the answer is known.
+ * Drives the wand blank's shaping path headlessly, so a dedicated server can prove which logs shape a
+ * blank without a human at a keyboard.
+ *
+ * <p>It exists because the failure it now guards was invisible from the outside: {@code
+ * WandBlankItem.wandWoodFromLogBlock} enumerated vanilla log tags only, so every one of the mod's own
+ * nine wandwood species returned {@code null} and clicking a blackthorn log simply did nothing. No
+ * exception, no log line — "not a wand wood log" is the correct answer for almost every block in the
+ * game, so the bug looked exactly like normal operation.
+ *
+ * <p>Each species is checked through {@code ItemStack.useOn}, the call the server actually makes on a
+ * right-click. A fake player supplies the hand; the block is placed and removed per species so the
+ * command leaves the world as it found it.
  */
-@net.neoforged.fml.common.EventBusSubscriber(modid = at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID)
 public final class BlankShapingSelfTest {
 
     private BlankShapingSelfTest() {}
 
-    /**
-     * TEMPORARY. Fires on both sides for a right-click made while holding a blank, so a single click says
-     * whether the interaction event even happens, and on which side, before the item is consulted.
-     */
-    @net.neoforged.bus.api.SubscribeEvent(priority = net.neoforged.bus.api.EventPriority.LOWEST)
-    public static void onRightClickBlock(
-            net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock event) {
-        if (!(event.getItemStack().getItem() instanceof at.koopro.wizardsandbeasts.item.wand.WandBlankItem)) {
-            return;
-        }
-        boolean client = event.getLevel().isClientSide();
-        event.getEntity().displayClientMessage(Component.literal(
-                (client ? "[probe/client] " : "[probe/server] ")
-                        + "RightClickBlock on " + event.getLevel().getBlockState(event.getPos()).getBlock()
-                        + " canceled=" + event.isCanceled()
-                        + " useItem=" + event.getUseItem()
-                        + " useBlock=" + event.getUseBlock()), false);
+    /** Vanilla families that shape a blank as a fallback, and the wood each is expected to yield. */
+    private static final Map<Block, String> VANILLA_DONORS = new LinkedHashMap<>();
+
+    static {
+        VANILLA_DONORS.put(Blocks.OAK_LOG, "rowan");
+        VANILLA_DONORS.put(Blocks.SPRUCE_LOG, "holly");
+        VANILLA_DONORS.put(Blocks.BIRCH_LOG, "hawthorn");
+        VANILLA_DONORS.put(Blocks.JUNGLE_LOG, "walnut");
+        VANILLA_DONORS.put(Blocks.ACACIA_LOG, "ash");
+        VANILLA_DONORS.put(Blocks.DARK_OAK_LOG, "yew");
+        VANILLA_DONORS.put(Blocks.MANGROVE_LOG, "willow");
+        VANILLA_DONORS.put(Blocks.CHERRY_LOG, "blackthorn");
+        VANILLA_DONORS.put(Blocks.CRIMSON_STEM, "elder");
+        VANILLA_DONORS.put(Blocks.WARPED_STEM, "vine");
     }
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
@@ -56,87 +68,69 @@ public final class BlankShapingSelfTest {
 
     private static int run(CommandSourceStack source) {
         ServerLevel level = source.getLevel();
-        reportEnvironment(source);
-        BlockPos logPos = BlockPos.containing(source.getPosition()).above(3);
-        level.setBlock(logPos, Blocks.OAK_LOG.defaultBlockState(), 3);
-        BlockState state = level.getBlockState(logPos);
+        BlockPos pos = BlockPos.containing(source.getPosition()).above(3);
+        BlockState restore = level.getBlockState(pos);
+        List<String> failures = new ArrayList<>();
 
-        say(source, "block at " + logPos.toShortString() + " = " + state.getBlock());
-        say(source, "is #minecraft:oak_logs = " + state.is(BlockTags.OAK_LOGS));
-        say(source, "WAND_WOOD registered = " + WandComponents.WAND_WOOD.isBound());
+        say(source, "--- mod wandwood logs (all four pillar variants) ---");
+        for (WoodSet set : ModBlocks.ALL_WOOD_SETS) {
+            for (Block variant : List.of(set.log().get(), set.strippedLog().get(),
+                    set.wood().get(), set.strippedWood().get())) {
+                check(source, level, pos, variant, set.name(), failures);
+            }
+        }
 
-        ItemStack blank = new ItemStack(WandItemRegistry.WAND_BLANK.get());
-        say(source, "blank item class = " + blank.getItem().getClass().getName());
-        say(source, "wood before = " + WandComponents.getWood(blank));
+        say(source, "--- vanilla donor fallbacks ---");
+        for (Map.Entry<Block, String> donor : VANILLA_DONORS.entrySet()) {
+            check(source, level, pos, donor.getKey(), donor.getValue(), failures);
+        }
 
-        var player = FakePlayerFactory.getMinecraft(level);
-        player.setItemInHand(InteractionHand.MAIN_HAND, blank);
-        ItemStack inHand = player.getItemInHand(InteractionHand.MAIN_HAND);
-        say(source, "stack in hand is the same object = " + (inHand == blank));
+        say(source, "--- a block that must NOT shape ---");
+        level.setBlock(pos, Blocks.STONE.defaultBlockState(), 3);
+        Identifier stone = shape(level, pos);
+        if (stone != null) {
+            failures.add("stone shaped to " + stone);
+        }
+        say(source, "stone -> " + stone + (stone == null ? "  OK" : "  FAIL"));
 
-        BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(logPos), Direction.UP, logPos, false);
-        UseOnContext context = new UseOnContext(level, player, InteractionHand.MAIN_HAND, inHand, hit);
-
-        InteractionResult direct = blank.getItem().useOn(context);
-        say(source, "Item.useOn returned " + direct);
-        say(source, "wood after direct useOn = " + WandComponents.getWood(inHand));
-
-        // And through the full ItemStack path, which is what the server actually calls.
-        ItemStack second = new ItemStack(WandItemRegistry.WAND_BLANK.get());
-        player.setItemInHand(InteractionHand.MAIN_HAND, second);
-        ItemStack inHand2 = player.getItemInHand(InteractionHand.MAIN_HAND);
-        UseOnContext context2 = new UseOnContext(level, player, InteractionHand.MAIN_HAND, inHand2, hit);
-        InteractionResult viaStack = inHand2.useOn(context2);
-        say(source, "ItemStack.useOn returned " + viaStack);
-        Identifier after = WandComponents.getWood(inHand2);
-        say(source, "wood after ItemStack.useOn = " + after);
-        say(source, "hand stack wood = " + WandComponents.getWood(player.getItemInHand(InteractionHand.MAIN_HAND)));
-
-        // Now the full server interaction path, which the two calls above skip: this is what a real
-        // right-click runs, and it posts PlayerInteractEvent.RightClickBlock on the way in.
-        ItemStack third = new ItemStack(WandItemRegistry.WAND_BLANK.get());
-        player.setItemInHand(InteractionHand.MAIN_HAND, third);
-        ItemStack inHand3 = player.getItemInHand(InteractionHand.MAIN_HAND);
-
-        var event = net.neoforged.neoforge.common.CommonHooks.onRightClickBlock(
-                player, InteractionHand.MAIN_HAND, logPos, hit);
-        say(source, "RightClickBlock canceled = " + event.isCanceled()
-                + ", useItem = " + event.getUseItem() + ", useBlock = " + event.getUseBlock());
-
-        InteractionResult viaGameMode =
-                player.gameMode.useItemOn(player, level, inHand3, InteractionHand.MAIN_HAND, hit);
-        say(source, "gameMode.useItemOn returned " + viaGameMode);
-        say(source, "wood after gameMode path = "
-                + WandComponents.getWood(player.getItemInHand(InteractionHand.MAIN_HAND)));
-
-        level.setBlock(logPos, Blocks.AIR.defaultBlockState(), 3);
-        say(source, after != null ? "RESULT: direct shaping works server-side" : "RESULT: direct shaping FAILED");
-        return 1;
+        level.setBlock(pos, restore, 3);
+        if (failures.isEmpty()) {
+            source.sendSuccess(() -> Component.literal("[blanktest] RESULT: every wandwood shapes correctly")
+                    .withStyle(ChatFormatting.GREEN), false);
+        } else {
+            for (String failure : failures) {
+                source.sendSuccess(() -> Component.literal("[blanktest] FAIL " + failure)
+                        .withStyle(ChatFormatting.RED), false);
+            }
+        }
+        return failures.isEmpty() ? 1 : 0;
     }
 
-    /**
-     * The state a real session actually depends on. The mechanism above works on a fake player in an
-     * empty world, so anything that breaks it for a real player lives here.
-     */
-    private static void reportEnvironment(CommandSourceStack source) {
-        var wands = at.koopro.wizardsandbeasts.module.Module.WANDS;
-        say(source, "WANDS module state = " + at.koopro.wizardsandbeasts.module.ModuleManager.state(wands)
-                + " (accessible = " + at.koopro.wizardsandbeasts.module.ModuleManager.isEnabled(wands) + ")");
-        var blankItem = WandItemRegistry.WAND_BLANK.get();
-        var owner = at.koopro.wizardsandbeasts.module.ModuleContentIndex.moduleOf(blankItem);
-        say(source, "wand_blank owned by module " + owner + ", accessible = "
-                + at.koopro.wizardsandbeasts.module.ModuleContentIndex.accessible(owner));
-
-        var player = source.getPlayer();
-        if (player == null) {
-            say(source, "run by console — no held item to inspect");
-            return;
+    /** Place the block, shape a fresh blank on it, and report what wood came back. */
+    private static void check(CommandSourceStack source, ServerLevel level, BlockPos pos,
+                              Block block, String expected, List<String> failures) {
+        level.setBlock(pos, block.defaultBlockState(), 3);
+        Identifier got = shape(level, pos);
+        boolean ok = got != null && got.getPath().equals(expected);
+        if (!ok) {
+            failures.add(blockName(block) + " -> " + got + " (expected " + expected + ")");
         }
-        ItemStack held = player.getItemInHand(InteractionHand.MAIN_HAND);
-        say(source, "your main hand = " + held.getItem() + " x" + held.getCount());
-        say(source, "its wand_wood component = " + WandComponents.getWood(held));
-        say(source, "gamemode = " + player.gameMode.getGameModeForPlayer()
-                + ", mayBuild = " + player.getAbilities().mayBuild);
+        say(source, blockName(block) + " -> " + got + (ok ? "  OK" : "  FAIL, expected " + expected));
+    }
+
+    /** One shaping attempt through the same call the server makes for a right-click. */
+    private static Identifier shape(ServerLevel level, BlockPos pos) {
+        var player = FakePlayerFactory.getMinecraft(level);
+        player.setItemInHand(InteractionHand.MAIN_HAND,
+                new ItemStack(WandItemRegistry.WAND_BLANK.get()));
+        ItemStack inHand = player.getItemInHand(InteractionHand.MAIN_HAND);
+        BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false);
+        inHand.useOn(new UseOnContext(level, player, InteractionHand.MAIN_HAND, inHand, hit));
+        return WandComponents.getWood(player.getItemInHand(InteractionHand.MAIN_HAND));
+    }
+
+    private static String blockName(Block block) {
+        return String.valueOf(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(block));
     }
 
     private static void say(CommandSourceStack source, String line) {
