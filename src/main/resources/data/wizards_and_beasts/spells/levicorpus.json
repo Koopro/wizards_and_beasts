@@ -19,5 +19,11 @@
   "learning": {
     "masterySpellId": "wingardium_leviosa",
     "minMasteryTier": "proficient"
+  },
+  "vfx": {
+    "trail": "arcane_mote",
+    "impact": "arcane_mote",
+    "trailDensity": 1,
+    "impactCount": 10
   }
 }

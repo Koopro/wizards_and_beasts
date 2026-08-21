@@ -35,5 +35,11 @@
   "learning": {
     "masterySpellId": "reparo",
     "minMasteryTier": "proficient"
+  },
+  "vfx": {
+    "trail": "light_glow",
+    "impact": "light_glow",
+    "trailDensity": 1,
+    "impactCount": 10
   }
 }

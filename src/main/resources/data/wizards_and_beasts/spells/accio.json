@@ -15,5 +15,11 @@
   "requirement": {
     "type": "knows",
     "prerequisiteId": "wingardium_leviosa"
+  },
+  "vfx": {
+    "trail": "arcane_mote",
+    "impact": "arcane_mote",
+    "trailDensity": 2,
+    "impactCount": 12
   }
 }

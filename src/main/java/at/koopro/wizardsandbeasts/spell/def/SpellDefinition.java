@@ -10,6 +10,7 @@ import at.koopro.wizardsandbeasts.spell.effect.SpellEffectEntry;
 import at.koopro.wizardsandbeasts.spell.gamp.GampDomain;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.Identifier;
@@ -102,7 +103,32 @@ public record SpellDefinition(
          * Presentation timing for the cast animation. Absent means instant, which is every spell
          * shipped before this field existed.
          */
-        Optional<CastTiming> castTiming) {
+        Optional<CastTiming> castTiming,
+        /**
+         * Authored particle look. Absent means the spell keeps its family default, which is what
+         * every spell did before the field existed — see {@link SpellVfx}.
+         */
+        Optional<SpellVfx> vfx,
+
+        /**
+         * Whether this spell's behaviour is written yet. Defaults to {@link
+         * SpellImplementationState#IMPLEMENTED}, which is what every spell that omits the field
+         * means — deliberately, so the 27 JSONs that shipped before the corpus stay valid unedited.
+         */
+        SpellImplementationState implementationState,
+
+        /**
+         * How this spell relates to {@link #relatedSpell}. Presentation only — see
+         * {@link SpellRelation} for why nothing may gate on it.
+         */
+        SpellRelation relation,
+
+        /**
+         * The spell {@link #relation} points at. Required whenever {@code relation != BASE} and
+         * rejected as a decode error otherwise, because a {@code RANK_OF} with nothing to rank
+         * against is a typo that would otherwise render as a dangling label.
+         */
+        Optional<Identifier> relatedSpell) {
 
     /** Embedded "explode" block. */
     /**
@@ -372,9 +398,49 @@ public record SpellDefinition(
         ).apply(inst, SpellDefinitionFieldsB::new));
     }
 
+    /**
+     * A third bucket, opened for {@code vfx} and now also holding the corpus fields.
+     *
+     * <p>{@code RecordCodecBuilder.group} tops out at sixteen entries and {@code FieldsB} already
+     * holds fifteen. Rather than spend the last slot and leave the next field with nowhere to go,
+     * {@code vfx} opened a new bucket; the pair below nests so the three read as one flat JSON object.
+     * Four of sixteen slots used.
+     */
+    private record SpellDefinitionFieldsC(
+            Optional<SpellVfx> vfx,
+            SpellImplementationState implementationState,
+            SpellRelation relation,
+            Optional<Identifier> relatedSpell) {
+
+        static final MapCodec<SpellDefinitionFieldsC> MAP_CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+                SpellVfx.CODEC.optionalFieldOf("vfx").forGetter(SpellDefinitionFieldsC::vfx),
+                SpellImplementationState.CODEC
+                        .optionalFieldOf("implementationState", SpellImplementationState.IMPLEMENTED)
+                        .forGetter(SpellDefinitionFieldsC::implementationState),
+                SpellRelation.CODEC.optionalFieldOf("relation", SpellRelation.BASE)
+                        .forGetter(SpellDefinitionFieldsC::relation),
+                Identifier.CODEC.optionalFieldOf("relatedSpell").forGetter(SpellDefinitionFieldsC::relatedSpell)
+        ).apply(inst, SpellDefinitionFieldsC::new));
+    }
+
+    /**
+     * The one cross-field invariant worth refusing a load over: a relation with nothing on the other
+     * end of it. Reported as a {@link DataResult} error rather than thrown, so a single malformed
+     * spell file is logged and skipped instead of taking the whole datapack reload down with it.
+     */
+    private static DataResult<SpellDefinition> validate(SpellDefinition def) {
+        if (def.relation() != SpellRelation.BASE && def.relatedSpell().isEmpty()) {
+            return DataResult.error(() -> "spell declares relation '"
+                    + def.relation().getSerializedName() + "' but no relatedSpell");
+        }
+        return DataResult.success(def);
+    }
+
     public static final Codec<SpellDefinition> CODEC = Codec.mapPair(
             SpellDefinitionFieldsA.MAP_CODEC,
-            SpellDefinitionFieldsB.MAP_CODEC
+            Codec.mapPair(
+                    SpellDefinitionFieldsB.MAP_CODEC,
+                    SpellDefinitionFieldsC.MAP_CODEC)
     ).codec().xmap(
             pair -> new SpellDefinition(
                     pair.getFirst().displayName(),
@@ -391,21 +457,25 @@ public record SpellDefinition(
                     pair.getFirst().range(),
                     pair.getFirst().knockback(),
                     pair.getFirst().igniteSeconds(),
-                    pair.getSecond().explode(),
-                    pair.getSecond().disarms(),
-                    pair.getSecond().selfEffects(),
-                    pair.getSecond().targetEffects(),
-                    pair.getSecond().sound(),
-                    pair.getSecond().requirement(),
-                    pair.getSecond().learning(),
-                    pair.getSecond().unblockable(),
-                    pair.getSecond().spellFamily(),
-                    pair.getSecond().gampDomains(),
-                    pair.getSecond().effectComponents(),
-                    pair.getSecond().opensBlocks(),
-                    pair.getSecond().pullStrength(),
-                    pair.getSecond().canonTier(),
-                    pair.getSecond().castTiming()),
+                    pair.getSecond().getFirst().explode(),
+                    pair.getSecond().getFirst().disarms(),
+                    pair.getSecond().getFirst().selfEffects(),
+                    pair.getSecond().getFirst().targetEffects(),
+                    pair.getSecond().getFirst().sound(),
+                    pair.getSecond().getFirst().requirement(),
+                    pair.getSecond().getFirst().learning(),
+                    pair.getSecond().getFirst().unblockable(),
+                    pair.getSecond().getFirst().spellFamily(),
+                    pair.getSecond().getFirst().gampDomains(),
+                    pair.getSecond().getFirst().effectComponents(),
+                    pair.getSecond().getFirst().opensBlocks(),
+                    pair.getSecond().getFirst().pullStrength(),
+                    pair.getSecond().getFirst().canonTier(),
+                    pair.getSecond().getFirst().castTiming(),
+                    pair.getSecond().getSecond().vfx(),
+                    pair.getSecond().getSecond().implementationState(),
+                    pair.getSecond().getSecond().relation(),
+                    pair.getSecond().getSecond().relatedSpell()),
             def -> Pair.of(
                     new SpellDefinitionFieldsA(
                             def.displayName(),
@@ -422,7 +492,7 @@ public record SpellDefinition(
                             def.range(),
                             def.knockback(),
                             def.igniteSeconds()),
-                    new SpellDefinitionFieldsB(
+                    Pair.of(new SpellDefinitionFieldsB(
                             def.explode(),
                             def.disarms(),
                             def.selfEffects(),
@@ -437,7 +507,13 @@ public record SpellDefinition(
                             def.opensBlocks(),
                             def.pullStrength(),
                             def.canonTier(),
-                            def.castTiming())));
+                            def.castTiming()),
+                            new SpellDefinitionFieldsC(
+                                    def.vfx(),
+                                    def.implementationState(),
+                                    def.relation(),
+                                    def.relatedSpell()))))
+            .validate(SpellDefinition::validate);
 
     // Gamp's Law checks. GampsLaw.validate() only consults these for domains the spell DECLARES
     // in its `gampDomains` JSON list, so declaring a domain marks every cast as a violation by

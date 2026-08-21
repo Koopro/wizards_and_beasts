@@ -14,5 +14,11 @@
   },
   "requirement": {
     "type": "none"
+  },
+  "vfx": {
+    "trail": "light_glow",
+    "impact": "light_glow",
+    "trailDensity": 1,
+    "impactCount": 10
   }
 }

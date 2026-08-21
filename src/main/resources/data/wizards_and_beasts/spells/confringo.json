@@ -20,5 +20,11 @@
     "type": "proficiency",
     "prerequisiteId": "incendio",
     "minProficiency": "proficient"
+  },
+  "vfx": {
+    "trail": "fire_ember",
+    "impact": "fire_ember",
+    "trailDensity": 2,
+    "impactCount": 24
   }
 }

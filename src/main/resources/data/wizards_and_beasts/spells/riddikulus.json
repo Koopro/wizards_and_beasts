@@ -44,5 +44,11 @@
       ],
       "respect_immunity": false
     }
-  ]
+  ],
+  "vfx": {
+    "trail": "light_glow",
+    "impact": "arcane_mote",
+    "trailDensity": 1,
+    "impactCount": 16
+  }
 }

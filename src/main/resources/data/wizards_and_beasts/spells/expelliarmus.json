@@ -4,6 +4,11 @@
   "category": "combat",
   "cooldownTicks": 50,
   "color": -39424,
+  "sound": {
+    "id": "minecraft:item.trident.return",
+    "volume": 0.7,
+    "pitch": 1.55
+  },
   "castType": "projectile",
   "projectileSpeed": 1.6,
   "projectileSpread": 0.02,
@@ -18,5 +23,11 @@
   "requirement": {
     "type": "knows",
     "prerequisiteId": "stupefy"
+  },
+  "vfx": {
+    "trail": "light_glow",
+    "impact": "arcane_mote",
+    "trailDensity": 2,
+    "impactCount": 14
   }
 }

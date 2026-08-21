@@ -23,5 +23,11 @@
     "type": "proficiency",
     "prerequisiteId": "flipendo",
     "minProficiency": "proficient"
+  },
+  "vfx": {
+    "trail": "ice_shard",
+    "impact": "ice_shard",
+    "trailDensity": 3,
+    "impactCount": 18
   }
 }

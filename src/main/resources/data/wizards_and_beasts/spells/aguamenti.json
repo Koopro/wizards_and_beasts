@@ -14,5 +14,11 @@
   "requirement": {
     "type": "knows",
     "prerequisiteId": "lumos"
+  },
+  "vfx": {
+    "trail": "water_droplet",
+    "impact": "water_droplet",
+    "trailDensity": 3,
+    "impactCount": 18
   }
 }

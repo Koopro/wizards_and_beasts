@@ -21,5 +21,11 @@
       "duration": 220,
       "amplifier": 0
     }
-  ]
+  ],
+  "vfx": {
+    "trail": "ice_shard",
+    "impact": "arcane_mote",
+    "trailDensity": 1,
+    "impactCount": 12
+  }
 }

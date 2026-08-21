@@ -14,5 +14,11 @@
   },
   "requirement": {
     "type": "none"
+  },
+  "vfx": {
+    "trail": "arcane_mote",
+    "impact": "arcane_mote",
+    "trailDensity": 2,
+    "impactCount": 12
   }
 }

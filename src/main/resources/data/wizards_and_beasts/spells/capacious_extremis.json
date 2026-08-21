@@ -10,5 +10,11 @@
     "id": "minecraft:block.end_portal_frame.fill",
     "volume": 0.5,
     "pitch": 1.1
+  },
+  "vfx": {
+    "trail": "arcane_mote",
+    "impact": "arcane_mote",
+    "trailDensity": 1,
+    "impactCount": 12
   }
 }

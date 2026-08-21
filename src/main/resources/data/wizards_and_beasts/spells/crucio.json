@@ -26,5 +26,11 @@
       "darkArts": true,
       "cadence": "tick"
     }
-  ]
+  ],
+  "vfx": {
+    "trail": "dark_wisp",
+    "impact": "dark_wisp",
+    "trailDensity": 3,
+    "impactCount": 22
+  }
 }

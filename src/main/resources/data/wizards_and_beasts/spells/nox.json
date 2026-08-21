@@ -27,5 +27,11 @@
       "type": "swap_active_spell",
       "spell": "lumos"
     }
-  ]
+  ],
+  "vfx": {
+    "trail": "dark_wisp",
+    "impact": "dark_wisp",
+    "trailDensity": 1,
+    "impactCount": 8
+  }
 }

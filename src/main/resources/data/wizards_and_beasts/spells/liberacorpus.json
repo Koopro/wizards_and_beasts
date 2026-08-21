@@ -25,5 +25,11 @@
         "minecraft:weakness"
       ]
     }
-  ]
+  ],
+  "vfx": {
+    "trail": "light_glow",
+    "impact": "arcane_mote",
+    "trailDensity": 1,
+    "impactCount": 10
+  }
 }

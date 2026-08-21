@@ -23,5 +23,11 @@
     "type": "proficiency",
     "prerequisiteId": "accio",
     "minProficiency": "proficient"
+  },
+  "vfx": {
+    "trail": "arcane_mote",
+    "impact": "arcane_mote",
+    "trailDensity": 2,
+    "impactCount": 14
   }
 }

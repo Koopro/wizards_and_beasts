@@ -24,5 +24,11 @@
     "type": "proficiency",
     "prerequisiteId": "stupefy",
     "minProficiency": "proficient"
+  },
+  "vfx": {
+    "trail": "ice_shard",
+    "impact": "ice_shard",
+    "trailDensity": 2,
+    "impactCount": 12
   }
 }

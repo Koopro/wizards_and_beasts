@@ -5,6 +5,11 @@
   "cooldownTicks": 40,
   "baseDamage": 4.0,
   "color": -65536,
+  "sound": {
+    "id": "minecraft:entity.wither.shoot",
+    "volume": 0.7,
+    "pitch": 1.45
+  },
   "baseEffectDurationTicks": 100,
   "projectileSpeed": 1.8,
   "projectileSpread": 0.04,
@@ -24,5 +29,11 @@
       "type": "interrupt_cast",
       "lock_ticks": 30
     }
-  ]
+  ],
+  "vfx": {
+    "trail": "electric_arc",
+    "impact": "electric_arc",
+    "trailDensity": 2,
+    "impactCount": 16
+  }
 }

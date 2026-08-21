@@ -65,6 +65,12 @@ public class JsonSpell extends Spell {
     }
 
     @Override
+    public boolean isImplemented() {
+        return def.implementationState()
+                == at.koopro.wizardsandbeasts.spell.def.SpellImplementationState.IMPLEMENTED;
+    }
+
+    @Override
     protected SpellProperties buildProperties() {
         SpellProperties.Builder b = switch (def.castType()) {
             case PROJECTILE -> SpellProperties.projectile();
@@ -165,5 +171,12 @@ public class JsonSpell extends Spell {
             return SoundEvents.BLAZE_SHOOT;
         }
         return ev;
+    }
+
+    /** The {@code vfx} block if the JSON authored one, otherwise the family default. */
+    @Override
+    public at.koopro.wizardsandbeasts.spell.def.SpellVfx vfx() {
+        return at.koopro.wizardsandbeasts.spell.def.SpellVfx.resolve(
+                definition().vfx(), definition().spellFamily().orElse(null));
     }
 }

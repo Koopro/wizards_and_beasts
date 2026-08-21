@@ -268,6 +268,31 @@ public abstract class Spell {
     }
 
     /**
+     * Authored particle look for this spell.
+     *
+     * <p>Overridden by {@code JsonSpell} to read the {@code vfx} block. Java spells inherit the
+     * family default, which is exactly what every spell in the mod looked like before the block
+     * existed — so this changes nothing until a spell opts in.
+     */
+    public at.koopro.wizardsandbeasts.spell.def.SpellVfx vfx() {
+        return at.koopro.wizardsandbeasts.spell.def.SpellVfx.defaultFor(SpellFamilies.of(this));
+    }
+
+    /**
+     * Whether this spell's behaviour is actually written. A Java spell exists because somebody wrote
+     * its {@code execute}, so the base answer is always yes; only {@code JsonSpell} can answer no, by
+     * reading {@code implementationState} off its definition.
+     *
+     * <p>Read by the cast gate and by
+     * {@link at.koopro.wizardsandbeasts.spell.learning.SpellLearningEligibility}. Both are
+     * server-side, which is what makes the refusal authoritative — see
+     * {@link at.koopro.wizardsandbeasts.spell.def.SpellImplementationState}.
+     */
+    public boolean isImplemented() {
+        return true;
+    }
+
+    /**
      * Optional hybrid-learning metadata used by the teacher progression system.
      * Java spells default to no extra gate; datapack spells can provide these.
      */

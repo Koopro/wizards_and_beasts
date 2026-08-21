@@ -18,5 +18,11 @@
     "type": "proficiency",
     "prerequisiteId": "stupefy",
     "minProficiency": "proficient"
+  },
+  "vfx": {
+    "trail": "fire_ember",
+    "impact": "fire_ember",
+    "trailDensity": 3,
+    "impactCount": 20
   }
 }

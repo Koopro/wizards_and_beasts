@@ -13,5 +13,11 @@
   "requirement": {
     "type": "knows",
     "prerequisiteId": "lumos"
+  },
+  "vfx": {
+    "trail": "light_glow",
+    "impact": "light_glow",
+    "trailDensity": 1,
+    "impactCount": 12
   }
 }

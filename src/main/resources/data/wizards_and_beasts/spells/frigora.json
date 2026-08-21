@@ -31,5 +31,11 @@
   "requirement": {
     "type": "knows",
     "prerequisiteId": "lumos"
+  },
+  "vfx": {
+    "trail": "ice_shard",
+    "impact": "ice_shard",
+    "trailDensity": 2,
+    "impactCount": 12
   }
 }

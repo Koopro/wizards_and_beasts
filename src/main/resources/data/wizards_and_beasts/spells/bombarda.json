@@ -20,5 +20,11 @@
     "type": "proficiency",
     "prerequisiteId": "diffindo",
     "minProficiency": "proficient"
+  },
+  "vfx": {
+    "trail": "arcane_mote",
+    "impact": "fire_ember",
+    "trailDensity": 1,
+    "impactCount": 28
   }
 }
