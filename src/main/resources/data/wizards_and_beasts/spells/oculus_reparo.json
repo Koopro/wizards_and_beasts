@@ -1,0 +1,11 @@
+{
+  "displayName": "spell.wizards_and_beasts.oculus_reparo.name",
+  "category": "utility",
+  "cooldownTicks": 20,
+  "color": 16777130,
+  "castType": "self",
+  "canonTier": "film",
+  "implementationState": "coming_soon",
+  "relation": "narrow_of",
+  "relatedSpell": "wizards_and_beasts:reparo"
+}

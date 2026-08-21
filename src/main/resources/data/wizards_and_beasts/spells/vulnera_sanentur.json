@@ -1,0 +1,16 @@
+{
+  "displayName": "spell.wizards_and_beasts.vulnera_sanentur.name",
+  "category": "utility",
+  "cooldownTicks": 20,
+  "color": 16777130,
+  "castType": "self",
+  "canonTier": "books",
+  "implementationState": "coming_soon",
+  "relation": "rank_of",
+  "relatedSpell": "wizards_and_beasts:episkey",
+  "requirement": {
+    "type": "proficiency",
+    "prerequisiteId": "episkey",
+    "minProficiency": "proficient"
+  }
+}

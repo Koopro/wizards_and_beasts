@@ -1,0 +1,10 @@
+{
+  "displayName": "spell.wizards_and_beasts.sectumsempra.name",
+  "category": "dark_arts",
+  "cooldownTicks": 20,
+  "color": 3021383,
+  "castType": "self",
+  "canonTier": "books",
+  "implementationState": "coming_soon",
+  "relation": "base"
+}

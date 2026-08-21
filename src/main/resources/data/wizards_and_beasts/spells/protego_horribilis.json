@@ -1,0 +1,16 @@
+{
+  "displayName": "spell.wizards_and_beasts.protego_horribilis.name",
+  "category": "defense",
+  "cooldownTicks": 20,
+  "color": 5614335,
+  "castType": "self",
+  "canonTier": "books",
+  "implementationState": "coming_soon",
+  "relation": "rank_of",
+  "relatedSpell": "wizards_and_beasts:protego",
+  "requirement": {
+    "type": "proficiency",
+    "prerequisiteId": "protego",
+    "minProficiency": "proficient"
+  }
+}

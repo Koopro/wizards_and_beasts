@@ -1,0 +1,11 @@
+{
+  "displayName": "spell.wizards_and_beasts.engorgio_skullus.name",
+  "category": "combat",
+  "cooldownTicks": 20,
+  "color": 16733525,
+  "castType": "self",
+  "canonTier": "pottermore",
+  "implementationState": "coming_soon",
+  "relation": "narrow_of",
+  "relatedSpell": "wizards_and_beasts:engorgio"
+}

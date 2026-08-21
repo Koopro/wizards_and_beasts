@@ -1,0 +1,10 @@
+{
+  "displayName": "spell.wizards_and_beasts.cave_inimicum.name",
+  "category": "defense",
+  "cooldownTicks": 20,
+  "color": 5614335,
+  "castType": "self",
+  "canonTier": "books",
+  "implementationState": "coming_soon",
+  "relation": "base"
+}

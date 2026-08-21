@@ -1,0 +1,11 @@
+{
+  "displayName": "spell.wizards_and_beasts.vipera_evanesca.name",
+  "category": "utility",
+  "cooldownTicks": 20,
+  "color": 16777130,
+  "castType": "self",
+  "canonTier": "film",
+  "implementationState": "coming_soon",
+  "relation": "counter_of",
+  "relatedSpell": "wizards_and_beasts:serpensortia"
+}

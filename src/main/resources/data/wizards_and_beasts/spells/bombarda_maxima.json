@@ -1,0 +1,16 @@
+{
+  "displayName": "spell.wizards_and_beasts.bombarda_maxima.name",
+  "category": "combat",
+  "cooldownTicks": 20,
+  "color": 16733525,
+  "castType": "self",
+  "canonTier": "film",
+  "implementationState": "coming_soon",
+  "relation": "rank_of",
+  "relatedSpell": "wizards_and_beasts:bombarda",
+  "requirement": {
+    "type": "proficiency",
+    "prerequisiteId": "bombarda",
+    "minProficiency": "proficient"
+  }
+}

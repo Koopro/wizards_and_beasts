@@ -1,0 +1,10 @@
+{
+  "displayName": "spell.wizards_and_beasts.obscuro.name",
+  "category": "combat",
+  "cooldownTicks": 20,
+  "color": 16733525,
+  "castType": "self",
+  "canonTier": "books",
+  "implementationState": "coming_soon",
+  "relation": "base"
+}

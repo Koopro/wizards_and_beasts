@@ -1,0 +1,11 @@
+{
+  "displayName": "spell.wizards_and_beasts.deletrius.name",
+  "category": "utility",
+  "cooldownTicks": 20,
+  "color": 16777130,
+  "castType": "self",
+  "canonTier": "books",
+  "implementationState": "coming_soon",
+  "relation": "counter_of",
+  "relatedSpell": "wizards_and_beasts:prior_incantato"
+}

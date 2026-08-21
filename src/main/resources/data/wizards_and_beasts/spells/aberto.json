@@ -1,0 +1,16 @@
+{
+  "displayName": "spell.wizards_and_beasts.aberto.name",
+  "category": "utility",
+  "cooldownTicks": 20,
+  "color": 16777130,
+  "castType": "self",
+  "canonTier": "film",
+  "implementationState": "coming_soon",
+  "relation": "rank_of",
+  "relatedSpell": "wizards_and_beasts:alohomora",
+  "requirement": {
+    "type": "proficiency",
+    "prerequisiteId": "alohomora",
+    "minProficiency": "proficient"
+  }
+}

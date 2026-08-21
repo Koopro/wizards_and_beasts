@@ -1,0 +1,11 @@
+{
+  "displayName": "spell.wizards_and_beasts.homenum_revelio.name",
+  "category": "utility",
+  "cooldownTicks": 20,
+  "color": 16777130,
+  "castType": "self",
+  "canonTier": "books",
+  "implementationState": "coming_soon",
+  "relation": "narrow_of",
+  "relatedSpell": "wizards_and_beasts:revelio"
+}
