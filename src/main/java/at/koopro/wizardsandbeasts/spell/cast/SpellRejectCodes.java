@@ -12,6 +12,13 @@ public final class SpellRejectCodes {
     public static final String NOT_HOLDING_WAND = "not_holding_wand";
     public static final String NO_ACTIVE_SPELL = "no_active_spell";
     public static final String UNKNOWN_SPELL = "unknown_spell";
+    /**
+     * The spell is registered but its behaviour is not written — {@code COMING_SOON}. Distinct from
+     * {@link #UNKNOWN_SPELL} (id resolves to nothing) and {@link #SPELL_NOT_KNOWN} (the caster has
+     * not learned it) because it is neither a desync nor anything the player can act on: the spell
+     * exists, is spelled correctly, and simply does not work yet for anybody.
+     */
+    public static final String SPELL_NOT_IMPLEMENTED = "spell_not_implemented";
     public static final String SPELL_NOT_KNOWN = "spell_not_known";
     public static final String ABILITY_REQUIRES_ABILITY_INPUT = "ability_requires_ability_input";
     public static final String REQUIREMENTS_UNMET = "requirements_unmet";
@@ -75,6 +82,7 @@ public final class SpellRejectCodes {
             NOT_HOLDING_WAND,
             NO_ACTIVE_SPELL,
             UNKNOWN_SPELL,
+            SPELL_NOT_IMPLEMENTED,
             SPELL_NOT_KNOWN,
             ABILITY_REQUIRES_ABILITY_INPUT,
             REQUIREMENTS_UNMET,
@@ -116,6 +124,7 @@ public final class SpellRejectCodes {
             Map.entry(LANGLOCKED, "wandcraft.cast.reject.langlocked"),
             Map.entry(NO_ACTIVE_SPELL, "wandcraft.cast.reject.no_active_spell"),
             Map.entry(UNKNOWN_SPELL, "wandcraft.cast.reject.unknown_spell"),
+            Map.entry(SPELL_NOT_IMPLEMENTED, "wandcraft.cast.reject.not_implemented"),
             Map.entry(SPELL_NOT_KNOWN, "wandcraft.cast.reject.not_known"),
             Map.entry(COOLDOWN_ACTIVE, "wandcraft.cast.reject.cooldown"),
             Map.entry(WAND_NOT_BONDED, "wandcraft.cast.requires_bond"),

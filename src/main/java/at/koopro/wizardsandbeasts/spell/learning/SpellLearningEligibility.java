@@ -38,6 +38,12 @@ public final class SpellLearningEligibility {
                 && !ModuleManager.isEnabled(Module.DARK_ARTS)) {
             return Result.deny("The Dark Arts are sealed away.");
         }
+        // Checked after the module gate and before every player-progress gate, mirroring the cast
+        // gate's ordering: the module owns whether the spell is present at all, and no amount of
+        // skill, profession or mastery unlocks a spell nobody has written yet.
+        if (!spell.isImplemented()) {
+            return Result.deny("Not yet learnable — this spell is still being written.");
+        }
         if (!ObscurialRules.canHeritageUseSpell(heritage, spell)) {
             return Result.deny("Only Obscurials can learn this spell.");
         }

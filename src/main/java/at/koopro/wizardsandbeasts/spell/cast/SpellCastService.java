@@ -103,6 +103,7 @@ public final class SpellCastService {
         SpellCastGate gate = SpellCastGate.evaluate(new SpellCastGate.Inputs(
                 activeSpellId != null,
                 spell != null,
+                spell == null || spell.isImplemented(),
                 spell != null && data.knowsSpell(spellId),
                 spell != null && ObscurialRules.isObscurialAbility(spell),
                 spell == null || !Config.enforceSpellRequirements || spell.getRequirement().isMet(player, data),
@@ -116,6 +117,8 @@ public final class SpellCastService {
                         rejectWithHumanStress(player, SpellRejectCodes.NO_ACTIVE_SPELL);
                 case UNKNOWN_SPELL ->
                         rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.UNKNOWN_SPELL, activeSpellId));
+                case SPELL_NOT_IMPLEMENTED ->
+                        rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.SPELL_NOT_IMPLEMENTED, spellId));
                 case SPELL_NOT_KNOWN ->
                         rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.SPELL_NOT_KNOWN, spellId));
                 case OBSCURIAL_ABILITY_INPUT ->

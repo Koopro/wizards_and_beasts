@@ -633,6 +633,7 @@
   "wandcraft.cast.reject.langlocked": "Your tongue is bound — you cannot form the incantation.",
   "wandcraft.cast.reject.no_active_spell": "No spell is selected.",
   "wandcraft.cast.reject.unknown_spell": "That incantation is unknown.",
+  "wandcraft.cast.reject.not_implemented": "This spell is not yet taught anywhere.",
   "wandcraft.cast.reject.not_known": "You have not learned this spell yet.",
   "wandcraft.cast.reject.cooldown": "The spell is still recharging.",
   "wandcraft.cast.reject.cast_failed": "§cThe spell comes apart mid-cast — nothing happens.",

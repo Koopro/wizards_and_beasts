@@ -18,6 +18,7 @@ import org.jspecify.annotations.Nullable;
 public enum SpellCastGate {
     NO_ACTIVE_SPELL,
     UNKNOWN_SPELL,
+    SPELL_NOT_IMPLEMENTED,
     SPELL_NOT_KNOWN,
     OBSCURIAL_ABILITY_INPUT,
     REQUIREMENTS_UNMET,
@@ -33,6 +34,8 @@ public enum SpellCastGate {
      *
      * @param activeSpellPresent    a spell id is set in the active loadout slot
      * @param spellResolved         that id resolves to a registered spell
+     * @param spellImplemented      that spell's behaviour is written — see
+     *                              {@link at.koopro.wizardsandbeasts.spell.def.SpellImplementationState}
      * @param spellKnown            the caster has learned the spell
      * @param obscurialAbility      the spell is an Obscurial ability (cast via ability keys, not the wand)
      * @param requirementSatisfied  the spell's requirement is met (or enforcement is off)
@@ -43,6 +46,7 @@ public enum SpellCastGate {
      */
     public record Inputs(boolean activeSpellPresent,
                          boolean spellResolved,
+                         boolean spellImplemented,
                          boolean spellKnown,
                          boolean obscurialAbility,
                          boolean requirementSatisfied,
@@ -56,6 +60,10 @@ public enum SpellCastGate {
     public static SpellCastGate evaluate(Inputs in) {
         if (!in.activeSpellPresent()) return NO_ACTIVE_SPELL;
         if (!in.spellResolved()) return UNKNOWN_SPELL;
+        // Ahead of SPELL_NOT_KNOWN on purpose: whether a spell works at all is a property of the
+        // spell, not of the caster, so it outranks every gate that describes the player's progress.
+        // Telling someone to go learn a spell that cannot be cast by anyone would be a lie.
+        if (!in.spellImplemented()) return SPELL_NOT_IMPLEMENTED;
         if (!in.spellKnown()) return SPELL_NOT_KNOWN;
         if (in.obscurialAbility()) return OBSCURIAL_ABILITY_INPUT;
         if (!in.requirementSatisfied()) return REQUIREMENTS_UNMET;
