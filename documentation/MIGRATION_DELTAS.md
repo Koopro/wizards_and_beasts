@@ -3234,3 +3234,97 @@ roots block through `root_provider`. The mod has none and adding one is out of s
 own fallback applies. The upwards-branching trunk carries the knotted read alone, with
 `can_grow_through: "#minecraft:leaves"` so branches push through the canopy, plus a light
 `leave_vine` decorator at 0.08 for the ancient look.
+
+---
+
+# Spell corpus placeholder registration — 2026-08-21
+
+Registers every canon spell with a known incantation as a `SpellDefinition` in a `COMING_SOON` state.
+**No cast behaviour was written for any of them.** 128 new datapack files; the 27 live JSONs and the 6
+bespoke Java spells are untouched.
+
+## Behavioural changes
+
+| Change | Before | After |
+|---|---|---|
+| Registry size | 33 spells (27 JSON + 6 Java) | 161 (155 JSON + 6 Java) |
+| Casting a `COMING_SOON` spell | n/a | refused server-side at `SpellCastGate.SPELL_NOT_IMPLEMENTED`, ahead of `SPELL_NOT_KNOWN`. No cooldown stamped, no cast count incremented, no particles, no sound. |
+| Teacher offers | 27 learnable candidates | +128 offers, all greyed with the button disabled. `SpellLearningEligibility` denies before `tryLearnSpell` reaches the vault, so no Knuts move. |
+| `/wandb spell learn_all` | learned 33 | learns 161, of which 128 remain uncastable |
+
+`Spell.isImplemented()` is the single accessor both sites read; it returns `true` on the base class,
+so every Java spell is implemented by construction and only `JsonSpell` can answer otherwise.
+
+## Schema
+
+Three optional fields, all in `SpellDefinitionFieldsC` (was 1 of 16 slots, now 4):
+
+- `implementationState` — defaults to `IMPLEMENTED`. Load-bearing: it is why all 27 pre-existing JSONs
+  stay valid **unedited**, verified by decoding each one rather than assumed.
+- `relation` — defaults to `BASE`. Presentation only.
+- `relatedSpell` — `Optional<Identifier>`, required when `relation != BASE`.
+
+The `relation != BASE ⇒ relatedSpell` invariant is enforced through `Codec.validate` on the composed
+`SpellDefinition.CODEC`, returning a `DataResult.error`. Deliberately **not** a throwing compact
+constructor like `CastTiming`'s: a `DataResult` error lets `SimpleJsonResourceReloadListener` log and
+skip one malformed spell file, where a thrown exception would take the whole datapack reload with it.
+
+Player spell knowledge persists as a plain `Set<String>` of ids (`KnownSpells`), so **no save
+migration is needed** — new registrations add ids, they do not rewrite existing ones.
+
+## Deviation: `relation` gates nothing, by design
+
+`SpellRequirementDef` already carried `prerequisiteId` + `minProficiency`, which is precisely the rank
+gate. `RANK_OF` entries therefore express their gate through an ordinary `requirement` block like any
+other spell, and no code branches on `relation`. Both new enums carry a doc comment saying so, because
+the obvious next edit is to add one.
+
+## Deviation: rank bands collapse 3 → 2
+
+`Proficiency` ships exactly `NOVICE / PROFICIENT / MASTERED`, so the roster's MINOR / MAJOR / APEX
+bands cannot map to three distinct constants at-or-above `PROFICIENT`. Ruled to two: MINOR and MAJOR
+both → `proficient`, APEX → `mastered`. In practice `protego_maxima` requires `mastered` and the other
+nine `RANK_OF` entries require `proficient`. `Proficiency` was **not** extended — its constants carry
+`castsRequired` / `cooldownMultiplier` / `damageMultiplier`, which are balance values.
+
+## Deviation: `PLACEHOLDER_CAST_TYPE` is `self`, not `instant`
+
+The generator specified `"instant"`. `CastType` has no such constant — it ships `PROJECTILE`, `SELF`,
+`CONE`, `TARGETED`, `BEAM_LETHAL`, `BEAM_CHANNEL`. Ruled to `self`: `SpellProperties.self()` spawns no
+projectile, acquires no target and reads no `range`, so it is the most inert dispatch shape for a
+spell the gate always refuses. The value is unreachable while the gate stands; it is the landing if a
+future bypass ever removes it.
+
+## Deviation: `SpellVfxCodecTest` scoped to renderable spells
+
+Two assertions in `SpellVfxCodecTest` required *every* file under `spells/` to carry a `vfx` block.
+Both now skip `COMING_SOON` entries. The invariant they protect — "two spells side by side must be
+tellable apart" — is unchanged for every spell that can actually render; a spell the cast gate always
+refuses draws no particle, and demanding an authored look for it would mean inventing appearance for
+content that has none. Every file is still decoded against `SpellDefinition.CODEC`, so the new
+`relatedSpell` validation is exercised across all 155.
+
+## Placeholder values — greppable, not tuned
+
+Emitted spells carry `cooldownTicks: 20`, `castType: "self"` and a per-category `color`, from
+`PLACEHOLDER_*` constants in `tools/spell_corpus/generate_spell_placeholders.py`. They are uniform
+stand-ins on spells that cannot be cast, not balance decisions, and every one must be replaced when
+the spell is implemented. No `vfx`, `sound`, `effects`, `baseDamage` or `range` is authored.
+
+## Incident: 75 uncommitted lang keys destroyed and recovered
+
+The first lang merge reserialized `en_us.json` through `json.dump`, which rewrote 7 `\uXXXX` escapes
+raw and turned an additive merge into a whole-file reformat. Reverting it with `git checkout --`
+destroyed 75 **uncommitted** working-tree keys belonging to the in-progress Marauder's Map work
+(`map.*` 46, `screen.*` 29), which had never been committed.
+
+All 75 were recovered byte-exact from `build/resources/main/assets/wizards_and_beasts/lang/en_us.json`
+(mtime 15:37, predating the session's writes) by subtracting the HEAD `main` keys and the datagen
+`generated` keys, and restored. Reconciled two ways: total key count returned to 3013, matching the
+pre-revert measurement, and a value-level comparison confirmed **zero** existing keys had been
+modified. The merge is now a pure textual line insertion that never reserializes the file — the diff
+is 205 insertions and 1 deletion, that deletion being a trailing comma added to the former last line.
+
+**Rule this leaves behind:** never reserialize `en_us.json`. It holds `\uXXXX` escapes that
+`json.dump` rewrites raw, and the working tree routinely carries uncommitted keys that a revert will
+take with it. Insert lines; do not round-trip the file.

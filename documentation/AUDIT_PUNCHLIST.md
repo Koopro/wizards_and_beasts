@@ -16,6 +16,37 @@ historical log of individual work passes — those are records of what was done,
 
 ## Open findings (verified 2026-07-19)
 
+- [x] **The Marauder's Map was an entity radar, not a map — FIXED 2026-08-21.** The item drew coloured
+  squares on `demo_background.png`: no terrain, no biome, no exploration, no waypoints, no zoom, no
+  pan, no persistence. Worse, it bound to the holder's position on first use and never moved again,
+  so a map made at spawn was blank forever after 200 blocks, and a dimension change silently killed
+  the sweep while leaving the screen open on frozen Overworld dots. It now charts every chunk it is
+  carried near into a persistent, shared `SavedData` atlas; draws hand-inked terrain tiles per
+  biome and relief band; discovers structures (surface-gated) and player-built wizarding landmarks
+  by block-palette count; supports pan, zoom-to-cursor, LOD, waypoints, a legend and coordinates;
+  and streams regions rather than stalling on open. Four correctness defects went with it:
+  `MapSyncS2CPayload.encode` wrote an unbounded count its own decoder rejected mid-stream, dots
+  bounds-checked against the panel rather than the content rect, the screen's `dimension` field was
+  write-only, and the entity sweep ran the full Y range. See WORKLOG 2026-08-21.
+- [x] **CI named a file that did not exist — FIXED 2026-08-20.** `.github/workflows/ci.yml` printed
+  "Update KNOWN_ISSUES.md with reproducible failure details before retagging" on failure while no such
+  file existed anywhere in the repository. `documentation/KNOWN_ISSUES.md` now exists, derived from
+  `ModuleDefaults` rather than from design intent, and the workflow names its real path. The companion
+  `documentation/ALPHA_SMOKE.md` holds the manual vertical-slice scenarios that the automated gate
+  cannot cover. Both are linked from `README.md`.
+
+- [MEDIUM] **680 root-relative source links across eight `documentation/*.md` files are broken.**
+  Links of the form `](src/main/java/...)` resolve relative to the file, so from `documentation/` they
+  point at `documentation/src/main/java/...`, which does not exist. Affects `SPELLS.md`,
+  `AUDIT_PUNCHLIST.md`, `DEFECT_REGISTER.md`, `GUI_AUDIT.md`, `PIPELINE_AUDIT.md`,
+  `SPELL_DEFECT_DIAGNOSIS.md`, `TOOLTIP_AUDIT.md` and `WANDMAKER_AUDIT.md`. They were written when
+  these documents lived at the repository root, where the paths were correct, and the 2026-08-12 move
+  into `documentation/` did not rewrite them. **Not fixed:** the mechanical repair is one substitution
+  (`](src/` → `](../src/`), and `](.github/` likewise), but it rewrites eight audit documents owned by
+  other passes, and this pass had no mandate to touch them. `README.md`, `KNOWN_ISSUES.md`,
+  `ALPHA_SMOKE.md`, `DEVELOPER_REFERENCE.md` and `CHANGELOG.md` are clean and stay clean; anything
+  added to them should use `../src/...` or a plain inline-code path.
+
 - [BLOCKER] **Form visual width has no hitbox counterpart (2026-08-13).** `SizeProfile.modelAspectX`
   and `modelAspectZ` are visual-only multipliers applied on top of `modelScale`, and nothing derives
   a hitbox from them — `hitboxWidth` is an independent field, and only `hitboxHeight` feeds
@@ -1999,3 +2030,66 @@ Placement correctness and silhouette rework. Deviations in `documentation/MIGRAT
   both used straight trunk + blob foliage and would have grown the same shape. Ash moved to
   `random_spread`. The clash existed from the moment ash was authored; nothing else would have
   found it. Worth remembering when a tenth species is added.
+
+---
+
+## Spell corpus placeholder registration — 2026-08-21
+
+Logged during the corpus pass. **None of these were fixed**; the pass registered 128 `COMING_SOON`
+spells and gated them, and everything below was found on the way and deliberately left alone.
+
+- [ ] **BLOCKER — a remote client's spell registry holds 6 spells, not 155.**
+  `SpellReloadListener` is registered on `AddServerReloadListenersEvent` only, and no
+  `SpellDefinition` sync payload exists. A remote client's `Spells` registry holds 6 Java spells
+  rather than the full datapack set. Any future client-side feature keyed on `Spells.all()` — a
+  spellbook, a browse UI, client-side tooltips — is broken in multiplayer before it is written.
+  Already latent today: `SpellMenuScreen.rebuildSpellList` iterates `Spells.all()` and
+  `SpellsTab.buildSortedEntries` resolves known ids through `Spells.byId`, so on a dedicated server
+  both silently drop every JSON spell the player has learned. It did **not** block the corpus pass,
+  because enforcement landed server-side only: the cast gate runs on the server and teacher offers
+  are built server-side and pushed whole through `SpellTeacherOpenS2CPayload`.
+
+- [ ] **POLISH — second cast entry point, unguarded.**
+  `ObscurialServerLogic:161` calls `spell.execute(...)` directly, bypassing `SpellCastGate`.
+  Harmless today because it reaches only `obscurus_grasp` / `obscurus_surge`. Becomes a live defect
+  the moment any spell reachable by that path is marked `COMING_SOON` — it would cast with no state
+  check. Second cast entry point, unguarded.
+
+- [ ] **POLISH — every teacher requirement affordance is untranslated.**
+  `SpellLearningEligibility.Result.deny(reason)` carries a raw English `String`, which crosses the
+  wire in `SpellOffer.requirementText` and is drawn verbatim by `SpellTeacherScreen`. Pre-existing,
+  and now more visible: the corpus adds 128 offers whose lock hint reads "Not yet learnable — this
+  spell is still being written." in every locale. Deliberately not fixed here — introducing a
+  parallel lang-key path for one string would leave two mechanisms describing the same refusal.
+
+- [ ] **POLISH — `capacious_extremis` and the trunk system do the same job.**
+  It ships as a castable spell that extends internal capacity while the trunk / pocket-dimension
+  system provides container capacity structurally. Two mechanics, one job, no ruling yet. Left as
+  authored; this is a design call, not a defect.
+
+- [ ] **POLISH — category skew: 4 constants for a 159-entry corpus.**
+  The corpus assigns the bulk of its entries to `UTILITY` against `SpellCategory`'s four constants
+  (`COMBAT`, `UTILITY`, `DEFENSE`, `DARK_ARTS`). Measured spread across the 155 datapack JSONs after
+  the pass: `utility` 84, `combat` 58, `defense` 9, `dark_arts` 4. Registry-wide, adding the 6
+  bespoke Java spells, 161 total: `utility` 84, `combat` 58, `defense` 11, `dark_arts` 8. More than
+  half of `UTILITY` arrived in this one pass. `SpellCategory` was **not** extended — that is a
+  separate ruling. Input for it, from the wand-wood school-key audit (§1.3 of the Phase 0 report):
+  12 distinct keys across 21 occurrences in 10 wand woods, of which only `combat` and `dark_arts`
+  land on a constant exactly.
+  - `charm` (holly) versus `charms` (vine, walnut) is a singular/plural inconsistency in authored
+    wand data. `spell_modifiers` is `unboundedMap(STRING, FLOAT)` and nothing validates the keys, so
+    it has never errored.
+  - `protection` and `warding` are two spellings of what `SpellCategory.DEFENSE` already expresses;
+    `UTILITY` has no school-key counterpart at all. This asymmetry is input to a future enum ruling,
+    not a defect to fix.
+  - Full key counts: `combat` 4, `protection` 3, `healing` 3, `charms` 2, `divination` 2, `warding` 1,
+    `hex` 1, `transfiguration` 1, `curse_breaking` 1, `charm` 1, `dark_arts` 1, `dueling` 1.
+  Nothing in Java reads `WandWoodDefinition.spellModifiers()` today.
+
+- [ ] **NICE-TO-HAVE — `SPELL_CORPUS_ROSTER.md` is stale and was deliberately not reconciled.**
+  It states 154 entries and ~252 lang keys. `tools/spell_corpus/corpus.py` is authoritative at 159.
+  Regenerating the roster from the corpus is a separate task and was explicitly out of scope here.
+
+**No corpus entry was flagged as canonically wrong.** Every entry was authored as written per the
+lore rule; nothing in the 159 read as a canon error worth Christian's attention, so this list has no
+canon section rather than a padded one.
