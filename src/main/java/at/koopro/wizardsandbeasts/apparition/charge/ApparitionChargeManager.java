@@ -6,14 +6,14 @@ import at.koopro.wizardsandbeasts.apparition.ApparitionBroadcast;
 import at.koopro.wizardsandbeasts.apparition.ApparitionPhase;
 import at.koopro.wizardsandbeasts.apparition.ApparitionPoint;
 import at.koopro.wizardsandbeasts.apparition.ApparitionServerLogic;
+import at.koopro.wizardsandbeasts.apparition.ApparitionStartResult;
 import at.koopro.wizardsandbeasts.apparition.ApparitionTier;
 import at.koopro.wizardsandbeasts.util.PlayerScopedState;
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -36,8 +36,10 @@ public final class ApparitionChargeManager {
 
     /** Vanilla's sneak factor; moving faster than this fraction of your walk speed counts as moving. */
     private static final double SNEAK_SPEED_FACTOR = 0.3;
-    /** Inventory fullness above which the load itself destabilises the jump. */
+    /** Pack fullness above which the load itself destabilises the jump. */
     private static final double ENCUMBERED_FRACTION = 0.8;
+    /** Food level at or below which a wizard is running on empty. Vanilla's own sprint threshold. */
+    private static final int FAMISHED_FOOD_LEVEL = 6;
 
     private static final PlayerScopedState<ApparitionCharge> CHARGES =
             PlayerScopedState.create("apparition_charge");
@@ -47,26 +49,33 @@ public final class ApparitionChargeManager {
     /**
      * Begins an attempt, replacing any already in flight.
      *
+     * <p>Runs the gate and tells the player the outcome, so this is the single place an attempt is allowed
+     * to start. Call it through {@link at.koopro.wizardsandbeasts.apparition.ApparitionService} rather than
+     * directly: that is the door every entry point shares.
+     *
      * @param anchor the memorised destination for {@link ApparitionTier#ANCHORED}, {@code null} for a blink
-     * @return false when the player may not Apparate at all, in which case nothing was started
+     * @return {@link ApparitionStartResult#STARTED}, or the reason nothing was started
      */
-    public static boolean begin(ServerPlayer player, ApparitionTier tier, @Nullable ApparitionPoint anchor) {
-        // An attempt already in flight is never replaced. This is what lets an anchored jump be started from
-        // the destination selector and then released with the same key press that would otherwise start a
-        // blink: the press finds a charge already running and does nothing.
+    public static ApparitionStartResult begin(ServerPlayer player, ApparitionTier tier,
+                                              @Nullable ApparitionPoint anchor) {
+        // An attempt already in flight is never replaced, and never complained about. This is what lets an
+        // anchored jump be started from the destination selector and then released with the same key press
+        // that would otherwise start a blink: the press finds a charge already running and does nothing.
         if (isCharging(player)) {
-            return false;
+            return ApparitionStartResult.REJECTED_ALREADY_CHARGING;
         }
-        if (!ApparitionServerLogic.canBeginAttempt(player)) {
-            return false;
+        ApparitionStartResult gate = ApparitionServerLogic.evaluateStart(player);
+        ApparitionServerLogic.announce(player, gate);
+        if (!gate.started()) {
+            return gate;
         }
         float proficiency = AbilityProficiency.get(player, AbilityIds.APPARITION);
         ApparitionCharge charge = new ApparitionCharge(tier, proficiency,
-                ApparitionServerLogic.windowFloorTicks(player), anchor);
+                ApparitionServerLogic.windowFloorTicks(player), anchor, player.position());
         CHARGES.put(player, charge);
         ApparitionBroadcast.get().onChargeBegin(player, tier, charge.phase(),
                 charge.windowOpen(), charge.windowClose());
-        return true;
+        return ApparitionStartResult.STARTED;
     }
 
     public static boolean isCharging(ServerPlayer player) {
@@ -187,6 +196,7 @@ public final class ApparitionChargeManager {
                 isMovingFasterThanSneak(player),
                 player.isEyeInFluid(FluidTags.WATER) || player.isEyeInFluid(FluidTags.LAVA),
                 isEncumbered(player),
+                isFamished(player),
                 false,
                 ApparitionServerLogic.isLicensed(player));
     }
@@ -196,24 +206,31 @@ public final class ApparitionChargeManager {
         return player.getDeltaMovement().horizontalDistance() > sneakSpeed;
     }
 
-    /** True when the pack is more than {@link #ENCUMBERED_FRACTION} full — a wizard laden is a wizard torn. */
+    /**
+     * True when the pack is more than {@link #ENCUMBERED_FRACTION} full — a wizard laden is a wizard torn.
+     *
+     * <p>The pack, and not {@code getContainerSize()}: that is 43 in 1.21.11 because it counts the four
+     * armour slots, the off-hand, body and saddle alongside the 36 real ones. Counting those made a fully
+     * armoured wizard measurably closer to encumbered for wearing a helmet, and made the threshold mean
+     * something different from what it says.
+     */
     private static boolean isEncumbered(ServerPlayer player) {
-        int size = player.getInventory().getContainerSize();
-        if (size <= 0) {
-            return false;
-        }
         int used = 0;
-        for (int slot = 0; slot < size; slot++) {
-            ItemStack stack = player.getInventory().getItem(slot);
-            if (!stack.isEmpty()) {
+        for (int slot = 0; slot < Inventory.INVENTORY_SIZE; slot++) {
+            if (!player.getInventory().getItem(slot).isEmpty()) {
                 used++;
             }
         }
-        return used > size * ENCUMBERED_FRACTION;
+        return used > Inventory.INVENTORY_SIZE * ENCUMBERED_FRACTION;
     }
 
-    /** Where the player is standing — the origin an attempt drops its splinched remains at. */
-    public static BlockPos origin(ServerPlayer player) {
-        return player.blockPosition();
+    /**
+     * True when the wizard is too hungry to hold themselves together.
+     *
+     * <p>Set at the point vanilla stops letting you sprint, which is already the game's own line for "out of
+     * fuel" and needs no second number invented for it.
+     */
+    private static boolean isFamished(ServerPlayer player) {
+        return player.getFoodData().getFoodLevel() <= FAMISHED_FOOD_LEVEL;
     }
 }

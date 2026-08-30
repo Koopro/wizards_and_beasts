@@ -1,6 +1,5 @@
 package at.koopro.wizardsandbeasts.client.broom;
 
-import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.broom.BroomDefinition;
 import at.koopro.wizardsandbeasts.broom.BroomSlot;
 import at.koopro.wizardsandbeasts.entity.broom.BroomEntity;
@@ -11,7 +10,6 @@ import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import org.jspecify.annotations.NonNull;
 import software.bernie.geckolib.constant.dataticket.DataTicket;
-import software.bernie.geckolib.model.DefaultedEntityGeoModel;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 import software.bernie.geckolib.renderer.base.BoneSnapshots;
 import software.bernie.geckolib.renderer.base.GeoRenderState;
@@ -35,6 +33,9 @@ import java.util.Map;
 public class BroomRenderer<R extends EntityRenderState & GeoRenderState>
         extends GeoEntityRenderer<BroomEntity, R> {
 
+    /** Base GeckoLib asset name: the geometry, the animation file and the fallback sheet. */
+    private static final String BASE_ASSET = "broom";
+
     public static final DataTicket<Float> PITCH_TILT =
             DataTicket.create("broom_pitch_tilt", Float.class);
     public static final DataTicket<Float> ROLL_TILT =
@@ -54,8 +55,7 @@ public class BroomRenderer<R extends EntityRenderState & GeoRenderState>
             DataTicket.create("broom_model_slots", (Class<Map<BroomSlot, Identifier>>) (Class<?>) Map.class);
 
     public BroomRenderer(EntityRendererProvider.Context context) {
-        super(context, new DefaultedEntityGeoModel<>(
-                Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "broom")));
+        super(context, new BroomVariantGeoModel(BASE_ASSET));
     }
 
     @Override
@@ -68,7 +68,9 @@ public class BroomRenderer<R extends EntityRenderState & GeoRenderState>
                 Mth.lerp(partialTick, broom.getPrevRollTilt(), broom.getRollTilt()));
         renderState.addGeckolibData(FORWARD_LEAN,
                 Mth.lerp(partialTick, broom.getPrevForwardLean(), broom.getForwardLean()));
-        renderState.addGeckolibData(MODEL_SLOTS, broom.resolveDefinition().modelSlots());
+        BroomDefinition definition = broom.resolveDefinition();
+        renderState.addGeckolibData(MODEL_SLOTS, definition.modelSlots());
+        renderState.addGeckolibData(BroomVariantGeoModel.ASSETS, definition.assets());
     }
 
     /**
@@ -78,12 +80,21 @@ public class BroomRenderer<R extends EntityRenderState & GeoRenderState>
      * multiplied in. Note this tints the <em>whole</em> model — GeckoLib's render colour is one value
      * per pass, so the binding band and the bristles take the wood colour too. Exempting the band
      * needs a second render layer; logged rather than bodged.
+     *
+     * <p>A broom that ships its own sheet is never tinted, whatever its JSON says. Its sheet is
+     * already painted in final colour, so a tint on top would multiply the wood in twice and drag
+     * the band and the bristles down with it — the exact whole-model problem the paragraph above
+     * describes, applied to art that had no need of it. The two are alternatives: paint a sheet, or
+     * tint the shared one.
      */
     @Override
     public int getRenderColor(@NonNull BroomEntity broom, Void unused, float partialTick) {
         int base = super.getRenderColor(broom, unused, partialTick);
-        int tint = broom.resolveDefinition().woodTint();
-        return tint == BroomDefinition.UNTINTED ? base : ARGB.multiply(base, tint);
+        BroomDefinition definition = broom.resolveDefinition();
+        int tint = definition.woodTint();
+        return definition.hasOwnTexture() || tint == BroomDefinition.UNTINTED
+                ? base
+                : ARGB.multiply(base, tint);
     }
 
     @Override

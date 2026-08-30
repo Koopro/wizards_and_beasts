@@ -3,6 +3,8 @@ package at.koopro.wizardsandbeasts.item.brew;
 import at.koopro.wizardsandbeasts.brew.Brew;
 import at.koopro.wizardsandbeasts.brew.BrewPotency;
 import at.koopro.wizardsandbeasts.brew.Brews;
+import at.koopro.wizardsandbeasts.brew.effect.BrewEffectContext;
+import at.koopro.wizardsandbeasts.brew.effect.BrewEffectEntry;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -10,7 +12,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -73,7 +74,8 @@ public class BrewItem extends Item {
         String brewId = stack.get(ModDataComponents.BREW_ID.get());
         Brew brew = Brews.byId(brewId);
         if (brew == null) {
-            player.displayClientMessage(Component.literal("\u00A7cThis bottle is empty."), true);
+            player.displayClientMessage(
+                    Component.translatable("brew.wizards_and_beasts.bottle_empty"), true);
             return stack;
         }
 
@@ -81,9 +83,15 @@ public class BrewItem extends Item {
                 ? BrewPotency.multiplierFor(serverPlayer)
                 : 1.0f;
 
-        for (Brew.EffectSpec spec : brew.effects()) {
-            MobEffectInstance instance = spec.instantiate(potency);
-            player.addEffect(instance);
+        // Components, not the effect list. Every brew has at least one by the time it reaches here:
+        // BrewDefinition wraps a legacy effects list in an apply_effects component at load, so this
+        // single path covers both authored styles and there is no second application route to keep
+        // in step.
+        if (level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+            // The stack goes through: a Polyjuice bottle is defined by whose hair is in it, which
+            // is a property of this bottle and not of the brew every bottle shares.
+            BrewEffectEntry.run(brew.components(),
+                    BrewEffectContext.onDrink(brew, player, serverLevel, potency, stack));
         }
 
         level.playSound(null, player.getX(), player.getY(), player.getZ(),

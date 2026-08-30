@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.client.spell.gui;
 
 import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellDataState;
+import at.koopro.wizardsandbeasts.client.spell.ui.SpellPowerTooltip;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.spell.core.Proficiency;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
@@ -18,7 +19,6 @@ import net.minecraft.network.chat.Component;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiText;
 
 import org.jspecify.annotations.Nullable;
-import java.util.List;
 
 /**
  * Non-widget painting for {@link SpellMenuScreen}.
@@ -220,11 +220,20 @@ public final class SpellMenuRenderHelper {
                 : infoY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_PROF_NO_DAMAGE_Y);
         graphics.drawString(font, profText, infoX, profY, profColor, false);
 
+        int nextY = profY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_REQ_Y);
+
         SpellRequirement req = sel.getRequirement();
         if (req != null && req != SpellRequirement.NONE) {
-            graphics.drawString(font, req.describe(), infoX,
-                    profY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_REQ_Y),
-                    WizardsPalette.TEXT_DIM, false);
+            graphics.drawString(font, req.describe(), infoX, nextY, WizardsPalette.TEXT_DIM, false);
+            nextY += layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_REQ_Y);
+        }
+
+        // What the spell will actually hit for, from the same class the server casts with. The base
+        // damage line above it is the number in the JSON; this is the number the player gets, and
+        // until now the screen only ever showed the first of the two.
+        for (Component line : SpellPowerTooltip.lines(sel)) {
+            graphics.drawString(font, line, infoX, nextY, WizardsPalette.TEXT_DIM, false);
+            nextY += font.lineHeight + 1;
         }
     }
 }

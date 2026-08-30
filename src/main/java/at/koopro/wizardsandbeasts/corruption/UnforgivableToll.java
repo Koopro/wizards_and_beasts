@@ -1,7 +1,6 @@
 package at.koopro.wizardsandbeasts.corruption;
 
 import at.koopro.wizardsandbeasts.spell.core.SpellIds;
-import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import org.jspecify.annotations.NullMarked;

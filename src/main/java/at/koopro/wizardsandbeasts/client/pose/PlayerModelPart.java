@@ -2,7 +2,6 @@ package at.koopro.wizardsandbeasts.client.pose;
 
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.model.player.PlayerModel;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 

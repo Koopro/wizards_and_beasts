@@ -3,7 +3,6 @@ package at.koopro.wizardsandbeasts.apparition;
 import at.koopro.wizardsandbeasts.apparition.licence.ApparitionLicence;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleDefaults;
-import at.koopro.wizardsandbeasts.module.ModuleState;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

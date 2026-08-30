@@ -1,14 +1,16 @@
 package at.koopro.wizardsandbeasts.wand.gui;
 
-import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import at.koopro.wizardsandbeasts.network.wand.SyncTrialResonancePayload;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.registry.ModMenuTypes;
+import at.koopro.wizardsandbeasts.registry.WandItemRegistry;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.ollivander.OllivanderPoolEntry;
 import at.koopro.wizardsandbeasts.wand.ollivander.OllivanderPoolLoader;
 import at.koopro.wizardsandbeasts.wand.resonance.WandResonanceConfigLoader;
 import at.koopro.wizardsandbeasts.wand.resonance.WandResonanceSystem;
+import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
+
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
@@ -23,7 +25,6 @@ import org.jspecify.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import at.koopro.wizardsandbeasts.registry.WandItemRegistry;
 
 public class OllivanderTrialMenu extends AbstractContainerMenu {
 

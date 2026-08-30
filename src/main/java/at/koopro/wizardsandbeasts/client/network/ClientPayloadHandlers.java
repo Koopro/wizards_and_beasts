@@ -13,6 +13,8 @@ import at.koopro.wizardsandbeasts.client.form.state.ClientTransitionTracker;
 import at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageDataState;
 import at.koopro.wizardsandbeasts.client.legilimency.state.ClientLegilimencyVisionState;
 import at.koopro.wizardsandbeasts.client.map.MapClientHandler;
+import at.koopro.wizardsandbeasts.client.ministry.state.ClientMinistryRecordState;
+import at.koopro.wizardsandbeasts.client.standing.state.ClientStandingState;
 import at.koopro.wizardsandbeasts.client.owl.ClientOWLCache;
 import at.koopro.wizardsandbeasts.client.petrify.state.ClientPetrifyState;
 import at.koopro.wizardsandbeasts.network.petrify.PetrifiedStateSyncS2CPayload;
@@ -31,6 +33,8 @@ import at.koopro.wizardsandbeasts.network.ClientScreenHooksInvoker;
 import at.koopro.wizardsandbeasts.network.ability.AbilityDataSyncPayload;
 import at.koopro.wizardsandbeasts.network.apparition.ApparitionWardsSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.azkaban.AzkabanTrespasserSyncPayload;
+import at.koopro.wizardsandbeasts.network.ministry.MinistryRecordSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.standing.StandingSyncS2CPayload;
 import at.koopro.wizardsandbeasts.bestiary.BestiaryEntryRegistry;
 import at.koopro.wizardsandbeasts.network.bestiary.BestiaryDataSyncPayload;
 import at.koopro.wizardsandbeasts.network.bestiary.SyncBestiaryEntriesPayload;
@@ -62,7 +66,6 @@ import at.koopro.wizardsandbeasts.network.trunk.PocketStatusS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -119,6 +122,18 @@ public final class ClientPayloadHandlers {
             player.setData(ModAttachments.AZKABAN_TRESPASSER_TAG.get(),
                     new AzkabanTrespasserData(pkt.tagged()));
         });
+    }
+
+    // --- ministry ---
+
+    public static void handleMinistryRecordSync(MinistryRecordSyncS2CPayload pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> ClientMinistryRecordState.set(pkt.record(), pkt.traceActive(), pkt.finesActive()));
+    }
+
+    // --- standing ---
+
+    public static void handleStandingSync(StandingSyncS2CPayload pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> ClientStandingState.set(pkt.values(), pkt.bands(), pkt.bound()));
     }
 
     // --- bestiary ---
@@ -208,6 +223,12 @@ public final class ClientPayloadHandlers {
         });
     }
 
+    public static void handleDragotQuote(at.koopro.wizardsandbeasts.network.currency.DragotQuoteS2CPayload pkt,
+                                         IPayloadContext ctx) {
+        ctx.enqueueWork(() -> at.koopro.wizardsandbeasts.client.currency.state.ClientDragotQuoteState
+                .load(pkt.rate(), pkt.drift(), pkt.purse()));
+    }
+
     private static void openGringottsScreenSafe() {
         ClientScreenHooksInvoker.invoke("openGringottsScreen");
     }
@@ -237,7 +258,8 @@ public final class ClientPayloadHandlers {
     public static void handleFlooTransit(at.koopro.wizardsandbeasts.network.floo.FlooTransitS2CPayload packet,
                                          IPayloadContext context) {
         context.enqueueWork(() ->
-                at.koopro.wizardsandbeasts.client.floo.FlooTransitOverlay.trigger(packet.durationTicks()));
+                at.koopro.wizardsandbeasts.client.floo.FlooTransitOverlay.trigger(
+                        packet.durationTicks(), packet.sootTicks()));
     }
 
     public static void handleFlooBlockSync(FlooBlockSyncS2CPayload packet, IPayloadContext context) {
@@ -254,13 +276,46 @@ public final class ClientPayloadHandlers {
         });
     }
 
+    public static void handleOpenFlooRegistration(
+            at.koopro.wizardsandbeasts.network.floo.OpenFlooRegistrationS2CPayload packet,
+            IPayloadContext context) {
+        // Same reflective route as the network screen, for the same reason: the client-only screen
+        // type must not load during server-side verification.
+        context.enqueueWork(() ->
+                ClientScreenHooksInvoker.invoke("openFlooRegistrationScreen",
+                        net.minecraft.core.BlockPos.class, packet.hearthPos(),
+                        String.class, packet.currentAddress(),
+                        int.class, packet.feeKnuts()));
+    }
+
+    /**
+     * Who a player now looks like, or that they look like themselves again.
+     *
+     * <p>An empty target UUID is the revert, so a set and a clear are one packet shape and cannot
+     * arrive out of order relative to each other.
+     */
+    public static void handlePolyjuiceSync(
+            at.koopro.wizardsandbeasts.network.polyjuice.PolyjuiceSyncS2CPayload packet) {
+        if (packet.targetId().equals(
+                at.koopro.wizardsandbeasts.network.polyjuice.PolyjuiceSyncS2CPayload.NONE)
+                || packet.targetName().isBlank()) {
+            at.koopro.wizardsandbeasts.client.polyjuice.ClientPolyjuiceState.set(packet.playerUUID(), null);
+            return;
+        }
+        at.koopro.wizardsandbeasts.client.polyjuice.ClientPolyjuiceState.set(packet.playerUUID(),
+                new at.koopro.wizardsandbeasts.client.polyjuice.ClientPolyjuiceState.Disguise(
+                        packet.targetId(), packet.targetName()));
+    }
+
     public static void handleOpenFlooGui(OpenFlooGuiS2CPayload packet, IPayloadContext context) {
         // Routed through the reflection invoker (not a direct `new FlooNetworkScreen`) so this
         // class — loaded server-side when the registrar resolves the method ref — never forces
         // verification-time loading of the client-only FlooNetworkScreen / Screen types.
         context.enqueueWork(() ->
                 ClientScreenHooksInvoker.invoke("openFlooNetworkScreen",
-                        List.class, packet.destinations(), boolean.class, packet.callMode()));
+                        List.class, packet.destinations(),
+                        String.class, packet.originAddress(),
+                        boolean.class, packet.headInFire()));
     }
 
     // --- form ---
@@ -361,6 +416,16 @@ public final class ClientPayloadHandlers {
         MapClientHandler.handleMapSync(pkt, ctx);
     }
 
+    public static void handleMapRegion(
+            at.koopro.wizardsandbeasts.network.map.MapRegionS2CPayload pkt, IPayloadContext ctx) {
+        MapClientHandler.handleMapRegion(pkt, ctx);
+    }
+
+    public static void handleMapMarkers(
+            at.koopro.wizardsandbeasts.network.map.MapMarkersS2CPayload pkt, IPayloadContext ctx) {
+        MapClientHandler.handleMapMarkers(pkt, ctx);
+    }
+
     // --- owl ---
 
     public static void handleOWLDataSync(OWLDataSyncPayload payload, IPayloadContext context) {
@@ -398,6 +463,20 @@ public final class ClientPayloadHandlers {
         ctx.enqueueWork(() -> ClientStatsState.applySync(pkt.data()));
     }
 
+    public static void handleStatLevelUp(
+            at.koopro.wizardsandbeasts.network.stats.StatLevelUpS2CPayload pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
+            at.koopro.wizardsandbeasts.stats.PlayerStat stat =
+                    at.koopro.wizardsandbeasts.stats.PlayerStat.fromId(pkt.statId());
+            // An id this build does not have: skipped rather than rejected, matching how the stat
+            // sync payload treats an unknown stat. A missing celebration beats a dropped connection.
+            if (stat != null) {
+                at.koopro.wizardsandbeasts.client.stats.ClientStatLevelUps
+                        .onLevelUp(stat, pkt.from(), pkt.to(), pkt.sourceKey());
+            }
+        });
+    }
+
     // --- trinket ---
 
     public static void handlePensieveOpen(at.koopro.wizardsandbeasts.network.trinket.PensieveOpenS2CPayload pkt,
@@ -406,6 +485,14 @@ public final class ClientPayloadHandlers {
         // loading of the client-only PensieveScreen.
         ctx.enqueueWork(() ->
                 ClientScreenHooksInvoker.invoke("openPensieveScreen", List.class, pkt.memories()));
+    }
+
+    public static void handleLicenceOpen(at.koopro.wizardsandbeasts.network.ministry.LicenceOpenS2CPayload pkt,
+                                         IPayloadContext ctx) {
+        // Reflection invoker, like the Pensieve: keeps this common-side class from forcing
+        // verification-time loading of the client-only MinistryLicenceScreen.
+        ctx.enqueueWork(() ->
+                ClientScreenHooksInvoker.invoke("openLicenceScreen", boolean.class, pkt.offHand()));
     }
 
     public static void handleMirrorOpen(at.koopro.wizardsandbeasts.network.trinket.MirrorOpenS2CPayload pkt,

@@ -1,6 +1,5 @@
 package at.koopro.wizardsandbeasts.client.event;
 
-import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.character.CharacterSheetScreen;
 import at.koopro.wizardsandbeasts.client.gui.character.CharacterSheetTextures;
 import at.koopro.wizardsandbeasts.module.Module;
@@ -37,6 +36,11 @@ public final class InventoryScreenInjector {
     public static void onScreenInit(ScreenEvent.Init.Post event) {
         if (!ModuleManager.isEnabled(Module.CHARACTER_SHEET)) return;
         if (!(event.getScreen() instanceof InventoryScreen inv)) return;
+
+        // The tab button can be drawn without the Character Sheet ever having been opened, so the
+        // art probe has to run here too — otherwise a pack missing icon_tab.png shows a magenta
+        // square on the inventory screen until the sheet is opened once.
+        CharacterSheetTextures.refresh();
 
         // Hand the inventory over as the return target, so pressing the inventory key inside
         // the sheet steps back to it rather than closing out to the world.
@@ -82,7 +86,7 @@ public final class InventoryScreenInjector {
             renderDefaultSprite(g);
             int ix = getX() + (getWidth() - ICON) / 2;
             int iy = getY() + (getHeight() - ICON) / 2;
-            McStylePanel.drawTexture(g, CharacterSheetTextures.ICON_TAB, ix, iy, ICON, ICON, ICON, ICON);
+            CharacterSheetTextures.drawTabIcon(g, ix, iy, ICON);
         }
     }
 }

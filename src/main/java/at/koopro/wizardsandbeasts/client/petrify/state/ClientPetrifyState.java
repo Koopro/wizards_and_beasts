@@ -1,6 +1,5 @@
 package at.koopro.wizardsandbeasts.client.petrify.state;
 
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;

@@ -7,13 +7,14 @@ import at.koopro.wizardsandbeasts.item.trinket.ExtendableEarsItem;
 import at.koopro.wizardsandbeasts.item.trinket.FoeGlassItem;
 import at.koopro.wizardsandbeasts.item.trinket.HandOfGloryItem;
 import at.koopro.wizardsandbeasts.item.trinket.HermionesBagItem;
+import at.koopro.wizardsandbeasts.item.trinket.MinistryLicenseScrollItem;
 import at.koopro.wizardsandbeasts.item.trinket.OmniocularsItem;
 import at.koopro.wizardsandbeasts.item.trinket.PensieveItem;
 import at.koopro.wizardsandbeasts.item.trinket.PortkeyItem;
 import at.koopro.wizardsandbeasts.item.trinket.RemembrallItem;
+import at.koopro.wizardsandbeasts.item.trinket.SneakoscopeItem;
 import at.koopro.wizardsandbeasts.item.trinket.TimeTurnerItem;
 import at.koopro.wizardsandbeasts.item.trinket.TwoWayMirrorItem;
-import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.registries.DeferredItem;
 
 public final class TrinketItemRegistry {
@@ -24,12 +25,14 @@ public final class TrinketItemRegistry {
             ModItems.ITEMS.registerItem("omnioculars", props -> new OmniocularsItem(props.stacksTo(1)));
     public static final DeferredItem<TimeTurnerItem> TIME_TURNER =
             ModItems.ITEMS.registerItem("time_turner", props -> new TimeTurnerItem(props.stacksTo(1)));
-    public static final DeferredItem<Item> SNEAKOSCOPE =
-            ModItems.ITEMS.registerItem("sneakoscope", props -> new Item(props.stacksTo(1)));
+    public static final DeferredItem<SneakoscopeItem> SNEAKOSCOPE =
+            ModItems.ITEMS.registerItem("sneakoscope", props -> new SneakoscopeItem(props.stacksTo(1)));
     public static final DeferredItem<PortkeyItem> PORTKEY =
             ModItems.ITEMS.registerItem("portkey", props -> new PortkeyItem(props.stacksTo(1)));
-    public static final DeferredItem<Item> MINISTRY_LICENSE_SCROLL =
-            ModItems.ITEMS.registerItem("ministry_license_scroll", props -> new Item(props.stacksTo(16)));
+    /** Each scroll names one wizard, one type and one rank, so two of them never merge. */
+    public static final DeferredItem<MinistryLicenseScrollItem> MINISTRY_LICENSE_SCROLL =
+            ModItems.ITEMS.registerItem("ministry_license_scroll",
+                    props -> new MinistryLicenseScrollItem(props.stacksTo(1)));
     public static final DeferredItem<ExtendableEarsItem> EXTENDABLE_EARS =
             ModItems.ITEMS.registerItem("extendable_ears", ExtendableEarsItem::new);
     public static final DeferredItem<FoeGlassItem> FOE_GLASS =

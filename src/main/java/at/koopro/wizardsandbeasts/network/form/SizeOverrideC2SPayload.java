@@ -16,7 +16,6 @@ import net.minecraft.server.permissions.Permissions;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.UUID;
-import at.koopro.wizardsandbeasts.feedback.NoticeKind;
 import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 
 /**
