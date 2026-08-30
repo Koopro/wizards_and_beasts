@@ -54,10 +54,6 @@ public record WandAllegiance(@Nullable UUID boundPlayer, float bondStrength, lon
         return boundPlayer != null;
     }
 
-    public WandAllegiance withBoundPlayer(@Nullable UUID player, long gameTick) {
-        return new WandAllegiance(player, bondStrength, player == null ? 0L : gameTick);
-    }
-
     public WandAllegiance withBondStrength(float value) {
         return new WandAllegiance(boundPlayer, value, firstBondTick);
     }

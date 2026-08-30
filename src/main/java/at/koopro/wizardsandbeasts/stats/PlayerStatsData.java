@@ -99,18 +99,6 @@ public record PlayerStatsData(
         return with(PlayerStat.POWER, newPower);
     }
 
-    public PlayerStatsData withPrecision(int newPrecision) {
-        return with(PlayerStat.PRECISION, newPrecision);
-    }
-
-    public PlayerStatsData withWillpower(int newWillpower) {
-        return with(PlayerStat.WILLPOWER, newWillpower);
-    }
-
-    public PlayerStatsData withReflexes(int newReflexes) {
-        return with(PlayerStat.REFLEXES, newReflexes);
-    }
-
     /** Carries the derived KNOWLEDGE snapshot for client sync; not persisted. */
     public PlayerStatsData withKnowledge(int newKnowledge) {
         return with(PlayerStat.KNOWLEDGE, newKnowledge);

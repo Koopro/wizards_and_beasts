@@ -122,11 +122,6 @@ public class SpellRequirement {
     }
 
     @Nullable
-    public Spell getPrerequisite() {
-        return prerequisiteId != null ? Spells.byId(prerequisiteId) : null;
-    }
-
-    @Nullable
     public Proficiency getMinProficiency() {
         return minProficiency;
     }

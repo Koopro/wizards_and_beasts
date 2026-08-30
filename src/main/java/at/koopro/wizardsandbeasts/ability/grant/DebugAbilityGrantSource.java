@@ -49,9 +49,4 @@ public final class DebugAbilityGrantSource implements AbilityGrantSource {
         Set<String> set = forced.get(player.getUUID());
         return set != null && set.remove(abilityKey);
     }
-
-    public Set<String> forcedFor(ServerPlayer player) {
-        Set<String> set = forced.get(player.getUUID());
-        return set == null ? Set.of() : Set.copyOf(set);
-    }
 }

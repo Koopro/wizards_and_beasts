@@ -102,20 +102,6 @@ public final class TrunkRegistryData extends SavedData {
         setDirty();
     }
 
-    public void setAccessMode(UUID pocketId, TrunkAccessMode accessMode) {
-        TrunkRecord record = records.get(pocketId);
-        if (record == null) return;
-        records.put(pocketId, record.withAccessMode(accessMode));
-        setDirty();
-    }
-
-    public void addMember(UUID pocketId, UUID memberId) {
-        TrunkRecord record = records.get(pocketId);
-        if (record == null) return;
-        records.put(pocketId, record.withMember(memberId));
-        setDirty();
-    }
-
     // --- Shell initialization tracking ---
 
     public boolean isInitialized(UUID pocketId) {

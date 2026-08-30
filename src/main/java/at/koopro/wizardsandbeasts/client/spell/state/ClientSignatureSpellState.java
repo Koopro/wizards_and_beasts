@@ -37,10 +37,6 @@ public final class ClientSignatureSpellState {
         return imperioControlled;
     }
 
-    public static UUID getImperioController() {
-        return imperioController;
-    }
-
     public static void setImperioBoundVictim(@Nullable UUID victimUuid) {
         if (victimUuid == null || victimUuid.equals(NIL_UUID)) {
             imperioBoundVictim = null;
@@ -55,10 +51,6 @@ public final class ClientSignatureSpellState {
 
     public static void setLastIntentMultiplier(float m) {
         lastIntentMultiplier = m;
-    }
-
-    public static float getLastIntentMultiplier() {
-        return lastIntentMultiplier;
     }
 
     public static void triggerImperioScreenShake() {

@@ -64,14 +64,4 @@ public final class AnimagusFormBinding {
     public static Optional<AnimagusFormDefinition> resolve(@Nullable String storedFormId) {
         return toFormKey(storedFormId).map(AnimagusFormRegistry::get);
     }
-
-    /** Client-side counterpart of {@link #resolve}, reading the synced cache. */
-    public static Optional<AnimagusFormDefinition> resolveClient(@Nullable String storedFormId) {
-        return toFormKey(storedFormId).map(AnimagusFormRegistry::clientGet);
-    }
-
-    /** True when the stored id names a form the datapack registry actually defines. */
-    public static boolean isDefined(@Nullable String storedFormId) {
-        return resolve(storedFormId).isPresent();
-    }
 }

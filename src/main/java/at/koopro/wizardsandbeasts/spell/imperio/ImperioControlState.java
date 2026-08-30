@@ -33,10 +33,6 @@ public record ImperioControlState(
         return new ImperioControlState(isControlled, controllerUUID, remainingTicks, resistanceProgress, imperioCommandOrdinal, v);
     }
 
-    public ImperioControlState withCommandOrdinal(int ord) {
-        return new ImperioControlState(isControlled, controllerUUID, remainingTicks, resistanceProgress, ord, sneakAttemptSinceLastResistTick);
-    }
-
     public ImperioControlState tickDown() {
         if (!isControlled) {
             return this;

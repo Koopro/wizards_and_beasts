@@ -77,10 +77,6 @@ public final class ClientAbilityChargeState {
         return abilityId != null && heldTicks >= chargeTicks;
     }
 
-    public static int heldTicks() {
-        return heldTicks;
-    }
-
     @Nullable
     public static Vec3 targetPosition() {
         return targetPosition;

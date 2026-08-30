@@ -141,10 +141,6 @@ public class PlayerHeritageData implements ModAttachments.NbtSerializable {
         return totalProfessionPointsEarned;
     }
 
-    public void setTotalProfessionPointsEarned(int points) {
-        totalProfessionPointsEarned = Math.max(0, points);
-    }
-
     public Set<String> getUnlockedProfessions() {
         return Set.copyOf(unlockedProfessions);
     }

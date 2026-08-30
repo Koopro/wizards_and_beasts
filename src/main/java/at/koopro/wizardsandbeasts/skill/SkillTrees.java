@@ -78,11 +78,6 @@ public final class SkillTrees {
         return SERVER.adjacency.getOrDefault(id, Set.of());
     }
 
-    /** All nodes in the given audience's web. */
-    public static List<Skill> webNodes(SkillTreeId.Audience audience) {
-        return SERVER.byAudience.getOrDefault(audience, List.of());
-    }
-
     // ── Client-side reads (synced cache) ──
 
     @Nullable
@@ -92,10 +87,6 @@ public final class SkillTrees {
 
     public static List<Skill> clientGetTree(SkillTreeId tree) {
         return CLIENT.byTree.getOrDefault(tree, Collections.emptyList());
-    }
-
-    public static Collection<Skill> clientAll() {
-        return Collections.unmodifiableCollection(CLIENT.byId.values());
     }
 
     public static Set<String> clientNeighbors(String id) {

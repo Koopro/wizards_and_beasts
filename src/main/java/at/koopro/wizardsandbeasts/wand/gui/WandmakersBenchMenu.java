@@ -112,14 +112,6 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
         return new WandmakersBenchMenu(containerId, inv, be, enh);
     }
 
-    public void writeOpenData(RegistryFriendlyByteBuf buf) {
-        buf.writeBlockPos(bench.getBlockPos());
-        buf.writeVarInt(enhancerBlockIds.size());
-        for (Identifier id : enhancerBlockIds) {
-            buf.writeUtf(id.toString(), 320);
-        }
-    }
-
     public List<Identifier> getEnhancerBlockIds() {
         return enhancerBlockIds;
     }

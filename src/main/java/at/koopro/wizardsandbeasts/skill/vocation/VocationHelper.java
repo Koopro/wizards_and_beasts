@@ -4,12 +4,10 @@ import at.koopro.wizardsandbeasts.ability.grant.AbilityGrantService;
 import at.koopro.wizardsandbeasts.ability.grant.AbilityGrants;
 import at.koopro.wizardsandbeasts.ability.grant.AbilityKey;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
-import at.koopro.wizardsandbeasts.skill.Skill;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -35,10 +33,6 @@ public final class VocationHelper {
         return getData(player).primary();
     }
 
-    public static boolean isCommitted(Player player, Identifier vocationId) {
-        return getData(player).primary().filter(vocationId::equals).isPresent();
-    }
-
     /**
      * True if the declared Vocation grants the named ability flag (see VocationAbilityHooks).
      *
@@ -59,10 +53,5 @@ public final class VocationHelper {
         return vocationId.map(VocationRegistry::get)
                 .map(v -> v.grantedAbilities().contains(flag))
                 .orElse(false);
-    }
-
-    /** The Vocation owning this node's tree, or null if no Vocation owns it (e.g. goblin / elf trees). */
-    public static @Nullable VocationDefinition vocationOf(Skill node) {
-        return VocationRegistry.forTree(node.getTree());
     }
 }

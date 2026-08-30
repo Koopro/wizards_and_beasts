@@ -6,6 +6,7 @@ import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiText;
 import at.koopro.wizardsandbeasts.client.gui.character.tab.AttributesTab;
 import at.koopro.wizardsandbeasts.client.gui.character.tab.CharacterTab;
+import at.koopro.wizardsandbeasts.client.gui.character.tab.RecordTab;
 import at.koopro.wizardsandbeasts.client.gui.character.tab.SkillsTab;
 import at.koopro.wizardsandbeasts.client.gui.character.tab.SpellsTab;
 import at.koopro.wizardsandbeasts.client.gui.character.widget.HeritageBlockWidget;
@@ -59,6 +60,8 @@ public final class CharacterSheetScreen extends Screen {
     // Column split
     private static final int TITLE_H = 14;
     private static final int TAB_H   = 14;
+    /** Corner mark on a tab fed by a PREVIEW module. Amber: a caution, not an error. */
+    private static final int COLOR_PREVIEW_DOT = 0xFFE0A030;
 
     /**
      * Three columns: the figure, the things that are true of the character whichever tab is open,
@@ -116,7 +119,6 @@ public final class CharacterSheetScreen extends Screen {
     }
 
     /** Side inset of the model viewport, which narrows it toward the figure's own aspect. */
-    private static final int VIEWPORT_SIDE_INSET = WizardsMetrics.SPACE_XL;
 
     // Palette
     private static final int COLOR_DIVIDER  = 0xFF44321A;
@@ -137,7 +139,8 @@ public final class CharacterSheetScreen extends Screen {
     private enum Tab {
         ATTRIBUTES("gui.wizards_and_beasts.character_sheet.tab.attributes"),
         SKILLS("gui.wizards_and_beasts.character_sheet.tab.skills"),
-        SPELLS("gui.wizards_and_beasts.character_sheet.tab.spells");
+        SPELLS("gui.wizards_and_beasts.character_sheet.tab.spells"),
+        RECORD("gui.wizards_and_beasts.character_sheet.tab.record");
 
         final String key;
         Tab(String key) { this.key = key; }
@@ -157,6 +160,7 @@ public final class CharacterSheetScreen extends Screen {
     private final CharacterTab attributesTab = new AttributesTab();
     private final CharacterTab skillsTab     = new SkillsTab();
     private final CharacterTab spellsTab     = new SpellsTab();
+    private final CharacterTab recordTab     = new RecordTab();
 
     // Viewport widget
     private final PlayerModelViewport viewport = new PlayerModelViewport();
@@ -189,6 +193,11 @@ public final class CharacterSheetScreen extends Screen {
         guiScale = layout.scale();
         bgX = layout.panelX();
         bgY = layout.panelY();
+
+        // Probe the bespoke tab art once per open rather than three times a frame. A pack that
+        // overrides this namespace without shipping panel.png would otherwise paint the whole tab
+        // row in the missing-texture checkerboard.
+        CharacterSheetTextures.refresh();
 
         if (ModuleManager.isPreview(Module.CHARACTER_SHEET) && !previewLogged) {
             LOGGER.debug("[W&B] CharacterSheetScreen opened in PREVIEW mode.");
@@ -234,6 +243,15 @@ public final class CharacterSheetScreen extends Screen {
 
         pose.popMatrix();
 
+        // Outside the scale transform on purpose. The framework draws a deferred tooltip after the
+        // whole screen, in screen space; a card positioned inside the pose above would be placed at
+        // design-space coordinates on a screen-space canvas and only land correctly at scale 1.0.
+        List<Component> tooltip = activeTabRenderer().consumeTooltip();
+        if (tooltip != null && !tooltip.isEmpty()) {
+            g.setTooltipForNextFrame(minecraft.font, tooltip, java.util.Optional.empty(),
+                    mouseX, mouseY);
+        }
+
         super.render(g, mouseX, mouseY, partialTick);
     }
 
@@ -253,7 +271,7 @@ public final class CharacterSheetScreen extends Screen {
 
         g.fill(bgX, bgY, bgX + BG_W, bgY + TITLE_H, 0xFF1A1005);
 
-        g.drawString(font, "Character Sheet", bgX + 4, bgY + 3, COLOR_TITLE, false);
+        g.drawString(font, this.title.getString(), bgX + 4, bgY + 3, COLOR_TITLE, false);
 
         String playerName = minecraft.player != null
                 ? minecraft.player.getName().getString() : "";
@@ -308,14 +326,18 @@ public final class CharacterSheetScreen extends Screen {
         if (minecraft.player == null) return;
         Font font = minecraft.font;
 
-        g.drawString(font, "Effects", x, y, COLOR_EFFECT_TXT, false);
+        g.drawString(font, Component.translatable(
+                "gui.wizards_and_beasts.character_sheet.effects").getString(),
+                x, y, COLOR_EFFECT_TXT, false);
         y += WizardsMetrics.LINE_BODY;
 
         Collection<MobEffectInstance> effects = minecraft.player.getActiveEffects();
         if (effects.isEmpty()) {
             // Said explicitly rather than left blank: an empty region under a divider reads as a
             // panel that failed to draw, not as a character who happens to have no effects.
-            g.drawString(font, "None", x, y, COLOR_EFFECT_MORE, false);
+            g.drawString(font, Component.translatable(
+                    "gui.wizards_and_beasts.character_sheet.effects.none").getString(),
+                    x, y, COLOR_EFFECT_MORE, false);
             return;
         }
 
@@ -327,7 +349,8 @@ public final class CharacterSheetScreen extends Screen {
         }
         if (list.size() > MAX_EFFECTS_SHOWN) {
             int remainder = list.size() - MAX_EFFECTS_SHOWN;
-            g.drawString(font, "+" + remainder + " more",
+            g.drawString(font, Component.translatable(
+                    "gui.wizards_and_beasts.character_sheet.effects.more", remainder).getString(),
                     x, y + shown * EFFECT_ROW_H,
                     COLOR_EFFECT_MORE, false);
         }
@@ -430,7 +453,7 @@ public final class CharacterSheetScreen extends Screen {
         // the right-hand column read as clipped. The outer edges now clear the frame; the
         // inner edge only has to clear the column divider, so it stays tighter.
         int[] r = contentRect();
-        activeTabRenderer().render(g, r[0], r[1], r[2], r[3], partialTick);
+        activeTabRenderer().render(g, r[0], r[1], r[2], r[3], mouseX, mouseY, partialTick);
     }
 
     private void renderTabButtons(@NonNull GuiGraphics g, int x, int y, int w,
@@ -447,14 +470,37 @@ public final class CharacterSheetScreen extends Screen {
             boolean hovered = mouseX >= tx && mouseX < tx + tw
                            && mouseY >= y && mouseY < y + TAB_H;
 
-            McStylePanel.drawNineSlice(g, (active || hovered) ? CharacterSheetTextures.PANEL_SEL : CharacterSheetTextures.PANEL,
-                    tx, y, tw, TAB_H, CharacterSheetTextures.PANEL_SIZE, CharacterSheetTextures.PANEL_BORDER);
+            CharacterSheetTextures.drawPanel(g, tx, y, tw, TAB_H, active, hovered);
 
-            // Shrink rather than spill: three tabs share the right column, so a longer
+            // Shrink rather than spill: the tabs share the right column, so a longer
             // translation of "Attributes" would otherwise run out over its neighbours.
             String label = Component.translatable(tab.key).getString();
             GuiText.drawFittedCentered(g, font, label, tx + 2, y + 3, tw - 4, COLOR_TAB_TXT);
+
+            // A tab whose data comes from a PREVIEW module is marked, so a player reading half-
+            // finished numbers knows they are half-finished rather than wrong. A corner dot rather
+            // than a word: the tabs already share one column and the labels already shrink to
+            // fit, so there is no room for a badge that spends horizontal space.
+            if (isPreviewSourced(tab)) {
+                g.fill(tx + tw - 4, y + 2, tx + tw - 2, y + 4, COLOR_PREVIEW_DOT);
+            }
         }
+    }
+
+    /**
+     * Whether this tab is showing data owned by a module that has not shipped as finished.
+     *
+     * <p>Read live from {@link ModuleManager} rather than hardcoded, so a server that promotes
+     * {@code PLAYER_STATS} out of PREVIEW stops marking the tab without a client change — and one
+     * that demotes it starts marking it.
+     */
+    private static boolean isPreviewSourced(Tab tab) {
+        return switch (tab) {
+            case ATTRIBUTES -> ModuleManager.isPreview(Module.PLAYER_STATS);
+            case SKILLS -> ModuleManager.isPreview(Module.SKILL_TREES);
+            case SPELLS -> ModuleManager.isPreview(Module.PROFICIENCY);
+            case RECORD -> ModuleManager.isPreview(Module.MINISTRY);
+        };
     }
 
     @NonNull
@@ -463,6 +509,7 @@ public final class CharacterSheetScreen extends Screen {
             case ATTRIBUTES -> attributesTab;
             case SKILLS     -> skillsTab;
             case SPELLS     -> spellsTab;
+            case RECORD     -> recordTab;
         };
     }
 
@@ -536,9 +583,6 @@ public final class CharacterSheetScreen extends Screen {
         }
         return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
-
-
-
 
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {

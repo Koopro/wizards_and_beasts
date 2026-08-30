@@ -1,12 +1,10 @@
 package at.koopro.wizardsandbeasts.client.network;
 
 import at.koopro.wizardsandbeasts.client.floo.gui.FlooNetworkScreen;
-import at.koopro.wizardsandbeasts.client.spell.gui.BeamDebugScreen;
 import at.koopro.wizardsandbeasts.client.bestiary.gui.BestiaryScreen;
 import at.koopro.wizardsandbeasts.client.handbook.HandbookScreen;
 import at.koopro.wizardsandbeasts.client.gui.character.CharacterSheetScreen;
 import at.koopro.wizardsandbeasts.client.currency.gui.GringottsScreen;
-import at.koopro.wizardsandbeasts.client.skill.gui.SkillScreenRouter;
 import at.koopro.wizardsandbeasts.client.spell.gui.SpellTeacherScreen;
 import at.koopro.wizardsandbeasts.client.heritage.gui.HeritageSelectionScreen;
 import at.koopro.wizardsandbeasts.client.trinket.gui.DiaryPossessionScreen;
@@ -28,16 +26,22 @@ public final class ClientScreenHooks {
     /** Opens the Floo network screen. Reflectively invoked from common code via
      *  {@link at.koopro.wizardsandbeasts.network.ClientScreenHooksInvoker}, so the
      *  {@code FlooNetworkScreen} reference never loads server-side. */
-    public static void openFlooNetworkScreen(List<FlooDestinationDto> destinations, boolean callMode) {
-        Minecraft.getInstance().setScreen(new FlooNetworkScreen(destinations, callMode));
+    public static void openFlooNetworkScreen(List<FlooDestinationDto> destinations,
+                                             String originAddress, boolean headInFire) {
+        Minecraft.getInstance().setScreen(
+                new FlooNetworkScreen(destinations, originAddress, headInFire));
+    }
+
+    /** Opens the Ministry registration form. Reflectively invoked, like the network screen. */
+    public static void openFlooRegistrationScreen(net.minecraft.core.BlockPos hearthPos,
+                                                   String currentAddress, int feeKnuts) {
+        Minecraft.getInstance().setScreen(
+                new at.koopro.wizardsandbeasts.client.floo.gui.FlooRegistrationScreen(
+                        hearthPos, currentAddress, feeKnuts));
     }
 
     public static void openGringottsScreen() {
         Minecraft.getInstance().setScreen(new GringottsScreen());
-    }
-
-    public static void openBeamDebugScreen() {
-        Minecraft.getInstance().setScreen(new BeamDebugScreen());
     }
 
     /** Editor for the beam system. */
@@ -48,10 +52,6 @@ public final class ClientScreenHooks {
 
     public static void openHeritageSelectionScreen() {
         Minecraft.getInstance().setScreen(new HeritageSelectionScreen());
-    }
-
-    public static void openSkillTreeScreen() {
-        SkillScreenRouter.openForCurrentPlayer();
     }
 
     public static void openSpellTeacherScreen() {
@@ -68,6 +68,11 @@ public final class ClientScreenHooks {
 
     public static void openCharacterSheetScreen() {
         Minecraft.getInstance().setScreen(new CharacterSheetScreen());
+    }
+
+    public static void openLicenceScreen(boolean offHand) {
+        Minecraft.getInstance().setScreen(
+                new at.koopro.wizardsandbeasts.client.ministry.gui.MinistryLicenceScreen(offHand));
     }
 
     public static void openPensieveScreen(List<MemoryEntry> memories) {

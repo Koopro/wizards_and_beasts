@@ -11,6 +11,9 @@ import at.koopro.wizardsandbeasts.spell.proficiency.SpellScalingProfile;
 import at.koopro.wizardsandbeasts.entity.spell.SpellProjectileEntity;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
+import net.minecraft.resources.Identifier;
+import at.koopro.wizardsandbeasts.spell.cast.SpellPower;
+import at.koopro.wizardsandbeasts.spell.proficiency.ProficiencyScaler;
 import at.koopro.wizardsandbeasts.wand.cast.WandStats;
 import at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver;
 import at.koopro.wizardsandbeasts.util.WandHelper;
@@ -90,7 +93,6 @@ public abstract class Spell {
     public float getProjectileSpeed() { return 1.5f; }
     public float getProjectileSpread() { return 0.0f; }
     public float getBaseKnockback() { return 0.0f; }
-    public float getBaseAoeRadius() { return 0.0f; }
 
     @Nullable
     public SpellProperties getProperties() { return properties; }
@@ -120,13 +122,29 @@ public abstract class Spell {
     }
 
     /**
-     * Calculates skill-, proficiency-, and wand-adjusted damage for this spell.
+     * An <em>estimate</em> of this spell's damage for a caster: base times the skill web, the
+     * proficiency curve and the wand.
+     *
+     * <p>Explicitly not the number a cast produces. A real cast composes the situational channel too
+     * ({@code ModifierStack}) and bounds the result through {@link SpellPower}; this is for callers
+     * outside a cast — commands, previews, a projectile spawned by something other than the caster.
+     * Kept deliberately close to the real formula so the gap is the situational channel and nothing
+     * else.
      */
     public float getDamageForCaster(ServerPlayer caster, ItemStack wandStack) {
         WandStats wand = WandStatsResolver.resolve(wandStack, caster.registryAccess());
-        return baseDamage
-                * SkillSystemAPI.getDamageMultiplier(caster, this)
-                * wand.damageFor(this);
+        return baseDamage * getDamageMultiplierForCaster(caster) * wand.damageFor(this);
+    }
+
+    /**
+     * Skill web times proficiency, bounded the same way a cast is — the multiplier half of
+     * {@link #getDamageForCaster}, without the wand or the base.
+     */
+    public float getDamageMultiplierForCaster(ServerPlayer caster) {
+        return SpellPower.damage(
+                1.0f,
+                ProficiencyScaler.getProfileForPlayer(caster, Identifier.parse(id)).damageMult(),
+                SkillSystemAPI.getSkillDamageMultiplier(caster, this)).total();
     }
 
     /**
@@ -235,8 +253,24 @@ public abstract class Spell {
     }
 
     public SpellProjectileEntity spawnProjectile(ServerLevel level, ServerPlayer caster, SpellScalingProfile profile) {
+        return spawnProjectile(level, caster, profile, getDamageMultiplierForCaster(caster));
+    }
+
+    /**
+     * Spawn this spell's projectile carrying an already-composed damage multiplier.
+     *
+     * <p>The multiplier is handed over rather than recomputed on impact because the cast site is the
+     * only place that knows the whole picture — {@code SpellExecutor} spends the first forty lines of
+     * a cast building a {@code ModifierStack} out of wand corruption, allegiance, dark corruption,
+     * vocation, Niffler happiness and player stats, and the projectile had no way to see any of it.
+     * It called {@code getDamageForCaster} instead, which knows only proficiency, the skill web and
+     * the wand, so every projectile spell silently ignored the rest of the pipeline.
+     */
+    public SpellProjectileEntity spawnProjectile(ServerLevel level, ServerPlayer caster,
+                                                 SpellScalingProfile profile, float damageMultiplier) {
         SpellProjectileEntity projectile = new SpellProjectileEntity(level, caster, id);
         projectile.setScalingProfile(profile);
+        projectile.setDamageMultiplier(damageMultiplier);
         float baseSpeed = this instanceof JsonSpell jsonSpell ? jsonSpell.definition().projectileSpeed() : getProjectileSpeed();
         float baseSpread = this instanceof JsonSpell jsonSpell ? jsonSpell.definition().projectileSpread() : getProjectileSpread();
         float speed = baseSpeed * profile.controlMult();
@@ -262,13 +296,8 @@ public abstract class Spell {
         };
     }
 
-    /** When true, Protego deflection does not apply (datapack / Java override). */
-    public boolean isUnblockable() {
-        return false;
-    }
-
     /**
-     * Authored particle look for this spell.
+     * This spell's authored particle look, or its family's default when it authors none.
      *
      * <p>Overridden by {@code JsonSpell} to read the {@code vfx} block. Java spells inherit the
      * family default, which is exactly what every spell in the mod looked like before the block
@@ -276,6 +305,11 @@ public abstract class Spell {
      */
     public at.koopro.wizardsandbeasts.spell.def.SpellVfx vfx() {
         return at.koopro.wizardsandbeasts.spell.def.SpellVfx.defaultFor(SpellFamilies.of(this));
+    }
+
+    /** When true, Protego deflection does not apply (datapack / Java override). */
+    public boolean isUnblockable() {
+        return false;
     }
 
     /**
@@ -299,23 +333,6 @@ public abstract class Spell {
     @Nullable
     public String getRequiredSkillId() {
         return requiredSkillId;
-    }
-
-    /**
-     * Declares the skill node a player must hold before a teacher will sell this spell — the same
-     * gate a datapack spell expresses through {@code learning.requiredSkillId}. Bespoke Java spells
-     * had no way to express it at all, so their capability surface differed structurally from JSON
-     * spells for no reason; that asymmetry is what this closes.
-     *
-     * <p>Takes a <em>bare</em> node id (no namespace): the reader is
-     * {@code PlayerSkillData.getSkillLevel(String)}, which keys on bare ids, so a namespaced value
-     * would fail closed and silently make the spell unlearnable.
-     *
-     * <p>No shipped spell calls this. Which spells earn a node gate is a progression ruling that
-     * belongs to the skill-web design session, not to this seam.
-     */
-    protected void setRequiredSkillId(@Nullable String skillId) {
-        this.requiredSkillId = skillId;
     }
 
     @Nullable

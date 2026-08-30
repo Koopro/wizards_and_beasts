@@ -14,6 +14,15 @@ public final class CurrencyHelper {
     public static final int KNUTS_PER_SICKLE = 29;
     public static final int SICKLES_PER_GALLEON = 17;
     public static final int KNUTS_PER_GALLEON = KNUTS_PER_SICKLE * SICKLES_PER_GALLEON; // 493
+    /**
+     * @deprecated Superseded by the {@code dragotGalleonRate} server config, which defaults to 0.8
+     *     Galleons per Dragot rather than the 0.2326 this implies. Never read by anything — it was
+     *     declared and forgotten — and a fixed integer ratio is the wrong shape for a Dragot anyway:
+     *     the exchange rate moves within a spread and the bank takes a cut. See
+     *     {@code at.koopro.wizardsandbeasts.currency.dragot.DragotRates}. Kept only so the discrepancy
+     *     is visible rather than silently resolved in a commit nobody reads.
+     */
+    @Deprecated
     public static final int DRAGOTS_PER_10_GALLEONS = 43;
     public static final Identifier KNUT_ID = Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "knut");
     public static final Identifier SICKLE_ID = Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "sickle");
@@ -97,14 +106,6 @@ public final class CurrencyHelper {
     public static String formatFromKnuts(long totalKnuts) {
         long[] parts = fromKnuts(totalKnuts);
         return formatCurrency(parts[0], parts[1], parts[2]);
-    }
-
-    public static boolean isCoin(ItemStack stack) {
-        if (stack.isEmpty()) {
-            return false;
-        }
-        Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
-        return WizardsAndBeastsMod.MODID.equals(id.getNamespace());
     }
 
     public static boolean isCanonicalCoin(ItemStack stack) {

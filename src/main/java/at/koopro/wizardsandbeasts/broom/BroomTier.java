@@ -26,8 +26,4 @@ public enum BroomTier {
     public Component displayName() {
         return displayName;
     }
-
-    public int baseRepairCost() {
-        return baseRepairCost;
-    }
 }

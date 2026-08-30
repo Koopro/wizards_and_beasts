@@ -46,8 +46,4 @@ public enum WandFlexibility implements StringRepresentable {
         String lower = getSerializedName().replace('_', ' ');
         return Character.toUpperCase(lower.charAt(0)) + lower.substring(1);
     }
-
-    public float getScalingFactor() {
-        return scalingFactor;
-    }
 }

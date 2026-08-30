@@ -35,10 +35,6 @@ public final class ObscurialResourceManager {
         data.setFlag(FLAG_DRAIN, String.valueOf(clamp(value)));
     }
 
-    public static float getMaxDrain() {
-        return MAX_DRAIN;
-    }
-
     public static float getLowDrainWarning() {
         return LOW_DRAIN_WARNING;
     }

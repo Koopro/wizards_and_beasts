@@ -45,25 +45,6 @@ public final class SizeLerpTracker {
     }
 
     /**
-     * Returns the visual scale factor for a player, accounting for lerp.
-     * If no lerp is active, returns 1.0 (no compensation needed).
-     *
-     * @param partialTick sub-tick interpolation
-     * @return the visual scale compensation factor (visualScale / serverScale)
-     */
-    public static float getVisualCompensation(UUID playerUUID, float serverScale, float partialTick) {
-        LerpState state = STATES.get(playerUUID);
-        if (state == null || serverScale == 0) return 1.0f;
-
-        float progress = Math.min(1.0f,
-                (state.elapsedTicks + partialTick) / LERP_DURATION_TICKS);
-        float visualScale = state.previousScale
-                + (state.targetScale - state.previousScale) * progress;
-
-        return serverScale != 0 ? visualScale / serverScale : 1.0f;
-    }
-
-    /**
      * Returns the absolute visual scale for a player, accounting for lerp.
      * Unlike {@link #getVisualCompensation}, this returns the raw interpolated
      * scale value — used by the Mixin where vanilla scale is NOT pre-applied.
@@ -79,14 +60,6 @@ public final class SizeLerpTracker {
         float progress = Math.min(1.0f,
                 (state.elapsedTicks + partialTick) / LERP_DURATION_TICKS);
         return state.previousScale + (state.targetScale - state.previousScale) * progress;
-    }
-
-    /**
-     * Returns whether a player is currently mid-lerp.
-     */
-    public static boolean isLerping(UUID playerUUID) {
-        LerpState state = STATES.get(playerUUID);
-        return state != null && state.elapsedTicks < LERP_DURATION_TICKS;
     }
 
     public static void remove(UUID playerUUID) {

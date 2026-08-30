@@ -108,19 +108,6 @@ public final class BeamRayResolver {
         return new BeamRay(start, end, chosen, reached);
     }
 
-    /** Convenience: living-entity filter, server-side (partialTick = 1). */
-    public static BeamRay resolveLiving(Player caster, float maxReach) {
-        return resolve(caster, 1.0f, maxReach, LIVING_FILTER);
-    }
-
-    /**
-     * Computes the ramp-extended max reach for a given tick count, capped at {@code rangeBlocks}.
-     * Mirrors {@code Math.min(range, beamTicks * extensionBlocksPerTick())}.
-     */
-    public static float rampedReach(float rangeBlocks, float elapsedTicks) {
-        return Math.min(rangeBlocks, elapsedTicks * extensionBlocksPerTick);
-    }
-
     /**
      * Manual entity ray pick. Mirrors the pattern in {@code findLeviosaTargetAlongCrosshair}
      * to avoid the cross-version churn of {@code ProjectileUtil.getEntityHitResult} signatures.

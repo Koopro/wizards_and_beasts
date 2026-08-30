@@ -100,20 +100,12 @@ public final class PlayerFormAnimatable implements GeoAnimatable {
         INSTANCES.clear();
     }
 
-    public static int liveCount() {
-        return INSTANCES.size();
-    }
-
     public PlayerFormRig rig() {
         return rig;
     }
 
     public boolean moving() {
         return moving;
-    }
-
-    public boolean attacking() {
-        return attacking;
     }
 
     public boolean hurt() {

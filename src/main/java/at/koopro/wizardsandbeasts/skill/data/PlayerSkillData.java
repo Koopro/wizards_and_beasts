@@ -46,6 +46,18 @@ public class PlayerSkillData implements ModAttachments.NbtSerializable {
     // One-shot milestone ledger: names of MilestoneType achievements already granted, so each
     // first-time stat bump fires exactly once even though the gameplay trigger may recur.
     private final Set<String> milestonesAchieved = new LinkedHashSet<>();
+    // Spells the web taught this player and that they did NOT already know. Written when a node
+    // carrying a learn_spell effect is allocated, read when one is refunded.
+    //
+    // Why a ledger and not a recompute: spell knowledge lives in PlayerSpellData as one flat set
+    // shared with the teacher, so "did a node give you this?" is not answerable from the spell data
+    // alone. Recording only spells the player lacked at allocation time is what keeps respec from
+    // confiscating a lesson they paid a teacher Knuts for, while still closing the obvious exploit
+    // (allocate, pocket the spell, refund the point, spend it elsewhere).
+    //
+    // Absent in pre-existing saves, which load as empty — nothing recorded means nothing revoked,
+    // so no migration is needed and no existing player loses a spell.
+    private final Set<String> webTaughtSpells = new LinkedHashSet<>();
     private int astronomyEvents;      // ASTRONOMY: nights observing + moon phase tracking events
     private int muggleItems;          // MUGGLE_STUDIES: muggle items crafted or traded
 
@@ -113,10 +125,6 @@ public class PlayerSkillData implements ModAttachments.NbtSerializable {
         return totalPointsEarned;
     }
 
-    public void setTotalPointsEarned(int amount) {
-        totalPointsEarned = Math.max(0, amount);
-    }
-
     public int getSkillLevel(String skillId) {
         return unlockedSkills.getOrDefault(skillId, 0);
     }
@@ -166,52 +174,33 @@ public class PlayerSkillData implements ModAttachments.NbtSerializable {
     }
 
     public int getMetamorphFormsUsed() { return metamorphFormsUsed; }
-    public void incrementMetamorphFormsUsed() { metamorphFormsUsed = Math.max(0, metamorphFormsUsed + 1); }
-    public void setMetamorphFormsUsed(int v) { metamorphFormsUsed = Math.max(0, v); }
 
     public int getPotionBrewPoints() { return potionBrewPoints; }
     public void addPotionBrewPoints(int amount) { potionBrewPoints = Math.max(0, potionBrewPoints + amount); }
-    public void setPotionBrewPoints(int v) { potionBrewPoints = Math.max(0, v); }
 
     public int getPlantsHarvested() { return plantsHarvested; }
     public void incrementPlantsHarvested() { plantsHarvested = Math.max(0, plantsHarvested + 1); }
-    public void setPlantsHarvested(int v) { plantsHarvested = Math.max(0, v); }
 
     public int getArithmancyInteractions() { return arithmancyInteractions; }
-    public void incrementArithmancyInteractions() { arithmancyInteractions = Math.max(0, arithmancyInteractions + 1); }
-    public void setArithmancyInteractions(int v) { arithmancyInteractions = Math.max(0, v); }
 
     public int getRunicInteractions() { return runicInteractions; }
-    public void incrementRunicInteractions() { runicInteractions = Math.max(0, runicInteractions + 1); }
-    public void setRunicInteractions(int v) { runicInteractions = Math.max(0, v); }
 
     public int getDivinationEvents() { return divinationEvents; }
-    public void incrementDivinationEvents() { divinationEvents = Math.max(0, divinationEvents + 1); }
-    public void setDivinationEvents(int v) { divinationEvents = Math.max(0, v); }
 
     /** Number of distinct lore tomes/plaques studied — feeds KNOWLEDGE and the History of Magic OWL grade. */
     public int getLoreItemsRead() { return loreEntriesRead.size(); }
-    /** True if this lore source has already been studied (no further credit on re-read). */
-    public boolean hasReadLoreEntry(String loreId) { return loreEntriesRead.contains(loreId); }
     /** Records a lore source as studied; returns true only the first time (i.e. when it actually counts). */
     public boolean markLoreEntryRead(String loreId) {
         return loreId != null && !loreId.isBlank() && loreEntriesRead.add(loreId);
     }
-
-    /** True if this milestone has already been granted (one-shot guard). */
-    public boolean hasAchievedMilestone(String milestoneId) { return milestonesAchieved.contains(milestoneId); }
     /** Records a milestone as achieved; returns true only the first time (i.e. when the bump should fire). */
     public boolean markMilestoneAchieved(String milestoneId) {
         return milestoneId != null && !milestoneId.isBlank() && milestonesAchieved.add(milestoneId);
     }
 
     public int getAstronomyEvents() { return astronomyEvents; }
-    public void incrementAstronomyEvents() { astronomyEvents = Math.max(0, astronomyEvents + 1); }
-    public void setAstronomyEvents(int v) { astronomyEvents = Math.max(0, v); }
 
     public int getMuggleItems() { return muggleItems; }
-    public void incrementMuggleItems() { muggleItems = Math.max(0, muggleItems + 1); }
-    public void setMuggleItems(int v) { muggleItems = Math.max(0, v); }
 
     public void applySync(int points, int totalEarned, Map<String, Integer> skills) {
         skillPoints = Math.max(0, points);
@@ -226,6 +215,21 @@ public class PlayerSkillData implements ModAttachments.NbtSerializable {
                 unlockedSkills.put(entry.getKey(), level);
             }
         }
+    }
+
+    /** Spells the web taught that the player did not already know — the respec revoke list. */
+    public Set<String> getWebTaughtSpells() {
+        return java.util.Collections.unmodifiableSet(webTaughtSpells);
+    }
+
+    /** Records that a node taught {@code spellId}. Call only when the player did not already know it. */
+    public void recordWebTaughtSpell(String spellId) {
+        webTaughtSpells.add(spellId);
+    }
+
+    /** Drops {@code spellId} from the ledger once its granting node is no longer allocated. */
+    public void forgetWebTaughtSpell(String spellId) {
+        webTaughtSpells.remove(spellId);
     }
 
     @Override
@@ -245,6 +249,7 @@ public class PlayerSkillData implements ModAttachments.NbtSerializable {
         tag.putInt("DivinationEvents", divinationEvents);
         NbtHelper.saveStringSet(tag, "LoreEntriesRead", loreEntriesRead);
         NbtHelper.saveStringSet(tag, "MilestonesAchieved", milestonesAchieved);
+        NbtHelper.saveStringSet(tag, "WebTaughtSpells", webTaughtSpells);
         tag.putInt("AstronomyEvents", astronomyEvents);
         tag.putInt("MuggleItems", muggleItems);
         return tag;
@@ -268,6 +273,8 @@ public class PlayerSkillData implements ModAttachments.NbtSerializable {
         loreEntriesRead.addAll(NbtHelper.loadStringSet(tag, "LoreEntriesRead"));
         milestonesAchieved.clear();
         milestonesAchieved.addAll(NbtHelper.loadStringSet(tag, "MilestonesAchieved"));
+        webTaughtSpells.clear();
+        webTaughtSpells.addAll(NbtHelper.loadStringSet(tag, "WebTaughtSpells"));
         astronomyEvents = tag.getInt("AstronomyEvents").orElse(0);
         muggleItems = tag.getInt("MuggleItems").orElse(0);
     }

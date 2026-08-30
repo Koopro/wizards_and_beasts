@@ -40,7 +40,6 @@ final class SpellCastSupport {
     static boolean isBombarda(Spell spell) { return SpellIds.matches(spell.getId(), "bombarda"); }
     static boolean isExpectoPatronum(Spell spell) { return SpellIds.matches(spell.getId(), "expecto_patronum"); }
     static boolean isColloportus(Spell spell) { return SpellIds.matches(spell.getId(), "colloportus"); }
-    static boolean isLiberacorpus(Spell spell) { return SpellIds.matches(spell.getId(), "liberacorpus"); }
     static boolean isLevicorpus(Spell spell) { return SpellIds.matches(spell.getId(), "levicorpus"); }
 
     static boolean isFiniteIncantatem(Spell spell) {

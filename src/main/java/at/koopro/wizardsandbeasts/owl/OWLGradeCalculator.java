@@ -2,7 +2,6 @@ package at.koopro.wizardsandbeasts.owl;
 
 import at.koopro.wizardsandbeasts.ability.data.PlayerAbilityData;
 import at.koopro.wizardsandbeasts.bestiary.data.PlayerBestiaryData;
-import at.koopro.wizardsandbeasts.owl.data.PlayerOWLData;
 import at.koopro.wizardsandbeasts.skill.data.PlayerSkillData;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
@@ -245,11 +244,5 @@ public final class OWLGradeCalculator {
         if (value <= 0) return OWLGrade.T;
         if (a > 0 && value < a / 3) return OWLGrade.D;
         return OWLGrade.P;
-    }
-
-    /** Recalculate from scratch if requested, ignoring any cached grades. */
-    public static @NonNull PlayerOWLData recalculate(@NonNull ServerPlayer player) {
-        Map<OWLSubject, OWLGrade> grades = calculateAll(player);
-        return new PlayerOWLData(grades, true);
     }
 }

@@ -174,10 +174,6 @@ public final class BeamSettings {
         activePreset = PerformancePreset.MEDIUM;
     }
 
-    public static PerformancePreset getActivePreset() {
-        return activePreset;
-    }
-
     public static void applyPerformancePreset(PerformancePreset preset) {
         activePreset = preset;
         switch (preset) {

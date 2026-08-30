@@ -34,8 +34,6 @@ public record ModuleUpdateRequestPayload(Kind kind,
     public enum Kind { STATE, SETTING }
 
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final Identifier NO_KEY =
-            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "none");
 
     public static final Type<ModuleUpdateRequestPayload> TYPE = new Type<>(
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "module_update_request"));
@@ -66,15 +64,6 @@ public record ModuleUpdateRequestPayload(Kind kind,
 
     private static net.minecraft.server.MinecraftServer requireServer(ServerPlayer player) {
         return player.level().getServer();
-    }
-
-    public static ModuleUpdateRequestPayload ofState(Module module, ModuleState state) {
-        return new ModuleUpdateRequestPayload(Kind.STATE, ModuleIds.of(module),
-                state.getSerializedName(), NO_KEY, "");
-    }
-
-    public static ModuleUpdateRequestPayload ofSetting(Module module, Identifier settingKey, String encodedValue) {
-        return new ModuleUpdateRequestPayload(Kind.SETTING, ModuleIds.of(module), "", settingKey, encodedValue);
     }
 
     @Override

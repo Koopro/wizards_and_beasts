@@ -61,11 +61,6 @@ import java.util.List;
  */
 public class SpellMenuScreen extends Screen {
 
-    private static final Identifier SLOT_TEX = Identifier.fromNamespaceAndPath(
-            "wizards_and_beasts", "textures/gui/spell_menu/slot.png");
-    private static final Identifier SLOT_ACTIVE_TEX = Identifier.fromNamespaceAndPath(
-            "wizards_and_beasts", "textures/gui/spell_menu/slot_active.png");
-
     private static final int PANEL_W = WizardsAndBeastsUiTokens.SpellMenu.PANEL_WIDTH;
     private static final int PANEL_H = WizardsAndBeastsUiTokens.SpellMenu.PANEL_HEIGHT;
     private static final int LEFT_W = WizardsAndBeastsUiTokens.SpellMenu.LEFT_WIDTH;

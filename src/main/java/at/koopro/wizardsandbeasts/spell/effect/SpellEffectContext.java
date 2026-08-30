@@ -45,12 +45,6 @@ public record SpellEffectContext(
         return new SpellEffectContext(caster, target, level, target.getBoundingBox().getCenter(), 1.0f, 1.0f, 1.0f);
     }
 
-    /** Positional impact (block hit / explosion point) with no living target. */
-    public static SpellEffectContext ofPosition(@NonNull ServerPlayer caster, @NonNull ServerLevel level,
-                                                @NonNull Vec3 position) {
-        return new SpellEffectContext(caster, null, level, position, 1.0f, 1.0f, 1.0f);
-    }
-
     /** Copy with scaling multipliers set (sourced from the cast's {@code SpellScalingProfile}/modifiers). */
     public SpellEffectContext withScaling(float damageMult, float durationMult, float controlMult) {
         return new SpellEffectContext(caster, target, level, position, damageMult, durationMult, controlMult);

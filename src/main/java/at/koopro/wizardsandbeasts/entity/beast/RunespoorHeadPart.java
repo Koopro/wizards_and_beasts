@@ -22,10 +22,6 @@ public class RunespoorHeadPart extends PartEntity<RunespoorEntity> {
         this.partDimensions = EntityDimensions.scalable(width, height);
     }
 
-    public String partId() {
-        return partId;
-    }
-
     @Override
     public EntityDimensions getDimensions(net.minecraft.world.entity.Pose pose) {
         return partDimensions;

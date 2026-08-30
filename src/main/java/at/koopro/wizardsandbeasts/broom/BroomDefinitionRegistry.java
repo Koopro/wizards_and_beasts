@@ -7,9 +7,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +27,32 @@ public final class BroomDefinitionRegistry {
      * <p>Values are Cleansweep Seven's verbatim, because that is what the generic broom resolved to
      * before it had a definition of its own. Nothing about how the starter broom flies changes.
      */
+    /**
+     * The generic broom's handle colour, kept in step with {@code broom_definitions/broom.json}.
+     *
+     * <p>The generic broom is the one broom that draws the shared greyscale sheet rather than a
+     * painted one of its own, so without a tint its handle renders grey. It is also the fallback a
+     * datapack broom lands on, which makes it the worked example of the no-art path.
+     * {@code BroomDefinitionCodecTest} holds this against the JSON.
+     */
+    private static final int GENERIC_WOOD_TINT = 0xFFA87C4A;
+
+    /**
+     * The starter broom's audio, kept in step with {@code broom_definitions/broom.json}.
+     *
+     * <p>Named here rather than left empty because the constant has to describe the same broom the
+     * JSON does — {@code BroomDefinitionCodecTest} compares the two field by field, and a fallback
+     * that sounds different from the file it replaces is exactly the tell that gives away which one
+     * you are flying.
+     */
+    private static final BroomAudio GENERIC_AUDIO = new BroomAudio(
+            java.util.Optional.of(Identifier.fromNamespaceAndPath(
+                    WizardsAndBeastsMod.MODID, "broom_boost_school")),
+            java.util.Optional.of(Identifier.fromNamespaceAndPath(
+                    WizardsAndBeastsMod.MODID, "broom_wind_slow")),
+            java.util.Optional.of(Identifier.fromNamespaceAndPath(
+                    WizardsAndBeastsMod.MODID, "broom_trail_dust")));
+
     private static final BroomDefinition CODE_DEFAULT = new BroomDefinition(
             FALLBACK_ID,
             Component.translatable("item.wizards_and_beasts.broom"),
@@ -50,15 +74,35 @@ public final class BroomDefinitionRegistry {
             TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("minecraft", "planks")),
             List.of(),
             BroomSlot.defaults(),
-            BroomDefinition.UNTINTED);
+            GENERIC_WOOD_TINT,
+            BroomAssets.DEFAULT,
+            BroomHandling.of(HandlingProfile.SCHOOL),
+            GENERIC_AUDIO,
+            BroomSeat.DEFAULT);
     /** Volatile-swapped immutable map: readers never observe a mid-reload empty/partial registry. */
     private static volatile Map<Identifier, BroomDefinition> DEFINITIONS = Map.of();
 
     private BroomDefinitionRegistry() {
     }
 
+    /**
+     * Bumped on every swap, so anything holding a resolved definition can tell it is stale.
+     *
+     * <p>{@code BroomEntity} caches the record it resolved, and its id-change hook only fires when
+     * the id changes. A {@code /reload} that retunes a broom in place changes no id at all, so
+     * without a generation the entity would keep flying the values from before the reload for as
+     * long as it lived. Compared, never dereferenced, so an int is enough.
+     */
+    private static volatile int generation;
+
     public static void replaceAll(Map<Identifier, BroomDefinition> loaded) {
         DEFINITIONS = Map.copyOf(loaded);
+        generation++;
+    }
+
+    /** The current table's generation. A holder that sees a different value must re-resolve. */
+    public static int generation() {
+        return generation;
     }
 
     @Nullable
@@ -70,15 +114,10 @@ public final class BroomDefinitionRegistry {
         return List.copyOf(DEFINITIONS.values());
     }
 
-    public static List<BroomDefinition> getByTier(BroomTier tier) {
-        List<BroomDefinition> out = new ArrayList<>();
-        for (BroomDefinition definition : DEFINITIONS.values()) {
-            if (definition.tier() == tier) {
-                out.add(definition);
-            }
-        }
-        out.sort(Comparator.comparing(def -> def.displayName().getString()));
-        return out;
+    /** {@link #get} with the fallback folded in, for call sites that only want a tier. */
+    public static BroomDefinition getOrFallback(Identifier id) {
+        BroomDefinition definition = DEFINITIONS.get(id);
+        return definition != null ? definition : getFallback();
     }
 
     /** Never null and never throws: the shipped definition if loaded, else {@link #CODE_DEFAULT}. */

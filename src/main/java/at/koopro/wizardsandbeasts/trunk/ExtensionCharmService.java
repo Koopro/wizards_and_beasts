@@ -9,9 +9,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.Level;
@@ -133,7 +133,15 @@ public final class ExtensionCharmService {
         target.playSound(null, spawn, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 1.0f, 1.0f);
         PocketDimensionEvents.scheduleLadderSound(player.getUUID(), 2);
 
+        // Name the ways out, at the one moment a player is guaranteed to be reading.
+        //
+        // Three exits exist and none of them announced itself: the hatch or door in the shell, the
+        // Claustra Reverto charm, and a void-fall safety net below y=50 that catches a player whose
+        // hatch has been broken or locked from outside. That net is the fail-safe, and a player who
+        // does not know it exists experiences a griefed hatch as being trapped forever.
         PocketStatusS2CPayload.send(player, "Entering " + record.pocketName());
+        player.displayClientMessage(
+                Component.translatable("pocket.wizards_and_beasts.entry_hint"), false);
     }
 
     public static void exitPocket(ServerPlayer player) {
@@ -171,48 +179,6 @@ public final class ExtensionCharmService {
         player.teleport(transition);
         setInventoryLatchSecured(player, true);
         PocketStatusS2CPayload.send(player, "Returning from extension realm");
-    }
-
-    // Called by creature release interactions — wire to creature entity AI
-    // when creature entities are implemented.
-    public static void releaseToWorld(ServerPlayer player, TrunkRecord trunk) {
-        if (!(player.level() instanceof ServerLevel sourceLevel)) return;
-
-        TrunkRegistryData data = TrunkRegistryData.get(sourceLevel);
-        ServerLevel returnLevel = sourceLevel.getServer().overworld();
-        BlockPos returnPos = BlockPos.ZERO;
-
-        String dimStr = data.getReturnDimension(player.getUUID()).orElse(null);
-        BlockPos savedPos = data.getReturnPosition(player.getUUID()).orElse(null);
-        if (dimStr != null && savedPos != null) {
-            try {
-                ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION, Identifier.parse(dimStr));
-                ServerLevel candidate = sourceLevel.getServer().getLevel(dimKey);
-                if (candidate != null) {
-                    returnLevel = candidate;
-                    returnPos = savedPos;
-                }
-            } catch (Exception ex) {
-                LOGGER.warn("[WizardsAndBeasts] Failed to parse saved return dimension '{}' for {} — falling back to overworld spawn",
-                        dimStr, player.getUUID(), ex);
-            }
-        }
-        data.clearReturnData(player.getUUID());
-        PocketDimensionEvents.cancelLadderSound(player.getUUID());
-
-        BlockPos safe = findSafeSpawn(returnLevel, returnPos);
-        TeleportTransition transition = new TeleportTransition(
-                returnLevel, Vec3.atCenterOf(safe), Vec3.ZERO,
-                player.getYRot(), player.getXRot(), Set.of(), entity -> {});
-        player.teleport(transition);
-
-        // Spawn PORTAL particles at exit location to mark the release point.
-        returnLevel.sendParticles(ParticleTypes.PORTAL,
-                safe.getX() + 0.5, safe.getY() + 1.0, safe.getZ() + 0.5,
-                30, 0.3, 0.5, 0.3, 0.1);
-        returnLevel.playSound(null, safe, SoundEvents.ENDER_EYE_DEATH, SoundSource.NEUTRAL, 1.0f, 0.9f);
-
-        PocketStatusS2CPayload.send(player, "Released from extension realm");
     }
 
     /** Sets latchSecured on all packed trunk stacks (carrying POCKET_CASE_ID) in the player's inventory. */

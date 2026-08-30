@@ -9,14 +9,12 @@ import at.koopro.wizardsandbeasts.map.MaraudersMapAtlasStore;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.network.map.MapOpenS2CPayload;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -53,7 +51,6 @@ import java.util.function.Consumer;
  * someone on the trusted list and they open the same parchment, already charted.
  */
 public class MaraudersMapItem extends GeoItemBase {
-    private static final org.slf4j.Logger LOGGER = com.mojang.logging.LogUtils.getLogger();
 
     private static final String TAG_MAP_ID = "MapId";
     private static final String TAG_BOUND_X = "BoundX";
@@ -245,44 +242,6 @@ public class MaraudersMapItem extends GeoItemBase {
         return false;
     }
 
-    public static void addTrusted(ItemStack stack, UUID playerUuid) {
-        if (isTrusted(stack, playerUuid)) return;
-        CompoundTag tag = getCustomTag(stack);
-        ListTag trusted = tag.getList(TAG_TRUSTED).orElse(new ListTag());
-        trusted.add(StringTag.valueOf(playerUuid.toString()));
-        tag.put(TAG_TRUSTED, trusted);
-        setCustomTag(stack, tag);
-    }
-
-    public static void removeTrusted(ItemStack stack, UUID playerUuid) {
-        CompoundTag tag = getCustomTag(stack);
-        ListTag trusted = tag.getList(TAG_TRUSTED).orElse(new ListTag());
-        String uuidStr = playerUuid.toString();
-        ListTag newTrusted = new ListTag();
-        for (int i = 0; i < trusted.size(); i++) {
-            if (!trusted.getString(i).orElse("").equals(uuidStr)) {
-                newTrusted.add(trusted.get(i));
-            }
-        }
-        tag.put(TAG_TRUSTED, newTrusted);
-        setCustomTag(stack, tag);
-    }
-
-    public static List<UUID> getTrustedPlayers(ItemStack stack) {
-        CompoundTag tag = getCustomTag(stack);
-        ListTag trusted = tag.getList(TAG_TRUSTED).orElse(new ListTag());
-        List<UUID> result = new ArrayList<>();
-        for (int i = 0; i < trusted.size(); i++) {
-            try {
-                result.add(UUID.fromString(trusted.getString(i).orElse("")));
-            } catch (IllegalArgumentException e) {
-                LOGGER.warn("[WizardsAndBeasts] Skipping malformed trusted-player UUID '{}' on Marauder's Map",
-                        trusted.getString(i).orElse(""));
-            }
-        }
-        return result;
-    }
-
     private void sendInsult(ItemStack stack, Player player) {
         CompoundTag tag = getCustomTag(stack);
         int index = tag.getInt(TAG_INSULT).orElse(0);
@@ -295,24 +254,6 @@ public class MaraudersMapItem extends GeoItemBase {
                 Component.literal(insult));
         tag.putInt(TAG_INSULT, (index + 1) % INSULTS.size());
         setCustomTag(stack, tag);
-    }
-
-    /** Where this map was first unfolded. Flavour for the tooltip, never the view centre. */
-    public static BlockPos getBoundPos(ItemStack stack) {
-        CompoundTag tag = getCustomTag(stack);
-        return new BlockPos(
-                tag.getInt(TAG_BOUND_X).orElse(0), 0,
-                tag.getInt(TAG_BOUND_Z).orElse(0));
-    }
-
-    public static Identifier getBoundDimension(ItemStack stack) {
-        CompoundTag tag = getCustomTag(stack);
-        String dim = tag.getString(TAG_BOUND_DIMENSION).orElse("");
-        if (dim.isEmpty()) {
-            return Identifier.fromNamespaceAndPath("minecraft", "overworld");
-        }
-        Identifier parsed = Identifier.tryParse(dim);
-        return parsed != null ? parsed : Identifier.fromNamespaceAndPath("minecraft", "overworld");
     }
 
     private static CompoundTag getCustomTag(ItemStack stack) {

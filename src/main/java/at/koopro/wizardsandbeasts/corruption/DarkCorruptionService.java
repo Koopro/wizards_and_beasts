@@ -41,13 +41,6 @@ public final class DarkCorruptionService {
         return next;
     }
 
-    /** Relieves corruption (cleansing rites, remorse). Clamped at zero; never vocation-scaled. */
-    public static float relieve(ServerPlayer player, float amount) {
-        float next = Math.max(0.0f, get(player) - Math.max(0.0f, amount));
-        apply(player, next);
-        return next;
-    }
-
     /**
      * Pushes the persisted attachment value onto the display {@link ModAttributes#DARK_CORRUPTION}
      * Attribute. The attachment is the source of truth; the syncable Attribute is only a client-visible

@@ -8,12 +8,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.entity.vehicle.VehicleEntity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
@@ -144,22 +142,5 @@ public final class SpellTargetHelper {
             }
         }
         return target;
-    }
-
-    /**
-     * First living entity along the caster's view ray, up to {@code maxRange} blocks.
-     * Uses {@link ProjectileUtil#getHitResultOnViewVector} so range is not capped by
-     * vanilla {@link net.minecraft.world.entity.Entity#pick} entity interaction distance (~3 blocks).
-     */
-    @Nullable
-    public static LivingEntity findLivingAlongCrosshair(ServerPlayer caster, float maxRange) {
-        if (maxRange <= 0) return null;
-        HitResult hit = ProjectileUtil.getHitResultOnViewVector(
-                caster,
-                e -> e instanceof LivingEntity && e != caster && e.isPickable(),
-                maxRange);
-        if (hit.getType() != HitResult.Type.ENTITY) return null;
-        Entity e = ((EntityHitResult) hit).getEntity();
-        return e instanceof LivingEntity living ? living : null;
     }
 }

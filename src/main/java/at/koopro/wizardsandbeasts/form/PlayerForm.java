@@ -28,10 +28,6 @@ public record PlayerForm(
         float firstPersonScale
 ) {
 
-    public boolean hasFlag(RenderFlag flag) {
-        return renderFlags.contains(flag);
-    }
-
     public int renderFlagBitmask() {
         return RenderFlag.toBitmask(renderFlags);
     }

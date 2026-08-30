@@ -32,11 +32,4 @@ public final class BestiaryEntryRegistry {
 
     public static @Nullable BestiaryEntry clientGet(Identifier id) { return CLIENT_ENTRIES.get(id); }
     public static Collection<BestiaryEntry> clientGetAll() { return CLIENT_ENTRIES.values(); }
-
-    public static List<BestiaryEntry> getByCategory(BestiaryCategory category) {
-        return ENTRIES.values().stream()
-                .filter(e -> e.category() == category)
-                .sorted(Comparator.comparingInt(BestiaryEntry::sortOrder).thenComparing(e -> e.id().toString()))
-                .toList();
-    }
 }

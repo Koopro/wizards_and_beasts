@@ -57,9 +57,4 @@ public final class PlayerFeedback {
     public static void actionBar(Player player, Component message) {
         player.displayClientMessage(message, true);
     }
-
-    /** Command output only. Gameplay events belong on {@link #toast} or {@link #actionBar}. */
-    public static void chat(Player player, Component message) {
-        player.displayClientMessage(message, false);
-    }
 }

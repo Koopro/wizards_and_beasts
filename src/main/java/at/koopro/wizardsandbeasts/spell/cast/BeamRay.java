@@ -16,15 +16,7 @@ import net.minecraft.world.phys.Vec3;
  */
 public record BeamRay(Vec3 start, Vec3 end, HitResult hit, float reachedDistance) {
 
-    public boolean hitsAnything() {
-        return hit != null && hit.getType() != HitResult.Type.MISS;
-    }
-
     public boolean hitsEntity() {
         return hit != null && hit.getType() == HitResult.Type.ENTITY;
-    }
-
-    public boolean hitsBlock() {
-        return hit != null && hit.getType() == HitResult.Type.BLOCK;
     }
 }

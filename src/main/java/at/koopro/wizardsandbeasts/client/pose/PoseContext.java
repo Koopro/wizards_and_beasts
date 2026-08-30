@@ -24,28 +24,4 @@ public record PoseContext(
         AvatarRenderState state,
         FirstPersonContext firstPerson,
         float partialTicks) {
-
-    /** Walk cycle position, for passes that want to damp against stride. */
-    public float walkPos() {
-        return state.walkAnimationPos;
-    }
-
-    public float walkSpeed() {
-        return state.walkAnimationSpeed;
-    }
-
-    /** Head pitch in degrees, the primary input to a flight attitude. */
-    public float pitchDeg() {
-        return state.xRot;
-    }
-
-    /** Head yaw relative to the body, in degrees. */
-    public float headYawDeg() {
-        return state.yRot - state.bodyRot;
-    }
-
-    /** A continuous clock for oscillators. Distinct from {@link #partialTicks()} — see the record doc. */
-    public float ageInTicks() {
-        return state.ageInTicks;
-    }
 }

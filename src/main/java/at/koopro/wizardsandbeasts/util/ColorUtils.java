@@ -66,14 +66,6 @@ public final class ColorUtils {
     }
 
     /**
-     * Creates a semi-transparent black background. Common for HUD panels.
-     * @param alpha 0-255
-     */
-    public static int blackBg(int alpha) {
-        return alpha << 24;
-    }
-
-    /**
      * Packs RGBA components (each 0-255) into a single ARGB int.
      */
     public static int pack(int r, int g, int b, int a) {
@@ -130,14 +122,5 @@ public final class ColorUtils {
      */
     public static int darken(int argb, float amount) {
         return lerp(argb, withAlpha(BLACK, getAlpha(argb)), amount);
-    }
-
-    /**
-     * Adjusts color opacity by multiplying the existing alpha.
-     * @param factor 0.0 = transparent, 1.0 = no change, 2.0 = double alpha (clamped)
-     */
-    public static int fadeAlpha(int argb, float factor) {
-        int a = Math.clamp((int) (getAlpha(argb) * factor), 0, 255);
-        return setAlpha(argb, a);
     }
 }

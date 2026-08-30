@@ -291,9 +291,4 @@ public final class FlightPosePass extends ProceduralPosePass {
         Tracked state = tracked.get(entityId);
         return state != null && state.toState != null && !state.fade.idle();
     }
-
-    public @Nullable FlightPoseState currentState(int entityId) {
-        Tracked state = tracked.get(entityId);
-        return state == null ? null : state.toState;
-    }
 }

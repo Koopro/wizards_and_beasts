@@ -172,19 +172,4 @@ public record AbilitySelectionState(
     public AbilitySelectionState withoutCooldowns() {
         return cooldowns.isEmpty() ? this : new AbilitySelectionState(selected, quickSlots, toggles, Map.of());
     }
-
-    /** Removes expired cooldown stamps relative to {@code gameTime}; returns {@code this} if nothing changed. */
-    public AbilitySelectionState prunedCooldowns(long gameTime) {
-        if (cooldowns.isEmpty()) {
-            return this;
-        }
-        LinkedHashMap<Identifier, Long> next = new LinkedHashMap<>();
-        for (Map.Entry<Identifier, Long> entry : cooldowns.entrySet()) {
-            if (entry.getValue() > gameTime) {
-                next.put(entry.getKey(), entry.getValue());
-            }
-        }
-        return next.size() == cooldowns.size() ? this
-                : new AbilitySelectionState(selected, quickSlots, toggles, next);
-    }
 }

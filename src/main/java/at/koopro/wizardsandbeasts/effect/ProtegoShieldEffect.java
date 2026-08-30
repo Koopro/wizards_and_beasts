@@ -23,10 +23,6 @@ public final class ProtegoShieldEffect extends MobEffect {
         return Math.min(3, Math.max(0, amplifier / 16));
     }
 
-    public static int deflectionsFromAmplifier(int amplifier) {
-        return Math.min(15, Math.max(0, amplifier % 16));
-    }
-
     @Override
     public boolean isBeneficial() {
         return true;

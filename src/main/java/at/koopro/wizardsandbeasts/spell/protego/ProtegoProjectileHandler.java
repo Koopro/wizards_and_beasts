@@ -1,19 +1,13 @@
 package at.koopro.wizardsandbeasts.spell.protego;
 
-import at.koopro.wizardsandbeasts.entity.spell.SpellProjectileEntity;
 import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
 import at.koopro.wizardsandbeasts.skill.SkillTreeId;
 import at.koopro.wizardsandbeasts.spell.core.Spells;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
 public final class ProtegoProjectileHandler {
 
     private ProtegoProjectileHandler() {}
-
-    public static void tryDeflect(ServerLevel level, SpellProjectileEntity projectile) {
-        // Legacy hook retained for compatibility. Deflection is now handled by ProtegoShieldEntity.
-    }
 
     public static int resolveTier(ServerPlayer caster, int heldTicks) {
         float prof = Spells.PROTEGO.getProficiencyScalar(caster);

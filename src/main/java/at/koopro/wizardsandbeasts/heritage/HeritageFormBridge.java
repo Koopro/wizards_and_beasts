@@ -1,7 +1,5 @@
 package at.koopro.wizardsandbeasts.heritage;
 
-import at.koopro.wizardsandbeasts.form.FormRegistry;
-import at.koopro.wizardsandbeasts.form.PlayerForm;
 
 import org.jspecify.annotations.Nullable;
 
@@ -60,14 +58,5 @@ public final class HeritageFormBridge {
             case MERPEOPLE -> { forms.add("merfolk_land"); forms.add("merfolk_water"); }
         }
         return forms;
-    }
-
-    /**
-     * Returns the default size profile ID for the given heritage/variant/state.
-     */
-    public static String getDefaultSizeProfileId(Heritage heritage, @Nullable HeritageVariant variant,
-                                                   TransformationState state) {
-        PlayerForm form = FormRegistry.get(getDefaultFormId(heritage, variant, state));
-        return form != null ? form.sizeProfileId() : "wizardkind_default";
     }
 }

@@ -206,15 +206,6 @@ public final class ObscurialRules {
         return ObscurialTierRules.getStressTier(stressPercent);
     }
 
-    public static float estimateDarkFormSecondsRemaining(ServerPlayer player, ServerLevel level) {
-        float stability = ObscurialResourceManager.getDrain(player);
-        float charge = ObscurialResourceManager.getCharge(player);
-        float stabilityPerTick = Math.max(0.0001f, computeDarkDrainPerTick(player, level));
-        float chargePerTick = Math.max(0.0001f, computeDarkChargeCostPerTick(player, level));
-        float limitingTicks = Math.min(stability / stabilityPerTick, charge / chargePerTick);
-        return Math.max(0f, limitingTicks / 20.0f);
-    }
-
     public static boolean isSpellAllowedInDarkForm(Spell spell) {
         return ObscurialSpellPolicy.isSpellAllowedInDarkForm(spell, DARK_FORM_ALLOWED_IDS);
     }

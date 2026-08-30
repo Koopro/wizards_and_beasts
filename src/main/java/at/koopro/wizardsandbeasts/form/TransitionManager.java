@@ -69,17 +69,6 @@ public final class TransitionManager {
     }
 
     /**
-     * Cancels an active transition, restoring the player's previous state.
-     */
-    public static void cancelTransition(ServerPlayer player) {
-        ActiveTransition transition = ACTIVE.remove(player.getUUID());
-        if (transition != null) {
-            player.setInvulnerable(transition.wasInvulnerable);
-            TransitionEndS2CPayload.sendToTracking(player, transition.fromFormId);
-        }
-    }
-
-    /**
      * Returns whether a player is currently transitioning.
      */
     public static boolean isTransitioning(UUID playerUUID) {

@@ -186,10 +186,6 @@ public class PlayerSpellData implements ModAttachments.NbtSerializable {
         }
     }
 
-    public void clearSpellProficiency(String spellId) {
-        spellProficiencies.remove(spellId);
-    }
-
     /**
      * Sets a spell's lifetime cast count to an absolute value. Intended for
      * applying snapshot syncs from the server; gameplay should normally use
@@ -268,8 +264,6 @@ public class PlayerSpellData implements ModAttachments.NbtSerializable {
     }
 
     public int getCombatSpellCasts() { return combatSpellCasts; }
-    public void incrementCombatSpellCasts() { combatSpellCasts = Math.max(0, combatSpellCasts + 1); }
-    public void setCombatSpellCasts(int value) { combatSpellCasts = Math.max(0, value); }
 
     public CompoundTag save() {
         CompoundTag tag = new CompoundTag();

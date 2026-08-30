@@ -52,12 +52,6 @@ public class ModelDebugEditor {
             : VANILLA_PARTS;
     }
 
-    public void populateGeckoBones(List<String> boneNames) {
-        geckoBoneNames.clear();
-        geckoBoneNames.add("root");
-        geckoBoneNames.addAll(boneNames);
-    }
-
     public void adjustValue(float delta) {
         String[] parts = getCurrentPartNames();
         if (parts.length == 0 || selectedPartIndex >= parts.length) return;
@@ -124,17 +118,6 @@ public class ModelDebugEditor {
     public String getCreatureType() { return activeCreatureType; }
     public ModelMode getModelMode() { return modelMode; }
     public Map<String, Map<String, DebugTransformData>> getAllData() { return creatureData; }
-
-    public void setCreatureType(String type) {
-        activeCreatureType = type;
-        selectedPartIndex = 0;
-    }
-
-    /** Loads previously exported data (e.g. from JSON config). */
-    public void loadData(Map<String, Map<String, DebugTransformData>> data) {
-        creatureData.clear();
-        creatureData.putAll(data);
-    }
 
     public enum EditMode { SCALE, OFFSET, ROTATION }
     public enum Axis { X, Y, Z }

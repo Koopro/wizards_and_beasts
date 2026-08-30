@@ -9,7 +9,6 @@ import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Static registry of all {@link PlayerForm} definitions.
@@ -129,15 +128,6 @@ public final class FormRegistry {
     public static PlayerForm getOrDefault(String formId) {
         PlayerForm form = FORMS.get(formId);
         return form != null ? form : FORMS.get("human_default");
-    }
-
-    /**
-     * Returns all forms whose size profile matches profiles available to the given list of profile IDs.
-     */
-    public static List<PlayerForm> getFormsForProfileIds(List<String> profileIds) {
-        return FORMS.values().stream()
-                .filter(f -> profileIds.contains(f.sizeProfileId()))
-                .collect(Collectors.toList());
     }
 
     public static Map<String, PlayerForm> getAll() {

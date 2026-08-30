@@ -25,7 +25,6 @@ public final class PlayerModelViewport {
     private static final float FILL_FRACTION = 0.88f;
     private static final float PLAYER_UNITS  = 1.8f;
 
-
     private int vx, vy, vw, vh;
 
     /**
@@ -52,11 +51,6 @@ public final class PlayerModelViewport {
                 mouseY,
                 player
         );
-    }
-
-    /** @return true if the (sx,sy) screen coordinate is inside the viewport. */
-    public boolean isInsideViewport(double sx, double sy) {
-        return sx >= vx && sx < vx + vw && sy >= vy && sy < vy + vh;
     }
 
 }

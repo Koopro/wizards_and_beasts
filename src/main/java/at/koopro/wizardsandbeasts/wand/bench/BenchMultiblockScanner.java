@@ -20,10 +20,6 @@ public final class BenchMultiblockScanner {
     private BenchMultiblockScanner() {
     }
 
-    public static float scanEnhancers(Level level, BlockPos benchPos, HolderLookup.RegistryLookup<BenchEnhancerDefinition> enhancerLookup, int radius) {
-        return scanEnhancersWithPositions(level, benchPos, enhancerLookup, radius).tierScore();
-    }
-
     public static ScanResult scanEnhancersWithPositions(Level level, BlockPos benchPos, HolderLookup.RegistryLookup<BenchEnhancerDefinition> enhancerLookup, int radius) {
         List<BenchEnhancerDefinition> definitions = enhancerLookup.listElements().map(Holder::value).toList();
         List<BlockPos> hits = new ArrayList<>();

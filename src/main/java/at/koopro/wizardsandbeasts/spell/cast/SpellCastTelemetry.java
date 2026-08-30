@@ -29,10 +29,8 @@ public final class SpellCastTelemetry {
      * Failure rate returned before a player has cast enough to fill the window. Matches the historical
      * hardcoded default so apparition balance is unchanged for players who have not yet cast.
      */
-    private static final float DEFAULT_RATE = 0.5f;
 
     /** Minimum recorded casts before the measured rate is trusted over {@link #DEFAULT_RATE}. */
-    private static final int MIN_SAMPLES = 4;
 
     /** Per-player ring of recent outcomes; {@code true} == misfire. Bounded to {@link #WINDOW}. */
     private static final Map<UUID, Deque<Boolean>> HISTORY = new ConcurrentHashMap<>();
@@ -48,31 +46,6 @@ public final class SpellCastTelemetry {
                 ring.removeFirst();
             }
         }
-    }
-
-    /**
-     * Fraction of recent casts that misfired, in {@code [0, 1]}. Returns {@link #DEFAULT_RATE} until at
-     * least {@link #MIN_SAMPLES} casts are on record.
-     */
-    public static float recentFailureRate(Player player) {
-        Deque<Boolean> ring = HISTORY.get(player.getUUID());
-        if (ring == null) {
-            return DEFAULT_RATE;
-        }
-        int total;
-        int failures = 0;
-        synchronized (ring) {
-            total = ring.size();
-            for (boolean failed : ring) {
-                if (failed) {
-                    failures++;
-                }
-            }
-        }
-        if (total < MIN_SAMPLES) {
-            return DEFAULT_RATE;
-        }
-        return (float) failures / total;
     }
 
     public static void clear(UUID playerId) {

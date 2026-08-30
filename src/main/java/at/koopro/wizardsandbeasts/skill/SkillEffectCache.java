@@ -62,7 +62,10 @@ public final class SkillEffectCache {
                             abilities.add(e.abilityId());
                     case SkillEffect.GameplayBonus e ->
                             gameplay.merge(e.stat(), e.perLevel() * level, Float::sum);
-                    case SkillEffect.LearnSpell ignored -> {} // no-op: spell learning is handled outside skill trees
+                    // Pushed into PlayerSpellData at allocation by SkillSystemAPI.applyImmediateEffects
+                    // and revoked by revokeWebTaughtSpells, because spell knowledge is stored rather
+                    // than derived. Nothing for a read-side cache to aggregate.
+                    case SkillEffect.LearnSpell ignored -> {}
                     case SkillEffect.PassiveAttribute ignored -> {} // handled at unlock time
                     // Grant/refinement flow through the source-tracked AbilityGrants layer, not this cache.
                     case SkillEffect.GrantAbility ignored -> {}
@@ -75,25 +78,21 @@ public final class SkillEffectCache {
     }
 
     /**
-     * Returns the total damage multiplier from skills for a specific spell.
-     * Combines spell-specific bonuses + category bonuses.
-     * Returns 1.0 if no bonuses apply (multiplicative identity).
+     * The per-spell damage bonus alone, with no category component.
+     *
+     * <p>Separate from {@link #getSpellDamageMultiplier} because the two halves reach cast time by
+     * different routes: category bonuses are pre-aggregated into {@code PlayerSkillBonusData} when
+     * allocation changes, and only the per-spell half is missing there. A caller that wants "the
+     * skill web's contribution" and already has the category half must add only this, or categories
+     * count twice.
      */
-    public float getSpellDamageMultiplier(String spellId, SpellCategory category) {
-        float bonus = spellDamageBonuses.getOrDefault(spellId, 0f)
-                + categoryDamageBonuses.getOrDefault(category, 0f);
-        return 1.0f + bonus;
+    public float getSpellOnlyDamageMultiplier(String spellId) {
+        return 1.0f + spellDamageBonuses.getOrDefault(spellId, 0f);
     }
 
-    /**
-     * Returns the total cooldown multiplier from skills for a specific spell.
-     * Combines spell-specific reductions + category reductions.
-     * Returns 1.0 if no reductions apply. Lower = faster cooldown.
-     */
-    public float getSpellCooldownMultiplier(String spellId, SpellCategory category) {
-        float reduction = spellCooldownReductions.getOrDefault(spellId, 0f)
-                + categoryCooldownReductions.getOrDefault(category, 0f);
-        return Math.max(0.1f, 1.0f - reduction); // floor at 10% cooldown
+    /** Per-spell cooldown reduction alone. Floored the same way as the combined form. */
+    public float getSpellOnlyCooldownMultiplier(String spellId) {
+        return Math.max(0.1f, 1.0f - spellCooldownReductions.getOrDefault(spellId, 0f));
     }
 
     /**

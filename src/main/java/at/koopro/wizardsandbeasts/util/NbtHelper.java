@@ -157,15 +157,6 @@ public final class NbtHelper {
         }).orElse(fallback);
     }
 
-    @Nullable
-    public static <E extends Enum<E>> E loadEnumNullable(CompoundTag tag, String key,
-                                                          Class<E> enumClass) {
-        return tag.getString(key).map(s -> {
-            try { return Enum.valueOf(enumClass, s); }
-            catch (IllegalArgumentException e) { return (E) null; }
-        }).orElse(null);
-    }
-
     // ── Nullable Strings ─────────────────────────────────────────────────
 
     public static void saveNullableString(CompoundTag tag, String key, @Nullable String value) {

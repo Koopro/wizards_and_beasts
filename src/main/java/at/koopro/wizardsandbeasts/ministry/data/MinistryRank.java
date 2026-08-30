@@ -56,8 +56,4 @@ public enum MinistryRank implements StringRepresentable {
     public boolean mayAppoint() {
         return atLeast(MINISTER);
     }
-
-    public boolean mayIssueNotices() {
-        return atLeast(OBLIVIATOR);
-    }
 }

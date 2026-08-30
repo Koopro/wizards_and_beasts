@@ -274,10 +274,6 @@ public class ProtegoShieldEntity extends Entity implements GeoEntity {
         return this.entityData.get(DATA_DEFLECTIONS_REMAINING);
     }
 
-    public BlockPos getAnchorPos() {
-        return this.entityData.get(DATA_ANCHOR_POS);
-    }
-
     public @Nullable UUID getCasterUuid() {
         String raw = this.entityData.get(DATA_CASTER_UUID);
         if (raw == null || raw.isBlank()) {

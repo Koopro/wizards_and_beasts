@@ -40,11 +40,6 @@ public record BeamStyle(Layer outer, Layer mid, Layer core, Path path, Pulse pul
         Geometry(float alphaScale) {
             this.alphaScale = alphaScale;
         }
-
-        /** Per-vertex alpha correction so swapping geometry does not change apparent brightness. */
-        public float alphaScale() {
-            return alphaScale;
-        }
     }
 
     /**

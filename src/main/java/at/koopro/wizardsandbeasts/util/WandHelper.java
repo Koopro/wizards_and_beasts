@@ -52,13 +52,6 @@ public final class WandHelper {
         return ItemStack.EMPTY;
     }
 
-    /**
-     * True when the player is actively using a wand (right-click hold).
-     */
-    public static boolean isUsingWand(Player player) {
-        return player.isUsingItem() && isWand(player.getUseItem());
-    }
-
     /** True when this wand stack lists the player as bonded master (post-resonance match). */
     public static boolean isWandBondedTo(Player player, ItemStack wand) {
         if (wand.isEmpty() || !isWand(wand)) {

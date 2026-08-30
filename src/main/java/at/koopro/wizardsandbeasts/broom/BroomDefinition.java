@@ -62,10 +62,24 @@ public record BroomDefinition(
         TagKey<Item> repairMaterial,
         List<Component> loreLines,
         Map<BroomSlot, Identifier> modelSlots,
-        int woodTint) {
+        int woodTint,
+        BroomAssets assets,
+        BroomHandling handling,
+        BroomAudio audio,
+        BroomSeat seat) {
 
     /** Tint that multiplies to no change — the value a broom carries when it authors no wood_tint. */
     public static final int UNTINTED = 0xFFFFFFFF;
+
+    /**
+     * Where a subpath-form {@code texture} is rooted, under {@code textures/entity/}.
+     *
+     * <p>A broom that names no sheet draws {@code textures/entity/broom.png}, whose handle is
+     * painted greyscale so {@link #woodTint()} can colour it. A broom that names one draws that
+     * sheet in final colour and must leave {@code wood_tint} alone — the two are alternatives, not
+     * layers, and setting both multiplies the colour in twice.
+     */
+    public static final String TEXTURE_ROOT = "broom/";
 
     public static final Codec<BroomDefinition> CODEC = Codec.of(
             BroomDefinition::encode,
@@ -80,6 +94,35 @@ public record BroomDefinition(
     private static final Codec<Map<BroomSlot, Identifier>> MODEL_SLOTS_CODEC =
             Codec.unboundedMap(SLOT_KEY_CODEC, Identifier.CODEC);
 
+    private static final Codec<BroomTier> TIER_CODEC = Codec.STRING.comapFlatMap(
+            name -> {
+                try {
+                    return DataResult.success(BroomTier.valueOf(name));
+                } catch (IllegalArgumentException ex) {
+                    return DataResult.error(() -> "Invalid tier '" + name + "'");
+                }
+            },
+            BroomTier::name);
+
+    /**
+     * A repair-material tag, written with or without the {@code #} a tag reference usually carries.
+     * The leading hash is what every other tag field in the mod's data uses, so it is accepted here
+     * even though the value is parsed as a bare tag id.
+     */
+    private static final Codec<TagKey<Item>> REPAIR_MATERIAL_CODEC = Codec.STRING.comapFlatMap(
+            raw -> {
+                if (raw.isBlank()) {
+                    return DataResult.error(() -> "repairMaterial must not be blank");
+                }
+                String value = raw.startsWith("#") ? raw.substring(1) : raw;
+                try {
+                    return DataResult.success(TagKey.create(Registries.ITEM, Identifier.parse(value)));
+                } catch (Exception ex) {
+                    return DataResult.error(() -> "Invalid repairMaterial value: " + raw);
+                }
+            },
+            tag -> "#" + tag.location());
+
     /**
      * Hex-string colour, the convention the creature {@code tint} ability already uses:
      * {@code "#RRGGBB"} is opaque, {@code "#AARRGGBB"} is taken as written.
@@ -88,83 +131,81 @@ public record BroomDefinition(
             BroomDefinition::parseHex,
             argb -> String.format(Locale.ROOT, "#%08X", argb));
 
+    /** True when this broom paints its own sheet and must therefore not also be tinted. */
+    public boolean hasOwnTexture() {
+        return assets.texture().isPresent();
+    }
+
     /** The variant chosen for {@code slot}, or empty when the slot is unset (so nothing is drawn). */
     public Optional<Identifier> modelSlot(BroomSlot slot) {
         return Optional.ofNullable(modelSlots.get(slot));
     }
 
+    /**
+     * Reads one definition, reporting every fault it finds rather than only the first.
+     *
+     * <p>This used to be a nested {@code flatMap} pyramid 22 levels deep, because
+     * {@code RecordCodecBuilder.group} caps at 16 fields and this record has more. The pyramid
+     * worked, but it short-circuited: a datapack with four bad values reported one, so fixing it
+     * took four reload cycles. {@link BroomFields} collects instead, which also means adding a field
+     * is one line here rather than one more level of indentation for every line below it.
+     *
+     * <p>Every optional field falls back to the value the broom had before that field existed, so a
+     * definition written against any earlier version of this schema decodes to the same broom it
+     * always described. The one deliberate exception is {@code yawDrift} — see
+     * {@link HandlingProfile}.
+     */
     private static <T> DataResult<Pair<BroomDefinition, T>> decode(DynamicOps<T> ops, T input) {
-        Dynamic<T> dynamic = new Dynamic<>(ops, input);
-        DataResult<Identifier> id = dynamic.get("id").result()
-                .map(node -> Identifier.CODEC.parse(ops, node.getValue()))
-                .orElse(DataResult.error(() -> "Missing required field: id"));
-        DataResult<Component> displayName = dynamic.get("displayName").result()
-                .map(node -> ComponentSerialization.CODEC.parse(ops, node.getValue()))
-                .orElse(DataResult.error(() -> "Missing required field: displayName"));
-        DataResult<BroomTier> tier = dynamic.get("tier").asString().flatMap(name -> {
-            try {
-                return DataResult.success(BroomTier.valueOf(name));
-            } catch (IllegalArgumentException ex) {
-                return DataResult.error(() -> "Invalid tier '" + name + "'");
-            }
-        });
-        DataResult<Float> maxSpeed = readRangedFloat(dynamic, "maxSpeed", 0.1f, 2.0f);
-        DataResult<Float> acceleration = readRangedFloat(dynamic, "acceleration", 0.005f, 0.15f);
-        DataResult<Float> deceleration = readRangedFloat(dynamic, "deceleration", 0.005f, 0.05f);
-        DataResult<Float> boostMultiplier = readRangedFloat(dynamic, "boostMultiplier", 1.0f, 3.0f);
-        DataResult<Integer> boostDurationTicks = readRangedInt(dynamic, "boostDurationTicks", 20, 200);
-        DataResult<Integer> boostCooldownTicks = readRangedInt(dynamic, "boostCooldownTicks", 40, 400);
-        DataResult<Float> weakGravity = readRangedFloat(dynamic, "weakGravity", 0.001f, 0.02f);
-        DataResult<Float> lerpFactor = readRangedFloat(dynamic, "lerpFactor", 0.05f, 0.5f);
-        DataResult<Float> turnSpeed = readRangedFloat(dynamic, "turnSpeed", 0.5f, 2.0f);
-        DataResult<Float> ascentSpeed = readRangedFloat(dynamic, "ascentSpeed", 0.05f, 0.4f);
-        DataResult<Float> descentSpeed = readRangedFloat(dynamic, "descentSpeed", 0.05f, 0.4f);
-        DataResult<Float> handlingRating = readRangedFloat(dynamic, "handlingRating", 0.0f, 1.0f);
-        DataResult<Float> stabilityRating = readRangedFloat(dynamic, "stabilityRating", 0.0f, 1.0f);
-        DataResult<Integer> durability = readRangedInt(dynamic, "durability", 50, 2000);
-        DataResult<TagKey<Item>> repairMaterial = dynamic.get("repairMaterial").result()
-                .map(node -> parseRepairMaterialTag(ops, node))
-                .orElse(DataResult.error(() -> "Missing required field: repairMaterial"));
-        DataResult<List<Component>> loreLines = dynamic.get("loreLines").result()
-                .map(node -> ComponentSerialization.CODEC.listOf().parse(ops, node.getValue()))
-                .orElse(DataResult.success(List.of()));
+        BroomFields<T> f = new BroomFields<>(new Dynamic<>(ops, input));
+
+        Identifier id = f.required("id", Identifier.CODEC);
+        Component displayName = f.required("displayName", ComponentSerialization.CODEC);
+        BroomTier tier = f.optional("tier", TIER_CODEC, null);
+        if (tier == null && !f.has("tier")) {
+            f.fault("Missing required field: tier");
+        }
+
+        float maxSpeed = f.rangedFloat("maxSpeed", 0.1f, 2.0f);
+        float acceleration = f.rangedFloat("acceleration", 0.005f, 0.15f);
+        float deceleration = f.rangedFloat("deceleration", 0.005f, 0.05f);
+        float boostMultiplier = f.rangedFloat("boostMultiplier", 1.0f, 3.0f);
+        int boostDurationTicks = f.rangedInt("boostDurationTicks", 20, 200);
+        int boostCooldownTicks = f.rangedInt("boostCooldownTicks", 40, 400);
+        float weakGravity = f.rangedFloat("weakGravity", 0.001f, 0.02f);
+        float lerpFactor = f.rangedFloat("lerpFactor", 0.05f, 0.5f);
+        float turnSpeed = f.rangedFloat("turnSpeed", 0.5f, 2.0f);
+        float ascentSpeed = f.rangedFloat("ascentSpeed", 0.05f, 0.4f);
+        float descentSpeed = f.rangedFloat("descentSpeed", 0.05f, 0.4f);
+        float handlingRating = f.rangedFloat("handlingRating", 0.0f, 1.0f);
+        float stabilityRating = f.rangedFloat("stabilityRating", 0.0f, 1.0f);
+        int durability = f.rangedInt("durability", 50, 2000);
+
+        TagKey<Item> repairMaterial = f.required("repairMaterial", REPAIR_MATERIAL_CODEC);
+        List<Component> loreLines =
+                f.optional("loreLines", ComponentSerialization.CODEC.listOf(), List.of());
         // Both optional: a broom JSON written before the master model existed still decodes, and
         // gets the plain default silhouette with no tint rather than an empty model.
-        DataResult<Map<BroomSlot, Identifier>> modelSlots = dynamic.get("model_slots").result()
-                .map(node -> MODEL_SLOTS_CODEC.parse(ops, node.getValue()))
-                .orElse(DataResult.success(BroomSlot.defaults()));
-        DataResult<Integer> woodTint = dynamic.get("wood_tint").result()
-                .map(node -> WOOD_TINT_CODEC.parse(ops, node.getValue()))
-                .orElse(DataResult.success(UNTINTED));
+        Map<BroomSlot, Identifier> modelSlots =
+                f.optional("model_slots", MODEL_SLOTS_CODEC, BroomSlot.defaults());
+        int woodTint = f.optional("wood_tint", WOOD_TINT_CODEC, UNTINTED);
 
-        return id.flatMap(vId ->
-                displayName.flatMap(vDisplay ->
-                        tier.flatMap(vTier ->
-                                maxSpeed.flatMap(vMaxSpeed ->
-                                        acceleration.flatMap(vAcceleration ->
-                                                deceleration.flatMap(vDeceleration ->
-                                                        boostMultiplier.flatMap(vBoostMultiplier ->
-                                                                boostDurationTicks.flatMap(vBoostDuration ->
-                                                                        boostCooldownTicks.flatMap(vBoostCooldown ->
-                                                                                weakGravity.flatMap(vWeakGravity ->
-                                                                                        lerpFactor.flatMap(vLerp ->
-                                                                                                turnSpeed.flatMap(vTurn ->
-                                                                                                        ascentSpeed.flatMap(vAscent ->
-                                                                                                                descentSpeed.flatMap(vDescent ->
-                                                                                                                        handlingRating.flatMap(vHandling ->
-                                                                                                                                stabilityRating.flatMap(vStability ->
-                                                                                                                                        durability.flatMap(vDurability ->
-                                                                                                                                                repairMaterial.flatMap(vRepair ->
-                                                                                                                                                        loreLines.flatMap(vLore ->
-                                                                                                                                                                modelSlots.flatMap(vSlots ->
-                                                                                                                                                                        woodTint.map(vTint ->
-                                                                                                                                                                                new BroomDefinition(vId, vDisplay, vTier,
-                                                                                                                                                                                        vMaxSpeed, vAcceleration, vDeceleration,
-                                                                                                                                                                                        vBoostMultiplier, vBoostDuration, vBoostCooldown,
-                                                                                                                                                                                        vWeakGravity, vLerp, vTurn, vAscent, vDescent,
-                                                                                                                                                                                        vHandling, vStability, vDurability, vRepair, vLore,
-                                                                                                                                                                                        vSlots, vTint)
-                                                                                                                                                                        ))))))))))))))))))))).map(def -> Pair.of(def, input));
+        BroomAssets assets = BroomAssets.decode(f);
+        BroomHandling handling = BroomHandling.decode(f);
+        BroomAudio audio = BroomAudio.decode(f);
+        BroomSeat seat = BroomSeat.decode(f);
+
+        Optional<String> failure = f.failure();
+        if (failure.isPresent()) {
+            String message = failure.get();
+            return DataResult.error(() -> message);
+        }
+
+        BroomDefinition definition = new BroomDefinition(id, displayName, tier,
+                maxSpeed, acceleration, deceleration, boostMultiplier, boostDurationTicks,
+                boostCooldownTicks, weakGravity, lerpFactor, turnSpeed, ascentSpeed, descentSpeed,
+                handlingRating, stabilityRating, durability, repairMaterial, loreLines,
+                modelSlots, woodTint, assets, handling, audio, seat);
+        return DataResult.success(Pair.of(definition, input));
     }
 
     private static <T> DataResult<T> encode(BroomDefinition definition, DynamicOps<T> ops, T prefix) {
@@ -198,6 +239,10 @@ public record BroomDefinition(
         if (definition.woodTint() != UNTINTED) {
             builder.add("wood_tint", WOOD_TINT_CODEC.encodeStart(ops, definition.woodTint()).result().orElseThrow());
         }
+        definition.assets().encode(builder, ops);
+        definition.handling().encode(builder, ops);
+        definition.audio().encode(builder, ops);
+        definition.seat().encode(builder, ops);
         return builder.build(prefix);
     }
 
@@ -215,50 +260,4 @@ public record BroomDefinition(
         }
     }
 
-    private static DataResult<Float> readRangedFloat(Dynamic<?> dynamic, String key, float min, float max) {
-        java.util.Optional<? extends Dynamic<?>> nodeOpt = dynamic.get(key).result();
-        if (nodeOpt.isEmpty()) {
-            return DataResult.error(() -> "Missing required field: " + key);
-        }
-        float v = nodeOpt.get().asFloat(Float.NaN);
-        if (Float.isNaN(v)) {
-            return DataResult.error(() -> "Invalid float for field: " + key);
-        }
-        if (v < min || v > max) {
-            return DataResult.error(() -> key + " out of range [" + min + ", " + max + "]: " + v);
-        }
-        return DataResult.success(v);
-    }
-
-    private static DataResult<Integer> readRangedInt(Dynamic<?> dynamic, String key, int min, int max) {
-        java.util.Optional<? extends Dynamic<?>> nodeOpt = dynamic.get(key).result();
-        if (nodeOpt.isEmpty()) {
-            return DataResult.error(() -> "Missing required field: " + key);
-        }
-        int v = nodeOpt.get().asInt(Integer.MIN_VALUE);
-        if (v == Integer.MIN_VALUE) {
-            return DataResult.error(() -> "Invalid int for field: " + key);
-        }
-        if (v < min || v > max) {
-            return DataResult.error(() -> key + " out of range [" + min + ", " + max + "]: " + v);
-        }
-        return DataResult.success(v);
-    }
-
-    private static <T> DataResult<TagKey<Item>> parseRepairMaterialTag(DynamicOps<T> ops, Dynamic<T> node) {
-        return node.asString().flatMap(raw -> {
-            if (raw.isBlank()) {
-                return DataResult.error(() -> "repairMaterial must not be blank");
-            }
-
-            String value = raw.startsWith("#") ? raw.substring(1) : raw;
-            Identifier id;
-            try {
-                id = Identifier.parse(value);
-            } catch (Exception ex) {
-                return DataResult.error(() -> "Invalid repairMaterial value: " + raw);
-            }
-            return DataResult.success(TagKey.create(Registries.ITEM, id));
-        });
-    }
 }

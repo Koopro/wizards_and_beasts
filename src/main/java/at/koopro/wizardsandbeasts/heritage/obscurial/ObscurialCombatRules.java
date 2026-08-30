@@ -108,10 +108,6 @@ public final class ObscurialCombatRules {
         stack.multiplyCooldown(getCooldownMultiplier(player), "obscurial");
     }
 
-    public static void applyAbilityCooldownModifier(ModifierStack stack, ServerPlayer player) {
-        stack.multiplyCooldown(getAbilityCooldownMultiplier(player), "obscurial_ability");
-    }
-
     public static float getAbilityCooldownMultiplier(ServerPlayer player) {
         PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
         if (!ObscurialRules.isObscurial(data)) return 1.0f;

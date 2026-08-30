@@ -177,15 +177,4 @@ public final class WandModuleRegistry {
         }
         return result;
     }
-
-    /**
-     * Validates that the bone referenced by a module exists in the given set of bone names.
-     * Logs a warning if not found. Called at datapack load time.
-     */
-    public static void warnIfBoneMissing(@NonNull WandModule module, @NonNull Set<String> boneNames) {
-        if (!boneNames.contains(module.boneName())) {
-            LOGGER.warn("[W&B] Wand module '{}' references bone '{}' which was not found in the wand model.",
-                    module.id(), module.boneName());
-        }
-    }
 }

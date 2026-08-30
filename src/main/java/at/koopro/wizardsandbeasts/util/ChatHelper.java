@@ -19,7 +19,6 @@ public final class ChatHelper {
     private static final String GOLD = "\u00A76";
     private static final String GRAY = "\u00A77";
     private static final String DARK_GRAY = "\u00A78";
-    private static final String AQUA = "\u00A7b";
     private static final String WHITE = "\u00A7f";
 
     // ── Component builders ──────────────────────────────────────────────
@@ -46,10 +45,6 @@ public final class ChatHelper {
 
     public static MutableComponent dim(String text) {
         return Component.literal(DARK_GRAY + text);
-    }
-
-    public static MutableComponent aqua(String text) {
-        return Component.literal(AQUA + text);
     }
 
     public static MutableComponent white(String text) {

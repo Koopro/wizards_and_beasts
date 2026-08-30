@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.brew;
 
+import at.koopro.wizardsandbeasts.brew.effect.BrewEffectEntry;
 import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -22,19 +23,60 @@ import java.util.Objects;
  * @param color       ARGB color used for the bottle texture tint
  * @param effects     list of effect specs applied to the drinker
  * @param flavorText  optional one-line description; {@code null} if absent
+ * @param silverVariant id of the brew this one becomes when an Occamy eggshell is added to the
+ *                      cauldron, or {@code null} if this brew is not silver-based
  */
 public record Brew(
         String id,
         String displayName,
         int color,
         List<EffectSpec> effects,
-        String flavorText) {
+        String flavorText,
+        String silverVariant,
+        List<BrewEffectEntry> components) {
 
     public Brew {
         Objects.requireNonNull(id, "id");
         Objects.requireNonNull(displayName, "displayName");
         Objects.requireNonNull(effects, "effects");
+        Objects.requireNonNull(components, "components");
         effects = List.copyOf(effects);
+        components = List.copyOf(components);
+    }
+
+    /**
+     * Six-argument form, for the brews that predate components.
+     *
+     * <p>Kept so adding the field did not have to touch every construction site and every test. A
+     * brew built this way has an empty component list, and {@code BrewDefinition} is what turns a
+     * legacy {@code effects} list into an {@code apply_effects} component at load time — so nothing
+     * that reaches the drink path is ever componentless.
+     */
+    public Brew(String id, String displayName, int color, List<EffectSpec> effects,
+                String flavorText, String silverVariant) {
+        this(id, displayName, color, effects, flavorText, silverVariant, List.of());
+    }
+
+    /**
+     * Five-argument form for a brew that is not silver-based, which is almost all of them.
+     *
+     * <p>Kept so that adding the silver field did not have to touch every existing construction site
+     * and every test — a brew with no silver variant is the overwhelming default, and making callers
+     * write {@code null} for it would have added noise everywhere to serve one mechanic.
+     */
+    public Brew(String id, String displayName, int color, List<EffectSpec> effects, String flavorText) {
+        this(id, displayName, color, effects, flavorText, null, List.of());
+    }
+
+    /**
+     * Whether an Occamy eggshell dropped into a cauldron brewing this would refine it.
+     *
+     * <p>"Silver-based" is defined by the brew declaring what it turns into, not by a flag or a name
+     * match. A datapack that wants a new silver brew writes one field; nothing in code learns its
+     * name.
+     */
+    public boolean isSilverBased() {
+        return silverVariant != null && !silverVariant.isBlank();
     }
 
     /**

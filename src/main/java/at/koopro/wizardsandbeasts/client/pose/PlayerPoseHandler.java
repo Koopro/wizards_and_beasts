@@ -5,11 +5,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
-import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.context.ContextKey;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 
 /**
  * The pose layer's entry point from {@code PlayerModelMixin}.
@@ -74,11 +72,6 @@ public final class PlayerPoseHandler {
         }
         body.applyTo(stack);
         state.setRenderData(BODY_TRANSFORM, body);
-    }
-
-    /** The whole-avatar transform for this render state, or null when nothing posed the body. */
-    public static @Nullable PoseStackResult bodyTransform(EntityRenderState state) {
-        return state.getRenderData(BODY_TRANSFORM);
     }
 
     /**

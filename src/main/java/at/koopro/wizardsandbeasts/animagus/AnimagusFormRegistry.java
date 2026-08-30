@@ -5,8 +5,6 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -57,18 +55,5 @@ public final class AnimagusFormRegistry {
 
     public static Collection<AnimagusFormDefinition> clientGetAll() {
         return CLIENT_FORMS.values();
-    }
-
-    /**
-     * Every form carrying the given capability, in id order so command suggestions and any future
-     * listing are stable across reloads.
-     */
-    public static List<Identifier> withCapability(AnimagusCapability capability) {
-        Map<Identifier, AnimagusFormDefinition> snapshot = new HashMap<>(FORMS);
-        return snapshot.entrySet().stream()
-                .filter(e -> e.getValue().hasCapability(capability))
-                .map(Map.Entry::getKey)
-                .sorted(Identifier::compareTo)
-                .toList();
     }
 }

@@ -17,8 +17,4 @@ public enum SizeCategory {
     public String getDisplayName() {
         return displayName;
     }
-
-    public float getScaleFactor() {
-        return scaleFactor;
-    }
 }

@@ -26,10 +26,6 @@ public enum FirstPersonContext {
         return firstPerson() && (this == RIGHT_ARM) == (mainArm == net.minecraft.world.entity.HumanoidArm.RIGHT);
     }
 
-    public boolean offArm(net.minecraft.world.entity.HumanoidArm mainArm) {
-        return firstPerson() && !mainArm(mainArm);
-    }
-
     /** The model part this context addresses, or null in third person. */
     public @org.jspecify.annotations.Nullable PlayerModelPart part() {
         return switch (this) {

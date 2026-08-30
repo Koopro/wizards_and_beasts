@@ -25,12 +25,7 @@ import org.jspecify.annotations.Nullable;
  */
 public final class SpellMenuRenderHelper {
 
-    private static final net.minecraft.resources.Identifier PANEL_TEX =
-            net.minecraft.resources.Identifier.fromNamespaceAndPath(
-                    at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID, "textures/gui/spell_menu/panel.png");
-
     /** Average ink of {@code panel.png} — the ground every label on this screen is read against. */
-    private static final int PANEL_INK = 0xFF1E1A32;
 
     private SpellMenuRenderHelper() {}
 

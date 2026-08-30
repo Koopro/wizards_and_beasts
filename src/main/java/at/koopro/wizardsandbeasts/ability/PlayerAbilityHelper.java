@@ -32,12 +32,6 @@ public final class PlayerAbilityHelper {
     public static int getApparitionCooldownTicks(@NonNull Player player) { return get(player).apparitionCooldownTicks(); }
     public static void setApparitionCooldownTicks(@NonNull Player player, int value) { set(player, p -> p.withApparitionCooldownTicks(Math.max(0, value))); }
 
-    public static int getSplinchSeverity(@NonNull Player player) { return get(player).splinchSeverity(); }
-    public static void setSplinchSeverity(@NonNull Player player, int value) { set(player, p -> p.withSplinchSeverity(Math.max(0, Math.min(2, value)))); }
-
-    public static int getSplinchTicksRemaining(@NonNull Player player) { return get(player).splinchTicksRemaining(); }
-    public static void setSplinchTicksRemaining(@NonNull Player player, int value) { set(player, p -> p.withSplinchTicksRemaining(Math.max(0, value))); }
-
     public static float getOcclumencyLevel(@NonNull Player player) { return get(player).occlumencyLevel(); }
     public static void setOcclumencyLevel(@NonNull Player player, float value) { set(player, p -> p.withOcclumencyLevel(clamp01(value))); }
 
@@ -57,26 +51,8 @@ public final class PlayerAbilityHelper {
     public static void setCurrentlyTransformed(@NonNull Player player, boolean value) { set(player, p -> p.withCurrentlyTransformed(value)); }
 
     public static boolean isWolfsbaneActive(@NonNull Player player) { return get(player).wolfsbaneActive(); }
-    public static void setWolfsbaneActive(@NonNull Player player, boolean value) { set(player, p -> p.withWolfsbaneActive(value)); }
-
-    public static boolean isParseltongueSpeaker(@NonNull Player player) { return get(player).parseltongueSpeaker(); }
-    public static void setParseltongueSpeaker(@NonNull Player player, boolean value) { set(player, p -> p.withParseltongueSpeaker(value)); }
-
-    public static @Nullable String getParseltongueSource(@NonNull Player player) { return get(player).parseltongueSource(); }
-    public static void setParseltongueSource(@NonNull Player player, @Nullable String value) { set(player, p -> p.withParseltongueSource(blankToNull(value))); }
-
-    public static boolean isMetamorphmagus(@NonNull Player player) { return get(player).metamorphmagus(); }
-    public static void setMetamorphmagus(@NonNull Player player, boolean value) { set(player, p -> p.withMetamorphmagus(value)); }
 
     public static @Nullable String getCurrentDisguiseFormId(@NonNull Player player) { return get(player).currentDisguiseFormId(); }
-    public static void setCurrentDisguiseFormId(@NonNull Player player, @Nullable String value) { set(player, p -> p.withCurrentDisguiseFormId(blankToNull(value))); }
-
-    public static float getWandlessCastingLevel(@NonNull Player player) { return get(player).wandlessCastingLevel(); }
-    public static void setWandlessCastingLevel(@NonNull Player player, float value) { set(player, p -> p.withWandlessCastingLevel(clamp01(value))); }
-
-    public static @NonNull Set<String> getAbilityFlags(@NonNull Player player) {
-        return Set.copyOf(get(player).abilityFlags());
-    }
 
     public static boolean hasAbilityFlag(@NonNull Player player, @NonNull String flag) {
         return !flag.isBlank() && get(player).abilityFlags().contains(flag);
@@ -91,33 +67,6 @@ public final class PlayerAbilityHelper {
             flags.add(flag);
             return p.withAbilityFlags(Set.copyOf(flags));
         });
-    }
-
-    public static void removeAbilityFlag(@NonNull Player player, @NonNull String flag) {
-        if (flag.isBlank()) {
-            return;
-        }
-        set(player, p -> {
-            LinkedHashSet<String> flags = new LinkedHashSet<>(p.abilityFlags());
-            flags.remove(flag);
-            return p.withAbilityFlags(Set.copyOf(flags));
-        });
-    }
-
-    public static void setAbilityFlags(@NonNull Player player, @NonNull Set<String> flags) {
-        LinkedHashSet<String> clean = new LinkedHashSet<>();
-        for (String flag : flags) {
-            if (flag != null && !flag.isBlank()) {
-                clean.add(flag);
-            }
-        }
-        set(player, p -> p.withAbilityFlags(Set.copyOf(clean)));
-    }
-
-    public static void forceSync(@NonNull Player player) {
-        if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
-            AbilityDataSyncPayload.syncToPlayer(serverPlayer);
-        }
     }
 
     private static void set(@NonNull Player player, @NonNull UnaryOperator<PlayerAbilityData> mutator) {

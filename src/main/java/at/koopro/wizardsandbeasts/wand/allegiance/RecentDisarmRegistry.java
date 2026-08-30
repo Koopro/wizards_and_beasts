@@ -21,10 +21,6 @@ public final class RecentDisarmRegistry {
     public record Entry(UUID attacker, long gameTime) {
     }
 
-    public static void registerDisarm(ServerLevel level, UUID victim, UUID attacker) {
-        ENTRIES.put(victim, new Entry(attacker, level.getGameTime()));
-    }
-
     public static Optional<Entry> consumeIfRecent(ServerLevel level, UUID victim, int maxAgeTicks) {
         prune(level, maxAgeTicks);
         Entry e = ENTRIES.remove(victim);

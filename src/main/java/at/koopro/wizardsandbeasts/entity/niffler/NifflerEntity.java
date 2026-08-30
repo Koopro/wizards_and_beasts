@@ -208,13 +208,6 @@ public class NifflerEntity extends GeoEntityBase {
         }
     }
 
-    public void storeItem(ItemStack stack) {
-        if (!level().isClientSide()) {
-            pouch.addItem(stack); // Assuming NifflerPouchInventory has addItem
-            syncPouchFull();
-        }
-    }
-
     // ─── Interaction ──────────────────────────────────────────────────────────
     @Override
     protected @NonNull InteractionResult mobInteract(@NonNull Player player, @NonNull InteractionHand hand) {
@@ -382,24 +375,6 @@ public class NifflerEntity extends GeoEntityBase {
     private void decreaseBond(int amount) {
         bondLevel = Math.max(0, bondLevel - amount);
         entityData.set(DATA_BOND_LEVEL, bondLevel);
-    }
-
-    public boolean canAccessPouch(Player player) {
-        int threshold = MagizoologyHelper.isMagizoologist(player) ? 30 : 50;
-        return bondLevel >= threshold;
-    }
-
-    /** Called when player retrieves item from pouch and returns it (bond +10). */
-    public void onItemReturnedToPouch(Player player) {
-        increaseBond(player, 10, true);
-    }
-
-    // ─── Peek trigger ─────────────────────────────────────────────────────────
-    /** Called when a shiny is detected nearby the carrier — forces immediate peek. */
-    public void triggerPeek() {
-        if (!level().isClientSide() && isCarried() && bondLevel >= 100 && peekPhase == 0) {
-            nextPeekDelay = 0;
-        }
     }
 
     private void resetPeekDelay() {

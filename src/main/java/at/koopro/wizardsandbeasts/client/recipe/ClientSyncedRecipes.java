@@ -37,11 +37,6 @@ public final class ClientSyncedRecipes {
 
     private ClientSyncedRecipes() {}
 
-    /** Run after each delivery, so a recipe viewer can rebuild from what actually arrived. */
-    public static void whenReceived(Runnable listener) {
-        LISTENERS.add(listener);
-    }
-
     public static <I extends RecipeInput, T extends Recipe<I>> List<T> byType(RecipeType<T> type) {
         return current.byType(type).stream().map(RecipeHolder::value).toList();
     }
