@@ -1,6 +1,5 @@
 package at.koopro.wizardsandbeasts.client.owl.screen;
 
-import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.network.owl.ChooseProfessionPacket;
 import at.koopro.wizardsandbeasts.owl.OWLGrade;
 import at.koopro.wizardsandbeasts.owl.OWLSubject;
@@ -8,14 +7,13 @@ import at.koopro.wizardsandbeasts.owl.Profession;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmScreen;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.jspecify.annotations.NonNull;
 
 import java.util.Map;
 
-public class ProfessionSelectionScreen extends Screen {
+public class ProfessionSelectionScreen extends ScaledParchmentScreen {
 
     private static final int BG_WIDTH = 300;
     private static final int BG_HEIGHT = 220;
@@ -24,38 +22,15 @@ public class ProfessionSelectionScreen extends Screen {
     private final Map<OWLSubject, OWLGrade> grades;
     private int scrollOffset = 0;
 
-    private float guiScale = 1.0f;
-    private int originX;
-    private int originY;
-    private int designLeft;
-    private int designTop;
-
     public ProfessionSelectionScreen(@NonNull Map<OWLSubject, OWLGrade> grades) {
         super(Component.translatable("owls.screen.profession_title"));
         this.grades = grades;
     }
 
-    /** Map an unscaled design-space x (relative to current width/height) to screen space. */
-    private int sx(int designX) {
-        return originX + Math.round((designX - designLeft) * guiScale);
-    }
-
-    private int sy(int designY) {
-        return originY + Math.round((designY - designTop) * guiScale);
-    }
-
-    private int sw(int size) {
-        return Math.max(1, Math.round(size * guiScale));
-    }
-
     @Override
     protected void init() {
         super.init();
-        guiScale = GuiScaleHelper.computeScale(BG_WIDTH, BG_HEIGHT, width, height, GuiScaleHelper.DEFAULT_MARGIN);
-        designLeft = width / 2 - BG_WIDTH / 2;
-        designTop = height / 2 - BG_HEIGHT / 2;
-        originX = GuiScaleHelper.clampedLeft(Math.round(BG_WIDTH * guiScale), width, GuiScaleHelper.DEFAULT_MARGIN);
-        originY = GuiScaleHelper.clampedTop(Math.round(BG_HEIGHT * guiScale), height, GuiScaleHelper.DEFAULT_MARGIN);
+        layout(BG_WIDTH, BG_HEIGHT);
         rebuildButtons();
     }
 
@@ -173,13 +148,9 @@ public class ProfessionSelectionScreen extends Screen {
         // No renderBackground() here: the screen framework already ran it for this frame.
         int cx = width / 2;
         int cy = height / 2;
-
         var pose = graphics.pose();
-        pose.pushMatrix();
-        pose.translate(originX - designLeft * guiScale, originY - designTop * guiScale);
-        pose.scale(guiScale, guiScale);
-
-        graphics.fill(cx - BG_WIDTH / 2, cy - BG_HEIGHT / 2, cx + BG_WIDTH / 2, cy + BG_HEIGHT / 2, 0xEEF5E6C8);
+        beginScaledPass(graphics);
+        drawParchment(graphics, BG_WIDTH, BG_HEIGHT);
         graphics.drawCenteredString(font,
                 Component.translatable("owls.screen.profession_title").withColor(0x5C3317),
                 cx, cy - BG_HEIGHT / 2 + 6, 0x5C3317);

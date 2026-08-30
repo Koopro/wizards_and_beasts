@@ -4,8 +4,6 @@ import at.koopro.wizardsandbeasts.currency.vault.PlayerVaultData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerPlayer;
 
 public final class VaultDebugModule implements DebugModule {
@@ -21,10 +19,7 @@ public final class VaultDebugModule implements DebugModule {
 
     @Override
     public LiteralArgumentBuilder<CommandSourceStack> register() {
-        return Commands.literal(name())
-                .executes(ctx -> inspect(ctx.getSource(), ctx.getSource().getPlayerOrException()))
-                .then(Commands.argument("target", EntityArgument.player())
-                        .executes(ctx -> inspect(ctx.getSource(), EntityArgument.getPlayer(ctx, "target"))));
+        return DebugModule.onSelfOrTarget(name(), this::inspect);
     }
 
     private int inspect(CommandSourceStack source, ServerPlayer target) {

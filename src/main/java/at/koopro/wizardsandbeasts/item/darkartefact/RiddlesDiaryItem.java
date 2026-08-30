@@ -1,37 +1,32 @@
 package at.koopro.wizardsandbeasts.item.darkartefact;
 
-import at.koopro.wizardsandbeasts.module.Module;
-import at.koopro.wizardsandbeasts.module.ModuleManager;
+import at.koopro.wizardsandbeasts.diary.DiaryService;
+import at.koopro.wizardsandbeasts.network.ClientScreenHooksInvoker;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public class RiddlesDiaryItem extends Item implements IHorcruxVessel {
+/**
+ * The only horcrux that answers back. A ruined diary still opens, but nothing writes in it.
+ */
+@NullMarked
+public class RiddlesDiaryItem extends HorcruxItem {
 
     public RiddlesDiaryItem(Properties properties) {
-        super(properties);
-    }
-
-    @Override
-    public boolean isSoulIntact(ItemStack stack) {
-        return stack.getOrDefault(ModDataComponents.SOUL_FRAGMENT_INTACT.get(), true);
-    }
-
-    @Override
-    public boolean isFoil(ItemStack stack) {
-        return isSoulIntact(stack);
+        super(properties, "Basilisk fang, 1993");
     }
 
     @Override
@@ -42,8 +37,7 @@ public class RiddlesDiaryItem extends Item implements IHorcruxVessel {
         tooltipAdder.accept(Component.literal("1943")
                 .withStyle(ChatFormatting.DARK_GRAY));
         if (!isSoulIntact(stack)) {
-            tooltipAdder.accept(Component.literal("[Destroyed — Basilisk fang, 1993]")
-                    .withStyle(ChatFormatting.STRIKETHROUGH, ChatFormatting.DARK_RED));
+            tooltipAdder.accept(soulDestroyed());
         }
         Optional<UUID> possessing = stack.getOrDefault(ModDataComponents.DIARY_POSSESSING.get(), Optional.empty());
         if (possessing.isPresent()) {
@@ -55,10 +49,7 @@ public class RiddlesDiaryItem extends Item implements IHorcruxVessel {
     }
 
     @Override
-    public InteractionResult use(Level level, Player player, InteractionHand hand) {
-        if (!ModuleManager.isEnabled(Module.DARK_ARTS)) {
-            return InteractionResult.FAIL;
-        }
+    protected InteractionResult onDarkArtsUse(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         if (!isSoulIntact(stack)) {
             if (!level.isClientSide()) {
@@ -67,10 +58,10 @@ public class RiddlesDiaryItem extends Item implements IHorcruxVessel {
             }
             return InteractionResult.SUCCESS;
         }
-        if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
-            at.koopro.wizardsandbeasts.diary.DiaryService.tryOpen(serverPlayer, stack);
+        if (player instanceof ServerPlayer serverPlayer) {
+            DiaryService.tryOpen(serverPlayer, stack);
         } else if (level.isClientSide()) {
-            at.koopro.wizardsandbeasts.network.ClientScreenHooksInvoker.invoke("openDiaryWriteScreen");
+            ClientScreenHooksInvoker.invoke("openDiaryWriteScreen");
         }
         return InteractionResult.SUCCESS;
     }

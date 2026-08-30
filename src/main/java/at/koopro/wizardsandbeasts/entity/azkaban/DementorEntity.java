@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.entity.azkaban;
 
+import at.koopro.wizardsandbeasts.entity.BeastNavigation;
 import at.koopro.wizardsandbeasts.azkaban.AzkabanDamageTypes;
 import at.koopro.wizardsandbeasts.entity.azkaban.goal.DementorKissGoal;
 import at.koopro.wizardsandbeasts.entity.azkaban.goal.DementorPatrolGoal;
@@ -25,7 +26,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
@@ -115,10 +115,7 @@ public class DementorEntity extends Monster implements GeoEntity {
 
     @Override
     protected @NonNull PathNavigation createNavigation(@NonNull Level level) {
-        FlyingPathNavigation nav = new FlyingPathNavigation(this, level);
-        nav.setCanOpenDoors(false);
-        nav.setCanFloat(true);
-        return nav;
+        return BeastNavigation.flying(this, level);
     }
 
     @Override

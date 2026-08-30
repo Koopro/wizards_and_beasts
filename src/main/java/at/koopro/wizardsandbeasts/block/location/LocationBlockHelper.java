@@ -3,12 +3,14 @@ package at.koopro.wizardsandbeasts.block.location;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.PressurePlateBlock;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
+import net.minecraft.world.level.material.MapColor;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredItem;
 
@@ -97,6 +99,20 @@ public final class LocationBlockHelper {
             DeferredItem<BlockItem> slabItem,
             DeferredItem<BlockItem> stairsItem,
             DeferredItem<BlockItem> wallItem) {}
+
+    // --- Shared properties ---
+
+    /**
+     * Worked masonry: the Hogwarts, Hogsmeade and Ministry sets are all cut stone and all wanted the
+     * same hardness, blast resistance, sound and pickaxe requirement. Only the map colour differs.
+     */
+    public static BlockBehaviour.Properties stone(MapColor color) {
+        return BlockBehaviour.Properties.of()
+                .mapColor(color)
+                .strength(1.5f, 6.0f)
+                .sound(SoundType.STONE)
+                .requiresCorrectToolForDrops();
+    }
 
     // --- Factories ---
 

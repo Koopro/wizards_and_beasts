@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.network.module;
 
+import at.koopro.wizardsandbeasts.network.PayloadBroadcast;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.client.module.ClientModuleState;
 import at.koopro.wizardsandbeasts.module.Module;
@@ -112,10 +113,7 @@ public record ModuleStateSyncPayload(Map<Identifier, ModuleState> states,
     }
 
     public static void broadcast(MinecraftServer server) {
-        ModuleStateSyncPayload payload = snapshot(server);
-        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            PacketDistributor.sendToPlayer(player, payload);
-        }
+        PayloadBroadcast.toAll(server, snapshot(server));
     }
 
     /** Decoded states keyed by {@link Module}, dropping ids this build no longer knows. */

@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.network.skill;
 
+import at.koopro.wizardsandbeasts.network.PayloadBroadcast;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.skill.vocation.VocationDefinition;
 import at.koopro.wizardsandbeasts.skill.vocation.VocationRegistry;
@@ -8,11 +9,9 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
-import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
 
@@ -44,14 +43,7 @@ public record SyncVocationDefinitionsPayload(List<VocationDefinition> vocations)
         public static void onDatapackSync(OnDatapackSyncEvent event) {
             SyncVocationDefinitionsPayload payload =
                     new SyncVocationDefinitionsPayload(List.copyOf(VocationRegistry.all()));
-            ServerPlayer joining = event.getPlayer();
-            if (joining != null) {
-                PacketDistributor.sendToPlayer(joining, payload);
-            } else {
-                for (ServerPlayer player : event.getPlayerList().getPlayers()) {
-                    PacketDistributor.sendToPlayer(player, payload);
-                }
-            }
+            PayloadBroadcast.toSyncTarget(event, payload);
         }
     }
 }

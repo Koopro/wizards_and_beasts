@@ -6,13 +6,12 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
 
-public class YewTreeFeature extends Feature<NoneFeatureConfiguration> {
+public class YewTreeFeature extends WandwoodTreeFeature {
 
     private static final Direction[] HORIZONTAL_DIRECTIONS = new Direction[]{
             Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST
@@ -65,10 +64,6 @@ public class YewTreeFeature extends Feature<NoneFeatureConfiguration> {
         return true;
     }
 
-    private boolean canReplace(WorldGenLevel level, BlockPos pos) {
-        return level.isEmptyBlock(pos);
-    }
-
     private void generateYewBranch(WorldGenLevel level, BlockPos base, Direction direction, int length,
                                    BlockState log, BlockState leaves, RandomSource random) {
         BlockPos.MutableBlockPos cursor = base.mutable();
@@ -81,7 +76,7 @@ public class YewTreeFeature extends Feature<NoneFeatureConfiguration> {
                 setBlock(level, cursor, log);
             }
             // Surround with dense leaves
-            generateSmallLeafCluster(level, cursor, 1 + random.nextInt(2), leaves);
+            leafSphere(level, cursor, 1 + random.nextInt(2), leaves);
         }
     }
 
@@ -99,20 +94,5 @@ public class YewTreeFeature extends Feature<NoneFeatureConfiguration> {
         }
     }
 
-    private void generateSmallLeafCluster(WorldGenLevel level, BlockPos center, int radius, BlockState leaves) {
-        int rSq = radius * radius;
-        for (int dx = -radius; dx <= radius; dx++) {
-            for (int dy = -radius; dy <= radius; dy++) {
-                for (int dz = -radius; dz <= radius; dz++) {
-                    if (dx * dx + dy * dy + dz * dz <= rSq) {
-                        BlockPos pos = center.offset(dx, dy, dz);
-                        if (level.isEmptyBlock(pos)) {
-                            setBlock(level, pos, leaves);
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
 

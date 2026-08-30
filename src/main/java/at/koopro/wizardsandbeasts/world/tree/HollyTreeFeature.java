@@ -5,13 +5,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
 
-public class HollyTreeFeature extends Feature<NoneFeatureConfiguration> {
+public class HollyTreeFeature extends WandwoodTreeFeature {
 
     public HollyTreeFeature(Codec<NoneFeatureConfiguration> codec) {
         super(codec);
@@ -52,29 +51,10 @@ public class HollyTreeFeature extends Feature<NoneFeatureConfiguration> {
         // Round, bushy leaf cap
         int radius = 2 + random.nextInt(2); // 2-3
         BlockPos center = origin.above(topY + 1);
-        generateLeafBlob(level, center, radius, leaves);
+        leafSphere(level, center, radius, leaves);
 
         return true;
     }
 
-    private boolean canReplace(WorldGenLevel level, BlockPos pos) {
-        return level.isEmptyBlock(pos);
-    }
-
-    private void generateLeafBlob(WorldGenLevel level, BlockPos center, int radius, BlockState leaves) {
-        int rSq = radius * radius;
-        for (int dx = -radius; dx <= radius; dx++) {
-            for (int dy = -radius; dy <= radius; dy++) {
-                for (int dz = -radius; dz <= radius; dz++) {
-                    if (dx * dx + dy * dy + dz * dz <= rSq) {
-                        BlockPos pos = center.offset(dx, dy, dz);
-                        if (level.isEmptyBlock(pos)) {
-                            setBlock(level, pos, leaves);
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
 

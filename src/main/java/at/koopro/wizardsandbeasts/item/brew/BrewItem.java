@@ -5,20 +5,18 @@ import at.koopro.wizardsandbeasts.brew.BrewPotency;
 import at.koopro.wizardsandbeasts.brew.Brews;
 import at.koopro.wizardsandbeasts.brew.effect.BrewEffectContext;
 import at.koopro.wizardsandbeasts.brew.effect.BrewEffectEntry;
+import at.koopro.wizardsandbeasts.item.consumable.ConsumedItem;
+import at.koopro.wizardsandbeasts.registry.ConsumableItemRegistry;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
+
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.level.Level;
-import at.koopro.wizardsandbeasts.registry.ConsumableItemRegistry;
 
 /**
  * The single, generic potion item produced by the brewing pillar. The
@@ -32,10 +30,10 @@ import at.koopro.wizardsandbeasts.registry.ConsumableItemRegistry;
  * registry-build time. Anchoring on a single item keeps recipes, models,
  * and creative-tab listing simple, and matches how vanilla potions work.
  */
-public class BrewItem extends Item {
+public class BrewItem extends ConsumedItem {
 
     public BrewItem(Properties properties) {
-        super(properties);
+        super(properties, 32, ItemUseAnimation.DRINK);
     }
 
     /** Convenience: build a stack of a specific brew. */
@@ -46,37 +44,13 @@ public class BrewItem extends Item {
     }
 
     @Override
-    public InteractionResult use(Level level, Player player, InteractionHand hand) {
-        ItemStack stack = player.getItemInHand(hand);
-        if (player.getCooldowns().isOnCooldown(stack)) {
-            return InteractionResult.FAIL;
-        }
-        player.startUsingItem(hand);
-        return InteractionResult.CONSUME;
-    }
-
-    @Override
-    public int getUseDuration(ItemStack stack, LivingEntity entity) {
-        return 32;
-    }
-
-    @Override
-    public ItemUseAnimation getUseAnimation(ItemStack stack) {
-        return ItemUseAnimation.DRINK;
-    }
-
-    @Override
-    public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
-        if (level.isClientSide() || !(entity instanceof Player player)) {
-            return stack;
-        }
-
+    protected void onConsumed(ItemStack stack, Level level, Player player) {
         String brewId = stack.get(ModDataComponents.BREW_ID.get());
         Brew brew = Brews.byId(brewId);
         if (brew == null) {
             player.displayClientMessage(
                     Component.translatable("brew.wizards_and_beasts.bottle_empty"), true);
-            return stack;
+            return;
         }
 
         float potency = (player instanceof ServerPlayer serverPlayer)
@@ -101,6 +75,5 @@ public class BrewItem extends Item {
         if (player instanceof ServerPlayer sp) {
             sp.awardStat(Stats.ITEM_USED.get(this));
         }
-        return stack;
     }
 }

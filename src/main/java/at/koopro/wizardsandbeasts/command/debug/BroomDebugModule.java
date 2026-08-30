@@ -3,8 +3,6 @@ package at.koopro.wizardsandbeasts.command.debug;
 import at.koopro.wizardsandbeasts.entity.broom.BroomEntity;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerPlayer;
 
 public final class BroomDebugModule implements DebugModule {
@@ -20,10 +18,7 @@ public final class BroomDebugModule implements DebugModule {
 
     @Override
     public LiteralArgumentBuilder<CommandSourceStack> register() {
-        return Commands.literal(name())
-                .executes(ctx -> inspect(ctx.getSource(), ctx.getSource().getPlayerOrException()))
-                .then(Commands.argument("target", EntityArgument.player())
-                        .executes(ctx -> inspect(ctx.getSource(), EntityArgument.getPlayer(ctx, "target"))));
+        return DebugModule.onSelfOrTarget(name(), this::inspect);
     }
 
     private int inspect(CommandSourceStack source, ServerPlayer target) {

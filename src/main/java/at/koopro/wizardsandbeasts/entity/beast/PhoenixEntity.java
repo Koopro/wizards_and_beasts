@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.entity.beast;
 
+import at.koopro.wizardsandbeasts.entity.BeastNavigation;
 import at.koopro.wizardsandbeasts.entity.GeoEntityBase;
 import at.koopro.wizardsandbeasts.util.AnimHelper;
 import net.minecraft.world.entity.EntityType;
@@ -11,7 +12,6 @@ import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomFlyingGoal;
-import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -43,10 +43,7 @@ public class PhoenixEntity extends GeoEntityBase {
 
     @Override
     protected PathNavigation createNavigation(Level level) {
-        FlyingPathNavigation nav = new FlyingPathNavigation(this, level);
-        nav.setCanOpenDoors(false);
-        nav.setCanFloat(true);
-        return nav;
+        return BeastNavigation.flying(this, level);
     }
 
     @Override

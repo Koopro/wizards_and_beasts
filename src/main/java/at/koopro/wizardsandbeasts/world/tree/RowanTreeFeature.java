@@ -6,13 +6,12 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
 
-public class RowanTreeFeature extends Feature<NoneFeatureConfiguration> {
+public class RowanTreeFeature extends WandwoodTreeFeature {
 
     private static final Direction[] HORIZONTAL_DIRECTIONS = new Direction[]{
             Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST
@@ -57,10 +56,6 @@ public class RowanTreeFeature extends Feature<NoneFeatureConfiguration> {
         generateSparseLeaves(level, top, 2, leaves);
 
         return true;
-    }
-
-    private boolean canReplace(WorldGenLevel level, BlockPos pos) {
-        return level.isEmptyBlock(pos);
     }
 
     private void generateUpwardBranch(WorldGenLevel level, BlockPos base, Direction direction, int length,

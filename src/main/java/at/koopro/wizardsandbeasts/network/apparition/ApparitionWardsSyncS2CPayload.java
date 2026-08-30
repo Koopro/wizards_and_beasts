@@ -1,4 +1,5 @@
 package at.koopro.wizardsandbeasts.network.apparition;
+import at.koopro.wizardsandbeasts.network.PayloadBroadcast;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
@@ -68,10 +69,7 @@ public record ApparitionWardsSyncS2CPayload(List<WardData> wards) implements Cus
     }
 
     public static void syncToAllPlayers(MinecraftServer server) {
-        ApparitionWardsSyncS2CPayload payload = fromRegistry();
-        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            PacketDistributor.sendToPlayer(player, payload);
-        }
+        PayloadBroadcast.toAll(server, fromRegistry());
     }
 
     private static ApparitionWardsSyncS2CPayload fromRegistry() {

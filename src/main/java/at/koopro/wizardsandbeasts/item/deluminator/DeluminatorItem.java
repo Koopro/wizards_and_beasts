@@ -1,10 +1,10 @@
 package at.koopro.wizardsandbeasts.item.deluminator;
 
+import at.koopro.wizardsandbeasts.item.GeoItemRenderers;
 import at.koopro.wizardsandbeasts.deluminator.DeluminatorBlockActions;
 import at.koopro.wizardsandbeasts.item.GeoItemBase;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
-import at.koopro.wizardsandbeasts.util.ClientClassBridge;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -33,7 +33,6 @@ import software.bernie.geckolib.animatable.manager.AnimatableManager;
 import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.animation.object.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.renderer.GeoItemRenderer;
 
 import java.util.function.Consumer;
 
@@ -56,20 +55,7 @@ public class DeluminatorItem extends GeoItemBase {
 
     @Override
     public void createGeoRenderer(Consumer<GeoRenderProvider> consumer) {
-        consumer.accept(new GeoRenderProvider() {
-            private GeoItemRenderer<?> renderer;
-
-            @Override
-            public GeoItemRenderer<?> getGeoItemRenderer() {
-                if (this.renderer == null)
-                    this.renderer = ClientClassBridge.instantiate(
-                            "at.koopro.wizardsandbeasts.client.deluminator.DeluminatorRenderer",
-                            GeoItemRenderer.class,
-                            new Class<?>[0],
-                            new Object[0]);
-                return this.renderer;
-            }
-        });
+        consumer.accept(GeoItemRenderers.lazy("at.koopro.wizardsandbeasts.client.deluminator.DeluminatorRenderer"));
     }
 
     @Override

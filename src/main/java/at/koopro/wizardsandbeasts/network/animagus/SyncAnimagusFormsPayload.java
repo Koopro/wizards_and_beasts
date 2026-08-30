@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.network.animagus;
 
+import at.koopro.wizardsandbeasts.network.PayloadBroadcast;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.animagus.AnimagusFormDefinition;
 import at.koopro.wizardsandbeasts.animagus.AnimagusFormRegistry;
@@ -9,11 +10,9 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
-import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.Map;
@@ -63,14 +62,7 @@ public record SyncAnimagusFormsPayload(Map<Identifier, AnimagusFormDefinition> f
         @SubscribeEvent
         public static void onDatapackSync(OnDatapackSyncEvent event) {
             SyncAnimagusFormsPayload payload = current();
-            ServerPlayer joining = event.getPlayer();
-            if (joining != null) {
-                PacketDistributor.sendToPlayer(joining, payload);
-            } else {
-                for (ServerPlayer player : event.getPlayerList().getPlayers()) {
-                    PacketDistributor.sendToPlayer(player, payload);
-                }
-            }
+            PayloadBroadcast.toSyncTarget(event, payload);
         }
     }
 }

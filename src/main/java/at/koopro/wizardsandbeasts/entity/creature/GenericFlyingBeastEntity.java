@@ -1,11 +1,11 @@
 package at.koopro.wizardsandbeasts.entity.creature;
 
+import at.koopro.wizardsandbeasts.entity.BeastNavigation;
 import at.koopro.wizardsandbeasts.util.AnimHelper;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomFlyingGoal;
-import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.level.Level;
 import software.bernie.geckolib.animatable.manager.AnimatableManager;
@@ -20,10 +20,7 @@ public class GenericFlyingBeastEntity extends GenericBeastEntity {
 
     @Override
     protected PathNavigation createNavigation(Level level) {
-        FlyingPathNavigation nav = new FlyingPathNavigation(this, level);
-        nav.setCanOpenDoors(false);
-        nav.setCanFloat(true);
-        return nav;
+        return BeastNavigation.flying(this, level);
     }
 
     @Override

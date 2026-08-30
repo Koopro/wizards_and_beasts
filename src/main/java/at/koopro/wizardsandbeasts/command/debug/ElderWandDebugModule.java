@@ -8,7 +8,6 @@ import at.koopro.wizardsandbeasts.wand.WandComponents;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -32,10 +31,7 @@ public final class ElderWandDebugModule implements DebugModule {
     public LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal(name())
                 .executes(ctx -> inspect(ctx.getSource()))
-                .then(Commands.literal("force_master")
-                        .executes(ctx -> forceMaster(ctx.getSource(), ctx.getSource().getPlayerOrException()))
-                        .then(Commands.argument("target", EntityArgument.player())
-                                .executes(ctx -> forceMaster(ctx.getSource(), EntityArgument.getPlayer(ctx, "target")))))
+                .then(DebugModule.onSelfOrTarget("force_master", ElderWandDebugModule::forceMaster))
                 .then(Commands.literal("clear_master")
                         .executes(ctx -> clearMaster(ctx.getSource())))
                 .then(Commands.literal("reset")

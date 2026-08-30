@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.item.wand;
 
+import at.koopro.wizardsandbeasts.util.ClientClassBridge;
 import at.koopro.wizardsandbeasts.entity.form.FormMannequinEntity;
-import com.mojang.logging.LogUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -27,7 +27,6 @@ import java.util.function.Consumer;
  * Requires OP permission (level 2).
  */
 public class MorphWandItem extends Item {
-    private static final org.slf4j.Logger LOGGER = LogUtils.getLogger();
 
     public MorphWandItem(Properties props) {
         super(props);
@@ -64,12 +63,7 @@ public class MorphWandItem extends Item {
     }
 
     private static void openClientDebugScreenSafe() {
-        try {
-            Class<?> hooks = Class.forName("at.koopro.wizardsandbeasts.client.wand.MorphWandClientHooks");
-            hooks.getMethod("openDebugScreen").invoke(null);
-        } catch (ReflectiveOperationException e) {
-            LOGGER.warn("[WizardsAndBeasts] Failed to open morph debug screen via client hook", e);
-        }
+        ClientClassBridge.callStatic("at.koopro.wizardsandbeasts.client.wand.MorphWandClientHooks", "openDebugScreen");
     }
 
     @Override
