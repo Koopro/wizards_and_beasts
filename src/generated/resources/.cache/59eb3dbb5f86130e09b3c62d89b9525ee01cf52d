@@ -1,4 +1,4 @@
-// 1.21.11	2026-08-19T18:23:47.1170732	Loot Tables
+// 1.21.11	2026-08-27T10:25:12.1389833	Loot Tables
 867bad6d013ba096052ad53738989dcfa000ba61 data/wizards_and_beasts/loot_table/blocks/ash_leaves.json
 8b9ac95b946ea568fd08f217a93dd6f450d08efe data/wizards_and_beasts/loot_table/blocks/ash_log.json
 379c30496864f83b76b6e25729f3c2a9b41e6507 data/wizards_and_beasts/loot_table/blocks/ash_planks.json
@@ -174,6 +174,7 @@ be323df445e3d957d49c13f20421386e22c1ada8 data/wizards_and_beasts/loot_table/bloc
 87b3a890ebb11da2fa7be8d8b7372c9c6df007e5 data/wizards_and_beasts/loot_table/blocks/ministry_wall_panel.json
 0c59ca86f3fae603cae47af130b23f73624fd36f data/wizards_and_beasts/loot_table/blocks/moodys_trunk.json
 2a5676be63cb4cf532a9cbf5a78a4bad22b4778e data/wizards_and_beasts/loot_table/blocks/newts_case_item.json
+27092da19a8fa44a42c092313fc791b4e1ae3bc9 data/wizards_and_beasts/loot_table/blocks/occamy_eggshell.json
 1ce8a1bc0b5d42c332d24fb3e281e7aac6af2479 data/wizards_and_beasts/loot_table/blocks/pewter_cauldron.json
 c32a9f233b28eadb516915013008f1a3ab1dbf0b data/wizards_and_beasts/loot_table/blocks/pocket_configurator.json
 1e917597dec45f44286370abd4740663a982ea7d data/wizards_and_beasts/loot_table/blocks/ravenclaw_banner.json

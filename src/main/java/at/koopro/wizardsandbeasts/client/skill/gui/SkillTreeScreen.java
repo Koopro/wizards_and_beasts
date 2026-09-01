@@ -406,7 +406,8 @@ public class SkillTreeScreen extends Screen {
             boolean adjacencyOpen = hoveredNode.isRoot() || hasAllocatedNeighbor(data, hoveredNode);
             boolean sealed = sealedTrees.contains(hoveredNode.getTree());
             SkillTreeRenderHelper.renderTooltipCard(graphics, font, hoveredNode, mouseX, mouseY,
-                    data.getSkillLevel(hoveredNode.getId()), data.getSkillPoints(), adjacencyOpen, sealed);
+                    data.getSkillLevel(hoveredNode.getId()), data.getSkillPoints(), adjacencyOpen, sealed,
+                    prerequisiteNames(hoveredNode));
         }
     }
 
@@ -516,7 +517,13 @@ public class SkillTreeScreen extends Screen {
             // through to the locked branch (reused, not a distinct sprite — the seal cue lives in
             // the tooltip).
             boolean sealed = sealedTrees.contains(node.getTree());
-            boolean allocatable = !allocated && !sealed && (node.isRoot() || hasAllocatedNeighbor(data, node));
+            boolean open = !sealed && (allocated || node.isRoot() || hasAllocatedNeighbor(data, node));
+            boolean maxed = level >= node.getMaxLevel();
+            // Three questions, not one. "Can I put a point here" and "can I pay for it" were the
+            // same boolean before, so the chart pulsed an invitation at a player with no points and
+            // said nothing until they hovered.
+            boolean allocatable = open && !maxed;
+            boolean affordable = allocatable && data.getSkillPoints() >= node.getPointCost();
 
             boolean isHovered = hovered == null && insideChart(mouseX, mouseY)
                     && withinHitRadius(node, polaris, cx, cy, mouseX, mouseY);
@@ -529,12 +536,21 @@ public class SkillTreeScreen extends Screen {
                         SkillTreeChartTextures.withAlpha(
                                 allocated ? SkillTreeChartTextures.GOLD
                                         : SkillTreeChartTextures.regionTint(node.getTree()), 170));
-            } else if (allocatable) {
+            } else if (affordable) {
+                // Only a star the player can actually buy right now breathes. The pulse is an
+                // invitation, and an invitation you cannot accept is worse than none.
                 McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.STAR_HALO,
                         cx, cy, (int) (size * 2.2),
                         SkillTreeChartTextures.withAlpha(
                                 SkillTreeChartTextures.regionTint(node.getTree()),
                                 60 + (int) (70 * pulse)));
+            } else if (allocatable) {
+                // Reachable but unaffordable: a still, dim halo. Legible as "open" without claiming
+                // to be takeable.
+                McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.STAR_HALO,
+                        cx, cy, (int) (size * 1.7),
+                        SkillTreeChartTextures.withAlpha(
+                                SkillTreeChartTextures.regionTint(node.getTree()), 45));
             }
 
             if (polaris) {
@@ -544,6 +560,16 @@ public class SkillTreeScreen extends Screen {
                         cx, cy, size, tint);
             } else if (allocated) {
                 // Shape + brightness cue: diffraction flare with a hot gold core.
+                //
+                // A maxed node gets a second, wider flare behind the first. One-of-three and
+                // three-of-three drew identically before, so the chart could not answer "is there
+                // anything left in this node" without a hover — on a 163-node web that is the single
+                // question a player asks most.
+                if (maxed && node.getMaxLevel() > 1) {
+                    McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.flare(node.getSize()),
+                            cx, cy, (int) (size * 1.45),
+                            SkillTreeChartTextures.withAlpha(SkillTreeChartTextures.GOLD, 110));
+                }
                 McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.flare(node.getSize()),
                         cx, cy, size, SkillTreeChartTextures.GOLD);
                 McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.core(node.getSize()),
@@ -649,6 +675,27 @@ public class SkillTreeScreen extends Screen {
             return 150;
         }
         return (int) (150 * Mth.clamp(1.0 - (zoom - 0.9) / 0.35, 0.0, 1.0));
+    }
+
+    /**
+     * The neighbours that would open this node, by display name.
+     *
+     * <p>Allocation needs any one edge-neighbour at level 1 or more, so the answer is a list and the
+     * tooltip says "any of". Empty for a root node, which needs nothing.
+     */
+    private List<Component> prerequisiteNames(Skill node) {
+        if (node.isRoot()) {
+            return List.of();
+        }
+        List<Component> names = new java.util.ArrayList<>();
+        for (String neighborId : SkillTrees.clientNeighbors(node.getId())) {
+            Skill neighbor = SkillTrees.clientById(neighborId);
+            if (neighbor != null) {
+                names.add(Component.literal(
+                        SkillTreeRenderHelper.resolveDisplayName(neighbor.getDisplayName())));
+            }
+        }
+        return names;
     }
 
     private static boolean hasAllocatedNeighbor(PlayerSkillData data, Skill node) {

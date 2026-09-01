@@ -1,6 +1,10 @@
 package at.koopro.wizardsandbeasts.entity.goblin;
 
 import at.koopro.wizardsandbeasts.entity.GeoEntityBase;
+import at.koopro.wizardsandbeasts.ministry.licence.LicenseType;
+import at.koopro.wizardsandbeasts.ministry.licence.MinistryLicenceGate;
+import at.koopro.wizardsandbeasts.currency.dragot.DragotQuotes;
+import at.koopro.wizardsandbeasts.network.currency.DragotQuoteS2CPayload;
 import at.koopro.wizardsandbeasts.network.currency.GringottsOpenS2CPayload;
 import at.koopro.wizardsandbeasts.util.AnimHelper;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -200,9 +204,18 @@ public class GoblinTellerEntity extends GeoEntityBase {
     @Override
     protected InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (!level().isClientSide() && player instanceof ServerPlayer serverPlayer) {
+            // Papers first. A goblin looks at what it is handed before it opens anything, which is
+            // both the licence gate and the moment a forgery gets its 15% chance to be noticed.
+            if (!MinistryLicenceGate.admit(serverPlayer, LicenseType.MINISTRY_ACCESS)) {
+                return InteractionResult.FAIL;
+            }
             // "The goblin bowed them through the silver doors." Fires as the vault screen opens.
             triggerAnim(ACTION_CONTROLLER, "bow");
+            // Walking up to the counter is what moves the rate: a fresh roll here, and the same
+            // number stands for the whole visit. See DragotQuotes.
+            DragotQuotes.refresh(serverPlayer);
             GringottsOpenS2CPayload.sendToPlayer(serverPlayer);
+            DragotQuoteS2CPayload.sendToPlayer(serverPlayer);
             return InteractionResult.SUCCESS;
         }
         return InteractionResult.SUCCESS_SERVER;

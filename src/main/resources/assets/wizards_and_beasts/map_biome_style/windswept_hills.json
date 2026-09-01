@@ -1,0 +1,9 @@
+{
+  "biomes": [
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills"
+  ],
+  "tile": 30,
+  "tint": "#8E8A80",
+  "relief_tile": 4
+}

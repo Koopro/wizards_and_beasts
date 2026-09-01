@@ -21,11 +21,22 @@
     {"translate": "broom_lore.wizards_and_beasts.cleansweep_seven.1"}
   ],
   "model_slots": {
-    "shaft": "wizards_and_beasts:plain",
+    "shaft": "wizards_and_beasts:oak",
     "tail_cap": "wizards_and_beasts:plain",
     "binding": "wizards_and_beasts:cord",
     "bristles": "wizards_and_beasts:ragged",
-    "footstrap": "wizards_and_beasts:leather",
+    "footstrap": "wizards_and_beasts:iron_peg",
     "accent": "wizards_and_beasts:none"
-  }
+  },
+  "model": "wizards_and_beasts:broom_cleansweep_seven",
+  "texture": "wizards_and_beasts:textures/entity/broom/cleansweep_seven.png",
+  "handlingProfile": "school",
+  "yawDrift": 0.06,
+  "momentumRetention": 0.82,
+  "wobbleAtBoost": 0.4,
+  "crashDamageMultiplier": 0.85,
+  "boostSound": "wizards_and_beasts:broom_boost_school",
+  "idleLoopSound": "wizards_and_beasts:broom_wind_slow",
+  "trailParticle": "wizards_and_beasts:broom_trail_dust",
+  "passengerOffset": [0.0, -0.375, 0.02]
 }

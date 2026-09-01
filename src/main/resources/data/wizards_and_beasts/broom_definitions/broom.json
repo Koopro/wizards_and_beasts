@@ -24,5 +24,11 @@
     "bristles": "wizards_and_beasts:ragged",
     "footstrap": "wizards_and_beasts:leather",
     "accent": "wizards_and_beasts:none"
-  }
+  },
+  "wood_tint": "#A87C4A",
+  "handlingProfile": "school",
+  "boostSound": "wizards_and_beasts:broom_boost_school",
+  "idleLoopSound": "wizards_and_beasts:broom_wind_slow",
+  "trailParticle": "wizards_and_beasts:broom_trail_dust",
+  "passengerOffset": [0.0, -0.4375, 0.0]
 }

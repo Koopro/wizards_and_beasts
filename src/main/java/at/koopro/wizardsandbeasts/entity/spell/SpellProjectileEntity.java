@@ -10,6 +10,7 @@ import at.koopro.wizardsandbeasts.registry.ModSounds;
 import at.koopro.wizardsandbeasts.registry.ModEntities;
 import at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions;
 import at.koopro.wizardsandbeasts.registry.ModParticles;
+import at.koopro.wizardsandbeasts.spell.def.SpellVfx;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.core.SpellFamilies;
 import at.koopro.wizardsandbeasts.spell.proficiency.SpellProficiencyTracker;
@@ -51,6 +52,8 @@ public class SpellProjectileEntity extends ThrowableProjectile {
     private Spell cachedSpell;
     private UUID casterUuid;
     private SpellScalingProfile scalingProfile = SpellScalingProfile.DEFAULT;
+    /** Composed damage multiplier from the cast that fired this. 1.0 = untouched base damage. */
+    private float damageMultiplier = 1.0f;
 
     public SpellProjectileEntity(EntityType<? extends ThrowableProjectile> type, Level level) {
         super(type, level);
@@ -85,19 +88,22 @@ public class SpellProjectileEntity extends ThrowableProjectile {
 
         SpellProperties props = cachedSpell.getProperties();
 
-        // Calculate proficiency-adjusted damage
-        float damage = cachedSpell.getBaseDamage();
+        // Damage = base * the multiplier the cast composed, handed over at spawn.
+        //
+        // This used to call getDamageForCaster on impact, which recomputes from the player and so
+        // knows only proficiency, the skill web and the wand — every other channel the cast built
+        // (wand corruption, allegiance, dark corruption, vocation, Niffler happiness, player stats)
+        // was silently dropped for every projectile spell. It then multiplied the proficiency
+        // scaling profile on top, counting proficiency a second time.
         Entity owner = getOwner();
-        if (owner instanceof ServerPlayer player) {
-            damage = cachedSpell.getDamageForCaster(player);
-        }
+        float damage = cachedSpell.getBaseDamage() * damageMultiplier;
         // A lethal-gaze boss (the basilisk) resists the Killing Curse down to fixed damage rather
         // than its default near-instant-kill damage — see LethalGazeBossResistance.
         if (SpellIds.matches(cachedSpell.getId(), "avada_kedavra")) {
             damage = LethalGazeBossResistance.resolveAvadaKedavraDamage(damage, LethalGazeBossResistance.isBossTarget(hit));
         }
         if (damage > 0 && hit instanceof LivingEntity living) {
-            living.hurt(level().damageSources().magic(), damage * scalingProfile.damageMult());
+            living.hurt(level().damageSources().magic(), damage);
         }
 
         if (props != null && hit instanceof LivingEntity living) {
@@ -286,10 +292,18 @@ public class SpellProjectileEntity extends ThrowableProjectile {
                     cachedSpell = sp;
                 }
                 if (sp != null) {
+                    // The spell's own trail particle, not its family's. Two arcane bolts used to be
+                    // the same effect twice; a spell can now name ice_shard or dark_wisp regardless
+                    // of the family it belongs to for damage purposes.
+                    var vfx = sp.vfx();
                     int particleRate = Math.max(1, Math.round(BASE_PARTICLE_RATE * scalingProfile.damageMult()));
+                    // Density multiplies the rate, and both are capped: a spell that asks for six
+                    // trail particles at a 3x damage multiplier must not become eighteen per tick.
+                    particleRate = Math.min(SpellVfx.MAX_TRAIL_DENSITY,
+                            particleRate * Math.max(1, vfx.trailDensity()));
+                    var opts = ModParticles.tinted(vfx.trail().particleFamily(), sp.getColor());
                     for (int i = 0; i < particleRate; i++) {
-                        level().addParticle(ModParticles.tinted(SpellFamilies.of(sp), sp.getColor()),
-                                getX(), getY(), getZ(), 0.0, 0.0, 0.0);
+                        level().addParticle(opts, getX(), getY(), getZ(), 0.0, 0.0, 0.0);
                     }
                 }
             }
@@ -312,6 +326,23 @@ public class SpellProjectileEntity extends ThrowableProjectile {
         this.scalingProfile = scalingProfile == null ? SpellScalingProfile.DEFAULT : scalingProfile;
     }
 
+    /**
+     * The composed damage multiplier the cast produced. Set at spawn; see
+     * {@code Spell#spawnProjectile(ServerLevel, ServerPlayer, SpellScalingProfile, float)}.
+     *
+     * <p>Saved with the entity so a projectile that survives a chunk unload still hits for what the
+     * cast said it would — recomputing on load would need a caster who may be long gone.
+     */
+    public void setDamageMultiplier(float damageMultiplier) {
+        this.damageMultiplier = Float.isFinite(damageMultiplier) && damageMultiplier > 0.0f
+                ? damageMultiplier
+                : 1.0f;
+    }
+
+    public float getDamageMultiplier() {
+        return damageMultiplier;
+    }
+
     @Override
     protected void readAdditionalSaveData(ValueInput input) {
         spellId = input.read("SpellId", com.mojang.serialization.Codec.STRING).orElse("");
@@ -325,6 +356,7 @@ public class SpellProjectileEntity extends ThrowableProjectile {
                 LOGGER.warn("[WizardsAndBeasts] Discarding malformed CasterUUID '{}' in spell projectile save data", uuid);
             }
         }
+        setDamageMultiplier(input.read("DamageMultiplier", com.mojang.serialization.Codec.FLOAT).orElse(1.0f));
     }
 
     @Override
@@ -333,6 +365,7 @@ public class SpellProjectileEntity extends ThrowableProjectile {
         if (casterUuid != null) {
             output.store("CasterUUID", com.mojang.serialization.Codec.STRING, casterUuid.toString());
         }
+        output.store("DamageMultiplier", com.mojang.serialization.Codec.FLOAT, damageMultiplier);
     }
 
     public String getSpellId() {

@@ -123,6 +123,10 @@ public final class ClientSpellDataState {
     }
 
     public static void applyDelta(SpellDataDeltaS2CPayload pkt) {
+        // A delta is only sent on a successful cast, which answers whatever the last refusal said —
+        // leaving "the spell is still recharging" on screen after the recharge finished is worse than
+        // saying nothing.
+        ClientSpellRejectFeedback.clear();
         applyCooldown(pkt.spellId(), pkt.cooldownExpiryTick());
         INSTANCE.setCastCount(pkt.spellId(), pkt.newCastCount());
         INSTANCE.setSuccessfulHits(pkt.spellId(), pkt.newSuccessfulHits());

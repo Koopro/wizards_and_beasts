@@ -5,10 +5,12 @@ import at.koopro.wizardsandbeasts.ministry.MinistryRecords;
 import at.koopro.wizardsandbeasts.ministry.data.MinistryRank;
 import at.koopro.wizardsandbeasts.ministry.data.PlayerMinistryRecord;
 import at.koopro.wizardsandbeasts.ministry.law.MagicalOffence;
+import at.koopro.wizardsandbeasts.ministry.law.MinistryFines;
 import at.koopro.wizardsandbeasts.ministry.law.TraceService;
 import at.koopro.wizardsandbeasts.ministry.law.WantedLevel;
 import at.koopro.wizardsandbeasts.ministry.post.MinistryPost;
 import com.mojang.brigadier.arguments.FloatArgumentType;
+import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.ChatFormatting;
@@ -101,6 +103,22 @@ public final class MinistryCommandsImpl {
                                                 EntityArgument.getPlayer(ctx, "player"),
                                                 StringArgumentType.getString(ctx, "message"))))))
 
+                // Your own bill is yours to see and to settle; no rank.
+                .then(Commands.literal("fine")
+                        .executes(ctx -> showFine(ctx.getSource(), ctx.getSource().getPlayerOrException()))
+                        .then(Commands.literal("pay")
+                                .executes(ctx -> payFine(ctx.getSource(),
+                                        ctx.getSource().getPlayerOrException(), Long.MAX_VALUE))
+                                .then(Commands.argument("knuts", LongArgumentType.longArg(1L))
+                                        .executes(ctx -> payFine(ctx.getSource(),
+                                                ctx.getSource().getPlayerOrException(),
+                                                LongArgumentType.getLong(ctx, "knuts")))))
+                        .then(Commands.literal("waive")
+                                .requires(MinistryPermissions.atLeast(MinistryRank.MAGICAL_LAW_ENFORCEMENT))
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .executes(ctx -> waiveFine(ctx.getSource(),
+                                                EntityArgument.getPlayer(ctx, "player"))))))
+
                 // Administrative: drive the system directly for testing. Operator only — no rank reaches it.
                 .then(Commands.literal("notoriety")
                         .requires(MinistryPermissions.operatorOnly())
@@ -157,6 +175,13 @@ public final class MinistryCommandsImpl {
             say(source, Component.literal("  Serving: " + formatTicks(record.sentenceTicks()) + " remaining")
                     .withStyle(ChatFormatting.RED));
         }
+        if (record.owesFine()) {
+            say(source, Component.literal("  Outstanding fine: ").withStyle(ChatFormatting.GRAY)
+                    .append(MinistryFines.money(record.outstandingFineKnuts())
+                            .copy().withStyle(ChatFormatting.GOLD))
+                    .append(Component.literal("  (heat will not cool until it is paid)")
+                            .withStyle(ChatFormatting.DARK_GRAY)));
+        }
 
         Map<MagicalOffence, Integer> offences = record.offencesByWeight();
         if (offences.isEmpty()) {
@@ -190,6 +215,58 @@ public final class MinistryCommandsImpl {
             say(source, Component.literal("Nobody currently of interest.").withStyle(ChatFormatting.GRAY));
         }
         return shown;
+    }
+
+    /** What you owe, and how to settle it. Self-service — the whole point is that it needs no official. */
+    private static int showFine(CommandSourceStack source, ServerPlayer target) {
+        long owed = MinistryFines.owed(target);
+        if (owed <= 0L) {
+            say(source, Component.literal("Nothing outstanding with the Ministry.")
+                    .withStyle(ChatFormatting.GREEN));
+            return 0;
+        }
+        say(source, Component.literal("Outstanding fine: ").withStyle(ChatFormatting.GOLD)
+                .append(MinistryFines.money(owed).copy().withStyle(ChatFormatting.WHITE)));
+        say(source, Component.literal("Gringotts settles it from your vault automatically; "
+                        + "/wandb ministry fine pay takes it now.")
+                .withStyle(ChatFormatting.DARK_GRAY));
+        return 1;
+    }
+
+    private static int payFine(CommandSourceStack source, ServerPlayer target, long maxKnuts) {
+        long owed = MinistryFines.owed(target);
+        if (owed <= 0L) {
+            say(source, Component.literal("Nothing outstanding with the Ministry.")
+                    .withStyle(ChatFormatting.GREEN));
+            return 0;
+        }
+        long paid = MinistryFines.pay(target, maxKnuts);
+        if (paid <= 0L) {
+            say(source, Component.literal("Your vault is empty — nothing could be collected.")
+                    .withStyle(ChatFormatting.RED));
+            return 0;
+        }
+        // The paid/remaining notice itself comes from MinistryFines through the Ministry post seam, so the
+        // command deliberately does not restate it; this line is only the command's own acknowledgement.
+        say(source, Component.literal("Paid ").withStyle(ChatFormatting.GREEN)
+                .append(MinistryFines.money(paid).copy().withStyle(ChatFormatting.WHITE)));
+        return 1;
+    }
+
+    private static int waiveFine(CommandSourceStack source, ServerPlayer target) {
+        long owed = MinistryFines.owed(target);
+        if (owed <= 0L) {
+            say(source, Component.literal("Nothing outstanding against ").withStyle(ChatFormatting.GRAY)
+                    .append(target.getDisplayName().plainCopy().withStyle(ChatFormatting.WHITE)));
+            return 0;
+        }
+        MinistryFines.waive(target);
+        say(source, Component.literal("Waived ").withStyle(ChatFormatting.GREEN)
+                .append(MinistryFines.money(owed).copy().withStyle(ChatFormatting.WHITE))
+                .append(Component.literal(" against "))
+                .append(target.getDisplayName().plainCopy().withStyle(ChatFormatting.WHITE))
+                .append(Component.literal(" — the file remains.").withStyle(ChatFormatting.DARK_GRAY)));
+        return 1;
     }
 
     // ── write ──

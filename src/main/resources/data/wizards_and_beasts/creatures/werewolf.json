@@ -13,7 +13,11 @@
   "texture": "wizards_and_beasts:textures/entity/werewolf.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/werewolf.animation.json",
   "attackDamage": 9.0,
-  "clips": ["attack", "hit"],
+  "clips": [
+    "attack",
+    "hit",
+    "howl"
+  ],
   "traits": [
     "PACK"
   ],

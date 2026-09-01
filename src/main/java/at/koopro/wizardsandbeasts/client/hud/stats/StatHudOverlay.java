@@ -5,14 +5,24 @@ import at.koopro.wizardsandbeasts.client.spell.SpellKeyBindings;
 import at.koopro.wizardsandbeasts.client.stats.ClientStatsState;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
+import at.koopro.wizardsandbeasts.stats.PlayerStat;
 import at.koopro.wizardsandbeasts.stats.PlayerStatsData;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 
+/**
+ * The toggleable corner readout of the five stats.
+ *
+ * <p>Rows are built from {@link PlayerStat#values()} and named through their own lang keys. They used
+ * to be five concatenated English literals, which meant the HUD said "Power" in every language and a
+ * sixth stat would simply not have appeared here.
+ */
 public final class StatHudOverlay {
 
     public static final Identifier ID =
@@ -24,6 +34,8 @@ public final class StatHudOverlay {
     private static final int TEXT_COLOR = 0xFFE0E0E0;
     private static final int POWER_COLOR = 0xFFB8A0FF;
     private static final int PRODIGY_COLOR = 0xFFFFD700;
+    /** Training percentage: dimmer than the stat, which is the number that actually matters. */
+    private static final int TRAINING_COLOR = 0xFF8A8A8A;
     private static final int PADDING = 4;
     private static final int ROW_HEIGHT = 10;
 
@@ -52,19 +64,18 @@ public final class StatHudOverlay {
         Font font = mc.font;
         int screenWidth = mc.getWindow().getGuiScaledWidth();
 
-        // Build rows — power row is drawn in two segments so the prodigy star gets its own colour.
-        String powerBase = "Power: " + data.power();
-        String precRow   = "Precision: " + data.precision();
-        String willRow   = "Willpower: " + data.willpower();
-        String reflRow   = "Reflexes: " + data.reflexes();
-        String knowRow   = "Knowledge: " + data.knowledge();
-
-        String[] rows = { powerBase + (data.isProdigy() ? " ☆" : ""), precRow, willRow, reflRow, knowRow };
-
+        PlayerStat[] stats = PlayerStat.values();
+        String[] rows = new String[stats.length];
+        String[] suffixes = new String[stats.length];
         int maxWidth = 0;
-        for (String row : rows) {
-            int w = font.width(row);
-            if (w > maxWidth) maxWidth = w;
+        for (int i = 0; i < stats.length; i++) {
+            PlayerStat stat = stats[i];
+            rows[i] = Component.translatable("gui.wizards_and_beasts.stat_hud.row",
+                    stat.displayName(), data.get(stat)).getString();
+            // The training fraction rides along as a dim suffix rather than a second row: it is the
+            // only thing that moves between two spell hits, and without it the panel looks frozen.
+            suffixes[i] = suffixFor(stat, data);
+            maxWidth = Math.max(maxWidth, font.width(rows[i]) + font.width(suffixes[i]));
         }
 
         int panelW = maxWidth + PADDING * 2;
@@ -77,15 +88,22 @@ public final class StatHudOverlay {
         for (int i = 0; i < rows.length; i++) {
             int x = panelX + PADDING;
             int y = panelY + PADDING + i * ROW_HEIGHT;
-            if (i == 0) {
-                // Power base in accent colour, then star in gold over it
-                graphics.drawString(font, powerBase, x, y, POWER_COLOR, false);
-                if (data.isProdigy()) {
-                    graphics.drawString(font, " ☆", x + font.width(powerBase), y, PRODIGY_COLOR, false);
-                }
-            } else {
-                graphics.drawString(font, rows[i], x, y, TEXT_COLOR, false);
+            int colour = stats[i] == PlayerStat.POWER ? POWER_COLOR : TEXT_COLOR;
+            graphics.drawString(font, rows[i], x, y, colour, false);
+            if (!suffixes[i].isEmpty()) {
+                int suffixColour = stats[i] == PlayerStat.POWER ? PRODIGY_COLOR : TRAINING_COLOR;
+                graphics.drawString(font, suffixes[i], x + font.width(rows[i]), y, suffixColour, false);
             }
         }
+    }
+
+    /** The prodigy star on POWER, the training percentage on a trainable stat, nothing otherwise. */
+    private static String suffixFor(PlayerStat stat, PlayerStatsData data) {
+        if (stat == PlayerStat.POWER) {
+            return data.isProdigy() ? " ☆" : "";
+        }
+        if (!stat.isTrainable()) return "";
+        int percent = Math.round(Mth.clamp(ClientStatsState.trainingProgress(stat), 0f, 1f) * 100f);
+        return Component.translatable("gui.wizards_and_beasts.stat_hud.training", percent).getString();
     }
 }

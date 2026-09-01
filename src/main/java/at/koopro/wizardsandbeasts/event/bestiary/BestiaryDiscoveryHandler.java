@@ -12,8 +12,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
@@ -27,37 +27,99 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Turns what happens in the world into bestiary progress. The <em>rule</em> lives in
+ * {@link EncounterRule}; this class only supplies the events and the player.
+ */
 @EventBusSubscriber(modid = WizardsAndBeastsMod.MODID)
 @NullMarked
 public final class BestiaryDiscoveryHandler {
+
     /** Proximity-sighting cooldowns, evicted on logout. */
     private static final Map<ProximityCooldownKey, Long> PROX_COOLDOWNS = new HashMap<>();
+
     /** Ticks between proximity scans per player. */
     private static final int PROXIMITY_SCAN_INTERVAL_TICKS = 20;
-    /** Scan radius (blocks) for proximity sightings. */
-    private static final double PROXIMITY_SCAN_RADIUS = 12;
+
+    /**
+     * Entries indexed by the entity type they describe, rebuilt on datapack reload rather than on
+     * every scan.
+     *
+     * <p>The previous shape rebuilt this map inside the per-player tick handler: 107 entries walked
+     * once a second per online player, to produce an answer that only changes on a datapack reload.
+     * Volatile-swapped immutable map, the same discipline {@code BestiaryEntryRegistry} uses, so a
+     * scan running during a reload sees one whole generation or the other.
+     */
+    private static volatile Map<Identifier, List<BestiaryEntry>> byEntityType = Map.of();
 
     private record ProximityCooldownKey(UUID playerId, Identifier entryId) {}
 
     private BestiaryDiscoveryHandler() {}
 
+    // -- index ----------------------------------------------------------------------------------
+
+    @SubscribeEvent
+    public static void onEntriesLoaded(BestiaryEntriesLoadedEvent event) {
+        rebuildIndex();
+    }
+
+    /** Package-private so a reload that lands before this handler is wired can still prime it. */
+    static void rebuildIndex() {
+        Map<Identifier, List<BestiaryEntry>> index = new HashMap<>();
+        for (BestiaryEntry entry : BestiaryEntryRegistry.getAll()) {
+            entry.entityType().ifPresent(type ->
+                    index.computeIfAbsent(type, k -> new ArrayList<>(1)).add(entry));
+        }
+        byEntityType = Map.copyOf(index);
+    }
+
+    private static List<BestiaryEntry> entriesFor(EntityType<?> type) {
+        Map<Identifier, List<BestiaryEntry>> index = byEntityType;
+        if (index.isEmpty() && !BestiaryEntryRegistry.getAll().isEmpty()) {
+            // Entries finished loading before this handler saw the event. Build the index now
+            // rather than answering "nothing matches" for the rest of the session.
+            rebuildIndex();
+            index = byEntityType;
+        }
+        return index.getOrDefault(type.builtInRegistryHolder().key().identifier(), List.of());
+    }
+
+    // -- events ---------------------------------------------------------------------------------
+
+    /**
+     * A kill both proves a sighting and fires the {@link EncounterTrigger#KILL} channel, so a
+     * KILL-triggered entry advances two steps on the first kill (unopened to
+     * {@link DiscoveryTier#ENCOUNTERED}) and one step on each kill after.
+     */
     @SubscribeEvent
     public static void onKill(LivingDeathEvent event) {
         if (!ModuleManager.isEnabled(Module.BESTIARY)) return;
-        Entity source = event.getSource().getEntity();
-        if (!(source instanceof Player player)) return;
-        Identifier killedType = event.getEntity().getType().builtInRegistryHolder().key().identifier();
-        for (BestiaryEntry entry : BestiaryEntryRegistry.getAll()) {
-            if (entry.encounterTrigger() != EncounterTrigger.KILL) continue;
-            if (entry.entityType().isPresent() && entry.entityType().get().equals(killedType)) {
-                DiscoveryTier oldTier = BestiaryDataHelper.getTier(player, entry.id());
-                DiscoveryTier newTier = oldTier == DiscoveryTier.SIGHTED ? DiscoveryTier.ENCOUNTERED : DiscoveryTier.SIGHTED;
-                BestiaryDataHelper.setTier(player, entry.id(), newTier);
-                announceDiscovery(player, entry, oldTier, newTier);
+        if (!(event.getSource().getEntity() instanceof ServerPlayer player)) return;
+        for (BestiaryEntry entry : entriesFor(event.getEntity().getType())) {
+            DiscoveryTier tier = BestiaryDataHelper.getTier(player, entry.id());
+            DiscoveryTier next = EncounterRule.onSighted(tier);
+            if (EncounterRule.deepensOn(entry.encounterTrigger(), EncounterTrigger.KILL)) {
+                next = EncounterRule.onTriggered(next);
             }
+            apply(player, entry, tier, next);
         }
     }
 
+    @SubscribeEvent
+    public static void onDrops(LivingDropsEvent event) {
+        if (!ModuleManager.isEnabled(Module.BESTIARY)) return;
+        if (!(event.getSource().getEntity() instanceof ServerPlayer player)) return;
+        for (BestiaryEntry entry : entriesFor(event.getEntity().getType())) {
+            if (!EncounterRule.deepensOn(entry.encounterTrigger(), EncounterTrigger.LOOT)) continue;
+            DiscoveryTier tier = BestiaryDataHelper.getTier(player, entry.id());
+            apply(player, entry, tier, EncounterRule.onTriggered(EncounterRule.onSighted(tier)));
+        }
+    }
+
+    /**
+     * Sighting scan. Every entry that names an entity type takes part, not only the ones declaring
+     * {@link EncounterTrigger#PROXIMITY} - see {@link EncounterRule} for why.
+     */
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
         if (!ModuleManager.isEnabled(Module.BESTIARY)) return;
@@ -65,50 +127,25 @@ public final class BestiaryDiscoveryHandler {
         if (player.tickCount % PROXIMITY_SCAN_INTERVAL_TICKS != 0) return;
 
         var nearby = player.level().getEntities(player,
-                player.getBoundingBox().inflate(PROXIMITY_SCAN_RADIUS), e -> e instanceof LivingEntity);
+                player.getBoundingBox().inflate(EncounterRule.SIGHTING_RANGE),
+                e -> e instanceof LivingEntity);
         if (nearby.isEmpty()) return;
-
-        // Index PROXIMITY entries by entity type once per scan (registry can change on datapack reload).
-        Map<Identifier, List<BestiaryEntry>> proximityByType = new HashMap<>();
-        for (BestiaryEntry entry : BestiaryEntryRegistry.getAll()) {
-            if (entry.encounterTrigger() != EncounterTrigger.PROXIMITY || entry.entityType().isEmpty()) continue;
-            proximityByType.computeIfAbsent(entry.entityType().get(), k -> new ArrayList<>(1)).add(entry);
-        }
-        if (proximityByType.isEmpty()) return;
 
         long now = player.level().getGameTime();
         var bestiaryXpMultipliers = PlayerSkillBonusData.forPlayer(player).bestiaryXpMultipliers();
 
         for (Entity entity : nearby) {
-            List<BestiaryEntry> entries = proximityByType.get(entity.getType().builtInRegistryHolder().key().identifier());
-            if (entries == null) continue;
-            for (BestiaryEntry entry : entries) {
+            for (BestiaryEntry entry : entriesFor(entity.getType())) {
                 ProximityCooldownKey cooldownKey = new ProximityCooldownKey(player.getUUID(), entry.id());
                 long last = PROX_COOLDOWNS.getOrDefault(cooldownKey, -1200L);
                 float multiplier = bestiaryXpMultipliers.getOrDefault(entry.category(), 1.0f);
                 long requiredTicks = Math.max(1L, Math.round(20.0f / Math.max(0.1f, multiplier)));
                 if (now - last < requiredTicks) continue;
                 PROX_COOLDOWNS.put(cooldownKey, now);
-                if (BestiaryDataHelper.getTier(player, entry.id()) == DiscoveryTier.UNDISCOVERED) {
-                    BestiaryDataHelper.setTier(player, entry.id(), DiscoveryTier.SIGHTED);
-                    announceDiscovery(player, entry, DiscoveryTier.UNDISCOVERED, DiscoveryTier.SIGHTED);
-                }
+                DiscoveryTier tier = BestiaryDataHelper.getTier(player, entry.id());
+                apply(player, entry, tier, EncounterRule.onSighted(tier));
             }
         }
-    }
-
-    /**
-     * Action-bar notice when a creature's bestiary tier first rises, so discovery isn't silent — the
-     * player learns an entry was logged without opening the screen and diffing it. Fires only on a
-     * genuine increase, never on the re-kill downgrade path.
-     */
-    private static void announceDiscovery(Player player, BestiaryEntry entry,
-                                          DiscoveryTier oldTier, DiscoveryTier newTier) {
-        if (newTier.ordinal() <= oldTier.ordinal()) return;
-        player.displayClientMessage(
-                Component.translatable("bestiary.wizards_and_beasts.discovered", entry.displayName())
-                        .withStyle(ChatFormatting.GREEN),
-                true);
     }
 
     @SubscribeEvent
@@ -117,18 +154,16 @@ public final class BestiaryDiscoveryHandler {
         PROX_COOLDOWNS.keySet().removeIf(key -> key.playerId().equals(playerId));
     }
 
-    @SubscribeEvent
-    public static void onDrops(LivingDropsEvent event) {
-        if (!ModuleManager.isEnabled(Module.BESTIARY)) return;
-        if (!(event.getSource().getEntity() instanceof Player player)) return;
-        Identifier droppedType = event.getEntity().getType().builtInRegistryHolder().key().identifier();
-        for (BestiaryEntry entry : BestiaryEntryRegistry.getAll()) {
-            if (entry.encounterTrigger() != EncounterTrigger.LOOT) continue;
-            if (entry.entityType().isPresent() && entry.entityType().get().equals(droppedType)) {
-                DiscoveryTier oldTier = BestiaryDataHelper.getTier(player, entry.id());
-                BestiaryDataHelper.setTier(player, entry.id(), DiscoveryTier.ENCOUNTERED);
-                announceDiscovery(player, entry, oldTier, DiscoveryTier.ENCOUNTERED);
-            }
-        }
+    // -- write + notify -------------------------------------------------------------------------
+
+    /** Store the new tier and, when it actually rose, tell the player. */
+    private static void apply(ServerPlayer player, BestiaryEntry entry,
+                              DiscoveryTier oldTier, DiscoveryTier newTier) {
+        if (newTier.ordinal() <= oldTier.ordinal()) return;
+        BestiaryDataHelper.setTier(player, entry.id(), newTier);
+        player.displayClientMessage(
+                Component.translatable("bestiary.wizards_and_beasts.discovered", entry.displayName())
+                        .withStyle(ChatFormatting.GREEN),
+                true);
     }
 }

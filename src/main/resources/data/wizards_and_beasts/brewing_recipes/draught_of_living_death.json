@@ -1,0 +1,26 @@
+{
+  "ingredients": [
+    {
+      "item": "minecraft:wither_rose",
+      "count": 1
+    },
+    {
+      "item": "minecraft:poppy",
+      "count": 2
+    },
+    {
+      "item": "minecraft:fermented_spider_eye",
+      "count": 1
+    }
+  ],
+  "cauldronTier": "copper",
+  "heatTimeTicks": 600,
+  "outputBrewId": "wizards_and_beasts:draught_of_living_death",
+  "failureChance": 0.35,
+  "catalyst": {
+    "item": "minecraft:glistering_melon_slice",
+    "windowStart": 0.45,
+    "windowEnd": 0.65,
+    "missPenalty": 0.4
+  }
+}

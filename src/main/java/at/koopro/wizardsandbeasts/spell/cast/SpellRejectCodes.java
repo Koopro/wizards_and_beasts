@@ -24,6 +24,8 @@ public final class SpellRejectCodes {
     public static final String REQUIREMENTS_UNMET = "requirements_unmet";
     public static final String OBSCURIAL_DARK_ONLY_OUTSIDE_FORM = "obscurial_dark_only_spell_outside_dark_form";
     public static final String OBSCURIAL_DARK_RESTRICTED = "obscurial_dark_spell_restricted";
+    /** Three Firewhiskies in two minutes. The wand will not hold still. */
+    public static final String TOO_DRUNK = "too_drunk";
     public static final String COOLDOWN_ACTIVE = "cooldown_active";
     public static final String COLLAPSE_INSTABILITY_FIZZLE = "collapse_instability_fizzle";
     public static final String OBSCURIAL_INSTABILITY_FIZZLE = "obscurial_instability_fizzle";

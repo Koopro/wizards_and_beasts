@@ -1,0 +1,416 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.broom_cleansweep_seven",
+        "texture_width": 64,
+        "texture_height": 512,
+        "visible_bounds_width": 4,
+        "visible_bounds_height": 2,
+        "visible_bounds_offset": [
+          0,
+          0.5,
+          0
+        ]
+      },
+      "bones": [
+        {
+          "name": "root",
+          "pivot": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "broom_root",
+          "pivot": [
+            0,
+            4,
+            0
+          ],
+          "parent": "root"
+        },
+        {
+          "name": "broom_body",
+          "pivot": [
+            0,
+            4,
+            0
+          ],
+          "parent": "broom_root"
+        },
+        {
+          "name": "shaft",
+          "pivot": [
+            0,
+            4,
+            14
+          ],
+          "parent": "broom_body"
+        },
+        {
+          "name": "tail_cap",
+          "pivot": [
+            0,
+            4,
+            -22
+          ],
+          "parent": "broom_body"
+        },
+        {
+          "name": "binding",
+          "pivot": [
+            0,
+            4,
+            14
+          ],
+          "parent": "broom_body"
+        },
+        {
+          "name": "bristles",
+          "pivot": [
+            0,
+            4,
+            14
+          ],
+          "parent": "broom_body"
+        },
+        {
+          "name": "footstrap",
+          "pivot": [
+            0,
+            4,
+            14
+          ],
+          "parent": "broom_body"
+        },
+        {
+          "name": "accent",
+          "pivot": [
+            0,
+            4,
+            -10
+          ],
+          "parent": "broom_body"
+        },
+        {
+          "name": "shaft_oak",
+          "pivot": [
+            0,
+            4,
+            14
+          ],
+          "parent": "shaft",
+          "cubes": [
+            {
+              "origin": [
+                -2.5,
+                1.5,
+                2.0
+              ],
+              "size": [
+                5,
+                5,
+                12
+              ],
+              "uv": [
+                0,
+                93
+              ]
+            }
+          ]
+        },
+        {
+          "name": "shaft_oak_mid",
+          "pivot": [
+            0,
+            4,
+            2
+          ],
+          "parent": "shaft_oak",
+          "rotation": [
+            3,
+            0,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -2.0,
+                2.0,
+                -8.0
+              ],
+              "size": [
+                4,
+                4,
+                10
+              ],
+              "uv": [
+                30,
+                204
+              ]
+            }
+          ]
+        },
+        {
+          "name": "shaft_oak_grip",
+          "pivot": [
+            0,
+            4,
+            -8
+          ],
+          "parent": "shaft_oak_mid",
+          "rotation": [
+            5,
+            0,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -2.0,
+                2.0,
+                -22.0
+              ],
+              "size": [
+                4,
+                4,
+                14
+              ],
+              "uv": [
+                0,
+                57
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tail_cap_plain",
+          "pivot": [
+            0,
+            4,
+            -22
+          ],
+          "parent": "tail_cap",
+          "cubes": [
+            {
+              "origin": [
+                -1.0,
+                3.0,
+                -23.0
+              ],
+              "size": [
+                2,
+                2,
+                2
+              ],
+              "uv": [
+                34,
+                391
+              ]
+            }
+          ]
+        },
+        {
+          "name": "binding_cord",
+          "pivot": [
+            0,
+            4,
+            14
+          ],
+          "parent": "binding",
+          "cubes": [
+            {
+              "origin": [
+                -3.5,
+                0.5,
+                12.0
+              ],
+              "size": [
+                7,
+                7,
+                5
+              ],
+              "uv": [
+                24,
+                272
+              ]
+            }
+          ]
+        },
+        {
+          "name": "bristles_ragged",
+          "pivot": [
+            0,
+            4,
+            14
+          ],
+          "parent": "bristles",
+          "cubes": [
+            {
+              "origin": [
+                -3.0,
+                1.0,
+                15.0
+              ],
+              "size": [
+                6,
+                6,
+                5
+              ],
+              "uv": [
+                22,
+                308
+              ]
+            },
+            {
+              "origin": [
+                -4.5,
+                0.0,
+                20.0
+              ],
+              "size": [
+                9,
+                8,
+                6
+              ],
+              "uv": [
+                0,
+                219
+              ]
+            },
+            {
+              "origin": [
+                -3.5,
+                -0.5,
+                26.0
+              ],
+              "size": [
+                7,
+                9,
+                6
+              ],
+              "uv": [
+                30,
+                189
+              ]
+            },
+            {
+              "origin": [
+                -4.5,
+                1.0,
+                32.0
+              ],
+              "size": [
+                9,
+                6,
+                6
+              ],
+              "uv": [
+                0,
+                284
+              ]
+            },
+            {
+              "origin": [
+                -3.0,
+                0.5,
+                38.0
+              ],
+              "size": [
+                6,
+                7,
+                5
+              ],
+              "uv": [
+                30,
+                284
+              ]
+            }
+          ]
+        },
+        {
+          "name": "footstrap_iron_peg",
+          "pivot": [
+            0,
+            4,
+            14
+          ],
+          "parent": "footstrap",
+          "cubes": [
+            {
+              "origin": [
+                -1.0,
+                0.0,
+                10.0
+              ],
+              "size": [
+                2,
+                3,
+                2
+              ],
+              "uv": [
+                12,
+                391
+              ]
+            },
+            {
+              "origin": [
+                -3.0,
+                -2.0,
+                9.0
+              ],
+              "size": [
+                6,
+                2,
+                4
+              ],
+              "uv": [
+                24,
+                385
+              ]
+            }
+          ]
+        },
+        {
+          "name": "accent_none",
+          "pivot": [
+            0,
+            4,
+            -10
+          ],
+          "parent": "accent"
+        },
+        {
+          "name": "fx_tip",
+          "pivot": [
+            0,
+            4,
+            -22
+          ],
+          "parent": "broom_root"
+        },
+        {
+          "name": "fx_tail",
+          "pivot": [
+            0,
+            4,
+            40
+          ],
+          "parent": "broom_root"
+        },
+        {
+          "name": "fx_mount",
+          "pivot": [
+            0,
+            5,
+            0
+          ],
+          "parent": "broom_root"
+        }
+      ]
+    }
+  ]
+}

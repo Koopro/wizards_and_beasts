@@ -47,8 +47,9 @@ public class CloakEffectsHandler {
     public static void onServerTick(ServerTickEvent.Post event) {
         List<ServerPlayer> allPlayers = event.getServer().getPlayerList().getPlayers();
 
+        boolean spendTick = event.getServer().getTickCount() % 20 == 0;
         for (ServerPlayer player : allPlayers) {
-            boolean cloaked = isCloakEquipped(player);
+            boolean cloaked = isCloakEquipped(player) && chargedEnough(player, spendTick);
             boolean deathlyCloaked = isDeathlyCloaked(player);
             UUID playerId = player.getUUID();
 
@@ -217,6 +218,30 @@ public class CloakEffectsHandler {
         if (newTarget instanceof Player player && CLOAK_INVISIBLE_PLAYERS.contains(player.getUUID())) {
             event.setCanceled(true);
         }
+    }
+
+    /**
+     * Whether the worn cloak still has concealment left in it, spending a second once per second.
+     *
+     * <p>Charge is spent for time actually spent hidden, which is why the spend happens here rather
+     * than on a wear tick: a cloak in a chest costs nothing, and so does one worn while the charge
+     * has already run out.
+     *
+     * <p>The Deathly Hallow always answers yes and is never written to — see
+     * {@link at.koopro.wizardsandbeasts.demiguise.CloakCharges#isChargeable}.
+     */
+    private static boolean chargedEnough(ServerPlayer player, boolean spendTick) {
+        ItemStack cloak = player.getItemBySlot(EquipmentSlot.CHEST);
+        if (!at.koopro.wizardsandbeasts.demiguise.CloakCharges.isChargeable(cloak)) {
+            return true;
+        }
+        if (!at.koopro.wizardsandbeasts.demiguise.CloakCharges.hasCharge(cloak)) {
+            return false;
+        }
+        if (spendTick) {
+            at.koopro.wizardsandbeasts.demiguise.CloakCharges.spendSecond(cloak);
+        }
+        return true;
     }
 
     private static void clearMobTargets(Player player) {

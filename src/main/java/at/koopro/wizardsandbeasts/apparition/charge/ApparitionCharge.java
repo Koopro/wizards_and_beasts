@@ -22,6 +22,8 @@ public final class ApparitionCharge {
     private final int windowClose;
     /** The memorised destination for an anchored jump; {@code null} for a blink. */
     private final @Nullable ApparitionPoint anchor;
+    /** Where the wizard stood when they began. Frozen, for the reason on {@link #startPosition()}. */
+    private final Vec3 startPosition;
 
     private int elapsed;
     private int damageInstances;
@@ -29,8 +31,9 @@ public final class ApparitionCharge {
     private @Nullable Vec3 destination;
 
     public ApparitionCharge(ApparitionTier tier, float proficiency, int windowFloorTicks,
-                            @Nullable ApparitionPoint anchor) {
+                            @Nullable ApparitionPoint anchor, Vec3 startPosition) {
         this.tier = tier;
+        this.startPosition = startPosition;
         this.windowTicks = ApparitionWindow.windowTicks(proficiency, windowFloorTicks);
         this.windowOpen = ApparitionWindow.windowOpen(tier);
         this.windowClose = ApparitionWindow.windowClose(tier, windowTicks);
@@ -44,6 +47,20 @@ public final class ApparitionCharge {
 
     public @Nullable ApparitionPoint anchor() {
         return anchor;
+    }
+
+    /**
+     * Where the attempt began, not where it ended.
+     *
+     * <p>Movement during Determination is legal — it is taxed through {@link Destabilization}, never
+     * forbidden — so the two are genuinely different places, and an anchored hold gives a wizard seventy
+     * ticks of walking room. Everything the origin is used for wants the place they were standing when they
+     * fixed on the destination: the crack the neighbours hear, the distance the journey is credited for, and
+     * above all where a splinch leaves what it tore off. Reading the live position instead let a player
+     * charge on solid ground, walk out over lava and drop the residue into it.
+     */
+    public Vec3 startPosition() {
+        return startPosition;
     }
 
     public int windowTicks() {

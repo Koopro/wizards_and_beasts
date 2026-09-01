@@ -6,6 +6,10 @@
   "pointCost": 4,
   "effects": [
     {
+      "type": "learn_spell",
+      "spellId": "expecto_patronum"
+    },
+    {
       "spellId": "expecto_patronum",
       "reductionPerLevel": 0.1,
       "type": "spell_cooldown_reduction"

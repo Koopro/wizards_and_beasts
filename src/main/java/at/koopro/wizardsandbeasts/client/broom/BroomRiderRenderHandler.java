@@ -25,7 +25,14 @@ public class BroomRiderRenderHandler {
         PoseStack poseStack = event.getPoseStack();
         poseStack.pushPose();
 
+        // 0.75 is the rider's hip: rotating about the seat rather than about their feet is what
+        // makes a bank read as leaning into a turn instead of swinging from the ankles.
         poseStack.translate(0, 0.75, 0);
+        // Yaw first, so the bank and the lean are applied in the rider's own frame — a side-saddle
+        // rider banks about the broom's axis, not about their own shoulders.
+        if (tilt.yawOffset() != 0.0f) {
+            poseStack.mulPose(Axis.YP.rotationDegrees(tilt.yawOffset()));
+        }
         poseStack.mulPose(Axis.ZP.rotationDegrees(tilt.roll()));
         poseStack.mulPose(Axis.XP.rotationDegrees(tilt.forwardLean() + tilt.pitchTilt()));
         poseStack.translate(0, -0.75, 0);

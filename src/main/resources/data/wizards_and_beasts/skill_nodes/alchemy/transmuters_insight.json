@@ -1,0 +1,24 @@
+{
+  "id": "transmuters_insight",
+  "displayName": "skill.wizards_and_beasts.node.transmuters_insight.name",
+  "description": "skill.wizards_and_beasts.node.transmuters_insight.desc",
+  "tree": "alchemy",
+  "size": "keystone",
+  "pointCost": 6,
+  "effects": [
+    {
+      "type": "learn_spell",
+      "spellId": "capacious_extremis"
+    },
+    {
+      "type": "category_cooldown_reduction",
+      "category": "utility",
+      "reductionPerLevel": 0.1
+    }
+  ],
+  "x": -317.0,
+  "y": 22.0,
+  "edges": [
+    "alchemy_minor_efficiency_9"
+  ]
+}

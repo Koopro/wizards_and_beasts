@@ -1,0 +1,6 @@
+{
+  "trigger": "bestiary_tier",
+  "minTier": "STUDIED",
+  "effects": { "tradition": -1.5 },
+  "cooldownSeconds": 0
+}

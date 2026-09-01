@@ -33,6 +33,48 @@ public final class ModEffects {
             MOB_EFFECTS.register("obscuro", ObscuroEffect::new);
     public static final DeferredHolder<MobEffect, LumosFieldEffect> LUMOS_FIELD =
             MOB_EFFECTS.register("lumos_field", LumosFieldEffect::new);
+    /** A Demiguise's trick: mobs look past you until you give them a reason not to. */
+    public static final DeferredHolder<MobEffect, CamouflageEffect> CAMOUFLAGE =
+            MOB_EFFECTS.register("camouflage", CamouflageEffect::new);
+    /** Half-there and quick, at the price of a light tax. See {@code ShadowForm}. */
+    public static final DeferredHolder<MobEffect, ShadowFormEffect> SHADOW_FORM =
+            MOB_EFFECTS.register("shadow_form", ShadowFormEffect::new);
+    /** Butterbeer warmth: no more freezing, and golden steam that says so. */
+    public static final DeferredHolder<MobEffect, WarmthEffect> WARMTH =
+            MOB_EFFECTS.register("warmth", WarmthEffect::new);
+    /** Butterbeer calm: neutral things stop minding you until you hit one. */
+    public static final DeferredHolder<MobEffect, MellowEffect> MELLOW =
+            MOB_EFFECTS.register("mellow", MellowEffect::new);
+    /** A clear head: +10% from what you kill and what you study. See {@code HogwartsComfort}. */
+    public static final DeferredHolder<MobEffect, HogwartsComfortEffect> HOGWARTS_COMFORT =
+            MOB_EFFECTS.register("hogwarts_comfort", HogwartsComfortEffect::new);
+    /** Half a minute after chocolate when the despair cannot come back. */
+    public static final DeferredHolder<MobEffect, ChocolateWardEffect> CHOCOLATE_WARD =
+            MOB_EFFECTS.register("chocolate_ward", ChocolateWardEffect::new);
+    /** Riding a bubble of Droobles. See {@code BubbleFloatHandler}. */
+    public static final DeferredHolder<MobEffect, BubbleFloatEffect> BUBBLE_FLOAT =
+            MOB_EFFECTS.register("bubble_float", BubbleFloatEffect::new);
+    /** The three seconds a mouthful of Firewhisky is still going down. */
+    public static final DeferredHolder<MobEffect, FirewhiskyBurnEffect> FIREWHISKY_BURN =
+            MOB_EFFECTS.register("firewhisky_burn", FirewhiskyBurnEffect::new);
+    /** Three in two minutes. Blocks casting; see {@code SpellCastGate.TOO_DRUNK}. */
+    public static final DeferredHolder<MobEffect, DrunkEffect> DRUNK =
+            MOB_EFFECTS.register("drunk", DrunkEffect::new);
+    /** Gillyweed: gills, webbed hands, and a lake that stops being a place you visit. */
+    public static final DeferredHolder<MobEffect, GillsEffect> GILLS =
+            MOB_EFFECTS.register("gills", GillsEffect::new);
+    /** Luna's trick: anything nearby that is hiding gets outlined, for you alone. */
+    public static final DeferredHolder<MobEffect, WrackspurtSightEffect> WRACKSPURT_SIGHT =
+            MOB_EFFECTS.register("wrackspurt_sight", WrackspurtSightEffect::new);
+    /** A slice of treacle tart: a slow heart, and fear passing sooner. */
+    public static final DeferredHolder<MobEffect, HomeComfortEffect> HOME_COMFORT =
+            MOB_EFFECTS.register("home_comfort", HomeComfortEffect::new);
+    /** Fizzing Whizzbee: the whizz on each jump, the sputter, and the pop. */
+    public static final DeferredHolder<MobEffect, FizzingEffect> FIZZING =
+            MOB_EFFECTS.register("fizzing", FizzingEffect::new);
+    /** The toad, still hopping, from the inside. */
+    public static final DeferredHolder<MobEffect, PeppermintHopEffect> PEPPERMINT_HOP =
+            MOB_EFFECTS.register("peppermint_hop", PeppermintHopEffect::new);
     public static final DeferredHolder<MobEffect, MuffliatoEffect> MUFFLIATO =
             MOB_EFFECTS.register("muffliato", MuffliatoEffect::new);
     public static final DeferredHolder<MobEffect, CruciatusPainEffect> CRUCIATUS_PAIN =
@@ -60,6 +102,10 @@ public final class ModEffects {
             MOB_EFFECTS.register("imperio_resisting", ImperioResistingEffect::new);
     public static final DeferredHolder<MobEffect, CrucioSanityDrainEffect> CRUCIO_SANITY_DRAIN =
             MOB_EFFECTS.register("crucio_sanity_drain", CrucioSanityDrainEffect::new);
+
+    /** Standing in a lit Floo hearth. See {@code FlooProtectionEvents}. */
+    public static final DeferredHolder<MobEffect, FlooProtectedEffect> FLOO_PROTECTED =
+            MOB_EFFECTS.register("floo_protected", FlooProtectedEffect::new);
 
     public static final DeferredHolder<MobEffect, DisorientedEffect> DISORIENTED =
             MOB_EFFECTS.register("disoriented", DisorientedEffect::new);

@@ -1,0 +1,15 @@
+{
+  "ingredients": [
+    {
+      "item": "minecraft:blaze_powder",
+      "count": 1
+    },
+    {
+      "item": "minecraft:sugar",
+      "count": 1
+    }
+  ],
+  "cauldronTier": "pewter",
+  "heatTimeTicks": 160,
+  "outputBrewId": "wizards_and_beasts:pepperup_potion"
+}

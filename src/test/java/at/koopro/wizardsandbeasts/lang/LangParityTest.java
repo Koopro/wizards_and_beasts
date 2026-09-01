@@ -56,6 +56,34 @@ class LangParityTest {
 
     private static final Pattern ANY_TRANSLATABLE = Pattern.compile("(?:Component\\.)?translatable\\(");
 
+    /**
+     * A file-local {@code static final String} whose value is part of a lang key, as in
+     * {@code private static final String PREFIX = "gui.wizards_and_beasts.stat.";}.
+     *
+     * <p>Only constants whose value already carries the modid are substituted. A blanket substitution
+     * would fold unrelated constants — NBT tag names, brigadier argument names — into strings that
+     * look like keys and report them as missing.
+     */
+    private static final Pattern KEY_PREFIX_CONSTANT = Pattern.compile(
+            "static final String\\s+([A-Z_][A-Z_0-9]*)\\s*=\\s*\"([^\"]*" + WizardsAndBeastsMod.MODID
+                    + "[^\"]*)\"\\s*;");
+
+    /** {@code "a" + "b"} — two adjacent literals the compiler folds into one. */
+    private static final Pattern LITERAL_CONCAT = Pattern.compile("\"\\s*\\+\\s*\"");
+
+    /** Any string literal, so a folded key counts wherever it is passed, not only to {@code translatable}. */
+    private static final Pattern STRING_LITERAL = Pattern.compile("\"([^\"\\n]+)\"");
+
+    /**
+     * The shape of a finished lang key: dot-separated lowercase segments, three or more.
+     *
+     * <p>The trailing segment may not be empty, which is what separates a key from the prefix half of
+     * one: {@code key.wizards_and_beasts.ability_quick_} is completed with a slot number at runtime and
+     * is not a key anybody should look up.
+     */
+    private static final Pattern KEY_SHAPED = Pattern.compile(
+            "^[a-z][a-z0-9_]*(?:\\.[a-z0-9_]*[a-z0-9]){2,}$");
+
     private static Map<String, String> readLang(Path path) throws IOException {
         Map<String, String> entries = new LinkedHashMap<>();
         if (!Files.exists(path)) {
@@ -91,6 +119,64 @@ class LangParityTest {
             }
         }
         return refs;
+    }
+
+    /**
+     * The same file with every compile-time-constant piece of a key folded in: {@code MODID} and any
+     * file-local {@code static final String} prefix resolved, then adjacent literals joined.
+     *
+     * <p>{@code translatable(PREFIX + "tooltip.current")} is as statically known as
+     * {@code translatable("gui.wizards_and_beasts.stat.tooltip.current")} — the compiler folds both to
+     * the same constant — but only the second was ever checked. Fifteen stat-tooltip keys and eighteen
+     * Floo command keys sat missing behind a prefix constant, rendering as raw keys in game, while this
+     * file reported full parity.
+     */
+    private static String withConstantsFolded(String source) {
+        String folded = source.replace("WizardsAndBeastsMod.MODID",
+                '"' + WizardsAndBeastsMod.MODID + '"');
+        Matcher constants = KEY_PREFIX_CONSTANT.matcher(folded);
+        Map<String, String> prefixes = new LinkedHashMap<>();
+        while (constants.find()) {
+            prefixes.put(constants.group(1), constants.group(2));
+        }
+        for (Map.Entry<String, String> prefix : prefixes.entrySet()) {
+            folded = folded.replaceAll("(?<![\\w.])" + Pattern.quote(prefix.getKey()) + "(?![\\w])",
+                    Matcher.quoteReplacement('"' + prefix.getValue() + '"'));
+        }
+        return LITERAL_CONCAT.matcher(folded).replaceAll("");
+    }
+
+    /**
+     * Keys assembled from constants rather than written out whole. Checked separately from
+     * {@link #everyReferencedKeyExists()} because folding rewrites the file and loses line numbers;
+     * the key alone is enough to find the call site.
+     */
+    @Test
+    void everyKeyBuiltFromConstantsExists() throws IOException {
+        Map<String, String> enUs = mergedEnUs();
+        Set<String> missing = new TreeSet<>();
+        try (Stream<Path> files = Files.walk(SOURCE_ROOT)) {
+            for (Path file : files.filter(p -> p.toString().endsWith(".java")).toList()) {
+                Matcher matcher = STRING_LITERAL.matcher(withConstantsFolded(Files.readString(file)));
+                while (matcher.find()) {
+                    String key = matcher.group(1);
+                    // A key names a translation; a resource id names a file. Only the first has dots
+                    // and neither a namespace colon nor a path separator.
+                    if (!key.contains(WizardsAndBeastsMod.MODID)
+                            || key.startsWith(WizardsAndBeastsMod.MODID)
+                            || key.indexOf(':') >= 0 || key.indexOf('/') >= 0
+                            || !KEY_SHAPED.matcher(key).matches()) {
+                        continue;
+                    }
+                    if (!enUs.containsKey(key)) {
+                        missing.add("%s  (%s)".formatted(key, file));
+                    }
+                }
+            }
+        }
+        assertTrue(missing.isEmpty(),
+                () -> "translation keys built from a constant prefix but absent from en_us:\n  "
+                        + String.join("\n  ", missing));
     }
 
     @Test

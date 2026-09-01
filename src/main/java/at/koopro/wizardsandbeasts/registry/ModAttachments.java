@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.registry;
 
+import at.koopro.wizardsandbeasts.felix.FelixState;
+import at.koopro.wizardsandbeasts.polyjuice.PolyjuiceState;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.azkaban.attachment.AzkabanTrespasserData;
 import at.koopro.wizardsandbeasts.stats.PlayerStatsData;
@@ -17,6 +19,7 @@ import at.koopro.wizardsandbeasts.bestiary.data.PlayerBestiaryData;
 import at.koopro.wizardsandbeasts.owl.data.PlayerOWLData;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerProfessionData;
 import at.koopro.wizardsandbeasts.memory.PlayerMemoryData;
+import at.koopro.wizardsandbeasts.standing.MagicalStanding;
 import at.koopro.wizardsandbeasts.skill.data.PlayerSkillData;
 import at.koopro.wizardsandbeasts.skill.vocation.PlayerVocationData;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
@@ -258,6 +261,31 @@ public class ModAttachments {
                     .copyOnDeath()
                     .build());
 
+    /**
+     * Liquid luck, and the memory of having drunk it.
+     *
+     * <p>Not {@code copyOnDeath}. Dying is the loudest possible evidence that your luck ran out, and
+     * carrying Felix through a respawn would also carry the near-death save that failed to stop it.
+     * The cooldown dying with the player is deliberate too: death is punishment enough.
+     */
+    /**
+     * Whose face a wizard is wearing.
+     *
+     * <p>Not {@code copyOnDeath}: dying drops the disguise, which is both the fictional answer and the
+     * one that cannot be exploited — a player who could die to keep a face would have a free revert.
+     */
+    public static final Supplier<AttachmentType<PolyjuiceState>> POLYJUICE_STATE =
+            ATTACHMENTS.register("polyjuice_state", () ->
+                    AttachmentType.builder(() -> PolyjuiceState.NONE)
+                            .serialize(PolyjuiceState.CODEC.fieldOf("polyjuice"))
+                            .build());
+
+    public static final Supplier<AttachmentType<FelixState>> FELIX_STATE =
+            ATTACHMENTS.register("felix_state", () ->
+                    AttachmentType.builder(() -> FelixState.NONE)
+                            .serialize(FelixState.CODEC.fieldOf("felix"))
+                            .build());
+
     public static final Supplier<AttachmentType<Set<String>>> FLOO_VISITED_DESTINATIONS =
             ATTACHMENTS.register("floo_visited_destinations", () ->
                     AttachmentType.<Set<String>>builder(() -> new HashSet<>())
@@ -266,6 +294,19 @@ public class ModAttachments {
                                     .fieldOf("visited"))
                             .copyOnDeath()
                             .build());
+
+    /**
+     * The two written-down halves of a player's standing in magical society — see
+     * {@link at.koopro.wizardsandbeasts.standing.MagicalStanding}. {@code copyOnDeath}: dying does not
+     * change who you were, and the two axes composed from this one
+     * ({@code DARK_CORRUPTION}, the Ministry record) are both {@code copyOnDeath} already, so anything
+     * else here would make alignment jump on respawn.
+     */
+    public static final Supplier<AttachmentType<MagicalStanding>> MAGICAL_STANDING =
+            ATTACHMENTS.register("magical_standing", () -> AttachmentType.builder(() -> MagicalStanding.DEFAULT)
+                    .serialize(MagicalStanding.CODEC.fieldOf("data"))
+                    .copyOnDeath()
+                    .build());
 
     public static final Supplier<AttachmentType<PlayerMemoryData>> MEMORIES =
             ATTACHMENTS.register("memories", () -> AttachmentType.builder(PlayerMemoryData::new)

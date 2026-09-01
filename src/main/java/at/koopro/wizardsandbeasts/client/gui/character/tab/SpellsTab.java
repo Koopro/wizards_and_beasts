@@ -30,7 +30,8 @@ public final class SpellsTab implements CharacterTab {
     }
 
     @Override
-    public void render(@NonNull GuiGraphics g, int x, int y, int w, int h, float partialTick) {
+    public void render(@NonNull GuiGraphics g, int x, int y, int w, int h,
+                       int mouseX, int mouseY, float partialTick) {
         Font font = Minecraft.getInstance().font;
 
         List<SpellEntry> entries = buildSortedEntries();

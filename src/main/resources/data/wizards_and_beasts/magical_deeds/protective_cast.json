@@ -1,0 +1,6 @@
+{
+  "trigger": "spell_cast",
+  "match": "protego",
+  "effects": { "alignment": 0.5 },
+  "cooldownSeconds": 180
+}

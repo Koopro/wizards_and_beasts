@@ -6,6 +6,10 @@
   "pointCost": 2,
   "effects": [
     {
+      "type": "learn_spell",
+      "spellId": "flipendo"
+    },
+    {
       "spellId": "flipendo",
       "bonusPerLevel": 0.1,
       "type": "spell_damage_bonus"

@@ -39,6 +39,8 @@ import at.koopro.wizardsandbeasts.registry.ModEntities;
 import at.koopro.wizardsandbeasts.registry.ModFeatures;
 import at.koopro.wizardsandbeasts.registry.ModBlockEntities;
 import at.koopro.wizardsandbeasts.registry.ModMenuTypes;
+import at.koopro.wizardsandbeasts.registry.ArmorItemRegistry;
+import at.koopro.wizardsandbeasts.registry.CanonItemRegistry;
 import at.koopro.wizardsandbeasts.registry.BroomItemRegistry;
 import at.koopro.wizardsandbeasts.registry.ConsumableItemRegistry;
 import at.koopro.wizardsandbeasts.registry.CurrencyItemRegistry;
@@ -78,6 +80,8 @@ public class WizardsAndBeastsMod {
         MiscItemRegistry.init();
         LoreItemRegistry.init();
         TrinketItemRegistry.init();
+        ArmorItemRegistry.init();
+        CanonItemRegistry.init();
         ModCreatures.register();
         ModCreatures.registerSpawnEggs();
         ModEntities.ENTITY_TYPES.register(modEventBus);
@@ -145,6 +149,11 @@ public class WizardsAndBeastsMod {
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "bestiary_entry_reload_listener"),
                     new BestiaryEntryLoader());
+            // Which rare materials a studied creature yields. A side table rather than a field on
+            // BestiaryEntry: that record is already at RecordCodecBuilder's sixteen-field ceiling.
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "bestiary_harvest_reload_listener"),
+                    new at.koopro.wizardsandbeasts.bestiary.harvest.HarvestRuleLoader());
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "handbook_chapter_reload_listener"),
                     new HandbookChapterManager());
@@ -175,6 +184,20 @@ public class WizardsAndBeastsMod {
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "heritage_appearance_reload_listener"),
                     new at.koopro.wizardsandbeasts.heritage.appearance.HeritageAppearanceLoader());
+            // How the Marauder's Map learns a place exists. Only the *rules* are datapack data --
+            // what a discovered place looks like is a client resource, so a server never ships art.
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "map_discovery_reload_listener"),
+                    new at.koopro.wizardsandbeasts.map.discovery.MapDiscoveryRuleLoader());
+            // Magical standing: the deeds that move it, and the gates that read it. Both are pure
+            // datapack policy -- the mod ships deeds and no gates, so a pack can retune what conduct
+            // means and what it unlocks without touching code.
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "magical_deed_reload_listener"),
+                    new at.koopro.wizardsandbeasts.standing.deed.DeedLoader());
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "standing_gate_reload_listener"),
+                    new at.koopro.wizardsandbeasts.standing.gate.StandingGateLoader());
         });
 
         // Ability framework: server-side sync/clone/cooldown lifecycle + debug behavior wiring.

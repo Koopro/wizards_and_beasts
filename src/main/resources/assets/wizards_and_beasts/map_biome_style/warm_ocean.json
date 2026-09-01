@@ -1,0 +1,8 @@
+{
+  "biomes": [
+    "minecraft:warm_ocean"
+  ],
+  "tile": 2,
+  "tint": "#6FA5A8",
+  "water_tint": "#6FA5A8"
+}

@@ -41,6 +41,17 @@ public final class ModParticles {
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> AK_BYPASS_FLASH =
             PARTICLE_TYPES.register("ak_bypass_flash", () -> new SimpleParticleType(true));
 
+    // Broom slipstreams, one per tier family. Option-free on purpose: BroomAudio resolves
+    // trailParticle from an id alone, so a type that needed options could not be named in JSON.
+    // `false` for overrideLimiter -- a trail is ambience, and it should thin out with the player's
+    // particle setting rather than ignoring it the way a spell impact does.
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> BROOM_TRAIL_DUST =
+            PARTICLE_TYPES.register("broom_trail_dust", () -> new SimpleParticleType(false));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> BROOM_TRAIL_GOLD =
+            PARTICLE_TYPES.register("broom_trail_gold", () -> new SimpleParticleType(false));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> BROOM_TRAIL_EMBER =
+            PARTICLE_TYPES.register("broom_trail_ember", () -> new SimpleParticleType(false));
+
     private static DeferredHolder<ParticleType<?>, ParticleType<SpellTintParticleOptions>> registerTint(String name) {
         return PARTICLE_TYPES.register(name, () -> new ParticleType<>(false) {
             @Override

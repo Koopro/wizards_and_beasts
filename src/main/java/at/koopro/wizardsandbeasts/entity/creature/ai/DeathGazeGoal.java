@@ -63,6 +63,7 @@ public final class DeathGazeGoal extends Goal {
             return;
         }
         Vec3 mobEye = mob.getEyePosition();
+        boolean gazed = false;
         for (Player player : nearbyPlayers()) {
             if (isGazeImmune(player) || !mob.hasLineOfSight(player)) {
                 continue;
@@ -70,6 +71,9 @@ public final class DeathGazeGoal extends Goal {
             Vec3 toMob = mobEye.subtract(player.getEyePosition()).normalize();
             double dot = player.getViewVector(1.0f).dot(toMob);
             boolean lethal = mob.has(Trait.LETHAL_GAZE);
+            if (dot > PERIPHERAL_DOT) {
+                gazed = true;
+            }
             if (dot > MEET_DOT) {
                 if (lethal) {
                     // Eyes met — begin the windup; BasiliskGazeWindupHandler resolves it to instant
@@ -94,6 +98,11 @@ public final class DeathGazeGoal extends Goal {
                     player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 40, 0));
                 }
             }
+        }
+        if (gazed) {
+            // The rig's `gaze` clip had no caller until now: the basilisk rears and fixes its stare
+            // only when a stare actually landed on someone, not every time the goal ticks.
+            mob.triggerDeclared("gaze");
         }
     }
 

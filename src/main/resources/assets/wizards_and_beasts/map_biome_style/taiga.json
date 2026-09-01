@@ -1,0 +1,10 @@
+{
+  "biomes": [
+    "minecraft:taiga",
+    "minecraft:old_growth_pine_taiga",
+    "minecraft:old_growth_spruce_taiga",
+    "minecraft:windswept_forest"
+  ],
+  "tile": 11,
+  "tint": "#4E6B53"
+}

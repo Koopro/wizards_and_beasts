@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.client.spell.network;
 import at.koopro.wizardsandbeasts.client.spell.SpellVfxClient;
 import at.koopro.wizardsandbeasts.client.spell.state.ClientSignatureSpellState;
 import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellDataState;
+import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellRejectFeedback;
 import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellTeacherState;
 import at.koopro.wizardsandbeasts.network.ClientScreenHooksInvoker;
 import at.koopro.wizardsandbeasts.client.beam.BeamChannelClient;
@@ -126,10 +127,11 @@ public final class SpellClientPayloadHandlers {
     }
 
     public static void handleSpellDenied(SpellDeniedS2CPayload pkt, IPayloadContext ctx) {
-        // Routed through SpellVfxClient (not an inline SoundManager.play) so this class —
+        // Routed through ClientSpellRejectFeedback (not an inline SoundManager.play) so this class —
         // loaded server-side when the registrar resolves the method ref — never forces
-        // verification-time loading of the client-only SoundInstance type.
-        ctx.enqueueWork(SpellVfxClient::playDeniedFeedback);
+        // verification-time loading of the client-only SoundInstance type. That class plays the
+        // denied sound and decides whether the reason is drawn on the spell HUD or the action bar.
+        ctx.enqueueWork(() -> ClientSpellRejectFeedback.onDenied(pkt.reason()));
     }
 
     /**

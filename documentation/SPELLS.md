@@ -182,3 +182,48 @@ The current, wired component vocabulary lives in `SPELL_EFFECT_COMPONENTS.md` (S
 
 **Components:** `apply_effect`, `damage`, `ignite`, `impulse`, `heal`, `dispel`, `clear_fire`, `light`, `repair`, `explosion`, `aoe_apply`, `swap_active_spell`  
 **Key mechanics:** scaling (F1) via `SpellEffectContext`, cadence (F2) for beam channels, hybrid props (Step 5) for behavior that fires where the runner has no hook.
+
+## 8. VFX / SFX plug points (per-spell look and sound)
+
+Where a spell's presentation comes from. All four are data-driven already — a new spell that wants
+its own look and sound almost never needs Java, and checking here first is cheaper than discovering
+it after writing a renderer.
+
+| What | Author it in | Read by |
+|---|---|---|
+| **Cast sound** | `"sound": { "id", "volume", "pitch" }` in the spell JSON (`SpellDefinition.SoundDef`). Java spells: `SpellProperties.Builder.sound(...)` | `Spell.playSound`, called from `SpellExecutor.dispatchGeneric` |
+| **Trail particles** | `spellFamily` + `color` in the spell JSON | `SpellProjectileEntity.tick`, tinting `ModParticles.tinted(family, argb)` |
+| **Impact burst** | the same `spellFamily` + `color` | server: `SpellImpactBurstS2CPayload.sendToTracking(...)`; client: `SpellVfxClient.spawnTintBurst` |
+| **Beam look** | `BeamStyles` / `BeamSettings` under `client.wand` | `client.beam` — the only beam renderer |
+
+`SpellFamilies.of(spell)` resolves the family: JSON spells return their declared `spellFamily`
+(defaulting to `ARCANE`), and the six bespoke Java spells fall through a hardcoded id table. If a
+spell renders in the wrong colour, that table is the first place to look.
+
+### Adding a genuinely bespoke effect
+
+1. Put the client code in `client.spell.SpellVfxClient` (or `client.beam`), **not** at the payload
+   handler. `SpellClientPayloadHandlers` is loaded *server*-side when the payload registrar resolves
+   its method references, so a client-only type in its signatures fails verification on a dedicated
+   server. Call a static method on `SpellVfxClient` from a handler lambda instead — this is why
+   `playDeniedFeedback` and `spawnTintBurst` are shaped the way they are.
+2. If it needs a new packet, put a bounded payload in `network/spell` and register it in
+   `ModNetworkSpells`.
+3. Keep the decision on the server. The client is told what happened; it never decides that anything
+   did. Sending a *code* rather than a rendered sentence is the same rule applied to text —
+   `SpellDeniedS2CPayload` carries a reject code and `ClientSpellRejectFeedback` decides what the
+   player reads and where.
+
+### Cast-failure feedback
+
+Two different things, on purpose:
+
+- **Reject** — the cast was refused before it happened. Routed through `SpellCastService.debugReject`,
+  which ticks the reject counter and sends `SpellDeniedS2CPayload` with the code. The client resolves
+  the code to a lang key via `SpellRejectCodes.castRejectMessageKey` and draws it on the spell HUD, or
+  the action bar when the HUD is hidden — one channel, never both. Codes whose text is composed from
+  live state (`REQUIREMENTS_UNMET`, `GAMP_HARD_REJECT`) resolve to `null` and the site's own richer
+  sentence stands alone.
+- **Misfire** — the cast was legal and the wand failed anyway (mental instability, obscurus
+  backlash, the modifier-driven misfire chance). No reject code, no denial packet: there is no reason
+  to report. It plays `SPELL_FIZZLE` and says so.

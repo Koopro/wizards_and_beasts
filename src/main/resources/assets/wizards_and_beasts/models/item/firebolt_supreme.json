@@ -1,4 +1,6 @@
 {
-  "_comment": "TODO: distinct model per variant",
-  "parent": "wizards_and_beasts:item/broom"
-}    
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "wizards_and_beasts:item/firebolt_supreme"
+  }
+}

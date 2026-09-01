@@ -1,0 +1,19 @@
+{
+  "ingredients": [
+    {
+      "item": "minecraft:fermented_spider_eye",
+      "count": 1
+    },
+    {
+      "item": "minecraft:kelp",
+      "count": 2
+    },
+    {
+      "item": "minecraft:rabbit_hide",
+      "count": 1
+    }
+  ],
+  "cauldronTier": "copper",
+  "heatTimeTicks": 1000,
+  "outputBrewId": "wizards_and_beasts:polyjuice_potion"
+}

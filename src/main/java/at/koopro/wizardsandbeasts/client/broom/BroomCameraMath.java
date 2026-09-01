@@ -33,10 +33,27 @@ public final class BroomCameraMath {
         return Mth.clamp(broomRollDeg * ROLL_SHARE, -MAX_ROLL_DEG, MAX_ROLL_DEG);
     }
 
-    /** Extra third-person camera distance, in blocks, for a broom moving at {@code speed}. */
-    public static float pullBackTarget(float speed) {
-        float ceiling = BroomTuning.MAX_SPEED * BroomTuning.BOOST_MULTIPLIER;
+    /**
+     * Extra third-person camera distance, in blocks, for a broom moving at {@code speed}, measured
+     * against that broom's own boosted ceiling.
+     *
+     * <p>{@code ceiling} is a parameter rather than a constant because the old fixed denominator
+     * ({@code MAX_SPEED * BOOST_MULTIPLIER}, 1.6675) described no broom that exists: a starter broom
+     * peaking at 0.455 never pulled the camera past a quarter of {@link #MAX_PULL_BACK}, so its top
+     * speed looked like a crawl, while a Firebolt Supreme peaking at 2.625 sat pinned at the cap for
+     * most of its range and so had no visual sense of accelerating at all. Per-broom, the pull-back
+     * spans its full travel on every broom in the game.
+     */
+    public static float pullBackTarget(float speed, float ceiling) {
+        if (ceiling <= 0.0F) {
+            return 0.0F;
+        }
         return Mth.clamp(Math.abs(speed) / ceiling, 0.0F, 1.0F) * MAX_PULL_BACK;
+    }
+
+    /** As above, against the fastest broom that ships — for a caller with no definition in hand. */
+    public static float pullBackTarget(float speed) {
+        return pullBackTarget(speed, BroomTuning.REFERENCE_TOP_SPEED);
     }
 
     /**

@@ -1,0 +1,27 @@
+{
+  "parent": "wizards_and_beasts:progression/root",
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "wizards_and_beasts:wand"
+    },
+    "title": {
+      "translate": "advancements.wizards_and_beasts.progression.apparate.title"
+    },
+    "description": {
+      "translate": "advancements.wizards_and_beasts.progression.apparate.description"
+    },
+    "show_toast": true,
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "apparated": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "apparated"
+    ]
+  ]
+}

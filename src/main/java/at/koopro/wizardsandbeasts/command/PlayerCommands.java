@@ -5,6 +5,7 @@ import at.koopro.wizardsandbeasts.heritage.command.HeritageCommands;
 import at.koopro.wizardsandbeasts.heritage.command.ProfessionCommands;
 import at.koopro.wizardsandbeasts.owl.command.OWLCommands;
 import at.koopro.wizardsandbeasts.skill.command.SkillCommands;
+import at.koopro.wizardsandbeasts.standing.command.StandingCommands;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -30,10 +31,12 @@ public final class PlayerCommands {
                 .then(HeritageCommands.register())
                 .then(ProfessionCommands.register())
                 .then(OWLCommands.register())
+                .then(at.koopro.wizardsandbeasts.owl.post.OwlPostCommands.register())
                 .then(AppearanceCommands.register())
                 .then(StatsCommands.register())
                 .then(SkillCommands.register())
                 .then(SkillCommands.registerVocation())
+                .then(StandingCommands.register())
                 .then(AbilityFrameworkCommands.register());
     }
 }

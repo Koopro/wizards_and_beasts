@@ -45,7 +45,7 @@ class BroomCameraMathTest {
         assertEquals(0.0F, BroomCameraMath.pullBackTarget(0.0F), EPS,
                 "a stationary broom must leave the camera exactly where vanilla put it");
 
-        float boosted = BroomTuning.MAX_SPEED * BroomTuning.BOOST_MULTIPLIER;
+        float boosted = BroomTuning.REFERENCE_TOP_SPEED;
         assertEquals(BroomCameraMath.MAX_PULL_BACK, BroomCameraMath.pullBackTarget(boosted), EPS);
         assertEquals(BroomCameraMath.MAX_PULL_BACK, BroomCameraMath.pullBackTarget(boosted * 4.0F), EPS,
                 "overspeed must saturate, not keep pushing the camera out");

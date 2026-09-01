@@ -1,54 +1,40 @@
 package at.koopro.wizardsandbeasts.client.spell.ui;
 
+import at.koopro.wizardsandbeasts.spell.cast.SpellRejectCodes;
+import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.NullMarked;
+
+/**
+ * Turns a stored reject code into a label for a diagnostic surface — the debug reject summary and
+ * {@link SpellHudUiModel#topRejectReason()}, which report <em>which refusal a player hits most</em>
+ * rather than narrating a single cast.
+ *
+ * <p>It holds no English of its own. It used to carry fifteen hardcoded sentences that paraphrased the
+ * ones the cast path was showing, which is two vocabularies for one set of reasons and exactly the kind
+ * of pair that drifts. Every label now resolves through {@link SpellRejectCodes#messageKeys()}, so
+ * changing a refusal's wording is one edit in the lang file.
+ *
+ * <p>Unlike the live reject line, this reads {@code messageKeys()} directly rather than
+ * {@link SpellRejectCodes#castRejectMessageKey}: site-owned codes have no <em>live</em> line to draw,
+ * but they very much still need a name in a summary of what a player keeps running into.
+ */
+@NullMarked
 public final class SpellRejectReasonFormatter {
+
     private SpellRejectReasonFormatter() {}
 
-    public static String toHudLabel(String reason) {
+    /**
+     * A label for {@code reason}, which may carry a {@code :detail} suffix.
+     *
+     * <p>Falls back to the bare code for anything unmapped. That is deliberate: an unrecognised code on
+     * a debug surface should show the code, not a friendly sentence that hides which one it was.
+     */
+    public static Component toHudLabel(String reason) {
         if (reason == null || reason.isBlank()) {
-            return "No recent spell rejection";
+            return Component.translatable("wandcraft.cast.reject.none");
         }
-        if (reason.startsWith("obscurial_dark_spell_restricted")) {
-            return "Obscurus rejected non-dark spell";
-        }
-        if (reason.startsWith("obscurial_dark_only_spell_outside_dark_form")) {
-            return "Ability requires dark form";
-        }
-        if (reason.startsWith("cooldown_active")) {
-            return "Spell recharging";
-        }
-        if (reason.startsWith("collapse_instability_fizzle")) {
-            return "Collapse instability disrupted cast";
-        }
-        if (reason.startsWith("obscurial_instability_fizzle")) {
-            return "Obscurial instability disrupted cast";
-        }
-        if (reason.startsWith("requirements_unmet")) {
-            return "Spell requirement not met";
-        }
-        if (reason.startsWith("spell_not_known")) {
-            return "Spell not learned";
-        }
-        if (reason.startsWith("assign_obscurial_ability")) {
-            return "Obscurial abilities are not spell slots";
-        }
-        if (reason.startsWith("ability_not_in_dark_form")) {
-            return "Dark form required for ability";
-        }
-        if (reason.startsWith("ability_cooldown_active")) {
-            return "Obscurial ability recharging";
-        }
-        if (reason.startsWith("ability_requires_ability_input")) {
-            return "Use obscurial ability hotkeys";
-        }
-        if (reason.startsWith("not_holding_wand")) {
-            return "Wand required";
-        }
-        if (reason.startsWith("wand_not_bonded")) {
-            return "Wand has not chosen you";
-        }
-        if (reason.startsWith("wand_wrong_master")) {
-            return "Wand serves another";
-        }
-        return reason;
+        String base = SpellRejectCodes.baseReason(reason);
+        String key = SpellRejectCodes.messageKeys().get(base);
+        return key == null ? Component.literal(base) : Component.translatable(key);
     }
 }

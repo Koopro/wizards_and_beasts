@@ -8,6 +8,7 @@ import net.neoforged.neoforge.common.data.BlockTagsProvider;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.block.location.LocationBlockHelper;
+import at.koopro.wizardsandbeasts.map.MapLandmarkTags;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleTags;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
@@ -44,6 +45,30 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
                 ModBlocks.UNLIT_SOUL_WALL_TORCH.get());
 
         addModuleTags();
+        addLandmarkTags();
+    }
+
+    /**
+     * The block palettes the Marauder's Map recognises as wizarding landmarks.
+     *
+     * <p>Filtered from {@link LocationBlockHelper#allBlocks()} by registry-name prefix rather than
+     * hand-listed. Those build sets are already named after the place they belong to, so the naming
+     * convention is the grouping; a hand-written list of forty ids is a list that stops being right
+     * the next time someone adds a marble variant, and the failure would be silent — the castle
+     * would simply take a few more blocks to register than the author intended.
+     */
+    private void addLandmarkTags() {
+        for (MapLandmarkTags.Group group : MapLandmarkTags.GROUPS) {
+            Block[] members = LocationBlockHelper.allBlocks().stream()
+                    .map(entry -> (Block) entry.get())
+                    .filter(block -> MapLandmarkTags.belongs(group,
+                            net.minecraft.core.registries.BuiltInRegistries.BLOCK
+                                    .getKey(block).getPath()))
+                    .toArray(Block[]::new);
+            if (members.length > 0) {
+                tag(group.tag()).add(members);
+            }
+        }
     }
 
     /**
@@ -82,11 +107,12 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
                 ModBlocks.SPELL_TEACHER.get());
 
         tag(ModuleTags.blocks(Module.FLOO_NETWORK)).add(
-                ModBlocks.FLOO_GRATE.get(), ModBlocks.FLOO_FIREPLACE.get());
+                ModBlocks.FLOO_GRATE.get(), ModBlocks.FLOO_FIREPLACE.get(), ModBlocks.FLOO_FLAMES.get());
 
         tag(ModuleTags.blocks(Module.WANDS)).add(ModBlocks.WANDMAKERS_BENCH.get());
         tag(ModuleTags.blocks(Module.OWLS)).add(ModBlocks.EXAMINATION_DESK.get());
-        tag(ModuleTags.blocks(Module.MAGIZOOLOGY)).add(ModBlocks.MANDRAKE_CROP.get());
+        tag(ModuleTags.blocks(Module.MAGIZOOLOGY)).add(ModBlocks.MANDRAKE_CROP.get(),
+                ModBlocks.OCCAMY_EGGSHELL.get());
 
         // The Deluminator's paired light blocks: they only ever exist because a Deluminator made them.
         tag(ModuleTags.blocks(Module.ARTEFACTS)).add(

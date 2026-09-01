@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.client.currency.gui;
 
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
+import at.koopro.wizardsandbeasts.client.currency.state.ClientDragotQuoteState;
 import at.koopro.wizardsandbeasts.client.currency.state.ClientVaultDataState;
 import at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper;
 import at.koopro.wizardsandbeasts.currency.vault.PlayerVaultData;
@@ -19,7 +20,7 @@ import at.koopro.wizardsandbeasts.registry.CurrencyItemRegistry;
 public class GringottsScreen extends Screen {
 
     private static final int PANEL_W = 300;
-    private static final int PANEL_H = 260;
+    private static final int PANEL_H = 288;
 
     private static final int COL_GOLD = 0xFFD4AF37;
     private static final int COL_SILVER = 0xFFC0C0C0;
@@ -82,6 +83,23 @@ public class GringottsScreen extends Screen {
                 .bounds(px + layout.s(10 + 130), exchangeY, exBtnW, btnH).build());
         addRenderableWidget(Button.builder(Component.literal("1G\u219217S"), b -> sendAction(Action.EXCHANGE_GALLEON_TO_SICKLES, 1))
                 .bounds(px + layout.s(10 + 195), exchangeY, exBtnW, btnH).build());
+
+        // Foreign exchange. Its own row and its own label because it is not the same operation
+        // as the three above: those are fixed integer ratios inside one currency, this is a rate
+        // that moves and a bank that takes a cut.
+        int dragotY = py + layout.s(196);
+        addRenderableWidget(Button.builder(Component.translatable("gui.wizards_and_beasts.dragot.sell", 1),
+                        b -> sendAction(Action.SELL_DRAGOTS, 1))
+                .bounds(px + layout.s(10), dragotY, exBtnW, btnH).build());
+        addRenderableWidget(Button.builder(Component.translatable("gui.wizards_and_beasts.dragot.sell", 10),
+                        b -> sendAction(Action.SELL_DRAGOTS, 10))
+                .bounds(px + layout.s(10 + 65), dragotY, exBtnW, btnH).build());
+        addRenderableWidget(Button.builder(Component.translatable("gui.wizards_and_beasts.dragot.buy", 1),
+                        b -> sendAction(Action.BUY_DRAGOTS, 1))
+                .bounds(px + layout.s(10 + 130), dragotY, exBtnW, btnH).build());
+        addRenderableWidget(Button.builder(Component.translatable("gui.wizards_and_beasts.dragot.buy", 10),
+                        b -> sendAction(Action.BUY_DRAGOTS, 10))
+                .bounds(px + layout.s(10 + 195), dragotY, exBtnW, btnH).build());
     }
 
     private void sendAction(Action action, int amount) {
@@ -129,6 +147,22 @@ public class GringottsScreen extends Screen {
 
         // "Exchange" label
         graphics.drawString(font, "Exchange", px + layout.s(10), py + layout.s(154), 0xFFCCCCCC, false);
+
+        // --- Foreign exchange board ---
+        // Quoted by the server and pinned for the visit; this only ever draws it. A rate
+        // computed here would be a rate the till does not honour.
+        String board;
+        int boardColour;
+        if (ClientDragotQuoteState.hasQuote()) {
+            float drift = ClientDragotQuoteState.drift();
+            board = String.format("1 Dragot = %.3fG  (%+.1f%%)   purse: %,d",
+                    ClientDragotQuoteState.rate(), drift, ClientDragotQuoteState.purse());
+            boardColour = drift >= 0.0f ? 0xFF7FD07F : 0xFFD07F7F;
+        } else {
+            board = "Dragot - no quote";
+            boardColour = 0xFF888888;
+        }
+        graphics.drawString(font, board, px + layout.s(10), py + layout.s(182), boardColour, false);
 
         // Divider above total
         graphics.fill(px + layout.s(5), py + layout.s(192), px + panelW - layout.s(5), py + layout.s(193), 0xFF444466);

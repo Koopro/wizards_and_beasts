@@ -1,0 +1,9 @@
+{
+  "biomes": [
+    "minecraft:frozen_ocean",
+    "minecraft:deep_frozen_ocean"
+  ],
+  "tile": 29,
+  "tint": "#A6C1CF",
+  "water_tint": "#A6C1CF"
+}

@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    { "id": "wizards_and_beasts:acromantula_venom", "required": false },
+    { "id": "wizards_and_beasts:basilisk_fang", "required": false },
+    { "id": "wizards_and_beasts:basilisk_venom", "required": false },
+    { "id": "wizards_and_beasts:dragon_blood", "required": false },
+    { "id": "wizards_and_beasts:dragon_heartstring", "required": false },
+    { "id": "wizards_and_beasts:erumpent_horn", "required": false },
+    { "id": "wizards_and_beasts:unicorn_blood", "required": false },
+    { "id": "wizards_and_beasts:unicorn_hair", "required": false },
+    { "id": "wizards_and_beasts:thestral_tail_hair", "required": false },
+    { "id": "wizards_and_beasts:occamy_eggshell", "required": false }
+  ]
+}

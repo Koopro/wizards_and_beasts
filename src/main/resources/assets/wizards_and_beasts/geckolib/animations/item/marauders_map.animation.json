@@ -3,59 +3,390 @@
   "animations": {
     "animation.marauders_map.folded_idle": {
       "loop": true,
-      "animation_length": 1.0,
+      "animation_length": 3.0,
       "bones": {
-        "fold_left": {
+        "flap_left": {
           "rotation": {
-            "0.0": [0, 0, 90]
+            "0.0": {
+              "vector": [
+                0,
+                178.0,
+                0
+              ]
+            }
           }
         },
-        "fold_right": {
+        "flap_right": {
           "rotation": {
-            "0.0": [0, 0, -90]
+            "0.0": {
+              "vector": [
+                0,
+                -178.0,
+                0
+              ]
+            }
+          }
+        },
+        "sheet": {
+          "rotation": {
+            "0.0": {
+              "vector": [
+                0,
+                0,
+                0
+              ],
+              "easing": "easeinoutsine"
+            },
+            "0.75": {
+              "vector": [
+                0,
+                0,
+                1.2
+              ],
+              "easing": "easeinoutsine"
+            },
+            "2.25": {
+              "vector": [
+                0,
+                0,
+                -1.2
+              ],
+              "easing": "easeinoutsine"
+            },
+            "3.0": {
+              "vector": [
+                0,
+                0,
+                0
+              ],
+              "easing": "easeinoutsine"
+            }
+          },
+          "position": {
+            "0.0": {
+              "vector": [
+                0,
+                0,
+                0
+              ],
+              "easing": "easeinoutsine"
+            },
+            "1.5": {
+              "vector": [
+                0,
+                0.15,
+                0
+              ],
+              "easing": "easeinoutsine"
+            },
+            "3.0": {
+              "vector": [
+                0,
+                0,
+                0
+              ],
+              "easing": "easeinoutsine"
+            }
           }
         }
       }
     },
     "animation.marauders_map.unfolding": {
       "loop": false,
-      "animation_length": 0.5,
+      "animation_length": 0.85,
       "bones": {
-        "fold_left": {
+        "flap_left": {
           "rotation": {
-            "0.0": [0, 0, 90],
-            "0.25": [0, 0, 45],
-            "0.5": [0, 0, 0]
+            "0.0": {
+              "vector": [
+                0,
+                178.0,
+                0
+              ],
+              "easing": "easeoutback"
+            },
+            "0.65": {
+              "vector": [
+                0,
+                0,
+                0
+              ],
+              "easing": "easeoutback"
+            }
           }
         },
-        "fold_right": {
+        "flap_right": {
           "rotation": {
-            "0.0": [0, 0, -90],
-            "0.25": [0, 0, -45],
-            "0.5": [0, 0, 0]
+            "0.0": {
+              "vector": [
+                0,
+                -178.0,
+                0
+              ],
+              "easing": "easeoutback"
+            },
+            "0.65": {
+              "vector": [
+                0,
+                0,
+                0
+              ],
+              "easing": "easeoutback"
+            }
+          }
+        },
+        "sheet": {
+          "rotation": {
+            "0.0": {
+              "vector": [
+                0,
+                0,
+                0
+              ],
+              "easing": "easeoutquad"
+            },
+            "0.85": {
+              "vector": [
+                -8,
+                0,
+                0
+              ],
+              "easing": "easeoutquad"
+            }
+          },
+          "position": {
+            "0.0": {
+              "vector": [
+                0,
+                0,
+                0
+              ],
+              "easing": "easeoutquad"
+            },
+            "0.85": {
+              "vector": [
+                0,
+                0.4,
+                -0.6
+              ],
+              "easing": "easeoutquad"
+            }
           }
         }
       }
     },
     "animation.marauders_map.open_idle": {
       "loop": true,
-      "animation_length": 2.0,
+      "animation_length": 4.0,
       "bones": {
-        "fold_left": {
+        "flap_left": {
           "rotation": {
-            "0.0": [0, 0, 0]
+            "0.0": {
+              "vector": [
+                0,
+                0,
+                0
+              ],
+              "easing": "easeinoutsine"
+            },
+            "1.0": {
+              "vector": [
+                0,
+                2.5,
+                0
+              ],
+              "easing": "easeinoutsine"
+            },
+            "3.0": {
+              "vector": [
+                0,
+                -1.0,
+                0
+              ],
+              "easing": "easeinoutsine"
+            },
+            "4.0": {
+              "vector": [
+                0,
+                0,
+                0
+              ],
+              "easing": "easeinoutsine"
+            }
           }
         },
-        "fold_right": {
+        "flap_right": {
           "rotation": {
-            "0.0": [0, 0, 0]
+            "0.0": {
+              "vector": [
+                0,
+                0,
+                0
+              ],
+              "easing": "easeinoutsine"
+            },
+            "1.5": {
+              "vector": [
+                0,
+                -2.5,
+                0
+              ],
+              "easing": "easeinoutsine"
+            },
+            "3.5": {
+              "vector": [
+                0,
+                1.0,
+                0
+              ],
+              "easing": "easeinoutsine"
+            },
+            "4.0": {
+              "vector": [
+                0,
+                0,
+                0
+              ],
+              "easing": "easeinoutsine"
+            }
           }
         },
-        "map_body": {
+        "sheet": {
+          "rotation": {
+            "0.0": {
+              "vector": [
+                -8,
+                0,
+                0
+              ],
+              "easing": "easeinoutsine"
+            },
+            "2.0": {
+              "vector": [
+                -8,
+                0.8,
+                0.6
+              ],
+              "easing": "easeinoutsine"
+            },
+            "4.0": {
+              "vector": [
+                -8,
+                0,
+                0
+              ],
+              "easing": "easeinoutsine"
+            }
+          },
           "position": {
-            "0.0":  [0, 0, 0],
-            "1.0":  [0, 0.15, 0],
-            "2.0":  [0, 0, 0]
+            "0.0": {
+              "vector": [
+                0,
+                0.4,
+                -0.6
+              ],
+              "easing": "easeinoutsine"
+            },
+            "2.0": {
+              "vector": [
+                0,
+                0.6,
+                -0.6
+              ],
+              "easing": "easeinoutsine"
+            },
+            "4.0": {
+              "vector": [
+                0,
+                0.4,
+                -0.6
+              ],
+              "easing": "easeinoutsine"
+            }
+          }
+        }
+      }
+    },
+    "animation.marauders_map.folding": {
+      "loop": false,
+      "animation_length": 0.6,
+      "bones": {
+        "flap_left": {
+          "rotation": {
+            "0.0": {
+              "vector": [
+                0,
+                0,
+                0
+              ],
+              "easing": "easeinquad"
+            },
+            "0.5": {
+              "vector": [
+                0,
+                178.0,
+                0
+              ],
+              "easing": "easeinquad"
+            }
+          }
+        },
+        "flap_right": {
+          "rotation": {
+            "0.0": {
+              "vector": [
+                0,
+                0,
+                0
+              ],
+              "easing": "easeinquad"
+            },
+            "0.5": {
+              "vector": [
+                0,
+                -178.0,
+                0
+              ],
+              "easing": "easeinquad"
+            }
+          }
+        },
+        "sheet": {
+          "rotation": {
+            "0.0": {
+              "vector": [
+                -8,
+                0,
+                0
+              ],
+              "easing": "easeinquad"
+            },
+            "0.6": {
+              "vector": [
+                0,
+                0,
+                0
+              ],
+              "easing": "easeinquad"
+            }
+          },
+          "position": {
+            "0.0": {
+              "vector": [
+                0,
+                0.4,
+                -0.6
+              ],
+              "easing": "easeinquad"
+            },
+            "0.6": {
+              "vector": [
+                0,
+                0,
+                0
+              ],
+              "easing": "easeinquad"
+            }
           }
         }
       }

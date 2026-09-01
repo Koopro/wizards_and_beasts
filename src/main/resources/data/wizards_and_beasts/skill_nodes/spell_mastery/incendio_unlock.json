@@ -6,6 +6,10 @@
   "pointCost": 3,
   "effects": [
     {
+      "type": "learn_spell",
+      "spellId": "incendio"
+    },
+    {
       "spellId": "incendio",
       "bonusPerLevel": 0.08,
       "type": "spell_damage_bonus"

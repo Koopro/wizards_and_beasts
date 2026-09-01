@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.registry;
 
+import at.koopro.wizardsandbeasts.entity.frog.ChocolateFrogEntity;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.client.beam.BeamEntity;
 import at.koopro.wizardsandbeasts.entity.azkaban.DementorEntity;
@@ -62,6 +63,11 @@ public class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<BabyNifflerEntity>> BABY_NIFFLER =
             EntityHelper.register(ENTITY_TYPES, "baby_niffler", BabyNifflerEntity::new, MobCategory.CREATURE, 0.2f, 0.25f);
     static { EntityAttributeBindings.queue(BABY_NIFFLER, BabyNifflerEntity::createAttributes); }
+
+    /** A Chocolate Frog that got away. An ItemEntity, so catching it is just picking it up. */
+    public static final DeferredHolder<EntityType<?>, EntityType<ChocolateFrogEntity>> CHOCOLATE_FROG =
+            EntityHelper.registerMisc(ENTITY_TYPES, "chocolate_frog",
+                    ChocolateFrogEntity::new, 0.3f, 0.3f);
 
     public static final DeferredHolder<EntityType<?>, EntityType<FormMannequinEntity>> FORM_MANNEQUIN =
             EntityHelper.register(ENTITY_TYPES, "form_mannequin", FormMannequinEntity::new, MobCategory.MISC, 0.6f, 1.8f);

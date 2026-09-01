@@ -33,6 +33,14 @@ public final class ModNetworkFloo {
                 FlooTransitS2CPayload.TYPE,
                 FlooTransitS2CPayload.STREAM_CODEC,
                 ClientPayloadHandlers::handleFlooTransit);
+        registrar.playToClient(
+                OpenFlooRegistrationS2CPayload.TYPE,
+                OpenFlooRegistrationS2CPayload.STREAM_CODEC,
+                ClientPayloadHandlers::handleOpenFlooRegistration);
+        registrar.playToServer(
+                FlooRegisterRequestC2SPayload.TYPE,
+                FlooRegisterRequestC2SPayload.STREAM_CODEC,
+                FlooRegisterRequestC2SPayload::handleServer);
         registrar.playToServer(
                 FlooCallRequestC2SPayload.TYPE,
                 FlooCallRequestC2SPayload.STREAM_CODEC,

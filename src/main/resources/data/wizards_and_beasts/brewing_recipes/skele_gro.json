@@ -1,0 +1,15 @@
+{
+  "ingredients": [
+    {
+      "item": "minecraft:bone_meal",
+      "count": 3
+    },
+    {
+      "item": "minecraft:ghast_tear",
+      "count": 1
+    }
+  ],
+  "cauldronTier": "brass",
+  "heatTimeTicks": 400,
+  "outputBrewId": "wizards_and_beasts:skele_gro"
+}

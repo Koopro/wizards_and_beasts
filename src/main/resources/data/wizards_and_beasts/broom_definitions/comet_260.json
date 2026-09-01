@@ -23,9 +23,20 @@
   "model_slots": {
     "shaft": "wizards_and_beasts:plain",
     "tail_cap": "wizards_and_beasts:plain",
-    "binding": "wizards_and_beasts:cord",
+    "binding": "wizards_and_beasts:collar_ring",
     "bristles": "wizards_and_beasts:teardrop",
     "footstrap": "wizards_and_beasts:leather",
-    "accent": "wizards_and_beasts:none"
-  }
+    "accent": "wizards_and_beasts:maker_mark"
+  },
+  "model": "wizards_and_beasts:broom_comet_260",
+  "texture": "wizards_and_beasts:textures/entity/broom/comet_260.png",
+  "handlingProfile": "balanced",
+  "yawDrift": 0.03,
+  "momentumRetention": 0.9,
+  "wobbleAtBoost": 0.1,
+  "crashDamageMultiplier": 1.0,
+  "boostSound": "wizards_and_beasts:broom_boost_standard",
+  "idleLoopSound": "wizards_and_beasts:broom_wind_mid",
+  "trailParticle": "wizards_and_beasts:broom_trail_dust",
+  "passengerOffset": [0.0, -0.4375, 0.0]
 }

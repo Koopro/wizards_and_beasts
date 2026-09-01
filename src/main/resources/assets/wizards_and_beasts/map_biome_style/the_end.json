@@ -1,0 +1,9 @@
+{
+  "biomes": [
+    "minecraft:the_end",
+    "minecraft:end_highlands",
+    "minecraft:end_midlands"
+  ],
+  "tile": 25,
+  "tint": "#C6C2A0"
+}

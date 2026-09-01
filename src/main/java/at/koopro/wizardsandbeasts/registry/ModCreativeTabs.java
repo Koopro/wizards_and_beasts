@@ -1,21 +1,28 @@
 package at.koopro.wizardsandbeasts.registry;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SpawnEggItem;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
+import at.koopro.wizardsandbeasts.Config;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.block.location.DiagonAlleyBlocks;
 import at.koopro.wizardsandbeasts.block.location.GringottsBlocks;
 import at.koopro.wizardsandbeasts.block.location.HogwartsBlocks;
 import at.koopro.wizardsandbeasts.block.location.HogsmeadeBlocks;
 import at.koopro.wizardsandbeasts.block.location.MinistryBlocks;
+import at.koopro.wizardsandbeasts.creature.AlphaRoster;
 import at.koopro.wizardsandbeasts.module.ModuleContentIndex;
+import at.koopro.wizardsandbeasts.registry.ArmorItemRegistry;
+import at.koopro.wizardsandbeasts.registry.CanonItemRegistry;
 import at.koopro.wizardsandbeasts.registry.BroomItemRegistry;
 import at.koopro.wizardsandbeasts.registry.ConsumableItemRegistry;
 import at.koopro.wizardsandbeasts.registry.CurrencyItemRegistry;
@@ -62,9 +69,6 @@ public class ModCreativeTabs {
                     .title(Component.translatable("itemGroup." + WizardsAndBeastsMod.MODID + ".main"))
                     .withTabsBefore(CreativeModeTabs.SPAWN_EGGS)
                     .icon(() -> new ItemStack(WandItemRegistry.WAND.get()))
-                    .withSearchBar()
-                    // After withSearchBar(): that call only swaps in the vanilla search
-                    // background while the texture is still the default one.
                     .backgroundTexture(background("main"))
                     .withLabelColor(LABEL_LEATHER)
                     .withSlotColor(SLOT_LEATHER)
@@ -138,6 +142,7 @@ public class ModCreativeTabs {
 
                         // Wizarding World — food & drink
                         output.accept(ConsumableItemRegistry.BUTTERBEER.get());
+                        output.accept(ConsumableItemRegistry.EMPTY_BUTTERBEER_MUG.get());
                         output.accept(ConsumableItemRegistry.PUMPKIN_JUICE.get());
                         output.accept(ConsumableItemRegistry.CHOCOLATE_FROG.get());
                         output.accept(ConsumableItemRegistry.FAMOUS_WIZARD_CARD.get());
@@ -167,6 +172,7 @@ public class ModCreativeTabs {
                         output.accept(ConsumableItemRegistry.MOONCALF_DUNG.get());
                         output.accept(ConsumableItemRegistry.ERUMPENT_HORN.get());
                         output.accept(ConsumableItemRegistry.MANDRAKE.get());
+                        output.accept(ConsumableItemRegistry.BABY_MANDRAKE.get());
                         output.accept(ModBlocks.MANDRAKE_SEEDS.get());
                         // Gear & misc
                         output.accept(TrinketItemRegistry.REMEMBRALL.get());
@@ -182,6 +188,7 @@ public class ModCreativeTabs {
                         output.accept(ModBlocks.MASTERS_TRUNK_ITEM.get());
                         output.accept(TrinketItemRegistry.MINISTRY_LICENSE_SCROLL.get());
                         output.accept(MiscItemRegistry.BLINDFOLD.get());
+                        output.accept(MiscItemRegistry.EARMUFFS.get());
                         output.accept(TrinketItemRegistry.PERUVIAN_DARKNESS_POWDER.get());
                         output.accept(TrinketItemRegistry.DECOY_DETONATOR.get());
                         output.accept(TrinketItemRegistry.EXTENDABLE_EARS.get());
@@ -241,13 +248,82 @@ public class ModCreativeTabs {
                     })
                     .build());
 
+    /**
+     * Worn wizarding armour — robes, hats and masks.
+     *
+     * <p>Its own tab rather than a shelf in {@link #MAIN}: the sets come in three or four pieces
+     * each and the masks in six castings, so folding twenty items into a tab that already runs to
+     * the bottom of the scroll would bury them.
+     *
+     * <p>Wears the leather panel because there is no dedicated {@code tab_apparel.png} yet — a
+     * background name with no texture behind it renders as the missing-texture checkerboard, so it
+     * borrows {@link #MAIN}'s until one is drawn.
+     */
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> APPAREL =
+            TABS.register("apparel", () -> CreativeModeTab.builder()
+                    .title(Component.translatable("itemGroup." + WizardsAndBeastsMod.MODID + ".apparel"))
+                    .withTabsBefore(CreativeModeTabs.SPAWN_EGGS)
+                    .icon(() -> new ItemStack(ArmorItemRegistry.WIZARD_HAT.get()))
+                    .backgroundTexture(background("main"))
+                    .withLabelColor(LABEL_LEATHER)
+                    .withSlotColor(SLOT_LEATHER)
+                    .displayItems((parameters, rawOutput) -> {
+                        CreativeModeTab.Output output = gated(rawOutput);
+
+                        // Student set — free for everyone, no house lock
+                        output.accept(ArmorItemRegistry.WIZARD_HAT.get());
+                        output.accept(ArmorItemRegistry.STUDENT_ROBE_CHEST.get());
+                        output.accept(ArmorItemRegistry.STUDENT_ROBE_LEGS.get());
+                        output.accept(ArmorItemRegistry.STUDENT_ROBE_BOOTS.get());
+
+                        // Auror set
+                        output.accept(ArmorItemRegistry.AUROR_ROBE_CHEST.get());
+                        output.accept(ArmorItemRegistry.AUROR_ROBE_LEGS.get());
+                        output.accept(ArmorItemRegistry.AUROR_ROBE_BOOTS.get());
+
+                        // Death Eater set
+                        output.accept(ArmorItemRegistry.DEATH_EATER_ROBE_CHEST.get());
+                        output.accept(ArmorItemRegistry.DEATH_EATER_ROBE_LEGS.get());
+                        output.accept(ArmorItemRegistry.DEATH_EATER_ROBE_BOOTS.get());
+                        for (var mask : ArmorItemRegistry.ALL_MASKS) {
+                            output.accept(mask.get());
+                        }
+                    })
+                    .build());
+
+    /**
+     * Catalogued canon objects that are registered but do nothing yet.
+     *
+     * <p>Its own tab, and named for what it is. These items have sprites and names and no
+     * behaviour whatsoever; dropping them into the main tab would leave a player holding a
+     * Sorting Hat that does nothing and no way to tell that from a bug.
+     *
+     * <p>Ordered by {@code CanonItemRegistry.ALL} rather than by a hand-copied list, so an item
+     * added there appears here, and one promoted out of there — given real behaviour and moved to
+     * its proper registry — leaves here on its own.
+     */
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> CANON_BACKLOG =
+            TABS.register("canon_backlog", () -> CreativeModeTab.builder()
+                    .title(Component.translatable("itemGroup." + WizardsAndBeastsMod.MODID + ".canon_backlog"))
+                    .withTabsBefore(CreativeModeTabs.SPAWN_EGGS)
+                    .icon(() -> new ItemStack(CanonItemRegistry.GOLDEN_SNITCH.get()))
+                    .backgroundTexture(background("main"))
+                    .withLabelColor(LABEL_LEATHER)
+                    .withSlotColor(SLOT_LEATHER)
+                    .displayItems((parameters, rawOutput) -> {
+                        CreativeModeTab.Output output = gated(rawOutput);
+                        for (var stub : CanonItemRegistry.ALL) {
+                            output.accept(stub.get());
+                        }
+                    })
+                    .build());
+
     /** Location/build-set decorative blocks (Diagon, Gringotts, Hogwarts, Hogsmeade, Ministry). */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> DECORATIVE_BLOCKS =
             TABS.register("decorative_blocks", () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup." + WizardsAndBeastsMod.MODID + ".decorative_blocks"))
                     .withTabsBefore(CreativeModeTabs.SPAWN_EGGS)
                     .icon(() -> new ItemStack(HogwartsBlocks.HOGWARTS_STONE_BRICKS.baseItem().get()))
-                    .withSearchBar()
                     .backgroundTexture(background("decorative"))
                     .withLabelColor(LABEL_STONE)
                     .withSlotColor(SLOT_STONE)
@@ -403,11 +479,38 @@ public class ModCreativeTabs {
      */
     private static CreativeModeTab.Output gated(CreativeModeTab.Output output) {
         return (stack, visibility) -> {
-            if (ModuleContentIndex.isAccessible(stack.getItem())) {
+            if (ModuleContentIndex.isAccessible(stack.getItem()) && !hiddenPlaceholderEgg(stack.getItem())) {
                 output.accept(stack, visibility);
             }
         };
     }
+
+    /**
+     * Whether this is a spawn egg for a creature that is still on a placeholder rig, with the config
+     * saying not to list those.
+     *
+     * <p>Derived from the item id rather than a hand-kept list, because the eggs come from two
+     * registries ({@code ModCreatures} for the generic roster, {@code MiscItemRegistry} for the bespoke
+     * classes) and a list that only knew about one of them would quietly go stale. Only ids on
+     * {@code ModCreatures.ROSTER} are considered at all, so the Gringotts goblin's egg — an NPC that
+     * lives under the same module — is never caught by this.
+     *
+     * <p>This hides eggs from the creative tab only. {@code /wandb beast creature summon} reaches every
+     * creature regardless, so nothing becomes unreachable.
+     */
+    private static boolean hiddenPlaceholderEgg(Item item) {
+        if (Config.showPlaceholderSpawnEggs || !(item instanceof SpawnEggItem)) {
+            return false;
+        }
+        Identifier id = BuiltInRegistries.ITEM.getKey(item);
+        if (!WizardsAndBeastsMod.MODID.equals(id.getNamespace()) || !id.getPath().endsWith(SPAWN_EGG_SUFFIX)) {
+            return false;
+        }
+        String creatureId = id.getPath().substring(0, id.getPath().length() - SPAWN_EGG_SUFFIX.length());
+        return ModCreatures.ROSTER.contains(creatureId) && !AlphaRoster.isAlpha(creatureId);
+    }
+
+    private static final String SPAWN_EGG_SUFFIX = "_spawn_egg";
 
     private ModCreativeTabs() {
     }

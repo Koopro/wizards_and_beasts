@@ -1,0 +1,40 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:poison",
+    "minecraft:wither",
+    "minecraft:instant_damage",
+    {
+      "id": "wizards_and_beasts:cruciatus_pain",
+      "required": false
+    },
+    {
+      "id": "wizards_and_beasts:crucio_sanity_drain",
+      "required": false
+    },
+    {
+      "id": "wizards_and_beasts:sectumsempra_bleed",
+      "required": false
+    },
+    {
+      "id": "wizards_and_beasts:splinched",
+      "required": false
+    },
+    {
+      "id": "wizards_and_beasts:soul_drained",
+      "required": false
+    },
+    {
+      "id": "wizards_and_beasts:dementor_chill",
+      "required": false
+    },
+    {
+      "id": "wizards_and_beasts:petrificus_totalus",
+      "required": false
+    },
+    {
+      "id": "wizards_and_beasts:basilisk_gaze_lock",
+      "required": false
+    }
+  ]
+}

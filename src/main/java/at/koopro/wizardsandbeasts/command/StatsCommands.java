@@ -116,6 +116,19 @@ public final class StatsCommands {
             report.meter(stat.displayName().getString(), PlayerStatsAPI.getStat(target, stat),
                     PlayerStatsData.MAX_VALUE, hover);
         }
+
+        // The Power ceiling and what is left of the growth allowance. Both are server-authoritative
+        // and neither was visible from anywhere: an operator checking whether a cap was doing its job
+        // could see the number but not the limit it was being held against.
+        report.divider();
+        report.row("Power cap", Component.translatable(
+                "command.wizards_and_beasts.stats.report.power_cap",
+                PlayerStatsAPI.getPowerCap(target),
+                PlayerStatsAPI.getRemainingPowerGrowth(target)));
+        if (PlayerStatsAPI.isPowerCapped(target)) {
+            report.note(Component.translatable("command.wizards_and_beasts.stats.report.power_capped"));
+        }
+
         report.send(source);
         return 1;
     }

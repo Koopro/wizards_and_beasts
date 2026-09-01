@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:smithing_trim",
+  "template": "#wizards_and_beasts:trim_templates",
+  "base": "#minecraft:trimmable_armor",
+  "addition": "wizards_and_beasts:demiguise_hair",
+  "pattern": "minecraft:silence"
+}

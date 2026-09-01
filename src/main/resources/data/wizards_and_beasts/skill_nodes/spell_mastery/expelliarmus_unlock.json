@@ -6,6 +6,10 @@
   "pointCost": 2,
   "effects": [
     {
+      "type": "learn_spell",
+      "spellId": "expelliarmus"
+    },
+    {
       "spellId": "expelliarmus",
       "reductionPerLevel": 0.1,
       "type": "spell_cooldown_reduction"

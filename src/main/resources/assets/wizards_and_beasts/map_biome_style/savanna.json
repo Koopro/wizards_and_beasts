@@ -1,0 +1,9 @@
+{
+  "biomes": [
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:windswept_savanna"
+  ],
+  "tile": 16,
+  "tint": "#A79A55"
+}

@@ -1,0 +1,7 @@
+{
+  "entry": "wizards_and_beasts:erumpent",
+  "item": "wizards_and_beasts:erumpent_horn",
+  "minTier": "MASTERED",
+  "chance": 0.5,
+  "cooldownSeconds": 600
+}

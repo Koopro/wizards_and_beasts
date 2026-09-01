@@ -1,0 +1,9 @@
+{
+  "biomes": [
+    "minecraft:frozen_peaks",
+    "minecraft:snowy_slopes"
+  ],
+  "tile": 17,
+  "tint": "#DFE6E8",
+  "relief_tile": 6
+}

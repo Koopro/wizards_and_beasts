@@ -1,0 +1,17 @@
+{
+  "displayName": "brew.wizards_and_beasts.pure_silver_solution.name",
+  "color": -1644826,
+  "flavorText": "Refined by an Occamy's shell. It will take to a blade, or to a trunk's hinges.",
+  "effects": [
+    {
+      "id": "minecraft:glowing",
+      "duration": 600,
+      "amplifier": 0
+    },
+    {
+      "id": "minecraft:night_vision",
+      "duration": 600,
+      "amplifier": 0
+    }
+  ]
+}

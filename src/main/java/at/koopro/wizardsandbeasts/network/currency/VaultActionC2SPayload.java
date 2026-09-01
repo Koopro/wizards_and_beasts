@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.network.currency;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.command.debug.DebugHooks;
+import at.koopro.wizardsandbeasts.currency.dragot.DragotExchange;
 import at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper;
 import at.koopro.wizardsandbeasts.currency.vault.GringottsTransaction;
 import at.koopro.wizardsandbeasts.currency.vault.PlayerVaultData;
@@ -155,6 +156,18 @@ public record VaultActionC2SPayload(int actionOrdinal, int amount) implements Cu
                 case EXCHANGE_SICKLE_TO_KNUTS -> { if (!vault.exchangeSickleToKnuts()) failKey = REJECT_EXCHANGE; }
                 case EXCHANGE_SICKLES_TO_GALLEON -> { if (!vault.exchangeSicklesToGalleon()) failKey = REJECT_EXCHANGE; }
                 case EXCHANGE_GALLEON_TO_SICKLES -> { if (!vault.exchangeGalleonToSickles()) failKey = REJECT_EXCHANGE; }
+                case SELL_DRAGOTS -> {
+                    // Result carries its own sentence — a Dragot exchange can fail six different ways
+                    // and "the exchange failed" would tell the player nothing about which.
+                    DragotExchange.Result result = DragotExchange.sell(player, pkt.amount);
+                    player.displayClientMessage(result.message().copy()
+                            .withStyle(result.ok() ? ChatFormatting.GOLD : ChatFormatting.RED), true);
+                }
+                case BUY_DRAGOTS -> {
+                    DragotExchange.Result result = DragotExchange.buy(player, pkt.amount);
+                    player.displayClientMessage(result.message().copy()
+                            .withStyle(result.ok() ? ChatFormatting.GOLD : ChatFormatting.RED), true);
+                }
             }
             DebugHooks.logVault(player, action.name(), pkt.amount, vault.getKnuts(), vault.getSickles(), vault.getGalleons());
 
@@ -162,6 +175,8 @@ public record VaultActionC2SPayload(int actionOrdinal, int amount) implements Cu
                 player.displayClientMessage(Component.translatable(failKey).withStyle(ChatFormatting.RED), true);
             }
             GringottsOpenS2CPayload.sendToPlayer(player);
+            // Purse count and standing quote, so a Dragot trade updates the counter it was made at.
+            DragotQuoteS2CPayload.sendToPlayer(player);
         });
     }
 
@@ -177,6 +192,10 @@ public record VaultActionC2SPayload(int actionOrdinal, int amount) implements Cu
         EXCHANGE_KNUTS_TO_SICKLE,
         EXCHANGE_SICKLE_TO_KNUTS,
         EXCHANGE_SICKLES_TO_GALLEON,
-        EXCHANGE_GALLEON_TO_SICKLES
+        EXCHANGE_GALLEON_TO_SICKLES,
+        /** Sell Dragots from the purse into the vault at the standing quote. */
+        SELL_DRAGOTS,
+        /** Buy Dragots into the purse out of the vault at the standing quote. */
+        BUY_DRAGOTS
     }
 }

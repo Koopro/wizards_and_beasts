@@ -4,6 +4,7 @@ import at.koopro.wizardsandbeasts.spell.core.*;
 
 import at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions;
 import at.koopro.wizardsandbeasts.registry.ModParticles;
+import at.koopro.wizardsandbeasts.spell.def.SpellVfx;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
@@ -11,9 +12,18 @@ import net.minecraft.world.phys.Vec3;
 final class SpellParticles {
     private SpellParticles() {}
 
+    /**
+     * A spell's impact burst, in the particle the spell authored.
+     *
+     * <p>Count is clamped to {@code SpellVfx.MAX_IMPACT_COUNT}. These go through
+     * {@code sendParticles}, so the server pays for every one of them and sends it to everyone in
+     * range — a caller asking for a thousand is a server problem, not just a framerate one.
+     */
     static void spawnBurst(ServerLevel level, Spell spell, Vec3 pos, int count, double spread) {
-        SpellTintParticleOptions opts = ModParticles.tinted(SpellFamilies.of(spell), spell.getColor());
-        level.sendParticles(opts, pos.x, pos.y, pos.z, count, spread, spread, spread, 0.05);
+        var vfx = spell.vfx();
+        SpellTintParticleOptions opts = ModParticles.tinted(vfx.impact().particleFamily(), spell.getColor());
+        int capped = Math.min(SpellVfx.MAX_IMPACT_COUNT, Math.max(0, count));
+        level.sendParticles(opts, pos.x, pos.y, pos.z, capped, spread, spread, spread, 0.05);
     }
 
     static void spawnBurst(ServerLevel level, SpellFamily family, int argb, Vec3 pos, int count, double spread) {
@@ -30,7 +40,8 @@ final class SpellParticles {
     }
 
     static void spawnBeam(ServerLevel level, Spell spell, Vec3 from, Vec3 to) {
-        SpellTintParticleOptions opts = ModParticles.tinted(SpellFamilies.of(spell), spell.getColor());
+        SpellTintParticleOptions opts =
+                ModParticles.tinted(spell.vfx().trail().particleFamily(), spell.getColor());
         beamTinted(level, from, to, opts);
     }
 
@@ -40,7 +51,8 @@ final class SpellParticles {
     }
 
     static void spawnTrail(ServerLevel level, Spell spell, Vec3 position, Vec3 motion, int segments) {
-        SpellTintParticleOptions opts = ModParticles.tinted(SpellFamilies.of(spell), spell.getColor());
+        SpellTintParticleOptions opts =
+                ModParticles.tinted(spell.vfx().trail().particleFamily(), spell.getColor());
         trailTinted(level, position, motion, segments, opts);
     }
 

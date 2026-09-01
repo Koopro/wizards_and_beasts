@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.network;
 
 import io.netty.buffer.ByteBuf;
+import net.minecraft.resources.Identifier;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
@@ -20,6 +21,15 @@ public final class PacketCodecUtils {
     public static final int MAX_COOLDOWNS = 512;
     public static final int MAX_CAST_COUNTS = 512;
     public static final int MAX_MAP_ENTRIES = 512;
+    /** Biomes one Marauder's Map may have charted. A signed short indexes the palette. */
+    public static final int MAX_MAP_PALETTE = Short.MAX_VALUE;
+    /** Markers on one map: discoveries plus every trusted player's pins. */
+    public static final int MAX_MAP_MARKERS = 1024;
+    /**
+     * Bytes in one run-length-encoded map region. The uncompressed region is 3KB and the encoder
+     * only ever shrinks it, so anything larger did not come from the encoder.
+     */
+    public static final int MAX_MAP_REGION_BYTES = 4096;
     public static final int MAX_UNLOCKED_SKILLS = 512;
     public static final int MAX_CUSTOM_FLAGS = 256;
     public static final int MAX_UNLOCKED_PROFESSIONS = 256;
@@ -60,6 +70,41 @@ public final class PacketCodecUtils {
             return "";
         }
         return IDENTIFIER_PATTERN.matcher(trimmed).matches() ? trimmed : "";
+    }
+
+    /**
+     * Reads an {@link Identifier}, falling back to {@code fallback} for anything malformed.
+     *
+     * <p>Every payload that carried an id used to inline the same normalise-parse-null-check dance,
+     * and each copy chose its own fallback. Decoding must never return null for a field the record
+     * declares non-null, and it must never throw on a hostile packet either.
+     */
+    public static Identifier readIdentifier(ByteBuf buf, Identifier fallback) {
+        Identifier parsed = Identifier.tryParse(normalizeIdentifier(readString(buf)));
+        return parsed != null ? parsed : fallback;
+    }
+
+    public static void writeIdentifier(ByteBuf buf, Identifier id) {
+        writeString(buf, id.toString());
+    }
+
+    /** Reads a length-prefixed byte block, refusing anything over {@code max}. */
+    public static byte[] readBytes(ByteBuf buf, int max, String label) {
+        int len = buf.readInt();
+        if (len < 0 || len > max) {
+            throw new IllegalArgumentException("Invalid " + label + " length: " + len + " (max=" + max + ")");
+        }
+        byte[] out = new byte[len];
+        buf.readBytes(out);
+        return out;
+    }
+
+    public static void writeBytes(ByteBuf buf, byte[] data, int max, String label) {
+        if (data.length > max) {
+            throw new IllegalArgumentException(label + " too large for packet: " + data.length);
+        }
+        buf.writeInt(data.length);
+        buf.writeBytes(data);
     }
 
     public static int readBoundedCount(ByteBuf buf, int max, String label) {

@@ -1,0 +1,27 @@
+{
+  "id": "wizards_and_beasts:floo",
+  "title": "handbook.wizards_and_beasts.floo.title",
+  "icon": "wizards_and_beasts:floo_powder",
+  "sort_index": 45,
+  "pages": [
+    {
+      "type": "text",
+      "heading": "handbook.wizards_and_beasts.floo.page1.heading",
+      "body": "handbook.wizards_and_beasts.floo.page1.body"
+    },
+    {
+      "type": "text",
+      "heading": "handbook.wizards_and_beasts.floo.page2.heading",
+      "body": "handbook.wizards_and_beasts.floo.page2.body"
+    },
+    {
+      "type": "recipe",
+      "recipe_id": "wizards_and_beasts:floo_powder"
+    },
+    {
+      "type": "text",
+      "heading": "handbook.wizards_and_beasts.floo.page3.heading",
+      "body": "handbook.wizards_and_beasts.floo.page3.body"
+    }
+  ]
+}

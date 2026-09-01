@@ -6,6 +6,10 @@
   "pointCost": 3,
   "effects": [
     {
+      "type": "learn_spell",
+      "spellId": "bombarda"
+    },
+    {
       "spellId": "bombarda",
       "bonusPerLevel": 0.1,
       "type": "spell_damage_bonus"

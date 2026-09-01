@@ -1,0 +1,8 @@
+{
+  "biomes": [
+    "minecraft:swamp"
+  ],
+  "tile": 13,
+  "tint": "#5C6B3E",
+  "water_tint": "#4C5B45"
+}

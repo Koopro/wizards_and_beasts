@@ -6,6 +6,10 @@
   "pointCost": 2,
   "effects": [
     {
+      "type": "learn_spell",
+      "spellId": "reparo"
+    },
+    {
       "spellId": "reparo",
       "reductionPerLevel": 0.15,
       "type": "spell_cooldown_reduction"

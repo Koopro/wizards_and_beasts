@@ -1,0 +1,24 @@
+{
+  "id": "beast_speaker",
+  "displayName": "skill.wizards_and_beasts.node.beast_speaker.name",
+  "description": "skill.wizards_and_beasts.node.beast_speaker.desc",
+  "tree": "magizoology",
+  "size": "keystone",
+  "pointCost": 6,
+  "effects": [
+    {
+      "type": "learn_spell",
+      "spellId": "riddikulus"
+    },
+    {
+      "type": "gameplay_bonus",
+      "stat": "beast_damage_resistance",
+      "perLevel": 0.15
+    }
+  ],
+  "x": 339.0,
+  "y": -22.0,
+  "edges": [
+    "keeper_vigor"
+  ]
+}

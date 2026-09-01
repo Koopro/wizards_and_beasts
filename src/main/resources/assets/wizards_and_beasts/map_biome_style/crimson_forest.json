@@ -1,0 +1,8 @@
+{
+  "biomes": [
+    "minecraft:crimson_forest"
+  ],
+  "tile": 21,
+  "tint": "#8C2F2F",
+  "water_tint": "#C8622A"
+}

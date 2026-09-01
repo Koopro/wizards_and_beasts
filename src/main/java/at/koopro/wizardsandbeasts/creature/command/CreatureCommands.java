@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.creature.command;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.creature.AlphaRoster;
 import at.koopro.wizardsandbeasts.creature.CreatureDefinition;
 import at.koopro.wizardsandbeasts.creature.CreatureDefinitionRegistry;
 import at.koopro.wizardsandbeasts.module.Module;
@@ -75,18 +76,30 @@ public final class CreatureCommands {
         return spawned;
     }
 
+    /**
+     * The build report. Each line now says whether the creature is on the alpha roster or still wears
+     * a placeholder rig, because "registered" and "finished" were the same colour before and the list
+     * read as 100 working creatures.
+     */
     private static int list(CommandSourceStack src) {
         src.sendSuccess(() -> Component.literal("Generic creatures: " + ModCreatures.MANIFEST.size()
-                + " registered, " + CreatureDefinitionRegistry.size() + " definitions loaded")
+                + " registered, " + CreatureDefinitionRegistry.size() + " definitions loaded, "
+                + AlphaRoster.SHIPPED.size() + " on the alpha roster")
                 .withStyle(ChatFormatting.GOLD), false);
         for (ModCreatures.Spec spec : ModCreatures.MANIFEST) {
             CreatureDefinition def = CreatureDefinitionRegistry.get(
                     Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, spec.id()));
             boolean ok = def != null;
+            boolean alpha = AlphaRoster.isAlpha(spec.id());
+            ChatFormatting colour = !ok ? ChatFormatting.RED
+                    : alpha ? ChatFormatting.GREEN : ChatFormatting.DARK_GRAY;
             src.sendSuccess(() -> Component.literal((ok ? "  [ok] " : "  [--] ") + spec.id()
-                    + " [" + spec.loco() + "]")
-                    .withStyle(ok ? ChatFormatting.GRAY : ChatFormatting.RED), false);
+                    + " [" + spec.loco() + "]" + (alpha ? " (alpha)" : " (placeholder rig)"))
+                    .withStyle(colour), false);
         }
+        src.sendSuccess(() -> Component.literal("Bespoke entity classes: "
+                + String.join(", ", ModCreatures.BESPOKE_IDS.stream().sorted().toList()))
+                .withStyle(ChatFormatting.GRAY), false);
         return 1;
     }
 }

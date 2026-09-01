@@ -1,0 +1,8 @@
+{
+  "biomes": [
+    "minecraft:nether_wastes"
+  ],
+  "tile": 20,
+  "tint": "#7A3A2E",
+  "water_tint": "#C8622A"
+}

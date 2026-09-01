@@ -2833,6 +2833,10 @@ accessor call unchanged.
 |---|---|---|---|---|
 | `modelSlots` | `model_slots` | `Map<BroomSlot, Identifier>` | yes | `BroomSlot.defaults()` |
 | `woodTint` | `wood_tint` | `int` (packed ARGB) | yes | `BroomDefinition.UNTINTED` = `0xFFFFFFFF` |
+| `entityTexture` | `entity_texture` | `Optional<Identifier>` | yes | empty — the shared `broom.png` |
+
+Renamed on 2026-08-27 to `texture` and folded into `assets` — see *Broom — models, audio and handling
+profiles* below. The old key is still accepted.
 
 ### Behaviour for JSON that omits both
 
@@ -3030,6 +3034,9 @@ written.
 | `FOOTSTRAP` | brass, wood, forged | **leather** |
 | `ACCENT` | nameplate, lettering, registration | **none, nameplate** |
 
+Superseded on 2026-08-27 — see *Per-broom identity* below. 14 → 23; the collapse was right about
+duplication and wrong about how many shapes seven distinct brooms need.
+
 `accent_none` is a real, cubeless bone rather than an absent map key, so "no nameplate" is
 selectable and the renderer's hide-all-but-one loop needs no special case.
 
@@ -3051,6 +3058,9 @@ broom in the game was the same object. All eight are explicit now.
 
 `BroomSlot.defaults()` moves with the roster: shaft `plain`, tail_cap `plain`, binding `cord`,
 bristles `ragged`, footstrap `leather`, accent `none`.
+
+Superseded on 2026-08-27 — see below. Three of the eight above are identical rows, and every one of
+them drew the same texture.
 
 ## Shaft chain — deviation from §3.1
 
@@ -3328,3 +3338,701 @@ is 205 insertions and 1 deletion, that deletion being a trailing comma added to 
 **Rule this leaves behind:** never reserialize `en_us.json`. It holds `\uXXXX` escapes that
 `json.dump` rewrites raw, and the working tree routinely carries uncommitted keys that a revert will
 take with it. Insert lines; do not round-trip the file.
+
+---
+
+# Broom — per-broom identity (2026-08-27)
+
+## The gap the slot system left
+
+The slot pass gave the brooms different **silhouettes** and stopped there. Three things carried over
+from it that this pass closes:
+
+1. **Nothing authored `wood_tint`.** `shaft_*` and `tail_cap_*` are painted greyscale *specifically*
+   so a tint can colour them, and all eight definitions omitted the key. Every handle in the game
+   rendered grey. The feature was built, shipped, tested, and never fed a value.
+2. **One texture for eight brooms.** `DefaultedEntityGeoModel("broom")` fixes the sheet at
+   construction. Past the distance where an outline blurs — which for a 2-metre object in flight is
+   most of the time you see one — the seven were the same object.
+3. **Shaft variants that were not variants.** `shaft_plain` and `shaft_swept` had byte-identical
+   cubes and differed by 5° and 9° of bone rotation. `oakshaft_79`, briefed as a very thick antique
+   oak, selected the same `plain` shaft as the school broom.
+
+## `entity_texture` — per-broom sheets over one geometry
+
+New optional field on `BroomDefinition`. `BroomVariantGeoModel` overrides `getTextureResource` from
+render-state data and leaves `getModelResource` and the animation path on the base asset, so there
+is still exactly one rig and one set of clips. The same shape as `GoblinVariantGeoModel`, minus the
+model branch — the goblin's four roles have different skeletons; a broom's seven do not.
+
+`tools/broom_model.py` packs the UV islands **once** and then paints the sheet once per scheme, so
+every sheet is interchangeable with every other and swapping a broom's texture cannot move an island.
+
+| broom | handle | bundle | band |
+|---|---|---|---|
+| `broom` | *(shared greyscale sheet + `wood_tint` `#A87C4A`)* | | |
+| `cleansweep_seven` | scuffed warm oak | dull uneven twigs | hemp twine |
+| `comet_260` | light birch | clean straw | brass |
+| `nimbus_2000` | polished walnut | golden brown | silver |
+| `nimbus_2001` | dark walnut | golden brown | bright chrome |
+| `firebolt` | ebony | dark twig | red cord |
+| `firebolt_supreme` | ebony, gold rune flecks | dark twig, **ember tips** | red cord |
+| `oakshaft_79` | aged oak, leather at the grip | near-black mass | iron |
+
+### `entity_texture` and `wood_tint` are alternatives, never layers
+
+A per-broom sheet is already in final colour. `BroomRenderer.getRenderColor` therefore refuses to
+tint a broom that has its own sheet — GeckoLib's render colour is one value for the whole pass, so a
+tint on top would drag the band and the bristles with it, which is the known whole-model limitation
+applied to art that had no need of it. `BroomModelParityTest` fails the build if a definition sets
+both, because otherwise it fails as a tint that silently does nothing.
+
+The generic `broom` is deliberately left on the shared sheet with a tint, so the no-art path a
+datapack broom takes is the path a shipped broom exercises.
+
+## Variants added
+
+14 → 23. Every new one exists because a broom in the roster had nothing to select.
+
+| slot | added | for |
+|---|---|---|
+| `SHAFT` | `oak` (5→4 units, bends down), `heavy_oak` (7→5, the thickest in the rig) | Cleansweep, Oakshaft |
+| `BINDING` | `collar_ring` (one proud narrow ring), `iron_rings` (two fat rings) | Comet/Nimbus, Oakshaft |
+| `BRISTLES` | `swept` (tight, between teardrop and streamlined), `heavy` (huge, never narrows) | Nimbus 2000, Oakshaft |
+| `FOOTSTRAP` | `iron_peg` (rigid bracket and plate) | Cleansweep |
+| `ACCENT` | `maker_mark` (stamped disc), `runic_band` (collar around the handle) | Comet/Firebolt, Supreme |
+
+`shaft_racing` was retuned 4→1 to 3→1: at 4 units it was the second-thickest handle in the rig while
+being briefed as the slimmest.
+
+Thickness now does the primary work and sweep the secondary, because a five-degree rotation is not a
+difference a player can see on a prop this long.
+
+## Seat — a rider who was flying next to the broom
+
+`getPassengerAttachmentPoint` returned `dimensions.height() * 0.55`. A hitbox height has nothing to
+do with where the model draws its shaft, and the two disagreed by a large margin:
+
+- the rig centres every shaft on `y = 4` model units — **0.25 blocks** above the broom's position;
+- a rendered humanoid's hip pivot sits **0.75 blocks** above its own position, because
+  `LivingEntityRenderer` translates the model up by 1.501 and the leg part hangs 12 units back down.
+  `BroomRiderRenderHandler` already banks the rider about that same 0.75;
+- so the seat is `0.25 - 0.75 = -0.50` blocks, and the old value put it at `+0.33`.
+
+The rider's hip was **0.83 blocks above the handle**: they flew alongside the broom, not on it.
+
+`BroomEntity.SEAT_OFFSET_Y` is now that derived constant, and `BroomItem` lifts a broom by the same
+amount when it is mounted — both when spawning one and when climbing onto one already lying on the
+ground — so the rider ends up exactly where they were standing rather than half a block into the
+floor. A broom nobody is riding still rests with its handle 0.25 blocks off the ground.
+
+## Item icons
+
+`tools/item_icons.py` drew all eight from one shape and one hue, and the hues disagreed with the
+world: the Comet was the **darkest** icon in the set and is the palest broom in the game; the
+Oakshaft was a light icon over the darkest handle. The hues now follow each broom's shaft colour in
+hue and in lightness *order*.
+
+They are not the wood hexes verbatim. `L_broom` shades a 16px sprite down from its base, so anything
+below roughly `#402f20` collapses to the same near-black smudge and four brooms stop being tellable
+apart in a hotbar. The values are the wood hues spread over the range the sprite can resolve.
+
+## Tests
+
+`BroomModelParityTest` gains four:
+
+- every `model_slots` value in every shipped definition names a variant `BroomSlot` knows — the
+  renderer shows a variant by hiding all the others, so an unknown name hides every real one and
+  draws a gap;
+- every `entity_texture` resolves to a PNG at the size `broom.geo.json` declares — a wrong-sized
+  sheet does not fail to load, it samples the islands from the wrong texels;
+- no definition sets both `entity_texture` and `wood_tint`;
+- every broom in `BroomItemRegistry` has a definition file, so none silently inherits the generic
+  broom's stats and silhouette.
+
+`tools/broom_lineup.py` renders the assembled brooms side by side in their own colours, applying
+`wood_tint` the way the renderer does. It answers the question `broom_silhouettes.py` cannot: that
+sheet gates whether two variants of one *slot* differ in outline, and outline is not what survives
+distance and motion.
+
+---
+
+# Broom — models, audio and handling profiles (2026-08-27)
+
+Sixteen optional fields, every one of them with a default that reproduces the broom's existing
+behaviour. A definition written against any earlier schema decodes to the same broom it always
+described, with one deliberate exception noted under *yawDrift*.
+
+## The codec stopped being a pyramid
+
+`BroomDefinition.CODEC` was a hand-written `Codec.of(encode, decode)` whose decode was a nested
+`flatMap` chain — 22 levels, because `RecordCodecBuilder.group` caps at 16 fields and this record has
+more. Sixteen more fields would have made it 38, with about 190 characters of leading whitespace on
+the deepest line.
+
+It is now a flat method over `BroomFields`, which **collects faults instead of short-circuiting**.
+The old chain reported the first bad value only, so a datapack with four mistakes took four
+edit-and-reload cycles to find them all; the new one names all four in one message. Adding a field is
+one line rather than one more level of indentation for every line beneath it.
+
+Unknown keys are ignored, which is what lets a definition written for a later version of the mod load
+in an earlier one minus the fields it does not understand.
+
+## Four groups, one flat JSON
+
+The JSON stays flat — `handlingProfile` and `yawDrift` sit at top level next to `maxSpeed`. The Java
+groups them, so the record gained four components rather than sixteen.
+
+| record | JSON keys |
+|---|---|
+| `BroomAssets` | `model`, `texture`, `animation` |
+| `BroomHandling` | `handlingProfile`, `yawDrift`, `momentumRetention`, `wobbleAtBoost`, `boostFovPunch`, `crashDamageMultiplier`, `minorImpactDurabilityLoss`, `severeImpactDurabilityLoss` |
+| `BroomAudio` | `boostSound`, `idleLoopSound`, `trailParticle` |
+| `BroomSeat` | `passengerOffset`, `passengerYawOffset` |
+
+## `model` / `texture` / `animation`
+
+All three default to the base `broom` asset, and `DefaultedGeoModel` resolves the three
+independently — which is what lets a broom swap its sheet without also needing its own geometry, the
+common case by a wide margin.
+
+`model` and `animation` are GeckoLib asset subpaths. `texture` takes **either** form: a value already
+rooted at `textures/` is used verbatim, anything else is a subpath under `textures/entity/`. The full
+path is what a datapack author expects to write and the subpath is what GeckoLib's own helpers
+produce; rejecting either would be a papercut for no gain.
+
+`entity_texture`, which existed for one day, is accepted as an alias for `texture`.
+
+**Replacing the geometry is the escape hatch, not the route.** `BroomRenderer` shows one slot variant
+by hiding every other variant *it knows by name*. A replacement rig carrying none of those bones has
+nothing hidden and nothing shown — harmless, but the slot system no longer applies to it. One
+carrying some of them gets a partial rig. `broom_body` must survive in any case, or the broom will
+not tilt.
+
+## `handlingProfile` — a profile that is not decoration
+
+`school` | `balanced` | `racing` | `tank`. The profile supplies the **starting value for every other
+handling field**, and any key the JSON authors explicitly wins over it. An enum nothing read would be
+the `wood_tint` failure again: a value authored into every file and consulted by nothing.
+
+`BALANCED` is the default and reproduces the constants these fields replaced, exactly:
+
+| field | BALANCED | what it reproduces |
+|---|---|---|
+| `momentumRetention` | 0.90 | `COAST_DRAG` 0.990 and `INPUT_DRAG` 0.995 |
+| `crashDamageMultiplier` | 1.00 | the uncapped `MAX_CRASH_DAMAGE` scaling |
+| `minor` / `severe` durability loss | 1 / 3 | the hardcoded 1, 2, 3 |
+| `wobbleAtBoost`, `boostFovPunch` | 0.00 | no wobble, no punch |
+
+`momentumRetention` is authored on a readable 0.5–1.0 scale and mapped into the narrow band a
+per-tick drag multiplier actually lives in (`1 - (1 - r) * 0.10`), anchored so 0.90 is exactly the old
+0.990. Authoring the raw multiplier would mean asking datapack authors to tell 0.988 from 0.997 by
+eye. Across the range it is a real difference: 0.86 coasts down to 76% of its speed over a second,
+0.97 keeps 94%.
+
+Moderate impacts interpolate — `round((minor + severe) / 2)`. The impact scale has three bands and the
+brief names two values; a third key would only ever be set to the number between the other two.
+
+### `yawDrift` is the one real behaviour change
+
+`BALANCED` sets it to `0.02`, the brief's stated default, and that is **not** a no-op: every broom now
+weaves about half a degree at top speed where it used to track a perfect line. Deterministic from
+`tickCount`, never random — yaw is stepped on both sides of the connection, and a random wander would
+have client and server disagreeing about the heading, which reads as the broom snapping back every
+few ticks. It scales to nothing at a standstill, so a hovering broom sits still.
+
+`wobbleAtBoost` splits: half becomes extra heading wander while the boost is firing, half a visual
+roll shudder on `rollTilt`.
+
+## `passengerOffset` — the brief's default was rejected
+
+The brief specified `(0, 0.55, 0)`. That is the bug fixed earlier the same day, one step further on:
+the rig draws every shaft **0.25 blocks** above the broom's position and a rendered humanoid's hip
+pivot sits **0.75 blocks** above its own, so an absolute `+0.55` seats the rider 1.30 blocks above the
+handle. The default here is the derived `-0.50`, and every shipped broom authors the value explicitly
+so the number is visible rather than inherited.
+
+Horizontal components are rotated into the broom's frame, so `[0, -0.5, 0.05]` means five centimetres
+toward the bristles rather than toward world south. Overriding `getPassengerAttachmentPoint` opts out
+of the rotation vanilla's `EntityAttachments.getClamped` would have done, so it is done by hand.
+
+`passengerYawOffset` turns the rider in the saddle — a render rotation applied in
+`BroomRiderRenderHandler` about the same 0.75 hip pivot the bank already uses. The rider still steers
+and looks wherever the player aims.
+
+## Audio: ids resolved at the point of use
+
+A broom definition is datapack data and loads on the server, where a client-only particle provider
+does not exist and a sound event may belong to a mod the server does not have. The fields hold ids
+and resolve them where they are used, so a bad id costs one silent effect rather than a failed
+datapack load.
+
+Eight sound events were added, and **not one `.ogg` with them**: every entry in `sounds.json` is a
+vanilla sample re-pitched, which is the mod's existing audio strategy — `broom_crash` was already
+`minecraft:random/explode1` at pitch 1.2. Elytra loops for wind, firecharge and firework launches for
+boosts, dragon wingbeats for the heavy end.
+
+`trailParticle` resolves against the live particle registry and takes any option-free type:
+`minecraft:flame` for the Firebolt, `minecraft:soul_fire_flame` for the Supreme, `minecraft:end_rod`
+for the Nimbus pair, `minecraft:ash` for the Oakshaft. Registering seven bespoke `broom_trail_*` types
+whose only difference is colour would be seven registry entries, seven providers and seven sprite
+sets to say what `minecraft:flame` already says. A type that needs options — the mod's own tinted
+spell particles — cannot be built from an id alone and falls back rather than crashing the render
+thread on a value a datapack was free to write.
+
+## Every field has a reader
+
+Ten of the sixteen change behaviour rather than being carried:
+
+| field | read by |
+|---|---|
+| `model` / `texture` / `animation` | `BroomVariantGeoModel` |
+| `yawDrift`, `wobbleAtBoost`, `momentumRetention` | `BroomMovement` |
+| `crashDamageMultiplier`, `minor` / `severe` durability loss | `BroomImpacts` |
+| `boostFovPunch`, `boostSound`, `idleLoopSound`, `trailParticle` | `BroomFlightFx` |
+| `passengerOffset` | `BroomEntity.getPassengerAttachmentPoint` |
+| `passengerYawOffset` | `BroomRiderRenderHandler` |
+| `handlingProfile` | supplies every other handling default |
+
+`/wandb world broom info` prints all of them on two extra lines. A value that can be authored and
+never inspected is how `wood_tint` sat unset on all eight brooms for a release.
+
+## Incidental: `BroomEntity.isBoostFiring()`
+
+Three places spelled out the same three-way test — input held, charge remaining, cooldown clear —
+against a package-private field, and the FX layer could not reach it at all. One predicate now, and
+the FOV punch, the boost cue and the movement step cannot drift apart on what "boosting" means.
+
+---
+
+# Broom — the client never had the definitions (2026-08-27)
+
+## The bug the model routing was sitting on
+
+`BroomDefinitionLoader` is registered on `AddServerReloadListenersEvent`, so
+`BroomDefinitionRegistry` is populated **on the server only**. `BroomEntity` syncs its
+`DEFINITION_ID` through `SynchedEntityData`, which is necessary and was never sufficient: an id is a
+key into a table, and on a dedicated server the client's copy of that table was empty. Every
+`resolveDefinition()` on the client fell through to `CODE_DEFAULT`, so **every broom in the world drew
+the generic sheet, sat at the generic seat and shed the generic trail**, whatever its JSON said.
+
+It worked in single-player and on a LAN host by accident: the integrated server shares a JVM with the
+client and the registry is a static field, so both were reading the same map. Exactly the shape of
+bug that survives every hour of dev testing and appears the moment somebody joins a real server — and
+it silently invalidated the whole per-broom pass, the model/texture routing and the per-broom seat
+alike.
+
+`BroomDefinitionsSyncS2CPayload` pushes the table on `OnDatapackSyncEvent` (login and every
+`/reload`), the seam `AbilityFrameworkEvents` and the brew recipe sync already use.
+
+### One codec, not two
+
+The stream codec is `BroomDefinition.CODEC` run through `ByteBufCodecs.fromCodecWithRegistries`, not a
+hand-written field list like `AbilityDefinitionsSyncS2CPayload`'s. A definition now carries
+twenty-five components across four nested records, and spelling those out again would mean every new
+field has to be added in three places — with the third failing *silently*, as the field arriving at
+its default on the client. Which is the bug this class exists to fix.
+
+Registries are required because `displayName` and `loreLines` are `Component`s.
+
+`BroomDefinitionCodecTest.everyShippedBroom_survivesAnNbtRoundTrip` is the gate: it encodes and
+re-decodes every shipped definition through `NbtOps` and demands equality, so a field `encode` forgets
+to write fails the build instead of reaching clients as a default.
+
+## Stale caches after `/reload`
+
+`BroomEntity` caches its resolved definition and cleared it on `onSyncedDataUpdated`, which fires only
+when the **id** changes. A `/reload` that retunes a broom in place changes no id, so every broom
+already in the world kept its pre-reload values until it unloaded.
+
+`BroomDefinitionRegistry.generation()` is bumped on every `replaceAll`, and the entity re-resolves
+whenever the generation it cached from is no longer current.
+
+## The seat was measured to the wrong surface
+
+The seat had been derived to the shaft's **centre line** (`0.25 - 0.75 = -0.50`), which sinks every
+rider half a shaft into the wood. What matters is the **top surface** of the segment that passes under
+them — the shaft chain's `_mid` bone, at `z ≈ 0`.
+
+Shafts are not all the same thickness, so this is genuinely per broom:
+
+| shaft | width at the seat | top | `passengerOffset.y` | used by |
+|---|---|---|---|---|
+| `plain` / `swept` / `racing` | 2 units | 0.3125 | **-0.4375** | broom, Comet, Nimbus ×2, Firebolt ×2 |
+| `oak` | 4 units | 0.375 | **-0.375** | Cleansweep Seven |
+| `heavy_oak` | 6 units | 0.4375 | **-0.3125** | Oakshaft 79 |
+
+Seated for the Firebolt's needle, a rider is buried to the knees in the Oakshaft's log — which is
+precisely the acceptance case. `BroomSeatParityTest` recomputes the expected seat from the geometry
+for every shipped broom, so widening a shaft without re-seating its brooms fails the build, and
+separately asserts the two named brooms actually differ.
+
+## Yaw only, deliberately — not pitch
+
+The brief asked for the offset to be transformed by yaw **and** pitch. Yaw is applied; pitch is not,
+for two independent reasons:
+
+1. **The mesh does not pitch with the entity.** The broom's drawn nose angle comes from
+   `BroomMovement.updateTilt` — roughly `-0.4 ×` the entity pitch, clamped to 35° — so rotating the
+   seat by the full entity pitch would swing the rider further than the thing they are sitting on.
+2. **The visual tilt cannot be used instead.** Those are client-side render values, and
+   `getPassengerAttachmentPoint` positions the rider on the server too. The two sides would disagree
+   about where a passenger is.
+
+Yaw is applied to the mesh one-for-one, which is why it is safe. The cost of leaving pitch out is
+bounded by the largest authored `z` — five centimetres — which at any real flight angle moves the seat
+by less than a pixel.
+
+## `rider_attach` bone sampling: rejected
+
+Not an API-convenience call. GeckoLib bone transforms exist only inside a client render pass, and
+`positionRider` needs an answer on the server. The JSON offset is the only form of this value both
+sides can agree on, and `BroomSeatParityTest` ties it back to the geometry — which is what sampling a
+bone would have bought.
+
+## Already in place before this pass
+
+- **The custom `GeoModel`** is `BroomVariantGeoModel`, branching model, texture and animation off the
+  definition with the base `broom` asset as the fallback for each.
+- **Per-item models**: all eight brooms have `models/item/<id>.json`, `items/<id>.json` and a distinct
+  16px sprite. No datagen change needed.
+
+---
+
+# Broom — handling profiles as behaviour (2026-08-28)
+
+The scalars landed first: `handlingProfile` chose a bundle of numbers, and `BroomMovement` read them
+inline. That made brooms differ, but only in ways a number can express. Eight brooms still
+accelerated, turned, drifted and stopped by the same arithmetic.
+
+`entity.broom.handling` is that arithmetic made polymorphic. `BroomHandlingProfile` has eleven hooks,
+**every one with a do-nothing default**, so a profile class reads as exactly the list of things it does
+differently — `BalancedHandling` overrides nothing, `TankHandling` four.
+
+## Data and behaviour stay apart
+
+| | lives in | is |
+|---|---|---|
+| `HandlingProfile` | `broom` | data: what `handlingProfile` parses to, and the scalar defaults a definition inherits |
+| `BroomHandlingProfile` | `entity.broom.handling` | behaviour: the shape of the response |
+| `HandlingProfileRegistry` | `entity.broom.handling` | the map from one to the other |
+
+The lookup is in the registry rather than a method on the enum so the arrow points from behaviour to
+data and never back. Folding them together would put a `BroomEntity` dependency inside the record the
+codec decodes — a record read by the loader, the command layer and a dozen tests that never touch an
+entity.
+
+A profile reads `def.handling()` for anything a datapack should retune. What lives in the class is
+what a number cannot say: the heading lock, the boost cap, the nose-heaviness at speed.
+
+## What each profile actually does
+
+**School** (Cleansweep, generic) — caps effective boost at **1.35× however greedy the JSON**, brakes
+15% harder, banks 20% less, and lurches upward when the boost catches. Forgiving in every direction
+except precision: it wanders most of the four. The cap is a no-op for every shipped school broom
+(the Cleansweep boosts 1.30), and a test asserts that, so it is a guard on datapacks rather than a
+silent retune.
+
+**Balanced** (Comet, and anything naming no profile) — overrides nothing. This is the regression gate:
+`balanced_changesNothing` pins each hook to its input.
+
+**Racing** (Nimbus pair, Firebolt family) — **locks the heading** when the rider is not steering
+(wander × 0.08), and past 0.7 speed ratio tightens the turn to 0.85 and starts sinking:
+`0.01 × ratio × (1.1 − stability)`. The sink goes through `afterVelocityComputed` and *not* through
+`modifyWeakGravity`, because gravity is skipped entirely while a vertical key is held — routing it
+there would make the effect vanish exactly when a rider is trying to pull out of a dive.
+
+**Tank** (Oakshaft) — 15% less acceleration, turn always × 0.75 (mass, not momentum, so it applies at
+rest too), 15% less sink, and glancing knocks cost half durability — floored at 1, never zero,
+because a broom that takes no damage from scrapes can be flown into scenery forever.
+
+## Two corrections to the scalar layer
+
+- **`SCHOOL` crash multiplier 1.15 → 0.85.** It had been set on the reasoning that a cheap broom is a
+  flimsy one. That is backwards for the broom students are handed: a school broom is built to survive
+  being flown badly. `cleansweep_seven.json`'s redundant `0.9` override was dropped so the profile
+  speaks for itself.
+- **`TANK` crash multiplier 0.75 → 1.0.** The brief's tank spec softens *glancing* knocks and says
+  severe ones still hurt. A broom nothing can hurt has no reason to be flown carefully.
+
+## Deviations from the brief
+
+- **`modifyTargetSpeed` returns a float rather than `void`.** A `void` method cannot change a local
+  `float`; making it work needs a mutable carrier allocated once per broom per tick in the movement
+  hot path.
+- **The school boost cap has no 40-tick session window.** "For the first 40 ticks of each flight
+  session" makes the same broom behave differently a moment later with no visible cause, and needs
+  per-flight state on the entity to do it. The flat cap is the same promise without the mystery.
+- **`deceleration × momentumRetention` is normalised, not raw.** Raw `1 / momentumRetention` would
+  make every broom in the game stop 11% faster than it used to — a silent retune of eight hand-tuned
+  definitions dressed as a feature. Anchored on `BroomHandling.NEUTRAL_MOMENTUM` so balanced is a
+  no-op and the *relative* feel is what the brief asked for.
+- **The FOV punch stays in `BroomFlightFx`, not `BroomCameraHandler`.** It was already implemented,
+  already derived from boost ticks (which the brief prefers over a new flag), and already smoothed in
+  and out. `BroomCameraHandler` handles camera angles and third-person distance; FOV belongs with the
+  rest of the speed-driven FX.
+
+## Testability drove the shape
+
+`RacingHandling.turnRateAt`, `lockedWander` and `sinkAt` are public statics, and `HandlingMath` takes
+a tick count rather than an entity. A response curve that cannot be checked without spawning a world
+is a curve that gets silently inverted — which is exactly what had happened to the school crash
+multiplier.
+
+`BroomHandlingProfileTest` asserts the orderings the blind flight test would reveal: school brakes
+harder than balanced, tank turns slower than school, a Nimbus holds a line better than a Cleansweep, a
+Firebolt punishes a wall harder. Plus `everyHookHasAtLeastOneImplementer`, which found `onBoostStart`
+about to ship inert and forced it to earn its place.
+
+## One new accessor, deliberately narrow
+
+`entity.broom.handling` is a different package to `entity.broom`, so the package-private movement
+fields are out of reach. Rather than widening all of them, `BroomEntity` exposes
+`getVerticalVelocity`/`setVerticalVelocity` — the only value a profile mutates — plus `isSteering()`,
+which wraps the 2° deadzone that stops mouse jitter reading as a turn. Everything else a profile needs
+arrives as a method argument.
+
+---
+
+# Broom — juice: sound, trails, polish, crash flair (2026-08-28)
+
+## Sound: five events, still no audio files
+
+`broom_crash_minor`, `broom_crash_severe`, `broom_mount`, `broom_dismount`, `broom_polish_apply` —
+all vanilla samples re-pitched in `sounds.json`, which remains the mod's whole audio strategy. Wood
+breaks for the crashes, a wood step plus a distant wingbeat for mounting, honeycomb wax for the tin.
+Every one has a subtitle.
+
+## Trails: three registered types after all
+
+The previous pass resolved `trailParticle` to vanilla ids and argued three bespoke types would be
+"seven registry entries to say what `minecraft:flame` already says". The brief named them again, so
+they exist: `broom_trail_dust`, `broom_trail_gold`, `broom_trail_ember`.
+
+They cost less than the earlier objection assumed, because they share one class and one sprite.
+`BroomTrailParticle` carries a three-value `Style` enum — colour, size, lifetime, friction, gravity —
+so a Firebolt's embers rise and die in seven ticks where a Cleansweep's dust falls and lingers for
+fourteen. No new PNGs: all three tint the existing `spell_mote`.
+
+Registered with `overrideLimiter = false`, unlike the spell particles. A trail is ambience and should
+thin out with the player's particle setting; a spell impact is information and should not.
+
+### The trail now leaves the broom
+
+It used to seed behind the **player**, offset along the direction of travel, which put it inside the
+rider on anything flying nose-up. `BroomEntity.tailPosition()` reads the rig's own `fx_tail` anchor —
+`[0, 4, 40]` model units, so 0.25 up and 2.5 back — and rotates it into the broom's frame the same
+way the seat is. That anchor had been in the geometry and referenced by nothing since the rig landed.
+
+Threshold dropped 0.55 → 0.4, and boosting always draws one: a boost that produces no visible change
+is a boost the player cannot tell fired. **Rate** carries the speed (1 to 5 per tick, +3 boosting);
+colour stays constant, which is what makes a gold trail read as "a Nimbus" rather than "something
+going a particular speed".
+
+## Broom polish: an item that does something
+
+It was a `SimpleTooltipItem` — an item whose entire behaviour was a line of hover text describing what
+it would do if it did anything.
+
+- **Repairs 25% of maximum durability.** A fraction, not a flat 40: a flat figure is most of a
+  Cleansweep and a rounding error on an Oakshaft, so one tin would be a full service on the cheap
+  broom and pointless on the expensive one.
+- **Leaves the handle slick for twenty minutes**, during which the broom's heading wander is halved —
+  the buff lands on the handling layer, so it is felt most on the brooms that wander most.
+- **Two ways to apply it**: tin in one hand and broom in the other, or right-click a broom standing in
+  the world. A player who has just landed has the broom under them, not in a slot.
+- Refuses a broom that is sound and already slick, and says so, rather than silently eating a tin.
+
+`POLISHED_UNTIL_TICK` stores an **absolute game time**, not a countdown, so a broom in a chest stays
+honest without being ticked. `BroomItem.inventoryTick` strips the component once it lapses — on the
+broom, which carries it, not on the tin, which may be nowhere near it. That is what lets the tooltip
+and the entity both read "component present" as "polished" without either needing the clock.
+
+The entity carries a **synced** `POLISHED` flag rather than reading the stack: the movement step runs
+on both sides and the stack does not, so a client that did not know would compute a different heading
+wander and the broom would snap back every few ticks.
+
+## Crash flair
+
+Severe impacts now scale durability loss by `crashDamageMultiplier` as well as base loss. It had
+applied to the rider only, which made the broom the safe half of the pair on a Firebolt — the
+multiplier that makes it frightening to fly at a wall was not costing the broom anything.
+
+Twigs burst from `tailPosition()`, crit particles at the point of contact, graded sound, and the rider
+gets an action-bar line — *"Your broom's bristles are badly frayed"* / *"The shaft cracks under the
+strain"*. The action bar rather than a toast: it fires often, and a toast per clipped fence post
+would bury the notices that matter.
+
+## Mount and the spent-broom gate
+
+Mounting plays a cue and grants **3 ticks of invulnerability**, because a rider is seated below the
+broom's origin and is briefly overlapping whatever it was resting on.
+
+`BroomItem.isSpent` closes the acceptance case. The spawn path did
+`setCurrentDurability(Math.max(1, remaining))`, which quietly handed a fully damaged broom one point
+and let it be flown — and broken again on the first knock. It now refuses, and says why. Polish is
+enough to get it flying again, which is the loop closing.
+
+## Testability, again
+
+`BroomPolish` takes a `long gameTime` alongside the `Level` overload. A window that can only be
+checked by handing it a live `Level` is a window nobody can write a test for, and *"does the polish
+actually wear off"* is exactly the question worth a test — an absolute expiry that is never checked is
+a permanent buff wearing a timer's clothes.
+
+## Found, not fixed
+
+`ModParticles.PROTEGO_SHATTER` and `AK_BYPASS_FLASH` are registered `SimpleParticleType`s with **no
+provider** in `ModParticleProviders`, which registers sprite sets only for the tinted spell types.
+`ProtegoShieldEntity` sends both. They will not render. Pre-existing, a different subsystem, and
+fixing it needs a decision about what they should look like — logged rather than guessed at.
+
+---
+
+# Broom — authoritative definition content (2026-08-28)
+
+All seven brooms authored to spec: profile, handling scalars, trail, boost cue, seat, and a per-broom
+`model`. Flight numbers — `maxSpeed`, `acceleration`, `deceleration`, boost timings, `durability` —
+are untouched, per the brief.
+
+| broom | profile | wobble | yawDrift | momentum | crash | trail | boost cue |
+|---|---|---|---|---|---|---|---|
+| `cleansweep_seven` | school | 0.4 | 0.06 | 0.82 | 0.85 | dust | school |
+| `comet_260` | balanced | 0.1 | 0.03 | 0.90 | 1.00 | dust | standard |
+| `nimbus_2000` | racing | 0.0 | 0.015 | 0.90 | 1.10 | gold | racing |
+| `nimbus_2001` | racing | 0.0 | 0.01 | 0.92 | 1.15 | gold | racing |
+| `firebolt` | racing | 0.0 | 0.05 | 0.86 | 1.35 | ember | firebolt |
+| `firebolt_supreme` | racing | 0.0 | 0.035 | 0.95 | 1.25 | ember | firebolt |
+| `oakshaft_79` | tank | 0.0 | 0.01 | 0.96 | 0.70 | dust | heavy |
+
+`nimbus_2001`'s `turnSpeed` was already 1.12 against the 2000's 1.10, so "slightly higher" needed no
+change. `firebolt_supreme`'s `stabilityRating` went **0.60 → 0.68**: the brief asks for it to be
+steadier than the Firebolt's 0.65 and it shipped less steady, which also meant it took *more* of the
+racing profile's high-speed sink than the broom it upgrades.
+
+## Per-broom `model` files are generated, never hand-written
+
+Every broom but the generic one now names its own geometry — `broom_firebolt.geo.json` and so on,
+20 bones each against the master rig's 45.
+
+They are **build output**, emitted by `tools/broom_model.py` from the master rig plus each
+definition's `model_slots`. Authoring seven by hand would be seven copies of the same shaft, and the
+renderer addresses slot variants by name: the moment two copies disagree it hides bones that exist in
+one and not the other, and a stale file looks exactly like a working one until something is invisible.
+Generating them removes the failure mode rather than guarding it.
+
+`BroomModelParityTest.everyPerBroomModelMatchesTheMasterRig` re-derives the expected bone list from
+the rig and the definition and demands an exact match, so a stale file fails the build. It also checks
+each file declares its own `geometry.<name>` identifier — sharing one would have GeckoLib caching one
+model under another's name.
+
+Slot **container** bones survive flattening even for unset slots, because the clips animate them:
+`fly_forward` rotates `bristles`, not `bristles_streamlined`.
+
+`tools/broom_lineup.py` now previews from the shipped file when a broom names one, rather than
+re-filtering the rig. A preview that agrees with itself while disagreeing with what ships is worse
+than no preview. The lineup is pixel-identical before and after flattening, which is the check that
+the generator is correct.
+
+The generic `broom` deliberately names **no** model and keeps the master rig, so the fallback path
+stays exercised by something that ships.
+
+## Three deviations from the brief
+
+### 1. `passengerOffset` Y is negative, not positive
+
+The brief gives `[0, 0.52, 0.02]` for the Cleansweep and `[0, 0.62, 0.0]` for the Oakshaft. Both are
+applied as **-0.375** and **-0.3125**.
+
+The offset is added to the broom's position to give the rider's **feet**, and a rendered humanoid's
+hip pivot sits 0.751 blocks above its own position — `LivingEntityRenderer` does `scale(-1,-1,1)` then
+`translate(0, -1.501, 0)`, and the leg `PartPose` hangs 12 units back down from there. The shafts are
+drawn with their top surface at 0.375 and 0.4375. So `+0.52` puts the rider's hips 0.9 blocks above
+the handle — the same floating-alongside-the-broom bug fixed on 2026-08-27, reintroduced.
+
+**The brief's relative intent is honoured exactly**: the Oakshaft seats higher than the Cleansweep,
+by 0.0625 against the brief's 0.10, and both are derived from the actual thickness of the shaft each
+broom draws. `BroomSeatParityTest` recomputes them from the geometry.
+
+If the literal values are wanted, they are one number per JSON — but the rider will visibly float.
+
+### 2. `comet_260`'s "dust/gold mix" is dust
+
+`trailParticle` holds one id. A blend would need either a second field or a weighted-list codec, and
+neither is worth inventing for one broom. Dust suits the Comet's straw-and-birch palette, and it keeps
+gold as the Nimbus family's tell — a mix would have blurred exactly the distinction the trails exist
+to draw.
+
+### 3. `oakshaft_79` uses the deep whoosh, not the school cue
+
+The brief offers "boost school or deep whoosh". `broom_boost_heavy` is already the deep whoosh — a
+re-pitched dragon wingbeat — and sharing the school cue would have tied the heaviest broom in the game
+to the lightest.
+
+---
+
+# Broom — inventory appearance (2026-08-28)
+
+## The bug: seven sprites nothing ever loaded
+
+Seven of the eight `models/item/*.json` were **texture-less children of
+`wizards_and_beasts:item/broom`**:
+
+```json
+{ "parent": "wizards_and_beasts:item/broom" }
+```
+
+So every broom in the game drew the generic broom's icon, and the seven distinct sprites sitting next
+to them were never loaded. The item side had been reported as complete twice on the strength of the
+files existing — which they did, correctly named, beside correctly named sprites. Existence was the
+wrong thing to check.
+
+Each model now declares its own `layer0` and parents to `minecraft:item/handheld`, which is the pose a
+shaft-like item wants — angled in hand rather than presented flat.
+
+`ModModelProvider` calls `declareCustomModelItem` for all eight, which emits only the
+`items/<id>.json` definition and leaves `models/item/` to be hand-authored. So these files are the
+intended home and datagen will not clobber them.
+
+## The icons now differ in build, not only in hue
+
+`L_broom` drew one shape for all eight, varying only the base colour. Five of the eight are browns,
+and at 16px a brown is a brown.
+
+`_broom(shaft_width, bundle, collar_width)` gives three builds — `broom`, `broom_slim`, `broom_heavy`
+— and the bundle scales about its own root, so a heavy broom reads as heavy in outline.
+
+The three materials are now three *things* rather than three shades of one colour:
+
+| material | is |
+|---|---|
+| `TRIM` | the handle |
+| `BODY` | the twig bundle |
+| `MARK` | the binding at the join |
+
+That split is what carries the brief's colour language. `MARK` is each broom's actual collar metal:
+twine on the Cleansweep, brass on the Comet, silver on the Nimbus 2000 and brighter chrome on the
+2001, red cord on the Firebolt, gold on the Supreme, iron on the Oakshaft.
+
+The collar is drawn **across** the handle rather than along it, and proud of it. The first attempt
+drew it along the shaft at one pixel wide and it vanished entirely — a collar flush with the handle is
+one pixel of a slightly different brown.
+
+| broom | build | handle | collar |
+|---|---|---|---|
+| `broom`, `cleansweep_seven`, `comet_260` | standard | tan → pale birch | twine, twine, brass |
+| `nimbus_2000`, `nimbus_2001`, `firebolt`, `firebolt_supreme` | slim | walnut → ebony | silver, chrome, red, gold |
+| `oakshaft_79` | heavy | aged oak | iron |
+
+## The test that would have caught it
+
+`BroomItemModelTest` checks three things existence cannot:
+
+- every model names **its own** `layer0`, not a parent's;
+- every model uses the handheld pose;
+- every sprite is **distinct by SHA-256**. Eight files with eight names can still be eight copies of
+  one picture, and a roster whose entire point is that the tiers are tellable apart fails silently on
+  that.
+
+The broom list is scraped from `BroomItemRegistry`, so a new broom is covered without editing the
+test.

@@ -1,0 +1,7 @@
+{
+  "type": "structure",
+  "structure": "minecraft:bastion_remnant",
+  "marker": "wizards_and_beasts:fortress",
+  "label": "map.wizards_and_beasts.landmark.bastion",
+  "reveal": "surface"
+}

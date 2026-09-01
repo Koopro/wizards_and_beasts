@@ -85,5 +85,22 @@ public enum Module {
      * and forms stay ungated on purpose — a player who committed a heritage should not silently lose
      * their body and their stat spread because a server operator turned a flag off mid-save.
      */
-    HERITAGE
+    HERITAGE,
+    /**
+     * Apparition: the Three Ds wind-up, the crack, splinching, anti-Apparition wards and the memorised
+     * destinations a wizard travels between.
+     *
+     * <p>Appended after {@link #HERITAGE} for the same reason that one was appended last — anything keyed on
+     * this enum's ordering keeps its numbering.
+     *
+     * <p>Its own module rather than a corner of {@link #PLAYER_ABILITIES}, mirroring {@link #FLOO_NETWORK}
+     * and {@link #BROOM_FLIGHT}: those are the mod's other two ways of getting somewhere, and each is a
+     * switch an operator can reach on its own. Until this existed, turning Apparition off meant turning off
+     * <em>every</em> player ability — Legilimency and the Animagus form included — which is not a choice a
+     * server should have to make.
+     *
+     * <p>Gates the mechanic, never the registration: the ability, its keybind and the destination selector
+     * all still exist with this switched off, and refuse at the point an attempt begins.
+     */
+    APPARITION
 }

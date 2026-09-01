@@ -7,9 +7,9 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -86,13 +86,12 @@ public final class ApparitionWardRegistry {
                 double maxX = obj.get("maxX").getAsDouble();
                 double maxY = obj.get("maxY").getAsDouble();
                 double maxZ = obj.get("maxZ").getAsDouble();
-                String message = obj.has("message") ? obj.get("message").getAsString() : "Something prevents you from Apparating here.";
                 boolean allowAdmins = obj.has("allowAdmins") && obj.get("allowAdmins").getAsBoolean();
                 register(new ApparitionWard(
                         wardId,
                         dimensionId,
                         new AABB(minX, minY, minZ, maxX, maxY, maxZ),
-                        Component.literal(message),
+                        readMessage(obj),
                         allowAdmins));
             }
         } catch (Exception ex) {
@@ -115,7 +114,7 @@ public final class ApparitionWardRegistry {
                 obj.addProperty("maxX", ward.bounds().maxX);
                 obj.addProperty("maxY", ward.bounds().maxY);
                 obj.addProperty("maxZ", ward.bounds().maxZ);
-                obj.addProperty("message", ward.blockMessage().getString());
+                writeMessage(obj, ward.blockMessage());
                 obj.addProperty("allowAdmins", ward.allowAdmins());
                 arr.add(obj);
             }
@@ -125,13 +124,50 @@ public final class ApparitionWardRegistry {
         }
     }
 
+    /** The message shown by a ward whose entry says nothing about one. */
+    public static final String DEFAULT_MESSAGE_KEY = "apparition.wizards_and_beasts.ward.default";
+
+    /**
+     * Reads a ward's refusal message, preferring a translation key over a baked string.
+     *
+     * <p>Two shapes, because wards come from two places. The built-ins are code and speak in lang keys, so
+     * every language sees its own sentence. An operator adding a ward by command types a sentence, and that
+     * sentence is theirs — it is stored as written and never looked up.
+     */
+    private static Component readMessage(JsonObject obj) {
+        if (obj.has("messageKey")) {
+            return Component.translatable(obj.get("messageKey").getAsString());
+        }
+        if (obj.has("message")) {
+            return Component.literal(obj.get("message").getAsString());
+        }
+        return Component.translatable(DEFAULT_MESSAGE_KEY);
+    }
+
+    /**
+     * Writes a ward's refusal message back in whichever of the two shapes it came in.
+     *
+     * <p>This exists because the old {@code getString()} round-trip was a one-way door for anything
+     * translatable. A server has no mod lang files — those are client assets — so resolving a mod key
+     * server-side yields the raw key, which was then saved as literal text and read back as literal text.
+     * The first save would have turned every built-in ward's message into the string
+     * {@code "apparition.wizards_and_beasts.ward.hogwarts"} on every player's screen, permanently.
+     */
+    private static void writeMessage(JsonObject obj, Component message) {
+        if (message.getContents() instanceof TranslatableContents translatable) {
+            obj.addProperty("messageKey", translatable.getKey());
+            return;
+        }
+        obj.addProperty("message", message.getString());
+    }
+
     private static void registerDefaults(MinecraftServer server) {
         Identifier hogwartsDimension = Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "hogwarts");
         register(new ApparitionWard(
                 Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "hogwarts"),
                 hogwartsDimension,
                 centered(0, 64, 0, 200, 200, 200),
-                Component.literal("You cannot Apparate within the grounds of Hogwarts."),
+                Component.translatable("apparition.wizards_and_beasts.ward.hogwarts"),
                 true));
 
         Identifier overworld = ServerLevel.OVERWORLD.identifier();
@@ -139,7 +175,10 @@ public final class ApparitionWardRegistry {
                 Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "gringotts_vaults"),
                 overworld,
                 centered(0, 40, 0, 100, 80, 100),
-                Component.literal("Gringotts enchantments prevent Apparition.").withStyle(ChatFormatting.YELLOW),
+                // Unstyled, like the other default. A style cannot survive the save round-trip (only the
+                // key is written) and the refusal toast does its own colouring anyway, so a colour here
+                // would appear once and then quietly never again.
+                Component.translatable("apparition.wizards_and_beasts.ward.gringotts"),
                 false));
     }
 

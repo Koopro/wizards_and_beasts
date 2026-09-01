@@ -1,0 +1,29 @@
+{
+  "displayName": "brew.wizards_and_beasts.pepperup_potion.name",
+  "color": -2861526,
+  "flavorText": "Cures the common cold. Side effect: steam from the ears for several hours.",
+  "components": [
+    {
+      "type": "heal_and_cure",
+      "heal": 4.0,
+      "cureAllHarmful": true
+    },
+    {
+      "type": "apply_effects",
+      "effects": [
+        {
+          "id": "minecraft:fire_resistance",
+          "duration": 600
+        },
+        {
+          "id": "minecraft:speed",
+          "duration": 1200
+        }
+      ]
+    },
+    {
+      "type": "flourish",
+      "count": 24
+    }
+  ]
+}

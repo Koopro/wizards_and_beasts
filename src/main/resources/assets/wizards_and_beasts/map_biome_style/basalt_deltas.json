@@ -1,0 +1,8 @@
+{
+  "biomes": [
+    "minecraft:basalt_deltas"
+  ],
+  "tile": 24,
+  "tint": "#4A4A4E",
+  "water_tint": "#C8622A"
+}

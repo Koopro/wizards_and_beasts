@@ -1,0 +1,19 @@
+{
+  "ingredients": [
+    {
+      "item": "minecraft:fern",
+      "count": 2
+    },
+    {
+      "item": "minecraft:spider_eye",
+      "count": 1
+    },
+    {
+      "item": "minecraft:nether_wart",
+      "count": 1
+    }
+  ],
+  "cauldronTier": "brass",
+  "heatTimeTicks": 600,
+  "outputBrewId": "wizards_and_beasts:wolfsbane_potion"
+}

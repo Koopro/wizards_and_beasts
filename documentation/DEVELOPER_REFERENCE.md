@@ -226,6 +226,14 @@ The mod uses two patterns. **Custom dynamic registries** are registered in `Wand
 | Broom definitions | expected reload path owned by `BroomDefinitionLoader` | loader is registered even though no bundled `brooms` JSON directory is present in this snapshot | addon/datapack extension point |
 | Handbook chapters | loader owned by `HandbookChapterManager` | reload listener | inspect matching resource path before authoring |
 | Wand modules | loader owned by `WandModuleLoader` | reload listener + programmatic bootstrap | inspect matching resource path before authoring |
+| Map discovery rules | `map_discovery/*.json` | `MapDiscoveryRule.CODEC` (sealed + dispatch) → `MapDiscoveryRuleLoader` → `MapDiscoveryRules` | `map_discovery/hogwarts.json` |
+
+The Marauder's Map is the one system that splits across both reload cycles, deliberately. *What
+exists* is a datapack question (`data/.../map_discovery/`, server); *what it looks like* is a
+resource-pack question (`assets/.../map_biome_style/` and `assets/.../map_marker_style/`, client,
+registered in `WizardsAndBeastsClient.registerMapStyleListeners`). The wire carries a biome id and a
+marker type id and never a colour, an icon or a size, so a texture pack can restyle the whole map
+without a datapack and without the server agreeing.
 
 All codecs should validate their own schema and loaders should log/reject bad definitions without leaving a partial registry. Spells are special: `clearJsonSpells()` runs before reload so a `/reload` is idempotent; Java/addon registrations are retained.
 
@@ -287,6 +295,35 @@ No shader subsystem was identified in this source snapshot. New rendering code b
 - `ModDimensions` exists as a registry location, but this snapshot does not establish a completed custom-dimension gameplay pipeline. Do not claim a new dimension without source evidence.
 
 For new worldgen, add the runtime feature/structure registration first, then the configured/placed/biome modifier JSON and datagen where applicable. Test with `runData` and an actual generated world.
+
+### The Marauder's Map
+
+Three streams reach an open map, kept separate because their shapes are opposite:
+
+| Stream | Payload | Cadence | Owner |
+|---|---|---|---|
+| Moving dots | `MapSyncS2CPayload` | every 5–12 ticks, scaled by viewer count | `MaraudersMapTracker` |
+| Charted terrain | `MapRegionS2CPayload` | ≤3 regions/tick while any are pending | `MapAtlasStreamer` |
+| Markers | `MapMarkersS2CPayload` | on change only | `MapAtlasStreamer` |
+
+Coordinate spaces, all in `MapGeometry`: **1 tile = 1 chunk = 16 blocks**, **1 region = 32×32 tiles
+= 512 blocks**. Regions are the unit of storage, of transfer and of the client cache. Everything is
+shift arithmetic — `/` and `%` round toward zero, which folds the four tiles at the origin into one
+and mirrors the negative half of the world.
+
+Storage is `SavedData` keyed by a `MapId` on the stack, not an item component: an `ItemStack`'s
+components re-send on every inventory change, so a well-explored atlas would ship whenever the
+holder picked up a cobblestone. Regions store `short` palette indices into `MapAtlas`'s biome
+palette rather than a datapack ordinal, so a pack change cannot repaint a saved world.
+
+Two invariants worth not breaking:
+
+1. **The surveyor never loads a chunk.** It reads `getChunkNow` only. A map that could force chunks
+   would chart a continent from a chair and generate terrain on the server thread to do it.
+2. **A tile is a biome and a relief band.** Caves, ore and buried bases are not expressible in that
+   format, which is a stronger anti-cheat guarantee than a filter. Structures are gated separately:
+   `MapDiscoveryRule.Reveal.AUTO` marks anything topping out at or above sea level from above and
+   requires everything else to be entered.
 
 ## 11. AI and entities
 
@@ -408,7 +445,17 @@ The following high-leverage classes are the primary map for contributors (full n
 | `at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper` | Currency conversion | Economy |
 | `at.koopro.wizardsandbeasts.floo.FlooNetworkManager` | Floo destinations | Travel |
 | `at.koopro.wizardsandbeasts.apparition.ApparitionServerLogic` | Authoritative Apparition mechanics | Travel |
-| `at.koopro.wizardsandbeasts.map.MaraudersMapTracker` | Map tracking/sync | Map |
+| `at.koopro.wizardsandbeasts.map.MapGeometry` | Block/tile/region coordinate math (pure, tested) | Map |
+| `at.koopro.wizardsandbeasts.map.MapAtlas` | One map's charted world: biome palette, regions, markers | Map |
+| `at.koopro.wizardsandbeasts.map.MapRegion` | 32x32-tile square + its run-length codec | Map |
+| `at.koopro.wizardsandbeasts.map.MaraudersMapAtlasStore` | `SavedData` holding every atlas, keyed by `MapId` | Map |
+| `at.koopro.wizardsandbeasts.map.MapSurveyor` | Chunk survey + structure/landmark discovery | Map |
+| `at.koopro.wizardsandbeasts.map.MapSessions` | Open-map lifecycle (one owner for three streams) | Map |
+| `at.koopro.wizardsandbeasts.map.MapAtlasStreamer` | Ships regions/markers to open maps | Map |
+| `at.koopro.wizardsandbeasts.map.MapMarkerService` | The one authorization gate for waypoint edits | Map |
+| `at.koopro.wizardsandbeasts.map.MaraudersMapTracker` | Live entity sweep (the moving dots) | Map |
+| `at.koopro.wizardsandbeasts.client.map.MapView` | World/screen transform, zoom, LOD (pure, tested) | Map |
+| `at.koopro.wizardsandbeasts.client.map.MapTerrainRenderer` | Draws charted tiles from the greyscale sheet | Map |
 | `at.koopro.wizardsandbeasts.trunk.template.PocketTemplateLoader` | Pocket template reload | Storage |
 | `at.koopro.wizardsandbeasts.trunk.TrunkBlockEntity` | Trunk/pocket state | Storage |
 | `at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlockEntity` | Floo block state | Travel |
@@ -486,6 +533,8 @@ Wands, spellcasting, skills, heritage/profession selection, forms, brooms, vault
 
 ## 18. Known issues and technical constraints
 
+> Player-facing limitations live in [`KNOWN_ISSUES.md`](KNOWN_ISSUES.md), derived from `ModuleDefaults`. This section is the *engineering* list: constraints a contributor has to work around, not things a player will notice.
+
 - Rapid channel release can desynchronise in multiplayer edge cases.
 - `runServer` can fail in some local environments during NeoForge bootstrap; this is not the same as a confirmed code failure, but must be reproduced/resolved before release confidence.
 - Balance values are intentionally provisional.
@@ -518,6 +567,8 @@ For a contributor, the governing pattern is: **put code in the owning feature pa
 Before implementing a feature, inspect its nearest existing analogue, update its data/assets/tests/sync path as a single change, run `test` and `runData`, then use `runGameTestServer` or a real multiplayer smoke test where the feature crosses the client/server boundary.
 
 ## 21. Alpha Release Gates & Smoke Checks
+
+> The by-hand scenario list moved to [`ALPHA_SMOKE.md`](ALPHA_SMOKE.md), which states what each step should show and what the automated gate covers instead. This section keeps the gate order and the release policy.
 
 > Merged from `ALPHA_STATUS.md` (2026-07-18). Detailed bug tracking with file:line references lives in `FULL_AUDIT_REPORT.md` (stable `AUD-*` IDs) and `ALPHA_IMPROVEMENT_AUDIT.md` (broader design/gameplay findings). Open audit-tracked items include: Dark Arts gating gap on Avada/learning (`AUD-F-001/002`), Protego recast self-shatter (`AUD-E-001`), wand-tip cache (`AUD-C-001/002`).
 
@@ -625,3 +676,193 @@ rotations are the raw JSON values.
 **`CubeDeformation` is not in the cube bounds.** `ModelPart.Cube.minX/maxX` are the un-grown bounds;
 the deformation is applied to vertex positions only. An overlay child's bounds therefore equal its
 base part's, with inflate carried separately — same as the geo file states it.
+
+## Spell power: how a cast's damage and cooldown are composed (2026-08-20)
+
+One owner: [`spell/cast/SpellPower.java`](../src/main/java/at/koopro/wizardsandbeasts/spell/cast/SpellPower.java),
+pure and unit-tested by `SpellPowerTest`. `ModifierStack.finalDamage()` / `finalCooldown()` are the
+only call sites that compose; nothing else multiplies channels together by hand.
+
+### The formula
+
+```
+damage   = baseDamage   × softCap( situational × proficiency × skill )
+cooldown = baseCooldown × clamp  ( situational × proficiency × skill )
+```
+
+Three named channels:
+
+| Channel | Owner | Contents |
+|---|---|---|
+| `situational` | `ModifierStack.multiplyDamage/multiplyCooldown` | wand stats and corruption, allegiance, dark corruption, vocation, Niffler happiness, player stats |
+| `proficiency` | `ProficiencyScaler` via `ModifierStack.setProficiency` | how well this caster knows this spell. Gated on `Module.PROFICIENCY`; `1.0` when off |
+| `skill` | `SkillSystemAPI.applySkillModifiers` | skill-web category multiplier **×** the node's per-spell bonus |
+
+`setProficiency` and `setSkill` **assign**; only `situational` accumulates. That is what makes a
+double application impossible to express rather than merely unlikely.
+
+### The soft cap
+
+```
+softCap(x) = x                                             if x ≤ knee
+           = max − (max − knee) · exp( −(x − knee) / (max − knee) )   otherwise
+```
+
+Continuous at the knee with slope 1, monotonic, asymptotic to `max`. Below the knee a multiplier is
+worth exactly what it says; above it each further point buys less. Chosen over a hard clamp because
+a clamp makes every source past the ceiling worth literally nothing, which reads to a player as a
+bug. In float the exponential underflows somewhere past `raw ≈ 100` and the value saturates exactly
+on `max` — allowed, and asserted as `≤ max` rather than `< max`.
+
+Cooldown is clamped, not soft-capped: its hazard is the floor (a spell with no cooldown at all), and
+a floor is a floor.
+
+### Bounds
+
+Config keys, pushed into `SpellPower.applyBounds` on config load — the class never reads `Config`,
+so a unit test that only wants arithmetic does not drag the `ModConfigSpec` build into its JVM
+(doing so killed the test JVM with an initializer error before the dependency was inverted).
+
+| Key | Default | Meaning |
+|---|---|---|
+| `spellPowerSoftCapKnee` | 1.5 | where compression starts |
+| `spellPowerMaxMultiplier` | 3.0 | asymptotic damage ceiling |
+| `spellPowerMinMultiplier` | 0.25 | hard damage floor |
+| `spellCooldownMinMultiplier` | 0.25 | anti-spam cooldown floor |
+| `spellCooldownMaxMultiplier` | 2.0 | cooldown ceiling |
+| `showSpellPowerInTooltip` | true | spell detail panel shows the effective multiplier |
+
+### What this replaced
+
+- **Proficiency was applied twice.** `SkillSystemAPI.applyDamageModifiers` multiplied in the
+  `Proficiency` enum tier (1.0 / 1.10 / 1.20, from `successfulHits`) while the cast site multiplied
+  in `ProficiencyScaler`'s float curve (0.65 – 1.50, from `spellProficiencies`). Both counters are
+  incremented by the same call, `SpellProficiencyTracker.recordSuccessfulHit`. The enum channel also
+  ignored `Module.PROFICIENCY`, so disabling the module still granted 1.2× at mastery.
+- **The clamp guarded the wrong quantity.** `ModifierStack` clamped its accumulator to [0.25, 3.0]
+  and the caller then multiplied by up to 1.5 → an effective 4.5×.
+- **Projectiles ignored the pipeline entirely.** `SpellProjectileEntity` called
+  `Spell.getDamageForCaster` on impact, which knows only proficiency, the skill web and the wand, so
+  every projectile spell silently discarded wand corruption, allegiance, dark corruption, vocation,
+  Niffler happiness and player stats. The composed multiplier is now handed to the projectile at
+  spawn and saved with it.
+- **17 skill nodes did nothing.** Every `<spell>_unlock` node declares a `spell_damage_bonus` or
+  `spell_cooldown_reduction`; `SkillEffectCache` computed them and the accessors had no callers,
+  because cast time read `PlayerSkillBonusData`, which carries per-*category* maps only.
+
+### Tooltip parity
+
+`client/spell/ui/SpellPowerTooltip` calls the same `SpellPower.damage` with the same synced inputs,
+so the number in the spell detail panel is the number the server casts with. It reports only the
+proficiency and skill channels and says so on its last line: the situational channel is resolved
+server-side at cast time and the client cannot know it. The per-spell half of the skill web is also
+absent from the client (only category maps are synced), so the panel under-reports rather than
+over-reports.
+
+## Magical standing (2026-08-25)
+
+Three bipolar axes describing where a wizard sits in magical society. The rule that keeps it from
+being four disconnected bars: **an axis is stored only if nothing already stores it.**
+
+| Axis | Poles | Source |
+|---|---|---|
+| `TRADITION` | Reformist ↔ Traditionalist | stored on `MAGICAL_STANDING` |
+| `ALIGNMENT` | Dark ↔ Light | `light` (stored) − `DARK_CORRUPTION` (pre-existing attachment) |
+| `MINISTRY` | Wanted ↔ Trusted | rank credit − notoriety, both from `PlayerMinistryRecord` |
+
+So the new attachment holds exactly two floats. The corruption meter keeps all four of its existing
+writers and simply becomes the dark pole; Ministry standing is a view over the criminal record, which
+means a pardon or a fine paid moves it with no standing code running at all.
+
+- `StandingBands` — pure arithmetic (clamp, band, compose). Never reads `Config`; thresholds are
+  parameters. Percent thresholds are computed in **double**: in float, `100f * (60 / 100.0f)` is
+  `60.000004`, and a wizard sitting exactly on the documented 60% threshold banded one step low.
+- `StandingService` — the one mutation seam. Refuses writes to a derived axis rather than silently
+  routing them, because both derived axes have their own owner (`DarkCorruptionService`, `TraceService`).
+- `StandingBand` — five steps. Everything downstream reacts to a *band*, never a raw float, so a
+  fractional drift cannot spam a toast or flicker a lock.
+
+### Datapack
+
+`data/<ns>/magical_deeds/<id>.json` — an event → standing rule. Triggers are a closed set of seams
+that already existed: `spell_cast`, `offence`, `bestiary_tier`.
+
+```json
+{ "trigger": "spell_cast", "match": "expecto_patronum",
+  "effects": { "alignment": 3.0 }, "cooldownSeconds": 300 }
+```
+
+Refused at load, not at fire time: an empty `effects`, a zero/NaN delta, a write to `ministry`, a
+negative `alignment` delta (that is corruption and belongs to `DarkCorruptionService` so vocation
+scaling still applies), a `minTier` on a non-bestiary trigger.
+
+`data/<ns>/standing_gates/<id>.json` — closes a tree or a node against a band window. **The mod ships
+none.** The mechanism is live and tested; authoring one changes what existing players can reach, which
+is a content decision. Read from `SkillSystemAPI.evaluateUnlock`, reason code `standing_unmet`.
+
+```json
+{ "tree": "dark_arts", "requirements": [ { "axis": "alignment", "maxBand": "neutral" } ] }
+```
+
+
+## Bestiary tier-gated harvest (2026-08-26)
+
+Discovery tiers used to be read by two things — `KnowledgeFormula` (a stat) and `OWLGradeCalculator`
+(an exam grade). Mastering a creature bought a number. A tier now decides whether the rarest part of a
+beast comes off it.
+
+### Why a side table, not a field on `BestiaryEntry`
+
+`BestiaryEntry` has **exactly sixteen** codec fields, which is `RecordCodecBuilder.group`'s ceiling. A
+seventeenth does not compile. A creature also yields several materials at different tiers, so the
+natural shape is a keyed list rather than a field anyway.
+
+### Declaring an advanced harvest
+
+`data/<ns>/bestiary/harvest/<id>.json`:
+
+```json
+{
+  "entry": "wizards_and_beasts:erumpent",
+  "item": "wizards_and_beasts:erumpent_horn",
+  "minTier": "MASTERED",
+  "chance": 0.5,
+  "minCount": 1,
+  "maxCount": 1,
+  "cooldownSeconds": 600
+}
+```
+
+`entry` names the **bestiary entry**, not the entity type — the tier is held per entry, and the entry
+is what a player studies. `HarvestTable` resolves entry → `entityType` at index time and warns about
+(then drops) a rule whose entry does not exist or has no `entityType`.
+
+Refused at load: `minTier: UNDISCOVERED` (gates nothing — that belongs in the creature's loot table),
+`chance: 0` (can never drop), a chance outside 0–1, an unknown item, an unknown tier.
+
+### How it applies
+
+`BestiaryHarvestLootModifier` is a global loot modifier that **only ever appends**. It never inspects,
+filters or removes what the loot table already rolled, so base drops are unchanged by construction
+rather than by care. Order of checks: tier → cooldown → chance roll, in that order, so a farm cannot
+burn rolls against a lockout it cannot pass.
+
+Two gates that are easy to get wrong:
+
+- It is listed **before** `module_gated` in `global_loot_modifiers.json`. That modifier strips stacks
+  whose module is off and can only strip what already exists — running after it would smuggle a
+  MAGIZOOLOGY item onto a server with the module disabled.
+- It requires `Module.BESTIARY` **and** `Module.MAGIZOOLOGY`. With BESTIARY off nothing can advance a
+  tier, so a tier gate would make these materials permanently unobtainable rather than merely rare.
+
+No killer means no harvest: a beast that burned to death or was killed by another mob was studied by
+nobody, which is also what stops a mob-crusher farm producing rare materials with no player involved.
+
+### Anti-farm lockout
+
+`cooldownSeconds` is per player **and** per bestiary entry, stored as `lastHarvests` on the existing
+`BESTIARY_DATA` attachment — persisted, not in memory, because a lockout you can clear by relogging is
+not a lockout. It tolerates game time running backwards (a dimension change does exactly that), which a
+naive `now - last >= cooldown` would turn into a permanent ban. A failed chance roll does not start it.
+
+Lockouts are never synced to clients: nothing on a client decides loot.

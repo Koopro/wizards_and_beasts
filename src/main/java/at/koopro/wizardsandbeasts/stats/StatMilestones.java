@@ -1,15 +1,14 @@
 package at.koopro.wizardsandbeasts.stats;
 
+import at.koopro.wizardsandbeasts.feedback.NoticeKind;
+import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.skill.data.PlayerSkillData;
-import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import com.mojang.logging.LogUtils;
 import org.slf4j.Logger;
-import at.koopro.wizardsandbeasts.feedback.NoticeKind;
-import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 
 public final class StatMilestones {
 
@@ -45,13 +44,28 @@ public final class StatMilestones {
 
         LOGGER.debug("[WizardsAndBeasts] Milestone {} for {} → +{} {}",
                 type, player.getName().getString(), amount, stat.getId());
-        PlayerStatsAPI.grantMilestoneBump(player, stat, amount);
 
-        if (player instanceof ServerPlayer serverPlayer) {
-            PlayerFeedback.toast(serverPlayer, NoticeKind.UNLOCK,
-                    Component.translatable("message.wizards_and_beasts.milestone.title"),
-                    Component.translatable("message.wizards_and_beasts.milestone." + type.name().toLowerCase(),
-                            Component.translatable("stat.wizards_and_beasts." + stat.getId()), amount));
+        // The reason travels with the grant rather than as a toast of its own. Both used to fire, so
+        // a near-death survival raised one panel saying the milestone happened and — once POWER
+        // learned to announce itself — a second saying the number changed, for one event.
+        int before = PlayerStatsAPI.getStat(player, stat);
+        PlayerStatsAPI.grantMilestoneBump(player, stat, amount, sourceKey(type));
+        int after = PlayerStatsAPI.getStat(player, stat);
+
+        // A milestone is one-shot whether or not the stat could take the points, and a player whose
+        // Power is already on its heritage band would otherwise have earned it, spent it and been
+        // told nothing at all — the level-up channel only speaks when a number actually moves. Say
+        // that the milestone happened and why it bought nothing.
+        if (after <= before && player instanceof ServerPlayer serverPlayer) {
+            PlayerFeedback.toast(serverPlayer, NoticeKind.DISCOVERY,
+                    Component.translatable(sourceKey(type)),
+                    Component.translatable("message.wizards_and_beasts.milestone.no_room",
+                            stat.displayName()));
         }
+    }
+
+    /** Lang key describing the milestone, shown as the body of the level-up notice. */
+    static String sourceKey(MilestoneType type) {
+        return "stat.wizards_and_beasts.milestone." + type.name().toLowerCase(java.util.Locale.ROOT);
     }
 }

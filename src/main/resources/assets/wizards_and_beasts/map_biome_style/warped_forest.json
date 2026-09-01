@@ -1,0 +1,8 @@
+{
+  "biomes": [
+    "minecraft:warped_forest"
+  ],
+  "tile": 22,
+  "tint": "#2F7A74",
+  "water_tint": "#C8622A"
+}

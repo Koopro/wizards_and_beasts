@@ -25,21 +25,24 @@ import java.util.Optional;
  * carry an accent plate.
  */
 public enum BroomSlot implements StringRepresentable {
-    /** Handle profile, taper and length silhouette. */
-    SHAFT("shaft_", "shaft", true, "plain", List.of("plain", "swept", "racing")),
+    /** Handle profile, thickness and taper. */
+    SHAFT("shaft_", "shaft", true, "plain", List.of("plain", "oak", "swept", "racing", "heavy_oak")),
     /** Butt-end finial or cap. */
     TAIL_CAP("tail_cap_", "tail_cap", false, "plain", List.of("plain", "finial")),
     /** Cord or metal band at the bristle join. */
-    BINDING("binding_", "binding", false, "cord", List.of("cord", "brass_band")),
+    BINDING("binding_", "binding", false, "cord",
+            List.of("cord", "brass_band", "collar_ring", "iron_rings")),
     /** Twig bundle silhouette. */
-    BRISTLES("bristles_", "bristles", true, "ragged", List.of("ragged", "teardrop", "blade", "streamlined")),
+    BRISTLES("bristles_", "bristles", true, "ragged",
+            List.of("ragged", "teardrop", "blade", "streamlined", "swept", "heavy")),
     /**
      * The hanging leather strap and toggle bead every prop carries, not a tier-gated
      * platform. Default-present: the reference shows it on training brooms too.
      */
-    FOOTSTRAP("footstrap_", "footstrap", false, "leather", List.of("leather")),
-    /** Nameplate, lettering, registration mark. */
-    ACCENT("accent_", "accent", false, "none", List.of("none", "nameplate"));
+    FOOTSTRAP("footstrap_", "footstrap", false, "leather", List.of("leather", "iron_peg")),
+    /** Nameplate, maker stamp, runic collar. */
+    ACCENT("accent_", "accent", false, "none",
+            List.of("none", "nameplate", "maker_mark", "runic_band"));
 
     public static final Codec<BroomSlot> CODEC = StringRepresentable.fromEnum(BroomSlot::values);
 

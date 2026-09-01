@@ -1,0 +1,13 @@
+{
+  "displayName": "brew.wizards_and_beasts.silver_solution.name",
+  "color": -4144960,
+  "flavorText": "Ground silver held in suspension. Useful, but coarse.",
+  "silverVariant": "wizards_and_beasts:pure_silver_solution",
+  "effects": [
+    {
+      "id": "minecraft:glowing",
+      "duration": 400,
+      "amplifier": 0
+    }
+  ]
+}

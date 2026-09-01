@@ -16,6 +16,26 @@ historical log of individual work passes — those are records of what was done,
 
 ## Open findings (verified 2026-07-19)
 
+- [MEDIUM] **Three Character Sheet translation keys are referenced and do not exist (2026-08-25).**
+  `CharacterSheetScreen` calls `Component.translatable` for
+  `gui.wizards_and_beasts.character_sheet.effects`, `.effects.none` and `.effects.more`; none is in
+  `en_us.json`, generated or hand-authored, so the effects column draws raw keys. `LangParityTest` does
+  not catch them: its `LITERAL_KEY` regex matches a single line, and all three calls wrap the key onto a
+  second line. **Not fixed:** they belong to uncommitted work by another pass on the same file, and the
+  English copy is that pass's to write. Two things to do when it is picked up — add the keys, and widen
+  the parity regex (or pre-join continuation lines) so the whole class of wrapped call is caught rather
+  than just these three.
+
+- [x] **Notoriety was a closed loop — FIXED 2026-08-25.** `TraceService` filed offences and
+  `MinistryEvents` decayed them, and nothing read the result: between them
+  `WantedLevel.dispatchesAurors()` and `aurorsPerDispatch()` had one caller, an announcement string.
+  The paperwork offences (`UNLICENSED_APPARITION`, `UNREGISTERED_ANIMAGUS`) that the enum documents as
+  "a fine, not Azkaban" had no penalty at all, and the record was never synced to any client. The money
+  half now exists: a per-offence tariff, collection against the Gringotts vault, an unpaid fine that
+  freezes notoriety decay and heats instead (capped at the `WANTED` band), a record sync, and a Record
+  tab on the Character Sheet. Aurors and sentences — the *time* half — remain unbuilt and are Ministry
+  plan Phase 2b. See WORKLOG 2026-08-25.
+
 - [x] **The Marauder's Map was an entity radar, not a map — FIXED 2026-08-21.** The item drew coloured
   squares on `demo_background.png`: no terrain, no biome, no exploration, no waypoints, no zoom, no
   pan, no persistence. Worse, it bound to the holder's position on first use and never moved again,
@@ -1840,6 +1860,25 @@ fixed, except where noted.
   a slow drift upward rather than a kick. Left alone: giving the boost arm its own rate is a new
   tuning value and a balance decision, not a typo fix.
 
+## Broom per-broom pass (2026-08-27)
+
+- [x] **BLOCKER (fixed) — no broom authored `wood_tint`, so every handle rendered grey.** The
+  greyscale paint pass, the codec and the renderer multiply had all shipped; the value never had.
+  Seven brooms now paint their own final-colour sheet via the new `entity_texture` field and the
+  generic broom carries a tint, which keeps the no-art path exercised.
+
+- [x] **BLOCKER (fixed) — the rider flew alongside the broom, not on it.**
+  `getPassengerAttachmentPoint` returned `dimensions.height() * 0.55`, putting the hip 0.83 blocks
+  above a handle the rig draws at 0.25. `BroomEntity.SEAT_OFFSET_Y` is derived from the rig and the
+  humanoid hip pivot now, and `BroomItem` lifts a broom by the same amount on mount.
+
+- [x] **POLISH (fixed) — `shaft_plain` and `shaft_swept` were the same shaft.** Byte-identical cubes,
+  5 deg apart. Every shaft variant now differs in cube width; `oakshaft_79` has a `heavy_oak` shaft
+  instead of the school broom's.
+
+- [x] **POLISH (fixed) — item icons disagreed with the world.** The Comet was the darkest broom icon
+  and is the palest broom. Icon hues now track each broom's shaft colour in hue and lightness order.
+
 ## Broom Rev 2 — found, not fixed (2026-08-12)
 
 - [x] **BLOCKER (fixed) — the renderer never resolved `model_slots`.** Rev 1 shipped the data layer
@@ -1854,8 +1893,16 @@ fixed, except where noted.
   Visible whenever a broom carries a strong `wood_tint` — the band goes the colour of the wood
   instead of staying metal.
 
+  **Narrowed 2026-08-27.** Seven of the eight shipped brooms now paint their own sheet in final
+  colour and are never tinted, so this is down to the generic `broom` and to datapack brooms that
+  take the no-art path. The second render layer is still what a real fix needs.
+
 - [ ] **POLISH — the broom texture reads as noise, not wood grain.** Known and deferred by §6.
   Deliberately untouched in this pass; the order is silhouette, then tint, then grain.
+
+  **Still open 2026-08-27**, and now the top remaining broom art item: the per-broom pass supplied
+  the colour step, so grain is the only one of the three left. The mottle is per-scheme now, which
+  means real grain can be authored per broom rather than once for all of them.
 
 - [ ] **POLISH — `tail_cap` cannot follow the shaft sweep.** `tail_cap_*` is parented to
   `broom_body`, but the grip end is swept upward by the shaft chain, so a cap sits at the unswept
@@ -2093,3 +2140,39 @@ spells and gated them, and everything below was found on the way and deliberatel
 **No corpus entry was flagged as canonically wrong.** Every entry was authored as written per the
 lore rule; nothing in the 159 read as a canon error worth Christian's attention, so this list has no
 canon section rather than a padded one.
+
+---
+
+## Skill web improvement pass — 2026-08-22
+
+Found during the pass, **not fixed**. See `documentation/SKILL_WEB.md` for the design sheet.
+
+- [ ] **POLISH — `passive_attribute` is a monoculture.** 55 of 199 shipped effects are
+  `max_health` (32), `armor` (20) and `movement_speed` (3). All three are wired and a test pins the
+  set, so these are not dead nodes — they are flavourless ones. Thirty-two nodes granting flat
+  health is the "+1% damage" filler pattern in a mod about wands. Converting them needs stats that
+  do not exist yet (potion yield, wand integrity, floo stability, broom handling), and
+  `GameplayStat` may only grow where a reader lands with it, so this is blocked on that wiring
+  rather than on authoring.
+
+- [ ] **POLISH — `grant_ability` and `ability_refinement` cannot describe themselves.** Both reach
+  a real system (`SkillNodeAbilityGrantSource`, `AbilityModifiers`) but neither has a line in
+  `SkillEffectSummary.describe`, so a node using one would allocate with a blank tooltip.
+  `isImplemented` therefore still reports them unimplemented, which is correct for its actual
+  contract ("safe to ship in a datapack") and misleading for its name. Zero nodes use either.
+  Give them summary lines, then flip the flag.
+
+- [ ] **NICE-TO-HAVE — `AbilityKey` is a free-form normalised string, not a registry.** It wraps
+  any lowercase text, so `grant_ability` and the legacy `unlock_ability` share one unvalidated key
+  space. A typo in either produces a key nothing reads, and nothing fails at load. The 17 shipped
+  flags were checked by hand this pass and all have readers; there is no test holding that true.
+
+- [ ] **NICE-TO-HAVE — `wingardium_unlock` is named for a spell id that does not exist.** The node
+  id abbreviates `wingardium_leviosa`. Its effects target the real id and always did, so nothing is
+  broken — but the mismatch cost this pass a false-positive "dead reference" finding, and will
+  again. Rename the node or leave a comment.
+
+- [ ] **NICE-TO-HAVE — Dark Arts `*_unlock` nodes stay silent.** `avada_kedavra_unlock`,
+  `crucio_unlock` and `imperio_unlock` were left without `learn_spell` while the other 13 gained it.
+  Teaching Unforgivables from a skill node is a gameplay expansion of a module that ships disabled,
+  not a wiring fix. Revisit when Dark Arts is designed, not before.

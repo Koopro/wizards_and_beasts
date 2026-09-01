@@ -1,0 +1,6 @@
+{
+  "type": "structure",
+  "structure": "minecraft:mansion",
+  "marker": "wizards_and_beasts:structure",
+  "label": "map.wizards_and_beasts.landmark.mansion"
+}

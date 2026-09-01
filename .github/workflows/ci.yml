@@ -39,7 +39,7 @@ jobs:
         if: failure()
         run: |
           echo "Pre-beta RC gate failed."
-          echo "Update KNOWN_ISSUES.md with reproducible failure details before retagging."
+          echo "Update documentation/KNOWN_ISSUES.md with reproducible failure details before retagging."
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

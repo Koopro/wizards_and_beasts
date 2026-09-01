@@ -11,10 +11,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -122,10 +124,17 @@ class SkillNodeJsonTest {
 
     @Test
     void nodeCountsMatchGeneratedLayout() {
-        assertEquals(163, BY_ID.size(),
-                "60 legacy notables + wizard_core + 100 fillers + 10 goblin/elf + 2 Apparition forks");
+        assertEquals(168, BY_ID.size(),
+                "60 legacy notables + wizard_core + 100 fillers + 10 goblin/elf + 2 Apparition forks"
+                        + " + 5 keystones");
         long fillers = BY_ID.values().stream().filter(s -> s.getSize() == Skill.Size.SMALL).count();
         assertEquals(100, fillers, "expected exactly 100 filler nodes");
+        // One keystone per wizard tree except dark_arts, which is not expanded while its module
+        // ships disabled. Pinned because a keystone is the payoff a whole branch routes toward:
+        // silently dropping one would leave a tree with nothing at the end of it.
+        long keystones = BY_ID.values().stream().filter(s -> s.getSize() == Skill.Size.KEYSTONE).count();
+        assertEquals(5, keystones, "expected one keystone each in spell_mastery, wandlore,"
+                + " magizoology, herbology and alchemy");
     }
 
     @Test
@@ -266,5 +275,109 @@ class SkillNodeJsonTest {
         assertEquals(original.getSize(), reparsed.getSize());
         assertEquals(original.isRoot(), reparsed.isRoot());
         assertEquals(List.of(), reparsed.getExplicitNodeEffects());
+    }
+
+    // -- effects reach a real system, and the tooltip can name them ------------------------------
+
+    /**
+     * Every effect a shipped node declares must be one that some system actually consumes.
+     *
+     * <p>This is the test that would have caught the seventeen {@code <spell>_unlock} nodes. Each
+     * declared a {@code spell_damage_bonus} or {@code spell_cooldown_reduction};
+     * {@code SkillEffectCache} computed both correctly, and the only methods that exposed them had
+     * no callers, because cast time read {@code PlayerSkillBonusData} — which carries per-category
+     * maps and nothing else. The nodes cost points and did nothing, and nothing in the build said so.
+     *
+     * <p>Asks {@link SkillEffectSummary#isImplemented} rather than keeping a list here, so the
+     * allowlist cannot drift away from the class that decides whether a tooltip line is printable.
+     */
+    @Test
+    void everyShippedEffectTypeReachesARealSystem() {
+        List<String> problems = new ArrayList<>();
+        for (Skill skill : BY_ID.values()) {
+            for (SkillEffect effect : skill.getEffects()) {
+                if (!SkillEffectSummary.isImplemented(effect.type())) {
+                    problems.add(skill.getId() + " declares '" + effect.type().getSerializedName()
+                            + "', which no system consumes — the node would cost points and do nothing");
+                }
+            }
+        }
+        assertTrue(problems.isEmpty(), String.join("\n", problems));
+    }
+
+    /**
+     * Only three attribute ids are wired ({@code Skill#deriveNodeEffects}); any other silently
+     * applies nothing, and the tooltip deliberately prints no line for it. Either way the node is
+     * inert, so it must not ship.
+     */
+    @Test
+    void everyPassiveAttributeNamesAWiredAttribute() {
+        Set<String> wired = Set.of("max_health", "movement_speed", "armor");
+        List<String> problems = new ArrayList<>();
+        for (Skill skill : BY_ID.values()) {
+            for (SkillEffect effect : skill.getEffects()) {
+                if (effect instanceof SkillEffect.PassiveAttribute passive
+                        && !wired.contains(passive.attributeId())) {
+                    problems.add(skill.getId() + ": attributeId '" + passive.attributeId()
+                            + "' is not one of " + wired);
+                }
+            }
+        }
+        assertTrue(problems.isEmpty(), String.join("\n", problems));
+    }
+
+    /**
+     * Every lang key the effect summary will ask for has to exist, or the tooltip renders a raw key
+     * where the reason to buy the node should be.
+     *
+     * <p>Keys are derived here the same way {@link SkillEffectSummary} derives them. That is a
+     * deliberate duplication of two short string concatenations: the alternative is rendering
+     * {@code Component}s in a test and reading them back, which proves less and needs a live
+     * language table.
+     */
+    @Test
+    void everyEffectLineResolvesInEnUs() throws IOException {
+        JsonObject lang = JsonParser.parseString(Files.readString(LANG_FILE)).getAsJsonObject();
+        Set<String> required = new HashSet<>();
+        for (Skill skill : BY_ID.values()) {
+            for (SkillEffect effect : skill.getEffects()) {
+                switch (effect) {
+                    case SkillEffect.SpellDamageBonus e -> {
+                        required.add("skill.wizards_and_beasts.effect.spell_damage");
+                        required.add("spell.wizards_and_beasts." + e.spellId() + ".name");
+                    }
+                    case SkillEffect.SpellCooldownReduction e -> {
+                        required.add("skill.wizards_and_beasts.effect.spell_cooldown");
+                        required.add("spell.wizards_and_beasts." + e.spellId() + ".name");
+                    }
+                    case SkillEffect.CategoryDamageBonus e -> {
+                        required.add("skill.wizards_and_beasts.effect.category_damage");
+                        required.add(categoryKey(e.category().name()));
+                    }
+                    case SkillEffect.CategoryCooldownReduction e -> {
+                        required.add("skill.wizards_and_beasts.effect.category_cooldown");
+                        required.add(categoryKey(e.category().name()));
+                    }
+                    case SkillEffect.PassiveAttribute e ->
+                            required.add("skill.wizards_and_beasts.effect.attribute." + e.attributeId());
+                    case SkillEffect.GameplayBonus e -> {
+                        required.add("skill.wizards_and_beasts.effect.gameplay_bonus");
+                        required.add("skill.wizards_and_beasts.stat."
+                                + e.stat().name().toLowerCase(Locale.ROOT));
+                    }
+                    case SkillEffect.UnlockAbility e -> {
+                        required.add("skill.wizards_and_beasts.effect.unlock_ability");
+                        required.add("skill.wizards_and_beasts.ability." + e.abilityId());
+                    }
+                    default -> { }
+                }
+            }
+        }
+        List<String> missing = required.stream().filter(key -> !lang.has(key)).sorted().toList();
+        assertTrue(missing.isEmpty(), "unresolved effect-summary lang keys: " + missing);
+    }
+
+    private static String categoryKey(String category) {
+        return "spell.wizards_and_beasts.category." + category.toLowerCase(Locale.ROOT);
     }
 }

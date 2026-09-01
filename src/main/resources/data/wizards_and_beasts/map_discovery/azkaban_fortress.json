@@ -1,0 +1,6 @@
+{
+  "type": "structure",
+  "structure": "wizards_and_beasts:azkaban_fortress",
+  "marker": "wizards_and_beasts:azkaban",
+  "label": "map.wizards_and_beasts.landmark.azkaban"
+}

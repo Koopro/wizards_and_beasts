@@ -1,0 +1,8 @@
+{
+  "icon": 17,
+  "tint": "#3E6B4A",
+  "size": 16,
+  "name": "map.wizards_and_beasts.marker.floo_hearth",
+  "legend": "magical",
+  "min_zoom": 0.9
+}

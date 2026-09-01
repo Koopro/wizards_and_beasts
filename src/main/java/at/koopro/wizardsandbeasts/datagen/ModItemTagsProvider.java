@@ -157,7 +157,7 @@ public class ModItemTagsProvider extends BlockTagCopyingItemTagProvider {
                 TrinketItemRegistry.PORTKEY.get(), TrinketItemRegistry.DECOY_DETONATOR.get(),
                 TrinketItemRegistry.EXTENDABLE_EARS.get(), TrinketItemRegistry.PERUVIAN_DARKNESS_POWDER.get(),
                 MiscItemRegistry.MARAUDERS_MAP.get(), MiscItemRegistry.DELUMINATOR.get(),
-                MiscItemRegistry.BLINDFOLD.get(),
+                MiscItemRegistry.BLINDFOLD.get(), MiscItemRegistry.EARMUFFS.get(),
                 DarkArtefactItemRegistry.INVISIBILITY_CLOAK.get(),
                 DarkArtefactItemRegistry.DEATHLY_HALLOW_CLOAK.get());
 
@@ -167,7 +167,9 @@ public class ModItemTagsProvider extends BlockTagCopyingItemTagProvider {
                 LoreItemRegistry.RISE_AND_FALL_OF_THE_DARK_ARTS.get());
 
         add(Module.WIZARDING_FOOD,
-                ConsumableItemRegistry.BUTTERBEER.get(), ConsumableItemRegistry.PUMPKIN_JUICE.get(),
+                ConsumableItemRegistry.BUTTERBEER.get(),
+                ConsumableItemRegistry.EMPTY_BUTTERBEER_MUG.get(),
+                ConsumableItemRegistry.PUMPKIN_JUICE.get(),
                 ConsumableItemRegistry.CHOCOLATE_FROG.get(), ConsumableItemRegistry.FAMOUS_WIZARD_CARD.get(),
                 ConsumableItemRegistry.BERTIE_BOTTS_EVERY_FLAVOUR_BEANS.get(),
                 ConsumableItemRegistry.DROOBLES_BEST_BLOWING_GUM.get(), ConsumableItemRegistry.FIREWHISKY.get(),
@@ -183,7 +185,8 @@ public class ModItemTagsProvider extends BlockTagCopyingItemTagProvider {
                 ConsumableItemRegistry.YETI_FUR.get(), ConsumableItemRegistry.MATAGOT_ESSENCE.get(),
                 ConsumableItemRegistry.BEZOAR.get(), ConsumableItemRegistry.DEMIGUISE_HAIR.get(),
                 ConsumableItemRegistry.MOONCALF_DUNG.get(), ConsumableItemRegistry.ERUMPENT_HORN.get(),
-                ConsumableItemRegistry.MANDRAKE.get(), ConsumableItemRegistry.GILLYWEED.get(),
+                ConsumableItemRegistry.MANDRAKE.get(), ConsumableItemRegistry.BABY_MANDRAKE.get(),
+                ConsumableItemRegistry.GILLYWEED.get(),
                 ConsumableItemRegistry.DITTANY.get(), ConsumableItemRegistry.BREW.get(),
                 ModBlocks.MANDRAKE_SEEDS.get());
 

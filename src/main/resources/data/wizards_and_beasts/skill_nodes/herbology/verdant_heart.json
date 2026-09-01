@@ -1,0 +1,24 @@
+{
+  "id": "verdant_heart",
+  "displayName": "skill.wizards_and_beasts.node.verdant_heart.name",
+  "description": "skill.wizards_and_beasts.node.verdant_heart.desc",
+  "tree": "herbology",
+  "size": "keystone",
+  "pointCost": 6,
+  "effects": [
+    {
+      "type": "learn_spell",
+      "spellId": "episkey"
+    },
+    {
+      "type": "gameplay_bonus",
+      "stat": "harvest_bonus_chance",
+      "perLevel": 0.2
+    }
+  ],
+  "x": -18.0,
+  "y": -340.0,
+  "edges": [
+    "herbal_vitality"
+  ]
+}

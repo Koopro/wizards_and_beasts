@@ -70,8 +70,13 @@ class BrewCodecTest {
                   "outputBrewId": "wizards_and_beasts:wiggenweld_potion"
                 }
                 """);
-        assertEquals(CauldronTier.BRASS, def.cauldronTier(),
-                "cauldronTier defaults to BRASS");
+        // PEWTER, not BRASS. An omitted cauldronTier means "any cauldron will do", which is the
+        // BOTTOM of the ladder -- and the ladder was flipped when pewter was restored to being the
+        // student cauldron. Under the old order BRASS was ordinal 0 and meant the same thing; leaving
+        // the default at BRASS afterwards would silently have gated every unspecified recipe behind
+        // an upgrade.
+        assertEquals(CauldronTier.PEWTER, def.cauldronTier(),
+                "an unspecified cauldronTier means the lowest tier, which is now pewter");
         assertEquals(200, def.heatTimeTicks(), "heatTimeTicks defaults to 200");
         assertEquals(1, def.ingredients().size());
         assertEquals(1, def.ingredients().get(0).count(), "count defaults to 1");

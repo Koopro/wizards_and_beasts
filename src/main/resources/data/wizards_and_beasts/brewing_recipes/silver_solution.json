@@ -1,0 +1,19 @@
+{
+  "ingredients": [
+    {
+      "item": "minecraft:iron_ingot",
+      "count": 1
+    },
+    {
+      "item": "minecraft:amethyst_shard",
+      "count": 2
+    },
+    {
+      "item": "minecraft:glow_ink_sac",
+      "count": 1
+    }
+  ],
+  "cauldronTier": "brass",
+  "heatTimeTicks": 600,
+  "outputBrewId": "wizards_and_beasts:silver_solution"
+}

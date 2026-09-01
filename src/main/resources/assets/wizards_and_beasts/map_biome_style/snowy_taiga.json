@@ -1,0 +1,8 @@
+{
+  "biomes": [
+    "minecraft:snowy_taiga",
+    "minecraft:grove"
+  ],
+  "tile": 11,
+  "tint": "#9EB3AE"
+}

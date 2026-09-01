@@ -1,0 +1,8 @@
+{
+  "biomes": [
+    "minecraft:forest",
+    "minecraft:flower_forest"
+  ],
+  "tile": 8,
+  "tint": "#5F7A42"
+}

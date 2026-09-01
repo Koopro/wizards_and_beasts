@@ -1,0 +1,7 @@
+{
+  "type": "structure",
+  "structure": "minecraft:end_city",
+  "marker": "wizards_and_beasts:structure",
+  "label": "map.wizards_and_beasts.landmark.end_city",
+  "reveal": "surface"
+}

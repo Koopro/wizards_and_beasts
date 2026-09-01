@@ -2,6 +2,8 @@ package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.item.wand.WandItem;
+import at.koopro.wizardsandbeasts.ministry.licence.LicenseData;
+import at.koopro.wizardsandbeasts.sneakoscope.SneakoscopeFocus;
 import at.koopro.wizardsandbeasts.wand.stat.WandCore;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import net.minecraft.core.BlockPos;
@@ -106,11 +108,42 @@ public class ModDataComponents {
      * a brew bottle. Resolved at consumption time via
      * {@link at.koopro.wizardsandbeasts.brew.Brews#byId(String)}.
      */
+    /**
+     * Whose hair went into this bottle: {@code "<uuid> <name>"}.
+     *
+     * <p>A single string rather than a pair of components, because the two halves are meaningless
+     * apart — a sample with a UUID and no name cannot be rendered, and one with a name and no UUID
+     * cannot be looked up. Keeping them in one component makes a half-set sample unrepresentable.
+     *
+     * <p>Set by {@code /wandb brew polyjuice sample} until the cauldron accepts a hair item. Read by
+     * {@code BrewEffect.PolyjuiceDisguise} at the moment the bottle is drunk.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> POLYJUICE_TARGET =
+            DATA_COMPONENTS.register("polyjuice_target", () ->
+                    DataComponentType.<String>builder()
+                            .persistent(com.mojang.serialization.Codec.STRING)
+                            .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.STRING_UTF8)
+                            .build());
+
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> BREW_ID =
             DATA_COMPONENTS.register("brew_id", () ->
                     DataComponentType.<String>builder()
                             .persistent(com.mojang.serialization.Codec.STRING)
                             .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.STRING_UTF8)
+                            .build());
+
+    /**
+     * Game time at which a broom's polish wears off, absent when it is not polished.
+     *
+     * <p>An absolute tick rather than a countdown, so a broom in a chest stays honest without being
+     * ticked. {@code BroomPolishItem.inventoryTick} strips it once it has passed, which is what lets
+     * the tooltip and the entity both read "present" as "polished" without needing the clock.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Long>> POLISHED_UNTIL_TICK =
+            DATA_COMPONENTS.register("polished_until_tick", () ->
+                    DataComponentType.<Long>builder()
+                            .persistent(com.mojang.serialization.Codec.LONG)
+                            .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG)
                             .build());
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Identifier>> BROOM_DEFINITION =
@@ -325,6 +358,86 @@ public class ModDataComponents {
                     DataComponentType.<Boolean>builder()
                             .persistent(com.mojang.serialization.Codec.BOOL)
                             .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.BOOL)
+                            .build());
+
+    /**
+     * Suspicious entities the Sneakoscope saw on its last sweep.
+     *
+     * <p>Network-synchronised on purpose and load-bearing: this single int is the whole channel the
+     * Sneakoscope's client presentation runs on. The spinning model, the orbiting motes, the alarm
+     * tint and the tooltip all read it off the held stack, which means the item needs no payload of
+     * its own. Absent means zero — a resting Sneakoscope carries no component at all.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> LAST_THREAT_COUNT =
+            DATA_COMPONENTS.register("last_threat_count", () ->
+                    DataComponentType.<Integer>builder()
+                            .persistent(com.mojang.serialization.Codec.INT)
+                            .networkSynchronized(ByteBufCodecs.VAR_INT)
+                            .build());
+
+    /** Sneakoscope focused mode, plus the sector of the nearest suspect while it is on. */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<SneakoscopeFocus>> SNEAKOSCOPE_FOCUS =
+            DATA_COMPONENTS.register("sneakoscope_focus", () ->
+                    DataComponentType.<SneakoscopeFocus>builder()
+                            .persistent(SneakoscopeFocus.CODEC)
+                            .networkSynchronized(SneakoscopeFocus.STREAM_CODEC)
+                            .build());
+
+    /**
+     * The Ministry licence written on a scroll.
+     *
+     * <p>Network-synchronised, and that is what makes the licence screen, the holographic seal and the
+     * REVOKED tooltip free of any payload of their own: the scroll replicates, so the client already
+     * holds the document the server stamped.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<LicenseData>> LICENSE_DATA =
+            DATA_COMPONENTS.register("license_data", () ->
+                    DataComponentType.<LicenseData>builder()
+                            .persistent(LicenseData.CODEC)
+                            .networkSynchronized(LicenseData.STREAM_CODEC)
+                            .build());
+
+    /**
+     * A Dragot that is not worth what it says it is.
+     *
+     * <p>A flag rather than a separate item, and that choice is load-bearing twice over: a devalued
+     * coin must be <em>indistinguishable</em> from a good one until somebody looks at it, and a stack
+     * carrying the component cannot merge with one that does not — so a bad coin in a purse of good
+     * ones stays exactly one bad coin instead of quietly infecting or vanishing into the pile.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> DRAGOT_DEVALUED =
+            DATA_COMPONENTS.register("dragot_devalued", () ->
+                    DataComponentType.<Boolean>builder()
+                            .persistent(com.mojang.serialization.Codec.BOOL)
+                            .networkSynchronized(ByteBufCodecs.BOOL)
+                            .build());
+
+    /**
+     * A weapon that has had pure silver drawn over it.
+     *
+     * <p>One boolean and no level: silvering is permanent, does not stack, and does not wear off, so
+     * there is nothing to store but the fact. Network-synchronised so the client can say so on the
+     * tooltip without asking.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> SILVERED =
+            DATA_COMPONENTS.register("silvered", () ->
+                    DataComponentType.<Boolean>builder()
+                            .persistent(com.mojang.serialization.Codec.BOOL)
+                            .networkSynchronized(ByteBufCodecs.BOOL)
+                            .build());
+
+    /**
+     * Seconds of concealment an ordinary Invisibility Cloak has left.
+     *
+     * <p>Absent means a full starting charge rather than empty, so cloaks that predate the mechanic
+     * and a bare {@code /give} both produce a working cloak. Never set on the Deathly Hallow — see
+     * {@link at.koopro.wizardsandbeasts.demiguise.CloakCharges}.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> CLOAK_CHARGES =
+            DATA_COMPONENTS.register("cloak_charges", () ->
+                    DataComponentType.<Integer>builder()
+                            .persistent(com.mojang.serialization.Codec.INT)
+                            .networkSynchronized(ByteBufCodecs.VAR_INT)
                             .build());
 
     private ModDataComponents() {

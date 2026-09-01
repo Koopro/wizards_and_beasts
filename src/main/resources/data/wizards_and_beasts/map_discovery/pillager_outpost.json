@@ -1,0 +1,6 @@
+{
+  "type": "structure",
+  "structure": "minecraft:pillager_outpost",
+  "marker": "wizards_and_beasts:fortress",
+  "label": "map.wizards_and_beasts.landmark.outpost"
+}

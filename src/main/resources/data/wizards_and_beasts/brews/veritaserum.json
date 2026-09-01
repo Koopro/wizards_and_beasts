@@ -1,0 +1,20 @@
+{
+  "displayName": "brew.wizards_and_beasts.veritaserum.name",
+  "color": -2231563,
+  "flavorText": "Colourless, odourless, and three drops will force the truth from anyone.",
+  "components": [
+    {
+      "type": "apply_effects",
+      "effects": [
+        {
+          "id": "minecraft:glowing",
+          "duration": 1200
+        },
+        {
+          "id": "minecraft:weakness",
+          "duration": 600
+        }
+      ]
+    }
+  ]
+}

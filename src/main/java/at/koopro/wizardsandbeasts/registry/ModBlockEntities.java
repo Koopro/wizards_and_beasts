@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.block.ExpansionFocusBlockEntity;
+import at.koopro.wizardsandbeasts.block.brew.CauldronBlockEntity;
 import at.koopro.wizardsandbeasts.block.trunk.TentBlockEntity;
 import at.koopro.wizardsandbeasts.block.trunk.TrunkBlockEntity;
 import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlockEntity;
@@ -28,6 +29,20 @@ public final class ModBlockEntities {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FlooFireplaceBlockEntity>> FLOO_FIREPLACE =
             BLOCK_ENTITY_TYPES.register("floo_fireplace", () ->
                     new BlockEntityType<>(FlooFireplaceBlockEntity::new, Set.of(ModBlocks.FLOO_FIREPLACE.get())));
+
+    /**
+     * All three cauldron metals share one block entity type.
+     *
+     * <p>The tier lives on the block, not on the block entity, so there is nothing per-metal for the
+     * state to hold — and one type means a recipe or a tooltip can ask "is this a cauldron" without
+     * enumerating metals.
+     */
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CauldronBlockEntity>> CAULDRON =
+            BLOCK_ENTITY_TYPES.register("cauldron", () ->
+                    new BlockEntityType<>(CauldronBlockEntity::new, Set.of(
+                            ModBlocks.PEWTER_CAULDRON.get(),
+                            ModBlocks.BRASS_CAULDRON.get(),
+                            ModBlocks.WIZARDING_COPPER_CAULDRON.get())));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TrunkBlockEntity>> TRUNK =
             BLOCK_ENTITY_TYPES.register("trunk", () ->

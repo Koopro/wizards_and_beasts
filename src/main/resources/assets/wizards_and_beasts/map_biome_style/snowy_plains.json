@@ -1,0 +1,8 @@
+{
+  "biomes": [
+    "minecraft:snowy_plains",
+    "minecraft:ice_spikes"
+  ],
+  "tile": 17,
+  "tint": "#D6DCDE"
+}

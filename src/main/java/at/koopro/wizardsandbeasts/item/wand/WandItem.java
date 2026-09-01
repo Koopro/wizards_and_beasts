@@ -148,8 +148,15 @@ public class WandItem extends GeoItemBase {
         tooltipAdder.accept(Component.translatable("wandcraft.tooltip.flexibility",
                 flexibility == null ? "?" : flexibility.getSerializedName()).withStyle(ChatFormatting.GRAY));
         if (master.isPresent()) {
-            tooltipAdder.accept(Component.translatable("wandcraft.tooltip.master", master.get().toString())
+            // A raw UUID told a player nothing and looked like a bug. The identity that matters in
+            // play is "is this mine"; the UUID stays available under advanced tooltips for anyone
+            // debugging a transfer.
+            tooltipAdder.accept(Component.translatable("wandcraft.tooltip.master_other")
                     .withStyle(ChatFormatting.AQUA));
+            if (flag.isAdvanced()) {
+                tooltipAdder.accept(Component.translatable("wandcraft.tooltip.master", master.get().toString())
+                        .withStyle(ChatFormatting.DARK_GRAY));
+            }
         }
         tooltipAdder.accept(Component.translatable("wandcraft.tooltip.integrity", WandComponents.getIntegrity(stack))
                 .withStyle(ChatFormatting.GREEN));

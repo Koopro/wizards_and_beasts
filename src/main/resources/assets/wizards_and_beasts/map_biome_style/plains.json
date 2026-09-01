@@ -1,0 +1,8 @@
+{
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:sunflower_plains"
+  ],
+  "tile": 7,
+  "tint": "#8C9B5A"
+}

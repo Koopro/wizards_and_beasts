@@ -7,6 +7,7 @@ import at.koopro.wizardsandbeasts.client.entity.DragonRenderer;
 import at.koopro.wizardsandbeasts.client.entity.GoblinRenderer;
 import at.koopro.wizardsandbeasts.client.bestiary.niffler.NifflerPocketLayer;
 import at.koopro.wizardsandbeasts.client.entity.ProtegoShieldRenderer;
+import at.koopro.wizardsandbeasts.client.entity.WandmakerHatLayer;
 import at.koopro.wizardsandbeasts.client.form.FormMannequinRenderer;
 import at.koopro.wizardsandbeasts.client.spell.PatronusRenderer;
 import at.koopro.wizardsandbeasts.client.spell.SpellProjectileRenderer;
@@ -14,11 +15,16 @@ import at.koopro.wizardsandbeasts.registry.ModEntities;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
+import net.minecraft.client.renderer.entity.VillagerRenderer;
+import net.minecraft.world.entity.EntityType;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 
 public class ClientSetup {
 
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        // Vanilla's own item renderer: an escaped frog is a dropped chocolate frog that hops.
+        event.registerEntityRenderer(ModEntities.CHOCOLATE_FROG.get(),
+                net.minecraft.client.renderer.entity.ItemEntityRenderer::new);
         event.registerEntityRenderer(ModEntities.BROOM.get(), BroomRenderer::new);
         event.registerEntityRenderer(ModEntities.SPELL_PROJECTILE.get(), SpellProjectileRenderer::new);
         event.registerEntityRenderer(ModEntities.BEAM.get(), BeamEntityRenderer::new);
@@ -69,10 +75,22 @@ public class ClientSetup {
     }
 
     public static void registerLayers(EntityRenderersEvent.AddLayers event) {
+        // Ollivander is a vanilla villager wearing a mod profession, so his hat has to be hung on
+        // the renderer Minecraft already built — a profession skin can only repaint cubes the
+        // villager model already has, and none of them is a cone.
+        VillagerRenderer villagerRenderer = event.getRenderer(EntityType.VILLAGER);
+        if (villagerRenderer != null) {
+            villagerRenderer.addLayer(new WandmakerHatLayer(villagerRenderer));
+        }
+
         for (var skin : event.getSkins()) {
             AvatarRenderer<AbstractClientPlayer> renderer = event.getPlayerRenderer(skin);
             if (renderer != null) {
                 renderer.addLayer(new NifflerPocketLayer(renderer));
+                renderer.addLayer(
+                        new at.koopro.wizardsandbeasts.client.gillyweed.GillyweedTintLayer(renderer));
+                renderer.addLayer(
+                        new at.koopro.wizardsandbeasts.client.floo.FlooFlameTintLayer(renderer));
             }
         }
     }

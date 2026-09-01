@@ -78,7 +78,10 @@ final class SpellCastTargetedHandler {
             }
 
             if (damage > 0) {
-                target.hurt(level.damageSources().magic(), damage);
+                // Light spells deal light-magic damage so Shadow Form's vulnerability has
+                // something to key on. Everything else stays plain magic.
+                target.hurt(at.koopro.wizardsandbeasts.shadow.SpellDamageSources
+                        .forSpell(level, caster, spell), damage);
                 successful = true;
             }
 

@@ -93,6 +93,24 @@ public final class BroomCommands {
                 def.displayName().getString(), def.tier().name(), def.maxSpeed(), def.acceleration(),
                 def.boostMultiplier(), def.boostDurationTicks(), def.boostCooldownTicks(),
                 def.weakGravity(), def.handlingRating(), def.stabilityRating(), def.durability())), false);
+        // Second line, because the handling and presentation fields are what a datapack author is
+        // actually iterating on and they cannot see them any other way. A value that can be authored
+        // and never inspected is how wood_tint sat unset on all eight brooms for a release.
+        context.getSource().sendSuccess(() -> Component.literal(String.format(
+                "    profile=%s drift=%.3f momentum=%.2f wobble=%.2f fovPunch=%.2f crashx%.2f wear=%d/%d/%d",
+                def.handling().profile().profileId(), def.handling().yawDrift(),
+                def.handling().momentumRetention(), def.handling().wobbleAtBoost(),
+                def.handling().boostFovPunch(), def.handling().crashDamageMultiplier(),
+                def.handling().minorImpactDurabilityLoss(),
+                def.handling().moderateImpactDurabilityLoss(),
+                def.handling().severeImpactDurabilityLoss())), false);
+        context.getSource().sendSuccess(() -> Component.literal(String.format(
+                "    model=%s texture=%s anim=%s seat=%s trail=%s",
+                def.assets().model().map(Object::toString).orElse("<broom>"),
+                def.assets().texture().map(Object::toString).orElse("<broom>"),
+                def.assets().animation().map(Object::toString).orElse("<broom>"),
+                def.seat().passengerOffset(),
+                def.audio().trailParticle().map(Object::toString).orElse("<cloud>"))), false);
         return 1;
     }
 

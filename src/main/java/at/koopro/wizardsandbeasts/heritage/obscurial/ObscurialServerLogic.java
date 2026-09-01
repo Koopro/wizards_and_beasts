@@ -124,7 +124,7 @@ public final class ObscurialServerLogic {
 
         if (!ObscurialRules.isObscurial(typeData) || !ObscurialRules.isDarkForm(typeData)) {
             spellData.incrementRejectReason(SpellRejectCodes.ABILITY_NOT_IN_DARK_FORM);
-            player.displayClientMessage(Component.literal("§5Obscurial abilities require obscurus form."), true);
+            player.displayClientMessage(Component.translatable("wandcraft.ability.reject.dark_form_required"), true);
             return;
         }
 
@@ -132,14 +132,14 @@ public final class ObscurialServerLogic {
         ObscurialAbility ability = ObscurialAbility.bySpellId(safeAbility);
         if (ability == null) {
             spellData.incrementRejectReason(SpellRejectCodes.ABILITY_UNKNOWN);
-            player.displayClientMessage(Component.literal("§cUnknown Obscurial ability."), true);
+            player.displayClientMessage(Component.translatable("wandcraft.ability.reject.unknown"), true);
             return;
         }
 
         Spell spell = Spells.byId(ability.spellId());
         if (spell == null || !ObscurialRules.isObscurialAbility(spell)) {
             spellData.incrementRejectReason(SpellRejectCodes.ABILITY_SPELL_MISSING);
-            player.displayClientMessage(Component.literal("§cAbility backend is unavailable."), true);
+            player.displayClientMessage(Component.translatable("wandcraft.ability.reject.spell_missing"), true);
             return;
         }
 
@@ -147,7 +147,8 @@ public final class ObscurialServerLogic {
         if (spellData.isOnCooldown(spell.getId(), now)) {
             spellData.incrementRejectReason(SpellRejectCodes.ABILITY_COOLDOWN_ACTIVE);
             float sec = (spellData.getCooldownExpiry(spell.getId()) - now) / 20f;
-            player.displayClientMessage(Component.literal(String.format("§e%s recharging %.1fs", ability.displayName(), Math.max(0f, sec))), true);
+            player.displayClientMessage(Component.translatable("wandcraft.ability.reject.cooldown",
+                    ability.displayName(), String.format("%.1f", Math.max(0f, sec))), true);
             return;
         }
         if (Config.enforceSpellRequirements && !spell.getRequirement().isMet(player, spellData)) {
@@ -160,7 +161,7 @@ public final class ObscurialServerLogic {
             spell.execute(level, player, player.getMainHandItem());
         } catch (Exception ex) {
             spellData.incrementRejectReason(SpellRejectCodes.ABILITY_EXECUTE_FAILED);
-            player.displayClientMessage(Component.literal("§cObscurial ability failed to execute."), true);
+            player.displayClientMessage(Component.translatable("wandcraft.ability.reject.execute_failed"), true);
             return;
         }
 

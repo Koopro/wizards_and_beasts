@@ -16,7 +16,6 @@ import net.minecraft.world.phys.Vec3;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -49,35 +48,36 @@ class MigratedAbilityBehaviorSeamTest {
     // ── Apparition ──
 
     @Test
-    void apparitionForwardsTheBlockTargetToTheServerLogic() {
-        AtomicReference<BlockPos> seenBlock = new AtomicReference<>();
-        AtomicReference<Vec3> seenPos = new AtomicReference<>();
-        ApparitionAbilityBehavior behavior = new ApparitionAbilityBehavior((caster, blockPos, position) -> {
-            seenBlock.set(blockPos);
-            seenPos.set(position);
-        });
-
-        BlockPos blockPos = new BlockPos(12, 64, -7);
-        Vec3 position = new Vec3(12.5, 64.0, -6.5);
-        boolean fired = behavior.onActivate(null, def("apparition", AbilityType.ACTIVE, AbilityTargeting.BLOCK, 32.0),
-                AbilityTarget.ofBlock(blockPos, position));
-
-        assertTrue(fired);
-        assertEquals(blockPos, seenBlock.get());
-        assertEquals(position, seenPos.get());
-    }
-
-    @Test
-    void apparitionWithoutADestinationIsASoftNoOp() {
+    void apparitionBeginsAChargeAndForwardsNoDestination() {
         AtomicInteger calls = new AtomicInteger();
         ApparitionAbilityBehavior behavior =
-                new ApparitionAbilityBehavior((caster, blockPos, position) -> calls.incrementAndGet());
+                new ApparitionAbilityBehavior(caster -> calls.incrementAndGet());
+
+        boolean fired = behavior.onActivate(null, def("apparition", AbilityType.ACTIVE, AbilityTargeting.BLOCK, 32.0),
+                AbilityTarget.ofBlock(new BlockPos(12, 64, -7), new Vec3(12.5, 64.0, -6.5)));
+
+        assertTrue(fired);
+        assertEquals(1, calls.get());
+    }
+
+    /**
+     * The one seam in this file that deliberately does <b>not</b> gate on the pick.
+     *
+     * <p>Apparition resolves its own destination server-side, every tick of the charge, and the clock does
+     * not start until that resolution succeeds. So a wizard who begins while facing open sky is holding, not
+     * failing, and refusing to begin at all would have made a documented behaviour unreachable.
+     */
+    @Test
+    void apparitionBeginsEvenWithNothingInView() {
+        AtomicInteger calls = new AtomicInteger();
+        ApparitionAbilityBehavior behavior =
+                new ApparitionAbilityBehavior(caster -> calls.incrementAndGet());
 
         boolean fired = behavior.onActivate(null, def("apparition", AbilityType.ACTIVE, AbilityTargeting.BLOCK, 32.0),
                 AbilityTarget.NONE);
 
-        assertFalse(fired, "no destination must not consume a cooldown");
-        assertEquals(0, calls.get());
+        assertTrue(fired, "an unaimed start is a hold, not a refusal");
+        assertEquals(1, calls.get());
     }
 
     // ── Legilimency ──

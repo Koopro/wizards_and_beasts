@@ -61,23 +61,23 @@ public record SpellAssignC2SPayload(int slotIndex, String spellId) implements Cu
                 Spell spell = Spells.byId(safeSpellId);
                 if (spell == null) {
                     data.incrementRejectReason(SpellRejectCodes.ASSIGN_UNKNOWN_SPELL);
-                    player.displayClientMessage(Component.literal("\u00A7cUnknown spell id."), true);
+                    player.displayClientMessage(Component.translatable("wandcraft.assign.reject.unknown_spell"), true);
                     return;
                 }
                 if (!data.knowsSpell(safeSpellId)) {
                     data.incrementRejectReason(SpellRejectCodes.ASSIGN_UNLEARNED_SPELL);
-                    player.displayClientMessage(Component.literal("\u00A7cYou have not learned that spell."), true);
+                    player.displayClientMessage(Component.translatable("wandcraft.assign.reject.not_known"), true);
                     return;
                 }
                 if (ObscurialRules.isObscurialAbility(spell)) {
                     data.incrementRejectReason(SpellRejectCodes.ASSIGN_OBSCURIAL_ABILITY);
-                    player.displayClientMessage(Component.literal("\u00A75Obscurial abilities are not assignable as spells."), true);
+                    player.displayClientMessage(Component.translatable("wandcraft.assign.reject.obscurial_ability"), true);
                     return;
                 }
                 Heritage type = player.getData(ModAttachments.HERITAGE_DATA.get()).getSelectedHeritage();
                 if (!ObscurialRules.canHeritageUseSpell(type, spell)) {
                     data.incrementRejectReason(SpellRejectCodes.ASSIGN_TYPE_RESTRICTED_SPELL);
-                    player.displayClientMessage(Component.literal("\u00A75Only Obscurials can equip this spell."), true);
+                    player.displayClientMessage(Component.translatable("wandcraft.assign.reject.heritage_restricted"), true);
                     return;
                 }
                 data.setLoadoutSpell(pkt.slotIndex, safeSpellId);

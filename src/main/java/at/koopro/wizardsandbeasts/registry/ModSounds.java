@@ -15,6 +15,40 @@ public class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> BROOM_CRASH =
             register("broom_crash");
 
+    // Broom flight, per tier. Every one of these is a vanilla sample re-pitched in sounds.json,
+    // which is the mod's whole audio strategy -- there is not one .ogg in the repo. A broom names
+    // one of these in its definition's boostSound / idleLoopSound; a broom that names neither keeps
+    // the shared elytra rush and gets no boost cue at all.
+    public static final DeferredHolder<SoundEvent, SoundEvent> BROOM_WIND_SLOW =
+            register("broom_wind_slow");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BROOM_WIND_MID =
+            register("broom_wind_mid");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BROOM_WIND_FAST =
+            register("broom_wind_fast");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BROOM_BOOST_SCHOOL =
+            register("broom_boost_school");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BROOM_BOOST_STANDARD =
+            register("broom_boost_standard");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BROOM_BOOST_RACING =
+            register("broom_boost_racing");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BROOM_BOOST_FIREBOLT =
+            register("broom_boost_firebolt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BROOM_BOOST_HEAVY =
+            register("broom_boost_heavy");
+
+    // Impact and mount cues. broom_crash (the original) stays as the catch-all the entity's own
+    // break path plays; these two are the graded pair BroomImpacts picks between by severity.
+    public static final DeferredHolder<SoundEvent, SoundEvent> BROOM_CRASH_MINOR =
+            register("broom_crash_minor");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BROOM_CRASH_SEVERE =
+            register("broom_crash_severe");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BROOM_MOUNT =
+            register("broom_mount");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BROOM_DISMOUNT =
+            register("broom_dismount");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BROOM_POLISH_APPLY =
+            register("broom_polish_apply");
+
     public static final DeferredHolder<SoundEvent, SoundEvent> SPELL_CAST_GENERIC =
             register("spell_cast_generic");
     public static final DeferredHolder<SoundEvent, SoundEvent> SPELL_CAST_DARK =
@@ -101,6 +135,51 @@ public class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> FLOO_WHOOSH = register("floo_whoosh");
     public static final DeferredHolder<SoundEvent, SoundEvent> FLOO_IGNITE = register("floo_ignite");
     public static final DeferredHolder<SoundEvent, SoundEvent> FLOO_LAND = register("floo_land");
+
+    // Sneakoscope — one spinning top wound tighter and tighter, so the three tiers read as the
+    // same object rather than three unrelated noises. Pitch does the winding; see SneakoscopeTuning.
+    public static final DeferredHolder<SoundEvent, SoundEvent> SNEAKOSCOPE_SPIN = register("sneakoscope_spin");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SNEAKOSCOPE_WHIRR = register("sneakoscope_whirr");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SNEAKOSCOPE_SHRIEK = register("sneakoscope_shriek");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SNEAKOSCOPE_FOCUS = register("sneakoscope_focus");
+
+    // Butterbeer. A fizz as the mug comes up and a warm swallow as it goes down -- the generic
+    // drink burp reads as a potion, and this is a pint in a pub.
+    public static final DeferredHolder<SoundEvent, SoundEvent> BUTTERBEER_FIZZ = register("butterbeer_fizz");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BUTTERBEER_CHUG = register("butterbeer_chug");
+
+    // Floo, beyond the three it started with. Every one is a vanilla sample re-pitched in
+    // sounds.json -- there is not one .ogg in this repo, and these are not the place to start.
+    //
+    // FLOO_LAND stays as the thud of a traveller hitting the floor. FLOO_ARRIVAL is the different
+    // event of a grate flaring as somebody comes out of it, which is what the people already in the
+    // room hear; borrowing the whoosh for it made a departure and an arrival sound identical.
+    public static final DeferredHolder<SoundEvent, SoundEvent> FLOO_TRAVEL_LOOP = register("floo_travel_loop");
+    public static final DeferredHolder<SoundEvent, SoundEvent> FLOO_ARRIVAL = register("floo_arrival");
+    public static final DeferredHolder<SoundEvent, SoundEvent> FLOO_FAIL_SPUTTER = register("floo_fail_sputter");
+    public static final DeferredHolder<SoundEvent, SoundEvent> FLOO_SEALED = register("floo_sealed");
+
+    // Apparition. Three cracks rather than one, because the server already resolves which crack an
+    // observer hears (ApparitionCrackVariant) and had nothing to play. All three are the firework blast
+    // and the generic explosion re-pitched -- deliberately NOT entity.enderman.teleport, which is what
+    // this used to borrow: an ender pearl and a wizard folding space are not the same event, and sharing
+    // a sample made them the same thing to anyone with their eyes shut.
+    public static final DeferredHolder<SoundEvent, SoundEvent> APPARITION_CRACK_WIZARD =
+            register("apparition_crack_wizard");
+    public static final DeferredHolder<SoundEvent, SoundEvent> APPARITION_CRACK_ELF =
+            register("apparition_crack_elf");
+    public static final DeferredHolder<SoundEvent, SoundEvent> APPARITION_CRACK_MUFFLED =
+            register("apparition_crack_muffled");
+    /**
+     * The gathering, before the crack. Played twice per attempt at different pitches -- once as the charge
+     * begins and once as the Deliberation window opens -- which makes the moment to let go audible as well
+     * as visible, and readable by a player who cannot see the ring behind them.
+     */
+    public static final DeferredHolder<SoundEvent, SoundEvent> APPARITION_WINDUP =
+            register("apparition_windup");
+    /** The tear. Played at the origin only, where the part that did not travel stays. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> APPARITION_SPLINCH =
+            register("apparition_splinch");
 
     private static DeferredHolder<SoundEvent, SoundEvent> register(String path) {
         return SOUND_EVENTS.register(path, () ->

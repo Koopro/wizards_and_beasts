@@ -1,0 +1,47 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:use_duration",
+    "entries": [
+      {
+        "threshold": 19.2,
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/demiguise_hair_fade_4"
+        }
+      },
+      {
+        "threshold": 14.4,
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/demiguise_hair_fade_3"
+        }
+      },
+      {
+        "threshold": 9.6,
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/demiguise_hair_fade_2"
+        }
+      },
+      {
+        "threshold": 4.8,
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/demiguise_hair_fade_1"
+        }
+      },
+      {
+        "threshold": 0.0,
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/demiguise_hair_fade_0"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "wizards_and_beasts:item/demiguise_hair"
+    }
+  }
+}

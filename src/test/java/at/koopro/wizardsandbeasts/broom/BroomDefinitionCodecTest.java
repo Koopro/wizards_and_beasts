@@ -160,6 +160,168 @@ class BroomDefinitionCodecTest {
         assertEquals(json.repairMaterial(), code.repairMaterial());
         assertEquals(json.modelSlots(), code.modelSlots());
         assertEquals(json.woodTint(), code.woodTint());
+        assertEquals(json.assets(), code.assets());
+        assertEquals(json.handling(), code.handling());
+        assertEquals(json.audio(), code.audio());
+        assertEquals(json.seat(), code.seat());
+    }
+
+    /**
+     * A definition authoring none of the new keys decodes to the broom it was before they existed.
+     *
+     * <p>This is the whole claim of the pass — sixteen optional fields, and a datapack written
+     * against the old schema still describes the same broom. Asserted against a minimal JSON rather
+     * than against a shipped one, because every shipped broom now authors these keys and would pass
+     * for the wrong reason.
+     */
+    @Test
+    void aDefinitionWithNoNewKeys_getsTheOldBehaviour() {
+        BroomDefinition def = decode(withExtra("\"loreLines\": [ ]")).result().orElseThrow().getFirst();
+
+        assertEquals(BroomAssets.DEFAULT, def.assets(),
+                "no model, texture or animation means the shared broom rig");
+        assertEquals(HandlingProfile.BALANCED, def.handling().profile());
+        assertEquals(BroomHandling.DEFAULT, def.handling());
+        assertEquals(BroomAudio.DEFAULT, def.audio());
+        assertEquals(BroomSeat.DEFAULT, def.seat());
+
+        // BALANCED's momentum is the value that reproduces BroomTuning's old drag constants; if
+        // this drifts, every unauthored broom silently changes how far it coasts.
+        assertEquals(0.990f, def.handling().coastDrag(), 1.0e-6f);
+        assertEquals(0.995f, def.handling().inputDrag(), 1.0e-6f);
+        // ...and the old hardcoded durability losses.
+        assertEquals(1, def.handling().minorImpactDurabilityLoss());
+        assertEquals(2, def.handling().moderateImpactDurabilityLoss());
+        assertEquals(3, def.handling().severeImpactDurabilityLoss());
+        assertEquals(1.0f, def.handling().crashDamageMultiplier(), 0.0f);
+    }
+
+    /** A profile supplies defaults; an explicit key beats it. That is what makes it not decoration. */
+    @Test
+    void handlingProfile_suppliesDefaults_andExplicitKeysWin() {
+        BroomDefinition racing = decode(withExtra("\"handlingProfile\": \"racing\""))
+                .result().orElseThrow().getFirst();
+        assertEquals(HandlingProfile.RACING, racing.handling().profile());
+        assertEquals(HandlingProfile.RACING.yawDrift(), racing.handling().yawDrift(), 0.0f);
+
+        BroomDefinition tuned = decode(withExtra(
+                "\"handlingProfile\": \"racing\", \"yawDrift\": 0.25"))
+                .result().orElseThrow().getFirst();
+        assertEquals(HandlingProfile.RACING, tuned.handling().profile());
+        assertEquals(0.25f, tuned.handling().yawDrift(), 0.0f,
+                "an authored key must beat the profile it sits next to");
+        assertEquals(HandlingProfile.RACING.momentumRetention(), tuned.handling().momentumRetention(), 0.0f,
+                "and must not disturb the fields it did not name");
+    }
+
+    /** An unknown profile is a codec error naming the value, not a silent fall back to balanced. */
+    @Test
+    void unknownHandlingProfile_isAnError() {
+        var result = decode(withExtra("\"handlingProfile\": \"hovercraft\""));
+        assertTrue(result.error().isPresent(), "an unknown handlingProfile must not decode");
+        assertTrue(result.error().orElseThrow().message().contains("hovercraft"),
+                "the error must name the offending value: " + result.error().orElseThrow().message());
+    }
+
+    /**
+     * Every fault in one definition is reported at once.
+     *
+     * <p>The nested-flatMap decoder this replaced stopped at the first, so fixing a datapack with
+     * four bad values took four reload cycles to discover them all.
+     */
+    @Test
+    void everyFaultIsReportedTogether() {
+        var result = decode(withExtra(
+                "\"handlingProfile\": \"hovercraft\", \"yawDrift\": 9.0, \"momentumRetention\": 0.1"));
+        String message = result.error().orElseThrow().message();
+        assertTrue(message.contains("hovercraft"), message);
+        assertTrue(message.contains("yawDrift"), message);
+        assertTrue(message.contains("momentumRetention"), message);
+    }
+
+    /**
+     * The acceptance claim: JSON alone redirects geometry, texture and animation.
+     *
+     * <p>Nothing downstream of this decodes anything else — {@code BroomVariantGeoModel} asks the
+     * definition for each of the three and falls back to the base {@code broom} asset for whichever
+     * is absent, so carrying the ids is the whole of the mechanism.
+     */
+    @Test
+    void assets_redirectModelTextureAndAnimation_fromJsonAlone() {
+        BroomDefinition def = decode(withExtra(
+                "\"model\": \"wizards_and_beasts:broom_firebolt\", "
+                        + "\"texture\": \"wizards_and_beasts:textures/entity/broom/firebolt.png\", "
+                        + "\"animation\": \"wizards_and_beasts:broom\""))
+                .result().orElseThrow().getFirst();
+
+        assertEquals(Identifier.parse("wizards_and_beasts:broom_firebolt"),
+                def.assets().model().orElseThrow());
+        assertEquals(Identifier.parse("wizards_and_beasts:broom"),
+                def.assets().animation().orElseThrow());
+        assertTrue(def.assets().textureIsFullPath(),
+                "a value already rooted at textures/ must be used verbatim, not formatted again");
+    }
+
+    /** The subpath form of {@code texture} is the one GeckoLib's own helpers produce. */
+    @Test
+    void texture_acceptsTheSubpathFormToo() {
+        BroomDefinition def = decode(withExtra("\"texture\": \"wizards_and_beasts:broom/firebolt\""))
+                .result().orElseThrow().getFirst();
+        assertFalse(def.assets().textureIsFullPath(),
+                "a subpath must be formatted under textures/entity/, not used as a path");
+        assertTrue(def.hasOwnTexture());
+    }
+
+    /** The key this field carried for one day. Kept so nothing written against it breaks. */
+    @Test
+    void texture_stillAcceptsTheLegacyEntityTextureKey() {
+        BroomDefinition def = decode(withExtra("\"entity_texture\": \"wizards_and_beasts:broom/firebolt\""))
+                .result().orElseThrow().getFirst();
+        assertEquals(Identifier.parse("wizards_and_beasts:broom/firebolt"),
+                def.assets().texture().orElseThrow());
+    }
+
+    /**
+     * Every shipped definition survives a full encode/decode round trip, unchanged.
+     *
+     * <p>This is the gate on the client sync. {@code BroomDefinitionsSyncS2CPayload} serialises with
+     * {@link BroomDefinition#CODEC} itself rather than a hand-written field list, so a field that
+     * {@code encode} forgets to write does not fail to compile and does not throw — it simply
+     * arrives on the client as its default. That is invisible in single-player, where the client
+     * reads the server's own static registry and no packet is involved at all.
+     *
+     * <p>Run through {@code NbtOps}, which is what the payload uses, rather than the {@code JsonOps}
+     * the rest of this class uses: number widening differs between the two, and the sync is the case
+     * that matters.
+     */
+    @Test
+    void everyShippedBroom_survivesAnNbtRoundTrip() throws IOException {
+        try (Stream<Path> files = Files.list(BROOM_DIR)) {
+            for (Path json : files.filter(p -> p.toString().endsWith(".json")).toList()) {
+                String name = json.getFileName().toString();
+                BroomDefinition original = parse(Files.readString(json), name);
+
+                var encoded = BroomDefinition.CODEC
+                        .encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, original)
+                        .resultOrPartial(err -> fail(name + " failed to encode: " + err))
+                        .orElseThrow();
+                BroomDefinition round = BroomDefinition.CODEC
+                        .parse(net.minecraft.nbt.NbtOps.INSTANCE, encoded)
+                        .resultOrPartial(err -> fail(name + " failed to decode: " + err))
+                        .orElseThrow();
+
+                assertEquals(original, round,
+                        name + " does not survive a round trip. Whatever differs is a field encode "
+                                + "does not write, and it would reach clients as its default.");
+            }
+        }
+    }
+
+    /** Unknown keys are ignored, so a definition from a later version still loads here. */
+    @Test
+    void unknownKeysAreIgnored() {
+        assertTrue(decode(withExtra("\"antiGravityCoils\": 4")).result().isPresent(),
+                "an unrecognised key must not fail the load — that is what forward compat means");
     }
 
     /** With nothing loaded, resolving a broom must still yield a broom rather than blowing up. */

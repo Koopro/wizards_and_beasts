@@ -1,0 +1,6 @@
+{
+  "trigger": "spell_cast",
+  "match": "episkey",
+  "effects": { "alignment": 1.5 },
+  "cooldownSeconds": 120
+}

@@ -3,13 +3,14 @@ package at.koopro.wizardsandbeasts.floo.call;
 import at.koopro.wizardsandbeasts.util.PlayerScopedState;
 
 import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlock;
+import at.koopro.wizardsandbeasts.floo.FlooAccess;
+import at.koopro.wizardsandbeasts.floo.FlooAddress;
 import at.koopro.wizardsandbeasts.floo.FlooNetworkManager;
 import at.koopro.wizardsandbeasts.floo.FlooRegistryEntry;
 import at.koopro.wizardsandbeasts.floo.FlooTravelHandler;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
@@ -39,30 +40,54 @@ public final class FlooCallService {
     private static final double LEASH_RANGE_SQ = 2.5 * 2.5;
     private static final double REMOTE_HEAR_RANGE_SQ = 6.0 * 6.0;
 
+    // FlooAccess and FlooAddress are the shared vocabulary for "who may reach what" and "what is
+    // the same address"; a call that answered either question its own way would drift from travel.
     private static final PlayerScopedState<FlooCall> SESSIONS =
             PlayerScopedState.create("floo-calls");
 
     private FlooCallService() {
     }
 
-    /** Begins a call from the player's nearby lit grate to the given address. */
+    /**
+     * Begins a call from the player's nearby lit grate to the given address.
+     *
+     * <p><b>Visibility is checked here, not only on the travel path.</b> This used to look the
+     * address straight up in the registry, which meant a private hearth nobody had ever visited could
+     * still be called — and, worse, that calling it answered differently from calling a name that did
+     * not exist. Every guarantee the travel path makes about not confirming a private address was
+     * undone by a second door that did not know about it.
+     *
+     * <p>Resolved through {@link FlooAccess} for the same reason, so a spoken call is heard the same
+     * way a spoken destination is, mumbles included.
+     */
     public static void startCall(@NonNull ServerPlayer caller, @NonNull String address) {
         if (!ModuleManager.isEnabled(Module.FLOO_NETWORK)) return;
 
         var origin = FlooTravelHandler.findNearbyLitFireplace(caller);
         if (origin == null) {
-            caller.displayClientMessage(Component.literal("You need a lit fireplace to make a Floo call."), true);
+            caller.displayClientMessage(
+                    Component.translatable("floo.wizards_and_beasts.fail.no_fireplace"), true);
             return;
         }
 
         FlooNetworkManager manager = FlooNetworkManager.get((ServerLevel) caller.level());
-        FlooRegistryEntry dest = manager.getEntry(address);
-        if (dest == null || !dest.isEnabled()) {
-            caller.displayClientMessage(Component.literal("That connection has been sealed."), true);
+        FlooRegistryEntry dest = FlooAccess.resolveSpoken(caller, manager, address);
+        if (dest == null) {
+            // The same sentence the travel path gives, and deliberately: "no such connection" has to
+            // cover an address that does not exist AND one the caller may not reach, or the
+            // difference between the two replies is itself the leak.
+            caller.displayClientMessage(Component.translatable(
+                    "floo.wizards_and_beasts.fail.unknown_address", FlooAddress.display(address)), true);
             return;
         }
-        if (address.equalsIgnoreCase(origin.getNetworkAddress())) {
-            caller.displayClientMessage(Component.literal("You cannot call your own grate."), true);
+        if (!dest.isEnabled()) {
+            caller.displayClientMessage(
+                    Component.translatable("floo.wizards_and_beasts.fail.sealed"), true);
+            return;
+        }
+        if (FlooAddress.sameAddress(dest.networkAddress(), origin.getNetworkAddress())) {
+            caller.displayClientMessage(
+                    Component.translatable("floo.wizards_and_beasts.call.fail.self"), true);
             return;
         }
 
@@ -77,19 +102,15 @@ public final class FlooCallService {
                 CALL_DURATION_TICKS);
         SESSIONS.put(caller.getUUID(), call);
 
-        caller.sendSystemMessage(Component.literal("You lean into the emerald flames and call ")
-                .withStyle(ChatFormatting.GRAY)
-                .append(Component.literal("\"" + dest.networkAddress() + "\"")
-                        .withStyle(ChatFormatting.GREEN))
-                .append(Component.literal(".").withStyle(ChatFormatting.GRAY)));
+        caller.sendSystemMessage(Component.translatable(
+                "floo.wizards_and_beasts.call.start", dest.networkAddress()));
         caller.level().playSound(null, origin.getBlockPos(), ModSounds.FLOO_WHOOSH.get(),
                 SoundSource.BLOCKS, 0.7f, 1.2f);
 
         ServerLevel targetLevel = resolveLevel(server, dest.dimension());
         if (targetLevel != null) {
-            announceNearRemote(targetLevel, dest.blockPos(),
-                    Component.literal(caller.getName().getString() + "'s head appears in the emerald flames.")
-                            .withStyle(ChatFormatting.GREEN, ChatFormatting.ITALIC));
+            announceNearRemote(targetLevel, dest.blockPos(), Component.translatable(
+                    "floo.wizards_and_beasts.call.remote.arrive", caller.getName().getString()));
             spawnHeadParticles(targetLevel, dest.blockPos());
         }
     }
@@ -102,7 +123,8 @@ public final class FlooCallService {
         MinecraftServer server = ((ServerLevel) player.level()).getServer();
         call.ticksRemaining--;
         if (call.ticksRemaining <= 0) {
-            endCall(server, player.getUUID(), "The connection fades and the flames die down.");
+            endCall(server, player.getUUID(),
+                    Component.translatable("floo.wizards_and_beasts.call.end.timeout"));
             return;
         }
 
@@ -110,14 +132,16 @@ public final class FlooCallService {
         if (!player.level().dimension().identifier().equals(call.originDim)
                 || player.distanceToSqr(call.originPos.getX() + 0.5,
                 call.originPos.getY() + 0.5, call.originPos.getZ() + 0.5) > LEASH_RANGE_SQ) {
-            endCall(server, player.getUUID(), "You pull your head out of the fire.");
+            endCall(server, player.getUUID(),
+                    Component.translatable("floo.wizards_and_beasts.call.end.moved"));
             return;
         }
 
         // Origin grate must stay lit.
         var state = player.level().getBlockState(call.originPos);
         if (!state.hasProperty(FlooFireplaceBlock.LIT) || !state.getValue(FlooFireplaceBlock.LIT)) {
-            endCall(server, player.getUUID(), "The flames die and the connection breaks.");
+            endCall(server, player.getUUID(),
+                    Component.translatable("floo.wizards_and_beasts.call.end.doused"));
             return;
         }
 
@@ -163,7 +187,18 @@ public final class FlooCallService {
         }
     }
 
-    public static void endCall(@NonNull MinecraftServer server, @NonNull UUID callerUuid, @Nullable String reason) {
+    /**
+     * Hang up.
+     *
+     * <p>{@code reason} is a {@link Component} rather than a {@code String} because every caller now
+     * hands over a finished, translated sentence. Taking raw text and wrapping it in
+     * {@code Component.literal} here made this method the one place a translated message could not be
+     * passed through — the type is what keeps English out of the call sites.
+     *
+     * <p>Null still means "ended silently": a login/logout teardown has nobody to tell.
+     */
+    public static void endCall(@NonNull MinecraftServer server, @NonNull UUID callerUuid,
+                               @Nullable Component reason) {
         FlooCall call = SESSIONS.remove(callerUuid);
         if (call == null) return;
 
@@ -171,13 +206,12 @@ public final class FlooCallService {
         if (caller != null && reason != null) {
             // Root slowness is re-applied each tick at 10t; once the call ends it lapses
             // on its own, so we avoid clearing unrelated Slowness here.
-            caller.sendSystemMessage(Component.literal(reason).withStyle(ChatFormatting.GRAY));
+            caller.sendSystemMessage(reason);
         }
         ServerLevel targetLevel = resolveLevel(server, call.targetDim);
         if (targetLevel != null) {
             announceNearRemote(targetLevel, call.targetPos,
-                    Component.literal("The head withdraws from the flames.")
-                            .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+                    Component.translatable("floo.wizards_and_beasts.call.remote.depart"));
         }
     }
 
@@ -190,9 +224,11 @@ public final class FlooCallService {
     }
 
     private static @NonNull Component flooLine(@NonNull ServerPlayer speaker, @NonNull String message) {
-        return Component.literal("[Floo] ").withStyle(ChatFormatting.GREEN)
-                .append(Component.literal(speaker.getName().getString() + ": ").withStyle(ChatFormatting.WHITE))
-                .append(Component.literal(message).withStyle(ChatFormatting.GRAY));
+        // The player's own words go in as an argument, never into the template: translation
+        // arguments are inserted after the template is parsed, so a message containing "%s" cannot
+        // reach back into the format string.
+        return Component.translatable("floo.wizards_and_beasts.call.line",
+                speaker.getName().getString(), message);
     }
 
     private static void announceNearRemote(@NonNull ServerLevel level, @NonNull BlockPos pos,

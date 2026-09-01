@@ -1,0 +1,26 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "wizards_and_beasts:dementor_chill",
+      "required": false
+    },
+    {
+      "id": "wizards_and_beasts:soul_drained",
+      "required": false
+    },
+    {
+      "id": "wizards_and_beasts:crucio_sanity_drain",
+      "required": false
+    },
+    {
+      "id": "wizards_and_beasts:confundo",
+      "required": false
+    },
+    {
+      "id": "wizards_and_beasts:obscuro",
+      "required": false
+    },
+    "minecraft:darkness"
+  ]
+}

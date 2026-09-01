@@ -27,6 +27,8 @@ import at.koopro.wizardsandbeasts.block.location.LocationBlockHelper;
 import at.koopro.wizardsandbeasts.block.location.MinistryBlocks;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
 import at.koopro.wizardsandbeasts.registry.WoodSet;
+import at.koopro.wizardsandbeasts.registry.ArmorItemRegistry;
+import at.koopro.wizardsandbeasts.registry.CanonItemRegistry;
 import at.koopro.wizardsandbeasts.registry.BroomItemRegistry;
 import at.koopro.wizardsandbeasts.registry.ConsumableItemRegistry;
 import at.koopro.wizardsandbeasts.registry.CurrencyItemRegistry;
@@ -60,6 +62,21 @@ public class ModModelProvider extends ModelProvider {
         itemModels.declareCustomModelItem(MiscItemRegistry.MARAUDERS_MAP.get());
         itemModels.declareCustomModelItem(MiscItemRegistry.DELUMINATOR.get());
         itemModels.generateFlatItem(MiscItemRegistry.BLINDFOLD.get(), ModelTemplates.FLAT_ITEM);
+
+        // Worn armour — robes, hats and masks. Flat inventory sprites only; the worn layer is
+        // an equipment asset, not an item model, and is not authored yet.
+        // Worn armour — flat inventory sprites. Looped over the registry's own roster rather
+        // than listed, so adding a piece cannot fail datagen by being forgotten here. The worn
+        // layer is an equipment asset, not an item model, and is unrelated to these.
+        for (var piece : ArmorItemRegistry.ALL) {
+            itemModels.generateFlatItem(piece.get(), ModelTemplates.FLAT_ITEM);
+        }
+
+        // Catalogued canon stubs — flat sprites, no behaviour. Looped rather than listed so
+        // adding one to CanonItemRegistry cannot fail datagen by being forgotten here.
+        for (var stub : CanonItemRegistry.ALL) {
+            itemModels.generateFlatItem(stub.get(), ModelTemplates.FLAT_ITEM);
+        }
         // All trunks + Newt's Case are now blocks — their item models come from the block-model
         // generation in generateWizardingWorld().
 
@@ -183,15 +200,18 @@ public class ModModelProvider extends ModelProvider {
             propBlock(blockModels, pot, cauldron, sideTop(pot, "_side"), false);
         }
 
+        propBlock(blockModels, ModBlocks.OCCAMY_EGGSHELL.get(), eggshellModel(),
+                eggshellTexture(), true);
         blockModels.createTrivialBlock(ModBlocks.FLOO_GRATE.get(), TexturedModel.LEAVES);
         propBlock(blockModels, ModBlocks.SPELL_TEACHER.get(), lecternModel(),
                 sideTop(ModBlocks.SPELL_TEACHER.get(), ""), false);
 
         java.util.List<net.minecraft.world.item.Item> wizardingItems = java.util.List.of(
-                ConsumableItemRegistry.OCCAMY_EGGSHELL.get(),
-                ConsumableItemRegistry.BEZOAR.get(), ConsumableItemRegistry.DEMIGUISE_HAIR.get(), ConsumableItemRegistry.MOONCALF_DUNG.get(),
-                ConsumableItemRegistry.ERUMPENT_HORN.get(), ConsumableItemRegistry.MANDRAKE.get(), TrinketItemRegistry.REMEMBRALL.get(),
-                TrinketItemRegistry.OMNI_OCULARS.get(), TrinketItemRegistry.SNEAKOSCOPE.get(),
+                ConsumableItemRegistry.BEZOAR.get(), ConsumableItemRegistry.MOONCALF_DUNG.get(),
+                ConsumableItemRegistry.ERUMPENT_HORN.get(), ConsumableItemRegistry.MANDRAKE.get(),
+                ConsumableItemRegistry.BABY_MANDRAKE.get(), MiscItemRegistry.EARMUFFS.get(),
+                TrinketItemRegistry.REMEMBRALL.get(),
+                TrinketItemRegistry.OMNI_OCULARS.get(),
                 TrinketItemRegistry.PORTKEY.get(), TrinketItemRegistry.PERUVIAN_DARKNESS_POWDER.get(), TrinketItemRegistry.DECOY_DETONATOR.get(),
                 TrinketItemRegistry.EXTENDABLE_EARS.get(), MiscItemRegistry.FLOO_POWDER.get());
         for (net.minecraft.world.item.Item item : wizardingItems) {
@@ -201,12 +221,24 @@ public class ModModelProvider extends ModelProvider {
         // Dittany and the wizard card moved off generateFlatItem: both now ship a hand-written
         // cuboid model from tools/item_models_3d.py, and leaving them in the flat list would emit
         // a second, competing models/item/<id>.json into the generated pack.
+        // The Sneakoscope ships a hand-written items/ definition: a minecraft:range_dispatch over
+        // eight pre-rotated spin frames, driven by SneakoscopeSpinProperty. generateFlatItem would
+        // emit a competing single-model items/sneakoscope.json over the top of it.
+        itemModels.declareCustomModelItem(TrinketItemRegistry.SNEAKOSCOPE.get());
+
+        // The hair ships a hand-written items/ definition: a range_dispatch over
+        // minecraft:use_duration through the fade frames. generateFlatItem would emit a
+        // competing single-model items/demiguise_hair.json over the top of it.
+        itemModels.declareCustomModelItem(ConsumableItemRegistry.DEMIGUISE_HAIR.get());
+
         itemModels.declareCustomModelItem(ConsumableItemRegistry.DITTANY.get());
         itemModels.declareCustomModelItem(ConsumableItemRegistry.FAMOUS_WIZARD_CARD.get());
 
         // Consumables use custom item models so they can point at vanilla textures while art is pending.
         itemModels.declareCustomModelItem(ConsumableItemRegistry.BREW.get());
         itemModels.declareCustomModelItem(ConsumableItemRegistry.BUTTERBEER.get());
+        itemModels.generateFlatItem(ConsumableItemRegistry.EMPTY_BUTTERBEER_MUG.get(),
+                net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
         itemModels.declareCustomModelItem(ConsumableItemRegistry.PUMPKIN_JUICE.get());
         itemModels.declareCustomModelItem(ConsumableItemRegistry.CHOCOLATE_FROG.get());
         itemModels.declareCustomModelItem(ConsumableItemRegistry.BERTIE_BOTTS_EVERY_FLAVOUR_BEANS.get());
@@ -250,6 +282,7 @@ public class ModModelProvider extends ModelProvider {
 
         blockModels.createTrivialBlock(ModBlocks.WANDMAKERS_BENCH.get(), TexturedModel.LEAVES);
         createFlooFireplace(blockModels, ModBlocks.FLOO_FIREPLACE.get());
+        createFlooFlames(blockModels, ModBlocks.FLOO_FLAMES.get());
         propBlock(blockModels, ModBlocks.EXAMINATION_DESK.get(), deskModel(),
                 sideTop(ModBlocks.EXAMINATION_DESK.get(), ""), false);
     }
@@ -406,7 +439,10 @@ public class ModModelProvider extends ModelProvider {
                                 .face(Direction.DOWN, f -> f.texture(TextureSlot.SIDE).cullface(Direction.DOWN)))
                         .element(e -> e.from(2, 3, 2).to(14, 12, 14)
                                 .textureAll(TextureSlot.SIDE)
-                                .face(Direction.UP, f -> f.texture(TextureSlot.TOP)));
+                                // tintindex 0 on the opening only. CauldronColors paints it by the
+                                // pot's visual state, so a filled, working or ruined cauldron reads
+                                // differently from across a room without needing six textures.
+                                .face(Direction.UP, f -> f.texture(TextureSlot.TOP).tintindex(0)));
         // Rim as four walls rather than a slab: a slab would cap the pot and hide the brew.
         float[][] rim = {
                 { 1, 1, 15, 2 },   // north
@@ -543,6 +579,29 @@ public class ModModelProvider extends ModelProvider {
                 blockModels.createFlatItemModelWithBlockTexture(block.asItem(), block, "_item"));
     }
 
+    /**
+     * A single Occamy shell: one small cuboid, six pixels across and five tall.
+     *
+     * <p>Textured from the <em>item</em> sprite rather than a block texture, because that is the art
+     * that exists — the shell shipped as an inventory item long before it was placeable. Swapping in
+     * a dedicated {@code block/occamy_eggshell} texture later is a one-line change to
+     * {@link #eggshellTexture()} and touches nothing else.
+     */
+    private static ExtendedModelTemplate eggshellModel() {
+        return prop(TextureSlot.PARTICLE, TextureSlot.TEXTURE)
+                .element(e -> e.from(5, 0, 5).to(11, 5, 11)
+                        .textureAll(TextureSlot.TEXTURE))
+                .build();
+    }
+
+    private static TextureMapping eggshellTexture() {
+        Identifier texture = Identifier.fromNamespaceAndPath(
+                WizardsAndBeastsMod.MODID, "item/occamy_eggshell");
+        return new TextureMapping()
+                .put(TextureSlot.TEXTURE, texture)
+                .put(TextureSlot.PARTICLE, texture);
+    }
+
     private static TextureMapping bannerTexture(Block block, String suffix) {
         Identifier texture = TextureMapping.getBlockTexture(block, suffix);
         return new TextureMapping()
@@ -581,6 +640,63 @@ public class ModModelProvider extends ModelProvider {
                                 BlockModelGenerators.plainVariant(off)))
                         .with(BlockModelGenerators.ROTATION_HORIZONTAL_FACING));
         blockModels.registerSimpleItemModel(block, off);
+    }
+
+    /**
+     * Green fire, drawn the way vanilla draws fire: four planes leaning inward from the block's
+     * faces, unshaded, with ambient occlusion off.
+     *
+     * <p>Copying that geometry rather than inventing one is the point. Crossed quads — the obvious
+     * alternative — read as a plant from every angle, and fire is the one shape a player already
+     * knows on sight; borrowing it is how these say "fire" before the colour says "Floo". The lean
+     * plus {@code rescale} is what makes the flames widen toward the top instead of standing flat.
+     *
+     * <p>Shorter than vanilla's, though: vanilla fire runs to 22.4 pixels and licks up past the block
+     * it sits in, which is right for something spreading and wrong for something burning in a
+     * fireplace. Sixteen keeps it inside its own cube.
+     */
+    private static ExtendedModelTemplate flamesModel() {
+        return prop(TextureSlot.PARTICLE, TextureSlot.TEXTURE)
+                .renderType("minecraft:cutout")
+                .ambientOcclusion(false)
+                .element(e -> e.from(0, 0, 8.8F).to(16, 16, 8.8F).shade(false)
+                        .rotation(r -> r.origin(8, 8, 8).singleAxis(Direction.Axis.X, -22.5F).rescale(true))
+                        .face(Direction.SOUTH, f -> f.texture(TextureSlot.TEXTURE).uvs(0, 0, 16, 16)))
+                .element(e -> e.from(0, 0, 7.2F).to(16, 16, 7.2F).shade(false)
+                        .rotation(r -> r.origin(8, 8, 8).singleAxis(Direction.Axis.X, 22.5F).rescale(true))
+                        .face(Direction.NORTH, f -> f.texture(TextureSlot.TEXTURE).uvs(0, 0, 16, 16)))
+                .element(e -> e.from(8.8F, 0, 0).to(8.8F, 16, 16).shade(false)
+                        .rotation(r -> r.origin(8, 8, 8).singleAxis(Direction.Axis.Z, -22.5F).rescale(true))
+                        .face(Direction.WEST, f -> f.texture(TextureSlot.TEXTURE).uvs(0, 0, 16, 16)))
+                .element(e -> e.from(7.2F, 0, 0).to(7.2F, 16, 16).shade(false)
+                        .rotation(r -> r.origin(8, 8, 8).singleAxis(Direction.Axis.Z, 22.5F).rescale(true))
+                        .face(Direction.EAST, f -> f.texture(TextureSlot.TEXTURE).uvs(0, 0, 16, 16)))
+                .build();
+    }
+
+    /**
+     * One model for every state of the flames, and no item model.
+     *
+     * <p>No dispatch on {@code FACING}: the shape is symmetric under the four horizontal rotations,
+     * so rotating it would emit three more variants that render identically. The property is on the
+     * block because the flames use it to find their hearth, not because they look different facing
+     * one way or another.
+     *
+     * <p>No dispatch on {@code CHARGES} either — a blockstate variant matches on the properties it
+     * names and ignores the rest, so this one variant covers all three. How much fire is left shows
+     * in the particle density instead ({@code FlooFlamesBlock.animateTick}).
+     *
+     * <p>{@code registerSimpleItemModel} is deliberately not called: flames have no {@code BlockItem}
+     * (they are placed by Floo Powder, never carried), and for an item-less block {@code asItem()}
+     * resolves to {@code minecraft:air} — the same trap {@link #createLanternWithoutItem} documents.
+     */
+    private void createFlooFlames(BlockModelGenerators blockModels, Block block) {
+        Identifier texture = TextureMapping.getBlockTexture(block);
+        Identifier model = flamesModel().create(block, new TextureMapping()
+                .put(TextureSlot.TEXTURE, texture)
+                .put(TextureSlot.PARTICLE, texture), blockModels.modelOutput);
+        blockModels.blockStateOutput.accept(
+                MultiVariantGenerator.dispatch(block, BlockModelGenerators.plainVariant(model)));
     }
 
     /** side/front/top mapping off {@code <block>}, {@code <block>_front} and {@code <block>_top}. */

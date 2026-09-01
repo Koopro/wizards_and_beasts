@@ -1,0 +1,8 @@
+{
+  "biomes": [
+    "minecraft:birch_forest",
+    "minecraft:old_growth_birch_forest"
+  ],
+  "tile": 9,
+  "tint": "#86A063"
+}

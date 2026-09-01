@@ -6,7 +6,9 @@ NeoForge mod for Minecraft 1.21.x (`at.koopro.wizardsandbeasts`). Spells, skill 
 
 - Current release channel: `0.1.0-alpha.1`
 - Build-by-build notes: `documentation/CHANGELOG.md`
-- Active issues, release gates, and alpha smoke scenarios: `documentation/DEVELOPER_REFERENCE.md` §21 (Alpha Release Gates & Smoke Checks)
+- Player-facing limitations of this build: [`documentation/KNOWN_ISSUES.md`](documentation/KNOWN_ISSUES.md)
+- Manual vertical-slice checks: [`documentation/ALPHA_SMOKE.md`](documentation/ALPHA_SMOKE.md)
+- Release gates and the systems checklist: `documentation/DEVELOPER_REFERENCE.md` §21 (Alpha Release Gates & Smoke Checks)
 - For the authoritative code/systems reference (package layout, registries, networking, key classes): see `documentation/DEVELOPER_REFERENCE.md`. Older design docs (`ARCHITECTURE.md`, `DESIGN_NOTES.md`, `ASSET_STATUS.md`) are archived in `documentation/history/` and superseded by `documentation/DEVELOPER_REFERENCE.md`.
 - Combined build/work history: `documentation/WORKLOG.md` (audit + deltas per build pass), `documentation/CREATURES.md` (creature build + abilities), `documentation/SPELLS.md` (spell migration foundation + deltas).
 
@@ -44,3 +46,4 @@ If the same resource path exists in both `src/main/resources` and `src/generated
 
 - Local/generated runtime outputs (`build/`, `bin/`) are not committed.
 - Before tagging alpha builds, follow the release gate checklist in `documentation/DEVELOPER_REFERENCE.md` §21.8 (same CI order).
+- When a gate fails, record the reproducible failure in [`documentation/KNOWN_ISSUES.md`](documentation/KNOWN_ISSUES.md) before retagging.

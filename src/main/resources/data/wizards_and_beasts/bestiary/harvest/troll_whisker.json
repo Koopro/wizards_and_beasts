@@ -1,0 +1,7 @@
+{
+  "entry": "wizards_and_beasts:troll",
+  "item": "wizards_and_beasts:troll_whisker",
+  "minTier": "STUDIED",
+  "chance": 0.5,
+  "cooldownSeconds": 300
+}

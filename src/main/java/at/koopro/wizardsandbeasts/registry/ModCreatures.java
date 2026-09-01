@@ -147,6 +147,25 @@ public final class ModCreatures {
             "hungarian_horntail", "norwegian_ridgeback", "peruvian_vipertooth", "romanian_longhorn",
             "swedish_short_snout", "ukrainian_ironbelly");
 
+    /**
+     * The creatures that have their own hand-written entity class instead of a {@link Spec} in
+     * {@link #MANIFEST}. Registered in {@code ModEntities}, not here, but they are part of the same
+     * roster as far as a player is concerned, so anything asking "is this id a beast of ours?" has to
+     * count them.
+     *
+     * <p>{@code goblin_teller} is deliberately absent: it is a Gringotts shopkeeper that happens to be
+     * tagged into {@code Module.CREATURES}, not a beast in the bestiary sense. {@code baby_niffler} is
+     * absent for the same reason — it is a niffler's child, not a separate creature.
+     */
+    public static final Set<String> BESPOKE_IDS = Set.of(
+            "niffler", "bowtruckle", "cornish_pixie", "thestral", "phoenix", "runespoor",
+            "hidebehind", "augurey", "mooncalf", "streeler");
+
+    /** Every creature id the mod ships a beast for: {@link #MANIFEST} plus {@link #BESPOKE_IDS}. */
+    public static final Set<String> ROSTER = java.util.stream.Stream.concat(
+                    MANIFEST.stream().map(Spec::id), BESPOKE_IDS.stream())
+            .collect(java.util.stream.Collectors.toUnmodifiableSet());
+
     public static final Map<String, DeferredHolder<EntityType<?>, EntityType<GenericBeastEntity>>> ENTITIES =
             new LinkedHashMap<>();
     public static final Map<String, DeferredItem<SpawnEggItem>> SPAWN_EGGS = new LinkedHashMap<>();

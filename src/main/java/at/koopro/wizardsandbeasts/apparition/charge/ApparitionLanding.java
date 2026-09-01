@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.apparition.charge;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.NullMarked;
@@ -40,6 +41,17 @@ public final class ApparitionLanding {
             if (!fits(level, player, candidate)) {
                 continue;
             }
+            // Lava has no collision shape, so it clears every geometric test above and would otherwise be a
+            // perfectly viable landing. Refused outright rather than left to the splinch ladder: arriving
+            // whole in lava is not a clean arrival by any reading.
+            if (isLava(level, foot) || isLava(level, foot.above())) {
+                continue;
+            }
+            // Water is a floor for this purpose. A wizard who arrives in a lake swims; one who arrives over
+            // a chasm falls, which is why open air still needs something solid underneath.
+            if (isSwimmable(level, foot)) {
+                return candidate;
+            }
             if (!isSupported(level, foot.below())) {
                 continue;
             }
@@ -57,5 +69,14 @@ public final class ApparitionLanding {
     /** True when {@code below} can be stood on, so a wizard does not arrive in mid-air over a chasm. */
     private static boolean isSupported(ServerLevel level, BlockPos below) {
         return !level.getBlockState(below).getCollisionShape(level, below).isEmpty();
+    }
+
+    /** True when the block itself is water, which a wizard can arrive into and swim out of. */
+    private static boolean isSwimmable(ServerLevel level, BlockPos pos) {
+        return level.getFluidState(pos).is(FluidTags.WATER);
+    }
+
+    private static boolean isLava(ServerLevel level, BlockPos pos) {
+        return level.getFluidState(pos).is(FluidTags.LAVA);
     }
 }

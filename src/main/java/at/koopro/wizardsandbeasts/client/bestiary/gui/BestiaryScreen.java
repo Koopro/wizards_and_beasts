@@ -175,23 +175,16 @@ public final class BestiaryScreen extends Screen {
         return listRowsRight();
     }
 
-    private static String formatCategoryLabel(BestiaryCategory category) {
-        String raw = category.name().toLowerCase(Locale.ROOT).replace('_', ' ');
-        StringBuilder out = new StringBuilder(raw.length());
-        boolean capNext = true;
-        for (int i = 0; i < raw.length(); i++) {
-            char c = raw.charAt(i);
-            if (c == ' ') {
-                capNext = true;
-                out.append(c);
-            } else if (capNext) {
-                out.append(Character.toTitleCase(c));
-                capNext = false;
-            } else {
-                out.append(c);
-            }
-        }
-        return out.toString();
+    /**
+     * The category header's label.
+     *
+     * <p>Translated now rather than title-cased from the enum constant: {@code WINGED_BEAST} became
+     * "Winged Beast" in every language, which is a mechanical transform of an internal identifier
+     * rather than a name anyone wrote.
+     */
+    private static Component categoryLabel(BestiaryCategory category) {
+        return Component.translatable(
+                "bestiary.wizards_and_beasts.category." + category.name().toLowerCase(Locale.ROOT));
     }
 
     /**
@@ -316,7 +309,8 @@ public final class BestiaryScreen extends Screen {
                 drawStretched(gg, TEX_HEADER, x + 6, rowY, LIST_ROWS_W, ROW_HEIGHT, 112, 14);
                 boolean isCollapsed = collapsed.getOrDefault(row.header, Boolean.FALSE);
                 String arrow = isCollapsed ? "\u25b6 " : "\u25bc ";
-                gg.drawString(font, Component.literal(arrow + formatCategoryLabel(row.header)), x + 8, rowY + 3, WizardsPalette.TEXT);
+                gg.drawString(font, Component.literal(arrow).append(categoryLabel(row.header)),
+                        x + 8, rowY + 3, WizardsPalette.TEXT);
             } else if (row.entry != null) {
                 BestiaryEntry e = row.entry;
                 boolean isSel = e.id().equals(selected);
@@ -325,7 +319,9 @@ public final class BestiaryScreen extends Screen {
                     gg.fill(x + 6, rowY, rowRight, rowY + ROW_HEIGHT, SELECTED_ROW_TINT);
                 }
                 DiscoveryTier tier = ClientBestiaryCache.get().tiers().getOrDefault(e.id(), DiscoveryTier.UNDISCOVERED);
-                Component name = tier == DiscoveryTier.UNDISCOVERED ? Component.literal("???") : e.displayName();
+                Component name = tier == DiscoveryTier.UNDISCOVERED
+                        ? Component.translatable("bestiary.wizards_and_beasts.entry.unknown")
+                        : e.displayName();
                 int nameMaxWidth = 72;
                 String clipped = font.plainSubstrByWidth(name.getString(), nameMaxWidth);
                 gg.drawString(font, Component.literal(clipped), x + 8, rowY + 3, tier == DiscoveryTier.UNDISCOVERED ? WizardsPalette.TEXT_DIM : WizardsPalette.TEXT);
@@ -336,11 +332,18 @@ public final class BestiaryScreen extends Screen {
             }
             rowY += ROW_STEP;
         }
+        if (rows.isEmpty()) {
+            gg.drawWordWrap(font, emptyListMessage(), x + 10, listTop + 4, LIST_ROWS_W - 8,
+                    WizardsPalette.TEXT_DIM);
+        }
         renderListScrollbar(gg, listTop, listBottom);
 
         BestiaryEntry selectedEntry = selected == null ? null : BestiaryEntryRegistry.clientGet(selected);
         if (selectedEntry != null) {
             renderDetail(gg, selectedEntry);
+        } else {
+            gg.drawWordWrap(font, Component.translatable("bestiary.wizards_and_beasts.empty.no_selection"),
+                    x + 132, y + 10, 176, WizardsPalette.TEXT_DIM);
         }
 
         pose.popMatrix();
@@ -367,7 +370,7 @@ public final class BestiaryScreen extends Screen {
                 if (row.entry != null) {
                     DiscoveryTier tier = ClientBestiaryCache.get().tiers().getOrDefault(row.entry.id(), DiscoveryTier.UNDISCOVERED);
                     if (tier == DiscoveryTier.UNDISCOVERED) {
-                        gg.setTooltipForNextFrame(font, Component.literal(tier.unlockHint()), mouseX, mouseY);
+                        gg.setTooltipForNextFrame(font, tier.unlockHint(), mouseX, mouseY);
                     }
                 }
             }
@@ -376,11 +379,28 @@ public final class BestiaryScreen extends Screen {
         super.render(gg, mouseX, mouseY, partialTick);
     }
 
+    /**
+     * Why the list is blank.
+     *
+     * <p>Three distinguishable causes and they used to share one blank panel: the search matched
+     * nothing, the server has not sent its entries yet, or the pack ships none at all. A player
+     * cannot tell "type something else" from "wait a moment" from "this is broken" without being
+     * told which it is.
+     */
+    private Component emptyListMessage() {
+        if (entries.isEmpty()) {
+            return Component.translatable("bestiary.wizards_and_beasts.empty.no_entries");
+        }
+        return Component.translatable("bestiary.wizards_and_beasts.empty.no_matches");
+    }
+
     private void renderDetail(GuiGraphics gg, BestiaryEntry entry) {
         int dx = x + 132;
         int dy = y + 10;
         DiscoveryTier tier = ClientBestiaryCache.get().tiers().getOrDefault(entry.id(), DiscoveryTier.UNDISCOVERED);
-        Component name = tier == DiscoveryTier.UNDISCOVERED ? Component.literal("???") : entry.displayName();
+        Component name = tier == DiscoveryTier.UNDISCOVERED
+                ? Component.translatable("bestiary.wizards_and_beasts.entry.unobserved")
+                : entry.displayName();
         gg.drawString(font, name, dx, dy, WizardsPalette.TEXT);
         dy += 12;
 
@@ -399,10 +419,11 @@ public final class BestiaryScreen extends Screen {
         int textX = portraitX + portraitSize + 8;
         int textW = 176 - (portraitSize + 8);
         if (tier == DiscoveryTier.UNDISCOVERED) {
-            gg.drawWordWrap(font, Component.literal(tier.unlockHint()), textX, portraitY, textW, WizardsPalette.TEXT_DIM);
+            gg.drawWordWrap(font, tier.unlockHint(), textX, portraitY, textW, WizardsPalette.TEXT_DIM);
             return;
         }
-        gg.drawString(font, Component.literal("MM Rating: ").append(ministryGrade(entry.mmRating())), textX, portraitY, WizardsPalette.TEXT_DIM);
+        gg.drawString(font, Component.translatable("bestiary.wizards_and_beasts.field.rating",
+                ministryGrade(entry.mmRating())), textX, portraitY, WizardsPalette.TEXT_DIM);
         int loreY = portraitY + 12;
         if (tier.ordinal() >= DiscoveryTier.ENCOUNTERED.ordinal()) {
             gg.drawWordWrap(font, entry.shortLore(), textX, loreY, textW, WizardsPalette.TEXT);
@@ -410,16 +431,28 @@ public final class BestiaryScreen extends Screen {
         }
         dy = Math.max(portraitY + portraitSize + 6, loreY);
         if (tier.ordinal() >= DiscoveryTier.ENCOUNTERED.ordinal()) {
-            Component habitatLine = Component.literal("Habitat: ").append(entry.habitat());
+            Component habitatLine =
+                    Component.translatable("bestiary.wizards_and_beasts.field.habitat", entry.habitat());
             gg.drawWordWrap(font, habitatLine, dx, dy, 176, WizardsPalette.TEXT_DIM);
             dy += font.wordWrapHeight(habitatLine, 176) + 2;
-            Component sizeLine = Component.literal("Size: " + entry.size());
+            Component sizeLine =
+                    Component.translatable("bestiary.wizards_and_beasts.field.size", sizeName(entry.size()));
             gg.drawWordWrap(font, sizeLine, dx, dy, 176, WizardsPalette.TEXT_DIM);
             dy += font.wordWrapHeight(sizeLine, 176) + 2;
         }
         if (tier.ordinal() >= DiscoveryTier.STUDIED.ordinal()) {
             gg.drawWordWrap(font, entry.fullLore(), dx, dy, 176, WizardsPalette.TEXT);
+        } else {
+            // Something still to earn: say so, rather than ending the page on blank parchment that
+            // reads as a missing lore key.
+            gg.drawWordWrap(font, tier.unlockHint(), dx, dy, 176, WizardsPalette.TEXT_DIM);
         }
+    }
+
+    /** {@code LARGE} rendered as localised copy rather than the raw enum constant. */
+    private static Component sizeName(BestiarySize size) {
+        return Component.translatable(
+                "bestiary.wizards_and_beasts.size." + size.name().toLowerCase(Locale.ROOT));
     }
 
     /**

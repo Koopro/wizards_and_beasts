@@ -75,6 +75,7 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.BRASS_CAULDRON.get());
         dropSelf(ModBlocks.WIZARDING_COPPER_CAULDRON.get());
         dropSelf(ModBlocks.PEWTER_CAULDRON.get());
+        dropSelf(ModBlocks.OCCAMY_EGGSHELL.get());
         dropSelf(ModBlocks.FLOO_GRATE.get());
         dropSelf(ModBlocks.SPELL_TEACHER.get());
         add(ModBlocks.DELUMINATOR_LIGHT.get(), noDrop());

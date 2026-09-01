@@ -33,8 +33,8 @@ public final class TraceService {
     }
 
     /**
-     * Registers one committed offence: files it permanently and adds heat, scaled by the offender's priors
-     * for that same offence.
+     * Registers one committed offence: files it permanently, adds heat, and — for the paperwork offences
+     * that carry one — assesses the fine. All three scale by the offender's priors for that same offence.
      *
      * @return the wanted level after the report, or {@link WantedLevel#CLEAR} when the Trace is off
      */
@@ -43,27 +43,48 @@ public final class TraceService {
             return WantedLevel.CLEAR;
         }
         PlayerMinistryRecord before = MinistryRecords.get(offender);
-        float gain = offence.notoriety() * before.repeatMultiplier(offence);
+        float priors = before.repeatMultiplier(offence);
+        float gain = offence.notoriety() * priors;
 
         MinistryRecords.mutate(offender, record -> record.withOffence(offence, gain));
         PlayerMinistryRecord after = MinistryRecords.get(offender);
 
         announce(offender, offence, before.wantedLevel(), after.wantedLevel());
+
+        // Filed first, billed second, so the fine notice follows the record of what it is for. The
+        // multiplier passed is the one measured *before* this offence was filed — the same value the
+        // notoriety gain used — so heat and fine escalate in step and a first offence is unscaled in both.
+        MinistryFines.assessFor(offender, offence, priors);
+
+        // Standing reads the *act*, not the heat. The Ministry axis already tracks notoriety on its
+        // own, so a deed on this trigger is for the other axes — a crime that says something about
+        // who you are becoming rather than about how badly you are wanted.
+        at.koopro.wizardsandbeasts.standing.deed.DeedService.onOffence(offender, offence.getSerializedName());
         return after.wantedLevel();
     }
 
     /**
-     * Cools heat for a player who is not currently being sought. Called from the Ministry tick.
+     * Cools heat for a player who is not currently being sought, or warms it for one who is ignoring a
+     * bill. Called from the Ministry tick.
      *
-     * <p>Only notoriety decays — the criminal file never does. A fugitive or a serving prisoner cools not
-     * at all: you do not become less wanted by hiding from a sentence you already have.
+     * <p>Only notoriety moves — the criminal file never does. A fugitive or a serving prisoner cools not
+     * at all: you do not become less wanted by hiding from a sentence you already have. Neither does a
+     * debtor: an unpaid fine is the mechanical reason a paperwork offence cannot simply be waited out, and
+     * it slowly heats instead, capped well short of a manhunt by {@link FineSchedule#DEBT_HEAT_CEILING}.
      */
     public static void decay(ServerPlayer player, int elapsedTicks) {
         if (!isActive()) {
             return;
         }
         PlayerMinistryRecord record = MinistryRecords.get(player);
-        if (record.notoriety() <= 0.0f || record.fugitive() || record.isServingSentence()) {
+        if (record.owesFine()) {
+            float heat = FineSchedule.debtHeat(record.notoriety(), elapsedTicks);
+            if (heat > 0.0f) {
+                MinistryRecords.mutate(player, r -> r.withNotoriety(r.notoriety() + heat));
+            }
+            return;
+        }
+        if (!FineSchedule.mayCool(record.notoriety(), false, record.fugitive(), record.isServingSentence())) {
             return;
         }
         float shed = DECAY_PER_SECOND * (elapsedTicks / 20.0f);

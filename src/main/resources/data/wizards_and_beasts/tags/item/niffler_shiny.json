@@ -13,6 +13,7 @@
     "minecraft:netherite_ingot",
     "minecraft:lapis_lazuli",
     "minecraft:quartz",
-    "minecraft:redstone"
+    "minecraft:redstone",
+    "wizards_and_beasts:golden_snidget_feather"
   ]
 }

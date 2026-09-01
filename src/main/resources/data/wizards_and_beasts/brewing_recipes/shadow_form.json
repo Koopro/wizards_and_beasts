@@ -1,0 +1,15 @@
+{
+  "ingredients": [
+    {
+      "item": "wizards_and_beasts:hidebehind_shadow_essence",
+      "count": 2
+    },
+    {
+      "item": "wizards_and_beasts:demiguise_hair",
+      "count": 1
+    }
+  ],
+  "cauldronTier": "copper",
+  "heatTimeTicks": 500,
+  "outputBrewId": "wizards_and_beasts:shadow_form"
+}

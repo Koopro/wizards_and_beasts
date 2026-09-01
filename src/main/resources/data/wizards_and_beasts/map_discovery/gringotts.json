@@ -1,0 +1,7 @@
+{
+  "type": "blocks",
+  "blocks": "wizards_and_beasts:landmark/gringotts",
+  "threshold": 120,
+  "marker": "wizards_and_beasts:gringotts",
+  "label": "map.wizards_and_beasts.landmark.gringotts"
+}

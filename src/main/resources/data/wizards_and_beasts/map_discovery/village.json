@@ -1,0 +1,6 @@
+{
+  "type": "structure",
+  "structure_tag": "minecraft:village",
+  "marker": "wizards_and_beasts:village",
+  "label": "map.wizards_and_beasts.landmark.village"
+}

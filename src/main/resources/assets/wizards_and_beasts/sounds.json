@@ -14,7 +14,173 @@
       }
     ]
   },
+  "broom_wind_slow": {
+    "subtitle": "subtitles.wizards_and_beasts.broom_wind_slow",
+    "sounds": [
+      {
+        "name": "minecraft:mob/enderdragon/wings1",
+        "volume": 0.35,
+        "pitch": 0.62
+      },
+      {
+        "name": "minecraft:mob/enderdragon/wings2",
+        "volume": 0.32,
+        "pitch": 0.58
+      }
+    ]
+  },
+  "broom_wind_mid": {
+    "subtitle": "subtitles.wizards_and_beasts.broom_wind_mid",
+    "sounds": [
+      {
+        "name": "minecraft:item/elytra/elytra_loop1",
+        "volume": 0.45,
+        "pitch": 0.95
+      },
+      {
+        "name": "minecraft:item/elytra/elytra_loop2",
+        "volume": 0.45,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "broom_wind_fast": {
+    "subtitle": "subtitles.wizards_and_beasts.broom_wind_fast",
+    "sounds": [
+      {
+        "name": "minecraft:item/elytra/elytra_loop3",
+        "volume": 0.5,
+        "pitch": 1.28
+      },
+      {
+        "name": "minecraft:item/elytra/elytra_loop4",
+        "volume": 0.5,
+        "pitch": 1.35
+      }
+    ]
+  },
+  "broom_boost_school": {
+    "subtitle": "subtitles.wizards_and_beasts.broom_boost_school",
+    "sounds": [
+      {
+        "name": "minecraft:item/firecharge/use",
+        "volume": 0.45,
+        "pitch": 0.75
+      }
+    ]
+  },
+  "broom_boost_standard": {
+    "subtitle": "subtitles.wizards_and_beasts.broom_boost_standard",
+    "sounds": [
+      {
+        "name": "minecraft:item/firecharge/use",
+        "volume": 0.5,
+        "pitch": 0.95
+      }
+    ]
+  },
+  "broom_boost_racing": {
+    "subtitle": "subtitles.wizards_and_beasts.broom_boost_racing",
+    "sounds": [
+      {
+        "name": "minecraft:entity/firework/launch1",
+        "volume": 0.55,
+        "pitch": 1.25
+      }
+    ]
+  },
+  "broom_boost_firebolt": {
+    "subtitle": "subtitles.wizards_and_beasts.broom_boost_firebolt",
+    "sounds": [
+      {
+        "name": "minecraft:entity/firework/launch1",
+        "volume": 0.6,
+        "pitch": 1.55
+      },
+      {
+        "name": "minecraft:item/firecharge/use",
+        "volume": 0.4,
+        "pitch": 1.6
+      }
+    ]
+  },
+  "broom_boost_heavy": {
+    "subtitle": "subtitles.wizards_and_beasts.broom_boost_heavy",
+    "sounds": [
+      {
+        "name": "minecraft:mob/enderdragon/wings3",
+        "volume": 0.55,
+        "pitch": 0.55
+      }
+    ]
+  },
+  "broom_crash_minor": {
+    "subtitle": "subtitles.wizards_and_beasts.broom_crash_minor",
+    "sounds": [
+      {
+        "name": "minecraft:block/wood/break1",
+        "volume": 0.55,
+        "pitch": 1.15
+      },
+      {
+        "name": "minecraft:block/wood/break2",
+        "volume": 0.55,
+        "pitch": 1.05
+      }
+    ]
+  },
+  "broom_crash_severe": {
+    "subtitle": "subtitles.wizards_and_beasts.broom_crash_severe",
+    "sounds": [
+      {
+        "name": "minecraft:block/wood/break3",
+        "volume": 0.85,
+        "pitch": 0.72
+      },
+      {
+        "name": "minecraft:random/explode1",
+        "volume": 0.45,
+        "pitch": 1.35
+      }
+    ]
+  },
+  "broom_mount": {
+    "subtitle": "subtitles.wizards_and_beasts.broom_mount",
+    "sounds": [
+      {
+        "name": "minecraft:block/wood/step1",
+        "volume": 0.5,
+        "pitch": 0.85
+      },
+      {
+        "name": "minecraft:mob/enderdragon/wings4",
+        "volume": 0.25,
+        "pitch": 1.4
+      }
+    ]
+  },
+  "broom_dismount": {
+    "subtitle": "subtitles.wizards_and_beasts.broom_dismount",
+    "sounds": [
+      {
+        "name": "minecraft:block/wood/step4",
+        "volume": 0.45,
+        "pitch": 0.95
+      }
+    ]
+  },
+  "broom_polish_apply": {
+    "subtitle": "subtitles.wizards_and_beasts.broom_polish_apply",
+    "sounds": [
+      {
+        "name": "minecraft:item/honeycomb/wax_on",
+        "volume": 0.7,
+        "pitch": 1.1
+      }
+    ]
+  },
   "spell_cast_generic": {
+    "subtitle": "subtitles.wizards_and_beasts.spell_cast_generic",
     "sounds": [
       {
         "name": "minecraft:entity.evoker.prepare_summon",
@@ -25,6 +191,7 @@
     ]
   },
   "spell_cast_dark": {
+    "subtitle": "subtitles.wizards_and_beasts.spell_cast_dark",
     "sounds": [
       {
         "name": "minecraft:mob/blaze/death",
@@ -34,6 +201,7 @@
     ]
   },
   "spell_cast_charm": {
+    "subtitle": "subtitles.wizards_and_beasts.spell_cast_charm",
     "sounds": [
       {
         "name": "minecraft:mob/allay/idle_with_item1",
@@ -43,6 +211,7 @@
     ]
   },
   "spell_impact_generic": {
+    "subtitle": "subtitles.wizards_and_beasts.spell_impact_generic",
     "sounds": [
       {
         "name": "minecraft:block.amethyst_cluster.break",
@@ -53,6 +222,7 @@
     ]
   },
   "spell_impact_expelliarmus": {
+    "subtitle": "subtitles.wizards_and_beasts.spell_impact_expelliarmus",
     "sounds": [
       {
         "name": "minecraft:entity.player.attack.strong",
@@ -63,6 +233,7 @@
     ]
   },
   "spell_impact_stupefy": {
+    "subtitle": "subtitles.wizards_and_beasts.spell_impact_stupefy",
     "sounds": [
       {
         "name": "minecraft:block.copper_bulb.turn_off",
@@ -73,6 +244,7 @@
     ]
   },
   "spell_impact_avada": {
+    "subtitle": "subtitles.wizards_and_beasts.spell_impact_avada",
     "sounds": [
       {
         "name": "minecraft:entity.evoker.prepare_summon",
@@ -83,6 +255,7 @@
     ]
   },
   "spell_fizzle": {
+    "subtitle": "subtitles.wizards_and_beasts.spell_fizzle",
     "sounds": [
       {
         "name": "minecraft:block.fire.extinguish",
@@ -93,6 +266,7 @@
     ]
   },
   "wand_equip": {
+    "subtitle": "subtitles.wizards_and_beasts.wand_equip",
     "sounds": [
       {
         "name": "minecraft:item/armor/equip_leather1",
@@ -102,6 +276,7 @@
     ]
   },
   "wand_unequip": {
+    "subtitle": "subtitles.wizards_and_beasts.wand_unequip",
     "sounds": [
       {
         "name": "minecraft:block.bamboo_wood_fence_gate.open",
@@ -112,6 +287,7 @@
     ]
   },
   "wand_swing": {
+    "subtitle": "subtitles.wizards_and_beasts.wand_swing",
     "sounds": [
       {
         "name": "minecraft:entity.player.attack.sweep",
@@ -122,6 +298,7 @@
     ]
   },
   "patronus_summon": {
+    "subtitle": "subtitles.wizards_and_beasts.patronus_summon",
     "sounds": [
       {
         "name": "minecraft:entity.allay.item_given",
@@ -138,6 +315,7 @@
     ]
   },
   "protego_raise": {
+    "subtitle": "subtitles.wizards_and_beasts.protego_raise",
     "sounds": [
       {
         "name": "minecraft:block.enchantment_table.use",
@@ -148,6 +326,7 @@
     ]
   },
   "protego_block": {
+    "subtitle": "subtitles.wizards_and_beasts.protego_block",
     "sounds": [
       {
         "name": "minecraft:enchant.thorns.hit",
@@ -158,6 +337,7 @@
     ]
   },
   "protego_shatter": {
+    "subtitle": "subtitles.wizards_and_beasts.protego_shatter",
     "sounds": [
       {
         "name": "minecraft:block.glass.break",
@@ -168,6 +348,7 @@
     ]
   },
   "protego_horribilis_absorb": {
+    "subtitle": "subtitles.wizards_and_beasts.protego_horribilis_absorb",
     "sounds": [
       {
         "name": "minecraft:block.respawn_anchor.charge",
@@ -178,6 +359,7 @@
     ]
   },
   "protego_totalum_raise": {
+    "subtitle": "subtitles.wizards_and_beasts.protego_totalum_raise",
     "sounds": [
       {
         "name": "minecraft:block.beacon.activate",
@@ -188,6 +370,7 @@
     ]
   },
   "protego_maxima_raise": {
+    "subtitle": "subtitles.wizards_and_beasts.protego_maxima_raise",
     "sounds": [
       {
         "name": "minecraft:block.beacon.power_select",
@@ -198,6 +381,7 @@
     ]
   },
   "spell_clash": {
+    "subtitle": "subtitles.wizards_and_beasts.spell_clash",
     "sounds": [
       {
         "name": "minecraft:block.amethyst_cluster.break",
@@ -313,6 +497,7 @@
     ]
   },
   "floo_whoosh": {
+    "subtitle": "subtitles.wizards_and_beasts.floo_whoosh",
     "sounds": [
       {
         "name": "minecraft:block.portal.travel",
@@ -323,6 +508,7 @@
     ]
   },
   "floo_ignite": {
+    "subtitle": "subtitles.wizards_and_beasts.floo_ignite",
     "sounds": [
       {
         "name": "minecraft:block.fire.ambient",
@@ -339,6 +525,7 @@
     ]
   },
   "floo_land": {
+    "subtitle": "subtitles.wizards_and_beasts.floo_land",
     "sounds": [
       {
         "name": "minecraft:block.fire.extinguish",
@@ -450,6 +637,237 @@
         "type": "event",
         "volume": 1.0,
         "pitch": 0.9
+      }
+    ]
+  },
+  "sneakoscope_spin": {
+    "subtitle": "subtitles.wizards_and_beasts.sneakoscope_spin",
+    "sounds": [
+      {
+        "name": "minecraft:entity.bee.loop",
+        "type": "event",
+        "volume": 0.8,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "sneakoscope_whirr": {
+    "subtitle": "subtitles.wizards_and_beasts.sneakoscope_whirr",
+    "sounds": [
+      {
+        "name": "minecraft:entity.bee.loop_aggressive",
+        "type": "event",
+        "volume": 0.9,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "sneakoscope_shriek": {
+    "subtitle": "subtitles.wizards_and_beasts.sneakoscope_shriek",
+    "sounds": [
+      {
+        "name": "minecraft:block.conduit.attack.target",
+        "type": "event",
+        "volume": 0.7,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "sneakoscope_focus": {
+    "subtitle": "subtitles.wizards_and_beasts.sneakoscope_focus",
+    "sounds": [
+      {
+        "name": "minecraft:block.amethyst_block.chime",
+        "type": "event",
+        "volume": 0.6,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "butterbeer_fizz": {
+    "subtitle": "subtitles.wizards_and_beasts.butterbeer_fizz",
+    "sounds": [
+      {
+        "name": "minecraft:block.brewing_stand.brew",
+        "type": "event",
+        "volume": 0.5,
+        "pitch": 1.6
+      },
+      {
+        "name": "minecraft:block.beehive.drip",
+        "type": "event",
+        "volume": 0.7,
+        "pitch": 1.3
+      }
+    ]
+  },
+  "butterbeer_chug": {
+    "subtitle": "subtitles.wizards_and_beasts.butterbeer_chug",
+    "sounds": [
+      {
+        "name": "minecraft:entity.generic.drink",
+        "type": "event",
+        "volume": 0.9,
+        "pitch": 0.8
+      },
+      {
+        "name": "minecraft:block.honey_block.slide",
+        "type": "event",
+        "volume": 0.4,
+        "pitch": 1.1
+      }
+    ]
+  },
+  "floo_travel_loop": {
+    "subtitle": "subtitles.wizards_and_beasts.floo_travel_loop",
+    "sounds": [
+      {
+        "name": "minecraft:block.portal.ambient",
+        "volume": 0.5,
+        "pitch": 1.6,
+        "type": "event"
+      },
+      {
+        "name": "minecraft:block.fire.ambient",
+        "volume": 0.4,
+        "pitch": 1.3,
+        "type": "event"
+      }
+    ]
+  },
+  "floo_arrival": {
+    "subtitle": "subtitles.wizards_and_beasts.floo_arrival",
+    "sounds": [
+      {
+        "name": "minecraft:block.respawn_anchor.deplete",
+        "volume": 0.6,
+        "pitch": 1.4,
+        "type": "event"
+      },
+      {
+        "name": "minecraft:entity.blaze.shoot",
+        "volume": 0.35,
+        "pitch": 0.8,
+        "type": "event"
+      }
+    ]
+  },
+  "floo_fail_sputter": {
+    "subtitle": "subtitles.wizards_and_beasts.floo_fail_sputter",
+    "sounds": [
+      {
+        "name": "minecraft:block.fire.extinguish",
+        "volume": 0.7,
+        "pitch": 0.7,
+        "type": "event"
+      },
+      {
+        "name": "minecraft:block.lava.extinguish",
+        "volume": 0.4,
+        "pitch": 1.5,
+        "type": "event"
+      }
+    ]
+  },
+  "floo_sealed": {
+    "subtitle": "subtitles.wizards_and_beasts.floo_sealed",
+    "sounds": [
+      {
+        "name": "minecraft:block.iron_door.close",
+        "volume": 0.6,
+        "pitch": 0.5,
+        "type": "event"
+      },
+      {
+        "name": "minecraft:block.note_block.bass",
+        "volume": 0.5,
+        "pitch": 0.6,
+        "type": "event"
+      }
+    ]
+  },
+  "apparition_crack_wizard": {
+    "subtitle": "subtitles.wizards_and_beasts.apparition_crack_wizard",
+    "sounds": [
+      {
+        "name": "minecraft:entity.firework_rocket.blast",
+        "volume": 0.6,
+        "pitch": 1.6,
+        "type": "event"
+      },
+      {
+        "name": "minecraft:entity.generic.explode",
+        "volume": 0.35,
+        "pitch": 1.9,
+        "type": "event"
+      }
+    ]
+  },
+  "apparition_crack_elf": {
+    "subtitle": "subtitles.wizards_and_beasts.apparition_crack_elf",
+    "sounds": [
+      {
+        "name": "minecraft:entity.firework_rocket.blast",
+        "volume": 0.5,
+        "pitch": 2.0,
+        "type": "event"
+      },
+      {
+        "name": "minecraft:entity.firework_rocket.blast_far",
+        "volume": 0.45,
+        "pitch": 2.0,
+        "type": "event"
+      }
+    ]
+  },
+  "apparition_crack_muffled": {
+    "subtitle": "subtitles.wizards_and_beasts.apparition_crack_muffled",
+    "sounds": [
+      {
+        "name": "minecraft:entity.firework_rocket.blast_far",
+        "volume": 0.3,
+        "pitch": 1.3,
+        "type": "event"
+      },
+      {
+        "name": "minecraft:entity.generic.explode",
+        "volume": 0.25,
+        "pitch": 1.2,
+        "type": "event"
+      }
+    ]
+  },
+  "apparition_splinch": {
+    "subtitle": "subtitles.wizards_and_beasts.apparition_splinch",
+    "sounds": [
+      {
+        "name": "minecraft:block.slime_block.break",
+        "volume": 0.8,
+        "pitch": 0.6,
+        "type": "event"
+      },
+      {
+        "name": "minecraft:block.wood.break",
+        "volume": 0.7,
+        "pitch": 0.5,
+        "type": "event"
+      }
+    ]
+  },
+  "apparition_windup": {
+    "subtitle": "subtitles.wizards_and_beasts.apparition_windup",
+    "sounds": [
+      {
+        "name": "minecraft:item.firecharge.use",
+        "volume": 0.5,
+        "pitch": 0.9,
+        "type": "event"
+      },
+      {
+        "name": "minecraft:entity.phantom.flap",
+        "volume": 0.5,
+        "pitch": 0.6,
+        "type": "event"
       }
     ]
   }

@@ -1,0 +1,20 @@
+{
+  "type": "wizards_and_beasts:add_item",
+  "conditions": [
+    {
+      "condition": "neoforge:loot_table_id",
+      "loot_table_id": "wizards_and_beasts:blocks/mandrake_crop"
+    },
+    {
+      "condition": "minecraft:block_state_property",
+      "block": "wizards_and_beasts:mandrake_crop",
+      "properties": {
+        "age": "7"
+      }
+    }
+  ],
+  "item": "wizards_and_beasts:baby_mandrake",
+  "min_count": 1,
+  "max_count": 1,
+  "chance": 0.25
+}

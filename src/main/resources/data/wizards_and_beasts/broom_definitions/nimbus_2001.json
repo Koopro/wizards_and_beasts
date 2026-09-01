@@ -22,11 +22,23 @@
     {"translate": "broom_lore.wizards_and_beasts.nimbus_2001.2"}
   ],
   "model_slots": {
-    "shaft": "wizards_and_beasts:swept",
+    "shaft": "wizards_and_beasts:racing",
     "tail_cap": "wizards_and_beasts:finial",
     "binding": "wizards_and_beasts:brass_band",
     "bristles": "wizards_and_beasts:blade",
     "footstrap": "wizards_and_beasts:leather",
     "accent": "wizards_and_beasts:nameplate"
-  }
+  },
+  "model": "wizards_and_beasts:broom_nimbus_2001",
+  "texture": "wizards_and_beasts:textures/entity/broom/nimbus_2001.png",
+  "handlingProfile": "racing",
+  "yawDrift": 0.01,
+  "momentumRetention": 0.92,
+  "wobbleAtBoost": 0.0,
+  "boostFovPunch": 0.16,
+  "crashDamageMultiplier": 1.15,
+  "boostSound": "wizards_and_beasts:broom_boost_racing",
+  "idleLoopSound": "wizards_and_beasts:broom_wind_fast",
+  "trailParticle": "wizards_and_beasts:broom_trail_gold",
+  "passengerOffset": [0.0, -0.4375, 0.04]
 }

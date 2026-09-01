@@ -5,10 +5,12 @@ import at.koopro.wizardsandbeasts.client.gui.WizardsAndBeastsUiTokens;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.skill.data.PlayerSkillData;
 import at.koopro.wizardsandbeasts.skill.Skill;
+import at.koopro.wizardsandbeasts.skill.SkillEffectSummary;
 import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 
 import java.util.List;
 
@@ -89,7 +91,13 @@ public final class SkillTreeRenderHelper {
         int spent = Math.max(0, earned - unspent);
         String left = I18n.get("screen.wizards_and_beasts.skill_tree.footer", unspent, earned,
                 SkillSystemAPI.MAX_SKILL_POINTS, spent);
-        String right = I18n.get("screen.wizards_and_beasts.skill_tree.controls");
+        // Once a point is spent, "how do I undo this" is the more useful of the two hints, and the
+        // drag/scroll hint has already done its job. Refund is not a stub and never was:
+        // `/wandb skill respec` carries no permission gate and refunds pointCost * level for every
+        // allocated node, so the only thing missing was a player ever being told it exists.
+        String right = I18n.get(spent > 0
+                ? "screen.wizards_and_beasts.skill_tree.respec_hint"
+                : "screen.wizards_and_beasts.skill_tree.controls");
 
         // Text is never scaled — the font has one legible size, and the panel scale exists to fit
         // the chrome to the window, not to shrink prose out of readability.
@@ -137,53 +145,109 @@ public final class SkillTreeRenderHelper {
      * the whole card carry the state: gold once the node is started, the region's own colour
      * before that.
      */
+    /**
+     * The hover card.
+     *
+     * <p>It grew two things it was missing. First, <b>what the node actually does</b>: the card used
+     * to show only the authored {@code description} prose, which is a separate field from the
+     * {@code effects} the game executes, so a rebalance that edited the number and not the sentence
+     * left the tooltip quietly lying. The effect lines come straight out of
+     * {@link SkillEffectSummary}, which reads the same field the cast does. Second, <b>which
+     * prerequisite is missing</b>: "allocate a connected star first" is true but unhelpful on a chart
+     * of 163 nodes, so the neighbours that would open it are named.
+     *
+     * <p>Height is measured rather than fixed. The old card was a constant 110px for every node,
+     * which is why nothing longer than two wrapped description lines could ever have been shown.
+     */
     public static void renderTooltipCard(GuiGraphics graphics, Font font, Skill skill, int mouseX, int mouseY,
-                                         int level, int points, boolean adjacencyOpen, boolean sealed) {
+                                         int level, int points, boolean adjacencyOpen, boolean sealed,
+                                         List<Component> prerequisites) {
         int w = WizardsAndBeastsUiTokens.SkillTree.TOOLTIP_WIDTH;
-        int h = WizardsAndBeastsUiTokens.SkillTree.TOOLTIP_HEIGHT;
+        int inner = w - 16;
+
+        boolean maxed = level >= skill.getMaxLevel();
+        boolean started = level > 0;
+        boolean affordable = points >= skill.getPointCost();
+        int regionTint = SkillTreeChartTextures.regionTint(skill.getTree());
+        int accent = started ? SkillTreeChartTextures.GOLD : regionTint;
+
+        List<String> descLines = wrap(font, safeText(skill.getDescription(), "No description."), inner, 2);
+
+        // What one more point buys, when there is one to buy; otherwise what the node is giving now.
+        // Those are different numbers on a multi-level node, and that is the choice being made.
+        int shownLevel = maxed ? skill.getMaxLevel() : Math.max(1, level + (started ? 1 : 0));
+        List<Component> effects = SkillEffectSummary.lines(skill, shownLevel);
+
+        List<String> prereqLines = List.of();
+        if (!sealed && !started && !adjacencyOpen && !prerequisites.isEmpty()) {
+            String joined = prerequisites.stream().map(Component::getString)
+                    .collect(java.util.stream.Collectors.joining(", "));
+            prereqLines = wrap(font,
+                    I18n.get("screen.wizards_and_beasts.skill_tree.requires_any", joined), inner, 2);
+        }
+
+        int h = TOOLTIP_PAD_TOP
+                + descLines.size() * LINE
+                + STATS_BLOCK
+                + (effects.isEmpty() ? 0 : LINE + effects.size() * LINE)
+                + prereqLines.size() * LINE
+                + TOOLTIP_PAD_BOTTOM;
+
         int tooltipX = Math.min(mouseX + WizardsAndBeastsUiTokens.SkillTree.TOOLTIP_OFFSET_X,
                 net.minecraft.client.Minecraft.getInstance().getWindow().getGuiScaledWidth() - w - 8);
         int tooltipY = Math.min(mouseY + WizardsAndBeastsUiTokens.SkillTree.TOOLTIP_OFFSET_Y,
                 net.minecraft.client.Minecraft.getInstance().getWindow().getGuiScaledHeight() - h - 8);
-
-        int regionTint = SkillTreeChartTextures.regionTint(skill.getTree());
-        boolean maxed = level >= skill.getMaxLevel();
-        boolean started = level > 0;
-        int accent = started ? SkillTreeChartTextures.GOLD : regionTint;
+        tooltipY = Math.max(4, tooltipY);
 
         // The panel art is night void with an indigo frame; a light tint would wash it out, so it
         // is only nudged toward the accent rather than painted with it.
         McStylePanel.drawSkinPanel(graphics, SKIN, tooltipX, tooltipY, w, h);
         // Inset by the panel's own 8px nine-slice border, so the rule sits in the card rather than
         // across its frame.
-        McStylePanel.drawSkinDivider(graphics, SKIN, tooltipX + 8, tooltipY + 17, w - 16);
+        McStylePanel.drawSkinDivider(graphics, SKIN, tooltipX + 8, tooltipY + 17, inner);
 
-        graphics.drawString(font, resolveDisplayName(skill.getDisplayName()),
-                tooltipX + 8, tooltipY + 7, accent, false);
-        List<String> descLines = wrap(font, safeText(skill.getDescription(), "No description."), w - 16, 2);
-        int descY = tooltipY + 24;
+        int textX = tooltipX + 8;
+        graphics.drawString(font, resolveDisplayName(skill.getDisplayName()), textX, tooltipY + 7, accent, false);
+
+        int y = tooltipY + 24;
         for (String line : descLines) {
-            graphics.drawString(font, line, tooltipX + 8, descY, 0xFFCED3E4, false);
-            descY += 10;
+            graphics.drawString(font, line, textX, y, 0xFFCED3E4, false);
+            y += LINE;
         }
 
-        int statsY = tooltipY + 48;
         graphics.drawString(font, "Level: " + level + "/" + skill.getMaxLevel(),
-                tooltipX + 8, statsY, SkillTreeChartTextures.NIGHT_TEXT_DIM, false);
+                textX, y, SkillTreeChartTextures.NIGHT_TEXT_DIM, false);
         graphics.drawString(font, "Cost: " + skill.getPointCost() + " SP",
-                tooltipX + 8, statsY + 10, SkillTreeChartTextures.NIGHT_TEXT_DIM, false);
+                textX, y + LINE, SkillTreeChartTextures.NIGHT_TEXT_DIM, false);
 
         String constellation = I18n.get("skilltree.region." + skill.getTree().getId() + ".constellation");
         boolean namedConstellation = !constellation.startsWith("skilltree.");
         McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.regionGlyph(skill.getTree()),
-                tooltipX + 8 + SkillTreeChartTextures.REGION_GLYPH_SIZE / 2, statsY + 24,
+                textX + SkillTreeChartTextures.REGION_GLYPH_SIZE / 2, y + LINE * 2 + 4,
                 SkillTreeChartTextures.REGION_GLYPH_SIZE, SkillTreeChartTextures.withAlpha(regionTint, 220));
         graphics.drawString(font, skill.getTree().getDisplayName()
                         + (namedConstellation ? " (" + constellation + ")" : ""),
-                tooltipX + 10 + SkillTreeChartTextures.REGION_GLYPH_SIZE, statsY + 20,
+                textX + 2 + SkillTreeChartTextures.REGION_GLYPH_SIZE, y + LINE * 2,
                 SkillTreeChartTextures.withAlpha(regionTint, 220), false);
+        y += STATS_BLOCK;
 
-        boolean affordable = points >= skill.getPointCost();
+        if (!effects.isEmpty()) {
+            String header = maxed || !started
+                    ? I18n.get("screen.wizards_and_beasts.skill_tree.effects")
+                    : I18n.get("screen.wizards_and_beasts.skill_tree.next_level");
+            graphics.drawString(font, header, textX, y, SkillTreeChartTextures.NIGHT_TEXT_DIM, false);
+            y += LINE;
+            for (Component effect : effects) {
+                graphics.drawString(font, effect, textX + 4, y, EFFECT_TEXT, false);
+                y += LINE;
+            }
+        }
+
+        for (String line : prereqLines) {
+            graphics.drawString(font, line, textX, y, WizardsAndBeastsUiTokens.SkillTree.STATUS_WARN, false);
+            y += LINE;
+        }
+
         String actionLine;
         int actionColor;
         if (sealed) {
@@ -192,22 +256,36 @@ public final class SkillTreeRenderHelper {
             actionLine = I18n.exists(SEALED_TOOLTIP_KEY) ? I18n.get(SEALED_TOOLTIP_KEY) : "Sealed";
             actionColor = WizardsAndBeastsUiTokens.SkillTree.STATUS_WARN;
         } else if (maxed) {
-            actionLine = "Maxed";
+            actionLine = I18n.get("screen.wizards_and_beasts.skill_tree.maxed");
             actionColor = SkillTreeChartTextures.GOLD;
         } else if (started || adjacencyOpen) {
             if (affordable) {
-                actionLine = started ? "Click to level up" : "Click to allocate";
+                actionLine = I18n.get(started
+                        ? "screen.wizards_and_beasts.skill_tree.level_up"
+                        : "screen.wizards_and_beasts.skill_tree.allocate");
                 actionColor = SkillTreeChartTextures.GOLD;
             } else {
-                actionLine = "Need " + (skill.getPointCost() - points) + " more SP";
+                actionLine = I18n.get("screen.wizards_and_beasts.skill_tree.need_points",
+                        skill.getPointCost() - points);
                 actionColor = WizardsAndBeastsUiTokens.SkillTree.STATUS_WARN;
             }
         } else {
-            actionLine = "Locked — allocate a connected star first";
+            actionLine = I18n.get("screen.wizards_and_beasts.skill_tree.locked");
             actionColor = WizardsAndBeastsUiTokens.SkillTree.STATUS_WARN;
         }
-        graphics.drawString(font, actionLine, tooltipX + 8, tooltipY + h - 15, actionColor, false);
+        graphics.drawString(font, actionLine, textX, tooltipY + h - 15, actionColor, false);
     }
+
+    /** Line height for every stacked text row in the card. */
+    private static final int LINE = 10;
+    /** Title, rule and the gap before the first description line. */
+    private static final int TOOLTIP_PAD_TOP = 24;
+    /** Level, cost and the region row. */
+    private static final int STATS_BLOCK = LINE * 3 + 2;
+    /** Room for the action line plus the panel bottom border. */
+    private static final int TOOLTIP_PAD_BOTTOM = 20;
+    /** Effect lines: brighter than the dim stat rows, because they are the reason to buy the node. */
+    private static final int EFFECT_TEXT = 0xFFDCE6C8;
 
     /**
      * Resolves a node's description for display.

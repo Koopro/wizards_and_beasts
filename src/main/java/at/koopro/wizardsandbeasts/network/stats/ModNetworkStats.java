@@ -12,5 +12,9 @@ public final class ModNetworkStats {
                 PlayerStatsSyncPayload.TYPE,
                 PlayerStatsSyncPayload.STREAM_CODEC,
                 ClientPayloadHandlers::handlePlayerStatsSync);
+        registrar.playToClient(
+                StatLevelUpS2CPayload.TYPE,
+                StatLevelUpS2CPayload.STREAM_CODEC,
+                ClientPayloadHandlers::handleStatLevelUp);
     }
 }

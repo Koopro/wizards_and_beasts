@@ -12,10 +12,13 @@ import at.koopro.wizardsandbeasts.apparition.charge.Destabilization;
 import at.koopro.wizardsandbeasts.apparition.sidealong.SideAlongService;
 import at.koopro.wizardsandbeasts.apparition.splinch.SplinchDamageTypes;
 import at.koopro.wizardsandbeasts.apparition.splinch.SplinchResolver;
+import at.koopro.wizardsandbeasts.apparition.splinch.SplinchTags;
 import at.koopro.wizardsandbeasts.apparition.splinch.SplinchTier;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 import at.koopro.wizardsandbeasts.ministry.law.MagicalOffence;
+import at.koopro.wizardsandbeasts.ministry.licence.LicenseType;
+import at.koopro.wizardsandbeasts.ministry.licence.MinistryLicences;
 import at.koopro.wizardsandbeasts.ministry.law.TraceService;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
@@ -27,10 +30,10 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
@@ -68,14 +71,21 @@ public final class ApparitionServerLogic {
     }
 
     /**
-     * Whether the player holds a Ministry licence.
+     * Whether the player holds a Ministry licence — by examination, or on paper.
      *
-     * <p>Not a gate. Unlicensed Apparition is illegal, not impossible — Harry, Ron and Hermione do it
-     * throughout <i>Deathly Hallows</i> — so this feeds the miss multiplier and the Trace, and refuses
-     * nothing. See {@code SplinchResolver.UNLICENSED_MULTIPLIER}.
+     * <p>Two OR'd sources, neither replacing the other: the {@code apparitionLicensed} flag
+     * {@link at.koopro.wizardsandbeasts.apparition.licence.ApparitionLicence} sets on passing the test,
+     * and a valid {@link LicenseType#APPARITION} scroll carried in the pack. A physical licence that
+     * the Apparition system did not recognise would be a prop.
+     *
+     * <p>Whether this is a <i>gate</i> depends on the Ministry. On its own it is not: unlicensed
+     * Apparition is illegal, not impossible — Harry, Ron and Hermione do it throughout
+     * <i>Deathly Hallows</i> — so it feeds the miss multiplier and the Trace. With
+     * {@link Module#MINISTRY} switched on, {@link #canBeginAttempt} refuses outright; see there.
      */
     public static boolean isLicensed(ServerPlayer player) {
-        return PlayerAbilityHelper.isApparitionLicensed(player);
+        return PlayerAbilityHelper.isApparitionLicensed(player)
+                || MinistryLicences.has(player, LicenseType.APPARITION);
     }
 
     /** Elf-magic Apparates without a test, a licence, a wizard heritage, or regard for wards that bind wizards. */
@@ -110,33 +120,84 @@ public final class ApparitionServerLogic {
      * The full gate, transient checks included. Called once when an attempt begins; a ward, a cooldown or an
      * existing splinch stops it here, before any charge exists to burn.
      */
-    public static boolean canBeginAttempt(ServerPlayer player) {
-        if (!ModuleManager.isEnabled(Module.PLAYER_ABILITIES)) {
-            return false;
+    /**
+     * The gate itself, as an answer rather than as a side effect.
+     *
+     * <p>Says nothing to the player: {@link #announce} does that, and {@link ApparitionService} is what puts
+     * the two together. Split apart so a caller can ask why without triggering a message, and so the message
+     * for a reason lives on the reason.
+     */
+    public static ApparitionStartResult evaluateStart(ServerPlayer player) {
+        // Apparition's own switch, and the ability framework that delivers its keybind. Both, because they
+        // gate different things: an operator turning off every player ability should not leave Apparition
+        // running, and an operator turning off Apparition alone should not have to disable Legilimency and
+        // the Animagus form to do it.
+        if (!ModuleManager.isEnabled(Module.APPARITION)
+                || !ModuleManager.isEnabled(Module.PLAYER_ABILITIES)) {
+            return ApparitionStartResult.REJECTED_MODULE_OFF;
         }
         if (!canApparate(player)) {
-            fail(player, "apparition.wizards_and_beasts.fail.untrained");
-            return false;
+            return ApparitionStartResult.REJECTED_UNTRAINED;
         }
         if (isSplinched(player)) {
-            fail(player, "apparition.wizards_and_beasts.fail.splinched");
-            return false;
+            return ApparitionStartResult.REJECTED_SPLINCHED;
         }
-        int cooldown = PlayerAbilityHelper.getApparitionCooldownTicks(player);
-        if (cooldown > 0) {
-            failTransient(player, "apparition.wizards_and_beasts.fail.cooldown");
-            return false;
+        // Papers. Only a gate while the Ministry is switched on, which is the line
+        // ApparitionLicence's own header draws: earning a licence must never depend on the Ministry
+        // module, but the Ministry is exactly what *cares* that you hold one. With MINISTRY off the
+        // canon behaviour is unchanged — the jump goes through, taxed by the Trace and the splinch
+        // multiplier — and elf-magic is never asked for paperwork it was never issued.
+        if (TraceService.isActive() && !isElfApparition(player) && !isLicensed(player)) {
+            return ApparitionStartResult.REJECTED_UNLICENSED;
+        }
+        if (PlayerAbilityHelper.getApparitionCooldownTicks(player) > 0) {
+            return ApparitionStartResult.REJECTED_COOLDOWN;
         }
         if (!(player.level() instanceof ServerLevel level)) {
-            return false;
+            return ApparitionStartResult.REJECTED_MODULE_OFF;
         }
         // Origin ward. A ward at either end fails the attempt cleanly — no cooldown, no splinch.
         if (isWarded(level, player, player.getBoundingBox())) {
-            fail(player, "apparition.wizards_and_beasts.fail.warded_origin");
-            return false;
+            return ApparitionStartResult.REJECTED_WARDED_ORIGIN;
         }
-        return true;
+        return ApparitionStartResult.STARTED;
     }
+
+    /** Tells the player what a result means, if it means anything worth saying. */
+    public static void announce(ServerPlayer player, ApparitionStartResult result) {
+        String key = result.messageKey();
+        if (key == null) {
+            return;
+        }
+        if (result.isTransientMessage()) {
+            failTransient(player, key);
+        } else {
+            fail(player, key);
+        }
+    }
+
+    /**
+     * How far a journey has to be before arriving from it turns the stomach.
+     *
+     * <p>Above the blink range a practised wizard has ({@code 12..30} blocks), so this is a mark of distance
+     * travelled rather than a tax on every jump.
+     */
+    private static final double TRAVEL_SICKNESS_DISTANCE = 64.0;
+    /** Two seconds of it. Long enough to feel, too short to fight in. */
+    private static final int TRAVEL_SICKNESS_TICKS = 40;
+
+    /**
+     * The sputter: what a jump costs when it was held to the end and then had nowhere to go.
+     *
+     * <p>Deliberately shorter than any success and far shorter than a splinch lockout, and deliberately
+     * charged <b>only</b> on failures that happen at the far end of a charge — a destination that never
+     * resolved, or one that turned out to be warded. The refusals in {@link #canBeginAttempt} charge nothing
+     * at all: declining to start something and then penalising the player for it is how a gate becomes a
+     * punishment.
+     */
+    // Package-private rather than private so the acceptance test can assert the three cooldown lengths are
+    // actually three lengths. It is a constant, not a seam: nothing writes it.
+    static final int FAILED_ATTEMPT_COOLDOWN_TICKS = 30;
 
     /** Ticks the {@code apparition_deliberation} node adds to the window floor. */
     private static final int DELIBERATION_NODE_TICKS = 3;
@@ -155,13 +216,19 @@ public final class ApparitionServerLogic {
     // ── entry points ──
 
     /**
-     * Aimed, line-of-sight Apparition. Begins a {@link ApparitionTier#BLINK} charge; the destination is
-     * whatever the server's own raycast resolves at the moment of release, so the position the client aimed
-     * at is a preview and never an instruction.
+     * Aimed, line-of-sight Apparition. Begins a {@link ApparitionTier#BLINK} charge.
+     *
+     * <p><b>Takes no target.</b> It used to accept the client's picked block and position and then ignore
+     * both, which read as though the client chose the destination. It never did: the charge re-runs the
+     * server's own raycast every tick and resolves it at release, so a client-supplied position could only
+     * ever be a preview, and carrying one through the signature invited somebody to start trusting it.
+     *
+     * <p>Beginning with no viable spot in view is deliberate. The Determination clock does not advance until
+     * a destination exists ({@link ApparitionCharge#advance()}), so a wizard who starts while facing open sky
+     * simply holds, unhurried, until they find somewhere to go.
      */
-    public static void handleRequest(ServerPlayer caster, net.minecraft.core.BlockPos targetBlockPos,
-                                     Vec3 targetPosition) {
-        ApparitionChargeManager.begin(caster, ApparitionTier.BLINK, null);
+    public static void handleRequest(ServerPlayer caster) {
+        ApparitionService.tryStart(caster);
     }
 
     /**
@@ -170,14 +237,7 @@ public final class ApparitionServerLogic {
      * blink is a step.
      */
     public static void travelTo(ServerPlayer caster, ApparitionPoint point) {
-        if (!(caster.level() instanceof ServerLevel level)) {
-            return;
-        }
-        if (!level.dimension().equals(point.dimension())) {
-            fail(caster, "apparition.wizards_and_beasts.fail.other_world");
-            return;
-        }
-        ApparitionChargeManager.begin(caster, ApparitionTier.ANCHORED, point);
+        ApparitionService.tryStart(caster, point);
     }
 
     // ── resolution ──
@@ -193,29 +253,44 @@ public final class ApparitionServerLogic {
         if (!(caster.level() instanceof ServerLevel level)) {
             return;
         }
-        Vec3 origin = caster.position();
+        // Where the attempt began, not where the wizard drifted to while holding it — see
+        // ApparitionCharge#startPosition. This is the crack the neighbours hear and the spot a splinch
+        // leaves an arm on.
+        Vec3 origin = charge.startPosition();
         Vec3 destination = charge.destination();
 
         // An attempt that never found a viable spot simply never happened: nothing to arrive at, nothing to
         // be torn by. Invalid targets do not lock, so they cannot splinch you either.
         if (destination == null) {
-            fail(caster, "apparition.wizards_and_beasts.fail.no_destination");
+            failAttempt(caster, "apparition.wizards_and_beasts.fail.no_destination");
             return;
         }
         if (!isElfApparition(caster)
                 && isWarded(level, caster, boundsAt(caster, destination))) {
-            fail(caster, "apparition.wizards_and_beasts.fail.warded_destination");
+            failAttempt(caster, "apparition.wizards_and_beasts.fail.warded_destination");
             return;
         }
 
         @Nullable Player passenger = findSideAlongPassenger(caster);
         Destabilization effective = passenger == null ? destabilization : destabilization.asSideAlong();
-        SplinchTier tier = SplinchResolver.resolve(missTicks, effective);
+        // The ladder first, then the under-fire floor. Two different questions, answered in that order:
+        // how badly was this released, and was this wizard being shot at while releasing it.
+        SplinchTier computed = SplinchResolver.resolve(missTicks, effective);
+        SplinchTier tier = SplinchResolver.floorForWindupDamage(
+                computed,
+                effective.damageInstances(),
+                charge.tier() == ApparitionTier.ANCHORED,
+                effective.sideAlong(),
+                ApparitionRules.windupDamageMode());
+
+        // Captured before anybody is teleported: a passenger's own departure is a second crack, in a
+        // different place, and after applyOutcome they are no longer standing in it.
+        @Nullable Vec3 passengerOrigin = passenger == null ? null : passenger.position();
 
         applyOutcome(caster, level, charge, tier, origin, destination);
         if (passenger instanceof ServerPlayer sideAlong) {
             // Both parties splinch at the same tier — Yaxley does not get a gentler landing than Hermione.
-            applyOutcome(sideAlong, level, charge, tier, sideAlong.position(), destination);
+            applyOutcome(sideAlong, level, charge, tier, passengerOrigin, destination);
         }
 
         caster.causeFoodExhaustion(charge.tier().exhaustion());
@@ -225,27 +300,54 @@ public final class ApparitionServerLogic {
         reportUnlicensed(caster);
         // A side-along is one journey, not a standing arrangement.
         SideAlongService.clearPartner(caster);
-        ApparitionBroadcast.get().onResolved(caster, charge.tier(), tier, origin,
-                tier.arrives() ? destination : null,
-                ApparitionPresentationBroadcaster.crackRadius(caster),
-                ApparitionPresentationBroadcaster.crackVariant(caster));
+
+        // One journey, one signature: the crack belongs to the wizard whose magic this is, so a side-along
+        // passenger cracks like their carrier rather than announcing their own proficiency and heritage.
+        int radius = ApparitionPresentationBroadcaster.crackRadius(caster);
+        ApparitionCrackVariant variant = ApparitionPresentationBroadcaster.crackVariant(caster);
+        @Nullable Vec3 arrival = tier.arrives() ? destination : null;
+
+        ApparitionBroadcast.get().onResolved(caster, charge.tier(), tier, origin, arrival, radius, variant);
+        if (passenger instanceof ServerPlayer sideAlong && passengerOrigin != null) {
+            // Without this the passenger vanishes and arrives in total silence: the caster's own resolution
+            // packet is addressed to the people watching the caster, and nobody is watching them.
+            ApparitionBroadcast.get().onResolved(
+                    sideAlong, charge.tier(), tier, passengerOrigin, arrival, radius, variant);
+        }
     }
 
     private static void applyOutcome(ServerPlayer player, ServerLevel level, ApparitionCharge charge,
                                      SplinchTier tier, Vec3 origin, Vec3 destination) {
         if (tier.arrives()) {
+            // Off the broom first. A passenger's position is written by its vehicle every tick, so a
+            // teleport that leaves the rider mounted puts them at the destination for exactly one tick and
+            // then snaps them back — silently, with the jump's cooldown and exhaustion already charged.
+            if (player.isPassenger()) {
+                player.stopRiding();
+            }
+            // And nothing rides them through it either. Same reason the Floo puts passengers down: an
+            // entity left attached to somebody who is suddenly a thousand blocks away is a bug looking for
+            // a place to happen.
+            if (!player.getPassengers().isEmpty()) {
+                player.ejectPassengers();
+            }
             player.teleportTo(destination.x, destination.y, destination.z);
+            // Apparating out of a fall is an escape from it. Without this the accumulated distance is still
+            // on the player and the ground they arrive on collects it.
+            player.resetFallDistance();
             ApparitionPoint anchor = charge.anchor();
             if (anchor != null) {
                 // The saved facing, so a long journey does not end with the wizard spun around.
                 player.setYRot(anchor.yaw());
             }
+            applyTravelSickness(player, origin, destination);
+            ApparitionAdvancements.awardArrival(player);
         }
-        playArrival(level, origin, tier.arrives() ? destination : origin);
 
         if (!tier.isSplinch()) {
             return;
         }
+        ApparitionAdvancements.awardSplinch(player);
         if (tier.damage() > 0.0f) {
             player.hurt(level.damageSources().source(SplinchDamageTypes.SPLINCH), tier.damage());
         }
@@ -260,12 +362,20 @@ public final class ApparitionServerLogic {
     /**
      * Leaves part of what the wizard was carrying where they started. Ordinary item entities with an extended
      * life, so a bad jump is a scramble back rather than a deletion.
+     *
+     * <p><b>The pack only.</b> {@code Inventory.getContainerSize()} is 43 in 1.21.11 — the 36 pack slots plus
+     * seven equipment ones (the four armour pieces, the off-hand, body and saddle) — so iterating it tore
+     * worn robes off a wizard's back and the wand out of their off-hand. Splinching leaves behind what you
+     * were <i>carrying</i>; what you are wearing and holding goes through with you.
+     *
+     * <p>Slots holding {@link SplinchTags#SPLINCH_IMMUNE} are stepped over entirely, which is the hook a pack
+     * needs to keep a quest item survivable on a server where losing it cannot be undone.
      */
     private static void dropResidue(ServerPlayer player, ServerLevel level, SplinchTier tier, Vec3 origin) {
         List<Integer> occupied = new ArrayList<>();
-        int size = player.getInventory().getContainerSize();
-        for (int slot = 0; slot < size; slot++) {
-            if (!player.getInventory().getItem(slot).isEmpty()) {
+        for (int slot = 0; slot < Inventory.INVENTORY_SIZE; slot++) {
+            ItemStack stack = player.getInventory().getItem(slot);
+            if (!stack.isEmpty() && !stack.is(SplinchTags.SPLINCH_IMMUNE)) {
                 occupied.add(slot);
             }
         }
@@ -423,25 +533,39 @@ public final class ApparitionServerLogic {
                 Component.translatable(reasonKey));
     }
 
+    /**
+     * A charge that ran its course and came to nothing: the message, plus the sputter cooldown.
+     *
+     * <p>Distinct from {@link #fail}, which is for the gates. Three lengths, as they should be — a success
+     * costs the tier's own cooldown, a splinch costs its lockout, and getting all the way to the end with
+     * nowhere to arrive costs {@link #FAILED_ATTEMPT_COOLDOWN_TICKS}.
+     */
+    private static void failAttempt(ServerPlayer player, String reasonKey) {
+        fail(player, reasonKey);
+        PlayerAbilityHelper.setApparitionCooldownTicks(player, FAILED_ATTEMPT_COOLDOWN_TICKS);
+    }
+
     /** A refusal that resolves on its own in a moment; see {@link #fail}. */
     private static void failTransient(ServerPlayer player, String reasonKey) {
         PlayerFeedback.actionBar(player,
                 Component.translatable(reasonKey).withStyle(ChatFormatting.RED));
     }
 
-    private static void playArrival(ServerLevel level, Vec3 origin, Vec3 destination) {
-        level.playSound(null, net.minecraft.core.BlockPos.containing(origin),
-                SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.8f, 0.9f);
-        level.playSound(null, net.minecraft.core.BlockPos.containing(destination),
-                SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.8f, 1.0f);
-        spawnBurst(level, origin);
-        spawnBurst(level, destination);
-    }
-
-    private static void spawnBurst(ServerLevel level, Vec3 pos) {
-        level.sendParticles(net.minecraft.core.particles.ParticleTypes.PORTAL,
-                pos.x, pos.y + 1.0, pos.z, 40, 0.3, 0.5, 0.3, 0.1);
-        level.sendParticles(net.minecraft.core.particles.ParticleTypes.SMOKE,
-                pos.x, pos.y + 1.0, pos.z, 15, 0.25, 0.25, 0.25, 0.01);
+    /**
+     * The lurch of a long journey.
+     *
+     * <p>Squeezing a body through space costs something at the far end, and canon is consistent that the
+     * effect is nausea rather than injury. Kept short and unamplified: this is the moment of arrival being
+     * unpleasant, not a debuff to play around, and a blink across a courtyard is under the threshold and
+     * costs nothing at all.
+     *
+     * <p>Elf-magic is exempt. An elf crosses the country without ceremony, which is the whole point of it.
+     */
+    private static void applyTravelSickness(ServerPlayer player, Vec3 origin, Vec3 destination) {
+        if (isElfApparition(player) || origin.distanceTo(destination) < TRAVEL_SICKNESS_DISTANCE) {
+            return;
+        }
+        player.addEffect(new MobEffectInstance(
+                MobEffects.NAUSEA, TRAVEL_SICKNESS_TICKS, 0, false, false, true));
     }
 }

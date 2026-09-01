@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.entity.beast;
 
+import at.koopro.wizardsandbeasts.Config;
+import at.koopro.wizardsandbeasts.creature.AlphaRoster;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.registry.ModEntities;
@@ -53,6 +55,22 @@ public final class BeastSpawnHandler {
         daySpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("common_welsh_green"));
     }
 
+    /**
+     * The roster gate: whether this creature is allowed to appear on its own under the current
+     * {@code creatureNaturalSpawns} setting.
+     *
+     * <p>Read here rather than at registration time because the placement predicate is what runs per
+     * spawn attempt; deciding at registration would freeze the answer for the session and make the
+     * config need a restart. It is a cheap set lookup either way.
+     */
+    private static boolean spawnsNaturally(EntityType<?> entityType) {
+        return switch (Config.creatureNaturalSpawns) {
+            case NONE -> false;
+            case ALL -> true;
+            case ALPHA_ONLY -> AlphaRoster.mayNaturallySpawnInAlphaSlice(entityType);
+        };
+    }
+
     private static void daySpawn(RegisterSpawnPlacementsEvent event,
                                  DeferredHolder<EntityType<?>, ? extends EntityType<? extends PathfinderMob>> holder) {
         register(event, holder, true);
@@ -72,6 +90,9 @@ public final class BeastSpawnHandler {
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 (entityType, level, spawnReason, pos, random) -> {
                     if (!ModuleManager.isEnabled(Module.CREATURES)) {
+                        return false;
+                    }
+                    if (!spawnsNaturally(entityType)) {
                         return false;
                     }
                     if (!level.getBlockState(pos.below()).isSolidRender()) {

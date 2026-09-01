@@ -16,19 +16,61 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class ModifierStackTest {
 
+    /**
+     * The bounds moved from this class to {@link SpellPower}, and two of them changed meaning.
+     *
+     * <p>Damage is now soft-capped rather than truncated: it approaches the ceiling asymptotically,
+     * so an absurd input still lands on it but a merely-large one does not. Cooldown gained its own
+     * pair of bounds — a floor of 0.25 as the anti-spam guard and a ceiling of 2.0, rather than the
+     * damage ceiling of 3.0 it used to borrow, because a penalty stack that triples a cooldown reads
+     * as a spell being taken away.
+     */
     @Test
     void damageAndCooldown_clampToHardBounds() {
+        SpellPower.Bounds bounds = SpellPower.configuredBounds();
+
         ModifierStack high = new ModifierStack();
         high.multiplyDamage(50.0f, "test");
         high.multiplyCooldown(50.0f, "test");
-        assertEquals(ModifierStack.HARD_CAP, high.finalDamage());
-        assertEquals(ModifierStack.HARD_CAP, high.finalCooldown());
+        assertEquals(bounds.max(), high.finalDamage(), 1e-4f);
+        assertEquals(bounds.cooldownMax(), high.finalCooldown(), 1e-4f);
 
         ModifierStack low = new ModifierStack();
         low.multiplyDamage(0.001f, "test");
         low.multiplyCooldown(0.001f, "test");
-        assertEquals(ModifierStack.HARD_FLOOR, low.finalDamage());
-        assertEquals(ModifierStack.HARD_FLOOR, low.finalCooldown());
+        assertEquals(bounds.min(), low.finalDamage(), 1e-4f);
+        assertEquals(bounds.cooldownMin(), low.finalCooldown(), 1e-4f);
+    }
+
+    /**
+     * The named channels are set, never accumulated, so proficiency cannot be applied twice.
+     *
+     * <p>This is the invariant that failed before {@link SpellPower} existed: {@code SkillSystemAPI}
+     * pushed the proficiency tier into the situational bag and the cast site multiplied the
+     * proficiency curve on top of it.
+     */
+    @Test
+    void namedChannelsAreSetNotAccumulated() {
+        ModifierStack stack = new ModifierStack();
+        stack.setProficiency(1.2f, 0.9f);
+        stack.setProficiency(1.2f, 0.9f);
+        assertEquals(1.2f, stack.damageBreakdown().proficiency(), 1e-6f,
+                "a second set overwrites; it must not compound to 1.44");
+        assertEquals(0.9f, stack.cooldownBreakdown().proficiency(), 1e-6f);
+    }
+
+    @Test
+    void theThreeChannelsAreReportedSeparately() {
+        ModifierStack stack = new ModifierStack();
+        stack.multiplyDamage(1.1f, "wand");
+        stack.setProficiency(1.2f, 1.0f);
+        stack.setSkill(1.05f, 1.0f);
+
+        SpellPower.Breakdown power = stack.damageBreakdown();
+        assertEquals(1.1f, power.situational(), 1e-6f);
+        assertEquals(1.2f, power.proficiency(), 1e-6f);
+        assertEquals(1.05f, power.skill(), 1e-6f);
+        assertEquals(1.1f * 1.2f * 1.05f, power.total(), 1e-4f);
     }
 
     @Test
@@ -54,8 +96,8 @@ class ModifierStackTest {
         stack.multiplyDamage(absurd.damageMultiplier(), "wand");
         stack.multiplyCooldown(absurd.cooldownMultiplier(), "wand");
 
-        assertEquals(ModifierStack.HARD_CAP, stack.finalDamage());
-        assertEquals(ModifierStack.HARD_FLOOR, stack.finalCooldown());
+        assertEquals(SpellPower.configuredBounds().max(), stack.finalDamage(), 1e-4f);
+        assertEquals(SpellPower.configuredBounds().cooldownMin(), stack.finalCooldown(), 1e-4f);
     }
 
     @Test

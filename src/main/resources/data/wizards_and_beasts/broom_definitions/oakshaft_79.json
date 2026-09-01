@@ -24,11 +24,22 @@
     {"translate": "broom_lore.wizards_and_beasts.oakshaft_79.4"}
   ],
   "model_slots": {
-    "shaft": "wizards_and_beasts:plain",
+    "shaft": "wizards_and_beasts:heavy_oak",
     "tail_cap": "wizards_and_beasts:finial",
-    "binding": "wizards_and_beasts:cord",
-    "bristles": "wizards_and_beasts:ragged",
+    "binding": "wizards_and_beasts:iron_rings",
+    "bristles": "wizards_and_beasts:heavy",
     "footstrap": "wizards_and_beasts:leather",
     "accent": "wizards_and_beasts:none"
-  }
+  },
+  "model": "wizards_and_beasts:broom_oakshaft_79",
+  "texture": "wizards_and_beasts:textures/entity/broom/oakshaft_79.png",
+  "handlingProfile": "tank",
+  "yawDrift": 0.01,
+  "momentumRetention": 0.96,
+  "wobbleAtBoost": 0.0,
+  "crashDamageMultiplier": 0.7,
+  "boostSound": "wizards_and_beasts:broom_boost_heavy",
+  "idleLoopSound": "wizards_and_beasts:broom_wind_slow",
+  "trailParticle": "wizards_and_beasts:broom_trail_dust",
+  "passengerOffset": [0.0, -0.3125, -0.04]
 }

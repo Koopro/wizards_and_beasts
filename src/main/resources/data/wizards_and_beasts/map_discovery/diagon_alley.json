@@ -1,0 +1,7 @@
+{
+  "type": "blocks",
+  "blocks": "wizards_and_beasts:landmark/diagon_alley",
+  "threshold": 96,
+  "marker": "wizards_and_beasts:diagon_alley",
+  "label": "map.wizards_and_beasts.landmark.diagon_alley"
+}

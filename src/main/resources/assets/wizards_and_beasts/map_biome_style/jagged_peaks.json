@@ -1,0 +1,9 @@
+{
+  "biomes": [
+    "minecraft:jagged_peaks",
+    "minecraft:stony_peaks"
+  ],
+  "tile": 30,
+  "tint": "#9A9186",
+  "relief_tile": 6
+}

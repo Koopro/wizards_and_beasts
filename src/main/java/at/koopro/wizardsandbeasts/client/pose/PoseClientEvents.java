@@ -25,6 +25,7 @@ public final class PoseClientEvents {
 
     private static final FlightPosePass FLIGHT = new FlightPosePass();
     private static final CastPosePass CAST = new CastPosePass();
+    private static final ApparitionPosePass APPARITION = new ApparitionPosePass();
     private static final at.koopro.wizardsandbeasts.client.heritage.appearance.HeritageProportionPass
             HERITAGE_PROPORTION =
             new at.koopro.wizardsandbeasts.client.heritage.appearance.HeritageProportionPass();
@@ -39,6 +40,7 @@ public final class PoseClientEvents {
         event.enqueueWork(() -> {
             PlayerPoseLayer.get().register(FLIGHT);
             PlayerPoseLayer.get().register(CAST);
+            PlayerPoseLayer.get().register(APPARITION);
             PlayerPoseLayer.get().register(HERITAGE_PROPORTION);
         });
     }

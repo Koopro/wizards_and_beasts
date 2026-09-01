@@ -1,6 +1,8 @@
 package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.block.AmbientParticleBlock;
+import at.koopro.wizardsandbeasts.block.brew.WizardingCauldronBlock;
+import at.koopro.wizardsandbeasts.brew.CauldronTier;
 import at.koopro.wizardsandbeasts.block.FloatingCandleBlock;
 import at.koopro.wizardsandbeasts.block.HouseBannerBlock;
 import at.koopro.wizardsandbeasts.block.MallowsweetBlock;
@@ -70,21 +72,33 @@ final class WizardingWorldBlockRegistry {
                             .noOcclusion());
 
     /** Brew tint drifting off a cauldron's mouth — one-in-eight so a potions room simmers rather than smokes. */
-    private static AmbientParticleBlock cauldron(BlockBehaviour.Properties props, int argb) {
-        return new AmbientParticleBlock(props,
-                () -> new SpellTintParticleOptions(ModParticles.ARCANE_MOTE.get(), argb),
-                AmbientParticleBlock.Emission.ABOVE, 8);
+    /**
+     * A brewing cauldron.
+     *
+     * <p>Was an {@code AmbientParticleBlock} — a decorative block that emitted a tinted mote and knew
+     * nothing else. It is now a real station with a block entity, and it draws its own particles so
+     * the bubble rate and colour can follow what is actually in the pot.
+     *
+     * <p>The tint passed here is the <em>idle</em> colour of the metal; once a brew is running the
+     * block lerps from it towards the brew's own colour.
+     */
+    private static WizardingCauldronBlock cauldron(BlockBehaviour.Properties props,
+                                                    CauldronTier tier, int argb) {
+        return new WizardingCauldronBlock(props, tier, argb);
     }
 
-    static final DeferredBlock<AmbientParticleBlock> BRASS_CAULDRON =
+    static final DeferredBlock<WizardingCauldronBlock> BRASS_CAULDRON =
             ModBlocks.BLOCKS.registerBlock("brass_cauldron",
-                    props -> cauldron(props, 0xFF8FD6B0), RegistryUtils::metalCauldronProps);
-    static final DeferredBlock<AmbientParticleBlock> WIZARDING_COPPER_CAULDRON =
+                    props -> cauldron(props, CauldronTier.BRASS, 0xFF8FD6B0),
+                    RegistryUtils::metalCauldronProps);
+    static final DeferredBlock<WizardingCauldronBlock> WIZARDING_COPPER_CAULDRON =
             ModBlocks.BLOCKS.registerBlock("wizarding_copper_cauldron",
-                    props -> cauldron(props, 0xFFB08FD6), RegistryUtils::metalCauldronProps);
-    static final DeferredBlock<AmbientParticleBlock> PEWTER_CAULDRON =
+                    props -> cauldron(props, CauldronTier.COPPER, 0xFFB08FD6),
+                    RegistryUtils::metalCauldronProps);
+    static final DeferredBlock<WizardingCauldronBlock> PEWTER_CAULDRON =
             ModBlocks.BLOCKS.registerBlock("pewter_cauldron",
-                    props -> cauldron(props, 0xFF9AB5C2), RegistryUtils::metalCauldronProps);
+                    props -> cauldron(props, CauldronTier.PEWTER, 0xFF9AB5C2),
+                    RegistryUtils::metalCauldronProps);
     /**
      * Decorative grate block — no Floo Network travel logic.
      * LORE: Intended as a visual prop (fireplace surround), not a travel node.

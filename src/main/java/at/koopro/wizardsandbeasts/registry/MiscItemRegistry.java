@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.registry;
 
+import at.koopro.wizardsandbeasts.item.wearable.EarmuffsItem;
 import at.koopro.wizardsandbeasts.item.bestiary.BestiaryItem;
 import at.koopro.wizardsandbeasts.item.MinistryHandbookItem;
 import at.koopro.wizardsandbeasts.item.InkItem;
@@ -16,6 +17,11 @@ public final class MiscItemRegistry {
 
     public static final DeferredItem<BestiaryItem> BESTIARY =
             ModItems.ITEMS.registerItem("bestiary", props -> new BestiaryItem(props.stacksTo(1)));
+
+    /** The Herbology greenhouse's first lesson. See {@code MandrakeScream}. */
+    public static final DeferredItem<EarmuffsItem> EARMUFFS =
+            ModItems.ITEMS.registerItem("earmuffs",
+                    props -> new EarmuffsItem(props.stacksTo(1).equippable(EquipmentSlot.HEAD)));
 
     public static final DeferredItem<BlindfoldItem> BLINDFOLD =
             ModItems.ITEMS.registerItem("blindfold", props -> new BlindfoldItem(props.stacksTo(1).equippable(EquipmentSlot.HEAD)));

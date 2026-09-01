@@ -23,6 +23,11 @@
       "type": "text",
       "heading": "handbook.wizards_and_beasts.brooms.page4.heading",
       "body": "handbook.wizards_and_beasts.brooms.page4.body"
+    },
+    {
+      "type": "text",
+      "heading": "handbook.wizards_and_beasts.brooms.page5.heading",
+      "body": "handbook.wizards_and_beasts.brooms.page5.body"
     }
   ]
 }

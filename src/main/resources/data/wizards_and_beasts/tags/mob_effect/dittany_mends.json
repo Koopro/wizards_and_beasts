@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "wizards_and_beasts:sectumsempra_bleed",
+      "required": false
+    },
+    {
+      "id": "wizards_and_beasts:cruciatus_pain",
+      "required": false
+    },
+    {
+      "id": "wizards_and_beasts:sundered",
+      "required": false
+    },
+    {
+      "id": "wizards_and_beasts:furnunculus",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "parent": "wizards_and_beasts:progression/apparate",
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "wizards_and_beasts:dittany"
+    },
+    "title": {
+      "translate": "advancements.wizards_and_beasts.progression.splinch.title"
+    },
+    "description": {
+      "translate": "advancements.wizards_and_beasts.progression.splinch.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "splinched": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "splinched"
+    ]
+  ]
+}

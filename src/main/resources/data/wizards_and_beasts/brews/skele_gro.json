@@ -1,0 +1,29 @@
+{
+  "displayName": "brew.wizards_and_beasts.skele_gro.name",
+  "color": -1514800,
+  "flavorText": "Regrows bones. It is said to be an agonising night.",
+  "components": [
+    {
+      "type": "heal_and_cure",
+      "heal": 6.0,
+      "cure": [
+        "minecraft:weakness",
+        "minecraft:mining_fatigue"
+      ]
+    },
+    {
+      "type": "apply_effects",
+      "effects": [
+        {
+          "id": "minecraft:regeneration",
+          "duration": 400,
+          "amplifier": 1
+        },
+        {
+          "id": "minecraft:nausea",
+          "duration": 300
+        }
+      ]
+    }
+  ]
+}

@@ -209,8 +209,8 @@ public final class SpellCommands {
         ItemStack wandStack = WandHelper.getWandStack(player);
         if (!wandStack.isEmpty()) {
             WandStats wand = WandStatsResolver.resolve(wandStack, player.registryAccess());
-            float skillDamageMult = SkillSystemAPI.getDamageMultiplier(player, spell);
-            float skillCooldownMult = SkillSystemAPI.getCooldownMultiplier(player, spell);
+            float skillDamageMult = SkillSystemAPI.getSkillDamageMultiplier(player, spell);
+            float skillCooldownMult = SkillSystemAPI.getSkillCooldownMultiplier(player, spell);
             float effectiveDamage = spell.getBaseDamage() * skillDamageMult * wand.damageFor(spell);
             float effectiveCooldownTicks = spell.getBaseCooldownTicks() * skillCooldownMult * wand.cooldownFor(spell);
 

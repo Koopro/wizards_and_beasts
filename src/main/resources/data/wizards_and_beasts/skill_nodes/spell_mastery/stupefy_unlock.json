@@ -6,6 +6,10 @@
   "pointCost": 2,
   "effects": [
     {
+      "type": "learn_spell",
+      "spellId": "stupefy"
+    },
+    {
       "spellId": "stupefy",
       "bonusPerLevel": 0.08,
       "type": "spell_damage_bonus"

@@ -9,6 +9,9 @@ import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
+import at.koopro.wizardsandbeasts.standing.StandingService;
+import at.koopro.wizardsandbeasts.standing.gate.StandingGates;
+import at.koopro.wizardsandbeasts.standing.gate.StandingRequirement;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import net.minecraft.server.level.ServerPlayer;
 import at.koopro.wizardsandbeasts.spell.cast.ModifierStack;
@@ -49,41 +52,65 @@ public final class SkillSystemAPI {
     /**
      * Total damage multiplier = proficiency multiplier × skill multiplier.
      */
-    public static float getDamageMultiplier(ServerPlayer player, Spell spell) {
-        float profMult = spell.getProficiency(player).getDamageMultiplier();
-        float skillMult = PlayerSkillBonusData.forPlayer(player)
+    /**
+     * The skill web's damage multiplier for this caster and spell: the category bonus times the
+     * per-spell bonus.
+     *
+     * <p><b>Proficiency is not in here any more.</b> It used to be — this method multiplied in the
+     * {@code Proficiency} enum tier while {@code ProficiencyScaler}'s float curve was multiplied in
+     * separately at the cast site, so the same practice was paid for twice from two systems reading
+     * the same counter. Worse, the enum channel ignored {@code Module.PROFICIENCY}: switching the
+     * module off still handed out 1.2x at mastery. Proficiency now has exactly one owner, and it is
+     * the module-gated one.
+     *
+     * <p>The two halves come from different places on purpose. Category bonuses are pre-aggregated
+     * into {@link PlayerSkillBonusData} when allocation changes; per-spell bonuses live only in
+     * {@link SkillEffectCache}, which is computed on demand. Reading categories from the cache too
+     * would double-count them, since the cache aggregates both.
+     */
+    public static float getSkillDamageMultiplier(ServerPlayer player, Spell spell) {
+        float category = PlayerSkillBonusData.forPlayer(player)
                 .damageMultipliers()
                 .getOrDefault(spell.getCategory(), 1.0f);
-        return profMult * skillMult;
+        return category * perSpellDamageMultiplier(player, spell);
+    }
+
+    /** Skill-web cooldown multiplier: category reduction times the per-spell reduction. Lower is faster. */
+    public static float getSkillCooldownMultiplier(ServerPlayer player, Spell spell) {
+        float category = PlayerSkillBonusData.forPlayer(player)
+                .cooldownMultipliers()
+                .getOrDefault(spell.getCategory(), 1.0f);
+        return category * perSpellCooldownMultiplier(player, spell);
     }
 
     /**
-     * Total cooldown multiplier = proficiency multiplier × skill multiplier.
+     * The per-spell half, which until now went nowhere.
+     *
+     * <p>Seventeen shipped nodes — every {@code <spell>_unlock} in the web — declare a
+     * {@code spell_damage_bonus} or {@code spell_cooldown_reduction}. {@link SkillEffectCache}
+     * computed them correctly and exposed them through
+     * {@link SkillEffectCache#getSpellDamageMultiplier}, and nothing ever called it: cast time read
+     * {@link PlayerSkillBonusData}, which only carries per-<em>category</em> maps. Every one of those
+     * nodes described a benefit the game did not give.
+     *
+     * <p>Scoped to the per-spell maps precisely so the category half stays where it already worked.
      */
-    public static float getCooldownMultiplier(ServerPlayer player, Spell spell) {
-        float profMult = spell.getProficiency(player).getCooldownMultiplier();
-        float skillMult = PlayerSkillBonusData.forPlayer(player)
-                .cooldownMultipliers()
-                .getOrDefault(spell.getCategory(), 1.0f);
-        return profMult * skillMult;
+    private static float perSpellDamageMultiplier(ServerPlayer player, Spell spell) {
+        return getCache(player).getSpellOnlyDamageMultiplier(spell.getId());
     }
 
-    public static void applyDamageModifiers(ModifierStack stack, ServerPlayer player, Spell spell) {
-        float profMult = spell.getProficiency(player).getDamageMultiplier();
-        float skillMult = PlayerSkillBonusData.forPlayer(player)
-                .damageMultipliers()
-                .getOrDefault(spell.getCategory(), 1.0f);
-        stack.multiplyDamage(profMult, "proficiency");
-        stack.multiplyDamage(skillMult, "skill_tree");
+    private static float perSpellCooldownMultiplier(ServerPlayer player, Spell spell) {
+        return getCache(player).getSpellOnlyCooldownMultiplier(spell.getId());
     }
 
-    public static void applyCooldownModifiers(ModifierStack stack, ServerPlayer player, Spell spell) {
-        float profMult = spell.getProficiency(player).getCooldownMultiplier();
-        float skillMult = PlayerSkillBonusData.forPlayer(player)
-                .cooldownMultipliers()
-                .getOrDefault(spell.getCategory(), 1.0f);
-        stack.multiplyCooldown(profMult, "proficiency");
-        stack.multiplyCooldown(skillMult, "skill_tree");
+    /**
+     * Publish the skill channel into the cast's {@link ModifierStack}.
+     *
+     * <p>Damage and cooldown together, because they are one channel with two faces and setting only
+     * half of it is always a mistake.
+     */
+    public static void applySkillModifiers(ModifierStack stack, ServerPlayer player, Spell spell) {
+        stack.setSkill(getSkillDamageMultiplier(player, spell), getSkillCooldownMultiplier(player, spell));
     }
 
     // ── Validation ──
@@ -130,6 +157,18 @@ public final class SkillSystemAPI {
             return new UnlockCheck(false, "requirement_unmet");
         }
 
+        // Magical standing — last, and last on purpose. It is the only gate a player can move by
+        // playing differently, so it should be the reason they are told about once the fixed facts
+        // (audience, capability) have already passed. Skips entirely when no gate is authored, which
+        // is every default install.
+        if (!StandingGates.isEmpty()) {
+            StandingRequirement unmet = StandingGates.firstUnmet(
+                    skill.getTree(), skill.getId(), axis -> StandingService.bandOf(player, axis));
+            if (unmet != null) {
+                return new UnlockCheck(false, "standing_unmet");
+            }
+        }
+
         // Vocation is declarative identity only (web rework Phase 3): the web's travel cost under the
         // point cap does the differentiation the old mastery-band/opposition gate used to enforce.
         return new UnlockCheck(true, "ok");
@@ -164,7 +203,7 @@ public final class SkillSystemAPI {
         int newLevel = data.getSkillLevel(skillId) + 1;
         data.setSkillLevel(skillId, newLevel);
 
-        applyImmediateEffects(skill);
+        applyImmediateEffects(player, skill);
         SkillAttributeApplicator.applyAll(player);
         PlayerStatsSyncPayload.syncToPlayer(player); // KNOWLEDGE derives from skill nodes unlocked
         // A newly allocated node may grant an ability (legacy unlock_ability or grant_ability) → refresh
@@ -186,7 +225,7 @@ public final class SkillSystemAPI {
 
         PlayerSkillData data = getSkillData(player);
         data.setSkillLevel(skillId, skill.getMaxLevel());
-        applyImmediateEffects(skill);
+        applyImmediateEffects(player, skill);
         SkillAttributeApplicator.applyAll(player);
         PlayerStatsSyncPayload.syncToPlayer(player); // KNOWLEDGE derives from skill nodes unlocked
         at.koopro.wizardsandbeasts.network.skill.AbilityGrantsSyncS2CPayload.syncToPlayer(player);
@@ -248,17 +287,98 @@ public final class SkillSystemAPI {
         return n;
     }
 
+    /**
+     * Re-derives everything an allocation change can affect. Called from every refund path
+     * ({@code respec}, {@code reset}, {@code reset &lt;skill&gt;}) and from the login web migration.
+     *
+     * <p>The spell revoke lives here rather than in each command precisely because there are four
+     * callers and a fifth will be added eventually; a refund path that forgot to call it would leave
+     * the player holding a spell they no longer pay for. Idempotent — a still-allocated node
+     * re-asserts its spell, so calling this on an unchanged web changes nothing.
+     */
     public static void reconcileDerivedEffects(ServerPlayer player) {
         SkillAttributeApplicator.applyAll(player);
+        revokeWebTaughtSpells(player);
     }
 
-    private static void applyImmediateEffects(Skill skill) {
+    /**
+     * The effects that must be <em>pushed</em> at allocation time rather than derived on read.
+     *
+     * <p>Most effects are derived: abilities recompute from allocated nodes through
+     * {@link at.koopro.wizardsandbeasts.ability.grant.AbilityGrantService}, attributes are re-applied
+     * wholesale by {@link SkillAttributeApplicator}, and the multiplier maps are rebuilt from the
+     * cache. Spell knowledge is the exception, because it lives in {@code PlayerSpellData} as one flat
+     * set shared with the teacher and has no source column to derive from.
+     */
+    private static void applyImmediateEffects(ServerPlayer player, Skill skill) {
         for (SkillEffect effect : skill.getEffects()) {
             if (effect instanceof SkillEffect.UnlockAbility) {
                 // Ability availability is derived from unlocked skill levels via SkillEffectCache.
                 // Keep this branch explicit so unlock effects remain discoverable in one place.
+            } else if (effect instanceof SkillEffect.LearnSpell learn) {
+                teachSpell(player, learn.spellId());
             }
         }
+    }
+
+    /**
+     * Teaches a node's spell, recording it only if the player did not already know it.
+     *
+     * <p>The ledger entry is what {@link #revokeWebTaughtSpells} later acts on, and skipping it for a
+     * spell the player already had is the whole reason a respec cannot confiscate a lesson bought
+     * from a teacher with Knuts.
+     */
+    private static void teachSpell(ServerPlayer player, String spellId) {
+        var spell = at.koopro.wizardsandbeasts.spell.core.Spells.byId(spellId);
+        if (spell == null) {
+            return;
+        }
+        String canonicalId = spell.getId();
+        var spellData = player.getData(ModAttachments.SPELL_DATA.get());
+        if (spellData.knowsSpell(canonicalId)) {
+            return;
+        }
+        spellData.learnSpell(canonicalId);
+        getSkillData(player).recordWebTaughtSpell(canonicalId);
+        at.koopro.wizardsandbeasts.network.spell.SpellDataSyncS2CPayload.syncToPlayer(player);
+    }
+
+    /**
+     * Revokes every web-taught spell whose granting node is no longer allocated. Called from the
+     * respec path; safe to call at any time, since a still-allocated node simply re-asserts its spell.
+     *
+     * @return the number of spells forgotten
+     */
+    public static int revokeWebTaughtSpells(ServerPlayer player) {
+        PlayerSkillData data = getSkillData(player);
+        java.util.Set<String> stillGranted = new java.util.HashSet<>();
+        for (String nodeId : data.getUnlockedSkills().keySet()) {
+            Skill node = SkillTrees.byId(nodeId);
+            if (node == null) {
+                continue;
+            }
+            for (SkillEffect effect : node.getEffects()) {
+                if (effect instanceof SkillEffect.LearnSpell learn) {
+                    var spell = at.koopro.wizardsandbeasts.spell.core.Spells.byId(learn.spellId());
+                    stillGranted.add(spell != null ? spell.getId() : learn.spellId());
+                }
+            }
+        }
+
+        var spellData = player.getData(ModAttachments.SPELL_DATA.get());
+        int forgotten = 0;
+        for (String spellId : java.util.List.copyOf(data.getWebTaughtSpells())) {
+            if (stillGranted.contains(spellId)) {
+                continue;
+            }
+            spellData.forgetSpell(spellId);
+            data.forgetWebTaughtSpell(spellId);
+            forgotten++;
+        }
+        if (forgotten > 0) {
+            at.koopro.wizardsandbeasts.network.spell.SpellDataSyncS2CPayload.syncToPlayer(player);
+        }
+        return forgotten;
     }
 
     public static int getSpellGateOverride(ServerPlayer player, Spell spell) {

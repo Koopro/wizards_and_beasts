@@ -5,6 +5,10 @@
   "tree": "spell_mastery",
   "effects": [
     {
+      "type": "learn_spell",
+      "spellId": "lumos"
+    },
+    {
       "spellId": "lumos",
       "reductionPerLevel": 0.15,
       "type": "spell_cooldown_reduction"

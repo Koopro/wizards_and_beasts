@@ -1,0 +1,24 @@
+{
+  "displayName": "brew.wizards_and_beasts.wolfsbane_potion.name",
+  "color": -9732278,
+  "flavorText": "Does not cure lycanthropy. It lets the wolf keep a human mind.",
+  "components": [
+    {
+      "type": "apply_effects",
+      "effects": [
+        {
+          "id": "minecraft:resistance",
+          "duration": 3600
+        },
+        {
+          "id": "minecraft:night_vision",
+          "duration": 3600
+        }
+      ]
+    },
+    {
+      "type": "flourish",
+      "count": 12
+    }
+  ]
+}

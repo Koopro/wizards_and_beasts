@@ -1,0 +1,69 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "wizards_and_beasts:sneakoscope_spin",
+    "scale": 8.0,
+    "entries": [
+      {
+        "threshold": 0.0,
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/sneakoscope_spin_0"
+        }
+      },
+      {
+        "threshold": 1.0,
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/sneakoscope_spin_1"
+        }
+      },
+      {
+        "threshold": 2.0,
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/sneakoscope_spin_2"
+        }
+      },
+      {
+        "threshold": 3.0,
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/sneakoscope_spin_3"
+        }
+      },
+      {
+        "threshold": 4.0,
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/sneakoscope_spin_4"
+        }
+      },
+      {
+        "threshold": 5.0,
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/sneakoscope_spin_5"
+        }
+      },
+      {
+        "threshold": 6.0,
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/sneakoscope_spin_6"
+        }
+      },
+      {
+        "threshold": 7.0,
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/sneakoscope_spin_7"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "wizards_and_beasts:item/sneakoscope_spin_0"
+    }
+  }
+}

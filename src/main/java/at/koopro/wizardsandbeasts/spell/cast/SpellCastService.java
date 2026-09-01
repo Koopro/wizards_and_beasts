@@ -109,6 +109,7 @@ public final class SpellCastService {
                 spell == null || !Config.enforceSpellRequirements || spell.getRequirement().isMet(player, data),
                 spell != null && ObscurialRules.isDarkFormOnlySpell(spell) && !obscurialDark,
                 spell != null && obscurialDark && !ObscurialRules.isSpellAllowedInDarkForm(spell),
+                at.koopro.wizardsandbeasts.firewhisky.Firewhisky.isDrunk(player),
                 data.isOnCooldown(spellId, currentTick),
                 data.isGlobalCooldownActive(currentTick)));
         if (gate != null) {
@@ -139,6 +140,8 @@ public final class SpellCastService {
                     ObscurialCombatRules.applyBlockedCastPressureBacklash(player);
                     debugReject(player, SpellRejectCodes.withDetail(SpellRejectCodes.OBSCURIAL_DARK_RESTRICTED, spellId));
                 }
+                case TOO_DRUNK ->
+                        rejectWithHumanStress(player, SpellRejectCodes.TOO_DRUNK);
                 case ON_COOLDOWN ->
                         rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.COOLDOWN_ACTIVE, spellId));
                 case GLOBAL_COOLDOWN ->
@@ -250,6 +253,9 @@ public final class SpellCastService {
         if (offence != null) {
             at.koopro.wizardsandbeasts.ministry.law.TraceService.report(player, offence);
         }
+        // Magical standing: what a wizard repeatedly chooses to cast is the clearest statement they
+        // make about themselves. Returns immediately unless a datapack authored a spell_cast deed.
+        at.koopro.wizardsandbeasts.standing.deed.DeedService.onSpellCast(player, spellId);
         int newCount = data.getCastCount(spellId);
         long gcdEndTick = currentTick + GLOBAL_COOLDOWN_TICKS;
         data.setGlobalCooldownEndTick(gcdEndTick);

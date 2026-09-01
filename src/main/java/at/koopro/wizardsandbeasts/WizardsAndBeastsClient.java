@@ -25,6 +25,8 @@ import at.koopro.wizardsandbeasts.client.form.hud.FormDebugOverlay;
 import at.koopro.wizardsandbeasts.client.hud.MobEffectFullscreenOverlays;
 import at.koopro.wizardsandbeasts.client.spell.render.CrucioScreenRenderer;
 import at.koopro.wizardsandbeasts.client.hud.ObscurusOverlay;
+import at.koopro.wizardsandbeasts.client.hud.FirewhiskyBurnOverlay;
+import at.koopro.wizardsandbeasts.client.hud.SneakoscopeAlarmOverlay;
 import at.koopro.wizardsandbeasts.client.spell.hud.SpellDiamondOverlay;
 import at.koopro.wizardsandbeasts.client.debug.DebugHudRenderer;
 import at.koopro.wizardsandbeasts.client.debug.DebugKeyBindings;
@@ -54,16 +56,22 @@ public class WizardsAndBeastsClient {
         modEventBus.addListener(ClientSetup::registerRenderers);
         modEventBus.addListener(ClientSetup::registerLayers);
         modEventBus.addListener(ModParticleProviders::register);
+        modEventBus.addListener(at.koopro.wizardsandbeasts.client.brew.CauldronColors::register);
         modEventBus.addListener(BroomRiderRenderer::registerModifiers);
         modEventBus.addListener(FormRenderStateModifier::registerModifiers);
         modEventBus.addListener(EntityOutlines::registerModifiers);
         modEventBus.addListener(at.koopro.wizardsandbeasts.client.petrify.PetrifyRenderHandler::registerModifiers);
         modEventBus.addListener(
+                at.koopro.wizardsandbeasts.client.polyjuice.PolyjuiceRenderHandler::registerModifiers);
+        modEventBus.addListener(
                 at.koopro.wizardsandbeasts.client.heritage.appearance.HeritageAppearanceRenderState::registerModifiers);
+        modEventBus.addListener(
+                at.koopro.wizardsandbeasts.client.trinket.SneakoscopeSpinProperty::register);
         modEventBus.addListener(SpellKeyBindings::register);
         modEventBus.addListener(at.koopro.wizardsandbeasts.client.ability.AbilityFrameworkKeyBindings::register);
         modEventBus.addListener(this::registerGuiLayers);
         modEventBus.addListener(WizardsAndBeastsClient::registerMenus);
+        modEventBus.addListener(WizardsAndBeastsClient::registerMapStyleListeners);
         if (Config.enableDebugTools) {
             modEventBus.addListener(DebugKeyBindings::register);
         }
@@ -72,6 +80,9 @@ public class WizardsAndBeastsClient {
         NeoForge.EVENT_BUS.addListener(SpellClientInputHandler::onScroll);
         NeoForge.EVENT_BUS.addListener(BeamClientEvents::onLoggingOut);
         NeoForge.EVENT_BUS.addListener(BeamClientEvents::onEntityLeaveLevel);
+        // One more rule for the shared outline layer: anything hiding near a wizard who has
+        // eaten a Dirigible Plum. Per-viewer by construction -- see WrackspurtOutlineProvider.
+        at.koopro.wizardsandbeasts.client.wrackspurt.WrackspurtOutlineProvider.register();
         NeoForge.EVENT_BUS.addListener(ClientOutlineState::onLoggingOut);
         NeoForge.EVENT_BUS.addListener(ApparitionClientController::onRenderLevel);
         NeoForge.EVENT_BUS.addListener(LegilimencyVisionRenderer::onRenderLevel);
@@ -83,6 +94,7 @@ public class WizardsAndBeastsClient {
         NeoForge.EVENT_BUS.addListener(CharacterSheetKeyHandler::onClientTick);
         NeoForge.EVENT_BUS.addListener(StatHudOverlay::onClientTick);
         NeoForge.EVENT_BUS.addListener(at.koopro.wizardsandbeasts.client.ability.AbilityWheelController::onClientTick);
+        NeoForge.EVENT_BUS.addListener(at.koopro.wizardsandbeasts.client.spell.wheel.SpellWheelController::onClientTick);
     }
 
     private static void registerMenus(RegisterMenuScreensEvent event) {
@@ -93,15 +105,41 @@ public class WizardsAndBeastsClient {
         event.register(ModMenuTypes.HERMIONES_BAG.get(), HermionesBagScreen::new);
     }
 
+    /**
+     * The Marauder's Map's look, on the <em>resource</em> reload cycle rather than the datapack one.
+     *
+     * <p>Which tile sprite a biome gets and what ink a marker is drawn in are appearance, so a
+     * texture pack must be able to change them without a datapack and without the server agreeing.
+     * It also keeps art off the wire entirely: the server only ever sends a biome id and a marker
+     * type id, and this is where those become pixels.
+     */
+    private static void registerMapStyleListeners(
+            net.neoforged.neoforge.client.event.AddClientReloadListenersEvent event) {
+        event.addListener(
+                net.minecraft.resources.Identifier.fromNamespaceAndPath(
+                        WizardsAndBeastsMod.MODID, "map_biome_style_reload_listener"),
+                new at.koopro.wizardsandbeasts.client.map.style.MapStyleLoaders.Biomes());
+        event.addListener(
+                net.minecraft.resources.Identifier.fromNamespaceAndPath(
+                        WizardsAndBeastsMod.MODID, "map_marker_style_reload_listener"),
+                new at.koopro.wizardsandbeasts.client.map.style.MapStyleLoaders.Markers());
+    }
+
     private void registerGuiLayers(RegisterGuiLayersEvent event) {
         event.registerAboveAll(SpellDiamondOverlay.ID, SpellDiamondOverlay::render);
         event.registerAboveAll(ObscurusOverlay.ID, ObscurusOverlay::render);
         event.registerAboveAll(MobEffectFullscreenOverlays.ID, MobEffectFullscreenOverlays::render);
         event.registerAboveAll(CrucioScreenRenderer.ID, CrucioScreenRenderer::render);
         event.registerAboveAll(TransitionEffectRenderer.ID, TransitionEffectRenderer::render);
+        // Hearth before transit: the wash for standing in a fire has to draw under the spin for
+        // travelling through one, or a hop that begins in a grate flashes green over its own swirl.
+        event.registerAboveAll(at.koopro.wizardsandbeasts.client.floo.FlooHearthOverlay.ID,
+                at.koopro.wizardsandbeasts.client.floo.FlooHearthOverlay::render);
         event.registerAboveAll(at.koopro.wizardsandbeasts.client.floo.FlooTransitOverlay.ID,
                 at.koopro.wizardsandbeasts.client.floo.FlooTransitOverlay::render);
         event.registerAboveAll(StatHudOverlay.ID, StatHudOverlay::render);
+        event.registerAboveAll(SneakoscopeAlarmOverlay.ID, SneakoscopeAlarmOverlay::render);
+        event.registerAboveAll(FirewhiskyBurnOverlay.ID, FirewhiskyBurnOverlay::render);
         if (Config.enableDebugTools) {
             event.registerAboveAll(FormDebugOverlay.ID, FormDebugOverlay::render);
             event.registerAboveAll(DebugHudRenderer.ID, DebugHudRenderer::render);

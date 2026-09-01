@@ -6,8 +6,9 @@ import org.jspecify.annotations.NullMarked;
  * The two ways a wizard travels. They differ in what they cost to hold together, not in how they are aimed:
  * both charge, both open the same Deliberation window, both splinch by the same ladder.
  *
- * <p>{@link #ANCHORED} is deliberately legal in combat and practically impossible to finish under fire — a
- * seventy-tick hold that a single hit aborts. That is the balance mechanism; there is no combat lockout.
+ * <p>{@link #ANCHORED} is deliberately legal in combat and expensive to finish under fire — a seventy-tick
+ * hold that a single hit ends on the spot, and that no amount of good timing can bring in clean. That is the
+ * balance mechanism; there is no combat lockout.
  */
 @NullMarked
 public enum ApparitionTier {
@@ -15,7 +16,16 @@ public enum ApparitionTier {
     /** Line of sight, combat-viable. A short hold and a short window. */
     BLINK(10, 40, 1.0f, false),
 
-    /** To a memorised destination, any distance, same dimension. A long hold that damage ends. */
+    /**
+     * To a memorised destination, any distance, same dimension. A long hold that damage ends.
+     *
+     * <p>Anchored holds are harder to complete cleanly under fire: any damage during wind-up floors the
+     * outcome to at least {@code MAJOR}. Arriving while anchored and injured is possible but costly.
+     * Carrying a passenger under fire floors to {@code CATASTROPHIC}, which does not arrive at all.
+     *
+     * <p>The floor is applied by {@code SplinchResolver.floorForWindupDamage} rather than by the miss
+     * arithmetic, so it cannot be released past.
+     */
     ANCHORED(70, 1200, 6.0f, true);
 
     /** Blink range at proficiency 0. */

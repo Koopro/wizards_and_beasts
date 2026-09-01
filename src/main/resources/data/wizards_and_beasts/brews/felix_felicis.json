@@ -1,0 +1,18 @@
+{
+  "displayName": "brew.wizards_and_beasts.felix_felicis.name",
+  "color": -868018,
+  "flavorText": "Liquid luck. Desperately tricky to make, and disastrous if got wrong.",
+  "components": [
+    {
+      "type": "felix_felicis",
+      "durationTicks": 3600,
+      "strength": 2,
+      "cooldownTicks": 6000,
+      "overdose": "overdose"
+    },
+    {
+      "type": "flourish",
+      "count": 40
+    }
+  ]
+}

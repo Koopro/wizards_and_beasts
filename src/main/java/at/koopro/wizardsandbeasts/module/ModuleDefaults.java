@@ -73,6 +73,10 @@ public final class ModuleDefaults {
         // Three of ten heritages are alpha-available and the transformation triggers for the rest do
         // not exist yet, so PREVIEW rather than ENABLED: reachable, and not presented as finished.
         SHIPPED.put(Module.HERITAGE, ModuleState.PREVIEW);
+        // PREVIEW, which is exactly the state Apparition already had: it was gated on PLAYER_ABILITIES and
+        // inherited that module's PREVIEW. Splitting it into its own switch must not quietly promote or
+        // demote it in worlds that already exist.
+        SHIPPED.put(Module.APPARITION, ModuleState.PREVIEW);
     }
 
     private ModuleDefaults() {}

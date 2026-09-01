@@ -67,8 +67,11 @@ public final class SpellExecutor {
                 ctx.modifiers().multiplyDamage(WandComponents.getAllegianceScore(wandStack), "wand_foreign_master");
             }
         }
-        SkillSystemAPI.applyDamageModifiers(ctx.modifiers(), caster, spell);
-        SkillSystemAPI.applyCooldownModifiers(ctx.modifiers(), caster, spell);
+        // The two named channels, each set once by its owner. Everything else on the stack is
+        // situational and multiplies in freely. See SpellPower for why the split matters.
+        SkillSystemAPI.applySkillModifiers(ctx.modifiers(), caster, spell);
+        ctx.modifiers().setProficiency(
+                ctx.scalingProfile().damageMult(), ctx.scalingProfile().cooldownMult());
         WandStatsResolver.applyToStack(ctx.modifiers(), wand, spell);
         ObscurialCombatRules.applyCastModifiers(ctx.modifiers(), caster);
         at.koopro.wizardsandbeasts.skill.vocation.VocationAbilityHooks.applyCastModifiers(ctx.modifiers(), caster, spell);
@@ -87,8 +90,10 @@ public final class SpellExecutor {
             SpellCastTelemetry.recordCast(caster, true);
             level.playSound(null, caster.blockPosition(),
                     ModSounds.SPELL_FIZZLE.get(), SoundSource.PLAYERS, 0.5f, 1.05f + level.random.nextFloat() * 0.25f);
+            // Not a reject: the cast was legal and the wand simply failed, so this never goes through
+            // SpellRejectCodes / SpellDeniedS2CPayload \u2014 a misfire has no reason code to report.
             caster.displayClientMessage(
-                    Component.literal("\u00A77Your wand fizzles."), true);
+                    Component.translatable("wandcraft.cast.misfire"), true);
             return;
         }
         SpellCastTelemetry.recordCast(caster, false);
@@ -108,8 +113,10 @@ public final class SpellExecutor {
         ServerPlayer caster = ctx.caster();
         ItemStack wandStack = ctx.wandStack();
         WandStats wand = ctx.wandStats();
-        // TODO(skill_tree): keep damage stacking as base * proficiency * skill-tree multipliers.
-        float damageMultiplier = ctx.modifiers().finalDamage() * ctx.scalingProfile().damageMult();
+        // base * situational * proficiency * skill-tree, composed and soft-capped in one place.
+        // This used to multiply the scaling profile in by hand on top of an already-clamped stack,
+        // which is how a "hard cap" of 3.0 produced 4.5.
+        float damageMultiplier = ctx.modifiers().finalDamage();
         SpellProperties props = spell.getProperties();
         if (props == null) return;
 
@@ -135,7 +142,14 @@ public final class SpellExecutor {
                             scalingProfile.controlMult() * chargeMult,
                             scalingProfile.accuracyMult());
                 }
-                spell.spawnProjectile(level, caster, projectileProfile);
+                // The projectile carries the composed multiplier rather than recomputing damage from
+                // the caster on impact. Recomputing is what silently discarded this whole stack —
+                // wand corruption, allegiance, dark corruption, vocation, Niffler happiness, player
+                // stats — for every projectile spell in the mod, which is most of them.
+                float projectileDamageMult = SpellCastSupport.isFlipendo(spell)
+                        ? damageMultiplier * (projectileProfile.damageMult() / Math.max(1.0e-4f, scalingProfile.damageMult()))
+                        : damageMultiplier;
+                spell.spawnProjectile(level, caster, projectileProfile, projectileDamageMult);
             }
             case SELF -> {
                 boolean successful = false;
@@ -167,7 +181,7 @@ public final class SpellExecutor {
                 List<SpellEffectEntry> selfComponents = SpellEffectRunner.effectsOf(spell);
                 if (!selfComponents.isEmpty()) {
                     SpellEffectRunner.run(selfComponents, SpellEffectContext.ofSelf(caster, level)
-                            .withScaling(ctx.modifiers().finalDamage() * scalingProfile.damageMult(),
+                            .withScaling(damageMultiplier,
                                     scalingProfile.durationMult(), scalingProfile.controlMult()));
                     successful = true;
                 }

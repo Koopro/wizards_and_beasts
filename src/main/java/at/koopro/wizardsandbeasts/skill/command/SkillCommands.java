@@ -1,6 +1,9 @@
 package at.koopro.wizardsandbeasts.skill.command;
 
+import at.koopro.wizardsandbeasts.Config;
 import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
+import at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper;
+import at.koopro.wizardsandbeasts.currency.vault.PlayerVaultData;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.skill.data.PlayerSkillData;
@@ -263,6 +266,26 @@ public final class SkillCommands {
             ChatHelper.sendError(player, "You have no skills to respec.");
             return 0;
         }
+
+        // Charged before the refund, so a failed payment leaves the web exactly as it was.
+        // Gated on GRINGOTTS: with the currency module off there is no vault to bill, and a fee
+        // nobody can pay would make respec unreachable rather than costly.
+        int fee = Config.skillRespecCostKnuts;
+        if (fee > 0 && ModuleManager.isEnabled(Module.GRINGOTTS)) {
+            PlayerVaultData vault = player.getData(ModAttachments.VAULT_DATA.get());
+            long withdrawn = vault.withdrawSmartKnuts(fee);
+            if (withdrawn < fee) {
+                if (withdrawn > 0) {
+                    vault.depositKnuts(withdrawn); // all-or-nothing: never pocket a partial payment
+                }
+                long[] price = CurrencyHelper.fromKnuts(fee);
+                ChatHelper.sendError(player, "Respec costs "
+                        + CurrencyHelper.formatCurrency(price[0], price[1], price[2])
+                        + " — your vault is short.");
+                return 0;
+            }
+        }
+
         data.resetAll();
         SkillSystemAPI.reconcileDerivedEffects(player);
         PlayerStateSyncService.syncSkills(player);

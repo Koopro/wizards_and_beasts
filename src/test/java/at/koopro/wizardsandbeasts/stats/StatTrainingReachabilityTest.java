@@ -18,32 +18,28 @@ import static org.junit.jupiter.api.Assertions.fail;
  * <p>The event counts below are pinned rather than bounded so that retuning a constant in
  * {@link StatTraining} has to be a deliberate edit here too, with the new grind length visible in
  * the diff.
+ *
+ * <p>This used to carry its own transcription of the accumulator loop, which meant it could keep
+ * passing after the shipped loop changed underneath it — and the shipped loop did have a bug, a
+ * ceiling guard that re-read the player attachment it had not written to yet. The arithmetic now
+ * lives in {@link StatTrainingScaler#apply} and this drives it directly.
  */
 class StatTrainingReachabilityTest {
 
-    /**
-     * Replays {@code PlayerStatsAPI.addTrainingProgress}'s accumulator without needing a Player.
-     *
-     * <p>The real method's inner {@code while} can only ever run once per call, because
-     * {@link StatTrainingScaler#scale} tops out at the raw amount and every raw amount in
-     * {@link StatTraining} is well under 1.0.
-     */
+    /** Replays real training events against the real accumulator until the stat reaches the target. */
     private static int eventsToReach(float rawPerEvent, int targetStat) {
         int stat = 0;
-        float accumulator = 0f;
+        float progress = 0f;
         int events = 0;
         while (stat < targetStat) {
-            float scaled = StatTrainingScaler.scale(rawPerEvent, stat);
-            if (scaled <= 0f) {
+            StatTrainingScaler.Step step = StatTrainingScaler.apply(stat, progress, rawPerEvent);
+            if (step.stat() == stat && step.progress() == progress) {
                 fail("training stalled at stat " + stat + " — raw " + rawPerEvent
-                        + " scales to zero, so " + targetStat + " is unreachable");
+                        + " moves nothing, so " + targetStat + " is unreachable");
             }
-            accumulator += scaled;
+            stat = step.stat();
+            progress = step.progress();
             events++;
-            if (accumulator >= 1.0f) {
-                accumulator -= 1.0f;
-                stat++;
-            }
             if (events > 5_000_000) {
                 fail("no convergence towards stat " + targetStat + " after 5M events");
             }
@@ -100,5 +96,27 @@ class StatTrainingReachabilityTest {
         assertEquals(0f, StatTrainingScaler.scale(1.0f, 100), 1.0e-6f);
         assertTrue(StatTrainingScaler.scale(1.0f, 99) > 0f,
                 "99 must still be trainable — only the final point is out of reach");
+    }
+
+    /**
+     * Every {@link StatTraining.Source} names a stat that can actually take the training, and every
+     * trainable stat has at least one source pointing at it.
+     *
+     * <p>The second half is the one that matters. REFLEXES shipped trainable with nothing calling in,
+     * and the character sheet would now advertise a "trained by" list that was empty — a stat the
+     * game promises you can raise and gives you no way to.
+     */
+    @Test
+    void everyTrainableStatHasASourceAndEverySourceHasATrainableStat() {
+        for (StatTraining.Source source : StatTraining.Source.values()) {
+            assertTrue(source.stat().isTrainable(),
+                    source + " trains " + source.stat().getId() + ", which is not trainable");
+            assertTrue(source.rawAmount() > 0f, source + " is worth nothing");
+        }
+        for (PlayerStat stat : PlayerStat.values()) {
+            if (!stat.isTrainable()) continue;
+            assertTrue(!StatTraining.Source.forStat(stat).isEmpty(),
+                    stat.getId() + " is trainable but nothing in the mod trains it");
+        }
     }
 }

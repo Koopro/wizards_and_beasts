@@ -14,6 +14,11 @@
   "texture": "wizards_and_beasts:textures/entity/ghoul.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/ghoul.animation.json",
   "attackDamage": 2.0,
-  "traits": [ "FEARFUL" ],
-  "abilities": []
+  "traits": [
+    "FEARFUL"
+  ],
+  "abilities": [],
+  "clips": [
+    "groan"
+  ]
 }

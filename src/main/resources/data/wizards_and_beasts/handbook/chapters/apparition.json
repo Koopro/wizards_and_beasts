@@ -1,0 +1,28 @@
+{
+  "id": "wizards_and_beasts:apparition",
+  "title": "handbook.wizards_and_beasts.apparition.title",
+  "icon": "wizards_and_beasts:wand",
+  "sort_index": 46,
+  "pages": [
+    {
+      "type": "text",
+      "heading": "handbook.wizards_and_beasts.apparition.page1.heading",
+      "body": "handbook.wizards_and_beasts.apparition.page1.body"
+    },
+    {
+      "type": "text",
+      "heading": "handbook.wizards_and_beasts.apparition.page2.heading",
+      "body": "handbook.wizards_and_beasts.apparition.page2.body"
+    },
+    {
+      "type": "text",
+      "heading": "handbook.wizards_and_beasts.apparition.page3.heading",
+      "body": "handbook.wizards_and_beasts.apparition.page3.body"
+    },
+    {
+      "type": "text",
+      "heading": "handbook.wizards_and_beasts.apparition.page4.heading",
+      "body": "handbook.wizards_and_beasts.apparition.page4.body"
+    }
+  ]
+}

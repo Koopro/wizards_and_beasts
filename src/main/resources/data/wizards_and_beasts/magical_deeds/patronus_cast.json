@@ -1,0 +1,6 @@
+{
+  "trigger": "spell_cast",
+  "match": "expecto_patronum",
+  "effects": { "alignment": 3.0 },
+  "cooldownSeconds": 300
+}

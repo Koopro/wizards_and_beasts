@@ -1,0 +1,7 @@
+{
+  "type": "blocks",
+  "blocks": "wizards_and_beasts:landmark/ministry",
+  "threshold": 140,
+  "marker": "wizards_and_beasts:ministry",
+  "label": "map.wizards_and_beasts.landmark.ministry"
+}

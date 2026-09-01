@@ -29,6 +29,8 @@ public final class WorldCommands {
                 .then(AzkabanCommands.register())
                 .then(FlooCommands.register())
                 .then(ApparitionCommands.registerWard())
-                .then(PocketDebugCommands.register());
+                .then(PocketDebugCommands.register())
+                .then(at.koopro.wizardsandbeasts.polyjuice.command.PolyjuiceCommands.register())
+                .then(at.koopro.wizardsandbeasts.brew.command.CauldronDebugCommands.register());
     }
 }

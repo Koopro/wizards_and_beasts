@@ -91,6 +91,41 @@ class StatEffectsTest {
         assertEquals(0.0f, stack.finalMisfireChance(), EPS);
     }
 
+    @Test
+    void tuitionMultiplierSpansItsDeclaredRange() {
+        assertEquals(1.00f, StatEffects.tuitionMultiplier(0), EPS);
+        assertEquals(0.80f, StatEffects.tuitionMultiplier(50), EPS);
+        assertEquals(0.60f, StatEffects.tuitionMultiplier(100), EPS);
+
+        // KNOWLEDGE is the one stat whose effect is a discount, so the direction matters: more of it
+        // must never cost the player more.
+        for (int knowledge = 1; knowledge <= 100; knowledge++) {
+            assertTrue(StatEffects.tuitionMultiplier(knowledge)
+                            <= StatEffects.tuitionMultiplier(knowledge - 1),
+                    "tuition went up between KNOWLEDGE " + (knowledge - 1) + " and " + knowledge);
+        }
+    }
+
+    @Test
+    void tuitionCostRoundsUpAndNeverReachesFree() {
+        assertEquals(100, StatEffects.tuitionCost(100, 0));
+        assertEquals(60, StatEffects.tuitionCost(100, 100));
+
+        // A free lesson would let a well-read wizard drain the teacher's whole spell list for
+        // nothing, which is a different feature from a discount.
+        for (int knowledge = 0; knowledge <= 100; knowledge++) {
+            assertTrue(StatEffects.tuitionCost(1, knowledge) >= 1,
+                    "a 1-knut lesson became free at KNOWLEDGE " + knowledge);
+            assertTrue(StatEffects.tuitionCost(7, knowledge) <= 7,
+                    "the discount made a lesson dearer at KNOWLEDGE " + knowledge);
+        }
+
+        // A teacher configured to charge nothing still charges nothing; the discount must not
+        // manufacture a fee out of a disabled one.
+        assertEquals(0, StatEffects.tuitionCost(0, 50));
+        assertEquals(0, StatEffects.tuitionCost(-5, 50));
+    }
+
     private static void assertWithinClamp(float value, String channel, int stat) {
         assertTrue(value > ModifierStack.HARD_FLOOR && value < ModifierStack.HARD_CAP,
                 channel + " multiplier " + value + " at stat " + stat

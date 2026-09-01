@@ -459,7 +459,11 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.wizards_and_beasts.extendable_ears", "Extendable Ears");
         add("item.wizards_and_beasts.extendable_ears.desc", "Magical ears used for sneaky long-range listening.");
         add("item.wizards_and_beasts.floo_powder", "Floo Powder");
-        add("item.wizards_and_beasts.floo_powder.desc", "Teleportation powder used with connected Floo networks.");
+        // No `.desc` here. Floo Powder's description is three tooltip lines that spell out the order
+        // of the ritual (name the cold hearth, then light it, then step into the flames in front), and
+        // it lives with the rest of the Floo prose in the hand-authored en_us.json. processResources
+        // lets main win on conflict, so a copy here would not change what a player reads — it would
+        // only be a second place to edit that silently does nothing.
         add("gamps_law.wizards_and_beasts.food_conjuration", "Gamp's Law forbids conjuring food from nothing. Magic can only duplicate what already exists.");
         add("gamps_law.wizards_and_beasts.currency_conjuration", "The goblins of Gringotts have long ensured that wizarding coin cannot be conjured. This spell yields only worthless imitation.");
         add("gamps_law.wizards_and_beasts.life_creation", "To create life is beyond the reach of magic. Even the darkest wizard cannot overrule this law.");
@@ -770,6 +774,7 @@ public class ModLanguageProvider extends LanguageProvider {
 
     private void modules() {
         add("message.wizards_and_beasts.module.content_disabled", "%s is switched off here.");
+        add("module.wizards_and_beasts.apparition.name", "Apparition");
         add("module.wizards_and_beasts.wands.name", "Wands");
         add("module.wizards_and_beasts.wands_and_spells.name", "Wands & Spells");
         add("module.wizards_and_beasts.skill_trees.name", "Skill Trees");
@@ -803,6 +808,41 @@ public class ModLanguageProvider extends LanguageProvider {
         add("module.wizards_and_beasts.furnishings.desc", "House banners, cauldrons, floating candles and magical plants.");
         add("module.wizards_and_beasts.scholarship.name", "Scholarship");
         add("module.wizards_and_beasts.scholarship.desc", "Parchment, ink and the lore tomes that grant Knowledge and O.W.L. credit.");
+
+        // --- Wizarding armour: robes, hats and masks ---------------------------
+        add("itemGroup.wizards_and_beasts.apparel", "Wizards & Beasts: Robes & Hats");
+        add("item.wizards_and_beasts.student_robe_chest", "Student Robe");
+        add("item.wizards_and_beasts.student_robe_chest.desc", "Standard Hogwarts school robe. Plain black, no house colours.");
+        add("item.wizards_and_beasts.student_robe_legs", "Student Trousers");
+        add("item.wizards_and_beasts.student_robe_legs.desc", "School-issue trousers, cut for the robe worn over them.");
+        add("item.wizards_and_beasts.student_robe_boots", "Student Shoes");
+        add("item.wizards_and_beasts.student_robe_boots.desc", "Scuffed black school shoes. They have seen every staircase in the castle.");
+        add("item.wizards_and_beasts.wizard_hat", "Wizard's Hat");
+        add("item.wizards_and_beasts.wizard_hat.desc", "A tall pointed hat. Keeps the rain off; stops very little else.");
+        add("item.wizards_and_beasts.auror_robe_chest", "Auror's Robe");
+        add("item.wizards_and_beasts.auror_robe_chest.desc", "Dragonhide-lined duelling robe, issued by Magical Law Enforcement.");
+        add("item.wizards_and_beasts.auror_robe_legs", "Auror's Trousers");
+        add("item.wizards_and_beasts.auror_robe_legs.desc", "Reinforced field trousers cut for long pursuits.");
+        add("item.wizards_and_beasts.auror_robe_boots", "Auror's Boots");
+        add("item.wizards_and_beasts.auror_robe_boots.desc", "Heavy boots that hold their footing through an Apparition.");
+        add("item.wizards_and_beasts.death_eater_robe_chest", "Death Eater's Robe");
+        add("item.wizards_and_beasts.death_eater_robe_chest.desc", "Hooded black robe, the enchantments worked into it older than their wearer.");
+        add("item.wizards_and_beasts.death_eater_robe_legs", "Death Eater's Trousers");
+        add("item.wizards_and_beasts.death_eater_robe_legs.desc", "Dark-woven trousers that shrug off a glancing curse.");
+        add("item.wizards_and_beasts.death_eater_robe_boots", "Death Eater's Boots");
+        add("item.wizards_and_beasts.death_eater_robe_boots.desc", "Black boots that fall silent on stone.");
+        add("item.wizards_and_beasts.death_eater_mask", "Death Eater's Mask");
+        add("item.wizards_and_beasts.death_eater_mask.desc", "Wrought silver, moulded to no face in particular. That is the point of it.");
+        add("item.wizards_and_beasts.death_eater_mask_1", "Death Eater's Mask: Serpent");
+        add("item.wizards_and_beasts.death_eater_mask_1.desc", "Scaled silver drawn into a coil across the brow.");
+        add("item.wizards_and_beasts.death_eater_mask_2", "Death Eater's Mask: Skull");
+        add("item.wizards_and_beasts.death_eater_mask_2.desc", "Hollow-eyed and grinning, beaten thin as a leaf.");
+        add("item.wizards_and_beasts.death_eater_mask_3", "Death Eater's Mask: Filigree");
+        add("item.wizards_and_beasts.death_eater_mask_3.desc", "Fine silver lacework, and no less cold for the craftsmanship.");
+        add("item.wizards_and_beasts.death_eater_mask_4", "Death Eater's Mask: Horned");
+        add("item.wizards_and_beasts.death_eater_mask_4.desc", "Twin spurs of silver swept back from the temples.");
+        add("item.wizards_and_beasts.death_eater_mask_5", "Death Eater's Mask: Weeping");
+        add("item.wizards_and_beasts.death_eater_mask_5.desc", "Runnels chased down both cheeks. Nobody asks who for.");
     }
 }
 

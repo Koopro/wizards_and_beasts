@@ -25,6 +25,8 @@ import at.koopro.wizardsandbeasts.network.stats.ModNetworkStats;
 import at.koopro.wizardsandbeasts.network.trinket.ModNetworkTrinkets;
 import at.koopro.wizardsandbeasts.network.petrify.ModNetworkPetrify;
 import at.koopro.wizardsandbeasts.network.ability.ModNetworkAbilityFramework;
+import at.koopro.wizardsandbeasts.network.ministry.ModNetworkMinistry;
+import at.koopro.wizardsandbeasts.network.standing.ModNetworkStanding;
 
 public class ModNetwork {
 
@@ -57,7 +59,10 @@ public class ModNetwork {
         ModNetworkStats.register(registrar);
         ModNetworkTrinkets.register(registrar);
         ModNetworkPetrify.register(registrar);
+        at.koopro.wizardsandbeasts.network.polyjuice.ModNetworkPolyjuice.register(registrar);
         ModNetworkAbilityFramework.register(registrar);
+        ModNetworkMinistry.register(registrar);
+        ModNetworkStanding.register(registrar);
         at.koopro.wizardsandbeasts.network.module.ModNetworkModules.register(registrar);
         at.koopro.wizardsandbeasts.network.brew.ModNetworkBrew.register(registrar);
     }

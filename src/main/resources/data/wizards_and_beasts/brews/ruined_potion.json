@@ -1,0 +1,29 @@
+{
+  "displayName": "brew.wizards_and_beasts.ruined_potion.name",
+  "color": -11912406,
+  "flavorText": "Grey, lumpy, and it smells of burnt hair. Something went wrong.",
+  "components": [
+    {
+      "type": "apply_effects",
+      "effects": [
+        {
+          "id": "minecraft:nausea",
+          "duration": 400
+        },
+        {
+          "id": "minecraft:hunger",
+          "duration": 600
+        },
+        {
+          "id": "minecraft:weakness",
+          "duration": 400
+        }
+      ]
+    },
+    {
+      "type": "flourish",
+      "count": 14,
+      "useBrewColor": true
+    }
+  ]
+}

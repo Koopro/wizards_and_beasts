@@ -84,6 +84,18 @@ public enum SplinchTier {
         return this != CLEAN;
     }
 
+    /**
+     * The worse of two rungs.
+     *
+     * <p>Leans on the declaration order, which <b>is</b> the severity order: CLEAN, MINOR, MAJOR,
+     * CATASTROPHIC. Reordering these constants would silently invert every floor in
+     * {@link SplinchResolver#floorForWindupDamage}, which is why the order is stated here rather than left
+     * to be noticed.
+     */
+    public static SplinchTier worseOf(SplinchTier a, SplinchTier b) {
+        return a.ordinal() >= b.ordinal() ? a : b;
+    }
+
     public boolean appliesEffect() {
         return effectAmplifier >= 0;
     }

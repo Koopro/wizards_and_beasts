@@ -1,0 +1,30 @@
+{
+  "displayName": "brew.wizards_and_beasts.draught_of_living_death.name",
+  "color": -13949896,
+  "flavorText": "A sleeping draught so powerful the drinker cannot be told from a corpse.",
+  "components": [
+    {
+      "type": "apply_effects",
+      "effects": [
+        {
+          "id": "minecraft:slowness",
+          "duration": 600,
+          "amplifier": 4
+        },
+        {
+          "id": "minecraft:blindness",
+          "duration": 400
+        },
+        {
+          "id": "minecraft:mining_fatigue",
+          "duration": 600,
+          "amplifier": 2
+        },
+        {
+          "id": "minecraft:invisibility",
+          "duration": 600
+        }
+      ]
+    }
+  ]
+}

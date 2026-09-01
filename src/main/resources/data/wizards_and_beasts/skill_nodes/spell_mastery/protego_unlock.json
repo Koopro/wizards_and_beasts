@@ -6,6 +6,10 @@
   "pointCost": 2,
   "effects": [
     {
+      "type": "learn_spell",
+      "spellId": "protego"
+    },
+    {
       "spellId": "protego",
       "reductionPerLevel": 0.08,
       "type": "spell_cooldown_reduction"

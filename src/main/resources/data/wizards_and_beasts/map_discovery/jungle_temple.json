@@ -1,0 +1,6 @@
+{
+  "type": "structure",
+  "structure": "minecraft:jungle_pyramid",
+  "marker": "wizards_and_beasts:ruin",
+  "label": "map.wizards_and_beasts.landmark.jungle_temple"
+}

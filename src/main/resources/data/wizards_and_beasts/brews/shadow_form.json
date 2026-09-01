@@ -1,0 +1,12 @@
+{
+  "displayName": "brew.wizards_and_beasts.shadow_form.name",
+  "color": -13950666,
+  "flavorText": "You are mostly not there. Stay out of the light.",
+  "effects": [
+    {
+      "id": "wizards_and_beasts:shadow_form",
+      "duration": 600,
+      "amplifier": 0
+    }
+  ]
+}

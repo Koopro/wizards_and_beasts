@@ -26,5 +26,10 @@
       "hold_ticks": 100,
       "pull_strength": 0.8
     }
+  ],
+  "clips": [
+    "strike",
+    "hiss",
+    "gaze"
   ]
 }

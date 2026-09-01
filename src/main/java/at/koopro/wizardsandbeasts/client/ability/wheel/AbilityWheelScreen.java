@@ -240,7 +240,13 @@ public final class AbilityWheelScreen extends Screen {
     public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
         InputConstants.Key key = AbilityFrameworkKeyBindings.ABILITY_WHEEL.getKey();
         if (key.getType() == InputConstants.Type.KEYSYM && event.key() == key.getValue()) {
-            // Tapping the wheel key again closes a latched wheel; suppress the reopen while it stays held.
+            // Only a latched (tap-opened) wheel closes on a press of its own key. GLFW auto-repeat delivers
+            // this same callback while the key is merely *held* — the vanilla keyboard handler routes both
+            // PRESS and REPEAT to keyPressed — so during a hold gesture this must do nothing and leave the
+            // close to maybeCloseOnRelease, or the wheel slams shut half a second into every hold.
+            if (!Boolean.FALSE.equals(holdGesture)) {
+                return true;
+            }
             AbilityWheelController.suppressOpenUntilRelease();
             confirmHovered();
             onClose();

@@ -27,24 +27,35 @@ public final class PocketDebugCommands {
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("pocket")
-                // Stated here as well as on the group above: `enter` teleports into a pocket dimension
-                // and `reset` wipes one, and this node shipped with no gate at all — any player could
-                // run either. Keeping the check on the leaf means re-parenting cannot reopen the hole.
-                .requires(at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions.ADMIN)
+                // `exit` is the one node without the gate, on purpose: it is the guaranteed way out.
+                //
+                // It only ever moves the caller, only when the caller is already inside a pocket, and
+                // it reaches the same ExtensionCharmService.exitPocket the trapdoor does. Gating it
+                // would mean a player without operator rights whose exit hatch was griefed had no
+                // recourse but to jump into the void and hope the safety net caught them — which it
+                // does, but nothing told them so.
+                .then(Commands.literal("exit")
+                        .executes(ctx -> exitPocket(ctx.getSource().getPlayerOrException())))
+                // The gate sits on each leaf rather than on this node, so `exit` can sit beside them
+                // without a wrapper: `enter` teleports into a pocket dimension and `reset` wipes one,
+                // and both shipped with no gate at all until they were closed. Per-leaf also means
+                // re-parenting the group cannot silently reopen the hole.
                 .then(Commands.literal("enter")
+                        .requires(at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions.ADMIN)
                         .then(Commands.argument("archetype", StringArgumentType.word())
                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
                                         Arrays.stream(PocketArchetype.values()).map(PocketArchetype::getSerializedName), builder))
                                 .executes(ctx -> enterPocket(
                                         ctx.getSource().getPlayerOrException(),
                                         StringArgumentType.getString(ctx, "archetype")))))
-                .then(Commands.literal("exit")
-                        .executes(ctx -> exitPocket(ctx.getSource().getPlayerOrException())))
                 .then(Commands.literal("info")
+                        .requires(at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions.ADMIN)
                         .executes(ctx -> pocketInfo(ctx.getSource().getPlayerOrException())))
                 .then(Commands.literal("reset")
+                        .requires(at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions.ADMIN)
                         .executes(ctx -> resetPocket(ctx.getSource().getPlayerOrException())))
                 .then(Commands.literal("list")
+                        .requires(at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions.ADMIN)
                         .executes(ctx -> listPockets(ctx.getSource().getPlayerOrException())));
     }
 

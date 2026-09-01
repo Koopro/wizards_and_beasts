@@ -1,0 +1,13 @@
+{
+  "biomes": [
+    "minecraft:ocean",
+    "minecraft:deep_ocean",
+    "minecraft:lukewarm_ocean",
+    "minecraft:deep_lukewarm_ocean",
+    "minecraft:cold_ocean",
+    "minecraft:deep_cold_ocean"
+  ],
+  "tile": 2,
+  "tint": "#6E8CA0",
+  "water_tint": "#6E8CA0"
+}

@@ -24,5 +24,17 @@ public final class ModLootModifiers {
     public static final Supplier<MapCodec<ModuleGatedLootModifier>> MODULE_GATED =
             GLOBAL_LOOT_MODIFIER_SERIALIZERS.register("module_gated", () -> ModuleGatedLootModifier.CODEC);
 
+    public static final Supplier<MapCodec<BestiaryHarvestLootModifier>> BESTIARY_HARVEST =
+            GLOBAL_LOOT_MODIFIER_SERIALIZERS.register("bestiary_harvest",
+                    () -> BestiaryHarvestLootModifier.CODEC);
+
+    public static final Supplier<MapCodec<DevaluedDragotLootModifier>> DEVALUED_DRAGOT =
+            GLOBAL_LOOT_MODIFIER_SERIALIZERS.register("devalued_dragot",
+                    () -> DevaluedDragotLootModifier.CODEC);
+
+    public static final Supplier<MapCodec<FelixFortuneLootModifier>> FELIX_FORTUNE =
+            GLOBAL_LOOT_MODIFIER_SERIALIZERS.register("felix_fortune",
+                    () -> FelixFortuneLootModifier.CODEC);
+
     private ModLootModifiers() {}
 }

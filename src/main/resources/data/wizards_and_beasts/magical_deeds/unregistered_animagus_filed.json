@@ -1,0 +1,6 @@
+{
+  "trigger": "offence",
+  "match": "unregistered_animagus",
+  "effects": { "tradition": 2.0 },
+  "cooldownSeconds": 0
+}

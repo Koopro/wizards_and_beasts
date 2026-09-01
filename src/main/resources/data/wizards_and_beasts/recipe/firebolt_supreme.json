@@ -16,7 +16,7 @@
     "D": "minecraft:diamond",
     "S": "minecraft:stick",
     "E": "wizards_and_beasts:enchanted_twig_bundle",
-    "T": "#minecraft:leaves"
+    "T": "wizards_and_beasts:golden_snidget_feather"
   },
   "result": {
     "id": "wizards_and_beasts:firebolt_supreme",

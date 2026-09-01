@@ -1,0 +1,8 @@
+{
+  "icon": 18,
+  "tint": "#5A3E6B",
+  "size": 16,
+  "name": "map.wizards_and_beasts.marker.apparition_point",
+  "legend": "magical",
+  "min_zoom": 0.9
+}

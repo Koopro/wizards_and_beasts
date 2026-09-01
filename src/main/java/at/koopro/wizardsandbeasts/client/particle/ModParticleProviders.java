@@ -22,6 +22,17 @@ public final class ModParticleProviders {
         register(event, ModParticles.LIGHT_GLOW.get(), SpellFamily.LIGHT);
         register(event, ModParticles.WATER_DROPLET.get(), SpellFamily.WATER);
         register(event, ModParticles.PROTEGO_DEFLECT.get(), SpellFamily.ARCANE);
+
+        // Broom slipstreams. One particle class, three palettes: what separates a Cleansweep's dust
+        // from a Firebolt's embers is colour, size and how fast it fades, none of which needs its
+        // own class. All three share the spell_mote sprite rather than shipping three PNGs that
+        // would differ only in hue -- the tint does that at no cost.
+        event.registerSpriteSet(ModParticles.BROOM_TRAIL_DUST.get(),
+                sprites -> BroomTrailParticle.provider(sprites, BroomTrailParticle.Style.DUST));
+        event.registerSpriteSet(ModParticles.BROOM_TRAIL_GOLD.get(),
+                sprites -> BroomTrailParticle.provider(sprites, BroomTrailParticle.Style.GOLD));
+        event.registerSpriteSet(ModParticles.BROOM_TRAIL_EMBER.get(),
+                sprites -> BroomTrailParticle.provider(sprites, BroomTrailParticle.Style.EMBER));
     }
 
     private static void register(RegisterParticleProvidersEvent event,

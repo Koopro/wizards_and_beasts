@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:invisibility",
+    {
+      "id": "wizards_and_beasts:camouflage",
+      "required": false
+    },
+    {
+      "id": "wizards_and_beasts:shadow_form",
+      "required": false
+    }
+  ]
+}

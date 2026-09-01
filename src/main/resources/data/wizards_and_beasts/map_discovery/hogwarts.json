@@ -1,0 +1,7 @@
+{
+  "type": "blocks",
+  "blocks": "wizards_and_beasts:landmark/hogwarts",
+  "threshold": 220,
+  "marker": "wizards_and_beasts:hogwarts",
+  "label": "map.wizards_and_beasts.landmark.hogwarts"
+}

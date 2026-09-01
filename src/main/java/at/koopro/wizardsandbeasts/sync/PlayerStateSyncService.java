@@ -8,6 +8,8 @@ import at.koopro.wizardsandbeasts.network.skill.SkillDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.skill.VocationDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.SpellDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.currency.VaultSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.ministry.MinistryRecordSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.standing.StandingSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.ability.AbilityDataSyncPayload;
 import at.koopro.wizardsandbeasts.network.apparition.ApparitionWardsSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.azkaban.AzkabanTrespasserSyncPayload;
@@ -52,6 +54,10 @@ public final class PlayerStateSyncService {
 
         HeritageDataSyncS2CPayload.syncToPlayer(player, openTypeSelector);
         VaultSyncS2CPayload.syncToPlayer(player);
+        MinistryRecordSyncS2CPayload.syncToPlayer(player);
+        // After the Ministry record and the vault: two of the three standing axes are composed from
+        // state synced above, and sending standing first would put a correct number next to a stale one.
+        StandingSyncS2CPayload.syncToPlayer(player);
         AzkabanTrespasserSyncPayload.syncToPlayer(player);
         NifflerCarrySyncS2CPayload.sendToPlayer(player);
         if (HeritageAPI.hasHeritageSelected(player)) {

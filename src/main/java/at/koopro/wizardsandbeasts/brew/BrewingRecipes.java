@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.brew;
 
 import com.mojang.logging.LogUtils;
-import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.Container;
 import org.slf4j.Logger;
 
 import org.jspecify.annotations.Nullable;
@@ -56,16 +56,19 @@ public final class BrewingRecipes {
     }
 
     /**
-     * First registered recipe whose ingredients are present in {@code inventory}
-     * and whose required cauldron tier is met by {@code presentTier}; null if
-     * none. Iteration order matches registration order, which for JSON spells
-     * matches the datapack load order — so player-defined recipes can override
+     * First registered recipe whose ingredients are present in {@code container} and whose required
+     * cauldron tier is met by {@code presentTier}; null if none. Iteration order matches registration
+     * order, which for JSON matches datapack load order — so player-defined recipes can override
      * mod-supplied ones by sharing an id.
+     *
+     * <p>{@code container} is the <b>cauldron's own contents</b>. It used to be the player's
+     * inventory, which is why a wizard standing next to a pot with the right items in their backpack
+     * could start a brew the pot was empty of.
      */
     @Nullable
-    public static BrewingRecipe findMatch(Inventory inventory, CauldronTier presentTier) {
+    public static BrewingRecipe findMatch(Container container, CauldronTier presentTier) {
         for (BrewingRecipe recipe : BY_ID.values()) {
-            if (recipe.matches(inventory, presentTier)) return recipe;
+            if (recipe.matches(container, presentTier)) return recipe;
         }
         return null;
     }

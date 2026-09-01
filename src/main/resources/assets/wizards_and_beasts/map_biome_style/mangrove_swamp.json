@@ -1,0 +1,8 @@
+{
+  "biomes": [
+    "minecraft:mangrove_swamp"
+  ],
+  "tile": 28,
+  "tint": "#5A6B47",
+  "water_tint": "#4A5E4C"
+}

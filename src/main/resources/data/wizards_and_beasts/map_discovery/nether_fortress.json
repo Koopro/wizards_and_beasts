@@ -1,0 +1,7 @@
+{
+  "type": "structure",
+  "structure": "minecraft:fortress",
+  "marker": "wizards_and_beasts:fortress",
+  "label": "map.wizards_and_beasts.landmark.fortress",
+  "reveal": "surface"
+}

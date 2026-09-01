@@ -70,11 +70,25 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
      */
     public static final String BEAST_ACTION_CONTROLLER = "beast_action";
 
-    /** Clip fired on landing a melee hit, when the creature declares it. */
-    private static final String CLIP_ATTACK = "attack";
+    /**
+     * Clip names tried, in order, when this creature lands a melee hit.
+     *
+     * <p>A list rather than the single {@code "attack"} this used to be, because the built rigs did not
+     * agree on the name: the basilisk's melee clip is {@code strike}, a dragon's is {@code bite}. Those
+     * clips were on disk and unreachable — {@code attack} was the only name asked for, so the animator's
+     * work simply never played. The first name the creature declares wins.
+     */
+    private static final List<String> CLIPS_ATTACK = List.of("attack", "strike", "bite", "lunge");
 
     /** Clip fired on taking damage, when the creature declares it. */
-    private static final String CLIP_HIT = "hit";
+    private static final List<String> CLIPS_HIT = List.of("hit", "flinch");
+
+    /**
+     * Clip played with the creature's ambient noise: the ghoul's groan, the basilisk's hiss, the
+     * werewolf's howl. Same problem as {@link #CLIPS_ATTACK} — all three were animated and none of them
+     * had a caller.
+     */
+    private static final List<String> CLIPS_AMBIENT = List.of("groan", "hiss", "howl", "call", "song");
 
     /** Niffler-grade theft: stacks lifted from players, carried until the beast dies. */
     private static final int MAX_CARRIED = 8;
@@ -349,7 +363,7 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
     public boolean doHurtTarget(ServerLevel level, Entity target) {
         boolean hit = super.doHurtTarget(level, target);
         if (hit && target instanceof LivingEntity victim) {
-            triggerDeclared(CLIP_ATTACK);
+            triggerFirstDeclared(CLIPS_ATTACK);
             applyHitTraits(victim);
             if (ModuleManager.isEnabled(Module.CREATURES)) {
                 for (CreatureAbility ability : abilities()) {
@@ -364,7 +378,7 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
     public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
         boolean hurt = super.hurtServer(level, source, amount);
         if (hurt && isAlive()) {
-            triggerDeclared(CLIP_HIT);
+            triggerFirstDeclared(CLIPS_HIT);
         }
         if (hurt && ModuleManager.isEnabled(Module.CREATURES)) {
             for (CreatureAbility ability : abilities()) {
@@ -523,9 +537,39 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
      * clip its file does not define, it throws inside the render pass. So the clip set is declared
      * per creature in the datapack and nothing is ever triggered on faith.
      */
-    protected void triggerDeclared(String clip) {
+    public void triggerDeclared(String clip) {
         if (declaredClips().contains(clip)) {
             triggerAnim(BEAST_ACTION_CONTROLLER, clip);
+        }
+    }
+
+    /**
+     * Fire the first clip in {@code preference} that this creature declares, or nothing.
+     *
+     * <p>Lets one call site serve rigs that name the same beat differently ({@code attack} /
+     * {@code strike} / {@code bite}) without the entity having to know which creature it is.
+     */
+    protected void triggerFirstDeclared(List<String> preference) {
+        List<String> declared = declaredClips();
+        for (String clip : preference) {
+            if (declared.contains(clip)) {
+                triggerAnim(BEAST_ACTION_CONTROLLER, clip);
+                return;
+            }
+        }
+    }
+
+    /**
+     * Vanilla's ambient-noise beat, borrowed as the cue for a creature's signature clip.
+     *
+     * <p>Server-side only: {@code triggerAnim} is GeckoLib's synced trigger, so calling it on the
+     * client would play the clip for one viewer and no one else.
+     */
+    @Override
+    public void playAmbientSound() {
+        super.playAmbientSound();
+        if (level() instanceof ServerLevel) {
+            triggerFirstDeclared(CLIPS_AMBIENT);
         }
     }
 

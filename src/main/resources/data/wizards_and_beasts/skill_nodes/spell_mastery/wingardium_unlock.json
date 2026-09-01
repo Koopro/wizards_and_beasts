@@ -6,6 +6,10 @@
   "pointCost": 2,
   "effects": [
     {
+      "type": "learn_spell",
+      "spellId": "wingardium_leviosa"
+    },
+    {
       "spellId": "wingardium_leviosa",
       "reductionPerLevel": 0.1,
       "type": "spell_cooldown_reduction"

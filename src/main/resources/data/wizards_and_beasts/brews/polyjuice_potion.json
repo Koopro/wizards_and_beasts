@@ -1,0 +1,16 @@
+{
+  "displayName": "brew.wizards_and_beasts.polyjuice_potion.name",
+  "color": -8754374,
+  "flavorText": "Thick, mud-like, and it tastes of overcooked cabbage. Becomes another for an hour.",
+  "components": [
+    {
+      "type": "polyjuice_disguise",
+      "durationTicks": 6000
+    },
+    {
+      "type": "flourish",
+      "count": 30,
+      "useBrewColor": true
+    }
+  ]
+}

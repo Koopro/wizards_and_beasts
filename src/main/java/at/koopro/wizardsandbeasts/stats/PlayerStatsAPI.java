@@ -10,6 +10,7 @@ import net.minecraft.world.entity.player.Player;
 import com.mojang.logging.LogUtils;
 import org.slf4j.Logger;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -54,9 +55,25 @@ public final class PlayerStatsAPI {
         return KnowledgeFormula.compute(spells, bestiary, nodes, books);
     }
 
-    /** Returns the current Power ceiling: initial rolled Power + accumulated growth, capped at the Heritage band max. */
-    public static int getPowerCeiling(@NonNull Player player) {
-        return getData(player).power();
+    /**
+     * The highest POWER this player's heritage allows them to grow to, or
+     * {@link PlayerStatsData#MAX_VALUE} when no heritage has been chosen yet.
+     *
+     * <p>Server-side. The character sheet computes the same number on the client from the synced
+     * {@link HeritageVariant} rather than being told it — {@link PowerBandTable} is pure and lives in
+     * the common package precisely so both sides can read one table. Nothing on the client is
+     * <em>trusted</em> with it: {@link #grantPowerGrowth} is the only thing that raises POWER through
+     * play, and it clamps here regardless of what any client believes.
+     */
+    public static int getPowerCap(@NonNull Player player) {
+        if (!(player instanceof ServerPlayer sp)) return PlayerStatsData.MAX_VALUE;
+        HeritageVariant variant = HeritageAPI.getPlayerHeritageVariant(sp);
+        return variant == null ? PlayerStatsData.MAX_VALUE : PowerBandTable.getBandMax(variant);
+    }
+
+    /** True when POWER can no longer grow: either the band max or the growth allowance is spent. */
+    public static boolean isPowerCapped(@NonNull Player player) {
+        return getData(player).power() >= getPowerCap(player) || getRemainingPowerGrowth(player) <= 0;
     }
 
     /** Returns true if the player rolled a prodigy result at character creation. */
@@ -112,6 +129,11 @@ public final class PlayerStatsAPI {
      * No-op for Squib players.
      */
     public static void grantPowerGrowth(@NonNull Player player, int amount) {
+        grantPowerGrowth(player, amount, null);
+    }
+
+    /** @param sourceKey lang key naming what caused this, for the level-up notice; may be null. */
+    public static void grantPowerGrowth(@NonNull Player player, int amount, @Nullable String sourceKey) {
         requireServer(player);
         if (!(player instanceof ServerPlayer sp)) return;
         HeritageVariant variant = HeritageAPI.getPlayerHeritageVariant(sp);
@@ -131,44 +153,58 @@ public final class PlayerStatsAPI {
             LOGGER.debug("[WizardsAndBeasts] grantPowerGrowth: {} already at growth cap", player.getName().getString());
             return;
         }
-        int newPower = Math.min(old.power() + actual, bandMax);
+        // max(), not a bare min against the band: `/wandb player stats set` is an admin override that
+        // deliberately ignores the band, and a bare clamp would let the next milestone silently drag
+        // an overridden Power back down to it. Growth can stall at the cap; it must never reverse.
+        int newPower = Math.max(old.power(), Math.min(old.power() + actual, bandMax));
         int newAccumulated = accumulated + actual;
         LOGGER.debug("[WizardsAndBeasts] grantPowerGrowth: {} +{} Power (now {}, accumulated {})",
                 player.getName().getString(), actual, newPower, newAccumulated);
         setAndSync(player, old.withPower(newPower).withPowerGrowthAccumulated(newAccumulated));
+        if (newPower > old.power() && player instanceof ServerPlayer sp2) {
+            StatProgression.announceLevelUp(sp2, PlayerStat.POWER, old.power(), newPower, sourceKey);
+        }
     }
 
     /**
-     * Increments training progress for a trainable stat by the given raw amount (after S-curve scaling).
-     * When the accumulator reaches 1.0+, the stat integer is incremented and the accumulator decremented.
-     * Rejects calls for non-trainable stats.
+     * Increments training progress for a trainable stat by the given raw amount (before S-curve
+     * scaling). When the accumulator reaches 1.0+, the stat integer is incremented and the
+     * accumulator decremented. Rejects calls for non-trainable stats.
+     *
+     * <p>The arithmetic lives in {@link StatTrainingScaler#apply}; this method is the part that
+     * needs a {@link Player} — reading the block, writing it back, and announcing any point earned.
+     * The loop used to be inline here and re-read the <em>player attachment</em> for its ceiling
+     * check, which cannot have changed since nothing had been written yet, so the guard was dead and
+     * the leftover fraction at 100 was banked forever.
      */
     public static void addTrainingProgress(@NonNull Player player, @NonNull PlayerStat stat, float rawAmount) {
+        addTrainingProgress(player, stat, rawAmount, null);
+    }
+
+    /** @param sourceKey lang key naming what caused this, for the level-up notice; may be null. */
+    public static void addTrainingProgress(@NonNull Player player, @NonNull PlayerStat stat,
+                                           float rawAmount, @Nullable String sourceKey) {
         requireServer(player);
         if (!stat.isTrainable()) {
             LOGGER.warn("[WizardsAndBeasts] addTrainingProgress: stat {} is not trainable", stat.getId());
             return;
         }
         PlayerStatsData old = getData(player);
-        int currentStatValue = getStat(player, stat);
-        if (currentStatValue >= 100) return;
+        int before = old.get(stat);
+        float progressBefore = old.trainingProgress().getOrDefault(stat, 0f);
 
-        float scaled = StatTrainingScaler.scale(rawAmount, currentStatValue);
+        StatTrainingScaler.Step step = StatTrainingScaler.apply(before, progressBefore, rawAmount);
+        if (step.stat() == before && step.progress() == progressBefore) {
+            return; // at the ceiling, or a zero-value grant: nothing to write and nothing to sync
+        }
 
         Map<PlayerStat, Float> newTraining = new HashMap<>(old.trainingProgress());
-        float current = newTraining.getOrDefault(stat, 0f);
-        float accumulated = current + scaled;
+        newTraining.put(stat, step.progress());
+        setAndSync(player, old.with(stat, step.stat()).withTrainingProgress(newTraining));
 
-        PlayerStatsData updated = old;
-        while (accumulated >= 1.0f) {
-            accumulated -= 1.0f;
-            // Increment the stat integer
-            updated = incrementStatInt(updated, stat);
-            if (getStat(player, stat) >= 100) break;
+        if (step.gained() > 0 && player instanceof ServerPlayer sp) {
+            StatProgression.announceLevelUp(sp, stat, before, step.stat(), sourceKey);
         }
-        newTraining.put(stat, Math.max(0f, accumulated));
-        updated = updated.withTrainingProgress(newTraining);
-        setAndSync(player, updated);
     }
 
     /**
@@ -176,9 +212,15 @@ public final class PlayerStatsAPI {
      * For POWER, routes through grantPowerGrowth.
      */
     public static void grantMilestoneBump(@NonNull Player player, @NonNull PlayerStat stat, int amount) {
+        grantMilestoneBump(player, stat, amount, null);
+    }
+
+    /** @param sourceKey lang key naming the milestone, for the level-up notice; may be null. */
+    public static void grantMilestoneBump(@NonNull Player player, @NonNull PlayerStat stat, int amount,
+                                          @Nullable String sourceKey) {
         requireServer(player);
         if (stat == PlayerStat.POWER) {
-            grantPowerGrowth(player, amount);
+            grantPowerGrowth(player, amount, sourceKey);
             return;
         }
         if (stat.isDerived()) {
@@ -186,7 +228,12 @@ public final class PlayerStatsAPI {
             return;
         }
         LOGGER.info("[WizardsAndBeasts] grantMilestoneBump: {} {} +{}", player.getName().getString(), stat.getId(), amount);
-        setStat(player, stat, getStat(player, stat) + amount);
+        int before = getStat(player, stat);
+        setStat(player, stat, before + amount);
+        int after = getStat(player, stat);
+        if (after > before && player instanceof ServerPlayer sp) {
+            StatProgression.announceLevelUp(sp, stat, before, after, sourceKey);
+        }
     }
 
     /**
@@ -228,15 +275,6 @@ public final class PlayerStatsAPI {
         if (player instanceof ServerPlayer sp) {
             PlayerStatsSyncPayload.syncToPlayer(sp);
         }
-    }
-
-    private static PlayerStatsData incrementStatInt(PlayerStatsData data, PlayerStat stat) {
-        return switch (stat) {
-            case PRECISION -> data.withPrecision(data.precision() + 1);
-            case WILLPOWER -> data.withWillpower(data.willpower() + 1);
-            case REFLEXES  -> data.withReflexes(data.reflexes() + 1);
-            default        -> data;
-        };
     }
 
     private static void requireServer(Player player) {

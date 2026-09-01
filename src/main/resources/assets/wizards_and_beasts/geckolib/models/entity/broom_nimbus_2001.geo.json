@@ -1,0 +1,482 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.broom_nimbus_2001",
+        "texture_width": 64,
+        "texture_height": 512,
+        "visible_bounds_width": 4,
+        "visible_bounds_height": 2,
+        "visible_bounds_offset": [
+          0,
+          0.5,
+          0
+        ]
+      },
+      "bones": [
+        {
+          "name": "root",
+          "pivot": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "broom_root",
+          "pivot": [
+            0,
+            4,
+            0
+          ],
+          "parent": "root"
+        },
+        {
+          "name": "broom_body",
+          "pivot": [
+            0,
+            4,
+            0
+          ],
+          "parent": "broom_root"
+        },
+        {
+          "name": "shaft",
+          "pivot": [
+            0,
+            4,
+            14
+          ],
+          "parent": "broom_body"
+        },
+        {
+          "name": "tail_cap",
+          "pivot": [
+            0,
+            4,
+            -22
+          ],
+          "parent": "broom_body"
+        },
+        {
+          "name": "binding",
+          "pivot": [
+            0,
+            4,
+            14
+          ],
+          "parent": "broom_body"
+        },
+        {
+          "name": "bristles",
+          "pivot": [
+            0,
+            4,
+            14
+          ],
+          "parent": "broom_body"
+        },
+        {
+          "name": "footstrap",
+          "pivot": [
+            0,
+            4,
+            14
+          ],
+          "parent": "broom_body"
+        },
+        {
+          "name": "accent",
+          "pivot": [
+            0,
+            4,
+            -10
+          ],
+          "parent": "broom_body"
+        },
+        {
+          "name": "shaft_racing",
+          "pivot": [
+            0,
+            4,
+            14
+          ],
+          "parent": "shaft",
+          "cubes": [
+            {
+              "origin": [
+                -1.5,
+                2.5,
+                2.0
+              ],
+              "size": [
+                3,
+                3,
+                12
+              ],
+              "uv": [
+                30,
+                174
+              ]
+            }
+          ]
+        },
+        {
+          "name": "shaft_racing_mid",
+          "pivot": [
+            0,
+            4,
+            2
+          ],
+          "parent": "shaft_racing",
+          "rotation": [
+            -2,
+            0,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -1.0,
+                3.0,
+                -8.0
+              ],
+              "size": [
+                2,
+                2,
+                10
+              ],
+              "uv": [
+                0,
+                272
+              ]
+            }
+          ]
+        },
+        {
+          "name": "shaft_racing_grip",
+          "pivot": [
+            0,
+            4,
+            -8
+          ],
+          "parent": "shaft_racing_mid",
+          "rotation": [
+            -5,
+            0,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -0.5,
+                3.5,
+                -22.0
+              ],
+              "size": [
+                1,
+                1,
+                14
+              ],
+              "uv": [
+                0,
+                189
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tail_cap_finial",
+          "pivot": [
+            0,
+            4,
+            -22
+          ],
+          "parent": "tail_cap",
+          "cubes": [
+            {
+              "origin": [
+                -2.0,
+                2.0,
+                -25.0
+              ],
+              "size": [
+                4,
+                4,
+                3
+              ],
+              "uv": [
+                16,
+                377
+              ]
+            },
+            {
+              "origin": [
+                -1.5,
+                2.5,
+                -22.0
+              ],
+              "size": [
+                3,
+                3,
+                2
+              ],
+              "uv": [
+                44,
+                385
+              ]
+            }
+          ]
+        },
+        {
+          "name": "binding_brass_band",
+          "pivot": [
+            0,
+            4,
+            14
+          ],
+          "parent": "binding",
+          "cubes": [
+            {
+              "origin": [
+                -4.5,
+                -0.5,
+                8.0
+              ],
+              "size": [
+                9,
+                9,
+                1
+              ],
+              "uv": [
+                44,
+                319
+              ]
+            },
+            {
+              "origin": [
+                -4.5,
+                -0.5,
+                12.0
+              ],
+              "size": [
+                9,
+                9,
+                1
+              ],
+              "uv": [
+                0,
+                330
+              ]
+            },
+            {
+              "origin": [
+                -4.5,
+                -0.5,
+                16.0
+              ],
+              "size": [
+                9,
+                9,
+                1
+              ],
+              "uv": [
+                20,
+                330
+              ]
+            }
+          ]
+        },
+        {
+          "name": "bristles_blade",
+          "pivot": [
+            0,
+            4,
+            14
+          ],
+          "parent": "bristles",
+          "cubes": [
+            {
+              "origin": [
+                -3.5,
+                2.5,
+                15.0
+              ],
+              "size": [
+                7,
+                3,
+                5
+              ],
+              "uv": [
+                0,
+                369
+              ]
+            },
+            {
+              "origin": [
+                -5.5,
+                2.0,
+                20.0
+              ],
+              "size": [
+                11,
+                4,
+                6
+              ],
+              "uv": [
+                20,
+                340
+              ]
+            },
+            {
+              "origin": [
+                -4.5,
+                2.5,
+                26.0
+              ],
+              "size": [
+                9,
+                3,
+                6
+              ],
+              "uv": [
+                0,
+                360
+              ]
+            },
+            {
+              "origin": [
+                -2.5,
+                3.0,
+                32.0
+              ],
+              "size": [
+                5,
+                2,
+                6
+              ],
+              "uv": [
+                24,
+                369
+              ]
+            },
+            {
+              "origin": [
+                -0.5,
+                3.5,
+                38.0
+              ],
+              "size": [
+                1,
+                1,
+                5
+              ],
+              "uv": [
+                0,
+                385
+              ]
+            }
+          ]
+        },
+        {
+          "name": "footstrap_leather",
+          "pivot": [
+            0,
+            4,
+            14
+          ],
+          "parent": "footstrap",
+          "cubes": [
+            {
+              "origin": [
+                -1.0,
+                0.0,
+                11.0
+              ],
+              "size": [
+                2,
+                3,
+                1
+              ],
+              "uv": [
+                42,
+                391
+              ]
+            },
+            {
+              "origin": [
+                -1.5,
+                -2.0,
+                10.0
+              ],
+              "size": [
+                3,
+                2,
+                3
+              ],
+              "uv": [
+                0,
+                391
+              ]
+            }
+          ]
+        },
+        {
+          "name": "accent_nameplate",
+          "pivot": [
+            0,
+            4,
+            -10
+          ],
+          "parent": "accent",
+          "cubes": [
+            {
+              "origin": [
+                -2.0,
+                5.0,
+                -16.0
+              ],
+              "size": [
+                4,
+                3,
+                11
+              ],
+              "uv": [
+                0,
+                233
+              ]
+            }
+          ]
+        },
+        {
+          "name": "fx_tip",
+          "pivot": [
+            0,
+            4,
+            -22
+          ],
+          "parent": "broom_root"
+        },
+        {
+          "name": "fx_tail",
+          "pivot": [
+            0,
+            4,
+            40
+          ],
+          "parent": "broom_root"
+        },
+        {
+          "name": "fx_mount",
+          "pivot": [
+            0,
+            5,
+            0
+          ],
+          "parent": "broom_root"
+        }
+      ]
+    }
+  ]
+}

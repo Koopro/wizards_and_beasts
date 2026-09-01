@@ -58,7 +58,9 @@ public final class BroomCameraHandler {
     @SubscribeEvent
     public static void onCalculateCameraDistance(CalculateDetachedCameraDistanceEvent event) {
         BroomEntity broom = ridingBroom(event.getCamera());
-        float target = broom != null ? BroomCameraMath.pullBackTarget(broom.getCurrentSpeed()) : 0.0F;
+        float target = broom != null
+                ? BroomCameraMath.pullBackTarget(broom.getCurrentSpeed(), broom.getTopSpeed())
+                : 0.0F;
         smoothedPullBack = BroomCameraMath.advance(smoothedPullBack, target);
         if (smoothedPullBack == 0.0F) {
             return;

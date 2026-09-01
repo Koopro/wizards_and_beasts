@@ -40,6 +40,12 @@ public class WizardingThrownEntity extends ThrowableItemProjectile {
         if (item == TrinketItemRegistry.DECOY_DETONATOR.get()) {
             return WizardingThrownKind.DECOY_DETONATOR;
         }
+        if (item == ConsumableItemRegistry.BABY_MANDRAKE.get()) {
+            return WizardingThrownKind.BABY_MANDRAKE;
+        }
+        if (item == ConsumableItemRegistry.HIDEBEHIND_SHADOW_ESSENCE.get()) {
+            return WizardingThrownKind.SHADOW_ESSENCE;
+        }
         return WizardingThrownKind.PERUVIAN_DARKNESS_POWDER;
     }
 
@@ -64,6 +70,10 @@ public class WizardingThrownEntity extends ThrowableItemProjectile {
                     server.sendParticles(ParticleTypes.FIREWORK, p.x, p.y, p.z, 24, 0.4, 0.4, 0.4, 0.12);
                 }
             }
+            case BABY_MANDRAKE -> at.koopro.wizardsandbeasts.mandrake.MandrakeScream.baby(
+                    level(), p, getOwner() instanceof LivingEntity thrower ? thrower : null);
+            case SHADOW_ESSENCE ->
+                    at.koopro.wizardsandbeasts.shadow.ShadowZones.create(level(), p);
             case PERUVIAN_DARKNESS_POWDER -> {
                 AABB box = new AABB(BlockPos.containing(p)).inflate(4.0);
                 for (Entity e : level().getEntities(this, box, en -> en instanceof LivingEntity)) {

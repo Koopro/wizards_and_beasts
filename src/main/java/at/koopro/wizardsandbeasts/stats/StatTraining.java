@@ -2,7 +2,12 @@ package at.koopro.wizardsandbeasts.stats;
 
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import org.jspecify.annotations.NullMarked;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The gameplay events that train a {@link PlayerStat}, and how much each is worth.
@@ -18,7 +23,14 @@ import net.minecraft.server.level.ServerPlayer;
  * figures quoted below come from it rather than from intuition. Because the scaler returns zero at
  * 100, the last stretch is asymptotic by design: the practical ceiling is somewhere near 85–90, and
  * 100 is reachable only through {@code /wandb player stats set}.
+ *
+ * <p><b>Why {@link Source} is an enum.</b> The character sheet has to tell a player what raises a
+ * stat, and the only honest answer is the list of hooks that actually call in here. Written out in
+ * the GUI it would be a second list free to drift from this one — which is the shape of bug that
+ * left REFLEXES untrainable for a release. {@link Source#forStat} derives the tooltip from the same
+ * constants the hooks spend, so a source that stops firing cannot keep being advertised.
  */
+@NullMarked
 public final class StatTraining {
 
     /**
@@ -45,30 +57,72 @@ public final class StatTraining {
      */
     static final float WILLPOWER_PER_MIND_DEFENDED = 0.50f;
 
+    /** Every way a stat can be trained by playing, with what it trains and what it is worth. */
+    public enum Source {
+        SPELL_HIT(PlayerStat.PRECISION, PRECISION_PER_SPELL_HIT, "spell_hit"),
+        PROTEGO_DEFLECT(PlayerStat.REFLEXES, REFLEXES_PER_DEFLECT, "protego_deflect"),
+        IMPERIUS_ENDURED(PlayerStat.WILLPOWER, WILLPOWER_PER_IMPERIUS_ENDURED, "imperius_endured"),
+        MIND_DEFENDED(PlayerStat.WILLPOWER, WILLPOWER_PER_MIND_DEFENDED, "mind_defended");
+
+        private final PlayerStat stat;
+        private final float rawAmount;
+        private final String id;
+
+        Source(PlayerStat stat, float rawAmount, String id) {
+            this.stat = stat;
+            this.rawAmount = rawAmount;
+            this.id = id;
+        }
+
+        public PlayerStat stat() { return stat; }
+
+        /** Raw, pre-curve amount this event is worth. */
+        public float rawAmount() { return rawAmount; }
+
+        /** Lang key for the one-line description shown in the stat's tooltip. */
+        public String descriptionKey() {
+            return "stat.wizards_and_beasts.source." + id;
+        }
+
+        public Component description() {
+            return Component.translatable(descriptionKey());
+        }
+
+        /** The sources that feed one stat, in declaration order. Empty for untrainable stats. */
+        public static List<Source> forStat(PlayerStat stat) {
+            List<Source> out = new ArrayList<>(2);
+            for (Source source : values()) {
+                if (source.stat == stat) out.add(source);
+            }
+            return out;
+        }
+    }
+
     private StatTraining() {}
 
     /** A spell cast by this player struck its target. Trains PRECISION. */
     public static void onSpellHit(ServerPlayer player) {
-        train(player, PlayerStat.PRECISION, PRECISION_PER_SPELL_HIT);
+        train(player, Source.SPELL_HIT);
     }
 
     /** This player's Protego ward deflected an incoming spell. Trains REFLEXES. */
     public static void onSpellDeflected(ServerPlayer player) {
-        train(player, PlayerStat.REFLEXES, REFLEXES_PER_DEFLECT);
+        train(player, Source.PROTEGO_DEFLECT);
     }
 
     /** This player fought the Imperius Curse for a second and did not break it. Trains WILLPOWER. */
     public static void onImperiusEndured(ServerPlayer player) {
-        train(player, PlayerStat.WILLPOWER, WILLPOWER_PER_IMPERIUS_ENDURED);
+        train(player, Source.IMPERIUS_ENDURED);
     }
 
     /** This player repelled a Legilimency intrusion. Trains WILLPOWER. */
     public static void onMindDefended(ServerPlayer player) {
-        train(player, PlayerStat.WILLPOWER, WILLPOWER_PER_MIND_DEFENDED);
+        train(player, Source.MIND_DEFENDED);
     }
 
-    private static void train(ServerPlayer player, PlayerStat stat, float rawAmount) {
+    private static void train(ServerPlayer player, Source source) {
         if (!ModuleManager.isEnabled(Module.PLAYER_STATS)) return;
-        PlayerStatsAPI.addTrainingProgress(player, stat, rawAmount);
+        PlayerStatsAPI.addTrainingProgress(player, source.stat(), source.rawAmount(),
+                source.descriptionKey());
     }
 }

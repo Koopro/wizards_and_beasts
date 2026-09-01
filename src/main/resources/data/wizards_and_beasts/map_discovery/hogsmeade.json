@@ -1,0 +1,7 @@
+{
+  "type": "blocks",
+  "blocks": "wizards_and_beasts:landmark/hogsmeade",
+  "threshold": 96,
+  "marker": "wizards_and_beasts:hogsmeade",
+  "label": "map.wizards_and_beasts.landmark.hogsmeade"
+}

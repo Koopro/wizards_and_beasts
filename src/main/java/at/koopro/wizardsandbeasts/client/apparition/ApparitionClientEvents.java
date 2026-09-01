@@ -4,6 +4,7 @@ import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.client.apparition.state.ClientApparitionPointsState;
 import at.koopro.wizardsandbeasts.client.apparition.state.ClientApparitionPresentationState;
 import at.koopro.wizardsandbeasts.client.apparition.state.ClientApparitionWardState;
+import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -15,8 +16,9 @@ import org.jspecify.annotations.NullMarked;
  * Client-side lifecycle for the Apparition presentation state.
  *
  * <p>The tick here does not advance any charge — the server owns that clock and every number in
- * {@link ClientApparitionPresentationState} arrives in a packet. All this does is age out resolution events
- * nothing came to collect, so a client that misses a render pass does not accumulate them forever.
+ * {@link ClientApparitionPresentationState} arrives in a packet. What it does is hand finished attempts to
+ * {@link ApparitionResolutionFx} and then age out anything that somehow went uncollected, so a client that
+ * misses a tick does not accumulate them forever.
  */
 @NullMarked
 @EventBusSubscriber(modid = WizardsAndBeastsMod.MODID, value = Dist.CLIENT)
@@ -26,6 +28,11 @@ public final class ApparitionClientEvents {
 
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
+        // Play first, then age. The other order drops a resolution that arrived this very tick whenever the
+        // lifetime is short, and it is the drain that has to be reliable: a missed crack is a jump that
+        // happened in silence.
+        ApparitionResolutionFx.drainAndPlay(Minecraft.getInstance());
+        ApparitionResolutionFx.tick(Minecraft.getInstance());
         ClientApparitionPresentationState.tick();
     }
 
@@ -39,5 +46,6 @@ public final class ApparitionClientEvents {
         ClientApparitionWardState.clear();
         ClientApparitionPointsState.clear();
         ClientApparitionPresentationState.clear();
+        ApparitionResolutionFx.clear();
     }
 }

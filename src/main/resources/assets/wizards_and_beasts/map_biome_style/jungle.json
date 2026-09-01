@@ -1,0 +1,8 @@
+{
+  "biomes": [
+    "minecraft:jungle",
+    "minecraft:sparse_jungle"
+  ],
+  "tile": 12,
+  "tint": "#4E7A38"
+}

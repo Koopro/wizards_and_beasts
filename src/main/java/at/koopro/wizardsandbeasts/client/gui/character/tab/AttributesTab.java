@@ -1,17 +1,24 @@
 package at.koopro.wizardsandbeasts.client.gui.character.tab;
 
 import at.koopro.wizardsandbeasts.client.currency.state.ClientVaultDataState;
+import at.koopro.wizardsandbeasts.client.gui.character.StatIcons;
+import at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageDataState;
+import at.koopro.wizardsandbeasts.client.stats.ClientStatLevelUps;
 import at.koopro.wizardsandbeasts.client.stats.ClientStatsState;
+import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import at.koopro.wizardsandbeasts.item.wand.WandItem;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.registry.ModAttributes;
 import at.koopro.wizardsandbeasts.stats.PlayerStat;
 import at.koopro.wizardsandbeasts.stats.PlayerStatsData;
+import at.koopro.wizardsandbeasts.stats.PowerBandTable;
+import at.koopro.wizardsandbeasts.stats.StatReadout;
 import at.koopro.wizardsandbeasts.util.WandHelper;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.WandEligibility;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -19,6 +26,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
@@ -32,6 +40,8 @@ import java.util.Locale;
 /** Attributes tab: player stats, attributes, wand panel, wand affinity panel, currency panel. */
 public final class AttributesTab implements CharacterTab {
 
+    private static final String KEY = "gui.wizards_and_beasts.character_sheet.";
+
     private static final int COLOR_SECTION  = 0xFFDDB97A;
     private static final int COLOR_LABEL    = 0xFF887766;
     private static final int COLOR_VALUE    = 0xFFEEDDBB;
@@ -44,6 +54,11 @@ public final class AttributesTab implements CharacterTab {
      *  has earned stays visually louder than the fraction they are working towards. */
     private static final int COLOR_TRAINING_FILL = 0xFF5E4A22;
     private static final int COLOR_PRODIGY   = 0xFFFFD700;
+    /** The heritage ceiling, marked on the Power meter. Brass, so it reads as furniture on the bar. */
+    private static final int COLOR_CAP_TICK   = 0xFFDBA86D;
+    /** Effect-line tones. Off pure red/green to match the effects column: parchment ink, not an LED. */
+    private static final int COLOR_EFFECT_GOOD = 0xFF8FBF6A;
+    private static final int COLOR_EFFECT_BAD  = 0xFFCC7755;
     /** Clear space kept between a truncated label and its right-aligned value. */
     private static final int LABEL_VALUE_GAP = 4;
     private static final int COLOR_ELIGIBLE   = 0xFF55FF55;
@@ -51,22 +66,64 @@ public final class AttributesTab implements CharacterTab {
     private static final int COLOR_REASON     = 0xFFAA0000;
     private static final int COLOR_DETAIL     = 0xFFAAAAAA;
     private static final int COLOR_WAND_NAME  = 0xFFFFFFFF;
-    /** One stat row: label line plus its bar and training hairline. */
-    private static final int STAT_ROW_H     = 12;
+
+    /** One attribute row: label line plus its bar. */
+    private static final int ATTR_ROW_H = 12;
+
+    /**
+     * One stat row: name and value, the meter, the training hairline, and what the stat currently
+     * does. Twice an attribute row, because a stat carries twice the information — an attribute is a
+     * number the game already explains, where "Precision 37" means nothing without "−2.96% misfire"
+     * printed under it.
+     */
+    private static final int STAT_ROW_H = 26;
+    /** Left gutter: the 16px glyph plus its clearance. */
+    private static final int STAT_TEXT_X = StatIcons.SIZE + 4;
+    /** Right gutter reserved for the row's state mark (heritage padlock, prodigy star). */
+    private static final int STAT_STATUS_W = StatIcons.SIZE + 2;
 
     private float scrollOffset = 0f; // pixels scrolled from top
     private int lastTotalH = 0;      // content height measured last frame
 
+    /** The card the screen should draw this frame, in screen space. See {@link #consumeTooltip()}. */
+    private @Nullable List<Component> pendingTooltip;
+
+    /**
+     * Last stat card built, and what it was built from.
+     *
+     * <p>A card is a dozen {@link Component}s and, for a trainable stat, a bounded replay of the
+     * training accumulator to work out how many events the next point is away. That is cheap once and
+     * wasteful sixty times a second for as long as the pointer sits still — which is exactly how long
+     * someone reads a tooltip. Rebuilt only when the stat under the cursor or one of its numbers
+     * actually changes.
+     */
+    private @Nullable PlayerStat cachedTooltipStat;
+    private int cachedTooltipValue = -1;
+    private int cachedTooltipProgress = -1;
+    private int cachedTooltipCap = -1;
+    private boolean cachedTooltipProdigy;
+    private @Nullable List<Component> cachedTooltip;
+
+    /** The visible content rect, so a hover test can ignore a row scrolled under the scissor. */
+    private int viewX, viewY, viewW, viewH;
+
     @Override
     public @NonNull String translationKey() {
-        return "gui.wizards_and_beasts.character_sheet.tab.attributes";
+        return KEY + "tab.attributes";
     }
 
     @Override
-    public void render(@NonNull GuiGraphics g, int x, int y, int w, int h, float partialTick) {
+    public void render(@NonNull GuiGraphics g, int x, int y, int w, int h,
+                       int mouseX, int mouseY, float partialTick) {
         Minecraft mc = Minecraft.getInstance();
         if (!(mc.player instanceof LocalPlayer player)) return;
         Font font = mc.font;
+
+        pendingTooltip = null;
+        viewX = x;
+        viewY = y;
+        viewW = w;
+        viewH = h;
 
         float maxScroll = Math.max(0, lastTotalH - h);
         scrollOffset = Mth.clamp(scrollOffset, 0f, maxScroll);
@@ -84,15 +141,15 @@ public final class AttributesTab implements CharacterTab {
         // Above the attributes on purpose: these are the character's own numbers, where the block
         // below is the sum of everything currently modifying them.
         if (ModuleManager.isEnabled(Module.PLAYER_STATS) && ClientStatsState.hasData()) {
-            cy = drawStatsSection(g, font, cx, cy, innerW);
+            cy = drawStatsSection(g, font, cx, cy, innerW, mouseX, mouseY);
         }
 
         // ── Attributes: the sum of everything currently modifying the character ──
-        g.drawString(font, "Attributes", cx, cy, COLOR_SECTION, false);
+        section(g, font, cx, cy, "attributes");
         cy += 10;
 
         drawAttributeRows(g, player, cx, cy, innerW);
-        cy += 6 * STAT_ROW_H + 2;
+        cy += 6 * ATTR_ROW_H + 2;
 
         // ── Wand panel ────────────────────────────────────────────────────
         ItemStack heldStack = player.getMainHandItem();
@@ -115,6 +172,13 @@ public final class AttributesTab implements CharacterTab {
     }
 
     @Override
+    public @Nullable List<Component> consumeTooltip() {
+        List<Component> tooltip = pendingTooltip;
+        pendingTooltip = null;
+        return tooltip;
+    }
+
+    @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
         scrollOffset -= (float) (delta * 10.0);
         return true;
@@ -125,45 +189,178 @@ public final class AttributesTab implements CharacterTab {
     /**
      * Paints the five {@link PlayerStat} values and returns the new content cursor.
      *
-     * <p>A stat row is an attribute row on a fixed 0–100 scale, plus — for the three trainable
-     * stats — a hairline showing how far into the next point the player is. Without that second bar
-     * the main bar sits still for hundreds of casts and training reads as broken.
+     * <p>Each row answers four questions in the order a player asks them: what is this, how big is it,
+     * how close am I to the next point, and what is it doing for me. Only the second of those was on
+     * screen before — five bare numbers with no consequence attached to any of them, which is a debug
+     * readout rather than a character sheet.
      *
-     * <p>Section header is a bare literal to match "Attributes", "Wand" and "Currency" below it; the
-     * stat <em>names</em> go through {@link PlayerStat#displayName()}, whose keys already ship.
+     * <p>The stat <em>names</em> and every effect line go through {@link StatReadout}, which reads the
+     * same {@link at.koopro.wizardsandbeasts.stats.StatEffects} curves the cast pipeline spends. No
+     * percentage on this screen is worked out here.
      */
-    private int drawStatsSection(@NonNull GuiGraphics g, @NonNull Font font, int x, int y, int w) {
+    private int drawStatsSection(@NonNull GuiGraphics g, @NonNull Font font, int x, int y, int w,
+                                 int mouseX, int mouseY) {
         PlayerStatsData stats = ClientStatsState.get();
+        if (stats == null) return y;
 
-        g.drawString(font, "Stats", x, y, COLOR_SECTION, false);
-        if (stats.isProdigy()) {
-            String tag = "♦ Prodigy";
-            g.drawString(font, tag, x + w - font.width(tag), y, COLOR_PRODIGY, false);
-        }
+        section(g, font, x, y, "stats");
         y += 10;
 
-        PlayerStat[] order = {
-            PlayerStat.POWER, PlayerStat.PRECISION,
-            PlayerStat.WILLPOWER, PlayerStat.REFLEXES,
-            PlayerStat.KNOWLEDGE,
-        };
+        int powerCap = powerCap();
 
-        List<String> labels = new ArrayList<>();
-        List<String> values = new ArrayList<>();
-        for (PlayerStat stat : order) {
-            labels.add(stat.displayName().getString());
-            values.add(Integer.toString(valueOf(stats, stat)));
-        }
-        RowGutters gut = gutters(font, x, w, labels, values);
-
-        for (int i = 0; i < order.length; i++) {
-            PlayerStat stat = order[i];
-            drawMeterRow(g, font, x, y, w, gut, labels.get(i), values.get(i),
-                         valueOf(stats, stat) / 100.0,
-                         stat.isTrainable() ? stats.trainingProgress().getOrDefault(stat, 0f) : -1f);
+        // Declaration order, not a hand-written list: the sheet was one of the places a sixth stat
+        // would have had to be remembered, and nothing would have failed if it were not.
+        for (PlayerStat stat : PlayerStat.values()) {
+            drawStatRow(g, font, x, y, w, stat, stats, powerCap, mouseX, mouseY);
             y += STAT_ROW_H;
         }
         return y + 2;
+    }
+
+    /**
+     * The heritage ceiling on POWER, read on the client from the synced variant.
+     *
+     * <p>{@link PowerBandTable} is pure and lives in the common package precisely so both sides can
+     * consult one table; nothing is trusted to this number, which only decides where a tick is drawn.
+     * The server clamps growth itself in {@code PlayerStatsAPI.grantPowerGrowth}.
+     */
+    private static int powerCap() {
+        HeritageVariant variant = ClientHeritageDataState.get().getSelectedHeritageVariant();
+        return variant == null ? PlayerStatsData.MAX_VALUE : PowerBandTable.getBandMax(variant);
+    }
+
+    private void drawStatRow(@NonNull GuiGraphics g, @NonNull Font font, int x, int y, int w,
+                             @NonNull PlayerStat stat, @NonNull PlayerStatsData stats, int powerCap,
+                             int mouseX, int mouseY) {
+        int value = stats.get(stat);
+        String label = stat.displayName().getString();
+        String valueText = Integer.toString(value);
+        boolean capped = stat.isHeritageCapped() && value >= powerCap;
+        boolean prodigy = stats.isProdigy();
+
+        // A point that just landed lifts its own row for a moment, so a player who opens the sheet
+        // straight after the toast can see which number moved rather than hunting for it.
+        float flash = ClientStatLevelUps.flashStrength(stat);
+        if (flash > 0f) {
+            int alpha = (int) (flash * 64f) << 24;
+            g.fill(x - 2, y - 1, x + w + 2, y + STAT_ROW_H - 2, alpha | 0x00DBA86D);
+        }
+
+        StatIcons.drawStat(g, stat, x, y);
+
+        int textX = x + STAT_TEXT_X;
+        int statusX = x + w - StatIcons.SIZE;
+
+        // ── name and value ──
+        int valueColor = capped ? COLOR_PRODIGY : COLOR_VALUE;
+        int valueX = x + w - STAT_STATUS_W - font.width(valueText);
+        int labelW = Math.max(0, valueX - textX - LABEL_VALUE_GAP);
+        g.drawString(font, font.plainSubstrByWidth(label, labelW), textX, y + 1, COLOR_LABEL, false);
+        g.drawString(font, valueText, valueX, y + 1, valueColor, false);
+
+        // ── the state mark, if this row has one ──
+        if (capped) {
+            StatIcons.drawCapped(g, statusX, y);
+        } else if (prodigy && stat == PlayerStat.POWER) {
+            StatIcons.drawProdigy(g, statusX, y);
+        }
+
+        // ── meter ──
+        int barX = textX;
+        int barW = w - STAT_TEXT_X - STAT_STATUS_W;
+        if (barW > 0) {
+            int barY = y + 12;
+            g.fill(barX, barY, barX + barW, barY + 3, COLOR_BAR_TRACK);
+            int filled = Mth.clamp(Math.round(value / 100.0f * barW), 0, barW);
+            g.fill(barX, barY, barX + filled, barY + 3, COLOR_BAR_FILL);
+
+            // Where heritage stops this stat, marked on the bar rather than only stated in the
+            // tooltip: a Power meter that stalls two thirds along otherwise looks like a bug.
+            if (stat.isHeritageCapped() && powerCap < PlayerStatsData.MAX_VALUE) {
+                int tickX = barX + Mth.clamp(Math.round(powerCap / 100.0f * barW), 0, barW - 1);
+                g.fill(tickX, barY - 1, tickX + 1, barY + 4, COLOR_CAP_TICK);
+            }
+
+            // Training hairline under the main bar: without it the bar sits still for hundreds of
+            // casts and training reads as broken.
+            if (stat.isTrainable()) {
+                float progress = ClientStatsState.trainingProgress(stat);
+                int hairY = barY + 4;
+                g.fill(barX, hairY, barX + barW, hairY + 1, COLOR_BAR_TRACK);
+                int hair = Mth.clamp(Math.round(progress * barW), 0, barW);
+                g.fill(barX, hairY, barX + hair, hairY + 1, COLOR_TRAINING_FILL);
+            }
+        }
+
+        // ── what it is doing right now ──
+        String effectLabel = StatReadout.effectLabel(stat).getString();
+        String effectValue = StatReadout.effectValue(stat, value).getString();
+        int effectY = y + 18;
+        int effectValueX = x + w - STAT_STATUS_W - font.width(effectValue);
+        g.drawString(font, font.plainSubstrByWidth(effectLabel,
+                        Math.max(0, effectValueX - textX - LABEL_VALUE_GAP)),
+                textX, effectY, COLOR_LABEL, false);
+        g.drawString(font, effectValue, effectValueX, effectY,
+                toneColor(StatReadout.effectTone(stat, value)), false);
+
+        // ── hover ──
+        if (hovered(x - 2, y - 1, w + 4, STAT_ROW_H - 2, mouseX, mouseY)) {
+            pendingTooltip = tooltipFor(stat, value, ClientStatsState.trainingProgress(stat),
+                    stat.isHeritageCapped() ? powerCap : PlayerStatsData.MAX_VALUE, prodigy);
+        }
+    }
+
+    /**
+     * The hover card for one stat, rebuilt only when something it shows has changed.
+     *
+     * <p>Training progress is compared at the whole percent the card actually prints, not at full
+     * float precision — the eased hairline changes every frame while a sync settles, and keying on
+     * that would defeat the cache for the one number nobody can read moving.
+     */
+    private List<Component> tooltipFor(PlayerStat stat, int value, float progress, int cap,
+                                       boolean prodigy) {
+        int progressPercent = Math.round(Mth.clamp(progress, 0f, 1f) * 100f);
+        List<Component> cached = cachedTooltip;
+        if (cached != null && cachedTooltipStat == stat && cachedTooltipValue == value
+                && cachedTooltipProgress == progressPercent && cachedTooltipCap == cap
+                && cachedTooltipProdigy == prodigy) {
+            return cached;
+        }
+        List<Component> built = StatReadout.tooltip(stat, value, progress, cap, prodigy);
+        cachedTooltipStat = stat;
+        cachedTooltipValue = value;
+        cachedTooltipProgress = progressPercent;
+        cachedTooltipCap = cap;
+        cachedTooltipProdigy = prodigy;
+        cachedTooltip = built;
+        return built;
+    }
+
+    /** Warm parchment equivalents of the three tones {@link StatReadout} hands back. */
+    private static int toneColor(ChatFormatting tone) {
+        return switch (tone) {
+            case GREEN -> COLOR_EFFECT_GOOD;
+            case RED -> COLOR_EFFECT_BAD;
+            default -> COLOR_LABEL;
+        };
+    }
+
+    /**
+     * Hit-test for a row, clipped to the visible content rect.
+     *
+     * <p>The section is drawn inside a scissor and scrolls under it, so a row can be laid out at a
+     * y-coordinate that is off-panel entirely. Testing the row rect alone would pop a tooltip for a
+     * stat the player cannot see, positioned over whatever is above the tab.
+     */
+    private boolean hovered(int rx, int ry, int rw, int rh, int mouseX, int mouseY) {
+        return mouseX >= Math.max(rx, viewX) && mouseX < Math.min(rx + rw, viewX + viewW)
+                && mouseY >= Math.max(ry, viewY) && mouseY < Math.min(ry + rh, viewY + viewH);
+    }
+
+    private static void section(@NonNull GuiGraphics g, @NonNull Font font, int x, int y,
+                                @NonNull String id) {
+        g.drawString(font, Component.translatable(KEY + "section." + id).getString(),
+                x, y, COLOR_SECTION, false);
     }
 
     /**
@@ -201,16 +398,14 @@ public final class AttributesTab implements CharacterTab {
     }
 
     /**
-     * One meter row: label, bar, right-aligned value.
+     * One attribute row: label, bar, right-aligned value.
      *
      * <p>These were 26px tiles in a 2x3 grid, which is what a 200px column could hold and no more.
-     * A row is 12px, so the same space carries every stat and attribute plus the sections below.
-     *
-     * @param trainingProgress fraction into the next point, or a negative value to omit the hairline
+     * A row is 12px, so the same space carries every attribute plus the sections below.
      */
     private void drawMeterRow(@NonNull GuiGraphics g, @NonNull Font font, int x, int y, int w,
                               @NonNull RowGutters gut, @NonNull String label, @NonNull String value,
-                              double fraction, float trainingProgress) {
+                              double fraction) {
         g.drawString(font, font.plainSubstrByWidth(label, gut.labelW()), x, y + 1, COLOR_LABEL, false);
         g.drawString(font, value, x + w - font.width(value), y + 1, COLOR_VALUE, false);
 
@@ -221,25 +416,6 @@ public final class AttributesTab implements CharacterTab {
         g.fill(barX, barY, barX + barW, barY + 4, COLOR_BAR_TRACK);
         int filled = Math.max(0, Math.min(barW, (int) (fraction * barW)));
         g.fill(barX, barY, barX + filled, barY + 4, COLOR_BAR_FILL);
-
-        // Training hairline under the main bar: without it the bar sits still for hundreds of
-        // casts and training reads as broken.
-        if (trainingProgress < 0f) return;
-        int hairY = barY + 5;
-        g.fill(barX, hairY, barX + barW, hairY + 1, COLOR_BAR_TRACK);
-        int hair = Math.max(0, Math.min(barW, (int) (trainingProgress * barW)));
-        g.fill(barX, hairY, barX + hair, hairY + 1, COLOR_TRAINING_FILL);
-    }
-
-    /**
-     * KNOWLEDGE is derived server-side; the client reads the last synced snapshot for every stat alike.
-     *
-     * <p>This was a switch naming each constant, which made the character sheet one of the places a new
-     * stat had to be remembered — and the compiler only caught it because the switch was exhaustive. The
-     * stat block is keyed by {@link PlayerStat} now, so a new constant renders here on its own.
-     */
-    private static int valueOf(@NonNull PlayerStatsData stats, @NonNull PlayerStat stat) {
-        return stats.get(stat);
     }
 
     private void drawAttributeRows(@NonNull GuiGraphics g, @NonNull LocalPlayer player,
@@ -253,13 +429,17 @@ public final class AttributesTab implements CharacterTab {
         AttributeInstance corrupt = player.getAttribute(ModAttributes.DARK_CORRUPTION);
         AttributeInstance beast   = player.getAttribute(ModAttributes.BEAST_RESISTANCE);
 
+        // Names come from the attributes themselves rather than from six literals here. Vanilla
+        // already ships "Max Health" and "Armor" in every language it supports, and the mod's three
+        // carry their own description ids — a second English list would be untranslated and would
+        // drift the moment one of them was renamed.
         AttrRow[] cards = {
-            new AttrRow("Max Health",       val(health),  0,  40),
-            new AttrRow("Armor",            val(armor),   0,  30),
-            new AttrRow("Speed",            val(speed),   0,  1),
-            new AttrRow("Wand Affinity",    val(affin),   0.5, 2),
-            new AttrRow("Dark Corruption",  val(corrupt), 0,  100),
-            new AttrRow("Beast Resistance", val(beast),   0,  1),
+            new AttrRow(attrName(Attributes.MAX_HEALTH.value()),      val(health),  0,  40),
+            new AttrRow(attrName(Attributes.ARMOR.value()),           val(armor),   0,  30),
+            new AttrRow(attrName(Attributes.MOVEMENT_SPEED.value()),  val(speed),   0,  1),
+            new AttrRow(attrName(ModAttributes.WAND_AFFINITY.get()),  val(affin),   0.5, 2),
+            new AttrRow(attrName(ModAttributes.DARK_CORRUPTION.get()), val(corrupt), 0,  100),
+            new AttrRow(attrName(ModAttributes.BEAST_RESISTANCE.get()), val(beast), 0,  1),
         };
 
         Font font = Minecraft.getInstance().font;
@@ -274,14 +454,19 @@ public final class AttributesTab implements CharacterTab {
         for (int i = 0; i < cards.length; i++) {
             double range = cards[i].max() - cards[i].min();
             double frac = range > 0 ? (cards[i].value() - cards[i].min()) / range : 0;
-            drawMeterRow(g, font, x, y + i * STAT_ROW_H, w, gut,
-                         labels.get(i), values.get(i), frac, -1f);
+            drawMeterRow(g, font, x, y + i * ATTR_ROW_H, w, gut,
+                         labels.get(i), values.get(i), frac);
         }
+    }
+
+    @NonNull
+    private static String attrName(@NonNull Attribute attribute) {
+        return Component.translatable(attribute.getDescriptionId()).getString();
     }
 
     private int drawWandPanel(@NonNull GuiGraphics g, @NonNull Font font,
                               int x, int y, int w, @NonNull ItemStack stack) {
-        g.drawString(font, "Wand", x, y, COLOR_SECTION, false);
+        section(g, font, x, y, "wand");
         y += 10;
 
         @Nullable Identifier wood  = WandComponents.getWood(stack);
@@ -291,18 +476,18 @@ public final class AttributesTab implements CharacterTab {
         float integrity     = WandComponents.getIntegrity(stack);
         float allegiance    = WandComponents.getAllegianceScore(stack);
 
-        drawKV(g, font, x, y,      w, "Wood",        idToDisplay(wood));        y += 9;
-        drawKV(g, font, x, y,      w, "Core",        idToDisplay(core));        y += 9;
-        drawKV(g, font, x, y,      w, "Flexibility", flex != null ? flex.getDisplayName() : "—"); y += 9;
-        drawKV(g, font, x, y,      w, "Length",      length != null ? String.format("%.1f\"", length) : "—"); y += 9;
-        drawKV(g, font, x, y,      w, "Integrity",   String.format("%.0f%%", integrity * 100f));  y += 9;
-        drawKV(g, font, x, y,      w, "Allegiance",  String.format("%.0f%%", allegiance * 100f)); y += 11;
+        drawKV(g, font, x, y, w, "wand.wood",        idToDisplay(wood));        y += 9;
+        drawKV(g, font, x, y, w, "wand.core",        idToDisplay(core));        y += 9;
+        drawKV(g, font, x, y, w, "wand.flexibility", flex != null ? flex.getDisplayName() : "—"); y += 9;
+        drawKV(g, font, x, y, w, "wand.length",      length != null ? String.format(Locale.ROOT, "%.1f\"", length) : "—"); y += 9;
+        drawKV(g, font, x, y, w, "wand.integrity",   String.format(Locale.ROOT, "%.0f%%", integrity * 100f));  y += 9;
+        drawKV(g, font, x, y, w, "wand.allegiance",  String.format(Locale.ROOT, "%.0f%%", allegiance * 100f)); y += 11;
         return y;
     }
 
     private int drawWandAffinityPanel(@NonNull GuiGraphics g, @NonNull Font font,
                                       int x, int y, int w, @NonNull LocalPlayer player) {
-        g.drawString(font, "Wand Affinity", x, y, COLOR_SECTION, false);
+        section(g, font, x, y, "wand_affinity");
         y += 10;
 
         ItemStack wand = WandHelper.getWandStack(player);
@@ -342,21 +527,23 @@ public final class AttributesTab implements CharacterTab {
 
     private void drawCurrencyPanel(@NonNull GuiGraphics g, @NonNull Font font,
                                    int x, int y, int w) {
-        g.drawString(font, "Carried Coin", x, y, COLOR_SECTION, false);
+        section(g, font, x, y, "currency");
         y += 10;
 
         long galleons = ClientVaultDataState.get().getGalleons();
         long sickles  = ClientVaultDataState.get().getSickles();
         long knuts    = ClientVaultDataState.get().getKnuts();
 
-        drawKV(g, font, x, y, w, "Galleons", String.valueOf(galleons)); y += 9;
-        drawKV(g, font, x, y, w, "Sickles",  String.valueOf(sickles));  y += 9;
-        drawKV(g, font, x, y, w, "Knuts",    String.valueOf(knuts));
+        drawKV(g, font, x, y, w, "currency.galleons", String.valueOf(galleons)); y += 9;
+        drawKV(g, font, x, y, w, "currency.sickles",  String.valueOf(sickles));  y += 9;
+        drawKV(g, font, x, y, w, "currency.knuts",    String.valueOf(knuts));
     }
 
+    /** @param labelId key suffix under {@code gui.wizards_and_beasts.character_sheet.} */
     private static void drawKV(@NonNull GuiGraphics g, @NonNull Font font,
                                 int x, int y, int w,
-                                @NonNull String key, @NonNull String value) {
+                                @NonNull String labelId, @NonNull String value) {
+        String key = Component.translatable(KEY + labelId).getString();
         g.drawString(font, key + ":", x, y, COLOR_LABEL, false);
         int kw = font.width(key + ": ");
         String val = font.plainSubstrByWidth(value, w - kw);

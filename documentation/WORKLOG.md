@@ -2,6 +2,701 @@
 
 > **Reverse-chronological build log** — each build pass has an "Audit" subsection (findings) followed by "Resolution" subsection (deltas). Sources: `MIGRATION_DELTAS.md` (resolution deltas) + `AUDIT_PUNCHLIST.md` (audit findings + fix passes). Merged 2026-07-13.
 
+## Template for a new pass
+
+Copy this block, put it directly under this heading (newest first), and delete anything that has no
+content — an empty "Audit" is worse than none, because it reads as "nothing was wrong".
+
+Two rules the existing entries follow, and the reason for each:
+
+1. **Audit before Resolution.** The findings are written down before the fix, so an entry records
+   what was actually true, not a reconstruction from the diff.
+2. **A resolution states the behaviour change, not the edit.** "Renamed X to Y" belongs in git.
+   What belongs here is what a player or a caller can now do that they could not before, or what
+   silently used to happen and no longer does.
+
+Do not add an entry for work that has not happened. A worklog whose entries cannot be trusted is
+worth less than no worklog.
+
+```markdown
+## YYYY-MM-DD — <short title: the system touched, and what changed about it>
+
+### Audit
+- <finding: what is wrong, where, and how it shows up>
+- <deliberate non-fix: what was found and left alone, and why — these matter most later>
+
+### Resolution
+- **<the behaviour change, in bold>.** <What now happens. Name the classes/files, and say what the
+  old behaviour was so the delta is readable without a checkout.>
+- **<next change>.** <…>
+
+### Deferred
+- <what this pass did not do, and what it is blocked on>
+```
+
+---
+
+---
+
+## 2026-08-28 — Brooms: inventory appearance
+
+### Audit
+- **BLOCKER — seven broom sprites were never loaded.** Seven of the eight `models/item/*.json` were
+  texture-less children of `wizards_and_beasts:item/broom`, so every broom item drew the generic
+  broom's icon and the seven distinct PNGs beside them did nothing. The item side had been reported
+  complete twice on the strength of the files existing, correctly named, next to correctly named
+  sprites. Existence was the wrong thing to check.
+- **All eight used `minecraft:item/generated`** or inherited it, so a broom was held flat in hand
+  rather than angled like a shaft.
+- **The icons varied only in hue.** One shape for all eight, and five of the eight are browns; at 16px
+  a brown is a brown.
+
+### Resolution
+- **Every model declares its own `layer0`** and parents to `minecraft:item/handheld`.
+  `ModModelProvider` uses `declareCustomModelItem` for all eight, which emits only the item-model
+  definition and leaves `models/item/` hand-authored — so these files are the intended home and
+  datagen will not overwrite them.
+- **Three builds instead of one shape**: `_broom(shaft_width, bundle, collar_width)` backs `broom`,
+  `broom_slim` and `broom_heavy`, and the bundle scales about its own root so a heavy broom reads as
+  heavy in outline rather than only in colour.
+- **The three materials became three things** — `TRIM` the handle, `BODY` the twig bundle, `MARK` the
+  binding — which is what carries the brief's colour language: twine, brass, silver, chrome, red cord,
+  gold and iron collars, each the metal that broom carries on its entity sheet.
+- The collar is drawn **across** the handle and proud of it. Drawn along the shaft at one pixel wide,
+  as first attempted, it vanished completely.
+- **`BroomItemModelTest`** checks what existence cannot: each model names *its own* texture, each uses
+  the handheld pose, and every sprite is **distinct by SHA-256**. Eight files with eight names can
+  still be eight copies of one picture. The roster is scraped from `BroomItemRegistry`.
+- **1313 tests pass** (three new).
+
+---
+
+## 2026-08-28 — Brooms: authoritative definition content
+
+### Audit
+- **`firebolt_supreme` was less steady than the Firebolt it upgrades.** `stabilityRating` 0.60 against
+  0.65, where the brief asks for slightly higher. It also meant the Supreme took *more* of the racing
+  profile's high-speed sink than the cheaper broom.
+- **`nimbus_2001`'s turnSpeed already satisfied the brief** at 1.12 against the 2000's 1.10. Verified
+  rather than changed.
+- **The brief's `passengerOffset` values are positive.** `[0, 0.52, 0.02]` and `[0, 0.62, 0.0]` would
+  reintroduce the floating-rider bug fixed on 2026-08-27: the offset positions the rider's feet, a
+  rendered humanoid's hip sits 0.751 blocks above its own position, and the shafts are drawn with
+  their top at 0.375 and 0.4375 — so +0.52 puts the hips 0.9 blocks clear of the handle.
+- **`comet_260`'s "dust/gold mix" is not expressible.** `trailParticle` holds one id.
+
+### Resolution
+- **All seven brooms authored to spec** — profile, wobble, drift, momentum, crash multiplier, trail,
+  boost cue and seat. Flight numbers untouched, as the brief asks.
+- **`firebolt_supreme` stability 0.60 → 0.68**, so it is steadier than the Firebolt in fact as well as
+  in tier.
+- **Per-broom `model` files, generated not written.** `tools/broom_model.py` now emits one geometry per
+  broom that names a model — the master rig with the unselected variants dropped, 20 bones against 45.
+  Hand-authoring seven would be seven copies of the same shaft, and the renderer addresses variants by
+  name, so a drifted copy hides bones that exist in one file and not the other.
+  `everyPerBroomModelMatchesTheMasterRig` re-derives the expected bones and demands an exact match, and
+  checks each declares its own `geometry.<name>` identifier. The generic broom names no model and keeps
+  the master rig, so the fallback stays exercised.
+- **`tools/broom_lineup.py` previews from the shipped file** when a broom names one, instead of
+  re-filtering the rig — a preview that agrees with itself while disagreeing with what ships is worse
+  than none. The lineup is pixel-identical before and after flattening, which is the proof the
+  generator is right.
+- **Seats derived, not transcribed**: -0.375 for the Cleansweep's `oak` shaft, -0.3125 for the
+  Oakshaft's `heavy_oak`, -0.4375 for the thin shafts. The brief's *relative* intent — Oakshaft higher
+  than Cleansweep — is honoured exactly; only the frame differs, and `BroomSeatParityTest` recomputes
+  the values from the geometry.
+- **1310 tests pass** (one new).
+
+### Deferred
+- A blended trail would need a second field or a weighted-list codec. The Comet takes dust, which suits
+  its straw-and-birch palette and keeps gold as the Nimbus family's tell.
+
+---
+
+## 2026-08-28 — Brooms: sound, trails, polish and crash flair
+
+### Audit
+- **`broom_polish` was an item with a tooltip and nothing else.** A `SimpleTooltipItem` whose entire
+  behaviour was a line of hover text describing what it would do if it did anything.
+- **A spent broom was rideable.** The spawn path did `setCurrentDurability(Math.max(1, remaining))`,
+  which handed a fully damaged broom one point of durability and let it fly — then broke it again on
+  the first knock. The acceptance case, and it had been open since brooms had durability.
+- **`crashDamageMultiplier` applied to the rider but not the broom.** A Firebolt's 1.35 made the crash
+  hurt the player more and cost the broom nothing, so the broom was the safe half of the pair on the
+  broom most likely to hit a wall.
+- **The slipstream came out of the rider's back.** It seeded behind the *player*, offset along the
+  direction of travel, so on anything flying nose-up it drew inside them. `fx_tail` had been in the
+  rig and referenced by no Java since the rig landed.
+- **Found, not fixed: `PROTEGO_SHATTER` and `AK_BYPASS_FLASH` have no particle provider.**
+  `ModParticleProviders` registers sprite sets only for the tinted spell types; `ProtegoShieldEntity`
+  sends both of these. They render nothing. Pre-existing, different subsystem, and fixing it needs a
+  decision about what they should look like.
+- **Reversal, stated plainly:** the previous pass argued three bespoke trail particle types would be
+  "seven registry entries to say what `minecraft:flame` already says". The brief named them again, so
+  they were built — and they cost less than that objection assumed, because one class and one sprite
+  serve all three.
+
+### Resolution
+- **Five more sound events and still not one audio file** — wood breaks for the two crash grades, a
+  step and a wingbeat for mounting, honeycomb wax for the tin, all re-pitched vanilla with subtitles.
+- **Three registered trail types** sharing one `BroomTrailParticle` and one sprite; a `Style` enum
+  carries colour, size, lifetime, friction and gravity, so Firebolt embers rise and die in seven ticks
+  where Cleansweep dust falls and lingers for fourteen. Registered with `overrideLimiter = false`: a
+  trail is ambience and should thin out with the player's particle setting.
+- **The trail leaves the twigs.** `BroomEntity.tailPosition()` reads the rig's `fx_tail` anchor and
+  rotates it into the broom's frame. Threshold 0.55 → 0.4, boosting always draws, and *rate* carries
+  the speed while colour stays the broom's identity.
+- **Polish is a real item.** Repairs 25% of maximum durability — a fraction, because a flat figure is
+  most of a Cleansweep and a rounding error on an Oakshaft — and leaves the handle slick for twenty
+  minutes, halving the heading wander. Works with the broom in the other hand or on a broom standing
+  in the world, and refuses one that needs nothing rather than eating a tin.
+- **`POLISHED_UNTIL_TICK` is an absolute tick**, stripped by `BroomItem.inventoryTick` once it lapses,
+  so everything downstream can read "present" as "polished". The entity carries a *synced* flag, since
+  the movement step runs on both sides and the stack does not.
+- **Crash flair**: severe impacts scale durability by `crashDamageMultiplier`, throw twigs from the
+  tail and crit particles at the contact point, play the graded sound, and tell the rider on the
+  action bar.
+- **Mount cue plus 3 ticks of invulnerability**, because a rider seated below the broom's origin is
+  briefly inside whatever it was parked on.
+- **A spent broom refuses to fly** and says so; a tin is enough to get it airborne again.
+- **1309 tests pass** (8 new). `BroomPolish` takes a bare `long gameTime` alongside the `Level`
+  overload so the window can actually be tested — an absolute expiry nothing checks is a permanent
+  buff wearing a timer's clothes.
+
+### Deferred
+- The polish buff is the wobble half of the brief's "+2% maxSpeed OR reduced wobble". Speed was left
+  alone deliberately: it is the axis every broom is already balanced on.
+
+---
+
+## 2026-08-28 — Brooms: handling profiles as behaviour, not just numbers
+
+### Audit
+- **The scalars were not enough.** `handlingProfile` chose a bundle of numbers and `BroomMovement` read
+  them inline, so brooms differed only in ways a number can express. All eight still accelerated,
+  turned, drifted and stopped by identical arithmetic — the "same flying stick with a different
+  maxSpeed" the brief names.
+- **`SCHOOL`'s crash multiplier was backwards.** Set to 1.15 on the reasoning that a cheap broom is a
+  flimsy one, which is wrong for the broom students are handed: a school broom is built to survive
+  being flown badly. `cleansweep_seven.json` also carried a redundant 0.9 override of it.
+- **`TANK`'s crash multiplier softened real crashes.** 0.75, where the brief softens only glancing
+  knocks and says severe ones still hurt.
+- **`onBoostStart` was about to ship inert.** No profile implemented it, because the FOV punch it was
+  meant to trigger is derived from boost ticks instead. A hook nothing implements is a tuning constant
+  nothing reads: it looks like a working seam, so the next person wires into it and nothing happens.
+  Caught by a test written for the purpose, not by review.
+- **Deliberate non-fix: the FOV punch stays in `BroomFlightFx`.** The brief names `BroomCameraHandler`;
+  that class handles camera angles and third-person distance. FOV was already implemented there,
+  already derived from boost ticks (which the brief prefers over a new flag) and already smoothed.
+- **Deliberate non-fix: no 40-tick session window on the school boost cap.** It would make the same
+  broom behave differently a moment later with no visible cause, and needs per-flight state to do it.
+
+### Resolution
+- **`entity.broom.handling`**: `BroomHandlingProfile` with eleven hooks, every one defaulted, so a
+  profile class is exactly its deviations — `BalancedHandling` overrides nothing, `TankHandling` four.
+  `HandlingProfileRegistry` maps the data enum onto the behaviour, keeping the dependency pointing
+  from behaviour to data so `BroomDefinition` never gains a `BroomEntity` reference.
+- **School brooms cap their boost at 1.35× whatever the JSON asks**, brake 15% harder, bank 20% less
+  and lurch when the boost catches. The cap is a no-op for every shipped school broom, asserted, so it
+  guards datapacks rather than silently retuning the Cleansweep.
+- **Racing brooms lock the heading** when the rider is not steering, and past 0.7 speed ratio tighten
+  the turn and go nose-heavy. The sink runs through `afterVelocityComputed` rather than
+  `modifyWeakGravity`, because gravity is skipped while a vertical key is held — routing it there
+  would cancel the effect exactly when a rider is pulling out of a dive.
+- **Tank brooms** lose 15% acceleration, turn at 0.75 always (mass, not momentum, so it bites at rest
+  too), sink 15% less, and halve glancing durability loss — floored at 1, never zero.
+- **Two scalar corrections**: `SCHOOL` crash 1.15 → 0.85, `TANK` 0.75 → 1.0.
+- **The momentum-to-deceleration mapping is normalised**, anchored on `BroomHandling.NEUTRAL_MOMENTUM`,
+  so balanced is exactly a no-op. Raw `1 / momentumRetention` would have made every broom in the game
+  stop 11% faster than it used to.
+- **Response curves are public statics** and `HandlingMath` takes a tick count rather than an entity,
+  so every threshold is unit-testable. `BroomHandlingProfileTest` asserts the orderings a blind flight
+  test would reveal — school brakes harder than balanced, tank turns slower than school, a Nimbus holds
+  a line better than a Cleansweep, a Firebolt punishes a wall harder than either.
+- **One narrow accessor pair** (`get/setVerticalVelocity`) plus `isSteering()`, because a sub-package
+  cannot see package-private fields. Everything else a profile needs arrives as an argument.
+- **1302 tests pass** (17 new). Input timeout and sequence guards untouched.
+
+### Deferred
+- The blind flight test itself is the acceptance and remains unrun; what is automated is every
+  ordering it would expose.
+
+---
+
+## 2026-08-27 — Brooms: the client never had the definitions
+
+### Audit
+- **BLOCKER — the definition table was never sent to clients.** `BroomDefinitionLoader` is registered
+  on `AddServerReloadListenersEvent`, so `BroomDefinitionRegistry` is populated server-side only.
+  `BroomEntity` syncs its `DEFINITION_ID`, which is necessary and was never sufficient: an id is a key
+  into a table, and on a dedicated server the client's table was empty. Every `resolveDefinition()` on
+  the client fell through to `CODE_DEFAULT`, so every broom drew the generic sheet, sat at the generic
+  seat and shed the generic trail whatever its JSON said. It worked in single-player only because the
+  integrated server shares a JVM and the registry is a static field. This silently invalidated the
+  whole per-broom pass and both of this brief's acceptance criteria.
+- **The definition cache went stale on `/reload`.** `BroomEntity` cached its resolved definition and
+  cleared it only when the synced id changed. A reload that retunes a broom in place changes no id, so
+  brooms already in the world kept their pre-reload values until they unloaded.
+- **The seat was measured to the shaft's centre line,** not its top surface, so every rider sank half a
+  shaft into the handle. Worse, shafts are 2 to 6 model units thick at the point the rider sits, so one
+  seat height could not be right for both the Firebolt's needle and the Oakshaft's log — which is
+  exactly the case the acceptance criterion names.
+- **Deliberate non-fix: pitch is not applied to the seat offset.** The brief asked for yaw *and* pitch.
+  The drawn broom does not pitch with `getXRot()` — its nose angle is `updateTilt`'s roughly `-0.4×`,
+  clamped to 35° — so rotating the seat by the full entity pitch swings the rider further than the mesh
+  they sit on. Using the visual tilt instead is worse: those are client render values and this method
+  positions the rider on the server too. The cost of omitting it is bounded by the largest authored
+  `z`, five centimetres, which is under a pixel at any real flight angle.
+- **Deliberate non-fix: `rider_attach` bone sampling.** GeckoLib bone transforms exist only inside a
+  client render pass and `positionRider` needs an answer on the server. Not an API-convenience call.
+- **Already in place, verified not rebuilt:** the custom `GeoModel` (`BroomVariantGeoModel`, branching
+  model/texture/animation off the definition) and per-item models — all eight brooms already have
+  `models/item/<id>.json`, `items/<id>.json` and a distinct sprite.
+
+### Resolution
+- **`BroomDefinitionsSyncS2CPayload` pushes the table on `OnDatapackSyncEvent`** — login and every
+  `/reload` — the seam `AbilityFrameworkEvents` and the brew recipe sync already use. Brooms now render
+  as themselves on a dedicated server, which is the acceptance criterion.
+- **The stream codec is `BroomDefinition.CODEC` itself,** through
+  `ByteBufCodecs.fromCodecWithRegistries`, not a hand-written field list. Twenty-five components across
+  four nested records would otherwise need adding in three places, with the third failing silently as
+  the field arriving at its default on the client — the very bug being fixed.
+- **A round-trip test guards that.** Every shipped definition is encoded and re-decoded through
+  `NbtOps` and must come back equal, so a field `encode` forgets to write fails the build.
+- **`BroomDefinitionRegistry.generation()`** is bumped on every swap and the entity re-resolves when
+  its cached generation goes out of date, so a `/reload` reaches brooms already in the world.
+- **Riders sit on top of their own shaft.** Seat derived from the top surface of the shaft chain's
+  `_mid` segment minus the 0.75-block humanoid hip pivot: `-0.4375` for the thin shafts, `-0.375` for
+  `oak`, `-0.3125` for `heavy_oak`. `BroomSeatParityTest` recomputes it from the geometry for every
+  broom and separately asserts the Oakshaft and the Firebolt genuinely differ.
+- **1285 tests pass** (three new).
+
+### Deferred
+- `passengerYawOffset` is supported and every shipped broom leaves it at zero; it exists for datapacks
+  wanting a side-saddle rider.
+
+---
+
+## 2026-08-27 — Brooms: models, audio and handling profiles from the datapack
+
+### Audit
+- **The codec had run out of room.** `BroomDefinition.CODEC` is a hand-written `Codec.of` whose
+  decode was a nested `flatMap` chain 22 levels deep, because `RecordCodecBuilder.group` caps at 16
+  fields. Sixteen more fields meant 38 levels and about 190 characters of leading whitespace on the
+  deepest line. It also short-circuited: a datapack with four bad values reported one, so finding
+  them all took four edit-and-reload cycles.
+- **The renderer could only ever draw one geometry.** Model and animation were fixed at construction;
+  only the texture branched.
+- **The brief's `passengerOffset` default would have re-broken the seat.** It specified
+  `(0, 0.55, 0)`. The rig draws every shaft 0.25 blocks up and a humanoid's hip pivot is 0.75 blocks
+  up, so an absolute +0.55 seats the rider 1.30 blocks above the handle — the same class of mistake
+  as the `height * 0.55` fixed earlier the same day, one step further along.
+- **The mod has no audio files at all.** Zero `.ogg` in the repo; all 47 existing sound events are
+  vanilla samples re-pitched in `sounds.json`. Seven bespoke `broom_trail_*` particle types would
+  likewise have been seven registry entries, seven providers and seven sprite sets to say what
+  `minecraft:flame` already says.
+- **Three places spelled out the same boost test by hand** — input held, charge remaining, cooldown
+  clear — against a package-private field the FX layer could not reach.
+- **Deliberate non-fix: `handlingProfile` was not left as a label.** An enum authored into every file
+  and read by nothing is the `wood_tint` failure again, so the profile supplies every other handling
+  default and explicit keys override it.
+
+### Resolution
+- **Sixteen optional fields, grouped four ways.** `BroomAssets` (model/texture/animation),
+  `BroomHandling` (profile and seven scalars), `BroomAudio` (two sounds and a trail particle) and
+  `BroomSeat` (offset and yaw). The JSON stays flat — `yawDrift` sits next to `maxSpeed` — so the
+  record gained four components rather than sixteen.
+- **The decode pyramid is gone.** `BroomFields` reads the flat keys and collects every fault, so one
+  message now names all of them. Unknown keys are ignored, which is what makes a definition from a
+  later version of the mod load in an earlier one.
+- **A datapack can redirect geometry, texture and animation with no code edit,** and any of the three
+  left unset falls back to the shared `broom` asset. `texture` takes a full `textures/...` path or a
+  GeckoLib subpath; the one-day-old `entity_texture` key is still accepted.
+- **`BALANCED` reproduces the constants it replaced, to the decimal** — momentum 0.90 maps to the old
+  `COAST_DRAG` 0.990 and `INPUT_DRAG` 0.995, crash multiplier 1.0, durability loss 1/2/3. The single
+  deliberate change is `yawDrift` 0.02: every broom now weaves about half a degree at top speed where
+  it tracked a perfect line. Deterministic from `tickCount`, never random, because yaw is stepped on
+  both sides of the connection and a random wander desyncs into a visible snap-back.
+- **Ten of the sixteen fields change behaviour rather than being carried.** Drift, wobble and momentum
+  in `BroomMovement`; crash damage and durability loss in `BroomImpacts`; FOV punch, boost cue, flight
+  loop and trail particle in `BroomFlightFx`; the seat in `BroomEntity`; the yaw in
+  `BroomRiderRenderHandler`. `/wandb world broom info` prints all of them.
+- **Eight new sound events and not one new audio file.** Elytra loops for wind, firecharge and
+  firework launches for boosts, dragon wingbeats for the heavy end — all re-pitched vanilla, with
+  subtitles.
+- **`BroomEntity.isBoostFiring()`** replaced the three hand-written copies of the same three-way test.
+- **Nine new tests**, 1282 passing. The ones that matter: a definition authoring none of the new keys
+  decodes to the old broom exactly; a profile's defaults lose to an explicit key and nothing else
+  moves; every fault is reported together; every named sound exists in `sounds.json` and has a
+  subtitle; every trail particle is an option-free vanilla type.
+
+### Deferred
+- `model` and `animation` are supported and unused — no shipped broom needs its own geometry, which
+  is the point of the master rig. The fields exist for datapacks.
+- A replacement geometry silently opts out of the slot system, because the renderer hides variants by
+  name. Documented rather than guarded; a rig that carries the bones keeps working.
+
+---
+
+## 2026-08-27 — Brooms: seven identities over one rig
+
+### Audit
+- **Every handle in the game rendered grey.** `shaft_*` and `tail_cap_*` are painted greyscale
+  precisely so `wood_tint` can colour them, and all eight broom definitions omitted the key. The
+  codec, the renderer's `getRenderColor` multiply and the greyscale paint pass had all shipped; no
+  value was ever authored.
+- **One texture for eight brooms.** `BroomRenderer` built a `DefaultedEntityGeoModel("broom")`,
+  which fixes the sheet at construction. The slot system gave the brooms different outlines, and
+  outline is the first thing distance takes away.
+- **Two shaft variants that were the same shaft.** `shaft_plain` and `shaft_swept` had byte-identical
+  cubes differing by 5 deg and 9 deg of rotation. `oakshaft_79` — briefed as a very thick antique oak
+  — selected `plain`, the school broom's shaft. `broom` and `cleansweep_seven` had identical
+  `model_slots` rows.
+- **The rider was flying next to the broom.** `getPassengerAttachmentPoint` returned
+  `dimensions.height() * 0.55`. The rig draws every shaft 0.25 blocks above the broom's position and
+  a rendered humanoid's hip sits 0.75 blocks above its own, so the seat wanted -0.50 and got +0.33:
+  the hip was 0.83 blocks clear of the handle.
+- **Inventory icons disagreed with the world.** All eight drew one shape in one hue, and the Comet
+  was the darkest icon in the set while being the palest broom in the game.
+- **Deliberate non-fix: the brief's seven per-broom `.geo.json` files were not built.** The master
+  rig already holds every part of every broom and the renderer already hides the unselected ones;
+  seven copies of 45 bones would be seven places for the hide-all-but-one loop to drift out of sync
+  with. The identity gap was colour, and colour is a texture. Bone names `footrest`, `rider_attach`
+  and `boost_fx` likewise stay as the shipped `footstrap`, `fx_mount` and `fx_tail` — renaming them
+  breaks `BroomModelParityTest`, the animation clips and the docs for no visible gain.
+- **Deliberate non-fix: `fx_tip`, `fx_tail` and `fx_mount` are still referenced by no Java.** They
+  are anchors waiting on a particle pass; the parity test keeps them alive.
+
+### Resolution
+- **Each shipped broom draws its own texture sheet.** New optional `entity_texture` on
+  `BroomDefinition`; `BroomVariantGeoModel` overrides `getTextureResource` from render-state data and
+  leaves geometry and animation on the base asset, so there is still one rig and one set of clips.
+  `tools/broom_model.py` packs the UV islands once and paints them once per scheme, so the sheets are
+  interchangeable and swapping one cannot move an island. A Cleansweep is scuffed oak, a Comet pale
+  birch, a Nimbus polished walnut over silver, a Firebolt ebony bound in red cord, the Supreme the
+  same with gold runes and ember-tipped bristles, an Oakshaft near-black under iron.
+- **A broom is now either painted or tinted, never both.** `getRenderColor` refuses to tint a broom
+  that ships its own sheet — its colour is already final, and GeckoLib's render colour applies to the
+  whole pass, so a tint would drag the band and the bristles with it. The generic `broom` stays on the
+  shared greyscale sheet with a `wood_tint`, so the no-art path a datapack broom takes is the path a
+  shipped broom exercises.
+- **Nine new slot variants, 14 to 23.** Thick `oak` and `heavy_oak` shafts, a `collar_ring` and
+  `iron_rings` binding, `swept` and `heavy` bristles, an `iron_peg` footstrap, a `maker_mark` and a
+  `runic_band` accent — each because a broom in the roster had nothing to select. `shaft_racing` was
+  retuned from 4 units to 3 at the binding: it was briefed as the slimmest handle and was the
+  second-thickest. Thickness now carries the difference and sweep only seasons it.
+- **You sit on the broom.** `BroomEntity.SEAT_OFFSET_Y` is derived from the rig (shaft centre 0.25
+  blocks up) and the humanoid hip (0.75 blocks up) rather than from a hitbox height that has nothing
+  to do with either. `BroomItem` lifts a broom by the same amount on mount, both when spawning one and
+  when climbing onto one lying on the ground, so the rider lands where they were standing instead of
+  half a block into the floor.
+- **Item icons follow the wood.** Hue and lightness order now track each broom's shaft colour, spread
+  across the range a 16px sprite can actually resolve — below roughly `#402f20` the shading collapses
+  four brooms into the same smudge.
+- **Four new parity tests.** Every `model_slots` value names a variant `BroomSlot` knows; every
+  `entity_texture` resolves to a PNG at the declared sheet size; no definition sets both
+  `entity_texture` and `wood_tint`; every broom in `BroomItemRegistry` has a definition file. 1271
+  tests pass.
+
+### Deferred
+- The bright binding band still takes `wood_tint` on any broom that uses one, which is only the
+  generic broom now. Exempting it needs a second render layer — unchanged from the earlier pass.
+- `animation.broom.brake` and `animation.broom.summon` remain authored and unwired.
+
+---
+
+## 2026-08-26 — Bestiary harvest: a mastered creature finally yields something
+
+### Audit
+- **Discovery tiers were read by two things, and neither was loot.** `KnowledgeFormula` derived a stat
+  from the count of discoveries and `OWLGradeCalculator` checked a tier index for an exam grade. No loot
+  table, recipe, wand core or bench gate had ever asked what tier a player held, so MASTERED bought a
+  number on a screen.
+- **There was no rare tier for it to unlock even if something had asked.** All 27 entity loot tables
+  drop exactly one base material apiece — `unicorn` → `unicorn_hair`, `phoenix` → `phoenix_feather`.
+- **Five registered materials had no source at all.** `erumpent_horn`, `thunderbird_tail_feather`,
+  `troll_whisker`, `wampus_cat_hair` and `veela_hair` are registered items, four of them wand cores
+  tagged into WANDS and filed in the creative menu, and nothing in the world dropped any of them.
+- **`BestiaryEntry` is at the codec ceiling.** Sixteen fields exactly, which is
+  `RecordCodecBuilder.group`'s limit — extending it was not an option, so the side table the brief
+  allows was also the only thing that compiles.
+- **Deliberate non-fix: `veela_hair` stays sourceless.** There is no veela bestiary entry and no
+  registered veela entity; veela are a *heritage*, not a mob. Giving the item a source needs a creature
+  that does not exist, which is out of this pass's scope.
+
+### Resolution
+- **A tier now decides whether the rarest part of a beast comes off it.**
+  `data/<ns>/bestiary/harvest/*.json` names a bestiary entry, an item, a minimum `DiscoveryTier`, a
+  chance and an optional lockout. Five rules ship, four of which give a previously sourceless wand core
+  its first way into the world.
+- **Basic drops cannot disappear, by construction.** `BestiaryHarvestLootModifier` only ever appends to
+  the rolled loot; it has no code path that inspects, filters or removes an existing stack. An unstudied
+  player killing a unicorn gets exactly the same unicorn hair they got before this existed.
+- **A rule that could never fire is a load failure.** `minTier: UNDISCOVERED` (which would gate nothing),
+  `chance: 0`, a chance outside 0–1, an unknown item and an unknown tier are each refused by the codec
+  with a message saying why. A rule naming a non-existent entry is dropped at index time with a warning.
+- **Farming is throttled where it matters.** The lockout is per player *and* per bestiary entry, stored
+  on the existing bestiary attachment so a relog cannot clear it, checked *before* the chance roll so a
+  farm cannot burn attempts against it, and not started by a failed roll. A beast with no killer — burned,
+  or killed by another mob — yields nothing, which is what a mob crusher produces.
+- **`DiscoveryTier.CODEC` no longer throws on an unknown name.** It was
+  `Codec.STRING.xmap(DiscoveryTier::valueOf, …)`, so a typo in any datapack field carrying a tier took
+  the whole reload down instead of reporting one bad file. Found because a test asserted the refusal and
+  got an exception instead of an error result. Now a `comapFlatMap` returning a parse error; the wire and
+  disk format are unchanged.
+
+### Deferred
+- No new items. The five shipped rules use materials that already existed; a rare drop that needed a new
+  item would have been content authoring rather than closing the edge.
+- No recipe or bench gating on tier. The loot edge is closed; whether the *wandmaker* should also ask
+  what you have studied is a separate decision.
+- No GameTest. The gating is pure and fully unit-tested; the one seam a unit test cannot reach is the
+  loot modifier's use of `LootContext`, and a GameTest for it would need a mob, a kill and a player —
+  which is the manual check, not a cheap automated one.
+
+---
+
+## 2026-08-25 — Living heritage: three axes, two of them derived
+
+### Audit
+- **`Heritage` is species, not blood status.** PURE_BLOOD / HALF_BLOOD / MUGGLE_BORN / SQUIB /
+  ADOPTED_MAGICAL are `HeritageVariant` values under `Heritage.WIZARDKIND`. The brief's terms map one
+  level down from where they read as if they should.
+- **Half of the Light/Dark axis already existed and had no light pole.** `DARK_CORRUPTION` is a 0–100
+  attachment with a single write seam (`DarkCorruptionService`, which applies vocation scaling) and four
+  live writers: Unforgivables, a worn Horcrux, the Resurrection Stone, Riddle's diary. There was no way
+  to move it the other way and nothing that counted as being *light*.
+- **Nothing read blood status after character creation.** Heritage set stats, size, form and ability
+  grants at selection and was then inert as an identity.
+- **Three numbers, no model.** Notoriety, corruption and blood status never met.
+- **Deliberate non-fix: no fourth stored meter.** The brief's "Ministry standing" is the criminal
+  record, which already exists and is already banded. Mirroring it into a standing record would have
+  created a second source of truth that drifts the first time `TraceService` writes the original.
+- **Deliberate non-fix: the mod ships no standing gates.** The gate mechanism is live, loaded and
+  tested, but authoring one changes what existing players can reach in a save they have already spent
+  points in. That is a content decision, and a datapack file turns it on with no code change.
+
+### Resolution
+- **Standing is three bipolar axes and exactly two new stored floats.** `TRADITION` (reformist ↔
+  traditionalist) is stored. `ALIGNMENT` is `light − DARK_CORRUPTION`, so the existing corruption meter
+  becomes the dark pole of a bipolar axis and keeps every one of its four writers rather than being
+  replaced. `MINISTRY` is `rankCredit − notoriety`, a view over `PlayerMinistryRecord` — a pardon or a
+  fine paid now moves an axis with no standing code running at all.
+- **Conduct moves it, through datapack rules.** `data/<ns>/magical_deeds/*.json` maps an event to axis
+  deltas. The three triggers are seams that already existed and were already used by other systems, so
+  the whole system added no new event plumbing and no new tick work: the successful-cast line in
+  `SpellCastService`, `TraceService.report`, and the earned path in `BestiaryDataHelper.setTier`.
+  Five deeds ship.
+- **A deed that could never fire is a load failure, not a silent no-op.** Empty effects, a zero or NaN
+  delta, a write to the derived `ministry` axis, a negative `alignment` delta (that is corruption, and
+  routing it here would skip vocation scaling), a `minTier` on a non-bestiary trigger — each is refused
+  by the codec with a message saying why.
+- **Bands, not floats, reach anything downstream.** Five steps per axis, thresholds as a percent of the
+  bound, so gates and notices cannot flicker on a fractional drift and a server retuning the bound does
+  not move where the bands sit.
+- **The skill web can be gated on who you have become.** `SkillSystemAPI.evaluateUnlock` gained one
+  branch, last in the order and skipped entirely when nothing is authored, returning `standing_unmet` —
+  which the existing per-node refusal toast already knows how to translate.
+- **The Character Sheet's Record tab now opens with the three meters**, each filled from the centre
+  toward whichever pole the wizard has moved to, with the pole names under it. Drawn outside the Trace
+  check: tradition and alignment survive the Ministry module being switched off.
+- **One float bug found and fixed by its own test.** `100f * (60 / 100.0f)` is `60.000004`, so a wizard
+  sitting exactly on the documented 60% threshold banded one step below what their sheet said. The
+  percent arithmetic is in double now.
+
+### Deferred
+- No standing gate content. The mechanism ships inert by design; see the audit note.
+- No decay. Standing is currently monotonic per deed — nothing pulls an axis back toward neutral over
+  time. Whether it should is a design question, not an oversight.
+- Heritage variant does not seed `tradition`. Everyone starts at 0 deliberately: heritage decides where
+  you begin the game, conduct decides where you end it. A seeding pass would need a migration story for
+  existing saves.
+
+---
+
+## 2026-08-25 — Ministry fines: notoriety stops being a closed loop
+
+### Audit
+- **Notoriety was a closed loop.** `TraceService` filed offences and `MinistryEvents` decayed them,
+  and nothing else in the mod read the result. `WantedLevel.dispatchesAurors()` and
+  `aurorsPerDispatch()` had exactly one caller between them — an announcement string. Committing a
+  crime moved a number nobody could see toward a consequence that did not exist.
+- **The paperwork half of the law model had no penalty at all.** `MagicalOffence` splits crimes into
+  `arrestable` (Azkaban) and everything else, and the everything-else side is documented in the enum
+  itself as "a fine, not Azkaban" — but there was no fine anywhere in the mod. Casting an Unforgivable
+  at least raised heat; Apparating unlicensed or transforming unregistered filed a line on a record
+  nobody could read and cost nothing.
+- **`ApparitionServerLogic:317` already said so**: *"The whole enforcement half of this is deliberately
+  absent: no fine, no summons, no patrol, no way to…"*.
+- **The Ministry record was never synced to any client.** There is no `network/ministry` package;
+  `PlayerStateSyncService.syncFullLoginState` did not mention it. The only way to see your own criminal
+  record was a chat command, and the Character Sheet had three tabs, none of them about the Ministry.
+- **Deliberate non-fix: Aurors and Azkaban sentences stay unbuilt.** They are the other half of the same
+  loop and the natural next pass, but they need a new GeckoLib entity, combat AI, dispatch scheduling and
+  a teleport into the existing structure — none of which can be verified without a running world. This
+  pass took the half that is pure server arithmetic against data that already exists.
+- **Deliberate non-fix: `gui.wizards_and_beasts.character_sheet.effects{,.none,.more}` are referenced by
+  `CharacterSheetScreen` and absent from `en_us.json`.** They belong to another pass's uncommitted work on
+  the same screen and slip past `LangParityTest` because its regex only matches single-line
+  `translatable("…")` calls; these are wrapped across two lines. Reported rather than invented, because
+  the copy is that pass's to choose.
+
+### Resolution
+- **A paperwork offence now costs money.** `MagicalOffence` carries a `fineKnuts` tariff — two Galleons
+  for unlicensed Apparition, ten for an unregistered Animagus — and the split is exclusive by
+  construction: an arrestable offence carries no fine because Azkaban is its penalty, and a fineable one
+  is never arrestable. `MinistryFineTest` pins that as an invariant over `values()`, so a new offence
+  cannot be added that is punished twice or not at all.
+- **The Ministry bills Gringotts, not the pocket.** `MinistryFines` debits `PlayerVaultData`, taking
+  what is there and leaving the remainder on the books. A standing debt is swept every five seconds by
+  `MinistryEvents`, so a player who deposits at Gringotts walks out having paid. Previously the vault was
+  reachable only by the player choosing to spend; the world can now reach into it.
+- **An unpaid fine freezes notoriety decay and slowly heats instead.** `TraceService.decay` used to shed
+  heat for anyone not fugitive and not serving; a debtor is now a third case. The heat is capped at
+  `WantedLevel.WANTED`'s threshold by `FineSchedule.DEBT_HEAT_CEILING`, so ignoring a two-Galleon ticket
+  can make you sought for questioning and can never make you Undesirable No. 1.
+- **A pardon now settles the debt.** It did not exist to settle before; leaving it standing would have
+  left a pardoned wizard permanently unable to cool, which is the opposite of a pardon.
+- **The record reaches the client for the first time.** `MinistryRecordSyncS2CPayload` pushes the player's
+  own record — and only their own — on login and on every mutation that changes it, through the existing
+  `MinistryRecords.mutate` seam. `ClientMinistryRecordState` caches it and drops it on disconnect.
+- **The Character Sheet has a Record tab.** Wanted band, a notoriety meter, the outstanding fine and the
+  permanent file. It distinguishes a clean record from a world where the Trace is switched off, which the
+  record alone cannot express.
+- **`/wandb ministry fine`** shows what you owe (no rank needed — it is your bill), `fine pay [knuts]`
+  settles it now, and `fine waive <player>` remits it at Magical Law Enforcement rank or operator.
+- **`ministryFineScalePercent`** scales or disables the whole tariff without touching the criminal record.
+
+### Deferred
+- Aurors, arrest and sentence ticking — Ministry plan Phase 2, unchanged.
+- Wand registration and the registry service — Phase 3, unchanged.
+- Fines for arrestable offences: deliberately none. They are answered with time, and the sentence system
+  that will answer them does not exist yet.
+
+---
+
+## 2026-08-21 — Marauder's Map: from entity radar to a charted world
+
+### Audit
+- **The map had no terrain at all.** `MaraudersMapScreen` drew `demo_background.png` and coloured
+  `fill()` squares. There was no biome, no relief, no discovery, no persistence — 869 lines total,
+  all of it a live entity sweep.
+- **The map bound to the holder's position on first use and never moved again.** `initializeIfNeeded`
+  wrote `BoundX/BoundZ` once; `use()` re-read them forever. Walk 200 blocks from where you first
+  unfolded it and the map was blank, permanently.
+- **A dimension change silently killed the sweep and left the screen open.** `onPlayerChangedDimension`
+  called `removePlayer`; the client was never told, so the screen sat showing frozen Overworld dots
+  while the player stood in the Nether.
+- `MaraudersMapScreen.dimension` was stored and never read — the screen could not tell which
+  dimension it was drawing.
+- `renderEntities` bounds-checked dots against the whole panel rect rather than the content rect, so
+  dots drew over the frame and the header.
+- `MapSyncS2CPayload.encode` wrote an unbounded count while `decode` enforced `MAX_MAP_ENTRIES`. A
+  sweep over the cap desynchronises the connection mid-stream rather than dropping one packet.
+- The entity sweep ran `minY..maxY`: a player hiding in a cave, or a base sixty blocks down, was
+  fully revealed.
+- Tooltips were hand-drawn with `fill()` and ignored screen edges. Almost every string was hardcoded
+  English. `MapClientHandler` duplicated what `ClientPayloadHandlers` already forwarded.
+- **Deliberate non-fix:** the mod has no custom biomes (`PocketBiomes.SELECTABLE` is fifteen vanilla
+  ids), so "custom mod biomes have appropriate map representations" is satisfied by covering vanilla
+  and falling back gracefully. `MapStyles.DEFAULT_STYLE` is plain ground rather than a magenta error
+  tile, because an unstyled biome from another mod is the normal state of a modded world.
+
+### Resolution
+- **The map charts what it is carried across, and remembers it.** `MapSurveyor` samples five points
+  per chunk from `WORLD_SURFACE`/`OCEAN_FLOOR` on *already-loaded* chunks only — it never calls
+  `getChunk`, so a map cannot chart a continent from a chair, and cannot generate terrain on the
+  server thread. A tile is one biome plus one of seven `MapRelief` bands; caves, ravines, ore and
+  buried bases are not representable in that format at all, which is a stronger guarantee than a
+  filter. Steady state is free: a surveyed tile is never revisited.
+- **Exploration is persistent, shared and server-authoritative.** `MaraudersMapAtlasStore` is a
+  `SavedData` keyed by a `MapId` on the stack, so the atlas survives logout, restart, death and
+  dimension change for the same reason the world does. Hand the map to someone on its trusted list
+  and they open the same parchment, already charted. The alternative — the atlas in `CUSTOM_DATA` —
+  would re-serialise and re-ship a continent every time the holder picked up a cobblestone.
+- **The view follows the holder.** `MapSession` splits the two scopes the old code had conflated:
+  terrain and markers are the unbounded atlas, and the moving dots are a live sweep with a real
+  radius centred on the holder *right now*. A dimension change re-points the session and tells the
+  client instead of abandoning it.
+- **Terrain is an interpretation, not a screenshot.** `MapTerrainRenderer` draws one hand-drawn
+  sprite per chunk — trees for a wood, wave lines for water, hachures for a ridge — from a single
+  greyscale sheet tinted per biome. Four variants per terrain type, picked by a hash of the tile's
+  own world coordinates, so a forest is not the same six trees stamped in a perfect grid.
+  `MapView.lodStep` collapses tiles into power-of-two blocks as the player zooms out, so the blit
+  count stays roughly constant and the far view is *cheaper* than the near one.
+- **Places have to be earned.** A generated structure whose highest piece is at or above sea level is
+  marked when the holder walks over it; anything wholly below it has to be entered. That one rule
+  puts Azkaban and villages on the page and keeps strongholds, mineshafts and the Chamber of Secrets
+  off it — no per-structure flag to maintain, and `reveal: entered` is available when a pack wants
+  to be explicit.
+- **Hogwarts is found by being built.** The mod does not generate a castle; it ships the stone. New
+  `#wizards_and_beasts:landmark/*` tags (generated by filtering `LocationBlockHelper.allBlocks()` on
+  registry-name prefix, so a new marble variant joins its landmark for free) let
+  `MapDiscoveryRule.FromBlocks` count palette blocks per chunk. Lay 220 blocks of Hogwarts stone in
+  one chunk and a castle appears on the map, labelled, drawn larger than anything else on the page.
+  Hogsmeade, Diagon Alley, Gringotts and the Ministry work the same way at their own thresholds.
+- **Waypoints, with the authorization written once.** `MapMarkerService` is the single gate: a
+  discovery is not a player's to rewrite, another player's pins never reach the wire, and a refused
+  edit says why rather than doing nothing. Right-click the parchment to plant a pin where you are
+  pointing; eight icons, rename, hide, erase, capped at 64 per player.
+- **Footprints.** The positions were already arriving for the dots, so a trail is a short client-side
+  history of packets the screen already had: no extra sweep, no extra packet, no server state. It is
+  the one thing on this map no other map mod has.
+- **Server decides what is there; the resource pack decides what it looks like.** Biome tiles and
+  marker symbols are client resources under `assets/.../map_biome_style/` and
+  `map_marker_style/`, on the *resource* reload cycle. Discovery rules are datapack files under
+  `data/.../map_discovery/`. Nothing about appearance is ever on the wire.
+- **Art:** `tools/map_textures.py` generates nine sheets — 32 terrain types x 4 variants, 24 marker
+  symbols, the holder's arrowhead, footprints, a compass rose, paper grain, fold creases and the
+  control icons. `tools/gui_chrome.py` gains a sixth skin, `marauders_map`: aged parchment, scuffed
+  leather, pocket brass, with a quill-nib seal.
+- **The held item was rebuilt from scratch, because none of it worked.** The geometry declared a
+  64x64 texture and addressed UVs out to (40, 37) while `textures/item/marauders_map.png` was a
+  **16x16 flat inventory icon** — the model was sampling almost entirely outside its own skin. The
+  item model was `{"parent": "builtin/entity"}` with **no display block at all**, so an 8x1x12 model
+  rendered at raw model scale in the GUI, in hand, on the ground and in a frame. The two flaps
+  hinged on their *outer* edges, so they swung away from the centre rather than closing over it — a
+  tri-fold folded inside out — and were half-thickness slabs sitting on the body at the same height,
+  z-fighting it wherever they overlapped.
+- **The animation set could not have worked either.** `folded_idle` was a static hold with no motion
+  in it; `unfolding` was 0.5 s of linear interpolation; and because a triggered clip returns control
+  to the controller's default when it ends, and the default *was* `folded_idle`, the map snapped
+  shut in the same breath it finished opening. `open_idle` existed in the file and nothing
+  registered it.
+- **`tools/map_item_model.py` now generates all four artefacts from one panel table.** The sheet is
+  authored flat in **XY with its thickness along Z**, so the face normal is +Z — the direction every
+  display context already treats as toward the viewer — and the nine transforms became poses rather
+  than 90-degree corrections. The fold pivots are *solved*, not typed: a half turn about `p` maps a
+  coordinate to `2p - x`, so the hinge that lands a flap on the centre panel is fully determined,
+  and each flap is staggered one thickness proud so the closed map is three distinct sheets. Both
+  axes of that solve are asserted at generation time, with a note about the crossed pairing — a half
+  turn reverses an interval, so asserting the uncrossed one fails on correct geometry.
+- **Four clips and a state to be in:** closed, opening, open, closing. Opening chains into
+  `open_idle` so it stays open; closing eases *in* rather than out, because closing is a deliberate
+  act. The fold plays on `MapCloseC2SPayload` and nowhere else, since that is the only moment the
+  hand is visible again — the logout, respawn and dimension paths close the session silently.
+- **`tools/map_item_preview.py`** renders the geo with its real texture at its real display
+  transforms, which is what caught the remaining problems: an inverted depth test in the first draft
+  of the preview itself, and the fact that the folded stack, not the open sheet, is what the GUI
+  slot ever shows. `tools/audit/s13_map_resources.py` now cross-checks geometry against skin,
+  animation against bones, and clip names against the controller — it fails on the missing display
+  block, which is the exact bug that shipped.
+- **Two bugs the mockup caught that a compile could not.** `McStylePanel.drawNineSlice` cuts an 8px
+  border out of a 32px sprite, so a widget under 18px has no interior left and renders as four
+  disconnected corners around a hole — and `layout.s()` drops below 1.0 on a 1920x1080 window at GUI
+  scale 4, pushing an 18px design size back under the floor. Every skinned widget on the screen now
+  goes through `skinned()`, which holds the absolute floor the sprite's non-scaling border requires.
+
+### Deferred
+- Floo hearths and Apparition points have marker styles, translation keys and legend entries, but
+  nothing plants them yet: both live in systems the surveyor does not read
+  (`FlooNetworkManager`, `PlayerApparitionPoints`). The discovery side is one rule variant away.
+- Multiplayer player-tracking policy is deliberately "everyone within 128 blocks, invisibility
+  included, only for someone on the map's own trusted list" — that is the artefact, and a Marauder's
+  Map fooled by a Disillusionment Charm is not one. Revisit only if server operators ask.
+- `LangParityTest` and `StatReadoutTest` fail on this branch for 58 keys owned by the in-flight Floo
+  call service and character-sheet stats work. Not this pass's, and not touched.
+
 ---
 
 ## 2026-07-18 — Skill audience & access: tradition rule + capability gating

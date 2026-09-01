@@ -24,6 +24,7 @@ public enum SpellCastGate {
     REQUIREMENTS_UNMET,
     OBSCURIAL_DARK_ONLY,
     OBSCURIAL_DARK_RESTRICTED,
+    TOO_DRUNK,
     ON_COOLDOWN,
     GLOBAL_COOLDOWN;
 
@@ -41,6 +42,7 @@ public enum SpellCastGate {
      * @param requirementSatisfied  the spell's requirement is met (or enforcement is off)
      * @param darkFormOnlyOutsideForm  a dark-form-only spell cast while not in obscurus form
      * @param darkRestrictedInForm  a spell the obscurus form rejects, cast while in form
+     * @param tooDrunk              three Firewhiskies in two minutes; see {@code Firewhisky}
      * @param onCooldown            the spell's own cooldown is still active
      * @param globalCooldownActive  the shared global cooldown is still active
      */
@@ -52,6 +54,7 @@ public enum SpellCastGate {
                          boolean requirementSatisfied,
                          boolean darkFormOnlyOutsideForm,
                          boolean darkRestrictedInForm,
+                         boolean tooDrunk,
                          boolean onCooldown,
                          boolean globalCooldownActive) {}
 
@@ -69,6 +72,10 @@ public enum SpellCastGate {
         if (!in.requirementSatisfied()) return REQUIREMENTS_UNMET;
         if (in.darkFormOnlyOutsideForm()) return OBSCURIAL_DARK_ONLY;
         if (in.darkRestrictedInForm()) return OBSCURIAL_DARK_RESTRICTED;
+        // After every gate that describes the spell, before the two that describe timing. Telling a
+        // drunk wizard they have not learned the spell is more useful than telling them they are
+        // drunk; telling them about a cooldown they cannot reach is not useful at all.
+        if (in.tooDrunk()) return TOO_DRUNK;
         if (in.onCooldown()) return ON_COOLDOWN;
         if (in.globalCooldownActive()) return GLOBAL_COOLDOWN;
         return null;

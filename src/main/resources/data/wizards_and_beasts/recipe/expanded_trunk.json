@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SIS",
+    "ITI",
+    "SIS"
+  ],
+  "key": {
+    "S": {
+      "neoforge:ingredient_type": "neoforge:components",
+      "items": "wizards_and_beasts:brew",
+      "components": {
+        "wizards_and_beasts:brew_id": "wizards_and_beasts:pure_silver_solution"
+      }
+    },
+    "I": "minecraft:iron_ingot",
+    "T": "wizards_and_beasts:enchanted_trunk"
+  },
+  "result": {
+    "id": "wizards_and_beasts:expanded_trunk",
+    "count": 1
+  },
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "POCKET_DIMENSIONS"
+    }
+  ]
+}

@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.client.wand;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.item.wand.WandItem;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
+import at.koopro.wizardsandbeasts.wand.WandAppearance;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.customization.WandConfiguration;
 import at.koopro.wizardsandbeasts.wand.customization.WandModule;
@@ -29,6 +30,15 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
 
     public static final DataTicket<Boolean> IS_ELDER_WAND =
             DataTicket.create("is_elder_wand", Boolean.class);
+
+    /**
+     * ARGB tint for the wand's wood, from {@link WandAppearance}.
+     *
+     * <p>Read through render-state rather than off the stack at render time, matching the
+     * GeckoLib-5 contract the rest of this renderer already follows.
+     */
+    public static final DataTicket<Integer> WOOD_TINT =
+            DataTicket.create("wand_wood_tint", Integer.class);
 
     /**
      * Whether this render is the local player's own held wand.
@@ -58,9 +68,34 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
                 WandComponents.WAND_CONFIGURATION.get(), WandConfiguration.DEFAULT);
         renderState.addGeckolibData(WAND_CONFIG, config);
         renderState.addGeckolibData(IS_ELDER_WAND, ModDataComponents.isElderWand(stack));
+        // The Elder Wand keeps its own art and is never tinted: it is one specific wand, not a
+        // sample of elder wood, and washing its texture with a wood colour would flatten the one
+        // wand in the game that already looks like itself.
+        renderState.addGeckolibData(WOOD_TINT, ModDataComponents.isElderWand(stack)
+                ? WandAppearance.UNTINTED
+                : WandAppearance.woodTint(stack));
         var localPlayer = Minecraft.getInstance().player;
         renderState.addGeckolibData(IS_LOCAL_HELD, localPlayer != null
                 && (stack == localPlayer.getMainHandItem() || stack == localPlayer.getOffhandItem()));
+    }
+
+    /**
+     * Multiplies the wood tint into the wand sprite.
+     *
+     * <p>This is what makes two wands distinguishable in an inventory at all. Before it, ten woods
+     * and three cores shared one texture and the only way to tell two wands apart was to hover both
+     * and compare tooltips.
+     */
+    @Override
+    public int getRenderColor(WandItem animatable, GeoItemRenderer.RenderData renderData,
+                              float partialTick) {
+        int base = super.getRenderColor(animatable, renderData, partialTick);
+        int tint = WandAppearance.woodTint(renderData.itemStack());
+        if (tint == WandAppearance.UNTINTED
+                || ModDataComponents.isElderWand(renderData.itemStack())) {
+            return base;
+        }
+        return net.minecraft.util.ARGB.multiply(base, tint);
     }
 
     // ── Bone visibility (render thread) ─────────────────────────────────────

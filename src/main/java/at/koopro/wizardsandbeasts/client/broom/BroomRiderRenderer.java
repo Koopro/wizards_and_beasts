@@ -27,7 +27,13 @@ import org.jspecify.annotations.Nullable;
 @NullMarked
 public final class BroomRiderRenderer {
 
-    public record BroomRideData(float roll, float forwardLean, float pitchTilt) {}
+    /**
+     * @param yawOffset the definition's {@code passengerYawOffset}, in degrees — how far the rider
+     *                  is turned in the saddle. Zero is astride and facing the nose; a non-zero
+     *                  value rides side-saddle. Purely a render rotation: the rider still steers and
+     *                  looks wherever the player is aiming.
+     */
+    public record BroomRideData(float roll, float forwardLean, float pitchTilt, float yawOffset) {}
 
     /** Present on the render state of a player riding a broom; absent otherwise. */
     public static final ContextKey<BroomRideData> BROOM_RIDE =
@@ -52,7 +58,8 @@ public final class BroomRiderRenderer {
                         state.setRenderData(BROOM_RIDE, new BroomRideData(
                                 Mth.lerp(pt, broom.getPrevRollTilt(), broom.getRollTilt()),
                                 Mth.lerp(pt, broom.getPrevForwardLean(), broom.getForwardLean()),
-                                Mth.lerp(pt, broom.getPrevPitchTilt(), broom.getPitchTilt())
+                                Mth.lerp(pt, broom.getPrevPitchTilt(), broom.getPitchTilt()),
+                                broom.resolveDefinition().seat().passengerYawOffset()
                         ));
                     }
                 });

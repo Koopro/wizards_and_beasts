@@ -1,0 +1,6 @@
+{
+  "type": "structure",
+  "structure": "minecraft:swamp_hut",
+  "marker": "wizards_and_beasts:magical_site",
+  "label": "map.wizards_and_beasts.landmark.witch_hut"
+}

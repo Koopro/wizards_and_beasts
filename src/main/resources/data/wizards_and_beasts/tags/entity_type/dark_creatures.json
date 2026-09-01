@@ -1,0 +1,29 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "wizards_and_beasts:dementor",
+      "required": false
+    },
+    {
+      "id": "wizards_and_beasts:hidebehind",
+      "required": false
+    },
+    {
+      "id": "wizards_and_beasts:obscurus",
+      "required": false
+    },
+    "minecraft:zombie",
+    "minecraft:husk",
+    "minecraft:drowned",
+    "minecraft:zombie_villager",
+    "minecraft:skeleton",
+    "minecraft:stray",
+    "minecraft:bogged",
+    "minecraft:wither_skeleton",
+    "minecraft:wither",
+    "minecraft:phantom",
+    "minecraft:vex",
+    "minecraft:zoglin"
+  ]
+}

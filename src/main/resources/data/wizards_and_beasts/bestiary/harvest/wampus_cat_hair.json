@@ -1,0 +1,7 @@
+{
+  "entry": "wizards_and_beasts:wampus_cat",
+  "item": "wizards_and_beasts:wampus_cat_hair",
+  "minTier": "MASTERED",
+  "chance": 0.4,
+  "cooldownSeconds": 600
+}

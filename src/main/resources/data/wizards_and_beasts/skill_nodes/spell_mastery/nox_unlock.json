@@ -5,6 +5,10 @@
   "tree": "spell_mastery",
   "effects": [
     {
+      "type": "learn_spell",
+      "spellId": "nox"
+    },
+    {
       "spellId": "nox",
       "reductionPerLevel": 0.2,
       "type": "spell_cooldown_reduction"

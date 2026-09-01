@@ -3,6 +3,8 @@ package at.koopro.wizardsandbeasts.brew.def;
 import org.jspecify.annotations.Nullable;
 
 import at.koopro.wizardsandbeasts.brew.Brew;
+import at.koopro.wizardsandbeasts.brew.effect.BrewEffect;
+import at.koopro.wizardsandbeasts.brew.effect.BrewEffectEntry;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Holder;
@@ -25,14 +27,30 @@ public record BrewDefinition(
         String displayName,
         int color,
         List<EffectEntry> effects,
-        Optional<String> flavorText) {
+        Optional<String> flavorText,
+        Optional<String> silverVariant,
+        List<BrewEffectEntry> components) {
 
     public static final Codec<BrewDefinition> CODEC = RecordCodecBuilder.create(inst -> inst.group(
             Codec.STRING.fieldOf("displayName").forGetter(BrewDefinition::displayName),
             Codec.INT.fieldOf("color").forGetter(BrewDefinition::color),
-            EffectEntry.CODEC.listOf().fieldOf("effects").forGetter(BrewDefinition::effects),
-            Codec.STRING.optionalFieldOf("flavorText").forGetter(BrewDefinition::flavorText)
+            // Optional now. A brew that declares components does not need an effects list, and
+            // requiring an empty array to say so would be noise in every componentised file.
+            EffectEntry.CODEC.listOf().optionalFieldOf("effects", List.of())
+                    .forGetter(BrewDefinition::effects),
+            Codec.STRING.optionalFieldOf("flavorText").forGetter(BrewDefinition::flavorText),
+            // Optional, so every brew written before silver existed still parses. A brew that omits
+            // it is simply not silver-based, which is the correct reading of an absent field here.
+            Codec.STRING.optionalFieldOf("silverVariant").forGetter(BrewDefinition::silverVariant),
+            BrewEffectEntry.CODEC.listOf().optionalFieldOf("components", List.of())
+                    .forGetter(BrewDefinition::components)
     ).apply(inst, BrewDefinition::new));
+
+    /** Five-argument form for callers that predate components. */
+    public BrewDefinition(String displayName, int color, List<EffectEntry> effects,
+                          Optional<String> flavorText, Optional<String> silverVariant) {
+        this(displayName, color, effects, flavorText, silverVariant, List.of());
+    }
 
     /**
      * Bakes this definition into a {@link Brew}, dropping any effect whose
@@ -45,8 +63,26 @@ public record BrewDefinition(
                 .map(EffectEntry::resolve)
                 .filter(java.util.Objects::nonNull)
                 .toList();
-        if (specs.isEmpty()) return null;
-        return new Brew(fullId, displayName, color, specs, flavorText.orElse(null));
+
+        // A legacy effects list becomes an apply_effects component. This is what makes the migration
+        // opt-in per brew: nothing downstream has to know whether a brew was authored before or after
+        // components existed, because by the time it leaves here every brew is a component list.
+        List<BrewEffectEntry> resolved = new java.util.ArrayList<>(components);
+        if (!specs.isEmpty()) {
+            resolved.add(BrewEffectEntry.onDrink(new BrewEffect.ApplyEffects(
+                    effects.stream()
+                            .map(e -> new BrewEffect.ApplyEffects.EffectSpec(
+                                    e.id(), e.duration(), e.amplifier(), e.ambient()))
+                            .toList())));
+        }
+
+        // Rejected only when it would do nothing at all. It used to be rejected for an empty effects
+        // list alone, which would now throw away every brew whose behaviour is entirely in its
+        // components — the exact case this class was extended to allow.
+        if (resolved.isEmpty()) return null;
+
+        return new Brew(fullId, displayName, color, specs, flavorText.orElse(null),
+                silverVariant.orElse(null), resolved);
     }
 
     /**
@@ -65,8 +101,15 @@ public record BrewDefinition(
                         spec.amplifier(),
                         spec.ambient()))
                 .toList();
+        // The components that were AUTHORED, not the resolved list. toBrew appends an apply_effects
+        // component derived from the effects list, and sending that back alongside the effects it was
+        // derived from would double every effect the moment a client round-tripped a brew.
+        List<BrewEffectEntry> authored = brew.components().stream()
+                .filter(entry -> !(entry.component() instanceof BrewEffect.ApplyEffects))
+                .toList();
         return new BrewDefinition(brew.displayName(), brew.color(), entries,
-                Optional.ofNullable(brew.flavorText()));
+                Optional.ofNullable(brew.flavorText()), Optional.ofNullable(brew.silverVariant()),
+                authored);
     }
 
     /** Single mob-effect entry on a brew. */

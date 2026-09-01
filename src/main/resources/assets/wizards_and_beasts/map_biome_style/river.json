@@ -1,0 +1,8 @@
+{
+  "biomes": [
+    "minecraft:river"
+  ],
+  "tile": 2,
+  "tint": "#7DA0B4",
+  "water_tint": "#7DA0B4"
+}

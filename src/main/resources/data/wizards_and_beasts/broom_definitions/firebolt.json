@@ -25,9 +25,23 @@
   "model_slots": {
     "shaft": "wizards_and_beasts:racing",
     "tail_cap": "wizards_and_beasts:plain",
-    "binding": "wizards_and_beasts:brass_band",
+    "binding": "wizards_and_beasts:cord",
     "bristles": "wizards_and_beasts:streamlined",
     "footstrap": "wizards_and_beasts:leather",
-    "accent": "wizards_and_beasts:nameplate"
-  }
+    "accent": "wizards_and_beasts:maker_mark"
+  },
+  "model": "wizards_and_beasts:broom_firebolt",
+  "texture": "wizards_and_beasts:textures/entity/broom/firebolt.png",
+  "handlingProfile": "racing",
+  "yawDrift": 0.05,
+  "momentumRetention": 0.86,
+  "wobbleAtBoost": 0.0,
+  "boostFovPunch": 0.14,
+  "crashDamageMultiplier": 1.35,
+  "minorImpactDurabilityLoss": 1,
+  "severeImpactDurabilityLoss": 8,
+  "boostSound": "wizards_and_beasts:broom_boost_firebolt",
+  "idleLoopSound": "wizards_and_beasts:broom_wind_fast",
+  "trailParticle": "wizards_and_beasts:broom_trail_ember",
+  "passengerOffset": [0.0, -0.4375, 0.05]
 }

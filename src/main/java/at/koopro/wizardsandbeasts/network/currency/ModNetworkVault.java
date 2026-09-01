@@ -16,6 +16,10 @@ public final class ModNetworkVault {
                 GringottsOpenS2CPayload.TYPE,
                 GringottsOpenS2CPayload.STREAM_CODEC,
                 ClientPayloadHandlers::handleGringottsOpen);
+        registrar.playToClient(
+                DragotQuoteS2CPayload.TYPE,
+                DragotQuoteS2CPayload.STREAM_CODEC,
+                ClientPayloadHandlers::handleDragotQuote);
 
         registrar.playToServer(
                 VaultActionC2SPayload.TYPE,
