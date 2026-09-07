@@ -1,0 +1,42 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:iron_golem",
+    "minecraft:snow_golem",
+    "minecraft:blaze",
+    "minecraft:breeze",
+    "minecraft:magma_cube",
+    "minecraft:slime",
+    "minecraft:ghast",
+    "minecraft:happy_ghast",
+    "minecraft:shulker",
+    "minecraft:vex",
+    "minecraft:allay",
+    "minecraft:enderman",
+    "minecraft:endermite",
+    "minecraft:ender_dragon",
+    "minecraft:wither",
+    "minecraft:silverfish",
+    "minecraft:guardian",
+    "minecraft:elder_guardian",
+    "minecraft:warden",
+    "minecraft:bogged",
+    "minecraft:armor_stand",
+    {
+      "id": "wizards_and_beasts:dementor",
+      "required": false
+    },
+    {
+      "id": "wizards_and_beasts:obscurus",
+      "required": false
+    },
+    {
+      "id": "wizards_and_beasts:hidebehind",
+      "required": false
+    },
+    {
+      "id": "wizards_and_beasts:duelling_dummy",
+      "required": false
+    }
+  ]
+}

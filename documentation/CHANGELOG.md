@@ -4,6 +4,190 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Vampires stop eating (2026-09-07)
+
+**Nutrition is a heritage question now, not a universal one.** Every body in the mod ran on the same
+hunger bar, which is a claim about wizards that is false about half the heritage roster. A heritage
+resolves to a `NutritionPolicy` — vanilla hunger, blood, or nothing — and the three sites that care
+(the HUD, the food events, the tick) ask that one question instead of naming a heritage each.
+
+**A vampire has ten blood drops where their drumsticks were.** Same 9x9 sockets on the same 8-pixel
+pitch, filled and halved by the same loop vanilla runs for hunger, because a bar drawn a different way
+from vanilla's bars reads as a different mod's HUD however good its colours are. They dry to a dark
+withered red when the pool is nearly gone, and shake a pixel the way a starving player's drumsticks do.
+The bar fills by right-clicking a living creature with an empty hand: a bite is worth more from a
+larger animal and more again from something that fights back, the creature is left weakened and empty for
+ten seconds afterwards so a penned herd is not a buffet, and no single feed can fill the pool, because a
+thirst you can always top up is not a thirst. Crouching hands the click back to vanilla, so a vampire can
+still mount a horse.
+
+**Food does nothing.** The animation still plays — a vampire who cannot lift bread to their mouth reads
+as a bug — and then the bar is put back exactly where it was, and they are told it tasted of ash.
+
+**Running dry costs, in stages.** Sated, thirsty, parched, starving: weakness in the third band, weakness
+and slowness in the fourth, and attrition damage in the last few points of the pool. Two of the penalties
+are not applied by the mod at all. The hidden vanilla food level is driven from the blood pool, so
+vanilla's own rules take the sprint away below a third and stop natural regeneration below ninety
+percent, and there is only one system deciding either. It never reaches zero, so vanilla never starts
+starving them on a second clock of its own.
+
+Sprinting costs blood on top of the passive drain. Dying settles the pool to forty percent rather than
+refilling it, so a graveyard is not a meal. Vampires who predate all this arrive with a full pool rather
+than in a coma. `/wandb player heritage blood get|set|fill|drain` for testing, and the whole economy —
+pool size, drain rate, band floors, feed yield, cooldowns, whether players are on the menu — is config.
+
+
+### The Chocolate Frog gets a frog, and the cards get faces (2026-09-03)
+
+**An escaped frog is a frog now.** It was a dropped item with a mind of its own — the right call for the
+mechanic, because an `ItemEntity` already syncs, already despawns and is already catchable by walking
+into it, and none of that had to be written twice. It just read wrong: a spinning flat sprite is the
+universal signal for loot on the floor, and the joke is that this one is running away from you. It has
+its own moulded-chocolate model, points where it is going, stretches into a hop and squashes on landing,
+and pulses its throat while it sits there waiting for you.
+
+**Twenty-four wizards, twenty-four cards.** There were eight names sharing one picture, which is the one
+thing a collectible cannot be. Every card is now its own portrait — Dumbledore's half-moons over the
+silver beard, Lockhart's teeth, Morgana under a black hood, Flamel among stars — with a foil frame and a
+pip count for its tier, and a set number on the back of the tooltip. They are not equally likely: a
+Dumbledore is twelve times as easy to pull as an Andros, and the two legendary cards together turn up
+about once in eighty, because a collection nobody has to chase is just a list. The stack takes the
+wizard's name and the tier's colour, so a chest of cards reads as a collection instead of as twenty-four
+identical stacks that have to be hovered one at a time.
+
+**And a card is held like a map.** Vanilla reaches that two-handed pose through an
+`instanceof MapItem` check no mod item can satisfy without becoming a map, so the pose is reproduced and
+the default hold cancelled: both hands, flat in front of you, tipping toward horizontal as you look down.
+Same rule as vanilla's — only when the other hand is free, because a card spread across both hands would
+hide the wand in the off-hand.
+
+
+### A debug panel beside the thing, and a debug command per feature (2026-09-02)
+
+The cauldron dump was thirty lines of chat. Reading it meant losing the conversation, and by the time you
+had scrolled through it you were no longer looking at the pot it described. **It is a small box beside
+the cauldron now.** Turn debug on, look at a pot, and the phase, the heat, the timer, the contents and
+what each gesture would do are drawn next to it, updating four times a second while you watch.
+
+It is not only cauldrons. Anything you look at answers: the wandmaker's bench with its counted enhancers
+and its tier score, a Floo grate with both its own record and the network's — side by side, because the
+two disagreeing is the shape of every "my address does not work" report — a broom's live speed against
+its own ceiling while somebody is flying it, a beast's traits and *your* bestiary tier for it, and a
+player summarised by every feature at once. Anything with no inspector of its own still answers with its
+blockstate and its saved tag, because a panel that says nothing over an unclaimed block is
+indistinguishable from a panel that is broken.
+
+**The client never names what it is asking about.** It asks "what am I looking at"; the server does its
+own pick from the player's own rotation and replies about whatever it finds. The obvious design — the
+client raycasts and names the block — would have handed anyone with a packet editor the ability to read
+any block entity in the world by position, from any distance, through walls.
+
+**And thirty features had debug output for seven of them.** Not the unimportant ones — the ones nobody
+had recently had to debug. There is now a section per subsystem, living beside the subsystem it reports
+on: spells, wands, skills, abilities, heritage, transformations, stats, ministry, standing, Gringotts,
+O.W.L.s, Floo, pockets, brooms, armour, bestiary, brewing and the module switches over all of it.
+`/wandb debug feature <name>` prints one, `feature all` prints every one, and each takes an optional
+player because "what does the server think is going on with *them*" is the question that actually gets
+asked. A section that throws is reported as a failed section rather than taking the dump down with it —
+this is diagnostic code run against broken state by definition.
+
+The reports are built once as data and rendered twice, so the panel and the command cannot drift apart.
+
+**Reading the state was only half of it.** Nearly every subsystem already had setters — learn a spell,
+unlock a node, register a hearth — and none of them answered "I want to test brewing", which took eight
+commands you had to already know. `/wandb debug dev` answers it in one: `open` unlocks whatever is gating
+a feature, `kit` hands over the items it needs, `reset` puts it back, and `dev setup` does open-then-kit
+for all fourteen. Every action reports what it changed *and what it skipped*, because a command that
+silently writes fourteen fields is one you cannot trust.
+
+The kits read the game rather than a hard-coded list: brewing hands you the ingredients the currently
+loaded recipes actually name, brooms give one of every defined variant, abilities grant from the DEBUG
+source so `reset` can take back exactly what it gave and leave a heritage grant alone. Some of what they
+do is a deliberate refusal — the skill kit hands over the point budget rather than unlocking every node,
+because unlocking them all would make prerequisites, costs and tree gates untestable, which is most of
+what there is to test about a skill web.
+
+**And three things had no way in at all.** The vault could be read and never written, so "does this cost
+the right amount" could be observed but never arranged; it now has `/wandb player vault`. Dark corruption,
+the Dark Mark, mental stability, resolve, happiness, love protection and Cruciatus exposure were written
+by gameplay and settable by nothing — every one of them a threshold, and the only way to reach one was
+the intended way, which for Cruciatus exposure meant being tortured for several real minutes.
+`/wandb player condition` sets them. The Floo arrival cooldown can now be cleared, because waiting it out
+between attempts was most of the time cost of testing travel.
+
+### The moon takes werewolves now (2026-09-02)
+
+The mod shipped ten heritages, three werewolf variants all tagged `moon_sensitive`, a `werewolf_wolf`
+form with its own rig and animations, and a transition config for entering and leaving it — and no
+moon-phase code anywhere. `getMoonPhase` had zero hits across the whole source tree. The signature
+mechanic of the mod's signature heritage had no implementation, and the form was reachable only through
+an admin command.
+
+**A werewolf under a full moon is taken by it.** Moonlight has to actually reach them: standing under
+open sky banks exposure, standing under a roof loses it faster than it was gained, so a cellar is a real
+defence and a slow walk home is not. Once enough has soaked in the change begins — bones moving, the body
+held still, and then the wolf, with a howl. Gear a wolf cannot wear comes off into their own inventory.
+
+**And then it is not their character any more.** An unmedicated werewolf is a passenger: the wolf hunts
+on its own, going for people first, then villagers and the golems standing in front of them, then
+animals, and only then whatever hostile happens to be nearby. It sticks to what it is chasing until that
+thing dies or escapes, and only a genuinely more interesting kind of prey pulls it off. Being hurt winds
+it up; a wound-up wolf is faster, notices more and bites more often. The player cannot open a bag, use an
+item, break a block, cast, or change back. Dawn gives it all back, along with the exhaustion of a night
+spent as something else.
+
+**Wolfsbane does not cure it.** Canon is emphatic that Lupin still becomes a wolf every month, so the
+potion is honest about what it changes: the shape is still the wolf's, the mind behind it is yours again.
+Drink it mid-night and the wolf is handed back to its player within the second; let it run out mid-night
+and it is taken away again just as fast, after five seconds of warning that it is failing. A medicated
+werewolf is *offered* the shape at dawn rather than stripped of it, and keeps it until they give it back.
+Aconite steam hangs on anyone who has drunk it, visible to everyone around — on a shared server, whether
+the werewolf beside you took their potion is something you want to be able to see.
+
+**The no-hands rule is one rule now, and it always was supposed to be.** Animagus, Obscurial and the new
+werewolf each carried a near-identical wall of event cancels, and they had already drifted: the Animagus
+wall blocked right-clicking an item but never touched the spell-cast packet, so a wizard in a cat's body
+could still cast from the spell wheel — the one thing "a beast holds no wand" was supposed to mean. The
+prohibitions are now named once, enforced once, and declared by each system as a set. **Animagus stays
+voluntary**: it takes the beast's hands, never the door out.
+
+A transformed body also gets its senses back. Night vision no longer strobes — it was being re-applied on
+a 40-tick timer, permanently under vanilla's flash threshold, which is why cat form was unpleasant to
+play in the dark — and beasts that hunt by nose now smell what they cannot see: living things nearby
+outlined through walls, for that player alone.
+
+Four lifecycle bugs went with it. Logging out during any transformation left the player **permanently
+invulnerable**, because the transition borrowed invulnerability and only the completion path gave it
+back; the cleanup method for that case had been written and never called. Dying as a cat, or as a wolf,
+respawned you still shaped like one with the transformed flag already cleared underneath — a body no
+toggle could get you out of.
+
+
+### Potions look like what they are, and cauldrons look like what is in them (2026-09-02)
+
+Every potion in the game was called "Brew" and rendered as the same purple vial. Each of the fourteen
+brews had carried its own name and its own colour since the brewing pillar was written; the bottle item
+read neither. A bottle now takes the brew's name, wears the brew's colour, and carries its flavour line
+as a tooltip — including brews a datapack adds, because the colour comes from the definition rather
+than from a texture. The flavour text also became translatable on the way past: it used to be raw
+English baked into a datapack file that no resource pack could reach.
+
+**A cauldron can be empty now.** It never could before. The pot was a solid cube with a texture stretched
+across its opening, so there was no inside for anything to be in or absent from, and the one tinted face
+was its lid — invisible unless you stood directly over the block and looked down. Placed cauldrons are
+drawn by a rig instead: the pot is hollow, and the liquid in it is a real surface that appears when you
+fill it, thickens and flecks as ingredients steep, boils and steams while a brew works, settles pale when
+it is ready, and sinks into grey sludge if it curdles off the heat. All three metals share the rig and
+differ only in their sheet.
+
+The idle particles that used to be the only way to tell a full pot from an empty one are back to being a
+flourish at about a third of their old rate. They were tuned loud to carry a job the geometry can now do.
+
+**The wandmaker's bench works while there is work on it.** A blank or a core on the bench sets the lathe
+turning, the treadle pumping and the tools rattling on their rail; an empty bench settles to a slow idle
+with a wood shaving swaying off the front edge. Everyone nearby sees it, not only the player with the
+screen open.
+
 ### Apparition you can see and hear (2026-08-29)
 
 Apparating was silent theatre. A wizard winding up stood perfectly still, and the crack at either end

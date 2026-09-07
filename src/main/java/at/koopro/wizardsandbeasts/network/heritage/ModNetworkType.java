@@ -42,5 +42,10 @@ public final class ModNetworkType {
                 HeritageIdentitySyncS2CPayload.TYPE,
                 HeritageIdentitySyncS2CPayload.STREAM_CODEC,
                 ClientPayloadHandlers::handleHeritageIdentitySync);
+
+        registrar.playToClient(
+                BloodDataSyncS2CPayload.TYPE,
+                BloodDataSyncS2CPayload.STREAM_CODEC,
+                ClientPayloadHandlers::handleBloodDataSync);
     }
 }

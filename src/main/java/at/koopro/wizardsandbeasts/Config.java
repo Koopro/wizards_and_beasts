@@ -230,6 +230,70 @@ public class Config {
                     "every creature regardless of this setting.")
             .define("showPlaceholderSpawnEggs", false);
 
+    // --- Duelling dummy ------------------------------------------------------------
+    //
+    // A training target is only worth having if the numbers it reports are the numbers a
+    // real fight would produce, so these keys change what the dummy *reports*, never what
+    // a spell does. The one exception is dummyProtectEquipment, which is about the cost of
+    // practising rather than about the reading.
+
+    private static final ModConfigSpec.EnumValue<DummyNumberMode> DUMMY_DAMAGE_NUMBERS = BUILDER
+            .comment("Who sees the floating damage numbers a duelling dummy throws off.",
+                    "SELF shows them only to the wizard who landed the hit; ALL shows every player's",
+                    "hits to everyone in range, which is what a practice hall wants. NONE leaves the",
+                    "dummy working and silent.")
+            .defineEnum("dummyDamageNumbers", DummyNumberMode.SELF);
+    private static final ModConfigSpec.BooleanValue DUMMY_SHOW_HEARTS = BUILDER
+            .comment("If true, damage numbers are shown in hearts rather than half-heart points.",
+                    "Off by default because every other number the mod prints - spell power, brew",
+                    "potency, armour - is in points, and one display in a different unit is worse",
+                    "than a slightly less friendly one.")
+            .define("dummyShowHearts", false);
+    private static final ModConfigSpec.EnumValue<DummyDpsMode> DUMMY_DPS_MODE = BUILDER
+            .comment("How the dummy reports damage per second on the action bar.",
+                    "DYNAMIC updates the running average on every hit; ON_RESET prints one summary",
+                    "when the bout ends; OFF never reports.")
+            .defineEnum("dummyDpsMode", DummyDpsMode.DYNAMIC);
+    private static final ModConfigSpec.IntValue DUMMY_BOUT_TIMEOUT_TICKS = BUILDER
+            .comment("Ticks without a hit before a bout is considered over: the dummy heals back to",
+                    "full and the next hit starts a fresh DPS window. Too short and a spell with a",
+                    "long cast time reads as two bouts; too long and an abandoned dummy never resets.")
+            .defineInRange("dummyBoutTimeoutTicks", 60, 20, 6000);
+    private static final ModConfigSpec.IntValue DUMMY_HEALTH = BUILDER
+            .comment("Maximum health of a duelling dummy in training mode. It cannot be killed at any",
+                    "value - reaching zero resets it - so this only decides how many hits fit in a",
+                    "bout before the reset interrupts the reading.")
+            .defineInRange("dummyHealth", 200, 1, 1024);
+    private static final ModConfigSpec.IntValue DUMMY_BOSS_HEALTH = BUILDER
+            .comment("Maximum health while in boss mode, which a dummy enters when given a banner.",
+                    "Boss mode also raises a boss bar, so this is the number that bar measures.")
+            .defineInRange("dummyBossHealth", 1000, 1, 100000);
+    private static final ModConfigSpec.IntValue DUMMY_ARMOR = BUILDER
+            .comment("Armour points a bare dummy has before anything is equipped on it. 0 makes the",
+                    "dummy a plain damage readout; raise it to practise against a target that soaks.",
+                    "Armour from robes actually hung on the dummy is added on top of this.")
+            .defineInRange("dummyArmor", 0, 0, 30);
+    private static final ModConfigSpec.BooleanValue DUMMY_PROTECT_EQUIPMENT = BUILDER
+            .comment("If true, wands and weapons take no durability damage from hitting a dummy.",
+                    "On by default: an hour of practice should not cost a wand.")
+            .define("dummyProtectEquipment", true);
+    private static final ModConfigSpec.DoubleValue DUMMY_XP_PER_DAMAGE = BUILDER
+            .comment("Experience orbs dropped per point of damage dealt to a dummy. 0 disables it.",
+                    "Deliberately off by default - a dummy that pays out turns practice into a grind.")
+            .defineInRange("dummyXpPerDamage", 0.0, 0.0, 10.0);
+    private static final ModConfigSpec.BooleanValue DUMMY_SCARECROW = BUILDER
+            .comment("If true, a dummy wearing a carved pumpkin keeps animals away and suppresses",
+                    "hostile spawns around itself.")
+            .define("dummyScarecrow", true);
+    private static final ModConfigSpec.IntValue DUMMY_SCARE_RADIUS = BUILDER
+            .comment("Radius in blocks of the scarecrow effect. Ignored when dummyScarecrow is false.")
+            .defineInRange("dummyScareRadius", 12, 1, 64);
+    private static final ModConfigSpec.BooleanValue DUMMY_DECOY = BUILDER
+            .comment("If true, a dummy wearing a player head draws hostile mobs onto itself.",
+                    "Off by default: a decoy that works is a wall against every raid the server has,",
+                    "and that is a decision an operator should make on purpose.")
+            .define("dummyDecoy", false);
+
     /**
      * Accounts permitted to use the mod's administrative commands and the module admin surface.
      *
@@ -257,7 +321,12 @@ public class Config {
                     "When ANY valid UUID is listed this is a closed allow-list: operators not on it are",
                     "refused. The server console and command blocks always qualify, so a bad entry here",
                     "can always be corrected from the console.")
-            .defineList("adminUuids", DEFAULT_ADMIN_UUIDS, () -> "", entry -> entry instanceof String);
+            // defineListAllowEmpty because the comment above tells the operator to clear this list, and
+            // plain defineList pins the spec to ListValueSpec.NON_EMPTY — an operator who followed that
+            // instruction would have hit a config that rewrote itself once a second forever rather than
+            // one that fell back to operator permission. Same defect as werewolfEquipmentWhitelist.
+            .defineListAllowEmpty("adminUuids", DEFAULT_ADMIN_UUIDS, () -> "",
+                    entry -> entry instanceof String);
 
     /** Configured admin UUIDs; empty before the config has loaded, which reads as "unconfigured". */
     public static List<? extends String> adminUuids() {
@@ -269,6 +338,13 @@ public class Config {
     }
 
     static {
+        // Forced lycanthropy: the moon, the loss of control, Wolfsbane and the wolf's body.
+        // Declared flat rather than in a section so the keys reach the in-game config screen; see
+        // WerewolfConfig's class javadoc.
+        at.koopro.wizardsandbeasts.heritage.werewolf.WerewolfConfig.define(BUILDER);
+        // The blood economy: the pool, the drain, the thirst bands and what a bite is worth. Flat for
+        // the same reason as the werewolf block above.
+        at.koopro.wizardsandbeasts.heritage.vampire.VampireBloodConfig.define(BUILDER);
         // Seed state per module, consulted only when a world is first created.
         at.koopro.wizardsandbeasts.module.ModuleConfig.define(BUILDER);
     }
@@ -309,6 +385,18 @@ public class Config {
     /** Seeded with the shipped default so a spawn check before config load still answers sanely. */
     public static CreatureSpawns creatureNaturalSpawns = CreatureSpawns.ALPHA_ONLY;
     public static boolean showPlaceholderSpawnEggs;
+    public static DummyNumberMode dummyDamageNumbers = DummyNumberMode.SELF;
+    public static boolean dummyShowHearts = false;
+    public static DummyDpsMode dummyDpsMode = DummyDpsMode.DYNAMIC;
+    public static int dummyBoutTimeoutTicks = 60;
+    public static int dummyHealth = 200;
+    public static int dummyBossHealth = 1000;
+    public static int dummyArmor = 0;
+    public static boolean dummyProtectEquipment = true;
+    public static double dummyXpPerDamage = 0.0;
+    public static boolean dummyScarecrow = true;
+    public static int dummyScareRadius = 12;
+    public static boolean dummyDecoy = false;
     public static float broomSpeedMultiplier = 1.0f;
     public static boolean broomGentleLanding = true;
     public static float broomWindVolume = 0.6f;
@@ -336,6 +424,20 @@ public class Config {
     public static int flooTravelCooldownTicks = 60;
     public static boolean flooFuzzyMatch = true;
     public static int flooRegistrationFeeKnuts = 493;
+
+    /** Who a dummy's floating damage numbers are drawn for. */
+    public enum DummyNumberMode {
+        NONE,
+        SELF,
+        ALL
+    }
+
+    /** How a dummy reports damage per second. */
+    public enum DummyDpsMode {
+        DYNAMIC,
+        ON_RESET,
+        OFF
+    }
 
     public enum PerfProfile {
         LOW,
@@ -376,6 +478,18 @@ public class Config {
         reduceScreenEffects = REDUCE_SCREEN_EFFECTS.get();
         creatureNaturalSpawns = CREATURE_NATURAL_SPAWNS.get();
         showPlaceholderSpawnEggs = SHOW_PLACEHOLDER_SPAWN_EGGS.get();
+        dummyDamageNumbers = DUMMY_DAMAGE_NUMBERS.get();
+        dummyShowHearts = DUMMY_SHOW_HEARTS.get();
+        dummyDpsMode = DUMMY_DPS_MODE.get();
+        dummyBoutTimeoutTicks = DUMMY_BOUT_TIMEOUT_TICKS.get();
+        dummyHealth = DUMMY_HEALTH.get();
+        dummyBossHealth = DUMMY_BOSS_HEALTH.get();
+        dummyArmor = DUMMY_ARMOR.get();
+        dummyProtectEquipment = DUMMY_PROTECT_EQUIPMENT.get();
+        dummyXpPerDamage = DUMMY_XP_PER_DAMAGE.get();
+        dummyScarecrow = DUMMY_SCARECROW.get();
+        dummyScareRadius = DUMMY_SCARE_RADIUS.get();
+        dummyDecoy = DUMMY_DECOY.get();
         broomSpeedMultiplier = BROOM_SPEED_MULTIPLIER.get().floatValue();
         broomGentleLanding = BROOM_GENTLE_LANDING.get();
         broomWindVolume = BROOM_WIND_VOLUME.get().floatValue();
@@ -395,6 +509,8 @@ public class Config {
         flooTravelCooldownTicks = FLOO_TRAVEL_COOLDOWN_TICKS.get();
         flooFuzzyMatch = FLOO_FUZZY_MATCH.get();
         flooRegistrationFeeKnuts = FLOO_REGISTRATION_FEE_KNUTS.get();
+        at.koopro.wizardsandbeasts.heritage.werewolf.WerewolfConfig.refresh();
+        at.koopro.wizardsandbeasts.heritage.vampire.VampireBloodConfig.refresh();
         // Pushed rather than pulled: SpellPower must not depend on this class, so that the cast
         // formula stays unit-testable without a mod environment.
         at.koopro.wizardsandbeasts.spell.cast.SpellPower.applyBounds(

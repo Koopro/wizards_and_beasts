@@ -3,13 +3,18 @@ package at.koopro.wizardsandbeasts.heritage.command;
 import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.event.heritage.HeritageEvents;
-import at.koopro.wizardsandbeasts.network.heritage.HeritageDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
+import at.koopro.wizardsandbeasts.heritage.werewolf.WerewolfConfig;
+import at.koopro.wizardsandbeasts.heritage.werewolf.WerewolfRules;
+import at.koopro.wizardsandbeasts.heritage.werewolf.WerewolfState;
+import at.koopro.wizardsandbeasts.heritage.werewolf.WerewolfTransformService;
+import at.koopro.wizardsandbeasts.heritage.werewolf.Wolfsbane;
 import at.koopro.wizardsandbeasts.heritage.profession.ProfessionNode;
 import at.koopro.wizardsandbeasts.util.ChatReport;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.ChatFormatting;
@@ -32,6 +37,9 @@ import java.util.Arrays;
  * {@link ProfessionCommands} and {@link AppearanceCommands}.
  */
 public final class HeritageCommands {
+
+    /** Comfortably after nightfall (night starts at 12300), so the first scan after the jump counts. */
+    private static final long NIGHT_TARGET_TIME = 14000L;
 
     private HeritageCommands() {}
 
@@ -73,7 +81,155 @@ public final class HeritageCommands {
                                         ctx.getSource(),
                                         EntityArgument.getPlayer(ctx, "player")))))
                 .then(Commands.literal("list")
-                        .executes(ctx -> list(ctx.getSource())));
+                        .executes(ctx -> list(ctx.getSource())))
+                // The blood pool a blood_hunger lineage lives on. Its own file for the same reason the
+                // werewolf verbs below are not: they are one heritage's mechanics, not heritage itself.
+                .then(BloodCommands.register())
+                // Deliberately unguarded by ADMIN: this is a gameplay action a medicated werewolf
+                // performs on themselves, and it refuses on its own terms when they are not in a
+                // position to take it. See WerewolfTransformService.requestVoluntaryRevert.
+                .then(Commands.literal("werewolf")
+                        .then(Commands.literal("revert")
+                                .executes(ctx -> revertWerewolf(ctx.getSource())))
+                        .then(Commands.literal("status")
+                                .executes(ctx -> werewolfStatus(
+                                        ctx.getSource(), ctx.getSource().getPlayerOrException()))
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .executes(ctx -> werewolfStatus(
+                                                ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
+                        // Testing aids. Admin-gated, and both are shortcuts through conditions the
+                        // system checks for itself rather than back doors around them -- "moon" moves
+                        // the world clock and nothing else, so the ordinary scan does the actual work.
+                        .then(Commands.literal("moon")
+                                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
+                                .executes(ctx -> setFullMoonNight(ctx.getSource())))
+                        .then(Commands.literal("transform")
+                                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
+                                .executes(ctx -> forceTransform(
+                                        ctx.getSource(), ctx.getSource().getPlayerOrException()))
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .executes(ctx -> forceTransform(
+                                                ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
+                        .then(Commands.literal("wolfsbane")
+                                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .executes(ctx -> doseWolfsbane(
+                                                ctx.getSource(), EntityArgument.getPlayer(ctx, "player"), 0))
+                                        .then(Commands.argument("amplifier", IntegerArgumentType.integer(0, 10))
+                                                .executes(ctx -> doseWolfsbane(
+                                                        ctx.getSource(),
+                                                        EntityArgument.getPlayer(ctx, "player"),
+                                                        IntegerArgumentType.getInteger(ctx, "amplifier")))))));
+    }
+
+    /**
+     * A werewolf giving the shape back by choice. Only ever possible under Wolfsbane — an unmedicated
+     * wolf is refused, which is the loss-of-control contract's "cannot cancel the transform" clause.
+     */
+    private static int revertWerewolf(CommandSourceStack source) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        ServerPlayer player = source.getPlayerOrException();
+        return WerewolfTransformService.requestVoluntaryRevert(player) ? 1 : 0;
+    }
+
+    /**
+     * Winds the world clock to the next full-moon night.
+     *
+     * <p>Deliberately moves <em>only the clock</em>. It does not transform anyone, does not touch the
+     * exposure counter and does not bypass the sky check — the ordinary
+     * {@code WerewolfMoonHandler} scan then runs exactly as it would on a real full moon, which is the
+     * only way a test of it is worth anything. A werewolf standing in a cellar still will not turn.
+     *
+     * <p>Vanilla numbers the phases by day count modulo 8 with 0 as full, so the target is the next such
+     * day; 14000 puts it comfortably after nightfall (night starts at 12300).
+     */
+    private static int setFullMoonNight(CommandSourceStack source) {
+        net.minecraft.server.level.ServerLevel level = source.getLevel();
+        if (WerewolfRules.fullMoonNight(level)) {
+            source.sendSuccess(() -> Component.literal(
+                    "Already a full-moon night here. Nothing to move."), false);
+            return 1;
+        }
+        long dayTime = level.getDayTime();
+        long day = dayTime / 24000L;
+        // Today still counts if it is a full-moon day and night has not yet been missed. Without this
+        // the "already the right day, just too early" case would skip a whole eight-day cycle, which is
+        // the exact case a tester hits after running this command once.
+        boolean tonightStillWorks = WerewolfRules.moonPhase(dayTime) == WerewolfRules.FULL_MOON
+                && Math.floorMod(dayTime, 24000L) < NIGHT_TARGET_TIME;
+        long targetDay = tonightStillWorks
+                ? day
+                : day + Math.floorMod(-day, 8L) + (Math.floorMod(day, 8L) == 0 ? 8L : 0L);
+        long target = targetDay * 24000L + NIGHT_TARGET_TIME;
+        level.setDayTime(target);
+        source.sendSuccess(() -> Component.literal("Set " + level.dimension().identifier()
+                + " to a full-moon night (day " + targetDay + ", time " + target + ")."), true);
+        return 1;
+    }
+
+    /**
+     * Starts a forced change now, skipping only the moonlight-exposure wait.
+     *
+     * <p>Everything after that is the real path: the TRANSITIONING window, the delay, the equipment
+     * strip, the attributes and the loss-of-control flag all come from
+     * {@code WerewolfTransformService.beginForcedTransform}. It still refuses for a non-werewolf, for a
+     * player already in wolf shape, and while Wolfsbane suppression applies — those are the conditions
+     * under test, not obstacles to it.
+     */
+    private static int forceTransform(CommandSourceStack source, ServerPlayer target) {
+        PlayerHeritageData data = target.getData(ModAttachments.HERITAGE_DATA.get());
+        if (!WerewolfRules.isWerewolf(data)) {
+            source.sendFailure(Component.literal(target.getName().getString() + " is not a werewolf.")
+                    .withStyle(ChatFormatting.RED));
+            return 0;
+        }
+        if (!(target.level() instanceof net.minecraft.server.level.ServerLevel level)) {
+            return 0;
+        }
+        if (!WerewolfTransformService.beginForcedTransform(target, level, data)) {
+            source.sendFailure(Component.literal(
+                            "The change was refused: already a wolf, one is already in flight, "
+                                    + "forced transforms are disabled, or Wolfsbane is suppressing it.")
+                    .withStyle(ChatFormatting.RED));
+            return 0;
+        }
+        source.sendSuccess(() -> Component.literal("The moon takes " + target.getName().getString() + "."), true);
+        return 1;
+    }
+
+    /** Doses a werewolf from code, so the Wolfsbane config keys are reachable without brewing. */
+    private static int doseWolfsbane(CommandSourceStack source, ServerPlayer target, int amplifier) {
+        Wolfsbane.apply(target, amplifier);
+        int ticks = Wolfsbane.durationFor(amplifier);
+        source.sendSuccess(() -> Component.literal("Dosed " + target.getName().getString()
+                + " with Wolfsbane for " + ticks + " ticks (amplifier " + amplifier + ")."), true);
+        return 1;
+    }
+
+    /**
+     * What the moon and the potion are doing to this werewolf right now. Readable by anyone about
+     * anyone: none of it is secret, and every one of these numbers is something a player watching
+     * themselves transform would want to be able to check.
+     */
+    private static int werewolfStatus(CommandSourceStack source, ServerPlayer target) {
+        PlayerHeritageData data = target.getData(ModAttachments.HERITAGE_DATA.get());
+        if (!WerewolfRules.isWerewolf(data)) {
+            source.sendFailure(Component.literal(target.getName().getString() + " is not a werewolf.")
+                    .withStyle(ChatFormatting.RED));
+            return 0;
+        }
+        boolean moonUp = target.level() instanceof net.minecraft.server.level.ServerLevel level
+                && WerewolfRules.fullMoonNight(level);
+        ChatReport.of("Werewolf — " + target.getName().getString())
+                .flag("Full moon", moonUp)
+                .meter("Moonlight", WerewolfState.getExposure(data),
+                        Math.max(1, WerewolfConfig.exposureThreshold))
+                .row("State", data.getTransformationState().name())
+                .row("Form", data.getActiveFormId() == null ? "none" : data.getActiveFormId())
+                .flag("Wolfsbane", WerewolfRules.hasWolfsbane(target))
+                .flag("Loss of control", WerewolfState.isLossOfControl(data))
+                .flag("Staying by choice", WerewolfState.isVoluntary(data))
+                .send(source);
+        return 1;
     }
 
     private static int info(CommandSourceStack source, ServerPlayer target) {
@@ -129,14 +285,13 @@ public final class HeritageCommands {
         }
 
         PlayerHeritageData data = target.getData(ModAttachments.HERITAGE_DATA.get());
-        data.setSelectedHeritage(type);
-        data.setSelectedHeritageVariant(subtype);
-        data.setLocked(true);
         data.resetProfessionProgress();
         data.addProfessionPoints(3);
 
-        HeritageAPI.applyStats(target);
-        HeritageDataSyncS2CPayload.syncToPlayer(target, false);
+        // The same routine the first-join gate runs. This used to set the fields, apply the attribute
+        // modifiers and sync to the one player — which left the body, the POWER band, the ability grants
+        // and every other client's copy describing the heritage the target used to be.
+        HeritageAPI.commit(target, type, subtype);
 
         NeoForge.EVENT_BUS.post(new HeritageEvents.PlayerHeritageChangedEvent(target, type, subtype));
 
@@ -149,11 +304,9 @@ public final class HeritageCommands {
     }
 
     private static int reset(CommandSourceStack source, ServerPlayer target) {
-        PlayerHeritageData data = target.getData(ModAttachments.HERITAGE_DATA.get());
-        data.reset();
-
-        HeritageAPI.removeStats(target);
-        HeritageDataSyncS2CPayload.syncToPlayer(target, true);
+        // true: put the client back in front of the gate. Clearing the data without reopening it leaves a
+        // player with no heritage and no way to choose one.
+        HeritageAPI.clear(target, true);
 
         NeoForge.EVENT_BUS.post(new HeritageEvents.PlayerHeritageResetEvent(target));
 

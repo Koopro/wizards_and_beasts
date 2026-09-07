@@ -10,6 +10,7 @@ import at.koopro.wizardsandbeasts.client.currency.state.ClientVaultDataState;
 import at.koopro.wizardsandbeasts.client.form.SizeLerpTracker;
 import at.koopro.wizardsandbeasts.client.form.state.ClientFormDataState;
 import at.koopro.wizardsandbeasts.client.form.state.ClientTransitionTracker;
+import at.koopro.wizardsandbeasts.client.heritage.state.ClientBloodState;
 import at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageDataState;
 import at.koopro.wizardsandbeasts.client.legilimency.state.ClientLegilimencyVisionState;
 import at.koopro.wizardsandbeasts.client.map.MapClientHandler;
@@ -52,6 +53,7 @@ import at.koopro.wizardsandbeasts.network.form.DebugOverlayToggleS2CPayload;
 import at.koopro.wizardsandbeasts.network.form.FormSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.form.TransitionEndS2CPayload;
 import at.koopro.wizardsandbeasts.network.form.TransitionStartS2CPayload;
+import at.koopro.wizardsandbeasts.network.heritage.BloodDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.heritage.HeritageDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.legilimency.LegilimencyVisionS2CPayload;
 import at.koopro.wizardsandbeasts.network.map.MapOpenS2CPayload;
@@ -373,6 +375,19 @@ public final class ClientPayloadHandlers {
                 openHeritageSelectionScreenSafe();
             }
         });
+    }
+
+    /**
+     * The blood pool and the policy that owns the hunger slot.
+     *
+     * <p>Applied unconditionally rather than being gated on "is this player a vampire" here: the payload
+     * carries the policy, so a vampire who loses their heritage is corrected by the same packet that a
+     * vampire who gains one is set up by. A client that decided for itself would have no packet at all to
+     * tell it the bar had gone away.
+     */
+    public static void handleBloodDataSync(BloodDataSyncS2CPayload pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> ClientBloodState.applySync(
+                pkt.policy(), pkt.stage(), pkt.blood(), pkt.maxBlood()));
     }
 
     @Nullable

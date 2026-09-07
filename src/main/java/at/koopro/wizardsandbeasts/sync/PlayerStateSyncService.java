@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.sync;
 
 import at.koopro.wizardsandbeasts.form.FormSystemAPI;
 import at.koopro.wizardsandbeasts.network.form.FormSyncS2CPayload;
+import at.koopro.wizardsandbeasts.network.heritage.BloodDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.heritage.HeritageDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.skill.AbilityGrantsSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.skill.SkillDataSyncS2CPayload;
@@ -53,6 +54,10 @@ public final class PlayerStateSyncService {
         syncAbilityGrants(player); // derived from heritage+vocation+skills, all synced above; relog-safe
 
         HeritageDataSyncS2CPayload.syncToPlayer(player, openTypeSelector);
+        // After the heritage: the blood payload carries the nutrition policy, which is derived from the
+        // variant the line above just sent. Sending it first would have told a client to draw a blood
+        // meter for a heritage it did not yet know it had.
+        BloodDataSyncS2CPayload.syncToPlayer(player);
         VaultSyncS2CPayload.syncToPlayer(player);
         MinistryRecordSyncS2CPayload.syncToPlayer(player);
         // After the Ministry record and the vault: two of the three standing axes are composed from

@@ -24,6 +24,7 @@ import at.koopro.wizardsandbeasts.skill.data.PlayerSkillData;
 import at.koopro.wizardsandbeasts.skill.vocation.PlayerVocationData;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
+import at.koopro.wizardsandbeasts.heritage.vampire.VampireBloodData;
 import at.koopro.wizardsandbeasts.currency.vault.PlayerVaultData;
 import at.koopro.wizardsandbeasts.pose.PoseOverride;
 import at.koopro.wizardsandbeasts.skill.PlayerSkillBonusData;
@@ -61,6 +62,33 @@ public class ModAttachments {
 
     public static final Supplier<AttachmentType<PlayerSkillData>> SKILL_DATA =
             registerData("skill_data", PlayerSkillData::new);
+
+    /**
+     * A blood-drinker's pool — see {@code heritage.vampire}. {@code copyOnDeath} through
+     * {@link #registerData}: being killed does not make a vampire less thirsty, and a respawn that handed
+     * back a full pool would make dying the cheapest way to feed. {@code VampireBloodEvents.onRespawn}
+     * settles it to a fixed fraction instead.
+     *
+     * <p>Present on every player, not only on vampires. An attachment cannot be conditional, and a pool
+     * nobody drains or draws costs three fields in a save file.
+     */
+    public static final Supplier<AttachmentType<VampireBloodData>> VAMPIRE_BLOOD =
+            registerData("vampire_blood", VampireBloodData::new);
+
+    /**
+     * Game time until which a creature is empty of blood, keyed on the creature rather than the vampire.
+     *
+     * <p>On the target because that is what the rule is about: one cow cannot feed two vampires in a row
+     * either. A map on the feeding player would have had to be keyed by target UUID, grown without bound,
+     * and been wrong the moment a second player bit the same animal.
+     *
+     * <p>Not {@code copyOnDeath} — mobs do not respawn, and a drained window that survived a player's
+     * death would be a window on a body that no longer exists.
+     */
+    public static final Supplier<AttachmentType<Long>> BLOOD_DRAINED_UNTIL =
+            ATTACHMENTS.register("blood_drained_until", () -> AttachmentType.builder(() -> 0L)
+                    .serialize(Codec.LONG.fieldOf("until"))
+                    .build());
 
     /** Committed Vocation slots — separate from SKILL_DATA; absent on existing players → both empty. */
     public static final Supplier<AttachmentType<PlayerVocationData>> VOCATION_DATA =

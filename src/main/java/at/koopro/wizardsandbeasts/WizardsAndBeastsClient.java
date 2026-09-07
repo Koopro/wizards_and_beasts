@@ -56,7 +56,7 @@ public class WizardsAndBeastsClient {
         modEventBus.addListener(ClientSetup::registerRenderers);
         modEventBus.addListener(ClientSetup::registerLayers);
         modEventBus.addListener(ModParticleProviders::register);
-        modEventBus.addListener(at.koopro.wizardsandbeasts.client.brew.CauldronColors::register);
+        modEventBus.addListener(at.koopro.wizardsandbeasts.client.brew.BrewTintSource::register);
         modEventBus.addListener(BroomRiderRenderer::registerModifiers);
         modEventBus.addListener(FormRenderStateModifier::registerModifiers);
         modEventBus.addListener(EntityOutlines::registerModifiers);
@@ -69,6 +69,7 @@ public class WizardsAndBeastsClient {
                 at.koopro.wizardsandbeasts.client.trinket.SneakoscopeSpinProperty::register);
         modEventBus.addListener(SpellKeyBindings::register);
         modEventBus.addListener(at.koopro.wizardsandbeasts.client.ability.AbilityFrameworkKeyBindings::register);
+        modEventBus.addListener(at.koopro.wizardsandbeasts.client.armor.WardrobeKeyBindings::register);
         modEventBus.addListener(this::registerGuiLayers);
         modEventBus.addListener(WizardsAndBeastsClient::registerMenus);
         modEventBus.addListener(WizardsAndBeastsClient::registerMapStyleListeners);
@@ -77,24 +78,53 @@ public class WizardsAndBeastsClient {
         }
 
         NeoForge.EVENT_BUS.addListener(SpellClientInputHandler::onClientTick);
+        NeoForge.EVENT_BUS.addListener(at.koopro.wizardsandbeasts.client.armor.WardrobeInputHandler::onClientTick);
         NeoForge.EVENT_BUS.addListener(SpellClientInputHandler::onScroll);
         NeoForge.EVENT_BUS.addListener(BeamClientEvents::onLoggingOut);
         NeoForge.EVENT_BUS.addListener(BeamClientEvents::onEntityLeaveLevel);
         // One more rule for the shared outline layer: anything hiding near a wizard who has
         // eaten a Dirigible Plum. Per-viewer by construction -- see WrackspurtOutlineProvider.
         at.koopro.wizardsandbeasts.client.wrackspurt.WrackspurtOutlineProvider.register();
+        // And one for a beast's nose -- Animagus and werewolf alike, keyed on the marker effect the
+        // server grants, so the rule is not duplicated across the network boundary.
+        at.koopro.wizardsandbeasts.client.form.sense.FormScentOutlineProvider.register();
         NeoForge.EVENT_BUS.addListener(ClientOutlineState::onLoggingOut);
         NeoForge.EVENT_BUS.addListener(ApparitionClientController::onRenderLevel);
         NeoForge.EVENT_BUS.addListener(LegilimencyVisionRenderer::onRenderLevel);
         NeoForge.EVENT_BUS.addListener(ObscurialClientViewHandler::onRenderHand);
         NeoForge.EVENT_BUS.addListener(ObscurialClientViewHandler::onRenderGuiLayer);
+        // Takes the drumsticks away from anyone whose nutrition is not hunger. Paired with the blood
+        // meter registered below -- see NutritionHudHandler for why neither is correct on its own.
+        NeoForge.EVENT_BUS.addListener(
+                at.koopro.wizardsandbeasts.client.heritage.hud.NutritionHudHandler::onRenderGuiLayer);
+        // The client half of werewolf loss of control: the keyboard stops answering and container
+        // screens refuse to open. Enforcement is server-side -- see heritage.werewolf.FeralController.
+        NeoForge.EVENT_BUS.addListener(
+                at.koopro.wizardsandbeasts.client.heritage.WerewolfClientControlHandler::onMovementInput);
+        NeoForge.EVENT_BUS.addListener(
+                at.koopro.wizardsandbeasts.client.heritage.WerewolfClientControlHandler::onScreenOpening);
         NeoForge.EVENT_BUS.addListener(AnimagusClientViewHandler::onRenderHand);
+        // After the form handlers on purpose: a beast in a card-holding pose is not a thing, and
+        // a cancelled RenderHandEvent stops here, so theirs must get the first say.
+        NeoForge.EVENT_BUS.addListener(
+                at.koopro.wizardsandbeasts.client.trinket.WizardCardHandRenderer::onRenderHand);
         NeoForge.EVENT_BUS.addListener(AnimagusClientViewHandler::onRenderNameTag);
         NeoForge.EVENT_BUS.addListener(InventoryScreenInjector::onScreenInit);
         NeoForge.EVENT_BUS.addListener(CharacterSheetKeyHandler::onClientTick);
         NeoForge.EVENT_BUS.addListener(StatHudOverlay::onClientTick);
         NeoForge.EVENT_BUS.addListener(at.koopro.wizardsandbeasts.client.ability.AbilityWheelController::onClientTick);
         NeoForge.EVENT_BUS.addListener(at.koopro.wizardsandbeasts.client.spell.wheel.SpellWheelController::onClientTick);
+        // The in-world debug panel polls only while the server says debug mode is on, so this costs
+        // an int comparison a tick for everyone else. See DebugPanelClient.
+        NeoForge.EVENT_BUS.addListener(
+                at.koopro.wizardsandbeasts.client.debug.DebugPanelClient::onClientTick);
+        NeoForge.EVENT_BUS.addListener(
+                at.koopro.wizardsandbeasts.client.debug.DebugPanelClient::onLoggingOut);
+        // Damage numbers are anchored to world points, so any that survived a disconnect would be
+        // drawn at those coordinates in the next world joined.
+        NeoForge.EVENT_BUS.addListener(
+                (net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingOut event) ->
+                        at.koopro.wizardsandbeasts.client.dummy.DamageNumberOverlay.clear());
     }
 
     private static void registerMenus(RegisterMenuScreensEvent event) {
@@ -126,6 +156,12 @@ public class WizardsAndBeastsClient {
     }
 
     private void registerGuiLayers(RegisterGuiLayersEvent event) {
+        // registerAbove(FOOD_LEVEL), not registerAboveAll: this layer stands in for the hunger bar and
+        // has to draw in the hunger bar's place in the order, under the overlays and vignettes below.
+        event.registerAbove(
+                net.neoforged.neoforge.client.gui.VanillaGuiLayers.FOOD_LEVEL,
+                at.koopro.wizardsandbeasts.client.heritage.hud.BloodBarRenderer.ID,
+                at.koopro.wizardsandbeasts.client.heritage.hud.BloodBarRenderer::render);
         event.registerAboveAll(SpellDiamondOverlay.ID, SpellDiamondOverlay::render);
         event.registerAboveAll(ObscurusOverlay.ID, ObscurusOverlay::render);
         event.registerAboveAll(MobEffectFullscreenOverlays.ID, MobEffectFullscreenOverlays::render);
@@ -140,6 +176,16 @@ public class WizardsAndBeastsClient {
         event.registerAboveAll(StatHudOverlay.ID, StatHudOverlay::render);
         event.registerAboveAll(SneakoscopeAlarmOverlay.ID, SneakoscopeAlarmOverlay::render);
         event.registerAboveAll(FirewhiskyBurnOverlay.ID, FirewhiskyBurnOverlay::render);
+        // Numbers off a duelling dummy. Above the rest so a burst is not hidden behind a vignette,
+        // and unconditional: the layer draws nothing until a payload arrives, and payloads only
+        // arrive when the server's dummyDamageNumbers setting says this player should see them.
+        event.registerAboveAll(at.koopro.wizardsandbeasts.client.dummy.DamageNumberOverlay.ID,
+                at.koopro.wizardsandbeasts.client.dummy.DamageNumberOverlay::render);
+        // Not behind Config.enableDebugTools: this layer draws nothing at all unless the *server*
+        // has put the player in debug mode, and a client-side switch that also has to be on is how
+        // an operator ends up staring at a pot wondering why the panel they just enabled is absent.
+        event.registerAboveAll(at.koopro.wizardsandbeasts.client.debug.WorldDebugPanel.ID,
+                at.koopro.wizardsandbeasts.client.debug.WorldDebugPanel::render);
         if (Config.enableDebugTools) {
             event.registerAboveAll(FormDebugOverlay.ID, FormDebugOverlay::render);
             event.registerAboveAll(DebugHudRenderer.ID, DebugHudRenderer::render);
