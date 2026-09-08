@@ -854,6 +854,63 @@
       }
     ]
   },
+  "werewolf_transform": {
+    "subtitle": "subtitles.wizards_and_beasts.werewolf_transform",
+    "sounds": [
+      {
+        "name": "minecraft:entity.player.hurt",
+        "volume": 0.9,
+        "pitch": 0.55,
+        "type": "event"
+      },
+      {
+        "name": "minecraft:entity.wolf.growl",
+        "volume": 0.8,
+        "pitch": 0.6,
+        "type": "event"
+      },
+      {
+        "name": "minecraft:block.bone_block.break",
+        "volume": 0.7,
+        "pitch": 0.7,
+        "type": "event"
+      }
+    ]
+  },
+  "werewolf_howl": {
+    "subtitle": "subtitles.wizards_and_beasts.werewolf_howl",
+    "sounds": [
+      {
+        "name": "minecraft:entity.wolf.howl",
+        "volume": 1.0,
+        "pitch": 0.65,
+        "type": "event"
+      },
+      {
+        "name": "minecraft:entity.ravager.roar",
+        "volume": 0.45,
+        "pitch": 0.8,
+        "type": "event"
+      }
+    ]
+  },
+  "werewolf_revert": {
+    "subtitle": "subtitles.wizards_and_beasts.werewolf_revert",
+    "sounds": [
+      {
+        "name": "minecraft:entity.wolf.whine",
+        "volume": 0.7,
+        "pitch": 0.75,
+        "type": "event"
+      },
+      {
+        "name": "minecraft:entity.player.breath",
+        "volume": 0.6,
+        "pitch": 0.8,
+        "type": "event"
+      }
+    ]
+  },
   "apparition_windup": {
     "subtitle": "subtitles.wizards_and_beasts.apparition_windup",
     "sounds": [
