@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "H": "minecraft:hay_block",
+    "S": "minecraft:stick",
+    "W": "minecraft:white_wool"
+  },
+  "pattern": [
+    " W ",
+    "SHS",
+    " S "
+  ],
+  "result": {
+    "count": 1,
+    "id": "wizards_and_beasts:duelling_dummy"
+  }
+}

@@ -7,6 +7,10 @@
       "type": "apply_effects",
       "effects": [
         {
+          "id": "wizards_and_beasts:wolfsbane",
+          "duration": 3600
+        },
+        {
           "id": "minecraft:resistance",
           "duration": 3600
         },

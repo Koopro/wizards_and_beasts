@@ -1,0 +1,9 @@
+{
+  "_comment": "The bat shape, entirely voluntary -- nothing forces it. Daylight burning is separate and applies whether or not the vampire is a bat; see VampireHeritageHandler.",
+  "type": "toggle",
+  "icon": "wizards_and_beasts:textures/ability/placeholder.png",
+  "nameKey": "ability.wizards_and_beasts.vampire_form",
+  "descriptionKey": "ability.wizards_and_beasts.vampire_form.desc",
+  "cooldownTicks": 0,
+  "sortOrder": 24
+}

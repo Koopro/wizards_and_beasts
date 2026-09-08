@@ -1,0 +1,9 @@
+{
+  "_comment": "Voluntary half of the Veela transformation. The forced half (low health) is in VeelaHeritageHandler and needs no ability. Toggle state is owned by the player's TransformationState, not by the framework.",
+  "type": "toggle",
+  "icon": "wizards_and_beasts:textures/ability/placeholder.png",
+  "nameKey": "ability.wizards_and_beasts.veela_form",
+  "descriptionKey": "ability.wizards_and_beasts.veela_form.desc",
+  "cooldownTicks": 0,
+  "sortOrder": 22
+}
