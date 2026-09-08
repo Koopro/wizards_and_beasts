@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "wizards_and_beasts:item/one_thousand_magical_herbs_and_fungi"
-  }
-}

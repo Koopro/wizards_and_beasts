@@ -1,0 +1,181 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:component",
+    "component": "wizards_and_beasts:wizard_card_id",
+    "cases": [
+      {
+        "when": "albus_dumbledore",
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/card/albus_dumbledore"
+        }
+      },
+      {
+        "when": "gilderoy_lockhart",
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/card/gilderoy_lockhart"
+        }
+      },
+      {
+        "when": "hengist_of_woodcroft",
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/card/hengist_of_woodcroft"
+        }
+      },
+      {
+        "when": "alberic_grunnion",
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/card/alberic_grunnion"
+        }
+      },
+      {
+        "when": "bertie_bott",
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/card/bertie_bott"
+        }
+      },
+      {
+        "when": "glanmore_peakes",
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/card/glanmore_peakes"
+        }
+      },
+      {
+        "when": "wendelin_the_weird",
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/card/wendelin_the_weird"
+        }
+      },
+      {
+        "when": "uric_the_oddball",
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/card/uric_the_oddball"
+        }
+      },
+      {
+        "when": "paracelsus",
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/card/paracelsus"
+        }
+      },
+      {
+        "when": "cliodna",
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/card/cliodna"
+        }
+      },
+      {
+        "when": "newt_scamander",
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/card/newt_scamander"
+        }
+      },
+      {
+        "when": "bowman_wright",
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/card/bowman_wright"
+        }
+      },
+      {
+        "when": "artemisia_lufkin",
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/card/artemisia_lufkin"
+        }
+      },
+      {
+        "when": "gunhilda_of_gorsemoor",
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/card/gunhilda_of_gorsemoor"
+        }
+      },
+      {
+        "when": "cassandra_vablatsky",
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/card/cassandra_vablatsky"
+        }
+      },
+      {
+        "when": "adalbert_waffling",
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/card/adalbert_waffling"
+        }
+      },
+      {
+        "when": "merlin",
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/card/merlin"
+        }
+      },
+      {
+        "when": "circe",
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/card/circe"
+        }
+      },
+      {
+        "when": "morgana_le_fay",
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/card/morgana_le_fay"
+        }
+      },
+      {
+        "when": "ptolemy",
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/card/ptolemy"
+        }
+      },
+      {
+        "when": "cornelius_agrippa",
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/card/cornelius_agrippa"
+        }
+      },
+      {
+        "when": "andros_the_invincible",
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/card/andros_the_invincible"
+        }
+      },
+      {
+        "when": "nicolas_flamel",
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/card/nicolas_flamel"
+        }
+      },
+      {
+        "when": "harry_potter",
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/card/harry_potter"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "wizards_and_beasts:item/famous_wizard_card"
+    }
+  }
+}

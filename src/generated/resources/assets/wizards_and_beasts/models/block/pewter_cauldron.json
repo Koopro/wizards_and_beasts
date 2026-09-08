@@ -49,8 +49,7 @@
           "texture": "#side"
         },
         "up": {
-          "texture": "#top",
-          "tintindex": 0
+          "texture": "#top"
         },
         "west": {
           "texture": "#side"

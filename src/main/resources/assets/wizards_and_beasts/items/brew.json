@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "wizards_and_beasts:item/brew",
+    "tints": [
+      {
+        "type": "wizards_and_beasts:brew",
+        "default": 9398742
+      }
+    ]
+  }
+}

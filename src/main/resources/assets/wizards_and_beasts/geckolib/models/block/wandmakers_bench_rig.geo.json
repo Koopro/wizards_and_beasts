@@ -1,0 +1,335 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.wandmakers_bench",
+        "texture_width": 128,
+        "texture_height": 64,
+        "visible_bounds_width": 2,
+        "visible_bounds_height": 2,
+        "visible_bounds_offset": [
+          0,
+          0.75,
+          0
+        ]
+      },
+      "bones": [
+        {
+          "name": "bench",
+          "pivot": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "frame",
+          "pivot": [
+            0,
+            0,
+            0
+          ],
+          "parent": "bench",
+          "cubes": [
+            {
+              "origin": [
+                -8,
+                12,
+                -8
+              ],
+              "size": [
+                16,
+                3,
+                16
+              ],
+              "uv": [
+                0,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -7,
+                0,
+                -7
+              ],
+              "size": [
+                3,
+                12,
+                3
+              ],
+              "uv": [
+                64,
+                0
+              ]
+            },
+            {
+              "origin": [
+                4,
+                0,
+                -7
+              ],
+              "size": [
+                3,
+                12,
+                3
+              ],
+              "uv": [
+                76,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -7,
+                0,
+                4
+              ],
+              "size": [
+                3,
+                12,
+                3
+              ],
+              "uv": [
+                88,
+                0
+              ]
+            },
+            {
+              "origin": [
+                4,
+                0,
+                4
+              ],
+              "size": [
+                3,
+                12,
+                3
+              ],
+              "uv": [
+                100,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -7,
+                3,
+                5
+              ],
+              "size": [
+                14,
+                2,
+                1
+              ],
+              "uv": [
+                52,
+                19
+              ]
+            }
+          ]
+        },
+        {
+          "name": "rack",
+          "pivot": [
+            0,
+            15,
+            6
+          ],
+          "parent": "bench",
+          "cubes": [
+            {
+              "origin": [
+                -6,
+                15,
+                6
+              ],
+              "size": [
+                12,
+                1,
+                1
+              ],
+              "uv": [
+                86,
+                19
+              ]
+            },
+            {
+              "origin": [
+                -5,
+                16,
+                6
+              ],
+              "size": [
+                1,
+                3,
+                1
+              ],
+              "uv": [
+                44,
+                19
+              ]
+            },
+            {
+              "origin": [
+                -1,
+                16,
+                6
+              ],
+              "size": [
+                1,
+                4,
+                1
+              ],
+              "uv": [
+                40,
+                19
+              ]
+            },
+            {
+              "origin": [
+                3,
+                16,
+                6
+              ],
+              "size": [
+                1,
+                3,
+                1
+              ],
+              "uv": [
+                48,
+                19
+              ]
+            }
+          ]
+        },
+        {
+          "name": "lathe",
+          "pivot": [
+            0,
+            15,
+            -3
+          ],
+          "parent": "bench",
+          "cubes": [
+            {
+              "origin": [
+                -7,
+                15,
+                -5
+              ],
+              "size": [
+                2,
+                4,
+                4
+              ],
+              "uv": [
+                112,
+                0
+              ]
+            },
+            {
+              "origin": [
+                5,
+                15,
+                -5
+              ],
+              "size": [
+                2,
+                4,
+                4
+              ],
+              "uv": [
+                0,
+                19
+              ]
+            }
+          ]
+        },
+        {
+          "name": "blank",
+          "pivot": [
+            0,
+            16.5,
+            -3
+          ],
+          "parent": "lathe",
+          "cubes": [
+            {
+              "origin": [
+                -5,
+                16,
+                -3.5
+              ],
+              "size": [
+                10,
+                1,
+                1
+              ],
+              "uv": [
+                0,
+                27
+              ]
+            }
+          ]
+        },
+        {
+          "name": "treadle",
+          "pivot": [
+            0,
+            2,
+            4
+          ],
+          "parent": "bench",
+          "cubes": [
+            {
+              "origin": [
+                -4,
+                1.5,
+                -2
+              ],
+              "size": [
+                8,
+                1,
+                6
+              ],
+              "uv": [
+                12,
+                19
+              ]
+            }
+          ]
+        },
+        {
+          "name": "shaving",
+          "pivot": [
+            5,
+            15,
+            -8
+          ],
+          "parent": "bench",
+          "cubes": [
+            {
+              "origin": [
+                4.5,
+                13,
+                -8.5
+              ],
+              "size": [
+                1,
+                2,
+                1
+              ],
+              "uv": [
+                82,
+                19
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
