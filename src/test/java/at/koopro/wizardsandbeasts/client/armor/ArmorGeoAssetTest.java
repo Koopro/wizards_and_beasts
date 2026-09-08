@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.junit.jupiter.api.Test;
+import at.koopro.wizardsandbeasts.item.armor.HoodedRobe;
 import at.koopro.wizardsandbeasts.registry.ArmorItemRegistry;
 import software.bernie.geckolib.renderer.GeoArmorRenderer;
 
@@ -208,6 +209,52 @@ class ArmorGeoAssetTest {
         assertTrue(missing.isEmpty(), "worn armour with no inventory sprite: " + missing);
     }
 
+    // -- hood toggle ---------------------------------------------------------------------------
+
+    @Test
+    void theHoodedSetCarriesBothHoodBones() throws IOException {
+        // The toggle is a visibility switch between two bones that both have to exist in the file.
+        // If the generator stops emitting one of them, nothing throws: the renderer skips a bone
+        // that is not there, and the robe simply has no hood in one of its two states.
+        Set<String> bones = bonesOf("death_eater_robe");
+        assertTrue(bones.contains(HoodedRobe.HOOD_UP_BONE),
+                "death_eater_robe is missing " + HoodedRobe.HOOD_UP_BONE);
+        assertTrue(bones.contains(HoodedRobe.HOOD_DOWN_BONE),
+                "death_eater_robe is missing " + HoodedRobe.HOOD_DOWN_BONE);
+    }
+
+    @Test
+    void eachHoodBoneHangsFromThePartItShouldFollow() throws IOException {
+        // The raised hood turns with the head, so it hangs off armorHead — and the chest piece only
+        // draws that bone because HoodedArmorRenderer adds the HEAD segment to the chest slot. The
+        // lowered hood sits on the shoulders and must NOT turn, so it stays on armorBody. Swap
+        // either parent and nothing throws: the hood just stops tracking, or starts swinging.
+        assertEquals("armorHead", boneNamed("death_eater_robe", HoodedRobe.HOOD_UP_BONE)
+                        .get("parent").getAsString(),
+                HoodedRobe.HOOD_UP_BONE + " must hang from armorHead to follow the wearer's look");
+        assertEquals("armorBody", boneNamed("death_eater_robe", HoodedRobe.HOOD_DOWN_BONE)
+                        .get("parent").getAsString(),
+                HoodedRobe.HOOD_DOWN_BONE + " must hang from armorBody so a lowered hood stays put");
+
+        for (String hood : List.of(HoodedRobe.HOOD_UP_BONE, HoodedRobe.HOOD_DOWN_BONE)) {
+            JsonArray cubes = boneNamed("death_eater_robe", hood).getAsJsonArray("cubes");
+            assertTrue(cubes != null && !cubes.isEmpty(), hood + " has no cubes — that state is bare");
+        }
+    }
+
+    @Test
+    void theRaisedHoodStaysAboveTheHeadPivot() throws IOException {
+        // Everything on armorHead rotates about y=24, the neck. A cube reaching below that line
+        // swings out through the shoulders as the wearer looks around — it renders fine standing
+        // still, which is exactly why this needs asserting rather than eyeballing.
+        for (var element : boneNamed("death_eater_robe", HoodedRobe.HOOD_UP_BONE).getAsJsonArray("cubes")) {
+            JsonArray origin = element.getAsJsonObject().getAsJsonArray("origin");
+            assertTrue(origin.get(1).getAsFloat() >= 24f,
+                    "a raised-hood cube starts at y=" + origin.get(1).getAsFloat()
+                            + ", below the head pivot — it will sweep through the shoulders");
+        }
+    }
+
     // -- variant wiring ------------------------------------------------------------------------
 
     @Test
@@ -248,6 +295,16 @@ class ArmorGeoAssetTest {
         bones.forEach(bone -> names.add(bone.getAsJsonObject().get("name").getAsString()));
         assertFalse(names.isEmpty(), set + " declares no bones");
         return names;
+    }
+
+    private static JsonObject boneNamed(String set, String boneName) throws IOException {
+        for (var element : bonesArray(set)) {
+            JsonObject bone = element.getAsJsonObject();
+            if (boneName.equals(bone.get("name").getAsString())) {
+                return bone;
+            }
+        }
+        throw new AssertionError(set + " has no bone named " + boneName);
     }
 
     private static JsonObject readJson(Path path) throws IOException {

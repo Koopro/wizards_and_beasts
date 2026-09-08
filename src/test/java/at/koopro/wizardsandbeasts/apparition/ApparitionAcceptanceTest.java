@@ -331,9 +331,25 @@ class ApparitionAcceptanceTest {
         }
     }
 
-    /** And a discharge nobody released is the worst rung, which is what stops it being a free reset. */
+    /**
+     * A discharge nobody released never reaches the splinch ladder at all.
+     *
+     * <p>It used to: the sentinel fell through to {@link SplinchTier#CATASTROPHIC}, so the harshest rung in
+     * the ability was what a wizard got for doing nothing — and an anchored jump picked out of the selector
+     * could reach it without the player ever touching a key. {@code ApparitionServerLogic#collapseAttempt}
+     * now diverts on this predicate before the ladder is consulted: no arrival, no wound, but the cooldown
+     * and the exhaustion are still charged, so it is not a free reset either.
+     *
+     * <p>{@link SplinchResolver}'s own sentinel branch is left in place and is deliberately unreachable —
+     * it is the guard that stops an inflate overflowing if a future caller does hand it the sentinel.
+     */
     @Test
-    void neverLettingGoIsACatastrophe() {
+    void neverLettingGoIsDivertedBeforeTheLadder() {
+        assertTrue(ApparitionWindow.isForcedDischarge(ApparitionWindow.FORCED_DISCHARGE));
+        for (int miss : new int[] {0, 1, 4, 5, 12, 13, 600}) {
+            assertFalse(ApparitionWindow.isForcedDischarge(miss),
+                    "a real miss of " + miss + " must still run the ladder");
+        }
         assertEquals(SplinchTier.CATASTROPHIC,
                 SplinchResolver.resolve(ApparitionWindow.FORCED_DISCHARGE, Destabilization.NONE));
     }

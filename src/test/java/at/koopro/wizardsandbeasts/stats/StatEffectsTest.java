@@ -126,6 +126,34 @@ class StatEffectsTest {
         assertEquals(0, StatEffects.tuitionCost(-5, 50));
     }
 
+    /**
+     * Switching {@code PLAYER_STATS} off must never make the game harder than never having shipped it.
+     *
+     * <p>{@code StatResistModifiers} substitutes {@link PlayerStatsData#MAX_VALUE} for the trait when the
+     * module is off, because with it off WILLPOWER is unreadable, undisplayable and untrainable — an
+     * ungated read returned 0 forever and pinned the resist scalar at its 0.40 floor, making the Imperius
+     * Curse two and a half times harder to throw off on a server that had turned player stats <em>off</em>.
+     * These are the invariants that choice rests on: the fallback is the top of every mind-magic curve, and
+     * it restores the flat 0–100 pool with 30/15 attempt costs the Imperius code used before this system.
+     */
+    @Test
+    void theModuleOffFallbackIsTheMostGenerousPointOfEveryResistCurve() {
+        int off = PlayerStatsData.MAX_VALUE;
+        for (int trait = 0; trait <= 100; trait++) {
+            assertTrue(StatEffects.resistScalar(off) >= StatEffects.resistScalar(trait),
+                    "module-off resist scalar is worse than trait " + trait);
+            assertTrue(StatEffects.maxResolve(off) >= StatEffects.maxResolve(trait),
+                    "module-off Resolve ceiling is smaller than trait " + trait);
+            assertTrue(StatEffects.resolveRegenPerTick(off) >= StatEffects.resolveRegenPerTick(trait),
+                    "module-off Resolve regen is slower than trait " + trait);
+        }
+
+        assertEquals(1.00f, StatEffects.resistScalar(off), EPS, "module off must not scale the roll at all");
+        assertEquals(100.0f, StatEffects.maxResolve(off), EPS, "the pre-stats pool was a flat 0-100");
+        assertEquals(30f, StatEffects.resolveCostToBreakFree(off), EPS, "the pre-stats break-free cost");
+        assertEquals(15f, StatEffects.resolveCostOfFailedAttempt(off), EPS, "the pre-stats failure cost");
+    }
+
     private static void assertWithinClamp(float value, String channel, int stat) {
         assertTrue(value > ModifierStack.HARD_FLOOR && value < ModifierStack.HARD_CAP,
                 channel + " multiplier " + value + " at stat " + stat

@@ -42,7 +42,10 @@ class CastRejectMessageKeyTest {
     /** Desync guards and impossible-state checks: diagnostics, never shown. */
     private static final List<String> INTERNAL_ONLY = List.of(
             SpellRejectCodes.NOT_SERVER_LEVEL,
-            SpellRejectCodes.DUPLICATE_RELEASE_GUARD);
+            SpellRejectCodes.DUPLICATE_RELEASE_GUARD,
+            SpellRejectCodes.NO_CAST_SESSION,
+            SpellRejectCodes.CAST_SESSION_EXPIRED,
+            SpellRejectCodes.CASTER_NOT_ALIVE);
 
     @Test
     void everyPlayerFacingCode_mapsToItsOwnKey() {

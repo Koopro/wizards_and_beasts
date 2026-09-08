@@ -19,9 +19,15 @@ class ImperioResistReachabilityTest {
 
     private static final float EPS = 1.0e-4f;
 
-    /** {@code charge × proficiency term × trait scalar}, as the tick handler computes it. */
+    /**
+     * {@code charge x proficiency term x trait scalar}, as the tick handler computes it.
+     *
+     * <p>The charge term calls {@link StatEffects#resolveCharge} rather than dividing here, so this test
+     * drives the clamp the tick handler actually applies instead of a second copy of it that would agree
+     * with the old, unclamped arithmetic forever.
+     */
     private static float resistChance(float resolve, int willTrait, float imperioProficiency) {
-        float charge = resolve / StatEffects.maxResolve(willTrait);
+        float charge = StatEffects.resolveCharge(resolve, willTrait);
         return charge * (imperioProficiency * 0.5f + 0.5f) * StatEffects.resistScalar(willTrait);
     }
 
@@ -70,6 +76,26 @@ class ImperioResistReachabilityTest {
         float chance = resistChance(resolve, trait, 0f);
         assertTrue(chance > 0.08f,
                 "resist chance after three failures fell to " + chance + " — effectively locked in");
+    }
+
+    /**
+     * A pool carrying more charge than the current trait allows cannot roll better than a full one.
+     *
+     * <p>Reachable three ways, none of them exotic: {@code /wandb player stats set willpower}, a heritage
+     * change re-rolling the block, and any save written while Resolve was a flat 0-100 pool. The
+     * regeneration tick only ever clamped upward, so the excess never drained, and an unclamped
+     * {@code resolve / ceiling} turned it into a permanent resist bonus that presents in play as luck.
+     */
+    @Test
+    void aPoolAboveItsCeilingRollsNoBetterThanAFullOne() {
+        int trait = 0;
+        float overfilled = StatEffects.maxResolve(100); // a max-trait pool, now carried by a trait-0 wizard
+        assertEquals(resistChance(StatEffects.maxResolve(trait), trait, 0f),
+                resistChance(overfilled, trait, 0f), EPS,
+                "an over-cap Resolve pool bought a resist chance no amount of training can");
+        assertEquals(1.0f, StatEffects.resolveCharge(overfilled, trait), EPS);
+        assertEquals(0.0f, StatEffects.resolveCharge(-40f, trait), EPS,
+                "a negative pool must not invert the roll");
     }
 
     private static int failedAttemptsUntilEmpty(int willTrait) {

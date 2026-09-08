@@ -93,22 +93,10 @@ class CauldronVisualTest {
         assertEquals("visual", CauldronVisual.PROPERTY.getName());
     }
 
-    @Test
-    void theTintableFaceExistsInTheGeneratedModel() throws Exception {
-        // The blockstate is only half of it: without tintindex 0 on the pot's opening, the colour
-        // handler has nothing to paint and every state renders identically.
-        String json = java.nio.file.Files.readString(java.nio.file.Path.of(
-                "src/generated/resources/assets/wizards_and_beasts/models/block/pewter_cauldron.json"));
-        assertTrue(json.contains("\"tintindex\": 0"),
-                "the cauldron model must expose a tintable face, or the visual states are invisible");
-    }
-
-    @Test
-    void allThreeMetalsShareTheTintableModel() throws Exception {
-        for (String metal : new String[]{"pewter_cauldron", "brass_cauldron", "wizarding_copper_cauldron"}) {
-            String json = java.nio.file.Files.readString(java.nio.file.Path.of(
-                    "src/generated/resources/assets/wizards_and_beasts/models/block/" + metal + ".json"));
-            assertTrue(json.contains("\"tintindex\": 0"), metal + " is missing its tintable face");
-        }
-    }
+    // Two tests lived here that asserted `tintindex: 0` on the generated block models, one for pewter
+    // and one across all three metals. They are gone rather than adapted, because what they pinned is
+    // gone: the placed cauldron is RenderShape.INVISIBLE and drawn by a GeckoLib rig, and the tinted
+    // face they guarded was the pot's *lid* — invisible to anyone not standing directly over the
+    // block, which is why it never solved the problem it was added for. CauldronRigTest is the
+    // replacement, and it checks the thing that actually renders now.
 }

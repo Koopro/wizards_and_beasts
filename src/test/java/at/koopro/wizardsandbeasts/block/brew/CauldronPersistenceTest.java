@@ -215,6 +215,48 @@ class CauldronPersistenceTest {
                 "an empty pot must not start on its neighbour's ingredients");
     }
 
+    // ── the interaction guard ──────────────────────────────────────────────────────────────
+
+    @Test
+    void aBrandNewCauldronAcceptsItsVeryFirstInteraction() {
+        // The bug this exists for: lastInteractGameTime started at Long.MIN_VALUE and the guard did
+        // , which OVERFLOWS to a large negative number — less than
+        // the gap, so the first interaction was refused. It returned without stamping, so the next
+        // one overflowed identically. Every cauldron refused water, ingredients and bottles forever,
+        // silently. The field is not persisted, so a reload put every pot back into it.
+        assertTrue(newCauldron().acceptInteraction(1000L, 4),
+                "a pot nobody has touched must accept the first click");
+    }
+
+    @Test
+    void theFirstInteractionIsAcceptedAtAnyGameTime() {
+        for (long time : new long[]{0L, 1L, 20L, 1_000L, 1_000_000L, Long.MAX_VALUE / 2}) {
+            assertTrue(newCauldron().acceptInteraction(time, 4), "refused at gameTime " + time);
+        }
+    }
+
+    @Test
+    void aSecondInteractionInsideTheGapIsRefused() {
+        CauldronBlockEntity pot = newCauldron();
+        assertTrue(pot.acceptInteraction(1000L, 4));
+        assertFalse(pot.acceptInteraction(1002L, 4), "held right-click must not feed the pot twice");
+    }
+
+    @Test
+    void anInteractionAfterTheGapIsAccepted() {
+        CauldronBlockEntity pot = newCauldron();
+        assertTrue(pot.acceptInteraction(1000L, 4));
+        assertTrue(pot.acceptInteraction(1004L, 4));
+    }
+
+    @Test
+    void aClockThatWentBackwardsDoesNotBarThePlayer() {
+        // World restore or rollback. Barring somebody until the clock catches up could mean hours.
+        CauldronBlockEntity pot = newCauldron();
+        assertTrue(pot.acceptInteraction(1_000_000L, 4));
+        assertTrue(pot.acceptInteraction(500L, 4));
+    }
+
     // ── the start gate ─────────────────────────────────────────────────────────────────────
 
     @Test
