@@ -64,6 +64,14 @@ neoForge {
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
+        client2 {
+            client()
+            gameDirectory = project.file("runs/client2")
+            programArgument '--username'
+            programArgument 'Dev2'            // Optional but often helpful with the getsockopt error:
+            jvmArgument '-Djava.net.preferIPv4Stack=true'
+        }
+
         server {
             server()
             programArgument '--nogui'
