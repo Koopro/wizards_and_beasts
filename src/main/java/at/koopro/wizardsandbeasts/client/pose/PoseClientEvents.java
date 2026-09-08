@@ -23,6 +23,7 @@ public final class PoseClientEvents {
 
     private PoseClientEvents() {}
 
+    private static final ItemUsePosePass ITEM_USE = new ItemUsePosePass();
     private static final FlightPosePass FLIGHT = new FlightPosePass();
     private static final CastPosePass CAST = new CastPosePass();
     private static final ApparitionPosePass APPARITION = new ApparitionPosePass();
@@ -38,6 +39,7 @@ public final class PoseClientEvents {
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
+            PlayerPoseLayer.get().register(ITEM_USE);
             PlayerPoseLayer.get().register(FLIGHT);
             PlayerPoseLayer.get().register(CAST);
             PlayerPoseLayer.get().register(APPARITION);

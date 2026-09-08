@@ -7,6 +7,7 @@ import at.koopro.wizardsandbeasts.wand.WandLoreNames;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import at.koopro.wizardsandbeasts.wand.stat.WandLength;
 import at.koopro.wizardsandbeasts.wand.stat.WandWood;
+import at.koopro.wizardsandbeasts.spell.cast.WandCastSessions;
 import at.koopro.wizardsandbeasts.spell.cast.WandCastTiming;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.spell.beam.WandBeamChannelLogic;
@@ -40,6 +41,14 @@ import java.util.function.Consumer;
 import at.koopro.wizardsandbeasts.registry.WandItemRegistry;
 
 public class WandItem extends GeoItemBase {
+
+    /**
+     * How long a single wand hold may run before vanilla force-releases it. Named because
+     * {@link at.koopro.wizardsandbeasts.spell.cast.WandCastSessions} bounds a cast session by exactly
+     * this, and the two must not be able to drift apart.
+     */
+    public static final int USE_DURATION_TICKS = 72000;
+
     public WandItem(Properties properties) {
         super(properties.stacksTo(1));
     }
@@ -84,21 +93,28 @@ public class WandItem extends GeoItemBase {
             if (master.isEmpty()) {
                 float score = WandResonanceSystem.computeResonance(player, stack, level.registryAccess());
                 WandResonanceSystem.applyResonance(player, stack, score, level.registryAccess());
-                return InteractionResult.SUCCESS;
-            }
-            if (master.get().equals(player.getUUID())) {
-                // Spell system (future): dispatch cast event from here when not using beam channel.
-            } else {
+                // Falls through to startUsingItem rather than returning here. The client runs this same
+                // method with the server branch skipped, so an early return made the client believe it
+                // was holding a wand the server did not think was in use at all — the exact client/server
+                // divergence the cast session exists to rule out. Holding an unbonded wand is harmless:
+                // the beam tick refuses it (isWandBondedTo) and the release still reports WAND_NOT_BONDED.
+            } else if (!master.get().equals(player.getUUID())) {
                 player.displayClientMessage(Component.translatable("wandcraft.resonance.notYourWand"), true);
             }
         }
         player.startUsingItem(hand);
+        if (!level.isClientSide() && player instanceof ServerPlayer sp) {
+            // The hold has begun on the server. This is the only place a cast session is opened, so a
+            // release packet that does not correspond to a hold the server itself saw start has nothing
+            // to land on.
+            WandCastSessions.begin(sp, WandCastSessions.gameTickOf(sp));
+        }
         return InteractionResult.CONSUME;
     }
 
     @Override
     public int getUseDuration(ItemStack stack, LivingEntity entity) {
-        return 72000;
+        return USE_DURATION_TICKS;
     }
 
     @Override
@@ -111,6 +127,34 @@ public class WandItem extends GeoItemBase {
         super.onUseTick(level, entity, stack, remainingUseDuration);
         if (!level.isClientSide() && entity instanceof ServerPlayer sp) {
             WandBeamChannelLogic.tick(sp, stack);
+        }
+    }
+
+    /**
+     * Every way a hold can end <em>without</em> a release, funnelled to the same teardown.
+     *
+     * <p>{@code releaseUsing} is not the only exit from a wand hold, and it used to be the only one
+     * wired up. Vanilla's {@code LivingEntity.updatingUsingItem} compares the stack in hand against
+     * the one being used and, when they differ, calls {@code stopUsingItem()} — which never reaches
+     * {@code releaseUsing}. Switching hotbar slot mid-channel therefore ended the use with the beam
+     * session still open on the server: no {@code sendEnd} went out, and the client's beam entity
+     * has no timeout of its own, so the beam hung in the world until something else happened to
+     * clear it. Dropping the wand or having it moved out of the hand by a hopper is the same path.
+     *
+     * <p>Only the beam channel is torn down here. The cast session is deliberately left alone: the
+     * ordinary release also passes through {@code stopUsingItem()} (at the tail of
+     * {@code releaseUsingItem()}), and the client's cast packet arrives <em>after</em> it, so
+     * aborting the session here would refuse every cast with {@code NO_CAST_SESSION}. A hold that
+     * ends this way leaves a session that no release will ever be offered to, and it expires on its
+     * own at {@link WandCastSessions#MAX_SESSION_TICKS}.
+     *
+     * <p>Idempotent: {@code endChannel} returns immediately when there is no session, which is the
+     * case on the normal path where {@code releaseUsing} has already run.
+     */
+    @Override
+    public void onStopUsing(ItemStack stack, LivingEntity entity, int count) {
+        if (!entity.level().isClientSide() && entity instanceof ServerPlayer sp) {
+            WandBeamChannelLogic.endChannel(sp);
         }
     }
 

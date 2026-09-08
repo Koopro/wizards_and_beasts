@@ -129,9 +129,18 @@ public class WizardingCauldronBlock extends BaseEntityBlock {
         return createTickerHelper(type, ModBlockEntities.CAULDRON.get(), CauldronBlockEntity::serverTick);
     }
 
+    /**
+     * The pot is drawn by GeckoLib, not by a block model — same arrangement as the tents.
+     *
+     * <p>The blockstate still points at a JSON model and that model is still generated, because it is
+     * what the block <em>item</em> shows in the inventory and what break and step particles sample. It
+     * is simply not what you see standing in front of a placed cauldron. The rig is what gives the pot
+     * an inside, and therefore what lets it read as empty; a single cuboid with a texture across its
+     * opening never could, whatever colour that opening was tinted.
+     */
     @Override
     protected @NonNull RenderShape getRenderShape(@NonNull BlockState state) {
-        return RenderShape.MODEL;
+        return RenderShape.INVISIBLE;
     }
 
     // -- interaction -----------------------------------------------------------------------------
@@ -462,25 +471,24 @@ public class WizardingCauldronBlock extends BaseEntityBlock {
         double cz = pos.getZ() + 0.5;
 
         switch (be.phase()) {
-            // The tinted face is the pot's OPENING, which a player standing beside a cauldron cannot
-            // see — they are looking at the metal sides. So the idle states need a signal that rises
-            // above the rim, or a filled pot and an empty one are identical from every angle a player
-            // actually stands at. These particles are that signal, and they are deliberately frequent
-            // enough to read at a glance rather than being an occasional flourish.
+            // These used to be the *only* way to tell a filled pot from an empty one, because the
+            // tinted face was the pot's opening and a player standing beside a cauldron is looking at
+            // its metal sides. They were tuned deliberately frequent to carry that load. The rig
+            // carries it now — the pot has an inside and the liquid is a real surface in it — so they
+            // are back to being a flourish, at roughly a third of the old rate.
             case IDLE -> {
                 if (!be.isFilled()) {
                     break;
                 }
                 boolean loaded = !be.isEmptyOfIngredients();
-                if (random.nextInt(loaded ? 4 : 6) == 0) {
+                if (random.nextInt(loaded ? 12 : 18) == 0) {
                     level.addParticle(ParticleTypes.SPLASH,
                             cx + (random.nextDouble() - 0.5) * 0.5, cy,
                             cz + (random.nextDouble() - 0.5) * 0.5, 0, 0, 0);
                 }
-                // Ingredients steeping get a slow green drift above the rim; plain water does not.
-                // That is the difference a player most needs to see, because it is the one that says
-                // "this pot is ready to start".
-                if (loaded && random.nextInt(6) == 0) {
+                // Ingredients steeping still get a slow green drift, because "ready to start" is worth
+                // reading from further away than the liquid's colour carries.
+                if (loaded && random.nextInt(10) == 0) {
                     level.addParticle(new at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions(
                                     at.koopro.wizardsandbeasts.registry.ModParticles.ARCANE_MOTE.get(),
                                     0xFF8FBF5A),

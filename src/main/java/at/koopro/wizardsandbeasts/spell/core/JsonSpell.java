@@ -139,11 +139,12 @@ public class JsonSpell extends Spell {
 
     /**
      * Resolves a requirement's prerequisite id to the registered spell's full id when the spell is
-     * already present, else falls back to the mod-namespaced form of the raw id. JSON spells register
-     * one-by-one during a reload sweep (each inits immediately), so a JSON→JSON prerequisite may not
-     * be registered yet when this spell builds its requirement — {@link SpellRequirement}'s id-string
-     * form resolves lazily at {@code isMet} time, so the requirement still enforces correctly instead
-     * of degrading to NONE on unfavorable load order.
+     * already present, else falls back to the mod-namespaced form of the raw id. The whole JSON slice
+     * is built before it is published ({@code Spells.replaceJsonSpells}), so a JSON→JSON prerequisite
+     * is <em>never</em> resolvable here — {@link SpellRequirement}'s id-string form resolves lazily at
+     * {@code isMet} time, so the requirement still enforces correctly instead of degrading to NONE.
+     * That was already true when spells registered one at a time and load order decided the answer;
+     * the difference now is that the fallback is taken consistently rather than by luck.
      */
     private static String resolvePrerequisiteId(String raw) {
         Spell resolved = Spells.byId(raw);

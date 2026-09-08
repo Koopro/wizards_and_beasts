@@ -7,9 +7,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
@@ -38,19 +40,18 @@ public class BroomPolishItem extends Item {
         super(properties);
     }
 
+    /** Long enough to read as work with a rag. Half the carve, because a tin is routine upkeep. */
+    public static final int POLISH_TICKS = 40;
+
     /**
-     * Services a broom held in the other hand.
+     * Starts servicing a broom held in the other hand.
      *
-     * <p>Deliberately only the other hand, not a scan of the inventory: which broom got the tin has
-     * to be something the player decided, and an inventory scan would pick one for them.
+     * <p>The tin is not spent here. Servicing is a rub rather than a click, so this only opens the
+     * channel; {@link #finishUsingItem} is what applies it, and re-checks everything first.
      */
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
-        ItemStack tin = player.getItemInHand(hand);
-        InteractionHand otherHand = hand == InteractionHand.MAIN_HAND
-                ? InteractionHand.OFF_HAND
-                : InteractionHand.MAIN_HAND;
-        ItemStack broom = player.getItemInHand(otherHand);
+        ItemStack broom = player.getItemInHand(otherHand(hand));
 
         if (!(broom.getItem() instanceof BroomItem)) {
             return InteractionResult.PASS;
@@ -59,10 +60,51 @@ public class BroomPolishItem extends Item {
             refuse(player, level);
             return InteractionResult.FAIL;
         }
-        if (!level.isClientSide()) {
-            polish(broom, tin, player, level);
+        // CONSUME rather than SUCCESS: SUCCESS swings the arm, and a swing at the start of a rub
+        // reads as the rub having already happened.
+        player.startUsingItem(hand);
+        return InteractionResult.CONSUME;
+    }
+
+    @Override
+    public int getUseDuration(ItemStack stack, LivingEntity entity) {
+        return POLISH_TICKS;
+    }
+
+    /** {@link ItemUseAnimation#NONE}: the rub is {@code ItemUsePosePass}'s, not one of vanilla's five. */
+    @Override
+    public ItemUseAnimation getUseAnimation(ItemStack stack) {
+        return ItemUseAnimation.NONE;
+    }
+
+    /**
+     * Applies the tin once the rub is finished.
+     *
+     * <p>Everything is re-checked rather than trusted from {@link #use}. The broom is in the other
+     * hand and the player has had {@value #POLISH_TICKS} ticks to swap it, stow it or fly it away,
+     * and a tin spent on a broom that is no longer there would be spent on nothing.
+     */
+    @Override
+    public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
+        if (level.isClientSide() || !(entity instanceof Player player)) {
+            return stack;
         }
-        return InteractionResult.SUCCESS;
+        ItemStack broom = player.getItemInHand(otherHand(player.getUsedItemHand()));
+        if (!(broom.getItem() instanceof BroomItem) || !serviceable(broom, level)) {
+            return stack;
+        }
+        polish(broom, stack, player, level);
+        return stack;
+    }
+
+    /**
+     * The hand that is not holding the tin.
+     *
+     * <p>Deliberately only the other hand, not a scan of the inventory: which broom got the tin has
+     * to be something the player decided, and an inventory scan would pick one for them.
+     */
+    private static InteractionHand otherHand(InteractionHand hand) {
+        return hand == InteractionHand.MAIN_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
     }
 
     /** Whether this broom would gain anything at all from a tin. */

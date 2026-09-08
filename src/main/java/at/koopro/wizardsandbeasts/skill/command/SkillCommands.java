@@ -287,10 +287,18 @@ public final class SkillCommands {
         }
 
         data.resetAll();
+        // Take back the spells the web taught, which the refund alone does not. Without this a respec
+        // refunds every point while leaving every spell learned: allocate a node, learn its spell,
+        // respec, allocate elsewhere, and repeat for the whole spell list at one fee each.
+        // revokeWebTaughtSpells only ever forgets spells the web itself granted and whose node is gone —
+        // a spell the player learned from a teacher, or one a still-allocated node re-asserts, is safe.
+        int forgotten = SkillSystemAPI.revokeWebTaughtSpells(player);
         SkillSystemAPI.reconcileDerivedEffects(player);
         PlayerStateSyncService.syncSkills(player);
         PlayerStateSyncService.syncAbilityGrants(player); // refund strips SKILL_NODE-source grants
-        ChatHelper.sendSuccess(player, "Skills respecced — all points refunded.");
+        ChatHelper.sendSuccess(player, forgotten > 0
+                ? "Skills respecced — all points refunded, " + forgotten + " web-taught spell(s) forgotten."
+                : "Skills respecced — all points refunded.");
         return 1;
     }
 
@@ -308,10 +316,15 @@ public final class SkillCommands {
         }
 
         data.resetSkill(skillId);
+        // Same reason as the full respec: resetting one node has to take back that node's lesson too.
+        int forgotten = SkillSystemAPI.revokeWebTaughtSpells(player);
         SkillSystemAPI.reconcileDerivedEffects(player);
         PlayerStateSyncService.syncSkills(player);
         PlayerStateSyncService.syncAbilityGrants(player); // refund strips SKILL_NODE-source grants
-        ChatHelper.sendSuccess(player, "Reset " + skill.getDisplayName() + ". Points refunded.");
+        ChatHelper.sendSuccess(player, forgotten > 0
+                ? "Reset " + skill.getDisplayName() + ". Points refunded, "
+                        + forgotten + " web-taught spell(s) forgotten."
+                : "Reset " + skill.getDisplayName() + ". Points refunded.");
         return 1;
     }
 

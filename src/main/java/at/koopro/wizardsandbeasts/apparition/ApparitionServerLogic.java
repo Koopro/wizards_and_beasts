@@ -259,6 +259,15 @@ public final class ApparitionServerLogic {
         Vec3 origin = charge.startPosition();
         Vec3 destination = charge.destination();
 
+        // An attempt nobody ever let go of is not a botched jump; it is a jump that was never made. It used
+        // to run the ladder and land on CATASTROPHIC — the harshest rung in the ability, awarded for doing
+        // nothing — which made walking away from a charge the single most expensive thing a wizard could do
+        // with one. Now it collapses: no arrival, no wound, and the sputter cooldown for the wasted effort.
+        if (ApparitionWindow.isForcedDischarge(missTicks)) {
+            collapseAttempt(caster, charge);
+            return;
+        }
+
         // An attempt that never found a viable spot simply never happened: nothing to arrive at, nothing to
         // be torn by. Invalid targets do not lock, so they cannot splinch you either.
         if (destination == null) {
@@ -543,6 +552,28 @@ public final class ApparitionServerLogic {
     private static void failAttempt(ServerPlayer player, String reasonKey) {
         fail(player, reasonKey);
         PlayerAbilityHelper.setApparitionCooldownTicks(player, FAILED_ATTEMPT_COOLDOWN_TICKS);
+    }
+
+    /**
+     * A charge held past its hard cap and never released. Nothing arrives and nothing tears.
+     *
+     * <p>Deliberately not a splinch. Splinching is what a <em>botched jump</em> does to a body, and the
+     * three Ds have to have been attempted for one to be botched — a release, however badly timed, is an
+     * attempt. Standing there until the magic gutters out is a wizard who lost their nerve, and canon has
+     * nothing to say about that beyond it not working.
+     *
+     * <p>Not free either: the cooldown is charged, so a player cannot use an unreleased hold as a way to
+     * keep an attempt permanently available, and the exhaustion is charged because the effort was spent
+     * whether or not it went anywhere.
+     */
+    private static void collapseAttempt(ServerPlayer player, ApparitionCharge charge) {
+        player.causeFoodExhaustion(charge.tier().exhaustion());
+        PlayerAbilityHelper.setApparitionCooldownTicks(player, FAILED_ATTEMPT_COOLDOWN_TICKS);
+        fail(player, "apparition.wizards_and_beasts.fail.collapsed");
+        // Same teardown an abort does: without an IDLE phase the motes and the destination ring hang on
+        // every client watching until something else happens to this player.
+        ApparitionBroadcast.get().onPhaseChange(player, charge.tier(), ApparitionPhase.IDLE,
+                charge.elapsed(), charge.windowOpen(), charge.windowClose());
     }
 
     /** A refusal that resolves on its own in a moment; see {@link #fail}. */

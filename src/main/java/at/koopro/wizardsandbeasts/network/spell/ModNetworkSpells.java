@@ -48,6 +48,14 @@ public final class ModNetworkSpells {
                 SpellLeviosaAdjustC2SPayload.STREAM_CODEC,
                 SpellLeviosaAdjustC2SPayload::handle);
 
+        // Before every other spell payload in this method purely for readability: it is the one that
+        // has to arrive for any of the others to mean anything, since a spell id on the wire is a key
+        // into the table this payload carries.
+        registrar.playToClient(
+                SpellDefinitionsSyncS2CPayload.TYPE,
+                SpellDefinitionsSyncS2CPayload.STREAM_CODEC,
+                at.koopro.wizardsandbeasts.client.spell.network.ClientSpellDefinitions::handle);
+
         registrar.playToClient(
                 SpellDataSyncS2CPayload.TYPE,
                 SpellDataSyncS2CPayload.STREAM_CODEC,

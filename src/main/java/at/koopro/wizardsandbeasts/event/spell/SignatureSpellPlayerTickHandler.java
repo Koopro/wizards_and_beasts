@@ -5,9 +5,7 @@ import at.koopro.wizardsandbeasts.spell.imperio.ImperioControlState;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.spell.imperio.ImperioServerLogic;
-import at.koopro.wizardsandbeasts.stats.PlayerStat;
-import at.koopro.wizardsandbeasts.stats.PlayerStatsAPI;
-import at.koopro.wizardsandbeasts.stats.StatEffects;
+import at.koopro.wizardsandbeasts.stats.StatResistModifiers;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -32,12 +30,17 @@ public final class SignatureSpellPlayerTickHandler {
         // ceiling and the rate scale with the trait, so training Willpower widens the pool and
         // refills it faster rather than only helping on the roll itself.
         ImperioControlState st = player.getData(ModAttachments.IMPERIO_CONTROL_STATE.get());
-        int willTrait = PlayerStatsAPI.getStat(player, PlayerStat.WILLPOWER);
-        float maxResolve = StatEffects.maxResolve(willTrait);
+        float maxResolve = StatResistModifiers.maxResolve(player);
         float resolve = player.getData(ModAttachments.RESOLVE.get());
-        if (!st.isControlled() && resolve < maxResolve) {
+        if (resolve > maxResolve) {
+            // The ceiling moves under a stored pool — a lowered WILLPOWER, a heritage re-roll, or a save
+            // written when the pool was a flat 0-100 — and this tick only ever clamped upward, so a charge
+            // above the ceiling stayed there for the life of the character and made every resist roll read
+            // as better than full. Settling it costs one write, once.
+            player.setData(ModAttachments.RESOLVE.get(), maxResolve);
+        } else if (!st.isControlled() && resolve < maxResolve) {
             player.setData(ModAttachments.RESOLVE.get(),
-                    Math.min(maxResolve, resolve + StatEffects.resolveRegenPerTick(willTrait)));
+                    Math.min(maxResolve, resolve + StatResistModifiers.resolveRegenPerTick(player)));
         }
 
         float mental = player.getData(ModAttachments.MENTAL_STABILITY.get());

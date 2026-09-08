@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.ability.grant;
 
 import at.koopro.wizardsandbeasts.ability.AbilityIds;
+import at.koopro.wizardsandbeasts.heritage.HeritageTransformService;
 import at.koopro.wizardsandbeasts.ability.AnimagusAbilityService;
 import at.koopro.wizardsandbeasts.ability.AnimagusTransformService;
 import at.koopro.wizardsandbeasts.apparition.ApparitionServerLogic;
@@ -59,6 +60,10 @@ public final class PlayerStatusAbilityGrantSource implements AbilityGrantSource 
             out.add(AbilityIds.OBSCURUS_SURGE.toString());
             out.add(AbilityIds.OBSCURUS_GRASP.toString());
         }
+        // The plain two-form heritages. Gated on the same check the service enforces, so the wheel never
+        // shows a button that would be refused: a Quarter-Veela or a Dhampir carries no
+        // "transformation" tag and gets nothing here.
+        HeritageTransformService.grantsFor(player, out);
         return out;
     }
 }

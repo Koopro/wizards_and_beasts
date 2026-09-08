@@ -46,10 +46,8 @@ public final class LegilimencyServerLogic {
             ServerPlayer targetPlayer = (ServerPlayer) target;
             // Occlumency training decides whether a defence exists at all; Willpower decides how well
             // it holds. Scaling rather than adding keeps an untrained Occlumens at zero.
-            int willTrait = at.koopro.wizardsandbeasts.stats.PlayerStatsAPI.getStat(
-                    targetPlayer, at.koopro.wizardsandbeasts.stats.PlayerStat.WILLPOWER);
             float resistChance = PlayerAbilityHelper.getOcclumencyLevel(targetPlayer) * 0.8f
-                    * at.koopro.wizardsandbeasts.stats.StatEffects.resistScalar(willTrait);
+                    * at.koopro.wizardsandbeasts.stats.StatResistModifiers.resistScalar(targetPlayer);
             if (targetPlayer.getRandom().nextFloat() < resistChance) {
                 PlayerFeedback.toast(targetPlayer, NoticeKind.WARN,
                         Component.translatable(L + "defended.title"),

@@ -4,6 +4,7 @@ import at.koopro.wizardsandbeasts.chocolate.ChocolateFrog;
 import at.koopro.wizardsandbeasts.registry.ModEntities;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -34,6 +35,20 @@ public class ChocolateFrogEntity extends net.minecraft.world.entity.item.ItemEnt
     private static final int HOP_INTERVAL = 11;
     /** Ticks before it can be picked up, so it clears the thrower's feet first. */
     private static final int HEAD_START_TICKS = 12;
+    /** Fraction of the way the frog turns toward its heading each tick. */
+    private static final float TURN_RATE = 0.45f;
+    /** Below this horizontal speed the frog is not going anywhere, so it keeps the heading it had. */
+    private static final double TURN_THRESHOLD_SQ = 1.0E-4;
+
+    /**
+     * Which way the frog is pointing, purely for the renderer.
+     *
+     * <p>Not synced, and it does not need to be: it is derived from {@code getDeltaMovement}, which
+     * every tracking client already has, and both sides run this same tick. A frog that hops off
+     * screen and back on picks its heading up again from its own motion.
+     */
+    private float facingYaw;
+    private float lastFacingYaw;
 
     public ChocolateFrogEntity(EntityType<? extends net.minecraft.world.entity.item.ItemEntity> type,
                                Level level) {
@@ -53,10 +68,27 @@ public class ChocolateFrogEntity extends net.minecraft.world.entity.item.ItemEnt
     @Override
     public void tick() {
         super.tick();
+        updateFacing();
         if (level().isClientSide() || !onGround() || tickCount % HOP_INTERVAL != 0) {
             return;
         }
         hop();
+    }
+
+    /** Turns the frog toward the way it is travelling, easing rather than snapping. */
+    private void updateFacing() {
+        lastFacingYaw = facingYaw;
+        Vec3 motion = getDeltaMovement();
+        if (motion.x * motion.x + motion.z * motion.z <= TURN_THRESHOLD_SQ) {
+            return;
+        }
+        float target = (float) (-Mth.atan2(motion.x, motion.z) * (180.0 / Math.PI));
+        facingYaw = Mth.rotLerp(TURN_RATE, facingYaw, target);
+    }
+
+    /** Render-side heading in degrees, interpolated across the frame. */
+    public float renderYaw(float partialTick) {
+        return Mth.rotLerp(partialTick, lastFacingYaw, facingYaw);
     }
 
     /** One bound, in a random direction. */

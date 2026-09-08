@@ -29,7 +29,20 @@ public final class SpellRejectCodes {
     public static final String COOLDOWN_ACTIVE = "cooldown_active";
     public static final String COLLAPSE_INSTABILITY_FIZZLE = "collapse_instability_fizzle";
     public static final String OBSCURIAL_INSTABILITY_FIZZLE = "obscurial_instability_fizzle";
+    /**
+     * The open wand hold's single release token was already spent — a duplicate release packet, or the
+     * client's own release arriving after a server-driven one (Avada ending the channel on the kill).
+     */
     public static final String DUPLICATE_RELEASE_GUARD = "duplicate_release_guard";
+    /**
+     * A release arrived with no wand hold open on the server: nothing was ever cast, or the session was
+     * aborted by death, respawn, a dimension change or an admin reset before the packet landed.
+     */
+    public static final String NO_CAST_SESSION = "no_cast_session";
+    /** A release arrived for a hold older than the wand's declared use duration. See {@code WandCastSessions}. */
+    public static final String CAST_SESSION_EXPIRED = "cast_session_expired";
+    /** A release arrived from a dead player. Vanilla ends the hold client-side on death; the cast must not land. */
+    public static final String CASTER_NOT_ALIVE = "caster_not_alive";
     /** Held wand has no bonded master (resonance never matched). */
     public static final String WAND_NOT_BONDED = "wand_not_bonded";
     /** Held wand is bonded to another player. */
@@ -62,8 +75,19 @@ public final class SpellRejectCodes {
      */
     public static final String SUFFIX_TYPE_CANNOT_USE_WAND = "_type_cannot_use_wand";
     public static final String SUFFIX_INVALID_SLOT = "_invalid_slot";
+    /**
+     * A werewolf whose body is not currently theirs. Refused at the guard rather than per-spell so that
+     * <em>every</em> wand packet is covered by one check — see {@code heritage.werewolf}.
+     */
+    public static final String SUFFIX_FERAL = "_feral";
 
     public static final String ASSIGN_UNKNOWN_SPELL = "assign_unknown_spell";
+    /**
+     * A slot was asked to hold a {@code COMING_SOON} spell. Its own code rather than a reuse of
+     * {@link #SPELL_NOT_IMPLEMENTED} so the counters distinguish "tried to arm one" from "tried to
+     * cast one" — the first is a UI that offered a dead pick, the second is only ever a stale client.
+     */
+    public static final String ASSIGN_NOT_IMPLEMENTED = "assign_not_implemented";
     public static final String ASSIGN_UNLEARNED_SPELL = "assign_unlearned_spell";
     public static final String ASSIGN_OBSCURIAL_ABILITY = "assign_obscurial_ability";
     public static final String ASSIGN_TYPE_RESTRICTED_SPELL = "assign_type_restricted_spell";
@@ -94,6 +118,9 @@ public final class SpellRejectCodes {
             COLLAPSE_INSTABILITY_FIZZLE,
             OBSCURIAL_INSTABILITY_FIZZLE,
             DUPLICATE_RELEASE_GUARD,
+            NO_CAST_SESSION,
+            CAST_SESSION_EXPIRED,
+            CASTER_NOT_ALIVE,
             WAND_NOT_BONDED,
             WAND_WRONG_MASTER,
             LANGLOCKED,
@@ -139,6 +166,7 @@ public final class SpellRejectCodes {
             Map.entry(CAST_FAILED, "wandcraft.cast.reject.cast_failed"),
 
             Map.entry(ASSIGN_UNKNOWN_SPELL, "wandcraft.assign.reject.unknown_spell"),
+            Map.entry(ASSIGN_NOT_IMPLEMENTED, "wandcraft.assign.reject.not_implemented"),
             Map.entry(ASSIGN_UNLEARNED_SPELL, "wandcraft.assign.reject.not_known"),
             Map.entry(ASSIGN_OBSCURIAL_ABILITY, "wandcraft.assign.reject.obscurial_ability"),
             Map.entry(ASSIGN_TYPE_RESTRICTED_SPELL, "wandcraft.assign.reject.heritage_restricted"),
@@ -161,7 +189,8 @@ public final class SpellRejectCodes {
      */
     private static final Map<String, String> SUFFIX_MESSAGE_KEYS = Map.of(
             SUFFIX_TYPE_CANNOT_USE_WAND, "wandcraft.cast.reject.type_cannot_use_wand",
-            SUFFIX_INVALID_SLOT, "wandcraft.cast.reject.invalid_slot");
+            SUFFIX_INVALID_SLOT, "wandcraft.cast.reject.invalid_slot",
+            SUFFIX_FERAL, "wandcraft.cast.reject.feral");
 
     /**
      * Codes whose player-facing text is written at the reject site because it is composed from live
@@ -174,7 +203,12 @@ public final class SpellRejectCodes {
      * Codes never shown to a player at all: desync guards and impossible-state checks. They are
      * diagnostics, and a player who reads "duplicate release guard" has learned nothing.
      */
-    private static final Set<String> INTERNAL_ONLY = Set.of(NOT_SERVER_LEVEL, DUPLICATE_RELEASE_GUARD);
+    private static final Set<String> INTERNAL_ONLY = Set.of(
+            NOT_SERVER_LEVEL,
+            DUPLICATE_RELEASE_GUARD,
+            NO_CAST_SESSION,
+            CAST_SESSION_EXPIRED,
+            CASTER_NOT_ALIVE);
 
     private SpellRejectCodes() {}
 
@@ -235,7 +269,9 @@ public final class SpellRejectCodes {
      */
     public static String summaryBucket(String storedKey) {
         String base = baseReason(storedKey);
-        if (base.endsWith("_type_cannot_use_wand") || base.endsWith("_invalid_slot")) {
+        if (base.endsWith(SUFFIX_TYPE_CANNOT_USE_WAND)
+                || base.endsWith(SUFFIX_INVALID_SLOT)
+                || base.endsWith(SUFFIX_FERAL)) {
             return "guard_*";
         }
         if (base.startsWith("assign_")) {

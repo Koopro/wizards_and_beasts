@@ -8,6 +8,8 @@ import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
+import at.koopro.wizardsandbeasts.form.constraint.FormConstraint;
+import at.koopro.wizardsandbeasts.form.constraint.FormConstraints;
 import net.minecraft.server.level.ServerPlayer;
 import org.jspecify.annotations.NullMarked;
 
@@ -34,6 +36,17 @@ public final class SpellNetworkGuards {
         HeritageVariant subtype = player.getData(ModAttachments.HERITAGE_DATA.get()).getSelectedHeritageVariant();
         if (type == null || !type.canUseWand() || (subtype != null && subtype.hasTag("no_wand"))) {
             refuse(player, data, rejectReasonPrefix + SpellRejectCodes.SUFFIX_TYPE_CANNOT_USE_WAND);
+            return false;
+        }
+        // A beast holds no wand. Enforced here rather than in the cast pipeline on purpose: this guard
+        // is the one thing every wand packet passes, so one check covers casting, assigning, selecting
+        // and the Leviosa adjustment alike, and a spell added tomorrow is covered without being asked.
+        //
+        // Asked of the shared constraint layer rather than of the werewolf, which is what closed the
+        // gap this used to have: the Animagus wall cancelled right-clicks but never touched the cast
+        // packet, so a wizard in a cat's body could still cast from the spell wheel.
+        if (FormConstraints.denies(player, FormConstraint.NO_SPELLCASTING)) {
+            refuse(player, data, rejectReasonPrefix + SpellRejectCodes.SUFFIX_FERAL);
             return false;
         }
         return true;

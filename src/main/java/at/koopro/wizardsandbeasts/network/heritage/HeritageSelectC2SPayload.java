@@ -1,12 +1,10 @@
 package at.koopro.wizardsandbeasts.network.heritage;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
-import at.koopro.wizardsandbeasts.stats.PlayerStatsAPI;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.event.heritage.HeritageEvents;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
-import at.koopro.wizardsandbeasts.form.FormSystemAPI;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
@@ -82,34 +80,12 @@ public record HeritageSelectC2SPayload(String typeId, String subtypeId) implemen
                 return;
             }
 
-            // Set and lock
-            data.setSelectedHeritage(heritage);
-            data.setSelectedHeritageVariant(variant);
-            data.setLocked(true);
             data.resetProfessionProgress();
             data.addProfessionPoints(3);
 
-            // Roll initial Power for the chosen Heritage variant (idempotent — skips if stats already initialised).
-            PlayerStatsAPI.initializeStatsForNewPlayer(player, variant, player.getRandom());
-
-            // Apply stat modifiers
-            HeritageAPI.applyStats(player);
-
-            // Give them the body that goes with the heritage. Without this the selection set a
-            // heritage, a variant and a stat spread and left activeFormId null — so the size profile
-            // never applied, no form render data was ever produced, and every heritage looked
-            // identical to every other. Ten heritages of authored proportion were unreachable
-            // outside the admin `/wandb player appearance form` command.
-            FormSystemAPI.resetToDefault(player);
-
-            // Sync back to client
-            HeritageDataSyncS2CPayload.syncToPlayer(player, false);
-            // ...and to everyone who can see them. The line above reaches only this player, which is
-            // enough for their own HUD and useless for rendering: a visible heritage is one other
-            // people can see.
-            HeritageIdentitySyncS2CPayload.syncToTracking(player);
-            // Committing a heritage sets the variant tags that back HERITAGE-source ability grants.
-            at.koopro.wizardsandbeasts.sync.PlayerStateSyncService.syncAbilityGrants(player);
+            // Lock, roll, re-body, re-sync. Every step of that used to be written out here, which is how
+            // the two admin routes into the same change ended up each doing a different subset of it.
+            HeritageAPI.commit(player, heritage, variant);
 
             // Fire event
             NeoForge.EVENT_BUS.post(new HeritageEvents.PlayerHeritageSelectedEvent(player, heritage, variant));

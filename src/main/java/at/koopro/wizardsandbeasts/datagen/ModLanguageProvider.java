@@ -263,6 +263,12 @@ public class ModLanguageProvider extends LanguageProvider {
 
     private void debugEditorKeys() {
         // Debug editor keybindings
+        add("key.categories.wizards_and_beasts.wardrobe", "Wizards & Beasts Wardrobe");
+        add("key.wizards_and_beasts.hood_toggle", "Toggle Hood");
+        add("message.wizards_and_beasts.hood_up", "Hood up.");
+        add("message.wizards_and_beasts.hood_down", "Hood down.");
+        add("tooltip.wizards_and_beasts.hood_up", "Hood up — press the hood key to lower it.");
+        add("tooltip.wizards_and_beasts.hood_down", "Hood down — press the hood key to raise it.");
         add("key.categories.wizards_and_beasts.debug", "Wizards & Beasts Debug");
         add("key.wizards_and_beasts.debug_toggle", "Toggle Model Debug Editor");
         add("key.wizards_and_beasts.debug_export", "Export Debug Transforms");
@@ -359,14 +365,23 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.wizards_and_beasts.famous_wizard_card", "Famous Wizard Card");
         add("item.wizards_and_beasts.famous_wizard_card.desc", "Collectible card featuring famous magical figures.");
         add("item.wizards_and_beasts.famous_wizard_card.blank", "Blank card");
-        add("item.wizards_and_beasts.famous_wizard_card.variant.albus_dumbledore", "Albus Dumbledore");
-        add("item.wizards_and_beasts.famous_wizard_card.variant.harry_potter", "Harry Potter");
-        add("item.wizards_and_beasts.famous_wizard_card.variant.gilderoy_lockhart", "Gilderoy Lockhart");
-        add("item.wizards_and_beasts.famous_wizard_card.variant.merlin", "Merlin");
-        add("item.wizards_and_beasts.famous_wizard_card.variant.circe", "Circe");
-        add("item.wizards_and_beasts.famous_wizard_card.variant.paracelsus", "Paracelsus");
-        add("item.wizards_and_beasts.famous_wizard_card.variant.cliodna", "Cliodna");
-        add("item.wizards_and_beasts.famous_wizard_card.variant.morgana_le_fay", "Morgana le Fay");
+        add("item.wizards_and_beasts.famous_wizard_card.number", "%s · No. %s of %s");
+        for (at.koopro.wizardsandbeasts.card.CardRarity rarity
+                : at.koopro.wizardsandbeasts.card.CardRarity.values()) {
+            add(rarity.translationKey(), switch (rarity) {
+                case COMMON -> "Common";
+                case UNCOMMON -> "Uncommon";
+                case RARE -> "Rare";
+                case LEGENDARY -> "Legendary";
+            });
+        }
+        // Generated from the roster rather than transcribed: a wizard added to WizardCards without
+        // a name here would otherwise ship as a raw translation key on the card.
+        for (at.koopro.wizardsandbeasts.card.WizardCard card
+                : at.koopro.wizardsandbeasts.card.WizardCards.ALL) {
+            add(card.nameKey(), card.name());
+            add(card.achievementKey(), card.achievement());
+        }
         add("item.wizards_and_beasts.bertie_botts_every_flavour_beans", "Bertie Bott's Every Flavour Beans");
         add("item.wizards_and_beasts.bertie_botts_every_flavour_beans.desc", "Candy beans with wildly unpredictable flavors.");
         add("item.wizards_and_beasts.droobles_best_blowing_gum", "Drooble's Best Blowing Gum");

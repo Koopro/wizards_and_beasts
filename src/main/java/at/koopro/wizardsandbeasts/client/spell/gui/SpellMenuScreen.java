@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.client.spell.gui;
 
-import at.koopro.wizardsandbeasts.client.ModTextures;
+import at.koopro.wizardsandbeasts.client.hud.WandHudSprites;
 import at.koopro.wizardsandbeasts.client.gui.WizardsAndBeastsUiTokens;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
@@ -257,6 +257,17 @@ public class SpellMenuScreen extends Screen {
     }
 
     private void assign(int slot, @Nullable String spellId) {
+        // The one choke point every assignment passes through — click-to-slot and drag-and-drop
+        // both land here — so refusing a placeholder spell once covers both. Silent: the row it came
+        // from is already drawn faded and tagged, so there is nothing left to explain. The server
+        // refuses the same assign independently; this only keeps the local mirror from showing a
+        // slot filled for the moment before the sync packet undoes it.
+        if (spellId != null) {
+            Spell spell = Spells.byId(spellId);
+            if (spell != null && !spell.isImplemented()) {
+                return;
+            }
+        }
         ClientSpellDataState.get().setLoadoutSpell(slot, spellId);
         // The server reads a blank id as "clear this slot" — see SpellAssignC2SPayload.handle. That
         // branch existed from the start and nothing in the UI had ever reached it.
@@ -288,6 +299,12 @@ public class SpellMenuScreen extends Screen {
                 Spell spell = spellEntries.get(row).spell();
                 if (spell != null) {
                     selectedSpellId = spell.getId();
+                    if (!spell.isImplemented()) {
+                        // Selectable so the detail panel can still be read, but never draggable:
+                        // a ghost that can only ever be dropped onto a refusal is a worse answer
+                        // than not picking it up.
+                        return true;
+                    }
                     pressedSpellId = spell.getId();
                     pressX = mouseX;
                     pressY = mouseY;
@@ -467,10 +484,8 @@ public class SpellMenuScreen extends Screen {
                 if (spell != null) {
                     label = Component.literal(GuiText.resolve(spell.getDisplayName()));
                 }
-                Identifier icon = ModTextures.resolveWandHudSpellIcon(mc.getResourceManager(), spellId);
-                graphics.blit(RenderPipelines.GUI_TEXTURED, icon,
-                        sx + (size - iconSize) / 2, sy + (size - iconSize) / 2,
-                        0f, 0f, iconSize, iconSize, 92, 92, 92, 92);
+                graphics.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.spellIcon(spellId),
+                        sx + (size - iconSize) / 2, sy + (size - iconSize) / 2, iconSize, iconSize);
                 SpellSigilRenderer.proficiencyPips(graphics, sx, sy, size,
                         proficiencyPipsFor(spellId));
             }
@@ -547,10 +562,9 @@ public class SpellMenuScreen extends Screen {
         Minecraft mc = Minecraft.getInstance();
         int accent = accentOf(draggingSpellId);
         SpellSigilRenderer.dragThread(graphics, dragOriginX, dragOriginY, mouseX, mouseY, accent);
-        Identifier icon = ModTextures.resolveWandHudSpellIcon(mc.getResourceManager(), draggingSpellId);
         int s = LIST_ICON_SIZE + 4;
-        graphics.blit(RenderPipelines.GUI_TEXTURED, icon, mouseX - s / 2, mouseY - s / 2,
-                0f, 0f, s, s, 92, 92, 92, 92);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.spellIcon(draggingSpellId),
+                mouseX - s / 2, mouseY - s / 2, s, s);
     }
 
     @Override

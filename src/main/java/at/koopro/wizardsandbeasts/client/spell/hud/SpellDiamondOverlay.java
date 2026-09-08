@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.client.spell.hud;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.client.ModTextures;
+import at.koopro.wizardsandbeasts.client.hud.WandHudSprites;
 import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellDataState;
 import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellRejectFeedback;
 import at.koopro.wizardsandbeasts.client.spell.ui.SpellCooldownDisplay;
@@ -59,19 +59,8 @@ public class SpellDiamondOverlay {
         int hudX = screenWidth - HUD_ON_SCREEN_SIZE - EDGE_MARGIN;
         int hudY = screenHeight - HUD_ON_SCREEN_SIZE - EDGE_MARGIN;
 
-        graphics.blit(
-                RenderPipelines.GUI_TEXTURED,
-                ModTextures.WAND_HUD_BG,
-                hudX,
-                hudY,
-                0.0F,
-                0.0F,
-                HUD_ON_SCREEN_SIZE,
-                HUD_ON_SCREEN_SIZE,
-                HUD_TEX_SIZE,
-                HUD_TEX_SIZE,
-                HUD_TEX_SIZE,
-                HUD_TEX_SIZE);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.PLATE,
+                hudX, hudY, HUD_ON_SCREEN_SIZE, HUD_ON_SCREEN_SIZE);
 
         for (int i = 0; i < 4; i++) {
             String spellId = data.getLoadoutSpell(i);
@@ -79,19 +68,8 @@ public class SpellDiamondOverlay {
                 int iconSize = scalePx(ICON_TEX_SIZE);
                 int iconX = hudX + scalePx(SLOT_CENTERS[i][0]) - iconSize / 2;
                 int iconY = hudY + scalePx(SLOT_CENTERS[i][1]) - iconSize / 2;
-                graphics.blit(
-                        RenderPipelines.GUI_TEXTURED,
-                        ModTextures.resolveWandHudSpellIcon(mc.getResourceManager(), spellId),
-                        iconX,
-                        iconY,
-                        0.0F,
-                        0.0F,
-                        iconSize,
-                        iconSize,
-                        ICON_TEX_SIZE,
-                        ICON_TEX_SIZE,
-                        ICON_TEX_SIZE,
-                        ICON_TEX_SIZE);
+                graphics.blitSprite(RenderPipelines.GUI_TEXTURED,
+                        WandHudSprites.spellIcon(spellId), iconX, iconY, iconSize, iconSize);
             }
         }
 
@@ -121,33 +99,11 @@ public class SpellDiamondOverlay {
         }
 
         int activeSlot = Mth.clamp(data.getActiveSlot(), 0, 3);
-        graphics.blit(
-                RenderPipelines.GUI_TEXTURED,
-                ModTextures.WAND_HUD_OVERLAY,
-                hudX,
-                hudY,
-                0.0F,
-                0.0F,
-                HUD_ON_SCREEN_SIZE,
-                HUD_ON_SCREEN_SIZE,
-                HUD_TEX_SIZE,
-                HUD_TEX_SIZE,
-                HUD_TEX_SIZE,
-                HUD_TEX_SIZE);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.TRIM,
+                hudX, hudY, HUD_ON_SCREEN_SIZE, HUD_ON_SCREEN_SIZE);
 
-        graphics.blit(
-                RenderPipelines.GUI_TEXTURED,
-                ModTextures.resolveWandHudSelectedOverlay(mc.getResourceManager(), activeSlot),
-                hudX,
-                hudY,
-                0.0F,
-                0.0F,
-                HUD_ON_SCREEN_SIZE,
-                HUD_ON_SCREEN_SIZE,
-                HUD_TEX_SIZE,
-                HUD_TEX_SIZE,
-                HUD_TEX_SIZE,
-                HUD_TEX_SIZE);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.selectedTrim(activeSlot),
+                hudX, hudY, HUD_ON_SCREEN_SIZE, HUD_ON_SCREEN_SIZE);
 
         // GCD ring: clockwise sweep around the outer diamond perimeter, drawn above gold trim.
         // Appears for GLOBAL_COOLDOWN_TICKS (5 ticks = 0.25s) after every successful cast.

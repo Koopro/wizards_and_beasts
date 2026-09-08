@@ -104,6 +104,25 @@ public record PlayerStatsData(
         return with(PlayerStat.KNOWLEDGE, newKnowledge);
     }
 
+    /**
+     * Replaces the heritage-derived half of the block — the POWER roll, the prodigy flag and the spent
+     * growth allowance — and leaves everything a player <em>earned</em> exactly where it is.
+     *
+     * <p>Its reason for existing is that changing heritage and re-rolling Power are not the same act as
+     * starting a character. Both paths used to be expressed as "wipe the block, then run the new-player
+     * initialiser", which also took PRECISION, REFLEXES, WILLPOWER and all four training accumulators with
+     * it — hundreds of hours of practice deleted by a command named {@code reroll_power}.
+     *
+     * <p>{@code powerGrowthAccumulated} resets because the allowance is spent against a band, and the band
+     * is what just changed; carrying it over would hand a player a Squib's spent growth on a Centaur's band.
+     */
+    public PlayerStatsData withHeritageRoll(int newPower, boolean prodigy) {
+        EnumMap<PlayerStat, Integer> next = new EnumMap<>(PlayerStat.class);
+        next.putAll(values);
+        next.put(PlayerStat.POWER, clamp(newPower));
+        return new PlayerStatsData(next, prodigy, 0, trainingProgress);
+    }
+
     public PlayerStatsData withProdigy(boolean prodigy) {
         return new PlayerStatsData(values, prodigy, powerGrowthAccumulated, trainingProgress);
     }

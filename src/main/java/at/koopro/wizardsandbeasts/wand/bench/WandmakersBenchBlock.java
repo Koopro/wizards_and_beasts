@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.wand.bench;
 import org.jspecify.annotations.Nullable;
 
 import at.koopro.wizardsandbeasts.item.wand.WandModuleHooks;
+import at.koopro.wizardsandbeasts.registry.ModBlockEntities;
 import at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -97,15 +98,24 @@ public class WandmakersBenchBlock extends BaseEntityBlock implements EntityBlock
         return new WandmakersBenchBlockEntity(pos, state);
     }
 
+    /**
+     * Drawn by its GeckoLib rig, like the tents and the cauldron.
+     *
+     * <p>The JSON model is still generated and still used — it is what the block item shows in the
+     * inventory and what break particles sample — but it is not what a placed bench renders.
+     */
     @Override
     protected RenderShape getRenderShape(BlockState state) {
-        return RenderShape.MODEL;
+        return RenderShape.INVISIBLE;
     }
 
     @Override
     public <T extends BlockEntity> @Nullable BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
         if (!level.isClientSide()) {
-            return null;
+            // Server side has a job now: notice when a blank or a core lands on the bench, so the rig
+            // can switch to its working clip for everyone who can see it.
+            return createTickerHelper(type, ModBlockEntities.WANDMAKERS_BENCH.get(),
+                    WandmakersBenchBlockEntity::serverTick);
         }
         return (tickerLevel, tickerPos, tickerState, blockEntity) -> {
             if (!(blockEntity instanceof WandmakersBenchBlockEntity bench)) {

@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.datagen;
 
+import java.util.Set;
+
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.ModelProvider;
@@ -40,6 +42,39 @@ import at.koopro.wizardsandbeasts.registry.WandItemRegistry;
 
 public class ModModelProvider extends ModelProvider {
 
+    /**
+     * Canon stubs that carry a hand-authored cuboid model in {@code src/main/resources}
+     * rather than a flat sprite.
+     *
+     * <p>The models and their box-UV textures are built by {@code tools/item_models_3d.py};
+     * this is the half of that contract datagen owns. It has to be stated rather than
+     * discovered because a data provider has no view of the resource tree — and the failure
+     * mode of getting it wrong is silent: {@code src/generated/resources} is a second
+     * resource root, so an item that is both declared here and flat-generated ends up with
+     * two model files and the game loads whichever {@code processResources} copied first.
+     * The tool re-derives this list on every run and refuses to finish if the two disagree.
+     */
+    private static final Set<String> HAND_MODELLED_CANON = Set.of(
+            "acromantula_venom", "advanced_potion_making", "auto_answer_quill", "beaters_bat",
+            "beginners_guide_to_transfiguration", "blood_replenishing_potion", "bludger",
+            "brass_scales", "broomstick_servicing_kit", "canary_cream", "chocolate_bar",
+            "collapsible_cauldron", "da_galleon", "daily_prophet", "dragon_hide_gloves",
+            "draught_of_peace", "dungbomb", "elixir_of_life", "essence_of_dittany", "exploding_snap",
+            "fainting_fancies", "fantastic_beasts_and_where_to_find_them", "fever_fudge",
+            "filibusters_fireworks", "flesh_eating_slug_repellent", "goblet_of_fire", "gobstones",
+            "golden_egg", "golden_snitch", "gubraithian_fire", "headless_hat", "howler",
+            "magical_draughts_and_potions", "memory_vial", "mirror_of_erised",
+            "monster_book_of_monsters", "moste_potente_potions", "mrs_skowers_mess_remover",
+            "murtlap_essence", "nosebleed_nougat", "one_thousand_magical_herbs_and_fungi",
+            "opal_necklace", "portable_swamp", "probity_probe", "puking_pastilles",
+            "punching_telescope", "quaffle", "quick_quotes_quill", "quidditch_robes",
+            "quidditch_through_the_ages", "quill", "revealer", "secrecy_sensor",
+            "secrets_of_the_darkest_art", "self_stirring_cauldron", "shield_cloak", "shield_gloves",
+            "shield_hat", "shrunken_head", "skiving_snackbox", "sorting_hat", "spellotape",
+            "standard_book_of_spells", "sword_of_gryffindor", "tales_of_beedle_the_bard", "telescope",
+            "the_quibbler", "ton_tongue_toffee", "triwizard_cup", "u_no_poo", "unfogging_the_future",
+            "vanishing_cabinet", "wildfire_whiz_bangs", "wizarding_wireless", "wizards_chess_set");
+
     public ModModelProvider(PackOutput output) {
         super(output, WizardsAndBeastsMod.MODID);
     }
@@ -62,6 +97,7 @@ public class ModModelProvider extends ModelProvider {
         itemModels.declareCustomModelItem(MiscItemRegistry.MARAUDERS_MAP.get());
         itemModels.declareCustomModelItem(MiscItemRegistry.DELUMINATOR.get());
         itemModels.generateFlatItem(MiscItemRegistry.BLINDFOLD.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(MiscItemRegistry.DUELLING_DUMMY.get(), ModelTemplates.FLAT_ITEM);
 
         // Worn armour — robes, hats and masks. Flat inventory sprites only; the worn layer is
         // an equipment asset, not an item model, and is not authored yet.
@@ -72,10 +108,16 @@ public class ModModelProvider extends ModelProvider {
             itemModels.generateFlatItem(piece.get(), ModelTemplates.FLAT_ITEM);
         }
 
-        // Catalogued canon stubs — flat sprites, no behaviour. Looped rather than listed so
-        // adding one to CanonItemRegistry cannot fail datagen by being forgotten here.
+        // Catalogued canon stubs. Looped rather than listed so adding one to
+        // CanonItemRegistry cannot fail datagen by being forgotten here; the ones that have
+        // grown a real cuboid model are declared instead of flat-generated, because a stub
+        // emitted here would be a second, competing model file for the same item.
         for (var stub : CanonItemRegistry.ALL) {
-            itemModels.generateFlatItem(stub.get(), ModelTemplates.FLAT_ITEM);
+            if (HAND_MODELLED_CANON.contains(stub.getId().getPath())) {
+                itemModels.declareCustomModelItem(stub.get());
+            } else {
+                itemModels.generateFlatItem(stub.get(), ModelTemplates.FLAT_ITEM);
+            }
         }
         // All trunks + Newt's Case are now blocks — their item models come from the block-model
         // generation in generateWizardingWorld().
@@ -177,11 +219,13 @@ public class ModModelProvider extends ModelProvider {
 
         TextureMapping torchCross = TextureMapping.cross(Identifier.withDefaultNamespace("block/torch"));
         // The placed candle used to draw the vanilla torch cross, so the block in the world
-        // was a plain torch and floating_candle.png only ever showed up on the item.
-        blockModels.createCrossBlockWithDefaultItem(ModBlocks.FLOATING_CANDLE.get(),
-                BlockModelGenerators.PlantType.NOT_TINTED,
-                TextureMapping.cross(Identifier.fromNamespaceAndPath(
-                        WizardsAndBeastsMod.MODID, "block/floating_candle")));
+        // was a plain torch and floating_candle.png only ever showed up on the item. Pointing
+        // the cross at our own sprite fixed the wrong texture but not the wrong shape: a
+        // cross is two flat billboards, which is right for a sapling and wrong for a candle
+        // — in world it read as a paper cut-out, and the item was that same sheet extruded
+        // into a wafer. It is a real candle now, wax and flame.
+        propBlock(blockModels, ModBlocks.FLOATING_CANDLE.get(), floatingCandleModel(),
+                floatingCandleTexture(), false);
         blockModels.createCrossBlock(ModBlocks.DELUMINATOR_LIGHT.get(), BlockModelGenerators.PlantType.NOT_TINTED, torchCross);
         // These were emitting TexturedModel.LEAVES — a full cube — so every unlit torch
         // rendered as a solid block with the torch sprite tiled over all six faces.
@@ -210,8 +254,6 @@ public class ModModelProvider extends ModelProvider {
                 ConsumableItemRegistry.BEZOAR.get(), ConsumableItemRegistry.MOONCALF_DUNG.get(),
                 ConsumableItemRegistry.ERUMPENT_HORN.get(), ConsumableItemRegistry.MANDRAKE.get(),
                 ConsumableItemRegistry.BABY_MANDRAKE.get(), MiscItemRegistry.EARMUFFS.get(),
-                TrinketItemRegistry.REMEMBRALL.get(),
-                TrinketItemRegistry.OMNI_OCULARS.get(),
                 TrinketItemRegistry.PORTKEY.get(), TrinketItemRegistry.PERUVIAN_DARKNESS_POWDER.get(), TrinketItemRegistry.DECOY_DETONATOR.get(),
                 TrinketItemRegistry.EXTENDABLE_EARS.get(), MiscItemRegistry.FLOO_POWDER.get());
         for (net.minecraft.world.item.Item item : wizardingItems) {
@@ -234,8 +276,20 @@ public class ModModelProvider extends ModelProvider {
         itemModels.declareCustomModelItem(ConsumableItemRegistry.DITTANY.get());
         itemModels.declareCustomModelItem(ConsumableItemRegistry.FAMOUS_WIZARD_CARD.get());
 
-        // Consumables use custom item models so they can point at vanilla textures while art is pending.
+        // Same reason, for the two that grew a cuboid model in tools/item_models_3d.py: the
+        // Remembrall and the Omnioculars are objects you look *into*, which a flat sprite
+        // cannot show. Both were already emitting a model into each resource root before
+        // that, so declaring them also settles which one the game loads.
+        itemModels.declareCustomModelItem(TrinketItemRegistry.REMEMBRALL.get());
+        itemModels.declareCustomModelItem(TrinketItemRegistry.OMNI_OCULARS.get());
+
+        // The brew ships a hand-written items/ definition: a minecraft:model carrying a
+        // wizards_and_beasts:brew tint source, which is what paints the liquid the colour of whatever
+        // brew is in the bottle. It cannot be generated here — the tint source's MapCodec is registered
+        // from client mod-bus code that runData never fires, so datagen has no way to serialise it. The
+        // declaration stays so datagen does not emit a competing flat model; src/main wins the merge.
         itemModels.declareCustomModelItem(ConsumableItemRegistry.BREW.get());
+        // Consumables use custom item models so they can point at vanilla textures while art is pending.
         itemModels.declareCustomModelItem(ConsumableItemRegistry.BUTTERBEER.get());
         itemModels.generateFlatItem(ConsumableItemRegistry.EMPTY_BUTTERBEER_MUG.get(),
                 net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
@@ -430,7 +484,18 @@ public class ModModelProvider extends ModelProvider {
                 .build();
     }
 
-    /** Footed vessel with a raised rim, left open so the brew surface reads from above. */
+    /**
+     * Footed vessel with a raised rim. This is the <em>inventory icon</em>, not the placed block.
+     *
+     * <p>A placed cauldron is {@link net.minecraft.world.level.block.RenderShape#INVISIBLE} and drawn
+     * by its GeckoLib rig, which is what gives it a hollow inside and therefore a real empty state.
+     * This model survives because the block item still needs a shape in the hand and the inventory,
+     * and break and step particles still sample it.
+     *
+     * <p>It used to carry {@code tintindex 0} on the opening, painted by a block colour handler. Both
+     * are gone: the tinted face was the pot's <em>lid</em>, invisible to anyone not standing directly
+     * over the block, so it could never do the job it was added for.
+     */
     private static ExtendedModelTemplate cauldronModel() {
         ExtendedModelTemplateBuilder builder =
                 prop(TextureSlot.PARTICLE, TextureSlot.SIDE, TextureSlot.TOP)
@@ -439,10 +504,7 @@ public class ModModelProvider extends ModelProvider {
                                 .face(Direction.DOWN, f -> f.texture(TextureSlot.SIDE).cullface(Direction.DOWN)))
                         .element(e -> e.from(2, 3, 2).to(14, 12, 14)
                                 .textureAll(TextureSlot.SIDE)
-                                // tintindex 0 on the opening only. CauldronColors paints it by the
-                                // pot's visual state, so a filled, working or ruined cauldron reads
-                                // differently from across a room without needing six textures.
-                                .face(Direction.UP, f -> f.texture(TextureSlot.TOP).tintindex(0)));
+                                .face(Direction.UP, f -> f.texture(TextureSlot.TOP)));
         // Rim as four walls rather than a slab: a slab would cap the pot and hide the brew.
         float[][] rim = {
                 { 1, 1, 15, 2 },   // north
@@ -592,6 +654,49 @@ public class ModModelProvider extends ModelProvider {
                 .element(e -> e.from(5, 0, 5).to(11, 5, 11)
                         .textureAll(TextureSlot.TEXTURE))
                 .build();
+    }
+
+    /**
+     * A candle: a square wax column with the flame as two crossed quads above the wick.
+     *
+     * <p>Geometry follows {@code minecraft:block/template_candle}, but the UVs are read off
+     * our own sprite rather than vanilla's packing. {@code floating_candle.png} draws the
+     * candle centred in a 16x16 frame — flame on rows 0-4, wick on row 5, wax on rows 6-15,
+     * all within columns 6-9 — so the wax box is 4 wide and 10 tall and each part samples the
+     * rows it is actually drawn on. That one-texel-per-unit correspondence is why the model
+     * needs no new art: the existing eight-frame animation keeps flickering, because the
+     * flame quads sample the rows the animation moves.
+     */
+    private static ExtendedModelTemplate floatingCandleModel() {
+        return prop(TextureSlot.PARTICLE, TextureSlot.ALL)
+                .renderType("minecraft:cutout")
+                .element(e -> e.from(6, 0, 6).to(10, 10, 10)
+                        .face(Direction.NORTH, f -> f.texture(TextureSlot.ALL).uvs(6, 6, 10, 16))
+                        .face(Direction.SOUTH, f -> f.texture(TextureSlot.ALL).uvs(6, 6, 10, 16))
+                        .face(Direction.EAST, f -> f.texture(TextureSlot.ALL).uvs(6, 6, 10, 16))
+                        .face(Direction.WEST, f -> f.texture(TextureSlot.ALL).uvs(6, 6, 10, 16))
+                        .face(Direction.UP, f -> f.texture(TextureSlot.ALL).uvs(6, 6, 10, 10))
+                        .face(Direction.DOWN, f -> f.texture(TextureSlot.ALL).uvs(6, 12, 10, 16)
+                                .cullface(Direction.DOWN)))
+                // Unshaded, or the two halves of the flame land on different brightnesses and
+                // the cross seam becomes the most visible thing about it.
+                .element(e -> e.from(6, 10, 8).to(10, 16, 8).shade(false)
+                        .rotation(r -> r.origin(8, 10, 8).singleAxis(Direction.Axis.Y, 45F))
+                        .face(Direction.NORTH, f -> f.texture(TextureSlot.ALL).uvs(6, 0, 10, 6))
+                        .face(Direction.SOUTH, f -> f.texture(TextureSlot.ALL).uvs(6, 0, 10, 6)))
+                .element(e -> e.from(6, 10, 8).to(10, 16, 8).shade(false)
+                        .rotation(r -> r.origin(8, 10, 8).singleAxis(Direction.Axis.Y, -45F))
+                        .face(Direction.NORTH, f -> f.texture(TextureSlot.ALL).uvs(6, 0, 10, 6))
+                        .face(Direction.SOUTH, f -> f.texture(TextureSlot.ALL).uvs(6, 0, 10, 6)))
+                .build();
+    }
+
+    private static TextureMapping floatingCandleTexture() {
+        Identifier texture = Identifier.fromNamespaceAndPath(
+                WizardsAndBeastsMod.MODID, "block/floating_candle");
+        return new TextureMapping()
+                .put(TextureSlot.ALL, texture)
+                .put(TextureSlot.PARTICLE, texture);
     }
 
     private static TextureMapping eggshellTexture() {

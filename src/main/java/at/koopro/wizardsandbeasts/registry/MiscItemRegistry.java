@@ -6,6 +6,7 @@ import at.koopro.wizardsandbeasts.item.MinistryHandbookItem;
 import at.koopro.wizardsandbeasts.item.InkItem;
 import at.koopro.wizardsandbeasts.item.ParchmentItem;
 import at.koopro.wizardsandbeasts.item.deluminator.DeluminatorItem;
+import at.koopro.wizardsandbeasts.item.dummy.DuellingDummyItem;
 import at.koopro.wizardsandbeasts.item.floo.FlooPowderItem;
 import at.koopro.wizardsandbeasts.item.map.MaraudersMapItem;
 import at.koopro.wizardsandbeasts.item.wearable.BlindfoldItem;
@@ -37,6 +38,10 @@ public final class MiscItemRegistry {
 
     public static final DeferredItem<DeluminatorItem> DELUMINATOR =
             ModItems.ITEMS.registerItem("deluminator", props -> new DeluminatorItem(props.stacksTo(1)));
+
+    /** Practice target. One at a time: two in a pocket is two dummies nobody planted. */
+    public static final DeferredItem<DuellingDummyItem> DUELLING_DUMMY =
+            ModItems.ITEMS.registerItem("duelling_dummy", props -> new DuellingDummyItem(props.stacksTo(16)));
 
     public static final DeferredItem<MaraudersMapItem> MARAUDERS_MAP =
             ModItems.ITEMS.registerItem("marauders_map", props -> new MaraudersMapItem(props.stacksTo(1)));

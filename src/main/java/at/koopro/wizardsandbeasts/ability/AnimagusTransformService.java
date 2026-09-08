@@ -1,6 +1,12 @@
 package at.koopro.wizardsandbeasts.ability;
 
+import at.koopro.wizardsandbeasts.animagus.AnimagusCapability;
+import at.koopro.wizardsandbeasts.animagus.AnimagusCapabilityService;
+import at.koopro.wizardsandbeasts.animagus.AnimagusFormBinding;
 import at.koopro.wizardsandbeasts.form.FormSystemAPI;
+import at.koopro.wizardsandbeasts.form.constraint.FormConstraintSet;
+import at.koopro.wizardsandbeasts.form.sense.FormSense;
+import at.koopro.wizardsandbeasts.form.sense.FormSenseService;
 import at.koopro.wizardsandbeasts.form.TransitionManager;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
@@ -10,6 +16,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 import org.jspecify.annotations.Nullable;
+
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * Server-side gameplay logic for the Animagus ability: toggling between the
@@ -24,6 +33,63 @@ public final class AnimagusTransformService {
     public static final String ABILITY_ID = "animagus";
 
     private AnimagusTransformService() {}
+
+    /**
+     * True while the player is wearing a beast's body.
+     *
+     * <p>The standing condition for every constraint and sense below, and the same test
+     * {@code AnimagusEvents} used to spell out inline at five call sites.
+     */
+    public static boolean isInBeastForm(ServerPlayer player) {
+        return PlayerAbilityHelper.isCurrentlyTransformed(player)
+                && AnimagusForms.isAnimagusForm(PlayerAbilityHelper.getAnimagusFormId(player));
+    }
+
+    /**
+     * The Animagus contribution to {@link at.koopro.wizardsandbeasts.form.constraint.FormConstraints}.
+     *
+     * <p>{@link FormConstraintSet#BEAST_HANDS} and never {@link FormConstraintSet#FERAL}: an Animagus
+     * transformation is voluntary in both directions and must stay that way. The set deliberately omits
+     * {@code NO_VOLUNTARY_EXIT}, so {@link #toggleTransform} keeps working exactly as it always has —
+     * the discipline is a wizard choosing to be a beast, not a wizard trapped in one.
+     */
+    public static FormConstraintSet constraintsFor(ServerPlayer player) {
+        return isInBeastForm(player) ? FormConstraintSet.BEAST_HANDS : FormConstraintSet.NONE;
+    }
+
+    /**
+     * The Animagus contribution to {@link at.koopro.wizardsandbeasts.form.sense.FormSenses}, read from
+     * the form's datapack capabilities.
+     *
+     * <p>This is the <b>first consumer of {@link AnimagusCapability} outside the flight validation</b>.
+     * Capabilities were declared in {@code data/&lt;ns&gt;/animagus_forms/*.json}, loaded, validated, synced
+     * to the client and read by nothing: the per-form behaviour in {@code AnimagusAbilityService} is a
+     * hardcoded switch on the form id instead. Senses at least are now genuinely data-driven, so adding
+     * {@code "NIGHT_VISION"} to a form's capability list has an effect.
+     *
+     * <p>A form with no datapack definition contributes nothing rather than guessing — see
+     * {@link AnimagusFormBinding}, which resolves to empty for exactly that case.
+     */
+    public static Set<FormSense> sensesFor(ServerPlayer player) {
+        if (!isInBeastForm(player)) {
+            return Set.of();
+        }
+        return AnimagusFormBinding.resolve(PlayerAbilityHelper.getAnimagusFormId(player))
+                .<Set<FormSense>>map(def -> {
+                    EnumSet<FormSense> senses = EnumSet.noneOf(FormSense.class);
+                    if (def.hasCapability(AnimagusCapability.NIGHT_VISION)) {
+                        senses.add(FormSense.NIGHT_EYES);
+                    }
+                    if (def.hasCapability(AnimagusCapability.SCENT_TRACK)) {
+                        senses.add(FormSense.SCENT_TRACK);
+                    }
+                    if (def.hasCapability(AnimagusCapability.KEEN_SIGHT)) {
+                        senses.add(FormSense.KEEN_SIGHT);
+                    }
+                    return senses;
+                })
+                .orElseGet(Set::of);
+    }
 
     /** True if the player has the Animagus skill ability (capability to perform the ritual). */
     public static boolean hasAnimagusSkill(ServerPlayer player) {
@@ -74,6 +140,11 @@ public final class AnimagusTransformService {
             return;
         }
         PlayerAbilityHelper.setCurrentlyTransformed(player, true);
+        // Senses arrive with the body rather than on the next refresh sweep.
+        FormSenseService.apply(player, sensesFor(player));
+        // And so does the definition's attribute block, which until now nothing read at all.
+        AnimagusFormBinding.resolve(formId)
+                .ifPresent(def -> AnimagusCapabilityService.applyAttributes(player, def));
         // Transforming without being on the Animagus Registry is an offence — paperwork, not a manhunt.
         if (!PlayerAbilityHelper.isAnimagusRegistered(player)) {
             at.koopro.wizardsandbeasts.ministry.law.TraceService.report(
@@ -103,8 +174,11 @@ public final class AnimagusTransformService {
         if (!PlayerAbilityHelper.isCurrentlyTransformed(player)) {
             return;
         }
+        AnimagusFormBinding.resolve(PlayerAbilityHelper.getAnimagusFormId(player))
+                .ifPresent(def -> AnimagusCapabilityService.removeAttributes(player, def));
         PlayerAbilityHelper.setCurrentlyTransformed(player, false);
         AnimagusAbilityService.clearPassives(player);
+        FormSenseService.clear(player);
         if (!TransitionManager.isTransitioning(player.getUUID())) {
             FormSystemAPI.resetToDefault(player);
         }
@@ -115,10 +189,13 @@ public final class AnimagusTransformService {
      * other hard state resets where a transition is inappropriate.
      */
     public static void forceRevert(ServerPlayer player) {
+        AnimagusFormBinding.resolve(PlayerAbilityHelper.getAnimagusFormId(player))
+                .ifPresent(def -> AnimagusCapabilityService.removeAttributes(player, def));
         if (PlayerAbilityHelper.isCurrentlyTransformed(player)) {
             PlayerAbilityHelper.setCurrentlyTransformed(player, false);
         }
         AnimagusAbilityService.clearPassives(player);
+        FormSenseService.clear(player);
     }
 
     /**

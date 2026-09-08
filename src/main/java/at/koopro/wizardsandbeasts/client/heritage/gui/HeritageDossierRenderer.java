@@ -40,6 +40,19 @@ public final class HeritageDossierRenderer {
     private static final int LOCKED_RIBBON_EDGE = 0xFFB85050;
     private static final int LOCKED_RIBBON_TEXT = 0xFFF2D7D7;
     private static final int OVERLAY_DIM = 0xCC0A0603;
+    /**
+     * The player's own {@code MOVEMENT_SPEED}, which is what a heritage's speed modifier is added to.
+     *
+     * <p>Needed because the modifier is an {@code ADD_VALUE} on a base of 0.1, and the row printed
+     * {@code round(value * 100)} — so the Centaur's +0.03, which is a third again as fast, was advertised
+     * as <b>+3%</b>, and the Goblin's -0.005 rounded to a flat 0%. Four of the ten heritages read as
+     * "+2%" while actually differing by a factor of two.
+     *
+     * <p>A literal rather than the attribute's own default: {@code Attributes.MOVEMENT_SPEED} registers a
+     * default of 0.7 for entities generally, and 0.1 is the figure {@code Player.createAttributes} sets,
+     * which is the one this number has to be a percentage of.
+     */
+    private static final double PLAYER_BASE_SPEED = 0.1;
 
     private HeritageDossierRenderer() {}
 
@@ -233,9 +246,14 @@ public final class HeritageDossierRenderer {
         return (rounded > 0 ? "+" : "") + rounded;
     }
 
-    /** Speed is a small fraction, so it is shown as a percentage rather than "0.01". */
+    /**
+     * Speed as a percentage of the walking speed it modifies, rather than of nothing.
+     *
+     * <p>See {@link #PLAYER_BASE_SPEED}: the raw modifier is a fraction of 0.1, so it has to be divided by
+     * that base before it becomes a percentage anybody can act on.
+     */
     private static String signedPercent(double value) {
-        long pct = Math.round(value * 100.0);
+        long pct = Math.round(value / PLAYER_BASE_SPEED * 100.0);
         return (pct > 0 ? "+" : "") + pct + "%";
     }
 

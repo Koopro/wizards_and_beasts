@@ -42,14 +42,30 @@ final class BroomImpacts {
         float topSpeed = topSpeedOf(b);
         // Setting a broom down is not crashing it. Without this every flight ends in a durability
         // hit, because every flight ends in a vertical collision.
-        if (at.koopro.wizardsandbeasts.Config.broomGentleLanding
+        boolean gentle = at.koopro.wizardsandbeasts.Config.broomGentleLanding
                 && b.verticalCollision && !b.horizontalCollision
-                && BroomFlightRules.isGentleLanding(forwardSpeed, descentSpeed, topSpeed)) {
+                && BroomFlightRules.isGentleLanding(forwardSpeed, descentSpeed, topSpeed);
+        float severity = gentle ? 0f : BroomFlightRules.impactSeverity(
+                forwardSpeed, descentSpeed, topSpeed, b.horizontalCollision, b.verticalCollision);
+        // Reported before it is applied, not after: a landing report is deduplicated against
+        // announcedLanding, and apply() is what sets that flag. Reporting second would mean the first
+        // touchdown of every landing looked like one already announced, and none would ever be sent.
+        if (b.level().isClientSide()) {
+            b.reportImpact(gentle, severity);
+        }
+        // The rider's client is the only side that sees this collision, so it is the side that has to tell
+        // anyone. What apply() does here is kinematic — bleeding off speed, the bump — which has to happen
+        // on the flying side or the crash would not be felt; the consequences that are server state
+        // (durability, crash damage, the sound everyone hears) are applied when the report lands.
+        apply(b, gentle, severity);
+    }
+
+    /** The half of an impact that is the same wherever it is applied. */
+    static void apply(BroomEntity b, boolean gentle, float severity) {
+        if (gentle) {
             b.onGentleLanding();
             return;
         }
-        float severity = BroomFlightRules.impactSeverity(
-                forwardSpeed, descentSpeed, topSpeed, b.horizontalCollision, b.verticalCollision);
         handleBlockImpact(b, severity);
     }
 

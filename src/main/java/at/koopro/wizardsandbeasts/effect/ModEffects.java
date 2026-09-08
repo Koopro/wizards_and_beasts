@@ -119,6 +119,20 @@ public final class ModEffects {
     public static final DeferredHolder<MobEffect, BasiliskGazeLockEffect> BASILISK_GAZE_LOCK =
             MOB_EFFECTS.register("basilisk_gaze_lock", BasiliskGazeLockEffect::new);
 
+    /**
+     * A transformed body's nose. Marker only — granted by {@code FormSenseService} so the client can
+     * read one server-side rule instead of re-deriving it. See {@code FormSense.SCENT_TRACK}.
+     */
+    public static final DeferredHolder<MobEffect, ScentTrackingEffect> SCENT_TRACKING =
+            MOB_EFFECTS.register("scent_tracking", ScentTrackingEffect::new);
+
+    /**
+     * Wolfsbane: the werewolf keeps their mind, never their shape. Read by
+     * {@code WerewolfRules.hasWolfsbane}; see {@code heritage.werewolf}.
+     */
+    public static final DeferredHolder<MobEffect, WolfsbaneEffect> WOLFSBANE =
+            MOB_EFFECTS.register("wolfsbane", WolfsbaneEffect::new);
+
     private ModEffects() {
     }
 }

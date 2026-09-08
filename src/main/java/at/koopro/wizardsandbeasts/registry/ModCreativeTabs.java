@@ -178,6 +178,7 @@ public class ModCreativeTabs {
                         output.accept(TrinketItemRegistry.REMEMBRALL.get());
                         output.accept(TrinketItemRegistry.OMNI_OCULARS.get());
                         output.accept(MiscItemRegistry.DELUMINATOR.get());
+                        output.accept(MiscItemRegistry.DUELLING_DUMMY.get());
                         output.accept(TrinketItemRegistry.TIME_TURNER.get());
                         output.accept(DarkArtefactItemRegistry.INVISIBILITY_CLOAK.get());
                         output.accept(DarkArtefactItemRegistry.DEATHLY_HALLOW_CLOAK.get());

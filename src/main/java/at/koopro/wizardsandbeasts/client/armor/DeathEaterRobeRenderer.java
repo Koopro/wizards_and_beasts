@@ -12,9 +12,12 @@ import software.bernie.geckolib.renderer.base.GeoRenderState;
  *   animation  geckolib/animations/armor/death_eater_robe.animation.json
  *   texture    textures/armor/death_eater_robe.png
  * </pre>
+ *
+ * <p>The only hooded set: the model carries {@code robeHood} and {@code robeHoodDown}, and
+ * {@link HoodedArmorRenderer} shows whichever the worn stack asks for.
  */
 public class DeathEaterRobeRenderer<R extends HumanoidRenderState & GeoRenderState>
-        extends WizardArmorRenderer<DeathEaterRobeItem, R> {
+        extends HoodedArmorRenderer<DeathEaterRobeItem, R> {
 
     public static final String ASSET_NAME = "death_eater_robe";
 

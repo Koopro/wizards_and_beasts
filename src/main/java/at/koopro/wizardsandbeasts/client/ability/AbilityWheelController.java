@@ -5,9 +5,11 @@ import at.koopro.wizardsandbeasts.ability.def.AbilityDefinitionRegistry;
 import at.koopro.wizardsandbeasts.ability.def.AbilityInput;
 import at.koopro.wizardsandbeasts.ability.select.AbilitySelectionState;
 import at.koopro.wizardsandbeasts.ability.trigger.AbilityTarget;
+import at.koopro.wizardsandbeasts.apparition.ApparitionTier;
 import at.koopro.wizardsandbeasts.client.ability.state.ClientAbilityChargeState;
 import at.koopro.wizardsandbeasts.client.ability.state.ClientAbilitySelectionState;
 import at.koopro.wizardsandbeasts.client.ability.wheel.AbilityWheelScreen;
+import at.koopro.wizardsandbeasts.client.apparition.state.ClientApparitionPresentationState;
 import at.koopro.wizardsandbeasts.network.ability.AbilityUseC2SPayload;
 import at.koopro.wizardsandbeasts.network.apparition.ApparitionChargeAbortC2SPayload;
 import at.koopro.wizardsandbeasts.network.apparition.ApparitionChargeReleaseC2SPayload;
@@ -16,6 +18,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -53,6 +56,22 @@ public final class AbilityWheelController {
      * is dropped locally has to be withdrawn on the server too or it will discharge itself.
      */
     private static boolean chargingServerSide;
+    /**
+     * True while the server is running a charge that no key press on this client started.
+     *
+     * <p>Only the destination selector produces one: picking a point begins a seventy-tick anchored charge
+     * at a moment when the player is holding nothing, because they were clicking in a GUI. That charge was
+     * invisible to this driver — no key-up could release it and {@link #cancelCharge()} could not withdraw
+     * it — so the only way it ever ended was by running out its hard cap, which used to mean a catastrophic
+     * splinch for doing nothing.
+     *
+     * <p>Adopted from the server's own phase broadcast rather than from the selector screen, so the flag
+     * cannot race the frame the screen closes on, and so a charge begun any other way is picked up too.
+     *
+     * <p>While it is set, the next press <em>is</em> the release. There is nothing left to hold: the hold
+     * already happened, on the server, while the ring closed.
+     */
+    private static boolean adoptedServerCharge;
 
     /** Physical wheel-key state last tick — the wheel opens on the rising edge, never while merely held. */
     private static boolean wheelWasDown;
@@ -83,6 +102,8 @@ public final class AbilityWheelController {
             return;
         }
 
+        adoptOrphanedCharge(mc.player);
+
         drive(mc.player, AbilityFrameworkKeyBindings.ABILITY_USE, AbilitySelectionState.SLOT_SELECTED);
         for (int slot = 0; slot < AbilityFrameworkKeyBindings.QUICK_SLOTS.length; slot++) {
             drive(mc.player, AbilityFrameworkKeyBindings.QUICK_SLOTS[slot], slot);
@@ -92,6 +113,29 @@ public final class AbilityWheelController {
             cancelCharge();
             mc.setScreen(new AbilityWheelScreen());
         }
+    }
+
+    /**
+     * Notices a server-side charge this client is not driving, and arms the next press to commit it.
+     *
+     * <p>Anchored only. A blink is always started by a key that is still held, so it already has a key-up
+     * coming; an anchored jump picked out of the selector does not.
+     */
+    private static void adoptOrphanedCharge(LocalPlayer player) {
+        ClientApparitionPresentationState.Charge live =
+                ClientApparitionPresentationState.charge(player.getId());
+        if (live == null) {
+            adoptedServerCharge = false;
+            return;
+        }
+        if (adoptedServerCharge || charging || live.tier() != ApparitionTier.ANCHORED) {
+            return;
+        }
+        adoptedServerCharge = true;
+        // Said once, on the action bar, because the gesture is not guessable: every other ability in the
+        // framework is hold-and-release and this one is a single press.
+        player.displayClientMessage(
+                Component.translatable("apparition.wizards_and_beasts.travel.armed"), true);
     }
 
     private static boolean isWheelKeyDown(Minecraft mc) {
@@ -160,18 +204,32 @@ public final class AbilityWheelController {
      */
     private static void driveServerCharged(LocalPlayer player, KeyMapping key, int slot,
                                            AbilityDefinition def, AbilityInput input) {
+        // A charge the server began without this client holding anything: one press commits it. Checked
+        // before the hold logic so the press cannot also be read as the start of a second charge, and on
+        // the click edge rather than isDown() so the keypress that opened the selector cannot commit the
+        // charge it just created the instant the screen closes.
+        if (adoptedServerCharge) {
+            if (key.consumeClick()) {
+                ClientPacketDistributor.sendToServer(ApparitionChargeReleaseC2SPayload.INSTANCE);
+                adoptedServerCharge = false;
+            }
+            drain(key);
+            return;
+        }
         boolean down = !key.isUnbound() && key.isDown();
         if (down) {
             if (!charging || chargingSlot != slot) {
                 charging = true;
                 chargingServerSide = true;
                 chargingSlot = slot;
-                ClientAbilityChargeState.begin(def.id(), input.chargeTicks());
                 send(slot, pick(player, input));
-            } else {
-                ClientAbilityChargeState.tick();
-                store(pick(player, input));
             }
+            // No ClientAbilityChargeState here. It exists to time a client-side charge and to hold the
+            // target picked at the end of one, and a server-charged ability does neither: the server runs
+            // the clock, and the release payload carries no target because the server re-runs the raycast
+            // itself. Driving it was bookkeeping nothing read — its own javadoc claimed it kept a charge-up
+            // ring drawing, but no such ring exists; Apparition's readout is the destination ring, which
+            // ApparitionClientController draws straight from the server's phase packets.
         } else if (charging && chargingSlot == slot) {
             // A release is a commitment and is judged against the window, so it must not go out through
             // cancelCharge's withdrawal path.
@@ -254,6 +312,10 @@ public final class AbilityWheelController {
      * correct: the player did not let go, they were interrupted.
      */
     private static void cancelCharge() {
+        // Deliberately blind to adoptedServerCharge. This runs every tick a screen is open, and the
+        // selector that begins an anchored charge is a screen — withdrawing here would abort the jump on
+        // the frame it was chosen. An adopted charge that is genuinely abandoned collapses harmlessly on
+        // its own; see ApparitionServerLogic#collapseAttempt.
         if (chargingServerSide && charging) {
             ClientPacketDistributor.sendToServer(ApparitionChargeAbortC2SPayload.INSTANCE);
         }

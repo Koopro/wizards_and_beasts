@@ -70,6 +70,8 @@ public class WizardsAndBeastsClient {
         modEventBus.addListener(SpellKeyBindings::register);
         modEventBus.addListener(at.koopro.wizardsandbeasts.client.ability.AbilityFrameworkKeyBindings::register);
         modEventBus.addListener(at.koopro.wizardsandbeasts.client.armor.WardrobeKeyBindings::register);
+        modEventBus.addListener(
+                at.koopro.wizardsandbeasts.client.trinket.OmniocularsClientExtensions::register);
         modEventBus.addListener(this::registerGuiLayers);
         modEventBus.addListener(WizardsAndBeastsClient::registerMenus);
         modEventBus.addListener(WizardsAndBeastsClient::registerMapStyleListeners);
@@ -153,6 +155,13 @@ public class WizardsAndBeastsClient {
                 net.minecraft.resources.Identifier.fromNamespaceAndPath(
                         WizardsAndBeastsMod.MODID, "map_marker_style_reload_listener"),
                 new at.koopro.wizardsandbeasts.client.map.style.MapStyleLoaders.Markers());
+        // Not a loader — it only invalidates a cache. The wand HUD remembers which spells have an
+        // icon of their own so it does not ask the resource manager once per slot per frame, and
+        // that answer changes exactly when the packs do.
+        event.addListener(
+                net.minecraft.resources.Identifier.fromNamespaceAndPath(
+                        WizardsAndBeastsMod.MODID, "wand_hud_sprite_cache"),
+                new at.koopro.wizardsandbeasts.client.hud.WandHudSprites.Reload());
     }
 
     private void registerGuiLayers(RegisterGuiLayersEvent event) {

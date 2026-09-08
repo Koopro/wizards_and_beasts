@@ -2,6 +2,8 @@ package at.koopro.wizardsandbeasts.heritage.obscurial;
 
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.TransformationState;
+import at.koopro.wizardsandbeasts.form.constraint.FormConstraint;
+import at.koopro.wizardsandbeasts.form.constraint.FormConstraintSet;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
@@ -204,6 +206,32 @@ public final class ObscurialRules {
 
     public static StressTier getStressTier(float stressPercent) {
         return ObscurialTierRules.getStressTier(stressPercent);
+    }
+
+    /**
+     * What an obscurus cannot do, for
+     * {@link at.koopro.wizardsandbeasts.form.constraint.FormConstraints}.
+     *
+     * <p><b>{@code BEAST_HANDS} minus {@code NO_SPELLCASTING}</b>, and the exception is the whole point.
+     * Every other transformed state in the mod is mute — a cat and a wolf hold no wand. An obscurus is
+     * the opposite case: casting in dark form is a <em>designed feature</em>, curated by
+     * {@link #isSpellAllowedInDarkForm} and {@link #isDarkFormOnlySpell} and enforced by its own gates in
+     * {@code SpellCastGate}. Handing this state the blanket ban would have silently deleted
+     * {@code ObscurusGrasp}, {@code ObscurusSurge} and every Dark Arts cast the form exists to enable.
+     *
+     * <p>The other four prohibitions are new. The hand-written wall this replaced cancelled item use and
+     * block interaction and stopped there, so a cloud of smoke could still break blocks, open a chest,
+     * empty its pockets and shear a sheep. That reads as an oversight of the same kind the Animagus wall
+     * had rather than a decision, and a body with no hands should not have hands for those either.
+     */
+    private static final FormConstraintSet DARK_FORM_CONSTRAINTS =
+            FormConstraintSet.BEAST_HANDS.without(FormConstraint.NO_SPELLCASTING);
+
+    /** The Obscurial contribution to the shared constraint layer. */
+    public static FormConstraintSet constraintsFor(ServerPlayer player) {
+        PlayerHeritageData data = player.getData(
+                at.koopro.wizardsandbeasts.registry.ModAttachments.HERITAGE_DATA.get());
+        return isObscurial(data) && isDarkForm(data) ? DARK_FORM_CONSTRAINTS : FormConstraintSet.NONE;
     }
 
     public static boolean isSpellAllowedInDarkForm(Spell spell) {

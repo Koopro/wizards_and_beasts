@@ -14,6 +14,7 @@ import at.koopro.wizardsandbeasts.entity.beast.RunespoorEntity;
 import at.koopro.wizardsandbeasts.entity.beast.StreelerEntity;
 import at.koopro.wizardsandbeasts.entity.beast.ThestralEntity;
 import at.koopro.wizardsandbeasts.entity.broom.BroomEntity;
+import at.koopro.wizardsandbeasts.entity.dummy.DuellingDummyEntity;
 import at.koopro.wizardsandbeasts.entity.creature.BeastHexProjectile;
 import at.koopro.wizardsandbeasts.entity.form.FormMannequinEntity;
 import at.koopro.wizardsandbeasts.entity.goblin.GoblinTellerEntity;
@@ -72,6 +73,15 @@ public class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<FormMannequinEntity>> FORM_MANNEQUIN =
             EntityHelper.register(ENTITY_TYPES, "form_mannequin", FormMannequinEntity::new, MobCategory.MISC, 0.6f, 1.8f);
     static { EntityAttributeBindings.queue(FORM_MANNEQUIN, FormMannequinEntity::createAttributes); }
+
+    /**
+     * Duelling dummy. Player-sized on purpose - it wears the same armour on the same bones, so the
+     * damage it reports is the damage a wizard in that robe would take. See {@link DuellingDummyEntity}.
+     */
+    public static final DeferredHolder<EntityType<?>, EntityType<DuellingDummyEntity>> DUELLING_DUMMY =
+            EntityHelper.register(ENTITY_TYPES, "duelling_dummy", DuellingDummyEntity::new,
+                    MobCategory.MISC, 0.6f, 1.95f);
+    static { EntityAttributeBindings.queue(DUELLING_DUMMY, DuellingDummyEntity::createAttributes); }
 
     public static final DeferredHolder<EntityType<?>, EntityType<WizardingThrownEntity>> WIZARDING_THROWN =
             EntityHelper.register(ENTITY_TYPES, "wizarding_thrown", WizardingThrownEntity::new, MobCategory.MISC, 0.25f, 0.25f, 8, 2);

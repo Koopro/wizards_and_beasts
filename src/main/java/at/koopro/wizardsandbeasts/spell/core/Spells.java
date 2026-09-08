@@ -7,10 +7,12 @@ import com.mojang.logging.LogUtils;
 import org.slf4j.Logger;
 
 import org.jspecify.annotations.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,9 +38,23 @@ public final class Spells {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    private static final Map<String, Spell> BY_ID = new LinkedHashMap<>();
+    /**
+     * The live table, swapped rather than mutated in place.
+     *
+     * <p>Copy-on-write because two threads write to it. The server writes on a datapack reload; the
+     * client writes when {@code SpellDefinitionsSyncS2CPayload} arrives. In single-player those are
+     * the server thread and the render thread inside one JVM writing the same static field, so an
+     * in-place {@code LinkedHashMap} mutation was a data race that could be observed as a half-built
+     * map by anything calling {@link #byId(String)} — which the HUD does every frame. Publishing an
+     * immutable map through a volatile reference means a reader sees the table before the reload or
+     * the table after it, never a table mid-rebuild.
+     *
+     * <p>Insertion order is part of the contract: {@link #all()} feeds the spell menu's category
+     * grouping and every command suggestion list, and both should be stable between sessions.
+     */
+    private static volatile Map<String, Spell> BY_ID = Map.of();
     /** Ids contributed by JSON spells; tracked so {@link #clearJsonSpells()} only touches those. */
-    private static final Set<String> JSON_SPELL_IDS = new HashSet<>();
+    private static volatile Set<String> JSON_SPELL_IDS = Set.of();
     /** True once {@link #init()} has run; subsequent registrations must self-init. */
     private static boolean bootstrapped = false;
 
@@ -75,11 +91,13 @@ public final class Spells {
      * sweep. JSON spells should use {@link #registerJson(Spell)} instead so
      * that {@code /reload} can clear them.
      */
-    public static <T extends Spell> T register(T spell) {
+    public static synchronized <T extends Spell> T register(T spell) {
         if (BY_ID.containsKey(spell.getId())) {
             LOGGER.warn("Spell id collision: '{}' is already registered; replacing.", spell.getId());
         }
-        BY_ID.put(spell.getId(), spell);
+        Map<String, Spell> next = new LinkedHashMap<>(BY_ID);
+        next.put(spell.getId(), spell);
+        BY_ID = Collections.unmodifiableMap(next);
         if (bootstrapped) {
             spell.init();
         }
@@ -91,24 +109,71 @@ public final class Spells {
      * can remove only datapack-contributed spells on reload. Always self-inits
      * because reloads happen long after the {@link #init()} bootstrap.
      */
-    public static <T extends Spell> T registerJson(T spell) {
-        Spell previous = BY_ID.get(spell.getId());
-        if (previous != null) {
-            LOGGER.warn("JSON spell id collision: '{}' already registered as {}; replacing with {}.",
-                    spell.getId(), previous.getClass().getSimpleName(), spell.getClass().getSimpleName());
-        }
-        JSON_SPELL_IDS.add(spell.getId());
-        BY_ID.put(spell.getId(), spell);
-        spell.init();
+    public static synchronized <T extends Spell> T registerJson(T spell) {
+        replaceJsonSpells(concatJsonSlice(spell));
         return spell;
     }
 
-    /** Removes every spell previously contributed by {@link #registerJson(Spell)}. */
-    public static void clearJsonSpells() {
+    /** The current JSON slice with {@code spell} appended (or replacing its own earlier entry). */
+    private static List<Spell> concatJsonSlice(Spell spell) {
+        List<Spell> slice = new ArrayList<>(JSON_SPELL_IDS.size() + 1);
         for (String id : JSON_SPELL_IDS) {
-            BY_ID.remove(id);
+            if (!id.equals(spell.getId())) {
+                Spell existing = BY_ID.get(id);
+                if (existing != null) {
+                    slice.add(existing);
+                }
+            }
         }
-        JSON_SPELL_IDS.clear();
+        slice.add(spell);
+        return slice;
+    }
+
+    /**
+     * Swaps the whole JSON-contributed slice of the registry in one publish: the previous slice is
+     * dropped, every spell in {@code spells} is registered and initialized, and the new table goes
+     * live as a single volatile write.
+     *
+     * <p>This exists instead of {@code clearJsonSpells()} followed by 150-odd
+     * {@link #registerJson(Spell)} calls because that sequence was observable. Between the clear and
+     * the last registration the table genuinely did not contain most of the mod's spells, and
+     * anything reading it in that window — a HUD frame, another player's cast — saw a registry with
+     * holes in it. One swap has no such window.
+     *
+     * <p>Called by the datapack reload listener on the server and by
+     * {@code SpellDefinitionsSyncS2CPayload} on the client, which is why it is synchronized: in
+     * single-player both are the same static field written from two different threads.
+     */
+    public static synchronized void replaceJsonSpells(Collection<? extends Spell> spells) {
+        Map<String, Spell> next = new LinkedHashMap<>(BY_ID);
+        for (String id : JSON_SPELL_IDS) {
+            next.remove(id);
+        }
+        Set<String> nextJsonIds = new LinkedHashSet<>(spells.size());
+        for (Spell spell : spells) {
+            Spell previous = next.get(spell.getId());
+            if (previous != null) {
+                LOGGER.warn("JSON spell id collision: '{}' already registered as {}; replacing with {}.",
+                        spell.getId(), previous.getClass().getSimpleName(), spell.getClass().getSimpleName());
+            }
+            // Before the swap: init() reads cross-references out of the registry, and a half-built
+            // spell must never be reachable through the published table.
+            spell.init();
+            nextJsonIds.add(spell.getId());
+            next.put(spell.getId(), spell);
+        }
+        JSON_SPELL_IDS = Collections.unmodifiableSet(nextJsonIds);
+        BY_ID = Collections.unmodifiableMap(next);
+    }
+
+    /** Removes every spell previously contributed by {@link #registerJson(Spell)}. */
+    public static synchronized void clearJsonSpells() {
+        replaceJsonSpells(List.of());
+    }
+
+    /** Ids currently contributed by JSON, in registration order. */
+    public static Set<String> jsonSpellIds() {
+        return JSON_SPELL_IDS;
     }
 
     /**

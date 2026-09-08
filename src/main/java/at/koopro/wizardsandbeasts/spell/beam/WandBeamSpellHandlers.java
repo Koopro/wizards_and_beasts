@@ -202,8 +202,11 @@ final class WandBeamSpellHandlers {
         s.avadaConsumed = true;
         recordBeamProficiencyHit(caster, spellId, s, 1);
         AvadaBlastS2CPayload.sendToTracking(caster, caster.getEyePosition(), target.getBoundingBox().getCenter());
+        // Spends this hold's single release token, so the client's own release for the same hold —
+        // whenever the player actually lets go — is refused as a duplicate instead of casting again.
+        // This used to be backed up by a fifteen-tick ignore window, which ate a genuine re-press
+        // inside it and let a late duplicate through outside it.
         SpellCastC2SPayload.completeWandCastRelease(caster);
-        SpellCastC2SPayload.ignoreDuplicateReleasesUntil(caster, level.getGameTime() + 15);
         caster.releaseUsingItem();
     }
 

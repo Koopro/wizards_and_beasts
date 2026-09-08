@@ -48,9 +48,16 @@ public class TimeTurnerItem extends Item {
         return MAX_USE_TICKS;
     }
 
+    /**
+     * {@link ItemUseAnimation#NONE} — winding the chain belongs to {@code ItemUsePosePass}.
+     *
+     * <p>It was {@code BLOCK}, which is vanilla's shield stance: the arm comes across the body and
+     * stops. That reads as bracing for a hit, which is close to the opposite of what a Time-Turner
+     * is doing — the whole gesture is a small thing being turned, repeatedly, at the chest.
+     */
     @Override
     public ItemUseAnimation getUseAnimation(ItemStack stack) {
-        return ItemUseAnimation.BLOCK;
+        return ItemUseAnimation.NONE;
     }
 
     @Override

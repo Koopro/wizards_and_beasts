@@ -5,6 +5,7 @@ import at.koopro.wizardsandbeasts.ability.AnimagusAbilityService;
 import at.koopro.wizardsandbeasts.ability.AnimagusForms;
 import at.koopro.wizardsandbeasts.ability.AnimagusTransformService;
 import at.koopro.wizardsandbeasts.ability.PlayerAbilityHelper;
+import at.koopro.wizardsandbeasts.form.FormSystemAPI;
 import at.koopro.wizardsandbeasts.registry.ConsumableItemRegistry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
@@ -18,7 +19,6 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
-import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
@@ -45,13 +45,10 @@ public final class AnimagusEvents {
     public static void onRightClickItem(PlayerInteractEvent.RightClickItem event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
 
-        // While transformed, items cannot be used.
-        if (isLockedBeastForm(player)) {
-            event.setCanceled(true);
-            event.setCancellationResult(InteractionResult.FAIL);
-            return;
-        }
-
+        // The "no item use while transformed" cancel that used to open this method now lives in
+        // FormConstraintEvents, shared with the werewolf. It still runs -- and still runs first,
+        // because a cancelled event never reaches a later listener -- so a beast cannot start the
+        // ritual either.
         ItemStack stack = event.getItemStack();
         if (!stack.is(ConsumableItemRegistry.MANDRAKE.get())) return;
         if (!(player.level() instanceof ServerLevel level)) return;
@@ -96,25 +93,24 @@ public final class AnimagusEvents {
                 Component.translatable("animagus.wizards_and_beasts.achieved.body"));
     }
 
-    @SubscribeEvent
-    public static void onUseItemStart(LivingEntityUseItemEvent.Start event) {
-        if (event.getEntity() instanceof ServerPlayer player && isLockedBeastForm(player)) {
-            event.setCanceled(true);
-        }
-    }
-
-    @SubscribeEvent
-    public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-        if (event.getEntity() instanceof ServerPlayer player && isLockedBeastForm(player)) {
-            event.setCanceled(true);
-            event.setCancellationResult(InteractionResult.FAIL);
-        }
-    }
-
+    /**
+     * Death ends the transformation, body and all.
+     *
+     * <p>{@code forceRevert} clears the transformed flag and the passives; it does not touch the
+     * <em>form</em>, which lives on the heritage attachment. That attachment is {@code copyOnDeath} and
+     * {@code FormLifecycleHandler.onRespawn} faithfully re-applies whatever form it finds, so before
+     * this a wizard who died as a cat respawned still shaped like one, with
+     * {@code currentlyTransformed} false underneath — a body no toggle could get them out of, because
+     * the toggle believed they were already human.
+     */
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
+            boolean wasBeast = AnimagusTransformService.isInBeastForm(player);
             AnimagusTransformService.forceRevert(player);
+            if (wasBeast) {
+                FormSystemAPI.resetToDefault(player);
+            }
         }
     }
 
@@ -127,6 +123,11 @@ public final class AnimagusEvents {
         // for a key press that is itself gated. Their chosen form id survives the revert.
         if (AnimagusTransformService.revertIfModuleDisabled(player)) return;
         AnimagusAbilityService.tick(player, PlayerAbilityHelper.getAnimagusFormId(player));
+        // Capability-driven behaviour, from the form's own datapack file rather than a switch on its id.
+        at.koopro.wizardsandbeasts.animagus.AnimagusFormBinding
+                .resolve(PlayerAbilityHelper.getAnimagusFormId(player))
+                .ifPresent(def -> at.koopro.wizardsandbeasts.animagus.AnimagusCapabilityService
+                        .tickClimb(player, def));
     }
 
     /** Cat form lands on its feet — no fall damage. */
@@ -141,7 +142,6 @@ public final class AnimagusEvents {
 
     /** True when the player is currently in their Animagus beast form. */
     private static boolean isLockedBeastForm(ServerPlayer player) {
-        return PlayerAbilityHelper.isCurrentlyTransformed(player)
-                && AnimagusForms.isAnimagusForm(PlayerAbilityHelper.getAnimagusFormId(player));
+        return AnimagusTransformService.isInBeastForm(player);
     }
 }

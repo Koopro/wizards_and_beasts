@@ -83,9 +83,22 @@ public final class GeoRendererHelper {
      */
     public static <T extends BlockEntity & GeoBlockEntity, S extends BlockEntityRenderState & software.bernie.geckolib.renderer.base.GeoRenderState>
             BlockEntityRendererProvider<T, S> simpleBlock(String modelName, double renderMargin) {
-        return context -> new GeoBlockRenderer<T, S>(
-                new DefaultedBlockGeoModel<>(
-                        Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, modelName))) {
+        return simpleBlock(() -> new DefaultedBlockGeoModel<>(
+                Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, modelName)), renderMargin);
+    }
+
+    /**
+     * Same, for a block whose model is not the plain defaulted one.
+     *
+     * <p>The cauldron needs this: three metals share one {@code BlockEntityType} and therefore one
+     * renderer, so the sheet has to be chosen per block rather than baked into the model id. Taking a
+     * {@code Supplier} rather than an instance keeps the model construction inside the renderer
+     * factory, which is where the resource manager is guaranteed to be populated.
+     */
+    public static <T extends BlockEntity & GeoBlockEntity, S extends BlockEntityRenderState & software.bernie.geckolib.renderer.base.GeoRenderState>
+            BlockEntityRendererProvider<T, S> simpleBlock(java.util.function.Supplier<software.bernie.geckolib.model.GeoModel<T>> model,
+                                                          double renderMargin) {
+        return context -> new GeoBlockRenderer<T, S>(model.get()) {
             @Override
             public AABB getRenderBoundingBox(T blockEntity) {
                 return new AABB(blockEntity.getBlockPos()).inflate(renderMargin);

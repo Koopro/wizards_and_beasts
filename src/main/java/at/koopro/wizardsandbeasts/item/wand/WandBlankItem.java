@@ -8,52 +8,170 @@ import at.koopro.wizardsandbeasts.registry.WoodSet;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.WandLoreNames;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.function.Consumer;
 
+/**
+ * A wand blank, and the log it is shaped against.
+ *
+ * <h2>Shaping is a channel, not a click</h2>
+ *
+ * <p>Choosing the wood is the wandmaking beat of the mod — the one moment a player picks the thing
+ * their wand will be — and it used to resolve in a single tick with one soft knock. It now takes
+ * {@value #CARVE_TICKS} ticks of held right-click against the log, with the pose layer whittling the
+ * blank and a chip of the log flying every stroke.
+ *
+ * <h2>The target is re-found every tick rather than remembered</h2>
+ *
+ * <p>{@code useOn} knows the clicked block, but {@code onUseTick} and {@code finishUsingItem} do not,
+ * and the obvious fix — stash the {@code BlockPos} somewhere for the duration — buys a second problem
+ * for free: state that has to be cleaned up on logout, on death, on dropping the blank mid-carve.
+ *
+ * <p>Re-picking instead is both simpler and a better mechanic. Looking away from the log cancels the
+ * carve, because looking away genuinely stops the blank from being held against it, and the player
+ * needs no explanation of that rule. It also means the carve cannot survive the log being broken,
+ * replaced or turned into something else half way through.
+ */
 public class WandBlankItem extends Item {
+
+    /** Two and a half seconds of whittling. Long enough to be a decision, short of being a chore. */
+    public static final int CARVE_TICKS = 50;
+
+    /**
+     * One stroke of the knife. The pose layer runs the arm on this same period, so the sound and the
+     * chip land with the arm at the bottom of its travel rather than on some unrelated beat.
+     */
+    public static final int STROKE_TICKS = 10;
+
     public WandBlankItem(Properties properties) {
         super(properties.stacksTo(1));
+    }
+
+    /** A log this blank could be shaped from, and the wand wood it would yield. */
+    private record CarveTarget(BlockPos pos, BlockState state, Identifier wood) {}
+
+    /**
+     * The log the player is looking at, or null if there is nothing to carve against.
+     *
+     * <p>Also the guard for a blank that already has a wood: a shaped blank passes through to
+     * whatever else wants the click rather than being re-carved into a second species.
+     */
+    private static @Nullable CarveTarget targetUnderCrosshair(Level level, Player player, ItemStack stack) {
+        if (WandComponents.getWood(stack) != null) {
+            return null;
+        }
+        HitResult hit = player.pick(player.blockInteractionRange(), 0.0f, false);
+        if (!(hit instanceof BlockHitResult block) || hit.getType() != HitResult.Type.BLOCK) {
+            return null;
+        }
+        return targetAt(level, block.getBlockPos());
+    }
+
+    private static @Nullable CarveTarget targetAt(Level level, BlockPos pos) {
+        BlockState state = level.getBlockState(pos);
+        Identifier wood = wandWoodFromLogBlock(state);
+        return wood == null ? null : new CarveTarget(pos, state, wood);
     }
 
     @Override
     public InteractionResult useOn(UseOnContext context) {
         ItemStack stack = context.getItemInHand();
-        Level level = context.getLevel();
         Player player = context.getPlayer();
-        if (WandComponents.getWood(stack) != null) {
+        if (player == null || WandComponents.getWood(stack) != null) {
             return InteractionResult.PASS;
         }
-        BlockPos pos = context.getClickedPos();
-        BlockState state = level.getBlockState(pos);
-        Identifier wood = wandWoodFromLogBlock(state);
-        if (wood == null) {
+        if (targetAt(context.getLevel(), context.getClickedPos()) == null) {
             return InteractionResult.PASS;
         }
-        if (player == null) {
-            return InteractionResult.PASS;
+        // Started on both sides: the client needs the use to begin for the pose and the held-item
+        // animation, the server for everything else. CONSUME rather than SUCCESS because SUCCESS
+        // swings the arm, and an arm that swings at the start of a carve reads as the carve having
+        // already happened.
+        player.startUsingItem(context.getHand());
+        return InteractionResult.CONSUME;
+    }
+
+    @Override
+    public int getUseDuration(ItemStack stack, LivingEntity entity) {
+        return CARVE_TICKS;
+    }
+
+    /**
+     * {@link ItemUseAnimation#NONE}, because the pose belongs to {@code ItemUsePosePass}.
+     *
+     * <p>None of vanilla's five animations is a whittle — {@code EAT} and {@code DRINK} raise the
+     * blank to the mouth, {@code BOW} and {@code BLOCK} hold it still — and the same reasoning the
+     * wand already follows applies here: an approximate vanilla animation is worse than none, since
+     * it has to be undone by the pose pass before the real pose can be written.
+     */
+    @Override
+    public ItemUseAnimation getUseAnimation(ItemStack stack) {
+        return ItemUseAnimation.NONE;
+    }
+
+    @Override
+    public void onUseTick(Level level, LivingEntity entity, ItemStack stack, int remainingTicks) {
+        if (!(entity instanceof Player player)) {
+            return;
         }
-        if (level.isClientSide()) {
-            return InteractionResult.SUCCESS;
+        CarveTarget target = targetUnderCrosshair(level, player, stack);
+        if (target == null) {
+            // Looked away, or the log is gone. Stopping the use rather than letting it run out means
+            // finishUsingItem never fires, so there is no second place that has to re-check this.
+            entity.stopUsingItem();
+            return;
         }
-        stack.set(WandComponents.WAND_WOOD.get(), wood);
-        player.setItemInHand(context.getHand(), stack);
-        level.playSound(null, pos, SoundEvents.BAMBOO_WOOD_HIT, SoundSource.PLAYERS, 0.5f, 1.35f);
-        return InteractionResult.SUCCESS;
+        int elapsed = CARVE_TICKS - remainingTicks;
+        if (elapsed > 0 && elapsed % STROKE_TICKS == 0 && level instanceof ServerLevel server) {
+            stroke(server, player, target);
+        }
+    }
+
+    /** One pass of the knife: a knock off the log and a chip of its own wood. */
+    private static void stroke(ServerLevel level, Player player, CarveTarget target) {
+        level.playSound(null, target.pos(), SoundEvents.BAMBOO_WOOD_HIT, SoundSource.PLAYERS,
+                0.4f, 1.25f);
+        Vec3 centre = Vec3.atCenterOf(target.pos());
+        level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, target.state()),
+                centre.x, centre.y, centre.z, 6, 0.25, 0.25, 0.25, 0.0);
+    }
+
+    @Override
+    public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
+        if (level.isClientSide() || !(entity instanceof Player player)) {
+            return stack;
+        }
+        CarveTarget target = targetUnderCrosshair(level, player, stack);
+        if (target == null) {
+            return stack;
+        }
+        stack.set(WandComponents.WAND_WOOD.get(), target.wood());
+        player.setItemInHand(player.getUsedItemHand(), stack);
+        level.playSound(null, target.pos(), SoundEvents.BAMBOO_WOOD_HIT, SoundSource.PLAYERS,
+                0.5f, 1.35f);
+        return stack;
     }
 
     /**

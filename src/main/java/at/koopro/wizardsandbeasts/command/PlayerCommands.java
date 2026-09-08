@@ -37,6 +37,8 @@ public final class PlayerCommands {
                 .then(SkillCommands.register())
                 .then(SkillCommands.registerVocation())
                 .then(StandingCommands.register())
-                .then(AbilityFrameworkCommands.register());
+                .then(AbilityFrameworkCommands.register())
+                .then(PlayerVaultCommands.register())
+                .then(PlayerConditionCommands.register());
     }
 }

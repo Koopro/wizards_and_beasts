@@ -36,6 +36,12 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+import software.bernie.geckolib.animatable.GeoBlockEntity;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.animatable.manager.AnimatableManager;
+import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.RawAnimation;
+import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -70,7 +76,7 @@ import java.util.UUID;
  * difference between a machine that outputs and a pot that has something in it, and it is what makes
  * "collect it later" and "somebody else collects it" both work.
  */
-public class CauldronBlockEntity extends BlockEntity {
+public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
 
     /** Ingredient slots. Six is enough for every shipped recipe with room to grow. */
     public static final int SLOTS = 6;
@@ -104,10 +110,50 @@ public class CauldronBlockEntity extends BlockEntity {
 
     /** The recipe being run, so completion can read its difficulty and its catalyst. */
     private @Nullable String recipeId;
-    private long lastInteractGameTime = Long.MIN_VALUE;
+    /** Sentinel for "this pot has never been touched"; see {@link #acceptInteraction}. */
+    private static final long NEVER_INTERACTED = Long.MIN_VALUE;
+
+    private long lastInteractGameTime = NEVER_INTERACTED;
+
+    private final AnimatableInstanceCache animatableCache = GeckoLibUtil.createInstanceCache(this);
 
     public CauldronBlockEntity(@NonNull BlockPos pos, @NonNull BlockState state) {
         super(ModBlockEntities.CAULDRON.get(), pos, state);
+    }
+
+    // -- rendering -------------------------------------------------------------------------------
+
+    /**
+     * One controller, and the clip it plays is whatever {@link CauldronVisual} the blockstate says.
+     *
+     * <p>The visual property is already the block's synced summary of "what does this pot look like",
+     * computed by {@link #refreshVisual()} and written into the blockstate — so the animation needs no
+     * packet of its own and cannot disagree with what the debug command prints.
+     *
+     * <p>This is also where the empty pot comes from. GeckoLib 5's {@code GeoBone} has no
+     * {@code setHidden}, so bone visibility is the animation's job: each clip scales the four liquid
+     * surfaces it does not want to zero, and the {@code empty} clip zeroes all five. That is why the
+     * clip set and {@link CauldronVisual} have to stay in step, and why {@code CauldronRigTest} fails
+     * the build if they drift.
+     *
+     * <p>The transition length is 0: a pot going from boiling to ruined should snap, not ease. Blending
+     * two liquid surfaces would show both at once, which is the one thing the scale-to-zero scheme
+     * cannot survive.
+     */
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        controllers.add(new AnimationController<>("cauldron_visual", 0, state -> {
+            CauldronVisual visual = getBlockState().hasProperty(CauldronVisual.PROPERTY)
+                    ? getBlockState().getValue(CauldronVisual.PROPERTY)
+                    : CauldronVisual.EMPTY;
+            return state.setAndContinue(RawAnimation.begin()
+                    .thenLoop("animation.wizarding_cauldron." + visual.getSerializedName()));
+        }));
+    }
+
+    @Override
+    public @NonNull AnimatableInstanceCache getAnimatableInstanceCache() {
+        return animatableCache;
     }
 
     // -- state readers ---------------------------------------------------------------------------
@@ -596,8 +642,24 @@ public class CauldronBlockEntity extends BlockEntity {
      * which is neither the intended feel nor something a player can stop precisely.
      */
     public boolean acceptInteraction(long gameTime, int minimumGap) {
-        if (gameTime - lastInteractGameTime < minimumGap && gameTime >= lastInteractGameTime) {
-            return false;
+        // NEVER_INTERACTED is checked before any arithmetic, and that is the whole point.
+        //
+        // This used to be `gameTime - lastInteractGameTime < minimumGap`, with the field starting at
+        // Long.MIN_VALUE. On a fresh cauldron that subtraction OVERFLOWS — 1000 - (-2^63) wraps round
+        // to a large negative number, which is less than the gap, so the guard refused. It then
+        // returned without stamping, so the next call overflowed identically. Every cauldron in the
+        // world refused every item-in-hand interaction, permanently, and said nothing while doing it:
+        // no water, no ingredients, no bottling. The field is not persisted either, so a world reload
+        // put every pot straight back into it.
+        //
+        // Subtracting only once a real timestamp exists is what makes the arithmetic safe.
+        if (lastInteractGameTime != NEVER_INTERACTED) {
+            long since = gameTime - lastInteractGameTime;
+            // A negative gap means the clock went backwards — a world restore or a rollback. Allow it
+            // rather than barring the player until the clock catches up again.
+            if (since >= 0 && since < minimumGap) {
+                return false;
+            }
         }
         lastInteractGameTime = gameTime;
         setChanged();

@@ -45,6 +45,17 @@ public abstract class WizardArmorItem extends GeoItemBase {
         this.armorType = armorType;
     }
 
+    /** The slot this piece was built for. Read by {@link HoodedRobe} to tell a chest piece from
+     * the legs and boots drawn off the same model. */
+    public ArmorType armorType() {
+        return this.armorType;
+    }
+
+    /** The material this piece was built from. */
+    public ArmorMaterial material() {
+        return this.material;
+    }
+
     // -- GeckoLib ------------------------------------------------------------------------------
 
     /**

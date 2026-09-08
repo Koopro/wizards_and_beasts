@@ -203,6 +203,19 @@ public class ModRecipeProvider extends RecipeProvider {
                 .define('G', CurrencyItemRegistry.KNUT.get())
                 .unlockedBy("has_paper", has(Items.PAPER))
                 .save(sink(Module.WIZARDING_FOOD));
+
+        // Duelling dummy. Ungated on purpose: it is a practice target for whatever the server has
+        // switched on, so gating it behind one module would hide it from the very setups it helps.
+        ShapedRecipeBuilder.shaped(registries.lookupOrThrow(Registries.ITEM), RecipeCategory.MISC,
+                        MiscItemRegistry.DUELLING_DUMMY.get())
+                .pattern(" W ")
+                .pattern("SHS")
+                .pattern(" S ")
+                .define('W', Items.WHITE_WOOL)
+                .define('H', Items.HAY_BLOCK)
+                .define('S', Items.STICK)
+                .unlockedBy("has_hay_block", has(Items.HAY_BLOCK))
+                .save(output);
     }
 
     // ─── Location decorative blocks ─────────────────────────────────────────────

@@ -24,6 +24,8 @@ public final class MigratedAbilityBehaviors {
         AbilityBehaviors.register(AbilityIds.ANIMAGUS_BEAST_ABILITY,
                 new SimpleAbilityBehavior(AnimagusAbilityService::useActive));
         AbilityBehaviors.register(AbilityIds.OBSCURIAL_FORM, ObscurialFormAbilityBehavior.INSTANCE);
+        AbilityBehaviors.register(AbilityIds.VEELA_FORM, HeritageFormAbilityBehavior.VEELA);
+        AbilityBehaviors.register(AbilityIds.VAMPIRE_FORM, HeritageFormAbilityBehavior.VAMPIRE);
         AbilityBehaviors.register(AbilityIds.OBSCURIAL_STRESS_VENT,
                 new SimpleAbilityBehavior(ObscurialServerLogic::stressVent));
         AbilityBehaviors.register(AbilityIds.OBSCURUS_SURGE,

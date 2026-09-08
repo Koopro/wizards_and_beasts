@@ -116,9 +116,13 @@ final class WizardingWorldBlockRegistry {
     static final DeferredBlock<SpellTeacherBlock> SPELL_TEACHER =
             ModBlocks.BLOCKS.registerBlock("spell_teacher", SpellTeacherBlock::new,
                     () -> BlockBehaviour.Properties.of().strength(2.5f).sound(SoundType.WOOD).noOcclusion());
+    // noOcclusion is not cosmetic here: the bench renders through a GeckoLib rig and is therefore
+    // RenderShape.INVISIBLE. An occluding block culls the faces of its neighbours, so a block that
+    // occludes and draws nothing is a hole you can see the void through. Every other rig-drawn block
+    // in the mod already sets this (tents, and metalCauldronProps); this one was missed.
     static final DeferredBlock<WandmakersBenchBlock> WANDMAKERS_BENCH =
             ModBlocks.BLOCKS.registerBlock("wandmakers_bench", WandmakersBenchBlock::new,
-                    () -> BlockBehaviour.Properties.of().strength(2.5f).sound(SoundType.WOOD));
+                    () -> BlockBehaviour.Properties.of().strength(2.5f).sound(SoundType.WOOD).noOcclusion());
 
     static final DeferredItem<BlockItem> DEVILS_SNARE_ITEM = RegistryUtils.registerSimpleBlockItem("devils_snare", DEVILS_SNARE);
     static final DeferredItem<BlockItem> MALLOWSWEET_ITEM = RegistryUtils.registerSimpleBlockItem("mallowsweet", MALLOWSWEET);

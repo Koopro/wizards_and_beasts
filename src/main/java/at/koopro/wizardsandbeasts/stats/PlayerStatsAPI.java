@@ -261,6 +261,48 @@ public final class PlayerStatsAPI {
         setAndSync(player, fresh);
     }
 
+    /**
+     * Re-rolls POWER against a lineage's band because the lineage itself changed, keeping every stat the
+     * player trained.
+     *
+     * <p>The difference from {@link #initializeStatsForNewPlayer} is the whole point: that one is the
+     * first-selection path and refuses to run twice, which is correct for a gate a player passes once and
+     * wrong for every later change of heritage. Both admin routes into a heritage change expressed
+     * themselves as "wipe the block, then initialise", so switching a Squib to a Centaur — or simply
+     * running {@code /wandb player stats reroll_power} — also reset PRECISION, REFLEXES, WILLPOWER and all
+     * four training accumulators to zero.
+     *
+     * <p>Rolls unconditionally. A player who lands on the same lineage twice gets a genuinely new number,
+     * which is what "re-roll" means; the idempotency guarantee belongs to the first-selection path alone.
+     */
+    public static void rerollHeritagePower(@NonNull Player player,
+                                           @NonNull HeritageVariant heritage,
+                                           @NonNull RandomSource random) {
+        requireServer(player);
+        PowerBandTable.PowerRollResult result = PowerBandTable.rollInitialPower(heritage, random);
+        LOGGER.info("[WizardsAndBeasts] rerollHeritagePower: {} heritage={} power={} prodigy={}",
+                player.getName().getString(), heritage.getId(), result.power(), result.isProdigy());
+        setAndSync(player, getData(player).withHeritageRoll(result.power(), result.isProdigy()));
+    }
+
+    /**
+     * Drops the heritage-derived half of the block for a player who no longer has a heritage, so the next
+     * selection rolls fresh.
+     *
+     * <p>{@code initializeStatsForNewPlayer} skips any block that is not at defaults, and a POWER roll left
+     * behind by the old heritage is enough to make it skip. Without this, resetting a Full Giant and then
+     * choosing Squib left the Giant's Power sitting on the Squib's 0–10 band with nothing in the mod able
+     * to correct it.
+     */
+    public static void clearHeritageRoll(@NonNull Player player) {
+        requireServer(player);
+        PlayerStatsData old = getData(player);
+        if (old.power() == 0 && !old.isProdigy() && old.powerGrowthAccumulated() == 0) {
+            return;
+        }
+        setAndSync(player, old.withHeritageRoll(0, false));
+    }
+
     // -------------------------------------------------------------------------
     // Internal helpers
     // -------------------------------------------------------------------------

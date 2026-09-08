@@ -5,8 +5,10 @@ import at.koopro.wizardsandbeasts.Config;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.command.debug.DebugHooks;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
+import at.koopro.wizardsandbeasts.spell.cast.CastReleaseGate;
 import at.koopro.wizardsandbeasts.spell.cast.SpellRejectCodes;
 import at.koopro.wizardsandbeasts.spell.cast.SpellCastService;
+import at.koopro.wizardsandbeasts.spell.cast.WandCastSessions;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -17,17 +19,17 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.slf4j.Logger;
 import com.mojang.logging.LogUtils;
 
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-
+/**
+ * The wand release edge, as sent by the client.
+ *
+ * <p>Deliberately empty. The client is not asked which spell, which slot, how long it held, or which
+ * session it thinks it is in, because every one of those would be a claim the server must then either
+ * trust or re-derive — and the server already knows all of them. The packet says one thing: <em>the
+ * button came up</em>. {@link WandCastSessions} decides whether that edge lands on an open hold, and
+ * {@link SpellCastService} decides what it is worth.
+ */
 public record SpellCastC2SPayload() implements CustomPacketPayload {
     private static final Logger LOGGER = LogUtils.getLogger();
-    /**
-     * After a server-driven wand release (e.g. Avada kill), ignore duplicate release packets from the client
-     * for a few ticks so cooldown / cast count are not applied twice and chat is not spammed.
-     */
-    private static final Map<UUID, Long> IGNORE_RELEASE_UNTIL_GAME_TICK = new ConcurrentHashMap<>();
 
     public static final Type<SpellCastC2SPayload> TYPE = new Type<>(
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "spell_cast"));
@@ -48,21 +50,14 @@ public record SpellCastC2SPayload() implements CustomPacketPayload {
     }
 
     /**
-     * Ignore {@link #completeWandCastRelease(ServerPlayer)} calls (e.g. from a follow-up client packet) until this
-     * game tick (inclusive).
-     */
-    public static void ignoreDuplicateReleasesUntil(ServerPlayer player, long gameTickInclusive) {
-        IGNORE_RELEASE_UNTIL_GAME_TICK.put(player.getUUID(), gameTickInclusive);
-    }
-
-    /** Logout cleanup — entries otherwise persist for the server's lifetime (AUD-G-004). */
-    public static void clearFor(UUID playerId) {
-        IGNORE_RELEASE_UNTIL_GAME_TICK.remove(playerId);
-    }
-
-    /**
-     * Applies the same release logic as a client {@link SpellCastC2SPayload} (execute, cooldown, cast count, sync).
-     * Safe to call from server-only flows (e.g. Avada Kedavra ending the wand channel early).
+     * Resolves one wand release: spends the open session's release token, then applies the cast
+     * (execute, cooldown, cast count, sync).
+     *
+     * <p>Safe to call from server-only flows — Avada Kedavra ends its own channel on the kill by
+     * calling this. Doing so spends the same token, so the client's release for that hold, whenever it
+     * arrives, is refused as a duplicate rather than casting a second time. That is what replaced the
+     * fifteen-tick ignore window this class used to keep: a window let a genuine re-press inside it be
+     * eaten and a duplicate outside it through, because it was standing in for state it could not see.
      */
     public static void completeWandCastRelease(ServerPlayer player) {
         if (!(player.level() instanceof ServerLevel serverLevel)) {
@@ -70,14 +65,11 @@ public record SpellCastC2SPayload() implements CustomPacketPayload {
             return;
         }
 
-        Long ignoreUntil = IGNORE_RELEASE_UNTIL_GAME_TICK.get(player.getUUID());
-        if (ignoreUntil != null && serverLevel.getGameTime() <= ignoreUntil) {
+        CastReleaseGate refused = WandCastSessions.offerRelease(player, serverLevel.getGameTime());
+        if (refused != null) {
             player.getData(ModAttachments.SPELL_DATA.get()).incrementSyncCorrections();
-            debugReject(player, SpellRejectCodes.DUPLICATE_RELEASE_GUARD);
+            debugReject(player, refused.rejectCode());
             return;
-        }
-        if (ignoreUntil != null && serverLevel.getGameTime() > ignoreUntil) {
-            IGNORE_RELEASE_UNTIL_GAME_TICK.remove(player.getUUID());
         }
         SpellCastService.completeWandCastRelease(player);
     }

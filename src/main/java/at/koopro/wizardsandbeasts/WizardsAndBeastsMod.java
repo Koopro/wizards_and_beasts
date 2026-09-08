@@ -70,6 +70,11 @@ public class WizardsAndBeastsMod {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public WizardsAndBeastsMod(IEventBus modEventBus, ModContainer modContainer) {
+        // Game tests are registry entries in 1.21.11, and this event is the one hook fired late
+        // enough for a mod to add them. GameTestHooks.isGametestEnabled() gates the event itself,
+        // so nothing here runs outside a dev/gametest launch.
+        modEventBus.addListener(at.koopro.wizardsandbeasts.gametest.WizardsAndBeastsGameTests::register);
+        at.koopro.wizardsandbeasts.gametest.WizardsAndBeastsGameTests.registerTypes(modEventBus);
         ModBlocks.BLOCKS.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
         WandItemRegistry.init();
@@ -129,6 +134,12 @@ public class WizardsAndBeastsMod {
             // is what turns those calls into packets; nothing about the mechanics changes either way.
             at.koopro.wizardsandbeasts.apparition.ApparitionBroadcast.install(
                     at.koopro.wizardsandbeasts.apparition.ApparitionPresentationBroadcaster.INSTANCE);
+            // The shared transformed-player layer: who is restricted, and what their body can sense.
+            // Registered here rather than from a static block on each system because a static block only
+            // runs when something touches the class, and the constraint wall has to be standing before
+            // anything asks it a question.
+            at.koopro.wizardsandbeasts.form.constraint.FormConstraints.bootstrap();
+            at.koopro.wizardsandbeasts.form.sense.FormSenses.bootstrap();
         });
 
         // Datapack-driven JSON content: spells, brews, and brewing recipes

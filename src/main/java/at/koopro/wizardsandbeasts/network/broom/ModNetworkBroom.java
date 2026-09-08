@@ -20,5 +20,11 @@ public final class ModNetworkBroom {
                 BroomInputC2SPayload.TYPE,
                 BroomInputC2SPayload.STREAM_CODEC,
                 BroomInputC2SPayload::handle);
+        // The rider's client is the only side that can see the broom hit something -- see the payload for
+        // why the server cannot -- so a crash reaches the server as a report rather than as an observation.
+        registrar.playToServer(
+                BroomImpactC2SPayload.TYPE,
+                BroomImpactC2SPayload.STREAM_CODEC,
+                BroomImpactC2SPayload::handle);
     }
 }

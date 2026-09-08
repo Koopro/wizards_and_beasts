@@ -87,7 +87,9 @@ public final class TransitionManager {
 
             ServerPlayer player = event.getServer().getPlayerList().getPlayer(uuid);
             if (player == null) {
-                // Player disconnected — clean up
+                // Player disconnected mid-transition. Dropping the entry is not enough on its own —
+                // see onPlayerDisconnect, which is what actually gives their invulnerability back and
+                // now runs first. This stays as the backstop for a player who left some other way.
                 it.remove();
                 continue;
             }
@@ -120,7 +122,37 @@ public final class TransitionManager {
     }
 
     /**
-     * Removes a player from all active transitions (e.g. on disconnect).
+     * Ends a transition because the player left, restoring what the transition borrowed.
+     *
+     * <p><b>This method had no callers.</b> The tick loop dropped the entry on its own when the player
+     * went null, which looked like adequate cleanup and was not: {@link #startTransition} sets
+     * {@code setInvulnerable(true)} and only the <em>completion</em> path put it back. Invulnerability is
+     * saved to the player's NBT, so logging out during a transformation — the two-second window a
+     * transformation is — left a player permanently invulnerable, and nothing in the game would ever
+     * clear it again.
+     *
+     * <p>Now wired to {@code PlayerEvent.PlayerLoggedOutEvent}, ahead of the tick loop's backstop.
+     */
+    @SubscribeEvent
+    public static void onPlayerLoggedOut(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            onPlayerDisconnect(player);
+        }
+    }
+
+    /** Ends a transition for a player who is still around, restoring their prior invulnerability. */
+    public static void onPlayerDisconnect(ServerPlayer player) {
+        ActiveTransition transition = ACTIVE.remove(player.getUUID());
+        if (transition != null) {
+            player.setInvulnerable(transition.wasInvulnerable());
+        }
+    }
+
+    /**
+     * Removes a player from all active transitions by id.
+     *
+     * <p>Cannot restore invulnerability — there is no player to restore it on — so prefer
+     * {@link #onPlayerDisconnect(ServerPlayer)} wherever one is in hand.
      */
     public static void onPlayerDisconnect(UUID playerUUID) {
         ACTIVE.remove(playerUUID);

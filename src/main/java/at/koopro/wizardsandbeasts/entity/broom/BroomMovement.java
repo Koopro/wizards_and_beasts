@@ -128,23 +128,70 @@ final class BroomMovement {
         b.setDeltaMovement(motX, b.verticalVelocity, motZ);
         b.move(MoverType.SELF, b.getDeltaMovement());
 
-        if (!b.level().isClientSide() && (b.horizontalCollision || b.verticalCollision)) {
+        // No isClientSide guard. This runs on whichever side actually simulated the flight, which for a
+        // ridden broom is the rider's client — see BroomEntity#tick. The server cannot detect these
+        // collisions at all: the position it receives has already had the client's collisions resolved out
+        // of it, so its own move() sails through the wall the client stopped at.
+        if (b.horizontalCollision || b.verticalCollision) {
             BroomImpacts.handleCollision(b, preMoveSpeed, preMoveDescent);
         }
 
-        if (boostingNow) {
+    }
+
+    /**
+     * Boost bookkeeping. Server-side, and separate from {@link #tickMovement} because it is the one part of
+     * flight the server still owns.
+     *
+     * <p>{@code BOOST_TICKS_REMAINING} and {@code BOOST_COOLDOWN_TICKS} are synched entity data, so only the
+     * server can write them and have anybody hear it. While this lived inside {@code tickMovement} both
+     * sides counted their own copy, and the server's — running on input up to ten ticks stale — was then
+     * broadcast over the client's, so a boost visibly stuttered as the two disagreed about how much of it
+     * was left. One counter now, on the side that owns the field.
+     *
+     * <p>Reads {@code inputBoosting}, which reaches the server through {@code BroomInputC2SPayload}. Latency
+     * on that is harmless here: boost is a discrete state with a multi-second duration, not a per-tick
+     * velocity.
+     */
+    static void tickBoost(BroomEntity b) {
+        BroomDefinition def = b.resolveDefinition();
+        if (b.isBoostFiring()) {
             b.setBoostTicksRemaining(b.getBoostTicksRemaining() - 1);
             if (b.getBoostTicksRemaining() <= 0) {
                 b.setBoostCooldownTicks(def.boostCooldownTicks());
             }
-        } else {
-            if (b.getBoostCooldownTicks() > 0) {
-                b.setBoostCooldownTicks(b.getBoostCooldownTicks() - 1);
-                if (b.getBoostCooldownTicks() == 0) {
-                    b.setBoostTicksRemaining(def.boostDurationTicks());
-                }
+        } else if (b.getBoostCooldownTicks() > 0) {
+            b.setBoostCooldownTicks(b.getBoostCooldownTicks() - 1);
+            if (b.getBoostCooldownTicks() == 0) {
+                b.setBoostTicksRemaining(def.boostDurationTicks());
             }
         }
+    }
+
+    /**
+     * The flight state of a broom this side did not fly, read back out of the motion the authority produced.
+     *
+     * <p>The server runs this for every ridden broom, and a client runs it for everybody else's. Neither may
+     * simulate: {@code Player.isClientAuthoritative()} is true, so vanilla hands a ridden vehicle to the
+     * rider's client and overwrites the server's position and rotation from
+     * {@code ServerboundMoveVehiclePacket} every tick. Simulating anyway did not move the broom — it was
+     * snapped back regardless — but it did leave {@code currentSpeed} and {@code verticalVelocity} holding
+     * a flight nobody flew, and everything downstream of them believed it.
+     *
+     * <p>Derived from the position delta rather than {@code getDeltaMovement()}, because the snap that
+     * writes the position does not write the velocity: after an {@code absSnapTo} the delta is still last
+     * tick's guess. The travelled vector is what actually happened.
+     */
+    static void observeMovement(BroomEntity b) {
+        Vec3 here = b.position();
+        Vec3 previous = b.observedPreviousPosition;
+        b.observedPreviousPosition = here;
+        if (previous == null) {
+            return;
+        }
+        Vec3 travelled = here.subtract(previous);
+        b.currentSpeed = (float) travelled.horizontalDistance();
+        b.verticalVelocity = (float) travelled.y;
+        b.setDeltaMovement(travelled);
     }
 
     static void updateTilt(BroomEntity b) {

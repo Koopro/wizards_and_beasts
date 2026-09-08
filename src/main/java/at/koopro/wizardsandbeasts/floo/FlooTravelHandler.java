@@ -61,6 +61,18 @@ public final class FlooTravelHandler {
         return Math.max(0, at.koopro.wizardsandbeasts.Config.flooTravelCooldownTicks);
     }
 
+    /**
+     * Forgets when {@code player} last arrived, so the Network will take them again immediately.
+     *
+     * <p>For the dev kit and nothing else. The arrival cooldown is the commonest reason a grate does
+     * nothing, and waiting it out between attempts is most of the time cost of testing travel — but
+     * there was no way to clear it, because the timestamp is private and there is no gameplay reason
+     * to shorten it.
+     */
+    public static void clearCooldown(@NonNull ServerPlayer player) {
+        LAST_ARRIVAL.remove(player.getUUID());
+    }
+
     /** Ticks left on {@code player}'s arrival cooldown, or 0 when they may travel. */
     public static long cooldownRemaining(@NonNull ServerPlayer player) {
         int cooldown = cooldownTicks();

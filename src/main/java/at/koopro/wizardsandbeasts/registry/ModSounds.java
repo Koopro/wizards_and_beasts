@@ -181,6 +181,16 @@ public class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> APPARITION_SPLINCH =
             register("apparition_splinch");
 
+    // The change, and what comes out of it. Re-pitched vanilla samples like every other sound in this
+    // mod -- see sounds.json. The transform cue plays at the onset and covers the whole
+    // werewolfTransformDelayTicks window; the howl marks the change landing and every target acquired.
+    public static final DeferredHolder<SoundEvent, SoundEvent> WEREWOLF_TRANSFORM =
+            register("werewolf_transform");
+    public static final DeferredHolder<SoundEvent, SoundEvent> WEREWOLF_HOWL =
+            register("werewolf_howl");
+    public static final DeferredHolder<SoundEvent, SoundEvent> WEREWOLF_REVERT =
+            register("werewolf_revert");
+
     private static DeferredHolder<SoundEvent, SoundEvent> register(String path) {
         return SOUND_EVENTS.register(path, () ->
                 SoundEvent.createVariableRangeEvent(

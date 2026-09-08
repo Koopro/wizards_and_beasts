@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.client.spell.wheel;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.client.ModTextures;
+import at.koopro.wizardsandbeasts.client.hud.WandHudSprites;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiText;
 import at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageDataState;
@@ -65,9 +65,12 @@ public final class SpellWheelScreen extends Screen {
     private static final int COLOR_SLOT = 0xD0000000 | (WizardsPalette.WELL & 0x00FFFFFF);
     private static final int COLOR_SLOT_HOVER = 0xF0000000 | (WizardsPalette.RAIL & 0x00FFFFFF);
     private static final int COLOR_TEXT = WizardsPalette.TEXT;
+    private static final int COLOR_TEXT_DIM = WizardsPalette.TEXT_DIM;
     /** State, not theme: the armed spell has to stay distinguishable from the hovered one at a glance. */
     private static final int COLOR_ARMED = 0xFFFFD24A;
     private static final int COLOR_COOLDOWN = 0xB0000000;
+    /** Alpha a placeholder spell's icon is drawn at — present, legible, obviously not available. */
+    private static final float ALPHA_COMING_SOON = 0.35f;
 
     /**
      * Ticks the key must stay held for the gesture to count as a hold. Released sooner and it was a
@@ -162,15 +165,18 @@ public final class SpellWheelScreen extends Screen {
             int x1 = x0 + SLOT;
             int y1 = y0 + SLOT;
 
-            g.fill(x0, y0, x1, y1, i == hovered ? COLOR_SLOT_HOVER : COLOR_SLOT);
+            boolean placeholder = isComingSoon(spellId);
+            g.fill(x0, y0, x1, y1, i == hovered && !placeholder ? COLOR_SLOT_HOVER : COLOR_SLOT);
             if (spellId.equals(armed)) {
                 drawBorder(g, x0 - 1, y0 - 1, x1 + 1, y1 + 1, COLOR_ARMED);
             }
 
-            g.blit(RenderPipelines.GUI_TEXTURED,
-                    ModTextures.resolveWandHudSpellIcon(Minecraft.getInstance().getResourceManager(), spellId),
-                    x0 + ICON_INSET, y0 + ICON_INSET, 0.0F, 0.0F,
-                    ICON_SIZE, ICON_SIZE, ICON_TEX_SIZE, ICON_TEX_SIZE, ICON_TEX_SIZE, ICON_TEX_SIZE);
+            // A spell nobody can cast yet still occupies its sector, faded rather than removed: the
+            // wheel's order is muscle memory, and dropping entries in and out of it as spells are
+            // written would move every neighbour. Confirming one is refused in confirmHovered().
+            g.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.spellIcon(spellId),
+                    x0 + ICON_INSET, y0 + ICON_INSET, ICON_SIZE, ICON_SIZE,
+                    placeholder ? ALPHA_COMING_SOON : 1.0f);
 
             // Cooldown shade, bottom-up by remaining fraction — the same reading as the HUD diamond,
             // so a spell that looks half-recharged there looks half-recharged here.
@@ -189,8 +195,19 @@ public final class SpellWheelScreen extends Screen {
                 ? displayName(entries.get(hovered))
                 : Component.translatable("gui." + WizardsAndBeastsMod.MODID + ".spell_wheel.hint");
         g.drawCenteredString(font, centre, cx, cy - 4, COLOR_TEXT);
+        if (hovered >= 0 && isComingSoon(entries.get(hovered))) {
+            g.drawCenteredString(font,
+                    Component.translatable("gui." + WizardsAndBeastsMod.MODID + ".spell.coming_soon"),
+                    cx, cy + 7, COLOR_TEXT_DIM);
+        }
 
         maybeCloseOnRelease();
+    }
+
+    /** A registered spell whose behaviour is not written yet — see {@code SpellImplementationState}. */
+    private static boolean isComingSoon(String spellId) {
+        Spell spell = Spells.byId(spellId);
+        return spell != null && !spell.isImplemented();
     }
 
     private static Component displayName(String spellId) {
@@ -274,6 +291,12 @@ public final class SpellWheelScreen extends Screen {
         }
         int slot = Mth.clamp(ClientSpellDataState.get().getActiveSlot(), 0, PlayerSpellData.LOADOUT_SIZE - 1);
         String spellId = entries.get(hovered);
+        // The server refuses this assign too (SpellAssignC2SPayload). Refusing here as well is not a
+        // duplicated rule but the difference between a silent no-op and a red line on the HUD for a
+        // pick the wheel had already drawn as unavailable.
+        if (isComingSoon(spellId)) {
+            return;
+        }
         if (spellId.equals(ClientSpellDataState.get().getLoadoutSpell(slot))) {
             return; // already armed — no packet for a no-op
         }

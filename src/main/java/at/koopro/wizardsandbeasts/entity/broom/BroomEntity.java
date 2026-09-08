@@ -20,6 +20,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.InterpolationHandler;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
@@ -42,7 +43,18 @@ import java.util.Map;
 import at.koopro.wizardsandbeasts.registry.BroomItemRegistry;
 
 public class BroomEntity extends Entity implements GeoEntity {
-    private static final long INPUT_TIMEOUT_TICKS = 10L;
+    /**
+     * How long the server holds the last input it was sent before treating the rider as idle.
+     *
+     * <p>Twenty — two keepalives, not one. {@code BroomClientInputHandler} re-sends on an interval of ten
+     * ticks, so a timeout of ten meant a single late packet read as "the rider let go of everything".
+     */
+    private static final long INPUT_TIMEOUT_TICKS = 20L;
+    /**
+     * Largest single-tick change in speed that can be a real impact rather than a network artefact.
+     * See {@link #applyCrashWearFromMotionDelta}.
+     */
+    private static final double MAX_PLAUSIBLE_MOTION_DELTA = 4.0D;
     private static final Identifier FALLBACK_DEFINITION =
             Identifier.fromNamespaceAndPath("wizards_and_beasts", "cleansweep_seven");
     private static final EntityDataAccessor<String> DEFINITION_ID =
@@ -84,6 +96,21 @@ public class BroomEntity extends Entity implements GeoEntity {
     private boolean droppedItem;
     private transient @Nullable BroomDefinition currentDef;
     private double lastMotionDelta;
+    /**
+     * Where this broom was last tick, for {@link BroomMovement#observeMovement}. Null until the first
+     * observed tick, because there is no honest delta to report before there is a previous position — and
+     * seeding it to the origin would make a broom's first observed tick look like a fall from the world
+     * centre, which is a severe impact.
+     */
+    @Nullable Vec3 observedPreviousPosition;
+    /**
+     * Smoothing for a broom this client is not flying.
+     *
+     * <p>Needed the moment the non-authoritative side stopped simulating: without a handler,
+     * {@code Entity#moveOrInterpolateTo} falls back to {@code setPos}, so another player's broom would
+     * teleport once per position packet instead of flying. Three steps, the same as a boat.
+     */
+    private final InterpolationHandler interpolation = new InterpolationHandler(this, 3);
     /** Set by {@link #onGentleLanding()} and cleared each tick, so wear paths can agree on it. */
     private boolean landedGentlyThisTick;
     /** Keeps the touchdown sound to one per landing rather than one per grounded tick. */
@@ -116,6 +143,8 @@ public class BroomEntity extends Entity implements GeoEntity {
             announcedLanding = false;
         }
 
+        interpolation.interpolate();
+
         LivingEntity rider = getControllingPassenger();
         if (rider != null) {
             if (bailOutOfFluid(rider)) {
@@ -123,16 +152,34 @@ public class BroomEntity extends Entity implements GeoEntity {
             }
             clearStaleInputIfNeeded();
             refreshPolishedFlag();
-            ensureBoostInitialized();
-            BroomMovement.tickMovement(this);
+            if (!level().isClientSide()) {
+                ensureBoostInitialized();
+                BroomMovement.tickBoost(this);
+            }
+            // Vanilla's contract for a ridden vehicle, the one AbstractBoat#tick follows: simulate only
+            // where you are the authority. Player.isClientAuthoritative() is true, so for a broom with a
+            // rider that is the rider's own client and nobody else — the server's position and rotation are
+            // overwritten from ServerboundMoveVehiclePacket every tick regardless of what it computed.
+            // Running the flight sim on both sides did not make the server authoritative; it only gave it a
+            // second, wrong opinion, built from input that arrives on change or every ten ticks, and that
+            // opinion still fired collisions, durability wear and crash damage the rider never flew into.
+            if (isLocalInstanceAuthoritative()) {
+                BroomMovement.tickMovement(this);
+            } else {
+                BroomMovement.observeMovement(this);
+            }
             applyCrashWearFromMotionDelta();
             if (!level().isClientSide() && !isRemoved()) {
                 BroomImpacts.scanEntityCollisions(this, rider);
             }
-        } else {
+        } else if (isLocalInstanceAuthoritative()) {
+            // Nobody riding: with no controlling passenger there is no client to be authoritative, so this
+            // is the server, and the fall is its own to simulate.
             verticalVelocity = (float) getDeltaMovement().y;
             setDeltaMovement(getDeltaMovement().scale(0.95).add(0, -0.04, 0));
             move(MoverType.SELF, getDeltaMovement());
+        } else {
+            BroomMovement.observeMovement(this);
         }
         BroomMovement.updateTilt(this);
         BroomImpacts.tickCollisionCooldowns(this);
@@ -176,6 +223,11 @@ public class BroomEntity extends Entity implements GeoEntity {
         if (lastInputGameTick == Long.MIN_VALUE) return;
         if (level().getGameTime() - lastInputGameTick <= INPUT_TIMEOUT_TICKS) return;
         setInput(false, false, false, false, false, getYRot(), getXRot());
+    }
+
+    @Override
+    public InterpolationHandler getInterpolation() {
+        return interpolation;
     }
 
     @Nullable
@@ -612,6 +664,44 @@ public class BroomEntity extends Entity implements GeoEntity {
         }
     }
 
+    /** Server game tick the last impact report from this broom's rider was acted on. */
+    private long lastImpactReportTick = Long.MIN_VALUE;
+
+    /**
+     * Tells the server about a collision only this client could see. Client-side; see
+     * {@link at.koopro.wizardsandbeasts.network.broom.BroomImpactC2SPayload}.
+     *
+     * <p>Silent below the minor threshold, and silent for a landing already announced, so ordinary flight
+     * along the ground — a vertical collision every single tick — does not become a packet every tick.
+     */
+    void reportImpact(boolean gentle, float severity) {
+        if (gentle ? announcedLanding : severity < BroomTuning.MINOR_IMPACT_THRESHOLD) {
+            return;
+        }
+        at.koopro.wizardsandbeasts.util.ClientClassBridge.callStatic(
+                "at.koopro.wizardsandbeasts.client.broom.BroomImpactClient", "report",
+                new Class<?>[] {BroomEntity.class, boolean.class, float.class},
+                new Object[] {this, gentle, severity});
+    }
+
+    /**
+     * Applies an impact the rider's client reported. Server-side; validated by the payload before it gets
+     * here, rate-limited here because the limit is per broom and the clock lives on the level.
+     */
+    public void acceptImpactReport(boolean gentle, float severity) {
+        if (!(level() instanceof net.minecraft.server.level.ServerLevel serverLevel)) {
+            return;
+        }
+        long now = serverLevel.getGameTime();
+        if (now - lastImpactReportTick
+                < at.koopro.wizardsandbeasts.network.broom.BroomImpactC2SPayload.IMPACT_REPORT_INTERVAL_TICKS) {
+            return;
+        }
+        lastImpactReportTick = now;
+        BroomImpacts.apply(this, gentle, net.minecraft.util.Mth.clamp(severity, 0f,
+                at.koopro.wizardsandbeasts.network.broom.BroomImpactC2SPayload.MAX_SEVERITY));
+    }
+
     private void ensureBoostInitialized() {
         if (getBoostTicksRemaining() <= 0 && getBoostCooldownTicks() <= 0) {
             setBoostTicksRemaining(resolveDefinition().boostDurationTicks());
@@ -632,7 +722,12 @@ public class BroomEntity extends Entity implements GeoEntity {
             return;
         }
         double delta = Math.abs(getDeltaMovement().length() - lastMotionDelta);
-        if (delta > 0.4D) {
+        // Upper bound as well as lower. On the server the motion this reads is now observed from the
+        // position the rider's client reported, so a dropped packet or a lag spike arrives as one enormous
+        // apparent jump — and this would have billed the player for crashing into it. Nothing a broom can
+        // actually do produces a per-tick change this large; vanilla's own vehicle check tolerates ten
+        // blocks in a tick before it complains, so anything near that is the network, not the flight.
+        if (delta > 0.4D && delta < MAX_PLAUSIBLE_MOTION_DELTA) {
             int damage = 1 + random.nextInt(3);
             applyDurabilityDamage(damage);
         }
@@ -647,8 +742,12 @@ public class BroomEntity extends Entity implements GeoEntity {
         currentSpeed *= 0.5f;
         verticalVelocity = 0f;
         setDeltaMovement(getDeltaMovement().multiply(0.6, 0.0, 0.6));
-        if (!level().isClientSide() && !announcedLanding) {
-            announcedLanding = true;
+        // Latched on both sides. It used to be set only on the server, which was enough while the server
+        // was the one noticing landings; now the client is, and it uses this same flag to keep a touchdown
+        // to one report rather than one per grounded tick. The sound stays server-side.
+        boolean firstTouch = !announcedLanding;
+        announcedLanding = true;
+        if (firstTouch && !level().isClientSide()) {
             level().playSound(null, blockPosition(), SoundEvents.WOOL_STEP,
                     SoundSource.PLAYERS, 0.5f, 1.1f);
         }

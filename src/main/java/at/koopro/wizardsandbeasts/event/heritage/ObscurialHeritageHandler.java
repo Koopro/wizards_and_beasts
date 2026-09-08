@@ -21,8 +21,6 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -31,6 +29,14 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 /**
  * Maintains Obscurial state and condition-based effects.
+ *
+ * <p><b>The no-hands wall is not here any more.</b> Item use, block and entity interaction, breaking,
+ * the inventory and dropping are all enforced by
+ * {@link at.koopro.wizardsandbeasts.form.constraint.FormConstraintEvents}, shared with the Animagus and
+ * werewolf layers; this system only declares which set applies, through
+ * {@code ObscurialRules.constraintsFor}. Casting is deliberately excluded from that set — dark form is
+ * the one transformed state in the mod that is <em>supposed</em> to cast, and its spell policy is gated
+ * separately by {@code SpellCastGate}. See {@code documentation/TRANSFORMED_PLAYER_CONTRACT.md}.
  */
 @EventBusSubscriber(modid = WizardsAndBeastsMod.MODID)
 public final class ObscurialHeritageHandler {
@@ -151,30 +157,6 @@ public final class ObscurialHeritageHandler {
         }
     }
 
-    @SubscribeEvent
-    public static void onRightClickItem(PlayerInteractEvent.RightClickItem event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        if (isDarkObscurial(player)) {
-            event.setCanceled(true);
-        }
-    }
-
-    @SubscribeEvent
-    public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        if (isDarkObscurial(player)) {
-            event.setCanceled(true);
-        }
-    }
-
-    @SubscribeEvent
-    public static void onUseItemStart(LivingEntityUseItemEvent.Start event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        if (isDarkObscurial(player)) {
-            event.setCanceled(true);
-        }
-    }
-
     private static void syncStateFromActiveForm(ServerPlayer player, PlayerHeritageData data, boolean forceSync) {
         if (data.getTransformationState() == TransformationState.TRANSITIONING && !forceSync) {
             return;
@@ -256,11 +238,6 @@ public final class ObscurialHeritageHandler {
             data.setFlag(FLAG_FORCED_DARK_UNTIL_TICK, String.valueOf(now + ObscurialCombatRules.getForcedDarkFormDurationTicks()));
             player.displayClientMessage(Component.literal("\u00A75Your obscurus breaks loose under emotional strain."), true);
         }
-    }
-
-    private static boolean isDarkObscurial(ServerPlayer player) {
-        PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
-        return ObscurialRules.isObscurial(data) && ObscurialRules.isDarkForm(data);
     }
 
     private static void updateResourcesAndLockout(ServerPlayer player, PlayerHeritageData data, ServerLevel level) {

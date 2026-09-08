@@ -2,6 +2,8 @@ package at.koopro.wizardsandbeasts.client;
 
 import at.koopro.wizardsandbeasts.client.beam.BeamEntityRenderer;
 import at.koopro.wizardsandbeasts.client.broom.BroomRenderer;
+import at.koopro.wizardsandbeasts.client.entity.ChocolateFrogRenderer;
+import at.koopro.wizardsandbeasts.client.dummy.DuellingDummyRenderer;
 import at.koopro.wizardsandbeasts.client.entity.DementorRenderer;
 import at.koopro.wizardsandbeasts.client.entity.DragonRenderer;
 import at.koopro.wizardsandbeasts.client.entity.GoblinRenderer;
@@ -22,9 +24,9 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 public class ClientSetup {
 
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        // Vanilla's own item renderer: an escaped frog is a dropped chocolate frog that hops.
-        event.registerEntityRenderer(ModEntities.CHOCOLATE_FROG.get(),
-                net.minecraft.client.renderer.entity.ItemEntityRenderer::new);
+        // Its own model, not the item sprite: a spinning flat icon reads as loot on the floor,
+        // and the whole point of this one is that it is getting away. See ChocolateFrogRenderer.
+        event.registerEntityRenderer(ModEntities.CHOCOLATE_FROG.get(), ChocolateFrogRenderer::new);
         event.registerEntityRenderer(ModEntities.BROOM.get(), BroomRenderer::new);
         event.registerEntityRenderer(ModEntities.SPELL_PROJECTILE.get(), SpellProjectileRenderer::new);
         event.registerEntityRenderer(ModEntities.BEAM.get(), BeamEntityRenderer::new);
@@ -36,6 +38,7 @@ public class ClientSetup {
         event.registerEntityRenderer(ModEntities.NIFFLER.get(), GeoRendererHelper.simple("niffler"));
         event.registerEntityRenderer(ModEntities.BABY_NIFFLER.get(), GeoRendererHelper.simple("niffler"));
         event.registerEntityRenderer(ModEntities.FORM_MANNEQUIN.get(), FormMannequinRenderer::new);
+        event.registerEntityRenderer(ModEntities.DUELLING_DUMMY.get(), DuellingDummyRenderer::new);
         event.registerEntityRenderer(ModEntities.WIZARDING_THROWN.get(), ThrownItemRenderer::new);
         event.registerEntityRenderer(ModEntities.DEMENTOR.get(), DementorRenderer::new);
         event.registerEntityRenderer(ModEntities.BOWTRUCKLE.get(), GeoRendererHelper.simple("bowtruckle"));
@@ -54,6 +57,18 @@ public class ClientSetup {
                 GeoRendererHelper.simpleBlock("tent_canvas", 2.5));
         event.registerBlockEntityRenderer(at.koopro.wizardsandbeasts.registry.ModBlockEntities.TENT_GRAND.get(),
                 GeoRendererHelper.simpleBlock("tent_grand", 4.0));
+
+        // The cauldron is drawn entirely by its rig — the block is RenderShape.INVISIBLE. One margin
+        // block clears the steam column, which reaches above the rim while a brew is working.
+        event.registerBlockEntityRenderer(at.koopro.wizardsandbeasts.registry.ModBlockEntities.CAULDRON.get(),
+                GeoRendererHelper.simpleBlock(
+                        at.koopro.wizardsandbeasts.client.brew.CauldronGeoModel::new, 1.0));
+
+        // The bench rig is `wandmakers_bench_rig`, not `wandmakers_bench`: the bare name would
+        // resolve its texture to the flat block sprite the item still uses. See tools/bench_model.py.
+        event.registerBlockEntityRenderer(
+                at.koopro.wizardsandbeasts.registry.ModBlockEntities.WANDMAKERS_BENCH.get(),
+                GeoRendererHelper.simpleBlock("wandmakers_bench_rig", 1.0));
 
         // Generic data-driven creatures: one simple GeckoLib renderer per creature, keyed by id.
         // The ten dragon breeds get the breed-aware DragonRenderer (render-state scale + flame tint).

@@ -137,7 +137,12 @@ public final class AnimagusAbilityService {
     private static List<Holder<MobEffect>> passiveEffects(String formId) {
         List<Holder<MobEffect>> fx = new ArrayList<>();
         switch (formId) {
-            case "animagus_cat" -> fx.add(MobEffects.NIGHT_VISION); // plus fall immunity + creeper scare
+            // Cat: fall immunity + creeper scare. Its night vision used to be here, on the 40-tick
+            // refresh every other passive uses, which meant it sat permanently under vanilla's 200-tick
+            // flash threshold and strobed the screen for as long as you were a cat. It is now a
+            // FormSense, granted from the form's own datapack capability list and refreshed on a cadence
+            // that never dips into the flash. See FormSenseService.
+            case "animagus_cat" -> { }
             case "animagus_dog" -> fx.add(MobEffects.SPEED);
             case "animagus_stag" -> { fx.add(MobEffects.SPEED); fx.add(MobEffects.JUMP_BOOST); }
             case "animagus_hawk" -> fx.add(MobEffects.SLOW_FALLING);

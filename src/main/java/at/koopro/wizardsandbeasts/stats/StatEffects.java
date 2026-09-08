@@ -124,6 +124,20 @@ public final class StatEffects {
         return maxResolve(willpower) * RESOLVE_COST_FAILED_ATTEMPT;
     }
 
+    /**
+     * How full a Resolve pool is, as a fraction of the ceiling a WILLPOWER value sets. Always in [0, 1].
+     *
+     * <p>The clamp is the point. Resolve is a stored float and the ceiling is derived from a trait that can
+     * move underneath it — a lowered WILLPOWER, a heritage re-roll, or a save written while the pool was a
+     * flat 0–100 — and the regeneration tick only ever clamped <em>upward</em>, so a charge left above the
+     * ceiling stayed there permanently. A raw {@code resolve / ceiling} then exceeded 1 and multiplied the
+     * Imperius resist chance past what any amount of training is meant to buy: the one direction this
+     * number must never go, and invisible in play because it presents as unusually good luck.
+     */
+    public static float resolveCharge(float resolve, int willpower) {
+        return Math.max(0f, Math.min(1f, resolve / maxResolve(willpower)));
+    }
+
     /** Multiplier on a spell teacher's fee for a KNOWLEDGE value. Never below {@link #TUITION_AT_MAX}. */
     public static float tuitionMultiplier(int knowledge) {
         return lerp(TUITION_AT_ZERO, TUITION_AT_MAX, knowledge);

@@ -440,6 +440,23 @@ public class ModDataComponents {
                             .networkSynchronized(ByteBufCodecs.VAR_INT)
                             .build());
 
+    /**
+     * Whether a hooded robe's hood is worn up.
+     *
+     * <p>Absent means down, so a robe from {@code /give} or from a world that predates the toggle
+     * starts with the hood on the shoulders — the state the wearer can see themselves in.
+     *
+     * <p>Read on the client every frame by {@code DeathEaterRobeRenderer}, which is why this is
+     * {@code networkSynchronized}: a component that only persisted would flip for the wearer and
+     * stay wrong for everyone else.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> HOOD_UP =
+            DATA_COMPONENTS.register("hood_up", () ->
+                    DataComponentType.<Boolean>builder()
+                            .persistent(com.mojang.serialization.Codec.BOOL)
+                            .networkSynchronized(ByteBufCodecs.BOOL)
+                            .build());
+
     private ModDataComponents() {
     }
 

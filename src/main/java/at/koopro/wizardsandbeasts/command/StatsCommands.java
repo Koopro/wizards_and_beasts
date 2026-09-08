@@ -181,9 +181,11 @@ public final class StatsCommands {
             source.sendFailure(Component.literal("Player has no heritage selected yet."));
             return 0;
         }
-        // Wipe existing stats to allow re-initialization
-        target.setData(ModAttachments.PLAYER_STATS.get(), PlayerStatsData.EMPTY);
-        PlayerStatsAPI.initializeStatsForNewPlayer(target, variant, target.getRandom());
+        // Rolls POWER and the prodigy flag against the heritage band and nothing else. This used to wipe
+        // the block and run the new-player initialiser over it, because that was the only method that
+        // rolled — so a command named reroll_power also reset PRECISION, REFLEXES, WILLPOWER and every
+        // training accumulator to zero.
+        PlayerStatsAPI.rerollHeritagePower(target, variant, target.getRandom());
         int newPower = PlayerStatsAPI.getStat(target, PlayerStat.POWER);
         boolean prodigy = PlayerStatsAPI.isProdigy(target);
         String prodigyStr = prodigy ? " [Prodigy]" : "";

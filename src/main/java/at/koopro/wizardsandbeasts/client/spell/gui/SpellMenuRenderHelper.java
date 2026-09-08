@@ -27,6 +27,9 @@ public final class SpellMenuRenderHelper {
 
     /** Average ink of {@code panel.png} — the ground every label on this screen is read against. */
 
+    /** Alpha a placeholder spell's icon is drawn at — present, legible, obviously not available. */
+    private static final float ALPHA_COMING_SOON = 0.35f;
+
     private SpellMenuRenderHelper() {}
 
     /**
@@ -95,15 +98,32 @@ public final class SpellMenuRenderHelper {
         }
 
         Minecraft mc = Minecraft.getInstance();
-        graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED,
-                at.koopro.wizardsandbeasts.client.ModTextures.resolveWandHudSpellIcon(
-                        mc.getResourceManager(), spell.getId()),
-                x + 1, y + (h - iconSize) / 2, 0f, 0f, iconSize, iconSize, 92, 92, 92, 92);
+        // A spell whose behaviour is not written yet is drawn, not hidden: the corpus is registered
+        // precisely so the roster is visible. What it must not do is look pickable — faded icon,
+        // dimmed name, and a "coming soon" tag where the proficiency mark would go.
+        boolean comingSoon = !spell.isImplemented();
+
+        graphics.blitSprite(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED,
+                at.koopro.wizardsandbeasts.client.hud.WandHudSprites.spellIcon(spell.getId()),
+                x + 1, y + (h - iconSize) / 2, iconSize, iconSize,
+                comingSoon ? ALPHA_COMING_SOON : 1.0f);
 
         graphics.drawString(font,
                 at.koopro.wizardsandbeasts.client.gui.util.GuiText.resolve(spell.getDisplayName()),
                 x + iconSize + 4, y + WizardsAndBeastsUiTokens.SpellMenu.ENTRY_TEXT_Y_OFFSET,
-                UiContrast.readableOn(spell.getCategory().getColor(), WizardsPalette.PLATE), false);
+                comingSoon ? WizardsPalette.TEXT_DIM
+                        : UiContrast.readableOn(spell.getCategory().getColor(), WizardsPalette.PLATE),
+                false);
+
+        if (comingSoon) {
+            String tag = net.minecraft.network.chat.Component
+                    .translatable("gui.wizards_and_beasts.spell.coming_soon").getString();
+            graphics.drawString(font, tag,
+                    x + w - font.width(tag) - 2,
+                    y + WizardsAndBeastsUiTokens.SpellMenu.ENTRY_TEXT_Y_OFFSET,
+                    WizardsPalette.TEXT_DIM, false);
+            return;
+        }
 
         PlayerSpellData data = ClientSpellDataState.get();
         if (mc.level != null && data.isOnCooldown(spell.getId(), mc.level.getGameTime())) {

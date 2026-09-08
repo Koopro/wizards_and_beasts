@@ -66,7 +66,45 @@ public class WizardsConfigScreen extends Screen {
             Map.entry("beamChannelEffectIntervalTicks", "Performance"),
             Map.entry("enableDebugTools", "Debug"),
             Map.entry("debugLogSpellGateReasons", "Debug"),
-            Map.entry("debugLogCloakVisibility", "Debug"));
+            Map.entry("debugLogCloakVisibility", "Debug"),
+            // Forced lycanthropy. Its own card rather than a corner of Gameplay: twenty-odd keys that
+            // are all one mechanic would swamp everything else in that bucket.
+            Map.entry("werewolfEnableForcedTransform", "Heritage"),
+            Map.entry("werewolfExposureThreshold", "Heritage"),
+            Map.entry("werewolfExposureGain", "Heritage"),
+            Map.entry("werewolfExposureDecay", "Heritage"),
+            Map.entry("werewolfTransformDelayTicks", "Heritage"),
+            Map.entry("werewolfLossOfControl", "Heritage"),
+            Map.entry("werewolfAggroRadius", "Heritage"),
+            Map.entry("werewolfChargeSpeed", "Heritage"),
+            Map.entry("werewolfBiteCooldownTicks", "Heritage"),
+            Map.entry("werewolfDriftCorrectionBlocks", "Heritage"),
+            Map.entry("werewolfPackBetrayal", "Heritage"),
+            Map.entry("werewolfDropUnsafeEquipment", "Heritage"),
+            Map.entry("werewolfEquipmentWhitelist", "Heritage"),
+            Map.entry("werewolfWolfsbaneSuppressesTransform", "Heritage"),
+            Map.entry("werewolfWolfsbaneDurationTicks", "Heritage"),
+            Map.entry("werewolfWolfsbaneAmplifierExtendsDuration", "Heritage"),
+            Map.entry("werewolfPostTransformDebuffTicks", "Heritage"),
+            Map.entry("werewolfHealthBonus", "Heritage"),
+            Map.entry("werewolfSpeedBonus", "Heritage"),
+            Map.entry("werewolfArmorBonus", "Heritage"),
+            Map.entry("werewolfAttackDamageBonus", "Heritage"),
+            Map.entry("werewolfKnockbackResistanceBonus", "Heritage"),
+            // Duelling dummy. Its own card because every key is about reading a number off a
+            // practice target, which is a different question from how the spell itself behaves.
+            Map.entry("dummyDamageNumbers", "Training"),
+            Map.entry("dummyShowHearts", "Training"),
+            Map.entry("dummyDpsMode", "Training"),
+            Map.entry("dummyBoutTimeoutTicks", "Training"),
+            Map.entry("dummyHealth", "Training"),
+            Map.entry("dummyBossHealth", "Training"),
+            Map.entry("dummyArmor", "Training"),
+            Map.entry("dummyProtectEquipment", "Training"),
+            Map.entry("dummyXpPerDamage", "Training"),
+            Map.entry("dummyScarecrow", "Training"),
+            Map.entry("dummyScareRadius", "Training"),
+            Map.entry("dummyDecoy", "Training"));
     /**
      * Keys this screen must never show, even under the "Gameplay" fallback bucket. Both are administrative
      * rather than gameplay concerns: {@code adminUuids} is a security allow-list, and the module state fed
@@ -77,14 +115,19 @@ public class WizardsConfigScreen extends Screen {
     private static final java.util.Set<String> EXCLUDED_KEYS = java.util.Set.of("adminUuids");
     private static final String EXCLUDED_KEY_PREFIX = "moduleDefaults";
 
-    private static final List<String> CATEGORY_ORDER = List.of("Gameplay", "Performance", "Debug", "Dark Arts");
+    private static final List<String> CATEGORY_ORDER =
+            List.of("Gameplay", "Training", "Heritage", "Performance", "Debug", "Dark Arts");
     private static final Map<String, String> GLYPH_BY_CATEGORY = Map.of(
             "Gameplay", "⚗",
+            "Training", "⚔",
+            "Heritage", "☽",
             "Performance", "⚙",
             "Debug", "✒",
             "Dark Arts", "☠");
     private static final Map<String, String> ABBREV_BY_CATEGORY = Map.of(
             "Gameplay", "GP",
+            "Training", "TR",
+            "Heritage", "HR",
             "Performance", "PF",
             "Debug", "DB",
             "Dark Arts", "DA");

@@ -64,6 +64,17 @@ public record SpellAssignC2SPayload(int slotIndex, String spellId) implements Cu
                     player.displayClientMessage(Component.translatable("wandcraft.assign.reject.unknown_spell"), true);
                     return;
                 }
+                // Ahead of the "do you know it" gate, matching SpellCastGate's ordering: whether a
+                // spell works at all is a property of the spell, not of the caster. A COMING_SOON
+                // spell can still be in a player's known set — the dev kit and /wandb learnall hand
+                // out the whole corpus — and slotting one produced a loadout button that silently
+                // did nothing on release.
+                if (!spell.isImplemented()) {
+                    data.incrementRejectReason(SpellRejectCodes.ASSIGN_NOT_IMPLEMENTED);
+                    player.displayClientMessage(
+                            Component.translatable("wandcraft.assign.reject.not_implemented"), true);
+                    return;
+                }
                 if (!data.knowsSpell(safeSpellId)) {
                     data.incrementRejectReason(SpellRejectCodes.ASSIGN_UNLEARNED_SPELL);
                     player.displayClientMessage(Component.translatable("wandcraft.assign.reject.not_known"), true);
