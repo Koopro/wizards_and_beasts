@@ -8,5 +8,14 @@
   "loyalty": 0.5,
   "dark_affinity": 0.55,
   "initiative": 0.55,
-  "allegiance_transfer_resistance": 0.55
+  "allegiance_transfer_resistance": 0.55,
+  "cast_modifiers": {
+    "damage": 1.1,
+    "cooldown": 1.1,
+    "range": 0.92,
+    "fizzle": 0.09,
+    "category_damage_bonus": {
+      "combat": 0.1
+    }
+  }
 }

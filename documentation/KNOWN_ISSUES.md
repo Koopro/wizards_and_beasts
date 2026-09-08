@@ -361,6 +361,38 @@ Limitations, all deliberate for the alpha:
 - The bond toast keys on the unbound-to-bound transition, so it fires once per wand per owner. A wand
   transferred by defeat re-announces for its new owner, which is intended.
 
+### 5e.1 What a wand does is now readable — resolved 2026-09-08
+
+`CURRENT_STATE.md` Critical #1 ("the wand's identity is 40% wired and 0% visible") is closed. Both
+halves of it:
+
+- **All 10 woods and all 10 cores carry an authored `cast_modifiers` block.** The last hardcoded
+  switch in the wand — `WandStatsResolver`'s ten-case `WandCore` fallback table — is deleted, so wood
+  and core now resolve by exactly the same datapack path. A datapack can retune or override any of
+  the twenty, including downwards, which the fallback made impossible: it read a neutral result as
+  "nobody authored this yet" and answered from the enum instead.
+- **The tooltip states the resolved contribution.** Damage, cooldown, range, misfire chance and any
+  non-zero category bonus, in the tooltip's existing green/dark-red vocabulary. Hovering a card at
+  Ollivander's gives the same summary before the choice is spent.
+
+Three things worth knowing about the numbers:
+
+- They are the wand's **contribution**, not an outcome. A tooltip has no spell, no proficiency and no
+  caster stats in scope, and the cast pipeline applies further modifiers on top. Reading `+20% damage`
+  as "this wand deals 20% more damage than the one in your other hand" is right; reading it as a
+  final figure is not.
+- A row that rounds to zero is **omitted**, not printed as `+0%`. A wand with no rows is a wand whose
+  four components cancel, not a bug.
+- Ollivander's summary is computed at the **trial length**, 11". The gifted wand's length is rolled
+  on acceptance, so the range and cooldown rows can move a few points either way once it is yours.
+  The card says so.
+
+Deliberately still unwired: `spell_modifiers` on a wood definition stays authored and unread. Its
+keys are magical schools (`healing`, `divination`, `charms`) and `SpellCategory` has only `combat`,
+`utility`, `defense` and `dark_arts`. Mapping one onto the other is an unmade balance decision, and
+the same ruling is why unicorn's Healing, veela's Charms and thunderbird's Transfiguration bonuses
+are absent from the authored tables rather than mapped onto a category that means something else.
+
 ## 5f. Currency
 
 Rates are canon and correct: **29 Knuts = 1 Sickle, 17 Sickles = 1 Galleon, 493 Knuts = 1 Galleon**

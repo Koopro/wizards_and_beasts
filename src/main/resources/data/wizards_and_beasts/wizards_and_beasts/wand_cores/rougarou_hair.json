@@ -1,0 +1,21 @@
+{
+  "display_name": {
+    "translate": "wand_core.wizards_and_beasts.rougarou_hair"
+  },
+  "source_key": "rougarou",
+  "raw_power": 1.65,
+  "consistency": 0.5,
+  "loyalty": 0.4,
+  "dark_affinity": 0.7,
+  "initiative": 0.9,
+  "allegiance_transfer_resistance": 0.45,
+  "cast_modifiers": {
+    "damage": 1.12,
+    "cooldown": 1.02,
+    "range": 1.0,
+    "fizzle": 0.07,
+    "category_damage_bonus": {
+      "dark_arts": 0.15
+    }
+  }
+}

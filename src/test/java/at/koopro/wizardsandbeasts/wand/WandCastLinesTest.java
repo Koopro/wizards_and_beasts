@@ -2,14 +2,25 @@ package at.koopro.wizardsandbeasts.wand;
 
 import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 import at.koopro.wizardsandbeasts.wand.cast.WandStats;
+import at.koopro.wizardsandbeasts.wand.registry.WandCastModifiers;
+import at.koopro.wizardsandbeasts.wand.registry.WandCoreDefinition;
+import at.koopro.wizardsandbeasts.wand.registry.WandWoodDefinition;
+import com.google.gson.JsonParser;
+import com.mojang.serialization.JsonOps;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.network.chat.TextColor;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -177,5 +188,76 @@ class WandCastLinesTest {
         for (char c : rendered.toCharArray()) {
             assertTrue(c < 0x80, String.format("non-ASCII U+%04X in a cast row: %s", (int) c, rendered));
         }
+    }
+
+    // ── The shipped data, folded through the real formatter ──────────────
+
+    private static final Path DATA = Path.of("src", "main", "resources", "data",
+            "wizards_and_beasts", "wizards_and_beasts");
+
+    /**
+     * Every wood the mod ships, crossed with every core, produces a tooltip that says something.
+     *
+     * <p>The unit tests above prove the formatter is right about numbers handed to it. This proves the
+     * numbers actually authored reach a player, which is the claim the whole wand-identity pass makes
+     * and the one nothing else checks. The two ways it can fail are both silent: a component authored
+     * neutral contributes nothing, and — the sharper one — two components can cancel, a 1.12x damage
+     * core under a 0.88x wood landing back on 1.00 and rendering no row at all.
+     *
+     * <p>Length and flexibility are deliberately excluded. Including them would let a length bonus
+     * paper over a wood and core that cancel, and it is the wood and the core that a wizard chooses.
+     */
+    @Test
+    void everyShippedWoodAndCorePairSaysSomething() throws IOException {
+        Map<String, WandCastModifiers> woods = decode("wand_woods",
+                json -> WandWoodDefinition.CODEC.parse(JsonOps.INSTANCE, json)
+                        .getOrThrow(AssertionError::new).castModifiers());
+        Map<String, WandCastModifiers> cores = decode("wand_cores",
+                json -> WandCoreDefinition.CODEC.parse(JsonOps.INSTANCE, json)
+                        .getOrThrow(AssertionError::new).castModifiers());
+        assertFalse(woods.isEmpty(), "no wood definitions found under " + DATA);
+        assertFalse(cores.isEmpty(), "no core definitions found under " + DATA);
+
+        List<String> silent = new ArrayList<>();
+        for (Map.Entry<String, WandCastModifiers> wood : woods.entrySet()) {
+            for (Map.Entry<String, WandCastModifiers> core : cores.entrySet()) {
+                WandStats combined = fold(wood.getValue(), core.getValue());
+                if (WandCastLines.build(combined).isEmpty()) {
+                    silent.add(wood.getKey() + " + " + core.getKey());
+                }
+            }
+        }
+        assertEquals(List.of(), silent,
+                "these wand identities render an empty tooltip — the wizard is told nothing about "
+                        + "what the wand does: " + silent);
+    }
+
+    /** The same folding {@code WandStatsResolver.applyModifiers} does, without needing a registry. */
+    private static WandStats fold(WandCastModifiers... parts) {
+        WandStats.Builder b = WandStats.builder();
+        for (WandCastModifiers mods : parts) {
+            b.mulDamage(mods.damage())
+                    .mulCooldown(mods.cooldown())
+                    .mulRange(mods.range())
+                    .addFizzle(mods.fizzle());
+            mods.categoryDamageBonus().forEach(b::addCategoryDamageBonus);
+        }
+        return b.build();
+    }
+
+    private static Map<String, WandCastModifiers> decode(
+            String registryPath,
+            java.util.function.Function<com.google.gson.JsonElement, WandCastModifiers> parse)
+            throws IOException {
+        Path dir = DATA.resolve(registryPath);
+        assertTrue(Files.isDirectory(dir), "Missing definition directory: " + dir);
+        Map<String, WandCastModifiers> out = new LinkedHashMap<>();
+        try (Stream<Path> files = Files.list(dir)) {
+            for (Path path : files.filter(f -> f.toString().endsWith(".json")).sorted().toList()) {
+                out.put(path.getFileName().toString().replace(".json", ""),
+                        parse.apply(JsonParser.parseString(Files.readString(path))));
+            }
+        }
+        return out;
     }
 }

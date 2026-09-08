@@ -4,6 +4,8 @@ Lead Game Designer / Minecraft + Wizarding World consultant review. Based on rea
 
 What changed since Rev 1: two of the three criticals moved. The wand-wood system was rewired to read the datapack (mechanism fixed, data 40% done). Every creature now has a real multi-bone rig — the "colored box" finding is dead. The skill-tree filler finding is unchanged. A new load-bearing system landed that Rev 1 never saw: innate player stats now feed the cast pipeline. And the wand's dual-system bug did not die — it migrated from woods to cores.
 
+**Addendum, 2026-09-08 — Critical #1 is closed.** The finding below is left as written, because it is the record of what was wrong and the reasoning still explains why it mattered. What has since landed is summarised under it. Criticals #2 and #3 stand unchanged.
+
 1. What the mod actually is
 
 Core fantasy (as-built): "Be sorted into a magical heritage, earn a wand that chooses you, learn a spellbook of canon spells, and grow into a specialized wizard whose bloodline changes how magic leaves the wand." The lore layer is enormous and genuinely faithful — 96 canon creature definitions plus 107 bestiary entries, 10 wand woods / 8 cores drawn straight from Pottermore, the three Unforgivables gated correctly, Azkaban, the Chamber of Secrets, Gringotts, Ollivander, 10 heritages across 31 variants with paragraph-long canon descriptions.
@@ -21,7 +23,7 @@ Verdict on shape: Rev 1 called this an engineered skeleton whose flesh was entir
 
 2. The three findings that matter most
 
-🔴 CRITICAL #1 — The wand's identity is 40% wired and 0% visible
+🟢 CRITICAL #1 (RESOLVED 2026-09-08) — The wand's identity is 40% wired and 0% visible
 
 The wand is supposed to be a wizard's most important possession. The mechanism that makes it matter is now correct. The data behind it and the presentation in front of it are not.
 
@@ -36,6 +38,19 @@ Evidence:
 Why it matters: The wand-choosing-the-wizard ceremony, the woods, the cores, the personality affinity — the whole Ollivander fantasy — still resolves to numbers the player cannot see, and 60% of the wood roster plus the entire core roster still resolves to nothing. The plumbing got fixed; the faucet was never opened.
 
 The one thing that works, still: WandCastingAllegianceSystem.java:43-45 — using someone else's wand is 0.6× damage / 1.5× cooldown. Real, felt, canon-authentic. It remains the model for the rest.
+
+**What landed (2026-09-08).** Every claim above is now false, in the order it was made:
+
+	•	**All 10 woods carry a cast_modifiers block.** Ash, blackthorn, hawthorn, vine, walnut and willow were authored, and the four that existed — elder, holly, rowan, yew — were deliberately re-tuned rather than preserved. Pinned in WandWoodCastModifierTest, all ten, so a new wood cannot arrive unpinned.
+	•	**All 10 cores carry one too, and the enum switch is gone.** troll_whisker was authored; rougarou_hair and white_river_monster_spine had no definition file at all and now have one. WandStatsResolver.applyCoreFallback and its ten-case WandCore table are deleted, and applyCore is now line-for-line the shape of applyWood. Pinned in the new WandCoreCastModifierTest.
+	•	**The id mismatch is fixed at the source.** The enum persists Thestral as thestral_tail while every other system spells it thestral_tail_hair, so the datapack lookup missed and only the fallback answered — meaning that with the fallback deleted, every legacy Thestral wand would have gone to neutral. WandCore.getDefinitionPath() now carries the id the cast path keys on, separately from the frozen getSerializedName() that backs the persistent component. WandIdParityTest asserts both directions and that Thestral is the only core where the two disagree.
+	•	**The numbers are visible.** WandCastLines renders the resolved WandStats as tooltip rows — damage, cooldown, range, misfire chance and any non-zero category bonus — in the tooltip's existing green/dark-red vocabulary, and WandItem.appendHoverText appends them. It states the wand's *contribution*, not an effective damage figure: a tooltip has no spell, no proficiency and no caster stats in scope, and a number claiming to be the real one would be wrong in a way nobody could check. Rows that round to zero are omitted rather than printed as +0%.
+	•	**Wood and core read as names, not ids.** WandLoreNames resolves each definition's display_name, so the tooltip no longer prints `wizards_and_beasts:rowan`. ShippedWandDefinitionJsonTest asserts every display_name names a key en_us actually has — LangParityTest cannot reach these, because it scans Java and these keys live in JSON.
+	•	**Ollivander's trial cards show it before the choice is spent.** The cards printed a raw id truncated at 12 characters (`thestral_ta…`) and a resonance bar, which answers "will this wand have me" and nothing else. They now print resolved names clipped to the pixels a card has, and hovering one gives the full cast summary — resolved from the same trial stack the resonance score was computed from, through the same WandStatsResolver.resolve call the cast path makes. The gifted wand's length is rolled on acceptance rather than fixed at trial, so the summary says so rather than letting the wizard find out afterwards.
+
+**What is deliberately still unwired.** spell_modifiers stays authored and unread. Its keys are magical schools — healing, divination, charms — and SpellCategory has only COMBAT, UTILITY, DEFENSE and DARK_ARTS. Mapping one onto the other is a balance decision nobody has made, and inventing it to close a checkbox would be worse than the gap. The same ruling is why unicorn's Healing, veela's Charms and thunderbird's Transfiguration bonuses are absent from the authored tables; each omission is recorded at the line it affects.
+
+**Remaining polish, not blocking.** There is still one wand mesh, so core, length and flexibility are legible in the tooltip and nowhere on the model — the wood tint is the only visual difference between two wands in a hotbar.
 
 🔴 CRITICAL #2 — The skill trees are still literal filler
 

@@ -9,7 +9,6 @@ import at.koopro.wizardsandbeasts.wand.stat.WandWood;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.cast.ModifierStack;
-import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.registry.WandCastModifiers;
 import at.koopro.wizardsandbeasts.wand.registry.WandDatapackRegistries;
@@ -34,10 +33,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * tunable in one place and intentionally moderate so that no single component
  * dominates the math (the pillar that does the heavy lifting is the core).
  *
- * <p>Wood and core are datapack-driven — {@link WandWoodDefinition#castModifiers()} and
- * {@link WandCoreDefinition#castModifiers()}. Length and flexibility are still per-enum tables here,
- * and core keeps one too, as a temporary fallback for the three cores that have no authored block yet;
- * see {@link #applyCore}.
+ * <p>Wood and core are both datapack-driven — {@link WandWoodDefinition#castModifiers()} and
+ * {@link WandCoreDefinition#castModifiers()} — and are resolved by exactly the same path. Length and
+ * flexibility remain per-enum tables here: neither has a datapack registry to be moved into, and both
+ * are closed sets that a datapack cannot extend, so there is nothing to migrate.
  */
 public final class WandStatsResolver {
 
@@ -59,8 +58,10 @@ public final class WandStatsResolver {
      * not a wand or has missing attributes, the missing pieces fall back to
      * neutral contributions so the result is always usable in math.
      *
-     * @param registries needed to read wood definitions. When {@code null} the wood contributes
-     *                   nothing — callers without a registry get the other three pillars, not a crash.
+     * @param registries needed to read the wood and core definitions. When {@code null} neither
+     *                   contributes — callers without a registry get length and flexibility, not a
+     *                   crash. That is a real case: a tooltip context carries no registries on a
+     *                   client that has not finished joining a world.
      */
     public static WandStats resolve(@Nullable ItemStack wandStack, HolderLookup.@Nullable Provider registries) {
         if (wandStack == null || wandStack.isEmpty() || !(wandStack.getItem() instanceof WandItem)) {
@@ -68,7 +69,7 @@ public final class WandStatsResolver {
         }
 
         WandStats.Builder b = WandStats.builder();
-        applyCore(b, resolveCoreId(wandStack), resolveCore(wandStack), registries);
+        applyCore(b, resolveCoreId(wandStack), registries);
         applyWood(b, resolveWoodId(wandStack), registries);
         applyLength(b, resolveLength(wandStack));
         applyFlexibility(b, resolveFlexibility(wandStack));
@@ -86,40 +87,29 @@ public final class WandStatsResolver {
     // ── Cores: the dominant flavor knob ──────────────────────────────────
 
     /**
-     * A core's contribution, datapack first, enum table second.
+     * A core's contribution, read straight off its definition.
      *
-     * <p>Symmetric with {@link #applyWood} in the path that matters: a definition's
-     * {@code cast_modifiers} is the answer whenever it has one. It differs in keeping a fallback,
-     * because three of the ten cores have no authored block yet — {@code troll_whisker}, and the two
-     * that have no definition file at all ({@code rougarou_hair}, {@code white_river_monster_spine}).
-     * Dropping the table before those are authored would silently take three cores to neutral.
-     *
-     * <p>A neutral result is therefore read as <b>"not authored"</b>, not as "authored as neutral".
-     * That conflation is the cost of the fallback and the reason it is temporary: once all ten carry a
-     * block, {@link #applyCoreFallback} and its enum table are deleted and this collapses into
-     * {@code applyWood}'s exact shape.
-     *
-     * <p>The fallback also covers a case the datapack cannot: a pre-migration stack whose legacy enum
-     * is {@code THESTRAL_TAIL} resolves to id {@code thestral_tail}, while the definition file is
-     * {@code thestral_tail_hair}. The lookup misses, and the enum table answers correctly.
+     * <p>Identical in shape to {@link #applyWood}, which it was not until every core carried an
+     * authored {@code cast_modifiers} block. Until then this fell through to a ten-case
+     * {@code WandCore} switch for the three that did not — {@code troll_whisker}, {@code rougarou_hair}
+     * and {@code white_river_monster_spine} — which cost more than the duplication: it forced a neutral
+     * result to mean <em>"not authored"</em> rather than "authored as neutral", so a core deliberately
+     * tuned to contribute nothing was indistinguishable from one nobody had got to yet, and a datapack
+     * could not override a built-in core downwards at all. All ten are authored now, and both the
+     * switch and that ambiguity are gone.
      */
     private static void applyCore(WandStats.Builder b, @Nullable Identifier coreId,
-                                  @Nullable WandCore legacyCore,
                                   HolderLookup.@Nullable Provider registries) {
-        WandCastModifiers mods = (coreId == null || registries == null)
-                ? WandCastModifiers.NEUTRAL
-                : castModifiersForCore(coreId, registries);
-        if (!mods.isNeutral()) {
-            applyModifiers(b, mods);
-            return;
-        }
-        applyCoreFallback(b, legacyCore);
+        if (coreId == null || registries == null) return;
+        WandCastModifiers mods = castModifiersForCore(coreId, registries);
+        if (mods.isNeutral()) return;
+        applyModifiers(b, mods);
     }
 
     /**
-     * A core with no definition contributes nothing <em>from the datapack</em> rather than throwing,
-     * exactly as {@link #castModifiersFor} does for wood. Warned once per id for the same reason: this
-     * runs once per cast and once per beam tick.
+     * A core with no definition contributes nothing rather than throwing, exactly as
+     * {@link #castModifiersFor} does for wood. Warned once per id for the same reason: this runs once
+     * per cast and once per beam tick.
      */
     private static WandCastModifiers castModifiersForCore(Identifier coreId, HolderLookup.Provider registries) {
         Optional<Holder.Reference<WandCoreDefinition>> holder =
@@ -128,7 +118,7 @@ public final class WandStatsResolver {
                                 ResourceKey.create(WandDatapackRegistries.WAND_CORE_REGISTRY, coreId)));
         if (holder.isEmpty()) {
             if (WARNED_MISSING_CORES.add(coreId)) {
-                LOGGER.warn("Wand core '{}' has no definition; falling back to the built-in table.", coreId);
+                LOGGER.warn("Wand core '{}' has no definition; it contributes nothing to casts.", coreId);
             }
             return WandCastModifiers.NEUTRAL;
         }
@@ -142,51 +132,6 @@ public final class WandStatsResolver {
                 .mulRange(mods.range())
                 .addFizzle(mods.fizzle());
         mods.categoryDamageBonus().forEach(b::addCategoryDamageBonus);
-    }
-
-    /**
-     * The pre-datapack core table. <b>Temporary</b> — delete this and its caller once every core JSON
-     * carries a {@code cast_modifiers} block. Kept only so the three unauthored cores keep working.
-     */
-    private static void applyCoreFallback(WandStats.Builder b, @Nullable WandCore core) {
-        if (core == null) return;
-        switch (core) {
-            case PHOENIX_FEATHER -> b
-                    .addCategoryDamageBonus(SpellCategory.COMBAT, 0.15f)
-                    .mulCooldown(0.95f);
-            case DRAGON_HEARTSTRING -> b
-                    .mulDamage(1.15f)
-                    .addFizzle(0.05f);
-            case UNICORN_HAIR -> b
-                    .mulRange(1.10f)
-                    .addCategoryDamageBonus(SpellCategory.DEFENSE, 0.10f)
-                    .addFizzle(-0.03f);
-            case THESTRAL_TAIL -> b
-                    .addCategoryDamageBonus(SpellCategory.DARK_ARTS, 0.20f)
-                    .addFizzle(0.02f);
-            case VEELA_HAIR -> b
-                    .mulCooldown(0.92f)
-                    .addFizzle(0.03f);
-            case TROLL_WHISKER -> b
-                    .mulDamage(1.10f)
-                    .mulCooldown(1.08f)
-                    .addFizzle(0.04f);
-            case WAMPUS_CAT_HAIR -> b
-                    .addCategoryDamageBonus(SpellCategory.COMBAT, 0.12f)
-                    .mulCooldown(0.97f);
-            case THUNDERBIRD_TAIL_FEATHER -> b
-                    .mulRange(1.15f)
-                    .addCategoryDamageBonus(SpellCategory.DEFENSE, 0.08f)
-                    .addFizzle(0.02f);
-            case ROUGAROU_HAIR -> b
-                    .addCategoryDamageBonus(SpellCategory.DARK_ARTS, 0.15f)
-                    .mulDamage(1.05f)
-                    .addFizzle(0.05f);
-            case WHITE_RIVER_MONSTER_SPINE -> b
-                    .mulDamage(1.08f)
-                    .mulRange(1.08f)
-                    .mulCooldown(1.05f);
-        }
     }
 
     // ── Woods: datapack-driven ───────────────────────────────────────────
@@ -249,27 +194,19 @@ public final class WandStatsResolver {
      * The core's id, mirroring {@link #resolveWoodId}: the legacy enum component still wins, converted
      * to an {@code Identifier} so the datapack lookup has something to key on.
      *
-     * <p>Note the legacy conversion cannot be exact for Thestral — the enum serializes as
-     * {@code thestral_tail} and the definition is {@code thestral_tail_hair} — which is one of the
-     * cases {@link #applyCore}'s fallback exists to absorb.
+     * <p>Converted through {@link WandCore#getDefinitionPath()} rather than
+     * {@code getSerializedName()}. The two differ for exactly one core — the enum persists Thestral as
+     * {@code thestral_tail} while its definition is {@code thestral_tail_hair} — and taking the
+     * serialized form here made that lookup miss, which cost every legacy Thestral wand its core
+     * contribution. The enum fallback used to hide it; nothing does now.
      */
     @Nullable
     private static Identifier resolveCoreId(ItemStack wandStack) {
         WandCore legacy = wandStack.get(ModDataComponents.WAND_CORE.get());
         if (legacy != null) {
-            return Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, legacy.getSerializedName());
+            return Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, legacy.getDefinitionPath());
         }
         return WandComponents.getCore(wandStack);
-    }
-
-    @Nullable
-    private static WandCore resolveCore(ItemStack wandStack) {
-        WandCore legacy = wandStack.get(ModDataComponents.WAND_CORE.get());
-        if (legacy != null) {
-            return legacy;
-        }
-        Identifier id = WandComponents.getCore(wandStack);
-        return id == null ? null : WandCore.byName(id.getPath());
     }
 
     /**

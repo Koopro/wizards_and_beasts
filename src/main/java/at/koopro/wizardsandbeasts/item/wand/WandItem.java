@@ -219,13 +219,26 @@ public class WandItem extends GeoItemBase {
         WandCastLines.append(WandStatsResolver.resolve(stack, context.registries()), tooltipAdder);
     }
 
+    /**
+     * A wand from the four enums, for the paths that still speak them — {@code /wandb wand give}, the
+     * dev kit and the game-test fixtures.
+     *
+     * <p>Note which name each component is written with. These are the <em>modern</em> id components,
+     * so the core has to be its {@link WandCore#getDefinitionPath()} and not the
+     * {@code getSerializedName()} that backs the legacy enum component. The two differ for Thestral,
+     * and taking the serialized form here wrote {@code wizards_and_beasts:thestral_tail} — an id no
+     * {@code wand_cores} definition has. Nothing failed: the wand was built, named and bonded
+     * correctly, and simply contributed no core modifier to any cast. Wood needs no such care; every
+     * {@code WandWood} constant is spelled the same in both places, which {@code WandIdParityTest}
+     * holds it to.
+     */
     public static ItemStack createWand(WandWood wood, WandCore core, WandLength length, WandFlexibility flexibility) {
         ItemStack stack = new ItemStack(WandItemRegistry.WAND.get());
         if (wood != null) {
             stack.set(WandComponents.WAND_WOOD.get(), Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, wood.getSerializedName()));
         }
         if (core != null) {
-            stack.set(WandComponents.WAND_CORE.get(), Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, core.getSerializedName()));
+            stack.set(WandComponents.WAND_CORE.get(), Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, core.getDefinitionPath()));
         }
         if (flexibility != null) {
             stack.set(WandComponents.WAND_FLEXIBILITY.get(), flexibility);

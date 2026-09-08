@@ -1,0 +1,18 @@
+{
+  "display_name": {
+    "translate": "wand_core.wizards_and_beasts.white_river_monster_spine"
+  },
+  "source_key": "white_river_monster",
+  "raw_power": 1.55,
+  "consistency": 0.72,
+  "loyalty": 0.6,
+  "dark_affinity": 0.3,
+  "initiative": 0.6,
+  "allegiance_transfer_resistance": 0.65,
+  "cast_modifiers": {
+    "damage": 1.12,
+    "cooldown": 1.06,
+    "range": 1.18,
+    "fizzle": 0.02
+  }
+}

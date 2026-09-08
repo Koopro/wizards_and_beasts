@@ -211,23 +211,31 @@ Do not call `DeferredHolder#get()` during static initialisation unless the API e
 
 The mod uses two patterns. **Custom dynamic registries** are registered in `WandDatapackRegistries`; **reload-listener stores** are rebuilt at server resource reload in `WizardsAndBeastsMod`.
 
-| Type | Path beneath `src/main/resources/data/wizards_and_beasts` | Codec / loader / store | Example |
+> **The three dynamic registries sit one directory deeper than everything else here.** A dynamic
+> registry's content directory is `data/<pack namespace>/<registry key namespace>/<registry key path>`,
+> and these registry keys are namespaced to the mod — so the mod's own woods live at
+> `data/wizards_and_beasts/wizards_and_beasts/wand_woods/`, with the modid appearing twice. The
+> reload-listener stores below take the plain `data/wizards_and_beasts/<thing>/` path. Filing a wood or
+> core one level up is silent: nothing loads it, and a wand with no definition contributes nothing to a
+> cast rather than failing, so the only symptom is a wand that feels like every other wand.
+
+| Type | Path beneath `src/main/resources/data` | Codec / loader / store | Example |
 |---|---|---|---|
-| Wand woods | `wand_woods/*.json` | `WandWoodDefinition.CODEC`; dynamic registry | `wand_woods/*` |
-| Wand cores | `wand_cores/*.json` | `WandCoreDefinition.CODEC`; dynamic registry | `wand_cores/*` |
-| Bench enhancers | `bench_enhancers/*.json` | `BenchEnhancerDefinition.CODEC`; dynamic registry | `bench_enhancers/*` |
-| Spells | `spells/*.json` | `SpellDefinition.CODEC` → `SpellReloadListener` → `Spells.registerJson` | `spells/accio.json` |
-| Brews | `brews/*.json` | `BrewDefinition.CODEC` → `BrewReloadListener` | `brews/wiggenweld_potion.json` |
-| Brewing recipes | `brewing_recipes/*.json` | `BrewingRecipeDefinition.CODEC` → `BrewingRecipeReloadListener` | `brewing_recipes/wiggenweld_potion.json` |
-| Creature definitions | `creatures/*.json` | `CreatureDefinition.CODEC` → `CreatureDefinitionLoader` | `creatures/abraxan.json` |
-| Bestiary entries | `bestiary/entries/*.json` | `BestiaryEntryLoader` | `bestiary/entries/abraxan.json` |
-| Skill nodes | `skill_nodes/<tree>/*.json` | skill node codec → `SkillNodeLoader` | `skill_nodes/spell_mastery/basic_casting.json` |
-| Vocations | `vocations/*.json` | vocation codec → `VocationLoader` | `vocations/duelist.json` |
-| Pocket templates | `pocket_templates/*.json` | template codec → `PocketTemplateLoader` | inspect `pocket_templates/*` |
+| Wand woods | `wizards_and_beasts/wizards_and_beasts/wand_woods/*.json` | `WandWoodDefinition.CODEC`; dynamic registry | `wand_woods/rowan.json` |
+| Wand cores | `wizards_and_beasts/wizards_and_beasts/wand_cores/*.json` | `WandCoreDefinition.CODEC`; dynamic registry | `wand_cores/phoenix_feather.json` |
+| Bench enhancers | `wizards_and_beasts/wizards_and_beasts/bench_enhancers/*.json` | `BenchEnhancerDefinition.CODEC`; dynamic registry | `bench_enhancers/*` |
+| Spells | `wizards_and_beasts/spells/*.json` | `SpellDefinition.CODEC` → `SpellReloadListener` → `Spells.registerJson` | `spells/accio.json` |
+| Brews | `wizards_and_beasts/brews/*.json` | `BrewDefinition.CODEC` → `BrewReloadListener` | `brews/wiggenweld_potion.json` |
+| Brewing recipes | `wizards_and_beasts/brewing_recipes/*.json` | `BrewingRecipeDefinition.CODEC` → `BrewingRecipeReloadListener` | `brewing_recipes/wiggenweld_potion.json` |
+| Creature definitions | `wizards_and_beasts/creatures/*.json` | `CreatureDefinition.CODEC` → `CreatureDefinitionLoader` | `creatures/abraxan.json` |
+| Bestiary entries | `wizards_and_beasts/bestiary/entries/*.json` | `BestiaryEntryLoader` | `bestiary/entries/abraxan.json` |
+| Skill nodes | `wizards_and_beasts/skill_nodes/<tree>/*.json` | skill node codec → `SkillNodeLoader` | `skill_nodes/spell_mastery/basic_casting.json` |
+| Vocations | `wizards_and_beasts/vocations/*.json` | vocation codec → `VocationLoader` | `vocations/duelist.json` |
+| Pocket templates | `wizards_and_beasts/pocket_templates/*.json` | template codec → `PocketTemplateLoader` | inspect `pocket_templates/*` |
 | Broom definitions | expected reload path owned by `BroomDefinitionLoader` | loader is registered even though no bundled `brooms` JSON directory is present in this snapshot | addon/datapack extension point |
 | Handbook chapters | loader owned by `HandbookChapterManager` | reload listener | inspect matching resource path before authoring |
 | Wand modules | loader owned by `WandModuleLoader` | reload listener + programmatic bootstrap | inspect matching resource path before authoring |
-| Map discovery rules | `map_discovery/*.json` | `MapDiscoveryRule.CODEC` (sealed + dispatch) → `MapDiscoveryRuleLoader` → `MapDiscoveryRules` | `map_discovery/hogwarts.json` |
+| Map discovery rules | `wizards_and_beasts/map_discovery/*.json` | `MapDiscoveryRule.CODEC` (sealed + dispatch) → `MapDiscoveryRuleLoader` → `MapDiscoveryRules` | `map_discovery/hogwarts.json` |
 
 The Marauder's Map is the one system that splits across both reload cycles, deliberately. *What
 exists* is a datapack question (`data/.../map_discovery/`, server); *what it looks like* is a
