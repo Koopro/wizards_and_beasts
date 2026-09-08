@@ -239,6 +239,20 @@ Known limitations:
 
 ## 5b. Broom flight
 
+- **The rider's client flies the broom; the server keeps the consequences.** This is vanilla's own
+  contract for a ridden vehicle (`Player.isClientAuthoritative()` is true, and the server's position
+  and rotation are overwritten from the client every tick), and the mod now follows it instead of
+  simulating the flight on both sides at once. The old arrangement did not make the server
+  authoritative — its result was snapped away regardless — it only gave it a second, wrong opinion
+  built from input that arrives on change or every ten ticks, and that opinion still charged
+  durability, dealt crash damage and played crash sounds for walls the rider never touched. Impacts
+  now travel as a report from the side that actually saw them, checked and rate-limited on arrival.
+- **Boost is counted once, on the server.** Its two counters are synched entity data, so both sides
+  counting their own copy meant the server's stale count was broadcast over the client's prediction
+  and a firing boost visibly stuttered.
+- **Other players' brooms are interpolated, not re-simulated.** Onlookers used to run the full flight
+  model against input they did not have.
+
 - **Brooms sink when you let go.** Every definition authors a `weakGravity` and it is now applied:
   release the controls and the broom settles rather than hovering, capped well short of free-fall.
   Holding ascend or descend overrides it — that is the rider taking charge of altitude.
@@ -260,6 +274,19 @@ Known limitations:
   `broomFovEffect`, `broomSpeedParticles`) are all independently switchable, and **`broomFovEffect=0`
   is the supported setting for motion sickness** — a field of view that moves on its own is the
   commonest cause of it.
+
+## 5b-2. Apparition
+
+- **A charge nobody releases no longer splinches you.** Holding past the hard cap used to resolve as
+  `CATASTROPHIC` -- the harshest rung in the ability, awarded for doing nothing. It now collapses: no
+  arrival, no wound, and the sputter cooldown plus the exhaustion for the effort spent. Splinching is
+  what a botched *jump* does, and a jump has to have been attempted to be botched.
+- **Destination Apparition is press-to-commit.** Picking a point in the selector starts a seventy-tick
+  anchored charge at a moment when you are holding nothing, because you were clicking in a GUI. The
+  input driver now adopts that charge from the server's own phase broadcast and commits it on the next
+  press of the ability key -- watch the destination ring, press when it closes. Before this it could
+  not be released or withdrawn at all, so picking a destination and then changing your mind was a
+  guaranteed catastrophic splinch about seven seconds later.
 
 ## 5c. Floo Network
 
@@ -421,11 +448,110 @@ Limitations:
 
 ## 8. Testing gaps
 
-- The repository has **no `@GameTest` classes**. CI runs `runGameTestServer` as a gate, so it
-  currently proves the server boots and the registries load, not that any scenario passes.
+- `runGameTestServer` runs **four real in-world scenarios** as of 2026-09-03
+  ([`WandCastLifecycleTests`](../src/main/java/at/koopro/wizardsandbeasts/gametest/WandCastLifecycleTests.java)),
+  covering the wand cast/release lifecycle. Note that 1.21.11 has no `@GameTest` annotation — tests are
+  registry entries added through NeoForge's `RegisterGameTestsEvent`; earlier notes in this repository
+  describing an annotation-based system were written against an older Minecraft version.
+- Everything else in the mod still has **no in-world coverage**: no block entity, structure, GUI,
+  brewing, Floo or creature behaviour is exercised by a game test.
 - The vertical slice is verified by hand — see [`ALPHA_SMOKE.md`](ALPHA_SMOKE.md).
 - Pure logic is covered by JUnit under `src/test/java`; that is the preferred home for anything
   that does not need a live world.
+
+## 8a. Open defects found in the 2026-09-03 alpha-hardening audit
+
+Three defects found by that audit are **not fixed**. They are recorded here rather than in a
+worklog because each is reproducible and each has a player-visible consequence.
+
+### 8a.1 The common config file rewrites itself once a second, forever
+
+**Reproduce:** `./gradlew runGameTestServer`, then
+`grep -c "is not correct. Correcting" <log>` — 9 to 11 occurrences in a ~20-second run, all from
+`FileWatcher-1-thread-1`, every one naming `werewolfEquipmentWhitelist`.
+
+**What happens:** `run/config/wizards_and_beasts-common.toml` oscillates between two different
+contents — one of **66** top-level keys (19280 bytes) and one of **44** (13473 bytes) — flipping
+about once a second for as long as the process lives. Each flip logs a WARN and rotates a
+`-N.toml.bak`, so the five backup slots are consumed within seconds and further rotations fail
+with `FileAlreadyExistsException`. The werewolf tunables are in the 22 keys that come and go, so
+**they may not persist across a restart**.
+
+**Partly addressed:** `werewolfEquipmentWhitelist` and `adminUuids` both used
+`ModConfigSpec.Builder.defineList`, which pins the spec to `ListValueSpec.NON_EMPTY`; an empty
+default therefore failed its own size check on every load. Both now use `defineListAllowEmpty`,
+which removed the correction that used to fire during mod loading. `adminUuids` was the worse of
+the two — its own comment tells an operator to *clear the list* to fall back to operator
+permission, and plain `defineList` made that instruction impossible to follow.
+
+**It can also crash mod loading.** On 2026-09-03 a `runGameTestServer` run failed during mod loading
+with `WritingException: Failed to atomically write (REPLACE_ATOMIC) the config` /
+`NoSuchFileException: wizards_and_beasts-common.new.tmp.toml` — the rewrite loop lost its own temp file
+mid-write. Deleting `run/config/wizards_and_beasts-common*.toml*` and re-running cleared it. So this is
+not only log noise: it intermittently takes the server down at startup.
+
+**Still open:** the `FileWatcher` correction loop survives that fix, and the logged reason is the
+`value == null` branch of `ListValueSpec.correct` — the key is absent when the watcher re-reads,
+even though it is present in the file the correction just wrote. Something writes a 22-key-shorter
+variant of the file; that writer has not been identified. **Root cause unknown.**
+
+### 8a.4 A game-test player cannot be killed
+
+Both `Entity.kill(ServerLevel)` and `hurt(damageSources().genericKill(), Float.MAX_VALUE)` leave a
+`ServerPlayer` created inside a game test at **full health**, with `isRemoved() == false`. Clearing
+`invulnerableTime` first made no difference. On one earlier variant the player's health did reach zero
+and it was back to `20.0` one tick later.
+
+Something in the mod's `LivingIncomingDamageEvent` chain — nineteen handlers subscribe to it — or in the
+mock player's own setup is absorbing the blow. It has not been traced.
+
+**Consequence for coverage:** `lifeless_caster_cannot_release` empties the caster's health directly
+instead, which does exercise `CastReleaseGate.CASTER_NOT_ALIVE` through the real release path. The
+death-driven `WandCastSessions.abort` in `WizardsAndBeastsCommands.onLivingDeath` is therefore **not
+covered by any automated test**, and neither is anything else that depends on a player dying.
+
+### 8a.2 Five of the twelve O.W.L. subjects can only ever grade Troll
+
+`OWLGradeCalculator` reads seven counters that **nothing in the mod ever increments**:
+`combatSpellCasts` (on `PlayerSpellData`), and `metamorphFormsUsed`, `arithmancyInteractions`,
+`runicInteractions`, `divinationEvents`, `astronomyEvents`, `muggleItems` (on `PlayerSkillData`).
+`getLoreItemsRead()` is backed by `loreEntriesRead`, whose only mutator `recordLoreEntry` has zero
+call sites. All are saved to and loaded from NBT, so they look wired.
+
+Four subjects have a live second input and are unaffected in practice — Charms, Defence Against
+the Dark Arts, Transfiguration and Ancient Runes all reach `O` through skill-tree nodes or the
+Animagus stage. Potions (`potionBrewPoints`, awarded by `CauldronBlockEntity`) and Herbology
+(`plantsHarvested`, from `MandrakeCropBlock`) are fully live.
+
+**Permanently `T`:** Arithmancy, Divination, History of Magic, Astronomy, Muggle Studies. Each
+reads a dead counter as its *only* input. Not fixed here because the mod has no arithmancy,
+divination, astronomy or muggle-studies content to hang an increment on — wiring them would mean
+inventing those systems, not connecting existing ones. History of Magic is the closest to
+reachable: the Handbook exists, but it is a client-only screen with no server-side "chapter read"
+signal, so `recordLoreEntry` has nothing to call it.
+
+### 8a.3 Four selectable Animagus forms have no datapack definition
+
+The server says so itself on every boot:
+
+```
+[Animagus] 4 selectable form(s) have no datapack definition and will get no capabilities,
+attributes or senses: [animagus_stag, animagus_hawk, animagus_hare, animagus_beetle]
+[Animagus] 2 loaded definition(s) are not selectable by any player and are unreachable in game:
+[animagus_falcon, animagus_rat]
+```
+
+`AnimagusForms.IDS` offers six forms; `data/wizards_and_beasts/animagus_forms/` holds four
+definitions, and only `cat` and `dog` appear in both. A player who picks Stag — the iconic one —
+gets a form with no capabilities, no attribute changes and no senses. `AnimagusAbilityService`
+*does* have active-ability and passive-effect cases for all four missing forms, and
+`FormModelRenderer` has render cases, so the gap is the data row alone.
+
+Related: every `animagus_forms` definition names a GeckoLib model, texture and animation file
+under `geckolib/{models,animations}/entity/form/`, and **none of those directories contains a
+single file**; the only form texture that ships is `animagus_stag.png`, for the form that has no
+definition. Forms render through `FormModelRenderer` on vanilla models, so nothing is visibly
+broken today, but those three fields describe assets that do not exist.
 
 ## 9. Reporting a new issue
 

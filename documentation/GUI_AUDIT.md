@@ -115,7 +115,7 @@ Excluded from the count as *not* screens despite the filename: `client/camera/Sc
 | `spell_menu/panel.png` | 64×64 | [SpellMenuRenderHelper.java:27](src/main/java/at/koopro/wizardsandbeasts/client/spell/gui/SpellMenuRenderHelper.java#L27) |
 | `spell_menu/slot.png` | 40×40 | [SpellMenuScreen.java:34](src/main/java/at/koopro/wizardsandbeasts/client/spell/gui/SpellMenuScreen.java#L34) |
 | `spell_menu/slot_active.png` | 40×40 | SpellMenuScreen:36 |
-| `wand_hud/**` (39) | 92×92 / 256×256 | [ModTextures.java](src/main/java/at/koopro/wizardsandbeasts/client/ModTextures.java) — HUD, out of scope |
+| `sprites/wand_hud/**` (40) | 92×92 / 256×256 | [WandHudSprites.java](src/main/java/at/koopro/wizardsandbeasts/client/hud/WandHudSprites.java) — moved onto vanilla's GUI sprite atlas; drawn with `blitSprite`, no per-frame `ResourceManager` lookup |
 | `wandmakers_bench.png` | 176×196 | [WandmakersBenchScreen.java:26](src/main/java/at/koopro/wizardsandbeasts/client/wand/gui/WandmakersBenchScreen.java#L26) — excluded screen |
 
 ### 2.2 Referenced by zero screens (orphan candidates — **listed, not deleted**)
