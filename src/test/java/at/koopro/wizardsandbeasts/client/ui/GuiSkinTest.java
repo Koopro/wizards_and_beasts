@@ -4,6 +4,7 @@ import at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GuiSkin;
 import at.koopro.wizardsandbeasts.client.gui.util.UiContrast;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -119,6 +120,20 @@ class GuiSkinTest {
                         () -> skin + " has a non-opaque colour " + hex(colour));
             }
         }
+    }
+
+    /**
+     * The hearth's accent is the Floo network's own green.
+     *
+     * <p>{@code WizardsPalette} spells its values rather than importing them, so this tie lives in a
+     * javadoc sentence and would rot silently. On the Floo screen that green is the one colour
+     * carrying meaning rather than theme; a material built around a green that has drifted from it
+     * is a material built around nothing.
+     */
+    @Test
+    void hearthAccentIsFlooGreen() {
+        assertEquals(at.koopro.wizardsandbeasts.floo.FlooCues.EMERALD, GuiSkin.HEARTH.accent(),
+                "GuiSkin.HEARTH.accent() and FlooCues.EMERALD have drifted apart");
     }
 
     private static String hex(int argb) {

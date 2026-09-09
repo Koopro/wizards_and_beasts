@@ -1,7 +1,11 @@
 package at.koopro.wizardsandbeasts.client.wand.gui;
 
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
-import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
+import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GuiSkin;
+import at.koopro.wizardsandbeasts.client.gui.util.GuiText;
+import at.koopro.wizardsandbeasts.client.gui.util.UiContrast;
+import at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton;
 import at.koopro.wizardsandbeasts.network.wand.ChooseTrialWandPayload;
 import at.koopro.wizardsandbeasts.network.wand.SelectTrialWandPayload;
 import at.koopro.wizardsandbeasts.wand.WandCastLines;
@@ -9,7 +13,6 @@ import at.koopro.wizardsandbeasts.wand.WandLoreNames;
 import at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver;
 import at.koopro.wizardsandbeasts.wand.gui.OllivanderTrialMenu;
 import at.koopro.wizardsandbeasts.wand.ollivander.OllivanderPoolEntry;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -19,165 +22,317 @@ import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.jspecify.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
+/**
+ * Ollivander's: three wands on a tray, and what each of them would do.
+ *
+ * <p>Cut on the {@code workbench} material — worn wood, shellac and brass calipers — which was
+ * generated for this screen and had no consumer until now.
+ *
+ * <h2>What was wrong with the old one</h2>
+ *
+ * <p><strong>The click target was split by a line nobody could see.</strong> Each 70×120 card handled
+ * its own mouse events, and {@code mouseY < cy + 58} meant "select"; anything below meant "accept
+ * this wand, permanently". One rectangle, two outcomes, no visible boundary, on a screen a player
+ * meets once. A row selects now, and taking the wand is a button.
+ *
+ * <p><strong>The comparison was in a tooltip.</strong> This is the one screen in the mod where a
+ * wizard chooses between wands, and the only thing on it was a resonance bar — which answers "will
+ * this wand have me" and nothing else. Two wands can answer equally well and cast nothing alike;
+ * that is the entire point of ten woods and ten cores. Those numbers are on the panel now.
+ *
+ * <p><strong>Three cards, 62 usable pixels each.</strong> Wood, core, flexibility, a score, a bar and
+ * a two-line refusal, in a column narrower than the word "Thunderbird". The tray is a list and the
+ * detail is a pane, so each gets the width its content needs.
+ *
+ * <h2>Colour</h2>
+ *
+ * <p>Nothing here is drawn in {@code WizardsPalette}'s inks. This material's face is light, and the
+ * leather palette is built for the dark HUD: {@code BRASS_HI}, which the old screen used for every
+ * label, is 1.35 : 1 on it. Body text is {@link GuiSkin#ink()}, and the cast contributions — whose
+ * tooltip vocabulary is {@code GREEN} at 1.58 : 1 and {@code DARK_RED} at 2.40 : 1 — go through
+ * {@link UiContrast}, which keeps the hue and moves only the luminance, so good still reads green.
+ */
 public class OllivanderTrialScreen extends AbstractContainerScreen<OllivanderTrialMenu> {
 
-    private static final int CARD_W = 70;
-    private static final int CARD_H = 120;
-    private static final int CARD_STRIDE = 78;
-    /** Card width less the 4px inset on each side — the room a label actually has. */
-    private static final int CARD_TEXT_W = 62;
+    private static final GuiSkin SKIN = GuiSkin.WORKBENCH;
+
+    /** How many wands Ollivander puts on the tray. Fixed by {@link OllivanderTrialMenu}. */
+    private static final int TRIALS = 3;
+
+    private static final int FRAME = WizardsMetrics.PANEL_SPRITE_BORDER;
+    private static final int PAD = WizardsMetrics.SPACE_M;
+
+    private static final int HEADER_H = 44;
+    private static final int FOOTER_H = 30;
+    private static final int TRAY_W = 136;
+    private static final int GUTTER = WizardsMetrics.SPACE_L;
+
+    private static final int ROW_H = 42;
+    private static final int ROW_GAP = WizardsMetrics.SPACE_M;
+    private static final int BAR_H = 6;
+
+    private static final int TAKE_W = 120;
+    private static final int TAKE_H = 18;
+
+    /** Beneficial and harmful cast contributions, lifted onto this screen's own ground. */
+    private final int goodInk;
+    private final int badInk;
+
+    private ThemedButton takeButton;
 
     public OllivanderTrialScreen(OllivanderTrialMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
-        this.imageHeight = 200;
-        this.imageWidth = 256;
+        this.imageWidth = WizardsMetrics.PANEL_STANDARD_W;
+        this.imageHeight = WizardsMetrics.PANEL_STANDARD_H;
+        this.goodInk = UiContrast.readableOn(0x55FF55, SKIN.base(), UiContrast.AA_TEXT);
+        this.badInk = UiContrast.readableOn(0xAA0000, SKIN.base(), UiContrast.AA_TEXT);
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        takeButton = ThemedButton.skinned(
+                leftPos + (imageWidth - TAKE_W) / 2,
+                topPos + imageHeight - FRAME - PAD - TAKE_H,
+                TAKE_W, TAKE_H,
+                Component.translatable("wandcraft.gui.choose_wand"),
+                this::takeSelected, SKIN);
+        addRenderableWidget(takeButton);
     }
 
     /**
-     * Ollivander's tray, in the mod's leather and gold.
+     * Sends the acceptance the button stands for.
      *
-     * <p>This screen used to draw itself in a cold blue-lavender scheme of its own — panel
-     * {@code #1e1a28}, cards {@code #2a2535}, lavender and cyan text — that shared no hue with
-     * any other screen in the mod, on what is one of the first things a new wizard sees. Every
-     * colour here now comes from {@link WizardsPalette}.
-     *
-     * <p>Resonance still reads at a glance without a green/blue signal colour: a wand that
-     * answers you fills its bar in bright brass, one that does not stays dim leather.
+     * <p>Guarded again here rather than relying on {@code active}: the button's enabled state is
+     * refreshed once a frame from a score the server owns, and a click landing in the same tick as a
+     * score change would otherwise send an acceptance the bench has already stopped offering. The
+     * server re-checks regardless — this only avoids a pointless round trip.
      */
+    private void takeSelected() {
+        int index = menu.getSelectedIndex();
+        if (answers(index)) {
+            ClientPacketDistributor.sendToServer(new ChooseTrialWandPayload(menu.containerId, index));
+        }
+    }
+
+    /** Whether trial {@code index} resonates enough to be taken. */
+    private boolean answers(int index) {
+        return index >= 0 && index < TRIALS
+                && menu.getResonanceScore(index) >= menu.getMatchThreshold();
+    }
+
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        int x = (this.width - this.imageWidth) / 2;
-        int y = (this.height - this.imageHeight) / 2;
-        graphics.fill(x, y, x + imageWidth, y + imageHeight, 0xD0000000);
-        McStylePanel.drawPanel(graphics, x + 6, y + 6, imageWidth - 12, imageHeight - 12,
-                WizardsPalette.PLATE, WizardsPalette.EDGE_HI, WizardsPalette.INK);
-        McStylePanel.drawBorder(graphics, x + 8, y + 8, imageWidth - 16, imageHeight - 16,
-                WizardsPalette.BRASS, WizardsPalette.LINE);
+        McStylePanel.drawSkinPanel(graphics, SKIN, leftPos, topPos, imageWidth, imageHeight);
+        McStylePanel.drawSkinSeal(graphics, SKIN,
+                leftPos + imageWidth - FRAME - McStylePanel.SEAL_SIZE, topPos + FRAME);
+        McStylePanel.drawSkinDivider(graphics, SKIN, leftPos + FRAME,
+                topPos + HEADER_H - WizardsMetrics.DIVIDER_H, imageWidth - 2 * FRAME);
+        McStylePanel.drawSkinDivider(graphics, SKIN, leftPos + FRAME,
+                topPos + imageHeight - FOOTER_H, imageWidth - 2 * FRAME);
 
-        List<OllivanderPoolEntry> trials = menu.getTrials();
-        float thresh = menu.getMatchThreshold();
-        HolderLookup.@Nullable Provider registries = registries();
-        for (int i = 0; i < 3; i++) {
-            int cx = cardLeft(x, i);
-            int cy = cardTop(y);
-            boolean sel = menu.getSelectedIndex() == i;
-            McStylePanel.drawPanel(graphics, cx, cy, CARD_W, CARD_H,
-                    sel ? WizardsPalette.SELECT : WizardsPalette.WELL,
-                    sel ? WizardsPalette.BRASS : WizardsPalette.RAIL,
-                    WizardsPalette.INK);
-
-            OllivanderPoolEntry e = trials.get(i);
-            graphics.drawString(font, fit(WandLoreNames.wood(registries, e.woodKey())), cx + 4, cy + 6,
-                    WizardsPalette.BRASS_HI, false);
-            graphics.drawString(font, fit(WandLoreNames.core(registries, e.coreKey())), cx + 4, cy + 18,
-                    WizardsPalette.TEXT, false);
-            graphics.drawString(font, e.flexibility(), cx + 4, cy + 30,
-                    WizardsPalette.TEXT_DIM, false);
-
-            float score = menu.getResonanceScore(i);
-            graphics.drawString(font, Component.translatable("wandcraft.gui.resonance_fmt", score),
-                    cx + 4, cy + 44, WizardsPalette.BRASS, false);
-
-            int barW = CARD_TEXT_W;
-            boolean answers = score >= thresh;
-            graphics.fill(cx + 4, cy + 58, cx + 4 + barW, cy + 64, WizardsPalette.INK);
-            graphics.fill(cx + 5, cy + 59, cx + 5 + (int) ((barW - 2) * Math.min(1, score)), cy + 63,
-                    answers ? WizardsPalette.BRASS_HI : WizardsPalette.RAIL);
-
-            if (answers) {
-                graphics.drawString(font, Component.translatable("wandcraft.gui.choose_wand"),
-                        cx + 4, cy + 72, WizardsPalette.BRASS_HI, false);
-            } else {
-                // Without this the tray just sits there inert and the wizard cannot tell why.
-                int hintY = cy + 72;
-                for (var line : font.split(Component.translatable("wandcraft.gui.wand_refuses", thresh), CARD_TEXT_W)) {
-                    graphics.drawString(font, line, cx + 4, hintY, WizardsPalette.TEXT_DIM, false);
-                    hintY += 10;
-                }
-            }
-        }
+        McStylePanel.drawSkinInset(graphics, SKIN, detailX(), bodyTop(), detailW(), bodyH());
     }
 
-    /**
-     * The title only, in a colour that survives this screen's background.
-     *
-     * <p>Two defects in the inherited version. Vanilla draws both labels in {@code #404040}, which against
-     * the old cold-lavender panel is a contrast ratio of about 1.5 : 1 — the title was effectively
-     * invisible. And the second label is {@code playerInventoryTitle}, drawn at {@code imageHeight - 94}
-     * = y 106: {@link OllivanderTrialMenu} has no slots at all, so that was a heading for an inventory
-     * this screen does not show, printed straight across the middle trial card.
-     */
-    @Override
-    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(font, this.title, this.titleLabelX, this.titleLabelY, WizardsPalette.BRASS_HI, false);
-    }
-
-    /**
-     * Hovering a card says what that wand would do to a spell.
-     *
-     * <p>The trial cards carry a resonance bar, which answers "will this wand have me" and nothing
-     * else. Two wands can answer a wizard equally well and cast nothing alike — that is the entire
-     * point of ten woods and ten cores — and until this existed the only way to compare them was to
-     * accept one and read its tooltip, by which time the choice was spent. Ollivander's is the one
-     * screen in the mod where a wizard picks between wands, so it is the one screen where the numbers
-     * have to be legible.
-     *
-     * <p>Resolved from {@link OllivanderTrialMenu#createTrialStack} at the trial length — the same
-     * stack the resonance score beside it was computed from — through the same
-     * {@link WandStatsResolver#resolve} call the cast path makes, so a card cannot promise something
-     * the wand will not do. The gifted wand's length is rolled on acceptance rather than fixed here,
-     * so the length contribution can still move by a few points either way; the closing line says so
-     * rather than letting the wizard find out afterwards.
-     */
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        // The button's availability follows the selection, which the server owns and can change
+        // between frames. Set before super.render so the frame that draws it agrees with it.
+        takeButton.active = answers(menu.getSelectedIndex());
+
         super.render(graphics, mouseX, mouseY, partialTick);
 
-        int x = (this.width - this.imageWidth) / 2;
-        int cy = cardTop((this.height - this.imageHeight) / 2);
-        if (mouseY < cy || mouseY >= cy + CARD_H) {
-            return;
-        }
-        for (int i = 0; i < 3; i++) {
-            int cx = cardLeft(x, i);
-            if (mouseX >= cx && mouseX < cx + CARD_W) {
-                graphics.setTooltipForNextFrame(font, cardSummary(i), Optional.empty(), mouseX, mouseY);
-                return;
-            }
+        graphics.drawString(font, this.title, leftPos + FRAME + PAD, topPos + FRAME + 2,
+                SKIN.ink(), false);
+        graphics.drawString(font, Component.translatable("wandcraft.gui.trial_epigraph"),
+                leftPos + FRAME + PAD, topPos + FRAME + 2 + WizardsMetrics.LINE_SECTION,
+                SKIN.muted(), false);
+
+        renderTray(graphics);
+        renderDetail(graphics);
+        renderFooterNote(graphics);
+    }
+
+    /** The three wands, as rows. */
+    private void renderTray(GuiGraphics graphics) {
+        HolderLookup.@Nullable Provider registries = registries();
+        List<OllivanderPoolEntry> trials = menu.getTrials();
+        float threshold = menu.getMatchThreshold();
+
+        for (int i = 0; i < TRIALS; i++) {
+            int rx = trayX();
+            int ry = rowTop(i);
+            boolean selected = menu.getSelectedIndex() == i;
+
+            McStylePanel.drawSkinInset(graphics, SKIN, rx, ry, TRAY_W, ROW_H);
+            McStylePanel.drawSkinRow(graphics, SKIN, rx + 2, ry + 2, TRAY_W - 4, ROW_H - 4, selected);
+
+            OllivanderPoolEntry entry = trials.get(i);
+            int tx = rx + WizardsMetrics.SPACE_M;
+            int textW = TRAY_W - 2 * WizardsMetrics.SPACE_M;
+
+            // Fitted rather than clipped: "Thunderbird Tail Feather" and "Yew" want very different
+            // amounts of room, and the old screen cut both at twelve characters.
+            GuiText.drawFitted(graphics, font,
+                    WandLoreNames.wood(registries, entry.woodKey()).getString(),
+                    tx, ry + WizardsMetrics.SPACE_S, textW, SKIN.ink());
+            GuiText.drawFitted(graphics, font,
+                    WandLoreNames.core(registries, entry.coreKey()).getString(),
+                    tx, ry + WizardsMetrics.SPACE_S + WizardsMetrics.LINE_TIGHT, textW, SKIN.muted());
+
+            renderResonanceBar(graphics, tx, ry + ROW_H - WizardsMetrics.SPACE_S - BAR_H, textW,
+                    menu.getResonanceScore(i), threshold);
         }
     }
 
-    /** Wood, core and flexibility in full, then what the three of them come to. */
-    private List<Component> cardSummary(int index) {
-        OllivanderPoolEntry e = menu.getTrials().get(index);
+    /**
+     * How far this wand has come towards answering, and where the threshold sits.
+     *
+     * <p>The notch is the point. A bare fill says "this much"; it does not say whether this much is
+     * enough, and enough is the only question the bar is being asked. Below the mark the fill stays
+     * in the material's muted tone and only a wand that answers gets the brass.
+     */
+    private void renderResonanceBar(GuiGraphics graphics, int x, int y, int w,
+                                    float score, float threshold) {
+        graphics.fill(x, y, x + w, y + BAR_H, SKIN.frame());
+        int fill = (int) ((w - 2) * Math.min(1.0f, Math.max(0.0f, score)));
+        boolean answers = score >= threshold;
+        graphics.fill(x + 1, y + 1, x + 1 + fill, y + BAR_H - 1,
+                answers ? SKIN.accent() : SKIN.muted());
+
+        int notch = x + 1 + (int) ((w - 2) * Math.min(1.0f, Math.max(0.0f, threshold)));
+        graphics.fill(notch, y - 1, notch + 1, y + BAR_H + 1, SKIN.ink());
+    }
+
+    /** Everything about the selected wand that a bar cannot say. */
+    private void renderDetail(GuiGraphics graphics) {
+        int index = menu.getSelectedIndex();
+        int x = detailX() + WizardsMetrics.SPACE_M;
+        int w = detailW() - 2 * WizardsMetrics.SPACE_M;
+        int y = bodyTop() + WizardsMetrics.SPACE_M;
+
+        if (index < 0 || index >= TRIALS) {
+            // Nothing chosen yet. Saying so beats an empty pane that reads as a screen still loading.
+            for (var line : font.split(
+                    Component.translatable("wandcraft.gui.trial_pick_one"), w)) {
+                graphics.drawString(font, line, x, y, SKIN.muted(), false);
+                y += WizardsMetrics.LINE_TIGHT;
+            }
+            return;
+        }
+
         HolderLookup.@Nullable Provider registries = registries();
+        OllivanderPoolEntry entry = menu.getTrials().get(index);
 
-        List<Component> lines = new ArrayList<>();
-        lines.add(WandLoreNames.wood(registries, e.woodKey()).copy().withStyle(ChatFormatting.GOLD));
-        lines.add(WandLoreNames.core(registries, e.coreKey()).copy().withStyle(ChatFormatting.LIGHT_PURPLE));
-        lines.add(Component.translatable("wandcraft.tooltip.flexibility", e.flexibility())
-                .withStyle(ChatFormatting.GRAY));
+        GuiText.drawFitted(graphics, font,
+                WandLoreNames.wood(registries, entry.woodKey()).getString(), x, y, w, SKIN.ink());
+        y += WizardsMetrics.LINE_BODY;
+        GuiText.drawFitted(graphics, font,
+                WandLoreNames.core(registries, entry.coreKey()).getString(), x, y, w, SKIN.ink());
+        y += WizardsMetrics.LINE_BODY;
+        graphics.drawString(font, Component.translatable("wandcraft.tooltip.flexibility",
+                entry.flexibility()), x, y, SKIN.muted(), false);
+        y += WizardsMetrics.LINE_BODY;
 
-        List<Component> cast = WandCastLines.build(
+        McStylePanel.drawSkinDivider(graphics, SKIN, x, y, w);
+        y += WizardsMetrics.DIVIDER_H + WizardsMetrics.SPACE_XS;
+
+        float score = menu.getResonanceScore(index);
+        float threshold = menu.getMatchThreshold();
+        graphics.drawString(font,
+                Component.translatable("wandcraft.gui.resonance_of", score, threshold),
+                x, y, score >= threshold ? goodInk : badInk, false);
+        y += WizardsMetrics.LINE_SECTION;
+
+        // The length note is pinned to the foot of the pane and drawn first, because it is the one
+        // line here that must always be visible: it is the caveat on every number above it.
+        var noteLines = font.split(Component.translatable("wandcraft.gui.trial_length_note"), w);
+        int noteY = bodyTop() + bodyH() - WizardsMetrics.SPACE_M
+                - noteLines.size() * WizardsMetrics.LINE_TIGHT;
+        int ny = noteY;
+        for (var line : noteLines) {
+            graphics.drawString(font, line, x, ny, SKIN.muted(), false);
+            ny += WizardsMetrics.LINE_TIGHT;
+        }
+
+        // The same resolve() the cast path makes, on the same stack the score beside it came from,
+        // so a pane cannot promise something the wand will not do.
+        List<WandCastLines.Line> cast = WandCastLines.lines(
                 WandStatsResolver.resolve(menu.createTrialStack(index, false), registries));
-        lines.add(Component.empty());
         if (cast.isEmpty()) {
             // Reachable two ways: a wand whose contributions cancel, and a client with no registries
-            // yet. Silence would read as a broken screen rather than as the plain wand it describes.
-            lines.add(Component.translatable("wandcraft.gui.trial_cast_plain")
-                    .withStyle(ChatFormatting.DARK_GRAY));
-        } else {
-            lines.add(Component.translatable("wandcraft.gui.trial_cast_header")
-                    .withStyle(ChatFormatting.GRAY));
-            lines.addAll(cast);
+            // yet. Silence would read as a broken pane rather than as the plain wand it describes.
+            graphics.drawString(font, Component.translatable("wandcraft.gui.trial_cast_plain"),
+                    x, y, SKIN.muted(), false);
+            return;
         }
-        lines.add(Component.translatable("wandcraft.gui.trial_length_note")
-                .withStyle(ChatFormatting.DARK_GRAY));
-        return lines;
+
+        graphics.drawString(font, Component.translatable("wandcraft.gui.trial_cast_header"),
+                x, y, SKIN.muted(), false);
+        y += WizardsMetrics.LINE_BODY;
+
+        // Bounded against the pinned note rather than trusted to fit. The worst case is eight rows
+        // -- damage, cooldown, range, misfire and one per SpellCategory -- which is taller than the
+        // pane, and a list that runs past its own frame is how the old cards looked cramped.
+        int limit = noteY - WizardsMetrics.SPACE_S;
+        for (WandCastLines.Line line : cast) {
+            if (y + WizardsMetrics.LINE_TIGHT > limit) {
+                graphics.drawString(font, Component.translatable("wandcraft.gui.trial_cast_more"),
+                        x + WizardsMetrics.SPACE_S, y, SKIN.muted(), false);
+                break;
+            }
+            // Unstyled from `lines()`, coloured for this ground rather than for a tooltip's.
+            graphics.drawString(font, line.text(), x + WizardsMetrics.SPACE_S, y,
+                    line.beneficial() ? goodInk : badInk, false);
+            y += WizardsMetrics.LINE_TIGHT;
+        }
+    }
+
+    /**
+     * Why the button is dark, when it is.
+     *
+     * <p>The old screen printed this inside whichever card had refused, which is where a player
+     * would look for it only if they already knew the card could refuse. It sits beside the control
+     * it is about now.
+     */
+    private void renderFooterNote(GuiGraphics graphics) {
+        if (answers(menu.getSelectedIndex())) {
+            return;
+        }
+        Component note = Component.translatable("wandcraft.gui.wand_refuses", menu.getMatchThreshold());
+        int y = topPos + imageHeight - FOOTER_H + WizardsMetrics.SPACE_XS;
+        graphics.drawCenteredString(font, note, leftPos + imageWidth / 2, y, SKIN.muted());
+    }
+
+    // ── Geometry, shared by the drawing pass and the hit test ──────────────
+    //
+    // The two used to be separate copies of the same arithmetic, which is how a card ended up with
+    // an invisible boundary at cy+58 that only one of them knew about.
+
+    private int trayX() {
+        return leftPos + FRAME + PAD;
+    }
+
+    private int bodyTop() {
+        return topPos + HEADER_H;
+    }
+
+    private int bodyH() {
+        return imageHeight - HEADER_H - FOOTER_H - WizardsMetrics.SPACE_S;
+    }
+
+    private int detailX() {
+        return trayX() + TRAY_W + GUTTER;
+    }
+
+    private int detailW() {
+        return leftPos + imageWidth - FRAME - PAD - detailX();
+    }
+
+    private int rowTop(int index) {
+        return bodyTop() + index * (ROW_H + ROW_GAP);
     }
 
     /**
@@ -189,26 +344,9 @@ public class OllivanderTrialScreen extends AbstractContainerScreen<OllivanderTri
         return minecraft == null || minecraft.level == null ? null : minecraft.level.registryAccess();
     }
 
-    private static int cardLeft(int screenLeft, int index) {
-        return screenLeft + 20 + index * CARD_STRIDE;
-    }
-
-    private static int cardTop(int screenTop) {
-        return screenTop + 40;
-    }
-
-    /**
-     * Clipped to the pixels a card has, not to a character count. The old version cut at 12
-     * characters, which is narrower than the card for "Elder" and wider than it for
-     * "Thunderbird Tail Feather" — and it was fed the raw id path, so what it actually printed on a
-     * Thestral card was {@code thestral_ta…}.
-     */
-    private String fit(Component name) {
-        String s = name.getString();
-        if (font.width(s) <= CARD_TEXT_W) {
-            return s;
-        }
-        return font.plainSubstrByWidth(s, CARD_TEXT_W - font.width("…")) + "…";
+    /** No slots and no player inventory, so vanilla's two labels have nothing to name. */
+    @Override
+    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
     }
 
     @Override
@@ -218,18 +356,16 @@ public class OllivanderTrialScreen extends AbstractContainerScreen<OllivanderTri
         }
         double mouseX = event.x();
         double mouseY = event.y();
-        int x = (this.width - this.imageWidth) / 2;
-        int y = (this.height - this.imageHeight) / 2;
-        for (int i = 0; i < 3; i++) {
-            int cx = cardLeft(x, i);
-            int cy = cardTop(y);
-            if (mouseX >= cx && mouseX < cx + CARD_W && mouseY >= cy && mouseY < cy + CARD_H) {
-                if (mouseY < cy + 58) {
-                    ClientPacketDistributor.sendToServer(new SelectTrialWandPayload(menu.containerId, i));
-                } else if (menu.getResonanceScore(i) >= menu.getMatchThreshold()) {
-                    ClientPacketDistributor.sendToServer(new ChooseTrialWandPayload(menu.containerId, i));
+        if (mouseX >= trayX() && mouseX < trayX() + TRAY_W) {
+            for (int i = 0; i < TRIALS; i++) {
+                int ry = rowTop(i);
+                if (mouseY >= ry && mouseY < ry + ROW_H) {
+                    // Selecting is all a row does. Taking the wand is the button, and there is no
+                    // longer any part of this screen where a click can commit by accident.
+                    ClientPacketDistributor.sendToServer(
+                            new SelectTrialWandPayload(menu.containerId, i));
+                    return true;
                 }
-                return true;
             }
         }
         return super.mouseClicked(event, isDoubleClick);

@@ -53,9 +53,45 @@ public final class WandCastLines {
         }
     }
 
+    /**
+     * One contribution, and whether it is good news, with no colour applied.
+     *
+     * <p>{@link #build} styles these for a vanilla tooltip, which is near-black. That is the wrong
+     * ground for a screen: {@link ChatFormatting#GREEN} is 1.58 : 1 on the workbench material and
+     * {@code GOLD} is 1.10 : 1, so a panel that reuses the tooltip's colours renders text nobody
+     * can read. A caller that draws onto its own background takes this form and colours it for that
+     * background — {@code UiContrast.readableOn} keeps the hue and moves only the luminance.
+     *
+     * @param text the line, unstyled
+     * @param beneficial whether this contribution helps the caster, already accounting for the
+     *     stats whose sign reads backwards — a higher cooldown and a higher misfire chance are both
+     *     larger numbers and both worse
+     */
+    public record Line(Component text, boolean beneficial) {
+    }
+
+    /**
+     * The contributions with their sign, unstyled and in the order {@link #build} emits them.
+     *
+     * <p>{@code build} is this plus the tooltip's colour vocabulary, so the two orderings and the
+     * two omission rules cannot drift.
+     */
+    public static List<Line> lines(WandStats stats) {
+        List<Line> out = new ArrayList<>();
+        collect(stats, out);
+        return out;
+    }
+
     /** Visible for testing: the lines this would append, in order. */
     public static List<Component> build(WandStats stats) {
         List<Component> out = new ArrayList<>();
+        for (Line line : lines(stats)) {
+            out.add(line.text().copy().withStyle(tone(line.beneficial())));
+        }
+        return out;
+    }
+
+    private static void collect(WandStats stats, List<Line> out) {
 
         // Multipliers, as a percentage away from 1.0. Higher damage and range are good; a higher
         // cooldown means waiting longer, so its sign is read the other way round.
@@ -78,31 +114,29 @@ public final class WandCastLines {
             if (percent == 0) {
                 continue;
             }
-            out.add(Component.translatable("wandcraft.tooltip.cast.category",
-                            categoryName(category), signed(percent))
-                    .withStyle(tone(percent > 0)));
+            out.add(new Line(Component.translatable("wandcraft.tooltip.cast.category",
+                    categoryName(category), signed(percent)), percent > 0));
         }
-        return out;
     }
 
-    private static void addMultiplier(List<Component> out, float multiplier, String key,
+    private static void addMultiplier(List<Line> out, float multiplier, String key,
                                       boolean higherIsBetter) {
         int percent = Math.round((multiplier - 1.0f) * 100.0f);
         if (percent == 0) {
             return;
         }
-        out.add(Component.translatable(key, signed(percent))
-                .withStyle(tone(higherIsBetter == (percent > 0))));
+        out.add(new Line(Component.translatable(key, signed(percent)),
+                higherIsBetter == (percent > 0)));
     }
 
-    private static void addPoints(List<Component> out, float delta, String key,
+    private static void addPoints(List<Line> out, float delta, String key,
                                   boolean higherIsBetter) {
         int percent = Math.round(delta * 100.0f);
         if (percent == 0) {
             return;
         }
-        out.add(Component.translatable(key, signed(percent))
-                .withStyle(tone(higherIsBetter == (percent > 0))));
+        out.add(new Line(Component.translatable(key, signed(percent)),
+                higherIsBetter == (percent > 0)));
     }
 
     /** {@code +12%} / {@code -8%}. */

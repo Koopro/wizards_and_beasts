@@ -430,9 +430,14 @@ public final class McStylePanel {
      */
     public static void drawSkinRow(GuiGraphics g, WizardsPalette.GuiSkin skin,
                                    int x, int y, int w, int h, boolean selected) {
-        if (selected) {
-            g.fill(x, y, x + w, y + h, ROW_SELECT_ALPHA | (skin.accent() & 0x00FFFFFF));
+        if (!selected) {
+            return;
         }
+        g.fill(x, y, x + w, y + h, ROW_SELECT_ALPHA | (skin.accent() & 0x00FFFFFF));
+        // Plus an opaque edge. A quarter-alpha wash is a clear selection on the star chart's night
+        // void and almost nothing on the four light materials, where the tint and the face differ
+        // by a few points of luminance. The outline reads on all of them.
+        drawBorder(g, x, y, w, h, skin.accent(), skin.accent());
     }
 
     /** How much of a row's tint is the colour and how much is the row underneath. */

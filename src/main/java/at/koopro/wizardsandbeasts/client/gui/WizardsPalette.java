@@ -110,7 +110,19 @@ public final class WizardsPalette {
         /** Ollivander's bench: worn wood, shellac, leather, brass calipers, pale shavings. */
         WORKBENCH("workbench", 0xFFD9C49A, WELL, 0xFF2A1F14, 0xFF9C7B32, 0xFF8A6A45),
         /** The Marauder's Map: aged parchment in a scuffed leather portfolio, pocket-worn brass. */
-        MARAUDERS_MAP("marauders_map", 0xFFE3D6AE, 0xFF4A3524, 0xFF3A2E24, 0xFFB08A4A, 0xFF6B5A46);
+        MARAUDERS_MAP("marauders_map", 0xFFE3D6AE, 0xFF4A3524, 0xFF3A2E24, 0xFFB08A4A, 0xFF6B5A46),
+        /** The Pensieve: dark wet stone with an aubergine cast, and the light a memory gives off. */
+        PENSIEVE("pensieve", 0xFF221C2E, 0xFF4A3F5E, 0xFFDCE4F0, 0xFFC8D4E8, 0xFF8A87A8),
+        /**
+         * The Floo grate: soot-black stone, warm soot, green fire.
+         *
+         * <p>The accent is {@code FlooCues.EMERALD} to the byte. It is not <em>read</em> from there
+         * — that constant is common code and this is a client palette, and the rule in this file is
+         * that a value is spelled rather than derived so the two copies can be diffed by eye — but
+         * the tie is deliberate: on the Floo screen the green is the one colour carrying meaning
+         * rather than theme, so the material is built around it instead of beside it.
+         */
+        HEARTH("hearth", 0xFF141618, 0xFF2A2422, 0xFFE4E0D8, 0xFF21B342, 0xFF8A8A82);
 
         private final String folder;
         private final int base;
