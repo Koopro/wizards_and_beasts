@@ -53,6 +53,10 @@ public final class PoseOverrideService {
             return;
         }
         player.setData(ModAttachments.POSE_OVERRIDE.get(), override);
+        // The attitude decides the collision box (FlightHitbox), and a box is only recomputed when
+        // something asks for it. Without this the server keeps the standing box while the model
+        // lies flat, which is the whole defect this is here to prevent.
+        player.refreshDimensions();
         sync(player);
     }
 

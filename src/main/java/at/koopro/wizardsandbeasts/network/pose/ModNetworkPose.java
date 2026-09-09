@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.network.pose;
 
-import at.koopro.wizardsandbeasts.client.pose.ClientPoseState;
+import at.koopro.wizardsandbeasts.client.network.ClientPayloadHandlers;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import org.jspecify.annotations.NullMarked;
 
@@ -13,6 +13,6 @@ public final class ModNetworkPose {
         registrar.playToClient(
                 PoseOverrideSyncS2CPayload.TYPE,
                 PoseOverrideSyncS2CPayload.STREAM_CODEC,
-                ClientPoseState::handleSync);
+                ClientPayloadHandlers::handlePoseOverrideSync);
     }
 }

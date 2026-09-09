@@ -1,8 +1,6 @@
 package at.koopro.wizardsandbeasts.client.pose;
 
-import at.koopro.wizardsandbeasts.network.pose.PoseOverrideSyncS2CPayload;
 import at.koopro.wizardsandbeasts.pose.PoseOverride;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.Map;
@@ -18,6 +16,11 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * <p>Entries are dropped on world unload; a stale entry for a player who left is harmless in the
  * meantime, since nothing looks up an override for an entity that is not rendering.
+ *
+ * <p><b>This class must not touch {@code Minecraft} or any other client-only type.</b> It is read
+ * from {@code FlightHitboxHandler}, which is a common {@code EntityEvent.Size} listener running on
+ * both sides — the same contract {@code ClientFormDataState} holds for {@code FormHitboxHandler}.
+ * The payload handling that does need the client lives in {@code ClientPayloadHandlers}.
  */
 @NullMarked
 public final class ClientPoseState {
@@ -26,17 +29,15 @@ public final class ClientPoseState {
 
     private ClientPoseState() {}
 
-    /** Payload handler. Runs on the client thread via the context. */
-    public static void handleSync(PoseOverrideSyncS2CPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
-            if (payload.override().active()) {
-                OVERRIDES.put(payload.playerUuid(), payload.override());
-            } else {
-                // An inactive override is an absence, not a stored "nothing" — so clearing removes
-                // the entry rather than parking a NONE that every lookup then has to unwrap.
-                OVERRIDES.remove(payload.playerUuid());
-            }
-        });
+    /** Store a synced override. Called on the client thread by {@code ClientPayloadHandlers}. */
+    public static void apply(UUID playerUuid, PoseOverride override) {
+        if (override.active()) {
+            OVERRIDES.put(playerUuid, override);
+        } else {
+            // An inactive override is an absence, not a stored "nothing" — so clearing removes
+            // the entry rather than parking a NONE that every lookup then has to unwrap.
+            OVERRIDES.remove(playerUuid);
+        }
     }
 
     public static PoseOverride get(UUID playerUuid) {

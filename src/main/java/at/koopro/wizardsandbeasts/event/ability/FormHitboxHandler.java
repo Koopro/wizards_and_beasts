@@ -44,6 +44,17 @@ public final class FormHitboxHandler {
         event.setNewSize(EntityDimensions.scalable(profile.hitboxWidth(), profile.hitboxHeight()));
     }
 
+    /**
+     * True when an Animagus form owns this player's collision box.
+     *
+     * <p>Exposed so other size handlers can stand down rather than racing this one. Listener order
+     * is not guaranteed, so "whoever runs last wins" is not a rule anything can be built on.
+     */
+    public static boolean hasFormHitbox(Player player) {
+        String formId = resolveFormId(player);
+        return AnimagusForms.isAnimagusForm(formId) && SizeProfileRegistry.get(formId) != null;
+    }
+
     private static String resolveFormId(Player player) {
         if (player.level().isClientSide()) {
             ClientFormDataState.FormData data = ClientFormDataState.get(player.getUUID());

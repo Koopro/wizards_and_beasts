@@ -18,6 +18,7 @@ import at.koopro.wizardsandbeasts.client.ministry.state.ClientMinistryRecordStat
 import at.koopro.wizardsandbeasts.client.standing.state.ClientStandingState;
 import at.koopro.wizardsandbeasts.client.owl.ClientOWLCache;
 import at.koopro.wizardsandbeasts.client.petrify.state.ClientPetrifyState;
+import at.koopro.wizardsandbeasts.client.pose.ClientPoseState;
 import at.koopro.wizardsandbeasts.network.petrify.PetrifiedStateSyncS2CPayload;
 import at.koopro.wizardsandbeasts.client.skill.state.ClientSkillBonusCache;
 import at.koopro.wizardsandbeasts.client.skill.state.ClientSkillDataState;
@@ -69,6 +70,9 @@ import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.entity.player.Player;
+import at.koopro.wizardsandbeasts.network.pose.PoseOverrideSyncS2CPayload;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
@@ -338,6 +342,29 @@ public final class ClientPayloadHandlers {
             ClientFormDataState.update(pkt.playerUUID(), pkt.formId(), profile,
                     RenderFlag.fromBitmask(pkt.renderFlagMask()));
             SizeLerpTracker.onScaleChanged(pkt.playerUUID(), pkt.modelScale());
+        });
+    }
+
+    /**
+     * A player's flight attitude changed: store it, then recompute their collision box.
+     *
+     * <p>The refresh is the point. {@code FlightHitboxHandler} flattens the box while a player is
+     * drawn lying flat, but a box is only recomputed when something calls
+     * {@code refreshDimensions()} — the server does it in {@code PoseOverrideService.set} and this
+     * is the client half. Skipping it leaves the local player colliding as a standing 1.8-tall
+     * column while the server has them at 0.6, so the client refuses moves the server would have
+     * allowed and the player rubber-bands off ceilings they actually fit under.
+     */
+    public static void handlePoseOverrideSync(PoseOverrideSyncS2CPayload pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
+            ClientPoseState.apply(pkt.playerUuid(), pkt.override());
+            ClientLevel level = Minecraft.getInstance().level;
+            if (level != null) {
+                Player player = level.getPlayerByUUID(pkt.playerUuid());
+                if (player != null) {
+                    player.refreshDimensions();
+                }
+            }
         });
     }
 
