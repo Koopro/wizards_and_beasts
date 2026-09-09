@@ -244,8 +244,7 @@ public class ModModelProvider extends ModelProvider {
             propBlock(blockModels, pot, cauldron, sideTop(pot, "_side"), false);
         }
 
-        propBlock(blockModels, ModBlocks.OCCAMY_EGGSHELL.get(), eggshellModel(),
-                eggshellTexture(), true);
+        eggshellBlock(blockModels);
         blockModels.createTrivialBlock(ModBlocks.FLOO_GRATE.get(), TexturedModel.LEAVES);
         propBlock(blockModels, ModBlocks.SPELL_TEACHER.get(), lecternModel(),
                 sideTop(ModBlocks.SPELL_TEACHER.get(), ""), false);
@@ -586,6 +585,24 @@ public class ModModelProvider extends ModelProvider {
      * has a {@code BlockItem} — without the explicit call datagen fails with
      * "Missing item model definitions for: [...]".
      */
+    /**
+     * The Occamy eggshell, which is the one prop whose block and item want different art.
+     *
+     * <p>{@link #propBlock} points the item model at the block model, which is right for a cauldron
+     * or a lectern — you want to see the thing you are about to place. It is wrong here: the shell
+     * ships a hand-drawn 16x16 inventory sprite of a whole silver egg, and pointing the item at a
+     * 6x5 sub-cube would leave that art with no consumer at all. So the block takes the two new
+     * block textures and the item keeps its sprite.
+     */
+    private void eggshellBlock(BlockModelGenerators blockModels) {
+        Block block = ModBlocks.OCCAMY_EGGSHELL.get();
+        Identifier model = eggshellModel().create(block, sideTop(block, ""), blockModels.modelOutput);
+        blockModels.blockStateOutput.accept(
+                MultiVariantGenerator.dispatch(block, BlockModelGenerators.plainVariant(model))
+                        .with(BlockModelGenerators.ROTATION_HORIZONTAL_FACING));
+        blockModels.registerSimpleFlatItemModel(block.asItem());
+    }
+
     private void propBlock(BlockModelGenerators blockModels, Block block,
                            ExtendedModelTemplate template, TextureMapping mapping, boolean rotated) {
         Identifier model = template.create(block, mapping, blockModels.modelOutput);
@@ -644,15 +661,30 @@ public class ModModelProvider extends ModelProvider {
     /**
      * A single Occamy shell: one small cuboid, six pixels across and five tall.
      *
-     * <p>Textured from the <em>item</em> sprite rather than a block texture, because that is the art
-     * that exists — the shell shipped as an inventory item long before it was placeable. Swapping in
-     * a dedicated {@code block/occamy_eggshell} texture later is a one-line change to
-     * {@link #eggshellTexture()} and touches nothing else.
+     * <p>It used to borrow the <em>item</em> sprite for all six faces, and that was wrong twice
+     * over. The item sprite is a whole egg drawn in an inventory frame, so the placed block was an
+     * egg decal smeared across a cuboid rather than a broken shell on the ground; and because the
+     * template declared no render type, the sprite's transparent corners came back as opaque black
+     * under the default {@code solid} pass. The shell now has its own two block textures — a curved
+     * silver wall and a hole seen from above — drawn by {@code tools/block_textures.py}.
+     *
+     * <p>UVs are stated rather than left to the auto-mapper. A {@code from/to} of 5-11 makes vanilla
+     * sample the matching 6x5 <em>window</em> of the texture, which crops a 16x16 sprite down to
+     * whatever happens to sit in that corner; {@code 0-16} puts the whole authored face on the face.
+     *
+     * <p>The underside takes the wall texture, not the top: a shell resting on the ground is closed
+     * underneath, and the hole belongs on the one face you can see into.
      */
     private static ExtendedModelTemplate eggshellModel() {
-        return prop(TextureSlot.PARTICLE, TextureSlot.TEXTURE)
+        return prop(TextureSlot.PARTICLE, TextureSlot.SIDE, TextureSlot.TOP)
+                .renderType("minecraft:cutout")
                 .element(e -> e.from(5, 0, 5).to(11, 5, 11)
-                        .textureAll(TextureSlot.TEXTURE))
+                        .face(Direction.NORTH, f -> f.texture(TextureSlot.SIDE).uvs(0, 0, 16, 16))
+                        .face(Direction.SOUTH, f -> f.texture(TextureSlot.SIDE).uvs(0, 0, 16, 16))
+                        .face(Direction.EAST, f -> f.texture(TextureSlot.SIDE).uvs(0, 0, 16, 16))
+                        .face(Direction.WEST, f -> f.texture(TextureSlot.SIDE).uvs(0, 0, 16, 16))
+                        .face(Direction.UP, f -> f.texture(TextureSlot.TOP).uvs(0, 0, 16, 16))
+                        .face(Direction.DOWN, f -> f.texture(TextureSlot.SIDE).uvs(0, 0, 16, 16)))
                 .build();
     }
 
@@ -696,14 +728,6 @@ public class ModModelProvider extends ModelProvider {
                 WizardsAndBeastsMod.MODID, "block/floating_candle");
         return new TextureMapping()
                 .put(TextureSlot.ALL, texture)
-                .put(TextureSlot.PARTICLE, texture);
-    }
-
-    private static TextureMapping eggshellTexture() {
-        Identifier texture = Identifier.fromNamespaceAndPath(
-                WizardsAndBeastsMod.MODID, "item/occamy_eggshell");
-        return new TextureMapping()
-                .put(TextureSlot.TEXTURE, texture)
                 .put(TextureSlot.PARTICLE, texture);
     }
 

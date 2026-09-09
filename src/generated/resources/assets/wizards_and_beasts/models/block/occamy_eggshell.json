@@ -4,22 +4,58 @@
     {
       "faces": {
         "down": {
-          "texture": "#texture"
+          "texture": "#side",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
         },
         "east": {
-          "texture": "#texture"
+          "texture": "#side",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
         },
         "north": {
-          "texture": "#texture"
+          "texture": "#side",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
         },
         "south": {
-          "texture": "#texture"
+          "texture": "#side",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
         },
         "up": {
-          "texture": "#texture"
+          "texture": "#top",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
         },
         "west": {
-          "texture": "#texture"
+          "texture": "#side",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
         }
       },
       "from": [
@@ -34,8 +70,10 @@
       ]
     }
   ],
+  "render_type": "minecraft:cutout",
   "textures": {
-    "particle": "wizards_and_beasts:item/occamy_eggshell",
-    "texture": "wizards_and_beasts:item/occamy_eggshell"
+    "particle": "wizards_and_beasts:block/occamy_eggshell",
+    "side": "wizards_and_beasts:block/occamy_eggshell",
+    "top": "wizards_and_beasts:block/occamy_eggshell_top"
   }
 }
