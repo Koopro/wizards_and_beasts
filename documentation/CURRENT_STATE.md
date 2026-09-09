@@ -161,7 +161,7 @@ Brooms — still a hidden gem. 7 tiered brooms with a full flight-physics vector
 
 Audio — thin but honest. 41 sound events defined, 0 .ogg files — every event maps to a vanilla sound. Functional, never distinctive.
 
-Technical quality — high (7/10, held). Data-driven everywhere, codec-based, module-gated across 26 modules (ModuleManager), server-authoritative casting with a bounded ModifierStack (hard cap 3.0 / floor 0.25), synced entities, FML unit tests. 2,494 lang keys (up from 2,161) — content is thoroughly named and described. Docked for: the core dual-system split, the 93 stale PLACEHOLDER markers, SOUL_FRAGMENT_INTACT being read at six sites and never written false anywhere (every Horcrux vessel is permanently indestructible), ModifierStack.finalPower() remaining a dead knob with no consumers, and a working tree carrying three feature-sized uncommitted changes at once. The engineering is still not the problem.
+Technical quality — high (7/10, held). Data-driven everywhere, codec-based, module-gated across 26 modules (ModuleManager), server-authoritative casting with a bounded ModifierStack (hard cap 3.0 / floor 0.25), synced entities, FML unit tests. 2,494 lang keys (up from 2,161) — content is thoroughly named and described. Docked for: the core dual-system split, SOUL_FRAGMENT_INTACT being read at six sites and never written false anywhere (every Horcrux vessel is permanently indestructible), ModifierStack.finalPower() remaining a dead knob with no consumers, and a working tree carrying three feature-sized uncommitted changes at once. The engineering is still not the problem.
 
 4. Scores
 
@@ -173,7 +173,7 @@ Magic Design	6	7/10	Spells, proficiency and gating are strong, and the cast now 
 Wand Design	3	5/10	Wood mechanism correctly rewired to the datapack, but 6/10 woods are inert, all 8 cores are un-migrated, and the derived stats are invisible in the tooltip.
 RPG Progression	4	5/10 → 7/10	Player stats give a real, trainable growth axis; 100 of 163 tree nodes are still self-labelled filler. *(Re-scored 2026-09-09: 30 pathways of 107 nodes, `learn_spell` is the commonest effect on the web, and three keystones is a real all-in choice against the 60-point cap.)*
 Exploration	3	3/10	Two set-piece structures. Magical flora is not magical geography.
-Creature Design	4	5/10	111 rigs and 162 textures land; box-per-bone fidelity, stale placeholder markers and zero taming/breeding hold it down.
+Creature Design	4	6/10	111 rigs and 162 textures land, four creatures now bond/gift/breed on a reusable datapack layer, and every creature material is obtainable. Box-per-bone fidelity on 83 rigs still holds it down.
 Worldbuilding	5	5/10	The text (naming, heritage prose, handbook) is magical; the world you walk through still is not.
 Atmosphere	5	6/10	Real rigs and textures shipped alongside the beam/particle/Patronus VFX; procedural GUIs and all-vanilla audio still pull down.
 UX	4	5/10	Heritage choice is now informed. Wand math is still invisible and the trees still lie in their filenames.
@@ -193,12 +193,12 @@ B. Top 10 problems (by player impact)
 
 	1.	🔴 The wand's derived cast stats are invisible to the player — the Ollivander fantasy still resolves to unreadable numbers. (§Crit-1)
 	2.	🟢 *Closed 2026-09-09.* 100 of 163 skill nodes are named filler, and the *_unlock nodes unlock nothing. (§Crit-2) — now 30 pathways of 107, no small node grants an attribute, and every `<spell>_unlock` teaches its spell under a test.
-	3.	🔴 96 creatures, zero taming/breeding — the Niffler proves the pattern and is alone in it. (§Crit-3)
+	3.	🟠 PARTLY FIXED — the Niffler's bond system was extracted into a datapack-driven `creature/bond/` layer and now runs on four creatures (Niffler, Bowtruckle, Mooncalf, Hippogriff), with gifts and breeding on the two passive ones. Still four of a hundred: adding a fifth is one datapack file and no Java, so what remains is content, not architecture. (§Crit-3)
 	4.	🟠 6 of 10 wand woods and all 8 wand cores contribute nothing to a cast; the dual-system bug migrated from woods to cores.
 	5.	🟢 Brewing — RESOLVED. The codec seam landed 2026-08-28 and the signature roster was filled 2026-09-09: 14 brews, 12 recipes, and Veritaserum / Living Death / Amortentia are real rather than vanilla effect lists.
 	6.	🟠 Exploration is 2 set-piece structures; the overworld has magical flora but no magical places.
 	7.	🟠 102 of 111 rigs are box-per-bone; Hippogriff and Horntail look like they're from different mods.
-	8.	🟠 93 creature JSONs carry stale "PLACEHOLDER box rig" markers that misrepresent shipped work and corrupt audits.
+	8.	✅ RETRACTED — the markers were never stale. Checked against every rig on disk: all 83 marked rigs are generated box rigs and every hand-built rig is unmarked, so this contradicted issue 7 directly above it. `RigMarkerConsistencyTest` now decides it from the files in both directions, and the 83 are the real art backlog (`KNOWN_ISSUES` §4.2).
 	9.	🟡 SOUL_FRAGMENT_INTACT is read at six sites and never written false — every Horcrux vessel is permanently indestructible.
 	10.	🟡 Vocations are too thin to create distinct playstyles; currency risks becoming a grind-gate on spell learning.
 
@@ -237,7 +237,7 @@ G. Remove / Rework / Simplify / Keep / Expand
 	•	KEEP: Spell casting + proficiency, the player-stats cast layer, heritage system, wand allegiance, broom physics, module/networking foundation, the Niffler.
 	•	REWORK: Wand cores (migrate to datapack cast_modifiers, delete the enum switch) — *done 2026-09-08*; the whole skill-tree node set (replace filler with forks; make spell-unlock nodes actually unlock or rename them honestly) — *done 2026-09-09*.
 	•	SIMPLIFY: 8 skill trees → fewer, denser trees; collapse the 5-node stub trees into their heritages or cut.
-	•	REMOVE: The 93 stale PLACEHOLDER box rig comments; either wire spell_modifiers to a real SpellCategory mapping or drop the field.
+	•	KEEP: the PLACEHOLDER box rig comments — they are accurate, they are the art backlog, and a test now holds them to it. REMOVE: either wire spell_modifiers to a real SpellCategory mapping or drop the field.
 	•	EXPAND: creature bonding, everyday exploration structures, rig fidelity on the signature dozen. (Potions are no longer on this list.)
 
 H. Recommended development order

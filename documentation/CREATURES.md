@@ -97,7 +97,7 @@ All 62 bestiary entries minus the 9 with an `entityType` (augurey, bowtruckle, c
 | norwegian_ridgeback | WINGED_QUADRUPED | FLYING | 2.7x2.9 | 90 | PASS (placeholder) |
 | nundu | QUADRUPED | GROUND | 2.7x2.9 | 90 | PASS (placeholder) |
 | obscurus | BLOB_SPHERE | FLYING | 0.95x1.25 | 16 | PASS (placeholder, empty fly clip) |
-| occamy | SERPENTINE | GROUND | 1.7x1.9 | 40 | PASS (placeholder) |
+| occamy | SERPENTINE | GROUND | 1.7x1.9 | 40 | SHIPPED (hand-built, 44 cubes, UV clean; resizes 0.35–2.2) |
 | peruvian_vipertooth | WINGED_QUADRUPED | FLYING | 1.7x1.9 | 40 | PASS (placeholder) |
 | plimpy | AQUATIC | AQUATIC | 0.65x0.75 | 8 | PASS (placeholder) |
 | qilin | QUADRUPED | GROUND | 0.95x1.25 | 16 | PASS (placeholder) |
@@ -247,7 +247,7 @@ Closed the remaining canon signature gaps. New `onDeath(entity)` hook on `Creatu
 
 Built every remaining deferred item. 4 new variants (28 total) + a real projectile entity + a render-state size-shift + a new `onDeath`-style render path:
 
-- **occamy_choranaptyxis** (Occamy size-shift, render-only): `GenericBeastEntity` gains a synced `DATA_RENDER_SCALE` float (default 1.0, hitbox stays registry-frozen). New `ScaledBeastRenderer` (mirrors `DragonRenderer`'s render-state DataTicket → `root` bone scale, no live-entity access) now renders all non-dragon creatures (1.0 = identical to the old `GeoRendererHelper.simple`). The ability eases scale toward max when roused + roomy, min when calm/confined (ceiling headroom proxy).
+- **occamy_choranaptyxis** (Occamy size-shift, render-only — **superseded, see §15**): `GenericBeastEntity` gains a synced `DATA_RENDER_SCALE` float (default 1.0, hitbox stays registry-frozen). New `ScaledBeastRenderer` (mirrors `DragonRenderer`'s render-state DataTicket → `root` bone scale, no live-entity access) now renders all non-dragon creatures (1.0 = identical to the old `GeoRendererHelper.simple`). The ability eases scale toward max when roused + roomy, min when calm/confined (ceiling headroom proxy).
 - **flame_burst** (Fire Crab, +`FlameBurstGoal`) and **ember_trail** (Ashwinder): the "fire emission" follow-up the fire pass deferred. Burst = AoE ignite + small fire damage on cooldown; trail = small per-tick chance to lay a vanilla fire block in the Ashwinder's wake (air-on-solid only). No new items.
 - **Real ranged projectiles**: `ranged_hex` no longer hitscans. New `BeastHexProjectile` (`ThrowableItemProjectile`, registered `beast_hex_projectile`, rendered via vanilla `ThrownItemRenderer` as a flung magma cream — the `WizardingThrownEntity` pattern) carries server-side damage + optional effect + particle trail; `RangedHexGoal` now launches it (dodgeable, travels, LOS) with a throw sound.
 - **danger_sense** (Kneazle): periodically outlines nearby `Enemy` mobs with Glowing (its sixth sense for threats).
@@ -261,3 +261,201 @@ NOT done (clear rationale): new canon creatures — already exist as dedicated `
 - FLYING + a wingless body-plan (BLOB_SPHERE: obscurus) produces an empty `…fly` clip — valid, renders idle only. Acceptable for placeholder.
 - `Level.isClientSide` is private; use `level.isClientSide()`.
 - Generic entity learns its id via `BuiltInRegistries.ENTITY_TYPE.getKey(getType())` — no per-creature class needed.
+
+## 14. Relationships and rewards — the bond layer (2026-09-09)
+
+**The problem.** 111 rigs and 162 textures shipped, and a player could do exactly two things with
+any of them: look at it, or kill it. The Niffler was the sole exception — it had an owner, a 0–100
+bond, a feed table, milestone XP and a follow goal — and every one of those was hard-coded inside
+`NifflerEntity`, so it proved a pattern nothing else could use. Worse, every creature material was
+reachable only by killing its creature, which made a relationship strictly *worse* than no
+relationship: a Bowtruckle you have fed for an hour is worth less than one you have never met,
+because the stranger can still be butchered for parts.
+
+**The extraction.** `creature/bond/`:
+
+| File | Role |
+|---|---|
+| `BondProfile` | the species' numbers, from `data/…/creature_bonds/<id>.json` |
+| `BondFeed` | one accepted item: gain + how long it is full afterwards |
+| `BondGift` | what a bonded creature hands over while alive, and how often |
+| `BondBreeding` | how it raises young |
+| `BondState` | per-creature storage: owner, level, timers, juvenile growth |
+| `BondableBeast` | all the behaviour, as interface defaults |
+| `BondProfileRegistry` / `BondProfileLoader` | reload listener, mirroring `CreatureDefinitionLoader` |
+| `FollowBondedOwnerGoal` | generic form of `NifflerFollowBondedPlayerGoal` (deleted) |
+
+### Three decisions worth recording
+
+**1. The profile lives in its own datapack directory, not on `CreatureDefinition`.** This looks like
+the obvious place and is the wrong one: the creatures worth bonding to are exactly the ones with no
+`CreatureDefinition`. Niffler, Bowtruckle, Mooncalf, Thestral and Phoenix are bespoke classes from
+`ModCreatures.BESPOKE_IDS` and none ships a `creatures/*.json`, so a field there would have reached
+every creature *except* the five the layer was extracted from. Keyed by entity id, one directory
+serves the bespoke classes and the data-driven ninety-six identically.
+
+**2. Presence of the file is the whole opt-in.** There is no `bondable` boolean anywhere.
+`GenericBeastEntity` implements `BondableBeast` for all ninety-six data-driven creatures, so adding
+the relationship layer to one is a datapack file and no Java at all — the Hippogriff is the proof,
+and it required zero lines of code. A creature with no profile pays one null check per tick.
+
+**3. Juveniles are scaled adults, not a baby `EntityType`.** An `EntityType` is frozen registry data
+created at mod-init, so a real baby species is a registration, a renderer, a spawn egg and a
+save-compat story *each* — which is why `BabyNifflerEntity` exists and why nothing followed it.
+`Attributes.SCALE` drives the hitbox as well as the model, so a calf spawned as the same type at
+`SCALE 0.5` is genuinely small. It is set at birth, re-applied on load (the size lives on an
+attribute, not in save data), and restored to 1.0 when the growth timer runs out.
+
+### The Niffler migration, and the constraint on it
+
+Its numbers moved into `creature_bonds/niffler.json` **unchanged**, and the NBT keys are
+byte-identical, so existing worlds keep their Nifflers' owners and bonds.
+`BondProfileDataTest.theNifflerProfileRestatesItsOriginalHardCodedNumbers` asserts every one of them
+against the file — that test is the migration's safety net, because a typo in one datapack file is
+now the difference between the mod's flagship creature working and quietly losing its bond system.
+
+Two behaviour changes, both fixes: `getBondLevel()` now reads the synched value rather than a
+server-only field that is 0 on every client (which is why `NifflerPocketLayer`'s `>= 100` gate could
+never open), and crossing a milestone now raises a toast instead of firing an event silently.
+
+### Loot completeness
+
+- **The Basilisk's emerald stand-in** became `basilisk_fang`, an item that already existed.
+- **The Werewolf's** cannot be fixed the same way — canon names no werewolf material, and inventing
+  an item mid-way through an uncommitted item-model migration is the wrong risk. Its drop is now a
+  design instead of a stand-in: a cursed person leaves torn robes, bones and loose Knuts.
+- **Eleven registered materials were unobtainable**, four of them wand cores consumed by ten recipes
+  each. All eight cores are now reachable. `CreatureMaterialObtainabilityTest` fails the build if
+  one stops being.
+- **The eight extra dragon breeds got loot tables**, which was the only one of `AlphaRoster`'s four
+  tests they failed — so the roster went 12 → 20.
+
+### The marker claim that was false
+
+`CURRENT_STATE.md` said 93 `PLACEHOLDER box rig` markers were stale and "misrepresent shipped work".
+They were not, and the claim contradicted the entry directly above it in the same list. Checked
+against every rig: a generated rig has a cube-less `root` bone *and* nine cubes or fewer; every
+marked rig matches and every hand-built rig does not. Both signals are needed — the five
+hand-authored small creatures (`augurey`, `bowtruckle`, `cornish_pixie`, `niffler`, `streeler`) have
+no `root` bone, and `ghoul`, `hippogriff` and `werewolf` were rebuilt on top of the generated
+skeleton so they kept theirs while growing to 17–27 cubes. `RigMarkerConsistencyTest` checks both
+directions, including the one nobody was watching: an unmarked box rig reads as finished art in
+every audit that greps for the marker.
+
+### Lessons
+
+- A synched `EntityDataAccessor` that is written and never read is invisible: the Niffler's bond was
+  synced from the day it was written and every client-side caller read the server-only field beside
+  it instead. Grep for the *reader*, not the accessor.
+- Extracting a system and leaving its original implementation in place creates the dual-system split
+  this repo already documents four times. The Niffler was migrated onto the shared storage in the
+  same pass, not left as a second copy.
+- A datapack profile that cannot work must be refused at load. A bond with no feeds, a gift on a
+  zero cooldown or a milestone above the ceiling all parse fine and then do nothing (or, for the
+  gift, everything) — the exact failure mode that costs a day to find in play.
+
+
+## 15. Choranaptyxis made physical, and a rig for it (2026-09-09)
+
+Two complaints, one creature: *"the Occamy should resize if it wants or needs to but it can't —
+not the hitbox, not the model"*, and *"the Occamy design is trash"*. Both were true.
+
+### The size mechanism was the wrong one, next to the right one
+
+§12's `occamy_choranaptyxis` shipped a **render-only** scale: a synced float on
+`GenericBeastEntity`, applied by a bespoke `ScaledBeastRenderer` to the rig's `root` bone. The
+javadoc was honest about the cost — *"the hitbox never changes (registry-frozen)"* — but that cost
+is the entire feature. A grown Occamy was a big picture around a small body.
+
+The mod already drove size correctly everywhere else. `Attributes.SCALE` does both halves:
+
+| | mechanism |
+|---|---|
+| hitbox | `LivingEntity.getDimensions` = `getDefaultDimensions(pose).scale(getScale())` |
+| refresh | `LivingEntity.onAttributeUpdated` calls `refreshDimensions()` when `SCALE` changes |
+| model | `GeoEntityRenderer.scaleModelForRender` multiplies by `LivingEntityRenderState.scale`, which is `entity.getScale()` |
+
+`EngorgioEffect`, `ReducioEffect`, `SizeSystemAPI` and `BondBreeding` were all already on it. So the
+render-scale float and the bone hack were a second, weaker copy of a native mechanism, and both are
+deleted: `DATA_RENDER_SCALE`, `getRenderScale`/`setRenderScale`, `TICKET_SCALE` and
+`adjustModelBonesForRender`. `ScaledBeastRenderer` keeps only its tint override and is renamed
+`TintedBeastRenderer` — a class called "Scaled" that scales nothing is how the next audit gets lied
+to.
+
+### Want, then need
+
+The old trigger was `roused && headroom >= 3`, where headroom counted air blocks straight up. It
+never fired indoors and never considered width, so the creature could neither squeeze through a gap
+nor be boxed in.
+
+- **Want** — max while it holds a target, `calm_scale` otherwise.
+- **Need** — `largestFittingScale` walks candidates down from what it wants and takes the first
+  whose box passes `Level.noCollision`, so growth is only ever toward a size already proven to fit.
+  Shrinking runs 3x faster than growing. Nothing fits at all, it holds at the floor.
+
+Range `0.35`–`2.2`: **0.60 x 0.67** boxed in — through a one-block hole — and **3.74 x 4.18** roused
+in the open. `OccamyChoranaptyxisTest` asserts the search without standing up a level.
+
+**A game test caught what the unit tests could not.** `ChoranaptyxisTests` spawns a real Occamy and
+asserts its *bounding box*, and the first run failed: `a doubled Occamy is 1.7 wide, expected 3.4`.
+Vanilla does call `refreshDimensions()` on a `SCALE` change — but from `refreshDirtyAttributes()`
+during the entity's own tick, so between the write and the next tick the entity reports the new
+scale and the **old** box, and every collision, reach and suffocation check in that window uses a
+body the creature no longer has. `applySizeScale` refreshes by hand, the way `SizeSystemAPI` already
+did. A test that only checked the number would have passed against the render-only version too,
+which is the whole reason it checks the box.
+
+### The rig
+
+`tools/occamy_model.py` replaces `creature_gen.py`'s eight-bone, seven-cube box worm with 30 bones
+and 44 cubes on a 128px sheet.
+
+**Three cuts were rejected and every rejection was right.** The rig was twice built as an upright
+barrel-chested bird standing on legs — book-canon's "plumed, **two-legged** winged creature with a
+serpentine body" taken literally, which produces a chicken — and *"that's not how an Occamy looks in
+the movies"*. Then, with the legs merely shortened: *"an Occamy has no feet."*
+
+It has none. The animal is a **winged serpent with a bird's head**: the back two thirds of a long
+thin uniformly serpentine body lies along the ground, the front third rears, and it travels by
+slithering or flying. Its own coil is its support — `seg_03` back sits at y 0 — with a small head on
+a slender S-neck, a long pointed beak, a large crest of plumes sweeping back off the crown, modest
+wings set behind the neck, and a long tapering tail into a plume fan.
+
+`main()` now **fails on any bone or cube whose name contains** `thigh`, `shin`, `foot`, `leg`,
+`claw`, `talon` or `toe`. Asserted rather than merely absent, because the book text says two-legged
+and this rig grew feet twice.
+
+`walk` had to be rewritten with it: there are no legs to step with, so forward motion is a lateral
+wave travelling from the reared forebody to the tail tip, each segment lagging its parent — and the
+vertical bob a walk cycle normally carries is gone, because a body sliding on its belly does not
+rise and fall on a step it never takes.
+
+**And the textures did not align to the model** — 253 faults, which
+[`tools/uv_check.py`](../tools/uv_check.py) reports in one line and which nobody had run. GeckoLib
+lays box UV out from `Math.floor(size)` (`BakedModelFactory.buildQuad`) while `boxuv.Packer`/`faces()`
+round *up*, so every fractional cube size shifts every face by a texel: each face samples a strip of
+its neighbour, and the top and bottom faces sample the island corner the box layout never fills,
+which is transparent. Every cube in the first cut had a fractional extent. Four other rigs in
+`tools/` already carry a `snap()` for exactly this and its docstring says so — *"this is not
+cosmetic, a fractional cube size tears its own texture"*.
+
+Every extent is now a whole texel, and `main()` **refuses to write a rig the checker would reject**
+rather than leaving it to someone to remember to run it. `uv_check` reports `occamy: ok`.
+
+Four more things only the orthographic views caught:
+
+1. **A butted spine is a staircase.** Segments that meet end to end but step down in y show daylight
+   through every joint; a snake is recognised by being continuous. Each segment now overlaps its
+   neighbour in **both** y and z.
+2. **A plum dorsal ridge is a mohawk.** It read as a row of purple spikes down the back and stole the
+   crest's job. The ridge is body colour a shade darker now; the plum belongs to the crest alone.
+3. **A 1-unit plume is almost all top face**, so a uniform top-face highlight blew the crest out into
+   white candles. The lift toward white is per-role now — 0.42 on a body, 0.10 on the crest.
+4. **Mottle density in the low twenties is dazzle camouflage.** At that density the speckle becomes
+   the dominant read and the silhouette disappears into noise. Halved for every role.
+
+Bone names are unchanged (`root`, `head`, `seg_01`..`seg_06`) because clips already address them and
+a clip naming a bone that no longer exists fails silently. The `PLACEHOLDER box rig` marker is
+dropped from the rig, the clips and the definition — `RigMarkerConsistencyTest` would otherwise turn
+red, which is the point of it — and the Occamy joins `AlphaRoster` as the 21st creature, the rig
+having been the only one of the four roster tests it failed.

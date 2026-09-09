@@ -29,7 +29,7 @@ exist in the registry, which is why a `/give` can hand you something the module 
 |---|---|
 | `PROFICIENCY` | Per-spell proficiency accrues and scales casts. The stacking formula is now single-owned, clamped and test-locked (§4c, and the spell-power section of `DEVELOPER_REFERENCE.md`); the **numbers** in it are still unbalanced, which is why this stays `PREVIEW`. |
 | `PLAYER_ABILITIES` | The ability framework (wheel, quick slots, Apparition/Legilimency/Animagus/Obscurial) works; the roster is small and several abilities have placeholder VFX. |
-| `CREATURES` | 106 creatures are registered; **12 are alpha-ready and 83 are still on a placeholder box rig** (§4). Natural spawning defaults to the alpha slice only (`creatureNaturalSpawns`), and the creative tab hides placeholder spawn eggs (`showPlaceholderSpawnEggs`). Registration is never gated. |
+| `CREATURES` | 106 creatures are registered; **21 are alpha-ready and 82 are still on a placeholder box rig** (§4). Natural spawning defaults to the alpha slice only (`creatureNaturalSpawns`), and the creative tab hides placeholder spawn eggs (`showPlaceholderSpawnEggs`). Registration is never gated. |
 | `BESTIARY` | **107 entries ship** with full lore, under `data/wizards_and_beasts/bestiary/entries/`. The screen works and entries unlock on sight (§4b). What is thin is the art: only the 32px procedural portraits exist, and the detail pane has no per-entry illustration. |
 | `PLAYER_ANIMATION` | The pose layer runs, but wave 1 ships one proving clip plus a command-driven flight pass. Poses may read wrong in edge cases (swimming, riding, elytra). |
 | `OWLS` | The O.W.L. **examination** system — grades, subjects, professions, the examination desk. It works; the grade curve is unbalanced and the profession roster is thin. The **owl post** (§5d) is new and shares this module's gate. |
@@ -65,34 +65,60 @@ No hand-authored advancement references disabled-module content, and that is now
 through the four generic locomotion classes, plus 10 with their own entity class. They are not
 equally finished, and the difference is deliberate rather than accidental.
 
-### 4.1 Alpha-ready (12)
+### 4.1 Alpha-ready (21)
 
 Named in [`creature/AlphaRoster.java`](../src/main/java/at/koopro/wizardsandbeasts/creature/AlphaRoster.java),
 which is the single source of truth every gate reads. A creature is listed here only when it has a
 hand-built rig, AI beyond wander-and-look, a loot table (or a stated reason it drops nothing), and a
-bestiary entry naming its `entityType`.
+bestiary entry naming its `entityType`. All four are checked against the files on disk by
+`AlphaRosterAssetTest`, so the list cannot drift from what actually ships.
+
+**Eight dragon breeds joined the roster.** They already had hand-built 23–32 cube rigs,
+`DragonEntity`'s fire/venom kit and bestiary entries; the only one of the four tests they failed was
+the loot table, so killing one was a no-op. They have one now.
+
+**The Occamy joined it too**, on a 30-bone / 44-cube rig built by `tools/occamy_model.py`. It had
+abilities, a loot table and a bestiary entry already; the rig was the one test it failed. It is now
+also the only creature in the mod whose *hitbox* changes size during play — see 4.4.
 
 | Creature | Rig | Behaviour | Drops |
 |---|---|---|---|
 | `niffler` | built | steals shiny items, pouch inventory, bonds to a player | gold nuggets, knuts |
-| `bowtruckle` | hand-built | flees, tempted by sticks and saplings | sticks, sapling |
-| `mooncalf` | built | dances on its hind legs under a full moon | mooncalf dung |
+| `bowtruckle` | hand-built | flees, tempted by sticks; **bonds, follows, breeds, gifts wandwood saplings** | sticks, sapling |
+| `mooncalf` | built | dances under a full moon; **bonds, follows, breeds, gifts dung** | mooncalf dung |
 | `thestral` | built | grazes, rideable, seen only by those who have seen death | thestral tail hair, bone |
 | `phoenix` | built | fire-immune flyer | phoenix feather |
 | `ghoul` | built | fearful; groans on its ambient beat | ghoul slime, rotten flesh |
-| `hippogriff` | built (this pass) | enrage at low health, dive-bomb, rears and rakes on melee | feathers, leather |
+| `hippogriff` | built | enrage at low health, dive-bomb, rakes on melee; **bonds, follows, gifts feathers** | feathers, leather |
 | `obscurus` | built | dread aura, ranged hex, enrage, smoke tint | **nothing — see 4.3** |
-| `werewolf` | built | pack tactics, leap, frenzy, howls | leather |
-| `basilisk` | built | lethal gaze with a windup, constrict, petrify, cockcrow weakness | leather, emerald |
+| `werewolf` | built | pack tactics, leap, frenzy, howls | leather, bone, loose Knuts |
+| `basilisk` | built | lethal gaze with a windup, constrict, petrify, cockcrow weakness | basilisk fang, leather |
+| `occamy` | hand-built | constrict, enrage, **choranaptyxis: resizes hitbox and model to fit the space** | occamy eggshell |
 | `common_welsh_green` | built | fire breath, bite venom, enrage | dragon heartstring, leather |
 | `hungarian_horntail` | built | fire breath, bite venom, enrage, charge | dragon heartstring, leather |
+| `antipodean_opaleye` | built | dragon kit | dragon heartstring, leather |
+| `chinese_fireball` | built | dragon kit | dragon heartstring, leather |
+| `hebridean_black` | built | dragon kit | dragon heartstring, leather |
+| `norwegian_ridgeback` | built | dragon kit | dragon heartstring, leather |
+| `peruvian_vipertooth` | built | dragon kit | dragon heartstring, leather |
+| `romanian_longhorn` | built | dragon kit | dragon heartstring, leather |
+| `swedish_short_snout` | built | dragon kit | dragon heartstring, leather |
+| `ukrainian_ironbelly` | built | dragon kit | dragon heartstring, leather |
 
-### 4.2 Placeholder rigs (83)
+### 4.2 Placeholder rigs (82)
 
 These carry `"_comment": "PLACEHOLDER box rig …"` in their definition, or (for `hidebehind` and
 `runespoor`, which have a Java class and no JSON) a bulk-generated rig of the same grade. They are
 data-complete — attributes, traits, abilities, bestiary lore and spawn placement all work — and they
 are drawn as six to nine flat-shaded boxes.
+
+**The markers are accurate, and are now machine-checked.** `CURRENT_STATE.md` previously claimed 93
+of them were *stale* — left behind on creatures whose rigs had since been rebuilt. Checked against
+every rig on disk, none were: every marked rig is a generated box rig, and every hand-built rig is
+unmarked. `RigMarkerConsistencyTest` decides it from the files in both directions, so the question
+does not have to be re-argued by hand and an unmarked box rig can no longer pass as finished art.
+
+**This list is the art backlog.** These 82 are what still needs a modeller; nothing else does.
 
 `abraxan`, `acromantula`, `aethonan`, `ashwinder`, `billywig`, `blast_ended_skrewt`
 `boggart`, `bundimun`, `centaur`, `chimaera`, `chizpurfle`, `clabbert`
@@ -103,7 +129,7 @@ are drawn as six to nine flat-shaded boxes.
 `imp`, `jarvey`, `jobberknoll`, `kappa`, `kelpie`, `knarl`
 `kneazle`, `leprechaun`, `lethifold`, `lobalug`, `mackled_malaclaw`, `maledictus`
 `manticore`, `matagot`, `merperson`, `moke`, `murtlap`, `nogtail`
-`nundu`, `occamy`, `plimpy`, `pogrebin`, `porlock`, `puffskein`
+`nundu`, `plimpy`, `pogrebin`, `porlock`, `puffskein`
 `pukwudgie`, `pygmy_puff`, `qilin`, `quintaped`, `ramora`, `red_cap`
 `reem`, `rougarou`, `runespoor`, `salamander`, `sea_serpent`, `shrake`
 `snallygaster`, `sphinx`, `swooping_evil`, `tebo`, `thunderbird`, `toad`
@@ -123,23 +149,83 @@ wild source of unicorn hair, one of the three wand cores, and gating it would de
 - **The Obscurus drops nothing.** It is a parasitic magical force that disperses rather than dying,
   and no item exists for it to leave. Deliberate, not an oversight — but it does mean killing one is
   materially unrewarded.
-- **Basilisk and werewolf drops are vanilla stand-ins.** Leather and an emerald stand in for basilisk
-  hide and a venom fang; no mod item exists for either yet. The Phase-3 materials that *do* exist
-  (`ghoul_slime`, `yeti_fur`, `granian_hair`, `horned_serpent_gem`, `pukwudgie_venom_sac`,
-  `matagot_essence`, `golden_snidget_feather`, `rougarou_hair`, `hidebehind_claw`) were registered
-  with **no loot table at all** and were unobtainable in survival; they now drop from their creature.
+- **The Basilisk stand-in is fixed; the Werewolf's cannot be, and is now a design instead.** The
+  Basilisk's emerald was standing in for a venom fang — `basilisk_fang` is a registered item and now
+  drops, with leather still standing in for the hide. The Werewolf has no material at all: canon
+  names none, and inventing one would mean a new item in the middle of an uncommitted item-model
+  migration. So its drop is deliberately not a material — a werewolf is a cursed person, and it
+  leaves torn robes, bones and the coins in their pocket. A canon werewolf material remains open.
+- **Eleven creature materials were registered and unobtainable in survival.** Fixed by giving their
+  creature a loot table: `acromantula_venom`, `demiguise_hair`, `murtlap_essence`, `occamy_eggshell`
+  and `basilisk_fang`. Four more (`erumpent_horn`, `thunderbird_tail_feather`, `troll_whisker`,
+  `wampus_cat_hair`) *were* reachable through their bestiary harvest rules but their creatures had
+  no loot table at all, so killing one dropped nothing; they now drop a common part while the rare
+  material stays behind its study gate. The last two, `veela_hair` and `white_river_monster_spine`,
+  have no creature in the mod at all and are now in the `hidden_wizarding_cache` chest table.
+- **Four of the eight wand cores had no source.** `veela_hair`, `troll_whisker`, `wampus_cat_hair`
+  and `thunderbird_tail_feather` are each consumed by ten wand recipes and could not be obtained, so
+  half the wand catalogue advertised a core nobody could hold. All eight are now reachable, and
+  `CreatureMaterialObtainabilityTest` fails the build if one stops being.
 - **The Hippogriff does not bow.** Canon's greeting ritual — you bow, it bows back, and only then may
   it be ridden — is not implemented. It is approached and ridden by the generic path.
 - **Three creatures are art-complete but behaviour-thin**: `augurey`, `cornish_pixie` and `streeler`
   have hand-drawn rigs and skins but wander-and-look AI only, so they are not on the alpha roster.
   The Streeler's colour-shift and venomous trail, and the Augurey's rain-cry, are both unwritten.
-- **Eight dragon breeds have real rigs but are off the roster.** `antipodean_opaleye`,
-  `chinese_fireball`, `hebridean_black`, `norwegian_ridgeback`, `peruvian_vipertooth`,
-  `romanian_longhorn`, `swedish_short_snout` and `ukrainian_ironbelly` share `DragonEntity`'s
-  fire/venom kit with the two that are listed, and are built to the same standard. They are held
-  back only because they have no loot table yet and because an alpha slice of twenty is not a
-  slice. They still summon and fly correctly.
+- **The eight extra dragon breeds are on the roster now.** They were held back for a loot table and
+  for the argument that "an alpha slice of twenty is not a slice". They have loot, and the count
+  argument does not survive contact with what they are: one family sharing one implementation, not
+  eight unrelated creatures.
+- **Bonding reaches four creatures, not ninety-six.** `niffler`, `bowtruckle`, `mooncalf` and
+  `hippogriff` ship `creature_bonds/*.json`; every other creature has no profile and does not bond.
+  Adding one is a datapack file and no Java (see 4d), so this is a content gap rather than a
+  technical one.
+- **A bonded creature is not protected from anyone but its owner.** The betrayal penalty only reads
+  the owner's blows, so another player can kill a companion without the bond noticing. There is no
+  ownership check on damage at all; that is a multiplayer question this pass did not open.
 - **No creature has a sound of its own.** Every beast reuses vanilla sound events.
+
+### 4.4 Choranaptyxis — the one creature whose hitbox changes size
+
+The Occamy grows or shrinks to fill the space it is in, and since this pass that is true of its
+**box** as well as its picture.
+
+**What it was.** `OccamyChoranaptyxis` wrote a render-only synced float that a bespoke
+`ScaledBeastRenderer` applied to the rig's `root` bone. Its own javadoc said "the hitbox never
+changes (registry-frozen)", which made a grown Occamy a large image around a small body: it blocked
+nothing, reached no further, and fit everywhere it fit before. The trigger could barely fire either
+— it needed an attack target *and* three air blocks straight above its head, so indoors, in a fight,
+it never moved at all. Width was never measured, so it could neither squeeze through a gap nor be
+boxed in.
+
+**What it is.** One number, `Attributes.SCALE`, driven through `GenericBeastEntity.applySizeScale`:
+
+- vanilla recomputes the bounding box from `getScale()` and calls `refreshDimensions()` itself when
+  the attribute changes;
+- GeckoLib's `GeoEntityRenderer.scaleModelForRender` already multiplies the model by the same value,
+  so the renderer needs no support at all — `ScaledBeastRenderer`'s bone hack is deleted and the
+  class is now `TintedBeastRenderer`, named for the one thing it still does;
+- the modifier is `ADD_MULTIPLIED_BASE`, so it composes with the base scale `BondBreeding` writes
+  for a juvenile rather than overwriting it.
+
+It measures the space by probing candidate sizes against `Level.noCollision` and taking the largest
+that is actually free, so it can never inflate into a wall. `applySizeScale` refreshes dimensions by hand:
+vanilla's own refresh runs during the entity tick, so without it the creature carries the old box
+for up to a tick after deciding it has a new one — found by `ChoranaptyxisTests`, which asserts the
+box rather than the number. Shrinking runs 3x faster than growing:
+being crushed is a need, swelling is a display. Range is `0.35`–`2.2` of a 1.7 x 1.9 body — 0.6 x
+0.67 boxed in, through a one-block hole, and 3.7 x 4.2 roused in the open.
+
+Open, and deliberately not done here:
+
+- **`DragonRenderer` still carries the same defect.** It has its own render-state scale ticket doing
+  model-only bone scaling for breed size, so a big breed's box is the same as a small one's. Ten
+  creatures, the identical fix, and its own pass.
+- **Growing back into tight geometry can still suffocate.** The probe stops the Occamy growing into
+  a wall, but a player who builds a wall around a large one has boxed it in; it shrinks to its floor
+  within four ticks and then suffocates like any other mob in a block. Vanilla has the same problem
+  with elytra and does not guard it either.
+- **Nothing tells the player the size is meaningful.** There is no cue that the creature in front of
+  them is at its maximum, or that a corridor is what is keeping it small.
 
 ## 4b. Bestiary
 
@@ -227,6 +313,76 @@ Known limitations:
   pitch; the float `spellProficiencies` curve (+0.002 per hit, so 500 hits to 1.0) is the only one
   that touches damage now. The two disagree about what "mastered" means, and unifying them is
   outstanding.
+
+## 4d. Creature bonding
+
+**Four creatures form a relationship with a player, and the layer they use is datapack-driven.**
+Until this pass the Niffler was the only creature in the mod with one, and every part of it —
+owner, bond level, feed table, milestone XP, follow goal — was hard-coded in `NifflerEntity`. It is
+now `creature/bond/`, and the Niffler is one of its four users rather than its only implementation.
+
+### How a species opts in
+
+A creature bonds **if and only if** `data/wizards_and_beasts/creature_bonds/<id>.json` exists. There
+is no `bondable` flag in Java. For the ninety-six data-driven creatures that means adding the
+relationship layer costs one datapack file and no code at all: `GenericBeastEntity` implements the
+interface for all of them, and a creature with no profile pays nothing but a null check.
+
+Bespoke entity classes (`BowtruckleEntity`, `MooncalfEntity`, …) each supply three things — a
+`BondState` field, a synched bond accessor, and calls from `tick`/`mobInteract`/`hurtServer`/save —
+and inherit the rest as interface defaults.
+
+| File | What it is |
+|---|---|
+| `BondProfile` | the species' numbers: feeds, thresholds, milestones, gift, breeding |
+| `BondFeed` | one item it accepts, what it is worth, how long it is full afterwards |
+| `BondGift` | what a bonded creature hands over while alive, and how often |
+| `BondBreeding` | how it raises young |
+| `BondState` | per-creature storage: owner, level, timers, juvenile growth |
+| `BondableBeast` | the behaviour, as interface defaults |
+| `FollowBondedOwnerGoal` | follows the owner past `followThreshold` |
+
+### What bonding is *for*
+
+Every creature material used to be reachable exactly one way — kill the creature — which made a
+relationship strictly worse than no relationship. Two mechanics invert that:
+
+- **Gifts.** A bonded creature produces its material on a cooldown, indefinitely. A Bowtruckle hands
+  over wandwood saplings, a Mooncalf its dung, a Hippogriff feathers.
+- **Breeding.** Two bonded Mooncalves or Bowtruckles, fed the breeding item, produce a juvenile that
+  inherits part of its parents' bond and grows to full size on a timer.
+
+Juveniles are the **same** `EntityType` shrunk through `Attributes.SCALE` rather than a registered
+baby variant — an `EntityType` is frozen registry data, so a real baby species would be a
+registration, a renderer, a spawn egg and a save-compat story each. `SCALE` drives the hitbox too,
+so a calf is genuinely small rather than looking it.
+
+### The Niffler migration
+
+The Niffler's numbers moved into `creature_bonds/niffler.json` **unchanged** — diamond 20 / gold
+ingot 15 / nugget 5 on 120/60/30-second cooldowns, milestones at 20/50/80/100, follow from 50,
+bestiary `MASTERED` at 80 — and the NBT keys are byte-identical, so existing worlds keep their
+Nifflers' owners and bonds. `BondProfileDataTest` asserts each of those numbers against the file, so
+the migration cannot drift. Its pouch, pocket-carry, theft and peek are untouched.
+
+Two things did change, both fixes:
+
+- **`getBondLevel()` now reads the synched value.** It returned a server-only field, which is 0 on
+  every client, so `NifflerPocketLayer`'s `>= 100` gate could never open. The value had been synced
+  since the entity was written and nothing was reading it.
+- **Crossing a milestone now says so**, through a toast. The four milestones previously fired an
+  event and told the player nothing.
+
+### Known limitations
+
+- **`MagizoologyXPEvent` still has no listener.** Bond milestones post it, as they always did, and
+  nothing consumes it — the XP is a hook, not a system.
+- **Nothing shows the bond level.** It is synced to the client and no screen, tooltip or nameplate
+  draws it, so a player learns where they are only from the behaviour changing.
+- **A juvenile is a scaled adult in every other respect.** It has adult health and adult AI, and its
+  only juvenile behaviours are being small and not producing gifts.
+- **Breeding has no pathing toward a partner.** Both parents must already be within
+  `partnerRange`; they will not walk to each other the way vanilla animals do.
 
 ## 5. Spellcasting
 
