@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.felix.FelixState;
+import at.koopro.wizardsandbeasts.veritaserum.VeritaserumState;
 import at.koopro.wizardsandbeasts.polyjuice.PolyjuiceState;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.azkaban.attachment.AzkabanTrespasserData;
@@ -312,6 +313,19 @@ public class ModAttachments {
             ATTACHMENTS.register("felix_state", () ->
                     AttachmentType.builder(() -> FelixState.NONE)
                             .serialize(FelixState.CODEC.fieldOf("felix"))
+                            .build());
+
+    /**
+     * How long somebody is still unable to hide who they are.
+     *
+     * <p>Serialized like the two above, so a dose survives a relog: a compulsion a player could shed
+     * by reconnecting would be worth nothing, and logging out is the first thing anybody being
+     * interrogated would try.
+     */
+    public static final Supplier<AttachmentType<VeritaserumState>> VERITASERUM_STATE =
+            ATTACHMENTS.register("veritaserum_state", () ->
+                    AttachmentType.builder(() -> VeritaserumState.NONE)
+                            .serialize(VeritaserumState.CODEC.fieldOf("veritaserum"))
                             .build());
 
     public static final Supplier<AttachmentType<Set<String>>> FLOO_VISITED_DESTINATIONS =

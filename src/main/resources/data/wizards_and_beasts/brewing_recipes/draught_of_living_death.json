@@ -1,12 +1,12 @@
 {
   "ingredients": [
     {
-      "item": "minecraft:wither_rose",
-      "count": 1
+      "item": "wizards_and_beasts:devils_snare",
+      "count": 2
     },
     {
-      "item": "minecraft:poppy",
-      "count": 2
+      "item": "wizards_and_beasts:mandrake",
+      "count": 1
     },
     {
       "item": "minecraft:fermented_spider_eye",

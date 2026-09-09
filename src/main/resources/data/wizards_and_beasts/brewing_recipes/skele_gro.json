@@ -1,6 +1,10 @@
 {
   "ingredients": [
     {
+      "item": "wizards_and_beasts:dittany",
+      "count": 2
+    },
+    {
       "item": "minecraft:bone_meal",
       "count": 3
     },

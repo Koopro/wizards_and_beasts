@@ -1,16 +1,12 @@
 {
   "ingredients": [
     {
+      "item": "wizards_and_beasts:mallowsweet",
+      "count": 3
+    },
+    {
       "item": "minecraft:phantom_membrane",
       "count": 1
-    },
-    {
-      "item": "minecraft:glass_bottle",
-      "count": 1
-    },
-    {
-      "item": "minecraft:prismarine_crystals",
-      "count": 2
     }
   ],
   "cauldronTier": "copper",

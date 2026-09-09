@@ -487,6 +487,81 @@ Limitations:
   silently, because the address outlives the dimension in saved data.
 - Destination previewing ("peek before you step") is not implemented and is not in the data model.
 
+## 5i. Brewing and potions
+
+**14 brews and 12 recipes ship.** The cauldron ladder is pewter -> brass -> copper, and the tier a
+recipe asks for is what gates it.
+
+A brew's behaviour is a list of **components** (`brew/effect/BrewEffect`), dispatched by a `type`
+discriminator, with an optional `phase` of `on_drink` (the default) or `on_brew_complete`. A brew
+that declares no `components` has its legacy `effects` list wrapped in an `apply_effects` component
+at load, so the two original brews — Wiggenweld and Mandrake Restoration Draught — are still
+authored the old way and still work. That is deliberate and tested: an effect list *is* the right
+description of most potions.
+
+There are three ways to author a potion, in increasing order of cost, and the cheapest one that
+fits is the right one:
+
+| What the potion does | How to author it | Example |
+|---|---|---|
+| Vanilla effects | `apply_effects` | Pepperup |
+| Something that needs a rule of its own | a modded effect + one event handler | Wolfsbane, Draught of Living Death, Amortentia |
+| Something that needs state of its own | a component type handing off to a system | Felix Felicis, Polyjuice, Veritaserum |
+
+### 5i.1 What the signature potions actually do
+
+- **Veritaserum** — you cannot hold a false face for three minutes. Any Polyjuice disguise ends,
+  another cannot be started, invisibility is stripped and re-stripped, you are outlined, and your
+  Occlumency reads as zero so Legilimency goes straight through. It touches **nothing** you type,
+  and reveals no location, inventory or vault: it opens an ability the interrogator already had
+  rather than leaking anything by itself. A dose can be slipped into a drink, which is why that
+  boundary is where it is.
+- **Draught of Living Death** — hostiles stop targeting you, because you read as a body. You are
+  also blind, rooted and unable to mine for the duration; being overlooked is the compensation for
+  being helpless, not a stealth tool. It is a *harmful* effect, so milk and any healing draught with
+  an empty `cure` list will end it.
+- **Amortentia** — you cannot bring yourself to strike another player. Mobs are unaffected, so a
+  dose is a social disaster rather than a death sentence in a cave.
+- **Felix Felicis** — a real run of luck (near-death saves, extra ore, chest re-rolls) with an
+  internal cooldown and a punishing second bottle. Not Luck II.
+- **Polyjuice** — a real disguise, keyed to the hair in *that* bottle.
+- **Wolfsbane** — the werewolf keeps their mind, never their shape.
+
+**Known alpha limitation — Amortentia has no object of affection.** In canon you are besotted with
+a particular person; here the effect is indiscriminate, because a brewed bottle does not record who
+made it. Narrowing it needs the cauldron to stamp its brewer onto the output stack, which is not
+built. The effect is deliberately broad rather than faking a target by picking the nearest player.
+
+### 5i.2 Herbology now has a consumer
+
+Nine of the twelve recipes used to be built entirely from vanilla items while the mod's own flora —
+mandrake, mallowsweet, devil's snare, gillyweed, dittany — was consumed by no brew at all. Ten of
+twelve now use at least one mod ingredient, and `ShippedBrewDataTest` holds that at a floor of half.
+Pepperup (the pewter tutorial potion) and Silver Solution (metallurgy, not herbology) are vanilla on
+purpose.
+
+Two related fixes worth knowing about:
+
+- **`minecraft:crops` did not contain `wizards_and_beasts:mandrake_crop`.** `MandrakeCropBlock`
+  extends `CropBlock`, but that tag is *data*, not a superclass check — so Herbology's Harvest
+  Bounty, Bountiful Harvest and the Herbologist vocation's `crop_yield` all silently did nothing
+  when you harvested the mod's only crop. Fixed by
+  `data/minecraft/tags/block/crops.json`.
+- **`essence_of_dittany` is unobtainable** — a registered canon item with no loot table, no recipe
+  and no other source. It is one of the 87 behaviourless canon stubs. Skele-Gro asks for `dittany`
+  (which drops from holly and rowan leaves) instead. `ShippedBrewDataTest` now fails any recipe that
+  names an unobtainable mod ingredient, because the symptom is a cauldron that simply never matches.
+
+### 5i.3 Still missing
+
+- **`BrewDefinition` has no failure component.** `failureChance` and the catalyst window are recipe
+  properties; a brew cannot describe what its own botched version does beyond the shared
+  `ruined_potion`.
+- **`on_brew_complete` has no shipped user.** The phase works and is tested, but no brew uses it.
+- **Component `apply()` bodies are unit-tested only for parsing.** Executing one needs a level and a
+  living entity, so heal amounts, cure behaviour and the new handlers are compile-checked and
+  reasoned about rather than run — see §8.
+
 ## 6. Structures and worldgen
 
 - Azkaban and the Chamber of Secrets place nothing (§3).

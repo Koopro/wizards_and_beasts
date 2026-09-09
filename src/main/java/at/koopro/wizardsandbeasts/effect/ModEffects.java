@@ -133,6 +133,17 @@ public final class ModEffects {
     public static final DeferredHolder<MobEffect, WolfsbaneEffect> WOLFSBANE =
             MOB_EFFECTS.register("wolfsbane", WolfsbaneEffect::new);
 
+    /**
+     * Draught of Living Death: hostiles lose you, because you read as a body. See
+     * {@code LivingDeathHandler}.
+     */
+    public static final DeferredHolder<MobEffect, LivingDeathEffect> LIVING_DEATH =
+            MOB_EFFECTS.register("living_death", LivingDeathEffect::new);
+
+    /** Amortentia: you cannot strike another player while it lasts. See {@code InfatuationHandler}. */
+    public static final DeferredHolder<MobEffect, InfatuationEffect> INFATUATION =
+            MOB_EFFECTS.register("infatuation", InfatuationEffect::new);
+
     private ModEffects() {
     }
 }

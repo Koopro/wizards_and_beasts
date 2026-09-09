@@ -57,6 +57,27 @@ class BrewEffectComponentTest {
                 {"type":"extinguish","fireResistanceTicks":100}"""));
         assertInstanceOf(BrewEffect.Flourish.class, parse("""
                 {"type":"flourish","count":8}"""));
+        assertInstanceOf(BrewEffect.FelixFelicis.class, parse("""
+                {"type":"felix_felicis","strength":2}"""));
+        assertInstanceOf(BrewEffect.PolyjuiceDisguise.class, parse("""
+                {"type":"polyjuice_disguise"}"""));
+        assertInstanceOf(BrewEffect.TruthSerum.class, parse("""
+                {"type":"truth_serum","durationTicks":1200}"""));
+    }
+
+    /**
+     * The list above must stay exhaustive.
+     *
+     * <p>It was not: three of the eight types had been added without a parse case, so a discriminator
+     * that failed to dispatch would have gone unnoticed for whichever variant nobody had thought to
+     * list. Counting is cruder than parsing each one but it cannot silently fall behind, and the
+     * failure message says exactly what to add.
+     */
+    @Test
+    void theDiscriminatorTestCoversEveryType() {
+        assertEquals(8, BrewEffect.Type.values().length,
+                "a BrewEffect.Type was added or removed — add it to "
+                        + "everyComponentTypeParsesFromItsDiscriminator above, then update this count");
     }
 
     @Test

@@ -18,6 +18,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import at.koopro.wizardsandbeasts.veritaserum.VeritaserumService;
 
 public final class LegilimencyServerLogic {
 
@@ -53,9 +54,15 @@ public final class LegilimencyServerLogic {
             // multiplying would keep an untrained wizard who bought the Occlumency node at exactly
             // zero — the node would cost points and change nothing. Clamped to 1 before the
             // Willpower scalar so study plus practice can reach a full defence but never exceed it.
-            float occlumency = Math.min(1.0f,
+            //
+            // Veritaserum zeroes the whole thing, study and practice together. That is the potion's
+            // one offensive property and the reason it opens an interrogation: Occlumency is the
+            // skill of keeping your mind shut, and three drops are canonically what takes it away.
+            // Wrapped around the finished number rather than either half, so a trained Occlumens
+            // under a dose cannot keep the skill-web share of their defence.
+            float occlumency = VeritaserumService.occlumencyFor(targetPlayer, Math.min(1.0f,
                     PlayerAbilityHelper.getOcclumencyLevel(targetPlayer)
-                            + SkillSystemAPI.getGameplayBonus(targetPlayer, GameplayStat.OCCLUMENCY_SHIELD));
+                            + SkillSystemAPI.getGameplayBonus(targetPlayer, GameplayStat.OCCLUMENCY_SHIELD)));
             float resistChance = occlumency * 0.8f
                     * at.koopro.wizardsandbeasts.stats.StatResistModifiers.resistScalar(targetPlayer);
             if (targetPlayer.getRandom().nextFloat() < resistChance) {

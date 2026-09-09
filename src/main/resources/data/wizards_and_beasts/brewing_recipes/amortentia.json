@@ -1,11 +1,11 @@
 {
   "ingredients": [
     {
-      "item": "minecraft:rose_bush",
+      "item": "wizards_and_beasts:mallowsweet",
       "count": 2
     },
     {
-      "item": "minecraft:glow_berries",
+      "item": "minecraft:rose_bush",
       "count": 2
     },
     {

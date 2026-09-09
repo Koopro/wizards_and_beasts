@@ -111,7 +111,43 @@ Spells — the strongest pillar (7/10 magic design, up from 6). 27 JSON spells +
 
 Player stats — new since Rev 1, and load-bearing. Rev 1 never saw this system because it was write-only. It now reads: StatCastModifiers is called from SpellExecutor.executeGeneric — POWER → damage multiplier, PRECISION → misfire delta (applied before the roll, so it's in the diced total), REFLEXES → cooldown multiplier. WILLPOWER is read at the Imperio and Legilimency resist rolls; KNOWLEDGE is derived and informational. StatTraining and StatMilestones give the stats a growth path. POWER is rolled once at the heritage ceremony inside a species band, so this is the "how strong were you born" axis. This is the layer that makes two wizards of the same heritage cast differently, and it is a bigger source of felt divergence than the entire skill tree. Uncommitted at time of writing; no in-game pass.
 
-Potions — built then abandoned, and now known to be blocked (unchanged, worse understood). The brewing infrastructure is real: cauldron tiers (pewter/brass), ingredient lists, heat-time ticks, colored output brews. There are still exactly 2 brews (Wiggenweld, Mandrake Restoration) and 2 recipes. The reason it stalled is now clear: BrewDefinition only supports lists of vanilla MobEffects, which structurally blocks every signature potion — Polyjuice, Felix Felicis, Veritaserum and Wolfsbane all need effects the codec cannot express. This is not a content gap you can author your way out of; it needs a codec extension first. Meanwhile Herbology (24 skill nodes) still grows crops for potions that don't exist. Still the single biggest content-empty engine in the mod.
+Potions — RESOLVED since this audit; see the addendum below. The paragraph as written was: "built then abandoned, and now known to be blocked. The brewing infrastructure is real: cauldron tiers (pewter/brass), ingredient lists, heat-time ticks, colored output brews. There are still exactly 2 brews (Wiggenweld, Mandrake Restoration) and 2 recipes. The reason it stalled is now clear: BrewDefinition only supports lists of vanilla MobEffects, which structurally blocks every signature potion — Polyjuice, Felix Felicis, Veritaserum and Wolfsbane all need effects the codec cannot express. This is not a content gap you can author your way out of; it needs a codec extension first. Meanwhile Herbology (24 skill nodes) still grows crops for potions that don't exist. Still the single biggest content-empty engine in the mod."
+**Addendum, 2026-09-09 — the codec blocker is gone and the roster is filled.** Two passes closed
+this, and the finding above is left as written because the reasoning is still why it mattered.
+
+*The codec (2026-08-28).* `BrewEffect` is a sealed interface with a `Type`-dispatch codec —
+the same shape `SpellEffectComponent` uses — plus a `BrewEffectEntry` carrying an optional
+`on_drink` / `on_brew_complete` phase. `BrewDefinition.toBrew` wraps a legacy `effects` list into an
+`apply_effects` component at load, so migration is opt-in per brew and the two original potions are
+still authored the old way and still work. Brews went 2 -> 14, recipes 2 -> 12.
+
+*The content (2026-09-09).* Three of those fourteen were still vanilla effect lists wearing canon
+names, because the systems behind them did not exist. All three are now real:
+
+- **Veritaserum** gets a `truth_serum` component and a `veritaserum` package. Truth here is
+  mechanical and narrow: you cannot hold a false face. Polyjuice is reverted and refused, invisibility
+  is stripped and re-stripped, you are outlined, and Occlumency reads zero so Legilimency lands. It
+  touches nothing you type and reveals no private data — it opens an ability the interrogator already
+  had, which is the right boundary for something you can put in a drink.
+- **Draught of Living Death** gets a `living_death` mob effect: hostiles stop targeting you, because
+  you read as a corpse. Blind, rooted and harmless for the duration.
+- **Amortentia** gets an `infatuation` mob effect: you cannot bring yourself to strike another
+  player. Indiscriminate rather than aimed at one person, because a bottle does not record its
+  brewer — documented as an alpha limitation in `KNOWN_ISSUES` §5i.1 rather than faked.
+
+Note what did *not* need a new component type. Two of the three are a mob effect plus one event
+handler, which is the cheap half of the seam: a component type is for a potion that must hand off to
+a system with state (Felix's cooldown, Polyjuice's identity, Veritaserum's compulsion). A potion whose
+whole behaviour is "while this is on you, X does not happen" is better as an effect, because then
+`/effect`, splash bottles, milk and a healing draught's `cure` list all work on it for free.
+
+*Herbology.* Nine of twelve recipes were built entirely from vanilla items while the mod's own flora
+was consumed by nothing. Ten of twelve now use mod ingredients. Two silent defects turned up
+underneath: `wizards_and_beasts:mandrake_crop` was **not in the `minecraft:crops` block tag**, so
+every Herbology harvest bonus did nothing on the mod's only crop (`CropBlock` is a superclass, that
+tag is data); and `essence_of_dittany` is a registered canon item with **no source anywhere**, so a
+recipe asking for it would never have matched. Both fixed, both now covered by
+`ShippedBrewDataTest`.
 
 Heritage — genuinely excellent, and now well presented (best RPG idea in the mod). Rev 1 undercounted this at 5 heritages; it is 10 heritages across 31 variants, with real mechanical divergence: base health/speed/armor deltas, wand-usability (Obscurial canUseWand = false → a whole no-wand playstyle), heritage-gated abilities and wand compatibility. This is where "two players feel like different wizards" actually happens — more than the skill trees deliver. Rev 1's only complaint, the blind first-login choice, is fixed: the dossier previews the mechanical deltas before you commit. Not yet verified in-game.
 
@@ -151,7 +187,7 @@ Overall	5	6/10	Two of three Rev-1 criticals moved. The mod crossed from "enginee
 
 A. Executive summary
 
-Doing well: Lore authenticity, spell design (interaction + mastery + gating), heritage-driven identity, the new innate-stat cast layer, and the underlying engineering. Held back by: the wand's choice is still invisible and 60% unwired, the skill trees are still self-admitted filler, the beasts have bodies but no relationships, and the brewing engine is empty by codec limitation rather than by neglect. Strongest identity: canon-faithful spellcasting where your wand, your bloodline and your practice all measurably change the spell. Path to exceptional: stop adding systems and finish the five that are already 40–80% built — surface the wand's numbers, author the remaining wood/core data, replace filler nodes with real forks, extend the brew codec then fill it, and generalise the Niffler's bond layer.
+Doing well: Lore authenticity, spell design (interaction + mastery + gating), heritage-driven identity, the new innate-stat cast layer, and the underlying engineering. Held back by: the wand's choice is still invisible and 60% unwired, the skill trees are still self-admitted filler, and the beasts have bodies but no relationships. Strongest identity: canon-faithful spellcasting where your wand, your bloodline and your practice all measurably change the spell. Path to exceptional: stop adding systems and finish the five that are already 40–80% built — surface the wand's numbers, author the remaining wood/core data, replace filler nodes with real forks, and generalise the Niffler's bond layer. (The wand and the brew codec are both done as of September; see their addenda.)
 
 B. Top 10 problems (by player impact)
 
@@ -159,7 +195,7 @@ B. Top 10 problems (by player impact)
 	2.	🟢 *Closed 2026-09-09.* 100 of 163 skill nodes are named filler, and the *_unlock nodes unlock nothing. (§Crit-2) — now 30 pathways of 107, no small node grants an attribute, and every `<spell>_unlock` teaches its spell under a test.
 	3.	🔴 96 creatures, zero taming/breeding — the Niffler proves the pattern and is alone in it. (§Crit-3)
 	4.	🟠 6 of 10 wand woods and all 8 wand cores contribute nothing to a cast; the dual-system bug migrated from woods to cores.
-	5.	🟠 Brewing is blocked at the codec — BrewDefinition cannot express any signature potion. Still 2 brews.
+	5.	🟢 Brewing — RESOLVED. The codec seam landed 2026-08-28 and the signature roster was filled 2026-09-09: 14 brews, 12 recipes, and Veritaserum / Living Death / Amortentia are real rather than vanilla effect lists.
 	6.	🟠 Exploration is 2 set-piece structures; the overworld has magical flora but no magical places.
 	7.	🟠 102 of 111 rigs are box-per-bone; Hippogriff and Horntail look like they're from different mods.
 	8.	🟠 93 creature JSONs carry stale "PLACEHOLDER box rig" markers that misrepresent shipped work and corrupt audits.
@@ -191,7 +227,7 @@ F. Biggest missed opportunities (small effort, big payoff)
 
 	•	Print the wand's resolved cast stats in the tooltip. The values already compute on the cast path and already render in a debug command. This is a display change, and it repairs the mod's central fantasy.
 	•	Author cast_modifiers for the 6 remaining woods and migrate the 8 cores off the enum switch. The reader exists; this is JSON authoring plus one deletion.
-	•	Extend BrewDefinition past vanilla MobEffect lists. One codec change unblocks Polyjuice, Felix Felicis, Veritaserum and Wolfsbane, and finally gives Herbology's 24 nodes a reason to exist.
+	•	~~Extend BrewDefinition past vanilla MobEffect lists.~~ Done 2026-08-28, filled 2026-09-09. What is left in brewing is a failure component and an `on_brew_complete` user — see `KNOWN_ISSUES` §5i.3.
 	•	Generalise the Niffler's bond layer onto GenericBeastEntity. The hard part is written and shipping; a dozen signature beasts could inherit it.
 	•	Clear the 93 stale _comment markers. Trivial, and it stops the data lying about itself.
 	•	Upgrade rig fidelity on the signature dozen. The Horntail is the quality bar and it was hand-built — the recipe exists.
@@ -202,14 +238,14 @@ G. Remove / Rework / Simplify / Keep / Expand
 	•	REWORK: Wand cores (migrate to datapack cast_modifiers, delete the enum switch) — *done 2026-09-08*; the whole skill-tree node set (replace filler with forks; make spell-unlock nodes actually unlock or rename them honestly) — *done 2026-09-09*.
 	•	SIMPLIFY: 8 skill trees → fewer, denser trees; collapse the 5-node stub trees into their heritages or cut.
 	•	REMOVE: The 93 stale PLACEHOLDER box rig comments; either wire spell_modifiers to a real SpellCategory mapping or drop the field.
-	•	EXPAND: Potions (after the codec fix), creature bonding, everyday exploration structures, rig fidelity on the signature dozen.
+	•	EXPAND: creature bonding, everyday exploration structures, rig fidelity on the signature dozen. (Potions are no longer on this list.)
 
 H. Recommended development order
 
 	1.	Surface the wand. Tooltip the resolved cast stats. Highest leverage, smallest change, fixes the core fantasy — Crit-1.
 	2.	Finish the wand data. 6 woods + 8 cores onto cast_modifiers; delete the core enum switch. Kills the dual-system bug for good.
 	3.	~~De-filler the skill trees (fixes fake depth — Crit-2). Convert minor_* clusters into meaningful forks; make spell-unlock nodes actually unlock, or rename them.~~ **Done 2026-09-09.**
-	4.	Unblock brewing at the codec, then fill it (10–20 canon potions) and tie Herbology to it.
+	4.	~~Unblock brewing at the codec, then fill it and tie Herbology to it.~~ Done — 14 brews, and ten of twelve recipes are built on the mod's own flora.
 	5.	Generalise Niffler bonding to a signature dozen beasts (fixes the "Beasts" half — Crit-3).
 	6.	Upgrade rig fidelity on those same dozen, using the Horntail as the bar.
 	7.	Seed everyday magical exploration (a wizard hamlet, a hedge-witch cottage, a ruin with a spellbook).
@@ -221,7 +257,7 @@ If Wizards & Beasts shipped tomorrow, after 10 hours players would remember: "A 
 
 What they should remember instead: "The wand that chose me and fought better in my hand than a stolen one — and I could see exactly why. The Niffler I raised, and the Hippogriff that finally let me near it. The Wolfsbane I brewed the night before the full moon. The Patronus I conjured when the Dementors came. The duel I won by disarming someone and claiming their wand's allegiance."
 
-Rev 1 called the gap between those two paragraphs a depth-and-presentation gap. Rev 2 narrows it further: it is a finishing gap. Every pillar in that second paragraph is 40–80% built and stalled one deliberate step short of being felt — the wand reader is wired but silent, the rigs shipped but the data still calls them placeholders, the bond system works on exactly one animal, the brewing engine runs but its codec cannot express a real potion. Nothing here needs a new system. It needs the last mile on five existing ones. Close that and this becomes the mod where players think: "This is what it feels like to actually be a wizard in Minecraft."
+Rev 1 called the gap between those two paragraphs a depth-and-presentation gap. Rev 2 narrows it further: it is a finishing gap. Every pillar in that second paragraph is 40–80% built and stalled one deliberate step short of being felt — the wand reader is wired but silent, the rigs shipped but the data still calls them placeholders, the bond system works on exactly one animal. Nothing here needs a new system. It needs the last mile on five existing ones. Close that and this becomes the mod where players think: "This is what it feels like to actually be a wizard in Minecraft."
 
 —
 

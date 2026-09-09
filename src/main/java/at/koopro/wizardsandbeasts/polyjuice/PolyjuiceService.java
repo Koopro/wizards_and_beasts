@@ -4,6 +4,7 @@ import at.koopro.wizardsandbeasts.feedback.NoticeKind;
 import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 import at.koopro.wizardsandbeasts.network.polyjuice.PolyjuiceSyncS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
+import at.koopro.wizardsandbeasts.veritaserum.VeritaserumService;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -62,7 +63,9 @@ public final class PolyjuiceService {
     public enum Result {
         TRANSFORMED,
         NO_SAMPLE,
-        ALREADY_DISGUISED
+        ALREADY_DISGUISED,
+        /** Under Veritaserum. You cannot put a face on while you cannot hold one. */
+        COMPELLED
     }
 
     /**
@@ -84,6 +87,14 @@ public final class PolyjuiceService {
             PlayerFeedback.actionBar(player,
                     Component.translatable("polyjuice.wizards_and_beasts.already"));
             return Result.ALREADY_DISGUISED;
+        }
+        // Checked here rather than undone afterwards. A disguise granted and then reverted by the
+        // Veritaserum tick would still have existed for up to ten ticks, which on a busy server is
+        // long enough to walk through a door somebody is watching.
+        if (VeritaserumService.blocksDisguise(player)) {
+            PlayerFeedback.actionBar(player,
+                    Component.translatable("polyjuice.wizards_and_beasts.compelled"));
+            return Result.COMPELLED;
         }
 
         set(player, new PolyjuiceState(Math.max(1, durationTicks), targetId, targetName));

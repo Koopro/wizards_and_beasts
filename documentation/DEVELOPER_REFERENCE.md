@@ -195,7 +195,7 @@ Do not call `DeferredHolder#get()` during static initialisation unless the API e
 | Brooms | `BroomItem`, `BroomEntity`, `BroomClientInputHandler`, `BroomInputPacket` | Client sends directional input; server simulates acceleration, boost, collision, crash damage and rider state. GeckoLib render/animation is client-only. |
 | Creatures | `ModCreatures`, `CreatureDefinitionLoader`, `Generic*BeastEntity`, `DragonEntity` | Java manifest supplies registry-time ID, locomotion and hitbox. JSON supplies runtime stats/traits. Dragons select the shared dragon implementation; special beasts retain bespoke classes. |
 | Bestiary | `BestiaryEntryLoader`, `PlayerBestiaryData`, `BestiaryDiscoveryHandler` | 95 JSON entries; server discovery data and sync packets drive client book UI. |
-| Brewing | `brew.*`, `BrewReloadListener`, `BrewingRecipeReloadListener`, `CauldronBrewing`, `BrewItem` | Brews and recipes are JSON. Current cauldron flow is event-driven/atomic rather than timed block-entity brewing. |
+| Brewing | `brew.*`, `BrewReloadListener`, `BrewingRecipeReloadListener`, `CauldronBrewing`, `CauldronBlockEntity`, `BrewItem` | Brews and recipes are JSON. Brewing is a real block entity with tiers, heat ticks, a failure chance and a timed catalyst window. What a brew *does* is a list of `BrewEffect` components — see §6.1. |
 | Plants / woods | `ModBlocks`, `ModFeatures`, `world.tree.*` | Four magical wood sets and plants such as Mandrake, Mallowsweet and Devil’s Snare; resources define feature placement. |
 | Floo | `floo.*`, `FlooFireplaceBlock(Entity)`, `FlooVisitedDestinations` attachment | Fireplace/block entity, discovered destinations and transit UI/packets. |
 | Apparition | `apparition.*`, `event.apparition.*`, client controller | Server applies the rule/teleportation result; client renders appropriate effects. |
@@ -225,7 +225,7 @@ The mod uses two patterns. **Custom dynamic registries** are registered in `Wand
 | Wand cores | `wizards_and_beasts/wizards_and_beasts/wand_cores/*.json` | `WandCoreDefinition.CODEC`; dynamic registry | `wand_cores/phoenix_feather.json` |
 | Bench enhancers | `wizards_and_beasts/wizards_and_beasts/bench_enhancers/*.json` | `BenchEnhancerDefinition.CODEC`; dynamic registry | `bench_enhancers/*` |
 | Spells | `wizards_and_beasts/spells/*.json` | `SpellDefinition.CODEC` → `SpellReloadListener` → `Spells.registerJson` | `spells/accio.json` |
-| Brews | `wizards_and_beasts/brews/*.json` | `BrewDefinition.CODEC` → `BrewReloadListener` | `brews/wiggenweld_potion.json` |
+| Brews | `wizards_and_beasts/brews/*.json` | `BrewDefinition.CODEC` → `BrewReloadListener` | `brews/wiggenweld_potion.json` (legacy list), `brews/veritaserum.json` (components) |
 | Brewing recipes | `wizards_and_beasts/brewing_recipes/*.json` | `BrewingRecipeDefinition.CODEC` → `BrewingRecipeReloadListener` | `brewing_recipes/wiggenweld_potion.json` |
 | Creature definitions | `wizards_and_beasts/creatures/*.json` | `CreatureDefinition.CODEC` → `CreatureDefinitionLoader` | `creatures/abraxan.json` |
 | Bestiary entries | `wizards_and_beasts/bestiary/entries/*.json` | `BestiaryEntryLoader` | `bestiary/entries/abraxan.json` |
@@ -243,6 +243,39 @@ resource-pack question (`assets/.../map_biome_style/` and `assets/.../map_marker
 registered in `WizardsAndBeastsClient.registerMapStyleListeners`). The wire carries a biome id and a
 marker type id and never a colour, an icon or a size, so a texture pack can restyle the whole map
 without a datapack and without the server agreeing.
+
+### 6.1 What a brew does: `BrewEffect` components
+
+A brew's behaviour is a list of **components** under `components`, each dispatched on a `type`
+discriminator, with an optional `phase` of `on_drink` (default) or `on_brew_complete`. Same shape as
+`SpellEffectComponent`: a sealed interface, a `Type` enum pairing each discriminator with a
+`MapCodec`, and a top-level `CODEC` built by `dispatch`.
+
+A brew that declares **no** `components` has its legacy `effects` list wrapped into an
+`apply_effects` component by `BrewDefinition.toBrew`. So migration is opt-in per file and nothing
+authored before components existed behaves differently — an effect list *is* the right description
+of most potions, and un-migrated brews are not second-class.
+
+**Choosing how to author a potion.** Take the cheapest of these that fits:
+
+1. **Vanilla effects** → `apply_effects`. Most potions.
+2. **A rule of its own** → register a `MobEffect` in `ModEffects` and read it from one event handler
+   (`SignatureBrewHandler` is where the brew ones live). Wolfsbane, the Draught of Living Death and
+   Amortentia are all this. Prefer it over a component type: `/effect`, splash bottles, milk and a
+   `heal_and_cure` with an empty `cure` list then all work on it for free.
+3. **State of its own** → a component type handing off to a service that owns the state. Felix
+   Felicis, Polyjuice and Veritaserum. Keep the component thin: it should author only what a
+   datapack gets to decide (how long, how strong), never reimplement any of the system's rules, or
+   it becomes a second place for them to disagree.
+
+Adding a type means editing `BrewEffect` (the `permits` clause, the `Type` enum, the record) and
+nothing else. `BrewEffectComponentTest` asserts the discriminator list stays exhaustive, so a new
+type that nobody wired up fails the build rather than silently never parsing.
+
+**Two silent failure modes, both now tested by `ShippedBrewDataTest`.** An `apply_effects` id that
+resolves to nothing is logged and *skipped*, so a typo removes part of a potion without failing the
+reload; and a recipe naming an item with no source is a recipe the cauldron can never match, with no
+error at all.
 
 All codecs should validate their own schema and loaders should log/reject bad definitions without leaving a partial registry. Spells are special: `clearJsonSpells()` runs before reload so a `/reload` is idempotent; Java/addon registrations are retained.
 
@@ -535,7 +568,6 @@ Wands, spellcasting, skills, heritage/profession selection, forms, brooms, vault
 
 ### Planned or explicitly incomplete
 
-- A timed/block-entity cauldron brewing experience replaces the current atomic event-driven MVP.
 - House-specific progression/mechanics are intentionally not part of this alpha.
 - Pre-beta large-server soak, further UI/admin-flow polish and more content are noted in §21.9.
 - Some module-gated dark-arts/artefact content is present but intentionally disabled or not fully wired.

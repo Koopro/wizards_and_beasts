@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.brew.effect;
 import at.koopro.wizardsandbeasts.felix.FelixFortune;
 import at.koopro.wizardsandbeasts.polyjuice.PolyjuiceSample;
 import at.koopro.wizardsandbeasts.polyjuice.PolyjuiceService;
+import at.koopro.wizardsandbeasts.veritaserum.VeritaserumService;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -59,7 +60,8 @@ public sealed interface BrewEffect permits
         BrewEffect.Extinguish,
         BrewEffect.Flourish,
         BrewEffect.FelixFelicis,
-        BrewEffect.PolyjuiceDisguise {
+        BrewEffect.PolyjuiceDisguise,
+        BrewEffect.TruthSerum {
 
     Logger LOGGER = LogUtils.getLogger();
 
@@ -95,7 +97,8 @@ public sealed interface BrewEffect permits
         EXTINGUISH("extinguish", Extinguish.CODEC),
         FLOURISH("flourish", Flourish.CODEC),
         FELIX_FELICIS("felix_felicis", FelixFelicis.CODEC),
-        POLYJUICE_DISGUISE("polyjuice_disguise", PolyjuiceDisguise.CODEC);
+        POLYJUICE_DISGUISE("polyjuice_disguise", PolyjuiceDisguise.CODEC),
+        TRUTH_SERUM("truth_serum", TruthSerum.CODEC);
 
         public static final Codec<Type> CODEC = StringRepresentable.fromValues(Type::values);
 
@@ -342,6 +345,40 @@ public sealed interface BrewEffect permits
             PolyjuiceSample sample = PolyjuiceSample.read(ctx.source());
             PolyjuiceService.drink(player, sample.id(), sample.name(),
                     ctx.scaleDuration(durationTicks));
+        }
+    }
+
+    /**
+     * Veritaserum. Hands off to {@link at.koopro.wizardsandbeasts.veritaserum.VeritaserumService}.
+     *
+     * <p>Thin for the same reason {@link FelixFelicis} and {@link PolyjuiceDisguise} are: the
+     * compulsion is enforced from inside two refusals that live elsewhere — a Polyjuice dose and the
+     * Occlumency read — and a component that tried to own any of that would be a second place for
+     * them to disagree. What is authored here is only how long it lasts.
+     *
+     * <p>No-ops for a non-player drinker. There is nothing to compel a cow to be honest about.
+     */
+    record TruthSerum(int durationTicks) implements BrewEffect {
+
+        public static final MapCodec<TruthSerum> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+                Codec.INT.optionalFieldOf("durationTicks", VeritaserumService.DEFAULT_DURATION_TICKS)
+                        .forGetter(TruthSerum::durationTicks)
+        ).apply(inst, TruthSerum::new));
+
+        @Override
+        public Type type() {
+            return Type.TRUTH_SERUM;
+        }
+
+        @Override
+        public void apply(BrewEffectContext ctx) {
+            if (!(ctx.drinker() instanceof net.minecraft.server.level.ServerPlayer player)) {
+                return;
+            }
+            // Potency lengthens it like every other brewed duration. A better-brewed Veritaserum
+            // holds somebody longer; it does not hold them harder, because there is no strength here
+            // to raise — see VeritaserumState.
+            VeritaserumService.dose(player, ctx.scaleDuration(durationTicks));
         }
     }
 

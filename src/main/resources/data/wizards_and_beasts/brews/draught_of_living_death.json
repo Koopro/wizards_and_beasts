@@ -7,22 +7,22 @@
       "type": "apply_effects",
       "effects": [
         {
+          "id": "wizards_and_beasts:living_death",
+          "duration": 600
+        },
+        {
           "id": "minecraft:slowness",
           "duration": 600,
-          "amplifier": 4
+          "amplifier": 5
         },
         {
           "id": "minecraft:blindness",
-          "duration": 400
+          "duration": 600
         },
         {
           "id": "minecraft:mining_fatigue",
           "duration": 600,
           "amplifier": 2
-        },
-        {
-          "id": "minecraft:invisibility",
-          "duration": 600
         }
       ]
     }

@@ -1,12 +1,12 @@
 {
   "ingredients": [
     {
-      "item": "minecraft:fermented_spider_eye",
-      "count": 1
+      "item": "wizards_and_beasts:gillyweed",
+      "count": 2
     },
     {
-      "item": "minecraft:kelp",
-      "count": 2
+      "item": "minecraft:fermented_spider_eye",
+      "count": 1
     },
     {
       "item": "minecraft:rabbit_hide",

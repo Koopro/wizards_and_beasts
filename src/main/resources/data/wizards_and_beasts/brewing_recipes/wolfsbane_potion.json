@@ -1,15 +1,15 @@
 {
   "ingredients": [
     {
-      "item": "minecraft:fern",
+      "item": "wizards_and_beasts:devils_snare",
       "count": 2
     },
     {
-      "item": "minecraft:spider_eye",
+      "item": "minecraft:nether_wart",
       "count": 1
     },
     {
-      "item": "minecraft:nether_wart",
+      "item": "minecraft:spider_eye",
       "count": 1
     }
   ],
