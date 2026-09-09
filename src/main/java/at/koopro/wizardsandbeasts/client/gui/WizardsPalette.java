@@ -78,6 +78,93 @@ public final class WizardsPalette {
     /** Body text on parchment — brown, never black. */
     public static final int PARCHMENT_INK = 0xFF3A2E24;
 
+    /**
+     * The materials the shared chrome is cut from, and the only place their colours are spelled.
+     *
+     * <p>{@code tools/gui_chrome.py} generates eleven sprites per skin from its own {@code SKINS}
+     * table and has claimed since it was written that "{@code WizardsPalette.GuiSkin} mirrors it".
+     * It did not exist. So the two screens that adopted a skin each hand-copied the numbers into a
+     * class of their own — {@code SkillTreeChartTextures.CHART_INK} is {@link #STAR_CHART}'s
+     * {@link #ink()} retyped — which is exactly the drift the rest of this file exists to stop, one
+     * level down.
+     *
+     * <p>It is load-bearing rather than tidy. Four of the six materials are <em>light</em>, and
+     * every colour above assumes the dark leather panel: {@link #TEXT} on {@link #WORKBENCH}'s face
+     * is 1.4 : 1, and the wand trial drew its labels in {@link #BRASS_HI} at 1.35 : 1. A screen that
+     * takes a skin must take that skin's {@link #ink()} with it, and before this there was nothing
+     * to take. {@code UiContrast.readableOn} is the escape hatch for a colour that carries meaning
+     * and so cannot simply be replaced — a coin's gold, a spell family's hue.
+     *
+     * <p>Keep in step with {@code gui_chrome.py}'s {@code SKINS}. Both spell the values out rather
+     * than deriving them from the other, so the two can be diffed by eye.
+     */
+    public enum GuiSkin {
+        /** Scamander's case notes: kraft paper on an oiled canvas board, pencil, a leather strap. */
+        FIELD_NOTEBOOK("field_notebook", 0xFFD8CDB4, 0xFF3E4A46, INK, SELECT, 0xFF6E6A5C),
+        /** Ministry interior. The frame is {@link #MINISTRY} to the byte; memos are pale violet. */
+        MINISTRY_MEMO("ministry", PARCHMENT_SHADE, MINISTRY, 0xFF14181B, 0xFFC9A227, 0xFF8C2B26),
+        /** Astronomy tower: night void, indigo, silver leaf, a brass instrument. */
+        STAR_CHART("star_chart", 0xFF14172B, 0xFF232A52, 0xFFC7CEDB, 0xFFB08D3F, 0xFF7FA6D8),
+        /** Goblin ledger: oxblood leather, brass, ruled paper, gold. */
+        GOBLIN_LEDGER("goblin_ledger", 0xFFE6DFC9, 0xFF4A1E1E, 0xFF1A1512, 0xFFD4AF37, 0xFF5A6E82),
+        /** Ollivander's bench: worn wood, shellac, leather, brass calipers, pale shavings. */
+        WORKBENCH("workbench", 0xFFD9C49A, WELL, 0xFF2A1F14, 0xFF9C7B32, 0xFF8A6A45),
+        /** The Marauder's Map: aged parchment in a scuffed leather portfolio, pocket-worn brass. */
+        MARAUDERS_MAP("marauders_map", 0xFFE3D6AE, 0xFF4A3524, 0xFF3A2E24, 0xFFB08A4A, 0xFF6B5A46);
+
+        private final String folder;
+        private final int base;
+        private final int frame;
+        private final int ink;
+        private final int accent;
+        private final int muted;
+
+        GuiSkin(String folder, int base, int frame, int ink, int accent, int muted) {
+            this.folder = folder;
+            this.base = base;
+            this.frame = frame;
+            this.ink = ink;
+            this.accent = accent;
+            this.muted = muted;
+        }
+
+        /** The {@code gui/sprites/<folder>/} directory this skin's art lives in. */
+        public String folder() {
+            return folder;
+        }
+
+        /** The panel face. Backgrounds only — never text, which is what {@link #ink()} is for. */
+        public int base() {
+            return base;
+        }
+
+        /** The border. */
+        public int frame() {
+            return frame;
+        }
+
+        /** Body text on this material, and the only colour guaranteed to be readable on it. */
+        public int ink() {
+            return ink;
+        }
+
+        /** The filigree rule and small furniture: bars, thumbs, the selected-row tint. */
+        public int accent() {
+            return accent;
+        }
+
+        /**
+         * Secondary text: hints, units, disabled entries.
+         *
+         * <p>Not guaranteed to clear AA against {@link #base()} — it is the material's own second
+         * voice, and on {@link #WORKBENCH} it lands at 2.9 : 1. Use it for text that may recede,
+         * and {@link #ink()} for text that must be read.
+         */
+        public int muted() {
+            return muted;
+        }
+    }
+
     private WizardsPalette() {
     }
 }

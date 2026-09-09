@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.skill.gui;
 
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GuiSkin;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsAndBeastsUiTokens;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
@@ -29,7 +30,7 @@ public final class SkillTreeRenderHelper {
     }
 
     /** The material the whole screen is cut from — night void, indigo frame, brass accent. */
-    private static final String SKIN = McStylePanel.SKIN_STAR_CHART;
+    private static final GuiSkin SKIN = GuiSkin.STAR_CHART;
 
     /**
      * Resolves a node display name: lang keys (Phase 4 fillers, Polaris) translate; legacy

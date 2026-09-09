@@ -1,6 +1,8 @@
 package at.koopro.wizardsandbeasts.client.map;
 
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GuiSkin;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import net.minecraft.resources.Identifier;
 
 /**
@@ -25,8 +27,14 @@ public final class MaraudersMapTextures {
         return Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "textures/gui/map/" + path);
     }
 
-    /** The material the panel is cut from — parchment, ink and tarnished brass. */
-    public static final String SKIN = "marauders_map";
+    /**
+     * The material the panel is cut from — parchment, ink and tarnished brass.
+     *
+     * <p>Delegated rather than spelled: this was {@code "marauders_map"} as a bare string, and the
+     * screen carried its own copies of the same skin's ink and muted beside it. Three constants,
+     * all of them the generator's numbers retyped.
+     */
+    public static final GuiSkin SKIN = GuiSkin.MARAUDERS_MAP;
 
     // -- Terrain sheet -----------------------------------------------------
 

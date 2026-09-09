@@ -320,12 +320,56 @@ public final class McStylePanel {
     // that atlas; the raw path with an explicit border is what `drawThemedPanel` above already
     // does, and it is the one that is known to work here.
 
-    /** Star chart: night void, indigo frame, brass accent. The skill web's material. */
-    public static final String SKIN_STAR_CHART = "star_chart";
-
     public static Identifier skinSprite(String skin, String element) {
         return Identifier.fromNamespaceAndPath(at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID,
                 "textures/gui/sprites/" + skin + "/" + element + ".png");
+    }
+
+    public static Identifier skinSprite(WizardsPalette.GuiSkin skin, String element) {
+        return skinSprite(skin.folder(), element);
+    }
+
+    // The GuiSkin overloads below are the ones new code should call; each delegates to the
+    // String form, which the two screens that predate the enum still use.
+
+    /** {@link #drawSkinPanel(GuiGraphics, String, int, int, int, int)} in a named material. */
+    public static void drawSkinPanel(GuiGraphics g, WizardsPalette.GuiSkin skin,
+                                     int x, int y, int w, int h) {
+        drawSkinPanel(g, skin.folder(), x, y, w, h);
+    }
+
+    /** {@link #drawSkinInset(GuiGraphics, String, int, int, int, int)} in a named material. */
+    public static void drawSkinInset(GuiGraphics g, WizardsPalette.GuiSkin skin,
+                                     int x, int y, int w, int h) {
+        drawSkinInset(g, skin.folder(), x, y, w, h);
+    }
+
+    /** {@link #drawSkinDivider(GuiGraphics, String, int, int, int)} in a named material. */
+    public static void drawSkinDivider(GuiGraphics g, WizardsPalette.GuiSkin skin,
+                                       int x, int y, int w) {
+        drawSkinDivider(g, skin.folder(), x, y, w);
+    }
+
+    /** {@link #drawSkinButton} in a named material. */
+    public static void drawSkinButton(GuiGraphics g, WizardsPalette.GuiSkin skin,
+                                      int x, int y, int w, int h, ControlState state) {
+        drawSkinButton(g, skin.folder(), x, y, w, h, state);
+    }
+
+    /** {@link #drawSkinSeal} in a named material, tinted with the skin's own accent. */
+    public static void drawSkinSeal(GuiGraphics g, WizardsPalette.GuiSkin skin, int x, int y) {
+        drawSkinSeal(g, skin.folder(), x, y, skin.accent());
+    }
+
+    /**
+     * The same seal under a caller's tint.
+     *
+     * <p>The seal art is greyscale, so the tint is the whole of its colour — which is why a screen
+     * that wants the motif to answer something other than the material (the skill web dims it when
+     * a region is sealed) needs this rather than the accent-tinted form above.
+     */
+    public static void drawSkinSeal(GuiGraphics g, WizardsPalette.GuiSkin skin, int x, int y, int tint) {
+        drawSkinSeal(g, skin.folder(), x, y, tint);
     }
 
     /** The raised panel in a skin — {@link #drawThemedPanel} in another material. */
@@ -352,6 +396,47 @@ public final class McStylePanel {
         drawNineSlice(g, skinSprite(skin, "button" + state.suffix), x, y, w, h,
                 WizardsMetrics.PANEL_SPRITE_SIZE, WizardsMetrics.PANEL_SPRITE_BORDER);
     }
+
+    /**
+     * Track plus thumb in a skin — {@link #drawScrollbar} in another material.
+     *
+     * <p>Its absence is why the Floo screen draws a two-pixel bar out of {@code fill()} calls:
+     * every skin has shipped a {@code scrollbar_track.png} and a {@code scrollbar_thumb.png} since
+     * the generator was written, and nothing in Java could ask for either. Both sprites are
+     * columnar, so the vertical stretch is exact, and there are no end caps for the same reason the
+     * shared set has none.
+     */
+    public static void drawSkinScrollbar(GuiGraphics g, WizardsPalette.GuiSkin skin, int x, int y,
+                                         int trackH, int thumbY, int thumbH) {
+        int w = WizardsMetrics.SCROLLBAR_W;
+        drawTexture(g, skinSprite(skin, "scrollbar_track"), x, y, w, trackH,
+                w, WizardsMetrics.PANEL_SPRITE_SIZE);
+        if (thumbH > 0) {
+            drawTexture(g, skinSprite(skin, "scrollbar_thumb"), x, thumbY, w, thumbH,
+                    w, WizardsMetrics.PANEL_SPRITE_SIZE);
+        }
+    }
+
+    /**
+     * A list row in a skin — {@link #drawRow} in another material.
+     *
+     * <p>Tinted with the skin's own {@link WizardsPalette.GuiSkin#accent()} rather than the
+     * leather {@link WizardsPalette#SELECT}: a warm brown wash over the star chart's night void is
+     * the same mismatch a leather button on an indigo panel is, and half the skins are light
+     * enough that the leather tint reads as a stain rather than a selection.
+     *
+     * <p>Alpha is composed separately from the hue for the reason {@link #drawRow} gives — taking
+     * the colour wholesale drags its opaque {@code 0xFF} along and paints over the row beneath.
+     */
+    public static void drawSkinRow(GuiGraphics g, WizardsPalette.GuiSkin skin,
+                                   int x, int y, int w, int h, boolean selected) {
+        if (selected) {
+            g.fill(x, y, x + w, y + h, ROW_SELECT_ALPHA | (skin.accent() & 0x00FFFFFF));
+        }
+    }
+
+    /** How much of a row's tint is the colour and how much is the row underneath. */
+    private static final int ROW_SELECT_ALPHA = 0x44000000;
 
     /** The corner motif for a skin, at its native 16x16. */
     public static void drawSkinSeal(GuiGraphics g, String skin, int x, int y, int tint) {

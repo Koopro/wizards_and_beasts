@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.skill.gui;
 
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GuiSkin;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.client.gui.WizardsAndBeastsUiTokens;
@@ -206,7 +207,7 @@ public class SkillTreeScreen extends Screen {
 
     private ThemedButton chartButton(int x, int y, int w, int h, Component label,
                                      @Nullable Identifier icon, Runnable action) {
-        return ThemedButton.skinned(x, y, w, h, label, action, McStylePanel.SKIN_STAR_CHART,
+        return ThemedButton.skinned(x, y, w, h, label, action, GuiSkin.STAR_CHART.folder(),
                 icon, SkillTreeChartTextures.ICON_SIZE,
                 SkillTreeChartTextures.CHART_INK, SkillTreeChartTextures.NIGHT_TEXT_DIM);
     }
@@ -386,7 +387,7 @@ public class SkillTreeScreen extends Screen {
         SkillTreeRenderHelper.renderWindowFrame(graphics, font, layout, resolvedTitle);
 
         // The well is drawn before the scissor so its own frame is not clipped away by it.
-        McStylePanel.drawSkinInset(graphics, McStylePanel.SKIN_STAR_CHART,
+        McStylePanel.drawSkinInset(graphics, GuiSkin.STAR_CHART,
                 viewportX, viewportY, viewportW, viewportH);
 
         graphics.enableScissor(chartX, chartY, chartX + chartW, chartY + chartH);

@@ -80,8 +80,8 @@ public class MaraudersMapScreen extends Screen {
     // -- Ink ---------------------------------------------------------------
 
     /** The page. Warmer and dirtier than the Ministry's memo stock; this thing is old. */
-    private static final int PARCHMENT_INK = 0xFF3A2E24;
-    private static final int PARCHMENT_INK_DIM = 0xFF6B5A46;
+    private static final int PARCHMENT_INK = MaraudersMapTextures.SKIN.ink();
+    private static final int PARCHMENT_INK_DIM = MaraudersMapTextures.SKIN.muted();
     private static final int TITLE_INK = 0xFF4A2B18;
     private static final int BRASS = 0xFFB08A4A;
     /** Wash over uncharted parchment, so "not yet been there" reads as unfinished, not as empty. */
@@ -233,7 +233,7 @@ public class MaraudersMapScreen extends Screen {
     private ThemedButton mapButton(int x, int y, int w, int h, Component label,
                                    @Nullable Sprite icon, Runnable action) {
         return new ThemedButton(x, y, w, h, label, action, icon,
-                MaraudersMapTextures.SKIN, PARCHMENT_INK, PARCHMENT_INK_DIM);
+                MaraudersMapTextures.SKIN);
     }
 
     private Component filterLabel(String key, boolean on) {

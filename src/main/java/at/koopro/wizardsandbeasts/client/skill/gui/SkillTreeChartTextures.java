@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.skill.gui;
 
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GuiSkin;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.skill.Skill;
 import at.koopro.wizardsandbeasts.skill.SkillTreeId;
@@ -108,7 +109,14 @@ public final class SkillTreeChartTextures {
     public static final int EMBER = 0xFF6E6156;
     /** Locked edge hairline: faint blue-grey. */
     public static final int EDGE_LOCKED = 0xFF272E44;
-    /** Secondary text on the night plate. */
+    /**
+     * Secondary text on the night plate.
+     *
+     * <p>Deliberately <em>not</em> {@code GuiSkin.STAR_CHART.muted()}, which is a saturated blue
+     * ({@code #7FA6D8}) the art uses for its own furniture. This is the greyer voice that reads as
+     * disabled next to {@link #CHART_INK}; the two are different colours doing different jobs, so
+     * folding them would be a change, not a de-duplication.
+     */
     public static final int NIGHT_TEXT_DIM = 0xFF8C93AA;
     /**
      * The {@code star_chart} skin's own silver ink, for label text and the untinted furniture.
@@ -117,7 +125,7 @@ public final class SkillTreeChartTextures {
      * that consumed them: the footer strip and the tooltip card are sprites now, and a colour
      * constant nothing paints with is a knob waiting to drift out of step with the art.
      */
-    public static final int CHART_INK = 0xFFC7CEDB;
+    public static final int CHART_INK = GuiSkin.STAR_CHART.ink();
     /** No tint: the sentinel the tinted blit overload treats as "draw the sprite as authored". */
     public static final int UNTINTED = 0xFFFFFFFF;
 

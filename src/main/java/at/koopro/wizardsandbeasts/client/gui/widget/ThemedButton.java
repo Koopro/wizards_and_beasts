@@ -4,6 +4,7 @@ import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel.ButtonTone;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel.Sprite;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GuiSkin;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.Font;
@@ -67,6 +68,19 @@ public final class ThemedButton extends AbstractButton {
                 WizardsPalette.TEXT, WizardsPalette.TEXT_DIM);
     }
 
+    /**
+     * The material form: a sprite icon and a {@link GuiSkin}, which carries its own ink.
+     *
+     * <p>The five-argument form below still takes a folder name and two colours, because a caller
+     * can legitimately want a skin's face under a different ink — the skill web wants its own
+     * greyer disabled voice rather than the material's saturated blue. This is the form for
+     * everyone else, and it is the one that cannot be given the wrong ink.
+     */
+    public ThemedButton(int x, int y, int w, int h, @NonNull Component label, @NonNull Runnable action,
+                        @Nullable Sprite icon, @NonNull GuiSkin skin) {
+        this(x, y, w, h, label, action, icon, skin.folder(), skin.ink(), skin.muted());
+    }
+
     public ThemedButton(int x, int y, int w, int h, @NonNull Component label, @NonNull Runnable action,
                         @Nullable Sprite icon,
                         @Nullable String skin, int textColor, int textColorOff) {
@@ -102,6 +116,28 @@ public final class ThemedButton extends AbstractButton {
         return new ThemedButton(x, y, w, h, label, action,
                 icon == null ? null : Sprite.whole(icon, iconSize, iconSize),
                 skin, textColor, textColorOff);
+    }
+
+    /**
+     * The same button, taking the material itself rather than the name of its folder.
+     *
+     * <p>The label colours come from the skin, which is the point: a skinned button asked for its
+     * ink separately is a button that can be given the wrong ink, and four of the six materials are
+     * light enough that the leather palette's {@code TEXT} on them is under 1.5 : 1.
+     */
+    public static ThemedButton skinned(int x, int y, int w, int h, @NonNull Component label,
+                                       @NonNull Runnable action,
+                                       @NonNull GuiSkin skin,
+                                       @Nullable Identifier icon, int iconSize) {
+        return skinned(x, y, w, h, label, action, skin.folder(), icon, iconSize,
+                skin.ink(), skin.muted());
+    }
+
+    /** {@link #skinned} with no icon — the common case. */
+    public static ThemedButton skinned(int x, int y, int w, int h, @NonNull Component label,
+                                       @NonNull Runnable action,
+                                       @NonNull GuiSkin skin) {
+        return skinned(x, y, w, h, label, action, skin, null, 0);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.skill.gui;
 
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GuiSkin;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton;
@@ -105,7 +106,7 @@ public class VocationSelectionScreen extends Screen {
     private static ThemedButton chartButton(int x, int y, int w, int h, Component label,
                                             Runnable action) {
         return ThemedButton.skinned(x, y, w, h, label, action,
-                McStylePanel.SKIN_STAR_CHART, null, 0,
+                GuiSkin.STAR_CHART.folder(), null, 0,
                 SkillTreeChartTextures.CHART_INK, SkillTreeChartTextures.NIGHT_TEXT_DIM);
     }
 
@@ -134,10 +135,10 @@ public class VocationSelectionScreen extends Screen {
         // rectangles, which read as a different mod's dialog the moment the screen behind it
         // became night void and brass.
         McStylePanel.drawSkinPanel(graphics,
-                McStylePanel.SKIN_STAR_CHART,
+                GuiSkin.STAR_CHART,
                 layout.panelX(), layout.panelY(), layout.panelW(), layout.panelH());
         McStylePanel.drawSkinDivider(graphics,
-                McStylePanel.SKIN_STAR_CHART,
+                GuiSkin.STAR_CHART,
                 layout.panelX() + layout.s(8),
                 layout.panelY() + layout.s(WizardsAndBeastsUiTokens.SkillTree.HEADER_HEIGHT),
                 layout.panelW() - layout.s(16));
