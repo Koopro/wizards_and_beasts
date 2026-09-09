@@ -1,13 +1,17 @@
 package at.koopro.wizardsandbeasts.client.floo.gui;
 
+import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
+import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GuiSkin;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
+import at.koopro.wizardsandbeasts.client.gui.widget.ScrollList;
+import at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton;
 import at.koopro.wizardsandbeasts.floo.FlooDestinationDto;
 import at.koopro.wizardsandbeasts.network.floo.FlooCallRequestC2SPayload;
 import at.koopro.wizardsandbeasts.network.floo.FlooTravelRequestC2SPayload;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
@@ -59,25 +63,29 @@ public class FlooNetworkScreen extends Screen {
     private static final int ENTRY_H = 16;
     private static final int MAX_VISIBLE = 7;
     private static final int LIST_PADDING = 8;
+    /** The hearth sprite's nine-slice border. Content clears it; the fire sits just inside it. */
+    private static final int FRAME = WizardsMetrics.PANEL_SPRITE_BORDER;
 
     /** Matches {@code FlooAddress.MAX_LENGTH}; the server validates regardless. */
     private static final int ADDRESS_MAX_LENGTH = 48;
 
-    // -- the palette -----------------------------------------------------------------------------
+    // -- the material ----------------------------------------------------------------------------
     // Dark stone and green fire, not a chest. The Floo screen is something you are looking at from
     // inside a fireplace, and vanilla's inventory beige says "container" louder than any text can
     // say "hearth".
-    private static final int COL_STONE = 0xF00E1013;
-    private static final int COL_STONE_HEAD = 0xF6070809;
-    private static final int COL_INSET = 0xC0000000;
+    //
+    // That instinct was right and the eleven hand-mixed constants under it were not: they were this
+    // screen's private approximation of a material, and `gui/sprites/hearth/` is now that material
+    // properly cut -- soot-black stone, warm soot, and an accent that is FlooCues.EMERALD to the
+    // byte. What survives as a literal is only what carries meaning rather than theme.
+    private static final GuiSkin SKIN = GuiSkin.HEARTH;
+
+    /** The network's green. Semantic: it is the Floo, not the decor. */
     private static final int COL_EMERALD = at.koopro.wizardsandbeasts.floo.FlooCues.EMERALD;
+    /** A brighter ember of the same green, for the one line spoken by the fire itself. */
     private static final int COL_EMBER = 0xFF6ADF7F;
-    private static final int COL_TITLE = 0xFFD4AF37;
-    private static final int COL_ENTRY = 0xFFE8E8E8;
     private static final int COL_SELECTED = 0xFF7BE08F;
-    private static final int COL_DISABLED = 0xFF6A6A6A;
     private static final int COL_HOVER = 0xFF8BC34A;
-    private static final int COL_MUTED = 0xFF8A8A8A;
 
     private static boolean lastSpeakMode = false;
 
@@ -89,11 +97,19 @@ public class FlooNetworkScreen extends Screen {
     private int scrollOffset = 0;
     private boolean speakMode;
 
-    private Button confirmButton;
-    private Button listTab;
-    private Button speakTab;
+    private ThemedButton confirmButton;
+    private ThemedButton listTab;
+    private ThemedButton speakTab;
     private EditBox addressField;
     private GuiScaleHelper.Layout layout;
+    /**
+     * Geometry and art for the list's scrollbar.
+     *
+     * <p>The list itself still scrolls on this screen's own {@code scrollOffset}, which the keyboard
+     * and wheel handlers already drive correctly; this is handed that offset each frame and asked
+     * only to draw. Taking over the scrolling too would be a second source of truth for one number.
+     */
+    private final ScrollList scrollbar = new ScrollList(ENTRY_H);
 
     public FlooNetworkScreen(@NonNull List<FlooDestinationDto> destinations,
                              @NonNull String originAddress, boolean headInFire) {
@@ -119,14 +135,11 @@ public class FlooNetworkScreen extends Screen {
 
         if (!headInFire) {
             int tabW = (panelW - layout.s(24)) / 2;
-            listTab = addRenderableWidget(
-                    Button.builder(Component.translatable("floo.wizards_and_beasts.gui.tab.known"),
-                                    b -> setSpeakMode(false))
-                            .bounds(px + layout.s(8), py + layout.s(34), tabW, layout.s(16)).build());
-            speakTab = addRenderableWidget(
-                    Button.builder(Component.translatable("floo.wizards_and_beasts.gui.tab.speak"),
-                                    b -> setSpeakMode(true))
-                            .bounds(px + layout.s(12) + tabW, py + layout.s(34), tabW, layout.s(16)).build());
+            int tabH = Math.max(MIN_SKINNED, layout.s(16));
+            listTab = addRenderableWidget(hearthButton(px + layout.s(8), py + layout.s(34),
+                    tabW, tabH, "floo.wizards_and_beasts.gui.tab.known", () -> setSpeakMode(false)));
+            speakTab = addRenderableWidget(hearthButton(px + layout.s(12) + tabW, py + layout.s(34),
+                    tabW, tabH, "floo.wizards_and_beasts.gui.tab.speak", () -> setSpeakMode(true)));
         }
 
         addressField = new EditBox(font, px + LIST_PADDING, py + layout.s(74),
@@ -139,20 +152,33 @@ public class FlooNetworkScreen extends Screen {
 
         int btnW = layout.s(84);
         int btnY = py + panelH - layout.s(26);
-        confirmButton = addRenderableWidget(
-                Button.builder(Component.translatable(headInFire
-                                        ? "floo.wizards_and_beasts.gui.button.call"
-                                        : "floo.wizards_and_beasts.gui.button.travel"),
-                                b -> onConfirm())
-                        .bounds(px + panelW / 2 - btnW - layout.s(3), btnY, btnW, layout.s(18)).build());
+        int btnH = Math.max(MIN_SKINNED, layout.s(18));
+        confirmButton = addRenderableWidget(hearthButton(
+                px + panelW / 2 - btnW - layout.s(3), btnY, btnW, btnH,
+                headInFire ? "floo.wizards_and_beasts.gui.button.call"
+                        : "floo.wizards_and_beasts.gui.button.travel",
+                this::onConfirm));
 
-        addRenderableWidget(
-                Button.builder(Component.translatable("floo.wizards_and_beasts.gui.button.cancel"),
-                                b -> onClose())
-                        .bounds(px + panelW / 2 + layout.s(3), btnY, btnW, layout.s(18)).build());
+        addRenderableWidget(hearthButton(px + panelW / 2 + layout.s(3), btnY, btnW, btnH,
+                "floo.wizards_and_beasts.gui.button.cancel", this::onClose));
 
         applyMode();
     }
+
+    /**
+     * A control cut from this screen's material.
+     *
+     * <p>{@value #MIN_SKINNED} is the floor a nine-slice needs: the sprites are 32px cut on 8, so
+     * below {@code 2 * 8 + 2} the two borders overlap and the face disappears. {@code Layout.panel}
+     * can scale to 0.72, and 16 * 0.72 is 11.
+     */
+    private ThemedButton hearthButton(int x, int y, int w, int h, String key, Runnable action) {
+        return ThemedButton.skinned(x, y, Math.max(MIN_SKINNED, w), h,
+                Component.translatable(key), action, SKIN);
+    }
+
+    /** Smallest a nine-sliced control can be drawn: two 8px borders plus a pixel of face. */
+    private static final int MIN_SKINNED = 2 * WizardsMetrics.PANEL_SPRITE_BORDER + 2;
 
     private void setSpeakMode(boolean speak) {
         if (speakMode == speak) {
@@ -212,14 +238,14 @@ public class FlooNetworkScreen extends Screen {
 
         drawHearthFrame(graphics, px, py, panelW, panelH);
 
-        graphics.drawCenteredString(font, this.title, px + panelW / 2, py + layout.s(10), COL_TITLE);
+        graphics.drawCenteredString(font, this.title, px + panelW / 2, py + layout.s(10), SKIN.accent());
 
         // Subtitle: the grate you are standing in. A network screen that never says where you are is
         // disorienting in exactly the place the fiction is already disorienting.
         if (!originAddress.isBlank()) {
             graphics.drawCenteredString(font,
                     Component.translatable("floo.wizards_and_beasts.gui.from", originAddress),
-                    px + panelW / 2, py + layout.s(21), COL_MUTED);
+                    px + panelW / 2, py + layout.s(21), SKIN.muted());
         }
 
         int contentTop = py + layout.s(headInFire ? 36 : 54);
@@ -231,22 +257,22 @@ public class FlooNetworkScreen extends Screen {
             } else {
                 graphics.drawCenteredString(font,
                         Component.translatable("floo.wizards_and_beasts.gui.speak.prompt"),
-                        px + panelW / 2, contentTop, COL_ENTRY);
+                        px + panelW / 2, contentTop, SKIN.ink());
             }
         } else if (destinations.isEmpty()) {
             // An empty network has exactly one cause and one cure, so the empty state says both.
             // "No connected fireplaces found" alone reads as a fault; it is actually the starting
             // state of every world, and a player has no way to guess that a name tag is the answer.
             graphics.drawCenteredString(font, Component.translatable("floo.wizards_and_beasts.gui.empty"),
-                    px + panelW / 2, contentTop + layout.s(20), COL_DISABLED);
+                    px + panelW / 2, contentTop + layout.s(20), SKIN.muted());
             graphics.drawCenteredString(font, Component.translatable("floo.wizards_and_beasts.gui.empty_hint"),
-                    px + panelW / 2, contentTop + layout.s(32), COL_DISABLED);
+                    px + panelW / 2, contentTop + layout.s(32), SKIN.muted());
         } else {
             renderList(graphics, px, py, panelW, contentTop, mouseX, mouseY);
         }
 
         graphics.drawCenteredString(font, Component.translatable("floo.wizards_and_beasts.gui.footer"),
-                px + panelW / 2, py + panelH - layout.s(38), COL_MUTED);
+                px + panelW / 2, py + panelH - layout.s(38), SKIN.muted());
 
         super.render(graphics, mouseX, mouseY, partialTick);
     }
@@ -260,7 +286,12 @@ public class FlooNetworkScreen extends Screen {
      * be alive while you are standing in it.
      */
     private void drawHearthFrame(GuiGraphics graphics, int px, int py, int w, int h) {
-        graphics.fill(px, py, px + w, py + h, headInFire ? COL_STONE_HEAD : COL_STONE);
+        McStylePanel.drawSkinPanel(graphics, SKIN, px, py, w, h);
+        if (headInFire) {
+            // A call is not a journey and should not look like the screen that moves you. The
+            // material carries the stone; this is the light going out of it.
+            graphics.fill(px + FRAME, py + FRAME, px + w - FRAME, py + h - FRAME, 0x66000000);
+        }
 
         // Two counter-phased sines, so opposite edges never pulse together and the frame never looks
         // like it is breathing as one object.
@@ -269,19 +300,24 @@ public class FlooNetworkScreen extends Screen {
         float a = 0.62f + 0.38f * Mth.sin(t * 2.0f);
         float b = 0.62f + 0.38f * Mth.sin(t * 2.0f + Mth.PI);
 
-        int thick = Math.max(2, layout.s(2));
-        graphics.fill(px, py, px + w, py + thick, flame(a));
-        graphics.fill(px, py + h - thick, px + w, py + h, flame(b));
-        graphics.fill(px, py, px + thick, py + h, flame(b));
-        graphics.fill(px + w - thick, py, px + w, py + h, flame(a));
+        // The fire moved inside the sprite's border rather than replacing it. The panel is a
+        // nine-slice now and the flame is still four fills, because it animates: an animated
+        // nine-slice needs a sheet and an mcmeta for what is two sines, and a static frame would
+        // cost the one thing this screen has that no other screen does — the fire is supposed to be
+        // alive while you are standing in it.
+        int inset = FRAME - 1;
+        int thick = Math.max(1, layout.s(2));
+        int fx = px + inset;
+        int fy = py + inset;
+        int fw = w - 2 * inset;
+        int fh = h - 2 * inset;
+        graphics.fill(fx, fy, fx + fw, fy + thick, flame(a));
+        graphics.fill(fx, fy + fh - thick, fx + fw, fy + fh, flame(b));
+        graphics.fill(fx, fy, fx + thick, fy + fh, flame(b));
+        graphics.fill(fx + fw - thick, fy, fx + fw, fy + fh, flame(a));
 
-        // Inner bevel: one dark line inside the fire, which is what makes the border read as a frame
-        // around a recess rather than as a coloured rectangle.
-        graphics.fill(px + thick, py + thick, px + w - thick, py + thick + 1, 0x60000000);
-
-        // Header divider under the title block.
-        int divY = py + layout.s(headInFire ? 30 : 30);
-        graphics.fill(px + layout.s(6), divY, px + w - layout.s(6), divY + 1, 0x50FFFFFF);
+        McStylePanel.drawSkinDivider(graphics, SKIN, px + FRAME,
+                py + layout.s(30) - WizardsMetrics.DIVIDER_H / 2, w - 2 * FRAME);
     }
 
     /** Emerald at {@code intensity}, kept opaque so the stone never shows through the frame. */
@@ -304,34 +340,42 @@ public class FlooNetworkScreen extends Screen {
                             int listY, int mouseX, int mouseY) {
         int listX = px + LIST_PADDING;
         int listW = panelW - LIST_PADDING * 2;
+        // Rows stop short of the scrollbar. The old bar was two pixels drawn over the rows and got
+        // away with it; the shared one is eight, and a row running under it would put an address
+        // behind the thumb.
+        int rowW = destinations.size() > MAX_VISIBLE
+                ? listW - WizardsMetrics.SCROLLBAR_W : listW;
         int visibleCount = Math.min(MAX_VISIBLE, destinations.size() - scrollOffset);
 
-        graphics.fill(listX - 2, listY - 2, listX + listW + 2, listY + MAX_VISIBLE * ENTRY_H + 2, COL_INSET);
+        McStylePanel.drawSkinInset(graphics, SKIN, listX - WizardsMetrics.SPACE_S,
+                listY - WizardsMetrics.SPACE_S,
+                listW + 2 * WizardsMetrics.SPACE_S,
+                MAX_VISIBLE * ENTRY_H + 2 * WizardsMetrics.SPACE_S);
         graphics.enableScissor(listX, listY, listX + listW, listY + MAX_VISIBLE * ENTRY_H);
 
         for (int i = 0; i < visibleCount; i++) {
             int idx = i + scrollOffset;
             FlooDestinationDto dto = destinations.get(idx);
             int entryY = listY + i * ENTRY_H;
-            boolean hovered = mouseX >= listX && mouseX < listX + listW
+            boolean hovered = mouseX >= listX && mouseX < listX + rowW
                     && mouseY >= entryY && mouseY < entryY + ENTRY_H;
 
             if (idx == selectedIndex) {
-                graphics.fill(listX, entryY, listX + listW, entryY + ENTRY_H, 0x8021B342);
+                graphics.fill(listX, entryY, listX + rowW, entryY + ENTRY_H, 0x8021B342);
                 graphics.fill(listX, entryY, listX + 1, entryY + ENTRY_H, COL_EMERALD);
             } else if (hovered && dto.isEnabled()) {
-                graphics.fill(listX, entryY, listX + listW, entryY + ENTRY_H, 0x40808080);
+                graphics.fill(listX, entryY, listX + rowW, entryY + ENTRY_H, 0x40808080);
             }
 
             int textColour;
             if (!dto.isEnabled()) {
-                textColour = COL_DISABLED;
+                textColour = SKIN.muted();
             } else if (idx == selectedIndex) {
                 textColour = COL_SELECTED;
             } else if (hovered) {
                 textColour = COL_HOVER;
             } else {
-                textColour = COL_ENTRY;
+                textColour = SKIN.ink();
             }
 
             String label = dto.networkAddress();
@@ -340,14 +384,14 @@ public class FlooNetworkScreen extends Screen {
             }
             // Ellipsised, not clipped: an address can now be 48 characters and the row cannot. A hard
             // scissor cut would leave a name that looks like a different, shorter name.
-            String shown = font.width(label) > listW - 6
-                    ? font.plainSubstrByWidth(label, listW - 12) + "..."
+            String shown = font.width(label) > rowW - 6
+                    ? font.plainSubstrByWidth(label, rowW - 12) + "..."
                     : label;
 
             String dimLabel = formatDimension(dto.dimensionName());
             if (!dimLabel.isEmpty()) {
                 graphics.drawString(font, shown, listX + 3, entryY + 2, textColour, false);
-                graphics.drawString(font, dimLabel, listX + 3, entryY + 9, COL_DISABLED, false);
+                graphics.drawString(font, dimLabel, listX + 3, entryY + 9, SKIN.muted(), false);
             } else {
                 graphics.drawString(font, shown, listX + 3, entryY + 4, textColour, false);
             }
@@ -355,15 +399,12 @@ public class FlooNetworkScreen extends Screen {
 
         graphics.disableScissor();
 
-        if (destinations.size() > MAX_VISIBLE) {
-            int scrollbarX = px + panelW - LIST_PADDING - 2;
-            int scrollbarTotalH = MAX_VISIBLE * ENTRY_H;
-            int thumbH = Math.max(10, scrollbarTotalH * MAX_VISIBLE / destinations.size());
-            int thumbY = listY + (scrollbarTotalH - thumbH) * scrollOffset
-                    / Math.max(1, destinations.size() - MAX_VISIBLE);
-            graphics.fill(scrollbarX, listY, scrollbarX + 2, listY + scrollbarTotalH, 0x40FFFFFF);
-            graphics.fill(scrollbarX, thumbY, scrollbarX + 2, thumbY + thumbH, 0xAA21B342);
-        }
+        // Was a hand-rolled two-pixel bar out of two fills. Every skin has shipped a track and a
+        // thumb from the start; until `drawSkinScrollbar` existed there was no way to ask for them.
+        scrollbar.setBounds(listX, listY, listW, MAX_VISIBLE * ENTRY_H);
+        scrollbar.setItemCount(destinations.size());
+        scrollbar.setScrollOffset(scrollOffset);
+        scrollbar.renderScrollbar(graphics, SKIN);
     }
 
     private static @NonNull String formatDimension(@NonNull String dimensionId) {
