@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.client.gui.widget;
 
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GuiSkin;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.Font;
@@ -11,6 +12,7 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -43,6 +45,16 @@ public final class CyclerWidget<T> {
     private final List<T> options;
     private final Function<T, String> labeller;
     private final Consumer<T> onChange;
+    /**
+     * Which material the label plate is cut from, or {@code null} for the shared leather.
+     *
+     * <p>Added because the wandmaker's bench put one on a pale wood panel and got a leather plate
+     * with leather ink — the same two-styles-on-one-screen mismatch {@link ThemedButton} exists to
+     * end, one level down and one widget later. A cycler on a skinned screen must wear that screen's
+     * material, and take its ink with it: four of the six materials are light enough that
+     * {@link WizardsPalette#TEXT} on them is under 1.5 : 1.
+     */
+    private @Nullable GuiSkin skin;
 
     private final ArrowButton left;
     private final ArrowButton right;
@@ -93,6 +105,12 @@ public final class CyclerWidget<T> {
         onChange.accept(options.get(index));
     }
 
+    /** Cuts this cycler from a named material. Chainable, so it reads at the call site. */
+    public CyclerWidget<T> skin(@NonNull GuiSkin skin) {
+        this.skin = skin;
+        return this;
+    }
+
     /**
      * Draws the label panel. The arrows draw themselves as registered widgets, so this only paints
      * what sits between them.
@@ -103,13 +121,17 @@ public final class CyclerWidget<T> {
         int panelW = w - 2 * (ARROW_W + GAP);
         if (panelW <= 0) return;
 
-        McStylePanel.drawThemedPanel(g, panelX, y, panelW, h);
+        if (skin == null) {
+            McStylePanel.drawThemedPanel(g, panelX, y, panelW, h);
+        } else {
+            McStylePanel.drawSkinPanel(g, skin, panelX, y, panelW, h);
+        }
 
         String label = trim(font, labeller.apply(options.get(index)), panelW - 6);
         g.drawString(font, label,
                 panelX + (panelW - font.width(label)) / 2,
                 y + (h - font.lineHeight) / 2,
-                WizardsPalette.TEXT, false);
+                skin == null ? WizardsPalette.TEXT : skin.ink(), false);
     }
 
     private static String trim(Font font, String text, int maxWidth) {

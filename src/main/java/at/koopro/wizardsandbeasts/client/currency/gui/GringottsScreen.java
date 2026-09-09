@@ -374,12 +374,14 @@ public class GringottsScreen extends Screen {
         // Quoted by the server and pinned for the visit; this only ever draws it. A rate computed
         // here would be a rate the till does not honour.
         float drift = ClientDragotQuoteState.drift();
-        graphics.drawString(font, Component.translatable(
+        // Fitted to the column. The rate, the drift and the purse are three variable-length numbers
+        // on one line, and drawn plainly the line ran out past the panel's own frame.
+        GuiText.drawFitted(graphics, font, Component.translatable(
                         "gui.wizards_and_beasts.gringotts.dragot_board",
                         String.format("%.3f", ClientDragotQuoteState.rate()),
                         String.format("%+.1f", drift),
-                        ClientDragotQuoteState.purse()),
-                x, labelY, drift >= 0.0f ? riseInk : fallInk, false);
+                        ClientDragotQuoteState.purse()).getString(),
+                x, labelY, w, drift >= 0.0f ? riseInk : fallInk);
     }
 
     /** Both purses in one figure each, on a ruled foot. */

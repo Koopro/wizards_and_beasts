@@ -65,7 +65,14 @@ public class OllivanderTrialScreen extends AbstractContainerScreen<OllivanderTri
     private static final int PAD = WizardsMetrics.SPACE_M;
 
     private static final int HEADER_H = 44;
-    private static final int FOOTER_H = 30;
+    /**
+     * The footer band.
+     *
+     * <p>40, not 30. The button sits at {@code imageHeight - FRAME - PAD - TAKE_H} = 206 and a
+     * 30px footer puts the divider at 210 — through the middle of it. Anything here must clear the
+     * control it belongs to.
+     */
+    private static final int FOOTER_H = 40;
     private static final int TRAY_W = 136;
     private static final int GUTTER = WizardsMetrics.SPACE_L;
 
@@ -152,7 +159,6 @@ public class OllivanderTrialScreen extends AbstractContainerScreen<OllivanderTri
 
         renderTray(graphics);
         renderDetail(graphics);
-        renderFooterNote(graphics);
     }
 
     /** The three wands, as rows. */
@@ -241,10 +247,23 @@ public class OllivanderTrialScreen extends AbstractContainerScreen<OllivanderTri
 
         float score = menu.getResonanceScore(index);
         float threshold = menu.getMatchThreshold();
+        boolean answers = score >= threshold;
         graphics.drawString(font,
                 Component.translatable("wandcraft.gui.resonance_of", score, threshold),
-                x, y, score >= threshold ? goodInk : badInk, false);
-        y += WizardsMetrics.LINE_SECTION;
+                x, y, answers ? goodInk : badInk, false);
+        y += WizardsMetrics.LINE_BODY;
+
+        if (!answers) {
+            // Beside the number it is about. This used to be drawn in the footer, where it landed on
+            // top of the very button it was explaining -- and before that, inside whichever card had
+            // refused, which is where a player looks for it only if they already know a card can.
+            for (var line : font.split(
+                    Component.translatable("wandcraft.gui.wand_refuses", threshold), w)) {
+                graphics.drawString(font, line, x, y, badInk, false);
+                y += WizardsMetrics.LINE_TIGHT;
+            }
+        }
+        y += WizardsMetrics.SPACE_S;
 
         // The length note is pinned to the foot of the pane and drawn first, because it is the one
         // line here that must always be visible: it is the caveat on every number above it.
@@ -288,22 +307,6 @@ public class OllivanderTrialScreen extends AbstractContainerScreen<OllivanderTri
                     line.beneficial() ? goodInk : badInk, false);
             y += WizardsMetrics.LINE_TIGHT;
         }
-    }
-
-    /**
-     * Why the button is dark, when it is.
-     *
-     * <p>The old screen printed this inside whichever card had refused, which is where a player
-     * would look for it only if they already knew the card could refuse. It sits beside the control
-     * it is about now.
-     */
-    private void renderFooterNote(GuiGraphics graphics) {
-        if (answers(menu.getSelectedIndex())) {
-            return;
-        }
-        Component note = Component.translatable("wandcraft.gui.wand_refuses", menu.getMatchThreshold());
-        int y = topPos + imageHeight - FOOTER_H + WizardsMetrics.SPACE_XS;
-        graphics.drawCenteredString(font, note, leftPos + imageWidth / 2, y, SKIN.muted());
     }
 
     // ── Geometry, shared by the drawing pass and the hit test ──────────────

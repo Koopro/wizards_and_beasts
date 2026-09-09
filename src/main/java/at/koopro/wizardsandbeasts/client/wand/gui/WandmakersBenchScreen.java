@@ -4,6 +4,7 @@ import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GuiSkin;
+import at.koopro.wizardsandbeasts.client.gui.util.GuiText;
 import at.koopro.wizardsandbeasts.client.gui.widget.CyclerWidget;
 import at.koopro.wizardsandbeasts.network.wand.SetFlexibilityPayload;
 import at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu;
@@ -54,9 +55,15 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
     private static final int FLEX_ROW_H = 18;
     private static final int FLEX_INSET_X = 16;
 
-    /** Where the bench says what it is waiting for: the gap above the player inventory. */
-    private static final int STATUS_Y = 88;
-    private static final int STATUS_LINES = 2;
+    /**
+     * Where the bench says what it is waiting for.
+     *
+     * <p>One line, and fitted rather than wrapped. The band looks like it runs to the slot grid at
+     * y 111, but vanilla draws {@code playerInventoryTitle} at {@code imageHeight - 94} = y 102 —
+     * budgeting against the slots instead of the label is how the second line of "Place a shaped
+     * blank and a core" ended up printed through the word "Inventory".
+     */
+    private static final int STATUS_Y = 90;
 
     /**
      * Tier bar geometry. The bar sits in the strip of bare panel below the hotbar — the artwork's
@@ -101,7 +108,7 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
 
         flexCycler = new CyclerWidget<>(values, current,
                 flexibility -> flexibility.label().getString(),
-                this::chooseFlexibility);
+                this::chooseFlexibility).skin(SKIN);
         flexCycler.setBounds(leftPos + FLEX_INSET_X, topPos + FLEX_ROW_Y,
                 imageWidth - 2 * FLEX_INSET_X, FLEX_ROW_H);
         flexCycler.buttons().forEach(this::addRenderableWidget);
@@ -234,12 +241,9 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
         if (reason == null) {
             return;
         }
-        int py = topPos + STATUS_Y;
-        for (var line : font.split(reason, this.imageWidth - 2 * FLEX_INSET_X)
-                .stream().limit(STATUS_LINES).toList()) {
-            graphics.drawString(font, line, leftPos + FLEX_INSET_X, py, SKIN.muted(), false);
-            py += WizardsMetrics.LINE_TIGHT;
-        }
+        GuiText.drawFitted(graphics, font, reason.getString(),
+                leftPos + FLEX_INSET_X, topPos + STATUS_Y,
+                this.imageWidth - 2 * FLEX_INSET_X, SKIN.muted());
     }
 
     /**

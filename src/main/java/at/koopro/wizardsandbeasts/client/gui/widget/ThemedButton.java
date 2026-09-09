@@ -5,6 +5,7 @@ import at.koopro.wizardsandbeasts.client.gui.McStylePanel.ButtonTone;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel.Sprite;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GuiSkin;
+import at.koopro.wizardsandbeasts.client.gui.util.GuiText;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.Font;
@@ -157,8 +158,10 @@ public final class ThemedButton extends AbstractButton {
 
         Font font = Minecraft.getInstance().font;
         String label = getMessage().getString();
-        int textW = font.width(label);
         int iconSpan = icon == null ? 0 : icon.w() + ICON_GAP;
+        // The room a label actually has, once the frame and any icon have taken theirs.
+        int room = getWidth() - 2 * EDGE_PAD - iconSpan;
+        int textW = Math.min(font.width(label), room);
         // Icon and label are centred as one group, so a button reads as balanced whether or not it
         // carries an icon and whichever language the label is in.
         int groupX = getX() + (getWidth() - (iconSpan + textW)) / 2;
@@ -167,8 +170,11 @@ public final class ThemedButton extends AbstractButton {
         if (icon != null) {
             McStylePanel.drawSprite(g, icon, groupX, getY() + (getHeight() - icon.h()) / 2);
         }
-        g.drawString(font, label, Math.max(getX() + EDGE_PAD, groupX + iconSpan), textY,
-                active ? textColor : textColorOff, false);
+        // Fitted, not drawn and hoped for. A ThemedButton used to let any label wider than its own
+        // frame run straight out the side: Gringotts' "Withdraw all" and "1S -> 29K" both did, and
+        // a translated label on a fixed-width button is the same bug in every other locale.
+        GuiText.drawFitted(g, font, label, Math.max(getX() + EDGE_PAD, groupX + iconSpan), textY,
+                room, active ? textColor : textColorOff);
     }
 
     @Override
