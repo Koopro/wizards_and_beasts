@@ -2,13 +2,12 @@ package at.koopro.wizardsandbeasts.entity.niffler;
 
 import at.koopro.wizardsandbeasts.entity.GeoEntityBase;
 import at.koopro.wizardsandbeasts.entity.niffler.CarriedNifflerAttachment;
-import at.koopro.wizardsandbeasts.bestiary.BestiaryDataHelper;
-import at.koopro.wizardsandbeasts.bestiary.DiscoveryTier;
+import at.koopro.wizardsandbeasts.creature.bond.BondState;
+import at.koopro.wizardsandbeasts.creature.bond.BondableBeast;
+import at.koopro.wizardsandbeasts.creature.bond.FollowBondedOwnerGoal;
 import at.koopro.wizardsandbeasts.entity.niffler.ai.NifflerFleeWhenPouchStolen;
-import at.koopro.wizardsandbeasts.entity.niffler.ai.NifflerFollowBondedPlayerGoal;
 import at.koopro.wizardsandbeasts.entity.niffler.ai.NifflerSeekShinyBlockGoal;
 import at.koopro.wizardsandbeasts.entity.niffler.ai.NifflerSeekShinyItemGoal;
-import at.koopro.wizardsandbeasts.event.bestiary.niffler.MagizoologyXPEvent;
 import at.koopro.wizardsandbeasts.event.bestiary.niffler.NifflerPouchOpenEvent;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
@@ -16,7 +15,6 @@ import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.network.bestiary.niffler.NifflerCarrySyncS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
 import at.koopro.wizardsandbeasts.util.AnimHelper;
-import at.koopro.wizardsandbeasts.util.MagizoologyHelper;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -52,7 +50,7 @@ import software.bernie.geckolib.animation.RawAnimation;
 
 import java.util.UUID;
 
-public class NifflerEntity extends GeoEntityBase {
+public class NifflerEntity extends GeoEntityBase implements BondableBeast {
 
     // ─── Synched data ─────────────────────────────────────────────────────────
     private static final EntityDataAccessor<Integer> DATA_BOND_LEVEL =
@@ -71,18 +69,32 @@ public class NifflerEntity extends GeoEntityBase {
     // ─── Bestiary ID ──────────────────────────────────────────────────────────
     public static final Identifier BESTIARY_ID = Identifier.fromNamespaceAndPath("wizards_and_beasts", "niffler");
 
-    // ─── Bond milestone XP tags ───────────────────────────────────────────────
-    private static final int[] BOND_XP_MILESTONES = {20, 50, 80, 100};
+    /**
+     * Ceiling used by the two paths that set a bond without going through the profile: the debug
+     * command and the baby → adult hand-over. Both predate the datapack layer and neither has a
+     * player to attribute the change to, so neither can reasonably fail because a profile is
+     * missing. Kept equal to {@code creature_bonds/niffler.json}'s {@code maxBond}, which
+     * {@code CreatureBondProfileTest} asserts.
+     */
+    public static final int MAX_BOND = 100;
 
     // ─── Per-entity state (NBT-backed) ────────────────────────────────────────
     private final NifflerPouchInventory pouch = new NifflerPouchInventory(getPouchCapacity());
-    @Nullable private UUID ownerUUID;
-    private int bondLevel;
-    private int feedCooldown;
+
+    /**
+     * Owner, bond level and the feed cooldown, on the shared {@code creature.bond} storage.
+     *
+     * <p>These were three fields on this class, and the rules that moved them were three more
+     * methods. They now live in {@link BondState} and are driven by
+     * {@code data/wizards_and_beasts/creature_bonds/niffler.json}, which restates this creature's
+     * original numbers exactly: diamond 20 / gold ingot 15 / nugget 5, milestones at 20/50/80/100,
+     * follow from 50, MASTERED at 80. The save keys are unchanged, so existing Nifflers keep their
+     * owner and their bond.
+     */
+    private final BondState bond = new BondState();
 
     // ─── Transient ticks ──────────────────────────────────────────────────────
     private int ticksSincePouchAccess;
-    private int proximityBondTicks;
     private int peekPhase; // 0=idle, 1=rising, 2=held, 3=falling
     private int peekPhaseTick;
     private int nextPeekDelay;
@@ -118,7 +130,8 @@ public class NifflerEntity extends GeoEntityBase {
         goalSelector.addGoal(2, new NifflerFleeWhenPouchStolen(this));
         goalSelector.addGoal(3, new NifflerSeekShinyItemGoal(this));
         goalSelector.addGoal(4, new NifflerSeekShinyBlockGoal(this));
-        goalSelector.addGoal(5, new NifflerFollowBondedPlayerGoal(this));
+        // A pocketed Niffler is inside the player; it must not also be pathing to them.
+        goalSelector.addGoal(5, new FollowBondedOwnerGoal<>(this, n -> !n.isCarried()));
         goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.4));
         goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 6.0f));
         goalSelector.addGoal(8, new RandomLookAroundGoal(this));
@@ -130,31 +143,15 @@ public class NifflerEntity extends GeoEntityBase {
         super.tick();
         if (level().isClientSide()) return;
 
-        if (feedCooldown > 0) feedCooldown--;
         if (ticksSincePouchAccess > 0) ticksSincePouchAccess--;
 
-        tickProximityBond();
+        tickBond();
         tickPeek();
         syncPouchFull();
     }
 
-    private void tickProximityBond() {
-        if (tickCount % 20 != 0) return;
-        if (ownerUUID == null) return;
-        Player owner = level().getPlayerByUUID(ownerUUID);
-        if (owner == null || distanceToSqr(owner) > 36.0) {
-            proximityBondTicks = 0;
-            return;
-        }
-        proximityBondTicks++;
-        if (proximityBondTicks >= 30) {
-            proximityBondTicks = 0;
-            increaseBond(owner, 1, false);
-        }
-    }
-
     private void tickPeek() {
-        if (!isCarried() || bondLevel < 100) {
+        if (!isCarried() || getBondLevel() < 100) {
             if (entityData.get(DATA_PEEK_TICK) != 0) entityData.set(DATA_PEEK_TICK, 0);
             return;
         }
@@ -213,12 +210,15 @@ public class NifflerEntity extends GeoEntityBase {
     protected @NonNull InteractionResult mobInteract(@NonNull Player player, @NonNull InteractionHand hand) {
         if (!ModuleManager.isEnabled(Module.CREATURES)) return InteractionResult.PASS;
 
-        ItemStack held = player.getItemInHand(hand);
-
-        // Feed interaction
-        if (isFeedItem(held)) {
-            return tryFeed(player, hand, held);
+        // Feeding, the feed cooldown and the bond gain are all the shared layer's now; it returns
+        // PASS for anything this species does not eat, so the two hand-empty interactions below
+        // still see every other item.
+        InteractionResult fed = offerBondFood(player, hand);
+        if (fed != InteractionResult.PASS) {
+            return fed;
         }
+
+        ItemStack held = player.getItemInHand(hand);
 
         // Pocket carry — sneak + empty hand
         if (held.isEmpty() && player.isShiftKeyDown()) {
@@ -233,35 +233,9 @@ public class NifflerEntity extends GeoEntityBase {
         return super.mobInteract(player, hand);
     }
 
-    private @NonNull InteractionResult tryFeed(Player player, InteractionHand hand, ItemStack held) {
-        if (level().isClientSide()) return InteractionResult.SUCCESS;
-        if (feedCooldown > 0) {
-            level().playSound(null, blockPosition(), ModSounds.NIFFLER_HISS.get(), SoundSource.NEUTRAL, 0.7f, 1.2f);
-            return InteractionResult.SUCCESS;
-        }
-
-        int gain = 0;
-        int cooldownSecs = 0;
-        if (held.is(Items.DIAMOND)) { gain = 20; cooldownSecs = 120; }
-        else if (held.is(Items.GOLD_INGOT)) { gain = 15; cooldownSecs = 60; }
-        else if (held.is(Items.GOLD_NUGGET)) { gain = 5; cooldownSecs = 30; }
-
-        if (gain == 0) return InteractionResult.PASS;
-
-        if (!player.isCreative()) held.shrink(1);
-        feedCooldown = cooldownSecs * 20;
-        increaseBond(player, gain, true);
-        level().playSound(null, blockPosition(), ModSounds.NIFFLER_EAT.get(), SoundSource.NEUTRAL, 1.0f, 1.0f);
-        return InteractionResult.SUCCESS;
-    }
-
-    private boolean isFeedItem(ItemStack stack) {
-        return stack.is(Items.DIAMOND) || stack.is(Items.GOLD_INGOT) || stack.is(Items.GOLD_NUGGET);
-    }
-
     private @NonNull InteractionResult tryToggleCarry(Player player) {
         if (level().isClientSide()) return InteractionResult.SUCCESS;
-        if (bondLevel < 80) return InteractionResult.PASS;
+        if (getBondLevel() < 80) return InteractionResult.PASS;
 
         if (isBaby()) {
             level().playSound(null, blockPosition(), ModSounds.NIFFLER_SQUIRM.get(), SoundSource.NEUTRAL, 1.0f, 1.0f);
@@ -271,8 +245,8 @@ public class NifflerEntity extends GeoEntityBase {
         if (isCarried()) {
             setCarried(null);
         } else {
-            if (ownerUUID == null) ownerUUID = player.getUUID();
-            if (!player.getUUID().equals(ownerUUID)) return InteractionResult.PASS;
+            if (bond.ownerUUID() == null) bond.setOwner(player.getUUID());
+            if (!bond.isOwnedBy(player.getUUID())) return InteractionResult.PASS;
             setCarried(player);
         }
         return InteractionResult.SUCCESS;
@@ -282,7 +256,7 @@ public class NifflerEntity extends GeoEntityBase {
         if (level().isClientSide()) return InteractionResult.SUCCESS;
         if (!(player instanceof ServerPlayer sp)) return InteractionResult.PASS;
 
-        if (bondLevel < 50) {
+        if (getBondLevel() < 50) {
             level().playSound(null, blockPosition(), ModSounds.NIFFLER_HISS.get(), SoundSource.NEUTRAL, 1.0f, 0.8f);
             player.hurt(level().damageSources().generic(), 1.0f);
             ticksSincePouchAccess = 60;
@@ -317,8 +291,8 @@ public class NifflerEntity extends GeoEntityBase {
                 setInvisible(false);
                 entityData.set(DATA_IS_CARRIED, false);
                 // Clear attachment from owner
-                if (ownerUUID != null) {
-                    Player owner = level().getPlayerByUUID(ownerUUID);
+                {
+                    Player owner = resolveBondOwner();
                     if (owner != null) {
                         owner.setData(ModAttachments.CARRIED_NIFFLER.get(), CarriedNifflerAttachment.EMPTY);
                         setPos(owner.getX(), owner.getY(), owner.getZ());
@@ -334,8 +308,8 @@ public class NifflerEntity extends GeoEntityBase {
     /** Called server-side each tick to follow the carrier. */
     @Override
     public void aiStep() {
-        if (!level().isClientSide() && isCarried() && ownerUUID != null) {
-            Player carrier = level().getPlayerByUUID(ownerUUID);
+        if (!level().isClientSide() && isCarried() && bond.ownerUUID() != null) {
+            Player carrier = resolveBondOwner();
             if (carrier != null) {
                 setPos(carrier.getX(), carrier.getY(), carrier.getZ());
             } else {
@@ -347,34 +321,35 @@ public class NifflerEntity extends GeoEntityBase {
     }
 
     // ─── Bond system ──────────────────────────────────────────────────────────
-    public void increaseBond(Player player, int amount, boolean fireXp) {
-        if (ownerUUID == null) ownerUUID = player.getUUID();
 
-        if (MagizoologyHelper.isMagizoologist(player)) {
-            amount = (int) Math.ceil(amount * 1.5);
-        }
-
-        int old = bondLevel;
-        bondLevel = Math.min(100, bondLevel + amount);
-        entityData.set(DATA_BOND_LEVEL, bondLevel);
-
-        level().playSound(null, blockPosition(), ModSounds.NIFFLER_HAPPY.get(), SoundSource.NEUTRAL, 0.6f, 1.0f);
-
-        if (fireXp) {
-            for (int milestone : BOND_XP_MILESTONES) {
-                if (old < milestone && bondLevel >= milestone) {
-                    NeoForge.EVENT_BUS.post(new MagizoologyXPEvent(player, milestone, "niffler_bond_" + milestone));
-                    if (milestone == 80 && level() instanceof ServerLevel && player instanceof ServerPlayer sp) {
-                        BestiaryDataHelper.setTier(sp, BESTIARY_ID, DiscoveryTier.MASTERED);
-                    }
-                }
-            }
-        }
+    @Override
+    public @NonNull BondState bondState() {
+        return bond;
     }
 
-    private void decreaseBond(int amount) {
-        bondLevel = Math.max(0, bondLevel - amount);
-        entityData.set(DATA_BOND_LEVEL, bondLevel);
+    @Override
+    public void setSyncedBondLevel(int level) {
+        entityData.set(DATA_BOND_LEVEL, level);
+    }
+
+    @Override
+    public int getSyncedBondLevel() {
+        return entityData.get(DATA_BOND_LEVEL);
+    }
+
+    /**
+     * The Niffler chirps on every bond gain, including the slow drip of company — the shared layer
+     * has no opinion about noise, and this one is the creature's character.
+     *
+     * <p>Played before delegating so it still sounds at a full bond, which is what it did when the
+     * whole method lived here.
+     */
+    @Override
+    public void increaseBond(@NonNull Player player, int amount, boolean fireXp) {
+        if (!level().isClientSide()) {
+            level().playSound(null, blockPosition(), ModSounds.NIFFLER_HAPPY.get(), SoundSource.NEUTRAL, 0.6f, 1.0f);
+        }
+        BondableBeast.super.increaseBond(player, amount, fireXp);
     }
 
     private void resetPeekDelay() {
@@ -386,11 +361,9 @@ public class NifflerEntity extends GeoEntityBase {
     protected void dropCustomDeathLoot(@NonNull ServerLevel level, @NonNull DamageSource source, boolean recentlyHit) {
         super.dropCustomDeathLoot(level, source, recentlyHit);
         pouch.dropAll(this);
-        if (ownerUUID != null) {
-            Player owner = level.getPlayerByUUID(ownerUUID);
-            if (owner != null) {
-                owner.setData(ModAttachments.CARRIED_NIFFLER.get(), CarriedNifflerAttachment.EMPTY);
-            }
+        Player owner = resolveBondOwner();
+        if (owner != null) {
+            owner.setData(ModAttachments.CARRIED_NIFFLER.get(), CarriedNifflerAttachment.EMPTY);
         }
     }
 
@@ -399,21 +372,14 @@ public class NifflerEntity extends GeoEntityBase {
     protected void addAdditionalSaveData(@NonNull ValueOutput output) {
         super.addAdditionalSaveData(output);
         pouch.save(output);
-        if (ownerUUID != null) output.store("OwnerUUID", com.mojang.serialization.Codec.STRING, ownerUUID.toString());
-        output.store("BondLevel", com.mojang.serialization.Codec.INT, bondLevel);
-        output.store("FeedCooldown", com.mojang.serialization.Codec.INT, feedCooldown);
+        saveBond(output);
     }
 
     @Override
     protected void readAdditionalSaveData(@NonNull ValueInput input) {
         super.readAdditionalSaveData(input);
         pouch.load(input);
-        ownerUUID = input.read("OwnerUUID", com.mojang.serialization.Codec.STRING)
-                .map(s -> { try { return java.util.UUID.fromString(s); } catch (IllegalArgumentException e) { return null; } })
-                .orElse(null);
-        bondLevel = Math.max(0, Math.min(100, input.read("BondLevel", com.mojang.serialization.Codec.INT).orElse(0)));
-        feedCooldown = Math.max(0, input.read("FeedCooldown", com.mojang.serialization.Codec.INT).orElse(0));
-        entityData.set(DATA_BOND_LEVEL, bondLevel);
+        loadBond(input);
     }
 
     // ─── Sound overrides ──────────────────────────────────────────────────────
@@ -434,8 +400,17 @@ public class NifflerEntity extends GeoEntityBase {
 
     // ─── Accessors ────────────────────────────────────────────────────────────
     public @NonNull NifflerPouchInventory getPouch() { return pouch; }
-    public @Nullable UUID getOwnerUUID() { return ownerUUID; }
-    public int getBondLevel() { return bondLevel; }
+    public @Nullable UUID getOwnerUUID() { return bond.ownerUUID(); }
+
+    /**
+     * The bond level, read from synched data rather than the server-only field it used to read.
+     *
+     * <p>That field was never written on the client, so every client-side caller saw 0 no matter
+     * how bonded the creature was — which is why {@code NifflerPocketLayer}'s {@code >= 100} gate
+     * could never open and the pocket peek never drew. The value has been synced since the entity
+     * was written; nothing was reading it.
+     */
+    public int getBondLevel() { return getSyncedBondLevel(); }
     public boolean isCarried() { return entityData.get(DATA_IS_CARRIED); }
     public boolean isPouchFull() { return entityData.get(DATA_POUCH_FULL); }
     public int getDataPeekTick() { return entityData.get(DATA_PEEK_TICK); }
@@ -445,15 +420,13 @@ public class NifflerEntity extends GeoEntityBase {
 
     /** Force-sets bond level (debug/command use only — bypasses cooldowns and XP events). */
     public void setForcedBond(int value) {
-        bondLevel = Math.max(0, Math.min(100, value));
-        entityData.set(DATA_BOND_LEVEL, bondLevel);
+        setSyncedBondLevel(bond.setLevel(value, MAX_BOND));
     }
 
     /** Transfers owner UUID and bond level from another Niffler (used on baby → adult growth). */
     public void transferBondFrom(NifflerEntity source) {
-        this.ownerUUID = source.ownerUUID;
-        this.bondLevel = source.bondLevel;
-        entityData.set(DATA_BOND_LEVEL, bondLevel);
+        bond.setOwner(source.bond.ownerUUID());
+        setSyncedBondLevel(bond.setLevel(source.bond.level(), MAX_BOND));
     }
 
     // ─── GeckoLib ─────────────────────────────────────────────────────────────

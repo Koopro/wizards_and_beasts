@@ -23,6 +23,7 @@ import at.koopro.wizardsandbeasts.event.spell.RegisterSpellsEvent;
 import at.koopro.wizardsandbeasts.bestiary.BestiaryEntryLoader;
 import at.koopro.wizardsandbeasts.handbook.HandbookChapterManager;
 import at.koopro.wizardsandbeasts.creature.CreatureDefinitionLoader;
+import at.koopro.wizardsandbeasts.creature.bond.BondProfileLoader;
 import at.koopro.wizardsandbeasts.registry.ModCreatures;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.network.ModNetwork;
@@ -177,6 +178,12 @@ public class WizardsAndBeastsMod {
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "creature_definition_reload_listener"),
                     new CreatureDefinitionLoader());
+            // How each species bonds to a player. A directory of its own rather than a field on
+            // CreatureDefinition: the creatures worth bonding to are the bespoke entity classes,
+            // and none of those ships a creatures/*.json for the field to live in.
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "creature_bond_reload_listener"),
+                    new BondProfileLoader());
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "wand_module_reload_listener"),
                     new WandModuleLoader());

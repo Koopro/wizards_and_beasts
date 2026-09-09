@@ -1,4 +1,5 @@
 {
+  "_comment": "No werewolf material exists as an item and canon names none, so this is deliberately not a material drop: a werewolf is a cursed person, and what it leaves is what the person had. Torn robes, bones, and the coins in their pocket. Recorded in KNOWN_ISSUES 4.3.",
   "type": "minecraft:entity",
   "pools": [
     {
@@ -14,6 +15,44 @@
                 "type": "minecraft:uniform",
                 "min": 1,
                 "max": 2
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:bone",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 0,
+                "max": 2
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "wizards_and_beasts:knut",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 0,
+                "max": 8
               }
             }
           ]

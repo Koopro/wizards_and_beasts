@@ -1,5 +1,5 @@
 {
-  "_comment": "The emerald was a stand-in for a venom fang; basilisk_fang is a registered item and now drops. Leather stays as the hide, which has no item of its own.",
+  "_comment": "Same drops as the two dragons already on the alpha roster: they share DragonEntity's fire/venom kit and are built to the same standard, and the missing loot table was the only thing holding them off it.",
   "type": "minecraft:entity",
   "pools": [
     {
@@ -7,7 +7,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "wizards_and_beasts:basilisk_fang",
+          "name": "wizards_and_beasts:dragon_heartstring",
           "functions": [
             {
               "function": "minecraft:set_count",

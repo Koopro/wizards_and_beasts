@@ -1,0 +1,34 @@
+{
+  "_comment": "Mooncalves are shy to the point of only surfacing at the full moon, so the bond is slow and food-led. A bonded one keeps producing the dung its crop-growth use depends on, which was previously a kill-only drop.",
+  "feeds": [
+    { "item": "minecraft:wheat", "gain": 8, "cooldownSeconds": 45 },
+    { "item": "minecraft:beetroot", "gain": 5, "cooldownSeconds": 30 }
+  ],
+  "followThreshold": 60,
+  "milestones": [25, 50, 75, 100],
+  "proximityRange": 6.0,
+  "proximitySeconds": 30,
+  "proximityGain": 1,
+  "betrayalPenalty": 30,
+  "gift": {
+    "item": "wizards_and_beasts:mooncalf_dung",
+    "minBond": 50,
+    "cooldownSeconds": 600,
+    "minCount": 1,
+    "maxCount": 2
+  },
+  "_breedingComment": "A herd is the point. Mooncalf dung is the mod's fertiliser and a single bonded mooncalf gives it slowly; two give you a herd that keeps giving. Wheat is both the feed and the breeding item, so raising them is one loop rather than two.",
+  "breeding": {
+    "item": "minecraft:wheat",
+    "minBond": 60,
+    "cooldownSeconds": 900,
+    "partnerRange": 8.0,
+    "loveSeconds": 30,
+    "growSeconds": 1200,
+    "juvenileScale": 0.5,
+    "inheritedBondPercent": 50
+  },
+  "masteryBond": 100,
+  "feedSound": "minecraft:entity.cow.milk",
+  "refuseSound": "minecraft:entity.cow.ambient"
+}

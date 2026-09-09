@@ -1,5 +1,5 @@
 {
-  "_comment": "The emerald was a stand-in for a venom fang; basilisk_fang is a registered item and now drops. Leather stays as the hide, which has no item of its own.",
+  "_comment": "occamy_eggshell was registered, used as a cauldron catalyst, and unobtainable in survival.",
   "type": "minecraft:entity",
   "pools": [
     {
@@ -7,13 +7,13 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "wizards_and_beasts:basilisk_fang",
+          "name": "wizards_and_beasts:occamy_eggshell",
           "functions": [
             {
               "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
-                "min": 1,
+                "min": 0,
                 "max": 1
               }
             }
@@ -26,14 +26,14 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:leather",
+          "name": "minecraft:feather",
           "functions": [
             {
               "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
-                "min": 2,
-                "max": 4
+                "min": 1,
+                "max": 2
               }
             }
           ]

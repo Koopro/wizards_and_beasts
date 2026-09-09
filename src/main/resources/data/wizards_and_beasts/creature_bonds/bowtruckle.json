@@ -1,0 +1,33 @@
+{
+  "_comment": "Bowtruckles guard wand-wood trees and will lead a wandmaker to good wood for a woodlouse. The gift is the whole point of bonding one: a wandwood sapling is otherwise found only by chopping down the tree it came from.",
+  "feeds": [
+    { "item": "wizards_and_beasts:mallowsweet", "gain": 15, "cooldownSeconds": 90 },
+    { "item": "minecraft:oak_sapling", "gain": 8, "cooldownSeconds": 60 },
+    { "item": "minecraft:stick", "gain": 4, "cooldownSeconds": 30 }
+  ],
+  "followThreshold": 50,
+  "milestones": [25, 50, 75, 100],
+  "proximityRange": 5.0,
+  "proximitySeconds": 40,
+  "proximityGain": 1,
+  "betrayalPenalty": 25,
+  "gift": {
+    "item": "wizards_and_beasts:holly_sapling",
+    "minBond": 75,
+    "cooldownSeconds": 1200
+  },
+  "_breedingComment": "Bowtruckles nest in a wand-wood tree in colonies, so a grove that has been fed for long enough gets more of them. Gated on the same mallowsweet as the top feed and behind a higher bond than the mooncalf: a wandwood supply that reproduces needs to be earned.",
+  "breeding": {
+    "item": "wizards_and_beasts:mallowsweet",
+    "minBond": 75,
+    "cooldownSeconds": 1200,
+    "partnerRange": 6.0,
+    "loveSeconds": 30,
+    "growSeconds": 900,
+    "juvenileScale": 0.45,
+    "inheritedBondPercent": 60
+  },
+  "masteryBond": 100,
+  "feedSound": "minecraft:block.grass.place",
+  "refuseSound": "minecraft:block.bamboo.break"
+}

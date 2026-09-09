@@ -1,0 +1,20 @@
+{
+  "_comment": "The Niffler's original hard-coded numbers, moved out of NifflerEntity unchanged. Changing them here changes the creature; NifflerEntity keeps only the pouch, the pocket-carry and the theft.",
+  "feeds": [
+    { "item": "minecraft:diamond", "gain": 20, "cooldownSeconds": 120 },
+    { "item": "minecraft:gold_ingot", "gain": 15, "cooldownSeconds": 60 },
+    { "item": "minecraft:gold_nugget", "gain": 5, "cooldownSeconds": 30 }
+  ],
+  "maxBond": 100,
+  "followThreshold": 50,
+  "milestones": [20, 50, 80, 100],
+  "proximityRange": 6.0,
+  "proximitySeconds": 30,
+  "proximityGain": 1,
+  "_betrayalComment": "Zero, because the Niffler never had one and this pass does not change how it behaves. The hook is unwired on NifflerEntity; raising this alone would do nothing.",
+  "betrayalPenalty": 0,
+  "masteryBond": 80,
+  "xpSource": "niffler_bond",
+  "feedSound": "wizards_and_beasts:niffler_eat",
+  "refuseSound": "wizards_and_beasts:niffler_hiss"
+}

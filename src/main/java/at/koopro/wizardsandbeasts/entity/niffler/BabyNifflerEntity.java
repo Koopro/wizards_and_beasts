@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.entity.niffler;
 
+import at.koopro.wizardsandbeasts.creature.bond.BondProfile;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
 import at.koopro.wizardsandbeasts.util.AnimHelper;
 import net.minecraft.server.level.ServerLevel;
@@ -77,10 +78,16 @@ public class BabyNifflerEntity extends NifflerEntity {
         return super.mobInteract(player, hand);
     }
 
+    /**
+     * Whether this counts toward the three feedings growth needs — asked of the species' bond
+     * profile rather than restated here.
+     *
+     * <p>It used to be a second copy of the adult's feed list, which meant adding a treat to the
+     * Niffler would have raised its bond and silently not counted toward a cub growing up.
+     */
     private boolean isFeedItemForGrowth(net.minecraft.world.item.ItemStack stack) {
-        return stack.is(net.minecraft.world.item.Items.DIAMOND)
-                || stack.is(net.minecraft.world.item.Items.GOLD_INGOT)
-                || stack.is(net.minecraft.world.item.Items.GOLD_NUGGET);
+        BondProfile profile = bondProfile();
+        return profile != null && profile.feedFor(stack) != null;
     }
 
     private void growIntoAdult() {

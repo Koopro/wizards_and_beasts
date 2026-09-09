@@ -1,0 +1,25 @@
+{
+  "_comment": "The horn stays behind its MASTERED harvest rule; killing one blind should not hand over the thing studying it is for. This is the common part, which was missing entirely.",
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:leather",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 2,
+                "max": 4
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

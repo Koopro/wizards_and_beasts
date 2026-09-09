@@ -61,6 +61,26 @@
           "weight": 5
         }
       ]
+    },
+    {
+      "_comment": "The two wand-core materials with no creature behind them. Veela and the White River Monster ship no entity and no harvest rule, so veela_hair and white_river_monster_spine were consumed by ten wand recipes each and obtainable by nothing at all. A wandmaker's cache is where a core with no living source plausibly comes from; it is rare on purpose, and it stops the wand catalogue advertising two cores that cannot be held.",
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "wizards_and_beasts:veela_hair",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "wizards_and_beasts:white_river_monster_spine",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 12
+        }
+      ]
     }
   ]
 }

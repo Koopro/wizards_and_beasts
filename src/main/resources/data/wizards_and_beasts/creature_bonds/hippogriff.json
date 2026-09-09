@@ -1,0 +1,24 @@
+{
+  "_comment": "Proud, and it eats meat. No Java: the Hippogriff is a data-driven GenericFlyingBeastEntity, and this file is the whole of its opt-in. The betrayal penalty is the steepest in the mod because insulting a Hippogriff is the one thing canon is explicit about.",
+  "feeds": [
+    { "item": "minecraft:cooked_beef", "gain": 15, "cooldownSeconds": 90 },
+    { "item": "minecraft:rabbit", "gain": 12, "cooldownSeconds": 60 },
+    { "item": "minecraft:beef", "gain": 8, "cooldownSeconds": 45 }
+  ],
+  "followThreshold": 70,
+  "milestones": [25, 50, 75, 100],
+  "proximityRange": 8.0,
+  "proximitySeconds": 45,
+  "proximityGain": 1,
+  "betrayalPenalty": 40,
+  "gift": {
+    "item": "minecraft:feather",
+    "minBond": 60,
+    "cooldownSeconds": 900,
+    "minCount": 1,
+    "maxCount": 3
+  },
+  "masteryBond": 100,
+  "feedSound": "minecraft:entity.parrot.eat",
+  "refuseSound": "minecraft:entity.parrot.hurt"
+}
