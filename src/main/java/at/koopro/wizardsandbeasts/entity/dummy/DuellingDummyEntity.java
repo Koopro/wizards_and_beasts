@@ -145,6 +145,27 @@ public class DuellingDummyEntity extends Mob {
         // Deliberately none. A dummy that walks off is not a dummy.
     }
 
+    /**
+     * Point the dummy at a direction — body and head, not just {@code yRot}.
+     *
+     * <p>{@code Entity.snapTo} sets only {@code yRot}/{@code xRot}, and a {@code LivingEntity} is
+     * <em>drawn</em> from {@code yBodyRot}, which nothing here ever updates: a dummy registers no
+     * goals, so {@code LivingEntity.aiStep}'s body-rotation tracking never runs on it. Every dummy
+     * therefore rendered facing south whichever way it was planted, while its {@code yRot} said
+     * otherwise — the placing code had been correct since it was written and had no effect.
+     *
+     * <p>The previous-tick values are set with them, or the first frame interpolates a spin from
+     * south to wherever the dummy was actually put.
+     */
+    public void setFacing(float yRot) {
+        setYRot(yRot);
+        this.yRotO = yRot;
+        setYBodyRot(yRot);
+        this.yBodyRotO = yRot;
+        setYHeadRot(yRot);
+        this.yHeadRotO = yRot;
+    }
+
     // --- configuration ------------------------------------------------------------
 
     /**
@@ -611,6 +632,10 @@ public class DuellingDummyEntity extends Mob {
         super.readAdditionalSaveData(input);
         input.read("Boss", Codec.BOOL).ifPresent(boss -> this.entityData.set(BOSS, boss));
         this.applyConfiguredAttributes();
+        // Only yRot is saved and restored; yBodyRot is not, and nothing on a goal-less mob would
+        // rebuild it. Without this a dummy faces south again after a reload even when it was
+        // planted correctly. Entity.load sets the rotation well before this runs.
+        setFacing(getYRot());
     }
 
     /**

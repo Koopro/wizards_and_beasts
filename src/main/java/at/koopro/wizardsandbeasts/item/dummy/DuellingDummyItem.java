@@ -71,7 +71,11 @@ public class DuellingDummyItem extends Item {
         if (dummy == null) {
             return InteractionResult.FAIL;
         }
-        dummy.snapTo(x, y, z, rotationFacing(context.getHorizontalDirection()), 0.0f);
+        float facing = rotationFacing(context.getHorizontalDirection());
+        dummy.snapTo(x, y, z, facing, 0.0f);
+        // snapTo moves only yRot, which a LivingEntity is not drawn from. setFacing carries it into
+        // the body and head rotation as well; without it the dummy renders facing south.
+        dummy.setFacing(facing);
         ItemStack stack = context.getItemInHand();
         Component name = stack.get(DataComponents.CUSTOM_NAME);
         if (name != null) {

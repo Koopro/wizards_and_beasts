@@ -227,6 +227,36 @@ Open, and deliberately not done here:
 - **Nothing tells the player the size is meaningful.** There is no cue that the creature in front of
   them is at its maximum, or that a corridor is what is keeping it small.
 
+### 4.5 Placement facing — two bugs that looked like one
+
+Reported together: the duelling dummy and the spell teacher both faced a fixed direction however
+they were put down. They had nothing in common except the symptom.
+
+**The spell teacher had no facing at all.** It extended `Block`, its blockstate had a single `""`
+variant, and its model is a lectern with a *tilted reading surface* — so every one placed had its
+desk tilted north. It is a `HorizontalDirectionalBlock` now, `FACING` is
+`getHorizontalDirection().getOpposite()` (the reader's side, matching vanilla's lectern and
+`OccamyEggshellBlock`), and `rotate`/`mirror` come free from the superclass, so a structure block or
+a rotated `/clone` turns one correctly.
+
+Its model tilt was also the wrong sign. A positive X rotation raises the *north* edge, which points
+the desk away from a reader standing on the `FACING` side; vanilla's own lectern desk uses `-22.5`.
+Invisible for as long as the block had no facing and all of them pointed one way.
+
+**The dummy's placement code was correct and could not work.** `DuellingDummyItem` had always
+computed `placerFacing.getOpposite().toYRot()` and handed it to `Entity.snapTo` — which writes
+`yRot` and `xRot` only. A `LivingEntity` is *drawn* from `yBodyRot`, and the tracking that brings
+`yBodyRot` toward `yRot` lives in `LivingEntity.aiStep`'s goal handling, which never runs on a mob
+that registers no goals. So the dummy's `yRot` was right and its rendered body was south, always.
+`DuellingDummyEntity.setFacing` now carries the angle into `yBodyRot`, `yHeadRot` and both
+previous-tick values (without the latter the first frame renders a spin from south), and
+`readAdditionalSaveData` re-applies it from `yRot`, because `yBodyRot` is not saved and a reload put
+every dummy back to south.
+
+`PlacementFacingTests` drives the real use path from a player looking along each of the four
+cardinals and asserts the **rendered** rotation. An assertion on `yRot` would have passed against
+the bug — which is the whole reason the bug survived to be reported.
+
 ## 4b. Bestiary
 
 **The unlock rule is: seeing a creature opens its page, and the entry's own `encounterTrigger`

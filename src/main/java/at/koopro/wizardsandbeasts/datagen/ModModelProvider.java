@@ -247,7 +247,7 @@ public class ModModelProvider extends ModelProvider {
         eggshellBlock(blockModels);
         blockModels.createTrivialBlock(ModBlocks.FLOO_GRATE.get(), TexturedModel.LEAVES);
         propBlock(blockModels, ModBlocks.SPELL_TEACHER.get(), lecternModel(),
-                sideTop(ModBlocks.SPELL_TEACHER.get(), ""), false);
+                sideTop(ModBlocks.SPELL_TEACHER.get(), ""), true);
 
         java.util.List<net.minecraft.world.item.Item> wizardingItems = java.util.List.of(
                 ConsumableItemRegistry.BEZOAR.get(), ConsumableItemRegistry.MOONCALF_DUNG.get(),
@@ -542,8 +542,11 @@ public class ModModelProvider extends ModelProvider {
                         .face(Direction.DOWN, f -> f.texture(TextureSlot.SIDE).cullface(Direction.DOWN)))
                 .element(e -> e.from(5, 2, 5).to(11, 10, 11)
                         .textureAll(TextureSlot.SIDE))
+                // -22.5, the sign vanilla's own lectern desk uses. A positive X rotation raises the
+                // *north* edge, which tilts the reading surface away from the reader — invisible
+                // while the block had no facing and every one of them pointed north.
                 .element(e -> e.from(2, 10, 2).to(14, 13, 14)
-                        .rotation(r -> r.singleAxis(Direction.Axis.X, 22.5F).origin(8, 11, 8))
+                        .rotation(r -> r.singleAxis(Direction.Axis.X, -22.5F).origin(8, 11, 8))
                         .textureAll(TextureSlot.SIDE)
                         .face(Direction.UP, f -> f.texture(TextureSlot.TOP)))
                 .build();
