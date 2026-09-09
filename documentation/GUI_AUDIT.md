@@ -161,6 +161,16 @@ and reference no texture of their own:
 
 ¹ delegates its textures to `HeritageCeremonyRenderer`.
 
+> **Superseded for six screens (screen-redo pass, 2026-09-09).** `GringottsScreen`,
+> `FlooNetworkScreen`, `PensieveScreen`, `PocketConfiguratorScreen`, `OllivanderTrialScreen` and
+> `WandmakersBenchScreen` no longer hand-draw their chrome. Five now blit a `gui/sprites/<skin>/`
+> material through `McStylePanel.drawSkin*` and the sixth takes the shared `gui/theme/` set;
+> `wandmakers_bench.png` is generated art rather than hand-authored. Adoption is **17 of 34**.
+>
+> The counts and grades in §5 below are the pre-pass measurement and are kept as the baseline. Six
+> rows are stale by design — see `GUI_DESIGN_SYSTEM.md` for the material table, the ladder rule and
+> the contrast constraint that the pass turned up.
+
 ### 2.4 Missing directory
 
 `BestiaryScreen.java:201` builds `textures/gui/bestiary/entries/<id>.png`. **That directory does

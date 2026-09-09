@@ -12,7 +12,7 @@ Measured across all 34 client screens before this landed:
 | Panel sizes | **25 distinct** — 14 widths, 19 heights |
 | Off-grid paddings | **9 of 19** — 3, 6, 7, 9, 10, 13, 19, 22, 26 |
 | Scaling approaches | **4** — 5 `fit`, 11 `panel`, 5 raw, **13 none** |
-| `McStylePanel` adoption | **11 of 34**; 23 hand-draw with `g.fill()` |
+| `McStylePanel` adoption | **11 of 34**; 23 hand-draw with `g.fill()` — 17 of 34 after the screen-redo pass |
 | `font.lineHeight` readers | **6 of 34**; 2 screens declare a line-height constant |
 | `UiTokens` readers | **7 of 34**; ~283 constants, 27 screens read zero |
 
@@ -83,6 +83,65 @@ swap them and an inset reads as a second panel stacked on the first.
 
 `GuiScaleHelper.Layout.panel` for procedural screens, `Layout.fit` for fixed art. No new code —
 both already exist. The 5 raw `computeScale` callers and the 13 unscaled screens adopt `Layout`.
+
+## Materials — `WizardsPalette.GuiSkin`
+
+`tools/gui_chrome.py` generates eleven sprites per skin into `gui/sprites/<skin>/`. It has always
+claimed `WizardsPalette.GuiSkin` mirrors its `SKINS` table; that class did not exist until the
+screen-redo pass, so Java knew only a folder name and the two screens that had adopted a skin each
+hand-copied its colours (`SkillTreeChartTextures.CHART_INK` is `star_chart`'s ink, retyped).
+
+| Skin | Material | Screen |
+|---|---|---|
+| `star_chart` | night void, indigo, silver leaf | skill web, vocation select |
+| `marauders_map` | pocket-worn parchment and brass | Marauder's Map |
+| `workbench` | worn wood, shellac, brass calipers | Ollivander's trial, wandmaker's bench |
+| `goblin_ledger` | oxblood leather, ruled paper, gold | Gringotts |
+| `pensieve` | dark wet stone, silver memory light | Pensieve |
+| `hearth` | soot stone, warm soot, Floo green | Floo network |
+| `ministry` | pale violet memo, emblem purple | — |
+| `field_notebook` | kraft paper, canvas board, pencil | — |
+
+**A screen that takes a skin must take that skin's `ink()` with it.** Four materials are light and
+every colour above the skin table was picked against the dark leather HUD:
+
+| On `workbench` `#D9C49A` | | On `goblin_ledger` `#E6DFC9` | |
+|---|---:|---|---:|
+| `TEXT` | 1.39 | Galleon gold `#D4AF37` | 1.58 |
+| `TEXT_DIM` | 1.34 | Sickle silver `#C0C0C0` | 1.37 |
+| `BRASS_HI` | 1.35 | `#CCCCCC` labels | 1.21 |
+| *its own `ink`* | *9.44* | *its own `ink`* | *13.59* |
+
+For a colour that carries meaning and so cannot be replaced — a coin, a spell family, a good/bad
+cast contribution — use `UiContrast.readableOn(fg, skin.base())`, which keeps the hue and moves only
+the luminance. `GuiSkinTest` pins ink-on-base at AA and that every material has a legible edge.
+
+Note the edge invariant is a disjunction, not `accent` alone: sampling the generated `divider.png`,
+a light skin's rule is carried by its dark seat row at 9.4–11.9 : 1 while the accent row beside it
+sits at 1.6–2.3. The accent is the highlight *on* the edge. `star_chart` is the inverse case.
+
+## Scaling — the ladder rule
+
+Skinned screens pre-multiply every coordinate through `layout.s()` at layout time and push no pose,
+so mouse coordinates need no unmapping. **Do not mix scaled and unscaled offsets in one column.**
+Gringotts' first cut kept a fixed 32px header above scaled rows; at `Layout.panel`'s 0.72 floor that
+put its buttons at y 170 and its totals at y 148. A ladder whose every rung scales cannot overflow
+the panel it fits at 1.0 — and it is worth checking arithmetically across 0.72…1.35 rather than by
+eye at 1.0.
+
+Two corollaries:
+
+- A nine-sliced control needs **≥18px** (`2 * 8 + 2`). Do not reach for `Math.max(18, s(h))`: a
+  floored button is taller than the rung that reserved space for it. Pick a design height whose
+  smallest scaled value already clears 18 — 26 works, since `26 × 0.72 = 19`.
+- `drawDivider` is an **8px sprite, not a 1px rule**. Advance by `DIVIDER_H`.
+
+## Lists
+
+`client/gui/widget/ScrollList` — row-index scrolling plus the scrollbar that goes with it. Extracted
+from the Bestiary, which was the copy that was already right. Before it there were four hand-rolled
+lists behind three different scrollbars, and two of the four (the Marauder's Map waypoints, the
+Pensieve) drew no bar at all while scrolling perfectly.
 
 ## Mockups
 
