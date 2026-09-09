@@ -12,7 +12,7 @@ import software.bernie.geckolib.renderer.base.GeoRenderState;
  *
  * <p>All this adds over {@code GeoRendererHelper.simple} is copying the synced variant onto the
  * render state so {@link GoblinVariantGeoModel} can branch on it — the same one-ticket shape
- * {@link ScaledBeastRenderer} uses for render scale and {@link DisguisableBeastRenderer} for the
+ * {@link TintedBeastRenderer} uses for the tint and {@link DisguisableBeastRenderer} for the
  * Kelpie's guise. The live entity is never read at render time (GeckoLib-5 contract).
  *
  * <p>No glow layer: nothing on a goblin is emissive, so there is no {@code _glowmask} to probe for.
@@ -31,7 +31,7 @@ public class GoblinRenderer<R extends EntityRenderState & GeoRenderState>
         renderState.addGeckolibData(GoblinVariantGeoModel.TICKET_VARIANT, goblin.variant());
     }
 
-    /** Provider mirroring {@code ScaledBeastRenderer.provider}, for {@code ClientSetup}. */
+    /** Provider mirroring {@code TintedBeastRenderer.provider}, for {@code ClientSetup}. */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static EntityRendererProvider<GoblinTellerEntity> provider(String baseAsset) {
         return context -> new GoblinRenderer(context, baseAsset);

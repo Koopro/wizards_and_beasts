@@ -1,11 +1,15 @@
 package at.koopro.wizardsandbeasts.entity.creature;
 
+import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.creature.CreatureDefinition;
 import at.koopro.wizardsandbeasts.creature.CreatureDefinitionRegistry;
 import at.koopro.wizardsandbeasts.creature.Temperament;
 import at.koopro.wizardsandbeasts.creature.Trait;
 import at.koopro.wizardsandbeasts.creature.ability.CreatureAbility;
 import at.koopro.wizardsandbeasts.creature.ability.FireAffinity;
+import at.koopro.wizardsandbeasts.creature.bond.BondState;
+import at.koopro.wizardsandbeasts.creature.bond.BondableBeast;
+import at.koopro.wizardsandbeasts.creature.bond.FollowBondedOwnerGoal;
 import at.koopro.wizardsandbeasts.entity.GeoEntityBase;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
@@ -27,6 +31,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -37,6 +42,8 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
@@ -61,7 +68,7 @@ import java.util.Set;
  * {@link CreatureDefinition} ({@link Temperament} + {@link Trait} vocabulary). No bespoke per-creature
  * subclass exists — only the four locomotion subclasses, which supply movement goals + animation.
  */
-public abstract class GenericBeastEntity extends GeoEntityBase {
+public abstract class GenericBeastEntity extends GeoEntityBase implements BondableBeast {
 
     /**
      * Controller for one-shot reaction clips. Named distinctly from {@code dragon_action},
@@ -113,12 +120,12 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
             Codec.unboundedMap(Codec.STRING, Codec.INT);
 
     /**
-     * Render-only model scale, synced to the client for the Occamy's choranaptyxic size-shift (and any
-     * future size ability). Default {@code 1.0} = no change; the hitbox stays registry-frozen (this never
-     * touches collision), surfaced to the renderer via render-state — never read live at render time.
+     * The one modifier every size ability writes, so two of them can never each think they own the
+     * creature's size. Transient: it is recomputed within a few ticks of loading anyway, and a
+     * persisted copy would fight a datapack that later changes the range.
      */
-    private static final EntityDataAccessor<Float> DATA_RENDER_SCALE =
-            SynchedEntityData.defineId(GenericBeastEntity.class, EntityDataSerializers.FLOAT);
+    private static final Identifier SIZE_SCALE_ID =
+            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "creature_size");
 
     /**
      * Render-only ARGB tint, synced to the client for {@code Tint}-style colour abilities (obscurus smoke,
@@ -136,6 +143,19 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
     private static final EntityDataAccessor<Boolean> DATA_DISGUISED =
             SynchedEntityData.defineId(GenericBeastEntity.class, EntityDataSerializers.BOOLEAN);
 
+    /**
+     * Bond level, synced for the client, defined once here for all ninety-six data-driven creatures.
+     *
+     * <p>Declaring it on the shared base rather than per creature is what makes the relationship
+     * layer cost no Java at all: a data-driven creature opts in by shipping
+     * {@code data/wizards_and_beasts/creature_bonds/<id>.json} and nothing else. The Hippogriff is
+     * the first to do it.
+     */
+    private static final EntityDataAccessor<Integer> DATA_BOND_LEVEL =
+            SynchedEntityData.defineId(GenericBeastEntity.class, EntityDataSerializers.INT);
+
+    private final BondState bond = new BondState();
+
     protected GenericBeastEntity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
         if (!level.isClientSide()) {
@@ -146,18 +166,73 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
-        builder.define(DATA_RENDER_SCALE, 1.0f);
         builder.define(DATA_TINT, 0xFFFFFFFF);
         builder.define(DATA_DISGUISED, false);
+        builder.define(DATA_BOND_LEVEL, 0);
     }
 
-    /** Render-only model scale (1.0 = unscaled). Set server-side by size abilities, read on the client renderer. */
-    public float getRenderScale() {
-        return this.entityData.get(DATA_RENDER_SCALE);
+    // ── bond layer ────────────────────────────────────────────────────────────
+
+    @Override
+    public BondState bondState() {
+        return bond;
     }
 
-    public void setRenderScale(float scale) {
-        this.entityData.set(DATA_RENDER_SCALE, scale);
+    @Override
+    public void setSyncedBondLevel(int level) {
+        this.entityData.set(DATA_BOND_LEVEL, level);
+    }
+
+    @Override
+    public int getSyncedBondLevel() {
+        return this.entityData.get(DATA_BOND_LEVEL);
+    }
+
+    /**
+     * The size a size ability has asked for ({@code 1.0} = the creature's declared body).
+     *
+     * <p>Read back from the modifier rather than from {@link #getScale()}, which is the composed
+     * total — a juvenile's base scale, this, and any {@code Engorgio} on top of both. An ability
+     * easing its own value has to see its own value.
+     */
+    public float getSizeScale() {
+        AttributeInstance instance = getAttribute(Attributes.SCALE);
+        if (instance == null) {
+            return 1.0f;
+        }
+        AttributeModifier modifier = instance.getModifier(SIZE_SCALE_ID);
+        return modifier == null ? 1.0f : (float) (1.0 + modifier.amount());
+    }
+
+    /**
+     * Resize this creature — hitbox and model both.
+     *
+     * <p>{@code Attributes.SCALE} is the whole of it: the bounding box is
+     * {@code getDefaultDimensions(pose).scale(getScale())}, and GeckoLib multiplies the rendered model
+     * by the same number. Nothing else has to be told.
+     *
+     * <p>{@code ADD_MULTIPLIED_BASE} rather than a base-value write, so this composes with the base a
+     * juvenile's {@code BondBreeding} sets instead of overwriting it — a half-grown Occamy that
+     * swells still ends up half-grown.
+     *
+     * <p>The explicit {@link #refreshDimensions()} is <b>not</b> redundant, which a game test had to
+     * prove. Vanilla does call it on a {@code SCALE} change, but from {@code refreshDirtyAttributes()}
+     * during the entity's own tick — so between the write and the next tick the entity reports the new
+     * scale and the <em>old</em> box, and every collision, attack reach and suffocation check in that
+     * window uses a body the creature no longer has. {@code SizeSystemAPI.applyProfile} refreshes by
+     * hand for the same reason.
+     */
+    public void applySizeScale(float scale) {
+        AttributeInstance instance = getAttribute(Attributes.SCALE);
+        if (instance == null) {
+            return;
+        }
+        instance.removeModifier(SIZE_SCALE_ID);
+        if (scale != 1.0f) {
+            instance.addTransientModifier(new AttributeModifier(
+                    SIZE_SCALE_ID, scale - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
+        }
+        refreshDimensions();
     }
 
     /** Render-only ARGB tint (0xFFFFFFFF = none). Set server-side by colour abilities, read on the renderer. */
@@ -179,12 +254,15 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
     }
 
     @Override
-    protected net.minecraft.world.InteractionResult mobInteract(Player player, net.minecraft.world.InteractionHand hand) {
+    protected InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (isDisguised() && getPassengers().isEmpty() && !level().isClientSide()) {
             player.startRiding(this);
-            return net.minecraft.world.InteractionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
-        return super.mobInteract(player, hand);
+        // Only creatures with a bond profile get past this; every other item and every other
+        // creature falls straight through to the default interaction.
+        InteractionResult fed = offerBondFood(player, hand);
+        return fed != InteractionResult.PASS ? fed : super.mobInteract(player, hand);
     }
 
     /** The creature id == this entity type's registry key (e.g. {@code wizards_and_beasts:unicorn}). */
@@ -300,6 +378,10 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
         wireBehaviourGoals();
         goalSelector.addGoal(9, new LookAtPlayerGoal(this, Player.class, 7.0f));
         goalSelector.addGoal(10, new RandomLookAroundGoal(this));
+        // Always registered, never conditional on a profile existing right now: goals are wired once
+        // at construction, and a datapack reload that adds a bond profile must reach creatures that
+        // are already in the world. The goal self-gates instead — it does nothing without a profile.
+        goalSelector.addGoal(6, new FollowBondedOwnerGoal<>(this));
         // Ability-contributed goals. Always registered; each goal self-gates on Module.CREATURES at canUse().
         for (CreatureAbility ability : abilities()) {
             ability.registerGoals(this, goalSelector);
@@ -381,6 +463,7 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
             triggerFirstDeclared(CLIPS_HIT);
         }
         if (hurt && ModuleManager.isEnabled(Module.CREATURES)) {
+            onBondedHurt(source);
             for (CreatureAbility ability : abilities()) {
                 ability.onHurt(this, source, amount);
             }
@@ -460,6 +543,7 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
         if (!abilityCooldowns.isEmpty()) {
             output.store("AbilityCooldowns", COOLDOWNS_CODEC, Map.copyOf(abilityCooldowns));
         }
+        saveBond(output);
     }
 
     @Override
@@ -476,11 +560,13 @@ public abstract class GenericBeastEntity extends GeoEntityBase {
         if (legacy > 0) {
             abilityCooldowns.put("legacy", legacy);
         }
+        loadBond(input);
     }
 
     @Override
     public void tick() {
         super.tick();
+        tickBond();
         if (!level().isClientSide() && has(Trait.REGEN) && this.tickCount % 40 == 0
                 && getHealth() < getMaxHealth() && isAlive()) {
             heal(1.0f);

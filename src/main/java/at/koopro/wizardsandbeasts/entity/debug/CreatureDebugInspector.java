@@ -58,7 +58,8 @@ public final class CreatureDebugInspector implements DebugInspector.OfEntity {
         report.row("health", String.format("%.1f / %.1f", beast.getHealth(), beast.getMaxHealth()));
 
         report.section("appearance");
-        report.row("  render scale", String.format("%.2f", beast.getRenderScale()));
+        report.row("  size scale", String.format("%.2f asked / %.2f total (box %.2f x %.2f)",
+                beast.getSizeScale(), beast.getScale(), beast.getBbWidth(), beast.getBbHeight()));
         report.row("  tint", String.format("#%08X", beast.getTint()));
         report.flag("  disguised", beast.isDisguised());
 

@@ -76,7 +76,7 @@ public class BroomRenderer<R extends EntityRenderState & GeoRenderState>
     /**
      * Multiplies the definition's {@code wood_tint} into the render colour.
      *
-     * <p>Mirrors {@code ScaledBeastRenderer}: an opaque white tint is the no-op, anything else is
+     * <p>Mirrors {@code TintedBeastRenderer}: an opaque white tint is the no-op, anything else is
      * multiplied in. Note this tints the <em>whole</em> model — GeckoLib's render colour is one value
      * per pass, so the binding band and the bristles take the wood colour too. Exempting the band
      * needs a second render layer; logged rather than bodged.

@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.creature;
 
 import at.koopro.wizardsandbeasts.creature.ability.CreatureAbility;
 import at.koopro.wizardsandbeasts.creature.ability.FireAffinity;
+import at.koopro.wizardsandbeasts.creature.ability.OccamyChoranaptyxis;
 import at.koopro.wizardsandbeasts.creature.ability.Tint;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -56,6 +57,43 @@ class CreatureDefinitionCodecTest {
                 """, "legacy");
         assertTrue(def.abilities().isEmpty(), "absent abilities -> empty list (back-compat)");
         assertTrue(def.dragon().isEmpty());
+    }
+
+    @Test
+    void occamy_decodesTheSizeRangeItActuallyShips() {
+        // The range is not decoration: it is the hitbox, so a datapack typo here changes what the
+        // creature collides with. `calm_scale` is also the newest field on the record, and an
+        // optional field that silently falls back to its default is the kind of thing that only
+        // shows up in play.
+        OccamyChoranaptyxis size = parse(read("occamy.json"), "occamy").abilities().stream()
+                .filter(OccamyChoranaptyxis.class::isInstance)
+                .map(OccamyChoranaptyxis.class::cast)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("the Occamy ships no choranaptyxis ability"));
+
+        assertEquals(0.35f, size.minScale(), 1.0e-4f);
+        assertEquals(2.2f, size.maxScale(), 1.0e-4f);
+        assertEquals(1.0f, size.calmScale(), 1.0e-4f);
+        assertTrue(size.rate() > 0, "a rate of zero would freeze it at whatever size it loaded at");
+    }
+
+    @Test
+    void choranaptyxis_omittingCalmScaleFallsBackToTheNaturalBody() {
+        CreatureDefinition def = parse("""
+                {
+                  "id": "wizards_and_beasts:occamy",
+                  "bodyPlan": "SERPENTINE",
+                  "locomotion": "GROUND",
+                  "width": 1.7, "height": 1.9,
+                  "maxHealth": 47.0, "movementSpeed": 0.23,
+                  "model": "wizards_and_beasts:entity/occamy",
+                  "texture": "wizards_and_beasts:textures/entity/occamy.png",
+                  "animation": "wizards_and_beasts:geckolib/animations/entity/occamy.animation.json",
+                  "abilities": [{ "type": "occamy_choranaptyxis" }]
+                }
+                """, "occamy-defaults");
+        OccamyChoranaptyxis size = (OccamyChoranaptyxis) def.abilities().getFirst();
+        assertEquals(1.0f, size.calmScale(), 1.0e-4f, "a creature with no stated calm size is its declared body");
     }
 
     @Test

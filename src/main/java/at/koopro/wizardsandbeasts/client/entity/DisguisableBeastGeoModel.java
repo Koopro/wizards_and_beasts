@@ -11,7 +11,7 @@ import software.bernie.geckolib.renderer.base.GeoRenderState;
  * disguise flag — the Kelpie's tame-horse guise vs its true form. {@code getModelResource}/
  * {@code getTextureResource} both take the render state in this GeckoLib version (confirmed by reading
  * {@code DefaultedGeoModel}'s source directly), so branching here needs no live entity read at render
- * time, keeping the GeckoLib-5 render-state contract {@link ScaledBeastRenderer} already follows.
+ * time, keeping the GeckoLib-5 render-state contract {@link TintedBeastRenderer} already follows.
  */
 public class DisguisableBeastGeoModel extends DefaultedEntityGeoModel<GenericBeastEntity> {
 

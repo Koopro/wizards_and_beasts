@@ -29,7 +29,21 @@ import java.util.Set;
  *   <li>a bestiary entry that names its {@code entityType}, so encountering it fills a page.</li>
  * </ol>
  *
- * <p>Adding an id here is therefore a claim about four separate things being true, not a label.
+ * <p>Adding an id here is therefore a claim about four separate things being true, not a label, and
+ * {@code AlphaRosterAssetTest} checks all four against the files on disk rather than trusting it.
+ *
+ * <h2>Why the eight extra dragon breeds joined</h2>
+ * They failed exactly one of the four tests and it was the cheapest one. {@code antipodean_opaleye},
+ * {@code chinese_fireball}, {@code hebridean_black}, {@code norwegian_ridgeback},
+ * {@code peruvian_vipertooth}, {@code romanian_longhorn}, {@code swedish_short_snout} and
+ * {@code ukrainian_ironbelly} carry hand-built 23–32 cube rigs, run {@code DragonEntity}'s
+ * fire/venom kit, and have bestiary entries naming their {@code entityType} — they simply had no
+ * loot table, so killing one was a no-op. They have one now.
+ *
+ * <p>The earlier reason for holding them back was that "an alpha slice of twenty is not a slice".
+ * That argument is about the count, and the count is misleading here: these eight are one family
+ * with one shared implementation, not eight unrelated creatures. Ten dragon breeds and ten
+ * everything-else is a slice a player can tell the shape of.
  */
 @NullMarked
 public final class AlphaRoster {
@@ -51,8 +65,18 @@ public final class AlphaRoster {
             "obscurus",           // tinted smoke-form aerial threat
             "werewolf",           // moon-driven hostile
             "basilisk",           // lethal gaze; boss threat
+            "occamy",             // choranaptyxic: it resizes to fit the space, hitbox and all
+            // -- the ten dragon breeds; one family, one shared kit, one standard --
             "common_welsh_green", // starter dragon, and the wild source of dragon heartstring
-            "hungarian_horntail"  // apex dragon
+            "hungarian_horntail", // apex dragon
+            "antipodean_opaleye",
+            "chinese_fireball",
+            "hebridean_black",
+            "norwegian_ridgeback",
+            "peruvian_vipertooth",
+            "romanian_longhorn",
+            "swedish_short_snout",
+            "ukrainian_ironbelly"
     );
 
     /**

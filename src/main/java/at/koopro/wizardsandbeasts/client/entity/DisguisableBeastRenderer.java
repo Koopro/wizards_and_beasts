@@ -11,12 +11,12 @@ import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.renderer.base.GeoRenderState;
 
 /**
- * Drop-in extension of {@link ScaledBeastRenderer} (keeps scale/tint working) for creatures with a
+ * Drop-in extension of {@link TintedBeastRenderer} (keeps the tint working) for creatures with a
  * {@code LureDisguise} ability — feeds the synced disguise flag into {@link DisguisableBeastGeoModel}
- * via a {@code DataTicket}, exactly mirroring how the parent already threads scale/tint.
+ * via a {@code DataTicket}, exactly mirroring how the parent already threads the tint.
  */
 public class DisguisableBeastRenderer<R extends EntityRenderState & GeoRenderState>
-        extends ScaledBeastRenderer<R> {
+        extends TintedBeastRenderer<R> {
 
     public DisguisableBeastRenderer(EntityRendererProvider.Context context,
                                      Identifier trueFormAssetSubpath, Identifier disguiseAssetSubpath) {
@@ -30,7 +30,7 @@ public class DisguisableBeastRenderer<R extends EntityRenderState & GeoRenderSta
         renderState.addGeckolibData(DisguisableBeastGeoModel.TICKET_DISGUISED, beast.isDisguised());
     }
 
-    /** Provider mirroring {@code ScaledBeastRenderer.provider}, taking both the true-form and disguise asset names. */
+    /** Provider mirroring {@code TintedBeastRenderer.provider}, taking both the true-form and disguise asset names. */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T extends Entity & GeoEntity> EntityRendererProvider<T> provider(
             String trueFormModelName, String disguiseModelName) {

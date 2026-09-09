@@ -61,8 +61,8 @@ class AlphaRosterAssetTest {
 
     @Test
     void rosterIsTheSizeItClaims() {
-        assertEquals(12, AlphaRoster.SHIPPED.size(),
-                "the alpha slice is 12 creatures; update KNOWN_ISSUES.md alongside this");
+        assertEquals(21, AlphaRoster.SHIPPED.size(),
+                "the alpha slice is 21 creatures; update KNOWN_ISSUES.md alongside this");
     }
 
     @Test

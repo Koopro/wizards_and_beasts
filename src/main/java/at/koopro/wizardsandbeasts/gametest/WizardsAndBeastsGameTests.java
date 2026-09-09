@@ -66,5 +66,6 @@ public final class WizardsAndBeastsGameTests {
         RegistrySyncTests.contribute(registrar);
         HeritageCommitTests.contribute(registrar);
         VampireBloodTests.contribute(registrar);
+        ChoranaptyxisTests.contribute(registrar);
     }
 }

@@ -82,9 +82,9 @@ public class ClientSetup {
                 event.registerEntityRenderer(type,
                         at.koopro.wizardsandbeasts.client.entity.DisguisableBeastRenderer.provider("kelpie", "kelpie_disguise"));
             } else {
-                // Scale-aware renderer (honours the synced render-scale; 1.0 = identical to simple).
+                // Tint-aware renderer (an opaque white tint = identical to simple).
                 event.registerEntityRenderer(type,
-                        at.koopro.wizardsandbeasts.client.entity.ScaledBeastRenderer.provider(spec.id()));
+                        at.koopro.wizardsandbeasts.client.entity.TintedBeastRenderer.provider(spec.id()));
             }
         }
     }
