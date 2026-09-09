@@ -56,24 +56,24 @@ public class ModModelProvider extends ModelProvider {
      */
     private static final Set<String> HAND_MODELLED_CANON = Set.of(
             "acromantula_venom", "advanced_potion_making", "auto_answer_quill", "beaters_bat",
-            "beginners_guide_to_transfiguration", "blood_replenishing_potion", "bludger",
-            "brass_scales", "broomstick_servicing_kit", "canary_cream", "chocolate_bar",
-            "collapsible_cauldron", "da_galleon", "daily_prophet", "dragon_hide_gloves",
-            "draught_of_peace", "dungbomb", "elixir_of_life", "essence_of_dittany", "exploding_snap",
-            "fainting_fancies", "fantastic_beasts_and_where_to_find_them", "fever_fudge",
-            "filibusters_fireworks", "flesh_eating_slug_repellent", "goblet_of_fire", "gobstones",
-            "golden_egg", "golden_snitch", "gubraithian_fire", "headless_hat", "howler",
+            "beginners_guide_to_transfiguration", "blood_replenishing_potion", "brass_scales",
+            "broomstick_servicing_kit", "chocolate_bar", "collapsible_cauldron", "da_galleon",
+            "daily_prophet", "dragon_hide_gloves", "draught_of_peace", "dungbomb",
+            "elixir_of_life", "essence_of_dittany", "exploding_snap", "fainting_fancies",
+            "fantastic_beasts_and_where_to_find_them", "fever_fudge", "filibusters_fireworks",
+            "flesh_eating_slug_repellent", "gubraithian_fire", "headless_hat",
             "magical_draughts_and_potions", "memory_vial", "mirror_of_erised",
             "monster_book_of_monsters", "moste_potente_potions", "mrs_skowers_mess_remover",
             "murtlap_essence", "nosebleed_nougat", "one_thousand_magical_herbs_and_fungi",
-            "opal_necklace", "portable_swamp", "probity_probe", "puking_pastilles",
-            "punching_telescope", "quaffle", "quick_quotes_quill", "quidditch_robes",
-            "quidditch_through_the_ages", "quill", "revealer", "secrecy_sensor",
-            "secrets_of_the_darkest_art", "self_stirring_cauldron", "shield_cloak", "shield_gloves",
-            "shield_hat", "shrunken_head", "skiving_snackbox", "sorting_hat", "spellotape",
-            "standard_book_of_spells", "sword_of_gryffindor", "tales_of_beedle_the_bard", "telescope",
-            "the_quibbler", "ton_tongue_toffee", "triwizard_cup", "u_no_poo", "unfogging_the_future",
-            "vanishing_cabinet", "wildfire_whiz_bangs", "wizarding_wireless", "wizards_chess_set");
+            "probity_probe", "puking_pastilles", "punching_telescope", "quick_quotes_quill",
+            "quidditch_robes", "quidditch_through_the_ages", "quill", "revealer",
+            "secrecy_sensor", "secrets_of_the_darkest_art", "self_stirring_cauldron",
+            "shield_cloak", "shield_gloves", "shield_hat", "shrunken_head", "skiving_snackbox",
+            "sorting_hat", "spellotape", "standard_book_of_spells", "sword_of_gryffindor",
+            "tales_of_beedle_the_bard", "telescope", "the_quibbler", "ton_tongue_toffee",
+            "triwizard_cup", "u_no_poo", "unfogging_the_future", "vanishing_cabinet",
+            "wildfire_whiz_bangs", "wizarding_wireless", "wizards_chess_set"
+    );
 
     public ModModelProvider(PackOutput output) {
         super(output, WizardsAndBeastsMod.MODID);
