@@ -478,7 +478,7 @@ public final class AttributesTab implements CharacterTab {
 
         drawKV(g, font, x, y, w, "wand.wood",        idToDisplay(wood));        y += 9;
         drawKV(g, font, x, y, w, "wand.core",        idToDisplay(core));        y += 9;
-        drawKV(g, font, x, y, w, "wand.flexibility", flex != null ? flex.getDisplayName() : "—"); y += 9;
+        drawKV(g, font, x, y, w, "wand.flexibility", flex != null ? flex.label().getString() : "—"); y += 9;
         drawKV(g, font, x, y, w, "wand.length",      length != null ? String.format(Locale.ROOT, "%.1f\"", length) : "—"); y += 9;
         drawKV(g, font, x, y, w, "wand.integrity",   String.format(Locale.ROOT, "%.0f%%", integrity * 100f));  y += 9;
         drawKV(g, font, x, y, w, "wand.allegiance",  String.format(Locale.ROOT, "%.0f%%", allegiance * 100f)); y += 11;

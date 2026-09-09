@@ -246,6 +246,9 @@
   "entity.wizards_and_beasts.form_mannequin": "Form Mannequin",
   "entity.wizards_and_beasts.wizarding_thrown": "Thrown wizarding item",
   "gui.wizards_and_beasts.pocket_configurator.apply": "Apply",
+  "gui.wizards_and_beasts.pocket_configurator.radius": "%s blocks",
+  "gui.wizards_and_beasts.pocket_configurator.decrease": "Shrink the pocket by one block",
+  "gui.wizards_and_beasts.pocket_configurator.increase": "Grow the pocket by one block",
   "gui.wizards_and_beasts.pocket_configurator.biome": "Biome",
   "gui.wizards_and_beasts.pocket_configurator.size": "Size",
   "gui.wizards_and_beasts.pocket_configurator.title": "Expansion Focus",
@@ -776,6 +779,13 @@
   "wandcraft.gui.tier_hint": "Raise it with bookshelves and wizarding furnishings within 5 blocks.",
   "wandcraft.tooltip.wood": "Wood: %s",
   "wandcraft.tooltip.core": "Core: %s",
+  "wandcraft.flexibility.unyielding": "Unyielding",
+  "wandcraft.flexibility.rigid": "Rigid",
+  "wandcraft.flexibility.pliant": "Pliant",
+  "wandcraft.flexibility.supple": "Supple",
+  "wandcraft.flexibility.springy": "Springy",
+  "wandcraft.bench.flexibility": "Flexibility",
+  "wandcraft.bench.tier_track": "Bench tier",
   "wandcraft.tooltip.flexibility": "Flexibility: %s",
   "wandcraft.tooltip.master": "Master: %s",
   "wandcraft.tooltip.integrity": "Integrity: %.2f",
@@ -3885,5 +3895,7 @@
   "skill.wizards_and_beasts.node.claustra_reverto_unlock.name": "Barrier Study",
   "skill.wizards_and_beasts.node.claustra_reverto_unlock.desc": "Wandlore taken outward: what a barrier is made of, and how to turn it back.",
   "skill.wizards_and_beasts.node.frigora_unlock.name": "Chilling Charm",
-  "skill.wizards_and_beasts.node.frigora_unlock.desc": "Temperature is the alchemist's other hand. Some preparations only come off cold."
+  "skill.wizards_and_beasts.node.frigora_unlock.desc": "Temperature is the alchemist's other hand. Some preparations only come off cold.",
+  "bond.wizards_and_beasts.milestone": "%s trusts you",
+  "bond.wizards_and_beasts.milestone.detail": "Bond %s. Keep it close and keep feeding it."
 }

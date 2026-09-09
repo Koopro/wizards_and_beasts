@@ -42,6 +42,25 @@ public enum WandFlexibility implements StringRepresentable {
         return name().toLowerCase(Locale.ROOT);
     }
 
+    /**
+     * The name a wizard reads, translated.
+     *
+     * <p>{@link #getDisplayName()} title-cases the enum constant, which produces English for every
+     * locale — the same mechanical transform of an internal identifier the Bestiary's category
+     * labels were fixed for. These are Ollivander's five words, so they are words someone wrote.
+     */
+    public net.minecraft.network.chat.Component label() {
+        return net.minecraft.network.chat.Component.translatable(
+                "wandcraft.flexibility." + getSerializedName());
+    }
+
+    /**
+     * Title-cased from the constant, in English for every locale.
+     *
+     * <p>Not deprecated, but not for players either. Its one caller is {@code WandGiveCommands},
+     * whose feedback line is admin output — a place where a mechanical name off an enum constant is
+     * the honest thing to print. Anything a wizard reads wants {@link #label()}.
+     */
     public String getDisplayName() {
         String lower = getSerializedName().replace('_', ' ');
         return Character.toUpperCase(lower.charAt(0)) + lower.substring(1);
