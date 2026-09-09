@@ -1,0 +1,19 @@
+{
+  "id": "wandlore_path_2",
+  "displayName": "skill.wizards_and_beasts.path.wandlore.name",
+  "description": "skill.wizards_and_beasts.path.wandlore.desc",
+  "tree": "wandlore",
+  "effects": [
+    {
+      "type": "gameplay_bonus",
+      "stat": "spell_misfire_reduction",
+      "perLevel": 0.02
+    }
+  ],
+  "x": -72.5,
+  "y": -43.1,
+  "edges": [
+    "wizard_core"
+  ],
+  "size": "small"
+}

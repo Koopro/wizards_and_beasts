@@ -1,0 +1,24 @@
+{
+  "id": "aguamenti_unlock",
+  "displayName": "skill.wizards_and_beasts.node.aguamenti_unlock.name",
+  "description": "skill.wizards_and_beasts.node.aguamenti_unlock.desc",
+  "tree": "herbology",
+  "pointCost": 2,
+  "effects": [
+    {
+      "type": "learn_spell",
+      "spellId": "aguamenti"
+    },
+    {
+      "type": "spell_cooldown_reduction",
+      "spellId": "aguamenti",
+      "reductionPerLevel": 0.15
+    }
+  ],
+  "x": 102.8,
+  "y": -174.8,
+  "edges": [
+    "natural_remedy",
+    "potion_potency"
+  ]
+}

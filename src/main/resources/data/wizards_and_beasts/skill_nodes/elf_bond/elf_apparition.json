@@ -13,6 +13,7 @@
   "x": 140.0,
   "y": 0.0,
   "edges": [
-    "elf_devotion"
+    "elf_devotion",
+    "elf_free"
   ]
 }

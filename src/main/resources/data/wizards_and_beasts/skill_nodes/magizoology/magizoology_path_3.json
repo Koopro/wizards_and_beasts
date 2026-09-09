@@ -1,0 +1,19 @@
+{
+  "id": "magizoology_path_3",
+  "displayName": "skill.wizards_and_beasts.path.magizoology.name",
+  "description": "skill.wizards_and_beasts.path.magizoology.desc",
+  "tree": "magizoology",
+  "effects": [
+    {
+      "type": "gameplay_bonus",
+      "stat": "beast_damage_resistance",
+      "perLevel": 0.05
+    }
+  ],
+  "x": 145.9,
+  "y": -98.9,
+  "edges": [
+    "niffler_friend"
+  ],
+  "size": "small"
+}

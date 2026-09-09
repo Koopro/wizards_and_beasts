@@ -176,17 +176,44 @@ admin form. A player cannot soft-lock themselves out of the web. The skill scree
 advertises the respec command once any point has been spent, since the only real gap was that
 nothing ever told a player it existed.
 
+**The filler purge landed 2026-09-09.** The web went from **168 nodes, 100 of them carrying a
+`skill.wizards_and_beasts.filler.minor_*` display key, to 107 nodes with 30 pathways.** What was
+wrong was not the node count on its own: 41 of those 100 paid a raw attribute, so the cheapest thing
+a player could do with a point was buy the fourteenth +0.5 max health. The design sheet
+[`SKILL_WEB.md`](SKILL_WEB.md) carries the chain-by-chain account; the parts that matter here:
+
+- **No small node may grant an attribute**, enforced by
+  `SkillNodeJsonTest.noSmallNodeGrantsARawAttribute`. Pathways pay in their region's own currency —
+  harvest luck, beast resistance, misfires, curse damage — because an attribute is the only effect
+  type with no theme attached and therefore the only one that can be pasted onto a connector without
+  anybody deciding what that connector is for.
+- **Every `<spell>_unlock` node teaches its spell**, enforced by
+  `SkillNodeJsonTest.everyUnlockNodeTeachesItsSpell`. The three DARK_ARTS nodes that shaved a
+  cooldown while wearing an Unforgivable's name now teach it; knowing a spell and being allowed to
+  cast it are separate data, so `AvadaKedavra`'s PROFICIENT-on-both-Imperio-and-Crucio requirement
+  still holds and `Module.DARK_ARTS` still ships disabled.
+- **`legilimency` was renamed `occlumency`** and grants the defence half of the mind-magic pair. The
+  old node granted Dark Arts damage and had nothing to do with Legilimency, which every wizard
+  already holds through `PlayerStatusAbilityGrantSource`.
+- **Existing saves are refunded at login**, not stranded: `PlayerSkillData.CURRENT_VERSION` is 4.
+  A saved allocation names deleted node ids, and `respec` can only refund what `SkillTrees.byId`
+  still resolves, so without the bump those points would be neither spent nor recoverable.
+
 Known limitations:
 
 - **Node tooltips derive their effect lines from the `effects` data, not from the `description`
-  prose.** That is the fix, not the limitation — the limitation is that three declarable effect types
-  (`learn_spell`, `grant_ability`, `ability_refinement`) reach no system, so a node using one would
-  render no line for it. `SkillNodeJsonTest` now fails the build if a shipped node declares one, and
-  none do.
+  prose.** That is the fix, not the limitation — the limitation is that one declarable effect type,
+  `ability_refinement`, reaches no consumer: `AbilityModifiers` aggregates it correctly and no
+  ability implementation reads the result, so a node using it would cost points and change nothing
+  and render no line for it. `SkillNodeJsonTest` fails the build if a shipped node declares it, and
+  none do. Wiring a consumer means choosing which ability an axis means something for, and inventing
+  that mapping to close a checkbox is the same mistake as mapping wand `spell_modifiers` onto
+  `SpellCategory`. (`learn_spell` was wired 2026-08-22 and `grant_ability` 2026-09-09; both ship.)
 - **The tooltip shows what the *next* level buys on a partly-allocated node**, and the total on a
   maxed one. It does not show both at once.
 - **`passive_attribute` only wires three attribute ids** (`max_health`, `movement_speed`, `armor`).
-  Any other is inert; a test now enforces that none ship.
+  Any other is inert; a test now enforces that none ship. 14 nodes use it, all notables where
+  toughness is the fantasy — it was 55 before the purge.
 - **Spell power is `PREVIEW`-grade tuning, not balance.** The formula and its bounds are locked by
   `SpellPowerTest` and documented in [`DEVELOPER_REFERENCE.md`](DEVELOPER_REFERENCE.md); the numbers
   in it are provisional. Proficiency at zero still lands a freshly-learned spell at 0.65×, which is a

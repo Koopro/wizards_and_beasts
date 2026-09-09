@@ -1,0 +1,24 @@
+{
+  "id": "diffindo_unlock",
+  "displayName": "skill.wizards_and_beasts.node.diffindo_unlock.name",
+  "description": "skill.wizards_and_beasts.node.diffindo_unlock.desc",
+  "tree": "spell_mastery",
+  "pointCost": 2,
+  "effects": [
+    {
+      "type": "learn_spell",
+      "spellId": "diffindo"
+    },
+    {
+      "type": "spell_damage_bonus",
+      "spellId": "diffindo",
+      "bonusPerLevel": 0.1
+    }
+  ],
+  "x": 195.4,
+  "y": 60.4,
+  "edges": [
+    "expelliarmus_unlock",
+    "flipendo_unlock"
+  ]
+}

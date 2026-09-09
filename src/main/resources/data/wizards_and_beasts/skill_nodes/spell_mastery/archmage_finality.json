@@ -3,7 +3,6 @@
   "displayName": "skill.wizards_and_beasts.node.archmage_finality.name",
   "description": "skill.wizards_and_beasts.node.archmage_finality.desc",
   "tree": "spell_mastery",
-  "size": "keystone",
   "pointCost": 6,
   "effects": [
     {
@@ -18,7 +17,6 @@
   ],
   "x": 335.0,
   "y": 10.0,
-  "edges": [
-    "alohomora_unlock"
-  ]
+  "edges": [],
+  "size": "keystone"
 }

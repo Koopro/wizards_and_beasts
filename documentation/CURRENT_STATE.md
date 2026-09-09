@@ -2,9 +2,9 @@ Wizards & Beasts — Design Audit (Rev 2 · 2026-08-10)
 
 Lead Game Designer / Minecraft + Wizarding World consultant review. Based on reading the actual repo (1,137 Java files, ~99.5k LOC, 682 hand-authored + 891 generated data files), not the docs — which I treated as stale where they disagreed with source. Re-verified from scratch; where this revision disagrees with Rev 1, the code moved.
 
-What changed since Rev 1: two of the three criticals moved. The wand-wood system was rewired to read the datapack (mechanism fixed, data 40% done). Every creature now has a real multi-bone rig — the "colored box" finding is dead. The skill-tree filler finding is unchanged. A new load-bearing system landed that Rev 1 never saw: innate player stats now feed the cast pipeline. And the wand's dual-system bug did not die — it migrated from woods to cores.
+What changed since Rev 1: two of the three criticals moved. The wand-wood system was rewired to read the datapack (mechanism fixed, data 40% done). Every creature now has a real multi-bone rig — the "colored box" finding is dead. The skill-tree filler finding is unchanged. *(Both have since been closed — see the addendum below. The skill web went from 168 nodes / 100 fillers to 107 / 30 on 2026-09-09.)* A new load-bearing system landed that Rev 1 never saw: innate player stats now feed the cast pipeline. And the wand's dual-system bug did not die — it migrated from woods to cores.
 
-**Addendum, 2026-09-08 — Critical #1 is closed.** The finding below is left as written, because it is the record of what was wrong and the reasoning still explains why it mattered. What has since landed is summarised under it. Criticals #2 and #3 stand unchanged.
+**Addendum, 2026-09-08 — Critical #1 is closed. Addendum, 2026-09-09 — Critical #2 is closed.** Each finding below is left as written, because it is the record of what was wrong and the reasoning still explains why it mattered. What has since landed is summarised under it. Critical #3 stands unchanged. The scores, the top-10 list and the roadmap below were written before either fix and are annotated where they are now out of date.
 
 1. What the mod actually is
 
@@ -52,7 +52,7 @@ The one thing that works, still: WandCastingAllegianceSystem.java:43-45 — usin
 
 **Remaining polish, not blocking.** There is still one wand mesh, so core, length and flexibility are legible in the tooltip and nowhere on the model — the wood tint is the only visual difference between two wands in a hotbar.
 
-🔴 CRITICAL #2 — The skill trees are still literal filler
+🟢 CRITICAL #2 (RESOLVED 2026-09-09) — The skill trees are still literal filler
 
 8 skill trees, now 163 nodes (was 161). I re-tallied every node's effect type:
 
@@ -70,6 +70,22 @@ The developer named the filler nodes filler in the shipped data, and 100 of 163 
 Worse, and unchanged: the nodes named incendio_unlock, accio_unlock, avada_kedavra_unlock etc. still don't unlock the spell — they only shave cooldown or add damage. A grep across all 163 nodes for any spell-granting effect returns 0. Spells are learned from teachers for coin, not from the tree. The tree's most exciting-looking nodes are misnamed passives.
 
 Why it matters: A player spends an hour earning points to buy +0.5 hearts fourteen times. That is the "huge skill tree where most nodes are +5%" anti-pattern. This is the one Rev-1 critical that has not moved at all.
+
+**Two corrections to the finding above, found while fixing it.** The node count was 168, not 163, and `learn_spell` had already been wired on 2026-08-22 — 18 nodes carried it and every `<spell>_unlock` in SPELL_MASTERY did teach its spell. "A grep for any spell-granting effect returns 0" was true when Rev 1 wrote it and stale by Rev 2. The misnaming was real but narrower than reported: exactly **three** nodes, all in DARK_ARTS (`crucio_unlock`, `imperio_unlock`, `avada_kedavra_unlock`), plus a fourth nobody had listed — `legilimency`, which granted Dark Arts damage and had nothing whatever to do with Legilimency, an ability every wizard already holds through `PlayerStatusAbilityGrantSource`.
+
+**What landed (2026-09-09).** The web is **168 → 107 nodes, and 100 self-labelled fillers → 30 pathways.**
+
+	•	**The +0.5-hearts stack is gone, and cannot be rebuilt.** 41 of the 100 fillers each paid a raw attribute — fourteen separate nodes granting +0.5 max health, ten granting +0.5 armour. Not one small node grants an attribute now, and `SkillNodeJsonTest.noSmallNodeGrantsARawAttribute` fails the build if one ever does again. An attribute is the only effect type with no theme attached to it, and therefore the only one that can be pasted onto a connector without anybody deciding what that connector is for. `passive_attribute` fell from 55 of 199 effects to 14 of 151, and all 14 now sit on notables where toughness *is* the fantasy — `herbal_vitality`, `goblin_steelheart`, `keeper_vigor`.
+	•	**The fillers were load-bearing, so they were dissolved rather than deleted.** They were the web's connective tissue: 57 all-small chain components sitting between notables. The purge went chain by chain — 4 dead-end spurs off the hub deleted outright, 23 single fillers becoming 15 direct notable↔notable edges and 8 real spell nodes, and 30 chains of two-to-four fillers each collapsing to **one** pathway node at the chain's centroid. Every surviving node kept or averaged its coordinates, so the constellation still reads as the same six spokes around Polaris.
+	•	**A pathway is what a filler should have been.** One point, one effect, and that effect is its region's own currency rather than a generic stat: Herbology pays harvest luck, Magizoology beast resistance, Wandlore fewer misfires, Dark Arts curse damage. Magnitudes are 2–4× what the fillers paid, on a third as many nodes.
+	•	**The tree's most exciting-looking nodes are no longer lies.** The three Unforgivable nodes teach their spells. Teaching is safe because knowing a spell and being allowed to cast it are separate data — `AvadaKedavra`'s requirement still demands PROFICIENT on both Imperio and Crucio, and `Module.DARK_ARTS` still ships disabled. `SkillNodeJsonTest.everyUnlockNodeTeachesItsSpell` now holds every `<spell>_unlock` node in the web to its own name. `legilimency` became `occlumency` and grants the defence half of the mind-magic pair, read at the Legilimency resist roll.
+	•	**Nine new nodes hand over a spell instead of a number.** Drawn from the twelve implemented spells no node reached: Confringo, Glacius, Diffindo, Depulso, Colloportus, Levicorpus (with Liberacorpus, because somebody has to let them down), Aguamenti, Claustra Reverto and Frigora. Eight of them sit at a deleted filler's coordinates *beside* a route that also got its direct edge, so each is a fork you may take rather than a toll you must pay. `learn_spell` went from the fifth-commonest effect on the web to **the commonest** — 31 uses against `passive_attribute`'s 14.
+	•	**The budget tension survived and improved.** Buying the whole wizard web costs 272 against a 60-point cap. Counting route overlap, the cheapest two keystones now land at 29 and three at 47 — leaving 13 points of real depth — while four costs 65 and does not fit. Before the purge the same three cost 40+ with almost nothing left over. The difference is entirely the halved travel tax.
+	•	**Two `GameplayStat` members were added, each with its reader landing beside it.** `SPELL_MISFIRE_REDUCTION` is subtracted from the cast's misfire total in `SkillSystemAPI.applySkillModifiers` — added negatively rather than set, because misfire accumulates from the wand's fizzle, allegiance and PRECISION, and a setter would silently discard whichever ran first. `OCCLUMENCY_SHIELD` is *added* to the target's trained Occlumency in `LegilimencyServerLogic`, not multiplied: multiplying would have left an untrained wizard who bought the node at exactly zero.
+	•	**`grant_ability` is shippable now.** It reached `SkillNodeAbilityGrantSource` all along and was flagged unimplemented only because it had no tooltip line. It prints the same sentence `unlock_ability` does, because it is the same benefit. **`ability_refinement` stays flagged** — `AbilityModifiers` aggregates it and no ability implementation reads the result, so a node using one would cost points and change nothing. Inventing a consumer to close the checkbox would be the same mistake as mapping wand `spell_modifiers` onto `SpellCategory`, and is refused for the same reason.
+	•	**Existing saves are refunded, not stranded.** A saved allocation names node ids that no longer exist, and `respec` can only give back what `SkillTrees.byId` still resolves — so those points would have been neither spent nor refundable. `PlayerSkillData.CURRENT_VERSION` is bumped to 4, which re-runs the login refund that already exists for exactly this case, strips the attribute modifiers and revokes the web-taught spells on the way through.
+
+**What this does not fix.** The web is still the *only* place these decisions live, and DARK_ARTS still has no keystone because its module ships disabled — authoring a branch payoff nobody can reach is content for its own sake. Verified by 35 passing skill tests; no in-game pass.
 
 🔴 CRITICAL #3 — The beasts have bodies now, but only one of them will look at you
 
@@ -119,14 +135,14 @@ Wizarding World Authenticity	8	8/10	Lore density is outstanding — 10 heritages
 Fun	4	5/10	Casting improved — innate stats and datapack woods now reach the pipeline; the loops around it are still filler grind and non-interactive beasts.
 Magic Design	6	7/10	Spells, proficiency and gating are strong, and the cast now has genuine player-influenced inputs; the wand half is still half-dead.
 Wand Design	3	5/10	Wood mechanism correctly rewired to the datapack, but 6/10 woods are inert, all 8 cores are un-migrated, and the derived stats are invisible in the tooltip.
-RPG Progression	4	5/10	Player stats give a real, trainable growth axis; 100 of 163 tree nodes are still self-labelled filler.
+RPG Progression	4	5/10 → 7/10	Player stats give a real, trainable growth axis; 100 of 163 tree nodes are still self-labelled filler. *(Re-scored 2026-09-09: 30 pathways of 107 nodes, `learn_spell` is the commonest effect on the web, and three keystones is a real all-in choice against the 60-point cap.)*
 Exploration	3	3/10	Two set-piece structures. Magical flora is not magical geography.
 Creature Design	4	5/10	111 rigs and 162 textures land; box-per-bone fidelity, stale placeholder markers and zero taming/breeding hold it down.
 Worldbuilding	5	5/10	The text (naming, heritage prose, handbook) is magical; the world you walk through still is not.
 Atmosphere	5	6/10	Real rigs and textures shipped alongside the beam/particle/Patronus VFX; procedural GUIs and all-vanilla audio still pull down.
 UX	4	5/10	Heritage choice is now informed. Wand math is still invisible and the trees still lie in their filenames.
 Multiplayer Design	6	6/10	Real sync discipline (server-authoritative casts, synced Patronus/stats). Unblockable instakill still needs review.
-Balance	5	5/10	Proficiency curve and Avada gating are well-tuned; inert woods and filler progression still muddy the decisions.
+Balance	5	5/10 → 6/10	Proficiency curve and Avada gating are well-tuned; inert woods and filler progression still muddy the decisions. *(Re-scored 2026-09-09: the filler half is fixed; the wand half was fixed on 09-08.)*
 Replayability	4	5/10	10 heritages / 31 variants (Rev 1 undercounted at 5) is a real replay hook; filler trees and no procedural world undercut it.
 Technical Quality	7	7/10	Genuinely solid data-driven engineering; docked for the core split, stale markers, a dead knob, and three uncommitted feature branches in one tree.
 Overall	5	6/10	Two of three Rev-1 criticals moved. The mod crossed from "engineered skeleton" to "engineered skeleton with skin."
@@ -140,7 +156,7 @@ Doing well: Lore authenticity, spell design (interaction + mastery + gating), he
 B. Top 10 problems (by player impact)
 
 	1.	🔴 The wand's derived cast stats are invisible to the player — the Ollivander fantasy still resolves to unreadable numbers. (§Crit-1)
-	2.	🔴 100 of 163 skill nodes are named filler, and the *_unlock nodes unlock nothing. (§Crit-2)
+	2.	🟢 *Closed 2026-09-09.* 100 of 163 skill nodes are named filler, and the *_unlock nodes unlock nothing. (§Crit-2) — now 30 pathways of 107, no small node grants an attribute, and every `<spell>_unlock` teaches its spell under a test.
 	3.	🔴 96 creatures, zero taming/breeding — the Niffler proves the pattern and is alone in it. (§Crit-3)
 	4.	🟠 6 of 10 wand woods and all 8 wand cores contribute nothing to a cast; the dual-system bug migrated from woods to cores.
 	5.	🟠 Brewing is blocked at the codec — BrewDefinition cannot express any signature potion. Still 2 brews.
@@ -183,7 +199,7 @@ F. Biggest missed opportunities (small effort, big payoff)
 G. Remove / Rework / Simplify / Keep / Expand
 
 	•	KEEP: Spell casting + proficiency, the player-stats cast layer, heritage system, wand allegiance, broom physics, module/networking foundation, the Niffler.
-	•	REWORK: Wand cores (migrate to datapack cast_modifiers, delete the enum switch); the whole skill-tree node set (replace filler with forks; make spell-unlock nodes actually unlock or rename them honestly).
+	•	REWORK: Wand cores (migrate to datapack cast_modifiers, delete the enum switch) — *done 2026-09-08*; the whole skill-tree node set (replace filler with forks; make spell-unlock nodes actually unlock or rename them honestly) — *done 2026-09-09*.
 	•	SIMPLIFY: 8 skill trees → fewer, denser trees; collapse the 5-node stub trees into their heritages or cut.
 	•	REMOVE: The 93 stale PLACEHOLDER box rig comments; either wire spell_modifiers to a real SpellCategory mapping or drop the field.
 	•	EXPAND: Potions (after the codec fix), creature bonding, everyday exploration structures, rig fidelity on the signature dozen.
@@ -192,7 +208,7 @@ H. Recommended development order
 
 	1.	Surface the wand. Tooltip the resolved cast stats. Highest leverage, smallest change, fixes the core fantasy — Crit-1.
 	2.	Finish the wand data. 6 woods + 8 cores onto cast_modifiers; delete the core enum switch. Kills the dual-system bug for good.
-	3.	De-filler the skill trees (fixes fake depth — Crit-2). Convert minor_* clusters into meaningful forks; make spell-unlock nodes actually unlock, or rename them.
+	3.	~~De-filler the skill trees (fixes fake depth — Crit-2). Convert minor_* clusters into meaningful forks; make spell-unlock nodes actually unlock, or rename them.~~ **Done 2026-09-09.**
 	4.	Unblock brewing at the codec, then fill it (10–20 canon potions) and tie Herbology to it.
 	5.	Generalise Niffler bonding to a signature dozen beasts (fixes the "Beasts" half — Crit-3).
 	6.	Upgrade rig fidelity on those same dozen, using the Horntail as the bar.

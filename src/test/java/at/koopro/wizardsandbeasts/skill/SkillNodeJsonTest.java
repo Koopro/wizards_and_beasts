@@ -63,7 +63,10 @@ class SkillNodeJsonTest {
             new String[]{"avada_kedavra_unlock", "imperio_unlock"}, new String[]{"avada_kedavra_unlock", "dark_resilience"},
             new String[]{"crucio_unlock", "dark_knowledge"}, new String[]{"curse_mastery", "dark_resilience"},
             new String[]{"dark_damage", "dark_knowledge"}, new String[]{"dark_resilience", "dark_damage"},
-            new String[]{"imperio_unlock", "crucio_unlock"}, new String[]{"legilimency", "dark_knowledge"},
+            // `legilimency` was renamed to `occlumency` in the filler purge: the node granted Dark
+            // Arts damage and had nothing to do with the spell it was named for, which every wizard
+            // already holds through PlayerStatusAbilityGrantSource.
+            new String[]{"imperio_unlock", "crucio_unlock"}, new String[]{"occlumency", "dark_knowledge"},
             // herbology
             new String[]{"bountiful_harvest", "harvest_bounty"}, new String[]{"harvest_bounty", "green_thumb"},
             new String[]{"herbal_vitality", "natural_remedy"}, new String[]{"natural_remedy", "potion_potency"},
@@ -124,11 +127,11 @@ class SkillNodeJsonTest {
 
     @Test
     void nodeCountsMatchGeneratedLayout() {
-        assertEquals(168, BY_ID.size(),
-                "60 legacy notables + wizard_core + 100 fillers + 10 goblin/elf + 2 Apparition forks"
-                        + " + 5 keystones");
+        assertEquals(107, BY_ID.size(),
+                "60 legacy notables + wizard_core + 30 pathways + 10 goblin/elf + 2 Apparition forks"
+                        + " + 5 keystones + 9 spell forks");
         long fillers = BY_ID.values().stream().filter(s -> s.getSize() == Skill.Size.SMALL).count();
-        assertEquals(100, fillers, "expected exactly 100 filler nodes");
+        assertEquals(30, fillers, "expected exactly 30 pathway nodes (was 100 fillers before the purge)");
         // One keystone per wizard tree except dark_arts, which is not expanded while its module
         // ships disabled. Pinned because a keystone is the payoff a whole branch routes toward:
         // silently dropping one would leave a tree with nothing at the end of it.
@@ -206,13 +209,69 @@ class SkillNodeJsonTest {
     }
 
     @Test
-    void fillersFollowTheContentRule() {
+    void pathwaysFollowTheContentRule() {
         for (Skill skill : BY_ID.values()) {
             if (skill.getSize() != Skill.Size.SMALL) continue;
-            assertEquals(1, skill.getEffects().size(), skill.getId() + ": fillers carry exactly one effect");
-            assertEquals(1, skill.getMaxLevel(), skill.getId() + ": fillers are single-level");
-            assertEquals(1, skill.getPointCost(), skill.getId() + ": fillers cost 1");
+            assertEquals(1, skill.getEffects().size(), skill.getId() + ": pathways carry exactly one effect");
+            assertEquals(1, skill.getMaxLevel(), skill.getId() + ": pathways are single-level");
+            assertEquals(1, skill.getPointCost(), skill.getId() + ": pathways cost 1");
         }
+    }
+
+    /**
+     * No small node may grant a raw attribute.
+     *
+     * <p>This is the shape rule that keeps the purge from being undone one node at a time. What made
+     * the old web filler was not the node count on its own — it was that 41 of the 100 small nodes
+     * each paid +0.5 max health or +0.5 armour, so the cheapest thing to do with a point was buy the
+     * fourteenth half-heart. An attribute is the only effect type with no theme attached to it, and
+     * therefore the only one that can be pasted onto a connector without anybody having to decide
+     * what that connector is <em>for</em>. Pathways must pay in their region's own currency instead:
+     * harvest luck in Herbology, misfires in Wandlore, beast resistance in Magizoology.
+     *
+     * <p>Notables and keystones are deliberately unrestricted — {@code herbal_vitality} and
+     * {@code goblin_steelheart} are toughness nodes on purpose, and each pays a whole heart or a
+     * whole point of armour per level rather than a half.
+     */
+    @Test
+    void noSmallNodeGrantsARawAttribute() {
+        List<String> problems = new ArrayList<>();
+        for (Skill skill : BY_ID.values()) {
+            if (skill.getSize() != Skill.Size.SMALL) continue;
+            for (SkillEffect effect : skill.getEffects()) {
+                if (effect instanceof SkillEffect.PassiveAttribute passive) {
+                    problems.add(skill.getId() + " grants " + passive.attributeId()
+                            + " — a pathway node may not pay in raw attributes");
+                }
+            }
+        }
+        assertTrue(problems.isEmpty(), String.join("\n", problems));
+    }
+
+    /**
+     * Every {@code <spell>_unlock} node must actually teach the spell it is named for.
+     *
+     * <p>The web shipped for months with {@code crucio_unlock}, {@code imperio_unlock} and
+     * {@code avada_kedavra_unlock} granting a cooldown shave and nothing else: the three most
+     * exciting-looking nodes in the tree were passives wearing a spell's name, and a player could
+     * only find that out by spending four to six points. Naming is a promise here, so it is checked.
+     */
+    @Test
+    void everyUnlockNodeTeachesItsSpell() {
+        List<String> problems = new ArrayList<>();
+        for (Skill skill : BY_ID.values()) {
+            if (!skill.getId().endsWith("_unlock")) continue;
+            String named = skill.getId().substring(0, skill.getId().length() - "_unlock".length());
+            // A prefix match, not equality, because a node may be named for the incantation's first
+            // word: `wingardium_unlock` teaches `wingardium_leviosa`.
+            boolean teaches = skill.getEffects().stream()
+                    .anyMatch(e -> e instanceof SkillEffect.LearnSpell learn && learn.spellId().startsWith(named));
+            if (!teaches) {
+                problems.add(skill.getId() + " does not teach '" + named
+                        + "' — rename the node or give it a learn_spell effect");
+            }
+        }
+        assertTrue(problems.isEmpty(), String.join("\n", problems));
     }
 
     @Test
@@ -299,6 +358,49 @@ class SkillNodeJsonTest {
                 if (!SkillEffectSummary.isImplemented(effect.type())) {
                     problems.add(skill.getId() + " declares '" + effect.type().getSerializedName()
                             + "', which no system consumes — the node would cost points and do nothing");
+                }
+            }
+        }
+        assertTrue(problems.isEmpty(), String.join("\n", problems));
+    }
+
+    /**
+     * A node may only teach a spell the cast pipeline will actually fire.
+     *
+     * <p>The spell datapack ships 155 definitions of which 27 are implemented; the rest carry
+     * {@code "implementationState": "coming_soon"} and exist so the canon roster is registered and
+     * nameable. Wiring one into a {@code learn_spell} would spend a player's points on a spell that
+     * appears in their book and is refused at the wand — the same defect as the misnamed
+     * {@code *_unlock} nodes, one layer further in, and invisible in every other test because the id
+     * resolves and the lang key exists.
+     *
+     * <p>The six bespoke Java spells have no JSON at all and are allowlisted by name, because the
+     * datapack cannot answer for them.
+     */
+    @Test
+    void everyTaughtSpellIsImplemented() throws IOException {
+        Set<String> javaSpells = Set.of("avada_kedavra", "expecto_patronum", "imperio",
+                "obscurus_grasp", "obscurus_surge", "protego");
+        Path spellDir = Path.of("src", "main", "resources", "data", "wizards_and_beasts", "spells");
+        Set<String> implemented = new HashSet<>(javaSpells);
+        try (Stream<Path> files = Files.walk(spellDir)) {
+            for (Path file : files.filter(p -> p.toString().endsWith(".json")).toList()) {
+                JsonObject spell = JsonParser.parseString(Files.readString(file)).getAsJsonObject();
+                String state = spell.has("implementationState")
+                        ? spell.get("implementationState").getAsString() : "implemented";
+                if (!"coming_soon".equals(state)) {
+                    String name = file.getFileName().toString();
+                    implemented.add(name.substring(0, name.length() - ".json".length()));
+                }
+            }
+        }
+        List<String> problems = new ArrayList<>();
+        for (Skill skill : BY_ID.values()) {
+            for (SkillEffect effect : skill.getEffects()) {
+                if (effect instanceof SkillEffect.LearnSpell learn
+                        && !implemented.contains(learn.spellId())) {
+                    problems.add(skill.getId() + " teaches '" + learn.spellId()
+                            + "', which is not an implemented spell");
                 }
             }
         }

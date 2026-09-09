@@ -9,6 +9,8 @@ import at.koopro.wizardsandbeasts.network.legilimency.LegilimencyVisionS2CPayloa
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
+import at.koopro.wizardsandbeasts.skill.GameplayStat;
+import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -46,7 +48,15 @@ public final class LegilimencyServerLogic {
             ServerPlayer targetPlayer = (ServerPlayer) target;
             // Occlumency training decides whether a defence exists at all; Willpower decides how well
             // it holds. Scaling rather than adding keeps an untrained Occlumens at zero.
-            float resistChance = PlayerAbilityHelper.getOcclumencyLevel(targetPlayer) * 0.8f
+            //
+            // The skill web adds to the trained level rather than multiplying it, because
+            // multiplying would keep an untrained wizard who bought the Occlumency node at exactly
+            // zero — the node would cost points and change nothing. Clamped to 1 before the
+            // Willpower scalar so study plus practice can reach a full defence but never exceed it.
+            float occlumency = Math.min(1.0f,
+                    PlayerAbilityHelper.getOcclumencyLevel(targetPlayer)
+                            + SkillSystemAPI.getGameplayBonus(targetPlayer, GameplayStat.OCCLUMENCY_SHIELD));
+            float resistChance = occlumency * 0.8f
                     * at.koopro.wizardsandbeasts.stats.StatResistModifiers.resistScalar(targetPlayer);
             if (targetPlayer.getRandom().nextFloat() < resistChance) {
                 PlayerFeedback.toast(targetPlayer, NoticeKind.WARN,

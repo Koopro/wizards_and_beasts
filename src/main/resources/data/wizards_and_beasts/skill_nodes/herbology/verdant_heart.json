@@ -3,7 +3,6 @@
   "displayName": "skill.wizards_and_beasts.node.verdant_heart.name",
   "description": "skill.wizards_and_beasts.node.verdant_heart.desc",
   "tree": "herbology",
-  "size": "keystone",
   "pointCost": 6,
   "effects": [
     {
@@ -18,7 +17,6 @@
   ],
   "x": -18.0,
   "y": -340.0,
-  "edges": [
-    "herbal_vitality"
-  ]
+  "edges": [],
+  "size": "keystone"
 }

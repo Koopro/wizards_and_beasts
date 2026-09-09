@@ -1,0 +1,28 @@
+{
+  "id": "levicorpus_unlock",
+  "displayName": "skill.wizards_and_beasts.node.levicorpus_unlock.name",
+  "description": "skill.wizards_and_beasts.node.levicorpus_unlock.desc",
+  "tree": "spell_mastery",
+  "pointCost": 3,
+  "effects": [
+    {
+      "type": "learn_spell",
+      "spellId": "levicorpus"
+    },
+    {
+      "type": "learn_spell",
+      "spellId": "liberacorpus"
+    },
+    {
+      "type": "spell_cooldown_reduction",
+      "spellId": "levicorpus",
+      "reductionPerLevel": 0.1
+    }
+  ],
+  "x": 164.0,
+  "y": 141.6,
+  "edges": [
+    "reparo_unlock",
+    "utility_mastery"
+  ]
+}

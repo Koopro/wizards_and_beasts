@@ -1,0 +1,19 @@
+{
+  "id": "herbology_path_3",
+  "displayName": "skill.wizards_and_beasts.path.herbology.name",
+  "description": "skill.wizards_and_beasts.path.herbology.desc",
+  "tree": "herbology",
+  "effects": [
+    {
+      "type": "gameplay_bonus",
+      "stat": "harvest_bonus_chance",
+      "perLevel": 0.06
+    }
+  ],
+  "x": 47.2,
+  "y": -244.4,
+  "edges": [
+    "natural_remedy"
+  ],
+  "size": "small"
+}

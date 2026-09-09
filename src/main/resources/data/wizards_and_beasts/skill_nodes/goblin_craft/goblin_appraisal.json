@@ -11,5 +11,9 @@
   ],
   "x": 0.0,
   "y": 0.0,
+  "edges": [
+    "goblin_forge_sense",
+    "goblin_vault_step"
+  ],
   "root": true
 }

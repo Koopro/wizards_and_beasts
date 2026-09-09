@@ -108,9 +108,19 @@ public final class SkillSystemAPI {
      *
      * <p>Damage and cooldown together, because they are one channel with two faces and setting only
      * half of it is always a mistake.
+     *
+     * <p>Misfire rides along as a third face rather than a separate call, for the same reason. It is
+     * <em>added</em> (negatively) instead of set, because {@code ModifierStack} accumulates misfire
+     * from several independent sources — the wand's fizzle, allegiance, the caster's PRECISION — and
+     * a setter would silently discard whichever ran first. The reader clamps the running total to
+     * {@code [0, 1]}, so a large web bonus floors at zero rather than turning into a hit bonus.
      */
     public static void applySkillModifiers(ModifierStack stack, ServerPlayer player, Spell spell) {
         stack.setSkill(getSkillDamageMultiplier(player, spell), getSkillCooldownMultiplier(player, spell));
+        float steadiness = getGameplayBonus(player, GameplayStat.SPELL_MISFIRE_REDUCTION);
+        if (steadiness > 0f) {
+            stack.addMisfireChance(-steadiness, "skill_web");
+        }
     }
 
     // ── Validation ──

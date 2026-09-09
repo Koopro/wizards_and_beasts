@@ -3,14 +3,15 @@
   "displayName": "skill.wizards_and_beasts.node.polaris",
   "description": "",
   "tree": "spell_mastery",
-  "x": 0.0,
-  "y": 0.0,
-  "root": true,
   "effects": [
     {
       "type": "passive_attribute",
       "attributeId": "max_health",
-      "amountPerLevel": 0.5
+      "amountPerLevel": 2.0
     }
-  ]
+  ],
+  "x": 0.0,
+  "y": 0.0,
+  "edges": [],
+  "root": true
 }

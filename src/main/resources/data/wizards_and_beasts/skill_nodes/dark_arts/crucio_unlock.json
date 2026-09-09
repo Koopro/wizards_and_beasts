@@ -6,6 +6,10 @@
   "pointCost": 4,
   "effects": [
     {
+      "type": "learn_spell",
+      "spellId": "crucio"
+    },
+    {
       "spellId": "crucio",
       "bonusPerLevel": 0.06,
       "type": "spell_damage_bonus"
@@ -14,6 +18,7 @@
   "x": 77.1,
   "y": 155.1,
   "edges": [
-    "dark_arts_minor_resilience_7"
+    "dark_arts_path_4",
+    "dark_knowledge"
   ]
 }

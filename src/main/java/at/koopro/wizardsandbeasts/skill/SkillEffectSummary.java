@@ -22,10 +22,10 @@ import java.util.Locale;
  *
  * <h2>Honesty about what is not implemented</h2>
  * <p>{@link #describe} answers {@code null} for an effect type nothing consumes, and the caller
- * drops the line rather than printing a promise. That is not hypothetical: {@code learn_spell},
- * {@code grant_ability} and {@code ability_refinement} are declarable and ship on zero nodes, and
+ * drops the line rather than printing a promise. That is not hypothetical:
  * {@code spell_damage_bonus}/{@code spell_cooldown_reduction} were declared on seventeen nodes and
- * consumed by nothing at all until the cast path was fixed to read them.
+ * consumed by nothing at all until the cast path was fixed to read them. {@code ability_refinement}
+ * is the one type still in that state, and {@link #isImplemented} keeps it out of shipped data.
  *
  * <p>Client-safe: no player, no server types, so the same code renders the tooltip and can be
  * checked in a unit test.
@@ -76,10 +76,13 @@ public final class SkillEffectSummary {
             case SkillEffect.UnlockAbility e ->
                     line("unlock_ability", abilityName(e.abilityId()));
             case SkillEffect.LearnSpell e -> line("learn_spell", spellName(e.spellId()));
-            // Consumed by the grant layer, but with no line to describe themselves yet. Returning
-            // null keeps the tooltip silent rather than advertising a benefit it cannot name; see
-            // isImplemented, which keeps both out of shippable datapacks for exactly this reason.
-            case SkillEffect.GrantAbility ignored -> null;
+            // Same sentence as UnlockAbility, because it is the same benefit: SkillNodeAbilityGrantSource
+            // feeds both into one grant list, and a player reading a tooltip has no way to care which
+            // record type the datapack used. The key is derived from the AbilityKey's normalized id.
+            case SkillEffect.GrantAbility e -> line("unlock_ability", abilityName(e.ability().id()));
+            // Aggregated by AbilityModifiers and read by nothing. Returning null keeps the tooltip
+            // silent rather than advertising a benefit no ability implementation applies; see
+            // isImplemented, which keeps it out of shippable datapacks for exactly that reason.
             case SkillEffect.AbilityRefinement ignored -> null;
         };
     }
@@ -98,13 +101,16 @@ public final class SkillEffectSummary {
                  // Wired 2026-08-22: SkillSystemAPI.applyImmediateEffects teaches the spell at
                  // allocation and revokeWebTaughtSpells takes it back on refund. Before that this
                  // was the one shipped-but-inert type, and it read `false` correctly.
-                 LEARN_SPELL -> true;
-            // These two DO reach a system — SkillNodeAbilityGrantSource reads GrantAbility and
-            // AbilityModifiers reads AbilityRefinement — but neither has a summary line yet, so a
-            // node shipping one would allocate with a blank tooltip. The flag gates "safe to ship
-            // in a datapack", not "the effect exists", and stays false until they can describe
-            // themselves. No node uses either today.
-            case GRANT_ABILITY, ABILITY_REFINEMENT -> false;
+                 LEARN_SPELL,
+                 // Wired at the grant layer all along (SkillNodeAbilityGrantSource) and blocked here
+                 // only because it had no tooltip line. It has one now, identical to UnlockAbility's,
+                 // so a node may ship it.
+                 GRANT_ABILITY -> true;
+            // AbilityModifiers aggregates AbilityRefinement and no ability implementation reads the
+            // result, so a node declaring one would cost points and change nothing. The flag gates
+            // "safe to ship in a datapack", not "the mechanism exists"; it stays false until some
+            // ability actually consumes an axis. No node uses it today.
+            case ABILITY_REFINEMENT -> false;
         };
     }
 

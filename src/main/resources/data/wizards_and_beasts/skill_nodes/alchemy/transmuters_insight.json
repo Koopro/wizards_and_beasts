@@ -3,7 +3,6 @@
   "displayName": "skill.wizards_and_beasts.node.transmuters_insight.name",
   "description": "skill.wizards_and_beasts.node.transmuters_insight.desc",
   "tree": "alchemy",
-  "size": "keystone",
   "pointCost": 6,
   "effects": [
     {
@@ -18,7 +17,6 @@
   ],
   "x": -317.0,
   "y": 22.0,
-  "edges": [
-    "alchemy_minor_efficiency_9"
-  ]
+  "edges": [],
+  "size": "keystone"
 }

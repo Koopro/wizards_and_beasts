@@ -13,7 +13,6 @@
   "x": 104.5,
   "y": -196.6,
   "edges": [
-    "herbology_minor_green_touch_2",
-    "herbology_minor_vitality_8"
+    "potion_potency"
   ]
 }

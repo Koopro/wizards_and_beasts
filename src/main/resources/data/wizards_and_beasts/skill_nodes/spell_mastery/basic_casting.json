@@ -13,6 +13,9 @@
   "x": 114.0,
   "y": 56.6,
   "edges": [
-    "spell_mastery_minor_focus_2"
+    "lumos_unlock",
+    "protego_unlock",
+    "spell_mastery_path_1",
+    "stupefy_unlock"
   ]
 }

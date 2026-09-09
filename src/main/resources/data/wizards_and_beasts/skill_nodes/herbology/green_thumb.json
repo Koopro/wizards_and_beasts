@@ -12,6 +12,8 @@
   "x": -6.1,
   "y": -117.8,
   "edges": [
-    "herbology_minor_vitality_2"
+    "herbology_path_1",
+    "herbology_path_4",
+    "herbology_path_5"
   ]
 }

@@ -18,6 +18,7 @@
   "x": 185.1,
   "y": 9.8,
   "edges": [
-    "lumos_unlock"
+    "lumos_unlock",
+    "reparo_unlock"
   ]
 }

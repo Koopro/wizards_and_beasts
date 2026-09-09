@@ -3,7 +3,6 @@
   "displayName": "skill.wizards_and_beasts.node.beast_speaker.name",
   "description": "skill.wizards_and_beasts.node.beast_speaker.desc",
   "tree": "magizoology",
-  "size": "keystone",
   "pointCost": 6,
   "effects": [
     {
@@ -20,5 +19,6 @@
   "y": -22.0,
   "edges": [
     "keeper_vigor"
-  ]
+  ],
+  "size": "keystone"
 }

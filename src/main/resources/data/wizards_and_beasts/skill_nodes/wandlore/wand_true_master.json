@@ -3,7 +3,6 @@
   "displayName": "skill.wizards_and_beasts.node.wand_true_master.name",
   "description": "skill.wizards_and_beasts.node.wand_true_master.desc",
   "tree": "wandlore",
-  "size": "keystone",
   "pointCost": 6,
   "effects": [
     {
@@ -18,7 +17,6 @@
   ],
   "x": -378.0,
   "y": -90.0,
-  "edges": [
-    "apparition_deliberation"
-  ]
+  "edges": [],
+  "size": "keystone"
 }

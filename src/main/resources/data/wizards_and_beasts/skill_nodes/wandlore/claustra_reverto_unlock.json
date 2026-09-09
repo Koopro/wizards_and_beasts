@@ -1,0 +1,24 @@
+{
+  "id": "claustra_reverto_unlock",
+  "displayName": "skill.wizards_and_beasts.node.claustra_reverto_unlock.name",
+  "description": "skill.wizards_and_beasts.node.claustra_reverto_unlock.desc",
+  "tree": "wandlore",
+  "pointCost": 2,
+  "effects": [
+    {
+      "type": "learn_spell",
+      "spellId": "claustra_reverto"
+    },
+    {
+      "type": "spell_cooldown_reduction",
+      "spellId": "claustra_reverto",
+      "reductionPerLevel": 0.15
+    }
+  ],
+  "x": -110.3,
+  "y": -100.2,
+  "edges": [
+    "wand_precision",
+    "wand_study"
+  ]
+}

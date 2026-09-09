@@ -23,7 +23,8 @@
   "x": -137.1,
   "y": -194.7,
   "edges": [
-    "wandlore_minor_quickcast_5",
-    "wandlore_minor_precision_7"
+    "wand_precision",
+    "wandlore_path_4",
+    "wandlore_path_6"
   ]
 }

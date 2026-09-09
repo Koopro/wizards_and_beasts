@@ -15,6 +15,9 @@
   "x": -83.3,
   "y": -156.6,
   "edges": [
-    "herbology_minor_green_touch_5"
+    "herbology_path_2",
+    "herbology_path_5",
+    "herbology_path_6",
+    "herbology_path_7"
   ]
 }

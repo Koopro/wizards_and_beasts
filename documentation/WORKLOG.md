@@ -38,6 +38,94 @@ worth less than no worklog.
 
 ---
 
+## 2026-09-09 — Skill web: filler purge and real decision nodes
+
+### Audit
+- **100 of 168 nodes carried a `skill.wizards_and_beasts.filler.minor_*` display key**, and 41 of
+  those paid a raw attribute: `minor_vitality` ×14 and `polaris_minor_vitality` ×4 at +0.5 max
+  health, `minor_hide` ×10 and `minor_iron_skin` ×7 at +0.5 armour. The rest paid 1.5–3%. Against a
+  60-point cap the cheapest use of a point was the fourteenth half-heart.
+- **The fillers were the graph.** They were not decoration hung off the trees — they were 57
+  all-small chain components sitting *between* notables (27 × len-1, 20 × len-2, 7 × len-3,
+  3 × len-4). Deleting them wholesale would have disconnected six of the eight trees from
+  `wizard_core`. This is why the finding had survived two audits without moving.
+- **Only three `*_unlock` nodes were misnamed, not seventeen.** `CURRENT_STATE.md` Critical #2 said
+  a grep for a spell-granting effect returned 0; `learn_spell` had in fact been wired on 2026-08-22
+  and 18 nodes used it. The lie was confined to DARK_ARTS: `crucio_unlock`, `imperio_unlock` and
+  `avada_kedavra_unlock` shaved a cooldown and taught nothing.
+- **A fourth misnamed node nobody had listed.** `dark_arts/legilimency` granted
+  `category_damage_bonus` and had no connection to Legilimency, which every wizard already holds via
+  `PlayerStatusAbilityGrantSource` — so the node was named for something it neither granted nor
+  gated.
+- **`grant_ability` was mis-diagnosed as unwired.** It reached `SkillNodeAbilityGrantSource` all
+  along, landing in the same grant list as `unlock_ability`. What it lacked was a tooltip line,
+  which is why `isImplemented` returned false and no node could ship it.
+- **Deliberate non-fix: `ability_refinement`.** `AbilityModifiers` aggregates it and no ability
+  implementation reads the result. The candidate consumer was Apparition, whose only refinable knob
+  is `ApparitionAnchors.capacity` — an anchor count, which is not `POTENCY`, `DURATION`, `COOLDOWN`
+  or `RANGE`. Mapping an axis onto it to close the checkbox is the same mistake as mapping wand
+  `spell_modifiers` onto `SpellCategory`, so it stays flagged unshippable.
+- **Deliberate non-fix: DARK_ARTS still has no keystone.** Its module ships disabled; a branch
+  payoff nobody can reach is content for its own sake.
+
+### Resolution
+- **A skill point can no longer be spent on half a heart.** No node with `size: small` grants an
+  attribute, and `SkillNodeJsonTest.noSmallNodeGrantsARawAttribute` fails the build if one ever does
+  again. `passive_attribute` fell from 55 of 199 effects to 14 of 151, and all 14 sit on notables
+  where toughness is the fantasy (`herbal_vitality`, `keeper_vigor`, `goblin_steelheart`). Even
+  `wizard_core` — the first point anyone spends — went from +0.5 max health to a whole heart.
+- **The web is 107 nodes where it was 168, with the constellation intact.** Chain by chain: 4
+  dead-end spurs off the hub deleted; 23 single fillers became 15 direct notable↔notable edges and 8
+  real spell nodes; 30 chains of two-to-four collapsed to **one** pathway node each, at the chain's
+  centroid. Every surviving node kept or averaged its coordinates, so the six spokes around Polaris
+  still read the same and the sector seals still hold. Travel across a two-filler link now costs 1
+  point instead of 2.
+- **A pathway pays its region's own currency.** One point, one effect: Herbology pays harvest luck,
+  Magizoology beast resistance, Wandlore misfires, Dark Arts curse damage, Alchemy and Spell Mastery
+  cooldown. Magnitudes are 2–4× what the fillers paid, on 30 nodes instead of 100.
+- **Every `<spell>_unlock` node teaches its spell**, held there by
+  `SkillNodeJsonTest.everyUnlockNodeTeachesItsSpell`. The three Unforgivable nodes now teach
+  Crucio, Imperio and Avada Kedavra. Knowing a spell and being allowed to cast it are separate data,
+  so `AvadaKedavra`'s PROFICIENT-on-both-Imperio-and-Crucio requirement is untouched and
+  `Module.DARK_ARTS` still holds the whole region shut.
+- **Nine nodes hand over a spell instead of a number.** Drawn from the twelve implemented spells no
+  node reached: Confringo, Glacius, Diffindo, Depulso, Colloportus, Levicorpus (which teaches
+  Liberacorpus with it), Aguamenti, Claustra Reverto, Frigora. Eight sit at a deleted filler's
+  coordinates *beside* a route that also got its direct edge, so each is a fork you may take rather
+  than a toll you must pay. `learn_spell` is now the commonest effect on the web at 31 uses.
+- **`legilimency` became `occlumency`** and grants `OCCLUMENCY_SHIELD`, read at the Legilimency
+  resist roll. Previously a wizard's only defence was the trained `occlumencyLevel`, which grows
+  +0.001 at a time; there is now a studied path to it.
+- **A wizard can study away their own misfires.** `SPELL_MISFIRE_REDUCTION` is subtracted from the
+  cast's misfire total in `SkillSystemAPI.applySkillModifiers`. Added negatively rather than set,
+  because misfire accumulates from the wand's fizzle, allegiance and the caster's PRECISION and a
+  setter would silently discard whichever ran first; `ModifierStack` clamps the running total to
+  `[0, 1]`, so a large bonus floors at zero instead of becoming a hit bonus.
+- **`OCCLUMENCY_SHIELD` adds to the trained level rather than scaling it.** Scaling would have left
+  an untrained wizard who bought the node at exactly zero — the node would have cost points and
+  changed nothing, which is the defect this whole pass is about. Clamped to 1 before the Willpower
+  scalar so study plus practice reaches a full defence and never exceeds it.
+- **A datapack may now ship `grant_ability`.** It renders the same tooltip sentence
+  `unlock_ability` does, because it is the same benefit, and `isImplemented` says so.
+- **Existing saves are refunded at login instead of stranded.** `PlayerSkillData.CURRENT_VERSION` is
+  4. A saved allocation names deleted node ids and `PlayerSkillData.resetAll` only refunds what
+  `SkillTrees.byId` still resolves, so without the bump those points would have been neither spent
+  on anything nor recoverable by `/wandb skill respec`. The existing login migration strips the
+  attribute modifiers and revokes the web-taught spells on the way through.
+- **The budget tension improved rather than loosening.** Buying the whole wizard web costs 272
+  against the 60-point cap. Counting route overlap the cheapest two keystones land at 29 and three at
+  47 — leaving 13 points of depth — while four costs 65 and does not fit. Before the purge the same
+  three cost 40+ with almost nothing left over.
+
+### Deferred
+- `ability_refinement` stays unshippable until some ability implementation reads an axis.
+- DARK_ARTS has no keystone while its module ships disabled.
+- No in-game pass: verified by 35 passing skill tests and a full 1674-test suite run.
+
+---
+
+---
+
 ## 2026-08-28 — Brooms: inventory appearance
 
 ### Audit

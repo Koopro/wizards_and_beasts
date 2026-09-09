@@ -18,6 +18,7 @@
   "x": 157.7,
   "y": 233.8,
   "edges": [
-    "spell_mastery_minor_focus_3"
+    "combat_focus",
+    "confringo_unlock"
   ]
 }

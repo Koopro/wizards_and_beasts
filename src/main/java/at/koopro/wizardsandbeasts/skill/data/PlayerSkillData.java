@@ -17,10 +17,15 @@ public class PlayerSkillData implements ModAttachments.NbtSerializable {
     public static final String VERSION_KEY = "DataVersion";
     /**
      * v2 = web rework (adjacency allocation, 60-point cap, full refund);
-     * v3 = wizard web content pass (geometry + fillers reshaped the graph → full refund again).
+     * v3 = wizard web content pass (geometry + fillers reshaped the graph → full refund again);
+     * v4 = filler purge (70 nodes deleted, 30 rebuilt as pathways, 9 spell nodes added). A bump is
+     * mandatory here rather than merely tidy: a saved allocation names node ids that no longer
+     * exist, and {@code SkillTrees.byId} answers null for them — so those points would be neither
+     * spent on anything nor refundable by {@code respec}, which can only give back what it can
+     * still resolve. The login refund is the only path that returns them.
      * Any bump re-runs {@link #applyWebMigration} at login.
      */
-    public static final int CURRENT_VERSION = 3;
+    public static final int CURRENT_VERSION = 4;
 
     /**
      * Schema version of the data this instance was loaded from. Fresh instances (new players)

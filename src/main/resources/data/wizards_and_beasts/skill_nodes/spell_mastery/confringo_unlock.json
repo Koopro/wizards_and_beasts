@@ -1,0 +1,21 @@
+{
+  "id": "confringo_unlock",
+  "displayName": "skill.wizards_and_beasts.node.confringo_unlock.name",
+  "description": "skill.wizards_and_beasts.node.confringo_unlock.desc",
+  "tree": "spell_mastery",
+  "pointCost": 3,
+  "effects": [
+    {
+      "type": "learn_spell",
+      "spellId": "confringo"
+    },
+    {
+      "type": "spell_damage_bonus",
+      "spellId": "confringo",
+      "bonusPerLevel": 0.08
+    }
+  ],
+  "x": 214.3,
+  "y": 132.5,
+  "edges": []
+}

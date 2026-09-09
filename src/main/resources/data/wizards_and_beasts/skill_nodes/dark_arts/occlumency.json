@@ -1,0 +1,18 @@
+{
+  "id": "occlumency",
+  "displayName": "skill.wizards_and_beasts.node.occlumency.name",
+  "description": "skill.wizards_and_beasts.node.occlumency.desc",
+  "tree": "dark_arts",
+  "maxLevel": 2,
+  "pointCost": 2,
+  "effects": [
+    {
+      "type": "gameplay_bonus",
+      "stat": "occlumency_shield",
+      "perLevel": 0.2
+    }
+  ],
+  "x": -72.8,
+  "y": 147.4,
+  "edges": []
+}

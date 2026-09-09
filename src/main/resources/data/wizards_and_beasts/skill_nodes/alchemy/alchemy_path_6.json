@@ -1,0 +1,20 @@
+{
+  "id": "alchemy_path_6",
+  "displayName": "skill.wizards_and_beasts.path.alchemy.name",
+  "description": "skill.wizards_and_beasts.path.alchemy.desc",
+  "tree": "alchemy",
+  "effects": [
+    {
+      "type": "category_cooldown_reduction",
+      "category": "utility",
+      "reductionPerLevel": 0.04
+    }
+  ],
+  "x": -141.9,
+  "y": 196.3,
+  "edges": [
+    "hardened_skin",
+    "philosophers_stone"
+  ],
+  "size": "small"
+}

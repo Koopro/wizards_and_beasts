@@ -6,6 +6,10 @@
   "pointCost": 4,
   "effects": [
     {
+      "type": "learn_spell",
+      "spellId": "imperio"
+    },
+    {
       "spellId": "imperio",
       "reductionPerLevel": 0.1,
       "type": "spell_cooldown_reduction"
@@ -13,7 +17,5 @@
   ],
   "x": -99.5,
   "y": 199.8,
-  "edges": [
-    "dark_arts_minor_dark_power_4"
-  ]
+  "edges": []
 }

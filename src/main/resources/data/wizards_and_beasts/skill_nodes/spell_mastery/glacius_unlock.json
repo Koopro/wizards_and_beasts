@@ -1,0 +1,23 @@
+{
+  "id": "glacius_unlock",
+  "displayName": "skill.wizards_and_beasts.node.glacius_unlock.name",
+  "description": "skill.wizards_and_beasts.node.glacius_unlock.desc",
+  "tree": "spell_mastery",
+  "pointCost": 3,
+  "effects": [
+    {
+      "type": "learn_spell",
+      "spellId": "glacius"
+    },
+    {
+      "type": "spell_damage_bonus",
+      "spellId": "glacius",
+      "bonusPerLevel": 0.08
+    }
+  ],
+  "x": 210.8,
+  "y": 62.9,
+  "edges": [
+    "incendio_unlock"
+  ]
+}

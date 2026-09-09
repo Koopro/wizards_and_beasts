@@ -1,0 +1,23 @@
+{
+  "id": "colloportus_unlock",
+  "displayName": "skill.wizards_and_beasts.node.colloportus_unlock.name",
+  "description": "skill.wizards_and_beasts.node.colloportus_unlock.desc",
+  "tree": "spell_mastery",
+  "pointCost": 2,
+  "effects": [
+    {
+      "type": "learn_spell",
+      "spellId": "colloportus"
+    },
+    {
+      "type": "spell_cooldown_reduction",
+      "spellId": "colloportus",
+      "reductionPerLevel": 0.15
+    }
+  ],
+  "x": 208.5,
+  "y": 98.0,
+  "edges": [
+    "wingardium_unlock"
+  ]
+}

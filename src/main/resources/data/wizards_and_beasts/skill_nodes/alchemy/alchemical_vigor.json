@@ -13,6 +13,8 @@
   "x": -111.4,
   "y": 55.3,
   "edges": [
-    "alchemy_minor_efficiency_2"
+    "alchemy_path_1",
+    "alchemy_path_3",
+    "alchemy_path_4"
   ]
 }

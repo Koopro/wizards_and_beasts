@@ -1,0 +1,24 @@
+{
+  "id": "depulso_unlock",
+  "displayName": "skill.wizards_and_beasts.node.depulso_unlock.name",
+  "description": "skill.wizards_and_beasts.node.depulso_unlock.desc",
+  "tree": "spell_mastery",
+  "pointCost": 2,
+  "effects": [
+    {
+      "type": "learn_spell",
+      "spellId": "depulso"
+    },
+    {
+      "type": "spell_damage_bonus",
+      "spellId": "depulso",
+      "bonusPerLevel": 0.1
+    }
+  ],
+  "x": 121.5,
+  "y": 117.3,
+  "edges": [
+    "expelliarmus_unlock",
+    "stupefy_unlock"
+  ]
+}

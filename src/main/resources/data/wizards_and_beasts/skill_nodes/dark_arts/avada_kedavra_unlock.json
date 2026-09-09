@@ -6,6 +6,10 @@
   "pointCost": 6,
   "effects": [
     {
+      "type": "learn_spell",
+      "spellId": "avada_kedavra"
+    },
+    {
       "spellId": "avada_kedavra",
       "reductionPerLevel": 0.08,
       "type": "spell_cooldown_reduction"
@@ -14,7 +18,7 @@
   "x": 110.2,
   "y": 250.8,
   "edges": [
-    "dark_arts_minor_dark_power_3",
-    "dark_arts_minor_resilience_10"
+    "dark_arts_path_3",
+    "dark_resilience"
   ]
 }

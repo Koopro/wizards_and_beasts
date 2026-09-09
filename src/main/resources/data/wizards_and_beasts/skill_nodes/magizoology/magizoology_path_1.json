@@ -1,0 +1,19 @@
+{
+  "id": "magizoology_path_1",
+  "displayName": "skill.wizards_and_beasts.path.magizoology.name",
+  "description": "skill.wizards_and_beasts.path.magizoology.desc",
+  "tree": "magizoology",
+  "effects": [
+    {
+      "type": "gameplay_bonus",
+      "stat": "beast_damage_resistance",
+      "perLevel": 0.05
+    }
+  ],
+  "x": 74.0,
+  "y": -49.1,
+  "edges": [
+    "wizard_core"
+  ],
+  "size": "small"
+}

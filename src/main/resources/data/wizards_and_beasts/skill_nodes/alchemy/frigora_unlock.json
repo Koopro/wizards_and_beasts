@@ -1,0 +1,24 @@
+{
+  "id": "frigora_unlock",
+  "displayName": "skill.wizards_and_beasts.node.frigora_unlock.name",
+  "description": "skill.wizards_and_beasts.node.frigora_unlock.desc",
+  "tree": "alchemy",
+  "pointCost": 2,
+  "effects": [
+    {
+      "type": "learn_spell",
+      "spellId": "frigora"
+    },
+    {
+      "type": "spell_cooldown_reduction",
+      "spellId": "frigora",
+      "reductionPerLevel": 0.15
+    }
+  ],
+  "x": -227.3,
+  "y": 26.4,
+  "edges": [
+    "swift_brewer",
+    "transmute_focus"
+  ]
+}
