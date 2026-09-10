@@ -4,6 +4,8 @@
   "package": "at.koopro.wizardsandbeasts.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "LivingEntityDimensionsMixin",
+    "PlayerMovementLockMixin"
   ],
   "client": [
     "client.AvatarRendererMixin",
