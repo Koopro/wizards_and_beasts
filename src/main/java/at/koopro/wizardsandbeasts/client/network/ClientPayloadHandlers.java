@@ -332,6 +332,16 @@ public final class ClientPayloadHandlers {
         });
     }
 
+    /**
+     * A player changed form: store the profile, then recompute their collision box.
+     *
+     * <p>The refresh is the same point {@link #handlePoseOverrideSync} makes below, and it was
+     * missing here. {@code PlayerBoxOverrides} gives an Animagus the beast's own box, but
+     * {@code getBoundingBox()} reads a cached field that only {@code refreshDimensions()} rewrites
+     * — and the server-side call lives in {@code SizeSystemAPI.applyProfile}, which takes a
+     * {@code ServerPlayer}. Without this the client kept colliding as a {@code 0.6 x 1.8} human
+     * while the server had a cat, which is the rubber-band described below with the shapes swapped.
+     */
     public static void handleFormSync(FormSyncS2CPayload pkt, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
             SizeProfile profile = new SizeProfile(
@@ -342,13 +352,14 @@ public final class ClientPayloadHandlers {
             ClientFormDataState.update(pkt.playerUUID(), pkt.formId(), profile,
                     RenderFlag.fromBitmask(pkt.renderFlagMask()));
             SizeLerpTracker.onScaleChanged(pkt.playerUUID(), pkt.modelScale());
+            refreshDimensions(pkt.playerUUID());
         });
     }
 
     /**
      * A player's flight attitude changed: store it, then recompute their collision box.
      *
-     * <p>The refresh is the point. {@code FlightHitboxHandler} flattens the box while a player is
+     * <p>The refresh is the point. {@code PlayerBoxOverrides} flattens the box while a player is
      * drawn lying flat, but a box is only recomputed when something calls
      * {@code refreshDimensions()} — the server does it in {@code PoseOverrideService.set} and this
      * is the client half. Skipping it leaves the local player colliding as a standing 1.8-tall
@@ -358,14 +369,27 @@ public final class ClientPayloadHandlers {
     public static void handlePoseOverrideSync(PoseOverrideSyncS2CPayload pkt, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
             ClientPoseState.apply(pkt.playerUuid(), pkt.override());
-            ClientLevel level = Minecraft.getInstance().level;
-            if (level != null) {
-                Player player = level.getPlayerByUUID(pkt.playerUuid());
-                if (player != null) {
-                    player.refreshDimensions();
-                }
-            }
+            refreshDimensions(pkt.playerUuid());
         });
+    }
+
+    /**
+     * Recomputes one tracked player's collision box on this client.
+     *
+     * <p>Shared by the two syncs that change what a player's box should be. Silently does nothing
+     * for a player who is not loaded here, which is the ordinary case for a packet that arrives
+     * while they are leaving view — their box will be built from the synced state when they come
+     * back.
+     */
+    private static void refreshDimensions(java.util.UUID playerUuid) {
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level == null) {
+            return;
+        }
+        Player player = level.getPlayerByUUID(playerUuid);
+        if (player != null) {
+            player.refreshDimensions();
+        }
     }
 
     public static void handlePetrifiedStateSync(PetrifiedStateSyncS2CPayload pkt, IPayloadContext ctx) {

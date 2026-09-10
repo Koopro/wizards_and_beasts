@@ -59,8 +59,13 @@ public final class SpellCombatControlHandler {
 
         for (ServerPlayer player : event.getServer().getPlayerList().getPlayers()) {
             if (isStunned(player)) {
-                player.setDeltaMovement(Vec3.ZERO);
-                player.hurtMarked = true;
+                // Movement is not handled here any more. This used to write setDeltaMovement(ZERO)
+                // and hurtMarked every tick, which the client — authoritative for its own player —
+                // simply disagreed with, producing a stutter and a velocity packet per tick. The
+                // stun is a MobEffect, so MovementLock can read it on both sides and
+                // PlayerMovementLockMixin unplugs the controls in LivingEntity.isImmobile() where
+                // client prediction and server simulation agree. Gravity deliberately still
+                // applies: someone stupefied off a tower falls off the tower.
                 player.stopUsingItem();
             }
         }

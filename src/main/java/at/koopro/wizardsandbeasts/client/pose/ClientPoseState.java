@@ -18,9 +18,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * meantime, since nothing looks up an override for an entity that is not rendering.
  *
  * <p><b>This class must not touch {@code Minecraft} or any other client-only type.</b> It is read
- * from {@code FlightHitboxHandler}, which is a common {@code EntityEvent.Size} listener running on
- * both sides — the same contract {@code ClientFormDataState} holds for {@code FormHitboxHandler}.
- * The payload handling that does need the client lives in {@code ClientPayloadHandlers}.
+ * from {@code PlayerBoxOverrides}, which runs on both sides off {@code LivingEntityDimensionsMixin}
+ * — the same contract {@code ClientFormDataState} holds for the form half of that class, and the
+ * same one {@code ClientPetrifyState} holds for {@code MovementLock}. The payload handling that
+ * does need the client lives in {@code ClientPayloadHandlers}.
  */
 @NullMarked
 public final class ClientPoseState {

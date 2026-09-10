@@ -138,7 +138,7 @@ public final class SizeProfileRegistry {
         // ── Animagus beast forms ──
         // Each borrows a real vanilla entity model authored at true scale, so modelScale and
         // aspect ratios stay 1.0 (no distortion of the borrowed model). The hitbox W×H below is
-        // applied verbatim by FormHitboxHandler (EntityEvent.Size) — independent of Attributes.SCALE
+        // applied verbatim by PlayerBoxOverrides (LivingEntityDimensionsMixin) — independent of Attributes.SCALE
         // — so the collision box matches the real animal instead of a uniformly-shrunk player box.
 
         // Cat: vanilla CatModel — box matches an adult cat.

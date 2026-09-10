@@ -9,8 +9,10 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
  * Restoration Draught) or until {@code petrifiedAtGameTime} plus the natural-cure window elapses, matching canon's
  * "wears off after about a century" (scaled down to ~100 in-game days here). A Bezoar dose advances
  * {@code petrifiedAtGameTime} backward to shorten that remaining window without lifting the stone state outright.
- * The frozen pose is captured at the moment of petrification so the movement-freeze tick can pin the
- * player exactly, rather than merely zeroing velocity (which still allows creep from knockback/pushing).
+ * The frozen pose is captured at the moment of petrification so {@code PetrifyServerLogic#correctDrift}
+ * has somewhere to put back a player who left it. Zeroing velocity alone would not do: knockback and
+ * pushing still creep. The routine freeze itself is {@code MovementLock}'s {@code PINNED}, which stops
+ * the movement on both sides so the stored pose is normally never needed.
  */
 public record PetrifiedState(
         boolean isPetrified,
