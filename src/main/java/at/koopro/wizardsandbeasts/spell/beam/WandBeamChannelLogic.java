@@ -126,6 +126,10 @@ public final class WandBeamChannelLogic {
 
         float maxReach = Math.min(range, s.beamTicks * BeamRayResolver.extensionBlocksPerTick());
         boolean leviosa = WandBeamSpellIds.isLeviosa(spell.getId());
+        if (leviosa && s.leviosaThrown) {
+            // This hold already threw what it lifted. Lifting resumes on the next hold, not the next tick.
+            return;
+        }
         boolean aguamenti = WandBeamSpellIds.isAguamenti(spell.getId());
         LivingEntity target = null;
         Entity leviosaTarget = null;
@@ -278,5 +282,20 @@ public final class WandBeamChannelLogic {
                 Math.min(maxReach, WandBeamSpellHandlers.LEVIOSA_MAX_DISTANCE));
         s.leviosaHoldDistance = Mth.clamp(s.leviosaHoldDistance + delta,
                 WandBeamSpellHandlers.LEVIOSA_MIN_DISTANCE, cap);
+    }
+
+    /**
+     * Throws what the caster's Wingardium Leviosa is holding, along their aim.
+     *
+     * <p>Nothing happens without a live Leviosa hold on a wand, or with nothing lifted in it — a click at
+     * empty air is not an error, and it does not spend the hold's throw.
+     *
+     * @return whether something was thrown
+     */
+    public static boolean throwLeviosaTarget(ServerPlayer player) {
+        WandBeamSession s = SESSIONS.get(player.getUUID());
+        if (s == null || s.spellId == null || !WandBeamSpellIds.isLeviosa(s.spellId)) return false;
+        if (!(player.getUseItem().getItem() instanceof WandItem)) return false;
+        return WandBeamSpellHandlers.throwLeviosaTarget(player, s);
     }
 }

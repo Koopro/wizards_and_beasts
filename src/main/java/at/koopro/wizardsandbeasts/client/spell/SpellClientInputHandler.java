@@ -7,8 +7,10 @@ import at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageDataState;
 import at.koopro.wizardsandbeasts.client.spell.input.SpellInputController;
 import at.koopro.wizardsandbeasts.client.ui.HudVisibilityPolicy;
 import at.koopro.wizardsandbeasts.client.ui.InputPolicy;
+import at.koopro.wizardsandbeasts.item.wand.WandItem;
 import at.koopro.wizardsandbeasts.network.spell.ImperioResistC2SPayload;
 import at.koopro.wizardsandbeasts.network.spell.SpellLeviosaAdjustC2SPayload;
+import at.koopro.wizardsandbeasts.network.spell.SpellLeviosaThrowC2SPayload;
 import at.koopro.wizardsandbeasts.spell.core.CastType;
 import at.koopro.wizardsandbeasts.spell.core.SpellIds;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
@@ -20,6 +22,28 @@ import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 public class SpellClientInputHandler {
     private static final float LEVIOSA_SCROLL_STEP = 0.75f;
+
+    /**
+     * The attack key during a Wingardium Leviosa hold throws what is being lifted.
+     *
+     * <p>This has to be {@code Pre}. While any item is in use, {@code Minecraft.handleKeybinds} drains
+     * every queued attack click and discards it, and it runs between {@code Pre} and {@code Post} — by
+     * {@link #onClientTick} the click is already gone. Reading the key mapping rather than a mouse button
+     * keeps a rebound attack key working.
+     */
+    public static void onClientTickPre(ClientTickEvent.Pre event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (!InputPolicy.canProcessGameplayInput(mc)) return;
+        if (!mc.player.isUsingItem() || !(mc.player.getUseItem().getItem() instanceof WandItem)) return;
+        if (!isLeviosaChannelActive()) return;
+        boolean clicked = false;
+        while (mc.options.keyAttack.consumeClick()) {
+            clicked = true;
+        }
+        if (clicked) {
+            ClientPacketDistributor.sendToServer(new SpellLeviosaThrowC2SPayload());
+        }
+    }
 
     public static void onClientTick(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();

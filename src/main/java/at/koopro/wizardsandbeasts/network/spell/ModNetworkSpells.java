@@ -48,6 +48,11 @@ public final class ModNetworkSpells {
                 SpellLeviosaAdjustC2SPayload.STREAM_CODEC,
                 SpellLeviosaAdjustC2SPayload::handle);
 
+        registrar.playToServer(
+                SpellLeviosaThrowC2SPayload.TYPE,
+                SpellLeviosaThrowC2SPayload.STREAM_CODEC,
+                SpellLeviosaThrowC2SPayload::handle);
+
         // Before every other spell payload in this method purely for readability: it is the one that
         // has to arrive for any of the others to mean anything, since a spell id on the wire is a key
         // into the table this payload carries.

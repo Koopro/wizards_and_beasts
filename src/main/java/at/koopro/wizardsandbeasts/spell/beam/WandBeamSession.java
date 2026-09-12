@@ -23,6 +23,11 @@ final class WandBeamSession {
     float leviosaHoldDistance = 6.0f;
     float leviosaLastCommandedSpeed;
     int lastLeviosaSlamTick = -9999;
+    /**
+     * Set once this hold has thrown what it was lifting. Nothing is lifted again until the button comes
+     * up: the thrown target is still under the crosshair, and the next tick's scan would catch it.
+     */
+    boolean leviosaThrown;
     int lastProficiencyHitTick;
     @Nullable UUID cachedTarget;
     @Nullable BlockPos aguamentiWaterAim;
@@ -41,6 +46,7 @@ final class WandBeamSession {
             leviosaHoldDistance = 6.0f;
             leviosaLastCommandedSpeed = 0f;
             lastLeviosaSlamTick = -9999;
+            leviosaThrown = false;
             lastProficiencyHitTick = -9999;
             cachedTarget = null;
             aguamentiWaterAim = null;

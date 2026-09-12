@@ -79,6 +79,7 @@ public class WizardsAndBeastsClient {
             modEventBus.addListener(DebugKeyBindings::register);
         }
 
+        NeoForge.EVENT_BUS.addListener(SpellClientInputHandler::onClientTickPre);
         NeoForge.EVENT_BUS.addListener(SpellClientInputHandler::onClientTick);
         NeoForge.EVENT_BUS.addListener(at.koopro.wizardsandbeasts.client.armor.WardrobeInputHandler::onClientTick);
         NeoForge.EVENT_BUS.addListener(SpellClientInputHandler::onScroll);

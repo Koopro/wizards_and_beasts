@@ -40,4 +40,18 @@ class WandBeamChannelLogicTest {
         assertNull(session.lastCrucioTarget);
         assertNull(session.cachedTarget);
     }
+
+    /** A spent throw belongs to the hold that threw; switching away and back must be able to lift again. */
+    @Test
+    void sessionSyncSpell_clearsSpentLeviosaThrowWhenSpellChanges() {
+        WandBeamSession session = new WandBeamSession();
+        session.syncSpell("wingardium_leviosa");
+        session.leviosaThrown = true;
+
+        session.syncSpell("wingardium_leviosa");
+        assertTrue(session.leviosaThrown, "the same spell ticking on must keep the throw spent");
+
+        session.syncSpell("crucio");
+        assertFalse(session.leviosaThrown);
+    }
 }

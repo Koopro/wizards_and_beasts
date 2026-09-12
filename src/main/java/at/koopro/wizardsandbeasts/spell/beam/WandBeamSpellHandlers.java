@@ -122,7 +122,27 @@ final class WandBeamSpellHandlers {
     static void clearSessionEffects(ServerPlayer player, WandBeamSession s) {
         UUID casterId = player.getUUID();
         releaseCrucioTarget(player, s, casterId);
-        releaseLeviosaTarget(player, s, casterId, true);
+        // A drop, never a throw. Every end of a hold lands here — letting go of the button, but also a
+        // spell switch, death, logout and a dimension change — and this used to fling the target along
+        // the caster's aim on all of them, so nothing lifted could ever simply be put down.
+        releaseLeviosaTarget(player, s, casterId, false);
+    }
+
+    /**
+     * Throws this caster's Leviosa target along their aim, and lifts nothing more for the rest of the hold.
+     *
+     * <p>The throw is its own input — the attack key during the hold, sent as
+     * {@code SpellLeviosaThrowC2SPayload} — rather than a side effect of letting go.
+     *
+     * @return whether anything was held to throw
+     */
+    static boolean throwLeviosaTarget(ServerPlayer caster, WandBeamSession s) {
+        if (s.lastLeviosaTarget == null) {
+            return false;
+        }
+        releaseLeviosaTarget(caster, s, caster.getUUID(), true);
+        s.leviosaThrown = true;
+        return true;
     }
 
     /** Strips this caster's Crucio effects from its held target and drops the claim, if any. */
@@ -147,7 +167,7 @@ final class WandBeamSpellHandlers {
         if (prev != null) {
             clearLeviosaEffects(prev, s.lastLeviosaHadNoGravity);
             if (fling) {
-                // Wingardium throw: releasing the beam flings the held object/mob where the caster aims.
+                // A throw: the held object/mob leaves along the caster's aim. Only throwLeviosaTarget asks for one.
                 Vec3 dir = caster.getLookAngle();
                 double force = 1.6;
                 prev.setDeltaMovement(dir.x * force, dir.y * force + 0.2, dir.z * force);

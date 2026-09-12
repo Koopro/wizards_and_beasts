@@ -70,7 +70,7 @@ public final class SpellRejectCodes {
     /**
      * Suffixes for the two {@code SpellNetworkGuards} refusals. Both are stored with a caller prefix
      * naming the packet that hit them ({@code cast_}, {@code assign_}, {@code select_},
-     * {@code leviosa_adjust_}), so they are matched by suffix rather than looked up whole — the same
+     * {@code leviosa_adjust_}, {@code leviosa_throw_}), so they are matched by suffix rather than looked up whole — the same
      * shape {@link #summaryBucket} already uses to bucket them.
      */
     public static final String SUFFIX_TYPE_CANNOT_USE_WAND = "_type_cannot_use_wand";

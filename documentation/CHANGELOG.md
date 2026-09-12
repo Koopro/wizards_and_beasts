@@ -4,6 +4,19 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Wingardium Leviosa throws only when you tell it to (2026-09-11)
+
+**Letting go threw whatever you were holding.** Every end of a Leviosa hold ran through one teardown,
+and that teardown flung the target along your aim at 1.6 blocks a tick. Releasing right-click shot it
+forward, and so did switching spell, dying or logging out. Nothing lifted could simply be put down.
+
+**Releasing drops it now, and the attack key throws it.** Left-click (or wherever attack is bound)
+during the hold sends `SpellLeviosaThrowC2SPayload`. The server throws the held target and lifts
+nothing more for the rest of that hold, because the target is still the cached one and the next
+channel tick would lift it straight back out of the throw. One hold is still one cast. The click is
+read in `ClientTickEvent.Pre` on purpose: while any item is in use, vanilla's `handleKeybinds` drains
+attack clicks and discards them, and it runs before `Post`.
+
 ### Vampires stop eating (2026-09-07)
 
 **Nutrition is a heritage question now, not a universal one.** Every body in the mod ran on the same
