@@ -42,6 +42,7 @@ public final class WandCastSessions {
         private final long id;
         private final long startGameTick;
         private boolean releaseConsumed;
+        private boolean clashHold;
 
         private Session(long id, long startGameTick) {
             this.id = id;
@@ -58,6 +59,11 @@ public final class WandCastSessions {
 
         public boolean releaseConsumed() {
             return releaseConsumed;
+        }
+
+        /** Whether this hold is sustaining a spell clash, so its release casts nothing. */
+        public boolean clashHold() {
+            return clashHold;
         }
     }
 
@@ -90,7 +96,12 @@ public final class WandCastSessions {
                 session != null,
                 session != null && session.releaseConsumed,
                 session == null ? 0L : gameTick - session.startGameTick,
-                MAX_SESSION_TICKS));
+                MAX_SESSION_TICKS,
+                session != null && session.clashHold));
+        if (verdict == CastReleaseGate.CLASH_HOLD) {
+            // The hold is over either way; spending the token makes a duplicate of this release read as one.
+            session.releaseConsumed = true;
+        }
         if (verdict != null) {
             return verdict;
         }
@@ -100,12 +111,29 @@ public final class WandCastSessions {
     }
 
     /**
+     * Marks the player's open hold as sustaining a spell clash, so its release casts nothing. A no-op
+     * without an open, unspent session — there is no hold to spend.
+     */
+    public static void markClashHold(ServerPlayer player) {
+        Session session = SESSIONS.get(player.getUUID());
+        if (session != null && !session.releaseConsumed) {
+            session.clashHold = true;
+        }
+    }
+
+    /**
      * Drops the player's session. Every path that invalidates a caster mid-hold calls this — death,
      * respawn, dimension change, an admin reset — so a release that arrives afterwards meets IDLE
      * rather than a session the caster no longer has any claim to.
      */
     public static void abort(ServerPlayer player) {
         SESSIONS.remove(player.getUUID());
+    }
+
+    /** Whether the player's open hold is sustaining a spell clash. See {@link #markClashHold}. */
+    public static boolean isClashHold(ServerPlayer player) {
+        Session session = SESSIONS.get(player.getUUID());
+        return session != null && session.clashHold;
     }
 
     /** The player's open session, for diagnostics. Never mutate what this returns. */

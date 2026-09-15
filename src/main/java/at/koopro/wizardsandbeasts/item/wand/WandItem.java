@@ -11,6 +11,7 @@ import at.koopro.wizardsandbeasts.spell.cast.WandCastSessions;
 import at.koopro.wizardsandbeasts.spell.cast.WandCastTiming;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.spell.beam.WandBeamChannelLogic;
+import at.koopro.wizardsandbeasts.spell.clash.SpellClashLocks;
 import at.koopro.wizardsandbeasts.util.ClientClassBridge;
 import at.koopro.wizardsandbeasts.wand.WandCastLines;
 import at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver;
@@ -108,6 +109,10 @@ public class WandItem extends GeoItemBase {
             // release packet that does not correspond to a hold the server itself saw start has nothing
             // to land on.
             WandCastSessions.begin(sp, WandCastSessions.gameTickOf(sp));
+            if (SpellClashLocks.isLocked(sp)) {
+                // A hold inside a spell clash feeds the lock: its release must not cast.
+                WandCastSessions.markClashHold(sp);
+            }
         }
         return InteractionResult.CONSUME;
     }
@@ -125,7 +130,9 @@ public class WandItem extends GeoItemBase {
     @Override
     public void onUseTick(Level level, LivingEntity entity, ItemStack stack, int remainingUseDuration) {
         super.onUseTick(level, entity, stack, remainingUseDuration);
-        if (!level.isClientSide() && entity instanceof ServerPlayer sp) {
+        // A hold that is sustaining a spell clash drives no channel — not during the lock, and not after
+        // it either, for a winner who is still holding when it ends.
+        if (!level.isClientSide() && entity instanceof ServerPlayer sp && !WandCastSessions.isClashHold(sp)) {
             WandBeamChannelLogic.tick(sp, stack);
         }
     }

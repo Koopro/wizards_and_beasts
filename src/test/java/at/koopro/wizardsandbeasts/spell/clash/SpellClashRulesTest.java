@@ -64,15 +64,72 @@ class SpellClashRulesTest {
         assertTrue(SpellClashRules.bias(-5.0f, 1.0f) >= -1.0f);
     }
 
-    /** An even duel holds longest; a mismatch collapses sooner. Both stay inside the authored window. */
-    @Test
-    void lifetimeFollowsHowEvenTheDuelIs() {
-        int even = SpellClashRules.lifetimeTicks(1.0f, 1.0f);
-        int lopsided = SpellClashRules.lifetimeTicks(4.0f, 1.0f);
+    // ── a held lock ─────────────────────────────────────────────────────────────────────────────
 
-        assertEquals(SpellClashRules.MAX_LIFETIME_TICKS, even);
-        assertTrue(lopsided < even, "a lopsided clash should break before an even one");
-        assertTrue(lopsided >= SpellClashRules.MIN_LIFETIME_TICKS);
+    private static final int IN_GRACE = SpellClashRules.HOLD_GRACE_TICKS - 1;
+    private static final int AFTER_GRACE = SpellClashRules.HOLD_GRACE_TICKS;
+    private static final double FAR = 3.0;
+
+    /** Nobody has picked the lock up yet, but there is still time to: it waits. */
+    @Test
+    void nobodyHoldingInsideTheGraceWaits() {
+        assertEquals(SpellClashRules.Outcome.HOLD,
+                SpellClashRules.judge(false, false, false, false, IN_GRACE, FAR, FAR));
+    }
+
+    /** One caster picked it up in time and the other never did: the one holding wins. */
+    @Test
+    void neverPickingItUpLosesOnceTheGraceIsOver() {
+        assertEquals(SpellClashRules.Outcome.A_WINS,
+                SpellClashRules.judge(true, true, false, false, AFTER_GRACE, FAR, FAR));
+        assertEquals(SpellClashRules.Outcome.B_WINS,
+                SpellClashRules.judge(false, false, true, true, AFTER_GRACE, FAR, FAR));
+    }
+
+    /** Letting go loses at once — the grace is for picking the lock up, not for putting it down. */
+    @Test
+    void lettingGoLosesEvenInsideTheGrace() {
+        assertEquals(SpellClashRules.Outcome.B_WINS,
+                SpellClashRules.judge(false, true, true, true, IN_GRACE, FAR, FAR));
+        assertEquals(SpellClashRules.Outcome.A_WINS,
+                SpellClashRules.judge(true, true, false, true, IN_GRACE, FAR, FAR));
+    }
+
+    /** Both gave up, one by letting go and one by never holding: nobody is left to win. */
+    @Test
+    void bothGivingUpBreaksTheLock() {
+        assertEquals(SpellClashRules.Outcome.BREAK,
+                SpellClashRules.judge(false, false, false, false, AFTER_GRACE, FAR, FAR));
+        assertEquals(SpellClashRules.Outcome.BREAK,
+                SpellClashRules.judge(false, true, false, false, AFTER_GRACE, FAR, FAR));
+    }
+
+    /** Pushed onto a caster's wand, that caster loses; the one pushing wins. */
+    @Test
+    void theJointReachingAWandLosesThatCaster() {
+        double reach = SpellClashRules.WAND_REACH;
+        assertEquals(SpellClashRules.Outcome.B_WINS,
+                SpellClashRules.judge(true, true, true, true, AFTER_GRACE, reach, FAR));
+        assertEquals(SpellClashRules.Outcome.A_WINS,
+                SpellClashRules.judge(true, true, true, true, AFTER_GRACE, FAR, reach));
+        assertEquals(SpellClashRules.Outcome.HOLD,
+                SpellClashRules.judge(true, true, true, true, AFTER_GRACE, reach + 0.01, FAR));
+    }
+
+    /** Both holding, joint clear of both wands: no time limit ends it. */
+    @Test
+    void anEvenHeldLockHasNoTimeLimit() {
+        assertEquals(SpellClashRules.Outcome.HOLD,
+                SpellClashRules.judge(true, true, true, true, 20 * 60 * 10, FAR, FAR));
+    }
+
+    /** The stronger cast pushes the joint away from itself, and an even duel does not move. */
+    @Test
+    void theJointMovesAwayFromTheStrongerCast() {
+        assertTrue(SpellClashRules.jointStep(3.0f, 1.0f) > 0.0);
+        assertTrue(SpellClashRules.jointStep(1.0f, 3.0f) < 0.0);
+        assertEquals(0.0, SpellClashRules.jointStep(1.5f, 1.5f), 1.0e-9);
+        assertTrue(Math.abs(SpellClashRules.jointStep(1000.0f, 0.0f)) <= SpellClashRules.DRIFT_PER_TICK + 1.0e-9);
     }
 
     /**
@@ -104,6 +161,16 @@ class SpellClashRulesTest {
     void closestMomentIsClampedToTheTick() {
         assertEquals(0.0, SpellClashRules.closestApproachTime(1.0, 0, 0, 3.6, 0, 0));
         assertEquals(1.0, SpellClashRules.closestApproachTime(-10.0, 0, 0, 3.6, 0, 0));
+    }
+
+    /** Bolts flying at each other are head-on; two converging on one target from the same side are not. */
+    @Test
+    void onlyBoltsFlyingAtEachOtherAreHeadOn() {
+        assertTrue(SpellClashRules.headOn(-1.8 * 1.8));
+        // Two allies 4 blocks apart firing at one enemy 10 blocks ahead: about 23 degrees between them.
+        double dot = (0.2 * -0.2) + (1.0 * 1.0);
+        assertFalse(SpellClashRules.headOn(dot));
+        assertFalse(SpellClashRules.headOn(0.0), "bolts crossing at a right angle are not duelling");
     }
 
     /** Two bolts not moving relative to each other have no better moment than the start. */

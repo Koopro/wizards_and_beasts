@@ -35,6 +35,8 @@ import org.jspecify.annotations.Nullable;
  *       so a packet sent before the new {@code use()} is <em>read</em> before it too, and it meets
  *       the old session's spent token. A client that withholds one instead is indistinguishable from
  *       one that releases late, which is the duplicate case again.</li>
+ *   <li><b>letting go of a spell clash</b> — the hold was feeding a lock, not charging a cast:
+ *       {@link #CLASH_HOLD}</li>
  * </ul>
  *
  * <p>No wire sequence number is needed for that last case and none is sent. A number the client
@@ -56,7 +58,13 @@ public enum CastReleaseGate {
      * The session is older than the wand's own declared use duration, so no live hold can correspond
      * to it. Not a tuning window — past this point vanilla has already force-released the item.
      */
-    SESSION_EXPIRED;
+    SESSION_EXPIRED,
+    /**
+     * The hold was spent sustaining a spell clash. A hold that begins inside a lock, or is already open
+     * when one starts, feeds the lock and nothing else — letting go is giving the lock up, not casting.
+     * See {@code SpellClashLocks}.
+     */
+    CLASH_HOLD;
 
     /**
      * Side-effect-free facts about a release attempt. Read in precedence order, short-circuiting at
@@ -67,12 +75,14 @@ public enum CastReleaseGate {
      * @param releaseAlreadyConsumed  that session's release token is already spent
      * @param ticksSinceSessionStart  game ticks between the session opening and this release
      * @param maxSessionTicks         the wand's declared use duration; see {@code WandItem}
+     * @param clashHold               that session was spent holding a spell clash
      */
     public record Inputs(boolean casterAlive,
                          boolean sessionOpen,
                          boolean releaseAlreadyConsumed,
                          long ticksSinceSessionStart,
-                         long maxSessionTicks) {}
+                         long maxSessionTicks,
+                         boolean clashHold) {}
 
     /** The first failing gate, or {@code null} when the release may resolve into a cast. */
     @Nullable
@@ -87,6 +97,7 @@ public enum CastReleaseGate {
         if (in.ticksSinceSessionStart() < 0 || in.ticksSinceSessionStart() > in.maxSessionTicks()) {
             return SESSION_EXPIRED;
         }
+        if (in.clashHold()) return CLASH_HOLD;
         return null;
     }
 
@@ -97,6 +108,7 @@ public enum CastReleaseGate {
             case ALREADY_RELEASED -> SpellRejectCodes.DUPLICATE_RELEASE_GUARD;
             case CASTER_NOT_ALIVE -> SpellRejectCodes.CASTER_NOT_ALIVE;
             case SESSION_EXPIRED -> SpellRejectCodes.CAST_SESSION_EXPIRED;
+            case CLASH_HOLD -> SpellRejectCodes.CLASH_HOLD;
         };
     }
 }

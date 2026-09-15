@@ -64,6 +64,8 @@ public class SpellProjectileEntity extends ThrowableProjectile {
     private float damageMultiplier = 1.0f;
     /** The server tick this bolt last moved in; see {@link #trySpellClash}. Never saved. */
     private long movedAtGameTime = Long.MIN_VALUE;
+    /** A winner's spell leaving a won clash. It has fought already, so it locks with nothing. Never saved. */
+    private boolean fromClash;
 
     public SpellProjectileEntity(EntityType<? extends ThrowableProjectile> type, Level level) {
         super(type, level);
@@ -287,7 +289,7 @@ public class SpellProjectileEntity extends ThrowableProjectile {
                 o -> o != this && o.isAlive() && o.movedAtGameTime == now);
         double radiusSqr = SpellClashRules.CLASH_RADIUS * SpellClashRules.CLASH_RADIUS;
         for (SpellProjectileEntity other : nearby) {
-            if (!isOpposedTo(other)) {
+            if (!isOpposedTo(other) || !SpellClashRules.headOn(getDeltaMovement().dot(other.getDeltaMovement()))) {
                 continue;
             }
             Vec3 theirStart = other.oldPosition();
@@ -305,7 +307,9 @@ public class SpellProjectileEntity extends ThrowableProjectile {
             if (theirs == null || !SpellClashRules.canClash(mine.getId(), theirs.getId())) {
                 continue;
             }
-            SpellClashEntity.spawn(level, myPoint.add(theirPoint).scale(0.5), this, other);
+            if (!SpellClashEntity.spawn(level, myPoint.add(theirPoint).scale(0.5), this, other)) {
+                continue;
+            }
             other.discard();
             discard();
             return;
@@ -326,7 +330,9 @@ public class SpellProjectileEntity extends ThrowableProjectile {
 
         if (!level().isClientSide() && level() instanceof ServerLevel sl && isAlive()) {
             movedAtGameTime = sl.getGameTime();
-            trySpellClash(sl);
+            if (!fromClash) {
+                trySpellClash(sl);
+            }
         }
 
         if (level().isClientSide()) {
@@ -366,6 +372,15 @@ public class SpellProjectileEntity extends ThrowableProjectile {
             case MEDIUM -> 2;
             case HIGH -> 1;
         };
+    }
+
+    public SpellScalingProfile getScalingProfile() {
+        return scalingProfile;
+    }
+
+    /** See {@link #fromClash}. */
+    public void markFromClash() {
+        this.fromClash = true;
     }
 
     public void setScalingProfile(SpellScalingProfile scalingProfile) {

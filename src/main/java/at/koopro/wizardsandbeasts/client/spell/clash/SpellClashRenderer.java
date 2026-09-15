@@ -2,7 +2,9 @@ package at.koopro.wizardsandbeasts.client.spell.clash;
 
 import at.koopro.wizardsandbeasts.Config;
 import at.koopro.wizardsandbeasts.client.beam.BeamStyle;
+import at.koopro.wizardsandbeasts.client.beam.Laser;
 import at.koopro.wizardsandbeasts.client.beam.Lightning;
+import at.koopro.wizardsandbeasts.client.beam.WandTipTracker;
 import at.koopro.wizardsandbeasts.entity.spell.SpellClashEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -11,11 +13,17 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
- * Draws the lightning of a {@link SpellClashEntity}: several jagged bolts flailing between the two
- * points the spells came from, re-rolled a few times a second so the lock crackles.
+ * Draws a {@link SpellClashEntity}: a beam from each holding caster's wand tip to the joint, and a knot of
+ * jagged bolts where the two meet, re-rolled a few times a second so the lock crackles.
+ *
+ * <p>A side that is not holding draws no beam. During the grace after the bolts meet, that is the cue: the
+ * beam comes back out of your wand when you pick the lock up.
  *
  * <p>No new bolt code — this reuses {@link Lightning}, the beam system's jagged shape, and
  * {@link BeamStyle#lightning} for its white core with a coloured glow. Bolts alternate between the
@@ -29,6 +37,10 @@ public class SpellClashRenderer extends EntityRenderer<SpellClashEntity, SpellCl
 
     /** Short, wide-jittered bolts: a lock is a knot of lightning, not a tidy arc. */
     private static final Lightning BOLT = new Lightning(6, 4.0f, 2);
+    /** The steady spell beam from a wand tip to the joint. */
+    private static final Laser BEAM = new Laser();
+    /** Lightning running along each beam, so the stream strains rather than sitting still. */
+    private static final Lightning STRAIN = new Lightning(10, 3.0f, 2);
     /** How far along the axis each side's anchor sits, in blocks. */
     private static final double ARM = 0.55;
     /** Half-width of the random wander applied to each bolt's ends, in blocks. */
@@ -51,11 +63,30 @@ public class SpellClashRenderer extends EntityRenderer<SpellClashEntity, SpellCl
         state.axis = clash.axis();
         state.ticks = clash.tickCount;
         state.seed = clash.getId();
+        // Relative to the entity's interpolated position — that is where the submit pose sits.
+        Vec3 reference = clash.getPosition(partialTick);
+        state.tipA = clash.isHoldingA() ? tipOf(clash, clash.getCasterAId(), partialTick, reference) : null;
+        state.tipB = clash.isHoldingB() ? tipOf(clash, clash.getCasterBId(), partialTick, reference) : null;
+    }
+
+    /** Where a caster's wand tip is drawn, relative to the joint — the same resolver the wand beam starts at. */
+    private static @Nullable Vec3 tipOf(SpellClashEntity clash, int casterId, float partialTick, Vec3 reference) {
+        Entity caster = casterId < 0 ? null : clash.level().getEntity(casterId);
+        return caster instanceof LivingEntity living
+                ? WandTipTracker.resolve(living, partialTick).subtract(reference)
+                : null;
     }
 
     @Override
     public void submit(ClashState state, PoseStack poseStack, SubmitNodeCollector collector,
                        CameraRenderState cameraState) {
+        if (state.tipA != null) {
+            drawBeam(state, state.tipA, state.colorA, 0, poseStack, collector);
+        }
+        if (state.tipB != null) {
+            drawBeam(state, state.tipB, state.colorB, 1, poseStack, collector);
+        }
+
         Vec3 axis = state.axis;
         if (axis.lengthSqr() < 1.0e-6) {
             return;
@@ -84,6 +115,14 @@ public class SpellClashRenderer extends EntityRenderer<SpellClashEntity, SpellCl
         }
     }
 
+    private static void drawBeam(ClashState state, Vec3 tip, int color, int side,
+                                 PoseStack poseStack, SubmitNodeCollector collector) {
+        BEAM.render(BeamStyle.laser(color), tip, Vec3.ZERO, 1.0f, state.seed + side,
+                poseStack, collector, state.ticks, state.partialTick);
+        STRAIN.render(BeamStyle.lightning(color), tip, Vec3.ZERO, 1.0f, state.seed * 7 + side,
+                poseStack, collector, state.ticks, state.partialTick);
+    }
+
     private static Vec3 scatter(RandomSource random, Vec3 perpA, Vec3 perpB) {
         return perpA.scale((random.nextDouble() - 0.5) * 2.0 * SCATTER)
                 .add(perpB.scale((random.nextDouble() - 0.5) * 2.0 * SCATTER));
@@ -99,8 +138,8 @@ public class SpellClashRenderer extends EntityRenderer<SpellClashEntity, SpellCl
     }
 
     /**
-     * The clash is a metre-wide knot of lightning hung on a tiny hitbox, so culling it against that
-     * hitbox would pop it out of view at the edge of the screen.
+     * The clash is a knot of lightning with beams reaching back to both casters, hung on a tiny hitbox, so
+     * culling it against that hitbox would pop it out of view at the edge of the screen.
      */
     @Override
     protected boolean affectedByCulling(SpellClashEntity clash) {
@@ -113,5 +152,8 @@ public class SpellClashRenderer extends EntityRenderer<SpellClashEntity, SpellCl
         public Vec3 axis = Vec3.ZERO;
         public int ticks;
         public int seed;
+        /** Holding casters' wand tips, relative to the joint; {@code null} for a side drawing no beam. */
+        public @Nullable Vec3 tipA;
+        public @Nullable Vec3 tipB;
     }
 }

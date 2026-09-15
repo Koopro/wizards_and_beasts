@@ -8,6 +8,7 @@ import at.koopro.wizardsandbeasts.spell.core.Proficiency;
 import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
 import at.koopro.wizardsandbeasts.spell.cast.SpellCastService;
 import at.koopro.wizardsandbeasts.spell.cast.SpellExecutor;
+import at.koopro.wizardsandbeasts.spell.clash.SpellClashLocks;
 import at.koopro.wizardsandbeasts.spell.core.CastType;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
@@ -16,6 +17,7 @@ import at.koopro.wizardsandbeasts.spell.core.Spells;
 import at.koopro.wizardsandbeasts.wand.cast.WandStats;
 import at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver;
 import at.koopro.wizardsandbeasts.util.WandHelper;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -23,10 +25,13 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.Collection;
 
 public final class SpellCommands {
 
@@ -72,7 +77,16 @@ public final class SpellCommands {
                                                 .map(Spell::getId), builder))
                                 .executes(ctx -> castSpell(
                                         ctx.getSource(),
-                                        StringArgumentType.getString(ctx, "spell")))));
+                                        StringArgumentType.getString(ctx, "spell")))))
+                .then(Commands.literal("clash")
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
+                        .then(Commands.literal("hold")
+                                .then(Commands.argument("targets", EntityArgument.players())
+                                        .then(Commands.argument("held", BoolArgumentType.bool())
+                                                .executes(ctx -> pinClashHold(
+                                                        ctx.getSource(),
+                                                        EntityArgument.getPlayers(ctx, "targets"),
+                                                        BoolArgumentType.getBool(ctx, "held")))))));
     }
 
     /**
@@ -335,6 +349,22 @@ public final class SpellCommands {
         ServerLevel level = player.level();
         SpellExecutor.executeGeneric(SpellCastService.contextFor(player, spell, level), level);
         return 1;
+    }
+
+    /**
+     * Pins the targets' side of any spell clash as held, or releases the pin.
+     *
+     * <p>A lock is held with the wand, and one person cannot hold right-click in two game windows at once.
+     * Pin one side from the console before firing, then hold the other for real. A pinned player holds
+     * every lock they are in until unpinned; it does not start or cast anything on its own.
+     */
+    private static int pinClashHold(CommandSourceStack source, Collection<ServerPlayer> targets, boolean held) {
+        for (ServerPlayer target : targets) {
+            SpellClashLocks.pinHold(target.getUUID(), held);
+        }
+        source.sendSuccess(() -> Component.literal((held ? "Pinned" : "Released") + " the clash hold for "
+                + targets.size() + (targets.size() == 1 ? " player" : " players")), true);
+        return targets.size();
     }
 
     private static boolean castableFromCommand(Spell spell) {

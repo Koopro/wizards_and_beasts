@@ -31,11 +31,27 @@ class CastReleaseGateTest {
     private static final long MAX = WandItem.USE_DURATION_TICKS;
 
     private static CastReleaseGate.Inputs alive(boolean sessionOpen, boolean consumed, long age) {
-        return new CastReleaseGate.Inputs(true, sessionOpen, consumed, age, MAX);
+        return new CastReleaseGate.Inputs(true, sessionOpen, consumed, age, MAX, false);
     }
 
     private static CastReleaseGate.Inputs dead(boolean sessionOpen, boolean consumed, long age) {
-        return new CastReleaseGate.Inputs(false, sessionOpen, consumed, age, MAX);
+        return new CastReleaseGate.Inputs(false, sessionOpen, consumed, age, MAX, false);
+    }
+
+    /** A hold that was spent sustaining a spell clash: letting go gives the lock up and casts nothing. */
+    @Test
+    void clashHold_releaseCastsNothing() {
+        assertEquals(CastReleaseGate.CLASH_HOLD,
+                CastReleaseGate.evaluate(new CastReleaseGate.Inputs(true, true, false, 40L, MAX, true)));
+    }
+
+    /** The older refusals still win: a dead caster or a duplicate is reported as what it is. */
+    @Test
+    void clashHold_isReadAfterTheSessionChecks() {
+        assertEquals(CastReleaseGate.CASTER_NOT_ALIVE,
+                CastReleaseGate.evaluate(new CastReleaseGate.Inputs(false, true, false, 40L, MAX, true)));
+        assertEquals(CastReleaseGate.ALREADY_RELEASED,
+                CastReleaseGate.evaluate(new CastReleaseGate.Inputs(true, true, true, 40L, MAX, true)));
     }
 
     @Test

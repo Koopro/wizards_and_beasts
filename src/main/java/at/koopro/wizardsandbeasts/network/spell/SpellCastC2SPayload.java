@@ -67,7 +67,10 @@ public record SpellCastC2SPayload() implements CustomPacketPayload {
 
         CastReleaseGate refused = WandCastSessions.offerRelease(player, serverLevel.getGameTime());
         if (refused != null) {
-            player.getData(ModAttachments.SPELL_DATA.get()).incrementSyncCorrections();
+            if (refused != CastReleaseGate.CLASH_HOLD) {
+                // Letting go of a clash is the game working, not the client and server disagreeing.
+                player.getData(ModAttachments.SPELL_DATA.get()).incrementSyncCorrections();
+            }
             debugReject(player, refused.rejectCode());
             return;
         }

@@ -4,6 +4,35 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Spell clashes are held (2026-09-15)
+
+**A lock is a duel now, not a firework.** When two bolts lock, a beam runs from each caster's wand tip to
+the joint, and the lock lasts as long as both keep holding. A bolt fires when the button comes up, so both
+casters have let go by the time their bolts meet: each has a second and a half to press and hold the wand
+again, and is told so on the action bar. That hold feeds the lock and nothing else — no channel beam starts
+under it, and letting go casts nothing (a new `CastReleaseGate.CLASH_HOLD` verdict spends the release).
+
+**Whoever lets go loses.** Letting go, or never picking the lock up, fires the other caster's spell from the
+joint at you as an ordinary bolt, so it lands with its full effect and can still be blocked. While both hold,
+the stronger cast pushes the joint along the line between the wands, and pushing it onto a wand loses that
+caster the lock the same way. Both letting go breaks the lock with nobody hit. There is no time limit: an
+even duel lasts as long as the two of you do. The old timer (1.5 to 2.5 seconds) is gone.
+
+**The joint follows the casters.** It sits on the line between their wands, so walking moves the lock with
+you; casters who get closer than about three blocks or further than 48 break it.
+
+**Only bolts flying at each other lock.** Clashes used to need nothing but two different casters, so two
+allies firing at the same enemy could lock with each other on the way in. The bolts must now be heading more
+than a right angle apart.
+
+**`/wandb magic spell clash hold <players> <true|false>`** (admin) pins a player's side of any lock as held,
+because one person cannot hold right-click in two game windows. Pin one side from the console before firing
+and hold the other for real.
+
+Covered by `SpellClashRulesTest` (grace, letting go, never holding, breaking, pushing onto a wand, head-on)
+and three new game tests: the caster still holding wins, nobody holding breaks the lock, and releasing a lock
+hold casts nothing while the releaser is hit. Disabling the gate, or making holds never count, fails them.
+
 ### Spells clash in mid-air (2026-09-12)
 
 **Two bolts that meet now fight.** They used to fly through one another, with a single hard-coded

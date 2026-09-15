@@ -43,6 +43,8 @@ public final class SpellRejectCodes {
     public static final String CAST_SESSION_EXPIRED = "cast_session_expired";
     /** A release arrived from a dead player. Vanilla ends the hold client-side on death; the cast must not land. */
     public static final String CASTER_NOT_ALIVE = "caster_not_alive";
+    /** A release ended a hold that was sustaining a spell clash. Not a desync and never shown: letting go lost the lock. */
+    public static final String CLASH_HOLD = "clash_hold";
     /** Held wand has no bonded master (resonance never matched). */
     public static final String WAND_NOT_BONDED = "wand_not_bonded";
     /** Held wand is bonded to another player. */
@@ -121,6 +123,7 @@ public final class SpellRejectCodes {
             NO_CAST_SESSION,
             CAST_SESSION_EXPIRED,
             CASTER_NOT_ALIVE,
+            CLASH_HOLD,
             WAND_NOT_BONDED,
             WAND_WRONG_MASTER,
             LANGLOCKED,

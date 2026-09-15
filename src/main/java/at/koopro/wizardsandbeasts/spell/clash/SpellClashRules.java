@@ -4,7 +4,7 @@ import at.koopro.wizardsandbeasts.spell.core.SpellIds;
 
 /**
  * The rules of a spell clash — when two bolts lock instead of passing through each other, which way
- * the lock slides, and how long it holds.
+ * the lock slides, and who wins it.
  *
  * <p>Deliberately free of Minecraft types and of {@code Config}: this is the part worth testing, and
  * a class that reads config cannot be unit-tested in this repo (touching {@code Config} builds the
@@ -15,9 +15,29 @@ public final class SpellClashRules {
     /** How close two bolts must come, in blocks, before they lock. */
     public static final double CLASH_RADIUS = 0.4;
 
-    /** An even lock holds this long; a lopsided one breaks nearer {@link #MIN_LIFETIME_TICKS}. */
-    public static final int MIN_LIFETIME_TICKS = 30;   // 1.5s
-    public static final int MAX_LIFETIME_TICKS = 50;   // 2.5s
+    /**
+     * How long each caster has to pick the lock up. A bolt fires when the button comes <em>up</em>, so
+     * both casters have let go by the time their bolts meet; this is the time to press and hold again.
+     */
+    public static final int HOLD_GRACE_TICKS = 30;   // 1.5s
+
+    /** How close the joint may be pushed to a caster's wand, in blocks, before that caster is hit. */
+    public static final double WAND_REACH = 0.75;
+
+    /** Blocks per tick the joint moves at a total mismatch in power, while both casters hold. */
+    public static final double DRIFT_PER_TICK = 0.08;
+
+    /** How a held lock stands after a tick. */
+    public enum Outcome {
+        /** Both still in it. */
+        HOLD,
+        /** A wins: B gave up, or the joint reached B's wand. A's spell lands on B. */
+        A_WINS,
+        /** B wins: A gave up, or the joint reached A's wand. B's spell lands on A. */
+        B_WINS,
+        /** Both gave up. Nobody is hit. */
+        BREAK
+    }
 
     private SpellClashRules() {}
 
@@ -41,6 +61,19 @@ public final class SpellClashRules {
             return SpellIds.matches(killingA ? spellB : spellA, "expelliarmus");
         }
         return true;
+    }
+
+    /**
+     * Whether two bolts are flying at each other rather than the same way.
+     *
+     * <p>A clash is a head-on meeting. Two allies firing at one enemy send bolts that converge on the same
+     * point, and those must land on the enemy, not lock with each other — so bolts whose directions are
+     * more than a right angle apart qualify, and nothing else does.
+     *
+     * @param dot the dot product of the two bolts' velocities
+     */
+    public static boolean headOn(double dot) {
+        return dot < 0.0;
     }
 
     /**
@@ -79,11 +112,47 @@ public final class SpellClashRules {
     }
 
     /**
-     * How long the lock holds. Evenly matched wizards hold the longest; a mismatch collapses sooner,
-     * because the point of the drift is that somebody eventually loses it.
+     * Judges one tick of a held lock.
+     *
+     * <p>A side <em>gives up</em> when it held and let go, or never held at all once
+     * {@link #HOLD_GRACE_TICKS} are over. Giving up loses to a side still in it; both giving up breaks
+     * the lock. While both hold, the joint reaching one caster's wand loses that caster the lock.
+     *
+     * @param holdingA   A is holding this tick
+     * @param everHeldA  A has held at some point during this lock
+     * @param ticksAlive ticks since the lock began
+     * @param distToA    blocks from the joint to A's wand
      */
-    public static int lifetimeTicks(float powerA, float powerB) {
-        float evenness = 1.0f - Math.abs(bias(powerA, powerB));
-        return MIN_LIFETIME_TICKS + Math.round(evenness * (MAX_LIFETIME_TICKS - MIN_LIFETIME_TICKS));
+    public static Outcome judge(boolean holdingA, boolean everHeldA, boolean holdingB, boolean everHeldB,
+                                int ticksAlive, double distToA, double distToB) {
+        boolean graceOver = ticksAlive >= HOLD_GRACE_TICKS;
+        boolean aGaveUp = !holdingA && (everHeldA || graceOver);
+        boolean bGaveUp = !holdingB && (everHeldB || graceOver);
+        if (aGaveUp && bGaveUp) {
+            return Outcome.BREAK;
+        }
+        if (aGaveUp) {
+            return Outcome.B_WINS;
+        }
+        if (bGaveUp) {
+            return Outcome.A_WINS;
+        }
+        if (holdingA && holdingB) {
+            if (distToA <= WAND_REACH) {
+                return Outcome.B_WINS;
+            }
+            if (distToB <= WAND_REACH) {
+                return Outcome.A_WINS;
+            }
+        }
+        return Outcome.HOLD;
+    }
+
+    /**
+     * How far the joint moves this tick, in blocks along the axis from A to B. Positive moves it towards
+     * B. Applied only while both casters hold: a push needs someone pushing.
+     */
+    public static double jointStep(float powerA, float powerB) {
+        return bias(powerA, powerB) * DRIFT_PER_TICK;
     }
 }
