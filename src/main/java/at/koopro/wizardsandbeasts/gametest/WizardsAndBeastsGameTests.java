@@ -69,5 +69,6 @@ public final class WizardsAndBeastsGameTests {
         ChoranaptyxisTests.contribute(registrar);
         PlacementFacingTests.contribute(registrar);
         LeviosaThrowTests.contribute(registrar);
+        SpellClashTests.contribute(registrar);
     }
 }

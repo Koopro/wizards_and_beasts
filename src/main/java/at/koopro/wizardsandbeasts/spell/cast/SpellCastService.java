@@ -41,6 +41,34 @@ public final class SpellCastService {
 
     private SpellCastService() {}
 
+    /**
+     * Everything a cast knows about its caster before the modifier pipeline runs: the wand in hand and
+     * its stats, the wand's allegiance and compatibility, and the caster's proficiency with this spell.
+     *
+     * <p>Shared with {@code /wandb magic spell cast}, which skips the gates above a cast but must
+     * still hit exactly as hard as one.
+     */
+    public static CastContext contextFor(ServerPlayer player, Spell spell, ServerLevel serverLevel) {
+        var wandStack = WandHelper.getWandStack(player);
+        WandStats wandStats = WandStatsResolver.resolve(wandStack, player.registryAccess());
+        CastContext castContext = CastContext.create(
+                player,
+                wandStack,
+                spell,
+                spell instanceof JsonSpell jsonSpell ? jsonSpell.definition() : null,
+                wandStats,
+                spell.getProficiency(player));
+        castContext = castContext.withAllegiance(WandCastingAllegianceSystem.resolve(wandStack));
+        castContext = castContext.withCompatibility(WandCastingAllegianceSystem.applyLayer(castContext, serverLevel));
+        Identifier spellKey;
+        try {
+            spellKey = Identifier.parse(spell.getId());
+        } catch (Exception ignored) {
+            spellKey = Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, spell.getId());
+        }
+        return castContext.withScalingProfile(ProficiencyScaler.getProfileForPlayer(player, spellKey));
+    }
+
     public static CastResult completeWandCastRelease(ServerPlayer player) {
         if (!(player.level() instanceof ServerLevel serverLevel)) {
             debugReject(player, SpellRejectCodes.NOT_SERVER_LEVEL);
@@ -150,24 +178,7 @@ public final class SpellCastService {
             return CastResult.REJECTED;
         }
 
-        var wandStack = WandHelper.getWandStack(player);
-        WandStats wandStats = WandStatsResolver.resolve(wandStack, player.registryAccess());
-        CastContext castContext = CastContext.create(
-                player,
-                wandStack,
-                spell,
-                spell instanceof JsonSpell jsonSpell ? jsonSpell.definition() : null,
-                wandStats,
-                spell.getProficiency(player));
-        castContext = castContext.withAllegiance(WandCastingAllegianceSystem.resolve(wandStack));
-        castContext = castContext.withCompatibility(WandCastingAllegianceSystem.applyLayer(castContext, serverLevel));
-        Identifier spellKey;
-        try {
-            spellKey = Identifier.parse(spell.getId());
-        } catch (Exception ignored) {
-            spellKey = Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, spell.getId());
-        }
-        castContext = castContext.withScalingProfile(ProficiencyScaler.getProfileForPlayer(player, spellKey));
+        CastContext castContext = contextFor(player, spell, serverLevel);
 
         long collapseInstabilityUntil = parseLong(
                 player.getData(ModAttachments.HERITAGE_DATA.get()).getFlag(FLAG_COLLAPSE_CAST_INSTABILITY_UNTIL), 0L);

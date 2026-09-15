@@ -4,6 +4,41 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Spells clash in mid-air (2026-09-12)
+
+**Two bolts that meet now fight.** They used to fly through one another, with a single hard-coded
+exception: Expelliarmus, and only as a dozen particles in one frame before both spells blinked out.
+Any two projectiles from different casters whose paths come within four tenths of a block now lock, and what
+they leave behind is an entity rather than a one-frame puff — `SpellClashEntity` holds for one and a
+half to two and a half seconds, spitting sparks in both spells' colours, crackling, and creeping
+towards whichever wizard is casting weaker, so the stronger cast visibly wins the push. Evenly matched
+wizards hold the lock longest; a mismatch breaks sooner, because the point of the drift is that
+somebody eventually loses it.
+
+**The Killing Curse still meets only Expelliarmus** — the pairing that causes the wand-lock in the
+first place — and two Killing Curses lock each other, which is Priori Incantatem itself. Nothing in a
+clash deals damage: the two spells already cancelled when their bolts were destroyed.
+
+**The lightning is the beam system's own.** `client.beam.Lightning` already draws a jagged bolt that
+holds its shape for a couple of ticks and then snaps to a new one; a clash runs two to four of them at
+once between the points the two spells came from, each in one spell's colour over a white core, with
+the count following the same performance preset as the rest of the spell VFX. Nothing new goes on the
+wire — the bolts are seeded from the entity id and the tick, and the camera kick comes free from the
+impact burst the clash already sends.
+
+**Bolts cannot slip through each other.** A bolt moves its whole step in one go, and two flying at each
+other close about three blocks a tick, so a check on where they ended up missed nearly every head-on
+pair. The clash is decided along both bolts' paths through the tick, at the moment they are closest, by
+whichever of the two moves second.
+
+**`/wandb magic spell cast <spell>`** (admin) fires a projectile spell from whoever runs it, through the
+real cast past its gates: wand, allegiance, proficiency and the rest of the modifier pipeline apply, and
+a wand can still misfire; knowing the spell, cooldowns, requirements and Gamp's Law are skipped. Nobody
+alt-tabbing between two clients can line two casts up in one tick, and
+`/execute as @a at @s run wandb magic spell cast stupefy` does. The game test
+`spell_clash_opposed_bolts_lock` uses it to fire two casters at each other from 6.64 blocks, a range at
+which the old position check never saw the bolts meet.
+
 ### Wingardium Leviosa throws only when you tell it to (2026-09-11)
 
 **Letting go threw whatever you were holding.** Every end of a Leviosa hold ran through one teardown,

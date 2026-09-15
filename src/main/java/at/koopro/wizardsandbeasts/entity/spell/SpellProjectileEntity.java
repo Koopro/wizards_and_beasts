@@ -2,13 +2,13 @@ package at.koopro.wizardsandbeasts.entity.spell;
 
 import at.koopro.wizardsandbeasts.Config;
 import at.koopro.wizardsandbeasts.creature.LethalGazeBossResistance;
+import at.koopro.wizardsandbeasts.spell.clash.SpellClashRules;
 import at.koopro.wizardsandbeasts.spell.core.SpellIds;
 import at.koopro.wizardsandbeasts.spell.expelliarmus.ExpelliarmusDisarmHandler;
 import at.koopro.wizardsandbeasts.event.spell.SpellCombatControlHandler;
 import at.koopro.wizardsandbeasts.network.spell.SpellImpactBurstS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
 import at.koopro.wizardsandbeasts.registry.ModEntities;
-import at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions;
 import at.koopro.wizardsandbeasts.registry.ModParticles;
 import at.koopro.wizardsandbeasts.spell.def.SpellVfx;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
@@ -35,7 +35,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.Vec3;
 
 import org.jspecify.annotations.Nullable;
 import java.util.List;
@@ -44,6 +46,12 @@ import java.util.UUID;
 public class SpellProjectileEntity extends ThrowableProjectile {
     private static final org.slf4j.Logger LOGGER = com.mojang.logging.LogUtils.getLogger();
     private static final int BASE_PARTICLE_RATE = 1;
+    /**
+     * The farthest any bolt moves in one tick, in blocks, which is how far past a meeting point the
+     * other bolt of a clash can already be. The fastest authored bolt is 1.8; mastery scales speed by
+     * up to 1.3 and a full Flipendo charge doubles it.
+     */
+    private static final double MAX_BOLT_STEP = 5.0;
 
     private static final EntityDataAccessor<String> DATA_SPELL_ID =
             SynchedEntityData.defineId(SpellProjectileEntity.class, EntityDataSerializers.STRING);
@@ -54,6 +62,8 @@ public class SpellProjectileEntity extends ThrowableProjectile {
     private SpellScalingProfile scalingProfile = SpellScalingProfile.DEFAULT;
     /** Composed damage multiplier from the cast that fired this. 1.0 = untouched base damage. */
     private float damageMultiplier = 1.0f;
+    /** The server tick this bolt last moved in; see {@link #trySpellClash}. Never saved. */
+    private long movedAtGameTime = Long.MIN_VALUE;
 
     public SpellProjectileEntity(EntityType<? extends ThrowableProjectile> type, Level level) {
         super(type, level);
@@ -246,40 +256,76 @@ public class SpellProjectileEntity extends ThrowableProjectile {
         return "confringo".equals(spellId) || "wizards_and_beasts:confringo".equals(spellId);
     }
 
+    /**
+     * Movie-style clash. Two live bolts from different casters whose paths come within
+     * {@link SpellClashRules#CLASH_RADIUS} of each other lock instead of flying past: both are
+     * destroyed and a {@link SpellClashEntity} takes their place where they met, which is what
+     * carries the lightning, the sparks and the crackle for the next second or two.
+     *
+     * <p>This used to fire only for Expelliarmus, and only ever produced a single frame of particles.
+     *
+     * <p><b>Paths, not positions.</b> A bolt moves its whole step in one go, and two bolts flying at
+     * each other close about three blocks a tick — so comparing where they ended up let nearly every
+     * head-on pair pass straight through each other. Each bolt's path this tick runs from
+     * {@link #oldPosition()} to {@link #position()}, and the clash is decided at the closest moment
+     * along both.
+     *
+     * <p><b>The second bolt to move decides.</b> Both paths are only known once both bolts have
+     * ticked, so a bolt skips any other that has not moved yet this tick; that one will find this one
+     * when its own turn comes. This also means a pair spawns exactly one clash.
+     */
     private void trySpellClash(ServerLevel level) {
-        if (cachedSpell == null || !SpellIds.matches(cachedSpell.getId(), "expelliarmus")) {
+        Spell mine = getCachedOrResolveSpell();
+        if (mine == null) {
             return;
         }
-        List<SpellProjectileEntity> nearby = level.getEntitiesOfClass(SpellProjectileEntity.class,
-                getBoundingBox().inflate(0.35), o -> o != this && o.isAlive());
+        long now = level.getGameTime();
+        Vec3 myStart = oldPosition();
+        Vec3 myEnd = position();
+        AABB sweep = new AABB(myStart, myEnd).inflate(SpellClashRules.CLASH_RADIUS + MAX_BOLT_STEP);
+        List<SpellProjectileEntity> nearby = level.getEntitiesOfClass(SpellProjectileEntity.class, sweep,
+                o -> o != this && o.isAlive() && o.movedAtGameTime == now);
+        double radiusSqr = SpellClashRules.CLASH_RADIUS * SpellClashRules.CLASH_RADIUS;
         for (SpellProjectileEntity other : nearby) {
-            if (other.cachedSpell == null) {
+            if (!isOpposedTo(other)) {
                 continue;
             }
-            if (SpellIds.matches(other.cachedSpell.getId(), "avada_kedavra")) {
+            Vec3 theirStart = other.oldPosition();
+            Vec3 theirEnd = other.position();
+            Vec3 offset = myStart.subtract(theirStart);
+            Vec3 closing = myEnd.subtract(myStart).subtract(theirEnd.subtract(theirStart));
+            double t = SpellClashRules.closestApproachTime(
+                    offset.x, offset.y, offset.z, closing.x, closing.y, closing.z);
+            Vec3 myPoint = myStart.lerp(myEnd, t);
+            Vec3 theirPoint = theirStart.lerp(theirEnd, t);
+            if (myPoint.distanceToSqr(theirPoint) > radiusSqr) {
                 continue;
             }
-            net.minecraft.world.phys.Vec3 mid = position().add(other.position()).scale(0.5);
-            for (int i = 0; i < 12; i++) {
-                level.sendParticles(net.minecraft.core.particles.ParticleTypes.CRIT,
-                        mid.x, mid.y, mid.z, 1, 0.15, 0.15, 0.15, 0.02);
+            Spell theirs = other.getCachedOrResolveSpell();
+            if (theirs == null || !SpellClashRules.canClash(mine.getId(), theirs.getId())) {
+                continue;
             }
-            var clashTint = new SpellTintParticleOptions(ModParticles.SPELL_CLASH.get(), 0xFFEEDD);
-            for (int i = 0; i < 8; i++) {
-                level.sendParticles(clashTint, mid.x, mid.y, mid.z, 1, 0.12, 0.12, 0.12, 0.0);
-            }
-            level.playSound(null, BlockPos.containing(mid), ModSounds.SPELL_CLASH.get(), SoundSource.PLAYERS, 0.55f, 1.1f);
+            SpellClashEntity.spawn(level, myPoint.add(theirPoint).scale(0.5), this, other);
             other.discard();
             discard();
             return;
         }
     }
 
+    /**
+     * Two bolts fight only if two different wizards sent them: a single wizard's volley flies side by
+     * side, and a bolt with no caster has nobody to duel.
+     */
+    private boolean isOpposedTo(SpellProjectileEntity other) {
+        return casterUuid != null && other.casterUuid != null && !casterUuid.equals(other.casterUuid);
+    }
+
     @Override
     public void tick() {
         super.tick();
 
-        if (!level().isClientSide() && level() instanceof ServerLevel sl) {
+        if (!level().isClientSide() && level() instanceof ServerLevel sl && isAlive()) {
+            movedAtGameTime = sl.getGameTime();
             trySpellClash(sl);
         }
 

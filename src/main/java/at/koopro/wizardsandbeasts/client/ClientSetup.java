@@ -33,6 +33,9 @@ public class ClientSetup {
         event.registerEntityRenderer(ModEntities.BEAST_HEX_PROJECTILE.get(), ThrownItemRenderer::new);
         event.registerEntityRenderer(ModEntities.PATRONUS.get(), PatronusRenderer::new);
         event.registerEntityRenderer(ModEntities.PROTEGO_SHIELD.get(), ProtegoShieldRenderer::new);
+        // Movie-style spell clash: jagged bolts drawn with the beam system's Lightning shape.
+        event.registerEntityRenderer(ModEntities.SPELL_CLASH.get(),
+                at.koopro.wizardsandbeasts.client.spell.clash.SpellClashRenderer::new);
         // Not `simple`: the goblin picks its geometry and texture from its synced Gringotts role.
         event.registerEntityRenderer(ModEntities.GOBLIN_TELLER.get(), GoblinRenderer.provider("goblin_teller"));
         event.registerEntityRenderer(ModEntities.NIFFLER.get(), GeoRendererHelper.simple("niffler"));

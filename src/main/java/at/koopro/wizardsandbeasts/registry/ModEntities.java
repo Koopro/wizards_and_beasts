@@ -22,6 +22,7 @@ import at.koopro.wizardsandbeasts.entity.niffler.BabyNifflerEntity;
 import at.koopro.wizardsandbeasts.entity.niffler.NifflerEntity;
 import at.koopro.wizardsandbeasts.entity.spell.PatronusEntity;
 import at.koopro.wizardsandbeasts.entity.spell.ProtegoShieldEntity;
+import at.koopro.wizardsandbeasts.entity.spell.SpellClashEntity;
 import at.koopro.wizardsandbeasts.entity.spell.SpellProjectileEntity;
 import at.koopro.wizardsandbeasts.entity.spell.WizardingThrownEntity;
 import net.minecraft.core.registries.Registries;
@@ -44,6 +45,13 @@ public class ModEntities {
 
     public static final DeferredHolder<EntityType<?>, EntityType<BeastHexProjectile>> BEAST_HEX_PROJECTILE =
             EntityHelper.register(ENTITY_TYPES, "beast_hex_projectile", BeastHexProjectile::new, MobCategory.MISC, 0.25f, 0.25f, 8, 2);
+
+    /**
+     * Two spells locked together where their bolts met. Short-lived and purely visual, but spawned
+     * by the server so every duellist sees the same lock — see {@link SpellClashEntity}.
+     */
+    public static final DeferredHolder<EntityType<?>, EntityType<SpellClashEntity>> SPELL_CLASH =
+            EntityHelper.registerMisc(ENTITY_TYPES, "spell_clash", SpellClashEntity::new, 0.6f, 0.6f, 32, 2);
 
     public static final DeferredHolder<EntityType<?>, EntityType<PatronusEntity>> PATRONUS =
             EntityHelper.register(ENTITY_TYPES, "patronus", PatronusEntity::new, MobCategory.MISC, 0.6f, 1.2f, 8, 2);

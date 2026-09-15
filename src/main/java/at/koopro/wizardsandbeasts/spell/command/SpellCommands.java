@@ -6,6 +6,9 @@ import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.sync.PlayerStateSyncService;
 import at.koopro.wizardsandbeasts.spell.core.Proficiency;
 import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
+import at.koopro.wizardsandbeasts.spell.cast.SpellCastService;
+import at.koopro.wizardsandbeasts.spell.cast.SpellExecutor;
+import at.koopro.wizardsandbeasts.spell.core.CastType;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 import at.koopro.wizardsandbeasts.spell.core.SpellRequirement;
@@ -15,11 +18,13 @@ import at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver;
 import at.koopro.wizardsandbeasts.util.WandHelper;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
@@ -58,7 +63,16 @@ public final class SpellCommands {
                         .executes(ctx -> resetSpells(ctx.getSource().getPlayerOrException())))
                 .then(Commands.literal("learn_all")
                         .requires(WizardsAndBeastsCommandPermissions.ADMIN)
-                        .executes(ctx -> learnAllSpells(ctx.getSource().getPlayerOrException())));
+                        .executes(ctx -> learnAllSpells(ctx.getSource().getPlayerOrException())))
+                .then(Commands.literal("cast")
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
+                        .then(Commands.argument("spell", StringArgumentType.word())
+                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
+                                        Spells.all().stream().filter(SpellCommands::castableFromCommand)
+                                                .map(Spell::getId), builder))
+                                .executes(ctx -> castSpell(
+                                        ctx.getSource(),
+                                        StringArgumentType.getString(ctx, "spell")))));
     }
 
     /**
@@ -288,6 +302,45 @@ public final class SpellCommands {
         PlayerStateSyncService.syncSpells(player);
         player.displayClientMessage(Component.literal("All spell knowledge has been reset.").withStyle(ChatFormatting.YELLOW), false);
         return 1;
+    }
+
+    /**
+     * Fires a projectile spell from this player now, as a real cast with the gates in front of it
+     * skipped.
+     *
+     * <p>For anything that needs two casts in the same tick — a spell clash above all, which nobody
+     * alt-tabbing between two clients can line up: {@code /execute as @a at @s run wandb magic spell
+     * cast stupefy}. Everything past the gates is the real cast: wand, allegiance, proficiency, skills
+     * and the rest of the modifier pipeline apply, and a wand can still misfire. Knowing the spell, its
+     * requirement, cooldowns and Gamp's Law are skipped, and no cooldown is stamped.
+     *
+     * <p>Projectile spells only. Beam and channel spells are fed by a held wand every tick, which a
+     * command cannot do.
+     *
+     * <p>Refusals go to the command source rather than the player's chat, so the console running
+     * {@code /execute as …} is the one told.
+     */
+    private static int castSpell(CommandSourceStack source, String spellId) throws CommandSyntaxException {
+        ServerPlayer player = source.getPlayerOrException();
+        Spell spell = Spells.byId(spellId);
+        if (spell == null) {
+            source.sendFailure(Component.literal("Unknown spell: " + spellId));
+            return 0;
+        }
+        if (!castableFromCommand(spell)) {
+            source.sendFailure(Component.literal(
+                    spell.getId() + " cannot be cast from a command: only implemented projectile spells can."));
+            return 0;
+        }
+        ServerLevel level = player.level();
+        SpellExecutor.executeGeneric(SpellCastService.contextFor(player, spell, level), level);
+        return 1;
+    }
+
+    private static boolean castableFromCommand(Spell spell) {
+        return spell.isImplemented()
+                && spell.getProperties() != null
+                && spell.getProperties().getCastType() == CastType.PROJECTILE;
     }
 
     private static int learnAllSpells(ServerPlayer player) {
