@@ -134,6 +134,11 @@ public class WandItem extends GeoItemBase {
         // it either, for a winner who is still holding when it ends.
         if (!level.isClientSide() && entity instanceof ServerPlayer sp && !WandCastSessions.isClashHold(sp)) {
             WandBeamChannelLogic.tick(sp, stack);
+            // Protego charges while the wand is held: the longer the hold, the stronger the shape
+            // that will be raised on release, and the charge-up says which one out loud as it goes.
+            // Server-side so what the caster hears is what the release will actually give them.
+            at.koopro.wizardsandbeasts.spell.protego.ProtegoCharge.tick(
+                    sp, getUseDuration(stack, entity) - remainingUseDuration);
         }
     }
 

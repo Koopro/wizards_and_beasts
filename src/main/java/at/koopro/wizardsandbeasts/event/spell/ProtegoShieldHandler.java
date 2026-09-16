@@ -1,81 +1,106 @@
 package at.koopro.wizardsandbeasts.event.spell;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.registry.ModSounds;
+import at.koopro.wizardsandbeasts.entity.spell.ProtegoShieldEntity;
 import at.koopro.wizardsandbeasts.spell.cast.SpellProtegoRules;
+import at.koopro.wizardsandbeasts.spell.protego.ProtegoDarkThreats;
+import at.koopro.wizardsandbeasts.spell.protego.ProtegoWardManager;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.common.damagesource.DamageContainer;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-
+/**
+ * Where a raised Shield Charm meets a blow.
+ *
+ * <p>Two changes from the ward this replaces, both deliberate:
+ *
+ * <p><b>It absorbs instead of cancelling.</b> The shield has a pool of integrity; a hit spends from
+ * it and anything the pool cannot cover still lands. A nearly-spent ward is nearly no protection,
+ * which is what makes the pool worth watching.
+ *
+ * <p><b>It only answers attacks.</b> The old ward cancelled <em>every</em> damage event while it was
+ * up — falling, drowning, starving, standing in fire, poison. A shield charm is not a life-support
+ * bubble, and blocking all of that made Protego the best survival tool in the game by a wide margin.
+ * An attack here means damage that came from somewhere: an attacker, a projectile, a blast.
+ */
 @EventBusSubscriber(modid = WizardsAndBeastsMod.MODID)
 public final class ProtegoShieldHandler {
-    public static final String PROTEGO_ACTIVE_TAG = "neo_protego_active";
-    private static final Map<UUID, Long> PROTEGO_EXPIRY_TICKS = new ConcurrentHashMap<>();
+
+    /**
+     * An entity tag the old implementation used to mark an active ward.
+     *
+     * <p>Entity tags are saved with the player while the expiry map that cleared it was not, so a
+     * crash or restart with a shield up left the tag behind for good — a permanently invulnerable
+     * player. Nothing writes it any more; login sweeps whatever old saves still carry.
+     */
+    private static final String LEGACY_ACTIVE_TAG = "neo_protego_active";
 
     private ProtegoShieldHandler() {}
 
-    public static void activate(ServerPlayer player, long expiryTick) {
-        PROTEGO_EXPIRY_TICKS.put(player.getUUID(), expiryTick);
-        player.addTag(PROTEGO_ACTIVE_TAG);
-    }
-
-    /** Ends the incoming-damage ward early — called when the shield entity shatters before expiry. */
-    public static void deactivate(ServerPlayer player) {
-        PROTEGO_EXPIRY_TICKS.remove(player.getUUID());
-        player.removeTag(PROTEGO_ACTIVE_TAG);
-    }
-
     @SubscribeEvent
     public static void onIncomingDamage(LivingIncomingDamageEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        // Protected by your own ward, or sheltering inside an ally's dome.
-        boolean ownWard = player.getTags().contains(PROTEGO_ACTIVE_TAG);
-        if (!ownWard && !at.koopro.wizardsandbeasts.spell.protego.ProtegoWardManager.isInsideAllyDome(player)) {
+        LivingEntity victim = event.getEntity();
+        if (!(victim.level() instanceof ServerLevel level) || !ProtegoWardManager.anyWardActive()) {
             return;
         }
-        if (SpellProtegoRules.bypassesProtego(event)) {
+        DamageSource source = event.getSource();
+        // Canon: no shield stops the Killing Curse.
+        if (SpellProtegoRules.bypassesProtego(event) || !isWardable(source)) {
             return;
         }
-        event.setCanceled(true);
-        if (player.level() instanceof ServerLevel serverLevel) {
-            serverLevel.playSound(null, player.blockPosition(), ModSounds.PROTEGO_BLOCK.get(),
-                    SoundSource.PLAYERS, 0.72f, 1.03f + serverLevel.random.nextFloat() * 0.09f);
+        DamageContainer container = event.getContainer();
+        float incoming = container.getNewDamage();
+        if (incoming <= 0.0f) {
+            return;
+        }
+
+        Entity attacker = source.getEntity() != null ? source.getEntity() : source.getDirectEntity();
+        Vec3 from = source.getSourcePosition();
+        ProtegoShieldEntity shield = ProtegoWardManager.findProtector(victim, attacker, from);
+        if (shield == null) {
+            return;
+        }
+
+        // A dementor's chill costs Horribilis a third of what it costs any lesser ward — the same
+        // split Dark bolts get, applied to the half of Dark magic a player actually meets.
+        float absorbed = shield.absorbDamage(level, incoming, from, ProtegoDarkThreats.isDarkDamage(source));
+        if (absorbed >= incoming) {
+            event.setCanceled(true);
+        } else if (absorbed > 0.0f) {
+            // The ward emptied mid-blow: it takes what it can and the rest gets through.
+            container.setNewDamage(incoming - absorbed);
         }
     }
 
-    @SubscribeEvent
-    public static void onServerTick(ServerTickEvent.Post event) {
-        long now = event.getServer().overworld().getGameTime();
-        for (ServerPlayer player : event.getServer().getPlayerList().getPlayers()) {
-            Long expiry = PROTEGO_EXPIRY_TICKS.get(player.getUUID());
-            if (expiry == null) continue;
-            if (now >= expiry) {
-                PROTEGO_EXPIRY_TICKS.remove(player.getUUID());
-                player.removeTag(PROTEGO_ACTIVE_TAG);
-            }
+    /**
+     * Whether this damage is the sort a shield can stand in front of.
+     *
+     * <p>It must have come from somewhere — an attacker, the thing it threw, or a blast position.
+     * Damage with no origin is the environment or the victim's own state (fall, drown, starve,
+     * burn, poison, wither), and a barrier in front of them is not an answer to any of it.
+     */
+    private static boolean isWardable(DamageSource source) {
+        if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+            return false; // the void and /kill answer to nothing
         }
+        return source.getEntity() != null || source.getSourcePosition() != null;
     }
 
+    /** Heals saves that still carry the old always-on ward tag. Costs one set lookup per login. */
     @SubscribeEvent
-    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        PROTEGO_EXPIRY_TICKS.remove(player.getUUID());
-        player.removeTag(PROTEGO_ACTIVE_TAG);
-    }
-
-    @SubscribeEvent
-    public static void onChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        PROTEGO_EXPIRY_TICKS.remove(player.getUUID());
-        player.removeTag(PROTEGO_ACTIVE_TAG);
+    public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
+        Player player = event.getEntity();
+        if (player.getTags().contains(LEGACY_ACTIVE_TAG)) {
+            player.removeTag(LEGACY_ACTIVE_TAG);
+        }
     }
 }

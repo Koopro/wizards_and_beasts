@@ -54,8 +54,9 @@ cosmetics/conveniences are shed, and a few spells retain Java tails for bits no 
 
 - **11 Java spell classes deleted** (incendio, diffindo, bombarda, confringo, flipendo, glacius,
   depulso, nox, reparo, liberacorpus, arresto_momentum). 4 JSON spells gained `effects`.
-- `SELF_UTILITY_RULES` now holds only: **bespoke** (protego, capacious_extremis, claustra_reverto,
-  riddikulus) + **residual tails** (reparo, arresto_momentum, episkey, frigora).
+- `SELF_UTILITY_RULES` now holds only: **bespoke** (capacious_extremis, claustra_reverto,
+  riddikulus) + **residual tails** (reparo, arresto_momentum, episkey, frigora). (`protego` was in this
+  list and never reached: it overrides `executeCast`. Dropped 2026-09-16 with the Protego redesign.)
 - `Crucio` requirement repointed `Spells.INCENDIO` → `"incendio"` (id-string). Tests repointed
   `Spells.FLIPENDO` → `Spells.EXPELLIARMUS` (FLIPENDO removed).
 - **Still Java / deferred:** crucio + wingardium_leviosa (BEAM — F2), the 5 hybrids, the bespoke set.

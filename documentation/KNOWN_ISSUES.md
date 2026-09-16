@@ -873,6 +873,32 @@ single file**; the only form texture that ships is `animagus_stag.png`, for the 
 definition. Forms render through `FormModelRenderer` on vanilla models, so nothing is visibly
 broken today, but those three fields describe assets that do not exist.
 
+## 8b. Open gaps left by the 2026-09-16 Protego redesign
+
+### 8b.1 Beam spells do not consult a Shield Charm
+
+The ward answers damage that carries an attacker or a source position. Beam damage in
+`WandBeamSpellHandlers` is dealt as `damageSources().magic()` with neither — Crucio's escalating ramp
+damage and Aguamenti's jet against fire-immune creatures both land on a warded player as if no shield
+were up. (Crucio's actual pain effect was never blocked by Protego either; it rides an effect
+component, not damage.) The fix is attribution at the source — `indirectMagic(caster, caster)` — which
+also changes kill credit and death messages, so it was left for its own pass rather than folded into
+this one. Avada Kedavra's beam is deliberately unaffected: nothing stops the Killing Curse.
+
+### 8b.2 The shield's visuals have not been seen in a client
+
+Tier colour, the integrity fade, the charge vignette, the wand's charge tint, the planted ring and the
+dome sitting on the ground are reasoned from
+the geometry and the render pipeline, not observed: the redesign was built and verified headlessly
+(`compileJava`, 1780 unit tests, 29 game tests). The dome is still the geo's box, now scaled to the
+radius it actually protects; a round hemisphere is art work nobody has done yet.
+
+### 8b.3 Vanilla projectiles are absorbed at the body, not turned at the wall
+
+Spell bolts are deflected where they cross the ward. Arrows, fireballs and thrown items pass through it
+visually and are paid for out of integrity when they reach whoever is inside. Correct in effect, wrong
+in appearance.
+
 ## 9. Reporting a new issue
 
 Include: the module states in effect (`/wandb admin module list`), whether the world was

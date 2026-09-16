@@ -207,10 +207,10 @@ No entry is marked `PARTIAL`: the audit found no half-registered spell.
 
 | id | Incantation | Effect | Tier | Relation | Status |
 |---|---|---|---|---|---|
-| `protego` | Protego | Shield Charm | T1 | BASE | **IMPLEMENTED** |
-| `protego_totalum` | Protego Totalum | Area shield over a location | T1 | RANK_OF `protego` | COMING_SOON |
-| `protego_horribilis` | Protego Horribilis | Wards specifically against dark magic | T1 | RANK_OF `protego` | COMING_SOON |
-| `protego_maxima` | Protego Maxima | Castle-scale shield | T4 | RANK_OF `protego_totalum` | COMING_SOON |
+| `protego` | Protego | Shield Charm, in four held shapes | T1 | BASE | **IMPLEMENTED** |
+| ~~`protego_totalum`~~ | Protego Totalum | Ally-covering bubble | T1 | tier 1 of `protego` | **FOLDED IN** |
+| ~~`protego_maxima`~~ | Protego Maxima | Wide, plantable dome | T4 | tier 2 of `protego` | **FOLDED IN** |
+| ~~`protego_horribilis`~~ | Protego Horribilis | Dome that swallows Dark spells | T1 | tier 3 of `protego` | **FOLDED IN** |
 | `fianto_duri` | Fianto Duri | Hardens a shield against impact | T4 | BASE | COMING_SOON |
 | `repello_inimicum` | Repello Inimicum | Disintegrates enemies at the boundary | T4 | BASE | COMING_SOON |
 | `salvio_hexia` | Salvio Hexia | Deflects incoming hexes | T1 | BASE | COMING_SOON |

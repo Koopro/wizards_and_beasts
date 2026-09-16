@@ -70,5 +70,6 @@ public final class WizardsAndBeastsGameTests {
         PlacementFacingTests.contribute(registrar);
         LeviosaThrowTests.contribute(registrar);
         SpellClashTests.contribute(registrar);
+        ProtegoShieldTests.contribute(registrar);
     }
 }

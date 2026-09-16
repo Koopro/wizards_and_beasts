@@ -4,6 +4,66 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### The Shield Charm has weight (2026-09-16)
+
+**The charge is something you can see and hear climbing.** Under the four chimes there is a hum whose
+pitch and volume rise with how far the hold has come towards the next shape, motes circle the wand in
+that shape's colour, and — for the caster alone — the screen edges take a vignette in the same colour
+that closes in as the charge climbs and flares on each threshold. The wand in your hand takes the
+colour too. Sneak while a dome is ready and the footprint it would take is drawn on the ground. All of
+it respects `reduceScreenEffects`: with it on, the sounds and the particles still carry the whole
+picture.
+
+**Thresholds** (novice, and 15%/30% faster at Proficient/Mastered): Totalum at 8 ticks, Maxima at 18,
+Horribilis at 32 — a tap is 3-5 ticks once release latency is counted, so a flinch can never buy a
+bubble, and the whole climb still fits inside one exchange of a duel.
+
+**One spell, four shapes, chosen by how long you hold the wand.** A tap is *Protego*: a disc held out in
+front of you that raises instantly, covers the arc you face and recovers faster than the spell's own
+cooldown. Hold longer and it becomes *Totalum* (a bubble that walks with you and shelters whoever stands
+close), then *Maxima* (a wide dome), then *Horribilis*. Practice raises the ceiling and shortens the
+climb; Horribilis also needs three unlocked Dark Arts nodes, because warding a curse means understanding
+it. The wand says which shape it has reached as it reaches it — a rising chime, motes in the tier's
+colour, and the incantation on the action bar — and tells you which wall you hit when it can go no
+further. Totalum, Maxima and Horribilis are **not** separate spells; the three `coming_soon` stubs that
+claimed they were are gone.
+
+**A shield is an absorb pool, not a hit counter.** Every spell it turns and every blow it takes for
+someone spends integrity, which scales with the shape, your practice and the cast's own power. Damage
+the pool cannot cover still lands. Over the last third of the pool the ward sings, reddens and thins, so
+a shield about to go looks like one.
+
+**Sneak as you release a dome to plant it.** A planted Maxima or Horribilis stays where you set it —
+deeper, longer-lived, and standing for everyone inside it even after you walk out (up to 48 blocks).
+
+**Running out of time and being broken are different endings.** Time runs out: it fades, quietly, and
+costs nothing. Broken: glass, a shockwave that throws whatever was leaning on it, a stagger, and a recast
+lockout stamped on the Protego cooldown that grows with the shape you lost. A broken Horribilis also
+lashes its caster — Dark magic swallowed whole has to go somewhere.
+
+**Horribilis now has Dark magic to actually ward against.** Its clause used to read "a Dark-family spell
+projectile", which in this game is almost nothing: the Killing Curse is unblockable by canon, Crucio and
+Imperio are beams, and the rest of the Dark list is self-cast. A spell now counts as Dark if its family
+is Dark *or* its category is the Dark Arts, and — the half a player actually meets — so does a blow from
+anything in the `dark_creatures` tag: dementors, the obscurus, the undead. Horribilis pays a third of the
+integrity for those, every lesser ward pays a quarter more, so a Horribilis holds a graveyard roughly
+three and a half times as long as a Maxima with the same pool.
+
+**What Protego no longer does:** cancel every damage event while it is up. Falling, drowning, starving,
+burning and poison are not somebody attacking you, and a charm that answered all of them was the best
+survival tool in the mod. It answers attacks: an attacker, a projectile, a blast.
+
+**Fixes underneath.** Protego never recorded a successful cast, so its proficiency was pinned at NOVICE
+forever and Expecto Patronum (which needs Protego at Proficient) could not be learned. The old ward
+marked players with a saved entity tag whose expiry lived only in memory, so a crash with a shield up
+left a permanently invulnerable player — the tag is gone and old saves are swept at login. Bolt
+interception is swept over each bolt's step instead of sampled, so fast spells no longer tunnel through a
+ward, and a deflected bolt is no longer re-deflected until the shield's pool is gone. A spell stopped at
+a body now has its stun, disarm and effects stopped with it, rather than only its damage.
+
+Covered by `ProtegoRulesTest` (26 cases over the ladder, the pool and the swept geometry) and four game
+tests: a dome spends integrity instead of health, the disc has a back, the ward ignores the weather, and
+a breach locks the recast. Each was checked against a mutation that should break it.
 ### Spell clashes are held (2026-09-15)
 
 **A lock is a duel now, not a firework.** When two bolts lock, a beam runs from each caster's wand tip to

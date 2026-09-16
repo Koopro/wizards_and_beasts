@@ -367,7 +367,7 @@ class SkillNodeJsonTest {
     /**
      * A node may only teach a spell the cast pipeline will actually fire.
      *
-     * <p>The spell datapack ships 155 definitions of which 27 are implemented; the rest carry
+     * <p>The spell datapack ships 152 definitions of which 27 are implemented; the rest carry
      * {@code "implementationState": "coming_soon"} and exist so the canon roster is registered and
      * nameable. Wiring one into a {@code learn_spell} would spend a player's points on a spell that
      * appears in their book and is refused at the wand — the same defect as the misnamed

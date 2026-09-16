@@ -12,10 +12,14 @@ public final class BeamClientEvents {
 
     private BeamClientEvents() {}
 
-    /** Whole client level is going away — drop every anchor and every beam. */
+    /** Whole client level is going away — drop every anchor, every beam and any charge in progress. */
     public static void onLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
         WandTipTracker.clear();
         BeamChannelClient.clear();
+        // A Protego charge expires on its own after a few silent ticks, but the client tick it was
+        // stamped with belongs to a level that is going away; clearing it keeps the next session's
+        // first ticks from reading a stale stamp as a live charge.
+        at.koopro.wizardsandbeasts.client.spell.protego.ClientProtegoChargeState.clear();
     }
 
     /**

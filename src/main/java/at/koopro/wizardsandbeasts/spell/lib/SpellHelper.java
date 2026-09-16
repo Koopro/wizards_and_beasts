@@ -320,27 +320,6 @@ public final class SpellHelper {
         scatterGroundFire(level, Vec3.atCenterOf(hit.getBlockPos()), 6, 2.2);
     }
 
-    public static void applyProtegoCastPulse(ServerLevel level, ServerPlayer caster, Spell spell) {
-        level.playSound(null, caster.blockPosition(), ModSounds.PROTEGO_RAISE.get(), SoundSource.PLAYERS,
-                0.88f, 1.0f + level.random.nextFloat() * 0.12f);
-        Vec3 center = caster.getBoundingBox().getCenter();
-        AABB area = caster.getBoundingBox().inflate(3.0);
-        for (Entity e : level.getEntities(caster, area, entity -> entity instanceof Projectile || entity instanceof LivingEntity)) {
-            Vec3 away = e.getBoundingBox().getCenter().subtract(center);
-            if (away.lengthSqr() < 1.0e-4) continue;
-            applyKnockback(e, away, 1.2f);
-        }
-        for (BlockPos p : BlockPos.betweenClosed(
-                BlockPos.containing(center).offset(-2, -1, -2),
-                BlockPos.containing(center).offset(2, 2, 2))) {
-            BlockState st = level.getBlockState(p);
-            if (st.is(Blocks.FIRE) || st.is(Blocks.SOUL_FIRE)) {
-                level.removeBlock(p, false);
-            }
-        }
-        spawnBurst(level, spell, center, 12, 0.2);
-    }
-
     public static void applyArrestoAreaStabilize(ServerLevel level, ServerPlayer caster, Spell spell) {
         AABB area = caster.getBoundingBox().inflate(4.0, 3.0, 4.0);
         // Time-stop bubble: everything but the caster is caught. Living things are slow-fallen, near-frozen

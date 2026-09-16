@@ -21,6 +21,14 @@
         "dome_hemisphere": { "scale": { "0.0": [1, 1, 1], "0.15": [1.15, 1.15, 1.15], "0.4": [1, 1, 1] } }
       }
     },
+    "fade": {
+      "loop": false,
+      "animation_length": 1.0,
+      "bones": {
+        "disc_core": { "scale": { "0.0": [1, 1, 1], "1.0": [0, 0, 0] } },
+        "dome_hemisphere": { "scale": { "0.0": [1, 1, 1], "1.0": [0, 0, 0] } }
+      }
+    },
     "shatter": {
       "loop": false,
       "bones": {

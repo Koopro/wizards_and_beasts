@@ -1,29 +1,35 @@
 package at.koopro.wizardsandbeasts.spell.impl;
 
 import at.koopro.wizardsandbeasts.effect.ModEffects;
-import at.koopro.wizardsandbeasts.effect.ProtegoShieldEffect;
 import at.koopro.wizardsandbeasts.entity.spell.ProtegoShieldEntity;
-import at.koopro.wizardsandbeasts.event.spell.ProtegoShieldHandler;
-import at.koopro.wizardsandbeasts.network.spell.ProtegoSpawnS2CPayload;
-import at.koopro.wizardsandbeasts.registry.ModSounds;
-import at.koopro.wizardsandbeasts.spell.core.*;
-import at.koopro.wizardsandbeasts.spell.cast.*;
-import at.koopro.wizardsandbeasts.spell.lib.*;
-import at.koopro.wizardsandbeasts.spell.beam.*;
+import at.koopro.wizardsandbeasts.spell.cast.CastContext;
 import at.koopro.wizardsandbeasts.spell.cast.WandCastTiming;
-import at.koopro.wizardsandbeasts.spell.protego.ProtegoProjectileHandler;
+import at.koopro.wizardsandbeasts.spell.core.Spell;
+import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
+import at.koopro.wizardsandbeasts.spell.core.SpellProperties;
+import at.koopro.wizardsandbeasts.spell.core.SpellRequirement;
+import at.koopro.wizardsandbeasts.spell.cast.SpellPower;
+import at.koopro.wizardsandbeasts.spell.proficiency.SpellProficiencyTracker;
+import at.koopro.wizardsandbeasts.spell.protego.ProtegoCharge;
+import at.koopro.wizardsandbeasts.spell.protego.ProtegoFeedback;
+import at.koopro.wizardsandbeasts.spell.protego.ProtegoRules;
+import at.koopro.wizardsandbeasts.spell.protego.ProtegoTier;
 import at.koopro.wizardsandbeasts.spell.protego.ProtegoWardManager;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
-import net.neoforged.neoforge.network.PacketDistributor;
 
+/**
+ * The Shield Charm. One spell, four shapes — see {@link ProtegoTier}.
+ *
+ * <p>The wand hold chooses the shape ({@link ProtegoCharge}), sneaking on release plants the dome
+ * tiers, and the shape decides everything else: how much the ward can absorb, how long it stands,
+ * who it covers, what a Dark bolt costs it, what recovering from a break costs the caster.
+ *
+ * <p>Totalum, Maxima and Horribilis are <em>not</em> separate spells. They are ranks of this one,
+ * named at the charge-up so a player learns the ladder by casting it.
+ */
 public class Protego extends Spell {
-    public static final int PROTEGO_DURATION_TICKS = 100;
 
     public Protego() {
         super("protego", "Protego", SpellCategory.DEFENSE, 100, 0.0f, 0xFF4488FF);
@@ -40,45 +46,51 @@ public class Protego extends Spell {
     public void executeCast(CastContext ctx, ServerLevel level) {
         ServerPlayer caster = ctx.caster();
         int heldTicks = WandCastTiming.consumeLastHoldTicks(caster);
-        int tier = ProtegoProjectileHandler.resolveTier(caster, heldTicks);
-        int duration = 60 + (int) (getProficiencyScalar(caster) * 100);
-        String label = switch (tier) {
-            case 0 -> "Protego";
-            case 1 -> "Protego Totalum";
-            case 2 -> "Protego Maxima";
-            default -> "Protego Horribilis";
-        };
-        caster.displayClientMessage(Component.literal(label).withStyle(ChatFormatting.AQUA), true);
-        int deflections = switch (tier) {
-            case 0 -> 1;
-            case 1 -> 3;
-            default -> 5;
-        };
-        int amplifier = ProtegoShieldEffect.encodeAmplifier(tier, deflections);
-        // Shatter the previous shield BEFORE adding the new effect: beginShatter() removes the
-        // caster's PROTEGO_SHIELD effect, which would otherwise strip the effect added below and
-        // make the fresh shield self-shatter on its first tick (recast bug).
-        ProtegoWardManager.shatterExistingIfPresent(caster);
-        caster.addEffect(new MobEffectInstance(ModEffects.PROTEGO_SHIELD, duration, amplifier, false, false, true));
-        // Activate the incoming-damage ward for the shield's lifetime. Without this the shield only
-        // deflected spell projectiles and left the caster fully exposed to melee/arrows/etc.
-        // SpellProtegoRules lets the Killing Curse through; everything else is cancelled while up.
-        ProtegoShieldHandler.activate(caster, level.getGameTime() + duration);
-        ProtegoShieldEntity shield = new ProtegoShieldEntity(level, caster, tier);
+        ProtegoTier tier = ProtegoCharge.resolve(caster, heldTicks).tier();
+        boolean planted = ProtegoRules.canPlant(tier, caster.isShiftKeyDown());
+
+        float proficiency = getProficiencyScalar(caster);
+        float integrity = ProtegoRules.integrity(tier, proficiency, castPower(ctx), planted);
+        int lifetime = ProtegoRules.lifetimeTicks(tier, proficiency, planted);
+
+        // The shape decides the recovery. Applied to the cast's cooldown channel rather than to a
+        // timer of our own, because SpellCastService reads that channel after executeCast returns —
+        // so a quick parry really is quicker to get back, and a Horribilis really does leave the
+        // caster without a shield for a while.
+        ctx.modifiers().multiplyCooldown(tier.cooldownFactor(), "protego_tier");
+        if (tier.raiseExhaustion() > 0.0f) {
+            caster.causeFoodExhaustion(tier.raiseExhaustion());
+        }
+
+        // Replace first: collapsing the old shield releases the effect and the registry entry, and
+        // both are re-taken below. (The collapse only releases what still points at that shield, so
+        // this ordering is a courtesy now rather than the load-bearing thing it used to be.)
+        ProtegoWardManager.replaceExisting(caster);
+
+        ProtegoShieldEntity shield = ProtegoShieldEntity.raise(level, caster, tier, planted, integrity, lifetime);
         level.addFreshEntity(shield);
         ProtegoWardManager.register(caster.getUUID(), shield.getId());
-        PacketDistributor.sendToPlayersNear(level, null, shield.getX(), shield.getY(), shield.getZ(), 32.0,
-                new ProtegoSpawnS2CPayload(shield.getId(), tier, caster.getUUID(), shield.getX(), shield.getY(), shield.getZ()));
-        level.playSound(null, caster.blockPosition(), ModSounds.PROTEGO_RAISE.get(), SoundSource.PLAYERS, 0.75f, 1.1f);
-        if (tier == 1) {
-            level.playSound(null, caster.blockPosition(), ModSounds.PROTEGO_TOTALUM_RAISE.get(), SoundSource.PLAYERS, 0.9f, 1.0f);
-        } else if (tier >= 2) {
-            level.playSound(null, caster.blockPosition(), ModSounds.PROTEGO_MAXIMA_RAISE.get(), SoundSource.PLAYERS, 1.0f, 0.95f);
-        }
-        SpellHelper.applyProtegoCastPulse(level, caster, this);
-        if (getProficiency(caster) == Proficiency.MASTERED) {
-            caster.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 60, 2, false, true, true));
-        }
+        caster.addEffect(new MobEffectInstance(ModEffects.PROTEGO_SHIELD, lifetime, tier.index(),
+                false, false, true));
+        ProtegoFeedback.raise(level, caster, shield);
+
+        // Raising a ward is the practice that improves it. Protego never recorded a hit — it
+        // overrides executeCast and so skipped the SELF branch that does it for every other
+        // self-cast — which left its proficiency pinned at NOVICE forever: no tier above Totalum
+        // was reachable, and Expecto Patronum (which requires Protego at PROFICIENT) was unlearnable.
+        SpellProficiencyTracker.recordSuccessfulHit(caster, getId());
+    }
+
+    /**
+     * The cast's power, with the proficiency channel left out.
+     *
+     * <p>{@code finalDamage()} composes situational × proficiency × skill; integrity applies
+     * proficiency itself, in its own curve, so taking the full product here would count practice
+     * twice — the double-multiplication this codebase has already had to unpick once.
+     */
+    private static float castPower(CastContext ctx) {
+        SpellPower.Breakdown damage = ctx.modifiers().damageBreakdown();
+        return damage.situational() * damage.skill();
     }
 
     @Override

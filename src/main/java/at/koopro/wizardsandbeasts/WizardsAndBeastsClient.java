@@ -186,6 +186,10 @@ public class WizardsAndBeastsClient {
         event.registerAboveAll(StatHudOverlay.ID, StatHudOverlay::render);
         event.registerAboveAll(SneakoscopeAlarmOverlay.ID, SneakoscopeAlarmOverlay::render);
         event.registerAboveAll(FirewhiskyBurnOverlay.ID, FirewhiskyBurnOverlay::render);
+        // Under the rest of the tints: a charge in progress must never hide what it is being raised
+        // against. It draws nothing unless this player is holding a Protego right now.
+        event.registerAboveAll(at.koopro.wizardsandbeasts.client.hud.ProtegoChargeOverlay.ID,
+                at.koopro.wizardsandbeasts.client.hud.ProtegoChargeOverlay::render);
         // Numbers off a duelling dummy. Above the rest so a burst is not hidden behind a vignette,
         // and unconditional: the layer draws nothing until a payload arrives, and payloads only
         // arrive when the server's dummyDamageNumbers setting says this player should see them.

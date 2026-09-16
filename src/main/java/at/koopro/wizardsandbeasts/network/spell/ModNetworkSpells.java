@@ -10,7 +10,6 @@ import at.koopro.wizardsandbeasts.network.spell.ImperioResistS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.ImperioVictimBoundS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.PatronusFormSetS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.ProtegoAnimationS2CPayload;
-import at.koopro.wizardsandbeasts.network.spell.ProtegoSpawnS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.SpellAssignC2SPayload;
 import at.koopro.wizardsandbeasts.network.spell.SpellCastC2SPayload;
 import at.koopro.wizardsandbeasts.network.spell.SpellDataDeltaS2CPayload;
@@ -99,9 +98,9 @@ public final class ModNetworkSpells {
                 BeamChannelS2CPayload.STREAM_CODEC,
                 SpellClientPayloadHandlers::handleBeamChannel);
         registrar.playToClient(
-                ProtegoSpawnS2CPayload.TYPE,
-                ProtegoSpawnS2CPayload.STREAM_CODEC,
-                SpellClientPayloadHandlers::handleProtegoSpawn);
+                ProtegoChargeS2CPayload.TYPE,
+                ProtegoChargeS2CPayload.STREAM_CODEC,
+                SpellClientPayloadHandlers::handleProtegoCharge);
         registrar.playToClient(
                 ProtegoAnimationS2CPayload.TYPE,
                 ProtegoAnimationS2CPayload.STREAM_CODEC,

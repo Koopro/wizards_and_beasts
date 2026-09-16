@@ -2,7 +2,11 @@ package at.koopro.wizardsandbeasts.client.wand;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.item.wand.WandItem;
+import at.koopro.wizardsandbeasts.client.spell.protego.ClientProtegoChargeState;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
+import at.koopro.wizardsandbeasts.spell.protego.ProtegoTier;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemDisplayContext;
 import at.koopro.wizardsandbeasts.wand.WandAppearance;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.customization.WandConfiguration;
@@ -91,11 +95,34 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
                               float partialTick) {
         int base = super.getRenderColor(animatable, renderData, partialTick);
         int tint = WandAppearance.woodTint(renderData.itemStack());
-        if (tint == WandAppearance.UNTINTED
-                || ModDataComponents.isElderWand(renderData.itemStack())) {
+        if (tint != WandAppearance.UNTINTED && !ModDataComponents.isElderWand(renderData.itemStack())) {
+            base = net.minecraft.util.ARGB.multiply(base, tint);
+        }
+        return applyProtegoCharge(base, renderData.renderPerspective());
+    }
+
+    /**
+     * A wand gathering a Shield Charm takes on the colour of the shape it is gathering, deepening as
+     * the hold climbs.
+     *
+     * <p>Held perspectives only: this is the local player's own wand in their own hand telling them
+     * what a release would buy, and tinting the same item in an inventory slot or on the ground would
+     * describe a state that item does not have.
+     */
+    private static int applyProtegoCharge(int base, ItemDisplayContext perspective) {
+        boolean inHand = perspective.firstPerson()
+                || perspective == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND
+                || perspective == ItemDisplayContext.THIRD_PERSON_LEFT_HAND;
+        if (!inHand || !ClientProtegoChargeState.isCharging()) {
             return base;
         }
-        return net.minecraft.util.ARGB.multiply(base, tint);
+        ProtegoTier tier = ClientProtegoChargeState.tier();
+        float climb = (tier.index() + (ClientProtegoChargeState.isCapped()
+                ? 1.0f : ClientProtegoChargeState.progress())) / ProtegoTier.values().length;
+        float strength = Mth.clamp(0.25f + 0.75f * climb, 0.0f, 1.0f);
+        // Lerp towards the tier colour rather than multiplying by it: a multiply on dark wandwood
+        // darkens the wand instead of lighting it up, which is the opposite of a charge.
+        return net.minecraft.util.ARGB.srgbLerp(strength, base, tier.colour());
     }
 
     // ── Bone visibility (render thread) ─────────────────────────────────────

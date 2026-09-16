@@ -89,6 +89,18 @@ public class ModSounds {
             register("protego_totalum_raise"); // vanilla-event remap in sounds.json; bespoke asset optional
     public static final DeferredHolder<SoundEvent, SoundEvent> PROTEGO_MAXIMA_RAISE =
             register("protego_maxima_raise"); // vanilla-event remap in sounds.json; bespoke asset optional
+    /** One step up the tier ladder while the wand is held. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> PROTEGO_CHARGE =
+            register("protego_charge"); // vanilla-event remap in sounds.json; bespoke asset optional
+    /** A dome being set down rather than carried. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> PROTEGO_PLANT =
+            register("protego_plant"); // vanilla-event remap in sounds.json; bespoke asset optional
+    /** A ward running out of time — the quiet ending, never the broken one. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> PROTEGO_FADE =
+            register("protego_fade"); // vanilla-event remap in sounds.json; bespoke asset optional
+    /** The last third of the pool: the ward singing under pressure. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> PROTEGO_STRAIN =
+            register("protego_strain"); // vanilla-event remap in sounds.json; bespoke asset optional
     public static final DeferredHolder<SoundEvent, SoundEvent> SPELL_CLASH =
             register("spell_clash");
 

@@ -207,6 +207,9 @@ public final class SpellExecutor {
 
     private static final SelfUtilityRule[] SELF_UTILITY_RULES = new SelfUtilityRule[] {
             // Step 3/4 migration notes:
+            //  - protego is NOT here: it overrides executeCast (it spawns a shield entity and needs the
+            //    hold time), so this table was never reached for it. The raise pulse it used to run from
+            //    here now lives with the rest of the shield's feedback in ProtegoFeedback.
             //  - lumos (S3) & nox (S4) are JSON spells; their light/dispel ride effect components, and
             //    the lumos<->nox learn + loadout-swap toggle rides a swap_active_spell component.
             //  - reparo (S4): residual tail. SpellDefinition has no repairsItem field and the `repair`
@@ -218,10 +221,6 @@ public final class SpellExecutor {
             //    heal+cleanse / clear-fire+resistances ride components in JSON.
             new SelfUtilityRule("reparo", (level, caster, spell) ->
                     SpellCastHandlers.handleReparoSelf(level, caster, spell)),
-            new SelfUtilityRule("protego", (level, caster, spell) -> {
-                SpellHelper.applyProtegoCastPulse(level, caster, spell);
-                return true;
-            }),
             new SelfUtilityRule("arresto_momentum", (level, caster, spell) -> {
                 SpellHelper.applyArrestoAreaStabilize(level, caster, spell);
                 return true;

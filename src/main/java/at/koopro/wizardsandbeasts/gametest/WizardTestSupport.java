@@ -118,6 +118,18 @@ public final class WizardTestSupport {
      * reports itself loaded long before any of this matters.
      */
     public static ServerPlayer placeMockPlayer(GameTestHelper helper, String name) {
+        return placeMockPlayer(helper, name, GameType.CREATIVE);
+    }
+
+    /**
+     * The same player in a chosen game mode.
+     *
+     * <p>Worth knowing before writing a scenario about damage: a creative player is invulnerable to
+     * everything, and vanilla answers that in {@code isInvulnerableTo} — <em>before</em> the incoming
+     * damage event — so a creative test player silently never fires one. Anything that measures what
+     * a hit does needs {@link GameType#SURVIVAL}.
+     */
+    public static ServerPlayer placeMockPlayer(GameTestHelper helper, String name, GameType mode) {
         ServerLevel level = helper.getLevel();
         CommonListenerCookie cookie = CommonListenerCookie.createInitial(
                 new GameProfile(UUID.randomUUID(), name), false);
@@ -125,7 +137,7 @@ public final class WizardTestSupport {
                 level.getServer(), level, cookie.gameProfile(), cookie.clientInformation()) {
             @Override
             public GameType gameMode() {
-                return GameType.CREATIVE;
+                return mode;
             }
         };
         Connection connection = new Connection(PacketFlow.SERVERBOUND);
@@ -133,6 +145,9 @@ public final class WizardTestSupport {
         NetworkRegistry.configureMockConnection(connection);
         level.getServer().getPlayerList().placeNewPlayer(connection, player, cookie);
         player.connection.handleAcceptPlayerLoad(new ServerboundPlayerLoadedPacket());
+        // placeNewPlayer hands out the server's default abilities, which in a game-test server are
+        // creative ones — and creative abilities carry invulnerable=true whatever gameMode() says.
+        player.setGameMode(mode);
         return player;
     }
 

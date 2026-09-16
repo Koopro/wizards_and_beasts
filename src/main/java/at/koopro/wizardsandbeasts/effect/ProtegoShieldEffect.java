@@ -7,20 +7,17 @@ import net.minecraft.world.entity.LivingEntity;
 import org.jspecify.annotations.NonNull;
 
 /**
- * Amplifier encodes tier and deflection charges: {@code tier * 16 + remainingDeflections}.
- * Tier: 0 basic, 1 Totalum, 2 Maxima, 3 Horribilis.
+ * "You have a shield up." Marker only: the shield entity owns the ward's integrity, radius and
+ * lifetime, and this effect exists so the player sees an icon for as long as it stands and so
+ * systems that only need a yes/no (the basilisk's gaze, for one) have something cheap to ask.
+ *
+ * <p>Amplifier is the {@link at.koopro.wizardsandbeasts.spell.protego.ProtegoTier} index, nothing
+ * more. It used to pack tier and remaining deflections into one number, which meant the shield's
+ * real state lived in two places that could disagree.
  */
 public final class ProtegoShieldEffect extends MobEffect {
     public ProtegoShieldEffect() {
         super(MobEffectCategory.BENEFICIAL, 0xB0C4DE);
-    }
-
-    public static int encodeAmplifier(int tier, int deflectionsRemaining) {
-        return tier * 16 + Math.min(15, Math.max(0, deflectionsRemaining));
-    }
-
-    public static int tierFromAmplifier(int amplifier) {
-        return Math.min(3, Math.max(0, amplifier / 16));
     }
 
     @Override

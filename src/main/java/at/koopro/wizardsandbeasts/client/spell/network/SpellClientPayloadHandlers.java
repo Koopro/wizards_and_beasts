@@ -15,7 +15,7 @@ import at.koopro.wizardsandbeasts.network.spell.ImperioResistS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.ImperioVictimBoundS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.PatronusFormSetS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.ProtegoAnimationS2CPayload;
-import at.koopro.wizardsandbeasts.network.spell.ProtegoSpawnS2CPayload;
+import at.koopro.wizardsandbeasts.network.spell.ProtegoChargeS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.SpellDataDeltaS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.SpellDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.SpellDeniedS2CPayload;
@@ -110,8 +110,8 @@ public final class SpellClientPayloadHandlers {
         });
     }
 
-    public static void handleProtegoSpawn(ProtegoSpawnS2CPayload pkt, IPayloadContext ctx) {
-        ctx.enqueueWork(() -> ProtegoClientPacketHandlers.handleSpawn(pkt));
+    public static void handleProtegoCharge(ProtegoChargeS2CPayload pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> ProtegoClientPacketHandlers.handleCharge(pkt));
     }
 
     public static void handleProtegoAnimation(ProtegoAnimationS2CPayload pkt, IPayloadContext ctx) {

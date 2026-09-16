@@ -1,28 +1,27 @@
 package at.koopro.wizardsandbeasts.entity.spell;
 
 import at.koopro.wizardsandbeasts.effect.ModEffects;
-import at.koopro.wizardsandbeasts.event.spell.ProtegoShieldHandler;
 import at.koopro.wizardsandbeasts.network.spell.ProtegoAnimationS2CPayload;
-import at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions;
 import at.koopro.wizardsandbeasts.registry.ModEntities;
 import at.koopro.wizardsandbeasts.registry.ModParticles;
-import at.koopro.wizardsandbeasts.registry.ModSounds;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
-import at.koopro.wizardsandbeasts.spell.core.SpellFamilies;
-import at.koopro.wizardsandbeasts.spell.core.SpellFamily;
-import at.koopro.wizardsandbeasts.spell.core.Spells;
+import at.koopro.wizardsandbeasts.spell.protego.ProtegoBreach;
+import at.koopro.wizardsandbeasts.spell.protego.ProtegoDarkThreats;
+import at.koopro.wizardsandbeasts.spell.protego.ProtegoFeedback;
+import at.koopro.wizardsandbeasts.spell.protego.ProtegoRules;
+import at.koopro.wizardsandbeasts.spell.protego.ProtegoTier;
 import at.koopro.wizardsandbeasts.spell.protego.ProtegoWardManager;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -39,29 +38,89 @@ import software.bernie.geckolib.animation.object.PlayState;
 import software.bernie.geckolib.animation.state.AnimationTest;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
+/**
+ * A raised Shield Charm: the thing that actually stands in the world and decides what gets through.
+ *
+ * <p>The shield is an <b>absorb pool</b>, not a hit counter. Every spell it turns aside and every
+ * blow it takes for someone spends integrity; when the pool runs out it is <em>breached</em>, which
+ * is loud, hurts the caster's next cast and (at Horribilis) hurts the caster. Running out of time
+ * instead is a quiet fade with no penalty — telling those two apart is most of what makes the charm
+ * feel like a shield rather than a timer.
+ *
+ * <p>Two shapes. {@link ProtegoTier#frontalOnly() Frontal} tiers are a disc the caster holds in
+ * front of them and only cover the arc they face; the rest are domes centred on the caster, which
+ * either walk with them or — when released while sneaking — are {@link #isPlanted() planted} and
+ * hold their ground for everyone standing inside.
+ *
+ * <p>Transient: never written to disk. A shield that outlived a restart would have no caster and no
+ * cast behind it.
+ */
 public class ProtegoShieldEntity extends Entity implements GeoEntity {
+
+    /** How a shield ended. Synced so the client can draw a fade differently from a break. */
+    public enum Collapse {
+        /** Still up. */
+        NONE,
+        /** Ran its time out. */
+        EXPIRED,
+        /** The caster raised a new one. */
+        REPLACED,
+        /** The caster died, left, changed dimension, or walked away from a planted dome. */
+        CASTER_LOST,
+        /** Its integrity was spent — the only ending that costs the caster anything. */
+        BREACHED;
+
+        static Collapse byIndex(int index) {
+            Collapse[] all = values();
+            return all[Math.max(0, Math.min(all.length - 1, index))];
+        }
+
+        public boolean isBreach() {
+            return this == BREACHED;
+        }
+    }
+
     private static final EntityDataAccessor<Integer> DATA_TIER =
-            SynchedEntityData.defineId(ProtegoShieldEntity.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Integer> DATA_DEFLECTIONS_REMAINING =
             SynchedEntityData.defineId(ProtegoShieldEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<String> DATA_CASTER_UUID =
             SynchedEntityData.defineId(ProtegoShieldEntity.class, EntityDataSerializers.STRING);
-    private static final EntityDataAccessor<Boolean> DATA_IS_SHATTERING =
+    private static final EntityDataAccessor<Boolean> DATA_PLANTED =
             SynchedEntityData.defineId(ProtegoShieldEntity.class, EntityDataSerializers.BOOLEAN);
-    private static final EntityDataAccessor<BlockPos> DATA_ANCHOR_POS =
-            SynchedEntityData.defineId(ProtegoShieldEntity.class, EntityDataSerializers.BLOCK_POS);
+    private static final EntityDataAccessor<Float> DATA_INTEGRITY =
+            SynchedEntityData.defineId(ProtegoShieldEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> DATA_MAX_INTEGRITY =
+            SynchedEntityData.defineId(ProtegoShieldEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Integer> DATA_COLLAPSE =
+            SynchedEntityData.defineId(ProtegoShieldEntity.class, EntityDataSerializers.INT);
 
     private static final RawAnimation IDLE_DISC = RawAnimation.begin().thenLoop("idle_disc");
     private static final RawAnimation IDLE_DOME = RawAnimation.begin().thenLoop("idle_dome");
 
+    /** How far in front of the caster the T0 disc is held. */
+    public static final double DISC_OFFSET = 1.2;
+    /** The protected sphere is centred on the body, not on the feet the entity stands at. */
+    public static final double CENTRE_LIFT = 1.0;
+    /** Ticks the wreckage lingers after a collapse before the entity goes away. */
+    private static final int COLLAPSE_TICKS = 20;
+    /** Broadphase slack for the swept interception — the fastest bolt in the mod moves well under this. */
+    private static final double MAX_BOLT_STEP = 5.0;
+
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
 
     private int ticksAlive;
-    private int shatterTicks;
+    private int collapseTicks;
     private int maxLifetime = 80;
+    private boolean warnedLowIntegrity;
+    /**
+     * Bolts this shield has already answered. Without it a deflected bolt that is still inside the
+     * sphere gets turned again next tick, and a ward could eat its whole pool ping-ponging one spell.
+     */
+    private final Set<Integer> answeredBolts = new HashSet<>();
 
     public ProtegoShieldEntity(EntityType<?> type, Level level) {
         super(type, level);
@@ -73,205 +132,413 @@ public class ProtegoShieldEntity extends Entity implements GeoEntity {
         this(ModEntities.PROTEGO_SHIELD.get(), level);
     }
 
-    public ProtegoShieldEntity(Level level, ServerPlayer caster, int tier) {
-        this(ModEntities.PROTEGO_SHIELD.get(), level);
-        int clampedTier = Mth.clamp(tier, 0, 3);
-        this.entityData.set(DATA_TIER, clampedTier);
-        this.entityData.set(DATA_DEFLECTIONS_REMAINING, maxDeflectionsFor(clampedTier));
-        this.entityData.set(DATA_CASTER_UUID, caster.getUUID().toString());
-        this.entityData.set(DATA_ANCHOR_POS, caster.blockPosition());
-        this.maxLifetime = computeMaxLifetime(clampedTier, Spells.PROTEGO.getProficiencyScalar(caster));
-        this.setPos(caster.position());
+    /** Builds a shield for a cast that has already decided its tier, pool and lifetime. */
+    public static ProtegoShieldEntity raise(Level level, ServerPlayer caster, ProtegoTier tier,
+                                            boolean planted, float integrity, int lifetimeTicks) {
+        ProtegoShieldEntity shield = new ProtegoShieldEntity(level);
+        shield.entityData.set(DATA_TIER, tier.index());
+        shield.entityData.set(DATA_CASTER_UUID, caster.getUUID().toString());
+        shield.entityData.set(DATA_PLANTED, planted);
+        shield.entityData.set(DATA_MAX_INTEGRITY, Math.max(1.0f, integrity));
+        shield.entityData.set(DATA_INTEGRITY, Math.max(1.0f, integrity));
+        shield.maxLifetime = lifetimeTicks;
+        shield.setYRot(caster.getYRot());
+        shield.setPos(caster.position());
+        if (!planted) {
+            shield.followCaster(caster);
+        }
+        return shield;
     }
 
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         builder.define(DATA_TIER, 0);
-        builder.define(DATA_DEFLECTIONS_REMAINING, 1);
         builder.define(DATA_CASTER_UUID, "");
-        builder.define(DATA_IS_SHATTERING, false);
-        builder.define(DATA_ANCHOR_POS, BlockPos.ZERO);
+        builder.define(DATA_PLANTED, false);
+        builder.define(DATA_INTEGRITY, 1.0f);
+        builder.define(DATA_MAX_INTEGRITY, 1.0f);
+        builder.define(DATA_COLLAPSE, Collapse.NONE.ordinal());
     }
+
+    // ── lifecycle ───────────────────────────────────────────────────────────────────────────────
 
     @Override
     public void tick() {
         super.tick();
-        if (level().isClientSide()) {
+
+        if (isCollapsing()) {
+            collapseTicks++;
+            if (level() instanceof ServerLevel serverLevel) {
+                ProtegoFeedback.collapseTrail(serverLevel, this, collapseTicks);
+                if (collapseTicks >= COLLAPSE_TICKS) {
+                    discard();
+                }
+            }
             return;
         }
-        ticksAlive++;
-        ServerLevel serverLevel = (ServerLevel) level();
 
-        if (isShattering()) {
-            shatterTicks++;
-            if (shatterTicks >= 20) {
-                discard();
-            }
+        Player caster = findCaster();
+        // Followed on both sides: the client redraws the shield against the caster it can already
+        // see every tick, instead of stepping along whatever the entity tracker last sent.
+        if (!isPlanted() && caster != null) {
+            followCaster(caster);
+        }
+        if (!(level() instanceof ServerLevel serverLevel)) {
+            return;
+        }
+
+        ticksAlive++;
+        if (caster == null || !caster.isAlive()) {
+            collapse(Collapse.CASTER_LOST);
+            return;
+        }
+        if (isPlanted() && caster.distanceToSqr(this) > ProtegoRules.PLANT_LEASH_BLOCKS * ProtegoRules.PLANT_LEASH_BLOCKS) {
+            // A planted dome is a place, not a leash — but the caster cannot hold one from another
+            // valley either. Walking out of range dissolves it rather than breaking it.
+            collapse(Collapse.CASTER_LOST);
             return;
         }
         if (ticksAlive > maxLifetime) {
-            beginShatter();
+            collapse(Collapse.EXPIRED);
             return;
         }
 
-        if (!updatePositionFromTier(serverLevel)) {
-            beginShatter();
-            return;
-        }
-
-        runInterception(serverLevel);
+        interceptSpells(serverLevel);
+        ProtegoFeedback.ambient(serverLevel, this, ticksAlive);
     }
 
-    private boolean updatePositionFromTier(ServerLevel serverLevel) {
-        ServerPlayer caster = getCaster(serverLevel);
-        if (caster == null || !caster.isAlive() || caster.getEffect(ModEffects.PROTEGO_SHIELD) == null) {
-            return false;
-        }
-        if (getTier() == 0) {
-            // Basic Protego: an aimed disc planted just in front of the caster at torso height. Track
-            // yaw only (ignore pitch) so the disc never dives into the ground or floats overhead when
-            // the caster looks up/down. The renderer stands the disc upright to face this aim.
-            Vec3 look = caster.getLookAngle();
-            Vec3 aim = new Vec3(look.x, 0.0, look.z);
-            aim = aim.lengthSqr() < 1.0e-6 ? new Vec3(0.0, 0.0, 1.0) : aim.normalize();
-            setPos(caster.getX() + aim.x * 1.2, caster.getY(), caster.getZ() + aim.z * 1.2);
+    /** Mobile shields ride the caster: a disc out in front on their aim, a dome centred on them. */
+    private void followCaster(Player caster) {
+        if (tier().frontalOnly()) {
+            Vec3 aim = horizontalAim(caster.getYRot());
+            setPos(caster.getX() + aim.x * DISC_OFFSET, caster.getY(), caster.getZ() + aim.z * DISC_OFFSET);
             setYRot(caster.getYRot());
-            return true;
-        }
-        // Upgrades (Totalum / Maxima / Horribilis): a dome centred on the caster that follows them,
-        // rather than anchoring to the cast-time block position.
-        setPos(caster.position().add(0.0, 0.5, 0.0));
-        return true;
-    }
-
-    private void runInterception(ServerLevel level) {
-        double radius = interceptRadius(getTier());
-        AABB area = AABB.ofSize(position(), radius * 2.0, radius * 2.0, radius * 2.0);
-        List<SpellProjectileEntity> candidates =
-                level.getEntitiesOfClass(SpellProjectileEntity.class, area, Entity::isAlive);
-        for (SpellProjectileEntity projectile : candidates) {
-            if (isShattering()) {
-                return;
-            }
-            if (projectile.position().distanceToSqr(position()) > radius * radius) {
-                continue;
-            }
-            UUID casterId = getCasterUuid();
-            if (casterId != null && casterId.equals(projectile.getCasterUuid())) {
-                continue;
-            }
-            Spell spell = projectile.getCachedOrResolveSpell();
-            if (spell == null) {
-                continue;
-            }
-            if (spell.isUnblockable()) {
-                level.sendParticles(ModParticles.AK_BYPASS_FLASH.get(),
-                        projectile.getX(), projectile.getY(), projectile.getZ(),
-                        8, 0.12, 0.12, 0.12, 0.01);
-                continue;
-            }
-            if (getTier() == 3 && SpellFamilies.of(spell) == SpellFamily.DARK) {
-                projectile.discard();
-                level.sendParticles(ModParticles.PROTEGO_SHATTER.get(),
-                        projectile.getX(), projectile.getY(), projectile.getZ(),
-                        14, 0.2, 0.2, 0.2, 0.03);
-                level.playSound(null, blockPosition(), ModSounds.PROTEGO_HORRIBILIS_ABSORB.get(),
-                        SoundSource.PLAYERS, 0.85f, 0.92f);
-                ProtegoAnimationS2CPayload.sendToTracking(this, "absorb");
-                trainCasterReflexes(getCaster(level));
-                continue;
-            }
-            deflect(level, projectile);
+        } else {
+            setPos(caster.position());
         }
     }
 
     /**
-     * Credits the shield's owner with a stopped spell. Both outcomes count — a Horribilis absorb is
-     * as much a successful block as a deflection, and training only the bounce would quietly punish
-     * the higher tier.
+     * Ends the shield. Idempotent, and the only place the caster's ward bookkeeping is undone.
+     *
+     * <p>The effect and the registry entry are released only if they still point at <em>this</em>
+     * shield. That is what makes a recast safe: the new shield may already own both by the time the
+     * old one is told to go, and the old one must not take them with it (the recast self-shatter,
+     * AUD-E-001, was exactly this ordering being load-bearing).
      */
+    public void collapse(Collapse cause) {
+        // Server-owned: the ending is synced down like every other bit of the shield's state, and a
+        // client that set it locally would fight the next entity-data update.
+        if (isCollapsing() || cause == Collapse.NONE || !(level() instanceof ServerLevel serverLevel)) {
+            return;
+        }
+        this.entityData.set(DATA_COLLAPSE, cause.ordinal());
+        this.entityData.set(DATA_INTEGRITY, 0.0f);
+        this.collapseTicks = 0;
+
+        UUID casterId = getCasterUuid();
+        ServerPlayer caster = getServerCaster(serverLevel);
+        boolean ownsWard = casterId != null && ProtegoWardManager.getEntityId(casterId) == getId();
+        if (ownsWard) {
+            ProtegoWardManager.remove(casterId);
+            if (caster != null && caster.getEffect(ModEffects.PROTEGO_SHIELD) != null) {
+                caster.removeEffect(ModEffects.PROTEGO_SHIELD);
+            }
+        }
+
+        if (cause.isBreach()) {
+            ProtegoFeedback.breach(serverLevel, this);
+            ProtegoBreach.apply(serverLevel, this, caster);
+        } else {
+            ProtegoFeedback.fade(serverLevel, this, cause);
+        }
+        ProtegoAnimationS2CPayload.sendToTracking(this, cause.isBreach() ? "shatter" : "fade");
+    }
+
+    // ── spell interception ──────────────────────────────────────────────────────────────────────
+
+    /**
+     * Turns aside bolts that cross into the ward this tick.
+     *
+     * <p>Swept, over each bolt's last step plus the step it is about to take, so a fast spell cannot
+     * pass through the sphere between two samples. Bolts that start inside were cast from within the
+     * ward and are never stopped by it — the wall is a wall, not a bubble of goodwill.
+     */
+    private void interceptSpells(ServerLevel level) {
+        ProtegoTier tier = tier();
+        Vec3 centre = centre();
+        double radius = tier.radius();
+        double reach = radius + MAX_BOLT_STEP;
+        AABB area = AABB.ofSize(centre, reach * 2.0, reach * 2.0, reach * 2.0);
+
+        List<SpellProjectileEntity> bolts =
+                level.getEntitiesOfClass(SpellProjectileEntity.class, area, Entity::isAlive);
+        for (SpellProjectileEntity bolt : bolts) {
+            if (isCollapsing()) {
+                return;
+            }
+            if (answeredBolts.contains(bolt.getId()) || ProtegoWardManager.isFriendlyBolt(this, bolt)) {
+                continue;
+            }
+            Vec3 from = bolt.oldPosition();
+            Vec3 to = bolt.position().add(bolt.getDeltaMovement());
+            double t = ProtegoRules.sphereEntry(from.x, from.y, from.z, to.x, to.y, to.z,
+                    centre.x, centre.y, centre.z, radius);
+            if (t < 0.0) {
+                continue;
+            }
+            Vec3 entry = from.lerp(to, t);
+            if (tier.frontalOnly() && !coversDirection(entry)) {
+                continue;
+            }
+            receiveSpell(level, bolt, entry, true);
+        }
+        if (answeredBolts.size() > 256) {
+            answeredBolts.clear();
+        }
+    }
+
+    /**
+     * Answers one spell: swallow it, turn it, or let it pass.
+     *
+     * @param canDeflect false when the bolt has already reached its target and the ward is catching
+     *                   it at the body — there is nothing left to reflect, so it is simply eaten.
+     * @return true if the shield dealt with the bolt (it must not go on to do anything else)
+     */
+    public boolean receiveSpell(ServerLevel level, SpellProjectileEntity bolt, Vec3 impact, boolean canDeflect) {
+        if (isCollapsing()) {
+            return false;
+        }
+        Spell spell = bolt.getCachedOrResolveSpell();
+        if (spell == null) {
+            return false;
+        }
+        if (spell.isUnblockable()) {
+            // Canon: the Killing Curse is not stopped by any shield. It flashes and goes through.
+            level.sendParticles(ModParticles.AK_BYPASS_FLASH.get(),
+                    impact.x, impact.y, impact.z, 8, 0.12, 0.12, 0.12, 0.01);
+            answeredBolts.add(bolt.getId());
+            return false;
+        }
+
+        answeredBolts.add(bolt.getId());
+        ProtegoTier tier = tier();
+        boolean dark = ProtegoDarkThreats.isDarkSpell(spell);
+        boolean swallow = dark && tier.absorbsDark();
+        float cost = ProtegoRules.spellImpactCost(tier, spell.getBaseDamage() * bolt.getDamageMultiplier(), dark);
+
+        ServerPlayer caster = getServerCaster(level);
+        if (swallow || !canDeflect) {
+            bolt.discard();
+        } else {
+            deflect(bolt, impact, caster);
+        }
+        ProtegoFeedback.spellImpact(level, this, impact, swallow);
+        if (swallow) {
+            ProtegoAnimationS2CPayload.sendToTracking(this, "absorb");
+        } else {
+            ProtegoAnimationS2CPayload.sendToTracking(this, "deflect");
+        }
+        // A swallowed curse is as much a block as a bounced one; training only the bounce would
+        // quietly punish the tier that swallows.
+        trainCasterReflexes(caster);
+        spendIntegrity(level, cost, impact);
+        return true;
+    }
+
+    /** Reflects a bolt off the sphere at the point it entered, and hands it to the shield's caster. */
+    private void deflect(SpellProjectileEntity bolt, Vec3 impact, @Nullable ServerPlayer caster) {
+        Vec3 motion = bolt.getDeltaMovement();
+        Vec3 normal = impact.subtract(centre());
+        if (motion.lengthSqr() < 1.0e-6 || normal.lengthSqr() < 1.0e-6) {
+            bolt.discard();
+            return;
+        }
+        normal = normal.normalize();
+        Vec3 reflected = motion.subtract(normal.scale(2.0 * motion.dot(normal)));
+        // Put it back on the surface facing out, so it leaves rather than re-entering next tick.
+        bolt.setPos(impact.add(normal.scale(0.05)));
+        bolt.setDeltaMovement(reflected);
+        if (caster != null) {
+            bolt.setOwner(caster);
+        }
+    }
+
+    // ── damage absorption ───────────────────────────────────────────────────────────────────────
+
+    /**
+     * Takes a blow aimed at someone this shield covers.
+     *
+     * @param from where the attack came from, for the impact flash and the T0 arc; may be null
+     * @return how much of {@code amount} the ward swallowed. Anything left over is real damage and
+     *         reaches the victim — an absorb pool that is nearly empty stops nearly nothing.
+     */
+    public float absorbDamage(ServerLevel level, float amount, @Nullable Vec3 from, boolean darkSource) {
+        if (isCollapsing() || amount <= 0.0f) {
+            return 0.0f;
+        }
+        ProtegoTier tier = tier();
+        // How much of the blow the pool can stand in front of, and what that costs it — two numbers,
+        // because Horribilis pays a third of a point per point of Dark damage and everything else
+        // pays a premium for the same blow.
+        float absorbed = ProtegoRules.absorbableDamage(tier, getIntegrity(), amount, darkSource);
+        float cost = ProtegoRules.damageImpactCost(tier, absorbed, darkSource);
+        Vec3 impact = surfacePointToward(from);
+        ProtegoFeedback.blowImpact(level, this, impact);
+        ProtegoAnimationS2CPayload.sendToTracking(this, "deflect");
+        spendIntegrity(level, cost, impact);
+        return absorbed;
+    }
+
+    /** One place where integrity leaves the pool, so warning, sound and breach cannot disagree. */
+    private void spendIntegrity(ServerLevel level, float cost, Vec3 at) {
+        float max = getMaxIntegrity();
+        float before = getIntegrity();
+        float after = Math.max(0.0f, before - Math.max(0.0f, cost));
+        this.entityData.set(DATA_INTEGRITY, after);
+
+        if (!warnedLowIntegrity && ProtegoRules.crossedLowIntegrity(before, after, max)) {
+            warnedLowIntegrity = true;
+            ProtegoFeedback.strain(level, this, at);
+        }
+        if (after <= 0.0f) {
+            collapse(Collapse.BREACHED);
+        }
+    }
+
     private void trainCasterReflexes(@Nullable ServerPlayer caster) {
         if (caster != null) {
             at.koopro.wizardsandbeasts.stats.StatTraining.onSpellDeflected(caster);
         }
     }
 
-    private void deflect(ServerLevel level, SpellProjectileEntity projectile) {
-        Vec3 motion = projectile.getDeltaMovement();
-        if (motion.lengthSqr() < 1.0e-6) {
-            return;
-        }
-        Vec3 normal = position().subtract(projectile.position()).normalize();
-        Vec3 reflected = motion.subtract(normal.scale(2.0 * motion.dot(normal)));
-        projectile.setDeltaMovement(reflected);
-        ServerPlayer caster = getCaster(level);
-        if (caster != null) {
-            projectile.setOwner(caster);
-        }
-        trainCasterReflexes(caster);
-        int tint = getTier() == 3 ? 0xFF6A0DAD : 0xFF4169E1;
-        SpellTintParticleOptions options = new SpellTintParticleOptions(ModParticles.PROTEGO_DEFLECT.get(), tint);
-        level.sendParticles(options, projectile.getX(), projectile.getY(), projectile.getZ(),
-                16, 0.15, 0.15, 0.15, 0.02);
-        level.playSound(null, projectile.blockPosition(), ModSounds.PROTEGO_BLOCK.get(),
-                SoundSource.PLAYERS, 0.8f, 1.0f + (getTier() * 0.1f));
-        ProtegoAnimationS2CPayload.sendToTracking(this, "deflect");
+    // ── coverage ────────────────────────────────────────────────────────────────────────────────
 
-        int remaining = Math.max(0, getDeflectionsRemaining() - 1);
-        this.entityData.set(DATA_DEFLECTIONS_REMAINING, remaining);
-        if (remaining <= 0) {
-            beginShatter();
+    /**
+     * Whether this shield stands between {@code victim} and an attack.
+     *
+     * <p>Three rules, in order: a caster's own charm never blocks the caster's own attacks; the
+     * caster is covered unless they have walked out of their own planted dome; anyone else is
+     * covered only by a dome tier, only while inside it, and only if the caster counts them a
+     * friend ({@link ProtegoWardManager#isAlly}).
+     */
+    public boolean protects(LivingEntity victim, @Nullable Entity attacker, @Nullable Vec3 from) {
+        if (isCollapsing() || getIntegrity() <= 0.0f || victim.level() != level()) {
+            return false;
         }
-    }
-
-    public void beginShatter() {
-        if (isShattering()) {
-            return;
+        UUID casterId = getCasterUuid();
+        if (casterId == null) {
+            return false;
         }
-        this.entityData.set(DATA_IS_SHATTERING, true);
-        this.entityData.set(DATA_DEFLECTIONS_REMAINING, 0);
-        this.shatterTicks = 0;
-        if (level() instanceof ServerLevel serverLevel) {
-            double spread = Math.max(1.0, interceptRadius(getTier()) * 0.35);
-            serverLevel.sendParticles(ModParticles.PROTEGO_SHATTER.get(),
-                    getX(), getY(), getZ(), 40, spread, spread, spread, 0.01);
-            serverLevel.playSound(null, blockPosition(), ModSounds.PROTEGO_SHATTER.get(),
-                    SoundSource.PLAYERS, 1.2f, 0.8f + (getTier() * 0.05f));
-            ServerPlayer caster = getCaster(serverLevel);
-            if (caster != null) {
-                if (caster.getEffect(ModEffects.PROTEGO_SHIELD) != null) {
-                    caster.removeEffect(ModEffects.PROTEGO_SHIELD);
-                }
-                ProtegoWardManager.remove(caster.getUUID());
-                // End the incoming-damage ward together with the visible shield.
-                ProtegoShieldHandler.deactivate(caster);
+        if (attacker != null && casterId.equals(attacker.getUUID())) {
+            return false;
+        }
+        if (casterId.equals(victim.getUUID())) {
+            if (isPlanted() && !covers(victim)) {
+                return false;
             }
-            ProtegoAnimationS2CPayload.sendToTracking(this, "shatter");
+        } else {
+            ProtegoTier tier = tier();
+            if (!tier.coversAllies() || !covers(victim)) {
+                return false;
+            }
+            Player caster = findCaster();
+            if (caster == null || !ProtegoWardManager.isAlly(caster, victim)) {
+                return false;
+            }
         }
+        return !tier().frontalOnly() || from == null || coversDirection(from);
     }
 
-    public void configureClientSpawn(int tier, UUID casterUuid, Vec3 pos) {
-        this.entityData.set(DATA_TIER, Mth.clamp(tier, 0, 3));
-        this.entityData.set(DATA_CASTER_UUID, casterUuid == null ? "" : casterUuid.toString());
-        this.entityData.set(DATA_ANCHOR_POS, BlockPos.containing(pos));
-        this.setPos(pos);
+    /** Whether a point stands inside the warded sphere. */
+    public boolean covers(Entity entity) {
+        return covers(entity.getBoundingBox().getCenter());
     }
 
+    public boolean covers(Vec3 point) {
+        double r = tier().radius();
+        return centre().distanceToSqr(point) <= r * r;
+    }
+
+    /** Frontal tiers only cover the arc the caster faces; dome tiers cover every direction. */
+    private boolean coversDirection(Vec3 worldPoint) {
+        Vec3 aim = horizontalAim(getYRot());
+        Vec3 to = worldPoint.subtract(centre());
+        return ProtegoRules.isFrontal(aim.x, aim.z, to.x, to.z);
+    }
+
+    /** Centre of the protected sphere: the caster's body, not the disc hanging in front of them. */
+    public Vec3 centre() {
+        Vec3 base = position().add(0.0, CENTRE_LIFT, 0.0);
+        if (!tier().frontalOnly()) {
+            return base;
+        }
+        Vec3 aim = horizontalAim(getYRot());
+        return base.subtract(aim.scale(DISC_OFFSET));
+    }
+
+    /** Where to draw an impact for an attack arriving from {@code from}: on the ward, facing it. */
+    private Vec3 surfacePointToward(@Nullable Vec3 from) {
+        Vec3 centre = centre();
+        if (from == null) {
+            return centre;
+        }
+        Vec3 direction = from.subtract(centre);
+        if (direction.lengthSqr() < 1.0e-6) {
+            return centre;
+        }
+        return centre.add(direction.normalize().scale(tier().radius() * 0.9));
+    }
+
+    private static Vec3 horizontalAim(float yRot) {
+        double radians = yRot * Mth.DEG_TO_RAD;
+        return new Vec3(-Math.sin(radians), 0.0, Math.cos(radians));
+    }
+
+    // ── accessors ───────────────────────────────────────────────────────────────────────────────
+
+    public ProtegoTier tier() {
+        return ProtegoTier.byIndex(this.entityData.get(DATA_TIER));
+    }
+
+    /** Raw synced tier index, for payloads and render data. */
     public int getTier() {
         return this.entityData.get(DATA_TIER);
     }
 
-    /** Radius this shield physically covers — used to extend the ward to allies inside a dome. */
+    public boolean isPlanted() {
+        return this.entityData.get(DATA_PLANTED);
+    }
+
+    public float getIntegrity() {
+        return this.entityData.get(DATA_INTEGRITY);
+    }
+
+    public float getMaxIntegrity() {
+        return Math.max(1.0f, this.entityData.get(DATA_MAX_INTEGRITY));
+    }
+
+    /** 1 at full pool, 0 at breach — what the renderer and the strain sounds read. */
+    public float integrityFraction() {
+        return Mth.clamp(getIntegrity() / getMaxIntegrity(), 0.0f, 1.0f);
+    }
+
+    public Collapse collapseCause() {
+        return Collapse.byIndex(this.entityData.get(DATA_COLLAPSE));
+    }
+
+    public boolean isCollapsing() {
+        return collapseCause() != Collapse.NONE;
+    }
+
+    /** Ticks since this shield started coming apart; 0 while it is still up. */
+    public int collapseTicks() {
+        return collapseTicks;
+    }
+
+    /** Radius this shield covers — the same number the renderer scales to. */
     public double coverRadius() {
-        return interceptRadius(getTier());
-    }
-
-    public boolean isShattering() {
-        return this.entityData.get(DATA_IS_SHATTERING);
-    }
-
-    public int getDeflectionsRemaining() {
-        return this.entityData.get(DATA_DEFLECTIONS_REMAINING);
+        return tier().radius();
     }
 
     public @Nullable UUID getCasterUuid() {
@@ -286,10 +553,18 @@ public class ProtegoShieldEntity extends Entity implements GeoEntity {
         }
     }
 
-    private @Nullable ServerPlayer getCaster(ServerLevel level) {
+    /** The caster as seen from either side — the client needs them too, to follow them smoothly. */
+    public @Nullable Player findCaster() {
+        UUID casterId = getCasterUuid();
+        return casterId == null ? null : level().getPlayerByUUID(casterId);
+    }
+
+    public @Nullable ServerPlayer getServerCaster(ServerLevel level) {
         UUID casterId = getCasterUuid();
         return casterId == null ? null : level.getServer().getPlayerList().getPlayer(casterId);
     }
+
+    // ── entity plumbing ─────────────────────────────────────────────────────────────────────────
 
     @Override
     public boolean isPickable() {
@@ -313,10 +588,7 @@ public class ProtegoShieldEntity extends Entity implements GeoEntity {
 
     @Override
     public void move(MoverType type, Vec3 movement) {
-        if (!isShattering()) {
-            return;
-        }
-        super.move(type, movement);
+        // The shield is placed, never pushed — it follows its caster or holds its planted spot.
     }
 
     @Override
@@ -326,6 +598,12 @@ public class ProtegoShieldEntity extends Entity implements GeoEntity {
 
     @Override
     public boolean hurtServer(ServerLevel level, net.minecraft.world.damagesource.DamageSource source, float amount) {
+        return false;
+    }
+
+    /** Transient: a shield that survived a restart would have no cast behind it. */
+    @Override
+    public boolean shouldBeSaved() {
         return false;
     }
 
@@ -344,40 +622,16 @@ public class ProtegoShieldEntity extends Entity implements GeoEntity {
         controllers.add(new AnimationController<ProtegoShieldEntity>("shield_controller", 2, this::shieldAnimController)
                 .triggerableAnim("deflect", RawAnimation.begin().thenPlay("deflect"))
                 .triggerableAnim("shatter", RawAnimation.begin().thenPlay("shatter"))
+                .triggerableAnim("fade", RawAnimation.begin().thenPlay("fade"))
                 .triggerableAnim("absorb", RawAnimation.begin().thenPlay("horribilis_absorb")));
     }
 
     private PlayState shieldAnimController(AnimationTest<ProtegoShieldEntity> test) {
-        return test.setAndContinue(getTier() == 0 ? IDLE_DISC : IDLE_DOME);
+        return test.setAndContinue(tier().frontalOnly() ? IDLE_DISC : IDLE_DOME);
     }
 
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return geoCache;
-    }
-
-    private static int maxDeflectionsFor(int tier) {
-        return switch (tier) {
-            case 0 -> 1;
-            case 1 -> 3;
-            default -> 5;
-        };
-    }
-
-    private static int computeMaxLifetime(int tier, float proficiency) {
-        return switch (tier) {
-            case 0 -> 60 + (int) (proficiency * 120f);
-            case 1 -> 100 + (int) (proficiency * 200f);
-            default -> 200 + (int) (proficiency * 400f);
-        };
-    }
-
-    private static double interceptRadius(int tier) {
-        return switch (tier) {
-            case 0 -> 1.5;
-            case 1 -> 2.2;
-            case 2, 3 -> 5.8;
-            default -> 1.5;
-        };
     }
 }

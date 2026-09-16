@@ -380,6 +380,50 @@
       }
     ]
   },
+  "protego_charge": {
+    "subtitle": "subtitles.wizards_and_beasts.protego_charge",
+    "sounds": [
+      {
+        "name": "minecraft:block.amethyst_block.chime",
+        "volume": 0.7,
+        "pitch": 1.0,
+        "type": "event"
+      }
+    ]
+  },
+  "protego_plant": {
+    "subtitle": "subtitles.wizards_and_beasts.protego_plant",
+    "sounds": [
+      {
+        "name": "minecraft:block.respawn_anchor.set_spawn",
+        "volume": 0.9,
+        "pitch": 0.85,
+        "type": "event"
+      }
+    ]
+  },
+  "protego_fade": {
+    "subtitle": "subtitles.wizards_and_beasts.protego_fade",
+    "sounds": [
+      {
+        "name": "minecraft:block.beacon.deactivate",
+        "volume": 0.6,
+        "pitch": 1.15,
+        "type": "event"
+      }
+    ]
+  },
+  "protego_strain": {
+    "subtitle": "subtitles.wizards_and_beasts.protego_strain",
+    "sounds": [
+      {
+        "name": "minecraft:block.amethyst_block.resonate",
+        "volume": 0.9,
+        "pitch": 0.75,
+        "type": "event"
+      }
+    ]
+  },
   "spell_clash": {
     "subtitle": "subtitles.wizards_and_beasts.spell_clash",
     "sounds": [

@@ -98,6 +98,18 @@ public class SpellProjectileEntity extends ThrowableProjectile {
             return;
         }
 
+        // A Shield Charm on the target eats the bolt here, before any of its effects run. The
+        // shield's own swept interception catches most bolts at its wall, but not one that reaches
+        // a body in the same tick it crosses, and not one fired from inside a dome — and a hit that
+        // only had its *damage* cancelled downstream would still have disarmed, stunned or cursed
+        // the person the charm is protecting.
+        if (hit instanceof LivingEntity warded && level() instanceof ServerLevel wardLevel
+                && at.koopro.wizardsandbeasts.spell.protego.ProtegoWardManager
+                        .interceptSpellHit(wardLevel, this, warded)) {
+            discard();
+            return;
+        }
+
         SpellProperties props = cachedSpell.getProperties();
 
         // Damage = base * the multiplier the cast composed, handed over at spawn.
