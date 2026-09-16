@@ -149,8 +149,8 @@ class RigMarkerConsistencyTest {
     void theArtBacklogIsStillTheSizeTheDocsSayItIs() throws IOException {
         Set<String> marked = markedIds();
         assertFalse(marked.isEmpty(), "no rig carries the marker any more; retire it and this test");
-        assertTrue(marked.size() >= 70,
-                "the documented backlog is 70 creatures; found " + marked.size()
+        assertTrue(marked.size() >= 52,
+                "the documented backlog is 52 creatures; found " + marked.size()
                         + ". If rigs were finished, update KNOWN_ISSUES.md 4.2 in the same change.");
     }
 
