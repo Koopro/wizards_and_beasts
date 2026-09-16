@@ -5,12 +5,12 @@
       "description": {
         "identifier": "geometry.boggart",
         "texture_width": 64,
-        "texture_height": 24,
-        "visible_bounds_width": 2.375,
-        "visible_bounds_height": 2.375,
+        "texture_height": 56,
+        "visible_bounds_width": 1.91,
+        "visible_bounds_height": 2.47,
         "visible_bounds_offset": [
           0,
-          1,
+          0.74,
           0
         ]
       },
@@ -18,61 +18,195 @@
         {
           "name": "root",
           "pivot": [
-            0,
-            0,
-            0
+            0.0,
+            0.3,
+            0.0
           ]
         },
         {
-          "name": "body",
+          "name": "mass",
           "pivot": [
-            0,
-            4.0,
-            0
+            0.0,
+            0.3,
+            0.0
           ],
           "parent": "root",
           "cubes": [
             {
               "origin": [
-                -4.0,
-                0.5,
-                -4.0
+                -7.0,
+                0.3,
+                -6.0
               ],
               "size": [
-                8.0,
-                8.0,
-                8.0
+                14,
+                6,
+                12
               ],
+              "inflate": 0.3,
               "uv": [
-                1,
-                1
+                0,
+                0
               ]
             }
           ]
         },
         {
-          "name": "head",
+          "name": "swell",
           "pivot": [
             0.0,
-            8.25,
+            6.3,
             0.0
           ],
-          "parent": "body",
+          "parent": "mass",
+          "rotation": [
+            0.0,
+            18.0,
+            0.0
+          ],
           "cubes": [
             {
               "origin": [
-                -2.0,
-                8.25,
+                -5.0,
+                5.3,
+                -5.0
+              ],
+              "size": [
+                10,
+                8,
+                10
+              ],
+              "uv": [
+                0,
+                18
+              ]
+            }
+          ]
+        },
+        {
+          "name": "crown",
+          "pivot": [
+            0.0,
+            13.3,
+            -1.0
+          ],
+          "parent": "swell",
+          "rotation": [
+            0.0,
+            -24.0,
+            6.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -4.0,
+                12.3,
+                -4.5
+              ],
+              "size": [
+                7,
+                6,
+                7
+              ],
+              "uv": [
+                0,
+                36
+              ]
+            }
+          ]
+        },
+        {
+          "name": "wisp_0",
+          "pivot": [
+            -3.0,
+            18.3,
+            1.0
+          ],
+          "parent": "crown",
+          "rotation": [
+            0.0,
+            0.0,
+            20.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -4.0,
+                17.3,
+                0.0
+              ],
+              "size": [
+                2,
+                5,
+                2
+              ],
+              "uv": [
+                36,
+                36
+              ]
+            }
+          ]
+        },
+        {
+          "name": "wisp_1",
+          "pivot": [
+            2.0,
+            18.3,
+            -1.0
+          ],
+          "parent": "crown",
+          "rotation": [
+            0.0,
+            0.0,
+            -15.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                1.0,
+                17.3,
                 -2.0
               ],
               "size": [
-                4.0,
-                3.0,
-                4.0
+                2,
+                6,
+                2
               ],
               "uv": [
-                34,
-                1
+                28,
+                36
+              ]
+            }
+          ]
+        },
+        {
+          "name": "wisp_2",
+          "pivot": [
+            0.0,
+            18.3,
+            2.0
+          ],
+          "parent": "crown",
+          "rotation": [
+            0.0,
+            0.0,
+            5.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -1.0,
+                17.3,
+                1.0
+              ],
+              "size": [
+                2,
+                4,
+                2
+              ],
+              "uv": [
+                44,
+                36
               ]
             }
           ]

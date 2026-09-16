@@ -4,13 +4,13 @@
     {
       "description": {
         "identifier": "geometry.horklump",
-        "texture_width": 32,
-        "texture_height": 16,
-        "visible_bounds_width": 2.0,
-        "visible_bounds_height": 2.0,
+        "texture_width": 64,
+        "texture_height": 32,
+        "visible_bounds_width": 1.96,
+        "visible_bounds_height": 1.75,
         "visible_bounds_offset": [
           0,
-          1,
+          0.38,
           0
         ]
       },
@@ -18,142 +18,205 @@
         {
           "name": "root",
           "pivot": [
-            0,
-            0,
-            0
+            0.0,
+            0.0,
+            0.0
           ]
         },
         {
-          "name": "body",
+          "name": "stalk",
           "pivot": [
-            0,
-            1.6,
-            0
+            0.0,
+            0.0,
+            0.0
           ],
           "parent": "root",
           "cubes": [
             {
               "origin": [
-                -2.4,
-                0,
-                -2.4
+                -2.0,
+                0.0,
+                -2.0
               ],
               "size": [
-                4.8,
-                3.2,
-                4.8
+                4,
+                6,
+                4
               ],
               "uv": [
-                1,
-                1
+                40,
+                0
               ]
             }
           ]
         },
         {
-          "name": "bristle_01",
+          "name": "cap",
           "pivot": [
             0.0,
-            2.95,
-            1.6
-          ],
-          "parent": "body",
-          "cubes": [
-            {
-              "origin": [
-                -0.2,
-                2.95,
-                1.4
-              ],
-              "size": [
-                0.4,
-                2.4,
-                0.4
-              ],
-              "uv": [
-                22,
-                1
-              ]
-            }
-          ]
-        },
-        {
-          "name": "bristle_02",
-          "pivot": [
-            -1.6,
-            2.95,
+            6.0,
             0.0
           ],
-          "parent": "body",
+          "parent": "stalk",
           "cubes": [
             {
               "origin": [
-                -1.8,
-                2.95,
-                -0.2
+                -5.0,
+                6.0,
+                -5.0
               ],
               "size": [
-                0.4,
-                2.4,
-                0.4
+                10,
+                4,
+                10
               ],
               "uv": [
-                25,
-                1
+                0,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -3.5,
+                10.0,
+                -3.5
+              ],
+              "size": [
+                7,
+                2,
+                7
+              ],
+              "uv": [
+                0,
+                14
               ]
             }
           ]
         },
         {
-          "name": "bristle_03",
+          "name": "tendril_0",
           "pivot": [
             0.0,
-            2.95,
-            -1.6
+            0.5,
+            0.0
           ],
-          "parent": "body",
+          "parent": "stalk",
+          "rotation": [
+            0.0,
+            20.0,
+            0.0
+          ],
           "cubes": [
             {
               "origin": [
-                -0.2,
-                2.95,
-                -1.8
+                -0.5,
+                0.0,
+                2.0
               ],
               "size": [
-                0.4,
-                2.4,
-                0.4
+                1,
+                1,
+                6
               ],
               "uv": [
                 28,
-                1
+                14
               ]
             }
           ]
         },
         {
-          "name": "bristle_04",
+          "name": "tendril_1",
           "pivot": [
-            1.6,
-            2.95,
+            0.0,
+            0.5,
             0.0
           ],
-          "parent": "body",
+          "parent": "stalk",
+          "rotation": [
+            0.0,
+            110.0,
+            0.0
+          ],
           "cubes": [
             {
               "origin": [
-                1.4,
-                2.95,
-                -0.2
+                -0.5,
+                0.0,
+                2.0
               ],
               "size": [
-                0.4,
-                2.4,
-                0.4
+                1,
+                1,
+                6
               ],
               "uv": [
+                42,
+                14
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tendril_2",
+          "pivot": [
+            0.0,
+            0.5,
+            0.0
+          ],
+          "parent": "stalk",
+          "rotation": [
+            0.0,
+            200.0,
+            0.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -0.5,
+                0.0,
+                2.0
+              ],
+              "size": [
                 1,
-                10
+                1,
+                6
+              ],
+              "uv": [
+                0,
+                23
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tendril_3",
+          "pivot": [
+            0.0,
+            0.5,
+            0.0
+          ],
+          "parent": "stalk",
+          "rotation": [
+            0.0,
+            290.0,
+            0.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -0.5,
+                0.0,
+                2.0
+              ],
+              "size": [
+                1,
+                1,
+                6
+              ],
+              "uv": [
+                14,
+                23
               ]
             }
           ]

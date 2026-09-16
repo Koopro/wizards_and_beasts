@@ -45,6 +45,7 @@ class FormRigScaleTest {
         RIG_FORMS.put("centaur_default", new String[]{"centaur", "centaur_default"});
         RIG_FORMS.put("goblin_default", new String[]{"goblin_teller", "goblin_default"});
         RIG_FORMS.put("obscurial_dark", new String[]{"obscurus", "obscurial_dark"});
+        RIG_FORMS.put("merfolk_water", new String[]{"merperson", "merpeople_water"});
     }
 
     /** Height of a GeckoLib rig in blocks, from the extent of its cubes. 16 model units per block. */

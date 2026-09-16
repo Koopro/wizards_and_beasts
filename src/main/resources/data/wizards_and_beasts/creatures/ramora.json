@@ -1,5 +1,4 @@
 {
-  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:ramora",
   "bodyPlan": "AQUATIC",
   "locomotion": "AQUATIC",
@@ -34,5 +33,8 @@
       "radius": 6.0,
       "slow_amplifier": 4
     }
+  ],
+  "clips": [
+    "flinch"
   ]
 }

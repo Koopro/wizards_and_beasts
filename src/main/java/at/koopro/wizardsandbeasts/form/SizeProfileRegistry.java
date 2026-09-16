@@ -130,10 +130,12 @@ public final class SizeProfileRegistry {
                 1.0f, 1.0f, 1.0f,
                 0.0f, 0.0f, 0.0f));
 
-        // Water form: slightly crouched, model a touch wider
+        // Water form: drawn by merperson.geo.json since that rig was built (tools/merperson_model.py),
+        // which is 1.625 blocks tall, so 1.62 / 1.625 = 0.997. The 0.9 and the 1.111 aspect were the
+        // human-fraction reading of the placeholder MerfolkSwimModel; a real rig wants 1.0 on both axes.
         register(new SizeProfile("merpeople_water",
-                0.54f, 1.62f,   // 0.9× human height
-                0.9f, 1.111f, 1.111f,
+                0.54f, 1.62f,
+                0.997f, 1.0f, 1.0f,
                 0.5f, 0.1f, 0.0f));
 
         // ── Animagus beast forms ──

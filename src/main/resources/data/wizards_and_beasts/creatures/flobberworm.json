@@ -1,5 +1,4 @@
 {
-  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:flobberworm",
   "bodyPlan": "WORM_LARVA",
   "locomotion": "GROUND",
@@ -15,5 +14,8 @@
   "animation": "wizards_and_beasts:geckolib/animations/entity/flobberworm.animation.json",
   "attackDamage": 0.0,
   "traits": [],
-  "abilities": []
+  "abilities": [],
+  "clips": [
+    "flinch"
+  ]
 }

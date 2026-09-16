@@ -4,13 +4,13 @@
     {
       "description": {
         "identifier": "geometry.chizpurfle",
-        "texture_width": 32,
+        "texture_width": 64,
         "texture_height": 16,
-        "visible_bounds_width": 2.0,
-        "visible_bounds_height": 2.0,
+        "visible_bounds_width": 1.81,
+        "visible_bounds_height": 1.25,
         "visible_bounds_offset": [
           0,
-          1,
+          0.12,
           0
         ]
       },
@@ -18,255 +18,931 @@
         {
           "name": "root",
           "pivot": [
-            0,
-            0,
-            0
+            0.0,
+            0.1,
+            0.0
           ]
         },
         {
           "name": "body",
           "pivot": [
-            0,
-            3.0,
-            0
+            0.0,
+            3.1,
+            0.0
           ],
           "parent": "root",
           "cubes": [
             {
               "origin": [
-                -1.8,
-                3.0,
-                -2.4
+                -2.5,
+                1.095,
+                -2.0
               ],
               "size": [
-                3.6,
-                2.4,
-                5.4
+                5,
+                2,
+                4
               ],
               "uv": [
-                1,
-                1
+                0,
+                0
               ]
             }
           ]
         },
         {
-          "name": "head",
+          "name": "leg_0_left_hip",
           "pivot": [
-            0,
-            3.0,
-            -2.4
+            1.5,
+            2.1,
+            -1.0
           ],
           "parent": "body",
-          "cubes": [
-            {
-              "origin": [
-                -1.2,
-                3.0,
-                -4.2
-              ],
-              "size": [
-                2.4,
-                1.8,
-                1.8
-              ],
-              "uv": [
-                20,
-                1
-              ]
-            }
+          "rotation": [
+            0.0,
+            -30.0,
+            0.0
           ]
         },
         {
-          "name": "leg_left_1",
+          "name": "leg_0_left_coxa",
           "pivot": [
-            1.8,
-            3.6,
-            -1.428
+            1.5,
+            2.1,
+            -1.0
           ],
-          "parent": "body",
-          "cubes": [
-            {
-              "origin": [
-                1.44,
-                3.3,
-                -1.728
-              ],
-              "size": [
-                2.4,
-                0.6,
-                0.6
-              ],
-              "uv": [
-                1,
-                10
-              ]
-            }
-          ],
+          "parent": "leg_0_left_hip",
           "rotation": [
             0.0,
             0.0,
-            -70.0
-          ]
-        },
-        {
-          "name": "leg_left_2",
-          "pivot": [
-            1.8,
-            3.6,
-            0.3
+            12.0
           ],
-          "parent": "body",
           "cubes": [
             {
               "origin": [
-                1.44,
-                3.3,
-                0.0
+                1.5,
+                1.595,
+                -1.5
               ],
               "size": [
-                2.4,
-                0.6,
-                0.6
+                1,
+                1,
+                1
+              ],
+              "uv": [
+                26,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg_0_left_femur",
+          "pivot": [
+            2.5,
+            2.1,
+            -1.0
+          ],
+          "parent": "leg_0_left_coxa",
+          "rotation": [
+            0.0,
+            0.0,
+            26.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                2.5,
+                1.595,
+                -1.5
+              ],
+              "size": [
+                2,
+                1,
+                1
+              ],
+              "uv": [
+                30,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg_0_left_tibia",
+          "pivot": [
+            4.5,
+            2.1,
+            -1.0
+          ],
+          "parent": "leg_0_left_femur",
+          "rotation": [
+            0.0,
+            0.0,
+            -93.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                4.5,
+                1.595,
+                -1.5
+              ],
+              "size": [
+                3,
+                1,
+                1
+              ],
+              "uv": [
+                36,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg_0_left_tarsus",
+          "pivot": [
+            7.5,
+            2.1,
+            -1.0
+          ],
+          "parent": "leg_0_left_tibia",
+          "rotation": [
+            0.0,
+            0.0,
+            -24.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                7.5,
+                1.595,
+                -1.5
+              ],
+              "size": [
+                1,
+                1,
+                1
+              ],
+              "uv": [
+                44,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg_0_right_hip",
+          "pivot": [
+            -1.5,
+            2.1,
+            -1.0
+          ],
+          "parent": "body",
+          "rotation": [
+            0.0,
+            30.0,
+            0.0
+          ]
+        },
+        {
+          "name": "leg_0_right_coxa",
+          "pivot": [
+            -1.5,
+            2.1,
+            -1.0
+          ],
+          "parent": "leg_0_right_hip",
+          "rotation": [
+            0.0,
+            0.0,
+            -12.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -2.5,
+                1.595,
+                -1.5
+              ],
+              "size": [
+                1,
+                1,
+                1
+              ],
+              "uv": [
+                48,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg_0_right_femur",
+          "pivot": [
+            -2.5,
+            2.1,
+            -1.0
+          ],
+          "parent": "leg_0_right_coxa",
+          "rotation": [
+            0.0,
+            0.0,
+            -26.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -4.5,
+                1.595,
+                -1.5
+              ],
+              "size": [
+                2,
+                1,
+                1
+              ],
+              "uv": [
+                52,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg_0_right_tibia",
+          "pivot": [
+            -4.5,
+            2.1,
+            -1.0
+          ],
+          "parent": "leg_0_right_femur",
+          "rotation": [
+            0.0,
+            0.0,
+            93.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -7.5,
+                1.595,
+                -1.5
+              ],
+              "size": [
+                3,
+                1,
+                1
+              ],
+              "uv": [
+                0,
+                6
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg_0_right_tarsus",
+          "pivot": [
+            -7.5,
+            2.1,
+            -1.0
+          ],
+          "parent": "leg_0_right_tibia",
+          "rotation": [
+            0.0,
+            0.0,
+            24.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -8.5,
+                1.595,
+                -1.5
+              ],
+              "size": [
+                1,
+                1,
+                1
               ],
               "uv": [
                 8,
-                10
+                6
               ]
             }
-          ],
-          "rotation": [
-            0.0,
-            0.0,
-            -70.0
           ]
         },
         {
-          "name": "leg_left_3",
+          "name": "leg_1_left_hip",
           "pivot": [
-            1.8,
-            3.6,
-            2.028
+            1.5,
+            2.1,
+            0.0
           ],
           "parent": "body",
+          "rotation": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "name": "leg_1_left_coxa",
+          "pivot": [
+            1.5,
+            2.1,
+            0.0
+          ],
+          "parent": "leg_1_left_hip",
+          "rotation": [
+            0.0,
+            0.0,
+            12.0
+          ],
           "cubes": [
             {
               "origin": [
-                1.44,
-                3.3,
-                1.728
+                1.5,
+                1.595,
+                -0.5
               ],
               "size": [
-                2.4,
-                0.6,
-                0.6
+                1,
+                1,
+                1
               ],
               "uv": [
-                15,
-                10
+                12,
+                6
               ]
             }
-          ],
-          "rotation": [
-            0.0,
-            0.0,
-            -70.0
           ]
         },
         {
-          "name": "leg_right_1",
+          "name": "leg_1_left_femur",
           "pivot": [
-            -1.8,
-            3.6,
-            -1.428
+            2.5,
+            2.1,
+            0.0
           ],
-          "parent": "body",
+          "parent": "leg_1_left_coxa",
+          "rotation": [
+            0.0,
+            0.0,
+            26.0
+          ],
           "cubes": [
             {
               "origin": [
-                -3.84,
-                3.3,
-                -1.728
+                2.5,
+                1.595,
+                -0.5
               ],
               "size": [
-                2.4,
-                0.6,
-                0.6
+                2,
+                1,
+                1
+              ],
+              "uv": [
+                16,
+                6
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg_1_left_tibia",
+          "pivot": [
+            4.5,
+            2.1,
+            0.0
+          ],
+          "parent": "leg_1_left_femur",
+          "rotation": [
+            0.0,
+            0.0,
+            -93.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                4.5,
+                1.595,
+                -0.5
+              ],
+              "size": [
+                3,
+                1,
+                1
               ],
               "uv": [
                 22,
-                10
+                6
               ]
             }
-          ],
-          "rotation": [
-            0.0,
-            0.0,
-            70.0
           ]
         },
         {
-          "name": "leg_right_2",
+          "name": "leg_1_left_tarsus",
           "pivot": [
-            -1.8,
-            3.6,
-            0.3
+            7.5,
+            2.1,
+            0.0
           ],
-          "parent": "body",
+          "parent": "leg_1_left_tibia",
+          "rotation": [
+            0.0,
+            0.0,
+            -24.0
+          ],
           "cubes": [
             {
               "origin": [
-                -3.84,
-                3.3,
-                0.0
+                7.5,
+                1.595,
+                -0.5
               ],
               "size": [
-                2.4,
-                0.6,
-                0.6
-              ],
-              "uv": [
                 1,
-                13
+                1,
+                1
+              ],
+              "uv": [
+                30,
+                6
               ]
             }
-          ],
-          "rotation": [
-            0.0,
-            0.0,
-            70.0
           ]
         },
         {
-          "name": "leg_right_3",
+          "name": "leg_1_right_hip",
           "pivot": [
-            -1.8,
-            3.6,
-            2.028
+            -1.5,
+            2.1,
+            0.0
+          ],
+          "parent": "body",
+          "rotation": [
+            0.0,
+            -0.0,
+            0.0
+          ]
+        },
+        {
+          "name": "leg_1_right_coxa",
+          "pivot": [
+            -1.5,
+            2.1,
+            0.0
+          ],
+          "parent": "leg_1_right_hip",
+          "rotation": [
+            0.0,
+            0.0,
+            -12.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -2.5,
+                1.595,
+                -0.5
+              ],
+              "size": [
+                1,
+                1,
+                1
+              ],
+              "uv": [
+                34,
+                6
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg_1_right_femur",
+          "pivot": [
+            -2.5,
+            2.1,
+            0.0
+          ],
+          "parent": "leg_1_right_coxa",
+          "rotation": [
+            0.0,
+            0.0,
+            -26.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -4.5,
+                1.595,
+                -0.5
+              ],
+              "size": [
+                2,
+                1,
+                1
+              ],
+              "uv": [
+                38,
+                6
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg_1_right_tibia",
+          "pivot": [
+            -4.5,
+            2.1,
+            0.0
+          ],
+          "parent": "leg_1_right_femur",
+          "rotation": [
+            0.0,
+            0.0,
+            93.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -7.5,
+                1.595,
+                -0.5
+              ],
+              "size": [
+                3,
+                1,
+                1
+              ],
+              "uv": [
+                44,
+                6
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg_1_right_tarsus",
+          "pivot": [
+            -7.5,
+            2.1,
+            0.0
+          ],
+          "parent": "leg_1_right_tibia",
+          "rotation": [
+            0.0,
+            0.0,
+            24.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -8.5,
+                1.595,
+                -0.5
+              ],
+              "size": [
+                1,
+                1,
+                1
+              ],
+              "uv": [
+                52,
+                6
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg_2_left_hip",
+          "pivot": [
+            1.5,
+            2.1,
+            1.0
+          ],
+          "parent": "body",
+          "rotation": [
+            0.0,
+            30.0,
+            0.0
+          ]
+        },
+        {
+          "name": "leg_2_left_coxa",
+          "pivot": [
+            1.5,
+            2.1,
+            1.0
+          ],
+          "parent": "leg_2_left_hip",
+          "rotation": [
+            0.0,
+            0.0,
+            12.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                1.5,
+                1.595,
+                0.5
+              ],
+              "size": [
+                1,
+                1,
+                1
+              ],
+              "uv": [
+                56,
+                6
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg_2_left_femur",
+          "pivot": [
+            2.5,
+            2.1,
+            1.0
+          ],
+          "parent": "leg_2_left_coxa",
+          "rotation": [
+            0.0,
+            0.0,
+            26.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                2.5,
+                1.595,
+                0.5
+              ],
+              "size": [
+                2,
+                1,
+                1
+              ],
+              "uv": [
+                0,
+                8
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg_2_left_tibia",
+          "pivot": [
+            4.5,
+            2.1,
+            1.0
+          ],
+          "parent": "leg_2_left_femur",
+          "rotation": [
+            0.0,
+            0.0,
+            -93.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                4.5,
+                1.595,
+                0.5
+              ],
+              "size": [
+                3,
+                1,
+                1
+              ],
+              "uv": [
+                6,
+                8
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg_2_left_tarsus",
+          "pivot": [
+            7.5,
+            2.1,
+            1.0
+          ],
+          "parent": "leg_2_left_tibia",
+          "rotation": [
+            0.0,
+            0.0,
+            -24.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                7.5,
+                1.595,
+                0.5
+              ],
+              "size": [
+                1,
+                1,
+                1
+              ],
+              "uv": [
+                14,
+                8
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg_2_right_hip",
+          "pivot": [
+            -1.5,
+            2.1,
+            1.0
+          ],
+          "parent": "body",
+          "rotation": [
+            0.0,
+            -30.0,
+            0.0
+          ]
+        },
+        {
+          "name": "leg_2_right_coxa",
+          "pivot": [
+            -1.5,
+            2.1,
+            1.0
+          ],
+          "parent": "leg_2_right_hip",
+          "rotation": [
+            0.0,
+            0.0,
+            -12.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -2.5,
+                1.595,
+                0.5
+              ],
+              "size": [
+                1,
+                1,
+                1
+              ],
+              "uv": [
+                18,
+                8
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg_2_right_femur",
+          "pivot": [
+            -2.5,
+            2.1,
+            1.0
+          ],
+          "parent": "leg_2_right_coxa",
+          "rotation": [
+            0.0,
+            0.0,
+            -26.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -4.5,
+                1.595,
+                0.5
+              ],
+              "size": [
+                2,
+                1,
+                1
+              ],
+              "uv": [
+                22,
+                8
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg_2_right_tibia",
+          "pivot": [
+            -4.5,
+            2.1,
+            1.0
+          ],
+          "parent": "leg_2_right_femur",
+          "rotation": [
+            0.0,
+            0.0,
+            93.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -7.5,
+                1.595,
+                0.5
+              ],
+              "size": [
+                3,
+                1,
+                1
+              ],
+              "uv": [
+                28,
+                8
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg_2_right_tarsus",
+          "pivot": [
+            -7.5,
+            2.1,
+            1.0
+          ],
+          "parent": "leg_2_right_tibia",
+          "rotation": [
+            0.0,
+            0.0,
+            24.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -8.5,
+                1.595,
+                0.5
+              ],
+              "size": [
+                1,
+                1,
+                1
+              ],
+              "uv": [
+                36,
+                8
+              ]
+            }
+          ]
+        },
+        {
+          "name": "fangs",
+          "pivot": [
+            0.0,
+            2.1,
+            -2.0
           ],
           "parent": "body",
           "cubes": [
             {
               "origin": [
-                -3.84,
-                3.3,
-                1.728
+                0.5,
+                0.095,
+                -3.0
               ],
               "size": [
-                2.4,
-                0.6,
-                0.6
+                1,
+                2,
+                1
               ],
               "uv": [
-                8,
-                13
+                18,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -1.5,
+                0.095,
+                -3.0
+              ],
+              "size": [
+                1,
+                2,
+                1
+              ],
+              "uv": [
+                22,
+                0
               ]
             }
-          ],
-          "rotation": [
-            0.0,
-            0.0,
-            70.0
           ]
         }
       ]

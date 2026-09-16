@@ -1,5 +1,4 @@
 {
-  "_comment": "PLACEHOLDER box rig \u2014 swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:toad",
   "bodyPlan": "BLOB_SPHERE",
   "locomotion": "GROUND",
@@ -15,5 +14,9 @@
   "animation": "wizards_and_beasts:geckolib/animations/entity/toad.animation.json",
   "traits": [
     "AMPHIBIOUS"
+  ],
+  "clips": [
+    "call",
+    "flinch"
   ]
 }

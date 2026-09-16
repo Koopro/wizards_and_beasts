@@ -342,6 +342,11 @@ skeleton so they kept theirs while growing to 17–27 cubes. `RigMarkerConsisten
 directions, including the one nobody was watching: an unmarked box rig reads as finished art in
 every audit that greps for the marker.
 
+*Retired 2026-09-16:* every box rig was rebuilt (`KNOWN_ISSUES.md` §4.2), the marker is gone, and the
+shape signature stopped discriminating once simple hand-built chains (Ashwinder, Flobberworm) matched
+it. `CreatureRigGuardTest` replaced it — no marker anywhere, and every definition's rig, animation and
+skin exist and agree.
+
 ### Lessons
 
 - A synched `EntityDataAccessor` that is written and never read is invisible: the Niffler's bond was
