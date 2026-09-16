@@ -1,5 +1,4 @@
 {
-  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:aethonan",
   "bodyPlan": "WINGED_QUADRUPED",
   "locomotion": "FLYING",
@@ -25,5 +24,9 @@
       "strength_amplifier": 2,
       "duration_ticks": 300
     }
+  ],
+  "clips": [
+    "strike",
+    "call"
   ]
 }

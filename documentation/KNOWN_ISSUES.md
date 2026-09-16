@@ -105,7 +105,7 @@ also the only creature in the mod whose *hitbox* changes size during play — se
 | `swedish_short_snout` | built | dragon kit | dragon heartstring, leather |
 | `ukrainian_ironbelly` | built | dragon kit | dragon heartstring, leather |
 
-### 4.2 Placeholder rigs (39)
+### 4.2 Placeholder rigs (25)
 
 These carry `"_comment": "PLACEHOLDER box rig …"` in their definition, or (for `hidebehind` and
 `runespoor`, which have a Java class and no JSON) a bulk-generated rig of the same grade. They are
@@ -140,18 +140,20 @@ Two consequences outside the art:
 `leprechaun`, `maledictus`, `porlock`, `pukwudgie`, `red_cap`, `rougarou`, `giant`, `yeti`,
 `hidebehind`.
 
+**Wave 4 (2026-09-16), fliers on `bodies.bird`, `wing_pair`, `winged_horse.py` and `insect.py`:**
+`abraxan`, `aethonan`, `granian`, `snallygaster`, `thunderbird`, `fwooper`, `golden_snidget`,
+`jobberknoll`, `diricawl`, `billywig`, `doxy`, `fairy`, `glumbumble`, `swooping_evil`.
+
 `tools/` is gitignored, so the generators live on disk only. The first run of one over a skin
 another tool wrote needs `--force`; after that it owns the PNG and re-runs byte-identically.
 
-**This list is the art backlog.** These 39 are what still needs a modeller; nothing else does.
+**This list is the art backlog.** These 25 are what still needs a modeller; nothing else does.
 
-`abraxan`, `aethonan`, `ashwinder`, `billywig`, `blast_ended_skrewt`, `boggart`
-`bundimun`, `chizpurfle`, `diricawl`, `doxy`, `fairy`, `fire_crab`
-`flobberworm`, `fwooper`, `glumbumble`, `golden_snidget`, `granian`, `grindylow`
-`hippocampus`, `horklump`, `horned_serpent`, `jobberknoll`, `kappa`, `kelpie`
-`lethifold`, `lobalug`, `mackled_malaclaw`, `merperson`, `plimpy`, `pogrebin`
-`quintaped`, `ramora`, `runespoor`, `sea_serpent`, `shrake`, `snallygaster`
-`swooping_evil`, `thunderbird`, `toad`
+`ashwinder`, `blast_ended_skrewt`, `boggart`, `bundimun`, `chizpurfle`, `fire_crab`
+`flobberworm`, `grindylow`, `hippocampus`, `horklump`, `horned_serpent`, `kappa`
+`kelpie`, `lethifold`, `lobalug`, `mackled_malaclaw`, `merperson`, `plimpy`
+`pogrebin`, `quintaped`, `ramora`, `runespoor`, `sea_serpent`, `shrake`
+`toad`
 
 **What this means in a default install:** they do not spawn naturally
 (`creatureNaturalSpawns = ALPHA_ONLY`) and their spawn eggs are hidden from the creative tab
