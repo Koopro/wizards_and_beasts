@@ -71,5 +71,6 @@ public final class WizardsAndBeastsGameTests {
         LeviosaThrowTests.contribute(registrar);
         SpellClashTests.contribute(registrar);
         ProtegoShieldTests.contribute(registrar);
+        ProtegoWardBeamTests.contribute(registrar);
     }
 }

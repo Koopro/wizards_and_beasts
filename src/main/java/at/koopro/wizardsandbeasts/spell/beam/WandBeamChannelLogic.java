@@ -177,6 +177,18 @@ public final class WandBeamChannelLogic {
         }
     }
 
+    /**
+     * The spell this player is channelling right now, or null.
+     *
+     * <p>Beam damage arrives at a victim as plain magic with an attacker and nothing else — there is
+     * no projectile to read a spell off. This is how {@code ProtegoDarkThreats} tells a Cruciatus
+     * beam from an ordinary one, so Horribilis' Dark discount reaches beams too.
+     */
+    public static @org.jspecify.annotations.Nullable String activeChannelSpellId(ServerPlayer player) {
+        WandBeamSession session = SESSIONS.get(player.getUUID());
+        return session == null ? null : session.spellId;
+    }
+
     public static void endChannel(ServerPlayer player) {
         WandBeamSession s = SESSIONS.remove(player.getUUID());
         if (s == null) return;

@@ -207,6 +207,16 @@ public final class ProtegoFeedback {
                 0.8f, blockPitch(shield));
     }
 
+    /**
+     * An ordinary projectile turned at the wall. Between a spell and a blow: louder than taking a
+     * hit for someone, because something visibly bounced, but without a spell's colour burst.
+     */
+    public static void projectileImpact(ServerLevel level, ProtegoShieldEntity shield, Vec3 at) {
+        level.sendParticles(tint(shield.tier()), at.x, at.y, at.z, scaled(10), 0.12, 0.12, 0.12, 0.02);
+        level.playSound(null, BlockPos.containing(at), ModSounds.PROTEGO_BLOCK.get(), SoundSource.PLAYERS,
+                0.7f, blockPitch(shield));
+    }
+
     /** A blow the ward took for somebody. Quieter than a spell; it happens far more often. */
     public static void blowImpact(ServerLevel level, ProtegoShieldEntity shield, Vec3 at) {
         level.sendParticles(tint(shield.tier()), at.x, at.y, at.z, scaled(8), 0.12, 0.12, 0.12, 0.01);

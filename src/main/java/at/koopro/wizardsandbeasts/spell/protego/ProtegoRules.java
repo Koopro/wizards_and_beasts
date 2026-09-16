@@ -21,6 +21,8 @@ public final class ProtegoRules {
 
     /** Even a harmless bolt costs the ward something to turn aside. */
     public static final float MIN_SPELL_COST = 3.0f;
+    /** An arrow or a snowball is not a curse; turning one costs less than the cheapest spell. */
+    public static final float MIN_PROJECTILE_COST = 1.5f;
     /** What a Dark bolt costs a shield that swallows it whole (Horribilis). */
     public static final float DARK_ABSORB_FACTOR = 0.35f;
     /** What a Dark bolt costs every other tier — Dark magic leans harder on an ordinary ward. */
@@ -220,6 +222,21 @@ public final class ProtegoRules {
             return Math.max(0.0f, amount);
         }
         return Math.min(Math.max(0.0f, amount), Math.max(0.0f, integrity) / perPoint);
+    }
+
+    /**
+     * Integrity spent turning aside an ordinary projectile — an arrow, a fireball, a thrown egg.
+     *
+     * <p>Same shape as {@link #spellImpactCost}, with a lower floor: a ward that spent three points
+     * on a snowball would be defeated by a chicken farm. The Dark split still applies, because a
+     * wither skull is Dark magic whatever its delivery.
+     */
+    public static float projectileImpactCost(ProtegoTier tier, float estimatedDamage, boolean darkSource) {
+        float cost = Math.max(MIN_PROJECTILE_COST, Math.max(0.0f, safe(estimatedDamage, 0.0f)));
+        if (darkSource) {
+            cost *= tier.absorbsDark() ? DARK_ABSORB_FACTOR : DARK_PRESSURE_FACTOR;
+        }
+        return cost;
     }
 
     /** True when this hit takes the shield from "holding" to "about to go". */

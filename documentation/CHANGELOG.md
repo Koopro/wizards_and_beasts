@@ -4,6 +4,19 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Shields answer beams, and turn arrows at the wall (2026-09-16)
+
+**A Shield Charm now stands in front of a beam.** Beam damage was dealt as anonymous magic — no
+attacker, no position — so a warded player took a Cruciatus beam as if nothing were up, and the kill
+went to nobody. Both beam damage sites name their caster now, which is all a ward needed to see them.
+Horribilis pays its Dark discount against a Cruciatus beam too. The Cruciatus *pain* is unchanged and
+still unblockable, and so is the Killing Curse: nothing stops that, by canon and by test.
+
+**Arrows bounce off a dome instead of through it.** Ordinary projectiles used to fly through the ward
+and only cost it anything when they reached the body inside — a shield that visibly did not work. They
+are turned at the surface now, at a cost floored below the cheapest spell, because a snowball is not a
+curse. A wither skull is still Dark magic, and the tier split applies to it.
+
 ### The Shield Charm has weight (2026-09-16)
 
 **The charge is something you can see and hear climbing.** Under the four chimes there is a hum whose

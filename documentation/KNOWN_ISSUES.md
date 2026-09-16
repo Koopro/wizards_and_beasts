@@ -875,7 +875,20 @@ broken today, but those three fields describe assets that do not exist.
 
 ## 8b. Open gaps left by the 2026-09-16 Protego redesign
 
-### 8b.1 Beam spells do not consult a Shield Charm
+### 8b.1 Beam spells do not consult a Shield Charm — resolved 2026-09-16
+
+**Fixed.** Both beam damage sites now attribute to their caster —
+`damageSources().indirectMagic(caster, caster)` in place of a bare `magic()` — so a Shield Charm sees
+them like any other attack, and the kill is credited to the wizard holding the wand. A warded player
+no longer takes a Cruciatus beam in full at any tier, and Horribilis pays its Dark discount for one:
+`ProtegoDarkThreats` reads the attacker's live channel (`WandBeamChannelLogic.activeChannelSpellId`),
+because beam damage carries no spell of its own. Cruciatus *pain* still rides an effect component and
+is still not blocked — a ward never stopped that. Avada Kedavra's beam is untouched and still
+unblockable. Covered by `protego_absorbs_a_crucio_beam`, `protego_aguamenti_jet_names_its_caster` and
+`protego_never_stops_the_killing_curse`, each checked against a mutation that restores the old
+attribution.
+
+The original report follows.
 
 The ward answers damage that carries an attacker or a source position. Beam damage in
 `WandBeamSpellHandlers` is dealt as `damageSources().magic()` with neither — Crucio's escalating ramp
@@ -893,7 +906,15 @@ the geometry and the render pipeline, not observed: the redesign was built and v
 (`compileJava`, 1780 unit tests, 29 game tests). The dome is still the geo's box, now scaled to the
 radius it actually protects; a round hemisphere is art work nobody has done yet.
 
-### 8b.3 Vanilla projectiles are absorbed at the body, not turned at the wall
+### 8b.3 Vanilla projectiles are absorbed at the body, not turned at the wall — resolved 2026-09-16
+
+**Fixed.** The swept interception runs over every `Projectile`, not only spell bolts, so arrows,
+fireballs and thrown things are turned at the ward's surface and billed there
+(`ProtegoRules.projectileImpactCost`, floored lower than a spell's — a snowball is not a curse). The
+bounce is a real server-side velocity change, which the entity tracker syncs, so every client sees it.
+Covered by `protego_turns_an_arrow_at_the_wall`.
+
+The original report follows.
 
 Spell bolts are deflected where they cross the ward. Arrows, fireballs and thrown items pass through it
 visually and are paid for out of integrity when they reach whoever is inside. Correct in effect, wrong

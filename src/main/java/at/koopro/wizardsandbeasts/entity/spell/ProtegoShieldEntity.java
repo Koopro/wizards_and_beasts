@@ -22,6 +22,9 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
+import net.minecraft.world.entity.projectile.hurtingprojectile.AbstractHurtingProjectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -109,6 +112,12 @@ public class ProtegoShieldEntity extends Entity implements GeoEntity {
     private static final int COLLAPSE_TICKS = 20;
     /** Broadphase slack for the swept interception — the fastest bolt in the mod moves well under this. */
     private static final double MAX_BOLT_STEP = 5.0;
+    /** Vanilla's default {@code AbstractArrow} base damage; the field has a setter and no getter. */
+    private static final double VANILLA_ARROW_BASE_DAMAGE = 2.0;
+    /** What a fireball, wither skull or wind charge is billed at when the ward turns it. */
+    private static final float HURTING_PROJECTILE_DAMAGE = 6.0f;
+    /** How much of its speed a turned projectile keeps. The ward absorbs the rest. */
+    private static final double DEFLECTION_DAMPING = 0.6;
 
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
 
@@ -117,10 +126,10 @@ public class ProtegoShieldEntity extends Entity implements GeoEntity {
     private int maxLifetime = 80;
     private boolean warnedLowIntegrity;
     /**
-     * Bolts this shield has already answered. Without it a deflected bolt that is still inside the
+     * Projectiles this shield has already answered. Without it a deflected bolt still inside the
      * sphere gets turned again next tick, and a ward could eat its whole pool ping-ponging one spell.
      */
-    private final Set<Integer> answeredBolts = new HashSet<>();
+    private final Set<Integer> answeredProjectiles = new HashSet<>();
 
     public ProtegoShieldEntity(EntityType<?> type, Level level) {
         super(type, level);
@@ -203,7 +212,7 @@ public class ProtegoShieldEntity extends Entity implements GeoEntity {
             return;
         }
 
-        interceptSpells(serverLevel);
+        interceptProjectiles(serverLevel);
         ProtegoFeedback.ambient(serverLevel, this, ticksAlive);
     }
 
@@ -255,33 +264,34 @@ public class ProtegoShieldEntity extends Entity implements GeoEntity {
         ProtegoAnimationS2CPayload.sendToTracking(this, cause.isBreach() ? "shatter" : "fade");
     }
 
-    // ── spell interception ──────────────────────────────────────────────────────────────────────
+    // ── interception ────────────────────────────────────────────────────────────────────────────
 
     /**
-     * Turns aside bolts that cross into the ward this tick.
+     * Turns aside anything in flight that crosses into the ward this tick — spell bolts, and arrows,
+     * fireballs and thrown things with them.
      *
-     * <p>Swept, over each bolt's last step plus the step it is about to take, so a fast spell cannot
-     * pass through the sphere between two samples. Bolts that start inside were cast from within the
-     * ward and are never stopped by it — the wall is a wall, not a bubble of goodwill.
+     * <p>Swept, over each projectile's last step plus the step it is about to take, so nothing fast
+     * can pass through the sphere between two samples. Anything that starts inside was loosed from
+     * within the ward and is never stopped by it — the wall is a wall, not a bubble of goodwill.
      */
-    private void interceptSpells(ServerLevel level) {
+    private void interceptProjectiles(ServerLevel level) {
         ProtegoTier tier = tier();
         Vec3 centre = centre();
         double radius = tier.radius();
         double reach = radius + MAX_BOLT_STEP;
         AABB area = AABB.ofSize(centre, reach * 2.0, reach * 2.0, reach * 2.0);
 
-        List<SpellProjectileEntity> bolts =
-                level.getEntitiesOfClass(SpellProjectileEntity.class, area, Entity::isAlive);
-        for (SpellProjectileEntity bolt : bolts) {
+        List<Projectile> inFlight = level.getEntitiesOfClass(Projectile.class, area, Entity::isAlive);
+        for (Projectile projectile : inFlight) {
             if (isCollapsing()) {
                 return;
             }
-            if (answeredBolts.contains(bolt.getId()) || ProtegoWardManager.isFriendlyBolt(this, bolt)) {
+            if (answeredProjectiles.contains(projectile.getId())
+                    || ProtegoWardManager.isFriendlyProjectile(this, projectile)) {
                 continue;
             }
-            Vec3 from = bolt.oldPosition();
-            Vec3 to = bolt.position().add(bolt.getDeltaMovement());
+            Vec3 from = projectile.oldPosition();
+            Vec3 to = projectile.position().add(projectile.getDeltaMovement());
             double t = ProtegoRules.sphereEntry(from.x, from.y, from.z, to.x, to.y, to.z,
                     centre.x, centre.y, centre.z, radius);
             if (t < 0.0) {
@@ -291,11 +301,71 @@ public class ProtegoShieldEntity extends Entity implements GeoEntity {
             if (tier.frontalOnly() && !coversDirection(entry)) {
                 continue;
             }
-            receiveSpell(level, bolt, entry, true);
+            if (projectile instanceof SpellProjectileEntity bolt) {
+                receiveSpell(level, bolt, entry, true);
+            } else {
+                receiveProjectile(level, projectile, entry);
+            }
         }
-        if (answeredBolts.size() > 256) {
-            answeredBolts.clear();
+        if (answeredProjectiles.size() > 256) {
+            answeredProjectiles.clear();
         }
+    }
+
+    /**
+     * Answers an ordinary projectile at the wall: it bounces off the ward, and the ward pays for it.
+     *
+     * <p>An arrow used to fly through a dome untouched and only cost integrity when it reached a body
+     * inside, which looks exactly like a shield that does not work. The bounce is a real velocity
+     * change on the server; the entity tracker syncs it, so every client sees the arrow turn at the
+     * surface without a packet of our own.
+     */
+    public void receiveProjectile(ServerLevel level, Projectile projectile, Vec3 impact) {
+        if (isCollapsing()) {
+            return;
+        }
+        answeredProjectiles.add(projectile.getId());
+        boolean dark = ProtegoDarkThreats.isDarkAttacker(projectile.getOwner())
+                || ProtegoDarkThreats.isDarkAttacker(projectile);
+        float cost = ProtegoRules.projectileImpactCost(tier(), estimateProjectileDamage(projectile), dark);
+
+        Vec3 motion = projectile.getDeltaMovement();
+        Vec3 normal = impact.subtract(centre());
+        if (motion.lengthSqr() < 1.0e-6 || normal.lengthSqr() < 1.0e-6) {
+            projectile.discard();
+        } else {
+            normal = normal.normalize();
+            // Turned aside rather than stopped dead: a shield charm deflects, and an arrow halting in
+            // mid-air reads as a bug. Damped, because the ward eats most of the energy.
+            Vec3 reflected = motion.subtract(normal.scale(2.0 * motion.dot(normal))).scale(DEFLECTION_DAMPING);
+            projectile.setPos(impact.add(normal.scale(0.05)));
+            // No impulse flag to set on 1.21.11: ServerEntity compares deltaMovement against what it
+            // last sent and pushes a motion packet on its own, which is what makes the bounce visible.
+            projectile.setDeltaMovement(reflected);
+        }
+        ProtegoFeedback.projectileImpact(level, this, impact);
+        ProtegoAnimationS2CPayload.sendToTracking(this, "deflect");
+        trainCasterReflexes(getServerCaster(level));
+        spendIntegrity(level, cost, impact);
+    }
+
+    /**
+     * What this projectile would have done to whoever it was aimed at.
+     *
+     * <p>An arrow's damage is its speed times a base the class keeps to itself (there is a setter and
+     * no getter), so the vanilla default stands in for it — an approximation that only decides how
+     * much integrity a bounce costs. Anything that carries its own explosion is billed as a heavy
+     * hit; everything else is a nuisance and pays the floor.
+     */
+    private static float estimateProjectileDamage(Projectile projectile) {
+        double speed = projectile.getDeltaMovement().length();
+        if (projectile instanceof AbstractArrow) {
+            return (float) (speed * VANILLA_ARROW_BASE_DAMAGE);
+        }
+        if (projectile instanceof AbstractHurtingProjectile) {
+            return HURTING_PROJECTILE_DAMAGE;
+        }
+        return 0.0f; // snowballs, eggs, pearls: the floor in projectileImpactCost covers them
     }
 
     /**
@@ -317,11 +387,11 @@ public class ProtegoShieldEntity extends Entity implements GeoEntity {
             // Canon: the Killing Curse is not stopped by any shield. It flashes and goes through.
             level.sendParticles(ModParticles.AK_BYPASS_FLASH.get(),
                     impact.x, impact.y, impact.z, 8, 0.12, 0.12, 0.12, 0.01);
-            answeredBolts.add(bolt.getId());
+            answeredProjectiles.add(bolt.getId());
             return false;
         }
 
-        answeredBolts.add(bolt.getId());
+        answeredProjectiles.add(bolt.getId());
         ProtegoTier tier = tier();
         boolean dark = ProtegoDarkThreats.isDarkSpell(spell);
         boolean swallow = dark && tier.absorbsDark();
