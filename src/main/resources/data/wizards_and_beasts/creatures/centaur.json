@@ -1,5 +1,4 @@
 {
-  "_comment": "PLACEHOLDER box rig — swap with a Blockbench model matching these bone/texture/anim slots.",
   "id": "wizards_and_beasts:centaur",
   "bodyPlan": "QUADRUPED",
   "locomotion": "GROUND",
@@ -25,5 +24,9 @@
       "cooldown_ticks": 50,
       "particle": "crit"
     }
+  ],
+  "clips": [
+    "attack",
+    "call"
   ]
 }

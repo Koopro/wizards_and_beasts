@@ -87,7 +87,11 @@ public final class ModCreatures {
             new Spec("thunderbird", Locomotion.FLYING, 1.7f, 1.9f),
             new Spec("troll", Locomotion.GROUND, 2.7f, 2.9f),
             new Spec("ukrainian_ironbelly", Locomotion.FLYING, 2.7f, 2.9f),
-            new Spec("unicorn", Locomotion.GROUND, 0.95f, 1.25f),
+            // A vanilla horse's box, because a unicorn is a horse. The 0.95 x 1.25 it had was one
+            // of the five bulk buckets every generic creature was sized from, and the real animal
+            // does not fit it: drawn at true proportion the rig is 2.0 blocks nose to tail, so the
+            // old box ended around its shoulder and half the creature could not be hit.
+            new Spec("unicorn", Locomotion.GROUND, 1.4f, 1.6f),
             new Spec("werewolf", Locomotion.GROUND, 1.7f, 1.9f),
             new Spec("zouwu", Locomotion.GROUND, 2.7f, 2.9f),
             // --- canonical sweep batch 2 (new bestiary entries) ---

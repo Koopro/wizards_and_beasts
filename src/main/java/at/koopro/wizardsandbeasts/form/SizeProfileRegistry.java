@@ -103,12 +103,13 @@ public final class SizeProfileRegistry {
                 1.0f, 0.3f, 0.5f));
 
         // ── Centaur ──
-        // Horse-body shape: elongated Z (front-to-back), slightly wider X
-        // centaur.geo.json is 1.49 blocks tall, so 2.34 / 1.49 = 1.570. The old 1.3 was the
-        // human-fraction reading and drew the centaur at 1.93 blocks inside a 2.34 box — sunk into it.
+        // centaur.geo.json is 2.25 blocks tall since the wave-1 rig (tools/centaur_model.py), so
+        // 2.34 / 2.25 = 1.040. The previous 1.570 was fitted to the 1.49-block box rig it replaced.
+        // Aspect is 1.0 on both axes: the 1.077 / 1.385 stretch gave a box rig a horse's length and
+        // girth, and applied to a rig that already has them it drew a 2.4-block dachshund.
         register(new SizeProfile("centaur_default",
                 0.78f, 2.34f,
-                1.570f, 1.077f, 1.385f,
+                1.040f, 1.0f, 1.0f,
                 0.5f, 0.2f, 1.0f));
 
         // ── Vampire ──

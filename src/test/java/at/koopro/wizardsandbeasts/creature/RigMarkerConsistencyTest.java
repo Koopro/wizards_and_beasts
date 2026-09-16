@@ -149,8 +149,8 @@ class RigMarkerConsistencyTest {
     void theArtBacklogIsStillTheSizeTheDocsSayItIs() throws IOException {
         Set<String> marked = markedIds();
         assertFalse(marked.isEmpty(), "no rig carries the marker any more; retire it and this test");
-        assertTrue(marked.size() >= 80,
-                "the documented backlog is 83 creatures; found " + marked.size()
+        assertTrue(marked.size() >= 70,
+                "the documented backlog is 70 creatures; found " + marked.size()
                         + ". If rigs were finished, update KNOWN_ISSUES.md 4.2 in the same change.");
     }
 
@@ -167,29 +167,40 @@ class RigMarkerConsistencyTest {
     /**
      * True when this rig has the shape {@code tools/creature_gen.py} emits.
      *
-     * <p>Two signals, and both are needed. The cube-less {@code root} bone is the generator's
+     * <p>Three signals, and all are needed. The cube-less {@code root} bone is the generator's
      * signature — the five hand-authored small creatures ({@code augurey}, {@code bowtruckle},
      * {@code cornish_pixie}, {@code niffler}, {@code streeler}) do not have one, and are otherwise
-     * indistinguishable by size. The nine-cube ceiling is the other half: {@code ghoul},
+     * indistinguishable by size. The nine-cube ceiling is the second: {@code ghoul},
      * {@code hippogriff} and {@code werewolf} were rebuilt on top of the generated skeleton, so they
      * kept the {@code root} bone while growing to 17–27 cubes, and a root-only test calls them
-     * generated. Together the two agree with every marker on disk and disagree with none.
+     * generated.
+     *
+     * <p>The third is the one this class's own javadoc always described and never checked:
+     * <b>exactly one cube on every other bone</b>. The cube count alone stopped being enough once a
+     * hand-built rig could be small. {@code tools/rigkit.py} also emits a cube-less {@code root}, and
+     * the Puffskein and Pygmy Puff are seven cubes because a ball needs no more — but four of them
+     * sit on one {@code body} bone, which the generator never produces. Checked against all 119 rigs
+     * on disk, adding this condition changes the verdict for those two and for nothing else except
+     * {@code dementor} and {@code protego_shield}, which {@link #NOT_A_CREATURE} already excludes.
      */
     private static boolean isGeneratedBoxRig(String id) throws IOException {
         JsonObject geometry = GSON.fromJson(Files.readString(rig(id)), JsonObject.class)
                 .getAsJsonArray("minecraft:geometry").get(0).getAsJsonObject();
         JsonArray bones = geometry.getAsJsonArray("bones");
         boolean hasEmptyRoot = false;
+        boolean oneCubePerBone = true;
         int totalCubes = 0;
         for (var element : bones) {
             JsonObject bone = element.getAsJsonObject();
             int cubes = bone.has("cubes") ? bone.getAsJsonArray("cubes").size() : 0;
             totalCubes += cubes;
-            if ("root".equals(bone.get("name").getAsString()) && cubes == 0) {
-                hasEmptyRoot = true;
+            if ("root".equals(bone.get("name").getAsString())) {
+                hasEmptyRoot |= cubes == 0;
+            } else if (cubes != 1) {
+                oneCubePerBone = false;
             }
         }
-        return hasEmptyRoot && totalCubes <= GENERATED_CUBE_CEILING;
+        return hasEmptyRoot && oneCubePerBone && totalCubes <= GENERATED_CUBE_CEILING;
     }
 
     /** Every creature id carrying the marker, in either of the two files that can carry it. */
