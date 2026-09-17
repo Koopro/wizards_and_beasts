@@ -23,5 +23,31 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/demiguise.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/demiguise.png",
   "sortOrder": 94,
-  "entityType": "wizards_and_beasts:demiguise"
+  "entityType": "wizards_and_beasts:demiguise",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.demiguise.diet",
+    "behaviour": "bestiary.wizards_and_beasts.demiguise.behaviour",
+    "society": "bestiary.wizards_and_beasts.demiguise.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.demiguise.interaction.1",
+      "bestiary.wizards_and_beasts.demiguise.interaction.2"
+    ],
+    "materials": [
+      {
+        "item": "wizards_and_beasts:demiguise_hair",
+        "how": "shed"
+      },
+      {
+        "item": "wizards_and_beasts:demiguise_hair",
+        "how": "grooming"
+      }
+    ],
+    "study": [
+      "harvest",
+      "handle"
+    ],
+    "signature": "bestiary.wizards_and_beasts.demiguise.signature"
+  }
 }

@@ -20,5 +20,19 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/bundimun.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/bundimun.png",
   "sortOrder": 209,
-  "entityType": "wizards_and_beasts:bundimun"
+  "entityType": "wizards_and_beasts:bundimun",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.bundimun.diet",
+    "behaviour": "bestiary.wizards_and_beasts.bundimun.behaviour",
+    "society": "bestiary.wizards_and_beasts.bundimun.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.bundimun.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

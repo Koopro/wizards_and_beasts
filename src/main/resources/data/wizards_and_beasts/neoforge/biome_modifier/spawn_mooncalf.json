@@ -1,5 +1,14 @@
 {
   "type": "neoforge:add_spawns",
-  "biomes": [ "minecraft:meadow", "minecraft:plains", "minecraft:sunflower_plains" ],
-  "spawners": { "type": "wizards_and_beasts:mooncalf", "weight": 6, "minCount": 2, "maxCount": 3 }
+  "biomes": [
+    "minecraft:meadow",
+    "minecraft:plains",
+    "minecraft:sunflower_plains"
+  ],
+  "spawners": {
+    "type": "wizards_and_beasts:mooncalf",
+    "weight": 4,
+    "minCount": 2,
+    "maxCount": 3
+  }
 }

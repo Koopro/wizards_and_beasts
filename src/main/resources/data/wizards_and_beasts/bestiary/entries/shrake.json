@@ -23,5 +23,19 @@
   "entityType": "wizards_and_beasts:shrake",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/shrake.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/shrake.png",
-  "sortOrder": 87
+  "sortOrder": 87,
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.shrake.diet",
+    "behaviour": "bestiary.wizards_and_beasts.shrake.behaviour",
+    "society": "bestiary.wizards_and_beasts.shrake.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.shrake.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

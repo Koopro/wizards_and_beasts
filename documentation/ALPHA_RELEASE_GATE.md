@@ -172,8 +172,10 @@ survival, and that `clear` takes the body, both attribute modifiers and the roll
 
 Manual, because the ceremony is a screen:
 1. Join fresh. The selection screen opens and cannot be dismissed.
-2. Cycle `◀ ▶`. **Exactly three are selectable** — Wizardkind, Werewolf, Obscurial. The other
-   seven show and refuse.
+2. Cycle `◀ ▶`. **Only Wizardkind is selectable**; the other seven peoples show and refuse.
+   A third cycler offers a starting **condition** — "No condition", the three lycanthropy origins and
+   the two Obscurus ones — and it disappears for a lineage that cannot carry one (a Squib is offered
+   no Obscurus). Randomise must never hand out a condition.
 3. Confirm Wizardkind. Screen closes, size profile applies.
 4. `/wandb player heritage set <player> giant full_giant`, then `/wandb player sheet`.
    The body, POWER band and ability grants must all change together — those were three

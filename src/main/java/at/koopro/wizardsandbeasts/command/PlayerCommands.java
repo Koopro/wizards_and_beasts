@@ -33,6 +33,7 @@ public final class PlayerCommands {
                 .then(OWLCommands.register())
                 .then(at.koopro.wizardsandbeasts.owl.post.OwlPostCommands.register())
                 .then(AppearanceCommands.register())
+                .then(at.koopro.wizardsandbeasts.disguise.command.DisguiseCommands.register())
                 .then(StatsCommands.register())
                 .then(SkillCommands.register())
                 .then(SkillCommands.registerVocation())

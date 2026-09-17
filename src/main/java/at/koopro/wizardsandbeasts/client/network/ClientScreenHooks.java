@@ -5,7 +5,6 @@ import at.koopro.wizardsandbeasts.client.bestiary.gui.BestiaryScreen;
 import at.koopro.wizardsandbeasts.client.handbook.HandbookScreen;
 import at.koopro.wizardsandbeasts.client.gui.character.CharacterSheetScreen;
 import at.koopro.wizardsandbeasts.client.currency.gui.GringottsScreen;
-import at.koopro.wizardsandbeasts.client.spell.gui.SpellTeacherScreen;
 import at.koopro.wizardsandbeasts.client.heritage.gui.HeritageSelectionScreen;
 import at.koopro.wizardsandbeasts.client.trinket.gui.DiaryPossessionScreen;
 import at.koopro.wizardsandbeasts.client.trinket.gui.DiaryWriteScreen;
@@ -52,10 +51,6 @@ public final class ClientScreenHooks {
 
     public static void openHeritageSelectionScreen() {
         Minecraft.getInstance().setScreen(new HeritageSelectionScreen());
-    }
-
-    public static void openSpellTeacherScreen() {
-        Minecraft.getInstance().setScreen(new SpellTeacherScreen());
     }
 
     public static void openBestiaryScreen() {

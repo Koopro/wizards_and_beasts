@@ -33,7 +33,8 @@ public sealed interface CreatureAbility permits
         SpellResist, ExplosiveHorn, DeathCry, Anchor,
         OccamyChoranaptyxis, FlameBurst, EmberTrail, DangerSense,
         Tint, Evasion, PackTactics, DamageReduction, SporeCloud, Frenzy, DiveBomb,
-        JarveyJinx, SphinxRiddle, LureDisguise, Duplication, BlockDecay {
+        JarveyJinx, SphinxRiddle, LureDisguise, Duplication, BlockDecay,
+        Shed, Wary, WatchedInvisibility, Foresight, Groomable, MoonBound, LycanthropicBite, SlayerCurse {
 
     /** Dispatch codec keyed by the variant's {@link Type}, mirroring {@code SkillNodeEffect.CODEC}. */
     Codec<CreatureAbility> CODEC = Type.CODEC.dispatch(CreatureAbility::type, Type::codec);
@@ -51,6 +52,15 @@ public sealed interface CreatureAbility permits
 
     /** After the beast lands a melee hit on a living target, server-side, while the module is enabled. No-op by default. */
     default void onMeleeContact(@NonNull GenericBeastEntity entity, @NonNull LivingEntity target) {
+    }
+
+    /**
+     * A player used an empty hand or an item on the beast, server-side, while the module is enabled. The first ability
+     * to answer anything but {@code PASS} decides the interaction. {@code PASS} by default.
+     */
+    default net.minecraft.world.@NonNull InteractionResult onInteract(@NonNull GenericBeastEntity entity,
+            net.minecraft.world.entity.player.@NonNull Player player, net.minecraft.world.@NonNull InteractionHand hand) {
+        return net.minecraft.world.InteractionResult.PASS;
     }
 
     /** When the beast dies, server-side, while the module is enabled. No-op by default. */
@@ -106,7 +116,15 @@ public sealed interface CreatureAbility permits
         SPHINX_RIDDLE("sphinx_riddle", SphinxRiddle.CODEC),
         LURE_DISGUISE("lure_disguise", LureDisguise.CODEC),
         DUPLICATION("duplication", Duplication.CODEC),
-        BLOCK_DECAY("block_decay", BlockDecay.CODEC);
+        BLOCK_DECAY("block_decay", BlockDecay.CODEC),
+        SHED("shed", Shed.CODEC),
+        WARY("wary", Wary.CODEC),
+        WATCHED_INVISIBILITY("watched_invisibility", WatchedInvisibility.CODEC),
+        FORESIGHT("foresight", Foresight.CODEC),
+        GROOMABLE("groomable", Groomable.CODEC),
+        MOON_BOUND("moon_bound", MoonBound.CODEC),
+        LYCANTHROPIC_BITE("lycanthropic_bite", LycanthropicBite.CODEC),
+        SLAYER_CURSE("slayer_curse", SlayerCurse.CODEC);
 
         public static final Codec<Type> CODEC = StringRepresentable.fromValues(Type::values);
 

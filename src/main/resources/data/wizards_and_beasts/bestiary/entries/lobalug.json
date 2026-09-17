@@ -20,5 +20,19 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/lobalug.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/lobalug.png",
   "sortOrder": 210,
-  "entityType": "wizards_and_beasts:lobalug"
+  "entityType": "wizards_and_beasts:lobalug",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.lobalug.diet",
+    "behaviour": "bestiary.wizards_and_beasts.lobalug.behaviour",
+    "society": "bestiary.wizards_and_beasts.lobalug.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.lobalug.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

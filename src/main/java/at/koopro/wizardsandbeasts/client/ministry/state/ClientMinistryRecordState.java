@@ -20,13 +20,33 @@ public final class ClientMinistryRecordState {
     private static PlayerMinistryRecord record = PlayerMinistryRecord.DEFAULT;
     private static boolean traceActive;
     private static boolean finesActive;
+    private static boolean underage;
+    private static boolean wandHeld;
+    private static String caseStage = "";
 
     private ClientMinistryRecordState() {}
 
-    public static void set(PlayerMinistryRecord incoming, boolean trace, boolean fines) {
+    public static void set(PlayerMinistryRecord incoming, boolean trace, boolean fines,
+                           boolean isUnderage, boolean isWandHeld, String stage) {
         record = incoming;
         traceActive = trace;
         finesActive = fines;
+        underage = isUnderage;
+        wandHeld = isWandHeld;
+        caseStage = stage;
+    }
+
+    public static boolean underage() {
+        return underage;
+    }
+
+    public static boolean wandHeld() {
+        return wandHeld;
+    }
+
+    /** The open case's stage name, or empty. */
+    public static String caseStage() {
+        return caseStage;
     }
 
     public static PlayerMinistryRecord get() {
@@ -49,5 +69,8 @@ public final class ClientMinistryRecordState {
         record = PlayerMinistryRecord.DEFAULT;
         traceActive = false;
         finesActive = false;
+        underage = false;
+        wandHeld = false;
+        caseStage = "";
     }
 }

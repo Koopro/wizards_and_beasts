@@ -23,5 +23,19 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/clabbert.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/clabbert.png",
   "sortOrder": 38,
-  "entityType": "wizards_and_beasts:clabbert"
+  "entityType": "wizards_and_beasts:clabbert",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.clabbert.diet",
+    "behaviour": "bestiary.wizards_and_beasts.clabbert.behaviour",
+    "society": "bestiary.wizards_and_beasts.clabbert.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.clabbert.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

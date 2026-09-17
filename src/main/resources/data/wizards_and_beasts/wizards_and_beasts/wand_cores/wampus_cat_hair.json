@@ -1,4 +1,5 @@
 {
+  "_lore": "Canon: an early American core (Sayre and Steward); no properties given. Gameplay only: an ordinary, slightly forceful core.",
   "display_name": {
     "translate": "wand_core.wizards_and_beasts.wampus_cat_hair"
   },
@@ -10,9 +11,9 @@
   "initiative": 0.88,
   "allegiance_transfer_resistance": 0.85,
   "cast_modifiers": {
-    "damage": 1.2,
+    "damage": 1.04,
     "cooldown": 1.0,
     "range": 1.0,
-    "fizzle": 0.05
+    "fizzle": 0.01
   }
 }

@@ -2,7 +2,10 @@ package at.koopro.wizardsandbeasts.client;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.util.WandHelper;
+import at.koopro.wizardsandbeasts.wand.WandCastLines;
 import at.koopro.wizardsandbeasts.wand.WandEligibility;
+import at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver;
+import net.minecraft.world.item.ItemStack;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -42,35 +45,31 @@ public final class WandEligibilityTooltipHandler {
             return;
         }
 
-        WandEligibility.Result result = WandEligibility.evaluate(player, event.getItemStack());
-        if (result.eligible()) {
-            tooltip.add(Component.translatable("wandcraft.eligibility.can_use")
-                    .withStyle(ChatFormatting.GREEN));
-        } else {
-            tooltip.add(Component.translatable("wandcraft.eligibility.cannot_use")
-                    .withStyle(ChatFormatting.RED));
-            if (result.reason() != null) {
-                tooltip.add(Component.literal("  ").append(result.reason())
-                        .withStyle(ChatFormatting.DARK_RED));
-            }
+        ItemStack wand = event.getItemStack();
+        WandEligibility.Result result = WandEligibility.evaluate(player, wand);
+        // The relationship first, as a sentence; then why it will not serve, if it will not.
+        if (result.detailLine1() != null) {
+            tooltip.add(result.detailLine1());
+        }
+        if (result.detailLine3() != null) {
+            tooltip.add(Component.literal("  ").append(result.detailLine3()).withStyle(ChatFormatting.DARK_GRAY));
+        }
+        if (result.reason() != null) {
+            tooltip.add(Component.literal("  ").append(result.reason())
+                    .withStyle(result.eligible() ? ChatFormatting.GOLD : ChatFormatting.DARK_RED));
         }
 
+        var registries = player.level().registryAccess();
         if (isShiftDown()) {
-            tooltip.add(Component.literal("——————")
-                    .withStyle(ChatFormatting.DARK_GRAY));
-            boolean any = false;
-            for (@Nullable Component detail : new Component[]{
-                    result.detailLine1(), result.detailLine2(), result.detailLine3()}) {
-                if (detail != null) {
-                    tooltip.add(detail.copy().withStyle(ChatFormatting.GRAY));
-                    any = true;
-                }
+            List<Component> character = WandEligibility.characterLines(wand, registries);
+            if (!character.isEmpty()) {
+                tooltip.add(Component.translatable("wandcraft.tooltip.character").withStyle(ChatFormatting.DARK_AQUA));
+                tooltip.addAll(character);
             }
-            if (!any) {
-                tooltip.add(Component.literal("  ")
-                        .append(Component.translatable("wandcraft.eligibility.no_data"))
-                        .withStyle(ChatFormatting.DARK_GRAY));
-            }
+            // What it adds to a spell, for anyone who wants the figures — beneath its character, not above it.
+            WandCastLines.append(WandStatsResolver.resolve(wand, registries), tooltip::add);
+        } else {
+            tooltip.add(Component.translatable("wandcraft.tooltip.character.hint").withStyle(ChatFormatting.DARK_GRAY));
         }
     }
 

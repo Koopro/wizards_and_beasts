@@ -23,5 +23,19 @@
   "entityType": "wizards_and_beasts:sea_serpent",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/sea_serpent.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/sea_serpent.png",
-  "sortOrder": 79
+  "sortOrder": 79,
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.sea_serpent.diet",
+    "behaviour": "bestiary.wizards_and_beasts.sea_serpent.behaviour",
+    "society": "bestiary.wizards_and_beasts.sea_serpent.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.sea_serpent.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

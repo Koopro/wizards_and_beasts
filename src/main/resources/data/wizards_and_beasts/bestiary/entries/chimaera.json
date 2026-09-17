@@ -23,5 +23,19 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/chimaera.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/chimaera.png",
   "sortOrder": 25,
-  "entityType": "wizards_and_beasts:chimaera"
+  "entityType": "wizards_and_beasts:chimaera",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.chimaera.diet",
+    "behaviour": "bestiary.wizards_and_beasts.chimaera.behaviour",
+    "society": "bestiary.wizards_and_beasts.chimaera.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.chimaera.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

@@ -20,5 +20,24 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/matagot.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/matagot.png",
   "sortOrder": 208,
-  "entityType": "wizards_and_beasts:matagot"
+  "entityType": "wizards_and_beasts:matagot",
+  "profile": {
+    "classification": "beast",
+    "basis": "partial",
+    "diet": "bestiary.wizards_and_beasts.matagot.diet",
+    "behaviour": "bestiary.wizards_and_beasts.matagot.behaviour",
+    "society": "bestiary.wizards_and_beasts.matagot.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.matagot.interaction.1"
+    ],
+    "materials": [
+      {
+        "item": "wizards_and_beasts:matagot_essence",
+        "how": "remains"
+      }
+    ],
+    "study": [
+      "watch"
+    ]
+  }
 }

@@ -84,20 +84,25 @@ final class WandBeamSpellHandlers {
                 }
             }
         }
+        // The ray the beam is drawn along (BeamRayResolver: colliders, no fluids), so water goes where the jet
+        // visibly ends. This was OUTLINE + any fluid, and both halves misfired: a crop has an outline but no
+        // collider, so the jet stopped on the crop and never reached the farmland under it; and a placed source
+        // is a fluid, so it became the next hit and walked each following placement one block back towards the
+        // caster, until one was in their face.
         BlockHitResult blockHit = level.clip(new ClipContext(
                 start, start.add(look.scale(maxReach)),
-                ClipContext.Block.OUTLINE,
-                ClipContext.Fluid.ANY,
+                ClipContext.Block.COLLIDER,
+                ClipContext.Fluid.NONE,
                 player));
         if (blockHit.getType() == HitResult.Type.BLOCK) {
-            if (AguamentiHelper.aguamentiSoakSoilOrFillCauldron(level, blockHit.getBlockPos(), spell)) {
+            if (AguamentiHelper.aguamentiSoakSoilOrFillCauldron(level, player, blockHit.getBlockPos(), spell)) {
                 recordBeamProficiencyHit(player, spell.getId(), s, 20);
                 s.aguamentiWaterAim = null;
                 s.aguamentiWaterHold = 0;
                 return;
             }
         }
-        BlockPos waterAim = AguamentiHelper.aguamentiResolveSourceWaterAim(level, start, look, maxReach, blockHit);
+        BlockPos waterAim = AguamentiHelper.aguamentiResolveSourceWaterAim(level, blockHit, player.getBoundingBox());
         if (waterAim == null) {
             s.aguamentiWaterAim = null;
             s.aguamentiWaterHold = 0;
@@ -109,7 +114,7 @@ final class WandBeamSpellHandlers {
         } else {
             s.aguamentiWaterHold++;
         }
-        AguamentiHelper.aguamentiTryPlaceSourceAfterHold(level, player, spell, waterAim, s.aguamentiWaterHold);
+        AguamentiHelper.aguamentiTryPlaceSourceAfterHold(level, spell, waterAim, s.aguamentiWaterHold);
         if (s.aguamentiWaterHold >= 20) {
             recordBeamProficiencyHit(player, spell.getId(), s, 40);
         }
@@ -226,7 +231,7 @@ final class WandBeamSpellHandlers {
         // whenever the player actually lets go — is refused as a duplicate instead of casting again.
         // This used to be backed up by a fifteen-tick ignore window, which ate a genuine re-press
         // inside it and let a late duplicate through outside it.
-        SpellCastC2SPayload.completeWandCastRelease(caster);
+        SpellCastC2SPayload.completeServerDrivenWandCastRelease(caster);
         caster.releaseUsingItem();
     }
 

@@ -1,8 +1,6 @@
 package at.koopro.wizardsandbeasts.client.ui;
 
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
-import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
-import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.util.WandHelper;
 import net.minecraft.client.Minecraft;
 
@@ -10,15 +8,13 @@ public final class HudVisibilityPolicy {
     private HudVisibilityPolicy() {}
 
     public static boolean shouldRenderObscurialHud(PlayerHeritageData typeData) {
-        if (typeData.getSelectedHeritage() != Heritage.OBSCURIAL) return false;
+        if (!typeData.hasCondition(at.koopro.wizardsandbeasts.heritage.MagicalCondition.OBSCURUS)) return false;
         String form = typeData.getActiveFormId();
         return ObscurialUiFlags.FORM_DARK.equals(form) || ObscurialUiFlags.FORM_HUMAN.equals(form);
     }
 
     public static boolean canUseWandMagic(PlayerHeritageData typeData) {
-        Heritage type = typeData.getSelectedHeritage();
-        HeritageVariant subtype = typeData.getSelectedHeritageVariant();
-        return type != null && type.canUseWand() && (subtype == null || !subtype.hasTag("no_wand"));
+        return typeData.canUseWand();
     }
 
     public static boolean shouldRenderSpellHud(Minecraft mc, PlayerHeritageData typeData) {

@@ -20,5 +20,24 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/yeti.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/yeti.png",
   "sortOrder": 206,
-  "entityType": "wizards_and_beasts:yeti"
+  "entityType": "wizards_and_beasts:yeti",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.yeti.diet",
+    "behaviour": "bestiary.wizards_and_beasts.yeti.behaviour",
+    "society": "bestiary.wizards_and_beasts.yeti.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.yeti.interaction.1"
+    ],
+    "materials": [
+      {
+        "item": "wizards_and_beasts:yeti_fur",
+        "how": "remains"
+      }
+    ],
+    "study": [
+      "watch"
+    ]
+  }
 }

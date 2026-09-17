@@ -31,7 +31,9 @@ public record HeritageDataSyncS2CPayload(
         int totalProfessionPointsEarned,
         Set<String> unlockedProfessions,
         String selectedProfessionId,
-        boolean openSelector) implements CustomPacketPayload {
+        boolean openSelector,
+        String conditionId,
+        String conditionOriginId) implements CustomPacketPayload {
     private static final AtomicInteger NEXT_SYNC_VERSION = new AtomicInteger();
 
     public static final Type<HeritageDataSyncS2CPayload> TYPE = new Type<>(
@@ -69,8 +71,11 @@ public record HeritageDataSyncS2CPayload(
             }
             String selectedProfessionId = PacketCodecUtils.normalizeIdentifier(PacketCodecUtils.readString(buf));
             boolean open = buf.readBoolean();
+            String conditionId = PacketCodecUtils.normalizeIdentifier(PacketCodecUtils.readString(buf));
+            String conditionOriginId = PacketCodecUtils.normalizeIdentifier(PacketCodecUtils.readString(buf));
             return new HeritageDataSyncS2CPayload(syncVersion, heritageId, variantId, locked, state, activeFormId, debugOverlay, flags,
-                    professionPoints, totalProfessionPointsEarned, unlockedProfessions, selectedProfessionId, open);
+                    professionPoints, totalProfessionPointsEarned, unlockedProfessions, selectedProfessionId, open,
+                    conditionId, conditionOriginId);
         }
 
         @Override
@@ -95,6 +100,8 @@ public record HeritageDataSyncS2CPayload(
             }
             PacketCodecUtils.writeString(buf, pkt.selectedProfessionId == null ? "" : pkt.selectedProfessionId);
             buf.writeBoolean(pkt.openSelector);
+            PacketCodecUtils.writeString(buf, pkt.conditionId == null ? "" : pkt.conditionId);
+            PacketCodecUtils.writeString(buf, pkt.conditionOriginId == null ? "" : pkt.conditionOriginId);
         }
     };
 
@@ -104,8 +111,18 @@ public record HeritageDataSyncS2CPayload(
     }
 
     public static void syncToPlayer(ServerPlayer player, boolean openSelector) {
-        PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
-        PacketDistributor.sendToPlayer(player, new HeritageDataSyncS2CPayload(
+        PacketDistributor.sendToPlayer(player,
+                of(player.getData(ModAttachments.HERITAGE_DATA.get()), openSelector));
+    }
+
+    /**
+     * The packet that would be sent for this block, without sending it.
+     *
+     * <p>Extracted from {@link #syncToPlayer} so a test can assert what a client is actually told — a condition that
+     * lives on the server and never reaches the wire is the failure mode a single-player check cannot see.
+     */
+    public static HeritageDataSyncS2CPayload of(PlayerHeritageData data, boolean openSelector) {
+        return new HeritageDataSyncS2CPayload(
                 NEXT_SYNC_VERSION.incrementAndGet(),
                 data.getSelectedHeritage() == null ? "" : data.getSelectedHeritage().getId(),
                 data.getSelectedHeritageVariant() == null ? "" : data.getSelectedHeritageVariant().getId(),
@@ -118,6 +135,8 @@ public record HeritageDataSyncS2CPayload(
                 data.getTotalProfessionPointsEarned(),
                 new LinkedHashSet<>(data.getUnlockedProfessions()),
                 data.getSelectedProfessionId() == null ? "" : data.getSelectedProfessionId(),
-                openSelector));
+                openSelector,
+                data.getCondition() == null ? "" : data.getCondition().condition().getId(),
+                data.getCondition() == null ? "" : data.getCondition().getId());
     }
 }

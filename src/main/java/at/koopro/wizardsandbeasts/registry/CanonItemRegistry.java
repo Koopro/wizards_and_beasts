@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.registry;
 
+import at.koopro.wizardsandbeasts.item.spell.SpellSourceItem;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.registries.DeferredItem;
 
@@ -135,8 +136,17 @@ public final class CanonItemRegistry {
             ModItems.ITEMS.registerItem("u_no_poo", Item::new);
 
     // --- Educational & school ----------------------------------------------
+    /**
+     * The first stub promoted out of this catalogue, and the one the registry's own note predicted:
+     * "the behaviour can land later without renaming anything or migrating a save". It is now a
+     * {@link SpellSourceItem} — a book with one spell written in it, and the thing that replaced the
+     * spell-teacher vendor. Blank copies stack and behave exactly as the stub did.
+     *
+     * <p>It stays in {@link #ALL} on purpose: the sprite, the lang keys and the catalogue test are
+     * all still its, and only the class in the middle changed.
+     */
     public static final DeferredItem<Item> STANDARD_BOOK_OF_SPELLS =
-            ModItems.ITEMS.registerItem("standard_book_of_spells", Item::new);
+            ModItems.ITEMS.registerItem("standard_book_of_spells", SpellSourceItem::new);
     public static final DeferredItem<Item> DRAGON_HIDE_GLOVES =
             ModItems.ITEMS.registerItem("dragon_hide_gloves", Item::new);
     public static final DeferredItem<Item> MONSTER_BOOK_OF_MONSTERS =

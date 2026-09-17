@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.ministry.data;
 
 import at.koopro.wizardsandbeasts.ministry.law.MagicalOffence;
 import at.koopro.wizardsandbeasts.ministry.law.WantedLevel;
+import at.koopro.wizardsandbeasts.ministry.trace.WizardingAge;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import org.jspecify.annotations.NullMarked;
@@ -28,6 +29,9 @@ import java.util.Map;
  * @param fugitive             walked out of a sentence and was never re-taken
  * @param rank                 Ministry position held, if any
  * @param outstandingFineKnuts unpaid fines owed to the Ministry, in Knuts
+ * @param ageYears             age at {@code ageAnchorTick}, or {@link WizardingAge#UNSET} — no birth record, of age
+ * @param ageAnchorTick        game tick {@code ageYears} was recorded at
+ * @param wandConfiscatedUntil game tick the Ministry returns a confiscated wand; 0 when none is held
  */
 @NullMarked
 public record PlayerMinistryRecord(
@@ -36,18 +40,23 @@ public record PlayerMinistryRecord(
         int sentenceTicks,
         boolean fugitive,
         MinistryRank rank,
-        long outstandingFineKnuts) {
+        long outstandingFineKnuts,
+        int ageYears,
+        long ageAnchorTick,
+        long wandConfiscatedUntil) {
 
     public static final float MAX_NOTORIETY = 100.0f;
 
     public static final PlayerMinistryRecord DEFAULT =
-            new PlayerMinistryRecord(0.0f, Map.of(), 0, false, MinistryRank.NONE, 0L);
+            new PlayerMinistryRecord(0.0f, Map.of(), 0, false, MinistryRank.NONE, 0L, -1, 0L, 0L);
 
     public PlayerMinistryRecord {
         notoriety = Math.max(0.0f, Math.min(MAX_NOTORIETY, notoriety));
         sentenceTicks = Math.max(0, sentenceTicks);
         offences = Map.copyOf(offences);
         outstandingFineKnuts = Math.max(0L, outstandingFineKnuts);
+        ageYears = Math.max(-1, ageYears);
+        wandConfiscatedUntil = Math.max(0L, wandConfiscatedUntil);
     }
 
     public static final Codec<PlayerMinistryRecord> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -60,7 +69,13 @@ public record PlayerMinistryRecord(
             // Optional so a save written before fines existed loads as owing nothing rather than failing
             // to parse — the whole record would otherwise reset to DEFAULT and wipe the criminal file.
             Codec.LONG.optionalFieldOf("outstandingFineKnuts", 0L)
-                    .forGetter(PlayerMinistryRecord::outstandingFineKnuts)
+                    .forGetter(PlayerMinistryRecord::outstandingFineKnuts),
+            // Absent in every save written before ages existed, and absent means of age: nobody's childhood
+            // is policed because the mod updated.
+            Codec.INT.optionalFieldOf("ageYears", -1).forGetter(PlayerMinistryRecord::ageYears),
+            Codec.LONG.optionalFieldOf("ageAnchorTick", 0L).forGetter(PlayerMinistryRecord::ageAnchorTick),
+            Codec.LONG.optionalFieldOf("wandConfiscatedUntil", 0L)
+                    .forGetter(PlayerMinistryRecord::wandConfiscatedUntil)
     ).apply(instance, PlayerMinistryRecord::new));
 
     // ── derived ──
@@ -71,6 +86,16 @@ public record PlayerMinistryRecord(
 
     public boolean isServingSentence() {
         return sentenceTicks > 0;
+    }
+
+    /** Years old at {@code now}, or {@link WizardingAge#UNSET}. */
+    public int ageAt(long now, long ticksPerYear) {
+        return WizardingAge.yearsAt(ageYears, ageAnchorTick, now, ticksPerYear);
+    }
+
+    /** True while the Ministry holds this wizard's wand. */
+    public boolean wandConfiscatedAt(long now) {
+        return now < wandConfiscatedUntil;
     }
 
     /** True while money is owed to the Ministry. */
@@ -102,7 +127,8 @@ public record PlayerMinistryRecord(
     // ── withers ──
 
     public PlayerMinistryRecord withNotoriety(float value) {
-        return new PlayerMinistryRecord(value, offences, sentenceTicks, fugitive, rank, outstandingFineKnuts);
+        return new PlayerMinistryRecord(value, offences, sentenceTicks, fugitive, rank,
+                outstandingFineKnuts, ageYears, ageAnchorTick, wandConfiscatedUntil);
     }
 
     /** Adds heat and files the offence. The two move together on every conviction. */
@@ -111,29 +137,45 @@ public record PlayerMinistryRecord(
         next.putAll(offences);
         next.merge(offence, 1, Integer::sum);
         return new PlayerMinistryRecord(notoriety + notorietyGain, next, sentenceTicks, fugitive, rank,
-                outstandingFineKnuts);
+                outstandingFineKnuts, ageYears, ageAnchorTick, wandConfiscatedUntil);
     }
 
     public PlayerMinistryRecord withSentenceTicks(int value) {
-        return new PlayerMinistryRecord(notoriety, offences, value, fugitive, rank, outstandingFineKnuts);
+        return new PlayerMinistryRecord(notoriety, offences, value, fugitive, rank,
+                outstandingFineKnuts, ageYears, ageAnchorTick, wandConfiscatedUntil);
     }
 
     public PlayerMinistryRecord withFugitive(boolean value) {
-        return new PlayerMinistryRecord(notoriety, offences, sentenceTicks, value, rank, outstandingFineKnuts);
+        return new PlayerMinistryRecord(notoriety, offences, sentenceTicks, value, rank,
+                outstandingFineKnuts, ageYears, ageAnchorTick, wandConfiscatedUntil);
     }
 
     public PlayerMinistryRecord withRank(MinistryRank value) {
-        return new PlayerMinistryRecord(notoriety, offences, sentenceTicks, fugitive, value, outstandingFineKnuts);
+        return new PlayerMinistryRecord(notoriety, offences, sentenceTicks, fugitive, value,
+                outstandingFineKnuts, ageYears, ageAnchorTick, wandConfiscatedUntil);
     }
 
     /** Sets the outstanding debt outright. Negative values clamp to zero in the compact constructor. */
     public PlayerMinistryRecord withOutstandingFine(long knuts) {
-        return new PlayerMinistryRecord(notoriety, offences, sentenceTicks, fugitive, rank, knuts);
+        return new PlayerMinistryRecord(notoriety, offences, sentenceTicks, fugitive, rank, knuts,
+                ageYears, ageAnchorTick, wandConfiscatedUntil);
     }
 
     /** Adds to the debt; {@code knuts} may be negative to settle part of it. */
     public PlayerMinistryRecord withFineAdjusted(long knuts) {
         return withOutstandingFine(outstandingFineKnuts + knuts);
+    }
+
+    /** Records an age as of {@code now}; {@link WizardingAge#UNSET} clears the birth record. */
+    public PlayerMinistryRecord withAge(int years, long now) {
+        return new PlayerMinistryRecord(notoriety, offences, sentenceTicks, fugitive, rank, outstandingFineKnuts,
+                years, now, wandConfiscatedUntil);
+    }
+
+    /** Holds the wand until {@code tick}; 0 returns it. */
+    public PlayerMinistryRecord withWandConfiscatedUntil(long tick) {
+        return new PlayerMinistryRecord(notoriety, offences, sentenceTicks, fugitive, rank, outstandingFineKnuts,
+                ageYears, ageAnchorTick, tick);
     }
 
     /**
@@ -142,7 +184,8 @@ public record PlayerMinistryRecord(
      * uncoolable forever, which is the opposite of what a pardon is for.
      */
     public PlayerMinistryRecord pardoned() {
-        return new PlayerMinistryRecord(0.0f, offences, 0, false, rank, 0L);
+        return new PlayerMinistryRecord(0.0f, offences, 0, false, rank, 0L, ageYears, ageAnchorTick,
+                wandConfiscatedUntil);
     }
 
     /** Insertion-ordered view for display, heaviest offence first. */

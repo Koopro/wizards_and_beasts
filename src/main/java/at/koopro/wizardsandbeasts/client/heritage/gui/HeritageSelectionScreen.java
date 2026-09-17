@@ -8,6 +8,7 @@ import at.koopro.wizardsandbeasts.client.gui.widget.CyclerWidget;
 import at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
+import at.koopro.wizardsandbeasts.heritage.ConditionOrigin;
 import at.koopro.wizardsandbeasts.network.heritage.HeritageSelectC2SPayload;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -19,8 +20,10 @@ import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * First-join Heritage selection: two cyclers on the left, a dossier in the middle, and the player
@@ -64,10 +67,13 @@ public class HeritageSelectionScreen extends Screen {
 
     @Nullable private Heritage selectedHeritage;
     @Nullable private HeritageVariant selectedVariant;
+    /** The condition this character begins with, if the player chooses one. Empty for almost everybody. */
+    private Optional<ConditionOrigin> selectedCondition = Optional.empty();
     private boolean confirmOpen;
 
     @Nullable private CyclerWidget<Heritage> heritageCycler;
     @Nullable private CyclerWidget<HeritageVariant> variantCycler;
+    @Nullable private CyclerWidget<Optional<ConditionOrigin>> conditionCycler;
 
     // ── Layout (recomputed in init) ──────────────────────────────────────
     private float scale = 1.0F;
@@ -158,6 +164,20 @@ public class HeritageSelectionScreen extends Screen {
             variantCycler = null;
         }
 
+        // Begin with a condition. Offered, not hidden away: a player who wants to play Remus Lupin should be able
+        // to say so at creation instead of hunting a werewolf for a bite. The list is the conditions this lineage
+        // could actually carry, so it disappears entirely for a goblin or a Squib choosing an Obscurus.
+        List<Optional<ConditionOrigin>> conditions = availableConditions();
+        if (conditions.size() > 1) {
+            conditionCycler = new CyclerWidget<>(
+                    conditions, selectedCondition,
+                    HeritageSelectionScreen::conditionLabel, this::selectCondition);
+            conditionCycler.setBounds(leftColX, contentTop + (cyclerH + s(8)) * 2, colW, cyclerH);
+            conditionCycler.buttons().forEach(this::addRenderableWidget);
+        } else {
+            conditionCycler = null;
+        }
+
         // Randomise sits at the foot of the left column, opposite Confirm on the right, so the two
         // "commit something" actions bracket the dossier rather than crowding each other.
         addRenderableWidget(ThemedButton.randomise(
@@ -200,12 +220,44 @@ public class HeritageSelectionScreen extends Screen {
         }
         selectedHeritage = heritage;
         selectedVariant = heritage.getSubtypes().isEmpty() ? null : heritage.getSubtypes().get(0);
+        // A condition belongs to the character they were building, not to whoever they just became.
+        selectedCondition = Optional.empty();
         rebuild();
     }
 
     private void selectVariant(HeritageVariant variant) {
         selectedVariant = variant;
+        if (selectedCondition.isPresent()
+                && !selectedCondition.get().condition().canBeCarriedBy(selectedHeritage, variant)) {
+            selectedCondition = Optional.empty();
+        }
         rebuild();
+    }
+
+    private void selectCondition(Optional<ConditionOrigin> condition) {
+        selectedCondition = condition;
+        rebuild();
+    }
+
+    /** "None", then every origin of every condition this heritage and lineage could carry. */
+    private List<Optional<ConditionOrigin>> availableConditions() {
+        List<Optional<ConditionOrigin>> options = new ArrayList<>();
+        options.add(Optional.empty());
+        for (ConditionOrigin origin : ConditionOrigin.values()) {
+            if (origin.condition().canBeCarriedBy(selectedHeritage, selectedVariant)) {
+                options.add(Optional.of(origin));
+            }
+        }
+        return options;
+    }
+
+    private static String conditionLabel(Optional<ConditionOrigin> condition) {
+        if (condition.isEmpty()) {
+            return Component.translatable("gui.wizards_and_beasts.heritage.condition_none").getString();
+        }
+        ConditionOrigin origin = condition.get();
+        return Component.translatable(origin.condition().getTranslationKey()).getString()
+                + ": " + Component.translatable(origin.getTranslationKey()).getString();
     }
 
     /**
@@ -224,6 +276,9 @@ public class HeritageSelectionScreen extends Screen {
         List<HeritageVariant> variants = heritage.getSubtypes();
         selectedHeritage = heritage;
         selectedVariant = variants.get(RANDOM.nextInt(variants.size()));
+        // Never rolled. Lycanthropy and an Obscurus shape a whole character; being handed one by a dice button
+        // you pressed for a starting lineage is not a choice anybody made.
+        selectedCondition = Optional.empty();
         rebuild();
     }
 
@@ -264,8 +319,9 @@ public class HeritageSelectionScreen extends Screen {
 
     private void commit() {
         if (selectedHeritage != null && selectedVariant != null && selectedHeritage.isAlphaAvailable()) {
-            ClientPacketDistributor.sendToServer(
-                    new HeritageSelectC2SPayload(selectedHeritage.getId(), selectedVariant.getId()));
+            ClientPacketDistributor.sendToServer(new HeritageSelectC2SPayload(
+                    selectedHeritage.getId(), selectedVariant.getId(),
+                    selectedCondition.map(ConditionOrigin::getId).orElse("")));
             onClose();
         }
     }
@@ -316,11 +372,14 @@ public class HeritageSelectionScreen extends Screen {
         if (variantCycler != null) {
             variantCycler.renderLabel(g);
         }
+        if (conditionCycler != null) {
+            conditionCycler.renderLabel(g);
+        }
 
         // Nav hint lives in the left column's dead space under the cyclers. Centred on the screen it
         // would sit inside the dossier panel (which spans the whole middle column) and overprint the
         // flavour line.
-        int hintY = contentTop + cyclerH * 2 + s(20);
+        int hintY = contentTop + (cyclerH + s(8)) * (conditionCycler == null ? 2 : 3) + s(12);
         for (var line : font.split(Component.translatable("gui.wizards_and_beasts.heritage.nav_hint"),
                 s(COL_SIDE_W))) {
             g.drawString(font, line, leftColX, hintY, WizardsPalette.TEXT_DIM, false);

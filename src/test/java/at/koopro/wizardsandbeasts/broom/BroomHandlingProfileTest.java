@@ -193,21 +193,6 @@ class BroomHandlingProfileTest {
         assertTrue(RacingHandling.turnRateAt(10.0f, 0.95f) < 10.0f);
     }
 
-    /** Nose-heaviness scales with speed and with how unstable the broom is. */
-    @Test
-    void racing_sinksHarderWhenFasterAndLessStable() {
-        assertEquals(0.0f, RacingHandling.sinkAt(0.5f, 0.7f), 1.0e-6f, "no sink below the threshold");
-
-        float fast = RacingHandling.sinkAt(1.0f, 0.7f);
-        float slower = RacingHandling.sinkAt(0.8f, 0.7f);
-        assertTrue(fast > slower, "faster must sink harder");
-
-        float unstable = RacingHandling.sinkAt(1.0f, 0.6f);
-        assertTrue(unstable > fast, "less stable must sink harder");
-        assertTrue(RacingHandling.sinkAt(1.0f, 1.0f) > 0.0f,
-                "even a perfectly stable racing broom gets nose-heavy at its ceiling");
-    }
-
     // ── tank: heavy, floaty, hard to chip ───────────────────────────────────
 
     @Test
@@ -221,7 +206,7 @@ class BroomHandlingProfileTest {
         assertTrue(tankTurn < schoolTurn, "tank " + tankTurn + " must turn slower than school " + schoolTurn);
     }
 
-    /** It hangs in the air longer than anything else with nothing held. */
+    /** Let go of, it settles slower than anything else; ridden, it coasts the longest. */
     @Test
     void tank_floatsLongerThanBalanced() {
         BroomDefinition tank = definition(HandlingProfile.TANK);

@@ -9,6 +9,11 @@ import at.koopro.wizardsandbeasts.ministry.law.MinistryFines;
 import at.koopro.wizardsandbeasts.ministry.law.TraceService;
 import at.koopro.wizardsandbeasts.ministry.law.WantedLevel;
 import at.koopro.wizardsandbeasts.ministry.post.MinistryPost;
+import at.koopro.wizardsandbeasts.ministry.trace.Dossier;
+import at.koopro.wizardsandbeasts.ministry.trace.MinistryCaseData;
+import at.koopro.wizardsandbeasts.ministry.trace.MinistryTrace;
+import at.koopro.wizardsandbeasts.ministry.trace.WizardingAge;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -44,6 +49,39 @@ public final class MinistryCommandsImpl {
                         .then(Commands.argument("player", EntityArgument.player())
                                 .requires(MinistryPermissions.atLeast(MinistryRank.AUROR))
                                 .executes(ctx -> showRecord(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
+
+                // A summons is answered by the wizard it names; nobody needs a rank to turn up to their own hearing.
+                .then(Commands.literal("summons")
+                        .then(Commands.literal("answer")
+                                .executes(ctx -> answerSummons(ctx.getSource(),
+                                        ctx.getSource().getPlayerOrException()))))
+
+                .then(Commands.literal("case")
+                        .executes(ctx -> showCase(ctx.getSource(), ctx.getSource().getPlayerOrException()))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .requires(MinistryPermissions.atLeast(MinistryRank.AUROR))
+                                .executes(ctx -> showCase(ctx.getSource(), EntityArgument.getPlayer(ctx, "player"))))
+                        // Runs the Ministry clock as if this many ticks had passed. Authoring and testing only.
+                        .then(Commands.literal("process")
+                                .requires(MinistryPermissions.operatorOnly())
+                                .then(Commands.argument("ticks_ahead", IntegerArgumentType.integer(0))
+                                        .executes(ctx -> processCases(ctx.getSource(),
+                                                IntegerArgumentType.getInteger(ctx, "ticks_ahead"))))))
+
+                // A birth record is authored, not policed: operators set it.
+                .then(Commands.literal("age")
+                        .requires(MinistryPermissions.operatorOnly())
+                        .then(Commands.literal("set")
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .then(Commands.argument("years", IntegerArgumentType.integer(
+                                                        WizardingAge.YOUNGEST, 200))
+                                                .executes(ctx -> setAge(ctx.getSource(),
+                                                        EntityArgument.getPlayer(ctx, "player"),
+                                                        IntegerArgumentType.getInteger(ctx, "years"))))))
+                        .then(Commands.literal("clear")
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .executes(ctx -> setAge(ctx.getSource(),
+                                                EntityArgument.getPlayer(ctx, "player"), WizardingAge.UNSET)))))
 
                 .then(Commands.literal("wanted")
                         .requires(MinistryPermissions.atLeast(MinistryRank.AUROR))
@@ -358,6 +396,66 @@ public final class MinistryCommandsImpl {
                 .append(offence.displayName())
                 .append(Component.literal(" — now "))
                 .append(level.displayName()));
+        return 1;
+    }
+
+    // ── the Trace ──
+
+    private static int answerSummons(CommandSourceStack source, ServerPlayer wizard) {
+        if (!TraceService.isActive()) {
+            say(source, Component.literal("The Ministry is not sitting.").withStyle(ChatFormatting.GRAY));
+            return 0;
+        }
+        return switch (MinistryTrace.answerSummons(wizard)) {
+            case HEARD -> 1;
+            case NOTHING_TO_ANSWER -> {
+                say(source, Component.literal("The Ministry has not summoned you.").withStyle(ChatFormatting.GRAY));
+                yield 0;
+            }
+            case STILL_UNDER_INVESTIGATION -> {
+                say(source, Component.literal("Your case is still being investigated; no hearing has been called.")
+                        .withStyle(ChatFormatting.YELLOW));
+                yield 0;
+            }
+        };
+    }
+
+    private static int showCase(CommandSourceStack source, ServerPlayer wizard) {
+        Dossier dossier = MinistryCaseData.get(source.getServer()).dossier(wizard.getUUID());
+        int years = MinistryRecords.get(wizard).ageAt(MinistryTrace.now(source.getServer()), MinistryTrace.ticksPerYear());
+        say(source, Component.literal("Case file — ").withStyle(ChatFormatting.GOLD)
+                .append(wizard.getDisplayName().plainCopy().withStyle(ChatFormatting.WHITE)));
+        say(source, Component.literal("  Age: " + (years == WizardingAge.UNSET ? "of age (no birth record)"
+                        : years + (WizardingAge.isUnderage(years) ? " — under the Trace" : "")))
+                .withStyle(ChatFormatting.GRAY));
+        say(source, Component.literal("  Underage warnings: " + dossier.underageWarnings()
+                + "   Secrecy breaches noted: " + dossier.secrecyNotes()).withStyle(ChatFormatting.GRAY));
+        dossier.openCase().ifPresentOrElse(open -> say(source, Component.literal("  Open case: "
+                        + open.stage().getSerializedName() + ", " + open.incidents().size() + " incident(s)"
+                        + (open.failedToAppear() ? ", failed to appear" : ""))
+                        .withStyle(ChatFormatting.YELLOW)),
+                () -> say(source, Component.literal("  No open case.").withStyle(ChatFormatting.DARK_GRAY)));
+        dossier.lastVerdict().ifPresent(verdict -> say(source,
+                Component.literal("  Last ruling: " + verdict.getSerializedName()).withStyle(ChatFormatting.GRAY)));
+        if (MinistryTrace.wandConfiscated(wizard)) {
+            say(source, Component.literal("  Wand held by the Ministry.").withStyle(ChatFormatting.RED));
+        }
+        return 1;
+    }
+
+    private static int processCases(CommandSourceStack source, int ticksAhead) {
+        MinistryTrace.process(source.getServer(), MinistryTrace.now(source.getServer()) + ticksAhead);
+        say(source, Component.literal("Ministry clock run " + ticksAhead + " ticks ahead.")
+                .withStyle(ChatFormatting.GRAY));
+        return 1;
+    }
+
+    private static int setAge(CommandSourceStack source, ServerPlayer wizard, int years) {
+        MinistryTrace.setAge(wizard, years);
+        say(source, Component.literal(years == WizardingAge.UNSET
+                        ? "Birth record cleared — of age."
+                        : "Age set to " + years + (WizardingAge.isUnderage(years) ? " — under the Trace." : "."))
+                .withStyle(ChatFormatting.GREEN));
         return 1;
     }
 

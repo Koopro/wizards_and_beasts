@@ -3,7 +3,7 @@
   "display": {
     "icon": {
       "count": 1,
-      "id": "wizards_and_beasts:spell_teacher"
+      "id": "wizards_and_beasts:standard_book_of_spells"
     },
     "title": {
       "translate": "advancements.wizards_and_beasts.progression.spell_teacher.title"
@@ -15,12 +15,12 @@
     "announce_to_chat": false
   },
   "criteria": {
-    "teacher": {
+    "spellbook": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
-            "items": "wizards_and_beasts:spell_teacher"
+            "items": "wizards_and_beasts:standard_book_of_spells"
           }
         ]
       }
@@ -28,7 +28,7 @@
   },
   "requirements": [
     [
-      "teacher"
+      "spellbook"
     ]
   ]
 }

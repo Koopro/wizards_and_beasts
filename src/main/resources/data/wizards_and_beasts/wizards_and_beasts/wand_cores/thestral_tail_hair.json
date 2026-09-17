@@ -1,4 +1,5 @@
 {
+  "_lore": "Canon: the Elder Wand's core. Secondary sources only (not Rowling's text): masterable only by one who can face death. Gameplay: cannot be fully mastered by a wizard who has not seen death.",
   "display_name": {
     "translate": "wand_core.wizards_and_beasts.thestral_tail_hair"
   },
@@ -10,9 +11,12 @@
   "initiative": 0.85,
   "allegiance_transfer_resistance": 0.4,
   "cast_modifiers": {
-    "damage": 1.22,
+    "damage": 1.05,
     "cooldown": 1.0,
-    "range": 1.1,
-    "fizzle": 0.05
+    "range": 1.0,
+    "fizzle": 0.0
+  },
+  "temperament": {
+    "mastery_needs_death_witness": true
   }
 }

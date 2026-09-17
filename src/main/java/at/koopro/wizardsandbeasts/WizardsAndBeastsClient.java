@@ -60,9 +60,13 @@ public class WizardsAndBeastsClient {
         modEventBus.addListener(BroomRiderRenderer::registerModifiers);
         modEventBus.addListener(FormRenderStateModifier::registerModifiers);
         modEventBus.addListener(EntityOutlines::registerModifiers);
-        modEventBus.addListener(at.koopro.wizardsandbeasts.client.petrify.PetrifyRenderHandler::registerModifiers);
+        // Disguise before petrify, and the order is load-bearing. Both write AvatarRenderState.skin,
+        // NeoForge runs render-state modifiers in registration order, and petrify derives its stone
+        // from whatever skin it finds (state.skin.model()). Registered the other way round, a
+        // disguise would paint over the stone and a petrified player could hide being a statue.
         modEventBus.addListener(
-                at.koopro.wizardsandbeasts.client.polyjuice.PolyjuiceRenderHandler::registerModifiers);
+                at.koopro.wizardsandbeasts.client.disguise.DisguiseRenderHandler::registerModifiers);
+        modEventBus.addListener(at.koopro.wizardsandbeasts.client.petrify.PetrifyRenderHandler::registerModifiers);
         modEventBus.addListener(
                 at.koopro.wizardsandbeasts.client.heritage.appearance.HeritageAppearanceRenderState::registerModifiers);
         modEventBus.addListener(

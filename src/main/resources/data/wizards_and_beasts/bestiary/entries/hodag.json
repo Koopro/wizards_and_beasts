@@ -23,5 +23,19 @@
   "entityType": "wizards_and_beasts:hodag",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/hodag.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/hodag.png",
-  "sortOrder": 89
+  "sortOrder": 89,
+  "profile": {
+    "classification": "beast",
+    "basis": "gameplay",
+    "diet": "bestiary.wizards_and_beasts.hodag.diet",
+    "behaviour": "bestiary.wizards_and_beasts.hodag.behaviour",
+    "society": "bestiary.wizards_and_beasts.hodag.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.hodag.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

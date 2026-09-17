@@ -23,5 +23,24 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/chinese_fireball.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/chinese_fireball.png",
   "sortOrder": 3,
-  "entityType": "wizards_and_beasts:chinese_fireball"
+  "entityType": "wizards_and_beasts:chinese_fireball",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.chinese_fireball.diet",
+    "behaviour": "bestiary.wizards_and_beasts.chinese_fireball.behaviour",
+    "society": "bestiary.wizards_and_beasts.chinese_fireball.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.chinese_fireball.interaction.1"
+    ],
+    "materials": [
+      {
+        "item": "wizards_and_beasts:dragon_heartstring",
+        "how": "remains"
+      }
+    ],
+    "study": [
+      "watch"
+    ]
+  }
 }

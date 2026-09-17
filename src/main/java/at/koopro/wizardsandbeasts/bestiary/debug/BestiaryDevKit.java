@@ -37,12 +37,12 @@ public final class BestiaryDevKit implements FeatureDevKit {
 
     @Override
     public void open(ServerPlayer target, DevLog log) {
-        writeAll(target, log, DiscoveryTier.MASTERED);
+        writeAll(target, log, DiscoveryTier.KNOWN);
     }
 
     @Override
     public void reset(ServerPlayer target, DevLog log) {
-        writeAll(target, log, DiscoveryTier.UNDISCOVERED);
+        writeAll(target, log, DiscoveryTier.UNKNOWN);
     }
 
     /**

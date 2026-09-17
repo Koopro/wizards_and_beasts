@@ -23,5 +23,19 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/dementor.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/dementor.png",
   "sortOrder": 47,
-  "entityType": "wizards_and_beasts:dementor"
+  "entityType": "wizards_and_beasts:dementor",
+  "profile": {
+    "classification": "unclassified",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.dementor.diet",
+    "behaviour": "bestiary.wizards_and_beasts.dementor.behaviour",
+    "society": "bestiary.wizards_and_beasts.dementor.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.dementor.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

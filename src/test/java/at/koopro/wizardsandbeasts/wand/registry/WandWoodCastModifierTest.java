@@ -23,8 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * <p>These were originally the exact numbers transcribed out of {@code WandStatsResolver.applyWood}
  * when woods became datapack-driven, because that migration was required to be behaviour-neutral.
- * They are now the authored tuning table: all ten woods carry a block, and the four that were wired
- * before — elder, holly, rowan, yew — were <b>deliberately re-tuned</b> rather than preserved.
+ * They are now the authored tuning table, flattened on 2026-09-17 (within 5% of neutral) when a wood's
+ * character moved into its {@code temperament} — see {@code WandTemperamentLoreTest}.
  *
  * <p>The reason to keep pinning them is unchanged. Nothing else in the build notices if one of these
  * numbers moves: a wood that contributes the wrong amount casts perfectly well. If one changes, that
@@ -42,23 +42,23 @@ class WandWoodCastModifierTest {
 
     /** wood id -> its authored contribution. All ten, so a new wood cannot slip in unpinned. */
     private static final Map<String, WandCastModifiers> EXPECTED = Map.ofEntries(
-            Map.entry("ash", new WandCastModifiers(1.00f, 0.95f, 1.00f, -0.02f, Map.of())),
-            Map.entry("blackthorn", new WandCastModifiers(1.12f, 1.00f, 1.00f, 0.01f,
-                    Map.of(SpellCategory.DEFENSE, 0.10f))),
-            Map.entry("elder", new WandCastModifiers(1.20f, 0.85f, 1.15f, -0.03f, Map.of())),
-            // Healing +15% omitted: no SpellCategory counterpart.
-            Map.entry("hawthorn", new WandCastModifiers(1.10f, 1.00f, 1.00f, 0.05f,
-                    Map.of(SpellCategory.DARK_ARTS, 0.15f))),
-            Map.entry("holly", new WandCastModifiers(0.95f, 0.95f, 1.00f, -0.02f,
-                    Map.of(SpellCategory.DEFENSE, 0.12f))),
-            Map.entry("rowan", new WandCastModifiers(0.92f, 0.90f, 1.00f, -0.04f,
-                    Map.of(SpellCategory.DEFENSE, 0.15f, SpellCategory.DARK_ARTS, -0.10f))),
-            Map.entry("vine", new WandCastModifiers(1.05f, 1.00f, 1.10f, 0.00f, Map.of())),
-            Map.entry("walnut", new WandCastModifiers(1.08f, 0.95f, 1.05f, 0.02f, Map.of())),
-            // Healing +15% omitted, which leaves willow with no category bonus at all.
-            Map.entry("willow", new WandCastModifiers(0.95f, 0.92f, 1.00f, -0.03f, Map.of())),
-            Map.entry("yew", new WandCastModifiers(1.18f, 1.00f, 1.05f, 0.02f,
-                    Map.of(SpellCategory.DARK_ARTS, 0.15f))));
+            Map.entry("ash", new WandCastModifiers(1.00f, 0.97f, 1.00f, -0.01f, Map.of())),
+            Map.entry("blackthorn", new WandCastModifiers(1.04f, 1.00f, 1.00f, 0.00f, Map.of())),
+            // Elder's power is the Elder Wand's mastery, not a wood multiplier (WandAllegianceRules).
+            Map.entry("elder", new WandCastModifiers(1.03f, 1.00f, 1.05f, 0.00f, Map.of())),
+            // Healing omitted: no SpellCategory counterpart.
+            Map.entry("hawthorn", new WandCastModifiers(1.00f, 1.00f, 1.00f, 0.00f,
+                    Map.of(SpellCategory.DARK_ARTS, 0.05f))),
+            Map.entry("holly", new WandCastModifiers(1.00f, 1.00f, 1.00f, 0.00f,
+                    Map.of(SpellCategory.DEFENSE, 0.08f))),
+            Map.entry("rowan", new WandCastModifiers(1.00f, 1.00f, 1.00f, 0.00f,
+                    Map.of(SpellCategory.DEFENSE, 0.10f, SpellCategory.DARK_ARTS, -0.10f))),
+            Map.entry("vine", new WandCastModifiers(1.00f, 1.00f, 1.03f, 0.00f, Map.of())),
+            Map.entry("walnut", new WandCastModifiers(1.00f, 0.97f, 1.00f, 0.00f, Map.of())),
+            // Healing omitted, which leaves willow with no category bonus at all.
+            Map.entry("willow", new WandCastModifiers(1.00f, 0.97f, 1.00f, 0.00f, Map.of())),
+            Map.entry("yew", new WandCastModifiers(1.05f, 1.00f, 1.00f, 0.00f,
+                    Map.of(SpellCategory.DARK_ARTS, 0.05f))));
 
     @Test
     void everyWoodDefinition_decodes() throws IOException {

@@ -5,6 +5,7 @@ import at.koopro.wizardsandbeasts.item.bestiary.BestiaryItem;
 import at.koopro.wizardsandbeasts.item.MinistryHandbookItem;
 import at.koopro.wizardsandbeasts.item.InkItem;
 import at.koopro.wizardsandbeasts.item.ParchmentItem;
+import at.koopro.wizardsandbeasts.item.spell.SpellSourceItem;
 import at.koopro.wizardsandbeasts.item.deluminator.DeluminatorItem;
 import at.koopro.wizardsandbeasts.item.dummy.DuellingDummyItem;
 import at.koopro.wizardsandbeasts.item.floo.FlooPowderItem;
@@ -35,6 +36,19 @@ public final class MiscItemRegistry {
 
     public static final DeferredItem<InkItem> INK_BOTTLE =
             ModItems.ITEMS.registerItem("ink_bottle", InkItem::new);
+
+    /**
+     * A single leaf out of somebody else's spellbook — the mid-game spell source.
+     *
+     * <p>The Standard Book of Spells is the bound one: it survives being read and can be lent around
+     * a server. A page is loose, spent on a successful read, and is where the spells that are not
+     * first-year material turn up. Blank until something writes a {@code spell_source} onto it, the
+     * same as the book — a page nobody has written on is scrap paper, and the item makes no claim
+     * about which spell it holds.
+     */
+    public static final DeferredItem<SpellSourceItem> TORN_SPELL_PAGE =
+            ModItems.ITEMS.registerItem("torn_spell_page",
+                    props -> new SpellSourceItem(props.stacksTo(16), true));
 
     public static final DeferredItem<DeluminatorItem> DELUMINATOR =
             ModItems.ITEMS.registerItem("deluminator", props -> new DeluminatorItem(props.stacksTo(1)));

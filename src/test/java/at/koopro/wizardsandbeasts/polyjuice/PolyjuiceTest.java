@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.polyjuice;
 
 import at.koopro.wizardsandbeasts.brew.effect.BrewEffect;
+import at.koopro.wizardsandbeasts.disguise.DisguiseState;
 import at.koopro.wizardsandbeasts.registry.ConsumableItemRegistry;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
@@ -82,35 +83,61 @@ class PolyjuiceTest {
 
     @Test
     void noStateMeansNoDisguise() {
-        assertFalse(PolyjuiceState.NONE.isDisguised());
+        assertFalse(DisguiseState.NONE.isDisguised());
     }
 
     @Test
     void aStateWithTicksButNoTargetIsNotADisguise() {
         // Both halves are required. A timer with nobody to look like would render as the player's own
         // face while the server believed they were hidden — the worst of both.
-        assertFalse(new PolyjuiceState(200, Optional.empty(), "Hermione").isDisguised());
+        assertFalse(new DisguiseState(200, Optional.empty(), "Hermione").isDisguised());
     }
 
     @Test
     void aStateWithATargetButNoTicksIsNotADisguise() {
-        assertFalse(new PolyjuiceState(0, Optional.of(TARGET), "Hermione").isDisguised());
+        assertFalse(new DisguiseState(0, Optional.of(TARGET), "Hermione").isDisguised());
     }
 
     @Test
     void aFullStateIsADisguise() {
-        assertTrue(new PolyjuiceState(200, Optional.of(TARGET), "Hermione").isDisguised());
+        assertTrue(new DisguiseState(200, Optional.of(TARGET), "Hermione").isDisguised());
     }
 
     @Test
     void tickingDownToZeroEndsIt() {
-        PolyjuiceState state = new PolyjuiceState(1, Optional.of(TARGET), "Hermione");
+        DisguiseState state = new DisguiseState(1, Optional.of(TARGET), "Hermione");
         assertFalse(state.withTicks(0).isDisguised());
     }
 
     @Test
     void tickingNeverGoesNegative() {
-        assertEquals(0, new PolyjuiceState(1, Optional.of(TARGET), "H").withTicks(-9).ticksRemaining());
+        assertEquals(0, new DisguiseState(1, Optional.of(TARGET), "H").withTicks(-9).ticksRemaining());
+    }
+
+    @Test
+    void anIndefiniteDisguiseIsADisguise() {
+        // The admin command's shape. A negative sentinel rather than a huge number, so that "no clock"
+        // is a state the countdown can recognise instead of one it decrements for sixty-eight years.
+        assertTrue(new DisguiseState(DisguiseState.INDEFINITE, Optional.of(TARGET), "Hermione")
+                .isDisguised());
+    }
+
+    @Test
+    void anIndefiniteDisguiseNeverTicksDown() {
+        DisguiseState state = new DisguiseState(DisguiseState.INDEFINITE, Optional.of(TARGET), "H");
+        assertEquals(DisguiseState.INDEFINITE, state.tickDown().tickDown().ticksRemaining());
+        assertTrue(state.isIndefinite());
+    }
+
+    @Test
+    void aTimedDisguiseCannotTickIntoTheIndefiniteSentinel() {
+        // The sentinel is -1 and the clock counts down, so the one tick that matters is the one at
+        // zero. If it ever passed through, an expiring Polyjuice would silently become permanent.
+        DisguiseState expiring = new DisguiseState(1, Optional.of(TARGET), "H");
+        DisguiseState ended = expiring.tickDown();
+        assertEquals(0, ended.ticksRemaining());
+        assertFalse(ended.isDisguised());
+        assertFalse(ended.tickDown().isIndefinite());
     }
 
     @Test
@@ -118,7 +145,7 @@ class PolyjuiceTest {
         // The security property, asserted structurally: a disguise is an appearance and a clock. If a
         // future field ever added a permission, a team or a UUID claim, this is the test that should
         // stop it — the record has exactly three components and none of them is an identity.
-        assertEquals(3, PolyjuiceState.class.getRecordComponents().length,
+        assertEquals(3, DisguiseState.class.getRecordComponents().length,
                 "a disguise must remain appearance + clock; anything else is an identity claim");
     }
 

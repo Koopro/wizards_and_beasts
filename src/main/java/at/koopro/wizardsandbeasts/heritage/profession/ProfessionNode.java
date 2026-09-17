@@ -32,28 +32,6 @@ public enum ProfessionNode {
             Set.of("wizard_wandmaker", "wizard_seer"),
             Set.of("wand_mastery", "divination")),
 
-    // Werewolf
-    WEREWOLF_TRACKER("werewolf_tracker", Heritage.WEREWOLF, "Tracker",
-            "Heightened senses and fieldcraft learned under moons that do not forgive mistakes.", 1, Set.of(),
-            Set.of("combat", "beast_mastery")),
-    WEREWOLF_PACKMASTER("werewolf_packmaster", Heritage.WEREWOLF, "Pack Master",
-            "Begins to steer the transformation instead of only surviving it — instinct shaped into strategy.", 2, Set.of("werewolf_tracker"),
-            Set.of("combat", "transformation")),
-    WEREWOLF_ALPHA("werewolf_alpha", Heritage.WEREWOLF, "Alpha",
-            "Commands the night with a predator's certainty; lesser wolves answer before they think.", 3, Set.of("werewolf_packmaster"),
-            Set.of("combat", "transformation", "beast_mastery")),
-
-    // Obscurial
-    OBSCURIAL_CHANNELER("obscurial_channeler", Heritage.OBSCURIAL, "Channeler",
-            "First tentative reins on a force that would rather consume than obey.", 1, Set.of(),
-            Set.of("dark_arts", "bond_magic")),
-    OBSCURIAL_CONDUIT("obscurial_conduit", Heritage.OBSCURIAL, "Conduit",
-            "Channels the Obscurus with intent, trading serenity for bursts of annihilating pressure.", 2, Set.of("obscurial_channeler"),
-            Set.of("dark_arts", "transformation")),
-    OBSCURIAL_HARBINGER("obscurial_harbinger", Heritage.OBSCURIAL, "Harbinger",
-            "Walks the edge where host and parasite blur; cities remember names like this in ash.", 3, Set.of("obscurial_conduit"),
-            Set.of("dark_arts", "transformation", "bond_magic")),
-
     // Goblin
     GOBLIN_CLERK("goblin_clerk", Heritage.GOBLIN, "Vault Clerk",
             "Ledgers, liens, and the patient arithmetic that keeps a dragon from boredom.", 1, Set.of(),
@@ -229,9 +207,9 @@ public enum ProfessionNode {
                 result.add(new SkillNodeEffect.AttributeBoost(Attributes.MAX_HEALTH, pointCost, AttributeModifier.Operation.ADD_VALUE,
                         skillModifierId(id, "max_health")));
             }
-            case WEREWOLF, GIANT -> result.add(new SkillNodeEffect.AttributeBoost(Attributes.ARMOR, pointCost * 0.5d,
+            case GIANT -> result.add(new SkillNodeEffect.AttributeBoost(Attributes.ARMOR, pointCost * 0.5d,
                     AttributeModifier.Operation.ADD_VALUE, skillModifierId(id, "armor")));
-            case OBSCURIAL, VAMPIRE -> result.add(new SkillNodeEffect.SpellDamageMultiplier(SpellCategory.DARK_ARTS, 1.0f + (pointCost * 0.06f)));
+            case VAMPIRE -> result.add(new SkillNodeEffect.SpellDamageMultiplier(SpellCategory.DARK_ARTS, 1.0f + (pointCost * 0.06f)));
             case HOUSE_ELF -> result.add(new SkillNodeEffect.SpellCooldownMultiplier(SpellCategory.DEFENSE, 1.0f - (pointCost * 0.06f)));
             case VEELA, MERPEOPLE -> result.add(new SkillNodeEffect.SpellCooldownMultiplier(SpellCategory.UTILITY, 1.0f - (pointCost * 0.05f)));
             case GOBLIN, CENTAUR -> result.add(new SkillNodeEffect.AttributeBoost(Attributes.MOVEMENT_SPEED, pointCost * 0.01d,

@@ -40,10 +40,7 @@ class SkillAudienceAccessTest {
         // Wizardkind incl. squib.
         assertEquals(SkillTreeId.Audience.WIZARD, SkillTreeId.audienceForVariant(HeritageVariant.PURE_BLOOD));
         assertEquals(SkillTreeId.Audience.WIZARD, SkillTreeId.audienceForVariant(HeritageVariant.SQUIB));
-        // Werewolf, obscurial, vampire.
-        assertEquals(SkillTreeId.Audience.WIZARD, SkillTreeId.audienceForVariant(HeritageVariant.WEREWOLF_BITTEN));
-        assertEquals(SkillTreeId.Audience.WIZARD, SkillTreeId.audienceForVariant(HeritageVariant.SUPPRESSED));
-        assertEquals(SkillTreeId.Audience.WIZARD, SkillTreeId.audienceForVariant(HeritageVariant.UNLEASHED));
+        // Vampire. (Werewolves and Obscurials are wizards carrying a condition, so they are WIZARD by lineage.)
         assertEquals(SkillTreeId.Audience.WIZARD, SkillTreeId.audienceForVariant(HeritageVariant.VAMPIRE_TURNED));
         assertEquals(SkillTreeId.Audience.WIZARD, SkillTreeId.audienceForVariant(HeritageVariant.VAMPIRE_BORN));
         assertEquals(SkillTreeId.Audience.WIZARD, SkillTreeId.audienceForVariant(HeritageVariant.VAMPIRE_DHAMPIR));
@@ -90,14 +87,22 @@ class SkillAudienceAccessTest {
 
     @Test
     void obscurialSealsWandAndCastingButNotOpenRegions() {
-        Heritage h = Heritage.OBSCURIAL;
-        HeritageVariant v = HeritageVariant.SUPPRESSED;
-        assertFalse(SkillTreeId.meetsRequirement(SkillTreeId.Requirement.WAND, h, v),
-                "obscurial cannot use a wand → wandlore sealed");
-        assertFalse(SkillTreeId.meetsRequirement(SkillTreeId.Requirement.CASTING, h, v),
-                "obscurial has no_casting → spell_mastery/dark_arts sealed");
-        assertTrue(SkillTreeId.meetsRequirement(SkillTreeId.Requirement.NONE, h, v),
+        at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData data =
+                new at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData();
+        data.setSelectedHeritage(Heritage.WIZARDKIND);
+        data.setSelectedHeritageVariant(HeritageVariant.PURE_BLOOD);
+        assertTrue(SkillTreeId.meetsRequirement(SkillTreeId.Requirement.CASTING, data), "before the Obscurus");
+
+        data.setCondition(at.koopro.wizardsandbeasts.heritage.ConditionOrigin.SUPPRESSED);
+        assertFalse(SkillTreeId.meetsRequirement(SkillTreeId.Requirement.WAND, data),
+                "an Obscurial cannot use a wand → wandlore sealed");
+        assertFalse(SkillTreeId.meetsRequirement(SkillTreeId.Requirement.CASTING, data),
+                "an Obscurus seals casting → spell_mastery/dark_arts sealed");
+        assertTrue(SkillTreeId.meetsRequirement(SkillTreeId.Requirement.NONE, data),
                 "open regions stay allocatable");
+        assertTrue(SkillTreeId.meetsRequirement(SkillTreeId.Requirement.CASTING,
+                        data.getSelectedHeritage(), data.getSelectedHeritageVariant()),
+                "the lineage alone still casts: it is the condition that seals it");
     }
 
     @Test
@@ -122,13 +127,24 @@ class SkillAudienceAccessTest {
     @Test
     void werewolfAndVampireAndHalfVeelaKeepFullWizardWeb() {
         for (HeritageVariant v : new HeritageVariant[]{
-                HeritageVariant.WEREWOLF_BITTEN, HeritageVariant.VAMPIRE_TURNED, HeritageVariant.VEELA_HALF}) {
+                HeritageVariant.VAMPIRE_TURNED, HeritageVariant.VEELA_HALF}) {
             Heritage h = v.getParentHeritage();
             assertTrue(SkillTreeId.meetsRequirement(SkillTreeId.Requirement.CASTING, h, v),
                     v + " should keep casting regions");
             assertTrue(SkillTreeId.meetsRequirement(SkillTreeId.Requirement.WAND, h, v),
                     v + " should keep wandlore");
         }
+    }
+
+    @Test
+    void aWerewolfKeepsTheFullWizardWeb() {
+        at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData data =
+                new at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData();
+        data.setSelectedHeritage(Heritage.WIZARDKIND);
+        data.setSelectedHeritageVariant(HeritageVariant.HALF_BLOOD);
+        data.setCondition(at.koopro.wizardsandbeasts.heritage.ConditionOrigin.BITTEN);
+        assertTrue(SkillTreeId.meetsRequirement(SkillTreeId.Requirement.CASTING, data));
+        assertTrue(SkillTreeId.meetsRequirement(SkillTreeId.Requirement.WAND, data));
     }
 
     // ── Per-audience cap hook is a no-op today ──

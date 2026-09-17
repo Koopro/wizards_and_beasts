@@ -63,20 +63,23 @@ public final class StatEffects {
 
     // ── Knowledge: the one thing being well-read buys you ────────────────────────────────────
     /**
-     * Multiplier on what a spell teacher charges for a lesson.
+     * Multiplier on how fast practice turns into proficiency.
      *
-     * <p>KNOWLEDGE had no gameplay consumer at all — it was derived, synced and displayed, and
-     * nothing in the mod read it. One consequence, not a system: a wizard who has already read the
-     * books, walked the bestiary and worked the skill web arrives at the lesson knowing half of it,
-     * and is charged accordingly. It attaches to {@code SpellLearningService}, which is the only
-     * place KNOWLEDGE's four sources and spending money already meet.
+     * <p>KNOWLEDGE used to be a discount on a spell teacher's fee. When the teacher stopped being a
+     * shop the discount had nothing left to discount, and re-pricing something else would have left
+     * the stat's one consequence being "you pay less" — which is a wallet effect wearing a scholar's
+     * name. It now does the thing being well-read actually does: a wizard who has read the books,
+     * walked the bestiary and worked the skill web recognises what they are doing wrong sooner, so
+     * each landed cast teaches them more.
      *
-     * <p>40% off at KNOWLEDGE 100 is deliberately modest. The teacher fee is configurable and can be
-     * switched off entirely ({@code Config.spellTeacherRequirePayment}), so this must not be the
-     * reason anyone trains a stat — it is the reward for having trained everything else.
+     * <p>Read by {@code SpellProficiencyTracker}, which owns the whole proficiency curve, so this is
+     * the only place the two meet and there is no second formula to keep in step.
+     *
+     * <p>+50% at KNOWLEDGE 100 is deliberately modest, and multiplies an increment that already
+     * tapers above 0.8 proficiency. It shortens the grind; it does not replace it.
      */
-    static final float TUITION_AT_ZERO = 1.00f;
-    static final float TUITION_AT_MAX  = 0.60f;
+    static final float STUDY_RATE_AT_ZERO = 1.00f;
+    static final float STUDY_RATE_AT_MAX  = 1.50f;
 
     private StatEffects() {}
 
@@ -138,27 +141,13 @@ public final class StatEffects {
         return Math.max(0f, Math.min(1f, resolve / maxResolve(willpower)));
     }
 
-    /** Multiplier on a spell teacher's fee for a KNOWLEDGE value. Never below {@link #TUITION_AT_MAX}. */
-    public static float tuitionMultiplier(int knowledge) {
-        return lerp(TUITION_AT_ZERO, TUITION_AT_MAX, knowledge);
-    }
-
     /**
-     * A teacher's fee in knuts after the KNOWLEDGE discount, never below 1 for a lesson that costs
-     * anything at all.
-     *
-     * <p>Both the quoted price and the amount actually withdrawn go through here, so the number on
-     * the offer card is the number that leaves the vault. Quoting from one formula and charging from
-     * another is how a shop ends up refusing a purchase it just advertised as affordable.
-     *
-     * <p>Rounded to nearest rather than up. {@code ceil} looks like the conservative choice and is
-     * the wrong one here: {@link #TUITION_AT_MAX} lands on 0.6000000238 in {@code float}, so a
-     * 100-knut lesson at KNOWLEDGE 100 came to 60.000002 and was billed as <em>61</em> — a player
-     * told they had earned 40% off, charged 40% minus a knut, with no way to tell why.
+     * Proficiency-gain multiplier for a KNOWLEDGE value. Never below {@link #STUDY_RATE_AT_ZERO}, so
+     * an unread wizard learns at the unmodified rate rather than a penalised one — KNOWLEDGE is a
+     * reward for work already done elsewhere and must never make the baseline worse.
      */
-    public static int tuitionCost(int baseCostKnuts, int knowledge) {
-        if (baseCostKnuts <= 0) return 0;
-        return Math.max(1, Math.round(baseCostKnuts * tuitionMultiplier(knowledge)));
+    public static float studyRate(int knowledge) {
+        return lerp(STUDY_RATE_AT_ZERO, STUDY_RATE_AT_MAX, knowledge);
     }
 
     /** Linear interpolation from {@code atZero} to {@code atMax} over a stat clamped to 0–100. */

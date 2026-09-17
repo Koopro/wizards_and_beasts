@@ -20,5 +20,24 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/horned_serpent.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/horned_serpent.png",
   "sortOrder": 204,
-  "entityType": "wizards_and_beasts:horned_serpent"
+  "entityType": "wizards_and_beasts:horned_serpent",
+  "profile": {
+    "classification": "beast",
+    "basis": "partial",
+    "diet": "bestiary.wizards_and_beasts.horned_serpent.diet",
+    "behaviour": "bestiary.wizards_and_beasts.horned_serpent.behaviour",
+    "society": "bestiary.wizards_and_beasts.horned_serpent.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.horned_serpent.interaction.1"
+    ],
+    "materials": [
+      {
+        "item": "wizards_and_beasts:horned_serpent_gem",
+        "how": "remains"
+      }
+    ],
+    "study": [
+      "watch"
+    ]
+  }
 }

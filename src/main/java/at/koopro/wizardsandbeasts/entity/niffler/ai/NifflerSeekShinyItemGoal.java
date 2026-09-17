@@ -36,7 +36,7 @@ public class NifflerSeekShinyItemGoal extends Goal {
     public boolean canUse() {
         if (niffler.isCarried()) return false;
         if (niffler.isPouchFull()) return false;
-        targetItem = findNearest();
+        targetItem = findPreferred();
         return targetItem != null && targetItem.isAlive();
     }
 
@@ -66,13 +66,18 @@ public class NifflerSeekShinyItemGoal extends Goal {
         niffler.getNavigation().stop();
     }
 
+    /** The shiny thing in range the Niffler wants most, nearest first among equals. */
     @Nullable
-    private ItemEntity findNearest() {
+    public ItemEntity findPreferred() {
         AABB area = niffler.getBoundingBox().inflate(SEARCH_RANGE);
         List<ItemEntity> items = niffler.level().getEntitiesOfClass(ItemEntity.class, area,
                 e -> e.isAlive() && e.getItem().is(NIFFLER_SHINY));
+        // The shiniest first, then the nearest: a Niffler walks past a copper ingot to get to a gold one.
         return items.stream()
-                .min(Comparator.comparingDouble(niffler::distanceToSqr))
+                .min(Comparator.<ItemEntity>comparingInt(item -> -at.koopro.wizardsandbeasts.creature.wildlife
+                                .WildlifeRules.treasureValue(net.minecraft.core.registries.BuiltInRegistries.ITEM
+                                        .getKey(item.getItem().getItem()).getPath()))
+                        .thenComparingDouble(niffler::distanceToSqr))
                 .orElse(null);
     }
 }

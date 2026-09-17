@@ -9,12 +9,11 @@ import at.koopro.wizardsandbeasts.wand.stat.WandLength;
 import at.koopro.wizardsandbeasts.wand.stat.WandWood;
 import at.koopro.wizardsandbeasts.spell.cast.WandCastSessions;
 import at.koopro.wizardsandbeasts.spell.cast.WandCastTiming;
+import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.spell.beam.WandBeamChannelLogic;
 import at.koopro.wizardsandbeasts.spell.clash.SpellClashLocks;
 import at.koopro.wizardsandbeasts.util.ClientClassBridge;
-import at.koopro.wizardsandbeasts.wand.WandCastLines;
-import at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.resonance.WandResonanceSystem;
 import net.minecraft.ChatFormatting;
@@ -91,24 +90,30 @@ public class WandItem extends GeoItemBase {
         ItemStack stack = player.getItemInHand(hand);
         if (!level.isClientSide()) {
             Optional<UUID> master = WandComponents.getMaster(stack);
-            if (master.isEmpty()) {
+            // The Elder Wand is never chosen by resonance: nobody becomes its master by picking it up. See
+            // WandAllegianceService — it is won.
+            if (master.isEmpty() && !ModDataComponents.isElderWand(stack)) {
                 float score = WandResonanceSystem.computeResonance(player, stack, level.registryAccess());
                 WandResonanceSystem.applyResonance(player, stack, score, level.registryAccess());
                 // Falls through to startUsingItem rather than returning here. The client runs this same
                 // method with the server branch skipped, so an early return made the client believe it
                 // was holding a wand the server did not think was in use at all — the exact client/server
                 // divergence the cast session exists to rule out. Holding an unbonded wand is harmless:
-                // the beam tick refuses it (isWandBondedTo) and the release still reports WAND_NOT_BONDED.
-            } else if (!master.get().equals(player.getUUID())) {
+                // the beam tick refuses it and the release still reports WAND_NOT_BONDED.
+            } else if (master.isPresent() && !master.get().equals(player.getUUID())) {
                 player.displayClientMessage(Component.translatable("wandcraft.resonance.notYourWand"), true);
             }
         }
+        boolean holdAlreadyRunning = player.isUsingItem();
         player.startUsingItem(hand);
-        if (!level.isClientSide() && player instanceof ServerPlayer sp) {
+        if (!level.isClientSide() && player instanceof ServerPlayer sp && !holdAlreadyRunning && sp.isUsingItem()) {
             // The hold has begun on the server. This is the only place a cast session is opened, so a
             // release packet that does not correspond to a hold the server itself saw start has nothing
-            // to land on.
-            WandCastSessions.begin(sp, WandCastSessions.gameTickOf(sp));
+            // to land on. Only a hold that actually began: vanilla reads a use packet even while the wand is
+            // already in use (startUsingItem is then a no-op), and a cancelled use-start begins nothing either.
+            // Opening a session for those replaced the running hold's session and everything it knew.
+            WandCastSessions.begin(sp, WandCastSessions.gameTickOf(sp),
+                    sp.getData(ModAttachments.SPELL_DATA.get()).getActiveSpellId());
             if (SpellClashLocks.isLocked(sp)) {
                 // A hold inside a spell clash feeds the lock: its release must not cast.
                 WandCastSessions.markClashHold(sp);
@@ -131,8 +136,10 @@ public class WandItem extends GeoItemBase {
     public void onUseTick(Level level, LivingEntity entity, ItemStack stack, int remainingUseDuration) {
         super.onUseTick(level, entity, stack, remainingUseDuration);
         // A hold that is sustaining a spell clash drives no channel — not during the lock, and not after
-        // it either, for a winner who is still holding when it ends.
-        if (!level.isClientSide() && entity instanceof ServerPlayer sp && !WandCastSessions.isClashHold(sp)) {
+        // it either, for a winner who is still holding when it ends. Nor does a hold whose spell was switched
+        // under it: it was pressed for the old spell, and the server ends it at the close of this tick.
+        if (!level.isClientSide() && entity instanceof ServerPlayer sp
+                && !WandCastSessions.isClashHold(sp) && !WandCastSessions.spellChangedDuringHold(sp)) {
             WandBeamChannelLogic.tick(sp, stack);
             // Protego charges while the wand is held: the longer the hold, the stronger the shape
             // that will be raised on release, and the charge-up says which one out loud as it goes.
@@ -153,26 +160,50 @@ public class WandItem extends GeoItemBase {
      * has no timeout of its own, so the beam hung in the world until something else happened to
      * clear it. Dropping the wand or having it moved out of the hand by a hopper is the same path.
      *
-     * <p>Only the beam channel is torn down here. The cast session is deliberately left alone: the
-     * ordinary release also passes through {@code stopUsingItem()} (at the tail of
-     * {@code releaseUsingItem()}), and the client's cast packet arrives <em>after</em> it, so
-     * aborting the session here would refuse every cast with {@code NO_CAST_SESSION}. A hold that
-     * ends this way leaves a session that no release will ever be offered to, and it expires on its
-     * own at {@link WandCastSessions#MAX_SESSION_TICKS}.
+     * <p>The ordinary release also passes through {@code stopUsingItem()} (at the tail of
+     * {@code releaseUsingItem()}), but {@link #releaseUsing} marks that authoritative vanilla release
+     * first. Every other stop is an interruption, so it aborts the cast session as well as the beam.
+     * This prevents an old packet from turning a slot swap, disarm, stun, or forced item cancellation
+     * into a late cast.
      *
-     * <p>Idempotent: {@code endChannel} returns immediately when there is no session, which is the
-     * case on the normal path where {@code releaseUsing} has already run.
+     * <p>Vanilla does not call this for every stop, though: {@code stopUsingItem()} skips it when the used
+     * stack is already empty, which is exactly how dropping the wand ends a hold. {@code WandCastSessions}'
+     * per-tick reconciliation reaches {@link #endHoldWithoutRelease} for those.
      */
     @Override
     public void onStopUsing(ItemStack stack, LivingEntity entity, int count) {
         if (!entity.level().isClientSide() && entity instanceof ServerPlayer sp) {
-            WandBeamChannelLogic.endChannel(sp);
+            endHoldWithoutRelease(sp);
         }
+    }
+
+    /**
+     * Tears down whatever a wand hold left open when it ended without vanilla's release: the beam channel, and —
+     * unless vanilla did release it and the client's packet is still on its way — the cast session and the
+     * recorded hold time.
+     *
+     * <p>Idempotent, and cheap when there is nothing to tear down: the normal release path has already ended
+     * the channel in {@link #releaseUsing}, and a player who is not casting has no session.
+     */
+    public static void endHoldWithoutRelease(ServerPlayer player) {
+        WandBeamChannelLogic.endChannel(player);
+        if (!WandCastSessions.hasVanillaReleaseObserved(player)) {
+            WandCastTiming.clear(player);
+            WandCastSessions.abort(player);
+        }
+    }
+
+    /** Whether this entity is in the middle of a wand hold, by vanilla's item-use state. */
+    public static boolean isUsingWand(LivingEntity entity) {
+        return entity.isUsingItem() && entity.getUseItem().getItem() instanceof WandItem;
     }
 
     @Override
     public boolean releaseUsing(ItemStack stack, Level level, LivingEntity entity, int timeLeft) {
         if (!level.isClientSide() && entity instanceof ServerPlayer sp) {
+            // Vanilla invokes this before onStopUsing. The client release packet is ordered after the
+            // vanilla RELEASE_USE_ITEM packet, so it may spend the token only after this fact exists.
+            WandCastSessions.markVanillaReleaseObserved(sp);
             int holdTicks = Math.max(0, getUseDuration(stack, entity) - timeLeft);
             WandCastTiming.recordRelease(sp, holdTicks);
             WandBeamChannelLogic.endChannel(sp);
@@ -195,40 +226,36 @@ public class WandItem extends GeoItemBase {
         Identifier wood = WandComponents.getWood(stack);
         Identifier core = WandComponents.getCore(stack);
         WandFlexibility flexibility = WandComponents.getFlexibility(stack);
-        Optional<UUID> master = WandComponents.getMaster(stack);
 
         tooltipAdder.accept(Component.translatable("wandcraft.tooltip.wood",
                 WandLoreNames.wood(context.registries(), wood)).withStyle(ChatFormatting.GOLD));
         tooltipAdder.accept(Component.translatable("wandcraft.tooltip.core",
                 WandLoreNames.core(context.registries(), core)).withStyle(ChatFormatting.LIGHT_PURPLE));
-        tooltipAdder.accept(Component.translatable("wandcraft.tooltip.flexibility",
-                flexibility == null ? "?" : flexibility.getSerializedName()).withStyle(ChatFormatting.GRAY));
-        if (master.isPresent()) {
-            // A raw UUID told a player nothing and looked like a bug. The identity that matters in
-            // play is "is this mine"; the UUID stays available under advanced tooltips for anyone
-            // debugging a transfer.
-            tooltipAdder.accept(Component.translatable("wandcraft.tooltip.master_other")
-                    .withStyle(ChatFormatting.AQUA));
-            if (flag.isAdvanced()) {
-                tooltipAdder.accept(Component.translatable("wandcraft.tooltip.master", master.get().toString())
-                        .withStyle(ChatFormatting.DARK_GRAY));
-            }
-        }
-        tooltipAdder.accept(Component.translatable("wandcraft.tooltip.integrity", WandComponents.getIntegrity(stack))
-                .withStyle(ChatFormatting.GREEN));
-        tooltipAdder.accept(Component.translatable("wandcraft.tooltip.corruption", WandComponents.getCorruption(stack))
-                .withStyle(ChatFormatting.DARK_RED));
         Float len = WandComponents.getLength(stack);
         tooltipAdder.accept(Component.translatable("wandcraft.tooltip.length_in", len == null ? 0.0f : len)
                 .withStyle(ChatFormatting.BLUE));
-        tooltipAdder.accept(Component.translatable("wandcraft.tooltip.allegiance", WandComponents.getAllegianceScore(stack))
-                .withStyle(ChatFormatting.DARK_GREEN));
+        tooltipAdder.accept(Component.translatable("wandcraft.tooltip.flexibility",
+                flexibility == null ? "?" : flexibility.getSerializedName()).withStyle(ChatFormatting.GRAY));
 
-        // What the wand is worth, under what it is. Resolved through the same call the cast path makes,
-        // so the stated contribution cannot drift from the applied one. Silent when the wand contributes
-        // nothing, and silent when the registries are unavailable — resolve() answers NEUTRAL rather
-        // than throwing, and a neutral set produces no lines.
-        WandCastLines.append(WandStatsResolver.resolve(stack, context.registries()), tooltipAdder);
+        // Condition and taint as words. The floats these replaced told a player nothing they could act on; the
+        // relationship to the viewer is added client-side (WandEligibilityTooltipHandler), which knows who is
+        // looking.
+        tooltipAdder.accept(at.koopro.wizardsandbeasts.wand.WandEligibility.conditionLine(stack));
+        Component taint = at.koopro.wizardsandbeasts.wand.WandEligibility.corruptionLine(stack);
+        if (taint != null) {
+            tooltipAdder.accept(taint);
+        }
+
+        if (flag.isAdvanced()) {
+            WandComponents.getMaster(stack).ifPresent(master -> tooltipAdder.accept(
+                    Component.translatable("wandcraft.tooltip.master", master.toString()).withStyle(ChatFormatting.DARK_GRAY)));
+            tooltipAdder.accept(Component.translatable("wandcraft.tooltip.bond_percent",
+                    Math.round(WandComponents.getAllegianceScore(stack) * 100f)).withStyle(ChatFormatting.DARK_GRAY));
+            tooltipAdder.accept(Component.translatable("wandcraft.tooltip.integrity", WandComponents.getIntegrity(stack))
+                    .withStyle(ChatFormatting.DARK_GRAY));
+            tooltipAdder.accept(Component.translatable("wandcraft.tooltip.corruption", WandComponents.getCorruption(stack))
+                    .withStyle(ChatFormatting.DARK_GRAY));
+        }
     }
 
     /**

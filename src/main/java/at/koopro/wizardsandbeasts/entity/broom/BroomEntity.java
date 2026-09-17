@@ -2,6 +2,8 @@ package at.koopro.wizardsandbeasts.entity.broom;
 
 import at.koopro.wizardsandbeasts.broom.BroomDefinition;
 import at.koopro.wizardsandbeasts.broom.BroomDefinitionRegistry;
+import at.koopro.wizardsandbeasts.broom.BroomGeometry;
+import at.koopro.wizardsandbeasts.entity.broom.handling.HandlingProfileRegistry;
 import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import net.minecraft.core.BlockPos;
@@ -23,6 +25,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.InterpolationHandler;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -50,11 +53,6 @@ public class BroomEntity extends Entity implements GeoEntity {
      * ticks, so a timeout of ten meant a single late packet read as "the rider let go of everything".
      */
     private static final long INPUT_TIMEOUT_TICKS = 20L;
-    /**
-     * Largest single-tick change in speed that can be a real impact rather than a network artefact.
-     * See {@link #applyCrashWearFromMotionDelta}.
-     */
-    private static final double MAX_PLAUSIBLE_MOTION_DELTA = 4.0D;
     private static final Identifier FALLBACK_DEFINITION =
             Identifier.fromNamespaceAndPath("wizards_and_beasts", "cleansweep_seven");
     private static final EntityDataAccessor<String> DEFINITION_ID =
@@ -95,7 +93,6 @@ public class BroomEntity extends Entity implements GeoEntity {
     private ItemStack broomStack = ItemStack.EMPTY;
     private boolean droppedItem;
     private transient @Nullable BroomDefinition currentDef;
-    private double lastMotionDelta;
     /**
      * Where this broom was last tick, for {@link BroomMovement#observeMovement}. Null until the first
      * observed tick, because there is no honest delta to report before there is a previous position — and
@@ -111,8 +108,6 @@ public class BroomEntity extends Entity implements GeoEntity {
      * teleport once per position packet instead of flying. Three steps, the same as a boat.
      */
     private final InterpolationHandler interpolation = new InterpolationHandler(this, 3);
-    /** Set by {@link #onGentleLanding()} and cleared each tick, so wear paths can agree on it. */
-    private boolean landedGentlyThisTick;
     /** Keeps the touchdown sound to one per landing rather than one per grounded tick. */
     private boolean announcedLanding;
 
@@ -138,7 +133,6 @@ public class BroomEntity extends Entity implements GeoEntity {
     public void tick() {
         super.tick();
 
-        landedGentlyThisTick = false;
         if (!onGround() && !verticalCollision) {
             announcedLanding = false;
         }
@@ -168,23 +162,35 @@ public class BroomEntity extends Entity implements GeoEntity {
             } else {
                 BroomMovement.observeMovement(this);
             }
-            applyCrashWearFromMotionDelta();
+            // Durability is charged for impacts and nothing else; the impact the rider's client saw reaches
+            // the server through BroomImpactC2SPayload. A catch-all used to sit here billing one to three
+            // points for any tick whose motion jumped by more than 0.4 — but on the server that motion is
+            // observed from the rider's position packets, so one late or doubled packet at cruising speed
+            // was billed as a crash, twice, and simply flying wore the broom out.
             if (!level().isClientSide() && !isRemoved()) {
                 BroomImpacts.scanEntityCollisions(this, rider);
             }
         } else if (isLocalInstanceAuthoritative()) {
             // Nobody riding: with no controlling passenger there is no client to be authoritative, so this
-            // is the server, and the fall is its own to simulate.
-            verticalVelocity = (float) getDeltaMovement().y;
-            setDeltaMovement(getDeltaMovement().scale(0.95).add(0, -0.04, 0));
+            // is the server, and the settle is its own to simulate. A broom let go of in mid-air drifts down
+            // under its own weakGravity rather than dropping like a plank; on the ground it rests, its model
+            // still hovering at seat height (BroomGeometry).
+            BroomDefinition def = resolveDefinition();
+            Vec3 drift = getDeltaMovement();
+            verticalVelocity = BroomFlightRules.applyWeakGravity((float) drift.y,
+                    HandlingProfileRegistry.of(def).modifyWeakGravity(def.weakGravity(), this, def));
+            setDeltaMovement(drift.x * UNRIDDEN_DRAG, verticalVelocity, drift.z * UNRIDDEN_DRAG);
             move(MoverType.SELF, getDeltaMovement());
+            currentSpeed = (float) getDeltaMovement().horizontalDistance();
         } else {
             BroomMovement.observeMovement(this);
         }
         BroomMovement.updateTilt(this);
         BroomImpacts.tickCollisionCooldowns(this);
-        lastMotionDelta = getDeltaMovement().length();
     }
+
+    /** Horizontal drag per tick on a broom nobody is riding, so one let go of at speed coasts to a stop. */
+    private static final double UNRIDDEN_DRAG = 0.9;
 
     /** Which {@link BroomDefinitionRegistry#generation()} {@link #currentDef} was resolved from. */
     private int currentDefGeneration = -1;
@@ -237,37 +243,6 @@ public class BroomEntity extends Entity implements GeoEntity {
     }
 
     /**
-     * Where the rider straddles the shaft, read from the definition.
-     *
-     * <p>The derivation — shaft centre 0.25 blocks up, humanoid hip pivot 0.75 blocks up, so the
-     * seat is -0.50 — lives on {@link at.koopro.wizardsandbeasts.broom.BroomSeat}, which is also
-     * where the default comes from. What used to be here was {@code dimensions.height() * 0.55}: a
-     * hitbox height, which says nothing about where a model draws its shaft, and which put the
-     * rider's hip 0.83 blocks above the handle.
-     *
-     * <p>The horizontal components are rotated into the broom's own frame, so a definition writing
-     * {@code [0, -0.4375, 0.05]} means five centimetres toward the bristles rather than five
-     * centimetres toward world south. Vanilla's default attachment does the same thing through
-     * {@code EntityAttachments.getClamped}; overriding the method opts out of that, so the rotation
-     * has to be done here or a non-zero offset would swing around the broom as it turned.
-     *
-     * <p><b>Yaw only, deliberately — not pitch.</b> The rendered broom does not pitch with
-     * {@code getXRot()}: its nose angle comes from {@code BroomMovement.updateTilt}, which is roughly
-     * {@code -0.4} times the entity pitch and clamped to 35 degrees. Rotating the seat by the full
-     * entity pitch would swing the rider further than the mesh they are sitting on. Using the visual
-     * tilt instead is worse still — those are client-side render values, and this method positions
-     * the rider on the server too, so the two sides would disagree about where a passenger is. Yaw is
-     * applied to the mesh one-for-one, which is why it is safe. The cost of leaving pitch out is
-     * bounded by the largest authored {@code z}, five centimetres, which at any real flight angle
-     * moves the seat by less than a pixel.
-     *
-     * <p>Sampling a {@code rider_attach} bone instead was considered and rejected for the same
-     * reason: GeckoLib bone transforms exist only inside a client render pass, and
-     * {@code positionRider} needs an answer on the server. The JSON offset is the only form of this
-     * value both sides can agree on — and {@code BroomSeatParityTest} ties it back to the geometry,
-     * which is what a bone would have given.
-     */
-    /**
      * Whether the boost is actually firing this tick — held, charged, and off cooldown.
      *
      * <p>Three conditions, and every one of them matters: the input alone is a player mashing a key
@@ -279,26 +254,72 @@ public class BroomEntity extends Entity implements GeoEntity {
         return inputBoosting && getBoostCooldownTicks() <= 0 && getBoostTicksRemaining() > 0;
     }
 
+    /**
+     * Where the rider is put: feet on this broom's position, nudged along the shaft by the definition.
+     *
+     * <p>Height is exactly the passenger's own vehicle attachment, because {@code Entity.positionRider}
+     * subtracts that again — for a player it is {@code Avatar.DEFAULT_VEHICLE_ATTACHMENT}, 0.6. Every seat
+     * derivation before 2026-09-11 left it out, so every rider sat 0.6 blocks below where the arithmetic
+     * said, with the handle through their stomach. The model is lifted to meet the rider instead
+     * ({@link at.koopro.wizardsandbeasts.broom.BroomSeat#modelLift()}), which is also what makes the box
+     * the rider's box, from their feet up.
+     *
+     * <p><b>Yaw only, not pitch.</b> The rendered broom's nose angle is {@code updateTilt}'s client-side
+     * visual, and this method positions the rider on the server too, so the two sides could not agree on a
+     * pitched seat. The cost is bounded by the largest authored {@code z}, five centimetres.
+     */
     @Override
-    protected net.minecraft.world.phys.Vec3 getPassengerAttachmentPoint(Entity entity, EntityDimensions dimensions, float scale) {
-        Vec3 offset = resolveDefinition().seat().passengerOffset();
-        if (offset.x == 0.0 && offset.z == 0.0) {
-            return offset;
+    protected Vec3 getPassengerAttachmentPoint(Entity entity, EntityDimensions dimensions, float scale) {
+        Vec3 seat = resolveDefinition().seat().passengerOffset();
+        double height = entity.getVehicleAttachmentPoint(this).y;
+        return BroomGeometry.localToWorld(seat.x, height, seat.z, getYRot());
+    }
+
+    /**
+     * Turns the rider's body with the broom, as {@code AbstractHorse} does for its rider.
+     *
+     * <p>Without it the body follows the head only once the two are 50 degrees apart, so legs posed astride
+     * the shaft point across it through every turn, and the lean {@code BroomRiderRenderHandler} applies in
+     * the body's frame tips the rider off the broom's axis.
+     */
+    @Override
+    protected void positionRider(Entity passenger, Entity.MoveFunction moveFunction) {
+        super.positionRider(passenger, moveFunction);
+        if (passenger instanceof LivingEntity living) {
+            living.yBodyRot = getYRot();
         }
-        return offset.yRot(-getYRot() * net.minecraft.util.Mth.DEG_TO_RAD);
+    }
+
+    /** The rider's box, while there is a rider. See {@link #getDimensions}. */
+    private static final EntityDimensions RIDDEN_DIMENSIONS = EntityDimensions.scalable(0.8f, 1.8f);
+
+    /**
+     * A ridden broom's box is its rider's.
+     *
+     * <p>The entity's position is the rider's feet, so this is the box that has to stop at a ceiling before
+     * a head goes into it and fit through a doorway a player fits through. The registered size — a hovering
+     * broom on its own — is what an unridden one keeps. The single box this replaced was 1.5 wide and 0.6
+     * tall: too wide for a one-block gap, and too short to keep a rider out of the ceiling.
+     */
+    @Override
+    public EntityDimensions getDimensions(Pose pose) {
+        return isVehicle() ? RIDDEN_DIMENSIONS : super.getDimensions(pose);
     }
 
     @Override
     protected void addPassenger(Entity passenger) {
         super.addPassenger(passenger);
+        // Both sides: the box becomes the rider's the moment there is one, or the client would fly a
+        // different box from the one the server checks the vehicle's moves against.
+        refreshDimensions();
         if (level().isClientSide()) {
             return;
         }
         level().playSound(null, blockPosition(), ModSounds.BROOM_MOUNT.get(),
                 SoundSource.PLAYERS, 0.7f, 0.95f + random.nextFloat() * 0.1f);
-        // A rider is seated below the broom's origin, so the tick they mount they are briefly
-        // overlapping whatever the broom was resting on. Without this, stepping onto a parked broom
-        // could cost a heart to a collision that was never a crash.
+        // The box grows to the rider's this tick and may be nudged out of whatever it now overlaps.
+        // Without this, stepping onto a parked broom could cost a heart to a collision that was never a
+        // crash.
         passenger.invulnerableTime = Math.max(passenger.invulnerableTime, MOUNT_GRACE_TICKS);
         passenger.fallDistance = 0.0;
     }
@@ -367,6 +388,7 @@ public class BroomEntity extends Entity implements GeoEntity {
                     SoundSource.PLAYERS, 0.6f, 1.0f);
         }
         super.removePassenger(passenger);
+        refreshDimensions();
         // Exit velocity: a rider stepping off keeps whatever the broom was doing, so dismounting
         // at speed used to fling them forward and dismounting in a dive dropped them still
         // falling at flight speed. Their own momentum is theirs; the broom's is not.
@@ -425,9 +447,14 @@ public class BroomEntity extends Entity implements GeoEntity {
         return !isRemoved();
     }
 
+    /**
+     * Not solid. A ridden broom's box is its rider's, and a solid one would be a pillar other players stand
+     * on; a parked one would be a step. Brooms meeting each other are handled by
+     * {@code BroomImpacts.scanEntityCollisions}, which never needed the solidity.
+     */
     @Override
     public boolean canBeCollidedWith(Entity other) {
-        return true;
+        return false;
     }
 
     @Override
@@ -498,7 +525,7 @@ public class BroomEntity extends Entity implements GeoEntity {
     }
 
     /**
-     * Vertical velocity, exposed for {@code BroomHandlingProfile#afterVelocityComputed}.
+     * Vertical velocity, exposed for {@code BroomHandlingProfile#onBoostStart}.
      *
      * <p>Public because the profiles live in a sub-package, and a sub-package is a different package
      * to Java — the movement fields they would otherwise reach for are package-private. This is the
@@ -529,18 +556,16 @@ public class BroomEntity extends Entity implements GeoEntity {
     /**
      * World position of the bristle tips, where a slipstream is shed from.
      *
-     * <p>Taken from the rig's {@code fx_tail} anchor — {@code [0, 4, 40]} in model units, so 0.25
-     * blocks up and 2.5 blocks back — and rotated into the broom's frame the same way the seat is.
-     * Read from the geometry rather than sampled from the bone: GeckoLib bone transforms exist only
-     * inside a client render pass, and this is wanted by anything that wants to put an effect at the
-     * back of a broom.
+     * <p>The rig's {@code fx_tail} anchor at render scale, on the lifted model — see
+     * {@link BroomGeometry#tailOffset}. Read from the geometry rather than sampled from the bone: GeckoLib
+     * bone transforms exist only inside a client render pass, and crash debris wants this on the server.
+     *
+     * <p>It used to rotate {@code +z} straight through {@code Vec3.yRot(-yaw)}, which maps local {@code +z}
+     * to <em>forward</em>, so the trail was seeded 2.5 blocks in front of the rider and flown through.
      */
     public Vec3 tailPosition() {
-        return position().add(TAIL_OFFSET.yRot(-getYRot() * net.minecraft.util.Mth.DEG_TO_RAD));
+        return position().add(BroomGeometry.tailOffset(resolveDefinition().seat().modelLift(), getYRot()));
     }
-
-    /** {@code fx_tail} in blocks: 4/16 up, 40/16 back along the broom's own axis. */
-    private static final Vec3 TAIL_OFFSET = new Vec3(0.0, 4.0 / 16.0, 40.0 / 16.0);
 
     public float getCurrentSpeed() {
         return currentSpeed;
@@ -550,32 +575,25 @@ public class BroomEntity extends Entity implements GeoEntity {
         return inputBoosting;
     }
 
+    /**
+     * One controller, three clips.
+     *
+     * <p>There were three controllers, one per clip, each stopping when its condition failed. All three
+     * animate {@code bristles} and {@code shaft}, so through every hand-over two of them were fading in and
+     * out on the same bones at once — and a held sprint key with no charge played the boost clip, because
+     * the test read the key rather than {@link #isBoostFiring()}. A single controller blends from one clip to
+     * the next, which is what a hand-over is.
+     */
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<BroomEntity>("idle", 5, this::idleController));
-        controllers.add(new AnimationController<BroomEntity>("fly", 5, this::flyController));
-        controllers.add(new AnimationController<BroomEntity>("boost", 3, this::boostController));
+        controllers.add(new AnimationController<BroomEntity>("flight", 5, this::flightController));
     }
 
-    private PlayState idleController(AnimationTest<BroomEntity> test) {
+    private PlayState flightController(AnimationTest<BroomEntity> test) {
         if (Math.abs(currentSpeed) < 0.01f) {
             return test.setAndContinue(IDLE_ANIM);
         }
-        return PlayState.STOP;
-    }
-
-    private PlayState flyController(AnimationTest<BroomEntity> test) {
-        if (Math.abs(currentSpeed) >= 0.01f && !inputBoosting) {
-            return test.setAndContinue(FLY_ANIM);
-        }
-        return PlayState.STOP;
-    }
-
-    private PlayState boostController(AnimationTest<BroomEntity> test) {
-        if (Math.abs(currentSpeed) >= 0.01f && inputBoosting) {
-            return test.setAndContinue(BOOST_ANIM);
-        }
-        return PlayState.STOP;
+        return test.setAndContinue(isBoostFiring() ? BOOST_ANIM : FLY_ANIM);
     }
 
     @Override
@@ -709,36 +727,10 @@ public class BroomEntity extends Entity implements GeoEntity {
     }
 
     /**
-     * Wear from a sudden change in motion — the catch-all for impacts the collision path did not
-     * classify.
-     *
-     * <p>Skipped for a tick that was judged a gentle landing. Coming to a stop on the ground is a
-     * large motion delta by definition, so without this check every touchdown was charged one to
-     * three durability here regardless of what the landing rule decided — the exemption would have
-     * been exempting nothing.
-     */
-    private void applyCrashWearFromMotionDelta() {
-        if (landedGentlyThisTick) {
-            return;
-        }
-        double delta = Math.abs(getDeltaMovement().length() - lastMotionDelta);
-        // Upper bound as well as lower. On the server the motion this reads is now observed from the
-        // position the rider's client reported, so a dropped packet or a lag spike arrives as one enormous
-        // apparent jump — and this would have billed the player for crashing into it. Nothing a broom can
-        // actually do produces a per-tick change this large; vanilla's own vehicle check tolerates ten
-        // blocks in a tick before it complains, so anything near that is the network, not the flight.
-        if (delta > 0.4D && delta < MAX_PLAUSIBLE_MOTION_DELTA) {
-            int damage = 1 + random.nextInt(3);
-            applyDurabilityDamage(damage);
-        }
-    }
-
-    /**
      * A controlled touchdown: bleed off the remaining speed and say so quietly. No damage, no
      * durability cost, no knock — see {@link BroomFlightRules#isGentleLanding}.
      */
     void onGentleLanding() {
-        landedGentlyThisTick = true;
         currentSpeed *= 0.5f;
         verticalVelocity = 0f;
         setDeltaMovement(getDeltaMovement().multiply(0.6, 0.0, 0.6));

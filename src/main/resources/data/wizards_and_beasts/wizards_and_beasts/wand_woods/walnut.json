@@ -1,4 +1,5 @@
 {
+  "_lore": "Canon: unusually versatile and adaptable; once subjugated it performs any task its owner desires. Gameplay: quicker recovery, more so once it is loyal.",
   "display_name": {
     "translate": "wand_wood.wizards_and_beasts.walnut"
   },
@@ -19,9 +20,12 @@
   "rarity": "rare",
   "refuse_threshold": 0.24,
   "cast_modifiers": {
-    "damage": 1.08,
-    "cooldown": 0.95,
-    "range": 1.05,
-    "fizzle": 0.02
+    "damage": 1.0,
+    "cooldown": 0.97,
+    "range": 1.0,
+    "fizzle": 0.0
+  },
+  "temperament": {
+    "loyal_cooldown": 0.95
   }
 }

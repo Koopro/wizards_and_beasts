@@ -23,5 +23,27 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/mooncalf.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/mooncalf.png",
   "sortOrder": 34,
-  "entityType": "wizards_and_beasts:mooncalf"
+  "entityType": "wizards_and_beasts:mooncalf",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.mooncalf.diet",
+    "behaviour": "bestiary.wizards_and_beasts.mooncalf.behaviour",
+    "society": "bestiary.wizards_and_beasts.mooncalf.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.mooncalf.interaction.1",
+      "bestiary.wizards_and_beasts.mooncalf.interaction.2"
+    ],
+    "materials": [
+      {
+        "item": "wizards_and_beasts:mooncalf_dung",
+        "how": "husbandry"
+      }
+    ],
+    "study": [
+      "feed",
+      "bond"
+    ],
+    "signature": "bestiary.wizards_and_beasts.mooncalf.signature"
+  }
 }

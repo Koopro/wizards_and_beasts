@@ -1,7 +1,7 @@
 {
   "entry": "wizards_and_beasts:thunderbird",
   "item": "wizards_and_beasts:thunderbird_tail_feather",
-  "minTier": "MASTERED",
+  "minTier": "KNOWN",
   "chance": 0.4,
   "cooldownSeconds": 900
 }

@@ -29,11 +29,12 @@ config override is in play — resolve it before continuing, or the rest of the 
 
 1. Join the fresh world.
 2. **Expect:** the heritage selection screen opens and cannot be dismissed.
-3. Cycle with `◀ ▶`. **Expect:** exactly three heritages are selectable — Wizardkind,
-   Werewolf, Obscurial. The other seven show but refuse.
-4. Pick Wizardkind and confirm.
-5. **Expect:** the screen closes, and the model viewport's size profile is applied to the
-   player (a Werewolf pick should look visibly different from Wizardkind).
+3. Cycle with `◀ ▶`. **Expect:** only Wizardkind is selectable; the other seven peoples show but
+   refuse. The right-hand panel reads in words — Traits, Magical affinities, Special characteristics —
+   with no Health/Speed/Armour numbers anywhere.
+4. Pick Wizardkind, half-blood, and the condition "Lycanthropy: Bitten"; confirm.
+5. **Expect:** the screen closes, the character sheet shows the lineage *and* the condition, and the
+   body is the werewolf human form (visibly different from a plain Wizardkind pick).
 
 **Fail modes seen before:** selection completing without assigning a form, which silently
 skips all 22 size profiles.

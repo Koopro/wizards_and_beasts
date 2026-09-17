@@ -184,10 +184,10 @@ class StandingDeedTest {
         Deed deed = parseOrThrow("""
                 { "trigger": "bestiary_tier", "minTier": "STUDIED", "effects": { "tradition": -1.5 } }
                 """);
-        assertFalse(deed.meetsTier(DiscoveryTier.SIGHTED));
         assertFalse(deed.meetsTier(DiscoveryTier.ENCOUNTERED));
+        assertFalse(deed.meetsTier(DiscoveryTier.OBSERVED));
         assertTrue(deed.meetsTier(DiscoveryTier.STUDIED));
-        assertTrue(deed.meetsTier(DiscoveryTier.MASTERED));
+        assertTrue(deed.meetsTier(DiscoveryTier.KNOWN));
         assertFalse(deed.meetsTier(null), "no tier reported cannot clear a floor");
     }
 

@@ -10,108 +10,126 @@ import java.util.Locale;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * The bestiary unlock rule, tested on its own. {@link EncounterRule} is deliberately free of player,
- * level and registry so this needs no Minecraft bootstrap — the rule that used to live inline in
- * {@code BestiaryDiscoveryHandler} could only be checked by playing the game.
+ * The bestiary unlock rule, tested on its own: a naturalist's notebook fills by seeing, watching, handling and finally
+ * understanding a creature — never by killing it.
  */
 class EncounterRuleTest {
 
-    // -- sighting -------------------------------------------------------------------------------
+    // -- encountering ---------------------------------------------------------------------------
 
     @Test
-    void sighting_opensAnUnopenedEntry() {
-        assertEquals(DiscoveryTier.SIGHTED, EncounterRule.onSighted(DiscoveryTier.UNDISCOVERED));
-    }
-
-    @Test
-    void sighting_neverAdvancesAnAlreadyOpenEntry() {
-        // Standing next to a bowtruckle for a minute must not master it.
+    void anEncounterOpensAPageAndNothingMore() {
+        assertEquals(DiscoveryTier.ENCOUNTERED, EncounterRule.onEncountered(DiscoveryTier.UNKNOWN));
         for (DiscoveryTier tier : DiscoveryTier.values()) {
-            if (tier == DiscoveryTier.UNDISCOVERED) continue;
-            assertEquals(tier, EncounterRule.onSighted(tier),
-                    tier + " should be unchanged by a repeat sighting");
+            if (tier != DiscoveryTier.UNKNOWN) {
+                assertEquals(tier, EncounterRule.onEncountered(tier), tier + " changed on a repeat encounter");
+            }
         }
     }
 
-    // -- declared trigger -----------------------------------------------------------------------
+    @Test
+    void killingTeachesNothingBeyondAnEncounter() {
+        // A kill is routed through onEncountered; however many times it happens, it cannot deepen a page.
+        DiscoveryTier tier = DiscoveryTier.UNKNOWN;
+        for (int kill = 0; kill < 50; kill++) {
+            tier = EncounterRule.onEncountered(tier);
+        }
+        assertEquals(DiscoveryTier.ENCOUNTERED, tier);
+    }
+
+    // -- watching -------------------------------------------------------------------------------
 
     @Test
-    void trigger_advancesExactlyOneTier() {
-        assertEquals(DiscoveryTier.SIGHTED, EncounterRule.onTriggered(DiscoveryTier.UNDISCOVERED));
-        assertEquals(DiscoveryTier.ENCOUNTERED, EncounterRule.onTriggered(DiscoveryTier.SIGHTED));
-        assertEquals(DiscoveryTier.STUDIED, EncounterRule.onTriggered(DiscoveryTier.ENCOUNTERED));
-        assertEquals(DiscoveryTier.MASTERED, EncounterRule.onTriggered(DiscoveryTier.STUDIED));
+    void thirtySecondsOfCalmWatchingIsAnObservation() {
+        assertEquals(DiscoveryTier.ENCOUNTERED,
+                EncounterRule.afterWatching(DiscoveryTier.ENCOUNTERED, EncounterRule.OBSERVED_TICKS - 1, true, true));
+        assertEquals(DiscoveryTier.OBSERVED,
+                EncounterRule.afterWatching(DiscoveryTier.ENCOUNTERED, EncounterRule.OBSERVED_TICKS, true, true));
     }
 
     @Test
-    void trigger_clampsAtMastered() {
-        assertEquals(DiscoveryTier.MASTERED, EncounterRule.onTriggered(DiscoveryTier.MASTERED));
+    void watchingAloneStudiesOnlyACreatureThatAsksForNothingElse() {
+        int longWatch = EncounterRule.STUDIED_BY_WATCHING_TICKS;
+        assertEquals(DiscoveryTier.STUDIED,
+                EncounterRule.afterWatching(DiscoveryTier.OBSERVED, longWatch, false, true));
+        assertEquals(DiscoveryTier.OBSERVED,
+                EncounterRule.afterWatching(DiscoveryTier.OBSERVED, longWatch * 100, true, true),
+                "a creature that must be fed or handled is not studied from a distance, however long");
     }
 
     @Test
-    void everyTransitionIsMonotonic() {
+    void aCreatureWithASignatureIsNeverKnownByWatchingAlone() {
+        int forever = EncounterRule.KNOWN_BY_WATCHING_TICKS * 100;
+        assertEquals(DiscoveryTier.STUDIED, EncounterRule.afterWatching(DiscoveryTier.STUDIED, forever, false, true));
+        assertEquals(DiscoveryTier.KNOWN, EncounterRule.afterWatching(DiscoveryTier.STUDIED, forever, false, false));
+    }
+
+    @Test
+    void theWatchingRoutesClimbInOrder() {
+        assertTrue(EncounterRule.OBSERVED_TICKS < EncounterRule.STUDIED_BY_WATCHING_TICKS);
+        assertTrue(EncounterRule.STUDIED_BY_WATCHING_TICKS < EncounterRule.KNOWN_BY_WATCHING_TICKS);
+    }
+
+    // -- handling and signature -----------------------------------------------------------------
+
+    @Test
+    void aStudyActReachesStudiedFromAnyEarlierTier() {
+        assertEquals(DiscoveryTier.STUDIED, EncounterRule.onStudied(DiscoveryTier.UNKNOWN));
+        assertEquals(DiscoveryTier.STUDIED, EncounterRule.onStudied(DiscoveryTier.OBSERVED));
+        assertEquals(DiscoveryTier.KNOWN, EncounterRule.onStudied(DiscoveryTier.KNOWN));
+    }
+
+    @Test
+    void witnessingTheSignatureCompletesThePage() {
         for (DiscoveryTier tier : DiscoveryTier.values()) {
-            assertTrue(EncounterRule.onSighted(tier).ordinal() >= tier.ordinal());
-            assertTrue(EncounterRule.onTriggered(tier).ordinal() >= tier.ordinal());
+            assertEquals(DiscoveryTier.KNOWN, EncounterRule.onSignature(tier));
         }
     }
 
-    // -- channel matching -----------------------------------------------------------------------
-
     @Test
-    void declaredTriggerDeepensOnlyOnItsOwnChannel() {
-        assertTrue(EncounterRule.deepensOn(EncounterTrigger.KILL, EncounterTrigger.KILL));
-        assertFalse(EncounterRule.deepensOn(EncounterTrigger.KILL, EncounterTrigger.LOOT));
-        assertTrue(EncounterRule.deepensOn(EncounterTrigger.LOOT, EncounterTrigger.LOOT));
-        assertFalse(EncounterRule.deepensOn(EncounterTrigger.PROXIMITY, EncounterTrigger.KILL));
-    }
-
-    @Test
-    void manualEntriesAreNeverDeepenedByWorldEvents() {
-        for (EncounterTrigger event : EncounterTrigger.values()) {
-            assertFalse(EncounterRule.deepensOn(EncounterTrigger.MANUAL, event),
-                    "MANUAL entries advance only by command, not by " + event);
+    void noRuleEverLowersATier() {
+        for (DiscoveryTier tier : DiscoveryTier.values()) {
+            assertTrue(EncounterRule.onEncountered(tier).atLeast(tier));
+            assertTrue(EncounterRule.onStudied(tier).atLeast(tier));
+            assertTrue(EncounterRule.onSignature(tier).atLeast(tier));
+            for (boolean byHand : new boolean[] {false, true}) {
+                for (boolean signature : new boolean[] {false, true}) {
+                    assertTrue(EncounterRule.afterWatching(tier, 0, byHand, signature).atLeast(tier));
+                }
+            }
         }
     }
 
-    // -- the composite the handler applies ------------------------------------------------------
-
     @Test
-    void firstKillOfAKillEntry_landsOnEncountered() {
-        // A kill proves a sighting AND fires the KILL channel, so an unopened KILL entry jumps two.
-        DiscoveryTier after = EncounterRule.onTriggered(EncounterRule.onSighted(DiscoveryTier.UNDISCOVERED));
-        assertEquals(DiscoveryTier.ENCOUNTERED, after);
-    }
-
-    @Test
-    void repeatKills_keepClimbingInsteadOfFlipFlopping() {
-        // The shape this replaces computed `old == SIGHTED ? ENCOUNTERED : SIGHTED`, which asked for a
-        // downgrade on every kill after the second and so could never reach STUDIED.
-        DiscoveryTier tier = DiscoveryTier.UNDISCOVERED;
-        for (int i = 0; i < 5; i++) {
-            tier = EncounterRule.onTriggered(EncounterRule.onSighted(tier));
+    void onlyManualEntriesAreOutsideAutomaticProgress() {
+        for (EncounterTrigger trigger : EncounterTrigger.values()) {
+            assertEquals(trigger != EncounterTrigger.MANUAL, EncounterRule.automatic(trigger));
         }
-        assertEquals(DiscoveryTier.MASTERED, tier);
+    }
+
+    // -- the rename -----------------------------------------------------------------------------
+
+    @Test
+    void oldSaveNamesKeepTheirDepthOfKnowledge() {
+        assertEquals(DiscoveryTier.UNKNOWN, DiscoveryTier.fromLegacySave("UNDISCOVERED"));
+        assertEquals(DiscoveryTier.ENCOUNTERED, DiscoveryTier.fromLegacySave("SIGHTED"));
+        assertEquals(DiscoveryTier.OBSERVED, DiscoveryTier.fromLegacySave("ENCOUNTERED"),
+                "a saved ENCOUNTERED was index 2 and must not fall back a tier");
+        assertEquals(DiscoveryTier.STUDIED, DiscoveryTier.fromLegacySave("STUDIED"));
+        assertEquals(DiscoveryTier.KNOWN, DiscoveryTier.fromLegacySave("MASTERED"));
     }
 
     @Test
-    void seeingAKillEntryIsEnoughToOpenIt() {
-        // The regression that motivated the rule: a KILL-triggered Unicorn used to be invisible to the
-        // sighting scan, so its page could only be opened by killing one.
-        assertEquals(DiscoveryTier.SIGHTED, EncounterRule.onSighted(DiscoveryTier.UNDISCOVERED));
-        assertFalse(EncounterRule.deepensOn(EncounterTrigger.KILL, EncounterTrigger.PROXIMITY),
-                "sighting still must not deepen a KILL entry past SIGHTED");
+    void datapackNamesAcceptTheUnambiguousOldSpellings() {
+        assertEquals(DiscoveryTier.KNOWN, DiscoveryTier.byName("MASTERED"));
+        assertEquals(DiscoveryTier.ENCOUNTERED, DiscoveryTier.byName("SIGHTED"));
+        assertEquals(DiscoveryTier.OBSERVED, DiscoveryTier.byName("OBSERVED"));
+        assertNull(DiscoveryTier.byName("PROFICIENT"));
     }
 
     // -- copy contract --------------------------------------------------------------------------
 
-    /**
-     * Both strings a tier contributes to the screen must be translation keys.
-     *
-     * <p>{@code unlockHint()} shipped as a hardcoded English sentence, which is why this is asserted
-     * rather than assumed: it is the first copy a new player reads and it was the one Bestiary string
-     * no language file could reach.
-     */
+    /** Both strings a tier contributes to the screen must be translation keys. */
     @Test
     void everyTierNamesTranslationKeysRatherThanEnglish() {
         for (DiscoveryTier tier : DiscoveryTier.values()) {

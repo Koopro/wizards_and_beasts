@@ -19,5 +19,19 @@
   "entityType": "wizards_and_beasts:toad",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/toad.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/toad.png",
-  "sortOrder": 107
+  "sortOrder": 107,
+  "profile": {
+    "classification": "unclassified",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.toad.diet",
+    "behaviour": "bestiary.wizards_and_beasts.toad.behaviour",
+    "society": "bestiary.wizards_and_beasts.toad.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.toad.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

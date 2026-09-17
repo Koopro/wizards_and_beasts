@@ -23,5 +23,19 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/kelpie.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/kelpie.png",
   "sortOrder": 53,
-  "entityType": "wizards_and_beasts:kelpie"
+  "entityType": "wizards_and_beasts:kelpie",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.kelpie.diet",
+    "behaviour": "bestiary.wizards_and_beasts.kelpie.behaviour",
+    "society": "bestiary.wizards_and_beasts.kelpie.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.kelpie.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

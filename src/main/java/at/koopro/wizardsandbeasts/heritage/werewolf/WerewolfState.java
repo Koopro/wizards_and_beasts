@@ -53,6 +53,28 @@ public final class WerewolfState {
         }
     }
 
+    // ── onset ──────────────────────────────────────────────────────────
+
+    /** Day number (world day time / 24000) the curse was caught on. The moon cannot claim them that night. */
+    public static final String FLAG_ONSET_DAY = "werewolf_onset_day";
+
+    public static void setOnsetDay(PlayerHeritageData data, long day) {
+        data.setFlag(FLAG_ONSET_DAY, Long.toString(day));
+    }
+
+    /** True while it is still the night the curse was caught: the first change waits for the next full moon. */
+    public static boolean inOnset(PlayerHeritageData data, long currentDay) {
+        String raw = data.getFlag(FLAG_ONSET_DAY);
+        if (raw == null) {
+            return false;
+        }
+        try {
+            return Long.parseLong(raw) == currentDay;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
     // ── moonlight exposure ─────────────────────────────────────────────
 
     public static int getExposure(PlayerHeritageData data) {

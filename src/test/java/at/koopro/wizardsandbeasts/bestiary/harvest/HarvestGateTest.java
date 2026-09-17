@@ -48,37 +48,37 @@ class HarvestGateTest {
 
     @Test
     void aRareDropNeedsTheDeclaredTier() {
-        HarvestRule mastered = rule(DiscoveryTier.MASTERED, 1.0f, 0);
+        HarvestRule mastered = rule(DiscoveryTier.KNOWN, 1.0f, 0);
 
-        assertFalse(mastered.tierSatisfiedBy(DiscoveryTier.UNDISCOVERED));
-        assertFalse(mastered.tierSatisfiedBy(DiscoveryTier.SIGHTED));
+        assertFalse(mastered.tierSatisfiedBy(DiscoveryTier.UNKNOWN));
         assertFalse(mastered.tierSatisfiedBy(DiscoveryTier.ENCOUNTERED));
+        assertFalse(mastered.tierSatisfiedBy(DiscoveryTier.OBSERVED));
         assertFalse(mastered.tierSatisfiedBy(DiscoveryTier.STUDIED));
-        assertTrue(mastered.tierSatisfiedBy(DiscoveryTier.MASTERED));
+        assertTrue(mastered.tierSatisfiedBy(DiscoveryTier.KNOWN));
     }
 
     @Test
     void aLowerFloorAdmitsEveryTierAboveIt() {
         HarvestRule studied = rule(DiscoveryTier.STUDIED, 1.0f, 0);
 
-        assertFalse(studied.tierSatisfiedBy(DiscoveryTier.ENCOUNTERED));
+        assertFalse(studied.tierSatisfiedBy(DiscoveryTier.OBSERVED));
         assertTrue(studied.tierSatisfiedBy(DiscoveryTier.STUDIED));
-        assertTrue(studied.tierSatisfiedBy(DiscoveryTier.MASTERED),
+        assertTrue(studied.tierSatisfiedBy(DiscoveryTier.KNOWN),
                 "mastering a creature must never take away what studying it gave");
     }
 
     @Test
     void anUnstudiedKillerIsIneligibleWhateverElseIsTrue() {
-        HarvestRule r = rule(DiscoveryTier.MASTERED, 1.0f, 0);
-        assertFalse(HarvestGate.isEligible(r, DiscoveryTier.UNDISCOVERED, HarvestGate.NEVER, 1_000L));
-        assertFalse(HarvestGate.yields(r, DiscoveryTier.SIGHTED, HarvestGate.NEVER, 1_000L, 0.0f),
+        HarvestRule r = rule(DiscoveryTier.KNOWN, 1.0f, 0);
+        assertFalse(HarvestGate.isEligible(r, DiscoveryTier.UNKNOWN, HarvestGate.NEVER, 1_000L));
+        assertFalse(HarvestGate.yields(r, DiscoveryTier.ENCOUNTERED, HarvestGate.NEVER, 1_000L, 0.0f),
                 "a roll of zero still cannot beat an unmet tier");
     }
 
     @Test
     void aStudiedKillerWithACertainRuleAlwaysYields() {
-        HarvestRule r = rule(DiscoveryTier.MASTERED, 1.0f, 0);
-        assertTrue(HarvestGate.yields(r, DiscoveryTier.MASTERED, HarvestGate.NEVER, 1_000L, 0.999f));
+        HarvestRule r = rule(DiscoveryTier.KNOWN, 1.0f, 0);
+        assertTrue(HarvestGate.yields(r, DiscoveryTier.KNOWN, HarvestGate.NEVER, 1_000L, 0.999f));
     }
 
     // ── chance ──
@@ -112,21 +112,21 @@ class HarvestGateTest {
 
     @Test
     void repeatedKillsInsideTheWindowYieldNothingFurther() {
-        HarvestRule r = rule(DiscoveryTier.MASTERED, 1.0f, 600);
+        HarvestRule r = rule(DiscoveryTier.KNOWN, 1.0f, 600);
         long harvestedAt = 100_000L;
 
-        assertFalse(HarvestGate.isEligible(r, DiscoveryTier.MASTERED, harvestedAt, harvestedAt),
+        assertFalse(HarvestGate.isEligible(r, DiscoveryTier.KNOWN, harvestedAt, harvestedAt),
                 "the kill that just paid out cannot pay again");
-        assertFalse(HarvestGate.isEligible(r, DiscoveryTier.MASTERED, harvestedAt, harvestedAt + 1L));
-        assertFalse(HarvestGate.isEligible(r, DiscoveryTier.MASTERED, harvestedAt,
+        assertFalse(HarvestGate.isEligible(r, DiscoveryTier.KNOWN, harvestedAt, harvestedAt + 1L));
+        assertFalse(HarvestGate.isEligible(r, DiscoveryTier.KNOWN, harvestedAt,
                 harvestedAt + 600L * TICKS_PER_SECOND - 1L), "one tick short is still locked");
     }
 
     @Test
     void theWindowOpensExactlyOnTheDeclaredSecond() {
-        HarvestRule r = rule(DiscoveryTier.MASTERED, 1.0f, 600);
+        HarvestRule r = rule(DiscoveryTier.KNOWN, 1.0f, 600);
         long harvestedAt = 100_000L;
-        assertTrue(HarvestGate.isEligible(r, DiscoveryTier.MASTERED, harvestedAt,
+        assertTrue(HarvestGate.isEligible(r, DiscoveryTier.KNOWN, harvestedAt,
                 harvestedAt + 600L * TICKS_PER_SECOND),
                 "600s must mean 600s, not 600s plus a tick");
     }
@@ -138,18 +138,18 @@ class HarvestGateTest {
      */
     @Test
     void aClockThatWentBackwardsDoesNotLockAPlayerOutForever() {
-        HarvestRule r = rule(DiscoveryTier.MASTERED, 1.0f, 600);
+        HarvestRule r = rule(DiscoveryTier.KNOWN, 1.0f, 600);
         assertTrue(HarvestGate.isOffCooldown(r, 5_000_000L, 12L),
                 "a dimension change must not strand the lockout");
     }
 
     @Test
     void cooldownIsCheckedBeforeTheChanceRollSoAFarmCannotBurnAttempts() {
-        HarvestRule r = rule(DiscoveryTier.MASTERED, 1.0f, 600);
+        HarvestRule r = rule(DiscoveryTier.KNOWN, 1.0f, 600);
         long harvestedAt = 100_000L;
         // A guaranteed rule with a roll of 0 — the most generous input there is — still yields nothing
         // while locked, which is only true if the cooldown is evaluated independently of the roll.
-        assertFalse(HarvestGate.yields(r, DiscoveryTier.MASTERED, harvestedAt, harvestedAt + 10L, 0.0f));
+        assertFalse(HarvestGate.yields(r, DiscoveryTier.KNOWN, harvestedAt, harvestedAt + 10L, 0.0f));
     }
 
     // ── counts ──
@@ -200,11 +200,11 @@ class HarvestGateTest {
      */
     @Test
     void twoPlayersAtDifferentTiersGetDifferentAnswersForTheSameKill() {
-        HarvestRule r = rule(DiscoveryTier.MASTERED, 1.0f, 600);
+        HarvestRule r = rule(DiscoveryTier.KNOWN, 1.0f, 600);
         long now = 50_000L;
 
-        boolean expert = HarvestGate.yields(r, DiscoveryTier.MASTERED, HarvestGate.NEVER, now, 0.0f);
-        boolean novice = HarvestGate.yields(r, DiscoveryTier.SIGHTED, HarvestGate.NEVER, now, 0.0f);
+        boolean expert = HarvestGate.yields(r, DiscoveryTier.KNOWN, HarvestGate.NEVER, now, 0.0f);
+        boolean novice = HarvestGate.yields(r, DiscoveryTier.ENCOUNTERED, HarvestGate.NEVER, now, 0.0f);
 
         assertTrue(expert);
         assertFalse(novice);
@@ -212,12 +212,12 @@ class HarvestGateTest {
 
     @Test
     void oneCreaturesLockoutSaysNothingAboutAnother() {
-        HarvestRule r = rule(DiscoveryTier.MASTERED, 1.0f, 600);
+        HarvestRule r = rule(DiscoveryTier.KNOWN, 1.0f, 600);
         long harvestedAt = 100_000L;
 
         // Same rule, two different last-harvest values — which is exactly how the caller keys the map
         // per bestiary entry. Mastering a unicorn must not throttle a phoenix.
-        assertFalse(HarvestGate.isEligible(r, DiscoveryTier.MASTERED, harvestedAt, harvestedAt + 10L));
-        assertTrue(HarvestGate.isEligible(r, DiscoveryTier.MASTERED, HarvestGate.NEVER, harvestedAt + 10L));
+        assertFalse(HarvestGate.isEligible(r, DiscoveryTier.KNOWN, harvestedAt, harvestedAt + 10L));
+        assertTrue(HarvestGate.isEligible(r, DiscoveryTier.KNOWN, HarvestGate.NEVER, harvestedAt + 10L));
     }
 }

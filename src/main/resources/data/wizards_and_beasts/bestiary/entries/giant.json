@@ -23,5 +23,19 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/giant.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/giant.png",
   "sortOrder": 23,
-  "entityType": "wizards_and_beasts:giant"
+  "entityType": "wizards_and_beasts:giant",
+  "profile": {
+    "classification": "unclassified",
+    "basis": "partial",
+    "diet": "bestiary.wizards_and_beasts.giant.diet",
+    "behaviour": "bestiary.wizards_and_beasts.giant.behaviour",
+    "society": "bestiary.wizards_and_beasts.giant.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.giant.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

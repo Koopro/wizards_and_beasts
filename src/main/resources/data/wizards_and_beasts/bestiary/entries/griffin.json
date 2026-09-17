@@ -23,5 +23,19 @@
   "entityType": "wizards_and_beasts:griffin",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/griffin.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/griffin.png",
-  "sortOrder": 62
+  "sortOrder": 62,
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.griffin.diet",
+    "behaviour": "bestiary.wizards_and_beasts.griffin.behaviour",
+    "society": "bestiary.wizards_and_beasts.griffin.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.griffin.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

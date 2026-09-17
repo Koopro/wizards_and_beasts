@@ -23,5 +23,24 @@
   "entityType": "wizards_and_beasts:murtlap",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/murtlap.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/murtlap.png",
-  "sortOrder": 73
+  "sortOrder": 73,
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.murtlap.diet",
+    "behaviour": "bestiary.wizards_and_beasts.murtlap.behaviour",
+    "society": "bestiary.wizards_and_beasts.murtlap.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.murtlap.interaction.1"
+    ],
+    "materials": [
+      {
+        "item": "wizards_and_beasts:murtlap_essence",
+        "how": "remains"
+      }
+    ],
+    "study": [
+      "watch"
+    ]
+  }
 }

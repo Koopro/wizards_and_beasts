@@ -142,6 +142,7 @@ public class ModModelProvider extends ModelProvider {
         itemModels.declareCustomModelItem(ConsumableItemRegistry.YETI_FUR.get());
         itemModels.declareCustomModelItem(ConsumableItemRegistry.MATAGOT_ESSENCE.get());
 
+        itemModels.generateFlatItem(MiscItemRegistry.TORN_SPELL_PAGE.get(), ModelTemplates.FLAT_ITEM);
         itemModels.declareCustomModelItem(MiscItemRegistry.PARCHMENT.get());
         itemModels.declareCustomModelItem(MiscItemRegistry.INK_BOTTLE.get());
 
@@ -618,6 +619,10 @@ public class ModModelProvider extends ModelProvider {
 
     /**
      * One half of a hanging banner: a single quad a half-pixel off the back face.
+     *
+     * <p>In game this quad is never drawn — {@code HouseBannerBlock} is {@code RenderShape.INVISIBLE}
+     * and {@code HouseBannerRenderer} draws the waving cloth instead. The model stays because break
+     * particles take their sprite from it, and it still shows the banner in a model viewer.
      *
      * <p>The cloth's outline — inset sides, swallowtail hem, the gap either side of the
      * hanging rod — is alpha in the texture, not geometry, so this stays one element and the

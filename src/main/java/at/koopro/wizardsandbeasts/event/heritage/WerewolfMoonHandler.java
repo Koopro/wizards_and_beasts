@@ -138,6 +138,10 @@ public final class WerewolfMoonHandler {
         if (!WerewolfConfig.enableForcedTransform) {
             return;
         }
+        // Bitten tonight: the curse is in the blood, but the first change is at the next full moon.
+        if (WerewolfState.inOnset(data, WerewolfRules.nightOf(level.getDayTime()))) {
+            return;
+        }
         int threshold = WerewolfConfig.exposureThreshold;
         int delta = WerewolfRules.isMoonExposed(player, level)
                 ? WerewolfConfig.exposureGain

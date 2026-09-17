@@ -217,7 +217,7 @@ public class SkillTreeScreen extends Screen {
         sealedTrees.clear();
         for (SkillTreeId tree : SkillTreeId.values()) {
             if (tree.getAudience() == audience
-                    && !SkillTreeId.meetsRequirement(tree.getRequirement(), heritage, variant)) {
+                    && !SkillTreeId.meetsRequirement(tree.getRequirement(), ClientHeritageDataState.get())) {
                 sealedTrees.add(tree);
             }
         }

@@ -54,16 +54,17 @@ public final class AlphaRoster {
      */
     public static final Set<String> SHIPPED = Set.of(
             // -- bespoke entity classes --
-            "niffler",            // theft + pouch + bonding; the mod's most complete creature
-            "bowtruckle",         // tempted by sticks, panics; tree-guardian
-            "mooncalf",           // dances under a full moon
+            "niffler",            // theft + pouch + bonding; wants gold most; digs in badlands
+            "bowtruckle",         // lives in a tree and goes for the eyes of anyone who cuts it
+            "mooncalf",           // burrowed until the full moon, when the herd gathers and dances
             "thestral",           // grazes, rideable, visible only to those who have seen death
-            "phoenix",            // fire-immune flyer
+            "phoenix",            // reborn from its ashes; loyal, weeps for its person, sheds feathers
+            "unicorn",            // wary of all but the quiet and pure; groomed or found, never killed for hair
             // -- generic entity + CreatureDefinition abilities --
             "ghoul",              // attic haunt
             "hippogriff",         // enrage + dive bomb; rideable aerial
             "obscurus",           // tinted smoke-form aerial threat
-            "werewolf",           // moon-driven hostile
+            "werewolf",           // out only under a full moon; its bite carries the curse
             "basilisk",           // lethal gaze; boss threat
             "occamy",             // choranaptyxic: it resizes to fit the space, hitbox and all
             // -- the ten dragon breeds; one family, one shared kit, one standard --
@@ -83,13 +84,11 @@ public final class AlphaRoster {
      * Creatures that keep spawning naturally even when the roster is restricted to the alpha slice,
      * because the mod's own progression dead-ends without them.
      *
-     * <p>The Unicorn is the wild source of unicorn hair, one of the three wand cores. Restricting
-     * spawns to finished creatures must not make the Wandmaker's Bench unusable, so the gate asks
-     * "alpha or load-bearing", not "alpha". The Unicorn still wears a placeholder rig and is still
-     * listed as such in {@code KNOWN_ISSUES.md} — this exempts it from the spawn gate, not from the
-     * honesty.
+     * <p>The Demiguise is the only wild source of demiguise hair now that its hair is shed and given rather than
+     * taken from a body. Its rig is below the roster's cube bar, so it is exempted from the spawn gate here rather
+     * than claimed as finished. (The Unicorn was listed here until 2026-09-17, when it joined the roster.)
      */
-    public static final Set<String> PROGRESSION_CRITICAL = Set.of("unicorn");
+    public static final Set<String> PROGRESSION_CRITICAL = Set.of("demiguise");
 
     private AlphaRoster() {}
 

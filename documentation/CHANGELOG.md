@@ -4,6 +4,140 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Heritage says who you are, not what you rolled (2026-09-17)
+
+Heritage was a selectable race with a stat block: pure-bloods rolled POWER on a higher band than Muggle-borns,
+a bitten wizard stopped being a wizard of any family, and the selection screen advertised Health ±, Speed % and
+Armour ± like an MMO character creator. Canon says the opposite in every case.
+
+- **Lycanthropy and the Obscurus became conditions.** `MagicalCondition` and `ConditionOrigin` sit alongside a
+  character's heritage and lineage instead of replacing them. Remus Lupin is a half-blood wizard with a wand,
+  a teaching post and a curse; being bitten now keeps the POWER roll, the training and the family, adds the
+  condition's traits, and changes the body. `HeritageAPI.afflict` gives one and `cure` takes it away.
+- **Saves migrate.** A Werewolf or Obscurial record loads as Wizardkind plus the condition, with half-blood as
+  the lineage the old model never recorded (data version 2).
+- **Blood status stopped being a power level.** Every lineage with magic rolls POWER on one band; a Squib keeps
+  0–10 and no growth. Nothing on the selection screen makes a character stronger.
+- **Traits in words.** `HeritageTraits` gives each trait a name and a sentence under Traits / Magical
+  affinities / Special characteristics, and that is what the selection dossier and the character sheet print.
+  Dead tags (`vault_access`, `divination_sight`, `enhanced_bond`, `dark_resistance`, `nature_speech`,
+  `water_breathing`) are gone; the ones that stayed are read by something.
+- **A character can begin with a condition**, chosen at creation next to heritage and lineage, never rolled by
+  the randomiser, and refused where it makes no sense (an Obscurus in a Squib).
+- **Three gated peoples gained real mechanics**: goblins pay no Gringotts commission and are always caught
+  passing forgeries; a house-elf Apparates past wards by trait, as Dobby did inside Hogwarts; a star-reading
+  centaur reads the moon's calendar and the weather off the night sky.
+- **Six profession nodes removed.** A curse is not a career.
+
+### Creatures behave like wildlife (2026-09-17)
+
+**The bestiary fills by watching, not killing.** Seeing a creature opens its page; watching it calmly for half a
+minute teaches you how it lives; feeding it, handling it or finding what it sheds lets you study it; seeing the
+thing it is known for completes the page. Killing a creature only ever tells you that you met it. Every page now
+says which Ministry division the creature falls under, what it eats, how to approach it, what it yields and how,
+and what wizards make of it — and how much of that is canon.
+
+**Nothing lore protects comes from a body.** Unicorn hair is shed where unicorns graze, or combed loose by someone
+the unicorn lets near. A phoenix is reborn from its ashes when it would die, and gives feathers to the person it is
+loyal to. Demiguise hair is found where it rests, or given up when you reach one it did not see coming. Mooncalf
+dung is left where the herd danced. None of them drops anything when killed — and a unicorn's killer is marked for
+it.
+
+**The creatures act like themselves.** A demiguise vanishes when you look straight at it and steps aside when you
+walk straight at it. A unicorn keeps away unless you come quietly, empty-handed, and with a clear conscience.
+Mooncalves stay burrowed until the full moon, then gather and dance. A bowtruckle defends its tree. A niffler goes
+for gold first. A phoenix weeps healing tears for its friend.
+
+**Werewolves are people most of the month.** A werewolf is only abroad under a full moon and is gone by dawn. Its
+bite passes the curse to a human: you keep everything that makes you you, and the next full moon takes you.
+
+### The Ministry has to find out (2026-09-17)
+
+The Trace used to mean "cast a forbidden spell and it is on your record", and nothing else was law at all. The
+Ministry now learns of magic the way it does in the books: the Trace feels magic around underage wizards,
+Muggles who see something are reported to the Obliviators, and officials who watch report what they saw. An
+adult casting alone in the wilderness is known to nobody.
+
+**Children are under the Trace.** Characters can have an age, and until seventeen magic outside Hogwarts earns
+a warning letter, then a summons. Magic at Hogwarts is fine, and so is magic in a life-threatening situation —
+the Wizengamot will say so.
+
+**Muggles notice.** A light in front of a villager is tidied up by the Obliviators. A spectacle in front of a
+crowd opens an inquiry, and if enough of them saw, it finds you. Dark magic or a dangerous beast in front of any
+Muggle goes to the Auror Office.
+
+**Cases take time.** Record, warning, investigation, summons, Aurors: each rung is a letter that says what
+happened and what comes next. A summons is answered with `/wandb ministry summons answer`. Aurors look where you
+were last reported, not where you are.
+
+**Hearings give reasons.** A ruling can dismiss the charges, warn, fine, hold your wand for a while, or refer you
+to Azkaban, and the letter lists why. A hearing also examines your wand — an Unforgivable nobody saw can still
+come out there.
+
+**Not all illegal magic is equal.** Lumos, Accio and Reparo are everyday magic; Stupefy is restricted; Crucio,
+Imperio and Avada Kedavra are crimes in themselves. What the law thinks of each spell is datapack data.
+
+### A wand answers to whoever won it (2026-09-17)
+
+Wands had three different ideas of who owned them — a stack master, a player attachment and a disarm log —
+and they disagreed. A wand is now one record on the stack: its master, how far it has settled into that
+master's hand, and who has been challenging for it. Casting with it reads the same record every time.
+
+**Another wizard's wand works, poorly.** It casts at reduced power and a longer cooldown, and the tooltip
+says whose it is. Hawthorn turns on strangers outright.
+
+**You win a wand by beating its master.** Disarm, stun or kill them — how many times depends on the wand's
+wood and core. Picking a dropped wand up wins nothing, and neither does looting a wizard the world killed.
+
+**The Elder Wand has to be won.** It no longer belongs to whoever crafts or first holds it. Defeating its
+master hands it over wherever it lies, and only its master gets its full power.
+
+**Woods and cores have temperaments.** Their flat damage bonuses were narrowed; instead dragon heartstring
+changes hands easily, phoenix feather is slow to trust, rowan dislikes dark magic, thestral hair only
+fully answers someone who has seen death. Each wood and core carries notes separating canon from gameplay.
+
+**Wands can break.** Blasts wear a held wand down, a broken wand backfires, and only the Elder Wand's Reparo
+mends one.
+
+### A wand hold is one cast, whatever the network does (2026-09-17)
+
+An audit of the whole cast path — press, hold, channel, release, and every way a hold ends — against
+duplicated, late, lost and forged packets, death, respawn, dimension changes, reconnects and a second
+player. The release protocol itself held: the server reads a client's packets in wire order, so the
+session's one release token already made duplicates and stragglers worthless. What broke was the
+lifecycle around it.
+
+**Dropping the wand mid-hold left the spell running.** Vanilla empties the wand stack before it stops
+the use, and then skips the item's own teardown for an empty stack. A Leviosa target hung in the air,
+the beam never ended for anyone watching, and the next hold picked up the stale channel. The server now
+reconciles every player's hold with vanilla's item-use state once a tick, from state rather than from a
+hook that can be skipped.
+
+**Switching spell under a hold changed what the hold cast.** A long Lumos hold, switched to Protego just
+before letting go, came out as a fully charged Protego — Bombarda and Flipendo too. A hold now belongs to
+the spell it was pressed for: switching ends it (the wand starts a fresh hold if the button is still
+down), and a release that races the switch casts nothing.
+
+**A beam ran on after its own release would have been refused.** The channel checked three of the
+release's rules. A silenced, drunk or wand-barred caster held Crucio for as long as they liked, and since
+the refused release stamps no cooldown it cost nothing; Finite's interrupt was undone the next tick. The
+channel now asks exactly what the release asks, bar the random rolls.
+
+**A use packet sent into a running hold replaced its session**, forgetting that the hold was sustaining
+a spell clash, so letting go of a won clash could cast after all.
+
+**A dead player's late input no longer acts:** an ability press (Obscurus Grasp and Surge fired around the
+corpse), an Imperius command, and a Patronus aura that kept pulsing around the body.
+
+21 new game-test scenarios (84 total), each mutation-checked against the defect it guards: lifecycle
+(respawn, dimension change, logout and reconnect, hotbar swap, dropped wand), races and latency (two full
+presses in one tick; cast A, release A, cast B, duplicate A, release B; a release pair split across
+ticks; a lost release; a re-sent use packet; spell switches), Avada Kedavra's server-driven release
+against a real kill, two players whose releases and packets stay their own, an observer told of a beam
+and of its end, and the after-death inputs. Found and not changed — interrupted channels cost nothing,
+Imperio's mob tick is never registered, `/wandb magic spell learn` needs no permission — are in
+`KNOWN_ISSUES.md` §8c.
+
 ### The Shield Charm has weight (2026-09-16)
 
 **The charge is something you can see and hear climbing.** Under the four chimes there is a hum whose
@@ -128,6 +262,22 @@ alt-tabbing between two clients can line two casts up in one tick, and
 `spell_clash_opposed_bolts_lock` uses it to fire two casters at each other from 6.64 blocks, a range at
 which the old position check never saw the bolts meet.
 
+### Aguamenti fills brewing cauldrons, waters crops, and stops drowning its caster (2026-09-11)
+
+**Holding it at nothing poured water on your head.** When the jet hit nothing, the source-water hold fell
+back to the first open cell along your aim — one block from your eyes — so a long hold at open air put a
+source over your own head. The aim also saw water, so every source it placed became the next thing the
+jet hit, and the next source landed a block nearer, until one was in your face. Now a jet that hits
+nothing places nothing, the aim looks through water, and no source is placed in or above the caster.
+
+**Brewing cauldrons stayed dry.** A brewing pot keeps its water on the block entity, and the spell only
+recognised vanilla cauldrons by blockstate, so the jet stacked a water block against the pot instead. It
+fills an idle, empty pot now, the way a water bucket does.
+
+**Crops stopped the jet above the soil.** The aim used block outlines, which a crop has and the drawn beam
+ignores, so the farmland under a field was never reached and a held jet dropped a source on the crops.
+The aim is now the beam's own collision ray, and it waters the farmland under them.
+
 ### Wingardium Leviosa throws only when you tell it to (2026-09-11)
 
 **Letting go threw whatever you were holding.** Every end of a Leviosa hold ran through one teardown,
@@ -140,6 +290,64 @@ nothing more for the rest of that hold, because the target is still the cached o
 channel tick would lift it straight back out of the throw. One hold is still one cast. The click is
 read in `ClientTickEvent.Pre` on purpose: while any item is in use, vanilla's `handleKeybinds` drains
 attack clicks and discards them, and it runs before `Post`.
+
+### /wandb magic spell learn taught you a spell you could not cast (2026-09-11)
+
+**The command stored the wrong key.** It resolved the spell, then wrote player data under the raw
+argument you typed instead of the spell's canonical id. `Spells.byId` accepts a bare path, a
+namespaced id and a legacy namespace — three spellings of one spell — while the known-spell set is a
+plain string set that normalises nothing. So `/wandb magic spell learn alohomora` stored `alohomora`,
+every reader in the mod looked up `wizards_and_beasts:alohomora`, and the spell was learned and
+uncastable. `forget` could not remove what `learn` had written, and `info` read cast counts off a key
+nothing writes. All three now canonicalise after resolving, which is what the skill web already did.
+
+**And the completions were unparseable by their own command.** The spell argument accepts a word, and
+a word has no colon in it; the suggestions were namespaced ids, so accepting one put a red line under
+it. They are bare paths now — what the parser takes and what the resolver expands — falling back to
+the full id for a spell in another namespace.
+
+Found by the smoke test written while retiring the spell-teacher package, not by the retirement.
+
+### Nobody sells spells (2026-09-10)
+
+**The spell teacher was a shop.** Walk to a lectern, open a catalogue of every spell you were
+eligible for, pay 58 Knuts. It undercut four things the mod already had — skill-web keystones that
+grant spells as earned progression, proficiency as the mastery curve, and the heritage, profession
+and mastery-tier gates, all reduced to shelf labels on a price list. The screen, both packets, the
+offer builder and the Knuts charge are gone.
+
+**Spells are written down, and you have to find the writing.** A `spell_source` component holds one
+spell id, and The Standard Book of Spells carries it — the first canon stub promoted out of the
+behaviourless catalogue it was registered in. Holding right-click reads it for three seconds and
+teaches what is written inside. Eligibility runs twice, once to open the read and once to finish it,
+because three seconds is long enough for a skill node to have granted the spell already or for the
+book in hand to have been swapped. Nothing about **who may learn what** changed: every gate is where
+it was, and refuses through the reading path instead of by being left off a list.
+
+**Books turn up in libraries.** Village houses (0.35), stronghold libraries and bastion treasure
+(0.7), woodland mansions and pillager outposts (0.6), each with its own pool — a village shelf holds
+Lumos or Alohomora, a stronghold holds Expelliarmus or Confringo. The hidden wizarding cache carries
+a guaranteed one plus blanks and ink. Which spell is rolled, never chosen: a found book you pick the
+contents of is a catalogue with extra steps.
+
+**And a torn page turns up in ruins.** Mineshafts, dungeons, pyramids, temples, sunken ruins and
+shipwrecks hold a single leaf out of somebody else’s spellbook, and it does not survive being
+studied — spent on a successful read, and only on a successful one, because destroying a page a gate
+has just refused would mean an unmet requirement costs you the only copy you had of the spell you
+cannot learn yet. A textbook is lendable; a scrap is not.
+
+**The lectern kept its job's other half.** Same block, same id, same model, now the **Study Lectern**:
+a wizard who knows a spell can spend an ink bottle to write a blank book into a copy of it. That is
+what makes the first found book matter to a whole server rather than to one player.
+
+**Knowledge stopped being a discount.** Its only consequence was cheaper tuition, and there is no
+tuition. It is now a study rate — 1.00 at Knowledge 0, 1.50 at 100 — multiplying the proficiency a
+landed cast earns. The floor is 1.0 and never below: a stat nobody trains directly must not punish
+the player who has not ground out the four systems it derives from.
+
+**Known gap:** this removed the only coin sink that was on by default. Buying a wand and the skill
+respec fee are what is left. A second sink is wanted, and it must buy an object or a service.
+
 
 ### Vampires stop eating (2026-09-07)
 

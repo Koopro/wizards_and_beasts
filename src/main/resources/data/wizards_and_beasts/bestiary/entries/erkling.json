@@ -23,5 +23,19 @@
   "entityType": "wizards_and_beasts:erkling",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/erkling.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/erkling.png",
-  "sortOrder": 69
+  "sortOrder": 69,
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.erkling.diet",
+    "behaviour": "bestiary.wizards_and_beasts.erkling.behaviour",
+    "society": "bestiary.wizards_and_beasts.erkling.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.erkling.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

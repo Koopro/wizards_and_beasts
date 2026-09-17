@@ -36,5 +36,9 @@ public final class ModLootModifiers {
             GLOBAL_LOOT_MODIFIER_SERIALIZERS.register("felix_fortune",
                     () -> FelixFortuneLootModifier.CODEC);
 
+    public static final Supplier<MapCodec<SpellbookLootModifier>> SPELLBOOK =
+            GLOBAL_LOOT_MODIFIER_SERIALIZERS.register("spellbook",
+                    () -> SpellbookLootModifier.CODEC);
+
     private ModLootModifiers() {}
 }

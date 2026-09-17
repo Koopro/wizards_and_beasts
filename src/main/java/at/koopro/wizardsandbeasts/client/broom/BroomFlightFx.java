@@ -69,6 +69,13 @@ public final class BroomFlightFx {
     private static float smoothedFov;
     /** Whether the boost was firing last tick, so the cue is played on the edge and not every tick. */
     private static boolean boostWasFiring;
+    /** Where the bristles were last tick, so a trail can be laid along the stretch between. */
+    private static @Nullable Vec3 previousTail;
+    /**
+     * Longest stretch, squared, a trail is laid along. Past it the broom did not fly there — it was
+     * teleported or remounted somewhere else — and a trail across the gap would be a line through the sky.
+     */
+    private static final double MAX_SEGMENT_SQR = 16.0;
 
     private BroomFlightFx() {}
 
@@ -79,6 +86,7 @@ public final class BroomFlightFx {
         if (broom == null || mc.player == null || mc.level == null) {
             windCooldown = 0;
             boostWasFiring = false;
+            previousTail = null;
             return;
         }
         float ratio = BroomFlightRules.speedRatio(broom.getCurrentSpeed(), broom.getCruiseSpeed());
@@ -86,6 +94,7 @@ public final class BroomFlightFx {
         playWind(mc, def, ratio);
         playBoostCue(mc, broom, def);
         spawnSlipstream(mc.player, broom, def, ratio);
+        previousTail = broom.tailPosition();
     }
 
     /**
@@ -165,13 +174,18 @@ public final class BroomFlightFx {
         }
 
         Vec3 tail = broom.tailPosition();
+        // Laid along the stretch the bristles covered since last tick, not piled where they are now. At
+        // forty blocks a second a tick is two blocks of sky, and one clump per tick reads as a dotted line.
+        Vec3 from = previousTail != null && previousTail.distanceToSqr(tail) < MAX_SEGMENT_SQR
+                ? previousTail : tail;
         var particle = def.audio().trailParticleOrDefault();
         var random = player.level().random;
         for (int i = 0; i < count; i++) {
+            Vec3 at = from.lerp(tail, (i + random.nextDouble()) / count);
             player.level().addParticle(particle,
-                    tail.x + (random.nextDouble() - 0.5) * PARTICLE_JITTER,
-                    tail.y + (random.nextDouble() - 0.5) * PARTICLE_JITTER,
-                    tail.z + (random.nextDouble() - 0.5) * PARTICLE_JITTER,
+                    at.x + (random.nextDouble() - 0.5) * PARTICLE_JITTER,
+                    at.y + (random.nextDouble() - 0.5) * PARTICLE_JITTER,
+                    at.z + (random.nextDouble() - 0.5) * PARTICLE_JITTER,
                     0.0, 0.0, 0.0);
         }
     }

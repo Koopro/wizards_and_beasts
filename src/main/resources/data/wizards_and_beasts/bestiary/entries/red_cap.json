@@ -23,5 +23,19 @@
   "entityType": "wizards_and_beasts:red_cap",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/red_cap.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/red_cap.png",
-  "sortOrder": 68
+  "sortOrder": 68,
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.red_cap.diet",
+    "behaviour": "bestiary.wizards_and_beasts.red_cap.behaviour",
+    "society": "bestiary.wizards_and_beasts.red_cap.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.red_cap.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

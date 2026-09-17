@@ -23,5 +23,19 @@
   "entityType": "wizards_and_beasts:knarl",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/knarl.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/knarl.png",
-  "sortOrder": 61
+  "sortOrder": 61,
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.knarl.diet",
+    "behaviour": "bestiary.wizards_and_beasts.knarl.behaviour",
+    "society": "bestiary.wizards_and_beasts.knarl.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.knarl.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

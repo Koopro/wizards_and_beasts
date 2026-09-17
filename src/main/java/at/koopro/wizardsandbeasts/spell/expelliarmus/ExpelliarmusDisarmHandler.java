@@ -2,32 +2,25 @@ package at.koopro.wizardsandbeasts.spell.expelliarmus;
 
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.item.wand.ExpelliarmusDropTag;
-import at.koopro.wizardsandbeasts.event.wand.DisarmLogState;
-import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.util.WandHelper;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
-import at.koopro.wizardsandbeasts.wand.cast.WandCastingAllegianceSystem;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
+import at.koopro.wizardsandbeasts.wand.allegiance.WandAllegianceService;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 /**
- * Lore-accurate Expelliarmus disarm: vector, proficiency fizzle, disarm log / allegiance, pickup lock.
+ * Lore-accurate Expelliarmus disarm: vector, proficiency fizzle, a defeat for wand allegiance, pickup lock.
  */
 public final class ExpelliarmusDisarmHandler {
 
@@ -56,8 +49,12 @@ public final class ExpelliarmusDisarmHandler {
         }
 
         ItemStack dropped = held.copy();
-        UUID wandInstanceId = WandInstanceIds.getOrAssign(level, dropped);
-        recordDisarmForAllegiance(caster, wandInstanceId, level.getGameTime());
+        WandInstanceIds.getOrAssign(level, dropped);
+        if (target instanceof ServerPlayer victim) {
+            // Disarming a wand's master is a defeat, and a defeat is how a wand is won (Deathly Hallows). Settled
+            // on the stack before it leaves the hand, so the wand on the ground already says whose it now is.
+            WandAllegianceService.onDefeat(victim, caster, WandAllegianceService.DefeatKind.DISARM, List.of(dropped));
+        }
 
         target.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
 
@@ -73,8 +70,6 @@ public final class ExpelliarmusDisarmHandler {
 
         int disarmEffectTicks = 40 + (int) (casterProficiencyScalar * 80);
         target.addEffect(new MobEffectInstance(ModEffects.EXPELLIARMUS_DISARMED, disarmEffectTicks, 0, false, true, true));
-
-        tryTransferAllegianceFromLog(level, caster, dropped, wandInstanceId);
     }
 
     private static void applyMobKnockoff(ServerLevel level, LivingEntity target, ServerPlayer caster,
@@ -88,34 +83,4 @@ public final class ExpelliarmusDisarmHandler {
         level.addFreshEntity(itemEntity);
     }
 
-    private static void recordDisarmForAllegiance(ServerPlayer disarmer, UUID wandInstanceId, long gameTime) {
-        DisarmLogState log = disarmer.getData(ModAttachments.DISARM_LOG.get());
-        Map<UUID, List<Long>> entries = new java.util.HashMap<>(log.entries());
-        List<Long> times = new ArrayList<>(entries.getOrDefault(wandInstanceId, List.of()));
-        times.add(gameTime);
-        times.removeIf(t -> gameTime - t > 12000L);
-        entries.put(wandInstanceId, times);
-        disarmer.setData(ModAttachments.DISARM_LOG.get(), new DisarmLogState(entries));
-    }
-
-    private static void tryTransferAllegianceFromLog(ServerLevel level, ServerPlayer disarmer, ItemStack wandStack, UUID wandInstanceId) {
-        var log = disarmer.getData(ModAttachments.DISARM_LOG.get());
-        List<Long> times = log.entries().get(wandInstanceId);
-        if (times == null || times.size() < 3) {
-            return;
-        }
-        java.util.Optional<UUID> prevMaster = WandComponents.getMaster(wandStack);
-        WandCastingAllegianceSystem.transferTo(wandStack, disarmer.getUUID(), 0.55f, level.getGameTime());
-        disarmer.sendSystemMessage(Component.literal("The wand has chosen you.").withStyle(ChatFormatting.GOLD));
-        prevMaster.ifPresent(prev -> {
-            Player prevPlayer = level.getPlayerByUUID(prev);
-            if (prevPlayer instanceof ServerPlayer prevSp) {
-                prevSp.sendSystemMessage(
-                        Component.literal("Your wand no longer answers to you.").withStyle(ChatFormatting.DARK_RED));
-            }
-        });
-        java.util.HashMap<UUID, List<Long>> next = new java.util.HashMap<>(log.entries());
-        next.remove(wandInstanceId);
-        disarmer.setData(ModAttachments.DISARM_LOG.get(), new DisarmLogState(next));
-    }
 }

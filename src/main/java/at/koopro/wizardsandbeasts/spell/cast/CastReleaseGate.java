@@ -18,12 +18,21 @@ import org.jspecify.annotations.Nullable;
  * decides whether the edge lands on one. The states, in the vocabulary of the cast:
  *
  * <pre>
- *   IDLE ──use()──▶ CASTING ──onUseTick──▶ CHANNELING ──release packet──▶ RELEASED ──▶ COOLDOWN
- *                      │                        │
- *                      └────────────────────────┴── death / respawn / dimension / logout ──▶ IDLE
+ *   IDLE ──use() starts a hold──▶ CASTING ──onUseTick──▶ CHANNELING ──vanilla releaseUsing()──▶ RELEASE_PENDING
+ *                                    │                       │                                      │
+ *                                    └───────────────────────┴──▶ IDLE                    client release packet
+ *                                       death · respawn · dimension · logout ·                      │
+ *                                       hold ended without a release (slot swap,                    ▼
+ *                                       dropped wand, stun, spell switched)            RELEASED ──▶ COOLDOWN
+ *
+ *   A server-driven release (Avada Kedavra on a kill) goes CHANNELING ──▶ RELEASED directly, then releases
+ *   the item itself; the client's release for that hold then meets RELEASED.
  * </pre>
  *
- * <p>IDLE is "no session"; RELEASED is "the session's one release token is spent". Both refuse a
+ * <p>RELEASE_PENDING is a server observation, not a client claim: it exists only after vanilla calls
+ * {@code Item#releaseUsing}. IDLE is "no session"; RELEASED is "the session's one release token is spent".
+ * CASTING and CHANNELING are one session state — a channel is the beam logic acting on a hold, not a separate
+ * edge. Both IDLE and RELEASED refuse a
  * release, which is what makes every hostile case below a single rule rather than a special case:
  *
  * <ul>
@@ -37,6 +46,10 @@ import org.jspecify.annotations.Nullable;
  *       one that releases late, which is the duplicate case again.</li>
  *   <li><b>letting go of a spell clash</b> — the hold was feeding a lock, not charging a cast:
  *       {@link #CLASH_HOLD}</li>
+ *   <li><b>a client release before vanilla sees the hold end</b> — it is not a release at all:
+ *       {@link #RELEASE_NOT_CONFIRMED}</li>
+ *   <li><b>switching spell before letting go</b> — the hold was charged for another spell:
+ *       {@link #SPELL_CHANGED}</li>
  * </ul>
  *
  * <p>No wire sequence number is needed for that last case and none is sent. A number the client
@@ -52,6 +65,8 @@ public enum CastReleaseGate {
     NO_SESSION,
     /** This hold's single release has already been spent (duplicate packet, or a server-driven release). */
     ALREADY_RELEASED,
+    /** The client packet arrived before vanilla confirmed that this server-side hold had ended. */
+    RELEASE_NOT_CONFIRMED,
     /** The caster is dead. Vanilla ends the hold client-side on death, and that release must not land. */
     CASTER_NOT_ALIVE,
     /**
@@ -64,7 +79,14 @@ public enum CastReleaseGate {
      * when one starts, feeds the lock and nothing else — letting go is giving the lock up, not casting.
      * See {@code SpellClashLocks}.
      */
-    CLASH_HOLD;
+    CLASH_HOLD,
+    /**
+     * The active spell is not the one this hold began with. Everything a hold accumulates — its charge, a
+     * channel's effects — belongs to the spell it was pressed for, so the release casts neither: letting go of
+     * a long Lumos hold must not come out as a fully charged Protego. The server also ends such a hold on its own
+     * tick, so this verdict is what meets a switch and a release read in the same drain.
+     */
+    SPELL_CHANGED;
 
     /**
      * Side-effect-free facts about a release attempt. Read in precedence order, short-circuiting at
@@ -73,16 +95,20 @@ public enum CastReleaseGate {
      * @param casterAlive             the releasing player is alive
      * @param sessionOpen             a wand hold was opened server-side and has not been aborted
      * @param releaseAlreadyConsumed  that session's release token is already spent
+     * @param vanillaReleaseObserved  vanilla {@code Item#releaseUsing} has run for this hold
      * @param ticksSinceSessionStart  game ticks between the session opening and this release
      * @param maxSessionTicks         the wand's declared use duration; see {@code WandItem}
      * @param clashHold               that session was spent holding a spell clash
+     * @param holdSpellStillActive    the active spell is the one the hold began with
      */
     public record Inputs(boolean casterAlive,
                          boolean sessionOpen,
                          boolean releaseAlreadyConsumed,
+                         boolean vanillaReleaseObserved,
                          long ticksSinceSessionStart,
                          long maxSessionTicks,
-                         boolean clashHold) {}
+                         boolean clashHold,
+                         boolean holdSpellStillActive) {}
 
     /** The first failing gate, or {@code null} when the release may resolve into a cast. */
     @Nullable
@@ -92,13 +118,24 @@ public enum CastReleaseGate {
         if (!in.casterAlive()) return CASTER_NOT_ALIVE;
         if (!in.sessionOpen()) return NO_SESSION;
         if (in.releaseAlreadyConsumed()) return ALREADY_RELEASED;
+        if (!in.vanillaReleaseObserved()) return RELEASE_NOT_CONFIRMED;
         // A negative age means the session was stamped from a clock ahead of this one — an impossible
         // state rather than an old session, and refused as firmly.
         if (in.ticksSinceSessionStart() < 0 || in.ticksSinceSessionStart() > in.maxSessionTicks()) {
             return SESSION_EXPIRED;
         }
         if (in.clashHold()) return CLASH_HOLD;
+        if (!in.holdSpellStillActive()) return SPELL_CHANGED;
         return null;
+    }
+
+    /**
+     * Whether this verdict is a real release of a hold that is simply worth nothing — as opposed to a packet the
+     * server could not match to a release. Such a verdict spends the hold's token, so a duplicate of the same
+     * release reads as a duplicate, and it is the game working rather than the client and server disagreeing.
+     */
+    public boolean endsHoldWithoutCast() {
+        return this == CLASH_HOLD || this == SPELL_CHANGED;
     }
 
     /** The telemetry / denial code this verdict is recorded under. */
@@ -106,9 +143,11 @@ public enum CastReleaseGate {
         return switch (this) {
             case NO_SESSION -> SpellRejectCodes.NO_CAST_SESSION;
             case ALREADY_RELEASED -> SpellRejectCodes.DUPLICATE_RELEASE_GUARD;
+            case RELEASE_NOT_CONFIRMED -> SpellRejectCodes.RELEASE_NOT_CONFIRMED;
             case CASTER_NOT_ALIVE -> SpellRejectCodes.CASTER_NOT_ALIVE;
             case SESSION_EXPIRED -> SpellRejectCodes.CAST_SESSION_EXPIRED;
             case CLASH_HOLD -> SpellRejectCodes.CLASH_HOLD;
+            case SPELL_CHANGED -> SpellRejectCodes.SPELL_CHANGED_DURING_HOLD;
         };
     }
 }

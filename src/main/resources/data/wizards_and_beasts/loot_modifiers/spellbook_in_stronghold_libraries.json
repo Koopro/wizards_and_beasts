@@ -1,0 +1,28 @@
+{
+  "type": "wizards_and_beasts:spellbook",
+  "conditions": [
+    {
+      "condition": "minecraft:any_of",
+      "terms": [
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/stronghold_library" },
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/stronghold_crossing" },
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/stronghold_corridor" },
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/bastion_treasure" }
+      ]
+    }
+  ],
+  "spells": [
+    "stupefy",
+    "expelliarmus",
+    "incendio",
+    "glacius",
+    "arresto_momentum",
+    "episkey",
+    "finite_incantatem",
+    "flipendo",
+    "diffindo",
+    "aguamenti",
+    "confringo"
+  ],
+  "chance": 0.7
+}

@@ -84,12 +84,7 @@ public enum SkillTreeId {
         VARIANT_AUDIENCE.put(HeritageVariant.SQUIB, Audience.WIZARD);
         VARIANT_AUDIENCE.put(HeritageVariant.ADOPTED_MAGICAL, Audience.WIZARD);
         // Werewolf → WIZARD.
-        VARIANT_AUDIENCE.put(HeritageVariant.WEREWOLF_BITTEN, Audience.WIZARD);
-        VARIANT_AUDIENCE.put(HeritageVariant.WEREWOLF_BORN, Audience.WIZARD);
-        VARIANT_AUDIENCE.put(HeritageVariant.WEREWOLF_SAVAGE, Audience.WIZARD);
         // Obscurial → WIZARD.
-        VARIANT_AUDIENCE.put(HeritageVariant.SUPPRESSED, Audience.WIZARD);
-        VARIANT_AUDIENCE.put(HeritageVariant.UNLEASHED, Audience.WIZARD);
         // Vampire (all variants) → WIZARD.
         VARIANT_AUDIENCE.put(HeritageVariant.VAMPIRE_TURNED, Audience.WIZARD);
         VARIANT_AUDIENCE.put(HeritageVariant.VAMPIRE_BORN, Audience.WIZARD);
@@ -123,8 +118,6 @@ public enum SkillTreeId {
 
         // ── Heritage → audience (null-variant fallback only) ──
         HERITAGE_FALLBACK.put(Heritage.WIZARDKIND, Audience.WIZARD);
-        HERITAGE_FALLBACK.put(Heritage.WEREWOLF, Audience.WIZARD);
-        HERITAGE_FALLBACK.put(Heritage.OBSCURIAL, Audience.WIZARD);
         HERITAGE_FALLBACK.put(Heritage.VAMPIRE, Audience.WIZARD);
         HERITAGE_FALLBACK.put(Heritage.GOBLIN, Audience.GOBLIN);
         HERITAGE_FALLBACK.put(Heritage.HOUSE_ELF, Audience.HOUSE_ELF);
@@ -195,6 +188,22 @@ public enum SkillTreeId {
     /**
      * Whether a player holding {@code heritage}/{@code variant} meets a region's capability requirement.
      * The capability tags ({@code no_wand}, {@code no_casting}) are the only gate inside a web.
+     */
+    public static boolean meetsRequirement(Requirement requirement,
+                                           at.koopro.wizardsandbeasts.heritage.data.@Nullable PlayerHeritageData data) {
+        if (data == null) {
+            return meetsRequirement(requirement, null, null);
+        }
+        return switch (requirement) {
+            case NONE -> true;
+            case WAND -> data.canUseWand();
+            case CASTING -> data.canCast();
+        };
+    }
+
+    /**
+     * The lineage-only answer, for callers with no character in hand. A condition can take a capability away (an
+     * Obscurus seals casting), so anything with a player uses {@link #meetsRequirement(Requirement, PlayerHeritageData)}.
      */
     public static boolean meetsRequirement(Requirement requirement,
                                            @Nullable Heritage heritage,

@@ -1,0 +1,18 @@
+{
+  "_comment": "A phoenix is loyal to those who show it loyalty. It eats nothing a wizard can offer, so trust is not fed: a player who kills something that has just hurt a phoenix earns its notice (PhoenixEntity, +20), calm company keeps it growing, and a single blow undoes it. At 60 it weeps healing tears over its person; at 80 it gives a feather now and then; at 90 it follows.",
+  "feeds": [],
+  "followThreshold": 90,
+  "milestones": [20, 60, 80, 100],
+  "proximityRange": 12.0,
+  "proximitySeconds": 60,
+  "proximityGain": 1,
+  "betrayalPenalty": 100,
+  "gift": {
+    "item": "wizards_and_beasts:phoenix_feather",
+    "minBond": 80,
+    "cooldownSeconds": 2400
+  },
+  "masteryBond": 100,
+  "feedSound": "minecraft:entity.parrot.ambient",
+  "refuseSound": "minecraft:entity.parrot.hurt"
+}

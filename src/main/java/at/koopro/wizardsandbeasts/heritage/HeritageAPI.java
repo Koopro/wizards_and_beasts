@@ -81,7 +81,7 @@ public final class HeritageAPI {
      * are written and not alongside them.
      *
      * <p><b>Not gated on {@link at.koopro.wizardsandbeasts.module.Module#PLAYER_STATS}, deliberately.</b>
-     * Every other stat write in the mod is — training, the cast modifiers, the tuition discount — because
+     * Every other stat write in the mod is — training, the cast modifiers, the study rate — because
      * each of those is an ongoing effect nobody can see with the module off. The POWER roll is not an
      * effect; it is the character, made once at a gate that is passed once. Skipping it would leave every
      * player who joined while the module was off permanently at POWER 0 with nothing able to roll for them
@@ -138,6 +138,44 @@ public final class HeritageAPI {
         // their own HUD and useless for rendering: a visible heritage is one other people can see.
         HeritageIdentitySyncS2CPayload.syncToTracking(player);
         // Committing a heritage sets the variant tags that back HERITAGE-source ability grants.
+        PlayerStateSyncService.syncAbilityGrants(player);
+    }
+
+    /**
+     * A condition that has happened to a player — a werewolf's bite — rather than something they chose.
+     *
+     * <p>Heritage, lineage, POWER roll, Resolve and lock are all left exactly as they were: a wizard bitten by a
+     * werewolf is the same wizard, with the same magic and the same training, and now the moon has a claim on them.
+     * Only the body is brought up to date (the form that goes with the condition) and the change published.
+     */
+    public static void afflict(ServerPlayer player, ConditionOrigin condition) {
+        PlayerHeritageData data = getData(player);
+        data.setCondition(condition);
+        applyStats(player);
+        VampireBloodAPI.seed(player);
+        FormSystemAPI.resetToDefault(player);
+        HeritageDataSyncS2CPayload.syncToPlayer(player, false);
+        HeritageIdentitySyncS2CPayload.syncToTracking(player);
+        PlayerStateSyncService.syncAbilityGrants(player);
+    }
+
+    /**
+     * Takes a condition off a player, leaving the witch or wizard underneath exactly as they were.
+     *
+     * <p>No canon cure exists for either condition — Wolfsbane makes a werewolf's night survivable and an Obscurus
+     * kills its host — so this is an operator's eraser and a test seam, not a remedy the world offers.
+     */
+    public static void cure(ServerPlayer player) {
+        PlayerHeritageData data = getData(player);
+        if (data.getCondition() == null) {
+            return;
+        }
+        data.setCondition(null);
+        data.setTransformationState(TransformationState.NORMAL);
+        applyStats(player);
+        FormSystemAPI.resetToDefault(player);
+        HeritageDataSyncS2CPayload.syncToPlayer(player, false);
+        HeritageIdentitySyncS2CPayload.syncToTracking(player);
         PlayerStateSyncService.syncAbilityGrants(player);
     }
 
@@ -204,7 +242,8 @@ public final class HeritageAPI {
             armorMod += variant.getArmorMod();
         }
 
-        if (heritage == Heritage.OBSCURIAL && player.level() instanceof net.minecraft.server.level.ServerLevel level) {
+        if (data.hasCondition(MagicalCondition.OBSCURUS)
+                && player.level() instanceof net.minecraft.server.level.ServerLevel level) {
             healthMod += ObscurialRules.getHealthBonus(data);
             speedMod += ObscurialRules.getSpeedBonus(data, level, player);
             armorMod += ObscurialRules.getArmorBonus(data);
@@ -236,7 +275,6 @@ public final class HeritageAPI {
     private static void seedResolve(ServerPlayer player, Heritage heritage) {
         float seed = switch (heritage) {
             case WIZARDKIND -> 50.0f;
-            case WEREWOLF -> 70.0f;
             case GIANT -> 35.0f;
             case VAMPIRE -> 80.0f;
             case GOBLIN -> 60.0f;

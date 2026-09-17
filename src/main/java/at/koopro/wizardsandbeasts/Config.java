@@ -23,17 +23,6 @@ public class Config {
     private static final ModConfigSpec.BooleanValue ENABLE_DEBUG_TOOLS = BUILDER
             .comment("If true, enables client debug overlays and debug keybindings.")
             .define("enableDebugTools", false);
-    private static final ModConfigSpec.BooleanValue SPELL_TEACHER_REQUIRE_PAYMENT = BUILDER
-            .comment("If true, learning from the spell teacher consumes vault funds.",
-                    "On by default so wizarding money has somewhere to go: with it off, nothing in a",
-                    "default install ever consumes a coin, and the whole Gringotts economy is decoration.",
-                    "Set false to restore the sandbox behaviour where lessons are free.")
-            .define("spellTeacherRequirePayment", true);
-    private static final ModConfigSpec.IntValue SPELL_TEACHER_LEARN_COST_KNUTS = BUILDER
-            .comment("Cost in knuts for learning one spell from the spell teacher.",
-                    "Default 58 = two Sickles: affordable from early loot, but enough that coins are worth",
-                    "picking up. Ignored when spellTeacherRequirePayment is false.")
-            .defineInRange("spellTeacherLearnCostKnuts", 58, 0, Integer.MAX_VALUE);
     private static final ModConfigSpec.IntValue SKILL_RESPEC_COST_KNUTS = BUILDER
             .comment("Cost in knuts to respec the skill web. Default 493 = one Galleon.",
                     "A fee rather than a point penalty on purpose: a percentage loss compounds across",
@@ -49,6 +38,16 @@ public class Config {
                     "sentence, so scaling this never touches them. Fines are charged only while the",
                     "Gringotts module is on; with no vault to bill there is nothing to collect.")
             .defineInRange("ministryFineScalePercent", 100, 0, 10000);
+    private static final ModConfigSpec.IntValue MINISTRY_DAYS_PER_YEAR = BUILDER
+            .comment("In-game days one year of a character's life takes. An underage wizard comes of age - and",
+                    "the Trace lifts - after (17 - age) of these years. World time, not play time: it passes for",
+                    "everyone at once, in every dimension.")
+            .defineInRange("ministryDaysPerYear", 8, 1, 3650);
+    private static final ModConfigSpec.IntValue MINISTRY_NEW_CHARACTER_AGE = BUILDER
+            .comment("The age a brand-new character starts at. 0 keeps every character of age (the default), so",
+                    "no one is placed under the Trace unless an admin sets an age. 11 to 16 starts new players",
+                    "underage. Existing characters are never changed by this setting.")
+            .defineInRange("ministryNewCharacterAge", 0, 0, 16);
     private static final ModConfigSpec.IntValue STANDING_AXIS_BOUND = BUILDER
             .comment("Magnitude of every magical-standing axis. Each axis runs -bound to +bound with 0",
                     "as true neutrality. Raising it makes standing slower to move, not deeper: the deed",
@@ -354,14 +353,14 @@ public class Config {
     public static boolean enforceSpellRequirements;
     public static boolean debugLogSpellGateReasons;
     public static boolean enableDebugTools;
-    public static boolean spellTeacherRequirePayment;
-    public static int spellTeacherLearnCostKnuts;
     public static int skillRespecCostKnuts;
     /**
      * Seeded with the shipped default rather than left at 0: an uninitialised scale reads as "fines are
      * switched off", so a fine assessed before the config load event would silently cost nothing.
      */
     public static int ministryFineScalePercent = 100;
+    public static int ministryDaysPerYear = 8;
+    public static int ministryNewCharacterAge = 0;
     /**
      * Seeded with the shipped defaults for the same reason the fine scale is: standing is read from the
      * character sheet and from the skill-gate path, and a bound of 0 before the config load event would
@@ -457,10 +456,10 @@ public class Config {
         enforceSpellRequirements = ENFORCE_SPELL_REQUIREMENTS.get();
         debugLogSpellGateReasons = DEBUG_LOG_SPELL_GATE_REASONS.get();
         enableDebugTools = ENABLE_DEBUG_TOOLS.get();
-        spellTeacherRequirePayment = SPELL_TEACHER_REQUIRE_PAYMENT.get();
-        spellTeacherLearnCostKnuts = SPELL_TEACHER_LEARN_COST_KNUTS.get();
         skillRespecCostKnuts = SKILL_RESPEC_COST_KNUTS.get();
         ministryFineScalePercent = MINISTRY_FINE_SCALE_PERCENT.get();
+        ministryDaysPerYear = MINISTRY_DAYS_PER_YEAR.get();
+        ministryNewCharacterAge = MINISTRY_NEW_CHARACTER_AGE.get();
         standingAxisBound = STANDING_AXIS_BOUND.get();
         standingLeanThresholdPercent = STANDING_LEAN_THRESHOLD_PERCENT.get();
         standingStrongThresholdPercent = STANDING_STRONG_THRESHOLD_PERCENT.get();

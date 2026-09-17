@@ -227,3 +227,15 @@ Two different things, on purpose:
 - **Misfire** — the cast was legal and the wand failed anyway (mental instability, obscurus
   backlash, the modifier-driven misfire chance). No reject code, no denial packet: there is no reason
   to report. It plays `SPELL_FIZZLE` and says so.
+
+## 9. Revelio and the outline systems
+
+Revelio (`spell/revelio/`) has no rendering of its own. `RevelioScan` finds what the caster can see within
+`range` (line-of-sight rays, `ClipContext.Block.VISUAL`): living entities plus `#wizards_and_beasts:revelio_reveals`
+entity types, and blocks that carry a block entity or sit in `#revelio_reveals`, minus `#revelio_ignores` —
+nearest 32 entities and 64 blocks. `Revelio.cast` wraps the spell colour in one `OutlineStyle.forSpell` (made
+vivid and opaque, so both halves share one colour) and calls `SpellOutlines.highlightEntities` (broadcast to
+everyone) and `SpellOutlines.highlightBlocks` (caster only). The services own the rest: expiry on the server
+tick, a last-second fade on the client, overlap that never shortens an outline (newer colour, later expiry),
+and cleanup on logout and dimension change. Debug outlines live behind `DebugOutlines` and are a separate layer
+a spell cannot touch. An empty cast sends nothing and earns no proficiency.

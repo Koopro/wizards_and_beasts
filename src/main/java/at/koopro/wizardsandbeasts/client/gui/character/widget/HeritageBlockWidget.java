@@ -2,15 +2,25 @@ package at.koopro.wizardsandbeasts.client.gui.character.widget;
 
 import at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageDataState;
 import at.koopro.wizardsandbeasts.client.spell.state.ClientSignatureSpellState;
+import at.koopro.wizardsandbeasts.heritage.ConditionOrigin;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
+import at.koopro.wizardsandbeasts.heritage.HeritageTraits;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
+import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
+import net.minecraft.network.chat.Component;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-/** Renders the heritage info block in the sheet's identity column. */
+/**
+ * Renders the heritage block in the sheet's identity column: who this character is.
+ *
+ * <p>Heritage, lineage, any condition they carry, and then their traits, magical affinities and special
+ * characteristics by name ({@link HeritageTraits}). The block used to print heritage, variant, patronus and animagus
+ * and stop there, which told a player their label and nothing about what it meant.
+ */
 public final class HeritageBlockWidget {
 
     private static final int COLOR_HEADER = 0xFFDDB97A;
@@ -40,20 +50,60 @@ public final class HeritageBlockWidget {
         g.drawString(font, "Heritage", x, y, COLOR_HEADER, false);
         int cy = y + LINE_H;
 
-        String typeName   = heritage != null ? heritage.getDisplayName()  : "—";
-        String variantName = variant != null ? variant.getDisplayName()   : "—";
-        String patronus   = resolvePatronus();
-        String animagus   = resolveAnimagus();
+        PlayerHeritageData data = ClientHeritageDataState.get();
+        ConditionOrigin condition = data.getCondition();
 
-        drawRow(g, font, x, cy, w, "Type",     typeName);    cy += ROW_H;
-        drawRow(g, font, x, cy, w, "Variant",  variantName); cy += ROW_H;
-        drawRow(g, font, x, cy, w, "Patronus", patronus);    cy += ROW_H;
-        drawRow(g, font, x, cy, w, "Animagus", animagus);
+        drawRow(g, font, x, cy, w, "Heritage", heritage != null ? heritage.getDisplayName() : "—");
+        cy += ROW_H;
+        drawRow(g, font, x, cy, w, "Lineage", variant != null ? variant.getDisplayName() : "—");
+        cy += ROW_H;
+        if (condition != null) {
+            // Named, not hidden: the character knows. A condition is a fact about them, like a scar.
+            drawRow(g, font, x, cy, w, "Condition",
+                    Component.translatable(condition.condition().getTranslationKey()).getString()
+                            + " (" + Component.translatable(condition.getTranslationKey()).getString() + ")");
+            cy += ROW_H;
+        }
+        drawRow(g, font, x, cy, w, "Patronus", resolvePatronus());
+        cy += ROW_H;
+        drawRow(g, font, x, cy, w, "Animagus", resolveAnimagus());
+        cy += ROW_H;
+
+        for (HeritageTraits.Kind kind : HeritageTraits.Kind.values()) {
+            java.util.List<HeritageTraits.Trait> traits = HeritageTraits.of(data, kind);
+            if (traits.isEmpty()) {
+                continue;
+            }
+            g.drawString(font, Component.translatable(kind.getHeadingKey()), x, cy, COLOR_HEADER, false);
+            cy += LINE_H;
+            for (HeritageTraits.Trait trait : traits) {
+                g.drawString(font, font.plainSubstrByWidth(
+                                Component.translatable(trait.getNameKey()).getString(), w - 4),
+                        x + 4, cy, COLOR_VALUE, false);
+                cy += LINE_H;
+            }
+            cy += 2;
+        }
     }
 
-    /** Total pixel height consumed by this block. */
+    /**
+     * Total pixel height consumed by this block, for the identity column's layout.
+     *
+     * <p>Computed from the same state {@link #draw} reads rather than fixed, because a character's trait list is
+     * exactly as long as their traits: a bitten half-blood prints two more lines than they did yesterday, and a
+     * fixed height would have the next block drawn over them.
+     */
     public static int height() {
-        return LINE_H + ROW_H * 4; // header + 4 two-line rows
+        PlayerHeritageData data = ClientHeritageDataState.get();
+        int rows = data.getCondition() == null ? 4 : 5;
+        int height = LINE_H + ROW_H * rows;
+        for (HeritageTraits.Kind kind : HeritageTraits.Kind.values()) {
+            int traits = HeritageTraits.of(data, kind).size();
+            if (traits > 0) {
+                height += LINE_H * (traits + 1) + 2;
+            }
+        }
+        return height;
     }
 
     // ── internals ───────────────────────────────────────────────────────────

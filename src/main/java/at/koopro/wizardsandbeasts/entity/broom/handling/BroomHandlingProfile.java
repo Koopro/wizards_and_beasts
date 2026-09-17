@@ -25,7 +25,7 @@ import at.koopro.wizardsandbeasts.entity.broom.BroomEntity;
  * A profile reads {@code def.handling()} for anything a datapack should be able to retune —
  * {@code yawDrift}, {@code momentumRetention}, {@code crashDamageMultiplier}. What lives in the class
  * is the <em>shape</em> of the response: the heading lock a racing broom has and a school broom does
- * not, the extra sink at speed, the boost cap. Those are not numbers a datapack can express, which is
+ * not, the boost cap. Those are not numbers a datapack can express, which is
  * the whole reason this is code and not more JSON.
  *
  * <h2>Threading</h2>
@@ -88,7 +88,10 @@ public interface BroomHandlingProfile {
         return HandlingMath.defaultWander(broom.tickCount, def.handling(), speedRatio, boosting);
     }
 
-    /** How hard the broom sinks with no vertical input held. */
+    /**
+     * How fast a broom nobody is riding settles toward the ground. A ridden broom holds its altitude and
+     * never reads this.
+     */
     default float modifyWeakGravity(float weakGravity, BroomEntity broom, BroomDefinition def) {
         return weakGravity;
     }
@@ -96,16 +99,6 @@ public interface BroomHandlingProfile {
     /** Visual bank angle. Cosmetic: {@code rollTilt} is a render value and steers nothing. */
     default float modifyRollTilt(float rollTilt, BroomEntity broom, BroomDefinition def) {
         return rollTilt;
-    }
-
-    /**
-     * Last word on the broom's velocity for this tick, after everything else has run.
-     *
-     * <p>The one hook that mutates rather than returning, because it exists for effects that are not
-     * a modification of any single scalar — a racing broom's nose-heaviness at speed is a change to
-     * the finished vertical velocity, not to gravity or to lift.
-     */
-    default void afterVelocityComputed(BroomEntity broom, BroomDefinition def) {
     }
 
     /** Fired the tick a boost actually starts firing — not when the key is pressed. */

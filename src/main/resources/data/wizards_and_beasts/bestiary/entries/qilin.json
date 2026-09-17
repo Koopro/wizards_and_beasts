@@ -23,5 +23,19 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/qilin.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/qilin.png",
   "sortOrder": 59,
-  "entityType": "wizards_and_beasts:qilin"
+  "entityType": "wizards_and_beasts:qilin",
+  "profile": {
+    "classification": "beast",
+    "basis": "partial",
+    "diet": "bestiary.wizards_and_beasts.qilin.diet",
+    "behaviour": "bestiary.wizards_and_beasts.qilin.behaviour",
+    "society": "bestiary.wizards_and_beasts.qilin.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.qilin.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

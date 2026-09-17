@@ -7,11 +7,15 @@ import at.koopro.wizardsandbeasts.entity.broom.BroomEntity;
  * Racing brooms — the Nimbus pair and the Firebolt family.
  *
  * <p>Two things define the feel, and they pull against each other. It <b>holds a line</b>: let go of
- * the stick and the heading locks, where a school broom keeps searching. And it gets
- * <b>nose-heavy at speed</b>: past seventy per cent of its ceiling the turn tightens up and the
- * broom starts wanting the ground, so the thing that makes it fast is also the thing that makes it
- * dangerous. The Firebolts pay for that with the highest crash multipliers in the game, which is
- * authored in their JSON rather than here — the profile is the shape, the numbers are the tier.
+ * the stick and the heading locks, where a school broom keeps searching. And it gets <b>stiff at
+ * speed</b>: past seventy per cent of its ceiling the turn rate drops, so the thing that makes it fast is
+ * also the thing that makes it hard to thread. The Firebolts pay for that with the highest crash
+ * multipliers in the game, which is authored in their JSON rather than here — the profile is the shape,
+ * the numbers are the tier.
+ *
+ * <p>It was also nose-heavy until 2026-09-11, sinking at speed even in level flight. That went with the
+ * rest of the no-input sink: a broom that loses height while its rider holds a level line reads as
+ * broken, whatever the lore says about it.
  */
 public final class RacingHandling implements BroomHandlingProfile {
 
@@ -21,10 +25,6 @@ public final class RacingHandling implements BroomHandlingProfile {
     private static final float HIGH_SPEED_TURN_PENALTY = 0.85f;
     /** How much heading wander survives when the rider is holding a heading. Near zero: a lock. */
     private static final float HEADING_LOCK = 0.08f;
-    /** Blocks per tick of extra sink at the ceiling on the least stable broom. */
-    private static final float SINK_AT_LIMIT = 0.01f;
-    /** Stability is subtracted from this, so even a perfectly stable racing broom sinks a little. */
-    private static final float SINK_STABILITY_BASE = 1.1f;
 
     @Override
     public String profileId() {
@@ -47,13 +47,6 @@ public final class RacingHandling implements BroomHandlingProfile {
         return steering ? wander : wander * HEADING_LOCK;
     }
 
-    /** Extra downward velocity at a given speed and stability. Zero below the threshold. */
-    public static float sinkAt(float speedRatio, float stabilityRating) {
-        return speedRatio <= HIGH_SPEED_RATIO
-                ? 0f
-                : SINK_AT_LIMIT * speedRatio * (SINK_STABILITY_BASE - stabilityRating);
-    }
-
     /**
      * Damps the wander to almost nothing while the rider is holding a heading.
      *
@@ -66,21 +59,5 @@ public final class RacingHandling implements BroomHandlingProfile {
         return lockedWander(
                 BroomHandlingProfile.super.yawWander(broom, def, speedRatio, boosting, steering),
                 steering);
-    }
-
-    /**
-     * Nose-heaviness at speed: the faster it goes, the more it wants the ground.
-     *
-     * <p>Applied to the finished vertical velocity rather than to {@code weakGravity}, because it
-     * must bite even while the rider is holding ascend — that is the point of it. Gravity is skipped
-     * entirely when a vertical key is held, so routing it there would make the effect vanish exactly
-     * when a rider is trying to pull out of a dive.
-     */
-    @Override
-    public void afterVelocityComputed(BroomEntity broom, BroomDefinition def) {
-        float sink = sinkAt(HandlingMath.speedRatio(broom.getCurrentSpeed(), def), def.stabilityRating());
-        if (sink > 0f) {
-            broom.setVerticalVelocity(broom.getVerticalVelocity() - sink);
-        }
     }
 }

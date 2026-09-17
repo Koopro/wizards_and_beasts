@@ -17,7 +17,6 @@ import at.koopro.wizardsandbeasts.network.bestiary.ModNetworkBestiary;
 import at.koopro.wizardsandbeasts.network.handbook.ModNetworkHandbook;
 import at.koopro.wizardsandbeasts.network.bestiary.niffler.ModNetworkNiffler;
 import at.koopro.wizardsandbeasts.network.spell.ModNetworkSpells;
-import at.koopro.wizardsandbeasts.spell.teacher.ModNetworkTeacher;
 import at.koopro.wizardsandbeasts.spell.beam.ModNetworkBeamDebug;
 import at.koopro.wizardsandbeasts.network.wand.ModNetworkWand;
 import at.koopro.wizardsandbeasts.network.character.ModNetworkCharacter;
@@ -42,9 +41,9 @@ public class ModNetwork {
         at.koopro.wizardsandbeasts.network.pose.ModNetworkPose.register(registrar);
         ModNetworkAbilities.register(registrar);
         ModNetworkBeamDebug.register(registrar);
+        at.koopro.wizardsandbeasts.network.outline.ModNetworkOutline.register(registrar);
         at.koopro.wizardsandbeasts.network.feedback.ModNetworkFeedback.register(registrar);
         ModNetworkSkills.register(registrar);
-        ModNetworkTeacher.register(registrar);
         ModNetworkWand.register(registrar);
         ModNetworkBestiary.register(registrar);
         at.koopro.wizardsandbeasts.network.animagus.ModNetworkAnimagus.register(registrar);
@@ -59,7 +58,7 @@ public class ModNetwork {
         ModNetworkStats.register(registrar);
         ModNetworkTrinkets.register(registrar);
         ModNetworkPetrify.register(registrar);
-        at.koopro.wizardsandbeasts.network.polyjuice.ModNetworkPolyjuice.register(registrar);
+        at.koopro.wizardsandbeasts.network.disguise.ModNetworkDisguise.register(registrar);
         ModNetworkAbilityFramework.register(registrar);
         ModNetworkMinistry.register(registrar);
         ModNetworkStanding.register(registrar);

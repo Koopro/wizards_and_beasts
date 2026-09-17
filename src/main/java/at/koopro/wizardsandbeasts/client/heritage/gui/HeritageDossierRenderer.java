@@ -5,8 +5,8 @@ import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.util.UiContrast;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
+import at.koopro.wizardsandbeasts.heritage.HeritageTraits;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
-import at.koopro.wizardsandbeasts.stats.PowerBandTable;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -40,20 +40,6 @@ public final class HeritageDossierRenderer {
     private static final int LOCKED_RIBBON_EDGE = 0xFFB85050;
     private static final int LOCKED_RIBBON_TEXT = 0xFFF2D7D7;
     private static final int OVERLAY_DIM = 0xCC0A0603;
-    /**
-     * The player's own {@code MOVEMENT_SPEED}, which is what a heritage's speed modifier is added to.
-     *
-     * <p>Needed because the modifier is an {@code ADD_VALUE} on a base of 0.1, and the row printed
-     * {@code round(value * 100)} — so the Centaur's +0.03, which is a third again as fast, was advertised
-     * as <b>+3%</b>, and the Goblin's -0.005 rounded to a flat 0%. Four of the ten heritages read as
-     * "+2%" while actually differing by a factor of two.
-     *
-     * <p>A literal rather than the attribute's own default: {@code Attributes.MOVEMENT_SPEED} registers a
-     * default of 0.7 for entities generally, and 0.1 is the figure {@code Player.createAttributes} sets,
-     * which is the one this number has to be a percentage of.
-     */
-    private static final double PLAYER_BASE_SPEED = 0.1;
-
     private HeritageDossierRenderer() {}
 
     // ── Centre column: the dossier ───────────────────────────────────────────
@@ -151,39 +137,54 @@ public final class HeritageDossierRenderer {
     // ── Right column: the trait readout ──────────────────────────────────────
 
     /**
-     * The stat block under the player preview: what this heritage grants, as label/value rows.
+     * What this heritage <em>means</em>, under the player preview: how their magic reaches them, what body they have,
+     * and then their traits, their magical affinities and their special characteristics, each by name.
      *
-     * <p>Reads the live getters rather than a cached snapshot, so the block always agrees with what
-     * {@code HeritageAPI.applyStats} will actually apply on commit.
+     * <p>This replaced a stat block — POWER band, Health ±, Speed %, Armour ± — which was the readout of a
+     * selectable MMO race. It said nothing about being a goblin and everything about which row to pick to win.
+     * Heritage carries no bonus for being itself now, so there are no numbers left to print; what a player needs
+     * before committing is who they would be.
+     *
+     * <p>Reads {@link HeritageTraits} live rather than a cached snapshot, so the panel always agrees with the tags
+     * the lineage actually carries.
      */
     public static void drawTraits(@NonNull GuiGraphics g, @NonNull Font font,
                                   int x, int y, int w,
                                   @NonNull Heritage heritage, @Nullable HeritageVariant variant) {
         int cursorY = y;
 
-        cursorY = row(g, font, x, cursorY, w, "gui.wizards_and_beasts.heritage.trait.wand",
-                Component.translatable(heritage.canUseWand()
-                        ? "gui.wizards_and_beasts.heritage.trait.yes"
-                        : "gui.wizards_and_beasts.heritage.trait.no"),
-                heritage.canUseWand() ? WizardsPalette.TEXT : WizardsPalette.TEXT_DIM);
-
         cursorY = row(g, font, x, cursorY, w, "gui.wizards_and_beasts.heritage.trait.magic",
                 Component.literal(heritage.getMagicSource().getDisplayName()), WizardsPalette.TEXT);
 
         cursorY = row(g, font, x, cursorY, w, "gui.wizards_and_beasts.heritage.trait.size",
                 Component.literal(title(heritage.getSizeCategory().name())), WizardsPalette.TEXT);
+        cursorY += 2;
 
-        if (variant != null) {
-            cursorY = row(g, font, x, cursorY, w, "gui.wizards_and_beasts.heritage.trait.power",
-                    Component.literal(PowerBandTable.getBandMin(variant) + "–" + PowerBandTable.getBandMax(variant)),
-                    WizardsPalette.BRASS);
-            cursorY = row(g, font, x, cursorY, w, "gui.wizards_and_beasts.heritage.trait.health",
-                    Component.literal(signed(variant.getTotalHealth())), deltaColor(variant.getTotalHealth()));
-            cursorY = row(g, font, x, cursorY, w, "gui.wizards_and_beasts.heritage.trait.speed",
-                    Component.literal(signedPercent(variant.getTotalSpeed())), deltaColor(variant.getTotalSpeed()));
-            row(g, font, x, cursorY, w, "gui.wizards_and_beasts.heritage.trait.armour",
-                    Component.literal(signed(variant.getTotalArmor())), deltaColor(variant.getTotalArmor()));
+        for (HeritageTraits.Kind kind : HeritageTraits.Kind.values()) {
+            cursorY = section(g, font, x, cursorY, w, kind, HeritageTraits.of(variant, kind));
         }
+    }
+
+    /**
+     * One heading plus its traits by name, wrapped. Nothing is drawn for an empty heading — a lineage with no
+     * affinities should read as a lineage with no affinities, not as an empty label.
+     */
+    private static int section(GuiGraphics g, Font font, int x, int y, int w,
+                               HeritageTraits.Kind kind, List<HeritageTraits.Trait> traits) {
+        if (traits.isEmpty()) {
+            return y;
+        }
+        int cursorY = y;
+        g.drawString(font, Component.translatable(kind.getHeadingKey()), x, cursorY, WizardsPalette.BRASS, false);
+        cursorY += font.lineHeight + 1;
+        for (HeritageTraits.Trait trait : traits) {
+            for (FormattedCharSequence line : font.split(
+                    Component.translatable(trait.getNameKey()), w - 6)) {
+                g.drawString(font, line, x + 6, cursorY, WizardsPalette.TEXT, false);
+                cursorY += font.lineHeight;
+            }
+        }
+        return cursorY + 3;
     }
 
     /** One label-left / value-right row. Returns the next row's Y. */
@@ -238,29 +239,6 @@ public final class HeritageDossierRenderer {
         g.fill(x, y + h - 1, x + w, y + h, color);
         g.fill(x, y, x + 1, y + h, color);
         g.fill(x + w - 1, y, x + w, y + h, color);
-    }
-
-    /** Health and armour are flat point deltas; a whole number reads better than "4.0". */
-    private static String signed(double value) {
-        long rounded = Math.round(value);
-        return (rounded > 0 ? "+" : "") + rounded;
-    }
-
-    /**
-     * Speed as a percentage of the walking speed it modifies, rather than of nothing.
-     *
-     * <p>See {@link #PLAYER_BASE_SPEED}: the raw modifier is a fraction of 0.1, so it has to be divided by
-     * that base before it becomes a percentage anybody can act on.
-     */
-    private static String signedPercent(double value) {
-        long pct = Math.round(value / PLAYER_BASE_SPEED * 100.0);
-        return (pct > 0 ? "+" : "") + pct + "%";
-    }
-
-    private static int deltaColor(double value) {
-        if (value > 0) return WizardsPalette.BRASS;
-        if (value < 0) return LOCKED_RIBBON_EDGE;
-        return WizardsPalette.TEXT_DIM;
     }
 
     private static String title(String enumName) {

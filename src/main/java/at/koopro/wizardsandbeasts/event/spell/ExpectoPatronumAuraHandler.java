@@ -44,6 +44,12 @@ public final class ExpectoPatronumAuraHandler {
         for (ServerPlayer caster : event.getServer().getPlayerList().getPlayers()) {
             Long until = AURA_UNTIL.get(caster.getUUID());
             if (until == null || now >= until) continue;
+            if (!caster.isAlive()) {
+                // The aura is the caster's Patronus, and it goes with them — not on around the body, and not
+                // onto the respawned one, which shares the id this map is keyed by.
+                AURA_UNTIL.remove(caster.getUUID());
+                continue;
+            }
             if (!(caster.level() instanceof ServerLevel level)) continue;
 
             if (now % AURA_TICK_INTERVAL == 0) {

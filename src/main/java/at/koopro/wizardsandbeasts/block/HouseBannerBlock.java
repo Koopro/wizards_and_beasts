@@ -14,7 +14,10 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -29,21 +32,21 @@ import org.jspecify.annotations.Nullable;
 import java.util.Map;
 
 /**
- * A house banner: two blocks of cloth hanging from a rod, flat against whatever is behind it.
+ * A house banner: two blocks of cloth hanging from a rod.
  *
- * <p>This used to be a single block drawn on {@code minecraft:block/cross} — two crossed
- * diagonal planes, i.e. the sapling model — which read as a plant rather than as fabric and
- * gave a banner square proportions. It is now the shape a banner actually has: a thin quad
- * one half-pixel off the back face, stacked {@link DoubleBlockHalf#LOWER} under
- * {@link DoubleBlockHalf#UPPER}, with the silhouette (inset cloth, swallowtail hem) living in
- * the texture's alpha so the geometry stays one quad per half.
+ * <p>The block draws nothing itself ({@link RenderShape#INVISIBLE}). It was first the sapling's
+ * crossed planes, then one flat quad per half; either way a block model is baked once and cannot
+ * move, so the banner hung like paper. The cloth is now a mesh with thickness, rebuilt every frame
+ * by {@code HouseBannerRenderer} from a {@link HouseBannerBlockEntity} that only the
+ * {@link DoubleBlockHalf#LOWER} half carries. The block models are still generated, but only the
+ * break particles read them.
  *
  * <p>Nothing has to support it. The pair is held together only by each half checking for the
  * other, so a banner can hang in a doorway or off a beam; break or blow up either half and the
  * other goes with it, and the loot table ({@code createDoorTable}) pays out once, from the
  * lower half, no matter which end was hit.
  */
-public class HouseBannerBlock extends HorizontalDirectionalBlock {
+public class HouseBannerBlock extends HorizontalDirectionalBlock implements EntityBlock {
 
     public static final MapCodec<HouseBannerBlock> CODEC = simpleCodec(HouseBannerBlock::new);
 
@@ -51,12 +54,12 @@ public class HouseBannerBlock extends HorizontalDirectionalBlock {
 
     /**
      * Authored for {@code FACING == NORTH}, which is the identity entry of
-     * {@link Shapes#rotateHorizontal} — the same convention the model's blockstate rotation
-     * uses. The cloth sits at the far side of the block so its visible face points along
-     * {@code FACING}, and it is one pixel deep because that is all the cloth is.
+     * {@link Shapes#rotateHorizontal} — the same convention the renderer's rotation uses. The
+     * cloth hangs four pixels off the back face and swings about as far forward of that, so the
+     * outline covers the whole band it moves through rather than the plane it rests in.
      */
     private static final Map<Direction, VoxelShape> SHAPES =
-            Shapes.rotateHorizontal(Block.box(0, 0, 15, 16, 16, 16));
+            Shapes.rotateHorizontal(Block.box(0, 0, 8, 16, 16, 16));
 
     public HouseBannerBlock(Properties properties) {
         super(properties);
@@ -73,6 +76,17 @@ public class HouseBannerBlock extends HorizontalDirectionalBlock {
     @Override
     protected void createBlockStateDefinition(StateDefinition.@NonNull Builder<Block, BlockState> builder) {
         builder.add(FACING, HALF);
+    }
+
+    /** Lower half only: the renderer draws the whole banner from there. */
+    @Override
+    public @Nullable BlockEntity newBlockEntity(@NonNull BlockPos pos, @NonNull BlockState state) {
+        return state.getValue(HALF) == DoubleBlockHalf.LOWER ? new HouseBannerBlockEntity(pos, state) : null;
+    }
+
+    @Override
+    protected @NonNull RenderShape getRenderShape(@NonNull BlockState state) {
+        return RenderShape.INVISIBLE;
     }
 
     @Override

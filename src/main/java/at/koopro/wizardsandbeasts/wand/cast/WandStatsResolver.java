@@ -201,7 +201,7 @@ public final class WandStatsResolver {
      * contribution. The enum fallback used to hide it; nothing does now.
      */
     @Nullable
-    private static Identifier resolveCoreId(ItemStack wandStack) {
+    public static Identifier resolveCoreId(ItemStack wandStack) {
         WandCore legacy = wandStack.get(ModDataComponents.WAND_CORE.get());
         if (legacy != null) {
             return Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, legacy.getDefinitionPath());
@@ -215,7 +215,7 @@ public final class WandStatsResolver {
      * component, and dropping this branch would silently make them neutral.
      */
     @Nullable
-    private static Identifier resolveWoodId(ItemStack wandStack) {
+    public static Identifier resolveWoodId(ItemStack wandStack) {
         WandWood legacy = wandStack.get(ModDataComponents.WAND_WOOD.get());
         if (legacy != null) {
             return Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, legacy.getSerializedName());

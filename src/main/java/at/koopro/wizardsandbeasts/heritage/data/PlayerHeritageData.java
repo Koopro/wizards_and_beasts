@@ -17,13 +17,15 @@ import at.koopro.wizardsandbeasts.registry.ModAttachments;
 
 public class PlayerHeritageData implements ModAttachments.NbtSerializable {
     public static final String VERSION_KEY = "DataVersion";
-    public static final int CURRENT_VERSION = 1;
+    /** 2: werewolf and obscurial moved from heritages to conditions (see {@link PlayerHeritageDataMigrator}). */
+    public static final int CURRENT_VERSION = 2;
 
     @Nullable
     private Heritage selectedHeritage;
     @Nullable
     private HeritageVariant selectedHeritageVariant;
     private boolean locked;
+    private at.koopro.wizardsandbeasts.heritage.@Nullable ConditionOrigin condition;
     private TransformationState transformationState = TransformationState.NORMAL;
     @Nullable
     private String activeFormId;
@@ -51,6 +53,45 @@ public class PlayerHeritageData implements ModAttachments.NbtSerializable {
 
     public void setSelectedHeritageVariant(@Nullable HeritageVariant variant) {
         this.selectedHeritageVariant = variant;
+    }
+
+    /**
+     * The condition this character carries — lycanthropy, an Obscurus — or {@code null}. A condition is something that
+     * happened to them; their heritage and lineage are unchanged by it.
+     */
+    public at.koopro.wizardsandbeasts.heritage.@Nullable ConditionOrigin getCondition() {
+        return condition;
+    }
+
+    public void setCondition(at.koopro.wizardsandbeasts.heritage.@Nullable ConditionOrigin condition) {
+        this.condition = condition;
+    }
+
+    public boolean hasCondition(at.koopro.wizardsandbeasts.heritage.MagicalCondition kind) {
+        return condition != null && condition.condition() == kind;
+    }
+
+    /**
+     * Whether this character has a trait, from their lineage or from a condition they carry. The one question every
+     * system that cares about a trait asks — a squib's lack of a wand and an Obscurial's inability to cast are answered
+     * the same way.
+     */
+    public boolean hasTrait(String trait) {
+        return (selectedHeritageVariant != null && selectedHeritageVariant.hasTag(trait))
+                || (condition != null && condition.traits().contains(trait));
+    }
+
+    /**
+     * Whether this character can hold a wand to any purpose: their people use wands, and neither their lineage (a
+     * Squib) nor a condition (the Obscurus) takes that away.
+     */
+    public boolean canUseWand() {
+        return selectedHeritage != null && selectedHeritage.canUseWand() && !hasTrait("no_wand");
+    }
+
+    /** Whether this character can work spells at all: false for a Squib and for anyone an Obscurus lives in. */
+    public boolean canCast() {
+        return !hasTrait("no_casting");
     }
 
     public boolean isLocked() {
@@ -191,6 +232,7 @@ public class PlayerHeritageData implements ModAttachments.NbtSerializable {
         activeFormId = null;
         debugOverlay = false;
         customFlags.clear();
+        condition = null;
         resetProfessionProgress();
     }
 
@@ -204,7 +246,9 @@ public class PlayerHeritageData implements ModAttachments.NbtSerializable {
                           int professionPoints,
                           int totalProfessionPointsEarned,
                           Set<String> unlockedProfessions,
-                          @Nullable String selectedProfessionId) {
+                          @Nullable String selectedProfessionId,
+                          at.koopro.wizardsandbeasts.heritage.@Nullable ConditionOrigin condition) {
+        this.condition = condition;
         this.selectedHeritage = heritage;
         this.selectedHeritageVariant = variant;
         this.locked = locked;
@@ -223,6 +267,8 @@ public class PlayerHeritageData implements ModAttachments.NbtSerializable {
         tag.putInt(VERSION_KEY, CURRENT_VERSION);
         NbtHelper.saveNullableString(tag, "Type", selectedHeritage != null ? selectedHeritage.getId() : null);
         NbtHelper.saveNullableString(tag, "Subtype", selectedHeritageVariant != null ? selectedHeritageVariant.getId() : null);
+        NbtHelper.saveNullableString(tag, "Condition", condition != null ? condition.condition().getId() : null);
+        NbtHelper.saveNullableString(tag, "ConditionOrigin", condition != null ? condition.getId() : null);
         tag.putBoolean("Locked", locked);
         NbtHelper.saveEnum(tag, "TransformState", transformationState);
         NbtHelper.saveNullableString(tag, "ActiveForm", activeFormId);
@@ -239,6 +285,10 @@ public class PlayerHeritageData implements ModAttachments.NbtSerializable {
         PlayerHeritageDataMigrator.migrate(tag);
         selectedHeritage = tag.getString("Type").map(Heritage::byId).orElse(null);
         selectedHeritageVariant = tag.getString("Subtype").map(HeritageVariant::byId).orElse(null);
+        at.koopro.wizardsandbeasts.heritage.MagicalCondition kind =
+                at.koopro.wizardsandbeasts.heritage.MagicalCondition.byId(NbtHelper.loadNullableString(tag, "Condition"));
+        condition = kind == null ? null : at.koopro.wizardsandbeasts.heritage.ConditionOrigin.byId(kind,
+                NbtHelper.loadNullableString(tag, "ConditionOrigin"));
         locked = tag.getBoolean("Locked").orElse(false);
         transformationState = NbtHelper.loadEnum(tag, "TransformState",
                 TransformationState.class, TransformationState.NORMAL);

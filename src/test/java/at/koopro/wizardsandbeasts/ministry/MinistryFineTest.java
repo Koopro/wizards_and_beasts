@@ -30,23 +30,35 @@ class MinistryFineTest {
     // ── the tariff ──
 
     /**
-     * The load-bearing invariant of the whole design. An offence is answered with time <em>or</em> with
-     * money, never both and never neither: an arrestable offence carries no fine because Azkaban is the
-     * penalty, and a paperwork offence must carry one or committing it costs nothing at all.
+     * The load-bearing invariant of the whole design. An offence is answered with time, with money or with
+     * a caution — exactly one: an arrestable offence carries no fine because Azkaban is the penalty, a
+     * paperwork offence must carry one or committing it costs nothing at all, and a caution carries neither.
      */
     @Test
-    void everyOffenceIsAnsweredWithExactlyOneOfTimeOrMoney() {
+    void everyOffenceIsAnsweredWithExactlyOneRemedy() {
         for (MagicalOffence offence : MagicalOffence.values()) {
-            assertEquals(!offence.arrestable(), offence.fineable(),
-                    offence.getSerializedName() + " must be fineable exactly when it is not arrestable");
-            if (offence.arrestable()) {
-                assertEquals(0, offence.fineKnuts(),
-                        offence.getSerializedName() + " is settled in Azkaban and must carry no fine");
-            } else {
-                assertTrue(offence.fineKnuts() > 0,
-                        offence.getSerializedName() + " has no penalty at all");
+            String name = offence.getSerializedName();
+            switch (offence.remedy()) {
+                case SENTENCE -> {
+                    assertTrue(offence.arrestable(), name + " is settled in Azkaban and must be arrestable");
+                    assertEquals(0, offence.fineKnuts(), name + " is settled in Azkaban and must carry no fine");
+                }
+                case FINE -> {
+                    assertFalse(offence.arrestable(), name + " is settled with money and sends nobody");
+                    assertTrue(offence.fineKnuts() > 0, name + " is a fine with no amount — no penalty at all");
+                }
+                case CAUTION -> {
+                    assertFalse(offence.arrestable(), name + " is a caution and sends nobody");
+                    assertFalse(offence.fineable(), name + " is a caution and must not also be billed");
+                }
             }
         }
+    }
+
+    @Test
+    void underageMagicIsCautionedNeverBilled() {
+        assertEquals(MagicalOffence.Remedy.CAUTION, MagicalOffence.UNDERAGE_MAGIC.remedy(),
+                "canon answers underage magic with a warning letter, never a fine");
     }
 
     @Test

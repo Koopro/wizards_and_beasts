@@ -23,5 +23,19 @@
   "entityType": "wizards_and_beasts:horklump",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/horklump.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/horklump.png",
-  "sortOrder": 67
+  "sortOrder": 67,
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.horklump.diet",
+    "behaviour": "bestiary.wizards_and_beasts.horklump.behaviour",
+    "society": "bestiary.wizards_and_beasts.horklump.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.horklump.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

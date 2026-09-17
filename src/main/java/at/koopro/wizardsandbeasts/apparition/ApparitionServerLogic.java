@@ -25,6 +25,7 @@ import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
+import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -89,8 +90,16 @@ public final class ApparitionServerLogic {
     }
 
     /** Elf-magic Apparates without a test, a licence, a wizard heritage, or regard for wards that bind wizards. */
+    /**
+     * Elf-magic Apparition: either the learned ability, or the heritage trait a house-elf simply has.
+     *
+     * <p>The trait arm is not decoration. House-elves Apparate where witches and wizards cannot — Dobby came and
+     * went inside Hogwarts, which is warded against every wizard in the castle — so the trait has to reach the
+     * ward check, not only the skill node a house-elf would have no reason to buy.
+     */
     private static boolean isElfApparition(ServerPlayer player) {
-        return SkillSystemAPI.hasAbility(player, "elf_apparition");
+        return SkillSystemAPI.hasAbility(player, "elf_apparition")
+                || HeritageAPI.getData(player).hasTrait("innate_apparition");
     }
 
     /**
@@ -492,17 +501,15 @@ public final class ApparitionServerLogic {
     }
 
     private static boolean isAllowedHeritage(ServerPlayer player) {
-        Heritage heritage = HeritageAPI.getPlayerHeritage(player);
-        HeritageVariant variant = HeritageAPI.getPlayerHeritageVariant(player);
-        if (heritage == Heritage.WIZARDKIND) {
-            return true;
-        }
-        if (variant == null) {
-            return false;
-        }
+        PlayerHeritageData data = HeritageAPI.getData(player);
         // House-elves carry `innate_apparition` — the same concept the `elf_apparition` skill ability is built
         // around. `can_apparate` is the explicit opt-in for anything else that should be able to.
-        return variant.hasTag("can_apparate") || variant.hasTag("innate_apparition");
+        if (data.hasTrait("can_apparate") || data.hasTrait("innate_apparition")) {
+            return true;
+        }
+        // Apparition is spellwork: a witch or wizard can learn it — a werewolf too, Lupin Apparated — but a Squib
+        // has no magic to do it with, and an Obscurus leaves nothing to direct.
+        return data.getSelectedHeritage() == Heritage.WIZARDKIND && data.canCast();
     }
 
     /**

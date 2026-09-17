@@ -32,6 +32,7 @@ public final class WerewolfConfig {
     // ── spec holders ───────────────────────────────────────────────────
 
     private static ModConfigSpec.BooleanValue ENABLE_FORCED_TRANSFORM;
+    private static ModConfigSpec.BooleanValue BITE_INFECTS;
     private static ModConfigSpec.IntValue EXPOSURE_THRESHOLD;
     private static ModConfigSpec.IntValue EXPOSURE_GAIN;
     private static ModConfigSpec.IntValue EXPOSURE_DECAY;
@@ -57,6 +58,7 @@ public final class WerewolfConfig {
     // ── cached values, seeded with the shipped defaults ────────────────
 
     public static boolean enableForcedTransform = true;
+    public static boolean biteInfects = true;
     public static int exposureThreshold = 60;
     public static int exposureGain = 4;
     public static int exposureDecay = 6;
@@ -86,6 +88,12 @@ public final class WerewolfConfig {
                         "Turning this off leaves the werewolf heritage intact — its stats, its forms and the",
                         "manual form commands all still work; only the compulsion goes away.")
                 .define("werewolfEnableForcedTransform", true);
+        BITE_INFECTS = builder
+                .comment("If true, a werewolf in wolf form that bites a human player under a full moon passes on",
+                        "lycanthropy: the player becomes a Bitten werewolf, keeping their name, inventory, skills",
+                        "and trained stats. The first change waits for the next full moon. There is no cure, as in",
+                        "the books. Off keeps lycanthropy a heritage chosen at character creation only.")
+                .define("werewolfBiteInfects", true);
         EXPOSURE_THRESHOLD = builder
                 .comment("Moonlight the wolf must soak up before the change begins, in exposure points.",
                         "The counter rises by werewolfExposureGain on every scan under open sky and falls by",
@@ -196,6 +204,7 @@ public final class WerewolfConfig {
     /** Pulls every value into the cached fields. Called from the mod's {@code ModConfigEvent} handler. */
     public static void refresh() {
         enableForcedTransform = ENABLE_FORCED_TRANSFORM.get();
+        biteInfects = BITE_INFECTS.get();
         exposureThreshold = EXPOSURE_THRESHOLD.get();
         exposureGain = EXPOSURE_GAIN.get();
         exposureDecay = EXPOSURE_DECAY.get();

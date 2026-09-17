@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.block.ExpansionFocusBlockEntity;
+import at.koopro.wizardsandbeasts.block.HouseBannerBlockEntity;
 import at.koopro.wizardsandbeasts.block.brew.CauldronBlockEntity;
 import at.koopro.wizardsandbeasts.block.trunk.TentBlockEntity;
 import at.koopro.wizardsandbeasts.block.trunk.TrunkBlockEntity;
@@ -52,6 +53,18 @@ public final class ModBlockEntities {
                             ModBlocks.MASTERS_TRUNK.get(),
                             ModBlocks.MOODYS_TRUNK.get(),
                             ModBlocks.NEWTS_CASE.get())));
+
+    /**
+     * All four house banners share one type, carried by the lower half only — it holds no data and
+     * exists so {@code HouseBannerRenderer} can draw the cloth moving.
+     */
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<HouseBannerBlockEntity>> HOUSE_BANNER =
+            BLOCK_ENTITY_TYPES.register("house_banner", () ->
+                    new BlockEntityType<>(HouseBannerBlockEntity::new, Set.of(
+                            ModBlocks.GRYFFINDOR_BANNER.get(),
+                            ModBlocks.SLYTHERIN_BANNER.get(),
+                            ModBlocks.RAVENCLAW_BANNER.get(),
+                            ModBlocks.HUFFLEPUFF_BANNER.get())));
 
     // Tent preview harness — one type per block (model choice lives at the renderer factory, see
     // GeoRendererHelper.simpleBlock), not one shared type across both like TRUNK above.

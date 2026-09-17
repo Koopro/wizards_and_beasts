@@ -473,15 +473,16 @@ public final class AttributesTab implements CharacterTab {
         @Nullable Identifier core  = WandComponents.getCore(stack);
         @Nullable WandFlexibility flex = WandComponents.getFlexibility(stack);
         @Nullable Float length = WandComponents.getLength(stack);
-        float integrity     = WandComponents.getIntegrity(stack);
-        float allegiance    = WandComponents.getAllegianceScore(stack);
 
         drawKV(g, font, x, y, w, "wand.wood",        idToDisplay(wood));        y += 9;
         drawKV(g, font, x, y, w, "wand.core",        idToDisplay(core));        y += 9;
         drawKV(g, font, x, y, w, "wand.flexibility", flex != null ? flex.label().getString() : "—"); y += 9;
         drawKV(g, font, x, y, w, "wand.length",      length != null ? String.format(Locale.ROOT, "%.1f\"", length) : "—"); y += 9;
-        drawKV(g, font, x, y, w, "wand.integrity",   String.format(Locale.ROOT, "%.0f%%", integrity * 100f));  y += 9;
-        drawKV(g, font, x, y, w, "wand.allegiance",  String.format(Locale.ROOT, "%.0f%%", allegiance * 100f)); y += 11;
+        // Words, as on the tooltip — the same sentences, from the same place.
+        drawKV(g, font, x, y, w, "wand.integrity",   WandEligibility.conditionLine(stack).getString());  y += 9;
+        drawKV(g, font, x, y, w, "wand.allegiance",
+                net.minecraft.client.Minecraft.getInstance().player == null ? "—"
+                        : WandEligibility.bondLine(net.minecraft.client.Minecraft.getInstance().player, stack).getString()); y += 11;
         return y;
     }
 

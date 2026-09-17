@@ -31,27 +31,64 @@ class CastReleaseGateTest {
     private static final long MAX = WandItem.USE_DURATION_TICKS;
 
     private static CastReleaseGate.Inputs alive(boolean sessionOpen, boolean consumed, long age) {
-        return new CastReleaseGate.Inputs(true, sessionOpen, consumed, age, MAX, false);
+        return new CastReleaseGate.Inputs(true, sessionOpen, consumed, true, age, MAX, false, true);
     }
 
     private static CastReleaseGate.Inputs dead(boolean sessionOpen, boolean consumed, long age) {
-        return new CastReleaseGate.Inputs(false, sessionOpen, consumed, age, MAX, false);
+        return new CastReleaseGate.Inputs(false, sessionOpen, consumed, true, age, MAX, false, true);
     }
 
     /** A hold that was spent sustaining a spell clash: letting go gives the lock up and casts nothing. */
     @Test
     void clashHold_releaseCastsNothing() {
         assertEquals(CastReleaseGate.CLASH_HOLD,
-                CastReleaseGate.evaluate(new CastReleaseGate.Inputs(true, true, false, 40L, MAX, true)));
+                CastReleaseGate.evaluate(new CastReleaseGate.Inputs(true, true, false, true, 40L, MAX, true, true)));
     }
 
     /** The older refusals still win: a dead caster or a duplicate is reported as what it is. */
     @Test
     void clashHold_isReadAfterTheSessionChecks() {
         assertEquals(CastReleaseGate.CASTER_NOT_ALIVE,
-                CastReleaseGate.evaluate(new CastReleaseGate.Inputs(false, true, false, 40L, MAX, true)));
+                CastReleaseGate.evaluate(new CastReleaseGate.Inputs(false, true, false, true, 40L, MAX, true, true)));
         assertEquals(CastReleaseGate.ALREADY_RELEASED,
-                CastReleaseGate.evaluate(new CastReleaseGate.Inputs(true, true, true, 40L, MAX, true)));
+                CastReleaseGate.evaluate(new CastReleaseGate.Inputs(true, true, true, true, 40L, MAX, true, true)));
+    }
+
+    /**
+     * Hold one spell, switch, let go: the hold's charge belongs to the spell it was pressed for, so the
+     * release casts neither — a long Lumos hold must not come out as a fully charged Protego.
+     */
+    @Test
+    void spellSwitchedDuringHold_releaseCastsNothing() {
+        assertEquals(CastReleaseGate.SPELL_CHANGED,
+                CastReleaseGate.evaluate(new CastReleaseGate.Inputs(true, true, false, true, 40L, MAX, false, false)));
+    }
+
+    /**
+     * A clash hold feeds the lock whatever is selected, so the clash verdict is reported first; the session
+     * refusals outrank both, as they do for every other verdict.
+     */
+    @Test
+    void spellSwitch_isReadAfterTheSessionAndClashChecks() {
+        assertEquals(CastReleaseGate.CLASH_HOLD,
+                CastReleaseGate.evaluate(new CastReleaseGate.Inputs(true, true, false, true, 40L, MAX, true, false)));
+        assertEquals(CastReleaseGate.ALREADY_RELEASED,
+                CastReleaseGate.evaluate(new CastReleaseGate.Inputs(true, true, true, true, 40L, MAX, false, false)));
+        assertEquals(CastReleaseGate.RELEASE_NOT_CONFIRMED,
+                CastReleaseGate.evaluate(new CastReleaseGate.Inputs(true, true, false, false, 40L, MAX, false, false)),
+                "a switch must not let an unconfirmed packet spend the hold's token");
+    }
+
+    /**
+     * Only a real release of a hold that is simply worth nothing spends the token and is not a desync. Every
+     * other verdict is a packet the server could not match to a release, and must leave any token alone.
+     */
+    @Test
+    void onlyClashAndSpellSwitch_endTheHoldWithoutCasting() {
+        for (CastReleaseGate gate : CastReleaseGate.values()) {
+            boolean expected = gate == CastReleaseGate.CLASH_HOLD || gate == CastReleaseGate.SPELL_CHANGED;
+            assertEquals(expected, gate.endsHoldWithoutCast(), "verdict " + gate);
+        }
     }
 
     @Test
@@ -65,6 +102,14 @@ class CastReleaseGateTest {
     @Test
     void releaseWithoutCast_hasNoSessionToLandOn() {
         assertEquals(CastReleaseGate.NO_SESSION, CastReleaseGate.evaluate(alive(false, false, 0L)));
+    }
+
+    @Test
+    void clientReleaseBeforeVanillaRelease_isRefusedWithoutSpendingTheToken() {
+        assertEquals(CastReleaseGate.RELEASE_NOT_CONFIRMED,
+                CastReleaseGate.evaluate(new CastReleaseGate.Inputs(true, true, false, false, 2L, MAX, false, true)));
+        assertNull(CastReleaseGate.evaluate(new CastReleaseGate.Inputs(true, true, false, true, 2L, MAX, false, true)),
+                "the same unspent session must accept the properly ordered release");
     }
 
     @Test

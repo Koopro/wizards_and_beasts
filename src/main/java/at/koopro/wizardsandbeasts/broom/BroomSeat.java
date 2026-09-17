@@ -5,63 +5,54 @@ import com.mojang.serialization.RecordBuilder;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Where the rider sits, relative to the broom's own position.
+ * Where a rider sits on a broom's model, and so how high that model is drawn.
  *
- * <h2>The default is negative, and that is not a typo</h2>
- * Two numbers decide where a rider straddles a broom, and neither is the entity's hitbox height:
+ * <h2>The rider stands on the broom's position; the model rises to meet them</h2>
+ * A broom entity's position is its rider's feet — see {@link BroomGeometry}. What a definition authors is
+ * where on the <em>model</em> the rider sits: {@code passengerOffset.y} is the seat's height above the
+ * rendered model's origin, which is the top surface of the shaft's {@code _mid} segment at
+ * {@link BroomGeometry#MODEL_SCALE}. The renderer lifts the model by {@link #modelLift()} so that surface
+ * meets the rider's hip.
  *
- * <ul>
- *   <li>the rider straddles the shaft where the shaft passes under them — at {@code z ≈ 0}, which is
- *       the {@code _mid} segment of the shaft chain. What matters is that segment's <b>top
- *       surface</b>, because a person sitting on a broomstick has it pressed under them, not running
- *       through them. For the default {@code plain} shaft that is {@code y = 5} model units,
- *       <b>0.3125 blocks</b>;</li>
- *   <li>a rendered humanoid's hip pivot sits <b>0.75 blocks</b> above its own position, because
- *       {@code LivingEntityRenderer} translates the model up by 1.501 and the leg part hangs 12 units
- *       back down from there. {@code BroomRiderRenderHandler} already banks the rider about that
- *       same 0.75.</li>
- * </ul>
- *
- * <p>So the default seat is {@code 0.3125 - 0.75 = }{@value #DEFAULT_SEAT_Y} blocks. Two earlier
- * values were wrong in different directions: {@code dimensions.height() * 0.55} put the hip 0.83
- * blocks <em>above</em> the handle, because a hitbox height says nothing about where a model draws
- * its shaft; and {@code -0.50}, measured to the shaft's centre line, sank every rider half a shaft
- * into the wood.
- *
- * <h2>It is per broom, because shafts are not all the same thickness</h2>
- * The rig ships shafts from two model units across to six at the point the rider sits. A single seat
- * height cannot be right for both: seated for the Firebolt's needle, a rider is buried to the knees
- * in the Oakshaft's log. Each shipped broom authors the value its own shaft asks for —
- * {@code -0.4375} for the thin shafts, {@code -0.375} for {@code oak}, {@code -0.3125} for
- * {@code heavy_oak} — and {@code BroomSeatParityTest} holds those against the geometry, so widening
+ * <p>Shafts are not all the same thickness, so it is per broom: {@code 0.15625} for the five-unit shafts
+ * ({@code plain}, {@code swept}, {@code racing}), {@code 0.1875} for {@code oak}, {@code 0.21875} for
+ * {@code heavy_oak}. {@code BroomSeatParityTest} holds every shipped value against the geometry, so widening
  * a shaft without re-seating its broom fails the build.
  *
- * <p>The brief for this field specified a default of {@code (0, 0.55, 0)}. That is the same mistake
- * one step further on: as an absolute offset it seats the rider a full 1.30 blocks above a handle
- * whose top is drawn at 0.3125. The default here is the derived value instead, and every shipped
- * broom authors {@code passengerOffset} explicitly so the number is visible rather than inherited.
+ * <h2>Why the number is authored this way</h2>
+ * It has been wrong three different ways. {@code dimensions.height() * 0.55} put the hip 0.83 above the
+ * handle; measuring to the shaft's centre line sank the rider half a shaft into it; and the
+ * {@code shaftTop - 0.75} derivation that replaced both never subtracted the 0.6 that
+ * {@code Entity.positionRider} takes off for a player's own vehicle attachment, so every rider sat 0.6
+ * blocks inside the broom. Authoring a height on the model and letting the entity place the feet removes
+ * the arithmetic that kept going wrong. A negative value is from the old frame and is rejected by range
+ * rather than silently reinterpreted.
  *
- * <p>Because the seat sits <em>below</em> the broom's origin, {@code BroomItem} lifts a broom by
- * {@code -y} when it is mounted. Anything that seats a rider on a broom has to do the same, or the
- * rider arrives half a block inside the floor and gets pushed out.
+ * <p>{@code x} and {@code z} nudge the rider along the broom's own axes, {@code +z} toward the bristles.
  */
 public record BroomSeat(Vec3 passengerOffset, float passengerYawOffset) {
 
-    /** Top of the default {@code plain} shaft (0.3125) minus humanoid hip height (0.75). */
-    public static final double DEFAULT_SEAT_Y = -0.4375;
+    /** Top of the default {@code plain} shaft's {@code _mid} segment — five model units — at render scale. */
+    public static final double DEFAULT_SEAT_Y = 0.15625;
 
     /** Straddling the shaft, facing the way the broom points. */
     public static final BroomSeat DEFAULT = new BroomSeat(new Vec3(0.0, DEFAULT_SEAT_Y, 0.0), 0.0f);
 
     static BroomSeat decode(BroomFields<?> fields) {
-        return new BroomSeat(
-                fields.optional("passengerOffset", Vec3.CODEC, DEFAULT.passengerOffset()),
+        Vec3 offset = fields.optional("passengerOffset", Vec3.CODEC, DEFAULT.passengerOffset());
+        if (offset.y < 0.0 || offset.y > BroomGeometry.HIP_HEIGHT) {
+            fields.fault("passengerOffset y is the seat's height above the model origin and must be in [0, "
+                    + BroomGeometry.HIP_HEIGHT + "]: " + offset.y
+                    + " (a negative value is from the seat frame used before 2026-09-11)");
+            offset = DEFAULT.passengerOffset();
+        }
+        return new BroomSeat(offset,
                 fields.rangedFloat("passengerYawOffset", -180.0f, 180.0f, DEFAULT.passengerYawOffset()));
     }
 
-    /** How far a broom must be raised so a rider mounting it lands where they were standing. */
-    public double mountLift() {
-        return -passengerOffset.y;
+    /** How far the model is drawn above the broom's position, so its seat meets the rider's hip. */
+    public double modelLift() {
+        return BroomGeometry.HIP_HEIGHT - passengerOffset.y;
     }
 
     <T> void encode(RecordBuilder<T> builder, DynamicOps<T> ops) {

@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.heritage.appearance;
 
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
+import at.koopro.wizardsandbeasts.heritage.MagicalCondition;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
@@ -86,6 +87,14 @@ public final class HeritageAppearanceRegistry {
         return resolve(SERVER, heritage, variant);
     }
 
+    /**
+     * The entry for a condition, server side only. A condition is never broadcast (see {@link HeritageAppearance}), so
+     * there is deliberately no client counterpart.
+     */
+    public static @Nullable HeritageAppearance resolveCondition(@Nullable MagicalCondition condition) {
+        return condition == null ? null : SERVER.byCondition.get(condition.getId());
+    }
+
     private static @Nullable HeritageAppearance resolve(Index index,
                                                         @Nullable Heritage heritage,
                                                         @Nullable HeritageVariant variant) {
@@ -125,7 +134,7 @@ public final class HeritageAppearanceRegistry {
     }
 
     /**
-     * The three lookup views, built once per reload.
+     * The four lookup views, built once per reload.
      *
      * <p>Built rather than computed per call because the variant view is what a render path asks for,
      * and walking every entry to find one is the sort of thing that looks free until sixty players
@@ -133,19 +142,27 @@ public final class HeritageAppearanceRegistry {
      */
     private record Index(Map<Identifier, HeritageAppearance> byId,
                          Map<String, HeritageAppearance> byHeritage,
-                         Map<String, HeritageAppearance> byVariant) {
+                         Map<String, HeritageAppearance> byVariant,
+                         Map<String, HeritageAppearance> byCondition) {
 
-        static final Index EMPTY = new Index(Map.of(), Map.of(), Map.of());
+        static final Index EMPTY = new Index(Map.of(), Map.of(), Map.of(), Map.of());
 
         static Index of(Collection<HeritageAppearance> entries) {
             Map<Identifier, HeritageAppearance> byId = new HashMap<>();
             Map<String, HeritageAppearance> byHeritage = new HashMap<>();
             Map<String, HeritageAppearance> byVariant = new HashMap<>();
+            Map<String, HeritageAppearance> byCondition = new HashMap<>();
 
             for (HeritageAppearance entry : entries) {
                 byId.put(entry.id(), entry);
                 Optional<String> variant = entry.variant();
-                if (variant.isPresent()) {
+                if (entry.condition().isPresent()) {
+                    HeritageAppearance clash = byCondition.put(entry.condition().get(), entry);
+                    if (clash != null) {
+                        LOGGER.warn("[W&B] Two heritage appearance entries claim condition '{}': {} and {}. "
+                                + "Keeping {}.", entry.condition().get(), clash.id(), entry.id(), entry.id());
+                    }
+                } else if (variant.isPresent()) {
                     HeritageAppearance clash = byVariant.put(variant.get(), entry);
                     if (clash != null) {
                         LOGGER.warn("[W&B] Two heritage appearance entries claim variant '{}': {} and {}. "
@@ -159,7 +176,7 @@ public final class HeritageAppearanceRegistry {
                     }
                 }
             }
-            return new Index(Map.copyOf(byId), Map.copyOf(byHeritage), Map.copyOf(byVariant));
+            return new Index(Map.copyOf(byId), Map.copyOf(byHeritage), Map.copyOf(byVariant), Map.copyOf(byCondition));
         }
     }
 }

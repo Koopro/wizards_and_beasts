@@ -161,9 +161,7 @@ public final class SkillSystemAPI {
         // Region capability requirement — ordered strictly after the audience check. A sealed region
         // (e.g. wandlore for a squib, spell_mastery for an obscurial) is visible in the chart but cannot
         // be allocated. Rejects crafted payloads for sealed regions server-side.
-        Heritage heritage = HeritageAPI.getPlayerHeritage(player);
-        HeritageVariant variant = HeritageAPI.getPlayerHeritageVariant(player);
-        if (!SkillTreeId.meetsRequirement(skill.getTree().getRequirement(), heritage, variant)) {
+        if (!SkillTreeId.meetsRequirement(skill.getTree().getRequirement(), HeritageAPI.getData(player))) {
             return new UnlockCheck(false, "requirement_unmet");
         }
 

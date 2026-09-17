@@ -2085,16 +2085,21 @@ Placement correctness and silhouette rework. Deviations in `documentation/MIGRAT
 Logged during the corpus pass. **None of these were fixed**; the pass registered 128 `COMING_SOON`
 spells and gated them, and everything below was found on the way and deliberately left alone.
 
-- [ ] **BLOCKER — a remote client's spell registry holds 6 spells, not 155.**
-  `SpellReloadListener` is registered on `AddServerReloadListenersEvent` only, and no
-  `SpellDefinition` sync payload exists. A remote client's `Spells` registry holds 6 Java spells
-  rather than the full datapack set. Any future client-side feature keyed on `Spells.all()` — a
-  spellbook, a browse UI, client-side tooltips — is broken in multiplayer before it is written.
-  Already latent today: `SpellMenuScreen.rebuildSpellList` iterates `Spells.all()` and
-  `SpellsTab.buildSortedEntries` resolves known ids through `Spells.byId`, so on a dedicated server
-  both silently drop every JSON spell the player has learned. It did **not** block the corpus pass,
-  because enforcement landed server-side only: the cast gate runs on the server and teacher offers
-  are built server-side and pushed whole through `SpellTeacherOpenS2CPayload`.
+- [x] **RESOLVED — a remote client's spell registry holds 6 spells, not 155.**
+  `SpellReloadListener` is registered on `AddServerReloadListenersEvent` only, so the JSON slice of
+  `Spells` is populated server-side; a remote client's registry held 6 Java spells rather than the
+  full datapack set, and `SpellMenuScreen.rebuildSpellList` / `SpellsTab.buildSortedEntries` silently
+  dropped every JSON spell the player had learned.
+
+  **Fixed by `SpellDefinitionsSyncS2CPayload`**, pushed from `SpellDefinitionSyncEvents` on
+  `OnDatapackSyncEvent` — once per player on join, and to everyone after a `/reload`. Same shape as
+  the broom-definition and brew-recipe syncs. `Spells.byId` answers correctly on a dedicated client.
+
+  *Re-checked 2026-09-11 while retiring `spell/teacher`.* This entry had been left open after the fix
+  landed, and was cited as still-broken in the first draft of `AGENT_PROMPT_SPELL_LEARNING.md` §6.1 —
+  corrected there too. `SpellSource.writtenName` still builds a book's title from the stored id rather
+  than the registry, but for a different and narrower reason: an id whose definition a pack has since
+  removed resolves to `null`, and a title built that way would go silently untitled.
 
 - [ ] **POLISH — second cast entry point, unguarded.**
   `ObscurialServerLogic:161` calls `spell.execute(...)` directly, bypassing `SpellCastGate`.
@@ -2102,12 +2107,13 @@ spells and gated them, and everything below was found on the way and deliberatel
   the moment any spell reachable by that path is marked `COMING_SOON` — it would cast with no state
   check. Second cast entry point, unguarded.
 
-- [ ] **POLISH — every teacher requirement affordance is untranslated.**
-  `SpellLearningEligibility.Result.deny(reason)` carries a raw English `String`, which crosses the
-  wire in `SpellOffer.requirementText` and is drawn verbatim by `SpellTeacherScreen`. Pre-existing,
-  and now more visible: the corpus adds 128 offers whose lock hint reads "Not yet learnable — this
-  spell is still being written." in every locale. Deliberately not fixed here — introducing a
-  parallel lang-key path for one string would leave two mechanisms describing the same refusal.
+- [ ] **POLISH — every learning refusal is untranslated.**
+  `SpellLearningEligibility.Result.deny(reason)` carries a raw English `String`. It used to cross the
+  wire in `SpellOffer.requirementText` and be drawn by `SpellTeacherScreen`; with the vendor gone
+  (2026-09-10) it is shown on the action bar by `SpellSourceItem` when a read is refused, so the
+  problem survived the rewrite unchanged — a player in any locale is told "Not yet learnable — this
+  spell is still being written." in English. Deliberately still not fixed: introducing a parallel
+  lang-key path for one string would leave two mechanisms describing the same refusal.
 
 - [ ] **POLISH — `capacious_extremis` and the trunk system do the same job.**
   It ships as a castable spell that extends internal capacity while the trunk / pocket-dimension

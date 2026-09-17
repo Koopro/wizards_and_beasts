@@ -23,5 +23,19 @@
   "entityType": "wizards_and_beasts:gnome",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/gnome.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/gnome.png",
-  "sortOrder": 77
+  "sortOrder": 77,
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.gnome.diet",
+    "behaviour": "bestiary.wizards_and_beasts.gnome.behaviour",
+    "society": "bestiary.wizards_and_beasts.gnome.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.gnome.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

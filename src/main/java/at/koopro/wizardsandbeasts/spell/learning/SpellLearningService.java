@@ -1,107 +1,64 @@
 package at.koopro.wizardsandbeasts.spell.learning;
 
-import at.koopro.wizardsandbeasts.Config;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
-import at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper;
-import at.koopro.wizardsandbeasts.currency.vault.PlayerVaultData;
 import at.koopro.wizardsandbeasts.network.spell.SpellDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.stats.PlayerStatsSyncPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.core.Spells;
-import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialRules;
-import at.koopro.wizardsandbeasts.heritage.Heritage;
-import at.koopro.wizardsandbeasts.module.Module;
-import at.koopro.wizardsandbeasts.module.ModuleManager;
-import at.koopro.wizardsandbeasts.stats.PlayerStat;
-import at.koopro.wizardsandbeasts.stats.PlayerStatsAPI;
-import at.koopro.wizardsandbeasts.stats.StatEffects;
+import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import net.minecraft.server.level.ServerPlayer;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import org.jspecify.annotations.Nullable;
 
+/**
+ * The one place a spell becomes known.
+ *
+ * <h2>What this used to be</h2>
+ * A till. {@code buildOffers} listed every spell the player was eligible for, priced each one in
+ * Knuts, and {@code tryLearnSpell} took the money before writing the spell into
+ * {@code PlayerSpellData}. That is a generic RPG trainer, and it undercut everything the mod already
+ * had: skill-web keystones that grant spells as earned progression, proficiency as the mastery
+ * curve, and heritage, profession and mastery-tier gates that were all reduced to shelf labels on a
+ * catalogue.
+ *
+ * <h2>What it is now</h2>
+ * Eligibility and the write are unchanged and still live here — every gate in
+ * {@link SpellLearningEligibility} applies to every caller. What is gone is the trigger and the
+ * price. Learning is triggered by:
+ *
+ * <ul>
+ *   <li>reading a <em>spell source</em> — {@link SpellSource}, the book/page/notes path;</li>
+ *   <li>allocating a skill node carrying a {@code learn_spell} effect, via
+ *       {@code SkillSystemAPI.teachSpell}.</li>
+ * </ul>
+ *
+ * <p>Neither charges. Money buys objects — a wand, a broom, a book someone else wrote — and not the
+ * contents of your own head.
+ *
+ * <p>{@code /wandb spell learn} deliberately does <em>not</em> come through here. It writes to
+ * {@code PlayerSpellData} directly and is meant to: an operator granting a spell is overriding the
+ * gates, and a debug command that could be refused by the rules it exists to step around would be
+ * useless for setting up the exact state a test needs.
+ */
 public final class SpellLearningService {
 
     private SpellLearningService() {
     }
 
-    public static List<SpellOffer> buildOffers(ServerPlayer player) {
-        Heritage type = player.getData(ModAttachments.HERITAGE_DATA.get()).getSelectedHeritage();
-        return buildOffers(player.getData(ModAttachments.SPELL_DATA.get()), type, tuitionFor(player));
-    }
-
-    public static List<SpellOffer> buildOffers(PlayerSpellData data) {
-        return buildOffers(data, null);
-    }
-
-    public static List<SpellOffer> buildOffers(PlayerSpellData data, Heritage type) {
-        return buildOffers(data, type, Config.spellTeacherLearnCostKnuts);
-    }
-
     /**
-     * @param costKnuts what a lesson costs this particular customer — see {@link #tuitionFor}. Passed
-     *                  in rather than read here so the two no-player overloads above stay usable from
-     *                  the unit tests, which have no {@code ServerPlayer} to derive KNOWLEDGE from.
-     */
-    private static List<SpellOffer> buildOffers(PlayerSpellData data, Heritage type, int costKnuts) {
-        List<SpellOffer> offers = new ArrayList<>();
-
-        for (Spell spell : Spells.all()) {
-            SpellLearningEligibility.Result eligibility = SpellLearningEligibility.evaluate(null, spell, data, type);
-            if (ObscurialRules.isObscurialAbility(spell) || data.knowsSpell(spell.getId())) {
-                continue;
-            }
-            offers.add(new SpellOffer(
-                    spell.getId(),
-                    spell.getDisplayName(),
-                    spell.getCategory().name(),
-                    eligibility.learnable(),
-                    eligibility.reason(),
-                    costKnuts));
-        }
-
-        offers.sort(Comparator.comparing(SpellOffer::category).thenComparing(SpellOffer::displayName));
-        return offers;
-    }
-
-    /**
-     * What a lesson costs this player after the KNOWLEDGE discount.
+     * Teaches a spell if every gate allows it, then syncs.
      *
-     * <p>The one gameplay consequence KNOWLEDGE has. It is quoted on the offer card and charged at
-     * the till from this single method, so the two cannot disagree — see
-     * {@link StatEffects#tuitionCost}.
+     * <p>The stats sync is not incidental: KNOWLEDGE derives partly from how many spells are known,
+     * so a client that learned a spell without it would show a stale figure until the next full sync.
      */
-    public static int tuitionFor(ServerPlayer player) {
-        if (!ModuleManager.isEnabled(Module.PLAYER_STATS)) {
-            return Config.spellTeacherLearnCostKnuts;
-        }
-        return StatEffects.tuitionCost(Config.spellTeacherLearnCostKnuts,
-                PlayerStatsAPI.getStat(player, PlayerStat.KNOWLEDGE));
-    }
-
     public static LearnResult tryLearnSpell(ServerPlayer player, String spellId) {
         Spell spell = Spells.byId(spellId);
         PlayerSpellData data = player.getData(ModAttachments.SPELL_DATA.get());
-        Heritage type = player.getData(ModAttachments.HERITAGE_DATA.get()).getSelectedHeritage();
+        PlayerHeritageData type = player.getData(ModAttachments.HERITAGE_DATA.get());
         LearnResult validation = validateLearnAttempt(player, spell, data, type);
         if (!validation.success()) {
             return validation;
-        }
-
-        int fee = tuitionFor(player);
-        if (Config.spellTeacherRequirePayment && fee > 0) {
-            PlayerVaultData vault = player.getData(ModAttachments.VAULT_DATA.get());
-            long withdrawn = vault.withdrawSmartKnuts(fee);
-            if (withdrawn < fee) {
-                if (withdrawn > 0) {
-                    vault.depositKnuts(withdrawn);
-                }
-                long[] price = CurrencyHelper.fromKnuts(fee);
-                return LearnResult.failure("Not enough in your vault — this lesson costs "
-                        + CurrencyHelper.formatCurrency(price[0], price[1], price[2]) + ".");
-            }
         }
 
         data.learnSpell(spell.getId());
@@ -110,15 +67,25 @@ public final class SpellLearningService {
         return LearnResult.success(spell.getDisplayName());
     }
 
-    public static LearnResult validateLearnAttempt(Spell spell, PlayerSpellData data) {
+    /** Whether this player could learn this spell right now, without learning it. */
+    public static LearnResult validateLearnAttempt(ServerPlayer player, @Nullable Spell spell) {
+        return validateLearnAttempt(
+                player,
+                spell,
+                player.getData(ModAttachments.SPELL_DATA.get()),
+                player.getData(ModAttachments.HERITAGE_DATA.get()));
+    }
+
+    public static LearnResult validateLearnAttempt(@Nullable Spell spell, PlayerSpellData data) {
         return validateLearnAttempt(null, spell, data, null);
     }
 
-    public static LearnResult validateLearnAttempt(Spell spell, PlayerSpellData data, Heritage type) {
+    public static LearnResult validateLearnAttempt(@Nullable Spell spell, PlayerSpellData data, @Nullable PlayerHeritageData type) {
         return validateLearnAttempt(null, spell, data, type);
     }
 
-    public static LearnResult validateLearnAttempt(ServerPlayer player, Spell spell, PlayerSpellData data, Heritage type) {
+    public static LearnResult validateLearnAttempt(@Nullable ServerPlayer player, @Nullable Spell spell,
+                                                   PlayerSpellData data, @Nullable PlayerHeritageData type) {
         if (spell == null) {
             return LearnResult.failure("Unknown spell.");
         }
@@ -127,15 +94,6 @@ public final class SpellLearningService {
             return LearnResult.failure(eligibility.reason());
         }
         return LearnResult.success("ok");
-    }
-
-    public record SpellOffer(
-            String spellId,
-            String displayName,
-            String category,
-            boolean learnable,
-            String requirementText,
-            int costKnuts) {
     }
 
     public record LearnResult(boolean success, String message) {

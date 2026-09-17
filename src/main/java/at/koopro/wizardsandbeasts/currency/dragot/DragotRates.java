@@ -67,11 +67,16 @@ public final class DragotRates {
      * rounding that cannot mint value out of a long enough chain of exchanges.
      */
     public static long dragotsToKnuts(int dragots, float rate) {
+        return dragotsToKnuts(dragots, rate, GRINGOTTS_FEE);
+    }
+
+    /** As {@link #dragotsToKnuts(int, float)}, at a commission the caller names — a goblin's is zero. */
+    public static long dragotsToKnuts(int dragots, float rate, float fee) {
         if (dragots <= 0) {
             return 0L;
         }
         double gross = (double) dragots * rate * CurrencyHelper.KNUTS_PER_GALLEON;
-        return (long) Math.floor(gross * (1.0 - GRINGOTTS_FEE));
+        return (long) Math.floor(gross * (1.0 - fee));
     }
 
     /**
@@ -81,11 +86,16 @@ public final class DragotRates {
      * the same coin back-to-back must never leave the player ahead, or the exchange is a money press.
      */
     public static long knutsToBuyDragots(int dragots, float rate) {
+        return knutsToBuyDragots(dragots, rate, GRINGOTTS_FEE);
+    }
+
+    /** As {@link #knutsToBuyDragots(int, float)}, at a commission the caller names. */
+    public static long knutsToBuyDragots(int dragots, float rate, float fee) {
         if (dragots <= 0) {
             return 0L;
         }
         double net = (double) dragots * rate * CurrencyHelper.KNUTS_PER_GALLEON;
-        return (long) Math.ceil(net * (1.0 + GRINGOTTS_FEE));
+        return (long) Math.ceil(net * (1.0 + fee));
     }
 
     /** How many whole Dragots {@code knuts} will buy at {@code rate}. */

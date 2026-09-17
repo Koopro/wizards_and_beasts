@@ -23,5 +23,19 @@
   "entityType": "wizards_and_beasts:puffskein",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/puffskein.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/puffskein.png",
-  "sortOrder": 64
+  "sortOrder": 64,
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.puffskein.diet",
+    "behaviour": "bestiary.wizards_and_beasts.puffskein.behaviour",
+    "society": "bestiary.wizards_and_beasts.puffskein.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.puffskein.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

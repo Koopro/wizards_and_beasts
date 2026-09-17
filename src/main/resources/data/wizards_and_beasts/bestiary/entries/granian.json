@@ -20,5 +20,24 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/granian.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/granian.png",
   "sortOrder": 203,
-  "entityType": "wizards_and_beasts:granian"
+  "entityType": "wizards_and_beasts:granian",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.granian.diet",
+    "behaviour": "bestiary.wizards_and_beasts.granian.behaviour",
+    "society": "bestiary.wizards_and_beasts.granian.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.granian.interaction.1"
+    ],
+    "materials": [
+      {
+        "item": "wizards_and_beasts:granian_hair",
+        "how": "remains"
+      }
+    ],
+    "study": [
+      "watch"
+    ]
+  }
 }

@@ -1,31 +1,43 @@
 package at.koopro.wizardsandbeasts.command;
 
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.apparition.command.ApparitionCommands;
 import at.koopro.wizardsandbeasts.command.debug.DebugModuleRegistry;
 import at.koopro.wizardsandbeasts.command.debug.DebugTreeCommand;
 import at.koopro.wizardsandbeasts.command.debug.WizMorphCommands;
+import at.koopro.wizardsandbeasts.command.debug.inspect.DebugInspectors;
 import at.koopro.wizardsandbeasts.pose.command.PoseCommands;
 import at.koopro.wizardsandbeasts.wand.command.BlankShapingSelfTest;
 import at.koopro.wizardsandbeasts.item.wand.DebugWandState;
 import at.koopro.wizardsandbeasts.network.debug.BeamDebugOpenS2CPayload;
 import at.koopro.wizardsandbeasts.network.debug.BeamPresetS2CPayload;
-import at.koopro.wizardsandbeasts.render.outline.EntityOutlineService;
+import at.koopro.wizardsandbeasts.render.outline.DebugOutlines;
+import at.koopro.wizardsandbeasts.render.outline.OutlineStyle;
+import at.koopro.wizardsandbeasts.render.outline.SpellOutlines;
 import at.koopro.wizardsandbeasts.util.RgbHex;
+import com.mojang.brigadier.arguments.FloatArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ARGB;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import at.koopro.wizardsandbeasts.registry.WandItemRegistry;
 
@@ -48,6 +60,10 @@ import at.koopro.wizardsandbeasts.registry.WandItemRegistry;
 public final class WandbCommands {
 
     private static final Set<String> TREE_TYPES = Set.of("elder", "yew", "holly", "rowan");
+    private static final int TIMED_GLOW_DEFAULT_SECONDS = 5;
+    private static final int HIGHLIGHT_DEFAULT_SECONDS = 4;
+    /** Revelio's own colour ({@code "color": 16777130} in {@code spells/revelio.json}), so the test looks like the spell. */
+    private static final int HIGHLIGHT_DEFAULT_RGB = 0xFFFFAA;
 
     private WandbCommands() {}
 
@@ -62,6 +78,22 @@ public final class WandbCommands {
                 .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                 .then(DebugTreeCommand.register())
                 .then(Commands.literal("glow")
+                        // Timed outline on whatever the caller is looking at — any entity, not just
+                        // players. Exercises the path Revelio will use.
+                        .then(Commands.literal("look")
+                                .executes(ctx -> setGlowLook(ctx.getSource(), TIMED_GLOW_DEFAULT_SECONDS, null))
+                                .then(Commands.literal("off")
+                                        .executes(ctx -> clearGlowLook(ctx.getSource())))
+                                .then(Commands.argument("seconds", IntegerArgumentType.integer(1, 600))
+                                        .executes(ctx -> setGlowLook(
+                                                ctx.getSource(),
+                                                IntegerArgumentType.getInteger(ctx, "seconds"),
+                                                null))
+                                        .then(Commands.argument("rgb", StringArgumentType.word())
+                                                .executes(ctx -> setGlowLook(
+                                                        ctx.getSource(),
+                                                        IntegerArgumentType.getInteger(ctx, "seconds"),
+                                                        StringArgumentType.getString(ctx, "rgb"))))))
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.literal("off")
                                         .executes(ctx -> setGlowOff(
@@ -77,6 +109,26 @@ public final class WandbCommands {
                                                         ctx.getSource(),
                                                         EntityArgument.getPlayer(ctx, "player"),
                                                         StringArgumentType.getString(ctx, "rgb")))))))
+                // Timed block highlight on the 3x3 under the caller's feet — the path Revelio will use.
+                .then(Commands.literal("highlight")
+                        .executes(ctx -> highlightFloor(ctx.getSource(), HIGHLIGHT_DEFAULT_SECONDS, null, 1.0f))
+                        .then(Commands.literal("off")
+                                .executes(ctx -> clearHighlights(ctx.getSource())))
+                        .then(Commands.argument("seconds", IntegerArgumentType.integer(1, 600))
+                                .executes(ctx -> highlightFloor(
+                                        ctx.getSource(), IntegerArgumentType.getInteger(ctx, "seconds"), null, 1.0f))
+                                .then(Commands.argument("rgb", StringArgumentType.word())
+                                        .executes(ctx -> highlightFloor(
+                                                ctx.getSource(),
+                                                IntegerArgumentType.getInteger(ctx, "seconds"),
+                                                StringArgumentType.getString(ctx, "rgb"),
+                                                1.0f))
+                                        .then(Commands.argument("alpha", FloatArgumentType.floatArg(0.05f, 1.0f))
+                                                .executes(ctx -> highlightFloor(
+                                                        ctx.getSource(),
+                                                        IntegerArgumentType.getInteger(ctx, "seconds"),
+                                                        StringArgumentType.getString(ctx, "rgb"),
+                                                        FloatArgumentType.getFloat(ctx, "alpha")))))))
                 .then(Commands.literal("wandtool")
                         .executes(ctx -> giveDebugWand(ctx.getSource().getPlayerOrException(), null))
                         .then(Commands.argument("type", StringArgumentType.word())
@@ -158,7 +210,7 @@ public final class WandbCommands {
     /** Picks the beam renderer on the invoking player's client. Both stay wired; no restart needed. */
 
     private static int setGlowOff(CommandSourceStack source, ServerPlayer target) {
-        EntityOutlineService.clear(target);
+        DebugOutlines.clear(target);
         source.sendSuccess(() -> Component.literal("Glow debug for ")
                 .withStyle(ChatFormatting.GRAY)
                 .append(target.getDisplayName().plainCopy().withStyle(ChatFormatting.WHITE))
@@ -168,7 +220,7 @@ public final class WandbCommands {
     }
 
     private static int setGlowHash(CommandSourceStack source, ServerPlayer target) {
-        EntityOutlineService.setHashColor(target);
+        DebugOutlines.setHashColor(target);
         source.sendSuccess(() -> Component.literal("Glow debug for ")
                 .withStyle(ChatFormatting.GRAY)
                 .append(target.getDisplayName().plainCopy().withStyle(ChatFormatting.WHITE))
@@ -183,13 +235,105 @@ public final class WandbCommands {
             source.sendFailure(Component.literal("Invalid color. Use RRGGBB or #RRGGBB.").withStyle(ChatFormatting.RED));
             return 0;
         }
-        EntityOutlineService.setColor(target, Integer.parseInt(hex, 16));
+        DebugOutlines.setColor(target, Integer.parseInt(hex, 16));
         source.sendSuccess(() -> Component.literal("Glow debug for ")
                 .withStyle(ChatFormatting.GRAY)
                 .append(target.getDisplayName().plainCopy().withStyle(ChatFormatting.WHITE))
                 .append(Component.literal(": ").withStyle(ChatFormatting.GRAY))
                 .append(Component.literal("#" + hex).withStyle(ChatFormatting.GREEN)), true);
         return 1;
+    }
+
+    private static int setGlowLook(CommandSourceStack source, int seconds, @Nullable String rgbInput)
+            throws CommandSyntaxException {
+        Entity target = lookedAtOrFail(source);
+        if (target == null) return 0;
+
+        int rgb;
+        String label;
+        if (rgbInput == null) {
+            rgb = DebugOutlines.hashColor(target.getUUID());
+            label = "hash";
+        } else {
+            String hex = RgbHex.normalizeRgbHex(rgbInput);
+            if (hex == null) {
+                source.sendFailure(Component.literal("Invalid color. Use RRGGBB or #RRGGBB.").withStyle(ChatFormatting.RED));
+                return 0;
+            }
+            rgb = Integer.parseInt(hex, 16);
+            label = "#" + hex;
+        }
+
+        // The temporary path, exactly as a spell uses it — this command exists to exercise that path.
+        SpellOutlines.highlightEntities(List.of(target), new OutlineStyle(rgb, seconds * 20));
+        source.sendSuccess(() -> Component.literal("Timed glow on ")
+                .withStyle(ChatFormatting.GRAY)
+                .append(target.getDisplayName().plainCopy().withStyle(ChatFormatting.WHITE))
+                .append(Component.literal(": ").withStyle(ChatFormatting.GRAY))
+                .append(Component.literal(label).withStyle(ChatFormatting.GREEN))
+                .append(Component.literal(" for " + seconds + "s").withStyle(ChatFormatting.GRAY)), true);
+        return 1;
+    }
+
+    private static int clearGlowLook(CommandSourceStack source) throws CommandSyntaxException {
+        Entity target = lookedAtOrFail(source);
+        if (target == null) return 0;
+
+        SpellOutlines.clearEntity(target);
+        source.sendSuccess(() -> Component.literal("Timed glow on ")
+                .withStyle(ChatFormatting.GRAY)
+                .append(target.getDisplayName().plainCopy().withStyle(ChatFormatting.WHITE))
+                .append(Component.literal(": ").withStyle(ChatFormatting.GRAY))
+                .append(Component.literal("OFF").withStyle(ChatFormatting.RED)), true);
+        return 1;
+    }
+
+    private static int highlightFloor(CommandSourceStack source, int seconds, @Nullable String rgbInput, float alpha)
+            throws CommandSyntaxException {
+        ServerPlayer player = source.getPlayerOrException();
+        // By default, the colour Revelio actually draws, not its raw datapack value.
+        int rgb = OutlineStyle.vivid(HIGHLIGHT_DEFAULT_RGB);
+        if (rgbInput != null) {
+            String hex = RgbHex.normalizeRgbHex(rgbInput);
+            if (hex == null) {
+                source.sendFailure(Component.literal("Invalid color. Use RRGGBB or #RRGGBB.").withStyle(ChatFormatting.RED));
+                return 0;
+            }
+            rgb = Integer.parseInt(hex, 16);
+        }
+
+        BlockPos below = player.blockPosition().below();
+        List<BlockPos> floor = new ArrayList<>(9);
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                floor.add(below.offset(dx, 0, dz));
+            }
+        }
+        SpellOutlines.highlightBlocks(player, floor, new OutlineStyle(ARGB.color(alpha, rgb), seconds * 20));
+
+        String colour = String.format("#%06X", rgb);
+        source.sendSuccess(() -> Component.literal("Highlighted 3x3 under you: ")
+                .withStyle(ChatFormatting.GRAY)
+                .append(Component.literal(colour + " @" + Math.round(alpha * 100) + "%").withStyle(ChatFormatting.GREEN))
+                .append(Component.literal(" for " + seconds + "s").withStyle(ChatFormatting.GRAY)), false);
+        return 1;
+    }
+
+    private static int clearHighlights(CommandSourceStack source) throws CommandSyntaxException {
+        SpellOutlines.clearBlocks(source.getPlayerOrException());
+        source.sendSuccess(() -> Component.literal("Block highlights: ")
+                .withStyle(ChatFormatting.GRAY)
+                .append(Component.literal("CLEARED").withStyle(ChatFormatting.RED)), false);
+        return 1;
+    }
+
+    private static @Nullable Entity lookedAtOrFail(CommandSourceStack source) throws CommandSyntaxException {
+        Entity target = DebugInspectors.entityLookedAt(source.getPlayerOrException()).orElse(null);
+        if (target == null) {
+            source.sendFailure(Component.literal("Not looking at an entity within "
+                    + (int) DebugInspectors.REACH + " blocks.").withStyle(ChatFormatting.RED));
+        }
+        return target;
     }
 
     private static int giveDebugWand(ServerPlayer player, String treeType) {

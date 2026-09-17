@@ -23,5 +23,24 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/common_welsh_green.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/common_welsh_green.png",
   "sortOrder": 4,
-  "entityType": "wizards_and_beasts:common_welsh_green"
+  "entityType": "wizards_and_beasts:common_welsh_green",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.common_welsh_green.diet",
+    "behaviour": "bestiary.wizards_and_beasts.common_welsh_green.behaviour",
+    "society": "bestiary.wizards_and_beasts.common_welsh_green.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.common_welsh_green.interaction.1"
+    ],
+    "materials": [
+      {
+        "item": "wizards_and_beasts:dragon_heartstring",
+        "how": "remains"
+      }
+    ],
+    "study": [
+      "watch"
+    ]
+  }
 }

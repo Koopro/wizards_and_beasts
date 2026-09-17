@@ -23,5 +23,24 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/basilisk.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/basilisk.png",
   "sortOrder": 41,
-  "entityType": "wizards_and_beasts:basilisk"
+  "entityType": "wizards_and_beasts:basilisk",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.basilisk.diet",
+    "behaviour": "bestiary.wizards_and_beasts.basilisk.behaviour",
+    "society": "bestiary.wizards_and_beasts.basilisk.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.basilisk.interaction.1"
+    ],
+    "materials": [
+      {
+        "item": "wizards_and_beasts:basilisk_fang",
+        "how": "remains"
+      }
+    ],
+    "study": [
+      "watch"
+    ]
+  }
 }

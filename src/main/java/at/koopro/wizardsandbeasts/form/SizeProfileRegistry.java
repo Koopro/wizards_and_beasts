@@ -9,7 +9,10 @@ import java.util.Map;
  * Static registry of all {@link SizeProfile} instances, keyed by profile ID.
  * <p>
  * Constructor order: (id, hitboxWidth, hitboxHeight, modelScale, modelAspectX, modelAspectZ,
- *                     reachBonus, knockbackResistance, stepHeight)
+ *                     reachBonus, knockbackResistance, stepHeight[, eyeHeight])
+ * <p>
+ * Omitting eyeHeight keeps vanilla's height * 0.85. Only the Animagus beasts declare one — see
+ * {@link SizeProfile} for why an animal cannot use that ratio.
  * <p>
  * hitboxWidth/hitboxHeight = explicit collision box in blocks (1.8 = default player height).
  * modelScale = visual Y scale; modelAspectX/Z = visual width/depth ratios vs modelScale.
@@ -144,41 +147,60 @@ public final class SizeProfileRegistry {
         // applied verbatim by PlayerBoxOverrides (LivingEntityDimensionsMixin) — independent of Attributes.SCALE
         // — so the collision box matches the real animal instead of a uniformly-shrunk player box.
 
+        // Every beast form declares its eye height rather than inheriting vanilla's height * 0.85.
+        // That ratio describes something standing upright: on a cat it puts the camera above the
+        // ears, on a beetle it puts it above the shell. Where a datapack definition exists the two
+        // must agree, which AnimagusEyeHeightParityTest enforces.
+
         // Cat: vanilla CatModel — box matches an adult cat.
+        // Eye 0.55 of 0.70: a cat carries its head high, but not at the top of its back.
         register(new SizeProfile("animagus_cat",
                 0.60f, 0.70f,
                 1.0f, 1.0f, 1.0f,
-                -0.8f, 0.0f, 0.5f));
+                -0.8f, 0.0f, 0.5f,
+                0.55f));
 
         // Dog: vanilla WolfModel — box matches a wolf.
+        // Eye 0.75 of 0.85: muzzle-forward head, level with the shoulders.
         register(new SizeProfile("animagus_dog",
                 0.60f, 0.85f,
                 1.0f, 1.0f, 1.0f,
-                -0.4f, 0.1f, 0.5f));
+                -0.4f, 0.1f, 0.5f,
+                0.75f));
 
         // Stag: no vanilla analog — placeholder geometry, tall and broad.
+        // Eye 1.45 of 1.60: the head is raised well above the back, which the flat ratio's 1.36
+        // would have sunk into the shoulders.
         register(new SizeProfile("animagus_stag",
                 0.90f, 1.60f,
                 1.1f, 0.95f, 1.4f,
-                0.4f, 0.3f, 1.0f));
+                0.4f, 0.3f, 1.0f,
+                1.45f));
 
         // Hawk: vanilla ParrotModel — small perched-bird box.
+        // Eye 0.42 of 0.50: a perched bird's eyes really are near the top. Declared anyway, so a
+        // later change to the box height cannot quietly move the camera with it.
         register(new SizeProfile("animagus_hawk",
                 0.50f, 0.50f,
                 1.0f, 1.0f, 1.0f,
-                -1.0f, 0.0f, 0.0f));
+                -1.0f, 0.0f, 0.0f,
+                0.42f));
 
         // Hare: vanilla RabbitModel — small rabbit box.
+        // Eye 0.40 of 0.50: below the ears, which is most of a hare's height.
         register(new SizeProfile("animagus_hare",
                 0.40f, 0.50f,
                 1.0f, 1.0f, 1.0f,
-                -0.9f, 0.0f, 0.5f));
+                -0.9f, 0.0f, 0.5f,
+                0.40f));
 
         // Beetle: vanilla SilverfishModel — minuscule low box.
+        // Eye 0.20 of 0.30: at the front of the shell, not on top of it.
         register(new SizeProfile("animagus_beetle",
                 0.40f, 0.30f,
                 1.0f, 1.0f, 1.0f,
-                -1.0f, 0.0f, 0.0f));
+                -1.0f, 0.0f, 0.0f,
+                0.20f));
     }
 
     public static void register(SizeProfile profile) {

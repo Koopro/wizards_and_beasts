@@ -23,9 +23,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class BroomFlightRulesTest {
 
-    /** `broom` / `cleansweep_seven`: maxSpeed 0.35 x boost 1.3. */
+    /**
+     * `broom` / `cleansweep_seven` as they were when these regressions shipped: maxSpeed 0.35 x boost 1.3.
+     * Kept at those numbers on purpose — the preconditions below describe the old denominator's failure on
+     * that roster, and the 2026-09-11 retune does not change what the rules have to get right.
+     */
     private static final float SLOW_BROOM_TOP = 0.455f;
-    /** `firebolt_supreme`: maxSpeed 1.05 x boost 2.5. */
+    /** `firebolt_supreme` as it was then: maxSpeed 1.05 x boost 2.5. */
     private static final float FAST_BROOM_TOP = 2.625f;
     /** The fixed denominator that used to be used for every broom. */
     private static final float OLD_FIXED_DENOMINATOR = 1.15f * 1.45f;

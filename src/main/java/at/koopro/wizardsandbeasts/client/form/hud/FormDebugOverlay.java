@@ -72,9 +72,11 @@ public final class FormDebugOverlay {
                 x, y, TEXT_COLOR, false);
         y += lineHeight;
 
-        float eyeHeight = size.hitboxHeight() * (1.62f / 1.8f);
+        // Read, not recomputed. This line used to derive height * (1.62/1.8), which matched
+        // neither the profile nor the height * 0.85 the box actually used — so the one readout
+        // meant to verify the camera was a third opinion of its own.
         graphics.drawString(mc.font,
-                String.format("Eye Height: %.2f", eyeHeight),
+                String.format("Eye Height: %.2f", size.eyeHeight()),
                 x, y, TEXT_COLOR, false);
         y += lineHeight;
 

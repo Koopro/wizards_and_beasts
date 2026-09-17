@@ -4,7 +4,7 @@ import at.koopro.wizardsandbeasts.util.PlayerScopedState;
 
 import at.koopro.wizardsandbeasts.spell.core.*;
 
-import at.koopro.wizardsandbeasts.Config;
+import at.koopro.wizardsandbeasts.spell.cast.SpellCastService;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.item.wand.WandItem;
@@ -18,7 +18,6 @@ import at.koopro.wizardsandbeasts.spell.effect.SpellEffectEntry;
 import at.koopro.wizardsandbeasts.spell.effect.SpellEffectRunner;
 import at.koopro.wizardsandbeasts.spell.proficiency.ProficiencyScaler;
 import at.koopro.wizardsandbeasts.spell.proficiency.SpellScalingProfile;
-import at.koopro.wizardsandbeasts.util.WandHelper;
 import at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
@@ -53,7 +52,7 @@ public final class WandBeamChannelLogic {
             endChannel(player);
             return;
         }
-        if (!WandHelper.isWandBondedTo(player, wandStack)) {
+        if (!at.koopro.wizardsandbeasts.wand.allegiance.WandAllegianceService.answersToSomeone(wandStack)) {
             endChannel(player);
             return;
         }
@@ -87,16 +86,11 @@ public final class WandBeamChannelLogic {
             return;
         }
 
-        if (!data.knowsSpell(spellId)) {
-            endChannel(player);
-            return;
-        }
-        long currentTick = level.getGameTime();
-        if (data.isOnCooldown(spellId, currentTick)) {
-            endChannel(player);
-            return;
-        }
-        if (Config.enforceSpellRequirements && !spell.getRequirement().isMet(player, data)) {
+        // Everything the release at the end of this hold would refuse without rolling a die — silenced, barred
+        // from wands, unknown, on cooldown, requirements, drunk, Obscurial form rules. It used to check only
+        // three of those, so a caster the release refuses channelled for free: the refusal also skips the
+        // cooldown, and an interrupt's langlock was undone the next tick.
+        if (SpellCastService.releaseWouldBeRefused(player, data, spellId, spell, level.getGameTime())) {
             endChannel(player);
             return;
         }
@@ -175,6 +169,17 @@ public final class WandBeamChannelLogic {
         } else {
             WandBeamSpellHandlers.handleCrucioChannel(player, spell, target, s, channelEffectInterval);
         }
+    }
+
+    /**
+     * The spell this player is channelling right now, or null.
+     *
+     * <p>A channel only exists while a wand hold drives it, so this is also how the hold lifecycle — and
+     * the game tests that watch it — tell a torn-down beam from one left running with nothing holding it.
+     */
+    public static @org.jspecify.annotations.Nullable String activeChannelSpellId(ServerPlayer player) {
+        WandBeamSession session = SESSIONS.get(player.getUUID());
+        return session == null ? null : session.spellId;
     }
 
     public static void endChannel(ServerPlayer player) {

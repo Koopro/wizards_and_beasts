@@ -41,13 +41,14 @@ public final class ClientHeritageDataState {
                                  int professionPoints,
                                  int totalProfessionPointsEarned,
                                  Set<String> unlockedProfessions,
-                                 @Nullable String selectedProfessionId) {
+                                 @Nullable String selectedProfessionId,
+                                 at.koopro.wizardsandbeasts.heritage.@Nullable ConditionOrigin condition) {
         if (syncVersion < lastSyncVersion) {
             return;
         }
         lastSyncVersion = syncVersion;
         INSTANCE.applySync(heritage, variant, locked, state, activeFormId, debugOverlay, flags,
-                professionPoints, totalProfessionPointsEarned, unlockedProfessions, selectedProfessionId);
+                professionPoints, totalProfessionPointsEarned, unlockedProfessions, selectedProfessionId, condition);
     }
 
     public static PlayerHeritageData get() {

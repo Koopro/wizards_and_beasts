@@ -23,5 +23,19 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/reem.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/reem.png",
   "sortOrder": 21,
-  "entityType": "wizards_and_beasts:reem"
+  "entityType": "wizards_and_beasts:reem",
+  "profile": {
+    "classification": "beast",
+    "basis": "partial",
+    "diet": "bestiary.wizards_and_beasts.reem.diet",
+    "behaviour": "bestiary.wizards_and_beasts.reem.behaviour",
+    "society": "bestiary.wizards_and_beasts.reem.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.reem.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

@@ -23,5 +23,19 @@
   "entityType": "wizards_and_beasts:salamander",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/salamander.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/salamander.png",
-  "sortOrder": 72
+  "sortOrder": 72,
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.salamander.diet",
+    "behaviour": "bestiary.wizards_and_beasts.salamander.behaviour",
+    "society": "bestiary.wizards_and_beasts.salamander.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.salamander.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

@@ -1,4 +1,5 @@
 {
+  "_lore": "Canon: traditionally protective; suits those overcoming anger or engaged in dangerous quests; notoriously difficult with phoenix feather (not modelled). Gameplay: a lean toward defensive magic.",
   "display_name": {
     "translate": "wand_wood.wizards_and_beasts.holly"
   },
@@ -19,12 +20,12 @@
   "rarity": "uncommon",
   "refuse_threshold": 0.25,
   "cast_modifiers": {
-    "damage": 0.95,
-    "cooldown": 0.95,
+    "damage": 1.0,
+    "cooldown": 1.0,
     "range": 1.0,
-    "fizzle": -0.02,
+    "fizzle": 0.0,
     "category_damage_bonus": {
-      "defense": 0.12
+      "defense": 0.08
     }
   }
 }

@@ -2,7 +2,7 @@ package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.felix.FelixState;
 import at.koopro.wizardsandbeasts.veritaserum.VeritaserumState;
-import at.koopro.wizardsandbeasts.polyjuice.PolyjuiceState;
+import at.koopro.wizardsandbeasts.disguise.DisguiseState;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.azkaban.attachment.AzkabanTrespasserData;
 import at.koopro.wizardsandbeasts.stats.PlayerStatsData;
@@ -303,10 +303,10 @@ public class ModAttachments {
      * <p>Not {@code copyOnDeath}: dying drops the disguise, which is both the fictional answer and the
      * one that cannot be exploited — a player who could die to keep a face would have a free revert.
      */
-    public static final Supplier<AttachmentType<PolyjuiceState>> POLYJUICE_STATE =
-            ATTACHMENTS.register("polyjuice_state", () ->
-                    AttachmentType.builder(() -> PolyjuiceState.NONE)
-                            .serialize(PolyjuiceState.CODEC.fieldOf("polyjuice"))
+    public static final Supplier<AttachmentType<DisguiseState>> DISGUISE_STATE =
+            ATTACHMENTS.register("disguise_state", () ->
+                    AttachmentType.builder(() -> DisguiseState.NONE)
+                            .serialize(DisguiseState.CODEC.fieldOf("disguise"))
                             .build());
 
     public static final Supplier<AttachmentType<FelixState>> FELIX_STATE =

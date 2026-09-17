@@ -117,6 +117,23 @@ public final class RecordTab implements CharacterTab {
             drawKV(g, font, cx, cy, innerW, "record.rank", record.rank().displayName().getString());
             cy += ROW_H;
         }
+        // The Trace and the case: what the Ministry is doing about this wizard right now, in words.
+        if (ClientMinistryRecordState.underage()) {
+            g.drawString(font, Component.translatable(KEY + "record.underage").getString(),
+                    cx, cy, COLOR_FINE, false);
+            cy += ROW_H;
+        }
+        if (!ClientMinistryRecordState.caseStage().isEmpty()) {
+            drawKV(g, font, cx, cy, innerW, "record.case",
+                    Component.translatable(KEY + "record.case." + ClientMinistryRecordState.caseStage()).getString(),
+                    COLOR_FINE);
+            cy += ROW_H;
+        }
+        if (ClientMinistryRecordState.wandHeld()) {
+            g.drawString(font, Component.translatable(KEY + "record.wand_held").getString(),
+                    cx, cy, 0xFFCC4444, false);
+            cy += ROW_H;
+        }
         if (record.fugitive()) {
             g.drawString(font, Component.translatable(KEY + "record.fugitive").getString(),
                     cx, cy, 0xFFCC4444, false);

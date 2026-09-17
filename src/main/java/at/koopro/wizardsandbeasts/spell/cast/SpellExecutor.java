@@ -13,7 +13,6 @@ import at.koopro.wizardsandbeasts.spell.effect.SpellEffectEntry;
 import at.koopro.wizardsandbeasts.spell.effect.SpellEffectContext;
 import at.koopro.wizardsandbeasts.spell.effect.SpellEffectRunner;
 import at.koopro.wizardsandbeasts.spell.proficiency.SpellScalingProfile;
-import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.cast.WandStats;
 import at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver;
 import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialCombatRules;
@@ -26,8 +25,6 @@ import at.koopro.wizardsandbeasts.registry.ModSounds;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -62,10 +59,6 @@ public final class SpellExecutor {
             WandCorruptionSystem.onSpellCast(caster, wandStack, spell.getCategory());
             float corruptIntegrity = WandCorruptionSystem.getEffectivePowerMultiplier(wandStack, spell.getCategory(), level.registryAccess());
             ctx.modifiers().multiplyDamage(corruptIntegrity, "wand_corruption_integrity");
-            Optional<UUID> master = WandComponents.getMaster(wandStack);
-            if (master.isPresent() && !master.get().equals(caster.getUUID())) {
-                ctx.modifiers().multiplyDamage(WandComponents.getAllegianceScore(wandStack), "wand_foreign_master");
-            }
         }
         // The two named channels, each set once by its owner. Everything else on the stack is
         // situational and multiplies in freely. See SpellPower for why the split matters.
@@ -228,7 +221,10 @@ public final class SpellExecutor {
             new SelfUtilityRule("episkey", (level, caster, spell) -> SpellCastHandlers.handleEpiskeySelf(caster, spell)),
             new SelfUtilityRule("frigora", (level, caster, spell) -> SpellCastHandlers.handleFrigoraSelf(level, caster, spell)),
             new SelfUtilityRule("capacious_extremis", (level, caster, spell) -> SpellCastHandlers.handlePocketIngress(caster)),
-            new SelfUtilityRule("claustra_reverto", (level, caster, spell) -> SpellCastHandlers.handlePocketEgress(caster))
+            new SelfUtilityRule("claustra_reverto", (level, caster, spell) -> SpellCastHandlers.handlePocketEgress(caster)),
+            // Bespoke: a line-of-sight scan with no component to express it. Returns false when nothing was
+            // found, so an empty cast earns no proficiency.
+            new SelfUtilityRule("revelio", at.koopro.wizardsandbeasts.spell.revelio.Revelio::cast)
     };
 
     private static boolean handleSelfUtilitySpell(ServerLevel level, ServerPlayer caster, Spell spell) {

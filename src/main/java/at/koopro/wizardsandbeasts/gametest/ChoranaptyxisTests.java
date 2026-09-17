@@ -93,23 +93,35 @@ public final class ChoranaptyxisTests {
             }
         }
 
-        GenericBeastEntity occamy = spawnOccamy(helper, 1, 1, 1);
-        WizardTestSupport.check(helper, near(occamy.getSizeScale(), 1.0f),
-                () -> "the Occamy did not start at its natural size");
+        // The box can straddle a chunk edge, and only the structure's own chunk ticks entities: an Occamy
+        // standing across the edge would never run its ability and stay at 1.0 for a reason that is not
+        // the ability's. Force every chunk the box touches before spawning it.
+        BlockPos boxMin = new BlockPos(0, 0, 0);
+        BlockPos boxMax = new BlockPos(2, 3, 2);
+        WizardTestSupport.forceChunks(helper, boxMin, boxMax);
+        GenericBeastEntity[] occamy = new GenericBeastEntity[1];
 
-        helper.runAfterDelay(SETTLE_TICKS, () -> {
-            float scale = occamy.getSizeScale();
-            WizardTestSupport.check(helper, scale < 1.0f,
-                    () -> "boxed into a two-block gap the Occamy stayed at " + scale
-                            + "; the fit probe never shrank it");
-            WizardTestSupport.check(helper, occamy.getBbHeight() < BODY_HEIGHT,
-                    () -> "the Occamy's box is still " + occamy.getBbHeight()
-                            + " tall, so the scale moved but the hitbox did not");
-            WizardTestSupport.check(helper, scale >= 0.35f,
-                    () -> "the Occamy shrank to " + scale + ", past the floor its datapack declares");
-            occamy.discard();
-            helper.succeed();
-        });
+        helper.startSequence()
+                .thenWaitUntil(() -> WizardTestSupport.checkChunksTick(helper, boxMin, boxMax))
+                .thenExecute(() -> {
+                    occamy[0] = spawnOccamy(helper, 1, 1, 1);
+                    WizardTestSupport.check(helper, near(occamy[0].getSizeScale(), 1.0f),
+                            () -> "the Occamy did not start at its natural size");
+                })
+                .thenIdle(SETTLE_TICKS)
+                .thenExecute(() -> {
+                    float scale = occamy[0].getSizeScale();
+                    WizardTestSupport.check(helper, scale < 1.0f,
+                            () -> "boxed into a two-block gap the Occamy stayed at " + scale
+                                    + "; the fit probe never shrank it");
+                    WizardTestSupport.check(helper, occamy[0].getBbHeight() < BODY_HEIGHT,
+                            () -> "the Occamy's box is still " + occamy[0].getBbHeight()
+                                    + " tall, so the scale moved but the hitbox did not");
+                    WizardTestSupport.check(helper, scale >= 0.35f,
+                            () -> "the Occamy shrank to " + scale + ", past the floor its datapack declares");
+                    occamy[0].discard();
+                })
+                .thenSucceed();
     }
 
     // -- helpers -----------------------------------------------------------------------------------

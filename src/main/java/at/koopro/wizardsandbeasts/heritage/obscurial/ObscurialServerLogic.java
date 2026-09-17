@@ -42,13 +42,13 @@ public final class ObscurialServerLogic {
 
     /** True if the player is an Obscurial at all — the standing requirement for the form toggle. */
     public static boolean canToggleForm(ServerPlayer player) {
-        return heritageData(player).getSelectedHeritage() == Heritage.OBSCURIAL;
+        return ObscurialRules.isObscurial(heritageData(player));
     }
 
     /** Stress venting is a human-form action; it is rejected outright while in obscurus form. */
     public static boolean canStressVent(ServerPlayer player) {
         PlayerHeritageData data = heritageData(player);
-        return data.getSelectedHeritage() == Heritage.OBSCURIAL && !ObscurialRules.isDarkForm(data);
+        return ObscurialRules.isObscurial(data) && !ObscurialRules.isDarkForm(data);
     }
 
     /** Obscurial combat abilities require obscurus form. */
@@ -62,7 +62,7 @@ public final class ObscurialServerLogic {
     /** Toggles between the human and obscurus forms. Authority for the lockout and drain gates. */
     public static void toggleForm(ServerPlayer player) {
         PlayerHeritageData data = heritageData(player);
-        if (data.getSelectedHeritage() != Heritage.OBSCURIAL) {
+        if (!ObscurialRules.isObscurial(data)) {
             return;
         }
         if (TransitionManager.isTransitioning(player.getUUID())) {
@@ -95,7 +95,7 @@ public final class ObscurialServerLogic {
     /** Vents accumulated obscurus strain for a drawback. Authority for the cooldown gate. */
     public static void stressVent(ServerPlayer player) {
         PlayerHeritageData data = heritageData(player);
-        if (data.getSelectedHeritage() != Heritage.OBSCURIAL) return;
+        if (!ObscurialRules.isObscurial(data)) return;
         if (ObscurialRules.isDarkForm(data)) return;
 
         long now = player.level().getGameTime();

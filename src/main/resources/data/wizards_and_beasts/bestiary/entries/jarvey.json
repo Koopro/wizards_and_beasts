@@ -23,5 +23,19 @@
   "entityType": "wizards_and_beasts:jarvey",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/jarvey.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/jarvey.png",
-  "sortOrder": 75
+  "sortOrder": 75,
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.jarvey.diet",
+    "behaviour": "bestiary.wizards_and_beasts.jarvey.behaviour",
+    "society": "bestiary.wizards_and_beasts.jarvey.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.jarvey.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

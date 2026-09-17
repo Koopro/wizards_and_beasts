@@ -15,7 +15,7 @@ import org.jspecify.annotations.NullMarked;
  *
  * <h2>Why the gate matters here more than anywhere else</h2>
  * Every other consumer of this system already asks {@link Module#PLAYER_STATS} first — the cast modifiers,
- * every training hook, the tuition discount — and each of them degrades to <em>nothing</em> when the module
+ * every training hook, the study rate — and each of them degrades to <em>nothing</em> when the module
  * is off, which is the right shape for a modifier. The resist rolls cannot degrade to nothing, because they
  * do not add a modifier; they scale a chance. With the module off, an ungated read returns WILLPOWER 0
  * forever — the trait is never displayed, never trained ({@link StatTraining} is a no-op) and never

@@ -9,7 +9,6 @@ import at.koopro.wizardsandbeasts.network.spell.SpellProficiencySyncS2CPayload;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
-import at.koopro.wizardsandbeasts.wand.cast.WandCastingAllegianceSystem;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
@@ -29,7 +28,7 @@ public final class SpellProficiencyTracker {
         int newHits = data.getSuccessfulHits(spellId);
         if (ModuleManager.isEnabled(Module.PROFICIENCY)) {
             float current = data.getSpellProficiency(spellId);
-            float baseIncrement = 0.002f;
+            float baseIncrement = 0.002f * studyRate(player);
             float effectiveIncrement = baseIncrement * (current >= 0.8f ? (1.0f - current) : 1.0f);
             float updated = Math.min(1.0f, current + Math.max(0.0f, effectiveIncrement));
             data.setSpellProficiency(spellId, updated);
@@ -40,8 +39,9 @@ public final class SpellProficiencyTracker {
         // that reach this method, so every path that counts as a hit counts as practice.
         at.koopro.wizardsandbeasts.stats.StatTraining.onSpellHit(player);
         ItemStack wandStack = at.koopro.wizardsandbeasts.util.WandHelper.getWandStack(player);
-        if (!wandStack.isEmpty() && player.level() instanceof net.minecraft.server.level.ServerLevel level) {
-            WandCastingAllegianceSystem.onSuccessfulCast(player, wandStack, level);
+        if (!wandStack.isEmpty()) {
+            at.koopro.wizardsandbeasts.wand.allegiance.WandAllegianceService.onSuccessfulCast(
+                    player, wandStack, at.koopro.wizardsandbeasts.spell.core.Spells.byId(spellId));
         }
         SpellDataDeltaS2CPayload.sendTo(
                 player,
@@ -50,5 +50,21 @@ public final class SpellProficiencyTracker {
                 data.getCastCount(spellId),
                 newHits,
                 data.getGlobalCooldownEndTick());
+    }
+
+    /**
+     * How much faster this player's practice pays off, from KNOWLEDGE.
+     *
+     * <p>KNOWLEDGE's one gameplay consequence, and the one place it is read. With PLAYER_STATS off
+     * there is no stat to read and everyone trains at the unmodified rate — never a penalty, because
+     * a module being disabled must not make the game harder than a module being enabled at zero.
+     */
+    private static float studyRate(ServerPlayer player) {
+        if (!ModuleManager.isEnabled(Module.PLAYER_STATS)) {
+            return 1.0f;
+        }
+        return at.koopro.wizardsandbeasts.stats.StatEffects.studyRate(
+                at.koopro.wizardsandbeasts.stats.PlayerStatsAPI.getStat(
+                        player, at.koopro.wizardsandbeasts.stats.PlayerStat.KNOWLEDGE));
     }
 }

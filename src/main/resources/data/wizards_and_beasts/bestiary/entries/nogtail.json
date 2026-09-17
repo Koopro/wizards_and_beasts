@@ -23,5 +23,19 @@
   "entityType": "wizards_and_beasts:nogtail",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/nogtail.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/nogtail.png",
-  "sortOrder": 83
+  "sortOrder": 83,
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.nogtail.diet",
+    "behaviour": "bestiary.wizards_and_beasts.nogtail.behaviour",
+    "society": "bestiary.wizards_and_beasts.nogtail.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.nogtail.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

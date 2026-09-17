@@ -23,5 +23,19 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/fwooper.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/fwooper.png",
   "sortOrder": 28,
-  "entityType": "wizards_and_beasts:fwooper"
+  "entityType": "wizards_and_beasts:fwooper",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.fwooper.diet",
+    "behaviour": "bestiary.wizards_and_beasts.fwooper.behaviour",
+    "society": "bestiary.wizards_and_beasts.fwooper.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.fwooper.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

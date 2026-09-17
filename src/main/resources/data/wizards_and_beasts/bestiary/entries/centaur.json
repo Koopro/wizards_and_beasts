@@ -23,5 +23,19 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/centaur.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/centaur.png",
   "sortOrder": 16,
-  "entityType": "wizards_and_beasts:centaur"
+  "entityType": "wizards_and_beasts:centaur",
+  "profile": {
+    "classification": "beast_by_choice",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.centaur.diet",
+    "behaviour": "bestiary.wizards_and_beasts.centaur.behaviour",
+    "society": "bestiary.wizards_and_beasts.centaur.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.centaur.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

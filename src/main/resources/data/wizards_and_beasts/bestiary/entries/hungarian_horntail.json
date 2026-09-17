@@ -23,5 +23,28 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/hungarian_horntail.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/hungarian_horntail.png",
   "sortOrder": 0,
-  "entityType": "wizards_and_beasts:hungarian_horntail"
+  "entityType": "wizards_and_beasts:hungarian_horntail",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.hungarian_horntail.diet",
+    "behaviour": "bestiary.wizards_and_beasts.hungarian_horntail.behaviour",
+    "society": "bestiary.wizards_and_beasts.hungarian_horntail.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.hungarian_horntail.interaction.1"
+    ],
+    "materials": [
+      {
+        "item": "wizards_and_beasts:dragon_heartstring",
+        "how": "remains"
+      },
+      {
+        "item": "wizards_and_beasts:dragon_heartstring",
+        "how": "studied_kill"
+      }
+    ],
+    "study": [
+      "watch"
+    ]
+  }
 }

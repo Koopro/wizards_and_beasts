@@ -23,5 +23,19 @@
   "entityType": "wizards_and_beasts:tebo",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/tebo.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/tebo.png",
-  "sortOrder": 88
+  "sortOrder": 88,
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.tebo.diet",
+    "behaviour": "bestiary.wizards_and_beasts.tebo.behaviour",
+    "society": "bestiary.wizards_and_beasts.tebo.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.tebo.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

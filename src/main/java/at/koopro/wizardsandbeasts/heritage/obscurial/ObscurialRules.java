@@ -85,7 +85,7 @@ public final class ObscurialRules {
     private ObscurialRules() {}
 
     public static boolean isObscurial(PlayerHeritageData data) {
-        return data.getSelectedHeritage() == Heritage.OBSCURIAL;
+        return data.hasCondition(at.koopro.wizardsandbeasts.heritage.MagicalCondition.OBSCURUS);
     }
 
     public static boolean isDarkForm(PlayerHeritageData data) {
@@ -254,11 +254,12 @@ public final class ObscurialRules {
         return ObscurialSpellPolicy.isObscurialAbilityId(spellId);
     }
 
-    public static boolean canHeritageUseSpell(Heritage heritage, Spell spell) {
+    /** Whether a character can use {@code spell}: Obscurial abilities never, Obscurial-only spells only if they carry one. */
+    public static boolean canHeritageUseSpell(@org.jspecify.annotations.Nullable PlayerHeritageData data, Spell spell) {
         if (spell == null) return false;
         if (isObscurialAbility(spell)) return false;
         if (!isObscurialOnlySpell(spell)) return true;
-        return heritage == Heritage.OBSCURIAL;
+        return data != null && isObscurial(data);
     }
 
     public static float getInstabilityFizzleChance(ServerPlayer player, ServerLevel level) {

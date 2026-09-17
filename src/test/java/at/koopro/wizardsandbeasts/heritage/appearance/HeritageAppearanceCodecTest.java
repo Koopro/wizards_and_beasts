@@ -77,8 +77,8 @@ class HeritageAppearanceCodecTest {
     void formArm_roundTrips() {
         HeritageAppearance entry = parseOk("""
                 {
-                  "id": "wizards_and_beasts:werewolf",
-                  "heritage": "werewolf",
+                  "id": "wizards_and_beasts:lycanthropy",
+                  "condition": "lycanthropy",
                   "mechanisms": [
                     {
                       "type": "form",
@@ -104,9 +104,9 @@ class HeritageAppearanceCodecTest {
     void overlayArm_roundTrips() {
         HeritageAppearance entry = parseOk("""
                 {
-                  "id": "wizards_and_beasts:obscurial_unleashed",
-                  "heritage": "obscurial",
-                  "variant": "unleashed",
+                  "id": "wizards_and_beasts:veela_full",
+                  "heritage": "veela",
+                  "variant": "full",
                   "mechanisms": [
                     {
                       "type": "overlay",
@@ -209,7 +209,7 @@ class HeritageAppearanceCodecTest {
         DataResult<HeritageAppearance> result = parse("""
                 {
                   "id": "wizards_and_beasts:contradiction",
-                  "heritage": "werewolf",
+                  "heritage": "vampire",
                   "mechanisms": [
                     { "type": "proportion", "scale": 1.2 },
                     { "type": "form", "formId": "werewolf_wolf" }
@@ -254,13 +254,70 @@ class HeritageAppearanceCodecTest {
     }
 
     @Test
+    void conditionEntry_decodesAndIsNotAHeritageEntry() {
+        HeritageAppearance entry = parseOk("""
+                {
+                  "id": "wizards_and_beasts:obscurus",
+                  "condition": "obscurus",
+                  "provenance": { "fanExtrapolation": true }
+                }
+                """);
+        assertTrue(entry.isCondition());
+        assertEquals("", entry.heritage());
+        assertRoundTrips(entry);
+    }
+
+    @Test
+    void werewolfAsAHeritage_isRejected() {
+        // Lycanthropy is a condition a witch or wizard carries; a save or datapack still naming the old
+        // heritage must fail loudly rather than resolve to nothing.
+        DataResult<HeritageAppearance> result = parse("""
+                {
+                  "id": "wizards_and_beasts:werewolf",
+                  "heritage": "werewolf",
+                  "provenance": { "fanExtrapolation": true }
+                }
+                """);
+        assertTrue(result.isError());
+        assertTrue(result.error().orElseThrow().message().contains("unknown heritage"));
+    }
+
+    @Test
+    void heritageAndConditionTogether_areRejected() {
+        DataResult<HeritageAppearance> result = parse("""
+                {
+                  "id": "wizards_and_beasts:both",
+                  "heritage": "wizardkind",
+                  "condition": "lycanthropy",
+                  "provenance": { "fanExtrapolation": true }
+                }
+                """);
+        assertTrue(result.isError());
+        assertTrue(result.error().orElseThrow().message().contains("name only one"));
+    }
+
+    @Test
+    void conditionEntries_rejectUnknownIdsVariantsAndEmptiness() {
+        assertTrue(parse("""
+                { "id": "wizards_and_beasts:a", "condition": "vampirism", "provenance": { "fanExtrapolation": true } }
+                """).error().orElseThrow().message().contains("unknown condition"));
+        assertTrue(parse("""
+                { "id": "wizards_and_beasts:b", "condition": "lycanthropy", "variant": "bitten",
+                  "provenance": { "fanExtrapolation": true } }
+                """).error().orElseThrow().message().contains("cannot name a variant"));
+        assertTrue(parse("""
+                { "id": "wizards_and_beasts:c", "provenance": { "fanExtrapolation": true } }
+                """).error().orElseThrow().message().contains("neither a heritage nor a condition"));
+    }
+
+    @Test
     void variantFromADifferentHeritage_isRejected() {
-        // "turned" is a vampire variant; claiming it under werewolf is the kind of copy-paste slip
+        // "turned" is a vampire variant; claiming it under goblin is the kind of copy-paste slip
         // that would otherwise resolve to nothing at render time and look like a missing texture.
         DataResult<HeritageAppearance> result = parse("""
                 {
                   "id": "wizards_and_beasts:mismatch",
-                  "heritage": "werewolf",
+                  "heritage": "goblin",
                   "variant": "turned",
                   "provenance": { "fanExtrapolation": true }
                 }
@@ -275,7 +332,7 @@ class HeritageAppearanceCodecTest {
         DataResult<HeritageAppearance> result = parse("""
                 {
                   "id": "wizards_and_beasts:nope",
-                  "heritage": "werewolf",
+                  "heritage": "giant",
                   "variant": "moon_touched",
                   "provenance": { "fanExtrapolation": true }
                 }

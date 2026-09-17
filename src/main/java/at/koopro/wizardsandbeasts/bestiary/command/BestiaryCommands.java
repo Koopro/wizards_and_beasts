@@ -27,7 +27,7 @@ public final class BestiaryCommands {
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("entry_id", StringArgumentType.word())
                                         .suggests((ctx, b) -> SharedSuggestionProvider.suggest(BestiaryEntryRegistry.getAll().stream().map(e -> e.id().toString()), b))
-                                        .executes(ctx -> setTier(EntityArgument.getPlayer(ctx, "player"), StringArgumentType.getString(ctx, "entry_id"), DiscoveryTier.MASTERED)))))
+                                        .executes(ctx -> setTier(EntityArgument.getPlayer(ctx, "player"), StringArgumentType.getString(ctx, "entry_id"), DiscoveryTier.KNOWN)))))
                 .then(Commands.literal("set")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("entry_id", StringArgumentType.word())
@@ -76,12 +76,12 @@ public final class BestiaryCommands {
     }
 
     private static int resetOne(ServerPlayer player, String id) {
-        BestiaryDataHelper.forceSetTier(player, Identifier.parse(id), DiscoveryTier.UNDISCOVERED);
+        BestiaryDataHelper.forceSetTier(player, Identifier.parse(id), DiscoveryTier.UNKNOWN);
         return 1;
     }
 
     private static int resetAll(ServerPlayer player) {
-        BestiaryEntryRegistry.getAll().forEach(entry -> BestiaryDataHelper.forceSetTier(player, entry.id(), DiscoveryTier.UNDISCOVERED));
+        BestiaryEntryRegistry.getAll().forEach(entry -> BestiaryDataHelper.forceSetTier(player, entry.id(), DiscoveryTier.UNKNOWN));
         return 1;
     }
 
@@ -98,7 +98,7 @@ public final class BestiaryCommands {
 
     private static int forceUnlockAll(Collection<ServerPlayer> players, CommandSourceStack source) {
         for (ServerPlayer player : players) {
-            BestiaryEntryRegistry.getAll().forEach(entry -> BestiaryDataHelper.forceSetTier(player, entry.id(), DiscoveryTier.MASTERED));
+            BestiaryEntryRegistry.getAll().forEach(entry -> BestiaryDataHelper.forceSetTier(player, entry.id(), DiscoveryTier.KNOWN));
         }
         source.sendSuccess(() -> Component.literal("Force unlocked all bestiary entries for " + players.size() + " player(s).")
                 .withStyle(ChatFormatting.GREEN), true);
@@ -107,7 +107,7 @@ public final class BestiaryCommands {
 
     private static int forceResetAll(Collection<ServerPlayer> players, CommandSourceStack source) {
         for (ServerPlayer player : players) {
-            BestiaryEntryRegistry.getAll().forEach(entry -> BestiaryDataHelper.forceSetTier(player, entry.id(), DiscoveryTier.UNDISCOVERED));
+            BestiaryEntryRegistry.getAll().forEach(entry -> BestiaryDataHelper.forceSetTier(player, entry.id(), DiscoveryTier.UNKNOWN));
         }
         source.sendSuccess(() -> Component.literal("Force reset all bestiary entries for " + players.size() + " player(s).")
                 .withStyle(ChatFormatting.GREEN), true);

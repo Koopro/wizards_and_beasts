@@ -23,5 +23,19 @@
   "entityType": "wizards_and_beasts:pogrebin",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/pogrebin.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/pogrebin.png",
-  "sortOrder": 92
+  "sortOrder": 92,
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.pogrebin.diet",
+    "behaviour": "bestiary.wizards_and_beasts.pogrebin.behaviour",
+    "society": "bestiary.wizards_and_beasts.pogrebin.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.pogrebin.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

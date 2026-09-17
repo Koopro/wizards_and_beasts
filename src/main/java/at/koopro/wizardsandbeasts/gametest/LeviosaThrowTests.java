@@ -1,10 +1,12 @@
 package at.koopro.wizardsandbeasts.gametest;
 
+import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.spell.beam.WandBeamChannelLogic;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.level.block.Blocks;
@@ -58,6 +60,12 @@ public final class LeviosaThrowTests {
                 LeviosaThrowTests::releaseDropsWithoutThrowing);
         tests.add("leviosa_attack_throws_and_does_not_relift", "leviosa: attack key throws, once",
                 LeviosaThrowTests::attackThrowsAndDoesNotRelift);
+        tests.add("leviosa_dropped_wand_ends_the_channel", "leviosa: dropping the wand drops the target",
+                LeviosaThrowTests::droppedWandEndsTheChannel);
+        tests.add("leviosa_silenced_caster_cannot_channel", "leviosa: a langlocked hold lifts nothing",
+                LeviosaThrowTests::silencedCasterCannotChannel);
+        tests.add("leviosa_interrupt_is_not_undone", "leviosa: an interrupted channel stays down while silenced",
+                LeviosaThrowTests::interruptIsNotUndoneNextTick);
     }
 
     // ── A: letting go is a drop ─────────────────────────────────────────────────────────────────
@@ -68,6 +76,7 @@ public final class LeviosaThrowTests {
         ArmorStand target = helper.spawn(EntityType.ARMOR_STAND, TARGET);
 
         helper.startSequence()
+                .thenWaitUntil(() -> checkLaneTicks(helper))
                 .thenExecute(() -> beginCast(helper, caster))
                 .thenExecuteFor(HOLD_TICKS, caster::doTick)
                 .thenExecute(() -> {
@@ -98,6 +107,7 @@ public final class LeviosaThrowTests {
         ArmorStand target = helper.spawn(EntityType.ARMOR_STAND, TARGET);
 
         helper.startSequence()
+                .thenWaitUntil(() -> checkLaneTicks(helper))
                 .thenExecute(() -> {
                     beginCast(helper, caster);
                     // No channel tick has run, so there is no session: a throw here must be a no-op.
@@ -141,6 +151,116 @@ public final class LeviosaThrowTests {
                 .thenSucceed();
     }
 
+    // ── C: dropping the wand ends the channel ───────────────────────────────────────────────────
+
+    /**
+     * Drop the wand while it lifts something. {@code ServerPlayer.drop} empties the used stack before stopping the
+     * use, and vanilla skips {@code onStopUsing} for an empty stack — so without the server's own reconciliation
+     * the channel outlived the hold: the target hung in the air and the beam never ended for anyone watching.
+     */
+    private static void droppedWandEndsTheChannel(GameTestHelper helper) {
+        clearTheLane(helper);
+        ServerPlayer caster = readyCaster(helper, "wandb-leviosa-dropper-wand");
+        ArmorStand target = helper.spawn(EntityType.ARMOR_STAND, TARGET);
+
+        helper.startSequence()
+                .thenWaitUntil(() -> checkLaneTicks(helper))
+                .thenExecute(() -> beginCast(helper, caster))
+                .thenExecuteFor(HOLD_TICKS, caster::doTick)
+                .thenExecute(() -> {
+                    checkLifted(helper, caster, target);
+                    caster.drop(false);
+                })
+                .thenExecuteFor(2, caster::doTick)
+                .thenExecute(() -> {
+                    check(helper, WandBeamChannelLogic.activeChannelSpellId(caster) == null,
+                            () -> "the channel outlived the dropped wand: " + describe(caster, target));
+                    check(helper, !target.isNoGravity(),
+                            () -> "the target kept floating after the wand was dropped: " + describe(caster, target));
+                })
+                .thenExecute(() -> {
+                    target.discard();
+                    helper.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,
+                            caster.getBoundingBox().inflate(4.0)).forEach(net.minecraft.world.entity.Entity::discard);
+                    retire(helper, caster);
+                })
+                .thenSucceed();
+    }
+
+    // ── D: a silenced caster's hold drives no channel ───────────────────────────────────────────
+
+    /**
+     * Langlock refuses a release; it must refuse the channel under that release too, or a silenced caster holds
+     * the beam for as long as they like and never meets the refusal that would have cost them a cooldown.
+     */
+    private static void silencedCasterCannotChannel(GameTestHelper helper) {
+        clearTheLane(helper);
+        ServerPlayer caster = readyCaster(helper, "wandb-leviosa-silenced");
+        ArmorStand target = helper.spawn(EntityType.ARMOR_STAND, TARGET);
+
+        helper.startSequence()
+                .thenWaitUntil(() -> checkLaneTicks(helper))
+                .thenExecute(() -> {
+                    caster.addEffect(new MobEffectInstance(ModEffects.LANGLOCK, 200, 0));
+                    beginCast(helper, caster);
+                })
+                .thenExecuteFor(HOLD_TICKS, caster::doTick)
+                .thenExecute(() -> {
+                    check(helper, caster.isUsingItem(), () -> "the hold ended on its own: " + describe(caster, target));
+                    check(helper, !target.isNoGravity() && WandBeamChannelLogic.activeChannelSpellId(caster) == null,
+                            () -> "a langlocked caster channelled Leviosa: " + describe(caster, target));
+                    caster.removeEffect(ModEffects.LANGLOCK);
+                })
+                .thenExecuteFor(HOLD_TICKS, caster::doTick)
+                .thenExecute(() -> {
+                    // The control: the same hold, unsilenced, lifts — so the refusal above was the langlock.
+                    checkLifted(helper, caster, target);
+                    caster.releaseUsingItem();
+                })
+                .thenExecute(() -> {
+                    target.discard();
+                    retire(helper, caster);
+                })
+                .thenSucceed();
+    }
+
+    // ── E: an interrupt holds while the langlock does ───────────────────────────────────────────
+
+    /**
+     * Finite's interrupt (and the {@code interrupt_cast} effect component) end the target's channel and langlock
+     * them. The hold itself stays down on the client, so the very next tick drove the channel again and the
+     * interrupt lasted one tick. Driven here exactly as {@code SpellCastTargetedHandler.interruptCasting} does it.
+     */
+    private static void interruptIsNotUndoneNextTick(GameTestHelper helper) {
+        clearTheLane(helper);
+        ServerPlayer caster = readyCaster(helper, "wandb-leviosa-interrupted");
+        ArmorStand target = helper.spawn(EntityType.ARMOR_STAND, TARGET);
+
+        helper.startSequence()
+                .thenWaitUntil(() -> checkLaneTicks(helper))
+                .thenExecute(() -> beginCast(helper, caster))
+                .thenExecuteFor(HOLD_TICKS, caster::doTick)
+                .thenExecute(() -> {
+                    checkLifted(helper, caster, target);
+                    WandBeamChannelLogic.endChannel(caster);
+                    caster.addEffect(new MobEffectInstance(ModEffects.LANGLOCK, 30, 0, false, true, true));
+                    check(helper, !target.isNoGravity(),
+                            () -> "the interrupt did not put the target down: " + describe(caster, target));
+                })
+                .thenExecuteFor(5, caster::doTick)
+                .thenExecute(() -> {
+                    check(helper, !target.isNoGravity() && WandBeamChannelLogic.activeChannelSpellId(caster) == null,
+                            () -> "the interrupted channel picked the target straight back up while langlocked: "
+                                    + describe(caster, target));
+                    caster.releaseUsingItem();
+                })
+                .thenExecute(() -> {
+                    target.discard();
+                    retire(helper, caster);
+                })
+                .thenSucceed();
+    }
+
     // ── shared setup ────────────────────────────────────────────────────────────────────────────
 
     /**
@@ -150,7 +270,9 @@ public final class LeviosaThrowTests {
      * stop on one before it reached the target, and the first channel tick — which is allowed to lift a
      * block when it finds no entity — would try to pull a barrier out of the wall instead.
      */
-    private static void clearTheLane(GameTestHelper helper) {
+    static void clearTheLane(GameTestHelper helper) {
+        // The lane spans up to five blocks from the origin, which can cross a chunk boundary. See forceChunks.
+        WizardTestSupport.forceChunks(helper, LANE_MIN, LANE_MAX);
         for (int x = 0; x <= 2; x++) {
             for (int z = 0; z <= 4; z++) {
                 helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
@@ -159,6 +281,15 @@ public final class LeviosaThrowTests {
                 }
             }
         }
+    }
+
+    /** The lane's corners, test-relative: stone at y 0, air above, three wide and five long. */
+    static final BlockPos LANE_MIN = new BlockPos(0, 0, 0);
+    static final BlockPos LANE_MAX = new BlockPos(2, 4, 4);
+
+    /** The first step of every lane scenario: {@link #clearTheLane} forced the chunks; wait until they tick. */
+    static void checkLaneTicks(GameTestHelper helper) {
+        WizardTestSupport.checkChunksTick(helper, LANE_MIN, LANE_MAX);
     }
 
     private static ServerPlayer readyCaster(GameTestHelper helper, String name) {

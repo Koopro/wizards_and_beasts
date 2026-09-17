@@ -21,8 +21,6 @@ public final class PatronusFormDeterminer {
 
     static {
         RARE_FORMS.put(Heritage.WIZARDKIND, mc("horse"));     // noble steed — stag stand-in
-        RARE_FORMS.put(Heritage.WEREWOLF, mc("polar_bear"));  // the wolf mastered, not denied
-        RARE_FORMS.put(Heritage.OBSCURIAL, mc("phantom"));    // the shadow given wings
         RARE_FORMS.put(Heritage.VAMPIRE, mc("cat"));          // a warm-blooded companion
         RARE_FORMS.put(Heritage.VEELA, mc("allay"));          // radiant spirit of the dance
     }
@@ -41,8 +39,6 @@ public final class PatronusFormDeterminer {
         }
         return switch (heritage) {
             case WIZARDKIND -> wizardkindForm(variant);
-            case WEREWOLF   -> mc("wolf");
-            case OBSCURIAL  -> mc("bat");
             case VAMPIRE    -> vampireForm(variant);
             case VEELA      -> mc("parrot");
             default         -> null;

@@ -94,6 +94,6 @@ public final class SpellClashLocks {
     }
 
     private static boolean isHoldingWand(Player player) {
-        return player.isUsingItem() && player.getUseItem().getItem() instanceof WandItem;
+        return WandItem.isUsingWand(player);
     }
 }

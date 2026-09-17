@@ -105,7 +105,10 @@ class ShippedHeritageAppearanceJsonTest {
         Set<String> variants = new HashSet<>();
 
         for (HeritageAppearance entry : loadAll()) {
-            if (entry.variant().isPresent()) {
+            if (entry.isCondition()) {
+                assertTrue(variants.add("condition:" + entry.condition().get()),
+                        "two entries claim condition '" + entry.condition().get() + "'; one silently wins");
+            } else if (entry.variant().isPresent()) {
                 assertTrue(variants.add(entry.variant().get()),
                         "two entries claim variant '" + entry.variant().get() + "'; one silently wins");
             } else {

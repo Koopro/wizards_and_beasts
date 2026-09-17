@@ -4,7 +4,6 @@ import org.jspecify.annotations.Nullable;
 
 import at.koopro.wizardsandbeasts.wand.elder.ElderWandSavedData;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
-import at.koopro.wizardsandbeasts.wand.WandComponents;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -13,7 +12,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.Optional;
 
 public final class ElderWandDebugModule implements DebugModule {
 
@@ -64,10 +62,10 @@ public final class ElderWandDebugModule implements DebugModule {
 
         data.setMaster(target.getUUID());
 
-        // Also update WAND_MASTER on the wand stack if the target holds it
+        // The saved master is authoritative; bring a held stack in line now rather than on the next tick.
         ItemStack held = elderWandInHand(target);
         if (held != null) {
-            held.set(WandComponents.WAND_MASTER.get(), Optional.of(target.getUUID()));
+            at.koopro.wizardsandbeasts.wand.allegiance.WandAllegianceService.reconcileElderStack(held, target.getUUID());
         }
 
         out.ok("Set elder wand master to " + target.getName().getString() + ".");
@@ -78,7 +76,7 @@ public final class ElderWandDebugModule implements DebugModule {
         ServerLevel level = source.getLevel();
         ElderWandSavedData data = ElderWandSavedData.get(level);
         data.setMaster(null);
-        new DebugOutput(source).ok("Cleared elder wand master. Next player to hold it will claim it.");
+        new DebugOutput(source).ok("Cleared elder wand master. It is won by the next wizard to defeat another while wielding it.");
         return 1;
     }
 

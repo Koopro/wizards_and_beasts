@@ -29,12 +29,12 @@ exist in the registry, which is why a `/give` can hand you something the module 
 |---|---|
 | `PROFICIENCY` | Per-spell proficiency accrues and scales casts. The stacking formula is now single-owned, clamped and test-locked (§4c, and the spell-power section of `DEVELOPER_REFERENCE.md`); the **numbers** in it are still unbalanced, which is why this stays `PREVIEW`. |
 | `PLAYER_ABILITIES` | The ability framework (wheel, quick slots, Apparition/Legilimency/Animagus/Obscurial) works; the roster is small and several abilities have placeholder VFX. |
-| `CREATURES` | 106 creatures are registered; **21 are alpha-ready and 82 are still on a placeholder box rig** (§4). Natural spawning defaults to the alpha slice only (`creatureNaturalSpawns`), and the creative tab hides placeholder spawn eggs (`showPlaceholderSpawnEggs`). Registration is never gated. |
+| `CREATURES` | 106 creatures are registered; **22 are alpha-ready** (the unicorn joined on 2026-09-17) (§4). Natural spawning defaults to the alpha slice only (`creatureNaturalSpawns`), and the creative tab hides placeholder spawn eggs (`showPlaceholderSpawnEggs`). Registration is never gated. |
 | `BESTIARY` | **107 entries ship** with full lore, under `data/wizards_and_beasts/bestiary/entries/`. The screen works and entries unlock on sight (§4b). What is thin is the art: only the 32px procedural portraits exist, and the detail pane has no per-entry illustration. |
 | `PLAYER_ANIMATION` | The pose layer runs, but wave 1 ships one proving clip plus a command-driven flight pass. Poses may read wrong in edge cases (swimming, riding, elytra). |
 | `OWLS` | The O.W.L. **examination** system — grades, subjects, professions, the examination desk. It works; the grade curve is unbalanced and the profession roster is thin. The **owl post** (§5d) is new and shares this module's gate. |
 | `PLAYER_STATS` | Stats are real and read by casts and training, but the derived values and the HUD are provisional. |
-| `HERITAGE` | **3 of 10 heritages are alpha-available** — Wizardkind, Werewolf, Obscurial. The other seven (Goblin, House-Elf, Veela, Giant, Centaur, Vampire, Merpeople) are defined and shown but not selectable, and the transformation triggers for them do not exist. |
+| `HERITAGE` | **1 of 8 heritages is alpha-available** — Wizardkind. Werewolf and Obscurial are no longer heritages at all: they are **conditions** a witch or wizard carries (§5m), and a character may begin with one. The other seven peoples (Goblin, House-Elf, Veela, Giant, Centaur, Vampire, Merpeople) are defined, described in words and browsable, but not selectable; three of them now have real mechanics behind their traits (§5m). |
 
 ## 3. `DISABLED` modules — off by default
 
@@ -42,7 +42,7 @@ exist in the registry, which is why a `/give` can hand you something the module 
 |---|---|
 | `AZKABAN` | The fortress jigsaw start pool points at `data/wizards_and_beasts/structure/azkaban.nbt`, a **225-byte placeholder** with no reachable content. No Dementor spawn table, no loot. Turning it on generates an empty crag. |
 | `CHAMBER_OF_SECRETS` | Same failure mode: `structure/chamber_of_secrets/chamber.nbt` is a **1.3 KB placeholder**. `ChamberOfSecretsStructure` gates generation on the module, so a default install places no chamber. |
-| `MINISTRY` | Law enforcement — the Trace, notoriety, Auror dispatch, sentencing, licences, ranks. Never enabled in any shipped build; preserved off so existing worlds do not suddenly gain a police force. With it off, illegal magic is legal. |
+| `MINISTRY` | Law enforcement — the Trace (by evidence, not by cast), cases, hearings, fines, licences, ranks. Aurors are procedural (no mob) and Azkaban sentences are not served in-game — see §5k. Never enabled in any shipped build; preserved off so existing worlds do not suddenly gain a police force. With it off, illegal magic is legal. |
 | `DARK_ARTS` | Dark-arts gating layer. Off, so the content it would gate falls back to whatever other module owns it. |
 
 Both structure modules are deliberately `DISABLED` rather than `COMING_SOON`: `COMING_SOON`
@@ -65,7 +65,7 @@ No hand-authored advancement references disabled-module content, and that is now
 through the four generic locomotion classes, plus 10 with their own entity class. They are not
 equally finished, and the difference is deliberate rather than accidental.
 
-### 4.1 Alpha-ready (21)
+### 4.1 Alpha-ready (22)
 
 Named in [`creature/AlphaRoster.java`](../src/main/java/at/koopro/wizardsandbeasts/creature/AlphaRoster.java),
 which is the single source of truth every gate reads. A creature is listed here only when it has a
@@ -235,10 +235,11 @@ Open, and deliberately not done here:
 
 ### 4.5 Placement facing — two bugs that looked like one
 
-Reported together: the duelling dummy and the spell teacher both faced a fixed direction however
+Reported together: the duelling dummy and the study lectern both faced a fixed direction however
 they were put down. They had nothing in common except the symptom.
 
-**The spell teacher had no facing at all.** It extended `Block`, its blockstate had a single `""`
+**The study lectern had no facing at all** (it was the spell teacher then; the block id is still
+`spell_teacher`). It extended `Block`, its blockstate had a single `""`
 variant, and its model is a lectern with a *tilted reading surface* — so every one placed had its
 desk tilted north. It is a `HorizontalDirectionalBlock` now, `FACING` is
 `getHorizontalDirection().getOpposite()` (the reader's side, matching vanilla's lectern and
@@ -263,16 +264,65 @@ every dummy back to south.
 cardinals and asserts the **rendered** rotation. An assertion on `yRot` would have passed against
 the bug — which is the whole reason the bug survived to be reported.
 
+### 4.5a The spell teacher was a shop
+
+Learning a spell used to mean walking to a lectern, opening a catalogue of every spell you were
+eligible for, and paying 58 Knuts. That is a generic RPG trainer, and it quietly undercut four
+systems the mod already had: skill-web keystones that grant spells as earned progression,
+proficiency as the mastery curve, and the heritage / profession / mastery-tier gates — all of which
+were reduced to shelf labels on a price list.
+
+**What was removed.** `SpellTeacherScreen`, `ClientSpellTeacherState`, both teacher payloads,
+`ModNetworkTeacher`, `SpellLearningService.buildOffers`, `SpellOffer`, `tuitionFor`,
+`StatEffects.tuitionCost` / `tuitionMultiplier`, and the config keys `spellTeacherRequirePayment`
+and `spellTeacherLearnCostKnuts`.
+
+**What was not.** `SpellLearningEligibility` is untouched and still owns every gate;
+`SpellLearningService.tryLearnSpell` still writes and syncs. Only the trigger and the price changed.
+
+**What replaced it.** A `spell_source` data component on an item, shipped on two of them:
+`standard_book_of_spells` — the first canon stub promoted out of `CanonItemRegistry` — which survives
+being read, and `torn_spell_page`, which is spent by a successful read and only by a successful one.
+Reading either is a 60-tick channel that runs eligibility twice, once to open and once to teach.
+Sources are found: `SpellbookLootModifier` rolls one spell from a per-modifier pool into village
+houses, stronghold libraries, woodland mansions and (as pages) ruins and mineshafts, and
+`hidden_wizarding_cache` carries a guaranteed book. The block survives as
+the **Study Lectern** — same id, same model, new job: a wizard who knows a spell can spend an ink
+bottle to write a blank book into a copy, which is how a spell spreads on a server after the first
+copy is found.
+
+**KNOWLEDGE moved with it.** Its only consequence was the tuition discount, which had nothing left
+to discount. It is now a study-rate multiplier (1.00 → 1.50 at KNOWLEDGE 100) read by
+`SpellProficiencyTracker`. The floor is 1.0, never below: a stat nobody trains directly must not
+penalise the player who has not ground out the four systems it derives from.
+
+**Still open.** The coin sink this removed has not been replaced — see §5f.
+
 ## 4b. Bestiary
 
-**The unlock rule is: seeing a creature opens its page, and the entry's own `encounterTrigger`
-deepens it.** Sighting range is 12 blocks, scanned once a second per player. The rule itself is
+**A page fills the way a naturalist's notebook does — never by killing.** Reworked 2026-09-17. The rule is
 [`bestiary/EncounterRule.java`](../src/main/java/at/koopro/wizardsandbeasts/bestiary/EncounterRule.java)
-and is covered by `EncounterRuleTest`.
+(`EncounterRuleTest`):
 
-Tiers are `UNDISCOVERED → SIGHTED → ENCOUNTERED → STUDIED → MASTERED`; each rung reveals more of the
-page (rating, then short lore and habitat, then the full account). Progress is per player, stored on
-a data attachment and synced on every change.
+| Tier | Earned by | Page shows |
+|---|---|---|
+| `UNKNOWN` | — | silhouette and a hint |
+| `ENCOUNTERED` | seeing it within 12 blocks (it must be visible to you), being attacked by it, or killing it | grade, classification, short lore, habitat, size |
+| `OBSERVED` | 30 s of calm watching within 16 blocks, in sight, not having hurt it in the last minute | behaviour, diet, threats |
+| `STUDIED` | the profile's study act — feeding, handling, picking up what it shed, earning trust — or 5 min of watching for a creature that asks for nothing more | full lore, magic, weaknesses, how to approach it, materials and how each is had, its place among wizards |
+| `KNOWN` | witnessing its signature behaviour or winning its trust — or 20 min of watching for a creature with none | the signature line |
+
+Killing is only ever an encounter. `encounterTrigger` no longer decides depth; only `MANUAL` still means
+"nothing automatic touches this page". The Magizoology skill's category bonuses now speed up watching.
+
+Tiers were renamed from `UNDISCOVERED → SIGHTED → ENCOUNTERED → STUDIED → MASTERED` with the same indices.
+Saves are written by index (`tier_levels`); old name-keyed saves load with every page at the same depth. A
+datapack may still write `UNDISCOVERED`, `SIGHTED` or `MASTERED`; an old `ENCOUNTERED` now means the new tier 1.
+
+**Every entry has a profile** — Ministry division (Beast, Beast by choice, Being, Spirit, Unclassified),
+diet, behaviour, interaction rules, materials, relationship with wizarding society, study acts, signature — and
+says how much of it is canon (`CreatureProfileDataTest` checks every materials claim against the loot table,
+creature definition, bond profile or harvest rule that makes it true).
 
 Known limitations:
 
@@ -280,12 +330,46 @@ Known limitations:
   placeholder otherwise; `textures/gui/bestiary/entries/<id>.png` is read if present but none ship.
 - **Undiscovered entries are listed, not hidden.** An unopened entry shows as `???` with its
   silhouette, so the book reveals how many creatures exist before you have met any of them.
-- **`EncounterTrigger.ITEM_USE` has no caller.** Entries may declare it; nothing fires it, so such an
-  entry could only ever reach `SIGHTED`. No shipped entry uses it.
+- **Profiles for obscure creatures are thin.** Where canon says little (Rougarou, Hodag) the page says so
+  (`basis: gameplay`) rather than inventing; several diets read "Unrecorded".
+- **A signature exists for five creatures** (Bowtruckle, Demiguise, Mooncalf, Phoenix, Unicorn). Every other
+  page is completed by long watching, which is slow on purpose.
+- **Pages are not scrollable by keyboard**, only by mouse wheel over the detail pane.
 - **Ministry classification renders as repeated `X` in every language**, which is how canon writes it;
   category, size and tier labels are translated.
 - Entries whose creature has no `entityType` can never be reached at all. `toad` was in that state
   and is fixed; nothing else ships without one.
+
+## 4f. Creatures as wildlife — reworked 2026-09-17
+
+Seven creatures were given the behaviour their lore describes; the shared pieces are datapack abilities
+(`creature/ability`) and pure rules (`creature/wildlife/WildlifeRules`, `WildlifeRulesTest`), so other
+creatures can use them from JSON.
+
+| Creature | Now |
+|---|---|
+| **Demiguise** | Invisible while any player within 16 blocks looks straight at it (`watched_invisibility`); sidesteps anyone walking straight at it (`foresight`), so only an unpredictable approach reaches it; reached, it gives a tuft of hair (`groomable`) and its page is complete; sheds a tuft about once a day where it rests; rare, alone, in jungle and dark forest. Killing it yields nothing. |
+| **Unicorn** | Keeps away from anyone within 12 blocks who is not quiet (sneaking), empty-handed and already familiar with unicorns (`OBSERVED`); flees unicorn slayers and badly corrupted wizards from 24 (`wary`). The right person can comb loose a hair once a day (`groomable`), which completes its page. Sheds hair where it grazes. Killing one yields nothing, stains the killer (dark corruption, weakness, bad luck) and marks them — no unicorn lets them near again (`slayer_curse`). Rarer, in old birch and dark forest; now on the alpha roster. |
+| **Phoenix** | Is reborn instead of dying: a killing blow sets it alight and it rises as a chick that grows back over five minutes; only the void or a command ends it. Loyalty is the bond system (`creature_bonds/phoenix.json`): killing something that just hurt a phoenix earns its notice, calm company deepens it, one blow breaks it. At 60 it weeps healing tears over its badly hurt person, at 80 it gives feathers, at 90 it follows. Sheds a feather about once a day. Avoids whoever last hurt it. |
+| **Mooncalf** | A wild mooncalf is burrowed — unseen and still — except under a full moon, when the herd walks to its centre and dances; watching the dance completes its page. At dawn each dancer leaves dung. It scatters from anyone who comes at it upright. A kept (bonded) mooncalf lives above ground. Killing one yields nothing. |
+| **Bowtruckle** | Settles on the nearest tree (wandwood first) and stays within 10 blocks of it. Breaking that tree's logs or leaves sets every bowtruckle living there on the culprit for 30 s: a scratch and a moment's blindness. Its bonded wandmaker is spared. |
+| **Niffler** | Goes for gold before stones and coin, and those before anything else shiny, nearest first among equals. Spawns in badlands (in dark places, as it always would have — it had a placement and no biome). A niffler loaded from disk no longer brings a new litter with it every time its chunk loads. |
+| **Werewolf** | The creature is only out on a full-moon night; when the moon sets it leaves (no drops). Its bite — or a transformed werewolf player's — passes on lycanthropy to a human (Wizardkind) player: they become a Bitten werewolf, keeping POWER, inventory, skills and training; their first change waits for the next full moon (`werewolfBiteInfects`, on by default). |
+
+Still left:
+
+- **Other creatures keep their old AI** (wander, avoid or attack by temperament). The abilities above are
+  available to them from JSON; none has been applied beyond these seven.
+- **The mooncalf dance leaves no crop patterns**, and the herd gathers only among mooncalves that are loaded
+  together.
+- **A demiguise is found by glimpses**: it can be observed only while nobody is looking straight at it, which
+  makes its `OBSERVED` tier slow; catching it or finding its hair skips ahead.
+- **Harvest rules are still kill-gated** for troll whisker, erumpent horn, thunderbird tail feather, wampus cat
+  hair and prime heartstring (rare, tier-gated, not guaranteed). Golden snidget feather and thestral tail hair
+  still drop on a kill, although canon protects the snidget; both are flagged here rather than changed.
+- **Werewolf curse has no cure**, as in canon. `/wandb player heritage condition clear <player>` is an operator's eraser, not a remedy the world offers.
+- **No animation for rebirth, grooming, the bowtruckle's attack or the demiguise's sidestep** beyond particles
+  and sound; the rigs have no such clips.
 
 ## 4c. Skill web and spell power
 
@@ -384,7 +468,7 @@ Every creature material used to be reachable exactly one way — kill the creatu
 relationship strictly worse than no relationship. Two mechanics invert that:
 
 - **Gifts.** A bonded creature produces its material on a cooldown, indefinitely. A Bowtruckle hands
-  over wandwood saplings, a Mooncalf its dung, a Hippogriff feathers.
+  over wandwood saplings, a Mooncalf its dung, a Hippogriff feathers, a Phoenix its feathers (§4f).
 - **Breeding.** Two bonded Mooncalves or Bowtruckles, fed the breeding item, produce a juvenile that
   inherits part of its parents' bond and grows to full size on a timer.
 
@@ -397,7 +481,7 @@ so a calf is genuinely small rather than looking it.
 
 The Niffler's numbers moved into `creature_bonds/niffler.json` **unchanged** — diamond 20 / gold
 ingot 15 / nugget 5 on 120/60/30-second cooldowns, milestones at 20/50/80/100, follow from 50,
-bestiary `MASTERED` at 80 — and the NBT keys are byte-identical, so existing worlds keep their
+bestiary `KNOWN` (then `MASTERED`) at 80 — and the NBT keys are byte-identical, so existing worlds keep their
 Nifflers' owners and bonds. `BondProfileDataTest` asserts each of those numbers against the file, so
 the migration cannot drift. Its pouch, pocket-carry, theft and peek are untouched.
 
@@ -419,6 +503,37 @@ Two things did change, both fixes:
   only juvenile behaviours are being small and not producing gifts.
 - **Breeding has no pathing toward a partner.** Both parents must already be within
   `partnerRange`; they will not walk to each other the way vanilla animals do.
+
+## 5m. Heritage as identity — reworked 2026-09-17
+
+Heritage answers "who is this character", not "which race did you pick". The rework, and what is still missing:
+
+- **No heritage grants a bonus for being itself.** Wizardkind is the baseline and carries nothing; the only
+  attribute modifiers left describe bodies canon describes as physically different — a giant's size and hide, a
+  centaur's frame, the small stature of goblins and house-elves. Everything else a heritage means is a **named
+  trait** with a sentence, sorted into Traits / Magical affinities / Special characteristics
+  (`HeritageTraits`), and that is what the selection screen and the character sheet print. The old stat block
+  (POWER band, Health ±, Speed %, Armour ±) is gone from both.
+- **Blood status buys nothing.** Pure-blood, half-blood, Muggle-born and wizard-raised all roll POWER on one
+  band (20–85, `PowerBandTable`); blood purity is a prejudice in canon and is now culture and standing here.
+  The **Squib** keeps the one real difference: 0–10, no growth, no wand, no casting.
+- **Lycanthropy and the Obscurus are conditions** (`MagicalCondition`, `ConditionOrigin`), carried on top of a
+  heritage and a lineage rather than replacing them. A bitten wizard keeps their family, their POWER roll and
+  their training; the condition adds traits, decides the body, and — for the Obscurus — seals wandwork.
+  Existing saves migrate on load: a Werewolf or Obscurial record becomes Wizardkind (half-blood, because the
+  real lineage was never recorded) plus the condition (`PlayerHeritageDataMigrator`, data version 2).
+- **A character may begin with a condition.** The selection screen offers "No condition" plus every origin the
+  chosen lineage could carry. The randomiser never rolls one, and an Obscurus is refused to a Squib.
+- **Known gaps.** The seven gated peoples remain unselectable, and only three carry live mechanics: goblins pay
+  no Gringotts commission and are always spotted passing bad money; a house-elf's Apparition is elf-magic and
+  ignores wards by trait rather than by a bought skill; a star-reading centaur can read the sky
+  (`/wandb player heritage stars`) for the moon's calendar and the weather. Veela allure, merpeople water
+  dwelling, giant hide resistance and goblin craft are **described and not yet mechanical**.
+- **A condition is not broadcast.** Other clients see the form a condition puts a player in, never the
+  condition itself — Lupin kept his from a castle full of people for a year. Heritage appearance entries may be
+  keyed by condition, and those resolve server-side only.
+- **Professions dropped the six condition nodes** (werewolf Tracker/Pack Master/Alpha, obscurial
+  Channeler/Conduit/Harbinger): a curse is not a career. Anyone who had one keeps the points, not the node.
 
 ## 5. Spellcasting
 
@@ -452,6 +567,13 @@ Two things did change, both fixes:
   that authors nothing is unchanged. See §8 of [`SPELLS.md`](SPELLS.md) for the plug points.
 - **Particle counts are capped in the codec**, not trusted: 48 per impact burst, 6 per trail tick.
   Trails are client-side; impact bursts go through `sendParticles` and cost the server too.
+- **A wand hold belongs to the spell it was pressed for.** Switching the active spell mid-hold ends
+  the hold; with the button still down the wand simply starts a fresh one for the new spell, so a
+  Protego, Bombarda or Flipendo charge restarts rather than carrying over. A release that races the
+  switch casts nothing.
+- **A beam stops the moment its release would be refused.** Silenced (Langlock, Finite's interrupt),
+  drunk, barred from wands, or on the global cooldown: the channel ends instead of running on. The
+  random refusals — mental misfire, Obscurial fizzles — are still rolled once, at release.
 - Beam styles are still family-generic — only trail and impact are per-spell.
 - Every spell sound is a vanilla event. `stupefy` and `expelliarmus` shipped with no `sound` block at
   all and fell back to the generic family cast sound; both now have their own.
@@ -472,9 +594,10 @@ Two things did change, both fixes:
 - **Other players' brooms are interpolated, not re-simulated.** Onlookers used to run the full flight
   model against input they did not have.
 
-- **Brooms sink when you let go.** Every definition authors a `weakGravity` and it is now applied:
-  release the controls and the broom settles rather than hovering, capped well short of free-fall.
-  Holding ascend or descend overrides it — that is the rider taking charge of altitude.
+- **A ridden broom holds its altitude; a let-go broom settles.** (Changed 2026-09-11.) The earlier
+  build sank a ridden broom under `weakGravity` whenever neither vertical key was held, and racing
+  brooms sank in level flight at speed; both read as the broom being broken. `weakGravity` now only
+  moves a broom nobody is riding, which drifts down gently instead of dropping.
 - **Landing gently is free.** Coming down at a walking descent, not still travelling forward at
   speed, costs no durability and deals no damage. Anything harder is scored as an impact, and so is
   any wall. `broomGentleLanding=false` restores the older behaviour where every touchdown counted.
@@ -612,6 +735,29 @@ keys are magical schools (`healing`, `divination`, `charms`) and `SpellCategory`
 the same ruling is why unicorn's Healing, veela's Charms and thunderbird's Transfiguration bonuses
 are absent from the authored tables rather than mapped onto a category that means something else.
 
+### 5e.2 Wand allegiance — reworked 2026-09-17
+
+A wand's relationship with a wizard is now a state on the stack — unfamiliar, reluctant, accepting, loyal,
+mastered — worked out from its master, its bond and its history, never rolled. What changed and what is left:
+
+- **Another wizard's wand serves, badly** (0.70× power, 1.25× cooldown), and says so on the tooltip.
+  Hawthorn is the exception: it backfires in a stranger's hand. A wand with no master at all still refuses.
+- **Allegiance moves by defeat, not by possession.** Disarming, stunning (Stupefy) or killing the master
+  counts; picking a wand up, finding it on a corpse or a world death does not. The base is two defeats;
+  ash, blackthorn, unicorn hair and phoenix feather each add one, dragon heartstring takes one away. The master's next successful cast
+  clears a challenger's progress.
+- **The Elder Wand is won, never made.** Crafting or holding it grants nothing. Any defeat of its master
+  transfers it at once, wherever the wand is. Unmastered it is weaker than an ordinary wand; mastered it is
+  1.35× — extraordinary, not the highest damage in the mod by construction.
+- **Wands break.** Heavy explosion damage while held wears integrity; at 10% a wand backfires on every cast.
+  Only Reparo cast *with the Elder Wand* mends a wand; any other Reparo refuses.
+- Still left: `BONDED_WAND` and `DISARM_LOG` stay registered so saved worlds load, but nothing in play writes
+  them (the debug module still can). The legacy `wand_allegiance_legacy` record only feeds the
+  compatibility score. Neglect is applied lazily, on the master's next cast, so an idle wand's tooltip can
+  overstate its bond. Bond shifts show a toast, sound and particles — there is no wand animation.
+  Thestral's death-witness rule and troll whisker's temperament rest on low-confidence secondary sources and
+  are marked as gameplay in their `_lore` blocks.
+
 ## 5f. Currency
 
 Rates are canon and correct: **29 Knuts = 1 Sickle, 17 Sickles = 1 Galleon, 493 Knuts = 1 Galleon**
@@ -620,10 +766,12 @@ coins previously had no tooltip at all, so a new player had no way to learn that
 decimal. Balance is on the character sheet's Carried Coin panel and in the Gringotts screen at any
 goblin teller.
 
-- **The spell teacher is the coin sink, and it is now on by default** (58 Knuts — two Sickles — per
-  lesson). It was implemented but switched off, which meant nothing in a default install ever consumed
-  a coin and the whole economy was decoration. `spellTeacherRequirePayment=false` restores the old
-  sandbox behaviour.
+- **The coin sink is thin again, and this is the open problem.** The spell teacher used to be it
+  (58 Knuts per lesson). The vendor was removed on 2026-09-10 — see §4.5a — because selling spells
+  made the early game a shop rather than a school, and `spellTeacherRequirePayment` /
+  `spellTeacherLearnCostKnuts` are gone from the config with it. That leaves buying a wand from
+  Ollivander and the 493-Knut skill respec as the only sinks in a default install. **A second sink
+  that is not a spell wall is wanted**; it must buy an object or a service, not knowledge.
 - **No exchange path with emeralds.** Wizarding coins and villager trade are separate economies with
   no conversion between them, deliberately for now; there is no Gringotts exchange desk yet.
 - Coins are not accepted by any vanilla mechanic, so a player who only ever trades with villagers can
@@ -754,6 +902,52 @@ Two related fixes worth knowing about:
   living entity, so heal amounts, cure behaviour and the new handlers are compile-checked and
   reasoned about rather than run — see §8.
 
+## 5k. Ministry and magical law — reworked 2026-09-17
+
+The Trace used to be `spell cast = detected`: Avada Kedavra, Crucio and Imperio filed an offence the instant
+they were cast, anywhere, by anyone, and every other spell was invisible to the law. It is now a chain of
+evidence (`ministry.trace`):
+
+- **A cast becomes an incident only if someone will hear of it.** The Trace notices magic around an
+  underage wizard; Muggles who saw something are reported to the Obliviators; a Ministry official who watched
+  reports the caster by name. An adult's magic nobody saw is known to nobody.
+- **Word travels, and knows only part of the story.** The Trace cannot tell a child's magic from an adult's
+  standing beside them. A Muggle sighting names a place, not a person; only a serious breach earns an inquiry,
+  and the inquiry names the caster only if two or more Muggles saw.
+- **Responses climb a ladder:** noted, warning letter, investigation, summons, Auror Office. A child's first
+  offence is a warning and the second a hearing (*Chamber of Secrets*); an Unforgivable goes straight to the
+  Aurors. A case only ever climbs.
+- **Aurors look where the wizard was last reported.** They find someone only if that wizard is online, alive,
+  in the same dimension and within 96 blocks of the report. Moving away works until the next report.
+- **The Wizengamot rules on stated facts** and the letter lists its reasons: dismissed (e.g. underage magic in a
+  life-threatening situation, as in *Order of the Phoenix*), warning, fine, wand confiscation, or an Azkaban
+  referral. A hearing examines the wand and can find the last three dark acts nobody reported.
+- **Age** is on the Ministry record. Everyone is of age unless an operator sets an age
+  (`/wandb ministry age set`) or `ministryNewCharacterAge` starts new characters younger; a year takes
+  `ministryDaysPerYear` in-game days, and the Trace lifts at seventeen.
+- **Muggles** are the `wizards_and_beasts:muggles` entity tag: villagers (except wandmakers) and wandering
+  traders. **Hogwarts** is the same block-density rule the Ministry premises use, over Hogwarts stone.
+- **What the law thinks of each spell** is datapack data in `spell_law/`: legal class, visibility, offence.
+  Unauthored spells default by category; the three Unforgivables keep a floor in code.
+
+Still left:
+
+- **No Auror entity and no Azkaban sentence.** An arrest convenes the hearing at once; a referral files the
+  arrestable offence and holds the wand for a week. The record's `sentenceTicks` and `fugitive` are still
+  written by no gameplay (only the Ministry dev kit resets them).
+- **Players are never informants.** Another player who watched is recorded on the incident for the file, but
+  nothing reports them to the Ministry on their behalf, and there is no command to testify.
+- **Dangerous creatures count only at a cast.** A creature rated XXXX or above in a Muggle's view makes the
+  cast an extreme breach; a creature seen without any magic being cast is not an incident.
+- **Harm to a Muggle is not an incident of its own.** A hex that hits a villager is judged by what the
+  villagers saw, not by the hit.
+- **Goblin tellers are the only `ministry_officials`.** They are Gringotts staff, not Ministry employees, but
+  the tag already meant "who a forged licence is reported to"; a server that disagrees can empty the tag.
+- **Hogwarts and the Ministry are found by block palette**, so a house built of Hogwarts stone is Hogwarts.
+- **The Unforgivables are called by id in the game tests.** A test player cannot cast them through the wand
+  (Dark Arts module, a target and a dark alignment are needed), so those scenarios call the Trace's cast hook
+  directly with the spell id, which is everything the Trace reads.
+
 ## 6. Structures and worldgen
 
 - Azkaban and the Chamber of Secrets place nothing (§3).
@@ -774,11 +968,21 @@ Two related fixes worth knowing about:
 
 ## 8. Testing gaps
 
-- `runGameTestServer` runs **four real in-world scenarios** as of 2026-09-03
-  ([`WandCastLifecycleTests`](../src/main/java/at/koopro/wizardsandbeasts/gametest/WandCastLifecycleTests.java)),
-  covering the wand cast/release lifecycle. Note that 1.21.11 has no `@GameTest` annotation — tests are
-  registry entries added through NeoForge's `RegisterGameTestsEvent`; earlier notes in this repository
-  describing an annotation-based system were written against an older Minecraft version.
+- `runGameTestServer` runs **114 in-world scenarios** as of 2026-09-17 (the heritage rework added six: three for conditions in [`HeritageCommitTests`](../src/main/java/at/koopro/wizardsandbeasts/gametest/HeritageCommitTests.java) and three for gated-heritage mechanics in [`HeritageIdentityTests`](../src/main/java/at/koopro/wizardsandbeasts/gametest/HeritageIdentityTests.java)). The wand cast/release path is
+  covered in [`WandCastLifecycleTests`](../src/main/java/at/koopro/wizardsandbeasts/gametest/WandCastLifecycleTests.java)
+  (death, respawn, dimension change, logout/reconnect, hotbar swap, dropped wand),
+  [`WandCastRaceTests`](../src/main/java/at/koopro/wizardsandbeasts/gametest/WandCastRaceTests.java)
+  (duplicates, stragglers, releases split across ticks, re-sent use packets, spell switches, Avada's
+  server-driven release, two players) and
+  [`AfterDeathInputTests`](../src/main/java/at/koopro/wizardsandbeasts/gametest/AfterDeathInputTests.java).
+  Note that 1.21.11 has no `@GameTest` annotation — tests are registry entries added through NeoForge's
+  `RegisterGameTestsEvent`; earlier notes in this repository describing an annotation-based system were
+  written against an older Minecraft version.
+- **No test runs over a real network.** "Two clients" are two mock connections on one server:
+  packets are driven in wire order by hand and clientbound traffic is read from the embedded channel.
+  That proves the server's decisions and what it sends each player, not netty, compression or a real
+  client's prediction. Latency is modelled as the only thing it can do on one ordered connection —
+  spreading a client's packets over more server ticks.
 - Everything else in the mod still has **no in-world coverage**: no block entity, structure, GUI,
   brewing, Floo or creature behaviour is exercised by a game test.
 - The vertical slice is verified by hand — see [`ALPHA_SMOKE.md`](ALPHA_SMOKE.md).
@@ -904,6 +1108,45 @@ radius it actually protects; a round hemisphere is art work nobody has done yet.
 Spell bolts are deflected where they cross the ward. Arrows, fireballs and thrown items pass through it
 visually and are paid for out of integrity when they reach whoever is inside. Correct in effect, wrong
 in appearance.
+
+## 8c. Open findings from the 2026-09-17 casting audit
+
+The audit hardened the wand release and hold lifecycle (see `CHANGELOG.md`). These it found and left
+alone, because each is a design decision or lies outside the release pipeline.
+
+### 8c.1 `/wandb magic spell learn` and `forget` need no permission
+Neither node, nor the `/wandb` root, has a `requires`. Any player can teach themselves any spell,
+Unforgivables included, which clears the release's "spell not known" gate. `learn_all`, `reset` and
+`cast` are admin-gated. `SpellLearningTests` calls `learn` "operator level", so the gap looks
+unintended — a one-line `.requires(WizardsAndBeastsCommandPermissions.ADMIN)` each.
+
+### 8c.2 An interrupted channel costs nothing
+A beam spell's cooldown is stamped only by an accepted release. A channel ended any other way — slot
+swap, dropped wand, stun, spell switch, death — or a release refused by a random roll (mental misfire,
+Obscurial fizzle) applied its effects for free. The worst case is Avada Kedavra: the kill happens in the
+channel, and if the server-driven release then rolls a misfire the 1200-tick cooldown is never set.
+Stamping the cooldown when a channel that has *acted* ends is the obvious fix; it is a balance call.
+
+### 8c.3 Imperio on mobs does nothing after the first tick
+`ImperioServerLogic.onServerTick` carries `@SubscribeEvent` but its class is never registered, so
+commands to a controlled mob are never carried out and a mob's control state never counts down (it is
+saved with the mob). A controlled *player* keeps the control state through death — the attachment is
+`copyOnDeath`. Nothing clears a caster's bookkeeping on the caster's death or dimension change.
+
+### 8c.4 Smaller ones
+- **Expecto Patronum's fizzle still costs a cast.** Its own comments say a weak memory or a heritage
+  refusal should cost nothing, but `executeCast` returns normally, so `SpellCastService` stamps the
+  cooldown and cast count anyway.
+- **No lifecycle hook ends an Apparition charge.** Logout, the abort packet and — for tiers that abort on
+  damage — being hurt clear it; death by a source that skips that, a respawn under the same id, or a
+  dimension change do not. Not reproduced in-world.
+- **Beam proficiency is farmable by re-pressing.** The first hit of every new beam session records
+  immediately; the 20-tick spacing only applies within one hold.
+- **An Imperius-bound release leaves its token pending.** With a victim bound, letting go opens the
+  command menu and the client sends no release, so the hold's single release stays available until the
+  next hold, death, respawn, dimension change or logout. Still one cast per hold at most.
+- **A wand swapped for another wand mid-hold keeps the hold** (vanilla's same-item rule); the release
+  then casts with the wand in hand.
 
 ## 9. Reporting a new issue
 

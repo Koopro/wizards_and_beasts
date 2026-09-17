@@ -121,7 +121,7 @@ public final class SpellWheelScreen extends Screen {
             Spell spell = Spells.byId(id);
             // canHeritageUseSpell already rejects Obscurial abilities, which are driven by the ability
             // wheel and are refused by SpellAssignC2SPayload — offering one here would be a dead pick.
-            return spell != null && ObscurialRules.canHeritageUseSpell(heritage, spell);
+            return spell != null && ObscurialRules.canHeritageUseSpell(ClientHeritageDataState.get(), spell);
         });
     }
 

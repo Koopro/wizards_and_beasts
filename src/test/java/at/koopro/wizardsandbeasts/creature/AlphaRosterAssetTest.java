@@ -61,8 +61,8 @@ class AlphaRosterAssetTest {
 
     @Test
     void rosterIsTheSizeItClaims() {
-        assertEquals(21, AlphaRoster.SHIPPED.size(),
-                "the alpha slice is 21 creatures; update KNOWN_ISSUES.md alongside this");
+        assertEquals(22, AlphaRoster.SHIPPED.size(),
+                "the alpha slice is 22 creatures; update KNOWN_ISSUES.md alongside this");
     }
 
     @Test
@@ -175,10 +175,11 @@ class AlphaRosterAssetTest {
     /**
      * A loot table, or a named exception. The Obscurus disperses rather than dying and there is no
      * item for it to leave — recorded here so "no loot table" stays a decision rather than a gap
-     * nobody noticed.
+     * nobody noticed. A table may be deliberately empty: the unicorn, phoenix, mooncalf and werewolf
+     * yield nothing to a killer (see {@code CreatureLootLoreTest}).
      */
     @Test
-    void everyAlphaCreatureDropsSomething() {
+    void everyAlphaCreatureHasALootDecision() {
         Set<String> dropsNothingOnPurpose = Set.of("obscurus");
         for (String id : AlphaRoster.SHIPPED) {
             if (dropsNothingOnPurpose.contains(id)) {

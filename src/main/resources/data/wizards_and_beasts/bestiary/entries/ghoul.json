@@ -20,5 +20,24 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/ghoul.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/ghoul.png",
   "sortOrder": 201,
-  "entityType": "wizards_and_beasts:ghoul"
+  "entityType": "wizards_and_beasts:ghoul",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.ghoul.diet",
+    "behaviour": "bestiary.wizards_and_beasts.ghoul.behaviour",
+    "society": "bestiary.wizards_and_beasts.ghoul.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.ghoul.interaction.1"
+    ],
+    "materials": [
+      {
+        "item": "wizards_and_beasts:ghoul_slime",
+        "how": "remains"
+      }
+    ],
+    "study": [
+      "watch"
+    ]
+  }
 }

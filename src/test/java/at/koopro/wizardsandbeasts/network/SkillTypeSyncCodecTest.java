@@ -54,7 +54,9 @@ class SkillTypeSyncCodecTest {
                 9,
                 unlockedProfessions,
                 "wizard_apprentice",
-                true);
+                true,
+                "lycanthropy",
+                "born");
 
         ByteBuf buf = Unpooled.buffer();
         try {
@@ -73,6 +75,8 @@ class SkillTypeSyncCodecTest {
             assertEquals(original.unlockedProfessions(), decoded.unlockedProfessions());
             assertEquals(original.selectedProfessionId(), decoded.selectedProfessionId());
             assertEquals(original.openSelector(), decoded.openSelector());
+            assertEquals(original.conditionId(), decoded.conditionId());
+            assertEquals(original.conditionOriginId(), decoded.conditionOriginId());
         } finally {
             buf.release();
         }

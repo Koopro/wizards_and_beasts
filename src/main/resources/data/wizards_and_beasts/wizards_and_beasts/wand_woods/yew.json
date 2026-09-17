@@ -1,4 +1,5 @@
 {
+  "_lore": "Canon: rare, with a dark and fearsome reputation; never chooses a mediocre or timid owner. Gameplay: slightly more force and a slight Dark lean.",
   "display_name": {
     "translate": "wand_wood.wizards_and_beasts.yew"
   },
@@ -19,12 +20,12 @@
   "rarity": "rare",
   "refuse_threshold": 0.15,
   "cast_modifiers": {
-    "damage": 1.18,
+    "damage": 1.05,
     "cooldown": 1.0,
-    "range": 1.05,
-    "fizzle": 0.02,
+    "range": 1.0,
+    "fizzle": 0.0,
     "category_damage_bonus": {
-      "dark_arts": 0.15
+      "dark_arts": 0.05
     }
   }
 }

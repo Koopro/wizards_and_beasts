@@ -1,8 +1,10 @@
 package at.koopro.wizardsandbeasts.client.broom;
 
 import at.koopro.wizardsandbeasts.broom.BroomDefinition;
+import at.koopro.wizardsandbeasts.broom.BroomGeometry;
 import at.koopro.wizardsandbeasts.broom.BroomSlot;
 import at.koopro.wizardsandbeasts.entity.broom.BroomEntity;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.resources.Identifier;
@@ -42,6 +44,9 @@ public class BroomRenderer<R extends EntityRenderState & GeoRenderState>
             DataTicket.create("broom_roll_tilt", Float.class);
     public static final DataTicket<Float> FORWARD_LEAN =
             DataTicket.create("broom_forward_lean", Float.class);
+    /** Blocks the model is drawn above the broom's position: the seat lift plus the hover bob. */
+    public static final DataTicket<Float> MODEL_LIFT =
+            DataTicket.create("broom_model_lift", Float.class);
 
     /**
      * The slot → variant map this broom draws.
@@ -56,6 +61,8 @@ public class BroomRenderer<R extends EntityRenderState & GeoRenderState>
 
     public BroomRenderer(EntityRendererProvider.Context context) {
         super(context, new BroomVariantGeoModel(BASE_ASSET));
+        // The rigs are authored about 4.4 blocks long. See BroomGeometry for why half.
+        withScale(BroomGeometry.MODEL_SCALE);
     }
 
     @Override
@@ -69,6 +76,8 @@ public class BroomRenderer<R extends EntityRenderState & GeoRenderState>
         renderState.addGeckolibData(FORWARD_LEAN,
                 Mth.lerp(partialTick, broom.getPrevForwardLean(), broom.getForwardLean()));
         BroomDefinition definition = broom.resolveDefinition();
+        renderState.addGeckolibData(MODEL_LIFT,
+                (float) definition.seat().modelLift() + BroomVisuals.bob(broom, partialTick));
         renderState.addGeckolibData(MODEL_SLOTS, definition.modelSlots());
         renderState.addGeckolibData(BroomVariantGeoModel.ASSETS, definition.assets());
     }
@@ -95,6 +104,19 @@ public class BroomRenderer<R extends EntityRenderState & GeoRenderState>
         return definition.hasOwnTexture() || tint == BroomDefinition.UNTINTED
                 ? base
                 : ARGB.multiply(base, tint);
+    }
+
+    /**
+     * Lifts the model to its rider's hip before GeckoLib scales and turns it.
+     *
+     * <p>A broom's position is its rider's feet ({@code BroomGeometry}), so the shaft is drawn
+     * {@code modelLift} above it. Done here, before the scale, so the lift is in blocks rather than in
+     * half-size model space; and before the rotation, so it stays vertical however the broom is turned.
+     */
+    @Override
+    public void preRenderPass(RenderPassInfo<R> info, SubmitNodeCollector renderTasks) {
+        super.preRenderPass(info, renderTasks);
+        info.poseStack().translate(0.0f, info.getOrDefaultGeckolibData(MODEL_LIFT, 0f), 0.0f);
     }
 
     @Override

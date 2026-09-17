@@ -1,4 +1,5 @@
 {
+  "_lore": "Canon: the most power and the most flamboyant spells; learns quickly; can change allegiance if won from its master and always bonds strongly with its current owner; somewhat temperamental. Gameplay: more force and a little less control; won with one fewer defeat, accepts a new owner at once, bonds faster.",
   "display_name": {
     "translate": "wand_core.wizards_and_beasts.dragon_heartstring"
   },
@@ -10,9 +11,14 @@
   "initiative": 0.7,
   "allegiance_transfer_resistance": 0.75,
   "cast_modifiers": {
-    "damage": 1.25,
-    "cooldown": 1.05,
+    "damage": 1.1,
+    "cooldown": 1.0,
     "range": 1.0,
-    "fizzle": 0.03
+    "fizzle": 0.02
+  },
+  "temperament": {
+    "extra_wins": -1,
+    "bond_growth": 1.5,
+    "transfer_bond_bonus": 0.25
   }
 }

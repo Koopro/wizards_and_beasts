@@ -95,15 +95,8 @@ public final class DebugInspectors {
     public static Optional<Result> lookedAt(ServerPlayer player) {
         bootstrap();
         ServerLevel level = player.level();
-        Vec3 eye = player.getEyePosition();
-        Vec3 end = eye.add(player.getLookAngle().scale(REACH));
-
-        BlockHitResult blockHit = level.clip(new ClipContext(
-                eye, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
-        Vec3 blockEnd = blockHit.getType() == HitResult.Type.BLOCK ? blockHit.getLocation() : end;
-
-        // Entities only up to the first solid block: you cannot inspect what you cannot see.
-        Entity entity = pickEntity(player, eye, blockEnd);
+        BlockHitResult blockHit = clipBlocks(player);
+        Entity entity = pickEntity(player, blockHit);
         if (entity != null) {
             for (DebugInspector.OfEntity inspector : ENTITIES) {
                 if (inspector.matches(entity)) {
@@ -126,6 +119,29 @@ public final class DebugInspectors {
             }
         }
         return Optional.empty();
+    }
+
+    /**
+     * The entity one player is looking at, by the same pick the panel uses — for debug commands that
+     * act on a target rather than describe it.
+     */
+    public static Optional<Entity> entityLookedAt(ServerPlayer player) {
+        return Optional.ofNullable(pickEntity(player, clipBlocks(player)));
+    }
+
+    private static BlockHitResult clipBlocks(ServerPlayer player) {
+        Vec3 eye = player.getEyePosition();
+        Vec3 end = eye.add(player.getLookAngle().scale(REACH));
+        return player.level().clip(new ClipContext(
+                eye, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
+    }
+
+    /**
+     * Entities only up to the first solid block: you cannot inspect what you cannot see. A miss reports
+     * the ray's own end as its location, so with nothing in the way this is the full reach.
+     */
+    private static @Nullable Entity pickEntity(ServerPlayer player, BlockHitResult blockHit) {
+        return pickEntity(player, player.getEyePosition(), blockHit.getLocation());
     }
 
     /**

@@ -1,4 +1,5 @@
 {
+  "_lore": "Canon (Ilvermorny writing, via summaries): Shikoba Wolfe's cores; extremely powerful but difficult to master. Gameplay: strong, and slow to bond.",
   "display_name": {
     "translate": "wand_core.wizards_and_beasts.thunderbird_tail_feather"
   },
@@ -10,9 +11,12 @@
   "initiative": 0.92,
   "allegiance_transfer_resistance": 0.8,
   "cast_modifiers": {
-    "damage": 1.15,
-    "cooldown": 0.95,
-    "range": 1.1,
-    "fizzle": 0.04
+    "damage": 1.08,
+    "cooldown": 1.0,
+    "range": 1.0,
+    "fizzle": 0.0
+  },
+  "temperament": {
+    "bond_growth": 0.6
   }
 }

@@ -33,7 +33,9 @@ import java.util.Locale;
  *       misfire roll rather than a proportion of it.</li>
  *   <li>WILLPOWER's headline is the resist scalar, shown as a multiplier because that is what it is.
  *       The Resolve pool and its regeneration are real too and appear in the tooltip.</li>
- *   <li>KNOWLEDGE is the tuition discount.</li>
+ *   <li>KNOWLEDGE is the study rate — how much faster practice turns into proficiency. It reads
+ *       as a gain rather than a saving, so unlike the three above it is not sign-flipped when the
+ *       readout decides whether the number is doing the player a favour.</li>
  * </ul>
  */
 @NullMarked
@@ -68,7 +70,7 @@ public final class StatReadout {
             case PRECISION -> Component.literal(signedPercent(StatEffects.misfireDelta(value)));
             case REFLEXES  -> Component.literal(signedPercent(StatEffects.cooldownMultiplier(value) - 1f));
             case WILLPOWER -> Component.literal(multiplier(StatEffects.resistScalar(value)));
-            case KNOWLEDGE -> Component.literal(signedPercent(StatEffects.tuitionMultiplier(value) - 1f));
+            case KNOWLEDGE -> Component.literal(signedPercent(StatEffects.studyRate(value) - 1f));
         };
     }
 
@@ -78,11 +80,13 @@ public final class StatReadout {
      */
     public static ChatFormatting effectTone(PlayerStat stat, int value) {
         float delta = switch (stat) {
-            // Lower is better for these three, so their sign is flipped before the comparison.
+            // Lower is better for these two, so their sign is flipped before the comparison.
             case PRECISION -> -StatEffects.misfireDelta(value);
             case REFLEXES  -> 1f - StatEffects.cooldownMultiplier(value);
-            case KNOWLEDGE -> 1f - StatEffects.tuitionMultiplier(value);
             case POWER     -> StatEffects.damageMultiplier(value) - 1f;
+            // KNOWLEDGE used to be a discount, where lower was better. It is now a study-rate
+            // multiplier, where higher is, so it moved out of the flipped group when it was re-homed.
+            case KNOWLEDGE -> StatEffects.studyRate(value) - 1f;
             // WILLPOWER has no bad end — the scalar only climbs from its floor — so it is measured
             // against that floor rather than against a neutral it does not have.
             case WILLPOWER -> StatEffects.resistScalar(value) - StatEffects.RESIST_AT_ZERO;

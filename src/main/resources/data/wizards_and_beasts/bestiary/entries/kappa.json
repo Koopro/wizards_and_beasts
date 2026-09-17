@@ -23,5 +23,19 @@
   "entityType": "wizards_and_beasts:kappa",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/kappa.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/kappa.png",
-  "sortOrder": 76
+  "sortOrder": 76,
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.kappa.diet",
+    "behaviour": "bestiary.wizards_and_beasts.kappa.behaviour",
+    "society": "bestiary.wizards_and_beasts.kappa.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.kappa.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

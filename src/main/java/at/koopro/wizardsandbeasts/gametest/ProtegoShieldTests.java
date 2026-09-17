@@ -6,6 +6,7 @@ import at.koopro.wizardsandbeasts.spell.core.Spells;
 import at.koopro.wizardsandbeasts.spell.protego.ProtegoRules;
 import at.koopro.wizardsandbeasts.spell.protego.ProtegoTier;
 import at.koopro.wizardsandbeasts.spell.protego.ProtegoWardManager;
+import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -222,8 +223,15 @@ public final class ProtegoShieldTests {
         check(helper, !ProtegoRules.canPlant(ProtegoTier.TOTALUM, true),
                 () -> "Totalum reported itself plantable");
         ProtegoShieldEntity shield = raise(helper, caster, ProtegoTier.TOTALUM, false, POOL);
+        // The ward only follows while it is ticked, and only the structure's own chunk ticks entities. The walk
+        // and the dome's footprint can reach the next chunk, where the ward would stand still for a reason that
+        // has nothing to do with the ward: force every chunk the scenario spans first.
+        BlockPos spanMin = BlockPos.containing(at.add(-3.0, -1.0, -3.0));
+        BlockPos spanMax = BlockPos.containing(at.add(8.0, 3.0, 3.0));
+        WizardTestSupport.forceChunks(helper, spanMin, spanMax);
 
         helper.startSequence()
+                .thenWaitUntil(() -> WizardTestSupport.checkChunksTick(helper, spanMin, spanMax))
                 .thenExecute(() -> {
                     Vec3 away = helper.absoluteVec(at.add(4.0, 0.0, 0.0));
                     caster.teleportTo(away.x, away.y, away.z);

@@ -23,5 +23,31 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/phoenix.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/phoenix.png",
   "sortOrder": 26,
-  "entityType": "wizards_and_beasts:phoenix"
+  "entityType": "wizards_and_beasts:phoenix",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.phoenix.diet",
+    "behaviour": "bestiary.wizards_and_beasts.phoenix.behaviour",
+    "society": "bestiary.wizards_and_beasts.phoenix.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.phoenix.interaction.1",
+      "bestiary.wizards_and_beasts.phoenix.interaction.2"
+    ],
+    "materials": [
+      {
+        "item": "wizards_and_beasts:phoenix_feather",
+        "how": "shed"
+      },
+      {
+        "item": "wizards_and_beasts:phoenix_feather",
+        "how": "gift"
+      }
+    ],
+    "study": [
+      "harvest",
+      "bond"
+    ],
+    "signature": "bestiary.wizards_and_beasts.phoenix.signature"
+  }
 }

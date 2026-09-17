@@ -16,14 +16,33 @@
   "traits": [],
   "abilities": [
     {
-      "type": "camouflage",
-      "reveal_ticks": 60
-    },
-    {
       "type": "evasion",
       "dodge_chance": 0.6,
       "range": 6.0,
       "cooldown_ticks": 40
+    },
+    {
+      "type": "watched_invisibility",
+      "range": 16.0
+    },
+    {
+      "type": "foresight",
+      "range": 7.0,
+      "cooldown_ticks": 30,
+      "sidestep": 4.0
+    },
+    {
+      "type": "groomable",
+      "item": "wizards_and_beasts:demiguise_hair",
+      "count": 1,
+      "cooldown_ticks": 24000,
+      "require_trust": false
+    },
+    {
+      "type": "shed",
+      "item": "wizards_and_beasts:demiguise_hair",
+      "interval_ticks": 24000,
+      "count": 1
     }
   ],
   "clips": [

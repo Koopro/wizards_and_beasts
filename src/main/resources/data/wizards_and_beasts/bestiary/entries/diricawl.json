@@ -23,5 +23,19 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/diricawl.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/diricawl.png",
   "sortOrder": 30,
-  "entityType": "wizards_and_beasts:diricawl"
+  "entityType": "wizards_and_beasts:diricawl",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.diricawl.diet",
+    "behaviour": "bestiary.wizards_and_beasts.diricawl.behaviour",
+    "society": "bestiary.wizards_and_beasts.diricawl.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.diricawl.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

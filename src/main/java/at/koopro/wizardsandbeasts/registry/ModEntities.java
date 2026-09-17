@@ -38,7 +38,8 @@ public class ModEntities {
     private ModEntities() {}
 
     public static final DeferredHolder<EntityType<?>, EntityType<BroomEntity>> BROOM =
-            EntityHelper.registerMisc(ENTITY_TYPES, "broom", BroomEntity::new, 1.5f, 0.6f);
+            // A hovering broom on its own. A ridden one takes its rider's box: BroomEntity#getDimensions.
+            EntityHelper.registerMisc(ENTITY_TYPES, "broom", BroomEntity::new, 0.8f, 1.0f);
 
     public static final DeferredHolder<EntityType<?>, EntityType<SpellProjectileEntity>> SPELL_PROJECTILE =
             EntityHelper.register(ENTITY_TYPES, "spell_projectile", SpellProjectileEntity::new, MobCategory.MISC, 0.25f, 0.25f, 8, 2);

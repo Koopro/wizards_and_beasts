@@ -32,6 +32,7 @@ public record FormSyncS2CPayload(
         float reachBonus,
         float knockbackResistance,
         float stepHeight,
+        float eyeHeight,
         int renderFlagMask
 ) implements CustomPacketPayload {
 
@@ -52,9 +53,10 @@ public record FormSyncS2CPayload(
             float reach = buf.readFloat();
             float kb    = buf.readFloat();
             float step  = buf.readFloat();
+            float eye   = buf.readFloat();
             int flags   = buf.readInt();
 
-            return new FormSyncS2CPayload(uuid, formId, hw, hh, ms, ax, az, reach, kb, step, flags);
+            return new FormSyncS2CPayload(uuid, formId, hw, hh, ms, ax, az, reach, kb, step, eye, flags);
         }
 
         @Override
@@ -70,6 +72,7 @@ public record FormSyncS2CPayload(
             buf.writeFloat(pkt.reachBonus);
             buf.writeFloat(pkt.knockbackResistance);
             buf.writeFloat(pkt.stepHeight);
+            buf.writeFloat(pkt.eyeHeight);
             buf.writeInt(pkt.renderFlagMask);
         }
     };
@@ -109,6 +112,9 @@ public record FormSyncS2CPayload(
                 size.hitboxWidth(), size.hitboxHeight(),
                 size.modelScale(), size.modelAspectX(), size.modelAspectZ(),
                 size.reachBonus(), size.knockbackResistance(), size.stepHeight(),
+                // Without this the client rebuilds the profile with vanilla's ratio and the camera
+                // of a transformed player sits at a different height on each side.
+                size.eyeHeight(),
                 form.renderFlagBitmask());
     }
 }

@@ -18,7 +18,10 @@ import net.minecraft.server.level.ServerPlayer;
  *
  * <p>{@link PlayerStat#WILLPOWER} is not here: it governs resisting magic rather than casting it,
  * and is read at the resist rolls in {@code ImperioServerLogic} and {@code LegilimencyServerLogic}.
- * {@link PlayerStat#KNOWLEDGE} is derived and purely informational.
+ * {@link PlayerStat#KNOWLEDGE} is not here either, and it is no longer merely informational: it is
+ * read once, by {@code SpellProficiencyTracker}, as the rate at which a landed cast turns into
+ * proficiency. Deliberately outside the cast pipeline — it governs what a cast <em>teaches</em>, not
+ * what it does — so putting it here would make one stat two things.
  *
  * <p>POWER goes through {@code multiplyDamage} because {@code ModifierStack} has no power channel.
  * It used to carry one, but nothing ever read the result, so the channel was deleted rather than

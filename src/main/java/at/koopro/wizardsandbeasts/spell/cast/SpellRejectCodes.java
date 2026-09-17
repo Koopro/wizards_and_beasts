@@ -34,6 +34,8 @@ public final class SpellRejectCodes {
      * client's own release arriving after a server-driven one (Avada ending the channel on the kill).
      */
     public static final String DUPLICATE_RELEASE_GUARD = "duplicate_release_guard";
+    /** A client release packet arrived while vanilla still considered the server-side wand hold active. */
+    public static final String RELEASE_NOT_CONFIRMED = "release_not_confirmed";
     /**
      * A release arrived with no wand hold open on the server: nothing was ever cast, or the session was
      * aborted by death, respawn, a dimension change or an admin reset before the packet landed.
@@ -45,10 +47,20 @@ public final class SpellRejectCodes {
     public static final String CASTER_NOT_ALIVE = "caster_not_alive";
     /** A release ended a hold that was sustaining a spell clash. Not a desync and never shown: letting go lost the lock. */
     public static final String CLASH_HOLD = "clash_hold";
+    /**
+     * A release ended a hold that began with a different active spell. Not a desync: the player switched spell
+     * before letting go, and the hold's charge belongs to the spell it was pressed for.
+     */
+    public static final String SPELL_CHANGED_DURING_HOLD = "spell_changed_during_hold";
     /** Held wand has no bonded master (resonance never matched). */
     public static final String WAND_NOT_BONDED = "wand_not_bonded";
     /** Held wand is bonded to another player. */
     public static final String WAND_WRONG_MASTER = "wand_wrong_master";
+    /**
+     * The wand backfired instead of casting: it is broken, or it will not work for anyone but its master.
+     * Site-owned — {@code WandAllegianceService.backfire} says which.
+     */
+    public static final String WAND_BACKFIRE = "wand_backfire";
     public static final String LANGLOCKED = "langlocked";
     /**
      * Gamp's Law refused the cast outright. Not stored in the reject counters — the Gamp path predates
@@ -82,6 +94,8 @@ public final class SpellRejectCodes {
      * <em>every</em> wand packet is covered by one check — see {@code heritage.werewolf}.
      */
     public static final String SUFFIX_FERAL = "_feral";
+    /** The Ministry holds this wizard's wand after a hearing. */
+    public static final String SUFFIX_WAND_CONFISCATED = "_wand_confiscated";
 
     public static final String ASSIGN_UNKNOWN_SPELL = "assign_unknown_spell";
     /**
@@ -120,12 +134,15 @@ public final class SpellRejectCodes {
             COLLAPSE_INSTABILITY_FIZZLE,
             OBSCURIAL_INSTABILITY_FIZZLE,
             DUPLICATE_RELEASE_GUARD,
+            RELEASE_NOT_CONFIRMED,
             NO_CAST_SESSION,
             CAST_SESSION_EXPIRED,
             CASTER_NOT_ALIVE,
             CLASH_HOLD,
+            SPELL_CHANGED_DURING_HOLD,
             WAND_NOT_BONDED,
             WAND_WRONG_MASTER,
+            WAND_BACKFIRE,
             LANGLOCKED,
             CAST_FAILED);
 
@@ -193,14 +210,15 @@ public final class SpellRejectCodes {
     private static final Map<String, String> SUFFIX_MESSAGE_KEYS = Map.of(
             SUFFIX_TYPE_CANNOT_USE_WAND, "wandcraft.cast.reject.type_cannot_use_wand",
             SUFFIX_INVALID_SLOT, "wandcraft.cast.reject.invalid_slot",
-            SUFFIX_FERAL, "wandcraft.cast.reject.feral");
+            SUFFIX_FERAL, "wandcraft.cast.reject.feral",
+            SUFFIX_WAND_CONFISCATED, "wandcraft.cast.reject.wand_confiscated");
 
     /**
      * Codes whose player-facing text is written at the reject site because it is composed from live
      * state. The denial still travels — the sound plays and the counter ticks — but the client renders
      * no text of its own for these, so the site's richer sentence is never doubled by a generic one.
      */
-    private static final Set<String> SITE_OWNED = Set.of(REQUIREMENTS_UNMET, GAMP_HARD_REJECT);
+    private static final Set<String> SITE_OWNED = Set.of(REQUIREMENTS_UNMET, GAMP_HARD_REJECT, WAND_BACKFIRE);
 
     /**
      * Codes never shown to a player at all: desync guards and impossible-state checks. They are
@@ -274,7 +292,8 @@ public final class SpellRejectCodes {
         String base = baseReason(storedKey);
         if (base.endsWith(SUFFIX_TYPE_CANNOT_USE_WAND)
                 || base.endsWith(SUFFIX_INVALID_SLOT)
-                || base.endsWith(SUFFIX_FERAL)) {
+                || base.endsWith(SUFFIX_FERAL)
+                || base.endsWith(SUFFIX_WAND_CONFISCATED)) {
             return "guard_*";
         }
         if (base.startsWith("assign_")) {

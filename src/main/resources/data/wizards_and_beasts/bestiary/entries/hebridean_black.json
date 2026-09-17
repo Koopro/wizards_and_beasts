@@ -23,5 +23,24 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/hebridean_black.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/hebridean_black.png",
   "sortOrder": 9,
-  "entityType": "wizards_and_beasts:hebridean_black"
+  "entityType": "wizards_and_beasts:hebridean_black",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.hebridean_black.diet",
+    "behaviour": "bestiary.wizards_and_beasts.hebridean_black.behaviour",
+    "society": "bestiary.wizards_and_beasts.hebridean_black.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.hebridean_black.interaction.1"
+    ],
+    "materials": [
+      {
+        "item": "wizards_and_beasts:dragon_heartstring",
+        "how": "remains"
+      }
+    ],
+    "study": [
+      "watch"
+    ]
+  }
 }

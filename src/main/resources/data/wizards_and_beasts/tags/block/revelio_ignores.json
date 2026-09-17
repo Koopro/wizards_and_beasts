@@ -1,0 +1,23 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:all_signs",
+    "#minecraft:beds",
+    "#minecraft:banners",
+    "#minecraft:campfires",
+    "#minecraft:beehives",
+    { "id": "#c:skulls", "required": false },
+    "minecraft:bell",
+    "minecraft:daylight_detector",
+    "minecraft:comparator",
+    "minecraft:enchanting_table",
+    "minecraft:end_portal",
+    "minecraft:end_gateway",
+    "wizards_and_beasts:gryffindor_banner",
+    "wizards_and_beasts:slytherin_banner",
+    "wizards_and_beasts:ravenclaw_banner",
+    "wizards_and_beasts:hufflepuff_banner",
+    "wizards_and_beasts:tent_canvas",
+    "wizards_and_beasts:tent_grand"
+  ]
+}

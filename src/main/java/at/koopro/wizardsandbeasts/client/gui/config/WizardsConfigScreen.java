@@ -54,8 +54,6 @@ public class WizardsConfigScreen extends Screen {
     // Unknown future keys fall back to Gameplay.
     private static final Map<String, String> CATEGORY_BY_KEY = Map.ofEntries(
             Map.entry("enforceSpellRequirements", "Gameplay"),
-            Map.entry("spellTeacherRequirePayment", "Gameplay"),
-            Map.entry("spellTeacherLearnCostKnuts", "Gameplay"),
             Map.entry("enableWandAllegiance", "Gameplay"),
             Map.entry("enableCloakSelfViewRestrictions", "Gameplay"),
             Map.entry("cloakSelfViewRestrictionsDeathlyOnly", "Gameplay"),

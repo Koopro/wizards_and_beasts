@@ -23,5 +23,19 @@
   "entityType": "wizards_and_beasts:glumbumble",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/glumbumble.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/glumbumble.png",
-  "sortOrder": 91
+  "sortOrder": 91,
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.glumbumble.diet",
+    "behaviour": "bestiary.wizards_and_beasts.glumbumble.behaviour",
+    "society": "bestiary.wizards_and_beasts.glumbumble.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.glumbumble.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

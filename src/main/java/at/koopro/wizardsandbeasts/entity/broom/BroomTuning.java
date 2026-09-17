@@ -23,10 +23,16 @@ public final class BroomTuning {
 
     // ── Steering ────────────────────────────────────────────────────────────────────────────────
 
-    /** Degrees of yaw per tick at a standstill — a broom turns tightest when it is slowest. */
-    public static final float LOW_SPEED_TURN_RATE = 13.0f;
+    /**
+     * Degrees of yaw per tick at a standstill — a broom turns tightest when it is slowest.
+     *
+     * <p>Raised from 13 (and 7 at the ceiling) on 2026-09-11. The rider looks where the mouse points and
+     * the broom follows at this rate, so a slow rate means flying one way while looking another; at 13 a
+     * school broom took most of a second to come round a right angle at speed.
+     */
+    public static final float LOW_SPEED_TURN_RATE = 18.0f;
     /** Degrees of yaw per tick at this broom's ceiling. */
-    public static final float HIGH_SPEED_TURN_RATE = 7.0f;
+    public static final float HIGH_SPEED_TURN_RATE = 11.0f;
     /** Degrees of pitch per tick. Caps how fast the nose can swing, not how far. */
     public static final float MAX_PITCH_RATE = 9.0f;
     /**
@@ -50,7 +56,7 @@ public final class BroomTuning {
 
     /**
      * The fastest any shipped broom goes: the Firebolt Supreme's {@code maxSpeed * boostMultiplier},
-     * 1.05 × 2.5.
+     * 1.35 × 1.8 since the 2026-09-11 retune (1.05 × 2.5 before it).
      *
      * <p>A fallback denominator, and nothing else. Any code holding the definition being flown must
      * divide by <em>that</em> broom's ceiling instead.
@@ -65,14 +71,14 @@ public final class BroomTuning {
      * the thresholds mean "a fraction of what this broom can do", which is the only reading under
      * which one set of numbers can serve an eight-broom range.
      */
-    public static final float REFERENCE_TOP_SPEED = 2.625f;
+    public static final float REFERENCE_TOP_SPEED = 2.43f;
 
     // ── Sink ────────────────────────────────────────────────────────────────────────────────────
 
     /**
-     * Fastest a broom sinks under its own {@code weakGravity} with no input. Well under free-fall:
-     * letting go of the controls should feel like settling, and should never kill a player who let go
-     * over a long drop.
+     * Fastest a broom nobody is riding settles under its own {@code weakGravity}. Well under free-fall:
+     * a broom let go of in mid-air drifts down rather than dropping, which is what a thing that flies
+     * does when nobody is flying it. A ridden broom holds its altitude and never reaches this.
      */
     public static final float TERMINAL_SINK_SPEED = 0.35f;
 

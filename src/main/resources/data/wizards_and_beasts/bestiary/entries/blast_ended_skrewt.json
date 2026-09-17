@@ -23,5 +23,19 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/blast_ended_skrewt.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/blast_ended_skrewt.png",
   "sortOrder": 20,
-  "entityType": "wizards_and_beasts:blast_ended_skrewt"
+  "entityType": "wizards_and_beasts:blast_ended_skrewt",
+  "profile": {
+    "classification": "beast",
+    "basis": "partial",
+    "diet": "bestiary.wizards_and_beasts.blast_ended_skrewt.diet",
+    "behaviour": "bestiary.wizards_and_beasts.blast_ended_skrewt.behaviour",
+    "society": "bestiary.wizards_and_beasts.blast_ended_skrewt.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.blast_ended_skrewt.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

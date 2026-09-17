@@ -77,7 +77,7 @@ public final class FormSystemAPI {
         PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
         Heritage type = data.getSelectedHeritage();
         if (type == null) return List.of("human_default");
-        return HeritageFormBridge.getAvailableFormIds(type);
+        return HeritageFormBridge.getAvailableFormIds(type, data.getCondition());
     }
 
     /**
@@ -91,7 +91,7 @@ public final class FormSystemAPI {
         String defaultFormId;
         if (type != null) {
             defaultFormId = HeritageFormBridge.getDefaultFormId(
-                    type, data.getSelectedHeritageVariant(), data.getTransformationState());
+                    type, data.getSelectedHeritageVariant(), data.getCondition(), data.getTransformationState());
         } else {
             defaultFormId = "human_default";
         }

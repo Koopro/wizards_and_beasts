@@ -23,5 +23,19 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/boggart.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/boggart.png",
   "sortOrder": 46,
-  "entityType": "wizards_and_beasts:boggart"
+  "entityType": "wizards_and_beasts:boggart",
+  "profile": {
+    "classification": "unclassified",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.boggart.diet",
+    "behaviour": "bestiary.wizards_and_beasts.boggart.behaviour",
+    "society": "bestiary.wizards_and_beasts.boggart.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.boggart.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

@@ -37,8 +37,8 @@ public final class Compatibility {
             return new Score(0.5f, 0.5f);
         }
 
-        float subtypeAffinity = subtypeAffinity(core, wood, subtype);
-        float flexibility = flexibilityMatch(flex, subtype);
+        float subtypeAffinity = subtypeAffinity(core, wood, typeData);
+        float flexibility = flexibilityMatch(flex, typeData);
         float lengthMatch = lengthMatch(length, subtype);
         float fate = fate(core, wood, flex, length, subtype);
 
@@ -51,34 +51,33 @@ public final class Compatibility {
         return initialCompat >= BIND_THRESHOLD;
     }
 
-    private static float subtypeAffinity(WandCore core, WandWood wood, HeritageVariant subtype) {
+    /**
+     * What a character's traits draw a wand towards. Blood status draws nothing: a wand chooses the witch or wizard,
+     * and Ollivander never asked Hermione who her parents were.
+     */
+    private static float subtypeAffinity(WandCore core, WandWood wood, PlayerHeritageData data) {
         float score = 0.5f;
-        if (subtype.hasTag("obscurus_form")) {
+        if (data.hasTrait("obscurus_form")) {
             if (core == WandCore.THESTRAL_TAIL || core == WandCore.DRAGON_HEARTSTRING) score += 0.2f;
             if (wood == WandWood.YEW || wood == WandWood.ELDER) score += 0.1f;
         }
-        boolean veelaCharm = subtype.getParentHeritage() == Heritage.VEELA
-                && (subtype.hasTag("enhanced_bond") || subtype.hasTag("transformation"));
-        if (veelaCharm) {
+        // Fleur Delacour's wand has a core of her grandmother's hair.
+        if (data.getSelectedHeritage() == Heritage.VEELA && data.hasTrait("allure")) {
             if (core == WandCore.VEELA_HAIR || core == WandCore.UNICORN_HAIR) score += 0.2f;
             if (wood == WandWood.HOLLY) score += 0.05f;
         }
-        if (subtype.hasTag("nature_speech")) {
+        if (data.hasTrait("creature_kinship")) {
             if (wood == WandWood.ROWAN) score += 0.2f;
             if (core == WandCore.UNICORN_HAIR) score += 0.1f;
-        }
-        if (subtype.hasTag("dark_resistance")) {
-            if (core == WandCore.PHOENIX_FEATHER) score += 0.1f;
-            if (wood == WandWood.ELDER) score -= 0.05f;
         }
         return clamp(score);
     }
 
-    private static float flexibilityMatch(WandFlexibility flexibility, HeritageVariant subtype) {
+    private static float flexibilityMatch(WandFlexibility flexibility, PlayerHeritageData data) {
         float score = 0.5f;
-        boolean rigidLean = subtype.hasTag("moon_sensitive")
-                || "warrior".equals(subtype.getId())
-                || (subtype.hasTag("obscurus_form") && subtype.hasTag("transformation"));
+        boolean rigidLean = data.hasTrait("moon_sensitive")
+                || data.hasTrait("goblin_rebellions")
+                || (data.hasTrait("obscurus_form") && data.hasTrait("transformation"));
         if (rigidLean) {
             if (flexibility == WandFlexibility.UNYIELDING || flexibility == WandFlexibility.RIGID) score += 0.2f;
         } else {
@@ -91,8 +90,7 @@ public final class Compatibility {
         float score = 0.5f;
         if ("full_giant".equals(subtype.getId()) || "war".equals(subtype.getId())) {
             if (length == WandLength.LONG) score += 0.2f;
-        } else if (subtype.hasTag("enhanced_bond") || subtype.hasTag("divination_sight")
-                || subtype.hasTag("rune_affinity")) {
+        } else if (subtype.hasTag("star_reading") || subtype.hasTag("rune_affinity")) {
             if (length == WandLength.MEDIUM || length == WandLength.STANDARD) score += 0.15f;
         } else if (length == WandLength.STANDARD) {
             score += 0.1f;

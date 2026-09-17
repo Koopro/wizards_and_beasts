@@ -259,6 +259,15 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
             player.startRiding(this);
             return InteractionResult.SUCCESS;
         }
+        // Abilities first: a unicorn that lets itself be groomed, a demiguise caught.
+        if (!level().isClientSide() && ModuleManager.isEnabled(Module.CREATURES)) {
+            for (CreatureAbility ability : abilities()) {
+                InteractionResult answered = ability.onInteract(this, player, hand);
+                if (answered != InteractionResult.PASS) {
+                    return answered;
+                }
+            }
+        }
         // Only creatures with a bond profile get past this; every other item and every other
         // creature falls straight through to the default interaction.
         InteractionResult fed = offerBondFood(player, hand);

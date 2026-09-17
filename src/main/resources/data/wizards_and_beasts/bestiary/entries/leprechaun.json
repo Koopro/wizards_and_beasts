@@ -23,5 +23,19 @@
   "entityType": "wizards_and_beasts:leprechaun",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/leprechaun.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/leprechaun.png",
-  "sortOrder": 70
+  "sortOrder": 70,
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.leprechaun.diet",
+    "behaviour": "bestiary.wizards_and_beasts.leprechaun.behaviour",
+    "society": "bestiary.wizards_and_beasts.leprechaun.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.leprechaun.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

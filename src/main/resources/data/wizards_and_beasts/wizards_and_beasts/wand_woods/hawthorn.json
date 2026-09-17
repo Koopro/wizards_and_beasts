@@ -1,4 +1,5 @@
 {
+  "_lore": "Canon: strange and contradictory; suited to healing and to curses; its spells can backfire when badly handled. Gameplay: a slight lean toward curses (healing has no spell category to lean on), and its spells backfire in any hand but its master's.",
   "display_name": {
     "translate": "wand_wood.wizards_and_beasts.hawthorn"
   },
@@ -18,12 +19,15 @@
   "rarity": "uncommon",
   "refuse_threshold": 0.2,
   "cast_modifiers": {
-    "damage": 1.1,
+    "damage": 1.0,
     "cooldown": 1.0,
     "range": 1.0,
-    "fizzle": 0.05,
+    "fizzle": 0.0,
     "category_damage_bonus": {
-      "dark_arts": 0.15
+      "dark_arts": 0.05
     }
+  },
+  "temperament": {
+    "backfires_in_foreign_hands": true
   }
 }

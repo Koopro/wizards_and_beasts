@@ -1,11 +1,12 @@
 package at.koopro.wizardsandbeasts.client.render.outline;
 
-import at.koopro.wizardsandbeasts.network.debug.EntityOutlineS2CPayload;
+import at.koopro.wizardsandbeasts.network.outline.BlockOutlineS2CPayload;
+import at.koopro.wizardsandbeasts.network.outline.EntityOutlineS2CPayload;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jspecify.annotations.NullMarked;
 
 /**
- * Client-side handler for the outline payload. Kept separate from the common registrar for the same
+ * Client-side handlers for the outline payloads. Kept separate from the common registrars for the same
  * dist-safety reason as {@code BeamClientPayloadHandlers}: client types are referenced only inside
  * method bodies, which never run on a dedicated server.
  */
@@ -20,6 +21,16 @@ public final class OutlineClientPayloadHandlers {
                 ClientOutlineState.replaceAll(payload.entities());
             } else {
                 payload.entities().forEach(ClientOutlineState::put);
+            }
+        });
+    }
+
+    public static void handleBlockOutline(BlockOutlineS2CPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            switch (payload.action()) {
+                case ADD -> ClientBlockOutlineState.add(payload.highlightId(), payload.outline(), payload.positions());
+                case REMOVE -> ClientBlockOutlineState.remove(payload.highlightId());
+                case CLEAR -> ClientBlockOutlineState.clear();
             }
         });
     }

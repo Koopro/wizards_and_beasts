@@ -85,6 +85,13 @@ public final class BestiaryScreen extends Screen {
     private Identifier selected;
     private int scrollOffset = 0;
 
+    /** Detail pane scroll, in wrapped lines; reset whenever the selection changes. */
+    private int detailScroll = 0;
+    private int detailScrollMax = 0;
+    private @Nullable Identifier detailScrollFor;
+    private static final int DETAIL_LINE_H = 9;
+    private static final int DETAIL_GAP_H = 3;
+
     /** Cached client-side entity instances for live detail-panel rendering. */
     private final Map<Identifier, LivingEntity> renderEntities = new HashMap<>();
     /** Entity-type ids that failed to resolve to a LivingEntity — don't retry each frame. */
@@ -217,7 +224,7 @@ public final class BestiaryScreen extends Screen {
     }
 
     private Identifier resolveEntryPortrait(BestiaryEntry entry, DiscoveryTier tier) {
-        if (tier == DiscoveryTier.UNDISCOVERED) {
+        if (tier == DiscoveryTier.UNKNOWN) {
             return entry.silhouetteTexture();
         }
         Identifier specific = Identifier.fromNamespaceAndPath(
@@ -318,13 +325,13 @@ public final class BestiaryScreen extends Screen {
                 if (isSel) {
                     gg.fill(x + 6, rowY, rowRight, rowY + ROW_HEIGHT, SELECTED_ROW_TINT);
                 }
-                DiscoveryTier tier = ClientBestiaryCache.get().tiers().getOrDefault(e.id(), DiscoveryTier.UNDISCOVERED);
-                Component name = tier == DiscoveryTier.UNDISCOVERED
+                DiscoveryTier tier = ClientBestiaryCache.get().tiers().getOrDefault(e.id(), DiscoveryTier.UNKNOWN);
+                Component name = tier == DiscoveryTier.UNKNOWN
                         ? Component.translatable("bestiary.wizards_and_beasts.entry.unknown")
                         : e.displayName();
                 int nameMaxWidth = 72;
                 String clipped = font.plainSubstrByWidth(name.getString(), nameMaxWidth);
-                gg.drawString(font, Component.literal(clipped), x + 8, rowY + 3, tier == DiscoveryTier.UNDISCOVERED ? WizardsPalette.TEXT_DIM : WizardsPalette.TEXT);
+                gg.drawString(font, Component.literal(clipped), x + 8, rowY + 3, tier == DiscoveryTier.UNKNOWN ? WizardsPalette.TEXT_DIM : WizardsPalette.TEXT);
                 for (int i = 0; i < 5; i++) {
                     int c = i <= tier.tierIndex() ? WizardsPalette.PIP_ON : WizardsPalette.PIP_OFF;
                     gg.fill(x + 82 + i * 5, rowY + 5, x + 85 + i * 5, rowY + 8, c);
@@ -352,8 +359,8 @@ public final class BestiaryScreen extends Screen {
         // the entity helper sets up its own projection/scissor from raw screen coordinates.
         if (selectedEntry != null) {
             DiscoveryTier detailTier = ClientBestiaryCache.get().tiers()
-                    .getOrDefault(selectedEntry.id(), DiscoveryTier.UNDISCOVERED);
-            if (detailTier != DiscoveryTier.UNDISCOVERED) {
+                    .getOrDefault(selectedEntry.id(), DiscoveryTier.UNKNOWN);
+            if (detailTier != DiscoveryTier.UNKNOWN) {
                 LivingEntity living = getRenderEntity(selectedEntry);
                 if (living != null) {
                     renderBestiaryEntity(gg, living, mouseX, mouseY);
@@ -368,8 +375,8 @@ public final class BestiaryScreen extends Screen {
             if (hovered >= 0 && hovered < rows.size()) {
                 Row row = rows.get(hovered);
                 if (row.entry != null) {
-                    DiscoveryTier tier = ClientBestiaryCache.get().tiers().getOrDefault(row.entry.id(), DiscoveryTier.UNDISCOVERED);
-                    if (tier == DiscoveryTier.UNDISCOVERED) {
+                    DiscoveryTier tier = ClientBestiaryCache.get().tiers().getOrDefault(row.entry.id(), DiscoveryTier.UNKNOWN);
+                    if (tier == DiscoveryTier.UNKNOWN) {
                         gg.setTooltipForNextFrame(font, tier.unlockHint(), mouseX, mouseY);
                     }
                 }
@@ -397,8 +404,12 @@ public final class BestiaryScreen extends Screen {
     private void renderDetail(GuiGraphics gg, BestiaryEntry entry) {
         int dx = x + 132;
         int dy = y + 10;
-        DiscoveryTier tier = ClientBestiaryCache.get().tiers().getOrDefault(entry.id(), DiscoveryTier.UNDISCOVERED);
-        Component name = tier == DiscoveryTier.UNDISCOVERED
+        if (!entry.id().equals(detailScrollFor)) {
+            detailScrollFor = entry.id();
+            detailScroll = 0;
+        }
+        DiscoveryTier tier = ClientBestiaryCache.get().tiers().getOrDefault(entry.id(), DiscoveryTier.UNKNOWN);
+        Component name = tier == DiscoveryTier.UNKNOWN
                 ? Component.translatable("bestiary.wizards_and_beasts.entry.unobserved")
                 : entry.displayName();
         gg.drawString(font, name, dx, dy, WizardsPalette.TEXT);
@@ -409,7 +420,7 @@ public final class BestiaryScreen extends Screen {
         int portraitSize = 32;
         // When the entry has a live entity, it is drawn later in screen space (post-scale);
         // only fall back to the static portrait texture when no entity is available.
-        boolean liveEntity = tier != DiscoveryTier.UNDISCOVERED && getRenderEntity(entry) != null;
+        boolean liveEntity = tier != DiscoveryTier.UNKNOWN && getRenderEntity(entry) != null;
         if (!liveEntity) {
             drawStretched(gg, resolveEntryPortrait(entry, tier), portraitX, portraitY, portraitSize, portraitSize, 32, 32);
         }
@@ -418,35 +429,133 @@ public final class BestiaryScreen extends Screen {
 
         int textX = portraitX + portraitSize + 8;
         int textW = 176 - (portraitSize + 8);
-        if (tier == DiscoveryTier.UNDISCOVERED) {
+        if (tier == DiscoveryTier.UNKNOWN) {
             gg.drawWordWrap(font, tier.unlockHint(), textX, portraitY, textW, WizardsPalette.TEXT_DIM);
             return;
         }
         gg.drawString(font, Component.translatable("bestiary.wizards_and_beasts.field.rating",
                 ministryGrade(entry.mmRating())), textX, portraitY, WizardsPalette.TEXT_DIM);
-        int loreY = portraitY + 12;
-        if (tier.ordinal() >= DiscoveryTier.ENCOUNTERED.ordinal()) {
-            gg.drawWordWrap(font, entry.shortLore(), textX, loreY, textW, WizardsPalette.TEXT);
-            loreY += font.wordWrapHeight(entry.shortLore(), textW) + 4;
+        Optional<CreatureProfile> profile = entry.profile();
+        profile.ifPresent(p -> gg.drawString(font, p.classification().displayName(), textX, portraitY + 10,
+                WizardsPalette.TEXT_DIM));
+        gg.drawString(font, tier.displayName(), textX, portraitY + 20, WizardsPalette.TEXT);
+
+        List<Facet> facets = facetsFor(entry, tier);
+        int bodyTop = portraitY + portraitSize + 6;
+        int bodyBottom = y + H - 8;
+        List<Line> lines = new ArrayList<>();
+        for (Facet facet : facets) {
+            for (net.minecraft.util.FormattedCharSequence seq : font.split(facet.text(), 176)) {
+                lines.add(new Line(seq, facet.color()));
+            }
+            lines.add(Line.GAP);
         }
-        dy = Math.max(portraitY + portraitSize + 6, loreY);
-        if (tier.ordinal() >= DiscoveryTier.ENCOUNTERED.ordinal()) {
-            Component habitatLine =
-                    Component.translatable("bestiary.wizards_and_beasts.field.habitat", entry.habitat());
-            gg.drawWordWrap(font, habitatLine, dx, dy, 176, WizardsPalette.TEXT_DIM);
-            dy += font.wordWrapHeight(habitatLine, 176) + 2;
-            Component sizeLine =
-                    Component.translatable("bestiary.wizards_and_beasts.field.size", sizeName(entry.size()));
-            gg.drawWordWrap(font, sizeLine, dx, dy, 176, WizardsPalette.TEXT_DIM);
-            dy += font.wordWrapHeight(sizeLine, 176) + 2;
+        int visible = Math.max(1, (bodyBottom - bodyTop) / DETAIL_LINE_H);
+        detailScrollMax = Math.max(0, lines.size() - visible);
+        detailScroll = Math.clamp(detailScroll, 0, detailScrollMax);
+        int lineY = bodyTop;
+        for (int i = detailScroll; i < lines.size() && lineY + DETAIL_LINE_H <= bodyBottom; i++) {
+            Line line = lines.get(i);
+            if (line.text() != null) {
+                gg.drawString(font, line.text(), dx, lineY, line.color(), false);
+                lineY += DETAIL_LINE_H;
+            } else {
+                lineY += DETAIL_GAP_H;
+            }
         }
-        if (tier.ordinal() >= DiscoveryTier.STUDIED.ordinal()) {
-            gg.drawWordWrap(font, entry.fullLore(), dx, dy, 176, WizardsPalette.TEXT);
+        if (detailScrollMax > 0) {
+            int trackX = x + W - 6;
+            int trackH = bodyBottom - bodyTop;
+            gg.fill(trackX, bodyTop, trackX + 2, bodyBottom, PORTRAIT_EDGE);
+            int thumbH = Math.max(8, trackH * visible / lines.size());
+            int thumbY = bodyTop + (trackH - thumbH) * detailScroll / detailScrollMax;
+            gg.fill(trackX, thumbY, trackX + 2, thumbY + thumbH, WizardsPalette.TEXT_DIM);
+        }
+    }
+
+    private record Facet(Component text, int color) {}
+
+    private record Line(net.minecraft.util.@Nullable FormattedCharSequence text, int color) {
+        static final Line GAP = new Line(null, 0);
+    }
+
+    /**
+     * What a page shows at each depth of knowledge. Seeing a creature tells you what it looks like and where it
+     * lives; watching it tells you how it behaves and what it eats; working with it tells you its magic, how to
+     * approach it, what it yields and what wizards make of it; knowing it adds the thing it is famous for.
+     */
+    private static List<Facet> facetsFor(BestiaryEntry entry, DiscoveryTier tier) {
+        List<Facet> out = new ArrayList<>();
+        Optional<CreatureProfile> profile = entry.profile();
+        String field = "bestiary.wizards_and_beasts.field.";
+        out.add(new Facet(entry.shortLore(), WizardsPalette.TEXT));
+        out.add(new Facet(Component.translatable(field + "habitat", entry.habitat()), WizardsPalette.TEXT_DIM));
+        out.add(new Facet(Component.translatable(field + "size", sizeName(entry.size())), WizardsPalette.TEXT_DIM));
+
+        if (tier.atLeast(DiscoveryTier.OBSERVED)) {
+            profile.ifPresent(p -> {
+                out.add(new Facet(Component.translatable(field + "behaviour", Component.translatable(p.behaviour())),
+                        WizardsPalette.TEXT));
+                out.add(new Facet(Component.translatable(field + "diet", Component.translatable(p.diet())),
+                        WizardsPalette.TEXT_DIM));
+            });
+            for (String threat : entry.threatKeys()) {
+                out.add(new Facet(Component.translatable(field + "threat", Component.translatable(threat)),
+                        WizardsPalette.TEXT_DIM));
+            }
+        }
+
+        if (tier.atLeast(DiscoveryTier.STUDIED)) {
+            out.add(new Facet(entry.fullLore(), WizardsPalette.TEXT));
+            for (String ability : entry.magicAbilityKeys()) {
+                out.add(new Facet(Component.translatable(field + "magic", Component.translatable(ability)),
+                        WizardsPalette.TEXT_DIM));
+            }
+            for (String weakness : entry.weaknessKeys()) {
+                out.add(new Facet(Component.translatable(field + "weakness", Component.translatable(weakness)),
+                        WizardsPalette.TEXT_DIM));
+            }
+            profile.ifPresent(p -> {
+                for (String interaction : p.interactions()) {
+                    out.add(new Facet(Component.translatable(field + "interaction",
+                            Component.translatable(interaction)), WizardsPalette.TEXT));
+                }
+                for (CreatureProfile.Material material : p.materials()) {
+                    Component item = BuiltInRegistries.ITEM.getOptional(material.item())
+                            .map(found -> found.getName())
+                            .orElse(Component.literal(material.item().toString()));
+                    out.add(new Facet(Component.translatable(field + "material", item, material.how().displayName()),
+                            WizardsPalette.TEXT_DIM));
+                }
+                out.add(new Facet(Component.translatable(field + "society", Component.translatable(p.society())),
+                        WizardsPalette.TEXT));
+            });
+        }
+
+        if (tier.atLeast(DiscoveryTier.KNOWN)) {
+            profile.flatMap(CreatureProfile::signature).ifPresent(signature -> out.add(new Facet(
+                    Component.translatable(field + "signature", Component.translatable(signature)),
+                    WizardsPalette.TEXT)));
         } else {
-            // Something still to earn: say so, rather than ending the page on blank parchment that
-            // reads as a missing lore key.
-            gg.drawWordWrap(font, tier.unlockHint(), dx, dy, 176, WizardsPalette.TEXT_DIM);
+            // Something still to earn: say how, rather than ending the page on blank parchment.
+            out.add(new Facet(tier.unlockHint(), WizardsPalette.TEXT_DIM));
+            profile.ifPresent(p -> {
+                if (tier.ordinal() < DiscoveryTier.STUDIED.ordinal() && p.studiedByHand()) {
+                    List<Component> acts = new ArrayList<>();
+                    p.study().stream().filter(act -> act != CreatureProfile.StudyAct.WATCH)
+                            .forEach(act -> acts.add(act.displayName()));
+                    out.add(new Facet(Component.translatable(field + "study",
+                            net.minecraft.network.chat.ComponentUtils.formatList(acts, Component.literal(", "))),
+                            WizardsPalette.TEXT_DIM));
+                }
+                if (p.hasSignature()) {
+                    out.add(new Facet(Component.translatable(field + "signature_pending"), WizardsPalette.TEXT_DIM));
+                }
+            });
         }
+        profile.ifPresent(p -> out.add(new Facet(Component.translatable(field + "basis", p.basis().displayName()),
+                WizardsPalette.TEXT_DIM)));
+        return out;
     }
 
     /** {@code LARGE} rendered as localised copy rather than the raw enum constant. */
@@ -508,6 +617,10 @@ public final class BestiaryScreen extends Screen {
             } else if (scrollOffset > maxScroll()) {
                 scrollOffset = maxScroll();
             }
+            return true;
+        }
+        if (dmx >= x + 128 && dmx <= x + W - 4 && dmy >= y + 4 && dmy <= y + H - 4) {
+            detailScroll = Math.clamp(detailScroll - (int) Math.signum(scrollY) * 2, 0, detailScrollMax);
             return true;
         }
         return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);

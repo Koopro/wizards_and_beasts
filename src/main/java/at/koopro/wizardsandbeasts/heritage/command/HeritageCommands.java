@@ -4,7 +4,10 @@ import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.event.heritage.HeritageEvents;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
+import at.koopro.wizardsandbeasts.heritage.ConditionOrigin;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
+import at.koopro.wizardsandbeasts.heritage.HeritageTraits;
+import at.koopro.wizardsandbeasts.heritage.centaur.StarReading;
 import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import at.koopro.wizardsandbeasts.heritage.werewolf.WerewolfConfig;
@@ -27,6 +30,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * {@code /wandb player heritage …} — the heritage itself: what you are, and the roster of what
@@ -82,6 +86,31 @@ public final class HeritageCommands {
                                         EntityArgument.getPlayer(ctx, "player")))))
                 .then(Commands.literal("list")
                         .executes(ctx -> list(ctx.getSource())))
+                // A condition is given and taken away separately from heritage, because that is what it is:
+                // something that happened to a character who stays who they were.
+                // Reading the stars is something a centaur does, not something done to them, so it is
+                // unguarded and refuses on its own terms — daylight, a roof, or not being a reader.
+                .then(Commands.literal("stars")
+                        .executes(ctx -> readStars(ctx.getSource())))
+                .then(Commands.literal("condition")
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
+                        .then(Commands.literal("set")
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .then(Commands.argument("origin", StringArgumentType.word())
+                                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
+                                                        Arrays.stream(ConditionOrigin.values())
+                                                                .map(origin -> origin.condition().getId()
+                                                                        + "/" + origin.getId()),
+                                                        builder))
+                                                .executes(ctx -> setCondition(
+                                                        ctx.getSource(),
+                                                        EntityArgument.getPlayer(ctx, "player"),
+                                                        StringArgumentType.getString(ctx, "origin"))))))
+                        .then(Commands.literal("clear")
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .executes(ctx -> clearCondition(
+                                                ctx.getSource(),
+                                                EntityArgument.getPlayer(ctx, "player"))))))
                 // The blood pool a blood_hunger lineage lives on. Its own file for the same reason the
                 // werewolf verbs below are not: they are one heritage's mechanics, not heritage itself.
                 .then(BloodCommands.register())
@@ -246,15 +275,30 @@ public final class HeritageCommands {
         HeritageVariant subtype = data.getSelectedHeritageVariant();
 
         report.row("Heritage", type.getDisplayName())
-                .row("Variant", subtype.getDisplayName())
+                .row("Lineage", subtype.getDisplayName())
                 .flag("Locked", data.isLocked())
                 .row("Magic", type.getMagicSource().getDisplayName())
-                .flag("Wand", type.canUseWand())
-                .row("Stats", String.format("HP %+.0f  SPD %+.3f  ARM %+.0f",
-                        subtype.getTotalHealth(), subtype.getTotalSpeed(), subtype.getTotalArmor()));
+                .flag("Wand", data.canUseWand())
+                .flag("Casts", data.canCast());
 
-        if (!subtype.getTags().isEmpty()) {
-            report.row("Tags", String.join(", ", subtype.getTags()));
+        ConditionOrigin condition = data.getCondition();
+        if (condition != null) {
+            report.row("Condition", condition.condition().getId() + "/" + condition.getId());
+        }
+
+        // Body numbers only where the body is physically different (a giant's size and hide, a centaur's frame);
+        // every other heritage reports zeroes, which is the point of printing them at all.
+        if (subtype.getTotalHealth() != 0 || subtype.getTotalSpeed() != 0 || subtype.getTotalArmor() != 0) {
+            report.row("Body", String.format("HP %+.0f  SPD %+.3f  ARM %+.0f",
+                    subtype.getTotalHealth(), subtype.getTotalSpeed(), subtype.getTotalArmor()));
+        }
+
+        for (HeritageTraits.Kind kind : HeritageTraits.Kind.values()) {
+            List<HeritageTraits.Trait> traits = HeritageTraits.of(data, kind);
+            if (!traits.isEmpty()) {
+                report.row(kind.name().charAt(0) + kind.name().substring(1).toLowerCase(java.util.Locale.ROOT),
+                        traits.stream().map(HeritageTraits.Trait::id).collect(java.util.stream.Collectors.joining(", ")));
+            }
         }
 
         String selectedProfessionId = data.getSelectedProfessionId();
@@ -266,6 +310,73 @@ public final class HeritageCommands {
                 .row("Transform", data.getTransformationState().name())
                 .send(source);
 
+        return 1;
+    }
+
+    /** What the sky says to someone who reads it. See {@link StarReading}. */
+    private static int readStars(CommandSourceStack source) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        ServerPlayer player = source.getPlayerOrException();
+        StarReading.Reading reading = StarReading.read(player);
+        if (reading instanceof StarReading.Reading.Refused refused) {
+            source.sendFailure(refused.reason().copy().withStyle(ChatFormatting.GRAY));
+            return 0;
+        }
+        ChatReport report = ChatReport.of("The stars tonight");
+        for (Component line : ((StarReading.Reading.Seen) reading).lines()) {
+            report.note(line.getString());
+        }
+        report.send(source);
+        return 1;
+    }
+
+    /** Gives a player a condition, by {@code <condition>/<origin>} or just {@code <origin>}. */
+    private static int setCondition(CommandSourceStack source, ServerPlayer target, String originId) {
+        String wanted = originId.contains("/") ? originId.substring(originId.indexOf('/') + 1) : originId;
+        ConditionOrigin origin = null;
+        for (ConditionOrigin candidate : ConditionOrigin.values()) {
+            if (candidate.getId().equals(wanted)
+                    && (!originId.contains("/")
+                            || originId.startsWith(candidate.condition().getId() + "/"))) {
+                origin = candidate;
+                break;
+            }
+        }
+        if (origin == null) {
+            source.sendFailure(Component.literal("Unknown condition origin: " + originId)
+                    .withStyle(ChatFormatting.RED));
+            return 0;
+        }
+
+        PlayerHeritageData data = target.getData(ModAttachments.HERITAGE_DATA.get());
+        if (!data.hasHeritageSelected()) {
+            source.sendFailure(Component.literal(target.getName().getString()
+                    + " has not chosen a heritage yet").withStyle(ChatFormatting.RED));
+            return 0;
+        }
+        if (!origin.condition().canBeCarriedBy(data.getSelectedHeritage(), data.getSelectedHeritageVariant())) {
+            source.sendFailure(Component.literal(target.getName().getString() + " cannot carry "
+                    + origin.condition().getId()).withStyle(ChatFormatting.RED));
+            return 0;
+        }
+
+        HeritageAPI.afflict(target, origin);
+        final ConditionOrigin given = origin;
+        source.sendSuccess(() -> Component.literal(target.getName().getString() + " now carries "
+                + given.condition().getId() + "/" + given.getId()).withStyle(ChatFormatting.GREEN), false);
+        return 1;
+    }
+
+    /** Takes a condition away. Lycanthropy has no cure in canon, so this is an operator's eraser, not a remedy. */
+    private static int clearCondition(CommandSourceStack source, ServerPlayer target) {
+        PlayerHeritageData data = target.getData(ModAttachments.HERITAGE_DATA.get());
+        if (data.getCondition() == null) {
+            source.sendFailure(Component.literal(target.getName().getString() + " carries no condition")
+                    .withStyle(ChatFormatting.RED));
+            return 0;
+        }
+        HeritageAPI.cure(target);
+        source.sendSuccess(() -> Component.literal("Cleared " + target.getName().getString() + "'s condition")
+                .withStyle(ChatFormatting.GREEN), false);
         return 1;
     }
 

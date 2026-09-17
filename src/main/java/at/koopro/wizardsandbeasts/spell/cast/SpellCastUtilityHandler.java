@@ -133,6 +133,10 @@ final class SpellCastUtilityHandler {
                     Component.literal("This wand refuses Reparo.").withStyle(ChatFormatting.DARK_RED), true);
             return false;
         }
+        if (WandHelper.isWand(toRepair)) {
+            // A wand is not mended like a cup: Hermione's Reparo could not save Harry's, and only the Elder Wand did.
+            return at.koopro.wizardsandbeasts.wand.allegiance.WandAllegianceService.mendWand(caster, wandStack, toRepair);
+        }
 
         if (toRepair.isDamageableItem() && toRepair.isDamaged()) {
             int before = toRepair.getDamageValue();

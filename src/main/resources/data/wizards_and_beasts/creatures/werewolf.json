@@ -57,6 +57,12 @@
       "type": "frenzy",
       "max_stacks": 3,
       "decay_ticks": 80
+    },
+    {
+      "type": "moon_bound"
+    },
+    {
+      "type": "lycanthropic_bite"
     }
   ]
 }

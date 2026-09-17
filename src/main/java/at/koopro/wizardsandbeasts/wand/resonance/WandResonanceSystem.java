@@ -8,6 +8,7 @@ import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import at.koopro.wizardsandbeasts.wand.WandAttachments;
+import at.koopro.wizardsandbeasts.wand.allegiance.WandAllegianceService;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.registry.WandCoreDefinition;
 import at.koopro.wizardsandbeasts.wand.registry.WandDatapackRegistries;
@@ -125,7 +126,11 @@ public final class WandResonanceSystem {
         if (sub == null) {
             return NEUTRAL_WOOD_AFFINITY;
         }
-        return woodAffinityScore(traitsOf(sub), wood.personalityAffinity());
+        Set<String> traits = traitsOf(sub);
+        if (typeData.getCondition() != null) {
+            traits.addAll(typeData.getCondition().traits());
+        }
+        return woodAffinityScore(traits, wood.personalityAffinity());
     }
 
     /**
@@ -202,8 +207,7 @@ public final class WandResonanceSystem {
 
     private static float scoreFlexibilityMatch(Player player, WandFlexibility wandFlex) {
         PlayerHeritageData td = player.getData(ModAttachments.HERITAGE_DATA.get());
-        HeritageVariant sub = td.getSelectedHeritageVariant();
-        boolean shapeshifter = sub != null && sub.hasTag("obscurus_form") && sub.hasTag("transformation");
+        boolean shapeshifter = td.hasTrait("obscurus_form") && td.hasTrait("transformation");
         return flexibilityScore(wandFlex, player.experienceLevel, shapeshifter);
     }
 
@@ -235,12 +239,14 @@ public final class WandResonanceSystem {
         }
 
         if (score >= cfg.matchThreshold()) {
-            wandStack.set(WandComponents.WAND_MASTER.get(), Optional.of(player.getUUID()));
-            wandStack.set(WandComponents.WAND_ALLEGIANCE_SCORE.get(), 1.0f);
-            if (flex != null) {
-                float allegiance = WandComponents.getAllegianceScore(wandStack);
-                player.setData(WandAttachments.BONDED_WAND.get(), Optional.of(new WandAttachments.BondedWandRecord(
-                        woodKey, coreKey, flex, allegiance)));
+            if (player instanceof ServerPlayer sp) {
+                // How well it matched decides how the bond starts: a bare match accepts you, a perfect one is
+                // loyal from the first day. It was a flat 1.0 — every wand fully mastered the moment it chose.
+                WandAllegianceService.chooseWizard(sp, wandStack, score, cfg.matchThreshold());
+            } else {
+                wandStack.set(WandComponents.WAND_MASTER.get(), Optional.of(player.getUUID()));
+                wandStack.set(WandComponents.WAND_ALLEGIANCE_SCORE.get(),
+                        at.koopro.wizardsandbeasts.wand.allegiance.WandAllegianceRules.startingBond(score, cfg.matchThreshold()));
             }
             if (player instanceof ServerPlayer sp) {
                 sp.level().playSound(null, sp.blockPosition(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 1.0f, 1.0f);

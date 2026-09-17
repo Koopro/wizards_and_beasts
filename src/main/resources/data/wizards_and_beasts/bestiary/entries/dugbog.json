@@ -23,5 +23,19 @@
   "entityType": "wizards_and_beasts:dugbog",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/dugbog.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/dugbog.png",
-  "sortOrder": 84
+  "sortOrder": 84,
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.dugbog.diet",
+    "behaviour": "bestiary.wizards_and_beasts.dugbog.behaviour",
+    "society": "bestiary.wizards_and_beasts.dugbog.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.dugbog.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

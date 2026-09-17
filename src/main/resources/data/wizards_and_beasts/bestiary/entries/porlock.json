@@ -23,5 +23,19 @@
   "entityType": "wizards_and_beasts:porlock",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/porlock.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/porlock.png",
-  "sortOrder": 82
+  "sortOrder": 82,
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.porlock.diet",
+    "behaviour": "bestiary.wizards_and_beasts.porlock.behaviour",
+    "society": "bestiary.wizards_and_beasts.porlock.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.porlock.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

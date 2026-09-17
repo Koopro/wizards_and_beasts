@@ -125,6 +125,21 @@ public class ModDataComponents {
                             .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.STRING_UTF8)
                             .build());
 
+    /**
+     * The spell written on a spell source — a book, a page, a set of notes. Absent means blank.
+     *
+     * <p>Network-synchronised because the client draws the source's name and tooltip from it: a book
+     * that says "Standard Book of Spells" in hand and only reveals which spell it holds once the
+     * server answers would make choosing which one to read a guess. See
+     * {@code at.koopro.wizardsandbeasts.spell.learning.SpellSource}.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> SPELL_SOURCE =
+            DATA_COMPONENTS.register("spell_source", () ->
+                    DataComponentType.<String>builder()
+                            .persistent(com.mojang.serialization.Codec.STRING)
+                            .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.STRING_UTF8)
+                            .build());
+
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> BREW_ID =
             DATA_COMPONENTS.register("brew_id", () ->
                     DataComponentType.<String>builder()

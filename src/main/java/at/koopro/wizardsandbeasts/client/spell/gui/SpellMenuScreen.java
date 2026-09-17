@@ -237,7 +237,7 @@ public class SpellMenuScreen extends Screen {
                 if (spell.getCategory() != category
                         || !data.knowsSpell(spell.getId())
                         || ObscurialRules.isObscurialAbility(spell)
-                        || !ObscurialRules.canHeritageUseSpell(type, spell)) {
+                        || !ObscurialRules.canHeritageUseSpell(ClientHeritageDataState.get(), spell)) {
                     continue;
                 }
                 boolean matches = q.isEmpty()

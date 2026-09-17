@@ -14,6 +14,7 @@ import java.util.Map;
  *                       counterpart, and choosing the mapping is a balance decision that has not
  *                       been made. Kept as authored so it is ready when that lands.
  * @param castModifiers  what the wood actually contributes to a cast. Absent means neutral.
+ * @param temperament    how the wood behaves toward its wielder — see {@link WandTemperament}. Absent means neutral.
  */
 public record WandWoodDefinition(
         Component displayName,
@@ -22,7 +23,8 @@ public record WandWoodDefinition(
         List<String> personalityAffinity,
         String rarity,
         float refuseThreshold,
-        WandCastModifiers castModifiers) {
+        WandCastModifiers castModifiers,
+        WandTemperament temperament) {
     public static final Codec<WandWoodDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ComponentSerialization.CODEC.fieldOf("display_name").forGetter(WandWoodDefinition::displayName),
             Codec.STRING.listOf().fieldOf("affinity_tags").forGetter(WandWoodDefinition::affinityTags),
@@ -31,6 +33,8 @@ public record WandWoodDefinition(
             Codec.STRING.fieldOf("rarity").forGetter(WandWoodDefinition::rarity),
             Codec.FLOAT.optionalFieldOf("refuse_threshold", 0.2f).forGetter(WandWoodDefinition::refuseThreshold),
             WandCastModifiers.CODEC.optionalFieldOf("cast_modifiers", WandCastModifiers.NEUTRAL)
-                    .forGetter(WandWoodDefinition::castModifiers)
+                    .forGetter(WandWoodDefinition::castModifiers),
+            WandTemperament.CODEC.optionalFieldOf("temperament", WandTemperament.NEUTRAL)
+                    .forGetter(WandWoodDefinition::temperament)
     ).apply(instance, WandWoodDefinition::new));
 }

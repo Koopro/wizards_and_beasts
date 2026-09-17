@@ -1,4 +1,5 @@
 {
+  "_lore": "Canon (Ollivander): cleaves to its one true master and ought not be passed on or given; loses power and skill when it is. Gameplay: one more defeat to win, weaker once passed on and in a stranger's hand.",
   "display_name": {
     "translate": "wand_wood.wizards_and_beasts.ash"
   },
@@ -19,8 +20,13 @@
   "refuse_threshold": 0.22,
   "cast_modifiers": {
     "damage": 1.0,
-    "cooldown": 0.95,
+    "cooldown": 0.97,
     "range": 1.0,
-    "fizzle": -0.02
+    "fizzle": -0.01
+  },
+  "temperament": {
+    "extra_wins": 1,
+    "passed_on_power": 0.8,
+    "foreign_hand_power": 0.8
   }
 }

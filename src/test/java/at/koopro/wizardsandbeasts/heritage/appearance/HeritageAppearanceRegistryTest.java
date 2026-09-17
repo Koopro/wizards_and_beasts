@@ -49,23 +49,38 @@ class HeritageAppearanceRegistryTest {
 
     @Test
     void heritageWideEntry_resolvesForEveryVariant() {
-        HeritageAppearance wide = entry("werewolf", Heritage.WEREWOLF, null);
+        HeritageAppearance wide = entry("veela", Heritage.VEELA, null);
         HeritageAppearanceRegistry.setClientEntries(List.of(wide));
 
-        assertSame(wide, HeritageAppearanceRegistry.clientResolve(Heritage.WEREWOLF, HeritageVariant.WEREWOLF_BITTEN));
-        assertSame(wide, HeritageAppearanceRegistry.clientResolve(Heritage.WEREWOLF, HeritageVariant.WEREWOLF_BORN));
-        assertSame(wide, HeritageAppearanceRegistry.clientResolve(Heritage.WEREWOLF, null));
+        assertSame(wide, HeritageAppearanceRegistry.clientResolve(Heritage.VEELA, HeritageVariant.VEELA_HALF));
+        assertSame(wide, HeritageAppearanceRegistry.clientResolve(Heritage.VEELA, HeritageVariant.VEELA_QUARTER));
+        assertSame(wide, HeritageAppearanceRegistry.clientResolve(Heritage.VEELA, null));
     }
 
     @Test
     void variantEntry_winsOverTheHeritageWideEntry() {
-        HeritageAppearance wide = entry("werewolf", Heritage.WEREWOLF, null);
-        HeritageAppearance specific = entry("werewolf_born", Heritage.WEREWOLF, HeritageVariant.WEREWOLF_BORN);
+        HeritageAppearance wide = entry("veela", Heritage.VEELA, null);
+        HeritageAppearance specific = entry("veela_full", Heritage.VEELA, HeritageVariant.VEELA_FULL);
         HeritageAppearanceRegistry.setClientEntries(List.of(wide, specific));
 
-        assertSame(specific, HeritageAppearanceRegistry.clientResolve(Heritage.WEREWOLF, HeritageVariant.WEREWOLF_BORN));
-        assertSame(wide, HeritageAppearanceRegistry.clientResolve(Heritage.WEREWOLF, HeritageVariant.WEREWOLF_BITTEN),
+        assertSame(specific, HeritageAppearanceRegistry.clientResolve(Heritage.VEELA, HeritageVariant.VEELA_FULL));
+        assertSame(wide, HeritageAppearanceRegistry.clientResolve(Heritage.VEELA, HeritageVariant.VEELA_HALF),
                 "a variant entry must not shadow the heritage-wide entry for other variants");
+    }
+
+    @Test
+    void conditionEntry_resolvesOnTheServerAndNeverShadowsAHeritage() {
+        HeritageAppearance lycanthropy = new HeritageAppearance(
+                Identifier.fromNamespaceAndPath("wizards_and_beasts", "lycanthropy"), "", Optional.empty(),
+                List.of(), Provenance.extrapolated(), Optional.of("lycanthropy"));
+        HeritageAppearanceRegistry.replaceAll(Map.of(lycanthropy.id(), lycanthropy));
+
+        assertSame(lycanthropy, HeritageAppearanceRegistry.resolveCondition(
+                at.koopro.wizardsandbeasts.heritage.MagicalCondition.LYCANTHROPY));
+        assertNull(HeritageAppearanceRegistry.resolveCondition(
+                at.koopro.wizardsandbeasts.heritage.MagicalCondition.OBSCURUS));
+        assertNull(HeritageAppearanceRegistry.resolve(Heritage.WIZARDKIND, HeritageVariant.HALF_BLOOD),
+                "a condition entry is not the Wizardkind entry: a bitten wizard's lineage still looks like itself");
     }
 
     @Test

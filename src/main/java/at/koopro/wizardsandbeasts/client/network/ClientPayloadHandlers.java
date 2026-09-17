@@ -133,7 +133,8 @@ public final class ClientPayloadHandlers {
     // --- ministry ---
 
     public static void handleMinistryRecordSync(MinistryRecordSyncS2CPayload pkt, IPayloadContext ctx) {
-        ctx.enqueueWork(() -> ClientMinistryRecordState.set(pkt.record(), pkt.traceActive(), pkt.finesActive()));
+        ctx.enqueueWork(() -> ClientMinistryRecordState.set(pkt.record(), pkt.traceActive(), pkt.finesActive(),
+                pkt.underage(), pkt.wandHeld(), pkt.caseStage()));
     }
 
     // --- standing ---
@@ -300,16 +301,16 @@ public final class ClientPayloadHandlers {
      * <p>An empty target UUID is the revert, so a set and a clear are one packet shape and cannot
      * arrive out of order relative to each other.
      */
-    public static void handlePolyjuiceSync(
-            at.koopro.wizardsandbeasts.network.polyjuice.PolyjuiceSyncS2CPayload packet) {
+    public static void handleDisguiseSync(
+            at.koopro.wizardsandbeasts.network.disguise.DisguiseSyncS2CPayload packet) {
         if (packet.targetId().equals(
-                at.koopro.wizardsandbeasts.network.polyjuice.PolyjuiceSyncS2CPayload.NONE)
+                at.koopro.wizardsandbeasts.network.disguise.DisguiseSyncS2CPayload.NONE)
                 || packet.targetName().isBlank()) {
-            at.koopro.wizardsandbeasts.client.polyjuice.ClientPolyjuiceState.set(packet.playerUUID(), null);
+            at.koopro.wizardsandbeasts.client.disguise.ClientDisguiseState.set(packet.playerUUID(), null);
             return;
         }
-        at.koopro.wizardsandbeasts.client.polyjuice.ClientPolyjuiceState.set(packet.playerUUID(),
-                new at.koopro.wizardsandbeasts.client.polyjuice.ClientPolyjuiceState.Disguise(
+        at.koopro.wizardsandbeasts.client.disguise.ClientDisguiseState.set(packet.playerUUID(),
+                new at.koopro.wizardsandbeasts.client.disguise.ClientDisguiseState.Disguise(
                         packet.targetId(), packet.targetName()));
     }
 
@@ -348,7 +349,8 @@ public final class ClientPayloadHandlers {
                     pkt.formId(),
                     pkt.hitboxWidth(), pkt.hitboxHeight(),
                     pkt.modelScale(), pkt.modelAspectX(), pkt.modelAspectZ(),
-                    pkt.reachBonus(), pkt.knockbackResistance(), pkt.stepHeight());
+                    pkt.reachBonus(), pkt.knockbackResistance(), pkt.stepHeight(),
+                    pkt.eyeHeight());
             ClientFormDataState.update(pkt.playerUUID(), pkt.formId(), profile,
                     RenderFlag.fromBitmask(pkt.renderFlagMask()));
             SizeLerpTracker.onScaleChanged(pkt.playerUUID(), pkt.modelScale());
@@ -412,6 +414,13 @@ public final class ClientPayloadHandlers {
 
     // --- heritage ---
 
+    private static at.koopro.wizardsandbeasts.heritage.@org.jspecify.annotations.Nullable ConditionOrigin resolveCondition(
+            String conditionId, String originId) {
+        at.koopro.wizardsandbeasts.heritage.MagicalCondition kind =
+                at.koopro.wizardsandbeasts.heritage.MagicalCondition.byId(conditionId);
+        return kind == null ? null : at.koopro.wizardsandbeasts.heritage.ConditionOrigin.byId(kind, originId);
+    }
+
     public static void handleHeritageDataSync(HeritageDataSyncS2CPayload pkt, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
             Heritage heritage = resolveHeritage(pkt.heritageId());
@@ -421,7 +430,8 @@ public final class ClientPayloadHandlers {
             String selectedProfessionId = pkt.selectedProfessionId() == null || pkt.selectedProfessionId().isBlank()
                     ? null : pkt.selectedProfessionId();
             ClientHeritageDataState.applySync(pkt.syncVersion(), heritage, variant, pkt.locked(), state, activeForm, pkt.debugOverlay(), pkt.customFlags(),
-                    pkt.professionPoints(), pkt.totalProfessionPointsEarned(), pkt.unlockedProfessions(), selectedProfessionId);
+                    pkt.professionPoints(), pkt.totalProfessionPointsEarned(), pkt.unlockedProfessions(), selectedProfessionId,
+                    resolveCondition(pkt.conditionId(), pkt.conditionOriginId()));
             if (pkt.openSelector()) {
                 openHeritageSelectionScreenSafe();
             }

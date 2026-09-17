@@ -23,5 +23,24 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/antipodean_opaleye.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/antipodean_opaleye.png",
   "sortOrder": 5,
-  "entityType": "wizards_and_beasts:antipodean_opaleye"
+  "entityType": "wizards_and_beasts:antipodean_opaleye",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.antipodean_opaleye.diet",
+    "behaviour": "bestiary.wizards_and_beasts.antipodean_opaleye.behaviour",
+    "society": "bestiary.wizards_and_beasts.antipodean_opaleye.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.antipodean_opaleye.interaction.1"
+    ],
+    "materials": [
+      {
+        "item": "wizards_and_beasts:dragon_heartstring",
+        "how": "remains"
+      }
+    ],
+    "study": [
+      "watch"
+    ]
+  }
 }

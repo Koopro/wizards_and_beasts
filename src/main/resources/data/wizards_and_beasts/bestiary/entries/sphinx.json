@@ -23,5 +23,19 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/sphinx.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/sphinx.png",
   "sortOrder": 24,
-  "entityType": "wizards_and_beasts:sphinx"
+  "entityType": "wizards_and_beasts:sphinx",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.sphinx.diet",
+    "behaviour": "bestiary.wizards_and_beasts.sphinx.behaviour",
+    "society": "bestiary.wizards_and_beasts.sphinx.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.sphinx.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

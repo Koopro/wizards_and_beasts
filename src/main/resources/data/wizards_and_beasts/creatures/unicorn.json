@@ -14,7 +14,6 @@
   "animation": "wizards_and_beasts:geckolib/animations/entity/unicorn.animation.json",
   "attackDamage": 0.0,
   "traits": [
-    "FEARFUL",
     "REGEN"
   ],
   "abilities": [
@@ -32,13 +31,45 @@
       "cooldown_ticks": 100
     },
     {
-      "type": "thorns",
-      "reflect_fraction": 0.0,
-      "attacker_effect": {
-        "effect": "minecraft:bad_omen",
-        "amplifier": 0,
-        "duration_ticks": 600
-      }
+      "type": "wary",
+      "radius": 12.0,
+      "shun_radius": 24.0,
+      "purity_sensitive": true,
+      "slayer_flag": "unicorn_slayer"
+    },
+    {
+      "type": "groomable",
+      "item": "wizards_and_beasts:unicorn_hair",
+      "count": 1,
+      "cooldown_ticks": 24000,
+      "require_trust": true,
+      "purity_sensitive": true,
+      "slayer_flag": "unicorn_slayer",
+      "refusal": "creature.wizards_and_beasts.unicorn.refused"
+    },
+    {
+      "type": "shed",
+      "item": "wizards_and_beasts:unicorn_hair",
+      "interval_ticks": 12000,
+      "count": 1
+    },
+    {
+      "type": "slayer_curse",
+      "flag": "unicorn_slayer",
+      "corruption": 15.0,
+      "effects": [
+        {
+          "effect": "minecraft:weakness",
+          "amplifier": 0,
+          "duration_ticks": 12000
+        },
+        {
+          "effect": "minecraft:unluck",
+          "amplifier": 1,
+          "duration_ticks": 24000
+        }
+      ],
+      "message": "creature.wizards_and_beasts.unicorn.slain"
     }
   ],
   "clips": [

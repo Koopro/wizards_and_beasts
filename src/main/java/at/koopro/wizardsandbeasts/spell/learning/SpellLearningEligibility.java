@@ -9,7 +9,6 @@ import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialRules;
-import at.koopro.wizardsandbeasts.heritage.Heritage;
 import net.minecraft.server.level.ServerPlayer;
 
 import org.jspecify.annotations.Nullable;
@@ -23,11 +22,11 @@ public final class SpellLearningEligibility {
             return Result.deny("Unknown spell.");
         }
         PlayerSpellData spellData = player.getData(ModAttachments.SPELL_DATA.get());
-        Heritage heritage = player.getData(ModAttachments.HERITAGE_DATA.get()).getSelectedHeritage();
+        PlayerHeritageData heritage = player.getData(ModAttachments.HERITAGE_DATA.get());
         return evaluate(player, spell, spellData, heritage);
     }
 
-    public static Result evaluate(@Nullable ServerPlayer player, Spell spell, PlayerSpellData spellData, @Nullable Heritage heritage) {
+    public static Result evaluate(@Nullable ServerPlayer player, Spell spell, PlayerSpellData spellData, @Nullable PlayerHeritageData heritage) {
         if (spell == null) {
             return Result.deny("Unknown spell.");
         }

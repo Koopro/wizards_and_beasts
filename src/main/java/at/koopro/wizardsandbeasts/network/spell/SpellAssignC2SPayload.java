@@ -85,8 +85,7 @@ public record SpellAssignC2SPayload(int slotIndex, String spellId) implements Cu
                     player.displayClientMessage(Component.translatable("wandcraft.assign.reject.obscurial_ability"), true);
                     return;
                 }
-                Heritage type = player.getData(ModAttachments.HERITAGE_DATA.get()).getSelectedHeritage();
-                if (!ObscurialRules.canHeritageUseSpell(type, spell)) {
+                if (!ObscurialRules.canHeritageUseSpell(player.getData(ModAttachments.HERITAGE_DATA.get()), spell)) {
                     data.incrementRejectReason(SpellRejectCodes.ASSIGN_TYPE_RESTRICTED_SPELL);
                     player.displayClientMessage(Component.translatable("wandcraft.assign.reject.heritage_restricted"), true);
                     return;

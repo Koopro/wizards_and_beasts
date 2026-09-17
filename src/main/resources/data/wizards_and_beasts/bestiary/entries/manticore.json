@@ -23,5 +23,19 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/manticore.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/manticore.png",
   "sortOrder": 19,
-  "entityType": "wizards_and_beasts:manticore"
+  "entityType": "wizards_and_beasts:manticore",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.manticore.diet",
+    "behaviour": "bestiary.wizards_and_beasts.manticore.behaviour",
+    "society": "bestiary.wizards_and_beasts.manticore.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.manticore.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

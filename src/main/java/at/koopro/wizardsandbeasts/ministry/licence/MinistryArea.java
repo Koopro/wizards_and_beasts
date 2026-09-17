@@ -2,7 +2,9 @@ package at.koopro.wizardsandbeasts.ministry.licence;
 
 import at.koopro.wizardsandbeasts.map.MapLandmarkTags;
 import net.minecraft.core.BlockPos;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
 import org.jspecify.annotations.NullMarked;
 
 /**
@@ -34,6 +36,11 @@ public final class MinistryArea {
      * {@link LicenceRules#AREA_CHECK_INTERVAL_TICKS} ticks.
      */
     public static int countMinistryBlocks(LevelReader level, BlockPos centre) {
+        return countLandmarkBlocks(level, centre, MapLandmarkTags.MINISTRY);
+    }
+
+    /** {@link #countMinistryBlocks}, for any landmark palette. */
+    public static int countLandmarkBlocks(LevelReader level, BlockPos centre, TagKey<Block> palette) {
         int radius = LicenceRules.AREA_SCAN_RADIUS;
         int found = 0;
         BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
@@ -44,7 +51,7 @@ public final class MinistryArea {
                     if (!level.hasChunkAt(cursor)) {
                         continue;
                     }
-                    if (level.getBlockState(cursor).is(MapLandmarkTags.MINISTRY)) {
+                    if (level.getBlockState(cursor).is(palette)) {
                         found++;
                         if (LicenceRules.isMinistryDensity(found)) {
                             return found;
@@ -69,14 +76,22 @@ public final class MinistryArea {
      * drop. That is a narrow enough gap to be worth the ratio.
      */
     public static boolean isInside(LevelReader level, BlockPos centre) {
-        if (!hasAnyMinistryStoneUnderfoot(level, centre)) {
+        return isInside(level, centre, MapLandmarkTags.MINISTRY);
+    }
+
+    /**
+     * {@link #isInside}, for any landmark palette — the same density rule finds Hogwarts in Hogwarts stone as
+     * finds the Ministry in Ministry marble, and with the same honest caveat about building your house from it.
+     */
+    public static boolean isInside(LevelReader level, BlockPos centre, TagKey<Block> palette) {
+        if (!hasAnyPaletteUnderfoot(level, centre, palette)) {
             return false;
         }
-        return LicenceRules.isMinistryDensity(countMinistryBlocks(level, centre));
+        return LicenceRules.isMinistryDensity(countLandmarkBlocks(level, centre, palette));
     }
 
     /** The 5×5 floor slab on the two layers below {@code centre} — fifty reads, no allocation. */
-    private static boolean hasAnyMinistryStoneUnderfoot(LevelReader level, BlockPos centre) {
+    private static boolean hasAnyPaletteUnderfoot(LevelReader level, BlockPos centre, TagKey<Block> palette) {
         BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
         for (int dy = -1; dy >= -2; dy--) {
             for (int dx = -2; dx <= 2; dx++) {
@@ -85,7 +100,7 @@ public final class MinistryArea {
                     if (!level.hasChunkAt(cursor)) {
                         continue;
                     }
-                    if (level.getBlockState(cursor).is(MapLandmarkTags.MINISTRY)) {
+                    if (level.getBlockState(cursor).is(palette)) {
                         return true;
                     }
                 }

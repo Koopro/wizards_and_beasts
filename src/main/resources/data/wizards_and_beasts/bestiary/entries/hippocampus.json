@@ -23,5 +23,19 @@
   "entityType": "wizards_and_beasts:hippocampus",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/hippocampus.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/hippocampus.png",
-  "sortOrder": 78
+  "sortOrder": 78,
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.hippocampus.diet",
+    "behaviour": "bestiary.wizards_and_beasts.hippocampus.behaviour",
+    "society": "bestiary.wizards_and_beasts.hippocampus.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.hippocampus.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:doors",
+    "#minecraft:trapdoors",
+    "#minecraft:fence_gates",
+    "#minecraft:buttons",
+    "#minecraft:pressure_plates",
+    "minecraft:lever",
+    "minecraft:tripwire_hook",
+    "minecraft:note_block",
+    "minecraft:target",
+    { "id": "#c:ores", "required": false }
+  ]
+}

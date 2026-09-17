@@ -50,25 +50,37 @@ public record SpellCastC2SPayload() implements CustomPacketPayload {
     }
 
     /**
-     * Resolves one wand release: spends the open session's release token, then applies the cast
-     * (execute, cooldown, cast count, sync).
+     * Resolves a client wand release: spends the open session's release token only after vanilla has
+     * ended that hold on the server, then applies the cast (execute, cooldown, cast count, sync).
      *
-     * <p>Safe to call from server-only flows — Avada Kedavra ends its own channel on the kill by
-     * calling this. Doing so spends the same token, so the client's release for that hold, whenever it
-     * arrives, is refused as a duplicate rather than casting a second time. That is what replaced the
-     * fifteen-tick ignore window this class used to keep: a window let a genuine re-press inside it be
-     * eaten and a duplicate outside it through, because it was standing in for state it could not see.
+     * <p>The client packet is only an edge after vanilla's ordered release packet. A packet injected
+     * while the server still sees a live hold cannot spend the token.
      */
     public static void completeWandCastRelease(ServerPlayer player) {
+        completeWandCastRelease(player, false);
+    }
+
+    /**
+     * Resolves a server-driven release against the same token as a client release. The server is the
+     * release authority in this path, so it need not wait for the vanilla callback it is about to cause.
+     */
+    public static void completeServerDrivenWandCastRelease(ServerPlayer player) {
+        completeWandCastRelease(player, true);
+    }
+
+    private static void completeWandCastRelease(ServerPlayer player, boolean serverDriven) {
         if (!(player.level() instanceof ServerLevel serverLevel)) {
             debugReject(player, SpellRejectCodes.NOT_SERVER_LEVEL);
             return;
         }
 
-        CastReleaseGate refused = WandCastSessions.offerRelease(player, serverLevel.getGameTime());
+        CastReleaseGate refused = serverDriven
+                ? WandCastSessions.offerServerDrivenRelease(player, serverLevel.getGameTime())
+                : WandCastSessions.offerClientRelease(player, serverLevel.getGameTime());
         if (refused != null) {
-            if (refused != CastReleaseGate.CLASH_HOLD) {
-                // Letting go of a clash is the game working, not the client and server disagreeing.
+            if (!refused.endsHoldWithoutCast()) {
+                // Letting go of a clash, or of a hold after switching spell, is the game working — not the
+                // client and server disagreeing.
                 player.getData(ModAttachments.SPELL_DATA.get()).incrementSyncCorrections();
             }
             debugReject(player, refused.rejectCode());

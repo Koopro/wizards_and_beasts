@@ -216,6 +216,10 @@ public class WizardsAndBeastsMod {
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "standing_gate_reload_listener"),
                     new at.koopro.wizardsandbeasts.standing.gate.StandingGateLoader());
+            // What the law thinks of each spell. Datapack policy: a server can make a spell legal or not.
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "spell_law_reload_listener"),
+                    new at.koopro.wizardsandbeasts.ministry.trace.SpellLawRegistry.Loader());
         });
 
         // Ability framework: server-side sync/clone/cooldown lifecycle + debug behavior wiring.

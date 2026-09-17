@@ -21,9 +21,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * rider sunk into the handle; narrowing one produces a rider hovering above it. Neither throws,
  * neither logs, and both look like a modelling mistake rather than a data one.
  *
- * <p>The arithmetic is the same two numbers {@link BroomSeat} documents: the top surface of the
- * shaft chain's {@code _mid} segment — the piece that passes under the rider at {@code z ≈ 0} — minus
- * the 0.75 blocks a rendered humanoid's hip pivot sits above its own position.
+ * <p>The seat is the top surface of the shaft chain's {@code _mid} segment — the piece that passes under
+ * the rider at {@code z ≈ 0} — at {@link BroomGeometry#MODEL_SCALE}: its height above the rendered model's
+ * origin. The hip height and the rider's vehicle attachment are not part of the authored number any more
+ * (see {@link BroomSeat}); the entity places the feet and the renderer lifts the model.
  */
 class BroomSeatParityTest {
 
@@ -33,9 +34,7 @@ class BroomSeatParityTest {
     private static final Path DEFINITIONS = Path.of("src", "main", "resources", "data",
             "wizards_and_beasts", "broom_definitions");
 
-    /** Height of a rendered humanoid's hip pivot above its own position. */
-    private static final double HIP_HEIGHT = 0.75;
-    /** One model unit. Seats land on unit boundaries, so exact comparison is the right tolerance. */
+    /** Seats land on half-unit boundaries at half scale, so exact comparison is the right tolerance. */
     private static final double EPSILON = 1.0e-9;
 
     @Test
@@ -62,12 +61,12 @@ class BroomSeatParityTest {
                 assertNotNull(offset, name + " does not author passengerOffset. Every shipped broom "
                         + "states its seat explicitly, so the number is visible rather than inherited.");
 
-                double expected = top - HIP_HEIGHT;
+                double expected = top;
                 assertEquals(expected, offset.get(1).getAsDouble(), EPSILON,
                         name + " seats its rider at " + offset.get(1).getAsDouble() + ", but its '"
-                                + variant + "' shaft has its top surface at " + top + " blocks, so the "
-                                + "seat should be " + expected + ". A rider sitting below that is inside "
-                                + "the handle; above it, hovering over it.");
+                                + variant + "' shaft has its top surface at " + top + " blocks on the "
+                                + "rendered model, so the seat should be " + expected + ". A seat below "
+                                + "that sinks the rider into the handle; above it, floats them over it.");
             }
         }
     }
@@ -91,7 +90,7 @@ class BroomSeatParityTest {
                         + "serve both and the per-broom seat would be pointless");
     }
 
-    /** Top surface, in blocks, of each shaft variant's {@code _mid} segment. */
+    /** Top surface, in rendered blocks, of each shaft variant's {@code _mid} segment. */
     private static Map<String, Double> shaftTopsByVariant() throws IOException {
         JsonObject geometry = GSON.fromJson(Files.readString(GEO), JsonObject.class)
                 .getAsJsonArray("minecraft:geometry").get(0).getAsJsonObject();
@@ -107,7 +106,7 @@ class BroomSeatParityTest {
             double top = cube.getAsJsonArray("origin").get(1).getAsDouble()
                     + cube.getAsJsonArray("size").get(1).getAsDouble();
             tops.put(boneName.substring("shaft_".length(), boneName.length() - "_mid".length()),
-                    top / 16.0);
+                    BroomGeometry.unitsToBlocks(top));
         });
         return tops;
     }

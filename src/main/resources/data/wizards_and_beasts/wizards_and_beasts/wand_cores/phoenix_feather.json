@@ -1,4 +1,5 @@
 {
+  "_lore": "Canon: the rarest core; the greatest range of magic, though slow to reveal it; the most initiative; the pickiest, its allegiance hard won. Gameplay: bonds slowly and resists being won, then recovers faster from every spell once loyal.",
   "display_name": {
     "translate": "wand_core.wizards_and_beasts.phoenix_feather"
   },
@@ -10,9 +11,14 @@
   "initiative": 0.95,
   "allegiance_transfer_resistance": 0.9,
   "cast_modifiers": {
-    "damage": 1.05,
-    "cooldown": 0.95,
-    "range": 1.25,
+    "damage": 1.0,
+    "cooldown": 1.0,
+    "range": 1.05,
     "fizzle": 0.0
+  },
+  "temperament": {
+    "extra_wins": 1,
+    "bond_growth": 0.5,
+    "loyal_cooldown": 0.9
   }
 }

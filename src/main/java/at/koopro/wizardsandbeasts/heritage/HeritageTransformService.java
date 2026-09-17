@@ -140,7 +140,7 @@ public final class HeritageTransformService {
         if (heritage == null) {
             return false;
         }
-        String targetForm = HeritageFormBridge.getDefaultFormId(heritage, variant, target);
+        String targetForm = HeritageFormBridge.getDefaultFormId(heritage, variant, data.getCondition(), target);
         if (targetForm.equals(data.getActiveFormId())) {
             return false;
         }

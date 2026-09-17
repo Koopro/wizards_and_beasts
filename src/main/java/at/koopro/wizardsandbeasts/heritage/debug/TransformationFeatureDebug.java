@@ -3,7 +3,7 @@ package at.koopro.wizardsandbeasts.heritage.debug;
 import at.koopro.wizardsandbeasts.ability.data.PlayerAbilityData;
 import at.koopro.wizardsandbeasts.command.debug.feature.FeatureDebugSection;
 import at.koopro.wizardsandbeasts.command.debug.report.DebugReport;
-import at.koopro.wizardsandbeasts.polyjuice.PolyjuiceState;
+import at.koopro.wizardsandbeasts.disguise.DisguiseState;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import net.minecraft.server.level.ServerPlayer;
 import org.jspecify.annotations.NullMarked;
@@ -38,11 +38,11 @@ public final class TransformationFeatureDebug implements FeatureDebugSection {
     @Override
     public void append(DebugReport report, ServerPlayer target, Detail detail) {
         PlayerAbilityData ability = target.getData(ModAttachments.PLAYER_ABILITY_DATA.get());
-        PolyjuiceState polyjuice = target.getData(ModAttachments.POLYJUICE_STATE.get());
+        DisguiseState disguise = target.getData(ModAttachments.DISGUISE_STATE.get());
 
         int active = 0;
         if (ability.currentlyTransformed()) active++;
-        if (polyjuice.isDisguised()) active++;
+        if (disguise.isDisguised()) active++;
         if (ability.currentDisguiseFormId() != null && !ability.currentDisguiseFormId().isEmpty()) active++;
         report.row("  active disguises", active);
         if (active > 1) {
@@ -50,7 +50,7 @@ public final class TransformationFeatureDebug implements FeatureDebugSection {
         }
         if (detail == Detail.BRIEF) {
             report.flag("  transformed", ability.currentlyTransformed());
-            report.flag("  polyjuiced", polyjuice.isDisguised());
+            report.flag("  disguised", disguise.isDisguised());
             return;
         }
 
@@ -61,11 +61,12 @@ public final class TransformationFeatureDebug implements FeatureDebugSection {
                 ? "(none)" : ability.animagusFormId());
         report.flag("    transformed now", ability.currentlyTransformed());
 
-        report.section("  polyjuice");
-        report.flag("    disguised", polyjuice.isDisguised());
-        report.row("    target", polyjuice.targetName().isEmpty() ? "(none)" : polyjuice.targetName());
-        report.row("    target uuid", polyjuice.targetId().map(Object::toString).orElse("none"));
-        report.row("    ticks remaining", polyjuice.ticksRemaining());
+        report.section("  disguise");
+        report.flag("    disguised", disguise.isDisguised());
+        report.row("    target", disguise.targetName().isEmpty() ? "(none)" : disguise.targetName());
+        report.row("    target uuid", disguise.targetId().map(Object::toString).orElse("none"));
+        report.row("    ticks remaining", disguise.isIndefinite()
+                ? "indefinite" : String.valueOf(disguise.ticksRemaining()));
 
         report.section("  metamorphmagus");
         report.flag("    is metamorph", ability.metamorphmagus());

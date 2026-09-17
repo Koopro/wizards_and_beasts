@@ -1,4 +1,5 @@
 {
+  "_lore": "Canon (Ollivander): the most consistent magic, least subject to fluctuation; the most faithful, strongly attached to its first owner; hardest to turn to the Dark Arts; not the most powerful. Gameplay: steadier and a little weaker, one more defeat to win, and its bond suffers every Dark cast.",
   "display_name": {
     "translate": "wand_core.wizards_and_beasts.unicorn_hair"
   },
@@ -10,9 +11,13 @@
   "initiative": 0.45,
   "allegiance_transfer_resistance": 1.25,
   "cast_modifiers": {
-    "damage": 0.88,
-    "cooldown": 0.88,
+    "damage": 0.95,
+    "cooldown": 1.0,
     "range": 1.0,
-    "fizzle": -0.06
+    "fizzle": -0.05
+  },
+  "temperament": {
+    "extra_wins": 1,
+    "dark_arts_bond_cost": 0.03
   }
 }

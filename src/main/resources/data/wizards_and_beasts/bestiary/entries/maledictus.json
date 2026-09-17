@@ -23,5 +23,19 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/maledictus.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/maledictus.png",
   "sortOrder": 50,
-  "entityType": "wizards_and_beasts:maledictus"
+  "entityType": "wizards_and_beasts:maledictus",
+  "profile": {
+    "classification": "unclassified",
+    "basis": "partial",
+    "diet": "bestiary.wizards_and_beasts.maledictus.diet",
+    "behaviour": "bestiary.wizards_and_beasts.maledictus.behaviour",
+    "society": "bestiary.wizards_and_beasts.maledictus.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.maledictus.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

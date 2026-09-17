@@ -23,5 +23,19 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/lethifold.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/lethifold.png",
   "sortOrder": 48,
-  "entityType": "wizards_and_beasts:lethifold"
+  "entityType": "wizards_and_beasts:lethifold",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.lethifold.diet",
+    "behaviour": "bestiary.wizards_and_beasts.lethifold.behaviour",
+    "society": "bestiary.wizards_and_beasts.lethifold.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.lethifold.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

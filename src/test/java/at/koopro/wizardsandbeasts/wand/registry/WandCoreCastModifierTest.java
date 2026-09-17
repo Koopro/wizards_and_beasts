@@ -29,10 +29,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * one arrives without one, the silent consequence is that the core contributes nothing and the wand
  * still casts perfectly well.
  *
- * <p>The numbers here are not the old enum table transcribed. Cores were deliberately re-tuned when
- * they were authored, on a wider band than the enum used, so that the core is felt as the dominant
- * component: damage spans 0.88× (unicorn) to 1.25× (dragon heartstring), and misfire spans -6 points
- * to +9. If one of these moves, that is a balance decision and should be a deliberate one.
+ * <p>The numbers are deliberately narrow. They were once the dominant component of a wand (0.88x to 1.25x
+ * damage), which made a wand a stat stick; since 2026-09-17 a core's identity lives in its
+ * {@code temperament} (how it bonds, how hard it is to win, what it resents), pinned by
+ * {@code WandTemperamentLoreTest}, and these contributions span 0.95x (unicorn) to 1.10x (dragon
+ * heartstring). If one moves, that is a balance decision and should be a deliberate one.
  *
  * <p>Category bonuses asked for as Transfiguration (thunderbird), Charms (veela) and Healing
  * (unicorn) are absent on purpose: {@link SpellCategory} has only {@code COMBAT}, {@code UTILITY},
@@ -46,25 +47,21 @@ class WandCoreCastModifierTest {
 
     /** core id -> its authored contribution. All ten, so a new core cannot slip in unpinned. */
     private static final Map<String, WandCastModifiers> EXPECTED = Map.ofEntries(
-            Map.entry("dragon_heartstring", new WandCastModifiers(1.25f, 1.05f, 1.00f, 0.03f, Map.of())),
-            Map.entry("phoenix_feather", new WandCastModifiers(1.05f, 0.95f, 1.25f, 0.00f, Map.of())),
+            Map.entry("dragon_heartstring", new WandCastModifiers(1.10f, 1.00f, 1.00f, 0.02f, Map.of())),
+            Map.entry("phoenix_feather", new WandCastModifiers(1.00f, 1.00f, 1.05f, 0.00f, Map.of())),
             // Healing omitted: no SpellCategory counterpart.
-            Map.entry("unicorn_hair", new WandCastModifiers(0.88f, 0.88f, 1.00f, -0.06f, Map.of())),
-            Map.entry("thestral_tail_hair", new WandCastModifiers(1.22f, 1.00f, 1.10f, 0.05f, Map.of())),
+            Map.entry("unicorn_hair", new WandCastModifiers(0.95f, 1.00f, 1.00f, -0.05f, Map.of())),
+            Map.entry("thestral_tail_hair", new WandCastModifiers(1.05f, 1.00f, 1.00f, 0.00f, Map.of())),
             // Charms omitted: no SpellCategory counterpart.
-            Map.entry("veela_hair", new WandCastModifiers(1.15f, 1.05f, 1.00f, 0.06f, Map.of())),
+            Map.entry("veela_hair", new WandCastModifiers(1.05f, 1.00f, 1.00f, 0.04f, Map.of())),
             // Transfiguration omitted: no SpellCategory counterpart.
-            Map.entry("thunderbird_tail_feather", new WandCastModifiers(1.15f, 0.95f, 1.10f, 0.04f, Map.of())),
-            Map.entry("wampus_cat_hair", new WandCastModifiers(1.20f, 1.00f, 1.00f, 0.05f, Map.of())),
-            // Canon says the troll whisker is a generally inferior core, so it is the only one that is
-            // worse on damage, cooldown and range at once. The Combat bonus is what keeps it from being
-            // strictly dominated — a starter core should be a bad wand, not a pointless one.
-            Map.entry("troll_whisker", new WandCastModifiers(1.10f, 1.10f, 0.92f, 0.09f,
-                    Map.of(SpellCategory.COMBAT, 0.10f))),
-            Map.entry("rougarou_hair", new WandCastModifiers(1.12f, 1.02f, 1.00f, 0.07f,
-                    Map.of(SpellCategory.DARK_ARTS, 0.15f))),
+            Map.entry("thunderbird_tail_feather", new WandCastModifiers(1.08f, 1.00f, 1.00f, 0.00f, Map.of())),
+            Map.entry("wampus_cat_hair", new WandCastModifiers(1.04f, 1.00f, 1.00f, 0.01f, Map.of())),
+            Map.entry("troll_whisker", new WandCastModifiers(1.04f, 1.00f, 0.95f, 0.05f, Map.of())),
+            Map.entry("rougarou_hair", new WandCastModifiers(1.00f, 1.00f, 1.00f, 0.03f,
+                    Map.of(SpellCategory.DARK_ARTS, 0.10f))),
             Map.entry("white_river_monster_spine",
-                    new WandCastModifiers(1.12f, 1.06f, 1.18f, 0.02f, Map.of())));
+                    new WandCastModifiers(1.00f, 1.00f, 1.08f, -0.02f, Map.of())));
 
     @Test
     void everyCoreDefinition_decodes() throws IOException {
@@ -131,21 +128,22 @@ class WandCoreCastModifierTest {
     }
 
     /**
-     * The core band is deliberately wider than the wood band, because the core is meant to be the
-     * component a wizard notices. Asserted as a floor rather than exact numbers so re-tuning inside
-     * the band does not fail here — {@link #everyCoreContributesItsAuthoredValues} covers that.
+     * Still the component a wizard feels more than the wood, but no longer by a mile: a wand's character is its
+     * temperament, not its damage multiplier. The spread is capped as well as floored, so the stat stick this
+     * replaced cannot creep back in one balance pass at a time.
      */
     @Test
-    void theCoreBandIsWiderThanTheWoodBand() {
+    void theCoreBandIsNarrowButWiderThanTheWoodBand() {
         float min = Float.MAX_VALUE;
         float max = -Float.MAX_VALUE;
         for (WandCastModifiers mods : EXPECTED.values()) {
             min = Math.min(min, mods.damage());
             max = Math.max(max, mods.damage());
         }
-        assertTrue(max - min >= 0.30f,
-                "cores span only " + (max - min) + "x on damage; the core is supposed to be the "
-                        + "component that decides how a wand feels, so it should out-spread wood");
+        float spread = max - min;
+        assertTrue(spread >= 0.10f, "cores span only " + spread + "x on damage; they should still out-spread wood");
+        assertTrue(spread <= 0.20f, "cores span " + spread + "x on damage; a wand is not a stat stick "
+                + "- put a core's identity in its temperament");
     }
 
     private static Map<String, WandCoreDefinition> decodeAll() throws IOException {

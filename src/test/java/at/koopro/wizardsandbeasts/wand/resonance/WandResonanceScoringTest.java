@@ -121,6 +121,8 @@ class WandResonanceScoringTest {
     void variantIdsAndCapabilityTagsStillMatchForDatapacks() {
         Set<String> traits = WandResonanceSystem.traitsOf(HeritageVariant.PURE_BLOOD);
         assertTrue(traits.contains("pure_blood"), "variant id must remain matchable");
-        assertTrue(traits.contains("enhanced_bond"), "capability tags must remain matchable");
+        // `old_family` replaced `enhanced_bond` when blood status stopped being a magical bonus and became what it
+        // is in canon: standing. A wood may still key off it; what it no longer does is make the wand work better.
+        assertTrue(traits.contains("old_family"), "capability tags must remain matchable");
     }
 }

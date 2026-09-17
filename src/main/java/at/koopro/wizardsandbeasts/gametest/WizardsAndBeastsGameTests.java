@@ -62,14 +62,26 @@ public final class WizardsAndBeastsGameTests {
                 new WizardTestSupport.Registrar(event, environment, MAX_TICKS);
 
         WandCastLifecycleTests.contribute(registrar);
+        WandCastRaceTests.contribute(registrar);
+        AfterDeathInputTests.contribute(registrar);
+        WandAllegianceTests.contribute(registrar);
+        MinistryTraceTests.contribute(registrar);
+        CreatureWildlifeTests.contribute(registrar);
         CauldronBrewingTests.contribute(registrar);
         RegistrySyncTests.contribute(registrar);
         HeritageCommitTests.contribute(registrar);
+        HeritageIdentityTests.contribute(registrar);
         VampireBloodTests.contribute(registrar);
         ChoranaptyxisTests.contribute(registrar);
         PlacementFacingTests.contribute(registrar);
+        SpellLearningTests.contribute(registrar);
+        DisguiseTests.contribute(registrar);
         LeviosaThrowTests.contribute(registrar);
+        BroomRideTests.contribute(registrar);
+        AguamentiTests.contribute(registrar);
         SpellClashTests.contribute(registrar);
         ProtegoShieldTests.contribute(registrar);
+        TimedOutlineTests.contribute(registrar);
+        RevelioTests.contribute(registrar);
     }
 }

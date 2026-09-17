@@ -23,5 +23,31 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/unicorn.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/unicorn.png",
   "sortOrder": 15,
-  "entityType": "wizards_and_beasts:unicorn"
+  "entityType": "wizards_and_beasts:unicorn",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.unicorn.diet",
+    "behaviour": "bestiary.wizards_and_beasts.unicorn.behaviour",
+    "society": "bestiary.wizards_and_beasts.unicorn.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.unicorn.interaction.1",
+      "bestiary.wizards_and_beasts.unicorn.interaction.2"
+    ],
+    "materials": [
+      {
+        "item": "wizards_and_beasts:unicorn_hair",
+        "how": "shed"
+      },
+      {
+        "item": "wizards_and_beasts:unicorn_hair",
+        "how": "grooming"
+      }
+    ],
+    "study": [
+      "harvest",
+      "handle"
+    ],
+    "signature": "bestiary.wizards_and_beasts.unicorn.signature"
+  }
 }

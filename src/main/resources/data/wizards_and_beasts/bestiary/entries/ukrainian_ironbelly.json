@@ -23,5 +23,24 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/ukrainian_ironbelly.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/ukrainian_ironbelly.png",
   "sortOrder": 6,
-  "entityType": "wizards_and_beasts:ukrainian_ironbelly"
+  "entityType": "wizards_and_beasts:ukrainian_ironbelly",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.ukrainian_ironbelly.diet",
+    "behaviour": "bestiary.wizards_and_beasts.ukrainian_ironbelly.behaviour",
+    "society": "bestiary.wizards_and_beasts.ukrainian_ironbelly.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.ukrainian_ironbelly.interaction.1"
+    ],
+    "materials": [
+      {
+        "item": "wizards_and_beasts:dragon_heartstring",
+        "how": "remains"
+      }
+    ],
+    "study": [
+      "watch"
+    ]
+  }
 }

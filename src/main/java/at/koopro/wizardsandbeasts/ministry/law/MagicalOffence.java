@@ -17,26 +17,26 @@ import org.jspecify.annotations.Nullable;
  * <p>{@code arrestable} separates the curses that get Aurors sent after you from the paperwork offences that
  * merely go on your record.
  *
- * <p>{@code fineKnuts} is the other half of that split, and the two are exclusive by design: an arrestable
- * offence is settled in Azkaban and carries <b>no</b> fine, while a paperwork offence is settled with money
- * and never sends anyone. Nothing is punished twice, and no offence is punished not at all —
- * {@code MinistryFineTest} pins the invariant so a new offence cannot be added that falls between them.
+ * <p>{@link Remedy} names how each offence is answered, and exactly one applies: an arrestable offence is
+ * settled in Azkaban and carries <b>no</b> fine, a paperwork offence is settled with money and never sends
+ * anyone, and a caution is a formal warning on the file. Nothing is punished twice, and no offence is punished
+ * not at all — {@code MinistryFineTest} pins the invariant so a new offence cannot fall between them.
  */
 @NullMarked
 public enum MagicalOffence implements StringRepresentable {
 
     /** Killing curse. The single worst thing on the books. */
-    AVADA_KEDAVRA("avada_kedavra", 45.0f, true, 0),
+    AVADA_KEDAVRA("avada_kedavra", 45.0f, Remedy.SENTENCE, 0),
     /** Torture. */
-    CRUCIO("crucio", 32.0f, true, 0),
+    CRUCIO("crucio", 32.0f, Remedy.SENTENCE, 0),
     /** Seizing another's will. */
-    IMPERIO("imperio", 28.0f, true, 0),
+    IMPERIO("imperio", 28.0f, Remedy.SENTENCE, 0),
     /**
      * Transforming while unregistered — a fine and a file, not a manhunt. Ten Galleons: heavy enough that
      * an unregistered Animagus who transforms habitually feels it, cheap enough that registering (free)
      * is obviously the better deal.
      */
-    UNREGISTERED_ANIMAGUS("unregistered_animagus", 6.0f, false, 10 * CurrencyHelper.KNUTS_PER_GALLEON),
+    UNREGISTERED_ANIMAGUS("unregistered_animagus", 6.0f, Remedy.FINE, 10 * CurrencyHelper.KNUTS_PER_GALLEON),
     /**
      * Apparating without a licence. Illegal, not impossible — the trio do it all through
      * <i>Deathly Hallows</i> — so it goes on the file and nothing is dispatched. Rated a third of
@@ -46,19 +46,19 @@ public enum MagicalOffence implements StringRepresentable {
      * size of a parking ticket, because the trio do it all through <i>Deathly Hallows</i> and it should
      * stay affordable enough to be worth doing.
      */
-    UNLICENSED_APPARITION("unlicensed_apparition", 2.0f, false, 2 * CurrencyHelper.KNUTS_PER_GALLEON),
+    UNLICENSED_APPARITION("unlicensed_apparition", 2.0f, Remedy.FINE, 2 * CurrencyHelper.KNUTS_PER_GALLEON),
     /** Being somewhere in Azkaban you have no business being. */
-    AZKABAN_TRESPASS("azkaban_trespass", 15.0f, true, 0),
+    AZKABAN_TRESPASS("azkaban_trespass", 15.0f, Remedy.SENTENCE, 0),
     /** Walking out of a sentence. Raises the stakes rather than settling them. */
-    AZKABAN_BREAKOUT("azkaban_breakout", 40.0f, true, 0),
+    AZKABAN_BREAKOUT("azkaban_breakout", 40.0f, Remedy.SENTENCE, 0),
     /** Fighting back against the Aurors sent for you. */
-    AUROR_ASSAULT("auror_assault", 20.0f, true, 0),
+    AUROR_ASSAULT("auror_assault", 20.0f, Remedy.SENTENCE, 0),
     /**
      * Walking into Ministry premises without the papers for it. Paperwork, not a manhunt — one Galleon,
      * the smallest fine on the books, because the punishment for wandering into the Atrium should be a
      * clerk with a form and not a cell.
      */
-    MINISTRY_TRESPASS("ministry_trespass", 1.5f, false, CurrencyHelper.KNUTS_PER_GALLEON),
+    MINISTRY_TRESPASS("ministry_trespass", 1.5f, Remedy.FINE, CurrencyHelper.KNUTS_PER_GALLEON),
     /**
      * Presenting a forged Ministry licence, and being caught at it.
      *
@@ -67,7 +67,7 @@ public enum MagicalOffence implements StringRepresentable {
      * difference between the two is the whole reason forging is worth a fifteen-percent risk per
      * dealing. Rated above unregistered Animagi and below the Unforgivables.
      */
-    FORGED_DOCUMENTS("forged_documents", 18.0f, true, 0),
+    FORGED_DOCUMENTS("forged_documents", 18.0f, Remedy.SENTENCE, 0),
     /**
      * Passing devalued foreign coin. Fineable, at three Galleons — above skipping a form and below
      * concealing what you are, because the wizard who does this took something from whoever accepted
@@ -77,20 +77,52 @@ public enum MagicalOffence implements StringRepresentable {
      * offence already flows through {@code TraceService.report} into the standing system's
      * {@code OFFENCE} deed trigger, so a bad coin moves the same needle a bad curse does.
      */
-    PASSING_DEVALUED_COIN("passing_devalued_coin", 4.0f, false, 3 * CurrencyHelper.KNUTS_PER_GALLEON);
+    PASSING_DEVALUED_COIN("passing_devalued_coin", 4.0f, Remedy.FINE, 3 * CurrencyHelper.KNUTS_PER_GALLEON),
+    /**
+     * Magic worked by a wizard under seventeen outside school, in breach of the Decree for the Reasonable
+     * Restriction of Underage Sorcery. A caution: canon answers it with a warning letter, and a second one
+     * with a hearing ("a second offence would lead to expulsion", <i>Chamber of Secrets</i> ch. 2) — never a
+     * bill. Filed only when a hearing rules on it, not when the Trace first notices.
+     */
+    UNDERAGE_MAGIC("underage_magic", 1.0f, Remedy.CAUTION, 0),
+    /**
+     * Magic Muggles saw, found against the wizard at a hearing. Five Galleons: dearer than any paperwork,
+     * because the Obliviators had to be sent. Gameplay figure; canon names the breach, not a tariff.
+     */
+    STATUTE_OF_SECRECY_BREACH("statute_of_secrecy_breach", 5.0f, Remedy.FINE, 5 * CurrencyHelper.KNUTS_PER_GALLEON),
+    /**
+     * Dark magic or a dangerous creature loosed in front of Muggles. Arrestable: the breach and the danger
+     * together are no longer a matter for a bill.
+     */
+    GRAVE_SECRECY_BREACH("grave_secrecy_breach", 25.0f, Remedy.SENTENCE, 0);
+
+    /** How an offence is answered once it is on the file. Exactly one per offence. */
+    public enum Remedy {
+        /** Settled in Azkaban; Aurors may be sent. */
+        SENTENCE,
+        /** Settled with money from the offender's vault. */
+        FINE,
+        /** A formal warning on the file, and nothing else. */
+        CAUTION
+    }
 
     public static final Codec<MagicalOffence> CODEC = StringRepresentable.fromEnum(MagicalOffence::values);
 
     private final String serializedName;
     private final float notoriety;
-    private final boolean arrestable;
+    private final Remedy remedy;
     private final int fineKnuts;
 
-    MagicalOffence(String serializedName, float notoriety, boolean arrestable, int fineKnuts) {
+    MagicalOffence(String serializedName, float notoriety, Remedy remedy, int fineKnuts) {
         this.serializedName = serializedName;
         this.notoriety = notoriety;
-        this.arrestable = arrestable;
+        this.remedy = remedy;
         this.fineKnuts = fineKnuts;
+    }
+
+    /** How this offence is answered. */
+    public Remedy remedy() {
+        return remedy;
     }
 
     /** Heat added on a first offence, before the repeat-offender multiplier. */
@@ -100,12 +132,12 @@ public enum MagicalOffence implements StringRepresentable {
 
     /** Whether committing this is enough to have Aurors dispatched. */
     public boolean arrestable() {
-        return arrestable;
+        return remedy == Remedy.SENTENCE;
     }
 
     /**
      * The base fine in Knuts before priors are counted, or {@code 0} for offences answered with a
-     * sentence instead. Always zero exactly when {@link #arrestable()} is true.
+     * sentence or a caution instead. Positive exactly when {@link #remedy()} is {@link Remedy#FINE}.
      */
     public int fineKnuts() {
         return fineKnuts;

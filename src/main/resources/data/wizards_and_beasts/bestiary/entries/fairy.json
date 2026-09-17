@@ -23,5 +23,19 @@
   "entityType": "wizards_and_beasts:fairy",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/fairy.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/fairy.png",
-  "sortOrder": 63
+  "sortOrder": 63,
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.fairy.diet",
+    "behaviour": "bestiary.wizards_and_beasts.fairy.behaviour",
+    "society": "bestiary.wizards_and_beasts.fairy.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.fairy.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

@@ -63,6 +63,63 @@
       ]
     },
     {
+      "_comment": "A written spellbook, plus the blanks and the ink to copy it. Nobody sells spells any more, so the first one has to be found: this cache is the mod's own guaranteed source, and the blanks are what let whoever finds it pass the spell on at a lectern.",
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "wizards_and_beasts:standard_book_of_spells",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "wizards_and_beasts:spell_source": "wizards_and_beasts:lumos"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "wizards_and_beasts:standard_book_of_spells",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "wizards_and_beasts:spell_source": "wizards_and_beasts:stupefy"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "wizards_and_beasts:standard_book_of_spells",
+          "weight": 3,
+          "functions": [
+            { "function": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 1, "max": 3 } }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "wizards_and_beasts:ink_bottle",
+          "weight": 6,
+          "functions": [
+            { "function": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 1, "max": 4 } }
+          ]
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 4
+        }
+      ]
+    },
+    {
       "_comment": "The two wand-core materials with no creature behind them. Veela and the White River Monster ship no entity and no harvest rule, so veela_hair and white_river_monster_spine were consumed by ten wand recipes each and obtainable by nothing at all. A wandmaker's cache is where a core with no living source plausibly comes from; it is rare on purpose, and it stops the wand catalogue advertising two cores that cannot be held.",
       "rolls": 1,
       "entries": [

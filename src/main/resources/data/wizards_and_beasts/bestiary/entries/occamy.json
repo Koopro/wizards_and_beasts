@@ -23,5 +23,24 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/occamy.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/occamy.png",
   "sortOrder": 40,
-  "entityType": "wizards_and_beasts:occamy"
+  "entityType": "wizards_and_beasts:occamy",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.occamy.diet",
+    "behaviour": "bestiary.wizards_and_beasts.occamy.behaviour",
+    "society": "bestiary.wizards_and_beasts.occamy.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.occamy.interaction.1"
+    ],
+    "materials": [
+      {
+        "item": "wizards_and_beasts:occamy_eggshell",
+        "how": "remains"
+      }
+    ],
+    "study": [
+      "watch"
+    ]
+  }
 }

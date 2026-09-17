@@ -1,4 +1,5 @@
 {
+  "_lore": "Canon: more sensitive than any other wood to a suitable owner, reacting the moment one appears. Gameplay: the bond with its master deepens faster.",
   "display_name": {
     "translate": "wand_wood.wizards_and_beasts.vine"
   },
@@ -18,9 +19,12 @@
   "rarity": "uncommon",
   "refuse_threshold": 0.3,
   "cast_modifiers": {
-    "damage": 1.05,
+    "damage": 1.0,
     "cooldown": 1.0,
-    "range": 1.1,
+    "range": 1.03,
     "fizzle": 0.0
+  },
+  "temperament": {
+    "bond_growth": 1.25
   }
 }

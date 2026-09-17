@@ -23,5 +23,19 @@
   "entityType": "wizards_and_beasts:quintaped",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/quintaped.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/quintaped.png",
-  "sortOrder": 93
+  "sortOrder": 93,
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.quintaped.diet",
+    "behaviour": "bestiary.wizards_and_beasts.quintaped.behaviour",
+    "society": "bestiary.wizards_and_beasts.quintaped.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.quintaped.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

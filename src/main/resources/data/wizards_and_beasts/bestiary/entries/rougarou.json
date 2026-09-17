@@ -20,5 +20,24 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/rougarou.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/rougarou.png",
   "sortOrder": 207,
-  "entityType": "wizards_and_beasts:rougarou"
+  "entityType": "wizards_and_beasts:rougarou",
+  "profile": {
+    "classification": "beast",
+    "basis": "gameplay",
+    "diet": "bestiary.wizards_and_beasts.rougarou.diet",
+    "behaviour": "bestiary.wizards_and_beasts.rougarou.behaviour",
+    "society": "bestiary.wizards_and_beasts.rougarou.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.rougarou.interaction.1"
+    ],
+    "materials": [
+      {
+        "item": "wizards_and_beasts:rougarou_hair",
+        "how": "remains"
+      }
+    ],
+    "study": [
+      "watch"
+    ]
+  }
 }

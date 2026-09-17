@@ -20,12 +20,24 @@ public final class HeritageFormBridge {
      */
     public static String getDefaultFormId(Heritage heritage, @Nullable HeritageVariant variant,
                                            TransformationState state) {
+        return getDefaultFormId(heritage, variant, null, state);
+    }
+
+    /**
+     * The default form, with a condition taken into account: a werewolf or an Obscurial wears the condition's
+     * forms whatever heritage they have, because the condition is what changes the body.
+     */
+    public static String getDefaultFormId(Heritage heritage, @Nullable HeritageVariant variant,
+                                           @Nullable ConditionOrigin condition, TransformationState state) {
+        boolean changed = state == TransformationState.TRANSFORMED;
+        if (condition != null) {
+            return switch (condition.condition()) {
+                case LYCANTHROPY -> changed ? "werewolf_wolf" : "werewolf_human";
+                case OBSCURUS -> changed ? "obscurial_dark" : "obscurial_human";
+            };
+        }
         return switch (heritage) {
             case WIZARDKIND -> "human_default";
-            case WEREWOLF -> state == TransformationState.TRANSFORMED
-                    ? "werewolf_wolf" : "werewolf_human";
-            case OBSCURIAL -> state == TransformationState.TRANSFORMED
-                    ? "obscurial_dark" : "obscurial_human";
             case GOBLIN -> "goblin_default";
             case HOUSE_ELF -> "house_elf_default";
             case VEELA -> state == TransformationState.TRANSFORMED
@@ -44,11 +56,21 @@ public final class HeritageFormBridge {
      * Returns all form IDs available to the given heritage.
      */
     public static List<String> getAvailableFormIds(Heritage heritage) {
+        return getAvailableFormIds(heritage, null);
+    }
+
+    /** Every form a heritage can wear, and, when a condition is carried, the condition's forms instead. */
+    public static List<String> getAvailableFormIds(Heritage heritage, @Nullable ConditionOrigin condition) {
         List<String> forms = new ArrayList<>();
+        if (condition != null) {
+            switch (condition.condition()) {
+                case LYCANTHROPY -> { forms.add("werewolf_human"); forms.add("werewolf_wolf"); }
+                case OBSCURUS -> { forms.add("obscurial_human"); forms.add("obscurial_dark"); }
+            }
+            return forms;
+        }
         switch (heritage) {
             case WIZARDKIND -> forms.add("human_default");
-            case WEREWOLF -> { forms.add("werewolf_human"); forms.add("werewolf_wolf"); }
-            case OBSCURIAL -> { forms.add("obscurial_human"); forms.add("obscurial_dark"); }
             case GOBLIN -> forms.add("goblin_default");
             case HOUSE_ELF -> forms.add("house_elf_default");
             case VEELA -> { forms.add("veela_human"); forms.add("veela_harpy"); }

@@ -92,38 +92,34 @@ class StatEffectsTest {
     }
 
     @Test
-    void tuitionMultiplierSpansItsDeclaredRange() {
-        assertEquals(1.00f, StatEffects.tuitionMultiplier(0), EPS);
-        assertEquals(0.80f, StatEffects.tuitionMultiplier(50), EPS);
-        assertEquals(0.60f, StatEffects.tuitionMultiplier(100), EPS);
+    void studyRateSpansItsDeclaredRange() {
+        assertEquals(1.00f, StatEffects.studyRate(0), EPS);
+        assertEquals(1.25f, StatEffects.studyRate(50), EPS);
+        assertEquals(1.50f, StatEffects.studyRate(100), EPS);
 
-        // KNOWLEDGE is the one stat whose effect is a discount, so the direction matters: more of it
-        // must never cost the player more.
+        // KNOWLEDGE is a reward for work already done elsewhere, so the direction matters: more of
+        // it must never make practice pay off more slowly.
         for (int knowledge = 1; knowledge <= 100; knowledge++) {
-            assertTrue(StatEffects.tuitionMultiplier(knowledge)
-                            <= StatEffects.tuitionMultiplier(knowledge - 1),
-                    "tuition went up between KNOWLEDGE " + (knowledge - 1) + " and " + knowledge);
+            assertTrue(StatEffects.studyRate(knowledge) >= StatEffects.studyRate(knowledge - 1),
+                    "study rate fell between KNOWLEDGE " + (knowledge - 1) + " and " + knowledge);
         }
     }
 
+    /**
+     * The floor is 1.0, not something below it.
+     *
+     * <p>KNOWLEDGE was a tuition discount before it was a study rate, and a discount's natural
+     * shape is "everyone pays full price, the well-read pay less". Ported carelessly onto a rate
+     * that becomes "everyone learns slowly, the well-read learn normally" — a penalty on a stat
+     * nobody can train directly, applied to every player who has not ground out the other four
+     * systems it derives from.
+     */
     @Test
-    void tuitionCostRoundsUpAndNeverReachesFree() {
-        assertEquals(100, StatEffects.tuitionCost(100, 0));
-        assertEquals(60, StatEffects.tuitionCost(100, 100));
-
-        // A free lesson would let a well-read wizard drain the teacher's whole spell list for
-        // nothing, which is a different feature from a discount.
+    void studyRateNeverPenalisesAnUnreadWizard() {
         for (int knowledge = 0; knowledge <= 100; knowledge++) {
-            assertTrue(StatEffects.tuitionCost(1, knowledge) >= 1,
-                    "a 1-knut lesson became free at KNOWLEDGE " + knowledge);
-            assertTrue(StatEffects.tuitionCost(7, knowledge) <= 7,
-                    "the discount made a lesson dearer at KNOWLEDGE " + knowledge);
+            assertTrue(StatEffects.studyRate(knowledge) >= 1.0f,
+                    "practice was slowed at KNOWLEDGE " + knowledge);
         }
-
-        // A teacher configured to charge nothing still charges nothing; the discount must not
-        // manufacture a fee out of a disabled one.
-        assertEquals(0, StatEffects.tuitionCost(0, 50));
-        assertEquals(0, StatEffects.tuitionCost(-5, 50));
     }
 
     /**

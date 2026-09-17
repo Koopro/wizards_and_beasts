@@ -67,6 +67,10 @@ public class ClientSetup {
                 GeoRendererHelper.simpleBlock(
                         at.koopro.wizardsandbeasts.client.brew.CauldronGeoModel::new, 1.0));
 
+        // House banners are waving cloth rebuilt every frame — the block itself is RenderShape.INVISIBLE.
+        event.registerBlockEntityRenderer(at.koopro.wizardsandbeasts.registry.ModBlockEntities.HOUSE_BANNER.get(),
+                context -> new at.koopro.wizardsandbeasts.client.banner.HouseBannerRenderer());
+
         // The bench rig is `wandmakers_bench_rig`, not `wandmakers_bench`: the bare name would
         // resolve its texture to the flat block sprite the item still uses. See tools/bench_model.py.
         event.registerBlockEntityRenderer(

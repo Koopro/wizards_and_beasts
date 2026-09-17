@@ -23,5 +23,24 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/acromantula.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/acromantula.png",
   "sortOrder": 44,
-  "entityType": "wizards_and_beasts:acromantula"
+  "entityType": "wizards_and_beasts:acromantula",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.acromantula.diet",
+    "behaviour": "bestiary.wizards_and_beasts.acromantula.behaviour",
+    "society": "bestiary.wizards_and_beasts.acromantula.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.acromantula.interaction.1"
+    ],
+    "materials": [
+      {
+        "item": "wizards_and_beasts:acromantula_venom",
+        "how": "remains"
+      }
+    ],
+    "study": [
+      "watch"
+    ]
+  }
 }

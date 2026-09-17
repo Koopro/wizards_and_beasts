@@ -23,5 +23,19 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/obscurus.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/obscurus.png",
   "sortOrder": 60,
-  "entityType": "wizards_and_beasts:obscurus"
+  "entityType": "wizards_and_beasts:obscurus",
+  "profile": {
+    "classification": "unclassified",
+    "basis": "partial",
+    "diet": "bestiary.wizards_and_beasts.obscurus.diet",
+    "behaviour": "bestiary.wizards_and_beasts.obscurus.behaviour",
+    "society": "bestiary.wizards_and_beasts.obscurus.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.obscurus.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

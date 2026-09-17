@@ -1,4 +1,5 @@
 {
+  "_lore": "No canon properties found beyond being an older, cruder core. Gameplay only: blunt force, shorter reach, rough control, slow to bond.",
   "display_name": {
     "translate": "wand_core.wizards_and_beasts.troll_whisker"
   },
@@ -10,12 +11,12 @@
   "initiative": 0.55,
   "allegiance_transfer_resistance": 0.55,
   "cast_modifiers": {
-    "damage": 1.1,
-    "cooldown": 1.1,
-    "range": 0.92,
-    "fizzle": 0.09,
-    "category_damage_bonus": {
-      "combat": 0.1
-    }
+    "damage": 1.04,
+    "cooldown": 1.0,
+    "range": 0.95,
+    "fizzle": 0.05
+  },
+  "temperament": {
+    "bond_growth": 0.8
   }
 }

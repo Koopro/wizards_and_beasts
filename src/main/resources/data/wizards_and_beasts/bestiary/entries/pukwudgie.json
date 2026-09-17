@@ -21,5 +21,24 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/pukwudgie.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/pukwudgie.png",
   "sortOrder": 205,
-  "entityType": "wizards_and_beasts:pukwudgie"
+  "entityType": "wizards_and_beasts:pukwudgie",
+  "profile": {
+    "classification": "beast",
+    "basis": "partial",
+    "diet": "bestiary.wizards_and_beasts.pukwudgie.diet",
+    "behaviour": "bestiary.wizards_and_beasts.pukwudgie.behaviour",
+    "society": "bestiary.wizards_and_beasts.pukwudgie.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.pukwudgie.interaction.1"
+    ],
+    "materials": [
+      {
+        "item": "wizards_and_beasts:pukwudgie_venom_sac",
+        "how": "remains"
+      }
+    ],
+    "study": [
+      "watch"
+    ]
+  }
 }

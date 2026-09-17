@@ -39,9 +39,15 @@ class CreatureMaterialObtainabilityTest {
     private static final Path LANG = Path.of("src", "main", "resources", "assets", "wizards_and_beasts",
             "lang", "en_us.json");
 
-    /** Directories a mod item can be granted from. Recipes count: a craft is a way to get one. */
+    /**
+     * Directories a mod item can be granted from. Recipes count: a craft is a way to get one. So do living creatures:
+     * a creature definition's {@code shed} and {@code groomable} abilities and a bond profile's {@code gift} put
+     * materials in a player's hands without anything dying, which since 2026-09-17 is the only way to come by unicorn
+     * hair, phoenix feathers, demiguise hair and wild mooncalf dung.
+     */
     private static final List<String> SOURCE_DIRECTORIES =
-            List.of("loot_table", "recipe", "bestiary/harvest", "brewing_recipes", "ollivander_pool");
+            List.of("loot_table", "recipe", "bestiary/harvest", "brewing_recipes", "ollivander_pool",
+                    "creatures", "creature_bonds");
 
     /**
      * The creature materials, named rather than pattern-matched.

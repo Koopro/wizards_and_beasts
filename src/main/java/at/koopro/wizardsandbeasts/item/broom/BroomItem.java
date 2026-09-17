@@ -93,27 +93,19 @@ public class BroomItem extends Item {
                         .min(Comparator.comparingDouble(player::distanceToSqr))
                         .orElse(null);
                 if (nearest != null) {
-                    // A broom at rest lies on the floor, and the seat is below its origin, so
-                    // mounting one where it lies would put the rider's feet underground and let
-                    // the collision push them back out. Lift it to meet them instead — which is
-                    // also what picking a broom up off the ground looks like.
-                    nearest.setPos(nearest.getX(),
-                            nearest.getY() + nearest.resolveDefinition().seat().mountLift(),
-                            nearest.getZ());
+                    // No lift. A broom's position is its rider's feet and its model already hovers at
+                    // their hip (BroomGeometry), so mounting one where it floats seats the rider there.
+                    // The old half-block lift was a position jump in one tick, which the server billed
+                    // as a crash.
                     player.startRiding(nearest);
                     return InteractionResult.SUCCESS;
                 }
             }
 
             BroomEntity broom = new BroomEntity(ModEntities.BROOM.get(), level);
-            // Spawned high enough that the seat lands exactly where the player is standing:
-            // startRiding then places them at broomY + SEAT_OFFSET_Y, which is their own feet.
-            // Without the lift, mounting would drop the player half a block into the ground.
-            broom.setPos(player.getX(),
-                    player.getY() + BroomDefinitionRegistry.getOrFallback(
-                            stack.getOrDefault(ModDataComponents.BROOM_DEFINITION.get(), FALLBACK_ID))
-                            .seat().mountLift(),
-                    player.getZ());
+            // At the player's own feet: a broom's position is where its rider stands, so startRiding
+            // leaves them exactly where they were.
+            broom.setPos(player.getX(), player.getY(), player.getZ());
             broom.setYRot(player.getYRot());
             broom.setBroomStack(stack.copy());
             Identifier defId = stack.getOrDefault(ModDataComponents.BROOM_DEFINITION.get(), FALLBACK_ID);

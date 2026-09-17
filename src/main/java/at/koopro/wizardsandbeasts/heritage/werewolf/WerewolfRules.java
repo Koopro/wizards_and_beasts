@@ -63,6 +63,11 @@ public final class WerewolfRules {
      * eight — the same index vanilla uses into {@code DimensionType.MOON_BRIGHTNESS_PER_PHASE}, whose
      * first entry is {@code 1.0F}. That is what makes {@link #FULL_MOON} zero rather than four.
      */
+    /** The number of the day a night belongs to — the same day count the moon phase is taken from. */
+    public static long nightOf(long dayTime) {
+        return Math.floorDiv(dayTime, 24000L);
+    }
+
     public static int moonPhase(long dayTime) {
         return (int) Math.floorMod(dayTime / 24000L, 8L);
     }
@@ -90,7 +95,7 @@ public final class WerewolfRules {
     // ── who is a werewolf, and what shape are they in ──────────────────
 
     public static boolean isWerewolf(@Nullable PlayerHeritageData data) {
-        return data != null && data.getSelectedHeritage() == Heritage.WEREWOLF;
+        return data != null && data.hasCondition(at.koopro.wizardsandbeasts.heritage.MagicalCondition.LYCANTHROPY);
     }
 
     public static boolean isWerewolf(ServerPlayer player) {

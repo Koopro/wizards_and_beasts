@@ -14,7 +14,7 @@ public final class UiStateProjection {
     public static ObscurialUiModel obscurialHud() {
         PlayerHeritageData typeData = ClientHeritageDataState.get();
         return new ObscurialUiModel(
-                typeData.getSelectedHeritage() == Heritage.OBSCURIAL,
+                typeData.hasCondition(at.koopro.wizardsandbeasts.heritage.MagicalCondition.OBSCURUS),
                 typeData.getActiveFormId(),
                 parseMeter(typeData.getFlag(ObscurialUiFlags.FLAG_DRAIN), ObscurialUiFlags.MAX_METER),
                 parseMeter(typeData.getFlag(ObscurialUiFlags.FLAG_CHARGE), ObscurialUiFlags.MAX_METER),

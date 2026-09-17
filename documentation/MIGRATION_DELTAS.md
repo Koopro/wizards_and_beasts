@@ -4037,3 +4037,175 @@ one pixel of a slightly different brown.
 
 The broom list is scraped from `BroomItemRegistry`, so a new broom is covered without editing the
 test.
+
+---
+
+# Spellteacher vendor removed — sources, scribing, skill web and proficiency remain
+
+**2026-09-10.** Learning a spell was a purchase: walk to a lectern, open a catalogue of every spell
+you were eligible for, pay 58 Knuts. What replaced it is finding the writing.
+
+## What moved
+
+| Was | Is | Note |
+|---|---|---|
+| `SpellTeacherScreen` + `ClientSpellTeacherState` | *(deleted)* | the catalogue was the vendor |
+| `SpellTeacherOpenS2CPayload`, `SpellTeacherLearnC2SPayload`, `ModNetworkTeacher` | *(deleted)* | both packets existed only to serve the screen |
+| `SpellLearningService.buildOffers` + `SpellOffer` | *(deleted)* | a priced list of eligible spells |
+| `SpellLearningService.tuitionFor`, `StatEffects.tuitionCost` / `tuitionMultiplier` | *(deleted)* | KNOWLEDGE's only consumer, re-homed below |
+| `Config.spellTeacherRequirePayment`, `Config.spellTeacherLearnCostKnuts` | *(deleted)* | an existing config file keeps the stale keys until NeoForge corrects it; both are ignored |
+| `SpellTeacherBlock` (`spell.teacher`) | `SpellScriptoriumBlock` (`spell.study`) | **registry id `spell_teacher` is unchanged** — every placed copy, the recipe, the advancement, the loot table and the bench-enhancer entry survive. Display name is now "Study Lectern" |
+| — | `ModDataComponents.SPELL_SOURCE` (`spell_source`, a `String` spell id) | absent = a blank book |
+| — | `SpellSourceItem` + `SpellSource` | the read path. Two registered sources: `standard_book_of_spells` survives a read, `torn_spell_page` (new, `MiscItemRegistry`) is spent by one |
+| — | `SpellbookLootModifier` (`wizards_and_beasts:spellbook`) | the find path |
+| `CanonItemRegistry.STANDARD_BOOK_OF_SPELLS` as `Item::new` | as `SpellSourceItem::new` | first canon stub promoted; stays in `CanonItemRegistry.ALL`, so its sprite, lang keys and catalogue test are unchanged |
+
+## What did not move
+
+`SpellLearningEligibility` is byte-for-byte untouched. Every gate it owned — Obscurial abilities, the
+DARK_ARTS module, `isImplemented`, heritage, already-known, `SpellRequirement`, required skill,
+required profession, mastery tier — still refuses, and now refuses through the reading path instead
+of by omission from a list. `tryLearnSpell` still writes and still syncs both spell data and stats.
+
+`SkillEffect.LearnSpell` and `SkillSystemAPI.teachSpell` are unchanged: skill keystones were always
+earned progression rather than a shop, and they keep granting spells exactly as before, respec
+revocation included.
+
+`/wandb spell learn` deliberately still bypasses the service and writes `PlayerSpellData` directly.
+An operator granting a spell is overriding the gates, and a debug command that could be refused by
+the rules it exists to step around is useless for setting up a test's state.
+
+## Two-stage knowledge was considered and rejected
+
+The obvious shape for a book fantasy is *known* (read it) then *trained* (practised it). The mod
+already has that second axis — proficiency, with mastery tiers on top — and adding a third state
+would have meant a new field in `PlayerSpellData`, a `CURRENT_VERSION` bump, a sync-format change and
+a new failure mode in every gate that currently asks `knowsSpell`. `knowsSpell` stays binary: reading
+teaches, casting masters.
+
+## KNOWLEDGE re-homed: tuition discount → study rate
+
+`StatEffects.studyRate(knowledge)` returns 1.00 at 0 and 1.50 at 100, and multiplies the base
+proficiency increment in `SpellProficiencyTracker`. Three constraints shaped it:
+
+- **The floor is 1.0, not below.** A discount's natural shape ("everyone pays full, the well-read pay
+  less") ported carelessly onto a rate becomes "everyone learns slowly, the well-read learn normally"
+  — a penalty on a stat nobody can train directly.
+- **PLAYER_STATS off returns 1.0**, not a computed value from an unread stat. A module being disabled
+  must never make the game harder than a module enabled at zero.
+- **It multiplies an increment that already tapers** above 0.8 proficiency, so it shortens the grind
+  without flattening the curve.
+
+`StatReadout` moved KNOWLEDGE out of its "lower is better" group at the same time; it now reads
+`+50.0%` at 100 where it read `-40.0%` before.
+
+## Where the first spell comes from
+
+| Source | Pool | Chance |
+|---|---|---|
+| `hidden_wizarding_cache` | one guaranteed roll: Lumos (w4), Stupefy (w3), 1–3 blanks (w3), plus an ink pool | always |
+| `spellbook_in_village_libraries` | lumos, nox, stupefy, alohomora, wingardium_leviosa, reparo, colloportus, accio, depulso | 0.35 |
+| `spellbook_in_stronghold_libraries` | stupefy, expelliarmus, incendio, glacius, arresto_momentum, episkey, finite_incantatem, flipendo, diffindo, aguamenti, confringo | 0.7 |
+| `spellbook_in_woodland_mansions` | riddikulus, levicorpus, liberacorpus, bombarda, frigora, claustra_reverto, capacious_extremis | 0.6 |
+| `spell_pages_in_ruins` (torn pages, spent on reading) | episkey, arresto_momentum, finite_incantatem, colloportus, alohomora, aguamenti, glacius, diffindo, levicorpus, liberacorpus, riddikulus | 0.4 |
+
+No Dark Art and no Obscurial ability is in any pool, and `SpellbookLootPoolTest` fails the build if
+one appears or if an id stops resolving — the modifier itself skips an unresolvable entry silently,
+which is right at runtime and useless as a warning.
+
+After the first copy, spells spread player-to-player: a blank Standard Book of Spells plus an ink
+bottle at a Study Lectern writes the scribe's **active** spell into it. The wheel already answers
+"which spell am I thinking about", so there is no second picker to keep in step.
+
+# Broom — flight overhaul (2026-09-11)
+
+Player report: flying wears durability, a broom is slower than walking, the model is too big, the rider
+animation and the slipstream look wrong, and a broom sinks when you do nothing. Each traced to a defect.
+Three choices were the user's: a parked broom hovers at seat height, the "Brisk" speed table, half-size
+models.
+
+## Seat frame — supersedes "The seat was measured to the wrong surface" and "`passengerOffset` Y is negative"
+
+`Entity.positionRider` places a passenger at `vehicle.position() + getPassengerAttachmentPoint(...) -
+passenger.getVehicleAttachmentPoint(vehicle)`, and a player's vehicle attachment is
+`Avatar.DEFAULT_VEHICLE_ATTACHMENT` = `(0, 0.6, 0)`. The earlier `shaftTop - 0.75` derivation never
+subtracted it, so on all eight brooms **the rider's hip sat exactly 0.6 blocks below the shaft top** — the
+handle through their stomach. Both sections above are therefore wrong about where the rider ended up.
+
+New frame (`broom/BroomGeometry`): a broom's position is its rider's feet. `getPassengerAttachmentPoint`
+returns the passenger's own vehicle-attachment height, so feet land exactly on the origin for any rider,
+and the renderer lifts the model by `BroomSeat.modelLift() = 0.75 - passengerOffset.y`.
+
+| key | before | now |
+|---|---|---|
+| `passengerOffset.y` | rider's feet relative to the broom origin (negative) | seat height above the rendered model origin — shaft `_mid` top × `MODEL_SCALE`, range `[0, 0.75]` |
+| `passengerOffset.z` | documented "toward the bristles", but `Vec3.yRot(-yaw)` sent it toward the nose | toward the bristles (`BroomGeometry.localToWorld` negates z) |
+
+Shipped: `plain`/`swept`/`racing` 0.15625, `oak` 0.1875, `heavy_oak` 0.21875. **Breaking for datapacks:**
+a negative `y` is a decode fault, deliberately not reinterpreted. `BroomSeat.mountLift()` and both
+`BroomItem` lifts are gone — a mount no longer moves the broom at all.
+
+## Box
+
+Registered `0.8 × 1.0` (a parked broom hovering at seat height); ridden, `getDimensions` returns the
+rider's `0.8 × 1.8`, refreshed in `addPassenger`/`removePassenger` on both sides. It was `1.5 × 0.6`: too
+wide for a one-block gap, too short to keep a rider's head out of a ceiling, and a landing left the rider's
+legs under the floor. `canBeCollidedWith` is now `false` — a rider-sized solid box is a pillar.
+
+## Model scale
+
+`BroomRenderer` calls GeckoLib's `withScale(BroomGeometry.MODEL_SCALE)` = 0.5: the rigs measured 4.1–4.6
+blocks long, now 2.1–2.3. Geometry files are untouched — halving the cube sizes in the files would make
+fractional box-UV extents and tear the textures. `BroomSeatParityTest` multiplies by the scale.
+
+## Durability
+
+`BroomEntity.applyCrashWearFromMotionDelta` is deleted. Server-side, a ridden broom's motion is observed
+from `ServerboundMoveVehiclePacket`, so a single late or doubled packet at 0.4+ blocks/tick read as a 0.4+
+change in motion and was billed 1–3 durability, normally twice; the mount lift was billed too. Real
+impacts still reach the server through `BroomImpactC2SPayload`. Pinned by GameTest
+`broom_packet_jitter_costs_no_durability`.
+
+## Hover
+
+A ridden broom no longer sinks with no vertical key held, and `RacingHandling`'s sink at speed is deleted
+together with `BroomHandlingProfile.afterVelocityComputed`, which it was the only user of. `weakGravity`
+(and `modifyWeakGravity`, still Tank's) now drives an **unridden** broom's settle instead of the hardcoded
+`-0.04` / `0.95` fall: 6.25 blocks in 20 ticks became about 2.5. Pinned by GameTest
+`broom_let_go_settles_rather_than_drops`.
+
+## Speed — "Brisk"
+
+| broom | maxSpeed b/t | boost × | deceleration | lerpFactor | ascent / descent |
+|---|---|---|---|---|---|
+| `broom`, `cleansweep_seven` | 0.35 → 0.55 | 1.3 | 0.012 → 0.050 | 0.10 → 0.25 | 0.14/0.18 → 0.22/0.28 |
+| `comet_260` | 0.47 → 0.70 | 1.5 → 1.4 | 0.010 → 0.050 | 0.12 → 0.30 | 0.18/0.22 → 0.27/0.33 |
+| `oakshaft_79` | 0.50 → 0.68 | 1.4 → 1.3 | 0.006 → 0.035 | 0.08 → 0.20 | 0.16/0.20 → 0.22/0.27 |
+| `nimbus_2000` | 0.66 → 0.90 | 1.8 → 1.45 | 0.009 → 0.042 | 0.15 → 0.32 | 0.24/0.27 → 0.33/0.37 |
+| `nimbus_2001` | 0.69 → 0.95 | 1.85 → 1.5 | 0.009 → 0.042 | 0.15 → 0.33 | 0.25/0.28 → 0.34/0.39 |
+| `firebolt` | 0.92 → 1.20 | 2.2 → 1.75 | 0.007 → 0.040 | 0.20 → 0.38 | 0.32/0.34 → 0.40/0.40 |
+| `firebolt_supreme` | 1.05 → 1.35 | 2.5 → 1.8 | 0.006 → 0.043 | 0.22 → 0.40 | 0.36/0.36 → 0.40/0.40 |
+
+The starter cruises at 11 blocks/s (sprint is 5.6); coasting to 10% speed takes about 1.8 s on a school
+broom and 3.5 s on the Oakshaft, where it took 7.5–20 s. Boosted ceilings stay close to their old values
+on purpose. Every value sits inside the existing codec ranges. `BroomTuning` turn rates 13/7 → 18/11;
+`REFERENCE_TOP_SPEED` 2.625 → 2.43.
+
+## Slipstream
+
+`tailPosition()` rotated `(0, 0.25, +2.5)` by `Vec3.yRot(-yaw)`, which maps local `+z` to **forward**
+(vanilla `Camel` seats its driver at `z = +0.5`), so the trail and the crash twigs spawned 2.5 blocks in
+front of the rider. Now `BroomGeometry.tailOffset`: z negated, scaled, on the lifted model.
+`BroomFlightFx` lays each tick's particles along the stretch since the last tick. Pinned by
+`BroomGeometryTest`.
+
+## Rider and broom animation
+
+- `RenderLivingEvent.Pre` fires before `LivingEntityRenderer.setupRotations`, so the rider's lean and roll
+  were applied about world axes. They are now taken in the body's frame, with both signs flipped to match
+  the broom bone inside GeckoLib's `180 - yaw` model frame — previously the rider leaned back while the
+  broom nosed down and banked against it. The torso `body.xRot` sign had the same inversion.
+- `BroomEntity.positionRider` locks the rider's `yBodyRot` to the broom (vanilla `AbstractHorse` pattern).
+- Arms `-1.15 → -0.55` (hands on the shaft), legs `-0.15 → +0.25`.
+- `root` position tracks removed from `idle`/`hover`/`fly_forward`/`boost`; the hover bob is
+  `BroomVisuals.bob`, applied identically to broom and rider. Three animation controllers became one.

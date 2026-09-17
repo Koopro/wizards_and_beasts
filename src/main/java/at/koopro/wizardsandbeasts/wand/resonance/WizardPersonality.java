@@ -37,15 +37,6 @@ public final class WizardPersonality {
         put(HeritageVariant.SQUIB, "perceptive", "patient", "survivor");
         put(HeritageVariant.ADOPTED_MAGICAL, "adaptable", "empathetic", "seeker");
 
-        // Werewolf
-        put(HeritageVariant.WEREWOLF_BITTEN, "survivor", "resolute", "selfless");
-        put(HeritageVariant.WEREWOLF_BORN, "unyielding", "intense", "fated");
-        put(HeritageVariant.WEREWOLF_SAVAGE, "hardened", "intense", "survivor");
-
-        // Obscurial
-        put(HeritageVariant.SUPPRESSED, "complex", "patient", "seeker");
-        put(HeritageVariant.UNLEASHED, "intense", "unyielding", "exceptional");
-
         // Goblin
         put(HeritageVariant.GOBLIN_COMMON, "perceptive", "principled", "resolute");
         put(HeritageVariant.GOBLIN_WARRIOR, "hardened", "unyielding", "determined");

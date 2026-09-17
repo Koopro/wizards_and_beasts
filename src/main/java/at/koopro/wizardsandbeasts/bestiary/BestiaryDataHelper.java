@@ -10,14 +10,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.common.NeoForge;
 
-import java.util.HashMap;
-import java.util.Map;
 
 public final class BestiaryDataHelper {
     private BestiaryDataHelper() {}
 
     public static DiscoveryTier getTier(Player player, Identifier entryId) {
-        return player.getData(ModAttachments.BESTIARY_DATA.get()).tiers().getOrDefault(entryId, DiscoveryTier.UNDISCOVERED);
+        return player.getData(ModAttachments.BESTIARY_DATA.get()).tiers().getOrDefault(entryId, DiscoveryTier.UNKNOWN);
     }
 
     public static void setTier(Player player, Identifier entryId, DiscoveryTier requestedTier) {
@@ -29,13 +27,11 @@ public final class BestiaryDataHelper {
         if (NeoForge.EVENT_BUS.post(event).isCanceled()) {
             return;
         }
-        PlayerBestiaryData current = player.getData(ModAttachments.BESTIARY_DATA.get());
-        Map<Identifier, DiscoveryTier> map = new HashMap<>(current.tiers());
-        map.put(entryId, requestedTier);
-        // Harvest lockouts are carried through: they live on the same record, and a tier advancing is
-        // not a reason to hand back a rare drop the player has already taken.
-        player.setData(ModAttachments.BESTIARY_DATA.get(),
-                new PlayerBestiaryData(map, new HashMap<>(current.lastHarvests())));
+        PlayerBestiaryData next = player.getData(ModAttachments.BESTIARY_DATA.get()).copy();
+        // Harvest lockouts and observation time are carried through: they live on the same record, and a tier
+        // advancing is not a reason to hand back a rare drop or forget the hours spent watching.
+        next.tiers().put(entryId, requestedTier);
+        player.setData(ModAttachments.BESTIARY_DATA.get(), next);
         if (player instanceof ServerPlayer sp) {
             BestiaryDataSyncPayload.syncToPlayer(sp);
             PlayerStatsSyncPayload.syncToPlayer(sp); // KNOWLEDGE derives from bestiary discoveries
@@ -54,18 +50,17 @@ public final class BestiaryDataHelper {
         if (NeoForge.EVENT_BUS.post(event).isCanceled()) {
             return;
         }
-        PlayerBestiaryData current = player.getData(ModAttachments.BESTIARY_DATA.get());
-        Map<Identifier, DiscoveryTier> map = new HashMap<>(current.tiers());
-        Map<Identifier, Long> harvests = new HashMap<>(current.lastHarvests());
-        if (tier == DiscoveryTier.UNDISCOVERED) {
-            map.remove(entryId);
-            // Clearing an entry outright clears its lockout too: an operator resetting someone's
-            // bestiary should not leave an invisible timer behind on an entry that no longer exists.
-            harvests.remove(entryId);
+        PlayerBestiaryData next = player.getData(ModAttachments.BESTIARY_DATA.get()).copy();
+        if (tier == DiscoveryTier.UNKNOWN) {
+            next.tiers().remove(entryId);
+            // Clearing an entry outright clears its lockout and its watching time too: an operator resetting
+            // someone's bestiary should not leave an invisible timer behind on an entry that no longer exists.
+            next.lastHarvests().remove(entryId);
+            next.observation().remove(entryId);
         } else {
-            map.put(entryId, tier);
+            next.tiers().put(entryId, tier);
         }
-        player.setData(ModAttachments.BESTIARY_DATA.get(), new PlayerBestiaryData(map, harvests));
+        player.setData(ModAttachments.BESTIARY_DATA.get(), next);
         if (player instanceof ServerPlayer sp) {
             BestiaryDataSyncPayload.syncToPlayer(sp);
             PlayerStatsSyncPayload.syncToPlayer(sp); // KNOWLEDGE derives from bestiary discoveries
@@ -89,10 +84,28 @@ public final class BestiaryDataHelper {
      * a timer it could be written to lie about.
      */
     public static void recordHarvest(ServerPlayer player, Identifier entryId, long gameTime) {
-        PlayerBestiaryData current = player.getData(ModAttachments.BESTIARY_DATA.get());
-        Map<Identifier, Long> harvests = new HashMap<>(current.lastHarvests());
-        harvests.put(entryId, gameTime);
-        player.setData(ModAttachments.BESTIARY_DATA.get(),
-                new PlayerBestiaryData(new HashMap<>(current.tiers()), harvests));
+        PlayerBestiaryData next = player.getData(ModAttachments.BESTIARY_DATA.get()).copy();
+        next.lastHarvests().put(entryId, gameTime);
+        player.setData(ModAttachments.BESTIARY_DATA.get(), next);
+    }
+
+    // ── observation ────────────────────────────────────────────────────────
+
+    public static int getObservedTicks(Player player, Identifier entryId) {
+        return player.getData(ModAttachments.BESTIARY_DATA.get()).observedTicks(entryId);
+    }
+
+    /**
+     * Adds watching time. Server-side and unsynced, like harvest lockouts: the client is only ever told the tier
+     * the time earns.
+     *
+     * @return the new total
+     */
+    public static int addObservedTicks(ServerPlayer player, Identifier entryId, int ticks) {
+        PlayerBestiaryData next = player.getData(ModAttachments.BESTIARY_DATA.get()).copy();
+        int total = (int) Math.min(Integer.MAX_VALUE, (long) next.observedTicks(entryId) + Math.max(0, ticks));
+        next.observation().put(entryId, total);
+        player.setData(ModAttachments.BESTIARY_DATA.get(), next);
+        return total;
     }
 }

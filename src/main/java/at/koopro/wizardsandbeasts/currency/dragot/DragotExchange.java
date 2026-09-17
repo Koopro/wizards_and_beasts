@@ -23,6 +23,11 @@ import org.jspecify.annotations.NullMarked;
  * the reputation hit: {@link TraceService#report} already funnels into the standing system's
  * {@code OFFENCE} deed trigger, so passing bad money moves the same needle every other crime does
  * without a second reputation counter existing.
+ *
+ * <p><b>Goblins pay no commission.</b> Gringotts is theirs — goblin-run since it was founded, and goblin law holds
+ * that what a goblin made stays a goblin's. A wizard changing money is a customer; a goblin changing money is
+ * family, and the five percent is what the bank charges outsiders. The same counting eye cuts the other way: the
+ * teller is a goblin, so a goblin trying to pass a devalued Dragot is spotted every single time.
  */
 @NullMarked
 public final class DragotExchange {
@@ -57,13 +62,14 @@ public final class DragotExchange {
             return Result.no("currency.wizards_and_beasts.dragot.exchange.short");
         }
 
-        if (badTaken > 0 && player.getRandom().nextFloat() < DragotRates.DEVALUED_NOTICE_CHANCE) {
+        if (badTaken > 0 && (isGoblin(player)
+                || player.getRandom().nextFloat() < DragotRates.DEVALUED_NOTICE_CHANCE)) {
             // Caught. The coins are already out of the purse and stay out — confiscated, not refunded.
             reportBadMoney(player);
             return Result.no("currency.wizards_and_beasts.dragot.exchange.caught", badTaken);
         }
 
-        long knuts = DragotRates.dragotsToKnuts(dragots, rate);
+        long knuts = DragotRates.dragotsToKnuts(dragots, rate, feeFor(player));
         vault(player).depositKnuts(knuts);
         return new Result(true, Component.translatable("currency.wizards_and_beasts.dragot.exchange.sold",
                 dragots, CurrencyHelper.formatFromKnuts(knuts)));
@@ -75,7 +81,7 @@ public final class DragotExchange {
             return Result.no("currency.wizards_and_beasts.dragot.exchange.nothing");
         }
         float rate = DragotQuotes.rateFor(player);
-        long cost = DragotRates.knutsToBuyDragots(dragots, rate);
+        long cost = DragotRates.knutsToBuyDragots(dragots, rate, feeFor(player));
         PlayerVaultData vault = vault(player);
         if (vault.getTotalInKnuts() < cost) {
             return Result.no("currency.wizards_and_beasts.dragot.exchange.funds",
@@ -110,6 +116,16 @@ public final class DragotExchange {
     }
 
     /** One place files the crime, so the two detection paths cannot drift apart. */
+    /** Whether the customer at the counter is a goblin: Gringotts is theirs. */
+    private static boolean isGoblin(ServerPlayer player) {
+        return at.koopro.wizardsandbeasts.heritage.HeritageAPI.getData(player).hasTrait("goblin_property");
+    }
+
+    /** The commission this customer is charged: nothing for a goblin, the standing Gringotts fee for everyone else. */
+    private static float feeFor(ServerPlayer player) {
+        return isGoblin(player) ? 0.0f : DragotRates.GRINGOTTS_FEE;
+    }
+
     private static void reportBadMoney(ServerPlayer player) {
         TraceService.report(player, MagicalOffence.PASSING_DEVALUED_COIN);
     }

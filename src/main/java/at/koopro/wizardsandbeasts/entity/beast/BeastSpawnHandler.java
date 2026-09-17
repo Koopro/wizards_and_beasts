@@ -53,6 +53,14 @@ public final class BeastSpawnHandler {
         // Wandmaker's Bench unusable even once it became craftable: only phoenix feathers dropped.
         daySpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("unicorn"));
         daySpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("common_welsh_green"));
+
+        // The Demiguise keeps to deep jungle and dark forest, alone: the only wild source of its hair now that the hair
+        // is shed and given rather than taken from a body. (The Niffler's placement is NifflerSpawnHandler's; its
+        // badlands spawn lives in data/.../biome_modifier/spawn_niffler.json.)
+        daySpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("demiguise"));
+        // A werewolf is a person on any other night. It is only ever out under a full moon.
+        register(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("werewolf"), false,
+                level -> at.koopro.wizardsandbeasts.heritage.werewolf.WerewolfRules.fullMoonNight(level.getLevel()));
     }
 
     /**
@@ -84,6 +92,13 @@ public final class BeastSpawnHandler {
     private static void register(RegisterSpawnPlacementsEvent event,
                                  DeferredHolder<EntityType<?>, ? extends EntityType<? extends PathfinderMob>> holder,
                                  boolean daytime) {
+        register(event, holder, daytime, level -> true);
+    }
+
+    private static void register(RegisterSpawnPlacementsEvent event,
+                                 DeferredHolder<EntityType<?>, ? extends EntityType<? extends PathfinderMob>> holder,
+                                 boolean daytime,
+                                 java.util.function.Predicate<net.minecraft.world.level.ServerLevelAccessor> when) {
         event.register(
                 holder.get(),
                 SpawnPlacementTypes.ON_GROUND,
@@ -92,7 +107,7 @@ public final class BeastSpawnHandler {
                     if (!ModuleManager.isEnabled(Module.CREATURES)) {
                         return false;
                     }
-                    if (!spawnsNaturally(entityType)) {
+                    if (!spawnsNaturally(entityType) || !when.test(level)) {
                         return false;
                     }
                     if (!level.getBlockState(pos.below()).isSolidRender()) {

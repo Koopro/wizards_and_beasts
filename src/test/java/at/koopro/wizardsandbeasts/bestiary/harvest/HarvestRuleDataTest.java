@@ -79,7 +79,7 @@ class HarvestRuleDataTest {
                 """);
 
         assertEquals(Identifier.fromNamespaceAndPath("wizards_and_beasts", "unicorn"), rule.entry());
-        assertEquals(DiscoveryTier.MASTERED, rule.minTier());
+        assertEquals(DiscoveryTier.KNOWN, rule.minTier());
         assertEquals(0.35f, rule.chance(), 1e-5);
         assertEquals(600, rule.cooldownSeconds());
         assertEquals(1, rule.minCount());
@@ -223,19 +223,19 @@ class HarvestRuleDataTest {
 
     /**
      * The whole point of the feature: the shipped set has to make a high tier matter. A pack of rules
-     * that all sit at SIGHTED would load, pass every other test, and gate nothing worth studying for.
+     * that all sit at ENCOUNTERED would load, pass every other test, and gate nothing worth studying for.
      */
     @Test
     void theShippedRulesActuallyRequireStudy() throws Exception {
-        boolean anyMastered = false;
+        boolean anyKnown = false;
         for (Path file : shippedRuleFiles()) {
             HarvestRule rule = parseOrThrow(Files.readString(file));
             assertTrue(rule.minTier().ordinal() >= DiscoveryTier.STUDIED.ordinal(),
                     () -> file.getFileName() + " gates on " + rule.minTier()
                             + ", which a player reaches without deliberately studying anything");
-            anyMastered |= rule.minTier() == DiscoveryTier.MASTERED;
+            anyKnown |= rule.minTier() == DiscoveryTier.KNOWN;
         }
-        assertTrue(anyMastered, "at least one shipped material should require MASTERED");
+        assertTrue(anyKnown, "at least one shipped material should require KNOWN");
     }
 
     // ── persistence ──
@@ -248,7 +248,7 @@ class HarvestRuleDataTest {
                         "{\"tiers\": {\"wizards_and_beasts:unicorn\": \"MASTERED\"}}", JsonElement.class))
                 .getOrThrow(msg -> new AssertionError("legacy save failed to parse: " + msg));
 
-        assertEquals(DiscoveryTier.MASTERED,
+        assertEquals(DiscoveryTier.KNOWN,
                 restored.tiers().get(Identifier.fromNamespaceAndPath("wizards_and_beasts", "unicorn")),
                 "a required lastHarvests field would have failed the parse and wiped the bestiary");
         assertTrue(restored.lastHarvests().isEmpty(), "and the player owes no lockout they never earned");
@@ -267,16 +267,34 @@ class HarvestRuleDataTest {
     void tiersAndLockoutsBothSurviveARoundTrip() {
         Identifier unicorn = Identifier.fromNamespaceAndPath("wizards_and_beasts", "unicorn");
         PlayerBestiaryData original = new PlayerBestiaryData(
-                new java.util.HashMap<>(Map.of(unicorn, DiscoveryTier.MASTERED)),
-                new java.util.HashMap<>(Map.of(unicorn, 123_456L)));
+                new java.util.HashMap<>(Map.of(unicorn, DiscoveryTier.KNOWN)),
+                new java.util.HashMap<>(Map.of(unicorn, 123_456L)),
+                new java.util.HashMap<>(Map.of(unicorn, 4_200)));
 
         JsonElement encoded = PlayerBestiaryData.CODEC.encodeStart(JsonOps.INSTANCE, original)
                 .getOrThrow(msg -> new AssertionError("encode failed: " + msg));
         PlayerBestiaryData restored = PlayerBestiaryData.CODEC.parse(JsonOps.INSTANCE, encoded)
                 .getOrThrow(msg -> new AssertionError("parse failed: " + msg));
 
-        assertEquals(DiscoveryTier.MASTERED, restored.tiers().get(unicorn));
+        assertEquals(DiscoveryTier.KNOWN, restored.tiers().get(unicorn));
         assertEquals(123_456L, restored.lastHarvests().get(unicorn));
+        assertEquals(4_200, restored.observedTicks(unicorn), "watching time is persisted like a lockout");
+        assertFalse(encoded.getAsJsonObject().has("tiers") && !encoded.getAsJsonObject().getAsJsonObject("tiers").isEmpty(),
+                "tiers are written by index only; the legacy name map is read, never written");
+    }
+
+    @Test
+    void aSaveFromBeforeTheRenameKeepsEveryDepthOfKnowledge() {
+        PlayerBestiaryData restored = PlayerBestiaryData.CODEC
+                .parse(JsonOps.INSTANCE, GSON.fromJson("{\"tiers\": {"
+                        + "\"wizards_and_beasts:a\": \"SIGHTED\", \"wizards_and_beasts:b\": \"ENCOUNTERED\", "
+                        + "\"wizards_and_beasts:c\": \"STUDIED\", \"wizards_and_beasts:d\": \"MASTERED\"}}",
+                        JsonElement.class))
+                .getOrThrow(msg -> new AssertionError(msg));
+        assertEquals(DiscoveryTier.ENCOUNTERED, restored.tiers().get(Identifier.parse("wizards_and_beasts:a")));
+        assertEquals(DiscoveryTier.OBSERVED, restored.tiers().get(Identifier.parse("wizards_and_beasts:b")));
+        assertEquals(DiscoveryTier.STUDIED, restored.tiers().get(Identifier.parse("wizards_and_beasts:c")));
+        assertEquals(DiscoveryTier.KNOWN, restored.tiers().get(Identifier.parse("wizards_and_beasts:d")));
     }
 
     /**
@@ -289,7 +307,7 @@ class HarvestRuleDataTest {
         PlayerBestiaryData a = new PlayerBestiaryData();
         PlayerBestiaryData b = new PlayerBestiaryData();
 
-        a.tiers().put(unicorn, DiscoveryTier.MASTERED);
+        a.tiers().put(unicorn, DiscoveryTier.KNOWN);
         a.lastHarvests().put(unicorn, 99L);
 
         assertTrue(b.tiers().isEmpty(), "one player's discoveries must not appear on another's record");

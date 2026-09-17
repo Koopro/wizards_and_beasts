@@ -38,7 +38,7 @@ import org.jspecify.annotations.NullMarked;
  * @param entry           the bestiary entry whose tier gates this — <em>not</em> the entity type, because
  *                        the tier is held per entry and an entry is what a player actually studies
  * @param item            what drops
- * @param minTier         the tier the killer must have reached. {@link DiscoveryTier#UNDISCOVERED} is
+ * @param minTier         the tier the killer must have reached. {@link DiscoveryTier#UNKNOWN} is
  *                        rejected: a rule that gates on nothing is an unconditional extra drop, which
  *                        belongs in the creature's own loot table.
  * @param chance          0–1 probability, rolled per kill after the tier check passes
@@ -80,7 +80,7 @@ public record HarvestRule(Identifier entry,
      * whose whole job is to be rare.
      */
     private static DataResult<HarvestRule> validate(HarvestRule rule) {
-        if (rule.minTier == DiscoveryTier.UNDISCOVERED) {
+        if (rule.minTier == DiscoveryTier.UNKNOWN) {
             return DataResult.error(() -> "minTier UNDISCOVERED gates nothing; an unconditional extra "
                     + "drop belongs in the creature's own loot table, not in a harvest rule");
         }

@@ -172,6 +172,10 @@ public interface BondableBeast {
         }
         bondState().setFeedCooldown(feed.cooldownSeconds() * 20);
         increaseBond(player, feed.gain(), true);
+        // Feeding a creature is how a naturalist studies it.
+        if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+            at.koopro.wizardsandbeasts.event.bestiary.BestiaryDiscoveryHandler.studied(serverPlayer, bondMob());
+        }
         playBondSound(profile.feedSound(), 1.0f, 1.0f);
         tryEnterLove(profile, offered);
         return InteractionResult.SUCCESS;
@@ -216,7 +220,7 @@ public interface BondableBeast {
         // land whether the bond was earned by feeding or by keeping company.
         profile.masteryBond().ifPresent(mastery -> {
             if (before < mastery && after >= mastery) {
-                BestiaryDataHelper.setTier(player, bondSpecies(), DiscoveryTier.MASTERED);
+                BestiaryDataHelper.setTier(player, bondSpecies(), DiscoveryTier.KNOWN);
             }
         });
     }

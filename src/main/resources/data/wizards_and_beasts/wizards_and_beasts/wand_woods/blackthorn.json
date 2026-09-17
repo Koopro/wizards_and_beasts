@@ -1,4 +1,5 @@
 {
+  "_lore": "Canon: a warrior's wand; truly bonds only after passing through danger or hardship with its owner, then as loyal as one could wish. Gameplay: the bond deepens only through casts made in danger; one more defeat to win.",
   "display_name": {
     "translate": "wand_wood.wizards_and_beasts.blackthorn"
   },
@@ -19,12 +20,13 @@
   "rarity": "rare",
   "refuse_threshold": 0.16,
   "cast_modifiers": {
-    "damage": 1.12,
+    "damage": 1.04,
     "cooldown": 1.0,
     "range": 1.0,
-    "fizzle": 0.01,
-    "category_damage_bonus": {
-      "defense": 0.1
-    }
+    "fizzle": 0.0
+  },
+  "temperament": {
+    "bond_needs_danger": true,
+    "extra_wins": 1
   }
 }

@@ -6,7 +6,7 @@ import at.koopro.wizardsandbeasts.brew.CauldronTier;
 import at.koopro.wizardsandbeasts.block.FloatingCandleBlock;
 import at.koopro.wizardsandbeasts.block.HouseBannerBlock;
 import at.koopro.wizardsandbeasts.block.MallowsweetBlock;
-import at.koopro.wizardsandbeasts.spell.teacher.SpellTeacherBlock;
+import at.koopro.wizardsandbeasts.spell.study.SpellScriptoriumBlock;
 import at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions;
 import at.koopro.wizardsandbeasts.wand.bench.WandmakersBenchBlock;
 import net.minecraft.world.item.BlockItem;
@@ -113,8 +113,8 @@ final class WizardingWorldBlockRegistry {
                             AmbientParticleBlock.Emission.ABOVE, 12),
                     () -> BlockBehaviour.Properties.of().strength(3.0f).sound(SoundType.COPPER).noOcclusion());
 
-    static final DeferredBlock<SpellTeacherBlock> SPELL_TEACHER =
-            ModBlocks.BLOCKS.registerBlock("spell_teacher", SpellTeacherBlock::new,
+    static final DeferredBlock<SpellScriptoriumBlock> SPELL_TEACHER =
+            ModBlocks.BLOCKS.registerBlock("spell_teacher", SpellScriptoriumBlock::new,
                     () -> BlockBehaviour.Properties.of().strength(2.5f).sound(SoundType.WOOD).noOcclusion());
     // noOcclusion is not cosmetic here: the bench renders through a GeckoLib rig and is therefore
     // RenderShape.INVISIBLE. An occluding block culls the faces of its neighbours, so a block that

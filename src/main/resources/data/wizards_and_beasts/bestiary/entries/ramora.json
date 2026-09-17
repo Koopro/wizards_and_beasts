@@ -23,5 +23,19 @@
   "entityType": "wizards_and_beasts:ramora",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/ramora.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/ramora.png",
-  "sortOrder": 86
+  "sortOrder": 86,
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.ramora.diet",
+    "behaviour": "bestiary.wizards_and_beasts.ramora.behaviour",
+    "society": "bestiary.wizards_and_beasts.ramora.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.ramora.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

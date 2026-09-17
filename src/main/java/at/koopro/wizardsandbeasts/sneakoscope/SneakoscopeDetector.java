@@ -1,11 +1,11 @@
 package at.koopro.wizardsandbeasts.sneakoscope;
 
+import at.koopro.wizardsandbeasts.wand.WandComponents;
+
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.item.darkartefact.IHorcruxVessel;
 import at.koopro.wizardsandbeasts.item.wand.WandItem;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
-import at.koopro.wizardsandbeasts.registry.ModDataComponents;
-import at.koopro.wizardsandbeasts.wand.cast.WandAllegiance;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -162,8 +162,9 @@ public final class SneakoscopeDetector {
         if (!(stack.getItem() instanceof WandItem)) {
             return false;
         }
-        WandAllegiance allegiance = stack.get(ModDataComponents.WAND_ALLEGIANCE.get());
-        return allegiance != null && allegiance.isBound() && !wielder.equals(allegiance.boundPlayer());
+        // WAND_MASTER, not the legacy allegiance record: the master is who a wand answers to, and the record
+        // stopped being written when allegiance became one model.
+        return WandComponents.getMaster(stack).map(master -> !master.equals(wielder)).orElse(false);
     }
 
     /**

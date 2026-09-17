@@ -1,4 +1,5 @@
 {
+  "_lore": "Canon (Ilvermorny writing, via summaries): Thiago Quintana's sleek, lengthy wands producing spells of force and elegance. Gameplay: reach and clean casting.",
   "display_name": {
     "translate": "wand_core.wizards_and_beasts.white_river_monster_spine"
   },
@@ -10,9 +11,9 @@
   "initiative": 0.6,
   "allegiance_transfer_resistance": 0.65,
   "cast_modifiers": {
-    "damage": 1.12,
-    "cooldown": 1.06,
-    "range": 1.18,
-    "fizzle": 0.02
+    "damage": 1.0,
+    "cooldown": 1.0,
+    "range": 1.08,
+    "fizzle": -0.02
   }
 }

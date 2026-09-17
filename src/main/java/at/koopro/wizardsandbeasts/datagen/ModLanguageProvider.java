@@ -284,6 +284,8 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.wizards_and_beasts.parchment.desc", "Blank parchment used in wizarding crafting.");
         add("item.wizards_and_beasts.ink_bottle", "Ink Bottle");
         add("item.wizards_and_beasts.ink_bottle.desc", "A bottle of ink for writing magical notes.");
+        add("item.wizards_and_beasts.torn_spell_page", "Torn Spell Page");
+        add("item.wizards_and_beasts.torn_spell_page.desc", "A single leaf out of somebody else's spellbook.");
         add("item.wizards_and_beasts.broom", "Broom");
         add("item.wizards_and_beasts.broom.desc", "A flying broom for quick travel through the skies.");
 
@@ -501,7 +503,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("block.wizards_and_beasts.wizarding_copper_cauldron", "Copper Cauldron");
         add("block.wizards_and_beasts.pewter_cauldron", "Pewter Cauldron");
         add("block.wizards_and_beasts.floo_grate", "Floo Grate");
-        add("block.wizards_and_beasts.spell_teacher", "Spell Teacher");
+        add("block.wizards_and_beasts.spell_teacher", "Study Lectern");
         add("block.wizards_and_beasts.unlit_torch", "Unlit Torch");
         add("block.wizards_and_beasts.unlit_wall_torch", "Unlit Wall Torch");
         add("block.wizards_and_beasts.unlit_copper_torch", "Unlit Copper Torch");

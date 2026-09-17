@@ -50,6 +50,17 @@ public final class WandComponents {
                     .networkSynchronized(ByteBufCodecs.FLOAT)
                     .build());
 
+    /**
+     * The wand's allegiance history — first master, former master, a standing challenge. Beside
+     * {@link #WAND_MASTER} (who it answers to) and {@link #WAND_ALLEGIANCE_SCORE} (how strongly), which remain
+     * the two facts the cast path reads. See {@code WandAllegianceService}.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<at.koopro.wizardsandbeasts.wand.allegiance.WandBondHistory>> WAND_BOND_HISTORY =
+            DATA_COMPONENTS.register("wand_bond_history", () -> DataComponentType.<at.koopro.wizardsandbeasts.wand.allegiance.WandBondHistory>builder()
+                    .persistent(at.koopro.wizardsandbeasts.wand.allegiance.WandBondHistory.CODEC)
+                    .networkSynchronized(at.koopro.wizardsandbeasts.wand.allegiance.WandBondHistory.STREAM_CODEC)
+                    .build());
+
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Float>> WAND_CORRUPTION =
             DATA_COMPONENTS.register("wand_corruption", () -> DataComponentType.<Float>builder()
                     .persistent(Codec.FLOAT)
@@ -97,6 +108,10 @@ public final class WandComponents {
 
     public static Optional<UUID> getMaster(ItemStack stack) {
         return stack.getOrDefault(WAND_MASTER.get(), Optional.empty());
+    }
+
+    public static at.koopro.wizardsandbeasts.wand.allegiance.WandBondHistory getBondHistory(ItemStack stack) {
+        return stack.getOrDefault(WAND_BOND_HISTORY.get(), at.koopro.wizardsandbeasts.wand.allegiance.WandBondHistory.EMPTY);
     }
 
     public static float getAllegianceScore(ItemStack stack) {

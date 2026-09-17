@@ -97,18 +97,12 @@ final class BroomMovement {
         double targetMotY = fwdY * b.currentSpeed * BroomTuning.PITCH_LIFT_FACTOR;
         if (b.inputUp) targetMotY += def.ascentSpeed();
         if (b.inputDown) targetMotY -= def.descentSpeed();
+        // No sink while ridden. With neither vertical key held this eases toward whatever the nose angle
+        // asks for, which in level flight or at a hover is nothing: a ridden broom holds its altitude. It
+        // used to sink under weakGravity whenever the rider let go of the keys, and a broom that loses
+        // height while its rider sits still reads as broken, not as heavy. weakGravity now belongs to a
+        // broom nobody is riding — see BroomEntity#tick.
         b.verticalVelocity = Mth.lerp(BroomTuning.VERTICAL_RESPONSE, b.verticalVelocity, (float) targetMotY);
-
-        // A broom the rider is not actively holding up sinks. weakGravity has been authored on
-        // every definition, range-validated by the codec and printed by /wandb world broom info
-        // since the definitions landed, and read by nothing at all — so a ridden broom hovered
-        // forever and "landing" meant flying into the ground. Only applied when neither vertical
-        // key is held: holding ascend or descend is the rider taking charge of altitude, and
-        // sinking against a held ascend would just be a weaker ascent with extra arithmetic.
-        if (!b.inputUp && !b.inputDown) {
-            b.verticalVelocity = BroomFlightRules.applyWeakGravity(b.verticalVelocity,
-                    handling.modifyWeakGravity(def.weakGravity(), b, def));
-        }
 
         float preMoveSpeed = b.currentSpeed;
         float preMoveDescent = -b.verticalVelocity; // positive while falling
@@ -123,8 +117,6 @@ final class BroomMovement {
         float convergence = snidget ? SnidgetFeather.stabilise(def.lerpFactor()) : def.lerpFactor();
         double motX = Mth.lerp(convergence, prevMotion.x * drag, fwdX * b.currentSpeed);
         double motZ = Mth.lerp(convergence, prevMotion.z * drag, fwdZ * b.currentSpeed);
-        // Last word on velocity, after lift, gravity and drag have all had theirs.
-        handling.afterVelocityComputed(b, def);
         b.setDeltaMovement(motX, b.verticalVelocity, motZ);
         b.move(MoverType.SELF, b.getDeltaMovement());
 

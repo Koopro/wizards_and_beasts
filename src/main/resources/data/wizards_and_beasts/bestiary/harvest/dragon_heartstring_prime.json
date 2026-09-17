@@ -1,7 +1,7 @@
 {
   "entry": "wizards_and_beasts:hungarian_horntail",
   "item": "wizards_and_beasts:dragon_heartstring",
-  "minTier": "MASTERED",
+  "minTier": "KNOWN",
   "chance": 0.35,
   "cooldownSeconds": 1200
 }

@@ -23,5 +23,24 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/swedish_short_snout.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/swedish_short_snout.png",
   "sortOrder": 8,
-  "entityType": "wizards_and_beasts:swedish_short_snout"
+  "entityType": "wizards_and_beasts:swedish_short_snout",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.swedish_short_snout.diet",
+    "behaviour": "bestiary.wizards_and_beasts.swedish_short_snout.behaviour",
+    "society": "bestiary.wizards_and_beasts.swedish_short_snout.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.swedish_short_snout.interaction.1"
+    ],
+    "materials": [
+      {
+        "item": "wizards_and_beasts:dragon_heartstring",
+        "how": "remains"
+      }
+    ],
+    "study": [
+      "watch"
+    ]
+  }
 }

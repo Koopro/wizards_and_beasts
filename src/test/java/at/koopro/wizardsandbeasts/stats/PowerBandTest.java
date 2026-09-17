@@ -66,12 +66,26 @@ class PowerBandTest {
     }
 
     @Test
-    void unlistedVariantsFallBackToTheDefaultBand() {
-        // Only the five Wizardkind lineages have their own entry, so every other heritage's lineages
-        // resolve to the 20-70 default and all display the same range. Pinned so the day someone
-        // gives them real bands, this test is what tells them the screen's readout changes too.
-        HeritageVariant goblinCommon = Heritage.GOBLIN.getSubtypes().get(0);
-        assertEquals(20, PowerBandTable.getBandMin(goblinCommon));
-        assertEquals(70, PowerBandTable.getBandMax(goblinCommon));
+    void bloodStatusBuysNoPower() {
+        // The ruling, and canon's: blood purity is a prejudice, not a magical measurement. Every lineage with
+        // magic rolls inside one band, so nothing the player picks on the selection screen makes them stronger.
+        HeritageVariant reference = null;
+        for (Heritage heritage : Heritage.values()) {
+            for (HeritageVariant variant : heritage.getSubtypes()) {
+                if ("squib".equals(variant.getId())) {
+                    continue;
+                }
+                if (reference == null) {
+                    reference = variant;
+                    continue;
+                }
+                assertEquals(PowerBandTable.getBandMin(reference), PowerBandTable.getBandMin(variant),
+                        variant.getId() + " rolls from a different floor than " + reference.getId());
+                assertEquals(PowerBandTable.getBandMax(reference), PowerBandTable.getBandMax(variant),
+                        variant.getId() + " reaches a different ceiling than " + reference.getId());
+                assertEquals(PowerBandTable.getGrowthCap(reference), PowerBandTable.getGrowthCap(variant),
+                        variant.getId() + " trains to a different cap than " + reference.getId());
+            }
+        }
     }
 }

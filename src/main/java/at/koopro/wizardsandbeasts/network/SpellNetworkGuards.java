@@ -12,6 +12,7 @@ import at.koopro.wizardsandbeasts.form.constraint.FormConstraint;
 import at.koopro.wizardsandbeasts.form.constraint.FormConstraints;
 import net.minecraft.server.level.ServerPlayer;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The two guards every wand-spell packet passes before its own logic runs.
@@ -32,11 +33,23 @@ public final class SpellNetworkGuards {
     private SpellNetworkGuards() {}
 
     public static boolean canUseWand(ServerPlayer player, PlayerSpellData data, String rejectReasonPrefix) {
-        Heritage type = player.getData(ModAttachments.HERITAGE_DATA.get()).getSelectedHeritage();
-        HeritageVariant subtype = player.getData(ModAttachments.HERITAGE_DATA.get()).getSelectedHeritageVariant();
-        if (type == null || !type.canUseWand() || (subtype != null && subtype.hasTag("no_wand"))) {
-            refuse(player, data, rejectReasonPrefix + SpellRejectCodes.SUFFIX_TYPE_CANNOT_USE_WAND);
+        String refusal = wandRefusal(player);
+        if (refusal != null) {
+            refuse(player, data, rejectReasonPrefix + refusal);
             return false;
+        }
+        return true;
+    }
+
+    /**
+     * Why this player may not use a wand at all, as a reject-code suffix, or {@code null} when they may.
+     *
+     * <p>Side-effect free, so a check that runs every tick — the beam channel, which must refuse whatever
+     * the release under it would — can ask without counting a refusal or sending a denial each time.
+     */
+    public static @Nullable String wandRefusal(ServerPlayer player) {
+        if (!player.getData(ModAttachments.HERITAGE_DATA.get()).canUseWand()) {
+            return SpellRejectCodes.SUFFIX_TYPE_CANNOT_USE_WAND;
         }
         // A beast holds no wand. Enforced here rather than in the cast pipeline on purpose: this guard
         // is the one thing every wand packet passes, so one check covers casting, assigning, selecting
@@ -46,10 +59,14 @@ public final class SpellNetworkGuards {
         // gap this used to have: the Animagus wall cancelled right-clicks but never touched the cast
         // packet, so a wizard in a cat's body could still cast from the spell wheel.
         if (FormConstraints.denies(player, FormConstraint.NO_SPELLCASTING)) {
-            refuse(player, data, rejectReasonPrefix + SpellRejectCodes.SUFFIX_FERAL);
-            return false;
+            return SpellRejectCodes.SUFFIX_FERAL;
         }
-        return true;
+        // A wand held by the Ministry after a hearing. Checked here for the same reason as the form wall: every
+        // wand packet passes this guard, so no spell can be cast around the confiscation.
+        if (at.koopro.wizardsandbeasts.ministry.trace.MinistryTrace.wandConfiscated(player)) {
+            return SpellRejectCodes.SUFFIX_WAND_CONFISCATED;
+        }
+        return null;
     }
 
     public static boolean isValidSlot(ServerPlayer player, PlayerSpellData data, int slotIndex, String rejectReasonPrefix) {

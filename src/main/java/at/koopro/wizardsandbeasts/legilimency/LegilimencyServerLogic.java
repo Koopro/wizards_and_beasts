@@ -8,6 +8,7 @@ import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.network.legilimency.LegilimencyVisionS2CPayload;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
+import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import at.koopro.wizardsandbeasts.skill.GameplayStat;
 import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
@@ -116,18 +117,15 @@ public final class LegilimencyServerLogic {
      * {@link #handleRequest} remains the authority and re-runs it itself.
      */
     public static boolean canLegilimise(ServerPlayer player) {
-        Heritage heritage = HeritageAPI.getPlayerHeritage(player);
-        HeritageVariant variant = HeritageAPI.getPlayerHeritageVariant(player);
-        if (heritage != Heritage.WIZARDKIND) {
+        PlayerHeritageData data = HeritageAPI.getData(player);
+        if (data.getSelectedHeritage() != Heritage.WIZARDKIND) {
             return false;
         }
         // Was `variant.hasTag("can_legilimise")` — a tag no HeritageVariant has ever declared, so this
         // returned false for every player (every wizard has a non-null variant) and the whole ability was
         // unreachable. Gated on the mod's existing capability vocabulary instead: any wizard who can work
-        // magic at all, which excludes the Squib. `can_legilimise` still grants it explicitly, so a
-        // datapack or future variant can opt in without touching this code.
-        return variant == null
-                || variant.hasTag("can_legilimise")
-                || !variant.hasTag("no_casting");
+        // magic at all, which excludes the Squib and anyone an Obscurus lives in. `can_legilimise` still grants
+        // it explicitly, so a datapack or future variant can opt in without touching this code.
+        return data.hasTrait("can_legilimise") || data.canCast();
     }
 }

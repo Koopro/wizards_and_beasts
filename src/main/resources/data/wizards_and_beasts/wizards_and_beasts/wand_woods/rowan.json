@@ -1,4 +1,5 @@
 {
+  "_lore": "Canon: more protective than any other wood; defensive charms especially strong; no Dark witch or wizard ever owned one. Gameplay: favours defence, dulls the Dark Arts, and its bond suffers every Dark cast.",
   "display_name": {
     "translate": "wand_wood.wizards_and_beasts.rowan"
   },
@@ -18,13 +19,16 @@
   "rarity": "common",
   "refuse_threshold": 0.65,
   "cast_modifiers": {
-    "damage": 0.92,
-    "cooldown": 0.9,
+    "damage": 1.0,
+    "cooldown": 1.0,
     "range": 1.0,
-    "fizzle": -0.04,
+    "fizzle": 0.0,
     "category_damage_bonus": {
-      "dark_arts": -0.1,
-      "defense": 0.15
+      "defense": 0.1,
+      "dark_arts": -0.1
     }
+  },
+  "temperament": {
+    "dark_arts_bond_cost": 0.02
   }
 }

@@ -75,8 +75,12 @@ public final class PlayerBoxOverrides {
      * narrow sliver. Real beasts are wider than they are tall, so the form's explicit
      * {@link SizeProfile} hitbox replaces the computed size outright.
      *
-     * <p>Built with {@link EntityDimensions#scalable} so the eye height keeps vanilla's
-     * convention and the first-person camera sits somewhere believable on a short body.
+     * <p>The eye height is taken from the profile rather than left to
+     * {@link EntityDimensions#scalable}, which puts it at a flat {@code height * 0.85}. That ratio
+     * describes an upright body: on a 0.7-block cat it lands above the ears, and on a 0.3-block
+     * beetle above the shell. Since {@code refreshDimensions()} copies whatever comes back here
+     * into {@code Entity.eyeHeight}, and the camera reads that field, this is also the one place
+     * that decides where a transformed player is looking from.
      */
     @Nullable
     private static EntityDimensions formBox(Player player) {
@@ -88,7 +92,8 @@ public final class PlayerBoxOverrides {
         if (profile == null) {
             return null;
         }
-        return EntityDimensions.scalable(profile.hitboxWidth(), profile.hitboxHeight());
+        return EntityDimensions.scalable(profile.hitboxWidth(), profile.hitboxHeight())
+                .withEyeHeight(profile.eyeHeight());
     }
 
     /**

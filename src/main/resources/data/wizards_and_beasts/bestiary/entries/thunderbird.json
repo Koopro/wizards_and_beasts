@@ -23,5 +23,24 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/thunderbird.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/thunderbird.png",
   "sortOrder": 12,
-  "entityType": "wizards_and_beasts:thunderbird"
+  "entityType": "wizards_and_beasts:thunderbird",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.thunderbird.diet",
+    "behaviour": "bestiary.wizards_and_beasts.thunderbird.behaviour",
+    "society": "bestiary.wizards_and_beasts.thunderbird.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.thunderbird.interaction.1"
+    ],
+    "materials": [
+      {
+        "item": "wizards_and_beasts:thunderbird_tail_feather",
+        "how": "studied_kill"
+      }
+    ],
+    "study": [
+      "watch"
+    ]
+  }
 }

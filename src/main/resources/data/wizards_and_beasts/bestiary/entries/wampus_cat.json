@@ -23,5 +23,24 @@
   "entityType": "wizards_and_beasts:wampus_cat",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/wampus_cat.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/wampus_cat.png",
-  "sortOrder": 71
+  "sortOrder": 71,
+  "profile": {
+    "classification": "beast",
+    "basis": "partial",
+    "diet": "bestiary.wizards_and_beasts.wampus_cat.diet",
+    "behaviour": "bestiary.wizards_and_beasts.wampus_cat.behaviour",
+    "society": "bestiary.wizards_and_beasts.wampus_cat.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.wampus_cat.interaction.1"
+    ],
+    "materials": [
+      {
+        "item": "wizards_and_beasts:wampus_cat_hair",
+        "how": "studied_kill"
+      }
+    ],
+    "study": [
+      "watch"
+    ]
+  }
 }

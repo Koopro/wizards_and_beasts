@@ -23,5 +23,19 @@
   "entityType": "wizards_and_beasts:snallygaster",
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/snallygaster.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/snallygaster.png",
-  "sortOrder": 90
+  "sortOrder": 90,
+  "profile": {
+    "classification": "beast",
+    "basis": "partial",
+    "diet": "bestiary.wizards_and_beasts.snallygaster.diet",
+    "behaviour": "bestiary.wizards_and_beasts.snallygaster.behaviour",
+    "society": "bestiary.wizards_and_beasts.snallygaster.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.snallygaster.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

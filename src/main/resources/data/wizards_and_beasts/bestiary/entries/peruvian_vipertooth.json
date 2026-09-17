@@ -23,5 +23,24 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/peruvian_vipertooth.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/peruvian_vipertooth.png",
   "sortOrder": 7,
-  "entityType": "wizards_and_beasts:peruvian_vipertooth"
+  "entityType": "wizards_and_beasts:peruvian_vipertooth",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.peruvian_vipertooth.diet",
+    "behaviour": "bestiary.wizards_and_beasts.peruvian_vipertooth.behaviour",
+    "society": "bestiary.wizards_and_beasts.peruvian_vipertooth.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.peruvian_vipertooth.interaction.1"
+    ],
+    "materials": [
+      {
+        "item": "wizards_and_beasts:dragon_heartstring",
+        "how": "remains"
+      }
+    ],
+    "study": [
+      "watch"
+    ]
+  }
 }

@@ -23,5 +23,19 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/swooping_evil.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/swooping_evil.png",
   "sortOrder": 58,
-  "entityType": "wizards_and_beasts:swooping_evil"
+  "entityType": "wizards_and_beasts:swooping_evil",
+  "profile": {
+    "classification": "beast",
+    "basis": "partial",
+    "diet": "bestiary.wizards_and_beasts.swooping_evil.diet",
+    "behaviour": "bestiary.wizards_and_beasts.swooping_evil.behaviour",
+    "society": "bestiary.wizards_and_beasts.swooping_evil.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.swooping_evil.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

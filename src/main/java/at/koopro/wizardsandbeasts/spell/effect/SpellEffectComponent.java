@@ -261,8 +261,10 @@ public sealed interface SpellEffectComponent permits
             Holder<MobEffect> holder = resolveMobEffect(effect);
             if (holder == null) return;
             LivingEntity who = target ? ctx.subject() : ctx.caster();
+            // With its caster as the source, as vanilla does for a thrown potion: who laid an effect on someone is
+            // a fact other systems read — a Stupefy from a wizard is how that wizard defeats a wand's master.
             who.addEffect(new MobEffectInstance(holder, scaleDuration(duration, ctx.durationMult()),
-                    amplifier, false, true, true));
+                    amplifier, false, true, true), ctx.caster());
         }
     }
 

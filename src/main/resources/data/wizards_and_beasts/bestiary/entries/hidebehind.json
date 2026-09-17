@@ -20,5 +20,24 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/hidebehind.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/hidebehind.png",
   "sortOrder": 211,
-  "entityType": "wizards_and_beasts:hidebehind"
+  "entityType": "wizards_and_beasts:hidebehind",
+  "profile": {
+    "classification": "beast",
+    "basis": "partial",
+    "diet": "bestiary.wizards_and_beasts.hidebehind.diet",
+    "behaviour": "bestiary.wizards_and_beasts.hidebehind.behaviour",
+    "society": "bestiary.wizards_and_beasts.hidebehind.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.hidebehind.interaction.1"
+    ],
+    "materials": [
+      {
+        "item": "wizards_and_beasts:hidebehind_claw",
+        "how": "remains"
+      }
+    ],
+    "study": [
+      "watch"
+    ]
+  }
 }

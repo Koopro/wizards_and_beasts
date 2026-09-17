@@ -22,7 +22,8 @@ import at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver;
 import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialCombatRules;
 import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialRules;
 import at.koopro.wizardsandbeasts.util.WandHelper;
-import at.koopro.wizardsandbeasts.wand.WandComponents;
+import at.koopro.wizardsandbeasts.wand.allegiance.WandAllegianceService;
+import net.minecraft.world.item.ItemStack;
 import com.mojang.logging.LogUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -30,6 +31,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.common.NeoForge;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 public final class SpellCastService {
@@ -93,14 +95,11 @@ public final class SpellCastService {
         }
 
         var bondCheckStack = WandHelper.getWandStack(player);
-        if (!WandHelper.isWandBondedTo(player, bondCheckStack)) {
-            // Both codes map to their own lang key in SpellRejectCodes, so the client speaks and
-            // this site does not. Same two sentences, now resolved in the player's language.
-            if (WandComponents.getMaster(bondCheckStack).isEmpty()) {
-                rejectWithHumanStress(player, SpellRejectCodes.WAND_NOT_BONDED);
-            } else {
-                rejectWithHumanStress(player, SpellRejectCodes.WAND_WRONG_MASTER);
-            }
+        if (!WandAllegianceService.answersToSomeone(bondCheckStack)) {
+            // A wand that has chosen no one must choose first. Another wizard's wand is not refused here: it
+            // casts, worse, in the allegiance layer — Harry used Draco's wand in Deathly Hallows. The lang key
+            // resolves client-side, so this site says nothing itself.
+            rejectWithHumanStress(player, SpellRejectCodes.WAND_NOT_BONDED);
             return CastResult.REJECTED;
         }
 
@@ -117,8 +116,6 @@ public final class SpellCastService {
         // when the spell doesn't resolve (the UNKNOWN_SPELL gate then fires with that raw id).
         String spellId = spell != null ? spell.getId() : activeSpellId;
 
-        boolean obscurialDark = ObscurialRules.isDarkForm(player.getData(ModAttachments.HERITAGE_DATA.get()));
-
         // Cooldown clock invariant: ALWAYS use getGameTime() (monotonic, shared across every dimension
         // via DerivedLevelData — getDayTime()/fixed_time do NOT affect it). Cooldowns are stored as
         // absolute expiry ticks and persist across relog/death/dimension, so the stamp here and every
@@ -128,18 +125,7 @@ public final class SpellCastService {
         // Deterministic reject precedence (no-active-spell -> global cooldown) is decided purely in
         // SpellCastGate; the switch reproduces each gate's exact player feedback. The bond and
         // canUseWand guards above, and the random misfires below, stay inline (side-effecting/ordered).
-        SpellCastGate gate = SpellCastGate.evaluate(new SpellCastGate.Inputs(
-                activeSpellId != null,
-                spell != null,
-                spell == null || spell.isImplemented(),
-                spell != null && data.knowsSpell(spellId),
-                spell != null && ObscurialRules.isObscurialAbility(spell),
-                spell == null || !Config.enforceSpellRequirements || spell.getRequirement().isMet(player, data),
-                spell != null && ObscurialRules.isDarkFormOnlySpell(spell) && !obscurialDark,
-                spell != null && obscurialDark && !ObscurialRules.isSpellAllowedInDarkForm(spell),
-                at.koopro.wizardsandbeasts.firewhisky.Firewhisky.isDrunk(player),
-                data.isOnCooldown(spellId, currentTick),
-                data.isGlobalCooldownActive(currentTick)));
+        SpellCastGate gate = evaluateGate(player, data, activeSpellId, spell, currentTick);
         if (gate != null) {
             switch (gate) {
                 case NO_ACTIVE_SPELL ->
@@ -175,6 +161,14 @@ public final class SpellCastService {
                 case GLOBAL_COOLDOWN ->
                         rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.COOLDOWN_ACTIVE, "global_cooldown"));
             }
+            return CastResult.REJECTED;
+        }
+
+        if (WandAllegianceService.wouldBackfire(player, bondCheckStack, serverLevel.registryAccess())) {
+            // Not a roll: a broken wand always backfires, and so does a wand that will not work for a stranger.
+            // The backfire says which, so the player can do something about it.
+            WandAllegianceService.backfire(player, bondCheckStack);
+            debugReject(player, SpellRejectCodes.withDetail(SpellRejectCodes.WAND_BACKFIRE, spellId));
             return CastResult.REJECTED;
         }
 
@@ -258,12 +252,9 @@ public final class SpellCastService {
         // The Unforgivables are the corrupting acts in the lore; until now only dark artefacts stained the
         // caster. No-op for every other spell.
         at.koopro.wizardsandbeasts.corruption.UnforgivableToll.onCast(player, spellId);
-        // The Trace: the Ministry registers illegal magic the instant it is worked.
-        at.koopro.wizardsandbeasts.ministry.law.MagicalOffence offence =
-                at.koopro.wizardsandbeasts.ministry.law.MagicalOffence.forSpell(spellId);
-        if (offence != null) {
-            at.koopro.wizardsandbeasts.ministry.law.TraceService.report(player, offence);
-        }
+        // The Trace: not a detection. The cast becomes an incident only if someone — the Trace on an underage
+        // wizard, a Muggle, an official — will hear of it, or if it is dark enough for a wand examination.
+        at.koopro.wizardsandbeasts.ministry.trace.MinistryTrace.onSuccessfulCast(player, spellId, spell.getCategory());
         // Magical standing: what a wizard repeatedly chooses to cast is the clearest statement they
         // make about themselves. Returns immediately unless a datapack authored a spell_cast deed.
         at.koopro.wizardsandbeasts.standing.deed.DeedService.onSpellCast(player, spellId);
@@ -274,6 +265,52 @@ public final class SpellCastService {
 
         SpellDataDeltaS2CPayload.sendTo(player, spellId, expiryTick, newCount, data.getSuccessfulHits(spellId), gcdEndTick);
         return CastResult.SUCCESS;
+    }
+
+    /**
+     * The {@link SpellCastGate} verdict for casting {@code spell} now, read without side effects.
+     *
+     * @param activeSpellId the raw loadout id, which may be bare or unresolvable
+     * @param spell         that id resolved, or {@code null}
+     */
+    public static @Nullable SpellCastGate evaluateGate(ServerPlayer player, PlayerSpellData data,
+                                                       @Nullable String activeSpellId, @Nullable Spell spell,
+                                                       long currentTick) {
+        String spellId = spell != null ? spell.getId() : activeSpellId;
+        boolean obscurialDark = ObscurialRules.isDarkForm(player.getData(ModAttachments.HERITAGE_DATA.get()));
+        return SpellCastGate.evaluate(new SpellCastGate.Inputs(
+                activeSpellId != null,
+                spell != null,
+                spell == null || spell.isImplemented(),
+                spell != null && data.knowsSpell(spellId),
+                spell != null && ObscurialRules.isObscurialAbility(spell),
+                spell == null || !Config.enforceSpellRequirements || spell.getRequirement().isMet(player, data),
+                spell != null && ObscurialRules.isDarkFormOnlySpell(spell) && !obscurialDark,
+                spell != null && obscurialDark && !ObscurialRules.isSpellAllowedInDarkForm(spell),
+                at.koopro.wizardsandbeasts.firewhisky.Firewhisky.isDrunk(player),
+                data.isOnCooldown(spellId, currentTick),
+                data.isGlobalCooldownActive(currentTick)));
+    }
+
+    /**
+     * Whether a release right now would be refused for a reason that is not chance: the caster is silenced, may
+     * not hold a wand at all, or the active spell fails {@link SpellCastGate}. Side-effect free.
+     *
+     * <p>The beam channel asks this every tick. A channel acts for the whole hold and only the release at its end
+     * settles the cost, so a channel running under a release that would be refused is effect without cost — a
+     * silenced or drunk caster held Crucio indefinitely, and Finite's interrupt lasted one tick. The random
+     * refusals (mental misfire, Obscurial fizzles) and Gamp's law stay release-only: they are rolled or judged
+     * once per cast, not once per tick.
+     */
+    public static boolean releaseWouldBeRefused(ServerPlayer player, PlayerSpellData data,
+                                                @Nullable String activeSpellId, @Nullable Spell spell,
+                                                long currentTick) {
+        ItemStack wand = WandHelper.getWandStack(player);
+        return player.hasEffect(ModEffects.LANGLOCK)
+                || SpellNetworkGuards.wandRefusal(player) != null
+                || !WandAllegianceService.answersToSomeone(wand)
+                || WandAllegianceService.wouldBackfire(player, wand, player.registryAccess())
+                || evaluateGate(player, data, activeSpellId, spell, currentTick) != null;
     }
 
     private static void debugReject(ServerPlayer player, String reason) {

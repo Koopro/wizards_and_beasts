@@ -23,5 +23,19 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/crup.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/crup.png",
   "sortOrder": 36,
-  "entityType": "wizards_and_beasts:crup"
+  "entityType": "wizards_and_beasts:crup",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.crup.diet",
+    "behaviour": "bestiary.wizards_and_beasts.crup.behaviour",
+    "society": "bestiary.wizards_and_beasts.crup.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.crup.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

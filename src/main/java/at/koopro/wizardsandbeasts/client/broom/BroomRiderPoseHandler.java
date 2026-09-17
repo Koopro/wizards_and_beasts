@@ -27,12 +27,20 @@ import org.jspecify.annotations.NullMarked;
 @NullMarked
 public final class BroomRiderPoseHandler {
 
-    /** Legs hang slightly forward of vertical — astride the shaft, not stiff. */
-    private static final float LEG_X_ROT = -0.15F;
+    /**
+     * Legs swing a little back from vertical, toward the footrest behind the seat. They used to hang
+     * slightly forward, which with the rider sat on the shaft read as sitting on a fence.
+     */
+    private static final float LEG_X_ROT = 0.25F;
     /** Splay, so the legs read as either side of the broom rather than fused together. */
     private static final float LEG_Z_ROT = 0.10F;
-    /** Arms reach forward and down onto the handle. */
-    private static final float ARM_X_ROT = -1.15F;
+    /**
+     * Arms reach forward and down onto the handle. The shoulder pivot is 1.375 above the feet and the arm
+     * 0.625 long, so a hanging hand ends at hip height; swung 31 degrees forward it comes to rest on the
+     * shaft about a third of a block ahead of the hips. The old -1.15 held both hands out level with the
+     * chest, a third of a block above the handle.
+     */
+    private static final float ARM_X_ROT = -0.55F;
     private static final float ARM_Z_ROT = 0.12F;
     /** How much of the broom's forward lean the torso takes on. Under 1 so the rider still reads as
      *  bracing against the broom rather than being welded to it. */
@@ -68,8 +76,11 @@ public final class BroomRiderPoseHandler {
         humanoid.leftArm.zRot = -ARM_Z_ROT;
 
         // The body part is normally left at zero by HumanoidModel; leaning it here tips the torso
-        // without moving the head, which keeps the rider looking where the player is aiming.
-        float leanDeg = Mth.clamp(ride.forwardLean() * TORSO_LEAN_SHARE,
+        // without moving the head, which keeps the rider looking where the player is aiming. Negated:
+        // forwardLean is negative for a nose-down tuck, and a humanoid torso leans forward for a
+        // positive xRot (the crouch uses 0.5), so the unnegated value leaned the rider back as the
+        // broom tucked.
+        float leanDeg = Mth.clamp(-ride.forwardLean() * TORSO_LEAN_SHARE,
                 -MAX_TORSO_LEAN_DEG, MAX_TORSO_LEAN_DEG);
         humanoid.body.xRot = leanDeg * Mth.DEG_TO_RAD;
     }

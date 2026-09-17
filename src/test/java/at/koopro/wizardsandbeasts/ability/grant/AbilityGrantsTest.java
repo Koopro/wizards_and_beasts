@@ -148,8 +148,16 @@ class AbilityGrantsTest {
      */
     @Test
     void heritageTagsDoNotResolveToAbilityIds() {
-        List<String> shippedTags = List.of("innate_apparition", "transformation", "no_wand", "nature_speech",
-                "enhanced_bond", "dark_resistance", "obscurus_form", "divination_sight");
+        java.util.Set<String> tagSet = new java.util.TreeSet<>();
+        for (at.koopro.wizardsandbeasts.heritage.HeritageVariant variant
+                : at.koopro.wizardsandbeasts.heritage.HeritageVariant.values()) {
+            tagSet.addAll(variant.getTags());
+        }
+        for (at.koopro.wizardsandbeasts.heritage.ConditionOrigin origin
+                : at.koopro.wizardsandbeasts.heritage.ConditionOrigin.values()) {
+            tagSet.addAll(origin.traits());
+        }
+        List<String> shippedTags = List.copyOf(tagSet);
         AbilityGrants g = AbilityGrants.ofSources(Map.of(AbilityGrants.Source.HERITAGE, shippedTags));
 
         for (String id : List.of(APPARITION, LEGILIMENCY, ANIMAGUS_FORM)) {

@@ -57,17 +57,17 @@ public final class BroomDefinitionRegistry {
             FALLBACK_ID,
             Component.translatable("item.wizards_and_beasts.broom"),
             BroomTier.SCHOOL,
-            0.35f,   // maxSpeed
+            0.55f,   // maxSpeed
             0.090f,  // acceleration
-            0.012f,  // deceleration
+            0.050f,  // deceleration
             1.3f,    // boostMultiplier
             40,      // boostDurationTicks
             200,     // boostCooldownTicks
             0.012f,  // weakGravity
-            0.10f,   // lerpFactor
+            0.25f,   // lerpFactor
             0.75f,   // turnSpeed
-            0.14f,   // ascentSpeed
-            0.18f,   // descentSpeed
+            0.22f,   // ascentSpeed
+            0.28f,   // descentSpeed
             0.40f,   // handlingRating
             0.80f,   // stabilityRating
             120,     // durability

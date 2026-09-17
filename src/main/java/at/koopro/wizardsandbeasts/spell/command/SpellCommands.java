@@ -11,6 +11,7 @@ import at.koopro.wizardsandbeasts.spell.cast.SpellExecutor;
 import at.koopro.wizardsandbeasts.spell.clash.SpellClashLocks;
 import at.koopro.wizardsandbeasts.spell.core.CastType;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
+import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 import at.koopro.wizardsandbeasts.spell.core.SpellRequirement;
 import at.koopro.wizardsandbeasts.spell.core.Spells;
@@ -19,6 +20,7 @@ import at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver;
 import at.koopro.wizardsandbeasts.util.WandHelper;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.ChatFormatting;
@@ -38,19 +40,40 @@ public final class SpellCommands {
     private SpellCommands() {
     }
 
+    /**
+     * Bare spell paths — {@code alohomora}, not {@code wizards_and_beasts:alohomora}.
+     *
+     * <p>These used to suggest {@link Spell#getId()}, which is namespaced, and every one of those
+     * suggestions was unparseable by the command offering it: the argument is
+     * {@link StringArgumentType#word()}, whose charset has no colon, so accepting a suggestion put a
+     * red line under it. Nothing is unreachable as a result — {@code Spells.byId} prefixes a bare id
+     * with the mod's namespace — but the completion list and the parser disagreed about what a spell
+     * id looks like, and the list was the one that was wrong.
+     *
+     * <p>A spell whose id belongs to another namespace is suggested in full, since its bare path
+     * would resolve to the wrong spell or to nothing.
+     */
+    private static final SuggestionProvider<CommandSourceStack> SPELL_ID_SUGGESTIONS =
+            (ctx, builder) -> SharedSuggestionProvider.suggest(
+                    Spells.all().stream().map(SpellCommands::suggestibleId), builder);
+
+    private static String suggestibleId(Spell spell) {
+        String id = spell.getId();
+        String ownPrefix = WizardsAndBeastsMod.MODID + ":";
+        return id.startsWith(ownPrefix) ? id.substring(ownPrefix.length()) : id;
+    }
+
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("spell")
                 .then(Commands.literal("learn")
                         .then(Commands.argument("spell", StringArgumentType.word())
-                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
-                                        Spells.all().stream().map(Spell::getId), builder))
+                                .suggests(SPELL_ID_SUGGESTIONS)
                                 .executes(ctx -> learnSpell(
                                         ctx.getSource().getPlayerOrException(),
                                         StringArgumentType.getString(ctx, "spell")))))
                 .then(Commands.literal("forget")
                         .then(Commands.argument("spell", StringArgumentType.word())
-                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
-                                        Spells.all().stream().map(Spell::getId), builder))
+                                .suggests(SPELL_ID_SUGGESTIONS)
                                 .executes(ctx -> forgetSpell(
                                         ctx.getSource().getPlayerOrException(),
                                         StringArgumentType.getString(ctx, "spell")))))
@@ -58,8 +81,7 @@ public final class SpellCommands {
                         .executes(ctx -> listSpells(ctx.getSource().getPlayerOrException())))
                 .then(Commands.literal("info")
                         .then(Commands.argument("spell", StringArgumentType.word())
-                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
-                                        Spells.all().stream().map(Spell::getId), builder))
+                                .suggests(SPELL_ID_SUGGESTIONS)
                                 .executes(ctx -> spellInfo(
                                         ctx.getSource().getPlayerOrException(),
                                         StringArgumentType.getString(ctx, "spell")))))
@@ -112,13 +134,20 @@ public final class SpellCommands {
             return 0;
         }
 
+        // The canonical id, never the argument. `Spells.byId` accepts a bare path and a legacy
+        // namespace and resolves both, so `spellId` here can be any of three spellings of one spell —
+        // and `PlayerSpellData` is a plain string set with no normalisation of its own. Writing the
+        // argument stored `alohomora` while every reader in the mod looks up
+        // `wizards_and_beasts:alohomora`, which learned the spell and left it uncastable.
+        // `SkillSystemAPI.teachSpell` canonicalises for the same reason.
+        String canonicalId = spell.getId();
         PlayerSpellData data = player.getData(ModAttachments.SPELL_DATA.get());
-        if (data.knowsSpell(spellId)) {
+        if (data.knowsSpell(canonicalId)) {
             player.displayClientMessage(Component.translatable("spell.wizards_and_beasts.cmd.already_known", Component.translatable(spell.getDisplayName())).withStyle(ChatFormatting.YELLOW), false);
             return 0;
         }
 
-        data.learnSpell(spellId);
+        data.learnSpell(canonicalId);
         PlayerStateSyncService.syncSpells(player);
         player.displayClientMessage(Component.translatable("spell.wizards_and_beasts.cmd.learned", Component.translatable(spell.getDisplayName())).withStyle(ChatFormatting.GREEN), false);
         return 1;
@@ -132,7 +161,7 @@ public final class SpellCommands {
         }
 
         PlayerSpellData data = player.getData(ModAttachments.SPELL_DATA.get());
-        data.forgetSpell(spellId);
+        data.forgetSpell(spell.getId());
         PlayerStateSyncService.syncSpells(player);
         player.displayClientMessage(Component.translatable("spell.wizards_and_beasts.cmd.forgot", Component.translatable(spell.getDisplayName())).withStyle(ChatFormatting.YELLOW), false);
         return 1;
@@ -185,8 +214,9 @@ public final class SpellCommands {
             return 0;
         }
 
+        String canonicalId = spell.getId();
         PlayerSpellData data = player.getData(ModAttachments.SPELL_DATA.get());
-        boolean known = data.knowsSpell(spellId);
+        boolean known = data.knowsSpell(canonicalId);
 
         player.displayClientMessage(Component.translatable("spell.wizards_and_beasts.cmd.header", Component.translatable(spell.getDisplayName())).withStyle(ChatFormatting.GOLD), false);
         player.displayClientMessage(Component.literal("Category: ").withStyle(ChatFormatting.GRAY)
@@ -203,7 +233,7 @@ public final class SpellCommands {
                         : Component.literal("Not learned").withStyle(ChatFormatting.RED)), false);
 
         if (known) {
-            int casts = data.getSuccessfulHits(spellId);
+            int casts = data.getSuccessfulHits(canonicalId);
             Proficiency prof = Proficiency.fromCastCount(casts);
             String profName = switch (prof) {
                 case MASTERED -> "Mastered";

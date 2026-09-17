@@ -4,8 +4,6 @@ import at.koopro.wizardsandbeasts.client.spell.SpellVfxClient;
 import at.koopro.wizardsandbeasts.client.spell.state.ClientSignatureSpellState;
 import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellDataState;
 import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellRejectFeedback;
-import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellTeacherState;
-import at.koopro.wizardsandbeasts.network.ClientScreenHooksInvoker;
 import at.koopro.wizardsandbeasts.client.beam.BeamChannelClient;
 import at.koopro.wizardsandbeasts.network.spell.AvadaBlastS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.BeamChannelS2CPayload;
@@ -24,7 +22,6 @@ import at.koopro.wizardsandbeasts.client.pose.ClientCastAnimationState;
 import at.koopro.wizardsandbeasts.network.spell.SpellCastAnimationS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.SpellImpactBurstS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.SpellProficiencySyncS2CPayload;
-import at.koopro.wizardsandbeasts.network.spell.teacher.SpellTeacherOpenS2CPayload;
 import at.koopro.wizardsandbeasts.spell.core.SpellFamily;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -161,14 +158,4 @@ public final class SpellClientPayloadHandlers {
         ctx.enqueueWork(() -> ClientSpellDataState.applyProficiencyDelta(pkt));
     }
 
-    public static void handleSpellTeacherOpen(SpellTeacherOpenS2CPayload pkt, IPayloadContext ctx) {
-        ctx.enqueueWork(() -> {
-            ClientSpellTeacherState.setOffers(pkt.offers());
-            openClientScreenSafe();
-        });
-    }
-
-    private static void openClientScreenSafe() {
-        ClientScreenHooksInvoker.invoke("openSpellTeacherScreen");
-    }
 }

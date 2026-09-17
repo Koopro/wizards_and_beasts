@@ -1,4 +1,5 @@
 {
+  "_lore": "Canon: uncommon, with healing power; chooses those of greatest potential; sensitive to non-verbal magic (not modelled). Gameplay: slightly quicker recovery (healing has no spell category to lean on).",
   "display_name": {
     "translate": "wand_wood.wizards_and_beasts.willow"
   },
@@ -18,9 +19,9 @@
   "rarity": "common",
   "refuse_threshold": 0.28,
   "cast_modifiers": {
-    "damage": 0.95,
-    "cooldown": 0.92,
+    "damage": 1.0,
+    "cooldown": 0.97,
     "range": 1.0,
-    "fizzle": -0.03
+    "fizzle": 0.0
   }
 }

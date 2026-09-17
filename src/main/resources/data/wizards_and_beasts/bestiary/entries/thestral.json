@@ -23,5 +23,24 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/thestral.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/thestral.png",
   "sortOrder": 11,
-  "entityType": "wizards_and_beasts:thestral"
+  "entityType": "wizards_and_beasts:thestral",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.thestral.diet",
+    "behaviour": "bestiary.wizards_and_beasts.thestral.behaviour",
+    "society": "bestiary.wizards_and_beasts.thestral.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.thestral.interaction.1"
+    ],
+    "materials": [
+      {
+        "item": "wizards_and_beasts:thestral_tail_hair",
+        "how": "remains"
+      }
+    ],
+    "study": [
+      "watch"
+    ]
+  }
 }

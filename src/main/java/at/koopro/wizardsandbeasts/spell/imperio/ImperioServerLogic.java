@@ -72,7 +72,8 @@ public final class ImperioServerLogic {
 
     public static void applyCommand(ServerPlayer caster, ImperioCommand cmd) {
         UUID victimId = CASTER_TO_VICTIM.get(caster.getUUID());
-        if (victimId == null || !(caster.level() instanceof ServerLevel sl)) {
+        // A dead caster commands nothing; the command menu's packet can still arrive after the death.
+        if (victimId == null || !caster.isAlive() || !(caster.level() instanceof ServerLevel sl)) {
             return;
         }
         LivingEntity victim = findLiving(sl, victimId);

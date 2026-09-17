@@ -115,6 +115,11 @@ public final class AbilityTriggerHandler {
     // ── internals ──
 
     private static void activate(ServerPlayer player, AbilityDefinition def, AbilityTarget target) {
+        if (!player.isAlive()) {
+            // A key press already on the wire when its sender died is read after the death. A corpse fires
+            // nothing — Obscurus Grasp and Surge used to go off around the body.
+            return;
+        }
         long gameTime = player.level().getGameTime();
         AbilitySelectionState state = AbilitySelectionHelper.get(player);
         if (state.isOnCooldown(def.id(), gameTime)) {
@@ -127,6 +132,9 @@ public final class AbilityTriggerHandler {
     }
 
     private static void flipToggle(ServerPlayer player, AbilityDefinition def) {
+        if (!player.isAlive()) {
+            return; // As in activate: a dead player's late press transforms nothing.
+        }
         long gameTime = player.level().getGameTime();
         AbilitySelectionState state = AbilitySelectionHelper.get(player);
         if (state.isOnCooldown(def.id(), gameTime)) {

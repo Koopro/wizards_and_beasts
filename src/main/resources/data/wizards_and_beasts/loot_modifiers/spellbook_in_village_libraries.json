@@ -1,0 +1,29 @@
+{
+  "type": "wizards_and_beasts:spellbook",
+  "conditions": [
+    {
+      "condition": "minecraft:any_of",
+      "terms": [
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/village/village_cartographer" },
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/village/village_temple" },
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/village/village_plains_house" },
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/village/village_savanna_house" },
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/village/village_snowy_house" },
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/village/village_taiga_house" },
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/village/village_desert_house" }
+      ]
+    }
+  ],
+  "spells": [
+    "lumos",
+    "nox",
+    "stupefy",
+    "alohomora",
+    "wingardium_leviosa",
+    "reparo",
+    "colloportus",
+    "accio",
+    "depulso"
+  ],
+  "chance": 0.35
+}

@@ -3,7 +3,7 @@ package at.koopro.wizardsandbeasts.gametest;
 import at.koopro.wizardsandbeasts.entity.dummy.DuellingDummyEntity;
 import at.koopro.wizardsandbeasts.registry.MiscItemRegistry;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
-import at.koopro.wizardsandbeasts.spell.teacher.SpellTeacherBlock;
+import at.koopro.wizardsandbeasts.spell.study.SpellScriptoriumBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -21,13 +21,14 @@ import net.minecraft.world.phys.Vec3;
 import java.util.List;
 
 /**
- * Placing a duelling dummy or a spell teacher points it back at whoever placed it.
+ * Placing a duelling dummy or a study lectern points it back at whoever placed it.
  *
  * <p>Both were reported facing one fixed direction however they were put down, and the two had
  * different causes a screenshot cannot tell apart:
  *
  * <ul>
- *   <li>the <b>spell teacher</b> had no {@code FACING} property at all — one blockstate variant,
+ *   <li>the <b>study lectern</b> (registered as {@code spell_teacher}, from when it was one) had no
+ *       {@code FACING} property at all — one blockstate variant,
  *       one orientation, and a lectern model with a tilted desk that therefore always tilted
  *       north;</li>
  *   <li>the <b>dummy</b> had correct placement code that could not work. {@code Entity.snapTo}
@@ -57,7 +58,7 @@ public final class PlacementFacingTests {
                 "dummy: planting one from each cardinal turns its body back at the placer",
                 PlacementFacingTests::dummyFacesThePlacer);
         tests.add("placement_spell_teacher_faces_the_player_who_placed_it",
-                "spell teacher: placing one from each cardinal sets FACING back at the placer",
+                "study lectern: placing one from each cardinal sets FACING back at the placer",
                 PlacementFacingTests::spellTeacherFacesThePlacer);
     }
 
@@ -117,9 +118,9 @@ public final class PlacementFacingTests {
 
                 BlockState placed = helper.getBlockState(TARGET);
                 WizardTestSupport.check(helper, placed.is(ModBlocks.SPELL_TEACHER.get()),
-                        () -> "the spell teacher did not place while looking " + look
+                        () -> "the study lectern did not place while looking " + look
                                 + "; found " + placed);
-                Direction facing = placed.getValue(SpellTeacherBlock.FACING);
+                Direction facing = placed.getValue(SpellScriptoriumBlock.FACING);
                 WizardTestSupport.check(helper, facing == look.getOpposite(),
                         () -> "placed while looking " + look + ": FACING is " + facing
                                 + ", expected " + look.getOpposite());

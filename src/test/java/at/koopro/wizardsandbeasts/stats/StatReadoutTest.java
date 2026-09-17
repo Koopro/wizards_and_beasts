@@ -59,7 +59,7 @@ class StatReadoutTest {
                     text(PlayerStat.PRECISION, value), "PRECISION at " + value);
             assertEquals(pct(StatEffects.cooldownMultiplier(value) - 1f),
                     text(PlayerStat.REFLEXES, value), "REFLEXES at " + value);
-            assertEquals(pct(StatEffects.tuitionMultiplier(value) - 1f),
+            assertEquals(pct(StatEffects.studyRate(value) - 1f),
                     text(PlayerStat.KNOWLEDGE, value), "KNOWLEDGE at " + value);
             assertEquals(String.format(java.util.Locale.ROOT, "x%.2f", StatEffects.resistScalar(value)),
                     text(PlayerStat.WILLPOWER, value), "WILLPOWER at " + value);
@@ -82,7 +82,7 @@ class StatReadoutTest {
         assertEquals("x1.00", text(PlayerStat.WILLPOWER, 100));
 
         assertEquals("0.0%", text(PlayerStat.KNOWLEDGE, 0));
-        assertEquals("-40.0%", text(PlayerStat.KNOWLEDGE, 100));
+        assertEquals("+50.0%", text(PlayerStat.KNOWLEDGE, 100));
     }
 
     @Test

@@ -23,5 +23,19 @@
   "iconTexture": "wizards_and_beasts:textures/bestiary/icons/ashwinder.png",
   "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/ashwinder.png",
   "sortOrder": 43,
-  "entityType": "wizards_and_beasts:ashwinder"
+  "entityType": "wizards_and_beasts:ashwinder",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.ashwinder.diet",
+    "behaviour": "bestiary.wizards_and_beasts.ashwinder.behaviour",
+    "society": "bestiary.wizards_and_beasts.ashwinder.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.ashwinder.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }

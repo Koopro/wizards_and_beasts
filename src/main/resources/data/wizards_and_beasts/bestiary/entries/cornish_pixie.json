@@ -23,5 +23,19 @@
   "entityType": "wizards_and_beasts:cornish_pixie",
   "iconTexture": "wizards_and_beasts:textures/gui/bestiary/entry_placeholder.png",
   "silhouetteTexture": "wizards_and_beasts:textures/gui/bestiary/entry_placeholder.png",
-  "sortOrder": 33
+  "sortOrder": 33,
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.cornish_pixie.diet",
+    "behaviour": "bestiary.wizards_and_beasts.cornish_pixie.behaviour",
+    "society": "bestiary.wizards_and_beasts.cornish_pixie.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.cornish_pixie.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
 }
