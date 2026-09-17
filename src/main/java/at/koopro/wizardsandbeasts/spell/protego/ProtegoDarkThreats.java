@@ -5,6 +5,9 @@ import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 import at.koopro.wizardsandbeasts.spell.core.SpellFamilies;
 import at.koopro.wizardsandbeasts.spell.core.SpellFamily;
+import at.koopro.wizardsandbeasts.spell.core.Spells;
+import at.koopro.wizardsandbeasts.spell.beam.WandBeamChannelLogic;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import org.jspecify.annotations.Nullable;
@@ -49,7 +52,28 @@ public final class ProtegoDarkThreats {
      * should be reacting to.
      */
     public static boolean isDarkDamage(DamageSource source) {
-        return isDarkEntity(source.getEntity()) || isDarkEntity(source.getDirectEntity());
+        return isDarkEntity(source.getEntity()) || isDarkEntity(source.getDirectEntity())
+                || isChannellingDarkMagic(source.getEntity()) || isChannellingDarkMagic(source.getDirectEntity());
+    }
+
+    /**
+     * Whether this attacker is a player holding a Dark beam on someone.
+     *
+     * <p>A beam's damage arrives with an attacker and no spell attached — there is no bolt to read
+     * one off — so the caster's live channel is the only place the answer lives. Without this a
+     * Cruciatus beam would cost Horribilis exactly what a Lumos would.
+     */
+    private static boolean isChannellingDarkMagic(@Nullable Entity attacker) {
+        if (!(attacker instanceof ServerPlayer player)) {
+            return false;
+        }
+        String channelled = WandBeamChannelLogic.activeChannelSpellId(player);
+        return channelled != null && isDarkSpell(Spells.byId(channelled));
+    }
+
+    /** Whether this entity is one of the Dark things the tag names — also true of what it shoots. */
+    public static boolean isDarkAttacker(@Nullable Entity entity) {
+        return isDarkEntity(entity);
     }
 
     private static boolean isDarkEntity(@Nullable Entity entity) {

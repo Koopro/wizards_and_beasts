@@ -80,7 +80,10 @@ final class WandBeamSpellHandlers {
                 le.hurtMarked = true;
                 le.clearFire();
                 if (le.fireImmune()) {
-                    le.hurt(level.damageSources().magic(), 2.0f);
+                    // Attributed to the caster, like every other thing a wand does. Bare magic()
+                    // carries neither attacker nor position, so a Shield Charm could not see it
+                    // coming and the kill went to nobody (KNOWN_ISSUES 8b.1).
+                    le.hurt(level.damageSources().indirectMagic(player, player), 2.0f);
                 }
             }
         }
@@ -280,7 +283,10 @@ final class WandBeamSpellHandlers {
         if (s.crucioHoldTicks >= 30 && s.crucioHoldTicks % 20 == 0) {
             float intent = crucioIntentMultiplier(caster, spell);
             float rampDamage = Math.min(2.5f, 0.4f + (s.crucioHoldTicks / 80f)) * intent;
-            target.hurt(caster.level().damageSources().magic(), rampDamage);
+            // Same attribution fix as the Aguamenti jet: the curse belongs to whoever is holding it,
+            // which is what lets a Shield Charm stand in front of it. The Cruciatus *pain* rides an
+            // effect component and is deliberately untouched — a ward never stopped that.
+            target.hurt(caster.level().damageSources().indirectMagic(caster, caster), rampDamage);
             int painAmp = Math.min(3, s.crucioHoldTicks / 40);
             if (painAmp > 0) {
                 target.addEffect(new MobEffectInstance(ModEffects.CRUCIATUS_PAIN, 40, painAmp, false, false, true));

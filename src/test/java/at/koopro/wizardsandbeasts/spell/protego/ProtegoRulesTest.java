@@ -231,6 +231,33 @@ class ProtegoRulesTest {
         assertEquals(3.0f, ProtegoRules.absorbableDamage(ProtegoTier.HORRIBILIS, 999.0f, 3.0f, true), 1.0e-4f);
     }
 
+    // ── ordinary projectiles at the wall ────────────────────────────────────────────────────────
+
+    /** A snowball is not a curse: turning one must not cost what the cheapest spell costs. */
+    @Test
+    void aThrownNuisanceCostsLessThanASpell() {
+        float nuisance = ProtegoRules.projectileImpactCost(ProtegoTier.TOTALUM, 0.0f, false);
+        assertEquals(ProtegoRules.MIN_PROJECTILE_COST, nuisance, 1.0e-4f);
+        assertTrue(nuisance < ProtegoRules.spellImpactCost(ProtegoTier.TOTALUM, 0.0f, false),
+                "a snowball cost " + nuisance + ", the same as a spell");
+    }
+
+    /** A hard-hitting arrow costs the ward what it would have done to the body behind it. */
+    @Test
+    void aProjectileCostsWhatItWouldHaveDone() {
+        assertEquals(9.0f, ProtegoRules.projectileImpactCost(ProtegoTier.MAXIMA, 9.0f, false), 1.0e-4f);
+    }
+
+    /** A wither skull is Dark magic however it is delivered, so the tier split still applies. */
+    @Test
+    void darkProjectilesFollowTheSameSplitAsDarkSpells() {
+        float horribilis = ProtegoRules.projectileImpactCost(ProtegoTier.HORRIBILIS, 8.0f, true);
+        float maxima = ProtegoRules.projectileImpactCost(ProtegoTier.MAXIMA, 8.0f, true);
+        float ordinary = ProtegoRules.projectileImpactCost(ProtegoTier.MAXIMA, 8.0f, false);
+        assertTrue(horribilis < ordinary, "Horribilis paid " + horribilis + " against " + ordinary);
+        assertTrue(maxima > ordinary, "a lesser ward paid " + maxima + " against " + ordinary);
+    }
+
     @Test
     void theLowWarningFiresOnceOnTheWayDown() {
         float max = 40.0f;

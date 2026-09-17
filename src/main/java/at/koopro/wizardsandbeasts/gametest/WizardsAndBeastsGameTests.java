@@ -83,5 +83,6 @@ public final class WizardsAndBeastsGameTests {
         ProtegoShieldTests.contribute(registrar);
         TimedOutlineTests.contribute(registrar);
         RevelioTests.contribute(registrar);
+        ProtegoWardBeamTests.contribute(registrar);
     }
 }

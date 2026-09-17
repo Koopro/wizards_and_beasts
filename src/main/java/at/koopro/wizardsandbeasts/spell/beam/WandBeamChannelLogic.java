@@ -176,6 +176,10 @@ public final class WandBeamChannelLogic {
      *
      * <p>A channel only exists while a wand hold drives it, so this is also how the hold lifecycle — and
      * the game tests that watch it — tell a torn-down beam from one left running with nothing holding it.
+     *
+     * <p>Beam damage arrives at a victim as plain magic with an attacker and nothing else — there is
+     * no projectile to read a spell off. This is how {@code ProtegoDarkThreats} tells a Cruciatus
+     * beam from an ordinary one, so Horribilis' Dark discount reaches beams too.
      */
     public static @org.jspecify.annotations.Nullable String activeChannelSpellId(ServerPlayer player) {
         WandBeamSession session = SESSIONS.get(player.getUUID());

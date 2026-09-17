@@ -8,6 +8,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -121,16 +122,20 @@ public final class ProtegoWardManager {
      * else does. The looser "every player is a friend" rule {@link #isAlly} uses for who is
      * sheltered would, applied here, make a dome useless in any duel on a server without teams.
      */
-    public static boolean isFriendlyBolt(@NonNull ProtegoShieldEntity shield, @NonNull SpellProjectileEntity bolt) {
+    public static boolean isFriendlyProjectile(@NonNull ProtegoShieldEntity shield, @NonNull Projectile projectile) {
         UUID casterId = shield.getCasterUuid();
         if (casterId == null) {
             return false;
         }
-        if (casterId.equals(bolt.getCasterUuid())) {
+        // A spell bolt knows its caster even when its owner entity has gone; an arrow only has an owner.
+        if (projectile instanceof SpellProjectileEntity bolt && casterId.equals(bolt.getCasterUuid())) {
+            return true;
+        }
+        Entity owner = projectile.getOwner();
+        if (owner != null && casterId.equals(owner.getUUID())) {
             return true;
         }
         Player caster = shield.findCaster();
-        Entity owner = bolt.getOwner();
         return caster != null && owner != null && owner.isAlliedTo(caster);
     }
 
