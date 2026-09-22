@@ -2,18 +2,24 @@
   "id": "creature_knowledge",
   "displayName": "skill.wizards_and_beasts.node.creature_knowledge.name",
   "description": "skill.wizards_and_beasts.node.creature_knowledge.desc",
+  "lore": "skill.wizards_and_beasts.node.creature_knowledge.lore",
+  "practice": "skill.wizards_and_beasts.node.creature_knowledge.practice",
   "tree": "magizoology",
+  "pointCost": 1,
+  "provenance": {
+    "modAdvancement": true
+  },
   "effects": [
     {
-      "abilityId": "creature_knowledge",
-      "type": "unlock_ability"
+      "type": "unlock_ability",
+      "abilityId": "creature_knowledge"
     }
   ],
-  "x": 119.7,
-  "y": -46.5,
+  "x": 95.1,
+  "y": -13.4,
   "edges": [
-    "magizoology_path_1",
-    "magizoology_path_5",
-    "niffler_friend"
+    "wizard_core",
+    "patient_watching",
+    "creature_handling"
   ]
 }

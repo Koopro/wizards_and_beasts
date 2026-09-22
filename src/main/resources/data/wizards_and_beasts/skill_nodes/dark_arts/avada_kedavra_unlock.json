@@ -2,23 +2,25 @@
   "id": "avada_kedavra_unlock",
   "displayName": "skill.wizards_and_beasts.node.avada_kedavra_unlock.name",
   "description": "skill.wizards_and_beasts.node.avada_kedavra_unlock.desc",
+  "lore": "skill.wizards_and_beasts.node.avada_kedavra_unlock.lore",
+  "practice": "skill.wizards_and_beasts.node.avada_kedavra_unlock.practice",
   "tree": "dark_arts",
   "pointCost": 6,
+  "provenance": {
+    "citation": "Attested in the novels"
+  },
   "effects": [
     {
       "type": "learn_spell",
       "spellId": "avada_kedavra"
     },
     {
-      "spellId": "avada_kedavra",
-      "reductionPerLevel": 0.08,
-      "type": "spell_cooldown_reduction"
+      "type": "dark_study",
+      "corruption": 12.0
     }
   ],
-  "x": 110.2,
-  "y": 250.8,
-  "edges": [
-    "dark_arts_path_3",
-    "dark_resilience"
-  ]
+  "x": -52.4,
+  "y": 129.8,
+  "edges": [],
+  "size": "keystone"
 }

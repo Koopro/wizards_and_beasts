@@ -2,17 +2,24 @@
   "id": "goblin_vault_step",
   "displayName": "skill.wizards_and_beasts.node.goblin_vault_step.name",
   "description": "skill.wizards_and_beasts.node.goblin_vault_step.desc",
+  "lore": "skill.wizards_and_beasts.node.goblin_vault_step.lore",
+  "practice": "skill.wizards_and_beasts.node.goblin_vault_step.practice",
   "tree": "goblin_craft",
-  "maxLevel": 2,
   "pointCost": 2,
+  "provenance": {
+    "modAdvancement": true
+  },
   "effects": [
     {
+      "type": "passive_attribute",
       "attributeId": "movement_speed",
-      "amountPerLevel": 0.01,
-      "type": "passive_attribute"
+      "amountPerLevel": 0.01
     }
   ],
-  "x": -70.0,
-  "y": 0.0,
-  "edges": []
+  "x": -140.0,
+  "y": 45.0,
+  "edges": [
+    "goblin_forge_sense"
+  ],
+  "maxLevel": 2
 }

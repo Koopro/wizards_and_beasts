@@ -2,22 +2,26 @@
   "id": "goblin_steelheart",
   "displayName": "skill.wizards_and_beasts.node.goblin_steelheart.name",
   "description": "skill.wizards_and_beasts.node.goblin_steelheart.desc",
+  "lore": "skill.wizards_and_beasts.node.goblin_steelheart.lore",
+  "practice": "skill.wizards_and_beasts.node.goblin_steelheart.practice",
   "tree": "goblin_craft",
   "pointCost": 4,
+  "provenance": {
+    "modAdvancement": true
+  },
   "effects": [
     {
+      "type": "passive_attribute",
       "attributeId": "max_health",
-      "amountPerLevel": 2.0,
-      "type": "passive_attribute"
+      "amountPerLevel": 2.0
     },
     {
-      "abilityId": "goblin_steelheart",
-      "type": "unlock_ability"
+      "type": "unlock_ability",
+      "abilityId": "goblin_steelheart"
     }
   ],
-  "x": -140.0,
+  "x": 70.0,
   "y": 0.0,
-  "edges": [
-    "goblin_vault_step"
-  ]
+  "edges": [],
+  "size": "keystone"
 }

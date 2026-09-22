@@ -2,20 +2,26 @@
   "id": "imperio_unlock",
   "displayName": "skill.wizards_and_beasts.node.imperio_unlock.name",
   "description": "skill.wizards_and_beasts.node.imperio_unlock.desc",
+  "lore": "skill.wizards_and_beasts.node.imperio_unlock.lore",
+  "practice": "skill.wizards_and_beasts.node.imperio_unlock.practice",
   "tree": "dark_arts",
   "pointCost": 4,
+  "provenance": {
+    "citation": "Attested in the novels"
+  },
   "effects": [
     {
       "type": "learn_spell",
       "spellId": "imperio"
     },
     {
-      "spellId": "imperio",
-      "reductionPerLevel": 0.1,
-      "type": "spell_cooldown_reduction"
+      "type": "dark_study",
+      "corruption": 6.0
     }
   ],
-  "x": -99.5,
-  "y": 199.8,
-  "edges": []
+  "x": -17.9,
+  "y": 138.9,
+  "edges": [
+    "avada_kedavra_unlock"
+  ]
 }

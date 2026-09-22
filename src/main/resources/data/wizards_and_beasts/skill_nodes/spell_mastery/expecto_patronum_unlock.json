@@ -2,22 +2,21 @@
   "id": "expecto_patronum_unlock",
   "displayName": "skill.wizards_and_beasts.node.expecto_patronum_unlock.name",
   "description": "skill.wizards_and_beasts.node.expecto_patronum_unlock.desc",
+  "lore": "skill.wizards_and_beasts.node.expecto_patronum_unlock.lore",
+  "practice": "skill.wizards_and_beasts.node.expecto_patronum_unlock.practice",
   "tree": "spell_mastery",
-  "pointCost": 4,
+  "pointCost": 5,
+  "provenance": {
+    "citation": "Prisoner of Azkaban, ch. 12"
+  },
   "effects": [
     {
       "type": "learn_spell",
       "spellId": "expecto_patronum"
-    },
-    {
-      "spellId": "expecto_patronum",
-      "reductionPerLevel": 0.1,
-      "type": "spell_cooldown_reduction"
     }
   ],
-  "x": 181.2,
-  "y": 43.6,
-  "edges": [
-    "protego_unlock"
-  ]
+  "x": 102.1,
+  "y": 95.8,
+  "edges": [],
+  "size": "keystone"
 }

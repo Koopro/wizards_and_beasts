@@ -1,0 +1,26 @@
+{
+  "id": "bench_discipline",
+  "displayName": "skill.wizards_and_beasts.node.bench_discipline.name",
+  "description": "skill.wizards_and_beasts.node.bench_discipline.desc",
+  "lore": "skill.wizards_and_beasts.node.bench_discipline.lore",
+  "practice": "skill.wizards_and_beasts.node.bench_discipline.practice",
+  "tree": "alchemy",
+  "pointCost": 1,
+  "provenance": {
+    "modAdvancement": true
+  },
+  "effects": [
+    {
+      "type": "category_cooldown_reduction",
+      "category": "utility",
+      "reductionPerLevel": 0.04
+    }
+  ],
+  "x": -59.1,
+  "y": 75.6,
+  "edges": [
+    "wizard_core",
+    "measured_hand",
+    "frigora_unlock"
+  ]
+}

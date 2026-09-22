@@ -67,6 +67,9 @@ public final class SkillEffectCache {
                     // than derived. Nothing for a read-side cache to aggregate.
                     case SkillEffect.LearnSpell ignored -> {}
                     case SkillEffect.PassiveAttribute ignored -> {} // handled at unlock time
+                    // Corruption is accrued once, at allocation, and then lives in its own attachment. A
+                    // read-side cache must not re-add it every recompute, or logging in would darken you.
+                    case SkillEffect.DarkStudy ignored -> {}
                     // Grant/refinement flow through the source-tracked AbilityGrants layer, not this cache.
                     case SkillEffect.GrantAbility ignored -> {}
                     case SkillEffect.AbilityRefinement ignored -> {}

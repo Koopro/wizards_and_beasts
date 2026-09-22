@@ -52,7 +52,11 @@ public final class CastSurvey {
         boolean underage = WizardingAge.isUnderage(MinistryRecords.get(caster).ageAt(now, ticksPerYear));
         boolean atHogwarts = MinistryArea.isInside(level, caster.blockPosition(), MapLandmarkTags.HOGWARTS);
 
-        double radius = TraceRules.witnessRadius(law.visibility());
+        // A discreet caster is noticed from less far off — the Dark Arts web's discretion line, and the one
+        // thing it may buy against the Ministry. It never empties a room: a Muggle at your elbow still sees.
+        double radius = TraceRules.witnessRadius(law.visibility(),
+                at.koopro.wizardsandbeasts.skill.SkillSystemAPI.getGameplayBonus(
+                        caster, at.koopro.wizardsandbeasts.skill.GameplayStat.TRACE_DISCRETION));
         AABB box = caster.getBoundingBox().inflate(radius);
         List<LivingEntity> muggles = level.getEntitiesOfClass(LivingEntity.class, box,
                 entity -> isMuggle(entity) && sees(entity, caster, radius));

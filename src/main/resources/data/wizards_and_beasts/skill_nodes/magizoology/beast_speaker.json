@@ -2,8 +2,13 @@
   "id": "beast_speaker",
   "displayName": "skill.wizards_and_beasts.node.beast_speaker.name",
   "description": "skill.wizards_and_beasts.node.beast_speaker.desc",
+  "lore": "skill.wizards_and_beasts.node.beast_speaker.lore",
+  "practice": "skill.wizards_and_beasts.node.beast_speaker.practice",
   "tree": "magizoology",
   "pointCost": 6,
+  "provenance": {
+    "citation": "Attested in the novels"
+  },
   "effects": [
     {
       "type": "learn_spell",
@@ -11,14 +16,12 @@
     },
     {
       "type": "gameplay_bonus",
-      "stat": "beast_damage_resistance",
-      "perLevel": 0.15
+      "stat": "creature_trust",
+      "perLevel": 1.0
     }
   ],
-  "x": 339.0,
-  "y": -22.0,
-  "edges": [
-    "keeper_vigor"
-  ],
+  "x": 138.6,
+  "y": -19.5,
+  "edges": [],
   "size": "keystone"
 }

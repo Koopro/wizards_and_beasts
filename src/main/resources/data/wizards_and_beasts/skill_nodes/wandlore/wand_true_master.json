@@ -2,21 +2,27 @@
   "id": "wand_true_master",
   "displayName": "skill.wizards_and_beasts.node.wand_true_master.name",
   "description": "skill.wizards_and_beasts.node.wand_true_master.desc",
+  "lore": "skill.wizards_and_beasts.node.wand_true_master.lore",
+  "practice": "skill.wizards_and_beasts.node.wand_true_master.practice",
   "tree": "wandlore",
   "pointCost": 6,
+  "provenance": {
+    "citation": "Deathly Hallows, ch. 24"
+  },
   "effects": [
     {
-      "type": "learn_spell",
-      "spellId": "arresto_momentum"
+      "type": "gameplay_bonus",
+      "stat": "allegiance_grip",
+      "perLevel": 1.0
     },
     {
-      "type": "category_cooldown_reduction",
-      "category": "utility",
-      "reductionPerLevel": 0.15
+      "type": "gameplay_bonus",
+      "stat": "spell_misfire_reduction",
+      "perLevel": 0.03
     }
   ],
-  "x": -378.0,
-  "y": -90.0,
+  "x": -86.2,
+  "y": -110.3,
   "edges": [],
   "size": "keystone"
 }

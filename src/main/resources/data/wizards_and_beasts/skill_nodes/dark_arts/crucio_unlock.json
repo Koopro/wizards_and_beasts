@@ -2,23 +2,26 @@
   "id": "crucio_unlock",
   "displayName": "skill.wizards_and_beasts.node.crucio_unlock.name",
   "description": "skill.wizards_and_beasts.node.crucio_unlock.desc",
+  "lore": "skill.wizards_and_beasts.node.crucio_unlock.lore",
+  "practice": "skill.wizards_and_beasts.node.crucio_unlock.practice",
   "tree": "dark_arts",
   "pointCost": 4,
+  "provenance": {
+    "citation": "Attested in the novels"
+  },
   "effects": [
     {
       "type": "learn_spell",
       "spellId": "crucio"
     },
     {
-      "spellId": "crucio",
-      "bonusPerLevel": 0.06,
-      "type": "spell_damage_bonus"
+      "type": "dark_study",
+      "corruption": 6.0
     }
   ],
-  "x": 77.1,
-  "y": 155.1,
+  "x": -17.9,
+  "y": 138.9,
   "edges": [
-    "dark_arts_path_4",
-    "dark_knowledge"
+    "avada_kedavra_unlock"
   ]
 }

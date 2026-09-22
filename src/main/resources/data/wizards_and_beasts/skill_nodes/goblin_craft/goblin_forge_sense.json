@@ -2,19 +2,24 @@
   "id": "goblin_forge_sense",
   "displayName": "skill.wizards_and_beasts.node.goblin_forge_sense.name",
   "description": "skill.wizards_and_beasts.node.goblin_forge_sense.desc",
+  "lore": "skill.wizards_and_beasts.node.goblin_forge_sense.lore",
+  "practice": "skill.wizards_and_beasts.node.goblin_forge_sense.practice",
   "tree": "goblin_craft",
-  "maxLevel": 2,
   "pointCost": 2,
+  "provenance": {
+    "modAdvancement": true
+  },
   "effects": [
     {
+      "type": "passive_attribute",
       "attributeId": "armor",
-      "amountPerLevel": 1.0,
-      "type": "passive_attribute"
+      "amountPerLevel": 1.0
     }
   ],
-  "x": 70.0,
+  "x": -70.0,
   "y": 0.0,
   "edges": [
     "goblin_ledger"
-  ]
+  ],
+  "maxLevel": 2
 }

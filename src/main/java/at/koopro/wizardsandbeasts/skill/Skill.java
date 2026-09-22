@@ -63,7 +63,10 @@ public final class Skill {
             Codec.DOUBLE.optionalFieldOf("y", 0.0).forGetter(Skill::getY),
             Codec.STRING.listOf().optionalFieldOf("edges", List.of()).forGetter(Skill::getEdges),
             Size.CODEC.optionalFieldOf("size", Size.NOTABLE).forGetter(Skill::getSize),
-            Codec.BOOL.optionalFieldOf("root", false).forGetter(Skill::isRoot)
+            Codec.BOOL.optionalFieldOf("root", false).forGetter(Skill::isRoot),
+            Codec.STRING.optionalFieldOf("lore", "").forGetter(Skill::getLore),
+            Codec.STRING.optionalFieldOf("practice", "").forGetter(Skill::getPractice),
+            NodeProvenance.CODEC.optionalFieldOf("provenance").forGetter(Skill::getProvenance)
     ).apply(instance, Skill::fromCodec));
 
     public static final StreamCodec<ByteBuf, Skill> STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);
@@ -87,6 +90,18 @@ public final class Skill {
     private final Size size;
     /** Web entry point: allocatable without any allocated neighbor. */
     private final boolean root;
+    /**
+     * Lang key for one sentence of in-world voice, or empty.
+     *
+     * <p>Separate from {@link #description} on purpose: the description says what the node does to the game and
+     * the lore says what it is to a witch or wizard, and a screen that runs them together can print neither
+     * well. A node with no lore line simply has none.
+     */
+    private final String lore;
+    /** Lang key for what the player actually does with this, in one concrete example, or empty. */
+    private final String practice;
+    /** Whether this node is attested canon or the mod's own advancement; empty means "ask the taught spell". */
+    private final @Nullable NodeProvenance provenance;
 
     private Skill(Builder builder) {
         this.id = builder.id;
@@ -102,12 +117,16 @@ public final class Skill {
         this.edges = Collections.unmodifiableList(new ArrayList<>(builder.edges));
         this.size = builder.size;
         this.root = builder.root;
+        this.lore = builder.lore;
+        this.practice = builder.practice;
+        this.provenance = builder.provenance;
     }
 
     private static Skill fromCodec(String id, String displayName, String description, SkillTreeId tree,
                                    int maxLevel, int pointCost, List<SkillEffect> effects,
                                    List<SkillNodeEffect> nodeEffects,
-                                   double x, double y, List<String> edges, Size size, boolean root) {
+                                   double x, double y, List<String> edges, Size size, boolean root,
+                                   String lore, String practice, java.util.Optional<NodeProvenance> provenance) {
         Builder builder = builder(id, displayName)
                 .description(description)
                 .tree(tree)
@@ -115,7 +134,10 @@ public final class Skill {
                 .cost(pointCost)
                 .position(x, y)
                 .size(size)
-                .root(root);
+                .root(root)
+                .lore(lore)
+                .practice(practice);
+        provenance.ifPresent(builder::provenance);
         effects.forEach(builder::effect);
         nodeEffects.forEach(builder::nodeEffect);
         edges.forEach(builder::edge);
@@ -180,6 +202,23 @@ public final class Skill {
     public List<String> getEdges() { return edges; }
     public Size getSize() { return size; }
     public boolean isRoot() { return root; }
+    public String getLore() { return lore; }
+    public String getPractice() { return practice; }
+
+    /** Declared provenance, or empty when the node inherits the canon tier of the spell it teaches. */
+    public java.util.Optional<NodeProvenance> getProvenance() {
+        return java.util.Optional.ofNullable(provenance);
+    }
+
+    /** The spell this node teaches, or null. Also what an omitted {@link #getProvenance()} defers to. */
+    public @Nullable String getTaughtSpellId() {
+        for (SkillEffect effect : effects) {
+            if (effect instanceof SkillEffect.LearnSpell learn) {
+                return learn.spellId();
+            }
+        }
+        return null;
+    }
 
     public static Builder builder(String id, String displayName) {
         return new Builder(id, displayName);
@@ -199,6 +238,9 @@ public final class Skill {
         private final List<String> edges = new ArrayList<>();
         private Size size = Size.NOTABLE;
         private boolean root;
+        private String lore = "";
+        private String practice = "";
+        private @Nullable NodeProvenance provenance;
 
         private Builder(String id, String displayName) {
             this.id = id;
@@ -232,6 +274,21 @@ public final class Skill {
 
         public Builder nodeEffect(SkillNodeEffect effect) {
             this.nodeEffects.add(effect);
+            return this;
+        }
+
+        public Builder lore(String lore) {
+            this.lore = lore;
+            return this;
+        }
+
+        public Builder practice(String practice) {
+            this.practice = practice;
+            return this;
+        }
+
+        public Builder provenance(NodeProvenance provenance) {
+            this.provenance = provenance;
             return this;
         }
 

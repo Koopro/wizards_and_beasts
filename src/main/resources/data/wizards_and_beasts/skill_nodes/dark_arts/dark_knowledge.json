@@ -2,18 +2,29 @@
   "id": "dark_knowledge",
   "displayName": "skill.wizards_and_beasts.node.dark_knowledge.name",
   "description": "skill.wizards_and_beasts.node.dark_knowledge.desc",
+  "lore": "skill.wizards_and_beasts.node.dark_knowledge.lore",
+  "practice": "skill.wizards_and_beasts.node.dark_knowledge.practice",
   "tree": "dark_arts",
   "pointCost": 2,
+  "provenance": {
+    "modAdvancement": true
+  },
   "effects": [
     {
-      "category": "dark_arts",
-      "bonusPerLevel": 0.04,
-      "type": "category_damage_bonus"
+      "type": "gameplay_bonus",
+      "stat": "curse_backlash",
+      "perLevel": 0.02
+    },
+    {
+      "type": "dark_study",
+      "corruption": 2.0
     }
   ],
-  "x": -17.2,
-  "y": 116.7,
+  "x": 36.0,
+  "y": 89.0,
   "edges": [
-    "occlumency"
+    "wizard_core",
+    "curse_control",
+    "legilimency_study"
   ]
 }

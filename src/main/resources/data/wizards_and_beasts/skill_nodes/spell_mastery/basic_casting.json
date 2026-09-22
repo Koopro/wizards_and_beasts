@@ -2,20 +2,27 @@
   "id": "basic_casting",
   "displayName": "skill.wizards_and_beasts.node.basic_casting.name",
   "description": "skill.wizards_and_beasts.node.basic_casting.desc",
+  "lore": "skill.wizards_and_beasts.node.basic_casting.lore",
+  "practice": "skill.wizards_and_beasts.node.basic_casting.practice",
   "tree": "spell_mastery",
+  "pointCost": 1,
+  "provenance": {
+    "modAdvancement": true
+  },
   "effects": [
     {
-      "type": "category_cooldown_reduction",
-      "category": "combat",
-      "reductionPerLevel": 0.02
+      "type": "gameplay_bonus",
+      "stat": "spell_misfire_reduction",
+      "perLevel": 0.02
     }
   ],
-  "x": 114.0,
-  "y": 56.6,
+  "x": 86.6,
+  "y": 41.5,
   "edges": [
+    "wizard_core",
     "lumos_unlock",
+    "expelliarmus_unlock",
     "protego_unlock",
-    "spell_mastery_path_1",
-    "stupefy_unlock"
+    "accio_unlock"
   ]
 }

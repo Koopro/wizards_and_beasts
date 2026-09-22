@@ -2,15 +2,22 @@
   "id": "niffler_friend",
   "displayName": "skill.wizards_and_beasts.node.niffler_friend.name",
   "description": "skill.wizards_and_beasts.node.niffler_friend.desc",
+  "lore": "skill.wizards_and_beasts.node.niffler_friend.lore",
+  "practice": "skill.wizards_and_beasts.node.niffler_friend.practice",
   "tree": "magizoology",
   "pointCost": 2,
+  "provenance": {
+    "modAdvancement": true
+  },
   "effects": [
     {
-      "abilityId": "niffler_friend",
-      "type": "unlock_ability"
+      "type": "unlock_ability",
+      "abilityId": "niffler_friend"
     }
   ],
-  "x": 175.0,
-  "y": -6.1,
-  "edges": []
+  "x": 86.2,
+  "y": -110.3,
+  "edges": [
+    "animagus_study"
+  ]
 }

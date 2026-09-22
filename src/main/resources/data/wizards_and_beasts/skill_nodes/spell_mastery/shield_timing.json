@@ -1,0 +1,25 @@
+{
+  "id": "shield_timing",
+  "displayName": "skill.wizards_and_beasts.node.shield_timing.name",
+  "description": "skill.wizards_and_beasts.node.shield_timing.desc",
+  "lore": "skill.wizards_and_beasts.node.shield_timing.lore",
+  "practice": "skill.wizards_and_beasts.node.shield_timing.practice",
+  "tree": "spell_mastery",
+  "pointCost": 2,
+  "provenance": {
+    "modAdvancement": true
+  },
+  "effects": [
+    {
+      "type": "gameplay_bonus",
+      "stat": "ward_lifetime",
+      "perLevel": 0.15
+    }
+  ],
+  "x": 102.1,
+  "y": 95.8,
+  "edges": [
+    "shield_control"
+  ],
+  "maxLevel": 2
+}

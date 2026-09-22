@@ -2,17 +2,23 @@
   "id": "transmute_focus",
   "displayName": "skill.wizards_and_beasts.node.transmute_focus.name",
   "description": "skill.wizards_and_beasts.node.transmute_focus.desc",
+  "lore": "skill.wizards_and_beasts.node.transmute_focus.lore",
+  "practice": "skill.wizards_and_beasts.node.transmute_focus.practice",
   "tree": "alchemy",
-  "maxLevel": 2,
   "pointCost": 3,
+  "provenance": {
+    "modAdvancement": true
+  },
   "effects": [
     {
-      "category": "utility",
-      "bonusPerLevel": 0.05,
-      "type": "category_damage_bonus"
+      "type": "gameplay_bonus",
+      "stat": "spell_misfire_reduction",
+      "perLevel": 0.03
     }
   ],
-  "x": -278.6,
-  "y": 36.1,
-  "edges": []
+  "x": -114.5,
+  "y": 146.6,
+  "edges": [
+    "transmuters_insight"
+  ]
 }

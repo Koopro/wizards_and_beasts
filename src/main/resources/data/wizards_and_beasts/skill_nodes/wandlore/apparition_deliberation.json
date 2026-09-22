@@ -2,18 +2,20 @@
   "id": "apparition_deliberation",
   "displayName": "skill.wizards_and_beasts.node.apparition_deliberation.name",
   "description": "skill.wizards_and_beasts.node.apparition_deliberation.desc",
+  "lore": "skill.wizards_and_beasts.node.apparition_deliberation.lore",
+  "practice": "skill.wizards_and_beasts.node.apparition_deliberation.practice",
   "tree": "wandlore",
   "pointCost": 5,
+  "provenance": {
+    "modAdvancement": true
+  },
   "effects": [
     {
-      "abilityId": "apparition_deliberation",
-      "type": "unlock_ability"
+      "type": "unlock_ability",
+      "abilityId": "apparition_deliberation"
     }
   ],
-  "x": -320.0,
-  "y": -90.0,
-  "edges": [
-    "apparition_training",
-    "wand_true_master"
-  ]
+  "x": -138.6,
+  "y": -19.5,
+  "edges": []
 }

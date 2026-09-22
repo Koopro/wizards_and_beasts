@@ -1,0 +1,25 @@
+{
+  "id": "allegiance_grip",
+  "displayName": "skill.wizards_and_beasts.node.allegiance_grip.name",
+  "description": "skill.wizards_and_beasts.node.allegiance_grip.desc",
+  "lore": "skill.wizards_and_beasts.node.allegiance_grip.lore",
+  "practice": "skill.wizards_and_beasts.node.allegiance_grip.practice",
+  "tree": "wandlore",
+  "pointCost": 3,
+  "provenance": {
+    "modAdvancement": true
+  },
+  "effects": [
+    {
+      "type": "gameplay_bonus",
+      "stat": "allegiance_grip",
+      "perLevel": 1.0
+    }
+  ],
+  "x": -114.5,
+  "y": -146.6,
+  "edges": [
+    "wand_true_master"
+  ],
+  "maxLevel": 2
+}

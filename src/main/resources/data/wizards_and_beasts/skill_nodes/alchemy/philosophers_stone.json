@@ -2,25 +2,26 @@
   "id": "philosophers_stone",
   "displayName": "skill.wizards_and_beasts.node.philosophers_stone.name",
   "description": "skill.wizards_and_beasts.node.philosophers_stone.desc",
+  "lore": "skill.wizards_and_beasts.node.philosophers_stone.lore",
+  "practice": "skill.wizards_and_beasts.node.philosophers_stone.practice",
   "tree": "alchemy",
   "pointCost": 5,
+  "provenance": {
+    "citation": "Philosopher's Stone, ch. 13"
+  },
   "effects": [
     {
-      "attributeId": "max_health",
-      "amountPerLevel": 4.0,
-      "type": "passive_attribute"
+      "type": "unlock_ability",
+      "abilityId": "philosophers_stone"
     },
     {
+      "type": "category_cooldown_reduction",
       "category": "utility",
-      "reductionPerLevel": 0.1,
-      "type": "category_cooldown_reduction"
-    },
-    {
-      "abilityId": "philosophers_stone",
-      "type": "unlock_ability"
+      "reductionPerLevel": 0.1
     }
   ],
-  "x": -164.6,
-  "y": 216.6,
-  "edges": []
+  "x": -138.6,
+  "y": 19.5,
+  "edges": [],
+  "size": "keystone"
 }

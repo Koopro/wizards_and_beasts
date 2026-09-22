@@ -104,8 +104,19 @@ public final class MandrakeScream {
         return afflicted;
     }
 
-    /** Whether this entity is wearing something that keeps the scream out. */
+    /**
+     * Whether this entity is spared the scream — by what it is wearing, or by what it has been taught.
+     *
+     * <p>Earmuffs are the canonical answer and stay the answer for everyone. The Herbology web's dangerous-plant
+     * training is the second: a student who has repotted mandrakes all term knows to look away and breathe out,
+     * which is exactly the sort of thing a skill web should be able to say. It spares the scream and nothing
+     * else — the plant is no less dangerous, the handler is just no longer a novice.
+     */
     public static boolean isProtected(LivingEntity entity) {
-        return entity.getItemBySlot(EquipmentSlot.HEAD).is(MUFFLES_SCREAMS);
+        if (entity.getItemBySlot(EquipmentSlot.HEAD).is(MUFFLES_SCREAMS)) {
+            return true;
+        }
+        return entity instanceof net.minecraft.server.level.ServerPlayer player
+                && at.koopro.wizardsandbeasts.skill.SkillSystemAPI.hasAbility(player, "mandrake_trained");
     }
 }

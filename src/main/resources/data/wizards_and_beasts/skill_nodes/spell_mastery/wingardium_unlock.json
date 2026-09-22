@@ -2,20 +2,22 @@
   "id": "wingardium_unlock",
   "displayName": "skill.wizards_and_beasts.node.wingardium_unlock.name",
   "description": "skill.wizards_and_beasts.node.wingardium_unlock.desc",
+  "lore": "skill.wizards_and_beasts.node.wingardium_unlock.lore",
+  "practice": "skill.wizards_and_beasts.node.wingardium_unlock.practice",
   "tree": "spell_mastery",
   "pointCost": 2,
+  "provenance": {
+    "citation": "Attested in the novels"
+  },
   "effects": [
     {
       "type": "learn_spell",
       "spellId": "wingardium_leviosa"
-    },
-    {
-      "spellId": "wingardium_leviosa",
-      "reductionPerLevel": 0.1,
-      "type": "spell_cooldown_reduction"
     }
   ],
-  "x": 151.8,
-  "y": 194.5,
-  "edges": []
+  "x": 86.2,
+  "y": 110.3,
+  "edges": [
+    "wandlight_mastery"
+  ]
 }

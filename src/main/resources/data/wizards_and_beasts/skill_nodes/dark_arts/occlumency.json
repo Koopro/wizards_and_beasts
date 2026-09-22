@@ -2,9 +2,13 @@
   "id": "occlumency",
   "displayName": "skill.wizards_and_beasts.node.occlumency.name",
   "description": "skill.wizards_and_beasts.node.occlumency.desc",
+  "lore": "skill.wizards_and_beasts.node.occlumency.lore",
+  "practice": "skill.wizards_and_beasts.node.occlumency.practice",
   "tree": "dark_arts",
-  "maxLevel": 2,
-  "pointCost": 2,
+  "pointCost": 3,
+  "provenance": {
+    "citation": "Order of the Phoenix, ch. 24"
+  },
   "effects": [
     {
       "type": "gameplay_bonus",
@@ -12,7 +16,10 @@
       "perLevel": 0.2
     }
   ],
-  "x": -72.8,
-  "y": 147.4,
-  "edges": []
+  "x": 52.4,
+  "y": 129.8,
+  "edges": [
+    "legilimency_study"
+  ],
+  "maxLevel": 2
 }

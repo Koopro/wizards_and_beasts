@@ -808,6 +808,34 @@ server-side at cast time and the client cannot know it. The per-spell half of th
 absent from the client (only category maps are synced), so the panel under-reports rather than
 over-reports.
 
+## Skill webs: adding a node that means something (2026-09-17)
+
+A node is a JSON file under `data/wizards_and_beasts/skill_nodes/<tree>/<id>.json`. The fields that matter for
+the education rework:
+
+| Field | What it is |
+|---|---|
+| `provenance` | `{"citation": "..."}` for attested content, `{"modAdvancement": true}` for the mod's own. **Required** — `SkillNodeProvenanceTest` fails a node without one, and fails a citation that disagrees with the taught spell's `canonTier`. |
+| `lore` | lang key, one sentence of in-world voice. Every node ships one. |
+| `practice` | lang key, the worked example: what the player actually does with it. |
+| `effects` | `SkillEffect` list. `gameplay_bonus` + a `GameplayStat` is the right tool for anything continuous; `dark_study` accrues corruption at allocation. |
+| `nodeEffects` | `SkillNodeEffect` list, for `unlock_spell_early` (lowers a prerequisite spell's practised-cast gate) and `bestiary_xp_multiplier`. |
+
+Rules the tests enforce:
+
+- **Every effect type must reach a real system** (`SkillEffectSummary.isImplemented`). Shipping an inert effect
+  is how the old webs ended up advertising benefits nothing applied.
+- **Every `GameplayStat` needs a lang key and a consumer.** Add the stat, wire the consumer at the call site,
+  then write the node — in that order, or the tooltip promises something the game does not do.
+- **Counts are not percentages.** `GameplayStat.isCount()` decides which line the tooltip uses; a "+1 light
+  ahead" stat printed as "+100%" is a lie the player can catch.
+- **Layout is polar.** Each wizard tree owns a 60° sector (`SPOKE_ORDER` in `SkillNodeJsonTest`, index 0
+  centred at −90°, y-down); a node outside its wedge reads as an edge into the neighbouring discipline. Nodes
+  inside `HUB_RADIUS` (112) are exempt, which is where a tree's trunk joins Polaris.
+- **Deleting a node id needs a `PlayerSkillData.CURRENT_VERSION` bump.** The bump fires `applyWebMigration()`
+  at login, which clears every allocation and sets unspent = earned. Without it, points sit on ids that no
+  longer resolve and are silently worth nothing.
+
 ## Heritage, lineage and conditions (2026-09-17)
 
 Three layers, and keeping them apart is the whole design:

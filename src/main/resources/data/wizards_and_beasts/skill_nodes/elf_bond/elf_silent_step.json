@@ -2,17 +2,25 @@
   "id": "elf_silent_step",
   "displayName": "skill.wizards_and_beasts.node.elf_silent_step.name",
   "description": "skill.wizards_and_beasts.node.elf_silent_step.desc",
+  "lore": "skill.wizards_and_beasts.node.elf_silent_step.lore",
+  "practice": "skill.wizards_and_beasts.node.elf_silent_step.practice",
   "tree": "elf_bond",
-  "maxLevel": 2,
+  "pointCost": 1,
+  "provenance": {
+    "modAdvancement": true
+  },
   "effects": [
     {
+      "type": "passive_attribute",
       "attributeId": "movement_speed",
-      "amountPerLevel": 0.01,
-      "type": "passive_attribute"
+      "amountPerLevel": 0.01
     }
   ],
-  "x": 0.0,
+  "x": -140.0,
   "y": 0.0,
-  "edges": [],
+  "edges": [
+    "elf_apparition"
+  ],
+  "maxLevel": 2,
   "root": true
 }

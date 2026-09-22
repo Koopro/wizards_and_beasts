@@ -36,7 +36,8 @@ public sealed interface SkillEffect {
         UNLOCK_ABILITY("unlock_ability", UnlockAbility.CODEC),
         GAMEPLAY_BONUS("gameplay_bonus", GameplayBonus.CODEC),
         GRANT_ABILITY("grant_ability", GrantAbility.CODEC),
-        ABILITY_REFINEMENT("ability_refinement", AbilityRefinement.CODEC);
+        ABILITY_REFINEMENT("ability_refinement", AbilityRefinement.CODEC),
+        DARK_STUDY("dark_study", DarkStudy.CODEC);
 
         public static final Codec<Type> CODEC = StringRepresentable.fromValues(Type::values);
 
@@ -59,6 +60,30 @@ public sealed interface SkillEffect {
     }
 
     /** Teaches the player a spell when unlocked. */
+    /**
+     * What studying the Dark Arts costs the student: {@code corruption} points of dark corruption, applied the
+     * moment the node is allocated.
+     *
+     * <p>The one thing the Dark Arts web must not be is a damage bonus with a scary name. Canon is explicit that
+     * this magic marks the people who use it — Voldemort's face, Karkaroff's nerve, the way the Order can pick a
+     * Death Eater out of a crowd. Corruption is already read by things that care: purity-sensitive creatures shun
+     * a corrupted wizard, unicorns refuse to be approached, the character sheet shows it. So the curriculum
+     * itself accrues it, and nothing about it can be trained away.
+     *
+     * <p>Applied once per allocated level, at allocation, and never refunded — a respec can take the node back
+     * and cannot take back what learning it did.
+     */
+    record DarkStudy(float corruption) implements SkillEffect {
+        public static final MapCodec<DarkStudy> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                Codec.floatRange(0.0f, 25.0f).fieldOf("corruption").forGetter(DarkStudy::corruption)
+        ).apply(instance, DarkStudy::new));
+
+        @Override
+        public Type type() {
+            return Type.DARK_STUDY;
+        }
+    }
+
     record LearnSpell(String spellId) implements SkillEffect {
         public static final MapCodec<LearnSpell> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 Codec.STRING.fieldOf("spellId").forGetter(LearnSpell::spellId)

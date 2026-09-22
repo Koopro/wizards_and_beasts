@@ -1,0 +1,23 @@
+{
+  "id": "arresto_momentum_unlock",
+  "displayName": "skill.wizards_and_beasts.node.arresto_momentum_unlock.name",
+  "description": "skill.wizards_and_beasts.node.arresto_momentum_unlock.desc",
+  "lore": "skill.wizards_and_beasts.node.arresto_momentum_unlock.lore",
+  "practice": "skill.wizards_and_beasts.node.arresto_momentum_unlock.practice",
+  "tree": "wandlore",
+  "pointCost": 3,
+  "provenance": {
+    "citation": "Attested on screen"
+  },
+  "effects": [
+    {
+      "type": "learn_spell",
+      "spellId": "arresto_momentum"
+    }
+  ],
+  "x": -121.2,
+  "y": -70.0,
+  "edges": [
+    "claustra_reverto_unlock"
+  ]
+}

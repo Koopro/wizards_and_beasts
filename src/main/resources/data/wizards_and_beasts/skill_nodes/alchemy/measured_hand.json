@@ -1,0 +1,24 @@
+{
+  "id": "measured_hand",
+  "displayName": "skill.wizards_and_beasts.node.measured_hand.name",
+  "description": "skill.wizards_and_beasts.node.measured_hand.desc",
+  "lore": "skill.wizards_and_beasts.node.measured_hand.lore",
+  "practice": "skill.wizards_and_beasts.node.measured_hand.practice",
+  "tree": "alchemy",
+  "pointCost": 2,
+  "provenance": {
+    "modAdvancement": true
+  },
+  "effects": [
+    {
+      "type": "gameplay_bonus",
+      "stat": "spell_misfire_reduction",
+      "perLevel": 0.03
+    }
+  ],
+  "x": -171.2,
+  "y": 219.1,
+  "edges": [
+    "reagent_lore"
+  ]
+}

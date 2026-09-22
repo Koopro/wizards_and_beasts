@@ -1,0 +1,25 @@
+{
+  "id": "plant_cultivation",
+  "displayName": "skill.wizards_and_beasts.node.plant_cultivation.name",
+  "description": "skill.wizards_and_beasts.node.plant_cultivation.desc",
+  "lore": "skill.wizards_and_beasts.node.plant_cultivation.lore",
+  "practice": "skill.wizards_and_beasts.node.plant_cultivation.practice",
+  "tree": "herbology",
+  "pointCost": 2,
+  "provenance": {
+    "modAdvancement": true
+  },
+  "effects": [
+    {
+      "type": "gameplay_bonus",
+      "stat": "harvest_bonus_chance",
+      "perLevel": 0.1
+    }
+  ],
+  "x": 0.0,
+  "y": -140.0,
+  "edges": [
+    "magical_harvesting"
+  ],
+  "maxLevel": 2
+}

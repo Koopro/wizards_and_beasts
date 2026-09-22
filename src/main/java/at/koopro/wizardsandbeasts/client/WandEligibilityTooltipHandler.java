@@ -9,6 +9,8 @@ import net.minecraft.world.item.ItemStack;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import at.koopro.wizardsandbeasts.ability.grant.AbilityKey;
+import at.koopro.wizardsandbeasts.client.ability.state.ClientAbilityGrantState;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
@@ -60,14 +62,28 @@ public final class WandEligibilityTooltipHandler {
         }
 
         var registries = player.level().registryAccess();
+        // Wandlore is a discipline, so reading a wand is a trained skill rather than a keypress. Without
+        // Appraisal the shift view says only that there is more here than you can see; the two Wandlore nodes
+        // are what open the wand's character and then its figures.
+        boolean appraises = ClientAbilityGrantState.hasAbility(AbilityKey.of("wand_appraisal"));
+        boolean readsFigures = ClientAbilityGrantState.hasAbility(AbilityKey.of("wandlore_figures"));
         if (isShiftDown()) {
-            List<Component> character = WandEligibility.characterLines(wand, registries);
-            if (!character.isEmpty()) {
-                tooltip.add(Component.translatable("wandcraft.tooltip.character").withStyle(ChatFormatting.DARK_AQUA));
-                tooltip.addAll(character);
+            if (!appraises) {
+                tooltip.add(Component.translatable("wandcraft.tooltip.character.untrained")
+                        .withStyle(ChatFormatting.DARK_GRAY));
+            } else {
+                List<Component> character = WandEligibility.characterLines(wand, registries);
+                if (!character.isEmpty()) {
+                    tooltip.add(Component.translatable("wandcraft.tooltip.character")
+                            .withStyle(ChatFormatting.DARK_AQUA));
+                    tooltip.addAll(character);
+                }
             }
-            // What it adds to a spell, for anyone who wants the figures — beneath its character, not above it.
-            WandCastLines.append(WandStatsResolver.resolve(wand, registries), tooltip::add);
+            // What it adds to a spell, for anyone who has learned to read the figures — beneath its
+            // character, not above it.
+            if (readsFigures) {
+                WandCastLines.append(WandStatsResolver.resolve(wand, registries), tooltip::add);
+            }
         } else {
             tooltip.add(Component.translatable("wandcraft.tooltip.character.hint").withStyle(ChatFormatting.DARK_GRAY));
         }

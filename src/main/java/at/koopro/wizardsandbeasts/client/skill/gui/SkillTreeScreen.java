@@ -408,7 +408,7 @@ public class SkillTreeScreen extends Screen {
             boolean sealed = sealedTrees.contains(hoveredNode.getTree());
             SkillTreeRenderHelper.renderTooltipCard(graphics, font, hoveredNode, mouseX, mouseY,
                     data.getSkillLevel(hoveredNode.getId()), data.getSkillPoints(), adjacencyOpen, sealed,
-                    prerequisiteNames(hoveredNode));
+                    prerequisiteNames(hoveredNode), unallocatedNeighbourNames(hoveredNode, data));
         }
     }
 
@@ -690,6 +690,28 @@ public class SkillTreeScreen extends Screen {
         }
         List<Component> names = new java.util.ArrayList<>();
         for (String neighborId : SkillTrees.clientNeighbors(node.getId())) {
+            Skill neighbor = SkillTrees.clientById(neighborId);
+            if (neighbor != null) {
+                names.add(Component.literal(
+                        SkillTreeRenderHelper.resolveDisplayName(neighbor.getDisplayName())));
+            }
+        }
+        return names;
+    }
+
+    /**
+     * What taking this node would open next: its neighbours the player has not taken yet.
+     *
+     * <p>The same edge list the prerequisites come from, read the other way round. A web has no direction, so
+     * "leads to" and "requires" are the same neighbours seen from either side of the point you are standing on
+     * — which is exactly why the card only prints this for a node the player has not allocated.
+     */
+    private List<Component> unallocatedNeighbourNames(Skill node, PlayerSkillData data) {
+        List<Component> names = new java.util.ArrayList<>();
+        for (String neighborId : SkillTrees.clientNeighbors(node.getId())) {
+            if (data.getSkillLevel(neighborId) >= 1) {
+                continue;
+            }
             Skill neighbor = SkillTrees.clientById(neighborId);
             if (neighbor != null) {
                 names.add(Component.literal(

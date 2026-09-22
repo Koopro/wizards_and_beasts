@@ -2,19 +2,22 @@
   "id": "dragon_tamer",
   "displayName": "skill.wizards_and_beasts.node.dragon_tamer.name",
   "description": "skill.wizards_and_beasts.node.dragon_tamer.desc",
+  "lore": "skill.wizards_and_beasts.node.dragon_tamer.lore",
+  "practice": "skill.wizards_and_beasts.node.dragon_tamer.practice",
   "tree": "magizoology",
-  "maxLevel": 2,
   "pointCost": 3,
+  "provenance": {
+    "modAdvancement": true
+  },
   "effects": [
     {
+      "type": "gameplay_bonus",
       "stat": "beast_damage_resistance",
-      "perLevel": 0.1,
-      "type": "gameplay_bonus"
+      "perLevel": 0.1
     }
   ],
-  "x": 218.0,
-  "y": -17.7,
-  "edges": [
-    "magizoology_path_4"
-  ]
+  "x": 129.2,
+  "y": -54.0,
+  "edges": [],
+  "maxLevel": 2
 }

@@ -1,0 +1,24 @@
+{
+  "id": "lumos_steady",
+  "displayName": "skill.wizards_and_beasts.node.lumos_steady.name",
+  "description": "skill.wizards_and_beasts.node.lumos_steady.desc",
+  "lore": "skill.wizards_and_beasts.node.lumos_steady.lore",
+  "practice": "skill.wizards_and_beasts.node.lumos_steady.practice",
+  "tree": "spell_mastery",
+  "pointCost": 2,
+  "provenance": {
+    "modAdvancement": true
+  },
+  "effects": [
+    {
+      "type": "gameplay_bonus",
+      "stat": "light_reach",
+      "perLevel": 1.0
+    }
+  ],
+  "x": 138.6,
+  "y": 19.5,
+  "edges": [
+    "lumos_corridor"
+  ]
+}

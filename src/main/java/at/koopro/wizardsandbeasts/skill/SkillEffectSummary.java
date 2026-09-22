@@ -71,11 +71,15 @@ public final class SkillEffectSummary {
             case SkillEffect.CategoryCooldownReduction e ->
                     line("category_cooldown", percent(-e.reductionPerLevel() * level), categoryName(e.category().name()));
             case SkillEffect.PassiveAttribute e -> attributeLine(e, level);
-            case SkillEffect.GameplayBonus e ->
-                    line("gameplay_bonus", percent(e.perLevel() * level), statName(e.stat()));
+            // A count and a percentage read completely differently, and three of these stats are counts:
+            // "+1 duel" and "+100% duel" are not the same promise.
+            case SkillEffect.GameplayBonus e -> counted(e.stat())
+                    ? line("gameplay_count", String.format("%+.0f", e.perLevel() * level), statName(e.stat()))
+                    : line("gameplay_bonus", percent(e.perLevel() * level), statName(e.stat()));
             case SkillEffect.UnlockAbility e ->
                     line("unlock_ability", abilityName(e.abilityId()));
             case SkillEffect.LearnSpell e -> line("learn_spell", spellName(e.spellId()));
+            case SkillEffect.DarkStudy e -> line("dark_study", String.format("%.0f", e.corruption() * level));
             // Same sentence as UnlockAbility, because it is the same benefit: SkillNodeAbilityGrantSource
             // feeds both into one grant list, and a player reading a tooltip has no way to care which
             // record type the datapack used. The key is derived from the AbilityKey's normalized id.
@@ -105,7 +109,10 @@ public final class SkillEffectSummary {
                  // Wired at the grant layer all along (SkillNodeAbilityGrantSource) and blocked here
                  // only because it had no tooltip line. It has one now, identical to UnlockAbility's,
                  // so a node may ship it.
-                 GRANT_ABILITY -> true;
+                 GRANT_ABILITY,
+                 // Wired 2026-09-17: applyImmediateEffects accrues it through DarkCorruptionService, which
+                 // purity-sensitive creatures, the unicorn and the character sheet all already read.
+                 DARK_STUDY -> true;
             // AbilityModifiers aggregates AbilityRefinement and no ability implementation reads the
             // result, so a node declaring one would cost points and change nothing. The flag gates
             // "safe to ship in a datapack", not "the mechanism exists"; it stays false until some
@@ -171,6 +178,11 @@ public final class SkillEffectSummary {
     private static Component categoryName(String category) {
         return Component.translatable("spell.wizards_and_beasts.category."
                 + category.toLowerCase(Locale.ROOT));
+    }
+
+    /** Whether this stat reads as a whole count rather than a percentage. */
+    private static boolean counted(GameplayStat stat) {
+        return stat.isCount();
     }
 
     private static Component statName(GameplayStat stat) {

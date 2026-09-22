@@ -163,6 +163,20 @@ public final class SkillTreeRenderHelper {
     public static void renderTooltipCard(GuiGraphics graphics, Font font, Skill skill, int mouseX, int mouseY,
                                          int level, int points, boolean adjacencyOpen, boolean sealed,
                                          List<Component> prerequisites) {
+        renderTooltipCard(graphics, font, skill, mouseX, mouseY, level, points, adjacencyOpen, sealed,
+                prerequisites, List.of());
+    }
+
+    /**
+     * The node card: what this is, what it means, what it does, what it needs and what it opens.
+     *
+     * <p>The five questions the brief asks a learning screen to answer, in the order a student asks them.
+     * {@code leadsTo} is the last of them — "what can I learn next" — and is drawn only for a node the player
+     * has not taken yet, because once it is theirs the web itself shows the way on.
+     */
+    public static void renderTooltipCard(GuiGraphics graphics, Font font, Skill skill, int mouseX, int mouseY,
+                                         int level, int points, boolean adjacencyOpen, boolean sealed,
+                                         List<Component> prerequisites, List<Component> leadsTo) {
         int w = WizardsAndBeastsUiTokens.SkillTree.TOOLTIP_WIDTH;
         int inner = w - 16;
 
@@ -179,6 +193,22 @@ public final class SkillTreeRenderHelper {
         int shownLevel = maxed ? skill.getMaxLevel() : Math.max(1, level + (started ? 1 : 0));
         List<Component> effects = SkillEffectSummary.lines(skill, shownLevel);
 
+        // Lore, then the practical example. Both optional: a node with nothing in-world to say says nothing
+        // rather than padding the card with a restatement of its own description.
+        List<String> loreLines = skill.getLore().isEmpty()
+                ? List.of() : wrap(font, I18n.get(skill.getLore()), inner, 3);
+        List<String> practiceLines = skill.getPractice().isEmpty()
+                ? List.of() : wrap(font, I18n.get("screen.wizards_and_beasts.skill_tree.practice",
+                        I18n.get(skill.getPractice())), inner, 2);
+        List<String> provenanceLines = wrap(font, provenanceText(skill), inner, 2);
+        List<String> leadsToLines = List.of();
+        if (!leadsTo.isEmpty() && level <= 0) {
+            String joined = leadsTo.stream().map(Component::getString)
+                    .collect(java.util.stream.Collectors.joining(", "));
+            leadsToLines = wrap(font,
+                    I18n.get("screen.wizards_and_beasts.skill_tree.leads_to", joined), inner, 2);
+        }
+
         List<String> prereqLines = List.of();
         if (!sealed && !started && !adjacencyOpen && !prerequisites.isEmpty()) {
             String joined = prerequisites.stream().map(Component::getString)
@@ -189,8 +219,12 @@ public final class SkillTreeRenderHelper {
 
         int h = TOOLTIP_PAD_TOP
                 + descLines.size() * LINE
+                + (loreLines.isEmpty() ? 0 : loreLines.size() * LINE + 2)
                 + STATS_BLOCK
                 + (effects.isEmpty() ? 0 : LINE + effects.size() * LINE)
+                + (practiceLines.isEmpty() ? 0 : practiceLines.size() * LINE + 2)
+                + provenanceLines.size() * LINE
+                + leadsToLines.size() * LINE
                 + prereqLines.size() * LINE
                 + TOOLTIP_PAD_BOTTOM;
 
@@ -214,6 +248,14 @@ public final class SkillTreeRenderHelper {
         for (String line : descLines) {
             graphics.drawString(font, line, textX, y, 0xFFCED3E4, false);
             y += LINE;
+        }
+        if (!loreLines.isEmpty()) {
+            for (String line : loreLines) {
+                graphics.drawString(font, Component.literal(line).withStyle(style -> style.withItalic(true)),
+                        textX, y, LORE_TEXT, false);
+                y += LINE;
+            }
+            y += 2;
         }
 
         graphics.drawString(font, "Level: " + level + "/" + skill.getMaxLevel(),
@@ -242,6 +284,26 @@ public final class SkillTreeRenderHelper {
                 graphics.drawString(font, effect, textX + 4, y, EFFECT_TEXT, false);
                 y += LINE;
             }
+        }
+
+        if (!practiceLines.isEmpty()) {
+            for (String line : practiceLines) {
+                graphics.drawString(font, line, textX, y, PRACTICE_TEXT, false);
+                y += LINE;
+            }
+            y += 2;
+        }
+
+        // Whether this is an attested piece of magic or a training step of the mod's own devising. Printed on
+        // every card, because a player cannot tell by looking and should never have to guess.
+        for (String line : provenanceLines) {
+            graphics.drawString(font, line, textX, y, PROVENANCE_TEXT, false);
+            y += LINE;
+        }
+
+        for (String line : leadsToLines) {
+            graphics.drawString(font, line, textX, y, SkillTreeChartTextures.NIGHT_TEXT_DIM, false);
+            y += LINE;
         }
 
         for (String line : prereqLines) {
@@ -278,6 +340,30 @@ public final class SkillTreeRenderHelper {
     }
 
     /** Line height for every stacked text row in the card. */
+    /** In-world voice: dimmer and italic, so it never competes with what the node does. */
+    private static final int LORE_TEXT = 0xFF9AA4C0;
+    /** The worked example. */
+    private static final int PRACTICE_TEXT = 0xFFB9C7A8;
+    /** Canon attestation or an honest "this mod invented it". */
+    private static final int PROVENANCE_TEXT = 0xFF8C93A8;
+
+    /**
+     * One line saying where this node's content comes from.
+     *
+     * <p>A node declares its own provenance; nothing is inferred at render time, because the client cannot
+     * reliably read the spell registry and a tooltip that guessed would be the exact failure this line exists
+     * to prevent. {@code SkillNodeProvenanceTest} is what keeps a declaration honest against the spell it
+     * teaches.
+     */
+    private static String provenanceText(Skill skill) {
+        return skill.getProvenance()
+                .map(provenance -> provenance.isCanon()
+                        ? I18n.get("screen.wizards_and_beasts.skill_tree.canon",
+                                provenance.citation().orElse(""))
+                        : I18n.get("screen.wizards_and_beasts.skill_tree.mod_advancement"))
+                .orElseGet(() -> I18n.get("screen.wizards_and_beasts.skill_tree.provenance_unstated"));
+    }
+
     private static final int LINE = 10;
     /** Title, rule and the gap before the first description line. */
     private static final int TOOLTIP_PAD_TOP = 24;

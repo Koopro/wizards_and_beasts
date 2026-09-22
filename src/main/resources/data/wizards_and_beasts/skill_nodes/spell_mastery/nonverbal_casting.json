@@ -1,0 +1,28 @@
+{
+  "id": "nonverbal_casting",
+  "displayName": "skill.wizards_and_beasts.node.nonverbal_casting.name",
+  "description": "skill.wizards_and_beasts.node.nonverbal_casting.desc",
+  "lore": "skill.wizards_and_beasts.node.nonverbal_casting.lore",
+  "practice": "skill.wizards_and_beasts.node.nonverbal_casting.practice",
+  "tree": "spell_mastery",
+  "pointCost": 6,
+  "provenance": {
+    "citation": "Half-Blood Prince, ch. 9"
+  },
+  "effects": [
+    {
+      "type": "gameplay_bonus",
+      "stat": "spell_misfire_reduction",
+      "perLevel": 0.05
+    },
+    {
+      "type": "category_cooldown_reduction",
+      "category": "combat",
+      "reductionPerLevel": 0.1
+    }
+  ],
+  "x": 167.7,
+  "y": 80.4,
+  "edges": [],
+  "size": "keystone"
+}

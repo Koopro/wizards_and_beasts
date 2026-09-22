@@ -1,0 +1,25 @@
+{
+  "id": "magical_harvesting",
+  "displayName": "skill.wizards_and_beasts.node.magical_harvesting.name",
+  "description": "skill.wizards_and_beasts.node.magical_harvesting.desc",
+  "lore": "skill.wizards_and_beasts.node.magical_harvesting.lore",
+  "practice": "skill.wizards_and_beasts.node.magical_harvesting.practice",
+  "tree": "herbology",
+  "pointCost": 3,
+  "provenance": {
+    "modAdvancement": true
+  },
+  "effects": [
+    {
+      "type": "gameplay_bonus",
+      "stat": "harvest_bonus_chance",
+      "perLevel": 0.15
+    }
+  ],
+  "x": -52.4,
+  "y": -129.8,
+  "edges": [
+    "dangerous_plants"
+  ],
+  "maxLevel": 2
+}

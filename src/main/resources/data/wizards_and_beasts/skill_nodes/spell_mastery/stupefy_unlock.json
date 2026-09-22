@@ -2,20 +2,24 @@
   "id": "stupefy_unlock",
   "displayName": "skill.wizards_and_beasts.node.stupefy_unlock.name",
   "description": "skill.wizards_and_beasts.node.stupefy_unlock.desc",
+  "lore": "skill.wizards_and_beasts.node.stupefy_unlock.lore",
+  "practice": "skill.wizards_and_beasts.node.stupefy_unlock.practice",
   "tree": "spell_mastery",
   "pointCost": 2,
+  "provenance": {
+    "citation": "Attested in the novels"
+  },
   "effects": [
     {
       "type": "learn_spell",
       "spellId": "stupefy"
-    },
-    {
-      "spellId": "stupefy",
-      "bonusPerLevel": 0.08,
-      "type": "spell_damage_bonus"
     }
   ],
-  "x": 83.6,
-  "y": 114.4,
-  "edges": []
+  "x": 126.3,
+  "y": 60.5,
+  "edges": [
+    "duelling_forms",
+    "incendio_unlock",
+    "depulso_unlock"
+  ]
 }

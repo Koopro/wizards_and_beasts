@@ -2,17 +2,20 @@
   "id": "apparition_recall",
   "displayName": "skill.wizards_and_beasts.node.apparition_recall.name",
   "description": "skill.wizards_and_beasts.node.apparition_recall.desc",
+  "lore": "skill.wizards_and_beasts.node.apparition_recall.lore",
+  "practice": "skill.wizards_and_beasts.node.apparition_recall.practice",
   "tree": "wandlore",
   "pointCost": 4,
+  "provenance": {
+    "modAdvancement": true
+  },
   "effects": [
     {
-      "abilityId": "apparition_recall",
-      "type": "unlock_ability"
+      "type": "unlock_ability",
+      "abilityId": "apparition_recall"
     }
   ],
-  "x": -320.0,
-  "y": -160.0,
-  "edges": [
-    "apparition_training"
-  ]
+  "x": -184.2,
+  "y": -25.9,
+  "edges": []
 }

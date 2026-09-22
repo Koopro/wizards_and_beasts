@@ -27,6 +27,17 @@ public final class HarvestGate {
 
     private HarvestGate() {}
 
+    /**
+     * A rule's chance, raised by a trained handler's gentleness and never past certainty.
+     *
+     * <p>Pure, because the Magizoology web's harvesting line is a number a player will compare against the
+     * tooltip: a quarter more often has to mean a quarter more often.
+     */
+    public static float effectiveChance(float ruleChance, float gentleness) {
+        float bonus = Math.max(0.0f, gentleness);
+        return Math.min(1.0f, ruleChance * (1.0f + bonus));
+    }
+
     /** Sentinel for "this player has never harvested this entry". */
     public static final long NEVER = Long.MIN_VALUE;
 

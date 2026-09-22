@@ -2,19 +2,24 @@
   "id": "elf_devotion",
   "displayName": "skill.wizards_and_beasts.node.elf_devotion.name",
   "description": "skill.wizards_and_beasts.node.elf_devotion.desc",
+  "lore": "skill.wizards_and_beasts.node.elf_devotion.lore",
+  "practice": "skill.wizards_and_beasts.node.elf_devotion.practice",
   "tree": "elf_bond",
-  "maxLevel": 2,
   "pointCost": 2,
+  "provenance": {
+    "modAdvancement": true
+  },
   "effects": [
     {
+      "type": "passive_attribute",
       "attributeId": "max_health",
-      "amountPerLevel": 2.0,
-      "type": "passive_attribute"
+      "amountPerLevel": 2.0
     }
   ],
-  "x": 70.0,
+  "x": 0.0,
   "y": 0.0,
   "edges": [
     "elf_silent_step"
-  ]
+  ],
+  "maxLevel": 2
 }

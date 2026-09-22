@@ -2,8 +2,13 @@
   "id": "verdant_heart",
   "displayName": "skill.wizards_and_beasts.node.verdant_heart.name",
   "description": "skill.wizards_and_beasts.node.verdant_heart.desc",
+  "lore": "skill.wizards_and_beasts.node.verdant_heart.lore",
+  "practice": "skill.wizards_and_beasts.node.verdant_heart.practice",
   "tree": "herbology",
   "pointCost": 6,
+  "provenance": {
+    "citation": "Attested in the novels"
+  },
   "effects": [
     {
       "type": "learn_spell",
@@ -15,8 +20,8 @@
       "perLevel": 0.2
     }
   ],
-  "x": -18.0,
-  "y": -340.0,
+  "x": 0.0,
+  "y": -140.0,
   "edges": [],
   "size": "keystone"
 }

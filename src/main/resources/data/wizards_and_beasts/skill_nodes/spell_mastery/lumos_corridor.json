@@ -1,0 +1,25 @@
+{
+  "id": "lumos_corridor",
+  "displayName": "skill.wizards_and_beasts.node.lumos_corridor.name",
+  "description": "skill.wizards_and_beasts.node.lumos_corridor.desc",
+  "lore": "skill.wizards_and_beasts.node.lumos_corridor.lore",
+  "practice": "skill.wizards_and_beasts.node.lumos_corridor.practice",
+  "tree": "spell_mastery",
+  "pointCost": 3,
+  "provenance": {
+    "modAdvancement": true
+  },
+  "effects": [
+    {
+      "type": "gameplay_bonus",
+      "stat": "light_reach",
+      "perLevel": 1.0
+    }
+  ],
+  "x": 138.6,
+  "y": 19.5,
+  "edges": [
+    "wandlight_mastery"
+  ],
+  "maxLevel": 2
+}

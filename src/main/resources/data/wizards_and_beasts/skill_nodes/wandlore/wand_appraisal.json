@@ -1,0 +1,23 @@
+{
+  "id": "wand_appraisal",
+  "displayName": "skill.wizards_and_beasts.node.wand_appraisal.name",
+  "description": "skill.wizards_and_beasts.node.wand_appraisal.desc",
+  "lore": "skill.wizards_and_beasts.node.wand_appraisal.lore",
+  "practice": "skill.wizards_and_beasts.node.wand_appraisal.practice",
+  "tree": "wandlore",
+  "pointCost": 2,
+  "provenance": {
+    "modAdvancement": true
+  },
+  "effects": [
+    {
+      "type": "unlock_ability",
+      "abilityId": "wand_appraisal"
+    }
+  ],
+  "x": -171.2,
+  "y": -219.1,
+  "edges": [
+    "wandlore_figures"
+  ]
+}

@@ -2,23 +2,22 @@
   "id": "frigora_unlock",
   "displayName": "skill.wizards_and_beasts.node.frigora_unlock.name",
   "description": "skill.wizards_and_beasts.node.frigora_unlock.desc",
+  "lore": "skill.wizards_and_beasts.node.frigora_unlock.lore",
+  "practice": "skill.wizards_and_beasts.node.frigora_unlock.practice",
   "tree": "alchemy",
   "pointCost": 2,
+  "provenance": {
+    "modAdvancement": true
+  },
   "effects": [
     {
       "type": "learn_spell",
       "spellId": "frigora"
-    },
-    {
-      "type": "spell_cooldown_reduction",
-      "spellId": "frigora",
-      "reductionPerLevel": 0.15
     }
   ],
-  "x": -227.3,
-  "y": 26.4,
+  "x": -229.7,
+  "y": 32.3,
   "edges": [
-    "swift_brewer",
-    "transmute_focus"
+    "swift_brewer"
   ]
 }

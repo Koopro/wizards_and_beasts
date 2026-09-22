@@ -4,6 +4,31 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### The skill webs teach magic instead of handing out percentages (2026-09-17)
+
+Progression was an MMO talent tree wearing a wizard's hat. Thirty-four of the hundred-and-seven nodes were
+connectors that printed the same sentence as six of their siblings — "Bench Discipline" seven times over — and
+almost every node's actual effect was +damage%, -cooldown%, +2 max health or +1 armour. Dark Arts was damage
+and health. Magizoology was beast-damage-resistance, nine times.
+
+- **84 nodes, each of which does something you can name.** The filler is gone. Deleting node ids refunds every
+  character's points at their next login, so the webs are re-spent from scratch.
+- **Ten new effects that are magical rather than numerical.** A trained Lumos lights a block further ahead of
+  you for each step of the line, up to a corridor's worth. A practised Shield Charm absorbs more and stands
+  longer. A wandlore student's wand survives a defeat that would have taken it. Wild creatures let a trained
+  handler as close as someone who had studied them a tier longer, and a gentle hand finds more of what they
+  shed. A Dark curse misfires less for a student of curse control — and for nothing else.
+- **Dark Arts costs something.** Every curriculum node accrues dark corruption on allocation, which the
+  creatures that shun corrupted wizards already read, and no respec returns it. Casting quietly narrows how far
+  the Ministry hears about you, clamped so a witness at your elbow always sees.
+- **Defence is a line inside Spell Mastery**: Protego, holding the charm, shield control, Finite Incantatem,
+  the Patronus.
+- **Canon and invention are labelled.** Every node declares where its content comes from — a citation, or an
+  honest "a training step of this mod's own devising" — the screen prints it, and a test refuses a node that
+  claims an attestation the spell it teaches does not have.
+- **The card answers the five questions**: what this is, what it means, what it does, what it needs, and what
+  it opens. Unlocking one gives a toast naming the effect, a quiet chime and a few motes.
+
 ### Heritage says who you are, not what you rolled (2026-09-17)
 
 Heritage was a selectable race with a stat block: pure-bloods rolled POWER on a higher band than Muggle-borns,

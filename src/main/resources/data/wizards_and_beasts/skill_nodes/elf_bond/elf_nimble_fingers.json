@@ -2,17 +2,22 @@
   "id": "elf_nimble_fingers",
   "displayName": "skill.wizards_and_beasts.node.elf_nimble_fingers.name",
   "description": "skill.wizards_and_beasts.node.elf_nimble_fingers.desc",
+  "lore": "skill.wizards_and_beasts.node.elf_nimble_fingers.lore",
+  "practice": "skill.wizards_and_beasts.node.elf_nimble_fingers.practice",
   "tree": "elf_bond",
   "pointCost": 2,
+  "provenance": {
+    "modAdvancement": true
+  },
   "effects": [
     {
-      "abilityId": "elf_nimble_fingers",
-      "type": "unlock_ability"
+      "type": "unlock_ability",
+      "abilityId": "elf_nimble_fingers"
     }
   ],
-  "x": -70.0,
-  "y": 0.0,
+  "x": 0.0,
+  "y": 45.0,
   "edges": [
-    "elf_silent_step"
+    "elf_devotion"
   ]
 }

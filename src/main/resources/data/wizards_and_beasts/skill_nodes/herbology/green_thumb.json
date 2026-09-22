@@ -2,18 +2,24 @@
   "id": "green_thumb",
   "displayName": "skill.wizards_and_beasts.node.green_thumb.name",
   "description": "skill.wizards_and_beasts.node.green_thumb.desc",
+  "lore": "skill.wizards_and_beasts.node.green_thumb.lore",
+  "practice": "skill.wizards_and_beasts.node.green_thumb.practice",
   "tree": "herbology",
+  "pointCost": 1,
+  "provenance": {
+    "modAdvancement": true
+  },
   "effects": [
     {
-      "abilityId": "green_thumb",
-      "type": "unlock_ability"
+      "type": "unlock_ability",
+      "abilityId": "green_thumb"
     }
   ],
-  "x": -6.1,
-  "y": -117.8,
+  "x": 36.0,
+  "y": -89.0,
   "edges": [
-    "herbology_path_1",
-    "herbology_path_4",
-    "herbology_path_5"
+    "wizard_core",
+    "plant_cultivation",
+    "aguamenti_unlock"
   ]
 }

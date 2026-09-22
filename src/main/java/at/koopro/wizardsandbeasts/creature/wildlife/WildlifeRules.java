@@ -80,6 +80,20 @@ public final class WildlifeRules {
      * they come quietly and empty-handed. A purity-sensitive creature — the unicorn — also refuses anyone who has
      * killed one of its kind or whose soul is darkened.
      */
+    /**
+     * {@code tier}, raised by however many tiers of handling a player has trained, capped at the top tier.
+     *
+     * <p>Pure so the Magizoology web's handling line can be tested without a creature: "as if you had studied
+     * it one tier longer" is the promise the tooltip makes, and this is the whole of it.
+     */
+    public static DiscoveryTier trustedTier(DiscoveryTier tier, int trainedSteps) {
+        if (trainedSteps <= 0) {
+            return tier;
+        }
+        DiscoveryTier[] tiers = DiscoveryTier.values();
+        return tiers[Math.min(tiers.length - 1, tier.ordinal() + trainedSteps)];
+    }
+
     public static boolean letsNear(DiscoveryTier tier, boolean sneaking, boolean emptyHanded, boolean puritySensitive,
                                    boolean slayer, float corruption) {
         if (!tier.atLeast(DiscoveryTier.OBSERVED) || !sneaking || !emptyHanded) {

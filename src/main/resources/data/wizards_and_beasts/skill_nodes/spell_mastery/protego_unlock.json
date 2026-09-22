@@ -2,20 +2,22 @@
   "id": "protego_unlock",
   "displayName": "skill.wizards_and_beasts.node.protego_unlock.name",
   "description": "skill.wizards_and_beasts.node.protego_unlock.desc",
+  "lore": "skill.wizards_and_beasts.node.protego_unlock.lore",
+  "practice": "skill.wizards_and_beasts.node.protego_unlock.practice",
   "tree": "spell_mastery",
   "pointCost": 2,
+  "provenance": {
+    "citation": "Attested in the novels"
+  },
   "effects": [
     {
       "type": "learn_spell",
       "spellId": "protego"
-    },
-    {
-      "spellId": "protego",
-      "reductionPerLevel": 0.08,
-      "type": "spell_cooldown_reduction"
     }
   ],
-  "x": 128.3,
-  "y": 72.0,
-  "edges": []
+  "x": 102.1,
+  "y": 95.8,
+  "edges": [
+    "shield_timing"
+  ]
 }

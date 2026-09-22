@@ -2,8 +2,13 @@
   "id": "transmuters_insight",
   "displayName": "skill.wizards_and_beasts.node.transmuters_insight.name",
   "description": "skill.wizards_and_beasts.node.transmuters_insight.desc",
+  "lore": "skill.wizards_and_beasts.node.transmuters_insight.lore",
+  "practice": "skill.wizards_and_beasts.node.transmuters_insight.practice",
   "tree": "alchemy",
   "pointCost": 6,
+  "provenance": {
+    "citation": "Attested in Wizarding World writing"
+  },
   "effects": [
     {
       "type": "learn_spell",
@@ -15,8 +20,8 @@
       "reductionPerLevel": 0.1
     }
   ],
-  "x": -317.0,
-  "y": 22.0,
+  "x": -86.2,
+  "y": 110.3,
   "edges": [],
   "size": "keystone"
 }

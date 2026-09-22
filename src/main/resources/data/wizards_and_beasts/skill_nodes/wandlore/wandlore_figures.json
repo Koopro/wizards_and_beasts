@@ -1,0 +1,23 @@
+{
+  "id": "wandlore_figures",
+  "displayName": "skill.wizards_and_beasts.node.wandlore_figures.name",
+  "description": "skill.wizards_and_beasts.node.wandlore_figures.desc",
+  "lore": "skill.wizards_and_beasts.node.wandlore_figures.lore",
+  "practice": "skill.wizards_and_beasts.node.wandlore_figures.practice",
+  "tree": "wandlore",
+  "pointCost": 2,
+  "provenance": {
+    "modAdvancement": true
+  },
+  "effects": [
+    {
+      "type": "unlock_ability",
+      "abilityId": "wandlore_figures"
+    }
+  ],
+  "x": -142.8,
+  "y": -182.8,
+  "edges": [
+    "allegiance_grip"
+  ]
+}

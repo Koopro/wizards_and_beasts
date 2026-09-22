@@ -15,6 +15,12 @@ import at.koopro.wizardsandbeasts.standing.gate.StandingRequirement;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import net.minecraft.server.level.ServerPlayer;
 import at.koopro.wizardsandbeasts.spell.cast.ModifierStack;
+import java.util.List;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.core.particles.ParticleTypes;
+import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 
 /**
  * Public API for querying and modifying skill data.
@@ -121,6 +127,14 @@ public final class SkillSystemAPI {
         if (steadiness > 0f) {
             stack.addMisfireChance(-steadiness, "skill_web");
         }
+        // The Dark Arts web buys control over dangerous magic and nothing else: this reaches a curse and no
+        // other category, so studying the Dark Arts makes a curse behave, never makes it hit harder.
+        if (spell != null && spell.getCategory() == at.koopro.wizardsandbeasts.spell.core.SpellCategory.DARK_ARTS) {
+            float control = getGameplayBonus(player, GameplayStat.CURSE_BACKLASH);
+            if (control > 0f) {
+                stack.addMisfireChance(-control, "dark_control");
+            }
+        }
     }
 
     // ── Validation ──
@@ -201,6 +215,9 @@ public final class SkillSystemAPI {
      * Attempts to unlock (or level up) a skill. Returns true on success.
      * Skill unlocks only affect skill-derived bonuses/abilities.
      */
+    /** Motes on an unlock. Small on purpose: the brief asks for subtle, and a learning moment is not a firework. */
+    private static final int UNLOCK_PARTICLES = 12;
+
     public static boolean tryUnlock(ServerPlayer player, String skillId) {
         Skill skill = SkillTrees.byId(skillId);
         if (skill == null) return false;
@@ -220,7 +237,32 @@ public final class SkillSystemAPI {
         // Mastering a new node is a formative achievement → happy memory.
         at.koopro.wizardsandbeasts.memory.MemoryService.tryFormMemory(
                 player, at.koopro.wizardsandbeasts.memory.MemoryType.HAPPY, 0.5f, "skill_unlock", 1200L);
+        announceUnlock(player, skill, newLevel);
         return true;
+    }
+
+    /**
+     * The moment of learning something, made perceptible: a toast naming what was learned and what it does, one
+     * quiet chime, and a few motes around the player.
+     *
+     * <p>Deliberately small. The screen the player is looking at already shows the node lighting up, so this
+     * exists for the half-second after they close it — and a learning moment that fires a firework is the
+     * opposite of the brief. One sound at low volume, one toast, {@link #UNLOCK_PARTICLES} motes.
+     */
+    private static void announceUnlock(ServerPlayer player, Skill skill, int level) {
+        Component name = Component.translatable(skill.getDisplayName());
+        List<Component> effects = SkillEffectSummary.lines(skill, level);
+        Component detail = effects.isEmpty()
+                ? Component.translatable(skill.getDescription())
+                : effects.get(0);
+        PlayerFeedback.unlocked(player, name, detail);
+
+        // The same chime the mod uses for a lesson landing, at a volume that does not carry across a room.
+        player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
+                SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.35f, 1.35f);
+        player.level().sendParticles(ParticleTypes.ENCHANT,
+                player.getX(), player.getY() + 1.2, player.getZ(),
+                UNLOCK_PARTICLES, 0.35, 0.5, 0.35, 0.02);
     }
 
     /**
@@ -325,6 +367,10 @@ public final class SkillSystemAPI {
                 // Keep this branch explicit so unlock effects remain discoverable in one place.
             } else if (effect instanceof SkillEffect.LearnSpell learn) {
                 teachSpell(player, learn.spellId());
+            } else if (effect instanceof SkillEffect.DarkStudy study) {
+                // The consequence half of the Dark Arts web. Accrued at allocation and never given back.
+                at.koopro.wizardsandbeasts.corruption.DarkCorruptionService.accrue(player, study.corruption());
+                at.koopro.wizardsandbeasts.corruption.DarkCorruptionService.syncDisplay(player);
             }
         }
     }

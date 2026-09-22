@@ -2,24 +2,22 @@
   "id": "alohomora_unlock",
   "displayName": "skill.wizards_and_beasts.node.alohomora_unlock.name",
   "description": "skill.wizards_and_beasts.node.alohomora_unlock.desc",
+  "lore": "skill.wizards_and_beasts.node.alohomora_unlock.lore",
+  "practice": "skill.wizards_and_beasts.node.alohomora_unlock.practice",
   "tree": "spell_mastery",
   "pointCost": 2,
+  "provenance": {
+    "citation": "Attested in the novels"
+  },
   "effects": [
     {
       "type": "learn_spell",
       "spellId": "alohomora"
-    },
-    {
-      "spellId": "alohomora",
-      "reductionPerLevel": 0.2,
-      "type": "spell_cooldown_reduction"
     }
   ],
-  "x": 277.2,
-  "y": 9.7,
+  "x": 86.2,
+  "y": 110.3,
   "edges": [
-    "archmage_finality",
-    "colloportus_unlock",
-    "wingardium_unlock"
+    "colloportus_unlock"
   ]
 }

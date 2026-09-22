@@ -17,7 +17,7 @@ import net.minecraft.server.level.ServerPlayer;
  */
 public final class BrewPotency {
 
-    /** Skill id used by {@link at.koopro.wizardsandbeasts.skill.HerbologySkills#POTION_POTENCY}. */
+    /** The Herbology node id this reads, {@code data/wizards_and_beasts/skill_nodes/herbology/potion_potency.json}. */
     public static final String SKILL_ID = "potion_potency";
 
     /** Per-level bonus added to the duration multiplier. */

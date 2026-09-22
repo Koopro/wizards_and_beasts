@@ -2,22 +2,28 @@
   "id": "elf_free",
   "displayName": "skill.wizards_and_beasts.node.elf_free.name",
   "description": "skill.wizards_and_beasts.node.elf_free.desc",
+  "lore": "skill.wizards_and_beasts.node.elf_free.lore",
+  "practice": "skill.wizards_and_beasts.node.elf_free.practice",
   "tree": "elf_bond",
   "pointCost": 4,
+  "provenance": {
+    "citation": "Chamber of Secrets, ch. 18"
+  },
   "effects": [
     {
+      "type": "passive_attribute",
       "attributeId": "movement_speed",
-      "amountPerLevel": 0.01,
-      "type": "passive_attribute"
+      "amountPerLevel": 0.01
     },
     {
-      "abilityId": "free_elf",
-      "type": "unlock_ability"
+      "type": "unlock_ability",
+      "abilityId": "free_elf"
     }
   ],
-  "x": -140.0,
-  "y": 0.0,
+  "x": -70.0,
+  "y": 45.0,
   "edges": [
     "elf_nimble_fingers"
-  ]
+  ],
+  "size": "keystone"
 }

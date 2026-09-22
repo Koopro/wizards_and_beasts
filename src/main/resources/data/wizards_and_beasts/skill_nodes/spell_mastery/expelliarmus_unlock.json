@@ -2,23 +2,22 @@
   "id": "expelliarmus_unlock",
   "displayName": "skill.wizards_and_beasts.node.expelliarmus_unlock.name",
   "description": "skill.wizards_and_beasts.node.expelliarmus_unlock.desc",
+  "lore": "skill.wizards_and_beasts.node.expelliarmus_unlock.lore",
+  "practice": "skill.wizards_and_beasts.node.expelliarmus_unlock.practice",
   "tree": "spell_mastery",
   "pointCost": 2,
+  "provenance": {
+    "citation": "Attested in the novels"
+  },
   "effects": [
     {
       "type": "learn_spell",
       "spellId": "expelliarmus"
-    },
-    {
-      "spellId": "expelliarmus",
-      "reductionPerLevel": 0.1,
-      "type": "spell_cooldown_reduction"
     }
   ],
-  "x": 157.4,
-  "y": 104.7,
+  "x": 126.3,
+  "y": 60.5,
   "edges": [
-    "flipendo_unlock",
     "stupefy_unlock"
   ]
 }

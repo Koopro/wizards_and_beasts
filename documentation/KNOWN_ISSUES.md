@@ -504,6 +504,38 @@ Two things did change, both fixes:
 - **Breeding has no pathing toward a partner.** Both parents must already be within
   `partnerRange`; they will not walk to each other the way vanilla animals do.
 
+## 5n. Wizarding education — skill webs reworked 2026-09-17
+
+The five branches the brief named (Spell Mastery, Dark Arts, Wandlore, Magizoology, Herbology) plus Alchemy
+were rewritten so a node buys something nameable. What that means, and what is still missing:
+
+- **84 nodes, down from 107, and none of them filler.** The 34 `*_path_N` connectors are gone — "Bench
+  Discipline" ×7, "Wandwork" ×6, "Greenhouse Rotation" ×7, "Field Handling" ×5, "Dark Practice" ×4 all printed
+  the same sentence as their siblings. Deleting node ids means `PlayerSkillData.CURRENT_VERSION` is now 5, so
+  **every existing character's points are refunded at their next login** and the webs must be re-spent.
+- **Ten new effect stats, each with a live consumer**: wandlight reach (`LumosFieldEffect`), ward integrity and
+  lifetime (`Protego`), wand allegiance grip (`WandAllegianceService.onDefeat`), creature trust
+  (`WildlifeWorld`), gentle harvest (`BestiaryHarvestLootModifier`), curse control and Trace discretion
+  (`SkillSystemAPI.applySkillModifiers`, `CastSurvey`). A `dark_study` effect accrues dark corruption at
+  allocation, which purity-sensitive creatures and the character sheet already read.
+- **Defence lives inside Spell Mastery** as a line (Protego → holding the charm → shield control → Finite
+  Incantatem → the Patronus), per the ruling. There is no sixth branch.
+- **Dark Arts buys knowledge, control and consequence, never damage.** Curse control lowers a Dark cast's
+  misfire and nothing else's; discretion narrows how far a cast is noticed, clamped at 60% so a crowd at your
+  elbow always sees; every curriculum node accrues corruption that no respec gives back.
+- **Canon is separated from invention on every node.** A node declares `provenance` — a citation, or
+  `modAdvancement` — the tooltip prints it, and `SkillNodeProvenanceTest` fails a node that claims an
+  attestation its taught spell does not have.
+- **The tooltip answers the five questions**: what it is, what it means (lore), what it does (effects), what it
+  needs (prerequisites) and what it opens (leads-to), plus the worked example and the provenance line.
+  Unlocking gives a toast naming the effect, one quiet chime and twelve motes.
+- **Known gaps.** Breeding has no mechanical hook, so Magizoology stops at handling, harvesting and habitats.
+  Wand *making* is still Ollivander's shop rather than a skill line, and there is no wand-repair node because
+  the mod has no broken-wand state to mend. `wand_appraisal` and `wandlore_figures` now **gate** wand tooltip
+  detail that used to be free on Shift — intentional, and the one change here a returning player will notice
+  as a loss. Alchemy still pays partly in utility cooldown percentages, because the brewing pillar exposes
+  only `potion_potency` as a knob.
+
 ## 5m. Heritage as identity — reworked 2026-09-17
 
 Heritage answers "who is this character", not "which race did you pick". The rework, and what is still missing:
@@ -968,7 +1000,7 @@ Still left:
 
 ## 8. Testing gaps
 
-- `runGameTestServer` runs **114 in-world scenarios** as of 2026-09-17 (the heritage rework added six: three for conditions in [`HeritageCommitTests`](../src/main/java/at/koopro/wizardsandbeasts/gametest/HeritageCommitTests.java) and three for gated-heritage mechanics in [`HeritageIdentityTests`](../src/main/java/at/koopro/wizardsandbeasts/gametest/HeritageIdentityTests.java)). The wand cast/release path is
+- `runGameTestServer` runs **121 in-world scenarios** as of 2026-09-17. The heritage rework added six (three for conditions in [`HeritageCommitTests`](../src/main/java/at/koopro/wizardsandbeasts/gametest/HeritageCommitTests.java), three for gated-heritage mechanics in [`HeritageIdentityTests`](../src/main/java/at/koopro/wizardsandbeasts/gametest/HeritageIdentityTests.java)); the education rework added three in [`EducationWebTests`](../src/main/java/at/koopro/wizardsandbeasts/gametest/EducationWebTests.java) (wandlight reach, dark study's corruption, and the allegiance grip — that last one written because a mutation pass found the wiring untested). The wand cast/release path is
   covered in [`WandCastLifecycleTests`](../src/main/java/at/koopro/wizardsandbeasts/gametest/WandCastLifecycleTests.java)
   (death, respawn, dimension change, logout/reconnect, hotbar swap, dropped wand),
   [`WandCastRaceTests`](../src/main/java/at/koopro/wizardsandbeasts/gametest/WandCastRaceTests.java)

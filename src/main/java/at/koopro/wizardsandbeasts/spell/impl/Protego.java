@@ -10,6 +10,8 @@ import at.koopro.wizardsandbeasts.spell.core.SpellProperties;
 import at.koopro.wizardsandbeasts.spell.core.SpellRequirement;
 import at.koopro.wizardsandbeasts.spell.cast.SpellPower;
 import at.koopro.wizardsandbeasts.spell.proficiency.SpellProficiencyTracker;
+import at.koopro.wizardsandbeasts.skill.GameplayStat;
+import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
 import at.koopro.wizardsandbeasts.spell.protego.ProtegoCharge;
 import at.koopro.wizardsandbeasts.spell.protego.ProtegoFeedback;
 import at.koopro.wizardsandbeasts.spell.protego.ProtegoRules;
@@ -50,8 +52,12 @@ public class Protego extends Spell {
         boolean planted = ProtegoRules.canPlant(tier, caster.isShiftKeyDown());
 
         float proficiency = getProficiencyScalar(caster);
-        float integrity = ProtegoRules.integrity(tier, proficiency, castPower(ctx), planted);
-        int lifetime = ProtegoRules.lifetimeTicks(tier, proficiency, planted);
+        // Shield control, from the Defence line of the Spell Mastery web: what the caster has trained is how
+        // much the ward can swallow and how long they can hold it up, not how hard they hit.
+        float integrity = ProtegoRules.integrity(tier, proficiency, castPower(ctx), planted)
+                * (1.0f + Math.max(0.0f, SkillSystemAPI.getGameplayBonus(caster, GameplayStat.WARD_INTEGRITY)));
+        int lifetime = Math.round(ProtegoRules.lifetimeTicks(tier, proficiency, planted)
+                * (1.0f + Math.max(0.0f, SkillSystemAPI.getGameplayBonus(caster, GameplayStat.WARD_LIFETIME))));
 
         // The shape decides the recovery. Applied to the cast's cooldown channel rather than to a
         // timer of our own, because SpellCastService reads that channel after executeCast returns —

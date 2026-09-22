@@ -10,6 +10,8 @@ import at.koopro.wizardsandbeasts.item.wand.WandItem;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
+import at.koopro.wizardsandbeasts.skill.GameplayStat;
+import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver;
 import at.koopro.wizardsandbeasts.wand.elder.ElderWandSavedData;
@@ -251,9 +253,13 @@ public final class WandAllegianceService {
                 continue;
             }
             WandTemperament temperament = temperamentOf(wand, level.registryAccess());
+            // Wandlore's allegiance line: a wizard who has studied their own wand does not lose it to one
+            // lucky duel. The wand still chooses — this only sets how many wins the challenger needs.
+            int grip = Math.max(0, Math.round(
+                    SkillSystemAPI.getGameplayBonus(victim, GameplayStat.ALLEGIANCE_GRIP)));
             WandAllegianceRules.DefeatOutcome outcome = WandAllegianceRules.defeat(
                     WandComponents.getBondHistory(wand), victor.getUUID(),
-                    WandAllegianceRules.winsToTransfer(temperament, false));
+                    WandAllegianceRules.winsToTransfer(temperament, false) + grip);
             if (outcome.transferred()) {
                 transfer(wand, victim.getUUID(), victor, WandAllegianceRules.bondAfterTransfer(temperament));
                 announceTransfer(victor, victim, "wandcraft.allegiance.transferred", "wandcraft.allegiance.lost");

@@ -2,23 +2,22 @@
   "id": "depulso_unlock",
   "displayName": "skill.wizards_and_beasts.node.depulso_unlock.name",
   "description": "skill.wizards_and_beasts.node.depulso_unlock.desc",
+  "lore": "skill.wizards_and_beasts.node.depulso_unlock.lore",
+  "practice": "skill.wizards_and_beasts.node.depulso_unlock.practice",
   "tree": "spell_mastery",
   "pointCost": 2,
+  "provenance": {
+    "citation": "Attested in licensed games"
+  },
   "effects": [
     {
       "type": "learn_spell",
       "spellId": "depulso"
-    },
-    {
-      "type": "spell_damage_bonus",
-      "spellId": "depulso",
-      "bonusPerLevel": 0.1
     }
   ],
-  "x": 121.5,
-  "y": 117.3,
+  "x": 126.3,
+  "y": 60.5,
   "edges": [
-    "expelliarmus_unlock",
-    "stupefy_unlock"
+    "diffindo_unlock"
   ]
 }

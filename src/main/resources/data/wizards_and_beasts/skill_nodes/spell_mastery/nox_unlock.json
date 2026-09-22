@@ -2,19 +2,27 @@
   "id": "nox_unlock",
   "displayName": "skill.wizards_and_beasts.node.nox_unlock.name",
   "description": "skill.wizards_and_beasts.node.nox_unlock.desc",
+  "lore": "skill.wizards_and_beasts.node.nox_unlock.lore",
+  "practice": "skill.wizards_and_beasts.node.nox_unlock.practice",
   "tree": "spell_mastery",
+  "pointCost": 1,
+  "provenance": {
+    "citation": "Attested in the novels"
+  },
   "effects": [
     {
       "type": "learn_spell",
       "spellId": "nox"
     },
     {
+      "type": "spell_cooldown_reduction",
       "spellId": "nox",
-      "reductionPerLevel": 0.2,
-      "type": "spell_cooldown_reduction"
+      "reductionPerLevel": 0.2
     }
   ],
-  "x": 139.5,
-  "y": 134.9,
-  "edges": []
+  "x": 138.6,
+  "y": 19.5,
+  "edges": [
+    "lumos_steady"
+  ]
 }

@@ -37,6 +37,22 @@ public final class TraceRules {
     private TraceRules() {}
 
     /** How far away a witness can be and still notice magic of this visibility. */
+    /**
+     * {@link #witnessRadius(int)}, narrowed by a caster's trained discretion.
+     *
+     * <p>Split out as a pure function because it is the one place the Dark Arts web is allowed to act against
+     * the Ministry, and "how much quieter may study make you" is exactly the sort of number that should be
+     * pinned by a test rather than buried in a survey. Clamped at {@link #MAX_DISCRETION}: a witness standing
+     * at your elbow sees you whatever you have read.
+     */
+    public static double witnessRadius(int visibility, float discretion) {
+        double clamped = Math.max(0.0, Math.min(MAX_DISCRETION, discretion));
+        return witnessRadius(visibility) * (1.0 - clamped);
+    }
+
+    /** The most a trained caster may shrink the circle of people who notice them. */
+    public static final float MAX_DISCRETION = 0.6f;
+
     public static double witnessRadius(int visibility) {
         return switch (Math.max(0, Math.min(SpellLaw.MAX_VISIBILITY, visibility))) {
             case 0 -> 4.0;

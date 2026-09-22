@@ -2,18 +2,23 @@
   "id": "potion_potency",
   "displayName": "skill.wizards_and_beasts.node.potion_potency.name",
   "description": "skill.wizards_and_beasts.node.potion_potency.desc",
+  "lore": "skill.wizards_and_beasts.node.potion_potency.lore",
+  "practice": "skill.wizards_and_beasts.node.potion_potency.practice",
   "tree": "herbology",
-  "maxLevel": 3,
-  "pointCost": 2,
+  "pointCost": 3,
+  "provenance": {
+    "modAdvancement": true
+  },
   "effects": [
     {
-      "abilityId": "potion_potency",
-      "type": "unlock_ability"
+      "type": "unlock_ability",
+      "abilityId": "potion_potency"
     }
   ],
-  "x": 85.7,
-  "y": -161.2,
+  "x": 0.0,
+  "y": -140.0,
   "edges": [
-    "wandlore_path_1"
-  ]
+    "verdant_heart"
+  ],
+  "maxLevel": 3
 }

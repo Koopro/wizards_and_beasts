@@ -46,51 +46,6 @@ class SkillNodeJsonTest {
     /** Hub zone: nodes below this radius (Polaris, its cluster, spoke trunks) are sector-exempt. */
     private static final double HUB_RADIUS = 112;
 
-    /**
-     * The pre-Phase-4 wizard edge set (Phase 2's prereq conversion) — the §3.4 connectivity
-     * contract: each pair must remain connected by a path whose interior nodes are all fillers.
-     */
-    private static final List<String[]> LEGACY_EDGES = List.of(
-            // wizard_core spokes
-            new String[]{"wizard_core", "basic_casting"}, new String[]{"wizard_core", "dark_knowledge"},
-            new String[]{"wizard_core", "creature_knowledge"}, new String[]{"wizard_core", "wand_study"},
-            new String[]{"wizard_core", "green_thumb"}, new String[]{"wizard_core", "alchemical_vigor"},
-            // alchemy
-            new String[]{"hardened_skin", "alchemical_vigor"}, new String[]{"philosophers_stone", "transmute_focus"},
-            new String[]{"philosophers_stone", "hardened_skin"}, new String[]{"swift_brewer", "alchemical_vigor"},
-            new String[]{"transmute_focus", "swift_brewer"},
-            // dark_arts
-            new String[]{"avada_kedavra_unlock", "imperio_unlock"}, new String[]{"avada_kedavra_unlock", "dark_resilience"},
-            new String[]{"crucio_unlock", "dark_knowledge"}, new String[]{"curse_mastery", "dark_resilience"},
-            new String[]{"dark_damage", "dark_knowledge"}, new String[]{"dark_resilience", "dark_damage"},
-            // `legilimency` was renamed to `occlumency` in the filler purge: the node granted Dark
-            // Arts damage and had nothing to do with the spell it was named for, which every wizard
-            // already holds through PlayerStatusAbilityGrantSource.
-            new String[]{"imperio_unlock", "crucio_unlock"}, new String[]{"occlumency", "dark_knowledge"},
-            // herbology
-            new String[]{"bountiful_harvest", "harvest_bounty"}, new String[]{"harvest_bounty", "green_thumb"},
-            new String[]{"herbal_vitality", "natural_remedy"}, new String[]{"natural_remedy", "potion_potency"},
-            new String[]{"natural_remedy", "harvest_bounty"}, new String[]{"potion_potency", "green_thumb"},
-            // magizoology
-            new String[]{"animagus_study", "creature_bond"}, new String[]{"beast_handler", "creature_knowledge"},
-            new String[]{"creature_bond", "niffler_friend"}, new String[]{"creature_bond", "beast_handler"},
-            new String[]{"dragon_tamer", "beast_handler"}, new String[]{"keeper_vigor", "creature_bond"},
-            new String[]{"niffler_friend", "creature_knowledge"},
-            // spell_mastery
-            new String[]{"accio_unlock", "lumos_unlock"}, new String[]{"alohomora_unlock", "wingardium_unlock"},
-            new String[]{"bombarda_unlock", "combat_focus"}, new String[]{"combat_focus", "incendio_unlock"},
-            new String[]{"expecto_patronum_unlock", "protego_unlock"}, new String[]{"expelliarmus_unlock", "stupefy_unlock"},
-            new String[]{"flipendo_unlock", "expelliarmus_unlock"}, new String[]{"incendio_unlock", "stupefy_power"},
-            new String[]{"lumos_unlock", "basic_casting"}, new String[]{"nox_unlock", "lumos_unlock"},
-            new String[]{"protego_unlock", "basic_casting"}, new String[]{"reparo_unlock", "accio_unlock"},
-            new String[]{"stupefy_power", "stupefy_unlock"}, new String[]{"stupefy_unlock", "basic_casting"},
-            new String[]{"utility_mastery", "reparo_unlock"}, new String[]{"wingardium_unlock", "flipendo_unlock"},
-            // wandlore
-            new String[]{"apparition_training", "wand_mastery"}, new String[]{"arcane_reserve", "wand_precision"},
-            new String[]{"quick_cast", "wand_study"}, new String[]{"spell_efficiency", "quick_cast"},
-            new String[]{"wand_mastery", "spell_efficiency"}, new String[]{"wand_mastery", "wand_precision"},
-            new String[]{"wand_precision", "wand_study"});
-
     private static final Map<String, Skill> BY_ID = new HashMap<>();
     private static final Map<String, Set<String>> ADJACENCY = new HashMap<>();
 
@@ -127,17 +82,21 @@ class SkillNodeJsonTest {
 
     @Test
     void nodeCountsMatchGeneratedLayout() {
-        assertEquals(107, BY_ID.size(),
-                "60 legacy notables + wizard_core + 30 pathways + 10 goblin/elf + 2 Apparition forks"
-                        + " + 5 keystones + 9 spell forks");
+        assertEquals(84, BY_ID.size(),
+                "the 2026-09-17 education rework: 84 nodes that each do something nameable, down from 107");
+        // Zero, and it should stay zero. The 34 pathway nodes the webs used to be padded with each printed the
+        // same sentence as several siblings; the rework replaced them with fewer, named nodes. A SMALL node is
+        // still legal — pathwaysFollowTheContentRule and noSmallNodeGrantsARawAttribute constrain what one may
+        // do — but nothing ships as one today.
         long fillers = BY_ID.values().stream().filter(s -> s.getSize() == Skill.Size.SMALL).count();
-        assertEquals(30, fillers, "expected exactly 30 pathway nodes (was 100 fillers before the purge)");
+        assertEquals(0, fillers, "the education rework removed every pathway node");
         // One keystone per wizard tree except dark_arts, which is not expanded while its module
         // ships disabled. Pinned because a keystone is the payoff a whole branch routes toward:
         // silently dropping one would leave a tree with nothing at the end of it.
         long keystones = BY_ID.values().stream().filter(s -> s.getSize() == Skill.Size.KEYSTONE).count();
-        assertEquals(5, keystones, "expected one keystone each in spell_mastery, wandlore,"
-                + " magizoology, herbology and alchemy");
+        assertEquals(12, keystones, "Polaris plus three in spell_mastery (wandlight, nonverbal casting and the"
+                + " Patronus), one each in dark_arts, wandlore, magizoology and herbology, two in alchemy, and"
+                + " one each in the two heritage webs");
     }
 
     @Test
@@ -182,30 +141,44 @@ class SkillNodeJsonTest {
         }
     }
 
-    /** §3.4: every legacy edge survives as a path whose interior nodes are all fillers. */
+    /**
+     * Every wizard web hangs off Polaris, and no node in it needs a detour through another discipline.
+     *
+     * <p>This replaced the §3.4 legacy-edge contract, which held that every pre-web edge survived as a path
+     * whose interior nodes were all fillers. The 2026-09-17 education rework deleted the fillers, so that
+     * contract protected a shape the data deliberately no longer has. What it was protecting <em>for</em> still
+     * matters: no tree may be an island, and none may be reachable only by buying into its neighbour.
+     */
     @Test
-    void legacyConnectivityContractHolds() {
-        for (String[] legacy : LEGACY_EDGES) {
-            assertTrue(fillerPathExists(legacy[0], legacy[1]),
-                    "legacy edge " + legacy[0] + " - " + legacy[1] + " has no all-filler path");
-        }
-    }
-
-    private static boolean fillerPathExists(String from, String to) {
-        Set<String> visited = new HashSet<>();
-        Deque<String> queue = new ArrayDeque<>();
-        visited.add(from);
-        queue.add(from);
-        while (!queue.isEmpty()) {
-            String current = queue.poll();
-            for (String next : ADJACENCY.getOrDefault(current, Set.of())) {
-                if (next.equals(to)) return true;
-                Skill node = BY_ID.get(next);
-                if (node.getSize() != Skill.Size.SMALL) continue; // interiors must be fillers
-                if (visited.add(next)) queue.add(next);
+    void everyWizardTreeHangsFromTheHubWithoutCrossingAnother() {
+        for (String tree : SPOKE_ORDER) {
+            List<Skill> web = BY_ID.values().stream()
+                    .filter(node -> node.getTree().getId().equals(tree)).toList();
+            if (web.isEmpty()) {
+                continue;
+            }
+            Set<String> reached = new HashSet<>();
+            Deque<String> queue = new ArrayDeque<>();
+            for (String neighbour : ADJACENCY.getOrDefault("wizard_core", Set.of())) {
+                Skill node = BY_ID.get(neighbour);
+                if (node != null && node.getTree().getId().equals(tree) && reached.add(neighbour)) {
+                    queue.add(neighbour);
+                }
+            }
+            assertFalse(queue.isEmpty(), tree + " has no trunk node joined to Polaris");
+            while (!queue.isEmpty()) {
+                for (String next : ADJACENCY.getOrDefault(queue.poll(), Set.of())) {
+                    Skill node = BY_ID.get(next);
+                    if (node != null && node.getTree().getId().equals(tree) && reached.add(next)) {
+                        queue.add(next);
+                    }
+                }
+            }
+            for (Skill node : web) {
+                assertTrue(reached.contains(node.getId()),
+                        node.getId() + " is only reachable by leaving " + tree);
             }
         }
-        return false;
     }
 
     @Test

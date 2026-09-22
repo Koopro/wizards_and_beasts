@@ -1,0 +1,33 @@
+{
+  "id": "wandlight_mastery",
+  "displayName": "skill.wizards_and_beasts.node.wandlight_mastery.name",
+  "description": "skill.wizards_and_beasts.node.wandlight_mastery.desc",
+  "lore": "skill.wizards_and_beasts.node.wandlight_mastery.lore",
+  "practice": "skill.wizards_and_beasts.node.wandlight_mastery.practice",
+  "tree": "spell_mastery",
+  "pointCost": 4,
+  "provenance": {
+    "modAdvancement": true
+  },
+  "effects": [
+    {
+      "type": "gameplay_bonus",
+      "stat": "light_reach",
+      "perLevel": 1.0
+    },
+    {
+      "type": "spell_cooldown_reduction",
+      "spellId": "lumos",
+      "reductionPerLevel": 0.3
+    },
+    {
+      "type": "spell_cooldown_reduction",
+      "spellId": "nox",
+      "reductionPerLevel": 0.3
+    }
+  ],
+  "x": 138.6,
+  "y": 19.5,
+  "edges": [],
+  "size": "keystone"
+}

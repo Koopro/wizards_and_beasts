@@ -2,15 +2,20 @@
   "id": "goblin_ledger",
   "displayName": "skill.wizards_and_beasts.node.goblin_ledger.name",
   "description": "skill.wizards_and_beasts.node.goblin_ledger.desc",
+  "lore": "skill.wizards_and_beasts.node.goblin_ledger.lore",
+  "practice": "skill.wizards_and_beasts.node.goblin_ledger.practice",
   "tree": "goblin_craft",
   "pointCost": 3,
+  "provenance": {
+    "modAdvancement": true
+  },
   "effects": [
     {
-      "abilityId": "goblin_ledger",
-      "type": "unlock_ability"
+      "type": "unlock_ability",
+      "abilityId": "goblin_ledger"
     }
   ],
-  "x": 140.0,
+  "x": 0.0,
   "y": 0.0,
   "edges": [
     "goblin_steelheart"

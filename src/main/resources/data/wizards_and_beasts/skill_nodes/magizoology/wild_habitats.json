@@ -1,0 +1,35 @@
+{
+  "id": "wild_habitats",
+  "displayName": "skill.wizards_and_beasts.node.wild_habitats.name",
+  "description": "skill.wizards_and_beasts.node.wild_habitats.desc",
+  "lore": "skill.wizards_and_beasts.node.wild_habitats.lore",
+  "practice": "skill.wizards_and_beasts.node.wild_habitats.practice",
+  "tree": "magizoology",
+  "pointCost": 3,
+  "provenance": {
+    "modAdvancement": true
+  },
+  "effects": [],
+  "x": 138.6,
+  "y": -19.5,
+  "edges": [
+    "beast_speaker"
+  ],
+  "nodeEffects": [
+    {
+      "type": "bestiary_xp_multiplier",
+      "category": "AQUATIC",
+      "multiplier": 1.5
+    },
+    {
+      "type": "bestiary_xp_multiplier",
+      "category": "SPECTRAL",
+      "multiplier": 1.5
+    },
+    {
+      "type": "bestiary_xp_multiplier",
+      "category": "SERPENTINE",
+      "multiplier": 1.5
+    }
+  ]
+}

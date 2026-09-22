@@ -2,22 +2,22 @@
   "id": "flipendo_unlock",
   "displayName": "skill.wizards_and_beasts.node.flipendo_unlock.name",
   "description": "skill.wizards_and_beasts.node.flipendo_unlock.desc",
+  "lore": "skill.wizards_and_beasts.node.flipendo_unlock.lore",
+  "practice": "skill.wizards_and_beasts.node.flipendo_unlock.practice",
   "tree": "spell_mastery",
   "pointCost": 2,
+  "provenance": {
+    "citation": "Attested in licensed games"
+  },
   "effects": [
     {
       "type": "learn_spell",
       "spellId": "flipendo"
-    },
-    {
-      "spellId": "flipendo",
-      "bonusPerLevel": 0.1,
-      "type": "spell_damage_bonus"
     }
   ],
-  "x": 220.0,
-  "y": 7.7,
+  "x": 115.5,
+  "y": 79.1,
   "edges": [
-    "wingardium_unlock"
+    "levicorpus_unlock"
   ]
 }

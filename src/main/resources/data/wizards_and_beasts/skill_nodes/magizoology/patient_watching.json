@@ -1,0 +1,30 @@
+{
+  "id": "patient_watching",
+  "displayName": "skill.wizards_and_beasts.node.patient_watching.name",
+  "description": "skill.wizards_and_beasts.node.patient_watching.desc",
+  "lore": "skill.wizards_and_beasts.node.patient_watching.lore",
+  "practice": "skill.wizards_and_beasts.node.patient_watching.practice",
+  "tree": "magizoology",
+  "pointCost": 2,
+  "provenance": {
+    "modAdvancement": true
+  },
+  "effects": [],
+  "x": 138.6,
+  "y": -19.5,
+  "edges": [
+    "field_notes"
+  ],
+  "nodeEffects": [
+    {
+      "type": "bestiary_xp_multiplier",
+      "category": "SMALL_CREATURE",
+      "multiplier": 1.5
+    },
+    {
+      "type": "bestiary_xp_multiplier",
+      "category": "MAGICAL_CREATURE",
+      "multiplier": 1.5
+    }
+  ]
+}

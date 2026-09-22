@@ -106,7 +106,12 @@ public class BestiaryHarvestLootModifier extends LootModifier {
             if (!HarvestGate.isEligible(rule, held, last, now)) {
                 continue;
             }
-            if (context.getRandom().nextFloat() >= rule.chance()) {
+            // Magizoology's harvesting line. A gentler hand finds more of what a creature leaves; it never
+            // turns a guaranteed rule into more than one drop, because the count is the rule's own business.
+            float chance = HarvestGate.effectiveChance(rule.chance(),
+                    at.koopro.wizardsandbeasts.skill.SkillSystemAPI.getGameplayBonus(
+                            player, at.koopro.wizardsandbeasts.skill.GameplayStat.GENTLE_HARVEST));
+            if (context.getRandom().nextFloat() >= chance) {
                 // A failed roll deliberately does not start the lockout. The cooldown throttles what a
                 // player *receives*; charging it for a miss would make an unlucky player wait as long as
                 // a lucky one, which reads as the feature being broken.

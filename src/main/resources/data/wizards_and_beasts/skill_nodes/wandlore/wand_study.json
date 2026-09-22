@@ -2,17 +2,26 @@
   "id": "wand_study",
   "displayName": "skill.wizards_and_beasts.node.wand_study.name",
   "description": "skill.wizards_and_beasts.node.wand_study.desc",
+  "lore": "skill.wizards_and_beasts.node.wand_study.lore",
+  "practice": "skill.wizards_and_beasts.node.wand_study.practice",
   "tree": "wandlore",
+  "pointCost": 1,
+  "provenance": {
+    "modAdvancement": true
+  },
   "effects": [
     {
-      "type": "category_damage_bonus",
-      "category": "combat",
-      "bonusPerLevel": 0.02
+      "type": "gameplay_bonus",
+      "stat": "spell_misfire_reduction",
+      "perLevel": 0.02
     }
   ],
-  "x": -113.8,
-  "y": -66.2,
+  "x": -59.1,
+  "y": -75.6,
   "edges": [
-    "wandlore_path_2"
+    "wizard_core",
+    "wand_appraisal",
+    "wandwood_grain",
+    "apparition_training"
   ]
 }

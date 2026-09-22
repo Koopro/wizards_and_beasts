@@ -2,14 +2,20 @@
   "id": "goblin_appraisal",
   "displayName": "skill.wizards_and_beasts.node.goblin_appraisal.name",
   "description": "skill.wizards_and_beasts.node.goblin_appraisal.desc",
+  "lore": "skill.wizards_and_beasts.node.goblin_appraisal.lore",
+  "practice": "skill.wizards_and_beasts.node.goblin_appraisal.practice",
   "tree": "goblin_craft",
+  "pointCost": 1,
+  "provenance": {
+    "modAdvancement": true
+  },
   "effects": [
     {
-      "abilityId": "goblin_appraisal",
-      "type": "unlock_ability"
+      "type": "unlock_ability",
+      "abilityId": "goblin_appraisal"
     }
   ],
-  "x": 0.0,
+  "x": -140.0,
   "y": 0.0,
   "edges": [
     "goblin_forge_sense",

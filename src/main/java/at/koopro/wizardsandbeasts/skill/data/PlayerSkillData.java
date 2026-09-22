@@ -25,7 +25,12 @@ public class PlayerSkillData implements ModAttachments.NbtSerializable {
      * still resolve. The login refund is the only path that returns them.
      * Any bump re-runs {@link #applyWebMigration} at login.
      */
-    public static final int CURRENT_VERSION = 4;
+    /**
+     * Bumped to 5 by the 2026-09-17 education rework, which deleted 34 filler nodes and renamed others.
+     * An allocation pointing at a node that no longer exists is silently worth nothing, so the version bump
+     * fires {@link #applyWebMigration()} at login and hands every point back to be spent on the new webs.
+     */
+    public static final int CURRENT_VERSION = 5;
 
     /**
      * Schema version of the data this instance was loaded from. Fresh instances (new players)

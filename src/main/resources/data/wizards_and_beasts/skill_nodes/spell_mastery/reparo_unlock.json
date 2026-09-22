@@ -2,22 +2,22 @@
   "id": "reparo_unlock",
   "displayName": "skill.wizards_and_beasts.node.reparo_unlock.name",
   "description": "skill.wizards_and_beasts.node.reparo_unlock.desc",
+  "lore": "skill.wizards_and_beasts.node.reparo_unlock.lore",
+  "practice": "skill.wizards_and_beasts.node.reparo_unlock.practice",
   "tree": "spell_mastery",
   "pointCost": 2,
+  "provenance": {
+    "citation": "Attested in the novels"
+  },
   "effects": [
     {
       "type": "learn_spell",
       "spellId": "reparo"
-    },
-    {
-      "spellId": "reparo",
-      "reductionPerLevel": 0.15,
-      "type": "spell_cooldown_reduction"
     }
   ],
-  "x": 112.5,
-  "y": 180.1,
+  "x": 86.2,
+  "y": 110.3,
   "edges": [
-    "utility_mastery"
+    "wingardium_unlock"
   ]
 }
