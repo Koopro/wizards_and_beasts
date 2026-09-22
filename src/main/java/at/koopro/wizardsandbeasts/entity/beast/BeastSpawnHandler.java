@@ -46,7 +46,16 @@ public final class BeastSpawnHandler {
         nightSpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("ghoul"));
         nightSpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("pukwudgie"));
         nightSpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("rougarou"));
-        nightSpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("matagot"));
+        // A Matagot haunts wizarding buildings -- the Ministry's are the ones canon names -- rather
+        // than woodland. It was spawning across every forest on the map, which is the one habitat the
+        // lore rules out. It now wants wrought stone underfoot: the landmark block tags the map's own
+        // discovery rules already use to decide that a player has built Hogwarts or the Ministry.
+        //
+        // Checked on the block below the spawn position, which the placement predicate already reads,
+        // so this costs one tag lookup and no scan. "Standing on the castle's flagstones" is also the
+        // more evocative reading of the rule than "somewhere within N blocks of them".
+        registerAt(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("matagot"), false,
+                (level, pos) -> isWizardingStonework(level.getBlockState(pos.below())));
         nightSpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("bundimun"));
 
         // Wand-core sources. Two of the three cores had no wild source at all, which left the
@@ -99,6 +108,34 @@ public final class BeastSpawnHandler {
                                  DeferredHolder<EntityType<?>, ? extends EntityType<? extends PathfinderMob>> holder,
                                  boolean daytime,
                                  java.util.function.Predicate<net.minecraft.world.level.ServerLevelAccessor> when) {
+        registerAt(event, holder, daytime, (level, pos) -> when.test(level));
+    }
+
+    /**
+     * Whether a block is part of somebody's wizarding architecture.
+     *
+     * <p>The five landmark tags are the map's: {@code MapDiscoveryRule.FromBlocks} counts these to
+     * decide that a player has built Hogwarts or the Ministry, because this mod generates neither.
+     * Reusing them here means one answer to "is this a magical building" rather than a second list
+     * that could disagree with the map about what a castle is made of.
+     */
+    private static boolean isWizardingStonework(net.minecraft.world.level.block.state.BlockState state) {
+        for (at.koopro.wizardsandbeasts.map.MapLandmarkTags.Group group
+                : at.koopro.wizardsandbeasts.map.MapLandmarkTags.GROUPS) {
+            if (state.is(group.tag())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** As {@link #register}, for conditions that need the candidate position and not only the level. */
+    private static void registerAt(RegisterSpawnPlacementsEvent event,
+                                   DeferredHolder<EntityType<?>, ? extends EntityType<? extends PathfinderMob>> holder,
+                                   boolean daytime,
+                                   java.util.function.BiPredicate<
+                                           net.minecraft.world.level.ServerLevelAccessor,
+                                           net.minecraft.core.BlockPos> when) {
         event.register(
                 holder.get(),
                 SpawnPlacementTypes.ON_GROUND,
@@ -107,7 +144,7 @@ public final class BeastSpawnHandler {
                     if (!ModuleManager.isEnabled(Module.CREATURES)) {
                         return false;
                     }
-                    if (!spawnsNaturally(entityType) || !when.test(level)) {
+                    if (!spawnsNaturally(entityType) || !when.test(level, pos)) {
                         return false;
                     }
                     if (!level.getBlockState(pos.below()).isSolidRender()) {
