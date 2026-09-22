@@ -121,6 +121,142 @@ class SkillNodeJsonTest {
         }
     }
 
+    /**
+     * No two nodes a player can see at once may sit on the same point.
+     *
+     * <p>This is the assertion whose absence let the 2026-09-17 layout regression ship. Deleting the
+     * 34 pathway connectors removed the nodes that had been carrying the intermediate radii, so every
+     * survivor in a spoke inherited its spoke's single anchor: 57 of 84 nodes landed on r=140 and 54
+     * shared a position with a sibling. The Lumos line and the Defence line each drew as one dot, and
+     * every other invariant here still passed, because none of them looks at whether two nodes are
+     * distinguishable on screen.
+     *
+     * <p>Partitioned by {@link SkillTreeId.Audience} rather than asserted globally, because the
+     * overlap between the two heritage webs is deliberate: {@code elf_bond} and {@code goblin_craft}
+     * occupy the same coordinates on purpose, and a goblin never sees the elf web. Audience is the
+     * grouping the schema already carries, so the exemption is expressed in terms of who can see what
+     * rather than as a hand-maintained allowlist of colliding ids — which would have to be edited
+     * every time a node moved, and would quietly re-admit exactly this bug.
+     */
+    @Test
+    void everyNodeAPlayerCanSeeAtOnceHasItsOwnPosition() {
+        Map<SkillTreeId.Audience, Map<String, List<String>>> byAudience = new HashMap<>();
+        for (Skill skill : BY_ID.values()) {
+            String point = String.format(Locale.ROOT, "%.1f,%.1f", skill.getX(), skill.getY());
+            byAudience
+                    .computeIfAbsent(skill.getTree().getAudience(), a -> new HashMap<>())
+                    .computeIfAbsent(point, p -> new ArrayList<>())
+                    .add(skill.getId());
+        }
+
+        List<String> collisions = new ArrayList<>();
+        for (Map.Entry<SkillTreeId.Audience, Map<String, List<String>>> audience : byAudience.entrySet()) {
+            for (Map.Entry<String, List<String>> point : audience.getValue().entrySet()) {
+                if (point.getValue().size() > 1) {
+                    List<String> ids = new ArrayList<>(point.getValue());
+                    ids.sort(null);
+                    collisions.add(audience.getKey() + " at (" + point.getKey() + "): "
+                            + String.join(", ", ids));
+                }
+            }
+        }
+        collisions.sort(null);
+        assertTrue(collisions.isEmpty(),
+                "nodes visible together must not share a coordinate; regenerate with"
+                        + " tools/skill_web_layout.py:\n  " + String.join("\n  ", collisions));
+    }
+
+    /**
+     * Nodes are far enough apart to be separately clickable.
+     *
+     * <p>Distinct coordinates are not sufficient on their own: two nodes 3px apart are technically
+     * distinct and still one blob to a player aiming at them. The largest sprite the chart draws is
+     * the 26px keystone ({@code SkillTreeScreen.baseSpritePx}), so two centres closer than that
+     * overlap outright, and the hit radius is half the sprite. Twenty-eight design units is that
+     * width plus a little air, checked within an audience for the same reason as above.
+     */
+    @Test
+    void nodesVisibleTogetherAreFarEnoughApartToClick() {
+        double minimum = 28.0;
+        Map<SkillTreeId.Audience, List<Skill>> byAudience = new HashMap<>();
+        for (Skill skill : BY_ID.values()) {
+            byAudience.computeIfAbsent(skill.getTree().getAudience(), a -> new ArrayList<>()).add(skill);
+        }
+
+        List<String> tooClose = new ArrayList<>();
+        for (Map.Entry<SkillTreeId.Audience, List<Skill>> entry : byAudience.entrySet()) {
+            List<Skill> web = entry.getValue();
+            for (int i = 0; i < web.size(); i++) {
+                for (int j = i + 1; j < web.size(); j++) {
+                    Skill a = web.get(i);
+                    Skill b = web.get(j);
+                    double gap = Math.hypot(a.getX() - b.getX(), a.getY() - b.getY());
+                    if (gap < minimum) {
+                        tooClose.add(String.format(Locale.ROOT, "%s: %s / %s are %.1f apart",
+                                entry.getKey(), a.getId(), b.getId(), gap));
+                    }
+                }
+            }
+        }
+        tooClose.sort(null);
+        assertTrue(tooClose.isEmpty(),
+                "nodes visible together must be at least " + minimum + " apart:\n  "
+                        + String.join("\n  ", tooClose));
+    }
+
+    /**
+     * Progression runs outward: a prerequisite is always the node nearer Polaris.
+     *
+     * <p>The chart is polar and the hub is the origin, so radius is what a player reads as "how far
+     * into this discipline am I". Before the repair the ladder ran backwards in two webs — wandlore's
+     * depth-2 nodes sat at r=232 while its depth-5 keystone sat at r=140 — which draws a branch that
+     * appears to grow back towards the centre as it advances. Depth here is BFS distance from
+     * {@code wizard_core} over the same undirected adjacency the allocation gate uses.
+     */
+    @Test
+    void everyBranchGrowsAwayFromPolaris() {
+        Map<String, Integer> depth = new HashMap<>();
+        depth.put("wizard_core", 0);
+        Deque<String> queue = new ArrayDeque<>();
+        queue.add("wizard_core");
+        while (!queue.isEmpty()) {
+            String current = queue.poll();
+            List<String> neighbours = new ArrayList<>(ADJACENCY.getOrDefault(current, Set.of()));
+            neighbours.sort(null);
+            for (String neighbour : neighbours) {
+                if (BY_ID.containsKey(neighbour) && !depth.containsKey(neighbour)) {
+                    depth.put(neighbour, depth.get(current) + 1);
+                    queue.add(neighbour);
+                }
+            }
+        }
+
+        List<String> inverted = new ArrayList<>();
+        for (Skill skill : BY_ID.values()) {
+            if (!SPOKE_ORDER.contains(skill.getTree().getId())) continue;
+            Integer here = depth.get(skill.getId());
+            if (here == null) continue;
+            for (String edge : skill.getEdges()) {
+                Skill other = BY_ID.get(edge);
+                Integer there = depth.get(edge);
+                if (other == null || there == null || there.equals(here)) continue;
+                if (!SPOKE_ORDER.contains(other.getTree().getId())) continue;
+                Skill nearer = here < there ? skill : other;
+                Skill further = here < there ? other : skill;
+                if (radius(nearer) >= radius(further)) {
+                    inverted.add(String.format(Locale.ROOT,
+                            "%s (depth %d, r=%.0f) sits no closer to Polaris than %s (depth %d, r=%.0f)",
+                            nearer.getId(), Math.min(here, there), radius(nearer),
+                            further.getId(), Math.max(here, there), radius(further)));
+                }
+            }
+        }
+        inverted.sort(null);
+        assertTrue(inverted.isEmpty(),
+                "a prerequisite must sit nearer the hub than what it unlocks:\n  "
+                        + String.join("\n  ", inverted));
+    }
+
     @Test
     void noEdgeCrossesASealedBorder() {
         for (Skill skill : BY_ID.values()) {

@@ -15,8 +15,8 @@
       "abilityId": "apparition_training"
     }
   ],
-  "x": -229.7,
-  "y": -32.3,
+  "x": -138.3,
+  "y": -21.9,
   "edges": [
     "apparition_recall",
     "apparition_deliberation"

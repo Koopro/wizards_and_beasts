@@ -15,8 +15,8 @@
       "abilityId": "creature_knowledge"
     }
   ],
-  "x": 95.1,
-  "y": -13.4,
+  "x": 83.1,
+  "y": -48.0,
   "edges": [
     "wizard_core",
     "patient_watching",
