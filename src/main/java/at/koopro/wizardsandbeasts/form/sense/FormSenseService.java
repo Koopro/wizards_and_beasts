@@ -83,6 +83,12 @@ public final class FormSenseService {
         } else {
             revoke(player, ModEffects.SCENT_TRACKING);
         }
+
+        if (senses.contains(FormSense.WATER_BREATHING)) {
+            grant(player, MobEffects.WATER_BREATHING);
+        } else {
+            revoke(player, MobEffects.WATER_BREATHING);
+        }
         // FormSense.KEEN_SIGHT is client render tuning with no server effect to apply. See its javadoc.
     }
 

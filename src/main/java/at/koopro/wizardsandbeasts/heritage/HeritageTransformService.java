@@ -126,6 +126,24 @@ public final class HeritageTransformService {
         }
     }
 
+    /**
+     * What a heritage gives a body outright, as opposed to what a shape gives it.
+     *
+     * <p>Registered with {@link at.koopro.wizardsandbeasts.form.sense.FormSenses} beside the Animagus
+     * and werewolf sources, so the same refresh and the same revert path serve all three and no new
+     * lifecycle code exists to get login, respawn or a dimension change wrong.
+     *
+     * <p>The one entry is the {@code water_dwelling} trait, which until now was read by nothing:
+     * Merpeople changed shape at the waterline and then drowned in it. Deliberately keyed to the trait
+     * rather than to the merfolk form — a Merrow and a Siren never change shape at all, and a Selkie on
+     * land is still a Merperson, so a form-gated grant would have been wrong for all three.
+     */
+    public static Set<at.koopro.wizardsandbeasts.form.sense.FormSense> sensesFor(ServerPlayer player) {
+        return data(player).hasTrait("water_dwelling")
+                ? EnumSet.of(at.koopro.wizardsandbeasts.form.sense.FormSense.WATER_BREATHING)
+                : Set.of();
+    }
+
     private static boolean changeTo(ServerPlayer player, PlayerHeritageData data, TransformationState target) {
         if (!canTransform(data)) {
             return false;

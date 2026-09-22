@@ -1,6 +1,8 @@
 package at.koopro.wizardsandbeasts.sync;
 
 import at.koopro.wizardsandbeasts.form.FormSystemAPI;
+import at.koopro.wizardsandbeasts.form.sense.FormSenseService;
+import at.koopro.wizardsandbeasts.form.sense.FormSenses;
 import at.koopro.wizardsandbeasts.network.form.FormSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.heritage.BloodDataSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.heritage.HeritageDataSyncS2CPayload;
@@ -69,6 +71,11 @@ public final class PlayerStateSyncService {
             HeritageAPI.applyStats(player);
         }
         FormSystemAPI.reapplyCurrentForm(player);
+        // On the same tick as the form, not up to a refresh interval later. FormSenseService's own
+        // sweep would catch this within a hundred ticks, which is fine for a sense you merely see
+        // with and emphatically not fine for the one you breathe with: a Merperson who logs in, dies
+        // or steps through a portal while submerged would spend five seconds drowning first.
+        FormSenseService.apply(player, FormSenses.of(player));
         FormSyncS2CPayload.syncToTracking(player);
     }
 }

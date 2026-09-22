@@ -41,5 +41,21 @@ public enum FormSense {
      * server behaviour to hang on, so nothing applies it today. Named here so a form can state the
      * intent and so the gap is visible rather than silently absent.
      */
-    KEEN_SIGHT
+    KEEN_SIGHT,
+
+    /**
+     * Breathes water as easily as air.
+     *
+     * <p>Applied as vanilla Water Breathing, on the same ambient, no-icon terms as the rest: a body
+     * that simply has gills does not belong in the potion tray. Gillyweed is the one interaction
+     * worth knowing about and it already works — {@code GillyweedHandler} refuses vanilla Water
+     * Breathing outright while its own {@code GILLS} effect is up, so a Merperson who chews a sprig
+     * keeps the gills and this grant is quietly declined rather than fighting it.
+     *
+     * <p>Unlike the other senses this one is not owned by a transformation. Merpeople are aquatic
+     * whatever shape they are in: only the Selkie changes form at the waterline, and a Merrow or a
+     * Siren never changes at all, so keying it to a form would have left two of the three lineages
+     * drowning. It hangs off the {@code water_dwelling} lineage trait instead.
+     */
+    WATER_BREATHING
 }

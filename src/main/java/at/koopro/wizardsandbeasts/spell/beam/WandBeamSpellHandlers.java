@@ -268,9 +268,11 @@ final class WandBeamSpellHandlers {
         if (s.beamTicks % effectInterval == 0) {
             float intent = crucioIntentMultiplier(caster, spell);
             PacketDistributor.sendToPlayer(caster, new CrucioIntentFeedbackS2CPayload(intent));
-            float corruption = caster.getData(ModAttachments.DARK_CORRUPTION.get());
-            caster.setData(ModAttachments.DARK_CORRUPTION.get(), Math.min(100f, corruption
-                    + at.koopro.wizardsandbeasts.skill.vocation.VocationAbilityHooks.scaleCorruptionGain(caster, 5.0f * intent)));
+            // Charged per effect tick and scaled by intent, which is the whole price of the curse:
+            // holding it on one victim is what the Cruciatus is, so a flat charge at cast was both a
+            // double bill and a contradiction of crucioHoldTicks below. Through the toll so the
+            // vocation scaling, the clamp and the sheet's mirrored attribute stay in step.
+            at.koopro.wizardsandbeasts.corruption.UnforgivableToll.charge(caster, 5.0f * intent);
             target.removeEffect(MobEffects.WITHER);
             target.removeEffect(MobEffects.SLOWNESS);
             // F2: CRUCIATUS_PAIN now rides crucio.json's tick-cadence apply_effect component

@@ -61,5 +61,8 @@ public final class FormSenses {
     public static void bootstrap() {
         register("animagus", at.koopro.wizardsandbeasts.ability.AnimagusTransformService::sensesFor);
         register("werewolf", at.koopro.wizardsandbeasts.heritage.werewolf.WerewolfRules::sensesFor);
+        // Not a transformation: a heritage trait the body carries whatever shape it is in. See
+        // HeritageTransformService.sensesFor.
+        register("heritage", at.koopro.wizardsandbeasts.heritage.HeritageTransformService::sensesFor);
     }
 }

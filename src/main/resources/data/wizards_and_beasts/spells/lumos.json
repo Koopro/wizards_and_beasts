@@ -44,10 +44,6 @@
           "duration": 120,
           "amplifier": 0,
           "target": true
-        },
-        {
-          "type": "damage",
-          "amount": 2.5
         }
       ]
     }

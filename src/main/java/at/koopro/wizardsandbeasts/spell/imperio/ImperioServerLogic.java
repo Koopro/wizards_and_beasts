@@ -60,9 +60,11 @@ public final class ImperioServerLogic {
         if (target instanceof Mob mob) {
             mob.setTarget(null);
         }
-        float corruption = caster.getData(ModAttachments.DARK_CORRUPTION.get());
-        caster.setData(ModAttachments.DARK_CORRUPTION.get(), Math.min(100f,
-                corruption + at.koopro.wizardsandbeasts.skill.vocation.VocationAbilityHooks.scaleCorruptionGain(caster, 8f)));
+        // The whole price of an Imperius Curse, charged here rather than at cast: the weight of it is
+        // in seizing another will, and billing at cast charged for one that missed. Through the toll
+        // so the vocation scaling, the clamp and the character sheet's mirrored attribute all move
+        // together — writing the attachment raw left the sheet stale until the next login.
+        at.koopro.wizardsandbeasts.corruption.UnforgivableToll.charge(caster, 8f);
         level.playSound(null, target.blockPosition(), ModSounds.SPELL_CAST_DARK.get(), SoundSource.PLAYERS, 0.75f, 1.1f);
         Vec3 p = target.getBoundingBox().getCenter();
         level.sendParticles(ParticleTypes.HAPPY_VILLAGER, p.x, p.y + 1.0, p.z, 20, 0.35, 0.2, 0.35, 0.02);
