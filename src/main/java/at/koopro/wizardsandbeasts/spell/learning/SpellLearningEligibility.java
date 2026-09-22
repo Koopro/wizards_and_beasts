@@ -49,6 +49,14 @@ public final class SpellLearningEligibility {
         if (spellData.knowsSpell(spell.getId())) {
             return Result.deny("You already know this spell.");
         }
+        // What the law asks before a book will teach this. After the module and implementation gates,
+        // which decide whether the spell exists at all, and before the player's own progress gates so
+        // that "you have not studied this kind of magic" is the reason a student is told first rather
+        // than a proficiency requirement they could not have met anyway.
+        net.minecraft.network.chat.Component lawRefusal = SpellLawLearningGate.refusal(player, spell);
+        if (lawRefusal != null) {
+            return Result.deny(lawRefusal.getString());
+        }
         if (!spell.getRequirement().isMet(player, spellData)) {
             return Result.deny(spell.getRequirement().describe().getString());
         }

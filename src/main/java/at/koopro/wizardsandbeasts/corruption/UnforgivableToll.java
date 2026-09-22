@@ -1,6 +1,10 @@
 package at.koopro.wizardsandbeasts.corruption;
 
+import at.koopro.wizardsandbeasts.ministry.trace.LegalClass;
+import at.koopro.wizardsandbeasts.ministry.trace.SpellLawRegistry;
+import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.core.SpellIds;
+import at.koopro.wizardsandbeasts.spell.core.Spells;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import org.jspecify.annotations.NullMarked;
@@ -26,6 +30,8 @@ public final class UnforgivableToll {
     private static final float AVADA_KEDAVRA = 12.0f;
     private static final float CRUCIO = 8.0f;
     private static final float IMPERIO = 6.0f;
+    /** What an Unforgivable a datapack named but this class has no figure for costs. */
+    private static final float DEFAULT_UNFORGIVABLE = 8.0f;
 
     /** Corruption at which the caster starts being told what it is costing them. */
     private static final float WARN_THRESHOLD = 40.0f;
@@ -33,8 +39,36 @@ public final class UnforgivableToll {
 
     private UnforgivableToll() {}
 
-    /** Corruption cost of {@code spellId}, or 0 if it is not an Unforgivable. */
+    /** What the law calls this spell. The datapack's answer, never a list kept in here. */
+    private static boolean lawSaysUnforgivable(String spellId) {
+        Spell spell = Spells.byId(spellId);
+        return SpellLawRegistry.lawFor(spellId, spell == null ? null : spell.getCategory())
+                .legalClass() == LegalClass.UNFORGIVABLE;
+    }
+
+    /**
+     * Whether the law counts this spell among the Unforgivables.
+     *
+     * <p>Read from {@code spell_law}, which has classified 29 spells since the Ministry layer landed.
+     * This used to be three {@code SpellIds.matches} calls in here — a second, narrower register of
+     * what is forbidden, sitting beside the real one and free to disagree with it.
+     */
+    public static boolean isUnforgivable(String spellId) {
+        return lawSaysUnforgivable(spellId);
+    }
+
+    /**
+     * Corruption cost of casting {@code spellId}, or 0 if the law does not call it Unforgivable.
+     *
+     * <p>The classification is the datapack's; the three amounts are tuning this class owns, because
+     * {@code spell_law} describes a spell's standing in law and not what it does to the person casting
+     * it. A pack that names a fourth Unforgivable therefore gets {@link #DEFAULT_UNFORGIVABLE} rather
+     * than a silent zero — the old shape would have let an authored Unforgivable cost nothing at all.
+     */
     public static float tollFor(String spellId) {
+        if (!lawSaysUnforgivable(spellId)) {
+            return 0.0f;
+        }
         if (SpellIds.matches(spellId, "avada_kedavra")) {
             return AVADA_KEDAVRA;
         }
@@ -44,11 +78,7 @@ public final class UnforgivableToll {
         if (SpellIds.matches(spellId, "imperio")) {
             return IMPERIO;
         }
-        return 0.0f;
-    }
-
-    public static boolean isUnforgivable(String spellId) {
-        return tollFor(spellId) > 0.0f;
+        return DEFAULT_UNFORGIVABLE;
     }
 
     /**

@@ -62,6 +62,10 @@ public final class SpellLearningService {
         }
 
         data.learnSpell(spell.getId());
+        // Here rather than in validateLearnAttempt, which also answers the preview SpellSourceItem
+        // runs on the first right-click: a player who picks a book up, reads the refusal and puts it
+        // down again has not studied anything and must not be charged for it.
+        SpellLawLearningGate.stainForLearning(player, spell);
         SpellDataSyncS2CPayload.syncToPlayer(player);
         PlayerStatsSyncPayload.syncToPlayer(player); // KNOWLEDGE derives from spells learned
         return LearnResult.success(spell.getDisplayName());

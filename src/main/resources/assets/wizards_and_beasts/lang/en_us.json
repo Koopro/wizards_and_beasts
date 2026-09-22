@@ -4193,6 +4193,8 @@
   "spell.wizards_and_beasts.learning.learned": "Learned %s",
   "spell.wizards_and_beasts.learning.learned.detail": "Cast it to build proficiency.",
   "spell.wizards_and_beasts.learning.refused": "You cannot learn this yet",
+  "spell.wizards_and_beasts.learning.refused.dark": "Restricted knowledge. This spell is not taught through ordinary magical education, and you have not begun to study the Dark Arts.",
+  "spell.wizards_and_beasts.learning.refused.unforgivable": "Forbidden magic. An Unforgivable Curse is not something you stumble into — learn to hold a curse steady before you reach for this one.",
   "item.wizards_and_beasts.dragon_hide_gloves": "Dragon-Hide Gloves",
   "item.wizards_and_beasts.dragon_hide_gloves.desc": "On the first-year supply list. They do not tear, and nothing gets through them.",
   "item.wizards_and_beasts.monster_book_of_monsters": "The Monster Book of Monsters",
