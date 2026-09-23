@@ -93,8 +93,13 @@ public final class WizardsMetrics {
      */
     public static final int PANEL_SPRITE_SIZE = 64;
     public static final int PANEL_SPRITE_BORDER = 8;
-    /** Button cells (the controls atlas and each skin's button set) are 32x32 cut on 8, stretched. */
+    /**
+     * Button cells (the controls atlas and each skin's button set) are 32x32, stretched, and cut on
+     * 4 rather than the panels' 8: every shade on a button face sits in its outer three texels, so
+     * a 4px cut is exact, and it lets a button be as short as 8px -- the O.W.L. screens use 12.
+     */
     public static final int BUTTON_SPRITE_SIZE = 32;
+    public static final int BUTTON_SPRITE_BORDER = 4;
     /** Length of the divider (32x8) and scrollbar (8x32) sprites along their stretch axis. */
     public static final int BAR_SPRITE_LENGTH = 32;
     public static final int DIVIDER_H = 8;

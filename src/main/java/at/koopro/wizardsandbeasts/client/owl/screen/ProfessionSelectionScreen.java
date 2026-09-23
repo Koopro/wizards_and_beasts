@@ -1,12 +1,13 @@
 package at.koopro.wizardsandbeasts.client.owl.screen;
 
+import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
+import at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.network.owl.ChooseProfessionPacket;
 import at.koopro.wizardsandbeasts.owl.OWLGrade;
 import at.koopro.wizardsandbeasts.owl.OWLSubject;
 import at.koopro.wizardsandbeasts.owl.Profession;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
@@ -49,27 +50,16 @@ public class ProfessionSelectionScreen extends ScaledParchmentScreen {
             boolean eligible = isClientEligible(prof);
             if (eligible) {
                 Profession finalProf = prof;
-                addRenderableWidget(Button.builder(
-                        Component.translatable("owls.button.choose"),
-                        btn -> confirmChoose(finalProf))
-                        .pos(sx(cx + BG_WIDTH / 2 - 58), sy(rowY))
-                        .size(sw(44), sw(12))
-                        .build());
+                addRenderableWidget(new ThemedButton(sx(cx + BG_WIDTH / 2 - 58), sy(rowY), sw(44), sw(12),
+                Component.translatable("owls.button.choose"), () -> confirmChoose(finalProf))
+                .tone(McStylePanel.ButtonTone.CONFIRM));
             }
         }
 
-        addRenderableWidget(Button.builder(
-                Component.literal("▲"),
-                btn -> { scrollOffset = Math.max(0, scrollOffset - ROW_HEIGHT * 2); rebuildButtons(); })
-                .pos(sx(width / 2 + BG_WIDTH / 2 - 26), sy(height / 2 - BG_HEIGHT / 2 + 10))
-                .size(sw(12), sw(12))
-                .build());
-        addRenderableWidget(Button.builder(
-                Component.literal("▼"),
-                btn -> { scrollOffset += ROW_HEIGHT * 2; rebuildButtons(); })
-                .pos(sx(width / 2 + BG_WIDTH / 2 - 26), sy(height / 2 + BG_HEIGHT / 2 - 24))
-                .size(sw(12), sw(12))
-                .build());
+        addRenderableWidget(new ThemedButton(sx(width / 2 + BG_WIDTH / 2 - 26), sy(height / 2 - BG_HEIGHT / 2 + 10), sw(12), sw(12),
+                Component.literal("▲"), () -> { scrollOffset = Math.max(0, scrollOffset - ROW_HEIGHT * 2); rebuildButtons(); }));
+        addRenderableWidget(new ThemedButton(sx(width / 2 + BG_WIDTH / 2 - 26), sy(height / 2 + BG_HEIGHT / 2 - 24), sw(12), sw(12),
+                Component.literal("▼"), () -> { scrollOffset += ROW_HEIGHT * 2; rebuildButtons(); }));
     }
 
     private boolean isClientEligible(Profession prof) {

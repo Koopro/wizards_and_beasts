@@ -287,7 +287,7 @@ public final class McStylePanel {
         }
     }
 
-    /** Draws a themed button face, nine-sliced on the same 32/8 frame as the panels. */
+    /** Draws a themed button face: a 32px cell cut on 4 — see {@link WizardsMetrics#BUTTON_SPRITE_BORDER}. */
     public static void drawThemedButton(GuiGraphics g, int x, int y, int w, int h, ControlState state) {
         drawThemedButton(g, x, y, w, h, ButtonTone.NEUTRAL, state);
     }
@@ -298,7 +298,7 @@ public final class McStylePanel {
         int ts = WizardsMetrics.BUTTON_SPRITE_SIZE;
         drawNineSlice(g, THEME_CONTROLS, x, y, w, h,
                 tone.col * ts, state.row * ts,
-                ts, WizardsMetrics.PANEL_SPRITE_BORDER, ATLAS_W, ATLAS_H);
+                ts, WizardsMetrics.BUTTON_SPRITE_BORDER, ATLAS_W, ATLAS_H);
     }
 
     /** The default sheet: parchment, torn edge, double ink rule, gilt corner studs. */
@@ -449,11 +449,11 @@ public final class McStylePanel {
                 WizardsMetrics.BAR_SPRITE_LENGTH, WizardsMetrics.DIVIDER_H);
     }
 
-    /** A button face in a skin, on the same 32/8 frame as its panels. */
+    /** A button face in a skin, a 32px cell cut on 4 like the shared controls. */
     public static void drawSkinButton(GuiGraphics g, String skin, int x, int y, int w, int h,
                                       ControlState state) {
         drawNineSlice(g, skinSprite(skin, "button" + state.suffix), x, y, w, h,
-                WizardsMetrics.BUTTON_SPRITE_SIZE, WizardsMetrics.PANEL_SPRITE_BORDER);
+                WizardsMetrics.BUTTON_SPRITE_SIZE, WizardsMetrics.BUTTON_SPRITE_BORDER);
     }
 
     /**

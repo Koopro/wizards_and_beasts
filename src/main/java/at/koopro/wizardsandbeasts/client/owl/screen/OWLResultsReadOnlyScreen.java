@@ -1,11 +1,12 @@
 package at.koopro.wizardsandbeasts.client.owl.screen;
 
+import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
+import at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.owl.OWLGrade;
 import at.koopro.wizardsandbeasts.owl.OWLSubject;
 import at.koopro.wizardsandbeasts.owl.Profession;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -43,23 +44,16 @@ public class OWLResultsReadOnlyScreen extends ScaledParchmentScreen {
         int cy = height / 2;
 
         if (profession == null) {
-            addRenderableWidget(Button.builder(
-                    Component.translatable("owls.button.choose_path"),
-                    btn -> {
+            addRenderableWidget(new ThemedButton(sx(cx - 75), sy(cy + BG_HEIGHT / 2 - 28), sw(150), sw(20),
+                Component.translatable("owls.button.choose_path"), () -> {
                         assert minecraft != null;
                         minecraft.setScreen(new ProfessionSelectionScreen(grades));
                     })
-                    .pos(sx(cx - 75), sy(cy + BG_HEIGHT / 2 - 28))
-                    .size(sw(150), sw(20))
-                    .build());
+                .tone(McStylePanel.ButtonTone.CONFIRM));
         }
 
-        addRenderableWidget(Button.builder(
-                Component.translatable("gui.done"),
-                btn -> onClose())
-                .pos(sx(cx - 50), sy(cy + BG_HEIGHT / 2 - 6))
-                .size(sw(100), sw(20))
-                .build());
+        addRenderableWidget(new ThemedButton(sx(cx - 50), sy(cy + BG_HEIGHT / 2 - 6), sw(100), sw(20),
+                Component.translatable("gui.done"), () -> onClose()));
     }
 
     @Override

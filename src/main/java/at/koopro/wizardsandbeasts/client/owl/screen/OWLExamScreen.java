@@ -1,12 +1,13 @@
 package at.koopro.wizardsandbeasts.client.owl.screen;
 
+import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
+import at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.owl.ClientOWLCache;
 import at.koopro.wizardsandbeasts.network.owl.RequestOWLExamPacket;
 import at.koopro.wizardsandbeasts.owl.OWLGrade;
 import at.koopro.wizardsandbeasts.owl.OWLSubject;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
@@ -43,31 +44,21 @@ public class OWLExamScreen extends ScaledParchmentScreen {
     private void initConfirmPhase() {
         int cx = width / 2;
         int cy = height / 2;
-        addRenderableWidget(Button.builder(
-                Component.translatable("owls.button.ready"),
-                btn -> sendExamRequest())
-                .pos(sx(cx - 100), sy(cy + 20))
-                .size(sw(96), sw(20))
-                .build());
-        addRenderableWidget(Button.builder(
-                Component.translatable("owls.button.notyet"),
-                btn -> onClose())
-                .pos(sx(cx + 4), sy(cy + 20))
-                .size(sw(96), sw(20))
-                .build());
+        addRenderableWidget(new ThemedButton(sx(cx - 100), sy(cy + 20), sw(96), sw(20),
+                Component.translatable("owls.button.ready"), () -> sendExamRequest())
+                .tone(McStylePanel.ButtonTone.CONFIRM));
+        addRenderableWidget(new ThemedButton(sx(cx + 4), sy(cy + 20), sw(96), sw(20),
+                Component.translatable("owls.button.notyet"), () -> onClose()));
     }
 
     private void initResultsPhase() {
         int cx = width / 2;
-        addRenderableWidget(Button.builder(
-                Component.translatable("owls.button.choose_path"),
-                btn -> {
+        addRenderableWidget(new ThemedButton(sx(cx - 75), sy(height / 2 + 70), sw(150), sw(20),
+                Component.translatable("owls.button.choose_path"), () -> {
                     assert minecraft != null;
                     minecraft.setScreen(new ProfessionSelectionScreen(ClientOWLCache.getGrades()));
                 })
-                .pos(sx(cx - 75), sy(height / 2 + 70))
-                .size(sw(150), sw(20))
-                .build());
+                .tone(McStylePanel.ButtonTone.CONFIRM));
     }
 
     private void sendExamRequest() {
