@@ -3,39 +3,48 @@
   "minecraft:geometry": [
     {
       "description": {
-        "identifier": "geometry.wizards_and_beasts.elder_wand",
+        "identifier": "geometry.elder_wand",
         "texture_width": 32,
-        "texture_height": 16,
-        "visible_bounds_width": 3,
-        "visible_bounds_height": 3,
+        "texture_height": 24,
+        "visible_bounds_width": 1.14,
+        "visible_bounds_height": 2.12,
         "visible_bounds_offset": [
           0,
-          1,
+          0.56,
           0
         ]
       },
       "bones": [
         {
-          "name": "wand_root",
+          "name": "root",
           "pivot": [
-            0,
-            0,
-            0
+            0.0,
+            0.0,
+            0.0
           ]
         },
         {
-          "name": "shaft",
-          "parent": "wand_root",
+          "name": "wand_root",
           "pivot": [
-            0,
-            0,
-            0
+            0.0,
+            0.0,
+            0.0
           ],
+          "parent": "root"
+        },
+        {
+          "name": "shaft",
+          "pivot": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "parent": "wand_root",
           "cubes": [
             {
               "origin": [
                 -0.5,
-                0,
+                0.0,
                 -0.5
               ],
               "size": [
@@ -44,52 +53,137 @@
                 1
               ],
               "uv": [
+                0,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -1.0,
+                1.5,
+                -1.0
+              ],
+              "size": [
+                2,
                 1,
-                1
+                2
+              ],
+              "inflate": -0.25,
+              "uv": [
+                12,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -1.0,
+                4.5,
+                -1.0
+              ],
+              "size": [
+                2,
+                1,
+                2
+              ],
+              "inflate": -0.25,
+              "uv": [
+                20,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -1.0,
+                7.5,
+                -1.0
+              ],
+              "size": [
+                2,
+                1,
+                2
+              ],
+              "inflate": -0.25,
+              "uv": [
+                0,
+                14
+              ]
+            },
+            {
+              "origin": [
+                -1.0,
+                10.5,
+                -1.0
+              ],
+              "size": [
+                2,
+                1,
+                2
+              ],
+              "inflate": -0.25,
+              "uv": [
+                8,
+                14
               ]
             }
           ]
         },
         {
           "name": "knob",
-          "parent": "wand_root",
           "pivot": [
-            0,
-            13,
-            0
+            0.0,
+            13.0,
+            0.0
           ],
+          "parent": "wand_root",
           "cubes": [
             {
               "origin": [
-                -1,
-                13,
-                -1
+                -1.0,
+                13.0,
+                -1.0
               ],
               "size": [
                 2,
                 2,
                 2
               ],
+              "inflate": 0.1,
               "uv": [
-                6,
+                4,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -0.5,
+                15.0,
+                -0.5
+              ],
+              "size": [
+                1,
+                1,
                 1
+              ],
+              "uv": [
+                20,
+                14
               ]
             }
           ]
         },
         {
           "name": "tip",
-          "parent": "wand_root",
           "pivot": [
-            0,
-            0,
-            0
+            0.0,
+            0.0,
+            0.0
           ],
+          "parent": "wand_root",
           "cubes": [
             {
               "origin": [
                 -0.5,
-                -2,
+                -2.0,
                 -0.5
               ],
               "size": [
@@ -97,21 +191,22 @@
                 2,
                 1
               ],
+              "inflate": -0.15,
               "uv": [
-                15,
-                1
+                16,
+                14
               ]
             }
           ]
         },
         {
           "name": "wand_tip",
-          "parent": "tip",
           "pivot": [
-            0,
-            -2,
-            0
-          ]
+            0.0,
+            -2.0,
+            0.0
+          ],
+          "parent": "tip"
         }
       ]
     }
