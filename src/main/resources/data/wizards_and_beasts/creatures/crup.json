@@ -25,5 +25,12 @@
   "clips": [
     "bite",
     "call"
-  ]
+  ],
+  "behaviour": {
+    "sounds": {
+      "ambient": "minecraft:entity.wolf.ambient",
+      "hurt": "minecraft:entity.wolf.hurt",
+      "death": "minecraft:entity.wolf.death"
+    }
+  }
 }

@@ -13,6 +13,7 @@
   "texture": "wizards_and_beasts:textures/entity/basilisk.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/basilisk.animation.json",
   "attackDamage": 14.0,
+  "scale": 1.4,
   "traits": [
     "POISON_ATTACK",
     "PETRIFY",
@@ -31,5 +32,6 @@
     "strike",
     "hiss",
     "gaze"
-  ]
+  ],
+  "_scale_note": "Design decision, not a canon figure. Chamber of Secrets gives 'fifty feet', which no source converts to Minecraft blocks. The rig is 8.5 blocks nose to tail at scale 1.0 and 1.4 blocks tall; 1.4 takes it to roughly 12 blocks long, which reads enormous beside a player without making the square hitbox impassable. The real limit is that a vanilla hitbox is square in plan, so no scale can make a 12-block serpent occupy a 12-block-long box - only a multi-part entity could, and that is out of scope here. Scale raises hitbox and reach together via Attributes.SCALE."
 }

@@ -37,5 +37,12 @@
   "clips": [
     "attack",
     "flinch"
-  ]
+  ],
+  "behaviour": {
+    "sounds": {
+      "ambient": "minecraft:entity.guardian.ambient_land",
+      "hurt": "minecraft:entity.guardian.hurt",
+      "death": "minecraft:entity.guardian.death"
+    }
+  }
 }

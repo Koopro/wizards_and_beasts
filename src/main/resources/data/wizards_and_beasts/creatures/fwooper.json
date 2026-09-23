@@ -30,5 +30,12 @@
   "clips": [
     "flinch",
     "song"
-  ]
+  ],
+  "behaviour": {
+    "sounds": {
+      "ambient": "minecraft:entity.parrot.ambient",
+      "hurt": "minecraft:entity.parrot.hurt",
+      "death": "minecraft:entity.parrot.death"
+    }
+  }
 }

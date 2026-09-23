@@ -33,5 +33,12 @@
   "clips": [
     "bite",
     "call"
-  ]
+  ],
+  "behaviour": {
+    "sounds": {
+      "ambient": "minecraft:entity.fox.ambient",
+      "hurt": "minecraft:entity.fox.hurt",
+      "death": "minecraft:entity.fox.death"
+    }
+  }
 }

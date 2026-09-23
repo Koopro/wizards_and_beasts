@@ -7,6 +7,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.Identifier;
 
+import at.koopro.wizardsandbeasts.creature.profile.CreatureBehaviour;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,7 +43,9 @@ public record CreatureDefinition(
         Identifier animation,
         Optional<DragonTraits> dragon,
         List<CreatureAbility> abilities,
-        List<String> clips) {
+        List<String> clips,
+        float scale,
+        CreatureBehaviour behaviour) {
 
     private static <E extends Enum<E>> Codec<E> enumCodec(Class<E> type) {
         return Codec.STRING.xmap(s -> Enum.valueOf(type, s), Enum::name);
@@ -52,7 +55,7 @@ public record CreatureDefinition(
     private record StatBlock(
             Identifier id, BodyPlan bodyPlan, Locomotion locomotion, Temperament temperament,
             float width, float height, double maxHealth, double movementSpeed,
-            double flyingSpeed, double followRange, double attackDamage) {
+            double flyingSpeed, double followRange, double attackDamage, float scale) {
 
         static final MapCodec<StatBlock> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 Identifier.CODEC.fieldOf("id").forGetter(StatBlock::id),
@@ -65,14 +68,18 @@ public record CreatureDefinition(
                 Codec.DOUBLE.fieldOf("movementSpeed").forGetter(StatBlock::movementSpeed),
                 Codec.DOUBLE.optionalFieldOf("flyingSpeed", 0.0).forGetter(StatBlock::flyingSpeed),
                 Codec.DOUBLE.optionalFieldOf("followRange", 16.0).forGetter(StatBlock::followRange),
-                Codec.DOUBLE.optionalFieldOf("attackDamage", 0.0).forGetter(StatBlock::attackDamage)
+                Codec.DOUBLE.optionalFieldOf("attackDamage", 0.0).forGetter(StatBlock::attackDamage),
+                // Visual size, applied through vanilla Attributes.SCALE, which already moves the model and
+                // the hitbox together (the Occamy proves it). Default 1.0, so every existing file is
+                // unchanged and a creature only grows when its own data says so.
+                Codec.FLOAT.optionalFieldOf("scale", 1.0f).forGetter(StatBlock::scale)
         ).apply(instance, StatBlock::new));
     }
 
     /** Second flat half: trait vocabulary, asset ids, the dragon sub-block, abilities, and clips. */
     private record AssetBlock(
             List<Trait> traits, Identifier model, Identifier texture, Identifier animation,
-            Optional<DragonTraits> dragon, List<CreatureAbility> abilities, List<String> clips) {
+            Optional<DragonTraits> dragon, List<CreatureAbility> abilities, List<String> clips, CreatureBehaviour behaviour) {
 
         static final MapCodec<AssetBlock> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 enumCodec(Trait.class).listOf().optionalFieldOf("traits", List.of()).forGetter(AssetBlock::traits),
@@ -87,7 +94,12 @@ public record CreatureDefinition(
                 // a clip a file does not define, so a shared entity class cannot assume `attack` exists —
                 // it registers a triggerable only for what is declared here. Default empty, so the creatures
                 // that declare nothing register nothing and are untouched.
-                Codec.STRING.listOf().optionalFieldOf("clips", List.of()).forGetter(AssetBlock::clips)
+                Codec.STRING.listOf().optionalFieldOf("clips", List.of()).forGetter(AssetBlock::clips),
+                // Idle, sounds, reactions and combat rhythm, as one optional nested block. Nested rather
+                // than four more flat fields because this half is already near the sixteen-argument
+                // ceiling that forced the two-MapCodec split in the first place.
+                CreatureBehaviour.CODEC.optionalFieldOf("behaviour", CreatureBehaviour.EMPTY)
+                        .forGetter(AssetBlock::behaviour)
         ).apply(instance, AssetBlock::new));
     }
 
@@ -98,12 +110,13 @@ public record CreatureDefinition(
                 return new CreatureDefinition(
                         s.id(), s.bodyPlan(), s.locomotion(), s.temperament(), s.width(), s.height(),
                         s.maxHealth(), s.movementSpeed(), s.flyingSpeed(), s.followRange(), s.attackDamage(),
-                        a.traits(), a.model(), a.texture(), a.animation(), a.dragon(), a.abilities(), a.clips());
+                        a.traits(), a.model(), a.texture(), a.animation(), a.dragon(), a.abilities(),
+                        a.clips(), s.scale(), a.behaviour());
             },
             def -> Pair.of(
                     new StatBlock(def.id(), def.bodyPlan(), def.locomotion(), def.temperament(), def.width(),
                             def.height(), def.maxHealth(), def.movementSpeed(), def.flyingSpeed(),
-                            def.followRange(), def.attackDamage()),
+                            def.followRange(), def.attackDamage(), def.scale()),
                     new AssetBlock(def.traits(), def.model(), def.texture(), def.animation(), def.dragon(),
-                            def.abilities(), def.clips())));
+                            def.abilities(), def.clips(), def.behaviour())));
 }

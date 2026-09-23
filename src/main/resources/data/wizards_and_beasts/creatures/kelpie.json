@@ -53,5 +53,12 @@
   "clips": [
     "attack",
     "call"
-  ]
+  ],
+  "behaviour": {
+    "sounds": {
+      "ambient": "minecraft:entity.horse.ambient",
+      "hurt": "minecraft:entity.horse.hurt",
+      "death": "minecraft:entity.horse.death"
+    }
+  }
 }

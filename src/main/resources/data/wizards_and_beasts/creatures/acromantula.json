@@ -38,5 +38,20 @@
   "clips": [
     "bite",
     "hiss"
-  ]
+  ],
+  "behaviour": {
+    "sounds": {
+      "ambient": "minecraft:entity.spider.ambient",
+      "hurt": "minecraft:entity.spider.hurt",
+      "death": "minecraft:entity.spider.death",
+      "attack": "minecraft:entity.spider.step"
+    },
+    "combat": {
+      "style": "ambusher",
+      "approachSpeed": 1.35,
+      "windupTicks": 10,
+      "recoveryTicks": 20,
+      "retreatAtHealth": 0.2
+    }
+  }
 }

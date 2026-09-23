@@ -1,6 +1,11 @@
 package at.koopro.wizardsandbeasts.entity.creature;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.creature.profile.CombatProfile;
+import at.koopro.wizardsandbeasts.creature.profile.CreatureBehaviour;
+import at.koopro.wizardsandbeasts.creature.profile.CreatureReaction;
+import at.koopro.wizardsandbeasts.creature.profile.IdleProfile;
+import at.koopro.wizardsandbeasts.creature.profile.SoundProfile;
 import at.koopro.wizardsandbeasts.creature.CreatureDefinition;
 import at.koopro.wizardsandbeasts.creature.CreatureDefinitionRegistry;
 import at.koopro.wizardsandbeasts.creature.Temperament;
@@ -21,6 +26,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -89,6 +95,11 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
 
     /** Clip fired on taking damage, when the creature declares it. */
     private static final List<String> CLIPS_HIT = List.of("hit", "flinch");
+    /**
+     * Death. No rig declares one of these yet, which is the point: the hook exists so that adding a
+     * {@code death} clip to a rig is the only step needed, with no Java change per creature.
+     */
+    private static final List<String> CLIPS_DEATH = List.of("death", "die", "collapse");
 
     /**
      * Clip played with the creature's ambient noise: the ghoul's groan, the basilisk's hiss, the
@@ -368,6 +379,7 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
         if (def.attackDamage() > 0) {
             setBase(Attributes.ATTACK_DAMAGE, def.attackDamage());
         }
+        applyBodyScale(def.scale());
         setHealth(getMaxHealth());
     }
 
@@ -378,6 +390,88 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
         }
     }
 
+    // ── behaviour profiles ────────────────────────────────────────────────────
+
+    /**
+     * The declared body size of this species, as opposed to a size an ability is currently imposing.
+     *
+     * <p>A separate modifier id from {@code SIZE_SCALE_ID} on purpose: that one belongs to the
+     * abilities — the Occamy's choranaptyxis eases it every tick — and sharing an id would mean a
+     * growing Occamy erasing its own species scale, or a datapack edit erasing the Occamy's growth.
+     * Two ids compose, which is what {@link #applySizeScale}'s own javadoc already describes as the
+     * intended stack: a species body, an ability on top of it, an Engorgio on top of both.
+     */
+    private static final Identifier BODY_SCALE_ID =
+            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "creature_body_scale");
+
+    protected void applyBodyScale(float scale) {
+        AttributeInstance instance = getAttribute(Attributes.SCALE);
+        if (instance == null) {
+            return;
+        }
+        instance.removeModifier(BODY_SCALE_ID);
+        if (scale != 1.0f) {
+            instance.addTransientModifier(new AttributeModifier(
+                    BODY_SCALE_ID, scale - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
+        }
+        refreshDimensions();
+    }
+
+    /** This creature's behaviour block, or an empty one. Never null, so callers need no branch. */
+    public CreatureBehaviour behaviour() {
+        CreatureDefinition def = definition();
+        return def == null ? CreatureBehaviour.EMPTY : def.behaviour();
+    }
+
+    /** What this creature does when nothing is happening. Falls back to its body plan's profile. */
+    public IdleProfile idleProfile() {
+        CreatureDefinition def = definition();
+        return def == null
+                ? IdleProfile.NONE
+                : def.behaviour().idleOrDefault(def.bodyPlan());
+    }
+
+    /** Its rhythm in a fight. {@code CombatProfile.DEFAULT} is exactly the old shared behaviour. */
+    public CombatProfile combatProfile() {
+        return behaviour().combatOrDefault();
+    }
+
+    /** Its voice, or {@code SoundProfile.SILENT}. Silence is a choice, not a missing value. */
+    public SoundProfile soundProfile() {
+        return behaviour().sounds().orElse(SoundProfile.SILENT);
+    }
+
+    /**
+     * How this creature answers a stimulus, or {@code IGNORE} when it has declared no opinion.
+     *
+     * <p>The reaction framework's single entry point. Nothing raises most stimuli yet — that is
+     * deliberate, the framework lands before the events do — so this is the seam a later pass wires
+     * the cast pipeline and the death broadcast into, rather than a second behaviour system.
+     */
+    public CreatureReaction.Response reactionTo(CreatureReaction.Stimulus stimulus) {
+        for (CreatureReaction reaction : behaviour().reactions()) {
+            if (reaction.stimulus() == stimulus) {
+                return reaction.response();
+            }
+        }
+        return CreatureReaction.Response.IGNORE;
+    }
+
+    /** The radius at which this creature notices {@code stimulus}, or 0 when it does not. */
+    public double reactionRadius(CreatureReaction.Stimulus stimulus) {
+        for (CreatureReaction reaction : behaviour().reactions()) {
+            if (reaction.stimulus() == stimulus) {
+                return reaction.radius();
+            }
+        }
+        return 0.0;
+    }
+
+    /** Public view of the declared clip list, for goals that must filter before they start. */
+    public List<String> declaredClipNames() {
+        return declaredClips();
+    }
+
     // ── goals ───────────────────────────────────────────────────────────────
 
     @Override
@@ -385,6 +479,10 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
         goalSelector.addGoal(0, new FloatGoal(this));
         addMovementGoals();
         wireBehaviourGoals();
+        // Below the wander and every combat goal, above only the look goals: idle punctuation must
+        // lose to anything that matters. Self-gates on having a playable clip, so a creature whose
+        // rig declares none never starts it.
+        goalSelector.addGoal(8, new at.koopro.wizardsandbeasts.entity.creature.ai.CreatureIdleGoal(this));
         goalSelector.addGoal(9, new LookAtPlayerGoal(this, Player.class, 7.0f));
         goalSelector.addGoal(10, new RandomLookAroundGoal(this));
         // Always registered, never conditional on a profile existing right now: goals are wired once
@@ -421,7 +519,11 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
             goalSelector.addGoal(3, new at.koopro.wizardsandbeasts.entity.creature.ai.RoosterCrowWeaknessGoal(this));
         }
         if (canMelee && temperament != Temperament.PASSIVE) {
-            goalSelector.addGoal(4, new MeleeAttackGoal(this, charge ? 1.45 : 1.2, true));
+            // Approach speed comes from the combat profile, whose default is exactly the old figure,
+            // so a creature that declares no profile closes at precisely the speed it always did.
+            // CHARGE still wins, because it is a trait thirteen creatures already rely on.
+            double approach = charge ? 1.45 : combatProfile().approachSpeed();
+            goalSelector.addGoal(4, new MeleeAttackGoal(this, approach, true));
             HurtByTargetGoal retaliate = new HurtByTargetGoal(this);
             if (has(Trait.PACK)) {
                 retaliate.setAlertOthers();
@@ -612,8 +714,39 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
                     ability.onDeath(this);
                 }
             }
+            // Fired here, before super.die, because triggerAnim syncs from a live entity and vanilla's
+            // death sequence is what removes it. Gated by triggerFirstDeclared, so the fact that no rig
+            // ships a death clip today makes this a no-op rather than a crash — the hook lands first and
+            // the clips arrive per rig afterwards. die() is called once by vanilla, so no guard against
+            // repeats is needed beyond the isDeadOrDying check the caller already made.
+            triggerFirstDeclared(CLIPS_DEATH);
         }
         super.die(cause);
+    }
+
+    // ── voice ─────────────────────────────────────────────────────────────────
+
+    /**
+     * Ambient, hurt and death voices, read from the creature's own data.
+     *
+     * <p>Returning null for an undeclared sound is the whole design: vanilla treats null as "make no
+     * noise", so a creature with no sound profile is silent exactly as it was before this existed,
+     * and a Lethifold can stay silent on purpose. No creature id appears in here — the engine reads
+     * the profile and the profile comes from the creature's own file.
+     */
+    @Override
+    protected @org.jspecify.annotations.Nullable SoundEvent getAmbientSound() {
+        return soundProfile().ambientSound();
+    }
+
+    @Override
+    protected @org.jspecify.annotations.Nullable SoundEvent getHurtSound(DamageSource source) {
+        return soundProfile().hurtSound();
+    }
+
+    @Override
+    protected @org.jspecify.annotations.Nullable SoundEvent getDeathSound() {
+        return soundProfile().deathSound();
     }
 
     // ── reaction clips ────────────────────────────────────────────────────────
