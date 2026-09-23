@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.owl.screen;
 
+import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -20,9 +21,6 @@ import org.jspecify.annotations.NullMarked;
  */
 @NullMarked
 public abstract class ScaledParchmentScreen extends Screen {
-
-    /** Aged-paper fill behind every OWL panel. */
-    protected static final int PARCHMENT_ARGB = 0xEEF5E6C8;
 
     protected float guiScale = 1.0f;
     protected int originX;
@@ -82,11 +80,20 @@ public abstract class ScaledParchmentScreen extends Screen {
         pose.scale(guiScale, guiScale);
     }
 
-    /** The parchment panel itself, centred in design space. */
+    /**
+     * The parchment panel itself, centred in design space: the shared sheet, torn edge and double
+     * ink rule. That rule sits 4 and 6px in, so text on it starts at least 10 down and 12 in.
+     */
     protected void drawParchment(GuiGraphics graphics, int bgWidth, int bgHeight) {
-        int cx = width / 2;
-        int cy = height / 2;
-        graphics.fill(cx - bgWidth / 2, cy - bgHeight / 2, cx + bgWidth / 2, cy + bgHeight / 2,
-                PARCHMENT_ARGB);
+        McStylePanel.drawThemedPanel(graphics, width / 2 - bgWidth / 2, height / 2 - bgHeight / 2,
+                bgWidth, bgHeight);
+    }
+
+    /**
+     * Centred text, flat. {@code drawCenteredString} always draws a drop shadow, and under ink on
+     * paper that reads as a second, offset copy of every glyph.
+     */
+    protected void drawCentred(GuiGraphics graphics, Component text, int cx, int y, int colour) {
+        graphics.drawString(font, text, cx - font.width(text) / 2, y, colour, false);
     }
 }

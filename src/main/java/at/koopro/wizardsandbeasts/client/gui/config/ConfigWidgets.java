@@ -2,11 +2,14 @@ package at.koopro.wizardsandbeasts.client.gui.config;
 
 import java.util.List;
 import java.util.Locale;
+import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
+import at.koopro.wizardsandbeasts.client.gui.widget.ThemedSlider;
+import at.koopro.wizardsandbeasts.client.gui.widget.ThemedTextField;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
-import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
@@ -24,17 +27,11 @@ import org.jspecify.annotations.Nullable;
  */
 public final class ConfigWidgets {
 
-    // Shared parchment/ink palette for the config screens.
-    public static final int PARCHMENT = 0xFFF5EDD6;
-    public static final int PARCHMENT_DARK = 0xFF2A2318;
-    public static final int INK = 0xFF3B2A1A;
-    public static final int INK_FADED = 0xFFC8B89A;
-    public static final int STAMP_RED = 0xFF8B0000;
-
-    private static final int WIDGET_FILL = 0xFFEFE3C4;
-    private static final int WIDGET_FILL_HOVER = 0xFFE6D6AC;
-    private static final int TOGGLE_ON_FILL = 0xFF3F6B3A;
-    private static final int TOGGLE_ON_TEXT = 0xFFEFFFE9;
+    // The config screens' inks, named by role and taken from the shared page palette.
+    public static final int PARCHMENT = WizardsPalette.PAGE;
+    public static final int INK = WizardsPalette.PAGE_INK;
+    public static final int INK_FADED = WizardsPalette.PAGE_DEEP;
+    public static final int STAMP_RED = WizardsPalette.WAX;
 
     private ConfigWidgets() {}
 
@@ -106,7 +103,7 @@ public final class ConfigWidgets {
 
     private static EditBox numericEditBox(int x, int y, int width, int height,
             ModConfigSpec.ConfigValue<Number> value, ModConfigSpec.ValueSpec valueSpec, boolean integer) {
-        EditBox box = new EditBox(Minecraft.getInstance().font, x, y, width, height, Component.literal("value"));
+        EditBox box = new ThemedTextField(Minecraft.getInstance().font, x, y, width, height, Component.literal("value"));
         box.setValue(String.valueOf(value.get()));
         box.setFilter(s -> s.isEmpty() || s.matches(integer ? "-?\\d*" : "-?\\d*\\.?\\d*"));
         box.setResponder(s -> {
@@ -124,7 +121,7 @@ public final class ConfigWidgets {
 
     private static EditBox stringEditBox(int x, int y, int width, int height,
             ModConfigSpec.ConfigValue<String> value, ModConfigSpec.ValueSpec valueSpec) {
-        EditBox box = new EditBox(Minecraft.getInstance().font, x, y, width, height, Component.literal("value"));
+        EditBox box = new ThemedTextField(Minecraft.getInstance().font, x, y, width, height, Component.literal("value"));
         box.setValue(value.get());
         box.setResponder(s -> {
             if (valueSpec.test(s)) {
@@ -135,26 +132,20 @@ public final class ConfigWidgets {
     }
 
     private static EditBox listDisplayBox(int x, int y, int width, int height, int entryCount) {
-        EditBox box = new EditBox(Minecraft.getInstance().font, x, y, width, height, Component.literal("list"));
+        EditBox box = new ThemedTextField(Minecraft.getInstance().font, x, y, width, height, Component.literal("list"));
         box.setValue("[" + entryCount + " entries]");
         box.setEditable(false);
         box.setTooltip(Tooltip.create(Component.literal("Edit in TOML file directly.")));
         return box;
     }
 
-    private static void drawThemedBox(GuiGraphics graphics, AbstractWidget widget, int fill) {
-        int x0 = widget.getX();
-        int y0 = widget.getY();
-        int x1 = x0 + widget.getWidth();
-        int y1 = y0 + widget.getHeight();
-        graphics.fill(x0, y0, x1, y1, fill);
-        graphics.hLine(x0, x1 - 1, y0, INK);
-        graphics.hLine(x0, x1 - 1, y1 - 1, INK);
-        graphics.vLine(x0, y0, y1 - 1, INK);
-        graphics.vLine(x1 - 1, y0, y1 - 1, INK);
+    /** The shared paper button face, so a setting reads as the same control as every other button. */
+    private static void drawThemedBox(GuiGraphics graphics, AbstractButton widget, McStylePanel.ButtonTone tone) {
+        McStylePanel.drawThemedButton(graphics, widget.getX(), widget.getY(), widget.getWidth(), widget.getHeight(),
+                tone, McStylePanel.ControlState.of(widget.active, widget.isHovered() || widget.isFocused()));
     }
 
-    /** Boolean toggle: filled rect changes colour, label flips Enabled/Disabled. */
+    /** Boolean toggle: the face washes green while on, label flips Enabled/Disabled. */
     private static final class ToggleButton extends AbstractButton {
         private final ModConfigSpec.ConfigValue<Boolean> value;
         private boolean state;
@@ -174,11 +165,9 @@ public final class ConfigWidgets {
 
         @Override
         protected void renderContents(@NonNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-            int fill = state ? TOGGLE_ON_FILL : (isHovered() ? WIDGET_FILL_HOVER : WIDGET_FILL);
-            drawThemedBox(graphics, this, fill);
-            int textColor = state ? TOGGLE_ON_TEXT : INK;
+            drawThemedBox(graphics, this, state ? McStylePanel.ButtonTone.CONFIRM : McStylePanel.ButtonTone.NEUTRAL);
             drawCenteredNoShadow(graphics, Minecraft.getInstance().font, getMessage().getString(),
-                    getX() + getWidth() / 2, getY() + (getHeight() - 8) / 2, textColor);
+                    getX() + getWidth() / 2, getY() + (getHeight() - 8) / 2, INK);
         }
 
         @Override
@@ -210,7 +199,7 @@ public final class ConfigWidgets {
 
         @Override
         protected void renderContents(@NonNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-            drawThemedBox(graphics, this, isHovered() ? WIDGET_FILL_HOVER : WIDGET_FILL);
+            drawThemedBox(graphics, this, McStylePanel.ButtonTone.NEUTRAL);
             drawCenteredNoShadow(graphics, Minecraft.getInstance().font, getMessage().getString(),
                     getX() + getWidth() / 2, getY() + (getHeight() - 8) / 2, INK);
         }
@@ -221,8 +210,8 @@ public final class ConfigWidgets {
         }
     }
 
-    /** Vanilla slider subclass for ranged numeric values; current value drawn as the message. */
-    private static final class RangedSlider extends AbstractSliderButton {
+    /** Slider for ranged numeric values; current value drawn as the message. */
+    private static final class RangedSlider extends ThemedSlider {
         private final ModConfigSpec.ConfigValue<Number> configValue;
         private final double min;
         private final double max;

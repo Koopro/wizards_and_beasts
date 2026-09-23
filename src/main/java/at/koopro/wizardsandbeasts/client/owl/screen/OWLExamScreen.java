@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.owl.screen;
 
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.owl.ClientOWLCache;
 import at.koopro.wizardsandbeasts.network.owl.RequestOWLExamPacket;
 import at.koopro.wizardsandbeasts.owl.OWLGrade;
@@ -97,9 +98,8 @@ public class OWLExamScreen extends ScaledParchmentScreen {
     }
 
     private void renderConfirmPhase(GuiGraphics graphics, int cx, int cy) {
-        graphics.drawCenteredString(font,
-                Component.translatable("owls.screen.title").withColor(0x5C3317),
-                cx, cy - BG_HEIGHT / 2 + 12, 0x5C3317);
+        drawCentred(graphics, Component.translatable("owls.screen.title"),
+                cx, cy - BG_HEIGHT / 2 + 12, WizardsPalette.PAGE_RUBRIC);
         int lineY = cy - 30;
         String[] lines = font.getSplitter().splitLines(
                 Component.translatable("owls.screen.confirm_text"),
@@ -108,21 +108,22 @@ public class OWLExamScreen extends ScaledParchmentScreen {
                 .map(line -> line.getString())
                 .toArray(String[]::new);
         for (String line : lines) {
-            graphics.drawCenteredString(font, line, cx, lineY, 0x3A2010);
+            drawCentred(graphics, Component.literal(line), cx, lineY, WizardsPalette.PAGE_INK);
             lineY += font.lineHeight + 2;
         }
     }
 
     private void renderResultsPhase(GuiGraphics graphics, int cx, int cy) {
         Map<OWLSubject, OWLGrade> grades = ClientOWLCache.getGrades();
-        graphics.drawCenteredString(font,
-                Component.translatable("owls.screen.results_title").withColor(0x5C3317),
-                cx, cy - BG_HEIGHT / 2 + 12, 0x5C3317);
+        drawCentred(graphics, Component.translatable("owls.screen.results_title"),
+                cx, cy - BG_HEIGHT / 2 + 12, WizardsPalette.PAGE_RUBRIC);
 
         int rowY = cy - BG_HEIGHT / 2 + 30;
         for (OWLSubject subject : OWLSubject.values()) {
             OWLGrade grade = grades.getOrDefault(subject, OWLGrade.T);
-            int color = grade.passing ? 0xCC8800 : 0x666666;
+            // Opaque ink: the old 0xCC8800 / 0x666666 had no alpha byte, and a text colour with
+            // alpha 0 is not drawn at all on 1.21.11.
+            int color = grade.passing ? WizardsPalette.PAGE_GOOD : WizardsPalette.PAGE_INK_2;
             String text = Component.translatable(subject.translationKey()).getString()
                     + " — " + Component.translatable(grade.translationKey()).getString()
                     + " (" + grade.name() + ")";

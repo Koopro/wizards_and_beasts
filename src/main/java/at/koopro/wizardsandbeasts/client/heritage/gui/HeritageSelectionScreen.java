@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.client.heritage.gui;
 
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
+import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.character.widget.PlayerModelViewport;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
@@ -41,8 +42,10 @@ import java.util.Optional;
  */
 public class HeritageSelectionScreen extends Screen {
 
-    private static final int NAT_W = 416;
-    private static final int NAT_H = 236;
+    // Grown from 416x236 when the gate became a parchment sheet: the frame's double rule runs 4-6px
+    // in, so the outer edge went from 8 to 12 and the columns keep the widths they had.
+    private static final int NAT_W = 424;
+    private static final int NAT_H = 240;
     private static final int MARGIN = GuiScaleHelper.DEFAULT_MARGIN;
     /**
      * How far the layout may grow on a large viewport. Past this the vanilla font's own pixel grid
@@ -50,11 +53,15 @@ public class HeritageSelectionScreen extends Screen {
      */
     private static final float MAX_SCALE = 2.25F;
 
-    /** Column widths in design space: 8 | 104 | 6 | 180 | 6 | 104 | 8. */
+    /** Column widths in design space: 12 | 104 | 6 | 180 | 6 | 104 | 12. */
     private static final int COL_SIDE_W = 104;
     private static final int COL_MID_W = 180;
     private static final int COL_GAP = 6;
-    private static final int EDGE = 8;
+    /** Clearance from the sheet's edge: the parchment frame's inner rule sits at 6px. */
+    private static final int EDGE = WizardsMetrics.SPACE_L;
+    /** Title row and the rule under it, as on the Character Sheet: text at 10, rule sprite at 18. */
+    private static final int TITLE_TEXT_Y = 10;
+    private static final int TITLE_RULE_Y = 18;
 
     /**
      * Cosmetic only — this picks what the screen <em>shows</em>. The Power roll that actually
@@ -121,7 +128,7 @@ public class HeritageSelectionScreen extends Screen {
         traitsY = previewY + previewH + s(6);
 
         overlayW = s(228);
-        overlayH = s(122);
+        overlayH = s(128);
         overlayX = left + (scaledW - overlayW) / 2;
         overlayY = top + (scaledH - overlayH) / 2;
     }
@@ -198,7 +205,8 @@ public class HeritageSelectionScreen extends Screen {
     private void buildConfirmOverlay() {
         int bw = s(96);
         int bh = s(18);
-        int by = overlayY + overlayH - s(24);
+        // 30 up from the foot, so the buttons clear the overlay sheet's double rule at 4 and 6.
+        int by = overlayY + overlayH - s(30);
         int gap = s(8);
         // Back out stays neutral; sealing the character is green. Side by side in one colour, the
         // overlay asked "are you sure?" and then offered two identical answers.
@@ -330,10 +338,10 @@ public class HeritageSelectionScreen extends Screen {
 
     @Override
     public void render(@NonNull GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        // No opaque fill here. This used to paint the whole viewport with WizardsPalette.INK, which
-        // hid the world behind a flat black field — on the very first screen of a new character,
-        // before they have seen the place they are about to be a wizard in. The backdrop is now the
-        // dim overlay from renderBackground below, so the terrain reads through it.
+        // No full-viewport fill here. This used to paint the whole viewport with WizardsPalette.INK,
+        // which hid the world behind a flat black field — on the very first screen of a new
+        // character, before they have seen the place they are about to be a wizard in. The screen
+        // is one parchment sheet sized to the layout, and the dimmed world shows around it.
 
         if (confirmOpen) {
             // Browse chrome is not drawn behind the confirm overlay — the overlay owns the screen.
@@ -345,7 +353,11 @@ public class HeritageSelectionScreen extends Screen {
             return;
         }
 
-        g.drawCenteredString(font, getTitle(), left + scaledW / 2, top + s(10), WizardsPalette.BRASS_HI);
+        McStylePanel.drawThemedPanel(g, left, top, scaledW, scaledH);
+        // Written on the sheet, no shadow: a shadow on paper reads as a doubled glyph.
+        g.drawString(font, getTitle(), left + (scaledW - font.width(getTitle())) / 2, top + s(TITLE_TEXT_Y),
+                WizardsPalette.PAGE_INK, false);
+        McStylePanel.drawDivider(g, leftColX, top + s(TITLE_RULE_Y), scaledW - 2 * s(EDGE));
 
         if (selectedHeritage != null) {
             HeritageDossierRenderer.drawDossier(g, font, midColX, contentTop,
@@ -382,7 +394,7 @@ public class HeritageSelectionScreen extends Screen {
         int hintY = contentTop + (cyclerH + s(8)) * (conditionCycler == null ? 2 : 3) + s(12);
         for (var line : font.split(Component.translatable("gui.wizards_and_beasts.heritage.nav_hint"),
                 s(COL_SIDE_W))) {
-            g.drawString(font, line, leftColX, hintY, WizardsPalette.TEXT_DIM, false);
+            g.drawString(font, line, leftColX, hintY, WizardsPalette.PAGE_INK_2, false);
             hintY += font.lineHeight;
         }
 
@@ -446,10 +458,8 @@ public class HeritageSelectionScreen extends Screen {
 
     @Override
     public void renderBackground(@NonNull GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        // Dim only, no blur — same choice the Character Sheet makes. The world stays crisp behind
-        // the gate, and the dim is what keeps the title, cyclers and nav hint legible: they are
-        // drawn straight onto the backdrop with no panel of their own, so over bright terrain at
-        // midday they would otherwise be unreadable.
+        // Dim only, no blur — same choice the Character Sheet makes. The world stays crisp around
+        // the sheet; everything that has to be read is on the parchment itself.
         renderMenuBackground(g);
     }
 

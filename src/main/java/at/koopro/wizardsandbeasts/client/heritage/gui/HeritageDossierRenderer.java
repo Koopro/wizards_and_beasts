@@ -26,20 +26,24 @@ import java.util.Locale;
  * purpose — the screen is now a character creator rather than a certificate, and a flat surface is
  * both faster to read and cheaper to keep consistent.
  *
- * <p>Everything here draws from {@link WizardsPalette} and the shared {@code gui/theme/} sprites via
- * {@link McStylePanel}. The old screen was the last one carrying its own parchment colour block in
- * {@code WizardsAndBeastsUiTokens.HeritageSelection}; moving onto the palette <em>is</em> the
- * flattening, and it is why nothing in this file mixes its own browns.
+ * <p>Everything here draws from {@link WizardsPalette}'s page inks and the shared {@code gui/theme/}
+ * sprites via {@link McStylePanel}. The old screen was the last one carrying its own parchment colour
+ * block (since deleted from {@code WizardsAndBeastsUiTokens}); moving onto the palette <em>is</em> the
+ * flattening, and it is why nothing in this file mixes its own browns. (The screen is parchment again
+ * now, but the kit's parchment — the same sheet every other screen is written on.)
  */
 public final class HeritageDossierRenderer {
 
     /** Inner padding shared by both panels. */
     private static final int PAD = 8;
-    /** Ribbon ground for a heritage that cannot yet be chosen. */
-    private static final int LOCKED_RIBBON = 0xCC7A1E1E;
-    private static final int LOCKED_RIBBON_EDGE = 0xFFB85050;
-    private static final int LOCKED_RIBBON_TEXT = 0xFFF2D7D7;
+    /** Ribbon for a heritage that cannot yet be chosen: a strip of sealing wax, lettered in paper. */
+    private static final int LOCKED_RIBBON = WizardsPalette.WAX;
+    private static final int LOCKED_RIBBON_EDGE = WizardsPalette.PAGE_BAD;
+    private static final int LOCKED_RIBBON_TEXT = WizardsPalette.PAGE_LIGHT;
+    /** Scrim over the world behind the confirm sheet, not a colour on paper. */
     private static final int OVERLAY_DIM = 0xCC0A0603;
+    /** The dossier's field: the inset is the page one shade down, which PAGE_SHADE stands in for. */
+    private static final int DOSSIER_GROUND = WizardsPalette.PAGE_SHADE;
     private HeritageDossierRenderer() {}
 
     // ── Centre column: the dossier ───────────────────────────────────────────
@@ -47,30 +51,31 @@ public final class HeritageDossierRenderer {
     /**
      * Heritage name, lineage, signature trait, flavour line and the wrapped lore blurb.
      *
-     * <p>The name is tinted with {@link Heritage#getColor()} lifted onto the panel ground. Several
-     * signature colours (Veela, House-Elf, Wizardkind) are near-white and would bloom illegibly
-     * against a light surface, but this panel is dark, so the same value that reads as a washout on
-     * parchment reads correctly here — the tint is used raw and only forced opaque.
+     * <p>The name is tinted with {@link Heritage#getColor()} pushed onto the dossier ground. Several
+     * signature colours (Veela, House-Elf, Wizardkind) are near-white and would bloom illegibly on
+     * paper, so {@link UiContrast#readableOn} darkens them to body-text contrast (no shadow on paper to
+     * help a large-text target) while keeping their hue.
      */
     public static void drawDossier(@NonNull GuiGraphics g, @NonNull Font font,
                                    int x, int y, int w, int h,
                                    @NonNull Heritage heritage, @Nullable HeritageVariant variant,
                                    boolean locked) {
-        McStylePanel.drawThemedPanel(g, x, y, w, h);
+        // A recess in the sheet rather than a second sheet on it: the inset's edge is 3px, so PAD
+        // still lands on paper, and there is no double rule to strike through the name.
+        McStylePanel.drawThemedInset(g, x, y, w, h);
 
         int tx = x + PAD;
         int innerW = w - PAD * 2;
         int cursorY = y + PAD;
 
-        // The signature colour is chosen to work as a sigil, not as ink. Lifted onto the panel field
-        // so the dark ones (Pure-blood purple, Obscurial) stop sinking into the leather and the pale
-        // ones (Veela, House-Elf) stop glaring off it.
+        // The signature colour is chosen to work as a sigil, not as ink. Pushed onto the dossier
+        // ground so the pale ones (Veela, House-Elf, Wizardkind) stop vanishing into the paper.
         g.drawString(font, heritage.getDisplayName(), tx, cursorY,
-                UiContrast.readableOn(heritage.getColor(), WizardsPalette.PLATE, UiContrast.AA_LARGE), false);
+                UiContrast.readableOn(heritage.getColor(), DOSSIER_GROUND), false);
         cursorY += font.lineHeight + 2;
 
         if (variant != null) {
-            g.drawString(font, variant.getDisplayName(), tx, cursorY, WizardsPalette.TEXT_DIM, false);
+            g.drawString(font, variant.getDisplayName(), tx, cursorY, WizardsPalette.PAGE_INK_2, false);
             cursorY += font.lineHeight + 3;
         }
 
@@ -87,7 +92,7 @@ public final class HeritageDossierRenderer {
                         Component.translatable("heritage.wizards_and_beasts." + heritage.getId() + ".trait")),
                 innerW);
         for (FormattedCharSequence line : signature) {
-            g.drawString(font, line, tx, cursorY, WizardsPalette.BRASS, false);
+            g.drawString(font, line, tx, cursorY, WizardsPalette.PAGE_RUBRIC, false);
             cursorY += font.lineHeight;
         }
         cursorY += 4;
@@ -106,14 +111,14 @@ public final class HeritageDossierRenderer {
         List<FormattedCharSequence> lore = font.split(
                 Component.translatable("heritage.wizards_and_beasts." + heritage.getId() + ".lore"), innerW);
         for (int i = 0; i < Math.min(maxLines, lore.size()); i++) {
-            g.drawString(font, lore.get(i), tx, cursorY, WizardsPalette.TEXT, false);
+            g.drawString(font, lore.get(i), tx, cursorY, WizardsPalette.PAGE_INK, false);
             cursorY += font.lineHeight;
         }
 
         if (flavourLines > 0) {
             McStylePanel.drawDivider(g, tx, footerY - WizardsMetrics.DIVIDER_H - 1, innerW);
             for (int i = 0; i < flavourLines; i++) {
-                g.drawString(font, flavour.get(i), tx, footerY, WizardsPalette.TEXT_DIM, false);
+                g.drawString(font, flavour.get(i), tx, footerY, WizardsPalette.PAGE_INK_2, false);
                 footerY += font.lineHeight;
             }
         }
@@ -154,10 +159,10 @@ public final class HeritageDossierRenderer {
         int cursorY = y;
 
         cursorY = row(g, font, x, cursorY, w, "gui.wizards_and_beasts.heritage.trait.magic",
-                Component.literal(heritage.getMagicSource().getDisplayName()), WizardsPalette.TEXT);
+                Component.literal(heritage.getMagicSource().getDisplayName()), WizardsPalette.PAGE_INK);
 
         cursorY = row(g, font, x, cursorY, w, "gui.wizards_and_beasts.heritage.trait.size",
-                Component.literal(title(heritage.getSizeCategory().name())), WizardsPalette.TEXT);
+                Component.literal(title(heritage.getSizeCategory().name())), WizardsPalette.PAGE_INK);
         cursorY += 2;
 
         for (HeritageTraits.Kind kind : HeritageTraits.Kind.values()) {
@@ -175,12 +180,12 @@ public final class HeritageDossierRenderer {
             return y;
         }
         int cursorY = y;
-        g.drawString(font, Component.translatable(kind.getHeadingKey()), x, cursorY, WizardsPalette.BRASS, false);
+        g.drawString(font, Component.translatable(kind.getHeadingKey()), x, cursorY, WizardsPalette.PAGE_RUBRIC, false);
         cursorY += font.lineHeight + 1;
         for (HeritageTraits.Trait trait : traits) {
             for (FormattedCharSequence line : font.split(
                     Component.translatable(trait.getNameKey()), w - 6)) {
-                g.drawString(font, line, x + 6, cursorY, WizardsPalette.TEXT, false);
+                g.drawString(font, line, x + 6, cursorY, WizardsPalette.PAGE_INK, false);
                 cursorY += font.lineHeight;
             }
         }
@@ -191,7 +196,7 @@ public final class HeritageDossierRenderer {
     private static int row(GuiGraphics g, Font font, int x, int y, int w,
                            String labelKey, Component value, int valueColor) {
         Component label = Component.translatable(labelKey);
-        g.drawString(font, label, x, y, WizardsPalette.TEXT_DIM, false);
+        g.drawString(font, label, x, y, WizardsPalette.PAGE_INK_2, false);
         int vw = font.width(value);
         g.drawString(font, value, x + w - vw, y, valueColor, false);
         return y + font.lineHeight + 1;
@@ -211,21 +216,21 @@ public final class HeritageDossierRenderer {
         int ty = panelY + 12;
 
         centered(g, font, Component.translatable("gui.wizards_and_beasts.heritage.confirm_title"),
-                cx, ty, WizardsPalette.BRASS_HI);
+                cx, ty, WizardsPalette.PAGE_RUBRIC);
         ty += font.lineHeight + 6;
 
         centered(g, font, Component.literal(heritage.getDisplayName() + " — " + variant.getDisplayName()),
-                cx, ty, UiContrast.readableOn(heritage.getColor(), WizardsPalette.PLATE, UiContrast.AA_LARGE));
+                cx, ty, UiContrast.readableOn(heritage.getColor(), WizardsPalette.PAGE));
         ty += font.lineHeight + 8;
 
         for (FormattedCharSequence line : font.split(
                 Component.translatable("gui.wizards_and_beasts.heritage.confirm_body"), panelW - 24)) {
-            g.drawString(font, line, cx - font.width(line) / 2, ty, WizardsPalette.TEXT, false);
+            g.drawString(font, line, cx - font.width(line) / 2, ty, WizardsPalette.PAGE_INK, false);
             ty += font.lineHeight;
         }
         ty += 4;
         centered(g, font, Component.translatable("gui.wizards_and_beasts.heritage.confirm_final"),
-                cx, ty, LOCKED_RIBBON_EDGE);
+                cx, ty, WizardsPalette.PAGE_BAD);
     }
 
     // ── Primitives ───────────────────────────────────────────────────────────

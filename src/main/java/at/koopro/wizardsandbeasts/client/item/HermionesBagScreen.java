@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.item;
 
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.item.trinket.HermionesBagMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -13,7 +14,7 @@ import net.minecraft.world.entity.player.Inventory;
  *
  * <p>This used to blit vanilla's {@code generic_54} directly, so one of the mod's signature
  * artefacts opened as a plain double chest. The sheet it draws now is that same panel
- * recoloured into the mod's leather and gold by {@code tools/gui_chrome.py}, with beads
+ * recoloured onto the mod's parchment by {@code tools/gui_chrome.py}, with beads
  * along the title band — same geometry, so every slot still lands where the menu puts it.
  */
 public class HermionesBagScreen extends AbstractContainerScreen<HermionesBagMenu> {
@@ -55,6 +56,18 @@ public class HermionesBagScreen extends AbstractContainerScreen<HermionesBagMenu
                 x, y, 0.0F, 0.0F, this.imageWidth, CHEST_H, SHEET, SHEET);
         graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE,
                 x, y + CHEST_H, 0.0F, INVENTORY_V, this.imageWidth, INVENTORY_H, SHEET, SHEET);
+    }
+
+    /**
+     * Both labels in iron-gall ink rather than vanilla's {@code #404040}: grey reads on grey, but on
+     * paper it is the one cold colour on the sheet.
+     */
+    @Override
+    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
+        graphics.drawString(font, this.title, this.titleLabelX, this.titleLabelY,
+                WizardsPalette.PAGE_INK, false);
+        graphics.drawString(font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY,
+                WizardsPalette.PAGE_INK_2, false);
     }
 
     @Override

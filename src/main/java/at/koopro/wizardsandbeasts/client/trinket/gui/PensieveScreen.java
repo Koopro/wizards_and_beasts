@@ -44,9 +44,9 @@ import java.util.List;
  * <p><strong>The intensity bar was ten pipe characters.</strong> {@code "§d||||||...."} — a glyph
  * count standing in for a bar, at whatever width the font happened to give it.
  *
- * <p>Cut on the {@code pensieve} material: dark wet stone with an aubergine cast, and the
- * silver-white light a memory gives off. The old screen's {@code #100A1A} field and {@code #5B4B8A}
- * outline were the right instinct, hand-rolled — the hues survive, the {@code fill()} calls do not.
+ * <p>Cut on the {@code pensieve} material: silvered vellum, aubergine ink and the silver-blue light
+ * a memory gives off. It was dark wet stone until the screens became paper (2026-09-23); the
+ * aubergine the old hand-rolled {@code #100A1A} field carried survives as the ink.
  */
 public class PensieveScreen extends Screen {
 
@@ -56,12 +56,17 @@ public class PensieveScreen extends Screen {
     private static final int PANEL_H = WizardsMetrics.PANEL_STANDARD_H;
     private static final int FRAME = WizardsMetrics.PANEL_SPRITE_BORDER;
     private static final int PAD = WizardsMetrics.SPACE_M;
+    /** Clearance from the sheet's edge: its double rule runs 4-6px in. */
+    private static final int EDGE = WizardsMetrics.SPACE_L;
+    /** Title row, clear of the frame's rules; its divider lands at 18 at the smallest header. */
+    private static final int TITLE_Y = 10;
 
     private static final int HEADER_H = 30;
     /** Two lines and a bar, so a row can carry the source, the age and the strength together. */
     private static final int ROW_H = 24;
     private static final int DETAIL_H = 46;
-    private static final int FOOTER_H = 16;
+    /** The count line plus the sheet's 12px edge below it. */
+    private static final int FOOTER_H = 26;
     private static final int BAR_H = 4;
 
     /** Ticks in a second, and the units the age readout steps through. */
@@ -117,14 +122,23 @@ public class PensieveScreen extends Screen {
     }
 
     // Bands scale with the panel. `Layout.panel` clamps between 0.72x and 1.35x and floors the
-    // panel at 90px tall, so fixed bands would sum past the frame at the small end -- 30 + 46 + 16
-    // plus a gap is 100, and a list asked for -10 pixels draws its rows outside the panel.
+    // panel at 90px tall, so fixed bands would sum past the frame at the small end -- 30 + 46 + 26
+    // plus a gap is 110, and a list asked for -20 pixels draws its rows outside the panel.
+    //
+    // They grow but never shrink below their design size, though: what they hold is text and the
+    // sheet's own frame, and neither scales. Shrunk to 0.72 the header put its rule through the
+    // title and the detail band ran its third line out through its own bottom edge. The list
+    // absorbs the difference, and `listHeight` still floors it at one row.
+    private int band(int designPx) {
+        return Math.max(designPx, layout.s(designPx));
+    }
+
     private int headerH() {
-        return layout.s(HEADER_H);
+        return band(HEADER_H);
     }
 
     private int detailH() {
-        return layout.s(DETAIL_H);
+        return band(DETAIL_H);
     }
 
     private int rowStride() {
@@ -134,7 +148,7 @@ public class PensieveScreen extends Screen {
     /** Whatever is left for the list, but never less than one row. */
     private int listHeight() {
         int remaining = layout.panelH() - headerH() - detailH()
-                - layout.s(FOOTER_H) - WizardsMetrics.SPACE_M;
+                - band(FOOTER_H) - WizardsMetrics.SPACE_M;
         return Math.max(rowStride(), remaining);
     }
 
@@ -164,16 +178,19 @@ public class PensieveScreen extends Screen {
         McStylePanel.drawSkinPanel(graphics, SKIN, panelX, panelY, panelW, panelH);
         McStylePanel.drawSkinSeal(graphics, SKIN,
                 panelX + panelW - FRAME - McStylePanel.SEAL_SIZE, panelY + FRAME);
-        McStylePanel.drawSkinDivider(graphics, SKIN, panelX + FRAME,
-                panelY + headerH() - WizardsMetrics.DIVIDER_H, panelW - 2 * FRAME);
+        // A gap under the rule, because the list's inset starts SPACE_S above the band's foot and
+        // its edge would otherwise sit on the rule's lower line.
+        McStylePanel.drawSkinDivider(graphics, SKIN, panelX + EDGE,
+                panelY + headerH() - WizardsMetrics.DIVIDER_H - WizardsMetrics.SPACE_S,
+                panelW - 2 * EDGE);
 
-        graphics.drawString(font, this.title, panelX + FRAME + PAD, panelY + FRAME + 2,
+        graphics.drawString(font, this.title, panelX + FRAME + PAD, panelY + TITLE_Y,
                 SKIN.ink(), false);
 
         if (memories.isEmpty()) {
-            graphics.drawCenteredString(font,
-                    Component.translatable("gui.wizards_and_beasts.pensieve.empty"),
-                    panelX + panelW / 2, panelY + panelH / 2 - font.lineHeight, SKIN.muted());
+            Component empty = Component.translatable("gui.wizards_and_beasts.pensieve.empty");
+            graphics.drawString(font, empty, panelX + (panelW - font.width(empty)) / 2,
+                    panelY + panelH / 2 - font.lineHeight, SKIN.muted(), false);
             super.render(graphics, mouseX, mouseY, partialTick);
             return;
         }
@@ -230,10 +247,13 @@ public class PensieveScreen extends Screen {
      *
      * <p>This was ten {@code |} characters in a magenta section code — a glyph count standing in for
      * a bar, quantised to tenths for no reason but that ten pipes was a convenient number to type.
+     *
+     * <p>An outline in the thin ink rather than a solid track: filled in the frame ink it read as a
+     * black bar on the vellum, and the silver fill is too close to the vellum to stand on its own.
      */
     private void renderIntensity(GuiGraphics graphics, int x, int y, int w, float intensity) {
         float clamped = Math.max(0.0f, Math.min(1.0f, intensity));
-        graphics.fill(x, y, x + w, y + BAR_H, SKIN.frame());
+        McStylePanel.drawBorder(graphics, x, y, w, BAR_H, SKIN.muted(), SKIN.muted());
         graphics.fill(x + 1, y + 1, x + 1 + (int) ((w - 2) * clamped), y + BAR_H - 1, SKIN.accent());
     }
 
@@ -283,7 +303,7 @@ public class PensieveScreen extends Screen {
                 ? Component.translatable("gui.wizards_and_beasts.pensieve.count_scroll", count)
                 : count;
         graphics.drawString(font, note, panelX + FRAME + PAD,
-                panelY + layout.panelH() - FRAME - font.lineHeight, SKIN.muted(), false);
+                panelY + layout.panelH() - EDGE - font.lineHeight, SKIN.muted(), false);
     }
 
     private Component typeLabel(MemoryType type) {

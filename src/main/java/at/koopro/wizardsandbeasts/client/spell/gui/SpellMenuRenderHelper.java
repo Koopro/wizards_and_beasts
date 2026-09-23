@@ -13,6 +13,7 @@ import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.client.gui.util.UiContrast;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsAndBeastsUiTokens;
+import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -25,20 +26,42 @@ import org.jspecify.annotations.Nullable;
  */
 public final class SpellMenuRenderHelper {
 
-    /** Average ink of {@code panel.png} — the ground every label on this screen is read against. */
-
     /** Alpha a placeholder spell's icon is drawn at — present, legible, obviously not available. */
     private static final float ALPHA_COMING_SOON = 0.35f;
+
+    /**
+     * How far the sheet reaches past the layout rectangle on every side.
+     *
+     * <p>Every offset on this screen is measured from the layout's origin and sits 0-4px inside it,
+     * which is right on top of the parchment frame's double rule (4-6px in). Growing the sheet by the
+     * standard 12px clearance moves the frame out of the content's way without moving a single
+     * control; {@code Layout.panel} already leaves 12px of screen either side for it.
+     */
+    public static final int SHEET_OUTSET = WizardsMetrics.SPACE_L;
+
+    /**
+     * The ground the index headers and the info card's labels are read against, for
+     * {@link UiContrast}: an inset's stock is the page darkened, so the page's shade tone is the
+     * conservative stand-in.
+     */
+    private static final int WELL_GROUND = WizardsPalette.PAGE_SHADE;
+
+    /**
+     * Left edge of the info card, from the index column's edge. Clear of the index well, which runs
+     * {@code s(4)} past that edge to hold its scrollbar — two insets must not share an edge.
+     */
+    public static final int INFO_CARD_X = 8;
+    /** The info text, clear of the card's engraved edge. */
+    private static final int INFO_TEXT_X = INFO_CARD_X + 6;
 
     private SpellMenuRenderHelper() {}
 
     /**
-     * Leather plate, brass filigree, and a recessed well for the index.
+     * The sheet, the title, and a recessed well for the index.
      *
-     * <p>This screen used to paint a navy panel with a pure-gold title, which matched nothing else in
-     * the mod — {@code WizardsPalette} is leather and brass and says so in its own javadoc. The frame
-     * is now built from it: {@code PLATE} for the face, {@code BRASS} for the rule, {@code WELL} for
-     * the sunken list.
+     * <p>This screen was a navy panel with a pure-gold title, then leather and brass; it is now the
+     * parchment every other screen is — the shared themed sheet, an inset well for the list, and the
+     * title in ink on the page between the search box and the Skills button.
      */
     public static void renderFrame(GuiGraphics graphics, Font font, int width, int height,
                                    int panelW, int panelH, int leftW, GuiScaleHelper.Layout layout) {
@@ -48,23 +71,22 @@ public final class SpellMenuRenderHelper {
         int h = layout.panelH();
         int lw = layout.s(leftW);
 
-        graphics.fill(x, y, x + w, y + h, WizardsPalette.PLATE);
-        McStylePanel.drawBorder(graphics, x, y, w, h, WizardsPalette.BRASS, WizardsPalette.INK);
+        McStylePanel.drawThemedPanel(graphics, x - SHEET_OUTSET, y - SHEET_OUTSET,
+                w + 2 * SHEET_OUTSET, h + 2 * SHEET_OUTSET);
 
-        // Header band, seated on a brass rule.
-        int headerH = layout.s(WizardsAndBeastsUiTokens.SpellMenu.DIVIDER_Y_OFFSET);
-        graphics.fill(x + 1, y + 1, x + w - 1, y + headerH, WizardsPalette.RAIL);
-        graphics.fill(x + 1, y + headerH, x + w - 1, y + headerH + 1, WizardsPalette.LINE);
+        // Centred in the gap between the search box (which spans the index column) and the Skills
+        // button, not on the sheet: at w / 2 the search box, drawn later as a widget, covered half of it.
+        String title = net.minecraft.network.chat.Component
+                .translatable("gui.wizards_and_beasts.spell_menu.title").getString();
+        int titleCx = x + (lw + w - layout.s(62)) / 2;
+        graphics.drawString(font, title, titleCx - font.width(title) / 2,
+                y + layout.s(WizardsAndBeastsUiTokens.SpellMenu.HEADER_Y_OFFSET),
+                WizardsPalette.PAGE_INK, false);
 
-        graphics.drawCenteredString(font,
-                net.minecraft.network.chat.Component.translatable("gui.wizards_and_beasts.spell_menu.title"),
-                x + w / 2, y + layout.s(WizardsAndBeastsUiTokens.SpellMenu.HEADER_Y_OFFSET),
-                WizardsPalette.BRASS_HI);
-
-        // The index sits in a recessed well; the plate to its right carries the sigil.
-        int wellTop = y + headerH + layout.s(WizardsAndBeastsUiTokens.SpellMenu.TOP_PADDING);
-        graphics.fill(x + layout.s(2), wellTop, x + lw, y + h - layout.s(2), WizardsPalette.WELL);
-        graphics.fill(x + lw, y + headerH + 1, x + lw + 1, y + h - layout.s(2), WizardsPalette.LINE);
+        // The index sits in a recessed well that holds its search field too, the full height of the
+        // layout: the field is a well of its own, and two wells stacked edge to edge read as a seam.
+        // Its right edge clears the list's scrollbar; the plate to its right carries the sigil.
+        McStylePanel.drawThemedInset(graphics, x, y, lw + layout.s(4), h);
     }
 
     /**
@@ -80,21 +102,22 @@ public final class SpellMenuRenderHelper {
                                  boolean hovered, boolean selected, int iconSize) {
         if (entry.spell() == null) {
             String catName = entry.category().name().replace('_', ' ');
-            // DARK_ARTS' 0x8B00FF is darker than the navy panel it sits on — that header row was
-            // effectively invisible. Contrast-clamped, so the category hue survives but reads.
+            // Category hues were chosen for a dark ground — UTILITY's 0x44FF44 is 1.4 : 1 on paper.
+            // Contrast-clamped, so the hue survives but reads.
             graphics.drawString(font, catName, x + WizardsAndBeastsUiTokens.SpellMenu.CATEGORY_X_OFFSET,
                     y + WizardsAndBeastsUiTokens.SpellMenu.ENTRY_TEXT_Y_OFFSET,
-                    UiContrast.readableOn(entry.category().getColor(), WizardsPalette.WELL), false);
+                    UiContrast.readableOn(entry.category().getColor(), WELL_GROUND), false);
             return;
         }
 
         Spell spell = entry.spell();
         // Rows are cards on the well, not text on a void: a seated row is what makes the index read
-        // as a list of things you can pick up rather than a paragraph.
-        graphics.fill(x - 1, y - 1, x + w, y + h,
-                selected ? WizardsPalette.SELECT : hovered ? WizardsPalette.PLATE_2 : WizardsPalette.PLATE);
+        // as a list of things you can pick up rather than a paragraph. The card is the page laid on
+        // the darker well; hover lifts it, selection washes it with gilt and marks its edge.
+        int card = selected ? WizardsPalette.PAGE_SELECT : hovered ? WizardsPalette.PAGE_LIGHT : WizardsPalette.PAGE;
+        graphics.fill(x - 1, y - 1, x + w, y + h, card);
         if (selected) {
-            graphics.fill(x - 1, y - 1, x + 1, y + h, WizardsPalette.BRASS);
+            graphics.fill(x - 1, y - 1, x + 1, y + h, WizardsPalette.GILT_DARK);
         }
 
         Minecraft mc = Minecraft.getInstance();
@@ -111,8 +134,8 @@ public final class SpellMenuRenderHelper {
         graphics.drawString(font,
                 at.koopro.wizardsandbeasts.client.gui.util.GuiText.resolve(spell.getDisplayName()),
                 x + iconSize + 4, y + WizardsAndBeastsUiTokens.SpellMenu.ENTRY_TEXT_Y_OFFSET,
-                comingSoon ? WizardsPalette.TEXT_DIM
-                        : UiContrast.readableOn(spell.getCategory().getColor(), WizardsPalette.PLATE),
+                comingSoon ? WizardsPalette.PAGE_INK_3
+                        : UiContrast.readableOn(spell.getCategory().getColor(), card),
                 false);
 
         if (comingSoon) {
@@ -121,7 +144,7 @@ public final class SpellMenuRenderHelper {
             graphics.drawString(font, tag,
                     x + w - font.width(tag) - 2,
                     y + WizardsAndBeastsUiTokens.SpellMenu.ENTRY_TEXT_Y_OFFSET,
-                    WizardsPalette.TEXT_DIM, false);
+                    WizardsPalette.PAGE_INK_3, false);
             return;
         }
 
@@ -132,7 +155,7 @@ public final class SpellMenuRenderHelper {
             graphics.drawString(font, label,
                     x + w - WizardsAndBeastsUiTokens.SpellMenu.COOLDOWN_X_OFFSET,
                     y + WizardsAndBeastsUiTokens.SpellMenu.ENTRY_TEXT_Y_OFFSET,
-                    WizardsAndBeastsUiTokens.SpellMenu.COOLDOWN_COLOR, false);
+                    UiContrast.readableOn(WizardsAndBeastsUiTokens.SpellMenu.COOLDOWN_COLOR, card), false);
         }
 
         Proficiency prof = Proficiency.fromCastCount(data.getSuccessfulHits(spell.getId()));
@@ -142,9 +165,9 @@ public final class SpellMenuRenderHelper {
             default -> "○";
         };
         int profColor = switch (prof) {
-            case MASTERED -> WizardsAndBeastsUiTokens.SpellMenu.PROF_MASTERED;
-            case PROFICIENT -> WizardsAndBeastsUiTokens.SpellMenu.PROF_PROFICIENT;
-            default -> WizardsAndBeastsUiTokens.SpellMenu.PROF_DEFAULT_DARK;
+            case MASTERED -> UiContrast.readableOn(WizardsAndBeastsUiTokens.SpellMenu.PROF_MASTERED, card);
+            case PROFICIENT -> UiContrast.readableOn(WizardsAndBeastsUiTokens.SpellMenu.PROF_PROFICIENT, card);
+            default -> WizardsPalette.PAGE_INK_3;
         };
         graphics.drawString(font, indicator,
                 x + w - WizardsAndBeastsUiTokens.SpellMenu.PROF_X_OFFSET,
@@ -165,7 +188,7 @@ public final class SpellMenuRenderHelper {
         int panelY = layout.panelY();
         panelH = layout.panelH();
         leftW = layout.s(leftW);
-        int infoX = panelX + leftW + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_INFO_X_OFFSET);
+        int infoX = panelX + leftW + layout.s(INFO_TEXT_X);
 
         if (selectedSpellId == null) {
             return;
@@ -179,11 +202,11 @@ public final class SpellMenuRenderHelper {
         int infoY = panelY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_INFO_BASE_Y);
 
         graphics.drawString(font, GuiText.resolve(sel.getDisplayName()), infoX, infoY,
-                UiContrast.readableOn(sel.getCategory().getColor(), WizardsPalette.PLATE), false);
+                UiContrast.readableOn(sel.getCategory().getColor(), WELL_GROUND), false);
 
         graphics.drawString(font, sel.getCategory().name().replace('_', ' '), infoX,
                 infoY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_CATEGORY_Y),
-                WizardsPalette.TEXT_DIM, false);
+                WizardsPalette.PAGE_INK_2, false);
 
         Minecraft mc = Minecraft.getInstance();
         if (mc.level != null && data.isOnCooldown(sel.getId(), mc.level.getGameTime())) {
@@ -192,13 +215,13 @@ public final class SpellMenuRenderHelper {
                     Component.translatable("gui.wizards_and_beasts.spell_menu.recharging",
                             String.format("%.1f", sec)),
                     infoX, infoY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_COOLDOWN_Y),
-                    WizardsAndBeastsUiTokens.SpellMenu.COOLDOWN_COLOR, false);
+                    UiContrast.readableOn(WizardsAndBeastsUiTokens.SpellMenu.COOLDOWN_COLOR, WELL_GROUND), false);
         } else {
             graphics.drawString(font,
                     Component.translatable("gui.wizards_and_beasts.spell_menu.cooldown",
                             String.format("%.1f", sel.getBaseCooldownTicks() / 20.0f)),
                     infoX, infoY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_COOLDOWN_Y),
-                    WizardsPalette.TEXT_DIM, false);
+                    WizardsPalette.PAGE_INK_2, false);
         }
 
         if (sel.getBaseDamage() > 0) {
@@ -206,7 +229,7 @@ public final class SpellMenuRenderHelper {
                     Component.translatable("gui.wizards_and_beasts.spell_menu.damage",
                             String.format("%.1f", sel.getBaseDamage())),
                     infoX, infoY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_DAMAGE_Y),
-                    WizardsPalette.TEXT_DIM, false);
+                    WizardsPalette.PAGE_INK_2, false);
         }
 
         int casts = data.getSuccessfulHits(sel.getId());
@@ -222,9 +245,9 @@ public final class SpellMenuRenderHelper {
             default -> "gui.wizards_and_beasts.spell_menu.prof.novice";
         });
         int profColor = switch (prof) {
-            case MASTERED -> WizardsAndBeastsUiTokens.SpellMenu.PROF_MASTERED;
-            case PROFICIENT -> WizardsAndBeastsUiTokens.SpellMenu.PROF_PROFICIENT;
-            default -> WizardsAndBeastsUiTokens.SpellMenu.PROF_NOVICE_TEXT;
+            case MASTERED -> UiContrast.readableOn(WizardsAndBeastsUiTokens.SpellMenu.PROF_MASTERED, WELL_GROUND);
+            case PROFICIENT -> UiContrast.readableOn(WizardsAndBeastsUiTokens.SpellMenu.PROF_PROFICIENT, WELL_GROUND);
+            default -> WizardsPalette.PAGE_INK_2;
         };
         Component profText = prof == Proficiency.MASTERED
                 ? Component.translatable("gui.wizards_and_beasts.spell_menu.prof_casts", profName, casts)
@@ -239,7 +262,7 @@ public final class SpellMenuRenderHelper {
 
         SpellRequirement req = sel.getRequirement();
         if (req != null && req != SpellRequirement.NONE) {
-            graphics.drawString(font, req.describe(), infoX, nextY, WizardsPalette.TEXT_DIM, false);
+            graphics.drawString(font, req.describe(), infoX, nextY, WizardsPalette.PAGE_INK_2, false);
             nextY += layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_REQ_Y);
         }
 
@@ -247,7 +270,7 @@ public final class SpellMenuRenderHelper {
         // damage line above it is the number in the JSON; this is the number the player gets, and
         // until now the screen only ever showed the first of the two.
         for (Component line : SpellPowerTooltip.lines(sel)) {
-            graphics.drawString(font, line, infoX, nextY, WizardsPalette.TEXT_DIM, false);
+            graphics.drawString(font, line, infoX, nextY, WizardsPalette.PAGE_INK_2, false);
             nextY += font.lineHeight + 1;
         }
     }

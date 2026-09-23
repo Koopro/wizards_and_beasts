@@ -31,11 +31,13 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Star-chart canvas over the player's audience skill web: a three-layer parallax night sky, nodes
- * as tinted star sprites (size = magnitude, state = shape and brightness), connections as glowing
- * ley-lines, constellation glyphs and names fading out as you zoom in to build. Drag to pan, scroll
- * to zoom toward the cursor, click an allocatable star to send the {@link SkillUnlockC2SPayload}
- * roundtrip (state applies on the server's sync response).
+ * Star-chart canvas over the player's audience skill web, drawn as a page of an engraved celestial
+ * atlas: pale vellum with a dotted graticule, nodes as engraved stars (size and ray count =
+ * magnitude, state = shape), connections as ink lines -- dotted where uncharted, dashed on the
+ * frontier, solid over silver where taken -- hand-coloured region washes, and constellation glyphs
+ * and names fading out as you zoom in to build. Drag to pan, scroll to zoom toward the cursor,
+ * click an allocatable star to send the {@link SkillUnlockC2SPayload} roundtrip (state applies on
+ * the server's sync response).
  *
  * <p>Nothing on this screen is drawn with a shape primitive. The rings were a midpoint circle of
  * one-pixel {@code fill}s, the edges a Bresenham run, the pips two crossed rectangles and the
@@ -51,19 +53,28 @@ public class SkillTreeScreen extends Screen {
     private static final int CULL_PAD = 48;
 
     /**
-     * Parallax factors for the three sky layers, back to front.
+     * How far the page layers travel against the pan: all the way.
      *
-     * <p>One tile cannot have depth. What reads as distance is the difference in how far each
-     * layer travels against the pan, which is why the far field barely moves and the near stars
-     * keep up with the chart.
+     * <p>The night sky had three depths moving at 0.10, 0.18 and 0.32 of the pan. The atlas page
+     * has none -- its vellum, stipple and background stars are printed on the same sheet as the
+     * web, and a graticule that slid under the stars would read as two sheets, not a sky.
      */
-    private static final double PARALLAX_FAR = 0.10;
-    private static final double PARALLAX_NEBULA = 0.18;
-    private static final double PARALLAX_NEAR = 0.32;
+    private static final double PAGE_TRAVEL = 1.0;
 
     /** Survey rings (world units) centered on Polaris — the wizard notable band boundaries. */
     private static final int[] SURVEY_RINGS = {120, 200, 280};
-    private static final int SURVEY_RING_COLOR = 0x2E9FB8E8;
+    private static final int SURVEY_RING_COLOR =
+            SkillTreeChartTextures.withAlpha(SkillTreeChartTextures.CHART_INK_2, 0x70);
+    /** Region wash strength: hand-colouring laid thin enough that the engraving reads through it. */
+    private static final int REGION_WASH_ALPHA = 26;
+    /** Margin (world units) a region's wash reaches past its outermost node. */
+    private static final int REGION_WASH_MARGIN = 24;
+
+    /** Dash patterns (screen px, dash then gap) for untaken lines: dotted, and the dashed frontier. */
+    private static final int DOT_ON = 1;
+    private static final int DOT_OFF = 2;
+    private static final int DASH_ON = 4;
+    private static final int DASH_OFF = 3;
 
     private SkillTreeId.@Nullable Audience audience;
     /** Player heritage/variant, synced truth — drives audience selection and which regions are sealed. */
@@ -72,7 +83,7 @@ public class SkillTreeScreen extends Screen {
     /** Regions the player's capability tags seal shut: rendered permanently-locked, non-interactive. */
     private final Set<SkillTreeId> sealedTrees = EnumSet.noneOf(SkillTreeId.class);
     private List<Skill> webNodes = List.of();
-    /** Constellation label cache: recomputed only when the node list instance changes. */
+    /** Constellation label cache ({x, y, radius} in world units): recomputed only when the node list instance changes. */
     private final Map<SkillTreeId, double[]> labelCentroids = new EnumMap<>(SkillTreeId.class);
     private final Map<SkillTreeId, Component> labelText = new EnumMap<>(SkillTreeId.class);
 
@@ -158,11 +169,11 @@ public class SkillTreeScreen extends Screen {
                         vocation.displayName()))
                 .orElse(Component.translatable("screen.wizards_and_beasts.vocation.button.none"));
         // Skinned rather than a vanilla Button: this was the one piece of Minecraft grey stone left
-        // on a screen made of night sky and brass.
+        // on the chart. It sits on the header rule, clear of the frame's own ink rules.
         addRenderableWidget(chartButton(
                 panelX + panelW - layout.s(WizardsAndBeastsUiTokens.SkillTree.SEAL_INSET
                         + McStylePanel.SEAL_SIZE + 4) - buttonW,
-                panelY + layout.s(3), buttonW, buttonH, label, null,
+                SkillTreeRenderHelper.headerRowY(layout, buttonH), buttonW, buttonH, label, null,
                 () -> {
                     if (minecraft != null) {
                         minecraft.setScreen(new VocationSelectionScreen(this));
@@ -207,9 +218,8 @@ public class SkillTreeScreen extends Screen {
 
     private ThemedButton chartButton(int x, int y, int w, int h, Component label,
                                      @Nullable Identifier icon, Runnable action) {
-        return ThemedButton.skinned(x, y, w, h, label, action, GuiSkin.STAR_CHART.folder(),
-                icon, SkillTreeChartTextures.ICON_SIZE,
-                SkillTreeChartTextures.CHART_INK, SkillTreeChartTextures.NIGHT_TEXT_DIM);
+        return ThemedButton.skinned(x, y, w, h, label, action, GuiSkin.STAR_CHART,
+                icon, SkillTreeChartTextures.ICON_SIZE);
     }
 
     /** Seals every region in this audience whose capability requirement the player doesn't meet. */
@@ -241,11 +251,18 @@ public class SkillTreeScreen extends Screen {
         }
         sums.forEach((tree, sum) -> {
             if (sum[2] > 0) {
-                labelCentroids.put(tree, new double[]{sum[0] / sum[2], sum[1] / sum[2]});
+                labelCentroids.put(tree, new double[]{sum[0] / sum[2], sum[1] / sum[2], 0.0});
                 labelText.put(tree, Component.translatable("skilltree.region." + tree.getId() + ".constellation")
                         .withStyle(ChatFormatting.ITALIC));
             }
         });
+        // The region's reach from its centroid, which sizes its wash.
+        for (Skill node : webNodes) {
+            double[] centre = labelCentroids.get(node.getTree());
+            if (centre != null) {
+                centre[2] = Math.max(centre[2], Math.hypot(node.getX() - centre[0], node.getY() - centre[1]));
+            }
+        }
     }
 
     /** Start centered on the web's bounding box (the wizard web centers on Polaris at 0,0). */
@@ -391,7 +408,8 @@ public class SkillTreeScreen extends Screen {
                 viewportX, viewportY, viewportW, viewportH);
 
         graphics.enableScissor(chartX, chartY, chartX + chartW, chartY + chartH);
-        drawSky(graphics);
+        drawPage(graphics);
+        drawRegionWashes(graphics);
         drawSurveyRings(graphics);
         drawEdges(graphics, data);
         hoveredNode = drawNodes(graphics, data, mouseX, mouseY);
@@ -412,30 +430,50 @@ public class SkillTreeScreen extends Screen {
         }
     }
 
-    /** The three sky layers, back to front, each scrolled at its own fraction of the pan. */
-    private void drawSky(GuiGraphics graphics) {
+    /** The three page layers, back to front: vellum and graticule, stipple, background stars. */
+    private void drawPage(GuiGraphics graphics) {
         tileLayer(graphics, SkillTreeChartTextures.STARFIELD_FAR,
-                SkillTreeChartTextures.STARFIELD_SIZE, PARALLAX_FAR);
+                SkillTreeChartTextures.STARFIELD_SIZE, PAGE_TRAVEL);
         tileLayer(graphics, SkillTreeChartTextures.NEBULA,
-                SkillTreeChartTextures.NEBULA_SIZE, PARALLAX_NEBULA);
+                SkillTreeChartTextures.NEBULA_SIZE, PAGE_TRAVEL);
         tileLayer(graphics, SkillTreeChartTextures.STARFIELD,
-                SkillTreeChartTextures.STARFIELD_SIZE, PARALLAX_NEAR);
+                SkillTreeChartTextures.STARFIELD_SIZE, PAGE_TRAVEL);
     }
 
     /**
-     * One sky layer, tiled across the chart at 1:1.
+     * One page layer, tiled across the chart at 1:1.
      *
-     * <p>Drawn at native size rather than scaled with the chart, so the grain never swims when the
-     * player zooms — a sky that zooms is a wallpaper, not a sky.
+     * <p>Drawn at native size rather than scaled with the chart, so the grain and the engraving
+     * stay pixel-sharp at every zoom instead of smearing into blocks.
      */
-    private void tileLayer(GuiGraphics graphics, Identifier tex, int tile, double parallax) {
-        int offX = Math.floorMod((int) Math.round(panX * parallax * zoom), tile);
-        int offY = Math.floorMod((int) Math.round(panY * parallax * zoom), tile);
+    private void tileLayer(GuiGraphics graphics, Identifier tex, int tile, double travel) {
+        int offX = Math.floorMod((int) Math.round(panX * travel * zoom), tile);
+        int offY = Math.floorMod((int) Math.round(panY * travel * zoom), tile);
         for (int x = chartX - offX; x < chartX + chartW; x += tile) {
             for (int y = chartY - offY; y < chartY + chartH; y += tile) {
                 graphics.blit(RenderPipelines.GUI_TEXTURED, tex, x, y, 0.0F, 0.0F,
                         tile, tile, tile, tile);
             }
+        }
+    }
+
+    /**
+     * A thin wash of each region's ink over its part of the web, as the printed atlases were
+     * hand-coloured after the press. Under everything but the page, so the engraving reads
+     * through it; the region is recognisable before a single label is read.
+     */
+    private void drawRegionWashes(GuiGraphics graphics) {
+        for (Map.Entry<SkillTreeId, double[]> entry : labelCentroids.entrySet()) {
+            double[] region = entry.getValue();
+            int cx = (int) Math.round(toScreenX(region[0]));
+            int cy = (int) Math.round(toScreenY(region[1]));
+            int size = (int) Math.round((region[2] + REGION_WASH_MARGIN) * 2 * zoom);
+            if (size < 8) {
+                continue;
+            }
+            McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.STAR_HALO, cx, cy, size,
+                    SkillTreeChartTextures.withAlpha(SkillTreeChartTextures.regionTint(entry.getKey()),
+                            REGION_WASH_ALPHA));
         }
     }
 
@@ -453,10 +491,12 @@ public class SkillTreeScreen extends Screen {
         }
     }
 
+    /**
+     * Constellation lines in the engraver's three hands: dotted faint ink between uncharted stars,
+     * dashed region ink on the frontier, and a solid ink line laid over silver leaf once both ends
+     * are taken. Pattern and weight carry the state, so it survives a colour-blind reader.
+     */
     private void drawEdges(GuiGraphics graphics, PlayerSkillData data) {
-        // Slow ley-line shimmer: one global phase, subtle enough to miss on a screenshot.
-        float shimmer = (float) (0.5 + 0.5 * Math.sin(System.currentTimeMillis() / 1600.0 * Math.PI));
-        int allocatedAlpha = 205 + (int) (40 * shimmer);
         for (Skill node : webNodes) {
             double ax = toScreenX(node.getX());
             double ay = toScreenY(node.getY());
@@ -475,26 +515,56 @@ public class SkillTreeScreen extends Screen {
                 }
                 boolean aLit = data.getSkillLevel(node.getId()) >= 1;
                 boolean bLit = data.getSkillLevel(neighborId) >= 1;
-                int color;
-                int stroke;
                 if (aLit && bLit) {
-                    color = SkillTreeChartTextures.withAlpha(SkillTreeChartTextures.GOLD, allocatedAlpha);
-                    stroke = WizardsAndBeastsUiTokens.SkillTree.LEY_ALLOCATED_STROKE;
+                    drawLine(graphics, ax, ay, bx, by, WizardsAndBeastsUiTokens.SkillTree.LEY_ALLOCATED_STROKE,
+                            SkillTreeChartTextures.SILVER);
+                    drawLine(graphics, ax, ay, bx, by, WizardsAndBeastsUiTokens.SkillTree.LEY_LOCKED_STROKE,
+                            SkillTreeChartTextures.CHART_INK);
                 } else if (aLit || bLit) {
-                    // Frontier edge: slightly lifted, carrying the region tint when intra-region.
-                    int tint = node.getTree() == neighbor.getTree()
+                    // Frontier: dashed, in the region's ink when the line stays inside one region.
+                    int ink = node.getTree() == neighbor.getTree()
                             ? SkillTreeChartTextures.regionTint(node.getTree())
-                            : 0xFFB8C0D8;
-                    color = SkillTreeChartTextures.withAlpha(tint, 150);
-                    stroke = WizardsAndBeastsUiTokens.SkillTree.LEY_FRONTIER_STROKE;
+                            : SkillTreeChartTextures.CHART_INK_2;
+                    drawDashed(graphics, ax, ay, bx, by, DASH_ON, DASH_OFF, ink);
                 } else {
-                    color = SkillTreeChartTextures.withAlpha(SkillTreeChartTextures.EDGE_LOCKED, 220);
-                    stroke = WizardsAndBeastsUiTokens.SkillTree.LEY_LOCKED_STROKE;
+                    drawDashed(graphics, ax, ay, bx, by, DOT_ON, DOT_OFF,
+                            SkillTreeChartTextures.withAlpha(SkillTreeChartTextures.CHART_INK_FAINT, 220));
                 }
-                McStylePanel.drawTexturedSegment(graphics, SkillTreeChartTextures.LEY_LINE,
-                        ax, ay, bx, by, stroke,
-                        SkillTreeChartTextures.LEY_LINE_W, SkillTreeChartTextures.LEY_LINE_H, color);
             }
+        }
+    }
+
+    private static void drawLine(GuiGraphics graphics, double ax, double ay, double bx, double by,
+                                 int stroke, int color) {
+        McStylePanel.drawTexturedSegment(graphics, SkillTreeChartTextures.LEY_LINE, ax, ay, bx, by, stroke,
+                SkillTreeChartTextures.LEY_LINE_W, SkillTreeChartTextures.LEY_LINE_H, color);
+    }
+
+    /**
+     * A one-pixel line broken into dashes, one strip blit per dash.
+     *
+     * <p>Laid here rather than baked into the strip: the strip is stretched to each edge's length,
+     * so a pattern in the texture would stretch with it and every edge would have different
+     * dashes. Screen-space lengths keep the pattern identical on every line at every zoom.
+     */
+    private static void drawDashed(GuiGraphics graphics, double ax, double ay, double bx, double by,
+                                   int on, int off, int color) {
+        double dx = bx - ax;
+        double dy = by - ay;
+        double length = Math.sqrt(dx * dx + dy * dy);
+        if (length < 1.0) {
+            return;
+        }
+        double ux = dx / length;
+        double uy = dy / length;
+        for (double t = 0; t < length; t += on + off) {
+            // Nudged past `on`: a one-pixel dot along a unit vector can measure 0.9999…, and
+            // drawTexturedSegment skips anything under a pixel, which would erase every dot.
+            double end = Math.min(length, t + on + 0.01);
+            McStylePanel.drawTexturedSegment(graphics, SkillTreeChartTextures.LEY_LINE,
+                    ax + ux * t, ay + uy * t, ax + ux * end, ay + uy * end,
+                    WizardsAndBeastsUiTokens.SkillTree.LEY_LOCKED_STROKE,
+                    SkillTreeChartTextures.LEY_LINE_W, SkillTreeChartTextures.LEY_LINE_H, color);
         }
     }
 
@@ -529,64 +599,69 @@ public class SkillTreeScreen extends Screen {
             boolean isHovered = hovered == null && insideChart(mouseX, mouseY)
                     && withinHitRadius(node, polaris, cx, cy, mouseX, mouseY);
 
+            int regionInk = SkillTreeChartTextures.regionTint(node.getTree());
             if (isHovered) {
-                // Halo under everything else: a hover cue that sits on top would hide the node it
-                // is pointing at.
+                // Wash under everything else: a hover cue that sits on top would hide the node it
+                // is pointing at. Tarnished silver over a taken star, the region's ink otherwise.
                 McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.STAR_HALO,
                         cx, cy, size * 3,
                         SkillTreeChartTextures.withAlpha(
-                                allocated ? SkillTreeChartTextures.GOLD
-                                        : SkillTreeChartTextures.regionTint(node.getTree()), 170));
+                                allocated ? SkillTreeChartTextures.SILVER_DARK : regionInk, 110));
             } else if (affordable) {
                 // Only a star the player can actually buy right now breathes. The pulse is an
                 // invitation, and an invitation you cannot accept is worse than none.
                 McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.STAR_HALO,
                         cx, cy, (int) (size * 2.2),
-                        SkillTreeChartTextures.withAlpha(
-                                SkillTreeChartTextures.regionTint(node.getTree()),
-                                60 + (int) (70 * pulse)));
+                        SkillTreeChartTextures.withAlpha(regionInk, 40 + (int) (50 * pulse)));
             } else if (allocatable) {
-                // Reachable but unaffordable: a still, dim halo. Legible as "open" without claiming
-                // to be takeable.
+                // Reachable but unaffordable: a still, thin wash. Legible as "open" without
+                // claiming to be takeable.
                 McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.STAR_HALO,
                         cx, cy, (int) (size * 1.7),
-                        SkillTreeChartTextures.withAlpha(
-                                SkillTreeChartTextures.regionTint(node.getTree()), 45));
+                        SkillTreeChartTextures.withAlpha(regionInk, 35));
             }
 
+            Skill.Size sprite = node.getSize();
             if (polaris) {
-                // Polaris: brightest object on the chart; gold once taken, ice-white before.
-                int tint = allocated ? SkillTreeChartTextures.GOLD : 0xFFEFF2FF;
+                // Polaris: the compass rose, the largest object on the chart. On a silver roundel
+                // once taken; before that, thin ink over a vellum knockout.
+                McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.core(Skill.Size.KEYSTONE),
+                        cx, cy, size * 4 / 5,
+                        allocated ? SkillTreeChartTextures.SILVER : SkillTreeChartTextures.VELLUM);
                 McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.STAR_POLARIS,
-                        cx, cy, size, tint);
-            } else if (allocated) {
-                // Shape + brightness cue: diffraction flare with a hot gold core.
-                //
-                // A maxed node gets a second, wider flare behind the first. One-of-three and
-                // three-of-three drew identically before, so the chart could not answer "is there
-                // anything left in this node" without a hover — on a 163-node web that is the single
-                // question a player asks most.
-                if (maxed && node.getMaxLevel() > 1) {
-                    McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.flare(node.getSize()),
-                            cx, cy, (int) (size * 1.45),
-                            SkillTreeChartTextures.withAlpha(SkillTreeChartTextures.GOLD, 110));
-                }
-                McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.flare(node.getSize()),
-                        cx, cy, size, SkillTreeChartTextures.GOLD);
-                McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.core(node.getSize()),
-                        cx, cy, Math.max(4, size * 2 / 3), 0xFFFFF6DC);
-            } else if (allocatable) {
-                // Soft white core with a region-tinted rim ring.
-                McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.core(node.getSize()),
-                        cx, cy, size, 0xFFE8ECF8);
-                McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.ring(node.getSize()),
-                        cx, cy, size, SkillTreeChartTextures.regionTint(node.getTree()));
-            } else {
-                // Locked: an unlit socket. Its own shape, so "not yet" is legible without
-                // comparing two tints against a tinted sky.
-                McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.locked(node.getSize()),
                         cx, cy, size,
-                        SkillTreeChartTextures.withAlpha(SkillTreeChartTextures.EMBER, 210));
+                        allocated ? SkillTreeChartTextures.CHART_INK : SkillTreeChartTextures.CHART_INK_2);
+            } else if (allocated) {
+                // Taken: the engraved star, solid ink with its magnitude's rays, on silver leaf.
+                //
+                // A maxed node gets a second, wider star behind the first in thin ink. One-of-three
+                // and three-of-three drew identically before, so the chart could not answer "is
+                // there anything left in this node" without a hover — on a 163-node web that is the
+                // single question a player asks most.
+                if (maxed && node.getMaxLevel() > 1) {
+                    McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.flare(sprite),
+                            cx, cy, (int) (size * 1.45),
+                            SkillTreeChartTextures.withAlpha(SkillTreeChartTextures.CHART_INK_2, 110));
+                }
+                McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.core(sprite),
+                        cx, cy, size, SkillTreeChartTextures.SILVER);
+                McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.flare(sprite),
+                        cx, cy, size, SkillTreeChartTextures.CHART_INK);
+            } else {
+                // Untaken: a vellum knockout first, so the lines stop short of the star as they do
+                // on an engraved plate, then an open circle -- the region's ink when it can be
+                // taken, a faint outline when it cannot. Their own shapes, so "not yet" is
+                // legible without comparing two tints.
+                McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.core(sprite),
+                        cx, cy, size, SkillTreeChartTextures.VELLUM);
+                if (allocatable) {
+                    McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.ring(sprite),
+                            cx, cy, size, regionInk);
+                } else {
+                    McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.locked(sprite),
+                            cx, cy, size,
+                            SkillTreeChartTextures.withAlpha(SkillTreeChartTextures.CHART_INK_FAINT, 230));
+                }
             }
 
             if (node.getMaxLevel() > 1 && zoom >= 0.5) {
@@ -609,7 +684,7 @@ public class SkillTreeScreen extends Screen {
         return dx * dx + dy * dy <= (double) r * r;
     }
 
-    /** Level pips as a row of tiny stars: lit up to {@code level}, hollow sockets for the rest. */
+    /** Level pips as a row of tiny inked stars up to {@code level}, faint open circles for the rest. */
     private static void drawStarPips(GuiGraphics graphics, int cx, int y, int level, int maxLevel) {
         int pip = WizardsAndBeastsUiTokens.SkillTree.PIP_DRAW_SIZE;
         int spacing = WizardsAndBeastsUiTokens.SkillTree.PIP_SPACING;
@@ -619,8 +694,8 @@ public class SkillTreeScreen extends Screen {
             McStylePanel.drawTintedCentered(graphics,
                     lit ? SkillTreeChartTextures.PIP_ON : SkillTreeChartTextures.PIP_OFF,
                     startX + i * spacing, y + pip / 2, pip,
-                    lit ? SkillTreeChartTextures.GOLD
-                            : SkillTreeChartTextures.withAlpha(SkillTreeChartTextures.NIGHT_TEXT_DIM, 170));
+                    lit ? SkillTreeChartTextures.CHART_INK
+                            : SkillTreeChartTextures.withAlpha(SkillTreeChartTextures.CHART_INK_FAINT, 220));
         }
     }
 
@@ -653,16 +728,19 @@ public class SkillTreeScreen extends Screen {
             int groupX = cx - (glyph + gap + textW) / 2;
             McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.regionGlyph(entry.getKey()),
                     groupX + glyph / 2, cy, glyph, SkillTreeChartTextures.withAlpha(tint, alpha));
+            // Shadowless, in the region's ink darkened to AA on the vellum: a label fades by alpha
+            // as the view closes in, never by being drawn in a weaker colour.
             graphics.drawString(font, text, groupX + glyph + gap, cy - font.lineHeight / 2,
-                    SkillTreeChartTextures.withAlpha(tint, alpha), false);
+                    SkillTreeChartTextures.withAlpha(SkillTreeChartTextures.regionTextInk(entry.getKey()), alpha),
+                    false);
         }
     }
 
     /**
-     * Edge darkening over the chart, inside the scissor.
+     * Faint toning at the plate's edge, inside the scissor.
      *
-     * <p>Drawn last of the canvas layers so it dims the sky, the ley-lines and the outer stars
-     * alike, which is what stops the web from looking pasted onto a rectangle of sky.
+     * <p>Drawn last of the canvas layers so it ages the vellum, the lines and the outer stars
+     * alike, which is what stops the web from looking pasted onto a rectangle of paper.
      */
     private void drawVignette(GuiGraphics graphics) {
         int size = SkillTreeChartTextures.VIGNETTE_SIZE;
@@ -670,13 +748,18 @@ public class SkillTreeScreen extends Screen {
                 chartX, chartY, 0.0F, 0.0F, chartW, chartH, size, size, size, size);
     }
 
-    /** Full strength while zoomed out; fades to nothing as the view closes past ~0.9× for building. */
+    /**
+     * Full strength while zoomed out; fades to nothing as the view closes past ~0.9× for building.
+     * Full strength is near-opaque: ink on paper at half alpha is grey, and grey is not legible.
+     */
     private int labelAlpha() {
         if (zoom <= 0.9) {
-            return 150;
+            return LABEL_ALPHA;
         }
-        return (int) (150 * Mth.clamp(1.0 - (zoom - 0.9) / 0.35, 0.0, 1.0));
+        return (int) (LABEL_ALPHA * Mth.clamp(1.0 - (zoom - 0.9) / 0.35, 0.0, 1.0));
     }
+
+    private static final int LABEL_ALPHA = 235;
 
     /**
      * The neighbours that would open this node, by display name.

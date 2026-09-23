@@ -3,6 +3,8 @@ package at.koopro.wizardsandbeasts.client.gui.config;
 import at.koopro.wizardsandbeasts.Config;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
+import at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton;
 import com.mojang.logging.LogUtils;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -12,7 +14,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.network.chat.Component;
@@ -23,26 +24,32 @@ import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 
 /**
- * Main mod configuration screen — Ministry memo board aesthetic: parchment fill,
- * letter-spaced header, CLASSIFIED stamp, and a card grid of config categories
- * revealed with a staggered ink animation.
+ * Main mod configuration screen — Ministry memo board aesthetic: the parchment kit's page
+ * tiled edge to edge, letter-spaced header, CLASSIFIED stamp in wax red, and a card grid of
+ * config categories revealed with a staggered ink animation. Textures come from
+ * {@code tools/config_textures.py}.
  */
 public class WizardsConfigScreen extends Screen {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private static final String HEADER = "MINISTRY OF MAGIC — AUTHORISED CONFIGURATION FORM";
-    private static final Identifier PARCHMENT_TEX = Identifier.fromNamespaceAndPath(
+    static final Identifier PARCHMENT_TEX = Identifier.fromNamespaceAndPath(
             WizardsAndBeastsMod.MODID, "textures/gui/config/parchment.png");
     static final Identifier CARD_TEX = Identifier.fromNamespaceAndPath(
             WizardsAndBeastsMod.MODID, "textures/gui/config/card.png");
     static final Identifier CARD_DARK_TEX = Identifier.fromNamespaceAndPath(
             WizardsAndBeastsMod.MODID, "textures/gui/config/card_dark.png");
-    private static final int PARCHMENT_TILE = 64;
+    /** The kit's grain repeats every 48px, so the page tile is exactly one period. */
+    static final int PARCHMENT_TILE = 48;
     private static final int CARD_WIDTH = 84;
     private static final int CARD_HEIGHT = 64;
     private static final int CARD_GAP = 12;
     private static final int CARDS_PER_ROW = 4;
     private static final int CARD_STAGGER_MS = 80;
+    /** Hover wash inside a card's rule: the page's selection tint, translucent so the grain shows. */
+    private static final int CARD_HOVER = 0x66000000 | (WizardsPalette.PAGE_SELECT & 0xFFFFFF);
+    /** The Dark Arts card is soot stock; its words are in the quill's red rather than plain ink. */
+    private static final int DARK_ARTS_INK = WizardsPalette.PAGE_RUBRIC;
 
     /** One config key with its live value holder and spec metadata. */
     public record ConfigEntry(String key, ModConfigSpec.ConfigValue<?> value, ModConfigSpec.ValueSpec valueSpec) {}
@@ -198,9 +205,8 @@ public class WizardsConfigScreen extends Screen {
             }
         }
 
-        addRenderableWidget(Button.builder(Component.literal("Done"), b -> onClose())
-                .bounds(width / 2 - 50, height - 28, 100, 20)
-                .build());
+        addRenderableWidget(new ThemedButton(width / 2 - 50, height - 28, 100, 20,
+                Component.literal("Done"), this::onClose));
     }
 
     private void openCategory(Category category, int ordinal) {
@@ -306,16 +312,18 @@ public class WizardsConfigScreen extends Screen {
         @Override
         protected void renderContents(@NonNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
             boolean darkArts = "Dark Arts".equals(category.name());
-            int text = darkArts ? 0xFFE0B0B0 : ConfigWidgets.INK;
+            int text = darkArts ? DARK_ARTS_INK : ConfigWidgets.INK;
             int x0 = getX();
             int y0 = getY();
             int x1 = x0 + getWidth();
             int y1 = y0 + getHeight();
-            // Textured memo card (parchment / dark-arts variant); border + paper drawn in the art.
+            // Textured memo card (light slip / soot-stained dark-arts variant); torn edge and the
+            // rule 4px in are drawn in the art.
             McStylePanel.drawTexture(graphics, darkArts ? CARD_DARK_TEX : CARD_TEX,
                     x0, y0, getWidth(), getHeight(), CARD_WIDTH, CARD_HEIGHT);
             if (isHovered()) {
-                graphics.fill(x0 + 1, y0 + 1, x1 - 1, y1 - 1, darkArts ? 0x18FF8080 : 0x22FFFFFF);
+                // Inside the rule only: the card's edge is torn, so a full-rect wash would square it off.
+                graphics.fill(x0 + 5, y0 + 5, x1 - 5, y1 - 5, CARD_HOVER);
             }
 
             String glyph = category.glyph();

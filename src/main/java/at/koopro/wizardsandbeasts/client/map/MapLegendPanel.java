@@ -38,17 +38,22 @@ public final class MapLegendPanel {
     private static final List<String> GROUP_ORDER =
             List.of("self", "wizarding", "structure", "magical", "waypoint", "danger");
 
+    /** The key is written in the map's own ink, like everything else on the sheet. */
+    private static final int INK = MaraudersMapTextures.SKIN.ink();
+
     private MapLegendPanel() {
     }
 
     public static void render(GuiGraphics gfx, Font font, GuiScaleHelper.Layout layout,
                               int x, int y, int w, int h) {
+        // Every inset clears the sheet's double ink rule (4 and 6px in), as the waypoint panel does.
+        int pad = layout.s(MaraudersMapScreen.SIDE_PAD);
         McStylePanel.drawSkinPanel(gfx, MaraudersMapTextures.SKIN, x, y, w, h);
         gfx.drawString(font, Component.translatable("screen.wizards_and_beasts.marauders_map.legend.title"),
-                x + layout.s(5), y + layout.s(5), 0xFF4A2B18, false);
+                x + pad, y + layout.s(10), INK, false);
 
         int rowH = layout.s(12);
-        int rowY = y + layout.s(17);
+        int rowY = y + layout.s(MaraudersMapScreen.SIDE_LIST_TOP);
         // Exactly half the 16px source: a clean nearest-neighbour halving rather than the
         // non-integer resample that would soften every symbol in the key.
         int iconSize = layout.s(8);
@@ -57,21 +62,21 @@ public final class MapLegendPanel {
         // it is the first thing anyone looks for, so it is drawn by hand at the top rather than
         // left out of the key entirely.
         gfx.blit(RenderPipelines.GUI_TEXTURED, MaraudersMapTextures.PLAYER_MARK,
-                x + layout.s(5), rowY, 0.0F, 0.0F, iconSize, iconSize,
+                x + pad, rowY, 0.0F, 0.0F, iconSize, iconSize,
                 MaraudersMapTextures.PLAYER_MARK_SIZE, MaraudersMapTextures.PLAYER_MARK_SIZE,
                 MaraudersMapTextures.PLAYER_MARK_SIZE, MaraudersMapTextures.PLAYER_MARK_SIZE,
                 MapTrackedRenderer.INK_SELF);
         gfx.drawString(font, Component.translatable("screen.wizards_and_beasts.marauders_map.legend.self"),
-                x + layout.s(17), rowY, 0xFF3A2E24, false);
+                x + pad + layout.s(12), rowY, INK, false);
         rowY += rowH;
 
         for (Map.Entry<String, Identifier> group : groups().entrySet()) {
-            if (rowY + rowH > y + h - layout.s(4)) {
+            if (rowY + rowH > y + h - pad) {
                 break; // ran out of page; the remaining symbols still name themselves on hover
             }
             MapMarkerStyle style = MapStyles.marker(group.getValue());
             gfx.blit(RenderPipelines.GUI_TEXTURED, MaraudersMapTextures.MARKERS,
-                    x + layout.s(5), rowY,
+                    x + pad, rowY,
                     MaraudersMapTextures.markerU(style.icon()),
                     MaraudersMapTextures.markerV(style.icon()),
                     iconSize, iconSize,
@@ -81,7 +86,7 @@ public final class MapLegendPanel {
             gfx.drawString(font,
                     Component.translatable("screen.wizards_and_beasts.marauders_map.legend."
                             + group.getKey()),
-                    x + layout.s(17), rowY, 0xFF3A2E24, false);
+                    x + pad + layout.s(12), rowY, INK, false);
             rowY += rowH;
         }
     }

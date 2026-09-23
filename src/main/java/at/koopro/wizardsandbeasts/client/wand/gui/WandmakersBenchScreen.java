@@ -27,11 +27,10 @@ import java.util.Optional;
  * <p>Slot geometry is vanilla's and is not this screen's to move, so unlike its sibling at
  * Ollivander's this stays 176×196. Everything inside that frame changed.
  *
- * <p>The background is generated now — see {@code gui_chrome.a_wandmakers_bench} — which makes the
- * bench <em>light</em> where it used to be a flat {@code #171411}. That is the whole reason the text
- * colours below come from {@link GuiSkin#WORKBENCH} rather than {@code WizardsPalette}: the leather
- * palette's {@code TEXT} on this face is 1.39 : 1 and {@code TEXT_DIM} is 1.34 : 1. Both were
- * correct against the old field and are invisible against this one.
+ * <p>The background is generated — see {@code gui_chrome.a_wandmakers_bench} — on the
+ * {@link GuiSkin#WORKBENCH} pattern paper, which is why every colour below comes from that skin
+ * rather than {@code WizardsPalette}'s leather: the leather {@code TEXT} on this face is 1.39 : 1
+ * and {@code TEXT_DIM} 1.34 : 1, invisible on paper.
  *
  * <p>The flexibility picker was five hand-drawn rectangles labelled {@code 1} through {@code 5},
  * hit-tested by hand. A wand's flexibility is one of Ollivander's five words and the bench was
@@ -66,9 +65,10 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
     private static final int STATUS_Y = 90;
 
     /**
-     * Tier bar geometry. The bar sits in the strip of bare panel below the hotbar — the artwork's
-     * last slot row ends at y 187 and the panel's own border starts at y 193, and the background
-     * paints a recessed track across exactly that band.
+     * Tier bar geometry. The bar sits in the strip of bare paper below the hotbar — the artwork's
+     * last slot row ends at y 187 and the sheet's torn edge starts at y 193, and the background
+     * paints a recessed track across exactly that band. That band is also why the bench sheet
+     * carries no frame rule: one at the usual 4px in would run through the bar.
      */
     private static final int BAR_H = 6;
     private static final int BAR_INSET_X = 16;

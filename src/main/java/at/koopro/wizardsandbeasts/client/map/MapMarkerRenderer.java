@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.map;
 
+import at.koopro.wizardsandbeasts.client.gui.util.UiContrast;
 import at.koopro.wizardsandbeasts.client.map.style.MapMarkerStyle;
 import at.koopro.wizardsandbeasts.client.map.style.MapStyles;
 import at.koopro.wizardsandbeasts.map.MapMarker;
@@ -90,7 +91,7 @@ public final class MapMarkerRenderer {
                 int textY = (int) Math.round(screenY) + half + 1;
                 // Drawn without a drop shadow: a shadow is a screen convention and reads as a
                 // sticker floating over the page rather than as something written on it.
-                graphics.drawString(font, label, textX, textY, style.tint(), false);
+                graphics.drawString(font, label, textX, textY, labelInk(tint), false);
             }
 
             if (mouseX >= screenX - half - HOVER_PAD && mouseX <= screenX + half + HOVER_PAD
@@ -126,6 +127,20 @@ public final class MapMarkerRenderer {
         }
         float pulse = 0.5F + 0.5F * (float) Math.sin(now / 120.0);
         return lighten(tint, 0.35F * pulse);
+    }
+
+    /**
+     * A marker's tint, darkened only as far as it takes to read as text on the page.
+     *
+     * <p>The tint is a style's meaning (a pack's gold for treasure is gold), so it keeps its hue;
+     * but a gold that is fine as a filled symbol is under 3 : 1 as a line of 9px lettering on the
+     * parchment. Measured against the panel's own face, which is darker than the page it sits on,
+     * so the answer holds on the page too. The alpha is the caller's -- a hidden marker's label
+     * fades with its symbol.
+     */
+    private static int labelInk(int tint) {
+        int readable = UiContrast.readableOn(tint, MaraudersMapTextures.SKIN.base());
+        return (tint & 0xFF000000) | (readable & 0x00FFFFFF);
     }
 
     private static int fade(int argb, float factor) {

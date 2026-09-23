@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.client.gui.config;
 
 import java.util.ArrayList;
 import java.util.List;
+import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
@@ -13,7 +14,7 @@ import net.minecraft.client.gui.screens.Screen;
 import org.jspecify.annotations.NonNull;
 
 /**
- * Per-category config screen — grimoire page aesthetic: parchment fill, dark binding
+ * Per-category config screen — grimoire page aesthetic: the same tiled page as the memo board, ink binding
  * rule on the left edge, chapter header, and one labelled row per setting revealed
  * top-to-bottom with a staggered ink animation.
  */
@@ -90,6 +91,8 @@ public class WizardsConfigCategoryScreen extends Screen {
     @Override
     public void renderBackground(@NonNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         graphics.fill(0, 0, width, height, ConfigWidgets.PARCHMENT);
+        McStylePanel.drawTiled(graphics, WizardsConfigScreen.PARCHMENT_TEX, 0, 0, width, height,
+                WizardsConfigScreen.PARCHMENT_TILE);
         // Grimoire page binding: 4px ink rule down the left edge.
         graphics.fill(0, 0, 4, height, ConfigWidgets.INK);
     }

@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.client.skill.gui;
 
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GuiSkin;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
+import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton;
 import at.koopro.wizardsandbeasts.client.gui.WizardsAndBeastsUiTokens;
@@ -27,9 +28,9 @@ import java.util.Optional;
  * <p>Declaration existed only as {@code /wandb player vocation set primary <id>}, which is unreachable on a
  * world with cheats off — the whole specialization layer was invisible to a survival player.
  *
- * <p>Wears the {@code star_chart} skin, like the chart it opens from. It used to be vanilla widgets
- * on two flat {@code fill}ed rectangles, which was defensible while the screen behind it was flat
- * too and stopped being so the moment that one became night void and brass.
+ * <p>Wears the {@code star_chart} skin, like the chart it opens from: blue-grey vellum, indigo ink,
+ * text written shadowless on the sheet. It used to be vanilla widgets on two flat {@code fill}ed
+ * rectangles, which read as a different mod's dialog next to the chart behind it.
  */
 public class VocationSelectionScreen extends Screen {
 
@@ -44,6 +45,11 @@ public class VocationSelectionScreen extends Screen {
      */
     private @Nullable Identifier pending;
     private GuiScaleHelper.Layout layout;
+
+    /** Clearance from the panel edge past the frame's double ink rule; native px, never scaled. */
+    private static final int FRAME_CLEAR = 8;
+    /** Title baseline row, written on the sheet as the parchment screens all do. */
+    private static final int TITLE_Y = 10;
 
     public VocationSelectionScreen(@Nullable Screen parent) {
         super(Component.translatable("screen.wizards_and_beasts.vocation.title"));
@@ -73,9 +79,10 @@ public class VocationSelectionScreen extends Screen {
             y += buttonH + layout.s(4);
         }
 
+        // Bottom edge kept above the frame's double ink rule (4 and 6px in, unscaled).
         addRenderableWidget(chartButton(
                 layout.panelX() + layout.panelW() - layout.s(16) - layout.s(80),
-                layout.panelY() + layout.panelH() - layout.s(28), layout.s(80), buttonH,
+                layout.panelY() + layout.panelH() - FRAME_CLEAR - buttonH, layout.s(80), buttonH,
                 Component.translatable("gui.done"), this::onClose));
 
         Identifier active = activeVocation();
@@ -105,9 +112,7 @@ public class VocationSelectionScreen extends Screen {
     /** Every control on this screen is cut from the same material as the chart behind it. */
     private static ThemedButton chartButton(int x, int y, int w, int h, Component label,
                                             Runnable action) {
-        return ThemedButton.skinned(x, y, w, h, label, action,
-                GuiSkin.STAR_CHART.folder(), null, 0,
-                SkillTreeChartTextures.CHART_INK, SkillTreeChartTextures.NIGHT_TEXT_DIM);
+        return ThemedButton.skinned(x, y, w, h, label, action, GuiSkin.STAR_CHART);
     }
 
     /**
@@ -131,25 +136,24 @@ public class VocationSelectionScreen extends Screen {
         refreshLabels();
         // No renderBackground() here: the screen framework already ran it for this frame.
         //
-        // Same `star_chart` skin as the chart this screen opens from. It was two flat `fill`ed
-        // rectangles, which read as a different mod's dialog the moment the screen behind it
-        // became night void and brass.
+        // Same `star_chart` skin as the chart this screen opens from. The title is written on the
+        // sheet and ruled under, inside the frame's double ink rule (4 and 6px in, unscaled).
         McStylePanel.drawSkinPanel(graphics,
                 GuiSkin.STAR_CHART,
                 layout.panelX(), layout.panelY(), layout.panelW(), layout.panelH());
         McStylePanel.drawSkinDivider(graphics,
                 GuiSkin.STAR_CHART,
-                layout.panelX() + layout.s(8),
-                layout.panelY() + layout.s(WizardsAndBeastsUiTokens.SkillTree.HEADER_HEIGHT),
-                layout.panelW() - layout.s(16));
+                layout.panelX() + WizardsMetrics.SPACE_L,
+                layout.panelY() + TITLE_Y + font.lineHeight,
+                layout.panelW() - WizardsMetrics.SPACE_L * 2);
         graphics.drawString(font, title,
-                layout.panelX() + layout.s(16), layout.panelY() + layout.s(8),
-                WizardsAndBeastsUiTokens.SkillTree.TITLE_COLOR, false);
+                layout.panelX() + layout.s(16), layout.panelY() + TITLE_Y,
+                GuiSkin.STAR_CHART.ink(), false);
 
         if (vocations.isEmpty()) {
             graphics.drawString(font, Component.translatable("screen.wizards_and_beasts.vocation.none"),
                     layout.panelX() + layout.s(16), layout.panelY() + layout.s(44),
-                    WizardsAndBeastsUiTokens.SkillTree.SUBTEXT_COLOR, false);
+                    GuiSkin.STAR_CHART.muted(), false);
         }
 
         if (focused != null) {
@@ -157,17 +161,17 @@ public class VocationSelectionScreen extends Screen {
             int textY = layout.panelY() + layout.s(40);
             int wrap = layout.panelW() - layout.s(196);
             graphics.drawString(font, focused.displayName(), textX, textY,
-                    WizardsAndBeastsUiTokens.SkillTree.TITLE_COLOR, false);
+                    GuiSkin.STAR_CHART.ink(), false);
             textY += layout.s(14);
             for (var line : font.split(focused.pillar(), wrap)) {
                 graphics.drawString(font, line, textX, textY,
-                        WizardsAndBeastsUiTokens.SkillTree.SUBTEXT_COLOR, false);
+                        GuiSkin.STAR_CHART.muted(), false);
                 textY += font.lineHeight + 1;
             }
             textY += layout.s(4);
             for (var line : font.split(focused.description(), wrap)) {
                 graphics.drawString(font, line, textX, textY,
-                        WizardsAndBeastsUiTokens.SkillTree.SUBTEXT_COLOR, false);
+                        GuiSkin.STAR_CHART.muted(), false);
                 textY += font.lineHeight + 1;
             }
         }

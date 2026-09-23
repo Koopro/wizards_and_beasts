@@ -1,13 +1,19 @@
 package at.koopro.wizardsandbeasts.client.gui.config;
 
 import java.util.function.Supplier;
+import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
+import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
+import at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton;
+import at.koopro.wizardsandbeasts.client.gui.widget.ThemedTextField;
 import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.util.RandomSource;
 import org.jspecify.annotations.NonNull;
@@ -16,22 +22,32 @@ import org.jspecify.annotations.NonNull;
  * Blood Quill gate modal shown before entering the Dark Arts config category.
  * The player must type their own username; a wrong name triggers a 40-tick red
  * splatter failure animation and clears the field.
+ *
+ * <p>Still paper and ink like every other screen, but a different sheet: the soot-stained stock
+ * from the hearth with wax-red furniture ({@code tools/config_textures.py}), so it reads as a
+ * warrant rather than a settings page.
  */
 public class DarkArtsGateScreen extends Screen {
     private static final int FAIL_TICKS = 40;
     private static final int MODAL_WIDTH = 248;
-    private static final int MODAL_HEIGHT = 132;
-    private static final int MODAL_FILL = 0xFF1A0A0A;
-    private static final int MODAL_BORDER = 0xFF8B0000;
+    /** Room for the button to clear the frame's double rule at 4 and 6 from the bottom edge. */
+    private static final int MODAL_HEIGHT = 136;
+    private static final Identifier GATE_PANEL = Identifier.fromNamespaceAndPath(
+            WizardsAndBeastsMod.MODID, "textures/gui/config/gate_panel.png");
     private static final int DIM = 0xAA000000;
-    private static final int BODY_TEXT = 0xFFC8A0A0;
-    private static final int ERROR_TEXT = 0xFFFF5555;
+    private static final int TITLE_TEXT = WizardsPalette.PAGE_RUBRIC;
+    /** The soot stock's own ink, one shade blacker than the default page ink. */
+    private static final int BODY_TEXT = WizardsPalette.GuiSkin.HEARTH.ink();
+    private static final int ERROR_TEXT = WizardsPalette.PAGE_BAD;
+    /** Blood from the quill. Semantic, not a page colour: the splatter is the failure. */
+    private static final int SPLAT_DARK = 0xCC8B0000;
+    private static final int SPLAT_LIGHT = 0xCCB01010;
 
     private final Screen parent;
     private final Supplier<Screen> target;
     private GuiScaleHelper.Layout layout;
-    private EditBox nameField;
-    private Button confirmButton;
+    private ThemedTextField nameField;
+    private ThemedButton confirmButton;
     private int failTicks;
     private long failSeed;
 
@@ -46,14 +62,14 @@ public class DarkArtsGateScreen extends Screen {
         super.init();
         layout = GuiScaleHelper.Layout.fit(width, height, MODAL_WIDTH, MODAL_HEIGHT);
 
-        nameField = new EditBox(font, layout.x(24), layout.y(70),
-                layout.s(MODAL_WIDTH - 48), layout.s(18), Component.literal("Username"));
-        nameField.setHint(Component.literal("Enter your Minecraft username"));
+        nameField = new ThemedTextField(font, layout.x(24), layout.y(70),
+                layout.s(MODAL_WIDTH - 48), layout.s(18), Component.literal("Username"))
+                .inkHint(Component.literal("Enter your Minecraft username"));
         addRenderableWidget(nameField);
 
-        confirmButton = Button.builder(Component.literal("Sign with Blood Quill"), b -> onConfirm())
-                .bounds(layout.x(MODAL_WIDTH / 2 - 70), layout.y(MODAL_HEIGHT - 28), layout.s(140), layout.s(20))
-                .build();
+        confirmButton = new ThemedButton(layout.x(MODAL_WIDTH / 2 - 70), layout.y(MODAL_HEIGHT - 32),
+                layout.s(140), layout.s(20), Component.literal("Sign with Blood Quill"), this::onConfirm)
+                .tone(McStylePanel.ButtonTone.DANGER);
         addRenderableWidget(confirmButton);
 
         setInitialFocus(nameField);
@@ -89,15 +105,26 @@ public class DarkArtsGateScreen extends Screen {
         int boxY = layout.panelY();
         int cx = boxX + MODAL_WIDTH / 2;
 
-        graphics.fill(boxX - 2, boxY - 2, boxX + MODAL_WIDTH + 2, boxY + MODAL_HEIGHT + 2, MODAL_BORDER);
-        graphics.fill(boxX, boxY, boxX + MODAL_WIDTH, boxY + MODAL_HEIGHT, MODAL_FILL);
+        McStylePanel.drawNineSliceTiled(graphics, GATE_PANEL, boxX, boxY, MODAL_WIDTH, MODAL_HEIGHT,
+                WizardsMetrics.PANEL_SPRITE_SIZE, WizardsMetrics.PANEL_SPRITE_BORDER);
 
         ConfigWidgets.drawCenteredNoShadow(graphics, font, "UNFORGIVABLE ARTS — RESTRICTED ACCESS",
-                cx, boxY + 12, MODAL_BORDER);
-        ConfigWidgets.drawCenteredNoShadow(graphics, font, "\"By entering your name you acknowledge full magical responsibility.\"",
-                cx, boxY + 34, BODY_TEXT);
-        ConfigWidgets.drawCenteredNoShadow(graphics, font, "\"The Ministry has been notified.\"",
-                cx, boxY + 48, BODY_TEXT);
+                cx, boxY + 12, TITLE_TEXT);
+        McStylePanel.drawSkinDivider(graphics, WizardsPalette.GuiSkin.HEARTH,
+                boxX + WizardsMetrics.SPACE_L, boxY + 20, MODAL_WIDTH - 2 * WizardsMetrics.SPACE_L);
+        // Wrapped: the first line is wider than the modal, and on a sheet with a torn edge it would
+        // run off the paper instead of merely off a dark box.
+        int textY = boxY + 32;
+        for (String paragraph : new String[] {
+                "\"By entering your name you acknowledge full magical responsibility.\"",
+                "\"The Ministry has been notified.\""}) {
+            for (FormattedCharSequence line : font.split(Component.literal(paragraph),
+                    MODAL_WIDTH - 2 * WizardsMetrics.SPACE_L)) {
+                graphics.drawString(font, line, cx - font.width(line) / 2, textY, BODY_TEXT, false);
+                textY += font.lineHeight;
+            }
+            textY += 3;
+        }
 
         graphics.pose().popMatrix();
         super.render(graphics, mouseX, mouseY, partialTick);
@@ -120,7 +147,7 @@ public class DarkArtsGateScreen extends Screen {
             int h = 2 + random.nextInt(5);
             int x = fieldX - 12 + random.nextInt(fieldW + 24);
             int y = fieldY - 10 + random.nextInt(fieldH + 20);
-            int color = random.nextBoolean() ? 0xCC8B0000 : 0xCCB01010;
+            int color = random.nextBoolean() ? SPLAT_DARK : SPLAT_LIGHT;
             graphics.fill(x, y, x + w, y + h, color);
         }
         ConfigWidgets.drawCenteredNoShadow(graphics, font, "That is not your name.",

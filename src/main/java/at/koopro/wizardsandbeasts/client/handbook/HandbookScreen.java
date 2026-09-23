@@ -1,7 +1,9 @@
 package at.koopro.wizardsandbeasts.client.handbook;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GuiSkin;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.client.network.ClientScreenHooks;
 import at.koopro.wizardsandbeasts.handbook.HandbookChapter;
@@ -52,28 +54,35 @@ public final class HandbookScreen extends Screen {
     private static final Identifier TEX_EMBLEM =
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "textures/gui/handbook/emblem.png");
 
-    // ── Palette (Ministry: aubergine cover, sepia ink, plum titles) ──────────
+    // ── Palette (Ministry: aubergine cover, memo ink, plum titles) ───────────
     //
     // Purple on parchment, not the wand HUD's leather, and deliberately so: this book
     // speaks for the Ministry, and INK_TITLE is emblem.png's own dominant colour to the
     // byte. The shared constants now live in WizardsPalette under "Ministry of Magic" so a
     // palette audit reads them as the mod's second brand rather than as this screen having
     // drifted. Only the values with no counterpart there stay local.
-    private static final int COVER_OUTER = WizardsPalette.MINISTRY_DARK;
+    //
+    // The pages are the Ministry's memo stock (MINISTRY_MEMO), so the body is written in that
+    // skin's ink and its thin ink rather than in the leather-era brown and a 3 : 1 grey. The
+    // book's cover, the purple headings and the gilt are the brand and stay.
+    private static final GuiSkin SKIN = GuiSkin.MINISTRY_MEMO;
     private static final int COVER_HI = WizardsPalette.MINISTRY_LIGHT;
     private static final int PAGE = WizardsPalette.PARCHMENT;
     private static final int PAGE_SHADE = WizardsPalette.PARCHMENT_SHADE;
-    private static final int INK = WizardsPalette.PARCHMENT_INK;
+    private static final int INK = SKIN.ink();
     private static final int INK_TITLE = WizardsPalette.MINISTRY;
-    private static final int INK_GREY = 0xFF9A8E74;
-    private static final int DIVIDER = 0xFFCDBD97;
-    private static final int DIVIDER_SH = 0xFF9C8B66;
-    private static final int BAR_TRACK = 0xFF2E1B34;
-    private static final int BAR_FILL = 0xFFB08E4A;
+    /** Secondary text: flavour, page numbers, captions. The ink laid thin, still AA on the page. */
+    private static final int INK_GREY = SKIN.muted();
+    private static final int DIVIDER = WizardsPalette.PAGE_SHADE;
+    private static final int DIVIDER_SH = WizardsPalette.PAGE_DEEP;
+    private static final int BAR_TRACK = WizardsPalette.PAGE_SHADE;
+    private static final int BAR_EDGE = WizardsPalette.PAGE_DEEP;
+    private static final int BAR_FILL = WizardsPalette.GILT;
     /** The Ministry purple at 20% — a wash over a hovered row, not a fill. */
     private static final int HOVER = 0x33000000 | (WizardsPalette.MINISTRY & 0x00FFFFFF);
     private static final int ARROW = WizardsPalette.MINISTRY;
-    private static final int ARROW_OFF = 0xFFBCB096;
+    /** A page arrow with nowhere to go: the memo stock's faint ink, readable as "there but off". */
+    private static final int ARROW_OFF = 0xFF8A7890;
 
     private enum Mode { INDEX, CHAPTER }
 
@@ -355,18 +364,22 @@ public final class HandbookScreen extends Screen {
         divider(gg, cx + half + 6, x1, lineY);
     }
 
+    /**
+     * The memo stock's own rule, the same double ink line every paper screen draws under a
+     * heading. Its sprite carries the line three pixels down, so it is placed to land on {@code yy}.
+     */
     private void divider(GuiGraphics gg, int x0, int x1, int yy) {
         if (x1 - x0 < 4) {
             return;
         }
-        gg.fill(x0, yy, x1, yy + 1, DIVIDER);
-        gg.fill(x0, yy, x0 + 8, yy + 2, DIVIDER_SH);
-        gg.fill(x1 - 8, yy, x1, yy + 2, DIVIDER_SH);
+        McStylePanel.drawSkinDivider(gg, SKIN, x0, yy - 3, x1 - x0);
     }
 
     private void progressBar(GuiGraphics gg, int x0, int yy, int w, float frac) {
+        // A recessed paper track with a gilt fill: the dark aubergine well it replaces was the one
+        // piece of cover leather on the page.
         gg.fill(x0, yy, x0 + w, yy + 7, BAR_TRACK);
-        gg.fill(x0, yy, x0 + 1, yy + 7, COVER_OUTER);
+        gg.renderOutline(x0, yy, w, 7, BAR_EDGE);
         int fill = Math.round((w - 2) * Math.max(0f, Math.min(1f, frac)));
         if (fill > 0) {
             gg.fill(x0 + 1, yy + 1, x0 + 1 + fill, yy + 6, BAR_FILL);
@@ -454,7 +467,7 @@ public final class HandbookScreen extends Screen {
         gg.renderOutline(resX, arrowY - 5, 18, 18, DIVIDER_SH);
         // recipe ids are datapack-supplied and routinely wider than the half page
         int cy = gy + 64;
-        for (FormattedCharSequence line : font.split(Component.literal("§8" + recipe.recipeId().getPath()), w)) {
+        for (FormattedCharSequence line : font.split(Component.literal(recipe.recipeId().getPath()), w)) {
             ink(gg, line, gx, cy, INK_GREY);
             cy += LINE_H;
         }

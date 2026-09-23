@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.bestiary.niffler;
 
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.entity.niffler.NifflerPouchMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -27,7 +28,10 @@ public class NifflerPouchScreen extends AbstractContainerScreen<NifflerPouchMenu
         this.inventoryLabelY = this.imageHeight - 94;
     }
 
-    /** Both pouch sheets are 256×256 with the panel in the top-left corner, so one blit of that region. */
+    /**
+     * Both pouch sheets are 256×256 with the panel in the top-left corner, so one blit of that region.
+     * Drawn by {@code tools/pouch_textures.py}, whose slot wells follow {@code NifflerPouchMenu}'s grid.
+     */
     private static final int SHEET = 256;
 
     /**
@@ -46,6 +50,14 @@ public class NifflerPouchScreen extends AbstractContainerScreen<NifflerPouchMenu
         int y = (this.height - this.imageHeight) / 2;
         graphics.blit(RenderPipelines.GUI_TEXTURED, texture,
                 x, y, 0.0F, 0.0F, this.imageWidth, this.imageHeight, SHEET, SHEET);
+    }
+
+    /** Vanilla's labels are grey 0x404040; on the parchment sheet they take the page's inks. */
+    @Override
+    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
+        graphics.drawString(font, this.title, this.titleLabelX, this.titleLabelY, WizardsPalette.PAGE_INK, false);
+        graphics.drawString(font, this.playerInventoryTitle,
+                this.inventoryLabelX, this.inventoryLabelY, WizardsPalette.PAGE_INK_2, false);
     }
 
     @Override

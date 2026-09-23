@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.client.bestiary.gui;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
+import at.koopro.wizardsandbeasts.client.gui.widget.ThemedTextField;
 import org.jspecify.annotations.Nullable;
 
 import at.koopro.wizardsandbeasts.bestiary.*;
@@ -35,33 +36,60 @@ import java.util.Optional;
 import java.util.Set;
 
 public final class BestiaryScreen extends Screen {
-    private static final int W = 320;
-    private static final int H = 200;
+    /**
+     * The sheet. Grown from 320x200 when the Bestiary became parchment: the sheet's double ink rule
+     * runs 4-6px in, so everything that sat 4-8px from the edge moved to 12, and the title came
+     * inside the frame instead of floating above it over the world. {@code gui_chrome.py} draws the
+     * sheet and both wells at exactly these sizes ({@code BESTIARY_*}); the two must agree.
+     */
+    private static final int W = 344;
+    private static final int H = 216;
     private static final int ROW_HEIGHT = 14;
 
-    /**
-     * Selected-row tint and portrait edge, in the mod's leather/brass family.
-     *
-     * <p>These three fills were the last of the cold blue-lavender scheme {@link WizardsPalette}'s
-     * own javadoc describes the mod having drifted into before the palette existed — 0x335A84C5 and
-     * 0x664F5B72. They survived the Bestiary's retheme because they are alpha-composited fills
-     * drawn over the panel art rather than part of it, so recolouring the textures never touched
-     * them.
-     *
-     * <p>Alpha is composed separately from the hue so the fills stay translucent: taking a palette
-     * constant wholesale would drag its opaque 0xFF alpha along and paint over the row beneath.
-     */
-    private static final int SELECTED_ROW_TINT = 0x33000000 | (WizardsPalette.SELECT & 0x00FFFFFF);
-    private static final int PORTRAIT_EDGE     = 0x66000000 | (WizardsPalette.LINE & 0x00FFFFFF);
-    // On the shared scale rather than local literals: both already happened to land on it, so
-    // this is traceability rather than a visual change. The one value that does not is
-    // SCROLLBAR_W = 3 -- see the note there.
+    /** Clearance from the sheet's edge: the frame's inner rule sits at 6px. */
+    private static final int FRAME_PAD = WizardsMetrics.SPACE_L;
+    /** Title baseline and the rule under it, as on the Character Sheet. */
+    private static final int TITLE_TEXT_Y = 10;
+    private static final int TITLE_RULE_Y = 18;
+    /** Top of both columns, below the title rule. */
+    private static final int BODY_TOP = 28;
+
+    /** The index column: the search box, then the inset well the rows sit in. */
+    private static final int LIST_PANEL_W = 128;
+    private static final int SEARCH_H = 16;
+    private static final int LIST_PANEL_Y = BODY_TOP + SEARCH_H + WizardsMetrics.SPACE_S;
+    private static final int LIST_PANEL_H = H - FRAME_PAD - LIST_PANEL_Y;
+    /** Rows start one step in from the well, clear of its engraved edge. */
+    private static final int LIST_X = FRAME_PAD + WizardsMetrics.SPACE_S;
+
+    /** The detail column: one inset well from the index to the sheet's right padding. */
+    private static final int DETAIL_PANEL_X = FRAME_PAD + LIST_PANEL_W + 6;
+    private static final int DETAIL_PANEL_W = W - FRAME_PAD - DETAIL_PANEL_X;
+    private static final int DETAIL_PANEL_H = H - FRAME_PAD - BODY_TOP;
+    /** Detail text origin, clear of the well's edge. */
+    private static final int DETAIL_X = DETAIL_PANEL_X + 6;
+    private static final int DETAIL_Y = BODY_TOP + 6;
+    /** Detail scroll track: two pixels, six in from the well's right edge. */
+    private static final int DETAIL_TRACK_X = DETAIL_PANEL_X + DETAIL_PANEL_W - 6;
+    private static final int DETAIL_W = DETAIL_TRACK_X - 4 - DETAIL_X;
+    private static final int DETAIL_BOTTOM = H - FRAME_PAD - 4;
+
+    /** The live creature or placeholder, square, under the entry's name. */
+    private static final int PORTRAIT_SIZE = 32;
+    private static final int PORTRAIT_Y = DETAIL_Y + 12;
+
+    /** The portrait's drop shadow: the paper's deepest tone, so the frame reads as laid on the page. */
+    private static final int PORTRAIT_EDGE = WizardsPalette.PAGE_DEEP;
+    /** Detail scroll track and thumb: a groove and an ink stroke. */
+    private static final int DETAIL_TRACK = WizardsPalette.PAGE_DEEP;
+    private static final int DETAIL_THUMB = WizardsPalette.PAGE_INK_2;
+    // On the shared scale rather than local literals.
     private static final int ROW_STEP = WizardsMetrics.ROW_H;
-    private static final int LIST_START_Y = WizardsMetrics.SPACE_XXXL;
+    private static final int LIST_START_Y = LIST_PANEL_Y + WizardsMetrics.SPACE_S;
+    /** Bottom of the list, clear of the well's lower edge. */
+    private static final int LIST_BOTTOM = LIST_PANEL_Y + LIST_PANEL_H - WizardsMetrics.SPACE_S;
     /** Right edge of list row content (scrollbar sits just to the right). */
     private static final int LIST_ROWS_W = 112;
-    /** Width of the shared themed scrollbar. */
-    private static final int SCROLLBAR_W = WizardsMetrics.SCROLLBAR_W;
     private static final Identifier TEX_SCREEN =
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "textures/gui/bestiary/screen.png");
     private static final Identifier TEX_LEFT_PANEL =
@@ -110,8 +138,8 @@ public final class BestiaryScreen extends Screen {
         x = GuiScaleHelper.clampedLeft(Math.round(W * guiScale), width, GuiScaleHelper.DEFAULT_MARGIN);
         y = GuiScaleHelper.clampedTop(Math.round(H * guiScale), height, GuiScaleHelper.DEFAULT_MARGIN);
         // Widget lives in screen space (outside the scaled pose), so its bounds scale here.
-        search = new EditBox(font, x + Math.round(6 * guiScale), y + Math.round(6 * guiScale),
-                Math.round(108 * guiScale), Math.round(16 * guiScale),
+        search = new ThemedTextField(font, x + Math.round(FRAME_PAD * guiScale), y + Math.round(BODY_TOP * guiScale),
+                Math.round(LIST_PANEL_W * guiScale), Math.round(SEARCH_H * guiScale),
                 Component.translatable("gui.wizards_and_beasts.bestiary.search"));
         search.setResponder(value -> rebuildRows());
         addRenderableWidget(search);
@@ -159,7 +187,7 @@ public final class BestiaryScreen extends Screen {
     }
 
     private int visibleRowCount() {
-        return Math.max(1, (H - (LIST_START_Y + 18)) / ROW_STEP);
+        return Math.max(1, (LIST_BOTTOM - LIST_START_Y) / ROW_STEP);
     }
 
     private int maxScroll() {
@@ -167,16 +195,15 @@ public final class BestiaryScreen extends Screen {
     }
 
     private int listRowsRight() {
-        return x + 6 + LIST_ROWS_W;
+        return x + LIST_X + LIST_ROWS_W;
     }
 
     /**
      * Left edge of the list scrollbar.
      *
-     * <p>Flush against the rows rather than a pixel clear of them, because the shared 8px bar has
-     * to fit between the list and the detail panel: rows end at {@code x+118} and the panel starts
-     * at {@code x+126}, so 8px starting at 119 would have overlapped the panel by one. At 118 it
-     * abuts both exactly.
+     * <p>Flush against the rows, so the shared 8px bar fits inside the index well: rows end at
+     * {@code x+128}, the bar runs to {@code x+136}, and the well's engraved edge is at
+     * {@code x+137..139}.
      */
     private int scrollbarLeft() {
         return listRowsRight();
@@ -268,9 +295,9 @@ public final class BestiaryScreen extends Screen {
 
     /** Draw the live entity into the detail-panel portrait box (screen space, post-scale). */
     private void renderBestiaryEntity(GuiGraphics gg, LivingEntity entity, int mouseX, int mouseY) {
-        int pX = x + 132;
-        int pY = y + 22;
-        int pSize = 32;
+        int pX = x + DETAIL_X;
+        int pY = y + PORTRAIT_Y;
+        int pSize = PORTRAIT_SIZE;
         int sx1 = Math.round(x + (pX - x) * guiScale);
         int sy1 = Math.round(y + (pY - y) * guiScale);
         int sx2 = Math.round(x + (pX + pSize - x) * guiScale);
@@ -299,13 +326,19 @@ public final class BestiaryScreen extends Screen {
         pose.pushMatrix();
         pose.translate(x * (1.0f - guiScale), y * (1.0f - guiScale));
         pose.scale(guiScale, guiScale);
+        // The art is generated at exactly these sizes, so every blit is 1:1 and the grain lands
+        // where it was drawn.
         drawStretched(gg, TEX_SCREEN, x, y, W, H, W, H);
-        drawStretched(gg, TEX_LEFT_PANEL, x + 4, y + 28, 120, H - 32, 120, 168);
-        drawStretched(gg, TEX_RIGHT_PANEL, x + 126, y + 4, W - 130, H - 8, 190, 190);
-        gg.drawString(font, title, x + 8, y - 10, WizardsPalette.TEXT);
+        drawStretched(gg, TEX_LEFT_PANEL, x + FRAME_PAD, y + LIST_PANEL_Y, LIST_PANEL_W, LIST_PANEL_H,
+                LIST_PANEL_W, LIST_PANEL_H);
+        drawStretched(gg, TEX_RIGHT_PANEL, x + DETAIL_PANEL_X, y + BODY_TOP, DETAIL_PANEL_W, DETAIL_PANEL_H,
+                DETAIL_PANEL_W, DETAIL_PANEL_H);
+        // Written on the sheet, clear of the frame's rules, rather than over the world above it.
+        gg.drawString(font, title, x + FRAME_PAD, y + TITLE_TEXT_Y, WizardsPalette.PAGE_INK, false);
+        McStylePanel.drawDivider(gg, x + FRAME_PAD, y + TITLE_RULE_Y, W - 2 * FRAME_PAD);
 
         int listTop = y + LIST_START_Y;
-        int listBottom = y + H - 18;
+        int listBottom = y + LIST_BOTTOM;
         int rowY = listTop;
         int start = Math.min(scrollOffset, rows.size());
         int end = Math.min(rows.size(), start + visibleRowCount());
@@ -313,35 +346,36 @@ public final class BestiaryScreen extends Screen {
         for (int idx = start; idx < end; idx++) {
             Row row = rows.get(idx);
             if (row.header != null) {
-                drawStretched(gg, TEX_HEADER, x + 6, rowY, LIST_ROWS_W, ROW_HEIGHT, 112, 14);
+                drawStretched(gg, TEX_HEADER, x + LIST_X, rowY, LIST_ROWS_W, ROW_HEIGHT, LIST_ROWS_W, ROW_HEIGHT);
                 boolean isCollapsed = collapsed.getOrDefault(row.header, Boolean.FALSE);
                 String arrow = isCollapsed ? "\u25b6 " : "\u25bc ";
+                // Rubricated: a category is a section heading of the index.
                 gg.drawString(font, Component.literal(arrow).append(categoryLabel(row.header)),
-                        x + 8, rowY + 3, WizardsPalette.TEXT);
+                        x + LIST_X + 2, rowY + 3, WizardsPalette.PAGE_RUBRIC, false);
             } else if (row.entry != null) {
                 BestiaryEntry e = row.entry;
                 boolean isSel = e.id().equals(selected);
-                drawStretched(gg, TEX_ROW, x + 6, rowY, LIST_ROWS_W, ROW_HEIGHT, 112, 14);
-                if (isSel) {
-                    gg.fill(x + 6, rowY, rowRight, rowY + ROW_HEIGHT, SELECTED_ROW_TINT);
-                }
+                // Selection underneath: the row art is only its dotted rule, which stays on top.
+                McStylePanel.drawRow(gg, x + LIST_X, rowY, rowRight - (x + LIST_X), ROW_HEIGHT, isSel);
+                drawStretched(gg, TEX_ROW, x + LIST_X, rowY, LIST_ROWS_W, ROW_HEIGHT, LIST_ROWS_W, ROW_HEIGHT);
                 DiscoveryTier tier = ClientBestiaryCache.get().tiers().getOrDefault(e.id(), DiscoveryTier.UNKNOWN);
                 Component name = tier == DiscoveryTier.UNKNOWN
                         ? Component.translatable("bestiary.wizards_and_beasts.entry.unknown")
                         : e.displayName();
                 int nameMaxWidth = 72;
                 String clipped = font.plainSubstrByWidth(name.getString(), nameMaxWidth);
-                gg.drawString(font, Component.literal(clipped), x + 8, rowY + 3, tier == DiscoveryTier.UNKNOWN ? WizardsPalette.TEXT_DIM : WizardsPalette.TEXT);
+                gg.drawString(font, Component.literal(clipped), x + LIST_X + 2, rowY + 3,
+                        tier == DiscoveryTier.UNKNOWN ? WizardsPalette.PAGE_INK_2 : WizardsPalette.PAGE_INK, false);
                 for (int i = 0; i < 5; i++) {
-                    int c = i <= tier.tierIndex() ? WizardsPalette.PIP_ON : WizardsPalette.PIP_OFF;
-                    gg.fill(x + 82 + i * 5, rowY + 5, x + 85 + i * 5, rowY + 8, c);
+                    int c = i <= tier.tierIndex() ? WizardsPalette.GILT_DARK : WizardsPalette.PAGE_DEEP;
+                    gg.fill(x + LIST_X + 76 + i * 5, rowY + 5, x + LIST_X + 79 + i * 5, rowY + 8, c);
                 }
             }
             rowY += ROW_STEP;
         }
         if (rows.isEmpty()) {
-            gg.drawWordWrap(font, emptyListMessage(), x + 10, listTop + 4, LIST_ROWS_W - 8,
-                    WizardsPalette.TEXT_DIM);
+            gg.drawWordWrap(font, emptyListMessage(), x + LIST_X + 4, listTop + 4, LIST_ROWS_W - 8,
+                    WizardsPalette.PAGE_INK_2, false);
         }
         renderListScrollbar(gg, listTop, listBottom);
 
@@ -350,7 +384,7 @@ public final class BestiaryScreen extends Screen {
             renderDetail(gg, selectedEntry);
         } else {
             gg.drawWordWrap(font, Component.translatable("bestiary.wizards_and_beasts.empty.no_selection"),
-                    x + 132, y + 10, 176, WizardsPalette.TEXT_DIM);
+                    x + DETAIL_X, y + DETAIL_Y, DETAIL_W, WizardsPalette.PAGE_INK_2, false);
         }
 
         pose.popMatrix();
@@ -370,7 +404,7 @@ public final class BestiaryScreen extends Screen {
 
         int dmx = (int) toDesignX(mouseX);
         int dmy = (int) toDesignY(mouseY);
-        if (dmx >= x + 6 && dmx <= listRowsRight() && dmy >= listTop && dmy <= listBottom) {
+        if (dmx >= x + LIST_X && dmx <= listRowsRight() && dmy >= listTop && dmy <= listBottom) {
             int hovered = (dmy - listTop) / ROW_STEP + start;
             if (hovered >= 0 && hovered < rows.size()) {
                 Row row = rows.get(hovered);
@@ -402,8 +436,8 @@ public final class BestiaryScreen extends Screen {
     }
 
     private void renderDetail(GuiGraphics gg, BestiaryEntry entry) {
-        int dx = x + 132;
-        int dy = y + 10;
+        int dx = x + DETAIL_X;
+        int dy = y + DETAIL_Y;
         if (!entry.id().equals(detailScrollFor)) {
             detailScrollFor = entry.id();
             detailScroll = 0;
@@ -412,12 +446,12 @@ public final class BestiaryScreen extends Screen {
         Component name = tier == DiscoveryTier.UNKNOWN
                 ? Component.translatable("bestiary.wizards_and_beasts.entry.unobserved")
                 : entry.displayName();
-        gg.drawString(font, name, dx, dy, WizardsPalette.TEXT);
-        dy += 12;
+        gg.drawString(font, name, dx, dy, WizardsPalette.PAGE_INK, false);
+        dy += PORTRAIT_Y - DETAIL_Y;
 
         int portraitX = dx;
         int portraitY = dy;
-        int portraitSize = 32;
+        int portraitSize = PORTRAIT_SIZE;
         // When the entry has a live entity, it is drawn later in screen space (post-scale);
         // only fall back to the static portrait texture when no entity is available.
         boolean liveEntity = tier != DiscoveryTier.UNKNOWN && getRenderEntity(entry) != null;
@@ -428,24 +462,24 @@ public final class BestiaryScreen extends Screen {
         gg.fill(portraitX + portraitSize, portraitY, portraitX + portraitSize + 1, portraitY + portraitSize, PORTRAIT_EDGE);
 
         int textX = portraitX + portraitSize + 8;
-        int textW = 176 - (portraitSize + 8);
+        int textW = DETAIL_W - (portraitSize + 8);
         if (tier == DiscoveryTier.UNKNOWN) {
-            gg.drawWordWrap(font, tier.unlockHint(), textX, portraitY, textW, WizardsPalette.TEXT_DIM);
+            gg.drawWordWrap(font, tier.unlockHint(), textX, portraitY, textW, WizardsPalette.PAGE_INK_2, false);
             return;
         }
         gg.drawString(font, Component.translatable("bestiary.wizards_and_beasts.field.rating",
-                ministryGrade(entry.mmRating())), textX, portraitY, WizardsPalette.TEXT_DIM);
+                ministryGrade(entry.mmRating())), textX, portraitY, WizardsPalette.PAGE_INK_2, false);
         Optional<CreatureProfile> profile = entry.profile();
         profile.ifPresent(p -> gg.drawString(font, p.classification().displayName(), textX, portraitY + 10,
-                WizardsPalette.TEXT_DIM));
-        gg.drawString(font, tier.displayName(), textX, portraitY + 20, WizardsPalette.TEXT);
+                WizardsPalette.PAGE_INK_2, false));
+        gg.drawString(font, tier.displayName(), textX, portraitY + 20, WizardsPalette.PAGE_INK, false);
 
         List<Facet> facets = facetsFor(entry, tier);
         int bodyTop = portraitY + portraitSize + 6;
-        int bodyBottom = y + H - 8;
+        int bodyBottom = y + DETAIL_BOTTOM;
         List<Line> lines = new ArrayList<>();
         for (Facet facet : facets) {
-            for (net.minecraft.util.FormattedCharSequence seq : font.split(facet.text(), 176)) {
+            for (net.minecraft.util.FormattedCharSequence seq : font.split(facet.text(), DETAIL_W)) {
                 lines.add(new Line(seq, facet.color()));
             }
             lines.add(Line.GAP);
@@ -464,12 +498,12 @@ public final class BestiaryScreen extends Screen {
             }
         }
         if (detailScrollMax > 0) {
-            int trackX = x + W - 6;
+            int trackX = x + DETAIL_TRACK_X;
             int trackH = bodyBottom - bodyTop;
-            gg.fill(trackX, bodyTop, trackX + 2, bodyBottom, PORTRAIT_EDGE);
+            gg.fill(trackX, bodyTop, trackX + 2, bodyBottom, DETAIL_TRACK);
             int thumbH = Math.max(8, trackH * visible / lines.size());
             int thumbY = bodyTop + (trackH - thumbH) * detailScroll / detailScrollMax;
-            gg.fill(trackX, thumbY, trackX + 2, thumbY + thumbH, WizardsPalette.TEXT_DIM);
+            gg.fill(trackX, thumbY, trackX + 2, thumbY + thumbH, DETAIL_THUMB);
         }
     }
 
@@ -488,57 +522,57 @@ public final class BestiaryScreen extends Screen {
         List<Facet> out = new ArrayList<>();
         Optional<CreatureProfile> profile = entry.profile();
         String field = "bestiary.wizards_and_beasts.field.";
-        out.add(new Facet(entry.shortLore(), WizardsPalette.TEXT));
-        out.add(new Facet(Component.translatable(field + "habitat", entry.habitat()), WizardsPalette.TEXT_DIM));
-        out.add(new Facet(Component.translatable(field + "size", sizeName(entry.size())), WizardsPalette.TEXT_DIM));
+        out.add(new Facet(entry.shortLore(), WizardsPalette.PAGE_INK));
+        out.add(new Facet(Component.translatable(field + "habitat", entry.habitat()), WizardsPalette.PAGE_INK_2));
+        out.add(new Facet(Component.translatable(field + "size", sizeName(entry.size())), WizardsPalette.PAGE_INK_2));
 
         if (tier.atLeast(DiscoveryTier.OBSERVED)) {
             profile.ifPresent(p -> {
                 out.add(new Facet(Component.translatable(field + "behaviour", Component.translatable(p.behaviour())),
-                        WizardsPalette.TEXT));
+                        WizardsPalette.PAGE_INK));
                 out.add(new Facet(Component.translatable(field + "diet", Component.translatable(p.diet())),
-                        WizardsPalette.TEXT_DIM));
+                        WizardsPalette.PAGE_INK_2));
             });
             for (String threat : entry.threatKeys()) {
                 out.add(new Facet(Component.translatable(field + "threat", Component.translatable(threat)),
-                        WizardsPalette.TEXT_DIM));
+                        WizardsPalette.PAGE_INK_2));
             }
         }
 
         if (tier.atLeast(DiscoveryTier.STUDIED)) {
-            out.add(new Facet(entry.fullLore(), WizardsPalette.TEXT));
+            out.add(new Facet(entry.fullLore(), WizardsPalette.PAGE_INK));
             for (String ability : entry.magicAbilityKeys()) {
                 out.add(new Facet(Component.translatable(field + "magic", Component.translatable(ability)),
-                        WizardsPalette.TEXT_DIM));
+                        WizardsPalette.PAGE_INK_2));
             }
             for (String weakness : entry.weaknessKeys()) {
                 out.add(new Facet(Component.translatable(field + "weakness", Component.translatable(weakness)),
-                        WizardsPalette.TEXT_DIM));
+                        WizardsPalette.PAGE_INK_2));
             }
             profile.ifPresent(p -> {
                 for (String interaction : p.interactions()) {
                     out.add(new Facet(Component.translatable(field + "interaction",
-                            Component.translatable(interaction)), WizardsPalette.TEXT));
+                            Component.translatable(interaction)), WizardsPalette.PAGE_INK));
                 }
                 for (CreatureProfile.Material material : p.materials()) {
                     Component item = BuiltInRegistries.ITEM.getOptional(material.item())
                             .map(found -> found.getName())
                             .orElse(Component.literal(material.item().toString()));
                     out.add(new Facet(Component.translatable(field + "material", item, material.how().displayName()),
-                            WizardsPalette.TEXT_DIM));
+                            WizardsPalette.PAGE_INK_2));
                 }
                 out.add(new Facet(Component.translatable(field + "society", Component.translatable(p.society())),
-                        WizardsPalette.TEXT));
+                        WizardsPalette.PAGE_INK));
             });
         }
 
         if (tier.atLeast(DiscoveryTier.KNOWN)) {
             profile.flatMap(CreatureProfile::signature).ifPresent(signature -> out.add(new Facet(
                     Component.translatable(field + "signature", Component.translatable(signature)),
-                    WizardsPalette.TEXT)));
+                    WizardsPalette.PAGE_INK)));
         } else {
             // Something still to earn: say how, rather than ending the page on blank parchment.
-            out.add(new Facet(tier.unlockHint(), WizardsPalette.TEXT_DIM));
+            out.add(new Facet(tier.unlockHint(), WizardsPalette.PAGE_INK_2));
             profile.ifPresent(p -> {
                 if (tier.ordinal() < DiscoveryTier.STUDIED.ordinal() && p.studiedByHand()) {
                     List<Component> acts = new ArrayList<>();
@@ -546,15 +580,15 @@ public final class BestiaryScreen extends Screen {
                             .forEach(act -> acts.add(act.displayName()));
                     out.add(new Facet(Component.translatable(field + "study",
                             net.minecraft.network.chat.ComponentUtils.formatList(acts, Component.literal(", "))),
-                            WizardsPalette.TEXT_DIM));
+                            WizardsPalette.PAGE_INK_2));
                 }
                 if (p.hasSignature()) {
-                    out.add(new Facet(Component.translatable(field + "signature_pending"), WizardsPalette.TEXT_DIM));
+                    out.add(new Facet(Component.translatable(field + "signature_pending"), WizardsPalette.PAGE_INK_2));
                 }
             });
         }
         profile.ifPresent(p -> out.add(new Facet(Component.translatable(field + "basis", p.basis().displayName()),
-                WizardsPalette.TEXT_DIM)));
+                WizardsPalette.PAGE_INK_2)));
         return out;
     }
 
@@ -589,7 +623,8 @@ public final class BestiaryScreen extends Screen {
 
         double mouseX = toDesignX(event.x());
         double mouseY = toDesignY(event.y());
-        if (mouseX >= x + 6 && mouseX <= listRowsRight() && mouseY >= y + LIST_START_Y && mouseY <= y + H - 18) {
+        if (mouseX >= x + LIST_X && mouseX <= listRowsRight() && mouseY >= y + LIST_START_Y
+                && mouseY <= y + LIST_BOTTOM) {
             int idx = (int) ((mouseY - (y + LIST_START_Y)) / ROW_STEP) + scrollOffset;
             if (idx >= 0 && idx < rows.size()) {
                 Row row = rows.get(idx);
@@ -610,7 +645,8 @@ public final class BestiaryScreen extends Screen {
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         double dmx = toDesignX(mouseX);
         double dmy = toDesignY(mouseY);
-        if (dmx >= x + 4 && dmx <= x + 124 && dmy >= y + 28 && dmy <= y + H - 4) {
+        if (dmx >= x + FRAME_PAD && dmx <= x + FRAME_PAD + LIST_PANEL_W
+                && dmy >= y + BODY_TOP && dmy <= y + H - FRAME_PAD) {
             scrollOffset -= (int) Math.signum(scrollY);
             if (scrollOffset < 0) {
                 scrollOffset = 0;
@@ -619,7 +655,8 @@ public final class BestiaryScreen extends Screen {
             }
             return true;
         }
-        if (dmx >= x + 128 && dmx <= x + W - 4 && dmy >= y + 4 && dmy <= y + H - 4) {
+        if (dmx >= x + DETAIL_PANEL_X && dmx <= x + DETAIL_PANEL_X + DETAIL_PANEL_W
+                && dmy >= y + BODY_TOP && dmy <= y + H - FRAME_PAD) {
             detailScroll = Math.clamp(detailScroll - (int) Math.signum(scrollY) * 2, 0, detailScrollMax);
             return true;
         }

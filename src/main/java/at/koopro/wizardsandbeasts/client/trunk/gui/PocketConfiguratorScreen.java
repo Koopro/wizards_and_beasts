@@ -46,6 +46,12 @@ public class PocketConfiguratorScreen extends AbstractContainerScreen<PocketConf
     private static final int ROW_H = 18;
     private static final int APPLY_W = 84;
 
+    /** Title row and the rule under it, as on the character sheet: clear of the frame's 4-6px rules. */
+    private static final int TITLE_Y = 10;
+    private static final int TITLE_RULE_Y = 18;
+    /** Everything drawn on the sheet stays this far in from its edge. */
+    private static final int EDGE = WizardsMetrics.SPACE_L;
+
     private int localRadius;
     private int localBiomeIndex;
 
@@ -94,7 +100,7 @@ public class PocketConfiguratorScreen extends AbstractContainerScreen<PocketConf
         biomeCycler.buttons().forEach(this::addRenderableWidget);
 
         addRenderableWidget(new ThemedButton(
-                left + (imageWidth - APPLY_W) / 2, top + imageHeight - WizardsMetrics.SPACE_XXL - 2,
+                left + (imageWidth - APPLY_W) / 2, top + imageHeight - EDGE - ROW_H,
                 APPLY_W, ROW_H,
                 Component.translatable("gui.wizards_and_beasts.pocket_configurator.apply"),
                 this::applyAndClose).tone(McStylePanel.ButtonTone.CONFIRM));
@@ -121,21 +127,21 @@ public class PocketConfiguratorScreen extends AbstractContainerScreen<PocketConf
     }
 
     // Row origins, in panel-relative pixels, on the 4pt scale. Shared by init and render so the
-    // label and the control it belongs to cannot drift apart.
+    // label and the control it belongs to cannot drift apart. The gaps are SPACE_L rather than
+    // SPACE_XL so the Apply button can sit 12px off the sheet's edge, clear of its double rule,
+    // without crowding the cycler above it.
     private static int radiusRowY() {
-        return WizardsMetrics.LINE_TITLE + WizardsMetrics.SPACE_XL + WizardsMetrics.LINE_BODY;
+        return WizardsMetrics.LINE_TITLE + WizardsMetrics.SPACE_L + WizardsMetrics.LINE_BODY;
     }
 
     private static int biomeRowY() {
-        return radiusRowY() + ROW_H + WizardsMetrics.SPACE_XL + WizardsMetrics.LINE_BODY;
+        return radiusRowY() + ROW_H + WizardsMetrics.SPACE_L + WizardsMetrics.LINE_BODY;
     }
 
     @Override
     protected void renderBg(GuiGraphics g, float partial, int mx, int my) {
         McStylePanel.drawThemedPanel(g, leftPos, topPos, imageWidth, imageHeight);
-        McStylePanel.drawDivider(g, leftPos + WizardsMetrics.SPACE_M,
-                topPos + WizardsMetrics.LINE_TITLE - WizardsMetrics.DIVIDER_H / 2,
-                imageWidth - 2 * WizardsMetrics.SPACE_M);
+        McStylePanel.drawDivider(g, leftPos + EDGE, topPos + TITLE_RULE_Y, imageWidth - 2 * EDGE);
     }
 
     @Override
@@ -145,19 +151,20 @@ public class PocketConfiguratorScreen extends AbstractContainerScreen<PocketConf
         int contentX = leftPos + WizardsMetrics.SPACE_XL;
         int inner = imageWidth - 2 * WizardsMetrics.SPACE_XL;
 
-        g.drawCenteredString(font,
-                Component.translatable("gui.wizards_and_beasts.pocket_configurator.title"),
-                leftPos + imageWidth / 2, topPos + WizardsMetrics.SPACE_M, WizardsPalette.BRASS_HI);
+        // Written on the sheet, unshadowed: a shadow on paper reads as a smudge.
+        Component title = Component.translatable("gui.wizards_and_beasts.pocket_configurator.title");
+        g.drawString(font, title, leftPos + (imageWidth - font.width(title)) / 2, topPos + TITLE_Y,
+                WizardsPalette.PAGE_INK, false);
 
         int radiusY = topPos + radiusRowY();
         g.drawString(font, Component.translatable("gui.wizards_and_beasts.pocket_configurator.size"),
-                contentX, radiusY - WizardsMetrics.LINE_BODY, WizardsPalette.TEXT_DIM, false);
+                contentX, radiusY - WizardsMetrics.LINE_BODY, WizardsPalette.PAGE_INK_2, false);
         renderRadiusTrack(g, contentX + STEP_W + WizardsMetrics.SPACE_M, radiusY,
                 inner - 2 * (STEP_W + WizardsMetrics.SPACE_M));
 
         int biomeY = topPos + biomeRowY();
         g.drawString(font, Component.translatable("gui.wizards_and_beasts.pocket_configurator.biome"),
-                contentX, biomeY - WizardsMetrics.LINE_BODY, WizardsPalette.TEXT_DIM, false);
+                contentX, biomeY - WizardsMetrics.LINE_BODY, WizardsPalette.PAGE_INK_2, false);
         // The cycler draws only its label panel; its two arrows are registered widgets and have
         // already been drawn by super.render above.
         biomeCycler.renderLabel(g);
@@ -168,7 +175,8 @@ public class PocketConfiguratorScreen extends AbstractContainerScreen<PocketConf
      *
      * <p>Drawn on the recessed sprite rather than a {@code fill()} pair, so the bar sits in the
      * panel the way every other well in the mod does. The number stays: a track says "near the
-     * top of its range" and a player setting a pocket to match a build wants the integer.
+     * top of its range" and a player setting a pocket to match a build wants the integer. It is
+     * written in ink, which reads on both the gilt fill and the bare well.
      */
     private void renderRadiusTrack(GuiGraphics g, int x, int y, int w) {
         McStylePanel.drawThemedInset(g, x, y, w, ROW_H);
@@ -177,11 +185,12 @@ public class PocketConfiguratorScreen extends AbstractContainerScreen<PocketConf
         if (fillW > 0) {
             g.fill(x + WizardsMetrics.SPACE_S, y + WizardsMetrics.SPACE_S,
                     x + WizardsMetrics.SPACE_S + fillW, y + ROW_H - WizardsMetrics.SPACE_S,
-                    WizardsPalette.BRASS);
+                    WizardsPalette.GILT);
         }
-        g.drawCenteredString(font,
-                Component.translatable("gui.wizards_and_beasts.pocket_configurator.radius", localRadius),
-                x + w / 2, y + (ROW_H - font.lineHeight) / 2 + 1, WizardsPalette.BRASS_HI);
+        Component value = Component.translatable(
+                "gui.wizards_and_beasts.pocket_configurator.radius", localRadius);
+        g.drawString(font, value, x + (w - font.width(value)) / 2,
+                y + (ROW_H - font.lineHeight) / 2 + 1, WizardsPalette.PAGE_INK, false);
     }
 
     /** Vanilla's two labels are wrong here: there is no inventory, and the title is drawn centred. */

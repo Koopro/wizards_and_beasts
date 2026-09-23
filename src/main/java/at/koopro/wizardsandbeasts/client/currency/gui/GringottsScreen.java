@@ -4,6 +4,7 @@ import at.koopro.wizardsandbeasts.client.currency.state.ClientDragotQuoteState;
 import at.koopro.wizardsandbeasts.client.currency.state.ClientVaultDataState;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GuiSkin;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiText;
@@ -79,8 +80,26 @@ public class GringottsScreen extends Screen {
     // trade one thing for another sit on the right.
     private static final int HEADER_H = 32;
 
-    /** Left column: the vault and wallet balances, and what they come to. */
-    private static final int COLUMN_HEAD_Y = 32;
+    /**
+     * Floor for the rule under the title, in <em>unscaled</em> pixels from the panel's top.
+     *
+     * <p>The one rung that does not scale, because the thing it clears does not either: the
+     * sheet's own double rule is tiled at 1:1 and sits 4-6px in at every scale, and the title is
+     * font-sized. At 0.72 the scaled rung would put the rule through the title.
+     */
+    private static final int TITLE_RULE_MIN_Y = 18;
+    /** The title sits this far above its rule, as on the character sheet (10 over 18). */
+    private static final int TITLE_OVER_RULE = 8;
+    /** Rules that span the sheet stay clear of its frame, whose double rule runs 4-6px in. */
+    private static final int RULE_INSET = WizardsMetrics.SPACE_L;
+
+    /**
+     * Left column: the vault and wallet balances, and what they come to.
+     *
+     * <p>The two headings sit at 36 rather than 32 so that at the 0.72 floor they still land
+     * below the title rule's floor at {@link #TITLE_RULE_MIN_Y}.
+     */
+    private static final int COLUMN_HEAD_Y = 36;
     private static final int COIN_TABLE_Y = 48;
     private static final int COIN_ROW_H = 30;
     private static final int BULK_ROW_Y = 146;
@@ -88,7 +107,7 @@ public class GringottsScreen extends Screen {
     private static final int TOTALS_Y = 192;
 
     /** Right column: the two exchange desks, each a 2x2 of buttons under its heading. */
-    private static final int EXCHANGE_LABEL_Y = 32;
+    private static final int EXCHANGE_LABEL_Y = 36;
     private static final int EXCHANGE_ROW_Y = 48;
     private static final int DRAGOT_LABEL_Y = 126;
     private static final int DRAGOT_ROW_Y = 142;
@@ -113,7 +132,7 @@ public class GringottsScreen extends Screen {
     private final int goldInk;
     private final int silverInk;
     private final int bronzeInk;
-    /** A rate that has moved in the holder's favour, and one that has not. */
+    /** A rate that has moved in the holder's favour, and one that has not: good and bad news. */
     private final int riseInk;
     private final int fallInk;
 
@@ -126,8 +145,8 @@ public class GringottsScreen extends Screen {
         this.goldInk = UiContrast.readableOn(0xD4AF37, SKIN.base(), UiContrast.AA_TEXT);
         this.silverInk = UiContrast.readableOn(0x8A8A8A, SKIN.base(), UiContrast.AA_TEXT);
         this.bronzeInk = UiContrast.readableOn(0xCD7F32, SKIN.base(), UiContrast.AA_TEXT);
-        this.riseInk = UiContrast.readableOn(0x2E7D32, SKIN.base(), UiContrast.AA_TEXT);
-        this.fallInk = UiContrast.readableOn(0xB3261E, SKIN.base(), UiContrast.AA_TEXT);
+        this.riseInk = WizardsPalette.PAGE_GOOD;
+        this.fallInk = WizardsPalette.PAGE_BAD;
     }
 
     /**
@@ -296,10 +315,12 @@ public class GringottsScreen extends Screen {
         McStylePanel.drawSkinPanel(graphics, SKIN, panelX, panelY, panelW, panelH);
         McStylePanel.drawSkinSeal(graphics, SKIN,
                 panelX + panelW - FRAME - McStylePanel.SEAL_SIZE, panelY + FRAME);
-        McStylePanel.drawSkinDivider(graphics, SKIN, panelX + FRAME,
-                y(HEADER_H) - WizardsMetrics.DIVIDER_H, panelW - 2 * FRAME);
-        graphics.drawCenteredString(font, this.title, panelX + panelW / 2,
-                panelY + FRAME + WizardsMetrics.SPACE_S, SKIN.ink());
+        // Written on the sheet above its rule, unshadowed: a shadow on paper reads as a smudge.
+        int ruleY = Math.max(panelY + TITLE_RULE_MIN_Y, y(HEADER_H) - WizardsMetrics.DIVIDER_H);
+        McStylePanel.drawSkinDivider(graphics, SKIN, panelX + RULE_INSET, ruleY,
+                panelW - 2 * RULE_INSET);
+        graphics.drawString(font, this.title, panelX + (panelW - font.width(this.title)) / 2,
+                ruleY - TITLE_OVER_RULE, SKIN.ink(), false);
 
         renderCoinTable(graphics, leftColX(), colW());
         renderTotals(graphics, leftColX(), colW());

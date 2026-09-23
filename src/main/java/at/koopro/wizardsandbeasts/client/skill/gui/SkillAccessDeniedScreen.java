@@ -1,6 +1,8 @@
 package at.koopro.wizardsandbeasts.client.skill.gui;
 
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GuiSkin;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -25,14 +27,20 @@ public class SkillAccessDeniedScreen extends Screen {
         int px = layout.panelX();
         int py = layout.panelY();
         int cx = px + panelW / 2;
-        McStylePanel.drawTexturedPanel(graphics, px, py, panelW, panelH);
-        graphics.drawCenteredString(this.font, this.title, cx, py + 12, 0xFFB02A2A);
-        graphics.drawCenteredString(this.font, detail, cx, py + 30, 0xFF404040);
-        graphics.drawCenteredString(this.font,
-                Component.translatable("screen.wizards_and_beasts.skill_access_denied.hint"),
-                cx, py + 50, 0xFF606060);
+        // The skill web's own vellum, so a refusal reads as the same book as the chart it guards.
+        // Shadowless ink: the title in red rubrication, the reason in ink, the hint thinner.
+        McStylePanel.drawSkinPanel(graphics, GuiSkin.STAR_CHART, px, py, panelW, panelH);
+        drawCentred(graphics, this.title, cx, py + 14, WizardsPalette.PAGE_RUBRIC);
+        drawCentred(graphics, detail, cx, py + 32, GuiSkin.STAR_CHART.ink());
+        drawCentred(graphics, Component.translatable("screen.wizards_and_beasts.skill_access_denied.hint"),
+                cx, py + 52, GuiSkin.STAR_CHART.muted());
         graphics.pose().popMatrix();
         super.render(graphics, mouseX, mouseY, partialTick);
+    }
+
+    /** {@code drawCenteredString} without its drop shadow, which smudges on paper. */
+    private void drawCentred(GuiGraphics graphics, Component text, int cx, int y, int colour) {
+        graphics.drawString(this.font, text, cx - this.font.width(text) / 2, y, colour, false);
     }
 
     @Override

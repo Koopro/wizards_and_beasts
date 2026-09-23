@@ -1,6 +1,8 @@
 package at.koopro.wizardsandbeasts.client.ministry.gui;
 
+import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GuiSkin;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.ministry.licence.LicenceUpgrade;
 import at.koopro.wizardsandbeasts.ministry.licence.LicenseData;
@@ -48,6 +50,11 @@ public class MinistryLicenceScreen extends Screen {
     private static final int REVOKED_SEAL = 0xFF12090F;
     private static final int REVOKED_SEAL_DIM = 0xFF2A1620;
 
+    /** Cream memo stock and the Ministry's purple-black ink: the licence is a Ministry document. */
+    private static final GuiSkin SKIN = GuiSkin.MINISTRY_MEMO;
+    /** Content inset from the card's edge: clear of its double ink rule, 4 and 6px in. */
+    private static final int PAD = 12;
+
     private final boolean offHand;
     private GuiScaleHelper.Layout layout;
     private int panelX;
@@ -88,9 +95,9 @@ public class MinistryLicenceScreen extends Screen {
         drawSeal(graphics, revoked);
 
         if (data == null) {
-            graphics.drawCenteredString(font,
-                    Component.translatable("gui.wizards_and_beasts.licence.blank").getString(),
-                    panelX + PANEL_W / 2, panelY + PANEL_H / 2 - 4, WizardsPalette.PARCHMENT_INK);
+            String blank = Component.translatable("gui.wizards_and_beasts.licence.blank").getString();
+            graphics.drawString(font, blank, panelX + PANEL_W / 2 - font.width(blank) / 2,
+                    panelY + PANEL_H / 2 - 4, SKIN.ink(), false);
             graphics.pose().popMatrix();
             super.render(graphics, mouseX, mouseY, partialTick);
             return;
@@ -102,16 +109,20 @@ public class MinistryLicenceScreen extends Screen {
         super.render(graphics, mouseX, mouseY, partialTick);
     }
 
+    /**
+     * The card: the Ministry's memo sheet, its heading written on it in the Ministry's purple.
+     *
+     * <p>It used to be a flat fill with a purple band across the top and the heading reversed out
+     * of it in cream. A band painted over the sheet would cover the frame's own rules, so the
+     * purple moved from the ground to the lettering; a revoked licence's heading goes black with
+     * its seal.
+     */
     private void drawCard(GuiGraphics graphics, boolean revoked) {
-        graphics.fill(panelX, panelY, panelX + PANEL_W, panelY + PANEL_H, WizardsPalette.PARCHMENT);
-        graphics.fill(panelX, panelY, panelX + PANEL_W, panelY + 22,
-                revoked ? REVOKED_SEAL_DIM : WizardsPalette.MINISTRY);
-        graphics.renderOutline(panelX, panelY, PANEL_W, PANEL_H,
-                revoked ? REVOKED_SEAL : WizardsPalette.MINISTRY_DARK);
-
+        McStylePanel.drawSkinPanel(graphics, SKIN, panelX, panelY, PANEL_W, PANEL_H);
         graphics.drawString(font,
                 Component.translatable("gui.wizards_and_beasts.licence.header").getString(),
-                panelX + 10, panelY + 7, WizardsPalette.PARCHMENT, false);
+                panelX + PAD, panelY + 10, revoked ? REVOKED_SEAL : WizardsPalette.MINISTRY, false);
+        McStylePanel.drawSkinDivider(graphics, SKIN, panelX + PAD, panelY + 18, PANEL_W - 2 * PAD);
     }
 
     /**
@@ -130,10 +141,10 @@ public class MinistryLicenceScreen extends Screen {
         int bright = revoked ? REVOKED_SEAL : WizardsPalette.MINISTRY_LIGHT;
         int dim = revoked ? REVOKED_SEAL_DIM : WizardsPalette.MINISTRY;
 
-        // A hologram is light, not paint: the plate under it stays parchment-shaded so the ticks read
-        // as hovering rather than as a printed stamp.
-        graphics.fill(cx - SEAL_OUTER - 2, cy - SEAL_OUTER - 2, cx + SEAL_OUTER + 2, cy + SEAL_OUTER + 2,
-                WizardsPalette.PARCHMENT_SHADE);
+        // A hologram is light, not paint: the plate under it is a recessed well of the sheet, so the
+        // ticks read as hovering rather than as a printed stamp. 64 square, the well's native size.
+        McStylePanel.drawSkinInset(graphics, SKIN, cx - SEAL_OUTER - 2, cy - SEAL_OUTER - 2,
+                2 * SEAL_OUTER + 4, 2 * SEAL_OUTER + 4);
 
         drawRing(graphics, cx, cy, SEAL_OUTER, phase, bright);
         drawRing(graphics, cx, cy, SEAL_INNER, -phase * 1.4f, dim);
@@ -164,7 +175,7 @@ public class MinistryLicenceScreen extends Screen {
 
     private void drawFields(GuiGraphics graphics, LicenseData data, boolean revoked) {
         var player = Minecraft.getInstance().player;
-        int x = panelX + 12;
+        int x = panelX + PAD;
         int y = panelY + 32;
         int line = 13;
 
@@ -186,11 +197,13 @@ public class MinistryLicenceScreen extends Screen {
         y += line + 4;
 
         if (revoked) {
-            graphics.fill(panelX + 8, y - 3, panelX + PANEL_W - 8, y + 12, REVOKED_SEAL);
-            graphics.drawString(font,
-                    Component.translatable("ministry.wizards_and_beasts.licence.revoked_banner")
-                            .withStyle(ChatFormatting.BOLD).getString(),
-                    panelX + 12, y + 1, 0xFFD03A3A, false);
+            // Stamped on the card in red ink, boxed to the words: a black bar with red lettering
+            // reversed out of it was a strip of screen chrome laid over the paper. Sized to the text
+            // rather than the card, so the stamp stops short of the seal's well.
+            Component banner = Component.translatable("ministry.wizards_and_beasts.licence.revoked_banner")
+                    .withStyle(ChatFormatting.BOLD);
+            graphics.renderOutline(panelX + PAD - 3, y - 3, font.width(banner) + 6, 15, WizardsPalette.PAGE_BAD);
+            graphics.drawString(font, banner, panelX + PAD, y + 1, WizardsPalette.PAGE_BAD, false);
             return;
         }
 
@@ -200,12 +213,13 @@ public class MinistryLicenceScreen extends Screen {
                 : Component.translatable("gui.wizards_and_beasts.licence.next_rank",
                         Component.translatable(required.translationKey()),
                         Component.translatable(data.type().examinedSubject().translationKey())).getString();
-        graphics.drawString(font, next, x, y, WizardsPalette.PARCHMENT_INK, false);
+        graphics.drawString(font, next, x, y, SKIN.ink(), false);
     }
 
+    /** A field: its label in the sheet's thin ink, its value in the Ministry's purple. */
     private void line(GuiGraphics graphics, int x, int y, String labelKey, Component value) {
         String label = Component.translatable(labelKey).getString();
-        graphics.drawString(font, label, x, y, WizardsPalette.PARCHMENT_INK, false);
+        graphics.drawString(font, label, x, y, SKIN.muted(), false);
         graphics.drawString(font, value.getString(), x + 74, y, WizardsPalette.MINISTRY, false);
     }
 

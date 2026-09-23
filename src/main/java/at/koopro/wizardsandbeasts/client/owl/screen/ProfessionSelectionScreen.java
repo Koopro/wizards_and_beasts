@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.owl.screen;
 
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.network.owl.ChooseProfessionPacket;
 import at.koopro.wizardsandbeasts.owl.OWLGrade;
 import at.koopro.wizardsandbeasts.owl.OWLSubject;
@@ -51,7 +52,7 @@ public class ProfessionSelectionScreen extends ScaledParchmentScreen {
                 addRenderableWidget(Button.builder(
                         Component.translatable("owls.button.choose"),
                         btn -> confirmChoose(finalProf))
-                        .pos(sx(cx + BG_WIDTH / 2 - 50), sy(rowY))
+                        .pos(sx(cx + BG_WIDTH / 2 - 58), sy(rowY))
                         .size(sw(44), sw(12))
                         .build());
             }
@@ -60,13 +61,13 @@ public class ProfessionSelectionScreen extends ScaledParchmentScreen {
         addRenderableWidget(Button.builder(
                 Component.literal("▲"),
                 btn -> { scrollOffset = Math.max(0, scrollOffset - ROW_HEIGHT * 2); rebuildButtons(); })
-                .pos(sx(width / 2 + BG_WIDTH / 2 - 14), sy(height / 2 - BG_HEIGHT / 2 + 8))
+                .pos(sx(width / 2 + BG_WIDTH / 2 - 26), sy(height / 2 - BG_HEIGHT / 2 + 10))
                 .size(sw(12), sw(12))
                 .build());
         addRenderableWidget(Button.builder(
                 Component.literal("▼"),
                 btn -> { scrollOffset += ROW_HEIGHT * 2; rebuildButtons(); })
-                .pos(sx(width / 2 + BG_WIDTH / 2 - 14), sy(height / 2 + BG_HEIGHT / 2 - 22))
+                .pos(sx(width / 2 + BG_WIDTH / 2 - 26), sy(height / 2 + BG_HEIGHT / 2 - 24))
                 .size(sw(12), sw(12))
                 .build());
     }
@@ -151,9 +152,8 @@ public class ProfessionSelectionScreen extends ScaledParchmentScreen {
         var pose = graphics.pose();
         beginScaledPass(graphics);
         drawParchment(graphics, BG_WIDTH, BG_HEIGHT);
-        graphics.drawCenteredString(font,
-                Component.translatable("owls.screen.profession_title").withColor(0x5C3317),
-                cx, cy - BG_HEIGHT / 2 + 6, 0x5C3317);
+        drawCentred(graphics, Component.translatable("owls.screen.profession_title"),
+                cx, cy - BG_HEIGHT / 2 + 10, WizardsPalette.PAGE_RUBRIC);
 
         int startY = cy - BG_HEIGHT / 2 + 28;
         for (Profession prof : Profession.values()) {
@@ -161,8 +161,10 @@ public class ProfessionSelectionScreen extends ScaledParchmentScreen {
             if (rowY < startY || rowY > cy + BG_HEIGHT / 2 - 24) continue;
 
             boolean eligible = isClientEligible(prof);
-            int nameColor = eligible ? 0xCC8800 : 0x888888;
-            graphics.drawString(font, Component.translatable(prof.translationKey()), cx - BG_WIDTH / 2 + 10, rowY, nameColor, false);
+            // Opaque ink: the old 0xCC8800 / 0x888888 had no alpha byte, and a text colour with
+            // alpha 0 is not drawn at all on 1.21.11. Out of reach is faint ink, not gone.
+            int nameColor = eligible ? WizardsPalette.PAGE_INK : WizardsPalette.PAGE_INK_3;
+            graphics.drawString(font, Component.translatable(prof.translationKey()), cx - BG_WIDTH / 2 + 12, rowY, nameColor, false);
         }
 
         pose.popMatrix();

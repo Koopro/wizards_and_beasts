@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.client.skill.gui;
 
+import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GuiSkin;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsAndBeastsUiTokens;
@@ -22,14 +24,14 @@ import java.util.List;
  * <p>Every piece here is a sprite from the {@code star_chart} skin or the chart's own set. It used
  * to be {@code fill()} rectangles and a hand-rolled border, which is why a screen whose stars were
  * soft antialiased art sat inside hard flat boxes. The only thing this class draws directly is
- * text.
+ * text, always in the page's ink and never with a shadow.
  */
 public final class SkillTreeRenderHelper {
 
     private SkillTreeRenderHelper() {
     }
 
-    /** The material the whole screen is cut from — night void, indigo frame, brass accent. */
+    /** The material the whole screen is cut from — blue-grey vellum, indigo ink, silver leaf. */
     private static final GuiSkin SKIN = GuiSkin.STAR_CHART;
 
     /**
@@ -41,12 +43,38 @@ public final class SkillTreeRenderHelper {
     }
 
     /**
-     * The window: a nine-sliced {@code star_chart} panel, a rule under the title, and a rivet in
-     * each top corner.
+     * Clearance from the panel's outer edge to anything drawn inside it. The frame's double ink
+     * rule sits 4 and 6px in at native size, whatever the panel scale, so this is not scaled.
+     */
+    private static final int FRAME_CLEAR = 8;
+    /** The divider sprite's height: its two lines fall 3 and 5px below the y it is drawn at. */
+    private static final int RULE_SPRITE_H = 8;
+
+    /**
+     * The header rule's y: directly above the chart well, so the rule, the well and the vocation
+     * button share one budget at every panel scale instead of three scaled tokens that collide.
+     */
+    public static int headerRuleY(GuiScaleHelper.Layout layout) {
+        return layout.panelY() + layout.s(WizardsAndBeastsUiTokens.SkillTree.VIEWPORT_Y) - RULE_SPRITE_H;
+    }
+
+    /**
+     * The header row's top: the vocation button sits on the rule, clear of the frame's rules.
+     *
+     * <p>It used to hang at {@code panelY + s(3)}, straight across the double ink rule, which a
+     * dark leather frame hid and a paper page does not.
+     */
+    public static int headerRowY(GuiScaleHelper.Layout layout, int rowH) {
+        return Math.max(layout.panelY() + FRAME_CLEAR, headerRuleY(layout) + 2 - rowH);
+    }
+
+    /**
+     * The window: a nine-sliced {@code star_chart} panel, the title written on the sheet over a
+     * rule, and a seal in each top corner.
      *
      * <p>This used to tile a flat {@code skill_tree/panel.png} and stroke a two-colour border with
-     * four {@code fill}s. The skin it now wears was authored for exactly this screen by
-     * {@code tools/gui_chrome.py} and had no consumer in Java at all.
+     * four {@code fill}s. The title is written in the page's ink with no shadow: a drop shadow on
+     * paper reads as a misprint.
      */
     public static void renderWindowFrame(GuiGraphics graphics, Font font, GuiScaleHelper.Layout layout,
                                          String title) {
@@ -55,20 +83,19 @@ public final class SkillTreeRenderHelper {
         int panelW = layout.panelW();
         McStylePanel.drawSkinPanel(graphics, SKIN, panelX, panelY, panelW, layout.panelH());
 
-        int pad = layout.s(WizardsAndBeastsUiTokens.SkillTree.CHROME_PAD);
-        McStylePanel.drawSkinDivider(graphics, SKIN, panelX + pad,
-                panelY + layout.s(WizardsAndBeastsUiTokens.SkillTree.HEADER_RULE_Y), panelW - pad * 2);
+        int pad = WizardsMetrics.SPACE_L;
+        McStylePanel.drawSkinDivider(graphics, SKIN, panelX + pad, headerRuleY(layout), panelW - pad * 2);
 
         int seal = layout.s(WizardsAndBeastsUiTokens.SkillTree.SEAL_INSET);
-        McStylePanel.drawSkinSeal(graphics, SKIN, panelX + seal, panelY + seal,
-                SkillTreeChartTextures.UNTINTED);
+        McStylePanel.drawSkinSeal(graphics, SKIN, panelX + seal, panelY + seal);
         McStylePanel.drawSkinSeal(graphics, SKIN,
-                panelX + panelW - seal - McStylePanel.SEAL_SIZE, panelY + seal,
-                SkillTreeChartTextures.UNTINTED);
+                panelX + panelW - seal - McStylePanel.SEAL_SIZE, panelY + seal);
 
-        graphics.drawCenteredString(font, title, panelX + panelW / 2,
-                panelY + layout.s(WizardsAndBeastsUiTokens.SkillTree.TITLE_Y),
-                WizardsAndBeastsUiTokens.SkillTree.TITLE_COLOR);
+        // Centred on the vocation button's row, so the header reads as one line of type.
+        int rowH = layout.s(WizardsAndBeastsUiTokens.SkillTree.VOCATION_BUTTON_H);
+        int titleY = headerRowY(layout, rowH) + (rowH - font.lineHeight) / 2 + 1;
+        graphics.drawString(font, title, panelX + panelW / 2 - font.width(title) / 2, titleY,
+                SKIN.ink(), false);
     }
 
     /**
@@ -104,7 +131,7 @@ public final class SkillTreeRenderHelper {
         // the chrome to the window, not to shrink prose out of readability.
         int textY = footerY + (footerH - font.lineHeight) / 2;
         int textX = footerX + WizardsAndBeastsUiTokens.SkillTree.FOOTER_TEXT_X;
-        graphics.drawString(font, left, textX, textY, SkillTreeChartTextures.GOLD, false);
+        graphics.drawString(font, left, textX, textY, SKIN.ink(), false);
 
         int barW = WizardsAndBeastsUiTokens.SkillTree.POINTS_BAR_WIDTH;
         int barX = textX + font.width(left) + WizardsAndBeastsUiTokens.SkillTree.POINTS_BAR_GAP;
@@ -117,22 +144,22 @@ public final class SkillTreeRenderHelper {
         // goes first, because the bar restates a number that is already on screen.
         if (barX + barW + WizardsAndBeastsUiTokens.SkillTree.FOOTER_MIN_GAP < rightX) {
             drawPointsBar(graphics, barX, barY, barW, barH, earned);
-            graphics.drawString(font, right, rightX, textY,
-                    SkillTreeChartTextures.NIGHT_TEXT_DIM, false);
+            graphics.drawString(font, right, rightX, textY, SKIN.muted(), false);
         } else if (barX + barW < footerX + footerW - WizardsAndBeastsUiTokens.SkillTree.FOOTER_RIGHT_PAD) {
             drawPointsBar(graphics, barX, barY, barW, barH, earned);
         }
     }
 
+    /** A groove pressed into the vellum, filled with silver leaf. Both sprites carry their colour. */
     private static void drawPointsBar(GuiGraphics graphics, int x, int y, int w, int h, int earned) {
         int sprite = SkillTreeChartTextures.BAR_SPRITE_SIZE;
         McStylePanel.drawTintedTexture(graphics, SkillTreeChartTextures.BAR_TRACK, x, y, w, h,
-                sprite, sprite, SkillTreeChartTextures.CHART_INK);
+                sprite, sprite, SkillTreeChartTextures.UNTINTED);
         int cap = Math.max(1, SkillSystemAPI.MAX_SKILL_POINTS);
         int filled = (int) Math.round(w * Math.min(1.0, earned / (double) cap));
         if (filled > 0) {
             McStylePanel.drawTintedTexture(graphics, SkillTreeChartTextures.BAR_FILL, x, y, filled, h,
-                    sprite, sprite, SkillTreeChartTextures.GOLD);
+                    sprite, sprite, SkillTreeChartTextures.UNTINTED);
         }
     }
 
@@ -140,11 +167,8 @@ public final class SkillTreeRenderHelper {
     private static final String SEALED_TOOLTIP_KEY = "skilltree.region.sealed.tooltip";
 
     /**
-     * Hover card on a nine-sliced {@code star_chart} panel, tinted to the node's own state.
-     *
-     * <p>Tinting the panel rather than stroking a coloured border around a flat fill is what lets
-     * the whole card carry the state: gold once the node is started, the region's own colour
-     * before that.
+     * Hover card on a nine-sliced {@code star_chart} panel, its title inked to the node's state:
+     * full ink once the node is started, the region's own ink before that.
      */
     /**
      * The hover card.
@@ -178,13 +202,14 @@ public final class SkillTreeRenderHelper {
                                          int level, int points, boolean adjacencyOpen, boolean sealed,
                                          List<Component> prerequisites, List<Component> leadsTo) {
         int w = WizardsAndBeastsUiTokens.SkillTree.TOOLTIP_WIDTH;
-        int inner = w - 16;
+        int inner = w - TOOLTIP_MARGIN * 2;
 
         boolean maxed = level >= skill.getMaxLevel();
         boolean started = level > 0;
         boolean affordable = points >= skill.getPointCost();
         int regionTint = SkillTreeChartTextures.regionTint(skill.getTree());
-        int accent = started ? SkillTreeChartTextures.GOLD : regionTint;
+        int regionInk = SkillTreeChartTextures.regionTextInk(skill.getTree());
+        int accent = started ? SKIN.ink() : regionInk;
 
         List<String> descLines = wrap(font, safeText(skill.getDescription(), "No description."), inner, 2);
 
@@ -234,19 +259,17 @@ public final class SkillTreeRenderHelper {
                 net.minecraft.client.Minecraft.getInstance().getWindow().getGuiScaledHeight() - h - 8);
         tooltipY = Math.max(4, tooltipY);
 
-        // The panel art is night void with an indigo frame; a light tint would wash it out, so it
-        // is only nudged toward the accent rather than painted with it.
         McStylePanel.drawSkinPanel(graphics, SKIN, tooltipX, tooltipY, w, h);
-        // Inset by the panel's own 8px nine-slice border, so the rule sits in the card rather than
-        // across its frame.
-        McStylePanel.drawSkinDivider(graphics, SKIN, tooltipX + 8, tooltipY + 17, inner);
+        // Inside the frame's double ink rule, so the title rule sits on the card rather than
+        // across its border.
+        McStylePanel.drawSkinDivider(graphics, SKIN, tooltipX + TOOLTIP_MARGIN, tooltipY + 17, inner);
 
-        int textX = tooltipX + 8;
-        graphics.drawString(font, resolveDisplayName(skill.getDisplayName()), textX, tooltipY + 7, accent, false);
+        int textX = tooltipX + TOOLTIP_MARGIN;
+        graphics.drawString(font, resolveDisplayName(skill.getDisplayName()), textX, tooltipY + 10, accent, false);
 
-        int y = tooltipY + 24;
+        int y = tooltipY + TOOLTIP_PAD_TOP;
         for (String line : descLines) {
-            graphics.drawString(font, line, textX, y, 0xFFCED3E4, false);
+            graphics.drawString(font, line, textX, y, SKIN.ink(), false);
             y += LINE;
         }
         if (!loreLines.isEmpty()) {
@@ -259,9 +282,9 @@ public final class SkillTreeRenderHelper {
         }
 
         graphics.drawString(font, "Level: " + level + "/" + skill.getMaxLevel(),
-                textX, y, SkillTreeChartTextures.NIGHT_TEXT_DIM, false);
+                textX, y, SKIN.muted(), false);
         graphics.drawString(font, "Cost: " + skill.getPointCost() + " SP",
-                textX, y + LINE, SkillTreeChartTextures.NIGHT_TEXT_DIM, false);
+                textX, y + LINE, SKIN.muted(), false);
 
         String constellation = I18n.get("skilltree.region." + skill.getTree().getId() + ".constellation");
         boolean namedConstellation = !constellation.startsWith("skilltree.");
@@ -270,15 +293,14 @@ public final class SkillTreeRenderHelper {
                 SkillTreeChartTextures.REGION_GLYPH_SIZE, SkillTreeChartTextures.withAlpha(regionTint, 220));
         graphics.drawString(font, skill.getTree().getDisplayName()
                         + (namedConstellation ? " (" + constellation + ")" : ""),
-                textX + 2 + SkillTreeChartTextures.REGION_GLYPH_SIZE, y + LINE * 2,
-                SkillTreeChartTextures.withAlpha(regionTint, 220), false);
+                textX + 2 + SkillTreeChartTextures.REGION_GLYPH_SIZE, y + LINE * 2, regionInk, false);
         y += STATS_BLOCK;
 
         if (!effects.isEmpty()) {
             String header = maxed || !started
                     ? I18n.get("screen.wizards_and_beasts.skill_tree.effects")
                     : I18n.get("screen.wizards_and_beasts.skill_tree.next_level");
-            graphics.drawString(font, header, textX, y, SkillTreeChartTextures.NIGHT_TEXT_DIM, false);
+            graphics.drawString(font, header, textX, y, WizardsPalette.PAGE_RUBRIC, false);
             y += LINE;
             for (Component effect : effects) {
                 graphics.drawString(font, effect, textX + 4, y, EFFECT_TEXT, false);
@@ -302,12 +324,12 @@ public final class SkillTreeRenderHelper {
         }
 
         for (String line : leadsToLines) {
-            graphics.drawString(font, line, textX, y, SkillTreeChartTextures.NIGHT_TEXT_DIM, false);
+            graphics.drawString(font, line, textX, y, SKIN.muted(), false);
             y += LINE;
         }
 
         for (String line : prereqLines) {
-            graphics.drawString(font, line, textX, y, WizardsAndBeastsUiTokens.SkillTree.STATUS_WARN, false);
+            graphics.drawString(font, line, textX, y, WizardsPalette.PAGE_BAD, false);
             y += LINE;
         }
 
@@ -317,35 +339,35 @@ public final class SkillTreeRenderHelper {
             // Sealed region: capability tag denies this whole region. Distinct from adjacency-locked
             // only in wording.
             actionLine = I18n.exists(SEALED_TOOLTIP_KEY) ? I18n.get(SEALED_TOOLTIP_KEY) : "Sealed";
-            actionColor = WizardsAndBeastsUiTokens.SkillTree.STATUS_WARN;
+            actionColor = WizardsPalette.PAGE_BAD;
         } else if (maxed) {
             actionLine = I18n.get("screen.wizards_and_beasts.skill_tree.maxed");
-            actionColor = SkillTreeChartTextures.GOLD;
+            actionColor = SKIN.muted();
         } else if (started || adjacencyOpen) {
             if (affordable) {
                 actionLine = I18n.get(started
                         ? "screen.wizards_and_beasts.skill_tree.level_up"
                         : "screen.wizards_and_beasts.skill_tree.allocate");
-                actionColor = SkillTreeChartTextures.GOLD;
+                actionColor = WizardsPalette.PAGE_GOOD;
             } else {
                 actionLine = I18n.get("screen.wizards_and_beasts.skill_tree.need_points",
                         skill.getPointCost() - points);
-                actionColor = WizardsAndBeastsUiTokens.SkillTree.STATUS_WARN;
+                actionColor = WizardsPalette.PAGE_BAD;
             }
         } else {
             actionLine = I18n.get("screen.wizards_and_beasts.skill_tree.locked");
-            actionColor = WizardsAndBeastsUiTokens.SkillTree.STATUS_WARN;
+            actionColor = WizardsPalette.PAGE_BAD;
         }
-        graphics.drawString(font, actionLine, textX, tooltipY + h - 15, actionColor, false);
+        graphics.drawString(font, actionLine, textX, tooltipY + h - 18, actionColor, false);
     }
 
     /** Line height for every stacked text row in the card. */
-    /** In-world voice: dimmer and italic, so it never competes with what the node does. */
-    private static final int LORE_TEXT = 0xFF9AA4C0;
+    /** In-world voice: the thin ink and italic, so it never competes with what the node does. */
+    private static final int LORE_TEXT = SKIN.muted();
     /** The worked example. */
-    private static final int PRACTICE_TEXT = 0xFFB9C7A8;
+    private static final int PRACTICE_TEXT = SKIN.muted();
     /** Canon attestation or an honest "this mod invented it". */
-    private static final int PROVENANCE_TEXT = 0xFF8C93A8;
+    private static final int PROVENANCE_TEXT = SKIN.muted();
 
     /**
      * One line saying where this node's content comes from.
@@ -365,14 +387,16 @@ public final class SkillTreeRenderHelper {
     }
 
     private static final int LINE = 10;
+    /** Frame clearance: the panel's double ink rule sits 4 and 6px in. */
+    private static final int TOOLTIP_MARGIN = WizardsMetrics.SPACE_L;
     /** Title, rule and the gap before the first description line. */
-    private static final int TOOLTIP_PAD_TOP = 24;
+    private static final int TOOLTIP_PAD_TOP = 28;
     /** Level, cost and the region row. */
     private static final int STATS_BLOCK = LINE * 3 + 2;
-    /** Room for the action line plus the panel bottom border. */
-    private static final int TOOLTIP_PAD_BOTTOM = 20;
-    /** Effect lines: brighter than the dim stat rows, because they are the reason to buy the node. */
-    private static final int EFFECT_TEXT = 0xFFDCE6C8;
+    /** Room for the action line plus the panel bottom border and its rules. */
+    private static final int TOOLTIP_PAD_BOTTOM = 22;
+    /** Effect lines: full ink over the thin-ink stat rows, because they are the reason to buy the node. */
+    private static final int EFFECT_TEXT = SKIN.ink();
 
     /**
      * Resolves a node's description for display.

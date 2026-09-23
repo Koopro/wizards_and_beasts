@@ -5,6 +5,7 @@ import at.koopro.wizardsandbeasts.client.gui.McStylePanel.Sprite;
 import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton;
+import at.koopro.wizardsandbeasts.client.gui.widget.ThemedTextField;
 import at.koopro.wizardsandbeasts.client.map.style.MapMarkerStyle;
 import at.koopro.wizardsandbeasts.client.map.style.MapStyles;
 import at.koopro.wizardsandbeasts.map.MapMarker;
@@ -57,9 +58,18 @@ public class MaraudersMapScreen extends Screen {
 
     private static final int PANEL_W = 420;
     private static final int PANEL_H = 284;
-    private static final int HEADER_H = 30;
-    private static final int FOOTER_H = 26;
-    private static final int VIEW_INSET = 8;
+    /**
+     * Header, footer and side margin all clear the sheet's double ink rule, which sits 4 and 6px in
+     * from the panel edge: anything nearer than 12 is struck through by it. The title is written on
+     * the sheet at 10, the oath under it, and the rule under both sits above the map's inset.
+     */
+    private static final int HEADER_H = 34;
+    private static final int FOOTER_H = 30;
+    private static final int VIEW_INSET = 12;
+    /** Inside a side panel: clear of that panel's own rules, as above. */
+    static final int SIDE_PAD = 12;
+    /** First list row inside a side panel: under the title (written at 10) with a line to spare. */
+    static final int SIDE_LIST_TOP = 24;
     private static final int SIDE_PANEL_W = 124;
 
     /**
@@ -82,8 +92,8 @@ public class MaraudersMapScreen extends Screen {
     /** The page. Warmer and dirtier than the Ministry's memo stock; this thing is old. */
     private static final int PARCHMENT_INK = MaraudersMapTextures.SKIN.ink();
     private static final int PARCHMENT_INK_DIM = MaraudersMapTextures.SKIN.muted();
-    private static final int TITLE_INK = 0xFF4A2B18;
-    private static final int BRASS = 0xFFB08A4A;
+    /** The compass is drawn in the pen's thin ink, like the rest of the charting -- not in gilt. */
+    private static final int COMPASS_INK = MaraudersMapTextures.SKIN.muted();
     /** Wash over uncharted parchment, so "not yet been there" reads as unfinished, not as empty. */
     private static final int UNCHARTED_WASH = 0x22201408;
 
@@ -277,8 +287,9 @@ public class MaraudersMapScreen extends Screen {
         gfx.disableScissor();
 
         renderFooter(gfx);
-        super.render(gfx, mouseX, mouseY, partialTick);
 
+        // Before the widgets, not after: the waypoint panel's name field and buttons sit on it, and a
+        // sheet submitted after them is drawn over them.
         switch (sidePanel) {
             case LEGEND -> MapLegendPanel.render(gfx, font, layout, sidePanelX(), sidePanelY(),
                     layout.s(SIDE_PANEL_W), sidePanelH());
@@ -286,6 +297,8 @@ public class MaraudersMapScreen extends Screen {
             case NONE -> {
             }
         }
+
+        super.render(gfx, mouseX, mouseY, partialTick);
 
         renderTooltips(gfx, mouseX, mouseY);
     }
@@ -342,19 +355,24 @@ public class MaraudersMapScreen extends Screen {
         McStylePanel.drawTintedTexture(gfx, MaraudersMapTextures.COMPASS,
                 view.viewX() + margin, view.viewY() + margin, size, size,
                 MaraudersMapTextures.COMPASS_SIZE, MaraudersMapTextures.COMPASS_SIZE,
-                0xB0000000 | (BRASS & 0x00FFFFFF));
+                0xB0000000 | (COMPASS_INK & 0x00FFFFFF));
     }
 
     private void renderHeader(GuiGraphics gfx) {
         int cx = panelX + panelW / 2;
-        gfx.drawCenteredString(font, title, cx, panelY + layout.s(7), TITLE_INK);
-        gfx.drawCenteredString(font,
-                Component.translatable("screen.wizards_and_beasts.marauders_map.oath")
+        // Written on the sheet, flat: a drop shadow is a screen convention, and under ink on paper
+        // it reads as a second, offset copy of every glyph.
+        drawCentred(gfx, title, cx, panelY + layout.s(10), PARCHMENT_INK);
+        drawCentred(gfx, Component.translatable("screen.wizards_and_beasts.marauders_map.oath")
                         .withStyle(ChatFormatting.ITALIC),
-                cx, panelY + layout.s(18), PARCHMENT_INK_DIM);
+                cx, panelY + layout.s(20), PARCHMENT_INK_DIM);
         McStylePanel.drawSkinDivider(gfx, MaraudersMapTextures.SKIN,
-                panelX + layout.s(VIEW_INSET), panelY + layout.s(HEADER_H) - layout.s(6),
+                panelX + layout.s(VIEW_INSET), panelY + layout.s(HEADER_H) - layout.s(7),
                 panelW - 2 * layout.s(VIEW_INSET));
+    }
+
+    private void drawCentred(GuiGraphics gfx, Component text, int cx, int y, int colour) {
+        gfx.drawString(font, text, cx - font.width(text) / 2, y, colour, false);
     }
 
     /**
@@ -365,14 +383,14 @@ public class MaraudersMapScreen extends Screen {
      * without a second readout or a mode switch.
      */
     private void renderFooter(GuiGraphics gfx) {
-        int textY = panelY + panelH - layout.s(FOOTER_H) + layout.s(8);
+        int textY = panelY + panelH - layout.s(FOOTER_H) + layout.s(13);
         int left = panelX + layout.s(VIEW_INSET);
 
         gfx.drawString(font, coordinateReadout(), left, textY, PARCHMENT_INK, false);
 
         Component charted = Component.translatable(
                 "screen.wizards_and_beasts.marauders_map.charted", ClientMapAtlas.chartedTiles());
-        gfx.drawString(font, charted, left, textY - layout.s(9), PARCHMENT_INK_DIM, false);
+        gfx.drawString(font, charted, left, textY - layout.s(10), PARCHMENT_INK_DIM, false);
     }
 
     private Component coordinateReadout() {
@@ -469,16 +487,17 @@ public class MaraudersMapScreen extends Screen {
         }
         waypointRows.sort(java.util.Comparator.comparingLong(MapMarker::discoveredAt).reversed());
 
-        int x = sidePanelX() + layout.s(4);
-        int w = layout.s(SIDE_PANEL_W) - layout.s(8);
+        int x = sidePanelX() + layout.s(SIDE_PAD);
+        int w = layout.s(SIDE_PANEL_W) - 2 * layout.s(SIDE_PAD);
         int rowStep = skinned(MIN_SKINNED) + layout.s(2);
-        int boxY = sidePanelY() + sidePanelH() - rowStep * 3 - layout.s(4);
+        int boxY = nameBoxY();
 
-        nameBox = new EditBox(font, x, boxY, w, skinned(MIN_SKINNED),
-                Component.translatable("screen.wizards_and_beasts.marauders_map.waypoint.name"));
+        // A well pressed into the paper rather than vanilla's black box, written in the map's ink.
+        nameBox = new ThemedTextField(font, x, boxY, w, skinned(MIN_SKINNED),
+                Component.translatable("screen.wizards_and_beasts.marauders_map.waypoint.name"))
+                .inkHint(Component.translatable("screen.wizards_and_beasts.marauders_map.waypoint.name_hint"))
+                .skin(MaraudersMapTextures.SKIN);
         nameBox.setMaxLength(at.koopro.wizardsandbeasts.map.MapMarker.MAX_LABEL_LENGTH);
-        nameBox.setHint(Component.translatable(
-                "screen.wizards_and_beasts.marauders_map.waypoint.name_hint"));
         MapMarker selected = selected();
         if (selected != null) {
             nameBox.setValue(selected.label());
@@ -509,6 +528,12 @@ public class MaraudersMapScreen extends Screen {
                 null, this::deleteSelected);
         delete.active = selected != null;
         addRenderableWidget(delete);
+    }
+
+    /** Top of the name field: three control rows up from the side panel's bottom rules. */
+    private int nameBoxY() {
+        int rowStep = skinned(MIN_SKINNED) + layout.s(2);
+        return sidePanelY() + sidePanelH() - rowStep * 3 - layout.s(SIDE_PAD) + layout.s(2);
     }
 
     private @Nullable MapMarker selected() {
@@ -593,43 +618,44 @@ public class MaraudersMapScreen extends Screen {
         int y = sidePanelY();
         int w = layout.s(SIDE_PANEL_W);
         int h = sidePanelH();
+        int pad = layout.s(SIDE_PAD);
         McStylePanel.drawSkinPanel(gfx, MaraudersMapTextures.SKIN, x, y, w, h);
         gfx.drawString(font,
                 Component.translatable("screen.wizards_and_beasts.marauders_map.waypoint.title"),
-                x + layout.s(5), y + layout.s(5), TITLE_INK, false);
+                x + pad, y + layout.s(10), PARCHMENT_INK, false);
 
         int rowH = layout.s(12);
-        int listTop = y + layout.s(16);
-        int listBottom = y + h - (skinned(MIN_SKINNED) + layout.s(2)) * 3 - layout.s(6);
+        int listTop = y + layout.s(SIDE_LIST_TOP);
+        int listBottom = nameBoxY() - layout.s(2);
         int visible = Math.max(0, (listBottom - listTop) / rowH);
 
-        gfx.enableScissor(x, listTop, x + w, listBottom);
+        gfx.enableScissor(x, listTop - 2, x + w, listBottom);
         for (int i = 0; i < visible && waypointScroll + i < waypointRows.size(); i++) {
             MapMarker marker = waypointRows.get(waypointScroll + i);
             int rowY = listTop + i * rowH;
             boolean isSelected = marker.id().equals(selectedMarker);
-            if (isSelected) {
-                gfx.fill(x + layout.s(3), rowY - 1, x + w - layout.s(3), rowY + rowH - 2, 0x33000000);
-            }
+            McStylePanel.drawSkinRow(gfx, MaraudersMapTextures.SKIN, x + pad - 2, rowY - 2,
+                    w - 2 * pad + 4, rowH, isSelected);
             MapMarkerStyle style = MapStyles.marker(marker.type());
             gfx.blit(RenderPipelines.GUI_TEXTURED, MaraudersMapTextures.MARKERS,
-                    x + layout.s(5), rowY, MaraudersMapTextures.markerU(style.icon()),
+                    x + pad, rowY, MaraudersMapTextures.markerU(style.icon()),
                     MaraudersMapTextures.markerV(style.icon()),
                     layout.s(8), layout.s(8),
                     MaraudersMapTextures.MARKER_CELL, MaraudersMapTextures.MARKER_CELL,
                     MaraudersMapTextures.MARKER_SHEET_W, MaraudersMapTextures.MARKER_SHEET_H,
                     style.tint());
             Component label = MapMarkerRenderer.label(marker, style);
-            gfx.drawString(font, font.plainSubstrByWidth(label.getString(), w - layout.s(20)),
-                    x + layout.s(16), rowY, isSelected ? TITLE_INK : PARCHMENT_INK, false);
+            gfx.drawString(font, font.plainSubstrByWidth(label.getString(), w - 2 * pad - layout.s(12)),
+                    x + pad + layout.s(11), rowY, PARCHMENT_INK, false);
         }
         gfx.disableScissor();
 
         if (waypointRows.isEmpty()) {
-            gfx.drawString(font,
+            // Wrapped: the sentence is wider than the panel, and unwrapped it ran off the sheet.
+            gfx.drawWordWrap(font,
                     Component.translatable("screen.wizards_and_beasts.marauders_map.waypoint.empty")
                             .withStyle(ChatFormatting.ITALIC),
-                    x + layout.s(5), listTop + layout.s(4), PARCHMENT_INK_DIM, false);
+                    x + pad, listTop + layout.s(4), w - 2 * pad, PARCHMENT_INK_DIM, false);
         }
     }
 
@@ -681,7 +707,7 @@ public class MaraudersMapScreen extends Screen {
 
     private boolean clickWaypointRow(double mouseY) {
         int rowH = layout.s(12);
-        int listTop = sidePanelY() + layout.s(16);
+        int listTop = sidePanelY() + layout.s(SIDE_LIST_TOP);
         int index = waypointScroll + (int) ((mouseY - listTop) / rowH);
         if (mouseY < listTop || index < 0 || index >= waypointRows.size()) {
             return false;

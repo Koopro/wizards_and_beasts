@@ -4,8 +4,10 @@ import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GuiSkin;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
+import at.koopro.wizardsandbeasts.client.gui.util.UiContrast;
 import at.koopro.wizardsandbeasts.client.gui.widget.ScrollList;
 import at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton;
+import at.koopro.wizardsandbeasts.client.gui.widget.ThemedTextField;
 import at.koopro.wizardsandbeasts.floo.FlooDestinationDto;
 import at.koopro.wizardsandbeasts.network.floo.FlooCallRequestC2SPayload;
 import at.koopro.wizardsandbeasts.network.floo.FlooTravelRequestC2SPayload;
@@ -62,7 +64,13 @@ public class FlooNetworkScreen extends Screen {
     private static final int PANEL_H = 216;
     private static final int ENTRY_H = 16;
     private static final int MAX_VISIBLE = 7;
-    private static final int LIST_PADDING = 8;
+    /**
+     * Content inset from the sheet's edge. The list's well is drawn {@code SPACE_S} outside this,
+     * and the sheet's double ink rule sits 4 and 6px in, so 16 keeps the well clear of both rules.
+     */
+    private static final int LIST_PADDING = 16;
+    /** Tabs and other furniture: clear of the sheet's ink rule, which anything nearer 12 crosses. */
+    private static final int EDGE = WizardsMetrics.SPACE_L;
     /** The hearth sprite's nine-slice border. Content clears it; the fire sits just inside it. */
     private static final int FRAME = WizardsMetrics.PANEL_SPRITE_BORDER;
 
@@ -70,22 +78,35 @@ public class FlooNetworkScreen extends Screen {
     private static final int ADDRESS_MAX_LENGTH = 48;
 
     // -- the material ----------------------------------------------------------------------------
-    // Dark stone and green fire, not a chest. The Floo screen is something you are looking at from
-    // inside a fireplace, and vanilla's inventory beige says "container" louder than any text can
-    // say "hearth".
+    // Soot and green fire, not a chest. The Floo screen is something you are looking at from inside
+    // a fireplace, and vanilla's inventory beige says "container" louder than any text can say
+    // "hearth".
     //
-    // That instinct was right and the eleven hand-mixed constants under it were not: they were this
-    // screen's private approximation of a material, and `gui/sprites/hearth/` is now that material
-    // properly cut -- soot-black stone, warm soot, and an accent that is FlooCues.EMERALD to the
-    // byte. What survives as a literal is only what carries meaning rather than theme.
+    // `gui/sprites/hearth/` is that material properly cut: a soot-stained sheet from beside the
+    // grate, soot ink, and an accent that is FlooCues.EMERALD to the byte. It is paper now, like
+    // every screen, so text is soot ink and the green is kept for what it means -- the fire, the
+    // row the fire has caught, the line the fire speaks. What survives as a literal is only that.
     private static final GuiSkin SKIN = GuiSkin.HEARTH;
 
-    /** The network's green. Semantic: it is the Floo, not the decor. */
+    /** The network's green. Semantic: it is the Floo, not the decor. Furniture only, never text. */
     private static final int COL_EMERALD = at.koopro.wizardsandbeasts.floo.FlooCues.EMERALD;
-    /** A brighter ember of the same green, for the one line spoken by the fire itself. */
-    private static final int COL_EMBER = 0xFF6ADF7F;
-    private static final int COL_SELECTED = 0xFF7BE08F;
-    private static final int COL_HOVER = 0xFF8BC34A;
+    /** Selected row: a wash of the fire over the sheet, under soot ink. */
+    private static final int COL_SELECTED_WASH = 0x5521B342;
+    /** Hovered row: a breath of soot, so hover never competes with the green of a selection. */
+    private static final int COL_HOVER_WASH = 0x221E1A18;
+    /**
+     * A call is not a journey: the light goes out of the sheet. Soot at a sixth, not the old 40%
+     * black -- the sheet has to stay light enough for its ink to read.
+     */
+    private static final int COL_CALL_DIM = 0x2A1E1A18;
+    /** {@code SKIN.base()} under {@link #COL_CALL_DIM}: the face a head-in-fire call is read on. */
+    private static final int CALL_SHEET = 0xFFAA9F86;
+    /**
+     * The same green as ink: the line spoken by the fire itself, and a row the cursor is over.
+     * Pure emerald is 2 : 1 on the soot sheet, so it is taken down to text contrast with its hue kept
+     * -- measured on {@link #CALL_SHEET}, the darker of the two grounds it is read on.
+     */
+    private static final int COL_FIRE_INK = UiContrast.readableOn(COL_EMERALD, CALL_SHEET);
 
     private static boolean lastSpeakMode = false;
 
@@ -134,19 +155,23 @@ public class FlooNetworkScreen extends Screen {
         int panelH = layout.panelH();
 
         if (!headInFire) {
-            int tabW = (panelW - layout.s(24)) / 2;
+            int gap = layout.s(4);
+            int tabW = (panelW - 2 * layout.s(EDGE) - gap) / 2;
             int tabH = Math.max(MIN_SKINNED, layout.s(16));
-            listTab = addRenderableWidget(hearthButton(px + layout.s(8), py + layout.s(34),
+            listTab = addRenderableWidget(hearthButton(px + layout.s(EDGE), py + layout.s(34),
                     tabW, tabH, "floo.wizards_and_beasts.gui.tab.known", () -> setSpeakMode(false)));
-            speakTab = addRenderableWidget(hearthButton(px + layout.s(12) + tabW, py + layout.s(34),
+            speakTab = addRenderableWidget(hearthButton(px + layout.s(EDGE) + tabW + gap, py + layout.s(34),
                     tabW, tabH, "floo.wizards_and_beasts.gui.tab.speak", () -> setSpeakMode(true)));
         }
 
-        addressField = new EditBox(font, px + LIST_PADDING, py + layout.s(74),
-                panelW - LIST_PADDING * 2, layout.s(18),
-                Component.translatable("floo.wizards_and_beasts.gui.speak.hint"));
+        // A well pressed into the sheet, written in soot ink: vanilla's field is a black box with
+        // white text, the one thing that cannot sit on paper.
+        addressField = new ThemedTextField(font, px + LIST_PADDING, py + layout.s(74),
+                panelW - LIST_PADDING * 2, Math.max(MIN_SKINNED, layout.s(18)),
+                Component.translatable("floo.wizards_and_beasts.gui.speak.hint"))
+                .inkHint(Component.translatable("floo.wizards_and_beasts.gui.speak.hint"))
+                .skin(SKIN);
         addressField.setMaxLength(ADDRESS_MAX_LENGTH);
-        addressField.setHint(Component.translatable("floo.wizards_and_beasts.gui.speak.hint"));
         addressField.setResponder(text -> refreshConfirm());
         addRenderableWidget(addressField);
 
@@ -238,13 +263,14 @@ public class FlooNetworkScreen extends Screen {
 
         drawHearthFrame(graphics, px, py, panelW, panelH);
 
-        graphics.drawCenteredString(font, this.title, px + panelW / 2, py + layout.s(10), SKIN.accent());
+        // Soot ink on the sheet, flat. The title was once drawn in the emerald, which on paper is
+        // 2 : 1; the green now stays in the fire and the rows it catches.
+        drawCentred(graphics, this.title, px + panelW / 2, py + layout.s(10), SKIN.ink());
 
         // Subtitle: the grate you are standing in. A network screen that never says where you are is
         // disorienting in exactly the place the fiction is already disorienting.
         if (!originAddress.isBlank()) {
-            graphics.drawCenteredString(font,
-                    Component.translatable("floo.wizards_and_beasts.gui.from", originAddress),
+            drawCentred(graphics, Component.translatable("floo.wizards_and_beasts.gui.from", originAddress),
                     px + panelW / 2, py + layout.s(21), SKIN.muted());
         }
 
@@ -253,44 +279,48 @@ public class FlooNetworkScreen extends Screen {
         if (speakMode) {
             if (headInFire) {
                 drawWrapped(graphics, Component.translatable("floo.wizards_and_beasts.gui.head_in_fire"),
-                        px + LIST_PADDING, contentTop, panelW - LIST_PADDING * 2, COL_EMBER);
+                        px + LIST_PADDING, contentTop, panelW - LIST_PADDING * 2, COL_FIRE_INK);
             } else {
-                graphics.drawCenteredString(font,
-                        Component.translatable("floo.wizards_and_beasts.gui.speak.prompt"),
+                drawCentred(graphics, Component.translatable("floo.wizards_and_beasts.gui.speak.prompt"),
                         px + panelW / 2, contentTop, SKIN.ink());
             }
         } else if (destinations.isEmpty()) {
             // An empty network has exactly one cause and one cure, so the empty state says both.
             // "No connected fireplaces found" alone reads as a fault; it is actually the starting
             // state of every world, and a player has no way to guess that a name tag is the answer.
-            graphics.drawCenteredString(font, Component.translatable("floo.wizards_and_beasts.gui.empty"),
+            drawCentred(graphics, Component.translatable("floo.wizards_and_beasts.gui.empty"),
                     px + panelW / 2, contentTop + layout.s(20), SKIN.muted());
-            graphics.drawCenteredString(font, Component.translatable("floo.wizards_and_beasts.gui.empty_hint"),
+            drawCentred(graphics, Component.translatable("floo.wizards_and_beasts.gui.empty_hint"),
                     px + panelW / 2, contentTop + layout.s(32), SKIN.muted());
         } else {
             renderList(graphics, px, py, panelW, contentTop, mouseX, mouseY);
         }
 
-        graphics.drawCenteredString(font, Component.translatable("floo.wizards_and_beasts.gui.footer"),
+        drawCentred(graphics, Component.translatable("floo.wizards_and_beasts.gui.footer"),
                 px + panelW / 2, py + panelH - layout.s(38), SKIN.muted());
 
         super.render(graphics, mouseX, mouseY, partialTick);
     }
 
+    /** Centred and flat: a drop shadow under ink on paper reads as a second copy of the glyph. */
+    private void drawCentred(GuiGraphics graphics, Component text, int cx, int y, int colour) {
+        graphics.drawString(font, text, cx - font.width(text) / 2, y, colour, false);
+    }
+
     /**
-     * Dark stone with green fire licking the inside of the frame.
+     * The soot-stained sheet with green fire licking the inside of its frame.
      *
-     * <p>Drawn from fills rather than a texture, on purpose: the border animates, and an animated
-     * nine-slice would need a sprite sheet and an mcmeta for something that is four gradients and a
-     * sine. The flicker is what stops the panel reading as a static dialog — the fire is supposed to
-     * be alive while you are standing in it.
+     * <p>The fire is drawn from fills rather than a texture, on purpose: the border animates, and an
+     * animated nine-slice would need a sprite sheet and an mcmeta for something that is four fills
+     * and a sine. The flicker is what stops the panel reading as a static dialog — the fire is
+     * supposed to be alive while you are standing in it.
      */
     private void drawHearthFrame(GuiGraphics graphics, int px, int py, int w, int h) {
         McStylePanel.drawSkinPanel(graphics, SKIN, px, py, w, h);
         if (headInFire) {
             // A call is not a journey and should not look like the screen that moves you. The
-            // material carries the stone; this is the light going out of it.
-            graphics.fill(px + FRAME, py + FRAME, px + w - FRAME, py + h - FRAME, 0x66000000);
+            // material carries the soot; this is the light going out of it.
+            graphics.fill(px + FRAME, py + FRAME, px + w - FRAME, py + h - FRAME, COL_CALL_DIM);
         }
 
         // Two counter-phased sines, so opposite edges never pulse together and the frame never looks
@@ -320,12 +350,16 @@ public class FlooNetworkScreen extends Screen {
                 py + layout.s(30) - WizardsMetrics.DIVIDER_H / 2, w - 2 * FRAME);
     }
 
-    /** Emerald at {@code intensity}, kept opaque so the stone never shows through the frame. */
+    /**
+     * Emerald at {@code intensity}, as opacity over the sheet.
+     *
+     * <p>It used to scale the colour toward black, which on stone read as the fire guttering; on
+     * paper it read as a black line. Fading the alpha instead lets the sheet show through a dying
+     * flame, and the green never goes dark.
+     */
     private static int flame(float intensity) {
-        int r = (int) (0x21 * intensity);
-        int g = (int) (0xB3 * intensity);
-        int bl = (int) (0x42 * intensity);
-        return 0xFF000000 | (r << 16) | (g << 8) | bl;
+        int a = Math.clamp((int) (0xFF * intensity), 0, 0xFF);
+        return (a << 24) | (COL_EMERALD & 0x00FFFFFF);
     }
 
     private void drawWrapped(GuiGraphics graphics, Component text, int x, int y, int wrapWidth, int colour) {
@@ -361,19 +395,21 @@ public class FlooNetworkScreen extends Screen {
                     && mouseY >= entryY && mouseY < entryY + ENTRY_H;
 
             if (idx == selectedIndex) {
-                graphics.fill(listX, entryY, listX + rowW, entryY + ENTRY_H, 0x8021B342);
+                graphics.fill(listX, entryY, listX + rowW, entryY + ENTRY_H, COL_SELECTED_WASH);
                 graphics.fill(listX, entryY, listX + 1, entryY + ENTRY_H, COL_EMERALD);
             } else if (hovered && dto.isEnabled()) {
-                graphics.fill(listX, entryY, listX + rowW, entryY + ENTRY_H, 0x40808080);
+                graphics.fill(listX, entryY, listX + rowW, entryY + ENTRY_H, COL_HOVER_WASH);
             }
 
+            // The selected row keeps soot ink: its green is the wash under it, and green lettering
+            // on a green wash is the one pairing that cannot be read.
             int textColour;
             if (!dto.isEnabled()) {
                 textColour = SKIN.muted();
             } else if (idx == selectedIndex) {
-                textColour = COL_SELECTED;
+                textColour = SKIN.ink();
             } else if (hovered) {
-                textColour = COL_HOVER;
+                textColour = COL_FIRE_INK;
             } else {
                 textColour = SKIN.ink();
             }

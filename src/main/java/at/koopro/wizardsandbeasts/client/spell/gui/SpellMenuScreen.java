@@ -2,10 +2,13 @@ package at.koopro.wizardsandbeasts.client.spell.gui;
 
 import at.koopro.wizardsandbeasts.client.hud.WandHudSprites;
 import at.koopro.wizardsandbeasts.client.gui.WizardsAndBeastsUiTokens;
+import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiText;
+import at.koopro.wizardsandbeasts.client.gui.util.UiContrast;
 import at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton;
+import at.koopro.wizardsandbeasts.client.gui.widget.ThemedTextField;
 import at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageDataState;
 import at.koopro.wizardsandbeasts.client.skill.gui.SkillScreenRouter;
 import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellDataState;
@@ -116,7 +119,7 @@ public class SpellMenuScreen extends Screen {
                 Component.translatable("gui.wizards_and_beasts.spell_menu.skills"),
                 SkillScreenRouter::openForCurrentPlayer));
 
-        EditBox searchBox = new EditBox(this.font, listX(), searchY(),
+        EditBox searchBox = new ThemedTextField(this.font, listX(), searchY(),
                 listW(), layout.s(WizardsAndBeastsUiTokens.SpellMenu.SEARCH_HEIGHT),
                 Component.translatable("gui.wizards_and_beasts.spell_menu.search"));
         searchBox.setValue(searchQuery);
@@ -411,7 +414,7 @@ public class SpellMenuScreen extends Screen {
         if (spellEntries.isEmpty()) {
             graphics.drawString(font, Component.translatable("gui.wizards_and_beasts.spell_menu.empty"),
                     listX(), listTop() + WizardsAndBeastsUiTokens.SpellMenu.EMPTY_LIST_TEXT_Y_OFFSET,
-                    WizardsPalette.TEXT_DIM, false);
+                    WizardsPalette.PAGE_INK_2, false);
             return;
         }
         int hovered = rowAt(mouseX, mouseY);
@@ -435,11 +438,13 @@ public class SpellMenuScreen extends Screen {
         int x = scrollbarX();
         int w = layout.s(SCROLLBAR_W);
         int track = trackH();
-        graphics.fill(x, listTop(), x + w, listTop() + track, WizardsPalette.WELL);
+        // A groove in the well and the wax ribbon the shared scrollbar uses, at this list's narrower
+        // width.
+        graphics.fill(x, listTop(), x + w, listTop() + track, WizardsPalette.PAGE_DEEP);
 
         int thumbH = Math.max(layout.s(8), track * maxVisible() / Math.max(1, spellEntries.size()));
         int thumbY = listTop() + (track - thumbH) * scrollOffset / max;
-        graphics.fill(x, thumbY, x + w, thumbY + thumbH, WizardsPalette.THUMB);
+        graphics.fill(x, thumbY, x + w, thumbY + thumbH, WizardsPalette.WAX);
     }
 
     /**
@@ -495,17 +500,24 @@ public class SpellMenuScreen extends Screen {
             String text = font.plainSubstrByWidth(label.getString(), size + layout.s(8));
             graphics.drawString(font, text, sx + size / 2 - font.width(text) / 2,
                     sy - font.lineHeight - 2,
-                    spellId != null ? WizardsPalette.TEXT : WizardsPalette.TEXT_DIM, true);
+                    spellId != null ? WizardsPalette.PAGE_INK : WizardsPalette.PAGE_INK_2, false);
         }
     }
 
-    /** A filled socket is read by hue; an empty one has no spell to take a hue from. */
+    /**
+     * A filled socket is read by hue; an empty one has no spell to take a hue from.
+     *
+     * <p>The category hues were picked for a dark plate and several all but vanish on paper, so the
+     * hue is clamped to the 3 : 1 a ring or a line needs against the page — it keeps its meaning and
+     * gains the depth to be seen.
+     */
     private static int accentOf(@Nullable String spellId) {
         if (spellId == null) {
-            return WizardsPalette.LINE;
+            return WizardsPalette.PAGE_INK_2;
         }
         Spell spell = Spells.byId(spellId);
-        return spell == null ? WizardsPalette.LINE : 0xFF000000 | spell.getCategory().getColor();
+        return spell == null ? WizardsPalette.PAGE_INK_2
+                : UiContrast.readableOn(spell.getCategory().getColor(), WizardsPalette.PAGE, UiContrast.AA_LARGE);
     }
 
     private static int proficiencyPipsFor(String spellId) {
@@ -520,20 +532,19 @@ public class SpellMenuScreen extends Screen {
     /**
      * A recessed card under the detail text.
      *
-     * <p>Without it the spell's name, cooldown and proficiency sat directly on the leather with
+     * <p>Without it the spell's name, cooldown and proficiency sat directly on the sheet with
      * nothing holding them, and the lower half of the right column read as unused panel rather than
      * as a place information appears.
      */
     private void renderInfoCard(GuiGraphics graphics) {
-        int x = layout.panelX() + layout.s(LEFT_W) + layout.s(4);
-        int right = layout.panelX() + layout.panelW() - layout.s(4);
+        int x = layout.panelX() + layout.s(LEFT_W) + layout.s(SpellMenuRenderHelper.INFO_CARD_X);
+        int right = layout.panelX() + layout.panelW();
         int top = layout.panelY() + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_INFO_BASE_Y)
                 - layout.s(6);
         int bottom = layout.panelY() + layout.panelH()
                 - layout.s(WizardsAndBeastsUiTokens.SpellMenu.ASSIGN_HINT_BOTTOM_OFFSET)
                 - layout.s(4);
-        graphics.fill(x, top, right, bottom, WizardsPalette.WELL);
-        graphics.fill(x, top, right, top + 1, WizardsPalette.LINE);
+        McStylePanel.drawThemedInset(graphics, x, top, right - x, bottom - top);
     }
 
     /**
@@ -547,12 +558,15 @@ public class SpellMenuScreen extends Screen {
                 : selectedSpellId != null
                         ? "gui.wizards_and_beasts.spell_menu.hint_assign"
                         : "gui.wizards_and_beasts.spell_menu.hint_pick";
-        graphics.drawCenteredString(font, Component.translatable(key),
+        // Centred by hand: drawCenteredString always draws a shadow, and there is none on paper.
+        String hint = Component.translatable(key).getString();
+        graphics.drawString(font, hint,
                 layout.panelX() + layout.s(LEFT_W)
-                        + layout.s(WizardsAndBeastsUiTokens.SpellMenu.ASSIGN_HINT_CENTER_X),
+                        + layout.s(WizardsAndBeastsUiTokens.SpellMenu.ASSIGN_HINT_CENTER_X)
+                        - font.width(hint) / 2,
                 layout.panelY() + layout.panelH()
                         - layout.s(WizardsAndBeastsUiTokens.SpellMenu.ASSIGN_HINT_BOTTOM_OFFSET),
-                WizardsPalette.TEXT_DIM);
+                WizardsPalette.PAGE_INK_2, false);
     }
 
     private void renderDragGhost(GuiGraphics graphics, int mouseX, int mouseY) {

@@ -1,9 +1,9 @@
 package at.koopro.wizardsandbeasts.client.owl.screen;
 
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.owl.OWLGrade;
 import at.koopro.wizardsandbeasts.owl.OWLSubject;
 import at.koopro.wizardsandbeasts.owl.Profession;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
@@ -70,27 +70,28 @@ public class OWLResultsReadOnlyScreen extends ScaledParchmentScreen {
         var pose = graphics.pose();
         beginScaledPass(graphics);
         drawParchment(graphics, BG_WIDTH, BG_HEIGHT);
-        graphics.drawCenteredString(font,
-                Component.translatable("owls.screen.results_title").withColor(0x5C3317),
-                cx, cy - BG_HEIGHT / 2 + 8, 0x5C3317);
+        drawCentred(graphics, Component.translatable("owls.screen.results_title"),
+                cx, cy - BG_HEIGHT / 2 + 10, WizardsPalette.PAGE_RUBRIC);
 
         int rowY = cy - BG_HEIGHT / 2 + 24;
         for (OWLSubject subject : OWLSubject.values()) {
             OWLGrade grade = grades.getOrDefault(subject, OWLGrade.T);
-            int color = grade.passing ? 0xCC8800 : 0x666666;
+            // Opaque ink: the old 0xCC8800 / 0x666666 had no alpha byte, and a text colour with
+            // alpha 0 is not drawn at all on 1.21.11.
+            int color = grade.passing ? WizardsPalette.PAGE_GOOD : WizardsPalette.PAGE_INK_2;
             String text = Component.translatable(subject.translationKey()).getString()
                     + " — " + grade.name()
                     + " (" + Component.translatable(grade.translationKey()).getString() + ")";
-            graphics.drawString(font, text, cx - BG_WIDTH / 2 + 10, rowY, color, false);
+            graphics.drawString(font, text, cx - BG_WIDTH / 2 + 12, rowY, color, false);
             rowY += font.lineHeight + 3;
         }
 
         if (profession != null) {
             rowY += 6;
-            graphics.drawCenteredString(font,
-                    Component.translatable("owls.screen.profession_chosen",
-                            Component.translatable(profession.translationKey())).withStyle(ChatFormatting.GOLD),
-                    cx, rowY, 0xCC8800);
+            // Red ink rather than chat GOLD, which is under 2 : 1 on the sheet.
+            drawCentred(graphics, Component.translatable("owls.screen.profession_chosen",
+                            Component.translatable(profession.translationKey())),
+                    cx, rowY, WizardsPalette.PAGE_RUBRIC);
         }
 
         pose.popMatrix();

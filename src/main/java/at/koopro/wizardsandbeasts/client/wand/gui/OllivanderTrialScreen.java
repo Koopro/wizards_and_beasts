@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.client.wand.gui;
 
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GuiSkin;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiText;
 import at.koopro.wizardsandbeasts.client.gui.util.UiContrast;
@@ -27,8 +28,8 @@ import java.util.List;
 /**
  * Ollivander's: three wands on a tray, and what each of them would do.
  *
- * <p>Cut on the {@code workbench} material — worn wood, shellac and brass calipers — which was
- * generated for this screen and had no consumer until now.
+ * <p>Cut on the {@code workbench} material — Ollivander's pattern paper, brown ink and brass —
+ * which was generated for this screen and had no consumer until now.
  *
  * <h2>What was wrong with the old one</h2>
  *
@@ -48,9 +49,9 @@ import java.util.List;
  *
  * <h2>Colour</h2>
  *
- * <p>Nothing here is drawn in {@code WizardsPalette}'s inks. This material's face is light, and the
- * leather palette is built for the dark HUD: {@code BRASS_HI}, which the old screen used for every
- * label, is 1.35 : 1 on it. Body text is {@link GuiSkin#ink()}, and the cast contributions — whose
+ * <p>Nothing here is drawn in {@code WizardsPalette}'s leather inks. This material's face is light
+ * paper, and the leather palette is built for the dark HUD: {@code BRASS_HI}, which the old screen
+ * used for every label, is 1.35 : 1 on it. Body text is {@link GuiSkin#ink()}, and the cast contributions — whose
  * tooltip vocabulary is {@code GREEN} at 1.58 : 1 and {@code DARK_RED} at 2.40 : 1 — go through
  * {@link UiContrast}, which keeps the hue and moves only the luminance, so good still reads green.
  */
@@ -63,6 +64,10 @@ public class OllivanderTrialScreen extends AbstractContainerScreen<OllivanderTri
 
     private static final int FRAME = WizardsMetrics.PANEL_SPRITE_BORDER;
     private static final int PAD = WizardsMetrics.SPACE_M;
+    /** Clearance for the rules that span the sheet: its own double rule runs 4-6px in. */
+    private static final int RULE_INSET = WizardsMetrics.SPACE_L;
+    /** Title baseline row, clear of the frame's rules at 4 and 6. */
+    private static final int TITLE_Y = 10;
 
     private static final int HEADER_H = 44;
     /**
@@ -135,10 +140,10 @@ public class OllivanderTrialScreen extends AbstractContainerScreen<OllivanderTri
         McStylePanel.drawSkinPanel(graphics, SKIN, leftPos, topPos, imageWidth, imageHeight);
         McStylePanel.drawSkinSeal(graphics, SKIN,
                 leftPos + imageWidth - FRAME - McStylePanel.SEAL_SIZE, topPos + FRAME);
-        McStylePanel.drawSkinDivider(graphics, SKIN, leftPos + FRAME,
-                topPos + HEADER_H - WizardsMetrics.DIVIDER_H, imageWidth - 2 * FRAME);
-        McStylePanel.drawSkinDivider(graphics, SKIN, leftPos + FRAME,
-                topPos + imageHeight - FOOTER_H, imageWidth - 2 * FRAME);
+        McStylePanel.drawSkinDivider(graphics, SKIN, leftPos + RULE_INSET,
+                topPos + HEADER_H - WizardsMetrics.DIVIDER_H, imageWidth - 2 * RULE_INSET);
+        McStylePanel.drawSkinDivider(graphics, SKIN, leftPos + RULE_INSET,
+                topPos + imageHeight - FOOTER_H, imageWidth - 2 * RULE_INSET);
 
         McStylePanel.drawSkinInset(graphics, SKIN, detailX(), bodyTop(), detailW(), bodyH());
     }
@@ -151,10 +156,10 @@ public class OllivanderTrialScreen extends AbstractContainerScreen<OllivanderTri
 
         super.render(graphics, mouseX, mouseY, partialTick);
 
-        graphics.drawString(font, this.title, leftPos + FRAME + PAD, topPos + FRAME + 2,
+        graphics.drawString(font, this.title, leftPos + FRAME + PAD, topPos + TITLE_Y,
                 SKIN.ink(), false);
         graphics.drawString(font, Component.translatable("wandcraft.gui.trial_epigraph"),
-                leftPos + FRAME + PAD, topPos + FRAME + 2 + WizardsMetrics.LINE_SECTION,
+                leftPos + FRAME + PAD, topPos + TITLE_Y + WizardsMetrics.LINE_SECTION,
                 SKIN.muted(), false);
 
         renderTray(graphics);
@@ -199,10 +204,13 @@ public class OllivanderTrialScreen extends AbstractContainerScreen<OllivanderTri
      * <p>The notch is the point. A bare fill says "this much"; it does not say whether this much is
      * enough, and enough is the only question the bar is being asked. Below the mark the fill stays
      * in the material's muted tone and only a wand that answers gets the brass.
+     *
+     * <p>The track is recessed paper, as every bar on the sheet is; it used to be filled solid in the
+     * frame ink, which on paper reads as a black bar rather than an empty one.
      */
     private void renderResonanceBar(GuiGraphics graphics, int x, int y, int w,
                                     float score, float threshold) {
-        graphics.fill(x, y, x + w, y + BAR_H, SKIN.frame());
+        graphics.fill(x, y, x + w, y + BAR_H, WizardsPalette.PAGE_SHADE);
         int fill = (int) ((w - 2) * Math.min(1.0f, Math.max(0.0f, score)));
         boolean answers = score >= threshold;
         graphics.fill(x + 1, y + 1, x + 1 + fill, y + BAR_H - 1,

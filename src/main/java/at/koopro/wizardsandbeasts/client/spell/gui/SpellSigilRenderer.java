@@ -20,15 +20,20 @@ import org.jspecify.annotations.NullMarked;
  *
  * <h2>Colour comes from the palette</h2>
  *
- * <p>Leather and brass, per {@code WizardsPalette} — not the navy and pure gold this screen used to
- * paint, which matched nothing else in the mod. The one place a foreign hue is allowed in is the
- * socket ring of a filled slot, which takes its spell's category colour; that is the screen's whole
- * job, so it is what should carry the accent.
+ * <p>Ink and gilt on the page, per {@code WizardsPalette} — engraved into the sheet rather than set
+ * into a leather plate. The one place a foreign hue is allowed in is the socket ring of a filled
+ * slot, which takes its spell's category colour (contrast-clamped by the caller); that is the
+ * screen's whole job, so it is what should carry the accent.
  */
 @NullMarked
 public final class SpellSigilRenderer {
 
-    /** How far the idle shimmer moves the brass, as a fraction. Small on purpose — it is engraving. */
+    /** The engraved groove every channel, socket and the hub is cut into. */
+    private static final int GROOVE = WizardsPalette.PAGE_SHADE;
+    /** An unlit channel, an empty socket's ring and the hub's ring: ink laid thin. */
+    private static final int ENGRAVING = WizardsPalette.PAGE_INK_2;
+
+    /** How far the idle shimmer moves the gilt, as a fraction. Small on purpose — it is engraving. */
     private static final float PULSE_DEPTH = 0.18f;
     private static final float PULSE_PERIOD_TICKS = 70.0f;
 
@@ -36,7 +41,7 @@ public final class SpellSigilRenderer {
 
     /**
      * A stepped ring. Minecraft's grid has no circles, and a rasterised one at this radius reads as a
-     * lumpy blob; an octagon cut from filled rectangles reads as a deliberate brass fitting.
+     * lumpy blob; an octagon cut from filled rectangles reads as a deliberate engraved ring.
      */
     public static void ring(GuiGraphics g, int x, int y, int size, int thickness, int colour) {
         int inset = Math.max(1, size / 5);
@@ -57,13 +62,13 @@ public final class SpellSigilRenderer {
     /**
      * One engraved channel from the hub to a socket.
      *
-     * @param lit true once the socket it feeds holds a spell — an empty socket's channel stays dark,
-     *            so the plate reads at a glance as "two of four wired"
+     * @param lit true once the socket it feeds holds a spell — an empty socket's channel stays thin
+     *            ink, so the plate reads at a glance as "two of four wired"
      */
     public static void leyLine(GuiGraphics g, int hubX, int hubY, int socketCx, int socketCy,
                                boolean lit, int accent, float ageInTicks) {
-        int seat = WizardsPalette.WELL;
-        int live = lit ? pulse(accent, ageInTicks) : WizardsPalette.LINE;
+        int seat = GROOVE;
+        int live = lit ? pulse(accent, ageInTicks) : WizardsPalette.PAGE_DEEP;
         int half = 1;
 
         if (hubY == socketCy) {
@@ -83,15 +88,15 @@ public final class SpellSigilRenderer {
      * The hub the channels run to. Drawn last of the engraving so the lines tuck under it.
      */
     public static void hub(GuiGraphics g, int cx, int cy, int radius, float ageInTicks) {
-        g.fill(cx - radius, cy - radius, cx + radius, cy + radius, WizardsPalette.WELL);
-        ring(g, cx - radius, cy - radius, radius * 2, 1, WizardsPalette.LINE);
+        g.fill(cx - radius, cy - radius, cx + radius, cy + radius, GROOVE);
+        ring(g, cx - radius, cy - radius, radius * 2, 1, ENGRAVING);
         int inner = Math.max(1, radius / 2);
         g.fill(cx - inner, cy - inner, cx + inner, cy + inner,
-                pulse(WizardsPalette.BRASS, ageInTicks));
+                pulse(WizardsPalette.GILT, ageInTicks));
     }
 
     /**
-     * Proficiency as three brass pips around the socket's foot, replacing the ○/◉/★ glyph run.
+     * Proficiency as three gilt pips around the socket's foot, replacing the ○/◉/★ glyph run.
      *
      * <p>A shape you can count beats a symbol you have to learn, and it survives the pixel grid at
      * this size where a star does not.
@@ -104,24 +109,24 @@ public final class SpellSigilRenderer {
         int py = y + size + 1;
         for (int i = 0; i < 3; i++) {
             g.fill(px + i * gap, py, px + i * gap + pip, py + pip,
-                    i < filled ? WizardsPalette.BRASS_HI : WizardsPalette.PIP_OFF);
+                    i < filled ? WizardsPalette.GILT_DARK : WizardsPalette.PAGE_DEEP);
         }
     }
 
     /**
-     * The socket itself: a leather well, a brass ring, and — when filled — that ring re-struck in the
-     * spell's category colour so the plate can be read by hue alone.
+     * The socket itself: a groove in the page, an ink ring, and — when filled — that ring re-struck
+     * in the spell's category colour so the plate can be read by hue alone.
      */
     public static void socket(GuiGraphics g, int x, int y, int size,
                               boolean filled, boolean hovered, boolean dropTarget,
                               int accent, float ageInTicks) {
-        g.fill(x + 2, y + 2, x + size - 2, y + size - 2, WizardsPalette.WELL);
+        g.fill(x + 2, y + 2, x + size - 2, y + size - 2, GROOVE);
 
-        int ringColour = filled ? accent : WizardsPalette.LINE;
+        int ringColour = filled ? accent : ENGRAVING;
         if (dropTarget) {
-            ringColour = WizardsPalette.BRASS_HI;
+            ringColour = WizardsPalette.GILT;
         } else if (hovered) {
-            ringColour = WizardsPalette.EDGE_HI;
+            ringColour = WizardsPalette.GILT_DARK;
         }
         ring(g, x, y, size, 2, ringColour);
 
@@ -129,20 +134,20 @@ public final class SpellSigilRenderer {
             // A second, dimmer ring one step in reads as the socket being seated rather than empty.
             ring(g, x + 3, y + 3, size - 6, 1, pulse(accent, ageInTicks));
         } else {
-            // An empty socket needs to read as *available*, not as a hole cut in the plate. A single
-            // brass stud at the centre is enough to say "something seats here" — without it the four
+            // An empty socket needs to read as *available*, not as a hole cut in the page. A single
+            // gilt stud at the centre is enough to say "something seats here" — without it the four
             // wells look like damage.
             int stud = Math.max(1, size / 12);
             g.fill(x + size / 2 - stud, y + size / 2 - stud,
-                    x + size / 2 + stud, y + size / 2 + stud, WizardsPalette.LINE);
+                    x + size / 2 + stud, y + size / 2 + stud, WizardsPalette.GILT_DARK);
         }
         if (dropTarget) {
             // Flare outward, so the target is obvious while something is over it.
-            ring(g, x - 2, y - 2, size + 4, 1, WizardsPalette.BRASS_HI);
+            ring(g, x - 2, y - 2, size + 4, 1, WizardsPalette.GILT_DARK);
         }
     }
 
-    /** A slow brightness wander, so brass on this plate is never quite static. */
+    /** A slow brightness wander, so the gilt and the lit channels are never quite static. */
     private static int pulse(int argb, float ageInTicks) {
         float t = (Mth.sin(ageInTicks / PULSE_PERIOD_TICKS * Mth.TWO_PI) + 1.0f) * 0.5f;
         float k = 1.0f - PULSE_DEPTH + PULSE_DEPTH * t;
