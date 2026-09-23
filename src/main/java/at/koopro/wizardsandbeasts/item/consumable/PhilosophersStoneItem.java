@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.item.consumable;
 
+import at.koopro.wizardsandbeasts.item.AnimatedItem;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
@@ -22,7 +23,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.function.Consumer;
 
-public class PhilosophersStoneItem extends Item {
+public class PhilosophersStoneItem extends Item implements AnimatedItem {
 
     /** Elixir of Life sustains the drinker — long, potent vitality. */
     private static final int ELIXIR_DURATION = 6000;       // 5 minutes

@@ -1,0 +1,143 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.ministry_handbook",
+        "texture_width": 48,
+        "texture_height": 32,
+        "visible_bounds_width": 1.5,
+        "visible_bounds_height": 1.25,
+        "visible_bounds_offset": [
+          0,
+          0.12,
+          0
+        ]
+      },
+      "bones": [
+        {
+          "name": "root",
+          "pivot": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "name": "book",
+          "pivot": [
+            0.0,
+            4.0,
+            3.5
+          ],
+          "parent": "root",
+          "cubes": [
+            {
+              "origin": [
+                -4.0,
+                4.0,
+                -3.0
+              ],
+              "size": [
+                8,
+                1,
+                7
+              ],
+              "uv": [
+                0,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -3.5,
+                5.0,
+                -2.5
+              ],
+              "size": [
+                7,
+                2,
+                6
+              ],
+              "uv": [
+                0,
+                8
+              ]
+            },
+            {
+              "origin": [
+                -4.0,
+                5.0,
+                3.0
+              ],
+              "size": [
+                8,
+                2,
+                1
+              ],
+              "uv": [
+                24,
+                24
+              ]
+            }
+          ]
+        },
+        {
+          "name": "cover",
+          "pivot": [
+            0.0,
+            7.0,
+            3.5
+          ],
+          "parent": "book",
+          "cubes": [
+            {
+              "origin": [
+                -4.0,
+                7.0,
+                -3.0
+              ],
+              "size": [
+                8,
+                1,
+                7
+              ],
+              "uv": [
+                0,
+                16
+              ]
+            }
+          ]
+        },
+        {
+          "name": "page",
+          "pivot": [
+            0.0,
+            7.0,
+            3.0
+          ],
+          "parent": "book",
+          "cubes": [
+            {
+              "origin": [
+                -3.5,
+                7.0,
+                -2.5
+              ],
+              "size": [
+                7,
+                1,
+                5
+              ],
+              "inflate": -0.35,
+              "uv": [
+                0,
+                24
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

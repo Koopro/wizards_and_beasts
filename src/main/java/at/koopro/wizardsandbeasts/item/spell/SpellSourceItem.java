@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.item.spell;
 
+import at.koopro.wizardsandbeasts.item.AnimatedItem;
 import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.learning.SpellLearningService;
@@ -178,6 +179,13 @@ public class SpellSourceItem extends Item {
     private static void refuse(Player player, Level level, @Nullable Component reason) {
         if (!level.isClientSide() && reason != null) {
             PlayerFeedback.actionBar(player, reason.copy().withStyle(ChatFormatting.GRAY));
+        }
+    }
+
+    /** The Standard Book of Spells: a source that is also drawn as a book in hand. */
+    public static class Animated extends SpellSourceItem implements AnimatedItem {
+        public Animated(Properties properties) {
+            super(properties);
         }
     }
 }

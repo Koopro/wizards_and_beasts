@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.item.hallow;
 
+import at.koopro.wizardsandbeasts.item.AnimatedItem;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
@@ -24,7 +25,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.function.Consumer;
 
-public class ResurrectionStoneItem extends Item implements IHallowItem {
+public class ResurrectionStoneItem extends Item implements IHallowItem, AnimatedItem {
 
     /** "Turned thrice in the hand" — three turns call the shades. */
     private static final int TURNS_TO_SUMMON = 3;

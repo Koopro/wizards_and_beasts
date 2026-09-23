@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.item.trinket;
 
+import at.koopro.wizardsandbeasts.item.AnimatedItem;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
@@ -16,7 +17,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.function.Consumer;
 
-public class PensieveItem extends Item {
+public class PensieveItem extends Item implements AnimatedItem {
 
     public PensieveItem(Properties properties) {
         super(properties);

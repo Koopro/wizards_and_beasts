@@ -1,0 +1,101 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.howler",
+        "texture_width": 32,
+        "texture_height": 16,
+        "visible_bounds_width": 1.5,
+        "visible_bounds_height": 1.38,
+        "visible_bounds_offset": [
+          0,
+          0.19,
+          0
+        ]
+      },
+      "bones": [
+        {
+          "name": "root",
+          "pivot": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "name": "envelope",
+          "pivot": [
+            0.0,
+            7.0,
+            0.0
+          ],
+          "parent": "root",
+          "cubes": [
+            {
+              "origin": [
+                -4.0,
+                4.0,
+                -0.5
+              ],
+              "size": [
+                8,
+                6,
+                1
+              ],
+              "uv": [
+                0,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -1.0,
+                6.0,
+                -0.8
+              ],
+              "size": [
+                2,
+                2,
+                1
+              ],
+              "inflate": -0.1,
+              "uv": [
+                18,
+                7
+              ]
+            }
+          ]
+        },
+        {
+          "name": "flap",
+          "pivot": [
+            0.0,
+            10.0,
+            0.0
+          ],
+          "parent": "envelope",
+          "cubes": [
+            {
+              "origin": [
+                -4.0,
+                7.0,
+                -0.7
+              ],
+              "size": [
+                8,
+                3,
+                1
+              ],
+              "inflate": -0.05,
+              "uv": [
+                0,
+                7
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

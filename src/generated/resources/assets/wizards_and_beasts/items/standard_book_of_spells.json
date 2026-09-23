@@ -16,8 +16,11 @@
       }
     ],
     "fallback": {
-      "type": "minecraft:model",
-      "model": "wizards_and_beasts:item/standard_book_of_spells"
+      "type": "minecraft:special",
+      "base": "wizards_and_beasts:item/standard_book_of_spells",
+      "model": {
+        "type": "geckolib:geckolib"
+      }
     },
     "property": "minecraft:display_context"
   }

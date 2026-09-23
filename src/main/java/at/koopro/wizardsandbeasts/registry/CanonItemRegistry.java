@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.registry;
 
+import at.koopro.wizardsandbeasts.item.AnimatedItem;
 import at.koopro.wizardsandbeasts.item.spell.SpellSourceItem;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -35,7 +36,7 @@ public final class CanonItemRegistry {
     public static final DeferredItem<Item> SWORD_OF_GRYFFINDOR =
             ModItems.ITEMS.registerItem("sword_of_gryffindor", Item::new);
     public static final DeferredItem<Item> MIRROR_OF_ERISED =
-            ModItems.ITEMS.registerItem("mirror_of_erised", Item::new);
+            ModItems.ITEMS.registerItem("mirror_of_erised", AnimatedItem.Plain::new);
     public static final DeferredItem<Item> ELIXIR_OF_LIFE =
             ModItems.ITEMS.registerItem("elixir_of_life", Item::new);
     public static final DeferredItem<Item> GOBLET_OF_FIRE =
@@ -75,7 +76,7 @@ public final class CanonItemRegistry {
 
     // --- Communication & information ---------------------------------------
     public static final DeferredItem<Item> HOWLER =
-            ModItems.ITEMS.registerItem("howler", Item::new);
+            ModItems.ITEMS.registerItem("howler", AnimatedItem.Plain::new);
     public static final DeferredItem<Item> DA_GALLEON =
             ModItems.ITEMS.registerItem("da_galleon", Item::new);
     public static final DeferredItem<Item> DAILY_PROPHET =
@@ -146,11 +147,11 @@ public final class CanonItemRegistry {
      * all still its, and only the class in the middle changed.
      */
     public static final DeferredItem<Item> STANDARD_BOOK_OF_SPELLS =
-            ModItems.ITEMS.registerItem("standard_book_of_spells", SpellSourceItem::new);
+            ModItems.ITEMS.registerItem("standard_book_of_spells", SpellSourceItem.Animated::new);
     public static final DeferredItem<Item> DRAGON_HIDE_GLOVES =
             ModItems.ITEMS.registerItem("dragon_hide_gloves", Item::new);
     public static final DeferredItem<Item> MONSTER_BOOK_OF_MONSTERS =
-            ModItems.ITEMS.registerItem("monster_book_of_monsters", Item::new);
+            ModItems.ITEMS.registerItem("monster_book_of_monsters", AnimatedItem.Plain::new);
     public static final DeferredItem<Item> ADVANCED_POTION_MAKING =
             ModItems.ITEMS.registerItem("advanced_potion_making", Item::new);
     public static final DeferredItem<Item> QUILL =
@@ -180,7 +181,7 @@ public final class CanonItemRegistry {
 
     // --- Quidditch ---------------------------------------------------------
     public static final DeferredItem<Item> GOLDEN_SNITCH =
-            ModItems.ITEMS.registerItem("golden_snitch", Item::new);
+            ModItems.ITEMS.registerItem("golden_snitch", AnimatedItem.Plain::new);
     public static final DeferredItem<Item> QUAFFLE =
             ModItems.ITEMS.registerItem("quaffle", Item::new);
     public static final DeferredItem<Item> BLUDGER =

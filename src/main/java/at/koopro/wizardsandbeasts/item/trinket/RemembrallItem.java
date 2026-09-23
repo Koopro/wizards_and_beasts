@@ -1,9 +1,10 @@
 package at.koopro.wizardsandbeasts.item.trinket;
 
+import at.koopro.wizardsandbeasts.item.AnimatedItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-public class RemembrallItem extends Item {
+public class RemembrallItem extends Item implements AnimatedItem {
     public RemembrallItem(Properties properties) {
         super(properties);
     }

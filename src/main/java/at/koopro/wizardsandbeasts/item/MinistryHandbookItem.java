@@ -26,7 +26,7 @@ import org.jspecify.annotations.NonNull;
  * <p>The screen is opened reflectively (same pattern as {@code BestiaryItem}) so the client-only
  * {@code HandbookScreen} class never loads on a dedicated server.
  */
-public final class MinistryHandbookItem extends Item {
+public final class MinistryHandbookItem extends Item implements AnimatedItem {
 
     public MinistryHandbookItem(@NonNull Properties properties) {
         super(properties);

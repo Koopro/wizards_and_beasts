@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.item.trinket;
 
+import at.koopro.wizardsandbeasts.item.AnimatedItem;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import net.minecraft.ChatFormatting;
@@ -22,7 +23,7 @@ import net.minecraft.world.phys.AABB;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class FoeGlassItem extends Item {
+public class FoeGlassItem extends Item implements AnimatedItem {
 
     private static final double SCAN_RADIUS = 32.0;
 

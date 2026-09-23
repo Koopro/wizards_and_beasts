@@ -16,8 +16,11 @@
       }
     ],
     "fallback": {
-      "type": "minecraft:model",
-      "model": "wizards_and_beasts:item/ministry_handbook"
+      "type": "minecraft:special",
+      "base": "wizards_and_beasts:item/ministry_handbook",
+      "model": {
+        "type": "geckolib:geckolib"
+      }
     },
     "property": "minecraft:display_context"
   }

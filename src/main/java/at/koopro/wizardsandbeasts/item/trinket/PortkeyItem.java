@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.item.trinket;
 
+import at.koopro.wizardsandbeasts.item.AnimatedItem;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -14,7 +15,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.function.Consumer;
 
-public class PortkeyItem extends Item {
+public class PortkeyItem extends Item implements AnimatedItem {
     public PortkeyItem(Properties properties) {
         super(properties);
     }

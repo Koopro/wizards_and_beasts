@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.item.broom;
 
+import at.koopro.wizardsandbeasts.item.AnimatedItem;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.broom.BroomDefinition;
 import at.koopro.wizardsandbeasts.broom.BroomDefinitionRegistry;
@@ -33,7 +34,7 @@ import java.util.function.Consumer;
 import java.util.Comparator;
 import java.util.List;
 
-public class BroomItem extends Item {
+public class BroomItem extends Item implements AnimatedItem {
     private static final Identifier FALLBACK_ID =
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "broom");
 

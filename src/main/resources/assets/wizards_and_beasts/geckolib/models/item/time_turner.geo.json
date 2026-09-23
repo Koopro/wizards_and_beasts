@@ -7,10 +7,10 @@
         "texture_width": 32,
         "texture_height": 24,
         "visible_bounds_width": 1.56,
-        "visible_bounds_height": 1.75,
+        "visible_bounds_height": 1.78,
         "visible_bounds_offset": [
           0,
-          0.38,
+          0.39,
           0
         ]
       },
@@ -35,7 +35,7 @@
             {
               "origin": [
                 -0.5,
-                11.5,
+                12.0,
                 -0.5
               ],
               "size": [

@@ -25,6 +25,7 @@ import net.neoforged.neoforge.client.model.generators.template.ExtendedModelTemp
 import software.bernie.geckolib.renderer.internal.GeckolibItemSpecialRenderer;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.item.AnimatedItem;
 import at.koopro.wizardsandbeasts.block.location.DiagonAlleyBlocks;
 import at.koopro.wizardsandbeasts.block.location.GringottsBlocks;
 import at.koopro.wizardsandbeasts.block.location.HogwartsBlocks;
@@ -88,14 +89,14 @@ public class ModModelProvider extends ModelProvider {
         itemModels.declareCustomModelItem(WandItemRegistry.DEBUG_WAND.get());
         itemModels.declareCustomModelItem(WandItemRegistry.MORPH_WAND.get());
         itemModels.declareCustomModelItem(WandItemRegistry.WAND.get());
-        itemModels.declareCustomModelItem(BroomItemRegistry.BROOM_ITEM.get());
-        itemModels.declareCustomModelItem(BroomItemRegistry.CLEANSWEEP_SEVEN.get());
-        itemModels.declareCustomModelItem(BroomItemRegistry.COMET_260.get());
-        itemModels.declareCustomModelItem(BroomItemRegistry.NIMBUS_2000.get());
-        itemModels.declareCustomModelItem(BroomItemRegistry.NIMBUS_2001.get());
-        itemModels.declareCustomModelItem(BroomItemRegistry.FIREBOLT.get());
-        itemModels.declareCustomModelItem(BroomItemRegistry.FIREBOLT_SUPREME.get());
-        itemModels.declareCustomModelItem(BroomItemRegistry.OAKSHAFT_79.get());
+        declaredOrGeo(itemModels, BroomItemRegistry.BROOM_ITEM.get());
+        declaredOrGeo(itemModels, BroomItemRegistry.CLEANSWEEP_SEVEN.get());
+        declaredOrGeo(itemModels, BroomItemRegistry.COMET_260.get());
+        declaredOrGeo(itemModels, BroomItemRegistry.NIMBUS_2000.get());
+        declaredOrGeo(itemModels, BroomItemRegistry.NIMBUS_2001.get());
+        declaredOrGeo(itemModels, BroomItemRegistry.FIREBOLT.get());
+        declaredOrGeo(itemModels, BroomItemRegistry.FIREBOLT_SUPREME.get());
+        declaredOrGeo(itemModels, BroomItemRegistry.OAKSHAFT_79.get());
         iconInSlotModelInHand(itemModels, BroomItemRegistry.BROOM_POLISH.get());
         itemModels.declareCustomModelItem(BroomItemRegistry.ENCHANTED_TWIG_BUNDLE.get());
         itemModels.declareCustomModelItem(MiscItemRegistry.MARAUDERS_MAP.get());
@@ -119,7 +120,7 @@ public class ModModelProvider extends ModelProvider {
             if (HAND_MODELLED_CANON.contains(stub.getId().getPath())) {
                 iconInSlotModelInHand(itemModels, stub.get());
             } else {
-                itemModels.generateFlatItem(stub.get(), ModelTemplates.FLAT_ITEM);
+                flatOrGeo(itemModels, stub.get());
             }
         }
         // All trunks + Newt's Case are now blocks — their item models come from the block-model
@@ -184,7 +185,7 @@ public class ModModelProvider extends ModelProvider {
         iconInSlotModelInHand(itemModels, DarkArtefactItemRegistry.SLYTHERINS_LOCKET.get());
         iconInSlotModelInHand(itemModels, DarkArtefactItemRegistry.HUFFLEPUFFS_CUP.get());
         iconInSlotModelInHand(itemModels, DarkArtefactItemRegistry.RAVENCLAWS_DIADEM.get());
-        itemModels.declareCustomModelItem(DarkArtefactItemRegistry.PHILOSOPHERS_STONE.get());
+        declaredOrGeo(itemModels, DarkArtefactItemRegistry.PHILOSOPHERS_STONE.get());
         iconInSlotModelInHand(itemModels, TrinketItemRegistry.PENSIEVE.get());
         iconInSlotModelInHand(itemModels, TrinketItemRegistry.TWO_WAY_MIRROR.get());
         iconInSlotModelInHand(itemModels, TrinketItemRegistry.HAND_OF_GLORY.get());
@@ -217,6 +218,10 @@ public class ModModelProvider extends ModelProvider {
      * {@code src/main/resources} and is not ours to overwrite.
      */
     private static void iconInSlotModelInHand(ItemModelGenerators itemModels, Item item) {
+        if (item instanceof AnimatedItem) {
+            iconInSlotGeoInHand(itemModels, item, flatIcon(itemModels, item, "_inventory"));
+            return;
+        }
         Identifier icon = ModelTemplates.FLAT_ITEM.create(ModelLocationUtils.getModelLocation(item, "_inventory"),
                 TextureMapping.layer0(item), itemModels.modelOutput);
         itemModels.itemModelOutput.accept(item, ItemModelGenerators.createFlatModelDispatch(
@@ -224,17 +229,42 @@ public class ModModelProvider extends ModelProvider {
     }
 
     /**
-     * {@link #iconInSlotModelInHand} with a GeckoLib model in hand instead of the cuboid — for an
-     * {@code AnimatedItem}. The cuboid stays as the special model's {@code base}: that is where the
-     * hand, head and frame transforms come from, and it was already tuned for an object this size.
+     * The slot/hand split for an {@code AnimatedItem}: {@code icon} in slots, the GeckoLib model in
+     * hand. The special model's {@code base} is the item's own {@code models/item/<id>.json} — the
+     * hand-tuned cuboid, or the flat or handheld sprite model for items that never had one — because
+     * that is where the hand, head and frame transforms come from.
      */
-    private static void iconInSlotGeoInHand(ItemModelGenerators itemModels, Item item) {
-        Identifier icon = ModelTemplates.FLAT_ITEM.create(ModelLocationUtils.getModelLocation(item, "_inventory"),
-                TextureMapping.layer0(item), itemModels.modelOutput);
+    private static void iconInSlotGeoInHand(ItemModelGenerators itemModels, Item item, Identifier icon) {
         itemModels.itemModelOutput.accept(item, ItemModelGenerators.createFlatModelDispatch(
                 ItemModelUtils.plainModel(icon),
                 ItemModelUtils.specialModel(ModelLocationUtils.getModelLocation(item),
                         new GeckolibItemSpecialRenderer.Unbaked())));
+    }
+
+    private static Identifier flatIcon(ItemModelGenerators itemModels, Item item, String suffix) {
+        return ModelTemplates.FLAT_ITEM.create(ModelLocationUtils.getModelLocation(item, suffix),
+                TextureMapping.layer0(item), itemModels.modelOutput);
+    }
+
+    /** A flat item, or — once it is an {@code AnimatedItem} — that flat model in slots and as base. */
+    private static void flatOrGeo(ItemModelGenerators itemModels, Item item) {
+        if (item instanceof AnimatedItem) {
+            iconInSlotGeoInHand(itemModels, item, flatIcon(itemModels, item, ""));
+        } else {
+            itemModels.generateFlatItem(item, ModelTemplates.FLAT_ITEM);
+        }
+    }
+
+    /**
+     * An item whose {@code models/item/<id>.json} is hand-written — or, once it is an
+     * {@code AnimatedItem}, that model in slots and as base with the GeckoLib model in hand.
+     */
+    private static void declaredOrGeo(ItemModelGenerators itemModels, Item item) {
+        if (item instanceof AnimatedItem) {
+            iconInSlotGeoInHand(itemModels, item, ModelLocationUtils.getModelLocation(item));
+        } else {
+            itemModels.declareCustomModelItem(item);
+        }
     }
 
     private void generateWizardingWorld(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
@@ -291,7 +321,7 @@ public class ModModelProvider extends ModelProvider {
                 TrinketItemRegistry.PORTKEY.get(), TrinketItemRegistry.PERUVIAN_DARKNESS_POWDER.get(), TrinketItemRegistry.DECOY_DETONATOR.get(),
                 TrinketItemRegistry.EXTENDABLE_EARS.get(), MiscItemRegistry.FLOO_POWDER.get());
         for (net.minecraft.world.item.Item item : wizardingItems) {
-            itemModels.generateFlatItem(item, ModelTemplates.FLAT_ITEM);
+            flatOrGeo(itemModels, item);
         }
 
         // Dittany and the wizard card moved off generateFlatItem: both now ship a hand-written
@@ -314,7 +344,7 @@ public class ModModelProvider extends ModelProvider {
         // Remembrall and the Omnioculars are objects you look *into*, which a flat sprite
         // cannot show. Both were already emitting a model into each resource root before
         // that, so declaring them also settles which one the game loads.
-        itemModels.declareCustomModelItem(TrinketItemRegistry.REMEMBRALL.get());
+        declaredOrGeo(itemModels, TrinketItemRegistry.REMEMBRALL.get());
         iconInSlotModelInHand(itemModels, TrinketItemRegistry.OMNI_OCULARS.get());
 
         // The brew ships a hand-written items/ definition: the same slot/hand dispatch as
@@ -341,7 +371,7 @@ public class ModModelProvider extends ModelProvider {
         itemModels.declareCustomModelItem(ConsumableItemRegistry.PEPPERMINT_TOAD.get());
         iconInSlotModelInHand(itemModels, DarkArtefactItemRegistry.INVISIBILITY_CLOAK.get());
         iconInSlotModelInHand(itemModels, DarkArtefactItemRegistry.DEATHLY_HALLOW_CLOAK.get());
-        iconInSlotGeoInHand(itemModels, TrinketItemRegistry.TIME_TURNER.get());
+        iconInSlotModelInHand(itemModels, TrinketItemRegistry.TIME_TURNER.get());
 
         // Same cube problem as the torches. All three are real LanternBlocks, so they
         // carry the HANGING property to dispatch on, and get both the standing and

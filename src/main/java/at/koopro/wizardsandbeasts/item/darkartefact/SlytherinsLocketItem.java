@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.item.darkartefact;
 
+import at.koopro.wizardsandbeasts.item.AnimatedItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
@@ -15,7 +16,7 @@ import java.util.function.Consumer;
  * canon singles out as wearing on whoever wears it, so it says so.
  */
 @NullMarked
-public class SlytherinsLocketItem extends HorcruxItem {
+public class SlytherinsLocketItem extends HorcruxItem implements AnimatedItem {
 
     public SlytherinsLocketItem(Properties properties) {
         super(properties, "Gryffindor's Sword, 1998");

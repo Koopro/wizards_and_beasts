@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.item.trinket;
 
+import at.koopro.wizardsandbeasts.item.AnimatedItem;
 import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
@@ -57,7 +58,22 @@ import java.util.function.Consumer;
  * and off again without losing the item for two seconds.
  */
 @NullMarked
-public class SneakoscopeItem extends Item {
+public class SneakoscopeItem extends Item implements AnimatedItem {
+
+    /**
+     * The model in hand follows the same reading the icon's {@code sneakoscope_spin} property does:
+     * still when calm, a slow uneasy turn, a spin, a shrieking whirl. It never idles on its own —
+     * the whole information content of the object is the difference between still and not still.
+     */
+    @Override
+    public String clipFor(ItemStack stack) {
+        return switch (SneakoscopeTuning.tier(threatCount(stack))) {
+            case CALM -> "idle";
+            case LOW -> "uneasy";
+            case MEDIUM -> "spin";
+            case HIGH -> "shriek";
+        };
+    }
 
     public SneakoscopeItem(Properties properties) {
         super(properties);

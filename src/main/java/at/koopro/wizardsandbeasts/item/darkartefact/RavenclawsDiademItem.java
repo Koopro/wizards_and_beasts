@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.item.darkartefact;
 
+import at.koopro.wizardsandbeasts.item.AnimatedItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
@@ -10,7 +11,7 @@ import org.jspecify.annotations.NullMarked;
 import java.util.function.Consumer;
 
 @NullMarked
-public class RavenclawsDiademItem extends HorcruxItem {
+public class RavenclawsDiademItem extends HorcruxItem implements AnimatedItem {
 
     public RavenclawsDiademItem(Properties properties) {
         super(properties, "Fiendfyre, 1998");

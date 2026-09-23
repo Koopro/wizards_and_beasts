@@ -27,6 +27,8 @@ class BrewTintTest {
             Path.of("src/main/resources/assets/wizards_and_beasts/models/item/brew.json");
     private static final Path DEFINITION =
             Path.of("src/main/resources/assets/wizards_and_beasts/items/brew.json");
+    private static final Path INVENTORY_MODEL =
+            Path.of("src/main/resources/assets/wizards_and_beasts/models/item/brew_inventory.json");
 
     /** Must match {@code BrewTintSource.ID}; hard-coded so a rename cannot quietly satisfy both sides. */
     private static final String TINT_TYPE = "wizards_and_beasts:brew";
@@ -82,28 +84,54 @@ class BrewTintTest {
         }
     }
 
-    @Test
-    void theItemDefinitionDeclaresTheBrewTintSource() throws IOException {
+    /**
+     * The definition is a slot/hand split: the flat icon where the bottle is looked at, the tinted
+     * cuboid in hand. Both branches carry the brew tint, or one of them renders every brew purple.
+     */
+    private static JsonObject branch(boolean inSlot) throws IOException {
         JsonObject model = read(DEFINITION).getAsJsonObject("model");
-        assertEquals("minecraft:model", model.get("type").getAsString());
-        assertEquals("wizards_and_beasts:item/brew", model.get("model").getAsString());
+        assertEquals("minecraft:select", model.get("type").getAsString());
+        assertEquals("minecraft:display_context", model.get("property").getAsString());
+        return inSlot
+                ? model.getAsJsonArray("cases").get(0).getAsJsonObject().getAsJsonObject("model")
+                : model.getAsJsonObject("fallback");
+    }
 
-        JsonArray tints = model.getAsJsonArray("tints");
-        assertEquals(1, tints.size(), "one tint entry, matching tintindex 0");
-        JsonObject tint = tints.get(0).getAsJsonObject();
+    private static void assertBrewTint(JsonObject tint) {
         assertEquals(TINT_TYPE, tint.get("type").getAsString());
         assertTrue(tint.has("default"), "the source needs a fallback for an unbottled or unsynced stack");
+        // RGB_COLOR_CODEC takes a packed RGB, not ARGB. A value with an alpha byte set would be
+        // rejected at load and the whole item definition would fail to parse.
+        int fallback = tint.get("default").getAsInt();
+        assertTrue(fallback >= 0 && fallback <= 0xFFFFFF,
+                "fallback must fit in 24 bits, got " + Integer.toHexString(fallback));
     }
 
     @Test
-    void theFallbackColourIsAValidOpaqueRgb() throws IOException {
-        // RGB_COLOR_CODEC takes a packed RGB, not ARGB. A value with an alpha byte set would be
-        // rejected at load and the whole item definition would fail to parse.
-        int fallback = read(DEFINITION).getAsJsonObject("model")
-                .getAsJsonArray("tints").get(0).getAsJsonObject()
-                .get("default").getAsInt();
-        assertTrue(fallback >= 0 && fallback <= 0xFFFFFF,
-                "fallback must fit in 24 bits, got " + Integer.toHexString(fallback));
+    void theHandBranchTintsTheCuboid() throws IOException {
+        JsonObject hand = branch(false);
+        assertEquals("wizards_and_beasts:item/brew", hand.get("model").getAsString());
+        JsonArray tints = hand.getAsJsonArray("tints");
+        assertEquals(1, tints.size(), "one tint entry, matching the cuboid's tintindex 0");
+        assertBrewTint(tints.get(0).getAsJsonObject());
+    }
+
+    @Test
+    void theSlotBranchTintsOnlyTheLiquidLayer() throws IOException {
+        // The icon is glass on layer0 and a greyscale liquid mask on layer1. The brew tint has to sit
+        // at index 1, and index 0 must be white, or the glass and cork take the brew's colour too.
+        JsonObject slot = branch(true);
+        assertEquals("wizards_and_beasts:item/brew_inventory", slot.get("model").getAsString());
+        JsonArray tints = slot.getAsJsonArray("tints");
+        assertEquals(2, tints.size(), "one tint per icon layer");
+        JsonObject glass = tints.get(0).getAsJsonObject();
+        assertEquals("minecraft:constant", glass.get("type").getAsString());
+        assertEquals(-1, glass.get("value").getAsInt(), "layer0 (glass) stays untinted");
+        assertBrewTint(tints.get(1).getAsJsonObject());
+
+        JsonObject textures = read(INVENTORY_MODEL).getAsJsonObject("textures");
+        assertEquals("wizards_and_beasts:item/brew", textures.get("layer0").getAsString());
+        assertEquals("wizards_and_beasts:item/brew_liquid", textures.get("layer1").getAsString());
     }
 
     @Test

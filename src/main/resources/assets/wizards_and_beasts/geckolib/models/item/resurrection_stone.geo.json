@@ -1,0 +1,88 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.resurrection_stone",
+        "texture_width": 32,
+        "texture_height": 16,
+        "visible_bounds_width": 1.31,
+        "visible_bounds_height": 1.38,
+        "visible_bounds_offset": [
+          0,
+          0.19,
+          0
+        ]
+      },
+      "bones": [
+        {
+          "name": "root",
+          "pivot": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "name": "stone",
+          "pivot": [
+            0.0,
+            7.0,
+            0.0
+          ],
+          "parent": "root",
+          "cubes": [
+            {
+              "origin": [
+                -2.5,
+                5.0,
+                -1.0
+              ],
+              "size": [
+                5,
+                4,
+                2
+              ],
+              "uv": [
+                0,
+                8
+              ]
+            },
+            {
+              "origin": [
+                -1.5,
+                4.0,
+                -1.0
+              ],
+              "size": [
+                3,
+                6,
+                2
+              ],
+              "uv": [
+                0,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -1.5,
+                5.0,
+                -2.0
+              ],
+              "size": [
+                3,
+                4,
+                4
+              ],
+              "uv": [
+                10,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
