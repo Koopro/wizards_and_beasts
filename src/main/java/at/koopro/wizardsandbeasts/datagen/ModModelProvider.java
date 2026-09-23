@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.neoforged.neoforge.client.model.generators.template.ExtendedModelTemplate;
 import net.neoforged.neoforge.client.model.generators.template.ExtendedModelTemplateBuilder;
+import software.bernie.geckolib.renderer.internal.GeckolibItemSpecialRenderer;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.block.location.DiagonAlleyBlocks;
@@ -222,6 +223,20 @@ public class ModModelProvider extends ModelProvider {
                 ItemModelUtils.plainModel(icon), ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(item))));
     }
 
+    /**
+     * {@link #iconInSlotModelInHand} with a GeckoLib model in hand instead of the cuboid — for an
+     * {@code AnimatedItem}. The cuboid stays as the special model's {@code base}: that is where the
+     * hand, head and frame transforms come from, and it was already tuned for an object this size.
+     */
+    private static void iconInSlotGeoInHand(ItemModelGenerators itemModels, Item item) {
+        Identifier icon = ModelTemplates.FLAT_ITEM.create(ModelLocationUtils.getModelLocation(item, "_inventory"),
+                TextureMapping.layer0(item), itemModels.modelOutput);
+        itemModels.itemModelOutput.accept(item, ItemModelGenerators.createFlatModelDispatch(
+                ItemModelUtils.plainModel(icon),
+                ItemModelUtils.specialModel(ModelLocationUtils.getModelLocation(item),
+                        new GeckolibItemSpecialRenderer.Unbaked())));
+    }
+
     private void generateWizardingWorld(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
         TextureMapping cobwebCross = TextureMapping.cross(Identifier.withDefaultNamespace("block/cobweb"));
         blockModels.createCrossBlockWithDefaultItem(ModBlocks.DEVILS_SNARE.get(),
@@ -326,7 +341,7 @@ public class ModModelProvider extends ModelProvider {
         itemModels.declareCustomModelItem(ConsumableItemRegistry.PEPPERMINT_TOAD.get());
         iconInSlotModelInHand(itemModels, DarkArtefactItemRegistry.INVISIBILITY_CLOAK.get());
         iconInSlotModelInHand(itemModels, DarkArtefactItemRegistry.DEATHLY_HALLOW_CLOAK.get());
-        iconInSlotModelInHand(itemModels, TrinketItemRegistry.TIME_TURNER.get());
+        iconInSlotGeoInHand(itemModels, TrinketItemRegistry.TIME_TURNER.get());
 
         // Same cube problem as the torches. All three are real LanternBlocks, so they
         // carry the HANGING property to dispatch on, and get both the standing and

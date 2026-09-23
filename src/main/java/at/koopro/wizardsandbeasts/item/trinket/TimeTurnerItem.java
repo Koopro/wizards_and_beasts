@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.item.trinket;
 
+import at.koopro.wizardsandbeasts.item.AnimatedItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -19,7 +20,7 @@ import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 
-public class TimeTurnerItem extends Item {
+public class TimeTurnerItem extends Item implements AnimatedItem {
 
     private static final int MAX_USE_TICKS = 72000;
     private static final int MIN_CHANNEL_TICKS = 16;
