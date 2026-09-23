@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.gui.character.widget;
 
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -9,10 +10,10 @@ import org.jspecify.annotations.NonNull;
 public final class SkillTreeBarWidget {
 
     private static final int BAR_H         = 6;
-    private static final int COLOR_LABEL   = 0xFFCCBB99;
-    private static final int COLOR_TRACK   = 0xFF1A1005;
-    private static final int COLOR_LOCKED  = 0xFF443322;
-    private static final int COLOR_RANK    = 0xFF887766;
+    private static final int COLOR_LABEL   = WizardsPalette.PAGE_INK;
+    private static final int COLOR_TRACK   = WizardsPalette.PAGE_SHADE;
+    private static final int COLOR_LOCKED  = WizardsPalette.PAGE_DEEP;
+    private static final int COLOR_RANK    = WizardsPalette.PAGE_INK_2;
 
     private SkillTreeBarWidget() {}
 

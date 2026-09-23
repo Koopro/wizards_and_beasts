@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.client.gui.character.tab;
 
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
+import at.koopro.wizardsandbeasts.client.gui.util.UiContrast;
 import at.koopro.wizardsandbeasts.client.ministry.state.ClientMinistryRecordState;
 import at.koopro.wizardsandbeasts.client.standing.state.ClientStandingState;
 import at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper;
@@ -35,21 +37,21 @@ public final class RecordTab implements CharacterTab {
 
     private static final String KEY = "gui.wizards_and_beasts.character_sheet.";
 
-    private static final int COLOR_SECTION = 0xFFDDB97A;
-    private static final int COLOR_LABEL   = 0xFF887766;
-    private static final int COLOR_VALUE   = 0xFFEEDDBB;
-    private static final int COLOR_MUTED   = 0xFF6E5C44;
-    private static final int COLOR_FINE    = 0xFFDDAA44;
+    private static final int COLOR_SECTION = WizardsPalette.PAGE_RUBRIC;
+    private static final int COLOR_LABEL   = WizardsPalette.PAGE_INK_2;
+    private static final int COLOR_VALUE   = WizardsPalette.PAGE_INK;
+    private static final int COLOR_MUTED   = WizardsPalette.PAGE_INK_3;
+    private static final int COLOR_FINE    = WizardsPalette.GILT_DARK;
     /** Same warm track/fill as the attribute meters, so the heat bar reads as furniture from this sheet. */
-    private static final int COLOR_BAR_TRACK = 0xFF3B2A16;
-    private static final int COLOR_BAR_FILL  = 0xFF886622;
+    private static final int COLOR_BAR_TRACK = WizardsPalette.PAGE_SHADE;
+    private static final int COLOR_BAR_FILL  = WizardsPalette.GILT_DARK;
 
     private static final int ROW_H = 9;
     private static final int BAR_H = 4;
     /** Bipolar meter: taller than the notoriety bar, because it carries a centre mark and a fill either way. */
     private static final int AXIS_BAR_H = 5;
     /** Centre tick: where an axis reads as genuinely uncommitted. */
-    private static final int COLOR_AXIS_CENTRE = 0xFF6E5C44;
+    private static final int COLOR_AXIS_CENTRE = WizardsPalette.PAGE_INK_2;
 
     private float scrollOffset = 0f;
     private int lastTotalH = 0;
@@ -131,12 +133,12 @@ public final class RecordTab implements CharacterTab {
         }
         if (ClientMinistryRecordState.wandHeld()) {
             g.drawString(font, Component.translatable(KEY + "record.wand_held").getString(),
-                    cx, cy, 0xFFCC4444, false);
+                    cx, cy, WizardsPalette.PAGE_BAD, false);
             cy += ROW_H;
         }
         if (record.fugitive()) {
             g.drawString(font, Component.translatable(KEY + "record.fugitive").getString(),
-                    cx, cy, 0xFFCC4444, false);
+                    cx, cy, WizardsPalette.PAGE_BAD, false);
             cy += ROW_H;
         }
         cy += 4;
@@ -218,7 +220,8 @@ public final class RecordTab implements CharacterTab {
             String band = axis.bandName(ClientStandingState.bandOf(axis)).getString();
             g.drawString(font, font.plainSubstrByWidth(name, w - font.width(band) - 6),
                     x, y, COLOR_VALUE, false);
-            g.drawString(font, band, x + w - font.width(band), y, axis.color(), false);
+            g.drawString(font, band, x + w - font.width(band), y,
+                    UiContrast.readableOn(axis.color(), WizardsPalette.PAGE), false);
             y += ROW_H;
 
             drawAxisMeter(g, x, y, w, ClientStandingState.fractionOf(axis), axis.color());
@@ -286,17 +289,17 @@ public final class RecordTab implements CharacterTab {
     }
 
     /**
-     * The band's own colour, lifted onto the parchment. {@link WantedLevel#color()} is picked for chat on
-     * black and its lower bands are too dark to read on this panel, so the tones are restated here at the
-     * same contrast the rest of the sheet uses.
+     * The band's own colour, restated as ink. {@link WantedLevel#color()} is picked for chat on black and
+     * is far too light for the page, so the tones are restated here: the same hue ladder, green through
+     * ochre to red, each dark enough to clear AA on the sheet.
      */
     private static int bandColor(WantedLevel level) {
         return switch (level) {
-            case CLEAR -> 0xFF8FBF6A;
-            case OF_INTEREST -> 0xFFD8C070;
-            case WANTED -> 0xFFDDAA44;
-            case DANGEROUS -> 0xFFCC7755;
-            case UNDESIRABLE -> 0xFFCC4444;
+            case CLEAR -> WizardsPalette.PAGE_GOOD;
+            case OF_INTEREST -> 0xFF5E4A0E;
+            case WANTED -> 0xFF7A4210;
+            case DANGEROUS -> WizardsPalette.PAGE_RUBRIC;
+            case UNDESIRABLE -> WizardsPalette.PAGE_BAD;
         };
     }
 }

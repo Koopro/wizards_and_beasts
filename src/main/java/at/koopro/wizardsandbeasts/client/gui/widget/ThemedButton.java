@@ -19,7 +19,7 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 /**
- * A button wearing this mod's leather-and-brass chrome instead of vanilla's grey stone.
+ * A button wearing this mod's parchment-and-ink chrome instead of vanilla's grey stone.
  *
  * <p>The screens that most need it are the ones a player meets first — the heritage gate is the
  * very first screen of a new character, and it was drawing a hand-built dossier panel with vanilla
@@ -42,15 +42,15 @@ public final class ThemedButton extends AbstractButton {
      */
     private final @Nullable Sprite icon;
     /**
-     * Which material the face is cut from: {@code null} is the shared leather-and-brass
+     * Which material the face is cut from: {@code null} is the shared parchment
      * {@code gui/theme/}, a name is one of the {@code gui/sprites/<skin>/} sets.
      *
-     * <p>A skinned screen with a leather button on it is the same mismatch this widget exists to
-     * fix, one level down — the skill web is night void and indigo, and a brass-on-leather button
-     * reads as borrowed from another screen.
+     * <p>A skinned screen with a default button on it is the same mismatch this widget exists to
+     * fix, one level down — the skill web is blue-grey vellum and indigo ink, and a warm parchment
+     * button reads as borrowed from another screen.
      */
     private final @Nullable String skin;
-    /** Label colour, so a dark skin is not asked to carry the leather palette's ink. */
+    /** Label colour, so each skin's face gets its own ink. */
     private final int textColor;
     private final int textColorOff;
     /**
@@ -66,7 +66,7 @@ public final class ThemedButton extends AbstractButton {
     public ThemedButton(int x, int y, int w, int h, @NonNull Component label, @NonNull Runnable action,
                         @Nullable Sprite icon) {
         this(x, y, w, h, label, action, icon, null,
-                WizardsPalette.TEXT, WizardsPalette.TEXT_DIM);
+                WizardsPalette.PAGE_INK, WizardsPalette.PAGE_INK_3);
     }
 
     /**

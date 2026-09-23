@@ -86,10 +86,17 @@ public final class WizardsMetrics {
 
     // ── Component metrics ──────────────────────────────────────────────────
 
-    /** Nine-slice border of the {@code gui/theme/} panel sprites. They are 32x32 cut on 8. */
-    public static final int PANEL_SPRITE_SIZE = 32;
+    /**
+     * Panel and inset sprites are 64x64 cut on 8, and their centre and edges are <em>tiled</em>,
+     * not stretched: the parchment grain is the whole material, and a stretched 16px centre turned
+     * it into blurry blocks. The grain repeats every 48px, the inner span, without a seam.
+     */
+    public static final int PANEL_SPRITE_SIZE = 64;
     public static final int PANEL_SPRITE_BORDER = 8;
-    /** Divider sprite is 32x8; scrollbar sprites are 8x32. */
+    /** Button cells (the controls atlas and each skin's button set) are 32x32 cut on 8, stretched. */
+    public static final int BUTTON_SPRITE_SIZE = 32;
+    /** Length of the divider (32x8) and scrollbar (8x32) sprites along their stretch axis. */
+    public static final int BAR_SPRITE_LENGTH = 32;
     public static final int DIVIDER_H = 8;
     public static final int SCROLLBAR_W = 8;
     /** A selectable list row. */

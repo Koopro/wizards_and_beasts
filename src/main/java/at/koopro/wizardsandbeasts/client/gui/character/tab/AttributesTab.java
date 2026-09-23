@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.client.gui.character.tab;
 
 import at.koopro.wizardsandbeasts.client.currency.state.ClientVaultDataState;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.character.StatIcons;
 import at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageDataState;
 import at.koopro.wizardsandbeasts.client.stats.ClientStatLevelUps;
@@ -42,30 +43,30 @@ public final class AttributesTab implements CharacterTab {
 
     private static final String KEY = "gui.wizards_and_beasts.character_sheet.";
 
-    private static final int COLOR_SECTION  = 0xFFDDB97A;
-    private static final int COLOR_LABEL    = 0xFF887766;
-    private static final int COLOR_VALUE    = 0xFFEEDDBB;
+    private static final int COLOR_SECTION  = WizardsPalette.PAGE_RUBRIC;
+    private static final int COLOR_LABEL    = WizardsPalette.PAGE_INK_2;
+    private static final int COLOR_VALUE    = WizardsPalette.PAGE_INK;
     /** Empty-bar track. Was {@code 0xFF0D0905}, near-black on the tile these rows replaced — an
      *  attribute sitting at zero looked like a row with no bar at all rather than an empty one,
      *  which is why Armor / Wand Affinity / Beast Resistance read as unfinished. */
-    private static final int COLOR_BAR_TRACK = 0xFF3B2A16;
-    private static final int COLOR_BAR_FILL  = 0xFF886622;
+    private static final int COLOR_BAR_TRACK = WizardsPalette.PAGE_SHADE;
+    private static final int COLOR_BAR_FILL  = WizardsPalette.GILT_DARK;
     /** Training hairline. Deliberately dimmer than {@link #COLOR_BAR_FILL} so the point a player
      *  has earned stays visually louder than the fraction they are working towards. */
-    private static final int COLOR_TRAINING_FILL = 0xFF5E4A22;
-    private static final int COLOR_PRODIGY   = 0xFFFFD700;
+    private static final int COLOR_TRAINING_FILL = WizardsPalette.GILT;
+    private static final int COLOR_PRODIGY   = WizardsPalette.PAGE_RUBRIC;
     /** The heritage ceiling, marked on the Power meter. Brass, so it reads as furniture on the bar. */
-    private static final int COLOR_CAP_TICK   = 0xFFDBA86D;
+    private static final int COLOR_CAP_TICK   = WizardsPalette.PAGE_INK_2;
     /** Effect-line tones. Off pure red/green to match the effects column: parchment ink, not an LED. */
-    private static final int COLOR_EFFECT_GOOD = 0xFF8FBF6A;
-    private static final int COLOR_EFFECT_BAD  = 0xFFCC7755;
+    private static final int COLOR_EFFECT_GOOD = WizardsPalette.PAGE_GOOD;
+    private static final int COLOR_EFFECT_BAD  = WizardsPalette.PAGE_BAD;
     /** Clear space kept between a truncated label and its right-aligned value. */
     private static final int LABEL_VALUE_GAP = 4;
-    private static final int COLOR_ELIGIBLE   = 0xFF55FF55;
-    private static final int COLOR_INELIGIBLE = 0xFFFF5555;
-    private static final int COLOR_REASON     = 0xFFAA0000;
-    private static final int COLOR_DETAIL     = 0xFFAAAAAA;
-    private static final int COLOR_WAND_NAME  = 0xFFFFFFFF;
+    private static final int COLOR_ELIGIBLE   = WizardsPalette.PAGE_GOOD;
+    private static final int COLOR_INELIGIBLE = WizardsPalette.PAGE_BAD;
+    private static final int COLOR_REASON     = WizardsPalette.PAGE_RUBRIC;
+    private static final int COLOR_DETAIL     = WizardsPalette.PAGE_INK_3;
+    private static final int COLOR_WAND_NAME  = WizardsPalette.PAGE_INK;
 
     /** One attribute row: label line plus its bar. */
     private static final int ATTR_ROW_H = 12;
@@ -243,7 +244,7 @@ public final class AttributesTab implements CharacterTab {
         float flash = ClientStatLevelUps.flashStrength(stat);
         if (flash > 0f) {
             int alpha = (int) (flash * 64f) << 24;
-            g.fill(x - 2, y - 1, x + w + 2, y + STAT_ROW_H - 2, alpha | 0x00DBA86D);
+            g.fill(x - 2, y - 1, x + w + 2, y + STAT_ROW_H - 2, alpha | (WizardsPalette.GILT & 0x00FFFFFF));
         }
 
         StatIcons.drawStat(g, stat, x, y);

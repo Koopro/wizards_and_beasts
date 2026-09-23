@@ -66,6 +66,53 @@ public final class McStylePanel {
         g.blit(RenderPipelines.GUI_TEXTURED, tex, x + b,   y + b,   midX, midY, iw, ih, inner, inner, sheetW, sheetH);
     }
 
+    /**
+     * Nine-slice a square texture with corners fixed and edges and centre <em>tiled</em> at 1:1.
+     *
+     * <p>For textured materials. The stretching form above is exact only for art that is uniform
+     * along its stretch axis — a flat gradient — and turns anything with grain into blurry blocks,
+     * which is why the leather panels could never carry a texture. The parchment sheets are drawn
+     * periodic in {@code ts - 2b}, so the repeats meet without a seam.
+     *
+     * <p>Costs one blit per repeat: a 300x200 panel on a 48px inner span is about forty, which is
+     * nothing next to the text a screen draws on top of it.
+     */
+    public static void drawNineSliceTiled(GuiGraphics g, Identifier tex, int x, int y, int w, int h,
+                                          int ts, int b) {
+        int inner = ts - 2 * b;
+        int iw = w - 2 * b;
+        int ih = h - 2 * b;
+        if (iw < 0 || ih < 0) {
+            // Smaller than its own corners: nothing to tile, let the stretching form squash it.
+            drawNineSlice(g, tex, x, y, w, h, ts, b);
+            return;
+        }
+        int far = ts - b;
+        blit1to1(g, tex, x,         y,         0,   0,   b, b, ts);
+        blit1to1(g, tex, x + w - b, y,         far, 0,   b, b, ts);
+        blit1to1(g, tex, x,         y + h - b, 0,   far, b, b, ts);
+        blit1to1(g, tex, x + w - b, y + h - b, far, far, b, b, ts);
+        for (int dx = 0; dx < iw; dx += inner) {
+            int span = Math.min(inner, iw - dx);
+            blit1to1(g, tex, x + b + dx, y,         b, 0,   span, b, ts);
+            blit1to1(g, tex, x + b + dx, y + h - b, b, far, span, b, ts);
+        }
+        for (int dy = 0; dy < ih; dy += inner) {
+            int span = Math.min(inner, ih - dy);
+            blit1to1(g, tex, x,         y + b + dy, 0,   b, b, span, ts);
+            blit1to1(g, tex, x + w - b, y + b + dy, far, b, b, span, ts);
+            for (int dx = 0; dx < iw; dx += inner) {
+                blit1to1(g, tex, x + b + dx, y + b + dy, b, b, Math.min(inner, iw - dx), span, ts);
+            }
+        }
+    }
+
+    /** One unscaled rectangle of a square {@code ts} sheet. */
+    private static void blit1to1(GuiGraphics g, Identifier tex, int x, int y, int u, int v,
+                                 int w, int h, int ts) {
+        g.blit(RenderPipelines.GUI_TEXTURED, tex, x, y, u, v, w, h, w, h, ts, ts);
+    }
+
     /** {@link VanillaGuiTextures#DEMO_BACKGROUND_TEXTURE} is 256×256; entire image is stretched to the panel rect. */
     private static final int DEMO_BG_SIZE = 256;
 
@@ -115,6 +162,8 @@ public final class McStylePanel {
 
     public static final Identifier THEME_PANEL = theme("panel.png");
     public static final Identifier THEME_PANEL_INSET = theme("panel_inset.png");
+    /** The same torn paper with one faint rule: for cards too short for the page border. */
+    public static final Identifier THEME_SLIP = theme("slip.png");
     public static final Identifier THEME_DIVIDER = theme("divider.png");
     public static final Identifier THEME_SCROLL_TRACK = theme("scrollbar_track.png");
     public static final Identifier THEME_SCROLL_THUMB = theme("scrollbar_thumb.png");
@@ -246,15 +295,26 @@ public final class McStylePanel {
     /** The same face in one of the {@link ButtonTone}s — one cell of the controls atlas. */
     public static void drawThemedButton(GuiGraphics g, int x, int y, int w, int h,
                                         ButtonTone tone, ControlState state) {
-        int ts = WizardsMetrics.PANEL_SPRITE_SIZE;
+        int ts = WizardsMetrics.BUTTON_SPRITE_SIZE;
         drawNineSlice(g, THEME_CONTROLS, x, y, w, h,
                 tone.col * ts, state.row * ts,
                 ts, WizardsMetrics.PANEL_SPRITE_BORDER, ATLAS_W, ATLAS_H);
     }
 
-    /** The default raised panel: leather field, brass rule, lit from the top-left. */
+    /** The default sheet: parchment, torn edge, double ink rule, gilt corner studs. */
     public static void drawThemedPanel(GuiGraphics g, int x, int y, int w, int h) {
-        drawNineSlice(g, THEME_PANEL, x, y, w, h,
+        drawNineSliceTiled(g, THEME_PANEL, x, y, w, h,
+                WizardsMetrics.PANEL_SPRITE_SIZE, WizardsMetrics.PANEL_SPRITE_BORDER);
+    }
+
+    /**
+     * A paper slip — the panel's torn sheet with one faint rule and no studs.
+     *
+     * <p>For cards too short to carry the page border: at 32px (a toast slot) the double rule's
+     * bottom pair lands at y 25 and 27, straight through a second line of text.
+     */
+    public static void drawThemedSlip(GuiGraphics g, int x, int y, int w, int h) {
+        drawNineSliceTiled(g, THEME_SLIP, x, y, w, h,
                 WizardsMetrics.PANEL_SPRITE_SIZE, WizardsMetrics.PANEL_SPRITE_BORDER);
     }
 
@@ -266,7 +326,7 @@ public final class McStylePanel {
      * inset reads as a second panel stacked on the first.
      */
     public static void drawThemedInset(GuiGraphics g, int x, int y, int w, int h) {
-        drawNineSlice(g, THEME_PANEL_INSET, x, y, w, h,
+        drawNineSliceTiled(g, THEME_PANEL_INSET, x, y, w, h,
                 WizardsMetrics.PANEL_SPRITE_SIZE, WizardsMetrics.PANEL_SPRITE_BORDER);
     }
 
@@ -279,7 +339,7 @@ public final class McStylePanel {
      */
     public static void drawDivider(GuiGraphics g, int x, int y, int w) {
         drawTexture(g, THEME_DIVIDER, x, y, w, WizardsMetrics.DIVIDER_H,
-                WizardsMetrics.PANEL_SPRITE_SIZE, WizardsMetrics.DIVIDER_H);
+                WizardsMetrics.BAR_SPRITE_LENGTH, WizardsMetrics.DIVIDER_H);
     }
 
     /**
@@ -291,9 +351,9 @@ public final class McStylePanel {
      */
     public static void drawScrollbar(GuiGraphics g, int x, int y, int trackH, int thumbY, int thumbH) {
         int w = WizardsMetrics.SCROLLBAR_W;
-        drawTexture(g, THEME_SCROLL_TRACK, x, y, w, trackH, w, WizardsMetrics.PANEL_SPRITE_SIZE);
+        drawTexture(g, THEME_SCROLL_TRACK, x, y, w, trackH, w, WizardsMetrics.BAR_SPRITE_LENGTH);
         if (thumbH > 0) {
-            drawTexture(g, THEME_SCROLL_THUMB, x, thumbY, w, thumbH, w, WizardsMetrics.PANEL_SPRITE_SIZE);
+            drawTexture(g, THEME_SCROLL_THUMB, x, thumbY, w, thumbH, w, WizardsMetrics.BAR_SPRITE_LENGTH);
         }
     }
 
@@ -305,7 +365,7 @@ public final class McStylePanel {
      */
     public static void drawRow(GuiGraphics g, int x, int y, int w, int h, boolean selected) {
         if (selected) {
-            g.fill(x, y, x + w, y + h, 0x33000000 | (WizardsPalette.SELECT & 0x00FFFFFF));
+            g.fill(x, y, x + w, y + h, WizardsPalette.PAGE_SELECT);
         }
     }
 
@@ -356,17 +416,16 @@ public final class McStylePanel {
         drawSkinButton(g, skin.folder(), x, y, w, h, state);
     }
 
-    /** {@link #drawSkinSeal} in a named material, tinted with the skin's own accent. */
+    /** {@link #drawSkinSeal} in a named material, in its own wax colours. */
     public static void drawSkinSeal(GuiGraphics g, WizardsPalette.GuiSkin skin, int x, int y) {
-        drawSkinSeal(g, skin.folder(), x, y, skin.accent());
+        drawSkinSeal(g, skin.folder(), x, y, 0xFFFFFFFF);
     }
 
     /**
      * The same seal under a caller's tint.
      *
-     * <p>The seal art is greyscale, so the tint is the whole of its colour — which is why a screen
-     * that wants the motif to answer something other than the material (the skill web dims it when
-     * a region is sealed) needs this rather than the accent-tinted form above.
+     * <p>The seal is coloured wax, so the tint multiplies over it: white leaves it as drawn, and a
+     * grey dims it — which is how the skill web shows a region as sealed.
      */
     public static void drawSkinSeal(GuiGraphics g, WizardsPalette.GuiSkin skin, int x, int y, int tint) {
         drawSkinSeal(g, skin.folder(), x, y, tint);
@@ -374,27 +433,27 @@ public final class McStylePanel {
 
     /** The raised panel in a skin — {@link #drawThemedPanel} in another material. */
     public static void drawSkinPanel(GuiGraphics g, String skin, int x, int y, int w, int h) {
-        drawNineSlice(g, skinSprite(skin, "panel"), x, y, w, h,
+        drawNineSliceTiled(g, skinSprite(skin, "panel"), x, y, w, h,
                 WizardsMetrics.PANEL_SPRITE_SIZE, WizardsMetrics.PANEL_SPRITE_BORDER);
     }
 
     /** The recessed well in a skin — inverted bevel, exactly as {@link #drawThemedInset} inverts it. */
     public static void drawSkinInset(GuiGraphics g, String skin, int x, int y, int w, int h) {
-        drawNineSlice(g, skinSprite(skin, "panel_inset"), x, y, w, h,
+        drawNineSliceTiled(g, skinSprite(skin, "panel_inset"), x, y, w, h,
                 WizardsMetrics.PANEL_SPRITE_SIZE, WizardsMetrics.PANEL_SPRITE_BORDER);
     }
 
     /** A horizontal rule in a skin, stretched to {@code w}. Rows only, so the stretch is exact. */
     public static void drawSkinDivider(GuiGraphics g, String skin, int x, int y, int w) {
         drawTexture(g, skinSprite(skin, "divider"), x, y, w, WizardsMetrics.DIVIDER_H,
-                WizardsMetrics.PANEL_SPRITE_SIZE, WizardsMetrics.DIVIDER_H);
+                WizardsMetrics.BAR_SPRITE_LENGTH, WizardsMetrics.DIVIDER_H);
     }
 
     /** A button face in a skin, on the same 32/8 frame as its panels. */
     public static void drawSkinButton(GuiGraphics g, String skin, int x, int y, int w, int h,
                                       ControlState state) {
         drawNineSlice(g, skinSprite(skin, "button" + state.suffix), x, y, w, h,
-                WizardsMetrics.PANEL_SPRITE_SIZE, WizardsMetrics.PANEL_SPRITE_BORDER);
+                WizardsMetrics.BUTTON_SPRITE_SIZE, WizardsMetrics.PANEL_SPRITE_BORDER);
     }
 
     /**
@@ -410,10 +469,10 @@ public final class McStylePanel {
                                          int trackH, int thumbY, int thumbH) {
         int w = WizardsMetrics.SCROLLBAR_W;
         drawTexture(g, skinSprite(skin, "scrollbar_track"), x, y, w, trackH,
-                w, WizardsMetrics.PANEL_SPRITE_SIZE);
+                w, WizardsMetrics.BAR_SPRITE_LENGTH);
         if (thumbH > 0) {
             drawTexture(g, skinSprite(skin, "scrollbar_thumb"), x, thumbY, w, thumbH,
-                    w, WizardsMetrics.PANEL_SPRITE_SIZE);
+                    w, WizardsMetrics.BAR_SPRITE_LENGTH);
         }
     }
 

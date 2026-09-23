@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.client.gui.character.widget;
 
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
+import at.koopro.wizardsandbeasts.client.gui.util.UiContrast;
 import at.koopro.wizardsandbeasts.spell.core.Proficiency;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
@@ -17,16 +19,16 @@ public final class SpellCardWidget {
     /** Three 4px pips on a 6px pitch. */
     private static final int PIP_BLOCK_W = 16;
 
-    private static final int COLOR_BG_CARD    = 0xFF1E1408;
-    private static final int COLOR_HI         = 0xFF3A2A14;
-    private static final int COLOR_SHADOW     = 0xFF0A0500;
-    private static final int COLOR_NAME       = 0xFFEEDDBB;
+    private static final int COLOR_BG_CARD    = WizardsPalette.PAGE_LIGHT;
+    private static final int COLOR_HI         = 0xFFF6ECD0;
+    private static final int COLOR_SHADOW     = WizardsPalette.PAGE_DEEP;
+    private static final int COLOR_NAME       = WizardsPalette.PAGE_INK;
 
     // Proficiency pip colors: NOVICE=grey, PROFICIENT=gold, MASTERED=red
-    private static final int COLOR_PIP_NONE   = 0xFF443322;
-    private static final int COLOR_PIP_NOVICE     = 0xFF887766;
-    private static final int COLOR_PIP_PROFICIENT = 0xFFCC9933;
-    private static final int COLOR_PIP_MASTERED   = 0xFFCC3322;
+    private static final int COLOR_PIP_NONE   = WizardsPalette.PAGE_DEEP;
+    private static final int COLOR_PIP_NOVICE     = WizardsPalette.PAGE_INK_3;
+    private static final int COLOR_PIP_PROFICIENT = WizardsPalette.GILT;
+    private static final int COLOR_PIP_MASTERED   = WizardsPalette.WAX;
 
     private SpellCardWidget() {}
 
@@ -66,13 +68,16 @@ public final class SpellCardWidget {
 
         // Category label
         String catLabel = formatCategory(spell.getCategory());
-        g.drawString(font, catLabel, x + 3, y + 13, spellCategoryColor(spell.getCategory()), false);
+        // Category hues are the spell families' own; they are darkened onto the card, not replaced.
+        g.drawString(font, catLabel, x + 3, y + 13,
+                UiContrast.readableOn(spellCategoryColor(spell.getCategory()), COLOR_BG_CARD), false);
 
         // Proficiency tier label
         String tierLabel = proficiency.name().charAt(0)
                 + proficiency.name().substring(1).toLowerCase();
         int tierW = font.width(tierLabel);
-        g.drawString(font, tierLabel, x + w - 3 - tierW, y + 13, tierLabelColor(proficiency), false);
+        g.drawString(font, tierLabel, x + w - 3 - tierW, y + 13,
+                UiContrast.readableOn(tierLabelColor(proficiency), COLOR_BG_CARD), false);
     }
 
     // ── internals ──────────────────────────────────────────────────────────
@@ -110,9 +115,9 @@ public final class SpellCardWidget {
 
     private static int tierLabelColor(@NonNull Proficiency p) {
         return switch (p) {
-            case NOVICE     -> 0xFF887766;
-            case PROFICIENT -> 0xFFCC9933;
-            case MASTERED   -> 0xFFCC3322;
+            case NOVICE     -> WizardsPalette.PAGE_INK_2;
+            case PROFICIENT -> WizardsPalette.GILT_DARK;
+            case MASTERED   -> WizardsPalette.PAGE_RUBRIC;
         };
     }
 }

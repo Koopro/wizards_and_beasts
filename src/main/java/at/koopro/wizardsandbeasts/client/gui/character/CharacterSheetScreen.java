@@ -2,8 +2,7 @@ package at.koopro.wizardsandbeasts.client.gui.character;
 
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
-import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
-import at.koopro.wizardsandbeasts.client.gui.util.GuiText;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.character.tab.AttributesTab;
 import at.koopro.wizardsandbeasts.client.gui.character.tab.CharacterTab;
 import at.koopro.wizardsandbeasts.client.gui.character.tab.RecordTab;
@@ -12,6 +11,8 @@ import at.koopro.wizardsandbeasts.client.gui.character.tab.SpellsTab;
 import at.koopro.wizardsandbeasts.client.gui.character.widget.HeritageBlockWidget;
 import at.koopro.wizardsandbeasts.client.gui.character.widget.PlayerModelViewport;
 import at.koopro.wizardsandbeasts.client.gui.character.widget.VitalsBarWidget;
+import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
+import at.koopro.wizardsandbeasts.client.gui.util.GuiText;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -54,14 +55,22 @@ public final class CharacterSheetScreen extends Screen {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     // Background dimensions
-    private static final int BG_W = 400;
-    private static final int BG_H = 220;
+    // Grown from 400x220 when the sheet became parchment: the frame's double rule runs 4-6px in, so
+    // the padding went from 8 to 12 and the title moved inside the frame. The columns keep the size
+    // they had.
+    private static final int BG_W = 408;
+    private static final int BG_H = 234;
 
     // Column split
-    private static final int TITLE_H = 14;
+    /** Frame, title line and the rule under it. */
+    private static final int TITLE_H = 24;
+    /** Baseline row of the title text, clear of the frame's rules at 4 and 6. */
+    private static final int TITLE_TEXT_Y = 10;
+    /** The divider under the title: its rules land at +3 and +5, so at 21 and 23. */
+    private static final int TITLE_RULE_Y = 18;
     private static final int TAB_H   = 14;
     /** Corner mark on a tab fed by a PREVIEW module. Amber: a caution, not an error. */
-    private static final int COLOR_PREVIEW_DOT = 0xFFE0A030;
+    private static final int COLOR_PREVIEW_DOT = WizardsPalette.GILT;
 
     /**
      * Three columns: the figure, the things that are true of the character whichever tab is open,
@@ -75,12 +84,10 @@ public final class CharacterSheetScreen extends Screen {
     private static final int FIGURE_W   = 96;
     private static final int IDENTITY_W = 92;
     private static final int COL_GAP    = 6;
-    // Spacing comes from WizardsMetrics rather than this file. The three values here were 7, 4
-    // and 20 -- two of them off any grid, and the 7 in particular was reverse-engineered from
-    // `gui_chrome.dossier_backdrop` painting its frame out to 6px. SPACE_M still clears that.
+    // Spacing comes from WizardsMetrics rather than this file.
 
-    /** Clearance from the sheet's outer edge, which the backdrop's own frame occupies to 6px. */
-    private static final int FRAME_PAD = WizardsMetrics.SPACE_M;
+    /** Clearance from the sheet's outer edge: the parchment frame's inner rule sits at 6px. */
+    private static final int FRAME_PAD = WizardsMetrics.SPACE_L;
     /** Clearance from the internal column divider, which is a single rule rather than a frame. */
     private static final int DIVIDER_PAD = WizardsMetrics.SPACE_S;
     /**
@@ -121,15 +128,16 @@ public final class CharacterSheetScreen extends Screen {
     /** Side inset of the model viewport, which narrows it toward the figure's own aspect. */
 
     // Palette
-    private static final int COLOR_DIVIDER  = 0xFF44321A;
-    private static final int COLOR_TITLE    = 0xFFFFEECC;
-    private static final int COLOR_TITLE_SUB = 0xFFAA9977;
-    private static final int COLOR_TAB_TXT = 0xFFCCBB99;
-    private static final int COLOR_EFFECT_TXT = 0xFFCCBB99;
-    private static final int COLOR_EFFECT_MORE = 0xFF887766;
-    /** Kept off pure red/green: this column is warm parchment ink, not a status LED. */
-    private static final int COLOR_EFFECT_GOOD = 0xFF8FBF6A;
-    private static final int COLOR_EFFECT_BAD  = 0xFFCC7755;
+    private static final int COLOR_DIVIDER  = WizardsPalette.PAGE_DEEP;
+    private static final int COLOR_TITLE    = WizardsPalette.PAGE_INK;
+    private static final int COLOR_TITLE_SUB = WizardsPalette.PAGE_INK_2;
+    private static final int COLOR_TAB_TXT = WizardsPalette.PAGE_INK;
+    private static final int COLOR_TAB_TXT_IDLE = WizardsPalette.PAGE_INK_2;
+    private static final int COLOR_EFFECT_TXT = WizardsPalette.PAGE_INK;
+    private static final int COLOR_EFFECT_MORE = WizardsPalette.PAGE_INK_2;
+    /** Kept off pure red/green: these are inks, not status LEDs. */
+    private static final int COLOR_EFFECT_GOOD = WizardsPalette.PAGE_GOOD;
+    private static final int COLOR_EFFECT_BAD  = WizardsPalette.PAGE_BAD;
 
     private static final int MAX_EFFECTS_SHOWN = 6;
     /** One text line per effect, matching the heritage rows above. */
@@ -217,10 +225,9 @@ public final class CharacterSheetScreen extends Screen {
         pose.translate(bgX * (1.0f - guiScale), bgY * (1.0f - guiScale));
         pose.scale(guiScale, guiScale);
 
-        // The sheet's background is the shared nine-sliced theme panel rather than the fixed
-        // 320x240 `character_sheet/background.png` it used to blit. That art could only ever be
-        // one size, so every change to the sheet's footprint meant regenerating it; the theme
-        // panel is cut from a 32px sprite and is exact at any size.
+        // The sheet's background is the shared theme panel rather than the fixed 320x240
+        // `character_sheet/background.png` it used to blit. That art could only ever be one size;
+        // the theme panel tiles its parchment and is exact at any size.
         McStylePanel.drawThemedPanel(g, bgX, bgY, BG_W, BG_H);
 
         // Title bar
@@ -269,14 +276,16 @@ public final class CharacterSheetScreen extends Screen {
     private void renderTitleBar(@NonNull GuiGraphics g) {
         Font font = minecraft.font;
 
-        g.fill(bgX, bgY, bgX + BG_W, bgY + TITLE_H, 0xFF1A1005);
-
-        g.drawString(font, this.title.getString(), bgX + 4, bgY + 3, COLOR_TITLE, false);
+        // Written on the sheet rather than on a bar painted over it: a dark title strip across the
+        // top would cover the frame's own rules.
+        g.drawString(font, this.title.getString(), bgX + FRAME_PAD, bgY + TITLE_TEXT_Y, COLOR_TITLE, false);
 
         String playerName = minecraft.player != null
                 ? minecraft.player.getName().getString() : "";
         int nameW = font.width(playerName);
-        g.drawString(font, playerName, bgX + BG_W - 4 - nameW, bgY + 3, COLOR_TITLE_SUB, false);
+        g.drawString(font, playerName, bgX + BG_W - FRAME_PAD - nameW, bgY + TITLE_TEXT_Y,
+                COLOR_TITLE_SUB, false);
+        McStylePanel.drawDivider(g, bgX + FRAME_PAD, bgY + TITLE_RULE_Y, BG_W - 2 * FRAME_PAD);
     }
 
     // ── Left column ────────────────────────────────────────────────────────
@@ -475,7 +484,8 @@ public final class CharacterSheetScreen extends Screen {
             // Shrink rather than spill: the tabs share the right column, so a longer
             // translation of "Attributes" would otherwise run out over its neighbours.
             String label = Component.translatable(tab.key).getString();
-            GuiText.drawFittedCentered(g, font, label, tx + 2, y + 3, tw - 4, COLOR_TAB_TXT);
+            GuiText.drawFittedCentered(g, font, label, tx + 2, y + 3, tw - 4,
+                    active ? COLOR_TAB_TXT : COLOR_TAB_TXT_IDLE);
 
             // A tab whose data comes from a PREVIEW module is marked, so a player reading half-
             // finished numbers knows they are half-finished rather than wrong. A corner dot rather

@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.gui.character.tab;
 
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.character.widget.SpellCardWidget;
 import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellDataState;
 import at.koopro.wizardsandbeasts.spell.core.Proficiency;
@@ -20,7 +21,7 @@ import java.util.Set;
 public final class SpellsTab implements CharacterTab {
 
     private static final int CARD_GAP    = 3;
-    private static final int COLOR_NONE  = 0xFF776655;
+    private static final int COLOR_NONE  = WizardsPalette.PAGE_INK_3;
 
     private float scrollOffset = 0f; // pixels scrolled from top
 

@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.gui.character.widget;
 
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageDataState;
 import at.koopro.wizardsandbeasts.client.spell.state.ClientSignatureSpellState;
 import at.koopro.wizardsandbeasts.heritage.ConditionOrigin;
@@ -7,10 +8,10 @@ import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageTraits;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
-import net.minecraft.network.chat.Component;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -23,9 +24,9 @@ import org.jspecify.annotations.Nullable;
  */
 public final class HeritageBlockWidget {
 
-    private static final int COLOR_HEADER = 0xFFDDB97A;
-    private static final int COLOR_VALUE  = 0xFFEEDDBB;
-    private static final int COLOR_NONE   = 0xFF776655;
+    private static final int COLOR_HEADER = WizardsPalette.PAGE_INK_2;
+    private static final int COLOR_VALUE  = WizardsPalette.PAGE_INK;
+    private static final int COLOR_NONE   = WizardsPalette.PAGE_INK_3;
     private static final int LINE_H       = 9;
     /** A label line, its value line, and a blank one so the four rows read as separate. */
     private static final int ROW_H        = LINE_H * 2 + 3;

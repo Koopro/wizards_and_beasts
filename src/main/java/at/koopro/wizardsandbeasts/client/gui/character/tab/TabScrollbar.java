@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.gui.character.tab;
 
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import net.minecraft.client.gui.GuiGraphics;
 import org.jspecify.annotations.NonNull;
 
@@ -16,8 +17,8 @@ public final class TabScrollbar {
     /** Column reserved on the right edge of a scrollable tab's content area. */
     public static final int WIDTH = 4;
 
-    private static final int COLOR_TRACK = 0xFF1A1005;
-    private static final int COLOR_THUMB = 0xFF886622;
+    private static final int COLOR_TRACK = WizardsPalette.PAGE_SHADE;
+    private static final int COLOR_THUMB = WizardsPalette.WAX;
     /** Floor on the thumb so a very long list still leaves something grabbable to look at. */
     private static final int MIN_THUMB_H = 8;
 

@@ -38,8 +38,10 @@ public final class UiContrast {
         if (ratio(base, bg) >= minRatio) {
             return base;
         }
-        // Dark grounds have room to push the ink lighter; light grounds have room to push it darker.
-        boolean lighten = luminance(bg) < 0.5;
+        // Go whichever way has more room. The pivot is where white and black contrast equally
+        // (luminance ~0.18), not 0.5: a mid-tone paper like the Hearth's soot sheet sits just under
+        // 0.5, and lightening on it tops out near 2:1 where darkening clears AA easily.
+        boolean lighten = ratio(0xFFFFFFFF, bg) > ratio(0xFF000000, bg);
         int candidate = base;
         // Walk t over 0..2: the first unit gains brightness with the hue intact, the second gives hue up
         // only as far as the ratio demands. Darkening is scaling, so it never needs the second unit.

@@ -121,17 +121,19 @@ public final class CyclerWidget<T> {
         int panelW = w - 2 * (ARROW_W + GAP);
         if (panelW <= 0) return;
 
+        // A button face, not a panel: at control height a panel's double rule runs through the
+        // label. The face is also the honest reading — the value is something you click through.
         if (skin == null) {
-            McStylePanel.drawThemedPanel(g, panelX, y, panelW, h);
+            McStylePanel.drawThemedButton(g, panelX, y, panelW, h, McStylePanel.ControlState.NORMAL);
         } else {
-            McStylePanel.drawSkinPanel(g, skin, panelX, y, panelW, h);
+            McStylePanel.drawSkinButton(g, skin, panelX, y, panelW, h, McStylePanel.ControlState.NORMAL);
         }
 
         String label = trim(font, labeller.apply(options.get(index)), panelW - 6);
         g.drawString(font, label,
                 panelX + (panelW - font.width(label)) / 2,
                 y + (h - font.lineHeight) / 2,
-                skin == null ? WizardsPalette.TEXT : skin.ink(), false);
+                skin == null ? WizardsPalette.PAGE_INK : skin.ink(), false);
     }
 
     private static String trim(Font font, String text, int maxWidth) {

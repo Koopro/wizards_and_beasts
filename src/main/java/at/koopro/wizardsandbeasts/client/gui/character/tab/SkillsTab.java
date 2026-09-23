@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.gui.character.tab;
 
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.character.widget.SkillTreeBarWidget;
 import at.koopro.wizardsandbeasts.client.skill.state.ClientSkillDataState;
 import at.koopro.wizardsandbeasts.module.Module;
@@ -21,13 +22,13 @@ import java.util.Map;
 /** Skills tab: one progress bar per region (all 8 {@link SkillTreeId}s), unlocked node chips, unspent points. */
 public final class SkillsTab implements CharacterTab {
 
-    private static final int COLOR_SECTION = 0xFFDDB97A;
-    private static final int COLOR_LABEL   = 0xFF887766;
-    private static final int COLOR_VALUE   = 0xFFEEDDBB;
-    private static final int COLOR_CHIP_BG = 0xFF2A1E0F;
-    private static final int COLOR_CHIP_HI = 0xFF44321A;
-    private static final int COLOR_CHIP_SH = 0xFF160C00;
-    private static final int COLOR_CHIP_TXT = 0xFFCCBB99;
+    private static final int COLOR_SECTION = WizardsPalette.PAGE_RUBRIC;
+    private static final int COLOR_LABEL   = WizardsPalette.PAGE_INK_2;
+    private static final int COLOR_VALUE   = WizardsPalette.PAGE_INK;
+    private static final int COLOR_CHIP_BG = WizardsPalette.PAGE_LIGHT;
+    private static final int COLOR_CHIP_HI = 0xFFF6ECD0;
+    private static final int COLOR_CHIP_SH = WizardsPalette.PAGE_DEEP;
+    private static final int COLOR_CHIP_TXT = WizardsPalette.PAGE_INK;
     private static final int CHIP_H        = 9;
     private static final int CHIP_PAD      = 2;
 

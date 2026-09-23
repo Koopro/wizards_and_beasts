@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.gui.character.widget;
 
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.Mth;
 import org.jspecify.annotations.NonNull;
@@ -8,10 +9,10 @@ import org.jspecify.annotations.NonNull;
 public final class VitalsBarWidget {
 
     private static final int BAR_H          = 5;
-    private static final int COLOR_LABEL    = 0xFFCCBB99;
-    private static final int COLOR_TRACK    = 0xFF1A1005;
-    private static final int COLOR_BAR_RED  = 0xFFCC3333;
-    private static final int COLOR_BAR_XP   = 0xFF55AA33;
+    private static final int COLOR_LABEL    = WizardsPalette.PAGE_INK_2;
+    private static final int COLOR_TRACK    = WizardsPalette.PAGE_SHADE;
+    private static final int COLOR_BAR_RED  = 0xFFB0302A;
+    private static final int COLOR_BAR_XP   = 0xFF4E8A2A;
 
     private VitalsBarWidget() {}
 
