@@ -1,6 +1,24 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "wizards_and_beasts:item/hand_of_glory"
+    "type": "minecraft:select",
+    "cases": [
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/hand_of_glory_inventory"
+        },
+        "when": [
+          "gui",
+          "ground",
+          "fixed",
+          "on_shelf"
+        ]
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "wizards_and_beasts:item/hand_of_glory"
+    },
+    "property": "minecraft:display_context"
   }
 }

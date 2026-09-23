@@ -1,6 +1,24 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "wizards_and_beasts:item/brass_scales"
+    "type": "minecraft:select",
+    "cases": [
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/brass_scales_inventory"
+        },
+        "when": [
+          "gui",
+          "ground",
+          "fixed",
+          "on_shelf"
+        ]
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "wizards_and_beasts:item/brass_scales"
+    },
+    "property": "minecraft:display_context"
   }
 }

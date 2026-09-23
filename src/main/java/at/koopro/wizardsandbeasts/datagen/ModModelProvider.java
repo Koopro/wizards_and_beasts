@@ -5,6 +5,8 @@ import java.util.Set;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.ModelProvider;
+import net.minecraft.client.data.models.model.ItemModelUtils;
+import net.minecraft.client.data.models.model.ModelLocationUtils;
 import net.minecraft.client.data.models.blockstates.MultiVariantGenerator;
 import net.minecraft.client.data.models.blockstates.PropertyDispatch;
 import net.minecraft.client.data.models.model.ModelTemplates;
@@ -14,6 +16,7 @@ import net.minecraft.client.data.models.model.TexturedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
@@ -92,7 +95,7 @@ public class ModModelProvider extends ModelProvider {
         itemModels.declareCustomModelItem(BroomItemRegistry.FIREBOLT.get());
         itemModels.declareCustomModelItem(BroomItemRegistry.FIREBOLT_SUPREME.get());
         itemModels.declareCustomModelItem(BroomItemRegistry.OAKSHAFT_79.get());
-        itemModels.declareCustomModelItem(BroomItemRegistry.BROOM_POLISH.get());
+        iconInSlotModelInHand(itemModels, BroomItemRegistry.BROOM_POLISH.get());
         itemModels.declareCustomModelItem(BroomItemRegistry.ENCHANTED_TWIG_BUNDLE.get());
         itemModels.declareCustomModelItem(MiscItemRegistry.MARAUDERS_MAP.get());
         itemModels.declareCustomModelItem(MiscItemRegistry.DELUMINATOR.get());
@@ -110,11 +113,10 @@ public class ModModelProvider extends ModelProvider {
 
         // Catalogued canon stubs. Looped rather than listed so adding one to
         // CanonItemRegistry cannot fail datagen by being forgotten here; the ones that have
-        // grown a real cuboid model are declared instead of flat-generated, because a stub
-        // emitted here would be a second, competing model file for the same item.
+        // grown a real cuboid model keep it for the hand and show their flat icon in slots.
         for (var stub : CanonItemRegistry.ALL) {
             if (HAND_MODELLED_CANON.contains(stub.getId().getPath())) {
-                itemModels.declareCustomModelItem(stub.get());
+                iconInSlotModelInHand(itemModels, stub.get());
             } else {
                 itemModels.generateFlatItem(stub.get(), ModelTemplates.FLAT_ITEM);
             }
@@ -132,19 +134,19 @@ public class ModModelProvider extends ModelProvider {
         itemModels.declareCustomModelItem(WandItemRegistry.THUNDERBIRD_TAIL_FEATHER.get());
         itemModels.declareCustomModelItem(ConsumableItemRegistry.ROUGAROU_HAIR.get());
         itemModels.declareCustomModelItem(ConsumableItemRegistry.WHITE_RIVER_MONSTER_SPINE.get());
-        itemModels.declareCustomModelItem(ConsumableItemRegistry.HIDEBEHIND_SHADOW_ESSENCE.get());
+        iconInSlotModelInHand(itemModels, ConsumableItemRegistry.HIDEBEHIND_SHADOW_ESSENCE.get());
         itemModels.declareCustomModelItem(ConsumableItemRegistry.HIDEBEHIND_CLAW.get());
         itemModels.declareCustomModelItem(ConsumableItemRegistry.GHOUL_SLIME.get());
         itemModels.declareCustomModelItem(ConsumableItemRegistry.GOLDEN_SNIDGET_FEATHER.get());
         itemModels.declareCustomModelItem(ConsumableItemRegistry.GRANIAN_HAIR.get());
-        itemModels.declareCustomModelItem(ConsumableItemRegistry.HORNED_SERPENT_GEM.get());
-        itemModels.declareCustomModelItem(ConsumableItemRegistry.PUKWUDGIE_VENOM_SAC.get());
+        iconInSlotModelInHand(itemModels, ConsumableItemRegistry.HORNED_SERPENT_GEM.get());
+        iconInSlotModelInHand(itemModels, ConsumableItemRegistry.PUKWUDGIE_VENOM_SAC.get());
         itemModels.declareCustomModelItem(ConsumableItemRegistry.YETI_FUR.get());
         itemModels.declareCustomModelItem(ConsumableItemRegistry.MATAGOT_ESSENCE.get());
 
         itemModels.generateFlatItem(MiscItemRegistry.TORN_SPELL_PAGE.get(), ModelTemplates.FLAT_ITEM);
-        itemModels.declareCustomModelItem(MiscItemRegistry.PARCHMENT.get());
-        itemModels.declareCustomModelItem(MiscItemRegistry.INK_BOTTLE.get());
+        iconInSlotModelInHand(itemModels, MiscItemRegistry.PARCHMENT.get());
+        iconInSlotModelInHand(itemModels, MiscItemRegistry.INK_BOTTLE.get());
 
         // Spawn eggs: 1.21.10 removed minecraft:item/template_spawn_egg, so every egg is a plain
         // flat item with its own generated texture (textures/item/<id>_spawn_egg.png).
@@ -162,7 +164,7 @@ public class ModModelProvider extends ModelProvider {
         for (var egg : at.koopro.wizardsandbeasts.registry.ModCreatures.SPAWN_EGGS.values()) {
             itemModels.generateFlatItem(egg.get(), ModelTemplates.FLAT_ITEM);
         }
-        itemModels.declareCustomModelItem(MiscItemRegistry.MINISTRY_HANDBOOK.get());
+        iconInSlotModelInHand(itemModels, MiscItemRegistry.MINISTRY_HANDBOOK.get());
 
         itemModels.declareCustomModelItem(CurrencyItemRegistry.KNUT.get());
         itemModels.declareCustomModelItem(CurrencyItemRegistry.SICKLE.get());
@@ -171,29 +173,29 @@ public class ModModelProvider extends ModelProvider {
         itemModels.generateFlatItem(CurrencyItemRegistry.DRAGOT.get(), net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
 
         itemModels.declareCustomModelItem(WandItemRegistry.WAND_BLANK.get());
-        itemModels.declareCustomModelItem(MiscItemRegistry.BESTIARY.get());
+        iconInSlotModelInHand(itemModels, MiscItemRegistry.BESTIARY.get());
         itemModels.generateFlatItem(CurrencyItemRegistry.COUNTERFEIT_GALLEON.get(), net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(ConsumableItemRegistry.CONJURED_SPOILED_FOOD.get(), net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(TrinketItemRegistry.MINISTRY_LICENSE_SCROLL.get(), net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
-        itemModels.declareCustomModelItem(DarkArtefactItemRegistry.RESURRECTION_STONE.get());
-        itemModels.declareCustomModelItem(DarkArtefactItemRegistry.RIDDLES_DIARY.get());
+        iconInSlotModelInHand(itemModels, DarkArtefactItemRegistry.RESURRECTION_STONE.get());
+        iconInSlotModelInHand(itemModels, DarkArtefactItemRegistry.RIDDLES_DIARY.get());
         itemModels.declareCustomModelItem(DarkArtefactItemRegistry.MARVOLO_GAUNTS_RING.get());
-        itemModels.declareCustomModelItem(DarkArtefactItemRegistry.SLYTHERINS_LOCKET.get());
-        itemModels.declareCustomModelItem(DarkArtefactItemRegistry.HUFFLEPUFFS_CUP.get());
-        itemModels.declareCustomModelItem(DarkArtefactItemRegistry.RAVENCLAWS_DIADEM.get());
+        iconInSlotModelInHand(itemModels, DarkArtefactItemRegistry.SLYTHERINS_LOCKET.get());
+        iconInSlotModelInHand(itemModels, DarkArtefactItemRegistry.HUFFLEPUFFS_CUP.get());
+        iconInSlotModelInHand(itemModels, DarkArtefactItemRegistry.RAVENCLAWS_DIADEM.get());
         itemModels.declareCustomModelItem(DarkArtefactItemRegistry.PHILOSOPHERS_STONE.get());
-        itemModels.declareCustomModelItem(TrinketItemRegistry.PENSIEVE.get());
-        itemModels.declareCustomModelItem(TrinketItemRegistry.TWO_WAY_MIRROR.get());
-        itemModels.declareCustomModelItem(TrinketItemRegistry.HAND_OF_GLORY.get());
-        itemModels.declareCustomModelItem(TrinketItemRegistry.DARK_MARK_BRAND.get());
-        itemModels.declareCustomModelItem(TrinketItemRegistry.HERMIONES_BEADED_BAG.get());
-        itemModels.declareCustomModelItem(TrinketItemRegistry.FOE_GLASS.get());
-        itemModels.declareCustomModelItem(TrinketItemRegistry.BLOOD_PACT_VIAL.get());
+        iconInSlotModelInHand(itemModels, TrinketItemRegistry.PENSIEVE.get());
+        iconInSlotModelInHand(itemModels, TrinketItemRegistry.TWO_WAY_MIRROR.get());
+        iconInSlotModelInHand(itemModels, TrinketItemRegistry.HAND_OF_GLORY.get());
+        iconInSlotModelInHand(itemModels, TrinketItemRegistry.DARK_MARK_BRAND.get());
+        iconInSlotModelInHand(itemModels, TrinketItemRegistry.HERMIONES_BEADED_BAG.get());
+        iconInSlotModelInHand(itemModels, TrinketItemRegistry.FOE_GLASS.get());
+        iconInSlotModelInHand(itemModels, TrinketItemRegistry.BLOOD_PACT_VIAL.get());
 
         // Lore tomes — hand-authored item models exist; declare so datagen validation passes.
-        itemModels.declareCustomModelItem(LoreItemRegistry.A_HISTORY_OF_MAGIC.get());
-        itemModels.declareCustomModelItem(LoreItemRegistry.HOGWARTS_A_HISTORY.get());
-        itemModels.declareCustomModelItem(LoreItemRegistry.RISE_AND_FALL_OF_THE_DARK_ARTS.get());
+        iconInSlotModelInHand(itemModels, LoreItemRegistry.A_HISTORY_OF_MAGIC.get());
+        iconInSlotModelInHand(itemModels, LoreItemRegistry.HOGWARTS_A_HISTORY.get());
+        iconInSlotModelInHand(itemModels, LoreItemRegistry.RISE_AND_FALL_OF_THE_DARK_ARTS.get());
 
         for (WoodSet woodSet : ModBlocks.ALL_WOOD_SETS) {
             generateWoodSet(blockModels, woodSet);
@@ -201,6 +203,23 @@ public class ModModelProvider extends ModelProvider {
 
         generateWizardingWorld(blockModels, itemModels);
         generateLocationBlocks(blockModels);
+    }
+
+    /**
+     * The flat 16x16 icon wherever an item is <em>looked at</em> — inventory slot, dropped on the
+     * ground, item frame, shelf — and its hand-written cuboid {@code models/item/<id>.json} in hand.
+     *
+     * <p>Vanilla's spyglass and trident do exactly this, through the same
+     * {@link ItemModelGenerators#createFlatModelDispatch}. These items used to show the cuboid
+     * everywhere, so every slot held a tiny tilted box and the drawn icon was never seen. The flat
+     * model is written as {@code <id>_inventory} because {@code <id>} is the cuboid, which lives in
+     * {@code src/main/resources} and is not ours to overwrite.
+     */
+    private static void iconInSlotModelInHand(ItemModelGenerators itemModels, Item item) {
+        Identifier icon = ModelTemplates.FLAT_ITEM.create(ModelLocationUtils.getModelLocation(item, "_inventory"),
+                TextureMapping.layer0(item), itemModels.modelOutput);
+        itemModels.itemModelOutput.accept(item, ItemModelGenerators.createFlatModelDispatch(
+                ItemModelUtils.plainModel(icon), ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(item))));
     }
 
     private void generateWizardingWorld(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
@@ -273,7 +292,7 @@ public class ModModelProvider extends ModelProvider {
         // competing single-model items/demiguise_hair.json over the top of it.
         itemModels.declareCustomModelItem(ConsumableItemRegistry.DEMIGUISE_HAIR.get());
 
-        itemModels.declareCustomModelItem(ConsumableItemRegistry.DITTANY.get());
+        iconInSlotModelInHand(itemModels, ConsumableItemRegistry.DITTANY.get());
         itemModels.declareCustomModelItem(ConsumableItemRegistry.FAMOUS_WIZARD_CARD.get());
 
         // Same reason, for the two that grew a cuboid model in tools/item_models_3d.py: the
@@ -281,32 +300,33 @@ public class ModModelProvider extends ModelProvider {
         // cannot show. Both were already emitting a model into each resource root before
         // that, so declaring them also settles which one the game loads.
         itemModels.declareCustomModelItem(TrinketItemRegistry.REMEMBRALL.get());
-        itemModels.declareCustomModelItem(TrinketItemRegistry.OMNI_OCULARS.get());
+        iconInSlotModelInHand(itemModels, TrinketItemRegistry.OMNI_OCULARS.get());
 
-        // The brew ships a hand-written items/ definition: a minecraft:model carrying a
-        // wizards_and_beasts:brew tint source, which is what paints the liquid the colour of whatever
-        // brew is in the bottle. It cannot be generated here — the tint source's MapCodec is registered
+        // The brew ships a hand-written items/ definition: the same slot/hand dispatch as
+        // iconInSlotModelInHand, but both branches carry a wizards_and_beasts:brew tint source,
+        // which is what paints the liquid the colour of whatever brew is in the bottle (the icon's
+        // liquid is its own greyscale layer1, so the glass stays untinted). It cannot be generated here — the tint source's MapCodec is registered
         // from client mod-bus code that runData never fires, so datagen has no way to serialise it. The
         // declaration stays so datagen does not emit a competing flat model; src/main wins the merge.
         itemModels.declareCustomModelItem(ConsumableItemRegistry.BREW.get());
         // Consumables use custom item models so they can point at vanilla textures while art is pending.
-        itemModels.declareCustomModelItem(ConsumableItemRegistry.BUTTERBEER.get());
+        iconInSlotModelInHand(itemModels, ConsumableItemRegistry.BUTTERBEER.get());
         itemModels.generateFlatItem(ConsumableItemRegistry.EMPTY_BUTTERBEER_MUG.get(),
                 net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
-        itemModels.declareCustomModelItem(ConsumableItemRegistry.PUMPKIN_JUICE.get());
+        iconInSlotModelInHand(itemModels, ConsumableItemRegistry.PUMPKIN_JUICE.get());
         itemModels.declareCustomModelItem(ConsumableItemRegistry.CHOCOLATE_FROG.get());
-        itemModels.declareCustomModelItem(ConsumableItemRegistry.BERTIE_BOTTS_EVERY_FLAVOUR_BEANS.get());
-        itemModels.declareCustomModelItem(ConsumableItemRegistry.DROOBLES_BEST_BLOWING_GUM.get());
-        itemModels.declareCustomModelItem(ConsumableItemRegistry.FIREWHISKY.get());
+        iconInSlotModelInHand(itemModels, ConsumableItemRegistry.BERTIE_BOTTS_EVERY_FLAVOUR_BEANS.get());
+        iconInSlotModelInHand(itemModels, ConsumableItemRegistry.DROOBLES_BEST_BLOWING_GUM.get());
+        iconInSlotModelInHand(itemModels, ConsumableItemRegistry.FIREWHISKY.get());
         itemModels.declareCustomModelItem(ConsumableItemRegistry.GILLYWEED.get());
         itemModels.declareCustomModelItem(ConsumableItemRegistry.DIRIGIBLE_PLUM.get());
-        itemModels.declareCustomModelItem(ConsumableItemRegistry.TREACLE_TART.get());
-        itemModels.declareCustomModelItem(ConsumableItemRegistry.PUMPKIN_PASTY.get());
+        iconInSlotModelInHand(itemModels, ConsumableItemRegistry.TREACLE_TART.get());
+        iconInSlotModelInHand(itemModels, ConsumableItemRegistry.PUMPKIN_PASTY.get());
         itemModels.declareCustomModelItem(ConsumableItemRegistry.FIZZING_WHIZZBEE.get());
         itemModels.declareCustomModelItem(ConsumableItemRegistry.PEPPERMINT_TOAD.get());
-        itemModels.declareCustomModelItem(DarkArtefactItemRegistry.INVISIBILITY_CLOAK.get());
-        itemModels.declareCustomModelItem(DarkArtefactItemRegistry.DEATHLY_HALLOW_CLOAK.get());
-        itemModels.declareCustomModelItem(TrinketItemRegistry.TIME_TURNER.get());
+        iconInSlotModelInHand(itemModels, DarkArtefactItemRegistry.INVISIBILITY_CLOAK.get());
+        iconInSlotModelInHand(itemModels, DarkArtefactItemRegistry.DEATHLY_HALLOW_CLOAK.get());
+        iconInSlotModelInHand(itemModels, TrinketItemRegistry.TIME_TURNER.get());
 
         // Same cube problem as the torches. All three are real LanternBlocks, so they
         // carry the HANGING property to dispatch on, and get both the standing and

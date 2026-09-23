@@ -1,6 +1,24 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "wizards_and_beasts:item/fantastic_beasts_and_where_to_find_them"
+    "type": "minecraft:select",
+    "cases": [
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/fantastic_beasts_and_where_to_find_them_inventory"
+        },
+        "when": [
+          "gui",
+          "ground",
+          "fixed",
+          "on_shelf"
+        ]
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "wizards_and_beasts:item/fantastic_beasts_and_where_to_find_them"
+    },
+    "property": "minecraft:display_context"
   }
 }

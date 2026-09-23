@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "wizards_and_beasts:item/brew",
+    "layer1": "wizards_and_beasts:item/brew_liquid"
+  }
+}

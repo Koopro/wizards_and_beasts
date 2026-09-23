@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "wizards_and_beasts:item/fantastic_beasts_and_where_to_find_them"
+  }
+}

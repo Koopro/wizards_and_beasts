@@ -1,12 +1,26 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "wizards_and_beasts:item/brew",
-    "tints": [
+    "type": "minecraft:select",
+    "property": "minecraft:display_context",
+    "cases": [
       {
-        "type": "wizards_and_beasts:brew",
-        "default": 9398742
+        "when": ["gui", "ground", "fixed", "on_shelf"],
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/brew_inventory",
+          "tints": [
+            { "type": "minecraft:constant", "value": -1 },
+            { "type": "wizards_and_beasts:brew", "default": 9398742 }
+          ]
+        }
       }
-    ]
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "wizards_and_beasts:item/brew",
+      "tints": [
+        { "type": "wizards_and_beasts:brew", "default": 9398742 }
+      ]
+    }
   }
 }
