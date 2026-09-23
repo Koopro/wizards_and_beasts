@@ -5,12 +5,12 @@
       "description": {
         "identifier": "geometry.marauders_map",
         "texture_width": 64,
-        "texture_height": 64,
-        "visible_bounds_width": 3,
-        "visible_bounds_height": 2,
+        "texture_height": 16,
+        "visible_bounds_width": 2.12,
+        "visible_bounds_height": 1.62,
         "visible_bounds_offset": [
           0,
-          0,
+          0.31,
           0
         ]
       },
@@ -18,34 +18,34 @@
         {
           "name": "root",
           "pivot": [
-            0,
-            0,
-            0
+            0.0,
+            0.0,
+            0.0
           ]
         },
         {
           "name": "sheet",
-          "parent": "root",
           "pivot": [
-            0,
-            0,
-            0
-          ]
+            0.0,
+            0.0,
+            0.0
+          ],
+          "parent": "root"
         },
         {
           "name": "panel_centre",
-          "parent": "sheet",
           "pivot": [
-            0,
-            0,
-            0
+            0.0,
+            0.0,
+            0.0
           ],
+          "parent": "sheet",
           "cubes": [
             {
               "origin": [
                 -3.0,
                 -5.0,
-                0
+                0.0
               ],
               "size": [
                 6,
@@ -61,18 +61,18 @@
         },
         {
           "name": "flap_left",
-          "parent": "sheet",
           "pivot": [
             -3.0,
-            0,
+            0.0,
             1.0
           ],
+          "parent": "sheet",
           "cubes": [
             {
               "origin": [
                 -9.0,
                 -5.0,
-                0
+                0.0
               ],
               "size": [
                 6,
@@ -80,26 +80,26 @@
                 1
               ],
               "uv": [
-                0,
-                11
+                14,
+                0
               ]
             }
           ]
         },
         {
           "name": "flap_right",
-          "parent": "sheet",
           "pivot": [
             3.0,
-            0,
-            1.5
+            0.0,
+            0.0
           ],
+          "parent": "sheet",
           "cubes": [
             {
               "origin": [
                 3.0,
                 -5.0,
-                0
+                0.0
               ],
               "size": [
                 6,
@@ -107,8 +107,8 @@
                 1
               ],
               "uv": [
-                0,
-                22
+                28,
+                0
               ]
             }
           ]

@@ -5,12 +5,12 @@
       "description": {
         "identifier": "geometry.nimbus_2001",
         "texture_width": 32,
-        "texture_height": 16,
+        "texture_height": 24,
         "visible_bounds_width": 1.19,
-        "visible_bounds_height": 2.0,
+        "visible_bounds_height": 2.5,
         "visible_bounds_offset": [
           0,
-          0.5,
+          0.75,
           0
         ]
       },
@@ -27,7 +27,7 @@
           "name": "broom",
           "pivot": [
             0.0,
-            6.0,
+            9.0,
             0.0
           ],
           "parent": "root",
@@ -35,12 +35,12 @@
             {
               "origin": [
                 -0.5,
-                7.0,
+                10.0,
                 -0.5
               ],
               "size": [
                 1,
-                9,
+                14,
                 1
               ],
               "uv": [
@@ -51,7 +51,7 @@
             {
               "origin": [
                 -1.0,
-                6.0,
+                9.0,
                 -1.0
               ],
               "size": [
@@ -59,10 +59,10 @@
                 1,
                 2
               ],
-              "inflate": 0.1,
+              "inflate": 0.15,
               "uv": [
                 8,
-                10
+                15
               ]
             }
           ]
@@ -71,7 +71,7 @@
           "name": "tail",
           "pivot": [
             0.0,
-            6.0,
+            9.0,
             0.0
           ],
           "parent": "broom",
@@ -79,28 +79,28 @@
             {
               "origin": [
                 -1.0,
-                4.0,
+                6.0,
                 -1.0
               ],
               "size": [
                 2,
-                2,
+                3,
                 2
               ],
               "uv": [
                 0,
-                10
+                15
               ]
             },
             {
               "origin": [
                 -1.5,
-                2.0,
+                3.0,
                 -1.5
               ],
               "size": [
                 3,
-                2,
+                3,
                 3
               ],
               "uv": [
@@ -116,7 +116,7 @@
               ],
               "size": [
                 3,
-                2,
+                3,
                 3
               ],
               "uv": [

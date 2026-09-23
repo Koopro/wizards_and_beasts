@@ -99,8 +99,8 @@ public class ModModelProvider extends ModelProvider {
         declaredOrGeo(itemModels, BroomItemRegistry.OAKSHAFT_79.get());
         iconInSlotModelInHand(itemModels, BroomItemRegistry.BROOM_POLISH.get());
         itemModels.declareCustomModelItem(BroomItemRegistry.ENCHANTED_TWIG_BUNDLE.get());
-        itemModels.declareCustomModelItem(MiscItemRegistry.MARAUDERS_MAP.get());
-        itemModels.declareCustomModelItem(MiscItemRegistry.DELUMINATOR.get());
+        iconInSlotModelInHand(itemModels, MiscItemRegistry.MARAUDERS_MAP.get());
+        iconInSlotModelInHand(itemModels, MiscItemRegistry.DELUMINATOR.get());
         itemModels.generateFlatItem(MiscItemRegistry.BLINDFOLD.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(MiscItemRegistry.DUELLING_DUMMY.get(), ModelTemplates.FLAT_ITEM);
 
@@ -168,9 +168,9 @@ public class ModModelProvider extends ModelProvider {
         }
         iconInSlotModelInHand(itemModels, MiscItemRegistry.MINISTRY_HANDBOOK.get());
 
-        itemModels.declareCustomModelItem(CurrencyItemRegistry.KNUT.get());
-        itemModels.declareCustomModelItem(CurrencyItemRegistry.SICKLE.get());
-        itemModels.declareCustomModelItem(CurrencyItemRegistry.GALLEON.get());
+        iconInSlotModelInHand(itemModels, CurrencyItemRegistry.KNUT.get());
+        iconInSlotModelInHand(itemModels, CurrencyItemRegistry.SICKLE.get());
+        iconInSlotModelInHand(itemModels, CurrencyItemRegistry.GALLEON.get());
         itemModels.generateFlatItem(CurrencyItemRegistry.LEPRECHAUN_GOLD.get(), net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(CurrencyItemRegistry.DRAGOT.get(), net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
 

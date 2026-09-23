@@ -1,9 +1,0 @@
-{
-  "model": {
-    "type": "minecraft:special",
-    "base": "wizards_and_beasts:item/sickle",
-    "model": {
-      "type": "geckolib:geckolib"
-    }
-  }
-}

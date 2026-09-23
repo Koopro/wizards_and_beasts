@@ -1,7 +1,6 @@
 package at.koopro.wizardsandbeasts.item.map;
 
-import at.koopro.wizardsandbeasts.item.GeoItemRenderers;
-import at.koopro.wizardsandbeasts.item.GeoItemBase;
+import at.koopro.wizardsandbeasts.item.AnimatedItem;
 import at.koopro.wizardsandbeasts.map.MapAtlas;
 import at.koopro.wizardsandbeasts.map.MapSession;
 import at.koopro.wizardsandbeasts.map.MapSessions;
@@ -9,6 +8,7 @@ import at.koopro.wizardsandbeasts.map.MaraudersMapAtlasStore;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.network.map.MapOpenS2CPayload;
+import net.minecraft.world.item.Item;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -28,7 +28,6 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jspecify.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoItem;
-import software.bernie.geckolib.animatable.client.GeoRenderProvider;
 import software.bernie.geckolib.animatable.manager.AnimatableManager;
 import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.animation.RawAnimation;
@@ -36,7 +35,6 @@ import software.bernie.geckolib.animation.RawAnimation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 /**
  * The artefact itself.
@@ -50,7 +48,7 @@ import java.util.function.Consumer;
  * <p>It also makes the map a genuinely shared object, which is the canon reading: hand it to
  * someone on the trusted list and they open the same parchment, already charted.
  */
-public class MaraudersMapItem extends GeoItemBase {
+public class MaraudersMapItem extends Item implements AnimatedItem {
 
     private static final String TAG_MAP_ID = "MapId";
     private static final String TAG_BOUND_X = "BoundX";
@@ -92,6 +90,8 @@ public class MaraudersMapItem extends GeoItemBase {
 
     public MaraudersMapItem(Properties properties) {
         super(properties);
+        // Unfolded and folded from the server with triggerAnim: needs the synced registration.
+        GeoItem.registerSyncedAnimatable(this);
     }
 
     @Override
@@ -266,11 +266,6 @@ public class MaraudersMapItem extends GeoItemBase {
     }
 
     // -- GeckoLib --
-
-    @Override
-    public void createGeoRenderer(Consumer<GeoRenderProvider> consumer) {
-        consumer.accept(GeoItemRenderers.lazy("at.koopro.wizardsandbeasts.client.map.MaraudersMapRenderer"));
-    }
 
     /**
      * One controller, four clips, and a default of "closed".

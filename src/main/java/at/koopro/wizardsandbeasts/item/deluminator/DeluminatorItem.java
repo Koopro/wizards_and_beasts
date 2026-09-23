@@ -1,10 +1,10 @@
 package at.koopro.wizardsandbeasts.item.deluminator;
 
-import at.koopro.wizardsandbeasts.item.GeoItemRenderers;
 import at.koopro.wizardsandbeasts.deluminator.DeluminatorBlockActions;
-import at.koopro.wizardsandbeasts.item.GeoItemBase;
+import at.koopro.wizardsandbeasts.item.AnimatedItem;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
+import net.minecraft.world.item.Item;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -28,7 +28,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import software.bernie.geckolib.animatable.GeoItem;
-import software.bernie.geckolib.animatable.client.GeoRenderProvider;
 import software.bernie.geckolib.animatable.manager.AnimatableManager;
 import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.animation.object.PlayState;
@@ -36,7 +35,7 @@ import software.bernie.geckolib.animation.RawAnimation;
 
 import java.util.function.Consumer;
 
-public class DeluminatorItem extends GeoItemBase {
+public class DeluminatorItem extends Item implements AnimatedItem {
 
     private static final String CONTROLLER = "deluminator_controller";
     private static final String TAG_OPEN = "Open";
@@ -51,11 +50,9 @@ public class DeluminatorItem extends GeoItemBase {
 
     public DeluminatorItem(Properties properties) {
         super(properties);
-    }
-
-    @Override
-    public void createGeoRenderer(Consumer<GeoRenderProvider> consumer) {
-        consumer.accept(GeoItemRenderers.lazy("at.koopro.wizardsandbeasts.client.deluminator.DeluminatorRenderer"));
+        // The lid is opened and closed from the server with triggerAnim, which only reaches the
+        // client for an animatable registered for sync.
+        GeoItem.registerSyncedAnimatable(this);
     }
 
     @Override

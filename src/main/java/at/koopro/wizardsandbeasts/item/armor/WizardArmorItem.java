@@ -31,7 +31,7 @@ import java.util.function.Consumer;
  * Returning {@code null} from that provider is the supported way to fall back to the vanilla layer.
  *
  * <p>The renderer is named as a string and built through {@link ClientClassBridge} rather than
- * referenced directly, the same way {@code CoinItem} reaches {@code CoinRenderer}: this class is
+ * referenced directly, the same way {@code AnimatedItem} reaches its renderer: this class is
  * common code and loads on a dedicated server, where the client render classes do not exist.
  */
 public abstract class WizardArmorItem extends GeoItemBase {
