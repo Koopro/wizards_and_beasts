@@ -74,6 +74,7 @@ public final class WizardsAndBeastsGameTests {
         MerpeopleBreathTests.contribute(registrar);
         CorruptionTollTests.contribute(registrar);
         SpellLawLearningTests.contribute(registrar);
+        CorruptionLifecycleTests.contribute(registrar);
         EducationWebTests.contribute(registrar);
         VampireBloodTests.contribute(registrar);
         ChoranaptyxisTests.contribute(registrar);

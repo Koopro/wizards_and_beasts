@@ -51,7 +51,6 @@ public class WizardsAndBeastsCommands {
             PlayerStateSyncService.syncFullLoginState(player, needsSelection);
             OWLExaminationHandler.syncToPlayer(player);
             PlayerStatsSyncPayload.syncToPlayer(player);
-            DarkCorruptionService.syncDisplay(player);
             // Outlines are broadcast on change, so a player joining afterwards would otherwise never
             // learn about anyone already outlined.
             EntityOutlineService.syncToPlayer(player);
@@ -81,7 +80,6 @@ public class WizardsAndBeastsCommands {
             WandCastSessions.abort(player);
             PlayerStateSyncService.syncFullLoginState(player, false);
             PlayerStatsSyncPayload.syncToPlayer(player);
-            DarkCorruptionService.syncDisplay(player);
         }
     }
 

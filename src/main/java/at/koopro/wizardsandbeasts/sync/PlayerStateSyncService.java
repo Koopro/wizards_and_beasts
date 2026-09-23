@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.sync;
 
+import at.koopro.wizardsandbeasts.corruption.DarkCorruptionService;
 import at.koopro.wizardsandbeasts.form.FormSystemAPI;
 import at.koopro.wizardsandbeasts.form.sense.FormSenseService;
 import at.koopro.wizardsandbeasts.form.sense.FormSenses;
@@ -70,6 +71,12 @@ public final class PlayerStateSyncService {
         if (HeritageAPI.hasHeritageSelected(player)) {
             HeritageAPI.applyStats(player);
         }
+        // The attachment persists and copies on death; the syncable Attribute the character sheet reads
+        // does not, and starts at its default on a rebuilt player entity. Mirroring here rather than at
+        // each call site is what fixes the dimension change: login and respawn each remembered to call
+        // syncDisplay themselves and the portal path never did, so stepping through one left the sheet
+        // reading zero while the server still held the real figure.
+        DarkCorruptionService.syncDisplay(player);
         FormSystemAPI.reapplyCurrentForm(player);
         // On the same tick as the form, not up to a refresh interval later. FormSenseService's own
         // sweep would catch this within a hundred ticks, which is fine for a sense you merely see
