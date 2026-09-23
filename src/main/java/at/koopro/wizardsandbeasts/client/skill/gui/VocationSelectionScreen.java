@@ -10,7 +10,6 @@ import at.koopro.wizardsandbeasts.client.skill.state.ClientVocationCache;
 import at.koopro.wizardsandbeasts.network.skill.VocationCommitC2SPayload;
 import at.koopro.wizardsandbeasts.skill.vocation.VocationDefinition;
 import at.koopro.wizardsandbeasts.skill.vocation.VocationRegistry;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -116,9 +115,12 @@ public class VocationSelectionScreen extends Screen {
     }
 
     /**
-     * Re-colours the declared vocation's label in place. Done every frame rather than by rebuilding the
+     * Marks the declared vocation's label in place. Done every frame rather than by rebuilding the
      * widgets on click: the sync answer lands a tick or more after the packet leaves, so a rebuild fired
      * from the press handler still reads the stale cache.
+     *
+     * <p>The mark is in the text, not a colour: {@code ThemedButton} draws its label in the chart's own
+     * ink and drops component styling, so the gold this used to apply never rendered at all.
      */
     private void refreshLabels() {
         Identifier active = activeVocation();
@@ -126,7 +128,7 @@ public class VocationSelectionScreen extends Screen {
             VocationDefinition vocation = vocations.get(i);
             boolean current = vocation.id().equals(active);
             vocationButtons.get(i).setMessage(current
-                    ? vocation.displayName().copy().withStyle(ChatFormatting.GOLD)
+                    ? Component.literal("» ").append(vocation.displayName()).append(" «")
                     : vocation.displayName());
         }
     }
