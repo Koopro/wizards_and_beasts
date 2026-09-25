@@ -29,5 +29,11 @@
   },
   "temperament": {
     "backfires_in_foreign_hands": true
+  },
+  "appearance": {
+    "tint": "#9C6B54",
+    "handle": "wizards_and_beasts:twisted",
+    "shaft": "wizards_and_beasts:knotted",
+    "tip": "wizards_and_beasts:split"
   }
 }

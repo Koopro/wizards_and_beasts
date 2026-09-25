@@ -6,8 +6,6 @@ import at.koopro.wizardsandbeasts.item.wand.MorphWandItem;
 import at.koopro.wizardsandbeasts.item.wand.WandBlankItem;
 import at.koopro.wizardsandbeasts.item.wand.WandCoreMaterialItem;
 import at.koopro.wizardsandbeasts.item.wand.WandItem;
-import at.koopro.wizardsandbeasts.wand.WandComponents;
-import at.koopro.wizardsandbeasts.wand.customization.WandConfiguration;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -15,9 +13,9 @@ import net.neoforged.neoforge.registries.DeferredItem;
 public final class WandItemRegistry {
 
     public static final DeferredItem<WandItem> WAND =
-            ModItems.ITEMS.registerItem("wand", props -> new WandItem(props
-                    .stacksTo(1)
-                    .component(WandComponents.WAND_CONFIGURATION.get(), WandConfiguration.DEFAULT)));
+            // No default wand configuration: an absent component means "shaped by its wood"
+            // (WandAppearance.configuration). A default would pin every wand to the base shape.
+            ModItems.ITEMS.registerItem("wand", props -> new WandItem(props.stacksTo(1)));
 
     public static final DeferredItem<WandBlankItem> WAND_BLANK =
             ModItems.ITEMS.registerItem("wand_blank", props -> new WandBlankItem(props.stacksTo(1)));

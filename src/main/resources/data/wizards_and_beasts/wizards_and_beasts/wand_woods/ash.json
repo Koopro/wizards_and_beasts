@@ -28,5 +28,11 @@
     "extra_wins": 1,
     "passed_on_power": 0.8,
     "foreign_hand_power": 0.8
+  },
+  "appearance": {
+    "tint": "#CFC3A4",
+    "handle": "wizards_and_beasts:smooth",
+    "shaft": "wizards_and_beasts:straight",
+    "tip": "wizards_and_beasts:pointed"
   }
 }

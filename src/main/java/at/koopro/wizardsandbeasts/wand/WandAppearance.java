@@ -1,6 +1,14 @@
 package at.koopro.wizardsandbeasts.wand;
 
+import at.koopro.wizardsandbeasts.wand.customization.WandConfiguration;
+import at.koopro.wizardsandbeasts.wand.customization.WandSlot;
+import at.koopro.wizardsandbeasts.wand.registry.WandDatapackRegistries;
+import at.koopro.wizardsandbeasts.wand.registry.WandWoodAppearance;
+import at.koopro.wizardsandbeasts.wand.registry.WandWoodDefinition;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -8,25 +16,22 @@ import org.jspecify.annotations.Nullable;
 import java.util.Map;
 
 /**
- * What a wand looks like, derived from the wood it is made of.
+ * What a wand looks like, derived from the wood it is made of: its colour and its silhouette.
  *
- * <h2>The problem</h2>
- * <p>Every wand in the mod rendered the same sprite. {@code WandRenderer} branched on exactly one
- * thing — Elder Wand or not — so ten woods and three cores shared a single texture, and two wands
- * lying side by side in an inventory were indistinguishable until you hovered both and read the
- * tooltips. A wand is the most personal object in the mod and the one a player owns for the whole
- * game; it could not be told apart from anyone else's.
+ * <p>Both come from the wood's datapack entry ({@link WandWoodAppearance} on
+ * {@link WandWoodDefinition}), which the client already has: the wood registry is synced. This used
+ * to be a hard-coded table of ten tints beside that registry, and the silhouette was not derived at
+ * all -- every wand made in play rendered the base wand's classic handle, straight shaft and pointed
+ * tip, so ten woods differed only in colour.
  *
  * <h2>Why a tint rather than ten sprites</h2>
- * <p>A tint is data-driven for free. Wands carry their wood as an {@code Identifier} component, not
- * an enum, so a datapack can add a wood tomorrow — ten hand-drawn sprites would leave that wood
- * looking like whichever one the renderer fell back to, while a tint gives it a colour derived from
- * its own id. The canon ten get hand-picked colours drawn from the real timber; anything else gets a
- * deterministic hash, kept in a narrow band of warm wood hues so an unknown wood still reads as
+ * <p>A tint is data-driven for free: wands carry their wood as an {@code Identifier} component, not an
+ * enum, so a datapack can add a wood tomorrow. A wood that names no tint gets a deterministic colour
+ * derived from its id, kept in a narrow band of warm timber hues so an unknown wood still reads as
  * wood and not as a bug.
  *
- * <p>Shared rather than client-only so the same colour can key a tooltip or a GUI later without a
- * second table drifting from this one.
+ * <p>Shared rather than client-only so a tooltip or GUI can key off the same colour without a second
+ * table drifting from this one.
  */
 @NullMarked
 public final class WandAppearance {
@@ -35,39 +40,69 @@ public final class WandAppearance {
     public static final int UNTINTED = 0xFFFFFFFF;
 
     /**
-     * The canon ten, coloured from the real timber rather than from a palette ramp: elder is pale
-     * grey-white, yew almost black-red, holly a light warm cream, vine a green-tinged olive.
-     * A player who learns "mine is the dark one" is learning something true about the wand.
+     * A wand with no wood at all. The sheet is painted light and neutral so each wood's tint can
+     * colour it; left untinted it would read as bare bleached wood, so a woodless wand gets the
+     * classic warm brown the sheet used to be painted in.
      */
-    private static final Map<String, Integer> CANON_WOOD_TINTS = Map.ofEntries(
-            Map.entry("elder", 0xFFD9D2C2),
-            Map.entry("yew", 0xFF5A3A32),
-            Map.entry("holly", 0xFFE8D9B8),
-            Map.entry("rowan", 0xFFC98F72),
-            Map.entry("ash", 0xFFCFC3A4),
-            Map.entry("vine", 0xFF8E9B62),
-            Map.entry("walnut", 0xFF6B4A32),
-            Map.entry("willow", 0xFFBFA97E),
-            Map.entry("hawthorn", 0xFF9C6B54),
-            Map.entry("blackthorn", 0xFF3E3330));
+    public static final int NO_WOOD_TINT = 0xFFA9784B;
 
     private WandAppearance() {}
 
-    /**
-     * ARGB multiplier for a wand of this wood, or {@link #UNTINTED} when the wood is unknown and no
-     * sensible colour can be derived.
-     */
-    public static int woodTint(@Nullable Identifier wood) {
-        if (wood == null) {
-            return UNTINTED;
+    /** The wood's datapack entry, or null when there is no registry to ask or the wood is unknown. */
+    public static @Nullable WandWoodDefinition definition(HolderLookup.@Nullable Provider registries,
+                                                         @Nullable Identifier wood) {
+        if (registries == null || wood == null) {
+            return null;
         }
-        Integer canon = CANON_WOOD_TINTS.get(wood.getPath());
-        return canon != null ? canon : derivedTint(wood);
+        return registries.lookup(WandDatapackRegistries.WAND_WOOD_REGISTRY)
+                .flatMap(woods -> woods.get(ResourceKey.create(WandDatapackRegistries.WAND_WOOD_REGISTRY, wood)))
+                .map(Holder::value)
+                .orElse(null);
+    }
+
+    /**
+     * ARGB multiplier for a wand of this wood: the wood's own tint, a colour derived from its id when
+     * it names none, or {@link #NO_WOOD_TINT} for a wand with no wood at all.
+     */
+    public static int woodTint(@Nullable WandWoodDefinition definition, @Nullable Identifier wood) {
+        if (wood == null) {
+            return NO_WOOD_TINT;
+        }
+        if (definition != null && definition.appearance().tint().isPresent()) {
+            return definition.appearance().tint().get();
+        }
+        return derivedTint(wood);
     }
 
     /** Convenience for render and tooltip call sites that hold the stack. */
-    public static int woodTint(ItemStack stack) {
-        return woodTint(WandComponents.getWood(stack));
+    public static int woodTint(HolderLookup.@Nullable Provider registries, ItemStack stack) {
+        Identifier wood = WandComponents.getWood(stack);
+        return woodTint(definition(registries, wood), wood);
+    }
+
+    /**
+     * Which handle, shaft and tip a wand shows. An explicit configuration on the stack (set by
+     * {@code /wandb wand config}) is kept exactly; otherwise the wood's modules are laid over the base
+     * wand, so a slot the wood leaves open keeps the base wand's choice.
+     */
+    public static WandConfiguration configuration(HolderLookup.@Nullable Provider registries, ItemStack stack) {
+        WandConfiguration explicit = stack.get(WandComponents.WAND_CONFIGURATION.get());
+        if (explicit != null) {
+            return explicit;
+        }
+        return configurationFor(definition(registries, WandComponents.getWood(stack)));
+    }
+
+    /** The base wand with this wood's modules laid over it. */
+    public static WandConfiguration configurationFor(@Nullable WandWoodDefinition definition) {
+        WandConfiguration config = WandConfiguration.DEFAULT;
+        if (definition == null) {
+            return config;
+        }
+        for (Map.Entry<WandSlot, Identifier> module : definition.appearance().modules().entrySet()) {
+            config = config.withModule(module.getKey(), module.getValue());
+        }
+        return config;
     }
 
     /**

@@ -26,5 +26,11 @@
   },
   "temperament": {
     "extra_wins": -1
+  },
+  "appearance": {
+    "tint": "#D9D2C2",
+    "handle": "wizards_and_beasts:bulbous",
+    "shaft": "wizards_and_beasts:nodular",
+    "tip": "wizards_and_beasts:blunt"
   }
 }

@@ -26,5 +26,11 @@
   },
   "temperament": {
     "bond_growth": 1.25
+  },
+  "appearance": {
+    "tint": "#8E9B62",
+    "handle": "wizards_and_beasts:vine",
+    "shaft": "wizards_and_beasts:twining",
+    "tip": "wizards_and_beasts:spiralled"
   }
 }

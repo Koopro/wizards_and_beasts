@@ -27,5 +27,11 @@
   },
   "temperament": {
     "loyal_cooldown": 0.95
+  },
+  "appearance": {
+    "tint": "#6B4A32",
+    "handle": "wizards_and_beasts:carved",
+    "shaft": "wizards_and_beasts:segmented",
+    "tip": "wizards_and_beasts:chisel"
   }
 }

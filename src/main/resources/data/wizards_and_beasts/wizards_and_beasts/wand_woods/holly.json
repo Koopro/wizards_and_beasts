@@ -27,5 +27,11 @@
     "category_damage_bonus": {
       "defense": 0.08
     }
+  },
+  "appearance": {
+    "tint": "#E8D9B8",
+    "handle": "wizards_and_beasts:ribbed",
+    "shaft": "wizards_and_beasts:tapered",
+    "tip": "wizards_and_beasts:pointed"
   }
 }

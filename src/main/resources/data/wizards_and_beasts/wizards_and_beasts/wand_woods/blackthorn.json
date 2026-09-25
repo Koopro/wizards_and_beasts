@@ -28,5 +28,11 @@
   "temperament": {
     "bond_needs_danger": true,
     "extra_wins": 1
+  },
+  "appearance": {
+    "tint": "#3E3330",
+    "handle": "wizards_and_beasts:gnarled",
+    "shaft": "wizards_and_beasts:barked",
+    "tip": "wizards_and_beasts:claw"
   }
 }

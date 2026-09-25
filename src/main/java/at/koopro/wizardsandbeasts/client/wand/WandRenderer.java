@@ -9,12 +9,12 @@ import at.koopro.wizardsandbeasts.spell.protego.ProtegoTier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
 import at.koopro.wizardsandbeasts.wand.WandAppearance;
-import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.customization.WandConfiguration;
 import at.koopro.wizardsandbeasts.wand.customization.WandModule;
 import at.koopro.wizardsandbeasts.wand.customization.WandModuleRegistry;
 import at.koopro.wizardsandbeasts.wand.customization.WandSlot;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
@@ -38,15 +38,6 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
 
     public static final DataTicket<Boolean> IS_ELDER_WAND =
             DataTicket.create("is_elder_wand", Boolean.class);
-
-    /**
-     * ARGB tint for the wand's wood, from {@link WandAppearance}.
-     *
-     * <p>Read through render-state rather than off the stack at render time, matching the
-     * GeckoLib-5 contract the rest of this renderer already follows.
-     */
-    public static final DataTicket<Integer> WOOD_TINT =
-            DataTicket.create("wand_wood_tint", Integer.class);
 
     /**
      * Entity id of whoever holds this wand; absent when nobody does (inventory icon, item frame,
@@ -73,20 +64,25 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
                                           float partialTick) {
         super.captureDefaultRenderState(animatable, renderData, renderState, partialTick);
         ItemStack stack = renderData.itemStack();
-        WandConfiguration config = stack.getOrDefault(
-                WandComponents.WAND_CONFIGURATION.get(), WandConfiguration.DEFAULT);
-        renderState.addGeckolibData(WAND_CONFIG, config);
+        HolderLookup.Provider registries = registries(renderData);
+        renderState.addGeckolibData(WAND_CONFIG, WandAppearance.configuration(registries, stack));
         renderState.addGeckolibData(IS_ELDER_WAND, ModDataComponents.isElderWand(stack));
-        // The Elder Wand keeps its own art and is never tinted: it is one specific wand, not a
-        // sample of elder wood, and washing its texture with a wood colour would flatten the one
-        // wand in the game that already looks like itself.
-        renderState.addGeckolibData(WOOD_TINT, ModDataComponents.isElderWand(stack)
-                ? WandAppearance.UNTINTED
-                : WandAppearance.woodTint(stack));
         LivingEntity holder = renderData.itemOwner() == null ? null : renderData.itemOwner().asLivingEntity();
         if (holder != null) {
             renderState.addGeckolibData(HOLDER_ID, holder.getId());
         }
+    }
+
+    /**
+     * The client's copy of the synced registries, where the wand woods (and so their colours and
+     * silhouettes) live. Null only before a world is joined -- a wand drawn then gets the base shape.
+     */
+    private static HolderLookup.@org.jspecify.annotations.Nullable Provider registries(GeoItemRenderer.RenderData renderData) {
+        if (renderData.level() != null) {
+            return renderData.level().registryAccess();
+        }
+        Minecraft mc = Minecraft.getInstance();
+        return mc.level == null ? null : mc.level.registryAccess();
     }
 
     /**
@@ -100,7 +96,10 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
     public int getRenderColor(WandItem animatable, GeoItemRenderer.RenderData renderData,
                               float partialTick) {
         int base = super.getRenderColor(animatable, renderData, partialTick);
-        int tint = WandAppearance.woodTint(renderData.itemStack());
+        int tint = WandAppearance.woodTint(registries(renderData), renderData.itemStack());
+        // The Elder Wand keeps its own art and is never tinted: it is one specific wand, not a
+        // sample of elder wood, and washing its texture with a wood colour would flatten the one
+        // wand in the game that already looks like itself.
         if (tint != WandAppearance.UNTINTED && !ModDataComponents.isElderWand(renderData.itemStack())) {
             base = net.minecraft.util.ARGB.multiply(base, tint);
         }

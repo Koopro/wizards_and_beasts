@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.wand.command;
 
 import at.koopro.wizardsandbeasts.item.wand.WandItem;
+import at.koopro.wizardsandbeasts.wand.WandAppearance;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.customization.WandConfiguration;
 import at.koopro.wizardsandbeasts.wand.customization.WandModule;
@@ -50,7 +51,7 @@ public final class WandConfigCommands {
             player.displayClientMessage(error("Hold a wand in your main hand."), false);
             return 0;
         }
-        WandConfiguration config = stack.getOrDefault(WandComponents.WAND_CONFIGURATION.get(), WandConfiguration.DEFAULT);
+        WandConfiguration config = WandAppearance.configuration(player.registryAccess(), stack);
         player.displayClientMessage(header("Wand configuration:"), false);
         for (WandSlot slot : WandSlot.renderOrder()) {
             Optional<Identifier> moduleId = config.getModule(slot);
@@ -112,7 +113,7 @@ public final class WandConfigCommands {
             return 0;
         }
 
-        WandConfiguration current = stack.getOrDefault(WandComponents.WAND_CONFIGURATION.get(), WandConfiguration.DEFAULT);
+        WandConfiguration current = WandAppearance.configuration(player.registryAccess(), stack);
         WandConfiguration updated = current.withModule(slot, moduleId);
         stack.set(WandComponents.WAND_CONFIGURATION.get(), updated);
         player.containerMenu.broadcastChanges();
@@ -149,7 +150,7 @@ public final class WandConfigCommands {
             return 0;
         }
 
-        WandConfiguration current = stack.getOrDefault(WandComponents.WAND_CONFIGURATION.get(), WandConfiguration.DEFAULT);
+        WandConfiguration current = WandAppearance.configuration(player.registryAccess(), stack);
         if (current.getModule(slot).isEmpty()) {
             player.displayClientMessage(error("Slot '" + slotArg + "' is already empty."), false);
             return 0;
@@ -173,9 +174,10 @@ public final class WandConfigCommands {
             player.displayClientMessage(error("Hold a wand in your main hand."), false);
             return 0;
         }
-        stack.set(WandComponents.WAND_CONFIGURATION.get(), WandConfiguration.DEFAULT);
+        // Removing the component hands the shape back to the wood (WandAppearance.configuration).
+        stack.remove(WandComponents.WAND_CONFIGURATION.get());
         player.containerMenu.broadcastChanges();
-        player.displayClientMessage(success("Reset wand configuration to defaults."), false);
+        player.displayClientMessage(success("Reset wand configuration to its wood's shape."), false);
         return 1;
     }
 

@@ -78,7 +78,7 @@ public final class WandFeatureDebug implements FeatureDebugSection {
         report.section("  modules");
         WandConfiguration configuration = wand.get(WandComponents.WAND_CONFIGURATION.get());
         if (configuration == null) {
-            report.row("    —", "no configuration component (renders as the base wand)");
+            report.row("    —", "no configuration component (shaped by its wood)");
             return;
         }
         for (WandSlot slot : WandSlot.renderOrder()) {

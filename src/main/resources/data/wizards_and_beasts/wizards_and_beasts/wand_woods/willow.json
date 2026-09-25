@@ -23,5 +23,11 @@
     "cooldown": 0.97,
     "range": 1.0,
     "fizzle": 0.0
+  },
+  "appearance": {
+    "tint": "#BFA97E",
+    "handle": "wizards_and_beasts:flared",
+    "shaft": "wizards_and_beasts:spiral",
+    "tip": "wizards_and_beasts:needle"
   }
 }
