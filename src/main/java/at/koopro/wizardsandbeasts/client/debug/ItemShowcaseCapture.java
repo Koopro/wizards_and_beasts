@@ -9,7 +9,9 @@ import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.BuiltInRegistries;
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.commands.arguments.item.ItemParser;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -52,7 +54,9 @@ import java.util.Set;
  * contact sheet and a change can be compared against the run before it.
  *
  * <p>Development only, and inert unless asked for: it does nothing in production and nothing
- * unless {@code WB_ITEM_SHOWCASE} names a file of item ids (one per line, {@code #} comments).
+ * unless {@code WB_ITEM_SHOWCASE} names a file of items, one per line ({@code #} comments): a bare
+ * id, or {@code label=id[components]} in {@code /give} syntax for a stack that needs components (a
+ * wand of a given wood), shot as {@code <label>}.
  * {@code WB_ITEM_SHOWCASE_WORLD} names the save to open (a disposable copy — the scene is built
  * into it) and {@code WB_ITEM_SHOWCASE_OUT} the folder under {@code screenshots/} to write to.
  * The client quits when the last item is done. Two shots per item: {@code <id>__fp.png} (hotbar,
@@ -82,18 +86,31 @@ public final class ItemShowcaseCapture {
 
     private ItemShowcaseCapture() {}
 
-    private record Request(List<Identifier> items, String world, Path out) {
+    /** One line of the item list: the file name it is shot as, and the stack in /give syntax. */
+    private record Entry(String label, String spec) {
+        static Entry parse(String line) {
+            int eq = line.indexOf('=');
+            int bracket = line.indexOf('[');
+            if (eq > 0 && (bracket < 0 || eq < bracket)) {
+                return new Entry(line.substring(0, eq).strip(), line.substring(eq + 1).strip());
+            }
+            String spec = line.contains(":") ? line : WizardsAndBeastsMod.MODID + ":" + line;
+            return new Entry(Identifier.parse(spec).getPath(), spec);
+        }
+    }
+
+    private record Request(List<Entry> items, String world, Path out) {
         static Request fromEnvironment() {
             String list = System.getenv("WB_ITEM_SHOWCASE");
             if (list == null || FMLEnvironment.isProduction()) {
                 return null;
             }
-            List<Identifier> items = new ArrayList<>();
+            List<Entry> items = new ArrayList<>();
             try {
                 for (String line : Files.readAllLines(Path.of(list))) {
                     String id = line.strip();
                     if (!id.isEmpty() && !id.startsWith("#")) {
-                        items.add(Identifier.parse(id.contains(":") ? id : WizardsAndBeastsMod.MODID + ":" + id));
+                        items.add(Entry.parse(id));
                     }
                 }
             } catch (IOException e) {
@@ -164,9 +181,9 @@ public final class ItemShowcaseCapture {
         }
         captureThisFrame = false;
         Minecraft mc = Minecraft.getInstance();
-        Identifier id = REQUEST.items().get(shot / 2);
+        Entry entry = REQUEST.items().get(shot / 2);
         String suffix = view() == View.FIRST_PERSON ? "__fp.png" : "__tp.png";
-        Path file = mc.gameDirectory.toPath().resolve(REQUEST.out()).resolve(id.getPath() + suffix);
+        Path file = mc.gameDirectory.toPath().resolve(REQUEST.out()).resolve(entry.label() + suffix);
         Screenshot.takeScreenshot(mc.getMainRenderTarget(), image -> Util.ioPool().execute(() -> {
             try (image) {
                 Files.createDirectories(file.getParent());
@@ -192,11 +209,16 @@ public final class ItemShowcaseCapture {
 
     /** Puts the current item in the hand, the frame and on the ground, and turns the camera. */
     private static void present(Minecraft mc, MinecraftServer server) {
-        Identifier id = REQUEST.items().get(shot / 2);
-        ItemStack stack = BuiltInRegistries.ITEM.getOptional(id).map(ItemStack::new).orElse(ItemStack.EMPTY);
-        if (stack.isEmpty()) {
-            LOGGER.warn("Item showcase: unknown item {}", id);
+        Entry entry = REQUEST.items().get(shot / 2);
+        ItemStack stack;
+        try {
+            ItemParser.ItemResult parsed = new ItemParser(server.registryAccess()).parse(new StringReader(entry.spec()));
+            stack = new ItemStack(parsed.item(), 1, parsed.components());
+        } catch (CommandSyntaxException e) {
+            LOGGER.warn("Item showcase: cannot parse {}: {}", entry.spec(), e.getMessage());
+            stack = ItemStack.EMPTY;
         }
+        final ItemStack shown = stack;
         View view = view();
         mc.options.setCameraType(view == View.FIRST_PERSON ? CameraType.FIRST_PERSON : CameraType.THIRD_PERSON_FRONT);
         mc.options.hideGui = view != View.FIRST_PERSON;
@@ -210,15 +232,15 @@ public final class ItemShowcaseCapture {
             }
             ServerLevel level = player.level();
             level.setDayTime(6000);
-            player.getInventory().setItem(0, stack.copy());
+            player.getInventory().setItem(0, shown.copy());
             // Vanilla neighbours in the hotbar: the yardstick the new icon is read against.
             player.getInventory().setItem(1, new ItemStack(Items.IRON_SWORD));
             player.getInventory().setItem(2, new ItemStack(Items.BOOK));
             player.getInventory().setItem(3, new ItemStack(Items.SPYGLASS));
             player.getInventory().setItem(4, new ItemStack(Items.POTION));
             AABB area = new AABB(-8, STAGE_Y - 2, -10, 8, STAGE_Y + 6, 6);
-            level.getEntitiesOfClass(ItemFrame.class, area).forEach(frame -> frame.setItem(stack.copy(), false));
-            level.getEntitiesOfClass(ItemEntity.class, area).forEach(item -> item.setItem(stack.copy()));
+            level.getEntitiesOfClass(ItemFrame.class, area).forEach(frame -> frame.setItem(shown.copy(), false));
+            level.getEntitiesOfClass(ItemEntity.class, area).forEach(item -> item.setItem(shown.copy()));
         });
         wait = SETTLE_TICKS;
     }
