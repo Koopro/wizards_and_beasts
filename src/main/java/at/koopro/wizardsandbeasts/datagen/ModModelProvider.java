@@ -9,6 +9,7 @@ import net.minecraft.client.data.models.model.ItemModelUtils;
 import net.minecraft.client.data.models.model.ModelLocationUtils;
 import net.minecraft.client.data.models.blockstates.MultiVariantGenerator;
 import net.minecraft.client.data.models.blockstates.PropertyDispatch;
+import net.minecraft.client.data.models.model.ModelTemplate;
 import net.minecraft.client.data.models.model.ModelTemplates;
 import net.minecraft.client.data.models.model.TextureMapping;
 import net.minecraft.client.data.models.model.TextureSlot;
@@ -86,19 +87,19 @@ public class ModModelProvider extends ModelProvider {
 
     @Override
     protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
-        itemModels.declareCustomModelItem(WandItemRegistry.DEBUG_WAND.get());
-        itemModels.declareCustomModelItem(WandItemRegistry.MORPH_WAND.get());
+        itemModels.generateFlatItem(WandItemRegistry.DEBUG_WAND.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(WandItemRegistry.MORPH_WAND.get(), ModelTemplates.FLAT_ITEM);
         itemModels.declareCustomModelItem(WandItemRegistry.WAND.get());
-        declaredOrGeo(itemModels, BroomItemRegistry.BROOM_ITEM.get());
-        declaredOrGeo(itemModels, BroomItemRegistry.CLEANSWEEP_SEVEN.get());
-        declaredOrGeo(itemModels, BroomItemRegistry.COMET_260.get());
-        declaredOrGeo(itemModels, BroomItemRegistry.NIMBUS_2000.get());
-        declaredOrGeo(itemModels, BroomItemRegistry.NIMBUS_2001.get());
-        declaredOrGeo(itemModels, BroomItemRegistry.FIREBOLT.get());
-        declaredOrGeo(itemModels, BroomItemRegistry.FIREBOLT_SUPREME.get());
-        declaredOrGeo(itemModels, BroomItemRegistry.OAKSHAFT_79.get());
+        flatOrGeo(itemModels, BroomItemRegistry.BROOM_ITEM.get(), ModelTemplates.FLAT_HANDHELD_ITEM);
+        flatOrGeo(itemModels, BroomItemRegistry.CLEANSWEEP_SEVEN.get(), ModelTemplates.FLAT_HANDHELD_ITEM);
+        flatOrGeo(itemModels, BroomItemRegistry.COMET_260.get(), ModelTemplates.FLAT_HANDHELD_ITEM);
+        flatOrGeo(itemModels, BroomItemRegistry.NIMBUS_2000.get(), ModelTemplates.FLAT_HANDHELD_ITEM);
+        flatOrGeo(itemModels, BroomItemRegistry.NIMBUS_2001.get(), ModelTemplates.FLAT_HANDHELD_ITEM);
+        flatOrGeo(itemModels, BroomItemRegistry.FIREBOLT.get(), ModelTemplates.FLAT_HANDHELD_ITEM);
+        flatOrGeo(itemModels, BroomItemRegistry.FIREBOLT_SUPREME.get(), ModelTemplates.FLAT_HANDHELD_ITEM);
+        flatOrGeo(itemModels, BroomItemRegistry.OAKSHAFT_79.get(), ModelTemplates.FLAT_HANDHELD_ITEM);
         iconInSlotModelInHand(itemModels, BroomItemRegistry.BROOM_POLISH.get());
-        itemModels.declareCustomModelItem(BroomItemRegistry.ENCHANTED_TWIG_BUNDLE.get());
+        itemModels.generateFlatItem(BroomItemRegistry.ENCHANTED_TWIG_BUNDLE.get(), ModelTemplates.FLAT_ITEM);
         iconInSlotModelInHand(itemModels, MiscItemRegistry.MARAUDERS_MAP.get());
         iconInSlotModelInHand(itemModels, MiscItemRegistry.DELUMINATOR.get());
         itemModels.generateFlatItem(MiscItemRegistry.BLINDFOLD.get(), ModelTemplates.FLAT_ITEM);
@@ -126,25 +127,25 @@ public class ModModelProvider extends ModelProvider {
         // All trunks + Newt's Case are now blocks — their item models come from the block-model
         // generation in generateWizardingWorld().
 
-        itemModels.declareCustomModelItem(WandItemRegistry.PHOENIX_FEATHER.get());
-        itemModels.declareCustomModelItem(WandItemRegistry.DRAGON_HEARTSTRING.get());
-        itemModels.declareCustomModelItem(WandItemRegistry.UNICORN_HAIR.get());
-        itemModels.declareCustomModelItem(WandItemRegistry.THESTRAL_TAIL_HAIR.get());
-        itemModels.declareCustomModelItem(WandItemRegistry.VEELA_HAIR.get());
-        itemModels.declareCustomModelItem(WandItemRegistry.TROLL_WHISKER.get());
-        itemModels.declareCustomModelItem(WandItemRegistry.WAMPUS_CAT_HAIR.get());
-        itemModels.declareCustomModelItem(WandItemRegistry.THUNDERBIRD_TAIL_FEATHER.get());
-        itemModels.declareCustomModelItem(ConsumableItemRegistry.ROUGAROU_HAIR.get());
-        itemModels.declareCustomModelItem(ConsumableItemRegistry.WHITE_RIVER_MONSTER_SPINE.get());
+        itemModels.generateFlatItem(WandItemRegistry.PHOENIX_FEATHER.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(WandItemRegistry.DRAGON_HEARTSTRING.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(WandItemRegistry.UNICORN_HAIR.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(WandItemRegistry.THESTRAL_TAIL_HAIR.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(WandItemRegistry.VEELA_HAIR.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(WandItemRegistry.TROLL_WHISKER.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(WandItemRegistry.WAMPUS_CAT_HAIR.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(WandItemRegistry.THUNDERBIRD_TAIL_FEATHER.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(ConsumableItemRegistry.ROUGAROU_HAIR.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(ConsumableItemRegistry.WHITE_RIVER_MONSTER_SPINE.get(), ModelTemplates.FLAT_ITEM);
         iconInSlotModelInHand(itemModels, ConsumableItemRegistry.HIDEBEHIND_SHADOW_ESSENCE.get());
-        itemModels.declareCustomModelItem(ConsumableItemRegistry.HIDEBEHIND_CLAW.get());
-        itemModels.declareCustomModelItem(ConsumableItemRegistry.GHOUL_SLIME.get());
-        itemModels.declareCustomModelItem(ConsumableItemRegistry.GOLDEN_SNIDGET_FEATHER.get());
-        itemModels.declareCustomModelItem(ConsumableItemRegistry.GRANIAN_HAIR.get());
+        itemModels.generateFlatItem(ConsumableItemRegistry.HIDEBEHIND_CLAW.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(ConsumableItemRegistry.GHOUL_SLIME.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(ConsumableItemRegistry.GOLDEN_SNIDGET_FEATHER.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(ConsumableItemRegistry.GRANIAN_HAIR.get(), ModelTemplates.FLAT_ITEM);
         iconInSlotModelInHand(itemModels, ConsumableItemRegistry.HORNED_SERPENT_GEM.get());
         iconInSlotModelInHand(itemModels, ConsumableItemRegistry.PUKWUDGIE_VENOM_SAC.get());
-        itemModels.declareCustomModelItem(ConsumableItemRegistry.YETI_FUR.get());
-        itemModels.declareCustomModelItem(ConsumableItemRegistry.MATAGOT_ESSENCE.get());
+        itemModels.generateFlatItem(ConsumableItemRegistry.YETI_FUR.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(ConsumableItemRegistry.MATAGOT_ESSENCE.get(), ModelTemplates.FLAT_ITEM);
 
         itemModels.generateFlatItem(MiscItemRegistry.TORN_SPELL_PAGE.get(), ModelTemplates.FLAT_ITEM);
         iconInSlotModelInHand(itemModels, MiscItemRegistry.PARCHMENT.get());
@@ -174,18 +175,18 @@ public class ModModelProvider extends ModelProvider {
         itemModels.generateFlatItem(CurrencyItemRegistry.LEPRECHAUN_GOLD.get(), net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(CurrencyItemRegistry.DRAGOT.get(), net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
 
-        itemModels.declareCustomModelItem(WandItemRegistry.WAND_BLANK.get());
+        itemModels.generateFlatItem(WandItemRegistry.WAND_BLANK.get(), ModelTemplates.FLAT_HANDHELD_ITEM);
         iconInSlotModelInHand(itemModels, MiscItemRegistry.BESTIARY.get());
         itemModels.generateFlatItem(CurrencyItemRegistry.COUNTERFEIT_GALLEON.get(), net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(ConsumableItemRegistry.CONJURED_SPOILED_FOOD.get(), net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(TrinketItemRegistry.MINISTRY_LICENSE_SCROLL.get(), net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
         iconInSlotModelInHand(itemModels, DarkArtefactItemRegistry.RESURRECTION_STONE.get());
         iconInSlotModelInHand(itemModels, DarkArtefactItemRegistry.RIDDLES_DIARY.get());
-        itemModels.declareCustomModelItem(DarkArtefactItemRegistry.MARVOLO_GAUNTS_RING.get());
+        itemModels.generateFlatItem(DarkArtefactItemRegistry.MARVOLO_GAUNTS_RING.get(), ModelTemplates.FLAT_ITEM);
         iconInSlotModelInHand(itemModels, DarkArtefactItemRegistry.SLYTHERINS_LOCKET.get());
         iconInSlotModelInHand(itemModels, DarkArtefactItemRegistry.HUFFLEPUFFS_CUP.get());
         iconInSlotModelInHand(itemModels, DarkArtefactItemRegistry.RAVENCLAWS_DIADEM.get());
-        declaredOrGeo(itemModels, DarkArtefactItemRegistry.PHILOSOPHERS_STONE.get());
+        flatOrGeo(itemModels, DarkArtefactItemRegistry.PHILOSOPHERS_STONE.get());
         iconInSlotModelInHand(itemModels, TrinketItemRegistry.PENSIEVE.get());
         iconInSlotModelInHand(itemModels, TrinketItemRegistry.TWO_WAY_MIRROR.get());
         iconInSlotModelInHand(itemModels, TrinketItemRegistry.HAND_OF_GLORY.get());
@@ -244,28 +245,29 @@ public class ModModelProvider extends ModelProvider {
     }
 
     private static Identifier flatIcon(ItemModelGenerators itemModels, Item item, String suffix) {
-        return ModelTemplates.FLAT_ITEM.create(ModelLocationUtils.getModelLocation(item, suffix),
+        return flatIcon(itemModels, item, suffix, ModelTemplates.FLAT_ITEM);
+    }
+
+    private static Identifier flatIcon(ItemModelGenerators itemModels, Item item, String suffix, ModelTemplate template) {
+        return template.create(ModelLocationUtils.getModelLocation(item, suffix),
                 TextureMapping.layer0(item), itemModels.modelOutput);
     }
 
-    /** A flat item, or — once it is an {@code AnimatedItem} — that flat model in slots and as base. */
+    /** A flat item, or — once it is an {@code AnimatedItem} — that flat model in slots. */
     private static void flatOrGeo(ItemModelGenerators itemModels, Item item) {
-        if (item instanceof AnimatedItem) {
-            iconInSlotGeoInHand(itemModels, item, flatIcon(itemModels, item, ""));
-        } else {
-            itemModels.generateFlatItem(item, ModelTemplates.FLAT_ITEM);
-        }
+        flatOrGeo(itemModels, item, ModelTemplates.FLAT_ITEM);
     }
 
     /**
-     * An item whose {@code models/item/<id>.json} is hand-written — or, once it is an
-     * {@code AnimatedItem}, that model in slots and as base with the GeckoLib model in hand.
+     * {@link #flatOrGeo(ItemModelGenerators, Item)} with a chosen flat template — the brooms are
+     * {@code FLAT_HANDHELD_ITEM}. Every flat item model is generated here: a hand-written copy in
+     * src/main would be identical and silently win over this one.
      */
-    private static void declaredOrGeo(ItemModelGenerators itemModels, Item item) {
+    private static void flatOrGeo(ItemModelGenerators itemModels, Item item, ModelTemplate template) {
         if (item instanceof AnimatedItem) {
-            iconInSlotGeoInHand(itemModels, item, ModelLocationUtils.getModelLocation(item));
+            iconInSlotGeoInHand(itemModels, item, flatIcon(itemModels, item, "", template));
         } else {
-            itemModels.declareCustomModelItem(item);
+            itemModels.generateFlatItem(item, template);
         }
     }
 
@@ -346,7 +348,7 @@ public class ModModelProvider extends ModelProvider {
         // Remembrall and the Omnioculars are objects you look *into*, which a flat sprite
         // cannot show. Both were already emitting a model into each resource root before
         // that, so declaring them also settles which one the game loads.
-        declaredOrGeo(itemModels, TrinketItemRegistry.REMEMBRALL.get());
+        flatOrGeo(itemModels, TrinketItemRegistry.REMEMBRALL.get());
         iconInSlotModelInHand(itemModels, TrinketItemRegistry.OMNI_OCULARS.get());
 
         // The brew ships a hand-written items/ definition: the same slot/hand dispatch as
@@ -361,16 +363,16 @@ public class ModModelProvider extends ModelProvider {
         itemModels.generateFlatItem(ConsumableItemRegistry.EMPTY_BUTTERBEER_MUG.get(),
                 net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
         iconInSlotModelInHand(itemModels, ConsumableItemRegistry.PUMPKIN_JUICE.get());
-        itemModels.declareCustomModelItem(ConsumableItemRegistry.CHOCOLATE_FROG.get());
+        itemModels.generateFlatItem(ConsumableItemRegistry.CHOCOLATE_FROG.get(), ModelTemplates.FLAT_ITEM);
         iconInSlotModelInHand(itemModels, ConsumableItemRegistry.BERTIE_BOTTS_EVERY_FLAVOUR_BEANS.get());
         iconInSlotModelInHand(itemModels, ConsumableItemRegistry.DROOBLES_BEST_BLOWING_GUM.get());
         iconInSlotModelInHand(itemModels, ConsumableItemRegistry.FIREWHISKY.get());
-        itemModels.declareCustomModelItem(ConsumableItemRegistry.GILLYWEED.get());
-        itemModels.declareCustomModelItem(ConsumableItemRegistry.DIRIGIBLE_PLUM.get());
+        itemModels.generateFlatItem(ConsumableItemRegistry.GILLYWEED.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(ConsumableItemRegistry.DIRIGIBLE_PLUM.get(), ModelTemplates.FLAT_ITEM);
         iconInSlotModelInHand(itemModels, ConsumableItemRegistry.TREACLE_TART.get());
         iconInSlotModelInHand(itemModels, ConsumableItemRegistry.PUMPKIN_PASTY.get());
-        itemModels.declareCustomModelItem(ConsumableItemRegistry.FIZZING_WHIZZBEE.get());
-        itemModels.declareCustomModelItem(ConsumableItemRegistry.PEPPERMINT_TOAD.get());
+        itemModels.generateFlatItem(ConsumableItemRegistry.FIZZING_WHIZZBEE.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(ConsumableItemRegistry.PEPPERMINT_TOAD.get(), ModelTemplates.FLAT_ITEM);
         iconInSlotModelInHand(itemModels, DarkArtefactItemRegistry.INVISIBILITY_CLOAK.get());
         iconInSlotModelInHand(itemModels, DarkArtefactItemRegistry.DEATHLY_HALLOW_CLOAK.get());
         iconInSlotModelInHand(itemModels, TrinketItemRegistry.TIME_TURNER.get());

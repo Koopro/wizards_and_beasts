@@ -33,6 +33,9 @@ class BroomItemModelTest {
     private static final Gson GSON = new Gson();
     private static final Path ASSETS = Path.of("src", "main", "resources", "assets", "wizards_and_beasts");
     private static final Path MODELS = ASSETS.resolve(Path.of("models", "item"));
+    /** Datagen's root: the flat broom models are generated (ModModelProvider.flatOrGeo). */
+    private static final Path GENERATED_MODELS = Path.of("src", "generated", "resources", "assets",
+            "wizards_and_beasts", "models", "item");
     private static final Path TEXTURES = ASSETS.resolve(Path.of("textures", "item"));
     private static final Path REGISTRY = Path.of("src", "main", "java", "at", "koopro",
             "wizardsandbeasts", "registry", "BroomItemRegistry.java");
@@ -43,8 +46,8 @@ class BroomItemModelTest {
     @Test
     void everyBroomModelNamesItsOwnTexture() throws IOException {
         for (String broom : registeredBrooms()) {
-            Path model = MODELS.resolve(broom + ".json");
-            assertTrue(Files.exists(model), broom + " has no item model at " + model);
+            Path model = model(broom);
+            assertTrue(Files.exists(model), broom + " has no item model in either resource root");
 
             JsonObject json = GSON.fromJson(Files.readString(model), JsonObject.class);
             assertTrue(json.has("textures"),
@@ -60,12 +63,18 @@ class BroomItemModelTest {
         }
     }
 
+    /** The model the game loads: src/main wins over src/generated on a clash (build.gradle). */
+    private static Path model(String broom) {
+        Path main = MODELS.resolve(broom + ".json");
+        return Files.exists(main) ? main : GENERATED_MODELS.resolve(broom + ".json");
+    }
+
     /** A shaft is held in the hand, not presented flat like a page. */
     @Test
     void everyBroomUsesTheHandheldPose() throws IOException {
         for (String broom : registeredBrooms()) {
             JsonObject json = GSON.fromJson(
-                    Files.readString(MODELS.resolve(broom + ".json")), JsonObject.class);
+                    Files.readString(model(broom)), JsonObject.class);
             assertEquals(HANDHELD, json.get("parent").getAsString(),
                     broom + " does not use the handheld pose, so it is held flat in hand");
         }
