@@ -5,7 +5,7 @@
       {
         "model": {
           "type": "minecraft:model",
-          "model": "wizards_and_beasts:item/monster_book_of_monsters_inventory"
+          "model": "wizards_and_beasts:item/monster_book_of_monsters"
         },
         "when": [
           "gui",
@@ -17,7 +17,7 @@
     ],
     "fallback": {
       "type": "minecraft:special",
-      "base": "wizards_and_beasts:item/monster_book_of_monsters",
+      "base": "wizards_and_beasts:item/monster_book_of_monsters_held",
       "model": {
         "type": "geckolib:geckolib"
       }

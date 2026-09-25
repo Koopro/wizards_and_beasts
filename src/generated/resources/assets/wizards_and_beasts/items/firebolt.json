@@ -17,7 +17,7 @@
     ],
     "fallback": {
       "type": "minecraft:special",
-      "base": "wizards_and_beasts:item/firebolt",
+      "base": "wizards_and_beasts:item/firebolt_held",
       "model": {
         "type": "geckolib:geckolib"
       }

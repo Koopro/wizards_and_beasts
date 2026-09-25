@@ -67,14 +67,14 @@ public class ModModelProvider extends ModelProvider {
             "elixir_of_life", "essence_of_dittany", "exploding_snap", "fainting_fancies",
             "fantastic_beasts_and_where_to_find_them", "fever_fudge", "filibusters_fireworks",
             "flesh_eating_slug_repellent", "gubraithian_fire", "headless_hat",
-            "magical_draughts_and_potions", "memory_vial", "mirror_of_erised",
-            "monster_book_of_monsters", "moste_potente_potions", "mrs_skowers_mess_remover",
+            "magical_draughts_and_potions", "memory_vial", "moste_potente_potions",
+            "mrs_skowers_mess_remover",
             "murtlap_essence", "nosebleed_nougat", "one_thousand_magical_herbs_and_fungi",
             "probity_probe", "puking_pastilles", "punching_telescope", "quick_quotes_quill",
             "quidditch_robes", "quidditch_through_the_ages", "quill", "revealer",
             "secrecy_sensor", "secrets_of_the_darkest_art", "self_stirring_cauldron",
             "shield_cloak", "shield_gloves", "shield_hat", "shrunken_head", "skiving_snackbox",
-            "sorting_hat", "spellotape", "standard_book_of_spells", "sword_of_gryffindor",
+            "sorting_hat", "spellotape", "sword_of_gryffindor",
             "tales_of_beedle_the_bard", "telescope", "the_quibbler", "ton_tongue_toffee",
             "triwizard_cup", "u_no_poo", "unfogging_the_future", "vanishing_cabinet",
             "wildfire_whiz_bangs", "wizarding_wireless", "wizards_chess_set"
@@ -230,14 +230,16 @@ public class ModModelProvider extends ModelProvider {
 
     /**
      * The slot/hand split for an {@code AnimatedItem}: {@code icon} in slots, the GeckoLib model in
-     * hand. The special model's {@code base} is the item's own {@code models/item/<id>.json} — the
-     * hand-tuned cuboid, or the flat or handheld sprite model for items that never had one — because
-     * that is where the hand, head and frame transforms come from.
+     * hand. The special model's {@code base} contributes only display transforms, so it is
+     * {@code models/item/<id>_held.json}: transforms computed by {@code tools/item_geo.py} from the
+     * geo itself. It used to be whatever sat at {@code models/item/<id>.json} — a flat sprite or an
+     * old cuboid — whose transforms assumed a model standing on y 0, while GeckoLib draws geo y 0 at
+     * the centre of the item cube, so every geo item rendered eight units high.
      */
     private static void iconInSlotGeoInHand(ItemModelGenerators itemModels, Item item, Identifier icon) {
         itemModels.itemModelOutput.accept(item, ItemModelGenerators.createFlatModelDispatch(
                 ItemModelUtils.plainModel(icon),
-                ItemModelUtils.specialModel(ModelLocationUtils.getModelLocation(item),
+                ItemModelUtils.specialModel(ModelLocationUtils.getModelLocation(item, "_held"),
                         new GeckolibItemSpecialRenderer.Unbaked())));
     }
 
@@ -518,8 +520,8 @@ public class ModModelProvider extends ModelProvider {
     // cube with a single sprite on all six faces — a trunk's flank was stretched over its
     // lid, and the fireplace's hearth opening appeared on the back. The geometry is built
     // here rather than hand-written as JSON on purpose: a hand-authored model in
-    // src/main/resources silently *wins* over the generated one (build.gradle:136 adds
-    // src/generated as a second resource root and :139 excludes duplicates, main first),
+    // src/main/resources silently *wins* over the generated one (build.gradle:161 adds
+    // src/generated as a second resource root and :164 excludes duplicates, main first),
     // while ModelProvider still demands a generated blockstate for every block. Keeping
     // both sides in datagen leaves exactly one source of truth.
     //

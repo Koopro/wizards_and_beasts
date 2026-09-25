@@ -17,7 +17,7 @@
     ],
     "fallback": {
       "type": "minecraft:special",
-      "base": "wizards_and_beasts:item/portkey",
+      "base": "wizards_and_beasts:item/portkey_held",
       "model": {
         "type": "geckolib:geckolib"
       }

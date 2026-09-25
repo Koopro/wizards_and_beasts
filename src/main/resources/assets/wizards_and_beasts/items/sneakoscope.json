@@ -81,7 +81,7 @@
     ],
     "fallback": {
       "type": "minecraft:special",
-      "base": "wizards_and_beasts:item/sneakoscope",
+      "base": "wizards_and_beasts:item/sneakoscope_held",
       "model": {
         "type": "geckolib:geckolib"
       }

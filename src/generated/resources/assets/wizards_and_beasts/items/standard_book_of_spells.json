@@ -5,7 +5,7 @@
       {
         "model": {
           "type": "minecraft:model",
-          "model": "wizards_and_beasts:item/standard_book_of_spells_inventory"
+          "model": "wizards_and_beasts:item/standard_book_of_spells"
         },
         "when": [
           "gui",
@@ -17,7 +17,7 @@
     ],
     "fallback": {
       "type": "minecraft:special",
-      "base": "wizards_and_beasts:item/standard_book_of_spells",
+      "base": "wizards_and_beasts:item/standard_book_of_spells_held",
       "model": {
         "type": "geckolib:geckolib"
       }

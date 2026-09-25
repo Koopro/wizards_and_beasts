@@ -5,7 +5,7 @@
       {
         "model": {
           "type": "minecraft:model",
-          "model": "wizards_and_beasts:item/mirror_of_erised_inventory"
+          "model": "wizards_and_beasts:item/mirror_of_erised"
         },
         "when": [
           "gui",
@@ -17,7 +17,7 @@
     ],
     "fallback": {
       "type": "minecraft:special",
-      "base": "wizards_and_beasts:item/mirror_of_erised",
+      "base": "wizards_and_beasts:item/mirror_of_erised_held",
       "model": {
         "type": "geckolib:geckolib"
       }

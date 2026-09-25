@@ -17,7 +17,7 @@
     ],
     "fallback": {
       "type": "minecraft:special",
-      "base": "wizards_and_beasts:item/foe_glass",
+      "base": "wizards_and_beasts:item/foe_glass_held",
       "model": {
         "type": "geckolib:geckolib"
       }
