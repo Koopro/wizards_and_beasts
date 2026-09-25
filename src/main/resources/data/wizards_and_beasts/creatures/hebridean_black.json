@@ -23,8 +23,7 @@
     "fire_color": 16347926,
     "flame_shape": "STREAM",
     "block_effect": "IGNITE",
-    "rideable": false,
-    "scale": 1.8
+    "rideable": false
   },
   "_dragon_note": "fire_color=design-extrapolation; fire_range=design-extrapolation (not canon). Ministry classification XXXXX (uniform). Breath ships via DragonEntity, not the FIRE_BREATH trait.",
   "abilities": [
@@ -35,5 +34,21 @@
       "strength_amplifier": 2,
       "duration_ticks": 300
     }
+  ],
+  "behaviour": {
+    "idle": {
+      "actions": [
+        "stretch",
+        "shake"
+      ],
+      "minDelay": 300,
+      "maxDelay": 700
+    }
+  },
+  "clips": [
+    "hit",
+    "death",
+    "stretch",
+    "shake"
   ]
 }
