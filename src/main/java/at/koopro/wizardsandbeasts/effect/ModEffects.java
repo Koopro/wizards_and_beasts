@@ -119,6 +119,10 @@ public final class ModEffects {
     public static final DeferredHolder<MobEffect, BasiliskGazeLockEffect> BASILISK_GAZE_LOCK =
             MOB_EFFECTS.register("basilisk_gaze_lock", BasiliskGazeLockEffect::new);
 
+    /** A basilisk's bite or fang. Only phoenix tears draw it out. */
+    public static final DeferredHolder<MobEffect, BasiliskVenomEffect> BASILISK_VENOM =
+            MOB_EFFECTS.register("basilisk_venom", BasiliskVenomEffect::new);
+
     /**
      * A transformed body's nose. Marker only — granted by {@code FormSenseService} so the client can
      * read one server-side rule instead of re-deriving it. See {@code FormSense.SCENT_TRACK}.

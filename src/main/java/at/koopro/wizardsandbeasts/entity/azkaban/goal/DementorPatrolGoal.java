@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.entity.azkaban.goal;
 
-import at.koopro.wizardsandbeasts.entity.azkaban.DementorEntity;
 import at.koopro.wizardsandbeasts.azkaban.structure.AzkabanStructures;
+import at.koopro.wizardsandbeasts.entity.azkaban.DementorEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.phys.Vec3;
@@ -9,13 +9,22 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.EnumSet;
 
+/**
+ * Drift when nothing is felt. Inside Azkaban it patrols the fortress, a third of the time up in the high-security
+ * wing; anywhere else it drifts around where it first appeared ({@link DementorEntity#home()}).
+ *
+ * <p>Previously every Dementor in the world patrolled toward the Azkaban fortress centre once one was known, so one
+ * summoned anywhere else set off across the sea.
+ */
 public final class DementorPatrolGoal extends Goal {
 
     private static final int PATROL_INTERVAL = 80;
+    private static final double SPEED = 0.5;
+    private static final double HOME_RANGE = 12.0;
 
     private final DementorEntity dementor;
     private @Nullable Vec3 patrolTarget;
-    private int wanderCooldown = 0;
+    private int wanderCooldown;
 
     public DementorPatrolGoal(DementorEntity dementor) {
         this.dementor = dementor;
@@ -24,12 +33,17 @@ public final class DementorPatrolGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        return dementor.getFeltPlayers(24.0).isEmpty();
+        return dementor.sensed() == null && !dementor.isDissipating();
     }
 
     @Override
     public boolean canContinueToUse() {
-        return dementor.getFeltPlayers(24.0).isEmpty();
+        return canUse();
+    }
+
+    @Override
+    public void start() {
+        wanderCooldown = 0;
     }
 
     @Override
@@ -39,28 +53,25 @@ public final class DementorPatrolGoal extends Goal {
             wanderCooldown = PATROL_INTERVAL + dementor.getRandom().nextInt(40);
         }
         if (patrolTarget != null) {
-            dementor.getMoveControl().setWantedPosition(
-                    patrolTarget.x, patrolTarget.y, patrolTarget.z, 0.45);
+            dementor.getMoveControl().setWantedPosition(patrolTarget.x, patrolTarget.y, patrolTarget.z, SPEED);
         }
     }
 
     private Vec3 pickPatrolPoint() {
+        var random = dementor.getRandom();
         BlockPos center = AzkabanStructures.cachedFortressCenter;
-        if (center == null) {
-            // Fallback: drift randomly around current position
-            Vec3 pos = dementor.position();
-            return pos.add(
-                    (dementor.getRandom().nextDouble() - 0.5) * 20,
-                    (dementor.getRandom().nextDouble() - 0.5) * 10,
-                    (dementor.getRandom().nextDouble() - 0.5) * 20);
+        if (center == null || !dementor.insideAzkaban()) {
+            BlockPos home = dementor.home();
+            return new Vec3(
+                    home.getX() + 0.5 + (random.nextDouble() - 0.5) * 2 * HOME_RANGE,
+                    home.getY() + 1 + random.nextDouble() * 4,
+                    home.getZ() + 0.5 + (random.nextDouble() - 0.5) * 2 * HOME_RANGE);
         }
-        // Bias toward high-security wing (upper floors, Y+60 from base)
-        boolean highSec = dementor.getRandom().nextInt(3) == 0;
-        double dy = highSec ? 60 + dementor.getRandom().nextDouble() * 20
-                            : dementor.getRandom().nextDouble() * 50;
+        boolean highSec = random.nextInt(3) == 0;
+        double dy = highSec ? 60 + random.nextDouble() * 20 : random.nextDouble() * 50;
         return new Vec3(
-                center.getX() + (dementor.getRandom().nextDouble() - 0.5) * 14,
+                center.getX() + (random.nextDouble() - 0.5) * 14,
                 center.getY() + dy,
-                center.getZ() + (dementor.getRandom().nextDouble() - 0.5) * 14);
+                center.getZ() + (random.nextDouble() - 0.5) * 14);
     }
 }

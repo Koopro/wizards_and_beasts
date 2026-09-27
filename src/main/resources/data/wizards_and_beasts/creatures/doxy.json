@@ -32,6 +32,9 @@
   ],
   "clips": [
     "bite",
-    "flinch"
+    "flinch",
+    "death",
+    "hover",
+    "flit"
   ]
 }

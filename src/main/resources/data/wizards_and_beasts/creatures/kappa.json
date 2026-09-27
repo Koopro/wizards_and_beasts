@@ -44,6 +44,9 @@
   ],
   "clips": [
     "attack",
-    "flinch"
+    "flinch",
+    "death",
+    "drift",
+    "roll"
   ]
 }

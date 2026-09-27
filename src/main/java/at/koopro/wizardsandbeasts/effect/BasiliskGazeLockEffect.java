@@ -10,13 +10,13 @@ import net.minecraft.world.entity.LivingEntity;
 import org.jspecify.annotations.NonNull;
 
 /**
- * Windup applied by {@code DeathGazeGoal} for a lethal-gaze creature (the basilisk) instead of
- * triggering death/petrification immediately. Amplifier 0 = glancing gaze (petrify on expiry),
- * amplifier 1 = met gaze (instant death on expiry) — see {@code BasiliskGazeWindupHandler}, which
- * fires on natural {@code MobEffectEvent.Expired}, mirroring {@code ProtegoWardManager}'s idiom.
- * The escalating heartbeat here is the player-facing telegraph; a Blindfold/Blindness/Protego check
- * happening after expiry (not just at apply-time) lets a player avert their eyes mid-windup to
- * cancel the outcome.
+ * The telegraph of a basilisk's stare taking hold: an escalating heartbeat, and the fullscreen overlay
+ * ({@code MobEffectFullscreenOverlays} reads the remaining duration as progress). Amplifier 1 = direct sight (death
+ * ahead), 0 = indirect (petrification ahead).
+ *
+ * <p>It decides nothing. {@code DeathGazeGoal} holds the eye contact, re-measures it every interval, removes this
+ * effect the moment contact breaks, and applies the outcome itself when the windup completes. (The outcome used to
+ * resolve on this effect's natural expiry, which never re-checked whether the victim had since broken line of sight.)
  */
 public final class BasiliskGazeLockEffect extends MobEffect {
 
@@ -44,5 +44,5 @@ public final class BasiliskGazeLockEffect extends MobEffect {
         return true;
     }
 
-    public static final int WINDUP_TICKS = 16;
+    public static final int WINDUP_TICKS = 20;
 }

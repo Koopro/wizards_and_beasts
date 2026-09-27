@@ -74,10 +74,11 @@ public final class SizeProfileRegistry {
                 -0.5f, 0.0f, 0.0f));
 
         // ── House-Elf ──
-        // Smaller than goblin, similarly proportioned
+        // Rig-drawn (house_elf.geo.json, 1.0 blocks), so modelScale is hitboxHeight / rigHeight.
+        // The old 0.55 and the 1.273 widening were both corrections to the goblin placeholder.
         register(new SizeProfile("house_elf_default",
                 0.33f, 0.99f,   // 0.55× human height
-                0.55f, 1.273f, 1.273f,
+                0.99f, 1.0f, 1.0f,
                 -0.5f, 0.0f, 0.0f));
 
         // ── Veela ──
@@ -86,10 +87,11 @@ public final class SizeProfileRegistry {
                 1.0f, 1.0f, 1.0f,
                 0.0f, 0.0f, 0.0f));
 
-        // Harpy form: uniform scale-up, wings handled by WING_LAYER render flag
+        // Harpy form: rig-drawn (veela_harpy.geo.json, 2.0 blocks, wings on the rig), so
+        // modelScale is hitboxHeight / rigHeight.
         register(new SizeProfile("veela_harpy",
                 0.66f, 1.98f,   // 1.1× human height
-                1.1f, 1.0f, 1.0f,
+                0.99f, 1.0f, 1.0f,
                 0.5f, 0.1f, 0.0f));
 
         // ── Giant ──

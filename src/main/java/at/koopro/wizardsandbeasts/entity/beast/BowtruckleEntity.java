@@ -1,5 +1,11 @@
 package at.koopro.wizardsandbeasts.entity.beast;
 
+import at.koopro.wizardsandbeasts.registry.ModSounds;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.ai.navigation.WallClimberNavigation;
+import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.object.PlayState;
 import at.koopro.wizardsandbeasts.creature.bond.BondState;
 import at.koopro.wizardsandbeasts.creature.bond.BondableBeast;
 import at.koopro.wizardsandbeasts.creature.bond.FollowBondedOwnerGoal;
@@ -67,6 +73,15 @@ import software.bernie.geckolib.animation.RawAnimation;
  * did it for {@link WildlifeRules#DEFENCE_TICKS}: a scratch and a moment's blindness. Its bonded wandmaker is spared.
  * Anyone who sees it happen has seen what a Bowtruckle is for.
  *
+ * <p><b>It hides.</b> A stranger coming near sends it to its tree, where it presses itself to the trunk and goes still;
+ * still against bark it is camouflaged ({@link #isCamouflaged} — drawn faint, never invisible). It climbs
+ * (vanilla's wall climber, as a spider does).
+ *
+ * <p><b>It can be distracted.</b> Canon: to take wood from its tree, give it woodlice first. Whoever has just fed it may
+ * cut its tree for {@link #DISTRACTED_TICKS} without being set on.
+ *
+ * <p><b>It picks locks</b> for the person it trusts most ({@link BowtruckleLockpickGoal}).
+ *
  * <p><b>It can be won over.</b> Canon's Bowtruckle will lead a wandmaker to wand-quality wood in
  * exchange for a woodlouse, and that trade is what the bond layer buys here: feed one for long
  * enough and it follows you and starts handing over wandwood saplings, which are otherwise obtained
@@ -78,6 +93,27 @@ public class BowtruckleEntity extends GeoEntityBase implements BondableBeast {
 
     private static final RawAnimation IDLE_ANIM = AnimHelper.loop("bowtruckle", "idle");
     private static final RawAnimation WALK_ANIM = AnimHelper.loop("bowtruckle", "walk");
+    private static final RawAnimation RUN_ANIM = AnimHelper.loop("bowtruckle", "run");
+    private static final RawAnimation CLIMB_ANIM = AnimHelper.loop("bowtruckle", "climb");
+    private static final RawAnimation HIDE_ANIM = AnimHelper.loop("bowtruckle", "hide");
+    private static final RawAnimation DEFEND_ANIM = AnimHelper.loop("bowtruckle", "defend");
+    private static final RawAnimation LOCKPICK_ANIM = AnimHelper.loop("bowtruckle", "lockpick");
+    private static final String ACTION = "bowtruckle_action";
+    private static final double RUN_SPEED_SQR = 0.07 * 0.07;
+
+    private static final byte FLAG_CLIMBING = 1;
+    private static final byte FLAG_CAMOUFLAGED = 2;
+    private static final byte FLAG_LOCKPICKING = 4;
+    private static final byte FLAG_DEFENDING = 8;
+    private static final EntityDataAccessor<Byte> DATA_FLAGS =
+            SynchedEntityData.defineId(BowtruckleEntity.class, EntityDataSerializers.BYTE);
+
+    /** Still this long, against bark, and it has vanished into the tree. */
+    public static final int CAMOUFLAGE_AFTER = 40;
+    /** Canon's woodlouse: fed, it lets its feeder take wood this long. */
+    public static final int DISTRACTED_TICKS = 600;
+    /** How much it must trust someone before it will pick a lock for them. */
+    public static final int LOCKPICK_BOND = 75;
 
     /**
      * Bond level, synced so the client can show it. A synched accessor has to be defined on the
@@ -102,6 +138,10 @@ public class BowtruckleEntity extends GeoEntityBase implements BondableBeast {
     private boolean searchedForHome;
     private @Nullable UUID angryAt;
     private int angerTicks;
+    private int stillTicks;
+    private @Nullable UUID distractedBy;
+    private int distractedTicks;
+    private @Nullable BlockPos lockJob;
 
     public BowtruckleEntity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
@@ -111,6 +151,7 @@ public class BowtruckleEntity extends GeoEntityBase implements BondableBeast {
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(DATA_BOND_LEVEL, 0);
+        builder.define(DATA_FLAGS, (byte) 0);
     }
 
     @Override
@@ -148,6 +189,112 @@ public class BowtruckleEntity extends GeoEntityBase implements BondableBeast {
             angryAt = null;
             setTarget(null);
         }
+        if (distractedTicks > 0 && --distractedTicks == 0) {
+            distractedBy = null;
+        }
+        setFlag(FLAG_CLIMBING, horizontalCollision);
+        setFlag(FLAG_DEFENDING, isDefending());
+        if (tickCount % 10 == 0) {
+            boolean still = getDeltaMovement().horizontalDistanceSqr() < 1.0e-4 && getNavigation().isDone();
+            stillTicks = still ? stillTicks + 10 : 0;
+            setFlag(FLAG_CAMOUFLAGED, WildlifeRules.camouflaged(stillTicks, againstBark(serverLevel), isDefending()
+                    || lockJob != null));
+        }
+    }
+
+    // ── camouflage, climbing, flags ──────────────────────────────────────────
+
+    private void setFlag(byte flag, boolean on) {
+        byte flags = entityData.get(DATA_FLAGS);
+        byte next = (byte) (on ? flags | flag : flags & ~flag);
+        if (next != flags) entityData.set(DATA_FLAGS, next);
+    }
+
+    private boolean flag(byte flag) {
+        return (entityData.get(DATA_FLAGS) & flag) != 0;
+    }
+
+    /** Still against bark: drawn faint by the renderer. Server-decided, synced. */
+    public boolean isCamouflaged() {
+        return flag(FLAG_CAMOUFLAGED);
+    }
+
+    public boolean isClimbing() {
+        return flag(FLAG_CLIMBING);
+    }
+
+    public boolean isLockpicking() {
+        return flag(FLAG_LOCKPICKING);
+    }
+
+    public void setLockpicking(boolean on) {
+        setFlag(FLAG_LOCKPICKING, on);
+    }
+
+    /** Whether bark is right beside it: a log in any of the blocks around its body. Six lookups. */
+    boolean againstBark(ServerLevel level) {
+        BlockPos at = blockPosition();
+        for (net.minecraft.core.Direction dir : net.minecraft.core.Direction.values()) {
+            if (level.getBlockState(at.relative(dir)).is(BlockTags.LOGS)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    protected @NonNull PathNavigation createNavigation(@NonNull Level level) {
+        return new WallClimberNavigation(this, level);
+    }
+
+    @Override
+    public boolean onClimbable() {
+        return isClimbing();
+    }
+
+    /** The nearest player it is shy of: not its person, not in creative, not a spectator. */
+    public @Nullable Player nearestStranger(double range) {
+        return level().getNearestPlayer(getX(), getY(), getZ(), range,
+                p -> p instanceof Player player && !player.isSpectator() && !player.isCreative()
+                        && !player.getUUID().equals(bondState().ownerUUID()));
+    }
+
+    /** Someone came too close: a startled look, a rustle, and it is no longer part of the tree. */
+    public void startled() {
+        stillTicks = 0;
+        setFlag(FLAG_CAMOUFLAGED, false);
+        triggerAnim(ACTION, "curious");
+        playSound(ModSounds.BOWTRUCKLE_RUSTLE.get(), 0.6f, 1.3f);
+    }
+
+    // ── locks ────────────────────────────────────────────────────────────────
+
+    public @Nullable BlockPos lockJob() {
+        return lockJob;
+    }
+
+    public void clearLockJob() {
+        lockJob = null;
+        setLockpicking(false);
+    }
+
+    /**
+     * Its person asks it to pick the nearest lock around it. Only its bonded owner, only at {@link #LOCKPICK_BOND}, only a
+     * lock that person may touch.
+     *
+     * @return whether it took the job
+     */
+    public boolean askToPickLock(ServerPlayer owner) {
+        if (!owner.getUUID().equals(bondState().ownerUUID()) || bondLevel() < LOCKPICK_BOND || isDefending()) {
+            return false;
+        }
+        BlockPos lock = BowtruckleLockpickGoal.findLock((ServerLevel) level(), blockPosition(), owner);
+        if (lock == null) {
+            return false;
+        }
+        lockJob = lock;
+        triggerAnim(ACTION, "curious");
+        return true;
     }
 
     /** The nearest log within reach, preferring wand-quality wood. */
@@ -192,8 +339,12 @@ public class BowtruckleEntity extends GeoEntityBase implements BondableBeast {
 
     /** Someone cut its tree. */
     public void defendAgainst(ServerPlayer culprit) {
-        if (culprit.getUUID().equals(bondState().ownerUUID()) || culprit.isSpectator()) {
+        if (culprit.getUUID().equals(bondState().ownerUUID()) || culprit.isSpectator()
+                || (distractedTicks > 0 && culprit.getUUID().equals(distractedBy))) {
             return;
+        }
+        if (angryAt == null) {
+            playSound(ModSounds.BOWTRUCKLE_CLICK.get(), 0.8f, 1.4f);
         }
         angryAt = culprit.getUUID();
         angerTicks = WildlifeRules.DEFENCE_TICKS;
@@ -204,6 +355,9 @@ public class BowtruckleEntity extends GeoEntityBase implements BondableBeast {
     @Override
     public boolean doHurtTarget(@NonNull ServerLevel level, @NonNull Entity target) {
         boolean hit = super.doHurtTarget(level, target);
+        if (hit) {
+            triggerAnim(ACTION, "attack");
+        }
         if (hit && target instanceof LivingEntity living) {
             // It goes for the eyes.
             living.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, BLINDING_TICKS, 0));
@@ -248,7 +402,20 @@ public class BowtruckleEntity extends GeoEntityBase implements BondableBeast {
     @Override
     protected @NonNull InteractionResult mobInteract(@NonNull Player player, @NonNull InteractionHand hand) {
         InteractionResult fed = offerBondFood(player, hand);
-        return fed != InteractionResult.PASS ? fed : super.mobInteract(player, hand);
+        if (fed.consumesAction() && !level().isClientSide()) {
+            // Canon's woodlouse: busy with its food, it lets this person at its tree for a while.
+            distractedBy = player.getUUID();
+            distractedTicks = DISTRACTED_TICKS;
+            triggerAnim(ACTION, "pickup");
+        }
+        if (fed != InteractionResult.PASS) {
+            return fed;
+        }
+        // Its person, crouching with an empty hand: pick the lock nearby.
+        if (player.isShiftKeyDown() && player.getItemInHand(hand).isEmpty() && player instanceof ServerPlayer sp) {
+            return askToPickLock(sp) ? InteractionResult.SUCCESS : InteractionResult.PASS;
+        }
+        return super.mobInteract(player, hand);
     }
 
     @Override
@@ -256,8 +423,44 @@ public class BowtruckleEntity extends GeoEntityBase implements BondableBeast {
         boolean hurt = super.hurtServer(level, source, amount);
         if (hurt) {
             onBondedHurt(source);
+            clearLockJob();
+            stillTicks = 0;
+            if (isAlive()) triggerAnim(ACTION, "hit");
         }
         return hurt;
+    }
+
+    @Override
+    public void die(@NonNull DamageSource cause) {
+        if (!level().isClientSide()) {
+            triggerAnim(ACTION, "death");
+        }
+        super.die(cause);
+    }
+
+    @Override
+    protected @Nullable SoundEvent getAmbientSound() {
+        return ModSounds.BOWTRUCKLE_RUSTLE.get();
+    }
+
+    @Override
+    public int getAmbientSoundInterval() {
+        return 240;
+    }
+
+    @Override
+    protected @Nullable SoundEvent getHurtSound(@NonNull DamageSource source) {
+        return ModSounds.BOWTRUCKLE_CREAK.get();
+    }
+
+    @Override
+    protected @Nullable SoundEvent getDeathSound() {
+        return ModSounds.BOWTRUCKLE_SNAP.get();
+    }
+
+    @Override
+    protected float getSoundVolume() {
+        return 0.5f;
     }
 
     @Override
@@ -317,8 +520,10 @@ public class BowtruckleEntity extends GeoEntityBase implements BondableBeast {
                 return !isDefending() && super.canUse();
             }
         });
+        goalSelector.addGoal(3, new BowtruckleLockpickGoal(this));
         goalSelector.addGoal(3, new TemptGoal(this, 1.1,
                 Ingredient.of(Items.STICK, Items.OAK_SAPLING), false));
+        goalSelector.addGoal(4, new BowtruckleHideGoal(this));
         goalSelector.addGoal(4, new FollowBondedOwnerGoal<>(this));
         goalSelector.addGoal(5, new MoveTowardsRestrictionGoal(this, 0.8));
         goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.8));
@@ -328,8 +533,26 @@ public class BowtruckleEntity extends GeoEntityBase implements BondableBeast {
                 (target, level) -> isDefending() && target.getUUID().equals(angryAt)));
     }
 
+    /** Movement and held poses first, one-shots after: the last controller to touch a bone wins. */
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(AnimHelper.movementController("bowtruckle", 5, IDLE_ANIM, WALK_ANIM));
+        controllers.add(new AnimationController<BowtruckleEntity>("bowtruckle_movement", 4, test -> {
+            if (flag(FLAG_CLIMBING)) return test.setAndContinue(CLIMB_ANIM);
+            if (flag(FLAG_LOCKPICKING)) return test.setAndContinue(LOCKPICK_ANIM);
+            if (test.isMoving()) {
+                double dx = getX() - xo;
+                double dz = getZ() - zo;
+                return test.setAndContinue(dx * dx + dz * dz > RUN_SPEED_SQR ? RUN_ANIM : WALK_ANIM);
+            }
+            if (flag(FLAG_DEFENDING)) return test.setAndContinue(DEFEND_ANIM);
+            if (flag(FLAG_CAMOUFLAGED)) return test.setAndContinue(HIDE_ANIM);
+            return test.setAndContinue(IDLE_ANIM);
+        }));
+        controllers.add(new AnimationController<BowtruckleEntity>(ACTION, 0, test -> PlayState.STOP)
+                .triggerableAnim("curious", AnimHelper.playOnce("bowtruckle", "curious"))
+                .triggerableAnim("attack", AnimHelper.playOnce("bowtruckle", "attack"))
+                .triggerableAnim("pickup", AnimHelper.playOnce("bowtruckle", "pickup"))
+                .triggerableAnim("hit", AnimHelper.playOnce("bowtruckle", "hit"))
+                .triggerableAnim("death", AnimHelper.playOnce("bowtruckle", "death")));
     }
 }

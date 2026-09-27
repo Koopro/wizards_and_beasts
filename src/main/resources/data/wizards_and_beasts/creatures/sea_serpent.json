@@ -36,6 +36,10 @@
   ],
   "clips": [
     "bite",
-    "hiss"
+    "hiss",
+    "hit",
+    "death",
+    "coil",
+    "taste_air"
   ]
 }

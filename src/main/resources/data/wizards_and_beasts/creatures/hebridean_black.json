@@ -5,6 +5,7 @@
   "temperament": "HOSTILE",
   "width": 2.7,
   "height": 2.9,
+  "scale": 1.35,
   "maxHealth": 136.0,
   "movementSpeed": 0.2,
   "flyingSpeed": 0.5,

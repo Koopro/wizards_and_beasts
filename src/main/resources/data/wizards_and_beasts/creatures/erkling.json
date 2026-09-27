@@ -46,6 +46,9 @@
   ],
   "clips": [
     "attack",
-    "call"
+    "call",
+    "hit",
+    "death",
+    "peek"
   ]
 }

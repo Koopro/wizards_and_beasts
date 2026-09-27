@@ -23,13 +23,18 @@
     {
       "type": "bioluminescence",
       "particle": "enchant",
-      "interval": 10,
+      "interval": 20,
       "glow_self": false
     }
   ],
   "clips": [
     "flinch",
-    "song"
+    "song",
+    "death",
+    "attack",
+    "preen",
+    "ruffle",
+    "stretch"
   ],
   "behaviour": {
     "sounds": {

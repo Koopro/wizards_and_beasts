@@ -117,6 +117,50 @@ public class ModSounds {
             register("entity.niffler.happy");
     public static final DeferredHolder<SoundEvent, SoundEvent> NIFFLER_HISS =
             register("entity.niffler.hiss");
+
+    // Kelpie: an ordinary horse's call for the lure, something wrong underneath it once revealed, and the water.
+    public static final DeferredHolder<SoundEvent, SoundEvent> KELPIE_WHINNY = register("entity.kelpie.whinny");
+    public static final DeferredHolder<SoundEvent, SoundEvent> KELPIE_SNARL = register("entity.kelpie.snarl");
+    public static final DeferredHolder<SoundEvent, SoundEvent> KELPIE_SPLASH = register("entity.kelpie.splash");
+
+    // Bowtruckle: small wood-and-leaf noises, vanilla sounds through sounds.json.
+    public static final DeferredHolder<SoundEvent, SoundEvent> BOWTRUCKLE_RUSTLE = register("entity.bowtruckle.rustle");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BOWTRUCKLE_CREAK = register("entity.bowtruckle.creak");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BOWTRUCKLE_SNAP = register("entity.bowtruckle.snap");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BOWTRUCKLE_CLICK = register("entity.bowtruckle.click");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BOWTRUCKLE_PICK = register("entity.bowtruckle.pick");
+
+    // Dementor. Vanilla sounds through sounds.json until recordings exist: a rattling breath, the memory voices, a
+    // failing heartbeat while it feeds, the Kiss, the recoil from a blow, the shriek from a Patronus, dissipation.
+    public static final DeferredHolder<SoundEvent, SoundEvent> DEMENTOR_BREATH =
+            register("entity.dementor.breath");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DEMENTOR_WHISPER =
+            register("entity.dementor.whisper");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DEMENTOR_DRAIN =
+            register("entity.dementor.drain");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DEMENTOR_KISS =
+            register("entity.dementor.kiss");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DEMENTOR_RECOIL =
+            register("entity.dementor.recoil");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DEMENTOR_REPELLED =
+            register("entity.dementor.repelled");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DEMENTOR_DISSIPATE =
+            register("entity.dementor.dissipate");
+
+    // Phoenix. Each points at vanilla sounds through sounds.json until a recording exists; the events
+    // are the phoenix's own so a real call, song or burning can replace them without a code change.
+    public static final DeferredHolder<SoundEvent, SoundEvent> PHOENIX_CRY =
+            register("entity.phoenix.cry");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PHOENIX_SONG =
+            register("entity.phoenix.song");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PHOENIX_BURST =
+            register("entity.phoenix.burst");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PHOENIX_RISE =
+            register("entity.phoenix.rise");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PHOENIX_FLAME =
+            register("entity.phoenix.flame");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PHOENIX_TEARS =
+            register("entity.phoenix.tears");
     public static final DeferredHolder<SoundEvent, SoundEvent> NIFFLER_DIG =
             register("entity.niffler.dig");
     public static final DeferredHolder<SoundEvent, SoundEvent> NIFFLER_SQUIRM =

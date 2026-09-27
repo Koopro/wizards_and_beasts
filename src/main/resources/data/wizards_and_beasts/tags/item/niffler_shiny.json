@@ -14,6 +14,8 @@
     "minecraft:lapis_lazuli",
     "minecraft:quartz",
     "minecraft:redstone",
-    "wizards_and_beasts:golden_snidget_feather"
+    "wizards_and_beasts:golden_snidget_feather",
+    "minecraft:raw_gold",
+    "wizards_and_beasts:leprechaun_gold"
   ]
 }

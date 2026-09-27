@@ -32,6 +32,10 @@
   ],
   "clips": [
     "attack",
-    "hiss"
+    "hiss",
+    "hit",
+    "death",
+    "groom",
+    "skitter"
   ]
 }

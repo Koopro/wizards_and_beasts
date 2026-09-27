@@ -33,6 +33,8 @@
   ],
   "clips": [
     "flinch",
-    "call"
+    "call",
+    "death",
+    "peek"
   ]
 }

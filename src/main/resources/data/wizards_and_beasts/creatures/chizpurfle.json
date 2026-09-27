@@ -34,6 +34,9 @@
   ],
   "clips": [
     "bite",
-    "flinch"
+    "flinch",
+    "death",
+    "groom",
+    "skitter"
   ]
 }

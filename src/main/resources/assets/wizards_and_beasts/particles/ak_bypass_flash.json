@@ -1,1 +1,5 @@
-{"textures":["wizards_and_beasts:spell_mote"]} 
+{
+  "textures": [
+    "wizards_and_beasts:ak_bypass_flash_0"
+  ]
+}

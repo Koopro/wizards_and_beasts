@@ -35,6 +35,9 @@
     }
   ],
   "clips": [
-    "flinch"
+    "flinch",
+    "death",
+    "drift",
+    "roll"
   ]
 }

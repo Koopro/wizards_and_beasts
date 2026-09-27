@@ -52,6 +52,6 @@ public record NunduPestilence(double radius, int cooldownTicks, int poisonAmplif
         double y = entity.getY() + entity.getBbHeight() * 0.6;
         double z = entity.getZ();
         AbilitySupport.emitAt(level, AbilitySupport.Particle.SOUL, x, y, z, 30, radius * 0.4, 0.02);
-        AbilitySupport.emitAt(level, AbilitySupport.Particle.WITCH, x, y, z, 20, radius * 0.4, 0.02);
+        AbilitySupport.emitAt(level, AbilitySupport.Particle.POISON, x, y, z, 12, radius * 0.4, 0.02);
     }
 }

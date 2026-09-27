@@ -4,7 +4,7 @@
   "locomotion": "GROUND",
   "temperament": "HOSTILE",
   "width": 2.7,
-  "height": 2.9,
+  "height": 2.2,
   "maxHealth": 136.0,
   "movementSpeed": 0.2,
   "flyingSpeed": 0.0,
@@ -15,8 +15,6 @@
   "attackDamage": 14.0,
   "scale": 1.4,
   "traits": [
-    "POISON_ATTACK",
-    "PETRIFY",
     "DEATH_GAZE",
     "LETHAL_GAZE",
     "COCKCROW_WEAKNESS"
@@ -30,8 +28,12 @@
   ],
   "clips": [
     "strike",
+    "bite",
+    "gaze",
     "hiss",
-    "gaze"
+    "taste_air",
+    "hit",
+    "death"
   ],
-  "_scale_note": "Design decision, not a canon figure. Chamber of Secrets gives 'fifty feet', which no source converts to Minecraft blocks. The rig is 8.5 blocks nose to tail at scale 1.0 and 1.4 blocks tall; 1.4 takes it to roughly 12 blocks long, which reads enormous beside a player without making the square hitbox impassable. The real limit is that a vanilla hitbox is square in plan, so no scale can make a 12-block serpent occupy a 12-block-long box - only a multi-part entity could, and that is out of scope here. Scale raises hitbox and reach together via Attributes.SCALE."
+  "_scale_note": "Design decision, not a canon figure. Chamber of Secrets gives 'fifty feet', which no source converts to Minecraft blocks. The rig (tools/basilisk_model.py) is 9.6 blocks nose to tail at scale 1.0 and 1.95 tall with the head raised; scale 1.4 takes it to about 13.4 blocks long and 2.7 tall, which dwarfs a player without making the square hitbox impassable. A vanilla hitbox is square in plan, so the body lying outside it is drawn, culled and bitten from by BasiliskEntity rather than collided with. Scale raises hitbox and reach together via Attributes.SCALE."
 }

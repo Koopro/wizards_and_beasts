@@ -6,6 +6,7 @@ import at.koopro.wizardsandbeasts.creature.bond.BondState;
 import at.koopro.wizardsandbeasts.creature.bond.BondableBeast;
 import at.koopro.wizardsandbeasts.creature.bond.FollowBondedOwnerGoal;
 import at.koopro.wizardsandbeasts.entity.niffler.ai.NifflerFleeWhenPouchStolen;
+import at.koopro.wizardsandbeasts.entity.niffler.ai.NifflerHoardGoal;
 import at.koopro.wizardsandbeasts.entity.niffler.ai.NifflerSeekShinyBlockGoal;
 import at.koopro.wizardsandbeasts.entity.niffler.ai.NifflerSeekShinyItemGoal;
 import at.koopro.wizardsandbeasts.event.bestiary.niffler.NifflerPouchOpenEvent;
@@ -49,8 +50,72 @@ import software.bernie.geckolib.animatable.manager.AnimatableManager;
 import software.bernie.geckolib.animation.RawAnimation;
 
 import java.util.UUID;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.goal.MoveTowardsRestrictionGoal;
+import net.minecraft.world.entity.ai.goal.PanicGoal;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.object.PlayState;
 
+/**
+ * The Niffler: a small, harmless burrower with a pouch that holds far more than it should, and an eye for anything
+ * that glitters.
+ *
+ * <p>What lives where. Treasure — what it wants and how much — is tags ({@link NifflerTreasure}). It finds treasure on
+ * the ground ({@code NifflerSeekShinyItemGoal}) and in the ground ({@code NifflerSeekShinyBlockGoal}), keeps it in the
+ * pouch ({@link NifflerPouchInventory}, saved on the entity, dropped when it dies), and a wild one takes its haul home
+ * to sit over it ({@code NifflerHoardGoal}; home is vanilla's saved mob home, set where it first appeared). Bond,
+ * feeding, following and the pouch window are the shared bond layer's ({@code creature_bonds/niffler.json}). Struck,
+ * it bolts. It has a coat: classic black, and rarely brown, grey or pale.
+ */
 public class NifflerEntity extends GeoEntityBase implements BondableBeast {
+
+    /** Its coat, synced. The classic black is the base texture; the others are {@code textures/entity/niffler/<coat>.png}. */
+    public enum Coat {
+        CLASSIC(null, 70), DARK_BROWN("niffler/dark_brown", 12), GREY("niffler/grey", 12), PALE("niffler/pale", 6);
+
+        private static final Coat[] VALUES = values();
+        private final @Nullable String texture;
+        private final int weight;
+
+        Coat(@Nullable String texture, int weight) {
+            this.texture = texture;
+            this.weight = weight;
+        }
+
+        public @Nullable String texture() {
+            return texture;
+        }
+
+        public static Coat byId(int id) {
+            return id >= 0 && id < VALUES.length ? VALUES[id] : CLASSIC;
+        }
+
+        static Coat roll(net.minecraft.util.RandomSource random) {
+            int total = 0;
+            for (Coat c : VALUES) total += c.weight;
+            int r = random.nextInt(total);
+            for (Coat c : VALUES) {
+                if ((r -= c.weight) < 0) return c;
+            }
+            return CLASSIC;
+        }
+    }
+
+    public static final int HOME_RADIUS = 16;
+    private static final byte FLAG_DIGGING = 1;
+    private static final byte FLAG_HOARDING = 2;
+    private static final String ACTION_CONTROLLER = "niffler_action";
+    private static final double RUN_SPEED_SQR = 0.09 * 0.09;
+
 
     // ─── Synched data ─────────────────────────────────────────────────────────
     private static final EntityDataAccessor<Integer> DATA_BOND_LEVEL =
@@ -61,10 +126,16 @@ public class NifflerEntity extends GeoEntityBase implements BondableBeast {
             SynchedEntityData.defineId(NifflerEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> DATA_PEEK_TICK =
             SynchedEntityData.defineId(NifflerEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Byte> DATA_COAT =
+            SynchedEntityData.defineId(NifflerEntity.class, EntityDataSerializers.BYTE);
+    private static final EntityDataAccessor<Byte> DATA_ACTION =
+            SynchedEntityData.defineId(NifflerEntity.class, EntityDataSerializers.BYTE);
 
     // ─── Animations ───────────────────────────────────────────────────────────
     private static final RawAnimation IDLE_ANIM = AnimHelper.loop("niffler", "idle");
     private static final RawAnimation WALK_ANIM = AnimHelper.loop("niffler", "walk");
+    private static final RawAnimation RUN_ANIM = AnimHelper.loop("niffler", "run");
+    private static final RawAnimation HOARD_ANIM = AnimHelper.loop("niffler", "hoard");
 
     // ─── Bestiary ID ──────────────────────────────────────────────────────────
     public static final Identifier BESTIARY_ID = Identifier.fromNamespaceAndPath("wizards_and_beasts", "niffler");
@@ -98,6 +169,7 @@ public class NifflerEntity extends GeoEntityBase implements BondableBeast {
     private int peekPhase; // 0=idle, 1=rising, 2=held, 3=falling
     private int peekPhaseTick;
     private int nextPeekDelay;
+    private int digCooldown;
 
     public NifflerEntity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
@@ -110,7 +182,9 @@ public class NifflerEntity extends GeoEntityBase implements BondableBeast {
                 .add(Attributes.MAX_HEALTH, 10.0)
                 .add(Attributes.MOVEMENT_SPEED, 0.28)
                 .add(Attributes.ATTACK_DAMAGE, 1.0)
-                .add(Attributes.FOLLOW_RANGE, 24.0);
+                .add(Attributes.FOLLOW_RANGE, 24.0)
+                // Drawn big enough to carry a snout and a face, then scaled down to a small animal.
+                .add(Attributes.SCALE, 0.7);
     }
 
     // ─── Entity data ──────────────────────────────────────────────────────────
@@ -121,20 +195,26 @@ public class NifflerEntity extends GeoEntityBase implements BondableBeast {
         builder.define(DATA_IS_CARRIED, false);
         builder.define(DATA_POUCH_FULL, false);
         builder.define(DATA_PEEK_TICK, 0);
+        builder.define(DATA_COAT, (byte) Coat.CLASSIC.ordinal());
+        builder.define(DATA_ACTION, (byte) 0);
     }
 
     // ─── Goals ────────────────────────────────────────────────────────────────
     @Override
     protected void registerGoals() {
         goalSelector.addGoal(1, new FloatGoal(this));
+        // Not a fighter: struck, it bolts.
+        goalSelector.addGoal(2, new PanicGoal(this, 1.7));
         goalSelector.addGoal(2, new NifflerFleeWhenPouchStolen(this));
         goalSelector.addGoal(3, new NifflerSeekShinyItemGoal(this));
         goalSelector.addGoal(4, new NifflerSeekShinyBlockGoal(this));
         // A pocketed Niffler is inside the player; it must not also be pathing to them.
         goalSelector.addGoal(5, new FollowBondedOwnerGoal<>(this, n -> !n.isCarried()));
-        goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.4));
-        goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 6.0f));
-        goalSelector.addGoal(8, new RandomLookAroundGoal(this));
+        goalSelector.addGoal(6, new NifflerHoardGoal(this));
+        goalSelector.addGoal(7, new MoveTowardsRestrictionGoal(this, 0.8));
+        goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 0.4));
+        goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 6.0f));
+        goalSelector.addGoal(9, new RandomLookAroundGoal(this));
     }
 
     // ─── Tick ─────────────────────────────────────────────────────────────────
@@ -144,6 +224,10 @@ public class NifflerEntity extends GeoEntityBase implements BondableBeast {
         if (level().isClientSide()) return;
 
         if (ticksSincePouchAccess > 0) ticksSincePouchAccess--;
+        if (digCooldown > 0) digCooldown--;
+        if (!hasHome() && getOwnerUUID() == null) {
+            setHomeTo(blockPosition(), HOME_RADIUS);   // spawn eggs and old saves arrive without a burrow
+        }
 
         tickBond();
         tickPeek();
@@ -276,6 +360,169 @@ public class NifflerEntity extends GeoEntityBase implements BondableBeast {
         return InteractionResult.SUCCESS;
     }
 
+    // ─── Spawning ─────────────────────────────────────────────────────────────
+    @Override
+    public @Nullable SpawnGroupData finalizeSpawn(@NonNull ServerLevelAccessor level, @NonNull DifficultyInstance difficulty,
+                                                  @NonNull EntitySpawnReason reason, @Nullable SpawnGroupData data) {
+        setCoat(Coat.roll(getRandom()));
+        setHomeTo(blockPosition(), HOME_RADIUS);
+        return super.finalizeSpawn(level, difficulty, reason, data);
+    }
+
+    public Coat coat() {
+        return Coat.byId(entityData.get(DATA_COAT));
+    }
+
+    public void setCoat(Coat coat) {
+        entityData.set(DATA_COAT, (byte) coat.ordinal());
+    }
+
+    // ─── Treasure ─────────────────────────────────────────────────────────────
+
+    /**
+     * Takes treasure off the ground into the pouch: as much as fits, the rest left lying where it was. Server-side.
+     * The item flies to the Niffler (vanilla's pickup packet) and something gold makes it very happy.
+     *
+     * @return how many it took
+     */
+    public int pickUp(ItemEntity item) {
+        if (level().isClientSide() || !item.isAlive()) return 0;
+        ItemStack stack = item.getItem();
+        int value = NifflerTreasure.value(stack);
+        int before = stack.getCount();
+        ItemStack rest = pouch.addItem(stack.copy());
+        int taken = before - rest.getCount();
+        if (taken <= 0) return 0;
+        take(item, taken);
+        if (rest.isEmpty()) {
+            item.discard();
+        } else {
+            item.setItem(rest);
+        }
+        onPickedUpShinyItem();
+        found(value);
+        return taken;
+    }
+
+    /** The beat after a find: a little sparkle, a chirp, and a celebration if it was gold. */
+    private void found(int value) {
+        if (!(level() instanceof ServerLevel level)) return;
+        level.sendParticles(ParticleTypes.WAX_OFF, getX(), getY() + 0.4, getZ(), 3 + value, 0.2, 0.2, 0.2, 0.0);
+        level.playSound(null, blockPosition(), ModSounds.NIFFLER_HAPPY.get(), SoundSource.NEUTRAL, 0.5f,
+                1.0f + 0.1f * value);
+        triggerAnim(ACTION_CONTROLLER, value >= NifflerTreasure.HIGH_VALUE ? "celebrate" : "pickup");
+    }
+
+    /** It has caught the scent of something: a sniff, and a snuffle now and then. */
+    public void onSpottedTreasure() {
+        if (level().isClientSide()) return;
+        triggerAnim(ACTION_CONTROLLER, "sniff");
+        if (getRandom().nextInt(3) == 0) {
+            playSound(ModSounds.NIFFLER_AMBIENT.get(), 0.4f, 1.3f);
+        }
+    }
+
+    /** How many treasures are in the pouch. */
+    public int treasureCount() {
+        int n = 0;
+        for (int i = 0; i < pouch.getContainerSize(); i++) {
+            n += pouch.getItem(i).getCount();
+        }
+        return n;
+    }
+
+    /** Sitting over the hoard: turns something over, pleased with itself. */
+    public void admireHoard() {
+        if (level().isClientSide()) return;
+        triggerAnim(ACTION_CONTROLLER, getRandom().nextBoolean() ? "celebrate" : "pickup");
+        playSound(ModSounds.NIFFLER_HAPPY.get(), 0.4f, 1.1f);
+    }
+
+    // ─── Digging ──────────────────────────────────────────────────────────────
+
+    public int digCooldown() {
+        return digCooldown;
+    }
+
+    public void startDigCooldown(int ticks) {
+        digCooldown = Math.max(digCooldown, ticks);
+    }
+
+    /** Dirt flying: the dig clip, block-crack particles and the scrabbling sound. */
+    public void digEffects(BlockPos pos, BlockState state) {
+        if (!(level() instanceof ServerLevel level)) return;
+        triggerAnim(ACTION_CONTROLLER, "dig");
+        level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), pos.getX() + 0.5, pos.getY() + 1.0,
+                pos.getZ() + 0.5, 6, 0.3, 0.1, 0.3, 0.05);
+        level.playSound(null, pos, ModSounds.NIFFLER_DIG.get(), SoundSource.NEUTRAL, 0.6f, 0.9f + getRandom().nextFloat() * 0.2f);
+    }
+
+    /**
+     * Mines one block, for real: it is removed. Treasure (its drops) goes into the pouch, anything that does not fit is
+     * left on the ground; loose earth dug through on the way drops as it would for anyone.
+     */
+    public void mine(ServerLevel level, BlockPos pos, BlockState state) {
+        if (state.is(NifflerTreasure.ORE)) {
+            java.util.List<ItemStack> drops = Block.getDrops(state, level, pos, level.getBlockEntity(pos), this, ItemStack.EMPTY);
+            level.destroyBlock(pos, false, this);
+            int best = 0;
+            for (ItemStack drop : drops) {
+                best = Math.max(best, NifflerTreasure.value(drop));
+                ItemStack rest = pouch.addItem(drop);
+                if (!rest.isEmpty()) {
+                    Block.popResource(level, pos, rest);
+                }
+            }
+            onPickedUpShinyItem();
+            found(Math.max(best, NifflerTreasure.LOW));
+        } else {
+            level.destroyBlock(pos, true, this);
+        }
+    }
+
+    // ─── Action flags (synced for animation) ──────────────────────────────────
+
+    public boolean isDigging() {
+        return (entityData.get(DATA_ACTION) & FLAG_DIGGING) != 0;
+    }
+
+    public boolean isHoarding() {
+        return (entityData.get(DATA_ACTION) & FLAG_HOARDING) != 0;
+    }
+
+    public void setDigging(boolean on) {
+        setAction(FLAG_DIGGING, on);
+    }
+
+    public void setHoarding(boolean on) {
+        setAction(FLAG_HOARDING, on);
+    }
+
+    private void setAction(byte flag, boolean on) {
+        byte flags = entityData.get(DATA_ACTION);
+        byte next = (byte) (on ? flags | flag : flags & ~flag);
+        if (next != flags) entityData.set(DATA_ACTION, next);
+    }
+
+    @Override
+    public boolean hurtServer(@NonNull ServerLevel level, @NonNull DamageSource source, float amount) {
+        boolean hurt = super.hurtServer(level, source, amount);
+        if (hurt && isAlive()) {
+            triggerAnim(ACTION_CONTROLLER, "hit");
+            setHoarding(false);
+            setDigging(false);
+        }
+        return hurt;
+    }
+
+    @Override
+    public void die(@NonNull DamageSource cause) {
+        if (!level().isClientSide()) {
+            triggerAnim(ACTION_CONTROLLER, "death");
+        }
+        super.die(cause);
+    }
+
     // ─── Pocket carry system ──────────────────────────────────────────────────
     public void setCarried(@Nullable Player player) {
         if (!level().isClientSide()) {
@@ -373,6 +620,8 @@ public class NifflerEntity extends GeoEntityBase implements BondableBeast {
         super.addAdditionalSaveData(output);
         pouch.save(output);
         saveBond(output);
+        output.putInt("Coat", coat().ordinal());
+        output.putInt("DigCooldown", digCooldown);
     }
 
     @Override
@@ -380,6 +629,8 @@ public class NifflerEntity extends GeoEntityBase implements BondableBeast {
         super.readAdditionalSaveData(input);
         pouch.load(input);
         loadBond(input);
+        setCoat(Coat.byId(input.getIntOr("Coat", 0)));
+        digCooldown = input.getIntOr("DigCooldown", 0);
     }
 
     // ─── Sound overrides ──────────────────────────────────────────────────────
@@ -430,8 +681,25 @@ public class NifflerEntity extends GeoEntityBase implements BondableBeast {
     }
 
     // ─── GeckoLib ─────────────────────────────────────────────────────────────
+    /**
+     * Movement (idle, walk, run, or sat over its hoard) first, one-shots after: GeckoLib applies controllers in order
+     * and the last to touch a bone wins, so a dig or a celebration shows over the gait.
+     */
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(AnimHelper.movementController("niffler", 5, IDLE_ANIM, WALK_ANIM));
+        controllers.add(new AnimationController<NifflerEntity>("niffler_movement", 4, test -> {
+            if (isHoarding()) return test.setAndContinue(HOARD_ANIM);
+            if (!test.isMoving()) return test.setAndContinue(IDLE_ANIM);
+            double dx = getX() - xo;
+            double dz = getZ() - zo;
+            return test.setAndContinue(dx * dx + dz * dz > RUN_SPEED_SQR ? RUN_ANIM : WALK_ANIM);
+        }));
+        controllers.add(new AnimationController<NifflerEntity>(ACTION_CONTROLLER, 0, test -> PlayState.STOP)
+                .triggerableAnim("sniff", AnimHelper.playOnce("niffler", "sniff"))
+                .triggerableAnim("dig", AnimHelper.playOnce("niffler", "dig"))
+                .triggerableAnim("pickup", AnimHelper.playOnce("niffler", "pickup"))
+                .triggerableAnim("celebrate", AnimHelper.playOnce("niffler", "celebrate"))
+                .triggerableAnim("hit", AnimHelper.playOnce("niffler", "hit"))
+                .triggerableAnim("death", AnimHelper.playOnce("niffler", "death")));
     }
 }

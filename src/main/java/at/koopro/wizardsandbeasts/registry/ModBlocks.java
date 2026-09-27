@@ -178,6 +178,11 @@ public class ModBlocks {
     public static final DeferredBlock<? extends Block> UNLIT_COPPER_LANTERN = DeluminatorBlockRegistry.UNLIT_COPPER_LANTERN;
     public static final DeferredBlock<Block> UNLIT_GLOWSTONE = DeluminatorBlockRegistry.UNLIT_GLOWSTONE;
 
+    /** Acromantula silk: placed only by the spiders, crumbles when none is near. No item — it is not the player's. */
+    public static final DeferredBlock<at.koopro.wizardsandbeasts.block.AcromantulaWebBlock> ACROMANTULA_WEB =
+            BLOCKS.registerBlock("acromantula_web", at.koopro.wizardsandbeasts.block.AcromantulaWebBlock::new,
+                    () -> BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.COBWEB));
+
     // --- Pocket dimension blocks ---
 
     public static final DeferredBlock<WardingStoneBlock> WARDING_STONE =

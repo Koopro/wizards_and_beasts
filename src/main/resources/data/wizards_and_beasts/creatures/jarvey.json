@@ -32,7 +32,12 @@
   ],
   "clips": [
     "bite",
-    "call"
+    "call",
+    "hit",
+    "death",
+    "graze",
+    "sniff",
+    "shake"
   ],
   "behaviour": {
     "sounds": {

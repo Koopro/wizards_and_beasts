@@ -25,13 +25,16 @@
     },
     {
       "type": "bioluminescence",
-      "particle": "happy",
-      "interval": 8,
+      "particle": "light",
+      "interval": 20,
       "glow_self": true
     }
   ],
   "clips": [
     "flinch",
-    "call"
+    "call",
+    "death",
+    "attack",
+    "peek"
   ]
 }

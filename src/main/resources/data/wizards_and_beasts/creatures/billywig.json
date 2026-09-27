@@ -33,12 +33,15 @@
     {
       "type": "bioluminescence",
       "particle": "electric",
-      "interval": 8,
+      "interval": 20,
       "glow_self": true
     }
   ],
   "clips": [
     "flinch",
-    "call"
+    "call",
+    "death",
+    "hover",
+    "flit"
   ]
 }

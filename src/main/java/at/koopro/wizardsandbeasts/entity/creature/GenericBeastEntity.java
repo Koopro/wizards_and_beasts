@@ -802,13 +802,19 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
     }
 
     /**
-     * Registers a triggerable for each declared clip and nothing else.
+     * The locomotion loop first, then a triggerable for each declared clip.
      *
-     * <p>Subclasses add their movement controller on top of this and must call {@code super} —
-     * {@code DragonEntity} already did, and the four locomotion classes now do too.
+     * <p>The order is the whole reason this method is not left to subclasses. GeckoLib applies
+     * controllers in registration order and a non-additive controller overwrites every bone its
+     * current clip keys, so whichever controller comes last owns the shared bones. With the
+     * movement loop registered after the action controller — as it was — the idle or walk cycle
+     * rewrote the head, legs and tail of every attack, hit and ambient clip on every frame, and a
+     * creature's one-shots only moved the bones its idle happened not to touch. The one-shot
+     * layer has to be the later one: it is silent until triggered, and while it plays it wins.
      */
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        addMovementController(controllers);
         List<String> clips = declaredClips();
         if (clips.isEmpty()) {
             return;
@@ -820,5 +826,12 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
             action.triggerableAnim(clip, AnimHelper.playOnce(name, clip));
         }
         controllers.add(action);
+    }
+
+    /**
+     * The looping locomotion controller ({@code idle} plus {@code walk}/{@code fly}/{@code swim}).
+     * Each locomotion class supplies its own; called before the one-shot layer is registered.
+     */
+    protected void addMovementController(AnimatableManager.ControllerRegistrar controllers) {
     }
 }

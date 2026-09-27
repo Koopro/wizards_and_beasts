@@ -3,8 +3,8 @@
   "bodyPlan": "AQUATIC",
   "locomotion": "AQUATIC",
   "temperament": "NEUTRAL",
-  "width": 1.7,
-  "height": 1.9,
+  "width": 1.4,
+  "height": 1.7,
   "maxHealth": 47.0,
   "movementSpeed": 0.23,
   "flyingSpeed": 0.0,
@@ -15,7 +15,6 @@
   "attackDamage": 9.0,
   "traits": [
     "AMPHIBIOUS",
-    "CHARGE",
     "KNOCKBACK"
   ],
   "abilities": [
@@ -35,11 +34,6 @@
       "bubble_particles": false
     },
     {
-      "type": "constrict",
-      "hold_ticks": 100,
-      "pull_strength": 0.8
-    },
-    {
       "type": "status_on_hit",
       "effects": [
         {
@@ -51,12 +45,15 @@
     }
   ],
   "clips": [
-    "attack",
-    "call"
+    "bite",
+    "call",
+    "hit",
+    "death",
+    "drift",
+    "roll"
   ],
   "behaviour": {
     "sounds": {
-      "ambient": "minecraft:entity.horse.ambient",
       "hurt": "minecraft:entity.horse.hurt",
       "death": "minecraft:entity.horse.death"
     }

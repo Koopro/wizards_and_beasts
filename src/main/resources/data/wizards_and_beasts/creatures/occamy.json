@@ -41,5 +41,12 @@
       "type": "tint",
       "color": "#9FE0FF"
     }
+  ],
+  "clips": [
+    "attack",
+    "hit",
+    "death",
+    "coil",
+    "taste_air"
   ]
 }

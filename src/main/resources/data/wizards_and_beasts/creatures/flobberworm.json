@@ -16,6 +16,7 @@
   "traits": [],
   "abilities": [],
   "clips": [
-    "flinch"
+    "flinch",
+    "death"
   ]
 }

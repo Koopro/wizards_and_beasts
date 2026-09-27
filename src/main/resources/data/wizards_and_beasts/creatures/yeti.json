@@ -37,6 +37,10 @@
   ],
   "clips": [
     "attack",
-    "howl"
+    "howl",
+    "hit",
+    "death",
+    "stretch",
+    "grunt"
   ]
 }

@@ -1,12 +1,34 @@
 {
-  "_comment": "Proud, and it eats meat. No Java: the Hippogriff is a data-driven GenericFlyingBeastEntity, and this file is the whole of its opt-in. The betrayal penalty is the steepest in the mod because insulting a Hippogriff is the one thing canon is explicit about.",
+  "_comment": "Proud, and it eats meat: insects, birds and small animals (Fantastic Beasts; Buckbeak eats dead ferrets and rats in Prisoner of Azkaban). HippogriffEntity only accepts food, touch or a rider from someone it has bowed back to; this file is the trust that follows. Riding needs 25. The betrayal penalty is the steepest in the mod because insulting a hippogriff is the one thing canon is explicit about.",
   "feeds": [
-    { "item": "minecraft:cooked_beef", "gain": 15, "cooldownSeconds": 90 },
-    { "item": "minecraft:rabbit", "gain": 12, "cooldownSeconds": 60 },
-    { "item": "minecraft:beef", "gain": 8, "cooldownSeconds": 45 }
+    {
+      "item": "minecraft:rabbit",
+      "gain": 15,
+      "cooldownSeconds": 60
+    },
+    {
+      "item": "minecraft:chicken",
+      "gain": 12,
+      "cooldownSeconds": 60
+    },
+    {
+      "item": "minecraft:cod",
+      "gain": 8,
+      "cooldownSeconds": 45
+    },
+    {
+      "item": "minecraft:beef",
+      "gain": 8,
+      "cooldownSeconds": 45
+    }
   ],
   "followThreshold": 70,
-  "milestones": [25, 50, 75, 100],
+  "milestones": [
+    25,
+    50,
+    75,
+    100
+  ],
   "proximityRange": 8.0,
   "proximitySeconds": 45,
   "proximityGain": 1,

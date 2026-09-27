@@ -39,7 +39,7 @@
     {
       "type": "bioluminescence",
       "particle": "spore",
-      "interval": 12,
+      "interval": 20,
       "glow_self": false
     },
     {
@@ -58,6 +58,9 @@
   ],
   "clips": [
     "flinch",
-    "groan"
+    "groan",
+    "death",
+    "hover",
+    "flit"
   ]
 }

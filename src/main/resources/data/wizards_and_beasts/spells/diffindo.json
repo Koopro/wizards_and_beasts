@@ -4,7 +4,7 @@
   "category": "combat",
   "cooldownTicks": 50,
   "baseDamage": 6.0,
-  "color": -3407872,
+  "color": -2564888,
   "castType": "projectile",
   "effects": [
     {
@@ -26,8 +26,8 @@
     "minProficiency": "proficient"
   },
   "vfx": {
-    "trail": "ice_shard",
-    "impact": "ice_shard",
+    "trail": "arcane_mote",
+    "impact": "arcane_mote",
     "trailDensity": 2,
     "impactCount": 12
   }

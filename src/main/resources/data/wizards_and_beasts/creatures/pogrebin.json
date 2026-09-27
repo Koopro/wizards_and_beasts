@@ -43,6 +43,10 @@
   ],
   "clips": [
     "attack",
-    "groan"
+    "groan",
+    "hit",
+    "death",
+    "squirm",
+    "settle"
   ]
 }

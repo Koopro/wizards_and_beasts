@@ -70,8 +70,8 @@ public class ModEntityLootTableProvider extends EntityLootSubProvider {
             case "ashwinder" -> simple(Items.BLAZE_POWDER, 0, 1);
             case "fire_crab" -> withRare(Items.BLAZE_POWDER, 0, 1, Items.EMERALD, 0.20f);
             // venomous / arthropod
-            case "acromantula" -> two(Items.STRING, 1, 3, Items.SPIDER_EYE, 0, 1);
-            case "basilisk" -> two(Items.BONE, 1, 3, Items.SPIDER_EYE, 0, 2);
+            case "acromantula" -> two(modItem("acromantula_venom"), 1, 1, Items.STRING, 1, 3);
+            case "basilisk" -> two(modItem("basilisk_fang"), 1, 1, Items.LEATHER, 2, 4);
             // Phase 3 additions
             case "ghoul" -> two(modItem("ghoul_slime"), 0, 2, Items.BONE, 0, 1);
             case "golden_snidget" -> withRare(Items.FEATHER, 0, 1, modItem("golden_snidget_feather"), 0.40f);

@@ -35,6 +35,11 @@
   ],
   "clips": [
     "attack",
-    "groan"
+    "groan",
+    "hit",
+    "death",
+    "graze",
+    "sniff",
+    "shake"
   ]
 }

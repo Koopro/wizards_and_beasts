@@ -101,7 +101,8 @@ class ChocolateFrogTest {
                     "replace:true would drop anything a pack added");
             String values = json.getAsJsonArray("values").toString();
             assertTrue(values.contains("dementor_chill"), "the Dementor chill is the point: " + values);
-            assertTrue(values.contains("soul_drained"), values);
+            // Canon: chocolate helps after a Dementor; nothing undoes the Kiss.
+            assertTrue(!values.contains("soul_drained"), "chocolate does not give back a soul: " + values);
             assertTrue(values.contains("minecraft:wither"), "dark creatures inflict Wither: " + values);
             assertTrue(values.contains("minecraft:mining_fatigue"), values);
         }

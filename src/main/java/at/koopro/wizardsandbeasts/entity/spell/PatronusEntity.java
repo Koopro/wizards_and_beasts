@@ -80,6 +80,11 @@ public class PatronusEntity extends Mob {
         return ownerUuid;
     }
 
+    /** The strength it was cast with. Server-side only: never synced, so a client copy reads 0. */
+    public float getPower() {
+        return patronusPower;
+    }
+
     public static void trySpawn(ServerLevel level, ServerPlayer caster, float patronusPower,
                                 float proficiencyScalar, String formId) {
         for (PatronusEntity existing : level.getEntitiesOfClass(PatronusEntity.class, caster.getBoundingBox().inflate(96))) {
@@ -124,8 +129,8 @@ public class PatronusEntity extends Mob {
         }
 
         // A non-corporeal Patronus is a silver mist: it guards its caster but cannot hunt down a
-        // Dementor the way a corporeal form does. It still *exists* nearby, so PatronusDetection
-        // keeps holding off the Kiss (lore: even a wisp buys a moment). It just hovers and wards.
+        // Dementor the way a corporeal form does. It still wards the few blocks around itself (see
+        // PatronusDetection.MIST_REPEL_RADIUS), so it holds off the Kiss: even a wisp buys a moment.
         LivingEntity darkMob = isCorporeal() ? findNearestDarkMob(sl, owner, 20.0) : null;
         if (darkMob != null) {
             Vec3 to = darkMob.getEyePosition().subtract(getEyePosition());

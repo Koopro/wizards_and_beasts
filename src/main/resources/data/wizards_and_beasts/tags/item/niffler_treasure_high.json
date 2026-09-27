@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:gold_nugget",
+    "minecraft:gold_ingot",
+    "minecraft:raw_gold",
+    "minecraft:gold_block",
+    "wizards_and_beasts:galleon",
+    "wizards_and_beasts:leprechaun_gold",
+    "wizards_and_beasts:golden_snidget_feather"
+  ]
+}

@@ -20,8 +20,7 @@ public class GenericGroundBeastEntity extends GenericBeastEntity {
     }
 
     @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        super.registerControllers(controllers); // declared reaction clips, if this creature has any
+    protected void addMovementController(AnimatableManager.ControllerRegistrar controllers) {
         String name = assetName();
         controllers.add(AnimHelper.movementController(name, 5,
                 AnimHelper.loop(name, "idle"), AnimHelper.loop(name, "walk")));

@@ -971,5 +971,355 @@
         "type": "event"
       }
     ]
+  },
+  "entity.phoenix.cry": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.phoenix.cry",
+    "sounds": [
+      {
+        "name": "minecraft:mob/allay/idle_without_item1",
+        "volume": 0.8,
+        "pitch": 0.8
+      },
+      {
+        "name": "minecraft:mob/allay/idle_without_item3",
+        "volume": 0.8,
+        "pitch": 0.75
+      },
+      {
+        "name": "minecraft:mob/parrot/idle2",
+        "volume": 0.6,
+        "pitch": 0.7
+      }
+    ]
+  },
+  "entity.phoenix.song": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.phoenix.song",
+    "sounds": [
+      {
+        "name": "minecraft:note/flute",
+        "volume": 0.9,
+        "pitch": 1.0
+      },
+      {
+        "name": "minecraft:note/icechime",
+        "volume": 0.7,
+        "pitch": 1.0
+      },
+      {
+        "name": "minecraft:note/bell",
+        "volume": 0.5,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "entity.phoenix.burst": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.phoenix.burst",
+    "sounds": [
+      {
+        "name": "minecraft:mob/ghast/fireball4",
+        "volume": 1.0,
+        "pitch": 0.6
+      },
+      {
+        "name": "minecraft:block/respawn_anchor/deplete1",
+        "volume": 1.0,
+        "pitch": 0.8
+      }
+    ]
+  },
+  "entity.phoenix.rise": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.phoenix.rise",
+    "sounds": [
+      {
+        "name": "minecraft:block/respawn_anchor/set_spawn1",
+        "volume": 1.0,
+        "pitch": 1.2
+      },
+      {
+        "name": "minecraft:block/respawn_anchor/set_spawn2",
+        "volume": 1.0,
+        "pitch": 1.2
+      }
+    ]
+  },
+  "entity.phoenix.flame": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.phoenix.flame",
+    "sounds": [
+      {
+        "name": "minecraft:mob/ghast/fireball4",
+        "volume": 0.8,
+        "pitch": 1.3
+      },
+      {
+        "name": "minecraft:block/respawn_anchor/charge2",
+        "volume": 0.8,
+        "pitch": 1.4
+      }
+    ]
+  },
+  "entity.phoenix.tears": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.phoenix.tears",
+    "sounds": [
+      {
+        "name": "minecraft:block/amethyst/resonate1",
+        "volume": 1.0,
+        "pitch": 1.6
+      },
+      {
+        "name": "minecraft:block/amethyst/resonate3",
+        "volume": 1.0,
+        "pitch": 1.5
+      }
+    ]
+  },
+  "entity.dementor.breath": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.dementor.breath",
+    "sounds": [
+      {
+        "name": "minecraft:mob/warden/sniff_1",
+        "volume": 0.7,
+        "pitch": 0.45
+      },
+      {
+        "name": "minecraft:mob/warden/sniff_2",
+        "volume": 0.7,
+        "pitch": 0.4
+      },
+      {
+        "name": "minecraft:mob/warden/sniff_3",
+        "volume": 0.7,
+        "pitch": 0.5
+      }
+    ]
+  },
+  "entity.dementor.whisper": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.dementor.whisper",
+    "sounds": [
+      {
+        "name": "minecraft:ambient/cave/cave13",
+        "volume": 0.5,
+        "pitch": 0.6
+      },
+      {
+        "name": "minecraft:ambient/cave/cave14",
+        "volume": 0.5,
+        "pitch": 0.55
+      },
+      {
+        "name": "minecraft:ambient/cave/cave7",
+        "volume": 0.5,
+        "pitch": 0.6
+      }
+    ]
+  },
+  "entity.dementor.drain": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.dementor.drain",
+    "sounds": [
+      {
+        "name": "minecraft:mob/warden/heartbeat_1",
+        "volume": 0.9,
+        "pitch": 0.7
+      },
+      {
+        "name": "minecraft:mob/warden/heartbeat_2",
+        "volume": 0.9,
+        "pitch": 0.65
+      }
+    ]
+  },
+  "entity.dementor.kiss": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.dementor.kiss",
+    "sounds": [
+      {
+        "name": "minecraft:mob/warden/sonic_charge1",
+        "volume": 0.8,
+        "pitch": 0.5
+      },
+      {
+        "name": "minecraft:mob/warden/sonic_charge2",
+        "volume": 0.8,
+        "pitch": 0.45
+      }
+    ]
+  },
+  "entity.dementor.recoil": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.dementor.recoil",
+    "sounds": [
+      {
+        "name": "minecraft:mob/phantom/hurt1",
+        "volume": 0.6,
+        "pitch": 0.4
+      },
+      {
+        "name": "minecraft:mob/phantom/hurt2",
+        "volume": 0.6,
+        "pitch": 0.45
+      }
+    ]
+  },
+  "entity.dementor.repelled": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.dementor.repelled",
+    "sounds": [
+      {
+        "name": "minecraft:mob/vex/hurt1",
+        "volume": 1.0,
+        "pitch": 0.45
+      },
+      {
+        "name": "minecraft:mob/vex/death1",
+        "volume": 1.0,
+        "pitch": 0.4
+      }
+    ]
+  },
+  "entity.dementor.dissipate": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.dementor.dissipate",
+    "sounds": [
+      {
+        "name": "minecraft:mob/phantom/death1",
+        "volume": 1.0,
+        "pitch": 0.4
+      },
+      {
+        "name": "minecraft:mob/phantom/death2",
+        "volume": 1.0,
+        "pitch": 0.35
+      }
+    ]
+  },
+  "entity.bowtruckle.rustle": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.bowtruckle.rustle",
+    "sounds": [
+      {
+        "name": "minecraft:block/azalea_leaves/step1",
+        "volume": 0.4,
+        "pitch": 1.5
+      },
+      {
+        "name": "minecraft:block/azalea_leaves/step2",
+        "volume": 0.4,
+        "pitch": 1.6
+      },
+      {
+        "name": "minecraft:block/azalea_leaves/step3",
+        "volume": 0.4,
+        "pitch": 1.4
+      }
+    ]
+  },
+  "entity.bowtruckle.creak": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.bowtruckle.creak",
+    "sounds": [
+      {
+        "name": "minecraft:block/bamboo_wood/step1",
+        "volume": 0.6,
+        "pitch": 1.8
+      },
+      {
+        "name": "minecraft:block/bamboo_wood/step2",
+        "volume": 0.6,
+        "pitch": 1.9
+      }
+    ]
+  },
+  "entity.bowtruckle.snap": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.bowtruckle.snap",
+    "sounds": [
+      {
+        "name": "minecraft:block/bamboo/sapling_hit1",
+        "volume": 0.7,
+        "pitch": 1.6
+      },
+      {
+        "name": "minecraft:block/bamboo/sapling_hit2",
+        "volume": 0.7,
+        "pitch": 1.5
+      }
+    ]
+  },
+  "entity.bowtruckle.click": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.bowtruckle.click",
+    "sounds": [
+      {
+        "name": "minecraft:block/bamboo_wood/step3",
+        "volume": 0.7,
+        "pitch": 2.0
+      },
+      {
+        "name": "minecraft:block/bamboo_wood/step4",
+        "volume": 0.7,
+        "pitch": 2.0
+      }
+    ]
+  },
+  "entity.bowtruckle.pick": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.bowtruckle.pick",
+    "sounds": [
+      {
+        "name": "minecraft:block/chain/step1",
+        "volume": 0.4,
+        "pitch": 2.0
+      },
+      {
+        "name": "minecraft:block/chain/step2",
+        "volume": 0.4,
+        "pitch": 1.9
+      }
+    ]
+  },
+  "entity.kelpie.whinny": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.kelpie.whinny",
+    "sounds": [
+      {
+        "name": "minecraft:mob/horse/idle1",
+        "volume": 0.8,
+        "pitch": 1.0
+      },
+      {
+        "name": "minecraft:mob/horse/idle2",
+        "volume": 0.8,
+        "pitch": 0.95
+      },
+      {
+        "name": "minecraft:mob/horse/idle3",
+        "volume": 0.8,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "entity.kelpie.snarl": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.kelpie.snarl",
+    "sounds": [
+      {
+        "name": "minecraft:mob/horse/angry1",
+        "volume": 1.0,
+        "pitch": 0.55
+      },
+      {
+        "name": "minecraft:mob/horse/zombie/idle1",
+        "volume": 0.9,
+        "pitch": 0.7
+      },
+      {
+        "name": "minecraft:mob/horse/zombie/idle2",
+        "volume": 0.9,
+        "pitch": 0.65
+      }
+    ]
+  },
+  "entity.kelpie.splash": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.kelpie.splash",
+    "sounds": [
+      {
+        "name": "minecraft:liquid/splash",
+        "volume": 0.9,
+        "pitch": 0.8
+      },
+      {
+        "name": "minecraft:liquid/splash2",
+        "volume": 0.9,
+        "pitch": 0.7
+      }
+    ]
   }
 }

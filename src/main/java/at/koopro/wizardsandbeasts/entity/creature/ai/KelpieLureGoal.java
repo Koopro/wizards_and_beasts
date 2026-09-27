@@ -1,30 +1,36 @@
 package at.koopro.wizardsandbeasts.entity.creature.ai;
 
 import at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity;
+import at.koopro.wizardsandbeasts.entity.creature.KelpieEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.player.Player;
+import org.jspecify.annotations.Nullable;
 
 import java.util.EnumSet;
-import java.util.List;
 
 /**
- * Kelpie lure/disguise: idles as a tame-looking horse (see {@link GenericBeastEntity#isDisguised()} /
- * {@link GenericBeastEntity#mobInteract}) until mounted. After {@code revealAfterMountTicks}, drops the
- * disguise and charges the nearest water, dragging and periodically damaging the rider. Resets back to
- * disguised once the rider is gone.
+ * The lure, the reveal and the drowning — the {@code lure_disguise} ability's goal.
  *
- * <p>Claims {@code Flag.MOVE} only while mounted, so the normal wander goal keeps the disguised kelpie
- * moving naturally when riderless, and this goal takes over navigation the instant someone climbs on.
+ * <p>A disguised Kelpie lets someone climb on (see {@link GenericBeastEntity#mobInteract}). For
+ * {@code revealAfterMountTicks} it is only a horse that will not be steered and turns for the water — a moment to
+ * notice and get off. Then it reveals itself and grips ({@link KelpieEntity#beginGrip}): the rider can no longer
+ * dismount, it makes for the nearest water and dives, and under water the rider's breath runs out fast
+ * ({@link KelpieEntity#drown}) and it bites now and then. The grip ends — the rider is thrown off — after
+ * {@link KelpieEntity#GRIP_TICKS}, when the rider has struck it hard enough, when it is bridled, or when either dies.
+ *
+ * <p>Costs: water is looked for in a small box, only while gripping, and only every {@link #WATER_SCAN_INTERVAL}
+ * ticks; the old goal scanned eighteen thousand blocks a second and dealt drowning damage every single tick.
  */
 public final class KelpieLureGoal extends Goal {
 
-    private static final int WATER_SCAN_INTERVAL = 20;
-    private static final int DRAG_DAMAGE_INTERVAL = 20;
+    public static final int WATER_SCAN_INTERVAL = 40;
+    public static final int BITE_INTERVAL = 40;
+    public static final float BITE_DAMAGE = 3.0f;
+    private static final int DIVE_DEPTH = 3;
 
     private final GenericBeastEntity mob;
     private final int revealAfterMountTicks;
@@ -32,20 +38,21 @@ public final class KelpieLureGoal extends Goal {
     private final int waterSearchRadius;
 
     private int mountedTicks;
-    private BlockPos waterTarget;
+    private int gripTick;
+    private @Nullable BlockPos waterTarget;
 
     public KelpieLureGoal(GenericBeastEntity mob, int revealAfterMountTicks, double dragSpeed, int waterSearchRadius) {
         this.mob = mob;
         this.revealAfterMountTicks = revealAfterMountTicks;
         this.dragSpeed = dragSpeed;
-        this.waterSearchRadius = waterSearchRadius;
+        this.waterSearchRadius = Math.min(waterSearchRadius, 12);
         setFlags(EnumSet.of(Flag.MOVE));
         mob.setDisguised(true);
     }
 
     @Override
     public boolean canUse() {
-        return !mob.getPassengers().isEmpty();
+        return rider() != null && !(mob instanceof KelpieEntity kelpie && kelpie.isBridled());
     }
 
     @Override
@@ -56,6 +63,7 @@ public final class KelpieLureGoal extends Goal {
     @Override
     public void start() {
         mountedTicks = 0;
+        gripTick = 0;
         waterTarget = null;
     }
 
@@ -63,56 +71,77 @@ public final class KelpieLureGoal extends Goal {
     public void stop() {
         mountedTicks = 0;
         waterTarget = null;
-        mob.setDisguised(true);
+        if (mob instanceof KelpieEntity kelpie) {
+            kelpie.releaseGrip();
+        }
         mob.getNavigation().stop();
     }
 
     @Override
+    public boolean requiresUpdateEveryTick() {
+        return true;
+    }
+
+    @Override
     public void tick() {
-        LivingEntity rider = riderOf(mob);
-        if (rider == null) {
+        LivingEntity rider = rider();
+        if (rider == null || !(mob.level() instanceof ServerLevel level)) {
             return;
         }
-
-        if (mob.isDisguised()) {
-            mountedTicks++;
-            if (mountedTicks < revealAfterMountTicks) {
-                return;
+        KelpieEntity kelpie = mob instanceof KelpieEntity k ? k : null;
+        if (kelpie != null && !kelpie.isGripping()) {
+            if (!mob.isDisguised()) {
+                return;   // revealed and not gripping: it let go, and the rider will be off in a moment
             }
-            mob.setDisguised(false);
+            // The horse moment: it walks for the water and will not be steered.
+            if (++mountedTicks % WATER_SCAN_INTERVAL == 1) {
+                waterTarget = findWater(level);
+            }
+            moveToWater(false);
+            if (mountedTicks >= revealAfterMountTicks) {
+                kelpie.beginGrip(rider);
+                gripTick = 0;
+            }
+            return;
         }
-
-        if (mob.tickCount % WATER_SCAN_INTERVAL == 0 || waterTarget == null) {
-            waterTarget = findNearestWater();
+        if (kelpie == null || !kelpie.tickGrip()) {
+            return;
         }
-        if (waterTarget != null) {
-            mob.getNavigation().moveTo(waterTarget.getX() + 0.5, waterTarget.getY(), waterTarget.getZ() + 0.5, dragSpeed);
+        gripTick++;
+        if (gripTick % WATER_SCAN_INTERVAL == 1 || waterTarget == null) {
+            waterTarget = findWater(level);
         }
-
-        if (mob.tickCount % DRAG_DAMAGE_INTERVAL == 0 && !mob.level().isClientSide()
-                && mob.level() instanceof ServerLevel serverLevel && rider instanceof Player player) {
-            player.hurtServer(serverLevel, mob.damageSources().mobAttack(mob), 2.0f);
-        }
-
-        if (mob.isInWater() && rider instanceof Player player && !mob.level().isClientSide()
-                && mob.level() instanceof ServerLevel serverLevel) {
-            player.hurtServer(serverLevel, mob.damageSources().drown(), 4.0f);
+        moveToWater(true);
+        KelpieEntity.drown(rider);
+        if (gripTick % BITE_INTERVAL == 0 && mob.isInWater()) {
+            rider.hurtServer(level, mob.damageSources().mobAttack(mob), BITE_DAMAGE);
+            mob.triggerDeclared("bite");
         }
     }
 
-    private static LivingEntity riderOf(GenericBeastEntity mob) {
-        List<Entity> passengers = mob.getPassengers();
-        return passengers.isEmpty() ? null : (passengers.get(0) instanceof LivingEntity living ? living : null);
+    private void moveToWater(boolean dive) {
+        BlockPos water = waterTarget;
+        if (water == null) return;
+        double y = water.getY() + (dive && mob.isInWater() ? -DIVE_DEPTH : 0);
+        mob.getNavigation().moveTo(water.getX() + 0.5, y, water.getZ() + 0.5, dragSpeed);
+        if (dive && mob.isInWater()) {
+            mob.getMoveControl().setWantedPosition(water.getX() + 0.5, y, water.getZ() + 0.5, dragSpeed);
+        }
     }
 
-    private BlockPos findNearestWater() {
+    private @Nullable LivingEntity rider() {
+        Entity passenger = mob.getFirstPassenger();
+        return passenger instanceof LivingEntity living ? living : null;
+    }
+
+    /** The nearest deep-enough water in a small box: two blocks of water, one on the other. */
+    public @Nullable BlockPos findWater(ServerLevel level) {
         BlockPos origin = mob.blockPosition();
         BlockPos best = null;
         double bestDistSq = Double.MAX_VALUE;
-        for (BlockPos pos : BlockPos.betweenClosed(
-                origin.offset(-waterSearchRadius, -waterSearchRadius / 2, -waterSearchRadius),
-                origin.offset(waterSearchRadius, waterSearchRadius / 2, waterSearchRadius))) {
-            if (mob.level().getFluidState(pos).is(FluidTags.WATER)) {
+        int r = waterSearchRadius;
+        for (BlockPos pos : BlockPos.betweenClosed(origin.offset(-r, -3, -r), origin.offset(r, 2, r))) {
+            if (level.getFluidState(pos).is(FluidTags.WATER) && level.getFluidState(pos.below()).is(FluidTags.WATER)) {
                 double distSq = pos.distSqr(origin);
                 if (distSq < bestDistSq) {
                     bestDistSq = distSq;

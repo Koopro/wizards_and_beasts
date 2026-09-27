@@ -76,8 +76,8 @@
           "parent": "body",
           "rotation": [
             -5.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {
@@ -108,8 +108,8 @@
           "parent": "body",
           "rotation": [
             6.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {
@@ -157,8 +157,8 @@
           "parent": "neck",
           "rotation": [
             -8.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {
@@ -264,8 +264,8 @@
           "parent": "head",
           "rotation": [
             -8.0,
-            0.0,
-            -22.0
+            -0.0,
+            22.0
           ],
           "cubes": [
             {
@@ -296,8 +296,8 @@
           "parent": "head",
           "rotation": [
             -8.0,
-            0.0,
-            22.0
+            -0.0,
+            -22.0
           ],
           "cubes": [
             {
@@ -328,8 +328,8 @@
           "parent": "croup",
           "rotation": [
             18.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {
@@ -360,8 +360,8 @@
           "parent": "tail",
           "rotation": [
             10.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {
@@ -419,8 +419,8 @@
           "parent": "foreleg_left",
           "rotation": [
             6.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {
@@ -451,8 +451,8 @@
           "parent": "foreleg_left_cannon",
           "rotation": [
             -6.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {
@@ -510,8 +510,8 @@
           "parent": "foreleg_right",
           "rotation": [
             6.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {
@@ -542,8 +542,8 @@
           "parent": "foreleg_right_cannon",
           "rotation": [
             -6.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {
@@ -574,8 +574,8 @@
           "parent": "croup",
           "rotation": [
             14.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {
@@ -606,8 +606,8 @@
           "parent": "hindleg_left",
           "rotation": [
             -20.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {
@@ -638,8 +638,8 @@
           "parent": "hindleg_left_shank",
           "rotation": [
             6.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {
@@ -670,8 +670,8 @@
           "parent": "croup",
           "rotation": [
             14.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {
@@ -702,8 +702,8 @@
           "parent": "hindleg_right",
           "rotation": [
             -20.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {
@@ -734,8 +734,8 @@
           "parent": "hindleg_right_shank",
           "rotation": [
             6.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {

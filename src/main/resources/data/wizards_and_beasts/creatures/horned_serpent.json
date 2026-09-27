@@ -18,12 +18,16 @@
     {
       "type": "bioluminescence",
       "particle": "glow",
-      "interval": 15,
+      "interval": 20,
       "glow_self": false
     }
   ],
   "clips": [
     "bite",
-    "hiss"
+    "hiss",
+    "hit",
+    "death",
+    "coil",
+    "taste_air"
   ]
 }

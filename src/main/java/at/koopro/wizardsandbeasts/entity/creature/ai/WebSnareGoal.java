@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.entity.creature.ai;
 
+import at.koopro.wizardsandbeasts.entity.creature.AcromantulaWebs;
+
 import at.koopro.wizardsandbeasts.creature.ability.AbilitySupport;
 import at.koopro.wizardsandbeasts.creature.ability.WebSnare;
 import at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity;
@@ -16,7 +18,8 @@ import java.util.EnumSet;
 
 /**
  * Ranged snare goal for {@link WebSnare}: on a cooldown, roots the creature's target in place with heavy
- * Slowness + Mining Fatigue and traces cobweb particles. Hitscan, server-authoritative, module-gated.
+ * Slowness + Mining Fatigue, traces the strand, and leaves one web of silk where it landed
+ * ({@link AcromantulaWebs}). Hitscan, server-authoritative, module-gated.
  */
 public class WebSnareGoal extends Goal {
 
@@ -61,6 +64,10 @@ public class WebSnareGoal extends Goal {
         target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, snare.durationTicks(), snare.slowAmplifier()));
         target.addEffect(new MobEffectInstance(MobEffects.MINING_FATIGUE, snare.durationTicks(), 1));
         if (mob.level() instanceof ServerLevel level) {
+            mob.triggerDeclared("web");
+            // Silk where it landed: one web at the target's feet or head, if the spot can hold one. It crumbles once
+            // no spinner is near (AcromantulaWebBlock), so a snare never becomes permanent litter.
+            AcromantulaWebs.spinAt(level, target.blockPosition(), target.blockPosition().above());
             Vec3 from = mob.getEyePosition();
             Vec3 to = target.getEyePosition();
             int steps = (int) Math.max(4, from.distanceTo(to));

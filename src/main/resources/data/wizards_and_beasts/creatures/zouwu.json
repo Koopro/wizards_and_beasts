@@ -35,6 +35,11 @@
   ],
   "clips": [
     "lunge",
-    "call"
+    "call",
+    "hit",
+    "death",
+    "graze",
+    "sniff",
+    "shake"
   ]
 }

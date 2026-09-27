@@ -5,6 +5,7 @@
   "temperament": "NEUTRAL",
   "width": 1.7,
   "height": 1.9,
+  "scale": 1.4,
   "maxHealth": 47.0,
   "movementSpeed": 0.23,
   "flyingSpeed": 0.5,
@@ -41,6 +42,11 @@
   ],
   "clips": [
     "strike",
-    "call"
+    "call",
+    "hit",
+    "death",
+    "preen",
+    "ruffle",
+    "stretch"
   ]
 }

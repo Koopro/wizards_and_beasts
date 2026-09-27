@@ -29,7 +29,7 @@ public record RangedHex(
             Codec.FLOAT.optionalFieldOf("damage", 3.0f).forGetter(RangedHex::damage),
             AbilitySupport.EffectSpec.CODEC.optionalFieldOf("effect").forGetter(RangedHex::effect),
             Codec.INT.optionalFieldOf("cooldown_ticks", 60).forGetter(RangedHex::cooldownTicks),
-            AbilitySupport.Particle.CODEC.optionalFieldOf("particle", AbilitySupport.Particle.WITCH).forGetter(RangedHex::particle)
+            AbilitySupport.Particle.CODEC.optionalFieldOf("particle", AbilitySupport.Particle.DREAD).forGetter(RangedHex::particle)
     ).apply(instance, RangedHex::new));
 
     @Override

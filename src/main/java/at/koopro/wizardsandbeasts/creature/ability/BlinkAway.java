@@ -47,8 +47,8 @@ public record BlinkAway(float triggerHealthFraction, double range, int cooldownT
             double tz = entity.getZ() + dz;
             double ty = entity.getY();
             if (entity.randomTeleport(tx, ty, tz, true)) {
-                AbilitySupport.emitAt(level, AbilitySupport.Particle.PORTAL,
-                        entity.getX(), entity.getY() + entity.getBbHeight() * 0.5, entity.getZ(), 24, 0.4, 0.2);
+                AbilitySupport.emitAt(level, AbilitySupport.Particle.ARCANE,
+                        entity.getX(), entity.getY() + entity.getBbHeight() * 0.5, entity.getZ(), 10, 0.4, 0.05);
                 entity.setCooldown(COOLDOWN_KEY, cooldownTicks);
                 return;
             }

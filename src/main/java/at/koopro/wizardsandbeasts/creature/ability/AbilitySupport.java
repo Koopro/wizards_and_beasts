@@ -1,5 +1,8 @@
 package at.koopro.wizardsandbeasts.creature.ability;
 
+import at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions;
+import at.koopro.wizardsandbeasts.registry.ModParticles;
+import at.koopro.wizardsandbeasts.spell.core.MagicColours;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Holder;
@@ -114,7 +117,15 @@ public final class AbilitySupport {
         BUBBLE(() -> ParticleTypes.BUBBLE),
         PORTAL(() -> ParticleTypes.PORTAL),
         SPORE(() -> ParticleTypes.SPORE_BLOSSOM_AIR),
-        DAMAGE(() -> ParticleTypes.DAMAGE_INDICATOR);
+        DAMAGE(() -> ParticleTypes.DAMAGE_INDICATOR),
+        // The mod's own pixel sprites, tinted by meaning (MagicColours). Prefer these over the
+        // vanilla entries above: HAPPY is vanilla's "trade accepted" sparkle and PORTAL/WITCH
+        // are the Enderman's and the witch's, so a creature wearing them reads as a vanilla mob.
+        ARCANE(() -> new SpellTintParticleOptions(ModParticles.ARCANE_MOTE.get(), MagicColours.MAGIC)),
+        LIGHT(() -> new SpellTintParticleOptions(ModParticles.LIGHT_GLOW.get(), MagicColours.LIGHT)),
+        HEALING(() -> new SpellTintParticleOptions(ModParticles.LIGHT_GLOW.get(), MagicColours.HEALING)),
+        DREAD(() -> new SpellTintParticleOptions(ModParticles.DARK_WISP.get(), MagicColours.DARK_MAGIC)),
+        POISON(() -> new SpellTintParticleOptions(ModParticles.DARK_WISP.get(), MagicColours.POISON));
 
         private final Supplier<ParticleOptions> options;
 

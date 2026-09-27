@@ -47,6 +47,11 @@
   ],
   "clips": [
     "bite",
-    "hiss"
+    "hiss",
+    "hit",
+    "death",
+    "graze",
+    "sniff",
+    "shake"
   ]
 }

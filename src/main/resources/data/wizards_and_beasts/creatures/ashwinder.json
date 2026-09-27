@@ -39,6 +39,10 @@
   ],
   "clips": [
     "strike",
-    "hiss"
+    "hiss",
+    "hit",
+    "death",
+    "coil",
+    "taste_air"
   ]
 }

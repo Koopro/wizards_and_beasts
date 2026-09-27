@@ -62,7 +62,7 @@ public final class AlphaRoster {
             "unicorn",            // wary of all but the quiet and pure; groomed or found, never killed for hair
             // -- generic entity + CreatureDefinition abilities --
             "ghoul",              // attic haunt
-            "hippogriff",         // enrage + dive bomb; rideable aerial
+            "hippogriff",         // bow to it; rideable, walks and flies; enrage + dive bomb
             "obscurus",           // tinted smoke-form aerial threat
             "werewolf",           // out only under a full moon; its bite carries the curse
             "basilisk",           // lethal gaze; boss threat

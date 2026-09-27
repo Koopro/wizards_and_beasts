@@ -31,12 +31,15 @@
     {
       "type": "bioluminescence",
       "particle": "bubble",
-      "interval": 10,
+      "interval": 20,
       "glow_self": false
     }
   ],
   "clips": [
     "flinch",
-    "call"
+    "call",
+    "death",
+    "drift",
+    "roll"
   ]
 }

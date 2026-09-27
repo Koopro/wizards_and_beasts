@@ -10,6 +10,7 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -27,8 +28,6 @@ import software.bernie.geckolib.animation.RawAnimation;
  */
 public class BabyNifflerEntity extends NifflerEntity {
 
-    private static final RawAnimation IDLE_ANIM = AnimHelper.loop("niffler", "idle");
-    private static final RawAnimation WALK_ANIM = AnimHelper.loop("niffler", "walk");
 
     private int growthTicks;
     private int feedCount;
@@ -44,7 +43,7 @@ public class BabyNifflerEntity extends NifflerEntity {
                 .add(Attributes.MOVEMENT_SPEED, 0.3)
                 .add(Attributes.ATTACK_DAMAGE, 0.5)
                 .add(Attributes.FOLLOW_RANGE, 16.0)
-                .add(Attributes.SCALE, 0.5);
+                .add(Attributes.SCALE, 0.35);
     }
 
     @Override
@@ -90,12 +89,21 @@ public class BabyNifflerEntity extends NifflerEntity {
         return profile != null && profile.feedFor(stack) != null;
     }
 
-    private void growIntoAdult() {
+    /** Grows up now: an adult takes its place, keeping owner, bond, coat and pouch. Server-side. */
+    public void growIntoAdult() {
         if (!(level() instanceof ServerLevel serverLevel)) return;
         NifflerEntity adult = new NifflerEntity(at.koopro.wizardsandbeasts.registry.ModEntities.NIFFLER.get(), serverLevel);
         adult.copyPosition(this);
         // Transfer bond data without needing a Player reference
         adult.transferBondFrom(this);
+        adult.setCoat(coat());
+        // Its pouch comes with it: the baby is discarded, not killed, so nothing would drop it.
+        for (int i = 0; i < getPouch().getContainerSize(); i++) {
+            ItemStack rest = adult.getPouch().addItem(getPouch().removeItemNoUpdate(i));
+            if (!rest.isEmpty()) {
+                spawnAtLocation(serverLevel, rest);
+            }
+        }
         serverLevel.addFreshEntity(adult);
         this.discard();
     }
@@ -120,8 +128,4 @@ public class BabyNifflerEntity extends NifflerEntity {
         return ModSounds.BABY_NIFFLER_AMBIENT.get();
     }
 
-    @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(AnimHelper.movementController("niffler", 5, IDLE_ANIM, WALK_ANIM));
-    }
 }

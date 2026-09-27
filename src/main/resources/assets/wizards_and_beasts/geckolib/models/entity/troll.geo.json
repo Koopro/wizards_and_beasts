@@ -77,8 +77,8 @@
           "parent": "body",
           "rotation": [
             14.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {
@@ -125,8 +125,8 @@
           "parent": "chest",
           "rotation": [
             -10.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {
@@ -253,8 +253,8 @@
           "parent": "chest",
           "rotation": [
             -8.0,
-            0.0,
-            -8.0
+            -0.0,
+            8.0
           ],
           "cubes": [
             {
@@ -285,8 +285,8 @@
           "parent": "arm_left",
           "rotation": [
             -12.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {
@@ -344,8 +344,8 @@
           "parent": "chest",
           "rotation": [
             -8.0,
-            0.0,
-            8.0
+            -0.0,
+            -8.0
           ],
           "cubes": [
             {
@@ -376,8 +376,8 @@
           "parent": "arm_right",
           "rotation": [
             -12.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {
@@ -597,8 +597,8 @@
           "parent": "arm_right_hand",
           "rotation": [
             87.6,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {

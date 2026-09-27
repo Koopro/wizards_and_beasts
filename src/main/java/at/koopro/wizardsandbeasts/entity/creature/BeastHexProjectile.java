@@ -25,7 +25,7 @@ public class BeastHexProjectile extends ThrowableItemProjectile {
 
     private float damage = 3.0f;
     private AbilitySupport.@Nullable EffectSpec effect;
-    private AbilitySupport.Particle trail = AbilitySupport.Particle.WITCH;
+    private AbilitySupport.Particle trail = AbilitySupport.Particle.DREAD;
 
     public BeastHexProjectile(EntityType<? extends ThrowableItemProjectile> type, Level level) {
         super(type, level);

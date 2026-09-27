@@ -116,6 +116,39 @@ public final class WildlifeRules {
     public static final int REBIRTH_GROWTH_TICKS = 6000;
     public static final float REBORN_SCALE = 0.45f;
 
+    /** A reborn chick rises with this share of its health: "weak at first" (Fantastic Beasts). */
+    public static final float REBORN_HEALTH_FRACTION = 0.5f;
+    /** A phoenix this badly hurt, with its attacker close, leaves in a burst of flame. */
+    public static final float FLAME_ESCAPE_HEALTH_FRACTION = 0.4f;
+    /** Between one flame-travel and the next. */
+    public static final int FLAME_TRAVEL_COOLDOWN_TICKS = 600;
+    /** A bonded owner further than this (same dimension) is reached by flame rather than flight. */
+    public static final double FLAME_RETURN_DISTANCE = 40.0;
+    /** Between one song and the next. */
+    public static final int SONG_COOLDOWN_TICKS = 2400;
+    public static final int SONG_TICKS = 60;
+    public static final double SONG_RANGE = 12.0;
+    /** A phoenix's strike when it defends its person. Low, and never the killing blow. */
+    public static final float PHOENIX_STRIKE_DAMAGE = 3.0f;
+    /** A falling owner is caught once they have fallen this far. */
+    public static final float CATCH_FALL_DISTANCE = 8.0f;
+
+    /**
+     * Damage a phoenix may deal to something with {@code targetHealth} left: never enough to kill it.
+     *
+     * <p>Fantastic Beasts: the phoenix "has never been known to kill". Fawkes blinded the basilisk in
+     * <i>Chamber of Secrets</i>; Harry did the killing. So a phoenix defending its person wounds and blinds,
+     * and stops at one heart.
+     */
+    public static float phoenixStrikeDamage(float targetHealth, float damage) {
+        return Math.max(0.0f, Math.min(damage, targetHealth - 1.0f));
+    }
+
+    /** Whether a person needs a phoenix's song: badly hurt, or hurt by something in the last five seconds. */
+    public static boolean inDanger(float health, float maxHealth, int ticksSinceHurtByMob) {
+        return health <= maxHealth * 0.5f || ticksSinceHurtByMob < 100;
+    }
+
     /** Scale of a reborn phoenix {@code ticksSinceRebirth} after bursting into flame. */
     public static float rebirthScale(long ticksSinceRebirth) {
         if (ticksSinceRebirth >= REBIRTH_GROWTH_TICKS) {
@@ -125,24 +158,54 @@ public final class WildlifeRules {
         return REBORN_SCALE + (1.0f - REBORN_SCALE) * t;
     }
 
-    // ── the Niffler ────────────────────────────────────────────────────────
+    // ── the Hippogriff ─────────────────────────────────────────────────────
+    //
+    // Prisoner of Azkaban: "You always wait fer the hippogriff ter make the firs' move. It's polite, see? You walk
+    // towards him, and you bow, an' you wait. If he bows back, you're allowed ter touch him." Keep eye contact;
+    // never insult one. Crouching is the bow.
+
+    /** A bow must be held this long before the hippogriff answers it. */
+    public static final int BOW_HOLD_TICKS = 30;
+    /** A bow counts from this close. */
+    public static final double BOW_RANGE = 8.0;
+    /** A stranger who has not bowed and comes closer than this is warned off. */
+    public static final double CROWD_DISTANCE = 2.5;
+    /** A second crowding within this long of the warning is taken as an insult. */
+    public static final int WARNING_MEMORY_TICKS = 200;
+    /** Someone who struck it is not bowed back to for this long. */
+    public static final int GRUDGE_TICKS = 6000;
+    /** Bond at which a hippogriff lets the one who bowed to it ride. */
+    public static final int HIPPOGRIFF_RIDE_BOND = 25;
 
     /**
-     * How much a Niffler wants something shiny. Gold above all — Nifflers are "attracted to anything glittery", and
-     * the goblins keep them to dig for gold — then precious stones and wizarding coin, then any other bright thing.
+     * Whether a player is bowing to a hippogriff: crouched, holding its gaze (looking at its head, which is what "keep
+     * eye contact" asks for), standing still, and near enough to be seen doing it.
      *
-     * @param itemPath the item's registry path, e.g. {@code gold_ingot}
+     * @param lookDot  dot of the player's view vector with the direction to the hippogriff's eyes
+     * @param speedSqr the player's horizontal speed squared
      */
-    public static int treasureValue(String itemPath) {
-        if (itemPath.contains("gold") || itemPath.equals("galleon")) {
-            return 3;
-        }
-        if (itemPath.equals("diamond") || itemPath.equals("emerald") || itemPath.equals("sickle")
-                || itemPath.equals("netherite_ingot")) {
-            return 2;
-        }
-        return 1;
+    public static boolean bowing(boolean crouching, double lookDot, double speedSqr, double distance) {
+        return crouching && lookDot > 0.9 && speedSqr < 0.003 && distance <= BOW_RANGE;
     }
+
+    /** What an unbowed stranger crowding a hippogriff gets: nothing yet, a warning, or an attack. */
+    public enum Crowding { NONE, WARN, ATTACK }
+
+    /**
+     * @param ticksSinceWarned ticks since this stranger was last warned off, or a negative number if never
+     */
+    public static Crowding crowding(boolean respected, double distance, int ticksSinceWarned) {
+        if (respected || distance >= CROWD_DISTANCE) {
+            return Crowding.NONE;
+        }
+        if (ticksSinceWarned >= 0 && ticksSinceWarned < WARNING_MEMORY_TICKS) {
+            // A beat to back off after the warning before the insult is taken.
+            return ticksSinceWarned > 30 ? Crowding.ATTACK : Crowding.NONE;
+        }
+        return Crowding.WARN;
+    }
+
+    // The Niffler's treasure ranking lives in tags now (NifflerTreasure), not here.
 
     // ── shedding ───────────────────────────────────────────────────────────
 
@@ -152,6 +215,14 @@ public final class WildlifeRules {
     }
 
     // ── the Bowtruckle ─────────────────────────────────────────────────────
+
+    /**
+     * Whether a Bowtruckle has vanished into the bark: still for long enough, pressed against a log, and not busy
+     * defending its tree or working a lock.
+     */
+    public static boolean camouflaged(int stillTicks, boolean againstBark, boolean busy) {
+        return !busy && againstBark && stillTicks >= at.koopro.wizardsandbeasts.entity.beast.BowtruckleEntity.CAMOUFLAGE_AFTER;
+    }
 
     /** A block this close to a Bowtruckle's home tree is part of the tree. */
     public static final double HOME_TREE_RADIUS = 6.0;

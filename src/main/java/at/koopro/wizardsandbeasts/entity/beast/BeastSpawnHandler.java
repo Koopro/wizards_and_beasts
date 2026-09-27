@@ -67,6 +67,29 @@ public final class BeastSpawnHandler {
         // is shed and given rather than taken from a body. (The Niffler's placement is NifflerSpawnHandler's; its
         // badlands spawn lives in data/.../biome_modifier/spawn_niffler.json.)
         daySpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("demiguise"));
+        // The basilisk comes only from the Chamber of Secrets' spawn override, and only one to a Chamber that has
+        // not lost its basilisk already: without a rule the Chamber woke a new one every creature cycle.
+        var basilisk = at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("basilisk");
+        registerAt(event, basilisk, false, (level, pos) -> at.koopro.wizardsandbeasts.chamber.ChamberBasilisk.mayWake(
+                level.getLevel(), pos, at.koopro.wizardsandbeasts.chamber.ChamberBasilisk.ofType(basilisk.get())));
+        // Acromantulas keep to the dark forest, in the dark. A spawn arrives in ones and twos (a rating-5 creature
+        // may not arrive in bigger groups — CreatureEcologyDataTest) and each newcomer joins the colony it finds
+        // (AcromantulaEntity#joinOrFoundColony), so a colony grows over time — to COLONY_CAP within 48 blocks.
+        registerAt(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("acromantula"), false,
+                (level, pos) -> level.getEntitiesOfClass(at.koopro.wizardsandbeasts.entity.creature.AcromantulaEntity.class,
+                        new net.minecraft.world.phys.AABB(pos).inflate(48)).size()
+                        < at.koopro.wizardsandbeasts.entity.creature.AcromantulaEntity.COLONY_CAP);
+        // The Kelpie waits in rivers, one to a stretch of water: in the water, not on the bank (it comes out to
+        // lure), and never within 48 blocks of another.
+        var kelpie = at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("kelpie");
+        event.register(kelpie.get(), SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR,
+                (entityType, level, reason, pos, random) -> ModuleManager.isEnabled(Module.CREATURES)
+                        && spawnsNaturally(entityType)
+                        && level.getFluidState(pos).is(net.minecraft.tags.FluidTags.WATER)
+                        && level.getFluidState(pos.above()).is(net.minecraft.tags.FluidTags.WATER)
+                        && level.getEntitiesOfClass(at.koopro.wizardsandbeasts.entity.creature.KelpieEntity.class,
+                                new net.minecraft.world.phys.AABB(pos).inflate(48)).isEmpty(),
+                RegisterSpawnPlacementsEvent.Operation.OR);
         // A werewolf is a person on any other night. It is only ever out under a full moon.
         register(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("werewolf"), false,
                 level -> at.koopro.wizardsandbeasts.heritage.werewolf.WerewolfRules.fullMoonNight(level.getLevel()));

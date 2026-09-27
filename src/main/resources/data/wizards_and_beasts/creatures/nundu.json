@@ -50,6 +50,11 @@
   ],
   "clips": [
     "bite",
-    "howl"
+    "howl",
+    "hit",
+    "death",
+    "graze",
+    "sniff",
+    "shake"
   ]
 }

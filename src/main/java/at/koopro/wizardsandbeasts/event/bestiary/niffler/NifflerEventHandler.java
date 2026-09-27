@@ -52,6 +52,7 @@ public final class NifflerEventHandler {
             double ox = (niffler.getRandom().nextDouble() - 0.5) * 4;
             double oz = (niffler.getRandom().nextDouble() - 0.5) * 4;
             baby.setPos(niffler.getX() + ox, niffler.getY(), niffler.getZ() + oz);
+            baby.setCoat(niffler.coat());
             sl.addFreshEntity(baby);
         }
     }

@@ -30,6 +30,11 @@
   ],
   "clips": [
     "strike",
-    "hiss"
+    "hiss",
+    "hit",
+    "death",
+    "graze",
+    "sniff",
+    "shake"
   ]
 }

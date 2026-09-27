@@ -31,6 +31,10 @@
   ],
   "clips": [
     "flinch",
-    "hiss"
+    "hiss",
+    "death",
+    "graze",
+    "sniff",
+    "shake"
   ]
 }

@@ -17,6 +17,11 @@
   "abilities": [],
   "clips": [
     "strike",
-    "call"
+    "call",
+    "hit",
+    "death",
+    "stretch",
+    "shake",
+    "graze"
   ]
 }

@@ -26,6 +26,9 @@
   ],
   "clips": [
     "flinch",
-    "song"
+    "song",
+    "death",
+    "ruffle",
+    "stretch"
   ]
 }

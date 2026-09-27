@@ -47,8 +47,8 @@ public record Evasion(float dodgeChance, double range, int cooldownTicks) implem
             double tz = entity.getZ() + (entity.getRandom().nextDouble() - 0.5) * 2.0 * range;
             if (entity.randomTeleport(tx, entity.getY(), tz, true)) {
                 entity.heal(amount); // negate the blow it slipped
-                AbilitySupport.emitAt(level, AbilitySupport.Particle.PORTAL,
-                        entity.getX(), entity.getY() + entity.getBbHeight() * 0.5, entity.getZ(), 18, 0.35, 0.15);
+                AbilitySupport.emitAt(level, AbilitySupport.Particle.ARCANE,
+                        entity.getX(), entity.getY() + entity.getBbHeight() * 0.5, entity.getZ(), 8, 0.35, 0.05);
                 level.playSound(null, entity.getX(), entity.getY(), entity.getZ(),
                         SoundEvents.ENDERMAN_TELEPORT, SoundSource.HOSTILE, 0.6f, 1.4f);
                 entity.setCooldown(COOLDOWN_KEY, cooldownTicks);

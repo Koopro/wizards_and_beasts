@@ -20,7 +20,7 @@
     {
       "type": "bioluminescence",
       "particle": "glow",
-      "interval": 8,
+      "interval": 20,
       "glow_self": true
     },
     {
@@ -33,6 +33,9 @@
   ],
   "clips": [
     "flinch",
-    "song"
+    "song",
+    "death",
+    "hover",
+    "flit"
   ]
 }

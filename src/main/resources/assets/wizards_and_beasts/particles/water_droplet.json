@@ -1,1 +1,6 @@
-{"textures":["wizards_and_beasts:spell_mote"]}           
+{
+  "textures": [
+    "wizards_and_beasts:water_droplet_0",
+    "wizards_and_beasts:water_droplet_1"
+  ]
+}

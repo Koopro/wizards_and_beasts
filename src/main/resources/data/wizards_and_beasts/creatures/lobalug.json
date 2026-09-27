@@ -26,6 +26,9 @@
     }
   ],
   "clips": [
-    "flinch"
+    "flinch",
+    "death",
+    "squirm",
+    "settle"
   ]
 }

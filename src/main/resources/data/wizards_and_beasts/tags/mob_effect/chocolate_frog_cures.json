@@ -6,10 +6,6 @@
       "required": false
     },
     {
-      "id": "wizards_and_beasts:soul_drained",
-      "required": false
-    },
-    {
       "id": "wizards_and_beasts:obscuro",
       "required": false
     },

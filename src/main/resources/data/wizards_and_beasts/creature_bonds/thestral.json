@@ -1,0 +1,24 @@
+{
+  "_comment": "Thestrals are won with raw meat: Hagrid lures the Hogwarts herd out with a carcass, and they come to the smell of blood (Order of the Phoenix). ThestralEntity lets a rider on at 15; anyone may feed or ride one, seen or unseen. At 60 it leaves a tail hair now and then, a wand core from a living animal.",
+  "feeds": [
+    { "item": "minecraft:beef", "gain": 10, "cooldownSeconds": 60 },
+    { "item": "minecraft:mutton", "gain": 10, "cooldownSeconds": 60 },
+    { "item": "minecraft:porkchop", "gain": 8, "cooldownSeconds": 60 },
+    { "item": "minecraft:chicken", "gain": 6, "cooldownSeconds": 45 },
+    { "item": "minecraft:rabbit", "gain": 6, "cooldownSeconds": 45 }
+  ],
+  "followThreshold": 60,
+  "milestones": [15, 40, 60, 100],
+  "proximityRange": 8.0,
+  "proximitySeconds": 60,
+  "proximityGain": 1,
+  "betrayalPenalty": 25,
+  "gift": {
+    "item": "wizards_and_beasts:thestral_tail_hair",
+    "minBond": 60,
+    "cooldownSeconds": 2400
+  },
+  "masteryBond": 100,
+  "feedSound": "minecraft:entity.horse.eat",
+  "refuseSound": "minecraft:entity.horse.angry"
+}

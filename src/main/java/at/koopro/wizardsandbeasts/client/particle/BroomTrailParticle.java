@@ -12,8 +12,9 @@ import net.minecraft.util.RandomSource;
  *
  * <p>What separates a Cleansweep's dust from a Firebolt's embers is colour, size, lifetime and how
  * it moves; none of that needs its own class, and three near-identical particles would be three
- * places to fix the next time the trail is retuned. All three share the {@code spell_mote} sprite
- * rather than shipping three PNGs differing only in hue.
+ * places to fix the next time the trail is retuned. Each style draws a shape that fits it — dust
+ * puffs, gold motes, embers (`particles/broom_trail_*.json`, `tools/particle_sprites.py`) — and the
+ * tint supplies the colour.
  *
  * <p>Deliberately short-lived and small. A trail is read at speed and from behind, where a long-lived
  * particle turns into a wall the rider is looking through — the Firebolt's embers live barely half a

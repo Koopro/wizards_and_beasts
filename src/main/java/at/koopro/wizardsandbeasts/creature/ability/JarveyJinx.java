@@ -51,7 +51,7 @@ public record JarveyJinx(double radius, int cooldownTicks, int durationTicks) im
             player.addEffect(new MobEffectInstance(MobEffects.UNLUCK, durationTicks, 0));
             player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, durationTicks, 0));
         }
-        AbilitySupport.emitAtBody(level, entity, AbilitySupport.Particle.WITCH, 12);
+        AbilitySupport.emitAtBody(level, entity, AbilitySupport.Particle.DREAD, 8);
         level.playSound(null, entity.getX(), entity.getY(), entity.getZ(),
                 SoundEvents.FOX_SCREECH, SoundSource.HOSTILE, 1.0f, 1.3f);
     }

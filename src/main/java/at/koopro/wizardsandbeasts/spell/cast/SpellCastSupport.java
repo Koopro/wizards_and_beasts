@@ -13,11 +13,12 @@ import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.Blocks;
 
-final class SpellCastSupport {
+public final class SpellCastSupport {
     private SpellCastSupport() {
     }
 
-    static int lockTier(BlockState state) {
+    /** The lock system: 0 nothing to unlock, 1 a door, trapdoor or gate, 2 an iron (mechanical) door or trapdoor. */
+    public static int lockTier(BlockState state) {
         if (state.is(Blocks.IRON_DOOR) || state.is(Blocks.IRON_TRAPDOOR)) return 2;
         if (state.getBlock() instanceof DoorBlock) return 1;
         if (state.getBlock() instanceof TrapDoorBlock || state.getBlock() instanceof FenceGateBlock) return 1;

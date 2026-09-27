@@ -19,6 +19,10 @@
   ],
   "abilities": [],
   "clips": [
-    "groan"
+    "groan",
+    "hit",
+    "death",
+    "attack",
+    "peek"
   ]
 }

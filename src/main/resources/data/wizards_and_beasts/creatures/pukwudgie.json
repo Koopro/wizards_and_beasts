@@ -38,11 +38,14 @@
         "duration_ticks": 100
       },
       "cooldown_ticks": 70,
-      "particle": "witch"
+      "particle": "dread"
     }
   ],
   "clips": [
     "attack",
-    "call"
+    "call",
+    "hit",
+    "death",
+    "peek"
   ]
 }

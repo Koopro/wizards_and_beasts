@@ -2,7 +2,7 @@
   "displayName": "spell.wizards_and_beasts.aparecium.name",
   "category": "utility",
   "cooldownTicks": 20,
-  "color": 16777130,
+  "color": -10834631,
   "castType": "self",
   "canonTier": "books",
   "implementationState": "coming_soon",

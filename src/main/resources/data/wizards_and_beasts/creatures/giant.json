@@ -5,6 +5,7 @@
   "temperament": "HOSTILE",
   "width": 2.7,
   "height": 2.9,
+  "scale": 1.8,
   "maxHealth": 104.0,
   "movementSpeed": 0.2,
   "flyingSpeed": 0.0,
@@ -43,6 +44,10 @@
   ],
   "clips": [
     "attack",
-    "groan"
+    "groan",
+    "hit",
+    "death",
+    "stretch",
+    "grunt"
   ]
 }

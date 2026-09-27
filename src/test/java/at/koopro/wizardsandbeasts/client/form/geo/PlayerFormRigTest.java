@@ -158,9 +158,8 @@ class PlayerFormRigTest {
 
     @Test
     void unriggedFormsResolveToNullSoTheLegacyPathStillRuns() {
-        assertNull(PlayerFormRig.forForm("house_elf_default"),
-                "house-elf has no rig authored yet and must fall through to the legacy model");
-        assertNull(PlayerFormRig.forForm("veela_harpy"));
+        assertNull(PlayerFormRig.forForm("animagus_stag"),
+                "the stag has no rig authored yet and must fall through to the legacy model");
         assertNull(PlayerFormRig.forForm("human_default"));
         assertFalse(PlayerFormRig.hasRig("animagus_cat"),
                 "Animagus forms borrow real vanilla models, which beat any rig we would author");

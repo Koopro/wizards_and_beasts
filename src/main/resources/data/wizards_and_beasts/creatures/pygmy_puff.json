@@ -17,13 +17,16 @@
   "abilities": [
     {
       "type": "bioluminescence",
-      "particle": "happy",
-      "interval": 10,
+      "particle": "light",
+      "interval": 20,
       "glow_self": true
     }
   ],
   "clips": [
     "song",
-    "flinch"
+    "flinch",
+    "death",
+    "squirm",
+    "settle"
   ]
 }

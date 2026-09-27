@@ -32,6 +32,9 @@
   ],
   "clips": [
     "strike",
-    "hiss"
+    "hiss",
+    "hit",
+    "death",
+    "peek"
   ]
 }

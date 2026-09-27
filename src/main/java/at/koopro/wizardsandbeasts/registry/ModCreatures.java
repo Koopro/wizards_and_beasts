@@ -38,11 +38,11 @@ public final class ModCreatures {
 
     public static final List<Spec> MANIFEST = List.of(
             new Spec("abraxan", Locomotion.FLYING, 2.7f, 2.9f),
-            new Spec("acromantula", Locomotion.GROUND, 1.7f, 1.9f),
+            new Spec("acromantula", Locomotion.GROUND, 2.2f, 1.6f),
             new Spec("aethonan", Locomotion.FLYING, 1.7f, 1.9f),
             new Spec("antipodean_opaleye", Locomotion.FLYING, 2.7f, 2.9f),
             new Spec("ashwinder", Locomotion.GROUND, 0.65f, 0.75f),
-            new Spec("basilisk", Locomotion.GROUND, 2.7f, 2.9f),
+            new Spec("basilisk", Locomotion.GROUND, 2.7f, 2.2f),
             new Spec("toad", Locomotion.GROUND, 0.45f, 0.45f),
             new Spec("billywig", Locomotion.FLYING, 0.45f, 0.45f),
             new Spec("blast_ended_skrewt", Locomotion.GROUND, 1.7f, 1.9f),
@@ -66,7 +66,7 @@ public final class ModCreatures {
             new Spec("hippogriff", Locomotion.FLYING, 1.7f, 1.9f),
             new Spec("hungarian_horntail", Locomotion.FLYING, 2.7f, 2.9f),
             new Spec("jobberknoll", Locomotion.FLYING, 0.45f, 0.45f),
-            new Spec("kelpie", Locomotion.AQUATIC, 1.7f, 1.9f),
+            new Spec("kelpie", Locomotion.AQUATIC, 1.4f, 1.7f),
             new Spec("kneazle", Locomotion.GROUND, 0.65f, 0.75f),
             new Spec("lethifold", Locomotion.GROUND, 0.95f, 1.25f),
             new Spec("maledictus", Locomotion.GROUND, 0.95f, 1.25f),
@@ -201,6 +201,18 @@ public final class ModCreatures {
     private static EntityType.EntityFactory<GenericBeastEntity> factory(Spec spec) {
         if (DRAGON_IDS.contains(spec.id())) {
             return DragonEntity::new;
+        }
+        if ("hippogriff".equals(spec.id())) {
+            return at.koopro.wizardsandbeasts.entity.creature.HippogriffEntity::new;
+        }
+        if ("acromantula".equals(spec.id())) {
+            return at.koopro.wizardsandbeasts.entity.creature.AcromantulaEntity::new;
+        }
+        if ("kelpie".equals(spec.id())) {
+            return at.koopro.wizardsandbeasts.entity.creature.KelpieEntity::new;
+        }
+        if ("basilisk".equals(spec.id())) {
+            return at.koopro.wizardsandbeasts.entity.creature.BasiliskEntity::new;
         }
         return switch (spec.loco()) {
             case FLYING -> GenericFlyingBeastEntity::new;

@@ -51,8 +51,8 @@ public final class CanonItemRegistry {
             ModItems.ITEMS.registerItem("sorting_hat", Item::new);
 
     // --- Dark artefacts & cursed objects -----------------------------------
-    public static final DeferredItem<Item> BASILISK_FANG =
-            ModItems.ITEMS.registerItem("basilisk_fang", Item::new);
+    public static final DeferredItem<at.koopro.wizardsandbeasts.item.darkartefact.BasiliskFangItem> BASILISK_FANG =
+            ModItems.ITEMS.registerItem("basilisk_fang", at.koopro.wizardsandbeasts.item.darkartefact.BasiliskFangItem::new);
     public static final DeferredItem<Item> VANISHING_CABINET =
             ModItems.ITEMS.registerItem("vanishing_cabinet", Item::new);
     public static final DeferredItem<Item> OPAL_NECKLACE =
@@ -238,7 +238,7 @@ public final class CanonItemRegistry {
      * <p>Held here so the creative tab does not keep a hand-copied roster that goes stale the
      * moment an entry is added or promoted out of this class.
      */
-    public static final List<DeferredItem<Item>> ALL = List.of(
+    public static final List<DeferredItem<? extends Item>> ALL = List.of(
             TALES_OF_BEEDLE_THE_BARD, SWORD_OF_GRYFFINDOR, MIRROR_OF_ERISED,
             ELIXIR_OF_LIFE, GOBLET_OF_FIRE, TRIWIZARD_CUP,
             GOLDEN_EGG, SORTING_HAT, BASILISK_FANG,

@@ -120,8 +120,8 @@
           "parent": "body",
           "rotation": [
             0.0,
-            0.0,
-            -10.0
+            -0.0,
+            10.0
           ],
           "cubes": [
             {
@@ -152,8 +152,8 @@
           "parent": "arm_left",
           "rotation": [
             -20.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {
@@ -184,8 +184,8 @@
           "parent": "arm_left_fore",
           "rotation": [
             0.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {
@@ -216,8 +216,8 @@
           "parent": "body",
           "rotation": [
             0.0,
-            0.0,
-            10.0
+            -0.0,
+            -10.0
           ],
           "cubes": [
             {
@@ -248,8 +248,8 @@
           "parent": "arm_right",
           "rotation": [
             -20.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {
@@ -280,8 +280,8 @@
           "parent": "arm_right_fore",
           "rotation": [
             0.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {
@@ -312,8 +312,8 @@
           "parent": "arm_right_hand",
           "rotation": [
             -20.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {
@@ -360,8 +360,8 @@
           "parent": "body",
           "rotation": [
             18.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {
@@ -392,8 +392,8 @@
           "parent": "tail",
           "rotation": [
             26.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {
@@ -424,8 +424,8 @@
           "parent": "tail_mid",
           "rotation": [
             30.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {
@@ -456,8 +456,8 @@
           "parent": "tail_low",
           "rotation": [
             10.0,
-            0.0,
-            0.0
+            -0.0,
+            -0.0
           ],
           "cubes": [
             {

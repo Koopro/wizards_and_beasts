@@ -49,6 +49,6 @@ public record HealAura(float healPerSecond, double radius, boolean healAllies, b
                 }
             }
         }
-        AbilitySupport.emitAtBody(level, entity, AbilitySupport.Particle.HAPPY, 3);
+        AbilitySupport.emitAtBody(level, entity, AbilitySupport.Particle.HEALING, 3);
     }
 }

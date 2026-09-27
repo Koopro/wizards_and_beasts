@@ -67,11 +67,11 @@ public class ModEntities {
     static { EntityAttributeBindings.queue(GOBLIN_TELLER, GoblinTellerEntity::createAttributes); }
 
     public static final DeferredHolder<EntityType<?>, EntityType<NifflerEntity>> NIFFLER =
-            EntityHelper.register(ENTITY_TYPES, "niffler", NifflerEntity::new, MobCategory.CREATURE, 0.4f, 0.5f);
+            EntityHelper.register(ENTITY_TYPES, "niffler", NifflerEntity::new, MobCategory.CREATURE, 0.6f, 0.6f);
     static { EntityAttributeBindings.queue(NIFFLER, NifflerEntity::createAttributes); }
 
     public static final DeferredHolder<EntityType<?>, EntityType<BabyNifflerEntity>> BABY_NIFFLER =
-            EntityHelper.register(ENTITY_TYPES, "baby_niffler", BabyNifflerEntity::new, MobCategory.CREATURE, 0.2f, 0.25f);
+            EntityHelper.register(ENTITY_TYPES, "baby_niffler", BabyNifflerEntity::new, MobCategory.CREATURE, 0.6f, 0.6f);
     static { EntityAttributeBindings.queue(BABY_NIFFLER, BabyNifflerEntity::createAttributes); }
 
     /** A Chocolate Frog that got away. An ItemEntity, so catching it is just picking it up. */
@@ -100,7 +100,7 @@ public class ModEntities {
     static { EntityAttributeBindings.queue(DEMENTOR, DementorEntity::createAttributes); }
 
     public static final DeferredHolder<EntityType<?>, EntityType<BowtruckleEntity>> BOWTRUCKLE =
-            EntityHelper.register(ENTITY_TYPES, "bowtruckle", BowtruckleEntity::new, MobCategory.CREATURE, 0.4f, 0.8f);
+            EntityHelper.register(ENTITY_TYPES, "bowtruckle", BowtruckleEntity::new, MobCategory.CREATURE, 0.3f, 0.6f);
     static { EntityAttributeBindings.queue(BOWTRUCKLE, BowtruckleEntity::createAttributes); }
 
     public static final DeferredHolder<EntityType<?>, EntityType<CornishPixieEntity>> CORNISH_PIXIE =

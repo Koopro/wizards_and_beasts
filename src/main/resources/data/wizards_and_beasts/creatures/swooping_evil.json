@@ -49,6 +49,10 @@
   ],
   "clips": [
     "lunge",
-    "hiss"
+    "hiss",
+    "hit",
+    "death",
+    "hover",
+    "flit"
   ]
 }

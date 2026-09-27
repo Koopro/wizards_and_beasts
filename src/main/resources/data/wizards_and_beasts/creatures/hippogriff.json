@@ -33,6 +33,11 @@
     }
   ],
   "clips": [
-    "attack"
+    "attack",
+    "hit",
+    "death",
+    "graze",
+    "stretch",
+    "shake"
   ]
 }

@@ -39,6 +39,6 @@ public record DreadAura(double radius, @NonNull List<AbilitySupport.EffectSpec> 
         for (Player player : players) {
             AbilitySupport.applyAll(player, effects);
         }
-        AbilitySupport.emitAtBody(level, entity, AbilitySupport.Particle.WITCH, 4);
+        AbilitySupport.emitAtBody(level, entity, AbilitySupport.Particle.DREAD, 4);
     }
 }

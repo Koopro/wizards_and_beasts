@@ -1,1 +1,7 @@
-{"textures":["wizards_and_beasts:spell_mote"]}
+{
+  "textures": [
+    "wizards_and_beasts:arcane_mote_0",
+    "wizards_and_beasts:arcane_mote_1",
+    "wizards_and_beasts:arcane_mote_2"
+  ]
+}

@@ -16,7 +16,9 @@
   "clips": [
     "attack",
     "hit",
-    "howl"
+    "howl",
+    "death",
+    "peek"
   ],
   "traits": [
     "PACK"

@@ -207,7 +207,6 @@ public final class AzkabanCommands {
         AABB box = executor.getBoundingBox().inflate(32);
         List<DementorEntity> dementors = level.getEntitiesOfClass(DementorEntity.class, box, LivingEntity::isAlive);
         for (DementorEntity d : dementors) {
-            d.setDissipating(true);
             d.hurt(level.damageSources().source(AzkabanDamageTypes.DEMENTOR_DISSIPATE), Float.MAX_VALUE);
         }
         int count = dementors.size();

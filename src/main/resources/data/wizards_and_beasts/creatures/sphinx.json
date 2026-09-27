@@ -57,6 +57,11 @@
   ],
   "clips": [
     "strike",
-    "call"
+    "call",
+    "hit",
+    "death",
+    "graze",
+    "sniff",
+    "shake"
   ]
 }

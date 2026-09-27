@@ -69,6 +69,14 @@ public final class PlayerAbilityHelper {
         });
     }
 
+    public static void removeAbilityFlag(@NonNull Player player, @NonNull String flag) {
+        set(player, p -> {
+            LinkedHashSet<String> flags = new LinkedHashSet<>(p.abilityFlags());
+            flags.remove(flag);
+            return p.withAbilityFlags(Set.copyOf(flags));
+        });
+    }
+
     private static void set(@NonNull Player player, @NonNull UnaryOperator<PlayerAbilityData> mutator) {
         PlayerAbilityData previous = player.getData(ModAttachments.PLAYER_ABILITY_DATA.get());
         PlayerAbilityData next = mutator.apply(previous);

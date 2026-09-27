@@ -1,68 +1,55 @@
 package at.koopro.wizardsandbeasts.client.entity;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.entity.azkaban.DementorEntity;
 import at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageDataState;
-import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
-import at.koopro.wizardsandbeasts.heritage.Heritage;
+import at.koopro.wizardsandbeasts.entity.azkaban.DementorEntity;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.NonNull;
-import software.bernie.geckolib.constant.dataticket.DataTicket;
 import software.bernie.geckolib.model.DefaultedEntityGeoModel;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
-import software.bernie.geckolib.renderer.base.BoneSnapshots;
 import software.bernie.geckolib.renderer.base.GeoRenderState;
-import software.bernie.geckolib.renderer.base.RenderPassInfo;
 
 /**
- * GeckoLib renderer for {@link DementorEntity}.
+ * Draws a Dementor for those who can see one.
  *
- * <p>Heritage-aware: Muggles see no model (environmental effects still apply server-side).
- * All entity state is passed via {@link DataTicket} — no direct entity access at render time.
+ * <p>Canon: Muggles cannot see Dementors, though they feel them — Dudley felt the cold and relived his worst in
+ * Little Whinging and saw nothing. So seeing is decided per viewer in {@link #shouldRender}: the aura, the Kiss and
+ * the AI are the same for everyone (server-side), and a Muggle simply draws nothing — no model, no shadow, no name.
+ * A player with no heritage chosen is the Muggle case (the heritage enum has no Muggle entry). Spectators see it.
+ *
+ * <p>This replaces zero-scaling the {@code root} bone, which still ran the whole render pass to draw nothing.
+ *
+ * <p>Dissipation is the {@code dissipate} clip, not vanilla's death roll, so the death tilt is off.
  */
 public class DementorRenderer<R extends EntityRenderState & GeoRenderState>
         extends GeoEntityRenderer<DementorEntity, R> {
 
-    /** True when the local player is a Muggle (no magical heritage selected). */
-    public static final DataTicket<Boolean> TICKET_MUGGLE_VIEW =
-            DataTicket.create("dementor_muggle_view", Boolean.class);
-
     public DementorRenderer(EntityRendererProvider.Context context) {
         super(context, new DefaultedEntityGeoModel<>(
                 Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "dementor")));
+        this.shadowRadius = 0.4f;
     }
 
     @Override
-    public void addRenderData(@NonNull DementorEntity dementor, Void unused,
-                              @NonNull R renderState, float partialTick) {
-        super.addRenderData(dementor, unused, renderState, partialTick);
-        renderState.addGeckolibData(TICKET_MUGGLE_VIEW, isMuggleView());
+    public boolean shouldRender(@NonNull DementorEntity dementor, @NonNull Frustum frustum, double x, double y, double z) {
+        return canPerceive() && super.shouldRender(dementor, frustum, x, y, z);
     }
 
     @Override
-    public void adjustModelBonesForRender(@NonNull RenderPassInfo<R> info, @NonNull BoneSnapshots bones) {
-        super.adjustModelBonesForRender(info, bones);
-        if (Boolean.TRUE.equals(info.getOrDefaultGeckolibData(TICKET_MUGGLE_VIEW, false))) {
-            // Scale root to zero — Muggles cannot perceive the Dementor's form
-            bones.ifPresent("root", b -> {
-                b.setScaleX(0f);
-                b.setScaleY(0f);
-                b.setScaleZ(0f);
-            });
+    protected float getDeathMaxRotation(@NonNull GeoRenderState renderState) {
+        return 0f;
+    }
+
+    /** Whether the local player can see Dementors: anyone with magical heritage, or a spectator. */
+    public static boolean canPerceive() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null && mc.player.isSpectator()) {
+            return true;
         }
-    }
-
-    /**
-     * Heritage enum has no MUGGLE entry; non-magical humans are represented by
-     * an absence of selected heritage. We treat "no heritage selected" as Muggle.
-     *
-     * // TODO: update once a proper Muggle heritage type is added to the Heritage enum
-     */
-    private static boolean isMuggleView() {
-        PlayerHeritageData data = ClientHeritageDataState.get();
-        Heritage h = data.getSelectedHeritage();
-        return h == null;
+        return ClientHeritageDataState.get().getSelectedHeritage() != null;
     }
 }

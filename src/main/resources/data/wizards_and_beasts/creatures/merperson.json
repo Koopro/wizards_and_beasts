@@ -38,6 +38,10 @@
   ],
   "clips": [
     "attack",
-    "song"
+    "song",
+    "hit",
+    "death",
+    "drift",
+    "roll"
   ]
 }

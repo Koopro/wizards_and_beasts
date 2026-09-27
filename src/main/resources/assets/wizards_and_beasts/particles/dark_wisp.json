@@ -1,1 +1,7 @@
-{"textures":["wizards_and_beasts:spell_mote"]}   
+{
+  "textures": [
+    "wizards_and_beasts:dark_wisp_0",
+    "wizards_and_beasts:dark_wisp_1",
+    "wizards_and_beasts:dark_wisp_2"
+  ]
+}

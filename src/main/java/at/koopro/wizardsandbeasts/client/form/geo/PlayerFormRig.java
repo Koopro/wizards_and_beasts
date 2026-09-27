@@ -49,16 +49,18 @@ public record PlayerFormRig(String asset, String idleClip, @Nullable String move
     /**
      * Form id → rig, for the forms whose art exists.
      *
-     * <p>Absent entries fall through to the legacy hand-written models in {@code FormModelRenderer};
-     * house-elf and veela-harpy have no rig authored yet, and the Animagus forms borrow real vanilla
-     * entity models, which is better than any placeholder rig would be.
+     * <p>Absent entries fall through to the legacy hand-written models in {@code FormModelRenderer}:
+     * the Stag Animagus, and the Animagus forms that borrow real vanilla entity models, which is
+     * better than any placeholder rig would be.
      */
     private static final Map<String, PlayerFormRig> BY_FORM_ID = Map.of(
             "werewolf_wolf", rig("werewolf", "walk", "attack", "hit"),
             "centaur_default", rig("centaur", "walk"),
             "goblin_default", rig("goblin_teller", "walk"),
             "merfolk_water", rig("merperson", "swim"),
-            "obscurial_dark", rig("obscurus", "fly"));
+            "obscurial_dark", rig("obscurus", "fly"),
+            "house_elf_default", rig("house_elf", "walk", "attack", null),
+            "veela_harpy", rig("veela_harpy", "walk", "attack", "hit"));
 
     /** The rig for a form, or null when the form has no GeckoLib art and must use the legacy path. */
     public static @Nullable PlayerFormRig forForm(String formId) {

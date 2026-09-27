@@ -38,16 +38,16 @@ public class ClientSetup {
                 at.koopro.wizardsandbeasts.client.spell.clash.SpellClashRenderer::new);
         // Not `simple`: the goblin picks its geometry and texture from its synced Gringotts role.
         event.registerEntityRenderer(ModEntities.GOBLIN_TELLER.get(), GoblinRenderer.provider("goblin_teller"));
-        event.registerEntityRenderer(ModEntities.NIFFLER.get(), GeoRendererHelper.simple("niffler"));
-        event.registerEntityRenderer(ModEntities.BABY_NIFFLER.get(), GeoRendererHelper.simple("niffler"));
+        event.registerEntityRenderer(ModEntities.NIFFLER.get(), at.koopro.wizardsandbeasts.client.entity.NifflerRenderer::new);
+        event.registerEntityRenderer(ModEntities.BABY_NIFFLER.get(), at.koopro.wizardsandbeasts.client.entity.NifflerRenderer::new);
         event.registerEntityRenderer(ModEntities.FORM_MANNEQUIN.get(), FormMannequinRenderer::new);
         event.registerEntityRenderer(ModEntities.DUELLING_DUMMY.get(), DuellingDummyRenderer::new);
         event.registerEntityRenderer(ModEntities.WIZARDING_THROWN.get(), ThrownItemRenderer::new);
         event.registerEntityRenderer(ModEntities.DEMENTOR.get(), DementorRenderer::new);
-        event.registerEntityRenderer(ModEntities.BOWTRUCKLE.get(), GeoRendererHelper.simple("bowtruckle"));
+        event.registerEntityRenderer(ModEntities.BOWTRUCKLE.get(), at.koopro.wizardsandbeasts.client.entity.BowtruckleRenderer::new);
         event.registerEntityRenderer(ModEntities.CORNISH_PIXIE.get(), GeoRendererHelper.simple("cornish_pixie"));
-        event.registerEntityRenderer(ModEntities.THESTRAL.get(), GeoRendererHelper.simple("thestral"));
-        event.registerEntityRenderer(ModEntities.PHOENIX.get(), GeoRendererHelper.simple("phoenix"));
+        event.registerEntityRenderer(ModEntities.THESTRAL.get(), at.koopro.wizardsandbeasts.client.entity.ThestralRenderer::new);
+        event.registerEntityRenderer(ModEntities.PHOENIX.get(), at.koopro.wizardsandbeasts.client.entity.PhoenixRenderer::new);
         event.registerEntityRenderer(ModEntities.AUGUREY.get(), GeoRendererHelper.simple("augurey"));
         event.registerEntityRenderer(ModEntities.MOONCALF.get(), GeoRendererHelper.simple("mooncalf"));
         event.registerEntityRenderer(ModEntities.STREELER.get(), GeoRendererHelper.simple("streeler"));
@@ -84,10 +84,15 @@ public class ClientSetup {
             var type = at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get(spec.id()).get();
             if (at.koopro.wizardsandbeasts.registry.ModCreatures.DRAGON_IDS.contains(spec.id())) {
                 event.registerEntityRenderer(type, DragonRenderer.provider(spec.id()));
+            } else if ("hippogriff".equals(spec.id())) {
+                event.registerEntityRenderer(type,
+                        context -> new at.koopro.wizardsandbeasts.client.entity.HippogriffRenderer<>(context));
+            } else if ("basilisk".equals(spec.id())) {
+                event.registerEntityRenderer(type, at.koopro.wizardsandbeasts.client.entity.BasiliskRenderer.provider());
             } else if ("kelpie".equals(spec.id())) {
                 // LureDisguise: swaps model + texture between the tame-horse guise and the true form.
                 event.registerEntityRenderer(type,
-                        at.koopro.wizardsandbeasts.client.entity.DisguisableBeastRenderer.provider("kelpie", "kelpie_disguise"));
+                        context -> new at.koopro.wizardsandbeasts.client.entity.KelpieRenderer<>(context));
             } else {
                 // Tint-aware renderer (an opaque white tint = identical to simple).
                 event.registerEntityRenderer(type,

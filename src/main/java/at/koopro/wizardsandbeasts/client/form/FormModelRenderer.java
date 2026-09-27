@@ -157,7 +157,8 @@ public final class FormModelRenderer {
                 return;
             }
             case "animagus_hawk" -> {
-                renderVanilla(poseStack, collector, PARROT_TEXTURE, src, NO_TINT, () -> {
+                // Parrot geometry, own skin: the parrot's own was a red-and-blue macaw.
+                renderVanilla(poseStack, collector, ownOr(formData, PARROT_TEXTURE), src, NO_TINT, () -> {
                     ParrotModel model = getParrotModel();
                     model.resetPose();
                     model.setupAnim(buildParrotState(formData, src));
@@ -166,7 +167,7 @@ public final class FormModelRenderer {
                 return;
             }
             case "animagus_beetle" -> {
-                renderVanilla(poseStack, collector, SILVERFISH_TEXTURE, src, NO_TINT, () -> {
+                renderVanilla(poseStack, collector, ownOr(formData, SILVERFISH_TEXTURE), src, NO_TINT, () -> {
                     SilverfishModel model = getSilverfishModel();
                     model.resetPose();
                     model.setupAnim(src); // reads only ageInTicks from the (living) render state
@@ -177,10 +178,9 @@ public final class FormModelRenderer {
             default -> { /* stag has no vanilla analog — fall through to placeholder geometry */ }
         }
 
-        // Forms whose GeckoLib rig ships (werewolf, centaur, goblin, merfolk, obscurial) draw the
-        // real animated art. Everything below this point is the placeholder path: static box
-        // geometry, no walk cycle, and a hardcoded tint standing in for a texture that was never
-        // authored. It stays only for house-elf and veela-harpy, which have no rig yet.
+        // Forms whose GeckoLib rig ships (werewolf, centaur, goblin, merfolk, obscurial, house-elf,
+        // veela harpy) draw the real animated art. Everything below this point is the legacy
+        // path: static box geometry and no walk cycle. Only the Stag Animagus still uses it.
         if (camera != null && src != null
                 && PlayerFormGeoRenderer.render(formData.formId(), formData.playerUUID(),
                         src, poseStack, collector, camera)) {
@@ -200,7 +200,7 @@ public final class FormModelRenderer {
             tempStack.last().pose().set(pose.pose());
             tempStack.last().normal().set(pose.normal());
 
-            int light = 0xF000F0; // full brightness for placeholder models
+            int light = lightOf(src);
             int overlay = OverlayTexture.NO_OVERLAY;
 
             switch (formData.modelType()) {
@@ -239,8 +239,20 @@ public final class FormModelRenderer {
             FormEntitySpace.apply(tempStack, bodyRot);
 
             net.minecraft.client.model.Model model = animated.get();
-            model.renderToBuffer(tempStack, consumer, 0xF000F0, OverlayTexture.NO_OVERLAY, color);
+            // The world's light at the player, like any mob: a hard-coded full-bright made every
+            // Animagus glow in the dark.
+            model.renderToBuffer(tempStack, consumer, lightOf(src), OverlayTexture.NO_OVERLAY, color);
         });
+    }
+
+    /** The form's own skin (laid out on the borrowed model's UVs), or the vanilla one without it. */
+    private static Identifier ownOr(FormRenderStateModifier.FormRenderData formData, Identifier fallback) {
+        return formData.texturePath() != null ? formData.texturePath() : fallback;
+    }
+
+    /** The packed light the player stands in; full-bright only when there is no render state. */
+    private static int lightOf(@Nullable LivingEntityRenderState src) {
+        return src != null ? src.lightCoords : 0xF000F0;
     }
 
     /** Packs a wet-coat shade ({@code 1.0} dry .. darker) into an opaque ARGB tint for the wolf model. */

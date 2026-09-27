@@ -35,6 +35,9 @@
   ],
   "clips": [
     "attack",
-    "howl"
+    "howl",
+    "hit",
+    "death",
+    "peek"
   ]
 }
