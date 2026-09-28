@@ -1,0 +1,10 @@
+# Python packages for the art generators in tools/ (documentation/ART_PIPELINE.md).
+# Python 3.12 or newer; the shipped assets were produced and verified with CPython 3.13.
+#
+# Pinned exactly on purpose. The generators posterise with Pillow's median-cut quantiser and
+# wizard_cards.py lays out text in Pillow's bundled default font, so another Pillow release can
+# move pixels. After changing a pin, run `python tools/art_sync_check.py` before trusting output.
+#
+#   python -m pip install -r tools/requirements.txt
+pillow==12.3.0
+numpy==2.5.1

@@ -146,9 +146,44 @@ src/main/graphify-out/
 tools/__pycache__/
 
 # Local-only development scaffolding. These live on disk but are never published:
-# the art/audit generators, Blockbench sources, design notes, task lists and every
-# root-level working document except the README.
-/tools/
+# Blockbench sources, design notes, task lists and every root-level working document
+# except the README.
+#
+# tools/ is the exception, since 2026-09-28: the art generators that own shipped assets
+# are tracked so a fresh clone can reproduce them (documentation/ART_PIPELINE.md). A new
+# tools/*.py is tracked by default. Kept local: subfolders, previews and scratch output,
+# and the retired generators below -- superseded or one-shot scripts that would overwrite
+# approved art or data if run (class C/D in the art pipeline audit).
+/tools/*
+!/tools/*.py
+!/tools/requirements.txt
+/tools/armor_item_icons.py
+/tools/bestiary_placeholders.py
+/tools/canon_items.py
+/tools/canon_sprites.py
+/tools/creature_behavior.py
+/tools/creature_gen.py
+/tools/creature_gen_new.py
+/tools/creature_lore.py
+/tools/death_eater_masks.py
+/tools/dragon_anims_apply.py
+/tools/dragon_traits_apply.py
+/tools/entity_art_inventory.py
+/tools/entity_art_verdicts.py
+/tools/gen_chamber_nbt.py
+/tools/gen_mask_textures.py
+/tools/gui_mockups.py
+/tools/horntail_model.py
+/tools/item_icons.py
+/tools/legacy_sprites.py
+/tools/limb_layout.py
+/tools/map_item_model.py
+/tools/map_item_preview.py
+/tools/map_mockup.py
+/tools/petrify_stone_skin.py
+/tools/rig_repair.py
+/tools/spell_source_sprites.py
+/tools/wand_variants.py
 /blockbench/
 /docs/
 /tasks/

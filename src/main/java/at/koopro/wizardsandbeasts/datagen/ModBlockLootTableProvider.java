@@ -4,6 +4,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Block;
@@ -64,6 +65,9 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
                                 .hasProperty(CropBlock.AGE, ModBlocks.MANDRAKE_CROP.get().getMaxAge()))));
         dropSelf(ModBlocks.DEVILS_SNARE.get());
         dropSelf(ModBlocks.MALLOWSWEET.get());
+        // Acromantula silk has no item of its own; it breaks to string, like the hand-written
+        // table it replaces (every hand, no shears or silk touch needed; lost to explosions).
+        add(ModBlocks.ACROMANTULA_WEB.get(), createSingleItemTable(Items.STRING));
         // Banners are two blocks tall. createDoorTable pays out from the lower half only, so
         // breaking either end yields exactly one banner rather than two (dropSelf) or, once
         // the other half is cleared by updateShape, none.

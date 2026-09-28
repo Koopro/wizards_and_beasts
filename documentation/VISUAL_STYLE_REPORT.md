@@ -241,8 +241,9 @@ explicitly):
 The A/B list of §3, plus:
 - **Wand core detail:** needs a rig change or per-bone tinting. Cores are canonically hidden, so
   this is optional.
-- **`tools/` is git-ignored.** Every generator above exists only on the developer's machine. Track
-  it or back it up; regenerating from a fresh clone is currently impossible.
+- ~~**`tools/` is git-ignored.**~~ Fixed 2026-09-28: the generators that own shipped assets are
+  tracked, retired ones stay local, and `tools/art_sync_check.py` proves they reproduce the live
+  files. See `ART_PIPELINE.md`.
 
 ---
 
@@ -287,5 +288,6 @@ The A/B list of §3, plus:
 
 ## 7. Known environment blockers
 
-- `runData` fails on `Missing blockstate definitions for: [wizards_and_beasts:acromantula_web]`
-  (Acromantula redesign). It writes nothing. Fix the datagen before relying on generated resources.
+- ~~`runData` fails on `Missing blockstate definitions for: [wizards_and_beasts:acromantula_web]`.~~
+  Fixed 2026-09-28: the web's blockstate, model, loot table and module tag are generated
+  (`ART_PIPELINE.md` §2.1).

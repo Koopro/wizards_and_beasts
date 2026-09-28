@@ -113,6 +113,8 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
         tag(ModuleTags.blocks(Module.OWLS)).add(ModBlocks.EXAMINATION_DESK.get());
         tag(ModuleTags.blocks(Module.MAGIZOOLOGY)).add(ModBlocks.MANDRAKE_CROP.get(),
                 ModBlocks.OCCAMY_EGGSHELL.get());
+        // Acromantula silk only exists because a living spider spun it, and crumbles without one.
+        tag(ModuleTags.blocks(Module.CREATURES)).add(ModBlocks.ACROMANTULA_WEB.get());
 
         // The Deluminator's paired light blocks: they only ever exist because a Deluminator made them.
         tag(ModuleTags.blocks(Module.ARTEFACTS)).add(

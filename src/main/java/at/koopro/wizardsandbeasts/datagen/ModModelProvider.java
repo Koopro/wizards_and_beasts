@@ -281,6 +281,8 @@ public class ModModelProvider extends ModelProvider {
 
         blockModels.createCrossBlockWithDefaultItem(ModBlocks.MALLOWSWEET.get(), BlockModelGenerators.PlantType.NOT_TINTED);
 
+        createAcromantulaWeb(blockModels, ModBlocks.ACROMANTULA_WEB.get());
+
         createHouseBanner(blockModels, ModBlocks.GRYFFINDOR_BANNER.get());
         createHouseBanner(blockModels, ModBlocks.SLYTHERIN_BANNER.get());
         createHouseBanner(blockModels, ModBlocks.RAVENCLAW_BANNER.get());
@@ -901,6 +903,32 @@ public class ModModelProvider extends ModelProvider {
         Identifier model = flamesModel().create(block, new TextureMapping()
                 .put(TextureSlot.TEXTURE, texture)
                 .put(TextureSlot.PARTICLE, texture), blockModels.modelOutput);
+        blockModels.blockStateOutput.accept(
+                MultiVariantGenerator.dispatch(block, BlockModelGenerators.plainVariant(model)));
+    }
+
+    /**
+     * Acromantula silk: the vanilla cobweb cross, cut out so the gaps between strands stay open.
+     *
+     * <p>It was first shipped as hand-written JSON in {@code src/main/resources}, which the game
+     * loads happily but {@code ModelProvider} cannot see — so {@code runData} refused to run with
+     * "Missing blockstate definitions for: [wizards_and_beasts:acromantula_web]". Generated here, it
+     * emits the same model it replaced ({@code block/cross}, cobweb sprite, {@code cutout}).
+     *
+     * <p>No item model: the silk has no {@code BlockItem} (spiders place it, players never carry it),
+     * the same case as {@link #createFlooFlames}.
+     */
+    private void createAcromantulaWeb(BlockModelGenerators blockModels, Block block) {
+        Identifier cobweb = Identifier.withDefaultNamespace("block/cobweb");
+        Identifier model = ExtendedModelTemplateBuilder.builder()
+                .parent(Identifier.withDefaultNamespace("block/cross"))
+                .requiredTextureSlot(TextureSlot.CROSS)
+                .requiredTextureSlot(TextureSlot.PARTICLE)
+                .renderType("minecraft:cutout")
+                .build()
+                .create(block, new TextureMapping()
+                        .put(TextureSlot.CROSS, cobweb)
+                        .put(TextureSlot.PARTICLE, cobweb), blockModels.modelOutput);
         blockModels.blockStateOutput.accept(
                 MultiVariantGenerator.dispatch(block, BlockModelGenerators.plainVariant(model)));
     }
