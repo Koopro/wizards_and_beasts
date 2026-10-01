@@ -3,8 +3,10 @@ package at.koopro.wizardsandbeasts.datagen;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.EntityTypeTagsProvider;
+import net.minecraft.world.entity.EntityType;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.heritage.veela.VeelaAllure;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleTags;
 import at.koopro.wizardsandbeasts.registry.ModCreatures;
@@ -40,5 +42,11 @@ public class ModEntityTypeTagsProvider extends EntityTypeTagsProvider {
 
         tag(ModuleTags.entityTypes(Module.AZKABAN)).add(ModEntities.DEMENTOR.get());
         tag(ModuleTags.entityTypes(Module.BROOM_FLIGHT)).add(ModEntities.BROOM.get());
+
+        // People a Veela's allure reaches (VeelaAllure): those with a mind to lose. Beasts, the undead and
+        // constructs are left out on purpose, and so are the mod's goblins, who have seen it all before.
+        tag(VeelaAllure.SUSCEPTIBLE).add(
+                EntityType.VILLAGER, EntityType.WANDERING_TRADER, EntityType.PILLAGER, EntityType.VINDICATOR,
+                EntityType.EVOKER, EntityType.ILLUSIONER, EntityType.WITCH, EntityType.PIGLIN, EntityType.PIGLIN_BRUTE);
     }
 }

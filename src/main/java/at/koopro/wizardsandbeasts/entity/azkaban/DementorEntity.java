@@ -10,6 +10,7 @@ import at.koopro.wizardsandbeasts.entity.azkaban.goal.DementorPursueGoal;
 import at.koopro.wizardsandbeasts.entity.azkaban.goal.FleeFromPatronusGoal;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
+import at.koopro.wizardsandbeasts.particle.MagicSmoke;
 import at.koopro.wizardsandbeasts.registry.ModEntities;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
 import at.koopro.wizardsandbeasts.spell.patronus.PatronusDetection;
@@ -230,7 +231,7 @@ public class DementorEntity extends Monster implements GeoEntity {
         entityData.set(DATA_STATE, (byte) State.DISSIPATING.ordinal());
         kissVictim = null;
         if (level() instanceof ServerLevel sl) {
-            sl.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 1.5, getZ(), 24, 0.4, 0.8, 0.4, 0.03);
+            MagicSmoke.dread(sl, getX(), getY() + 1.5, getZ(), 12, 0.4, 0.8);
             sl.sendParticles(ParticleTypes.SNOWFLAKE, getX(), getY() + 1.5, getZ(), 16, 0.6, 0.8, 0.6, 0.02);
         }
         super.die(cause);

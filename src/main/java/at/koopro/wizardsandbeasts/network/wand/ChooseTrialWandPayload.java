@@ -46,12 +46,17 @@ public record ChooseTrialWandPayload(int containerId, int slotIndex) implements 
                 player.displayClientMessage(Component.translatable("wandcraft.trial.rejected"), true);
                 return;
             }
+            // Seven Galleons for every wand after the first (OllivanderPrice).
+            if (!at.koopro.wizardsandbeasts.wand.ollivander.OllivanderPrice.pay(player)) {
+                return;
+            }
             ItemStack wand = menu.createTrialStack(pkt.slotIndex, true);
             float score = WandResonanceSystem.computeResonance(player, wand, player.registryAccess());
             WandResonanceSystem.applyResonance(player, wand, score, player.registryAccess());
             if (!player.addItem(wand)) {
                 player.drop(wand, false);
             }
+            at.koopro.wizardsandbeasts.wand.ollivander.OllivanderPrice.recordSale(player);
             player.closeContainer();
         });
     }

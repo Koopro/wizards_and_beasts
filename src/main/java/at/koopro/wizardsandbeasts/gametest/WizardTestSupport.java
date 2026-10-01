@@ -90,6 +90,20 @@ public final class WizardTestSupport {
             add(name, description, EMPTY_STRUCTURE, scenario);
         }
 
+        /**
+         * Registers a scenario that rewrites server-wide configuration (applies a whole profile in replace mode,
+         * restores a snapshot). Scenarios in one environment run together in one batch, and such a scenario would
+         * reset values a neighbour in the same batch has just set; its own environment puts it in a batch of its own.
+         */
+        public void addAlone(String name, String description, Consumer<GameTestHelper> scenario) {
+            Holder<TestEnvironmentDefinition> own = event.registerEnvironment(
+                    Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "alone_" + name),
+                    new TestEnvironmentDefinition.AllOf());
+            event.registerTest(
+                    Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, name),
+                    new ScenarioTest(description, scenario, new TestData<>(own, EMPTY_STRUCTURE, maxTicks, 0, true)));
+        }
+
         /** Registers one scenario against a named structure. */
         public void add(String name, String description, Identifier structure,
                         Consumer<GameTestHelper> scenario) {

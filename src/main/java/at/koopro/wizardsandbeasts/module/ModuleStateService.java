@@ -13,7 +13,9 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
+import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * The one place module state changes. The command tree and the network packet are two doors into this
@@ -35,14 +37,42 @@ public final class ModuleStateService {
         /** The value did not parse as the setting's type. */
         BAD_VALUE,
         /** No server/level available. */
-        UNAVAILABLE;
+        UNAVAILABLE,
+        /** A module it {@link ModuleDependencies.Kind#REQUIRES} is off; see {@link Change#check()}. */
+        DEPENDENCY_MISSING;
 
         public boolean ok() {
             return this == OK;
         }
     }
 
+    /**
+     * The outcome of a state change, with what it took along: {@code alsoDisabled} are the dependants that went off
+     * with it (REQUIRES edges), {@code check} the full dependency answer it was judged on.
+     */
+    public record Change(Result result, List<Module> alsoDisabled, ModuleDependencies.Check check) {
+        public boolean ok() {
+            return result.ok();
+        }
+    }
+
+    /** Test seam: true only inside {@link #withoutDatapackReload}. */
+    private static boolean reloadSuppressed;
+
     private ModuleStateService() {}
+
+    /**
+     * Runs {@code body} with the datapack reload a state change normally triggers held back. For game tests only: a
+     * reload mid-batch would re-run every reload listener under other tests' feet. Scoped to one synchronous call.
+     */
+    public static <T> T withoutDatapackReload(Supplier<T> body) {
+        reloadSuppressed = true;
+        try {
+            return body.get();
+        } finally {
+            reloadSuppressed = false;
+        }
+    }
 
     /** Pushes the authoritative world state into the read cache and out to every client. */
     public static void refreshAndBroadcast(MinecraftServer server) {
@@ -51,7 +81,7 @@ public final class ModuleStateService {
         ModuleManager.acceptAuthoritative(data.allStates());
         ModuleManager.acceptAuthoritativeSettings(data.allSettings());
         ModuleStateSyncPayload.broadcast(server);
-        if (!before.equals(ModuleManager.snapshot())) {
+        if (!before.equals(ModuleManager.snapshot()) && !reloadSuppressed) {
             reloadDatapacks(server);
         }
     }
@@ -68,19 +98,42 @@ public final class ModuleStateService {
      * says "this is planned", which is a statement about the build rather than a server setting.
      */
     public static Result setState(MinecraftServer server, Module module, ModuleState target) {
+        return change(server, module, target).result();
+    }
+
+    /**
+     * Changes a module's state, judged against {@link ModuleDependencies}:
+     * <ul>
+     *   <li>opening a module whose REQUIRES dependency is off is refused ({@link Result#DEPENDENCY_MISSING});</li>
+     *   <li>closing a module closes its REQUIRES dependants with it, in one persisted step, and reports them in
+     *       {@link Change#alsoDisabled()} — callers say so before and after; nothing breaks silently;</li>
+     *   <li>PARTIAL dependants are left as they are; the change carries them in its check for the warning.</li>
+     * </ul>
+     */
+    public static Change change(MinecraftServer server, Module module, ModuleState target) {
         ModuleStateData data = ModuleStateData.get(server.overworld());
         ModuleState current = data.state(module);
+        ModuleDependencies.Check check = ModuleDependencies.check(data.allStates(), module, target);
 
         if (!current.isOperatorSettable() || !target.isOperatorSettable()) {
             LOGGER.warn("[Modules] Refused {} {} -> {}: COMING_SOON is not operator-settable",
                     module.name(), current.getSerializedName(), target.getSerializedName());
-            return Result.COMING_SOON_LOCKED;
+            return new Change(Result.COMING_SOON_LOCKED, List.of(), check);
+        }
+        if (!check.allowed()) {
+            LOGGER.warn("[Modules] Refused {} {} -> {}: requires {}", module.name(), current.getSerializedName(),
+                    target.getSerializedName(), check.blockedBy().stream().map(e -> e.dependency().name()).toList());
+            return new Change(Result.DEPENDENCY_MISSING, List.of(), check);
         }
 
+        for (Module dependant : check.cascade()) {
+            data.setState(dependant, ModuleState.DISABLED);
+        }
         data.setState(module, target);
         refreshAndBroadcast(server);
-        LOGGER.info("[Modules] {} {} -> {}", module.name(), current.getSerializedName(), target.getSerializedName());
-        return Result.OK;
+        LOGGER.info("[Modules] {} {} -> {}{}", module.name(), current.getSerializedName(), target.getSerializedName(),
+                check.cascade().isEmpty() ? "" : " (also disabled: " + check.cascade() + ")");
+        return new Change(Result.OK, check.cascade(), check);
     }
 
     /**
@@ -102,6 +155,16 @@ public final class ModuleStateService {
      *
      * <p>Settings cannot appear in a condition, so a settings-only change never reaches here.
      */
+    /**
+     * One datapack reload after a batch of module changes made with the reload held back (a profile applied) — so a
+     * batch of N module switches costs one reload, not N. Honours {@link #withoutDatapackReload} like every reload.
+     */
+    public static void reloadAfterBatch(MinecraftServer server) {
+        if (!reloadSuppressed) {
+            reloadDatapacks(server);
+        }
+    }
+
     private static void reloadDatapacks(MinecraftServer server) {
         server.reloadResources(server.getPackRepository().getSelectedIds()).exceptionally(throwable -> {
             // A failed reload leaves the previous resources in place, which is the safe direction: the

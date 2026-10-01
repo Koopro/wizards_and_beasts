@@ -22,6 +22,7 @@ public final class ModParticleProviders {
         register(event, ModParticles.LIGHT_GLOW.get(), SpellFamily.LIGHT);
         register(event, ModParticles.WATER_DROPLET.get(), SpellFamily.WATER);
         register(event, ModParticles.PROTEGO_DEFLECT.get(), SpellFamily.ARCANE);
+        event.registerSpriteSet(ModParticles.SMOKE_PUFF.get(), SmokePuffParticle::provider);
 
         // Broom slipstreams. One particle class, three palettes: what separates a Cleansweep's dust
         // from a Firebolt's embers is colour, size and how fast it fades, none of which needs its

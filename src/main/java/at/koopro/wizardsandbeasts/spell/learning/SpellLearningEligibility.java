@@ -61,7 +61,7 @@ public final class SpellLearningEligibility {
             return Result.deny(spell.getRequirement().describe().getString());
         }
         if (player != null) {
-            String requiredSkillId = spell.getRequiredSkillId();
+            String requiredSkillId = spell.getEffectiveRequiredSkillId();
             if (requiredSkillId != null && !requiredSkillId.isBlank()) {
                 PlayerSkillData skillData = player.getData(ModAttachments.SKILL_DATA.get());
                 if (!skillData.hasSkill(requiredSkillId)) {

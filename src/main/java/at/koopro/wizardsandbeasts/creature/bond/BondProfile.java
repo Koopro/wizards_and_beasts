@@ -41,7 +41,7 @@ import java.util.Optional;
  * @param feeds            what it accepts, in the order they are tried; the first match wins
  * @param maxBond          the ceiling, 100 by convention (the Niffler's)
  * @param followThreshold  bond at which it starts following its owner
- * @param milestones       bond levels that fire a {@code MagizoologyXPEvent} when first crossed
+ * @param milestones       bond levels announced to the owner when first crossed
  * @param proximityRange   blocks within which simply being near the owner counts as company
  * @param proximitySeconds seconds of company per {@code proximityGain}
  * @param proximityGain    bond awarded per completed company interval
@@ -51,7 +51,8 @@ import java.util.Optional;
  * @param masteryBond      bond at which the creature's bestiary entry is marked {@code MASTERED};
  *                         absent means bonding never touches the book. This is the Niffler's
  *                         hard-coded "80 sets MASTERED" rule, made a number instead of a branch
- * @param xpSource         tag on the milestone XP event; defaults to {@code <creature>_bond}
+ * @param xpSource         inert: named the milestone XP event, which nothing listened to and which is gone.
+ *                         Still parsed so existing datapacks load.
  * @param feedSound        sound on a successful feed
  * @param refuseSound      sound when it is still full, or when the offering is refused
  */

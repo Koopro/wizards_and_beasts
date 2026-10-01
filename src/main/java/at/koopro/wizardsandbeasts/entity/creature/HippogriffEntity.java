@@ -81,16 +81,22 @@ import java.util.UUID;
  *       and saved variant, rolled when it first spawns.</li>
  * </ul>
  */
-public class HippogriffEntity extends GenericFlyingBeastEntity implements WingedWalker {
+public class HippogriffEntity extends GenericFlyingBeastEntity implements WingedWalker,
+        at.koopro.wizardsandbeasts.creature.variant.VariantHolder {
 
     public static final String ACTION_CONTROLLER = "hippogriff_action";
 
-    public enum Coat {
+    public enum Coat implements at.koopro.wizardsandbeasts.creature.variant.CreatureVariant {
         STORM_GREY, BRONZE, ROAN, CHESTNUT, BLACK;
 
         /** Texture sub-path, or null for the base texture. */
         public @Nullable String textureName() {
             return this == STORM_GREY ? null : "hippogriff/" + name().toLowerCase(Locale.ROOT);
+        }
+
+        @Override
+        public @Nullable String variantTexture() {
+            return textureName();
         }
 
         static Coat byId(int id) {
@@ -179,6 +185,24 @@ public class HippogriffEntity extends GenericFlyingBeastEntity implements Winged
         entityData.set(DATA_COAT, (byte) coat.ordinal());
     }
 
+    // ── variant (Creature Lab) ──
+
+    @Override
+    public at.koopro.wizardsandbeasts.creature.variant.CreatureVariant variant() {
+        return coat();
+    }
+
+    @Override
+    public boolean applyVariant(String variantId) {
+        for (Coat candidate : Coat.values()) {
+            if (candidate.variantId().equals(variantId)) {
+                setCoat(candidate);
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean respects(Player player) {
         return respected.contains(player.getUUID());
     }
@@ -186,9 +210,9 @@ public class HippogriffEntity extends GenericFlyingBeastEntity implements Winged
     @Override
     public @Nullable SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty,
                                                   EntitySpawnReason reason, @Nullable SpawnGroupData data) {
-        // Rolled once, here and not in the constructor, which also runs on every chunk load.
-        Coat[] coats = Coat.values();
-        setCoat(coats[getRandom().nextInt(coats.length)]);
+        // Rolled once, here and not in the constructor, which also runs on every chunk load. The roll honours the
+        // server's creature rules (disabled coats, overridden weights); with none it is the uniform roll it always was.
+        setCoat(at.koopro.wizardsandbeasts.creature.variant.CreatureVariants.roll("hippogriff", Coat.values(), getRandom()));
         return super.finalizeSpawn(level, difficulty, reason, data);
     }
 

@@ -129,22 +129,29 @@ public class SpellProjectileEntity extends ThrowableProjectile {
         if (damage > 0 && hit instanceof LivingEntity living) {
             living.hurt(level().damageSources().magic(), damage);
         }
+        // An Unforgivable bolt is judged by whom it struck (MinistryTrace.onUnforgivableUse, CANON_AUDIT C-2).
+        if (hit instanceof LivingEntity struck && owner instanceof ServerPlayer castBy
+                && at.koopro.wizardsandbeasts.ministry.trace.MinistryTrace.isUnforgivable(
+                        cachedSpell.getId(), cachedSpell.getCategory())) {
+            at.koopro.wizardsandbeasts.ministry.trace.MinistryTrace.onUnforgivableUse(
+                    castBy, cachedSpell.getId(), cachedSpell.getCategory(), struck);
+        }
 
-        if (props != null && hit instanceof LivingEntity living) {
+        // A magic-resistant hide (a troll, a Graphorn, the basilisk, a half-giant) lets the bolt's force through
+        // but not its enchantment until enough spells land on it at once — see MagicResistance. Asked once per
+        // bolt, before any of the enchantment runs.
+        boolean takesHold = !(hit instanceof LivingEntity body)
+                || at.koopro.wizardsandbeasts.spell.resistance.MagicResistance.takesHold(
+                        cachedSpell, body, owner instanceof LivingEntity livingOwner ? livingOwner : null);
+        if (props != null && hit instanceof LivingEntity living && takesHold) {
             cachedSpell.applyTargetEffects(living, scalingProfile.durationMult());
 
             // Data-driven effect components (Step 3): run the spell's authored effect list against the
-            // hit target. No-op for spells without an effects list (all Java spells today). Stupefy
-            // only has a coin-flip chance to slow a lethal-gaze boss (the basilisk) rather than always
-            // landing — see LethalGazeBossResistance.
+            // hit target. No-op for spells without an effects list (all Java spells today).
             if (owner instanceof ServerPlayer casterPlayer && level() instanceof ServerLevel effectLevel) {
-                boolean allowEffect = !SpellIds.matches(cachedSpell.getId(), "stupefy")
-                        || LethalGazeBossResistance.allowsStupefyEffect(effectLevel.getRandom(), LethalGazeBossResistance.isBossTarget(living));
-                if (allowEffect) {
-                    SpellEffectRunner.run(cachedSpell, SpellEffectContext.ofTarget(casterPlayer, living, effectLevel)
-                            .withScaling(scalingProfile.damageMult(), scalingProfile.durationMult(),
-                                    scalingProfile.controlMult()));
-                }
+                SpellEffectRunner.run(cachedSpell, SpellEffectContext.ofTarget(casterPlayer, living, effectLevel)
+                        .withScaling(scalingProfile.damageMult(), scalingProfile.durationMult(),
+                                scalingProfile.controlMult()));
             }
 
             // Disarm (Expelliarmus) — already a no-op against the basilisk today (it's never equipped
@@ -170,10 +177,10 @@ public class SpellProjectileEntity extends ThrowableProjectile {
                 projectileLevel.playSound(null, BlockPos.containing(living.position()), ModSounds.SPELL_IMPACT_STUPEFY.get(),
                         SoundSource.PLAYERS, 0.42f, 1.03f + projectileLevel.random.nextFloat() * 0.08f);
             }
-
-            if (props.ignites()) {
-                SpellHelper.ignite(living, props.getIgniteDurationSeconds());
-            }
+        }
+        // Conjured fire is force, not enchantment: a hide does not keep it off.
+        if (props != null && props.ignites() && hit instanceof LivingEntity burning) {
+            SpellHelper.ignite(burning, props.getIgniteDurationSeconds());
         }
 
         if (level() instanceof ServerLevel && cachedSpell != null) {

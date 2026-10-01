@@ -45,8 +45,8 @@ public final class WandPresetRegistry {
         register("elder", "The Elder Wand", "classic", "nodular", "pointed", null);
         // Bone-white and thin, with the row of knuckles.
         register("voldemort", "Yew Wand", "bone", "straight", "claw", null);
-        // Gnarled and clawed.
-        register("bellatrix", "Talon Wand", "talon", "barked", "claw", null);
+        // One dark talon: sculpted clawed grip, bowed tapering shaft, curved point.
+        register("bellatrix", "Talon Wand", "bellatrix_handle", "bellatrix_shaft", "bellatrix_tip", null);
         // A cane: flared grip under a serpent's head.
         register("lucius", "Serpent Cane", "flared", "straight", "serpent", "serpent_coil");
         // Slim and severe.

@@ -30,6 +30,11 @@ public class Config {
                     "failure this web must not have. Coins can be earned back; earned points cannot.",
                     "Charged only while the Gringotts module is on; set 0 to make respec free.")
             .defineInRange("skillRespecCostKnuts", 493, 0, Integer.MAX_VALUE);
+    private static final ModConfigSpec.IntValue OLLIVANDER_WAND_PRICE_KNUTS = BUILDER
+            .comment("Price in knuts of every wand after a player's first from Ollivander's trial. Default 3451 =",
+                    "seven Galleons (Philosopher's Stone ch. 5). The first wand is always free: a new character has",
+                    "no money and cannot cast without one. Charged only while the Gringotts module is on; 0 = free.")
+            .defineInRange("ollivanderWandPriceKnuts", 3451, 0, Integer.MAX_VALUE);
     private static final ModConfigSpec.IntValue MINISTRY_FINE_SCALE_PERCENT = BUILDER
             .comment("Percentage applied to every Ministry fine. 100 ships the tariff as designed",
                     "(2 Galleons for unlicensed Apparition, 10 for an unregistered Animagus), 200 doubles it,",
@@ -48,6 +53,10 @@ public class Config {
                     "no one is placed under the Trace unless an admin sets an age. 11 to 16 starts new players",
                     "underage. Existing characters are never changed by this setting.")
             .defineInRange("ministryNewCharacterAge", 0, 0, 16);
+    private static final ModConfigSpec.DoubleValue MINISTRY_NOTORIETY_DECAY_PER_SECOND = BUILDER
+            .comment("Notoriety a wizard sheds per second while lying low (no unpaid fine, not a fugitive).",
+                    "0.05 ships the designed pace: a spree takes real time to cool. 0 keeps notoriety forever.")
+            .defineInRange("ministryNotorietyDecayPerSecond", 0.05, 0.0, 1.0);
     private static final ModConfigSpec.IntValue STANDING_AXIS_BOUND = BUILDER
             .comment("Magnitude of every magical-standing axis. Each axis runs -bound to +bound with 0",
                     "as true neutrality. Raising it makes standing slower to move, not deeper: the deed",
@@ -101,6 +110,26 @@ public class Config {
     private static final ModConfigSpec.BooleanValue ENABLE_WAND_ALLEGIANCE = BUILDER
             .comment("If true, wand allegiance compatibility, binding, and transfer mechanics are active.")
             .define("enableWandAllegiance", true);
+    // ── Wands: numbers the stat resolver and the allegiance rules already use in one place each ──
+    private static final ModConfigSpec.DoubleValue WAND_AFFINITY_STRENGTH = BUILDER
+            .comment("How much a wand's wood and core cast modifiers count. 1 as authored; 0 makes every wood and",
+                    "core cast alike; 2 doubles each one's difference from neutral.")
+            .defineInRange("wandAffinityStrength", 1.0, 0.0, 2.0);
+    private static final ModConfigSpec.DoubleValue WAND_BOND_GROWTH = BUILDER
+            .comment("Multiplies how fast a wand's bond with its wizard deepens with use.")
+            .defineInRange("wandBondGrowthMultiplier", 1.0, 0.0, 5.0);
+    private static final ModConfigSpec.IntValue WAND_DEFEATS_TO_WIN = BUILDER
+            .comment("Defeats of its master that win an ordinary wand, before its wood's temperament adjusts it.",
+                    "The Elder Wand is always won with one.")
+            .defineInRange("wandDefeatsToWin", 1, 1, 5);
+    private static final ModConfigSpec.DoubleValue WAND_NEGLECT_LOSS = BUILDER
+            .comment("Multiplies how fast an unused wand's bond cools once its grace period is over. 0 turns",
+                    "neglect off. Neglect alone never takes a bond below reluctance.")
+            .defineInRange("wandNeglectLossMultiplier", 1.0, 0.0, 5.0);
+    private static final ModConfigSpec.BooleanValue WAND_FOREIGN_BACKFIRE = BUILDER
+            .comment("If true (as shipped), a wand whose wood turns on a stranger (hawthorn) backfires in a hand",
+                    "it does not know. A broken wand always backfires.")
+            .define("wandForeignBackfire", true);
     private static final ModConfigSpec.BooleanValue SHOW_SPELL_HUD_OVERLAY = BUILDER
             .comment("If true, the spell diamond HUD overlay is drawn.")
             .define("showSpellHudOverlay", true);
@@ -129,6 +158,49 @@ public class Config {
             .comment("Hard ceiling for the composed cooldown multiplier, so a stack of penalties cannot",
                     "lock a spell away for minutes.")
             .defineInRange("spellCooldownMaxMultiplier", 2.0, 1.0, 10.0);
+    // ── Server-wide spell rules (administered from the Control Center's Magic and Dark Arts sections) ──
+    private static final ModConfigSpec.DoubleValue SPELL_DAMAGE_MULTIPLIER = BUILDER
+            .comment("Scales every spell's base damage before any caster bonus. 1.0 plays each spell as",
+                    "authored; 0 makes spells harmless. Applied to the base, so the spell power soft cap",
+                    "and ceiling still bound what bonuses add on top.")
+            .defineInRange("spellDamageMultiplier", 1.0, 0.0, 10.0);
+    private static final ModConfigSpec.DoubleValue SPELL_COOLDOWN_MULTIPLIER = BUILDER
+            .comment("Scales every spell's base cooldown. 1.0 is as authored, 0.5 halves every cooldown.",
+                    "The cooldown floor (spellCooldownMinMultiplier) still applies to caster bonuses.")
+            .defineInRange("spellCooldownMultiplier", 1.0, 0.1, 10.0);
+    private static final ModConfigSpec.DoubleValue SPELL_RANGE_MULTIPLIER = BUILDER
+            .comment("Scales the range of every targeted, cone and beam spell. Projectiles are unaffected:",
+                    "they fly until they hit something.")
+            .defineInRange("spellRangeMultiplier", 1.0, 0.25, 4.0);
+    private static final ModConfigSpec.BooleanValue ALLOW_UNFORGIVABLE_CURSES = BUILDER
+            .comment("If false, every spell the spell law classes as Unforgivable (Avada Kedavra, Crucio,",
+                    "Imperio as shipped) is refused at the cast, for everyone. They can still be learned.")
+            .define("allowUnforgivableCurses", true);
+    private static final ModConfigSpec.BooleanValue SPELL_BLOCK_DAMAGE = BUILDER
+            .comment("If false, spell explosions do not break blocks and spells do not set blocks alight.",
+                    "Entities are still hurt and ignited. Use on servers where spells must not grief builds.")
+            .define("spellBlockDamage", true);
+    // ── Brewing: server-wide rules the cauldron already has a single decision point for ──
+    private static final ModConfigSpec.BooleanValue BREWING_ENABLED = BUILDER
+            .comment("If false, no cauldron starts a new brew. Brews already on the heat finish, and bottles",
+                    "already made can still be drunk.")
+            .define("brewingEnabled", true);
+    private static final ModConfigSpec.DoubleValue BREW_SPEED_MULTIPLIER = BUILDER
+            .comment("Divides every recipe's heat time when a brew starts: 2.0 brews twice as fast. Brews",
+                    "already on the heat keep the time they started with.")
+            .defineInRange("brewSpeedMultiplier", 1.0, 0.1, 10.0);
+    private static final ModConfigSpec.DoubleValue BREW_FAILURE_MULTIPLIER = BUILDER
+            .comment("Scales every recipe's authored failure chance at the completion roll. 0 removes the",
+                    "recipes' own risk (mistakes in the pot still count); brewing skill still reduces it.")
+            .defineInRange("brewFailureMultiplier", 1.0, 0.0, 3.0);
+    private static final ModConfigSpec.BooleanValue BREW_REQUIRE_HEAT_SOURCE = BUILDER
+            .comment("If true (as shipped), a cauldron needs a heat source under it to start and keep brewing,",
+                    "and spoils when left cold. False lets any cauldron brew without one.")
+            .define("brewRequireHeatSource", true);
+    private static final ModConfigSpec.DoubleValue BREW_CONTAMINATION_PENALTY = BUILDER
+            .comment("Failure chance added for each item dropped into a working pot that does not belong in",
+                    "the brew (as shipped 0.25: two mistakes are recoverable, four are not).")
+            .defineInRange("brewContaminationPenalty", 0.25, 0.0, 1.0);
     private static final ModConfigSpec.BooleanValue SHOW_SPELL_POWER_IN_TOOLTIP = BUILDER
             .comment("If true, spell tooltips show the caster's effective damage multiplier and where it",
                     "comes from. The number is computed by the same class the server casts with, so it",
@@ -153,6 +225,14 @@ public class Config {
                     "definition specifies. Applied on top of the datapack value, so the ranking",
                     "between brooms is preserved at any setting.")
             .defineInRange("broomSpeedMultiplier", 1.0D, 0.25D, 2.0D);
+    private static final ModConfigSpec.DoubleValue BROOM_SERVER_SPEED_SCALE = BUILDER
+            .comment("Server rule: scales every broom's top speed for everyone, in the definitions the server",
+                    "sends. Unlike broomSpeedMultiplier (each player's own game), this one a client cannot change.")
+            .defineInRange("broomServerSpeedScale", 1.0D, 0.25D, 2.0D);
+    private static final ModConfigSpec.BooleanValue BROOM_SPEED_GUARD = BUILDER
+            .comment("Server rule: set down a rider whose broom keeps travelling faster than the server's",
+                    "definition allows (flight is simulated on the rider's client; this is the server's check).")
+            .define("broomSpeedGuard", true);
     private static final ModConfigSpec.BooleanValue BROOM_GENTLE_LANDING = BUILDER
             .comment("If true, setting a broom down at a controlled descent costs no durability and",
                     "deals no damage. Turn off for the older behaviour, where every touchdown was",
@@ -354,6 +434,7 @@ public class Config {
     public static boolean debugLogSpellGateReasons;
     public static boolean enableDebugTools;
     public static int skillRespecCostKnuts;
+    public static int ollivanderWandPriceKnuts = 3451;
     /**
      * Seeded with the shipped default rather than left at 0: an uninitialised scale reads as "fines are
      * switched off", so a fine assessed before the config load event would silently cost nothing.
@@ -361,6 +442,7 @@ public class Config {
     public static int ministryFineScalePercent = 100;
     public static int ministryDaysPerYear = 8;
     public static int ministryNewCharacterAge = 0;
+    public static double ministryNotorietyDecayPerSecond = 0.05;
     /**
      * Seeded with the shipped defaults for the same reason the fine scale is: standing is read from the
      * character sheet and from the skill-gate path, and a bound of 0 before the config load event would
@@ -377,6 +459,11 @@ public class Config {
     public static int beamTargetScanIntervalTicks;
     public static int beamChannelEffectIntervalTicks;
     public static boolean enableWandAllegiance;
+    public static float wandAffinityStrength = 1.0f;
+    public static float wandBondGrowthMultiplier = 1.0f;
+    public static int wandDefeatsToWin = 1;
+    public static float wandNeglectLossMultiplier = 1.0f;
+    public static boolean wandForeignBackfire = true;
     public static double dragotGalleonRate = 0.8;
     public static boolean butterbeerGulpNausea = false;
     public static boolean showSpellHudOverlay;
@@ -397,6 +484,8 @@ public class Config {
     public static int dummyScareRadius = 12;
     public static boolean dummyDecoy = false;
     public static float broomSpeedMultiplier = 1.0f;
+    public static float broomServerSpeedScale = 1.0f;
+    public static boolean broomSpeedGuard = true;
     public static boolean broomGentleLanding = true;
     public static float broomWindVolume = 0.6f;
     public static float broomFovEffect = 0.12f;
@@ -407,6 +496,16 @@ public class Config {
     public static float spellCooldownMinMultiplier = 0.25f;
     public static float spellCooldownMaxMultiplier = 2.0f;
     public static boolean showSpellPowerInTooltip = true;
+    public static float spellDamageMultiplier = 1.0f;
+    public static float spellCooldownMultiplier = 1.0f;
+    public static float spellRangeMultiplier = 1.0f;
+    public static boolean allowUnforgivableCurses = true;
+    public static boolean spellBlockDamage = true;
+    public static boolean brewingEnabled = true;
+    public static float brewSpeedMultiplier = 1.0f;
+    public static float brewFailureMultiplier = 1.0f;
+    public static boolean brewRequireHeatSource = true;
+    public static float brewContaminationPenalty = 0.25f;
     /**
      * Floo timings and risk, all seeded with their shipped defaults.
      *
@@ -457,9 +556,11 @@ public class Config {
         debugLogSpellGateReasons = DEBUG_LOG_SPELL_GATE_REASONS.get();
         enableDebugTools = ENABLE_DEBUG_TOOLS.get();
         skillRespecCostKnuts = SKILL_RESPEC_COST_KNUTS.get();
+        ollivanderWandPriceKnuts = OLLIVANDER_WAND_PRICE_KNUTS.get();
         ministryFineScalePercent = MINISTRY_FINE_SCALE_PERCENT.get();
         ministryDaysPerYear = MINISTRY_DAYS_PER_YEAR.get();
         ministryNewCharacterAge = MINISTRY_NEW_CHARACTER_AGE.get();
+        ministryNotorietyDecayPerSecond = MINISTRY_NOTORIETY_DECAY_PER_SECOND.get();
         standingAxisBound = STANDING_AXIS_BOUND.get();
         standingLeanThresholdPercent = STANDING_LEAN_THRESHOLD_PERCENT.get();
         standingStrongThresholdPercent = STANDING_STRONG_THRESHOLD_PERCENT.get();
@@ -471,6 +572,16 @@ public class Config {
         beamTargetScanIntervalTicks = BEAM_TARGET_SCAN_INTERVAL_TICKS.get();
         beamChannelEffectIntervalTicks = BEAM_CHANNEL_EFFECT_INTERVAL_TICKS.get();
         enableWandAllegiance = ENABLE_WAND_ALLEGIANCE.get();
+        wandAffinityStrength = WAND_AFFINITY_STRENGTH.get().floatValue();
+        wandBondGrowthMultiplier = WAND_BOND_GROWTH.get().floatValue();
+        wandDefeatsToWin = WAND_DEFEATS_TO_WIN.get();
+        wandNeglectLossMultiplier = WAND_NEGLECT_LOSS.get().floatValue();
+        wandForeignBackfire = WAND_FOREIGN_BACKFIRE.get();
+        // The stat resolver and allegiance rules read WandGlobals, never Config: that is also where a remote
+        // server's values arrive, so tooltips on a client show the server's numbers.
+        at.koopro.wizardsandbeasts.wand.rules.WandRulesService.onGlobalsChanged(
+                new at.koopro.wizardsandbeasts.wand.rules.WandGlobals.Values(wandAffinityStrength,
+                        wandBondGrowthMultiplier, wandDefeatsToWin, wandNeglectLossMultiplier, wandForeignBackfire));
         dragotGalleonRate = DRAGOT_GALLEON_RATE.get();
         butterbeerGulpNausea = BUTTERBEER_GULP_NAUSEA.get();
         showSpellHudOverlay = SHOW_SPELL_HUD_OVERLAY.get();
@@ -490,6 +601,12 @@ public class Config {
         dummyScareRadius = DUMMY_SCARE_RADIUS.get();
         dummyDecoy = DUMMY_DECOY.get();
         broomSpeedMultiplier = BROOM_SPEED_MULTIPLIER.get().floatValue();
+        float previousScale = broomServerSpeedScale;
+        broomServerSpeedScale = BROOM_SERVER_SPEED_SCALE.get().floatValue();
+        broomSpeedGuard = BROOM_SPEED_GUARD.get();
+        if (previousScale != broomServerSpeedScale) {
+            at.koopro.wizardsandbeasts.broom.rules.BroomRulesService.onSpeedScaleChanged();
+        }
         broomGentleLanding = BROOM_GENTLE_LANDING.get();
         broomWindVolume = BROOM_WIND_VOLUME.get().floatValue();
         broomFovEffect = BROOM_FOV_EFFECT.get().floatValue();
@@ -515,5 +632,21 @@ public class Config {
         at.koopro.wizardsandbeasts.spell.cast.SpellPower.applyBounds(
                 spellPowerSoftCapKnee, spellPowerMaxMultiplier, spellPowerMinMultiplier,
                 spellCooldownMinMultiplier, spellCooldownMaxMultiplier);
+        spellDamageMultiplier = SPELL_DAMAGE_MULTIPLIER.get().floatValue();
+        spellCooldownMultiplier = SPELL_COOLDOWN_MULTIPLIER.get().floatValue();
+        spellRangeMultiplier = SPELL_RANGE_MULTIPLIER.get().floatValue();
+        allowUnforgivableCurses = ALLOW_UNFORGIVABLE_CURSES.get();
+        spellBlockDamage = SPELL_BLOCK_DAMAGE.get();
+        brewingEnabled = BREWING_ENABLED.get();
+        brewSpeedMultiplier = BREW_SPEED_MULTIPLIER.get().floatValue();
+        brewFailureMultiplier = BREW_FAILURE_MULTIPLIER.get().floatValue();
+        brewRequireHeatSource = BREW_REQUIRE_HEAT_SOURCE.get();
+        brewContaminationPenalty = BREW_CONTAMINATION_PENALTY.get().floatValue();
+        // Pushed for the same reason: Spell reads SpellTuning, never Config, and SpellTuning is also what a
+        // remote server's values arrive in. This publishes the local layer and tells connected clients.
+        at.koopro.wizardsandbeasts.spell.tuning.SpellTuningService.onGlobalsChanged(
+                new at.koopro.wizardsandbeasts.spell.tuning.SpellTuningSnapshot.Globals(
+                        spellDamageMultiplier, spellCooldownMultiplier, spellRangeMultiplier,
+                        allowUnforgivableCurses, spellBlockDamage));
     }
 }

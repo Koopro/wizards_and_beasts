@@ -35,13 +35,19 @@ public final class PlayerVaultCommands {
     private PlayerVaultCommands() {}
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
+        // Reading your own vault is a player's right; everything else here creates, destroys or reveals someone's
+        // money, so it is the administrator's alone. The /wandb player branch is not gated as a whole (see
+        // PlayerCommands), and these verbs used to carry no gate of their own: any player could deposit unlimited
+        // Galleons into their own vault or empty another's.
         return Commands.literal("vault")
                 .executes(ctx -> show(ctx.getSource(), ctx.getSource().getPlayerOrException()))
                 .then(Commands.argument("target", EntityArgument.player())
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .executes(ctx -> show(ctx.getSource(), EntityArgument.getPlayer(ctx, "target"))))
-                .then(coinNode("deposit", true))
-                .then(coinNode("withdraw", false))
-                .then(DebugModule.onSelfOrTarget("clear", PlayerVaultCommands::clear));
+                .then(coinNode("deposit", true).requires(WizardsAndBeastsCommandPermissions.ADMIN))
+                .then(coinNode("withdraw", false).requires(WizardsAndBeastsCommandPermissions.ADMIN))
+                .then(DebugModule.onSelfOrTarget("clear", PlayerVaultCommands::clear)
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN));
     }
 
     /** {@code deposit|withdraw <galleons|sickles|knuts> <amount> [player]}. */

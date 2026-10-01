@@ -71,7 +71,7 @@ PLAIN = [
     "gui_parchment", "hud_blood_icons", "item_geo", "item_models_3d", "location_textures",
     "map_textures", "omnioculars_scope", "particle_sprites", "player_geo", "pouch_textures",
     "protego_shield_skin", "skill_chart_textures", "skill_web_layout", "spawn_eggs", "spell_sigils",
-    "stat_icons", "tent_skin", "texture_cleanup", "villager_wandmaker", "wand_skin",
+    "stat_icons", "tent_skin", "texture_cleanup", "villager_wandmaker", "wand_model",
     "wandwood_textures", "wizard_cards",
 ]
 

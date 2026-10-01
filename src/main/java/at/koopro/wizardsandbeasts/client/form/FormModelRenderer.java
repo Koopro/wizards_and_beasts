@@ -6,7 +6,6 @@ import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.client.model.ObscurialDarkModel;
 import at.koopro.wizardsandbeasts.client.model.WerewolfModel;
 import at.koopro.wizardsandbeasts.client.model.CentaurModel;
-import at.koopro.wizardsandbeasts.client.model.PatronusStagModel;
 import at.koopro.wizardsandbeasts.client.model.MerfolkSwimModel;
 import at.koopro.wizardsandbeasts.client.form.geo.PlayerFormGeoRenderer;
 import at.koopro.wizardsandbeasts.client.form.model.BatFormModel;
@@ -68,7 +67,6 @@ public final class FormModelRenderer {
     private static WerewolfModel werewolfModel;
     private static ObscurialDarkModel darkModel;
     private static CentaurModel centaurModel;
-    private static PatronusStagModel stagModel;
     private static GoblinFormModel goblinModel;
     private static BatFormModel batModel;
     private static MerfolkSwimModel merfolkModel;
@@ -105,7 +103,6 @@ public final class FormModelRenderer {
         switch (formData.modelType()) {
             case CUSTOM_BIPED -> getWerewolfModel().render(poseStack, consumer, packedLight, overlay);
             case QUADRUPED -> getCentaurModel().render(poseStack, consumer, packedLight, overlay);
-            case STAG -> getStagModel().render(poseStack, consumer, packedLight, overlay, NO_TINT);
             case SMALL_HUMANOID -> getGoblinModel().render(poseStack, consumer, packedLight, overlay);
             case FLYING -> getBatModel().render(poseStack, consumer, packedLight, overlay);
             case SWIMMING -> getMerfolkModel().render(poseStack, consumer, packedLight, overlay);
@@ -175,16 +172,20 @@ public final class FormModelRenderer {
                 });
                 return;
             }
-            default -> { /* stag has no vanilla analog — fall through to placeholder geometry */ }
+            default -> { /* no vanilla analogue: a GeckoLib rig below */ }
         }
 
         // Forms whose GeckoLib rig ships (werewolf, centaur, goblin, merfolk, obscurial, house-elf,
-        // veela harpy) draw the real animated art. Everything below this point is the legacy
-        // path: static box geometry and no walk cycle. Only the Stag Animagus still uses it.
-        if (camera != null && src != null
-                && PlayerFormGeoRenderer.render(formData.formId(), formData.playerUUID(),
-                        src, poseStack, collector, camera)) {
-            return;
+        // veela harpy, the stag Animagus) draw the real animated art. Everything below this point
+        // is the legacy fallback for a pass with no camera or render state: static box geometry
+        // and no walk cycle.
+        if (camera != null && src != null) {
+            AbstractClientPlayer player = livePlayer(formData);
+            boolean sprinting = player != null && player.isSprinting();
+            if (PlayerFormGeoRenderer.render(formData.formId(), formData.playerUUID(), src,
+                    sprinting, isAirborne(player), poseStack, collector, camera)) {
+                return;
+            }
         }
 
         Identifier texture = formData.texturePath() != null ? formData.texturePath() : PLACEHOLDER_TEXTURE;
@@ -206,7 +207,6 @@ public final class FormModelRenderer {
             switch (formData.modelType()) {
                 case CUSTOM_BIPED -> getWerewolfModel().render(tempStack, consumer, light, overlay);
                 case QUADRUPED -> getCentaurModel().render(tempStack, consumer, light, overlay);
-                case STAG -> getStagModel().render(tempStack, consumer, light, overlay, NO_TINT);
                 case SMALL_HUMANOID -> getGoblinModel().render(tempStack, consumer, light, overlay);
                 case FLYING -> getBatModel().render(tempStack, consumer, light, overlay);
                 case SWIMMING -> getMerfolkModel().render(tempStack, consumer, light, overlay);
@@ -347,6 +347,21 @@ public final class FormModelRenderer {
         return sneaking && clampSwing(src) <= 0.05f;
     }
 
+    /**
+     * Off the ground in a way the legs should show: rising or dropping, not in water, not flying and
+     * not riding. The vertical step is read off the position rather than the velocity because a remote
+     * player's velocity is not simulated on this client, and a single tick off a stair edge moves too
+     * little to count.
+     */
+    private static boolean isAirborne(@Nullable AbstractClientPlayer player) {
+        if (player == null || player.onGround() || player.isInWater() || player.isPassenger()
+                || player.getAbilities().flying || player.onClimbable()) {
+            return false;
+        }
+        double dy = player.getY() - player.yo;
+        return dy > 0.05 || dy < -0.15;
+    }
+
     private static @Nullable AbstractClientPlayer livePlayer(FormRenderStateModifier.FormRenderData formData) {
         if (Minecraft.getInstance().level == null) return null;
         return Minecraft.getInstance().level.getPlayerByUUID(formData.playerUUID()) instanceof AbstractClientPlayer p
@@ -384,15 +399,6 @@ public final class FormModelRenderer {
         return batModel;
     }
 
-    /**
-     * The stag shares the Patronus's geometry — it is the same animal, and the alternative was
-     * the centaur body. Its cubes all sit at texOffs(0,0), so the texture is read as one hide
-     * rather than a per-part layout.
-     */
-    private static PatronusStagModel getStagModel() {
-        if (stagModel == null) stagModel = new PatronusStagModel();
-        return stagModel;
-    }
 
     private static MerfolkSwimModel getMerfolkModel() {
         if (merfolkModel == null) merfolkModel = new MerfolkSwimModel();

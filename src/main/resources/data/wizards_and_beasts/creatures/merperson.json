@@ -34,6 +34,11 @@
       "damage": 4.0,
       "cooldown_ticks": 60,
       "particle": "bubble"
+    },
+    {
+      "type": "merfolk_song",
+      "interval_ticks": 600,
+      "verses": 4
     }
   ],
   "clips": [

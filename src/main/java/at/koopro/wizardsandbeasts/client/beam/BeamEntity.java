@@ -11,7 +11,10 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 /**
  * Carries a beam in the world so the normal entity-render dispatch draws it. Purely client-side:
@@ -46,6 +49,19 @@ public class BeamEntity extends Entity {
     private float extendSpeed;
     private boolean active = true;
 
+    /** Ticks over which the beam brightens to full after it appears. Visual only. */
+    private int fadeInTicks;
+    /** Ticks it keeps drawing, dimming, after the channel ended. Visual only: damage stopped with the channel. */
+    private int fadeOutTicks;
+    private int fadeOutLeft;
+    /** Reach when the channel ended; a fading beam never grows past it. */
+    private float stoppedReach = -1f;
+
+    /** A preview beam draws whatever this supplies each frame instead of its configured look. */
+    private @Nullable Supplier<BeamAppearance.Appearance> liveLook;
+    /** A preview beam discards itself at this tick unless kept alive; -1 = no limit (channel beams). */
+    private int expiresAt = -1;
+
     public BeamEntity(EntityType<? extends BeamEntity> type, Level level) {
         super(type, level);
         this.noPhysics = true;
@@ -66,7 +82,20 @@ public class BeamEntity extends Entity {
         // Sit on the caster so culling and distance checks use a sensible reference point.
         setPos(caster.getX(), caster.getY(), caster.getZ());
 
+        if (expiresAt >= 0 && tickCount >= expiresAt) {
+            discard();
+            return;
+        }
+
         progressPrev = progress;
+        if (!active && fadeOutLeft > 0) {
+            // Fading out: hold the drawn length, dim the light (fadeAlpha), then go.
+            fadeOutLeft--;
+            if (fadeOutLeft <= 0) {
+                discard();
+            }
+            return;
+        }
         if (extendSpeed <= 0f) {
             progress = active ? 1f : 0f;
         } else {
@@ -76,6 +105,18 @@ public class BeamEntity extends Entity {
         if (!active && progress <= 0f) {
             discard();
         }
+    }
+
+    /** 0..1 brightness from the fade-in and fade-out windows. */
+    public float fadeAlpha(float partialTick) {
+        float alpha = 1f;
+        if (fadeInTicks > 0) {
+            alpha = Math.min(1f, (tickCount + partialTick) / fadeInTicks);
+        }
+        if (!active && fadeOutTicks > 0) {
+            alpha *= Mth.clamp((fadeOutLeft - partialTick) / fadeOutTicks, 0f, 1f);
+        }
+        return alpha;
     }
 
     public float getProgress(float partialTick) {
@@ -100,8 +141,33 @@ public class BeamEntity extends Entity {
         this.extendSpeed = extendSpeed;
     }
 
+    /** Swaps the look of a live beam (the server's visuals changed); its caster, reach and age are kept. */
+    public void restyle(BeamAppearance.Appearance look) {
+        this.style = look.style();
+        this.shape = look.shape();
+        this.fadeInTicks = Math.max(0, look.fadeInTicks());
+        this.fadeOutTicks = Math.max(0, look.fadeOutTicks());
+    }
+
     public void setActive(boolean active) {
+        if (this.active && !active) {
+            stoppedReach = currentReach(0f);
+            fadeOutLeft = fadeOutTicks;
+        }
         this.active = active;
+    }
+
+    public void setLiveLook(@Nullable Supplier<BeamAppearance.Appearance> liveLook) {
+        this.liveLook = liveLook;
+    }
+
+    public BeamAppearance.@Nullable Appearance liveLook() {
+        return liveLook == null ? null : liveLook.get();
+    }
+
+    /** Keeps a preview beam for {@code ticks} more ticks. */
+    public void keepAliveFor(int ticks) {
+        expiresAt = tickCount + ticks;
     }
 
     public void setTarget(Vec3 target) {
@@ -132,7 +198,8 @@ public class BeamEntity extends Entity {
      */
     public float currentReach(float partialTick) {
         float elapsed = tickCount + partialTick;
-        return Math.min(range, elapsed * BeamRayResolver.extensionBlocksPerTick());
+        float reach = Math.min(range, elapsed * BeamRayResolver.extensionBlocksPerTick());
+        return stoppedReach >= 0f ? Math.min(stoppedReach, reach) : reach;
     }
 
     public int getCasterId() {

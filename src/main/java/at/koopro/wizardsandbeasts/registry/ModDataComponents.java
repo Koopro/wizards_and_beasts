@@ -103,6 +103,14 @@ public class ModDataComponents {
                             .networkSynchronized(BlockPos.STREAM_CODEC)
                             .build());
 
+    /** The world a Portkey's destination is in; a Portkey only travels within it. Absent on older stacks. */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Identifier>> PORTKEY_DIMENSION =
+            DATA_COMPONENTS.register("portkey_dimension", () ->
+                    DataComponentType.<Identifier>builder()
+                            .persistent(Identifier.CODEC)
+                            .networkSynchronized(Identifier.STREAM_CODEC)
+                            .build());
+
     /**
      * Fully-qualified id of the {@link at.koopro.wizardsandbeasts.brew.Brew} contained in
      * a brew bottle. Resolved at consumption time via

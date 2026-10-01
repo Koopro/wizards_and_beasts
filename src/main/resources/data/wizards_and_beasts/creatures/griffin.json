@@ -29,6 +29,11 @@
       "range": 16.0,
       "dive_damage": 4.0,
       "cooldown_ticks": 120
+    },
+    {
+      "type": "hoard_guard",
+      "search_radius": 10.0,
+      "tolerate_bond": 25
     }
   ],
   "clips": [

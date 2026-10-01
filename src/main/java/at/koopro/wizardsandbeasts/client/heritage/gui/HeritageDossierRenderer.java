@@ -170,6 +170,23 @@ public final class HeritageDossierRenderer {
         }
     }
 
+    /** The height {@link #drawTraits} will use at width {@code w}, for callers that lay out below it. */
+    public static int measureTraits(@NonNull Font font, int w, @Nullable HeritageVariant variant) {
+        int height = (font.lineHeight + 1) * 2 + 2;
+        for (HeritageTraits.Kind kind : HeritageTraits.Kind.values()) {
+            List<HeritageTraits.Trait> traits = HeritageTraits.of(variant, kind);
+            if (traits.isEmpty()) {
+                continue;
+            }
+            height += font.lineHeight + 1;
+            for (HeritageTraits.Trait trait : traits) {
+                height += font.split(Component.translatable(trait.getNameKey()), w - 6).size() * font.lineHeight;
+            }
+            height += 3;
+        }
+        return height;
+    }
+
     /**
      * One heading plus its traits by name, wrapped. Nothing is drawn for an empty heading — a lineage with no
      * affinities should read as a lineage with no affinities, not as an empty label.

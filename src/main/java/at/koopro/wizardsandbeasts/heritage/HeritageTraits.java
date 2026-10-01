@@ -75,6 +75,12 @@ public final class HeritageTraits {
         put("two_worlds", Kind.CHARACTERISTIC);      // at home in both, fully trusted by neither
         put("muggle_raised", Kind.CHARACTERISTIC);   // arrived knowing nothing of this world and learned it anyway
         put("wizard_raised", Kind.CHARACTERISTIC);
+        // What every casting lineage shares, which is Wizardkind's identity: breadth, not strength. Both describe
+        // rules that already hold — a wand bonds only to a people that uses wands (PlayerHeritageData.canUseWand),
+        // every skill tree is open to them, and Apparition and Legilimency are Wizardkind-only arts
+        // (ApparitionServerLogic, LegilimencyServerLogic).
+        put("wandwork", Kind.TRAIT);
+        put("learned_arts", Kind.TRAIT);
         put("no_wand", Kind.TRAIT);
         put("no_casting", Kind.TRAIT);
         put("creature_kinship", Kind.AFFINITY);      // squibs and half-giants: beasts trust them

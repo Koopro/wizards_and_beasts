@@ -81,7 +81,9 @@ public final class SpellPowerTooltip {
                 at.koopro.wizardsandbeasts.module.Module.PROFICIENCY)) {
             return 1.0f;
         }
-        float proficiency = ClientSpellDataState.get().getSpellProficiency(spell.getId());
+        var data = ClientSpellDataState.get();
+        float proficiency = at.koopro.wizardsandbeasts.spell.proficiency.SpellPractice.effective(
+                data.getSpellProficiency(spell.getId()), data.getSuccessfulHits(spell.getId()));
         return ProficiencyScaler.computeProfile(proficiency).damageMult();
     }
 

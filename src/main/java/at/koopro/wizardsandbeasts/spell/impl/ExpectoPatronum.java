@@ -10,7 +10,6 @@ import at.koopro.wizardsandbeasts.spell.cast.*;
 import at.koopro.wizardsandbeasts.spell.lib.*;
 import at.koopro.wizardsandbeasts.spell.beam.*;
 import at.koopro.wizardsandbeasts.spell.patronus.PatronusFormDeterminer;
-import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
@@ -60,25 +59,14 @@ public class ExpectoPatronum extends Spell {
             // Failed Patronus must not apply cooldown (lore: retry when memory is brighter).
             return;
         }
-        // Resolve the form up front. A stored form is reused; otherwise it is determined from
-        // heritage. A heritage that cannot conjure a Patronus rejects here — before super.executeCast
-        // pays any cost/cooldown, the same courtesy the faint-memory fizzle above already grants.
+        // Resolve the form up front. A stored form is reused; otherwise it is the caster's own animal,
+        // drawn once from who they are (PatronusFormDeterminer).
         String storedForm = caster.getData(ModAttachments.PATRONUS_FORM.get());
         boolean firstForm = storedForm == null || storedForm.isEmpty();
         Identifier determined = null;
         if (firstForm) {
-            determined = PatronusFormDeterminer.determine(
-                    HeritageAPI.getPlayerHeritage(caster),
-                    HeritageAPI.getPlayerHeritageVariant(caster),
-                    happiness);
-            if (determined == null) {
-                level.playSound(null, caster.blockPosition(), ModSounds.SPELL_FIZZLE.get(), SoundSource.PLAYERS, 0.55f, 1.0f);
-                caster.displayClientMessage(
-                        Component.translatable("spell.wizards_and_beasts.expecto_patronum.reject.heritage")
-                                .withStyle(net.minecraft.ChatFormatting.GRAY),
-                        true);
-                return;
-            }
+            // The caster's own animal, not their lineage's (CANON_AUDIT C-1).
+            determined = PatronusFormDeterminer.determine(caster.getUUID());
         }
         String formId = firstForm ? determined.toString() : storedForm;
 

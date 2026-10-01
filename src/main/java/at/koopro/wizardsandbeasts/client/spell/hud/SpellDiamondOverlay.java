@@ -163,7 +163,8 @@ public class SpellDiamondOverlay {
                         hudX, hudY - 11, screenWidth, SPELL_NAME_COLOR);
             }
             if (ModuleManager.isEnabled(Module.PROFICIENCY)) {
-                renderProficiencyPips(graphics, hudX, hudY, data.getSpellProficiency(activeSpellId));
+                renderProficiencyPips(graphics, hudX, hudY, at.koopro.wizardsandbeasts.spell.proficiency.SpellPractice.effective(
+                        data.getSpellProficiency(activeSpellId), data.getSuccessfulHits(activeSpellId)));
             }
         }
 
@@ -193,6 +194,35 @@ public class SpellDiamondOverlay {
         // to the plate width, and drawString(String) is the overload that pairs with clampTextToWidth.
         drawCaption(graphics, mc.font, reason.getString(), hudX, hudY - 22, screenWidth,
                 (alpha << 24) | REJECT_LINE_RGB);
+    }
+
+    /**
+     * The HUD plate as it would look with {@code spellId} armed in the active slot, drawn at {@code (x, y)} —
+     * for the Control Center's HUD preview. The same sprites, slot geometry and cooldown sweep as the live
+     * overlay, so the preview cannot drift from what players see. Draws nothing of the player's real loadout
+     * or cooldowns; {@code cooldownRemaining} (0..1) shows the sweep at that point.
+     *
+     * @return the plate's on-screen size, so a caller can lay out around it
+     */
+    public static int renderPreview(GuiGraphics graphics, int x, int y, String spellId, float cooldownRemaining) {
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.PLATE, x, y, HUD_ON_SCREEN_SIZE, HUD_ON_SCREEN_SIZE);
+        int iconSize = scalePx(ICON_TEX_SIZE);
+        int cx = x + scalePx(SLOT_CENTERS[0][0]);
+        int cy = y + scalePx(SLOT_CENTERS[0][1]);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.spellIcon(spellId),
+                cx - iconSize / 2, cy - iconSize / 2, iconSize, iconSize);
+        renderDiamondSweep(graphics, cx, cy, iconSize / 2, Mth.clamp(cooldownRemaining, 0f, 1f));
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.TRIM, x, y, HUD_ON_SCREEN_SIZE, HUD_ON_SCREEN_SIZE);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.selectedTrim(0), x, y, HUD_ON_SCREEN_SIZE, HUD_ON_SCREEN_SIZE);
+        Spell spell = Spells.byId(spellId);
+        if (spell != null) {
+            Minecraft mc = Minecraft.getInstance();
+            String name = clampTextToWidth(mc.font, at.koopro.wizardsandbeasts.client.gui.util.GuiText.resolve(spell.getDisplayName()),
+                    HUD_ON_SCREEN_SIZE + CAPTION_MAX_EXTRA_WIDTH);
+            graphics.drawString(mc.font, name, x + HUD_ON_SCREEN_SIZE / 2 - mc.font.width(name) / 2, y - 11,
+                    SPELL_NAME_COLOR, true);
+        }
+        return HUD_ON_SCREEN_SIZE;
     }
 
     /**

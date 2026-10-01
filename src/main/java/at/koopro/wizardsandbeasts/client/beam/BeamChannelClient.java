@@ -64,6 +64,7 @@ public final class BeamChannelClient {
         // extendSpeed 0: the beam's length comes from the server's reach ramp, re-resolved per
         // frame in BeamEntityRenderer. A second growth animation on top would fight it.
         beam.configure(casterId, look.get().style(), look.get().shape(), 0f);
+        beam.restyle(look.get());
         beam.setSpellId(spellId);
         beam.setRange(range);
         mc.level.addEntity(beam);
@@ -71,23 +72,79 @@ public final class BeamChannelClient {
     }
 
     /**
-     * Spawns a beam on the local player that is not tied to a channel, so the editor has something
-     * to look at. Uses the editor's own values directly rather than a spell's, and its own range —
-     * there is no server session behind it to ramp against.
+     * How long a preview beam lives without being kept alive. An editor that is open keeps calling
+     * {@link #keepPreviewAlive}; one that went away without cleaning up (a crash in a screen, a lost
+     * close event) cannot leave a beam running for more than this.
      */
-    public static void startPreview() {
+    public static final int PREVIEW_TTL_TICKS = 100;
+
+    /**
+     * Spawns a beam on the local player that is not tied to a channel, so an editor has something to
+     * look at in the world. It draws whatever {@code look} supplies each frame and reaches
+     * {@code range} blocks — there is no server session behind it to ramp against. Nothing is sent to
+     * the server and no other player sees it.
+     */
+    public static void startPreview(java.util.function.Supplier<BeamAppearance.Appearance> look, float range) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.player == null) {
             return;
         }
         stopPreview();
+        BeamAppearance.Appearance first = look.get();
         BeamEntity beam = new BeamEntity(ModEntities.BEAM.get(), mc.level);
         beam.setId(BeamEntity.nextClientId());
         beam.setPos(mc.player.getX(), mc.player.getY(), mc.player.getZ());
-        beam.configure(mc.player.getId(), BeamStyleEditor.style(), BeamStyleEditor.shape(), 0f);
-        beam.setRange(BeamStyleEditor.previewRange);
+        beam.configure(mc.player.getId(), first.style(), first.shape(), 0f);
+        beam.setLiveLook(look);
+        beam.setRange(range);
+        beam.keepAliveFor(PREVIEW_TTL_TICKS);
         mc.level.addEntity(beam);
         PREVIEW = beam;
+    }
+
+    /** The debug editor's preview: the {@link BeamStyleEditor} working copy. */
+    public static void startPreview() {
+        startPreview(() -> new BeamAppearance.Appearance(BeamStyleEditor.style(), BeamStyleEditor.shape()),
+                BeamStyleEditor.previewRange);
+    }
+
+    public static boolean previewRunning() {
+        return PREVIEW != null && !PREVIEW.isRemoved();
+    }
+
+    /** Called by an open editor each tick so its preview outlives {@link #PREVIEW_TTL_TICKS}. */
+    public static void keepPreviewAlive() {
+        if (PREVIEW != null) {
+            if (PREVIEW.isRemoved()) {
+                PREVIEW = null;
+            } else {
+                PREVIEW.keepAliveFor(PREVIEW_TTL_TICKS);
+            }
+        }
+    }
+
+    /** Sets the preview's reach, in blocks. */
+    public static void setPreviewRange(float range) {
+        if (PREVIEW != null) {
+            PREVIEW.setRange(range);
+        }
+    }
+
+    /**
+     * The server's beam visuals changed: every live channel beam takes its spell's new look at once,
+     * and a beam whose spell is now switched off goes.
+     */
+    public static void restyleAll() {
+        BEAMS.entrySet().removeIf(entry -> {
+            BeamEntity beam = entry.getValue();
+            Optional<BeamAppearance.Appearance> look = BeamAppearance.forSpell(Spells.byId(beam.getSpellId()));
+            if (look.isEmpty()) {
+                beam.discard();
+                return true;
+            }
+            beam.restyle(look.get());
+            return false;
+        });
     }
 
     /** Drops the editor's preview beam. Real channel beams are untouched. */
@@ -98,11 +155,9 @@ public final class BeamChannelClient {
         }
     }
 
-    /** Keeps the preview's reach in step with the editor's range slider. */
-    public static void syncPreviewRange() {
-        if (PREVIEW != null) {
-            PREVIEW.setRange(BeamStyleEditor.previewRange);
-        }
+    /** How many channel beams this client is drawing (the Debug tab's readout). */
+    public static int liveBeamCount() {
+        return BEAMS.size();
     }
 
     /** The channel ended — let the beam fade out and drop it. */

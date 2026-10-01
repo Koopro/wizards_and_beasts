@@ -20,6 +20,7 @@ public final class AbilityIds {
     public static final Identifier OBSCURIAL_FORM = id("obscurial_form");
     /** Veela wings, taken by choice. The fury path in {@code VeelaHeritageHandler} needs no ability. */
     public static final Identifier VEELA_FORM = id("veela_form");
+    public static final Identifier VEELA_ALLURE = id("veela_allure");
     /** A vampire's bat shape. Purely voluntary; nothing forces it. */
     public static final Identifier VAMPIRE_FORM = id("vampire_form");
     public static final Identifier OBSCURIAL_STRESS_VENT = id("obscurial_stress_vent");

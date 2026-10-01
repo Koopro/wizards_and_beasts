@@ -298,7 +298,11 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
         NOT_FILLED,
         EMPTY,
         NO_MATCH,
-        UNKNOWN_BREW
+        UNKNOWN_BREW,
+        /** The server's brewing rule is off. */
+        BREWING_DISABLED,
+        /** The recipe's brew has been disabled by an administrator. */
+        BREW_DISABLED
     }
 
     /**
@@ -330,6 +334,9 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
         if (isEmptyOfIngredients()) {
             return StartResult.EMPTY;
         }
+        if (!at.koopro.wizardsandbeasts.brew.tuning.BrewTuningService.brewingEnabled()) {
+            return StartResult.BREWING_DISABLED;
+        }
         BrewingRecipe recipe = BrewingRecipes.findMatch(contentsView(), tier);
         if (recipe == null) {
             return StartResult.NO_MATCH;
@@ -338,13 +345,18 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
         if (brew == null) {
             return StartResult.UNKNOWN_BREW;
         }
+        // Checked before anything is consumed, so a disabled brew costs the brewer nothing.
+        if (!at.koopro.wizardsandbeasts.brew.tuning.BrewTuning.enabled(brew.id())) {
+            return StartResult.BREW_DISABLED;
+        }
 
         consumeFromSlots(recipe);
         this.recipeId = recipe.id();
         this.penalties = 0f;
         this.catalystAdded = false;
         this.brewId = brew.id();
-        this.totalTicks = Math.max(1, recipe.heatTimeTicks());
+        // The server's brewing-speed rule applies to the brew as it starts; a pot already on the heat keeps its time.
+        this.totalTicks = at.koopro.wizardsandbeasts.brew.tuning.BrewTuningService.heatTimeFor(recipe);
         this.remainingTicks = this.totalTicks;
         this.phase = CauldronPhase.BREWING;
         this.brewerId = brewerId;
@@ -442,7 +454,7 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
             return;
         }
 
-        if (!CauldronHeat.hasHeatSource(serverLevel, pos.below())) {
+        if (!at.koopro.wizardsandbeasts.brew.tuning.BrewTuningService.heated(serverLevel, pos.below())) {
             be.spoilTicksWithoutHeat++;
             if (be.spoilTicksWithoutHeat >= SPOIL_TICKS_WITHOUT_HEAT) {
                 be.spoil(serverLevel, pos);
@@ -519,7 +531,7 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
      */
     private boolean rollFailure(ServerLevel level) {
         BrewingRecipe recipe = recipeId == null ? null : BrewingRecipes.byId(recipeId);
-        float base = recipe == null ? 0f : recipe.failureChance();
+        float base = recipe == null ? 0f : at.koopro.wizardsandbeasts.brew.tuning.BrewTuningService.baseFailureFor(recipe);
 
         // A catalyst that was never added is charged for here rather than when its window closed,
         // because the brewer can still be told about it in the same breath as the result.
@@ -592,12 +604,16 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
             return TimedAddResult.CATALYST_MISTIMED;
         }
 
-        penalties += CONTAMINATION_PENALTY;
+        penalties += at.koopro.wizardsandbeasts.brew.tuning.BrewTuningService.contaminationPenalty();
         setChangedAndSync();
         return TimedAddResult.CONTAMINATED;
     }
 
-    /** How much one wrong item costs. A quarter, so two mistakes are recoverable and four are not. */
+    /**
+     * How much one wrong item costs as shipped. A quarter, so two mistakes are recoverable and four are not. The live
+     * value is the {@code brewContaminationPenalty} rule ({@code BrewTuningService#contaminationPenalty}), whose
+     * default this is.
+     */
     public static final float CONTAMINATION_PENALTY = 0.25f;
 
     /** The failure chance as it currently stands, for tooltips and tests. */

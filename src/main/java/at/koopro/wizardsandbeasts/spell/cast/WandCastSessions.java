@@ -211,6 +211,11 @@ public final class WandCastSessions {
         return session != null && session.clashHold;
     }
 
+    /** Every open hold by player, read-only, for diagnostics (the Debug section's live view). */
+    public static java.util.Map<java.util.UUID, Session> openSessions() {
+        return java.util.Collections.unmodifiableMap(SESSIONS.view());
+    }
+
     /** The player's open session, for diagnostics. Never mutate what this returns. */
     @Nullable
     public static Session peek(ServerPlayer player) {

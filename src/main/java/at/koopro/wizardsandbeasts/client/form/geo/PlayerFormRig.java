@@ -26,10 +26,19 @@ import java.util.Map;
  * @param movementClip clip to play while moving, or null when the rig has none
  * @param attackClip   clip to play while swinging, or null when the rig has none
  * @param hurtClip     clip to play while taking damage, or null when the rig has none
+ * @param runClip      clip to play while sprinting, or null to keep the movement clip
+ * @param airClip      clip to hold while off the ground, or null to carry on as on the ground
  */
 @NullMarked
 public record PlayerFormRig(String asset, String idleClip, @Nullable String movementClip,
-                            @Nullable String attackClip, @Nullable String hurtClip) {
+                            @Nullable String attackClip, @Nullable String hurtClip,
+                            @Nullable String runClip, @Nullable String airClip) {
+
+    /** A rig with no sprint or airborne clips, which is every form but the stag. */
+    public PlayerFormRig(String asset, String idleClip, @Nullable String movementClip,
+                         @Nullable String attackClip, @Nullable String hurtClip) {
+        this(asset, idleClip, movementClip, attackClip, hurtClip, null, null);
+    }
 
     private static PlayerFormRig rig(String asset, @Nullable String movement) {
         return rig(asset, movement, null, null);
@@ -42,6 +51,14 @@ public record PlayerFormRig(String asset, String idleClip, @Nullable String move
                 qualify(asset, movement), qualify(asset, attack), qualify(asset, hurt));
     }
 
+    private static PlayerFormRig rig(String asset, @Nullable String movement, @Nullable String attack,
+                                     @Nullable String hurt, @Nullable String run, @Nullable String air) {
+        return new PlayerFormRig(asset,
+                "animation." + asset + ".idle",
+                qualify(asset, movement), qualify(asset, attack), qualify(asset, hurt),
+                qualify(asset, run), qualify(asset, air));
+    }
+
     private static @Nullable String qualify(String asset, @Nullable String clip) {
         return clip == null ? null : "animation." + asset + "." + clip;
     }
@@ -49,9 +66,12 @@ public record PlayerFormRig(String asset, String idleClip, @Nullable String move
     /**
      * Form id → rig, for the forms whose art exists.
      *
-     * <p>Absent entries fall through to the legacy hand-written models in {@code FormModelRenderer}:
-     * the Stag Animagus, and the Animagus forms that borrow real vanilla entity models, which is
-     * better than any placeholder rig would be.
+     * <p>Absent entries are the Animagus forms that borrow real vanilla entity models, which is
+     * better than any placeholder rig would be. The Stag Animagus has no vanilla analogue, so it has
+     * its own rig ({@code tools/animagus_stag_model.py}), and it is the one form that uses the sprint
+     * and airborne clips: a gallop and a leap read as a different animal from a walk. It has no death
+     * clip because it never dies as a stag: {@code AnimagusEvents.onDeath} ends the transformation at
+     * the moment of death, so the vanilla human death is what plays.
      */
     private static final Map<String, PlayerFormRig> BY_FORM_ID = Map.of(
             "werewolf_wolf", rig("werewolf", "walk", "attack", "hit"),
@@ -60,7 +80,8 @@ public record PlayerFormRig(String asset, String idleClip, @Nullable String move
             "merfolk_water", rig("merperson", "swim"),
             "obscurial_dark", rig("obscurus", "fly"),
             "house_elf_default", rig("house_elf", "walk", "attack", null),
-            "veela_harpy", rig("veela_harpy", "walk", "attack", "hit"));
+            "veela_harpy", rig("veela_harpy", "walk", "attack", "hit"),
+            "animagus_stag", rig("animagus_stag", "walk", null, "hit", "run", "leap"));
 
     /** The rig for a form, or null when the form has no GeckoLib art and must use the legacy path. */
     public static @Nullable PlayerFormRig forForm(String formId) {
@@ -108,11 +129,29 @@ public record PlayerFormRig(String asset, String idleClip, @Nullable String move
      * does not define, which throws inside the render pass.
      */
     public String clipFor(boolean moving, boolean attacking, boolean hurt) {
+        return clipFor(moving, false, false, attacking, hurt);
+    }
+
+    /**
+     * The full choice, in priority order: hurt, attack, airborne, sprint, movement, idle.
+     *
+     * <p>Off the ground beats the gait, since legs in mid-air are not walking. As above, every step
+     * falls through when the rig does not declare the clip, so a rig without the newer clips chooses
+     * exactly what it always did.
+     */
+    public String clipFor(boolean moving, boolean sprinting, boolean airborne, boolean attacking,
+                          boolean hurt) {
         if (hurt && hurtClip != null) {
             return hurtClip;
         }
         if (attacking && attackClip != null) {
             return attackClip;
+        }
+        if (airborne && airClip != null) {
+            return airClip;
+        }
+        if (moving && sprinting && runClip != null) {
+            return runClip;
         }
         return moving && movementClip != null ? movementClip : idleClip;
     }

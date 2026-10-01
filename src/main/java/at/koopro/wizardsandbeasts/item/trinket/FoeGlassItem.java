@@ -48,7 +48,7 @@ public class FoeGlassItem extends Item implements AnimatedItem {
 
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
-        if (!ModuleManager.isEnabled(Module.DARK_ARTS)) {
+        if (!ModuleManager.isEnabled(Module.ARTEFACTS)) {
             return InteractionResult.FAIL;
         }
         // Started on both sides: the client needs the use to begin for the raised pose, the server
@@ -78,12 +78,12 @@ public class FoeGlassItem extends Item implements AnimatedItem {
      * What the glass shows, once it has been held up long enough to show it.
      *
      * <p>The module is re-checked rather than trusted from {@link #use}: two seconds is long enough
-     * for an operator to switch DARK_ARTS off mid-look, and a gate that only guards the entrance is
+     * for an operator to switch ARTEFACTS off mid-look, and a gate that only guards the entrance is
      * not a gate.
      */
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
-        if (level.isClientSide() || !ModuleManager.isEnabled(Module.DARK_ARTS)) {
+        if (level.isClientSide() || !ModuleManager.isEnabled(Module.ARTEFACTS)) {
             return stack;
         }
         if (entity instanceof ServerPlayer serverPlayer) {

@@ -292,7 +292,9 @@ public final class CreatureWildlifeTests {
                             () -> "the unicorn's killer was not marked");
                     check(helper, DarkCorruptionService.get(stranger) > corruptionBefore,
                             () -> "killing a unicorn left no stain");
-                    check(helper, stranger.hasEffect(MobEffects.WEAKNESS), () -> "the slayer carries no curse");
+                    // The cursed life belongs to whoever drinks the blood (Philosopher's Stone ch. 15); the killer is
+                    // marked and stained, not cursed (CANON_AUDIT C-6).
+                    check(helper, !stranger.hasEffect(MobEffects.WEAKNESS), () -> "the slayer was cursed for the killing");
 
                     second[0] = still(helper, "unicorn", UNICORN_Y, 2, 6);
                     BestiaryDataHelper.setTier(stranger, unicornPage, DiscoveryTier.KNOWN);
@@ -1579,15 +1581,15 @@ public final class CreatureWildlifeTests {
 
     // ── shared ────────────────────────────────────────────────────────────────────────────────────
 
-    private static BlockPos min(int y) {
+    static BlockPos min(int y) {
         return new BlockPos(-1, y - 1, -1);
     }
 
-    private static BlockPos max(int y) {
+    static BlockPos max(int y) {
         return new BlockPos(7, y + 5, 8);
     }
 
-    private static void stage(GameTestHelper helper, int y) {
+    static void stage(GameTestHelper helper, int y) {
         WizardTestSupport.forceChunks(helper, min(y), max(y));
         for (int x = -1; x <= 7; x++) {
             for (int z = -1; z <= 8; z++) {
@@ -1606,13 +1608,13 @@ public final class CreatureWildlifeTests {
         return player;
     }
 
-    private static void place(GameTestHelper helper, ServerPlayer player, int y, int x, int z) {
+    static void place(GameTestHelper helper, ServerPlayer player, int y, int x, int z) {
         BlockPos at = helper.absolutePos(new BlockPos(x, y, z));
         player.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0.0f, 0.0f);
         player.setNoGravity(true);
     }
 
-    private static GenericBeastEntity still(GameTestHelper helper, String id, int y, int x, int z) {
+    static GenericBeastEntity still(GameTestHelper helper, String id, int y, int x, int z) {
         @SuppressWarnings("unchecked")
         EntityType<GenericBeastEntity> type = (EntityType<GenericBeastEntity>) ModCreatures.ENTITIES.get(id).get();
         GenericBeastEntity creature = helper.spawn(type, new BlockPos(x, y, z));
@@ -1630,7 +1632,7 @@ public final class CreatureWildlifeTests {
         return entity;
     }
 
-    private static void lookAt(ServerPlayer player, Entity target) {
+    static void lookAt(ServerPlayer player, Entity target) {
         Vec3 to = target.getEyePosition().subtract(player.getEyePosition());
         double horizontal = Math.sqrt(to.x * to.x + to.z * to.z);
         player.setYRot((float) (Math.toDegrees(Math.atan2(-to.x, to.z))));
@@ -1644,11 +1646,11 @@ public final class CreatureWildlifeTests {
         player.setYHeadRot(player.getYRot());
     }
 
-    private static Identifier page(String id) {
+    static Identifier page(String id) {
         return Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, id);
     }
 
-    private static DiscoveryTier tier(ServerPlayer player, Identifier page) {
+    static DiscoveryTier tier(ServerPlayer player, Identifier page) {
         return BestiaryDataHelper.getTier(player, page);
     }
 
@@ -1670,7 +1672,7 @@ public final class CreatureWildlifeTests {
 
     /** Saves a creature and loads a copy of it, the way a chunk does. The copy is not added to the world. */
     @SuppressWarnings("unchecked")
-    private static <T extends Entity> T roundTrip(GameTestHelper helper, T entity) {
+    static <T extends Entity> T roundTrip(GameTestHelper helper, T entity) {
         ServerLevel level = helper.getLevel();
         try (ProblemReporter.ScopedCollector reporter =
                      new ProblemReporter.ScopedCollector(entity.problemPath(), LogUtils.getLogger())) {

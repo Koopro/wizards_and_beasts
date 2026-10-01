@@ -32,6 +32,8 @@ import net.minecraft.resources.Identifier;
 import software.bernie.geckolib.animatable.client.GeoRenderProvider;
 import software.bernie.geckolib.animatable.manager.AnimatableManager;
 import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.RawAnimation;
+import software.bernie.geckolib.constant.dataticket.DataTicket;
 import software.bernie.geckolib.animation.object.PlayState;
 import software.bernie.geckolib.renderer.GeoItemRenderer;
 
@@ -72,9 +74,38 @@ public class WandItem extends GeoItemBase {
         });
     }
 
+    /**
+     * Whether the holder is in a wand hold with this stack, set by {@code WandRenderer} for a wand
+     * drawn in a hand and absent everywhere else (slots, frames, the ground).
+     */
+    public static final DataTicket<Boolean> HOLDING_CAST = DataTicket.create("wand_holding_cast", Boolean.class);
+
+    private static final RawAnimation CHARGE = RawAnimation.begin().thenLoop("animation.wand.charge");
+    private static final RawAnimation CAST = RawAnimation.begin().thenPlay("animation.wand.cast");
+
+    /**
+     * Purely cosmetic and read-only: the wand trembles while a cast is held and flicks once when the
+     * hold ends, from the holder's vanilla use state. Nothing here feeds back into casting, and a
+     * wand at rest shows the rest pose. Each stack gets its own animatable (GeckoLib keys unassigned
+     * stacks by identity), so one caster's charge never shakes another wand.
+     */
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<WandItem>("wand_controller", 0, state -> PlayState.STOP));
+        controllers.add(new AnimationController<WandItem>("wand_controller", 2, state -> {
+            Boolean holding = state.getData(HOLDING_CAST);
+            if (holding == null) {
+                // Drawn somewhere other than a hand: keep whatever the hand pass started.
+                return state.controller().getCurrentRawAnimation() == null ? PlayState.STOP : PlayState.CONTINUE;
+            }
+            if (holding) {
+                return state.setAndContinue(CHARGE);
+            }
+            if (state.isCurrentAnimation(CHARGE)
+                    || (state.isCurrentAnimation(CAST) && !state.controller().hasAnimationFinished())) {
+                return state.setAndContinue(CAST);
+            }
+            return PlayState.STOP;
+        }));
     }
 
     @Override

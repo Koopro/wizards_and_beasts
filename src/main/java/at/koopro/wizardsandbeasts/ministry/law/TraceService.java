@@ -22,8 +22,11 @@ import org.jspecify.annotations.NullMarked;
 @NullMarked
 public final class TraceService {
 
-    /** Notoriety shed per second while lying low. Slow enough that a spree takes real time to cool. */
-    private static final float DECAY_PER_SECOND = 0.05f;
+    /**
+     * Notoriety shed per second while lying low, as shipped. Slow enough that a spree takes real time to cool. The
+     * live value is {@code Config.ministryNotorietyDecayPerSecond} (Control Center → Ministry → Rules).
+     */
+    public static final float DEFAULT_DECAY_PER_SECOND = 0.05f;
 
     private TraceService() {}
 
@@ -87,7 +90,7 @@ public final class TraceService {
         if (!FineSchedule.mayCool(record.notoriety(), false, record.fugitive(), record.isServingSentence())) {
             return;
         }
-        float shed = DECAY_PER_SECOND * (elapsedTicks / 20.0f);
+        float shed = (float) at.koopro.wizardsandbeasts.Config.ministryNotorietyDecayPerSecond * (elapsedTicks / 20.0f);
         MinistryRecords.mutate(player, r -> r.withNotoriety(r.notoriety() - shed));
     }
 

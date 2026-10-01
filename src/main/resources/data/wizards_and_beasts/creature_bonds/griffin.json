@@ -1,0 +1,38 @@
+{
+  "_comment": "Griffins eat raw meat (Fantastic Beasts). Feeding one is how the few wizards who befriend a griffin do it; HoardGuard lets its bond owner near its gold from 25. It stays by its hoard: the home restriction outranks following, which only starts at full bond. No gift: canon names no griffin material.",
+  "feeds": [
+    {
+      "item": "minecraft:beef",
+      "gain": 10,
+      "cooldownSeconds": 60
+    },
+    {
+      "item": "minecraft:mutton",
+      "gain": 10,
+      "cooldownSeconds": 60
+    },
+    {
+      "item": "minecraft:rabbit",
+      "gain": 8,
+      "cooldownSeconds": 45
+    },
+    {
+      "item": "minecraft:chicken",
+      "gain": 6,
+      "cooldownSeconds": 45
+    }
+  ],
+  "followThreshold": 100,
+  "milestones": [
+    25,
+    50,
+    100
+  ],
+  "proximityRange": 8.0,
+  "proximitySeconds": 60,
+  "proximityGain": 1,
+  "betrayalPenalty": 40,
+  "masteryBond": 100,
+  "feedSound": "minecraft:entity.parrot.eat",
+  "refuseSound": "minecraft:entity.parrot.hurt"
+}

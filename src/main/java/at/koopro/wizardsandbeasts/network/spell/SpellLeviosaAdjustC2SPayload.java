@@ -40,6 +40,9 @@ public record SpellLeviosaAdjustC2SPayload(float distanceDelta) implements Custo
         ctx.enqueueWork(() -> {
             if (!(ctx.player() instanceof ServerPlayer player)) return;
             if (!(player.level() instanceof net.minecraft.server.level.ServerLevel level)) return;
+            // A NaN or infinite delta survived Mth.clamp into the hold distance and from there into the lifted
+            // entity's position: one malformed packet put a mob at NaN coordinates.
+            if (!Float.isFinite(pkt.distanceDelta)) return;
 
             PlayerSpellData data = player.getData(ModAttachments.SPELL_DATA.get());
             if (!SpellNetworkGuards.canUseWand(player, data, "leviosa_adjust")) return;

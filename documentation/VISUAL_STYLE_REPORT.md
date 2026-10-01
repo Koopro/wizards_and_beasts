@@ -126,17 +126,17 @@ paper. (`tasks/art_rework_phase2_brief.md`.)
 | Rigkit roster (~70 data-driven creatures) | **D** | Shared box language, strand/fleck grain, hit/death/idle clips on all 96. |
 | Troll, Giant | **D** | Silhouettes read; rescaled 1.25 / 1.8. |
 | Winged horses (Abraxan, Aethonan, Granian), Snallygaster | **D** | Feathered primaries added; horse bodies are the family. |
-| Griffin | **B** | Stepped wings fixed, but still reads as a beaked horse: the eagle forequarters need talons and a feathered chest instead of horse legs (model). |
-| Glumbumble | **B** | Grey box with a V of wings; a furry bumble-body silhouette is missing (model). |
-| Blast-Ended Skrewt | **B** | Crate on spider legs; needs a segmented, shell-less, scorpion-tailed body (model). |
-| Knarl | **B** | Reads as a brown boulder at distance; quills need to break the silhouette (model: spine cubes, not texture). |
+| Griffin | **D** | 2026-09-27 silhouette pass: eagle forelegs (feathered thigh, thin yellow tarsus, three-forward-one-back talons), keel chest and neck ruff, short hooked beak, wings held mantled over the croup. Lion hindquarters unchanged. |
+| Glumbumble | **D** | 2026-09-27: rounded fuzzy thorax and drooping banded abdomen (cross-slab rounding, no fur cubes), feelers, swept-back fore and hind wings set on the thorax. |
+| Blast-Ended Skrewt | **D** | 2026-09-27: low body under overlapping plates tipped up at the rear (serrated top line), shorter crab-bent legs, thick curled scorpion tail with bulb and barb, protruding lit blast vent. |
+| Knarl | **D** | 2026-09-27: rounded stepped dome, 22 quill cubes breaking the outline from every side, pointed snout with black nose tip, ears. |
 | Red Cap | **B** | Model 2× its 0.75 hitbox; needs a hitbox or `scale` decision (gameplay sign-off). |
 | Sea Serpent | **B** | 2.9 blocks for a canonically huge sea creature; candidate for `scale` once aquatic pathing is checked. |
 | Long, low creatures (Ashwinder, Moke, Salamander, Flobberworm, Runespoor) | **C** | Tall boxes around low bodies; a hitbox matter, not art. |
 | Obscurus | **C** | Painted gaps in its smoke are intended (the only speckle-flagged skin). |
 | Invisible / camouflaged creatures (Boggart, Demiguise, Dugbog, Hidebehind, Mooncalf, Moke, Pogrebin, Rougarou, Tebo, Thestral-unseen, Yeti) | **C** | Blank in captures by design; skins judged offline. |
 | Fwooper, Chinese Fireball, Salamander saturation | **C** | Vivid by canon / emissive. |
-| Bespoke creatures without `hit`/`death` (Niffler, Pixie, Streeler, Bowtruckle, Augurey, Mooncalf) | **B** | Only the vanilla red flash on damage, while every data-driven creature flinches and dies. Animation + clip gate. |
+| Bespoke creature reactions (Niffler, Pixie, Streeler, Bowtruckle, Augurey, Mooncalf) | **D** | 2026-09-27: all six flinch and die on a `<id>_action` controller registered after movement. Niffler and Bowtruckle already had it; the other four got `tools/bespoke_reactions.py` (shared beat + species overlay), wired into their generators. Verified in client (`hurt`/`death` views). |
 
 ### Player forms
 
@@ -146,14 +146,14 @@ paper. (`tasks/art_rework_phase2_brief.md`.)
 | House-elf, Veela harpy rigs | **D** | New; asset-tested, not seen in a client. |
 | Cat/Dog/Hare Animagus (vanilla model + skin) | **C** | Real vanilla animals are right for Animagi. |
 | Hawk/Beetle Animagus (vanilla model, own skin) | **D** | |
-| Stag Animagus | **B** | Last legacy `ModelPart` box model; no walk cycle. Needs a rigkit rig. |
+| Stag Animagus | **D** | 2026-09-28: rigkit rig `animagus_stag` on the GeckoLib form path (`PlayerFormRig`), same stag (raked neck, four-piece antlers, thin legs, brown coat + rump patch); `idle`, `walk`, `run` (sprint), `leap` (airborne), `hit`. Death is the vanilla human's: the transformation ends at death. Verified in client with `FormShowcaseCapture`. |
 
 ### Items, weapons and wands
 
 | Asset | Class | Note |
 |---|---|---|
 | All 16×16 item icons (`item_sprites.py`, 210) | **D** | The reference style. |
-| Wand (GeckoLib rig, wood appearance data) | **D** | Frozen rig; wood = heartwood tint shared with the blocks. Cores are not shown (canon: inside). |
+| Wand (GeckoLib rig, wood appearance data) | **D** | Modular rig from `wand_model.py` (2026-09-29); wood = heartwood tint shared with the blocks. Cores are not shown (canon: inside). |
 | Elder Wand | **D** | Own art, untinted. |
 | Book cuboids, hold-class transforms, GeckoLib artefacts | **D** | |
 | Wizard cards (128 px portraits) | **C** | Deliberate large-format collectible. |
@@ -188,10 +188,10 @@ paper. (`tasks/art_rework_phase2_brief.md`.)
 | Mob-effect icons (42) | **D** | 20 redrawn; the rest already fit. |
 | Particles (14 types, 29 sprites) | **D** | Crisp, greyscale-tinted, one set per type. |
 | Creature ability particles (arcane / light / healing / dread / poison) | **D** | |
-| Wand beam (`effect/wand_beam*.png`) | **B** | Smooth radial glow; pixel core + stepped glow would match the particles. Touches the custom beam pipeline; test the electrocute look after any change. |
+| Wand beam (`client/beam/BeamGeometry`) | **D** | Fixed 2026-09-27. The beam is untextured geometry (the `effect/wand_beam*.png` this report first blamed were unused orphans, now deleted). It had 0.5 px bloom shells at halving alpha, which drew a smooth anti-aliased glow. Now: a whole-pixel core with a 1 px lit spine, two stepped glow shells running core tone to spell colour, and sparse 1 px sparks that crawl every 2 ticks. Checked with an offline replica; not seen in a client (no harness casts a beam). |
 | Protego ward skin | **C** | Translucent magic; soft alpha intentional; pattern already crisp. |
-| Werewolf / Dementor / Phoenix `LARGE_SMOKE` bursts | **B** | Big grey vanilla smoke; should become `DREAD` / `dark_wisp`. |
-| Magenta vanilla particle clouds seen on some creatures (Fire Crab, Pukwudgie, earlier others) | **B** | Source not found. Not the mod's ability particles. Investigate before shipping. |
+| Werewolf / Dementor / Phoenix smoke | **D** | Fixed 2026-09-27. New `smoke_puff` particle: 4 pixel dissipation frames, stepped opacity, tinted by meaning through `particle/MagicSmoke`. Dementor = `DARK_MAGIC` puffs + dread wisps; Werewolf = `DARK_MAGIC`; Phoenix = `FIRE` puffs, and its burst's vanilla `LAVA` became `fire_ember`, because each lava pop trailed a black vanilla smoke column. Phoenix verified in client; Dementor dissipation and Werewolf exit not triggerable by the harness. |
+| Magenta particle clouds | **D** | Fixed 2026-09-27. Source: `BlinkAway` and `Evasion` called `randomTeleport(..., true)`; the broadcast flag sends vanilla entity event 46, 128 vanilla `PORTAL` particles along the trail (accidental: the abilities already mark the blink themselves). Now `false`, with `ARCANE` motes at departure and arrival. Clouds appeared on the blinking creature's hurt/death shots and drifted into the next creature's shots, which is why they seemed to come from the Fire Crab. Capture check: 19 affected shots before, 0 after. |
 | Vanilla tooltips over parchment screens | **C** | Vanilla players expect them; keep. |
 
 ---
@@ -202,13 +202,11 @@ paper. (`tasks/art_rework_phase2_brief.md`.)
    16 or 24 px, rim colour by category, glyph in the spell's own colour. Author the HUD frame at its
    on-screen size. Draw only at integer multiples: `SpellDiamondOverlay`, `SpellWheelScreen`,
    `SpellMenuScreen` (`ICON_TEX_SIZE`, `HUD_TEX_SIZE`). Keep the resource paths.
-2. **B — `LARGE_SMOKE` bursts and the magenta clouds** (VFX grammar, R7).
-3. **B — Stag Animagus rig**, and hit/death clips for the six bespoke creatures (animation parity).
-4. **B — Griffin, Glumbumble, Blast-Ended Skrewt, Knarl** silhouettes (model changes only; keep
-   bones and clip names; re-run `reactions.py` / `bestiary_portraits.py`).
-5. **B — wand beam** pixel pass.
-6. **B — hair items, Death Eater mask variants** (icons).
-7. **B — Red Cap / Sea Serpent scale, student house robes** — need gameplay or data sign-off
+2. ~~**B — Stag Animagus rig.**~~ — done 2026-09-28. (Animation parity for the six bespoke creatures: done 2026-09-27.)
+3. ~~**B — Griffin, Glumbumble, Blast-Ended Skrewt, Knarl** silhouettes~~ — done 2026-09-27
+   (models only; bones, clips and definitions unchanged; portraits re-rendered; eggs unchanged).
+4. **B — hair items, Death Eater mask variants** (icons).
+5. **B — Red Cap / Sea Serpent scale, student house robes** — need gameplay or data sign-off
    first.
 
 ---
@@ -221,7 +219,7 @@ paper. (`tasks/art_rework_phase2_brief.md`.)
 | Dementor, Hippogriff (+coats), Basilisk, Phoenix, Kelpie (+disguise, +coats) | Generators pinned to `Skin(grain="speckle")`, which reproduces the shipped files byte-for-byte. Never switch them to `strand`/`fleck`, and never hand-edit them to "match" the roster. |
 | Obscurus rig (`obscurus.geo.json` / `.animation.json`) | Never a full `obscurus_model.py` run: it drops the `add_reactions.py` clips and later geo fixes. Use `--form-only` for the player-form smoke. |
 | Spawn eggs of Bowtruckle, Cornish Pixie, Phoenix, Thestral | Hand-set by their redesigns; `spawn_eggs.py` would overwrite them. |
-| Wand rig (`wand.geo.json`) | The author's frozen model. Wood looks come from `wand_woods/*.json` `appearance`. |
+| Wand rig (`wand.geo.json`) | Owned by `tools/wand_model.py`; base wand (classic/straight/pointed) keeps the author's 2x11 grip and 1.5 stick. Wood looks come from `wand_woods/*.json` `appearance`. |
 | Parchment GUI kit, spell sigils, item icons, item geo | Owned by `gui_parchment.py`, `gui_chrome.py`, `spell_sigils.py`, `item_sprites.py`, `item_geo.py`. `artgen_common.save` refuses other writers even with `--force`. Redraw through the owner. |
 | Wizard cards | Deliberate 128 px exception. |
 | `src/main/resources` after `runData` | `runData` stubs placeholder textures over real art. Never `git add -A` after it. Snapshot and compare instead. |
@@ -230,7 +228,6 @@ Hand-made textures with no generator (keep them as they are, or claim them into 
 explicitly):
 - 19 mob-effect icons;
 - the spell-wheel overlay sprites (`gui/sprites/*/bg.png`, `overlay*.png`);
-- `effect/wand_beam*.png`;
 - `entity/petrify/stone_statue.png`;
 - `entity/form/placeholder.png`.
 

@@ -16,8 +16,24 @@ public final class DebugHooks {
     private DebugHooks() {
     }
 
+    /**
+     * Spell logging for every player, not only those in debug mode. Leased from the Control Center's Debug section
+     * ({@code DebugLeases}), so it goes off again when the administrator who turned it on leaves.
+     */
+    private static volatile boolean spellLoggingForAll;
+
+    public static void setSpellLoggingForAll(boolean enabled) {
+        spellLoggingForAll = enabled;
+    }
+
+    public static boolean spellLoggingForAll() {
+        return spellLoggingForAll;
+    }
+
     public static void logSpellCast(ServerPlayer player, String event, String detail) {
-        if (!DebugModeService.isEnabled(player)) return;
+        at.koopro.wizardsandbeasts.admin.debug.CastDiagnostics.record(player.getName().getString(),
+                player.level().getGameTime(), event, detail);
+        if (!spellLoggingForAll && !DebugModeService.isEnabled(player)) return;
         LOGGER.info("[W&B Debug][Spell] player='{}' event='{}' detail='{}'",
                 player.getName().getString(), event, detail);
     }

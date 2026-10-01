@@ -85,15 +85,19 @@ final class SpellCastTargetedHandler {
                 successful = true;
             }
 
-            spell.applyTargetEffects(target, scalingProfile.durationMult());
             successful = true;
+            // A magic-resistant hide takes the force but refuses the enchantment until enough land at once.
+            boolean takesHold = at.koopro.wizardsandbeasts.spell.resistance.MagicResistance.takesHold(spell, target, caster);
+            if (takesHold) {
+                spell.applyTargetEffects(target, scalingProfile.durationMult());
 
-            // Data-driven effect components (Step 3): run the authored effect list against the target.
-            // No-op for spells without an effects list (all Java spells today).
-            SpellEffectRunner.run(spell, SpellEffectContext.ofTarget(caster, target, level)
-                    .withScaling(damageMultiplier, scalingProfile.durationMult(), scalingProfile.controlMult()));
+                // Data-driven effect components (Step 3): run the authored effect list against the target.
+                // No-op for spells without an effects list (all Java spells today).
+                SpellEffectRunner.run(spell, SpellEffectContext.ofTarget(caster, target, level)
+                        .withScaling(damageMultiplier, scalingProfile.durationMult(), scalingProfile.controlMult()));
+            }
 
-            if (props.levitatesTarget()) {
+            if (takesHold && props.levitatesTarget()) {
                 target.addEffect(new MobEffectInstance(MobEffects.LEVITATION,
                         Math.max(1, Math.round(props.getLevitateDurationTicks() * scalingProfile.durationMult())),
                         0, false, true, true));
@@ -309,6 +313,11 @@ final class SpellCastTargetedHandler {
         LivingEntity target = SpellTargetHelper.findTargetedEntity(level, caster, effectiveRange);
         if (target == null) {
             return false;
+        }
+        // Hoisting a troll by the ankle takes more than one wand; the attempt still counts as a cast that landed.
+        if (!at.koopro.wizardsandbeasts.spell.resistance.MagicResistance.takesHold(target, caster)) {
+            SpellHelper.spawnBeam(level, spell, start, target.getBoundingBox().getCenter());
+            return true;
         }
         target.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 90, 1, false, true, true));
         target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 60, 2, false, true, true));

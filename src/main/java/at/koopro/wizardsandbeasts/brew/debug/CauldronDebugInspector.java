@@ -137,7 +137,7 @@ public final class CauldronDebugInspector implements DebugInspector.OfBlock {
         report.row("  penalties", String.format("%.2f", be.accumulatedPenalties()));
 
         BrewingRecipe recipe = be.recipeId() == null ? null : BrewingRecipes.byId(be.recipeId());
-        float base = recipe == null ? 0f : recipe.failureChance();
+        float base = recipe == null ? 0f : at.koopro.wizardsandbeasts.brew.tuning.BrewTuningService.baseFailureFor(recipe);
         float missed = be.accumulatedPenalties();
         if (recipe != null && recipe.catalyst().isPresent() && !be.isCatalystAdded()) {
             missed += recipe.catalyst().get().missPenalty();

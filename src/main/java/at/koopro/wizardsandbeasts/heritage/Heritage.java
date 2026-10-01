@@ -43,7 +43,10 @@ public enum Heritage {
     GIANT("giant", "Giant",
             "Colossal near-human folk once common across northern Europe, diminished by Muggle warfare and bloody feuds of their own. "
                     + "Their thick hides blunt many spells that would drop a wizard outright.",
-            false, MagicSource.NONE, 20, 0, 6, SizeCategory.LARGE, 0xFF667744, false),
+            // Wand use is decided per lineage: a half-giant is raised and trained as a witch or wizard — Hagrid keeps
+            // his broken wand in his umbrella, Madame Maxime heads Beauxbatons — while full giants and clan wardens
+            // carry no_wand (documentation/CANON_AUDIT.md C-5).
+            true, MagicSource.HYBRID, 20, 0, 6, SizeCategory.LARGE, 0xFF667744, false),
 
     CENTAUR("centaur", "Centaur",
             "Proud half-equine forest-dwellers who scorn being servants of humans yet read futures in the wheeling stars. "

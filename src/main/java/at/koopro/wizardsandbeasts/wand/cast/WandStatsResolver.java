@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.wand.cast;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.item.wand.WandItem;
+import at.koopro.wizardsandbeasts.wand.rules.WandGlobals;
 import at.koopro.wizardsandbeasts.wand.stat.WandCore;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import at.koopro.wizardsandbeasts.wand.stat.WandLength;
@@ -126,12 +127,16 @@ public final class WandStatsResolver {
     }
 
     /** Shared by wood and core: fold one {@link WandCastModifiers} into the builder. */
+    /**
+     * A wood's or core's modifiers, each moved toward or away from neutral by the server's affinity-strength rule
+     * ({@code WandGlobals}); at the shipped 1.0 exactly as authored.
+     */
     private static void applyModifiers(WandStats.Builder b, WandCastModifiers mods) {
-        b.mulDamage(mods.damage())
-                .mulCooldown(mods.cooldown())
-                .mulRange(mods.range())
-                .addFizzle(mods.fizzle());
-        mods.categoryDamageBonus().forEach(b::addCategoryDamageBonus);
+        b.mulDamage(WandGlobals.scaled(mods.damage(), 1.0f))
+                .mulCooldown(WandGlobals.scaled(mods.cooldown(), 1.0f))
+                .mulRange(WandGlobals.scaled(mods.range(), 1.0f))
+                .addFizzle(WandGlobals.scaled(mods.fizzle(), 0.0f));
+        mods.categoryDamageBonus().forEach((category, bonus) -> b.addCategoryDamageBonus(category, WandGlobals.scaled(bonus, 0.0f)));
     }
 
     // ── Woods: datapack-driven ───────────────────────────────────────────

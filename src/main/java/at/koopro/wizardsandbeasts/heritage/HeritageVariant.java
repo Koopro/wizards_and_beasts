@@ -24,17 +24,17 @@ public enum HeritageVariant {
             "Descended from families named in the Sacred Twenty-Eight, steeped in rites, registers, and the politics of blood status. "
                     + "Their children inherit not only vaults and portraits but centuries of whispered lore about dark curses survived and survived again.",
             0, 0, 0, 0xFFC9B8F2,
-            Set.of("old_family")),
+            Set.of("old_family", "wandwork", "learned_arts")),
     HALF_BLOOD("half_blood", Heritage.WIZARDKIND, "Half-Blood",
             "Born of one magical parent and one without, they bridge two worlds and are often the quiet majority in any common room. "
                     + "Neither pedigree nor novelty defines them — only how they choose to stand when old prejudices flare.",
             0, 0, 0, 0xFFB0A0E6,
-            Set.of("two_worlds")),
+            Set.of("two_worlds", "wandwork", "learned_arts")),
     MUGGLE_BORN("muggle_born", Heritage.WIZARDKIND, "Muggle-Born",
             "The first in their family to receive a Hogwarts letter, they grow up without moving photographs yet often outpace peers raised on borrowed prejudices. "
                     + "Their gift arrived unheralded — and sometimes proves the sharper for it.",
             0, 0, 0, 0xFFD8C6F5,
-            Set.of("muggle_raised")),
+            Set.of("muggle_raised", "wandwork", "learned_arts")),
     SQUIB("squib", Heritage.WIZARDKIND, "Squib",
             "Raised among cauldrons and cantrips yet unable to kindle a single spark, they occupy a lonely margin of the magical world. "
                     + "Still, many see what wizards overlook — from kneazles in alleys to winged horses others insist cannot exist.",
@@ -44,7 +44,7 @@ public enum HeritageVariant {
             "Their birth certificate may be Muggle, magical, or missing entirely — what matters is that cauldrons and bedtime stories were always wizarding. "
                     + "Hogwarts letters find them the same as any other child; only the parlour portraits argue about whose fault the nose is.",
             0, 0, 0, 0xFFC4D4F8,
-            Set.of("wizard_raised")),
+            Set.of("wizard_raised", "wandwork", "learned_arts")),
 
     // Goblin
     GOBLIN_COMMON("common", Heritage.GOBLIN, "Common",
@@ -102,7 +102,7 @@ public enum HeritageVariant {
             "Towering kin of Grawp's brutal cousins, bred in feuds and forgotten valleys where Ministry maps grow vague. "
                     + "Their footfalls shake trees; their laughter can be mistaken for weather.",
             0, 0, 0, 0xFF7A8C5C,
-            Set.of("spell_resistant_hide")),
+            Set.of("spell_resistant_hide", "no_wand")),
     GIANT_HALF("half_giant", Heritage.GIANT, "Half-Giant",
             "One human parent tempers size and temper alike, trading titanic reach for a door that sometimes opens in polite society. "
                     + "Hagrid and Madame Maxime proved such bloodlines can still gentle the wildest things — if the world lets them try.",
@@ -112,7 +112,7 @@ public enum HeritageVariant {
             "Neither raider nor exile — they remember old songs, burial cairns, and which passes stay open when snow seals the range. "
                     + "When giants feud, someone must count the dead; these are the fists that stop the next charge long enough for dawn.",
             0, 0, 0, 0xFF5E6A48,
-            Set.of("spell_resistant_hide")),
+            Set.of("spell_resistant_hide", "no_wand")),
 
     // Centaur
     CENTAUR_FOREST("forest", Heritage.CENTAUR, "Forest",

@@ -115,6 +115,11 @@ public class SpellRequirement {
         return prerequisiteId;
     }
 
+    /** The clauses of an AND composite; empty for a leaf requirement and for {@link #NONE}. */
+    public List<SpellRequirement> clauses() {
+        return clauses;
+    }
+
     /** The prerequisite's registered id when it resolves, else the authored id verbatim. */
     private String canonicalPrerequisiteId() {
         Spell prereq = Spells.byId(prerequisiteId);

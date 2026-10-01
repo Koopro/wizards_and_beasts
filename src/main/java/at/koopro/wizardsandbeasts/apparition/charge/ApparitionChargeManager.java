@@ -149,6 +149,11 @@ public final class ApparitionChargeManager {
         if (charge == null) {
             return;
         }
+        if (!player.isAlive()) {
+            // A release already on the wire when its sender died is read after the death: a corpse goes nowhere.
+            abort(player);
+            return;
+        }
         resolve(player, charge, charge.missTicksOnRelease());
     }
 

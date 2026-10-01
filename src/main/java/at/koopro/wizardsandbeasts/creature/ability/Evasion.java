@@ -42,11 +42,18 @@ public record Evasion(float dodgeChance, double range, int cooldownTicks) implem
                 || entity.getRandom().nextFloat() >= dodgeChance) {
             return;
         }
+        // `broadcast = false` on the teleport: `true` makes vanilla send entity event 46, 128 vanilla
+        // PORTAL particles along the trail — the magenta clouds the visual review could not place.
+        // This blink marks itself: the mod's arcane motes where it left and where it lands.
+        double fromX = entity.getX();
+        double fromY = entity.getY() + entity.getBbHeight() * 0.5;
+        double fromZ = entity.getZ();
         for (int attempt = 0; attempt < 8; attempt++) {
             double tx = entity.getX() + (entity.getRandom().nextDouble() - 0.5) * 2.0 * range;
             double tz = entity.getZ() + (entity.getRandom().nextDouble() - 0.5) * 2.0 * range;
-            if (entity.randomTeleport(tx, entity.getY(), tz, true)) {
+            if (entity.randomTeleport(tx, entity.getY(), tz, false)) {
                 entity.heal(amount); // negate the blow it slipped
+                AbilitySupport.emitAt(level, AbilitySupport.Particle.ARCANE, fromX, fromY, fromZ, 5, 0.35, 0.05);
                 AbilitySupport.emitAt(level, AbilitySupport.Particle.ARCANE,
                         entity.getX(), entity.getY() + entity.getBbHeight() * 0.5, entity.getZ(), 8, 0.35, 0.05);
                 level.playSound(null, entity.getX(), entity.getY(), entity.getZ(),

@@ -10,6 +10,7 @@ import at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import at.koopro.wizardsandbeasts.heritage.ConditionOrigin;
+import at.koopro.wizardsandbeasts.heritage.rules.HeritageRules;
 import at.koopro.wizardsandbeasts.network.heritage.HeritageSelectC2SPayload;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -39,6 +40,13 @@ import java.util.Optional;
  * is {@code false}, {@link #isPauseScreen()} is {@code false}, and ESC is swallowed at the root — the
  * only exit is committing an available heritage (or, while the confirm overlay is open, ESC steps back
  * to browsing). Opened server-side via {@code HeritageDataSyncS2CPayload.openSelector()}.
+ *
+ * <p>Which heritages may be confirmed is the server's {@link HeritageRules}, not a compile-time flag; the server
+ * enforces the same rule again when the choice arrives.
+ *
+ * <p><b>Preview mode</b> ({@link #preview}): the Control Center opens the same screen so an administrator can
+ * walk through onboarding as a new player would see it under the current rules. ESC returns to the Control
+ * Center, and confirming sends nothing — the administrator's own heritage is never touched.
  */
 public class HeritageSelectionScreen extends Screen {
 
@@ -90,8 +98,26 @@ public class HeritageSelectionScreen extends Screen {
     private int previewY, previewH, traitsY;
     private int overlayX, overlayY, overlayW, overlayH;
 
+    /** Non-null in preview mode: the screen to return to. Nothing is ever sent while it is set. */
+    @Nullable private final Screen previewReturn;
+
     public HeritageSelectionScreen() {
-        super(Component.translatable("gui.wizards_and_beasts.heritage.title"));
+        this(null);
+    }
+
+    private HeritageSelectionScreen(@Nullable Screen previewReturn) {
+        super(Component.translatable(previewReturn == null
+                ? "gui.wizards_and_beasts.heritage.title" : "gui.wizards_and_beasts.heritage.preview_title"));
+        this.previewReturn = previewReturn;
+    }
+
+    /** The onboarding screen as a new player would see it, committing nothing; ESC returns to {@code returnTo}. */
+    public static HeritageSelectionScreen preview(Screen returnTo) {
+        return new HeritageSelectionScreen(returnTo);
+    }
+
+    public boolean isPreview() {
+        return previewReturn != null;
     }
 
     @Override
@@ -198,7 +224,7 @@ public class HeritageSelectionScreen extends Screen {
                 rightColX, contentBottom - s(18), s(COL_SIDE_W), s(18),
                 Component.translatable("gui.wizards_and_beasts.heritage.confirm"),
                 this::openConfirm).tone(McStylePanel.ButtonTone.CONFIRM);
-        confirm.active = selectedHeritage.isAlphaAvailable() && selectedVariant != null;
+        confirm.active = HeritageRules.selectable(selectedHeritage) && selectedVariant != null;
         addRenderableWidget(confirm);
     }
 
@@ -274,7 +300,7 @@ public class HeritageSelectionScreen extends Screen {
      */
     private void randomise() {
         List<Heritage> available = Arrays.stream(Heritage.values())
-                .filter(Heritage::isAlphaAvailable)
+                .filter(HeritageRules::selectable)
                 .filter(h -> !h.getSubtypes().isEmpty())
                 .toList();
         if (available.isEmpty()) {
@@ -314,7 +340,7 @@ public class HeritageSelectionScreen extends Screen {
     }
 
     private void openConfirm() {
-        if (selectedHeritage != null && selectedHeritage.isAlphaAvailable() && selectedVariant != null) {
+        if (selectedHeritage != null && HeritageRules.selectable(selectedHeritage) && selectedVariant != null) {
             confirmOpen = true;
             rebuild();
         }
@@ -326,7 +352,11 @@ public class HeritageSelectionScreen extends Screen {
     }
 
     private void commit() {
-        if (selectedHeritage != null && selectedVariant != null && selectedHeritage.isAlphaAvailable()) {
+        if (selectedHeritage != null && selectedVariant != null && HeritageRules.selectable(selectedHeritage)) {
+            if (previewReturn != null) {
+                onClose();
+                return;
+            }
             ClientPacketDistributor.sendToServer(new HeritageSelectC2SPayload(
                     selectedHeritage.getId(), selectedVariant.getId(),
                     selectedCondition.map(ConditionOrigin::getId).orElse("")));
@@ -362,7 +392,7 @@ public class HeritageSelectionScreen extends Screen {
         if (selectedHeritage != null) {
             HeritageDossierRenderer.drawDossier(g, font, midColX, contentTop,
                     s(COL_MID_W), contentBottom - contentTop,
-                    selectedHeritage, selectedVariant, !selectedHeritage.isAlphaAvailable());
+                    selectedHeritage, selectedVariant, !HeritageRules.selectable(selectedHeritage));
         }
 
         // Right column: who you will be, then what that costs and grants.
@@ -404,7 +434,7 @@ public class HeritageSelectionScreen extends Screen {
 
     /** Explains why Confirm is dead when a browse-only heritage is on screen. */
     private void renderLockedTooltip(@NonNull GuiGraphics g, int mouseX, int mouseY) {
-        if (confirmOpen || selectedHeritage == null || selectedHeritage.isAlphaAvailable()) {
+        if (confirmOpen || selectedHeritage == null || HeritageRules.selectable(selectedHeritage)) {
             return;
         }
         int cw = s(COL_SIDE_W);
@@ -419,7 +449,16 @@ public class HeritageSelectionScreen extends Screen {
 
     @Override
     public boolean shouldCloseOnEsc() {
-        return false;
+        return previewReturn != null;
+    }
+
+    @Override
+    public void onClose() {
+        if (previewReturn != null && minecraft != null) {
+            minecraft.setScreen(previewReturn);
+            return;
+        }
+        super.onClose();
     }
 
     @Override
@@ -428,6 +467,8 @@ public class HeritageSelectionScreen extends Screen {
         if (key == 256) { // ESC
             if (confirmOpen) {
                 closeConfirm();
+            } else if (previewReturn != null) {
+                onClose();
             }
             // Root browse: ESC is swallowed — the gate cannot be dismissed without committing.
             return true;

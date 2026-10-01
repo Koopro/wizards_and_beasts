@@ -19,6 +19,7 @@ public enum SpellCastGate {
     NO_ACTIVE_SPELL,
     UNKNOWN_SPELL,
     SPELL_NOT_IMPLEMENTED,
+    SPELL_DISABLED,
     SPELL_NOT_KNOWN,
     OBSCURIAL_ABILITY_INPUT,
     REQUIREMENTS_UNMET,
@@ -37,6 +38,8 @@ public enum SpellCastGate {
      * @param spellResolved         that id resolves to a registered spell
      * @param spellImplemented      that spell's behaviour is written — see
      *                              {@link at.koopro.wizardsandbeasts.spell.def.SpellImplementationState}
+     * @param spellEnabled          a server administrator has not withdrawn the spell — see
+     *                              {@link at.koopro.wizardsandbeasts.spell.tuning.SpellAvailability}
      * @param spellKnown            the caster has learned the spell
      * @param obscurialAbility      the spell is an Obscurial ability (cast via ability keys, not the wand)
      * @param requirementSatisfied  the spell's requirement is met (or enforcement is off)
@@ -49,6 +52,7 @@ public enum SpellCastGate {
     public record Inputs(boolean activeSpellPresent,
                          boolean spellResolved,
                          boolean spellImplemented,
+                         boolean spellEnabled,
                          boolean spellKnown,
                          boolean obscurialAbility,
                          boolean requirementSatisfied,
@@ -56,7 +60,18 @@ public enum SpellCastGate {
                          boolean darkRestrictedInForm,
                          boolean tooDrunk,
                          boolean onCooldown,
-                         boolean globalCooldownActive) {}
+                         boolean globalCooldownActive) {
+
+        /** The inputs before administration existed: every spell enabled. Kept for callers that predate it. */
+        public Inputs(boolean activeSpellPresent, boolean spellResolved, boolean spellImplemented,
+                      boolean spellKnown, boolean obscurialAbility, boolean requirementSatisfied,
+                      boolean darkFormOnlyOutsideForm, boolean darkRestrictedInForm, boolean tooDrunk,
+                      boolean onCooldown, boolean globalCooldownActive) {
+            this(activeSpellPresent, spellResolved, spellImplemented, true, spellKnown, obscurialAbility,
+                    requirementSatisfied, darkFormOnlyOutsideForm, darkRestrictedInForm, tooDrunk, onCooldown,
+                    globalCooldownActive);
+        }
+    }
 
     /** The first failing gate in cast-precedence order, or {@code null} when the cast may proceed. */
     @Nullable
@@ -67,6 +82,9 @@ public enum SpellCastGate {
         // spell, not of the caster, so it outranks every gate that describes the player's progress.
         // Telling someone to go learn a spell that cannot be cast by anyone would be a lie.
         if (!in.spellImplemented()) return SPELL_NOT_IMPLEMENTED;
+        // Same reasoning: an administrator withdrawing a spell is a fact about the server, and it outranks
+        // anything the caster could fix by studying.
+        if (!in.spellEnabled()) return SPELL_DISABLED;
         if (!in.spellKnown()) return SPELL_NOT_KNOWN;
         if (in.obscurialAbility()) return OBSCURIAL_ABILITY_INPUT;
         if (!in.requirementSatisfied()) return REQUIREMENTS_UNMET;

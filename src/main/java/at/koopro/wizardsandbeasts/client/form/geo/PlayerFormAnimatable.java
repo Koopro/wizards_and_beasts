@@ -61,6 +61,8 @@ public final class PlayerFormAnimatable implements GeoAnimatable {
 
     private PlayerFormRig rig;
     private boolean moving;
+    private boolean sprinting;
+    private boolean airborne;
     private boolean attacking;
     private boolean hurt;
 
@@ -82,10 +84,23 @@ public final class PlayerFormAnimatable implements GeoAnimatable {
      */
     public static PlayerFormAnimatable forPlayer(UUID playerUUID, PlayerFormRig rig, float walkSpeed,
                                                  boolean attacking, boolean hurt) {
+        return forPlayer(playerUUID, rig, walkSpeed, false, false, attacking, hurt);
+    }
+
+    /**
+     * As above, plus the motion states only some rigs have clips for: sprinting and off the ground.
+     * Like the reactions they are read, not synced (vanilla already syncs a player's sprint flag and
+     * its ground state), and a rig without those clips ignores them.
+     */
+    public static PlayerFormAnimatable forPlayer(UUID playerUUID, PlayerFormRig rig, float walkSpeed,
+                                                 boolean sprinting, boolean airborne,
+                                                 boolean attacking, boolean hurt) {
         PlayerFormAnimatable animatable =
                 INSTANCES.computeIfAbsent(playerUUID, uuid -> new PlayerFormAnimatable(rig));
         animatable.rig = rig;
         animatable.moving = walkSpeed > MOVEMENT_THRESHOLD;
+        animatable.sprinting = sprinting;
+        animatable.airborne = airborne;
         animatable.attacking = attacking;
         animatable.hurt = hurt;
         return animatable;
@@ -114,7 +129,7 @@ public final class PlayerFormAnimatable implements GeoAnimatable {
 
     /** The clip this animatable would play right now. Split out so a test can assert the choice. */
     public RawAnimation currentClip() {
-        return clip(rig.clipFor(moving, attacking, hurt));
+        return clip(rig.clipFor(moving, sprinting, airborne, attacking, hurt));
     }
 
     private static RawAnimation clip(String name) {

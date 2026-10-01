@@ -1,9 +1,12 @@
 package at.koopro.wizardsandbeasts.brew.silver;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
+import at.koopro.wizardsandbeasts.heritage.werewolf.WerewolfRules;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -66,8 +69,15 @@ public final class SilveredWeapons {
         return true;
     }
 
-    /** Whether silver bites this target. */
+    /**
+     * Whether silver bites this target: a dark creature by type, or a player carrying lycanthropy while the moon has
+     * them in wolf shape. The player's condition is what silver answers to, never their heritage — a werewolf in human
+     * form is a witch or wizard, and silver is only metal to them.
+     */
     public static boolean isDarkCreature(Entity target) {
+        if (target instanceof ServerPlayer player) {
+            return WerewolfRules.isTransformed(HeritageAPI.getData(player));
+        }
         return target.getType().is(DARK_CREATURES);
     }
 

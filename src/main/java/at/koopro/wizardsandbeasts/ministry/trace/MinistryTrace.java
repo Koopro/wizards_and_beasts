@@ -63,12 +63,44 @@ public final class MinistryTrace {
      * magic that nobody saw leaves nothing behind.
      */
     public static void onSuccessfulCast(ServerPlayer caster, String spellId, @Nullable SpellCategory category) {
+        file(caster, spellId, SpellLawRegistry.lawFor(spellId, category));
+    }
+
+    /** Whether the law counts this spell among the Unforgivables, which are filed where they land. */
+    public static boolean isUnforgivable(String spellId, @Nullable SpellCategory category) {
+        return SpellLawRegistry.lawFor(spellId, category).legalClass() == LegalClass.UNFORGIVABLE;
+    }
+
+    /**
+     * An Unforgivable Curse reached {@code victim}. The crime is using one "on a fellow human being" (<i>Goblet of
+     * Fire</i> ch. 14), so on a person — a player, a villager or trader, an illager — it is filed as the Unforgivable
+     * it is. On a creature it is filed as Dark magic: it still leaves wand residue, still weighs in any case, and
+     * witnesses still report it, but it is not the life-sentence charge (documentation/CANON_AUDIT.md C-2).
+     * {@code onSuccessfulCast} is no longer called for Unforgivables at release, so a curse that hits no one is not
+     * an incident.
+     */
+    public static void onUnforgivableUse(ServerPlayer caster, String spellId, @Nullable SpellCategory category,
+                                         net.minecraft.world.entity.LivingEntity victim) {
+        SpellLaw law = SpellLawRegistry.lawFor(spellId, category);
+        if (law.legalClass() == LegalClass.UNFORGIVABLE && !isPerson(victim)) {
+            law = new SpellLaw(LegalClass.DARK, law.visibility(), java.util.Optional.empty());
+        }
+        file(caster, spellId, law);
+    }
+
+    /** A fellow human being, for the purposes of the Unforgivable law. */
+    public static boolean isPerson(net.minecraft.world.entity.LivingEntity entity) {
+        return entity instanceof net.minecraft.world.entity.player.Player
+                || entity instanceof net.minecraft.world.entity.npc.Npc
+                || entity instanceof net.minecraft.world.entity.raid.Raider;
+    }
+
+    private static void file(ServerPlayer caster, String spellId, SpellLaw law) {
         if (!TraceService.isActive()) {
             return;
         }
         MinecraftServer server = caster.level().getServer();
         long now = now(server);
-        SpellLaw law = SpellLawRegistry.lawFor(spellId, category);
         CastScene scene = CastSurvey.survey(caster, law, now);
         Exposure exposure = TraceRules.exposure(scene, law);
         List<TraceRules.PlannedReport> reports = TraceRules.reports(scene, law, exposure);

@@ -60,9 +60,19 @@ public final class SpellHelper {
      */
     public static void createExplosion(Level level, Entity source, Vec3 pos,
                                         float power, boolean breaksBlocks) {
-        Level.ExplosionInteraction interaction = breaksBlocks
-                ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.MOB;
-        level.explode(source, pos.x, pos.y, pos.z, power, interaction);
+        level.explode(source, pos.x, pos.y, pos.z, power, explosionInteraction(breaksBlocks));
+    }
+
+    /**
+     * How a spell explosion treats blocks. A spell that authors {@code breaksBlocks} breaks them like TNT;
+     * one that does not follows the mob-griefing game rule, as it always has. With the server's
+     * {@code spellBlockDamage} rule off, no spell explosion touches a block at all.
+     */
+    public static Level.ExplosionInteraction explosionInteraction(boolean breaksBlocks) {
+        if (!at.koopro.wizardsandbeasts.spell.tuning.SpellTuning.globals().blockDamage()) {
+            return Level.ExplosionInteraction.NONE;
+        }
+        return breaksBlocks ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.MOB;
     }
 
     /**
@@ -109,7 +119,8 @@ public final class SpellHelper {
      * @return {@code true} if fire was placed; {@code false} when the spot cannot hold it
      */
     public static boolean tryIgniteAdjacentToBlockHit(ServerLevel level, BlockHitResult blockHit) {
-        if (blockHit.getType() != HitResult.Type.BLOCK) {
+        if (blockHit.getType() != HitResult.Type.BLOCK
+                || !at.koopro.wizardsandbeasts.spell.tuning.SpellTuning.globals().blockDamage()) {
             return false;
         }
         BlockPos pos = blockHit.getBlockPos().relative(blockHit.getDirection());
@@ -133,6 +144,9 @@ public final class SpellHelper {
      * @return the number of fire blocks actually placed
      */
     public static int scatterGroundFire(ServerLevel level, Vec3 center, int attempts, double radius) {
+        if (!at.koopro.wizardsandbeasts.spell.tuning.SpellTuning.globals().blockDamage()) {
+            return 0; // the server's spellBlockDamage rule: spells do not set blocks alight
+        }
         int placed = 0;
         for (int i = 0; i < attempts; i++) {
             double angle = level.random.nextDouble() * Math.PI * 2.0;

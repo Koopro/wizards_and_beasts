@@ -2,13 +2,13 @@ package at.koopro.wizardsandbeasts.heritage.command;
 
 import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
-import at.koopro.wizardsandbeasts.event.heritage.HeritageEvents;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.heritage.ConditionOrigin;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageTraits;
 import at.koopro.wizardsandbeasts.heritage.centaur.StarReading;
 import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
+import at.koopro.wizardsandbeasts.heritage.HeritageAssignment;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import at.koopro.wizardsandbeasts.heritage.werewolf.WerewolfConfig;
 import at.koopro.wizardsandbeasts.heritage.werewolf.WerewolfRules;
@@ -27,7 +27,6 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.Arrays;
 import java.util.List;
@@ -395,16 +394,10 @@ public final class HeritageCommands {
             return 0;
         }
 
-        PlayerHeritageData data = target.getData(ModAttachments.HERITAGE_DATA.get());
-        data.resetProfessionProgress();
-        data.addProfessionPoints(3);
-
-        // The same routine the first-join gate runs. This used to set the fields, apply the attribute
-        // modifiers and sync to the one player — which left the body, the POWER band, the ability grants
-        // and every other client's copy describing the heritage the target used to be.
-        HeritageAPI.commit(target, type, subtype);
-
-        NeoForge.EVENT_BUS.post(new HeritageEvents.PlayerHeritageChangedEvent(target, type, subtype));
+        // The same routine the first-join gate and the Control Center run. This used to set the fields, apply
+        // the attribute modifiers and sync to the one player — which left the body, the POWER band, the ability
+        // grants and every other client's copy describing the heritage the target used to be.
+        HeritageAssignment.assign(target, type, subtype);
 
         source.sendSuccess(() -> Component.literal("Set " + target.getName().getString()
                 + " to " + type.getDisplayName() + " (" + subtype.getDisplayName() + ")").withStyle(ChatFormatting.GREEN), false);
@@ -415,11 +408,9 @@ public final class HeritageCommands {
     }
 
     private static int reset(CommandSourceStack source, ServerPlayer target) {
-        // true: put the client back in front of the gate. Clearing the data without reopening it leaves a
-        // player with no heritage and no way to choose one.
-        HeritageAPI.clear(target, true);
-
-        NeoForge.EVENT_BUS.post(new HeritageEvents.PlayerHeritageResetEvent(target));
+        // Puts the client back in front of the gate. Clearing the data without reopening it leaves a player
+        // with no heritage and no way to choose one.
+        HeritageAssignment.resetOnboarding(target);
 
         source.sendSuccess(() -> Component.literal(
                 "Reset " + target.getName().getString() + "'s heritage.").withStyle(ChatFormatting.YELLOW), false);

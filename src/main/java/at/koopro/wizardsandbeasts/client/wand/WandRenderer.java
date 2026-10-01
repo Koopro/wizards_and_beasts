@@ -7,7 +7,6 @@ import at.koopro.wizardsandbeasts.client.spell.protego.ClientProtegoChargeState;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.spell.protego.ProtegoTier;
 import net.minecraft.util.Mth;
-import net.minecraft.world.item.ItemDisplayContext;
 import at.koopro.wizardsandbeasts.wand.WandAppearance;
 import at.koopro.wizardsandbeasts.wand.customization.WandConfiguration;
 import at.koopro.wizardsandbeasts.wand.customization.WandModule;
@@ -70,7 +69,20 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
         LivingEntity holder = renderData.itemOwner() == null ? null : renderData.itemOwner().asLivingEntity();
         if (holder != null) {
             renderState.addGeckolibData(HOLDER_ID, holder.getId());
+            // Only a wand drawn in a hand says whether it is being held for a cast. The same stack
+            // is drawn again in the hotbar, and a slot copy must not tell the controller the hold
+            // ended -- WandItem's controller leaves its clip alone when the ticket is absent.
+            if (inHand(renderData.renderPerspective())) {
+                renderState.addGeckolibData(WandItem.HOLDING_CAST,
+                        WandItem.isUsingWand(holder) && holder.getUseItem() == stack);
+            }
         }
+    }
+
+    private static boolean inHand(ItemDisplayContext perspective) {
+        return perspective.firstPerson()
+                || perspective == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND
+                || perspective == ItemDisplayContext.THIRD_PERSON_LEFT_HAND;
     }
 
     /**
@@ -115,10 +127,7 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
      * describe a state that item does not have.
      */
     private static int applyProtegoCharge(int base, ItemDisplayContext perspective) {
-        boolean inHand = perspective.firstPerson()
-                || perspective == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND
-                || perspective == ItemDisplayContext.THIRD_PERSON_LEFT_HAND;
-        if (!inHand || !ClientProtegoChargeState.isCharging()) {
+        if (!inHand(perspective) || !ClientProtegoChargeState.isCharging()) {
             return base;
         }
         ProtegoTier tier = ClientProtegoChargeState.tier();
@@ -139,19 +148,16 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
         applyBoneVisibility(bones, config);
     }
 
-    private static final String FX_BONE = "fx";
-
+    /**
+     * Shows the one selected variant per slot and hides every other.
+     *
+     * <p>Variant bones are children of their slot's container bone (handle_briar under handle,
+     * tip_hook under tip) and may carry child bones of their own (a curl is a chain of bones);
+     * skipChildrenRender takes those along. Addressing variants by name works regardless of that
+     * hierarchy, which is why this loop does not walk it: the registry is the only thing that knows
+     * every variant bone name. The spell attachment belongs to no slot and is never touched.
+     */
     private static void applyBoneVisibility(BoneSnapshots bones, WandConfiguration config) {
-        // Hide entire FX subtree; spell rendering will show bones selectively.
-        bones.ifPresent(FX_BONE, snap -> {
-            snap.skipRender(true);
-            snap.skipChildrenRender(true);
-        });
-
-        // Variant bones are children of their slot's container bone — handle_gnarled under handle,
-        // tip_pointed under tip — and a tip variant's _anchor is a child of the variant itself.
-        // Addressing bones by name works regardless of that hierarchy, which is why this loop does
-        // not walk it: the registry is the only thing that knows every variant bone name.
         for (WandSlot slot : WandSlot.renderOrder()) {
             String selectedBoneName = config.getModule(slot)
                     .flatMap(WandModuleRegistry::get)
@@ -165,19 +171,18 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
                     snap.skipRender(!visible);
                     snap.skipChildrenRender(!visible);
                 });
-                // tip variants have a paired <variant>_anchor bone (also flat sibling)
-                bones.ifPresent(boneName + "_anchor", snap -> {
-                    snap.skipRender(!visible);
-                    snap.skipChildrenRender(!visible);
-                });
             }
         }
     }
 
     // ── Tip position capture ─────────────────────────────────────────────────
 
-    /** GeckoLib bone that marks the wand tip on the Elder Wand skin. */
-    private static final String WAND_TIP_BONE = "wand_tip";
+    /**
+     * Where a spell leaves the wand: one bone in every wand model (the modular wand and the Elder
+     * Wand alike), a child of wand_root rather than of any variant, so it sits in the same place
+     * whatever handle, shaft and tip are showing.
+     */
+    public static final String SPELL_ATTACHMENT_BONE = "wand_spell_attachment";
 
     @Override
     public void preRenderPass(RenderPassInfo<GeoRenderState> info, SubmitNodeCollector collector) {
@@ -200,15 +205,7 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
                         state.getPartialTick());
             }
         };
-        // Master model: the visible tip anchor is <selected tip variant>_anchor (the fx subtree is
-        // skipRender'd, so fx_tip_anchor never yields a position). Elder-wand skin: dedicated
-        // wand_tip bone. Listen on both — only the bone present and visible in the active model fires.
-        WandConfiguration config = state.getOrDefaultGeckolibData(WAND_CONFIG, WandConfiguration.DEFAULT);
-        config.getModule(WandSlot.TIP)
-                .flatMap(WandModuleRegistry::get)
-                .map(module -> module.boneName() + "_anchor")
-                .ifPresent(anchorBone -> info.addBonePositionListener(anchorBone, anchor));
-        info.addBonePositionListener(WAND_TIP_BONE, anchor);
+        info.addBonePositionListener(SPELL_ATTACHMENT_BONE, anchor);
     }
 
     /**

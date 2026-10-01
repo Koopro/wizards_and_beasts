@@ -76,10 +76,11 @@ import software.bernie.geckolib.animation.object.PlayState;
  * feeding, following and the pouch window are the shared bond layer's ({@code creature_bonds/niffler.json}). Struck,
  * it bolts. It has a coat: classic black, and rarely brown, grey or pale.
  */
-public class NifflerEntity extends GeoEntityBase implements BondableBeast {
+public class NifflerEntity extends GeoEntityBase implements BondableBeast,
+        at.koopro.wizardsandbeasts.creature.variant.VariantHolder {
 
     /** Its coat, synced. The classic black is the base texture; the others are {@code textures/entity/niffler/<coat>.png}. */
-    public enum Coat {
+    public enum Coat implements at.koopro.wizardsandbeasts.creature.variant.CreatureVariant {
         CLASSIC(null, 70), DARK_BROWN("niffler/dark_brown", 12), GREY("niffler/grey", 12), PALE("niffler/pale", 6);
 
         private static final Coat[] VALUES = values();
@@ -95,19 +96,20 @@ public class NifflerEntity extends GeoEntityBase implements BondableBeast {
             return texture;
         }
 
+        @Override
+        public @Nullable String variantTexture() {
+            return texture;
+        }
+
+        @Override
+        public int authoredWeight() {
+            return weight;
+        }
+
         public static Coat byId(int id) {
             return id >= 0 && id < VALUES.length ? VALUES[id] : CLASSIC;
         }
 
-        static Coat roll(net.minecraft.util.RandomSource random) {
-            int total = 0;
-            for (Coat c : VALUES) total += c.weight;
-            int r = random.nextInt(total);
-            for (Coat c : VALUES) {
-                if ((r -= c.weight) < 0) return c;
-            }
-            return CLASSIC;
-        }
     }
 
     public static final int HOME_RADIUS = 16;
@@ -364,9 +366,28 @@ public class NifflerEntity extends GeoEntityBase implements BondableBeast {
     @Override
     public @Nullable SpawnGroupData finalizeSpawn(@NonNull ServerLevelAccessor level, @NonNull DifficultyInstance difficulty,
                                                   @NonNull EntitySpawnReason reason, @Nullable SpawnGroupData data) {
-        setCoat(Coat.roll(getRandom()));
+        // The authored 70/12/12/6 roll, under the server's creature rules.
+        setCoat(at.koopro.wizardsandbeasts.creature.variant.CreatureVariants.roll("niffler", Coat.values(), getRandom()));
         setHomeTo(blockPosition(), HOME_RADIUS);
         return super.finalizeSpawn(level, difficulty, reason, data);
+    }
+
+    // ── variant (Creature Lab) ──
+
+    @Override
+    public at.koopro.wizardsandbeasts.creature.variant.CreatureVariant variant() {
+        return coat();
+    }
+
+    @Override
+    public boolean applyVariant(String variantId) {
+        for (Coat candidate : Coat.values()) {
+            if (candidate.variantId().equals(variantId)) {
+                setCoat(candidate);
+                return true;
+            }
+        }
+        return false;
     }
 
     public Coat coat() {

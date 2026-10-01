@@ -65,6 +65,8 @@ public final class ImperioServerLogic {
         // so the vocation scaling, the clamp and the character sheet's mirrored attribute all move
         // together — writing the attachment raw left the sheet stale until the next login.
         at.koopro.wizardsandbeasts.corruption.UnforgivableToll.charge(caster, 8f);
+        at.koopro.wizardsandbeasts.ministry.trace.MinistryTrace.onUnforgivableUse(caster, "wizards_and_beasts:imperio",
+                at.koopro.wizardsandbeasts.spell.core.SpellCategory.DARK_ARTS, target);
         level.playSound(null, target.blockPosition(), ModSounds.SPELL_CAST_DARK.get(), SoundSource.PLAYERS, 0.75f, 1.1f);
         Vec3 p = target.getBoundingBox().getCenter();
         level.sendParticles(ParticleTypes.HAPPY_VILLAGER, p.x, p.y + 1.0, p.z, 20, 0.35, 0.2, 0.35, 0.02);

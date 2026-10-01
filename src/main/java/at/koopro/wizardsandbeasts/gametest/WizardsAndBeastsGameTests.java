@@ -58,6 +58,13 @@ public final class WizardsAndBeastsGameTests {
                 Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "wizarding"),
                 new TestEnvironmentDefinition.AllOf());
 
+        // Performance measurement (documentation/PERFORMANCE_AUDIT.md) runs alone, so nothing else loads the server.
+        if (PerfScenario.enabled()) {
+            PerfScenario.contribute(new WizardTestSupport.Registrar(event, environment,
+                    PerfScenario.WARMUP_TICKS + PerfScenario.MEASURE_TICKS + 200));
+            return;
+        }
+
         WizardTestSupport.Registrar registrar =
                 new WizardTestSupport.Registrar(event, environment, MAX_TICKS);
 
@@ -67,6 +74,12 @@ public final class WizardsAndBeastsGameTests {
         WandAllegianceTests.contribute(registrar);
         MinistryTraceTests.contribute(registrar);
         CreatureWildlifeTests.contribute(registrar);
+        CreatureIdentityTests.contribute(registrar);
+        ProgressionTests.contribute(registrar);
+        SystemInteractionTests.contribute(registrar);
+        ArtefactTests.contribute(registrar);
+        AuthorityTests.contribute(registrar);
+        CanonRulingTests.contribute(registrar);
         CauldronBrewingTests.contribute(registrar);
         RegistrySyncTests.contribute(registrar);
         HeritageCommitTests.contribute(registrar);
@@ -89,5 +102,17 @@ public final class WizardsAndBeastsGameTests {
         TimedOutlineTests.contribute(registrar);
         RevelioTests.contribute(registrar);
         ProtegoWardBeamTests.contribute(registrar);
+        AdminFrameworkTests.contribute(registrar);
+        AdminMagicTests.contribute(registrar);
+        AdminHeritageTests.contribute(registrar);
+        AdminCreatureTests.contribute(registrar);
+        AdminBrewTests.contribute(registrar);
+        AdminWandBroomTests.contribute(registrar);
+        AdminVisualTests.contribute(registrar);
+        AdminWorldTests.contribute(registrar);
+        AdminModuleTests.contribute(registrar);
+        AdminProfileTests.contribute(registrar);
+        AdminPlayerTests.contribute(registrar);
+        AdminOpsTests.contribute(registrar);
     }
 }

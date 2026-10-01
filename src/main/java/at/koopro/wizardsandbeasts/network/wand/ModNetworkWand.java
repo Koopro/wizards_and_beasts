@@ -29,5 +29,9 @@ public final class ModNetworkWand {
                 SyncTrialResonancePayload.TYPE,
                 SyncTrialResonancePayload.STREAM_CODEC,
                 SyncTrialResonancePayload::handleClient);
+        registrar.playToClient(
+                WandGlobalsSyncS2CPayload.TYPE,
+                WandGlobalsSyncS2CPayload.STREAM_CODEC,
+                WandGlobalsSyncS2CPayload::handleClient);
     }
 }

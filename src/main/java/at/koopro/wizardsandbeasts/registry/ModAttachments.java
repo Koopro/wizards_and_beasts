@@ -91,6 +91,64 @@ public class ModAttachments {
                     .serialize(Codec.LONG.fieldOf("until"))
                     .build());
 
+    /**
+     * Spells landed on a magic-resistant hide in the current few seconds — see {@code MagicResistance}.
+     *
+     * <p>On the target because the rule is about the target: several wizards stunning one troll share one count.
+     * Not serialized: a window five seconds long has nothing worth saving, and a creature reloaded mid-fight
+     * simply starts a fresh one.
+     */
+    public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.spell.resistance.MagicResistanceRules.Strain>>
+            MAGIC_STRAIN = ATTACHMENTS.register("magic_strain", () -> AttachmentType
+                    .builder(() -> at.koopro.wizardsandbeasts.spell.resistance.MagicResistanceRules.Strain.NONE)
+                    .build());
+
+    /**
+     * Where a Time-Turner remembers its wearer standing — see {@code TimeTurnerRules}. Not serialized and not
+     * {@code copyOnDeath}: it may only reach back through hours it has actually spent with this wearer.
+     */
+    public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.timeturner.TimeTurnerTrail>>
+            TIME_TURNER_TRAIL = ATTACHMENTS.register("time_turner_trail", () -> AttachmentType
+                    .builder(at.koopro.wizardsandbeasts.timeturner.TimeTurnerTrail::new)
+                    .build());
+
+    /**
+     * Game time until which the shades called by the Resurrection Stone walk with this player; 0 when none do.
+     * Saved, so a relog does not dismiss them early; not {@code copyOnDeath}.
+     */
+    public static final Supplier<AttachmentType<Long>> SHADES_UNTIL =
+            ATTACHMENTS.register("shades_until", () -> AttachmentType.builder(() -> 0L)
+                    .serialize(Codec.LONG.fieldOf("until"))
+                    .build());
+
+    /**
+     * Game time at which each magical deed may next move a player's standing — see {@code DeedService}. Saved and
+     * {@code copyOnDeath}: held in memory only, a relog or a death reset every cooldown and let a player farm
+     * standing by casting, logging out and casting again.
+     */
+    public static final Supplier<AttachmentType<java.util.Map<net.minecraft.resources.Identifier, Long>>> DEED_COOLDOWNS =
+            ATTACHMENTS.register("deed_cooldowns", () -> AttachmentType
+                    .<java.util.Map<net.minecraft.resources.Identifier, Long>>builder(() -> java.util.Map.of())
+                    .serialize(Codec.unboundedMap(net.minecraft.resources.Identifier.CODEC, Codec.LONG).fieldOf("ready_at"))
+                    .copyOnDeath()
+                    .build());
+
+    /**
+     * Game time until which the Elixir of Life holds death off this player; 0 when it does not (never drunk, lapsed,
+     * or already spent saving them). See {@code item.consumable.ElixirOfLife}.
+     */
+    public static final Supplier<AttachmentType<Long>> ELIXIR_UNTIL =
+            ATTACHMENTS.register("elixir_until", () -> AttachmentType.builder(() -> 0L)
+                    .serialize(Codec.LONG.fieldOf("until"))
+                    .build());
+
+    /** Game time at which this player may next drink from the Philosopher's Stone. Survives death. */
+    public static final Supplier<AttachmentType<Long>> ELIXIR_NEXT_DRAUGHT =
+            ATTACHMENTS.register("elixir_next_draught", () -> AttachmentType.builder(() -> 0L)
+                    .serialize(Codec.LONG.fieldOf("at"))
+                    .copyOnDeath()
+                    .build());
+
     /** Committed Vocation slots — separate from SKILL_DATA; absent on existing players → both empty. */
     public static final Supplier<AttachmentType<PlayerVocationData>> VOCATION_DATA =
             ATTACHMENTS.register("vocation_data", () -> AttachmentType.builder(() -> PlayerVocationData.EMPTY)

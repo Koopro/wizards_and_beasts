@@ -514,10 +514,11 @@ public sealed interface SpellEffectComponent permits
         public void apply(SpellEffectContext ctx) {
             if (!standardEnabled() || radius <= 0f) return;
             Vec3 pos = ctx.position();
-            Level.ExplosionInteraction interaction = breakBlocks
-                    ? Level.ExplosionInteraction.TNT
-                    : Level.ExplosionInteraction.MOB;
-            ctx.level().explode(ctx.caster(), pos.x, pos.y, pos.z, radius, fire, interaction);
+            // Same rule as every other spell explosion, including the server's spellBlockDamage switch.
+            Level.ExplosionInteraction interaction =
+                    at.koopro.wizardsandbeasts.spell.lib.SpellHelper.explosionInteraction(breakBlocks);
+            boolean placesFire = fire && at.koopro.wizardsandbeasts.spell.tuning.SpellTuning.globals().blockDamage();
+            ctx.level().explode(ctx.caster(), pos.x, pos.y, pos.z, radius, placesFire, interaction);
         }
     }
 

@@ -143,6 +143,13 @@ public final class ObscurialServerLogic {
             return;
         }
 
+        // Withdrawn by a server administrator: the same rule the wand release gate applies.
+        if (!at.koopro.wizardsandbeasts.spell.tuning.SpellAvailability.castAllowed(spell)) {
+            spellData.incrementRejectReason(SpellRejectCodes.ABILITY_DISABLED);
+            player.displayClientMessage(Component.translatable("wandcraft.ability.reject.disabled"), true);
+            return;
+        }
+
         long now = level.getGameTime();
         if (spellData.isOnCooldown(spell.getId(), now)) {
             spellData.incrementRejectReason(SpellRejectCodes.ABILITY_COOLDOWN_ACTIVE);

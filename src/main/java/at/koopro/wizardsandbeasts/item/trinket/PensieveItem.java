@@ -35,7 +35,7 @@ public class PensieveItem extends Item implements AnimatedItem {
 
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
-        if (!ModuleManager.isEnabled(Module.DARK_ARTS)) {
+        if (!ModuleManager.isEnabled(Module.ARTEFACTS)) {
             return InteractionResult.FAIL;
         }
         if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {

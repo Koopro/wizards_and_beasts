@@ -1,68 +1,41 @@
 package at.koopro.wizardsandbeasts.spell.patronus;
 
-import at.koopro.wizardsandbeasts.heritage.Heritage;
-import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import net.minecraft.resources.Identifier;
-import org.jspecify.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
 
-import java.util.EnumMap;
-import java.util.Map;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
+/**
+ * Which animal a witch's or wizard's Patronus takes.
+ *
+ * <p>A Patronus belongs to the person who casts it. It is not inherited and not chosen: Harry's stag was his
+ * father's shape because of who Harry was, not because of his blood; Snape's doe matched Lily's (<i>Deathly
+ * Hallows</i> ch. 33); Tonks's changed with her heart (<i>Half-Blood Prince</i>). So the form is drawn once per
+ * character from a stable seed of their own identity, and the same character always gets the same animal.
+ *
+ * <p>It used to be decided by heritage and blood status — pure-blood wolf, half-blood fox, Muggle-born rabbit — with
+ * a "rare" form unlocked by happiness, and no Patronus at all for most heritages. Sorting a soul by its ancestry is
+ * the pure-blood idea the books condemn, and nothing in canon ties a Patronus to lineage
+ * (documentation/CANON_AUDIT.md C-1). A form already stored on a player is kept; this decides only first forms.
+ *
+ * <p>The animals are vanilla stand-ins drawn by the existing Patronus renderer.
+ */
+@NullMarked
 public final class PatronusFormDeterminer {
 
-    /** Happiness at/above which a heritage's rare Patronus form is used instead of the common one. */
-    private static final float RARE_FORM_THRESHOLD = 90.0f;
-
-    /**
-     * Rare Patronus forms, earned at {@link #RARE_FORM_THRESHOLD}+ happiness. Vanilla stand-in
-     * models, same pipeline as the common forms; heritages absent here fall through to common.
-     */
-    private static final Map<Heritage, Identifier> RARE_FORMS = new EnumMap<>(Heritage.class);
-
-    static {
-        RARE_FORMS.put(Heritage.WIZARDKIND, mc("horse"));     // noble steed — stag stand-in
-        RARE_FORMS.put(Heritage.VAMPIRE, mc("cat"));          // a warm-blooded companion
-        RARE_FORMS.put(Heritage.VEELA, mc("allay"));          // radiant spirit of the dance
-    }
+    /** The animals a Patronus can take. Order is part of the save contract: append, never reorder. */
+    public static final List<Identifier> FORMS = List.of(
+            mc("horse"), mc("wolf"), mc("fox"), mc("rabbit"),
+            mc("cat"), mc("goat"), mc("parrot"), mc("bat"));
 
     private PatronusFormDeterminer() {}
 
-    public static @Nullable Identifier determine(@Nullable Heritage heritage, @Nullable HeritageVariant variant, float happiness) {
-        if (heritage != null && happiness >= RARE_FORM_THRESHOLD) {
-            Identifier rare = RARE_FORMS.get(heritage);
-            if (rare != null) {
-                return rare;
-            }
-        }
-        if (heritage == null) {
-            return wizardkindForm(null);
-        }
-        return switch (heritage) {
-            case WIZARDKIND -> wizardkindForm(variant);
-            case VAMPIRE    -> vampireForm(variant);
-            case VEELA      -> mc("parrot");
-            default         -> null;
-        };
-    }
-
-    private static Identifier wizardkindForm(@Nullable HeritageVariant variant) {
-        if (variant == HeritageVariant.PURE_BLOOD) {
-            return mc("wolf");
-        }
-        if (variant == HeritageVariant.HALF_BLOOD) {
-            return mc("fox");
-        }
-        if (variant == HeritageVariant.MUGGLE_BORN) {
-            return mc("rabbit");
-        }
-        return mc("goat"); // closest vanilla stand-in for the classic deer until a custom model ships
-    }
-
-    private static Identifier vampireForm(@Nullable HeritageVariant variant) {
-        if (variant == HeritageVariant.VAMPIRE_BORN) {
-            return mc("phantom");
-        }
-        return mc("bat");
+    /** This character's Patronus form: the same every time for the same character, whatever their heritage. */
+    public static Identifier determine(UUID characterId) {
+        long seed = characterId.getMostSignificantBits() ^ Long.rotateLeft(characterId.getLeastSignificantBits(), 17);
+        return FORMS.get(new Random(seed).nextInt(FORMS.size()));
     }
 
     private static Identifier mc(String path) {

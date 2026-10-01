@@ -182,6 +182,17 @@ public final class WandAllegianceService {
      * nothing from it — and the master's cast also answers any standing challenge.
      */
     public static void onSuccessfulCast(ServerPlayer caster, ItemStack wand, @Nullable Spell spell) {
+        onSuccessfulCast(caster, wand, spell, true);
+    }
+
+    /**
+     * A spell the master cast through this wand landed.
+     *
+     * @param practised whether the cast counted as practice ({@code SpellPractice}); only practice deepens the bond,
+     *                  so the wand's loyalty grows with the wizard's skill rather than with a click count. Either
+     *                  way the master has used the wand — neglect is reset and a challenger's wins answered.
+     */
+    public static void onSuccessfulCast(ServerPlayer caster, ItemStack wand, @Nullable Spell spell, boolean practised) {
         if (!Config.enableWandAllegiance || !(wand.getItem() instanceof WandItem)) {
             return;
         }
@@ -200,8 +211,10 @@ public final class WandAllegianceService {
                 // Danger, for a wand whose bond is forged in it: a gameplay reading of "passed through danger".
                 at.koopro.wizardsandbeasts.util.ImmediateDanger.test(caster),
                 PlayerAbilityHelper.hasAbilityFlag(caster, ThestralEntity.WITNESSED_DEATH_FLAG));
-        float after = WandAllegianceRules.bondAfterSuccessfulCast(
-                bond, temperamentOf(wand, caster.registryAccess()), circumstances);
+        WandTemperament temperament = temperamentOf(wand, caster.registryAccess());
+        float after = practised
+                ? WandAllegianceRules.bondAfterSuccessfulCast(bond, temperament, circumstances)
+                : WandAllegianceRules.bondAfterRepetition(bond, temperament, circumstances);
 
         wand.set(WandComponents.WAND_ALLEGIANCE_SCORE.get(), after);
         wand.set(WandComponents.WAND_BOND_HISTORY.get(), history.withMasterCast(now));

@@ -30,6 +30,7 @@ public final class BeamStyleEditor {
     public static int bloomLayers = 3;
     public static float spin = 0f;
     public static boolean additive = true;
+    public static float sparkDensity = BeamStyle.DEFAULT_SPARK_DENSITY;
 
     // ── Shape fields ─────────────────────────────────────────────────────────
     public static ShapeType shapeType = ShapeType.LASER;
@@ -44,7 +45,7 @@ public final class BeamStyleEditor {
 
     public static BeamStyle style() {
         return new BeamStyle(width, height, coreColor, glowColor,
-                coreOpacity, glowOpacity, bloomLayers, spin, additive);
+                coreOpacity, glowOpacity, bloomLayers, spin, additive, sparkDensity);
     }
 
     public static BeamShape shape() {
@@ -64,6 +65,7 @@ public final class BeamStyleEditor {
         bloomLayers = from.bloomLayers();
         spin = from.spin();
         additive = from.additive();
+        sparkDensity = from.sparkDensity();
 
         if (fromShape instanceof Lightning bolt) {
             shapeType = ShapeType.LIGHTNING;
@@ -75,11 +77,18 @@ public final class BeamStyleEditor {
         }
     }
 
-    /** Seeds from a spell's authored look; falls back to the laser preset for non-beam spells. */
+    /**
+     * Seeds from a spell's current look (authored default plus the server's overrides, switched off or not); falls
+     * back to the laser preset for non-beam spells.
+     */
     public static void loadFromSpell(at.koopro.wizardsandbeasts.spell.core.Spell spell) {
-        BeamAppearance.forSpell(spell).ifPresentOrElse(
-                look -> loadFrom(look.style(), look.shape()),
-                () -> loadFrom(BeamStyle.laser(spell == null ? 0x44CCFF : spell.getColor()), new Laser()));
+        at.koopro.wizardsandbeasts.visual.beam.BeamVisual visual = ClientBeamVisuals.effective(spell);
+        if (visual != null) {
+            BeamAppearance.Appearance look = BeamAppearance.of(visual);
+            loadFrom(look.style(), look.shape());
+        } else {
+            loadFrom(BeamStyle.laser(spell == null ? 0x44CCFF : spell.getColor()), new Laser());
+        }
     }
 
     public static void reset() {

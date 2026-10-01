@@ -12,6 +12,8 @@ public final class NifflerSpawnHandler {
     private NifflerSpawnHandler() {}
 
     public static void registerSpawnPlacements(RegisterSpawnPlacementsEvent event) {
+        // What the predicate tests, for the Creature Lab (a lambda cannot be read back).
+        at.koopro.wizardsandbeasts.creature.rules.SpawnConditionNotes.note("niffler", "module_creatures", "solid_ground", "light_night");
         event.register(
                 ModEntities.NIFFLER.get(),
                 SpawnPlacementTypes.ON_GROUND,

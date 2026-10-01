@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.entity.broom;
 
+import at.koopro.wizardsandbeasts.broom.rules.BroomRules;
 import at.koopro.wizardsandbeasts.skill.PlayerSkillBonusData;
 import at.koopro.wizardsandbeasts.broom.BroomDefinition;
 import at.koopro.wizardsandbeasts.item.broom.BroomPolish;
@@ -64,7 +65,10 @@ final class BroomMovement {
         // Config scales the authored value, then the skill bonus is added on top: a flat bonus that
         // was balanced against real block-per-tick speeds should not itself be halved by a server
         // that dialled brooms down.
-        float maxForwardSpeed = def.maxSpeed() * at.koopro.wizardsandbeasts.Config.broomSpeedMultiplier + skillBonus;
+        // The player's own multiplier may only slow a broom on someone else's server: the server's speed rule is
+        // already in def.maxSpeed (BroomRules), and a client file must not be able to raise it.
+        float maxForwardSpeed = def.maxSpeed() * BroomRules
+                .personalSpeedMultiplier(at.koopro.wizardsandbeasts.Config.broomSpeedMultiplier) + skillBonus;
         // The feather multiplies the finished figure rather than the authored one, so it scales with
         // whatever the server decided a broom is worth instead of around it.
         if (snidget) {
@@ -182,6 +186,9 @@ final class BroomMovement {
         }
         Vec3 travelled = here.subtract(previous);
         b.currentSpeed = (float) travelled.horizontalDistance();
+        if (!b.level().isClientSide()) {
+            BroomSpeedGuard.observe(b, travelled.horizontalDistance());
+        }
         b.verticalVelocity = (float) travelled.y;
         b.setDeltaMovement(travelled);
     }

@@ -3,19 +3,18 @@ import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
-import at.koopro.wizardsandbeasts.event.heritage.HeritageEvents;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.heritage.ConditionOrigin;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
-import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
+import at.koopro.wizardsandbeasts.heritage.HeritageAssignment;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
+import at.koopro.wizardsandbeasts.heritage.rules.HeritageRules;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
@@ -55,7 +54,18 @@ public record HeritageSelectC2SPayload(String typeId, String subtypeId, String c
 
     public static void handle(HeritageSelectC2SPayload pkt, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
-            if (!(ctx.player() instanceof ServerPlayer player)) return;
+            if (ctx.player() instanceof ServerPlayer player) {
+                apply(player, pkt);
+            }
+        });
+    }
+
+    /**
+     * The server's answer to one selection, on the server thread. Everything the client sent is re-checked here —
+     * lock, heritage, the server's {@link HeritageRules}, lineage pairing, condition — before anything is committed.
+     */
+    public static void apply(ServerPlayer player, HeritageSelectC2SPayload pkt) {
+        {
             String safeTypeId = PacketCodecUtils.normalizeIdentifier(pkt.typeId);
             String safeSubtypeId = PacketCodecUtils.normalizeIdentifier(pkt.subtypeId);
             if (safeTypeId.isBlank() || safeSubtypeId.isBlank()) {
@@ -78,9 +88,11 @@ public record HeritageSelectC2SPayload(String typeId, String subtypeId, String c
                         Component.literal("\u00A7cUnknown type: " + safeTypeId), true);
                 return;
             }
-            if (!heritage.isAlphaAvailable()) {
-                player.displayClientMessage(
-                        Component.translatable("message.wizards_and_beasts.type_selection.coming_soon"), true);
+            // The server's rule, never the client's: a screen that offered a closed heritage (a stale sync, a
+            // modified client) is answered here.
+            String refusal = HeritageRules.refusalKey(heritage);
+            if (refusal != null) {
+                player.displayClientMessage(Component.translatable(refusal), true);
                 return;
             }
 
@@ -116,25 +128,13 @@ public record HeritageSelectC2SPayload(String typeId, String subtypeId, String c
                 }
             }
 
-            data.resetProfessionProgress();
-            data.addProfessionPoints(3);
-
-            // Lock, roll, re-body, re-sync. Every step of that used to be written out here, which is how
-            // the two admin routes into the same change ended up each doing a different subset of it.
-            HeritageAPI.commit(player, heritage, variant);
-
-            // After the commit, never inside it: the roll and the lock belong to the lineage, and the condition
-            // is something that happened to the character the commit just created.
-            if (condition != null) {
-                HeritageAPI.afflict(player, condition);
-            }
-
-            // Fire event
-            NeoForge.EVENT_BUS.post(new HeritageEvents.PlayerHeritageSelectedEvent(player, heritage, variant));
+            // Lock, roll, re-body, re-sync, condition, event. Every step of that used to be written out here,
+            // which is how the admin routes into the same change ended up each doing a different subset of it.
+            HeritageAssignment.select(player, heritage, variant, condition);
 
             player.displayClientMessage(
                     Component.literal("\u00A7aYou are now a " + heritage.getDisplayName()
                             + " (" + variant.getDisplayName() + ")!"), true);
-        });
+        }
     }
 }

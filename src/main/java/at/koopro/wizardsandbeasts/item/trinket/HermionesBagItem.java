@@ -40,7 +40,7 @@ public class HermionesBagItem extends Item {
 
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
-        if (!ModuleManager.isEnabled(Module.DARK_ARTS)) {
+        if (!ModuleManager.isEnabled(Module.ARTEFACTS)) {
             return InteractionResult.FAIL;
         }
         if (level.isClientSide()) {

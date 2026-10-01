@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.entity.broom;
 import at.koopro.wizardsandbeasts.broom.BroomDefinition;
 import at.koopro.wizardsandbeasts.broom.BroomDefinitionRegistry;
 import at.koopro.wizardsandbeasts.broom.BroomGeometry;
+import at.koopro.wizardsandbeasts.broom.rules.BroomRules;
 import at.koopro.wizardsandbeasts.entity.broom.handling.HandlingProfileRegistry;
 import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
@@ -221,7 +222,9 @@ public class BroomEntity extends Entity implements GeoEntity {
         }
         lastInputSequence = sequence;
         lastInputGameTick = gameTick;
-        setInput(forward, backward, up, down, boosting, yaw, pitch);
+        // A non-finite heading from the wire keeps the current one rather than steering toward NaN.
+        setInput(forward, backward, up, down, boosting,
+                Float.isFinite(yaw) ? yaw : getYRot(), Float.isFinite(pitch) ? pitch : getXRot());
     }
 
     private void clearStaleInputIfNeeded() {
@@ -433,6 +436,10 @@ public class BroomEntity extends Entity implements GeoEntity {
         if (!level().isClientSide() && getControllingPassenger() == null && !player.isPassenger()) {
             // The other half of the broom licence gate; BroomItem.use covers the spawn-and-ride path.
             if (at.koopro.wizardsandbeasts.ministry.licence.BroomLicence.refuse(player, resolveDefinition())) {
+                return InteractionResult.FAIL;
+            }
+            if (!BroomRules.enabled(resolveDefinition().id())) {
+                player.displayClientMessage(Component.translatable("broom.wizards_and_beasts.withdrawn"), true);
                 return InteractionResult.FAIL;
             }
             player.startRiding(this);
@@ -648,6 +655,9 @@ public class BroomEntity extends Entity implements GeoEntity {
     public float getCruiseSpeed() {
         return resolveDefinition().maxSpeed();
     }
+
+    /** {@link BroomSpeedGuard}'s running count of ticks over the server's ceiling. Server-side, not saved. */
+    int speedStrikes;
 
     public BroomDefinition resolveDefinition() {
         // The cache is only good for as long as the table it came from. A /reload swaps the table

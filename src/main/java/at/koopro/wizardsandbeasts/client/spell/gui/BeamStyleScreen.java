@@ -186,7 +186,7 @@ public class BeamStyleScreen extends Screen {
                 addSlider(rightX, sy, rightW, rowH, "Range", 2.0, 64.0,
                         BeamStyleEditor.previewRange, v -> {
                             BeamStyleEditor.previewRange = (float) v;
-                            BeamChannelClient.syncPreviewRange();
+                            BeamChannelClient.setPreviewRange(BeamStyleEditor.previewRange);
                         });
                 addSlider(rightX, sy + rowGap, rightW, rowH, "Spin", -20.0, 20.0,
                         BeamStyleEditor.spin, v -> BeamStyleEditor.spin = (float) v);
@@ -359,6 +359,22 @@ public class BeamStyleScreen extends Screen {
         } else {
             BeamChannelClient.stopPreview();
         }
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        // The world preview expires on its own unless an open editor keeps it (BeamChannelClient.PREVIEW_TTL_TICKS).
+        if (worldPreview) {
+            BeamChannelClient.keepPreviewAlive();
+        }
+    }
+
+    @Override
+    public void removed() {
+        // Covers every way out (Esc, another screen replacing this one), not only the Close button.
+        BeamChannelClient.stopPreview();
+        super.removed();
     }
 
     @Override

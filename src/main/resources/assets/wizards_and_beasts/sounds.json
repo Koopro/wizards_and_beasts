@@ -1321,5 +1321,110 @@
         "pitch": 0.7
       }
     ]
+  },
+  "entity.augurey.cry": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.augurey.cry",
+    "sounds": [
+      {
+        "name": "minecraft:mob/phantom/idle1",
+        "volume": 1.6,
+        "pitch": 0.5
+      },
+      {
+        "name": "minecraft:mob/phantom/idle3",
+        "volume": 1.6,
+        "pitch": 0.5
+      },
+      {
+        "name": "minecraft:mob/phantom/idle5",
+        "volume": 1.6,
+        "pitch": 0.5
+      }
+    ]
+  },
+  "entity.cornish_pixie.jabber": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.cornish_pixie.jabber",
+    "sounds": [
+      {
+        "name": "minecraft:mob/allay/idle_with_item1",
+        "volume": 0.8,
+        "pitch": 1.9
+      },
+      {
+        "name": "minecraft:mob/allay/idle_with_item2",
+        "volume": 0.8,
+        "pitch": 1.9
+      },
+      {
+        "name": "minecraft:mob/allay/idle_with_item3",
+        "volume": 0.8,
+        "pitch": 1.9
+      }
+    ]
+  },
+  "entity.blast_ended_skrewt.blast": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.blast_ended_skrewt.blast",
+    "sounds": [
+      {
+        "name": "minecraft:mob/ghast/fireball4",
+        "volume": 0.7,
+        "pitch": 1.6
+      }
+    ]
+  },
+  "entity.griffin.screech": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.griffin.screech",
+    "sounds": [
+      {
+        "name": "minecraft:mob/phantom/idle2",
+        "volume": 1.4,
+        "pitch": 1.2
+      },
+      {
+        "name": "minecraft:mob/phantom/idle4",
+        "volume": 1.4,
+        "pitch": 1.2
+      }
+    ]
+  },
+  "entity.merperson.song": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.merperson.song",
+    "sounds": [
+      {
+        "name": "minecraft:mob/allay/idle_without_item1",
+        "volume": 1.0,
+        "pitch": 0.7
+      },
+      {
+        "name": "minecraft:mob/allay/idle_without_item2",
+        "volume": 1.0,
+        "pitch": 0.7
+      },
+      {
+        "name": "minecraft:mob/allay/idle_without_item3",
+        "volume": 1.0,
+        "pitch": 0.7
+      }
+    ]
+  },
+  "entity.merperson.screech": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.merperson.screech",
+    "sounds": [
+      {
+        "name": "minecraft:mob/vex/idle1",
+        "volume": 1.0,
+        "pitch": 1.3
+      },
+      {
+        "name": "minecraft:mob/vex/idle2",
+        "volume": 1.0,
+        "pitch": 1.3
+      },
+      {
+        "name": "minecraft:mob/vex/idle3",
+        "volume": 1.0,
+        "pitch": 1.3
+      }
+    ]
   }
 }

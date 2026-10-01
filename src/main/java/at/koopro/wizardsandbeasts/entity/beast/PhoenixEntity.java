@@ -11,7 +11,11 @@ import at.koopro.wizardsandbeasts.entity.GeoEntityBase;
 import at.koopro.wizardsandbeasts.event.bestiary.BestiaryDiscoveryHandler;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
+import at.koopro.wizardsandbeasts.particle.MagicSmoke;
+import at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions;
+import at.koopro.wizardsandbeasts.registry.ModParticles;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
+import at.koopro.wizardsandbeasts.spell.core.MagicColours;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -268,8 +272,12 @@ public class PhoenixEntity extends GeoEntityBase implements BondableBeast {
         setDeltaMovement(0.0, Math.min(0.0, getDeltaMovement().y), 0.0);
         syncPhase();
         level.sendParticles(ParticleTypes.FLAME, getX(), getY() + 0.5, getZ(), 70, 0.5, 0.7, 0.5, 0.06);
-        level.sendParticles(ParticleTypes.LAVA, getX(), getY() + 0.4, getZ(), 12, 0.4, 0.3, 0.4, 0.0);
-        level.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 0.3, getZ(), 20, 0.4, 0.2, 0.4, 0.01);
+        // The mod's embers, not vanilla LAVA: each lava pop trails its own black vanilla smoke for its
+        // whole life, which drew a black column through the burst.
+        level.sendParticles(new SpellTintParticleOptions(ModParticles.FIRE_EMBER.get(), MagicColours.FIRE),
+                getX(), getY() + 0.4, getZ(), 12, 0.4, 0.3, 0.4, 0.02);
+        // Fire's own smoke: the burst's ash in the fire colour, as pixel puffs.
+        MagicSmoke.burst(level, getX(), getY() + 0.3, getZ(), MagicColours.FIRE, 10, 0.4, 0.2);
         level.playSound(null, blockPosition(), ModSounds.PHOENIX_BURST.get(), SoundSource.NEUTRAL, 1.2f, 1.0f);
         if (cause.getEntity() instanceof ServerPlayer player) {
             BestiaryDiscoveryHandler.encountered(player, this);
@@ -291,7 +299,7 @@ public class PhoenixEntity extends GeoEntityBase implements BondableBeast {
             case REBORN -> setHealth(getMaxHealth() * WildlifeRules.REBORN_HEALTH_FRACTION);
             case NONE -> {
                 if (rebirth.phase() == PhoenixRebirth.Phase.ASHES && tickCount % 6 == 0) {
-                    level.sendParticles(ParticleTypes.SMOKE, getX(), getY() + 0.2, getZ(), 2, 0.25, 0.05, 0.25, 0.01);
+                    MagicSmoke.burst(level, getX(), getY() + 0.2, getZ(), MagicColours.FIRE, 1, 0.25, 0.05);
                     level.sendParticles(ParticleTypes.SMALL_FLAME, getX(), getY() + 0.15, getZ(), 1, 0.2, 0.02, 0.2, 0.0);
                 }
             }

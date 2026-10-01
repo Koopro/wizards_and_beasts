@@ -168,6 +168,18 @@ public class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> BABY_NIFFLER_AMBIENT =
             register("entity.baby_niffler.ambient");
 
+    // Species voices from the creature identity pass: vanilla audio through sounds.json until recordings exist.
+    // The Augurey's low throbbing cry before rain; a Cornish Pixie's shrill jabber; the Skrewt's "phut" of a blast;
+    // a Griffin's screech over its gold; merfolk song as heard under water and as the screech it is above it.
+    public static final DeferredHolder<SoundEvent, SoundEvent> AUGUREY_CRY = register("entity.augurey.cry");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CORNISH_PIXIE_JABBER =
+            register("entity.cornish_pixie.jabber");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SKREWT_BLAST =
+            register("entity.blast_ended_skrewt.blast");
+    public static final DeferredHolder<SoundEvent, SoundEvent> GRIFFIN_SCREECH = register("entity.griffin.screech");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MERFOLK_SONG = register("entity.merperson.song");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MERFOLK_SCREECH = register("entity.merperson.screech");
+
     // Deluminator
     public static final DeferredHolder<SoundEvent, SoundEvent> DELUMINATOR_ABSORB = register("deluminator_absorb");
     public static final DeferredHolder<SoundEvent, SoundEvent> DELUMINATOR_RESTORE = register("deluminator_restore");

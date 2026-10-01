@@ -93,6 +93,16 @@ class WandAllegianceRulesTest {
         assertTrue(bondAfterSuccessfulCast(0.5f, ORDINARY, dark) > 0.5f, "an ordinary wand does not care");
     }
 
+    /** Past the day's practice a cast teaches the wand nothing — but a resentful wand still resents. */
+    @Test
+    void repetitionPastPractice_deepensNothingButStillCostsTheDarkArts() {
+        assertEquals(0.5f, bondAfterRepetition(0.5f, ORDINARY, CALM), 1.0e-6f);
+        WandTemperament unicorn = temperament(1, 1, 0, 0.03f, false, false, 1, 1, false, 1);
+        assertEquals(0.47f, bondAfterRepetition(0.5f, unicorn, new CastCircumstances(true, false, false)), 1.0e-6f);
+        assertTrue(bondAfterSuccessfulCast(0.5f, ORDINARY, CALM) > bondAfterRepetition(0.5f, ORDINARY, CALM),
+                "practice must be worth more than repetition");
+    }
+
     /** Thestral tail hair: loyal, but never mastered by one who has not seen death. */
     @Test
     void aThestralCore_stopsShortOfMasteryWithoutAWitnessOfDeath() {
@@ -126,18 +136,25 @@ class WandAllegianceRulesTest {
     // ── winning a wand ──────────────────────────────────────────────────────────────────────────
 
     @Test
-    void anOrdinaryWand_isWonByTwoDefeatsInARow() {
+    void anOrdinaryWand_isWonByOneDefeat() {
+        // Deathly Hallows ch. 24: Harry wins Draco's wand in one struggle.
         int needed = winsToTransfer(ORDINARY, false);
+        assertEquals(1, needed);
+        assertTrue(defeat(WandBondHistory.EMPTY, DRACO, needed).transferred());
+    }
+
+    @Test
+    void aHardWonWand_needsItsExtraDefeatsInARow() {
+        int needed = winsToTransfer(temperament(1, 1, 0, 0, false, false, 1, 1, false, 1), false);
         assertEquals(2, needed);
         DefeatOutcome first = defeat(WandBondHistory.EMPTY, DRACO, needed);
         assertFalse(first.transferred());
-        DefeatOutcome second = defeat(first.history(), DRACO, needed);
-        assertTrue(second.transferred());
+        assertTrue(defeat(first.history(), DRACO, needed).transferred());
     }
 
     @Test
     void aDifferentChallenger_startsTheTallyAgain() {
-        int needed = winsToTransfer(ORDINARY, false);
+        int needed = winsToTransfer(temperament(1, 1, 0, 0, false, false, 1, 1, false, 1), false);
         DefeatOutcome draco = defeat(WandBondHistory.EMPTY, DRACO, needed);
         DefeatOutcome harry = defeat(draco.history(), HARRY, needed);
         assertFalse(harry.transferred());
@@ -157,7 +174,7 @@ class WandAllegianceRulesTest {
         WandTemperament dragon = temperament(1.5f, -1, 0.25f, 0, false, false, 1, 1, false, 1);
         WandTemperament unicornAsh = temperament(1, 2, 0, 0, false, false, 1, 1, false, 1);
         assertEquals(1, winsToTransfer(dragon, false), "dragon heartstring can change allegiance if won");
-        assertEquals(4, winsToTransfer(unicornAsh, false));
+        assertEquals(3, winsToTransfer(unicornAsh, false));
         assertEquals(1, winsToTransfer(temperament(1, -9, 0, 0, false, false, 1, 1, false, 1), false), "never below one");
     }
 

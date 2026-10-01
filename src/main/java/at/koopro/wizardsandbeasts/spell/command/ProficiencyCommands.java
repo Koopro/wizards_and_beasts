@@ -72,7 +72,10 @@ public final class ProficiencyCommands {
 
     private static int get(CommandSourceStack source, ServerPlayer player, String spellId) {
         String normalizedSpellId = normalizeSpellId(spellId);
-        float value = player.getData(ModAttachments.SPELL_DATA.get()).getSpellProficiency(normalizedSpellId);
+        PlayerSpellData spellData = player.getData(ModAttachments.SPELL_DATA.get());
+        // What the spell casts at: the stored value, lifted to what its practised hits guarantee.
+        float value = at.koopro.wizardsandbeasts.spell.proficiency.SpellPractice.effective(
+                spellData.getSpellProficiency(normalizedSpellId), spellData.getSuccessfulHits(normalizedSpellId));
         source.sendSuccess(() -> Component.literal(String.format("Proficiency %s -> %.3f", normalizedSpellId, value)), false);
         return 1;
     }
@@ -123,7 +126,10 @@ public final class ProficiencyCommands {
         } catch (Exception ignored) {
             key = Identifier.fromNamespaceAndPath("wizards_and_beasts", normalizedSpellId);
         }
-        float value = player.getData(ModAttachments.SPELL_DATA.get()).getSpellProficiency(normalizedSpellId);
+        PlayerSpellData spellData = player.getData(ModAttachments.SPELL_DATA.get());
+        // What the spell casts at: the stored value, lifted to what its practised hits guarantee.
+        float value = at.koopro.wizardsandbeasts.spell.proficiency.SpellPractice.effective(
+                spellData.getSpellProficiency(normalizedSpellId), spellData.getSuccessfulHits(normalizedSpellId));
         SpellScalingProfile profile = ProficiencyScaler.getProfileForPlayer(player, key);
         source.sendSuccess(() -> Component.literal(String.format("Proficiency for %s: %.3f", normalizedSpellId, value)), false);
         source.sendSuccess(() -> Component.literal(String.format(

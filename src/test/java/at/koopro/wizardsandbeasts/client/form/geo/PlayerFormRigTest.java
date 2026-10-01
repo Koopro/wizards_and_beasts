@@ -73,10 +73,18 @@ class PlayerFormRigTest {
                     rig.asset() + " declares idle clip '" + rig.idleClip()
                             + "' which its animation file does not define. Defined: " + defined);
 
-            if (rig.movementClip() != null) {
-                assertTrue(defined.contains(rig.movementClip()),
-                        rig.asset() + " declares movement clip '" + rig.movementClip()
-                                + "' which its animation file does not define. Defined: " + defined);
+            java.util.Map<String, String> optional = new java.util.LinkedHashMap<>();
+            optional.put("movement", rig.movementClip());
+            optional.put("attack", rig.attackClip());
+            optional.put("hurt", rig.hurtClip());
+            optional.put("run", rig.runClip());
+            optional.put("air", rig.airClip());
+            for (java.util.Map.Entry<String, String> clip : optional.entrySet()) {
+                if (clip.getValue() != null) {
+                    assertTrue(defined.contains(clip.getValue()),
+                            rig.asset() + " declares " + clip.getKey() + " clip '" + clip.getValue()
+                                    + "' which its animation file does not define. Defined: " + defined);
+                }
             }
         }
     }
@@ -156,10 +164,30 @@ class PlayerFormRigTest {
         assertEquals("animation.werewolf.idle", werewolf.clipFor(false));
     }
 
+    /**
+     * The stag is the one rig with sprint and airborne clips. Hurt beats the air, the air beats the
+     * gait, and the gallop replaces the walk only while moving.
+     */
+    @Test
+    void theStagGallopsAndLeaps() {
+        PlayerFormRig stag = PlayerFormRig.forForm("animagus_stag");
+        assertNotNull(stag, "the stag draws its own rig now, not the legacy box model");
+        assertEquals("animation.animagus_stag.idle", stag.clipFor(false, false, false, false, false));
+        assertEquals("animation.animagus_stag.walk", stag.clipFor(true, false, false, false, false));
+        assertEquals("animation.animagus_stag.run", stag.clipFor(true, true, false, false, false));
+        assertEquals("animation.animagus_stag.idle", stag.clipFor(false, true, false, false, false),
+                "sprint held while standing still is not a gallop");
+        assertEquals("animation.animagus_stag.leap", stag.clipFor(true, true, true, false, false));
+        assertEquals("animation.animagus_stag.hit", stag.clipFor(true, true, true, false, true));
+
+        PlayerFormRig werewolf = PlayerFormRig.forForm("werewolf_wolf");
+        assertNotNull(werewolf);
+        assertEquals("animation.werewolf.walk", werewolf.clipFor(true, true, true, false, false),
+                "a rig without the newer clips chooses exactly what it always did");
+    }
+
     @Test
     void unriggedFormsResolveToNullSoTheLegacyPathStillRuns() {
-        assertNull(PlayerFormRig.forForm("animagus_stag"),
-                "the stag has no rig authored yet and must fall through to the legacy model");
         assertNull(PlayerFormRig.forForm("human_default"));
         assertFalse(PlayerFormRig.hasRig("animagus_cat"),
                 "Animagus forms borrow real vanilla models, which beat any rig we would author");

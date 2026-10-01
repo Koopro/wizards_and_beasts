@@ -1,0 +1,28 @@
+{
+  "schema": "wizards_and_beasts:admin_profile",
+  "schema_version": 1,
+  "mod_version": "",
+  "profile": {
+    "id": "developer",
+    "name": "Developer",
+    "description": "For testing: debug tools on, requirements off, unfinished systems reachable. Not for players.",
+    "author": "Wizards & Beasts",
+    "created": 0,
+    "kind": "preset"
+  },
+  "mode": "replace",
+  "settings": {
+    "wizards_and_beasts:enable_debug_tools": "true",
+    "wizards_and_beasts:debug_log_spell_gate_reasons": "true",
+    "wizards_and_beasts:enforce_spell_requirements": "false",
+    "wizards_and_beasts:allow_unforgivable_curses": "true"
+  },
+  "modules": {
+    "player_abilities": "enabled",
+    "apparition": "enabled",
+    "dark_arts": "enabled",
+    "ministry": "enabled",
+    "bestiary": "enabled",
+    "proficiency": "enabled"
+  }
+}

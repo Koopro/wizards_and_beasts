@@ -2,7 +2,6 @@ package at.koopro.wizardsandbeasts.creature.bond;
 
 import at.koopro.wizardsandbeasts.bestiary.BestiaryDataHelper;
 import at.koopro.wizardsandbeasts.bestiary.DiscoveryTier;
-import at.koopro.wizardsandbeasts.event.bestiary.niffler.MagizoologyXPEvent;
 import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
@@ -33,7 +32,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.neoforged.neoforge.common.NeoForge;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -45,7 +43,7 @@ import java.util.UUID;
  *
  * <p>Extracted from the Niffler, which was the only creature in the mod with one. The pieces the
  * Niffler had woven into its own class — an owner, a 0–100 bond, a feed table with cooldowns, the
- * Magizoology bonus, milestone XP events, and a follow goal gated on the bond — are all here, and
+ * Magizoology bonus, milestone announcements, and a follow goal gated on the bond — are all here, and
  * the numbers behind them moved out into a datapack {@link BondProfile}. The Niffler keeps its
  * pouch, its pocket-carry and its theft; those are the Niffler, not the bond.
  *
@@ -186,9 +184,8 @@ public interface BondableBeast {
     /**
      * Raise the bond, claiming the creature for {@code player} if it is unowned.
      *
-     * @param fireXp whether crossing a milestone should award Magizoology XP. False for the slow
-     *               drip of simply being nearby, which would otherwise pay out the same as a rare
-     *               treat for doing nothing but standing still.
+     * @param fireXp whether crossing a milestone is announced. False for the slow drip of simply
+     *               being nearby, which would otherwise celebrate standing still like a rare treat.
      */
     default void increaseBond(Player player, int amount, boolean fireXp) {
         BondProfile profile = bondProfile();
@@ -235,14 +232,14 @@ public interface BondableBeast {
     }
 
     /**
-     * A milestone crossed: XP for the system, and a toast so the player finds out it happened.
+     * A milestone crossed: a toast so the player finds out it happened.
      *
-     * <p>The Niffler fired the event and said nothing, which meant the four milestones it has were
-     * invisible unless you were watching the follow behaviour change.
+     * <p>This also posted a {@code MagizoologyXPEvent} that no system listened to — Magizoology XP was never a
+     * currency anything spent (2026-09-28, documentation/SYSTEM_INTERACTION_MAP.md). What a bond is worth to a
+     * wizard's progression is its {@code masteryBond}: reaching it completes the species' bestiary page, and a page
+     * reaching KNOWN pays a skill point ({@code BestiaryDataHelper.setTier}).
      */
     private void announceMilestone(Player player, BondProfile profile, int milestone) {
-        NeoForge.EVENT_BUS.post(new MagizoologyXPEvent(player, milestone,
-                profile.xpTag(bondSpecies(), milestone)));
         PlayerFeedback.unlocked(player,
                 Component.translatable("bond.wizards_and_beasts.milestone", bondMob().getDisplayName()),
                 Component.translatable("bond.wizards_and_beasts.milestone.detail", milestone));

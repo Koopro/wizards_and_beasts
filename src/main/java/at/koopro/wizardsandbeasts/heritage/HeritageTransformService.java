@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.heritage;
 
+import at.koopro.wizardsandbeasts.heritage.rules.HeritageRules;
 import at.koopro.wizardsandbeasts.form.TransitionManager;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
@@ -71,6 +72,12 @@ public final class HeritageTransformService {
                 && variant.hasTag(TAG_TRANSFORMATION);
     }
 
+    /** Whether the server's heritage rules let this player's heritage begin its change (see {@link HeritageRules}). */
+    public static boolean entryAllowed(PlayerHeritageData data) {
+        Heritage heritage = data.getSelectedHeritage();
+        return heritage != null && HeritageRules.transformationAllowed(heritage);
+    }
+
     public static boolean isTransformed(PlayerHeritageData data) {
         return data.getTransformationState() == TransformationState.TRANSFORMED;
     }
@@ -115,7 +122,8 @@ public final class HeritageTransformService {
      */
     public static void grantsFor(ServerPlayer player, java.util.List<String> out) {
         PlayerHeritageData data = data(player);
-        if (!canTransform(data)) {
+        // A closed transformation still offers the button to someone already changed, so they can change back.
+        if (!canTransform(data) || (!entryAllowed(data) && !isTransformed(data))) {
             return;
         }
         Heritage heritage = data.getSelectedHeritage();
@@ -146,6 +154,11 @@ public final class HeritageTransformService {
 
     private static boolean changeTo(ServerPlayer player, PlayerHeritageData data, TransformationState target) {
         if (!canTransform(data)) {
+            return false;
+        }
+        // The administrator's rule closes the way in, never the way out: a player already in the second shape
+        // must always be able to leave it.
+        if (target == TransformationState.TRANSFORMED && !entryAllowed(data)) {
             return false;
         }
         // Never start a second change on top of one already running -- the same guard the werewolf and

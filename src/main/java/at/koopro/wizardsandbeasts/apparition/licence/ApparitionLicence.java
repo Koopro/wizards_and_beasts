@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.apparition.licence;
 
+import at.koopro.wizardsandbeasts.apparition.ApparitionRules;
+
 import at.koopro.wizardsandbeasts.ability.AbilityIds;
 import at.koopro.wizardsandbeasts.ability.AbilityProficiency;
 import at.koopro.wizardsandbeasts.ability.PlayerAbilityHelper;
@@ -70,7 +72,8 @@ public final class ApparitionLicence {
     /** How far along the practice requirement this player is, clamped to 0–1 for display. */
     public static float progress(ServerPlayer player) {
         float held = AbilityProficiency.get(player, AbilityIds.APPARITION);
-        return Math.max(0.0f, Math.min(1.0f, held / REQUIRED_PROFICIENCY));
+        float required = ApparitionRules.requiredLicenceProficiency();
+        return required <= 0f ? 1.0f : Math.max(0.0f, Math.min(1.0f, held / required));
     }
 
     /**
@@ -96,7 +99,7 @@ public final class ApparitionLicence {
             return Eligibility.no("apparition.wizards_and_beasts.test.deny.splinched");
         }
         float held = AbilityProficiency.get(player, AbilityIds.APPARITION);
-        if (held < REQUIRED_PROFICIENCY) {
+        if (held < ApparitionRules.requiredLicenceProficiency()) {
             return Eligibility.no("apparition.wizards_and_beasts.test.deny.practice",
                     Math.round(progress(player) * 100.0f));
         }

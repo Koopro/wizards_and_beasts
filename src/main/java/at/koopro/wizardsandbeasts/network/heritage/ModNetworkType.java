@@ -18,6 +18,11 @@ public final class ModNetworkType {
                 HeritageDataSyncS2CPayload.STREAM_CODEC,
                 ClientPayloadHandlers::handleHeritageDataSync);
 
+        registrar.playToClient(
+                HeritageRulesSyncS2CPayload.TYPE,
+                HeritageRulesSyncS2CPayload.STREAM_CODEC,
+                HeritageRulesSyncS2CPayload::handleClient);
+
         registrar.playToServer(
                 HeritageSelectC2SPayload.TYPE,
                 HeritageSelectC2SPayload.STREAM_CODEC,

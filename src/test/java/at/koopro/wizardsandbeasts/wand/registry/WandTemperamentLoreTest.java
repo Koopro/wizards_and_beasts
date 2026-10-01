@@ -70,7 +70,10 @@ class WandTemperamentLoreTest {
     @Test
     void unicornHair_isTheMostFaithfulAndHardestToTurnDark() throws IOException {
         WandTemperament unicorn = core("unicorn_hair");
-        assertTrue(unicorn.extraWins() > 0);
+        // Faithful to its first owner: a won unicorn-hair wand serves the winner reluctantly. Not an extra defeat —
+        // Harry wins Draco's unicorn-hair wand in one struggle (Deathly Hallows ch. 24; CANON_AUDIT C-3).
+        assertTrue(unicorn.transferBondBonus() < 0.0f);
+        assertTrue(unicorn.extraWins() <= 0);
         assertTrue(unicorn.darkArtsBondCost() > 0.0f);
     }
 

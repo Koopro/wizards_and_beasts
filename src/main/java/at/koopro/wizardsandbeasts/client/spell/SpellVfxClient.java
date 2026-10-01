@@ -40,7 +40,9 @@ import net.minecraft.world.phys.Vec3;
  *   </tr>
  *   <tr>
  *     <td><b>Beam look</b></td>
- *     <td>{@code BeamStyles} / {@code BeamSettings} under {@code client.wand}</td>
+ *     <td>{@code visual.beam.BeamVisualDefaults} (authored), overridden per server from Control Center → Visuals
+ *         ({@code BeamVisualService}, synced by {@code BeamVisualSyncS2CPayload}). The {@code client.wand}
+ *         {@code BeamStyles}/{@code BeamSettings} cluster only feeds the legacy debug screen.</td>
  *     <td>{@code client.beam}, the only beam renderer</td>
  *   </tr>
  * </table>

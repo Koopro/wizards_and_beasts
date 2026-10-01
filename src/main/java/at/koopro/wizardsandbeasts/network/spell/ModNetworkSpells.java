@@ -59,6 +59,11 @@ public final class ModNetworkSpells {
                 SpellDefinitionsSyncS2CPayload.TYPE,
                 SpellDefinitionsSyncS2CPayload.STREAM_CODEC,
                 at.koopro.wizardsandbeasts.client.spell.network.ClientSpellDefinitions::handle);
+        // Administrator overrides on top of those definitions: cooldowns, damage, range, enabled.
+        registrar.playToClient(
+                SpellTuningSyncS2CPayload.TYPE,
+                SpellTuningSyncS2CPayload.STREAM_CODEC,
+                SpellTuningSyncS2CPayload::handleClient);
 
         registrar.playToClient(
                 SpellDataSyncS2CPayload.TYPE,

@@ -443,11 +443,11 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.wizards_and_beasts.deluminator.desc", "Device that manipulates nearby light sources.");
         add("item.wizards_and_beasts.deluminator.stored_lights", "Stored Lights: %s/%s");
         add("item.wizards_and_beasts.time_turner", "Time-Turner");
-        add("item.wizards_and_beasts.time_turner.desc", "Experimental training artifact: channels temporal magic and nudges world time forward.");
+        add("item.wizards_and_beasts.time_turner.desc", "Hold to wind it, one turn a second; let go to go back that many hours to where you stood.");
         add("item.wizards_and_beasts.sneakoscope", "Sneakoscope");
         add("item.wizards_and_beasts.sneakoscope.desc", "Spins and warns when trouble is nearby.");
         add("item.wizards_and_beasts.portkey", "Portkey");
-        add("item.wizards_and_beasts.portkey.desc", "Linked transport item. Sneak-use on a block to bind destination.");
+        add("item.wizards_and_beasts.portkey.desc", "Sneak-use on a block to set it. Hold it with everyone who is coming: one journey, then it is spent.");
         add("item.wizards_and_beasts.portkey.unlinked", "Sneak-use on a block to link a destination.");
         add("item.wizards_and_beasts.portkey.linked", "Linked: %s, %s, %s");
     }

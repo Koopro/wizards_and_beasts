@@ -344,7 +344,9 @@ public final class WandAllegianceTests {
         stage(helper, STUN_Y);
         ServerPlayer master = wizard(helper, "wandb-stun-master", GameType.SURVIVAL, STUN_Y, 1, 4);
         ServerPlayer duellist = duellist(helper, "wandb-stun-duellist", STUN_Y, "stupefy");
-        ItemStack wand = mastered(wand("holly", "veela_hair"), master.getUUID(), 1.0f);
+        // Phoenix feather is a hard-won core (one extra defeat), so the two-stun sequence below still tests the
+        // master answering a challenge. An ordinary wand now goes on the first defeat (CANON_AUDIT C-3).
+        ItemStack wand = mastered(wand("holly", "phoenix_feather"), master.getUUID(), 1.0f);
         master.setItemInHand(InteractionHand.MAIN_HAND, wand);
         Spell arresto = Spells.byId(ARRESTO);
 
@@ -355,7 +357,7 @@ public final class WandAllegianceTests {
                         () -> "the first stun did not count as a defeat: " + describe(master.getMainHandItem())))
                 .thenExecute(() -> {
                     check(helper, WandComponents.getMaster(master.getMainHandItem()).equals(Optional.of(master.getUUID())),
-                            () -> "an ordinary wand changed hands on a single defeat");
+                            () -> "a phoenix-feather wand changed hands on a single defeat");
                     master.setHealth(master.getMaxHealth());
                     WandAllegianceService.onSuccessfulCast(master, master.getMainHandItem(), arresto);
                     check(helper, wins(master) == 0,
@@ -467,8 +469,10 @@ public final class WandAllegianceTests {
                     check(helper, maker.getUUID().equals(data.getMaster()), () -> "defeating a rival while wielding it did not win the Elder Wand");
                     check(helper, WandAllegianceService.stateFor(maker.getUUID(), maker.getMainHandItem()) == WandBondState.RELUCTANT,
                             () -> "a newly won Elder Wand should be reluctant: " + describe(maker.getMainHandItem()));
-                    check(helper, WandComponents.getMaster(rival.getMainHandItem()).equals(Optional.of(rival.getUUID())),
-                            () -> "one defeat won the rival's unicorn wand too: " + describe(rival.getMainHandItem()));
+                    // And the rival's own wand with it: one defeat wins an ordinary wand, as Harry's one struggle at
+                    // Malfoy Manor won Draco's wand and the Elder Wand together (Deathly Hallows ch. 24; CANON_AUDIT C-3).
+                    check(helper, WandComponents.getMaster(rival.getMainHandItem()).equals(Optional.of(maker.getUUID())),
+                            () -> "one defeat did not win the rival's wand: " + describe(rival.getMainHandItem()));
 
                     // A usurper stuns the master, never touching the Elder Wand: its allegiance follows the defeat.
                     WandAllegianceService.onDefeat(maker, usurper, WandAllegianceService.DefeatKind.STUN, List.of());

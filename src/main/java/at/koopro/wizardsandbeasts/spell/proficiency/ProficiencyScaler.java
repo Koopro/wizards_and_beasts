@@ -78,8 +78,9 @@ public final class ProficiencyScaler {
         if (data == null) {
             return computeProfile(0.0f);
         }
-        float proficiency = data.getSpellProficiency(spellId.toString());
-        return computeProfile(proficiency);
+        // A spell practised to a tier never casts below what that tier promises, whatever an old save stored.
+        String id = spellId.toString();
+        return computeProfile(SpellPractice.effective(data.getSpellProficiency(id), data.getSuccessfulHits(id)));
     }
 
     private static float clamp01(float value) {

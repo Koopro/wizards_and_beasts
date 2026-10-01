@@ -72,7 +72,9 @@ public final class DementorAura {
             return false;
         }
         if (entity instanceof Player player) {
-            return !player.isCreative() && !player.isSpectator();
+            // The Resurrection Stone's shades: "the dementors' chill did not overcome him" (Deathly Hallows ch. 34).
+            return !player.isCreative() && !player.isSpectator()
+                    && !at.koopro.wizardsandbeasts.item.hallow.ShadesOfTheDead.walkWith(player);
         }
         return true;
     }

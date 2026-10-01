@@ -31,7 +31,8 @@
     },
     {
       "type": "spell_resist",
-      "resist_fraction": 0.6
+      "resist_fraction": 0.86,
+      "damage_fraction": 0.6
     },
     {
       "type": "damage_reduction",

@@ -16,6 +16,8 @@ public final class BeamClientEvents {
     public static void onLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
         WandTipTracker.clear();
         BeamChannelClient.clear();
+        // The next server sends its own beam looks on join; this one's must not carry over.
+        ClientBeamVisuals.clear();
         // A Protego charge expires on its own after a few silent ticks, but the client tick it was
         // stamped with belongs to a level that is going away; clearing it keeps the next session's
         // first ticks from reading a stale stamp as a live charge.

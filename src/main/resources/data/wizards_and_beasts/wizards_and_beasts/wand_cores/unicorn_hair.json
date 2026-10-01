@@ -1,5 +1,5 @@
 {
-  "_lore": "Canon (Ollivander): the most consistent magic, least subject to fluctuation; the most faithful, strongly attached to its first owner; hardest to turn to the Dark Arts; not the most powerful. Gameplay: steadier and a little weaker, one more defeat to win, and its bond suffers every Dark cast.",
+  "_lore": "Canon (Ollivander): the most consistent magic, least subject to fluctuation; the most faithful, strongly attached to its first owner; hardest to turn to the Dark Arts; not the most powerful. Gameplay: steadier and a little weaker; won in one defeat like any wand (Draco's unicorn-hair wand, Deathly Hallows ch. 24) but it serves its winner reluctantly at first, and its bond suffers every Dark cast.",
   "display_name": {
     "translate": "wand_core.wizards_and_beasts.unicorn_hair"
   },
@@ -17,7 +17,7 @@
     "fizzle": -0.05
   },
   "temperament": {
-    "extra_wins": 1,
+    "transfer_bond_bonus": -0.1,
     "dark_arts_bond_cost": 0.03
   }
 }

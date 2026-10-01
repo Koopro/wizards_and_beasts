@@ -1,0 +1,25 @@
+{
+  "schema": "wizards_and_beasts:admin_profile",
+  "schema_version": 1,
+  "mod_version": "",
+  "profile": {
+    "id": "sandbox",
+    "name": "Sandbox",
+    "description": "Build and explore: no law, no fees, faster brooms, no spell prerequisites.",
+    "author": "Wizards & Beasts",
+    "created": 0,
+    "kind": "preset"
+  },
+  "mode": "replace",
+  "settings": {
+    "wizards_and_beasts:enforce_spell_requirements": "false",
+    "wizards_and_beasts:skill_respec_cost_knuts": "0",
+    "wizards_and_beasts:ollivander_wand_price_knuts": "0",
+    "wizards_and_beasts:floo_registration_fee_knuts": "0",
+    "wizards_and_beasts:broom_server_speed_scale": "1.25",
+    "wizards_and_beasts:floo_misfire_chance_percent": "0"
+  },
+  "modules": {
+    "ministry": "disabled"
+  }
+}

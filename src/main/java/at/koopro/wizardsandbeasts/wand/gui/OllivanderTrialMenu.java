@@ -9,6 +9,7 @@ import at.koopro.wizardsandbeasts.wand.ollivander.OllivanderPoolEntry;
 import at.koopro.wizardsandbeasts.wand.ollivander.OllivanderPoolLoader;
 import at.koopro.wizardsandbeasts.wand.resonance.WandResonanceConfigLoader;
 import at.koopro.wizardsandbeasts.wand.resonance.WandResonanceSystem;
+import at.koopro.wizardsandbeasts.wand.rules.WandRules;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -202,7 +203,10 @@ public class OllivanderTrialMenu extends AbstractContainerMenu {
         List<OllivanderPoolEntry> pool = new ArrayList<>(OllivanderPoolLoader.getPool(player.level().registryAccess()));
         List<OllivanderPoolEntry> eligible = new ArrayList<>();
         for (OllivanderPoolEntry e : pool) {
-            if (player.experienceLevel >= e.minimumPlayerLevel()) {
+            // A wood, core or pairing the server has withdrawn is not offered. The fallback below is not filtered:
+            // a new wizard must always leave with a wand.
+            if (player.experienceLevel >= e.minimumPlayerLevel()
+                    && WandRules.mayMake(e.woodKey(), e.coreKey())) {
                 eligible.add(e);
             }
         }

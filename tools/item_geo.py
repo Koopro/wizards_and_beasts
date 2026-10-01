@@ -687,24 +687,25 @@ def build_marauders_map():
 def build_elder_wand():
     """The Elder Wand: pale bleached elder, knotted along its length with the nodes the books
     describe, a knob at the grip end. Drawn by WandRenderer, not AnimatedItemRenderer, so the
-    bone names are its contract: wand_root > shaft/knob/tip, and wand_tip (the beam anchor) at the
-    point. Never tinted: it is one wand, not a sample of elder wood.
+    bone names are its contract: wand_root > shaft/knob/tip, and wand_spell_attachment (where a
+    spell leaves; WandRenderer reads it from every wand model) at the point. Never tinted: it is one
+    wand, not a sample of elder wood.
 
-    Grip at y 0, point up at y 23 -- the base wand's orientation and length, because both share
-    one display base (models/item/wand.json). It used to run the other way (point at y -2, knob
-    on top), a leftover of the pre-GeckoLib model, which held it by the point."""
+    Grip at y 0, point up at y 27.5 -- the modular wand's orientation and length (tools/wand_model.py
+    contract), because both share one display base (models/item/wand.json)."""
     rig = Rig("elder_wand", tex_w=32)
     rig.bone("wand_root", "root", (0, 0, 0))
     rig.bone("knob", "wand_root", (0, 0, 0))
     rig.cube("knob", (-1, 0, -1), (2, 2, 2), key="knob", inflate=0.1)
     rig.cube("knob", (-0.5, -1, -0.5), (1, 1, 1), key="cap")
     rig.bone("shaft", "wand_root", (0, 2, 0))
-    rig.cube("shaft", (-0.5, 2, -0.5), (1, 18, 1), key="shaft")
-    for i, y in enumerate((4, 8, 12, 16)):
+    rig.cube("shaft", (-0.5, 2, -0.5), (1, 23, 1), key="shaft")
+    for i, y in enumerate((5, 10, 15, 20)):
         rig.cube("shaft", (-1, y, -1), (2, 1, 2), key=f"node{i}", inflate=-0.25)
-    rig.bone("tip", "wand_root", (0, 20, 0))
-    rig.cube("tip", (-0.5, 20, -0.5), (1, 3, 1), key="point", inflate=-0.15)
-    rig.bone("wand_tip", "tip", (0, 23, 0))
+    rig.bone("tip", "wand_root", (0, 25, 0))
+    # 24.8 -> 27.5 as drawn; its foot sits inside the shaft's end.
+    rig.cube("tip", (-0.5, 24.65, -0.5), (1, 3, 1), key="point", inflate=-0.15)
+    rig.bone("wand_spell_attachment", "wand_root", (0, 27.5, 0))
     skin = finish(rig)
     t = paint(skin, ["shaft", "point"], "#C8BFB0", dither=0.1, speck="shade")
     paint(skin, [f"node{i}" for i in range(4)], "#A89E8C", tone="shade", dither=0.2, speck="dark")

@@ -19,15 +19,25 @@
   ],
   "abilities": [
     {
-      "type": "ranged_hex",
-      "range": 8.0,
-      "damage": 3.0,
-      "cooldown_ticks": 70,
-      "particle": "flame"
-    },
-    {
       "type": "thorns",
       "reflect_fraction": 0.4
+    },
+    {
+      "type": "blast_propulsion",
+      "cooldown_ticks": 60,
+      "lunge_speed": 0.7,
+      "burn_reach": 2.0,
+      "burn_seconds": 3,
+      "wander_chance": 0.01
+    },
+    {
+      "type": "infighting",
+      "radius": 4.0,
+      "check_interval_ticks": 40
+    },
+    {
+      "type": "spell_resist",
+      "resist_fraction": 0.75
     }
   ],
   "clips": [

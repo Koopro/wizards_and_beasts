@@ -36,6 +36,28 @@ public final class DebugModeService {
         return globalEnabled;
     }
 
+    /** Sets one player's debug mode (the toggle's set form, for callers that must restore a known state). */
+    public static void setForPlayer(UUID id, boolean enabled) {
+        if (enabled) {
+            ENABLED_PLAYERS.add(id);
+        } else {
+            ENABLED_PLAYERS.remove(id);
+        }
+    }
+
+    public static boolean isEnabledFor(UUID id) {
+        return globalEnabled || ENABLED_PLAYERS.contains(id);
+    }
+
+    /** Whether this player has debug mode of their own, apart from the all-players switch. */
+    public static boolean hasOwn(UUID id) {
+        return ENABLED_PLAYERS.contains(id);
+    }
+
+    public static void setGlobal(boolean enabled) {
+        globalEnabled = enabled;
+    }
+
     public static boolean isGlobalEnabled() {
         return globalEnabled;
     }

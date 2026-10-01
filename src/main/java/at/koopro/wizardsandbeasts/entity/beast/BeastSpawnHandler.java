@@ -56,6 +56,7 @@ public final class BeastSpawnHandler {
         // more evocative reading of the rule than "somewhere within N blocks of them".
         registerAt(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("matagot"), false,
                 (level, pos) -> isWizardingStonework(level.getBlockState(pos.below())));
+        at.koopro.wizardsandbeasts.creature.rules.SpawnConditionNotes.note("matagot", "wizarding_stonework");
         nightSpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("bundimun"));
 
         // Wand-core sources. Two of the three cores had no wild source at all, which left the
@@ -72,6 +73,7 @@ public final class BeastSpawnHandler {
         var basilisk = at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("basilisk");
         registerAt(event, basilisk, false, (level, pos) -> at.koopro.wizardsandbeasts.chamber.ChamberBasilisk.mayWake(
                 level.getLevel(), pos, at.koopro.wizardsandbeasts.chamber.ChamberBasilisk.ofType(basilisk.get())));
+        at.koopro.wizardsandbeasts.creature.rules.SpawnConditionNotes.note("basilisk", "chamber_basilisk");
         // Acromantulas keep to the dark forest, in the dark. A spawn arrives in ones and twos (a rating-5 creature
         // may not arrive in bigger groups — CreatureEcologyDataTest) and each newcomer joins the colony it finds
         // (AcromantulaEntity#joinOrFoundColony), so a colony grows over time — to COLONY_CAP within 48 blocks.
@@ -79,6 +81,7 @@ public final class BeastSpawnHandler {
                 (level, pos) -> level.getEntitiesOfClass(at.koopro.wizardsandbeasts.entity.creature.AcromantulaEntity.class,
                         new net.minecraft.world.phys.AABB(pos).inflate(48)).size()
                         < at.koopro.wizardsandbeasts.entity.creature.AcromantulaEntity.COLONY_CAP);
+        at.koopro.wizardsandbeasts.creature.rules.SpawnConditionNotes.note("acromantula", "colony_cap");
         // The Kelpie waits in rivers, one to a stretch of water: in the water, not on the bank (it comes out to
         // lure), and never within 48 blocks of another.
         var kelpie = at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("kelpie");
@@ -90,9 +93,11 @@ public final class BeastSpawnHandler {
                         && level.getEntitiesOfClass(at.koopro.wizardsandbeasts.entity.creature.KelpieEntity.class,
                                 new net.minecraft.world.phys.AABB(pos).inflate(48)).isEmpty(),
                 RegisterSpawnPlacementsEvent.Operation.OR);
+        at.koopro.wizardsandbeasts.creature.rules.SpawnConditionNotes.note("kelpie", "module_creatures", "roster_setting", "in_deep_water", "kelpie_alone");
         // A werewolf is a person on any other night. It is only ever out under a full moon.
         register(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("werewolf"), false,
                 level -> at.koopro.wizardsandbeasts.heritage.werewolf.WerewolfRules.fullMoonNight(level.getLevel()));
+        at.koopro.wizardsandbeasts.creature.rules.SpawnConditionNotes.note("werewolf", "full_moon");
     }
 
     /**
@@ -159,6 +164,9 @@ public final class BeastSpawnHandler {
                                    java.util.function.BiPredicate<
                                            net.minecraft.world.level.ServerLevelAccessor,
                                            net.minecraft.core.BlockPos> when) {
+        // What the predicate below tests, written down beside it: a lambda cannot be read back (Creature Lab).
+        at.koopro.wizardsandbeasts.creature.rules.SpawnConditionNotes.note(holder.getId().getPath(), "module_creatures", "roster_setting", "solid_ground",
+                daytime ? "light_day" : "light_night");
         event.register(
                 holder.get(),
                 SpawnPlacementTypes.ON_GROUND,

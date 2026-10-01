@@ -116,6 +116,21 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
     private Set<Trait> cachedTraits;
 
     /**
+     * {@link #definition()} and {@link #hasFireImmuneAbility()}, remembered against the registry map they were read
+     * from. Vanilla asks {@code fireImmune()} many times per tick, and each answer was an entity-type registry
+     * lookup, a definitions-map lookup and a walk of the ability list — about 1% of the server thread in the perf
+     * scenario. A reload swaps the registry's map, so comparing identities is an exact staleness test: nothing
+     * here can outlive the definitions it came from (documentation/PERFORMANCE_AUDIT.md).
+     */
+    @Nullable
+    private Map<Identifier, CreatureDefinition> definitionSource;
+    @Nullable
+    private CreatureDefinition cachedDefinition;
+    @Nullable
+    private CreatureDefinition fireImmunitySource;
+    private boolean cachedFireImmuneAbility;
+
+    /**
      * Per-entity scratch counters for the ability layer. {@code fireDryTicks}/{@code waterDryTicks} are the
      * {@link FireAffinity}/{@code WaterAffinity} dry-out timers. Cooldown-gated abilities each own a private
      * string key into {@link #abilityCooldowns} (blink, camouflage reveal, signature bursts) so multiple
@@ -165,6 +180,14 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
     private static final EntityDataAccessor<Integer> DATA_BOND_LEVEL =
             SynchedEntityData.defineId(GenericBeastEntity.class, EntityDataSerializers.INT);
 
+    /**
+     * The shape this creature is wearing ({@link Guise#encode}), or {@code ""} for its own. Synced so the renderer can
+     * draw the borrowed model and the movement controller play its clips; set server-side by shapeshifting abilities
+     * (the Boggart's). Not saved: a shapeshifter decides its shape from who is looking, every time.
+     */
+    private static final EntityDataAccessor<String> DATA_GUISE =
+            SynchedEntityData.defineId(GenericBeastEntity.class, EntityDataSerializers.STRING);
+
     private final BondState bond = new BondState();
 
     protected GenericBeastEntity(EntityType<? extends PathfinderMob> type, Level level) {
@@ -180,6 +203,7 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
         builder.define(DATA_TINT, 0xFFFFFFFF);
         builder.define(DATA_DISGUISED, false);
         builder.define(DATA_BOND_LEVEL, 0);
+        builder.define(DATA_GUISE, "");
     }
 
     // ── bond layer ────────────────────────────────────────────────────────────
@@ -255,6 +279,15 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
         this.entityData.set(DATA_TINT, argb);
     }
 
+    /** The shape it wears ({@link Guise#encode}), {@code ""} for its own. */
+    public String getGuise() {
+        return this.entityData.get(DATA_GUISE);
+    }
+
+    public void setGuise(String guise) {
+        this.entityData.set(DATA_GUISE, guise);
+    }
+
     /** True while a {@code LureDisguise} ability has this beast hiding as something harmless. */
     public boolean isDisguised() {
         return this.entityData.get(DATA_DISGUISED);
@@ -297,7 +330,12 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
 
     @Nullable
     protected CreatureDefinition definition() {
-        return CreatureDefinitionRegistry.get(creatureId());
+        Map<Identifier, CreatureDefinition> current = CreatureDefinitionRegistry.snapshot();
+        if (current != definitionSource) {
+            cachedDefinition = current.get(creatureId());
+            definitionSource = current;
+        }
+        return cachedDefinition;
     }
 
     protected Temperament temperament() {
@@ -322,6 +360,31 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
     // ── ability layer ─────────────────────────────────────────────────────────
 
     /** This creature's datapack-declared abilities (empty when the definition is missing or omits them). */
+    /** Whether this creature's definition gives it an ability of {@code type}. */
+    public boolean hasAbility(CreatureAbility.Type type) {
+        for (CreatureAbility ability : abilities()) {
+            if (ability.type() == type) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** This creature's first ability of the given class, or {@code null}. */
+    public <A extends CreatureAbility> @Nullable A abilityOf(Class<A> kind) {
+        for (CreatureAbility ability : abilities()) {
+            if (kind.isInstance(ability)) {
+                return kind.cast(ability);
+            }
+        }
+        return null;
+    }
+
+    /** Whether this creature hunts people unprovoked ({@code HOSTILE} temperament). */
+    public boolean isNaturallyHostile() {
+        return temperament() == Temperament.HOSTILE;
+    }
+
     protected List<CreatureAbility> abilities() {
         CreatureDefinition def = definition();
         return def != null ? def.abilities() : List.of();
@@ -544,12 +607,22 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
 
     /** True if any {@link FireAffinity} ability declares fire immunity (so fire/lava damage is ignored). */
     private boolean hasFireImmuneAbility() {
-        for (CreatureAbility ability : abilities()) {
-            if (ability instanceof FireAffinity fire && fire.fireImmune()) {
-                return true;
-            }
+        CreatureDefinition def = definition();
+        if (def == null) {
+            return false;
         }
-        return false;
+        if (def != fireImmunitySource) {
+            boolean immune = false;
+            for (CreatureAbility ability : def.abilities()) {
+                if (ability instanceof FireAffinity fire && fire.fireImmune()) {
+                    immune = true;
+                    break;
+                }
+            }
+            cachedFireImmuneAbility = immune;
+            fireImmunitySource = def;
+        }
+        return cachedFireImmuneAbility;
     }
 
     @Override
@@ -766,6 +839,10 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
      * per creature in the datapack and nothing is ever triggered on faith.
      */
     public void triggerDeclared(String clip) {
+        // A borrowed shape plays the borrowed creature's clips; its own one-shots are not in that file.
+        if (!getGuise().isEmpty()) {
+            return;
+        }
         if (declaredClips().contains(clip)) {
             triggerAnim(BEAST_ACTION_CONTROLLER, clip);
         }
@@ -778,6 +855,9 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
      * {@code strike} / {@code bite}) without the entity having to know which creature it is.
      */
     protected void triggerFirstDeclared(List<String> preference) {
+        if (!getGuise().isEmpty()) {
+            return;
+        }
         List<String> declared = declaredClips();
         for (String clip : preference) {
             if (declared.contains(clip)) {

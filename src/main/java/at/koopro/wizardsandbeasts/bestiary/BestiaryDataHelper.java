@@ -38,6 +38,11 @@ public final class BestiaryDataHelper {
             // Only the earned path fires a deed. forceSetTier is the admin/debug door and must not
             // move a player's standing as a side effect of an operator fixing their data.
             at.koopro.wizardsandbeasts.standing.deed.DeedService.onBestiaryTier(sp, entryId, requestedTier);
+            if (requestedTier == DiscoveryTier.KNOWN && old != DiscoveryTier.KNOWN) {
+                // Knowing a creature is progress the skill web pays for, the way mastering a spell is — however
+                // the page was completed: watching, study, a signature, or a bond deep enough to know it by.
+                at.koopro.wizardsandbeasts.event.skill.SkillEvents.awardForKnownSpecies(sp);
+            }
         }
     }
 
@@ -103,9 +108,31 @@ public final class BestiaryDataHelper {
      */
     public static int addObservedTicks(ServerPlayer player, Identifier entryId, int ticks) {
         PlayerBestiaryData next = player.getData(ModAttachments.BESTIARY_DATA.get()).copy();
-        int total = (int) Math.min(Integer.MAX_VALUE, (long) next.observedTicks(entryId) + Math.max(0, ticks));
+        int total = observedTotal(next.observedTicks(entryId), ticks);
         next.observation().put(entryId, total);
         player.setData(ModAttachments.BESTIARY_DATA.get(), next);
         return total;
+    }
+
+    /** Watching time after adding {@code ticks} to {@code current}, saturating rather than overflowing. */
+    public static int observedTotal(int current, int ticks) {
+        return (int) Math.min(Integer.MAX_VALUE, (long) current + Math.max(0, ticks));
+    }
+
+    /**
+     * Stores several entries' watching totals in one write — one copy of the record rather than one per entry.
+     * The bestiary scan used to copy the whole record (tiers, harvest lockouts, watching time) once for every
+     * creature a player watched each second (documentation/PERFORMANCE_AUDIT.md). Server-side and unsynced, like
+     * {@link #addObservedTicks}.
+     *
+     * @param totals entry id → new total (already summed, see {@link #observedTotal})
+     */
+    public static void setObservedTicks(ServerPlayer player, java.util.Map<Identifier, Integer> totals) {
+        if (totals.isEmpty()) {
+            return;
+        }
+        PlayerBestiaryData next = player.getData(ModAttachments.BESTIARY_DATA.get()).copy();
+        next.observation().putAll(totals);
+        player.setData(ModAttachments.BESTIARY_DATA.get(), next);
     }
 }

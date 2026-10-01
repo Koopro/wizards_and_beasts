@@ -4,12 +4,16 @@ import at.koopro.wizardsandbeasts.ability.PlayerAbilityHelper;
 import at.koopro.wizardsandbeasts.bestiary.BestiaryDataHelper;
 import at.koopro.wizardsandbeasts.bestiary.BestiaryEntry;
 import at.koopro.wizardsandbeasts.bestiary.DiscoveryTier;
+import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
 import at.koopro.wizardsandbeasts.skill.GameplayStat;
 import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
 import at.koopro.wizardsandbeasts.corruption.DarkCorruptionService;
 import at.koopro.wizardsandbeasts.event.bestiary.BestiaryDiscoveryHandler;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.gamerules.GameRules;
+import net.minecraft.world.level.storage.ServerLevelData;
 import org.jspecify.annotations.NullMarked;
 
 /**
@@ -51,16 +55,37 @@ public final class WildlifeWorld {
         return WildlifeRules.shuns(isSlayer(player, slayerFlag), DarkCorruptionService.get(player));
     }
 
-    /** {@code tier}, raised by however many tiers of handling the player has trained. */
+    /**
+     * {@code tier}, raised by however many tiers of handling the player has trained — and by one more for someone of
+     * {@code creature_kinship}: a Squib, whom canon has keeping Kneazles and seeing what wizards walk past. Beasts
+     * treat them as if they had watched a while longer; it opens the same doors study does, one step sooner, and
+     * nothing that study could not.
+     */
     private static DiscoveryTier trusted(Player player, DiscoveryTier tier) {
         if (!(player instanceof net.minecraft.server.level.ServerPlayer server)) {
             return tier;
         }
-        return WildlifeRules.trustedTier(tier, Math.round(
+        int kinship = HeritageAPI.getData(server).hasTrait(CREATURE_KINSHIP) ? 1 : 0;
+        return WildlifeRules.trustedTier(tier, kinship + Math.round(
                 SkillSystemAPI.getGameplayBonus(server, GameplayStat.CREATURE_TRUST)));
     }
 
+    /** The lineage trait beasts answer to (Squibs). */
+    public static final String CREATURE_KINSHIP = "creature_kinship";
+
     public static boolean isSlayer(Player player, String slayerFlag) {
         return !slayerFlag.isBlank() && PlayerAbilityHelper.hasAbilityFlag(player, slayerFlag);
+    }
+
+    /**
+     * Whether rain is on its way to this level ({@link SignatureRules#rainComing}), read off the server's weather
+     * clock. The Augurey cries on it and a Centaur reads it in the sky.
+     */
+    public static boolean rainComing(ServerLevel level) {
+        if (!(level.getLevelData() instanceof ServerLevelData data)) {
+            return false;
+        }
+        boolean cycles = level.canHaveWeather() && level.getGameRules().get(GameRules.ADVANCE_WEATHER);
+        return SignatureRules.rainComing(cycles, level.isRaining(), data.getClearWeatherTime(), data.getRainTime());
     }
 }

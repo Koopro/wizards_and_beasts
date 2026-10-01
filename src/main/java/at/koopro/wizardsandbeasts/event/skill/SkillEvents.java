@@ -15,7 +15,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerXpEvent;
 
 /**
  * Handles automatic skill point awarding from gameplay events, plus the one-time
@@ -74,21 +73,20 @@ public class SkillEvents {
                 player.getName().getString());
     }
 
-    /**
-     * Award skill points when a player gains an XP level.
-     * 1 SP per level gained.
-     */
-    @SubscribeEvent
-    public static void onLevelUp(PlayerXpEvent.LevelChange event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        int levels = event.getLevels();
-        if (levels <= 0) return;
+    // Vanilla XP levels no longer award skill points (2026-09-28, documentation/PROGRESSION_MAP.md). They did, one
+    // per level, and a level regained after spending it on an anvil counted again — so mining and mob farms bought
+    // the whole wizard web without a spell ever being cast. Skill points now come from what the web is about: the
+    // heritage ceremony, practice that reaches a tier (checkProficiencyMilestone) and a bestiary page completed
+    // (awardForKnownSpecies).
 
-        SkillSystemAPI.awardPoints(player, levels);
+    /** Skill points for a bestiary page that reaches KNOWN: the naturalist's half of the web's income. */
+    public static final int KNOWN_SPECIES_POINTS = 1;
+
+    /** A species' page reached KNOWN: one skill point, once per page (a tier never drops). */
+    public static void awardForKnownSpecies(ServerPlayer player) {
+        SkillSystemAPI.awardPoints(player, KNOWN_SPECIES_POINTS);
         SkillDataSyncS2CPayload.syncToPlayer(player);
-        // Action bar, not a toast: levelling happens constantly, and a floating panel per level would
-        // be the chat problem again in a new place.
-        PlayerFeedback.actionBar(player, Component.translatable(L + "points_awarded", levels)
+        PlayerFeedback.actionBar(player, Component.translatable(L + "points_awarded", KNOWN_SPECIES_POINTS)
                 .withStyle(ChatFormatting.GOLD));
     }
 

@@ -293,19 +293,8 @@ public final class SpellCommands {
     }
 
     private static int revealPatronusForm(ServerPlayer player) {
-        float happiness = player.getData(ModAttachments.HAPPINESS.get());
         net.minecraft.resources.Identifier form =
-                at.koopro.wizardsandbeasts.spell.patronus.PatronusFormDeterminer.determine(
-                        at.koopro.wizardsandbeasts.heritage.HeritageAPI.getPlayerHeritage(player),
-                        at.koopro.wizardsandbeasts.heritage.HeritageAPI.getPlayerHeritageVariant(player),
-                        happiness);
-        if (form == null) {
-            player.displayClientMessage(
-                    Component.translatable("spell.wizards_and_beasts.expecto_patronum.reject.heritage")
-                            .withStyle(ChatFormatting.GRAY),
-                    false);
-            return 0;
-        }
+                at.koopro.wizardsandbeasts.spell.patronus.PatronusFormDeterminer.determine(player.getUUID());
         String formId = form.toString();
         player.setData(ModAttachments.PATRONUS_FORM.get(), formId);
         net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,

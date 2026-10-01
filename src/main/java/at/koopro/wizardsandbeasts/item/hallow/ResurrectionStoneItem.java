@@ -14,8 +14,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -43,6 +41,8 @@ public class ResurrectionStoneItem extends Item implements IHallowItem, Animated
                 .withStyle(ChatFormatting.ITALIC, ChatFormatting.DARK_GRAY));
         tooltipAdder.accept(Component.literal("They are not truly here.")
                 .withStyle(ChatFormatting.ITALIC, ChatFormatting.DARK_PURPLE));
+        tooltipAdder.accept(Component.translatable("item.wizards_and_beasts.resurrection_stone.rule")
+                .withStyle(ChatFormatting.GRAY));
         int uses = stack.getOrDefault(ModDataComponents.RESURRECTION_STONE_USES.get(), 0);
         if (uses > 0) {
             tooltipAdder.accept(Component.literal("Times used: " + uses)
@@ -86,8 +86,9 @@ public class ResurrectionStoneItem extends Item implements IHallowItem, Animated
         serverLevel.playSound(null, caster.blockPosition(), SoundEvents.SOUL_ESCAPE.value(),
                 SoundSource.PLAYERS, 0.7f, 0.8f);
 
-        caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, COMFORT_DURATION, 0, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, COMFORT_DURATION, 0, true, true));
+        // What the shades do is what they did for Harry: walk beside him through the Dementors' cold. They used to
+        // be Regeneration and Resistance — a potion any brewer could make, not the second Hallow.
+        ShadesOfTheDead.call(caster, COMFORT_DURATION);
 
         // The company of the dead steadies the mind, but meddling with death stains the soul.
         float mental = caster.getData(ModAttachments.MENTAL_STABILITY.get());
@@ -95,7 +96,7 @@ public class ResurrectionStoneItem extends Item implements IHallowItem, Animated
         at.koopro.wizardsandbeasts.corruption.DarkCorruptionService.accrue(caster, 3f);
 
         caster.getCooldowns().addCooldown(stack, COOLDOWN_TICKS);
-        caster.displayClientMessage(Component.literal("Shades of the dead gather around you.")
+        caster.displayClientMessage(Component.translatable("item.wizards_and_beasts.resurrection_stone.called")
                 .withStyle(ChatFormatting.DARK_PURPLE), true);
         return InteractionResult.SUCCESS;
     }

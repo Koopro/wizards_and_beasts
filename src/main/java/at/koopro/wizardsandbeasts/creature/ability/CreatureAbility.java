@@ -34,7 +34,8 @@ public sealed interface CreatureAbility permits
         OccamyChoranaptyxis, FlameBurst, EmberTrail, DangerSense,
         Tint, Evasion, PackTactics, DamageReduction, SporeCloud, Frenzy, DiveBomb,
         JarveyJinx, SphinxRiddle, LureDisguise, Duplication, BlockDecay,
-        Shed, Wary, WatchedInvisibility, Foresight, Groomable, MoonBound, LycanthropicBite, SlayerCurse {
+        Shed, Wary, WatchedInvisibility, Foresight, Groomable, MoonBound, LycanthropicBite, SlayerCurse,
+        BlastPropulsion, Infighting, HoardGuard, StarReading, ForestKeeper, MerfolkSong {
 
     /** Dispatch codec keyed by the variant's {@link Type}, mirroring {@code SkillNodeEffect.CODEC}. */
     Codec<CreatureAbility> CODEC = Type.CODEC.dispatch(CreatureAbility::type, Type::codec);
@@ -124,7 +125,14 @@ public sealed interface CreatureAbility permits
         GROOMABLE("groomable", Groomable.CODEC),
         MOON_BOUND("moon_bound", MoonBound.CODEC),
         LYCANTHROPIC_BITE("lycanthropic_bite", LycanthropicBite.CODEC),
-        SLAYER_CURSE("slayer_curse", SlayerCurse.CODEC);
+        SLAYER_CURSE("slayer_curse", SlayerCurse.CODEC),
+        // Creature identity pass (2026-09-28): one signature each, see documentation/CREATURE_IDENTITY_STATUS.md.
+        BLAST_PROPULSION("blast_propulsion", BlastPropulsion.CODEC),
+        INFIGHTING("infighting", Infighting.CODEC),
+        HOARD_GUARD("hoard_guard", HoardGuard.CODEC),
+        STAR_READING("star_reading", StarReading.CODEC),
+        FOREST_KEEPER("forest_keeper", ForestKeeper.CODEC),
+        MERFOLK_SONG("merfolk_song", MerfolkSong.CODEC);
 
         public static final Codec<Type> CODEC = StringRepresentable.fromValues(Type::values);
 

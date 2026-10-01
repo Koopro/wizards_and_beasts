@@ -763,7 +763,7 @@ def main():
     # Retired 2026-09-28 (art pipeline audit): every creature skin now belongs to its own
     # `tools/<id>_model.py`, and a run here paints nothing live -- it only drops placeholder
     # skins for rigs that are not creatures (the broom variants, `player`). The module stays as a
-    # library: spawn_eggs.py, tent_skin.py and wand_skin.py import its palettes and painters.
+    # library: spawn_eggs.py, tent_skin.py and wand_model.py import its palettes and painters.
     raise SystemExit("beast_skins.py is retired as a writer -- run the creature's tools/<id>_model.py")
     ap = argparse.ArgumentParser()
     ap.add_argument("--force", action="store_true",

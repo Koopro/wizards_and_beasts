@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.broom;
 
+import at.koopro.wizardsandbeasts.broom.rules.BroomRules;
 import at.koopro.wizardsandbeasts.event.broom.BroomDefinitionsLoadedEvent;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.Identifier;
@@ -21,7 +22,8 @@ public final class BroomDefinitionLoader extends SimpleJsonResourceReloadListene
     @Override
     protected void apply(Map<Identifier, BroomDefinition> jsonEntries, ResourceManager resourceManager, ProfilerFiller profiler) {
         Map<Identifier, BroomDefinition> loaded = new HashMap<>(jsonEntries);
-        BroomDefinitionRegistry.replaceAll(loaded);
+        // The authored set goes to the admin overlay, which registers it with any overrides applied.
+        BroomRules.acceptAuthored(loaded);
         NeoForge.EVENT_BUS.post(new BroomDefinitionsLoadedEvent(loaded.size()));
     }
 }

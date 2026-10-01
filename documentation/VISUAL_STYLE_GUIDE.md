@@ -102,6 +102,14 @@ Vanilla particles keep their vanilla meaning and must not stand in for ours: `HA
 is "trade accepted / bonemeal", `PORTAL` is the Enderman, `WITCH` the witch. Creature abilities
 use `AbilitySupport.Particle.ARCANE / LIGHT / HEALING / DREAD / POISON` (mod sprites, tinted).
 
+Mod VFX shapes follow the same rule:
+- **Smoke** is the mod's `smoke_puff`: four pixel dissipation frames, tinted by meaning through
+  `particle/MagicSmoke`. The mod's own magic never uses vanilla `LARGE_SMOKE`.
+- **Beams** are whole-pixel geometry (`BeamGeometry`): a core with a 1 px spine, two stepped glow
+  shells, and sparse sparks.
+- **Teleports** never broadcast vanilla's portal burst (`randomTeleport(..., false)`); they mark
+  themselves with `ARCANE`.
+
 Every spell's `color` is opaque signed ARGB and never a corpus stand-in (enforced). A spell with no
 designed colour takes the per-id hue its sigil already uses (`spell_sigils._stand_in`).
 

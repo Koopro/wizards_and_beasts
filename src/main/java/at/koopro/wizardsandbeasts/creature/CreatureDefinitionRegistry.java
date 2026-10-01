@@ -23,6 +23,16 @@ public final class CreatureDefinitionRegistry {
         return DEFINITIONS.get(id);
     }
 
+    /**
+     * The current definitions map itself. A reload replaces it with a new instance, so a caller that remembers
+     * which instance it read from can cache a lookup and know exactly when the cache went stale — which is what
+     * {@code GenericBeastEntity.definition()} does, because vanilla asks a creature things like
+     * {@code fireImmune()} many times per tick (documentation/PERFORMANCE_AUDIT.md).
+     */
+    public static Map<Identifier, CreatureDefinition> snapshot() {
+        return DEFINITIONS;
+    }
+
     public static Collection<CreatureDefinition> getAll() {
         return List.copyOf(DEFINITIONS.values());
     }

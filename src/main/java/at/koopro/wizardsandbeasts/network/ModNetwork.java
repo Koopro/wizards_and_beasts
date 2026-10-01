@@ -67,5 +67,7 @@ public class ModNetwork {
         at.koopro.wizardsandbeasts.network.debug.ModNetworkDebugPanel.register(registrar);
         at.koopro.wizardsandbeasts.network.armor.ModNetworkArmor.register(registrar);
         at.koopro.wizardsandbeasts.network.dummy.ModNetworkDummy.register(registrar);
+        at.koopro.wizardsandbeasts.network.admin.ModNetworkAdmin.register(registrar);
+        at.koopro.wizardsandbeasts.network.visual.ModNetworkVisual.register(registrar);
     }
 }

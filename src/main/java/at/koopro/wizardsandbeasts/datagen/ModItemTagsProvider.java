@@ -132,8 +132,6 @@ public class ModItemTagsProvider extends BlockTagCopyingItemTagProvider {
                 DarkArtefactItemRegistry.SLYTHERINS_LOCKET.get(), DarkArtefactItemRegistry.HUFFLEPUFFS_CUP.get(),
                 DarkArtefactItemRegistry.RAVENCLAWS_DIADEM.get(), DarkArtefactItemRegistry.RESURRECTION_STONE.get(),
                 DarkArtefactItemRegistry.PHILOSOPHERS_STONE.get(),
-                TrinketItemRegistry.PENSIEVE.get(), TrinketItemRegistry.TWO_WAY_MIRROR.get(),
-                TrinketItemRegistry.HERMIONES_BEADED_BAG.get(), TrinketItemRegistry.FOE_GLASS.get(),
                 TrinketItemRegistry.HAND_OF_GLORY.get(), TrinketItemRegistry.DARK_MARK_BRAND.get(),
                 TrinketItemRegistry.BLOOD_PACT_VIAL.get());
 
@@ -159,7 +157,11 @@ public class ModItemTagsProvider extends BlockTagCopyingItemTagProvider {
                 MiscItemRegistry.MARAUDERS_MAP.get(), MiscItemRegistry.DELUMINATOR.get(),
                 MiscItemRegistry.BLINDFOLD.get(), MiscItemRegistry.EARMUFFS.get(),
                 DarkArtefactItemRegistry.INVISIBILITY_CLOAK.get(),
-                DarkArtefactItemRegistry.DEATHLY_HALLOW_CLOAK.get());
+                DarkArtefactItemRegistry.DEATHLY_HALLOW_CLOAK.get(),
+                // Not Dark artefacts. They were filed under DARK_ARTS, so switching the Dark Arts off took away a
+                // memory basin, a mirror to talk through, a handbag and an Auror's Dark Detector (2026-09-29).
+                TrinketItemRegistry.PENSIEVE.get(), TrinketItemRegistry.TWO_WAY_MIRROR.get(),
+                TrinketItemRegistry.HERMIONES_BEADED_BAG.get(), TrinketItemRegistry.FOE_GLASS.get());
 
         add(Module.SCHOLARSHIP,
                 MiscItemRegistry.PARCHMENT.get(), MiscItemRegistry.INK_BOTTLE.get(),

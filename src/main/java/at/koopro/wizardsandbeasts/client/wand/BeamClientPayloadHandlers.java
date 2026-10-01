@@ -27,6 +27,10 @@ public final class BeamClientPayloadHandlers {
                 return;
             }
             BeamSettings.applyPerformancePreset(preset);
+            // The live renderer's budget. BeamSettings above only feeds the legacy debug screen; before this
+            // line the command changed nothing a player could see.
+            at.koopro.wizardsandbeasts.client.beam.BeamQuality.set(
+                    at.koopro.wizardsandbeasts.client.beam.BeamQuality.Level.valueOf(preset.name()));
         });
     }
 

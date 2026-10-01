@@ -172,7 +172,7 @@ that are not creatures, are:
 | `item_geo.py` | GeckoLib held items: `geckolib/{models,animations}/item`, `textures/item/model` (30) + Elder Wand sheet, `models/item/<id>_held.json`. **Protected owner.** |
 | `spawn_eggs.py` | 107 spawn eggs (skips the four hand-set ones, §7) |
 | `wizard_cards.py` | 24 card sheets `textures/item/card`, the blank card, card models, the card item definition |
-| `wand_skin.py` | wand sheet + glowmask |
+| `wand_model.py` | modular wand: `wand.geo.json` (handle/shaft/tip/core/ornament variants on the fixed 0-11-23-27.5 contract), `wand.png`, `wand.animation.json`; `--preview DIR` renders combination sheets, `--check` validates the geo. See `documentation/WAND_MODEL.md` |
 | `block_textures.py` | 41 block textures (unlit lights derived from vanilla, props) |
 | `location_textures.py` | 53 location-set blocks (Hogwarts, Gringotts, Ministry, …) and the one architectural gilt |
 | `wandwood_textures.py` | 63 wandwood block textures; heartwood = wand tint |
@@ -248,7 +248,6 @@ by default and names the retired scripts below.
 | `creature_gen.py`, `creature_gen_new.py`, `bestiary_placeholders.py` | Placeholder rigs, clips and bestiary shapes; `creature_gen_new` rewrites 232 files, `bestiary_placeholders` 213 portraits. |
 | `creature_behavior.py` | Rewrites temperament/damage/traits in 81 creature definitions (since tuned by hand). |
 | `canon_items.py` | Rewrites `CanonItemRegistry.java` and `en_us.json`. |
-| `wand_variants.py` | Appends variants to the frozen `wand.geo.json`. |
 | `rig_repair.py` | One-shot geometry repair; now rewrites 8 finished rigs (dragons, brooms). |
 | `map_item_model.py` | Overwrites the Marauder's Map model now owned by `item_geo.py`. |
 | `item_icons.py`, `legacy_sprites.py`, `canon_sprites.py`, `armor_item_icons.py`, `spell_source_sprites.py` | Earlier item-icon engines, superseded by `item_sprites.py`; they either write nothing (protected) or resurrect deleted/stale icons. |
@@ -330,7 +329,7 @@ From `VISUAL_STYLE_REPORT.md` §4, with how each is now enforced:
 | Dementor, Hippogriff (+coats), Basilisk, Phoenix, Kelpie (+disguise, +coats) | generators pinned to `Skin(grain="speckle")` | the pins; sync check |
 | Obscurus rig | never a bare full run | the chain in §3.2 (verified exact) or `--form-only` |
 | Bowtruckle, Cornish Pixie, Phoenix, Thestral spawn eggs | hand-set | `spawn_eggs.HAND_SET` (only `--force` repaints) |
-| Wand rig `wand.geo.json` | frozen | `wand_variants.py` not tracked; `wand_skin.py` paints only |
+| Wand rig `wand.geo.json` | only `wand_model.py` (2026-09-29: rebuilt on the V5 modular contract) | `WandModelContractTest` |
 | Parchment kit, spell sigils, item icons, item geo | only their owner | `artgen_common.PROTECTED` |
 | Wizard cards | 128 px exception | — |
 | `src/main/resources` after `runData` | never `git add -A` | datagen writes only `src/generated` now; still stage by path |

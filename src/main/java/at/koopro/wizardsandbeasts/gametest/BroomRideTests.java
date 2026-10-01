@@ -122,23 +122,37 @@ public final class BroomRideTests {
 
     private static void letGoBroomSettles(GameTestHelper helper) {
         clearTheSite(helper, 11);
-        BroomEntity broom = helper.spawn(ModEntities.BROOM.get(), new BlockPos(1, 9, 1));
-        double startY = broom.getY();
+        // An unridden broom only moves if its chunk ticks entities. Nothing guaranteed that here: the scenario
+        // passed while some neighbouring scenario's player happened to keep the chunk ticking, and measured
+        // "moved 0.0 blocks" whenever the batch layout put no player nearby. Force it, and wait, as the other
+        // entity-moving scenarios do.
+        BlockPos siteMin = new BlockPos(0, 0, 0);
+        BlockPos siteMax = new BlockPos(2, 11, 2);
+        WizardTestSupport.forceChunks(helper, siteMin, siteMax);
+        BroomEntity[] broom = new BroomEntity[1];
+        double[] startY = new double[1];
 
-        helper.runAfterDelay(SETTLE_TICKS, () -> {
-            try {
-                double fell = startY - broom.getY();
-                WizardTestSupport.check(helper, fell > 0.1,
-                        () -> "a broom nobody is riding moved " + fell + " blocks in " + SETTLE_TICKS
-                                + " ticks; it must settle rather than hang in the air");
-                WizardTestSupport.check(helper, fell < OLD_FALL_BLOCKS * 0.6,
-                        () -> "a let-go broom fell " + fell + " blocks in " + SETTLE_TICKS + " ticks, against "
-                                + OLD_FALL_BLOCKS + " for the old plank-like fall; it must drift down");
-                helper.succeed();
-            } finally {
-                broom.discard();
-            }
-        });
+        helper.startSequence()
+                .thenWaitUntil(() -> WizardTestSupport.checkChunksTick(helper, siteMin, siteMax))
+                .thenExecute(() -> {
+                    broom[0] = helper.spawn(ModEntities.BROOM.get(), new BlockPos(1, 9, 1));
+                    startY[0] = broom[0].getY();
+                })
+                .thenIdle(SETTLE_TICKS)
+                .thenExecute(() -> {
+                    try {
+                        double fell = startY[0] - broom[0].getY();
+                        WizardTestSupport.check(helper, fell > 0.1,
+                                () -> "a broom nobody is riding moved " + fell + " blocks in " + SETTLE_TICKS
+                                        + " ticks; it must settle rather than hang in the air");
+                        WizardTestSupport.check(helper, fell < OLD_FALL_BLOCKS * 0.6,
+                                () -> "a let-go broom fell " + fell + " blocks in " + SETTLE_TICKS + " ticks, against "
+                                        + OLD_FALL_BLOCKS + " for the old plank-like fall; it must drift down");
+                    } finally {
+                        broom[0].discard();
+                    }
+                })
+                .thenSucceed();
     }
 
     // -- helpers -----------------------------------------------------------------------------------

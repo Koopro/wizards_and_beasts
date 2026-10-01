@@ -5,7 +5,7 @@ import at.koopro.wizardsandbeasts.feedback.NoticeKind;
 import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 import at.koopro.wizardsandbeasts.standing.StandingAxis;
 import at.koopro.wizardsandbeasts.standing.StandingService;
-import at.koopro.wizardsandbeasts.util.PlayerScopedState;
+import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
@@ -23,17 +23,14 @@ import java.util.Map;
  * chain is: one existing seam → one dispatch → one mutation seam, with no system learning about any
  * other.
  *
- * <p>Cooldowns are per player and per deed, held in {@link PlayerScopedState} so they cannot outlive a
- * logout. They are deliberately <b>not</b> persisted: a cooldown exists to stop a spell being spammed
- * inside one session, and carrying it across a restart would mean a server reboot could silently owe a
- * player standing they had already earned.
+ * <p>Cooldowns are per player and per deed, saved on the {@code DEED_COOLDOWNS} attachment against absolute game
+ * time. They used to be held in memory only and cleared at logout, which meant a relog reset every one of them: a
+ * player could cast the Patronus, log out, log in and cast it again for another three points of standing
+ * (2026-09-29, documentation/MULTIPLAYER_AUDIT.md). Game time is monotonic across restarts, so a saved cooldown
+ * never owes anyone standing — it only stops the same deed scoring twice inside its window.
  */
 @NullMarked
 public final class DeedService {
-
-    /** Per-player map of deed id → game time at which it may next score. */
-    private static final PlayerScopedState<Map<Identifier, Long>> COOLDOWNS =
-            PlayerScopedState.create("standing_deed_cooldowns");
 
     private DeedService() {}
 
@@ -120,11 +117,7 @@ public final class DeedService {
     // ── cooldowns ──
 
     private static boolean isOnCooldown(ServerPlayer player, Identifier deedId, long now) {
-        Map<Identifier, Long> map = COOLDOWNS.get(player);
-        if (map == null) {
-            return false;
-        }
-        Long readyAt = map.get(deedId);
+        Long readyAt = player.getData(ModAttachments.DEED_COOLDOWNS.get()).get(deedId);
         return readyAt != null && now < readyAt;
     }
 
@@ -132,12 +125,19 @@ public final class DeedService {
         if (deed.cooldownSeconds() <= 0) {
             return;
         }
-        COOLDOWNS.computeIfAbsent(player.getUUID(), id -> new HashMap<>())
-                .put(deedId, now + (long) deed.cooldownSeconds() * 20L);
+        Map<Identifier, Long> next = new HashMap<>();
+        // Expired entries are dropped as the map is rewritten, so it never grows past the deeds still cooling.
+        player.getData(ModAttachments.DEED_COOLDOWNS.get()).forEach((id, readyAt) -> {
+            if (readyAt > now) {
+                next.put(id, readyAt);
+            }
+        });
+        next.put(deedId, now + (long) deed.cooldownSeconds() * 20L);
+        player.setData(ModAttachments.DEED_COOLDOWNS.get(), Map.copyOf(next));
     }
 
     /** Visible for tests and for {@code /reload}: a reload can retire a deed id, so stale keys go. */
     public static void clearCooldowns(ServerPlayer player) {
-        COOLDOWNS.remove(player);
+        player.setData(ModAttachments.DEED_COOLDOWNS.get(), Map.of());
     }
 }

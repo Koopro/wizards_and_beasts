@@ -29,7 +29,6 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
@@ -158,12 +157,16 @@ public class PocketDimensionEvents {
         // compensated 1-in-10 escape chance (same expected rate as 1-in-200 per tick).
         if (level.getGameTime() % ESCAPE_SCAN_INTERVAL_TICKS != 0) return;
 
+        // Every loaded ItemEntity in the level, read straight off the entity lookup. This was a spatial query over
+        // a world-border-sized box, and a spatial query walks the section index once per chunk column in range
+        // whether or not anything is there: about 3.75 million sorted-set iterations per level per second, which
+        // was 81% of the server thread in the perf scenario (documentation/PERFORMANCE_AUDIT.md). The border and
+        // height bounds the box expressed are kept as a predicate, so the same entities qualify.
         var border = level.getWorldBorder();
-        AABB borderBox = new AABB(border.getMinX(), -64, border.getMinZ(), border.getMaxX(), 320, border.getMaxZ());
-        List<ItemEntity> unsecured = level.getEntitiesOfClass(
-                ItemEntity.class,
-                borderBox,
-                ie -> ie.getItem().has(ModDataComponents.POCKET_CASE_ID.get())
+        List<? extends ItemEntity> unsecured = level.getEntities(
+                net.minecraft.world.level.entity.EntityTypeTest.forClass(ItemEntity.class),
+                ie -> ie.getY() >= -64 && ie.getY() <= 320 && border.isWithinBounds(ie.blockPosition())
+                        && ie.getItem().has(ModDataComponents.POCKET_CASE_ID.get())
                         && !ie.getItem().getOrDefault(ModDataComponents.POCKET_LATCH_SECURED.get(), true));
         if (unsecured.isEmpty()) return;
 

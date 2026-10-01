@@ -86,19 +86,68 @@ public abstract class Spell {
     public String getId() { return id; }
     public String getDisplayName() { return displayName; }
     public SpellCategory getCategory() { return category; }
-    public int getBaseCooldownTicks() { return baseCooldownTicks; }
-    public float getBaseDamage() { return baseDamage; }
+    /**
+     * The base cooldown casts use: the authored value, unless a server administrator has overridden it, then
+     * the global cooldown multiplier ({@link at.koopro.wizardsandbeasts.spell.tuning.SpellTuning}). Identical
+     * to the authored value when nothing is overridden.
+     */
+    public int getBaseCooldownTicks() { return at.koopro.wizardsandbeasts.spell.tuning.SpellTuning.cooldownTicks(id, baseCooldownTicks); }
+    /** The base damage casts use; authored unless overridden, then the global damage multiplier. */
+    public float getBaseDamage() { return at.koopro.wizardsandbeasts.spell.tuning.SpellTuning.damage(id, baseDamage); }
+    /** The cooldown as the spell's definition authored it, ignoring administration. For the admin panel's "default". */
+    public int getAuthoredCooldownTicks() { return baseCooldownTicks; }
+    /** The damage as the spell's definition authored it, ignoring administration. */
+    public float getAuthoredDamage() { return baseDamage; }
     public int getColor() { return color; }
     public int getBaseEffectDurationTicks() { return 0; }
     public float getProjectileSpeed() { return 1.5f; }
     public float getProjectileSpread() { return 0.0f; }
     public float getBaseKnockback() { return 0.0f; }
 
+    /**
+     * The spell's properties as casts see them. When an administrator has adjusted range (per spell or
+     * globally) this is a copy with the adjusted range, cached against the tuning version; otherwise it is the
+     * authored object itself.
+     */
     @Nullable
-    public SpellProperties getProperties() { return properties; }
+    public SpellProperties getProperties() {
+        SpellProperties authored = properties;
+        if (authored == null || authored.getRange() <= 0.0f
+                || !at.koopro.wizardsandbeasts.spell.tuning.SpellTuning.rangeAdjusted(id)) {
+            return authored;
+        }
+        long version = at.koopro.wizardsandbeasts.spell.tuning.SpellTuning.version();
+        TunedProperties cached = tunedProperties;
+        if (cached == null || cached.version != version || cached.authored != authored) {
+            cached = new TunedProperties(version, authored, authored.withRange(
+                    at.koopro.wizardsandbeasts.spell.tuning.SpellTuning.range(id, authored.getRange())));
+            tunedProperties = cached;
+        }
+        return cached.tuned;
+    }
 
+    /** The properties as authored, ignoring administration. */
+    @Nullable
+    public SpellProperties getAuthoredProperties() { return properties; }
+
+    private record TunedProperties(long version, SpellProperties authored, SpellProperties tuned) {}
+
+    private volatile @Nullable TunedProperties tunedProperties;
+
+    /** The prerequisite casts and learning check: the administrator's override when set, else the authored one. */
     public SpellRequirement getRequirement() {
+        return at.koopro.wizardsandbeasts.spell.tuning.SpellTuning.requirement(id, getAuthoredRequirement());
+    }
+
+    /** The prerequisite as authored, ignoring administration. */
+    public SpellRequirement getAuthoredRequirement() {
         return requirement != null ? requirement : SpellRequirement.NONE;
+    }
+
+    /** The learning skill the learning gate checks: the administrator's override when set, else authored. */
+    @Nullable
+    public final String getEffectiveRequiredSkillId() {
+        return at.koopro.wizardsandbeasts.spell.tuning.SpellTuning.requiredSkill(id, getRequiredSkillId());
     }
 
     // ── Helper methods for subclass overrides ────────────────────────────
@@ -155,7 +204,9 @@ public abstract class Spell {
         SoundEvent event = resolveCastSoundForPlayback();
         float proficiencyPitch = 1.0f;
         if (ModuleManager.isEnabled(Module.PROFICIENCY)) {
-            float proficiency = caster.getData(ModAttachments.SPELL_DATA.get()).getSpellProficiency(id);
+            var spellData = caster.getData(ModAttachments.SPELL_DATA.get());
+            float proficiency = at.koopro.wizardsandbeasts.spell.proficiency.SpellPractice.effective(
+                    spellData.getSpellProficiency(id), spellData.getSuccessfulHits(id));
             proficiencyPitch = 0.9f + (Math.max(0.0f, Math.min(1.0f, proficiency)) * 0.2f);
         }
         level.playSound(null, caster.blockPosition(), event,

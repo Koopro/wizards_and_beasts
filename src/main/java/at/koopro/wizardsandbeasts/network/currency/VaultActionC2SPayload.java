@@ -48,9 +48,19 @@ public record VaultActionC2SPayload(int actionOrdinal, int amount) implements Cu
 
     public static void handle(VaultActionC2SPayload pkt, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
-            if (!(ctx.player() instanceof ServerPlayer player)) return;
+            if (ctx.player() instanceof ServerPlayer player) {
+                perform(player, pkt);
+            }
+        });
+    }
+
+    /** The server's handling of one vault action, after the network hop. Public for the authority tests. */
+    public static void perform(ServerPlayer player, VaultActionC2SPayload pkt) {
+        {
             if (pkt.actionOrdinal < 0 || pkt.actionOrdinal >= Action.values().length) return;
             if (pkt.amount <= 0 || pkt.amount > MAX_TRANSACTION_AMOUNT) return;
+            // Only at the counter of the teller that checked this player's papers — see GringottsCounter.
+            if (!at.koopro.wizardsandbeasts.currency.vault.GringottsCounter.atCounter(player)) return;
 
             Action action = Action.values()[pkt.actionOrdinal];
             PlayerVaultData vault = player.getData(ModAttachments.VAULT_DATA.get());
@@ -142,9 +152,12 @@ public record VaultActionC2SPayload(int actionOrdinal, int amount) implements Cu
                     }
                 }
                 case WITHDRAW_ALL -> {
-                    long k = vault.getKnuts();
-                    long s = vault.getSickles();
-                    long g = vault.getGalleons();
+                    // Same per-transaction cap as every other verb: "all" used to hand out the whole balance and cast
+                    // it to int, so a balance past 2^31 coins wrapped to a negative stack count (or a huge one). The
+                    // rest stays in the vault for the next press; nothing is lost and nothing is minted.
+                    long k = Math.min(vault.getKnuts(), MAX_TRANSACTION_AMOUNT);
+                    long s = Math.min(vault.getSickles(), MAX_TRANSACTION_AMOUNT);
+                    long g = Math.min(vault.getGalleons(), MAX_TRANSACTION_AMOUNT);
                     if (k > 0) { vault.withdrawKnuts(k); CurrencyHelper.giveItems(player.getInventory(), CurrencyItemRegistry.KNUT.get(), (int) k); }
                     if (s > 0) { vault.withdrawSickles(s); CurrencyHelper.giveItems(player.getInventory(), CurrencyItemRegistry.SICKLE.get(), (int) s); }
                     if (g > 0) { vault.withdrawGalleons(g); CurrencyHelper.giveItems(player.getInventory(), CurrencyItemRegistry.GALLEON.get(), (int) g); }
@@ -177,7 +190,7 @@ public record VaultActionC2SPayload(int actionOrdinal, int amount) implements Cu
             GringottsOpenS2CPayload.sendToPlayer(player);
             // Purse count and standing quote, so a Dragot trade updates the counter it was made at.
             DragotQuoteS2CPayload.sendToPlayer(player);
-        });
+        }
     }
 
     public enum Action {

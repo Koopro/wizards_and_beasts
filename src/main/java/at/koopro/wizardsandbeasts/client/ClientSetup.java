@@ -50,7 +50,7 @@ public class ClientSetup {
         event.registerEntityRenderer(ModEntities.PHOENIX.get(), at.koopro.wizardsandbeasts.client.entity.PhoenixRenderer::new);
         event.registerEntityRenderer(ModEntities.AUGUREY.get(), GeoRendererHelper.simple("augurey"));
         event.registerEntityRenderer(ModEntities.MOONCALF.get(), GeoRendererHelper.simple("mooncalf"));
-        event.registerEntityRenderer(ModEntities.STREELER.get(), GeoRendererHelper.simple("streeler"));
+        event.registerEntityRenderer(ModEntities.STREELER.get(), at.koopro.wizardsandbeasts.client.entity.StreelerRenderer::new);
         event.registerEntityRenderer(ModEntities.RUNESPOOR.get(), GeoRendererHelper.simple("runespoor"));
         event.registerEntityRenderer(ModEntities.HIDEBEHIND.get(), GeoRendererHelper.simple("hidebehind"));
 
@@ -89,6 +89,10 @@ public class ClientSetup {
                         context -> new at.koopro.wizardsandbeasts.client.entity.HippogriffRenderer<>(context));
             } else if ("basilisk".equals(spec.id())) {
                 event.registerEntityRenderer(type, at.koopro.wizardsandbeasts.client.entity.BasiliskRenderer.provider());
+            } else if ("boggart".equals(spec.id())) {
+                // BoggartDread: drawn as the fear of whoever faces it (a synced Guise), or its own shadow.
+                event.registerEntityRenderer(type,
+                        at.koopro.wizardsandbeasts.client.entity.GuiseBeastRenderer.provider(spec.id()));
             } else if ("kelpie".equals(spec.id())) {
                 // LureDisguise: swaps model + texture between the tame-horse guise and the true form.
                 event.registerEntityRenderer(type,

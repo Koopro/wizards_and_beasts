@@ -1,0 +1,16 @@
+{
+  "schema": "wizards_and_beasts:admin_profile",
+  "schema_version": 1,
+  "mod_version": "",
+  "profile": {
+    "id": "default",
+    "name": "Default",
+    "description": "Every setting and module at its default: the configuration a new world starts with.",
+    "author": "Wizards & Beasts",
+    "created": 0,
+    "kind": "preset"
+  },
+  "mode": "replace",
+  "settings": {},
+  "modules": {}
+}

@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.item.broom;
 
+import at.koopro.wizardsandbeasts.broom.rules.BroomRules;
 import at.koopro.wizardsandbeasts.item.AnimatedItem;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.broom.BroomDefinition;
@@ -76,6 +77,11 @@ public class BroomItem extends Item implements AnimatedItem {
             if (BroomLicence.refuse(player, BroomDefinitionRegistry.getOrFallback(riddenId))) {
                 return InteractionResult.FAIL;
             }
+            // A broom the server has withdrawn is neither deployed nor mounted; the item is kept.
+            if (!BroomRules.enabled(riddenId)) {
+                player.displayClientMessage(Component.translatable("broom.wizards_and_beasts.withdrawn"), true);
+                return InteractionResult.FAIL;
+            }
             // A spent broom is not a slow broom, it is a broken one. The entity used to be spawned
             // with Math.max(1, remaining), which quietly handed a fully damaged broom one point of
             // durability and let it be flown -- and then broken again on the first knock.
@@ -93,7 +99,7 @@ public class BroomItem extends Item implements AnimatedItem {
                 BroomEntity nearest = nearbyBrooms.stream()
                         .min(Comparator.comparingDouble(player::distanceToSqr))
                         .orElse(null);
-                if (nearest != null) {
+                if (nearest != null && BroomRules.enabled(nearest.resolveDefinition().id())) {
                     // No lift. A broom's position is its rider's feet and its model already hovers at
                     // their hip (BroomGeometry), so mounting one where it floats seats the rider there.
                     // The old half-block lift was a position jump in one tick, which the server billed

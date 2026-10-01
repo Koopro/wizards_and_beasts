@@ -5,6 +5,7 @@ import at.koopro.wizardsandbeasts.ability.AnimagusAbilityService;
 import at.koopro.wizardsandbeasts.ability.trigger.AbilityBehaviors;
 import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialAbility;
 import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialServerLogic;
+import at.koopro.wizardsandbeasts.heritage.veela.VeelaAllure;
 import org.jspecify.annotations.NullMarked;
 
 /**
@@ -25,6 +26,8 @@ public final class MigratedAbilityBehaviors {
                 new SimpleAbilityBehavior(AnimagusAbilityService::useActive));
         AbilityBehaviors.register(AbilityIds.OBSCURIAL_FORM, ObscurialFormAbilityBehavior.INSTANCE);
         AbilityBehaviors.register(AbilityIds.VEELA_FORM, HeritageFormAbilityBehavior.VEELA);
+        AbilityBehaviors.register(AbilityIds.VEELA_ALLURE,
+                new SimpleAbilityBehavior(VeelaAllure::allure));
         AbilityBehaviors.register(AbilityIds.VAMPIRE_FORM, HeritageFormAbilityBehavior.VAMPIRE);
         AbilityBehaviors.register(AbilityIds.OBSCURIAL_STRESS_VENT,
                 new SimpleAbilityBehavior(ObscurialServerLogic::stressVent));

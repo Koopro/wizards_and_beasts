@@ -2,6 +2,8 @@ package at.koopro.wizardsandbeasts.wand.gui;
 
 import at.koopro.wizardsandbeasts.item.wand.WandBlankItem;
 import at.koopro.wizardsandbeasts.item.wand.WandCoreMaterialItem;
+import at.koopro.wizardsandbeasts.wand.rules.WandRules;
+import at.koopro.wizardsandbeasts.wand.rules.WandRulesService;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
 import at.koopro.wizardsandbeasts.registry.ModMenuTypes;
@@ -43,6 +45,8 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
     public static final int STATUS_BLANK_UNSHAPED = 2;
     public static final int STATUS_NO_RECIPE = 3;
     public static final int STATUS_BENCH_TOO_PLAIN = 4;
+    /** A recipe pairs this wood and core, but the server has withdrawn the wood, the core or the pairing. */
+    public static final int STATUS_WITHDRAWN = 5;
 
     private static final int DATA_TIER = 0;
     private static final int DATA_FLEXIBILITY = 1;
@@ -197,6 +201,11 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
             return;
         }
         WandmakingRecipe recipe = recipeOpt.get();
+        if (!WandRules.mayMake(wood, coreId)) {
+            handler.set(2, ItemResource.of(ItemStack.EMPTY), 0);
+            dataBacking[DATA_STATUS] = STATUS_WITHDRAWN;
+            return;
+        }
         if (bench.getCachedTierScore() < recipe.minimumBenchTier()) {
             handler.set(2, ItemResource.of(ItemStack.EMPTY), 0);
             dataBacking[DATA_STATUS] = STATUS_BENCH_TOO_PLAIN;
@@ -231,13 +240,7 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
         if (!(level instanceof ServerLevel serverLevel)) {
             return Optional.empty();
         }
-        for (RecipeHolder<?> holder : serverLevel.getServer().getRecipeManager().getRecipes()) {
-            if (holder.value() instanceof WandmakingRecipe r
-                    && r.woodKey().equals(wood) && r.coreKey().equals(core)) {
-                return Optional.of(r);
-            }
-        }
-        return Optional.empty();
+        return WandRulesService.recipeFor(serverLevel.getServer(), wood, core);
     }
 
     @Override

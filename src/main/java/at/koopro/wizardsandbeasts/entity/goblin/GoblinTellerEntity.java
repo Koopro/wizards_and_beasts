@@ -209,6 +209,8 @@ public class GoblinTellerEntity extends GeoEntityBase {
             if (!MinistryLicenceGate.admit(serverPlayer, LicenseType.MINISTRY_ACCESS)) {
                 return InteractionResult.FAIL;
             }
+            // The server's record of the visit: vault actions are honoured only at this counter.
+            at.koopro.wizardsandbeasts.currency.vault.GringottsCounter.admit(serverPlayer, this);
             // "The goblin bowed them through the silver doors." Fires as the vault screen opens.
             triggerAnim(ACTION_CONTROLLER, "bow");
             // Walking up to the counter is what moves the rate: a fresh roll here, and the same

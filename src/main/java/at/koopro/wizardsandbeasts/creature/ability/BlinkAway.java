@@ -40,13 +40,20 @@ public record BlinkAway(float triggerHealthFraction, double range, int cooldownT
         if (entity.getCooldown(COOLDOWN_KEY) > 0) {
             return;
         }
+        // `broadcast = false` on the teleport: `true` makes vanilla send entity event 46, 128 vanilla
+        // PORTAL particles along the trail — the magenta clouds the visual review could not place.
+        // This blink marks itself: the mod's arcane motes where it left and where it lands.
+        double fromX = entity.getX();
+        double fromY = entity.getY() + entity.getBbHeight() * 0.5;
+        double fromZ = entity.getZ();
         for (int attempt = 0; attempt < 8; attempt++) {
             double dx = (entity.getRandom().nextDouble() - 0.5) * 2.0 * range;
             double dz = (entity.getRandom().nextDouble() - 0.5) * 2.0 * range;
             double tx = entity.getX() + dx;
             double tz = entity.getZ() + dz;
             double ty = entity.getY();
-            if (entity.randomTeleport(tx, ty, tz, true)) {
+            if (entity.randomTeleport(tx, ty, tz, false)) {
+                AbilitySupport.emitAt(level, AbilitySupport.Particle.ARCANE, fromX, fromY, fromZ, 6, 0.35, 0.05);
                 AbilitySupport.emitAt(level, AbilitySupport.Particle.ARCANE,
                         entity.getX(), entity.getY() + entity.getBbHeight() * 0.5, entity.getZ(), 10, 0.4, 0.05);
                 entity.setCooldown(COOLDOWN_KEY, cooldownTicks);

@@ -79,12 +79,27 @@ public final class PlayerFormGeoRenderer extends GeoObjectRenderer<PlayerFormAni
                                  boolean attacking, boolean hurt,
                                  PoseStack poseStack, SubmitNodeCollector collector,
                                  CameraRenderState camera, int packedLight) {
+        return render(formId, playerUUID, walkSpeed, bodyYaw, false, false, attacking, hurt,
+                poseStack, collector, camera, packedLight);
+    }
+
+    /**
+     * As above, with the motion states a rig may have clips for.
+     *
+     * @param sprinting the player's sprint flag
+     * @param airborne  true while the player is off the ground (and not swimming or flying)
+     */
+    public static boolean render(String formId, UUID playerUUID, float walkSpeed, float bodyYaw,
+                                 boolean sprinting, boolean airborne,
+                                 boolean attacking, boolean hurt,
+                                 PoseStack poseStack, SubmitNodeCollector collector,
+                                 CameraRenderState camera, int packedLight) {
         PlayerFormRig rig = PlayerFormRig.forForm(formId);
         if (rig == null) {
             return false;
         }
-        PlayerFormAnimatable animatable =
-                PlayerFormAnimatable.forPlayer(playerUUID, rig, walkSpeed, attacking, hurt);
+        PlayerFormAnimatable animatable = PlayerFormAnimatable.forPlayer(playerUUID, rig, walkSpeed,
+                sprinting, airborne, attacking, hurt);
         BODY_YAW.set(bodyYaw);
         try {
             get().performRenderPass(animatable, null, poseStack, collector, camera,
@@ -106,9 +121,20 @@ public final class PlayerFormGeoRenderer extends GeoObjectRenderer<PlayerFormAni
     public static boolean render(String formId, UUID playerUUID, LivingEntityRenderState state,
                                  PoseStack poseStack, SubmitNodeCollector collector,
                                  CameraRenderState camera) {
+        return render(formId, playerUUID, state, false, false, poseStack, collector, camera);
+    }
+
+    /**
+     * As above, plus sprint and ground state, which the caller reads off the live player (the render
+     * state carries neither).
+     */
+    public static boolean render(String formId, UUID playerUUID, LivingEntityRenderState state,
+                                 boolean sprinting, boolean airborne,
+                                 PoseStack poseStack, SubmitNodeCollector collector,
+                                 CameraRenderState camera) {
         boolean attacking = state instanceof ArmedEntityRenderState armed && armed.attackTime > 0.0f;
         return render(formId, playerUUID, state.walkAnimationSpeed, state.bodyRot,
-                attacking, state.hasRedOverlay,
+                sprinting, airborne, attacking, state.hasRedOverlay,
                 poseStack, collector, camera, state.lightCoords);
     }
 

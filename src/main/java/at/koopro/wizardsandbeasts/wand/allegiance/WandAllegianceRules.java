@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.wand.allegiance;
 
 import at.koopro.wizardsandbeasts.wand.registry.WandTemperament;
+import at.koopro.wizardsandbeasts.wand.rules.WandGlobals;
 
 /**
  * The wand–wizard relationship as arithmetic: no Minecraft types, no {@code Config}, so every rule is
@@ -25,8 +26,14 @@ public final class WandAllegianceRules {
 
     /** Bond gained per successful cast before temperament. A first bond reaches loyal in a few dozen casts. */
     public static final float BASE_BOND_GROWTH = 0.004f;
-    /** Defeats of the master that win an ordinary wand, before temperament. */
-    public static final int BASE_WINS_TO_TRANSFER = 2;
+    /**
+     * Defeats of the master that win an ordinary wand, before temperament: one. Harry wins Draco's hawthorn and
+     * unicorn-hair wand, and through it the Elder Wand, in a single struggle at Malfoy Manor (<i>Deathly
+     * Hallows</i> ch. 24, 36), and Ollivander speaks of a wand "won", never of a count. It was two, which
+     * contradicted that (documentation/CANON_AUDIT.md C-3). Woods and cores Ollivander calls hard to part from
+     * their owner still add to it through {@code extra_wins}.
+     */
+    public static final int BASE_WINS_TO_TRANSFER = 1;
     /** The bond a wand holds for the wizard who has just won it: reluctant. */
     public static final float BASE_TRANSFER_BOND = 0.15f;
 
@@ -105,7 +112,7 @@ public final class WandAllegianceRules {
         if (c.darkArts() && t.darkArtsBondCost() > 0.0f) {
             return clamp01(bond - t.darkArtsBondCost());
         }
-        float growth = BASE_BOND_GROWTH * t.bondGrowth();
+        float growth = BASE_BOND_GROWTH * t.bondGrowth() * WandGlobals.current().bondGrowth();
         if (t.bondNeedsDanger() && !c.inDanger()) {
             growth = 0.0f;
         }
@@ -117,6 +124,18 @@ public final class WandAllegianceRules {
     }
 
     /**
+     * The bond after a successful cast that was not practice — the spell had already had its day's practice
+     * ({@code SpellPractice}). The wand learns its wizard as the wizard learns the spell, so a hundredth Nox in one
+     * evening teaches it nothing; a wand that resents the Dark Arts still resents every one of them.
+     */
+    public static float bondAfterRepetition(float bond, WandTemperament t, CastCircumstances c) {
+        if (c.darkArts() && t.darkArtsBondCost() > 0.0f) {
+            return clamp01(bond - t.darkArtsBondCost());
+        }
+        return bond;
+    }
+
+    /**
      * The bond after a master has left the wand unused for {@code idleTicks}. It cools slowly once the grace is
      * over and never below the edge of reluctance: neglect alone does not break a bond. Never raises it.
      */
@@ -125,12 +144,13 @@ public final class WandAllegianceRules {
             return bond;
         }
         float days = (idleTicks - NEGLECT_GRACE_TICKS) / (float) TICKS_PER_DAY;
-        return Math.max(RELUCTANT_BELOW, bond - days * NEGLECT_LOSS_PER_DAY);
+        return Math.max(RELUCTANT_BELOW, bond - days * NEGLECT_LOSS_PER_DAY * WandGlobals.current().neglectLoss());
     }
 
     /** How many defeats of its master win this wand. The Elder Wand goes with the first. */
     public static int winsToTransfer(WandTemperament t, boolean elderWand) {
-        return elderWand ? 1 : Math.max(1, BASE_WINS_TO_TRANSFER + t.extraWins());
+        // The base is the server's defeats-to-win rule (shipped: BASE_WINS_TO_TRANSFER).
+        return elderWand ? 1 : Math.max(1, WandGlobals.current().defeatsToWin() + t.extraWins());
     }
 
     /** The bond a wand holds for the wizard who has just won it. */
@@ -181,7 +201,8 @@ public final class WandAllegianceRules {
      * Secrets</i>), and in a stranger's hand for a wand that turns on a careless one (hawthorn).
      */
     public static boolean backfires(WandBondState state, WandTemperament t, float integrity) {
-        return integrity <= BROKEN_AT || (state == WandBondState.UNFAMILIAR && t.backfiresInForeignHands());
+        return integrity <= BROKEN_AT || (state == WandBondState.UNFAMILIAR && t.backfiresInForeignHands()
+                && WandGlobals.current().foreignBackfire());
     }
 
     /** Integrity left after the holder takes {@code damage} from an explosion. */

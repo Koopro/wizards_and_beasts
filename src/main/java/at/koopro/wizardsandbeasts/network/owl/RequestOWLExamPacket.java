@@ -28,7 +28,29 @@ public record RequestOWLExamPacket() implements CustomPacketPayload {
             if (!(context.player() instanceof ServerPlayer player)) return;
             PlayerOWLData current = player.getData(ModAttachments.OWL_DATA.get());
             if (current.examTaken()) return;
+            // The exam screen is opened client-side from the desk, so the server never saw the desk. Without
+            // these two checks the packet sat the exam anywhere, with the OWLS module off (2026-09-29,
+            // documentation/MULTIPLAYER_AUDIT.md).
+            if (!at.koopro.wizardsandbeasts.module.ModuleManager.isEnabled(at.koopro.wizardsandbeasts.module.Module.OWLS)
+                    || !atExaminationDesk(player)) {
+                return;
+            }
             OWLExaminationHandler.conductExam(player);
         });
+    }
+
+    /** Blocks from an examination desk within which a candidate is sitting at it. */
+    public static final int DESK_REACH = 6;
+
+    /** Whether an examination desk stands within {@link #DESK_REACH} blocks of the player. */
+    public static boolean atExaminationDesk(ServerPlayer player) {
+        net.minecraft.core.BlockPos centre = player.blockPosition();
+        for (net.minecraft.core.BlockPos pos : net.minecraft.core.BlockPos.betweenClosed(
+                centre.offset(-DESK_REACH, -DESK_REACH, -DESK_REACH), centre.offset(DESK_REACH, DESK_REACH, DESK_REACH))) {
+            if (player.level().getBlockState(pos).is(at.koopro.wizardsandbeasts.registry.ModBlocks.EXAMINATION_DESK.get())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

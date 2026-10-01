@@ -29,6 +29,12 @@
   "_dragon_note": "fire_color=design-extrapolation; fire_range=design-extrapolation (not canon). Ministry classification XXXXX (uniform). Breath ships via DragonEntity, not the FIRE_BREATH trait.",
   "abilities": [
     {
+      "_lore": "Too strong and too magical to be knocked out by a single Stunner: about half a dozen wizards at a time (Goblet of Fire ch. 19). Enchantments only; no damage heal-back (CANON_AUDIT C-12).",
+      "type": "spell_resist",
+      "resist_fraction": 0.83,
+      "damage_fraction": 0.0
+    },
+    {
       "type": "enrage",
       "health_fraction": 0.4,
       "speed_amplifier": 1,

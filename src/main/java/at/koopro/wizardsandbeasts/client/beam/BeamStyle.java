@@ -24,7 +24,18 @@ public record BeamStyle(
         float glowOpacity,
         int bloomLayers,
         float spin,
-        boolean additive) {
+        boolean additive,
+        float sparkDensity) {
+
+    /** The spark share the renderer shipped with: 96 of every 256 candidates lit. */
+    public static final float DEFAULT_SPARK_DENSITY = 0.375f;
+
+    /** The shape every caller used before sparks became a style value. */
+    public BeamStyle(float width, float height, int coreColor, int glowColor, float coreOpacity, float glowOpacity,
+                     int bloomLayers, float spin, boolean additive) {
+        this(width, height, coreColor, glowColor, coreOpacity, glowOpacity, bloomLayers, spin, additive,
+                DEFAULT_SPARK_DENSITY);
+    }
 
     public static final Codec<BeamStyle> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.FLOAT.optionalFieldOf("width", 2.0f).forGetter(BeamStyle::width),
@@ -35,8 +46,23 @@ public record BeamStyle(
             Codec.floatRange(0f, 1f).optionalFieldOf("glow_opacity", 0.55f).forGetter(BeamStyle::glowOpacity),
             Codec.intRange(0, 8).optionalFieldOf("bloom_layers", 3).forGetter(BeamStyle::bloomLayers),
             Codec.FLOAT.optionalFieldOf("spin", 0.0f).forGetter(BeamStyle::spin),
-            Codec.BOOL.optionalFieldOf("additive", true).forGetter(BeamStyle::additive)
+            Codec.BOOL.optionalFieldOf("additive", true).forGetter(BeamStyle::additive),
+            Codec.floatRange(0f, 1f).optionalFieldOf("spark_density", DEFAULT_SPARK_DENSITY)
+                    .forGetter(BeamStyle::sparkDensity)
     ).apply(instance, BeamStyle::new));
+
+    /**
+     * This style with both opacities scaled by {@code factor} (0..1) — how a beam fades in and out. Under additive
+     * blending opacity is brightness, so a fade dims the light rather than thinning the rod.
+     */
+    public BeamStyle withOpacityScale(float factor) {
+        if (factor >= 1f) {
+            return this;
+        }
+        float f = Math.max(0f, factor);
+        return new BeamStyle(width, height, coreColor, glowColor, coreOpacity * f, glowOpacity * f, bloomLayers, spin,
+                additive, sparkDensity);
+    }
 
     /** Bright, wide, well-bloomed additive beam. White core, coloured glow. */
     public static BeamStyle laser(int glowColor) {

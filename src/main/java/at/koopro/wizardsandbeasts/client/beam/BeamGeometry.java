@@ -61,19 +61,85 @@ public final class BeamGeometry {
             m.rotate(Axis.YP.rotationDegrees(((ticks + partialTick) * style.spin()) % 360f));
         }
 
-        float halfW = style.width() * PX * 0.5f;
-        float halfH = style.height() * PX * 0.5f;
+        // Everything below sits on the texel grid (VISUAL_STYLE_GUIDE §2, §7): whole-pixel sizes,
+        // flat tones, no sub-pixel falloff. The first renderer grew each bloom shell by half a pixel
+        // at half the alpha, which drew a smooth anti-aliased glow — the one soft VFX left beside
+        // the mod's crisp particles. Three layers now, each a stepped read:
+        int wPx = Math.max(1, Math.round(style.width()));
+        int hPx = Math.max(1, Math.round(style.height()));
+        float halfW = wPx * PX * 0.5f;
+        float halfH = hPx * PX * 0.5f;
         AABB box = new AABB(-halfW, 0, -halfH, halfW, length, halfH);
 
+        // CORE — the solid rod, plus a one-pixel spine in the lit tone when the rod is wide enough
+        // to carry one, so the centre reads as structure and not as a flat bar.
         if (style.coreOpacity() > 0f) {
             emitBox(m, consumer, box, style.coreColor(), style.coreOpacity());
+            if (wPx >= 2 && hPx >= 2) {
+                AABB spine = new AABB(-PX * 0.5f, 0, -PX * 0.5f, PX * 0.5f, length, PX * 0.5f);
+                emitBox(m, consumer, spine, mix(style.coreColor(), 0xFFFFFF, 0.6f), style.coreOpacity());
+            }
         }
-        // Start at 1, never 0: Palladium's 1F/i/2 at i=0 is Float.Infinity, which clamps to a fully
-        // opaque first glow shell. Each layer is 0.5px wider and half as bright as the previous.
-        for (int i = 1; i <= style.bloomLayers(); i++) {
-            emitBox(m, consumer, box.inflate(i * 0.5f * PX), style.glowColor(),
-                    style.glowOpacity() / (i * 2f));
+
+        // INNER GLOW — shells one whole pixel apart, each a flat step of a ramp that runs from the
+        // core tone out to the glow tone, with stepped (not halving) opacity.
+        int shells = Math.min(style.bloomLayers(), SHELL_STEPS.length);
+        for (int i = 1; i <= shells; i++) {
+            float t = shells == 1 ? 1f : (i - 1) / (float) (shells - 1);
+            int tone = mix(mix(style.coreColor(), style.glowColor(), 0.5f), style.glowColor(), t);
+            emitBox(m, consumer, box.inflate(i * PX), tone, style.glowOpacity() * SHELL_STEPS[i - 1]);
         }
+
+        // OUTER GLOW — sparse single pixels just outside the shells, on the four faces of the grid,
+        // re-rolled every two ticks so they crawl along the beam. Transparency here is sparseness,
+        // not a gradient: each spark is a whole pixel at one opacity. The share lit is the style's
+        // sparkDensity out of 256 (0.375 → 96, the value this renderer shipped with).
+        int sparkChance = Math.round(Mth.clamp(style.sparkDensity(), 0f, 1f) * 256f);
+        if (style.glowOpacity() > 0f && sparkChance > 0) {
+            float reach = (Math.max(wPx, hPx) * 0.5f + shells + 1) * PX;
+            int seed = Float.floatToIntBits((float) from.x) * 31 + Float.floatToIntBits((float) from.z) * 17
+                    + Float.floatToIntBits((float) from.y);
+            int bucket = ticks / 2;
+            int steps = (int) (length / (SPARK_SPACING * PX));
+            for (int k = 0; k < steps; k++) {
+                int h = hash(seed, k, bucket);
+                if ((h & 0xFF) >= sparkChance) {
+                    continue;
+                }
+                float y = (k * SPARK_SPACING + ((h >>> 8) % SPARK_SPACING)) * PX;
+                float side = ((h >>> 12) & 1) == 0 ? reach : -reach;
+                boolean onX = ((h >>> 13) & 1) == 0;
+                float x = onX ? side : 0f;
+                float z = onX ? 0f : side;
+                AABB spark = new AABB(x - PX * 0.5f, y, z - PX * 0.5f, x + PX * 0.5f, y + PX, z + PX * 0.5f);
+                emitBox(m, consumer, spark, mix(style.glowColor(), 0xFFFFFF, 0.35f),
+                        style.glowOpacity() * SPARK_OPACITY);
+            }
+        }
+    }
+
+    /**
+     * Inner-glow opacity per shell, stepped: a bright band, then a faint edge. Two, not three: on
+     * whole pixels a third shell grew a laser to half a block thick.
+     */
+    private static final float[] SHELL_STEPS = {0.65f, 0.28f};
+    /** One spark candidate per this many pixels of beam. */
+    private static final int SPARK_SPACING = 3;
+    private static final float SPARK_OPACITY = 1.0f;
+
+    private static int hash(int seed, int k, int bucket) {
+        int h = seed * 0x9E3779B1 ^ k * 0x85EBCA77 ^ bucket * 0xC2B2AE3D;
+        h ^= h >>> 15;
+        h *= 0x2545F491;
+        h ^= h >>> 13;
+        return h;
+    }
+
+    private static int mix(int a, int b, float t) {
+        int r = Math.round(((a >> 16) & 0xFF) + (((b >> 16) & 0xFF) - ((a >> 16) & 0xFF)) * t);
+        int g = Math.round(((a >> 8) & 0xFF) + (((b >> 8) & 0xFF) - ((a >> 8) & 0xFF)) * t);
+        int bl = Math.round((a & 0xFF) + ((b & 0xFF) - (a & 0xFF)) * t);
+        return (r << 16) | (g << 8) | bl;
     }
 
     /**

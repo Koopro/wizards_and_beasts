@@ -1,0 +1,25 @@
+{
+  "schema": "wizards_and_beasts:admin_profile",
+  "schema_version": 1,
+  "mod_version": "",
+  "profile": {
+    "id": "hardcore",
+    "name": "Hardcore",
+    "description": "Magic bites: stronger spells both ways, harsher splinching and brewing, doubled fines, the Ministry watching.",
+    "author": "Wizards & Beasts",
+    "created": 0,
+    "kind": "preset"
+  },
+  "mode": "replace",
+  "settings": {
+    "wizards_and_beasts:spell_damage_multiplier": "1.5",
+    "wizards_and_beasts:enforce_spell_requirements": "true",
+    "wizards_and_beasts:brew_failure_multiplier": "1.5",
+    "wizards_and_beasts:ministry_fine_scale_percent": "200",
+    "wizards_and_beasts:floo_misfire_chance_percent": "20",
+    "wizards_and_beasts:apparition_splinch_severity_percent": "150"
+  },
+  "modules": {
+    "ministry": "enabled"
+  }
+}

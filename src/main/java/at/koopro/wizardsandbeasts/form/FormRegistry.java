@@ -86,8 +86,9 @@ public final class FormRegistry {
         register(form("animagus_dog", "Animagus (Dog)", ModelType.QUADRUPED,
                 "entity/form/animagus_dog", "animagus_dog", EnumSet.of(RenderFlag.TAIL_LAYER)));
         // STAG, not QUADRUPED: QUADRUPED renders the centaur body, so a stag Animagus came out
-        // horse-bodied. This is also the one Animagus form with no vanilla analogue, so it is the
-        // only one whose declared texture is actually sampled — see the comment on the constant.
+        // horse-bodied. This is also the one Animagus form with no vanilla analogue, so it draws
+        // its own GeckoLib rig (`PlayerFormRig`, asset `animagus_stag`) and, like the other rigged
+        // forms, takes its skin from the rig rather than from the path declared here.
         register(form("animagus_stag", "Animagus (Stag)", ModelType.STAG,
                 "entity/form/animagus_stag", "animagus_stag", EnumSet.of(RenderFlag.TAIL_LAYER)));
         register(form("animagus_hawk", "Animagus (Hawk)", ModelType.FLYING,

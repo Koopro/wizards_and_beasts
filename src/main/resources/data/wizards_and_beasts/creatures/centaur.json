@@ -24,6 +24,16 @@
       "damage": 4.0,
       "cooldown_ticks": 50,
       "particle": "crit"
+    },
+    {
+      "type": "star_reading",
+      "speak_radius": 12.0,
+      "danger_radius": 48.0,
+      "cooldown_ticks": 2400
+    },
+    {
+      "type": "forest_keeper",
+      "grudge_ticks": 1200
     }
   ],
   "clips": [

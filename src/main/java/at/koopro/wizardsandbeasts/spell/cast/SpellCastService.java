@@ -134,6 +134,8 @@ public final class SpellCastService {
                         rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.UNKNOWN_SPELL, activeSpellId));
                 case SPELL_NOT_IMPLEMENTED ->
                         rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.SPELL_NOT_IMPLEMENTED, spellId));
+                case SPELL_DISABLED ->
+                        rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.SPELL_DISABLED, spellId));
                 case SPELL_NOT_KNOWN ->
                         rejectWithHumanStress(player, SpellRejectCodes.withDetail(SpellRejectCodes.SPELL_NOT_KNOWN, spellId));
                 case OBSCURIAL_ABILITY_INPUT ->
@@ -254,7 +256,10 @@ public final class SpellCastService {
         at.koopro.wizardsandbeasts.corruption.UnforgivableToll.onCast(player, spellId);
         // The Trace: not a detection. The cast becomes an incident only if someone — the Trace on an underage
         // wizard, a Muggle, an official — will hear of it, or if it is dark enough for a wand examination.
-        at.koopro.wizardsandbeasts.ministry.trace.MinistryTrace.onSuccessfulCast(player, spellId, spell.getCategory());
+        // Unforgivables are filed where they land (MinistryTrace.onUnforgivableUse): the crime depends on the victim.
+        if (!at.koopro.wizardsandbeasts.ministry.trace.MinistryTrace.isUnforgivable(spellId, spell.getCategory())) {
+            at.koopro.wizardsandbeasts.ministry.trace.MinistryTrace.onSuccessfulCast(player, spellId, spell.getCategory());
+        }
         // Magical standing: what a wizard repeatedly chooses to cast is the clearest statement they
         // make about themselves. Returns immediately unless a datapack authored a spell_cast deed.
         at.koopro.wizardsandbeasts.standing.deed.DeedService.onSpellCast(player, spellId);
@@ -282,6 +287,7 @@ public final class SpellCastService {
                 activeSpellId != null,
                 spell != null,
                 spell == null || spell.isImplemented(),
+                spell == null || at.koopro.wizardsandbeasts.spell.tuning.SpellAvailability.castAllowed(spell),
                 spell != null && data.knowsSpell(spellId),
                 spell != null && ObscurialRules.isObscurialAbility(spell),
                 spell == null || !Config.enforceSpellRequirements || spell.getRequirement().isMet(player, data),

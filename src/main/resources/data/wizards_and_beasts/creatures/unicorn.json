@@ -57,18 +57,6 @@
       "type": "slayer_curse",
       "flag": "unicorn_slayer",
       "corruption": 15.0,
-      "effects": [
-        {
-          "effect": "minecraft:weakness",
-          "amplifier": 0,
-          "duration_ticks": 12000
-        },
-        {
-          "effect": "minecraft:unluck",
-          "amplifier": 1,
-          "duration_ticks": 24000
-        }
-      ],
       "message": "creature.wizards_and_beasts.unicorn.slain"
     }
   ],

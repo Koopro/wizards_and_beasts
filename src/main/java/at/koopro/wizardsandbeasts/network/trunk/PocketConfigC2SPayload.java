@@ -23,6 +23,9 @@ import java.util.UUID;
 public record PocketConfigC2SPayload(BlockPos configuratorPos, int radius, String biomeKey)
         implements CustomPacketPayload {
 
+    /** How far from the configurator a player may stand and still be using it. */
+    public static final double CONFIGURATOR_REACH = 8.0;
+
     public static final Type<PocketConfigC2SPayload> TYPE = new Type<>(
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "pocket_config_c2s"));
 
@@ -46,6 +49,13 @@ public record PocketConfigC2SPayload(BlockPos configuratorPos, int radius, Strin
         ctx.enqueueWork(() -> {
             if (!(ctx.player() instanceof ServerPlayer player)) return;
             ServerLevel level = player.level();
+            // Reach and loaded-ness first. The position is the client's: looking it up unchecked let a packet
+            // load (or generate) any chunk in the world, and reconfigure an owned pocket from anywhere in it.
+            if (!level.isLoaded(packet.configuratorPos())
+                    || player.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(packet.configuratorPos()))
+                    > CONFIGURATOR_REACH * CONFIGURATOR_REACH) {
+                return;
+            }
             if (!(level.getBlockEntity(packet.configuratorPos()) instanceof ExpansionFocusBlockEntity be)) return;
             UUID pocketId = be.getPocketId();
             if (pocketId == null) return;

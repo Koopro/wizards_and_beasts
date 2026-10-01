@@ -10,15 +10,17 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 /**
- * Drives the Hand of Glory: while a player holds a <em>lit</em> Hand of Glory, the holder
- * receives night vision and every other player within {@link #BLIND_RADIUS} is blinded —
- * the canonical "gives light only to the one who holds it" behaviour.
+ * Drives the Hand of Glory: "Insert a candle and it gives light only to the holder" (<i>Chamber of Secrets</i>
+ * ch. 4). While a player holds a <em>lit</em> Hand, the holder sees in the dark — night vision, and any darkness laid
+ * on them (Peruvian Instant Darkness Powder's blindness, a Warden's darkness) is lifted, which is how Draco leads the
+ * Death Eaters through the powder in <i>Half-Blood Prince</i>. Nobody else is affected: the light is simply not
+ * theirs to see. It used to blind every other player within sixteen blocks, which canon never says and which made a
+ * thief's candle an area weapon (documentation/CANON_AUDIT.md C-7).
  * <p>
  * Effects are short-lived and refreshed each {@link #REFRESH_INTERVAL} ticks so they end
  * promptly once the candle is snuffed, the item is stowed, or the holder dies.
@@ -30,25 +32,21 @@ public final class HandOfGloryTickHandler {
     private static final int REFRESH_INTERVAL = 10;
     /** Slightly longer than the refresh interval so effects never visibly flicker. */
     private static final int EFFECT_DURATION = 30;
-    private static final double BLIND_RADIUS = 16.0;
 
     private HandOfGloryTickHandler() {}
 
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
         if (!ModuleManager.isEnabled(Module.DARK_ARTS)) return;
-        if (!(event.getEntity() instanceof ServerPlayer holder) || !(holder.level() instanceof ServerLevel level)) {
+        if (!(event.getEntity() instanceof ServerPlayer holder) || !(holder.level() instanceof ServerLevel)) {
             return;
         }
         if (holder.tickCount % REFRESH_INTERVAL != 0) return;
         if (!isHoldingLitHand(holder)) return;
 
         holder.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, EFFECT_DURATION, 0, true, false, false));
-
-        AABB area = holder.getBoundingBox().inflate(BLIND_RADIUS);
-        for (ServerPlayer other : level.getEntitiesOfClass(ServerPlayer.class, area, p -> p != holder)) {
-            other.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, EFFECT_DURATION, 0, true, false, true));
-        }
+        holder.removeEffect(MobEffects.BLINDNESS);
+        holder.removeEffect(MobEffects.DARKNESS);
     }
 
     private static boolean isHoldingLitHand(ServerPlayer player) {

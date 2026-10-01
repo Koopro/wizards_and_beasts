@@ -27,9 +27,27 @@ public final class AnimagusForms {
     public static final List<String> BEAST_KEYS = List.of(
             "cat", "dog", "stag", "hawk", "hare", "beetle");
 
-    /** The form a freshly-registered Animagus defaults to until they choose otherwise. */
+    /** The first selectable form: a fallback for tooling, never what a player is given. */
     public static String defaultFormId() {
         return IDS.get(0);
+    }
+
+    /**
+     * The one animal this witch or wizard becomes. An Animagus does not choose: the form is who they are —
+     * McGonagall's cat, Sirius's dog, Pettigrew's rat, Skeeter's beetle — and it never changes. Drawn once from a
+     * stable seed of the character's identity, among the forms that have a datapack definition (so the body it
+     * gives has real physics), falling back to every selectable form if none do.
+     *
+     * <p>Every new Animagus used to become a cat, and could pick another by command
+     * (documentation/CANON_AUDIT.md C-4). Choosing is now an operator tool only.
+     */
+    public static String innateFormId(java.util.UUID characterId) {
+        List<String> defined = IDS.stream()
+                .filter(id -> at.koopro.wizardsandbeasts.animagus.AnimagusFormBinding.resolve(id).isPresent())
+                .toList();
+        List<String> pool = defined.isEmpty() ? IDS : defined;
+        long seed = characterId.getLeastSignificantBits() ^ Long.rotateLeft(characterId.getMostSignificantBits(), 29);
+        return pool.get(new java.util.Random(seed).nextInt(pool.size()));
     }
 
     public static boolean isAnimagusForm(@Nullable String formId) {

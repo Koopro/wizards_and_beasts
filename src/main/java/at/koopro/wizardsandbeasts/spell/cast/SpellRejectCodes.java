@@ -19,6 +19,12 @@ public final class SpellRejectCodes {
      * exists, is spelled correctly, and simply does not work yet for anybody.
      */
     public static final String SPELL_NOT_IMPLEMENTED = "spell_not_implemented";
+    /**
+     * A server administrator has withdrawn the spell — switched it off individually, or refused its whole legal
+     * class (the Unforgivables). Like {@link #SPELL_NOT_IMPLEMENTED} a property of the spell on this server,
+     * not of the caster, so nothing the player does will change it.
+     */
+    public static final String SPELL_DISABLED = "spell_disabled";
     public static final String SPELL_NOT_KNOWN = "spell_not_known";
     public static final String ABILITY_REQUIRES_ABILITY_INPUT = "ability_requires_ability_input";
     public static final String REQUIREMENTS_UNMET = "requirements_unmet";
@@ -114,6 +120,8 @@ public final class SpellRejectCodes {
     public static final String ABILITY_COOLDOWN_ACTIVE = "ability_cooldown_active";
     public static final String ABILITY_REQUIREMENTS_UNMET = "ability_requirements_unmet";
     public static final String ABILITY_EXECUTE_FAILED = "ability_execute_failed";
+    /** The ability's spell is withdrawn by a server administrator; see {@link #SPELL_DISABLED}. */
+    public static final String ABILITY_DISABLED = "ability_disabled";
 
     /**
      * Reasons recorded on wand spell release / {@link at.koopro.wizardsandbeasts.spell.cast.SpellCastService}
@@ -125,6 +133,7 @@ public final class SpellRejectCodes {
             NO_ACTIVE_SPELL,
             UNKNOWN_SPELL,
             SPELL_NOT_IMPLEMENTED,
+            SPELL_DISABLED,
             SPELL_NOT_KNOWN,
             ABILITY_REQUIRES_ABILITY_INPUT,
             REQUIREMENTS_UNMET,
@@ -153,7 +162,8 @@ public final class SpellRejectCodes {
             ABILITY_SPELL_MISSING,
             ABILITY_COOLDOWN_ACTIVE,
             ABILITY_REQUIREMENTS_UNMET,
-            ABILITY_EXECUTE_FAILED);
+            ABILITY_EXECUTE_FAILED,
+            ABILITY_DISABLED);
 
     /**
      * One distinct lang key per reject code — the whole player-facing vocabulary of refusal.
@@ -174,6 +184,7 @@ public final class SpellRejectCodes {
             Map.entry(NO_ACTIVE_SPELL, "wandcraft.cast.reject.no_active_spell"),
             Map.entry(UNKNOWN_SPELL, "wandcraft.cast.reject.unknown_spell"),
             Map.entry(SPELL_NOT_IMPLEMENTED, "wandcraft.cast.reject.not_implemented"),
+            Map.entry(SPELL_DISABLED, "wandcraft.cast.reject.disabled"),
             Map.entry(SPELL_NOT_KNOWN, "wandcraft.cast.reject.not_known"),
             Map.entry(COOLDOWN_ACTIVE, "wandcraft.cast.reject.cooldown"),
             Map.entry(WAND_NOT_BONDED, "wandcraft.cast.requires_bond"),
@@ -196,7 +207,8 @@ public final class SpellRejectCodes {
             Map.entry(ABILITY_SPELL_MISSING, "wandcraft.ability.reject.spell_missing"),
             Map.entry(ABILITY_COOLDOWN_ACTIVE, "wandcraft.ability.reject.cooldown"),
             Map.entry(ABILITY_REQUIREMENTS_UNMET, "wandcraft.ability.reject.requirements"),
-            Map.entry(ABILITY_EXECUTE_FAILED, "wandcraft.ability.reject.execute_failed"));
+            Map.entry(ABILITY_EXECUTE_FAILED, "wandcraft.ability.reject.execute_failed"),
+            Map.entry(ABILITY_DISABLED, "wandcraft.ability.reject.disabled"));
 
     /**
      * The prefixed guard codes, keyed by suffix. Same contract as {@link #REJECT_MESSAGE_KEYS} — one

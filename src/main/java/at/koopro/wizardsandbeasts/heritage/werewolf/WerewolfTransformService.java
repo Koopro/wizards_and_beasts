@@ -10,7 +10,9 @@ import at.koopro.wizardsandbeasts.form.TransitionManager;
 import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
 import at.koopro.wizardsandbeasts.heritage.TransformationState;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
+import at.koopro.wizardsandbeasts.particle.MagicSmoke;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
+import at.koopro.wizardsandbeasts.spell.core.MagicColours;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -331,8 +333,8 @@ public final class WerewolfTransformService {
     private static void playChangeOnset(ServerPlayer player, ServerLevel level) {
         level.playSound(null, player.blockPosition(), ModSounds.WEREWOLF_TRANSFORM.get(),
                 SoundSource.PLAYERS, 1.0f, 0.8f);
-        level.sendParticles(ParticleTypes.LARGE_SMOKE, player.getX(), player.getY() + 1.0, player.getZ(),
-                30, 0.4, 0.8, 0.4, 0.02);
+        MagicSmoke.burst(level, player.getX(), player.getY() + 1.0, player.getZ(), MagicColours.DARK_MAGIC,
+                12, 0.4, 0.8);
         level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, player.getX(), player.getY() + 1.0, player.getZ(),
                 12, 0.4, 0.6, 0.4, 0.05);
     }

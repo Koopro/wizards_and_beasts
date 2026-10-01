@@ -23,6 +23,28 @@ class SpellCastGateTest {
         assertNull(SpellCastGate.evaluate(allClear()));
     }
 
+    /** The 12-argument form, with {@code spellEnabled} as the fourth input. */
+    private static Inputs withEnabled(boolean implemented, boolean enabled, boolean known, boolean requirementMet,
+                                      boolean onCooldown) {
+        return new Inputs(true, true, implemented, enabled, known, false, requirementMet, false, false, false,
+                onCooldown, false);
+    }
+
+    @Test
+    void aDisabledSpellIsRefusedBeforeAnythingAboutTheCaster() {
+        assertEquals(SpellCastGate.SPELL_DISABLED, SpellCastGate.evaluate(withEnabled(true, false, true, true, false)));
+        // Outranks the caster-side gates: unknown, requirement, cooldown.
+        assertEquals(SpellCastGate.SPELL_DISABLED, SpellCastGate.evaluate(withEnabled(true, false, false, false, true)));
+        // …but not the other spell-side fact that comes first: an unwritten spell.
+        assertEquals(SpellCastGate.SPELL_NOT_IMPLEMENTED, SpellCastGate.evaluate(withEnabled(false, false, true, true, false)));
+        assertNull(SpellCastGate.evaluate(withEnabled(true, true, true, true, false)));
+    }
+
+    @Test
+    void theOldElevenArgumentFormMeansEnabled() {
+        assertEquals(allClear(), withEnabled(true, true, true, true, false));
+    }
+
     @Test
     void eachGateFiresAtItsPosition() {
         assertEquals(SpellCastGate.NO_ACTIVE_SPELL,

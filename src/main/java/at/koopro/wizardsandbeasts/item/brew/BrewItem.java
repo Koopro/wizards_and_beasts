@@ -110,6 +110,12 @@ public class BrewItem extends ConsumedItem {
                     Component.translatable("brew.wizards_and_beasts.bottle_empty"), true);
             return;
         }
+        // A brew an administrator disabled does nothing when drunk, and the bottle is kept: disabling a brew
+        // withdraws it, it does not destroy what players already hold. Checked on the server's registry side.
+        if (!level.isClientSide() && !at.koopro.wizardsandbeasts.brew.tuning.BrewTuning.enabled(brew.id())) {
+            player.displayClientMessage(Component.translatable("brew.wizards_and_beasts.brew_disabled"), true);
+            return;
+        }
 
         float potency = (player instanceof ServerPlayer serverPlayer)
                 ? BrewPotency.multiplierFor(serverPlayer)

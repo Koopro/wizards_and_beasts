@@ -193,6 +193,8 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
                     Component.translatable("wandcraft.bench.blank_unshaped");
             case WandmakersBenchMenu.STATUS_NO_RECIPE ->
                     Component.translatable("wandcraft.bench.no_recipe");
+            case WandmakersBenchMenu.STATUS_WITHDRAWN ->
+                    Component.translatable("wandcraft.bench.status.withdrawn");
             case WandmakersBenchMenu.STATUS_BENCH_TOO_PLAIN ->
                     Component.translatable("wandcraft.bench.tier_too_low",
                             menu.getRequiredTierScaled() / 100.0f, menu.getTierScoreScaled() / 100.0f);

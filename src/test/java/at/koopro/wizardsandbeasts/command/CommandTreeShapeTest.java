@@ -97,6 +97,33 @@ class CommandTreeShapeTest {
         assertPath("beast", "niffler", "empty_pouch");  // was: bestiary niffler pouchempty
 
         assertPath("admin", "module", "setting");
+        assertPath("admin", "panel");                   // opens the Control Center
+        assertPath("admin", "config", "set");           // same mutation API as the panel
+        assertPath("admin", "config", "reset_all", "confirm");
+        assertPath("admin", "config", "undo");
+        assertPath("admin", "config", "confirm");        // applies a held dangerous change
+        assertPath("admin", "profile", "apply");         // profiles: preview, then apply <id> confirm
+        assertPath("admin", "profile", "revert_group");
+        assertPath("admin", "profile", "import");
+        assertPath("admin", "players", "log");           // players: read-only from the console
+        assertPath("admin", "players", "inspect");
+        assertPath("admin", "spell", "set");             // per-spell values, same service
+        assertPath("admin", "spell", "disable");
+        assertPath("admin", "spell", "test");
+        assertPath("admin", "heritage", "inspect");      // heritage player tools, same service as the panel
+        assertPath("admin", "heritage", "assign");
+        assertPath("admin", "heritage", "reset_onboarding");
+        assertPath("admin", "creature", "info");          // Creature Lab, same service as the panel
+        assertPath("admin", "creature", "spawn");
+        assertPath("admin", "creature", "cleanup");
+        assertPath("admin", "brew", "list");              // Brewing section; edits are admin config set
+        assertPath("admin", "brew", "info");
+        assertPath("admin", "wand", "woods");             // Wands section; withdrawals are admin config set
+        assertPath("admin", "wand", "cores");
+        assertPath("admin", "wand", "preview");
+        assertPath("admin", "wand", "give");
+        assertPath("admin", "broom", "list");             // Travel section; broom values are admin config set
+        assertPath("admin", "broom", "info");
 
         assertPath("debug", "pose", "cast");            // was: /wandb pose cast
         assertPath("debug", "morph");                   // was: debug morph debug

@@ -46,6 +46,33 @@ public final class WandBeamChannelLogic {
 
     private WandBeamChannelLogic() {}
 
+    /** One running channel, as diagnostics show it. */
+    public record ChannelView(java.util.UUID player, @org.jspecify.annotations.Nullable String spellId, int beamTicks,
+                              boolean hasTarget) {}
+
+    /** Ticks between target scans in effect now (the setting shifted by the performance profile). */
+    public static int scanIntervalTicks() {
+        return WandBeamSpellHandlers.getTargetScanIntervalTicks();
+    }
+
+    /** Ticks between effect applications in effect now. */
+    public static int effectIntervalTicks() {
+        return WandBeamSpellHandlers.getChannelEffectIntervalTicks();
+    }
+
+    /** How many beams are being channelled right now. */
+    public static int channelCount() {
+        return SESSIONS.size();
+    }
+
+    /** Every running channel, copied out; called on demand by the Debug section, never per tick. */
+    public static java.util.List<ChannelView> channels() {
+        java.util.List<ChannelView> out = new java.util.ArrayList<>();
+        SESSIONS.view().forEach((player, session) -> out.add(new ChannelView(player, session.spellId, session.beamTicks,
+                session.cachedTarget != null)));
+        return out;
+    }
+
     public static void tick(ServerPlayer player, ItemStack wandStack) {
         if (!(player.level() instanceof ServerLevel level)) return;
         if (!(wandStack.getItem() instanceof WandItem)) {

@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.module.command;
 
 import at.koopro.wizardsandbeasts.module.Module;
+import at.koopro.wizardsandbeasts.module.ModuleDependencies;
 import at.koopro.wizardsandbeasts.module.ModuleIds;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.module.ModuleState;
@@ -17,6 +18,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.NullMarked;
 
@@ -56,7 +58,12 @@ public final class ModuleCommands {
                                                         .map(ModuleState::getSerializedName), b))
                                         .executes(ctx -> setState(ctx.getSource(),
                                                 StringArgumentType.getString(ctx, "module"),
-                                                StringArgumentType.getString(ctx, "state"))))))
+                                                StringArgumentType.getString(ctx, "state"), false))
+                                        // Needed only when closing a module takes dependants with it.
+                                        .then(Commands.literal("confirm")
+                                                .executes(ctx -> setState(ctx.getSource(),
+                                                        StringArgumentType.getString(ctx, "module"),
+                                                        StringArgumentType.getString(ctx, "state"), true))))))
 
                 .then(Commands.literal("setting")
                         .then(Commands.argument("module", StringArgumentType.word())
@@ -130,7 +137,7 @@ public final class ModuleCommands {
         return 1;
     }
 
-    private static int setState(CommandSourceStack source, String rawModule, String rawState) {
+    private static int setState(CommandSourceStack source, String rawModule, String rawState, boolean confirmed) {
         Module module = ModuleIds.parse(rawModule);
         if (module == null) {
             source.sendFailure(Component.literal("Unknown module: " + rawModule).withStyle(ChatFormatting.RED));
@@ -142,11 +149,42 @@ public final class ModuleCommands {
                     + " (disabled, enabled, preview, coming_soon).").withStyle(ChatFormatting.RED));
             return 0;
         }
-        ModuleStateService.Result result = ModuleStateService.setState(source.getServer(), module, state);
-        return report(source, result, () -> Component.literal("Module ").withStyle(ChatFormatting.GRAY)
+        // Closing a module that others require takes them with it. Say so and wait for `confirm`, so a command can
+        // never break a dependant silently.
+        ModuleDependencies.Check preview = ModuleDependencies.check(ModuleManager.snapshot(), module, state);
+        if (preview.allowed() && !preview.cascade().isEmpty() && !confirmed) {
+            MutableComponent warning = Component.empty();
+            for (ModuleDependencies.Edge edge : ModuleDependencies.dependantsOf(module)) {
+                if (preview.cascade().contains(edge.dependent())) {
+                    warning.append(Component.translatable(edge.effectKey())).append(" ");
+                }
+            }
+            source.sendFailure(warning.append(Component.literal("Add 'confirm' to go ahead: /wandb admin module set "
+                    + ModuleIds.of(module).getPath() + " " + state.getSerializedName() + " confirm"))
+                    .withStyle(ChatFormatting.GOLD));
+            return 0;
+        }
+        ModuleStateService.Change change = ModuleStateService.change(source.getServer(), module, state);
+        if (change.result() == ModuleStateService.Result.DEPENDENCY_MISSING) {
+            for (ModuleDependencies.Edge edge : change.check().blockedBy()) {
+                source.sendFailure(Component.translatable(edge.blockedKey()).withStyle(ChatFormatting.RED));
+            }
+            return 0;
+        }
+        int ok = report(source, change.result(), () -> Component.literal("Module ").withStyle(ChatFormatting.GRAY)
                 .append(ModuleIds.displayName(module).copy().withStyle(ChatFormatting.AQUA))
                 .append(Component.literal(" → ").withStyle(ChatFormatting.DARK_GRAY))
                 .append(Component.literal(state.getSerializedName()).withStyle(ChatFormatting.GREEN)));
+        if (change.ok()) {
+            for (Module dependant : change.alsoDisabled()) {
+                source.sendSuccess(() -> Component.literal("Also disabled: ").withStyle(ChatFormatting.GOLD)
+                        .append(ModuleIds.displayName(dependant)), true);
+            }
+            for (ModuleDependencies.Edge edge : change.check().weakened()) {
+                source.sendSuccess(() -> Component.translatable(edge.effectKey()).withStyle(ChatFormatting.GOLD), false);
+            }
+        }
+        return ok;
     }
 
     private static int setSetting(CommandSourceStack source, String rawModule, String rawKey, String rawValue) {
@@ -187,6 +225,8 @@ public final class ModuleCommands {
                     "That value is not valid for this setting.").withStyle(ChatFormatting.RED));
             case UNAVAILABLE -> source.sendFailure(Component.literal(
                     "Module state is unavailable right now.").withStyle(ChatFormatting.RED));
+            case DEPENDENCY_MISSING -> source.sendFailure(Component.literal(
+                    "A module it requires is disabled.").withStyle(ChatFormatting.RED));
         }
         return 0;
     }

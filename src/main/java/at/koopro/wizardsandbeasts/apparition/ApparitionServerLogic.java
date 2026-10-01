@@ -293,7 +293,10 @@ public final class ApparitionServerLogic {
         Destabilization effective = passenger == null ? destabilization : destabilization.asSideAlong();
         // The ladder first, then the under-fire floor. Two different questions, answered in that order:
         // how badly was this released, and was this wizard being shot at while releasing it.
-        SplinchTier computed = SplinchResolver.resolve(missTicks, effective);
+        // The world's splinch severity scales the inflated miss before the ladder (ApparitionRules; 100% = as
+        // authored). The ladder itself stays pure.
+        SplinchTier computed = SplinchResolver.resolve(
+                ApparitionRules.scaleMiss(SplinchResolver.inflate(missTicks, effective)));
         SplinchTier tier = SplinchResolver.floorForWindupDamage(
                 computed,
                 effective.damageInstances(),
@@ -313,7 +316,7 @@ public final class ApparitionServerLogic {
 
         caster.causeFoodExhaustion(charge.tier().exhaustion());
         PlayerAbilityHelper.setApparitionCooldownTicks(caster,
-                Math.max(charge.tier().cooldownTicks(), tier.lockoutTicks()));
+                Math.max(ApparitionRules.cooldownTicks(charge.tier()), tier.lockoutTicks()));
         recordProficiency(caster, tier, origin, destination);
         reportUnlicensed(caster);
         // A side-along is one journey, not a standing arrangement.

@@ -71,13 +71,16 @@ final class SpellCastConeHandler {
                     successful = true;
                 }
 
-                spell.applyTargetEffects(living, scalingProfile.durationMult());
                 successful = true;
+                // A magic-resistant hide takes the force but refuses the enchantment until enough land at once.
+                if (at.koopro.wizardsandbeasts.spell.resistance.MagicResistance.takesHold(spell, living, caster)) {
+                    spell.applyTargetEffects(living, scalingProfile.durationMult());
 
-                // Data-driven effect components (Step 3): per-target run of the authored effect list.
-                // No-op for spells without an effects list (all Java spells today).
-                SpellEffectRunner.run(spell, SpellEffectContext.ofTarget(caster, living, level)
-                        .withScaling(damageMultiplier, scalingProfile.durationMult(), scalingProfile.controlMult()));
+                    // Data-driven effect components (Step 3): per-target run of the authored effect list.
+                    // No-op for spells without an effects list (all Java spells today).
+                    SpellEffectRunner.run(spell, SpellEffectContext.ofTarget(caster, living, level)
+                            .withScaling(damageMultiplier, scalingProfile.durationMult(), scalingProfile.controlMult()));
+                }
 
                 if (props.ignites()) {
                     SpellHelper.ignite(entity, props.getIgniteDurationSeconds());

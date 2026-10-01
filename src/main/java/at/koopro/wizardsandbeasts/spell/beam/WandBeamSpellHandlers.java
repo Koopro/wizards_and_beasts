@@ -18,6 +18,8 @@ import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
 import at.koopro.wizardsandbeasts.skill.SkillTreeId;
 import at.koopro.wizardsandbeasts.spell.cast.BeamRay;
 import at.koopro.wizardsandbeasts.spell.cast.BeamRayResolver;
+import at.koopro.wizardsandbeasts.visual.beam.BeamVisualDefaults;
+import at.koopro.wizardsandbeasts.visual.beam.BeamVisualService;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -60,6 +62,20 @@ final class WandBeamSpellHandlers {
     private static final int LEVIOSA_SLAM_COOLDOWN_TICKS = 20;
 
     private WandBeamSpellHandlers() {}
+
+    /**
+     * A beam's impact burst, scaled by the beam's {@code impact_intensity} visual setting (Control Center → Visuals).
+     * The burst is presentation only — particles and the camera kick riding on it — so the scale never touches what
+     * the beam does; at 0 nothing is sent.
+     */
+    private static void beamImpact(ServerPlayer anchor, String spellId, Vec3 pos, SpellFamily family, int argb,
+                                   int count, float spread) {
+        net.minecraft.server.MinecraftServer server = anchor.level().getServer();
+        int scaled = server == null ? count : BeamVisualService.impactCount(server, spellId, count);
+        if (scaled > 0) {
+            SpellImpactBurstS2CPayload.sendToTracking(anchor, pos, family, argb, scaled, spread);
+        }
+    }
 
     static void handleAguamentiChannel(ServerLevel level, ServerPlayer player, Spell spell,
                                        WandBeamSession s, float maxReach) {
@@ -123,7 +139,7 @@ final class WandBeamSpellHandlers {
         }
         if (s.beamTicks % 3 == 0) {
             Vec3 c = waterAim.getCenter();
-            SpellImpactBurstS2CPayload.sendToTracking(player, c, SpellFamilies.of(spell), spell.getColor(), 5, 0.12f);
+            beamImpact(player, spell.getId(), c, SpellFamilies.of(spell), spell.getColor(), 5, 0.12f);
         }
     }
 
@@ -181,7 +197,7 @@ final class WandBeamSpellHandlers {
                 prev.setDeltaMovement(dir.x * force, dir.y * force + 0.2, dir.z * force);
                 prev.hurtMarked = true;
                 prev.fallDistance = 0f;
-                SpellImpactBurstS2CPayload.sendToTracking(caster, prev.getBoundingBox().getCenter(),
+                beamImpact(caster, BeamVisualDefaults.LEVIOSA, prev.getBoundingBox().getCenter(),
                         SpellFamily.ARCANE, LEVIOSA_PARTICLE_COLOR, 8, 0.2f);
             }
         }
@@ -202,7 +218,7 @@ final class WandBeamSpellHandlers {
             // Longer, louder wind-up so the curse is dodgeable: gathering green light on the target
             // every other tick telegraphs the kill, and breaking line of sight (checked below) cancels it.
             if (s.beamTicks % 2 == 0) {
-                SpellImpactBurstS2CPayload.sendToTracking(caster, target.getBoundingBox().getCenter(),
+                beamImpact(caster, spellId, target.getBoundingBox().getCenter(),
                         SpellFamily.DARK, 0xFF00FF00, 8, 0.14f);
             }
             return;
@@ -262,8 +278,14 @@ final class WandBeamSpellHandlers {
             return;
         }
 
+        boolean newVictim = !tid.equals(s.lastCrucioTarget);
         s.lastCrucioTarget = tid;
         s.crucioHoldTicks++;
+        if (newVictim) {
+            // Once per victim per hold: the curse is used on someone the moment it holds them.
+            at.koopro.wizardsandbeasts.ministry.trace.MinistryTrace.onUnforgivableUse(
+                    caster, spell.getId(), spell.getCategory(), target);
+        }
         int effectInterval = Math.max(1, (int) (channelEffectInterval / Math.max(0.5f, crucioIntentMultiplier(caster, spell))));
         if (s.beamTicks % effectInterval == 0) {
             float intent = crucioIntentMultiplier(caster, spell);
@@ -398,7 +420,8 @@ final class WandBeamSpellHandlers {
                 && !state.hasBlockEntity();
     }
 
-    static int getTargetScanIntervalTicks() {
+    /** The scan interval in effect: the setting, shifted by the performance profile. */
+    public static int getTargetScanIntervalTicks() {
         return switch (Config.perfProfile) {
             case LOW -> Math.max(2, Config.beamTargetScanIntervalTicks + 2);
             case HIGH -> Math.max(1, Config.beamTargetScanIntervalTicks - 1);
@@ -406,7 +429,8 @@ final class WandBeamSpellHandlers {
         };
     }
 
-    static int getChannelEffectIntervalTicks() {
+    /** The effect interval in effect: the setting, shifted by the performance profile. */
+    public static int getChannelEffectIntervalTicks() {
         return switch (Config.perfProfile) {
             case LOW -> Math.max(2, Config.beamChannelEffectIntervalTicks + 2);
             case HIGH -> Math.max(1, Config.beamChannelEffectIntervalTicks - 1);
@@ -464,7 +488,7 @@ final class WandBeamSpellHandlers {
         target.fallDistance = 0f;
         s.leviosaLastCommandedSpeed = (float) blendedVelocity.length();
 
-        SpellImpactBurstS2CPayload.sendToTracking(caster, target.getBoundingBox().getCenter(),
+        beamImpact(caster, BeamVisualDefaults.LEVIOSA, target.getBoundingBox().getCenter(),
                 SpellFamily.ARCANE, LEVIOSA_PARTICLE_COLOR, 6, 0.18f);
     }
 

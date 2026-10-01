@@ -57,5 +57,7 @@ public class BrewReloadListener extends SimpleJsonResourceReloadListener<BrewDef
             loaded++;
         }
         LOGGER.info("BrewReloadListener: loaded {} brews ({} failed).", loaded, failed);
+        // What was just registered is the authored set; the admin overlay re-registers it with any overrides.
+        at.koopro.wizardsandbeasts.brew.tuning.BrewTuning.acceptAuthoredBrews(Brews.all());
     }
 }

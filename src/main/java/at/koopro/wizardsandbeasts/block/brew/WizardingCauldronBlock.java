@@ -313,7 +313,7 @@ public class WizardingCauldronBlock extends BaseEntityBlock {
     }
 
     private InteractionResult start(Level level, BlockPos pos, CauldronBlockEntity be, ServerPlayer player) {
-        if (!CauldronHeat.hasHeatSource(level, pos.below())) {
+        if (!at.koopro.wizardsandbeasts.brew.tuning.BrewTuningService.heated(level, pos.below())) {
             say(player, "brew.wizards_and_beasts.cauldron.cold");
             return InteractionResult.SUCCESS;
         }
@@ -332,6 +332,8 @@ public class WizardingCauldronBlock extends BaseEntityBlock {
             case NO_MATCH -> say(player, "brew.wizards_and_beasts.cauldron.no_match");
             case UNKNOWN_BREW -> say(player, "brew.wizards_and_beasts.cauldron.unknown_brew");
             case NOT_IDLE -> say(player, "brew.wizards_and_beasts.cauldron.mid_brew");
+            case BREWING_DISABLED -> say(player, "brew.wizards_and_beasts.cauldron.brewing_disabled");
+            case BREW_DISABLED -> say(player, "brew.wizards_and_beasts.cauldron.brew_disabled");
         }
         return InteractionResult.SUCCESS;
     }

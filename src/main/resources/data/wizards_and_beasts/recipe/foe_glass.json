@@ -2,7 +2,7 @@
   "neoforge:conditions": [
     {
       "type": "wizards_and_beasts:module_enabled",
-      "module": "DARK_ARTS"
+      "module": "ARTEFACTS"
     }
   ],
   "type": "minecraft:crafting_shaped",

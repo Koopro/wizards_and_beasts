@@ -69,10 +69,10 @@ import software.bernie.geckolib.animation.state.AnimationTest;
  *       leaves the waterside. Someone paying attention can see it before they climb on.</li>
  * </ul>
  */
-public class KelpieEntity extends GenericAquaticBeastEntity {
+public class KelpieEntity extends GenericAquaticBeastEntity implements at.koopro.wizardsandbeasts.creature.variant.VariantHolder {
 
     /** Its coat, synced. Black is the base texture; the others are {@code textures/entity/kelpie/<coat>.png}. */
-    public enum Coat {
+    public enum Coat implements at.koopro.wizardsandbeasts.creature.variant.CreatureVariant {
         BLACK(null), BLUE_BLACK("kelpie/blue_black"), GREEN_BLACK("kelpie/green_black");
 
         private static final Coat[] VALUES = values();
@@ -83,6 +83,11 @@ public class KelpieEntity extends GenericAquaticBeastEntity {
         }
 
         public @Nullable String texture() {
+            return texture;
+        }
+
+        @Override
+        public @Nullable String variantTexture() {
             return texture;
         }
 
@@ -155,10 +160,27 @@ public class KelpieEntity extends GenericAquaticBeastEntity {
     @Override
     public @Nullable SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty,
                                                   EntitySpawnReason reason, @Nullable SpawnGroupData data) {
-        Coat[] coats = Coat.values();
-        setCoat(coats[getRandom().nextInt(coats.length)]);
+        setCoat(at.koopro.wizardsandbeasts.creature.variant.CreatureVariants.roll("kelpie", Coat.values(), getRandom()));
         setHomeTo(blockPosition(), HOME_RADIUS);
         return super.finalizeSpawn(level, difficulty, reason, data);
+    }
+
+    // ── variant (Creature Lab) ──
+
+    @Override
+    public at.koopro.wizardsandbeasts.creature.variant.CreatureVariant variant() {
+        return coat();
+    }
+
+    @Override
+    public boolean applyVariant(String variantId) {
+        for (Coat candidate : Coat.values()) {
+            if (candidate.variantId().equals(variantId)) {
+                setCoat(candidate);
+                return true;
+            }
+        }
+        return false;
     }
 
     public Coat coat() {

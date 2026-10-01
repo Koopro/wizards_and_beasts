@@ -46,6 +46,7 @@ import org.jspecify.annotations.Nullable;
 import software.bernie.geckolib.animatable.manager.AnimatableManager;
 import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.animation.RawAnimation;
+import software.bernie.geckolib.animation.object.PlayState;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -73,6 +74,8 @@ public class MooncalfEntity extends GeoEntityBase implements BondableBeast {
     private static final RawAnimation IDLE_ANIM = AnimHelper.loop("mooncalf", "idle");
     private static final RawAnimation WALK_ANIM = AnimHelper.loop("mooncalf", "walk");
     private static final RawAnimation DANCE_ANIM = AnimHelper.loop("mooncalf", "dance");
+    /** One-shots (hit, death), registered after movement so they override the loop. */
+    private static final String ACTION = "mooncalf_action";
 
     /** True while the moon is full overhead. Synced because the client picks the clip from it. */
     private static final EntityDataAccessor<Boolean> DATA_DANCING =
@@ -148,8 +151,17 @@ public class MooncalfEntity extends GeoEntityBase implements BondableBeast {
         boolean hurt = super.hurtServer(level, source, amount);
         if (hurt) {
             onBondedHurt(source);
+            if (isAlive()) triggerAnim(ACTION, "hit");
         }
         return hurt;
+    }
+
+    @Override
+    public void die(@NonNull DamageSource cause) {
+        if (!level().isClientSide()) {
+            triggerAnim(ACTION, "death");
+        }
+        super.die(cause);
     }
 
     // ── the moon ────────────────────────────────────────────────────────────
@@ -348,5 +360,8 @@ public class MooncalfEntity extends GeoEntityBase implements BondableBeast {
             }
             return state.setAndContinue(isMoonUp() ? DANCE_ANIM : IDLE_ANIM);
         }));
+        controllers.add(new AnimationController<MooncalfEntity>(ACTION, 0, state -> PlayState.STOP)
+                .triggerableAnim("hit", AnimHelper.playOnce("mooncalf", "hit"))
+                .triggerableAnim("death", AnimHelper.playOnce("mooncalf", "death")));
     }
 }

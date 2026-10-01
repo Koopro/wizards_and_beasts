@@ -63,6 +63,38 @@ public class SpellProperties {
         this.soundPitch = builder.soundPitch;
     }
 
+    /** A copy identical in every respect but its range — how an administrator's range adjustment is applied. */
+    public SpellProperties withRange(float newRange) {
+        return new SpellProperties(this, newRange);
+    }
+
+    private SpellProperties(SpellProperties base, float range) {
+        this.castType = base.castType;
+        this.range = range;
+        this.knockbackStrength = base.knockbackStrength;
+        this.ignites = base.ignites;
+        this.igniteDurationSeconds = base.igniteDurationSeconds;
+        this.explodes = base.explodes;
+        this.explosionPower = base.explosionPower;
+        this.explosionBreaksBlocks = base.explosionBreaksBlocks;
+        this.disarms = base.disarms;
+        this.stuns = base.stuns;
+        this.repairsItem = base.repairsItem;
+        this.repairAmount = base.repairAmount;
+        this.opensBlocks = base.opensBlocks;
+        this.pullStrength = base.pullStrength;
+        this.levitatesTarget = base.levitatesTarget;
+        this.levitateDurationTicks = base.levitateDurationTicks;
+        this.undeadBonusDamage = base.undeadBonusDamage;
+        this.controlsMob = base.controlsMob;
+        this.controlDurationTicks = base.controlDurationTicks;
+        this.targetEffects = base.targetEffects;
+        this.selfEffects = base.selfEffects;
+        this.castSound = base.castSound;
+        this.soundVolume = base.soundVolume;
+        this.soundPitch = base.soundPitch;
+    }
+
     // Factory methods for each cast type
     public static Builder projectile() { return new Builder(CastType.PROJECTILE, 0); }
     public static Builder self() { return new Builder(CastType.SELF, 0); }

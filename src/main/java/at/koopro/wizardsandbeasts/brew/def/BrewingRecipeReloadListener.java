@@ -59,5 +59,6 @@ public class BrewingRecipeReloadListener extends SimpleJsonResourceReloadListene
             }
         }
         LOGGER.info("BrewingRecipeReloadListener: loaded {} recipes ({} failed).", loaded, failed);
+        at.koopro.wizardsandbeasts.brew.tuning.BrewTuning.acceptAuthoredRecipes(BrewingRecipes.all());
     }
 }

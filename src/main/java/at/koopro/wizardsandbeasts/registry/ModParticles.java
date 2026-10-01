@@ -35,6 +35,9 @@ public final class ModParticles {
             registerTint("spell_clash");
     public static final DeferredHolder<ParticleType<?>, ParticleType<SpellTintParticleOptions>> PROTEGO_DEFLECT =
             registerTint("protego_deflect");
+    /** Pixel smoke that dissipates in four frames; tinted by meaning (see {@code MagicSmoke}). */
+    public static final DeferredHolder<ParticleType<?>, ParticleType<SpellTintParticleOptions>> SMOKE_PUFF =
+            registerTint("smoke_puff");
 
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> PROTEGO_SHATTER =
             PARTICLE_TYPES.register("protego_shatter", () -> new SimpleParticleType(true));

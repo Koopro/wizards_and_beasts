@@ -6,6 +6,7 @@ import at.koopro.wizardsandbeasts.ability.AnimagusAbilityService;
 import at.koopro.wizardsandbeasts.ability.AnimagusTransformService;
 import at.koopro.wizardsandbeasts.apparition.ApparitionServerLogic;
 import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialServerLogic;
+import at.koopro.wizardsandbeasts.heritage.veela.VeelaAllure;
 import at.koopro.wizardsandbeasts.legilimency.LegilimencyServerLogic;
 import net.minecraft.server.level.ServerPlayer;
 import org.jspecify.annotations.NullMarked;
@@ -64,6 +65,10 @@ public final class PlayerStatusAbilityGrantSource implements AbilityGrantSource 
         // shows a button that would be refused: a Quarter-Veela or a Dhampir carries no
         // "transformation" tag and gets nothing here.
         HeritageTransformService.grantsFor(player, out);
+        // The allure is a Veela's, in human shape only: the harpy's fury replaces it.
+        if (VeelaAllure.canAllure(player)) {
+            out.add(AbilityIds.VEELA_ALLURE.toString());
+        }
         return out;
     }
 }

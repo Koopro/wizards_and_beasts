@@ -43,7 +43,7 @@ public class TwoWayMirrorItem extends Item {
 
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
-        if (!ModuleManager.isEnabled(Module.DARK_ARTS)) {
+        if (!ModuleManager.isEnabled(Module.ARTEFACTS)) {
             return InteractionResult.FAIL;
         }
         ItemStack stack = player.getItemInHand(hand);

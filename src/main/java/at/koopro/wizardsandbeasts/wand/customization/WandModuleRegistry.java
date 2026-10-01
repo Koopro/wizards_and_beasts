@@ -59,6 +59,10 @@ public final class WandModuleRegistry {
         register(WandSlot.HANDLE, "bone");
         register(WandSlot.HANDLE, "talon");
         register(WandSlot.HANDLE, "flared");
+        register(WandSlot.HANDLE, "briar");
+        // Module ids are global, so the three Bellatrix parts carry their slot in the id; the bone
+        // is still handle_bellatrix / shaft_bellatrix / tip_bellatrix.
+        register(WandSlot.HANDLE, "bellatrix_handle", "bellatrix");
 
         // SHAFT variants
         register(WandSlot.SHAFT, "straight");
@@ -71,6 +75,8 @@ public final class WandModuleRegistry {
         register(WandSlot.SHAFT, "reeded");
         register(WandSlot.SHAFT, "nodular");
         register(WandSlot.SHAFT, "barked");
+        register(WandSlot.SHAFT, "sinuous");
+        register(WandSlot.SHAFT, "bellatrix_shaft", "bellatrix");
 
         // TIP variants
         register(WandSlot.TIP, "pointed");
@@ -84,6 +90,9 @@ public final class WandModuleRegistry {
         register(WandSlot.TIP, "claw");
         register(WandSlot.TIP, "serpent");
         register(WandSlot.TIP, "spiralled");
+        register(WandSlot.TIP, "leaf");
+        register(WandSlot.TIP, "hook");
+        register(WandSlot.TIP, "bellatrix_tip", "bellatrix");
 
         // CORE variants
         register(WandSlot.CORE, "phoenix_feather");
@@ -105,7 +114,12 @@ public final class WandModuleRegistry {
     }
 
     private static void register(WandSlot slot, String variant) {
-        Identifier id = Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, variant);
+        register(slot, variant, variant);
+    }
+
+    /** A module whose id differs from its bone variant: {@code <slot prefix><boneVariant>} in the geo. */
+    private static void register(WandSlot slot, String idPath, String boneVariant) {
+        Identifier id = Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, idPath);
         // A module id carries no slot, so two slots using the same variant name collide on one
         // Identifier and the second silently replaces the first — the module simply stops
         // existing, with nothing in the log and an empty slot at render time. Caught once
@@ -116,7 +130,7 @@ public final class WandModuleRegistry {
                     + clash.slot().slotId() + "' already registered it, slot '" + slot.slotId()
                     + "' is trying to reuse it. Module ids must be unique across all slots.");
         }
-        BUILT_INS.put(id, WandModule.builtin(id, slot, variant));
+        BUILT_INS.put(id, WandModule.builtin(id, slot, boneVariant));
         slotViewCache = null;
     }
 

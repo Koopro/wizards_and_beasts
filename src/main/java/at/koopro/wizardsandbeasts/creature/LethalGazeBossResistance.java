@@ -1,7 +1,6 @@
 package at.koopro.wizardsandbeasts.creature;
 
 import at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 
 /**
@@ -11,13 +10,15 @@ import net.minecraft.world.entity.Entity;
  * melee/tick/death-only, and adding a spell-hit hook to that interface for exactly one creature would
  * be disproportionate. Gating on {@code Trait.LETHAL_GAZE} (rather than a hardcoded creature id) means
  * any future second lethal-gaze boss automatically inherits the same resistances.
+ *
+ * <p>Stupefy's coin flip used to live here. It is now the general hide rule in
+ * {@code spell.resistance.MagicResistance}: a lethal-gaze boss turns enchantments aside until two land at once,
+ * the same way every other magic-resistant body does, and without dice.
  */
 public final class LethalGazeBossResistance {
 
     /** Avada Kedavra deals fixed damage to a lethal-gaze boss rather than its default near-instant-kill damage. */
     public static final float AVADA_KEDAVRA_FIXED_DAMAGE = 100.0f;
-    /** Stupefy only has a coin-flip chance to actually slow a lethal-gaze boss. */
-    private static final float STUPEFY_EFFECT_CHANCE = 0.5f;
 
     private LethalGazeBossResistance() {}
 
@@ -27,9 +28,5 @@ public final class LethalGazeBossResistance {
 
     public static float resolveAvadaKedavraDamage(float defaultDamage, boolean isBoss) {
         return isBoss ? AVADA_KEDAVRA_FIXED_DAMAGE : defaultDamage;
-    }
-
-    public static boolean allowsStupefyEffect(RandomSource random, boolean isBoss) {
-        return !isBoss || random.nextFloat() < STUPEFY_EFFECT_CHANCE;
     }
 }

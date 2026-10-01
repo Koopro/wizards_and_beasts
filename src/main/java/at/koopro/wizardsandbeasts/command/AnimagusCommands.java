@@ -34,7 +34,9 @@ public final class AnimagusCommands {
                         .executes(ctx -> transform(ctx.getSource().getPlayerOrException())))
                 .then(Commands.literal("register")
                         .executes(ctx -> registerMinistry(ctx.getSource().getPlayerOrException())))
+                // Operator tool: an Animagus does not choose their form (CANON_AUDIT C-4).
                 .then(Commands.literal("form")
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .then(Commands.argument("beast", StringArgumentType.word())
                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
                                         AnimagusForms.BEAST_KEYS, builder))
@@ -132,7 +134,7 @@ public final class AnimagusCommands {
     private static int opUnlock(ServerPlayer player) {
         PlayerAbilityHelper.setAnimagusUnlocked(player, true);
         if (PlayerAbilityHelper.getAnimagusFormId(player) == null) {
-            PlayerAbilityHelper.setAnimagusFormId(player, AnimagusForms.defaultFormId());
+            PlayerAbilityHelper.setAnimagusFormId(player, AnimagusForms.innateFormId(player.getUUID()));
         }
         send(player, "[op] Animagus unlocked for " + player.getName().getString() + ".", ChatFormatting.YELLOW);
         return 1;

@@ -38,6 +38,9 @@ public class PlayerSpellData implements ModAttachments.NbtSerializable {
     private final Map<String, Integer> castCount = new HashMap<>();
     private final Map<String, Integer> successfulHits = new HashMap<>();
     private final Map<String, Float> spellProficiencies = new HashMap<>();
+    /** The in-game day each spell was last practised on, and how often that day (SpellPractice). */
+    private final Map<String, Long> practiceDay = new HashMap<>();
+    private final Map<String, Integer> practiceCount = new HashMap<>();
     private final Map<String, Integer> rejectCounts = new HashMap<>();
     private int syncCorrections;
     // NEW FIELD — OWL DEFENCE_AGAINST_DARK_ARTS: spells cast against hostile mobs
@@ -65,6 +68,24 @@ public class PlayerSpellData implements ModAttachments.NbtSerializable {
         }
     }
 
+    /**
+     * Clears what practice built — proficiency, casts, hits, the daily practice counters — for every spell, and
+     * keeps which spells are known, the loadout and cooldowns. Returns how many spells had any progress.
+     */
+    public int resetProgression() {
+        java.util.Set<String> touched = new java.util.HashSet<>();
+        touched.addAll(castCount.keySet());
+        touched.addAll(successfulHits.keySet());
+        touched.addAll(spellProficiencies.keySet());
+        touched.addAll(practiceCount.keySet());
+        castCount.clear();
+        successfulHits.clear();
+        spellProficiencies.clear();
+        practiceDay.clear();
+        practiceCount.clear();
+        return touched.size();
+    }
+
     public void resetAll() {
         knownSpells.clear();
         Arrays.fill(loadout, null);
@@ -73,6 +94,8 @@ public class PlayerSpellData implements ModAttachments.NbtSerializable {
         castCount.clear();
         successfulHits.clear();
         spellProficiencies.clear();
+        practiceDay.clear();
+        practiceCount.clear();
         rejectCounts.clear();
         syncCorrections = 0;
         globalCooldownEndTick = 0L;
@@ -171,6 +194,20 @@ public class PlayerSpellData implements ModAttachments.NbtSerializable {
 
     public void incrementSuccessfulHits(String spellId) {
         successfulHits.merge(spellId, 1, Integer::sum);
+    }
+
+    /** Practices this spell has taken on in-game day {@code today}. */
+    public int getPracticeToday(String spellId, long today) {
+        return at.koopro.wizardsandbeasts.spell.proficiency.SpellPractice.practicedToday(
+                today, practiceDay.getOrDefault(spellId, Long.MIN_VALUE), practiceCount.getOrDefault(spellId, 0));
+    }
+
+    /** Records one more practice of this spell on {@code today}; returns the count for today. */
+    public int recordPractice(String spellId, long today) {
+        int next = getPracticeToday(spellId, today) + 1;
+        practiceDay.put(spellId, today);
+        practiceCount.put(spellId, next);
+        return next;
     }
 
     public float getSpellProficiency(String spellId) {
@@ -278,6 +315,8 @@ public class PlayerSpellData implements ModAttachments.NbtSerializable {
         NbtHelper.saveStringIntMap(tag, "CastCount", castCount);
         NbtHelper.saveStringIntMap(tag, "SuccessfulHits", successfulHits);
         NbtHelper.saveStringFloatMap(tag, "SpellProficiencies", spellProficiencies);
+        NbtHelper.saveStringLongMap(tag, "PracticeDay", practiceDay);
+        NbtHelper.saveStringIntMap(tag, "PracticeCount", practiceCount);
         NbtHelper.saveStringIntMap(tag, "RejectCount", rejectCounts);
         tag.putInt("SyncCorrections", syncCorrections);
         tag.putInt("CombatSpellCasts", combatSpellCasts);
@@ -318,6 +357,11 @@ public class PlayerSpellData implements ModAttachments.NbtSerializable {
         for (Map.Entry<String, Float> entry : NbtHelper.loadStringFloatMap(tag, "SpellProficiencies").entrySet()) {
             spellProficiencies.put(NamespaceMigration.remapLegacyId(entry.getKey()), Math.max(0.0f, Math.min(1.0f, entry.getValue())));
         }
+        // Additive keys: a save from before practice was limited reads as "nothing practised today".
+        practiceDay.clear();
+        practiceDay.putAll(NbtHelper.loadStringLongMap(tag, "PracticeDay"));
+        practiceCount.clear();
+        practiceCount.putAll(NbtHelper.loadStringIntMap(tag, "PracticeCount"));
         rejectCounts.clear();
         rejectCounts.putAll(NbtHelper.loadStringIntMap(tag, "RejectCount"));
         syncCorrections = tag.getInt("SyncCorrections").orElse(0);

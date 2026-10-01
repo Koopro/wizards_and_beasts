@@ -74,7 +74,8 @@ public final class AnimagusEvents {
     private static void completeRitual(ServerPlayer player, ServerLevel level, ItemStack mandrake) {
         PlayerAbilityHelper.setAnimagusUnlocked(player, true);
         if (PlayerAbilityHelper.getAnimagusFormId(player) == null) {
-            PlayerAbilityHelper.setAnimagusFormId(player, AnimagusForms.defaultFormId());
+            // Not chosen: the ritual reveals the animal the wizard already is (CANON_AUDIT C-4).
+            PlayerAbilityHelper.setAnimagusFormId(player, AnimagusForms.innateFormId(player.getUUID()));
         }
         if (!player.getAbilities().instabuild) {
             mandrake.shrink(1);

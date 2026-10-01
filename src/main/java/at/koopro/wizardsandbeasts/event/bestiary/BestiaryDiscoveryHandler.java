@@ -172,6 +172,9 @@ public final class BestiaryDiscoveryHandler {
 
         Map<?, Float> multipliers = PlayerSkillBonusData.forPlayer(player).bestiaryXpMultipliers();
         Set<Identifier> watchedThisScan = new HashSet<>();
+        // Watching time for every entry watched this scan, written once at the end. Each entry is watched at most
+        // once per scan (watchedThisScan), so its total is its stored time plus this scan's gain.
+        Map<Identifier, Integer> watchedTotals = new HashMap<>();
         for (Entity entity : nearby) {
             LivingEntity creature = (LivingEntity) entity;
             List<BestiaryEntry> entries = entriesFor(creature.getType());
@@ -194,13 +197,17 @@ public final class BestiaryDiscoveryHandler {
                 }
                 float multiplier = multipliers.getOrDefault(entry.category(), 1.0f);
                 int gained = Math.max(1, Math.round(SCAN_INTERVAL_TICKS * Math.max(0.1f, multiplier)));
-                int total = BestiaryDataHelper.addObservedTicks(player, entry.id(), gained);
+                int total = BestiaryDataHelper.observedTotal(
+                        BestiaryDataHelper.getObservedTicks(player, entry.id()), gained);
+                watchedTotals.put(entry.id(), total);
                 CreatureProfile profile = entry.profile().orElse(null);
                 boolean byHand = profile != null && profile.studiedByHand();
                 boolean signature = profile != null && profile.hasSignature();
                 apply(player, entry, tier, EncounterRule.afterWatching(tier, total, byHand, signature));
             }
         }
+        // After the tier changes, from the latest record: a tier written above is carried through, not overwritten.
+        BestiaryDataHelper.setObservedTicks(player, watchedTotals);
     }
 
     /**

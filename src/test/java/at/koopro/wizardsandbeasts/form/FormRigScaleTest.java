@@ -48,6 +48,7 @@ class FormRigScaleTest {
         RIG_FORMS.put("merfolk_water", new String[]{"merperson", "merpeople_water"});
         RIG_FORMS.put("house_elf_default", new String[]{"house_elf", "house_elf_default"});
         RIG_FORMS.put("veela_harpy", new String[]{"veela_harpy", "veela_harpy"});
+        RIG_FORMS.put("animagus_stag", new String[]{"animagus_stag", "animagus_stag"});
     }
 
     /** Height of a GeckoLib rig in blocks, from the extent of its cubes. 16 model units per block. */

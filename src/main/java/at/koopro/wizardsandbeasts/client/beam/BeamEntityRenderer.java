@@ -46,9 +46,16 @@ public class BeamEntityRenderer extends EntityRenderer<BeamEntity, BeamRenderSta
         // The editor wins while it is open, so a slider drag shows on the next frame instead of
         // needing a recast. Read here rather than written into the entity: the entity keeps the
         // spell's real look, so closing the editor restores it without re-resolving anything.
+        // A preview beam (Control Center editor, debug editor) carries its own live look — the draft being
+        // edited — so a slider drag shows next frame without touching any real caster's beam. The debug
+        // editor's global override still wins for every other beam while it is switched on.
+        BeamAppearance.Appearance preview = beam.liveLook();
         boolean edit = BeamStyleEditor.active;
-        state.style = edit ? BeamStyleEditor.style() : beam.getStyle();
-        state.shape = edit ? BeamStyleEditor.shape() : beam.getShape();
+        BeamStyle style = preview != null ? preview.style() : edit ? BeamStyleEditor.style() : beam.getStyle();
+        BeamShape shape = preview != null ? preview.shape() : edit ? BeamStyleEditor.shape() : beam.getShape();
+        // Quality is this player's own budget; fading only dims (reach and damage are untouched).
+        state.style = BeamQuality.apply(style).withOpacityScale(beam.fadeAlpha(partialTick));
+        state.shape = BeamQuality.apply(shape);
         state.seed = beam.getCasterId();
         state.ticks = beam.tickCount;
         state.partialTick = partialTick;

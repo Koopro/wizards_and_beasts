@@ -65,7 +65,9 @@ public record BroomInputC2SPayload(
     public static void handle(BroomInputC2SPayload pkt, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
             Player player = ctx.player();
-            if (player != null && player.getVehicle() instanceof BroomEntity broom) {
+            // Only the rider who controls the broom steers it; a second passenger's keys are not the pilot's.
+            if (player != null && player.getVehicle() instanceof BroomEntity broom
+                    && broom.getControllingPassenger() == player) {
                 broom.setInputFromNetwork(
                         pkt.forward,
                         pkt.backward,

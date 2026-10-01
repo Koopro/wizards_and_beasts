@@ -170,12 +170,14 @@ public final class SizeProfileRegistry {
                 -0.4f, 0.1f, 0.5f,
                 0.75f));
 
-        // Stag: no vanilla analog — placeholder geometry, tall and broad.
+        // Stag: no vanilla analogue, so its own GeckoLib rig (`animagus_stag`). Rig-drawn, so
+        // modelScale is hitboxHeight / rigHeight (1.60 / 1.875) and FormRigScaleTest holds it; the
+        // rig is authored at true proportions, so the aspect stretch the old box model needed is gone.
         // Eye 1.45 of 1.60: the head is raised well above the back, which the flat ratio's 1.36
         // would have sunk into the shoulders.
         register(new SizeProfile("animagus_stag",
                 0.90f, 1.60f,
-                1.1f, 0.95f, 1.4f,
+                0.87f, 1.0f, 1.0f,
                 0.4f, 0.3f, 1.0f,
                 1.45f));
 

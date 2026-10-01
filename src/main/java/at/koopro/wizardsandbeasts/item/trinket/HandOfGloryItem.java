@@ -25,7 +25,7 @@ public class HandOfGloryItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
                                 Consumer<Component> tooltipAdder, TooltipFlag flag) {
-        tooltipAdder.accept(Component.literal("Gives light only to the holder. All others are blind.")
+        tooltipAdder.accept(Component.literal("Gives light only to the holder, who sees through any darkness.")
                 .withStyle(ChatFormatting.ITALIC, ChatFormatting.DARK_GRAY));
         tooltipAdder.accept(Component.literal("Made from the hand of a hanged man.")
                 .withStyle(ChatFormatting.DARK_RED));
@@ -47,8 +47,8 @@ public class HandOfGloryItem extends Item {
         ItemStack stack = player.getItemInHand(hand);
         boolean lit = stack.getOrDefault(ModDataComponents.HAND_OF_GLORY_CANDLE_LIT.get(), false);
         stack.set(ModDataComponents.HAND_OF_GLORY_CANDLE_LIT.get(), !lit);
-        // While lit, HandOfGloryTickHandler grants the holder night vision and blinds nearby
-        // players; snuffing the candle simply lets those short-lived effects lapse.
+        // While lit, HandOfGloryTickHandler lets the holder see in the dark; snuffing the candle simply lets
+        // that short-lived effect lapse.
         if (!level.isClientSide()) {
             player.displayClientMessage(Component.literal(lit ? "The candle gutters out." : "The candle flares to life.")
                     .withStyle(lit ? ChatFormatting.DARK_GRAY : ChatFormatting.GOLD), true);

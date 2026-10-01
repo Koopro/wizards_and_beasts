@@ -2,8 +2,9 @@ package at.koopro.wizardsandbeasts.creature.ability;
 
 import at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity;
 import at.koopro.wizardsandbeasts.heritage.werewolf.WerewolfRules;
+import at.koopro.wizardsandbeasts.particle.MagicSmoke;
+import at.koopro.wizardsandbeasts.spell.core.MagicColours;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -37,8 +38,10 @@ public record MoonBound() implements CreatureAbility {
 
     /** The change reversing: a hiss, a shudder of smoke, and nobody there. */
     public static void leave(GenericBeastEntity entity, ServerLevel level) {
-        level.sendParticles(ParticleTypes.LARGE_SMOKE, entity.getX(), entity.getY() + 1.0, entity.getZ(),
-                20, 0.4, 0.6, 0.4, 0.01);
+        // Lycanthropy is a curse, so its smoke is dark magic's colour (MagicColours), in the mod's
+        // own pixel puffs rather than vanilla's large smoke.
+        MagicSmoke.burst(level, entity.getX(), entity.getY() + 1.0, entity.getZ(), MagicColours.DARK_MAGIC,
+                10, 0.4, 0.6);
         level.playSound(null, entity.blockPosition(), SoundEvents.FIRE_EXTINGUISH, SoundSource.HOSTILE, 0.8f, 0.6f);
         entity.discard();
     }
