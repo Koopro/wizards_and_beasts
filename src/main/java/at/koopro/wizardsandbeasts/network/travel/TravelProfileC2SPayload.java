@@ -56,11 +56,9 @@ public record TravelProfileC2SPayload(int action, String arg) implements CustomP
                 return;
             }
             long now = player.level().getGameTime();
-            Long last = LAST.get(player);
-            if (last != null && now - last < MIN_TICKS_BETWEEN && now >= last) {
+            if (!PlayerScopedState.throttle(LAST, player, now, MIN_TICKS_BETWEEN)) {
                 return;
             }
-            LAST.put(player, now);
             TravelActions.perform(player, TravelProfile.ActionKind.of(payload.action()), payload.arg());
             PacketDistributor.sendToPlayer(player, new TravelProfileS2CPayload(TravelProfiles.build(player)));
         });

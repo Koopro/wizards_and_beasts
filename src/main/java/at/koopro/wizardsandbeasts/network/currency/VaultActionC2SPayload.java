@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.network.currency;
 
+import at.koopro.wizardsandbeasts.util.PlayerScopedState;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.command.debug.DebugHooks;
 import at.koopro.wizardsandbeasts.currency.dragot.DragotExchange;
@@ -57,11 +58,9 @@ public record VaultActionC2SPayload(int actionOrdinal, int amount) implements Cu
         ctx.enqueueWork(() -> {
             if (ctx.player() instanceof ServerPlayer player) {
                 long now = player.level().getGameTime();
-                Long last = LAST_ACTION.get(player);
-                if (last != null && now - last < MIN_TICKS_BETWEEN && now >= last) {
+                if (!PlayerScopedState.throttle(LAST_ACTION, player, now, MIN_TICKS_BETWEEN)) {
                     return;
                 }
-                LAST_ACTION.put(player, now);
                 perform(player, pkt);
             }
         });

@@ -40,11 +40,9 @@ public record PlaceStandingsC2SPayload() implements CustomPacketPayload {
                 return;
             }
             long now = player.level().getGameTime();
-            Long last = LAST.get(player);
-            if (last != null && now - last < MIN_TICKS_BETWEEN && now >= last) {
+            if (!PlayerScopedState.throttle(LAST, player, now, MIN_TICKS_BETWEEN)) {
                 return;
             }
-            LAST.put(player, now);
             PacketDistributor.sendToPlayer(player, new PlaceStandingsS2CPayload(LocationProgression.standings(player)));
         });
     }

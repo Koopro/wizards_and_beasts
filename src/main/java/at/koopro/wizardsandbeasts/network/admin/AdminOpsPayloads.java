@@ -68,12 +68,7 @@ public final class AdminOpsPayloads {
     /** Whether this request may run now; refreshes the stamp when it may. */
     private static boolean due(PlayerScopedState<Long> stamps, ServerPlayer player) {
         long now = player.level().getServer().getTickCount();
-        Long last = stamps.get(player);
-        if (last != null && now - last < MIN_TICKS_BETWEEN) {
-            return false;
-        }
-        stamps.put(player, now);
-        return true;
+        return PlayerScopedState.throttle(stamps, player, now, MIN_TICKS_BETWEEN);
     }
 
     // ── authority ──

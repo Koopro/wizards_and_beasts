@@ -74,11 +74,9 @@ public final class MinistryLicenceEvents {
         }
 
         long now = player.level().getGameTime();
-        Long last = LAST_TRESPASS_TICK.get(player);
-        if (last != null && now - last < LicenceRules.TRESPASS_COOLDOWN_TICKS) {
+        if (!PlayerScopedState.throttle(LAST_TRESPASS_TICK, player, now, LicenceRules.TRESPASS_COOLDOWN_TICKS)) {
             return;
         }
-        LAST_TRESPASS_TICK.put(player, now);
         TraceService.report(player, MagicalOffence.MINISTRY_TRESPASS);
     }
 

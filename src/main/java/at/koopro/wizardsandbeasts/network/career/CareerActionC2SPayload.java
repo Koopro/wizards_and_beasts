@@ -61,11 +61,9 @@ public record CareerActionC2SPayload(Action action, String contractId) implement
                 return;
             }
             long now = player.level().getGameTime();
-            Long last = LAST_ACTION.get(player);
-            if (last != null && now - last < MIN_TICKS_BETWEEN && now >= last) {
+            if (!PlayerScopedState.throttle(LAST_ACTION, player, now, MIN_TICKS_BETWEEN)) {
                 return;
             }
-            LAST_ACTION.put(player, now);
             switch (payload.action()) {
                 case VIEW -> CareerProgression.sync(player);
                 case ACCEPT -> CareerProgression.accept(player, payload.contractId());

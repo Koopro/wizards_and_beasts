@@ -45,11 +45,9 @@ public final class DebugPanelService {
             return;
         }
         long now = player.level().getGameTime();
-        Long last = LAST_ANSWER_TICK.get(player);
-        if (last != null && now - last < MIN_TICKS_BETWEEN) {
+        if (!PlayerScopedState.throttle(LAST_ANSWER_TICK, player, now, MIN_TICKS_BETWEEN)) {
             return;
         }
-        LAST_ANSWER_TICK.put(player, now);
 
         DebugInspectResultPayload.sendTo(player, DebugInspectors.lookedAt(player)
                 .map(result -> DebugInspectResultPayload.of(result.anchor(), result.report()))

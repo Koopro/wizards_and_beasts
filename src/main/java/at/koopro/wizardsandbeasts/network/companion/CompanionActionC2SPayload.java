@@ -69,11 +69,9 @@ public record CompanionActionC2SPayload(UUID companion, Action action, Companion
                 return;
             }
             long now = player.level().getGameTime();
-            Long last = LAST.get(player);
-            if (last != null && now >= last && now - last < MIN_TICKS_BETWEEN) {
+            if (!PlayerScopedState.throttle(LAST, player, now, MIN_TICKS_BETWEEN)) {
                 return;
             }
-            LAST.put(player, now);
             if (payload.action() == Action.REFRESH) {
                 CompanionRosterS2CPayload.send(player);
                 return;

@@ -113,6 +113,20 @@ public final class PlayerScopedState<T> {
         byPlayer.clear();
     }
 
+    /**
+     * A per-player request throttle over a stamp table: true (and the stamp moves to {@code now}) when at
+     * least {@code minGap} ticks have passed since the last admitted request. A clock that went backwards
+     * (a world-time change) admits rather than locking the player out until it catches up.
+     */
+    public static boolean throttle(PlayerScopedState<Long> stamps, Player player, long now, long minGap) {
+        Long last = stamps.get(player);
+        if (last != null && now >= last && now - last < minGap) {
+            return false;
+        }
+        stamps.put(player, now);
+        return true;
+    }
+
     @Override
     public String toString() {
         return "PlayerScopedState[" + debugName + ", size=" + byPlayer.size() + "]";
