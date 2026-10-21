@@ -18,7 +18,7 @@ public class DeathEaterMaskItem extends WizardArmorItem {
     private final int variant;
 
     public DeathEaterMaskItem(Properties properties, int variant) {
-        super(properties, WizardArmorMaterials.DEATH_EATER_MASK, ArmorType.HELMET);
+        super(properties, WizardArmorMaterials.DEATH_EATER_MASK, ArmorType.HELMET, Wear.CURIO);
         this.variant = variant;
     }
 

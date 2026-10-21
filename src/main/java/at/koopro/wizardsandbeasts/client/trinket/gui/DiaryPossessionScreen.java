@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.client.trinket.gui;
 
 import at.koopro.wizardsandbeasts.diary.DiaryService;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -10,6 +11,11 @@ import net.minecraft.network.chat.Component;
  * no movement, no dismissal — while the soul fragment speaks. Auto-closes when the hold expires.
  */
 public class DiaryPossessionScreen extends Screen {
+
+    /** The soul fragment's words: chat's dark red, the colour the line always had, on the black. */
+    private static final int VOICE = 0xFF000000 | ChatFormatting.DARK_RED.getColor();
+    /** The writer's helplessness, one step above the black so it recedes. */
+    private static final int ASIDE = 0xFF000000 | ChatFormatting.DARK_GRAY.getColor();
 
     private final String line;
     private int ticksLeft = DiaryService.POSSESSION_TICKS;
@@ -49,8 +55,11 @@ public class DiaryPossessionScreen extends Screen {
         graphics.fill(0, 0, width, height, alpha | 0x000000);
 
         int cy = height / 2;
-        graphics.drawCenteredString(font, "§4§o\"" + line + "\"", width / 2, cy - 6, 0xFFFFFF);
-        graphics.drawCenteredString(font, "§8you cannot look away", width / 2, cy + 12, 0xFFFFFF);
+        // Colour and italics from the code, not from section codes inside the string.
+        graphics.drawCenteredString(font, Component.translatable("gui.wizards_and_beasts.diary.possession.voice", line)
+                .withStyle(ChatFormatting.ITALIC), width / 2, cy - 6, VOICE);
+        graphics.drawCenteredString(font, Component.translatable("gui.wizards_and_beasts.diary.possession.aside"),
+                width / 2, cy + 12, ASIDE);
     }
 
     @Override

@@ -45,7 +45,7 @@ public class DiaryWriteScreen extends Screen {
     private static final int CONTROL_Y = PANEL_H - EDGE - CONTROL_H;
     private static final int WRITE_W = 64;
     private static final int FIELD_W = TEXT_W - WRITE_W - 8;
-    /** Where the borderless field's text sits inside its well. */
+    private static final String KEY = "gui.wizards_and_beasts.diary.";
 
     /** The writer's own lines: plain ink, as on any page. */
     private static final int WRITER_INK = WizardsPalette.PAGE_INK;
@@ -72,15 +72,15 @@ public class DiaryWriteScreen extends Screen {
     private int panelY;
 
     public DiaryWriteScreen() {
-        super(Component.literal("Riddle's Diary"));
+        super(Component.translatable(KEY + "title"));
     }
 
     /** Appends one of Riddle's replies to the active transcript. */
     public static void appendReply(String line, int tier) {
         if (active != null) {
             int ink = REPLY_INK[Math.max(0, Math.min(REPLY_INK.length - 1, tier))];
-            active.add(new Line(Component.literal("T. M. Riddle: ").withStyle(ChatFormatting.ITALIC)
-                    .append(Component.literal(line).withStyle(style -> style.withItalic(false))), ink));
+            active.add(new Line(Component.translatable(KEY + "riddle").withStyle(ChatFormatting.ITALIC)
+                    .append(Component.literal(" " + line).withStyle(style -> style.withItalic(false))), ink));
         }
     }
 
@@ -101,14 +101,14 @@ public class DiaryWriteScreen extends Screen {
         // Widgets live in screen space, so their bounds are scaled to line up
         // with the pose-scaled panel art drawn in render().
         input = new ThemedTextField(font, layout.x(EDGE), layout.y(CONTROL_Y),
-                layout.s(FIELD_W), layout.s(CONTROL_H), Component.literal("write"))
-                .inkHint(Component.literal("write a line…"));
+                layout.s(FIELD_W), layout.s(CONTROL_H), Component.translatable(KEY + "input"))
+                .inkHint(Component.translatable(KEY + "hint"));
         input.setTextColor(WRITER_INK);
         input.setMaxLength(80);
         addRenderableWidget(input);
         setInitialFocus(input);
         addRenderableWidget(new ThemedButton(layout.x(PANEL_W - EDGE - WRITE_W), layout.y(CONTROL_Y),
-                layout.s(WRITE_W), layout.s(CONTROL_H), Component.literal("Write"), this::submit));
+                layout.s(WRITE_W), layout.s(CONTROL_H), Component.translatable(KEY + "write"), this::submit));
     }
 
     private void submit() {
@@ -143,7 +143,7 @@ public class DiaryWriteScreen extends Screen {
         this.renderMenuBackground(graphics);
         layout.applyScale(graphics);
         McStylePanel.drawThemedPanel(graphics, panelX, panelY, PANEL_W, PANEL_H);
-        graphics.drawString(font, "A half-blank diary, dated 1943", panelX + EDGE, panelY + TITLE_Y,
+        graphics.drawString(font, Component.translatable(KEY + "heading"), panelX + EDGE, panelY + TITLE_Y,
                 WizardsPalette.PAGE_INK, false);
         McStylePanel.drawDivider(graphics, panelX + EDGE, panelY + TITLE_RULE_Y, TEXT_W);
 

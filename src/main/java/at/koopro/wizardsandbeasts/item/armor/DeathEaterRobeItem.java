@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 public class DeathEaterRobeItem extends WizardArmorItem implements HoodedRobe {
 
     public DeathEaterRobeItem(Properties properties, ArmorType armorType) {
-        super(properties, WizardArmorMaterials.DEATH_EATER_ROBE, armorType);
+        super(properties, WizardArmorMaterials.DEATH_EATER_ROBE, armorType, robeWear(armorType));
     }
 
     @Override

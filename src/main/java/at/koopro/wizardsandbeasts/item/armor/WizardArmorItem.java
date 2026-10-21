@@ -1,9 +1,14 @@
 package at.koopro.wizardsandbeasts.item.armor;
 
+import at.koopro.wizardsandbeasts.equipment.EquipmentAPI;
 import at.koopro.wizardsandbeasts.item.GeoItemBase;
 import at.koopro.wizardsandbeasts.util.ClientClassBridge;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.equipment.ArmorMaterial;
 import net.minecraft.world.item.equipment.ArmorType;
+import net.minecraft.world.level.Level;
 import software.bernie.geckolib.animatable.client.GeoRenderProvider;
 import software.bernie.geckolib.animatable.manager.AnimatableManager;
 import software.bernie.geckolib.animation.AnimationController;
@@ -13,7 +18,15 @@ import software.bernie.geckolib.renderer.GeoArmorRenderer;
 import java.util.function.Consumer;
 
 /**
- * Base class for the mod's worn armour.
+ * Base class for the mod's worn GeckoLib wardrobe: real armour <em>or</em> Curios clothing.
+ *
+ * <p><b>Two ways to be worn.</b> {@link Wear#ARMOR} pieces (robe trousers and boots) run their
+ * {@code Properties} through {@code humanoidArmor()} and are vanilla armour in every respect.
+ * {@link Wear#CURIO} pieces (the robe body, the wizard hat, the masks) are clothing: no armour
+ * components at all, worn in the Curios slot their {@code wearables} data-map entry names, and drawn by
+ * {@code client.equipment.curios.WornGeoCurioRenderer} through the very same {@link GeoArmorRenderer}
+ * this class binds — so one model and one renderer serve both paths. Whatever a clothing piece grants
+ * comes from that data-map entry, not from {@link #material()}.
  *
  * <p>There is no {@code ArmorItem} to extend in 1.21.11 — {@code Properties#humanoidArmor} is the
  * whole of what the old class did, applied as data components. This type exists so a piece still
@@ -36,24 +49,59 @@ import java.util.function.Consumer;
  */
 public abstract class WizardArmorItem extends GeoItemBase {
 
-    private final ArmorMaterial material;
-    private final ArmorType armorType;
-
-    protected WizardArmorItem(Properties properties, ArmorMaterial material, ArmorType armorType) {
-        super(properties.humanoidArmor(material, armorType));
-        this.material = material;
-        this.armorType = armorType;
+    /** How a piece is worn. */
+    public enum Wear {
+        /** A vanilla armour slot, with vanilla armour mechanics. */
+        ARMOR,
+        /** A Curios slot, as clothing. */
+        CURIO
     }
 
-    /** The slot this piece was built for. Read by {@link HoodedRobe} to tell a chest piece from
-     * the legs and boots drawn off the same model. */
+    private final ArmorMaterial material;
+    private final ArmorType armorType;
+    private final Wear wear;
+
+    protected WizardArmorItem(Properties properties, ArmorMaterial material, ArmorType armorType, Wear wear) {
+        super(wear == Wear.ARMOR ? properties.humanoidArmor(material, armorType) : properties.stacksTo(1));
+        this.material = material;
+        this.armorType = armorType;
+        this.wear = wear;
+    }
+
+    /**
+     * How each piece of a robe set is worn: the body (torso, sleeves, skirt, hood) is the robe and
+     * goes in the Curios body slot, so real armour can be worn under it; the trousers and boots are
+     * legitimately leg and foot armour and stay so.
+     */
+    protected static Wear robeWear(ArmorType armorType) {
+        return armorType == ArmorType.CHESTPLATE ? Wear.CURIO : Wear.ARMOR;
+    }
+
+    /**
+     * The body part this piece's model covers — which GeckoLib bone group it draws. For an armour
+     * piece that is also its slot; for clothing it only picks bones (a robe body draws the
+     * chestplate group). Read by {@link HoodedRobe} to tell the robe body from its trousers and boots.
+     */
     public ArmorType armorType() {
         return this.armorType;
     }
 
-    /** The material this piece was built from. */
+    /** The material this piece was built from. For clothing, informational only. */
     public ArmorMaterial material() {
         return this.material;
+    }
+
+    public Wear wear() {
+        return this.wear;
+    }
+
+    /** Right-click wears clothing in its Curios slot; armour keeps vanilla's equip-swap. */
+    @Override
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
+        if (wear == Wear.CURIO) {
+            return EquipmentAPI.equipFromHand(player, hand, material.equipSound());
+        }
+        return super.use(level, player, hand);
     }
 
     // -- GeckoLib ------------------------------------------------------------------------------

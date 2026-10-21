@@ -1,0 +1,6 @@
+{
+  "order": 50,
+  "validators": [
+    "wizards_and_beasts:wearable"
+  ]
+}

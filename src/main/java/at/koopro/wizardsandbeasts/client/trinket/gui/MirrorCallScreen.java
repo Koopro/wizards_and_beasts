@@ -31,7 +31,7 @@ public class MirrorCallScreen extends Screen {
     private static final int FIELD_Y = 54;
     private static final int FIELD_H = 18;
     private static final int BUTTON_H = 20;
-    /** Where the borderless field's text sits inside its well. */
+    static final String KEY = "gui.wizards_and_beasts.mirror.";
 
     private final UUID pairId;
     private ThemedTextField nameField;
@@ -39,7 +39,7 @@ public class MirrorCallScreen extends Screen {
     private int panelY;
 
     public MirrorCallScreen(UUID pairId) {
-        super(Component.literal("Two-Way Mirror"));
+        super(Component.translatable(KEY + "title"));
         this.pairId = pairId;
     }
 
@@ -51,7 +51,7 @@ public class MirrorCallScreen extends Screen {
         int innerW = PANEL_W - 2 * EDGE;
 
         nameField = new ThemedTextField(font, panelX + EDGE, panelY + FIELD_Y, innerW, FIELD_H,
-                Component.literal("name")).inkHint(Component.literal("Speak their name…"));
+                Component.translatable(KEY + "name")).inkHint(Component.translatable(KEY + "name_hint"));
         nameField.setMaxLength(40);
         addRenderableWidget(nameField);
         setInitialFocus(nameField);
@@ -59,9 +59,9 @@ public class MirrorCallScreen extends Screen {
         int buttonW = (innerW - WizardsMetrics.SPACE_M) / 2;
         int buttonY = panelY + PANEL_H - EDGE - BUTTON_H;
         addRenderableWidget(new ThemedButton(panelX + EDGE, buttonY, buttonW, BUTTON_H,
-                Component.literal("Call"), this::connect));
+                Component.translatable(KEY + "call"), this::connect));
         addRenderableWidget(new ThemedButton(panelX + PANEL_W - EDGE - buttonW, buttonY, buttonW,
-                BUTTON_H, Component.literal("Cancel"), this::onClose));
+                BUTTON_H, Component.translatable("gui.cancel"), this::onClose));
     }
 
     private void connect() {
@@ -89,7 +89,7 @@ public class MirrorCallScreen extends Screen {
         graphics.drawString(font, this.title, panelX + EDGE, panelY + TITLE_Y,
                 WizardsPalette.PAGE_INK, false);
         McStylePanel.drawDivider(graphics, panelX + EDGE, panelY + TITLE_RULE_Y, PANEL_W - 2 * EDGE);
-        graphics.drawString(font, "Hold the mirror and speak a name", panelX + EDGE,
+        graphics.drawString(font, Component.translatable(KEY + "prompt"), panelX + EDGE,
                 panelY + PROMPT_Y, WizardsPalette.PAGE_INK_2, false);
 
         super.render(graphics, mouseX, mouseY, partialTick);

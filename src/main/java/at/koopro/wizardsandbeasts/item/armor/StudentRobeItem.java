@@ -13,7 +13,7 @@ import net.minecraft.world.item.equipment.ArmorType;
 public class StudentRobeItem extends WizardArmorItem {
 
     public StudentRobeItem(Properties properties, ArmorType armorType) {
-        super(properties, WizardArmorMaterials.STUDENT_ROBE, armorType);
+        super(properties, WizardArmorMaterials.STUDENT_ROBE, armorType, robeWear(armorType));
     }
 
     @Override

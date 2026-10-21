@@ -6,7 +6,7 @@ import net.minecraft.world.item.equipment.ArmorType;
 public class WizardHatItem extends WizardArmorItem {
 
     public WizardHatItem(Properties properties) {
-        super(properties, WizardArmorMaterials.WIZARD_HAT, ArmorType.HELMET);
+        super(properties, WizardArmorMaterials.WIZARD_HAT, ArmorType.HELMET, Wear.CURIO);
     }
 
     @Override

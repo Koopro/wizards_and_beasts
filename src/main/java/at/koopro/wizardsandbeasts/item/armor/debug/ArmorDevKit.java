@@ -3,8 +3,10 @@ package at.koopro.wizardsandbeasts.item.armor.debug;
 import at.koopro.wizardsandbeasts.command.debug.dev.DevLog;
 import at.koopro.wizardsandbeasts.command.debug.dev.FeatureDevKit;
 import at.koopro.wizardsandbeasts.registry.ArmorItemRegistry;
+import at.koopro.wizardsandbeasts.registry.DarkArtefactItemRegistry;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.registries.DeferredItem;
 import org.jspecify.annotations.NullMarked;
 
@@ -22,17 +24,17 @@ public final class ArmorDevKit implements FeatureDevKit {
 
     @Override
     public String id() {
-        return "armor";
+        return "equipment";
     }
 
     @Override
     public String title() {
-        return "Worn Armour";
+        return "Equipment";
     }
 
     @Override
     public String summary() {
-        return "Student, Auror and Death Eater sets plus hat and mask - rigs are judged side by side.";
+        return "Robe sets, hat, mask, both cloaks and netherite to wear under them - rigs are judged side by side.";
     }
 
     @Override
@@ -44,7 +46,11 @@ public final class ArmorDevKit implements FeatureDevKit {
         give(target, "death eater robe", ArmorItemRegistry.DEATH_EATER_ROBE_CHEST,
                 ArmorItemRegistry.DEATH_EATER_ROBE_LEGS, ArmorItemRegistry.DEATH_EATER_ROBE_BOOTS);
         give(target, "headwear", ArmorItemRegistry.WIZARD_HAT, ArmorItemRegistry.DEATH_EATER_MASK);
-        log.changed("armour", "3 sets, a hat and a mask");
+        give(target, "cloaks", DarkArtefactItemRegistry.INVISIBILITY_CLOAK, DarkArtefactItemRegistry.DEATHLY_HALLOW_CLOAK);
+        // Real armour to wear under the clothing: armour hiding is only judged against something to hide.
+        target.getInventory().add(new ItemStack(Items.NETHERITE_HELMET));
+        target.getInventory().add(new ItemStack(Items.NETHERITE_CHESTPLATE));
+        log.changed("equipment", "3 robe sets, a hat, a mask, 2 cloaks and netherite helmet + chestplate");
     }
 
     @SafeVarargs

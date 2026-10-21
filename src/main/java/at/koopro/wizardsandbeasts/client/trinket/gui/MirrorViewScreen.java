@@ -62,7 +62,7 @@ public class MirrorViewScreen extends Screen {
     private boolean closingFromServer;
 
     public MirrorViewScreen(UUID otherUuid, String otherName) {
-        super(Component.literal("Two-Way Mirror"));
+        super(Component.translatable(MirrorCallScreen.KEY + "title"));
         this.otherUuid = otherUuid;
         this.otherName = otherName;
     }
@@ -77,7 +77,8 @@ public class MirrorViewScreen extends Screen {
         if (active != null) {
             Minecraft mc = Minecraft.getInstance();
             if (mc.player != null) {
-                mc.player.displayClientMessage(Component.literal("§5" + reason), true);
+                // The reason is the server's own sentence; its purple comes from the style, not a section code.
+                mc.player.displayClientMessage(Component.literal(reason).withStyle(ChatFormatting.DARK_PURPLE), true);
             }
             active.closingFromServer = true;
             active.onClose();
@@ -90,7 +91,7 @@ public class MirrorViewScreen extends Screen {
         active = this;
         addRenderableWidget(new ThemedButton(width / 2 - BUTTON_W / 2,
                 stackTop() + STACK_H - BUTTON_H, BUTTON_W, BUTTON_H,
-                Component.literal("Close"), this::onClose));
+                Component.translatable(MirrorCallScreen.KEY + "close"), this::onClose));
     }
 
     private int stackTop() {
@@ -134,7 +135,7 @@ public class MirrorViewScreen extends Screen {
 
         // The name on a paper slip under the glass: ink, unshadowed, like the rest of the kit.
         Component name = Component.literal(otherName);
-        Component status = Component.literal("connected").withStyle(ChatFormatting.ITALIC);
+        Component status = Component.translatable(MirrorCallScreen.KEY + "connected").withStyle(ChatFormatting.ITALIC);
         int plateW = Math.max(GLASS + 2 * FRAME_W,
                 Math.max(font.width(name), font.width(status)) + 2 * PLATE_PAD_X);
         int plateY = glassY + GLASS + FRAME_W + GAP;

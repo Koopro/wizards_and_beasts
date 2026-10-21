@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.item.armor;
 
+import at.koopro.wizardsandbeasts.equipment.EquipmentAPI;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.NullMarked;
@@ -39,13 +39,13 @@ public final class RobeHood {
     }
 
     /**
-     * The stack a hood toggle should act on: the worn chest piece, or a robe held in hand when
-     * none is worn (which is how you set a hood before putting the robe on).
+     * The stack a hood toggle should act on: the worn robe (Curios body slot), or a robe held in hand
+     * when none is worn (which is how you set a hood before putting the robe on).
      *
      * @return the stack, or {@link ItemStack#EMPTY} if the player has no hooded robe to toggle
      */
     public static ItemStack toggleTarget(Player player) {
-        ItemStack worn = player.getItemBySlot(EquipmentSlot.CHEST);
+        ItemStack worn = EquipmentAPI.getEquippedBodyClothing(player);
 
         if (hasHood(worn)) {
             return worn;
