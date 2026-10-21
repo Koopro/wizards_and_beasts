@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.network.admin;
 
+import at.koopro.wizardsandbeasts.admin.access.AdminGate;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.admin.AdminCategory;
 import at.koopro.wizardsandbeasts.admin.AdminResult;
@@ -13,7 +14,6 @@ import at.koopro.wizardsandbeasts.admin.profile.ProfileService;
 import at.koopro.wizardsandbeasts.admin.profile.ProfileValidator;
 import at.koopro.wizardsandbeasts.client.admin.AdminClientHandlers;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
-import com.mojang.logging.LogUtils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -23,7 +23,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jspecify.annotations.NullMarked;
-import org.slf4j.Logger;
 
 import java.util.List;
 
@@ -43,7 +42,6 @@ import static at.koopro.wizardsandbeasts.network.PacketCodecUtils.readList;
 @NullMarked
 public final class AdminProfilePayloads {
 
-    private static final Logger LOGGER = LogUtils.getLogger();
     private static final int MAX_PROFILES = 160;
     private static final int MAX_FILES = 200;
     private static final int MAX_HISTORY = 200;
@@ -218,12 +216,7 @@ public final class AdminProfilePayloads {
     // ── server side ──
 
     private static boolean admitted(ServerPlayer player, String what) {
-        if (ProfileService.authorised(AdminContext.of(player))) {
-            return true;
-        }
-        LOGGER.warn("[Admin] Dropped profile {} request from unauthorised {} ({})", what,
-                player.getName().getString(), player.getUUID());
-        return false;
+        return AdminGate.admit(player, ProfileService::authorised, "profile " + what);
     }
 
     public static Listing listing(MinecraftServer server) {

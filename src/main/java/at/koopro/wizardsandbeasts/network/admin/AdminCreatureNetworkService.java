@@ -1,13 +1,11 @@
 package at.koopro.wizardsandbeasts.network.admin;
 
-import at.koopro.wizardsandbeasts.admin.access.AdminContext;
+import at.koopro.wizardsandbeasts.admin.access.AdminGate;
 import at.koopro.wizardsandbeasts.admin.creature.CreatureAdminService;
 import at.koopro.wizardsandbeasts.admin.creature.CreatureTestSpawns;
-import com.mojang.logging.LogUtils;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jspecify.annotations.NullMarked;
-import org.slf4j.Logger;
 
 /**
  * Server side of the Creatures section's payloads. Reads from someone who is not an administrator with the content
@@ -16,8 +14,6 @@ import org.slf4j.Logger;
  */
 @NullMarked
 public final class AdminCreatureNetworkService {
-
-    private static final Logger LOGGER = LogUtils.getLogger();
 
     private AdminCreatureNetworkService() {}
 
@@ -63,10 +59,6 @@ public final class AdminCreatureNetworkService {
     }
 
     private static boolean authorised(ServerPlayer player, String what) {
-        if (CreatureAdminService.authorised(AdminContext.of(player))) {
-            return true;
-        }
-        LOGGER.warn("[Admin] Dropped {} request from unauthorised {} ({})", what, player.getName().getString(), player.getUUID());
-        return false;
+        return AdminGate.admit(player, CreatureAdminService::authorised, what);
     }
 }

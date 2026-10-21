@@ -1,11 +1,11 @@
 package at.koopro.wizardsandbeasts.network.admin;
 
+import at.koopro.wizardsandbeasts.admin.access.AdminGate;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.admin.access.AdminContext;
 import at.koopro.wizardsandbeasts.admin.wand.WandAdminService;
 import at.koopro.wizardsandbeasts.client.admin.AdminClientHandlers;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
-import com.mojang.logging.LogUtils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -14,7 +14,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jspecify.annotations.NullMarked;
-import org.slf4j.Logger;
 
 import java.util.List;
 
@@ -31,7 +30,6 @@ import static at.koopro.wizardsandbeasts.network.PacketCodecUtils.readList;
 @NullMarked
 public final class AdminWandPayloads {
 
-    private static final Logger LOGGER = LogUtils.getLogger();
     private static final int MAX_PARTS = 256;
     private static final int MAX_PAIRS = 4096;
     private static final int MAX_LINES = 64;
@@ -98,11 +96,7 @@ public final class AdminWandPayloads {
     }
 
     private static boolean authorised(ServerPlayer player, String what) {
-        if (WandAdminService.authorised(AdminContext.of(player))) {
-            return true;
-        }
-        LOGGER.warn("[Admin] Dropped {} request from unauthorised {} ({})", what, player.getName().getString(), player.getUUID());
-        return false;
+        return AdminGate.admit(player, WandAdminService::authorised, what);
     }
 
     /** Server side: the catalog, when the sender may read it. */

@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.network.admin;
 
+import at.koopro.wizardsandbeasts.admin.access.AdminGate;
 import at.koopro.wizardsandbeasts.admin.AdminResult;
 import at.koopro.wizardsandbeasts.admin.access.AdminCapability;
 import at.koopro.wizardsandbeasts.admin.access.AdminContext;
@@ -8,11 +9,9 @@ import at.koopro.wizardsandbeasts.admin.spell.SpellTestService;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 import at.koopro.wizardsandbeasts.spell.core.Spells;
-import com.mojang.logging.LogUtils;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jspecify.annotations.NullMarked;
-import org.slf4j.Logger;
 
 import java.util.List;
 
@@ -22,8 +21,6 @@ import java.util.List;
  */
 @NullMarked
 public final class AdminSpellNetworkService {
-
-    private static final Logger LOGGER = LogUtils.getLogger();
 
     private AdminSpellNetworkService() {}
 
@@ -85,12 +82,7 @@ public final class AdminSpellNetworkService {
     }
 
     private static boolean authorised(ServerPlayer player, String what) {
-        AdminContext actor = AdminContext.of(player);
-        if (actor.canRead() && actor.canModify(AdminCapability.CONTENT)) {
-            return true;
-        }
-        LOGGER.warn("[Admin] Dropped {} request from unauthorised {} ({})", what, player.getName().getString(), player.getUUID());
-        return false;
+        return AdminGate.admit(player, actor -> actor.canRead() && actor.canModify(AdminCapability.CONTENT), what);
     }
 
     private static @org.jspecify.annotations.Nullable SpellCategory categoryByName(String name) {

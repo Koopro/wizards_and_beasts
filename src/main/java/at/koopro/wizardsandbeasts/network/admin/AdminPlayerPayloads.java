@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.network.admin;
 
+import at.koopro.wizardsandbeasts.admin.access.AdminGate;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.admin.access.AdminCapability;
 import at.koopro.wizardsandbeasts.admin.access.AdminContext;
@@ -13,7 +14,6 @@ import at.koopro.wizardsandbeasts.admin.player.PlayerAdminService.Option;
 import at.koopro.wizardsandbeasts.admin.player.PlayerAdminService.PlayerRow;
 import at.koopro.wizardsandbeasts.client.admin.AdminClientHandlers;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
-import com.mojang.logging.LogUtils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -23,7 +23,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jspecify.annotations.NullMarked;
-import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.UUID;
@@ -42,7 +41,6 @@ import static at.koopro.wizardsandbeasts.network.PacketCodecUtils.readEnum;
 @NullMarked
 public final class AdminPlayerPayloads {
 
-    private static final Logger LOGGER = LogUtils.getLogger();
     private static final int MAX_ROWS = PlayerAdminService.MAX_PLAYERS;
     private static final int MAX_FACTS = 128;
     private static final int MAX_ITEMS = 1024;
@@ -133,12 +131,7 @@ public final class AdminPlayerPayloads {
     // ── server side ──
 
     private static boolean admitted(ServerPlayer player, String what) {
-        if (PlayerAdminService.authorised(AdminContext.of(player))) {
-            return true;
-        }
-        LOGGER.warn("[Admin] Dropped player-admin {} request from unauthorised {} ({})", what,
-                player.getName().getString(), player.getUUID());
-        return false;
+        return AdminGate.admit(player, PlayerAdminService::authorised, "player-admin " + what);
     }
 
     public static boolean sendSearch(ServerPlayer player, String query) {
