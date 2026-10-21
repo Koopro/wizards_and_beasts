@@ -7,5 +7,29 @@
   "grantedAbilities": [
     "duelist_spell_power",
     "duelist_cast_speed"
-  ]
+  ],
+  "capstoneNodeId": "wizards_and_beasts:duelling_riposte",
+  "pathway": {
+    "early": [
+      "basic_casting",
+      "expelliarmus_unlock",
+      "stupefy_unlock",
+      "protego_unlock"
+    ],
+    "mid": [
+      "duelling_forms",
+      "shield_timing",
+      "incendio_unlock",
+      "depulso_unlock"
+    ],
+    "advanced": [
+      "nonverbal_casting",
+      "shield_control",
+      "confringo_unlock"
+    ],
+    "capstoneDepth": 2,
+    "modules": [
+      "wands_and_spells"
+    ]
+  }
 }

@@ -1,0 +1,24 @@
+{
+  "id": "duelling_riposte",
+  "displayName": "skill.wizards_and_beasts.node.duelling_riposte.name",
+  "description": "skill.wizards_and_beasts.node.duelling_riposte.desc",
+  "lore": "skill.wizards_and_beasts.node.duelling_riposte.lore",
+  "practice": "skill.wizards_and_beasts.node.duelling_riposte.practice",
+  "tree": "spell_mastery",
+  "pointCost": 5,
+  "provenance": {
+    "modAdvancement": true
+  },
+  "effects": [
+    {
+      "type": "unlock_ability",
+      "abilityId": "duelling_riposte"
+    }
+  ],
+  "x": 347.7,
+  "y": 126.5,
+  "edges": [
+    "nonverbal_casting"
+  ],
+  "size": "keystone"
+}

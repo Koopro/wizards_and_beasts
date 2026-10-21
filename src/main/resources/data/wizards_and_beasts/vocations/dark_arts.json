@@ -7,5 +7,25 @@
   "grantedAbilities": [
     "curse_power",
     "dark_corruption_accrual"
-  ]
+  ],
+  "capstoneNodeId": "wizards_and_beasts:avada_kedavra_unlock",
+  "pathway": {
+    "early": [
+      "dark_knowledge",
+      "legilimency_study",
+      "occlumency"
+    ],
+    "mid": [
+      "curse_control",
+      "quiet_casting"
+    ],
+    "advanced": [
+      "crucio_unlock",
+      "imperio_unlock"
+    ],
+    "capstoneDepth": 2,
+    "modules": [
+      "dark_arts"
+    ]
+  }
 }

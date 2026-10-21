@@ -1,0 +1,25 @@
+{
+  "id": "seasoned_traveller",
+  "displayName": "skill.wizards_and_beasts.node.seasoned_traveller.name",
+  "description": "skill.wizards_and_beasts.node.seasoned_traveller.desc",
+  "lore": "skill.wizards_and_beasts.node.seasoned_traveller.lore",
+  "practice": "skill.wizards_and_beasts.node.seasoned_traveller.practice",
+  "tree": "wandlore",
+  "pointCost": 5,
+  "provenance": {
+    "modAdvancement": true
+  },
+  "effects": [
+    {
+      "type": "unlock_ability",
+      "abilityId": "seasoned_traveller"
+    }
+  ],
+  "x": -267.2,
+  "y": -76.6,
+  "edges": [
+    "apparition_deliberation",
+    "apparition_recall"
+  ],
+  "size": "keystone"
+}

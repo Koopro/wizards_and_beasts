@@ -1,9 +1,7 @@
 package at.koopro.wizardsandbeasts.skill.command;
 
-import at.koopro.wizardsandbeasts.Config;
 import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
 import at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper;
-import at.koopro.wizardsandbeasts.currency.vault.PlayerVaultData;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.skill.data.PlayerSkillData;
@@ -13,6 +11,10 @@ import at.koopro.wizardsandbeasts.skill.SkillEffect;
 import at.koopro.wizardsandbeasts.skill.SkillTreeId;
 import at.koopro.wizardsandbeasts.skill.SkillTrees;
 import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
+import at.koopro.wizardsandbeasts.skill.build.BuildProfile;
+import at.koopro.wizardsandbeasts.skill.build.BuildTier;
+import at.koopro.wizardsandbeasts.skill.build.Builds;
+import at.koopro.wizardsandbeasts.skill.build.SkillRespecService;
 import at.koopro.wizardsandbeasts.skill.vocation.VocationDefinition;
 import at.koopro.wizardsandbeasts.skill.vocation.VocationManager;
 import at.koopro.wizardsandbeasts.skill.vocation.VocationRegistry;
@@ -81,7 +83,22 @@ public final class SkillCommands {
                                                 EntityArgument.getPlayer(ctx, "player"),
                                                 StringArgumentType.getString(ctx, "skill"))))))
                 .then(Commands.literal("respec")
-                        .executes(ctx -> respec(ctx.getSource().getPlayerOrException())))
+                        .executes(ctx -> respec(ctx.getSource().getPlayerOrException()))
+                        .then(Commands.literal("preview")
+                                .executes(ctx -> previewRespec(ctx.getSource().getPlayerOrException()))))
+                .then(Commands.literal("unlearn")
+                        .then(Commands.argument("skill", StringArgumentType.word())
+                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
+                                        ctx.getSource().getPlayer() == null ? List.<String>of()
+                                                : ctx.getSource().getPlayer().getData(ModAttachments.SKILL_DATA.get())
+                                                        .getUnlockedSkills().keySet(), builder))
+                                .executes(ctx -> unlearn(ctx.getSource().getPlayerOrException(),
+                                        StringArgumentType.getString(ctx, "skill"), false))
+                                .then(Commands.literal("preview")
+                                        .executes(ctx -> unlearn(ctx.getSource().getPlayerOrException(),
+                                                StringArgumentType.getString(ctx, "skill"), true)))))
+                .then(Commands.literal("build")
+                        .executes(ctx -> showBuild(ctx.getSource().getPlayerOrException())))
                 .then(Commands.literal("info")
                         .then(Commands.argument("skill", StringArgumentType.word())
                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
@@ -176,6 +193,10 @@ public final class SkillCommands {
                     Component.translatable(L + "set.unknown", id.toString()).withStyle(ChatFormatting.RED));
             case DARK_ARTS_DISABLED -> ChatHelper.send(player,
                     Component.translatable(L + "set.dark_arts_disabled").withStyle(ChatFormatting.RED));
+            case BUILD_SEALED -> ChatHelper.send(player,
+                    Component.translatable("vocation.wizards_and_beasts.commit.build_sealed").withStyle(ChatFormatting.RED));
+            case MASTERY_HELD -> ChatHelper.send(player,
+                    Component.translatable("vocation.wizards_and_beasts.commit.mastery_held").withStyle(ChatFormatting.RED));
         }
         return 0;
     }
@@ -259,46 +280,148 @@ public final class SkillCommands {
         return 1;
     }
 
-    /** Self-serve respec: any player may refund and clear their own skills. */
+    private static final String R = "command.wizards_and_beasts.skill.respec.";
+
+    /** Self-serve respec: any player may refund and clear their own skills. Priced by {@code RespecPricing}. */
     private static int respec(ServerPlayer player) {
-        PlayerSkillData data = player.getData(ModAttachments.SKILL_DATA.get());
-        if (data.getUnlockedSkills().isEmpty()) {
-            ChatHelper.sendError(player, "You have no skills to respec.");
+        SkillRespecService.Outcome outcome = SkillRespecService.respec(player);
+        if (!outcome.done()) {
+            ChatHelper.send(player, refusal(outcome.result(), outcome.quote()));
             return 0;
         }
+        SkillRespecService.Quote quote = outcome.quote();
+        ChatHelper.send(player, Component.translatable(R + "done", quote.refundPoints(), fee(quote))
+                .withStyle(ChatFormatting.GREEN));
+        if (!quote.spellsForgotten().isEmpty()) {
+            ChatHelper.send(player, Component.translatable(R + "forgot", spellList(quote.spellsForgotten()))
+                    .withStyle(ChatFormatting.GRAY));
+        }
+        return 1;
+    }
 
-        // Charged before the refund, so a failed payment leaves the web exactly as it was.
-        // Gated on GRINGOTTS: with the currency module off there is no vault to bill, and a fee
-        // nobody can pay would make respec unreachable rather than costly.
-        int fee = Config.skillRespecCostKnuts;
-        if (fee > 0 && ModuleManager.isEnabled(Module.GRINGOTTS)) {
-            PlayerVaultData vault = player.getData(ModAttachments.VAULT_DATA.get());
-            long withdrawn = vault.withdrawSmartKnuts(fee);
-            if (withdrawn < fee) {
-                if (withdrawn > 0) {
-                    vault.depositKnuts(withdrawn); // all-or-nothing: never pocket a partial payment
-                }
-                long[] price = CurrencyHelper.fromKnuts(fee);
-                ChatHelper.sendError(player, "Respec costs "
-                        + CurrencyHelper.formatCurrency(price[0], price[1], price[2])
-                        + " — your vault is short.");
+    /** What a full respec would do, without doing it. */
+    private static int previewRespec(ServerPlayer player) {
+        SkillRespecService.Quote quote = SkillRespecService.quoteRespec(player);
+        if (!quote.allowed()) {
+            ChatHelper.send(player, refusal(quote.reason(), quote));
+            return 0;
+        }
+        ChatHelper.send(player, Component.translatable(R + "preview.header").withStyle(ChatFormatting.GOLD));
+        describeQuote(player, quote);
+        ChatHelper.send(player, Component.translatable(R + "preview.confirm").withStyle(ChatFormatting.DARK_GRAY));
+        return 1;
+    }
+
+    /** Unlearn one level of one node, or (preview) say what that would do. */
+    private static int unlearn(ServerPlayer player, String skillId, boolean preview) {
+        Skill skill = SkillTrees.byId(skillId);
+        Component name = skill == null ? Component.literal(skillId) : Component.translatable(skill.getDisplayName());
+        if (preview) {
+            SkillRespecService.Quote quote = SkillRespecService.quoteUnlearn(player, skillId);
+            if (!quote.allowed()) {
+                ChatHelper.send(player, refusal(quote.reason(), quote));
                 return 0;
             }
+            ChatHelper.send(player, Component.translatable(R + "unlearn.preview", name).withStyle(ChatFormatting.GOLD));
+            describeQuote(player, quote);
+            return 1;
         }
+        SkillRespecService.Outcome outcome = SkillRespecService.unlearn(player, skillId);
+        if (!outcome.done()) {
+            ChatHelper.send(player, refusal(outcome.result(), outcome.quote()));
+            return 0;
+        }
+        ChatHelper.send(player, Component.translatable(R + "unlearn.done", name, outcome.quote().refundPoints(),
+                fee(outcome.quote())).withStyle(ChatFormatting.GREEN));
+        if (!outcome.quote().spellsForgotten().isEmpty()) {
+            ChatHelper.send(player, Component.translatable(R + "forgot", spellList(outcome.quote().spellsForgotten()))
+                    .withStyle(ChatFormatting.GRAY));
+        }
+        return 1;
+    }
 
-        data.resetAll();
-        // Take back the spells the web taught, which the refund alone does not. Without this a respec
-        // refunds every point while leaving every spell learned: allocate a node, learn its spell,
-        // respec, allocate elsewhere, and repeat for the whole spell list at one fee each.
-        // revokeWebTaughtSpells only ever forgets spells the web itself granted and whose node is gone —
-        // a spell the player learned from a teacher, or one a still-allocated node re-asserts, is safe.
-        int forgotten = SkillSystemAPI.revokeWebTaughtSpells(player);
-        SkillSystemAPI.reconcileDerivedEffects(player);
-        PlayerStateSyncService.syncSkills(player);
-        PlayerStateSyncService.syncAbilityGrants(player); // refund strips SKILL_NODE-source grants
-        ChatHelper.sendSuccess(player, forgotten > 0
-                ? "Skills respecced — all points refunded, " + forgotten + " web-taught spell(s) forgotten."
-                : "Skills respecced — all points refunded.");
+    private static void describeQuote(ServerPlayer player, SkillRespecService.Quote quote) {
+        ChatHelper.send(player, Component.translatable(R + "line.refund", quote.refundPoints())
+                .withStyle(ChatFormatting.GRAY));
+        ChatHelper.send(player, Component.translatable(R + "line.fee", fee(quote)).withStyle(ChatFormatting.GRAY));
+        ChatHelper.send(player, Component.translatable(R + "line.spells",
+                quote.spellsForgotten().isEmpty() ? Component.translatable(R + "line.none")
+                        : spellList(quote.spellsForgotten())).withStyle(ChatFormatting.GRAY));
+        if (quote.corruptionKept() > 0f) {
+            ChatHelper.send(player, Component.translatable(R + "line.corruption",
+                    String.format(java.util.Locale.ROOT, "%.0f", quote.corruptionKept()))
+                    .withStyle(ChatFormatting.DARK_PURPLE));
+        }
+    }
+
+    private static Component fee(SkillRespecService.Quote quote) {
+        if (quote.feeKnuts() <= 0) {
+            return Component.translatable(quote.free() ? R + "fee.first_free" : R + "fee.free");
+        }
+        return Component.literal(CurrencyHelper.formatFromKnuts(quote.feeKnuts()));
+    }
+
+    private static Component spellList(List<String> spellIds) {
+        net.minecraft.network.chat.MutableComponent out = Component.empty();
+        for (int i = 0; i < spellIds.size(); i++) {
+            if (i > 0) {
+                out.append(", ");
+            }
+            String id = spellIds.get(i);
+            String path = id.contains(":") ? id.substring(id.indexOf(':') + 1) : id;
+            out.append(Component.translatable("spell.wizards_and_beasts." + path + ".name"));
+        }
+        return out;
+    }
+
+    private static Component refusal(String reason, SkillRespecService.Quote quote) {
+        if ("would_strand".equals(reason)) {
+            net.minecraft.network.chat.MutableComponent names = Component.empty();
+            int i = 0;
+            for (String id : quote.stranded()) {
+                if (i++ > 0) {
+                    names.append(", ");
+                }
+                Skill stranded = SkillTrees.byId(id);
+                names.append(stranded == null ? Component.literal(id) : Component.translatable(stranded.getDisplayName()));
+            }
+            return Component.translatable(R + "refused.would_strand", names).withStyle(ChatFormatting.RED);
+        }
+        if ("cannot_afford".equals(reason)) {
+            return Component.translatable(R + "refused.cannot_afford", fee(quote)).withStyle(ChatFormatting.RED);
+        }
+        return Component.translatable(R + "refused." + reason).withStyle(ChatFormatting.RED);
+    }
+
+    /** The player's build in chat: the same profile the character sheet draws. */
+    private static int showBuild(ServerPlayer player) {
+        BuildProfile profile = Builds.profileOf(player);
+        String b = "command.wizards_and_beasts.skill.build.";
+        Component current = profile.current() == null
+                ? Component.translatable(b + "none")
+                : Component.translatable(profile.current().nameKey());
+        ChatHelper.send(player, Component.translatable(b + "status."
+                + profile.status().name().toLowerCase(java.util.Locale.ROOT), current).withStyle(ChatFormatting.GOLD));
+        for (BuildProfile.PathwayProgress p : profile.pathways()) {
+            ChatHelper.send(player, Component.translatable(b + "pathway",
+                    Component.translatable(p.archetype().nameKey()),
+                    p.count(BuildTier.EARLY), p.size(BuildTier.EARLY),
+                    p.count(BuildTier.MID), p.size(BuildTier.MID),
+                    p.count(BuildTier.ADVANCED), p.size(BuildTier.ADVANCED),
+                    Component.translatable(p.capstoneHeld() ? b + "capstone.held" : b + "capstone.open"))
+                    .withStyle(ChatFormatting.GRAY));
+            for (String next : p.nextChoices()) {
+                Skill s = SkillTrees.byId(next);
+                if (s != null) {
+                    ChatHelper.send(player, Component.translatable(b + "next",
+                            Component.translatable(s.getDisplayName()), s.getPointCost())
+                            .withStyle(ChatFormatting.DARK_GRAY));
+                }
+            }
+        }
+        if (profile.pathways().isEmpty()) {
+            ChatHelper.send(player, Component.translatable(b + "empty").withStyle(ChatFormatting.GRAY));
+        }
         return 1;
     }
 

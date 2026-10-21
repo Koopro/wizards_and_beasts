@@ -16,7 +16,6 @@ import at.koopro.wizardsandbeasts.skill.SkillNodeEffect.BroomSpeedBonus;
 import at.koopro.wizardsandbeasts.skill.SkillNodeEffect.SpellCooldownMultiplier;
 import at.koopro.wizardsandbeasts.skill.SkillNodeEffect.SpellDamageMultiplier;
 import at.koopro.wizardsandbeasts.skill.SkillNodeEffect.UnlockSpellEarly;
-import at.koopro.wizardsandbeasts.heritage.profession.ProfessionNode;
 import net.minecraft.network.protocol.game.ClientboundUpdateAttributesPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -69,27 +68,9 @@ public final class SkillAttributeApplicator {
             }
         }
 
-        var heritageData = player.getData(ModAttachments.HERITAGE_DATA.get());
-        for (String professionId : heritageData.getUnlockedProfessions()) {
-            ProfessionNode node = ProfessionNode.byId(professionId);
-            if (node == null) {
-                continue;
-            }
-            for (SkillNodeEffect effect : node.getEffects()) {
-                applyNode(player, effect);
-                if (effect instanceof SpellCooldownMultiplier m) {
-                    cooldowns.merge(m.category(), m.multiplier(), (a, b) -> a * b);
-                } else if (effect instanceof SpellDamageMultiplier m) {
-                    damages.merge(m.category(), m.multiplier(), (a, b) -> a * b);
-                } else if (effect instanceof UnlockSpellEarly u) {
-                    gateOverrides.merge(u.spellId(), u.proficiencyGateOverride(), Math::min);
-                } else if (effect instanceof BroomSpeedBonus b) {
-                    broomSpeedBonus += b.additiveBonus();
-                } else if (effect instanceof BestiaryXpMultiplier x) {
-                    bestiary.merge(x.category(), x.multiplier(), (a, b) -> a * b);
-                }
-            }
-        }
+        // Heritage professions grant no attributes or multipliers: they pay in GameplayStat bonuses,
+        // read through SkillSystemAPI.getGameplayBonus (ProfessionNode). removeAll above still strips
+        // the skill/profession/* modifiers older saves carry.
 
         PlayerSkillBonusData bonusData = new PlayerSkillBonusData(cooldowns, damages, gateOverrides, broomSpeedBonus, bestiary);
         player.setData(ModAttachments.SKILL_BONUS_DATA.get(), bonusData);

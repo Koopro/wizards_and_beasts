@@ -1,0 +1,24 @@
+{
+  "id": "scholars_method",
+  "displayName": "skill.wizards_and_beasts.node.scholars_method.name",
+  "description": "skill.wizards_and_beasts.node.scholars_method.desc",
+  "lore": "skill.wizards_and_beasts.node.scholars_method.lore",
+  "practice": "skill.wizards_and_beasts.node.scholars_method.practice",
+  "tree": "alchemy",
+  "pointCost": 5,
+  "provenance": {
+    "modAdvancement": true
+  },
+  "effects": [
+    {
+      "type": "unlock_ability",
+      "abilityId": "scholars_method"
+    }
+  ],
+  "x": -280.6,
+  "y": 162.0,
+  "edges": [
+    "transmuters_insight"
+  ],
+  "size": "keystone"
+}

@@ -6,5 +6,24 @@
   "pillar": "vocation.wizards_and_beasts.herbologist.pillar",
   "grantedAbilities": [
     "crop_yield"
-  ]
+  ],
+  "capstoneNodeId": "wizards_and_beasts:healers_hands",
+  "pathway": {
+    "early": [
+      "green_thumb",
+      "aguamenti_unlock",
+      "natural_remedy"
+    ],
+    "mid": [
+      "potion_potency",
+      "plant_cultivation",
+      "magical_harvesting"
+    ],
+    "advanced": [
+      "verdant_heart",
+      "dangerous_plants"
+    ],
+    "capstoneDepth": 2,
+    "modules": []
+  }
 }

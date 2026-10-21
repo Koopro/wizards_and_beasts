@@ -85,7 +85,8 @@ public record SkillUnlockC2SPayload(String skillId) implements CustomPacketPaylo
     private static Component reasonOf(String reason) {
         String key = switch (reason) {
             case "maxed", "not_enough_points", "not_adjacent", "tree_unavailable",
-                 "module_disabled", "standing_unmet" -> reason;
+                 "module_disabled", "standing_unmet", "lineage_unmet",
+                 "build_module_disabled", "capstone_taken", "capstone_shallow" -> reason;
             case "requirement_unmet" -> "sealed";
             default -> "denied";
         };

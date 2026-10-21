@@ -17,6 +17,9 @@ import org.jspecify.annotations.NullMarked;
  *   <li>{@code crop_yield} — +10% harvest double-drop chance (HerbologyAbilityHandler).</li>
  *   <li>{@code beast_capacity} — +10% beast damage resistance (MagizoologyAbilityHandler).</li>
  *   <li>{@code mount_loyalty} — mounts you ride take 25% less damage (MagizoologyAbilityHandler).</li>
+ *   <li>{@code wand_steadiness} — five points off every cast's misfire chance: the Wandlore Master's wand
+ *       answers them more surely. Replaces a commitment boost to {@code wand_affinity}, an attribute no
+ *       player carries, so the vocation used to change nothing.</li>
  * </ul>
  */
 @NullMarked
@@ -29,6 +32,7 @@ public final class VocationAbilityHooks {
     public static final float CROP_YIELD_BONUS = 0.10f;
     public static final float BEAST_RESISTANCE_BONUS = 0.10f;
     public static final float MOUNT_DAMAGE_MULT = 0.75f;
+    public static final float WAND_STEADINESS = 0.05f;
 
     private VocationAbilityHooks() {}
 
@@ -39,6 +43,10 @@ public final class VocationAbilityHooks {
         }
         if (VocationHelper.hasGrantedAbility(caster, "duelist_cast_speed")) {
             modifiers.multiplyCooldown(CAST_SPEED_MULT, "vocation_duelist_cast_speed");
+        }
+        if (VocationHelper.hasGrantedAbility(caster, "wand_steadiness")) {
+            // Added negatively, like the web's steadiness: misfire accumulates from several sources.
+            modifiers.addMisfireChance(-WAND_STEADINESS, "vocation_wand_steadiness");
         }
         if (spell.getCategory() == SpellCategory.DARK_ARTS
                 && VocationHelper.hasGrantedAbility(caster, "curse_power")) {

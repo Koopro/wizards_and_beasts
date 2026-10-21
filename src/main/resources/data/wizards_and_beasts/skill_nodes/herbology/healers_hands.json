@@ -1,0 +1,24 @@
+{
+  "id": "healers_hands",
+  "displayName": "skill.wizards_and_beasts.node.healers_hands.name",
+  "description": "skill.wizards_and_beasts.node.healers_hands.desc",
+  "lore": "skill.wizards_and_beasts.node.healers_hands.lore",
+  "practice": "skill.wizards_and_beasts.node.healers_hands.practice",
+  "tree": "herbology",
+  "pointCost": 5,
+  "provenance": {
+    "modAdvancement": true
+  },
+  "effects": [
+    {
+      "type": "unlock_ability",
+      "abilityId": "healers_hands"
+    }
+  ],
+  "x": 0.0,
+  "y": -324.0,
+  "edges": [
+    "verdant_heart"
+  ],
+  "size": "keystone"
+}

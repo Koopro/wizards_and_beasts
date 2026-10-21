@@ -1,0 +1,28 @@
+{
+  "id": "wizards_and_beasts:explorer",
+  "tree": "wandlore",
+  "displayName": "vocation.wizards_and_beasts.explorer.name",
+  "description": "vocation.wizards_and_beasts.explorer.desc",
+  "pillar": "vocation.wizards_and_beasts.explorer.pillar",
+  "capstoneNodeId": "wizards_and_beasts:seasoned_traveller",
+  "pathway": {
+    "early": [
+      "lumos_unlock",
+      "nox_unlock",
+      "apparition_training"
+    ],
+    "mid": [
+      "lumos_steady",
+      "lumos_corridor",
+      "apparition_recall"
+    ],
+    "advanced": [
+      "wandlight_mastery",
+      "apparition_deliberation"
+    ],
+    "capstoneDepth": 2,
+    "modules": [
+      "apparition"
+    ]
+  }
+}

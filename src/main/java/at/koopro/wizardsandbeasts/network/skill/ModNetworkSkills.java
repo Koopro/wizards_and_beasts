@@ -46,6 +46,10 @@ public final class ModNetworkSkills {
                 SkillUnlockC2SPayload.STREAM_CODEC,
                 SkillUnlockC2SPayload::handle);
         registrar.playToServer(
+                SkillRespecC2SPayload.TYPE,
+                SkillRespecC2SPayload.STREAM_CODEC,
+                SkillRespecC2SPayload::handle);
+        registrar.playToServer(
                 VocationCommitC2SPayload.TYPE,
                 VocationCommitC2SPayload.STREAM_CODEC,
                 VocationCommitC2SPayload::handle);

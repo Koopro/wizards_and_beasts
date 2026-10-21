@@ -201,6 +201,20 @@ public final class SkillTreeRenderHelper {
     public static void renderTooltipCard(GuiGraphics graphics, Font font, Skill skill, int mouseX, int mouseY,
                                          int level, int points, boolean adjacencyOpen, boolean sealed,
                                          List<Component> prerequisites, List<Component> leadsTo) {
+        renderTooltipCard(graphics, font, skill, mouseX, mouseY, level, points, adjacencyOpen, sealed,
+                prerequisites, leadsTo, List.of());
+    }
+
+    /** A coloured line under the card's body: which builds a node serves, what a capstone still needs, how to unlearn. */
+    public record Note(Component text, int color) {}
+
+    /**
+     * The node card plus {@code notes}: the build layer's answers to "whose road is this on", "why is this
+     * capstone shut" and "how do I take this back".
+     */
+    public static void renderTooltipCard(GuiGraphics graphics, Font font, Skill skill, int mouseX, int mouseY,
+                                         int level, int points, boolean adjacencyOpen, boolean sealed,
+                                         List<Component> prerequisites, List<Component> leadsTo, List<Note> notes) {
         int w = WizardsAndBeastsUiTokens.SkillTree.TOOLTIP_WIDTH;
         int inner = w - TOOLTIP_MARGIN * 2;
 
@@ -211,7 +225,7 @@ public final class SkillTreeRenderHelper {
         int regionInk = SkillTreeChartTextures.regionTextInk(skill.getTree());
         int accent = started ? SKIN.ink() : regionInk;
 
-        List<String> descLines = wrap(font, safeText(skill.getDescription(), "No description."), inner, 2);
+        List<String> descLines = wrap(font, safeText(skill.getDescription(), I18n.get("screen.wizards_and_beasts.skill_tree.card.no_description")), inner, 2);
 
         // What one more point buys, when there is one to buy; otherwise what the node is giving now.
         // Those are different numbers on a multi-level node, and that is the choice being made.
@@ -242,6 +256,15 @@ public final class SkillTreeRenderHelper {
                     I18n.get("screen.wizards_and_beasts.skill_tree.requires_any", joined), inner, 2);
         }
 
+        List<String> noteLines = new java.util.ArrayList<>();
+        List<Integer> noteColors = new java.util.ArrayList<>();
+        for (Note note : notes) {
+            for (String line : wrap(font, note.text().getString(), inner, 3)) {
+                noteLines.add(line);
+                noteColors.add(note.color());
+            }
+        }
+
         int h = TOOLTIP_PAD_TOP
                 + descLines.size() * LINE
                 + (loreLines.isEmpty() ? 0 : loreLines.size() * LINE + 2)
@@ -251,6 +274,7 @@ public final class SkillTreeRenderHelper {
                 + provenanceLines.size() * LINE
                 + leadsToLines.size() * LINE
                 + prereqLines.size() * LINE
+                + noteLines.size() * LINE
                 + TOOLTIP_PAD_BOTTOM;
 
         int tooltipX = Math.min(mouseX + WizardsAndBeastsUiTokens.SkillTree.TOOLTIP_OFFSET_X,
@@ -281,9 +305,9 @@ public final class SkillTreeRenderHelper {
             y += 2;
         }
 
-        graphics.drawString(font, "Level: " + level + "/" + skill.getMaxLevel(),
+        graphics.drawString(font, I18n.get("screen.wizards_and_beasts.skill_tree.card.level", level, skill.getMaxLevel()),
                 textX, y, SKIN.muted(), false);
-        graphics.drawString(font, "Cost: " + skill.getPointCost() + " SP",
+        graphics.drawString(font, I18n.get("screen.wizards_and_beasts.skill_tree.card.cost", skill.getPointCost()),
                 textX, y + LINE, SKIN.muted(), false);
 
         String constellation = I18n.get("skilltree.region." + skill.getTree().getId() + ".constellation");
@@ -330,6 +354,11 @@ public final class SkillTreeRenderHelper {
 
         for (String line : prereqLines) {
             graphics.drawString(font, line, textX, y, WizardsPalette.PAGE_BAD, false);
+            y += LINE;
+        }
+
+        for (int i = 0; i < noteLines.size(); i++) {
+            graphics.drawString(font, noteLines.get(i), textX, y, noteColors.get(i), false);
             y += LINE;
         }
 

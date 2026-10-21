@@ -19,7 +19,28 @@ public record SkillDataSyncS2CPayload(
         int syncVersion,
         int skillPoints,
         int totalPointsEarned,
-        Map<String, Integer> unlockedSkills) implements CustomPacketPayload {
+        Map<String, Integer> unlockedSkills,
+        RespecTerms respec) implements CustomPacketPayload {
+
+    /**
+     * What the two respec doors cost this player right now, so the skill screen and the character sheet quote the
+     * server's numbers rather than guessing at a config the client cannot see.
+     *
+     * @param freeRespecAvailable the next full respec is the character's free one
+     * @param respecFeeKnuts      effective fee for the next full respec (0 when free or billing is off)
+     * @param unlearnPerPointKnuts effective unlearn fee per point (0 when billing is off)
+     * @param respecCapKnuts      the configured full-respec fee, which an unlearn never exceeds
+     */
+    public record RespecTerms(boolean freeRespecAvailable, int respecFeeKnuts, int unlearnPerPointKnuts,
+                              int respecCapKnuts) {
+        public static final RespecTerms FREE = new RespecTerms(true, 0, 0, 0);
+    }
+
+    /** Pre-builds constructor, kept for callers that only move points and nodes. */
+    public SkillDataSyncS2CPayload(int syncVersion, int skillPoints, int totalPointsEarned,
+                                   Map<String, Integer> unlockedSkills) {
+        this(syncVersion, skillPoints, totalPointsEarned, unlockedSkills, RespecTerms.FREE);
+    }
     private static final AtomicInteger NEXT_SYNC_VERSION = new AtomicInteger();
 
     public static final Type<SkillDataSyncS2CPayload> TYPE = new Type<>(
@@ -40,7 +61,11 @@ public record SkillDataSyncS2CPayload(
                     skills.put(id, level);
                 }
             }
-            return new SkillDataSyncS2CPayload(syncVersion, points, total, skills);
+            RespecTerms terms = new RespecTerms(buf.readBoolean(),
+                    PacketCodecUtils.clampNonNegative(buf.readInt()),
+                    PacketCodecUtils.clampNonNegative(buf.readInt()),
+                    PacketCodecUtils.clampNonNegative(buf.readInt()));
+            return new SkillDataSyncS2CPayload(syncVersion, points, total, skills, terms);
         }
 
         @Override
@@ -53,6 +78,10 @@ public record SkillDataSyncS2CPayload(
                 PacketCodecUtils.writeString(buf, entry.getKey());
                 buf.writeInt(PacketCodecUtils.clampNonNegative(entry.getValue()));
             }
+            buf.writeBoolean(pkt.respec.freeRespecAvailable());
+            buf.writeInt(PacketCodecUtils.clampNonNegative(pkt.respec.respecFeeKnuts()));
+            buf.writeInt(PacketCodecUtils.clampNonNegative(pkt.respec.unlearnPerPointKnuts()));
+            buf.writeInt(PacketCodecUtils.clampNonNegative(pkt.respec.respecCapKnuts()));
         }
     };
 
@@ -67,6 +96,11 @@ public record SkillDataSyncS2CPayload(
                 NEXT_SYNC_VERSION.incrementAndGet(),
                 data.getSkillPoints(),
                 data.getTotalPointsEarned(),
-                new HashMap<>(data.getUnlockedSkills())));
+                new HashMap<>(data.getUnlockedSkills()),
+                new RespecTerms(data.isFreeRespecAvailable(),
+                        at.koopro.wizardsandbeasts.skill.build.SkillRespecService.effectiveRespecFee(data),
+                        at.koopro.wizardsandbeasts.skill.build.SkillRespecService.effectiveUnlearnPerPoint(),
+                        at.koopro.wizardsandbeasts.skill.build.SkillRespecService.billingOn()
+                                ? at.koopro.wizardsandbeasts.Config.skillRespecCostKnuts : 0)));
     }
 }

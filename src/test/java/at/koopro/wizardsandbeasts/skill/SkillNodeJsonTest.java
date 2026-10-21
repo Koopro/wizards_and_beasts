@@ -82,8 +82,10 @@ class SkillNodeJsonTest {
 
     @Test
     void nodeCountsMatchGeneratedLayout() {
-        assertEquals(84, BY_ID.size(),
-                "the 2026-09-17 education rework: 84 nodes that each do something nameable, down from 107");
+        assertEquals(90, BY_ID.size(),
+                "the 2026-09-17 education rework left 84 nodes that each do something nameable; the 2026-10-14"
+                        + " builds pass added six capstones (Duelist, Wandmaster, Beastmaster, Scholar, Healer,"
+                        + " Explorer) — Dark Arts' capstone is the existing Avada Kedavra node");
         // Zero, and it should stay zero. The 34 pathway nodes the webs used to be padded with each printed the
         // same sentence as several siblings; the rework replaced them with fewer, named nodes. A SMALL node is
         // still legal — pathwaysFollowTheContentRule and noSmallNodeGrantsARawAttribute constrain what one may
@@ -94,7 +96,7 @@ class SkillNodeJsonTest {
         // ships disabled. Pinned because a keystone is the payoff a whole branch routes toward:
         // silently dropping one would leave a tree with nothing at the end of it.
         long keystones = BY_ID.values().stream().filter(s -> s.getSize() == Skill.Size.KEYSTONE).count();
-        assertEquals(12, keystones, "Polaris plus three in spell_mastery (wandlight, nonverbal casting and the"
+        assertEquals(18, keystones, "six build capstones, plus Polaris and three in spell_mastery (wandlight, nonverbal casting and the"
                 + " Patronus), one each in dark_arts, wandlore, magizoology and herbology, two in alchemy, and"
                 + " one each in the two heritage webs");
     }

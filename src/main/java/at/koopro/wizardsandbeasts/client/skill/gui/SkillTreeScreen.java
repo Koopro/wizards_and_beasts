@@ -153,7 +153,60 @@ public class SkillTreeScreen extends Screen {
             centerOnWeb();
         }
         addVocationButton();
+        addStartOverButton();
         addChartControls();
+    }
+
+    /**
+     * "Start over": the full respec, behind a confirmation that says exactly what it costs.
+     *
+     * <p>The respec used to exist only as {@code /wandb skill respec}, named in the footer — a command a player had to
+     * read about, type, and pay for before finding out what it would take. It sits beside the Vocation button
+     * because the two are the same kind of decision: who this wizard is.
+     */
+    private void addStartOverButton() {
+        int buttonH = layout.s(WizardsAndBeastsUiTokens.SkillTree.VOCATION_BUTTON_H);
+        int vocationW = layout.s(WizardsAndBeastsUiTokens.SkillTree.VOCATION_BUTTON_W);
+        int buttonW = Math.max(font.width(Component.translatable("screen.wizards_and_beasts.skill_tree.start_over")) + 12,
+                layout.s(64));
+        int x = panelX + panelW - layout.s(WizardsAndBeastsUiTokens.SkillTree.SEAL_INSET
+                + McStylePanel.SEAL_SIZE + 4) - vocationW - layout.s(4) - buttonW;
+        addRenderableWidget(chartButton(x, SkillTreeRenderHelper.headerRowY(layout, buttonH), buttonW, buttonH,
+                Component.translatable("screen.wizards_and_beasts.skill_tree.start_over"), null,
+                this::confirmStartOver));
+    }
+
+    private void confirmStartOver() {
+        if (minecraft == null) {
+            return;
+        }
+        PlayerSkillData data = ClientSkillDataState.get();
+        int refund = 0;
+        for (var entry : data.getUnlockedSkills().entrySet()) {
+            Skill node = SkillTrees.clientById(entry.getKey());
+            if (node != null) {
+                refund += node.getPointCost() * entry.getValue();
+            }
+        }
+        if (refund == 0) {
+            return;
+        }
+        var terms = ClientSkillDataState.respecTerms();
+        Component fee = terms.respecFeeKnuts() > 0
+                ? Component.literal(at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper.formatFromKnuts(terms.respecFeeKnuts()))
+                : Component.translatable(terms.freeRespecAvailable() && terms.respecCapKnuts() > 0
+                        ? "skill.wizards_and_beasts.respec.fee.first_free"
+                        : "skill.wizards_and_beasts.respec.fee.free");
+        Screen self = this;
+        minecraft.setScreen(new net.minecraft.client.gui.screens.ConfirmScreen(yes -> {
+            if (yes) {
+                ClientPacketDistributor.sendToServer(
+                        at.koopro.wizardsandbeasts.network.skill.SkillRespecC2SPayload.startOver());
+            }
+            minecraft.setScreen(self);
+        },
+                Component.translatable("screen.wizards_and_beasts.skill_tree.start_over.title"),
+                Component.translatable("screen.wizards_and_beasts.skill_tree.start_over.body", refund, fee)));
     }
 
     /**
@@ -182,27 +235,33 @@ public class SkillTreeScreen extends Screen {
     }
 
     /**
-     * Zoom and recenter, bottom-right inside the well.
+     * Zoom and recenter, on the header row at its left end -- the row's other end holds the Vocation
+     * button and its middle the title.
+     *
+     * <p>They sat bottom-right inside the chart, where they covered whatever stars lay under them and
+     * read as part of the map. Toolbar controls go in the chrome, never on the content they control.
      *
      * <p>Scroll-to-zoom and drag-to-pan are still the fast path; these exist because a player who
      * has panned off the web has no way back short of closing the screen, and a trackpad without
      * a scroll wheel has no way to zoom at all.
      */
     private void addChartControls() {
-        int size = layout.s(WizardsAndBeastsUiTokens.SkillTree.CONTROL_SIZE);
+        // Floored at the icon plus a two-pixel frame: icons are drawn at native size, and at the
+        // panel's smallest scale an 18px control is 13px around a 12px icon. The header row is 24px
+        // tall at that scale, so the floor cannot overflow its rung.
+        int size = Math.max(SkillTreeChartTextures.ICON_SIZE + 4, layout.s(WizardsAndBeastsUiTokens.SkillTree.CONTROL_SIZE));
         int gap = layout.s(WizardsAndBeastsUiTokens.SkillTree.CONTROL_GAP);
-        int margin = layout.s(WizardsAndBeastsUiTokens.SkillTree.CONTROL_MARGIN);
-        int y = chartY + chartH - margin - size;
-        int x = chartX + chartW - margin - size;
+        int y = SkillTreeRenderHelper.headerRowY(layout, size);
+        int x = panelX + layout.s(WizardsAndBeastsUiTokens.SkillTree.SEAL_INSET + McStylePanel.SEAL_SIZE + 4);
 
-        addRenderableWidget(iconControl(x, y, size, SkillTreeChartTextures.ICON_RECENTER,
-                "recenter", this::centerOnWeb));
-        x -= size + gap;
-        addRenderableWidget(iconControl(x, y, size, SkillTreeChartTextures.ICON_ZOOM_IN,
-                "zoom_in", () -> zoomAboutChartCenter(ZOOM_STEP)));
-        x -= size + gap;
         addRenderableWidget(iconControl(x, y, size, SkillTreeChartTextures.ICON_ZOOM_OUT,
                 "zoom_out", () -> zoomAboutChartCenter(1.0 / ZOOM_STEP)));
+        x += size + gap;
+        addRenderableWidget(iconControl(x, y, size, SkillTreeChartTextures.ICON_ZOOM_IN,
+                "zoom_in", () -> zoomAboutChartCenter(ZOOM_STEP)));
+        x += size + gap;
+        addRenderableWidget(iconControl(x, y, size, SkillTreeChartTextures.ICON_RECENTER,
+                "recenter", this::centerOnWeb));
     }
 
     /**
@@ -358,6 +417,14 @@ public class SkillTreeScreen extends Screen {
 
     @Override
     public boolean mouseReleased(net.minecraft.client.input.MouseButtonEvent event) {
+        // Right-click unlearns one level. The server quotes, charges and re-checks connectivity; the card has
+        // already told the player the price, and a refusal comes back as a toast naming what would be cut off.
+        if (event.button() == 1 && hoveredNode != null && !panned
+                && ClientSkillDataState.get().getSkillLevel(hoveredNode.getId()) > 0) {
+            ClientPacketDistributor.sendToServer(
+                    at.koopro.wizardsandbeasts.network.skill.SkillRespecC2SPayload.unlearn(hoveredNode.getId()));
+            return true;
+        }
         if (event.button() == 0) {
             boolean wasPan = panned;
             panned = false;
@@ -426,8 +493,76 @@ public class SkillTreeScreen extends Screen {
             boolean sealed = sealedTrees.contains(hoveredNode.getTree());
             SkillTreeRenderHelper.renderTooltipCard(graphics, font, hoveredNode, mouseX, mouseY,
                     data.getSkillLevel(hoveredNode.getId()), data.getSkillPoints(), adjacencyOpen, sealed,
-                    prerequisiteNames(hoveredNode), unallocatedNeighbourNames(hoveredNode, data));
+                    prerequisiteNames(hoveredNode), unallocatedNeighbourNames(hoveredNode, data),
+                    buildNotes(hoveredNode, data));
         }
+    }
+
+    /**
+     * The build layer's lines on a node card: which builds the node is part of (and at what depth), what a closed
+     * capstone still needs, and what unlearning it would cost or cut off.
+     */
+    private List<SkillTreeRenderHelper.Note> buildNotes(Skill node, PlayerSkillData data) {
+        List<SkillTreeRenderHelper.Note> notes = new java.util.ArrayList<>();
+        var tags = at.koopro.wizardsandbeasts.skill.build.Builds.tagsOf(node.getId());
+        if (!tags.isEmpty()) {
+            net.minecraft.network.chat.MutableComponent line = Component.empty();
+            for (int i = 0; i < tags.size(); i++) {
+                if (i > 0) {
+                    line.append(", ");
+                }
+                line.append(Component.translatable("skill.wizards_and_beasts.build.tag",
+                        Component.translatable(tags.get(i).getKey().nameKey()),
+                        Component.translatable(tags.get(i).getValue().translationKey())));
+            }
+            notes.add(new SkillTreeRenderHelper.Note(line, at.koopro.wizardsandbeasts.client.gui.WizardsPalette.PAGE_RUBRIC));
+        }
+
+        var archetypes = at.koopro.wizardsandbeasts.skill.build.Builds.all();
+        String refusal = at.koopro.wizardsandbeasts.skill.build.BuildRules.capstoneRefusal(node.getId(),
+                data.getUnlockedSkills(), archetypes, at.koopro.wizardsandbeasts.module.ModuleManager::isEnabled);
+        if (refusal != null) {
+            var owner = at.koopro.wizardsandbeasts.skill.build.BuildRules.capstoneOwner(node.getId(), archetypes);
+            Component detail = switch (refusal) {
+                case at.koopro.wizardsandbeasts.skill.build.BuildRules.CAPSTONE_SHALLOW -> Component.translatable(
+                        "skill.wizards_and_beasts.build.capstone.shallow",
+                        owner.map(a -> a.pathway().capstoneDepth()
+                                - at.koopro.wizardsandbeasts.skill.build.BuildRules.allocatedIn(a,
+                                at.koopro.wizardsandbeasts.skill.build.BuildTier.ADVANCED, data.getUnlockedSkills()))
+                                .orElse(1));
+                case at.koopro.wizardsandbeasts.skill.build.BuildRules.CAPSTONE_TAKEN -> Component.translatable(
+                        "skill.wizards_and_beasts.build.capstone.taken",
+                        at.koopro.wizardsandbeasts.skill.build.BuildRules.heldCapstone(data.getUnlockedSkills(), archetypes)
+                                .map(a -> (Component) Component.translatable(a.nameKey())).orElse(Component.empty()));
+                default -> Component.translatable("skill.wizards_and_beasts.build.capstone.sealed");
+            };
+            notes.add(new SkillTreeRenderHelper.Note(detail, at.koopro.wizardsandbeasts.client.gui.WizardsPalette.PAGE_BAD));
+        } else if (at.koopro.wizardsandbeasts.skill.build.BuildRules.capstoneOwner(node.getId(), archetypes).isPresent()
+                && data.getSkillLevel(node.getId()) <= 0) {
+            notes.add(new SkillTreeRenderHelper.Note(
+                    Component.translatable("skill.wizards_and_beasts.build.capstone.one_mastery"),
+                    at.koopro.wizardsandbeasts.client.gui.WizardsPalette.PAGE_RUBRIC));
+        }
+
+        if (data.getSkillLevel(node.getId()) > 0) {
+            var stranded = at.koopro.wizardsandbeasts.skill.build.Builds.clientStrandedBy(node.getId(), data.getUnlockedSkills());
+            if (!stranded.isEmpty()) {
+                notes.add(new SkillTreeRenderHelper.Note(Component.translatable(
+                        "skill.wizards_and_beasts.respec.hint.stranded", stranded.size()),
+                        GuiSkin.STAR_CHART.muted()));
+            } else {
+                var terms = ClientSkillDataState.respecTerms();
+                long fee = at.koopro.wizardsandbeasts.skill.build.RespecPricing.unlearnFee(node.getPointCost(),
+                        terms.unlearnPerPointKnuts(), terms.respecCapKnuts(), terms.unlearnPerPointKnuts() > 0);
+                Component price = fee > 0
+                        ? Component.literal(at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper.formatFromKnuts(fee))
+                        : Component.translatable("skill.wizards_and_beasts.respec.fee.free");
+                notes.add(new SkillTreeRenderHelper.Note(Component.translatable(
+                        "skill.wizards_and_beasts.respec.hint.unlearn", node.getPointCost(), price),
+                        GuiSkin.STAR_CHART.muted()));
+            }
+        }
+        return notes;
     }
 
     /** The three page layers, back to front: vellum and graticule, stipple, background stars. */

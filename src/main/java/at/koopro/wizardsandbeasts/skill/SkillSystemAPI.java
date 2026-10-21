@@ -178,6 +178,29 @@ public final class SkillSystemAPI {
         if (!SkillTreeId.meetsRequirement(skill.getTree().getRequirement(), HeritageAPI.getData(player))) {
             return new UnlockCheck(false, "requirement_unmet");
         }
+        // A node a lineage must reach in play first (a free elf's freedom is given, not bought).
+        if (!at.koopro.wizardsandbeasts.heritage.identity.HeritageNodeGates.open(skill.getId(), HeritageAPI.getData(player))) {
+            return new UnlockCheck(false, "lineage_unmet");
+        }
+        // A tree whose whole subject is a module the server switched off. Only the Dark Arts web has one: with
+        // DARK_ARTS off its spells cannot be cast, and its study still accrued corruption for nothing.
+        if (!treeModuleOpen(skill.getTree())) {
+            return new UnlockCheck(false, "module_disabled");
+        }
+        // A build's capstone: its modules on, no other mastery held, enough of its advanced nodes walked.
+        String buildRefusal = at.koopro.wizardsandbeasts.skill.build.BuildRules.capstoneRefusal(
+                skill.getId(), data.getUnlockedSkills(),
+                at.koopro.wizardsandbeasts.skill.build.Builds.all(), ModuleManager::isEnabled);
+        if (buildRefusal != null) {
+            return new UnlockCheck(false, buildRefusal);
+        }
+
+        // Advanced training: a build's capstone asks for the N.E.W.T. in its discipline (education.QualificationGates).
+        // Fail-open with the O.W.L. module off.
+        if (at.koopro.wizardsandbeasts.education.QualificationGates.firstUnmet(player,
+                at.koopro.wizardsandbeasts.education.QualificationGates.Kind.SKILL_NODE, skill.getId()) != null) {
+            return new UnlockCheck(false, "qualification_unmet");
+        }
 
         // Magical standing — last, and last on purpose. It is the only gate a player can move by
         // playing differently, so it should be the reason they are told about once the fixed facts
@@ -194,6 +217,11 @@ public final class SkillSystemAPI {
         // Vocation is declarative identity only (web rework Phase 3): the web's travel cost under the
         // point cap does the differentiation the old mastery-band/opposition gate used to enforce.
         return new UnlockCheck(true, "ok");
+    }
+
+    /** False for a tree whose subject lives in a module that is off (today: the Dark Arts web and DARK_ARTS). */
+    public static boolean treeModuleOpen(SkillTreeId tree) {
+        return tree != SkillTreeId.DARK_ARTS || ModuleManager.isEnabled(Module.DARK_ARTS);
     }
 
     /**
@@ -230,6 +258,14 @@ public final class SkillSystemAPI {
 
         applyImmediateEffects(player, skill);
         SkillAttributeApplicator.applyAll(player);
+        // A capstone is a declaration: the player who takes the Duelist's capstone is a Duelist, and the vocation
+        // says so without a second trip to the vocation screen. Before the grant sync below, which carries it.
+        if (newLevel == 1) {
+            at.koopro.wizardsandbeasts.skill.build.BuildRules.capstoneOwner(skillId,
+                            at.koopro.wizardsandbeasts.skill.build.Builds.all())
+                    .ifPresent(build -> at.koopro.wizardsandbeasts.skill.vocation.VocationManager
+                            .followMastery(player, build));
+        }
         PlayerStatsSyncPayload.syncToPlayer(player); // KNOWLEDGE derives from skill nodes unlocked
         // A newly allocated node may grant an ability (legacy unlock_ability or grant_ability) → refresh
         // the source-tracked snapshot so the client mirror reflects the new SKILL_NODE grant.
@@ -309,9 +345,15 @@ public final class SkillSystemAPI {
         return getCache(player).hasAbility(abilityId);
     }
 
-    /** Summed scalar gameplay bonus from all unlocked skills, or {@code 0} if none. */
+    /**
+     * Summed scalar gameplay bonus from all unlocked skills and heritage professions, or {@code 0} if
+     * none. Professions add here rather than in the web's cache because they are bought with a
+     * different currency and stored on the heritage record.
+     */
     public static float getGameplayBonus(ServerPlayer player, GameplayStat stat) {
-        return getCache(player).getGameplayBonus(stat);
+        return getCache(player).getGameplayBonus(stat)
+                + at.koopro.wizardsandbeasts.heritage.profession.ProfessionNode.bonus(
+                        player.getData(ModAttachments.HERITAGE_DATA.get()).getUnlockedProfessions(), stat);
     }
 
     // ── Internal ──

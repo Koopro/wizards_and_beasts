@@ -44,6 +44,10 @@ public final class HerbologyAbilityHandler {
         if (!(event.getBreaker() instanceof ServerPlayer player)) return;
         BlockState state = event.getState();
         if (!state.is(BlockTags.CROPS)) return;
+        // A grown crop brought in is a Herbologist's day of work; a seedling pulled is not.
+        if (state.getBlock() instanceof net.minecraft.world.level.block.CropBlock crop && crop.isMaxAge(state)) {
+            at.koopro.wizardsandbeasts.owl.career.CareerWork.record(player, at.koopro.wizardsandbeasts.owl.career.CareerWork.Kind.HARVEST);
+        }
 
         float chance = SkillSystemAPI.getGameplayBonus(player, GameplayStat.HARVEST_BONUS_CHANCE);
         if (at.koopro.wizardsandbeasts.skill.vocation.VocationHelper.hasGrantedAbility(player, "crop_yield")) {

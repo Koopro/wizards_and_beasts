@@ -64,6 +64,10 @@ public record VocationCommitC2SPayload(String vocationId) implements CustomPacke
                         Component.translatable(L + "refused"), Component.translatable(L + "unknown"));
                 case DARK_ARTS_DISABLED -> PlayerFeedback.refuse(player,
                         Component.translatable(L + "refused"), Component.translatable(L + "dark_arts_disabled"));
+                case BUILD_SEALED -> PlayerFeedback.refuse(player,
+                        Component.translatable(L + "refused"), Component.translatable(L + "build_sealed"));
+                case MASTERY_HELD -> PlayerFeedback.refuse(player,
+                        Component.translatable(L + "refused"), Component.translatable(L + "mastery_held"));
             }
         });
     }

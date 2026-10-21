@@ -49,6 +49,8 @@ public final class GoblinAbilityHandler {
 
         player.displayClientMessage(Component.literal("Appraised worth: " + CurrencyHelper.formatFromKnuts(total))
                 .withStyle(ChatFormatting.GOLD), true);
+        at.koopro.wizardsandbeasts.heritage.identity.HeritagePractice.record(player,
+                at.koopro.wizardsandbeasts.heritage.identity.PracticeKind.GOBLIN_APPRAISAL);
         event.setCanceled(true);
     }
 

@@ -3,7 +3,11 @@ package at.koopro.wizardsandbeasts.skill.vocation;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
+import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
 import at.koopro.wizardsandbeasts.skill.SkillTreeId;
+import at.koopro.wizardsandbeasts.skill.build.Archetype;
+import at.koopro.wizardsandbeasts.skill.build.BuildRules;
+import at.koopro.wizardsandbeasts.skill.build.Builds;
 import at.koopro.wizardsandbeasts.sync.PlayerStateSyncService;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
@@ -29,7 +33,11 @@ public final class VocationManager {
         OK,
         MODULE_DISABLED,
         UNKNOWN_VOCATION,
-        DARK_ARTS_DISABLED
+        DARK_ARTS_DISABLED,
+        /** The build's mechanics live in a module that is switched off. */
+        BUILD_SEALED,
+        /** The player holds another build's capstone; their vocation follows their mastery. */
+        MASTERY_HELD
     }
 
     private VocationManager() {}
@@ -45,6 +53,16 @@ public final class VocationManager {
         if (vocation.tree() == SkillTreeId.DARK_ARTS && !ModuleManager.isEnabled(Module.DARK_ARTS)) {
             return CommitResult.DARK_ARTS_DISABLED;
         }
+        if (vocation.archetype().filter(a -> !BuildRules.modulesOn(a, ModuleManager::isEnabled)).isPresent()) {
+            return CommitResult.BUILD_SEALED;
+        }
+        // Identity follows mastery. A declaration used to be free to swap at will, which made a vocation's
+        // label say nothing about the wizard wearing it. Once a capstone is held the declaration is that build's
+        // until the capstone is unlearned — and allocating the capstone declares it (see followMastery).
+        var held = BuildRules.heldCapstone(SkillSystemAPI.getSkillData(player).getUnlockedSkills(), Builds.all());
+        if (held.isPresent() && !held.get().id().equals(vocationId)) {
+            return CommitResult.MASTERY_HELD;
+        }
 
         PlayerVocationData updated = VocationHelper.getData(player).withPrimary(Optional.of(vocationId));
         player.setData(ModAttachments.VOCATION_DATA.get(), updated);
@@ -58,6 +76,16 @@ public final class VocationManager {
         PlayerStateSyncService.syncVocations(player);
         PlayerStateSyncService.syncAbilityGrants(player); // declaration adds VOCATION-source grants
         return CommitResult.OK;
+    }
+
+    /**
+     * Declares the build whose capstone was just allocated, so the sheet, the chat card and the vocation agree. A
+     * refusal here (module sealed between the check and now) leaves the old declaration alone.
+     */
+    public static void followMastery(ServerPlayer player, Archetype archetype) {
+        if (!VocationHelper.getPrimary(player).filter(archetype.id()::equals).isPresent()) {
+            commit(player, archetype.id());
+        }
     }
 
     /** Admin teardown: strip the commitment profile, clear the declaration, resync. */

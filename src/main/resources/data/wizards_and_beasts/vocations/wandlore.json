@@ -4,13 +4,28 @@
   "displayName": "vocation.wizards_and_beasts.wandlore.name",
   "description": "vocation.wizards_and_beasts.wandlore.desc",
   "pillar": "vocation.wizards_and_beasts.wandlore.pillar",
-  "commitmentEffects": [
-    {
-      "type": "attribute_boost",
-      "attribute": "wizards_and_beasts:wand_affinity",
-      "value": 0.1,
-      "operation": "add_value",
-      "modifier_id": "wizards_and_beasts:vocation/wandlore/wand_affinity"
-    }
-  ]
+  "grantedAbilities": [
+    "wand_steadiness"
+  ],
+  "capstoneNodeId": "wizards_and_beasts:wandkeepers_hands",
+  "pathway": {
+    "early": [
+      "wand_study",
+      "wand_appraisal",
+      "wandwood_grain"
+    ],
+    "mid": [
+      "wandlore_figures",
+      "arresto_momentum_unlock",
+      "claustra_reverto_unlock"
+    ],
+    "advanced": [
+      "allegiance_grip",
+      "wand_true_master"
+    ],
+    "capstoneDepth": 2,
+    "modules": [
+      "wands"
+    ]
+  }
 }

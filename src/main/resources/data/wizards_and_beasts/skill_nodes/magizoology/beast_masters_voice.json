@@ -1,0 +1,24 @@
+{
+  "id": "beast_masters_voice",
+  "displayName": "skill.wizards_and_beasts.node.beast_masters_voice.name",
+  "description": "skill.wizards_and_beasts.node.beast_masters_voice.desc",
+  "lore": "skill.wizards_and_beasts.node.beast_masters_voice.lore",
+  "practice": "skill.wizards_and_beasts.node.beast_masters_voice.practice",
+  "tree": "magizoology",
+  "pointCost": 5,
+  "provenance": {
+    "modAdvancement": true
+  },
+  "effects": [
+    {
+      "type": "unlock_ability",
+      "abilityId": "beast_masters_voice"
+    }
+  ],
+  "x": 280.6,
+  "y": -162.0,
+  "edges": [
+    "beast_speaker"
+  ],
+  "size": "keystone"
+}

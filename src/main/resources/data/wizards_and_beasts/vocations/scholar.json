@@ -1,0 +1,26 @@
+{
+  "id": "wizards_and_beasts:scholar",
+  "tree": "alchemy",
+  "displayName": "vocation.wizards_and_beasts.scholar.name",
+  "description": "vocation.wizards_and_beasts.scholar.desc",
+  "pillar": "vocation.wizards_and_beasts.scholar.pillar",
+  "capstoneNodeId": "wizards_and_beasts:scholars_method",
+  "pathway": {
+    "early": [
+      "bench_discipline",
+      "measured_hand",
+      "frigora_unlock"
+    ],
+    "mid": [
+      "reagent_lore",
+      "swift_brewer",
+      "transmute_focus"
+    ],
+    "advanced": [
+      "transmuters_insight",
+      "philosophers_stone"
+    ],
+    "capstoneDepth": 1,
+    "modules": []
+  }
+}

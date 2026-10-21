@@ -165,3 +165,50 @@ reversible:
   199 effects; it is now 14 of 151, and every one sits on a notable where toughness *is* the fantasy
   (`herbal_vitality`, `goblin_steelheart`, `keeper_vigor`). The 41 that went were all half-hearts and
   half-points-of-armour on connectors.
+
+## 7. Builds, capstones and respec (2026-10-14)
+
+A **build** is a vocation that authors a `pathway` (early / mid / advanced lists of *existing* nodes) and a
+`capstoneNodeId`. Data: `data/wizards_and_beasts/vocations/*.json`; code: `skill/build/`. The pathway re-reads
+the web — it adds no route and moves no node, so no schema bump was needed. Seven builds ship:
+
+| Build (vocation id) | Home | Capstone (new node unless noted) | What it changes in play | Cheapest route |
+|---|---|---|---|---|
+| Duelist (`duelist`) | spell_mastery | `duelling_riposte` — The Counter-Jinx | Own ward blocks a spell/projectile → attack-spell cooldowns cleared (5 s ICD). `ProtegoShieldEntity.trainCasterReflexes` | 23 |
+| Wandmaster (`wandlore`) | wandlore | `wandkeepers_hands` | Reparo mends wand wear short of snapped; a stranger's wand answers RELUCTANT, never foreign-backfires. `WandAllegianceService.castingState` / `mendWand` | 20 |
+| Beastmaster (`magizoologist`) | magizoology | `beast_masters_voice` | Owner's companions obey one stage early; no temperament refusals. `CompanionRules.check(..., beastMaster)` | 21 |
+| Dark Arts Specialist (`dark_arts`) | dark_arts | `avada_kedavra_unlock` (existing) | The Killing Curse; needs both other Unforgivables; sealed with `DARK_ARTS` off | 20 |
+| Scholar (`scholar`, new) | alchemy | `scholars_method` | Every proficiency prerequisite needs half the practice. `SpellRequirement.isMet` | 21 |
+| Healer (`herbologist`, shown as Healer) | herbology | `healers_hands` | Episkey lifts Stupefy / Petrificus / splinching from a faced ally, or mends the caster's own companion | 21 |
+| Explorer (`explorer`, new) | wandlore + spell_mastery | `seasoned_traveller` | Splinching one rung lighter; +4 destinations and the one lift of the 12-destination ceiling | 33 |
+
+"Cheapest route" is points from Polaris to the capstone with its depth met — every build fits the 60-point cap
+with 27+ points left for a second road. `ArchetypeDataTest` holds the ceiling at 40.
+
+**Rules** (`BuildRules`, one call in `SkillSystemAPI.evaluateUnlock`):
+1. `build_module_disabled` — a build's `modules` must be on (Dark Arts → `dark_arts`, Explorer → `apparition`, …).
+2. `capstone_taken` — **one mastery per wizard**. Unlearning a capstone reopens the choice.
+3. `capstone_shallow` — `capstoneDepth` of the build's advanced nodes first.
+
+Taking a capstone declares its vocation (`VocationManager.followMastery`); while it is held, declaring another
+vocation is refused (`MASTERY_HELD`). New builds carry no flat-percentage vocation perks. The Dark Arts *tree* is
+also sealed (`module_disabled`) while `DARK_ARTS` is off — before this its nodes were buyable and accrued
+corruption for spells nobody could cast.
+
+**Respec** (`SkillRespecService`, prices in `RespecPricing`). Points always come back in full.
+- *Unlearn* one level of one node: right-click a star, or `/wandb skill unlearn <node> [preview]`. Allowed only if
+  the rest of the web stays connected to a root (`WebConnectivity`). 1 Sickle per point
+  (`skillUnlearnCostKnutsPerPoint`), never more than a full respec.
+- *Start over*: the chart's header button (confirm screen with the price), or `/wandb skill respec [preview]`.
+  First one per character free (`PlayerSkillData.FreeRespecUsed`), then 1 Galleon (`skillRespecCostKnuts`).
+- Both free with Gringotts off. Quotes list points back, fee, web-taught spells forgotten and dark corruption kept.
+- The skill sync carries the live terms (`SkillDataSyncS2CPayload.RespecTerms`) so the GUI quotes the server's price.
+
+**Character sheet** (Skills tab, top): current build and how it was decided (Master / Declared / Leaning /
+Undecided), up to three active pathways with early/mid/advanced counts, each capstone's state, and the next
+adjacent nodes on that road. Same model as `/wandb skill build` (`BuildProfile`).
+
+**Audit notes left open:** the `philosophers_stone` node's `unlock_ability` flag has no consumer (its only live
+effect is −10% utility cooldown) — it sits in the Scholar's advanced list but is not required by the capstone
+depth. Declared vocations on the five original builds still carry their flat perks (+10% damage etc.); they are
+no longer free to swap once a capstone is held.

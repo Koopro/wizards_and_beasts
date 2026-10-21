@@ -1,0 +1,24 @@
+{
+  "id": "wandkeepers_hands",
+  "displayName": "skill.wizards_and_beasts.node.wandkeepers_hands.name",
+  "description": "skill.wizards_and_beasts.node.wandkeepers_hands.desc",
+  "lore": "skill.wizards_and_beasts.node.wandkeepers_hands.lore",
+  "practice": "skill.wizards_and_beasts.node.wandkeepers_hands.practice",
+  "tree": "wandlore",
+  "pointCost": 5,
+  "provenance": {
+    "modAdvancement": true
+  },
+  "effects": [
+    {
+      "type": "unlock_ability",
+      "abilityId": "wandkeepers_hands"
+    }
+  ],
+  "x": -280.6,
+  "y": -162.0,
+  "edges": [
+    "wand_true_master"
+  ],
+  "size": "keystone"
+}

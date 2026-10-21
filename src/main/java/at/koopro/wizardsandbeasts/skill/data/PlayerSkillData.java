@@ -68,6 +68,9 @@ public class PlayerSkillData implements ModAttachments.NbtSerializable {
     // Absent in pre-existing saves, which load as empty — nothing recorded means nothing revoked,
     // so no migration is needed and no existing player loses a spell.
     private final Set<String> webTaughtSpells = new LinkedHashSet<>();
+    // Whether this character has spent the one free full respec. A fresh character has not: the first web anyone
+    // builds is built before they know what the nodes do. Absent in older saves → false → one free respec owed.
+    private boolean freeRespecUsed;
     private int astronomyEvents;      // ASTRONOMY: nights observing + moon phase tracking events
     private int muggleItems;          // MUGGLE_STUDIES: muggle items crafted or traded
 
@@ -169,6 +172,32 @@ public class PlayerSkillData implements ModAttachments.NbtSerializable {
         skillPoints += refund;
     }
 
+    /**
+     * Takes one level off {@code skillId} and refunds its cost. Connectivity is the caller's job
+     * ({@code WebConnectivity}); this only does the bookkeeping.
+     *
+     * @return points refunded, 0 when the node is not allocated or no longer resolves
+     */
+    public int unlearnLevel(String skillId) {
+        int level = getSkillLevel(skillId);
+        Skill skill = SkillTrees.byId(skillId);
+        if (level <= 0 || skill == null) {
+            return 0;
+        }
+        setSkillLevel(skillId, level - 1);
+        skillPoints += skill.getPointCost();
+        return skill.getPointCost();
+    }
+
+    /** Whether the next full respec is the free one. */
+    public boolean isFreeRespecAvailable() {
+        return !freeRespecUsed;
+    }
+
+    public void markFreeRespecUsed() {
+        freeRespecUsed = true;
+    }
+
     public void resetSkill(String skillId) {
         int level = getSkillLevel(skillId);
         if (level <= 0) return;
@@ -199,6 +228,8 @@ public class PlayerSkillData implements ModAttachments.NbtSerializable {
 
     /** Number of distinct lore tomes/plaques studied — feeds KNOWLEDGE and the History of Magic OWL grade. */
     public int getLoreItemsRead() { return loreEntriesRead.size(); }
+    /** The lore ids studied — the written History of Magic paper is drawn only from these. */
+    public java.util.Set<String> getLoreEntriesRead() { return java.util.Collections.unmodifiableSet(loreEntriesRead); }
     /** Records a lore source as studied; returns true only the first time (i.e. when it actually counts). */
     public boolean markLoreEntryRead(String loreId) {
         return loreId != null && !loreId.isBlank() && loreEntriesRead.add(loreId);
@@ -211,6 +242,11 @@ public class PlayerSkillData implements ModAttachments.NbtSerializable {
     public int getAstronomyEvents() { return astronomyEvents; }
 
     public int getMuggleItems() { return muggleItems; }
+
+    public void applySync(int points, int totalEarned, Map<String, Integer> skills, boolean freeRespecAvailable) {
+        freeRespecUsed = !freeRespecAvailable;
+        applySync(points, totalEarned, skills);
+    }
 
     public void applySync(int points, int totalEarned, Map<String, Integer> skills) {
         skillPoints = Math.max(0, points);
@@ -260,6 +296,7 @@ public class PlayerSkillData implements ModAttachments.NbtSerializable {
         NbtHelper.saveStringSet(tag, "LoreEntriesRead", loreEntriesRead);
         NbtHelper.saveStringSet(tag, "MilestonesAchieved", milestonesAchieved);
         NbtHelper.saveStringSet(tag, "WebTaughtSpells", webTaughtSpells);
+        tag.putBoolean("FreeRespecUsed", freeRespecUsed);
         tag.putInt("AstronomyEvents", astronomyEvents);
         tag.putInt("MuggleItems", muggleItems);
         return tag;
@@ -285,6 +322,7 @@ public class PlayerSkillData implements ModAttachments.NbtSerializable {
         milestonesAchieved.addAll(NbtHelper.loadStringSet(tag, "MilestonesAchieved"));
         webTaughtSpells.clear();
         webTaughtSpells.addAll(NbtHelper.loadStringSet(tag, "WebTaughtSpells"));
+        freeRespecUsed = tag.getBoolean("FreeRespecUsed").orElse(false);
         astronomyEvents = tag.getInt("AstronomyEvents").orElse(0);
         muggleItems = tag.getInt("MuggleItems").orElse(0);
     }
