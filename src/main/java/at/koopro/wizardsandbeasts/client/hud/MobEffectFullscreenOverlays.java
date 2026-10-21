@@ -3,7 +3,6 @@ package at.koopro.wizardsandbeasts.client.hud;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
@@ -18,10 +17,8 @@ public final class MobEffectFullscreenOverlays {
     private MobEffectFullscreenOverlays() {}
 
     public static void render(GuiGraphics graphics, DeltaTracker delta) {
-        if (at.koopro.wizardsandbeasts.Config.reduceScreenEffects) return;
-        Minecraft mc = Minecraft.getInstance();
-        Player player = mc.player;
-        if (player == null || mc.level == null) {
+        Player player = HudOverlays.overlayTarget();
+        if (player == null) {
             return;
         }
         int w = graphics.guiWidth();

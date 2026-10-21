@@ -114,6 +114,14 @@ public final class LocationBlockHelper {
                 .requiresCorrectToolForDrops();
     }
 
+    /** Location woodwork: planks-like strength, wood sound, no tool requirement. */
+    public static BlockBehaviour.Properties wood(MapColor color) {
+        return BlockBehaviour.Properties.of()
+                .mapColor(color)
+                .strength(2.0f, 3.0f)
+                .sound(SoundType.WOOD);
+    }
+
     // --- Factories ---
 
     public static BlockEntry block(String id, BlockBehaviour.Properties props) {

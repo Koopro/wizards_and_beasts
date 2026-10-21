@@ -1,8 +1,8 @@
 package at.koopro.wizardsandbeasts.admin.operation;
 
+import net.minecraft.core.UUIDUtil;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
@@ -40,18 +40,10 @@ public final class AdminAuditLog extends SavedData {
             return "ok".equals(result);
         }
 
-        private static final Codec<UUID> UUID_TEXT = Codec.STRING.comapFlatMap(text -> {
-            try {
-                return DataResult.success(UUID.fromString(text));
-            } catch (IllegalArgumentException e) {
-                return DataResult.error(() -> "bad uuid " + text);
-            }
-        }, UUID::toString);
-
         static final Codec<Entry> CODEC = RecordCodecBuilder.create(i -> i.group(
                 Codec.LONG.fieldOf("seq").forGetter(Entry::sequence),
                 Codec.LONG.fieldOf("time").forGetter(Entry::timeMillis),
-                UUID_TEXT.optionalFieldOf("admin_id").forGetter(e -> Optional.ofNullable(e.adminId())),
+                UUIDUtil.STRING_CODEC.optionalFieldOf("admin_id").forGetter(e -> Optional.ofNullable(e.adminId())),
                 Codec.STRING.fieldOf("admin").forGetter(Entry::adminName),
                 Codec.STRING.optionalFieldOf("section", "").forGetter(Entry::section),
                 Codec.STRING.fieldOf("operation").forGetter(Entry::operation),

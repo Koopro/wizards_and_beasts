@@ -25,13 +25,6 @@ public final class DiagonAlleyBlocks {
                 .requiresCorrectToolForDrops();
     }
 
-    private static BlockBehaviour.Properties wood(MapColor color) {
-        return BlockBehaviour.Properties.of()
-                .mapColor(color)
-                .strength(2.0f, 3.0f)
-                .sound(SoundType.WOOD);
-    }
-
     // ASSET: diagon_brick, diagon_brick_slab, diagon_brick_stairs, diagon_brick_wall
     // Recipe (gated by Module.STRUCTURES, see ModRecipeProvider) —brick + terracotta
     public static final VariantSet DIAGON_BRICK =
@@ -55,22 +48,22 @@ public final class DiagonAlleyBlocks {
     // ASSET: diagon_shopfront_wood, diagon_shopfront_wood_slab, diagon_shopfront_wood_stairs
     // Recipe (gated by Module.STRUCTURES, see ModRecipeProvider) —dark oak log + copper ingot
     public static final StairSet DIAGON_SHOPFRONT_WOOD =
-            LocationBlockHelper.withSlabStair("diagon_shopfront_wood", wood(MapColor.COLOR_BROWN));
+            LocationBlockHelper.withSlabStair("diagon_shopfront_wood", LocationBlockHelper.wood(MapColor.COLOR_BROWN));
 
     // ASSET: diagon_shopfront_planks, diagon_shopfront_planks_slab, diagon_shopfront_planks_stairs
     // Recipe (gated by Module.STRUCTURES, see ModRecipeProvider) —dark oak planks + copper ingot
     public static final StairSet DIAGON_SHOPFRONT_PLANKS =
-            LocationBlockHelper.withSlabStair("diagon_shopfront_planks", wood(MapColor.COLOR_BROWN));
+            LocationBlockHelper.withSlabStair("diagon_shopfront_planks", LocationBlockHelper.wood(MapColor.COLOR_BROWN));
 
     // ASSET: diagon_painted_wood_green, diagon_painted_wood_green_slab, diagon_painted_wood_green_stairs
     // Recipe (gated by Module.STRUCTURES, see ModRecipeProvider) —planks + green dye
     public static final StairSet DIAGON_PAINTED_WOOD_GREEN =
-            LocationBlockHelper.withSlabStair("diagon_painted_wood_green", wood(MapColor.COLOR_GREEN));
+            LocationBlockHelper.withSlabStair("diagon_painted_wood_green", LocationBlockHelper.wood(MapColor.COLOR_GREEN));
 
     // ASSET: diagon_painted_wood_purple, diagon_painted_wood_purple_slab, diagon_painted_wood_purple_stairs
     // Recipe (gated by Module.STRUCTURES, see ModRecipeProvider) —planks + purple dye
     public static final StairSet DIAGON_PAINTED_WOOD_PURPLE =
-            LocationBlockHelper.withSlabStair("diagon_painted_wood_purple", wood(MapColor.COLOR_PURPLE));
+            LocationBlockHelper.withSlabStair("diagon_painted_wood_purple", LocationBlockHelper.wood(MapColor.COLOR_PURPLE));
 
     // Diagon Street Stone — base + slab + pressure plate (no stairs, no wall)
     // ASSET: diagon_street_stone, diagon_street_stone_slab, diagon_street_stone_pressure_plate

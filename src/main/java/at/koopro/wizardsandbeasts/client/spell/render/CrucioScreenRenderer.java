@@ -4,6 +4,7 @@ import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.client.spell.state.ClientSignatureSpellState;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import net.minecraft.client.DeltaTracker;
+import at.koopro.wizardsandbeasts.client.hud.HudOverlays;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.Identifier;
@@ -21,12 +22,11 @@ public final class CrucioScreenRenderer {
     private CrucioScreenRenderer() {}
 
     public static void render(GuiGraphics graphics, DeltaTracker delta) {
-        if (at.koopro.wizardsandbeasts.Config.reduceScreenEffects) return;
-        Minecraft mc = Minecraft.getInstance();
-        Player player = mc.player;
-        if (player == null || mc.level == null) {
+        Player player = HudOverlays.overlayTarget();
+        if (player == null) {
             return;
         }
+        Minecraft mc = Minecraft.getInstance();
         int w = graphics.guiWidth();
         int h = graphics.guiHeight();
 

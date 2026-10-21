@@ -1,12 +1,12 @@
 package at.koopro.wizardsandbeasts.visual.beam;
 
+import at.koopro.wizardsandbeasts.network.PayloadBroadcast;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.network.visual.BeamVisualSyncS2CPayload;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.core.Spells;
 import com.mojang.logging.LogUtils;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
@@ -233,21 +233,13 @@ public final class BeamVisualService {
 
     public static void publish(MinecraftServer server) {
         Map<String, Map<String, String>> table = BeamVisualData.get(server).overrides();
-        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            BeamVisualSyncS2CPayload.send(player, table);
-        }
+        PayloadBroadcast.toAll(server, player -> BeamVisualSyncS2CPayload.send(player, table));
     }
 
     @SubscribeEvent
     static void onDatapackSync(OnDatapackSyncEvent event) {
         MinecraftServer server = event.getPlayerList().getServer();
         Map<String, Map<String, String>> table = BeamVisualData.get(server).overrides();
-        if (event.getPlayer() != null) {
-            BeamVisualSyncS2CPayload.send(event.getPlayer(), table);
-            return;
-        }
-        for (ServerPlayer player : event.getPlayerList().getPlayers()) {
-            BeamVisualSyncS2CPayload.send(player, table);
-        }
+        PayloadBroadcast.toSyncTarget(event, player -> BeamVisualSyncS2CPayload.send(player, table));
     }
 }

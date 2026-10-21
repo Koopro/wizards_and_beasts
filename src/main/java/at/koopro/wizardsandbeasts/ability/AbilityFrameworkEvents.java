@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.ability;
 
+import at.koopro.wizardsandbeasts.network.PayloadBroadcast;
 import at.koopro.wizardsandbeasts.ability.select.AbilitySelectionState;
 import at.koopro.wizardsandbeasts.network.ability.AbilityDefinitionsSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.ability.AbilitySelectionSyncS2CPayload;
@@ -26,13 +27,7 @@ public final class AbilityFrameworkEvents {
 
     @SubscribeEvent
     public static void onDatapackSync(OnDatapackSyncEvent event) {
-        if (event.getPlayer() != null) {
-            syncTo(event.getPlayer());
-        } else {
-            for (ServerPlayer player : event.getPlayerList().getPlayers()) {
-                syncTo(player);
-            }
-        }
+        PayloadBroadcast.toSyncTarget(event, AbilityFrameworkEvents::syncTo);
     }
 
     @SubscribeEvent

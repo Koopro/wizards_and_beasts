@@ -1,8 +1,8 @@
 package at.koopro.wizardsandbeasts.broom;
 
+import at.koopro.wizardsandbeasts.network.PayloadBroadcast;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.network.broom.BroomDefinitionsSyncS2CPayload;
-import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
@@ -29,12 +29,6 @@ public final class BroomDefinitionSyncEvents {
 
     @SubscribeEvent
     public static void onDatapackSync(OnDatapackSyncEvent event) {
-        if (event.getPlayer() != null) {
-            BroomDefinitionsSyncS2CPayload.syncToPlayer(event.getPlayer());
-            return;
-        }
-        for (ServerPlayer player : event.getPlayerList().getPlayers()) {
-            BroomDefinitionsSyncS2CPayload.syncToPlayer(player);
-        }
+        PayloadBroadcast.toSyncTarget(event, BroomDefinitionsSyncS2CPayload::syncToPlayer);
     }
 }

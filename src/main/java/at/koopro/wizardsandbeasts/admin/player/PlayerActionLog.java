@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.admin.player;
 
+import net.minecraft.core.UUIDUtil;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -40,20 +41,12 @@ public final class PlayerActionLog extends SavedData {
             return "ok".equals(result);
         }
 
-        private static final Codec<UUID> UUID_TEXT = Codec.STRING.comapFlatMap(text -> {
-            try {
-                return com.mojang.serialization.DataResult.success(UUID.fromString(text));
-            } catch (IllegalArgumentException e) {
-                return com.mojang.serialization.DataResult.error(() -> "bad uuid " + text);
-            }
-        }, UUID::toString);
-
         static final Codec<Entry> CODEC = RecordCodecBuilder.create(i -> i.group(
                 Codec.LONG.fieldOf("seq").forGetter(Entry::sequence),
                 Codec.LONG.fieldOf("time").forGetter(Entry::timeMillis),
-                UUID_TEXT.optionalFieldOf("admin_id").forGetter(e -> Optional.ofNullable(e.adminId())),
+                UUIDUtil.STRING_CODEC.optionalFieldOf("admin_id").forGetter(e -> Optional.ofNullable(e.adminId())),
                 Codec.STRING.fieldOf("admin").forGetter(Entry::adminName),
-                UUID_TEXT.fieldOf("player_id").forGetter(Entry::playerId),
+                UUIDUtil.STRING_CODEC.fieldOf("player_id").forGetter(Entry::playerId),
                 Codec.STRING.fieldOf("player").forGetter(Entry::playerName),
                 Codec.STRING.fieldOf("action").forGetter(Entry::action),
                 Codec.STRING.optionalFieldOf("argument", "").forGetter(Entry::argument),

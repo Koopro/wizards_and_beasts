@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.admin.debug;
 
+import at.koopro.wizardsandbeasts.network.PayloadBroadcast;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.admin.access.AdminCapability;
 import at.koopro.wizardsandbeasts.admin.access.AdminContext;
@@ -288,9 +289,7 @@ public final class DebugLeases {
     }
 
     private static void syncDebugMode(MinecraftServer server) {
-        for (ServerPlayer online : server.getPlayerList().getPlayers()) {
-            DebugModeS2CPayload.sendTo(online, DebugModeService.isEnabled(online));
-        }
+        PayloadBroadcast.toAll(server, online -> DebugModeS2CPayload.sendTo(online, DebugModeService.isEnabled(online)));
     }
 
     // ── cleanup ──

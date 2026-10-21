@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.item.wand;
 
 import at.koopro.wizardsandbeasts.item.GeoItemBase;
+import at.koopro.wizardsandbeasts.item.GeoItemRenderers;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.wand.stat.WandCore;
 import at.koopro.wizardsandbeasts.wand.WandLoreNames;
@@ -35,7 +36,6 @@ import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.constant.dataticket.DataTicket;
 import software.bernie.geckolib.animation.object.PlayState;
-import software.bernie.geckolib.renderer.GeoItemRenderer;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -57,21 +57,7 @@ public class WandItem extends GeoItemBase {
 
     @Override
     public void createGeoRenderer(Consumer<GeoRenderProvider> consumer) {
-        consumer.accept(new GeoRenderProvider() {
-            private GeoItemRenderer<?> renderer;
-
-            @Override
-            public GeoItemRenderer<?> getGeoItemRenderer() {
-                if (this.renderer == null) {
-                    this.renderer = ClientClassBridge.instantiate(
-                            "at.koopro.wizardsandbeasts.client.wand.WandRenderer",
-                            GeoItemRenderer.class,
-                            new Class<?>[0],
-                            new Object[0]);
-                }
-                return this.renderer;
-            }
-        });
+        consumer.accept(GeoItemRenderers.lazy("at.koopro.wizardsandbeasts.client.wand.WandRenderer"));
     }
 
     /**

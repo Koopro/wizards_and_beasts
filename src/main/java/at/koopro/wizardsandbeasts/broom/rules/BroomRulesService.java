@@ -1,10 +1,10 @@
 package at.koopro.wizardsandbeasts.broom.rules;
 
+import at.koopro.wizardsandbeasts.network.PayloadBroadcast;
 import at.koopro.wizardsandbeasts.Config;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.network.broom.BroomDefinitionsSyncS2CPayload;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
@@ -40,9 +40,7 @@ public final class BroomRulesService {
 
     private static void publish(MinecraftServer server, BroomRulesData data) {
         BroomRules.publish(data.stats(), data.disabled(), Config.broomServerSpeedScale);
-        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            BroomDefinitionsSyncS2CPayload.syncToPlayer(player);
-        }
+        PayloadBroadcast.toAll(server, BroomDefinitionsSyncS2CPayload::syncToPlayer);
     }
 
     /** The speed-scale rule changed ({@code Config.onLoad}); republished on the server thread. */

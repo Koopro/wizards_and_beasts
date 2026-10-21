@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.command.debug;
 
+import at.koopro.wizardsandbeasts.network.PayloadBroadcast;
 import at.koopro.wizardsandbeasts.command.debug.dev.DevCommand;
 import at.koopro.wizardsandbeasts.command.debug.feature.FeatureDebugCommand;
 import at.koopro.wizardsandbeasts.command.debug.inspect.DebugInspectCommand;
@@ -74,9 +75,7 @@ public final class DebugModuleRegistry {
         // Everyone's flag just changed, including players with no per-player entry, so every client
         // has to be told rather than only the ones in ENABLED_PLAYERS.
         MinecraftServer server = source.getServer();
-        for (ServerPlayer online : server.getPlayerList().getPlayers()) {
-            DebugModeS2CPayload.sendTo(online, DebugModeService.isEnabled(online));
-        }
+        PayloadBroadcast.toAll(server, online -> DebugModeS2CPayload.sendTo(online, DebugModeService.isEnabled(online)));
         new DebugOutput(source).ok("All-player debug mode: " + (state ? "ON" : "OFF"));
         return 1;
     }

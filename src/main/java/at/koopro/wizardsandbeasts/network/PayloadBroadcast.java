@@ -7,6 +7,8 @@ import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jspecify.annotations.NullMarked;
 
+import java.util.function.Consumer;
+
 /**
  * The two ways this mod pushes a whole-registry snapshot at clients.
  *
@@ -27,20 +29,26 @@ public final class PayloadBroadcast {
      * {@code /reload} it is {@code null} and every player needs the new data, so everyone gets it.
      */
     public static void toSyncTarget(OnDatapackSyncEvent event, CustomPacketPayload payload) {
+        toSyncTarget(event, player -> PacketDistributor.sendToPlayer(player, payload));
+    }
+
+    /** {@link #toSyncTarget(OnDatapackSyncEvent, CustomPacketPayload)} for a sender that builds per player. */
+    public static void toSyncTarget(OnDatapackSyncEvent event, Consumer<ServerPlayer> send) {
         ServerPlayer joining = event.getPlayer();
         if (joining != null) {
-            PacketDistributor.sendToPlayer(joining, payload);
+            send.accept(joining);
             return;
         }
-        for (ServerPlayer player : event.getPlayerList().getPlayers()) {
-            PacketDistributor.sendToPlayer(player, payload);
-        }
+        event.getPlayerList().getPlayers().forEach(send);
     }
 
     /** Sends to every player currently connected. No-op on an empty server. */
     public static void toAll(MinecraftServer server, CustomPacketPayload payload) {
-        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            PacketDistributor.sendToPlayer(player, payload);
-        }
+        toAll(server, player -> PacketDistributor.sendToPlayer(player, payload));
+    }
+
+    /** {@link #toAll(MinecraftServer, CustomPacketPayload)} for a sender that builds per player. */
+    public static void toAll(MinecraftServer server, Consumer<ServerPlayer> send) {
+        server.getPlayerList().getPlayers().forEach(send);
     }
 }

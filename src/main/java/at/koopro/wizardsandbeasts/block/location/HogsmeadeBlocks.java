@@ -1,7 +1,5 @@
 package at.koopro.wizardsandbeasts.block.location;
 
-import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 
 import at.koopro.wizardsandbeasts.block.location.LocationBlockHelper.StairSet;
@@ -10,13 +8,6 @@ import at.koopro.wizardsandbeasts.block.location.LocationBlockHelper.VariantSet;
 // Blocks register unconditionally; their crafting recipes are gated behind Module.STRUCTURES (ModRecipeProvider).
 public final class HogsmeadeBlocks {
     private HogsmeadeBlocks() {}
-
-    private static BlockBehaviour.Properties wood(MapColor color) {
-        return BlockBehaviour.Properties.of()
-                .mapColor(color)
-                .strength(2.0f, 3.0f)
-                .sound(SoundType.WOOD);
-    }
 
     // ASSET: hogsmeade_stone, hogsmeade_stone_slab, hogsmeade_stone_stairs, hogsmeade_stone_wall
     // Recipe (gated by Module.STRUCTURES, see ModRecipeProvider) —stone + andesite
@@ -36,12 +27,12 @@ public final class HogsmeadeBlocks {
     // ASSET: three_broomsticks_timber, three_broomsticks_timber_slab, three_broomsticks_timber_stairs
     // Recipe (gated by Module.STRUCTURES, see ModRecipeProvider) —dark oak log + iron nugget
     public static final StairSet THREE_BROOMSTICKS_TIMBER =
-            LocationBlockHelper.withSlabStair("three_broomsticks_timber", wood(MapColor.COLOR_BROWN));
+            LocationBlockHelper.withSlabStair("three_broomsticks_timber", LocationBlockHelper.wood(MapColor.COLOR_BROWN));
 
     // ASSET: three_broomsticks_planks, three_broomsticks_planks_slab, three_broomsticks_planks_stairs
     // Recipe (gated by Module.STRUCTURES, see ModRecipeProvider) —dark oak planks
     public static final StairSet THREE_BROOMSTICKS_PLANKS =
-            LocationBlockHelper.withSlabStair("three_broomsticks_planks", wood(MapColor.COLOR_BROWN));
+            LocationBlockHelper.withSlabStair("three_broomsticks_planks", LocationBlockHelper.wood(MapColor.COLOR_BROWN));
 
     // ASSET: honeydukes_pastel_pink, honeydukes_pastel_pink_slab, honeydukes_pastel_pink_stairs
     // Recipe (gated by Module.STRUCTURES, see ModRecipeProvider) —quartz + pink dye

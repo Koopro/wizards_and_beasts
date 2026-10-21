@@ -1,8 +1,8 @@
 package at.koopro.wizardsandbeasts.spell.def;
 
+import at.koopro.wizardsandbeasts.network.PayloadBroadcast;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.network.spell.SpellDefinitionsSyncS2CPayload;
-import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
@@ -26,12 +26,6 @@ public final class SpellDefinitionSyncEvents {
 
     @SubscribeEvent
     public static void onDatapackSync(OnDatapackSyncEvent event) {
-        if (event.getPlayer() != null) {
-            SpellDefinitionsSyncS2CPayload.syncToPlayer(event.getPlayer());
-            return;
-        }
-        for (ServerPlayer player : event.getPlayerList().getPlayers()) {
-            SpellDefinitionsSyncS2CPayload.syncToPlayer(player);
-        }
+        PayloadBroadcast.toSyncTarget(event, SpellDefinitionsSyncS2CPayload::syncToPlayer);
     }
 }

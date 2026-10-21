@@ -14,14 +14,6 @@ import at.koopro.wizardsandbeasts.block.location.LocationBlockHelper.VariantSet;
 public final class GringottsBlocks {
     private GringottsBlocks() {}
 
-    private static BlockBehaviour.Properties marble(MapColor color) {
-        return BlockBehaviour.Properties.of()
-                .mapColor(color)
-                .strength(1.5f, 6.0f)
-                .sound(SoundType.STONE)
-                .requiresCorrectToolForDrops();
-    }
-
     private static BlockBehaviour.Properties vault(MapColor color) {
         return BlockBehaviour.Properties.of()
                 .mapColor(color)
@@ -33,27 +25,27 @@ public final class GringottsBlocks {
     // ASSET: gringotts_white_marble, gringotts_white_marble_slab, gringotts_white_marble_stairs, gringotts_white_marble_wall
     // Recipe (gated by Module.STRUCTURES, see ModRecipeProvider) —quartz + calcite
     public static final VariantSet GRINGOTTS_WHITE_MARBLE =
-            LocationBlockHelper.withVariants("gringotts_white_marble", marble(MapColor.QUARTZ));
+            LocationBlockHelper.withVariants("gringotts_white_marble", LocationBlockHelper.stone(MapColor.QUARTZ));
 
     // ASSET: gringotts_white_marble_pillar (side), gringotts_white_marble_pillar_top (end)
     // Recipe (gated by Module.STRUCTURES, see ModRecipeProvider) —gringotts_white_marble
     public static final PillarEntry GRINGOTTS_WHITE_MARBLE_PILLAR =
-            LocationBlockHelper.pillar("gringotts_white_marble_pillar", marble(MapColor.QUARTZ));
+            LocationBlockHelper.pillar("gringotts_white_marble_pillar", LocationBlockHelper.stone(MapColor.QUARTZ));
 
     // ASSET: gringotts_white_marble_tiles, gringotts_white_marble_tiles_slab, gringotts_white_marble_tiles_stairs
     // Recipe (gated by Module.STRUCTURES, see ModRecipeProvider) —gringotts_white_marble
     public static final StairSet GRINGOTTS_WHITE_MARBLE_TILES =
-            LocationBlockHelper.withSlabStair("gringotts_white_marble_tiles", marble(MapColor.QUARTZ));
+            LocationBlockHelper.withSlabStair("gringotts_white_marble_tiles", LocationBlockHelper.stone(MapColor.QUARTZ));
 
     // ASSET: gringotts_pale_marble, gringotts_pale_marble_slab, gringotts_pale_marble_stairs, gringotts_pale_marble_wall
     // Recipe (gated by Module.STRUCTURES, see ModRecipeProvider) —calcite + diorite
     public static final VariantSet GRINGOTTS_PALE_MARBLE =
-            LocationBlockHelper.withVariants("gringotts_pale_marble", marble(MapColor.COLOR_LIGHT_GRAY));
+            LocationBlockHelper.withVariants("gringotts_pale_marble", LocationBlockHelper.stone(MapColor.COLOR_LIGHT_GRAY));
 
     // ASSET: gringotts_gold_trim
     // Recipe (gated by Module.STRUCTURES, see ModRecipeProvider) —gold ingot + gringotts_white_marble
     public static final BlockEntry GRINGOTTS_GOLD_TRIM =
-            LocationBlockHelper.block("gringotts_gold_trim", marble(MapColor.GOLD));
+            LocationBlockHelper.block("gringotts_gold_trim", LocationBlockHelper.stone(MapColor.GOLD));
 
     // ASSET: gringotts_iron_vault_stone, gringotts_iron_vault_stone_slab, gringotts_iron_vault_stone_stairs, gringotts_iron_vault_stone_wall
     // Recipe (gated by Module.STRUCTURES, see ModRecipeProvider) —stone + iron ingot
@@ -68,12 +60,12 @@ public final class GringottsBlocks {
     // ASSET: gringotts_goblin_stonework, gringotts_goblin_stonework_slab, gringotts_goblin_stonework_stairs, gringotts_goblin_stonework_wall
     // Recipe (gated by Module.STRUCTURES, see ModRecipeProvider) —chiseled stone bricks + gold nugget
     public static final VariantSet GRINGOTTS_GOBLIN_STONEWORK =
-            LocationBlockHelper.withVariants("gringotts_goblin_stonework", marble(MapColor.COLOR_GRAY));
+            LocationBlockHelper.withVariants("gringotts_goblin_stonework", LocationBlockHelper.stone(MapColor.COLOR_GRAY));
 
     // ASSET: gringotts_counting_floor, gringotts_counting_floor_slab
     // Recipe (gated by Module.STRUCTURES, see ModRecipeProvider) —gringotts_white_marble + gold ingot
     public static final SlabSet GRINGOTTS_COUNTING_FLOOR =
-            LocationBlockHelper.withSlab("gringotts_counting_floor", marble(MapColor.COLOR_LIGHT_GRAY));
+            LocationBlockHelper.withSlab("gringotts_counting_floor", LocationBlockHelper.stone(MapColor.COLOR_LIGHT_GRAY));
 
     public static void init() { /* force class load, triggering static field registration */ }
 }
