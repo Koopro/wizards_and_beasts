@@ -178,6 +178,8 @@ public final class UiScreenCapture {
                 Step.client("skill_web", () -> open(new SkillTreeScreen())),
                 Step.client("spell_menu", () -> open(new SpellMenuScreen())),
                 Step.server("spell_menu_loadout", UiScreenCapture::openSpellLoadout),
+                Step.client("heritage_gate", () -> open(new at.koopro.wizardsandbeasts.client.heritage.gui.HeritageSelectionScreen())),
+                Step.client("heritage_confirm", UiScreenCapture::openHeritageConfirm),
                 Step.client("ability_wheel", () -> open(new AbilityWheelScreen())),
                 Step.client("bestiary", () -> open(new BestiaryScreen())),
                 Step.client("owl_exam", () -> open(new OWLExamScreen())),
@@ -221,6 +223,22 @@ public final class UiScreenCapture {
 
     private static void open(Screen screen) {
         Minecraft.getInstance().setScreen(screen);
+    }
+
+    /**
+     * The heritage gate with its "this is final" card open. The card has no public way in -- it is reached
+     * only through Confirm -- so the harness presses it the way a reflection-free test cannot. Dev only.
+     */
+    private static void openHeritageConfirm() {
+        var screen = new at.koopro.wizardsandbeasts.client.heritage.gui.HeritageSelectionScreen();
+        open(screen);
+        try {
+            var m = screen.getClass().getDeclaredMethod("openConfirm");
+            m.setAccessible(true);
+            m.invoke(screen);
+        } catch (ReflectiveOperationException e) {
+            LOGGER.error("UI capture: cannot open the heritage confirm card", e);
+        }
     }
 
     /**

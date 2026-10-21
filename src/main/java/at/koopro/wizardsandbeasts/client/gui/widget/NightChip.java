@@ -31,12 +31,28 @@ public final class NightChip extends AbstractButton {
 
     private final Runnable action;
     private final BooleanSupplier selected;
+    /** False for a primary action: its face is always chosen, which is not a selection to announce. */
+    private final boolean narrateSelection;
 
     public NightChip(int x, int y, int w, int h, @NonNull Component label,
                      @NonNull Runnable action, @NonNull BooleanSupplier selected) {
+        this(x, y, w, h, label, action, selected, true);
+    }
+
+    private NightChip(int x, int y, int w, int h, Component label, Runnable action,
+                      BooleanSupplier selected, boolean narrateSelection) {
         super(x, y, w, h, label);
         this.action = action;
         this.selected = selected;
+        this.narrateSelection = narrateSelection;
+    }
+
+    /**
+     * The sheet's primary action (Confirm, Seal): always the chosen face while it can be pressed, so the
+     * one control that commits something stands apart from the neutral buttons beside it.
+     */
+    public static NightChip primary(int x, int y, int w, int h, @NonNull Component label, @NonNull Runnable action) {
+        return new NightChip(x, y, w, h, label, action, () -> true, false);
     }
 
     /** Width a chip needs for {@code label}: the text plus the face's padding. */
@@ -51,7 +67,8 @@ public final class NightChip extends AbstractButton {
 
     @Override
     protected void renderContents(@NonNull GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        boolean on = selected.getAsBoolean();
+        // A chip that cannot be pressed never looks chosen: a greyed Confirm must not wear the arcane face.
+        boolean on = active && selected.getAsBoolean();
         McStylePanel.ControlState state = McStylePanel.ControlState.of(active, isHovered() || isFocused());
         NightChrome.button(g, getX(), getY(), getWidth(), getHeight(), state, on);
         Font font = Minecraft.getInstance().font;
@@ -70,7 +87,7 @@ public final class NightChip extends AbstractButton {
     @Override
     protected void updateWidgetNarration(@NonNull NarrationElementOutput output) {
         defaultButtonNarrationText(output);
-        if (selected.getAsBoolean()) {
+        if (narrateSelection && selected.getAsBoolean()) {
             output.add(NarratedElementType.HINT, Component.translatable("gui.wizards_and_beasts.chip.selected"));
         }
     }

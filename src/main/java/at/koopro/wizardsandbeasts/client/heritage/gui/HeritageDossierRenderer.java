@@ -3,12 +3,17 @@ package at.koopro.wizardsandbeasts.client.heritage.gui;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
+import at.koopro.wizardsandbeasts.client.gui.ui.Ui;
+import at.koopro.wizardsandbeasts.client.gui.ui.UiSurface;
+import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 import at.koopro.wizardsandbeasts.client.gui.util.UiContrast;
+import at.koopro.wizardsandbeasts.heritage.ConditionOrigin;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageTraits;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import org.jspecify.annotations.NonNull;
@@ -16,10 +21,11 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 /**
- * Flat drawing for the Heritage selection screen: the centre dossier, the right-hand trait readout
- * and the confirm overlay.
+ * Drawing for the heritage gate (night sheet) and the Control Center's heritage preview (parchment): the
+ * dossier, the trait readout and the confirm card, each in the inks of the surface it is given.
  *
  * <p>Replaces the previous ceremony renderer, which painted a tiled parchment ground, a candlelight
  * glow that tracked the selected row, a wax seal and a staggered ink reveal. All of that is gone on
@@ -40,8 +46,6 @@ public final class HeritageDossierRenderer {
     private static final int LOCKED_RIBBON = WizardsPalette.WAX;
     private static final int LOCKED_RIBBON_EDGE = WizardsPalette.PAGE_BAD;
     private static final int LOCKED_RIBBON_TEXT = WizardsPalette.PAGE_LIGHT;
-    /** Scrim over the world behind the confirm sheet, not a colour on paper. */
-    private static final int OVERLAY_DIM = 0xCC0A0603;
     /** The dossier's field: the inset is the page one shade down, which PAGE_SHADE stands in for. */
     private static final int DOSSIER_GROUND = WizardsPalette.PAGE_SHADE;
     private HeritageDossierRenderer() {}
@@ -139,35 +143,119 @@ public final class HeritageDossierRenderer {
         g.drawString(font, label, rx, ry, LOCKED_RIBBON_TEXT, false);
     }
 
-    // ── Right column: the trait readout ──────────────────────────────────────
+    // ── Night sheet: the dossier as one scrolling column ─────────────────────
 
     /**
-     * What this heritage <em>means</em>, under the player preview: how their magic reaches them, what body they have,
-     * and then their traits, their magical affinities and their special characteristics, each by name.
+     * The dossier for the night-sheet gate, flowing down from {@code top} inside {@code area}'s width, in
+     * {@code s}'s inks. Unlike {@link #drawDossier} nothing is pinned to the floor: the screen clips and
+     * scrolls it, so a long translation is read in full rather than cut. Returns the y below the last line.
      *
-     * <p>This replaced a stat block — POWER band, Health ±, Speed %, Armour ± — which was the readout of a
-     * selectable MMO race. It said nothing about being a goblin and everything about which row to pick to win.
-     * Heritage carries no bonus for being itself now, so there are no numbers left to print; what a player needs
-     * before committing is who they would be.
+     * <p>Order: who (name, lineage, a chip if it cannot be chosen), what it does (signature trait), where it
+     * comes from (lore, the lineage's own note), what it begins with (condition), and the closing line.
      *
-     * <p>Reads {@link HeritageTraits} live rather than a cached snapshot, so the panel always agrees with the tags
-     * the lineage actually carries.
+     * @param refusalKey {@code HeritageRules.refusalKey} for the heritage, or null when it can be chosen
      */
+    public static int drawDossierFlow(@NonNull GuiGraphics g, @NonNull Font font, @NonNull UiSurface s,
+                                      Ui.@NonNull Rect area, int top,
+                                      @NonNull Heritage heritage, @Nullable HeritageVariant variant,
+                                      @NonNull Optional<ConditionOrigin> condition, @Nullable String refusalKey) {
+        int x = area.x();
+        int w = area.w();
+        int y = top;
+
+        g.drawString(font, heritage.getDisplayName(), x, y,
+                UiContrast.readableOn(heritage.getColor(), s.well()), s.shadow());
+        y += font.lineHeight + 2;
+        if (variant != null) {
+            g.drawString(font, variant.getDisplayName(), x, y, s.ink2(), s.shadow());
+        }
+        if (refusalKey != null) {
+            Component tag = lockChip(refusalKey);
+            Ui.chip(g, font, s, x + w - Ui.chipWidth(font, tag), y - 2, tag, Ui.Tone.BAD);
+        }
+        y += font.lineHeight + 4;
+        Ui.hairline(g, s, x, y, w);
+        y += 5;
+
+        y = wrapped(g, font, s, Component.translatable("gui.wizards_and_beasts.heritage.signature_trait",
+                Component.translatable("heritage.wizards_and_beasts." + heritage.getId() + ".trait")),
+                x, y, w, s.heading());
+        y += 4;
+        y = wrapped(g, font, s, Component.translatable("heritage.wizards_and_beasts." + heritage.getId() + ".lore"),
+                x, y, w, s.ink());
+        if (variant != null && I18n.exists(variant.getDescriptionTranslationKey())) {
+            y += 4;
+            y = wrapped(g, font, s, Component.translatable(variant.getDescriptionTranslationKey()), x, y, w, s.ink2());
+        }
+        if (condition.isPresent()) {
+            ConditionOrigin origin = condition.get();
+            y += 6;
+            y = wrapped(g, font, s, conditionName(origin), x, y, w, s.warn());
+            if (I18n.exists(origin.getDescriptionTranslationKey())) {
+                y = wrapped(g, font, s, Component.translatable(origin.getDescriptionTranslationKey()), x, y, w, s.ink2());
+            }
+        }
+        y += 6;
+        Ui.hairline(g, s, x, y, w);
+        y += 5;
+        return wrapped(g, font, s, Component.translatable("heritage.wizards_and_beasts." + heritage.getId() + ".flavor")
+                .withStyle(style -> style.withItalic(true)), x, y, w, s.ink2());
+    }
+
+    /** The short tag for a heritage the gate refuses: "Closed" when an administrator shut it, else "Soon". */
+    public static Component lockChip(String refusalKey) {
+        return Component.translatable(refusalKey.endsWith(".closed")
+                ? "gui.wizards_and_beasts.heritage.closed_chip"
+                : "gui.wizards_and_beasts.spell.coming_soon_short");
+    }
+
+    /** "Lycanthropy: Bitten". */
+    public static Component conditionName(ConditionOrigin origin) {
+        return Component.translatable(origin.condition().getTranslationKey()).append(": ")
+                .append(Component.translatable(origin.getTranslationKey()));
+    }
+
+    private static int wrapped(GuiGraphics g, Font font, UiSurface s, Component text, int x, int y, int w, int colour) {
+        for (FormattedCharSequence line : font.split(text, w)) {
+            g.drawString(font, line, x, y, colour, s.shadow());
+            y += font.lineHeight;
+        }
+        return y;
+    }
+
+    // ── Right column: the trait readout ──────────────────────────────────────
+
+    /** {@link #drawTraits(GuiGraphics, Font, UiSurface, int, int, int, Heritage, HeritageVariant)} on parchment. */
     public static void drawTraits(@NonNull GuiGraphics g, @NonNull Font font,
                                   int x, int y, int w,
                                   @NonNull Heritage heritage, @Nullable HeritageVariant variant) {
+        drawTraits(g, font, UiSurface.PAGE, x, y, w, heritage, variant);
+    }
+
+    /**
+     * What this heritage <em>means</em>: how their magic reaches them, what body they have, and then their
+     * traits, their magical affinities and their special characteristics, each by name.
+     *
+     * <p>This replaced a stat block — POWER band, Health ±, Speed %, Armour ± — which was the readout of a
+     * selectable MMO race. Heritage carries no bonus for being itself now, so there are no numbers left to
+     * print; what a player needs before committing is who they would be.
+     *
+     * <p>Reads {@link HeritageTraits} live rather than a cached snapshot, so the panel always agrees with the tags
+     * the lineage actually carries. Returns the y below the last line.
+     */
+    public static int drawTraits(@NonNull GuiGraphics g, @NonNull Font font, @NonNull UiSurface s,
+                                 int x, int y, int w,
+                                 @NonNull Heritage heritage, @Nullable HeritageVariant variant) {
         int cursorY = y;
-
-        cursorY = row(g, font, x, cursorY, w, "gui.wizards_and_beasts.heritage.trait.magic",
-                Component.literal(heritage.getMagicSource().getDisplayName()), WizardsPalette.PAGE_INK);
-
-        cursorY = row(g, font, x, cursorY, w, "gui.wizards_and_beasts.heritage.trait.size",
-                Component.literal(title(heritage.getSizeCategory().name())), WizardsPalette.PAGE_INK);
+        cursorY = row(g, font, s, x, cursorY, w, "gui.wizards_and_beasts.heritage.trait.magic",
+                Component.literal(heritage.getMagicSource().getDisplayName()));
+        cursorY = row(g, font, s, x, cursorY, w, "gui.wizards_and_beasts.heritage.trait.size",
+                Component.literal(title(heritage.getSizeCategory().name())));
         cursorY += 2;
-
         for (HeritageTraits.Kind kind : HeritageTraits.Kind.values()) {
-            cursorY = section(g, font, x, cursorY, w, kind, HeritageTraits.of(variant, kind));
+            cursorY = section(g, font, s, x, cursorY, w, kind, HeritageTraits.of(variant, kind));
         }
+        return cursorY;
     }
 
     /** The height {@link #drawTraits} will use at width {@code w}, for callers that lay out below it. */
@@ -178,7 +266,7 @@ public final class HeritageDossierRenderer {
             if (traits.isEmpty()) {
                 continue;
             }
-            height += font.lineHeight + 1;
+            height += font.split(Component.translatable(kind.getHeadingKey()), w).size() * font.lineHeight + 1;
             for (HeritageTraits.Trait trait : traits) {
                 height += font.split(Component.translatable(trait.getNameKey()), w - 6).size() * font.lineHeight;
             }
@@ -191,18 +279,21 @@ public final class HeritageDossierRenderer {
      * One heading plus its traits by name, wrapped. Nothing is drawn for an empty heading — a lineage with no
      * affinities should read as a lineage with no affinities, not as an empty label.
      */
-    private static int section(GuiGraphics g, Font font, int x, int y, int w,
+    private static int section(GuiGraphics g, Font font, UiSurface s, int x, int y, int w,
                                HeritageTraits.Kind kind, List<HeritageTraits.Trait> traits) {
         if (traits.isEmpty()) {
             return y;
         }
         int cursorY = y;
-        g.drawString(font, Component.translatable(kind.getHeadingKey()), x, cursorY, WizardsPalette.PAGE_RUBRIC, false);
-        cursorY += font.lineHeight + 1;
+        // Wrapped: in a 92px column "Special characteristics" is wider than the column.
+        for (FormattedCharSequence line : font.split(Component.translatable(kind.getHeadingKey()), w)) {
+            g.drawString(font, line, x, cursorY, s.heading(), s.shadow());
+            cursorY += font.lineHeight;
+        }
+        cursorY += 1;
         for (HeritageTraits.Trait trait : traits) {
-            for (FormattedCharSequence line : font.split(
-                    Component.translatable(trait.getNameKey()), w - 6)) {
-                g.drawString(font, line, x + 6, cursorY, WizardsPalette.PAGE_INK, false);
+            for (FormattedCharSequence line : font.split(Component.translatable(trait.getNameKey()), w - 6)) {
+                g.drawString(font, line, x + 6, cursorY, s.ink(), s.shadow());
                 cursorY += font.lineHeight;
             }
         }
@@ -210,50 +301,56 @@ public final class HeritageDossierRenderer {
     }
 
     /** One label-left / value-right row. Returns the next row's Y. */
-    private static int row(GuiGraphics g, Font font, int x, int y, int w,
-                           String labelKey, Component value, int valueColor) {
+    private static int row(GuiGraphics g, Font font, UiSurface s, int x, int y, int w,
+                           String labelKey, Component value) {
         Component label = Component.translatable(labelKey);
-        g.drawString(font, label, x, y, WizardsPalette.PAGE_INK_2, false);
-        int vw = font.width(value);
-        g.drawString(font, value, x + w - vw, y, valueColor, false);
+        g.drawString(font, label, x, y, s.ink2(), s.shadow());
+        g.drawString(font, value, x + w - font.width(value), y, s.ink(), s.shadow());
         return y + font.lineHeight + 1;
     }
 
-    // ── Confirm overlay ──────────────────────────────────────────────────────
+    // ── Confirm card ─────────────────────────────────────────────────────────
 
-    /** Dim ground plus a panel making the permanence explicit. Buttons are screen widgets. */
-    public static void drawConfirmOverlay(@NonNull GuiGraphics g, @NonNull Font font,
-                                          int screenW, int screenH,
-                                          @NonNull Heritage heritage, @NonNull HeritageVariant variant,
-                                          int panelX, int panelY, int panelW, int panelH) {
-        g.fill(0, 0, screenW, screenH, OVERLAY_DIM);
-        McStylePanel.drawThemedPanel(g, panelX, panelY, panelW, panelH);
+    /**
+     * The "this is final" card: what is being sworn (heritage, lineage, any condition), why it matters, and
+     * that it cannot be undone -- the last line in the bad ink behind a "!", so it does not rest on colour.
+     * The buttons are the screen's widgets, under this text.
+     */
+    public static void drawConfirm(@NonNull GuiGraphics g, @NonNull Font font, @NonNull UiSurface s,
+                                   Ui.@NonNull Rect r, @NonNull Heritage heritage, @NonNull HeritageVariant variant,
+                                   @NonNull Optional<ConditionOrigin> condition) {
+        Ui.panel(g, s, r.x(), r.y(), r.w(), r.h());
+        int cx = r.x() + r.w() / 2;
+        int w = r.w() - 28;
+        int ty = r.y() + 14;
 
-        int cx = panelX + panelW / 2;
-        int ty = panelY + 12;
-
-        centered(g, font, Component.translatable("gui.wizards_and_beasts.heritage.confirm_title"),
-                cx, ty, WizardsPalette.PAGE_RUBRIC);
+        centered(g, font, s, Component.translatable("gui.wizards_and_beasts.heritage.confirm_title"), cx, ty, s.heading());
         ty += font.lineHeight + 6;
-
-        centered(g, font, Component.literal(heritage.getDisplayName() + " — " + variant.getDisplayName()),
-                cx, ty, UiContrast.readableOn(heritage.getColor(), WizardsPalette.PAGE));
-        ty += font.lineHeight + 8;
-
+        centered(g, font, s, Component.literal(UiText.fit(font,
+                        heritage.getDisplayName() + " — " + variant.getDisplayName(), w)),
+                cx, ty, UiContrast.readableOn(heritage.getColor(), s.field() | 0xFF000000));
+        ty += font.lineHeight + 2;
+        if (condition.isPresent()) {
+            Component c = Component.translatable("gui.wizards_and_beasts.heritage.confirm_condition",
+                    conditionName(condition.get()));
+            centered(g, font, s, Component.literal(UiText.fit(font, c.getString(), w)), cx, ty, s.warn());
+            ty += font.lineHeight + 2;
+        }
+        ty += 4;
         for (FormattedCharSequence line : font.split(
-                Component.translatable("gui.wizards_and_beasts.heritage.confirm_body"), panelW - 24)) {
-            g.drawString(font, line, cx - font.width(line) / 2, ty, WizardsPalette.PAGE_INK, false);
+                Component.translatable("gui.wizards_and_beasts.heritage.confirm_body"), w)) {
+            g.drawString(font, line, cx - font.width(line) / 2, ty, s.ink2(), s.shadow());
             ty += font.lineHeight;
         }
         ty += 4;
-        centered(g, font, Component.translatable("gui.wizards_and_beasts.heritage.confirm_final"),
-                cx, ty, WizardsPalette.PAGE_BAD);
+        centered(g, font, s, Component.literal("! ").append(
+                Component.translatable("gui.wizards_and_beasts.heritage.confirm_final")), cx, ty, s.bad());
     }
 
     // ── Primitives ───────────────────────────────────────────────────────────
 
-    private static void centered(GuiGraphics g, Font font, Component text, int cx, int y, int color) {
-        g.drawString(font, text, cx - font.width(text) / 2, y, color, false);
+    private static void centered(GuiGraphics g, Font font, UiSurface s, Component text, int cx, int y, int color) {
+        g.drawString(font, text, cx - font.width(text) / 2, y, color, s.shadow());
     }
 
     private static void outline(GuiGraphics g, int x, int y, int w, int h, int color) {

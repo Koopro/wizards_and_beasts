@@ -197,3 +197,20 @@ Hybrid direction: systems screens on the new `UiSurface.NIGHT_SHEET`, book scree
   longer looks accepted until reopen).
 - Seen in the client: 1920x1080 at GUI 2/3/4, 1366x768 and 1280x720 at GUI 3 (`run/screenshots/ui_overhaul*`).
 - ⏳ At 1280x720 GUI 3 (STACKED) the details card is ~3 lines tall and relies on scrolling.
+
+### Heritage gate — `client/heritage/gui` (redesigned)
+- Was: three ◀ ▶ cyclers (heritage, lineage, condition) on parchment, a 424x240 design scaled up to 2.25x
+  while text stayed native; lore cut at the panel floor; trait headings ran out of their column.
+- Now: night sheet, `HeritageSelectionLayout` (pure, unit-tested 320x240 … 960x540). All eight heritages
+  listed with a gem in their signature colour and a "Soon"/"Closed" chip from `HeritageRules.refusalKey`
+  (tooltip says why); lineages as chips; condition as a cycler only where the lineage can carry one;
+  dossier scrolls (adds the lineage note and the condition's description, where the lang has them);
+  preview + traits column (traits scroll, headings wrap). Under 360 GUI px content: two columns, traits
+  close the dossier.
+- Confirm card over the dimmed sheet: what is sworn (with any condition), "!"-marked final warning,
+  Not Yet / Seal It (primary face). Enter seals, Esc backs out, Tab/Space work the buttons.
+- Unchanged: first-join gate (Esc swallowed), admin preview sends nothing, server re-checks the rules,
+  `HeritageSelectC2SPayload` payload.
+- `HeritageDossierRenderer` now takes a `UiSurface`; the Control Center's `HeritagePreview` keeps parchment.
+- Seen: 1080p GUI 2/3/4, 1366x768 + 1280x720 GUI 3, confirm card GUI 3/4 (`run/screenshots/ui_overhaul_m3*`).
+
