@@ -30,6 +30,7 @@ import at.koopro.wizardsandbeasts.ministry.trace.UnsolvedIncident;
 import at.koopro.wizardsandbeasts.ministry.trace.Verdict;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
+import at.koopro.wizardsandbeasts.module.ModuleState;
 import at.koopro.wizardsandbeasts.registry.TrinketItemRegistry;
 import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 import net.minecraft.core.BlockPos;
@@ -470,15 +471,14 @@ public final class MinistryCaseworkTests {
         });
     }
 
-    @SuppressWarnings("deprecation") // The cache-only setter is the point: nothing is persisted or broadcast.
     private static <T> T withMinistry(Supplier<T> action) {
         boolean wasOn = ModuleManager.isEnabled(Module.MINISTRY);
-        ModuleManager.setState(Module.MINISTRY, ModuleManager.State.ENABLED);
+        ModuleManager.overrideCached(Module.MINISTRY, ModuleState.ENABLED);
         try {
             return action.get();
         } finally {
             if (!wasOn) {
-                ModuleManager.setState(Module.MINISTRY, ModuleManager.State.DISABLED);
+                ModuleManager.overrideCached(Module.MINISTRY, ModuleState.DISABLED);
             }
         }
     }

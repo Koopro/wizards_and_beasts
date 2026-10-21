@@ -16,6 +16,7 @@ import at.koopro.wizardsandbeasts.ministry.trace.MinistryCaseData;
 import at.koopro.wizardsandbeasts.ministry.trace.MinistryTrace;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
+import at.koopro.wizardsandbeasts.module.ModuleState;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModCreatures;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
@@ -83,11 +84,10 @@ public final class CanonRulingTests {
                 CanonRulingTests::dragonNeedsHalfADozen);
     }
 
-    @SuppressWarnings("deprecation") // The cache-only setter is the point: nothing is persisted or broadcast.
     private static void unforgivableNeedsAPerson(GameTestHelper helper) {
         ServerPlayer caster = player(helper, "CursingWizard", GameType.SURVIVAL);
         boolean wasOn = ModuleManager.isEnabled(Module.MINISTRY);
-        ModuleManager.setState(Module.MINISTRY, ModuleManager.State.ENABLED);
+        ModuleManager.overrideCached(Module.MINISTRY, ModuleState.ENABLED);
         try {
             var cow = helper.spawn(EntityType.COW, new BlockPos(2, 1, 0));
             cow.setNoAi(true);
@@ -109,7 +109,7 @@ public final class CanonRulingTests {
             helper.succeed();
         } finally {
             if (!wasOn) {
-                ModuleManager.setState(Module.MINISTRY, ModuleManager.State.DISABLED);
+                ModuleManager.overrideCached(Module.MINISTRY, ModuleState.DISABLED);
             }
             WizardTestSupport.retire(helper, caster);
         }

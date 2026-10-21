@@ -13,29 +13,11 @@ import java.util.Map;
  * <p><b>Authority lives in the world, not here.</b> On a server the truth is {@code ModuleStateData} on the
  * overworld; on a client it is whatever the last sync said. This class is a fast read cache in front of
  * that, because the gate call sites include per-tick paths that must not do a level lookup. Nothing writes
- * to it except {@code ModuleStateService} (server, after persisting) and the sync payload handler (client).
- *
- * <p>{@code State} is retained as a deprecated alias of {@link ModuleState} so pre-existing references to
- * {@code ModuleManager.State} keep compiling; new code should use {@link ModuleState}.
+ * to it except {@code ModuleStateService} (server, after persisting), the sync payload handler (client) and
+ * {@link #overrideCached} (tests).
  */
 @NullMarked
 public final class ModuleManager {
-
-    /** @deprecated use {@link ModuleState}. Kept so existing references still resolve. */
-    @Deprecated
-    public enum State {
-        DISABLED,
-        ENABLED,
-        PREVIEW;
-
-        public ModuleState toModuleState() {
-            return switch (this) {
-                case DISABLED -> ModuleState.DISABLED;
-                case ENABLED -> ModuleState.ENABLED;
-                case PREVIEW -> ModuleState.PREVIEW;
-            };
-        }
-    }
 
     private static final Map<Module, ModuleState> CACHE = new EnumMap<>(Module.class);
     private static final Map<Module, ModuleSettingsValues> SETTINGS_CACHE = new EnumMap<>(Module.class);
@@ -94,12 +76,11 @@ public final class ModuleManager {
     }
 
     /**
-     * @deprecated The mutation path is {@code ModuleStateService.setState}, which validates, persists and
-     *     broadcasts. This writes the cache only and will not survive a refresh; retained because it was
-     *     public API before module state became world-owned.
+     * Writes one module's cached state and nothing else: not persisted, not broadcast, and reverted by the next
+     * refresh. The real mutation path is {@code ModuleStateService.setState}. This exists for game tests and
+     * capture scenes, which share one server and must not trigger the datapack reload that path does.
      */
-    @Deprecated
-    public static void setState(Module module, State state) {
-        CACHE.put(module, state == null ? ModuleState.DISABLED : state.toModuleState());
+    public static void overrideCached(Module module, ModuleState state) {
+        CACHE.put(module, state);
     }
 }

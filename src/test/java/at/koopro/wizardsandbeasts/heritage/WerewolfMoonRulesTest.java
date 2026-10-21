@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.heritage;
 
-import at.koopro.wizardsandbeasts.event.heritage.WerewolfMoonHandler;
+import at.koopro.wizardsandbeasts.heritage.werewolf.WerewolfRules;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -15,31 +15,31 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * the night</em> is the part worth being certain about. A phase off by one turns the full moon into
  * the waning gibbous and the mechanic never fires on the night players expect.
  */
-class WerewolfMoonHandlerTest {
+class WerewolfMoonRulesTest {
 
     private static final long DAY = 24000L;
 
     /** Vanilla indexes {@code MOON_BRIGHTNESS_PER_PHASE} with this, and its first entry is 1.0F. */
     @Test
     void dayZeroIsTheFullMoon() {
-        assertEquals(0, WerewolfMoonHandler.moonPhase(0L));
-        assertEquals(0, WerewolfMoonHandler.moonPhase(DAY - 1));
+        assertEquals(0, WerewolfRules.moonPhase(0L));
+        assertEquals(0, WerewolfRules.moonPhase(DAY - 1));
     }
 
     @Test
     void thePhaseWheelAdvancesOncePerDayAndWrapsAtEight() {
         for (int day = 0; day < 8; day++) {
-            assertEquals(day, WerewolfMoonHandler.moonPhase(day * DAY),
+            assertEquals(day, WerewolfRules.moonPhase(day * DAY),
                     "day " + day + " should be phase " + day);
         }
-        assertEquals(0, WerewolfMoonHandler.moonPhase(8 * DAY), "the wheel wraps after eight days");
-        assertEquals(3, WerewolfMoonHandler.moonPhase(11 * DAY));
+        assertEquals(0, WerewolfRules.moonPhase(8 * DAY), "the wheel wraps after eight days");
+        assertEquals(3, WerewolfRules.moonPhase(11 * DAY));
     }
 
     @Test
     void theFullMoonReturnsEveryEighthDay() {
         for (int cycle = 0; cycle < 5; cycle++) {
-            assertEquals(0, WerewolfMoonHandler.moonPhase(cycle * 8L * DAY));
+            assertEquals(0, WerewolfRules.moonPhase(cycle * 8L * DAY));
         }
     }
 
@@ -47,7 +47,7 @@ class WerewolfMoonHandlerTest {
     @Test
     void aNegativeClockStillYieldsAPhaseInRange() {
         for (long t = -5 * DAY; t < 0; t += DAY / 3) {
-            int phase = WerewolfMoonHandler.moonPhase(t);
+            int phase = WerewolfRules.moonPhase(t);
             assertTrue(phase >= 0 && phase < 8, "phase out of range at t=" + t + ": " + phase);
         }
     }
@@ -56,16 +56,16 @@ class WerewolfMoonHandlerTest {
 
     @Test
     void dayIsNotNight() {
-        assertFalse(WerewolfMoonHandler.isNight(0L), "dawn");
-        assertFalse(WerewolfMoonHandler.isNight(6000L), "noon");
-        assertFalse(WerewolfMoonHandler.isNight(12299L), "the last tick of day");
+        assertFalse(WerewolfRules.isNight(0L), "dawn");
+        assertFalse(WerewolfRules.isNight(6000L), "noon");
+        assertFalse(WerewolfRules.isNight(12299L), "the last tick of day");
     }
 
     @Test
     void nightRunsFromDuskToTheNextDawn() {
-        assertTrue(WerewolfMoonHandler.isNight(12300L), "the first tick of night");
-        assertTrue(WerewolfMoonHandler.isNight(18000L), "midnight");
-        assertTrue(WerewolfMoonHandler.isNight(DAY - 1), "the last tick before dawn");
+        assertTrue(WerewolfRules.isNight(12300L), "the first tick of night");
+        assertTrue(WerewolfRules.isNight(18000L), "midnight");
+        assertTrue(WerewolfRules.isNight(DAY - 1), "the last tick before dawn");
     }
 
     /**
@@ -74,21 +74,21 @@ class WerewolfMoonHandlerTest {
      */
     @Test
     void theNightBoundaryMatchesTheObscurialRules() {
-        assertFalse(WerewolfMoonHandler.isNight(12299L));
-        assertTrue(WerewolfMoonHandler.isNight(12300L));
+        assertFalse(WerewolfRules.isNight(12299L));
+        assertTrue(WerewolfRules.isNight(12300L));
     }
 
     @Test
     void nightRepeatsEveryDay() {
-        assertTrue(WerewolfMoonHandler.isNight(DAY + 13000L), "the second night");
-        assertFalse(WerewolfMoonHandler.isNight(DAY + 6000L), "the second noon");
-        assertTrue(WerewolfMoonHandler.isNight(100 * DAY + 13000L));
+        assertTrue(WerewolfRules.isNight(DAY + 13000L), "the second night");
+        assertFalse(WerewolfRules.isNight(DAY + 6000L), "the second noon");
+        assertTrue(WerewolfRules.isNight(100 * DAY + 13000L));
     }
 
     @Test
     void aNegativeClockStillDistinguishesDayFromNight() {
-        assertTrue(WerewolfMoonHandler.isNight(-DAY + 13000L));
-        assertFalse(WerewolfMoonHandler.isNight(-DAY + 6000L));
+        assertTrue(WerewolfRules.isNight(-DAY + 13000L));
+        assertFalse(WerewolfRules.isNight(-DAY + 6000L));
     }
 
     /**
@@ -100,7 +100,7 @@ class WerewolfMoonHandlerTest {
         int transformingWindows = 0;
         for (long day = 0; day < 8; day++) {
             long dusk = day * DAY + 13000L;
-            if (WerewolfMoonHandler.moonPhase(dusk) == 0 && WerewolfMoonHandler.isNight(dusk)) {
+            if (WerewolfRules.moonPhase(dusk) == 0 && WerewolfRules.isNight(dusk)) {
                 transformingWindows++;
             }
         }
@@ -110,8 +110,8 @@ class WerewolfMoonHandlerTest {
     @Test
     void theFullMoonDaytimeIsNotATransformingWindow() {
         long fullMoonNoon = 6000L;
-        assertEquals(0, WerewolfMoonHandler.moonPhase(fullMoonNoon), "still the full-moon day");
-        assertFalse(WerewolfMoonHandler.isNight(fullMoonNoon),
+        assertEquals(0, WerewolfRules.moonPhase(fullMoonNoon), "still the full-moon day");
+        assertFalse(WerewolfRules.isNight(fullMoonNoon),
                 "the moon has to be up, not merely full");
     }
 }

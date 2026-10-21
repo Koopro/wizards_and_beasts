@@ -203,16 +203,4 @@ public final class WerewolfMoonHandler {
     public static boolean moonIsUp(ServerLevel level) {
         return WerewolfRules.fullMoonNight(level);
     }
-
-    /** @deprecated use {@link WerewolfRules#moonPhase(long)}. */
-    @Deprecated
-    public static int moonPhase(long dayTime) {
-        return WerewolfRules.moonPhase(dayTime);
-    }
-
-    /** @deprecated use {@link WerewolfRules#isNight(long)}. */
-    @Deprecated
-    public static boolean isNight(long dayTime) {
-        return WerewolfRules.isNight(dayTime);
-    }
 }

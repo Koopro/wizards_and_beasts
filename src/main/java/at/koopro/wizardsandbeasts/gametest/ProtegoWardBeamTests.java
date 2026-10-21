@@ -272,14 +272,9 @@ public final class ProtegoWardBeamTests {
      * swapped the creature-ability definitions out from under an unrelated Occamy test and failed it.
      * The cache write touches nothing else and is put back when this scenario ends.
      */
-    @SuppressWarnings("deprecation") // cache-only is exactly what a test wants; the service is not
     private static ModuleState swapDarkArts(ModuleState state) {
         ModuleState before = ModuleManager.state(Module.DARK_ARTS);
-        ModuleManager.setState(Module.DARK_ARTS, switch (state) {
-            case ENABLED -> ModuleManager.State.ENABLED;
-            case PREVIEW -> ModuleManager.State.PREVIEW;
-            default -> ModuleManager.State.DISABLED;
-        });
+        ModuleManager.overrideCached(Module.DARK_ARTS, state);
         return before;
     }
 

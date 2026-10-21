@@ -340,12 +340,11 @@ public final class WizardTestSupport {
      * under the other, which then failed on a refused cast one run in a few. A module a lease turned on is turned back
      * off only when the last lease on it is released. Releasing twice is harmless.
      */
-    @SuppressWarnings("deprecation") // The cache-only setter is the point: nothing is persisted or broadcast.
     public static Runnable leaseModule(at.koopro.wizardsandbeasts.module.Module module) {
         int holders = MODULE_LEASES.getOrDefault(module, 0);
         if (holders == 0 && !at.koopro.wizardsandbeasts.module.ModuleManager.isEnabled(module)) {
-            at.koopro.wizardsandbeasts.module.ModuleManager.setState(module,
-                    at.koopro.wizardsandbeasts.module.ModuleManager.State.ENABLED);
+            at.koopro.wizardsandbeasts.module.ModuleManager.overrideCached(module,
+                    at.koopro.wizardsandbeasts.module.ModuleState.ENABLED);
             ENABLED_BY_LEASE.add(module);
         }
         MODULE_LEASES.put(module, holders + 1);
@@ -358,8 +357,8 @@ public final class WizardTestSupport {
             int remaining = MODULE_LEASES.getOrDefault(module, 1) - 1;
             MODULE_LEASES.put(module, Math.max(0, remaining));
             if (remaining <= 0 && ENABLED_BY_LEASE.remove(module)) {
-                at.koopro.wizardsandbeasts.module.ModuleManager.setState(module,
-                        at.koopro.wizardsandbeasts.module.ModuleManager.State.DISABLED);
+                at.koopro.wizardsandbeasts.module.ModuleManager.overrideCached(module,
+                        at.koopro.wizardsandbeasts.module.ModuleState.DISABLED);
             }
         };
     }

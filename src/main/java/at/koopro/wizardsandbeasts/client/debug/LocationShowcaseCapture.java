@@ -161,10 +161,9 @@ public final class LocationShowcaseCapture {
     }
 
     /** The fence's board (the Ministry module switched on for the shot, cache only): illicit goods marked. */
-    @SuppressWarnings("deprecation")
     private static void fence(ServerPlayer p) {
-        at.koopro.wizardsandbeasts.module.ModuleManager.setState(at.koopro.wizardsandbeasts.module.Module.MINISTRY,
-                at.koopro.wizardsandbeasts.module.ModuleManager.State.ENABLED);
+        at.koopro.wizardsandbeasts.module.ModuleManager.overrideCached(at.koopro.wizardsandbeasts.module.Module.MINISTRY,
+                at.koopro.wizardsandbeasts.module.ModuleState.ENABLED);
         ServerLevel level = (ServerLevel) p.level();
         var trader = EntityType.WANDERING_TRADER.spawn(level,
                 BlockPos.containing(p.position().add(p.getLookAngle().scale(2.0))), EntitySpawnReason.COMMAND);

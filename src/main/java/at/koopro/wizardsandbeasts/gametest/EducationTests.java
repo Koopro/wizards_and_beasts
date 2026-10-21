@@ -14,6 +14,7 @@ import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import at.koopro.wizardsandbeasts.item.brew.BrewItem;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
+import at.koopro.wizardsandbeasts.module.ModuleState;
 import at.koopro.wizardsandbeasts.owl.OWLExaminationHandler;
 import at.koopro.wizardsandbeasts.owl.OWLGrade;
 import at.koopro.wizardsandbeasts.owl.OWLGradeCalculator;
@@ -252,7 +253,6 @@ final class EducationTests {
         }
     }
 
-    @SuppressWarnings("deprecation") // ModuleManager.setState: the test flips the module and puts it back
     private static void gates(GameTestHelper helper) {
         requireOwls(helper);
         ServerPlayer player = candidate(helper, "GatedCandidate");
@@ -274,12 +274,12 @@ final class EducationTests {
                     () -> "a N.E.W.T. Herbology O did not open the Healer's capstone gate");
 
             player.setData(ModAttachments.OWL_DATA.get(), PlayerOWLData.DEFAULT);
-            ModuleManager.setState(Module.OWLS, ModuleManager.State.DISABLED);
+            ModuleManager.overrideCached(Module.OWLS, ModuleState.DISABLED);
             try {
                 check(helper, QualificationGates.firstUnmet(player, QualificationGates.Kind.BREW, felix) == null,
                         () -> "with O.W.L.s off a brew still asked for one");
             } finally {
-                ModuleManager.setState(Module.OWLS, ModuleManager.State.ENABLED);
+                ModuleManager.overrideCached(Module.OWLS, ModuleState.ENABLED);
             }
             helper.succeed();
         } finally {

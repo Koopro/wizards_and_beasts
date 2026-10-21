@@ -258,7 +258,7 @@ public final class AdminWorldTests {
                     () -> "the fine scale did not reach the fine arithmetic");
 
             // Notoriety cooling, read by TraceService.decay while the Ministry watches.
-            ModuleManager.setState(Module.MINISTRY, ModuleManager.State.ENABLED);
+            ModuleManager.overrideCached(Module.MINISTRY, ModuleState.ENABLED);
             check(helper, TraceService.isActive(), () -> "the Ministry switch does not drive TraceService.isActive");
             MinistryRecords.mutate(suspect, r -> r.withNotoriety(20.0f));
             service().change(CONSOLE, id("ministry_notoriety_decay_per_second"), "0.5", true);
@@ -266,7 +266,7 @@ public final class AdminWorldTests {
             float after = MinistryRecords.get(suspect).notoriety();
             check(helper, Math.abs(after - 15.0f) < 1e-3, () -> "10 s at 0.5/s should cool 20 to 15, got " + after);
 
-            ModuleManager.setState(Module.MINISTRY, ModuleManager.State.DISABLED);
+            ModuleManager.overrideCached(Module.MINISTRY, ModuleState.DISABLED);
             check(helper, !TraceService.isActive(), () -> "closing the Ministry left the Trace running");
             TraceService.decay(suspect, 200);
             check(helper, Math.abs(MinistryRecords.get(suspect).notoriety() - 15.0f) < 1e-3,
@@ -285,11 +285,11 @@ public final class AdminWorldTests {
         ServerPlayer traveller = WizardTestSupport.placeMockPlayer(helper, "TravelRestricted", GameType.SURVIVAL);
         Map<Module, ModuleState> modules = new EnumMap<>(ModuleManager.snapshot());
         try {
-            ModuleManager.setState(Module.APPARITION, ModuleManager.State.DISABLED);
+            ModuleManager.overrideCached(Module.APPARITION, ModuleState.DISABLED);
             check(helper, ApparitionServerLogic.evaluateStart(traveller) == ApparitionStartResult.REJECTED_MODULE_OFF,
                     () -> "Apparition started with its module closed");
-            ModuleManager.setState(Module.APPARITION, ModuleManager.State.ENABLED);
-            ModuleManager.setState(Module.PLAYER_ABILITIES, ModuleManager.State.ENABLED);
+            ModuleManager.overrideCached(Module.APPARITION, ModuleState.ENABLED);
+            ModuleManager.overrideCached(Module.PLAYER_ABILITIES, ModuleState.ENABLED);
             ApparitionStartResult open = ApparitionServerLogic.evaluateStart(traveller);
             check(helper, open != ApparitionStartResult.REJECTED_MODULE_OFF, () -> "Apparition stayed refused once opened: " + open);
 
