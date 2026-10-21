@@ -10,7 +10,10 @@
         { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/desert_pyramid" },
         { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/jungle_temple" },
         { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/underwater_ruin_big" },
-        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/shipwreck_supply" }
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/shipwreck_supply" },
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/shipwreck_map" },
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/ruined_portal" },
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/nether_bridge" }
       ]
     }
   ],

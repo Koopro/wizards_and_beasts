@@ -54,6 +54,9 @@ public final class SpellTraceTests {
         tests.add("spell_learning_mastery_gate_reads_canonical_hits",
                 "learning: a bare masterySpellId (episkey -> reparo) counts the canonical hit ledger",
                 SpellTraceTests::masteryGateCanonical);
+        tests.add("spell_give_command_hands_a_written_source",
+                "command: /wandb magic spell give hands an admin a written page; a non-admin gets nothing",
+                SpellTraceTests::giveCommand);
         tests.add("spell_trace_death_cancels_the_challenge",
                 "tracing: dying ends the challenge", SpellTraceTests::deathCancels);
     }
@@ -262,6 +265,56 @@ public final class SpellTraceTests {
         } finally {
             WizardTestSupport.retire(helper, player);
         }
+    }
+
+    private static void giveCommand(GameTestHelper helper) {
+        var server = helper.getLevel().getServer();
+        java.util.UUID listed = AdminFrameworkTests.firstAllowListedUuid();
+        ServerPlayer admin = listed == null
+                ? WizardTestSupport.placeMockPlayer(helper, "GiveAdmin")
+                : WizardTestSupport.placeMockPlayer(helper, "GiveAdmin", listed, net.minecraft.world.level.GameType.CREATIVE);
+        ServerPlayer outsider = WizardTestSupport.placeMockPlayer(helper, "GiveOutsider",
+                net.minecraft.world.level.GameType.SURVIVAL);
+        boolean opped = false;
+        try {
+            if (listed == null) {
+                server.getPlayerList().op(admin.nameAndId());
+                opped = true;
+            }
+            // A mock player's inventory is not empty, and an allow-listed admin's reloads (lesson L862).
+            admin.getInventory().clearContent();
+            outsider.getInventory().clearContent();
+            server.getCommands().performPrefixedCommand(outsider.createCommandSourceStack().withSuppressedOutput(),
+                    "wandb magic spell give alohomora page 2");
+            WizardTestSupport.check(helper, countWritten(outsider, "alohomora") == 0,
+                    () -> "a non-admin gave themselves a spell page");
+
+            server.getCommands().performPrefixedCommand(admin.createCommandSourceStack().withSuppressedOutput(),
+                    "wandb magic spell give alohomora page 2");
+            int pages = countWritten(admin, "alohomora");
+            WizardTestSupport.check(helper, pages == 2, () -> "expected 2 written pages, found " + pages);
+            helper.succeed();
+        } finally {
+            if (opped) {
+                server.getPlayerList().deop(admin.nameAndId());
+            }
+            WizardTestSupport.retire(helper, admin);
+            WizardTestSupport.retire(helper, outsider);
+        }
+    }
+
+    private static int countWritten(ServerPlayer player, String spellId) {
+        Spell spell = Spells.byId(spellId);
+        int total = 0;
+        for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+            ItemStack stack = player.getInventory().getItem(slot);
+            Spell written = SpellSource.spellOf(stack);
+            if (written != null && spell != null && written.getId().equals(spell.getId())
+                    && stack.is(MiscItemRegistry.TORN_SPELL_PAGE.get())) {
+                total += stack.getCount();
+            }
+        }
+        return total;
     }
 
     // -- helpers ----------------------------------------------------------------------------------

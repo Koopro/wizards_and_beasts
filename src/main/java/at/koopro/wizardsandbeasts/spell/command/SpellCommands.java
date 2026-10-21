@@ -82,6 +82,18 @@ public final class SpellCommands {
                                 .executes(ctx -> forgetSpell(
                                         ctx.getSource().getPlayerOrException(),
                                         StringArgumentType.getString(ctx, "spell")))))
+                // Admin only: a written book or page to learn from — the test and setup path for the
+                // tracing challenge. Unlike `learn`, it grants nothing by itself: the reader still has to
+                // pass the trace, and every learning gate still applies when they do.
+                .then(Commands.literal("give")
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
+                        .then(Commands.argument("spell", StringArgumentType.word())
+                                .suggests(SPELL_ID_SUGGESTIONS)
+                                .executes(ctx -> giveSource(ctx.getSource(),
+                                        StringArgumentType.getString(ctx, "spell"), false, 1,
+                                        java.util.List.of(ctx.getSource().getPlayerOrException())))
+                                .then(sourceKind("book", false))
+                                .then(sourceKind("page", true))))
                 .then(Commands.literal("list")
                         .executes(ctx -> listSpells(ctx.getSource().getPlayerOrException())))
                 .then(Commands.literal("info")
@@ -130,6 +142,50 @@ public final class SpellCommands {
                                 .executes(ctx -> revealPatronusForm(ctx.getSource().getPlayerOrException())))
                         .then(Commands.literal("clear")
                                 .executes(ctx -> clearPatronusForm(ctx.getSource().getPlayerOrException()))));
+    }
+
+    /** {@code book|page [count] [targets]} under {@code spell give <spell>}. */
+    private static LiteralArgumentBuilder<CommandSourceStack> sourceKind(String name, boolean page) {
+        return Commands.literal(name)
+                .executes(ctx -> giveSource(ctx.getSource(), StringArgumentType.getString(ctx, "spell"), page, 1,
+                        java.util.List.of(ctx.getSource().getPlayerOrException())))
+                .then(Commands.argument("count", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, 64))
+                        .executes(ctx -> giveSource(ctx.getSource(), StringArgumentType.getString(ctx, "spell"), page,
+                                com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "count"),
+                                java.util.List.of(ctx.getSource().getPlayerOrException())))
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .executes(ctx -> giveSource(ctx.getSource(), StringArgumentType.getString(ctx, "spell"),
+                                        page, com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "count"),
+                                        EntityArgument.getPlayers(ctx, "targets")))));
+    }
+
+    /**
+     * Hands each target a Standard Book of Spells (reusable) or a torn page (spent by a passed trace)
+     * with {@code spellId} written in it. Refuses an unknown id; warns, but still gives, for a spell that
+     * cannot be learned yet, since checking that refusal is itself something an admin tests.
+     */
+    private static int giveSource(CommandSourceStack source, String spellId, boolean page, int count,
+                                  Collection<ServerPlayer> targets) {
+        Spell spell = Spells.byId(spellId);
+        if (spell == null) {
+            source.sendFailure(Component.literal("Unknown spell: " + spellId));
+            return 0;
+        }
+        for (ServerPlayer target : targets) {
+            ItemStack stack = new ItemStack(page
+                    ? at.koopro.wizardsandbeasts.registry.MiscItemRegistry.TORN_SPELL_PAGE.get()
+                    : at.koopro.wizardsandbeasts.registry.CanonItemRegistry.STANDARD_BOOK_OF_SPELLS.get(), count);
+            at.koopro.wizardsandbeasts.spell.learning.SpellSource.write(stack, spell);
+            at.koopro.wizardsandbeasts.util.InventoryHandover.giveOrDrop(target, stack);
+        }
+        String what = (page ? "torn page" : "book") + (count > 1 ? " x" + count : "");
+        source.sendSuccess(() -> Component.literal("Gave " + what + " of " + suggestibleId(spell) + " to "
+                + targets.size() + " player(s). Hold right-click to read, then trace to learn."), true);
+        if (!spell.isImplemented()) {
+            source.sendSuccess(() -> Component.literal("Note: " + suggestibleId(spell)
+                    + " is not implemented yet, so reading it will be refused.").withStyle(ChatFormatting.YELLOW), false);
+        }
+        return targets.size();
     }
 
     private static int learnSpell(ServerPlayer player, String spellId) {

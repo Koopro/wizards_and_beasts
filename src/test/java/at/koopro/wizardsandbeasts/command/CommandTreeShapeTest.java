@@ -75,7 +75,8 @@ class CommandTreeShapeTest {
         assertPath("player", "ability", "grant");
         assertPath("player", "sheet");                  // was: /wandb character
 
-        assertPath("magic", "spell", "learn_all");      // was: wand spell learnall
+        assertPath("magic", "spell", "learn_all");
+        assertPath("magic", "spell", "give", "spell", "page", "count", "targets");      // was: wand spell learnall
         assertPath("magic", "proficiency", "set_all");  // was: wand proficiency setall
         assertPath("magic", "patronus", "form", "reveal");
         assertPath("magic", "animagus", "transform");

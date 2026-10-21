@@ -1,0 +1,27 @@
+{
+  "type": "wizards_and_beasts:spellbook",
+  "conditions": [
+    {
+      "condition": "minecraft:any_of",
+      "terms": [
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/ancient_city" },
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/end_city_treasure" },
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/trial_chambers/reward" },
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/buried_treasure" },
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/igloo_chest" }
+      ]
+    }
+  ],
+  "spells": [
+    "protego",
+    "expecto_patronum",
+    "confringo",
+    "bombarda",
+    "revelio",
+    "levicorpus",
+    "episkey",
+    "capacious_extremis",
+    "claustra_reverto"
+  ],
+  "chance": 0.5
+}
