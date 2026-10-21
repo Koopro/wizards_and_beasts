@@ -7,7 +7,6 @@ import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton;
-import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.owl.ClientOWLCache;
 import at.koopro.wizardsandbeasts.owl.OWLGrade;
 import at.koopro.wizardsandbeasts.owl.OWLSubject;

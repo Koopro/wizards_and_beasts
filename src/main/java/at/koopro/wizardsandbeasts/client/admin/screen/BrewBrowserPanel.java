@@ -3,7 +3,6 @@ package at.koopro.wizardsandbeasts.client.admin.screen;
 import at.koopro.wizardsandbeasts.admin.AdminCategory;
 import at.koopro.wizardsandbeasts.admin.brew.BrewAdminService;
 import at.koopro.wizardsandbeasts.admin.brew.BrewSettingIds;
-import at.koopro.wizardsandbeasts.admin.config.SettingKind;
 import at.koopro.wizardsandbeasts.brew.tuning.BrewEffectText;
 import at.koopro.wizardsandbeasts.client.admin.AdminClientRequests;
 import at.koopro.wizardsandbeasts.client.admin.ClientAdminBrewState;

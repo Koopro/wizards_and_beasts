@@ -53,10 +53,6 @@ public final class ClientProtegoChargeState {
         return progress;
     }
 
-    public static boolean isPlanting() {
-        return planting;
-    }
-
     public static boolean isCapped() {
         return capped;
     }

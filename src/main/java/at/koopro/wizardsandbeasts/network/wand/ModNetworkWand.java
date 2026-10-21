@@ -1,9 +1,5 @@
 package at.koopro.wizardsandbeasts.network.wand;
 
-import at.koopro.wizardsandbeasts.network.wand.ChooseTrialWandPayload;
-import at.koopro.wizardsandbeasts.network.wand.SelectTrialWandPayload;
-import at.koopro.wizardsandbeasts.network.wand.SetFlexibilityPayload;
-import at.koopro.wizardsandbeasts.network.wand.SyncTrialResonancePayload;
 
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 

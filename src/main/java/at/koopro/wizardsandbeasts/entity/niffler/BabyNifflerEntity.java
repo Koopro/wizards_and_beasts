@@ -2,7 +2,6 @@ package at.koopro.wizardsandbeasts.entity.niffler;
 
 import at.koopro.wizardsandbeasts.creature.bond.BondProfile;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
-import at.koopro.wizardsandbeasts.util.AnimHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -19,8 +18,6 @@ import org.jspecify.annotations.Nullable;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.sounds.SoundEvent;
-import software.bernie.geckolib.animatable.manager.AnimatableManager;
-import software.bernie.geckolib.animation.RawAnimation;
 
 /**
  * Baby Niffler variant. 9-slot pouch, half-scale, cannot be pocket-carried,

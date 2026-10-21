@@ -107,12 +107,6 @@ public final class VeelaAllure {
                 && !HeritageTransformService.isTransformed(data);
     }
 
-    /** Whether someone is a Veela, and so past the reach of another's allure. */
-    static boolean isVeela(LivingEntity entity) {
-        return entity instanceof ServerPlayer player
-                && HeritageAPI.getData(player).getSelectedHeritage() == Heritage.VEELA;
-    }
-
     /**
      * Whether a player is past the allure altogether: another Veela, or a goblin — whose people answer to metal and
      * contract, as HERITAGE_IDENTITY_STATUS.md's immunity list always said and the code never did.

@@ -8,7 +8,6 @@ import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
 import at.koopro.wizardsandbeasts.item.wand.WandItem;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
-import at.koopro.wizardsandbeasts.spell.cast.CastContext;
 import at.koopro.wizardsandbeasts.spell.effect.SpellEffectEntry;
 import at.koopro.wizardsandbeasts.spell.effect.SpellEffectContext;
 import at.koopro.wizardsandbeasts.spell.effect.SpellEffectRunner;

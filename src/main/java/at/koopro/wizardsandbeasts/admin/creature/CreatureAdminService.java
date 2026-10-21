@@ -17,8 +17,6 @@ import at.koopro.wizardsandbeasts.creature.rules.CreatureRulesService;
 import at.koopro.wizardsandbeasts.creature.rules.SpawnConditionNotes;
 import at.koopro.wizardsandbeasts.creature.variant.CreatureVariant;
 import at.koopro.wizardsandbeasts.creature.variant.CreatureVariants;
-import at.koopro.wizardsandbeasts.module.Module;
-import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.network.admin.AdminCreaturePayloads.CreatureSummary;
 import at.koopro.wizardsandbeasts.network.admin.AdminCreaturePayloads.SpawnEntry;
 import at.koopro.wizardsandbeasts.network.admin.AdminCreaturePayloads.VariantInfo;
@@ -322,10 +320,5 @@ public final class CreatureAdminService {
             }
         }
         return String.join(", ", names);
-    }
-
-    /** Whether natural spawning can happen at all right now, globally. */
-    public static boolean creaturesModuleOpen() {
-        return ModuleManager.isEnabled(Module.CREATURES);
     }
 }

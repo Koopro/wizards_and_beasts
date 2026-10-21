@@ -1,7 +1,6 @@
 package at.koopro.wizardsandbeasts.entity.niffler;
 
 import at.koopro.wizardsandbeasts.entity.GeoEntityBase;
-import at.koopro.wizardsandbeasts.entity.niffler.CarriedNifflerAttachment;
 import at.koopro.wizardsandbeasts.creature.bond.BondState;
 import at.koopro.wizardsandbeasts.creature.bond.BondableBeast;
 import at.koopro.wizardsandbeasts.creature.bond.FollowBondedOwnerGoal;
@@ -39,7 +38,6 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -507,10 +505,6 @@ public class NifflerEntity extends GeoEntityBase implements BondableBeast,
     }
 
     // ─── Action flags (synced for animation) ──────────────────────────────────
-
-    public boolean isDigging() {
-        return (entityData.get(DATA_ACTION) & FLAG_DIGGING) != 0;
-    }
 
     public boolean isHoarding() {
         return (entityData.get(DATA_ACTION) & FLAG_HOARDING) != 0;

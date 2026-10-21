@@ -1,7 +1,6 @@
 package at.koopro.wizardsandbeasts.wand.elder;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.wand.elder.ElderWandSavedData;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.wand.allegiance.WandAllegianceService;
 import net.minecraft.ChatFormatting;

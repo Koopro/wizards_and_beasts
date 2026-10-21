@@ -1,10 +1,6 @@
 package at.koopro.wizardsandbeasts.network.heritage;
 
 import at.koopro.wizardsandbeasts.client.network.ClientPayloadHandlers;
-import at.koopro.wizardsandbeasts.network.heritage.HeritageDataSyncS2CPayload;
-import at.koopro.wizardsandbeasts.network.heritage.HeritageSelectC2SPayload;
-import at.koopro.wizardsandbeasts.network.heritage.ProfessionSelectC2SPayload;
-import at.koopro.wizardsandbeasts.network.heritage.ProfessionUnlockC2SPayload;
 
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 

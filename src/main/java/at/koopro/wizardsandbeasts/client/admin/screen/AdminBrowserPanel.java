@@ -1,6 +1,5 @@
 package at.koopro.wizardsandbeasts.client.admin.screen;
 
-import at.koopro.wizardsandbeasts.admin.config.SettingKind;
 import at.koopro.wizardsandbeasts.client.admin.ClientAdminState;
 import at.koopro.wizardsandbeasts.client.admin.widget.AdminSectionHeader;
 import at.koopro.wizardsandbeasts.client.admin.widget.AdminText;

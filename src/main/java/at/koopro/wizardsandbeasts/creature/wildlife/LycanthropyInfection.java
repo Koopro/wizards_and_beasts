@@ -3,7 +3,6 @@ package at.koopro.wizardsandbeasts.creature.wildlife;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
-import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.heritage.werewolf.WerewolfConfig;
 import at.koopro.wizardsandbeasts.heritage.werewolf.WerewolfRules;

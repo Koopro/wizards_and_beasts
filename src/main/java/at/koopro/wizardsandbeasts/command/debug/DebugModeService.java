@@ -45,10 +45,6 @@ public final class DebugModeService {
         }
     }
 
-    public static boolean isEnabledFor(UUID id) {
-        return globalEnabled || ENABLED_PLAYERS.contains(id);
-    }
-
     /** Whether this player has debug mode of their own, apart from the all-players switch. */
     public static boolean hasOwn(UUID id) {
         return ENABLED_PLAYERS.contains(id);

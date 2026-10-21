@@ -56,9 +56,4 @@ public enum EcologyIntent {
     public boolean flees() {
         return this == FLEE_PREDATOR || this == FLEE_PLAYER || this == FLEE_HURT || this == FLEE_STIMULUS;
     }
-
-    /** Intents that hold the creature still. */
-    public boolean holdsStill() {
-        return this == REST || this == WARN_INTRUDER;
-    }
 }

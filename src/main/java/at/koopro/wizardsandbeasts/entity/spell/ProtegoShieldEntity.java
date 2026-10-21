@@ -607,11 +607,6 @@ public class ProtegoShieldEntity extends Entity implements GeoEntity {
         return collapseTicks;
     }
 
-    /** Radius this shield covers — the same number the renderer scales to. */
-    public double coverRadius() {
-        return tier().radius();
-    }
-
     public @Nullable UUID getCasterUuid() {
         String raw = this.entityData.get(DATA_CASTER_UUID);
         if (raw == null || raw.isBlank()) {

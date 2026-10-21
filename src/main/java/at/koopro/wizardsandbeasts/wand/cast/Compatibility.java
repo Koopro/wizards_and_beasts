@@ -47,10 +47,6 @@ public final class Compatibility {
         return new Score(initial, total);
     }
 
-    public static boolean canBind(float initialCompat) {
-        return initialCompat >= BIND_THRESHOLD;
-    }
-
     /**
      * What a character's traits draw a wand towards. Blood status draws nothing: a wand chooses the witch or wizard,
      * and Ollivander never asked Hermione who her parents were.

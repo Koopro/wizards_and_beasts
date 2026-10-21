@@ -1,8 +1,6 @@
 package at.koopro.wizardsandbeasts.network.bloodpact;
 
 import at.koopro.wizardsandbeasts.client.network.ClientPayloadHandlers;
-import at.koopro.wizardsandbeasts.network.bloodpact.SBreakPactPayload;
-import at.koopro.wizardsandbeasts.network.bloodpact.SUpdateVialPayload;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public final class ModNetworkBloodPact {

@@ -3,7 +3,6 @@ package at.koopro.wizardsandbeasts.network.module;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleIds;
-import at.koopro.wizardsandbeasts.command.AdminAccess;
 import at.koopro.wizardsandbeasts.module.ModuleState;
 import at.koopro.wizardsandbeasts.module.ModuleStateService;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;

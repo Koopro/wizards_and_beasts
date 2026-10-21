@@ -71,9 +71,4 @@ public final class EcologyState {
     public boolean awake() {
         return wake;
     }
-
-    /** Test and admin seam: forget home so the next look around sets it here. */
-    public void resetHome(@Nullable Vec3 value) {
-        home = value;
-    }
 }

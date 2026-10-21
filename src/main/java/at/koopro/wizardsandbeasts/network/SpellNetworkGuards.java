@@ -6,8 +6,6 @@ import at.koopro.wizardsandbeasts.network.spell.SpellDeniedS2CPayload;
 import at.koopro.wizardsandbeasts.spell.cast.SpellRejectCodes;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
-import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
-import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.form.constraint.FormConstraint;
 import at.koopro.wizardsandbeasts.form.constraint.FormConstraints;
 import net.minecraft.server.level.ServerPlayer;

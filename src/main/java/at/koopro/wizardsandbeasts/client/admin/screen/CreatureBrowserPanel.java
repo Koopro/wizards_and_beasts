@@ -2,7 +2,6 @@ package at.koopro.wizardsandbeasts.client.admin.screen;
 
 import at.koopro.wizardsandbeasts.admin.AdminCategory;
 import at.koopro.wizardsandbeasts.admin.access.AdminCapability;
-import at.koopro.wizardsandbeasts.admin.config.SettingKind;
 import at.koopro.wizardsandbeasts.admin.creature.CreatureAdminService;
 import at.koopro.wizardsandbeasts.admin.creature.CreatureRuleSettings;
 import at.koopro.wizardsandbeasts.client.admin.AdminClientRequests;

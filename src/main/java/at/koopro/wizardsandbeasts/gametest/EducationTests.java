@@ -22,7 +22,6 @@ import at.koopro.wizardsandbeasts.owl.Profession;
 import at.koopro.wizardsandbeasts.owl.Qualification;
 import at.koopro.wizardsandbeasts.owl.career.CareerWork;
 import at.koopro.wizardsandbeasts.owl.data.PlayerOWLData;
-import at.koopro.wizardsandbeasts.registry.ConsumableItemRegistry;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
 import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;

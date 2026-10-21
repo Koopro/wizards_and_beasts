@@ -9,7 +9,6 @@ import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.core.Spells;
 import at.koopro.wizardsandbeasts.spell.cast.SpellRejectCodes;
 import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialRules;
-import at.koopro.wizardsandbeasts.heritage.Heritage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;

@@ -1,8 +1,6 @@
 package at.koopro.wizardsandbeasts.network.trunk;
 
 import at.koopro.wizardsandbeasts.client.network.ClientPayloadHandlers;
-import at.koopro.wizardsandbeasts.network.trunk.PocketConfigC2SPayload;
-import at.koopro.wizardsandbeasts.network.trunk.PocketStatusS2CPayload;
 
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 

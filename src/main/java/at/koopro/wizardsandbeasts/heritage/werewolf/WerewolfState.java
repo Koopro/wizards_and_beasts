@@ -130,10 +130,6 @@ public final class WerewolfState {
 
     // ── equipment ──────────────────────────────────────────────────────
 
-    public static boolean wasStripped(PlayerHeritageData data) {
-        return "true".equals(data.getFlag(FLAG_STRIPPED));
-    }
-
     public static void setStripped(PlayerHeritageData data, boolean value) {
         if (value) {
             data.setFlag(FLAG_STRIPPED, "true");

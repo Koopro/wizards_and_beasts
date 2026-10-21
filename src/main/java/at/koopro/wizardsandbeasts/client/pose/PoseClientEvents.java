@@ -76,9 +76,4 @@ public final class PoseClientEvents {
         ClientCastAnimationState.clear();
         at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageIdentityState.clear();
     }
-
-    /** The live flight pass, for the debug readout. */
-    public static FlightPosePass flightPass() {
-        return FLIGHT;
-    }
 }

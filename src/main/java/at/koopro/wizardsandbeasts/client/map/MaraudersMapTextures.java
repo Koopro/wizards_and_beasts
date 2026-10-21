@@ -2,7 +2,6 @@ package at.koopro.wizardsandbeasts.client.map;
 
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GuiSkin;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import net.minecraft.resources.Identifier;
 
 /**

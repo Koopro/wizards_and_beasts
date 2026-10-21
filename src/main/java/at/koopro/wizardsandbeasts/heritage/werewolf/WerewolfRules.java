@@ -2,7 +2,6 @@ package at.koopro.wizardsandbeasts.heritage.werewolf;
 
 import at.koopro.wizardsandbeasts.ability.PlayerAbilityHelper;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
-import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.TransformationState;
 import at.koopro.wizardsandbeasts.form.constraint.FormConstraintSet;
 import at.koopro.wizardsandbeasts.form.sense.FormSense;

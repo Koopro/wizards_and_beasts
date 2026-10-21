@@ -2,7 +2,6 @@ package at.koopro.wizardsandbeasts.block.brew;
 
 import at.koopro.wizardsandbeasts.brew.Brew;
 import at.koopro.wizardsandbeasts.brew.Brews;
-import at.koopro.wizardsandbeasts.brew.CauldronHeat;
 import at.koopro.wizardsandbeasts.brew.CauldronPhase;
 import at.koopro.wizardsandbeasts.brew.CauldronTier;
 import at.koopro.wizardsandbeasts.brew.CauldronVisual;

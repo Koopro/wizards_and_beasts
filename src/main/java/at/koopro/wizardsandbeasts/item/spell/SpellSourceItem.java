@@ -72,11 +72,6 @@ public class SpellSourceItem extends Item {
         this.spentOnRead = spentOnRead;
     }
 
-    /** Whether reading this destroys it. Read by the tooltip as well as by the read itself. */
-    public boolean isSpentOnRead() {
-        return spentOnRead;
-    }
-
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);

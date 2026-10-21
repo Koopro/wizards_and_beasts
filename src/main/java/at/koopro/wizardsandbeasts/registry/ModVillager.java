@@ -12,7 +12,6 @@ import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import at.koopro.wizardsandbeasts.registry.WandItemRegistry;
 
 public final class ModVillager {
     public static final DeferredRegister<PoiType> POI_TYPES =

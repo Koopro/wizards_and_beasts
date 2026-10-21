@@ -1,8 +1,6 @@
 package at.koopro.wizardsandbeasts.network.bestiary;
-import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.bestiary.DiscoveryTier;
 import at.koopro.wizardsandbeasts.bestiary.data.PlayerBestiaryData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import io.netty.buffer.ByteBuf;
@@ -15,8 +13,6 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-import java.util.HashMap;
-import java.util.Map;
 
 public record BestiaryDataSyncPayload(PlayerBestiaryData data) implements CustomPacketPayload {
     public static final Type<BestiaryDataSyncPayload> TYPE = new Type<>(Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "bestiary_data_sync"));

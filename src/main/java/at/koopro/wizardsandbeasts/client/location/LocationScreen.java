@@ -12,7 +12,6 @@ import at.koopro.wizardsandbeasts.network.location.LocationActionC2SPayload;
 import at.koopro.wizardsandbeasts.network.location.LocationActionC2SPayload.Action;
 import at.koopro.wizardsandbeasts.owl.career.track.CareerView;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;

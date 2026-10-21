@@ -1,10 +1,6 @@
 package at.koopro.wizardsandbeasts.network.owl;
 
 import at.koopro.wizardsandbeasts.client.network.ClientPayloadHandlers;
-import at.koopro.wizardsandbeasts.network.owl.ChooseProfessionPacket;
-import at.koopro.wizardsandbeasts.network.owl.OWLDataSyncPayload;
-import at.koopro.wizardsandbeasts.network.owl.ProfessionSyncPayload;
-import at.koopro.wizardsandbeasts.network.owl.RequestOWLExamPacket;
 
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 

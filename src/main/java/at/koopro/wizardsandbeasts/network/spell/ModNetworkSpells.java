@@ -1,23 +1,5 @@
 package at.koopro.wizardsandbeasts.network.spell;
 
-import at.koopro.wizardsandbeasts.network.spell.AvadaBlastS2CPayload;
-import at.koopro.wizardsandbeasts.network.spell.SpellDeniedS2CPayload;
-import at.koopro.wizardsandbeasts.network.spell.CrucioIntentFeedbackS2CPayload;
-import at.koopro.wizardsandbeasts.network.spell.ImperioCommandC2SPayload;
-import at.koopro.wizardsandbeasts.network.spell.ImperioControlS2CPayload;
-import at.koopro.wizardsandbeasts.network.spell.ImperioResistC2SPayload;
-import at.koopro.wizardsandbeasts.network.spell.ImperioResistS2CPayload;
-import at.koopro.wizardsandbeasts.network.spell.ImperioVictimBoundS2CPayload;
-import at.koopro.wizardsandbeasts.network.spell.PatronusFormSetS2CPayload;
-import at.koopro.wizardsandbeasts.network.spell.ProtegoAnimationS2CPayload;
-import at.koopro.wizardsandbeasts.network.spell.SpellAssignC2SPayload;
-import at.koopro.wizardsandbeasts.network.spell.SpellCastC2SPayload;
-import at.koopro.wizardsandbeasts.network.spell.SpellDataDeltaS2CPayload;
-import at.koopro.wizardsandbeasts.network.spell.SpellDataSyncS2CPayload;
-import at.koopro.wizardsandbeasts.network.spell.SpellImpactBurstS2CPayload;
-import at.koopro.wizardsandbeasts.network.spell.SpellLeviosaAdjustC2SPayload;
-import at.koopro.wizardsandbeasts.network.spell.SpellProficiencySyncS2CPayload;
-import at.koopro.wizardsandbeasts.network.spell.SpellSelectC2SPayload;
 
 import at.koopro.wizardsandbeasts.client.spell.network.SpellClientPayloadHandlers;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;

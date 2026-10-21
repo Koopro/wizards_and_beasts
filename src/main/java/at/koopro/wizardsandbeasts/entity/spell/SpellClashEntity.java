@@ -388,10 +388,6 @@ public class SpellClashEntity extends Entity {
         return spellA;
     }
 
-    public String getSpellB() {
-        return spellB;
-    }
-
     @Override
     public boolean isPickable() {
         return false;

@@ -1,10 +1,6 @@
 package at.koopro.wizardsandbeasts.network.floo;
 
 import at.koopro.wizardsandbeasts.client.network.ClientPayloadHandlers;
-import at.koopro.wizardsandbeasts.network.floo.FlooArrivalEffectsS2CPayload;
-import at.koopro.wizardsandbeasts.network.floo.FlooBlockSyncS2CPayload;
-import at.koopro.wizardsandbeasts.network.floo.FlooTravelRequestC2SPayload;
-import at.koopro.wizardsandbeasts.network.floo.OpenFlooGuiS2CPayload;
 
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 

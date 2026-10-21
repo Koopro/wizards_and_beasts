@@ -4,7 +4,6 @@ import at.koopro.wizardsandbeasts.brew.Brew;
 import at.koopro.wizardsandbeasts.brew.BrewFailure;
 import at.koopro.wizardsandbeasts.brew.BrewingRecipe;
 import at.koopro.wizardsandbeasts.brew.BrewingRecipes;
-import at.koopro.wizardsandbeasts.brew.CauldronHeat;
 import at.koopro.wizardsandbeasts.brew.CauldronPhase;
 import at.koopro.wizardsandbeasts.brew.CauldronTier;
 import at.koopro.wizardsandbeasts.brew.CauldronVisual;

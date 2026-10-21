@@ -120,11 +120,6 @@ public final class PlayerBoxOverrides {
         return prone == null ? null : prone.withEyeHeight(vanilla.eyeHeight());
     }
 
-    /** True when an Animagus form owns this player's collision box. */
-    public static boolean hasFormHitbox(Player player) {
-        return formBox(player) != null;
-    }
-
     private static @Nullable String resolveFormId(Player player) {
         if (player.level().isClientSide()) {
             ClientFormDataState.FormData data = ClientFormDataState.get(player.getUUID());

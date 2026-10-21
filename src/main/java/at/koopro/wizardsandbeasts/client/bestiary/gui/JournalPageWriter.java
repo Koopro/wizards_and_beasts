@@ -1,7 +1,6 @@
 package at.koopro.wizardsandbeasts.client.bestiary.gui;
 
 import at.koopro.wizardsandbeasts.bestiary.BestiaryEntry;
-import at.koopro.wizardsandbeasts.bestiary.BestiarySize;
 import at.koopro.wizardsandbeasts.bestiary.CreatureProfile;
 import at.koopro.wizardsandbeasts.bestiary.DiscoveryTier;
 import at.koopro.wizardsandbeasts.bestiary.data.EntryHistory;
@@ -206,10 +205,5 @@ final class JournalPageWriter {
     static Component duration(int seconds) {
         return seconds >= 60 ? Component.translatable(K + "minutes", (seconds + 59) / 60)
                 : Component.translatable(K + "seconds", seconds);
-    }
-
-    /** {@code SMALL} as localised copy. */
-    static Component sizeName(BestiarySize size) {
-        return Component.translatable("bestiary.wizards_and_beasts.size." + size.name().toLowerCase(Locale.ROOT));
     }
 }

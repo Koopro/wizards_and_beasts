@@ -2,9 +2,6 @@ package at.koopro.wizardsandbeasts.network.skill;
 
 import at.koopro.wizardsandbeasts.client.ability.state.ClientAbilityGrantState;
 import at.koopro.wizardsandbeasts.client.network.ClientPayloadHandlers;
-import at.koopro.wizardsandbeasts.network.skill.SkillBonusSyncS2CPayload;
-import at.koopro.wizardsandbeasts.network.skill.SkillDataSyncS2CPayload;
-import at.koopro.wizardsandbeasts.network.skill.SkillUnlockC2SPayload;
 
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 

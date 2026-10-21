@@ -8,7 +8,6 @@ import at.koopro.wizardsandbeasts.admin.visual.BeamVisualAdminService.PresetOp;
 import at.koopro.wizardsandbeasts.client.admin.AdminClientHandlers;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
 import at.koopro.wizardsandbeasts.visual.beam.BeamPreset;
-import at.koopro.wizardsandbeasts.visual.beam.BeamVisualService;
 import com.mojang.logging.LogUtils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;

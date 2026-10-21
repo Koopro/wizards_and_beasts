@@ -2,7 +2,6 @@ package at.koopro.wizardsandbeasts.network.apparition;
 
 import at.koopro.wizardsandbeasts.client.network.ClientPayloadHandlers;
 import at.koopro.wizardsandbeasts.network.ability.AbilityDataSyncPayload;
-import at.koopro.wizardsandbeasts.network.apparition.ApparitionWardsSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.legilimency.LegilimencyVisionS2CPayload;
 
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;

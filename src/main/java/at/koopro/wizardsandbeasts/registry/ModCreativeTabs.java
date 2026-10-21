@@ -21,15 +21,6 @@ import at.koopro.wizardsandbeasts.block.location.HogsmeadeBlocks;
 import at.koopro.wizardsandbeasts.block.location.MinistryBlocks;
 import at.koopro.wizardsandbeasts.creature.AlphaRoster;
 import at.koopro.wizardsandbeasts.module.ModuleContentIndex;
-import at.koopro.wizardsandbeasts.registry.ArmorItemRegistry;
-import at.koopro.wizardsandbeasts.registry.CanonItemRegistry;
-import at.koopro.wizardsandbeasts.registry.BroomItemRegistry;
-import at.koopro.wizardsandbeasts.registry.ConsumableItemRegistry;
-import at.koopro.wizardsandbeasts.registry.CurrencyItemRegistry;
-import at.koopro.wizardsandbeasts.registry.DarkArtefactItemRegistry;
-import at.koopro.wizardsandbeasts.registry.MiscItemRegistry;
-import at.koopro.wizardsandbeasts.registry.TrinketItemRegistry;
-import at.koopro.wizardsandbeasts.registry.WandItemRegistry;
 
 public class ModCreativeTabs {
     public static final DeferredRegister<CreativeModeTab> TABS =

@@ -1,6 +1,5 @@
 package at.koopro.wizardsandbeasts.spell.imperio;
 
-import at.koopro.wizardsandbeasts.spell.imperio.ImperioControlState;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;

@@ -223,10 +223,6 @@ public class BowtruckleEntity extends GeoEntityBase implements BondableBeast {
         return flag(FLAG_CLIMBING);
     }
 
-    public boolean isLockpicking() {
-        return flag(FLAG_LOCKPICKING);
-    }
-
     public void setLockpicking(boolean on) {
         setFlag(FLAG_LOCKPICKING, on);
     }

@@ -1,12 +1,6 @@
 package at.koopro.wizardsandbeasts.network.form;
 
 import at.koopro.wizardsandbeasts.client.network.ClientPayloadHandlers;
-import at.koopro.wizardsandbeasts.network.form.DebugOverlayToggleS2CPayload;
-import at.koopro.wizardsandbeasts.network.form.FormChangeRequestC2SPayload;
-import at.koopro.wizardsandbeasts.network.form.FormSyncS2CPayload;
-import at.koopro.wizardsandbeasts.network.form.SizeOverrideC2SPayload;
-import at.koopro.wizardsandbeasts.network.form.TransitionEndS2CPayload;
-import at.koopro.wizardsandbeasts.network.form.TransitionStartS2CPayload;
 
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 

@@ -56,10 +56,6 @@ public final class ClientOWLCache {
         return goblin;
     }
 
-    public static boolean isExamTaken() {
-        return examTaken;
-    }
-
     /** Game time from which the exam may be sat (again); 0 when it may be sat now. */
     public static long getNextSittingTick() {
         return nextSittingTick;

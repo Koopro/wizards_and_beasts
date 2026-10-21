@@ -26,7 +26,6 @@ import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
-import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;

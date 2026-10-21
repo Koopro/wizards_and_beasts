@@ -99,13 +99,6 @@ public record TrunkRecord(
                 createdAtEpochSeconds, seed, spawnPos, members, pocketRadius, biomeZones, muggleWorthy, lockedExternally);
     }
 
-    public TrunkRecord withMember(UUID playerId) {
-        HashSet<UUID> next = new HashSet<>(members);
-        next.add(playerId);
-        return new TrunkRecord(pocketId, owner, pocketName, accessMode, archetype, templateId,
-                createdAtEpochSeconds, seed, spawnPos, List.copyOf(next), pocketRadius, biomeZones, muggleWorthy, lockedExternally);
-    }
-
     public TrunkRecord withRadius(int newRadius) {
         return new TrunkRecord(pocketId, owner, pocketName, accessMode, archetype, templateId,
                 createdAtEpochSeconds, seed, spawnPos, members, newRadius, biomeZones, muggleWorthy, lockedExternally);

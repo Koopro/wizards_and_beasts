@@ -5,7 +5,6 @@ import at.koopro.wizardsandbeasts.client.spell.ui.SpellHudUiModel;
 import at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageDataState;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
-import at.koopro.wizardsandbeasts.heritage.Heritage;
 import net.minecraft.client.Minecraft;
 
 public final class UiStateProjection {

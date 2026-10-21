@@ -8,7 +8,6 @@ import at.koopro.wizardsandbeasts.module.ModuleState;
 import at.koopro.wizardsandbeasts.module.settings.ModuleSettingsSchema;
 import at.koopro.wizardsandbeasts.module.settings.ModuleSettingsValues;
 import com.mojang.logging.LogUtils;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;

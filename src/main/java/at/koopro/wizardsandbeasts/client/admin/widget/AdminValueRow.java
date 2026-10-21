@@ -52,10 +52,6 @@ public final class AdminValueRow {
         return control;
     }
 
-    public AdminButton resetButton() {
-        return reset;
-    }
-
     /** The control's width for a row of width {@code rowW}: generous, but never more than about half. */
     public static int controlWidth(int rowW) {
         return Math.max(90, Math.min(150, rowW * 45 / 100));

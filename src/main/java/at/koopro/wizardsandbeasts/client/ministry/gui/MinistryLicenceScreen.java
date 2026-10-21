@@ -15,7 +15,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
@@ -232,10 +231,5 @@ public class MinistryLicenceScreen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return false;
-    }
-
-    /** Opened from the payload handler; the hand is all the server sent. */
-    public static MinistryLicenceScreen forHand(InteractionHand hand) {
-        return new MinistryLicenceScreen(hand == InteractionHand.OFF_HAND);
     }
 }

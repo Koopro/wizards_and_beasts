@@ -1,6 +1,5 @@
 package at.koopro.wizardsandbeasts.heritage.obscurial;
 
-import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.TransformationState;
 import at.koopro.wizardsandbeasts.form.constraint.FormConstraint;
 import at.koopro.wizardsandbeasts.form.constraint.FormConstraintSet;

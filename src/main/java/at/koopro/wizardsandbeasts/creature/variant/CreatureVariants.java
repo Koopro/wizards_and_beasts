@@ -38,10 +38,6 @@ public final class CreatureVariants {
         return BY_CREATURE.getOrDefault(creatureId, List.of());
     }
 
-    public static boolean hasVariants(String creatureId) {
-        return BY_CREATURE.containsKey(creatureId);
-    }
-
     public static @Nullable CreatureVariant byId(String creatureId, String variantId) {
         for (CreatureVariant variant : of(creatureId)) {
             if (variant.variantId().equals(variantId)) {

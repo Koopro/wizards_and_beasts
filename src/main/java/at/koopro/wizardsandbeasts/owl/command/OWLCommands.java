@@ -3,8 +3,6 @@ package at.koopro.wizardsandbeasts.owl.command;
 import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
 import at.koopro.wizardsandbeasts.owl.data.PlayerOWLData;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerProfessionData;
-import at.koopro.wizardsandbeasts.network.owl.OWLDataSyncPayload;
-import at.koopro.wizardsandbeasts.network.owl.ProfessionSyncPayload;
 import at.koopro.wizardsandbeasts.owl.OWLExaminationHandler;
 import at.koopro.wizardsandbeasts.owl.OWLGrade;
 import at.koopro.wizardsandbeasts.owl.OWLSubject;
@@ -21,7 +19,6 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.Arrays;
 import java.util.EnumMap;

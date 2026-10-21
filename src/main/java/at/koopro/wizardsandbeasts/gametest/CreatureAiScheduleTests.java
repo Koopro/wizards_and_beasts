@@ -1,7 +1,6 @@
 package at.koopro.wizardsandbeasts.gametest;
 
 import at.koopro.wizardsandbeasts.creature.ecology.EcologyGoal;
-import at.koopro.wizardsandbeasts.creature.ecology.EcologyIntent;
 import at.koopro.wizardsandbeasts.creature.ecology.EcologySensing;
 import at.koopro.wizardsandbeasts.creature.schedule.AiCadence;
 import at.koopro.wizardsandbeasts.creature.schedule.AiMetrics;

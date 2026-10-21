@@ -50,14 +50,6 @@ public record WandAllegiance(@Nullable UUID boundPlayer, float bondStrength, lon
         return new WandAllegiance(null, 0.0f, 0L);
     }
 
-    public boolean isBound() {
-        return boundPlayer != null;
-    }
-
-    public WandAllegiance withBondStrength(float value) {
-        return new WandAllegiance(boundPlayer, value, firstBondTick);
-    }
-
     private static UUID parseUuid(String raw) {
         if (raw == null || raw.isBlank()) {
             return null;

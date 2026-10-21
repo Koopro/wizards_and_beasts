@@ -2,7 +2,6 @@ package at.koopro.wizardsandbeasts.command;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.command.debug.DebugModeService;
-import at.koopro.wizardsandbeasts.corruption.DarkCorruptionService;
 import at.koopro.wizardsandbeasts.effect.LumosFieldEffect;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.item.wand.DebugWandState;

@@ -109,11 +109,6 @@ public interface BondableBeast {
         return BondProfileRegistry.of(bondMob().getType());
     }
 
-    /** True when this species bonds at all — the presence of a profile is the whole opt-in. */
-    default boolean canBond() {
-        return bondProfile() != null;
-    }
-
     default int bondLevel() {
         return bondState().level();
     }

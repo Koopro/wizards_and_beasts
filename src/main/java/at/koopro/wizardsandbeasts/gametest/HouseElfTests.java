@@ -17,7 +17,6 @@ import at.koopro.wizardsandbeasts.ministry.law.CodeOfWandUse;
 import at.koopro.wizardsandbeasts.ministry.law.MagicalOffence;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.registry.ModEntities;
-import at.koopro.wizardsandbeasts.registry.WandItemRegistry;
 import at.koopro.wizardsandbeasts.stats.PlayerStat;
 import at.koopro.wizardsandbeasts.stats.PlayerStatsAPI;
 import net.minecraft.core.BlockPos;

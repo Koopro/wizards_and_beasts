@@ -1,9 +1,6 @@
 package at.koopro.wizardsandbeasts.network.currency;
 
 import at.koopro.wizardsandbeasts.client.network.ClientPayloadHandlers;
-import at.koopro.wizardsandbeasts.network.currency.GringottsOpenS2CPayload;
-import at.koopro.wizardsandbeasts.network.currency.VaultActionC2SPayload;
-import at.koopro.wizardsandbeasts.network.currency.VaultSyncS2CPayload;
 
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 

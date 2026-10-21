@@ -43,7 +43,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static at.koopro.wizardsandbeasts.gametest.WandCastLifecycleTests.beginCast;
-import static at.koopro.wizardsandbeasts.gametest.WandCastLifecycleTests.clearCooldowns;
 import static at.koopro.wizardsandbeasts.gametest.WandCastLifecycleTests.releaseWand;
 import static at.koopro.wizardsandbeasts.gametest.WizardTestSupport.check;
 import static at.koopro.wizardsandbeasts.gametest.WizardTestSupport.retire;

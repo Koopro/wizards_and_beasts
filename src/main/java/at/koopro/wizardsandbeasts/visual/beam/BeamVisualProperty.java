@@ -92,16 +92,6 @@ public enum BeamVisualProperty {
         return step;
     }
 
-    /** Only meaningful while the shape is {@link BeamShapeKind#LIGHTNING}. */
-    public boolean lightningOnly() {
-        return this == SEGMENTS || this == JITTER || this == CRACKLE_TICKS;
-    }
-
-    /** Read on the server where impact bursts are sent, not by the renderer. */
-    public boolean serverRead() {
-        return this == IMPACT_INTENSITY;
-    }
-
     /** This property's value in {@code visual}, as canonical text. */
     public String text(BeamVisual visual) {
         return format(getter.apply(visual));
