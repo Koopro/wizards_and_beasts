@@ -5,6 +5,7 @@ import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
+import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton;
 import at.koopro.wizardsandbeasts.client.gui.widget.ThemedTextField;
@@ -52,7 +53,7 @@ public class DarkArtsGateScreen extends Screen {
     private long failSeed;
 
     public DarkArtsGateScreen(Screen parent, Supplier<Screen> target) {
-        super(Component.literal("Unforgivable Arts — Restricted Access"));
+        super(Component.translatable(ConfigWidgets.KEY + "gate.title"));
         this.parent = parent;
         this.target = target;
     }
@@ -63,12 +64,12 @@ public class DarkArtsGateScreen extends Screen {
         layout = GuiScaleHelper.Layout.fit(width, height, MODAL_WIDTH, MODAL_HEIGHT);
 
         nameField = new ThemedTextField(font, layout.x(24), layout.y(70),
-                layout.s(MODAL_WIDTH - 48), layout.s(18), Component.literal("Username"))
-                .inkHint(Component.literal("Enter your Minecraft username"));
+                layout.s(MODAL_WIDTH - 48), layout.s(18), Component.translatable(ConfigWidgets.KEY + "gate.name"))
+                .inkHint(Component.translatable(ConfigWidgets.KEY + "gate.name_hint"));
         addRenderableWidget(nameField);
 
         confirmButton = new ThemedButton(layout.x(MODAL_WIDTH / 2 - 70), layout.y(MODAL_HEIGHT - 32),
-                layout.s(140), layout.s(20), Component.literal("Sign with Blood Quill"), this::onConfirm)
+                layout.s(140), layout.s(20), Component.translatable(ConfigWidgets.KEY + "gate.sign"), this::onConfirm)
                 .tone(McStylePanel.ButtonTone.DANGER);
         addRenderableWidget(confirmButton);
 
@@ -108,17 +109,16 @@ public class DarkArtsGateScreen extends Screen {
         McStylePanel.drawNineSliceTiled(graphics, GATE_PANEL, boxX, boxY, MODAL_WIDTH, MODAL_HEIGHT,
                 WizardsMetrics.PANEL_SPRITE_SIZE, WizardsMetrics.PANEL_SPRITE_BORDER);
 
-        ConfigWidgets.drawCenteredNoShadow(graphics, font, "UNFORGIVABLE ARTS — RESTRICTED ACCESS",
+        ConfigWidgets.drawCenteredNoShadow(graphics, font,
+                UiText.fit(font, title.getString().toUpperCase(java.util.Locale.ROOT), MODAL_WIDTH - 2 * WizardsMetrics.SPACE_L),
                 cx, boxY + 12, TITLE_TEXT);
         McStylePanel.drawSkinDivider(graphics, WizardsPalette.GuiSkin.HEARTH,
                 boxX + WizardsMetrics.SPACE_L, boxY + 20, MODAL_WIDTH - 2 * WizardsMetrics.SPACE_L);
         // Wrapped: the first line is wider than the modal, and on a sheet with a torn edge it would
         // run off the paper instead of merely off a dark box.
         int textY = boxY + 32;
-        for (String paragraph : new String[] {
-                "\"By entering your name you acknowledge full magical responsibility.\"",
-                "\"The Ministry has been notified.\""}) {
-            for (FormattedCharSequence line : font.split(Component.literal(paragraph),
+        for (String key : new String[] {"gate.oath", "gate.notified"}) {
+            for (FormattedCharSequence line : font.split(Component.translatable(ConfigWidgets.KEY + key),
                     MODAL_WIDTH - 2 * WizardsMetrics.SPACE_L)) {
                 graphics.drawString(font, line, cx - font.width(line) / 2, textY, BODY_TEXT, false);
                 textY += font.lineHeight;
@@ -150,7 +150,7 @@ public class DarkArtsGateScreen extends Screen {
             int color = random.nextBoolean() ? SPLAT_DARK : SPLAT_LIGHT;
             graphics.fill(x, y, x + w, y + h, color);
         }
-        ConfigWidgets.drawCenteredNoShadow(graphics, font, "That is not your name.",
+        ConfigWidgets.drawCenteredNoShadow(graphics, font, Component.translatable(ConfigWidgets.KEY + "gate.wrong").getString(),
                 fieldX + fieldW / 2, fieldY + fieldH + 6, ERROR_TEXT);
     }
 

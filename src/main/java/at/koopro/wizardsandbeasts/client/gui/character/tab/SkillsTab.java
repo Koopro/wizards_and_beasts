@@ -9,6 +9,12 @@ import at.koopro.wizardsandbeasts.skill.Skill;
 import at.koopro.wizardsandbeasts.skill.SkillTreeId;
 import at.koopro.wizardsandbeasts.skill.SkillTrees;
 import at.koopro.wizardsandbeasts.skill.data.PlayerSkillData;
+import at.koopro.wizardsandbeasts.skill.build.BuildProfile;
+import at.koopro.wizardsandbeasts.skill.build.BuildRules;
+import at.koopro.wizardsandbeasts.skill.build.BuildTier;
+import at.koopro.wizardsandbeasts.client.skill.gui.SkillTreeRenderHelper;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -17,9 +23,13 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
-/** Skills tab: one progress bar per region (all 8 {@link SkillTreeId}s), unlocked node chips, unspent points. */
+/**
+ * Skills tab: the player's build first — who the web says they are, the pathways they are walking, what to take
+ * next and the capstone ahead — then one progress bar per region, unlocked node chips and unspent points.
+ */
 public final class SkillsTab implements CharacterTab {
 
     private static final int COLOR_SECTION = WizardsPalette.PAGE_RUBRIC;
@@ -61,13 +71,15 @@ public final class SkillsTab implements CharacterTab {
         // already excludes it — "Unspent: N" is right-aligned and would run underneath.
         int innerW = w - 4 - TabScrollbar.WIDTH;
 
+        cy = drawBuild(g, font, cx, cy, innerW, unlocked);
+
         // ── Tree progress bars ────────────────────────────────────────────
-        g.drawString(font, "Skill Trees", cx, cy, COLOR_SECTION, false);
+        g.drawString(font, Component.translatable(S + "trees"), cx, cy, COLOR_SECTION, false);
 
         // Unspent points rides the section header rather than trailing the chips. It is the one
         // actionable number on this tab, and at the bottom it was the first thing to fall off the
         // end of a long list — the only readout here you would open the sheet specifically to check.
-        String pointsText = "Unspent: " + skillData.getSkillPoints();
+        String pointsText = Component.translatable(S + "unspent", skillData.getSkillPoints()).getString();
         g.drawString(font, pointsText, cx + innerW - font.width(pointsText), cy, COLOR_VALUE, false);
         cy += 10;
 
@@ -88,7 +100,7 @@ public final class SkillsTab implements CharacterTab {
         cy += 4;
 
         // ── Unlocked node chips ───────────────────────────────────────────
-        g.drawString(font, "Unlocked Nodes", cx, cy, COLOR_SECTION, false);
+        g.drawString(font, Component.translatable(S + "nodes"), cx, cy, COLOR_SECTION, false);
         cy += 10;
 
         List<String> nodeNames = new ArrayList<>();
@@ -116,6 +128,91 @@ public final class SkillsTab implements CharacterTab {
         return true;
     }
 
+    // ── build ─────────────────────────────────────────────────────────────
+
+    /** Pathways shown at most; past three a sheet is a list, not a portrait. */
+    private static final int MAX_PATHWAYS = 3;
+    private static final String B = "gui.wizards_and_beasts.character_sheet.build.";
+    private static final String S = "gui.wizards_and_beasts.character_sheet.skills.";
+
+    /**
+     * The build block: current build and how it was decided, then each active pathway's tier counts, the
+     * capstone's state, and the next meaningful choices on that road. Everything is derived from the synced
+     * allocation through {@code BuildProfile}, the same model {@code /wandb skill build} prints.
+     */
+    private int drawBuild(@NonNull GuiGraphics g, @NonNull Font font, int x, int y, int w,
+                          @NonNull Map<String, Integer> unlocked) {
+        // Cached on the skill sync: the profile walks every archetype's pathway and was rebuilt each frame.
+        BuildProfile profile = at.koopro.wizardsandbeasts.client.gui.character.SheetCaches.build();
+        g.drawString(font, Component.translatable(B + "header"), x, y, COLOR_SECTION, false);
+        Component current = profile.current() == null
+                ? Component.translatable(B + "status.undecided")
+                : Component.translatable(B + "status." + profile.status().name().toLowerCase(Locale.ROOT),
+                        Component.translatable(profile.current().nameKey()));
+        g.drawString(font, current, x + w - font.width(current), y, COLOR_VALUE, false);
+        y += 11;
+
+        if (profile.pathways().isEmpty()) {
+            for (var line : font.split(Component.translatable(B + "empty"), w)) {
+                g.drawString(font, line, x, y, COLOR_LABEL, false);
+                y += 9;
+            }
+            return y + 6;
+        }
+
+        int shown = 0;
+        for (BuildProfile.PathwayProgress p : profile.pathways()) {
+            if (shown++ >= MAX_PATHWAYS) {
+                break;
+            }
+            Component name = Component.translatable(p.archetype().nameKey());
+            g.drawString(font, name, x, y, COLOR_VALUE, false);
+            String tiers = I18n.get(B + "tiers",
+                    p.count(BuildTier.EARLY), p.size(BuildTier.EARLY),
+                    p.count(BuildTier.MID), p.size(BuildTier.MID),
+                    p.count(BuildTier.ADVANCED), p.size(BuildTier.ADVANCED));
+            g.drawString(font, tiers, x + w - font.width(tiers), y, COLOR_LABEL, false);
+            y += 10;
+
+            Skill capstone = SkillTrees.clientById(p.archetype().capstone());
+            Component capName = capstone == null ? Component.literal(p.archetype().capstone())
+                    : Component.literal(SkillTreeRenderHelper.resolveDisplayName(capstone.getDisplayName()));
+            Component capLine;
+            if (p.capstoneHeld()) {
+                capLine = Component.translatable(B + "capstone.held", capName);
+            } else if (p.capstoneRefusal() == null) {
+                capLine = Component.translatable(B + "capstone.open", capName);
+            } else if (BuildRules.CAPSTONE_SHALLOW.equals(p.capstoneRefusal())) {
+                capLine = Component.translatable(B + "capstone.shallow", capName, p.advancedStillNeeded());
+            } else if (BuildRules.CAPSTONE_TAKEN.equals(p.capstoneRefusal())) {
+                capLine = Component.translatable(B + "capstone.taken", capName);
+            } else {
+                capLine = Component.translatable(B + "capstone.sealed", capName);
+            }
+            for (var line : font.split(capLine, w - 4)) {
+                g.drawString(font, line, x + 4, y, p.capstoneHeld() ? COLOR_SECTION : COLOR_LABEL, false);
+                y += 9;
+            }
+
+            if (!p.nextChoices().isEmpty()) {
+                StringBuilder next = new StringBuilder();
+                for (String id : p.nextChoices()) {
+                    Skill node = SkillTrees.clientById(id);
+                    if (node == null) continue;
+                    if (next.length() > 0) next.append(", ");
+                    next.append(SkillTreeRenderHelper.resolveDisplayName(node.getDisplayName()))
+                            .append(" (").append(node.getPointCost()).append(")");
+                }
+                for (var line : font.split(Component.translatable(B + "next", next.toString()), w - 4)) {
+                    g.drawString(font, line, x + 4, y, COLOR_LABEL, false);
+                    y += 9;
+                }
+            }
+            y += 3;
+        }
+        return y + 4;
+    }
+
     // ── helpers ───────────────────────────────────────────────────────────
 
     /** Draws flow-layout chips; returns the y after the last row. */
@@ -123,7 +220,7 @@ public final class SkillsTab implements CharacterTab {
                           int x, int y, int w, int maxH,
                           @NonNull List<String> labels) {
         if (labels.isEmpty()) {
-            g.drawString(font, "None", x, y, COLOR_LABEL, false);
+            g.drawString(font, Component.translatable(S + "none"), x, y, COLOR_LABEL, false);
             return y + 9;
         }
 

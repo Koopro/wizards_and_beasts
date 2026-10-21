@@ -54,4 +54,18 @@ public interface CharacterTab {
     default boolean mouseScrolled(double mouseX, double mouseY, double delta) {
         return false;
     }
+
+    /**
+     * Called when the mouse is clicked inside the content area, in design space (the coordinates the tab
+     * laid its content out in).
+     *
+     * @return true if consumed
+     */
+    default boolean mouseClicked(double mouseX, double mouseY, int button) {
+        return false;
+    }
+
+    /** Called when the tab becomes the visible one, including when the sheet opens on it. */
+    default void onShown() {
+    }
 }

@@ -2,7 +2,11 @@ package at.koopro.wizardsandbeasts.client.spell.wheel;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.client.hud.WandHudSprites;
+import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
+import at.koopro.wizardsandbeasts.client.gui.ui.Ui;
+import at.koopro.wizardsandbeasts.client.gui.ui.UiSurface;
+import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiText;
 import at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageDataState;
 import at.koopro.wizardsandbeasts.client.spell.SpellKeyBindings;
@@ -61,13 +65,21 @@ public final class SpellWheelScreen extends Screen {
     /** Native size of the HUD spell icons this reuses. */
     private static final int ICON_TEX_SIZE = 92;
 
-    private static final int COLOR_BG = 0xC0000000 | (WizardsPalette.INK & 0x00FFFFFF);
-    private static final int COLOR_SLOT = 0xD0000000 | (WizardsPalette.WELL & 0x00FFFFFF);
-    private static final int COLOR_SLOT_HOVER = 0xF0000000 | (WizardsPalette.RAIL & 0x00FFFFFF);
-    private static final int COLOR_TEXT = WizardsPalette.TEXT;
-    private static final int COLOR_TEXT_DIM = WizardsPalette.TEXT_DIM;
-    /** State, not theme: the armed spell has to stay distinguishable from the hovered one at a glance. */
-    private static final int COLOR_ARMED = 0xFFFFD24A;
+    /** Smallest ring a cramped window gets; below this neighbouring sockets would overlap. */
+    private static final int RADIUS_FLOOR = 44;
+    /** Clearance between the outermost socket and the screen edge. */
+    private static final int EDGE_MARGIN = WizardsMetrics.SPACE_M;
+    /** The hub card: as wide as the ring's inside allows, within these bounds. */
+    private static final int HUB_MIN_W = 64;
+    private static final int HUB_MAX_W = 120;
+    private static final int HUB_H = 30;
+
+    /**
+     * The armed spell's ring. The selected state of every radial is the gilt-light outline (the
+     * ability wheel's, and {@code GUI_DESIGN_SYSTEM.md}'s state table); hover is the lift and the wash,
+     * so the two stay distinguishable at a glance without a colour of their own.
+     */
+    private static final int COLOR_ARMED = WizardsPalette.GILT_LIGHT;
     private static final int COLOR_COOLDOWN = 0xB0000000;
     /** Alpha a placeholder spell's icon is drawn at — present, legible, obviously not available. */
     private static final float ALPHA_COMING_SOON = 0.35f;
@@ -126,7 +138,13 @@ public final class SpellWheelScreen extends Screen {
     }
 
     private int radius() {
-        return Mth.clamp(RADIUS_MIN + entries.size() * RADIUS_PER_ENTRY, RADIUS_MIN, RADIUS_MAX);
+        return SpellWheelModel.radius(entries.size(), this.width, this.height,
+                RADIUS_MIN, RADIUS_PER_ENTRY, RADIUS_MAX, SLOT, EDGE_MARGIN, RADIUS_FLOOR);
+    }
+
+    /** The hub fits inside the ring, clear of the inner edge of the sockets. */
+    private static int hubWidth(int radius) {
+        return Mth.clamp(2 * (radius - SLOT / 2) - 2 * WizardsMetrics.SPACE_M, HUB_MIN_W, HUB_MAX_W);
     }
 
     @Override
@@ -137,13 +155,15 @@ public final class SpellWheelScreen extends Screen {
         hovered = SpellWheelModel.hoveredIndex(mouseX - cx, mouseY - cy, entries.size());
 
         int radius = radius();
-        g.fill(cx - radius - SLOT, cy - radius - SLOT, cx + radius + SLOT, cy + radius + SLOT, COLOR_BG);
+        int hubW = hubWidth(radius);
+        Ui.Rect hub = new Ui.Rect(cx - hubW / 2, cy - HUB_H / 2, hubW, HUB_H);
 
         Font font = this.font;
+        UiSurface night = UiSurface.NIGHT;
         if (entries.isEmpty()) {
-            g.drawCenteredString(font,
-                    Component.translatable("gui." + WizardsAndBeastsMod.MODID + ".spell_wheel.empty"),
-                    cx, cy - 4, COLOR_TEXT);
+            Ui.panel(g, night, hub.x(), hub.y(), hub.w(), hub.h());
+            Ui.emptyState(g, font, night, hub,
+                    Component.translatable("gui." + WizardsAndBeastsMod.MODID + ".spell_wheel.empty"), null);
             maybeCloseOnRelease();
             return;
         }
@@ -160,13 +180,19 @@ public final class SpellWheelScreen extends Screen {
             double angle = SpellWheelModel.angleOf(i, n);
             int ex = cx + (int) Math.round(Math.cos(angle) * radius);
             int ey = cy + (int) Math.round(Math.sin(angle) * radius);
-            int x0 = ex - SLOT / 2;
-            int y0 = ey - SLOT / 2;
+            boolean placeholder = isComingSoon(spellId);
+            boolean lifted = i == hovered && !placeholder;
+            // The hovered socket rises two pixels towards the hub, as on the ability wheel.
+            int lift = lifted ? 2 : 0;
+            int x0 = ex - SLOT / 2 - (int) Math.round(Math.cos(angle) * lift);
+            int y0 = ey - SLOT / 2 - (int) Math.round(Math.sin(angle) * lift);
             int x1 = x0 + SLOT;
             int y1 = y0 + SLOT;
 
-            boolean placeholder = isComingSoon(spellId);
-            g.fill(x0, y0, x1, y1, i == hovered && !placeholder ? COLOR_SLOT_HOVER : COLOR_SLOT);
+            Ui.nightCard(g, x0, y0, SLOT, SLOT);
+            if (lifted) {
+                g.fill(x0 + 2, y0 + 2, x1 - 2, y1 - 2, night.hoverWash());
+            }
             if (spellId.equals(armed)) {
                 drawBorder(g, x0 - 1, y0 - 1, x1 + 1, y1 + 1, COLOR_ARMED);
             }
@@ -186,19 +212,27 @@ public final class SpellWheelScreen extends Screen {
                 int base = spell != null ? Math.max(1, spell.getBaseCooldownTicks()) : 20;
                 long span = ClientSpellDataState.getCooldownSpanTicks(spellId, base);
                 float remaining = SpellCooldownDisplay.remainingFraction(expiry, gameTick, span);
-                int shade = Mth.ceil(SLOT * remaining);
-                g.fill(x0, y1 - shade, x1, y1, COLOR_COOLDOWN);
+                int shade = Mth.ceil((SLOT - 4) * remaining);
+                g.fill(x0 + 2, y1 - 2 - shade, x1 - 2, y1 - 2, COLOR_COOLDOWN);
             }
         }
 
-        Component centre = hovered >= 0
-                ? displayName(entries.get(hovered))
-                : Component.translatable("gui." + WizardsAndBeastsMod.MODID + ".spell_wheel.hint");
-        g.drawCenteredString(font, centre, cx, cy - 4, COLOR_TEXT);
-        if (hovered >= 0 && isComingSoon(entries.get(hovered))) {
-            g.drawCenteredString(font,
-                    Component.translatable("gui." + WizardsAndBeastsMod.MODID + ".spell.coming_soon"),
-                    cx, cy + 7, COLOR_TEXT_DIM);
+        // The hub: the hovered spell's name (and why it cannot be picked), or how to use the wheel.
+        Ui.panel(g, night, hub.x(), hub.y(), hub.w(), hub.h());
+        Ui.Rect text = hub.inset(WizardsMetrics.SPACE_S);
+        if (hovered >= 0) {
+            String spellId = entries.get(hovered);
+            boolean soon = isComingSoon(spellId);
+            int nameY = soon ? text.y() : cy - font.lineHeight / 2;
+            drawCentredFit(g, font, night, displayName(spellId), cx, nameY, text.w(), night.heading());
+            if (soon) {
+                drawCentredFit(g, font, night,
+                        Component.translatable("gui." + WizardsAndBeastsMod.MODID + ".spell.coming_soon"),
+                        cx, text.y() + WizardsMetrics.LINE_TIGHT + 1, text.w(), night.ink3());
+            }
+        } else {
+            Ui.emptyState(g, font, night, hub,
+                    Component.translatable("gui." + WizardsAndBeastsMod.MODID + ".spell_wheel.hint"), null);
         }
 
         maybeCloseOnRelease();
@@ -215,6 +249,13 @@ public final class SpellWheelScreen extends Screen {
         return spell == null
                 ? Component.literal(spellId)
                 : Component.literal(GuiText.resolve(spell.getDisplayName()));
+    }
+
+    /** Centred on {@code cx}, shortened with an ellipsis to {@code maxW}: the hub never spills onto a socket. */
+    private static void drawCentredFit(GuiGraphics g, Font font, UiSurface s, Component text, int cx, int y,
+                                       int maxW, int colour) {
+        String shown = UiText.fit(font, text.getString(), maxW);
+        UiText.draw(g, font, s, Component.literal(shown), cx - font.width(shown) / 2, y, colour);
     }
 
     private static void drawBorder(GuiGraphics g, int x0, int y0, int x1, int y1, int color) {

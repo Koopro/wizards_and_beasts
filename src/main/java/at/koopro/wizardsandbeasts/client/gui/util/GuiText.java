@@ -33,49 +33,25 @@ public final class GuiText {
                 : keyOrLiteral;
     }
 
-    /**
-     * Below this the text is too small to read, so it is left at this scale and allowed to
-     * clip. A label needing to shrink past ~65% signals a layout problem, not a text problem.
-     */
-    private static final float MIN_SCALE = 0.65F;
-
     private GuiText() {
     }
 
-    /** Draws {@code text} centred in {@code [x, x + boxW]}, shrunk if it would not fit. */
+    /**
+     * Draws {@code text} centred in {@code [x, x + boxW]}, shortened with an ellipsis if it would not fit.
+     *
+     * <p>This used to shrink the glyphs down to 65%. At GUI scale 4 that is a five-pixel-tall word, which
+     * nobody reads; an ellipsis keeps what is shown legible and the screen can put the whole text in a
+     * tooltip (see {@code UiText}, {@code UiTooltips.ifTruncated}).
+     */
     public static void drawFittedCentered(GuiGraphics g, Font font, String text,
                                           int x, int y, int boxW, int colour) {
-        int textW = font.width(text);
-        if (textW <= boxW) {
-            g.drawString(font, text, x + (boxW - textW) / 2, y, colour, false);
-            return;
-        }
-        float scale = Math.max(MIN_SCALE, boxW / (float) textW);
-        // Centre on the scaled width, then scale about this label's own origin so the
-        // surrounding panel geometry is untouched.
-        int drawX = x + Math.round((boxW - textW * scale) / 2.0F);
-        drawScaled(g, font, text, drawX, y, scale, colour);
+        String shown = at.koopro.wizardsandbeasts.client.gui.ui.UiText.fit(font, text, boxW);
+        g.drawString(font, shown, x + (boxW - font.width(shown)) / 2, y, colour, false);
     }
 
-    /** Draws {@code text} left-aligned at {@code x}, shrunk to fit {@code boxW}. */
+    /** Draws {@code text} left-aligned at {@code x}, shortened with an ellipsis to fit {@code boxW}. */
     public static void drawFitted(GuiGraphics g, Font font, String text,
                                   int x, int y, int boxW, int colour) {
-        int textW = font.width(text);
-        if (textW <= boxW) {
-            g.drawString(font, text, x, y, colour, false);
-            return;
-        }
-        drawScaled(g, font, text, x, y, Math.max(MIN_SCALE, boxW / (float) textW), colour);
-    }
-
-    private static void drawScaled(GuiGraphics g, Font font, String text,
-                                   int x, int y, float scale, int colour) {
-        var pose = g.pose();
-        pose.pushMatrix();
-        // Keep (x, y) fixed while scaling, so the caller's anchor still means what it says.
-        pose.translate(x * (1.0F - scale), y * (1.0F - scale));
-        pose.scale(scale, scale);
-        g.drawString(font, text, x, y, colour, false);
-        pose.popMatrix();
+        g.drawString(font, at.koopro.wizardsandbeasts.client.gui.ui.UiText.fit(font, text, boxW), x, y, colour, false);
     }
 }

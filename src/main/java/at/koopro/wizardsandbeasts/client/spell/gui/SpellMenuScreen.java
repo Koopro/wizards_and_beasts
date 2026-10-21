@@ -1,5 +1,10 @@
 package at.koopro.wizardsandbeasts.client.spell.gui;
 
+import at.koopro.wizardsandbeasts.client.gui.ui.Ui;
+import at.koopro.wizardsandbeasts.client.gui.ui.UiSurface;
+import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
+import at.koopro.wizardsandbeasts.client.gui.ui.UiTooltips;
+
 import at.koopro.wizardsandbeasts.client.hud.WandHudSprites;
 import at.koopro.wizardsandbeasts.client.gui.WizardsAndBeastsUiTokens;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
@@ -406,6 +411,7 @@ public class SpellMenuScreen extends Screen {
         super.render(graphics, mouseX, mouseY, partialTick);
 
         renderSlots(graphics, mouseX, mouseY);
+        renderSlotTooltip(graphics, mouseX, mouseY);
         renderHint(graphics);
         renderDragGhost(graphics, mouseX, mouseY);
     }
@@ -495,13 +501,32 @@ public class SpellMenuScreen extends Screen {
                         proficiencyPipsFor(spellId));
             }
 
-            // Clamped to the socket's own width plus a little. Spell names run long ("Expelliarmus"),
-            // and an unclamped centred label reaches into the ley-lines either side of it.
-            String text = font.plainSubstrByWidth(label.getString(), size + layout.s(8));
-            graphics.drawString(font, text, sx + size / 2 - font.width(text) / 2,
-                    sy - font.lineHeight - 2,
+            // The top and bottom sockets have the plate's width to themselves, so their names get it;
+            // the side sockets sit between the top socket and the hub and get their own width. The
+            // bottom label goes under its socket's pips, where it no longer meets the hub. A name that
+            // still does not fit ends in an ellipsis and is whole in the socket's tooltip.
+            boolean vertical = i == 0 || i == 2;
+            int room = vertical ? 2 * layout.s(WizardsAndBeastsUiTokens.SpellMenu.SLOT_SPACING) + size : size + layout.s(8);
+            String text = UiText.fit(font, label.getString(), room);
+            int labelY = i == 2 ? sy + size + 6 : sy - font.lineHeight - 2;
+            graphics.drawString(font, text, sx + size / 2 - font.width(text) / 2, labelY,
                     spellId != null ? WizardsPalette.PAGE_INK : WizardsPalette.PAGE_INK_2, false);
         }
+    }
+
+    /** A socket's full spell name and category: the label above it is shortened to the socket's width. */
+    private void renderSlotTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
+        int slot = slotAt(mouseX, mouseY);
+        if (slot < 0 || draggingSpellId != null) {
+            return;
+        }
+        String spellId = ClientSpellDataState.get().getLoadoutSpell(slot);
+        Spell spell = spellId == null ? null : Spells.byId(spellId);
+        if (spell == null) {
+            return;
+        }
+        UiTooltips.show(graphics, font, Component.literal(GuiText.resolve(spell.getDisplayName())),
+                java.util.List.of(SpellMenuRenderHelper.categoryName(spell.getCategory())), mouseX, mouseY);
     }
 
     /**
@@ -545,6 +570,11 @@ public class SpellMenuScreen extends Screen {
                 - layout.s(WizardsAndBeastsUiTokens.SpellMenu.ASSIGN_HINT_BOTTOM_OFFSET)
                 - layout.s(4);
         McStylePanel.drawThemedInset(graphics, x, top, right - x, bottom - top);
+        if (selectedSpellId == null) {
+            Ui.emptyState(graphics, font, UiSurface.PAGE, new Ui.Rect(x, top, right - x, bottom - top),
+                    Component.translatable("gui.wizards_and_beasts.spell_menu.no_selection"),
+                    Component.translatable("gui.wizards_and_beasts.spell_menu.no_selection_hint"));
+        }
     }
 
     /**

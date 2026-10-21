@@ -158,7 +158,8 @@ public final class ThemedButton extends AbstractButton {
 
         Font font = Minecraft.getInstance().font;
         String label = getMessage().getString();
-        int iconSpan = icon == null ? 0 : icon.w() + ICON_GAP;
+        // The gap only separates an icon from a label; an icon-only button centres the icon itself.
+        int iconSpan = icon == null ? 0 : icon.w() + (label.isEmpty() ? 0 : ICON_GAP);
         // The room a label actually has, once the frame and any icon have taken theirs.
         int room = getWidth() - 2 * EDGE_PAD - iconSpan;
         int textW = Math.min(font.width(label), room);

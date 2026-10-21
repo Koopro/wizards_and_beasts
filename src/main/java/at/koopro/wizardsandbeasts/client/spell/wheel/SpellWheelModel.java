@@ -79,6 +79,24 @@ public final class SpellWheelModel {
         return index < 0 ? index + entryCount : index;
     }
 
+    /**
+     * The ring's radius: grows with the entry count between {@code min} and {@code max}, then shrinks to
+     * whatever the screen can hold, so the outermost socket keeps {@code margin} clear of the edge.
+     *
+     * <p>The screen wins over the minimum. At GUI scale 3 on a 768-line display the scaled screen is
+     * 256 tall, and a 108 ring plus its 24 sockets wanted 264: the top and bottom sockets were cut off.
+     * A tighter ring with every socket visible beats a comfortable one with two missing.
+     *
+     * @param slot   socket size; half of it stands outside the radius
+     * @param floor  smallest radius ever returned, so a tiny window still has a ring and not a pile
+     */
+    public static int radius(int entryCount, int screenW, int screenH, int min, int perEntry, int max,
+                             int slot, int margin, int floor) {
+        int wanted = Math.max(min, Math.min(max, min + Math.max(0, entryCount) * perEntry));
+        int room = Math.min(screenW, screenH) / 2 - slot / 2 - margin;
+        return Math.max(floor, Math.min(wanted, room));
+    }
+
     /** Angle in radians of entry {@code index}, measured for screen coordinates (0 = top, clockwise). */
     public static double angleOf(int index, int entryCount) {
         if (entryCount <= 0) {

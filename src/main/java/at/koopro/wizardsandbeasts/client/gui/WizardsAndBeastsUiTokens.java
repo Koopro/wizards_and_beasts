@@ -26,7 +26,7 @@ public final class WizardsAndBeastsUiTokens {
         public static final int EMPTY_LIST_TEXT_Y_OFFSET = 4;
 
         public static final int SLOT_CENTER_X_OFFSET = 75;
-        public static final int SLOT_CENTER_Y_OFFSET = 80;
+        public static final int SLOT_CENTER_Y_OFFSET = 90;
         public static final int SLOT_BUTTON_SIZE = 32;
         public static final int SLOT_SPACING = 38;
 
@@ -35,7 +35,7 @@ public final class WizardsAndBeastsUiTokens {
         public static final int ENTRY_TEXT_Y_OFFSET = 4;
         public static final int CATEGORY_X_OFFSET = 2;
 
-        public static final int SELECTED_INFO_BASE_Y = 140;
+        public static final int SELECTED_INFO_BASE_Y = 168;
         public static final int SELECTED_CATEGORY_Y = 12;
         public static final int SELECTED_COOLDOWN_Y = 24;
         public static final int SELECTED_DAMAGE_Y = 36;
@@ -168,10 +168,9 @@ public final class WizardsAndBeastsUiTokens {
         public static final int POINTS_BAR_WIDTH = 96;
         public static final int POINTS_BAR_GAP = 8;
 
-        /** Viewport controls, bottom-right inside the well. Margin clears the well's own 8px frame. */
+        /** Viewport controls (zoom, recenter), in the header row beside the title since 2026-10-07. */
         public static final int CONTROL_SIZE = 18;
         public static final int CONTROL_GAP = 3;
-        public static final int CONTROL_MARGIN = 10;
         /** Vocation button, top-right in the header band. Wide enough for "Vocation: Wandlore Master". */
         public static final int VOCATION_BUTTON_W = 140;
         public static final int VOCATION_BUTTON_H = 16;

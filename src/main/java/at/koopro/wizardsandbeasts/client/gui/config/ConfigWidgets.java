@@ -12,10 +12,11 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.InputWithModifiers;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -33,7 +34,42 @@ public final class ConfigWidgets {
     public static final int INK_FADED = WizardsPalette.PAGE_DEEP;
     public static final int STAMP_RED = WizardsPalette.WAX;
 
+    /** The screens' own words. */
+    static final String KEY = "gui.wizards_and_beasts.config.";
+    /**
+     * NeoForge's convention for a config value's name ({@code <modid>.configuration.<key>}) and tooltip
+     * ({@code ….tooltip}); a key with no entry falls back to the humanised key and the spec's comment, so a
+     * new config value is never unlabelled and never shows a raw key.
+     */
+    private static final String VALUE_KEY = "wizards_and_beasts.configuration.";
+
     private ConfigWidgets() {}
+
+    /** A config value's row label: its translation when the lang file has one, else the humanised key. */
+    public static Component label(String key) {
+        return I18n.exists(VALUE_KEY + key) ? Component.translatable(VALUE_KEY + key) : Component.literal(humanise(key));
+    }
+
+    /**
+     * A config value's tooltip: the translated description when there is one, else the comment the spec
+     * was built with ({@code Config.java} documents all of them). Null when neither exists.
+     */
+    public static @Nullable Component tooltip(String key, ModConfigSpec.ValueSpec valueSpec, Object current) {
+        MutableComponent text;
+        if (I18n.exists(VALUE_KEY + key + ".tooltip")) {
+            text = Component.translatable(VALUE_KEY + key + ".tooltip");
+        } else if (valueSpec.getComment() != null && !valueSpec.getComment().isBlank()) {
+            text = Component.literal(valueSpec.getComment().strip());
+        } else {
+            text = null;
+        }
+        if (current instanceof List<?>) {
+            // A list is shown, not edited: say where it is edited.
+            Component where = Component.translatable(KEY + "list_edit_in_file");
+            return text == null ? where : text.append("\n\n").append(where);
+        }
+        return text;
+    }
 
     /**
      * Centered text without a drop shadow. Vanilla {@code drawCenteredString} always draws a
@@ -103,7 +139,7 @@ public final class ConfigWidgets {
 
     private static EditBox numericEditBox(int x, int y, int width, int height,
             ModConfigSpec.ConfigValue<Number> value, ModConfigSpec.ValueSpec valueSpec, boolean integer) {
-        EditBox box = new ThemedTextField(Minecraft.getInstance().font, x, y, width, height, Component.literal("value"));
+        EditBox box = new ThemedTextField(Minecraft.getInstance().font, x, y, width, height, Component.translatable(KEY + "value"));
         box.setValue(String.valueOf(value.get()));
         box.setFilter(s -> s.isEmpty() || s.matches(integer ? "-?\\d*" : "-?\\d*\\.?\\d*"));
         box.setResponder(s -> {
@@ -121,7 +157,7 @@ public final class ConfigWidgets {
 
     private static EditBox stringEditBox(int x, int y, int width, int height,
             ModConfigSpec.ConfigValue<String> value, ModConfigSpec.ValueSpec valueSpec) {
-        EditBox box = new ThemedTextField(Minecraft.getInstance().font, x, y, width, height, Component.literal("value"));
+        EditBox box = new ThemedTextField(Minecraft.getInstance().font, x, y, width, height, Component.translatable(KEY + "value"));
         box.setValue(value.get());
         box.setResponder(s -> {
             if (valueSpec.test(s)) {
@@ -132,10 +168,9 @@ public final class ConfigWidgets {
     }
 
     private static EditBox listDisplayBox(int x, int y, int width, int height, int entryCount) {
-        EditBox box = new ThemedTextField(Minecraft.getInstance().font, x, y, width, height, Component.literal("list"));
-        box.setValue("[" + entryCount + " entries]");
+        EditBox box = new ThemedTextField(Minecraft.getInstance().font, x, y, width, height, Component.translatable(KEY + "value"));
+        box.setValue(I18n.get(KEY + "list_entries", entryCount));
         box.setEditable(false);
-        box.setTooltip(Tooltip.create(Component.literal("Edit in TOML file directly.")));
         return box;
     }
 
@@ -151,7 +186,7 @@ public final class ConfigWidgets {
         private boolean state;
 
         ToggleButton(int x, int y, int width, int height, ModConfigSpec.ConfigValue<Boolean> value) {
-            super(x, y, width, height, Component.literal(value.get() ? "Enabled" : "Disabled"));
+            super(x, y, width, height, onOff(value.get()));
             this.value = value;
             this.state = value.get();
         }
@@ -160,7 +195,11 @@ public final class ConfigWidgets {
         public void onPress(@NonNull InputWithModifiers input) {
             state = !state;
             persist(value, state);
-            setMessage(Component.literal(state ? "Enabled" : "Disabled"));
+            setMessage(onOff(state));
+        }
+
+        private static Component onOff(boolean on) {
+            return Component.translatable(KEY + (on ? "enabled" : "disabled"));
         }
 
         @Override

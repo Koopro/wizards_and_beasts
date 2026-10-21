@@ -31,6 +31,13 @@ public final class ClientSpellDataState {
 
     private ClientSpellDataState() {}
 
+    /** Bumps on every sync, so a screen can cache what it derives from the spell data instead of redoing it per frame. */
+    private static long version;
+
+    public static long version() {
+        return version;
+    }
+
     public static PlayerSpellData get() {
         return INSTANCE;
     }
@@ -120,6 +127,7 @@ public final class ClientSpellDataState {
             INSTANCE.setRejectCount(e.getKey(), e.getValue());
         }
         INSTANCE.setSyncCorrections(pkt.syncCorrections());
+        version++;
     }
 
     public static void applyDelta(SpellDataDeltaS2CPayload pkt) {
@@ -131,9 +139,11 @@ public final class ClientSpellDataState {
         INSTANCE.setCastCount(pkt.spellId(), pkt.newCastCount());
         INSTANCE.setSuccessfulHits(pkt.spellId(), pkt.newSuccessfulHits());
         INSTANCE.setGlobalCooldownEndTick(pkt.globalCooldownEndTick());
+        version++;
     }
 
     public static void applyProficiencyDelta(SpellProficiencySyncS2CPayload pkt) {
         INSTANCE.setSpellProficiency(pkt.spellId(), pkt.proficiency());
+        version++;
     }
 }

@@ -100,7 +100,7 @@ hand-copied its colours (`SkillTreeChartTextures.CHART_INK` is `star_chart`'s in
 | `pensieve` | dark wet stone, silver memory light | Pensieve |
 | `hearth` | soot stone, warm soot, Floo green | Floo network |
 | `ministry` | pale violet memo, emblem purple | — |
-| `field_notebook` | kraft paper, canvas board, pencil | — |
+| `field_notebook` | kraft paper, canvas board, pencil | Bestiary (Field Journal) |
 
 **A screen that takes a skin must take that skin's `ink()` with it.** Four materials are light and
 every colour above the skin table was picked against the dark leather HUD:
@@ -157,10 +157,89 @@ Honest by construction, not by intention:
 
 A mockup that flatters the design is worse than none.
 
+## Visual language (2026-10-07)
+
+The rules every screen follows so the mod reads as one game. Components that implement them live in
+`client/gui/ui/` (`UiSurface`, `UiText`, `Ui`, `UiTooltips`, `UiIcons`, `ConfirmDialog`) and
+`client/gui/widget/`; how to use them is `GUI_COMPONENTS.md`.
+
+### Surfaces
+
+| Surface | Field | Ink / label / caption | Heading | Shadow |
+|---|---|---|---|---|
+| `PAGE` | parchment `#E4D2A6` | `#2E1F16` / `#5C4330` / `#8A6E52` | rubric `#8E2320` | no |
+| `NIGHT` | soot-violet `#1C1722` @ 94% | `#F3E6D2` / `#C2A78F` / `#9A8878` | gilt `#EBC874` | yes |
+| `of(GuiSkin)` | the skin's paper | the skin's ink; label and meaning colours lifted to AA on its paper | skin ink | no |
+
+`UiSurfaceTest` pins every surface: ink, label and heading at 4.5 : 1, caption / good / bad / warn /
+disabled at 3 : 1, shadow exactly on the dark surfaces. A screen has one body surface; NIGHT cards may
+float over it. Each screen keeps its own identity through its material, its art and its layout — the
+skill web stays a star chart, the bestiary a field notebook, the wand trial a workbench — while the type,
+spacing, controls, states and tooltips are shared.
+
+### Typography hierarchy
+
+One font at one size, so hierarchy is colour, position and space. Five roles (`UiText.Role`):
+**Title** (ink, step 20, one per screen, followed by the divider) · **Heading** (heading colour, step
+16) · **Body** (ink, 12) · **Label** (ink2, 12) · **Caption** (ink3, 10). No text is scaled below 1.0
+on a player screen; what does not fit is ellipsised and the full text goes in a tooltip.
+Sentence case for headings and buttons; no all-caps except where a material is lettered (the Ministry
+certificate heading).
+
+### Spacing
+
+The 4-pt scale above. In practice: **8** from a panel's frame and between components, **12** between
+sections, **4** inside a component (a chip's text from its edge), **2** between a bar and its label.
+Rows step by the type role's step; a list row is `ROW_H` 16.
+
+### Corners and borders
+
+- Paper panels carry their deckle and gilt corner studs in the sprite; nothing draws a second frame
+  inside them.
+- Procedural pieces (bars, chips, night cards, callouts) are square with the **corner texel cut** —
+  at GUI scale that is the same soft corner the sprites have. Nothing is rounded more than one texel.
+- Every piece has a **1px edge**: the surface's edge colour on paper, gilt at night (lit top-left,
+  shaded bottom-right). Insets invert the bevel. Light always comes from the top-left.
+
+### Icons
+
+Native size only: 16px in rows and sockets, 32px in large previews. Never 1.5× or fractional scales
+(pixel art shimmers). An icon named by data that has no texture draws a gilt monogram (`UiIcons`),
+never the missing-texture checkerboard. A spell family, an ability kind or a coin keeps its hue; the
+frame around it carries the state.
+
+### Interaction states
+
+| State | Buttons / tabs | Rows | Radial sockets | Text |
+|---|---|---|---|---|
+| Normal | atlas row 0 | — | night card | ink / label |
+| Hover / focus | atlas row 1 | `hoverWash` | lift 2px toward the hub + wash | ink |
+| Active / selected | `SELECT` tone | `selectWash` + gilt edge | gilt-light outline | heading or ink |
+| Disabled | atlas row 2 (`_off`) | ink3 text | — | `disabled`, tooltip says why |
+| Confirm / danger | `CONFIRM` / `DANGER` tone | — | — | — |
+
+### Tooltip rules
+
+Plain tooltips on any mod screen use the night card (`UiTooltipStyleHook`; sprites
+`gui/sprites/tooltip/night_*`, written by `gui_parchment.py`). Name first in gilt, then what it is,
+then numbers (good green / bad red), then why it is unavailable, lore last in grey italic. Wrap at
+180px. Item tooltips keep the item's own card.
+
+### Player-facing text
+
+No raw ids, enum constants, translation keys, tick counts or unrounded floats; no English in code;
+no new `§` codes in lang strings (colour is the component's job). The 2026-10-07 audit removed the
+ones it found (`GUI_AUDIT_2026_10.md`).
+
 ## Status
 
-Shipped: `WizardsMetrics`, the five themed components, the mockup tool, before/after for the
-character sheet and the bestiary.
+2026-10-15: finishing pass over all 41 screens and the HUD — spell wheel, Apparition, Imperio, trinkets, config and
+Obscurial HUD brought onto the kit and lang; orphaned Bestiary art and dead tokens removed. Details and what is
+still open: `GUI_AUDIT_2026_10.md`, "Finishing pass".
 
-Not yet applied to any screen — the concepts are proposals. **Nothing here has been seen in a
-running client.**
+2026-10-07: the visual language above is implemented and applied to the eleven audited screens; the
+fixes were checked in a running client at GUI scale 3 and 4 (`client/debug/UiScreenCapture`,
+`WB_UI_CAPTURE`). Before/after and the open items are in `GUI_AUDIT_2026_10.md`.
+
+Earlier: `WizardsMetrics`, the five themed components, the mockup tool, before/after for the character
+sheet and the bestiary.

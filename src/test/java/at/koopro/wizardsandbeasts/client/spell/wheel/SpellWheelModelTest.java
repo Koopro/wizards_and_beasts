@@ -124,4 +124,36 @@ class SpellWheelModelTest {
                     "the icon drawn for entry " + i + " is not the entry hovering it selects");
         }
     }
+
+    // ── radius ─────────────────────────────────────────────────────────────────────────────────
+
+    /** The screen's own numbers: 62..108, 5 per spell, 24px sockets, 8px from the edge, never below 44. */
+    private static int radius(int entries, int w, int h) {
+        return SpellWheelModel.radius(entries, w, h, 62, 5, 108, 24, 8, 44);
+    }
+
+    @Test
+    void radiusGrowsWithEntriesWhenTheScreenHasRoom() {
+        assertEquals(62, radius(0, 640, 360));
+        assertEquals(87, radius(5, 640, 360));
+        assertEquals(108, radius(40, 640, 360));
+    }
+
+    @Test
+    void everySocketStaysOnScreenAtTheScalesPlayersUse() {
+        // {window w, h, GUI scale}: 1080p at 1..4, 768p at 3, 720p at 2 and 3, 480p at 2, ultrawide at 4.
+        int[][] cases = {{1920, 1080, 1}, {1920, 1080, 2}, {1920, 1080, 3}, {1920, 1080, 4},
+                {1366, 768, 3}, {1280, 720, 2}, {1280, 720, 3}, {854, 480, 2}, {2560, 1080, 4}};
+        for (int[] c : cases) {
+            int w = c[0] / c[2];
+            int h = c[1] / c[2];
+            int r = radius(40, w, h);
+            assertTrue(r + 12 <= h / 2, "socket off-screen at " + c[0] + "x" + c[1] + " GUI " + c[2] + ": r=" + r);
+        }
+    }
+
+    @Test
+    void radiusNeverFallsBelowTheFloor() {
+        assertEquals(44, radius(40, 100, 80));
+    }
 }

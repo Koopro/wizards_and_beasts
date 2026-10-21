@@ -97,11 +97,14 @@ public final class AdminScreenCapture {
             case "wand" -> wandPlan();
             case "visual" -> visualPlan();
             case "world" -> worldPlan();
+            case "economy" -> economyPlan();
             case "modules" -> modulesPlan();
             case "profiles" -> profilesPlan();
             case "players" -> playersPlan();
             case "ops" -> opsPlan();
             case "polish" -> polishPlan();
+            case "wandlooks" -> wandLooksPlan();
+            case "controls" -> controlsPlan();
             default -> magicPlan();
         };
     }
@@ -283,6 +286,17 @@ public final class AdminScreenCapture {
     }
 
     /** Phase 8: Travel (Floo, Apparition), Ministry, Economy and World. */
+    /** The economy pass: Economy → Markets (live ledger and traders' books, after its first poll) and Rules. */
+    private static List<Step> economyPlan() {
+        return List.of(
+                new Step("e01_economy_markets", () -> screen().showTab(AdminCategory.ECONOMY, "markets"), 60),
+                new Step("e02_economy_markets_scrolled", () -> screen().mouseScrolled(
+                        screen().width * 0.6, screen().height * 0.6, 0, -12), 10),
+                new Step("e03_economy_markets_scrolled_more", () -> screen().mouseScrolled(
+                        screen().width * 0.6, screen().height * 0.6, 0, -24), 10),
+                new Step("e04_economy_rules", () -> screen().showTab(AdminCategory.ECONOMY, "rules"), 20));
+    }
+
     private static List<Step> worldPlan() {
         return List.of(
                 new Step("x01_travel_floo", () -> screen().showTab(AdminCategory.TRAVEL, "floo"), 30),
@@ -563,7 +577,8 @@ public final class AdminScreenCapture {
         }
         // The onboarding preview is a screen the Control Center opens itself; a step may be looking at it.
         boolean preview = index >= 0 && (mc.screen instanceof HeritageSelectionScreen selection && selection.isPreview()
-                || mc.screen instanceof EntityViewerScreen);
+                || mc.screen instanceof EntityViewerScreen
+                || mc.screen instanceof at.koopro.wizardsandbeasts.client.wand.WandLookPreviewScreen);
         // A step named *_world closes the Control Center on purpose and photographs the world behind it.
         boolean worldStep = index >= 0 && index < steps.size() && steps.get(index).name().endsWith("_world");
         if (!(mc.screen instanceof AdminControlCenterScreen) && !preview && !worldStep) {
@@ -610,7 +625,8 @@ public final class AdminScreenCapture {
             return;
         }
         if (mc.screen instanceof AdminControlCenterScreen || mc.screen instanceof EntityViewerScreen
-                || mc.screen instanceof HeritageSelectionScreen selection && selection.isPreview()) {
+                || mc.screen instanceof HeritageSelectionScreen selection && selection.isPreview()
+                || mc.screen instanceof at.koopro.wizardsandbeasts.client.wand.WandLookPreviewScreen) {
             steps.get(index).action().run();
         }
         wait = steps.get(index).settleTicks();
@@ -621,6 +637,101 @@ public final class AdminScreenCapture {
     /** The capturing player's UUID, read when a step runs (the plan is built before the world is open). */
     private static @org.jspecify.annotations.Nullable String me() {
         return Minecraft.getInstance().player == null ? null : Minecraft.getInstance().player.getUUID().toString();
+    }
+
+    /**
+     * The wand look preview (Visuals → Debug → Wand look preview), driven through its own arrows: wood, core,
+     * length, flexibility, bond, then a rare make and the Elder Wand. Reads nothing back; the shots are the check.
+     */
+    private static List<Step> wandLooksPlan() {
+        return List.of(
+                new Step("l01_debug_panel", () -> screen().showVisuals("debug", ""), 30),
+                new Step("l02_preview_ash", () -> press("admin.wizards_and_beasts.visual_debug.open_wand_looks"), 30),
+                new Step("l03_next_wood", () -> clickNth("▶", 0)),
+                new Step("l04_next_core", () -> clickNth("▶", 1)),
+                new Step("l05_shortest", () -> { for (int i = 0; i < 5; i++) clickNth("◀", 2); }),
+                new Step("l06_longest", () -> { for (int i = 0; i < 8; i++) clickNth("▶", 2); }),
+                new Step("l07_springy", () -> { clickNth("▶", 3); clickNth("▶", 3); }),
+                new Step("l08_unfamiliar", () -> { for (int i = 0; i < 4; i++) clickNth("◀", 4); }),
+                new Step("l09_next_rare", () -> clickNamed("Next rare")),
+                new Step("l10_elder_wand", () -> { clickNth("▶", 4); clickNth("▶", 4); clickNth("▶", 4);
+                    clickNth("▶", 4); clickNamed("Elder Wand"); }, 20));
+    }
+
+    /**
+     * 2026-10-07: the sidebar without empty sections, Magic → Availability and Creatures → Spawning (the multi-select,
+     * unedited and with drafts), and the Players resource picker open with a filter typed.
+     */
+    private static List<Step> controlsPlan() {
+        return List.of(
+                new Step("c01_dashboard_sidebar", () -> navigate(AdminCategory.DASHBOARD), 40),
+                new Step("c02_magic_availability", () -> screen().showTab(AdminCategory.MAGIC, "availability"), 50),
+                new Step("c03_availability_filtered", () -> {
+                    typeInto(net.minecraft.client.gui.components.EditBox.class, "dark");
+                }, 15),
+                new Step("c04_availability_drafts", () -> clickNamed(
+                        Component.translatable("admin.wizards_and_beasts.bulk.none").getString()), 15),
+                new Step("c05_availability_confirm", () -> {
+                    for (GuiEventListener child : Minecraft.getInstance().screen.children()) {
+                        if (child instanceof AdminButton button && button.active
+                                && button.getMessage().getString().matches(".*[0-9]+$")
+                                && button.getMessage().getString().startsWith(Component.translatable(
+                                        "admin.wizards_and_beasts.bulk.apply", "").getString().trim())) {
+                            button.onPress(new KeyEvent(GLFW.GLFW_KEY_ENTER, 0, 0));
+                            return;
+                        }
+                    }
+                }, 15),
+                new Step("c06_creatures_spawning", () -> {
+                    key(GLFW.GLFW_KEY_ESCAPE, 0);
+                    screen().showTab(AdminCategory.CREATURES, "spawning");
+                }, 50),
+                new Step("c07_players_effects", () -> screen().showPlayers("effects", me()), 40),
+                new Step("c08_players_picker_open", AdminScreenCapture::openPicker, 15),
+                new Step("c09_players_picker_filtered", () -> {
+                    for (char c : "vis".toCharArray()) {
+                        Minecraft.getInstance().screen.charTyped(new net.minecraft.client.input.CharacterEvent(c, 0));
+                    }
+                }, 10));
+    }
+
+    private static void openPicker() {
+        for (GuiEventListener child : Minecraft.getInstance().screen.children()) {
+            if (child instanceof at.koopro.wizardsandbeasts.client.admin.widget.AdminPicker picker) {
+                Minecraft.getInstance().screen.setFocused(picker);
+                picker.keyPressed(new KeyEvent(GLFW.GLFW_KEY_ENTER, 0, 0));
+                return;
+            }
+        }
+    }
+
+    private static void typeInto(Class<?> type, String text) {
+        for (GuiEventListener child : Minecraft.getInstance().screen.children()) {
+            if (type.isInstance(child)) {
+                ((net.minecraft.client.gui.components.EditBox) child).setValue(text);
+                return;
+            }
+        }
+    }
+
+    /** The n-th visible button on the open screen whose label is exactly {@code label}. */
+    private static void clickNth(String label, int n) {
+        net.minecraft.client.gui.screens.Screen open = Minecraft.getInstance().screen;
+        if (open == null) {
+            return;
+        }
+        int seen = 0;
+        for (GuiEventListener child : open.children()) {
+            if (child instanceof net.minecraft.client.gui.components.AbstractButton button && button.visible
+                    && button.getMessage().getString().equals(label) && seen++ == n) {
+                button.onPress(new KeyEvent(GLFW.GLFW_KEY_ENTER, 0, 0));
+                return;
+            }
+        }
+    }
+
+    private static void clickNamed(String label) {
+        clickNth(label, 0);
     }
 
     private static AdminControlCenterScreen screen() {

@@ -4,6 +4,7 @@ import at.koopro.wizardsandbeasts.Config;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
+import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 import at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton;
 import com.mojang.logging.LogUtils;
 import java.util.ArrayList;
@@ -32,7 +33,6 @@ import org.slf4j.Logger;
 public class WizardsConfigScreen extends Screen {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    private static final String HEADER = "MINISTRY OF MAGIC — AUTHORISED CONFIGURATION FORM";
     static final Identifier PARCHMENT_TEX = Identifier.fromNamespaceAndPath(
             WizardsAndBeastsMod.MODID, "textures/gui/config/parchment.png");
     static final Identifier CARD_TEX = Identifier.fromNamespaceAndPath(
@@ -54,8 +54,16 @@ public class WizardsConfigScreen extends Screen {
     /** One config key with its live value holder and spec metadata. */
     public record ConfigEntry(String key, ModConfigSpec.ConfigValue<?> value, ModConfigSpec.ValueSpec valueSpec) {}
 
-    /** A themed category of config entries. */
-    public record Category(String name, String glyph, String abbrev, List<ConfigEntry> entries) {}
+    /**
+     * A themed category of config entries. {@code name} is the bucket's id (English, matched in code);
+     * what the player reads is {@link #displayName()}.
+     */
+    public record Category(String name, String glyph, String abbrev, List<ConfigEntry> entries) {
+        public Component displayName() {
+            return Component.translatable(ConfigWidgets.KEY + "category."
+                    + name.toLowerCase(java.util.Locale.ROOT).replace(' ', '_'));
+        }
+    }
 
     // Logical subsystem grouping: the spec has no push/pop sections, so keys map here.
     // Unknown future keys fall back to Gameplay.
@@ -142,7 +150,7 @@ public class WizardsConfigScreen extends Screen {
     private final InkRevealRenderer inkReveal = new InkRevealRenderer();
 
     public WizardsConfigScreen(Screen parent) {
-        super(Component.literal("Wizards & Beasts Configuration"));
+        super(Component.translatable(ConfigWidgets.KEY + "title"));
         this.parent = parent;
         this.categories = buildCategories();
     }
@@ -189,7 +197,9 @@ public class WizardsConfigScreen extends Screen {
 
         int count = categories.size();
         if (count > 0) {
-            int perRow = Math.min(count, CARDS_PER_ROW);
+            // Four across where they fit; at the narrowest scaled width (320) that is three.
+            int fit = Math.max(1, (width - 2 * CARD_GAP + CARD_GAP) / (CARD_WIDTH + CARD_GAP));
+            int perRow = Math.min(count, Math.min(CARDS_PER_ROW, fit));
             int rows = (count + perRow - 1) / perRow;
             int gridHeight = rows * CARD_HEIGHT + (rows - 1) * CARD_GAP;
             int startY = Math.max(58, height / 2 - gridHeight / 2);
@@ -206,7 +216,26 @@ public class WizardsConfigScreen extends Screen {
         }
 
         addRenderableWidget(new ThemedButton(width / 2 - 50, height - 28, 100, 20,
-                Component.literal("Done"), this::onClose));
+                Component.translatable("gui.done"), this::onClose));
+    }
+
+    /**
+     * The chapter screen for one category by its id ("Heritage"), as its card opens it but without the
+     * Dark Arts gate. For the UI capture harness; null when the category is empty or unknown.
+     */
+    public static @org.jspecify.annotations.Nullable Screen chapter(Screen parent, String name) {
+        WizardsConfigScreen board = new WizardsConfigScreen(parent);
+        for (int i = 0; i < board.categories.size(); i++) {
+            if (board.categories.get(i).name().equals(name)) {
+                return new WizardsConfigCategoryScreen(board, board.categories.get(i), i + 1);
+            }
+        }
+        return null;
+    }
+
+    /** The Blood Quill gate in front of a chapter, for the UI capture harness. */
+    public static Screen darkArtsGate(Screen parent) {
+        return new DarkArtsGateScreen(parent, () -> parent);
     }
 
     private void openCategory(Category category, int ordinal) {
@@ -225,7 +254,7 @@ public class WizardsConfigScreen extends Screen {
         drawHeader(graphics);   // drawn after background fill, on top of widgets
         drawStamp(graphics);
         if (categories.isEmpty()) {
-            drawCenteredNoShadow(graphics, "Configuration file is not loaded — no settings to display.",
+            drawCenteredNoShadow(graphics, Component.translatable(ConfigWidgets.KEY + "not_loaded").getString(),
                     width / 2, height / 2 - 4, ConfigWidgets.INK);
         }
     }
@@ -246,8 +275,9 @@ public class WizardsConfigScreen extends Screen {
     }
 
     private void drawHeader(GuiGraphics graphics) {
-        String spaced = letterSpaced(HEADER);
-        String drawn = font.width(spaced) <= width - 24 ? spaced : HEADER;
+        String header = Component.translatable(ConfigWidgets.KEY + "header").getString();
+        String spaced = letterSpaced(header);
+        String drawn = font.width(spaced) <= width - 24 ? spaced : UiText.fit(font, header, width - 24);
         drawCenteredNoShadow(graphics, drawn, width / 2, 16, ConfigWidgets.INK);
         int ruleHalf = Math.min(font.width(drawn) / 2 + 8, width / 2 - 12);
         graphics.hLine(width / 2 - ruleHalf, width / 2 + ruleHalf, 28, ConfigWidgets.INK);
@@ -255,8 +285,9 @@ public class WizardsConfigScreen extends Screen {
     }
 
     private void drawStamp(GuiGraphics graphics) {
-        String line1 = "CLASSIFIED";
-        String line2 = "MOD CONFIGURATION";
+        // A rubber stamp is lettered, so its words keep the stamp's capitals and its 0.75 scale.
+        String line1 = Component.translatable(ConfigWidgets.KEY + "stamp.line1").getString();
+        String line2 = Component.translatable(ConfigWidgets.KEY + "stamp.line2").getString();
         float scale = 0.75F;
         int innerWidth = (int) (font.width(line2) * scale) + 8;
         int innerHeight = 24;
@@ -299,7 +330,7 @@ public class WizardsConfigScreen extends Screen {
         private final int ordinal;
 
         CategoryCard(int x, int y, Category category, int ordinal) {
-            super(x, y, CARD_WIDTH, CARD_HEIGHT, Component.literal(category.name()));
+            super(x, y, CARD_WIDTH, CARD_HEIGHT, category.displayName());
             this.category = category;
             this.ordinal = ordinal;
         }
@@ -321,7 +352,7 @@ public class WizardsConfigScreen extends Screen {
             // rule 4px in are drawn in the art.
             McStylePanel.drawTexture(graphics, darkArts ? CARD_DARK_TEX : CARD_TEX,
                     x0, y0, getWidth(), getHeight(), CARD_WIDTH, CARD_HEIGHT);
-            if (isHovered()) {
+            if (isHoveredOrFocused()) {
                 // Inside the rule only: the card's edge is torn, so a full-rect wash would square it off.
                 graphics.fill(x0 + 5, y0 + 5, x1 - 5, y1 - 5, CARD_HOVER);
             }
@@ -331,7 +362,8 @@ public class WizardsConfigScreen extends Screen {
                 glyph = category.abbrev();
             }
             drawCenteredNoShadow(graphics, glyph, x0 + getWidth() / 2, y0 + 16, text);
-            drawCenteredNoShadow(graphics, category.name(), x0 + getWidth() / 2, y1 - 22, text);
+            drawCenteredNoShadow(graphics, UiText.fit(font, getMessage().getString(), getWidth() - 12),
+                    x0 + getWidth() / 2, y1 - 22, text);
         }
 
         @Override

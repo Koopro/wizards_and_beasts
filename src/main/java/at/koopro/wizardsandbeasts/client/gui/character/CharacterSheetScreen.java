@@ -4,11 +4,16 @@ import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.character.tab.AttributesTab;
+import at.koopro.wizardsandbeasts.client.gui.character.tab.BeastsTab;
+import at.koopro.wizardsandbeasts.client.gui.character.tab.CareerTab;
 import at.koopro.wizardsandbeasts.client.gui.character.tab.CharacterTab;
+import at.koopro.wizardsandbeasts.client.gui.character.tab.EducationTab;
+import at.koopro.wizardsandbeasts.client.gui.character.tab.IdentityTab;
 import at.koopro.wizardsandbeasts.client.gui.character.tab.RecordTab;
 import at.koopro.wizardsandbeasts.client.gui.character.tab.SkillsTab;
 import at.koopro.wizardsandbeasts.client.gui.character.tab.SpellsTab;
-import at.koopro.wizardsandbeasts.client.gui.character.widget.HeritageBlockWidget;
+import at.koopro.wizardsandbeasts.client.gui.character.tab.TravelTab;
+import at.koopro.wizardsandbeasts.client.gui.character.tab.WandTab;
 import at.koopro.wizardsandbeasts.client.gui.character.widget.PlayerModelViewport;
 import at.koopro.wizardsandbeasts.client.gui.character.widget.VitalsBarWidget;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
@@ -24,92 +29,190 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectInstance;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Read-only Character Sheet screen.
+ * The Character Sheet: the one place a player reads who their wizard is and what they are becoming.
  *
- * <p>Layout (320 × 240 background):
+ * <p>Layout (408 × 234 design space):
  * <pre>
  *  ┌──────────────────────────────────────────────────────────────┐
- *  │ Title bar (14px)                                              │
- *  ├──────────────────────┬───────────────────────────────────────┤
- *  │ Left column (120px)  │ Right column (200px)                  │
- *  │  - 3D viewport       │  - [Attributes] [Skills] [Spells]     │
- *  │  - Heritage block    │  - Active tab content                 │
- *  │  - Vitals (hp + xp)  │                                       │
- *  │  - Active effects    │                                       │
- *  └──────────────────────┴───────────────────────────────────────┘
+ *  │ Title                                              Player    │
+ *  ├────────────┬────────────┬────────────────────────────────────┤
+ *  │ figure     │ ▣ Identity │ the open page                      │
+ *  │ (viewport) │ ▣ Attribs  │                                    │
+ *  │            │ ▣ Magic    │                                    │
+ *  │            │ ▣ Wand  …  │                                    │
+ *  │ health, xp │ ▣ Travel   │                                    │
+ *  └────────────┴────────────┴────────────────────────────────────┘
  * </pre>
+ *
+ * <p>The middle column was the identity column — heritage, lineage, traits, effects — beside two rows of tabs
+ * above the content. With nine tabs the rows clipped every label to two letters ("At…", "Sk…") and the identity
+ * facts competed with the content for a column they did not change in. Since 2026-10-15 the middle column is a
+ * page rail with an icon and a full name per page, the identity facts live on the Identity page (the one the sheet
+ * opens on), and the content gets the column's full height.
+ *
+ * <p>Read-only by design except where a page sends an intent (contract buttons, companion orders, travel actions):
+ * every number on every page is synced or server-built state, and the sheet never edits its own copy.
  */
 public final class CharacterSheetScreen extends Screen {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    // Background dimensions
-    // Grown from 400x220 when the sheet became parchment: the frame's double rule runs 4-6px in, so
-    // the padding went from 8 to 12 and the title moved inside the frame. The columns keep the size
-    // they had.
+    // Background dimensions. Grown from 400x220 when the sheet became parchment: the frame's double rule runs
+    // 4-6px in, so the padding went from 8 to 12 and the title moved inside the frame.
     private static final int BG_W = 408;
     private static final int BG_H = 234;
 
-    // Column split
     /** Frame, title line and the rule under it. */
     private static final int TITLE_H = 24;
     /** Baseline row of the title text, clear of the frame's rules at 4 and 6. */
     private static final int TITLE_TEXT_Y = 10;
     /** The divider under the title: its rules land at +3 and +5, so at 21 and 23. */
     private static final int TITLE_RULE_Y = 18;
-    private static final int TAB_H   = 14;
-    /** Corner mark on a tab fed by a PREVIEW module. Amber: a caution, not an error. */
+
+    /** One rail entry: a 16px icon with a texel above and below it. Ten entries and their gaps fit 194px. */
+    private static final int RAIL_ROW_H = 18;
+    private static final int RAIL_ROW_GAP = 1;
+    private static final int RAIL_ICON_X = 2;
+    private static final int RAIL_LABEL_X = RAIL_ICON_X + SheetIcons.SIZE + 3;
+    /** Corner mark on a page fed by a PREVIEW module. Amber: a caution, not an error. */
     private static final int COLOR_PREVIEW_DOT = WizardsPalette.GILT;
 
-    /**
-     * Three columns: the figure, the things that are true of the character whichever tab is open,
-     * and the tab content.
-     *
-     * <p>The two-column sheet put identity — heritage, lineage, wand, vocation, effects — in the
-     * same 120px rail as the model viewport, and gave the tabs everything else. That made the left
-     * rail a dumping ground and left identity competing with tab content for the reader's attention
-     * even though it never changes when a tab does.
-     */
-    private static final int FIGURE_W   = 96;
-    private static final int IDENTITY_W = 92;
-    private static final int COL_GAP    = 6;
-    // Spacing comes from WizardsMetrics rather than this file.
+    private static final int FIGURE_W = 96;
+    private static final int RAIL_W = 92;
+    private static final int COL_GAP = 6;
 
     /** Clearance from the sheet's outer edge: the parchment frame's inner rule sits at 6px. */
     private static final int FRAME_PAD = WizardsMetrics.SPACE_L;
     /** Clearance from the internal column divider, which is a single rule rather than a frame. */
     private static final int DIVIDER_PAD = WizardsMetrics.SPACE_S;
+
+    private static final int COLOR_DIVIDER = WizardsPalette.PAGE_DEEP;
+    private static final int COLOR_TITLE = WizardsPalette.PAGE_INK;
+    private static final int COLOR_TITLE_SUB = WizardsPalette.PAGE_INK_2;
+    private static final int COLOR_TAB_TXT = WizardsPalette.PAGE_INK;
+    private static final int COLOR_TAB_TXT_IDLE = WizardsPalette.PAGE_INK_2;
+
+    private SheetTab activeTab = SheetTab.IDENTITY;
+    /** The hovered rail entry's card this frame, or null. */
+    private @Nullable List<Component> railTooltip;
+    /** Whether the opening page has been told it is showing; {@code init} runs again on every resize. */
+    private boolean opened;
+
     /**
-     * Usable width of the left column: clear of the sheet frame on the outside, clear of the
-     * column divider on the inside.
-     *
-     * <p>The left column was drawing at {@code colX + 4} with width {@code colW - 8}, which put it
-     * inside the backdrop's own frame — that art carries rules at 0, 2 and 3 plus an inner rule and
-     * corner brackets at 6. Only the right column had been migrated, so the sheet cleared its frame
-     * on one side and sat on it on the other.
+     * Screen to hand back to when the inventory key is pressed, or null when the sheet was opened some other way
+     * (the {@code C} keybind, a server packet). Only set when the sheet was reached from the inventory, so {@code E}
+     * returns you exactly where you were instead of dumping you into the world.
      */
-    /** Left edge of each column, in design space. */
+    private final @Nullable Screen returnTo;
+
+    private final Map<SheetTab, CharacterTab> pages = new EnumMap<>(SheetTab.class);
+
+    private final PlayerModelViewport viewport = new PlayerModelViewport();
+
+    // Cached screen origin (clamped) and shrink factor for small screens
+    private int bgX, bgY;
+    private float guiScale = 1.0f;
+
+    private boolean previewLogged;
+
+    public CharacterSheetScreen() {
+        this(null);
+    }
+
+    /** @param returnTo screen the inventory key hands back to, or null to just close. */
+    public CharacterSheetScreen(@Nullable Screen returnTo) {
+        super(Component.translatable("gui.wizards_and_beasts.character_sheet.title"));
+        this.returnTo = returnTo;
+        pages.put(SheetTab.IDENTITY, new IdentityTab(this::select));
+        pages.put(SheetTab.ATTRIBUTES, new AttributesTab());
+        pages.put(SheetTab.MAGIC, new SpellsTab());
+        pages.put(SheetTab.WAND, new WandTab());
+        pages.put(SheetTab.SKILLS, new SkillsTab());
+        pages.put(SheetTab.CREATURES, new BeastsTab());
+        pages.put(SheetTab.EDUCATION, new EducationTab());
+        pages.put(SheetTab.PROFESSION, new CareerTab());
+        pages.put(SheetTab.REPUTATION, new RecordTab());
+        pages.put(SheetTab.TRAVEL, new TravelTab());
+    }
+
+    /** The sheet opened on a given page. */
+    public static CharacterSheetScreen onTab(SheetTab tab) {
+        CharacterSheetScreen sheet = new CharacterSheetScreen();
+        sheet.activeTab = tab;
+        return sheet;
+    }
+
+    /** The sheet opened on its Creatures page. */
+    public static CharacterSheetScreen onBeastsTab() {
+        return onTab(SheetTab.CREATURES);
+    }
+
+    /** The sheet opened on its Education page: subjects, grades and the next qualification. */
+    public static CharacterSheetScreen onEducationTab() {
+        return onTab(SheetTab.EDUCATION);
+    }
+
+    /** The sheet opened on its Profession page: where a promotion or a new contract is read. */
+    public static CharacterSheetScreen onCareerTab() {
+        return onTab(SheetTab.PROFESSION);
+    }
+
+    @Override
+    protected void init() {
+        // Layout.fit, not Layout.panel. panel() magnifies to 1.35x on a large window, and since everything here is
+        // text that magnified the font too — the sheet's labels came out a third larger than the inventory's, which
+        // is the screen a player compares it against. fit() never upscales, so the text is exactly the size vanilla
+        // draws at, and still shrinks the sheet to fit a small window.
+        GuiScaleHelper.Layout layout = GuiScaleHelper.Layout.fit(width, height, BG_W, BG_H);
+        guiScale = layout.scale();
+        bgX = layout.panelX();
+        bgY = layout.panelY();
+
+        // Probe the bespoke tab art once per open rather than every frame. A pack that overrides this namespace
+        // without shipping panel.png would otherwise paint the rail in the missing-texture checkerboard.
+        CharacterSheetTextures.refresh();
+
+        if (!opened) {
+            opened = true;
+            page().onShown();
+        }
+
+        if (ModuleManager.isPreview(Module.CHARACTER_SHEET) && !previewLogged) {
+            LOGGER.debug("[W&B] CharacterSheetScreen opened in PREVIEW mode.");
+            previewLogged = true;
+        }
+    }
+
+    /** Opens a page; the Identity page's cards call this. */
+    private void select(SheetTab tab) {
+        if (activeTab != tab) {
+            activeTab = tab;
+            page().onShown();
+        }
+    }
+
+    // ── layout ─────────────────────────────────────────────────────────────
+
     private int figureX() {
         return bgX + FRAME_PAD;
     }
 
-    private int identityX() {
+    private int railX() {
         return figureX() + FIGURE_W + COL_GAP;
     }
 
     private int contentX() {
-        return identityX() + IDENTITY_W + COL_GAP;
+        return railX() + RAIL_W + COL_GAP;
     }
 
     private int contentW() {
@@ -125,138 +228,58 @@ public final class CharacterSheetScreen extends Screen {
         return bgY + BG_H - FRAME_PAD;
     }
 
-    /** Side inset of the model viewport, which narrows it toward the figure's own aspect. */
-
-    // Palette
-    private static final int COLOR_DIVIDER  = WizardsPalette.PAGE_DEEP;
-    private static final int COLOR_TITLE    = WizardsPalette.PAGE_INK;
-    private static final int COLOR_TITLE_SUB = WizardsPalette.PAGE_INK_2;
-    private static final int COLOR_TAB_TXT = WizardsPalette.PAGE_INK;
-    private static final int COLOR_TAB_TXT_IDLE = WizardsPalette.PAGE_INK_2;
-    private static final int COLOR_EFFECT_TXT = WizardsPalette.PAGE_INK;
-    private static final int COLOR_EFFECT_MORE = WizardsPalette.PAGE_INK_2;
-    /** Kept off pure red/green: these are inks, not status LEDs. */
-    private static final int COLOR_EFFECT_GOOD = WizardsPalette.PAGE_GOOD;
-    private static final int COLOR_EFFECT_BAD  = WizardsPalette.PAGE_BAD;
-
-    private static final int MAX_EFFECTS_SHOWN = 6;
-    /** One text line per effect, matching the heritage rows above. */
-    private static final int EFFECT_ROW_H      = WizardsMetrics.LINE_BODY;
-
-    // Tabs
-    private enum Tab {
-        ATTRIBUTES("gui.wizards_and_beasts.character_sheet.tab.attributes"),
-        SKILLS("gui.wizards_and_beasts.character_sheet.tab.skills"),
-        SPELLS("gui.wizards_and_beasts.character_sheet.tab.spells"),
-        RECORD("gui.wizards_and_beasts.character_sheet.tab.record");
-
-        final String key;
-        Tab(String key) { this.key = key; }
+    /** The open page's rect, as {@code {x, y, w, h}}: one definition for drawing, clicking and scrolling. */
+    private int[] contentRect() {
+        return new int[] {contentX(), columnsTop(), contentW(), columnsBottom() - columnsTop()};
     }
 
-    private Tab activeTab = Tab.ATTRIBUTES;
-
-    /**
-     * Screen to hand back to when the inventory key is pressed, or null when the sheet was
-     * opened some other way (the {@code C} keybind, a server packet). Only set when the
-     * sheet was reached from the inventory, so {@code E} returns you exactly where you were
-     * instead of dumping you into the world.
-     */
-    private final @Nullable Screen returnTo;
-
-    // Tab instances (content renderers)
-    private final CharacterTab attributesTab = new AttributesTab();
-    private final CharacterTab skillsTab     = new SkillsTab();
-    private final CharacterTab spellsTab     = new SpellsTab();
-    private final CharacterTab recordTab     = new RecordTab();
-
-    // Viewport widget
-    private final PlayerModelViewport viewport = new PlayerModelViewport();
-
-    // Cached screen origin (clamped) and shrink factor for small screens
-    private int bgX, bgY;
-    private float guiScale = 1.0f;
-
-    // One-time PREVIEW debug log flag
-    private boolean previewLogged;
-
-    public CharacterSheetScreen() {
-        this(null);
+    /** Rail entry {@code i}'s top edge. */
+    private int railRowY(int i) {
+        return columnsTop() + i * (RAIL_ROW_H + RAIL_ROW_GAP);
     }
 
-    /** @param returnTo screen the inventory key hands back to, or null to just close. */
-    public CharacterSheetScreen(@Nullable Screen returnTo) {
-        super(Component.translatable("gui.wizards_and_beasts.character_sheet.title"));
-        this.returnTo = returnTo;
+    @NonNull
+    private CharacterTab page() {
+        return pages.get(activeTab);
     }
 
-    @Override
-    protected void init() {
-        // Layout.fit, not Layout.panel. panel() magnifies to 1.35x on a large window, and since
-        // everything here is text that magnified the font too — the sheet's labels came out a third
-        // larger than the inventory's, which is the screen a player compares it against. fit()
-        // never upscales, so the text is exactly the size vanilla draws at, and still shrinks the
-        // sheet to fit a small window.
-        GuiScaleHelper.Layout layout = GuiScaleHelper.Layout.fit(width, height, BG_W, BG_H);
-        guiScale = layout.scale();
-        bgX = layout.panelX();
-        bgY = layout.panelY();
-
-        // Probe the bespoke tab art once per open rather than three times a frame. A pack that
-        // overrides this namespace without shipping panel.png would otherwise paint the whole tab
-        // row in the missing-texture checkerboard.
-        CharacterSheetTextures.refresh();
-
-        if (ModuleManager.isPreview(Module.CHARACTER_SHEET) && !previewLogged) {
-            LOGGER.debug("[W&B] CharacterSheetScreen opened in PREVIEW mode.");
-            previewLogged = true;
-        }
-    }
+    // ── drawing ────────────────────────────────────────────────────────────
 
     @Override
     public void render(@NonNull GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        // Dim background is drawn by the framework's own renderBackground() call (overridden
-        // below); calling it again here would draw twice.
+        // Dim background is drawn by the framework's own renderBackground() call (overridden below); calling it
+        // again here would draw twice.
 
-        // All panel drawing anchors at (bgX, bgY), so a transform that keeps that
-        // point fixed while scaling lets the existing design-space code run unchanged.
+        // All panel drawing anchors at (bgX, bgY), so a transform that keeps that point fixed while scaling lets
+        // the design-space code run unchanged.
         var pose = g.pose();
         pose.pushMatrix();
         pose.translate(bgX * (1.0f - guiScale), bgY * (1.0f - guiScale));
         pose.scale(guiScale, guiScale);
 
-        // The sheet's background is the shared theme panel rather than the fixed 320x240
-        // `character_sheet/background.png` it used to blit. That art could only ever be one size;
-        // the theme panel tiles its parchment and is exact at any size.
         McStylePanel.drawThemedPanel(g, bgX, bgY, BG_W, BG_H);
-
-        // Title bar
         renderTitleBar(g);
 
-        // Column rules
-        g.fill(identityX() - COL_GAP / 2, columnsTop(), identityX() - COL_GAP / 2 + 1,
-                columnsBottom(), COLOR_DIVIDER);
-        g.fill(contentX() - COL_GAP / 2, columnsTop(), contentX() - COL_GAP / 2 + 1,
-                columnsBottom(), COLOR_DIVIDER);
+        g.fill(railX() - COL_GAP / 2, columnsTop(), railX() - COL_GAP / 2 + 1, columnsBottom(), COLOR_DIVIDER);
+        g.fill(contentX() - COL_GAP / 2, columnsTop(), contentX() - COL_GAP / 2 + 1, columnsBottom(), COLOR_DIVIDER);
 
-        // Figure column (viewport look-at uses design-space mouse)
+        int designX = (int) toDesignX(mouseX);
+        int designY = (int) toDesignY(mouseY);
         renderFigureColumn(g, partialTick, (float) toDesignX(mouseX), (float) toDesignY(mouseY));
-
-        // Identity column — unchanging facts, so they never compete with the tabs
-        renderIdentityColumn(g);
-
-        // Content column (hover tests run in design space)
-        renderRightColumn(g, (int) toDesignX(mouseX), (int) toDesignY(mouseY), partialTick);
+        renderRail(g, designX, designY);
+        int[] r = contentRect();
+        page().render(g, r[0], r[1], r[2], r[3], designX, designY, partialTick);
 
         pose.popMatrix();
 
-        // Outside the scale transform on purpose. The framework draws a deferred tooltip after the
-        // whole screen, in screen space; a card positioned inside the pose above would be placed at
-        // design-space coordinates on a screen-space canvas and only land correctly at scale 1.0.
-        List<Component> tooltip = activeTabRenderer().consumeTooltip();
+        // Outside the scale transform on purpose. The framework draws a deferred tooltip after the whole screen, in
+        // screen space; a card positioned inside the pose above would land correctly only at scale 1.0.
+        List<Component> tooltip = page().consumeTooltip();
+        if (tooltip == null || tooltip.isEmpty()) {
+            tooltip = railTooltip;
+        }
         if (tooltip != null && !tooltip.isEmpty()) {
-            g.setTooltipForNextFrame(minecraft.font, tooltip, java.util.Optional.empty(),
-                    mouseX, mouseY);
+            g.setTooltipForNextFrame(minecraft.font, tooltip, java.util.Optional.empty(), mouseX, mouseY);
         }
 
         super.render(g, mouseX, mouseY, partialTick);
@@ -271,41 +294,28 @@ public final class CharacterSheetScreen extends Screen {
         return bgY + (screenY - bgY) / guiScale;
     }
 
-    // ── Title bar ──────────────────────────────────────────────────────────
-
     private void renderTitleBar(@NonNull GuiGraphics g) {
         Font font = minecraft.font;
-
-        // Written on the sheet rather than on a bar painted over it: a dark title strip across the
-        // top would cover the frame's own rules.
+        // Written on the sheet rather than on a bar painted over it: a dark title strip across the top would cover
+        // the frame's own rules.
         g.drawString(font, this.title.getString(), bgX + FRAME_PAD, bgY + TITLE_TEXT_Y, COLOR_TITLE, false);
-
-        String playerName = minecraft.player != null
-                ? minecraft.player.getName().getString() : "";
+        String playerName = minecraft.player != null ? minecraft.player.getName().getString() : "";
         int nameW = font.width(playerName);
-        g.drawString(font, playerName, bgX + BG_W - FRAME_PAD - nameW, bgY + TITLE_TEXT_Y,
-                COLOR_TITLE_SUB, false);
+        g.drawString(font, playerName, bgX + BG_W - FRAME_PAD - nameW, bgY + TITLE_TEXT_Y, COLOR_TITLE_SUB, false);
         McStylePanel.drawDivider(g, bgX + FRAME_PAD, bgY + TITLE_RULE_Y, BG_W - 2 * FRAME_PAD);
     }
 
-    // ── Left column ────────────────────────────────────────────────────────
-
     /**
-     * The figure and the two readouts that describe its condition right now.
-     *
-     * <p>Vitals live here rather than with the identity facts on purpose: health and XP are things
-     * about the body standing in the viewport, and they change while you watch. Heritage does not.
+     * The figure and the two readouts that describe its condition right now. Vitals live here rather than on a
+     * page: health and XP are things about the body standing in the viewport, and they change while you watch.
      */
-    private void renderFigureColumn(@NonNull GuiGraphics g, float partialTick,
-                                    float mouseX, float mouseY) {
-        LocalPlayer player = minecraft.player;
-        if (!(player instanceof LocalPlayer lp)) return;
-
+    private void renderFigureColumn(@NonNull GuiGraphics g, float partialTick, float mouseX, float mouseY) {
+        if (!(minecraft.player instanceof LocalPlayer lp)) return;
         int colX = figureX();
         int top = columnsTop();
 
-        // Portrait aspect: a player is 0.6 blocks wide by 1.8 tall, so a near-square box spends
-        // most of itself on empty black either side of the figure.
+        // Portrait aspect: a player is 0.6 blocks wide by 1.8 tall, so a near-square box spends most of itself on
+        // empty black either side of the figure.
         int vpH = columnsBottom() - top - (WizardsMetrics.LINE_SECTION * 2) - DIVIDER_PAD * 2;
         viewport.render(g, colX, top, FIGURE_W, vpH, partialTick, lp, mouseX, mouseY);
 
@@ -317,251 +327,78 @@ public final class CharacterSheetScreen extends Screen {
                 lp.experienceLevel, lp.experienceProgress);
     }
 
-    /** Heritage and the active effects: true of the character regardless of which tab is open. */
-    private void renderIdentityColumn(@NonNull GuiGraphics g) {
-        int colX = identityX();
-        int y = columnsTop();
-
-        HeritageBlockWidget.draw(g, colX, y, IDENTITY_W);
-        y += HeritageBlockWidget.height() + DIVIDER_PAD;
-
-        McStylePanel.drawDivider(g, colX, y, IDENTITY_W);
-        y += WizardsMetrics.DIVIDER_H;
-
-        renderActiveEffects(g, colX, y, IDENTITY_W);
-    }
-
-    private void renderActiveEffects(@NonNull GuiGraphics g, int x, int y, int w) {
-        if (minecraft.player == null) return;
+    /**
+     * The page rail: one entry per page, icon and full name, the open one raised. Hovering an entry says what the
+     * page holds, so a player can find "where do I see my wand's bond" without opening every page.
+     */
+    private void renderRail(@NonNull GuiGraphics g, int mouseX, int mouseY) {
         Font font = minecraft.font;
-
-        g.drawString(font, Component.translatable(
-                "gui.wizards_and_beasts.character_sheet.effects").getString(),
-                x, y, COLOR_EFFECT_TXT, false);
-        y += WizardsMetrics.LINE_BODY;
-
-        Collection<MobEffectInstance> effects = minecraft.player.getActiveEffects();
-        if (effects.isEmpty()) {
-            // Said explicitly rather than left blank: an empty region under a divider reads as a
-            // panel that failed to draw, not as a character who happens to have no effects.
-            g.drawString(font, Component.translatable(
-                    "gui.wizards_and_beasts.character_sheet.effects.none").getString(),
-                    x, y, COLOR_EFFECT_MORE, false);
-            return;
-        }
-
-        List<MobEffectInstance> list = new ArrayList<>(effects);
-        int shown = Math.min(list.size(), MAX_EFFECTS_SHOWN);
-
-        for (int i = 0; i < shown; i++) {
-            drawEffectRow(g, font, x, y + i * EFFECT_ROW_H, w, list.get(i));
-        }
-        if (list.size() > MAX_EFFECTS_SHOWN) {
-            int remainder = list.size() - MAX_EFFECTS_SHOWN;
-            g.drawString(font, Component.translatable(
-                    "gui.wizards_and_beasts.character_sheet.effects.more", remainder).getString(),
-                    x, y + shown * EFFECT_ROW_H,
-                    COLOR_EFFECT_MORE, false);
-        }
-    }
-
-    /**
-     * One effect: its name, and how long is left.
-     *
-     * <p>These were nine-slice chips, which could not work at this size — {@code PANEL} carries a
-     * 3px border, so an 8px-tall chip is 6px of border around 2px of middle, and the label was drawn
-     * on top of the frame rather than inside it. The result read as an empty text field stretched
-     * across the column whatever the effect was called. Rows now match the heritage block directly
-     * above them, which is the same shape of information: flat text, no box.
-     *
-     * <p>Colour carries the one thing a chip never did — whether the effect is doing you a favour.
-     */
-    private void drawEffectRow(@NonNull GuiGraphics g, @NonNull Font font,
-                               int x, int y, int w, @NonNull MobEffectInstance fx) {
-        MobEffect effect = fx.getEffect().value();
-
-        String name = Component.translatable(effect.getDescriptionId()).getString();
-        if (fx.getAmplifier() > 0) {
-            name = name + " " + roman(fx.getAmplifier() + 1);
-        }
-
-        String duration = formatDuration(fx);
-        int durW = font.width(duration);
-
-        // Shrunk to fit rather than chopped mid-word, which is what plainSubstrByWidth did to
-        // every effect name longer than the column ("Fire Resistan").
-        GuiText.drawFitted(g, font, name, x, y, w - durW - 3, effectColor(effect));
-        g.drawString(font, duration, x + w - durW, y, COLOR_EFFECT_MORE, false);
-    }
-
-    /** Beneficial reads warm, harmful reads hot, neutral stays the column's own ink. */
-    private static int effectColor(@NonNull MobEffect effect) {
-        return switch (effect.getCategory()) {
-            case BENEFICIAL -> COLOR_EFFECT_GOOD;
-            case HARMFUL    -> COLOR_EFFECT_BAD;
-            case NEUTRAL    -> COLOR_EFFECT_TXT;
-        };
-    }
-
-    /** {@code m:ss}, or {@code ∞} for the effects that do not run out. */
-    @NonNull
-    private static String formatDuration(@NonNull MobEffectInstance fx) {
-        if (fx.isInfiniteDuration()) return "∞";
-        int seconds = fx.getDuration() / 20;
-        return seconds / 60 + ":" + String.format(java.util.Locale.ROOT, "%02d", seconds % 60);
-    }
-
-    /**
-     * Level numeral. Vanilla's {@code potion.potency.N} keys only ship for 1–5, and mod effects
-     * are not bound by that, so the numeral is built rather than looked up.
-     */
-    @NonNull
-    private static String roman(int value) {
-        if (value < 1 || value > 3999) return Integer.toString(value);
-        int[] nums = {1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1};
-        String[] sym = {"M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"};
-        StringBuilder out = new StringBuilder();
-        for (int i = 0; i < nums.length; i++) {
-            while (value >= nums[i]) {
-                value -= nums[i];
-                out.append(sym[i]);
-            }
-        }
-        return out.toString();
-    }
-
-    // ── Right column ───────────────────────────────────────────────────────
-
-    /**
-     * The active tab's content rect, as {@code {x, y, w, h}}.
-     *
-     * <p>Rendering and the scroll hit-test each computed this themselves and had already
-     * drifted apart — the hit-test used {@code bgX + LEFT_W + 3} against a render origin of
-     * {@code bgX + LEFT_W + 5} — so the top two pixels of the content scrolled the sheet
-     * rather than the tab. One definition now serves both.
-     */
-    private int[] contentRect() {
-        int top = columnsTop() + TAB_H + DIVIDER_PAD;
-        return new int[] {
-            contentX(),
-            top,
-            contentW(),
-            columnsBottom() - top,
-        };
-    }
-
-    private void renderRightColumn(@NonNull GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        // Tab buttons row
-        renderTabButtons(g, contentX(), columnsTop(), contentW(), mouseX, mouseY);
-
-        // Content area below tabs.
-        //
-        // The 2px inset this used to carry was narrower than the backdrop's own frame:
-        // `gui_chrome.dossier_backdrop` draws its rules and corner brackets out to 6px from
-        // the sheet edge, so attribute cards and their text landed on top of the border and
-        // the right-hand column read as clipped. The outer edges now clear the frame; the
-        // inner edge only has to clear the column divider, so it stays tighter.
-        int[] r = contentRect();
-        activeTabRenderer().render(g, r[0], r[1], r[2], r[3], mouseX, mouseY, partialTick);
-    }
-
-    private void renderTabButtons(@NonNull GuiGraphics g, int x, int y, int w,
-                                  int mouseX, int mouseY) {
-        Font font = minecraft.font;
-        Tab[] tabs = Tab.values();
-        int tabW = w / tabs.length;
-
+        railTooltip = null;
+        SheetTab[] tabs = SheetTab.values();
+        int x = railX();
         for (int i = 0; i < tabs.length; i++) {
-            Tab tab  = tabs[i];
-            int tx   = x + i * tabW;
-            int tw   = (i == tabs.length - 1) ? w - i * tabW : tabW;
-            boolean active  = tab == activeTab;
-            boolean hovered = mouseX >= tx && mouseX < tx + tw
-                           && mouseY >= y && mouseY < y + TAB_H;
+            SheetTab tab = tabs[i];
+            int y = railRowY(i);
+            boolean active = tab == activeTab;
+            boolean hovered = mouseX >= x && mouseX < x + RAIL_W && mouseY >= y && mouseY < y + RAIL_ROW_H;
 
-            CharacterSheetTextures.drawPanel(g, tx, y, tw, TAB_H, active, hovered);
+            CharacterSheetTextures.drawPanel(g, x, y, RAIL_W, RAIL_ROW_H, active, hovered);
+            SheetIcons.draw(g, tab, x + RAIL_ICON_X, y + (RAIL_ROW_H - SheetIcons.SIZE) / 2);
+            // Ellipsised, never shrunk: the rail is sized for the English names; a longer translation shortens
+            // and the hover card carries the full name.
+            GuiText.drawFitted(g, font, tab.label().getString(), x + RAIL_LABEL_X, y + (RAIL_ROW_H - 8) / 2,
+                    RAIL_W - RAIL_LABEL_X - 4, active ? COLOR_TAB_TXT : COLOR_TAB_TXT_IDLE);
 
-            // Shrink rather than spill: the tabs share the right column, so a longer
-            // translation of "Attributes" would otherwise run out over its neighbours.
-            String label = Component.translatable(tab.key).getString();
-            GuiText.drawFittedCentered(g, font, label, tx + 2, y + 3, tw - 4,
-                    active ? COLOR_TAB_TXT : COLOR_TAB_TXT_IDLE);
-
-            // A tab whose data comes from a PREVIEW module is marked, so a player reading half-
-            // finished numbers knows they are half-finished rather than wrong. A corner dot rather
-            // than a word: the tabs already share one column and the labels already shrink to
-            // fit, so there is no room for a badge that spends horizontal space.
-            if (isPreviewSourced(tab)) {
-                g.fill(tx + tw - 4, y + 2, tx + tw - 2, y + 4, COLOR_PREVIEW_DOT);
+            // A page whose data comes from a PREVIEW module is marked, so a player reading half-finished numbers
+            // knows they are half-finished rather than wrong.
+            if (tab.previewSourced()) {
+                g.fill(x + RAIL_W - 4, y + 2, x + RAIL_W - 2, y + 4, COLOR_PREVIEW_DOT);
+            }
+            if (hovered) {
+                railTooltip = List.of(tab.label(), tab.description());
             }
         }
     }
 
-    /**
-     * Whether this tab is showing data owned by a module that has not shipped as finished.
-     *
-     * <p>Read live from {@link ModuleManager} rather than hardcoded, so a server that promotes
-     * {@code PLAYER_STATS} out of PREVIEW stops marking the tab without a client change — and one
-     * that demotes it starts marking it.
-     */
-    private static boolean isPreviewSourced(Tab tab) {
-        return switch (tab) {
-            case ATTRIBUTES -> ModuleManager.isPreview(Module.PLAYER_STATS);
-            case SKILLS -> ModuleManager.isPreview(Module.SKILL_TREES);
-            case SPELLS -> ModuleManager.isPreview(Module.PROFICIENCY);
-            case RECORD -> ModuleManager.isPreview(Module.MINISTRY);
-        };
-    }
-
-    @NonNull
-    private CharacterTab activeTabRenderer() {
-        return switch (activeTab) {
-            case ATTRIBUTES -> attributesTab;
-            case SKILLS     -> skillsTab;
-            case SPELLS     -> spellsTab;
-            case RECORD     -> recordTab;
-        };
-    }
-
-    // ── Input handling ─────────────────────────────────────────────────────
+    // ── input ──────────────────────────────────────────────────────────────
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean isDoubleClick) {
         double mouseX = toDesignX(event.x());
         double mouseY = toDesignY(event.y());
-        int button = event.button();
-
-        // Check tab buttons
-        if (button == 0) {
-            int colX = contentX();
-            int colY = columnsTop();
-            int colW = contentW();
-            Tab[] tabs = Tab.values();
-            int tabW = colW / tabs.length;
-
+        if (event.button() == 0) {
+            SheetTab[] tabs = SheetTab.values();
+            int x = railX();
             for (int i = 0; i < tabs.length; i++) {
-                int tx = colX + i * tabW;
-                int tw = (i == tabs.length - 1) ? colW - i * tabW : tabW;
-                if (mouseX >= tx && mouseX < tx + tw
-                        && mouseY >= colY && mouseY < colY + TAB_H) {
-                    activeTab = tabs[i];
+                int y = railRowY(i);
+                if (mouseX >= x && mouseX < x + RAIL_W && mouseY >= y && mouseY < y + RAIL_ROW_H) {
+                    select(tabs[i]);
                     return true;
                 }
             }
         }
-
+        int[] r = contentRect();
+        if (mouseX >= r[0] && mouseX < r[0] + r[2] && mouseY >= r[1] && mouseY < r[1] + r[3]
+                && page().mouseClicked(mouseX, mouseY, event.button())) {
+            return true;
+        }
         return super.mouseClicked(event, isDoubleClick);
     }
 
     /**
-     * Closes on the inventory key as well as Escape, mirroring
-     * {@code AbstractContainerScreen#keyPressed}. Reached from the inventory, {@code E} hands
-     * you back to it rather than closing out to the world — the sheet is a tab off the
-     * inventory, so the key that opened it should also step back out of it.
+     * Up and down step through the pages, so the sheet can be read without the mouse. Closes on the inventory key
+     * as well as Escape, mirroring {@code AbstractContainerScreen#keyPressed}: reached from the inventory, {@code E}
+     * hands you back to it rather than closing out to the world.
      */
     @Override
     public boolean keyPressed(@NonNull KeyEvent event) {
         if (super.keyPressed(event)) return true;
+        if (event.key() == GLFW.GLFW_KEY_DOWN || event.key() == GLFW.GLFW_KEY_UP) {
+            SheetTab[] tabs = SheetTab.values();
+            int step = event.key() == GLFW.GLFW_KEY_DOWN ? 1 : tabs.length - 1;
+            select(tabs[(activeTab.ordinal() + step) % tabs.length]);
+            return true;
+        }
         if (minecraft != null
                 && minecraft.options.keyInventory.isActiveAndMatches(InputConstants.getKey(event))) {
             if (returnTo != null) {
@@ -575,29 +412,22 @@ public final class CharacterSheetScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY,
-                                 double scrollX, double scrollY) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         double dmx = toDesignX(mouseX);
         double dmy = toDesignY(mouseY);
-
-        // The wheel scrolls tab content and nothing else. It used to zoom the player preview,
-        // which let the figure be resized out of the framing the columns are composed around —
-        // and put a zoom control on a read-only sheet where nothing else is adjustable.
-
-        // Tab content scroll
+        // The wheel scrolls page content and nothing else. It used to zoom the player preview, which let the figure
+        // be resized out of the framing the columns are composed around.
         int[] r = contentRect();
-        int contentX = r[0], contentY = r[1], contentW = r[2], contentH = r[3];
-        if (dmx >= contentX && dmx < contentX + contentW
-                && dmy >= contentY && dmy < contentY + contentH) {
-            return activeTabRenderer().mouseScrolled(dmx, dmy, scrollY);
+        if (dmx >= r[0] && dmx < r[0] + r[2] && dmy >= r[1] && dmy < r[1] + r[3]) {
+            return page().mouseScrolled(dmx, dmy, scrollY);
         }
         return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        // Deliberately no blur pass: the parchment sheet reads better over a crisp world.
-        // Dim overlay only.
+        // Deliberately no blur pass: the parchment sheet reads better over a crisp world. Dim overlay only. (In
+        // 1.21.11 the framework calls this before render(), and blurring twice a frame throws — see lessons.md.)
         renderMenuBackground(g);
     }
 

@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.client.gui.widget;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
+import at.koopro.wizardsandbeasts.client.gui.ui.UiSurface;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.Mth;
 import org.jspecify.annotations.Nullable;
@@ -186,6 +187,32 @@ public final class ScrollList {
             return;
         }
         McStylePanel.drawScrollbar(graphics, trackLeft, y, height, thumbTop(), thumbHeight());
+    }
+
+    /**
+     * The bar on any {@link UiSurface}: a skin's sprites, the parchment theme's, or — on the night card,
+     * which has no sprite set — a recessed well with a gilt thumb lit on its top-left like the card's edge.
+     */
+    public void renderScrollbar(GuiGraphics graphics, UiSurface surface) {
+        if (surface.skin() != null) {
+            renderScrollbar(graphics, surface.skin());
+            return;
+        }
+        if (!surface.dark()) {
+            renderScrollbar(graphics);
+            return;
+        }
+        int left = x + width - WizardsMetrics.SCROLLBAR_W + 2;
+        int right = x + width - 2;
+        graphics.fill(left, y, right, y + height, surface.well());
+        if (!scrollable()) {
+            return;
+        }
+        int top = thumbTop();
+        int bottom = top + thumbHeight();
+        graphics.fill(left, top, right, bottom, WizardsPalette.GILT_DARK);
+        graphics.fill(left, top, right - 1, top + 1, WizardsPalette.GILT);
+        graphics.fill(left, top, left + 1, bottom - 1, WizardsPalette.GILT);
     }
 
     private int thumbHeight() {

@@ -1,5 +1,9 @@
 package at.koopro.wizardsandbeasts.client.spell.gui;
 
+import at.koopro.wizardsandbeasts.client.gui.ui.Ui;
+import at.koopro.wizardsandbeasts.client.gui.ui.UiSurface;
+import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
+
 import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellDataState;
 import at.koopro.wizardsandbeasts.client.spell.ui.SpellPowerTooltip;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
@@ -101,12 +105,15 @@ public final class SpellMenuRenderHelper {
                                  int x, int y, int w, int h,
                                  boolean hovered, boolean selected, int iconSize) {
         if (entry.spell() == null) {
-            String catName = entry.category().name().replace('_', ' ');
+            // The category's translated name, not its enum constant: "DARK ARTS" in capitals was the
+            // constant with its underscore swapped out, a debug readout.
             // Category hues were chosen for a dark ground — UTILITY's 0x44FF44 is 1.4 : 1 on paper.
             // Contrast-clamped, so the hue survives but reads.
-            graphics.drawString(font, catName, x + WizardsAndBeastsUiTokens.SpellMenu.CATEGORY_X_OFFSET,
-                    y + WizardsAndBeastsUiTokens.SpellMenu.ENTRY_TEXT_Y_OFFSET,
-                    UiContrast.readableOn(entry.category().getColor(), WELL_GROUND), false);
+            int hue = UiContrast.readableOn(entry.category().getColor(), WELL_GROUND);
+            graphics.drawString(font, categoryName(entry.category()),
+                    x + WizardsAndBeastsUiTokens.SpellMenu.CATEGORY_X_OFFSET,
+                    y + WizardsAndBeastsUiTokens.SpellMenu.ENTRY_TEXT_Y_OFFSET, hue, false);
+            graphics.fill(x, y + h - 3, x + w, y + h - 2, (0x60 << 24) | (hue & 0xFFFFFF));
             return;
         }
 
@@ -131,20 +138,22 @@ public final class SpellMenuRenderHelper {
                 x + 1, y + (h - iconSize) / 2, iconSize, iconSize,
                 comingSoon ? ALPHA_COMING_SOON : 1.0f);
 
+        // The name gets what the status on the right leaves it, and is shortened with an ellipsis
+        // rather than run under it: a long name used to print straight through the status tag.
+        Component soonTag = Component.translatable("gui.wizards_and_beasts.spell.coming_soon_short");
+        int statusW = comingSoon ? Ui.chipWidth(font, soonTag) + 2 : WizardsAndBeastsUiTokens.SpellMenu.COOLDOWN_X_OFFSET;
+        int nameX = x + iconSize + 4;
         graphics.drawString(font,
-                at.koopro.wizardsandbeasts.client.gui.util.GuiText.resolve(spell.getDisplayName()),
-                x + iconSize + 4, y + WizardsAndBeastsUiTokens.SpellMenu.ENTRY_TEXT_Y_OFFSET,
+                UiText.fit(font, at.koopro.wizardsandbeasts.client.gui.util.GuiText.resolve(spell.getDisplayName()),
+                        x + w - statusW - 2 - nameX),
+                nameX, y + WizardsAndBeastsUiTokens.SpellMenu.ENTRY_TEXT_Y_OFFSET,
                 comingSoon ? WizardsPalette.PAGE_INK_3
                         : UiContrast.readableOn(spell.getCategory().getColor(), card),
                 false);
 
         if (comingSoon) {
-            String tag = net.minecraft.network.chat.Component
-                    .translatable("gui.wizards_and_beasts.spell.coming_soon").getString();
-            graphics.drawString(font, tag,
-                    x + w - font.width(tag) - 2,
-                    y + WizardsAndBeastsUiTokens.SpellMenu.ENTRY_TEXT_Y_OFFSET,
-                    WizardsPalette.PAGE_INK_3, false);
+            Ui.chip(graphics, font, UiSurface.PAGE, x + w - Ui.chipWidth(font, soonTag) - 2,
+                    y + (h - Ui.CHIP_H) / 2, soonTag, Ui.Tone.MUTED);
             return;
         }
 
@@ -172,6 +181,12 @@ public final class SpellMenuRenderHelper {
         graphics.drawString(font, indicator,
                 x + w - WizardsAndBeastsUiTokens.SpellMenu.PROF_X_OFFSET,
                 y + WizardsAndBeastsUiTokens.SpellMenu.ENTRY_TEXT_Y_OFFSET, profColor, false);
+    }
+
+    /** A spell category as a player reads it. */
+    static Component categoryName(at.koopro.wizardsandbeasts.spell.core.SpellCategory category) {
+        return Component.translatable("spell_category.wizards_and_beasts."
+                + category.name().toLowerCase(java.util.Locale.ROOT));
     }
 
     /**
@@ -204,7 +219,7 @@ public final class SpellMenuRenderHelper {
         graphics.drawString(font, GuiText.resolve(sel.getDisplayName()), infoX, infoY,
                 UiContrast.readableOn(sel.getCategory().getColor(), WELL_GROUND), false);
 
-        graphics.drawString(font, sel.getCategory().name().replace('_', ' '), infoX,
+        graphics.drawString(font, categoryName(sel.getCategory()), infoX,
                 infoY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_CATEGORY_Y),
                 WizardsPalette.PAGE_INK_2, false);
 

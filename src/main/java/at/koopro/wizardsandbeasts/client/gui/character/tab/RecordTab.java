@@ -81,6 +81,8 @@ public final class RecordTab implements CharacterTab {
         // character that survive the Ministry module being switched off. Only the criminal file below
         // depends on the Trace running.
         cy = drawStandingSection(g, font, cx, cy, innerW);
+        // Where the wizard is known beyond the Ministry: their profession and the places that keep a standing.
+        cy = PlacesSection.draw(g, font, cx, cy, innerW);
 
         if (!ClientMinistryRecordState.traceActive()) {
             // An empty record and a switched-off Ministry look identical from the data alone, and a player
@@ -184,6 +186,17 @@ public final class RecordTab implements CharacterTab {
         }
 
         finish(g, x, y, w, h, cy, top);
+    }
+
+    /** Places only reach the client on request; the career view the profession row reads is asked for too. */
+    @Override
+    public void onShown() {
+        PlacesSection.request();
+        if (Minecraft.getInstance().getConnection() != null) {
+            net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(
+                    new at.koopro.wizardsandbeasts.network.career.CareerActionC2SPayload(
+                            at.koopro.wizardsandbeasts.network.career.CareerActionC2SPayload.Action.VIEW, ""));
+        }
     }
 
     @Override
@@ -293,7 +306,7 @@ public final class RecordTab implements CharacterTab {
      * is far too light for the page, so the tones are restated here: the same hue ladder, green through
      * ochre to red, each dark enough to clear AA on the sheet.
      */
-    private static int bandColor(WantedLevel level) {
+    static int bandColor(WantedLevel level) {
         return switch (level) {
             case CLEAR -> WizardsPalette.PAGE_GOOD;
             case OF_INTEREST -> 0xFF5E4A0E;

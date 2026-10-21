@@ -1,13 +1,11 @@
 package at.koopro.wizardsandbeasts.client.gui.character.tab;
 
-import at.koopro.wizardsandbeasts.client.currency.state.ClientVaultDataState;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.character.StatIcons;
 import at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageDataState;
 import at.koopro.wizardsandbeasts.client.stats.ClientStatLevelUps;
 import at.koopro.wizardsandbeasts.client.stats.ClientStatsState;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
-import at.koopro.wizardsandbeasts.item.wand.WandItem;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.registry.ModAttributes;
@@ -15,22 +13,16 @@ import at.koopro.wizardsandbeasts.stats.PlayerStat;
 import at.koopro.wizardsandbeasts.stats.PlayerStatsData;
 import at.koopro.wizardsandbeasts.stats.PowerBandTable;
 import at.koopro.wizardsandbeasts.stats.StatReadout;
-import at.koopro.wizardsandbeasts.util.WandHelper;
-import at.koopro.wizardsandbeasts.wand.WandComponents;
-import at.koopro.wizardsandbeasts.wand.WandEligibility;
-import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -38,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-/** Attributes tab: player stats, attributes, wand panel, wand affinity panel, currency panel. */
+/** Attributes page: the five stats with what each is doing, then the attributes everything else adds up to. */
 public final class AttributesTab implements CharacterTab {
 
     private static final String KEY = "gui.wizards_and_beasts.character_sheet.";
@@ -62,11 +54,6 @@ public final class AttributesTab implements CharacterTab {
     private static final int COLOR_EFFECT_BAD  = WizardsPalette.PAGE_BAD;
     /** Clear space kept between a truncated label and its right-aligned value. */
     private static final int LABEL_VALUE_GAP = 4;
-    private static final int COLOR_ELIGIBLE   = WizardsPalette.PAGE_GOOD;
-    private static final int COLOR_INELIGIBLE = WizardsPalette.PAGE_BAD;
-    private static final int COLOR_REASON     = WizardsPalette.PAGE_RUBRIC;
-    private static final int COLOR_DETAIL     = WizardsPalette.PAGE_INK_3;
-    private static final int COLOR_WAND_NAME  = WizardsPalette.PAGE_INK;
 
     /** One attribute row: label line plus its bar. */
     private static final int ATTR_ROW_H = 12;
@@ -149,21 +136,10 @@ public final class AttributesTab implements CharacterTab {
         section(g, font, cx, cy, "attributes");
         cy += 10;
 
-        drawAttributeRows(g, player, cx, cy, innerW);
+        drawAttributeRows(g, player, cx, cy, innerW, mouseX, mouseY);
         cy += 6 * ATTR_ROW_H + 2;
-
-        // ── Wand panel ────────────────────────────────────────────────────
-        ItemStack heldStack = player.getMainHandItem();
-        if (heldStack.getItem() instanceof WandItem) {
-            cy = drawWandPanel(g, font, cx, cy, innerW, heldStack);
-        }
-
-        // ── Wand affinity panel ───────────────────────────────────────────
-        cy = drawWandAffinityPanel(g, font, cx, cy, innerW, player);
-
-        // ── Currency panel ────────────────────────────────────────────────
-        drawCurrencyPanel(g, font, cx, cy, innerW);
-        cy += 10 + 9 * 3;
+        // The wand and the vault used to follow here. They moved to the Wand page and the Identity page
+        // (2026-10-15): this page is what the character is made of, not what they carry.
 
         g.disableScissor();
 
@@ -420,7 +396,7 @@ public final class AttributesTab implements CharacterTab {
     }
 
     private void drawAttributeRows(@NonNull GuiGraphics g, @NonNull LocalPlayer player,
-                                    int x, int y, int w) {
+                                    int x, int y, int w, int mouseX, int mouseY) {
         record AttrRow(String name, double value, double min, double max) {}
 
         AttributeInstance health  = player.getAttribute(Attributes.MAX_HEALTH);
@@ -452,104 +428,40 @@ public final class AttributesTab implements CharacterTab {
         }
         RowGutters gut = gutters(font, x, w, labels, values);
 
+        AttributeInstance[] instances = {health, armor, speed, affin, corrupt, beast};
         for (int i = 0; i < cards.length; i++) {
             double range = cards[i].max() - cards[i].min();
             double frac = range > 0 ? (cards[i].value() - cards[i].min()) / range : 0;
-            drawMeterRow(g, font, x, y + i * ATTR_ROW_H, w, gut,
+            int rowY = y + i * ATTR_ROW_H;
+            drawMeterRow(g, font, x, rowY, w, gut,
                          labels.get(i), values.get(i), frac);
+            if (instances[i] != null && hovered(x - 2, rowY, w + 4, ATTR_ROW_H, mouseX, mouseY)) {
+                pendingTooltip = attributeTooltip(labels.get(i), instances[i]);
+            }
         }
+    }
+
+    /**
+     * Name, then where the number comes from: the base the character has, and what everything worn, held or
+     * cast on them adds — the two halves the bar alone cannot show.
+     */
+    @NonNull
+    private static List<Component> attributeTooltip(@NonNull String name, @NonNull AttributeInstance inst) {
+        double base = inst.getBaseValue();
+        double modifiers = inst.getValue() - base;
+        List<Component> lines = new ArrayList<>(3);
+        lines.add(Component.literal(name));
+        lines.add(Component.translatable(KEY + "attribute.base", formatAttr(base)));
+        if (Math.abs(modifiers) > 1.0e-4) {
+            lines.add(Component.translatable(KEY + "attribute.modifiers",
+                    (modifiers > 0 ? "+" : "-") + formatAttr(Math.abs(modifiers))));
+        }
+        return lines;
     }
 
     @NonNull
     private static String attrName(@NonNull Attribute attribute) {
         return Component.translatable(attribute.getDescriptionId()).getString();
-    }
-
-    private int drawWandPanel(@NonNull GuiGraphics g, @NonNull Font font,
-                              int x, int y, int w, @NonNull ItemStack stack) {
-        section(g, font, x, y, "wand");
-        y += 10;
-
-        @Nullable Identifier wood  = WandComponents.getWood(stack);
-        @Nullable Identifier core  = WandComponents.getCore(stack);
-        @Nullable WandFlexibility flex = WandComponents.getFlexibility(stack);
-        @Nullable Float length = WandComponents.getLength(stack);
-
-        drawKV(g, font, x, y, w, "wand.wood",        idToDisplay(wood));        y += 9;
-        drawKV(g, font, x, y, w, "wand.core",        idToDisplay(core));        y += 9;
-        drawKV(g, font, x, y, w, "wand.flexibility", flex != null ? flex.label().getString() : "—"); y += 9;
-        drawKV(g, font, x, y, w, "wand.length",      length != null ? String.format(Locale.ROOT, "%.1f\"", length) : "—"); y += 9;
-        // Words, as on the tooltip — the same sentences, from the same place.
-        drawKV(g, font, x, y, w, "wand.integrity",   WandEligibility.conditionLine(stack).getString());  y += 9;
-        drawKV(g, font, x, y, w, "wand.allegiance",
-                net.minecraft.client.Minecraft.getInstance().player == null ? "—"
-                        : WandEligibility.bondLine(net.minecraft.client.Minecraft.getInstance().player, stack).getString()); y += 11;
-        return y;
-    }
-
-    private int drawWandAffinityPanel(@NonNull GuiGraphics g, @NonNull Font font,
-                                      int x, int y, int w, @NonNull LocalPlayer player) {
-        section(g, font, x, y, "wand_affinity");
-        y += 10;
-
-        ItemStack wand = WandHelper.getWandStack(player);
-        if (wand.isEmpty()) {
-            g.drawString(font, Component.translatable("wandcraft.eligibility.no_wand").getString(),
-                    x, y, COLOR_LABEL, false);
-            return y + 11;
-        }
-
-        WandEligibility.Result result = WandEligibility.evaluate(player, wand);
-
-        String name = font.plainSubstrByWidth(wand.getHoverName().getString(), w);
-        g.drawString(font, name, x, y, COLOR_WAND_NAME, false);
-        y += 9;
-
-        String statusKey = result.eligible()
-                ? "wandcraft.eligibility.can_use" : "wandcraft.eligibility.cannot_use";
-        int statusColor = result.eligible() ? COLOR_ELIGIBLE : COLOR_INELIGIBLE;
-        g.drawString(font, Component.translatable(statusKey).getString(), x, y, statusColor, false);
-        y += 9;
-
-        if (!result.eligible() && result.reason() != null) {
-            g.drawString(font, font.plainSubstrByWidth(result.reason().getString(), w),
-                    x, y, COLOR_REASON, false);
-            y += 9;
-        }
-
-        for (@Nullable Component detail : new Component[]{
-                result.detailLine1(), result.detailLine2(), result.detailLine3()}) {
-            if (detail == null) continue;
-            g.drawString(font, font.plainSubstrByWidth(detail.getString(), w),
-                    x, y, COLOR_DETAIL, false);
-            y += 9;
-        }
-        return y + 2;
-    }
-
-    private void drawCurrencyPanel(@NonNull GuiGraphics g, @NonNull Font font,
-                                   int x, int y, int w) {
-        section(g, font, x, y, "currency");
-        y += 10;
-
-        long galleons = ClientVaultDataState.get().getGalleons();
-        long sickles  = ClientVaultDataState.get().getSickles();
-        long knuts    = ClientVaultDataState.get().getKnuts();
-
-        drawKV(g, font, x, y, w, "currency.galleons", String.valueOf(galleons)); y += 9;
-        drawKV(g, font, x, y, w, "currency.sickles",  String.valueOf(sickles));  y += 9;
-        drawKV(g, font, x, y, w, "currency.knuts",    String.valueOf(knuts));
-    }
-
-    /** @param labelId key suffix under {@code gui.wizards_and_beasts.character_sheet.} */
-    private static void drawKV(@NonNull GuiGraphics g, @NonNull Font font,
-                                int x, int y, int w,
-                                @NonNull String labelId, @NonNull String value) {
-        String key = Component.translatable(KEY + labelId).getString();
-        g.drawString(font, key + ":", x, y, COLOR_LABEL, false);
-        int kw = font.width(key + ": ");
-        String val = font.plainSubstrByWidth(value, w - kw);
-        g.drawString(font, val, x + kw, y, COLOR_VALUE, false);
     }
 
     private static double val(@Nullable AttributeInstance inst) {
@@ -560,12 +472,5 @@ public final class AttributesTab implements CharacterTab {
     private static String formatAttr(double v) {
         if (v == Math.floor(v)) return String.valueOf((long) v);
         return String.format(Locale.ROOT, "%.2f", v);
-    }
-
-    @NonNull
-    private static String idToDisplay(@Nullable Identifier id) {
-        if (id == null) return "—";
-        String path = id.getPath();
-        return Character.toUpperCase(path.charAt(0)) + path.substring(1).replace('_', ' ');
     }
 }
