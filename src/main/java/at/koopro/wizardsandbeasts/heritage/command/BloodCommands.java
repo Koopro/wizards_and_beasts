@@ -40,6 +40,7 @@ public final class BloodCommands {
                 .then(Commands.literal("get")
                         .executes(ctx -> get(ctx.getSource(), ctx.getSource().getPlayerOrException()))
                         .then(Commands.argument("player", EntityArgument.player())
+                                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                                 .executes(ctx -> get(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
                 .then(Commands.literal("set")
                         .requires(WizardsAndBeastsCommandPermissions.ADMIN)

@@ -53,6 +53,7 @@ public final class HeritageCommands {
                                 ctx.getSource(),
                                 ctx.getSource().getPlayerOrException()))
                         .then(Commands.argument("player", EntityArgument.player())
+                                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                                 .executes(ctx -> info(
                                         ctx.getSource(),
                                         EntityArgument.getPlayer(ctx, "player")))))
@@ -123,6 +124,7 @@ public final class HeritageCommands {
                                 .executes(ctx -> werewolfStatus(
                                         ctx.getSource(), ctx.getSource().getPlayerOrException()))
                                 .then(Commands.argument("player", EntityArgument.player())
+                                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                                         .executes(ctx -> werewolfStatus(
                                                 ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
                         // Testing aids. Admin-gated, and both are shortcuts through conditions the
