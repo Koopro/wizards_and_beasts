@@ -26,4 +26,12 @@ public enum BroomTier {
     public Component displayName() {
         return displayName;
     }
+
+    /**
+     * How many times a School broom's servicing this tier costs: a racing broom's bristles are dearer to set than a
+     * school broom's. Read by the broom servicing service ({@code location.ollivanders.BroomServicing}).
+     */
+    public int baseRepairCost() {
+        return baseRepairCost;
+    }
 }

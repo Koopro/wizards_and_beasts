@@ -24,6 +24,11 @@ public record PlayerApparitionPoints(List<ApparitionPoint> points) {
      * filled a list under the old flat cap loses anything.
      */
     public static final int MAX_POINTS = 12;
+    /**
+     * The one ceiling a capstone may lift: the Explorer's {@code seasoned_traveller} holds four more than
+     * {@link #MAX_POINTS}. Ordinary nodes still stop at {@link #MAX_POINTS} (see ApparitionAnchorCapacityTest).
+     */
+    public static final int SEASONED_CEILING = MAX_POINTS + 4;
 
     public static final PlayerApparitionPoints EMPTY = new PlayerApparitionPoints(List.of());
 
@@ -57,7 +62,7 @@ public record PlayerApparitionPoints(List<ApparitionPoint> points) {
 
     /** True when {@code capacity} destinations are already held. */
     public boolean isFull(int capacity) {
-        return points.size() >= Math.min(capacity, MAX_POINTS);
+        return isFull(capacity, MAX_POINTS);
     }
 
     /** Adds {@code point}, replacing any existing point with the same name. Returns {@code this} if full. */
@@ -71,9 +76,19 @@ public record PlayerApparitionPoints(List<ApparitionPoint> points) {
      * returns {@code this} unchanged.
      */
     public PlayerApparitionPoints with(ApparitionPoint point, int capacity) {
+        return with(point, capacity, MAX_POINTS);
+    }
+
+    /** True when {@code capacity} destinations, held to {@code ceiling}, are already held. */
+    public boolean isFull(int capacity, int ceiling) {
+        return points.size() >= Math.min(capacity, ceiling);
+    }
+
+    /** {@link #with(ApparitionPoint, int)} against an explicit hard ceiling (a capstone's). */
+    public PlayerApparitionPoints with(ApparitionPoint point, int capacity, int ceiling) {
         List<ApparitionPoint> next = new ArrayList<>(points);
         next.removeIf(existing -> existing.matches(point.name()));
-        if (next.size() >= Math.min(capacity, MAX_POINTS)) {
+        if (next.size() >= Math.min(capacity, ceiling)) {
             return this;
         }
         next.add(point);

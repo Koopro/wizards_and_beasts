@@ -43,12 +43,81 @@ public final class FlooAccess {
     private FlooAccess() {
     }
 
-    /** Every hearth {@code player} is allowed to know about, in list order. */
+    /**
+     * Every hearth in {@code player}'s address book, in list order — what the picker lists: the hearths they have
+     * found ({@link #isListed}).
+     */
     public static List<FlooRegistryEntry> visibleTo(ServerPlayer player, FlooNetworkManager manager) {
+        return manager.getAllEntries().stream()
+                .filter(e -> isListed(player, e))
+                .sorted(Comparator.comparing(e -> FlooAddress.key(e.networkAddress())))
+                .toList();
+    }
+
+    /**
+     * Every hearth {@code player} could reach if they named it — the address book plus every public hearth they
+     * have not found yet. What a misfire can throw them into: a wrong grate is not one you chose, which is how
+     * Harry met Borgin and Burkes.
+     */
+    public static List<FlooRegistryEntry> reachableBy(ServerPlayer player, FlooNetworkManager manager) {
         return manager.getAllEntries().stream()
                 .filter(e -> mayReach(player, e))
                 .sorted(Comparator.comparing(e -> FlooAddress.key(e.networkAddress())))
                 .toList();
+    }
+
+    /**
+     * Whether {@code entry} is in {@code player}'s address book.
+     *
+     * <p><b>Discovery.</b> The picker used to list every public hearth on the server to everyone, so the network was
+     * a menu, not a place you learn. Now a hearth is listed once the player has been there (arrived, or stood at it
+     * and lit it), owns it, administers the network, or it is a landmark — public and owned by nobody, the way an
+     * administrator or the world registers a civic hearth. A player's own public hearth is found by visiting it or
+     * by being told its name: speaking an address still reaches any public hearth ({@link #mayReach}), because in
+     * canon knowing the name is what the Floo needs.
+     */
+    public static boolean isListed(ServerPlayer player, FlooRegistryEntry entry) {
+        return isListed(entry.isLandmark(), entry.isOwnedBy(player.getUUID()),
+                hasVisited(player, entry.networkAddress()), isAdmin(player));
+    }
+
+    /** The listing rule as arithmetic, for the tests. */
+    public static boolean isListed(boolean isLandmark, boolean isOwner, boolean hasVisited, boolean isAdmin) {
+        return isLandmark || isOwner || hasVisited || isAdmin;
+    }
+
+    /** Puts {@code address} in {@code player}'s address book. */
+    public static void discover(ServerPlayer player, String address) {
+        java.util.Set<String> visited = player.getData(ModAttachments.FLOO_VISITED_DESTINATIONS.get());
+        String key = FlooAddress.key(address);
+        if (visited.contains(key)) {
+            return;
+        }
+        java.util.Set<String> next = new java.util.HashSet<>(visited);
+        next.add(key);
+        player.setData(ModAttachments.FLOO_VISITED_DESTINATIONS.get(), next);
+    }
+
+    /**
+     * The one-time migration for players who knew the network before discovery: their address book is seeded with
+     * every public hearth registered now, so nobody loses a destination they could already pick. A player new to the
+     * world starts with an empty book. Runs once per player ({@code TravelRecord.flooSeeded}).
+     */
+    public static void seedOnce(ServerPlayer player, boolean playedBefore) {
+        var record = player.getData(ModAttachments.TRAVEL_RECORD.get());
+        if (record.flooSeeded()) {
+            return;
+        }
+        if (playedBefore && player.level() instanceof net.minecraft.server.level.ServerLevel level) {
+            java.util.Set<String> next = new java.util.HashSet<>(player.getData(ModAttachments.FLOO_VISITED_DESTINATIONS.get()));
+            for (FlooRegistryEntry entry : FlooNetworkManager.get(level).getAllEntries()) {
+                if (entry.isPublic()) {
+                    next.add(FlooAddress.key(entry.networkAddress()));
+                }
+            }
+            player.setData(ModAttachments.FLOO_VISITED_DESTINATIONS.get(), next);
+        }
+        player.setData(ModAttachments.TRAVEL_RECORD.get(), record.withFlooSeeded());
     }
 
     /**
@@ -180,9 +249,14 @@ public final class FlooAccess {
     /** Open the travel or call picker at {@code hearth} for {@code player}. */
     public static void openPicker(ServerPlayer player, FlooNetworkManager manager,
                                   String hearthAddress, boolean headInFire) {
+        // Standing at a lit hearth is finding it: the grate you travel from is in your book from now on.
+        if (manager.getEntry(hearthAddress) != null) {
+            discover(player, hearthAddress);
+        }
         List<FlooDestinationDto> destinations = visibleTo(player, manager).stream()
                 .filter(e -> !FlooAddress.sameAddress(e.networkAddress(), hearthAddress))
-                .map(e -> new FlooDestinationDto(e.networkAddress(), e.dimension().toString(), e.isEnabled()))
+                .map(e -> new FlooDestinationDto(e.networkAddress(), e.dimension().toString(), e.isEnabled(),
+                        FlooTolls.owes(player, e) ? e.tollKnuts() : 0))
                 .toList();
         OpenFlooGuiS2CPayload.send(player, destinations, hearthAddress, headInFire);
     }

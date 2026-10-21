@@ -3,13 +3,13 @@ package at.koopro.wizardsandbeasts.floo;
 import at.koopro.wizardsandbeasts.Config;
 import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlock;
 import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlockEntity;
+import at.koopro.wizardsandbeasts.currency.billing.GringottsBilling;
+import at.koopro.wizardsandbeasts.currency.billing.MoneyFlow;
 import at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper;
-import at.koopro.wizardsandbeasts.currency.vault.PlayerVaultData;
 import at.koopro.wizardsandbeasts.feedback.NoticeKind;
 import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
-import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
 import net.minecraft.core.BlockPos;
@@ -39,8 +39,8 @@ import java.util.Optional;
  * <h2>Charged where it is charged</h2>
  * <p>The fee is taken in {@link #submit}, after every other refusal has passed and immediately before
  * the entry goes in — so a player refused for a taken address, an invalid one, or a hearth that is
- * not theirs pays nothing. All-or-nothing on the withdrawal: a partial payment is refunded rather
- * than pocketed, which matters because {@code withdrawSmartKnuts} will happily take what it can.
+ * not theirs pays nothing. The charge goes through {@code GringottsBilling}: all or nothing, so a short vault
+ * keeps every coin it had, and a registration that still fails after payment is refunded.
  *
  * <p>Free for creative and for this mod's admins, and free entirely when the Gringotts module is off.
  * A fee that cannot be paid is not a cost, it is a wall.
@@ -134,15 +134,8 @@ public final class FlooRegistrationService {
         }
 
         int fee = feeFor(player);
-        PlayerVaultData vault = player.getData(ModAttachments.VAULT_DATA.get());
-        if (fee > 0) {
-            long withdrawn = vault.withdrawSmartKnuts(fee);
-            if (withdrawn < fee) {
-                if (withdrawn > 0) {
-                    vault.depositKnuts(withdrawn); // never pocket a partial payment
-                }
-                return Outcome.CANNOT_AFFORD;
-            }
+        if (!GringottsBilling.charge(player, MoneyFlow.FLOO_REGISTRATION, fee)) {
+            return Outcome.CANNOT_AFFORD;
         }
 
         FlooNetworkManager.RegisterResult result = manager.register(
@@ -151,9 +144,7 @@ public final class FlooRegistrationService {
             // Should be unreachable - both refusals are checked above - but the fee has already been
             // taken, so the refund is not optional. A registration that fails silently and costs a
             // Galleon is the worst outcome this method has.
-            if (fee > 0) {
-                vault.depositKnuts(fee);
-            }
+            GringottsBilling.refund(player, MoneyFlow.FLOO_REGISTRATION, fee);
             return result == FlooNetworkManager.RegisterResult.ADDRESS_TAKEN
                     ? Outcome.ADDRESS_TAKEN
                     : Outcome.INVALID_ADDRESS;

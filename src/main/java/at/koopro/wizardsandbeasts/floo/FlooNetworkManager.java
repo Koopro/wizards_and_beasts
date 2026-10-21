@@ -31,25 +31,67 @@ public final class FlooNetworkManager extends SavedData {
                             .forGetter(d -> Map.copyOf(d.entries)),
                     Codec.STRING.listOf()
                             .optionalFieldOf("travelLog", List.of())
-                            .forGetter(d -> List.copyOf(d.travelLog))
+                            .forGetter(d -> List.copyOf(d.travelLog)),
+                    Codec.unboundedMap(Codec.STRING, Codec.LONG)
+                            .optionalFieldOf("uncollectedTolls", Map.of())
+                            .forGetter(d -> Map.copyOf(d.uncollectedTolls))
             ).apply(instance, FlooNetworkManager::ofCodec)));
 
     private final LinkedHashMap<String, FlooRegistryEntry> entries;
     private final LinkedList<String> travelLog;
+    /**
+     * Tolls earned by keepers who were offline when a traveller paid, by keeper UUID string. A vault is a player
+     * attachment and cannot be credited while its owner is away, so the money waits here and is paid in at their
+     * next login ({@code floo.FlooTolls#collect}). Never lost, never paid twice: the entry is removed as it is paid.
+     */
+    private final HashMap<String, Long> uncollectedTolls;
 
     public FlooNetworkManager() {
-        this(new LinkedHashMap<>(), new LinkedList<>());
+        this(new LinkedHashMap<>(), new LinkedList<>(), new HashMap<>());
     }
 
     private FlooNetworkManager(@NonNull LinkedHashMap<String, FlooRegistryEntry> entries,
-                                @NonNull LinkedList<String> travelLog) {
+                                @NonNull LinkedList<String> travelLog, @NonNull HashMap<String, Long> uncollected) {
         this.entries = entries;
         this.travelLog = travelLog;
+        this.uncollectedTolls = uncollected;
     }
 
     private static FlooNetworkManager ofCodec(@NonNull Map<String, FlooRegistryEntry> entries,
-                                               @NonNull List<String> log) {
-        return new FlooNetworkManager(new LinkedHashMap<>(entries), new LinkedList<>(log));
+                                               @NonNull List<String> log, @NonNull Map<String, Long> uncollected) {
+        return new FlooNetworkManager(new LinkedHashMap<>(entries), new LinkedList<>(log), new HashMap<>(uncollected));
+    }
+
+    /** Holds {@code knuts} of toll income for an offline keeper. */
+    public void holdToll(@NonNull UUID keeper, long knuts) {
+        if (knuts > 0) {
+            uncollectedTolls.merge(keeper.toString(), knuts, Long::sum);
+            setDirty();
+        }
+    }
+
+    /** Removes and returns the toll income held for {@code keeper}; 0 when there is none. */
+    public long takeHeldTolls(@NonNull UUID keeper) {
+        Long held = uncollectedTolls.remove(keeper.toString());
+        if (held != null) {
+            setDirty();
+        }
+        return held == null ? 0L : held;
+    }
+
+    /** Puts tolls back after a payout the vault refused (its ceiling), so they are not lost. */
+    public void returnHeldTolls(@NonNull UUID keeper, long knuts) {
+        holdToll(keeper, knuts);
+    }
+
+    /** Sets the toll on {@code address}. */
+    public void setToll(@NonNull String address, int knuts) {
+        String key = FlooAddress.key(address);
+        FlooRegistryEntry entry = entries.get(key);
+        if (entry != null) {
+            entries.put(key, entry.withToll(knuts));
+            setDirty();
+        }
     }
 
     public static FlooNetworkManager get(@NonNull ServerLevel level) {
@@ -120,7 +162,7 @@ public final class FlooNetworkManager extends SavedData {
                 ? previous.owner()
                 : owner;
         entries.put(key, new FlooRegistryEntry(FlooAddress.display(address), dimension, pos,
-                true, isPublic, effectiveOwner));
+                true, isPublic, effectiveOwner, previous == null ? 0 : previous.tollKnuts()));
         setDirty();
         return RegisterResult.REGISTERED;
     }

@@ -1,5 +1,8 @@
 package at.koopro.wizardsandbeasts.apparition.licence;
 
+import at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper;
+import at.koopro.wizardsandbeasts.location.Locations;
+import net.minecraft.resources.Identifier;
 import at.koopro.wizardsandbeasts.apparition.ApparitionRules;
 
 import at.koopro.wizardsandbeasts.ability.AbilityIds;
@@ -120,5 +123,39 @@ public final class ApparitionLicence {
         }
         PlayerAbilityHelper.setApparitionLicensed(player, true);
         return verdict;
+    }
+
+    /** The Ministry location whose examiners sit the test in person when it is open. */
+    public static final Identifier MINISTRY = Identifier.fromNamespaceAndPath("wizards_and_beasts", "ministry");
+
+    /**
+     * The test fee: the twelve Galleons the Ministry's Apparition course cost (<i>Half-Blood Prince</i>), charged by the
+     * Ministry's {@code apparition_test} service (its {@code fee_knuts}). Here for the Travel tab to quote.
+     */
+    public static final long TEST_FEE_KNUTS = 12L * CurrencyHelper.KNUTS_PER_GALLEON;
+
+    /**
+     * Whether the test is sat in person at the Ministry: its location is open on this server.
+     *
+     * <p><b>Fails open.</b> The Ministry location belongs to a module that ships switched off, and with it off there
+     * is no counter to sit the test at. Then the test is sat wherever the wizard stands, free — the behaviour before
+     * the Ministry examined in person — so a licence is never out of reach (see the class note).
+     */
+    public static boolean examinedAtMinistry() {
+        return Locations.open(MINISTRY) != null;
+    }
+
+    /**
+     * The test as sat away from a Ministry counter (the command, the Travel tab). Refused while the Ministry examines
+     * in person; otherwise exactly {@link #takeTest}.
+     */
+    public static Eligibility takeTestAway(ServerPlayer player) {
+        if (examinedAtMinistry()) {
+            Eligibility verdict = evaluate(player);
+            return verdict.eligible()
+                    ? Eligibility.no("apparition.wizards_and_beasts.test.deny.at_ministry")
+                    : verdict;
+        }
+        return takeTest(player);
     }
 }

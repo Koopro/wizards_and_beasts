@@ -36,6 +36,14 @@ public final class ApparitionChargeManager {
 
     /** Vanilla's sneak factor; moving faster than this fraction of your walk speed counts as moving. */
     private static final double SNEAK_SPEED_FACTOR = 0.3;
+    /**
+     * Blocks per tick walked per point of the movement-speed attribute on flat ground (default attribute
+     * 0.1 walks about 0.216 b/t). The attribute is not itself a speed in blocks: comparing it straight
+     * against a distance put the line at 0.03 b/t, below a sneak's ~0.065, so even sneaking counted as moving.
+     */
+    private static final double BLOCKS_PER_TICK_PER_SPEED = 2.16;
+    /** Headroom over exact sneak speed, so a sneak with a little momentum is still a sneak. */
+    private static final double SNEAK_HEADROOM = 1.25;
     /** Pack fullness above which the load itself destabilises the jump. */
     private static final double ENCUMBERED_FRACTION = 0.8;
     /** Food level at or below which a wizard is running on empty. Vanilla's own sprint threshold. */
@@ -133,6 +141,10 @@ public final class ApparitionChargeManager {
             return;
         }
 
+        if (charge.elapsed() % ApparitionRiskReadout.INTERVAL_TICKS == 0) {
+            ApparitionRiskReadout.show(player, destabilization(player, charge));
+        }
+
         ApparitionPhase after = charge.phase();
         if (after != before) {
             ApparitionBroadcast.get().onPhaseChange(player, charge.tier(), after,
@@ -206,9 +218,17 @@ public final class ApparitionChargeManager {
                 ApparitionServerLogic.isLicensed(player));
     }
 
+    /**
+     * Whether the wizard was moving faster than a sneak when they let go.
+     *
+     * <p>Reads the movement the client reported for its last tick ({@code getKnownMovement}), not the server
+     * entity's {@code getDeltaMovement}: a player moves itself, and the server-side velocity of a player is
+     * not its walking speed — it can hold stale knockback or nothing at all.
+     */
     private static boolean isMovingFasterThanSneak(ServerPlayer player) {
-        double sneakSpeed = player.getAttributeValue(Attributes.MOVEMENT_SPEED) * SNEAK_SPEED_FACTOR;
-        return player.getDeltaMovement().horizontalDistance() > sneakSpeed;
+        double sneakSpeed = player.getAttributeValue(Attributes.MOVEMENT_SPEED)
+                * BLOCKS_PER_TICK_PER_SPEED * SNEAK_SPEED_FACTOR * SNEAK_HEADROOM;
+        return player.getKnownMovement().horizontalDistance() > sneakSpeed;
     }
 
     /**

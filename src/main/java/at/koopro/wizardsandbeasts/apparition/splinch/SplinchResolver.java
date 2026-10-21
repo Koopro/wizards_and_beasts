@@ -37,8 +37,20 @@ public final class SplinchResolver {
     /** Applied last: unlicensed Apparition is illegal and clumsy, never impossible. */
     public static final float UNLICENSED_MULTIPLIER = 1.25f;
 
-    private static final int MINOR_MAX = 4;
-    private static final int MAJOR_MAX = 12;
+    /**
+     * Inflated miss a release may carry and still land clean.
+     *
+     * <p>Without it the ladder had no slack at all: any single destabilizer splinched a perfectly timed
+     * release. A pack 30 slots full, walking instead of standing, or a food bar at six each added two ticks,
+     * and two ticks was a minor splinch — four hearts and a minute of Splinched for doing the jump right.
+     * Players met it on most jumps. Three ticks absorbs one careless condition (even unlicensed: 2 × 1.25
+     * rounds to 3) and a release a few ticks off the window, which is also about one round trip of network
+     * latency on a key the server times. Two conditions together, a hit (+4), or a genuinely early or late
+     * release still splinch.
+     */
+    public static final int CLEAN_MAX = 3;
+    private static final int MINOR_MAX = 9;
+    private static final int MAJOR_MAX = 18;
 
     private SplinchResolver() {}
 
@@ -75,7 +87,7 @@ public final class SplinchResolver {
         if (ApparitionWindow.isForcedDischarge(inflatedMissTicks)) {
             return SplinchTier.CATASTROPHIC;
         }
-        if (inflatedMissTicks <= 0) {
+        if (inflatedMissTicks <= CLEAN_MAX) {
             return SplinchTier.CLEAN;
         }
         if (inflatedMissTicks <= MINOR_MAX) {
@@ -85,6 +97,22 @@ public final class SplinchResolver {
             return SplinchTier.MAJOR;
         }
         return SplinchTier.CATASTROPHIC;
+    }
+
+    /**
+     * Ticks of release error the wizard can still afford and land clean, given what is working against them now; -1
+     * when not even a perfect release would. The number behind the risk readout shown during the hold
+     * ({@code ApparitionRiskReadout}): the ladder is deterministic, so the player can be told the stakes before
+     * they let go rather than finding out from the splinch.
+     */
+    public static int cleanMargin(Destabilization destabilization) {
+        int margin = -1;
+        for (int miss = 0; miss <= CLEAN_MAX; miss++) {
+            if (resolve(miss, destabilization) == SplinchTier.CLEAN) {
+                margin = miss;
+            }
+        }
+        return margin;
     }
 
     /** Inflate, then resolve. The whole ladder in one call. */

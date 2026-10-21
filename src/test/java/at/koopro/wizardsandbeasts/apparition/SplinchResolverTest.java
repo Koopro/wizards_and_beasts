@@ -26,21 +26,62 @@ class SplinchResolverTest {
     }
 
     @Test
-    void oneThroughFourIsMinor() {
-        assertEquals(SplinchTier.MINOR, SplinchResolver.resolve(1));
+    void upToThreeIsStillClean() {
+        assertEquals(SplinchTier.CLEAN, SplinchResolver.resolve(1));
+        assertEquals(SplinchTier.CLEAN, SplinchResolver.resolve(SplinchResolver.CLEAN_MAX));
+    }
+
+    @Test
+    void fourThroughNineIsMinor() {
         assertEquals(SplinchTier.MINOR, SplinchResolver.resolve(4));
+        assertEquals(SplinchTier.MINOR, SplinchResolver.resolve(9));
     }
 
     @Test
-    void fiveThroughTwelveIsMajor() {
-        assertEquals(SplinchTier.MAJOR, SplinchResolver.resolve(5));
-        assertEquals(SplinchTier.MAJOR, SplinchResolver.resolve(12));
+    void tenThroughEighteenIsMajor() {
+        assertEquals(SplinchTier.MAJOR, SplinchResolver.resolve(10));
+        assertEquals(SplinchTier.MAJOR, SplinchResolver.resolve(18));
     }
 
     @Test
-    void thirteenAndAboveIsCatastrophic() {
-        assertEquals(SplinchTier.CATASTROPHIC, SplinchResolver.resolve(13));
+    void nineteenAndAboveIsCatastrophic() {
+        assertEquals(SplinchTier.CATASTROPHIC, SplinchResolver.resolve(19));
         assertEquals(SplinchTier.CATASTROPHIC, SplinchResolver.resolve(500));
+    }
+
+    /**
+     * The reported bug: one everyday condition on a perfectly timed release splinched (four hearts and a
+     * minute of Splinched). Walking, a full pack, or hunger alone — licensed or not — must land clean.
+     */
+    @Test
+    void oneCarelessConditionDoesNotSplinchAPerfectRelease() {
+        for (boolean licensed : new boolean[]{true, false}) {
+            assertEquals(SplinchTier.CLEAN, SplinchResolver.resolve(0,
+                    new Destabilization(0, true, false, false, false, false, licensed)), "moving");
+            assertEquals(SplinchTier.CLEAN, SplinchResolver.resolve(0,
+                    new Destabilization(0, false, false, true, false, false, licensed)), "encumbered");
+            assertEquals(SplinchTier.CLEAN, SplinchResolver.resolve(0,
+                    new Destabilization(0, false, false, false, true, false, licensed)), "famished");
+        }
+    }
+
+    @Test
+    void twoCarelessConditionsTogetherStillSplinch() {
+        Destabilization movingAndLaden = new Destabilization(0, true, false, true, false, false, true);
+        assertEquals(SplinchTier.MINOR, SplinchResolver.resolve(0, movingAndLaden));
+    }
+
+    @Test
+    void aReleaseAFewTicksOffTheWindowIsForgiven() {
+        // Three ticks is ~150 ms: one round trip on a key the server times.
+        assertEquals(SplinchTier.CLEAN, SplinchResolver.resolve(3, calm()));
+        assertEquals(SplinchTier.MINOR, SplinchResolver.resolve(4, calm()));
+    }
+
+    @Test
+    void tappingInsteadOfHoldingStillHurts() {
+        // Releasing on the press itself misses the whole ten-tick Determination.
+        assertEquals(SplinchTier.MAJOR, SplinchResolver.resolve(10, calm()));
     }
 
     @Test
@@ -69,15 +110,15 @@ class SplinchResolverTest {
     @Test
     void additiveTermsLandBeforeMultiplicativeOnes() {
         Destabilization movingSideAlong = new Destabilization(0, true, false, false, false, true, true);
-        // (1 + 2) * 2 = 6. Multiplying first would give 1*2 + 2 = 4, a whole rung lower.
+        // (1 + 2) * 2 = 6. Multiplying first would give 1*2 + 2 = 4.
         assertEquals(6, SplinchResolver.inflate(1, movingSideAlong));
-        assertEquals(SplinchTier.MAJOR, SplinchResolver.resolve(1, movingSideAlong));
+        assertEquals(SplinchTier.MINOR, SplinchResolver.resolve(1, movingSideAlong));
     }
 
     @Test
     void theUnlicensedTaxIsAppliedLastAndRounds() {
         Destabilization unlicensed = new Destabilization(0, true, false, false, false, false, false);
-        // (1 + 2) * 1.25 = 3.75, rounded to 4 — still the top of the minor rung.
+        // (1 + 2) * 1.25 = 3.75, rounded to 4 — the tax tips a just-clean release onto the minor rung.
         assertEquals(4, SplinchResolver.inflate(1, unlicensed));
         assertEquals(SplinchTier.MINOR, SplinchResolver.resolve(1, unlicensed));
     }

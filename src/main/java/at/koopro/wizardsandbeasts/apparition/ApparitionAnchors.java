@@ -32,11 +32,20 @@ public final class ApparitionAnchors {
         return BASE_CAPACITY + (int) Math.floor(clamped * PROFICIENCY_CAPACITY);
     }
 
+    /** The hard ceiling for this player: twelve, or the Explorer capstone's sixteen. */
+    public static int ceiling(ServerPlayer player) {
+        return at.koopro.wizardsandbeasts.skill.build.capstone.SeasonedTraveller.has(player)
+                ? PlayerApparitionPoints.SEASONED_CEILING : PlayerApparitionPoints.MAX_POINTS;
+    }
+
     /** The cap this player is actually held to, skill nodes included. */
     public static int capacity(ServerPlayer player) {
         int capacity = capacity(AbilityProficiency.get(player, AbilityIds.APPARITION));
         if (SkillSystemAPI.hasAbility(player, "apparition_recall")) {
             capacity += NODE_BONUS;
+        }
+        if (at.koopro.wizardsandbeasts.skill.build.capstone.SeasonedTraveller.has(player)) {
+            capacity += at.koopro.wizardsandbeasts.skill.build.capstone.SeasonedTraveller.EXTRA_DESTINATIONS;
         }
         return capacity;
     }

@@ -11,18 +11,26 @@ import java.util.List;
 public record FlooDestinationDto(
         @NonNull String networkAddress,
         @NonNull String dimensionName,
-        boolean isEnabled
+        boolean isEnabled,
+        int tollKnuts
 ) {
+    /** A row with no toll. */
+    public FlooDestinationDto(@NonNull String networkAddress, @NonNull String dimensionName, boolean isEnabled) {
+        this(networkAddress, dimensionName, isEnabled, 0);
+    }
+
     public static final StreamCodec<ByteBuf, FlooDestinationDto> STREAM_CODEC = StreamCodec.of(
             (buf, dto) -> {
                 ByteBufCodecs.STRING_UTF8.encode(buf, dto.networkAddress);
                 ByteBufCodecs.STRING_UTF8.encode(buf, dto.dimensionName);
                 ByteBufCodecs.BOOL.encode(buf, dto.isEnabled);
+                ByteBufCodecs.VAR_INT.encode(buf, dto.tollKnuts);
             },
             buf -> new FlooDestinationDto(
                     ByteBufCodecs.STRING_UTF8.decode(buf),
                     ByteBufCodecs.STRING_UTF8.decode(buf),
-                    ByteBufCodecs.BOOL.decode(buf)
+                    ByteBufCodecs.BOOL.decode(buf),
+                    ByteBufCodecs.VAR_INT.decode(buf)
             )
     );
 

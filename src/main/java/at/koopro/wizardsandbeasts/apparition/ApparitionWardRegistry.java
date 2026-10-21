@@ -11,6 +11,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.Identifier;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.permissions.Permissions;
@@ -65,6 +66,25 @@ public final class ApparitionWardRegistry {
         return null;
     }
 
+    /**
+     * The ward that refuses a Floo arrival at {@code hearth}, or {@code null}. Checked against the block a traveller
+     * would step out at; an administrator passes a ward that lets admins through, exactly as for Apparition.
+     */
+    public static @Nullable ApparitionWard findFlooBlockingWard(ServerLevel level, BlockPos hearth, boolean isAdmin) {
+        Identifier dimensionId = level.dimension().identifier();
+        AABB box = new AABB(hearth);
+        for (ApparitionWard ward : WARDS.values()) {
+            if (!ward.blocksFloo() || !ward.dimensionId().equals(dimensionId) || !ward.bounds().intersects(box)) {
+                continue;
+            }
+            if (ward.allowAdmins() && isAdmin) {
+                continue;
+            }
+            return ward;
+        }
+        return null;
+    }
+
     public static void load(MinecraftServer server) {
         WARDS.clear();
         registerDefaults(server);
@@ -87,12 +107,19 @@ public final class ApparitionWardRegistry {
                 double maxY = obj.get("maxY").getAsDouble();
                 double maxZ = obj.get("maxZ").getAsDouble();
                 boolean allowAdmins = obj.has("allowAdmins") && obj.get("allowAdmins").getAsBoolean();
+                // Absent in every file written before Floo honoured wards: those wards block the Floo too.
+                boolean blocksFloo = !obj.has("blocksFloo") || obj.get("blocksFloo").getAsBoolean();
+                if (isRetiredDefault(wardId, dimensionId, new AABB(minX, minY, minZ, maxX, maxY, maxZ))) {
+                    LOGGER.info("[Apparition] Dropped the retired origin ward 'gringotts_vaults' from {}", file);
+                    continue;
+                }
                 register(new ApparitionWard(
                         wardId,
                         dimensionId,
                         new AABB(minX, minY, minZ, maxX, maxY, maxZ),
                         readMessage(obj),
-                        allowAdmins));
+                        allowAdmins,
+                        blocksFloo));
             }
         } catch (Exception ex) {
             LOGGER.error("Failed to load apparition wards", ex);
@@ -116,6 +143,7 @@ public final class ApparitionWardRegistry {
                 obj.addProperty("maxZ", ward.bounds().maxZ);
                 writeMessage(obj, ward.blockMessage());
                 obj.addProperty("allowAdmins", ward.allowAdmins());
+                obj.addProperty("blocksFloo", ward.blocksFloo());
                 arr.add(obj);
             }
             Files.writeString(file, GSON.toJson(arr));
@@ -169,17 +197,24 @@ public final class ApparitionWardRegistry {
                 centered(0, 64, 0, 200, 200, 200),
                 Component.translatable("apparition.wizards_and_beasts.ward.hogwarts"),
                 true));
+        // There was a second default, "gringotts_vaults": a 100x80x100 box at the Overworld origin. Nothing is built
+        // there — Gringotts is wherever its goblins keep a counter (locations/gringotts.json) — so all it did was
+        // forbid Apparition around most worlds' spawn (WIZARD_LIFE_AUDIT P0-1). Retired, and the copy every world
+        // saved is dropped on load by isRetiredDefault; an operator who wants a vault ward places one where the
+        // vaults actually are.
+    }
 
-        Identifier overworld = ServerLevel.OVERWORLD.identifier();
-        register(new ApparitionWard(
-                Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "gringotts_vaults"),
-                overworld,
-                centered(0, 40, 0, 100, 80, 100),
-                // Unstyled, like the other default. A style cannot survive the save round-trip (only the
-                // key is written) and the refusal toast does its own colouring anyway, so a colour here
-                // would appear once and then quietly never again.
-                Component.translatable("apparition.wizards_and_beasts.ward.gringotts"),
-                false));
+    /** The old origin box the retired "gringotts_vaults" default covered, exactly as it was saved. */
+    static final AABB RETIRED_GRINGOTTS_BOUNDS = centered(0, 40, 0, 100, 80, 100);
+
+    /**
+     * Whether a saved ward is the retired origin default rather than a ward an operator placed: same id, same
+     * dimension, same box to the block. A ward an operator moved or resized keeps working.
+     */
+    static boolean isRetiredDefault(Identifier wardId, Identifier dimensionId, AABB bounds) {
+        return wardId.equals(Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "gringotts_vaults"))
+                && dimensionId.equals(ServerLevel.OVERWORLD.identifier())
+                && bounds.equals(RETIRED_GRINGOTTS_BOUNDS);
     }
 
     private static AABB centered(double cx, double cy, double cz, double sx, double sy, double sz) {

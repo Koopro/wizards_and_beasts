@@ -28,8 +28,18 @@ public final class SideAlongService {
 
     /** Offers awaiting an answer, keyed by the player being asked. */
     private static final PlayerScopedState<Offer> OFFERS = PlayerScopedState.create("apparition_sidealong_offer");
-    /** Accepted partners, keyed by the caster. Cleared when the jump resolves or the partner logs out. */
-    private static final PlayerScopedState<UUID> PARTNERS = PlayerScopedState.create("apparition_sidealong_partner");
+    /** How long an accepted agreement stays good for a jump. Consent is for "now", not for the rest of the session. */
+    public static final long AGREEMENT_TICKS = 600;
+
+    /** Accepted partners, keyed by the caster. Cleared when the jump resolves, lapses, or the caster logs out. */
+    private static final PlayerScopedState<Agreement> PARTNERS = PlayerScopedState.create("apparition_sidealong_partner");
+
+    /** A partner's consent, good until {@code expiresAtGameTime}. */
+    record Agreement(UUID partnerId, long expiresAtGameTime) {
+        boolean liveAt(long gameTime) {
+            return gameTime <= expiresAtGameTime;
+        }
+    }
 
     private SideAlongService() {}
 
@@ -66,7 +76,19 @@ public final class SideAlongService {
             return false;
         }
         OFFERS.remove(invitee);
-        PARTNERS.put(offer.casterId(), invitee.getUUID());
+        // The caster may have logged out or died inside the offer window. Recording consent for a player
+        // who is not there would leave an entry nothing cleans and that they inherit on their next login.
+        ServerPlayer caster = invitee.level().getServer() == null
+                ? null
+                : invitee.level().getServer().getPlayerList().getPlayer(offer.casterId());
+        if (caster == null || !caster.isAlive()) {
+            PlayerFeedback.actionBar(invitee, Component.translatable(
+                            "apparition.wizards_and_beasts.sidealong.no_offer")
+                    .withStyle(ChatFormatting.RED));
+            return false;
+        }
+        PARTNERS.put(offer.casterId(), new Agreement(invitee.getUUID(),
+                invitee.level().getGameTime() + AGREEMENT_TICKS));
         PlayerFeedback.actionBar(invitee, Component.translatable(
                         "apparition.wizards_and_beasts.sidealong.accepted")
                 .withStyle(ChatFormatting.LIGHT_PURPLE));
@@ -86,13 +108,17 @@ public final class SideAlongService {
 
     /** The player who agreed to travel with {@code caster}, if any is still online and nearby. */
     public static @Nullable ServerPlayer partnerOf(ServerPlayer caster) {
-        UUID partnerId = PARTNERS.get(caster.getUUID());
-        if (partnerId == null) {
+        Agreement agreement = PARTNERS.get(caster.getUUID());
+        if (agreement == null) {
+            return null;
+        }
+        if (!agreement.liveAt(caster.level().getGameTime())) {
+            PARTNERS.remove(caster.getUUID());
             return null;
         }
         return caster.level().getServer() == null
                 ? null
-                : caster.level().getServer().getPlayerList().getPlayer(partnerId);
+                : caster.level().getServer().getPlayerList().getPlayer(agreement.partnerId());
     }
 
     /** Consumes the agreement. A side-along is a single journey, not a standing arrangement. */

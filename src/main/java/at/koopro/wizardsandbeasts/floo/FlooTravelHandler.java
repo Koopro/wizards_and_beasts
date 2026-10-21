@@ -245,6 +245,10 @@ public final class FlooTravelHandler {
             PlayerFeedback.actionBar(player, Component.translatable("floo.wizards_and_beasts.fail.blocked"));
             return;
         }
+        if (isWarded(player, destLevel, dest)) {
+            PlayerFeedback.actionBar(player, Component.translatable("floo.wizards_and_beasts.fail.warded"));
+            return;
+        }
 
         // Looked for, not taken. See the note above on why the fare is paid at the other end.
         if (!hasPowder(player)) {
@@ -252,7 +256,22 @@ public final class FlooTravelHandler {
             return;
         }
 
+        // Said before the fire roars, so nobody stands in a grate for two seconds to learn the price at the end.
+        if (FlooAddress.sameAddress(actualAddress, intended) && FlooTolls.owes(player, dest)) {
+            PlayerFeedback.actionBar(player, Component.translatable("floo.wizards_and_beasts.toll.notice",
+                    at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper.formatFromKnuts(dest.tollKnuts())));
+        }
+
         FlooDeparture.begin(player, origin.getBlockPos(), actualAddress, intended);
+    }
+
+    /**
+     * Whether a ward closes {@code dest} to Floo arrivals ({@code ApparitionWard.blocksFloo}). Checked at the start
+     * and again at the commit, like every other destination check, because a ward can be raised in between.
+     */
+    private static boolean isWarded(ServerPlayer player, ServerLevel destLevel, FlooRegistryEntry dest) {
+        return at.koopro.wizardsandbeasts.apparition.ApparitionWardRegistry.findFlooBlockingWard(destLevel,
+                dest.blockPos(), FlooAccess.isAdmin(player)) != null;
     }
 
     /**
@@ -268,7 +287,9 @@ public final class FlooTravelHandler {
                                                      @NonNull FlooNetworkManager manager,
                                                      @NonNull String address) {
         FlooRegistryEntry entry = manager.getEntry(address);
-        return entry != null && FlooAccess.mayReach(player, entry) ? entry : null;
+        // Listed, not merely reachable: a row can only be picked from the address book, so a crafted pick of a
+        // public hearth the player has not found is refused the same way as a name that does not exist.
+        return entry != null && FlooAccess.isListed(player, entry) ? entry : null;
     }
 
     /**
@@ -317,7 +338,21 @@ public final class FlooTravelHandler {
             PlayerFeedback.actionBar(player, Component.translatable("floo.wizards_and_beasts.fail.blocked"));
             return;
         }
+        if (isWarded(player, destLevel, dest)) {
+            PlayerFeedback.actionBar(player, Component.translatable("floo.wizards_and_beasts.fail.warded"));
+            FlooCues.sputter(originLevel, originPos);
+            return;
+        }
+        boolean wasMisfire = !FlooAddress.sameAddress(actualAddress, intended);
+        // The toll before the powder, so a traveller who cannot pay it keeps their pinch. A misfire owes nothing:
+        // the traveller did not choose that hearth.
+        long toll = wasMisfire ? 0L : FlooTolls.charge(player, dest);
+        if (toll < 0) {
+            FlooCues.sputter(originLevel, originPos);
+            return;
+        }
         if (!consumeOnePowder(player)) {
+            FlooTolls.refund(player, toll);
             PlayerFeedback.actionBar(player, Component.translatable("floo.wizards_and_beasts.fail.no_powder"));
             FlooCues.sputter(originLevel, originPos);
             return;
@@ -355,8 +390,8 @@ public final class FlooTravelHandler {
         player.teleport(transition);
 
         player.addEffect(new MobEffectInstance(ModEffects.DISORIENTED, 100, 0, false, true, true));
+        FlooTolls.payKeeper(destLevel, dest, toll);
 
-        boolean wasMisfire = !FlooAddress.sameAddress(actualAddress, intended);
         applyTravelSickness(player, destLevel, destPos, wasMisfire);
 
         lightArrivalHearth(player, destLevel, dest.blockPos());
@@ -599,7 +634,7 @@ public final class FlooTravelHandler {
             return heardAddress;
         }
 
-        List<FlooRegistryEntry> alternatives = FlooAccess.visibleTo(player, manager).stream()
+        List<FlooRegistryEntry> alternatives = FlooAccess.reachableBy(player, manager).stream()
                 .filter(FlooRegistryEntry::isEnabled)
                 .filter(e -> !FlooAddress.sameAddress(e.networkAddress(), heardAddress))
                 .filter(e -> !FlooAddress.sameAddress(e.networkAddress(), origin.getNetworkAddress()))

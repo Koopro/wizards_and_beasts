@@ -85,6 +85,10 @@ public final class ApparitionServerLogic {
      * {@link Module#MINISTRY} switched on, {@link #canBeginAttempt} refuses outright; see there.
      */
     public static boolean isLicensed(ServerPlayer player) {
+        // A hearing's suspension holds whichever proof of the licence the wizard has, the flag included.
+        if (MinistryLicences.suspended(player, LicenseType.APPARITION)) {
+            return false;
+        }
         return PlayerAbilityHelper.isApparitionLicensed(player)
                 || MinistryLicences.has(player, LicenseType.APPARITION);
     }
@@ -303,6 +307,9 @@ public final class ApparitionServerLogic {
                 charge.tier() == ApparitionTier.ANCHORED,
                 effective.sideAlong(),
                 ApparitionRules.windupDamageMode());
+        // Explorer capstone: a seasoned traveller lands one rung lighter, whatever put them on the ladder.
+        tier = at.koopro.wizardsandbeasts.skill.build.capstone.SeasonedTraveller.soften(tier,
+                at.koopro.wizardsandbeasts.skill.build.capstone.SeasonedTraveller.has(caster));
 
         // Captured before anybody is teleported: a passenger's own departure is a second crack, in a
         // different place, and after applyOutcome they are no longer standing in it.
@@ -363,6 +370,9 @@ public final class ApparitionServerLogic {
             }
             applyTravelSickness(player, origin, destination);
             ApparitionAdvancements.awardArrival(player);
+            // An elf's own art, practised (counts only for a house-elf).
+            at.koopro.wizardsandbeasts.heritage.identity.HeritagePractice.record(player,
+                    at.koopro.wizardsandbeasts.heritage.identity.PracticeKind.ELF_APPARITION);
         }
 
         if (!tier.isSplinch()) {
@@ -525,14 +535,18 @@ public final class ApparitionServerLogic {
      *       mid-Disapparition in <i>Deathly Hallows</i>, and she is not asked first.</li>
      * </ul>
      */
-    private static @Nullable Player findSideAlongPassenger(ServerPlayer caster) {
+    public static @Nullable Player findSideAlongPassenger(ServerPlayer caster) {
         AABB area = caster.getBoundingBox().inflate(1.5);
         ServerPlayer partner = SideAlongService.partnerOf(caster);
-        if (partner != null && partner.getBoundingBox().intersects(area)) {
+        // Same level and alive: the agreement outlives a death or a dimension change (it is cleared on logout
+        // only), and a bounding box compares coordinates, not worlds — a partner standing at the same x/y/z in
+        // another dimension, or one on the death screen, was taken along.
+        if (partner != null && partner.level() == caster.level() && partner.isAlive()
+                && partner.getBoundingBox().intersects(area)) {
             return partner;
         }
         for (Player candidate : caster.level().getEntitiesOfClass(Player.class, area,
-                p -> p != caster && p.isShiftKeyDown())) {
+                p -> p != caster && p.isAlive() && p.isShiftKeyDown())) {
             return candidate;
         }
         return null;

@@ -30,8 +30,21 @@ public record FlooRegistryEntry(
         @NonNull BlockPos blockPos,
         boolean isEnabled,
         boolean isPublic,
-        @NonNull Optional<UUID> owner
+        @NonNull Optional<UUID> owner,
+        int tollKnuts
 ) {
+    /**
+     * The most a keeper may ask to let a traveller through their hearth: three Sickles, a little over six pinches of
+     * powder. Enough to make keeping a busy public hearth worth something, never enough to wall a network off.
+     */
+    public static final int MAX_TOLL_KNUTS = 87;
+
+    /** An entry with no toll — every entry written before tolls existed. */
+    public FlooRegistryEntry(@NonNull String networkAddress, @NonNull Identifier dimension, @NonNull BlockPos blockPos,
+                             boolean isEnabled, boolean isPublic, @NonNull Optional<UUID> owner) {
+        this(networkAddress, dimension, blockPos, isEnabled, isPublic, owner, 0);
+    }
+
     public static final Codec<FlooRegistryEntry> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.fieldOf("address").forGetter(FlooRegistryEntry::networkAddress),
             Identifier.CODEC.fieldOf("dimension").forGetter(FlooRegistryEntry::dimension),
@@ -41,7 +54,8 @@ public record FlooRegistryEntry(
             // UUIDUtil.CODEC is the int-array form, and that is fine here precisely because nothing
             // outside this record ever writes the field: it is round-tripped by the same codec that
             // produced it. Hand-written UUID strings in a datapack would need LENIENT_CODEC instead.
-            UUIDUtil.CODEC.optionalFieldOf("owner").forGetter(FlooRegistryEntry::owner)
+            UUIDUtil.CODEC.optionalFieldOf("owner").forGetter(FlooRegistryEntry::owner),
+            Codec.intRange(0, MAX_TOLL_KNUTS).optionalFieldOf("toll_knuts", 0).forGetter(FlooRegistryEntry::tollKnuts)
     ).apply(instance, FlooRegistryEntry::new));
 
     /** Convenience for the common case of an entry nobody claimed. */
@@ -51,11 +65,26 @@ public record FlooRegistryEntry(
     }
 
     public FlooRegistryEntry withEnabled(boolean enabled) {
-        return new FlooRegistryEntry(networkAddress, dimension, blockPos, enabled, isPublic, owner);
+        return new FlooRegistryEntry(networkAddress, dimension, blockPos, enabled, isPublic, owner, tollKnuts);
     }
 
     public FlooRegistryEntry withPublic(boolean isPublic) {
-        return new FlooRegistryEntry(networkAddress, dimension, blockPos, isEnabled, isPublic, owner);
+        return new FlooRegistryEntry(networkAddress, dimension, blockPos, isEnabled, isPublic, owner, tollKnuts);
+    }
+
+    /** This entry asking {@code knuts} (clamped to 0–{@link #MAX_TOLL_KNUTS}) of each traveller. */
+    public FlooRegistryEntry withToll(int knuts) {
+        return new FlooRegistryEntry(networkAddress, dimension, blockPos, isEnabled, isPublic, owner,
+                Math.max(0, Math.min(MAX_TOLL_KNUTS, knuts)));
+    }
+
+    /**
+     * Whether this is a landmark: a public hearth nobody owns — one an administrator or the world itself put on the
+     * network. Landmarks are known to every traveller; a player's own public hearth has to be found
+     * ({@link FlooAccess#isListed}).
+     */
+    public boolean isLandmark() {
+        return isPublic && owner.isEmpty();
     }
 
     /**

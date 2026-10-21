@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.apparition.command;
 
-import at.koopro.wizardsandbeasts.apparition.ApparitionAnchors;
 import at.koopro.wizardsandbeasts.apparition.ApparitionPoint;
+import at.koopro.wizardsandbeasts.apparition.ApparitionPointService;
 import at.koopro.wizardsandbeasts.ability.PlayerAbilityHelper;
 import at.koopro.wizardsandbeasts.apparition.ApparitionServerLogic;
 import at.koopro.wizardsandbeasts.apparition.licence.ApparitionLicence;
@@ -9,7 +9,6 @@ import at.koopro.wizardsandbeasts.apparition.PlayerApparitionPoints;
 import at.koopro.wizardsandbeasts.apparition.sidealong.SideAlongService;
 import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 import at.koopro.wizardsandbeasts.util.ChatReport;
-import at.koopro.wizardsandbeasts.network.apparition.ApparitionPointsSyncS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -101,7 +100,7 @@ public final class ApparitionPointCommands {
         if (player == null) {
             return 0;
         }
-        ApparitionLicence.Eligibility verdict = ApparitionLicence.takeTest(player);
+        ApparitionLicence.Eligibility verdict = ApparitionLicence.takeTestAway(player);
         if (!verdict.eligible()) {
             PlayerFeedback.refuse(player,
                     Component.translatable("apparition.wizards_and_beasts.test.refused"),
@@ -131,30 +130,7 @@ public final class ApparitionPointCommands {
         if (player == null) {
             return 0;
         }
-        String name = ApparitionPoint.sanitize(rawName);
-        if (name.isEmpty()) {
-            feedback(source, "That is not a usable name.", ChatFormatting.RED);
-            return 0;
-        }
-        if (!ApparitionServerLogic.canApparate(player)) {
-            feedback(source, "You cannot Apparate, so there is no point memorising destinations.", ChatFormatting.RED);
-            return 0;
-        }
-
-        PlayerApparitionPoints points = points(player);
-        int capacity = ApparitionAnchors.capacity(player);
-        boolean replacing = points.byName(name) != null;
-        if (!replacing && points.isFull(capacity)) {
-            feedback(source, "You can only hold " + capacity
-                    + " destinations in mind. Forget one, or re-use the name of the one you are replacing.",
-                    ChatFormatting.RED);
-            return 0;
-        }
-
-        ApparitionPoint point = new ApparitionPoint(name, player.level().dimension(), player.position(), player.getYRot());
-        setPoints(player, points.with(point, capacity));
-        feedback(source, (replacing ? "Re-memorised " : "Memorised ") + name + ".", ChatFormatting.LIGHT_PURPLE);
-        return 1;
+        return report(source, ApparitionPointService.mark(player, rawName));
     }
 
     private static int forget(CommandSourceStack source, String rawName) {
@@ -162,15 +138,12 @@ public final class ApparitionPointCommands {
         if (player == null) {
             return 0;
         }
-        PlayerApparitionPoints points = points(player);
-        PlayerApparitionPoints next = points.without(rawName);
-        if (next == points) {
-            feedback(source, "You have no destination by that name.", ChatFormatting.RED);
-            return 0;
-        }
-        setPoints(player, next);
-        feedback(source, "Forgot " + ApparitionPoint.sanitize(rawName) + ".", ChatFormatting.GRAY);
-        return 1;
+        return report(source, ApparitionPointService.forget(player, rawName));
+    }
+
+    private static int report(CommandSourceStack source, ApparitionPointService.Outcome outcome) {
+        source.sendSuccess(outcome::message, false);
+        return outcome.done() ? 1 : 0;
     }
 
     private static int list(CommandSourceStack source) {
@@ -197,11 +170,6 @@ public final class ApparitionPointCommands {
 
     private static PlayerApparitionPoints points(ServerPlayer player) {
         return player.getData(ModAttachments.APPARITION_POINTS.get());
-    }
-
-    private static void setPoints(ServerPlayer player, PlayerApparitionPoints next) {
-        player.setData(ModAttachments.APPARITION_POINTS.get(), next);
-        ApparitionPointsSyncS2CPayload.syncToPlayer(player);
     }
 
     private static void feedback(CommandSourceStack source, String message, ChatFormatting color) {

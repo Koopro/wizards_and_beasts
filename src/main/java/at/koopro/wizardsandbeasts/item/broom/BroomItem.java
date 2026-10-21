@@ -5,7 +5,11 @@ import at.koopro.wizardsandbeasts.item.AnimatedItem;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.broom.BroomDefinition;
 import at.koopro.wizardsandbeasts.broom.BroomDefinitionRegistry;
-import at.koopro.wizardsandbeasts.broom.BroomDefinitionRegistry;
+import at.koopro.wizardsandbeasts.broom.fitting.BroomFitting;
+import at.koopro.wizardsandbeasts.broom.fitting.BroomFittings;
+import at.koopro.wizardsandbeasts.broom.fitting.BroomTune;
+import at.koopro.wizardsandbeasts.broom.fitting.BroomWear;
+import at.koopro.wizardsandbeasts.broom.fitting.BroomWorkshop;
 import at.koopro.wizardsandbeasts.entity.broom.BroomEntity;
 import at.koopro.wizardsandbeasts.ministry.licence.BroomLicence;
 import at.koopro.wizardsandbeasts.module.Module;
@@ -151,11 +155,31 @@ public class BroomItem extends Item implements AnimatedItem {
             tooltipAdder.accept(Component.literal("Broom flight is not yet available.").withStyle(ChatFormatting.RED));
             return;
         }
-        BroomDefinition definition = resolveDefinition(stack);
+        BroomDefinition base = resolveDefinition(stack);
+        BroomFittings fittings = BroomWorkshop.fittingsOf(stack);
+        BroomWear wear = wearOf(stack);
+        // The numbers the broom will actually fly at: the same BroomTune the entity applies in the air.
+        BroomDefinition definition = BroomTune.apply(base, fittings, wear);
         tooltipAdder.accept(definition.tier().displayName().copy().withStyle(ChatFormatting.GOLD));
         tooltipAdder.accept(Component.literal(String.format("Top speed: %.2f", definition.maxSpeed())).withStyle(ChatFormatting.GRAY));
         tooltipAdder.accept(Component.literal(String.format("Boost: x%.2f", definition.boostMultiplier())).withStyle(ChatFormatting.GRAY));
-        tooltipAdder.accept(Component.literal("Durability: " + definition.durability()).withStyle(ChatFormatting.GRAY));
+        tooltipAdder.accept(Component.literal("Durability: " + (stack.getMaxDamage() - stack.getDamageValue())
+                + " / " + stack.getMaxDamage()).withStyle(ChatFormatting.GRAY));
+        if (wear != BroomWear.SOUND) {
+            tooltipAdder.accept(Component.translatable(wear.translationKey()).withStyle(ChatFormatting.RED));
+        }
+        if (!fittings.isEmpty()) {
+            tooltipAdder.accept(Component.translatable("broom.wizards_and_beasts.fitting.header",
+                    fittings.count(), BroomFitting.capacity(base.tier())).withStyle(ChatFormatting.AQUA));
+            for (BroomFitting fitting : fittings.all()) {
+                tooltipAdder.accept(Component.literal(" ").append(Component.translatable(fitting.translationKey()))
+                        .withStyle(ChatFormatting.DARK_AQUA));
+            }
+        }
+        if (stack.has(ModDataComponents.BROOM_TRAIL_DYE.get())) {
+            tooltipAdder.accept(Component.translatable("broom.wizards_and_beasts.fitting.dyed_tooltip")
+                    .withStyle(ChatFormatting.LIGHT_PURPLE));
+        }
         // Present only while the window is open: BroomItem.inventoryTick strips the component the
         // moment it lapses, so this cannot claim a polish that has already worn off.
         if (stack.has(ModDataComponents.POLISHED_UNTIL_TICK.get())) {
@@ -167,12 +191,18 @@ public class BroomItem extends Item implements AnimatedItem {
         }
     }
 
+    /** The condition band of a broom stack, by its durability. */
+    public static BroomWear wearOf(ItemStack stack) {
+        return BroomWear.of(stack.getMaxDamage() - stack.getDamageValue(), stack.getMaxDamage());
+    }
+
     /** True when this broom has no durability left and must be serviced before it will fly. */
     public static boolean isSpent(ItemStack stack) {
         return stack.getMaxDamage() > 0 && stack.getDamageValue() >= stack.getMaxDamage();
     }
 
-    private static BroomDefinition resolveDefinition(ItemStack stack) {
+    /** The definition a broom stack flies by (its component, or the fallback). */
+    public static BroomDefinition resolveDefinition(ItemStack stack) {
         Identifier id = stack.getOrDefault(ModDataComponents.BROOM_DEFINITION.get(), FALLBACK_ID);
         BroomDefinition definition = BroomDefinitionRegistry.get(id);
         if (definition != null) {
