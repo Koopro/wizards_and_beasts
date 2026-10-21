@@ -176,8 +176,9 @@ fresh copy of `wb_admin_capture_visual`.
 
 ## UI overhaul — 2026-10-21 (branch `feature/ui-overhaul`)
 
-Hybrid direction: systems screens on the new `UiSurface.NIGHT_SHEET`, book screens stay parchment
-(`GUI_DESIGN_SYSTEM.md` "Hybrid direction"). Plan and per-milestone status: `tasks/todo_ui_overhaul_2026_10_21.md`.
+Material: **parchment**, as since 2026-09-23. A dark "night sheet" for the system screens was built and
+shown on 2026-10-21; the user preferred parchment, so it was removed and only the structural redesign kept.
+Plan and per-milestone status: `tasks/todo_ui_overhaul_2026_10_21.md`.
 
 ### Spell Menu — `client/spell/gui` (redesigned)
 - Was: 310x250 design scaled 0.72–1.35 by `Layout.panel` while text stayed native, so at GUI 4 rows shrank
@@ -185,11 +186,11 @@ Hybrid direction: systems screens on the new `UiSurface.NIGHT_SHEET`, book scree
 - Now: `SpellMenuLayout` (pure, unit-tested at 320x240 … 960x540) computes every rectangle in native pixels;
   painting, hit-testing, widget bounds and drop targets all read it. WIDE (library | wand | details) from
   440 GUI px wide, STACKED (library | wand over details) below.
-- Library: night search field (a letter typed with nothing focused starts a search), category filter chips (`NightChip`,
+- Library: search field (a letter typed with nothing focused starts a search), category filter chips (`ThemedChip`,
   disabled when nothing is known in the category), clipped list with headings, pips for proficiency,
   the bound socket's chevron, recharge time.
-- Wand: sprite sockets in HUD order with state bezels (idle / hover / drop target with violet rim), empty
-  sockets show their direction chevron, bound-spell rows under/beside the diamond as larger targets.
+- Wand: engraved sockets in HUD order (hover ring, drop-target flare), at native 30px; empty sockets show
+  their direction as an ink chevron (`Ui.arrow`), bound-spell rows under/beside the diamond as larger targets.
 - Details: only fields the spell has (description only where the lang key exists, damage only if > 0),
   status chips (category, bound where, recharging), proficiency bar over its real range, requirement with
   ✔/✕, power lines; scrolls with the wheel and shows a track when taller than its well.
@@ -201,14 +202,14 @@ Hybrid direction: systems screens on the new `UiSurface.NIGHT_SHEET`, book scree
 ### Heritage gate — `client/heritage/gui` (redesigned)
 - Was: three ◀ ▶ cyclers (heritage, lineage, condition) on parchment, a 424x240 design scaled up to 2.25x
   while text stayed native; lore cut at the panel floor; trait headings ran out of their column.
-- Now: night sheet, `HeritageSelectionLayout` (pure, unit-tested 320x240 … 960x540). All eight heritages
+- Now: parchment, `HeritageSelectionLayout` (pure, unit-tested 320x240 … 960x540). All eight heritages
   listed with a gem in their signature colour and a "Soon"/"Closed" chip from `HeritageRules.refusalKey`
   (tooltip says why); lineages as chips; condition as a cycler only where the lineage can carry one;
   dossier scrolls (adds the lineage note and the condition's description, where the lang has them);
   preview + traits column (traits scroll, headings wrap). Under 360 GUI px content: two columns, traits
   close the dossier.
 - Confirm card over the dimmed sheet: what is sworn (with any condition), "!"-marked final warning,
-  Not Yet / Seal It (primary face). Enter seals, Esc backs out, Tab/Space work the buttons.
+  Not Yet / Seal It (green). Enter seals, Esc backs out, Tab/Space work the buttons.
 - Unchanged: first-join gate (Esc swallowed), admin preview sends nothing, server re-checks the rules,
   `HeritageSelectC2SPayload` payload.
 - `HeritageDossierRenderer` now takes a `UiSurface`; the Control Center's `HeritagePreview` keeps parchment.

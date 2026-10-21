@@ -70,27 +70,6 @@ public record UiSurface(int field, int well, int edge,
             0xFF9BD08A, 0xFFE0857D, WizardsPalette.GILT_LIGHT, WizardsPalette.GILT, 0xFF7C6F64,
             wash(WizardsPalette.GILT, 0x40), wash(WizardsPalette.TEXT, 0x18), true, null);
 
-    /** The night sheet's cloth, opaque: a full screen is a board on the desk, not a card over the world. */
-    public static final int NIGHT_SHEET_FIELD = 0xFF1C1722;
-
-    /**
-     * The dark magical <em>sheet</em>: the night card's inks on an opaque, sprite-built board
-     * ({@code gui/sprites/night/}, drawn by {@link NightChrome}). For the system screens -- spell
-     * loadout, heritage, character, skills, workstations -- where {@link #PAGE} stays the material of
-     * anything read like a book. Identified by identity ({@link #nightSheet()}), so the components
-     * choose its sprites over the procedural card.
-     */
-    public static final UiSurface NIGHT_SHEET = new UiSurface(
-            NIGHT_SHEET_FIELD, NIGHT_WELL, WizardsPalette.GILT_DARK,
-            NIGHT.ink(), NIGHT.ink2(), NIGHT.ink3(), NIGHT.heading(),
-            NIGHT.good(), NIGHT.bad(), NIGHT.warn(), NIGHT.accent(), NIGHT.disabled(),
-            wash(0x6A4C93, 0x66), wash(WizardsPalette.TEXT, 0x14), true, null);
-
-    /** True for {@link #NIGHT_SHEET}: components draw the night sprites rather than the card. */
-    public boolean nightSheet() {
-        return this == NIGHT_SHEET;
-    }
-
     /**
      * A skin's material. Its ink and muted ink come from the skin; meaning-carrying colours (good, bad,
      * warn) keep their hue and are moved only in luminance until they read on the skin's paper.

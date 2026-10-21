@@ -18,7 +18,6 @@ every ink on it, including whether text gets a shadow.
 |---|---|---|
 | `UiSurface.PAGE` | the parchment sheet (`gui/theme/`) | any player screen without its own material |
 | `UiSurface.NIGHT` | soot-violet card, gilt edge, cream ink | things floating over the world: radial wheels, tooltip cards, dropdown lists, HUD-adjacent overlays |
-| `UiSurface.NIGHT_SHEET` | the night card's inks on an opaque bookcloth sheet (`gui/sprites/night/`, `NightChrome`) | full screens for the magical *systems*: spell loadout (2026-10-21), next heritage, character, skills, workstations. Parchment stays the material of anything read like a book |
 | `UiSurface.of(GuiSkin.X)` | one of the eight materials (star chart, workbench, ledger, field notebook, ministry memo, Marauder's map, Pensieve, hearth) | a screen with a strong identity of its own |
 
 A screen picks **one** surface for its body. A NIGHT card may float over a PAGE screen (a tooltip, a
@@ -53,8 +52,6 @@ Gaps come from `WizardsMetrics.SPACE_*` (2, 4, **8**, 12, 16, 24). Never a liter
 | Raised panel | `Ui.panel(g, S, x, y, w, h)` |
 | Recessed well (list, viewport, track) | `Ui.inset(g, S, x, y, w, h)` |
 | Dark magical card | `Ui.nightCard(g, x, y, w, h)` (same as `Ui.panel` with `NIGHT`) |
-| Night sheet pieces | `Ui.panel/inset/divider/tab` with `NIGHT_SHEET`; `NightChrome.ornament`, `.socket(g, x, y, UiSlotState)` (30px, 1:1), `.arrow(g, slot, x, y)` (7px chevron, loadout order), `.button(…, selected)`; widgets `NightChip` (filter/tab with a chosen face), `ThemedTextField.night()`, `ThemedButton.skinned(…, NightChrome.FOLDER, …)` |
-| Slot states | `UiSlotState` — one vocabulary for item slots, sockets and bound rows; each state needs a non-colour cue |
 | Section break | `Ui.divider(g, S, x, y, w)` — 8px sprite on paper, advance by its return |
 | Row separator | `Ui.hairline(g, S, x, y, w)` |
 | Modal dim | `Ui.scrim(g, screenW, screenH)` |

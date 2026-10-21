@@ -2,14 +2,14 @@ package at.koopro.wizardsandbeasts.client.heritage.gui;
 
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.character.widget.PlayerModelViewport;
-import at.koopro.wizardsandbeasts.client.gui.ui.NightChrome;
 import at.koopro.wizardsandbeasts.client.gui.ui.Ui;
 import at.koopro.wizardsandbeasts.client.gui.ui.Ui.Rect;
 import at.koopro.wizardsandbeasts.client.gui.ui.UiSurface;
 import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 import at.koopro.wizardsandbeasts.client.gui.ui.UiTooltips;
 import at.koopro.wizardsandbeasts.client.gui.util.UiContrast;
-import at.koopro.wizardsandbeasts.client.gui.widget.NightChip;
+import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
+import at.koopro.wizardsandbeasts.client.gui.widget.ThemedChip;
 import at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton;
 import at.koopro.wizardsandbeasts.heritage.ConditionOrigin;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
@@ -38,7 +38,7 @@ import java.util.Optional;
 /**
  * First-join heritage selection: every heritage in a list on the left, the dossier of the chosen one in
  * the middle with its lineage and starting condition above it, and the player you are about to become on
- * the right -- on the night sheet, the material of the mod's magical systems.
+ * the right, on the parchment sheet every other screen is written on.
  *
  * <p>All eight heritages are listed rather than cycled: a choice this weighty should show its whole field
  * at once, including what is locked and why. Lineages are chips (at most five); the starting condition,
@@ -59,9 +59,11 @@ import java.util.Optional;
  */
 public class HeritageSelectionScreen extends Screen {
 
-    private static final UiSurface S = UiSurface.NIGHT_SHEET;
+    private static final UiSurface S = UiSurface.PAGE;
     private static final int DOSSIER_PAD = 6;
     private static final int SCROLL_STEP = 10;
+    /** Randomise's dice icon, its gap and the button's padding, on top of the label's width. */
+    private static final int RANDOMISE_ICON_SPAN = 12 + 4 + 14;
 
     /**
      * Cosmetic only — this picks what the screen <em>shows</em>. The Power roll that actually
@@ -79,7 +81,7 @@ public class HeritageSelectionScreen extends Screen {
     private boolean confirmOpen;
 
     private HeritageSelectionLayout layout;
-    @Nullable private NightChip confirmButton;
+    @Nullable private ThemedButton confirmButton;
     private int dossierScroll;
     private int dossierContentH;
     private int traitsScroll;
@@ -140,11 +142,11 @@ public class HeritageSelectionScreen extends Screen {
         List<HeritageVariant> variants = selectedHeritage.getSubtypes();
         int[] chipW = new int[variants.size()];
         for (int i = 0; i < chipW.length; i++) {
-            chipW[i] = NightChip.widthFor(font, Component.literal(variants.get(i).getDisplayName()));
+            chipW[i] = ThemedChip.widthFor(font, Component.literal(variants.get(i).getDisplayName()));
         }
         layout = HeritageSelectionLayout.of(width, height, Heritage.values().length, chipW,
                 availableConditions().size() > 1,
-                NightChip.widthFor(font, randomiseLabel()) + 8, NightChip.widthFor(font, confirmLabel()) + 12);
+                font.width(randomiseLabel()) + RANDOMISE_ICON_SPAN, font.width(confirmLabel()) + 20);
 
         clearWidgets();
         confirmButton = null;
@@ -159,7 +161,7 @@ public class HeritageSelectionScreen extends Screen {
         for (int i = 0; i < variants.size(); i++) {
             HeritageVariant v = variants.get(i);
             Rect r = layout.lineageChips().get(i);
-            addRenderableWidget(new NightChip(r.x(), r.y(), r.w(), r.h(), Component.literal(v.getDisplayName()),
+            addRenderableWidget(new ThemedChip(r.x(), r.y(), r.w(), r.h(), Component.literal(v.getDisplayName()),
                     () -> selectVariant(v), () -> v == selectedVariant));
         }
 
@@ -169,20 +171,20 @@ public class HeritageSelectionScreen extends Screen {
         if (layout.condition() != null) {
             Rect p = layout.conditionPrev();
             Rect n = layout.conditionNext();
-            addRenderableWidget(new NightChip(p.x(), p.y(), p.w(), p.h(),
+            addRenderableWidget(new ThemedChip(p.x(), p.y(), p.w(), p.h(),
                     Component.translatable("gui.wizards_and_beasts.heritage.condition_prev"), () -> cycleCondition(-1), () -> false));
-            addRenderableWidget(new NightChip(n.x(), n.y(), n.w(), n.h(),
+            addRenderableWidget(new ThemedChip(n.x(), n.y(), n.w(), n.h(),
                     Component.translatable("gui.wizards_and_beasts.heritage.condition_next"), () -> cycleCondition(1), () -> false));
         }
 
         Rect r = layout.randomise();
-        addRenderableWidget(ThemedButton.skinned(r.x(), r.y(), r.w(), r.h(), randomiseLabel(), this::randomise,
-                NightChrome.FOLDER, null, 0, S.ink(), S.disabled()));
+        addRenderableWidget(ThemedButton.randomise(r.x(), r.y(), r.w(), r.h(), randomiseLabel(), this::randomise));
 
-        // The one control on this screen that starts something irreversible wears the chosen face; it
+        // Green, because it is the one control on this screen that starts something irreversible. It
         // greys out (and explains itself in a tooltip) when the heritage on show cannot be chosen.
         Rect c = layout.confirm();
-        confirmButton = NightChip.primary(c.x(), c.y(), c.w(), c.h(), confirmLabel(), this::openConfirm);
+        confirmButton = new ThemedButton(c.x(), c.y(), c.w(), c.h(), confirmLabel(), this::openConfirm)
+                .tone(McStylePanel.ButtonTone.CONFIRM);
         confirmButton.active = HeritageRules.selectable(selectedHeritage) && selectedVariant != null;
         addRenderableWidget(confirmButton);
     }
@@ -190,12 +192,12 @@ public class HeritageSelectionScreen extends Screen {
     private void buildConfirmCard() {
         Rect c = layout.overlayCancel();
         Rect s = layout.overlaySeal();
-        // Backing out stays neutral; sealing the character is the primary face.
-        addRenderableWidget(ThemedButton.skinned(c.x(), c.y(), c.w(), c.h(),
-                Component.translatable("gui.wizards_and_beasts.heritage.confirm_cancel"), this::closeConfirm,
-                NightChrome.FOLDER, null, 0, S.ink(), S.disabled()));
-        addRenderableWidget(NightChip.primary(s.x(), s.y(), s.w(), s.h(),
-                Component.translatable("gui.wizards_and_beasts.heritage.confirm_yes"), this::commit));
+        // Backing out stays neutral; sealing the character is green.
+        addRenderableWidget(new ThemedButton(c.x(), c.y(), c.w(), c.h(),
+                Component.translatable("gui.wizards_and_beasts.heritage.confirm_cancel"), this::closeConfirm));
+        addRenderableWidget(new ThemedButton(s.x(), s.y(), s.w(), s.h(),
+                Component.translatable("gui.wizards_and_beasts.heritage.confirm_yes"), this::commit)
+                .tone(McStylePanel.ButtonTone.CONFIRM));
     }
 
     // ── Selection actions ────────────────────────────────────────────────
@@ -340,10 +342,9 @@ public class HeritageSelectionScreen extends Screen {
         Rect p = layout.panel();
         Ui.panel(g, S, p.x(), p.y(), p.w(), p.h());
         Rect t = layout.title();
-        UiText.drawFit(g, font, S, getTitle(), t.x(), t.y() + 3, t.w(), S.heading());
+        UiText.drawFit(g, font, S, getTitle(), t.x(), t.y() + 3, t.w(), S.ink());
         Rect c = layout.content();
-        NightChrome.divider(g, c.x(), layout.ruleY(), c.w());
-        NightChrome.ornament(g, c.x() + c.w() / 2, layout.ruleY());
+        Ui.divider(g, S, c.x(), layout.ruleY(), c.w());
 
         renderList(g, mouseX, mouseY);
         renderChoices(g);
@@ -372,7 +373,7 @@ public class HeritageSelectionScreen extends Screen {
             boolean selected = h == selectedHeritage;
             if (selected) {
                 g.fill(r.x(), r.y(), r.right(), r.bottom(), S.selectWash());
-                g.fill(r.x(), r.y(), r.x() + 2, r.bottom(), WizardsPalette.GILT);
+                g.fill(r.x(), r.y(), r.x() + 2, r.bottom(), WizardsPalette.GILT_DARK);
             } else if (i == hovered) {
                 g.fill(r.x(), r.y(), r.right(), r.bottom(), S.hoverWash());
             }
@@ -386,7 +387,7 @@ public class HeritageSelectionScreen extends Screen {
                 Ui.chip(g, font, S, right, r.y() + (r.h() - Ui.CHIP_H) / 2, tag, Ui.Tone.MUTED);
                 right -= 3;
             }
-            int colour = refusal != null ? S.ink3() : selected ? S.heading() : S.ink();
+            int colour = refusal != null ? S.ink3() : S.ink();
             int nameX = r.x() + 13;
             UiText.drawFit(g, font, S, Component.literal(h.getDisplayName()), nameX,
                     r.y() + (r.h() - font.lineHeight) / 2 + 1, right - nameX, colour);
@@ -469,10 +470,10 @@ public class HeritageSelectionScreen extends Screen {
             return;
         }
         int x = well.right() - 2;
-        g.fill(x, area.y(), x + 1, area.bottom(), 0x60000000 | (WizardsPalette.GILT_DARK & 0xFFFFFF));
+        g.fill(x, area.y(), x + 1, area.bottom(), WizardsPalette.PAGE_DEEP);
         int thumbH = Math.max(8, area.h() * area.h() / contentH);
         int thumbY = area.y() + (area.h() - thumbH) * scroll / Math.max(1, contentH - area.h());
-        g.fill(x, thumbY, x + 1, thumbY + thumbH, WizardsPalette.GILT);
+        g.fill(x, thumbY, x + 1, thumbY + thumbH, WizardsPalette.WAX);
     }
 
     /** Why a heritage is locked (on its row, and on the greyed Confirm). */

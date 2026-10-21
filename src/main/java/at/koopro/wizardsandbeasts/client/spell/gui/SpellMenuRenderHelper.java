@@ -2,7 +2,6 @@ package at.koopro.wizardsandbeasts.client.spell.gui;
 
 import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
-import at.koopro.wizardsandbeasts.client.gui.ui.NightChrome;
 import at.koopro.wizardsandbeasts.client.gui.ui.Ui;
 import at.koopro.wizardsandbeasts.client.gui.ui.Ui.Rect;
 import at.koopro.wizardsandbeasts.client.gui.ui.UiSurface;
@@ -35,7 +34,7 @@ import java.util.Locale;
  */
 public final class SpellMenuRenderHelper {
 
-    private static final UiSurface S = UiSurface.NIGHT_SHEET;
+    private static final UiSurface S = UiSurface.PAGE;
 
     /** Alpha a placeholder spell's icon is drawn at -- present, legible, obviously not available. */
     private static final float ALPHA_COMING_SOON = 0.35f;
@@ -54,8 +53,8 @@ public final class SpellMenuRenderHelper {
     }
 
     /**
-     * A category's hue made legible on the night well. The hues were picked for a dark ground, but dark
-     * arts' violet is 2 : 1 on it; clamped, the hue keeps its meaning and gains the depth to be seen.
+     * A category's hue made legible in the parchment well. The hues were picked for a dark ground --
+     * utility's green is 1.4 : 1 on paper; clamped, the hue keeps its meaning and gains the depth to be seen.
      */
     static int hue(SpellCategory category) {
         return UiContrast.readableOn(category.getColor(), S.well(), UiContrast.AA_TEXT);
@@ -87,7 +86,7 @@ public final class SpellMenuRenderHelper {
                              boolean hovered, boolean selected, boolean dragSource, int boundSlot) {
         if (selected || dragSource) {
             g.fill(r.x(), r.y(), r.right(), r.bottom(), S.selectWash());
-            g.fill(r.x(), r.y(), r.x() + 2, r.bottom(), WizardsPalette.GILT);
+            g.fill(r.x(), r.y(), r.x() + 2, r.bottom(), WizardsPalette.GILT_DARK);
         } else if (hovered) {
             g.fill(r.x(), r.y(), r.right(), r.bottom(), S.hoverWash());
         }
@@ -106,8 +105,8 @@ public final class SpellMenuRenderHelper {
             right -= PIPS_W;
             pips(g, right, r.y() + (r.h() - PIP) / 2, proficiencyPips(spell.getId()));
             if (boundSlot >= 0) {
-                right -= NightChrome.ARROW + 3;
-                NightChrome.arrow(g, boundSlot, right, r.y() + (r.h() - NightChrome.ARROW) / 2);
+                right -= Ui.ARROW + 3;
+                Ui.arrow(g, boundSlot, right, r.y() + (r.h() - Ui.ARROW) / 2, S.ink2());
             }
             String cooldown = cooldownSeconds(spell);
             if (cooldown != null) {
@@ -117,7 +116,7 @@ public final class SpellMenuRenderHelper {
         }
 
         int nameX = r.x() + 4 + ICON + 4;
-        int colour = comingSoon ? S.ink3() : selected ? S.heading() : S.ink();
+        int colour = comingSoon ? S.ink3() : S.ink();
         return UiText.drawFit(g, font, S, Component.literal(GuiText.resolve(spell.getDisplayName())),
                 nameX, textY, right - 4 - nameX, colour);
     }
@@ -126,7 +125,7 @@ public final class SpellMenuRenderHelper {
     static void pips(GuiGraphics g, int x, int y, int filled) {
         for (int i = 0; i < 3; i++) {
             int px = x + i * (PIP + 1);
-            g.fill(px, y, px + PIP, y + PIP, i < filled ? WizardsPalette.GILT : SpellSigilRenderer.UNLIT);
+            g.fill(px, y, px + PIP, y + PIP, i < filled ? WizardsPalette.GILT_DARK : WizardsPalette.PAGE_DEEP);
         }
     }
 
@@ -142,9 +141,9 @@ public final class SpellMenuRenderHelper {
         } else if (hovered) {
             g.fill(r.x(), r.y(), r.right(), r.bottom(), S.hoverWash());
         }
-        NightChrome.arrow(g, slot, r.x() + 2, r.y() + (r.h() - NightChrome.ARROW) / 2);
+        Ui.arrow(g, slot, r.x() + 2, r.y() + (r.h() - Ui.ARROW) / 2, S.ink2());
         int textY = r.y() + (r.h() - font.lineHeight) / 2 + 1;
-        int x = r.x() + 2 + NightChrome.ARROW + 4;
+        int x = r.x() + 2 + Ui.ARROW + 4;
         g.drawString(font, Component.translatable("gui.wizards_and_beasts.spell_menu.slot." + SpellMenuScreen.SLOT_KEYS[slot]),
                 x, textY, S.ink3(), S.shadow());
         x += DIRECTION_W;

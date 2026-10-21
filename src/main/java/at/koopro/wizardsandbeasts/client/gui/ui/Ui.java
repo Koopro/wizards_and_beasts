@@ -54,9 +54,7 @@ public final class Ui {
 
     /** A raised panel of the surface's material: the parchment sheet, a skin's sheet, or the night card. */
     public static void panel(GuiGraphics g, UiSurface s, int x, int y, int w, int h) {
-        if (s.nightSheet()) {
-            NightChrome.panel(g, x, y, w, h);
-        } else if (s.skin() != null) {
+        if (s.skin() != null) {
             McStylePanel.drawSkinPanel(g, s.skin(), x, y, w, h);
         } else if (s.dark()) {
             nightCard(g, x, y, w, h);
@@ -67,9 +65,7 @@ public final class Ui {
 
     /** A recessed well on the surface: lists, viewports, previews. */
     public static void inset(GuiGraphics g, UiSurface s, int x, int y, int w, int h) {
-        if (s.nightSheet()) {
-            NightChrome.inset(g, x, y, w, h);
-        } else if (s.skin() != null) {
+        if (s.skin() != null) {
             McStylePanel.drawSkinInset(g, s.skin(), x, y, w, h);
         } else if (s.dark()) {
             g.fill(x, y, x + w, y + h, s.well());
@@ -108,9 +104,7 @@ public final class Ui {
 
     /** A full-width rule: the 8px divider sprite on paper, a gilt hairline at night. Returns the y below it. */
     public static int divider(GuiGraphics g, UiSurface s, int x, int y, int w) {
-        if (s.nightSheet()) {
-            NightChrome.divider(g, x, y, w);
-        } else if (s.skin() != null) {
+        if (s.skin() != null) {
             McStylePanel.drawSkinDivider(g, s.skin(), x, y, w);
         } else if (s.dark()) {
             g.fill(x, y + 3, x + w, y + 4, WizardsPalette.GILT_DARK);
@@ -371,18 +365,15 @@ public final class Ui {
                            boolean active, boolean hovered, boolean enabled) {
         McStylePanel.ControlState state = McStylePanel.ControlState.of(enabled, hovered && !active);
         McStylePanel.ButtonTone tone = active ? McStylePanel.ButtonTone.SELECT : McStylePanel.ButtonTone.NEUTRAL;
-        if (s.nightSheet()) {
-            NightChrome.button(g, r.x(), r.y(), r.w(), r.h(), state, active);
-        } else if (s.skin() != null) {
+        if (s.skin() != null) {
             McStylePanel.drawSkinButton(g, s.skin(), r.x(), r.y(), r.w(), r.h(), state);
         } else {
             McStylePanel.drawThemedButton(g, r.x(), r.y(), r.w(), r.h(), tone, state);
         }
-        int colour = s.nightSheet() ? (enabled ? s.ink() : s.disabled())
-                : !enabled ? WizardsPalette.PAGE_INK_3 : (s.skin() != null ? s.ink() : WizardsPalette.PAGE_INK);
+        int colour = !enabled ? WizardsPalette.PAGE_INK_3 : (s.skin() != null ? s.ink() : WizardsPalette.PAGE_INK);
         String text = UiText.fit(font, label.getString(), r.w() - 2 * WizardsMetrics.SPACE_S);
         g.drawString(font, text, r.x() + (r.w() - font.width(text)) / 2,
-                r.y() + (r.h() - font.lineHeight) / 2 + 1, colour, s.shadow());
+                r.y() + (r.h() - font.lineHeight) / 2 + 1, colour, false);
         if (active && s.skin() != null) {
             g.fill(r.x() + 3, r.bottom() - 3, r.right() - 3, r.bottom() - 2, s.accent());
         }
@@ -393,6 +384,28 @@ public final class Ui {
         int gap = WizardsMetrics.SPACE_XS;
         int tw = (w - gap * (count - 1)) / count;
         return new Rect(x + i * (tw + gap), y, tw, TAB_H);
+    }
+
+    // ── direction ─────────────────────────────────────────────────────────────
+
+    /** Edge of {@link #arrow}'s box. */
+    public static final int ARROW = 7;
+
+    /**
+     * A solid chevron in a 7x7 box pointing up (0), right (1), down (2) or left (3) -- the wand loadout's
+     * order, so an empty socket can say which way it answers without colour or a word.
+     */
+    public static void arrow(GuiGraphics g, int dir, int x, int y, int colour) {
+        for (int i = 0; i < 4; i++) {
+            int a = 3 - i;
+            int b = 4 + i;
+            switch (dir & 3) {
+                case 0 -> g.fill(x + a, y + 1 + i, x + b, y + 2 + i, colour);
+                case 1 -> g.fill(x + 5 - i, y + a, x + 6 - i, y + b, colour);
+                case 2 -> g.fill(x + a, y + 5 - i, x + b, y + 6 - i, colour);
+                default -> g.fill(x + 1 + i, y + a, x + 2 + i, y + b, colour);
+            }
+        }
     }
 
     // ── previews ──────────────────────────────────────────────────────────────

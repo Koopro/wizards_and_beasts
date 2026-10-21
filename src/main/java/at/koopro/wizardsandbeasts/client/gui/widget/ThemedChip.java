@@ -1,8 +1,7 @@
 package at.koopro.wizardsandbeasts.client.gui.widget;
 
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
-import at.koopro.wizardsandbeasts.client.gui.ui.NightChrome;
-import at.koopro.wizardsandbeasts.client.gui.ui.UiSurface;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ActiveTextCollector;
@@ -18,41 +17,25 @@ import org.jspecify.annotations.NonNull;
 import java.util.function.BooleanSupplier;
 
 /**
- * A filter or tab on the night sheet: a button whose face stays the arcane "chosen" face while
- * {@code selected} answers true.
+ * A filter or option on a parchment screen: a paper tab that wears the select wash while {@code selected}
+ * answers true -- a category filter, a lineage.
  *
- * <p>A real widget rather than a painted rectangle, so Tab reaches it and Enter or Space presses it.
- * The selection is read, not stored: the screen owns which filter is on, and a chip cannot disagree
- * with it.
+ * <p>A real widget rather than a painted rectangle, so Tab reaches it and Enter or Space presses it. The
+ * selection is read, not stored: the screen owns which option is on, and a chip cannot disagree with it.
+ * A chip that cannot be pressed never shows as chosen.
  */
-public final class NightChip extends AbstractButton {
+public final class ThemedChip extends AbstractButton {
 
     private static final int EDGE_PAD = 4;
 
     private final Runnable action;
     private final BooleanSupplier selected;
-    /** False for a primary action: its face is always chosen, which is not a selection to announce. */
-    private final boolean narrateSelection;
 
-    public NightChip(int x, int y, int w, int h, @NonNull Component label,
-                     @NonNull Runnable action, @NonNull BooleanSupplier selected) {
-        this(x, y, w, h, label, action, selected, true);
-    }
-
-    private NightChip(int x, int y, int w, int h, Component label, Runnable action,
-                      BooleanSupplier selected, boolean narrateSelection) {
+    public ThemedChip(int x, int y, int w, int h, @NonNull Component label,
+                      @NonNull Runnable action, @NonNull BooleanSupplier selected) {
         super(x, y, w, h, label);
         this.action = action;
         this.selected = selected;
-        this.narrateSelection = narrateSelection;
-    }
-
-    /**
-     * The sheet's primary action (Confirm, Seal): always the chosen face while it can be pressed, so the
-     * one control that commits something stands apart from the neutral buttons beside it.
-     */
-    public static NightChip primary(int x, int y, int w, int h, @NonNull Component label, @NonNull Runnable action) {
-        return new NightChip(x, y, w, h, label, action, () -> true, false);
     }
 
     /** Width a chip needs for {@code label}: the text plus the face's padding. */
@@ -67,27 +50,26 @@ public final class NightChip extends AbstractButton {
 
     @Override
     protected void renderContents(@NonNull GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        // A chip that cannot be pressed never looks chosen: a greyed Confirm must not wear the arcane face.
         boolean on = active && selected.getAsBoolean();
         McStylePanel.ControlState state = McStylePanel.ControlState.of(active, isHovered() || isFocused());
-        NightChrome.button(g, getX(), getY(), getWidth(), getHeight(), state, on);
+        McStylePanel.drawThemedButton(g, getX(), getY(), getWidth(), getHeight(),
+                on ? McStylePanel.ButtonTone.SELECT : McStylePanel.ButtonTone.NEUTRAL, state);
         Font font = Minecraft.getInstance().font;
-        UiSurface s = UiSurface.NIGHT_SHEET;
-        int colour = !active ? s.disabled() : on ? s.heading() : s.ink2();
         String text = UiText.fit(font, getMessage().getString(), getWidth() - 2 * EDGE_PAD);
         g.drawString(font, text, getX() + (getWidth() - font.width(text)) / 2,
-                getY() + (getHeight() - font.lineHeight) / 2 + 1, colour, s.shadow());
+                getY() + (getHeight() - font.lineHeight) / 2 + 1,
+                active ? WizardsPalette.PAGE_INK : WizardsPalette.PAGE_INK_3, false);
     }
 
     @Override
     protected void renderDefaultLabel(@NonNull ActiveTextCollector collector) {
-        // renderContents draws the label in the sheet's inks.
+        // renderContents draws the label in ink, without vanilla's shadow.
     }
 
     @Override
     protected void updateWidgetNarration(@NonNull NarrationElementOutput output) {
         defaultButtonNarrationText(output);
-        if (narrateSelection && selected.getAsBoolean()) {
+        if (selected.getAsBoolean()) {
             output.add(NarratedElementType.HINT, Component.translatable("gui.wizards_and_beasts.chip.selected"));
         }
     }

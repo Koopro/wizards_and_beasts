@@ -1,16 +1,14 @@
 package at.koopro.wizardsandbeasts.client.spell.gui;
 
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
-import at.koopro.wizardsandbeasts.client.gui.ui.NightChrome;
 import at.koopro.wizardsandbeasts.client.gui.ui.Ui;
 import at.koopro.wizardsandbeasts.client.gui.ui.Ui.Rect;
-import at.koopro.wizardsandbeasts.client.gui.ui.UiSlotState;
 import at.koopro.wizardsandbeasts.client.gui.ui.UiSurface;
 import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 import at.koopro.wizardsandbeasts.client.gui.ui.UiTooltips;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiText;
 import at.koopro.wizardsandbeasts.client.gui.util.UiContrast;
-import at.koopro.wizardsandbeasts.client.gui.widget.NightChip;
+import at.koopro.wizardsandbeasts.client.gui.widget.ThemedChip;
 import at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton;
 import at.koopro.wizardsandbeasts.client.gui.widget.ThemedTextField;
 import at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageDataState;
@@ -43,7 +41,7 @@ import java.util.Locale;
 /**
  * The wand loadout: which four spells the wand answers with, and what each of them is.
  *
- * <p>Three regions on the night sheet, all placed by {@link SpellMenuLayout}: the <b>library</b> of
+ * <p>Three regions on the parchment sheet, all placed by {@link SpellMenuLayout}: the <b>library</b> of
  * known spells (search, category filters, a clipped scrolling list), the <b>wand</b> (four sockets in
  * the HUD diamond's order, with a row per socket naming what it holds) and the <b>details</b> of the
  * picked spell (only the fields that spell has). On a narrow screen the details move under the wand.
@@ -64,7 +62,7 @@ import java.util.Locale;
  */
 public class SpellMenuScreen extends Screen {
 
-    private static final UiSurface S = UiSurface.NIGHT_SHEET;
+    private static final UiSurface S = UiSurface.PAGE;
 
     /** Slot order matches the HUD diamond in {@code SpellDiamondOverlay}: up, right, down, left. */
     static final String[] SLOT_KEYS = {"up", "right", "down", "left"};
@@ -106,7 +104,7 @@ public class SpellMenuScreen extends Screen {
     private boolean draggingScrollbar = false;
 
     /** The filter chips with the category each stands for (null = all), to re-judge after a sync. */
-    private final List<NightChip> chips = new ArrayList<>();
+    private final List<ThemedChip> chips = new ArrayList<>();
     private final List<@Nullable SpellCategory> chipCategories = new ArrayList<>();
     /** {@link ClientSpellDataState#version()} the list was built from. */
     private long seenVersion = -1;
@@ -135,7 +133,7 @@ public class SpellMenuScreen extends Screen {
                     ? Component.translatable("gui.wizards_and_beasts.spell_menu.filter.all")
                     : SpellMenuRenderHelper.categoryName(c);
             labels.add(label);
-            widths[i] = NightChip.widthFor(font, label);
+            widths[i] = ThemedChip.widthFor(font, label);
         }
         layout = SpellMenuLayout.of(width, height, widths);
         rebuildSpellList();
@@ -144,7 +142,6 @@ public class SpellMenuScreen extends Screen {
         Rect s = layout.search();
         searchBox = new ThemedTextField(font, s.x(), s.y(), s.w(), s.h(),
                 Component.translatable("gui.wizards_and_beasts.spell_menu.search"))
-                .night()
                 .inkHint(Component.translatable("gui.wizards_and_beasts.spell_menu.search_hint"));
         searchBox.setValue(searchText);
         searchBox.setResponder(text -> {
@@ -159,7 +156,7 @@ public class SpellMenuScreen extends Screen {
         for (int i = 0; i < filters.size(); i++) {
             SpellCategory c = filters.get(i);
             Rect r = layout.chips().get(i);
-            NightChip chip = new NightChip(r.x(), r.y(), r.w(), r.h(), labels.get(i),
+            ThemedChip chip = new ThemedChip(r.x(), r.y(), r.w(), r.h(), labels.get(i),
                     () -> setFilter(c), () -> filter == c);
             chips.add(chip);
             chipCategories.add(c);
@@ -169,9 +166,9 @@ public class SpellMenuScreen extends Screen {
         seenVersion = ClientSpellDataState.version();
 
         Rect k = layout.skills();
-        addRenderableWidget(ThemedButton.skinned(k.x(), k.y(), k.w(), k.h(),
+        addRenderableWidget(new ThemedButton(k.x(), k.y(), k.w(), k.h(),
                 Component.translatable("gui.wizards_and_beasts.spell_menu.skills"),
-                SkillScreenRouter::openForCurrentPlayer, NightChrome.FOLDER, null, 0, S.ink(), S.disabled()));
+                SkillScreenRouter::openForCurrentPlayer));
     }
 
     /**
@@ -507,10 +504,9 @@ public class SpellMenuScreen extends Screen {
         Rect p = layout.panel();
         Ui.panel(g, S, p.x(), p.y(), p.w(), p.h());
         Rect t = layout.title();
-        UiText.drawFit(g, font, S, title, t.x(), t.y() + 3, t.w(), S.heading());
+        UiText.drawFit(g, font, S, title, t.x(), t.y() + 3, t.w(), S.ink());
         Rect c = layout.content();
-        NightChrome.divider(g, c.x(), layout.ruleY(), c.w());
-        NightChrome.ornament(g, c.x() + c.w() / 2, layout.ruleY());
+        Ui.divider(g, S, c.x(), layout.ruleY(), c.w());
         Rect lib = layout.library();
         Ui.inset(g, S, lib.x(), lib.y(), lib.w(), lib.h());
         Rect d = layout.detail();
@@ -553,19 +549,17 @@ public class SpellMenuScreen extends Screen {
         return truncatedUnderMouse;
     }
 
-    /** A recessed track with a gilt thumb, only when the list is longer than its well. */
+    /** A groove in the well with the wax ribbon, only when the list is longer than its well. */
     private void renderScrollbar(GuiGraphics g) {
         int max = maxScroll();
         if (max <= 0) {
             return;
         }
         Rect bar = layout.scrollbar();
-        g.fill(bar.x(), bar.y(), bar.right(), bar.bottom(), 0xFF0A080D);
+        g.fill(bar.x() + 1, bar.y(), bar.right() - 1, bar.bottom(), WizardsPalette.PAGE_DEEP);
         int thumbH = Math.max(10, bar.h() * layout.visibleRows() / Math.max(1, spellEntries.size()));
         int thumbY = bar.y() + (bar.h() - thumbH) * scrollOffset / max;
-        g.fill(bar.x() + 1, thumbY, bar.right() - 1, thumbY + thumbH, WizardsPalette.GILT_DARK);
-        g.fill(bar.x() + 1, thumbY, bar.right() - 2, thumbY + 1, WizardsPalette.GILT);
-        g.fill(bar.x() + 1, thumbY, bar.x() + 2, thumbY + thumbH - 1, WizardsPalette.GILT);
+        g.fill(bar.x() + 1, thumbY, bar.right() - 1, thumbY + thumbH, WizardsPalette.WAX);
     }
 
     /**
@@ -590,19 +584,18 @@ public class SpellMenuScreen extends Screen {
         for (int i = 0; i < 4; i++) {
             Rect s = layout.sockets().get(i);
             String spellId = data.getLoadoutSpell(i);
-            UiSlotState state = i != hovered ? (spellId == null ? UiSlotState.EMPTY : UiSlotState.FILLED)
-                    : draggingSpellId != null ? UiSlotState.DROP_OK : UiSlotState.HOVER;
-            NightChrome.socket(g, s.x(), s.y(), state);
+            boolean over = i == hovered;
+            SpellSigilRenderer.socket(g, s.x(), s.y(), s.w(), spellId != null, over,
+                    over && draggingSpellId != null, accentOf(spellId), age);
             if (spellId != null) {
-                SpellSigilRenderer.seat(g, s.x(), s.y(), s.w(), accentOf(spellId), age);
                 int icon = 16;
                 g.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.spellIcon(spellId),
                         s.x() + (s.w() - icon) / 2, s.y() + (s.h() - icon) / 2, icon, icon);
-                SpellMenuRenderHelper.pips(g, s.x() + (s.w() - 8) / 2, s.bottom() + 2,
+                SpellSigilRenderer.proficiencyPips(g, s.x(), s.y(), s.w(),
                         SpellMenuRenderHelper.proficiencyPips(spellId));
             } else {
-                NightChrome.arrow(g, i, s.x() + (s.w() - NightChrome.ARROW) / 2,
-                        s.y() + (s.h() - NightChrome.ARROW) / 2);
+                Ui.arrow(g, i, s.x() + (s.w() - Ui.ARROW) / 2, s.y() + (s.h() - Ui.ARROW) / 2,
+                        WizardsPalette.PAGE_INK_2);
             }
         }
 
@@ -614,11 +607,14 @@ public class SpellMenuScreen extends Screen {
         }
     }
 
-    /** A filled socket is read by hue: the spell's category colour, held to 3 : 1 on the night cloth. */
+    /**
+     * A filled socket is read by hue. The category hues were picked for a dark plate and several all but
+     * vanish on paper, so the hue is clamped to the 3 : 1 a ring or a line needs against the page.
+     */
     private static int accentOf(@Nullable String spellId) {
         Spell spell = spellId == null ? null : Spells.byId(spellId);
-        return spell == null ? SpellSigilRenderer.UNLIT
-                : UiContrast.readableOn(spell.getCategory().getColor(), UiSurface.NIGHT_SHEET_FIELD, UiContrast.AA_LARGE);
+        return spell == null ? WizardsPalette.PAGE_INK_2
+                : UiContrast.readableOn(spell.getCategory().getColor(), WizardsPalette.PAGE, UiContrast.AA_LARGE);
     }
 
     /**
@@ -647,10 +643,10 @@ public class SpellMenuScreen extends Screen {
             // A hairline track on the card's right edge: there is more below, and roughly how much.
             int x = layout.detail().right() - 3;
             int trackTop = area.y();
-            g.fill(x, trackTop, x + 1, area.bottom(), 0x60000000 | (WizardsPalette.GILT_DARK & 0xFFFFFF));
+            g.fill(x, trackTop, x + 1, area.bottom(), WizardsPalette.PAGE_DEEP);
             int thumbH = Math.max(8, area.h() * area.h() / detailContentH);
             int thumbY = trackTop + (area.h() - thumbH) * detailScroll / Math.max(1, detailContentH - area.h());
-            g.fill(x, thumbY, x + 1, thumbY + thumbH, WizardsPalette.GILT);
+            g.fill(x, thumbY, x + 1, thumbY + thumbH, WizardsPalette.WAX);
         }
     }
 
@@ -718,7 +714,7 @@ public class SpellMenuScreen extends Screen {
         boolean overSocket = layout.slotAt(mouseX, mouseY) >= 0;
         SpellSigilRenderer.dragThread(g, dragOriginX, dragOriginY, mouseX, mouseY, accentOf(draggingSpellId));
         int card = 22;
-        Ui.nightCard(g, mouseX - card / 2, mouseY - card / 2, card, card);
+        Ui.inset(g, S, mouseX - card / 2, mouseY - card / 2, card, card);
         g.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.spellIcon(draggingSpellId),
                 mouseX - 8, mouseY - 8, 16, 16, overSocket ? 1.0f : 0.55f);
     }

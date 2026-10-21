@@ -1,6 +1,5 @@
 package at.koopro.wizardsandbeasts.client.spell.gui;
 
-import at.koopro.wizardsandbeasts.client.gui.ui.NightChrome;
 import at.koopro.wizardsandbeasts.client.gui.ui.Ui.Rect;
 import org.jspecify.annotations.NullMarked;
 
@@ -60,6 +59,8 @@ public record SpellMenuLayout(Mode mode, Rect panel, Rect content, Rect title, i
     static final int SCROLLBAR_W = 6;
 
     static final int WAND_W = 120;
+    /** Socket edge, drawn at native size. */
+    public static final int SOCKET = 30;
     /** Socket centre to diamond centre. Wide leaves room for the hub's channels; stacked saves height. */
     static final int SPACING_WIDE = 40;
     static final int SPACING_STACKED = 34;
@@ -116,7 +117,7 @@ public record SpellMenuLayout(Mode mode, Rect panel, Rect content, Rect title, i
             detail = new Rect(wand.right() + GAP, bodyTop, content.right() - wand.right() - GAP, bodyH);
         } else {
             spacing = SPACING_STACKED;
-            int extent = 2 * spacing + NightChrome.SOCKET;
+            int extent = 2 * spacing + SOCKET;
             int rightW = content.right() - rightX;
             int bindingsW = rightW - extent - GAP;
             int wandW = bindingsW >= BINDINGS_MIN_W ? rightW : extent;
@@ -125,7 +126,7 @@ public record SpellMenuLayout(Mode mode, Rect panel, Rect content, Rect title, i
             detail = new Rect(rightX, detailTop, rightW, bodyBottom - detailTop);
         }
 
-        int extent = 2 * spacing + NightChrome.SOCKET;
+        int extent = 2 * spacing + SOCKET;
         int hubX = mode == Mode.WIDE ? wand.x() + wand.w() / 2 : wand.x() + extent / 2;
         int hubY = wand.y() + extent / 2;
         boolean wideBindings = false;
@@ -138,11 +139,11 @@ public record SpellMenuLayout(Mode mode, Rect panel, Rect content, Rect title, i
             hubY += Math.max(0, wand.h() - used) / 3;
         }
         List<Rect> sockets = new ArrayList<>(4);
-        int half = NightChrome.SOCKET / 2;
+        int half = SOCKET / 2;
         int[][] dir = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
         for (int[] d : dir) {
             sockets.add(new Rect(hubX + d[0] * spacing - half, hubY + d[1] * spacing - half,
-                    NightChrome.SOCKET, NightChrome.SOCKET));
+                    SOCKET, SOCKET));
         }
 
         if (wideBindings) {
