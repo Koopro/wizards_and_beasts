@@ -35,7 +35,8 @@ class NoUntracedLearningTest {
             "client/spell/state/ClientSpellDataState.java",    // client mirror of server syncs
             "spell/command/SpellCommands.java",                // /wandb spell learn — operator override
             "admin/player/PlayerAdminService.java",            // admin panel grant — operator override
-            "spell/debug/SpellDevKit.java"                     // dev kit — operator override
+            "spell/debug/SpellDevKit.java",                    // dev kit — operator override
+            "client/debug/UiScreenCapture.java"                // screenshot harness — dev only, disposable world
     );
 
     /** Files allowed to call the service's commit entry points. */

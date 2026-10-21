@@ -1,292 +1,288 @@
 package at.koopro.wizardsandbeasts.client.spell.gui;
 
-import at.koopro.wizardsandbeasts.client.gui.ui.Ui;
-import at.koopro.wizardsandbeasts.client.gui.ui.UiSurface;
-import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
-
-import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellDataState;
-import at.koopro.wizardsandbeasts.client.spell.ui.SpellPowerTooltip;
-import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
-import at.koopro.wizardsandbeasts.spell.core.Proficiency;
-import at.koopro.wizardsandbeasts.spell.core.Spell;
-import at.koopro.wizardsandbeasts.spell.core.SpellRequirement;
-import at.koopro.wizardsandbeasts.spell.core.Spells;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
-import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
-import at.koopro.wizardsandbeasts.client.gui.util.UiContrast;
-import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
-import at.koopro.wizardsandbeasts.client.gui.WizardsAndBeastsUiTokens;
 import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
+import at.koopro.wizardsandbeasts.client.gui.ui.NightChrome;
+import at.koopro.wizardsandbeasts.client.gui.ui.Ui;
+import at.koopro.wizardsandbeasts.client.gui.ui.Ui.Rect;
+import at.koopro.wizardsandbeasts.client.gui.ui.UiSurface;
+import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiText;
-
+import at.koopro.wizardsandbeasts.client.gui.util.UiContrast;
+import at.koopro.wizardsandbeasts.client.hud.WandHudSprites;
+import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellDataState;
+import at.koopro.wizardsandbeasts.client.spell.ui.SpellPowerTooltip;
+import at.koopro.wizardsandbeasts.spell.core.Proficiency;
+import at.koopro.wizardsandbeasts.spell.core.Spell;
+import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
+import at.koopro.wizardsandbeasts.spell.core.SpellRequirement;
+import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
 /**
- * Non-widget painting for {@link SpellMenuScreen}.
+ * Painting for {@link SpellMenuScreen}: list rows, bound-spell rows and the details card, each into a
+ * rectangle the screen took from {@link SpellMenuLayout}. Nothing here decides where anything goes.
  */
 public final class SpellMenuRenderHelper {
 
-    /** Alpha a placeholder spell's icon is drawn at — present, legible, obviously not available. */
+    private static final UiSurface S = UiSurface.NIGHT_SHEET;
+
+    /** Alpha a placeholder spell's icon is drawn at -- present, legible, obviously not available. */
     private static final float ALPHA_COMING_SOON = 0.35f;
-
-    /**
-     * How far the sheet reaches past the layout rectangle on every side.
-     *
-     * <p>Every offset on this screen is measured from the layout's origin and sits 0-4px inside it,
-     * which is right on top of the parchment frame's double rule (4-6px in). Growing the sheet by the
-     * standard 12px clearance moves the frame out of the content's way without moving a single
-     * control; {@code Layout.panel} already leaves 12px of screen either side for it.
-     */
-    public static final int SHEET_OUTSET = WizardsMetrics.SPACE_L;
-
-    /**
-     * The ground the index headers and the info card's labels are read against, for
-     * {@link UiContrast}: an inset's stock is the page darkened, so the page's shade tone is the
-     * conservative stand-in.
-     */
-    private static final int WELL_GROUND = WizardsPalette.PAGE_SHADE;
-
-    /**
-     * Left edge of the info card, from the index column's edge. Clear of the index well, which runs
-     * {@code s(4)} past that edge to hold its scrollbar — two insets must not share an edge.
-     */
-    public static final int INFO_CARD_X = 8;
-    /** The info text, clear of the card's engraved edge. */
-    private static final int INFO_TEXT_X = INFO_CARD_X + 6;
+    private static final int ICON = 12;
+    /** Proficiency pips at the end of a row: three 2px squares, so the count reads without colour. */
+    private static final int PIP = 2;
+    private static final int PIPS_W = 3 * PIP + 2;
+    /** Width of the direction word on a bound-spell row ("Right" is the widest in English). */
+    private static final int DIRECTION_W = 28;
 
     private SpellMenuRenderHelper() {}
 
-    /**
-     * The sheet, the title, and a recessed well for the index.
-     *
-     * <p>This screen was a navy panel with a pure-gold title, then leather and brass; it is now the
-     * parchment every other screen is — the shared themed sheet, an inset well for the list, and the
-     * title in ink on the page between the search box and the Skills button.
-     */
-    public static void renderFrame(GuiGraphics graphics, Font font, int width, int height,
-                                   int panelW, int panelH, int leftW, GuiScaleHelper.Layout layout) {
-        int x = layout.panelX();
-        int y = layout.panelY();
-        int w = layout.panelW();
-        int h = layout.panelH();
-        int lw = layout.s(leftW);
-
-        McStylePanel.drawThemedPanel(graphics, x - SHEET_OUTSET, y - SHEET_OUTSET,
-                w + 2 * SHEET_OUTSET, h + 2 * SHEET_OUTSET);
-
-        // Centred in the gap between the search box (which spans the index column) and the Skills
-        // button, not on the sheet: at w / 2 the search box, drawn later as a widget, covered half of it.
-        String title = net.minecraft.network.chat.Component
-                .translatable("gui.wizards_and_beasts.spell_menu.title").getString();
-        int titleCx = x + (lw + w - layout.s(62)) / 2;
-        graphics.drawString(font, title, titleCx - font.width(title) / 2,
-                y + layout.s(WizardsAndBeastsUiTokens.SpellMenu.HEADER_Y_OFFSET),
-                WizardsPalette.PAGE_INK, false);
-
-        // The index sits in a recessed well that holds its search field too, the full height of the
-        // layout: the field is a well of its own, and two wells stacked edge to edge read as a seam.
-        // Its right edge clears the list's scrollbar; the plate to its right carries the sigil.
-        McStylePanel.drawThemedInset(graphics, x, y, lw + layout.s(4), h);
-    }
-
-    /**
-     * Paints one list row at a rectangle the caller owns.
-     *
-     * <p>Per-row rather than per-list because {@link SpellMenuScreen} computes the geometry and uses
-     * the same numbers to hit-test. The previous whole-list painter derived its own row positions and
-     * used the unscaled {@code LIST_ROW_SPACING} while the screen placed its buttons with the scaled
-     * one, so labels and click targets drifted apart at every GUI scale but 100%.
-     */
-    public static void renderRow(GuiGraphics graphics, Font font, SpellMenuScreen.SpellEntry entry,
-                                 int x, int y, int w, int h,
-                                 boolean hovered, boolean selected, int iconSize) {
-        if (entry.spell() == null) {
-            // The category's translated name, not its enum constant: "DARK ARTS" in capitals was the
-            // constant with its underscore swapped out, a debug readout.
-            // Category hues were chosen for a dark ground — UTILITY's 0x44FF44 is 1.4 : 1 on paper.
-            // Contrast-clamped, so the hue survives but reads.
-            int hue = UiContrast.readableOn(entry.category().getColor(), WELL_GROUND);
-            graphics.drawString(font, categoryName(entry.category()),
-                    x + WizardsAndBeastsUiTokens.SpellMenu.CATEGORY_X_OFFSET,
-                    y + WizardsAndBeastsUiTokens.SpellMenu.ENTRY_TEXT_Y_OFFSET, hue, false);
-            graphics.fill(x, y + h - 3, x + w, y + h - 2, (0x60 << 24) | (hue & 0xFFFFFF));
-            return;
-        }
-
-        Spell spell = entry.spell();
-        // Rows are cards on the well, not text on a void: a seated row is what makes the index read
-        // as a list of things you can pick up rather than a paragraph. The card is the page laid on
-        // the darker well; hover lifts it, selection washes it with gilt and marks its edge.
-        int card = selected ? WizardsPalette.PAGE_SELECT : hovered ? WizardsPalette.PAGE_LIGHT : WizardsPalette.PAGE;
-        graphics.fill(x - 1, y - 1, x + w, y + h, card);
-        if (selected) {
-            graphics.fill(x - 1, y - 1, x + 1, y + h, WizardsPalette.GILT_DARK);
-        }
-
-        Minecraft mc = Minecraft.getInstance();
-        // A spell whose behaviour is not written yet is drawn, not hidden: the corpus is registered
-        // precisely so the roster is visible. What it must not do is look pickable — faded icon,
-        // dimmed name, and a "coming soon" tag where the proficiency mark would go.
-        boolean comingSoon = !spell.isImplemented();
-
-        graphics.blitSprite(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED,
-                at.koopro.wizardsandbeasts.client.hud.WandHudSprites.spellIcon(spell.getId()),
-                x + 1, y + (h - iconSize) / 2, iconSize, iconSize,
-                comingSoon ? ALPHA_COMING_SOON : 1.0f);
-
-        // The name gets what the status on the right leaves it, and is shortened with an ellipsis
-        // rather than run under it: a long name used to print straight through the status tag.
-        Component soonTag = Component.translatable("gui.wizards_and_beasts.spell.coming_soon_short");
-        int statusW = comingSoon ? Ui.chipWidth(font, soonTag) + 2 : WizardsAndBeastsUiTokens.SpellMenu.COOLDOWN_X_OFFSET;
-        int nameX = x + iconSize + 4;
-        graphics.drawString(font,
-                UiText.fit(font, at.koopro.wizardsandbeasts.client.gui.util.GuiText.resolve(spell.getDisplayName()),
-                        x + w - statusW - 2 - nameX),
-                nameX, y + WizardsAndBeastsUiTokens.SpellMenu.ENTRY_TEXT_Y_OFFSET,
-                comingSoon ? WizardsPalette.PAGE_INK_3
-                        : UiContrast.readableOn(spell.getCategory().getColor(), card),
-                false);
-
-        if (comingSoon) {
-            Ui.chip(graphics, font, UiSurface.PAGE, x + w - Ui.chipWidth(font, soonTag) - 2,
-                    y + (h - Ui.CHIP_H) / 2, soonTag, Ui.Tone.MUTED);
-            return;
-        }
-
-        PlayerSpellData data = ClientSpellDataState.get();
-        if (mc.level != null && data.isOnCooldown(spell.getId(), mc.level.getGameTime())) {
-            float sec = Math.max(0f, (data.getCooldownExpiry(spell.getId()) - mc.level.getGameTime()) / 20f);
-            String label = String.format("%.1fs", sec);
-            graphics.drawString(font, label,
-                    x + w - WizardsAndBeastsUiTokens.SpellMenu.COOLDOWN_X_OFFSET,
-                    y + WizardsAndBeastsUiTokens.SpellMenu.ENTRY_TEXT_Y_OFFSET,
-                    UiContrast.readableOn(WizardsAndBeastsUiTokens.SpellMenu.COOLDOWN_COLOR, card), false);
-        }
-
-        Proficiency prof = Proficiency.fromCastCount(data.getSuccessfulHits(spell.getId()));
-        String indicator = switch (prof) {
-            case MASTERED -> "★";
-            case PROFICIENT -> "◉";
-            default -> "○";
-        };
-        int profColor = switch (prof) {
-            case MASTERED -> UiContrast.readableOn(WizardsAndBeastsUiTokens.SpellMenu.PROF_MASTERED, card);
-            case PROFICIENT -> UiContrast.readableOn(WizardsAndBeastsUiTokens.SpellMenu.PROF_PROFICIENT, card);
-            default -> WizardsPalette.PAGE_INK_3;
-        };
-        graphics.drawString(font, indicator,
-                x + w - WizardsAndBeastsUiTokens.SpellMenu.PROF_X_OFFSET,
-                y + WizardsAndBeastsUiTokens.SpellMenu.ENTRY_TEXT_Y_OFFSET, profColor, false);
-    }
-
     /** A spell category as a player reads it. */
-    static Component categoryName(at.koopro.wizardsandbeasts.spell.core.SpellCategory category) {
-        return Component.translatable("spell_category.wizards_and_beasts."
-                + category.name().toLowerCase(java.util.Locale.ROOT));
+    static Component categoryName(SpellCategory category) {
+        return Component.translatable("spell_category.wizards_and_beasts." + category.name().toLowerCase(Locale.ROOT));
     }
 
     /**
-     * The detail panel for whichever spell is selected.
-     *
-     * <p>The assignment hint that used to live at the bottom of this method moved onto the screen,
-     * which varies it with what you are holding. A "Sync corrections: N" counter was also removed —
-     * that is a debug readout, and this is a screen players open to pick a spell.
+     * A category's hue made legible on the night well. The hues were picked for a dark ground, but dark
+     * arts' violet is 2 : 1 on it; clamped, the hue keeps its meaning and gains the depth to be seen.
      */
-    public static void renderSelectedSpellPanel(GuiGraphics graphics, Font font, int width, int height,
-                                                int panelW, int panelH, int leftW,
-                                                @Nullable String selectedSpellId, GuiScaleHelper.Layout layout) {
-        int panelX = layout.panelX();
-        int panelY = layout.panelY();
-        panelH = layout.panelH();
-        leftW = layout.s(leftW);
-        int infoX = panelX + leftW + layout.s(INFO_TEXT_X);
+    static int hue(SpellCategory category) {
+        return UiContrast.readableOn(category.getColor(), S.well(), UiContrast.AA_TEXT);
+    }
 
-        if (selectedSpellId == null) {
-            return;
+    static int proficiencyPips(String spellId) {
+        return switch (Proficiency.fromCastCount(ClientSpellDataState.get().getSuccessfulHits(spellId))) {
+            case MASTERED -> 3;
+            case PROFICIENT -> 2;
+            default -> 1;
+        };
+    }
+
+    /** The category heading inside the list: its name in its hue over a hairline of the same hue. */
+    static void renderHeader(GuiGraphics g, Font font, SpellCategory category, Rect r) {
+        int hue = hue(category);
+        g.drawString(font, categoryName(category), r.x() + 2, r.y() + 5, hue, S.shadow());
+        g.fill(r.x(), r.bottom() - 2, r.right(), r.bottom() - 1, (0x70 << 24) | (hue & 0xFFFFFF));
+    }
+
+    /**
+     * One spell row. Right to left: proficiency pips (or a "Soon" chip), the chevron of the socket it is
+     * bound to, its recharge time; the name gets what is left and ends in an ellipsis rather than
+     * running under them. Returns whether the name had to be shortened, so the screen can tooltip it.
+     *
+     * @param boundSlot the first socket holding this spell, or -1
+     */
+    static boolean renderRow(GuiGraphics g, Font font, Spell spell, Rect r,
+                             boolean hovered, boolean selected, boolean dragSource, int boundSlot) {
+        if (selected || dragSource) {
+            g.fill(r.x(), r.y(), r.right(), r.bottom(), S.selectWash());
+            g.fill(r.x(), r.y(), r.x() + 2, r.bottom(), WizardsPalette.GILT);
+        } else if (hovered) {
+            g.fill(r.x(), r.y(), r.right(), r.bottom(), S.hoverWash());
         }
-        Spell sel = Spells.byId(selectedSpellId);
-        if (sel == null) {
-            return;
-        }
 
-        PlayerSpellData data = ClientSpellDataState.get();
-        int infoY = panelY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_INFO_BASE_Y);
+        boolean comingSoon = !spell.isImplemented();
+        g.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.spellIcon(spell.getId()),
+                r.x() + 4, r.y() + (r.h() - ICON) / 2, ICON, ICON, comingSoon ? ALPHA_COMING_SOON : 1.0f);
 
-        graphics.drawString(font, GuiText.resolve(sel.getDisplayName()), infoX, infoY,
-                UiContrast.readableOn(sel.getCategory().getColor(), WELL_GROUND), false);
-
-        graphics.drawString(font, categoryName(sel.getCategory()), infoX,
-                infoY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_CATEGORY_Y),
-                WizardsPalette.PAGE_INK_2, false);
-
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.level != null && data.isOnCooldown(sel.getId(), mc.level.getGameTime())) {
-            float sec = Math.max(0f, (data.getCooldownExpiry(sel.getId()) - mc.level.getGameTime()) / 20f);
-            graphics.drawString(font,
-                    Component.translatable("gui.wizards_and_beasts.spell_menu.recharging",
-                            String.format("%.1f", sec)),
-                    infoX, infoY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_COOLDOWN_Y),
-                    UiContrast.readableOn(WizardsAndBeastsUiTokens.SpellMenu.COOLDOWN_COLOR, WELL_GROUND), false);
+        int textY = r.y() + (r.h() - font.lineHeight) / 2 + 1;
+        int right = r.right() - 3;
+        if (comingSoon) {
+            Component soon = Component.translatable("gui.wizards_and_beasts.spell.coming_soon_short");
+            right -= Ui.chipWidth(font, soon);
+            Ui.chip(g, font, S, right, r.y() + (r.h() - Ui.CHIP_H) / 2, soon, Ui.Tone.MUTED);
         } else {
-            graphics.drawString(font,
-                    Component.translatable("gui.wizards_and_beasts.spell_menu.cooldown",
-                            String.format("%.1f", sel.getBaseCooldownTicks() / 20.0f)),
-                    infoX, infoY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_COOLDOWN_Y),
-                    WizardsPalette.PAGE_INK_2, false);
+            right -= PIPS_W;
+            pips(g, right, r.y() + (r.h() - PIP) / 2, proficiencyPips(spell.getId()));
+            if (boundSlot >= 0) {
+                right -= NightChrome.ARROW + 3;
+                NightChrome.arrow(g, boundSlot, right, r.y() + (r.h() - NightChrome.ARROW) / 2);
+            }
+            String cooldown = cooldownSeconds(spell);
+            if (cooldown != null) {
+                right -= font.width(cooldown) + 3;
+                g.drawString(font, cooldown, right, textY, S.warn(), S.shadow());
+            }
         }
 
-        if (sel.getBaseDamage() > 0) {
-            graphics.drawString(font,
-                    Component.translatable("gui.wizards_and_beasts.spell_menu.damage",
-                            String.format("%.1f", sel.getBaseDamage())),
-                    infoX, infoY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_DAMAGE_Y),
-                    WizardsPalette.PAGE_INK_2, false);
+        int nameX = r.x() + 4 + ICON + 4;
+        int colour = comingSoon ? S.ink3() : selected ? S.heading() : S.ink();
+        return UiText.drawFit(g, font, S, Component.literal(GuiText.resolve(spell.getDisplayName())),
+                nameX, textY, right - 4 - nameX, colour);
+    }
+
+    /** Three pips in a row, the first {@code filled} lit gilt. */
+    static void pips(GuiGraphics g, int x, int y, int filled) {
+        for (int i = 0; i < 3; i++) {
+            int px = x + i * (PIP + 1);
+            g.fill(px, y, px + PIP, y + PIP, i < filled ? WizardsPalette.GILT : SpellSigilRenderer.UNLIT);
+        }
+    }
+
+    /**
+     * A socket's row under the wand: chevron, direction word, the bound spell's name or "Empty". It is a
+     * second, larger target for the same socket (the layout hit-tests it as one), and the place a
+     * socket's spell can be read in full.
+     */
+    static void renderBinding(GuiGraphics g, Font font, int slot, Rect r, @Nullable Spell spell,
+                              boolean hovered, boolean dropTarget) {
+        if (dropTarget) {
+            g.fill(r.x(), r.y(), r.right(), r.bottom(), S.selectWash());
+        } else if (hovered) {
+            g.fill(r.x(), r.y(), r.right(), r.bottom(), S.hoverWash());
+        }
+        NightChrome.arrow(g, slot, r.x() + 2, r.y() + (r.h() - NightChrome.ARROW) / 2);
+        int textY = r.y() + (r.h() - font.lineHeight) / 2 + 1;
+        int x = r.x() + 2 + NightChrome.ARROW + 4;
+        g.drawString(font, Component.translatable("gui.wizards_and_beasts.spell_menu.slot." + SpellMenuScreen.SLOT_KEYS[slot]),
+                x, textY, S.ink3(), S.shadow());
+        x += DIRECTION_W;
+        Component name = spell == null
+                ? Component.translatable("gui.wizards_and_beasts.spell_menu.slot_empty")
+                : Component.literal(GuiText.resolve(spell.getDisplayName()));
+        UiText.drawFit(g, font, S, name, x, textY, r.right() - 2 - x,
+                spell == null ? S.ink3() : hue(spell.getCategory()));
+    }
+
+    /** Remaining recharge as "3.2s", or null when the spell is ready. */
+    static @Nullable String cooldownSeconds(Spell spell) {
+        Minecraft mc = Minecraft.getInstance();
+        PlayerSpellData data = ClientSpellDataState.get();
+        if (mc.level == null || !data.isOnCooldown(spell.getId(), mc.level.getGameTime())) {
+            return null;
+        }
+        float sec = Math.max(0f, (data.getCooldownExpiry(spell.getId()) - mc.level.getGameTime()) / 20f);
+        return String.format(Locale.ROOT, "%.1fs", sec);
+    }
+
+    /**
+     * The details card's contents for {@code spell}, from {@code top} down, inside {@code area}'s width.
+     * Only what the spell has: no damage row for a spell that deals none, no description where the
+     * language file has none. Returns the y below the last thing drawn, so the screen can scroll it.
+     *
+     * @param bound the sockets this spell sits in, in loadout order
+     */
+    static int renderDetail(GuiGraphics g, Font font, Spell spell, Rect area, int top, List<Integer> bound) {
+        PlayerSpellData data = ClientSpellDataState.get();
+        int x = area.x();
+        int w = area.w();
+        int y = top;
+
+        g.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.spellIcon(spell.getId()), x, y, 16, 16,
+                spell.isImplemented() ? 1.0f : ALPHA_COMING_SOON);
+        UiText.drawFit(g, font, S, Component.literal(GuiText.resolve(spell.getDisplayName())),
+                x + 20, y + 4, w - 20, hue(spell.getCategory()));
+        y += 20;
+
+        // Status chips: what the spell is, where it is, whether it can be cast now. Each says it in
+        // words; the tone only repeats it.
+        List<Component> chips = new ArrayList<>();
+        List<Ui.Tone> tones = new ArrayList<>();
+        chips.add(categoryName(spell.getCategory()));
+        tones.add(Ui.Tone.NEUTRAL);
+        if (!spell.isImplemented()) {
+            chips.add(Component.translatable("gui.wizards_and_beasts.spell.coming_soon_short"));
+            tones.add(Ui.Tone.MUTED);
+        } else if (bound.isEmpty()) {
+            chips.add(Component.translatable("gui.wizards_and_beasts.spell_menu.unbound"));
+            tones.add(Ui.Tone.MUTED);
+        } else {
+            Component where = Component.empty();
+            for (int i = 0; i < bound.size(); i++) {
+                if (i > 0) {
+                    where = where.copy().append(", ");
+                }
+                where = where.copy().append(Component.translatable(
+                        "gui.wizards_and_beasts.spell_menu.slot." + SpellMenuScreen.SLOT_KEYS[bound.get(i)]));
+            }
+            chips.add(Component.translatable("gui.wizards_and_beasts.spell_menu.bound", where));
+            tones.add(Ui.Tone.GOOD);
+        }
+        String recharge = cooldownSeconds(spell);
+        if (recharge != null) {
+            chips.add(Component.translatable("gui.wizards_and_beasts.spell_menu.recharging_chip", recharge));
+            tones.add(Ui.Tone.WARN);
+        }
+        int cx = x;
+        for (int i = 0; i < chips.size(); i++) {
+            int cw = Ui.chipWidth(font, chips.get(i));
+            if (cx > x && cx + cw > x + w) {
+                cx = x;
+                y += Ui.CHIP_H + 2;
+            }
+            cx += Ui.chip(g, font, S, cx, y, chips.get(i), tones.get(i)) + 3;
+        }
+        y += Ui.CHIP_H + WizardsMetrics.SPACE_S;
+        Ui.hairline(g, S, x, y, w);
+        y += WizardsMetrics.SPACE_S + 1;
+
+        String descKey = "spell.wizards_and_beasts." + spell.getId() + ".description";
+        if (I18n.exists(descKey)) {
+            Component desc = Component.translatable(descKey);
+            y = UiText.drawWrapped(g, font, S, UiText.Role.LABEL, desc, x, y, w, Integer.MAX_VALUE)
+                    + WizardsMetrics.SPACE_S;
         }
 
-        int casts = data.getSuccessfulHits(sel.getId());
+        y = Ui.statRow(g, font, S, x, y, w, Component.translatable("gui.wizards_and_beasts.spell_menu.stat.cooldown"),
+                Component.translatable("gui.wizards_and_beasts.spell_menu.value.seconds",
+                        String.format(Locale.ROOT, "%.1f", spell.getBaseCooldownTicks() / 20.0f)));
+        if (spell.getBaseDamage() > 0) {
+            y = Ui.statRow(g, font, S, x, y, w, Component.translatable("gui.wizards_and_beasts.spell_menu.stat.damage"),
+                    Component.literal(String.format(Locale.ROOT, "%.1f", spell.getBaseDamage())));
+        }
+
+        int casts = data.getSuccessfulHits(spell.getId());
         Proficiency prof = Proficiency.fromCastCount(casts);
-        int nextThreshold = switch (prof) {
-            case NOVICE -> Proficiency.PROFICIENT.getCastsRequired();
-            case PROFICIENT -> Proficiency.MASTERED.getCastsRequired();
-            case MASTERED -> casts;
-        };
-        Component profName = Component.translatable(switch (prof) {
-            case MASTERED -> "gui.wizards_and_beasts.spell_menu.prof.mastered";
-            case PROFICIENT -> "gui.wizards_and_beasts.spell_menu.prof.proficient";
-            default -> "gui.wizards_and_beasts.spell_menu.prof.novice";
-        });
-        int profColor = switch (prof) {
-            case MASTERED -> UiContrast.readableOn(WizardsAndBeastsUiTokens.SpellMenu.PROF_MASTERED, WELL_GROUND);
-            case PROFICIENT -> UiContrast.readableOn(WizardsAndBeastsUiTokens.SpellMenu.PROF_PROFICIENT, WELL_GROUND);
-            default -> WizardsPalette.PAGE_INK_2;
-        };
-        Component profText = prof == Proficiency.MASTERED
-                ? Component.translatable("gui.wizards_and_beasts.spell_menu.prof_casts", profName, casts)
-                : Component.translatable("gui.wizards_and_beasts.spell_menu.prof_progress",
-                        profName, casts, nextThreshold);
-        int profY = sel.getBaseDamage() > 0
-                ? infoY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_PROF_WITH_DAMAGE_Y)
-                : infoY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_PROF_NO_DAMAGE_Y);
-        graphics.drawString(font, profText, infoX, profY, profColor, false);
+        Component profName = Component.translatable("gui.wizards_and_beasts.spell_menu.prof."
+                + prof.name().toLowerCase(Locale.ROOT));
+        float fraction;
+        Component profValue;
+        if (prof == Proficiency.MASTERED) {
+            fraction = 1.0f;
+            profValue = Component.translatable("gui.wizards_and_beasts.spell_menu.prof_casts", profName, casts);
+        } else {
+            int from = prof == Proficiency.NOVICE ? 0 : Proficiency.PROFICIENT.getCastsRequired();
+            int to = prof == Proficiency.NOVICE ? Proficiency.PROFICIENT.getCastsRequired()
+                    : Proficiency.MASTERED.getCastsRequired();
+            fraction = (casts - from) / (float) Math.max(1, to - from);
+            profValue = Component.translatable("gui.wizards_and_beasts.spell_menu.prof_progress", profName, casts, to);
+        }
+        y = Ui.labelledBar(g, font, S, x, y + 2, w,
+                Component.translatable("gui.wizards_and_beasts.spell_menu.stat.proficiency"), profValue,
+                fraction, WizardsPalette.GILT);
 
-        int nextY = profY + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_REQ_Y);
-
-        SpellRequirement req = sel.getRequirement();
+        SpellRequirement req = spell.getRequirement();
         if (req != null && req != SpellRequirement.NONE) {
-            graphics.drawString(font, req.describe(), infoX, nextY, WizardsPalette.PAGE_INK_2, false);
-            nextY += layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_REQ_Y);
+            boolean met = req.isMet(data);
+            UiText.draw(g, font, S, UiText.Role.LABEL,
+                    Component.translatable("gui.wizards_and_beasts.spell_menu.stat.requires"), x, y);
+            y += WizardsMetrics.LINE_BODY;
+            // The glyph says met or not; the colour only repeats it.
+            Component line = Component.literal(met ? "✔ " : "✕ ").append(req.describe());
+            List<net.minecraft.util.FormattedCharSequence> lines = font.split(line, w);
+            for (var l : lines) {
+                g.drawString(font, l, x, y, met ? S.good() : S.bad(), S.shadow());
+                y += WizardsMetrics.LINE_BODY;
+            }
+            y += WizardsMetrics.SPACE_XS;
         }
 
-        // What the spell will actually hit for, from the same class the server casts with. The base
-        // damage line above it is the number in the JSON; this is the number the player gets, and
-        // until now the screen only ever showed the first of the two.
-        for (Component line : SpellPowerTooltip.lines(sel)) {
-            graphics.drawString(font, line, infoX, nextY, WizardsPalette.PAGE_INK_2, false);
-            nextY += font.lineHeight + 1;
+        // What the spell will actually hit for, from the class the server casts with -- the damage row
+        // above is the number in the JSON; this is the one the player gets.
+        for (Component line : SpellPowerTooltip.lines(spell)) {
+            y = UiText.drawWrapped(g, font, S, UiText.Role.CAPTION, line, x, y, w, 4);
         }
+        return y;
     }
 }

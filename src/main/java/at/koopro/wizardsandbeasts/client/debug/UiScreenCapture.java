@@ -114,6 +114,39 @@ public final class UiScreenCapture {
         return Integer.parseInt(spec.split("x")[index]);
     }
 
+    /**
+     * The loadout screen with something on it: up to seven spells of every category taught (placeholder
+     * spells included, so their state is in the shot), two sockets bound, and a spell picked so the
+     * details card is filled. The capture world is a disposable copy.
+     */
+    private static void openSpellLoadout(ServerPlayer player) {
+        var data = player.getData(at.koopro.wizardsandbeasts.registry.ModAttachments.SPELL_DATA.get());
+        Map<at.koopro.wizardsandbeasts.spell.core.SpellCategory, Integer> taught =
+                new EnumMap<>(at.koopro.wizardsandbeasts.spell.core.SpellCategory.class);
+        String first = null;
+        String second = null;
+        for (var spell : at.koopro.wizardsandbeasts.spell.core.Spells.all()) {
+            int n = taught.merge(spell.getCategory(), 1, Integer::sum);
+            if (n > 7) {
+                continue;
+            }
+            data.learnSpell(spell.getId());
+            if (spell.isImplemented()) {
+                if (first == null) {
+                    first = spell.getId();
+                } else if (second == null && !spell.getCategory().equals(
+                        at.koopro.wizardsandbeasts.spell.core.Spells.byId(first).getCategory())) {
+                    second = spell.getId();
+                }
+            }
+        }
+        data.setLoadoutSpell(0, first);
+        data.setLoadoutSpell(1, second);
+        at.koopro.wizardsandbeasts.network.spell.SpellDataSyncS2CPayload.syncToPlayer(player);
+        String pick = second;
+        Minecraft.getInstance().execute(() -> open(new SpellMenuScreen(pick)));
+    }
+
     /** Sixteen memorised places, the most a seasoned Apparator keeps: enough to make the list scroll. */
     private static void openApparition() {
         Minecraft mc = Minecraft.getInstance();
@@ -144,6 +177,7 @@ public final class UiScreenCapture {
                 Step.client("character_sheet", () -> open(new CharacterSheetScreen())),
                 Step.client("skill_web", () -> open(new SkillTreeScreen())),
                 Step.client("spell_menu", () -> open(new SpellMenuScreen())),
+                Step.server("spell_menu_loadout", UiScreenCapture::openSpellLoadout),
                 Step.client("ability_wheel", () -> open(new AbilityWheelScreen())),
                 Step.client("bestiary", () -> open(new BestiaryScreen())),
                 Step.client("owl_exam", () -> open(new OWLExamScreen())),

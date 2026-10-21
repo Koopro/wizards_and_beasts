@@ -173,3 +173,27 @@ fresh copy of `wb_admin_capture_visual`.
 3. Config value names and descriptions are the humanised key and the TOML comment until
    `wizards_and_beasts.configuration.*` keys are written (the screen picks them up with no code change).
 4. The Obscurial HUD badges are placed at fixed offsets measured on the English words.
+
+## UI overhaul — 2026-10-21 (branch `feature/ui-overhaul`)
+
+Hybrid direction: systems screens on the new `UiSurface.NIGHT_SHEET`, book screens stay parchment
+(`GUI_DESIGN_SYSTEM.md` "Hybrid direction"). Plan and per-milestone status: `tasks/todo_ui_overhaul_2026_10_21.md`.
+
+### Spell Menu — `client/spell/gui` (redesigned)
+- Was: 310x250 design scaled 0.72–1.35 by `Layout.panel` while text stayed native, so at GUI 4 rows shrank
+  under unshrunk names; socket labels fought for 38px; details a fixed column of y-offsets.
+- Now: `SpellMenuLayout` (pure, unit-tested at 320x240 … 960x540) computes every rectangle in native pixels;
+  painting, hit-testing, widget bounds and drop targets all read it. WIDE (library | wand | details) from
+  440 GUI px wide, STACKED (library | wand over details) below.
+- Library: night search field (a letter typed with nothing focused starts a search), category filter chips (`NightChip`,
+  disabled when nothing is known in the category), clipped list with headings, pips for proficiency,
+  the bound socket's chevron, recharge time.
+- Wand: sprite sockets in HUD order with state bezels (idle / hover / drop target with violet rim), empty
+  sockets show their direction chevron, bound-spell rows under/beside the diamond as larger targets.
+- Details: only fields the spell has (description only where the lang key exists, damage only if > 0),
+  status chips (category, bound where, recharging), proficiency bar over its real range, requirement with
+  ✔/✕, power lines; scrolls with the wheel and shows a track when taller than its well.
+- Keyboard: ↑/↓ walk the list, 1–4 bind, Esc closes. Sync while open rebuilds the list (a refused bind no
+  longer looks accepted until reopen).
+- Seen in the client: 1920x1080 at GUI 2/3/4, 1366x768 and 1280x720 at GUI 3 (`run/screenshots/ui_overhaul*`).
+- ⏳ At 1280x720 GUI 3 (STACKED) the details card is ~3 lines tall and relies on scrolling.

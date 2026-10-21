@@ -1,23 +1,22 @@
 package at.koopro.wizardsandbeasts.client.spell.gui;
 
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
+import at.koopro.wizardsandbeasts.client.gui.ui.NightChrome;
 import at.koopro.wizardsandbeasts.client.gui.ui.Ui;
+import at.koopro.wizardsandbeasts.client.gui.ui.Ui.Rect;
+import at.koopro.wizardsandbeasts.client.gui.ui.UiSlotState;
 import at.koopro.wizardsandbeasts.client.gui.ui.UiSurface;
 import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 import at.koopro.wizardsandbeasts.client.gui.ui.UiTooltips;
-
-import at.koopro.wizardsandbeasts.client.hud.WandHudSprites;
-import at.koopro.wizardsandbeasts.client.gui.WizardsAndBeastsUiTokens;
-import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
-import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
-import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiText;
 import at.koopro.wizardsandbeasts.client.gui.util.UiContrast;
+import at.koopro.wizardsandbeasts.client.gui.widget.NightChip;
 import at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton;
 import at.koopro.wizardsandbeasts.client.gui.widget.ThemedTextField;
 import at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageDataState;
+import at.koopro.wizardsandbeasts.client.hud.WandHudSprites;
 import at.koopro.wizardsandbeasts.client.skill.gui.SkillScreenRouter;
 import at.koopro.wizardsandbeasts.client.spell.state.ClientSpellDataState;
-import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialRules;
 import at.koopro.wizardsandbeasts.network.spell.SpellAssignC2SPayload;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
@@ -27,72 +26,72 @@ import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.util.MathUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
-
 import org.jspecify.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
- * Assigning spells to the four wand slots.
+ * The wand loadout: which four spells the wand answers with, and what each of them is.
  *
- * <p>Rebuilt around <b>direct manipulation</b>: drag a spell out of the list and drop it on a slot,
- * right-click a slot to empty it. Click-to-select then click-a-slot still works, because it is what
- * the screen used to do and it is the only path a player without a mouse drag can take.
+ * <p>Three regions on the night sheet, all placed by {@link SpellMenuLayout}: the <b>library</b> of
+ * known spells (search, category filters, a clipped scrolling list), the <b>wand</b> (four sockets in
+ * the HUD diamond's order, with a row per socket naming what it holds) and the <b>details</b> of the
+ * picked spell (only the fields that spell has). On a narrow screen the details move under the wand.
  *
- * <h2>Why the list and the slots are not widgets</h2>
+ * <h2>Direct manipulation, and the paths around it</h2>
  *
- * <p>They used to be. Every row was a {@code Button} and every slot was an invisible {@code Button},
- * and the whole set was torn down and rebuilt through {@code clearWidgets()} on every scroll tick —
- * which took the search box with it and dropped its focus and caret mid-type. Rows and slots are now
- * painted and hit-tested directly, so scrolling changes one integer and touches nothing else. Only
- * the search box and the Skills button are widgets, and they are built once in {@link #init()}.
+ * <p>Drag a spell onto a socket; right-click a socket to empty it. Click a spell and then a socket
+ * still works, and so does the keyboard: up/down walks the list, 1-4 binds the picked spell to
+ * up/right/down/left, and typing a letter anywhere starts a search. A socket's row under the diamond
+ * is the same target as the socket, only bigger.
  *
- * <p>It also buys the two interactions vanilla {@code Button} cannot express: a right-click (which
- * {@code Button} swallows) and a drag that begins on one control and ends on another.
+ * <h2>Why the list and the sockets are not widgets</h2>
  *
- * <h2>One source of geometry</h2>
- *
- * <p>{@link #rowY(int)} and {@link #slotX(int)}/{@link #slotY(int)} are used by the painting and by
- * the hit-testing, and that is deliberate. The previous split had the screen place its row buttons at
- * {@code layout.s(LIST_ROW_SPACING)} while the painter drew the row text at an unscaled
- * {@code LIST_ROW_SPACING}, so at any GUI scale other than 100% the labels and the things you could
- * click drifted apart down the list. Geometry that is computed twice will eventually be computed two
- * ways; this one is computed once.
+ * <p>They used to be, and the whole set was torn down and rebuilt on every scroll tick -- which took
+ * the search box with it and dropped its focus mid-word. Rows and sockets are painted and hit-tested
+ * from the layout, so scrolling changes one integer. Only the search box, the filters and the Skills
+ * button are widgets, built once in {@link #init()}, at the layout's rectangles.
  */
 public class SpellMenuScreen extends Screen {
 
-    private static final int PANEL_W = WizardsAndBeastsUiTokens.SpellMenu.PANEL_WIDTH;
-    private static final int PANEL_H = WizardsAndBeastsUiTokens.SpellMenu.PANEL_HEIGHT;
-    private static final int LEFT_W = WizardsAndBeastsUiTokens.SpellMenu.LEFT_WIDTH;
+    private static final UiSurface S = UiSurface.NIGHT_SHEET;
 
     /** Slot order matches the HUD diamond in {@code SpellDiamondOverlay}: up, right, down, left. */
-    private static final String[] SLOT_KEYS = {"up", "right", "down", "left"};
+    static final String[] SLOT_KEYS = {"up", "right", "down", "left"};
 
     /**
-     * How far the mouse must move before a press becomes a drag.
-     *
-     * <p>Without it every click is a one-pixel drag, and releasing over the list — where you already
-     * are — would look like a drop that did nothing. Below the threshold the press stays a click and
-     * selects, which is what keeps the old two-click flow alive.
+     * How far the mouse must move before a press becomes a drag. Below it the press stays a click and
+     * selects, which keeps the two-click flow alive.
      */
     private static final double DRAG_THRESHOLD_PX = 4.0;
-
-    private static final int SCROLLBAR_W = 4;
-    private static final int LIST_ICON_SIZE = 12;
+    private static final int DETAIL_PAD = 6;
+    private static final int DETAIL_SCROLL_STEP = 10;
 
     @Nullable
     private String selectedSpellId = null;
+    /** The category filter; null shows every category under its own heading. */
+    @Nullable
+    private SpellCategory filter = null;
     private final List<SpellEntry> spellEntries = new ArrayList<>();
     private int scrollOffset = 0;
-    private String searchQuery = "";
-    private GuiScaleHelper.Layout layout;
+    private String searchText = "";
+    private SpellMenuLayout layout;
+    @Nullable
+    private ThemedTextField searchBox;
+
+    private int detailScroll = 0;
+    /** Height the details took when last drawn, so the wheel knows how far it may scroll them. */
+    private int detailContentH = 0;
 
     /** Spell under the cursor since the last press, promoted to {@link #draggingSpellId} on move. */
     @Nullable
@@ -101,174 +100,182 @@ public class SpellMenuScreen extends Screen {
     private String draggingSpellId = null;
     private double pressX;
     private double pressY;
-    /** Where the dragged spell was lifted from, so the trail has somewhere to start. */
+    /** Where the dragged spell was lifted from, so the thread has somewhere to start. */
     private int dragOriginX;
     private int dragOriginY;
     private boolean draggingScrollbar = false;
+
+    /** The filter chips with the category each stands for (null = all), to re-judge after a sync. */
+    private final List<NightChip> chips = new ArrayList<>();
+    private final List<@Nullable SpellCategory> chipCategories = new ArrayList<>();
+    /** {@link ClientSpellDataState#version()} the list was built from. */
+    private long seenVersion = -1;
 
     public SpellMenuScreen() {
         super(Component.translatable("gui.wizards_and_beasts.spell_menu.title"));
     }
 
+    /** Opens with {@code spellId} picked, its details showing. */
+    public SpellMenuScreen(@Nullable String spellId) {
+        this();
+        this.selectedSpellId = spellId;
+    }
+
     @Override
     protected void init() {
         super.init();
-        layout = GuiScaleHelper.Layout.panel(width, height, PANEL_W, PANEL_H);
+        List<@Nullable SpellCategory> filters = new ArrayList<>();
+        filters.add(null);
+        filters.addAll(List.of(SpellCategory.values()));
+        int[] widths = new int[filters.size()];
+        List<Component> labels = new ArrayList<>(filters.size());
+        for (int i = 0; i < filters.size(); i++) {
+            SpellCategory c = filters.get(i);
+            Component label = c == null
+                    ? Component.translatable("gui.wizards_and_beasts.spell_menu.filter.all")
+                    : SpellMenuRenderHelper.categoryName(c);
+            labels.add(label);
+            widths[i] = NightChip.widthFor(font, label);
+        }
+        layout = SpellMenuLayout.of(width, height, widths);
         rebuildSpellList();
 
-        // Built once. Nothing below rebuilds widgets, which is the whole point — see the class doc.
-        addRenderableWidget(new ThemedButton(
-                layout.panelX() + layout.panelW() - layout.s(62), layout.panelY() + layout.s(4),
-                layout.s(56), layout.s(14),
-                Component.translatable("gui.wizards_and_beasts.spell_menu.skills"),
-                SkillScreenRouter::openForCurrentPlayer));
-
-        EditBox searchBox = new ThemedTextField(this.font, listX(), searchY(),
-                listW(), layout.s(WizardsAndBeastsUiTokens.SpellMenu.SEARCH_HEIGHT),
-                Component.translatable("gui.wizards_and_beasts.spell_menu.search"));
-        searchBox.setValue(searchQuery);
+        // Built once, at the layout's rectangles. Nothing below rebuilds widgets -- see the class doc.
+        Rect s = layout.search();
+        searchBox = new ThemedTextField(font, s.x(), s.y(), s.w(), s.h(),
+                Component.translatable("gui.wizards_and_beasts.spell_menu.search"))
+                .night()
+                .inkHint(Component.translatable("gui.wizards_and_beasts.spell_menu.search_hint"));
+        searchBox.setValue(searchText);
         searchBox.setResponder(text -> {
-            searchQuery = text.toLowerCase(java.util.Locale.ROOT);
+            searchText = text;
             scrollOffset = 0;
             rebuildSpellList();
         });
         addRenderableWidget(searchBox);
-    }
 
-    // ── geometry: used by both the painting and the hit-testing ──────────────
-
-    private int listX() {
-        return layout.panelX() + layout.s(WizardsAndBeastsUiTokens.SpellMenu.LEFT_PADDING);
-    }
-
-    private int listW() {
-        return layout.s(LEFT_W) - layout.s(WizardsAndBeastsUiTokens.SpellMenu.LIST_BUTTON_SIDE_PADDING);
-    }
-
-    private int searchY() {
-        return layout.panelY() + layout.s(WizardsAndBeastsUiTokens.SpellMenu.TOP_PADDING);
-    }
-
-    private int listTop() {
-        return searchY() + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SEARCH_HEIGHT
-                + WizardsAndBeastsUiTokens.SpellMenu.SEARCH_TO_LIST_GAP);
-    }
-
-    private int rowH() {
-        return layout.s(WizardsAndBeastsUiTokens.SpellMenu.LIST_BUTTON_HEIGHT);
-    }
-
-    /** Top edge of the {@code i}-th visible row, {@code i} counted from the scroll offset. */
-    private int rowY(int visibleIndex) {
-        return listTop() + visibleIndex * layout.s(WizardsAndBeastsUiTokens.SpellMenu.LIST_ROW_SPACING);
-    }
-
-    private int slotSize() {
-        return layout.s(WizardsAndBeastsUiTokens.SpellMenu.SLOT_BUTTON_SIZE);
-    }
-
-    private int slotX(int slot) {
-        int cx = layout.panelX() + layout.s(LEFT_W)
-                + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SLOT_CENTER_X_OFFSET);
-        int spacing = layout.s(WizardsAndBeastsUiTokens.SpellMenu.SLOT_SPACING);
-        int dx = switch (slot) {
-            case 1 -> spacing;
-            case 3 -> -spacing;
-            default -> 0;
-        };
-        return cx + dx - slotSize() / 2;
-    }
-
-    private int slotY(int slot) {
-        int cy = layout.panelY() + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SLOT_CENTER_Y_OFFSET);
-        int spacing = layout.s(WizardsAndBeastsUiTokens.SpellMenu.SLOT_SPACING);
-        int dy = switch (slot) {
-            case 0 -> -spacing;
-            case 2 -> spacing;
-            default -> 0;
-        };
-        return cy + dy - slotSize() / 2;
-    }
-
-    private int maxVisible() {
-        int available = layout.panelH()
-                - layout.s(WizardsAndBeastsUiTokens.SpellMenu.TOP_PADDING)
-                - layout.s(WizardsAndBeastsUiTokens.SpellMenu.SEARCH_HEIGHT)
-                - layout.s(WizardsAndBeastsUiTokens.SpellMenu.SEARCH_TO_LIST_GAP)
-                - layout.s(24);
-        return Math.max(4, available / Math.max(1, layout.s(WizardsAndBeastsUiTokens.SpellMenu.LIST_ROW_SPACING)));
-    }
-
-    private int maxScroll() {
-        return Math.max(0, spellEntries.size() - maxVisible());
-    }
-
-    /** Index into {@link #spellEntries} under the cursor, or -1. Category headers never match. */
-    private int rowAt(double mouseX, double mouseY) {
-        if (mouseX < listX() || mouseX > listX() + listW()) {
-            return -1;
+        chips.clear();
+        chipCategories.clear();
+        for (int i = 0; i < filters.size(); i++) {
+            SpellCategory c = filters.get(i);
+            Rect r = layout.chips().get(i);
+            NightChip chip = new NightChip(r.x(), r.y(), r.w(), r.h(), labels.get(i),
+                    () -> setFilter(c), () -> filter == c);
+            chips.add(chip);
+            chipCategories.add(c);
+            addRenderableWidget(chip);
         }
-        int visible = Math.min(maxVisible(), spellEntries.size() - scrollOffset);
-        for (int v = 0; v < visible; v++) {
-            int y = rowY(v);
-            if (mouseY >= y && mouseY < y + rowH()) {
-                int idx = scrollOffset + v;
-                return spellEntries.get(idx).spell() == null ? -1 : idx;
-            }
-        }
-        return -1;
+        judgeChips();
+        seenVersion = ClientSpellDataState.version();
+
+        Rect k = layout.skills();
+        addRenderableWidget(ThemedButton.skinned(k.x(), k.y(), k.w(), k.h(),
+                Component.translatable("gui.wizards_and_beasts.spell_menu.skills"),
+                SkillScreenRouter::openForCurrentPlayer, NightChrome.FOLDER, null, 0, S.ink(), S.disabled()));
     }
 
-    private int slotAt(double mouseX, double mouseY) {
-        for (int i = 0; i < 4; i++) {
-            int x = slotX(i);
-            int y = slotY(i);
-            if (mouseX >= x && mouseX < x + slotSize() && mouseY >= y && mouseY < y + slotSize()) {
-                return i;
-            }
+    /**
+     * Nothing is focused on open, so the number keys bind at once; the first letter typed focuses the
+     * search box instead ({@link #charTyped}). Vanilla would focus the first widget, the search box,
+     * and the number keys would type into it.
+     */
+    @Override
+    protected void setInitialFocus() {
+    }
+
+    /**
+     * A sync that lands while the screen is open -- a spell learned, a server refusal undoing a socket
+     * this screen filled optimistically -- rebuilds the list. Without it the list stayed as it was when
+     * the screen opened, and a refused bind looked accepted until the screen was reopened.
+     */
+    @Override
+    public void tick() {
+        super.tick();
+        if (seenVersion != ClientSpellDataState.version()) {
+            seenVersion = ClientSpellDataState.version();
+            judgeChips();
+            rebuildSpellList();
         }
-        return -1;
+    }
+
+    /** A category the player knows nothing in cannot be picked: it would only show an empty list. */
+    private void judgeChips() {
+        for (int i = 0; i < chips.size(); i++) {
+            SpellCategory c = chipCategories.get(i);
+            chips.get(i).active = c == null || knownIn(c) > 0;
+        }
+        if (filter != null && knownIn(filter) == 0) {
+            filter = null;
+        }
     }
 
     // ── data ─────────────────────────────────────────────────────────────────
 
+    /** Whether the list shows this spell at all: known, and castable by this player's heritage. */
+    private static boolean listed(Spell spell, PlayerSpellData data) {
+        return data.knowsSpell(spell.getId())
+                && !ObscurialRules.isObscurialAbility(spell)
+                && ObscurialRules.canHeritageUseSpell(ClientHeritageDataState.get(), spell);
+    }
+
+    private static int knownIn(SpellCategory category) {
+        PlayerSpellData data = ClientSpellDataState.get();
+        int n = 0;
+        for (Spell spell : Spells.all()) {
+            if (spell.getCategory() == category && listed(spell, data)) {
+                n++;
+            }
+        }
+        return n;
+    }
+
+    private void setFilter(@Nullable SpellCategory category) {
+        filter = category;
+        scrollOffset = 0;
+        rebuildSpellList();
+    }
+
     private void rebuildSpellList() {
         spellEntries.clear();
         PlayerSpellData data = ClientSpellDataState.get();
-        Heritage type = ClientHeritageDataState.get().getSelectedHeritage();
-        String q = searchQuery == null ? "" : searchQuery;
-
+        String q = searchText.toLowerCase(Locale.ROOT).trim();
         for (SpellCategory category : SpellCategory.values()) {
-            boolean hasSpells = false;
+            if (filter != null && category != filter) {
+                continue;
+            }
+            boolean headed = false;
             for (Spell spell : Spells.all()) {
-                if (spell.getCategory() != category
-                        || !data.knowsSpell(spell.getId())
-                        || ObscurialRules.isObscurialAbility(spell)
-                        || !ObscurialRules.canHeritageUseSpell(ClientHeritageDataState.get(), spell)) {
+                if (spell.getCategory() != category || !listed(spell, data)) {
                     continue;
                 }
                 boolean matches = q.isEmpty()
-                        || GuiText.resolve(spell.getDisplayName()).toLowerCase(java.util.Locale.ROOT).contains(q)
-                        || spell.getId().toLowerCase(java.util.Locale.ROOT).contains(q);
+                        || GuiText.resolve(spell.getDisplayName()).toLowerCase(Locale.ROOT).contains(q)
+                        || spell.getId().toLowerCase(Locale.ROOT).contains(q);
                 if (!matches) {
                     continue;
                 }
-                if (!hasSpells) {
+                // Headings only when every category is shown: under a filter the chip already says it.
+                if (!headed && filter == null) {
                     spellEntries.add(new SpellEntry(null, category));
-                    hasSpells = true;
                 }
+                headed = true;
                 spellEntries.add(new SpellEntry(spell, category));
             }
         }
-        scrollOffset = Math.min(scrollOffset, maxScroll());
+        scrollOffset = MathUtils.clampInt(scrollOffset, 0, maxScroll());
+    }
+
+    private void select(@Nullable String spellId) {
+        if (spellId != null && !spellId.equals(selectedSpellId)) {
+            detailScroll = 0;
+        }
+        selectedSpellId = spellId;
     }
 
     private void assign(int slot, @Nullable String spellId) {
-        // The one choke point every assignment passes through — click-to-slot and drag-and-drop
-        // both land here — so refusing a placeholder spell once covers both. Silent: the row it came
-        // from is already drawn faded and tagged, so there is nothing left to explain. The server
-        // refuses the same assign independently; this only keeps the local mirror from showing a
-        // slot filled for the moment before the sync packet undoes it.
+        // The one choke point every assignment passes through -- click, drag, keys -- so refusing a
+        // placeholder spell once covers all of them. The server refuses the same assign independently;
+        // this only keeps the local mirror from showing a socket filled before the sync undoes it.
         if (spellId != null) {
             Spell spell = Spells.byId(spellId);
             if (spell != null && !spell.isImplemented()) {
@@ -276,9 +283,44 @@ public class SpellMenuScreen extends Screen {
             }
         }
         ClientSpellDataState.get().setLoadoutSpell(slot, spellId);
-        // The server reads a blank id as "clear this slot" — see SpellAssignC2SPayload.handle. That
-        // branch existed from the start and nothing in the UI had ever reached it.
+        // The server reads a blank id as "clear this slot" -- see SpellAssignC2SPayload.handle.
         ClientPacketDistributor.sendToServer(new SpellAssignC2SPayload(slot, spellId == null ? "" : spellId));
+    }
+
+    private int maxScroll() {
+        return Math.max(0, spellEntries.size() - layout.visibleRows());
+    }
+
+    /** Index into {@link #spellEntries} of the spell row under the cursor, or -1. Headings never match. */
+    private int entryAt(double mouseX, double mouseY) {
+        int row = layout.rowAt(mouseX, mouseY);
+        if (row < 0) {
+            return -1;
+        }
+        int idx = scrollOffset + row;
+        return idx < spellEntries.size() && spellEntries.get(idx).spell() != null ? idx : -1;
+    }
+
+    /** The first socket holding {@code spellId}, or -1. */
+    private static int boundSlot(String spellId) {
+        PlayerSpellData data = ClientSpellDataState.get();
+        for (int i = 0; i < 4; i++) {
+            if (spellId.equals(data.getLoadoutSpell(i))) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private static List<Integer> boundSlots(String spellId) {
+        PlayerSpellData data = ClientSpellDataState.get();
+        List<Integer> out = new ArrayList<>(4);
+        for (int i = 0; i < 4; i++) {
+            if (spellId.equals(data.getLoadoutSpell(i))) {
+                out.add(i);
+            }
+        }
+        return out;
     }
 
     // ── input ────────────────────────────────────────────────────────────────
@@ -288,39 +330,42 @@ public class SpellMenuScreen extends Screen {
         double mouseX = event.x();
         double mouseY = event.y();
         int button = event.button();
-        int slot = slotAt(mouseX, mouseY);
+        int slot = layout.slotAt(mouseX, mouseY);
         if (slot >= 0) {
+            setFocused(null);
             if (button == 1) {
                 assign(slot, null);
                 return true;
             }
-            if (button == 0 && selectedSpellId != null) {
-                assign(slot, selectedSpellId);
+            if (button == 0) {
+                if (selectedSpellId != null) {
+                    assign(slot, selectedSpellId);
+                } else {
+                    // Nothing picked: a click on a filled socket opens its spell's details instead.
+                    select(ClientSpellDataState.get().getLoadoutSpell(slot));
+                }
                 return true;
             }
         }
 
         if (button == 0) {
-            int row = rowAt(mouseX, mouseY);
-            if (row >= 0) {
-                Spell spell = spellEntries.get(row).spell();
-                if (spell != null) {
-                    selectedSpellId = spell.getId();
-                    if (!spell.isImplemented()) {
-                        // Selectable so the detail panel can still be read, but never draggable:
-                        // a ghost that can only ever be dropped onto a refusal is a worse answer
-                        // than not picking it up.
-                        return true;
-                    }
+            int idx = entryAt(mouseX, mouseY);
+            if (idx >= 0) {
+                setFocused(null);
+                Spell spell = spellEntries.get(idx).spell();
+                select(spell.getId());
+                if (spell.isImplemented()) {
+                    // Placeholder spells are selectable so their details can be read, but never
+                    // draggable: a ghost that can only be dropped onto a refusal is worse than none.
                     pressedSpellId = spell.getId();
                     pressX = mouseX;
                     pressY = mouseY;
                     dragOriginX = (int) mouseX;
                     dragOriginY = (int) mouseY;
-                    return true;
                 }
+                return true;
             }
-            if (maxScroll() > 0 && overScrollbar(mouseX, mouseY)) {
+            if (maxScroll() > 0 && layout.scrollbar().contains(mouseX, mouseY)) {
                 draggingScrollbar = true;
                 scrollTo(mouseY);
                 return true;
@@ -352,14 +397,13 @@ public class SpellMenuScreen extends Screen {
 
     @Override
     public boolean mouseReleased(MouseButtonEvent event) {
-        double mouseX = event.x();
-        double mouseY = event.y();
         draggingScrollbar = false;
         if (draggingSpellId != null) {
-            int slot = slotAt(mouseX, mouseY);
+            int slot = layout.slotAt(event.x(), event.y());
             if (slot >= 0) {
                 assign(slot, draggingSpellId);
             }
+            // Released anywhere else: the drag is cancelled, which the hint said while it was held.
             draggingSpellId = null;
             pressedSpellId = null;
             return true;
@@ -370,27 +414,74 @@ public class SpellMenuScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (layout.detail().contains(mouseX, mouseY)) {
+            int max = Math.max(0, detailContentH - (layout.detail().h() - 2 * DETAIL_PAD));
+            detailScroll = MathUtils.clampInt((int) (detailScroll - scrollY * DETAIL_SCROLL_STEP), 0, max);
+            return true;
+        }
         scrollOffset = MathUtils.clampInt((int) (scrollOffset - scrollY), 0, maxScroll());
         return true;
     }
 
-    private boolean overScrollbar(double mouseX, double mouseY) {
-        int x = scrollbarX();
-        return mouseX >= x && mouseX <= x + layout.s(SCROLLBAR_W)
-                && mouseY >= listTop() && mouseY <= listTop() + trackH();
-    }
-
-    private int scrollbarX() {
-        return listX() + listW() + layout.s(2);
-    }
-
-    private int trackH() {
-        return maxVisible() * layout.s(WizardsAndBeastsUiTokens.SpellMenu.LIST_ROW_SPACING);
-    }
-
     private void scrollTo(double mouseY) {
-        double fraction = (mouseY - listTop()) / Math.max(1, trackH());
+        Rect bar = layout.scrollbar();
+        double fraction = (mouseY - bar.y()) / Math.max(1, bar.h());
         scrollOffset = MathUtils.clampInt((int) Math.round(fraction * maxScroll()), 0, maxScroll());
+    }
+
+    @Override
+    public boolean keyPressed(KeyEvent event) {
+        int key = event.key();
+        if (key == GLFW.GLFW_KEY_DOWN || key == GLFW.GLFW_KEY_UP) {
+            moveSelection(key == GLFW.GLFW_KEY_DOWN ? 1 : -1);
+            return true;
+        }
+        boolean typing = searchBox != null && searchBox.isFocused();
+        if (!typing && key >= GLFW.GLFW_KEY_1 && key <= GLFW.GLFW_KEY_4 && selectedSpellId != null) {
+            assign(key - GLFW.GLFW_KEY_1, selectedSpellId);
+            return true;
+        }
+        return super.keyPressed(event);
+    }
+
+    /** A letter typed with nothing focused starts a search, so the list can be searched without aiming. */
+    @Override
+    public boolean charTyped(CharacterEvent event) {
+        if (searchBox != null && getFocused() == null && Character.isLetter(event.codepoint())) {
+            setFocused(searchBox);
+            return searchBox.charTyped(event);
+        }
+        return super.charTyped(event);
+    }
+
+    /** Up/down through the spells in the list (headings skipped), keeping the pick on screen. */
+    private void moveSelection(int delta) {
+        List<Integer> spellRows = new ArrayList<>();
+        int current = -1;
+        for (int i = 0; i < spellEntries.size(); i++) {
+            Spell spell = spellEntries.get(i).spell();
+            if (spell != null) {
+                if (spell.getId().equals(selectedSpellId)) {
+                    current = spellRows.size();
+                }
+                spellRows.add(i);
+            }
+        }
+        if (spellRows.isEmpty()) {
+            return;
+        }
+        int next = current < 0 ? (delta > 0 ? 0 : spellRows.size() - 1)
+                : MathUtils.clampInt(current + delta, 0, spellRows.size() - 1);
+        int idx = spellRows.get(next);
+        select(spellEntries.get(idx).spell().getId());
+        int visible = layout.visibleRows();
+        if (idx < scrollOffset) {
+            // One row more when a heading sits right above, so the pick keeps its category in view.
+            scrollOffset = idx > 0 && spellEntries.get(idx - 1).spell() == null ? idx - 1 : idx;
+        } else if (idx >= scrollOffset + visible) {
+            scrollOffset = idx - visible + 1;
+        }
+        scrollOffset = MathUtils.clampInt(scrollOffset, 0, maxScroll());
     }
 
     // ── painting ─────────────────────────────────────────────────────────────
@@ -398,216 +489,238 @@ public class SpellMenuScreen extends Screen {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         this.renderMenuBackground(graphics);
-        SpellMenuRenderHelper.renderFrame(graphics, font, width, height, PANEL_W, PANEL_H, LEFT_W, layout);
-
-        renderList(graphics, mouseX, mouseY);
+        renderFrame(graphics);
+        boolean nameTruncated = renderList(graphics, mouseX, mouseY);
         renderScrollbar(graphics);
-
-        renderInfoCard(graphics);
-        SpellMenuRenderHelper.renderSelectedSpellPanel(graphics, font, width, height, PANEL_W, PANEL_H,
-                LEFT_W, selectedSpellId, layout);
+        renderWand(graphics, mouseX, mouseY);
+        renderDetail(graphics);
+        renderHint(graphics, mouseX, mouseY);
 
         super.render(graphics, mouseX, mouseY, partialTick);
 
-        renderSlots(graphics, mouseX, mouseY);
-        renderSlotTooltip(graphics, mouseX, mouseY);
-        renderHint(graphics);
+        renderTooltips(graphics, mouseX, mouseY, nameTruncated);
         renderDragGhost(graphics, mouseX, mouseY);
     }
 
-    private void renderList(GuiGraphics graphics, int mouseX, int mouseY) {
-        if (spellEntries.isEmpty()) {
-            graphics.drawString(font, Component.translatable("gui.wizards_and_beasts.spell_menu.empty"),
-                    listX(), listTop() + WizardsAndBeastsUiTokens.SpellMenu.EMPTY_LIST_TEXT_Y_OFFSET,
-                    WizardsPalette.PAGE_INK_2, false);
-            return;
-        }
-        int hovered = rowAt(mouseX, mouseY);
-        int visible = Math.min(maxVisible(), spellEntries.size() - scrollOffset);
-        for (int v = 0; v < visible; v++) {
-            int idx = scrollOffset + v;
-            SpellMenuRenderHelper.renderRow(graphics, font, spellEntries.get(idx),
-                    listX(), rowY(v), listW(), rowH(),
-                    idx == hovered,
-                    selectedSpellId != null && spellEntries.get(idx).spell() != null
-                            && selectedSpellId.equals(spellEntries.get(idx).spell().getId()),
-                    LIST_ICON_SIZE);
-        }
+    /** The sheet, the title over the gilt rule, and the three wells. */
+    private void renderFrame(GuiGraphics g) {
+        Rect p = layout.panel();
+        Ui.panel(g, S, p.x(), p.y(), p.w(), p.h());
+        Rect t = layout.title();
+        UiText.drawFit(g, font, S, title, t.x(), t.y() + 3, t.w(), S.heading());
+        Rect c = layout.content();
+        NightChrome.divider(g, c.x(), layout.ruleY(), c.w());
+        NightChrome.ornament(g, c.x() + c.w() / 2, layout.ruleY());
+        Rect lib = layout.library();
+        Ui.inset(g, S, lib.x(), lib.y(), lib.w(), lib.h());
+        Rect d = layout.detail();
+        Ui.inset(g, S, d.x(), d.y(), d.w(), d.h());
     }
 
-    private void renderScrollbar(GuiGraphics graphics) {
+    /** Returns whether the hovered row's name was shortened, for its tooltip. */
+    private boolean renderList(GuiGraphics g, int mouseX, int mouseY) {
+        Rect list = layout.list();
+        if (spellEntries.isEmpty()) {
+            boolean searching = !searchText.isBlank();
+            Ui.emptyState(g, font, S, list,
+                    Component.translatable(searching ? "gui.wizards_and_beasts.spell_menu.empty"
+                            : "gui.wizards_and_beasts.spell_menu.empty_none"),
+                    searching ? null : Component.translatable("gui.wizards_and_beasts.spell_menu.empty_none_hint"));
+            return false;
+        }
+        int hovered = draggingSpellId == null ? entryAt(mouseX, mouseY) : -1;
+        boolean truncatedUnderMouse = false;
+        int visible = Math.min(layout.visibleRows(), spellEntries.size() - scrollOffset);
+        // Rows are whole by construction (the list is a whole number of rows tall), so no scissor is
+        // needed for them; the scissor guards the icon blits against a future change to that.
+        g.enableScissor(list.x(), list.y(), list.right(), list.bottom());
+        for (int v = 0; v < visible; v++) {
+            int idx = scrollOffset + v;
+            SpellEntry entry = spellEntries.get(idx);
+            Rect r = layout.row(v);
+            if (entry.spell() == null) {
+                SpellMenuRenderHelper.renderHeader(g, font, entry.category(), r);
+                continue;
+            }
+            String id = entry.spell().getId();
+            boolean truncated = SpellMenuRenderHelper.renderRow(g, font, entry.spell(), r, idx == hovered,
+                    id.equals(selectedSpellId), id.equals(draggingSpellId), boundSlot(id));
+            if (idx == hovered) {
+                truncatedUnderMouse = truncated;
+            }
+        }
+        g.disableScissor();
+        return truncatedUnderMouse;
+    }
+
+    /** A recessed track with a gilt thumb, only when the list is longer than its well. */
+    private void renderScrollbar(GuiGraphics g) {
         int max = maxScroll();
         if (max <= 0) {
             return;
         }
-        int x = scrollbarX();
-        int w = layout.s(SCROLLBAR_W);
-        int track = trackH();
-        // A groove in the well and the wax ribbon the shared scrollbar uses, at this list's narrower
-        // width.
-        graphics.fill(x, listTop(), x + w, listTop() + track, WizardsPalette.PAGE_DEEP);
-
-        int thumbH = Math.max(layout.s(8), track * maxVisible() / Math.max(1, spellEntries.size()));
-        int thumbY = listTop() + (track - thumbH) * scrollOffset / max;
-        graphics.fill(x, thumbY, x + w, thumbY + thumbH, WizardsPalette.WAX);
+        Rect bar = layout.scrollbar();
+        g.fill(bar.x(), bar.y(), bar.right(), bar.bottom(), 0xFF0A080D);
+        int thumbH = Math.max(10, bar.h() * layout.visibleRows() / Math.max(1, spellEntries.size()));
+        int thumbY = bar.y() + (bar.h() - thumbH) * scrollOffset / max;
+        g.fill(bar.x() + 1, thumbY, bar.right() - 1, thumbY + thumbH, WizardsPalette.GILT_DARK);
+        g.fill(bar.x() + 1, thumbY, bar.right() - 2, thumbY + 1, WizardsPalette.GILT);
+        g.fill(bar.x() + 1, thumbY, bar.x() + 2, thumbY + thumbH - 1, WizardsPalette.GILT);
     }
 
     /**
-     * The rune-socket plate.
-     *
-     * <p>Engraving first, then the sockets on top of it, so the ley-lines tuck under the brass rather
-     * than crossing it.
+     * The diamond: channels first, then the hub, then the sockets on top, so the channels tuck under
+     * the metal. A filled socket shows its spell's icon inside a ring of its category's hue and its
+     * proficiency pips under it; an empty one shows the chevron of the direction it answers to.
      */
-    private void renderSlots(GuiGraphics graphics, int mouseX, int mouseY) {
+    private void renderWand(GuiGraphics g, int mouseX, int mouseY) {
         Minecraft mc = Minecraft.getInstance();
         PlayerSpellData data = ClientSpellDataState.get();
-        int size = slotSize();
-        int iconSize = Math.max(8, size - 14);
-        int hoveredSlot = slotAt(mouseX, mouseY);
         float age = mc.level == null ? 0f : mc.level.getGameTime() % 100000L;
-
-        int hubX = layout.panelX() + layout.s(LEFT_W)
-                + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SLOT_CENTER_X_OFFSET);
-        int hubY = layout.panelY() + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SLOT_CENTER_Y_OFFSET);
+        int hovered = layout.slotAt(mouseX, mouseY);
 
         for (int i = 0; i < 4; i++) {
+            Rect s = layout.sockets().get(i);
             String spellId = data.getLoadoutSpell(i);
-            SpellSigilRenderer.leyLine(graphics, hubX, hubY,
-                    slotX(i) + size / 2, slotY(i) + size / 2,
+            SpellSigilRenderer.leyLine(g, layout.hubX(), layout.hubY(), s.x() + s.w() / 2, s.y() + s.h() / 2,
                     spellId != null, accentOf(spellId), age);
         }
-        SpellSigilRenderer.hub(graphics, hubX, hubY, Math.max(3, size / 6), age);
+        SpellSigilRenderer.hub(g, layout.hubX(), layout.hubY(), 5, age);
 
         for (int i = 0; i < 4; i++) {
-            int sx = slotX(i);
-            int sy = slotY(i);
+            Rect s = layout.sockets().get(i);
             String spellId = data.getLoadoutSpell(i);
-            boolean hovered = i == hoveredSlot;
-
-            SpellSigilRenderer.socket(graphics, sx, sy, size, spellId != null, hovered,
-                    hovered && draggingSpellId != null, accentOf(spellId), age);
-
-            Component label = Component.translatable(
-                    "gui.wizards_and_beasts.spell_menu.slot." + SLOT_KEYS[i]);
+            UiSlotState state = i != hovered ? (spellId == null ? UiSlotState.EMPTY : UiSlotState.FILLED)
+                    : draggingSpellId != null ? UiSlotState.DROP_OK : UiSlotState.HOVER;
+            NightChrome.socket(g, s.x(), s.y(), state);
             if (spellId != null) {
-                Spell spell = Spells.byId(spellId);
-                if (spell != null) {
-                    label = Component.literal(GuiText.resolve(spell.getDisplayName()));
-                }
-                graphics.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.spellIcon(spellId),
-                        sx + (size - iconSize) / 2, sy + (size - iconSize) / 2, iconSize, iconSize);
-                SpellSigilRenderer.proficiencyPips(graphics, sx, sy, size,
-                        proficiencyPipsFor(spellId));
+                SpellSigilRenderer.seat(g, s.x(), s.y(), s.w(), accentOf(spellId), age);
+                int icon = 16;
+                g.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.spellIcon(spellId),
+                        s.x() + (s.w() - icon) / 2, s.y() + (s.h() - icon) / 2, icon, icon);
+                SpellMenuRenderHelper.pips(g, s.x() + (s.w() - 8) / 2, s.bottom() + 2,
+                        SpellMenuRenderHelper.proficiencyPips(spellId));
+            } else {
+                NightChrome.arrow(g, i, s.x() + (s.w() - NightChrome.ARROW) / 2,
+                        s.y() + (s.h() - NightChrome.ARROW) / 2);
             }
+        }
 
-            // The top and bottom sockets have the plate's width to themselves, so their names get it;
-            // the side sockets sit between the top socket and the hub and get their own width. The
-            // bottom label goes under its socket's pips, where it no longer meets the hub. A name that
-            // still does not fit ends in an ellipsis and is whole in the socket's tooltip.
-            boolean vertical = i == 0 || i == 2;
-            int room = vertical ? 2 * layout.s(WizardsAndBeastsUiTokens.SpellMenu.SLOT_SPACING) + size : size + layout.s(8);
-            String text = UiText.fit(font, label.getString(), room);
-            int labelY = i == 2 ? sy + size + 6 : sy - font.lineHeight - 2;
-            graphics.drawString(font, text, sx + size / 2 - font.width(text) / 2, labelY,
-                    spellId != null ? WizardsPalette.PAGE_INK : WizardsPalette.PAGE_INK_2, false);
+        for (int i = 0; i < layout.bindings().size(); i++) {
+            String spellId = data.getLoadoutSpell(i);
+            SpellMenuRenderHelper.renderBinding(g, font, i, layout.bindings().get(i),
+                    spellId == null ? null : Spells.byId(spellId),
+                    i == hovered && draggingSpellId == null, i == hovered && draggingSpellId != null);
         }
     }
 
-    /** A socket's full spell name and category: the label above it is shortened to the socket's width. */
-    private void renderSlotTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
-        int slot = slotAt(mouseX, mouseY);
-        if (slot < 0 || draggingSpellId != null) {
-            return;
-        }
-        String spellId = ClientSpellDataState.get().getLoadoutSpell(slot);
-        Spell spell = spellId == null ? null : Spells.byId(spellId);
-        if (spell == null) {
-            return;
-        }
-        UiTooltips.show(graphics, font, Component.literal(GuiText.resolve(spell.getDisplayName())),
-                java.util.List.of(SpellMenuRenderHelper.categoryName(spell.getCategory())), mouseX, mouseY);
-    }
-
-    /**
-     * A filled socket is read by hue; an empty one has no spell to take a hue from.
-     *
-     * <p>The category hues were picked for a dark plate and several all but vanish on paper, so the
-     * hue is clamped to the 3 : 1 a ring or a line needs against the page — it keeps its meaning and
-     * gains the depth to be seen.
-     */
+    /** A filled socket is read by hue: the spell's category colour, held to 3 : 1 on the night cloth. */
     private static int accentOf(@Nullable String spellId) {
-        if (spellId == null) {
-            return WizardsPalette.PAGE_INK_2;
-        }
-        Spell spell = Spells.byId(spellId);
-        return spell == null ? WizardsPalette.PAGE_INK_2
-                : UiContrast.readableOn(spell.getCategory().getColor(), WizardsPalette.PAGE, UiContrast.AA_LARGE);
-    }
-
-    private static int proficiencyPipsFor(String spellId) {
-        return switch (at.koopro.wizardsandbeasts.spell.core.Proficiency.fromCastCount(
-                ClientSpellDataState.get().getSuccessfulHits(spellId))) {
-            case MASTERED -> 3;
-            case PROFICIENT -> 2;
-            default -> 1;
-        };
+        Spell spell = spellId == null ? null : Spells.byId(spellId);
+        return spell == null ? SpellSigilRenderer.UNLIT
+                : UiContrast.readableOn(spell.getCategory().getColor(), UiSurface.NIGHT_SHEET_FIELD, UiContrast.AA_LARGE);
     }
 
     /**
-     * A recessed card under the detail text.
-     *
-     * <p>Without it the spell's name, cooldown and proficiency sat directly on the sheet with
-     * nothing holding them, and the lower half of the right column read as unused panel rather than
-     * as a place information appears.
+     * The details card, clipped to its well and scrolled by the wheel when it is taller. Empty until a
+     * spell is picked, and then it says what it will show.
      */
-    private void renderInfoCard(GuiGraphics graphics) {
-        int x = layout.panelX() + layout.s(LEFT_W) + layout.s(SpellMenuRenderHelper.INFO_CARD_X);
-        int right = layout.panelX() + layout.panelW();
-        int top = layout.panelY() + layout.s(WizardsAndBeastsUiTokens.SpellMenu.SELECTED_INFO_BASE_Y)
-                - layout.s(6);
-        int bottom = layout.panelY() + layout.panelH()
-                - layout.s(WizardsAndBeastsUiTokens.SpellMenu.ASSIGN_HINT_BOTTOM_OFFSET)
-                - layout.s(4);
-        McStylePanel.drawThemedInset(graphics, x, top, right - x, bottom - top);
-        if (selectedSpellId == null) {
-            Ui.emptyState(graphics, font, UiSurface.PAGE, new Ui.Rect(x, top, right - x, bottom - top),
+    private void renderDetail(GuiGraphics g) {
+        Rect area = layout.detail().inset(DETAIL_PAD);
+        Spell spell = selectedSpellId == null ? null : Spells.byId(selectedSpellId);
+        if (spell == null) {
+            detailContentH = 0;
+            Ui.emptyState(g, font, S, area,
                     Component.translatable("gui.wizards_and_beasts.spell_menu.no_selection"),
                     Component.translatable("gui.wizards_and_beasts.spell_menu.no_selection_hint"));
+            return;
+        }
+        int max = Math.max(0, detailContentH - area.h());
+        detailScroll = MathUtils.clampInt(detailScroll, 0, max);
+        g.enableScissor(area.x(), area.y(), area.right(), area.bottom());
+        int top = area.y() - detailScroll;
+        int bottom = SpellMenuRenderHelper.renderDetail(g, font, spell, area, top, boundSlots(spell.getId()));
+        g.disableScissor();
+        detailContentH = bottom - top;
+
+        if (detailContentH > area.h()) {
+            // A hairline track on the card's right edge: there is more below, and roughly how much.
+            int x = layout.detail().right() - 3;
+            int trackTop = area.y();
+            g.fill(x, trackTop, x + 1, area.bottom(), 0x60000000 | (WizardsPalette.GILT_DARK & 0xFFFFFF));
+            int thumbH = Math.max(8, area.h() * area.h() / detailContentH);
+            int thumbY = trackTop + (area.h() - thumbH) * detailScroll / Math.max(1, detailContentH - area.h());
+            g.fill(x, thumbY, x + 1, thumbY + thumbH, WizardsPalette.GILT);
         }
     }
 
     /**
-     * The one line of instruction, and it changes with what you are holding — a static "click slot to
-     * assign" was the only affordance the screen had, and it did not mention that a slot could be
-     * emptied at all.
+     * The one line of instruction, and it follows what you are doing: what a drag will do on release
+     * where you are holding it, how to bind what you picked, or how to start.
      */
-    private void renderHint(GuiGraphics graphics) {
-        String key = draggingSpellId != null
-                ? "gui.wizards_and_beasts.spell_menu.hint_drop"
-                : selectedSpellId != null
-                        ? "gui.wizards_and_beasts.spell_menu.hint_assign"
-                        : "gui.wizards_and_beasts.spell_menu.hint_pick";
-        // Centred by hand: drawCenteredString always draws a shadow, and there is none on paper.
-        String hint = Component.translatable(key).getString();
-        graphics.drawString(font, hint,
-                layout.panelX() + layout.s(LEFT_W)
-                        + layout.s(WizardsAndBeastsUiTokens.SpellMenu.ASSIGN_HINT_CENTER_X)
-                        - font.width(hint) / 2,
-                layout.panelY() + layout.panelH()
-                        - layout.s(WizardsAndBeastsUiTokens.SpellMenu.ASSIGN_HINT_BOTTOM_OFFSET),
-                WizardsPalette.PAGE_INK_2, false);
+    private void renderHint(GuiGraphics g, int mouseX, int mouseY) {
+        Component hint;
+        if (draggingSpellId != null) {
+            int slot = layout.slotAt(mouseX, mouseY);
+            hint = slot >= 0
+                    ? Component.translatable("gui.wizards_and_beasts.spell_menu.hint_drop_on",
+                    Component.translatable("gui.wizards_and_beasts.spell_menu.slot." + SLOT_KEYS[slot]))
+                    : Component.translatable("gui.wizards_and_beasts.spell_menu.hint_drop_cancel");
+        } else if (selectedSpellId != null) {
+            Spell spell = Spells.byId(selectedSpellId);
+            hint = Component.translatable(spell != null && !spell.isImplemented()
+                    ? "gui.wizards_and_beasts.spell_menu.hint_unavailable"
+                    : "gui.wizards_and_beasts.spell_menu.hint_assign");
+        } else {
+            hint = Component.translatable("gui.wizards_and_beasts.spell_menu.hint_pick");
+        }
+        Rect r = layout.hint();
+        String text = UiText.fit(font, hint.getString(), r.w());
+        UiText.drawCentered(g, font, S, Component.literal(text), r.x() + r.w() / 2, r.y(), S.ink2());
     }
 
-    private void renderDragGhost(GuiGraphics graphics, int mouseX, int mouseY) {
+    private void renderTooltips(GuiGraphics g, int mouseX, int mouseY, boolean nameTruncated) {
+        if (draggingSpellId != null) {
+            return;
+        }
+        int slot = layout.slotAt(mouseX, mouseY);
+        if (slot >= 0) {
+            String spellId = ClientSpellDataState.get().getLoadoutSpell(slot);
+            Spell spell = spellId == null ? null : Spells.byId(spellId);
+            Component direction = Component.translatable("gui.wizards_and_beasts.spell_menu.slot." + SLOT_KEYS[slot]);
+            if (spell == null) {
+                UiTooltips.show(g, font, Component.translatable("gui.wizards_and_beasts.spell_menu.socket_empty", direction),
+                        List.of(Component.translatable("gui.wizards_and_beasts.spell_menu.socket_empty_hint")),
+                        mouseX, mouseY);
+            } else {
+                UiTooltips.show(g, font, Component.literal(GuiText.resolve(spell.getDisplayName())),
+                        List.of(SpellMenuRenderHelper.categoryName(spell.getCategory()),
+                                Component.translatable("gui.wizards_and_beasts.spell_menu.socket_filled_hint", direction)),
+                        mouseX, mouseY);
+            }
+            return;
+        }
+        int idx = entryAt(mouseX, mouseY);
+        if (idx >= 0 && nameTruncated) {
+            Spell spell = spellEntries.get(idx).spell();
+            UiTooltips.show(g, font, Component.literal(GuiText.resolve(spell.getDisplayName())), mouseX, mouseY);
+        }
+    }
+
+    /**
+     * The spell on the end of a thread. Full strength over a socket that will take it, faded anywhere a
+     * release would cancel -- with the hint line saying which, so the fade is not the only cue.
+     */
+    private void renderDragGhost(GuiGraphics g, int mouseX, int mouseY) {
         if (draggingSpellId == null) {
             return;
         }
-        Minecraft mc = Minecraft.getInstance();
-        int accent = accentOf(draggingSpellId);
-        SpellSigilRenderer.dragThread(graphics, dragOriginX, dragOriginY, mouseX, mouseY, accent);
-        int s = LIST_ICON_SIZE + 4;
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.spellIcon(draggingSpellId),
-                mouseX - s / 2, mouseY - s / 2, s, s);
+        boolean overSocket = layout.slotAt(mouseX, mouseY) >= 0;
+        SpellSigilRenderer.dragThread(g, dragOriginX, dragOriginY, mouseX, mouseY, accentOf(draggingSpellId));
+        int card = 22;
+        Ui.nightCard(g, mouseX - card / 2, mouseY - card / 2, card, card);
+        g.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.spellIcon(draggingSpellId),
+                mouseX - 8, mouseY - 8, 16, 16, overSocket ? 1.0f : 0.55f);
     }
 
     @Override

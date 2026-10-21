@@ -7,49 +7,6 @@ public final class WizardsAndBeastsUiTokens {
 
     private WizardsAndBeastsUiTokens() {}
 
-    public static final class SpellMenu {
-        private SpellMenu() {}
-
-        public static final int PANEL_WIDTH = 310;
-        public static final int PANEL_HEIGHT = 250;
-        public static final int LEFT_WIDTH = 160;
-
-        public static final int TOP_PADDING = 4;
-        public static final int LEFT_PADDING = 4;
-        public static final int SEARCH_HEIGHT = 14;
-        public static final int SEARCH_TO_LIST_GAP = 4;
-        public static final int LIST_ROW_SPACING = 18;
-        public static final int LIST_BUTTON_HEIGHT = 16;
-        public static final int LIST_BUTTON_SIDE_PADDING = 8;
-
-        public static final int HEADER_Y_OFFSET = 6;
-        public static final int EMPTY_LIST_TEXT_Y_OFFSET = 4;
-
-        public static final int SLOT_CENTER_X_OFFSET = 75;
-        public static final int SLOT_CENTER_Y_OFFSET = 90;
-        public static final int SLOT_BUTTON_SIZE = 32;
-        public static final int SLOT_SPACING = 38;
-
-        public static final int COOLDOWN_X_OFFSET = 52;
-        public static final int PROF_X_OFFSET = 16;
-        public static final int ENTRY_TEXT_Y_OFFSET = 4;
-        public static final int CATEGORY_X_OFFSET = 2;
-
-        public static final int SELECTED_INFO_BASE_Y = 168;
-        public static final int SELECTED_CATEGORY_Y = 12;
-        public static final int SELECTED_COOLDOWN_Y = 24;
-        public static final int SELECTED_DAMAGE_Y = 36;
-        public static final int SELECTED_PROF_WITH_DAMAGE_Y = 48;
-        public static final int SELECTED_PROF_NO_DAMAGE_Y = 36;
-        public static final int SELECTED_REQ_Y = 14;
-        public static final int ASSIGN_HINT_CENTER_X = 75;
-        public static final int ASSIGN_HINT_BOTTOM_OFFSET = 16;
-
-        public static final int COOLDOWN_COLOR = 0xFFFFAA44;
-        public static final int PROF_PROFICIENT = 0xFFFFFF44;
-        public static final int PROF_MASTERED = 0xFFFFD700;
-    }
-
     public static final class BeamDebug {
         private BeamDebug() {}
 
