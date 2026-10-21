@@ -203,3 +203,21 @@ Two groups, and the whole point of this step is that they behave differently —
 Adding `@GameTest` coverage for S3, S7 and S9 is the obvious next step; each needs a structure
 template under `data/wizards_and_beasts/gametest/structures/` first. A flaky game test is worse
 than the manual step it replaced, so unit-test anything that can be made pure instead.
+
+## Spell tracing (2026-10-21, `feat/spell-tracing`)
+
+Manual — the screen has no automated client test. Fresh survival world, `/wandb magic spell forget lumos` if needed.
+
+1. Hold a Standard Book of Spells written with Lumos, hold right-click 3 s → **Trace Lumos** opens; chip says
+   *Basic*; green start mark pulses (static with `reduceScreenEffects=true`); status counts down "Begin within".
+2. Press on the green mark, trace to the blue ring → gold progress follows; on arrival "Learned Lumos",
+   accuracy shown; Close returns to the game; Lumos **and** Nox are in the spell list; the book is still held.
+3. Repeat with a torn page of Alohomora but leave the lines → red X at the slip, "Your wand strayed outside
+   the lines.", "Nothing was used up"; page count unchanged; **Try again** opens a fresh path (different shape).
+4. Release the mouse halfway → "The gesture was not finished"; let the timer run out → "Too slow".
+5. Toggle **Steady hand** before starting → the corridor visibly widens; the toggle is disabled once tracing.
+6. Skill web: allocate `frigora_unlock` → the trace opens over the web; press Esc → back on the web, node card
+   reads "Lesson not yet traced. Click to trace it."; click the node → trace reopens; pass → Frigora known.
+7. Resize the window / change GUI scale mid-challenge → corridor re-rasterises, still aligned with the markers.
+8. Dark Arts spell (with `dark_knowledge` held): edges are red; after a fail, Try again is disabled with
+   "You can try again in 10s" until the delay passes.
