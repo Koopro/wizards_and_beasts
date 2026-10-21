@@ -238,6 +238,28 @@ public final class WizardTestSupport {
     }
 
     /**
+     * Gives a player Outstanding O.W.L.s and N.E.W.T.s in every paper sat at each level, so scenarios about something
+     * else (a build's capstone, an advanced brew) are not stopped at a qualification gate. The gates themselves are
+     * exercised in {@code EducationTests}.
+     */
+    public static void grantNewts(ServerPlayer player) {
+        java.util.Map<at.koopro.wizardsandbeasts.owl.OWLSubject, at.koopro.wizardsandbeasts.owl.OWLGrade> owl =
+                new java.util.EnumMap<>(at.koopro.wizardsandbeasts.owl.OWLSubject.class);
+        java.util.Map<at.koopro.wizardsandbeasts.owl.OWLSubject, at.koopro.wizardsandbeasts.owl.OWLGrade> newt =
+                new java.util.EnumMap<>(at.koopro.wizardsandbeasts.owl.OWLSubject.class);
+        for (at.koopro.wizardsandbeasts.owl.OWLSubject subject : at.koopro.wizardsandbeasts.owl.OWLSubject.values()) {
+            if (at.koopro.wizardsandbeasts.owl.OWLGradeRules.ladder(subject) != null) {
+                owl.put(subject, at.koopro.wizardsandbeasts.owl.OWLGrade.O);
+            }
+            if (at.koopro.wizardsandbeasts.owl.OWLGradeRules.newtLadder(subject) != null) {
+                newt.put(subject, at.koopro.wizardsandbeasts.owl.OWLGrade.O);
+            }
+        }
+        player.setData(ModAttachments.OWL_DATA.get(), new at.koopro.wizardsandbeasts.owl.data.PlayerOWLData(
+                owl, true, 1, 1L, newt, 1, 1L));
+    }
+
+    /**
      * Puts a wand bonded to this player in their main hand.
      *
      * <p>The bond is the point. {@code WandHelper.isWandBondedTo} is checked early in the cast pipeline, and

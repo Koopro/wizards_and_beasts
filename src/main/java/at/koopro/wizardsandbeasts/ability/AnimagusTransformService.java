@@ -140,6 +140,9 @@ public final class AnimagusTransformService {
             return;
         }
         PlayerAbilityHelper.setCurrentlyTransformed(player, true);
+        // Taking the form under the examiner's eye is the Transfiguration practical.
+        at.koopro.wizardsandbeasts.education.ExamSittings.practical(player,
+                at.koopro.wizardsandbeasts.owl.OWLSubject.TRANSFIGURATION);
         // Senses arrive with the body rather than on the next refresh sweep.
         FormSenseService.apply(player, sensesFor(player));
         // And so does the definition's attribute block, which until now nothing read at all.

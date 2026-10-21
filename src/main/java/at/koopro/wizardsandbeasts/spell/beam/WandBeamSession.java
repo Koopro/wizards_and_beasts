@@ -29,6 +29,12 @@ final class WandBeamSession {
      */
     boolean leviosaThrown;
     int lastProficiencyHitTick;
+    /**
+     * Set the first time this hold's beam does its work (a hit that counts as practice: a kill, a held
+     * victim, a lift, water placed). An acted channel owes its cooldown whether or not the release casts
+     * (WandBeamChannelLogic#endChannel).
+     */
+    boolean acted;
     @Nullable UUID cachedTarget;
     @Nullable BlockPos aguamentiWaterAim;
     int aguamentiWaterHold;
@@ -48,6 +54,7 @@ final class WandBeamSession {
             lastLeviosaSlamTick = -9999;
             leviosaThrown = false;
             lastProficiencyHitTick = -9999;
+            acted = false;
             cachedTarget = null;
             aguamentiWaterAim = null;
             aguamentiWaterHold = 0;

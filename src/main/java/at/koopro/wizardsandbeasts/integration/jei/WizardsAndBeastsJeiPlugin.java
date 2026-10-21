@@ -120,8 +120,14 @@ public class WizardsAndBeastsJeiPlugin implements IModPlugin {
         var ingredients = jei.getIngredientManager();
         List<ItemStack> hidden = ViewerContentFilter.hiddenItems().stream().map(ItemStack::new).toList();
         List<ItemStack> visible = ViewerContentFilter.visibleItems().stream().map(ItemStack::new).toList();
-        ingredients.addIngredientsAtRuntime(VanillaTypes.ITEM_STACK, visible);
-        ingredients.removeIngredientsAtRuntime(VanillaTypes.ITEM_STACK, hidden);
+        // Both JEI calls reject an empty list (ErrorUtil.checkNotEmpty). With every module on nothing is hidden, and
+        // the throw skipped hideRecipes and escaped into the module-sync handler (ALPHA_RELEASE_GATE B-4).
+        if (!visible.isEmpty()) {
+            ingredients.addIngredientsAtRuntime(VanillaTypes.ITEM_STACK, visible);
+        }
+        if (!hidden.isEmpty()) {
+            ingredients.removeIngredientsAtRuntime(VanillaTypes.ITEM_STACK, hidden);
+        }
 
         hideRecipes(jei);
         LOGGER.debug("JEI hiding applied: {} items hidden, {} visible", hidden.size(), visible.size());

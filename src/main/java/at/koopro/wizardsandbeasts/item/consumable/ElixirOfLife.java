@@ -57,6 +57,12 @@ public final class ElixirOfLife {
         if (!(event.getEntity() instanceof ServerPlayer player) || !sustains(player)) {
             return;
         }
+        // The Elixir holds off death, not /kill or the void: those answer to nothing, the same rule the
+        // Shield Charm follows (ProtegoShieldHandler.isWardable). A player falling out of the world was
+        // spared at half a heart and died again on the next tick, having spent the day's draught for nothing.
+        if (event.getSource().is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+            return;
+        }
         event.setCanceled(true);
         player.setHealth(SPARED_HEALTH);
         player.clearFire();

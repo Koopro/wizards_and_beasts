@@ -1,6 +1,9 @@
 package at.koopro.wizardsandbeasts.command;
 
 import at.koopro.wizardsandbeasts.command.debug.DebugModule;
+import at.koopro.wizardsandbeasts.currency.billing.GringottsBilling;
+import at.koopro.wizardsandbeasts.currency.billing.MoneyFlow;
+import at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper;
 import at.koopro.wizardsandbeasts.currency.vault.PlayerVaultData;
 import at.koopro.wizardsandbeasts.network.currency.VaultSyncS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
@@ -70,7 +73,17 @@ public final class PlayerVaultCommands {
     private static int move(CommandSourceStack source, ServerPlayer target, Coin coin,
                             long amount, boolean deposit) {
         PlayerVaultData vault = target.getData(ModAttachments.VAULT_DATA.get());
+        long knuts = coin.knuts(amount);
+        if (deposit && (knuts < 0 || !vault.canCredit(knuts))) {
+            // Refused, never wrapped: a balance past the ceiling would overflow every total read from it.
+            source.sendFailure(Component.literal("That would take " + target.getName().getString()
+                    + "'s vault past its ceiling."));
+            return 0;
+        }
         boolean ok = deposit ? coin.deposit(vault, amount) : coin.withdraw(vault, amount);
+        if (ok) {
+            GringottsBilling.recordAdjustment(target, deposit ? MoneyFlow.ADMIN_DEPOSIT : MoneyFlow.ADMIN_WITHDRAWAL, knuts);
+        }
         VaultSyncS2CPayload.syncToPlayer(target);
         if (!ok) {
             source.sendFailure(Component.literal("Not enough " + coin.literal + " in "
@@ -88,6 +101,7 @@ public final class PlayerVaultCommands {
         PlayerVaultData vault = target.getData(ModAttachments.VAULT_DATA.get());
         long had = vault.getTotalInKnuts();
         vault.resetAll();
+        GringottsBilling.recordAdjustment(target, MoneyFlow.ADMIN_WITHDRAWAL, had);
         VaultSyncS2CPayload.syncToPlayer(target);
         source.sendSuccess(() -> Component.literal("Emptied " + target.getName().getString()
                         + "'s vault (" + had + " knuts)")
@@ -119,14 +133,25 @@ public final class PlayerVaultCommands {
      * own exchange verbs to be tested through.
      */
     private enum Coin {
-        GALLEONS("galleons"),
-        SICKLES("sickles"),
-        KNUTS("knuts");
+        GALLEONS("galleons", CurrencyHelper.KNUTS_PER_GALLEON),
+        SICKLES("sickles", CurrencyHelper.KNUTS_PER_SICKLE),
+        KNUTS("knuts", 1);
 
         private final String literal;
+        private final long knutsEach;
 
-        Coin(String literal) {
+        Coin(String literal, long knutsEach) {
             this.literal = literal;
+            this.knutsEach = knutsEach;
+        }
+
+        /** The value of {@code count} of this coin in Knuts, or -1 when it would overflow. */
+        long knuts(long count) {
+            try {
+                return Math.multiplyExact(count, knutsEach);
+            } catch (ArithmeticException overflow) {
+                return -1L;
+            }
         }
 
         boolean deposit(PlayerVaultData vault, long amount) {

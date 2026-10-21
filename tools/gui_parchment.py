@@ -783,6 +783,57 @@ GUI = "src/main/resources/assets/wizards_and_beasts/textures/gui"
 NINE_SLICE = {"panel.png", "panel_inset.png"}
 
 
+# --------------------------------------------------------------------------- tooltip style
+#
+# Vanilla 1.21.11 draws a tooltip from two nine-sliced sprites, `tooltip/<style>_background` and
+# `_frame`, 100x100 with the box's content starting 12px in. Passing a style id to
+# `GuiGraphics.setTooltipForNextFrame` (Java: `UiTooltips`) gives every mod tooltip the same card
+# instead of vanilla's purple-black one: the night surface (`UiSurface.NIGHT`), a gilt hairline,
+# a gilt stud in each corner. Same geometry as vanilla's, so vanilla's layout maths holds.
+
+NIGHT_FIELD = (0x1C, 0x17, 0x22)
+TOOLTIP = 100
+NL = chr(10)
+
+
+def tooltip_background(s):
+    img = Image.new("RGBA", (TOOLTIP, TOOLTIP), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    # Vanilla's shape: a filled box from 8 to 91 with its four corner texels cut.
+    d.rectangle([8, 8, TOOLTIP - 9, TOOLTIP - 9], fill=NIGHT_FIELD + (240,))
+    for x, y in ((8, 8), (TOOLTIP - 9, 8), (8, TOOLTIP - 9), (TOOLTIP - 9, TOOLTIP - 9)):
+        img.putpixel((x, y), (0, 0, 0, 0))
+    return img
+
+
+def tooltip_frame(s):
+    img = Image.new("RGBA", (TOOLTIP, TOOLTIP), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    lo, hi = 9, TOOLTIP - 10
+    # The rule: gilt, darker below and right so light still comes from the top-left.
+    d.line([(lo + 1, lo), (hi - 1, lo)], fill=s["gilt"] + (255,))
+    d.line([(lo, lo + 1), (lo, hi - 1)], fill=s["gilt"] + (255,))
+    d.line([(lo + 1, hi), (hi - 1, hi)], fill=s["gilt_d"] + (255,))
+    d.line([(hi, lo + 1), (hi, hi - 1)], fill=s["gilt_d"] + (255,))
+    # A faint inner rule a texel in, the "double line" of the parchment kit at night.
+    inner = s["gilt_d"] + (110,)
+    d.line([(lo + 2, lo + 2), (hi - 2, lo + 2)], fill=inner)
+    d.line([(lo + 2, hi - 2), (hi - 2, hi - 2)], fill=inner)
+    d.line([(lo + 2, lo + 3), (lo + 2, hi - 3)], fill=inner)
+    d.line([(hi - 2, lo + 3), (hi - 2, hi - 3)], fill=inner)
+    # Corner studs.
+    for x, y in ((lo, lo), (hi, lo), (lo, hi), (hi, hi)):
+        img.putpixel((x, y), s["gilt_l"] + (255,))
+    return img
+
+
+# Sprites that carry vanilla's own nine-slice metadata rather than the panels' 64/8.
+VANILLA_SLICE = {
+    "sprites/tooltip/night_background.png": {"width": TOOLTIP, "height": TOOLTIP, "border": 9},
+    "sprites/tooltip/night_frame.png": {"width": TOOLTIP, "height": TOOLTIP, "border": 10, "stretch_inner": True},
+}
+
+
 def assets():
     """Path under textures/gui -> zero-argument builder."""
     d = skin()
@@ -797,6 +848,8 @@ def assets():
         # The character sheet's tab chips, 24/3 -- see CharacterSheetTextures.
         "character_sheet/panel.png": lambda: button(d, "", "", 24),
         "character_sheet/panel_sel.png": lambda: button(d, "", "_hover", 24),
+        "sprites/tooltip/night_background.png": lambda: tooltip_background(d),
+        "sprites/tooltip/night_frame.png": lambda: tooltip_frame(d),
     }
     for i, name in enumerate(SKINS):
         sk = skin(name)
@@ -836,7 +889,11 @@ def write(force, only):
             continue
         save(fn(), path, MARKER)
         written.append(rel)
-        if os.path.basename(rel) in NINE_SLICE and rel.startswith("sprites/"):
+        if rel in VANILLA_SLICE:
+            with open(path + ".mcmeta", "w", encoding="utf-8", newline=NL) as fh:
+                json.dump({"gui": {"scaling": dict({"type": "nine_slice"}, **VANILLA_SLICE[rel])}}, fh, indent=4)
+                fh.write(NL)
+        elif os.path.basename(rel) in NINE_SLICE and rel.startswith("sprites/"):
             write_mcmeta(path)
     print(f"wrote {len(written)} gui textures")
     if skipped:

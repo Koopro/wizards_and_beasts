@@ -57,6 +57,11 @@ public final class FelixEvents {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
+        // Luck turns a blow aside; it does not argue with /kill or the void. Without this a lucky player
+        // falling out of the world was "saved" once per save cooldown on the way down.
+        if (event.getSource().is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+            return;
+        }
         if (FelixFortune.rollNearDeathSave(player, event.getAmount())) {
             event.setCanceled(true);
         }

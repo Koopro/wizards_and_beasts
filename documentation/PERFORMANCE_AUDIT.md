@@ -142,3 +142,24 @@ Execution samples on `Server thread` were aggregated by method, both inclusive a
   unchanged; only how the candidate list is fetched changed.
 - The perf scenario is in the repo (`PerfScenario`). It is inert unless `-Dwandb.perf=true` is set, so it adds
   nothing to the normal suite.
+
+## 8. Creature AI pass (2026-10-07)
+
+See `CREATURE_AI_SCHEDULING.md` for the full write-up. In short:
+
+- **The load scenario under-measured.** Most of the arena lay outside the test's entity-ticking chunks, so most
+  creatures were never ticked; §2's figures cover a fraction of the roster. `PerfScenario` now force-loads the
+  arena, logs how many creatures ticked, takes `-Dwandb.perf.copies` / `-Dwandb.perf.half`, and prints AI work
+  counters (`WANDB_AI`). Corrected baseline: 6.1–6.6 ms/tick (192 spawned), 11.8–12.5 ms/tick (384 spawned).
+- **The hot spot was ecology hunting** (added 2026-10-06 after this audit): a path search on almost every tick of a
+  chase, mostly 3D flying searches for dragon-sized bodies — 49 % of the server thread in the larger arena — and,
+  once paced, the same flying path finder planning large fliers' idle wandering.
+- **Fixes:** scheduling tiers (FAST / MEDIUM / SLOW / EVENT) with staggering, vanilla-paced pursuit, sight-steered
+  flying chases, Ghast-style wander for large fliers, backoff on hopeless searches, event wakes, cached per-type
+  profile lookups, `level.players()` for player queries, lazy line of sight in the bestiary scan, a cheaper
+  Camouflage refresh, idle goal caching, and death stimuli skipped when nobody can react.
+- **Result:** mean −8 % / −15 %, p95 −17 % / −33 %, p99 −37 % / −50 %; mod creature AI 6.6 → 1.3 ms/tick in the
+  larger arena. 279 GameTests pass, including every existing ecology behaviour test.
+- §6's two deferred candidates are now done: Camouflage refreshes at ≤ 20 ticks left; the Nundu's per-tick player
+  query is a walk of `level.players()` (same timing, so the first poisoning is not delayed).
+

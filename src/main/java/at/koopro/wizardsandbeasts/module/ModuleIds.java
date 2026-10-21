@@ -48,6 +48,31 @@ public final class ModuleIds {
             },
             ModuleIds::of);
 
+    /**
+     * A map keyed by module that <em>drops</em> entries for ids this build does not define, instead of
+     * failing the whole map the way {@link #CODEC} does. Persisted state outlives the {@link Module} enum:
+     * a removed or renamed module (or a world opened on an older build) must lose that one entry, not
+     * take every other module's saved state down with it.
+     */
+    public static <V> Codec<Map<Module, V>> lenientMap(Codec<V> valueCodec) {
+        return Codec.unboundedMap(Identifier.CODEC, valueCodec).xmap(
+                raw -> {
+                    Map<Module, V> known = new java.util.EnumMap<>(Module.class);
+                    raw.forEach((id, value) -> {
+                        Module module = FROM_ID.get(id);
+                        if (module != null) {
+                            known.put(module, value);
+                        }
+                    });
+                    return known;
+                },
+                modules -> {
+                    Map<Identifier, V> out = new HashMap<>();
+                    modules.forEach((module, value) -> out.put(of(module), value));
+                    return out;
+                });
+    }
+
     private ModuleIds() {}
 
     public static Identifier of(Module module) {

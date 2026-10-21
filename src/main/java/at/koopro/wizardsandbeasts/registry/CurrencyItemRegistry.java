@@ -22,6 +22,23 @@ public final class CurrencyItemRegistry {
     public static final DeferredItem<DragotItem> DRAGOT =
             ModItems.ITEMS.registerItem("dragot", DragotItem::new);
 
+    /**
+     * Cursed treasure from the tombs Gringotts sends its curse-breakers into (treasure/). One stack each: every
+     * find carries its own curse, depth and worth ({@code TreasureArtefact}).
+     */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.treasure.TreasureArtefactItem> ANCIENT_GOBLET =
+            ModItems.ITEMS.registerItem("ancient_goblet",
+                    props -> new at.koopro.wizardsandbeasts.treasure.TreasureArtefactItem(props.stacksTo(1)));
+    public static final DeferredItem<at.koopro.wizardsandbeasts.treasure.TreasureArtefactItem> WARDED_AMULET =
+            ModItems.ITEMS.registerItem("warded_amulet",
+                    props -> new at.koopro.wizardsandbeasts.treasure.TreasureArtefactItem(props.stacksTo(1)));
+    public static final DeferredItem<at.koopro.wizardsandbeasts.treasure.TreasureArtefactItem> SEALED_CASKET =
+            ModItems.ITEMS.registerItem("sealed_casket",
+                    props -> new at.koopro.wizardsandbeasts.treasure.TreasureArtefactItem(props.stacksTo(1)));
+    public static final DeferredItem<at.koopro.wizardsandbeasts.treasure.TreasureArtefactItem> TOMB_MEDALLION =
+            ModItems.ITEMS.registerItem("tomb_medallion",
+                    props -> new at.koopro.wizardsandbeasts.treasure.TreasureArtefactItem(props.stacksTo(1)));
+
     private CurrencyItemRegistry() {}
 
     public static void init() {}

@@ -30,7 +30,18 @@
   "appearance": {
     "tint": "#D9D2C2",
     "handle": "wizards_and_beasts:bulbous",
-    "shaft": "wizards_and_beasts:nodular",
-    "tip": "wizards_and_beasts:blunt"
+    "shaft": "wizards_and_beasts:tapered",
+    "tip": "wizards_and_beasts:blunt",
+    "grain": "wizards_and_beasts:nodal",
+    "rare": [
+      {
+        "chance": 0.05,
+        "ornament": "wizards_and_beasts:runes"
+      },
+      {
+        "chance": 0.03,
+        "tip": "wizards_and_beasts:orb"
+      }
+    ]
   }
 }

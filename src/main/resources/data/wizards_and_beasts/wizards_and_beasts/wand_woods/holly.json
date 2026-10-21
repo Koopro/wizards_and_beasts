@@ -32,6 +32,17 @@
     "tint": "#E8D9B8",
     "handle": "wizards_and_beasts:ribbed",
     "shaft": "wizards_and_beasts:tapered",
-    "tip": "wizards_and_beasts:pointed"
+    "tip": "wizards_and_beasts:pointed",
+    "grain": "wizards_and_beasts:fine",
+    "rare": [
+      {
+        "chance": 0.06,
+        "ornament": "wizards_and_beasts:spiral_inlay"
+      },
+      {
+        "chance": 0.04,
+        "tip": "wizards_and_beasts:leaf"
+      }
+    ]
   }
 }

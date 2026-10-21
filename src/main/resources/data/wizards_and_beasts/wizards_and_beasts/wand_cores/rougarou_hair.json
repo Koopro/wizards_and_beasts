@@ -18,5 +18,10 @@
     "category_damage_bonus": {
       "dark_arts": 0.1
     }
+  },
+  "appearance": {
+    "glint": "#7A2E46",
+    "pattern": "pulse",
+    "strength": 0.55
   }
 }

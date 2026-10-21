@@ -53,6 +53,8 @@ final class SpellCastUtilityHandler {
             ally.removeEffect(MobEffects.NAUSEA);
             ally.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 80, 0, false, true, true));
         }
+        // Healer capstone: the same charm lifts a stunned or petrified friend, and mends the Healer's own creature.
+        at.koopro.wizardsandbeasts.skill.build.capstone.HealersHands.afterEpiskey(caster, ally);
         return true;
     }
 
@@ -151,7 +153,7 @@ final class SpellCastUtilityHandler {
         if (!caster.isShiftKeyDown()) {
             ShareEntranceService.Doorway invite = ShareEntranceService.findUsable(caster);
             if (invite != null) {
-                ExtensionCharmService.enterPocket(caster, invite.pocket());
+                ExtensionCharmService.enterSharedPocket(caster, invite.pocket());
                 return true;
             }
         }

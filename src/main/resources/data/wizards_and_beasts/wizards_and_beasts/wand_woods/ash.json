@@ -33,6 +33,17 @@
     "tint": "#CFC3A4",
     "handle": "wizards_and_beasts:smooth",
     "shaft": "wizards_and_beasts:straight",
-    "tip": "wizards_and_beasts:pointed"
+    "tip": "wizards_and_beasts:pointed",
+    "grain": "wizards_and_beasts:straight",
+    "rare": [
+      {
+        "chance": 0.06,
+        "ornament": "wizards_and_beasts:metal_band"
+      },
+      {
+        "chance": 0.04,
+        "handle": "wizards_and_beasts:wrapped"
+      }
+    ]
   }
 }

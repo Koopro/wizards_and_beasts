@@ -1,0 +1,196 @@
+{
+  "values": {
+    "wizards_and_beasts:invisibility_cloak": {
+      "equipment_type": "cloak"
+    },
+    "wizards_and_beasts:deathly_hallow_cloak": {
+      "equipment_type": "cloak",
+      "conceals_wearer": true
+    },
+    "wizards_and_beasts:student_robe_chest": {
+      "equipment_type": "body_clothing",
+      "hides": [
+        "chest"
+      ],
+      "faction": "hogwarts",
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 3,
+          "operation": "add_value"
+        }
+      ]
+    },
+    "wizards_and_beasts:auror_robe_chest": {
+      "equipment_type": "body_clothing",
+      "hides": [
+        "chest"
+      ],
+      "faction": "auror_office",
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 6,
+          "operation": "add_value"
+        }
+      ]
+    },
+    "wizards_and_beasts:death_eater_robe_chest": {
+      "equipment_type": "body_clothing",
+      "hides": [
+        "chest"
+      ],
+      "hides_with_hood_up": [
+        "head"
+      ],
+      "faction": "death_eaters",
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 6,
+          "operation": "add_value"
+        },
+        {
+          "attribute": "minecraft:armor_toughness",
+          "amount": 1.0,
+          "operation": "add_value"
+        },
+        {
+          "attribute": "minecraft:knockback_resistance",
+          "amount": 0.05,
+          "operation": "add_value"
+        }
+      ]
+    },
+    "wizards_and_beasts:wizard_hat": {
+      "equipment_type": "headwear",
+      "hides": [
+        "head"
+      ],
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 1,
+          "operation": "add_value"
+        }
+      ]
+    },
+    "wizards_and_beasts:death_eater_mask": {
+      "equipment_type": "face",
+      "hides": [
+        "head"
+      ],
+      "faction": "death_eaters",
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 2,
+          "operation": "add_value"
+        },
+        {
+          "attribute": "minecraft:armor_toughness",
+          "amount": 0.5,
+          "operation": "add_value"
+        }
+      ]
+    },
+    "wizards_and_beasts:death_eater_mask_1": {
+      "equipment_type": "face",
+      "hides": [
+        "head"
+      ],
+      "faction": "death_eaters",
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 2,
+          "operation": "add_value"
+        },
+        {
+          "attribute": "minecraft:armor_toughness",
+          "amount": 0.5,
+          "operation": "add_value"
+        }
+      ]
+    },
+    "wizards_and_beasts:death_eater_mask_2": {
+      "equipment_type": "face",
+      "hides": [
+        "head"
+      ],
+      "faction": "death_eaters",
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 2,
+          "operation": "add_value"
+        },
+        {
+          "attribute": "minecraft:armor_toughness",
+          "amount": 0.5,
+          "operation": "add_value"
+        }
+      ]
+    },
+    "wizards_and_beasts:death_eater_mask_3": {
+      "equipment_type": "face",
+      "hides": [
+        "head"
+      ],
+      "faction": "death_eaters",
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 2,
+          "operation": "add_value"
+        },
+        {
+          "attribute": "minecraft:armor_toughness",
+          "amount": 0.5,
+          "operation": "add_value"
+        }
+      ]
+    },
+    "wizards_and_beasts:death_eater_mask_4": {
+      "equipment_type": "face",
+      "hides": [
+        "head"
+      ],
+      "faction": "death_eaters",
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 2,
+          "operation": "add_value"
+        },
+        {
+          "attribute": "minecraft:armor_toughness",
+          "amount": 0.5,
+          "operation": "add_value"
+        }
+      ]
+    },
+    "wizards_and_beasts:death_eater_mask_5": {
+      "equipment_type": "face",
+      "hides": [
+        "head"
+      ],
+      "faction": "death_eaters",
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 2,
+          "operation": "add_value"
+        },
+        {
+          "attribute": "minecraft:armor_toughness",
+          "amount": 0.5,
+          "operation": "add_value"
+        }
+      ]
+    },
+    "wizards_and_beasts:time_turner": {
+      "equipment_type": "necklace"
+    }
+  }
+}

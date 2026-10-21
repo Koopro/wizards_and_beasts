@@ -18,5 +18,10 @@
   },
   "temperament": {
     "bond_growth": 0.6
+  },
+  "appearance": {
+    "glint": "#8CCBFF",
+    "pattern": "storm",
+    "strength": 0.8
   }
 }

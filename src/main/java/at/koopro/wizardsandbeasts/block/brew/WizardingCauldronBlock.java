@@ -303,6 +303,19 @@ public class WizardingCauldronBlock extends BaseEntityBlock {
         return InteractionResult.SUCCESS;
     }
 
+    /**
+     * How long a brew takes, as a player says it: "about 30 seconds", "about 2 minutes". The start
+     * message used to print the raw tick count ("600t"), which is a number for the code, not for a
+     * player standing at a cauldron.
+     */
+    private static Component brewDuration(int ticks) {
+        int seconds = Math.max(1, Math.round(ticks / 20.0f));
+        if (seconds < 90) {
+            return Component.translatable("brew.wizards_and_beasts.duration.seconds", seconds);
+        }
+        return Component.translatable("brew.wizards_and_beasts.duration.minutes", Math.round(seconds / 60.0f));
+    }
+
     /** The pot objecting. Used for both a mistimed catalyst and outright contamination. */
     private static void spoilPuff(Level level, BlockPos pos) {
         level.playSound(null, pos, SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.BLOCKS, 0.7f, 0.6f);
@@ -325,7 +338,7 @@ public class WizardingCauldronBlock extends BaseEntityBlock {
                 PlayerFeedback.actionBar(player, Component.translatable(
                         "brew.wizards_and_beasts.started",
                         brew == null ? Component.literal("?") : Component.translatable(brew.displayName()),
-                        be.totalTicks()));
+                        brewDuration(be.totalTicks())));
             }
             case NOT_FILLED -> say(player, "brew.wizards_and_beasts.cauldron.needs_water");
             case EMPTY -> say(player, "brew.wizards_and_beasts.cauldron.empty");
@@ -334,6 +347,15 @@ public class WizardingCauldronBlock extends BaseEntityBlock {
             case NOT_IDLE -> say(player, "brew.wizards_and_beasts.cauldron.mid_brew");
             case BREWING_DISABLED -> say(player, "brew.wizards_and_beasts.cauldron.brewing_disabled");
             case BREW_DISABLED -> say(player, "brew.wizards_and_beasts.cauldron.brew_disabled");
+            case UNQUALIFIED -> {
+                String brewId = be.matchedBrewId(tier);
+                var unmet = brewId == null ? null : at.koopro.wizardsandbeasts.education.QualificationGates.firstUnmet(
+                        player, at.koopro.wizardsandbeasts.education.QualificationGates.Kind.BREW, brewId);
+                PlayerFeedback.actionBar(player, unmet == null
+                        ? Component.translatable("brew.wizards_and_beasts.cauldron.unqualified_generic")
+                        : Component.translatable("brew.wizards_and_beasts.cauldron.unqualified",
+                                at.koopro.wizardsandbeasts.education.QualificationGates.describe(unmet)));
+            }
         }
         return InteractionResult.SUCCESS;
     }
@@ -344,7 +366,8 @@ public class WizardingCauldronBlock extends BaseEntityBlock {
             say(player, "brew.wizards_and_beasts.cauldron.empty");
             return InteractionResult.SUCCESS;
         }
-        if (!player.getInventory().add(taken)) {
+        player.getInventory().add(taken); // true on a partial insert: pop whatever is left
+        if (!taken.isEmpty()) {
             Block.popResource(level, pos.above(), taken);
         }
         level.playSound(null, pos, SoundEvents.GENERIC_SPLASH, SoundSource.BLOCKS, 0.4f, 0.9f);
@@ -371,7 +394,8 @@ public class WizardingCauldronBlock extends BaseEntityBlock {
                     bottle.shrink(1);
                 }
                 ItemStack filled = BrewItem.of(brew);
-                if (!player.getInventory().add(filled)) {
+                player.getInventory().add(filled); // true on a partial insert: pop whatever is left
+                if (!filled.isEmpty()) {
                     Block.popResource(level, pos.above(), filled);
                 }
                 level.playSound(null, pos, SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0f, 1.0f);
@@ -409,7 +433,8 @@ public class WizardingCauldronBlock extends BaseEntityBlock {
                 bottle.shrink(1);
             }
             ItemStack filled = BrewItem.of(ruined);
-            if (!player.getInventory().add(filled)) {
+            player.getInventory().add(filled); // true on a partial insert: pop whatever is left
+            if (!filled.isEmpty()) {
                 Block.popResource(level, pos.above(), filled);
             }
             level.playSound(null, pos, SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0f, 0.7f);

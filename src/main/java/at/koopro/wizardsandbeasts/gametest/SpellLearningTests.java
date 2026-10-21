@@ -71,7 +71,7 @@ public final class SpellLearningTests {
                 "skill web: a learn_spell keystone still grants, with the vendor's service gone",
                 SpellLearningTests::skillNodeStillTeaches);
         tests.add("spell_learn_command_still_works",
-                "command: /wandb magic spell learn still teaches, and stores a canonical id",
+                "command: /wandb magic spell learn teaches an admin a canonical id and refuses a non-admin",
                 SpellLearningTests::learnCommandStillWorks);
         tests.add("spell_scriptorium_scribes_the_active_spell",
                 "study lectern: a blank book plus ink becomes a book of the active spell",
@@ -197,33 +197,51 @@ public final class SpellLearningTests {
      * has the node at all — the vendor's removal touched the same package.
      */
     private static void learnCommandStillWorks(GameTestHelper helper) {
-        ServerPlayer player = WizardTestSupport.placeMockPlayer(helper, "Operator");
+        var server = helper.getLevel().getServer();
+        // An admin as AdminAccess defines one: the first allow-listed UUID, or an operator when none is listed.
+        java.util.UUID listed = AdminFrameworkTests.firstAllowListedUuid();
+        ServerPlayer player = listed == null
+                ? WizardTestSupport.placeMockPlayer(helper, "Operator")
+                : WizardTestSupport.placeMockPlayer(helper, "Operator", listed, net.minecraft.world.level.GameType.CREATIVE);
+        ServerPlayer outsider = WizardTestSupport.placeMockPlayer(helper, "LearnOutsider",
+                net.minecraft.world.level.GameType.SURVIVAL);
+        boolean opped = false;
         try {
+            if (listed == null) {
+                server.getPlayerList().op(player.nameAndId());
+                opped = true;
+            }
             Spell spell = requireSpell(helper, COMMAND_TAUGHT_SPELL);
             PlayerSpellData data = WizardTestSupport.spellData(player);
-            WizardTestSupport.check(helper, !data.knowsSpell(spell.getId()),
-                    () -> "a fresh test player already knew " + spell.getId());
+            // An allow-listed UUID is reused across runs and its saved data reloads; start from not knowing it.
+            data.forgetSpell(spell.getId());
 
-            var server = helper.getLevel().getServer();
             WizardTestSupport.check(helper,
                     server.getCommands().getDispatcher().getRoot().getChild("wandb") != null,
                     () -> "/wandb is not registered at all");
 
-            // The server's own source rather than the player's: it is already at full permission, and
-            // 1.21.11 replaced withPermission(int) with a PermissionSet there is no literal for here.
-            // withEntity is what the command actually reads — it calls getPlayerOrException.
+            // A player who is not an admin cannot teach themselves a spell: spells are found and read.
+            PlayerSpellData outsiderData = WizardTestSupport.spellData(outsider);
+            server.getCommands().performPrefixedCommand(outsider.createCommandSourceStack().withSuppressedOutput(),
+                    "wandb magic spell learn " + COMMAND_TAUGHT_SPELL);
+            WizardTestSupport.check(helper, !outsiderData.knowsSpell(spell.getId()),
+                    () -> "a non-admin taught themselves " + spell.getId() + " with /wandb magic spell learn");
+
             // The bare path, which is what the command's own completion offers and what its
             // StringArgumentType.word() argument can actually parse. Passing spell.getId() here is
             // what caught the suggestions offering namespaced ids the parser rejects.
-            server.getCommands().performPrefixedCommand(
-                    server.createCommandSourceStack().withEntity(player).withSuppressedOutput(),
+            server.getCommands().performPrefixedCommand(player.createCommandSourceStack().withSuppressedOutput(),
                     "wandb magic spell learn " + COMMAND_TAUGHT_SPELL);
 
             WizardTestSupport.check(helper, data.knowsSpell(spell.getId()),
-                    () -> "/wandb magic spell learn did not teach " + spell.getId()
+                    () -> "/wandb magic spell learn did not teach an admin " + spell.getId()
                             + " — known set holds " + data.getKnownSpells());
             helper.succeed();
         } finally {
+            if (opped) {
+                server.getPlayerList().deop(player.nameAndId());
+            }
+            WizardTestSupport.retire(helper, outsider);
             WizardTestSupport.retire(helper, player);
         }
     }

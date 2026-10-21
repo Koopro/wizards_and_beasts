@@ -126,8 +126,11 @@ public final class AfterDeathInputTests {
 
                     caster.kill(helper.getLevel());
                     check(helper, !caster.isAlive(), () -> "the caster survived kill()");
+                    // A dead caster holds no one: the victim is free, and a command still on the wire changes nothing.
+                    check(helper, !state(victim).isControlled() && !ImperioServerLogic.holdsVictim(caster.getUUID()),
+                            () -> "the Imperius victim was still bound after its caster died: " + state(victim));
                     ImperioServerLogic.applyCommand(caster, ImperioCommand.STAND_STILL);
-                    check(helper, command(victim) == ImperioCommand.ATTACK_NEAREST,
+                    check(helper, !state(victim).isControlled(),
                             () -> "a dead caster commanded the Imperius victim: " + state(victim));
                 })
                 .thenExecute(() -> {

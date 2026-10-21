@@ -31,6 +31,17 @@
     "tint": "#8E9B62",
     "handle": "wizards_and_beasts:vine",
     "shaft": "wizards_and_beasts:twining",
-    "tip": "wizards_and_beasts:spiralled"
+    "tip": "wizards_and_beasts:spiralled",
+    "grain": "wizards_and_beasts:stringy",
+    "rare": [
+      {
+        "chance": 0.07,
+        "ornament": "wizards_and_beasts:vine_wrap"
+      },
+      {
+        "chance": 0.03,
+        "tip": "wizards_and_beasts:leaf"
+      }
+    ]
   }
 }

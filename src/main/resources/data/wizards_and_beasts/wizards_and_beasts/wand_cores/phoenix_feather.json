@@ -20,5 +20,10 @@
     "extra_wins": 1,
     "bond_growth": 0.5,
     "loyal_cooldown": 0.9
+  },
+  "appearance": {
+    "glint": "#FF9A4A",
+    "pattern": "ember",
+    "strength": 0.85
   }
 }

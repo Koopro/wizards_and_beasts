@@ -79,9 +79,7 @@ public class ChocolateFrogItem extends ConsumedItem {
         }
 
         ItemStack card = FamousWizardCardItem.randomCard(level);
-        if (!player.getInventory().add(card)) {
-            player.drop(card, false);
-        }
+        at.koopro.wizardsandbeasts.util.InventoryHandover.giveOrDrop(player, card);
 
         stack.consume(1, player);
         player.getCooldowns().addCooldown(stack, COOLDOWN_TICKS);

@@ -37,6 +37,11 @@ public final class MirrorSessionManager {
 
     /** Bidirectional player→partner links. Both directions are always kept in sync. */
     private static final Map<UUID, UUID> PARTNER = new HashMap<>();
+    /**
+     * The pair id each session was opened on, under both players. A player can carry several mirrors, so
+     * "the first mirror found" is not a stable answer to "do they still hold the one they connected on".
+     */
+    private static final Map<UUID, UUID> SESSION_PAIR = new HashMap<>();
 
     private MirrorSessionManager() {}
 
@@ -62,16 +67,23 @@ public final class MirrorSessionManager {
                     .withStyle(ChatFormatting.DARK_GRAY), true);
             return;
         }
-        open(caller, target);
+        open(caller, target, pairId);
     }
 
-    private static void open(ServerPlayer a, ServerPlayer b) {
+    private static void open(ServerPlayer a, ServerPlayer b, UUID pairId) {
         end(a.getUUID(), a.level().getServer(), null);
         end(b.getUUID(), b.level().getServer(), null);
         PARTNER.put(a.getUUID(), b.getUUID());
         PARTNER.put(b.getUUID(), a.getUUID());
+        SESSION_PAIR.put(a.getUUID(), pairId);
+        SESSION_PAIR.put(b.getUUID(), pairId);
         PacketDistributor.sendToPlayer(a, new MirrorOpenS2CPayload(b.getUUID(), b.getName().getString()));
         PacketDistributor.sendToPlayer(b, new MirrorOpenS2CPayload(a.getUUID(), a.getName().getString()));
+    }
+
+    /** Whether {@code playerId} is currently in a mirror session. */
+    public static boolean isConnected(UUID playerId) {
+        return PARTNER.containsKey(playerId);
     }
 
     /** Ends the session for {@code playerId} (and its partner). Sends a close note if {@code reason} is set. */
@@ -81,6 +93,8 @@ public final class MirrorSessionManager {
             return;
         }
         PARTNER.remove(partnerId);
+        SESSION_PAIR.remove(playerId);
+        SESSION_PAIR.remove(partnerId);
         if (reason != null && server != null) {
             notifyClose(server, playerId, reason);
             notifyClose(server, partnerId, reason);
@@ -112,8 +126,8 @@ public final class MirrorSessionManager {
                 end(id, server, "The connection fades.");
                 continue;
             }
-            UUID pair = sharedPairId(a, b);
-            if (pair == null) {
+            UUID sessionPair = SESSION_PAIR.get(id);
+            if (sessionPair == null || !holdsPairedMirror(a, sessionPair) || !holdsPairedMirror(b, sessionPair)) {
                 end(id, server, "The mirror slips from reach.");
                 continue;
             }
@@ -131,21 +145,8 @@ public final class MirrorSessionManager {
         }
     }
 
-    /** Both still hold a mirror keyed to the same pair id. Returns that id, or null. */
-    private static @Nullable UUID sharedPairId(ServerPlayer a, ServerPlayer b) {
-        UUID idA = heldPairId(a);
-        if (idA != null && idA.equals(heldPairId(b))) {
-            return idA;
-        }
-        return null;
-    }
-
     private static boolean holdsPairedMirror(ServerPlayer player, UUID pairId) {
         return pairId.equals(heldPairId(player, pairId));
-    }
-
-    private static @Nullable UUID heldPairId(ServerPlayer player) {
-        return heldPairId(player, null);
     }
 
     /** First mirror pair id found in the player's inventory; if {@code want} is set, only matches it. */

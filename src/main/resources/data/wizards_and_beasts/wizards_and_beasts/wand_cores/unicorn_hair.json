@@ -19,5 +19,10 @@
   "temperament": {
     "transfer_bond_bonus": -0.1,
     "dark_arts_bond_cost": 0.03
+  },
+  "appearance": {
+    "glint": "#EEF4FF",
+    "pattern": "steady",
+    "strength": 0.65
   }
 }

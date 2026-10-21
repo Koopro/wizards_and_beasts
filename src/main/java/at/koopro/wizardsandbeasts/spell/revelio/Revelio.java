@@ -55,8 +55,13 @@ public final class Revelio {
      */
     public static boolean cast(ServerLevel level, ServerPlayer caster, Spell spell) {
         Settings settings = Settings.of(spell);
+        // An Auror casting it at the scene of a case they hold reads the magic left there.
+        int evidence = at.koopro.wizardsandbeasts.ministry.trace.MinistryCasework.examine(caster);
         RevelioScan.Result found = RevelioScan.scan(level, caster, settings.radius());
         if (found.isEmpty()) {
+            if (evidence > 0) {
+                return true;
+            }
             PlayerFeedback.actionBar(caster, Component.translatable("spell.wizards_and_beasts.revelio.nothing"));
             return false;
         }

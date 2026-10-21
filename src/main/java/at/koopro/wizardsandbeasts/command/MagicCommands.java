@@ -17,8 +17,8 @@ import org.jspecify.annotations.NullMarked;
  * as a top-level {@code pact}. They are all the same category of thing — magic a character
  * performs — and they read like it now.
  *
- * <p>Ungated at the group, like {@link PlayerCommands}: {@code spell learn}, {@code apparate mark}
- * and {@code animagus transform} are ordinary play, while {@code spell learn_all} and
+ * <p>Ungated at the group, like {@link PlayerCommands}: {@code apparate mark} and {@code animagus transform}
+ * are ordinary play, while {@code spell learn}, {@code spell forget}, {@code spell learn_all} and
  * {@code pact break} are not.
  */
 @NullMarked

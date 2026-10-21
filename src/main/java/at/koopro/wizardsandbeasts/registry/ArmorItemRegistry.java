@@ -12,12 +12,20 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import java.util.List;
 
 /**
- * Worn wizarding armour: robes, hats and masks.
+ * The wizarding wardrobe: robes, hats and masks.
  *
- * <p>All real armour — each piece runs its {@code Properties} through {@code humanoidArmor()} (see
- * {@link at.koopro.wizardsandbeasts.item.armor.WizardArmorMaterials}), so it occupies a real
- * equipment slot, carries real ARMOR/ARMOR_TOUGHNESS modifiers, takes damage and is repairable.
- * None of it is a cosmetic overlay like {@link at.koopro.wizardsandbeasts.item.cloak.CloakItem}.
+ * <p>Two kinds of piece share these GeckoLib models (see {@link WizardArmorItem.Wear}):
+ * <ul>
+ *   <li><b>Clothing</b> — each robe's {@code _chest} piece (the robe body, sleeves, skirt and hood),
+ *       the wizard hat and every mask. Worn in Curios slots; what they grant and which armour they
+ *       cover is data ({@code data/wizards_and_beasts/data_maps/item/wearables.json}). A netherite
+ *       chestplate can be worn under a robe and keeps all of its protection.</li>
+ *   <li><b>Armour</b> — each robe's {@code _legs} and {@code _boots}: real trousers and boots in the
+ *       vanilla slots, with real ARMOR/ARMOR_TOUGHNESS modifiers, durability and repair.</li>
+ * </ul>
+ * The ids never changed, so stacks from before the split load as the same items; a robe body or hat
+ * still sitting in an armour slot is moved into its Curios slot on login by
+ * {@link at.koopro.wizardsandbeasts.equipment.EquipmentMigration}.
  *
  * <p>Nothing here is house- or allegiance-gated at registration. The student set is meant to be
  * free for everyone; the Auror and Death Eater sets are gated, if at all, by what can craft or drop

@@ -23,6 +23,12 @@ public final class AbilityIds {
     public static final Identifier VEELA_ALLURE = id("veela_allure");
     /** A vampire's bat shape. Purely voluntary; nothing forces it. */
     public static final Identifier VAMPIRE_FORM = id("vampire_form");
+    /** House-elf magic and service (heritage.elf). */
+    public static final Identifier ELF_SNAP = id("elf_snap");
+    public static final Identifier ELF_KITCHEN = id("elf_kitchen");
+    public static final Identifier CALL_HOUSE_ELF = id("call_house_elf");
+    /** A centaur's reading of the night sky (heritage.centaur.StarReading). */
+    public static final Identifier STAR_READING = id("star_reading");
     public static final Identifier OBSCURIAL_STRESS_VENT = id("obscurial_stress_vent");
     public static final Identifier OBSCURUS_SURGE = id("obscurus_surge");
     public static final Identifier OBSCURUS_GRASP = id("obscurus_grasp");

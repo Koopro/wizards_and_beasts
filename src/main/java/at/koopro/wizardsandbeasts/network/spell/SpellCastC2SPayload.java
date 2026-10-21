@@ -84,9 +84,13 @@ public record SpellCastC2SPayload() implements CustomPacketPayload {
                 player.getData(ModAttachments.SPELL_DATA.get()).incrementSyncCorrections();
             }
             debugReject(player, refused.rejectCode());
+            // A channel that already did its work still owes its cooldown when its release casts nothing.
+            at.koopro.wizardsandbeasts.spell.beam.WandBeamChannelLogic.settleReleasedChannel(player, false);
             return;
         }
-        SpellCastService.completeWandCastRelease(player);
+        at.koopro.wizardsandbeasts.spell.cast.CastResult result = SpellCastService.completeWandCastRelease(player);
+        at.koopro.wizardsandbeasts.spell.beam.WandBeamChannelLogic.settleReleasedChannel(player,
+                result == at.koopro.wizardsandbeasts.spell.cast.CastResult.SUCCESS);
     }
 
     private static void debugReject(ServerPlayer player, String reason) {

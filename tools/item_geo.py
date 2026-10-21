@@ -685,41 +685,129 @@ def build_marauders_map():
 
 
 def build_elder_wand():
-    """The Elder Wand: pale bleached elder, knotted along its length with the nodes the books
-    describe, a knob at the grip end. Drawn by WandRenderer, not AnimatedItemRenderer, so the
-    bone names are its contract: wand_root > shaft/knob/tip, and wand_spell_attachment (where a
-    spell leaves; WandRenderer reads it from every wand model) at the point. Never tinted: it is one
-    wand, not a sample of elder wood.
+    """The Elder Wand: pale bleached elder, knuckled along its whole length -- a beaded grip of four
+    knots, then node after node up a shaft that thins as it climbs, each node with a knot pushed off
+    to one side so no two read alike. Nothing in the modular wand has this silhouette, which is the
+    point: it is one wand, recognisable at a glance in a slot, in a hand or on the floor, and never
+    a sample of elder wood (an ordinary elder wand is a modular wand with elder's modules).
+
+    Drawn by WandRenderer, not AnimatedItemRenderer, so the bone names are its contract: wand_root >
+    knob/shaft/tip, and wand_spell_attachment (where a spell leaves; WandRenderer reads it from every
+    wand model) at the point. Never tinted, bent or resized (WandLookResolver).
 
     Grip at y 0, point up at y 27.5 -- the modular wand's orientation and length (tools/wand_model.py
     contract), because both share one display base (models/item/wand.json)."""
-    rig = Rig("elder_wand", tex_w=32)
+    rig = Rig("elder_wand", tex_w=48)
     rig.bone("wand_root", "root", (0, 0, 0))
     rig.bone("knob", "wand_root", (0, 0, 0))
-    rig.cube("knob", (-1, 0, -1), (2, 2, 2), key="knob", inflate=0.1)
-    rig.cube("knob", (-0.5, -1, -0.5), (1, 1, 1), key="cap")
-    rig.bone("shaft", "wand_root", (0, 2, 0))
-    rig.cube("shaft", (-0.5, 2, -0.5), (1, 23, 1), key="shaft")
-    for i, y in enumerate((5, 10, 15, 20)):
-        rig.cube("shaft", (-1, y, -1), (2, 1, 2), key=f"node{i}", inflate=-0.25)
-    rig.bone("tip", "wand_root", (0, 25, 0))
-    # 24.8 -> 27.5 as drawn; its foot sits inside the shaft's end.
-    rig.cube("tip", (-0.5, 24.65, -0.5), (1, 3, 1), key="point", inflate=-0.15)
+    rig.bone("shaft", "wand_root", (0, 9, 0))
+    rig.bone("tip", "wand_root", (0, 25.5, 0))
+
+    def part(bone, key, lo, hi):
+        """A cube by its rendered extents: whole-number size, shrunk by one uniform inflate."""
+        dims = [h - l for l, h in zip(lo, hi)]
+        frac = {round(d % 1.0, 4) for d in dims}
+        assert len(frac) == 1, (key, dims)
+        f = frac.pop()
+        inflate = 0.0 if f == 0 else -(1.0 - f) / 2.0
+        size = [int(round(d - 2 * inflate)) for d in dims]
+        rig.cube(bone, [l + inflate for l in lo], size, key=key, inflate=inflate or None)
+        return key
+
+    # Pommel: a rounded end cap under a collar.
+    part("knob", "cap", (-0.5, -1.5, -0.5), (0.5, -0.5, 0.5))
+    part("knob", "collar", (-1, -0.5, -1), (1, 0.5, 1))
+    # Grip: a 1.5 core strung with four knots, each with a knuckle off one face.
+    part("knob", "grip", (-0.75, -0.25, -0.75), (0.75, 9.25, 0.75))
+    side = ((1, 0), (0, -1), (-1, 0), (0, 1))
+    for i, y in enumerate((0.75, 3.25, 5.75, 8.25)):
+        part("knob", f"bead{i}", (-1.25, y, -1.25), (1.25, y + 1.5, 1.25))
+        sx, sz = side[i]
+        part("knob", f"bead_knot{i}", (sx * 1.25 - 0.5 + sx * 0.25, y + 0.25, sz * 1.25 - 0.5 + sz * 0.25),
+             (sx * 1.25 + 0.5 + sx * 0.25, y + 1.25, sz * 1.25 + 0.5 + sz * 0.25))
+    # Shaft: 1.5 to y 17.5, 1.0 above, a node every two and a half units with its own knot.
+    part("shaft", "shaft_low", (-0.75, 9.0, -0.75), (0.75, 17.5, 0.75))
+    part("shaft", "shaft_high", (-0.5, 17.5, -0.5), (0.5, 25.5, 0.5))
+    for i, y in enumerate((11.0, 13.5, 16.0)):
+        part("shaft", f"node{i}", (-1, y, -1), (1, y + 1, 1))
+        sx, sz = side[(i + 1) % 4]
+        part("shaft", f"node_knot{i}", (sx * 1.0 - 0.25 + sx * 0.25, y + 0.25, sz * 1.0 - 0.25 + sz * 0.25),
+             (sx * 1.0 + 0.25 + sx * 0.25, y + 0.75, sz * 1.0 + 0.25 + sz * 0.25))
+    for i, y in enumerate((19.0, 21.5, 24.0)):
+        part("shaft", f"node{i + 3}", (-0.75, y, -0.75), (0.75, y + 0.5, 0.75))
+        sx, sz = side[(i + 3) % 4]
+        part("shaft", f"node_knot{i + 3}", (sx * 0.75 - 0.25 + sx * 0.25, y, sz * 0.75 - 0.25 + sz * 0.25),
+             (sx * 0.75 + 0.25 + sx * 0.25, y + 0.5, sz * 0.75 + 0.25 + sz * 0.25))
+    # Point: half a unit thick, from inside the shaft's end to the attachment.
+    part("tip", "point", (-0.25, 25.0, -0.25), (0.25, 27.5, 0.25))
     rig.bone("wand_spell_attachment", "wand_root", (0, 27.5, 0))
+
     skin = finish(rig)
-    t = paint(skin, ["shaft", "point"], "#C8BFB0", dither=0.1, speck="shade")
-    paint(skin, [f"node{i}" for i in range(4)], "#A89E8C", tone="shade", dither=0.2, speck="dark")
-    paint(skin, ["knob", "cap"], "#B8AE9C", dither=0.15, speck="dark")
-    # grain: a faint darker fleck stepping down every long face of the shaft
-    for face in skin.SIDES:
-        x, y, w, h = skin.face("shaft", face)
-        for row in range(0, h, 3):
-            skin.d.point((x + (row // 3) % max(1, w), y + row), fill=t["shade"])
+    beads = [f"bead{i}" for i in range(4)]
+    nodes = [f"node{i}" for i in range(6)]
+    knots = [f"bead_knot{i}" for i in range(4)] + [f"node_knot{i}" for i in range(6)]
+    t = paint(skin, ["shaft_low", "shaft_high", "point", "grip"], "#C8BFB0", dither=0.1, speck="shade")
+    paint(skin, beads + nodes, "#A89E8C", tone="shade", dither=0.2, speck="dark")
+    paint(skin, knots, "#958A78", tone="shade", dither=0.25, speck="dark")
+    paint(skin, ["cap", "collar"], "#B8AE9C", dither=0.15, speck="dark")
+    # A carved seam round every knot and grain flecking down the long faces.
+    for key in beads + nodes:
+        for face in skin.SIDES:
+            x, y, w, h = skin.face(key, face)
+            skin.hline((x, y, w, h), h - 1, t["dark"])
+    for key in ("shaft_low", "shaft_high", "grip"):
+        for face in skin.SIDES:
+            x, y, w, h = skin.face(key, face)
+            for row in range(0, h, 3):
+                skin.d.point((x + (row // 3) % max(1, w), y + row), fill=t["shade"])
     return rig, skin, {}
+
+
+# The Elder Wand's core light (WandRenderer draws it additively in its own cold colour, like the
+# modular wand's wand_glint*.png): the point always; once the wand is loyal to its holder the pommel
+# too, and every knuckle faintly -- the wand waking all along its length.
+ELDER_GLINT_PATH = os.path.join(ASSETS, "textures", "item", "elder_wand_glint.png")
+ELDER_GLINT_BONDED_PATH = os.path.join(ASSETS, "textures", "item", "elder_wand_glint_bonded.png")
+
+
+def write_elder_glints(rig, skin):
+    from PIL import Image as _Image, ImageDraw as _Draw
+    size = skin.img.size
+    tip_img = _Image.new("RGBA", size, (0, 0, 0, 0))
+    full_img = _Image.new("RGBA", size, (0, 0, 0, 0))
+
+    def light(img, key, faces, level, rows=None, from_top=True):
+        d = _Draw.Draw(img)
+        a = int(round(255 * level))
+        for face in faces:
+            x, y, w, h = skin.face(key, face)
+            if w <= 0 or h <= 0:
+                continue
+            if rows is None:
+                d.rectangle([x, y, x + w - 1, y + h - 1], fill=(a, a, a, a))
+            else:
+                for i, lv in enumerate(rows):
+                    if i >= h:
+                        break
+                    row = y + i if from_top else y + h - 1 - i
+                    b = int(round(255 * lv))
+                    d.line([(x, row), (x + w - 1, row)], fill=(b, b, b, b))
+
+    for img in (tip_img, full_img):
+        light(img, "point", ("top",), 1.0)
+        light(img, "point", skin.SIDES, 1.0, rows=(1.0, 0.65, 0.3, 0.1))
+    light(full_img, "cap", ("bottom",), 1.0)
+    light(full_img, "cap", skin.SIDES, 1.0, rows=(0.7, 0.3), from_top=False)
+    for key in [f"bead{i}" for i in range(4)] + [f"node{i}" for i in range(6)]:
+        light(full_img, key, skin.SIDES, 0.25)
+    save(tip_img, ELDER_GLINT_PATH, MARKER)
+    save(full_img, ELDER_GLINT_BONDED_PATH, MARKER)
 
 
 # Models drawn by a bespoke renderer that reads its texture from the default item path.
 TEXTURE_PATHS = {"elder_wand": os.path.join(ASSETS, "textures", "item", "elder_wand.png")}
+# Files a model writes beside its geo, texture and clips.
+EXTRA_OUTPUTS = {"elder_wand": write_elder_glints}
 
 
 MODELS = {
@@ -864,6 +952,8 @@ def emit(name, force):
             json.dump({"format_version": "1.8.0", "animations": clips}, fh, indent=2)
             fh.write("\n")
     save(skin.img, paths["tex"], MARKER)
+    if name in EXTRA_OUTPUTS:
+        EXTRA_OUTPUTS[name](rig, skin)
     if name in HOLD:
         write_held(name)
     print(f"wrote {name}: {rig.cube_count()} cubes, {rig.tex_w}x{tex_h} sheet, clips {sorted(clips)}")

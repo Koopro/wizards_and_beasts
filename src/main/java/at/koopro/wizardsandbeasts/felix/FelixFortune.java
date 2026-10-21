@@ -220,6 +220,15 @@ public final class FelixFortune {
      *
      * @return true when the caller should cancel the damage
      */
+    /**
+     * Whether the save limiter has run out. {@code Long.MIN_VALUE} is "never saved" ({@link FelixState#NONE}, and
+     * every fresh dose): it used to go through {@code now - lastSave}, which overflows to a negative number and
+     * read as "saved a moment ago", so a player who had never been saved never could be.
+     */
+    static boolean saveReady(long now, long lastSaveGameTime) {
+        return lastSaveGameTime == Long.MIN_VALUE || now - lastSaveGameTime >= SAVE_INTERNAL_COOLDOWN;
+    }
+
     public static boolean rollNearDeathSave(ServerPlayer player, float incomingDamage) {
         FelixState state = get(player);
         if (!state.isActive()) {
@@ -230,7 +239,7 @@ public final class FelixFortune {
             return false;
         }
         long now = player.level().getGameTime();
-        if (now - state.lastSaveGameTime() < SAVE_INTERNAL_COOLDOWN) {
+        if (!saveReady(now, state.lastSaveGameTime())) {
             return false;
         }
         // 30% / 45% / 60% by strength. Deliberately not certain: a guaranteed save is invulnerability

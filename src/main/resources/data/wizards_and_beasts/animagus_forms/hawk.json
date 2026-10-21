@@ -1,0 +1,17 @@
+{
+  "canon_tier": "mod",
+  "texture": "wizards_and_beasts:textures/entity/form/animagus_hawk.png",
+  "hitbox": {
+    "width": 0.5,
+    "height": 0.5,
+    "eye_height": 0.42
+  },
+  "attributes": {
+    "minecraft:movement_speed": -0.02,
+    "minecraft:max_health": -8.0
+  },
+  "capabilities": [
+    "KEEN_SIGHT",
+    "SAFE_LANDING"
+  ]
+}

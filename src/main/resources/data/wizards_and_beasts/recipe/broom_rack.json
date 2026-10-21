@@ -1,0 +1,24 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "BROOM_FLIGHT"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "S S",
+    "SWS",
+    "SHS"
+  ],
+  "key": {
+    "S": "minecraft:stick",
+    "W": "#minecraft:planks",
+    "H": "minecraft:wheat"
+  },
+  "result": {
+    "id": "wizards_and_beasts:broom_rack",
+    "count": 1
+  }
+}

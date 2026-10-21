@@ -1,6 +1,10 @@
 package at.koopro.wizardsandbeasts.client.ability.wheel;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.client.gui.ui.Ui;
+import at.koopro.wizardsandbeasts.client.gui.ui.UiIcons;
+import at.koopro.wizardsandbeasts.client.gui.ui.UiSurface;
+import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 import at.koopro.wizardsandbeasts.ability.def.AbilityDefinition;
 import at.koopro.wizardsandbeasts.ability.def.AbilityDefinitionRegistry;
 import at.koopro.wizardsandbeasts.ability.def.AbilityType;
@@ -36,21 +40,16 @@ import java.util.List;
 @NullMarked
 public final class AbilityWheelScreen extends Screen {
 
-    private static final int RADIUS = 62;
-    private static final int SLOT = 22;
+    private static final int RADIUS = 76;
+    private static final int SLOT = 24;
     private static final int DEADZONE = 18;
+    /** The hub that names the hovered ability; wide enough for a two-word name and a wrapped line. */
+    private static final int HUB_W = 104;
+    private static final int HUB_H = 56;
 
-    // Chrome from the shared palette — the wheel used to draw its own cold blue-greys. Alpha
-    // is kept separate from the hue so these stay translucent over the world.
-    private static final int COLOR_BG = 0xC0000000 | (WizardsPalette.INK & 0x00FFFFFF);
-    private static final int COLOR_SLOT = 0xD0000000 | (WizardsPalette.WELL & 0x00FFFFFF);
-    private static final int COLOR_SLOT_HOVER = 0xF0000000 | (WizardsPalette.RAIL & 0x00FFFFFF);
-    private static final int COLOR_TEXT = WizardsPalette.TEXT;
-
-    // State, not theme, so deliberately not palette colours: toggled / selected / pinned have
-    // to stay distinguishable at a glance, and painting all three brass would merge them.
+    // State, not theme, so deliberately not the gilt the wheel is drawn in: toggled / selected / pinned
+    // have to stay distinguishable at a glance, and painting all three gilt would merge them.
     private static final int COLOR_TOGGLE_RING = 0xFF56D364;
-    private static final int COLOR_SELECTED = 0xFFFFD24A;
     private static final int COLOR_PIN = 0xFF6AB7FF;
     private static final int COLOR_COOLDOWN = 0xB0000000;
 
@@ -129,13 +128,12 @@ public final class AbilityWheelScreen extends Screen {
         hovered = computeHovered(mouseX, mouseY, cx, cy);
         autoArmHovered();
 
-        // Faint backing disc (square approximation — no texture dependency).
-        g.fill(cx - RADIUS - SLOT, cy - RADIUS - SLOT, cx + RADIUS + SLOT, cy + RADIUS + SLOT, COLOR_BG);
-
         Font font = this.font;
+        UiSurface night = UiSurface.NIGHT;
         if (entries.isEmpty()) {
-            Component none = Component.translatable("gui." + WizardsAndBeastsMod.MODID + ".ability_wheel.empty");
-            g.drawCenteredString(font, none, cx, cy - 4, COLOR_TEXT);
+            Ui.panel(g, night, cx - HUB_W / 2, cy - HUB_H / 2, HUB_W, HUB_H);
+            Ui.emptyState(g, font, night, new Ui.Rect(cx - HUB_W / 2, cy - HUB_H / 2, HUB_W, HUB_H),
+                    Component.translatable("gui." + WizardsAndBeastsMod.MODID + ".ability_wheel.empty"), null);
             maybeCloseOnRelease();
             return;
         }
@@ -150,44 +148,55 @@ public final class AbilityWheelScreen extends Screen {
             double angle = -Math.PI / 2.0 + i * (Math.PI * 2.0 / n);
             int ex = cx + (int) Math.round(Math.cos(angle) * RADIUS);
             int ey = cy + (int) Math.round(Math.sin(angle) * RADIUS);
-            int x0 = ex - SLOT / 2;
-            int y0 = ey - SLOT / 2;
-            int x1 = ex + SLOT / 2;
-            int y1 = ey + SLOT / 2;
-
             boolean isHovered = i == hovered;
-            g.fill(x0, y0, x1, y1, isHovered ? COLOR_SLOT_HOVER : COLOR_SLOT);
+            // The hovered socket rises two pixels towards the hub: a hover state that reads without colour.
+            int lift = isHovered ? 2 : 0;
+            int x0 = ex - SLOT / 2 - (int) Math.round(Math.cos(angle) * lift);
+            int y0 = ey - SLOT / 2 - (int) Math.round(Math.sin(angle) * lift);
+            int x1 = x0 + SLOT;
+            int y1 = y0 + SLOT;
 
-            // Toggle-on entries get a distinguishing active-state ring.
-            if (def.type() == AbilityType.TOGGLE && ClientAbilitySelectionState.isToggled(def.id())) {
-                drawBorder(g, x0, y0, x1, y1, COLOR_TOGGLE_RING);
+            Ui.nightCard(g, x0, y0, SLOT, SLOT);
+            if (isHovered) {
+                g.fill(x0 + 2, y0 + 2, x1 - 2, y1 - 2, night.hoverWash());
             }
-            // Armed selection + pin markers.
+            if (def.type() == AbilityType.TOGGLE && ClientAbilitySelectionState.isToggled(def.id())) {
+                drawBorder(g, x0 + 2, y0 + 2, x1 - 2, y1 - 2, COLOR_TOGGLE_RING);
+            }
             if (def.id().equals(selected)) {
-                drawBorder(g, x0 - 1, y0 - 1, x1 + 1, y1 + 1, COLOR_SELECTED);
+                drawBorder(g, x0 - 1, y0 - 1, x1 + 1, y1 + 1, WizardsPalette.GILT_LIGHT);
+            }
+            UiIcons.icon16(g, font, def.icon(), def.displayName(), x0 + 4, y0 + 4);
+
+            // Cooldown dim: shade the socket from the bottom up by remaining fraction.
+            float cd = ClientAbilitySelectionState.cooldownFraction(def.id(), gameTime, def.cooldownTicks());
+            if (cd > 0f) {
+                int shade = Mth.ceil((SLOT - 4) * cd);
+                g.fill(x0 + 2, y1 - 2 - shade, x1 - 2, y1 - 2, COLOR_COOLDOWN);
             }
             // Quick-slot badge: the number of the key that fires this ability directly.
             int quickSlot = ClientAbilitySelectionState.slotOf(def.id());
             if (quickSlot >= 0) {
-                g.drawString(font, String.valueOf(quickSlot + 1), x1 - 6, y0 - 1, COLOR_PIN, false);
-            }
-
-            // Placeholder icon (missing-texture is acceptable per spec).
-            g.blit(RenderPipelines.GUI_TEXTURED, def.icon(), x0 + 3, y0 + 3, 0.0F, 0.0F, 16, 16, 16, 16);
-
-            // Cooldown dim: shade the slot from the bottom up by remaining fraction.
-            float cd = ClientAbilitySelectionState.cooldownFraction(def.id(), gameTime, def.cooldownTicks());
-            if (cd > 0f) {
-                int shade = Mth.ceil((y1 - y0) * cd);
-                g.fill(x0, y1 - shade, x1, y1, COLOR_COOLDOWN);
+                String badge = String.valueOf(quickSlot + 1);
+                g.fill(x1 - 7, y0 - 2, x1 + 1, y0 + 8, UiSurface.NIGHT_WELL);
+                g.drawString(font, badge, x1 - 3 - font.width(badge) / 2, y0 - 1, COLOR_PIN, false);
             }
         }
 
-        // Center label: hovered ability name, or a prompt.
-        Component center = hovered >= 0
-                ? entries.get(hovered).displayName()
-                : Component.translatable("gui." + WizardsAndBeastsMod.MODID + ".ability_wheel.hint");
-        g.drawCenteredString(font, center, cx, cy - 4, COLOR_TEXT);
+        // The hub: the hovered ability's name, kind and description, or how to use the wheel.
+        int hx = cx - HUB_W / 2;
+        int hy = cy - HUB_H / 2;
+        Ui.panel(g, night, hx, hy, HUB_W, HUB_H);
+        Ui.Rect hub = new Ui.Rect(hx + 6, hy + 6, HUB_W - 12, HUB_H - 12);
+        if (hovered >= 0) {
+            AbilityDefinition def = entries.get(hovered);
+            UiText.drawFit(g, font, night, def.displayName(), hub.x(), hub.y(), hub.w(), night.heading());
+            UiText.drawWrapped(g, font, night, UiText.Role.CAPTION,
+                    Component.translatable(def.descriptionKey()), hub.x(), hub.y() + 12, hub.w(), 3);
+        } else {
+            Ui.emptyState(g, font, night, hub,
+                    Component.translatable("gui." + WizardsAndBeastsMod.MODID + ".ability_wheel.hint"), null);
+        }
 
         maybeCloseOnRelease();
     }

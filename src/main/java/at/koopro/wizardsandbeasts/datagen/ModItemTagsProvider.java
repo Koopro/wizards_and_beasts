@@ -120,12 +120,19 @@ public class ModItemTagsProvider extends BlockTagCopyingItemTagProvider {
                 BroomItemRegistry.COMET_260.get(), BroomItemRegistry.NIMBUS_2000.get(),
                 BroomItemRegistry.NIMBUS_2001.get(), BroomItemRegistry.FIREBOLT.get(),
                 BroomItemRegistry.FIREBOLT_SUPREME.get(), BroomItemRegistry.OAKSHAFT_79.get(),
-                BroomItemRegistry.BROOM_POLISH.get(), BroomItemRegistry.ENCHANTED_TWIG_BUNDLE.get());
+                BroomItemRegistry.BROOM_POLISH.get(), BroomItemRegistry.ENCHANTED_TWIG_BUNDLE.get(),
+                at.koopro.wizardsandbeasts.registry.CanonItemRegistry.BROOMSTICK_SERVICING_KIT.get());
+        // Fittings only mean something on a broom: switched off with broom flight.
+        for (var fitting : BroomItemRegistry.FITTINGS.values()) {
+            add(Module.BROOM_FLIGHT, fitting.get());
+        }
 
         add(Module.GRINGOTTS,
                 CurrencyItemRegistry.GALLEON.get(), CurrencyItemRegistry.SICKLE.get(),
                 CurrencyItemRegistry.KNUT.get(), CurrencyItemRegistry.DRAGOT.get(),
-                CurrencyItemRegistry.LEPRECHAUN_GOLD.get(), CurrencyItemRegistry.COUNTERFEIT_GALLEON.get());
+                CurrencyItemRegistry.LEPRECHAUN_GOLD.get(), CurrencyItemRegistry.COUNTERFEIT_GALLEON.get(),
+                CurrencyItemRegistry.ANCIENT_GOBLET.get(), CurrencyItemRegistry.WARDED_AMULET.get(),
+                CurrencyItemRegistry.SEALED_CASKET.get(), CurrencyItemRegistry.TOMB_MEDALLION.get());
 
         add(Module.DARK_ARTS,
                 DarkArtefactItemRegistry.RIDDLES_DIARY.get(), DarkArtefactItemRegistry.MARVOLO_GAUNTS_RING.get(),
@@ -147,6 +154,7 @@ public class ModItemTagsProvider extends BlockTagCopyingItemTagProvider {
         add(Module.HANDBOOK, MiscItemRegistry.MINISTRY_HANDBOOK.get());
         add(Module.BESTIARY, MiscItemRegistry.BESTIARY.get());
         add(Module.OWLS, ModBlocks.EXAMINATION_DESK_ITEM.get());
+        add(Module.BROOM_FLIGHT, ModBlocks.BROOM_RACK_ITEM.get());
         add(Module.MINISTRY, TrinketItemRegistry.MINISTRY_LICENSE_SCROLL.get());
 
         add(Module.ARTEFACTS,

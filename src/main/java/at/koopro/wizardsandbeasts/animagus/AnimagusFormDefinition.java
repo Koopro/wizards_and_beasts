@@ -24,17 +24,17 @@ import java.util.function.Function;
  *   <li>{@link AnimagusCapability#FLIGHT} and the {@code flight} block imply each other. A flier
  *       with no physics would fall out of the sky; physics on a non-flier is dead weight that reads
  *       as a working feature.</li>
- *   <li>{@code animation_map} must name every animation the renderer will ask for, including the
- *       two extra clips a flier needs. The renderer looks animations up by role and never hardcodes
+ *   <li>A form that declares an {@code animations} file must map every role in {@code animation_map}, including
+ *       the two extra clips a flier needs. A form drawn on a vanilla model declares no file and no map. The renderer looks animations up by role and never hardcodes
  *       a clip name, so a missing key is a silent T-pose at runtime.</li>
  * </ul>
  */
 @NullMarked
 public record AnimagusFormDefinition(
         AnimagusCanonTier canonTier,
-        Identifier model,
-        Identifier texture,
-        Identifier animations,
+        Optional<Identifier> model,
+        Optional<Identifier> texture,
+        Optional<Identifier> animations,
         Map<String, String> animationMap,
         AnimagusHitbox hitbox,
         Map<Identifier, Double> attributes,
@@ -50,10 +50,12 @@ public record AnimagusFormDefinition(
 
     private static final Codec<AnimagusFormDefinition> RAW = RecordCodecBuilder.create(instance -> instance.group(
             AnimagusCanonTier.CODEC.fieldOf("canon_tier").forGetter(AnimagusFormDefinition::canonTier),
-            Identifier.CODEC.fieldOf("model").forGetter(AnimagusFormDefinition::model),
-            Identifier.CODEC.fieldOf("texture").forGetter(AnimagusFormDefinition::texture),
-            Identifier.CODEC.fieldOf("animations").forGetter(AnimagusFormDefinition::animations),
-            Codec.unboundedMap(Codec.STRING, Codec.STRING).fieldOf("animation_map")
+            // Optional: a form declares only the art it really has. Five of the six forms render on a vanilla
+            // model (FormModelRenderer), and the schema's required GeckoLib paths named files that never existed.
+            Identifier.CODEC.optionalFieldOf("model").forGetter(AnimagusFormDefinition::model),
+            Identifier.CODEC.optionalFieldOf("texture").forGetter(AnimagusFormDefinition::texture),
+            Identifier.CODEC.optionalFieldOf("animations").forGetter(AnimagusFormDefinition::animations),
+            Codec.unboundedMap(Codec.STRING, Codec.STRING).optionalFieldOf("animation_map", Map.of())
                     .forGetter(AnimagusFormDefinition::animationMap),
             AnimagusHitbox.CODEC.fieldOf("hitbox").forGetter(AnimagusFormDefinition::hitbox),
             Codec.unboundedMap(Identifier.CODEC, Codec.DOUBLE).fieldOf("attributes")
@@ -87,6 +89,11 @@ public record AnimagusFormDefinition(
                     "form carries a 'flight' block but does not declare the FLIGHT capability");
         }
 
+        // Roles are clip names inside the declared animation file; a form drawn on a vanilla model has no file and
+        // its animation comes from the vanilla model itself.
+        if (def.animations.isEmpty()) {
+            return DataResult.success(def);
+        }
         for (String role : REQUIRED_ANIMATIONS) {
             if (!def.animationMap.containsKey(role)) {
                 return DataResult.error(() -> "animation_map is missing the required role '" + role + "'");

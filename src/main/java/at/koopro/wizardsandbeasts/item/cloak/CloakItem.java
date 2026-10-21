@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.item.cloak;
 
 import at.koopro.wizardsandbeasts.demiguise.CloakCharges;
+import at.koopro.wizardsandbeasts.equipment.EquipmentAPI;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -17,7 +18,10 @@ import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 
 /**
- * Wearable cloak that equips into the chest slot when used.
+ * Wearable cloak, worn in the Curios back slot ({@link at.koopro.wizardsandbeasts.equipment.EquipmentType#CLOAK}).
+ *
+ * <p>The item owns only what a cloak <em>is</em> — Hallow or not, its charge tooltip. Where it is worn
+ * and what wearing it does live elsewhere, so moving it off the chest slot changed neither.
  */
 public class CloakItem extends Item {
     private final boolean deathlyHallow;
@@ -56,26 +60,44 @@ public class CloakItem extends Item {
                 .withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 
+    /**
+     * Right-click puts the cloak on, in the Curios back slot.
+     *
+     * <p>Where the cloak is worn is the equipment layer's business ({@link EquipmentAPI}); what it does
+     * there — charges, concealment, the Hallow's exemption — stays in {@link CloakCharges} and
+     * {@code CloakEffectsHandler}, which read it through the same API. A cloak already on the back is
+     * never knocked off by a second one.
+     */
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
-        ItemStack inHand = player.getItemInHand(hand);
-        ItemStack inChest = player.getItemBySlot(EquipmentSlot.CHEST);
-
-        if (!inChest.isEmpty()) {
-            return InteractionResult.PASS;
+        InteractionResult result = EquipmentAPI.equipFromHand(player, hand, SoundEvents.ARMOR_EQUIP_LEATHER);
+        if (result == InteractionResult.SUCCESS) {
+            player.awardStat(Stats.ITEM_USED.get(this));
         }
-
-        ItemStack equipStack = inHand.copyWithCount(1);
-        player.setItemSlot(EquipmentSlot.CHEST, equipStack);
-        inHand.shrink(1);
-
-        player.awardStat(Stats.ITEM_USED.get(this));
-        player.playSound(SoundEvents.ARMOR_EQUIP_LEATHER.value(), 1.0F, 1.0F);
-        return InteractionResult.SUCCESS;
+        return result;
     }
 
+    /**
+     * Drapes the cloak over someone else.
+     *
+     * <p>A player (anything with a Curios inventory) gets it on the back like the wearer would. A mob
+     * has no Curios slots, so it keeps the old behaviour: the cloak goes in its chest slot, where
+     * {@code CloakEffectsHandler#onLivingEquipmentChanged} turns it invisible.
+     */
     @Override
     public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity target, InteractionHand hand) {
+        if (EquipmentAPI.canWear(target)) {
+            if (!EquipmentAPI.canEquip(target, stack)) {
+                return InteractionResult.PASS;
+            }
+            if (!player.level().isClientSide()) {
+                ItemStack given = player.getAbilities().instabuild ? stack.copy() : stack;
+                EquipmentAPI.tryEquip(target, given);
+            }
+            target.playSound(SoundEvents.ARMOR_EQUIP_LEATHER.value(), 1.0F, 1.0F);
+            return InteractionResult.SUCCESS;
+        }
+
         ItemStack targetChest = target.getItemBySlot(EquipmentSlot.CHEST);
         if (!targetChest.isEmpty()) {
             return InteractionResult.PASS;

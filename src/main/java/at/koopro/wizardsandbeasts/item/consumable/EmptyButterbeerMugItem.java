@@ -67,8 +67,8 @@ public class EmptyButterbeerMugItem extends Item {
         mug.shrink(1);
         if (mug.isEmpty()) {
             player.setItemInHand(context.getHand(), full);
-        } else if (!player.getInventory().add(full)) {
-            player.drop(full, false);
+        } else {
+            at.koopro.wizardsandbeasts.util.InventoryHandover.giveOrDrop(player, full);
         }
 
         level.playSound(null, context.getClickedPos(), ModSounds.BUTTERBEER_FIZZ.get(),

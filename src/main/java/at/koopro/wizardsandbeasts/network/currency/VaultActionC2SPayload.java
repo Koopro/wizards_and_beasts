@@ -24,6 +24,7 @@ public record VaultActionC2SPayload(int actionOrdinal, int amount) implements Cu
     private static final String REJECT_NO_COINS = "gringotts.wizards_and_beasts.reject.no_coins";
     private static final String REJECT_INSUFFICIENT = "gringotts.wizards_and_beasts.reject.insufficient";
     private static final String REJECT_EXCHANGE = "gringotts.wizards_and_beasts.reject.exchange";
+    private static final String REJECT_FULL = "gringotts.wizards_and_beasts.reject.full";
 
     public static final Type<VaultActionC2SPayload> TYPE = new Type<>(
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "vault_action"));
@@ -46,9 +47,21 @@ public record VaultActionC2SPayload(int actionOrdinal, int amount) implements Cu
         return TYPE;
     }
 
+    /** Ticks between handled actions per player: a held button is not a stream of withdrawals. */
+    private static final long MIN_TICKS_BETWEEN = 2;
+
+    private static final at.koopro.wizardsandbeasts.util.PlayerScopedState<Long> LAST_ACTION =
+            at.koopro.wizardsandbeasts.util.PlayerScopedState.create("vault_action");
+
     public static void handle(VaultActionC2SPayload pkt, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
             if (ctx.player() instanceof ServerPlayer player) {
+                long now = player.level().getGameTime();
+                Long last = LAST_ACTION.get(player);
+                if (last != null && now - last < MIN_TICKS_BETWEEN && now >= last) {
+                    return;
+                }
+                LAST_ACTION.put(player, now);
                 perform(player, pkt);
             }
         });
@@ -69,6 +82,15 @@ public record VaultActionC2SPayload(int actionOrdinal, int amount) implements Cu
             // nothing. null = the action moved coins; non-null = an action-bar line explaining why not.
             @Nullable String failKey = null;
 
+            // A deposit that would take the vault past its ceiling is refused before a coin leaves the pocket, so no
+            // coin is ever taken and then not credited.
+            long incoming = incomingKnuts(player, action, pkt.amount);
+            if (incoming > 0 && !vault.canCredit(incoming)) {
+                player.displayClientMessage(Component.translatable(REJECT_FULL).withStyle(ChatFormatting.RED), true);
+                return;
+            }
+
+            long before = vault.getTotalInKnuts();
             switch (action) {
                 case DEPOSIT_KNUT -> {
                     if (!GringottsTransaction.isAcceptedCoin(new net.minecraft.world.item.ItemStack(CurrencyItemRegistry.KNUT.get()))) return;
@@ -183,6 +205,17 @@ public record VaultActionC2SPayload(int actionOrdinal, int amount) implements Cu
                 }
             }
             DebugHooks.logVault(player, action.name(), pkt.amount, vault.getKnuts(), vault.getSickles(), vault.getGalleons());
+            // Pocket coins in or out. A Dragot trade books itself as an exchange, and coin exchanges keep the value.
+            if (action != Action.SELL_DRAGOTS && action != Action.BUY_DRAGOTS) {
+                long moved = vault.getTotalInKnuts() - before;
+                if (moved > 0) {
+                    at.koopro.wizardsandbeasts.currency.billing.GringottsBilling.recordCirculation(player,
+                            at.koopro.wizardsandbeasts.currency.billing.MoneyFlow.COUNTER_DEPOSIT, moved);
+                } else if (moved < 0) {
+                    at.koopro.wizardsandbeasts.currency.billing.GringottsBilling.recordCirculation(player,
+                            at.koopro.wizardsandbeasts.currency.billing.MoneyFlow.COUNTER_WITHDRAWAL, -moved);
+                }
+            }
 
             if (failKey != null) {
                 player.displayClientMessage(Component.translatable(failKey).withStyle(ChatFormatting.RED), true);
@@ -191,6 +224,21 @@ public record VaultActionC2SPayload(int actionOrdinal, int amount) implements Cu
             // Purse count and standing quote, so a Dragot trade updates the counter it was made at.
             DragotQuoteS2CPayload.sendToPlayer(player);
         }
+    }
+
+    /** The most a deposit action could add to the vault, in Knuts; 0 for anything that is not a deposit. */
+    static long incomingKnuts(ServerPlayer player, Action action, int amount) {
+        var inventory = player.getInventory();
+        long knuts = CurrencyHelper.countItem(inventory, CurrencyItemRegistry.KNUT.get());
+        long sickles = CurrencyHelper.countItem(inventory, CurrencyItemRegistry.SICKLE.get());
+        long galleons = CurrencyHelper.countItem(inventory, CurrencyItemRegistry.GALLEON.get());
+        return switch (action) {
+            case DEPOSIT_KNUT -> Math.min(amount, knuts);
+            case DEPOSIT_SICKLE -> Math.min(amount, sickles) * CurrencyHelper.KNUTS_PER_SICKLE;
+            case DEPOSIT_GALLEON -> Math.min(amount, galleons) * CurrencyHelper.KNUTS_PER_GALLEON;
+            case DEPOSIT_ALL -> CurrencyHelper.toKnuts(galleons, sickles, knuts);
+            default -> 0L;
+        };
     }
 
     public enum Action {

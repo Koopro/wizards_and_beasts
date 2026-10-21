@@ -69,6 +69,12 @@ public class WizardsAndBeastsClient {
         modEventBus.addListener(at.koopro.wizardsandbeasts.client.petrify.PetrifyRenderHandler::registerModifiers);
         modEventBus.addListener(
                 at.koopro.wizardsandbeasts.client.heritage.appearance.HeritageAppearanceRenderState::registerModifiers);
+        // Worn equipment: armour hiding under clothing / the Deathly Hallow, last so it sees the final
+        // equipment fields. Curios renderers bind at HIGHEST so they precede Curios' own AddLayers load.
+        modEventBus.addListener(
+                at.koopro.wizardsandbeasts.client.equipment.EquipmentRenderStateModifier::registerModifiers);
+        modEventBus.addListener(net.neoforged.bus.api.EventPriority.HIGHEST,
+                at.koopro.wizardsandbeasts.client.equipment.curios.CuriosClientRegistration::registerRenderers);
         modEventBus.addListener(
                 at.koopro.wizardsandbeasts.client.trinket.SneakoscopeSpinProperty::register);
         modEventBus.addListener(SpellKeyBindings::register);
@@ -167,6 +173,16 @@ public class WizardsAndBeastsClient {
                 net.minecraft.resources.Identifier.fromNamespaceAndPath(
                         WizardsAndBeastsMod.MODID, "wand_hud_sprite_cache"),
                 new at.koopro.wizardsandbeasts.client.hud.WandHudSprites.Reload());
+        // Same kind: which grain sheets exist is a question about the packs (WandLookCache).
+        event.addListener(
+                net.minecraft.resources.Identifier.fromNamespaceAndPath(
+                        WizardsAndBeastsMod.MODID, "wand_grain_sheet_cache"),
+                new at.koopro.wizardsandbeasts.client.wand.WandLookCache.Reload());
+        // And which data-named icons exist (UiIcons draws a monogram for one that does not).
+        event.addListener(
+                net.minecraft.resources.Identifier.fromNamespaceAndPath(
+                        WizardsAndBeastsMod.MODID, "ui_icon_cache"),
+                new at.koopro.wizardsandbeasts.client.gui.ui.UiIcons.Reload());
     }
 
     private void registerGuiLayers(RegisterGuiLayersEvent event) {
@@ -177,6 +193,8 @@ public class WizardsAndBeastsClient {
                 at.koopro.wizardsandbeasts.client.heritage.hud.BloodBarRenderer.ID,
                 at.koopro.wizardsandbeasts.client.heritage.hud.BloodBarRenderer::render);
         event.registerAboveAll(SpellDiamondOverlay.ID, SpellDiamondOverlay::render);
+        event.registerAboveAll(at.koopro.wizardsandbeasts.client.travel.TimeTrialClient.ID,
+                at.koopro.wizardsandbeasts.client.travel.TimeTrialClient::render);
         event.registerAboveAll(ObscurusOverlay.ID, ObscurusOverlay::render);
         event.registerAboveAll(MobEffectFullscreenOverlays.ID, MobEffectFullscreenOverlays::render);
         event.registerAboveAll(CrucioScreenRenderer.ID, CrucioScreenRenderer::render);
@@ -189,6 +207,8 @@ public class WizardsAndBeastsClient {
                 at.koopro.wizardsandbeasts.client.floo.FlooTransitOverlay::render);
         event.registerAboveAll(StatHudOverlay.ID, StatHudOverlay::render);
         event.registerAboveAll(SneakoscopeAlarmOverlay.ID, SneakoscopeAlarmOverlay::render);
+        event.registerAboveAll(at.koopro.wizardsandbeasts.client.hud.ExamSittingOverlay.ID,
+                at.koopro.wizardsandbeasts.client.hud.ExamSittingOverlay::render);
         event.registerAboveAll(FirewhiskyBurnOverlay.ID, FirewhiskyBurnOverlay::render);
         // Under the rest of the tints: a charge in progress must never hide what it is being raised
         // against. It draws nothing unless this player is holding a Protego right now.

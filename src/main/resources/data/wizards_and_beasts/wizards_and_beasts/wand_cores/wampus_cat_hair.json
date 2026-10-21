@@ -15,5 +15,10 @@
     "cooldown": 1.0,
     "range": 1.0,
     "fizzle": 0.01
+  },
+  "appearance": {
+    "glint": "#E0A93C",
+    "pattern": "steady",
+    "strength": 0.6
   }
 }

@@ -80,9 +80,7 @@ public final class SilveringHandler {
 
         SilveredWeapons.silver(weapon);
         bottle.shrink(1);
-        if (!player.getInventory().add(new ItemStack(Items.GLASS_BOTTLE))) {
-            player.drop(new ItemStack(Items.GLASS_BOTTLE), false);
-        }
+        at.koopro.wizardsandbeasts.util.InventoryHandover.giveOrDrop(player, new ItemStack(Items.GLASS_BOTTLE));
 
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
                 SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.9f, 1.2f);

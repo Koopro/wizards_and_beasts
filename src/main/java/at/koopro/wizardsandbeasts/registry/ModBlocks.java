@@ -319,6 +319,14 @@ public class ModBlocks {
     public static final DeferredItem<BlockItem> EXAMINATION_DESK_ITEM =
             ModItems.ITEMS.registerSimpleBlockItem("examination_desk", EXAMINATION_DESK);
 
+    /** A broom rack: the broommaker's job site (ModVillager.BROOMMAKER, location broom_shop). */
+    public static final DeferredBlock<at.koopro.wizardsandbeasts.block.BroomRackBlock> BROOM_RACK =
+            BLOCKS.registerBlock("broom_rack", at.koopro.wizardsandbeasts.block.BroomRackBlock::new,
+                    at.koopro.wizardsandbeasts.block.BroomRackBlock::defaultProperties);
+
+    public static final DeferredItem<BlockItem> BROOM_RACK_ITEM =
+            ModItems.ITEMS.registerSimpleBlockItem("broom_rack", BROOM_RACK);
+
     public static final WoodSet[] ALL_WOOD_SETS =
             { ELDER, YEW, HOLLY, ROWAN, ASH, BLACKTHORN, HAWTHORN, WALNUT, WILLOW };
 

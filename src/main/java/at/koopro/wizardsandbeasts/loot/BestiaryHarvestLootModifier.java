@@ -103,7 +103,8 @@ public class BestiaryHarvestLootModifier extends LootModifier {
             DiscoveryTier held = BestiaryDataHelper.getTier(player, rule.entry());
             long last = BestiaryDataHelper.getLastHarvestTick(player, rule.entry());
 
-            if (!HarvestGate.isEligible(rule, held, last, now)) {
+            boolean researched = BestiaryDataHelper.getData(player).historyOf(rule.entry()).complete();
+            if (!HarvestGate.isEligible(rule, held, last, now, researched)) {
                 continue;
             }
             // Magizoology's harvesting line. A gentler hand finds more of what a creature leaves; it never

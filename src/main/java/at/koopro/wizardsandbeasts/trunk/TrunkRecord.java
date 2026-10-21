@@ -75,6 +75,15 @@ public record TrunkRecord(
         };
     }
 
+    /**
+     * Whether {@code playerId} may step into this pocket. An {@code invited} player came through a doorway the
+     * owner opened for allies ({@link ShareEntranceService}); that invitation is the grant, so the access mode
+     * (SEALED for every pocket the mod creates) does not apply to them.
+     */
+    public boolean mayEnter(UUID playerId, boolean invited) {
+        return invited || canAccess(playerId);
+    }
+
     public TrunkRecord withAccessMode(TrunkAccessMode mode) {
         return new TrunkRecord(pocketId, owner, pocketName, mode, archetype, templateId,
                 createdAtEpochSeconds, seed, spawnPos, members, pocketRadius, biomeZones, muggleWorthy, lockedExternally);

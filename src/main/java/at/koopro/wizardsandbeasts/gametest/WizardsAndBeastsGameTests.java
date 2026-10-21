@@ -73,9 +73,14 @@ public final class WizardsAndBeastsGameTests {
         AfterDeathInputTests.contribute(registrar);
         WandAllegianceTests.contribute(registrar);
         MinistryTraceTests.contribute(registrar);
+        MinistryCaseworkTests.contribute(registrar);
         CreatureWildlifeTests.contribute(registrar);
         CreatureIdentityTests.contribute(registrar);
         ProgressionTests.contribute(registrar);
+        LifecycleDefectTests.contribute(registrar);
+        AuditRegressionTests.contribute(registrar);
+        EcologyTests.contribute(registrar);
+        JournalTests.contribute(registrar);
         SystemInteractionTests.contribute(registrar);
         ArtefactTests.contribute(registrar);
         AuthorityTests.contribute(registrar);
@@ -84,6 +89,7 @@ public final class WizardsAndBeastsGameTests {
         RegistrySyncTests.contribute(registrar);
         HeritageCommitTests.contribute(registrar);
         HeritageIdentityTests.contribute(registrar);
+        HouseElfTests.contribute(registrar);
         MerpeopleBreathTests.contribute(registrar);
         CorruptionTollTests.contribute(registrar);
         SpellLawLearningTests.contribute(registrar);
@@ -96,6 +102,7 @@ public final class WizardsAndBeastsGameTests {
         DisguiseTests.contribute(registrar);
         LeviosaThrowTests.contribute(registrar);
         BroomRideTests.contribute(registrar);
+        TravelTests.contribute(registrar);
         AguamentiTests.contribute(registrar);
         SpellClashTests.contribute(registrar);
         ProtegoShieldTests.contribute(registrar);
@@ -113,6 +120,17 @@ public final class WizardsAndBeastsGameTests {
         AdminModuleTests.contribute(registrar);
         AdminProfileTests.contribute(registrar);
         AdminPlayerTests.contribute(registrar);
+        AdminControlTests.contribute(registrar);
+        AdminReportTests.contribute(registrar);
+        EconomyTests.contribute(registrar);
+        EconomyLoopTests.contribute(registrar);
+        CreatureAiScheduleTests.contribute(registrar);
         AdminOpsTests.contribute(registrar);
+        EquipmentTests.contribute(registrar);
+        CareerTests.contribute(registrar);
+        EducationTests.contribute(registrar);
+        LocationTests.contribute(registrar);
+        CompanionTests.contribute(registrar);
+        BuildTests.contribute(registrar);
     }
 }

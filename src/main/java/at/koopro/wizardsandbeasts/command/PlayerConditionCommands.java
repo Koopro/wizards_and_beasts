@@ -76,10 +76,14 @@ public final class PlayerConditionCommands {
 
         return Commands.literal("condition")
                 .executes(ctx -> show(ctx.getSource(), ctx.getSource().getPlayerOrException()))
+                // Reading your own conditions is open. Everything that writes, and reading someone else's, is
+                // administrator-only: `set` can petrify or corrupt any online player, `clear` wipes their data.
                 .then(Commands.argument("target", EntityArgument.player())
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .executes(ctx -> show(ctx.getSource(), EntityArgument.getPlayer(ctx, "target"))))
-                .then(set)
-                .then(DebugModule.onSelfOrTarget("clear", PlayerConditionCommands::clear));
+                .then(set.requires(WizardsAndBeastsCommandPermissions.ADMIN))
+                .then(DebugModule.onSelfOrTarget("clear", PlayerConditionCommands::clear)
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN));
     }
 
     private static void floatField(LiteralArgumentBuilder<CommandSourceStack> set, String name,

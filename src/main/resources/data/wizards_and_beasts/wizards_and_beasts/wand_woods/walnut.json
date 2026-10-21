@@ -32,6 +32,17 @@
     "tint": "#6B4A32",
     "handle": "wizards_and_beasts:carved",
     "shaft": "wizards_and_beasts:segmented",
-    "tip": "wizards_and_beasts:chisel"
+    "tip": "wizards_and_beasts:chisel",
+    "grain": "wizards_and_beasts:figured",
+    "rare": [
+      {
+        "chance": 0.06,
+        "ornament": "wizards_and_beasts:initial_plate"
+      },
+      {
+        "chance": 0.04,
+        "ornament": "wizards_and_beasts:gem_inlay"
+      }
+    ]
   }
 }

@@ -1,0 +1,9 @@
+{
+  "_comment": "A centaur's reading of the night sky (StarReading.readAloud): moon phase, nights to the full moon, the weather. Needs night and open sky; a refused reading spends no cooldown. Was reachable only through /wandb player heritage stars.",
+  "type": "active",
+  "icon": "wizards_and_beasts:textures/ability/placeholder.png",
+  "nameKey": "ability.wizards_and_beasts.star_reading",
+  "descriptionKey": "ability.wizards_and_beasts.star_reading.desc",
+  "cooldownTicks": 1200,
+  "sortOrder": 29
+}

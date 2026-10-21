@@ -233,9 +233,89 @@ public class ModAttachments {
                     .copyOnDeath()
                     .build());
 
+    /** Telescope charts, keeper lessons, the sitting in progress and its last marks (education). */
+    public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.education.data.PlayerEducationData>> EDUCATION_DATA =
+            ATTACHMENTS.register("education_data", () -> AttachmentType.builder(
+                            () -> at.koopro.wizardsandbeasts.education.data.PlayerEducationData.EMPTY)
+                    .serialize(at.koopro.wizardsandbeasts.education.data.PlayerEducationData.CODEC.fieldOf("data"))
+                    .copyOnDeath()
+                    .build());
+
     public static final Supplier<AttachmentType<PlayerProfessionData>> PROFESSION_DATA =
             ATTACHMENTS.register("profession_data", () -> AttachmentType.builder(() -> PlayerProfessionData.DEFAULT)
                     .serialize(PlayerProfessionData.CODEC.fieldOf("data"))
+                    .copyOnDeath()
+                    .build());
+
+    /** The owner's companions as last seen, and whom they trust or fight (creature.companion). */
+    public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.creature.companion.CompanionRoster>> COMPANION_ROSTER =
+            ATTACHMENTS.register("companion_roster", () -> AttachmentType.builder(
+                            () -> at.koopro.wizardsandbeasts.creature.companion.CompanionRoster.EMPTY)
+                    .serialize(at.koopro.wizardsandbeasts.creature.companion.CompanionRoster.CODEC.fieldOf("data"))
+                    .copyOnDeath()
+                    .build());
+
+    /** Ranks, career experience and contracts in every career track worked (owl.career.track). */
+    public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.owl.career.track.PlayerCareerProgress>> CAREER_PROGRESS =
+            ATTACHMENTS.register("career_progress", () -> AttachmentType.builder(
+                            () -> at.koopro.wizardsandbeasts.owl.career.track.PlayerCareerProgress.EMPTY)
+                    .serialize(at.koopro.wizardsandbeasts.owl.career.track.PlayerCareerProgress.CODEC.fieldOf("data"))
+                    .copyOnDeath()
+                    .build());
+
+    /** Standing at every location dealt with: reputation, tier and board (location.LocationProgression). */
+    public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.location.PlayerLocationStanding>> LOCATION_STANDING =
+            ATTACHMENTS.register("location_standing", () -> AttachmentType.builder(
+                            () -> at.koopro.wizardsandbeasts.location.PlayerLocationStanding.EMPTY)
+                    .serialize(at.koopro.wizardsandbeasts.location.PlayerLocationStanding.CODEC.fieldOf("data"))
+                    .copyOnDeath()
+                    .build());
+
+    /** A rented Gringotts high-security vault: stored items and rent (location.gringotts.HighSecurityVault). */
+    public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.location.gringotts.HighSecurityVault>> HIGH_SECURITY_VAULT =
+            ATTACHMENTS.register("high_security_vault", () -> AttachmentType.builder(
+                            () -> at.koopro.wizardsandbeasts.location.gringotts.HighSecurityVault.EMPTY)
+                    .serialize(at.koopro.wizardsandbeasts.location.gringotts.HighSecurityVault.CODEC.fieldOf("data"))
+                    .copyOnDeath()
+                    .build());
+
+    /** The player's last money movements, for administrators (currency.billing.MoneyJournal). */
+    public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.currency.billing.MoneyJournal>> MONEY_JOURNAL =
+            ATTACHMENTS.register("money_journal", () -> AttachmentType.builder(
+                            () -> at.koopro.wizardsandbeasts.currency.billing.MoneyJournal.EMPTY)
+                    .serialize(at.koopro.wizardsandbeasts.currency.billing.MoneyJournal.CODEC.fieldOf("data"))
+                    .copyOnDeath()
+                    .build());
+
+    /** Weekly purchase counts and lifetime trade at every market (market.PlayerMarketRecord). */
+    public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.market.PlayerMarketRecord>> MARKET_RECORD =
+            ATTACHMENTS.register("market_record", () -> AttachmentType.builder(
+                            () -> at.koopro.wizardsandbeasts.market.PlayerMarketRecord.EMPTY)
+                    .serialize(at.koopro.wizardsandbeasts.market.PlayerMarketRecord.CODEC.fieldOf("data"))
+                    .copyOnDeath()
+                    .build());
+
+    /** Whom a house-elf serves (heritage.elf.HouseElfBond). Held on the elf; survives death and relog. */
+    public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.heritage.elf.ElfBondData>> ELF_BOND =
+            ATTACHMENTS.register("elf_bond", () -> AttachmentType.builder(
+                            () -> at.koopro.wizardsandbeasts.heritage.elf.ElfBondData.NONE)
+                    .serialize(at.koopro.wizardsandbeasts.heritage.elf.ElfBondData.CODEC.fieldOf("data"))
+                    .copyOnDeath()
+                    .build());
+
+    /** A people's own arts practised, towards profession points (heritage.identity.HeritagePractice). */
+    public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.heritage.identity.HeritagePracticeData>>
+            HERITAGE_PRACTICE = ATTACHMENTS.register("heritage_practice", () -> AttachmentType.builder(
+                            () -> at.koopro.wizardsandbeasts.heritage.identity.HeritagePracticeData.EMPTY)
+                    .serialize(at.koopro.wizardsandbeasts.heritage.identity.HeritagePracticeData.CODEC.fieldOf("data"))
+                    .copyOnDeath()
+                    .build());
+
+    /** The wand Ollivanders is making to order for this player, if any (location.ollivanders.WandCommission). */
+    public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.location.ollivanders.WandCommissionOrder>>
+            WAND_COMMISSION = ATTACHMENTS.register("wand_commission", () -> AttachmentType.builder(
+                            () -> at.koopro.wizardsandbeasts.location.ollivanders.WandCommissionOrder.NONE)
+                    .serialize(at.koopro.wizardsandbeasts.location.ollivanders.WandCommissionOrder.CODEC.fieldOf("data"))
                     .copyOnDeath()
                     .build());
 
@@ -264,6 +344,12 @@ public class ModAttachments {
             ATTACHMENTS.register("mental_stability", () -> AttachmentType.builder(() -> 100.0f)
                     .serialize(Codec.floatRange(0f, 100f).fieldOf("value"))
                     .copyOnDeath()
+                    .build());
+
+    /** A creature's ecological working memory (creature/ecology). Transient: never saved, never synced. */
+    public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.creature.ecology.EcologyState>> ECOLOGY_STATE =
+            ATTACHMENTS.register("ecology_state", () -> AttachmentType
+                    .builder(at.koopro.wizardsandbeasts.creature.ecology.EcologyState::new)
                     .build());
 
     public static final Supplier<AttachmentType<ImperioControlState>> IMPERIO_CONTROL_STATE =
@@ -385,6 +471,14 @@ public class ModAttachments {
                     AttachmentType.builder(() -> VeritaserumState.NONE)
                             .serialize(VeritaserumState.CODEC.fieldOf("veritaserum"))
                             .build());
+
+    /** Trials, parcels, survey and Floo seeding ({@code travel.TravelRecord}). */
+    public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.travel.TravelRecord>> TRAVEL_RECORD =
+            ATTACHMENTS.register("travel_record", () -> AttachmentType.builder(
+                            () -> at.koopro.wizardsandbeasts.travel.TravelRecord.EMPTY)
+                    .serialize(at.koopro.wizardsandbeasts.travel.TravelRecord.CODEC.fieldOf("data"))
+                    .copyOnDeath()
+                    .build());
 
     public static final Supplier<AttachmentType<Set<String>>> FLOO_VISITED_DESTINATIONS =
             ATTACHMENTS.register("floo_visited_destinations", () ->

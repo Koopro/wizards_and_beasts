@@ -112,6 +112,10 @@ public class GringottsScreen extends Screen {
     private static final int DRAGOT_LABEL_Y = 126;
     private static final int DRAGOT_ROW_Y = 142;
     private static final int DESK_ROW_H = 34;
+    /** Under the Dragot desk (ends at 202): the door to the bank's board. */
+    private static final int BUSINESS_ROW_Y = 212;
+    private static final net.minecraft.resources.Identifier GRINGOTTS =
+            net.minecraft.resources.Identifier.fromNamespaceAndPath("wizards_and_beasts", "gringotts");
 
     /**
      * Control height, in design pixels.
@@ -238,6 +242,14 @@ public class GringottsScreen extends Screen {
                 "gui.wizards_and_beasts.dragot.buy", () -> send(Action.BUY_DRAGOTS, 1), 1));
         addRenderableWidget(ledgerButton(rightX + deskStep, dragotY + deskRow, smallW, btnH,
                 "gui.wizards_and_beasts.dragot.buy", () -> send(Action.BUY_DRAGOTS, 10), 10));
+
+        // Beyond the counter: the bank as a place — standing, curse-breaking, expeditions, the high-security
+        // vaults. The server opens its board only if this player is still at the teller.
+        ThemedButton business = ledgerButton(rightX, y(BUSINESS_ROW_Y), colW(), btnH,
+                "gui.wizards_and_beasts.gringotts.business",
+                () -> at.koopro.wizardsandbeasts.client.location.LocationScreen.request(GRINGOTTS));
+        business.setTooltip(Tooltip.create(Component.translatable("gui.wizards_and_beasts.gringotts.business.tip")));
+        addRenderableWidget(business);
     }
 
     private void addExchange(int x, int y, int h, int slot, String key,

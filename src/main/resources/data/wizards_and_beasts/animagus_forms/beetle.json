@@ -1,0 +1,18 @@
+{
+  "canon_tier": "book",
+  "texture": "wizards_and_beasts:textures/entity/form/animagus_beetle.png",
+  "hitbox": {
+    "width": 0.4,
+    "height": 0.3,
+    "eye_height": 0.2
+  },
+  "attributes": {
+    "minecraft:movement_speed": -0.03,
+    "minecraft:max_health": -12.0
+  },
+  "capabilities": [
+    "CLIMB",
+    "GAP_SQUEEZE",
+    "LOW_PROFILE"
+  ]
+}

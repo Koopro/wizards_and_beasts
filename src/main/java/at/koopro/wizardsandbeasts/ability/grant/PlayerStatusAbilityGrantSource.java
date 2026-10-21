@@ -69,6 +69,18 @@ public final class PlayerStatusAbilityGrantSource implements AbilityGrantSource 
         if (VeelaAllure.canAllure(player)) {
             out.add(AbilityIds.VEELA_ALLURE.toString());
         }
+        // House-elf magic, wandless, in the elf's own shape; and the call, for anyone an elf serves.
+        if (at.koopro.wizardsandbeasts.heritage.elf.ElfMagic.canUse(player)) {
+            out.add(AbilityIds.ELF_SNAP.toString());
+            out.add(AbilityIds.ELF_KITCHEN.toString());
+        }
+        if (at.koopro.wizardsandbeasts.module.ModuleManager.isEnabled(at.koopro.wizardsandbeasts.module.Module.HERITAGE)
+                && at.koopro.wizardsandbeasts.heritage.centaur.StarReading.canRead(player)) {
+            out.add(AbilityIds.STAR_READING.toString());
+        }
+        if (at.koopro.wizardsandbeasts.heritage.elf.HouseElfBond.canCall(player)) {
+            out.add(AbilityIds.CALL_HOUSE_ELF.toString());
+        }
         return out;
     }
 }

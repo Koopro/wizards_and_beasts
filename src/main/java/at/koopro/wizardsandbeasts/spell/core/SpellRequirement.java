@@ -104,6 +104,7 @@ public class SpellRequirement {
                         ? Identifier.parse(prerequisiteId)
                         : Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, prerequisiteId);
                 requiredCasts = PlayerSkillBonusData.forPlayer(player).spellGateOverrides().getOrDefault(key, requiredCasts);
+                requiredCasts = at.koopro.wizardsandbeasts.skill.build.capstone.ScholarsMethod.gateFor(player, requiredCasts);
             }
             return casts >= requiredCasts;
         }

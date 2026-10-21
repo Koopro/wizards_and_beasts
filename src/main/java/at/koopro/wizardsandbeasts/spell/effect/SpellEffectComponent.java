@@ -690,6 +690,8 @@ public sealed interface SpellEffectComponent permits
                 ctx.level().playSound(null, boggart.getX(), boggart.getY(), boggart.getZ(),
                         SoundEvents.FIREWORK_ROCKET_BLAST, SoundSource.PLAYERS, 0.7f, 1.6f);
                 boggart.hurt(laughter, 1000.0f);
+                // Laughing at your worst fear is how a wizard alone trains WILLPOWER.
+                at.koopro.wizardsandbeasts.stats.StatTraining.onBoggartBanished(ctx.caster());
             }
         }
     }

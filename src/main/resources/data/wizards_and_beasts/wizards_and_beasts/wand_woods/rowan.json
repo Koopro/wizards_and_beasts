@@ -35,6 +35,17 @@
     "tint": "#C98F72",
     "handle": "wizards_and_beasts:fluted",
     "shaft": "wizards_and_beasts:reeded",
-    "tip": "wizards_and_beasts:budded"
+    "tip": "wizards_and_beasts:budded",
+    "grain": "wizards_and_beasts:flecked",
+    "rare": [
+      {
+        "chance": 0.06,
+        "ornament": "wizards_and_beasts:engraving"
+      },
+      {
+        "chance": 0.04,
+        "handle": "wizards_and_beasts:carved"
+      }
+    ]
   }
 }

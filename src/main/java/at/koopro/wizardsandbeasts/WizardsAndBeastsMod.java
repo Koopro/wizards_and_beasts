@@ -80,6 +80,7 @@ public class WizardsAndBeastsMod {
         ModItems.ITEMS.register(modEventBus);
         WandItemRegistry.init();
         BroomItemRegistry.init();
+        at.koopro.wizardsandbeasts.travel.TravelItems.init();
         ConsumableItemRegistry.init();
         CurrencyItemRegistry.init();
         DarkArtefactItemRegistry.init();
@@ -121,6 +122,10 @@ public class WizardsAndBeastsMod {
         modEventBus.addListener(at.koopro.wizardsandbeasts.entity.beast.BeastSpawnHandler::registerSpawnPlacements);
         modEventBus.addListener(at.koopro.wizardsandbeasts.entity.goblin.GoblinTellerSpawnHandler::registerSpawnPlacements);
         modEventBus.addListener(WandDatapackRegistries::registerDatapackRegistries);
+        // Worn equipment: the wearables item data map, and the Curios slot validator that reads it.
+        modEventBus.addListener(at.koopro.wizardsandbeasts.equipment.WearableDefinitions::register);
+        modEventBus.addListener((FMLCommonSetupEvent event) -> event.enqueueWork(
+                at.koopro.wizardsandbeasts.equipment.curios.CuriosEquipment::registerValidator));
 
         // Defer Spells.init() until FMLCommonSetupEvent so addon mods get a
         // chance to register Java spells via RegisterSpellsEvent before the
@@ -158,9 +163,32 @@ public class WizardsAndBeastsMod {
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "brewing_recipe_reload_listener"),
                     new BrewingRecipeReloadListener());
+            // What qualifications open beyond careers: advanced brews and the web's capstones (education).
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "qualification_gate_reload_listener"),
+                    new at.koopro.wizardsandbeasts.education.QualificationGates.Loader());
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "bestiary_entry_reload_listener"),
                     new BestiaryEntryLoader());
+            // Companions: how each bondable species behaves as a companion, and the personality traits it rolls.
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "companion_profile_reload_listener"),
+                    new at.koopro.wizardsandbeasts.creature.companion.CompanionData.ProfileLoader());
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "companion_trait_reload_listener"),
+                    new at.koopro.wizardsandbeasts.creature.companion.CompanionData.TraitLoader());
+            // Career tracks: ranks, contracts and career experience per profession (owl.career.track).
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "career_track_reload_listener"),
+                    new at.koopro.wizardsandbeasts.owl.career.track.CareerTracks.Loader());
+            // Locations as hubs: presence, standing, board and services per place (location/).
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "location_reload_listener"),
+                    new at.koopro.wizardsandbeasts.location.Locations.Loader());
+            // Treasure sites: which tomb loot carries cursed artefacts, and what curses they bear (treasure/).
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "treasure_site_reload_listener"),
+                    new at.koopro.wizardsandbeasts.treasure.TreasureSites.Loader());
             // Which rare materials a studied creature yields. A side table rather than a field on
             // BestiaryEntry: that record is already at RecordCodecBuilder's sixteen-field ceiling.
             event.addListener(
@@ -184,6 +212,14 @@ public class WizardsAndBeastsMod {
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "creature_bond_reload_listener"),
                     new BondProfileLoader());
+            // Each creature's ecology — predator, prey, herd, territory, night — for the same reason bonds have
+            // their own directory: half the roster is bespoke Java with no creatures/*.json to carry it.
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "bestiary_journal_reload_listener"),
+                    new at.koopro.wizardsandbeasts.bestiary.journal.JournalBook.LayoutLoader());
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "creature_ecology_reload_listener"),
+                    new at.koopro.wizardsandbeasts.creature.ecology.EcologyProfileLoader());
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "wand_module_reload_listener"),
                     new WandModuleLoader());
@@ -220,6 +256,10 @@ public class WizardsAndBeastsMod {
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "spell_law_reload_listener"),
                     new at.koopro.wizardsandbeasts.ministry.trace.SpellLawRegistry.Loader());
+            // The kinds of case the Auror Office posts against culprits who are not players.
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "ministry_case_reload_listener"),
+                    new at.koopro.wizardsandbeasts.ministry.trace.NpcCaseTemplates.Loader());
         });
 
         // Ability framework: server-side sync/clone/cooldown lifecycle + debug behavior wiring.

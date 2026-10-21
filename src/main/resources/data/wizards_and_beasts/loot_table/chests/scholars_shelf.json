@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        { "type": "minecraft:item", "name": "wizards_and_beasts:a_history_of_magic", "weight": 3 },
+        { "type": "minecraft:item", "name": "wizards_and_beasts:hogwarts_a_history", "weight": 2 },
+        { "type": "minecraft:item", "name": "wizards_and_beasts:rise_and_fall_of_the_dark_arts", "weight": 1 }
+      ]
+    }
+  ]
+}

@@ -153,8 +153,8 @@ paper. (`tasks/art_rework_phase2_brief.md`.)
 | Asset | Class | Note |
 |---|---|---|
 | All 16×16 item icons (`item_sprites.py`, 210) | **D** | The reference style. |
-| Wand (GeckoLib rig, wood appearance data) | **D** | Modular rig from `wand_model.py` (2026-09-29); wood = heartwood tint shared with the blocks. Cores are not shown (canon: inside). |
-| Elder Wand | **D** | Own art, untinted. |
+| Wand (GeckoLib rig, wood appearance data) | **D** | Modular rig from `wand_model.py` (2026-09-29); wood = heartwood tint shared with the blocks. 2026-10-07 looks: a grain sheet per wood, untinted trim, the core as a light at the point (never a recolour; canon: inside), length/flexibility as shaft proportions, bond as light strength. `WAND_MODEL.md` "Looks". |
+| Elder Wand | **D** | Own art, untinted. Redrawn 2026-10-07: beaded knuckle grip, knotted thinning shaft, cold light. |
 | Book cuboids, hold-class transforms, GeckoLib artefacts | **D** | |
 | Wizard cards (128 px portraits) | **C** | Deliberate large-format collectible. |
 | Spawn eggs | **D** | Vanilla egg shading from skin colours. |
@@ -236,8 +236,8 @@ explicitly):
 ## 5. Future redesign queue
 
 The A/B list of §3, plus:
-- **Wand core detail:** needs a rig change or per-bone tinting. Cores are canonically hidden, so
-  this is optional.
+- ~~**Wand core detail:**~~ Done 2026-10-07 without showing the core: the core is the light at the
+  point (`wand_glint*.png`, coloured per core), see `WAND_MODEL.md` "Looks".
 - ~~**`tools/` is git-ignored.**~~ Fixed 2026-09-28: the generators that own shipped assets are
   tracked, retired ones stay local, and `tools/art_sync_check.py` proves they reproduce the live
   files. See `ART_PIPELINE.md`.

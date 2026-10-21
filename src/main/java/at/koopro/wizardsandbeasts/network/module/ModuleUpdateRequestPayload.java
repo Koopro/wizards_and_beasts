@@ -76,9 +76,11 @@ public record ModuleUpdateRequestPayload(Kind kind,
             if (!(context.player() instanceof ServerPlayer player)) {
                 return;
             }
-            // The real boundary. Same rule the command tree uses: an admin allow-list if one is
-            // configured, operator permission otherwise. A screen that refuses to open is only a courtesy.
-            if (!AdminAccess.allows(player.createCommandSourceStack())) {
+            // The real boundary: the same CONFIG capability the module commands and module settings need
+            // (AdminPolicy: a permission node, defaulting to the administrator rule). A screen that refuses to open
+            // is only a courtesy.
+            if (!at.koopro.wizardsandbeasts.admin.access.AdminPolicy.capabilitiesOf(player.createCommandSourceStack())
+                    .contains(at.koopro.wizardsandbeasts.admin.access.AdminCapability.CONFIG)) {
                 LOGGER.warn("[Modules] Dropped module update from unauthorised player {} ({})",
                         player.getName().getString(), player.getUUID());
                 return;

@@ -124,9 +124,7 @@ public class FirewhiskyItem extends ConsumedItem {
             player.setItemInHand(player.getUsedItemHand(), empty);
             return;
         }
-        if (!player.getInventory().add(empty)) {
-            player.drop(empty, false);
-        }
+        at.koopro.wizardsandbeasts.util.InventoryHandover.giveOrDrop(player, empty);
     }
 
     @Override

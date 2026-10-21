@@ -111,6 +111,8 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
 
         tag(ModuleTags.blocks(Module.WANDS)).add(ModBlocks.WANDMAKERS_BENCH.get());
         tag(ModuleTags.blocks(Module.OWLS)).add(ModBlocks.EXAMINATION_DESK.get());
+        tag(ModuleTags.blocks(Module.BROOM_FLIGHT)).add(ModBlocks.BROOM_RACK.get());
+        tag(BlockTags.MINEABLE_WITH_AXE).add(ModBlocks.BROOM_RACK.get());
         tag(ModuleTags.blocks(Module.MAGIZOOLOGY)).add(ModBlocks.MANDRAKE_CROP.get(),
                 ModBlocks.OCCAMY_EGGSHELL.get());
         // Acromantula silk only exists because a living spider spun it, and crumbles without one.

@@ -32,6 +32,17 @@
     "tint": "#5A3A32",
     "handle": "wizards_and_beasts:bone",
     "shaft": "wizards_and_beasts:tapered",
-    "tip": "wizards_and_beasts:serpent"
+    "tip": "wizards_and_beasts:serpent",
+    "grain": "wizards_and_beasts:banded",
+    "rare": [
+      {
+        "chance": 0.05,
+        "ornament": "wizards_and_beasts:serpent_coil"
+      },
+      {
+        "chance": 0.04,
+        "handle": "wizards_and_beasts:talon"
+      }
+    ]
   }
 }

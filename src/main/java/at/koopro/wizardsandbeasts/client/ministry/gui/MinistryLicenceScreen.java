@@ -95,9 +95,15 @@ public class MinistryLicenceScreen extends Screen {
         drawSeal(graphics, revoked);
 
         if (data == null) {
-            String blank = Component.translatable("gui.wizards_and_beasts.licence.blank").getString();
-            graphics.drawString(font, blank, panelX + PANEL_W / 2 - font.width(blank) / 2,
-                    panelY + PANEL_H / 2 - 4, SKIN.ink(), false);
+            // In the space beside the seal, not across the middle of the card: centred on the card,
+            // the sentence ran straight through the seal's well.
+            int left = panelX + PAD;
+            int right = panelX + SEAL_CX - SEAL_OUTER - 2 - PAD;
+            at.koopro.wizardsandbeasts.client.gui.ui.Ui.emptyState(graphics, font,
+                    at.koopro.wizardsandbeasts.client.gui.ui.UiSurface.of(SKIN),
+                    new at.koopro.wizardsandbeasts.client.gui.ui.Ui.Rect(left, panelY + 24, right - left, PANEL_H - 24 - PAD),
+                    Component.translatable("gui.wizards_and_beasts.licence.blank"),
+                    Component.translatable("gui.wizards_and_beasts.licence.blank_hint"));
             graphics.pose().popMatrix();
             super.render(graphics, mouseX, mouseY, partialTick);
             return;

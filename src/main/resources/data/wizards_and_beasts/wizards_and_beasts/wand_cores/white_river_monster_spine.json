@@ -15,5 +15,10 @@
     "cooldown": 1.0,
     "range": 1.08,
     "fizzle": -0.02
+  },
+  "appearance": {
+    "glint": "#6FD8C8",
+    "pattern": "pulse",
+    "strength": 0.6
   }
 }

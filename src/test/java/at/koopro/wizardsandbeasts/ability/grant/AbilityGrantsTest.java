@@ -25,6 +25,7 @@ class AbilityGrantsTest {
     private static final List<String> DARK_ARTS = List.of("curse_power", "dark_corruption_accrual");
     private static final List<String> HERBOLOGIST = List.of("crop_yield");
     private static final List<String> MAGIZOOLOGIST = List.of("beast_capacity", "mount_loyalty");
+    private static final List<String> WANDLORE = List.of("wand_steadiness");
 
     private static final List<String> HERITAGE_TAGS = List.of("no_wand", "nature_speech");
     private static final List<String> NODE_ABILITIES = List.of("niffler_friend", "green_thumb");
@@ -46,7 +47,7 @@ class AbilityGrantsTest {
 
     @Test
     void vocationSourceCarriesExactlyDeclaredFlags() {
-        for (List<String> vocation : List.of(DUELIST, DARK_ARTS, HERBOLOGIST, MAGIZOOLOGIST)) {
+        for (List<String> vocation : List.of(DUELIST, DARK_ARTS, HERBOLOGIST, MAGIZOOLOGIST, WANDLORE)) {
             AbilityGrants g = AbilityGrants.of(List.of(), vocation, List.of());
             for (String flag : vocation) {
                 assertTrue(g.hasFrom(AbilityKey.of(flag), AbilityGrants.Source.VOCATION), flag);

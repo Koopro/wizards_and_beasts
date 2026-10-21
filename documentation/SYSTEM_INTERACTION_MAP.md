@@ -166,3 +166,20 @@ A spell of pure force (Confringo, Flipendo) never counts toward the hide and nev
   Dragons ask for six spells at once and get no damage heal-back. The Graphorn asks for eight, with its heal-back
   unchanged.
 - §3.1: an Unforgivable is now judged by whom it strikes (`CANON_AUDIT.md` C-2).
+
+## Update 2026-10-08 — companions
+
+The companion layer (`COMPANIONS.md`) builds on BONDING and connects it to these systems:
+
+| From | To | Through |
+|---|---|---|
+| Companion stage Trusting / Bonded | BESTIARY | `BestiaryDataHelper.setTier` → Observed / Studied |
+| Companion stage Trained / Mastered | CAREERS | `CareerProgression.record(COMPANION_TRAINED / COMPANION_MASTERED)` |
+| Companion SEARCH reveal | OUTLINES | `SpellOutlines.highlightBlocks` / `highlightEntities` |
+| Unicorn reveal `dark` | CORRUPTION | dark-creature tag, or `DARK_CORRUPTION` ≥ 25 |
+| Protection | COMBAT / PvP | `LivingIncomingDamageEvent`; `ServerLevel.isPvpAllowed` under `PVP_FLAG` |
+| Ownership | MOUNTS | thestral and hippogriff rides gated by `Companions.mayHandle` |
+
+All bond gain still passes through `BondableBeast.increaseBond`, so the magizoologist bonus and the
+milestones are unchanged.
+

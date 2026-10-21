@@ -1,9 +1,15 @@
 package at.koopro.wizardsandbeasts.registry;
 
+import at.koopro.wizardsandbeasts.broom.fitting.BroomFitting;
+import at.koopro.wizardsandbeasts.item.broom.BroomFittingItem;
 import at.koopro.wizardsandbeasts.item.broom.BroomItem;
 import at.koopro.wizardsandbeasts.item.broom.BroomPolishItem;
 import at.koopro.wizardsandbeasts.item.SimpleTooltipItem;
 import net.neoforged.neoforge.registries.DeferredItem;
+
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Map;
 
 public final class BroomItemRegistry {
     public static final DeferredItem<BroomItem> BROOM_ITEM = RegistryUtils.registerBroom("broom", 120);
@@ -21,6 +27,23 @@ public final class BroomItemRegistry {
                     props -> new BroomPolishItem(props.stacksTo(16)));
     public static final DeferredItem<SimpleTooltipItem> ENCHANTED_TWIG_BUNDLE =
             RegistryUtils.registerTooltipItem("enchanted_twig_bundle", "item.wizards_and_beasts.enchanted_twig_bundle.tooltip", 8);
+
+    /** One item per {@link BroomFitting}, named after it ({@code cushioning_charm}, …). */
+    public static final Map<BroomFitting, DeferredItem<BroomFittingItem>> FITTINGS = registerFittings();
+
+    private static Map<BroomFitting, DeferredItem<BroomFittingItem>> registerFittings() {
+        EnumMap<BroomFitting, DeferredItem<BroomFittingItem>> map = new EnumMap<>(BroomFitting.class);
+        for (BroomFitting fitting : BroomFitting.values()) {
+            map.put(fitting, ModItems.ITEMS.registerItem(fitting.id(),
+                    props -> new BroomFittingItem(props.stacksTo(16), fitting)));
+        }
+        return Collections.unmodifiableMap(map);
+    }
+
+    /** The item carrying {@code fitting}. */
+    public static BroomFittingItem fittingItem(BroomFitting fitting) {
+        return FITTINGS.get(fitting).get();
+    }
 
     private BroomItemRegistry() {}
 

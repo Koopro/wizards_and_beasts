@@ -150,7 +150,10 @@ public final class ClientPayloadHandlers {
     }
 
     public static void handleSyncBestiaryEntries(SyncBestiaryEntriesPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> BestiaryEntryRegistry.setClientEntries(payload.entries()));
+        context.enqueueWork(() -> {
+            BestiaryEntryRegistry.setClientEntries(payload.entries());
+            at.koopro.wizardsandbeasts.bestiary.journal.JournalBook.setClient(payload.layout(), payload.facts());
+        });
     }
 
     public static void handleHeritageIdentitySync(
@@ -260,6 +263,16 @@ public final class ClientPayloadHandlers {
                 mc.level.addParticle(ParticleTypes.SOUL_FIRE_FLAME, cx + ox, cy, cz + oz, 0, 0.05, 0);
             }
         });
+    }
+
+    public static void handleTimeTrial(at.koopro.wizardsandbeasts.network.travel.TimeTrialS2CPayload packet,
+                                       IPayloadContext context) {
+        context.enqueueWork(() -> at.koopro.wizardsandbeasts.client.travel.TimeTrialClient.accept(packet));
+    }
+
+    public static void handleTravelProfile(at.koopro.wizardsandbeasts.network.travel.TravelProfileS2CPayload packet,
+                                           IPayloadContext context) {
+        context.enqueueWork(() -> at.koopro.wizardsandbeasts.client.travel.ClientTravelProfileState.accept(packet.profile()));
     }
 
     public static void handleFlooTransit(at.koopro.wizardsandbeasts.network.floo.FlooTransitS2CPayload packet,
@@ -446,6 +459,15 @@ public final class ClientPayloadHandlers {
      * vampire who gains one is set up by. A client that decided for itself would have no packet at all to
      * tell it the bar had gone away.
      */
+    public static void handleHeritageProfile(at.koopro.wizardsandbeasts.network.heritage.HeritageProfileS2CPayload pkt,
+                                             IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
+            net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+            at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageProfileState.accept(pkt.profile(),
+                    mc.level == null ? 0L : mc.level.getGameTime());
+        });
+    }
+
     public static void handleBloodDataSync(BloodDataSyncS2CPayload pkt, IPayloadContext ctx) {
         ctx.enqueueWork(() -> ClientBloodState.applySync(
                 pkt.policy(), pkt.stage(), pkt.blood(), pkt.maxBlood()));
@@ -505,11 +527,38 @@ public final class ClientPayloadHandlers {
     // --- owl ---
 
     public static void handleOWLDataSync(OWLDataSyncPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> ClientOWLCache.setOWLData(payload.grades(), payload.examTaken()));
+        context.enqueueWork(() -> ClientOWLCache.setOWLData(payload.grades(), payload.examTaken(),
+                payload.nextSittingTick(), payload.careerOpen(), payload.newtGrades(), payload.goblin()));
     }
 
     public static void handleProfessionSync(ProfessionSyncPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> ClientOWLCache.setProfession(payload.profession()));
+    }
+
+    public static void handleCompanionRoster(at.koopro.wizardsandbeasts.network.companion.CompanionRosterS2CPayload payload,
+                                             IPayloadContext context) {
+        context.enqueueWork(() -> at.koopro.wizardsandbeasts.client.companion.ClientCompanionState.set(payload.roster()));
+    }
+
+    public static void handleEducationView(at.koopro.wizardsandbeasts.network.education.EducationViewS2CPayload payload,
+                                           IPayloadContext context) {
+        context.enqueueWork(() -> at.koopro.wizardsandbeasts.client.education.ClientEducationState.set(payload.view()));
+    }
+
+    public static void handleCareerView(at.koopro.wizardsandbeasts.network.career.CareerViewS2CPayload payload,
+                                        IPayloadContext context) {
+        context.enqueueWork(() -> at.koopro.wizardsandbeasts.client.career.ClientCareerState.set(payload.view()));
+    }
+
+    public static void handleLocationView(at.koopro.wizardsandbeasts.network.location.LocationViewS2CPayload payload,
+                                          IPayloadContext context) {
+        context.enqueueWork(() -> at.koopro.wizardsandbeasts.client.location.LocationScreen.receive(payload.view(),
+                payload.open()));
+    }
+
+    public static void handlePlaceStandings(at.koopro.wizardsandbeasts.network.location.PlaceStandingsS2CPayload payload,
+                                            IPayloadContext context) {
+        context.enqueueWork(() -> at.koopro.wizardsandbeasts.client.location.ClientPlaceStandingState.set(payload));
     }
 
     // --- skill ---
@@ -520,7 +569,7 @@ public final class ClientPayloadHandlers {
 
     public static void handleSkillDataSync(SkillDataSyncS2CPayload pkt, IPayloadContext ctx) {
         ctx.enqueueWork(() -> ClientSkillDataState.applySync(
-                pkt.syncVersion(), pkt.skillPoints(), pkt.totalPointsEarned(), pkt.unlockedSkills()));
+                pkt.syncVersion(), pkt.skillPoints(), pkt.totalPointsEarned(), pkt.unlockedSkills(), pkt.respec()));
     }
 
     public static void handleVocationDataSync(VocationDataSyncS2CPayload pkt, IPayloadContext ctx) {

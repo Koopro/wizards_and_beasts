@@ -60,7 +60,9 @@ public final class BloodPactEnforcer {
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
         if (event.getServer().getTickCount() % 20 != 0) return;
-        long currentTick = event.getServer().getTickCount();
+        // Expiry is stamped in level game time, which keeps counting across restarts; the server's own
+        // tick count restarts at zero, so comparing against it never expired anything in a long-lived world.
+        long currentTick = event.getServer().overworld().getGameTime();
         BloodPactVialItem.PENDING_PROPOSALS.entrySet()
                 .removeIf(entry -> entry.getValue().expiryGameTick() < currentTick);
     }

@@ -466,7 +466,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.wizards_and_beasts.enchanted_trunk.desc",
                 "Undetectable Extension Charm focus. Use to enter or leave the bound pocket; sneak-use cycles archetype and access.");
         add("item.wizards_and_beasts.invisibility_cloak", "Invisibility Cloak");
-        add("item.wizards_and_beasts.invisibility_cloak.desc", "Wear in chest slot to blend from sight.");
+        add("item.wizards_and_beasts.invisibility_cloak.desc", "Wear in the Back slot to blend from sight.");
         add("item.wizards_and_beasts.deathly_hallow_cloak", "Deathly Hallow Cloak");
         add("item.wizards_and_beasts.deathly_hallow_cloak.desc", "Legendary cloak that completely hides you from other players.");
         add("item.wizards_and_beasts.peruvian_instant_darkness_powder", "Peruvian Instant Darkness Powder");

@@ -32,8 +32,13 @@ public final class AdminCommands {
     private AdminCommands() {}
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
+        // Any administrative capability opens the group (AdminPolicy: one permission node per capability, each
+        // defaulting to the administrator rule). Each subtree is then checked for its own capability, by the
+        // service it calls or, where none checks, by a requirement on the subtree itself.
         return Commands.literal("admin")
-                .requires(WizardsAndBeastsCommandPermissions.ADMIN)
+                .requires(at.koopro.wizardsandbeasts.admin.access.AdminPolicy::isAdministrator)
+                // Bare `/wandb admin` opens the Control Center (console: the command list) — see CommandTreeShapeTest.
+                .executes(ctx -> AdminConfigCommands.openOrList(ctx.getSource()))
                 .then(ModuleCommands.register())
                 .then(AdminConfigCommands.panel())
                 .then(AdminConfigCommands.config())
@@ -44,6 +49,12 @@ public final class AdminCommands {
                 .then(at.koopro.wizardsandbeasts.admin.command.AdminWandCommands.register())
                 .then(at.koopro.wizardsandbeasts.admin.command.AdminBroomCommands.register())
                 .then(at.koopro.wizardsandbeasts.admin.command.AdminProfileCommands.register())
-                .then(at.koopro.wizardsandbeasts.admin.command.AdminPlayerCommands.register());
+                .then(at.koopro.wizardsandbeasts.admin.command.AdminPlayerCommands.register())
+                .then(at.koopro.wizardsandbeasts.admin.command.AdminOpsCommands.performance())
+                .then(at.koopro.wizardsandbeasts.admin.command.AdminOpsCommands.visual())
+                .then(at.koopro.wizardsandbeasts.admin.command.AdminOpsCommands.economy())
+                .then(at.koopro.wizardsandbeasts.admin.command.AdminMinistryCommands.register())
+                .then(at.koopro.wizardsandbeasts.admin.command.AdminReportCommands.report())
+                .then(at.koopro.wizardsandbeasts.admin.command.AdminReportCommands.operation());
     }
 }

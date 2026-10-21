@@ -105,7 +105,8 @@ historical log of individual work passes — those are records of what was done,
   the shape — so it gates only the disorientation, becoming the first reader `wolfsbaneActive` has
   ever had. Two 1.21.11 removals recorded in the class: `DimensionType.natural()` and
   `Level.getMoonPhase()` are both gone; the phase is the day count modulo eight, full moon at 0.
-  **Veela rage, merfolk water and vampire bat remain unwired.** Original finding follows.
+  *(2026-10-14: Veela rage and merfolk water are wired since; the vampire bat toggles but cannot fly and has no
+  rig.)* Original finding follows.
 
 - [POLISH] **Four of five transformation triggers do not exist (2026-08-13).** Only the Obscurial has
   real trigger logic (`ObscurialHeritageHandler`: HP thresholds, stress spikes, forced-dark duration).

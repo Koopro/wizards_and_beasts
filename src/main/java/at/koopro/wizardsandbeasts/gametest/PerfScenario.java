@@ -34,8 +34,10 @@ public final class PerfScenario {
     public static final String PROPERTY = "wandb.perf";
     public static final int WARMUP_TICKS = 300;
     public static final int MEASURE_TICKS = 1200;
-    public static final int COPIES = 2;
-    private static final int HALF = 16;
+    /** Copies of each creature; {@code -Dwandb.perf.copies=N} scales the load for steadier profiles. */
+    public static final int COPIES = Integer.getInteger("wandb.perf.copies", 2);
+    /** Half the arena's width; {@code -Dwandb.perf.half=N} spreads a larger load out (default 16 → 33×33). */
+    private static final int HALF = Integer.getInteger("wandb.perf.half", 16);
 
     private PerfScenario() {}
 
@@ -51,6 +53,17 @@ public final class PerfScenario {
         ServerLevel level = helper.getLevel();
         MinecraftServer server = level.getServer();
         BlockPos origin = helper.absolutePos(BlockPos.ZERO);
+        // Force the arena's chunks to entity-ticking. Without this most of the arena lies outside the test's ticking
+        // area and its creatures are never ticked at all (found 2026-10-07: tickCount 0 for most of the roster), so
+        // the scenario measured a fraction of the load it claimed to. Released when the run ends.
+        List<net.minecraft.world.level.ChunkPos> forced = new ArrayList<>();
+        for (int cx = (origin.getX() - HALF) >> 4; cx <= (origin.getX() + HALF) >> 4; cx++) {
+            for (int cz = (origin.getZ() - HALF) >> 4; cz <= (origin.getZ() + HALF) >> 4; cz++) {
+                if (level.setChunkForced(cx, cz, true)) {
+                    forced.add(new net.minecraft.world.level.ChunkPos(cx, cz));
+                }
+            }
+        }
         for (int x = -HALF; x <= HALF; x++) {
             for (int z = -HALF; z <= HALF; z++) {
                 level.setBlock(origin.offset(x, -1, z), Blocks.STONE.defaultBlockState(), 2);
@@ -105,12 +118,21 @@ public final class PerfScenario {
                 samples.sort(Long::compare);
                 double mean = samples.stream().mapToLong(Long::longValue).average().orElse(0) / 1.0e6;
                 double p95 = samples.get((int) (samples.size() * 0.95)) / 1.0e6;
+                double p99 = samples.get((int) (samples.size() * 0.99)) / 1.0e6;
+                double max = samples.get(samples.size() - 1) / 1.0e6;
+                List<? extends GenericBeastEntity> living = level.getEntities(net.minecraft.world.level.entity.EntityTypeTest
+                        .forClass(GenericBeastEntity.class), e -> e.isAlive());
+                // Only creatures that were actually ticked run any AI; a load outside ticking chunks measures nothing.
+                // A creature ticked through the whole run has a tickCount of at least the run's length.
+                long ticking = living.stream().filter(e -> e.tickCount >= (WARMUP_TICKS + MEASURE_TICKS) * 9 / 10).count();
                 LOGGER.info(String.format(java.util.Locale.ROOT,
-                        "WANDB_PERF creatures=%d living=%d players=%d mean_mspt=%.3f p95_mspt=%.3f samples=%d",
-                        creatures, level.getEntities(net.minecraft.world.level.entity.EntityTypeTest.forClass(
-                                GenericBeastEntity.class), e -> e.isAlive()).size(),
-                        players.size(), mean, p95, samples.size()));
+                        "WANDB_PERF creatures=%d living=%d ticking=%d players=%d arena=%d mean_mspt=%.3f p95_mspt=%.3f "
+                                + "p99_mspt=%.3f max_mspt=%.3f samples=%d",
+                        creatures, living.size(), ticking, players.size(), 2 * HALF + 1, mean, p95, p99, max,
+                        samples.size()));
+                LOGGER.info("WANDB_AI " + at.koopro.wizardsandbeasts.creature.schedule.AiMetrics.summary());
                 players.forEach(p -> WizardTestSupport.retire(helper, p));
+                forced.forEach(c -> level.setChunkForced(c.x, c.z, false));
                 helper.succeed();
             }
         });

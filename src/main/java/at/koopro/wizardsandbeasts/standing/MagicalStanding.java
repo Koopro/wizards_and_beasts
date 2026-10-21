@@ -20,7 +20,8 @@ import org.jspecify.annotations.NullMarked;
  *                  restorative magic; the dark pole is the existing corruption meter.
  */
 @NullMarked
-public record MagicalStanding(float tradition, float light) {
+public record MagicalStanding(float tradition, float light, float publicRep, float profession,
+                              String professionOf) {
 
     public static final MagicalStanding DEFAULT = new MagicalStanding(0.0f, 0.0f);
 
@@ -32,7 +33,10 @@ public record MagicalStanding(float tradition, float light) {
      */
     public static final Codec<MagicalStanding> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.FLOAT.optionalFieldOf("tradition", 0.0f).forGetter(MagicalStanding::tradition),
-            Codec.FLOAT.optionalFieldOf("light", 0.0f).forGetter(MagicalStanding::light)
+            Codec.FLOAT.optionalFieldOf("light", 0.0f).forGetter(MagicalStanding::light),
+            Codec.FLOAT.optionalFieldOf("public", 0.0f).forGetter(MagicalStanding::publicRep),
+            Codec.FLOAT.optionalFieldOf("profession", 0.0f).forGetter(MagicalStanding::profession),
+            Codec.STRING.optionalFieldOf("profession_of", "").forGetter(MagicalStanding::professionOf)
     ).apply(instance, MagicalStanding::new));
 
     public MagicalStanding {
@@ -41,18 +45,39 @@ public record MagicalStanding(float tradition, float light) {
         // are both realistic ways in.
         tradition = Float.isNaN(tradition) ? 0.0f : tradition;
         light = Float.isNaN(light) ? 0.0f : Math.max(0.0f, light);
+        publicRep = Float.isNaN(publicRep) ? 0.0f : publicRep;
+        profession = Float.isNaN(profession) ? 0.0f : profession;
+    }
+
+    /** Tradition and light only, as the record was before public and professional reputation. */
+    public MagicalStanding(float tradition, float light) {
+        this(tradition, light, 0.0f, 0.0f, "");
     }
 
     public MagicalStanding withTradition(float value) {
-        return new MagicalStanding(value, light);
+        return new MagicalStanding(value, light, publicRep, profession, professionOf);
     }
 
     public MagicalStanding withLight(float value) {
-        return new MagicalStanding(tradition, value);
+        return new MagicalStanding(tradition, value, publicRep, profession, professionOf);
+    }
+
+    public MagicalStanding withPublic(float value) {
+        return new MagicalStanding(tradition, light, value, profession, professionOf);
+    }
+
+    /** Professional reputation, held for {@code holder}; a different holder starts from {@code value} afresh. */
+    public MagicalStanding withProfession(float value, String holder) {
+        return new MagicalStanding(tradition, light, publicRep, value, holder);
+    }
+
+    /** Professional reputation as it applies to {@code current}: none at all for a profession not held then. */
+    public float professionFor(String current) {
+        return !current.isEmpty() && current.equals(professionOf) ? profession : 0.0f;
     }
 
     /** True for a wizard who has done nothing either way yet — used to skip work, never to hide the UI. */
     public boolean isNeutral() {
-        return tradition == 0.0f && light == 0.0f;
+        return tradition == 0.0f && light == 0.0f && publicRep == 0.0f && profession == 0.0f;
     }
 }

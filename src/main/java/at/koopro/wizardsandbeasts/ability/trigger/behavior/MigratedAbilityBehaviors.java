@@ -29,6 +29,31 @@ public final class MigratedAbilityBehaviors {
         AbilityBehaviors.register(AbilityIds.VEELA_ALLURE,
                 new SimpleAbilityBehavior(VeelaAllure::allure));
         AbilityBehaviors.register(AbilityIds.VAMPIRE_FORM, HeritageFormAbilityBehavior.VAMPIRE);
+        // House-elf arts: a miss (nothing looked at, nothing raw to cook, no elf to call) spends no cooldown.
+        AbilityBehaviors.register(AbilityIds.ELF_SNAP, new at.koopro.wizardsandbeasts.ability.trigger.AbilityBehavior() {
+            @Override
+            public boolean onActivate(net.minecraft.server.level.ServerPlayer player, at.koopro.wizardsandbeasts.ability.def.AbilityDefinition def) {
+                return at.koopro.wizardsandbeasts.heritage.elf.ElfMagic.snap(player);
+            }
+        });
+        AbilityBehaviors.register(AbilityIds.ELF_KITCHEN, new at.koopro.wizardsandbeasts.ability.trigger.AbilityBehavior() {
+            @Override
+            public boolean onActivate(net.minecraft.server.level.ServerPlayer player, at.koopro.wizardsandbeasts.ability.def.AbilityDefinition def) {
+                return at.koopro.wizardsandbeasts.heritage.elf.ElfMagic.kitchen(player) > 0;
+            }
+        });
+        AbilityBehaviors.register(AbilityIds.STAR_READING, new at.koopro.wizardsandbeasts.ability.trigger.AbilityBehavior() {
+            @Override
+            public boolean onActivate(net.minecraft.server.level.ServerPlayer player, at.koopro.wizardsandbeasts.ability.def.AbilityDefinition def) {
+                return at.koopro.wizardsandbeasts.heritage.centaur.StarReading.readAloud(player);
+            }
+        });
+        AbilityBehaviors.register(AbilityIds.CALL_HOUSE_ELF, new at.koopro.wizardsandbeasts.ability.trigger.AbilityBehavior() {
+            @Override
+            public boolean onActivate(net.minecraft.server.level.ServerPlayer player, at.koopro.wizardsandbeasts.ability.def.AbilityDefinition def) {
+                return at.koopro.wizardsandbeasts.heritage.elf.HouseElfBond.call(player) > 0;
+            }
+        });
         AbilityBehaviors.register(AbilityIds.OBSCURIAL_STRESS_VENT,
                 new SimpleAbilityBehavior(ObscurialServerLogic::stressVent));
         AbilityBehaviors.register(AbilityIds.OBSCURUS_SURGE,

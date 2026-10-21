@@ -38,8 +38,12 @@ Painting is the old `wand_skin.py` treatment, unchanged: a pale, near-neutral wo
 multiplies by the wand's wood tint, grain streaks on long faces, binding bands on the grip, and
 per-variant wood for the shapes named after screen wands.
 
+Also writes the grain sheets (`textures/item/wand/grain_<grain>.png`, same UV layout as wand.png)
+and the core-light masks (`textures/item/wand_glint.png`, `wand_glint_bonded.png`) the look system
+reads (documentation/WAND_MODEL.md, "Looks").
+
 Run from the repo root:
-    python tools/wand_model.py [--force] [--preview DIR]
+    python tools/wand_model.py [--force] [--preview DIR] [--looks DIR]
 """
 
 import argparse
@@ -59,6 +63,21 @@ ASSETS = "src/main/resources/assets/wizards_and_beasts"
 GEO_PATH = os.path.join(ASSETS, "geckolib", "models", "item", "wand.geo.json")
 ANIM_PATH = os.path.join(ASSETS, "geckolib", "animations", "item", "wand.animation.json")
 TEX_PATH = os.path.join(ASSETS, "textures", "item", "wand.png")
+# One sheet per grain family, same UV layout as wand.png; a wood names its grain in
+# `wand_woods/*.json` `appearance.grain` (WandLookResolver), WandRenderer picks the sheet.
+GRAIN_DIR = os.path.join(ASSETS, "textures", "item", "wand")
+# Where a core's light shows: the point always, the pommel too once the wand is loyal to its holder.
+# White where lit, transparent elsewhere; WandRenderer draws the model again with it, additively,
+# in the core's colour.
+GLINT_PATH = os.path.join(ASSETS, "textures", "item", "wand_glint.png")
+GLINT_BONDED_PATH = os.path.join(ASSETS, "textures", "item", "wand_glint_bonded.png")
+# The parts that are not wood -- brass, silver, set stones, leather, leaves -- alone on the sheet.
+# The wood tint multiplies the whole model, which turned a silver ferrule on walnut into a dark wood
+# ring; WandRenderer draws this over the tinted wand untinted, so metal stays metal.
+TRIM_PATH = os.path.join(ASSETS, "textures", "item", "wand_trim.png")
+TRIM_MATERIALS = ("brass", "gem", "silver", "leather", "eye", "leaf", "thorn")
+WOODS_DIR = "src/main/resources/data/wizards_and_beasts/wizards_and_beasts/wand_woods"
+CORES_DIR = "src/main/resources/data/wizards_and_beasts/wizards_and_beasts/wand_cores"
 MARKER = marker("wand_model.py")
 
 TEX_W = TEX_H = 96          # the sheet the wand has always had
@@ -70,6 +89,10 @@ ATTACHMENT = "wand_spell_attachment"
 
 # Bones Java reads by name (WandRenderer, WandItem clips, WandModelContractTest).
 SLOTS = ("handle", "shaft", "tip", "core", "ornament")
+# The length chain: the tip hangs off the shaft and the spell attachment off the tip, so when
+# WandRenderer lengthens, thins or bows the shaft (WandLook) the point and the place a spell leaves
+# go with it. Every other slot hangs off wand_root.
+SLOT_PARENT = {"tip": "shaft"}
 
 
 # --------------------------------------------------------------------------- rig
@@ -686,11 +709,11 @@ SLOT_PIVOT = {"handle": 0.0, "shaft": HANDLE_TOP, "tip": SHAFT_TOP, "core": 0.0,
 def build():
     w = Wand()
     for slot in SLOTS:
-        w.bone(slot, "wand_root", (0, SLOT_PIVOT[slot], 0))
+        w.bone(slot, SLOT_PARENT.get(slot, "wand_root"), (0, SLOT_PIVOT[slot], 0))
         for variant, builder in VARIANTS[slot].items():
             b = w.bone(f"{slot}_{variant}", slot, (0, SLOT_PIVOT[slot], 0))
             builder(w, b)
-    w.bone(ATTACHMENT, "wand_root", (0, TIP_TOP, 0))
+    w.bone(ATTACHMENT, "tip", (0, TIP_TOP, 0))
     return w
 
 
@@ -749,7 +772,62 @@ def variant_of(w, bone):
     raise ValueError("bone outside every slot")
 
 
-def paint(w):
+# Grain families. A face of a wand part is one or two texels wide and a dozen tall, so a grain is
+# mostly a rhythm down the length: how often it changes, how hard, and whether it runs straight,
+# waves, spirals or breaks into knots. Painted near-neutral like wand.png, so the wood's tint still
+# colours it; the contrast is what survives the tint and tells ash from yew at arm's length.
+GRAINS = ("straight", "fine", "wavy", "knotty", "figured", "banded", "flecked", "stringy", "pored", "nodal")
+
+
+def grain_factor(grain, lx, ly, fw, seed):
+    """Brightness multiplier for one texel of a long wooden face, by grain family."""
+    n = bs.noise(seed, lx, ly)
+    if grain == "straight":
+        # Ash: long, even, quiet streaks broken only every few texels.
+        f = 0.91 if ((lx * 7 + seed) % 3 == 0 and (ly // 5 + seed) % 2 == 0) else 1.0
+        return f * (0.98 + 0.04 * n)
+    if grain == "fine":
+        # Holly: almost no figure; polished, with a soft gloss line catching the light.
+        return (1.05 if ly % 9 == 4 else 1.0) * (0.99 + 0.02 * n)
+    if grain == "wavy":
+        # Willow: soft light and dark rippling down the length.
+        return 1.0 + 0.10 * math.sin(2 * math.pi * (ly + 2 * lx + seed % 5) / 6.0)
+    if grain == "knotty":
+        # Blackthorn: rough and uneven, broken by dark knots with a pale rim above each.
+        f = 0.90 + 0.14 * n
+        col = (seed // 5 + ly // 5) % max(1, fw)
+        k = (ly + seed) % 5
+        if lx == col and k == 2:
+            f *= 0.60
+        elif lx == col and k == 1:
+            f *= 1.16
+        return f
+    if grain == "figured":
+        # Walnut: curly figure, high contrast, three tones stepping across the face.
+        band = ((ly + 2 * lx + seed) // 2) % 3
+        return (1.15, 0.98, 0.82)[band] * (0.97 + 0.06 * n)
+    if grain == "banded":
+        # Yew: pale sapwood and dark heartwood in long alternating runs.
+        if ((ly + seed % 7) // 4) % 2 == 0:
+            return 1.32 if lx == 0 else 1.20
+        return 0.76
+    if grain == "flecked":
+        # Rowan: an even ground with short bright ray flecks.
+        return 1.26 if bs.noise(seed + 7, lx, ly) > 0.84 else 0.97 + 0.04 * n
+    if grain == "stringy":
+        # Vine: fibres spiralling round the stem.
+        return 0.84 if (lx + ly + seed) % 3 == 0 else 1.06
+    if grain == "pored":
+        # Hawthorn: dense and tight, every texel its own.
+        return 0.86 + 0.26 * n
+    if grain == "nodal":
+        # Elder: pale and smooth, ringed by nodes, with the odd dark pith pore.
+        f = 0.84 if ly % 6 == 5 else (1.12 if ly % 6 == 4 else 1.03)
+        return f * (0.80 if n > 0.9 else 1.0)
+    raise ValueError(f"unknown grain {grain}")
+
+
+def paint(w, grain="plain"):
     img = Image.new("RGBA", (TEX_W, TEX_H), (0, 0, 0, 0))
     px = img.load()
     painted = set()
@@ -781,7 +859,17 @@ def paint(w):
             for ly in range(fh):
                 for lx in range(fw):
                     f = shade * bs.pattern_factor(style, lx, ly, fw, fh, seed)
-                    if wooden and long_face:
+                    if wooden and long_face and grain != "plain":
+                        # A lit near edge and a shaded far edge keep a two-texel face reading round
+                        # whatever the grain; a grip keeps a faint binding every six texels.
+                        f *= grain_factor(grain, lx, ly, fw, seed)
+                        if fw > 1 and lx == 0:
+                            f *= 1.08
+                        elif fw > 1 and lx == fw - 1:
+                            f *= 0.88
+                        if role == "handle" and ly % 6 == 5:
+                            f *= 0.90
+                    elif wooden and long_face:
                         # Turned wood: grain down the length, a lit streak on the near edge so a
                         # two-texel face still reads round, binding bands on a grip.
                         if fw > 1 and lx == 0:
@@ -799,6 +887,83 @@ def paint(w):
                     if 0 <= x < TEX_W and 0 <= y < TEX_H:
                         px[x, y] = (col[0], col[1], col[2], 255)
     return posterise(img, 12)
+
+
+# --------------------------------------------------------------------------- glint masks
+# The core's light, as a mask over the same sheet. The point: the top face of each tip's highest
+# part and a fading rim down its sides. The pommel (bonded mask only): the underside of each grip's
+# lowest part and a rim up from it, plus any set stone. Islands are shared by a variant's repeats, so
+# a rim on a repeated part would light every repeat (a stacked grip turned into stripes): a part
+# whose island is shared gets its end face only.
+
+def _light_face(px, rect, rows_from, levels):
+    """Light one face: all of it at levels[0] when rows_from is None, else rows counted from its
+    'top' or 'bottom' edge at the given levels."""
+    fx0, fy0, fx1, fy1 = (int(c) for c in rect)
+    fw, fh = fx1 - fx0, fy1 - fy0
+    for ly in range(fh):
+        if rows_from is None:
+            level = levels[0]
+        else:
+            k = ly if rows_from == "top" else fh - 1 - ly
+            if k >= len(levels):
+                continue
+            level = levels[k]
+        for lx in range(fw):
+            x, y = fx0 + lx, fy0 + ly
+            if 0 <= x < TEX_W and 0 <= y < TEX_H:
+                a = max(px[x, y][3], int(round(255 * level)))
+                px[x, y] = (a, a, a, a)
+
+
+def trim_sheet(w, base):
+    """wand.png's own texels for the non-wood parts, transparent everywhere else."""
+    out = Image.new("RGBA", (TEX_W, TEX_H), (0, 0, 0, 0))
+    src, dst = base.load(), out.load()
+    for _, cube, mat in w.cubes:
+        if mat not in TRIM_MATERIALS:
+            continue
+        for fx0, fy0, fx1, fy1 in bs.box_faces(*cube["uv"], *cube["size"]).values():
+            for y in range(int(fy0), int(fy1)):
+                for x in range(int(fx0), int(fx1)):
+                    if 0 <= x < TEX_W and 0 <= y < TEX_H:
+                        dst[x, y] = src[x, y]
+    return out
+
+
+def glint_masks(w, geo):
+    """(point only, point + pommel) masks: wand_glint.png and wand_glint_bonded.png."""
+    g = geo["minecraft:geometry"][0]
+    tip_img = Image.new("RGBA", (TEX_W, TEX_H), (0, 0, 0, 0))
+    full_img = Image.new("RGBA", (TEX_W, TEX_H), (0, 0, 0, 0))
+    tip_px, full_px = tip_img.load(), full_img.load()
+    eps = 1e-4
+    for slot, pick in (("tip", "top"), ("handle", "bottom")):
+        for variant in VARIANTS[slot]:
+            boxes = world_boxes(g, subtree(g, f"{slot}_{variant}"))
+            if pick == "top":
+                edge = max(max(p[1] for p in pts) for _, _, pts in boxes)
+                chosen = [c for _, c, pts in boxes if abs(max(p[1] for p in pts) - edge) < eps]
+            else:
+                edge = min(min(p[1] for p in pts) for _, _, pts in boxes)
+                chosen = [c for _, c, pts in boxes if abs(min(p[1] for p in pts) - edge) < eps]
+            targets = [full_px] if slot == "handle" else [tip_px, full_px]
+            rim = (0.7, 0.35, 0.12) if pick == "top" else (0.6, 0.2)
+            for cube in chosen:
+                faces = bs.box_faces(*cube["uv"], *cube["size"])
+                shared = sum(1 for _, c, _ in boxes if c["uv"] == cube["uv"]) > 1
+                for px in targets:
+                    _light_face(px, faces["up" if pick == "top" else "down"], None, (1.0,))
+                    if shared:
+                        continue
+                    for side in ("north", "south", "east", "west"):
+                        _light_face(px, faces[side], pick, rim)
+    # Set stones carry the light too, once the wand is bonded.
+    for _, cube, mat in w.cubes:
+        if mat == "gem":
+            for rect in bs.box_faces(*cube["uv"], *cube["size"]).values():
+                _light_face(full_px, rect, None, (0.7,))
+    return tip_img, full_img
 
 
 # --------------------------------------------------------------------------- clips
@@ -909,8 +1074,12 @@ def check(geo):
                     if not core:
                         problems.append(f"{name}: base has no 1.0 neck on the axis")
     att = next((b for b in g["bones"] if b["name"] == ATTACHMENT), None)
-    if att is None or att.get("parent") != "wand_root" or att["pivot"] != [0.0, TIP_TOP, 0.0] or "rotation" in att:
-        problems.append(f"{ATTACHMENT} must be an unrotated child of wand_root at (0, {TIP_TOP}, 0)")
+    if att is None or att.get("parent") != "tip" or att["pivot"] != [0.0, TIP_TOP, 0.0] or "rotation" in att:
+        problems.append(f"{ATTACHMENT} must be an unrotated child of the tip slot at (0, {TIP_TOP}, 0)")
+    parents = {b["name"]: b.get("parent") for b in g["bones"]}
+    for slot in SLOTS:
+        if parents.get(slot) != SLOT_PARENT.get(slot, "wand_root"):
+            problems.append(f"slot {slot} must hang off {SLOT_PARENT.get(slot, 'wand_root')}")
     return problems
 
 
@@ -990,6 +1159,169 @@ def preview(out_dir, geo):
             print("preview", path)
 
 
+# --------------------------------------------------------------------------- looks
+# A mirror of WandLookResolver / WandRenderer for contact sheets: the same length, girth and bow
+# tables, the same grain sheet and tint, the core's light composited from the glint mask. Offline
+# only -- the game never reads this -- so a change to the Java tables wants the same change here
+# (WandLookAssetTest pins the tables these copy).
+
+REFERENCE_INCHES, SCALE_PER_INCH, MIN_SCALE, MAX_SCALE = 12.25, 0.10, 0.55, 1.45
+GIRTH = {"unyielding": 1.0, "rigid": 1.0, "pliant": 0.95, "supple": 0.90, "springy": 0.85}
+BOW = {"unyielding": 0.0, "rigid": 0.75, "pliant": 1.75, "supple": 3.0, "springy": 4.5}
+BOND = {"dormant": (0.40, 0.85, False), "awaiting": (0.50, 1.0, False), "unfamiliar": (0.22, 0.35, False),
+        "reluctant": (0.45, 0.80, False), "accepting": (0.65, 1.0, False), "loyal": (0.85, 1.0, True),
+        "mastered": (1.0, 1.0, True)}
+
+
+def length_scale(inches):
+    return max(MIN_SCALE, min(MAX_SCALE, 1.0 + (inches - REFERENCE_INCHES) * SCALE_PER_INCH))
+
+
+def load_defs(directory):
+    out = {}
+    for fn in sorted(os.listdir(directory)):
+        if fn.endswith(".json"):
+            out[fn[:-5]] = json.load(open(os.path.join(directory, fn), encoding="utf-8"))
+    return out
+
+
+def _strip(module_id):
+    return module_id.split(":", 1)[1] if module_id else None
+
+
+def look_texture(grain, tint, glint_rgb, level, bonded):
+    """The sheet as the game draws it: grain x tint, plus the core's light where the mask allows."""
+    import numpy as np
+    path = TEX_PATH if grain is None else os.path.join(GRAIN_DIR, f"grain_{grain}.png")
+    tex = np.asarray(Image.open(path).convert("RGBA")).astype(np.float32) / 255.0
+    tex = tex.copy()
+    tex[..., :3] *= np.array(tint, dtype=np.float32) / 255.0
+    trim = np.asarray(Image.open(TRIM_PATH).convert("RGBA")).astype(np.float32) / 255.0
+    tex[..., :3] = np.where(trim[..., 3:4] > 0.5, trim[..., :3], tex[..., :3])
+    if level > 0:
+        mask = np.asarray(Image.open(GLINT_BONDED_PATH if bonded else GLINT_PATH).convert("RGBA")
+                          ).astype(np.float32)[..., 3:4] / 255.0
+        tex[..., :3] = np.clip(tex[..., :3] + mask * (np.array(glint_rgb, dtype=np.float32) / 255.0) * level, 0, 1)
+    return tex
+
+
+def render_look(geo, tex, handle, shaft, tip, ornament=None, *, k=1.0, girth=1.0, bow=0.0, twist=0.0,
+                size=192):
+    """One wand with its look applied the way WandRenderer applies it: the shaft scaled about the
+    grip plane, the tip riding on it, both bowed. Side view, so the bend reads."""
+    import numpy as np
+    import beast_preview as bp
+    g = geo["minecraft:geometry"][0]
+    shaft_bones, tip_bones = subtree(g, f"shaft_{shaft}"), subtree(g, f"tip_{tip}")
+    keep = subtree(g, f"handle_{handle}") | shaft_bones | tip_bones
+    if ornament:
+        keep |= subtree(g, f"ornament_{ornament}")
+    a, t = math.radians(bow), math.radians(twist)
+    top = np.array([0.0, HANDLE_TOP + (SHAFT_TOP - HANDLE_TOP) * k, 0.0])
+
+    def rot_z(p, ang, about):
+        c, s_ = math.cos(ang), math.sin(ang)
+        d = p - about
+        return about + np.array([d[0] * c - d[1] * s_, d[0] * s_ + d[1] * c, d[2]])
+
+    def place(name, p):
+        p = np.array(p, dtype=float)
+        base = np.array([0.0, HANDLE_TOP, 0.0])
+        if name in shaft_bones or name in tip_bones:
+            # twist about the axis, thin, then lengthen (tip slides up instead of stretching)
+            x, z = p[0] * math.cos(t) - p[2] * math.sin(t), p[0] * math.sin(t) + p[2] * math.cos(t)
+            p = np.array([x * girth, p[1], z * girth])
+            if name in shaft_bones:
+                p[1] = HANDLE_TOP + (p[1] - HANDLE_TOP) * k
+            else:
+                p[1] += top[1] - SHAFT_TOP
+                p = rot_z(p, a, top)
+            p = rot_z(p, a, base)
+        return p
+
+    view = bp.rot_x(0.0) @ bp.rot_y(0.0)
+    th, tw = tex.shape[:2]
+    tris = []
+    for name, cube, m, off in bp.collect_cubes(g):
+        if name not in keep:
+            continue
+        ox, oy, oz = (float(c) for c in cube["origin"])
+        w_, h, d = (float(s_) for s_ in cube["size"])
+        inf = float(cube.get("inflate", 0.0))
+        u0, v0 = cube["uv"]
+        for fname, mults in bp.FACES.items():
+            cs = [view @ (bp.MIRROR @ place(name, m @ np.array([ox - inf + mu[0] * (w_ + 2 * inf),
+                                                                oy - inf + mu[1] * (h + 2 * inf),
+                                                                oz - inf + mu[2] * (d + 2 * inf)]) + off))
+                  for mu in mults]
+            ru, rv, rw, rh = bp.uv_rect(fname, u0, v0, w_, h, d)
+            tris.append((cs, [(ru, rv + rh), (ru + rw, rv + rh), (ru + rw, rv), (ru, rv)]))
+    scale = (size - 16) / 42.0
+    frame = np.zeros((size, size, 3), dtype=np.float32)
+    frame[:] = np.array(bp.BG, dtype=np.float32) / 255.0
+    zbuf = np.full((size, size), -1e9, dtype=np.float32)
+    for cs, uvs in tris:
+        s_ = [(c[0] * scale + size / 2, size - 8 - (c[1] + 5.5) * scale, c[2]) for c in cs]
+        for i0, i1, i2 in ((0, 1, 2), (0, 2, 3)):
+            bp.raster(frame, zbuf, [s_[i0], s_[i1], s_[i2]], [uvs[i0], uvs[i1], uvs[i2]], tex, tw, th)
+    return Image.fromarray((np.clip(frame, 0, 1) * 255).astype("uint8"), "RGB")
+
+
+def looks(out_dir, geo):
+    """Contact sheets of the look system on the shipped woods and cores."""
+    from PIL import ImageDraw
+    os.makedirs(out_dir, exist_ok=True)
+    woods, cores = load_defs(WOODS_DIR), load_defs(CORES_DIR)
+
+    def wand(wood, core="phoenix_feather", inches=12.25, flex="pliant", bond="mastered", rare=None):
+        app = woods[wood].get("appearance", {})
+        mods = {"handle": "classic", "shaft": "straight", "tip": "pointed", "ornament": None}
+        for slot in ("handle", "shaft", "tip"):
+            if app.get(slot):
+                mods[slot] = _strip(app[slot])
+        if rare is not None:
+            for slot in ("handle", "shaft", "tip", "ornament"):
+                if app["rare"][rare].get(slot):
+                    mods[slot] = _strip(app["rare"][rare][slot])
+        tint = hx(app.get("tint", "#A9784B"))[:3]
+        grain = _strip(app.get("grain"))
+        capp = cores[core].get("appearance", {})
+        strength, sat, bonded = BOND[bond]
+        rgb = hx(capp.get("glint", "#808080"))[:3]
+        grey = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]
+        rgb = tuple(grey + (c - grey) * sat for c in rgb)
+        level = capp.get("strength", 0.5) * strength
+        tex = look_texture(grain, tint, rgb, level, bonded)
+        return render_look(geo, tex, mods["handle"], mods["shaft"], mods["tip"], mods["ornament"],
+                           k=length_scale(inches), girth=GIRTH[flex], bow=BOW[flex], size=440)
+
+    rows = {
+        "woods": [(w_, (lambda w_=w_: wand(w_))) for w_ in woods],
+        "lengths": [(f'{i}"', (lambda i=i: wand("holly", inches=i))) for i in (8.5, 10.0, 12.25, 13.5, 15.0)],
+        "flexibility": [(f, (lambda f=f: wand("willow", flex=f))) for f in GIRTH],
+        "cores": [(c, (lambda c=c: wand("ash", core=c))) for c in cores],
+        "bond": [(b, (lambda b=b: wand("yew", core="dragon_heartstring", bond=b))) for b in BOND],
+        "rare": [(f"{w_} rare {i}", (lambda w_=w_, i=i: wand(w_, rare=i)))
+                 for w_ in woods for i in range(len(woods[w_].get("appearance", {}).get("rare", [])))],
+    }
+    tw, th = 120, 440
+    for sheet, items in rows.items():
+        if not items:
+            continue
+        tiles = [(label, make().crop(((th - tw) // 2, 0, (th + tw) // 2, th))) for label, make in items]
+        cols = min(12, len(tiles))
+        nrows = (len(tiles) + cols - 1) // cols
+        img = Image.new("RGB", (cols * tw, nrows * (th + 20)), (20, 20, 26))
+        d = ImageDraw.Draw(img)
+        for i, (label, tile) in enumerate(tiles):
+            x, y = (i % cols) * tw, (i // cols) * (th + 20)
+            img.paste(tile, (x, y))
+            d.text((x + 4, y + th + 4), label, fill=(220, 220, 220))
+        path = os.path.join(out_dir, f"looks_{sheet}.png")
+        img.save(path)
+        print("looks", path)
+
+
 # --------------------------------------------------------------------------- main
 
 def main():
@@ -997,6 +1329,7 @@ def main():
     ap.add_argument("--force", action="store_true", help="claim a wand.png another tool wrote")
     ap.add_argument("--preview", metavar="DIR", help="also render combination sheets here")
     ap.add_argument("--check", action="store_true", help="only validate the geo on disk")
+    ap.add_argument("--looks", metavar="DIR", help="also render look sheets (woods, lengths, flexibility, cores, bond, rare)")
     args = ap.parse_args()
 
     if args.check:
@@ -1024,11 +1357,21 @@ def main():
     with open(ANIM_PATH, "w", encoding="utf-8", newline="\n") as fh:
         json.dump({"format_version": "1.8.0", "animations": clips()}, fh, indent=2)
         fh.write("\n")
-    save(paint(w), TEX_PATH, MARKER)
+    base = paint(w)
+    save(base, TEX_PATH, MARKER)
+    save(trim_sheet(w, base), TRIM_PATH, MARKER)
+    os.makedirs(GRAIN_DIR, exist_ok=True)
+    for grain in GRAINS:
+        save(paint(w, grain), os.path.join(GRAIN_DIR, f"grain_{grain}.png"), MARKER)
+    tip_mask, bonded_mask = glint_masks(w, geo)
+    save(tip_mask, GLINT_PATH, MARKER)
+    save(bonded_mask, GLINT_BONDED_PATH, MARKER)
     print(f"wand: {len(w.bones)} bones, {len(w.cubes)} cubes, {rows}/{TEX_H} sheet rows; "
           f"{len(HANDLES)} handles x {len(SHAFTS)} shafts x {len(TIPS)} tips")
     if args.preview:
         preview(args.preview, geo)
+    if args.looks:
+        looks(args.looks, geo)
     return 0
 
 

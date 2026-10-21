@@ -48,10 +48,11 @@ class CommandTreeShapeTest {
         // A category groups; a verb executes. If a top-level node can be run on its own it is a verb
         // that escaped into the category list — which is exactly how the flat tree grew.
         //
-        // `debug` is the one allowed exception: running it bare prints the list of debug modules, so
-        // its executor describes the category instead of doing work inside it.
+        // Two allowed exceptions, both describing or opening the category instead of doing work inside it:
+        // bare `debug` prints the list of debug modules, and bare `admin` opens the Control Center (the
+        // console gets the admin command list) — the brief asked for the admin command to open the UI.
         for (CommandNode<CommandSourceStack> category : root.getChildren()) {
-            if (category.getName().equals("debug")) {
+            if (category.getName().equals("debug") || category.getName().equals("admin")) {
                 continue;
             }
             assertNull(category.getCommand(),
@@ -98,6 +99,8 @@ class CommandTreeShapeTest {
 
         assertPath("admin", "module", "setting");
         assertPath("admin", "panel");                   // opens the Control Center
+        assertPath("admin", "report", "list");          // the Control Center's report pages, printed
+        assertPath("admin", "op", "list");              // the Control Center's operation buttons
         assertPath("admin", "config", "set");           // same mutation API as the panel
         assertPath("admin", "config", "reset_all", "confirm");
         assertPath("admin", "config", "undo");
@@ -105,8 +108,18 @@ class CommandTreeShapeTest {
         assertPath("admin", "profile", "apply");         // profiles: preview, then apply <id> confirm
         assertPath("admin", "profile", "revert_group");
         assertPath("admin", "profile", "import");
-        assertPath("admin", "players", "log");           // players: read-only from the console
+        assertPath("admin", "players", "log");
         assertPath("admin", "players", "inspect");
+        assertPath("admin", "players", "act");           // every player action, through PlayerAdminService
+        assertPath("admin", "performance", "preset");    // Performance presets, same applier as the panel
+        assertPath("admin", "visual", "preset", "list"); // Visuals preset library, same service as the panel
+        assertPath("admin", "visual", "preset", "duplicate");
+        assertPath("admin", "visual", "preset", "rename");
+        assertPath("admin", "visual", "preset", "delete");
+        assertPath("admin", "economy", "ledger");        // Gringotts' money flows: sources against sinks
+        assertPath("admin", "economy", "market");        // every trader's book: price, saturation, ceiling
+        assertPath("admin", "economy", "market", "reset");
+        assertPath("admin", "economy", "journal");       // one player's last money movements
         assertPath("admin", "spell", "set");             // per-spell values, same service
         assertPath("admin", "spell", "disable");
         assertPath("admin", "spell", "test");

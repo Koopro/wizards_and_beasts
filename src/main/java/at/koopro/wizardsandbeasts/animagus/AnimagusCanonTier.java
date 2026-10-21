@@ -15,7 +15,10 @@ public enum AnimagusCanonTier {
     BOOK,
 
     /** Attested in Pottermore / Wizarding World material only. */
-    POTTERMORE;
+    POTTERMORE,
+
+    /** Not attested anywhere: an animal the mod offers (the hawk and the hare). Saying so beats a false citation. */
+    MOD;
 
     public static final Codec<AnimagusCanonTier> CODEC =
             Codec.STRING.xmap(s -> valueOf(s.toUpperCase(java.util.Locale.ROOT)),

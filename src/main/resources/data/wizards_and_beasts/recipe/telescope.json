@@ -1,0 +1,24 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "OWLS"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "tools",
+  "pattern": [
+    "  G",
+    " C ",
+    "S S"
+  ],
+  "key": {
+    "G": "minecraft:glass_pane",
+    "C": "minecraft:copper_ingot",
+    "S": "minecraft:stick"
+  },
+  "result": {
+    "id": "wizards_and_beasts:telescope",
+    "count": 1
+  }
+}

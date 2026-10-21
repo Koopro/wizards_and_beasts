@@ -2,16 +2,16 @@
 """Per-screen GUI art for Wizards & Beasts, in parchment and ink.
 
 `gui_parchment.py` owns the shared kit (`theme/`, the skin sets, the controls atlas). This file
-owns the art that belongs to one screen: the Bestiary's sheet and wells, the wandmaker's bench,
-Hermione's bag, the two creative tabs and the inventory tab icon. Art nothing reads any more
-was deleted on 2026-09-23 rather than kept current.
+owns the art that belongs to one screen: the wandmaker's bench, Hermione's bag, the two creative
+tabs and the inventory tab icon. Art nothing reads any more is deleted rather than kept current:
+on 2026-09-23, and on 2026-10-15 the Bestiary's sheet, wells, rows and placeholder, which the
+field-notebook skin replaced.
 It used to draw all of that in the wand HUD's tooled leather; since 2026-09-23 it draws the same
 aged sheet the kit does, by importing the kit's paper rather than inventing a second one.
 
 Three kinds of asset, picked per file:
 
-  - screen sheets (Bestiary, bench) are the kit's panel or inset composed at the size the Java
-    side blits them, so they match `McStylePanel.drawThemedPanel/Inset` pixel for pixel
+  - screen sheets (the bench) are the kit's sheet composed at the size the Java side blits it
   - vanilla-layout containers (the bag, the creative tabs) are recoloured from vanilla's own
     sheet, because the screen places every slot at a hardcoded offset into it
   - small furniture (rows, icons, sockets) is drawn 1:1 from the kit's palette
@@ -27,7 +27,7 @@ from PIL import Image, ImageDraw
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from artgen_common import client_jar_texture, is_regenerable, marker, save  # noqa: E402
-from gui_parchment import (BORDER, PANEL, Font, grain_field, inset, mix, panel,  # noqa: E402
+from gui_parchment import (BORDER, PANEL, grain_field, mix, panel,  # noqa: E402
                            paper_colour, shade, skin, slice_tiled)
 
 GUI = "src/main/resources/assets/wizards_and_beasts/textures/gui"
@@ -48,20 +48,6 @@ def opaque(c):
 def canvas(w, h):
     img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     return img, ImageDraw.Draw(img)
-
-
-def sheet(s, w, h, seed, slip=False):
-    """The kit's panel composed at a fixed size: exactly what `drawThemedPanel` tiles at runtime."""
-    img, _ = canvas(w, h)
-    slice_tiled(img, panel(s, seed=seed, slip=slip), 0, 0, w, h, BORDER)
-    return img
-
-
-def well(s, w, h, seed):
-    """The kit's inset composed at a fixed size: what `drawThemedInset` tiles at runtime."""
-    img, _ = canvas(w, h)
-    slice_tiled(img, inset(s, seed=seed), 0, 0, w, h, BORDER)
-    return img
 
 
 def bare_sheet(s, w, h, seed):
@@ -120,60 +106,6 @@ def recess(img, box, s):
     d.line([(x0, y0), (x0, y1)], fill=shadow)
     d.line([(x0 + 1, y1), (x1, y1)], fill=opaque(s["paper_ll"]))
     d.line([(x1, y0 + 1), (x1, y1)], fill=opaque(s["paper_ll"]))
-
-
-# --------------------------------------------------------------------------- bestiary
-#
-# Sizes are BestiaryScreen's. The sheet is W x H; the index well sits under the search box on the
-# left, the detail well fills the right. Both wells clear the sheet's double rule by 12px, which
-# is why the screen grew from 320x200 when it became paper.
-BESTIARY_W, BESTIARY_H = 344, 216
-BESTIARY_LIST = (128, 156)
-BESTIARY_DETAIL = (186, 176)
-ROW_W, ROW_H = 112, 14
-
-
-def a_bestiary_screen():
-    return sheet(PAGE, BESTIARY_W, BESTIARY_H, 11)
-
-
-def a_bestiary_list():
-    return well(PAGE, *BESTIARY_LIST, 23)
-
-
-def a_bestiary_detail():
-    return well(PAGE, *BESTIARY_DETAIL, 29)
-
-
-def a_row():
-    """An entry row: nothing but a dotted rule under it, the way a printed index runs. The row sits
-    on the well's own paper, so anything opaque here would be a second, flatter paper."""
-    img, _ = canvas(ROW_W, ROW_H)
-    dot = opaque(mix(PAGE["paper_d"], PAGE["ink_3"], 0.5))
-    for x in range(1, ROW_W - 1, 2):
-        img.putpixel((x, ROW_H - 1), dot)
-    return img
-
-
-def a_header():
-    """A category header: a band of darker stock with an ink rule under it. The label on it is
-    rubricated in Java, so the band stays quiet."""
-    img, d = canvas(ROW_W, ROW_H)
-    d.rectangle([0, 0, ROW_W - 1, ROW_H - 3], fill=opaque(PAGE["paper_d"]))
-    d.line([(0, 0), (ROW_W - 1, 0)], fill=opaque(mix(PAGE["paper_d"], PAGE["paper_l"], 0.5)))
-    d.line([(0, ROW_H - 2), (ROW_W - 1, ROW_H - 2)], fill=opaque(PAGE["ink_2"]))
-    return img
-
-
-def a_entry_placeholder():
-    """Portrait well for an entry with no art: an empty engraved frame with a faint query in it,
-    not a broken image."""
-    img = well(PAGE, 32, 32, 41)
-    glyph, _ = canvas(8, 8)
-    Font().draw(glyph, "?", 2, 0, PAGE["ink_3"])
-    glyph = glyph.resize((16, 16), Image.NEAREST)
-    img.alpha_composite(glyph, (8, 9))
-    return img
 
 
 # --------------------------------------------------------------------------- character sheet
@@ -377,12 +309,6 @@ ASSETS = {
     "container/creative_inventory/tab_decorative.png": lambda: a_creative_background(VELLUM, 7),
     "container/hermiones_bag.png": a_hermiones_bag,
     "wandmakers_bench.png": a_wandmakers_bench,
-    "bestiary/screen.png": a_bestiary_screen,
-    "bestiary/left_panel.png": a_bestiary_list,
-    "bestiary/right_panel.png": a_bestiary_detail,
-    "bestiary/row.png": a_row,
-    "bestiary/header.png": a_header,
-    "bestiary/entry_placeholder.png": a_entry_placeholder,
     "character_sheet/icon_tab.png": a_icon_tab,
 }
 

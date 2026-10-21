@@ -100,9 +100,19 @@ public class ModModelProvider extends ModelProvider {
         flatOrGeo(itemModels, BroomItemRegistry.OAKSHAFT_79.get(), ModelTemplates.FLAT_HANDHELD_ITEM);
         iconInSlotModelInHand(itemModels, BroomItemRegistry.BROOM_POLISH.get());
         itemModels.generateFlatItem(BroomItemRegistry.ENCHANTED_TWIG_BUNDLE.get(), ModelTemplates.FLAT_ITEM);
+        // Broom fittings: flat sprites from tools/item_icons.py, looped so a new fitting cannot be forgotten here.
+        for (var fitting : BroomItemRegistry.FITTINGS.values()) {
+            itemModels.generateFlatItem(fitting.get(), ModelTemplates.FLAT_ITEM);
+        }
+        itemModels.generateFlatItem(at.koopro.wizardsandbeasts.travel.TravelItems.COURIER_PARCEL.get(), ModelTemplates.FLAT_ITEM);
         iconInSlotModelInHand(itemModels, MiscItemRegistry.MARAUDERS_MAP.get());
         iconInSlotModelInHand(itemModels, MiscItemRegistry.DELUMINATOR.get());
         itemModels.generateFlatItem(MiscItemRegistry.BLINDFOLD.get(), ModelTemplates.FLAT_ITEM);
+        // Recovered tomb treasure (treasure/): flat sprites from tools/canon_sprites.py.
+        itemModels.generateFlatItem(CurrencyItemRegistry.ANCIENT_GOBLET.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(CurrencyItemRegistry.WARDED_AMULET.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(CurrencyItemRegistry.SEALED_CASKET.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(CurrencyItemRegistry.TOMB_MEDALLION.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(MiscItemRegistry.DUELLING_DUMMY.get(), ModelTemplates.FLAT_ITEM);
 
         // Worn armour — robes, hats and masks. Flat inventory sprites only; the worn layer is
@@ -319,6 +329,11 @@ public class ModModelProvider extends ModelProvider {
         blockModels.createTrivialBlock(ModBlocks.FLOO_GRATE.get(), TexturedModel.LEAVES);
         propBlock(blockModels, ModBlocks.SPELL_TEACHER.get(), lecternModel(),
                 sideTop(ModBlocks.SPELL_TEACHER.get(), ""), true);
+        propBlock(blockModels, ModBlocks.BROOM_RACK.get(), broomRackModel(), new TextureMapping()
+                .put(TextureSlot.PARTICLE, Identifier.withDefaultNamespace("block/spruce_planks"))
+                .put(TextureSlot.SIDE, Identifier.withDefaultNamespace("block/spruce_planks"))
+                .put(TextureSlot.END, Identifier.withDefaultNamespace("block/stripped_birch_log"))
+                .put(TextureSlot.TEXTURE, Identifier.withDefaultNamespace("block/hay_block_side")), true);
 
         java.util.List<net.minecraft.world.item.Item> wizardingItems = java.util.List.of(
                 ConsumableItemRegistry.BEZOAR.get(), ConsumableItemRegistry.MOONCALF_DUNG.get(),
@@ -604,6 +619,30 @@ public class ModModelProvider extends ModelProvider {
                     .face(Direction.DOWN, f -> f.texture(TextureSlot.SIDE).cullface(Direction.DOWN)));
         }
         return builder.build();
+    }
+
+    /**
+     * Broom rack, authored facing north: two posts and two rails along the south edge, and a broom stood in front
+     * of them — a birch handle up to the top rail and a bundle of twigs at the foot. Vanilla wood, birch and hay
+     * textures, so the rack needs no art of its own.
+     */
+    private static ExtendedModelTemplate broomRackModel() {
+        ExtendedModelTemplateBuilder builder = prop(TextureSlot.PARTICLE, TextureSlot.SIDE, TextureSlot.END,
+                TextureSlot.TEXTURE);
+        for (float x : new float[] { 1, 13 }) {
+            builder.element(e -> e.from(x, 0, 13).to(x + 2, 16, 15)
+                    .textureAll(TextureSlot.SIDE)
+                    .face(Direction.DOWN, f -> f.texture(TextureSlot.SIDE).cullface(Direction.DOWN)));
+        }
+        for (float y : new float[] { 3, 12 }) {
+            builder.element(e -> e.from(3, y, 13.5F).to(13, y + 2, 14.5F).textureAll(TextureSlot.SIDE));
+        }
+        return builder
+                .element(e -> e.from(7, 4, 11).to(9, 16, 13).textureAll(TextureSlot.END))
+                .element(e -> e.from(5.5F, 0, 9.5F).to(10.5F, 5, 14.5F)
+                        .textureAll(TextureSlot.TEXTURE)
+                        .face(Direction.DOWN, f -> f.texture(TextureSlot.TEXTURE).cullface(Direction.DOWN)))
+                .build();
     }
 
     /** Lectern: footed column under a reading surface tilted toward the reader. */

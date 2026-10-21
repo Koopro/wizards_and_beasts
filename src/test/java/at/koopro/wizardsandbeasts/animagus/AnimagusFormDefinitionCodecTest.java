@@ -35,7 +35,7 @@ class AnimagusFormDefinitionCodecTest {
     void everyShippedFormJson_roundTrips() throws IOException {
         try (Stream<Path> files = Files.list(FORMS_DIR)) {
             List<Path> jsons = files.filter(p -> p.toString().endsWith(".json")).sorted().toList();
-            assertEquals(4, jsons.size(), "expected rat, cat, dog and falcon on disk");
+            assertEquals(8, jsons.size(), "expected the six selectable forms plus rat and falcon on disk");
 
             for (Path json : jsons) {
                 String name = json.getFileName().toString();

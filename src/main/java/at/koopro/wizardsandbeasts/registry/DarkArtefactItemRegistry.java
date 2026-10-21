@@ -8,7 +8,6 @@ import at.koopro.wizardsandbeasts.item.darkartefact.RavenclawsDiademItem;
 import at.koopro.wizardsandbeasts.item.darkartefact.RiddlesDiaryItem;
 import at.koopro.wizardsandbeasts.item.darkartefact.SlytherinsLocketItem;
 import at.koopro.wizardsandbeasts.item.hallow.ResurrectionStoneItem;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.neoforged.neoforge.registries.DeferredItem;
 
 public final class DarkArtefactItemRegistry {
@@ -40,12 +39,14 @@ public final class DarkArtefactItemRegistry {
     public static final DeferredItem<ResurrectionStoneItem> RESURRECTION_STONE =
             ModItems.ITEMS.registerItem("resurrection_stone", props -> new ResurrectionStoneItem(props.stacksTo(1)));
 
+    // Worn in the Curios back slot (see data_maps/item/wearables.json), not the chest: no EQUIPPABLE
+    // component, so neither a dispenser nor a shift-click can put a cloak where a chestplate belongs.
     public static final DeferredItem<CloakItem> INVISIBILITY_CLOAK =
             ModItems.ITEMS.registerItem("invisibility_cloak",
-                    props -> new CloakItem(props.stacksTo(1).equippable(EquipmentSlot.CHEST), false));
+                    props -> new CloakItem(props.stacksTo(1), false));
     public static final DeferredItem<CloakItem> DEATHLY_HALLOW_CLOAK =
             ModItems.ITEMS.registerItem("deathly_hallow_cloak",
-                    props -> new CloakItem(props.stacksTo(1).equippable(EquipmentSlot.CHEST), true));
+                    props -> new CloakItem(props.stacksTo(1), true));
 
     // ── Containers ───────────────────────────────────────────────
     // All trunks (Traveller's / Expanded / Master's / Moody's) and Newt's Case are now placed blocks,

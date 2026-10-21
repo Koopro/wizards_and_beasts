@@ -101,6 +101,41 @@ public final class ExtensionCharmService {
      */
     public static void enterPocket(ServerPlayer player, TrunkRecord record,
                                    @Nullable ServerLevel returnLevel, @Nullable BlockPos returnPos) {
+        enterPocket(player, record, returnLevel, returnPos, false);
+    }
+
+    /**
+     * Steps {@code player} through a doorway its owner opened for allies ({@link ShareEntranceService}).
+     *
+     * <p>The owner's invitation is the access grant, so {@link TrunkRecord#canAccess} is skipped — every
+     * pocket is stamped {@link TrunkAccessMode#SEALED} at creation, which made the shared entrance admit
+     * nobody. What an invitation cannot override is the Ministry impound and a Muggle-Worthy case, and the
+     * record is re-read because the doorway holds a copy taken up to 30 seconds ago.
+     */
+    public static void enterSharedPocket(ServerPlayer player, TrunkRecord invitedTo) {
+        if (!(player.level() instanceof ServerLevel level)) return;
+        TrunkRegistryData data = TrunkRegistryData.get(level);
+        TrunkRecord record = data.getPocket(invitedTo.pocketId()).orElse(null);
+        if (record == null) {
+            return;
+        }
+        if (data.isImpounded(record.pocketId())) {
+            player.displayClientMessage(
+                    net.minecraft.network.chat.Component.literal("This compartment has been impounded by the Ministry of Magic.")
+                            .withStyle(net.minecraft.ChatFormatting.RED), true);
+            return;
+        }
+        if (record.muggleWorthy() && !record.owner().equals(player.getUUID())) {
+            player.displayClientMessage(net.minecraft.network.chat.Component.literal(
+                    "The case appears to contain only travel supplies."), true);
+            return;
+        }
+        enterPocket(player, record, null, null, true);
+    }
+
+    private static void enterPocket(ServerPlayer player, TrunkRecord record,
+                                    @Nullable ServerLevel returnLevel, @Nullable BlockPos returnPos,
+                                    boolean invited) {
         if (!(player.level() instanceof ServerLevel sourceLevel)) return;
 
         TrunkRegistryData data = TrunkRegistryData.get(sourceLevel);
@@ -113,7 +148,7 @@ public final class ExtensionCharmService {
             PocketStatusS2CPayload.send(player, "Extension realm is missing from datapacks.");
             return;
         }
-        if (!record.canAccess(player.getUUID())) {
+        if (!record.mayEnter(player.getUUID(), invited)) {
             PocketStatusS2CPayload.send(player, "This case is bound to a private pocket.");
             return;
         }

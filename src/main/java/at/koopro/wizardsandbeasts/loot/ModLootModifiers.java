@@ -32,6 +32,11 @@ public final class ModLootModifiers {
             GLOBAL_LOOT_MODIFIER_SERIALIZERS.register("devalued_dragot",
                     () -> DevaluedDragotLootModifier.CODEC);
 
+    /** Cursed artefacts in the chests of treasure sites (treasure/TreasureSites). */
+    public static final Supplier<MapCodec<at.koopro.wizardsandbeasts.treasure.TreasureLootModifier>> TREASURE =
+            GLOBAL_LOOT_MODIFIER_SERIALIZERS.register("treasure",
+                    () -> at.koopro.wizardsandbeasts.treasure.TreasureLootModifier.CODEC);
+
     public static final Supplier<MapCodec<FelixFortuneLootModifier>> FELIX_FORTUNE =
             GLOBAL_LOOT_MODIFIER_SERIALIZERS.register("felix_fortune",
                     () -> FelixFortuneLootModifier.CODEC);

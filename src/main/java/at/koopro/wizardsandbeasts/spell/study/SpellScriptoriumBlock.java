@@ -152,6 +152,8 @@ public class SpellScriptoriumBlock extends HorizontalDirectionalBlock {
         SpellSource.write(written, spell);
         consumeInk(serverPlayer);
         giveOrDrop(serverPlayer, written);
+        // Writing out a spell for someone else to learn is a Professor's day of work.
+        at.koopro.wizardsandbeasts.owl.career.CareerWork.record(serverPlayer, at.koopro.wizardsandbeasts.owl.career.CareerWork.Kind.TEACHING);
 
         level.playSound(null, pos, SoundEvents.BOOK_PAGE_TURN, SoundSource.BLOCKS, 0.8f, 1.0f);
         PlayerFeedback.unlocked(serverPlayer,
@@ -207,8 +209,6 @@ public class SpellScriptoriumBlock extends HorizontalDirectionalBlock {
 
     /** The written copy came out of the held stack, so it must land somewhere it cannot be lost. */
     private static void giveOrDrop(Player player, ItemStack written) {
-        if (!player.getInventory().add(written)) {
-            player.drop(written, false);
-        }
+        at.koopro.wizardsandbeasts.util.InventoryHandover.giveOrDrop(player, written);
     }
 }

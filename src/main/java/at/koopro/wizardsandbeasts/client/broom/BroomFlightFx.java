@@ -61,6 +61,10 @@ public final class BroomFlightFx {
     private static final int PARTICLES_BOOST_BONUS = 3;
     /** Spread of the seeded positions, in blocks. Small: a trail, not a cloud. */
     private static final double PARTICLE_JITTER = 0.18;
+    /** What a dyed slipstream fades to: ash, so every dye reads as smoke rather than as a solid ribbon. */
+    private static final int DYED_TRAIL_FADE = 0x8A8580;
+    /** Dust particle scale for a dyed trail — close to the broom trails' own size. */
+    private static final float DYED_TRAIL_SCALE = 0.8f;
     /** Per-frame smoothing on the FOV multiplier, so it eases in and out rather than snapping. */
     private static final float FOV_SMOOTHING = 0.08f;
 
@@ -178,7 +182,11 @@ public final class BroomFlightFx {
         // forty blocks a second a tick is two blocks of sky, and one clump per tick reads as a dotted line.
         Vec3 from = previousTail != null && previousTail.distanceToSqr(tail) < MAX_SEGMENT_SQR
                 ? previousTail : tail;
-        var particle = def.audio().trailParticleOrDefault();
+        // A dyed broom (BroomWorkshop.dye) sheds its colour, fading to ash grey; otherwise the broom's own trail.
+        int dye = broom.getTrailDye();
+        net.minecraft.core.particles.ParticleOptions particle = dye == BroomEntity.NO_DYE
+                ? def.audio().trailParticleOrDefault()
+                : new net.minecraft.core.particles.DustColorTransitionOptions(dye, DYED_TRAIL_FADE, DYED_TRAIL_SCALE);
         var random = player.level().random;
         for (int i = 0; i < count; i++) {
             Vec3 at = from.lerp(tail, (i + random.nextDouble()) / count);

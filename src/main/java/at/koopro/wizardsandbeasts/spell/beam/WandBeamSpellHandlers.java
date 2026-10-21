@@ -363,13 +363,28 @@ final class WandBeamSpellHandlers {
     }
 
     static void recordBeamProficiencyHit(ServerPlayer player, String spellId, WandBeamSession s, int minIntervalTicks) {
+        s.acted = true;
         int interval = Math.max(1, minIntervalTicks);
         if (s.beamTicks - s.lastProficiencyHitTick < interval) {
             return;
         }
+        // Spaced on the world clock as well as the hold's own: a new hold starts a fresh session whose
+        // first hit used to count at once, so letting go and pressing again practised a beam every click.
+        long now = player.level().getGameTime();
+        java.util.Map<String, Long> last = LAST_BEAM_PRACTICE.computeIfAbsent(player.getUUID(),
+                u -> new java.util.HashMap<>());
+        Long previous = last.get(spellId);
+        if (previous != null && now - previous < interval && now >= previous) {
+            return;
+        }
         s.lastProficiencyHitTick = s.beamTicks;
+        last.put(spellId, now);
         SpellProficiencyTracker.recordSuccessfulHit(player, spellId);
     }
+
+    /** World time each beam spell last counted as practice, per player, across holds. */
+    private static final at.koopro.wizardsandbeasts.util.PlayerScopedState<java.util.Map<String, Long>> LAST_BEAM_PRACTICE =
+            at.koopro.wizardsandbeasts.util.PlayerScopedState.create("wand-beam-last-practice");
 
     @Nullable
     static LivingEntity findLivingInLevel(ServerPlayer player, UUID id) {

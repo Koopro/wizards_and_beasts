@@ -8,7 +8,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
-import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EquipmentSlot;
+import org.jspecify.annotations.Nullable;
 
 import java.util.function.Consumer;
 
@@ -20,9 +22,12 @@ public class LeprechaunGoldItem extends Item {
         super(properties);
     }
 
-    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
-        if (level.isClientSide()) return;
-
+    /**
+     * Leprechaun gold vanishes a few hours after it is handed over (canon). The override had the pre-1.21.5
+     * signature, so it never ran and the gold was permanent; it is not money either way (the counter refuses it).
+     */
+    @Override
+    public void inventoryTick(ItemStack stack, ServerLevel level, Entity entity, @Nullable EquipmentSlot slot) {
         Long createdAt = stack.get(ModDataComponents.CREATION_TICK.get());
         if (createdAt == null) {
             stack.set(ModDataComponents.CREATION_TICK.get(), level.getGameTime());
@@ -34,6 +39,7 @@ public class LeprechaunGoldItem extends Item {
         }
     }
 
+    @Override
     public boolean isFoil(ItemStack stack) {
         return true;
     }

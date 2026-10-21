@@ -1,0 +1,9 @@
+{
+  "_comment": "House-elf magic (ElfMagic.snap): one snap at a living thing within 8 blocks throws it back and makes it drop what it holds (Dobby and Lucius Malfoy, CoS ch.18). Wandless. A bound elf cannot snap its master; against players PvP must be on. A miss spends no cooldown.",
+  "type": "active",
+  "icon": "wizards_and_beasts:textures/ability/placeholder.png",
+  "nameKey": "ability.wizards_and_beasts.elf_snap",
+  "descriptionKey": "ability.wizards_and_beasts.elf_snap.desc",
+  "cooldownTicks": 200,
+  "sortOrder": 26
+}

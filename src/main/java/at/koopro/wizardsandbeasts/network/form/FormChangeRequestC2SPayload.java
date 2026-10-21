@@ -65,7 +65,7 @@ public record FormChangeRequestC2SPayload(UUID targetUUID, String formId) implem
             MinecraftServer server = serverLevel.getServer();
 
             // Require operator permission
-            if (!sender.createCommandSourceStack().permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
+            if (!at.koopro.wizardsandbeasts.command.AdminAccess.allows(sender.createCommandSourceStack())) {
                 PlayerFeedback.refuse(sender, refused, Component.translatable(L + "no_permission"));
                 return;
             }

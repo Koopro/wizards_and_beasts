@@ -298,7 +298,20 @@ penalise the player who has not ground out the four systems it derives from.
 
 **Still open.** The coin sink this removed has not been replaced — see §5f.
 
+## 4g. Creature ecology — added 2026-10-06
+
+`CREATURE_ECOLOGY.md` §9 lists what the layer does not do yet: the Dementor declares an ecology but runs no goal;
+`burrowing`/`climbing` are descriptive; five stimuli are not raised; ecology state is not saved (home and hunger reset
+on reload). 78 of 103 creatures still have no natural habitat and 89 no own sounds (`CREATURE_QUALITY_MATRIX.md`).
+Field-note lines on the bestiary page have not had an in-client pass.
+
 ## 4b. Bestiary
+
+**Redesigned 2026-10-07 as the Magical Naturalist's Field Journal** (`BESTIARY_FIELD_JOURNAL.md`). The tier rule below
+is unchanged; what changed is how a page shows it. Superseded limitations: per-entry illustration now exists (staged
+plates; five showcase creatures painted, the rest fall back to the live model and icons); undiscovered entries no
+longer show a silhouette and cannot be found by searching their name; Niffler and Hippogriff now have signatures.
+Still open: only five creatures have plates; pages scroll by mouse wheel only; no in-client pass of the new screen.
 
 **A page fills the way a naturalist's notebook does — never by killing.** Reworked 2026-09-17. The rule is
 [`bestiary/EncounterRule.java`](../src/main/java/at/koopro/wizardsandbeasts/bestiary/EncounterRule.java)
@@ -556,14 +569,18 @@ Heritage answers "who is this character", not "which race did you pick". The rew
   real lineage was never recorded) plus the condition (`PlayerHeritageDataMigrator`, data version 2).
 - **A character may begin with a condition.** The selection screen offers "No condition" plus every origin the
   chosen lineage could carry. The randomiser never rolls one, and an Obscurus is refused to a Squib.
-- **Known gaps.** The seven gated peoples remain unselectable, and only three carry live mechanics: goblins pay
-  no Gringotts commission and are always spotted passing bad money; a house-elf's Apparition is elf-magic and
-  ignores wards by trait rather than by a bought skill; a star-reading centaur can read the sky
-  (`/wandb player heritage stars`) for the moon's calendar and the weather. Veela allure, merpeople water
-  dwelling, giant hide resistance and goblin craft are **described and not yet mechanical**.
+- **Known gaps (updated 2026-10-14).** The seven gated peoples remain unselectable. All carry live mechanics
+  (`HERITAGE_IDENTITY_STATUS.md`): the house-elf is the complete reference (service bond, summons, freedom by a
+  garment, wandless elf magic, practice towards professions); goblins pay a smaller Gringotts commission; Veela
+  allure, merpeople water breathing and giant hide resistance are wired; centaurs read the stars from the wheel.
+  Still description-only: `goblin_craft`, `forest_law`, `mermish`. The VEELA, GIANT, CENTAUR and MERPEOPLE skill
+  webs have no nodes.
 - **A condition is not broadcast.** Other clients see the form a condition puts a player in, never the
   condition itself — Lupin kept his from a castle full of people for a year. Heritage appearance entries may be
   keyed by condition, and those resolve server-side only.
+- **Heritage professions pay identity stats since 2026-10-06** — one `GameplayStat` per trade, read where the
+  web's own bonus is read (`ProfessionNode`). The shared formula (combat cooldown, and +max health for
+  Wizardkind) is gone; old modifiers are stripped at the next login.
 - **Professions dropped the six condition nodes** (werewolf Tracker/Pack Master/Alpha, obscurial
   Channeler/Conduit/Harbinger): a curse is not a career. Anyone who had one keeps the points, not the node.
 
@@ -798,12 +815,29 @@ coins previously had no tooltip at all, so a new player had no way to learn that
 decimal. Balance is on the character sheet's Carried Coin panel and in the Gringotts screen at any
 goblin teller.
 
-- **The coin sink is thin again, and this is the open problem.** The spell teacher used to be it
-  (58 Knuts per lesson). The vendor was removed on 2026-09-10 — see §4.5a — because selling spells
-  made the early game a shop rather than a school, and `spellTeacherRequirePayment` /
-  `spellTeacherLearnCostKnuts` are gone from the config with it. That leaves buying a wand from
-  Ollivander and the 493-Knut skill respec as the only sinks in a default install. **A second sink
-  that is not a spell wall is wanted**; it must buy an object or a service, not knowledge.
+- **Sinks — addressed 2026-10-07 (`ECONOMY.md`).** The spell teacher used to be the sink (58 Knuts per lesson)
+  until it was removed on 2026-09-10 (§4.5a). Two services now replace it, neither of them knowledge:
+  **Ollivander's wand care** (a worn or damaged wand restored for up to 2 Galleons by wear; a snapped one is beyond
+  him) and the **Ministry's endorsement fee** (2 / 4 / 6 Galleons for licence ranks 1–3, taken only once every other
+  requirement is met). Both are free with Gringotts closed. Everything else that bills a vault — replacement wand,
+  respec, Floo registration, fines, Dragots — now goes through one all-or-nothing door (`GringottsBilling`), and
+  `/wandb admin economy ledger` shows sources against sinks per world.
+- **Fixed on the way (2026-10-07):** a refused payment used to "withdraw what it could, then deposit the partial
+  back as Knuts" — the vault kept its value but a short customer's Galleons and Sickles became Knuts. Negative
+  withdrawals could mint coins; deposits had no ceiling; charges and wages did not resync the client's balance.
+- **Earned income exists since 2026-10-06.** An O.W.L. career pays a daily wage into the vault the first time
+  in an in-game day its holder does the career's work (`owl/career/CareerWork`, `PROGRESSION_MAP.md` §9).
+- **Built 2026-10-08** (`ECONOMY.md`): traders that buy materials, ingredients, brews and crafted wands at prices
+  moved by supply and demand; restricted-ingredient sales and purchases under licence; Ministry contracts and the
+  Portkey Office; creature treatment; broom servicing; finder's fees; certification fees; a fence (Ministry module)
+  for restricted, contraband and stolen goods with detection through the Ministry's own offences.
+- **Partial-insert item loss — fixed 2026-10-13.** The 15 hand-overs still written `if (!add) drop` now go through
+  `util/InventoryHandover.giveOrDrop` (or add, then drop what is left); `PartialInsertPatternTest` refuses the pattern.
+  `WandAdminService` keeps its refusal: it hands over one wand, which fits whole or not at all.
+- **Built 2026-10-13:** wand commissions at Ollivanders; a broom shop (broommaker at a broom rack) with broom
+  servicing; Dragots taken at the till by `dragot/accepts` keepers (`ECONOMY.md` §4a–4b).
+- **Still open:** appraisal of found wands beyond Ollivanders' evaluation; vanilla villager trades take no Dragots
+  (only location boards do); fines reach only the vault, so pocket coins cannot be fined.
 - **No exchange path with emeralds.** Wizarding coins and villager trade are separate economies with
   no conversion between them, deliberately for now; there is no Gringotts exchange desk yet.
 - Coins are not accepted by any vanilla mechanic, so a player who only ever trades with villagers can
@@ -964,11 +998,15 @@ evidence (`ministry.trace`):
 
 Still left:
 
-- **No Auror entity and no Azkaban sentence.** An arrest convenes the hearing at once; a referral files the
-  arrestable offence and holds the wand for a week. The record's `sentenceTicks` and `fugitive` are still
+- **No Auror entity and no Azkaban sentence.** Player Aurors and posted cases exist since 2026-10-15, but an arrest
+  still convenes the hearing at once; a referral files the arrestable offence, holds the wand for a week and
+  suspends four licences. The record's `sentenceTicks` and `fugitive` are still
   written by no gameplay (only the Ministry dev kit resets them).
-- **Players are never informants.** Another player who watched is recorded on the incident for the file, but
-  nothing reports them to the Ministry on their behalf, and there is no command to testify.
+- ~~**Players are never informants.**~~ Since 2026-10-15 a player the server recorded as an eyewitness may testify
+  (`/wandb ministry testify`); their word is capped and never names anyone on its own
+  ([MINISTRY_LAW.md](MINISTRY_LAW.md)).
+- **Casework is chat.** The Auror board, the dossier and the plea are commands with clickable buttons; there is no
+  screen yet. An Auror is credited for a closed case only if online when it closes.
 - **Dangerous creatures count only at a cast.** A creature rated XXXX or above in a Muggle's view makes the
   cast an extreme breach; a creature seen without any magic being cast is not an incident.
 - **Harm to a Muggle is not an incident of its own.** A hex that hits a villager is judged by what the
@@ -1026,7 +1064,18 @@ Still left:
 Three defects found by that audit are **not fixed**. They are recorded here rather than in a
 worklog because each is reproducible and each has a player-visible consequence.
 
-### 8a.1 The common config file rewrites itself once a second, forever
+### 8a.1 The common config file rewrites itself once a second, forever — not reproducible since 2026-09-10
+
+**Re-verified 2026-10-06.** The loop is a single-process FileWatcher self-loop (one correction about every 1.1 s in
+one DEDICATED_SERVER process); the run logs show it in every run on 2026-09-10 from 04:00 to 05:12 and in **none of
+206 boots since** — only six one-shot corrections at mod load, each on a day new keys were added. The diagnosis below
+is **wrong**: in NeoForge 21.11.42 `ListValueSpec`'s size range (`NON_EMPTY`) is read only by the client
+`ConfigurationScreen`, never by correction, so `defineList` with an empty default is stable (proven by reverting it:
+no test fails). The 09-10 key cannot be recovered — the surviving INFO logs do not name it. No code in the tree writes
+the config outside an admin action (`ConfigSpecBinding`) or the client config screen. Guards now:
+`ConfigSpecStabilityTest` (the whole spec is a fixed point of its own correction, in memory and through a TOML
+round-trip) and the game test `config_is_not_rewritten_while_the_server_runs` (100 server ticks, file untouched).
+The text below is the original finding.
 
 **Reproduce:** `./gradlew runGameTestServer`, then
 `grep -c "is not correct. Correcting" <log>` — 9 to 11 occurrences in a ~20-second run, all from
@@ -1057,7 +1106,18 @@ not only log noise: it intermittently takes the server down at startup.
 even though it is present in the file the correction just wrote. Something writes a 22-key-shorter
 variant of the file; that writer has not been identified. **Root cause unknown.**
 
-### 8a.4 A game-test player cannot be killed
+### 8a.4 A game-test player cannot be killed — resolved
+
+**Re-verified 2026-10-06.** The cause was the mock player, not a handler: `placeNewPlayer` hands out the
+game-test server's creative abilities (`invulnerable=true`) whatever `gameMode()` says, and
+`WizardTestSupport.placeMockPlayer` now calls `setGameMode(mode)`. `kill()` works (`dead_caster_cannot_release`
+covers the death-driven session abort). Tracing every `LivingIncomingDamageEvent`/`LivingDeathEvent` handler that
+cancels found two that did absorb unblockable damage — **Felix Felicis** turned aside `/kill` and the void, and the
+**Elixir of Life** spared a `/kill` or a fall out of the world (spending the day's draught for half a heart). Both now
+ignore `BYPASSES_INVULNERABILITY`, like the Shield Charm (`elixir_does_not_save_from_kill`,
+`felix_does_not_save_from_kill`). Felix's near-death save was also **dead**: a fresh dose stores `Long.MIN_VALUE` as
+"never saved" and `now - MIN_VALUE` overflowed, so the limiter always read "just saved" (`FelixFortune.saveReady`,
+`FelixFortuneTest`). The text below is the original finding.
 
 Both `Entity.kill(ServerLevel)` and `hurt(damageSources().genericKill(), Float.MAX_VALUE)` leave a
 `ServerPlayer` created inside a game test at **full health**, with `isRemoved() == false`. Clearing
@@ -1072,7 +1132,13 @@ instead, which does exercise `CastReleaseGate.CASTER_NOT_ALIVE` through the real
 death-driven `WandCastSessions.abort` in `WizardsAndBeastsCommands.onLivingDeath` is therefore **not
 covered by any automated test**, and neither is anything else that depends on a player dying.
 
-### 8a.2 Five of the twelve O.W.L. subjects can only ever grade Troll
+### 8a.2 Five of the twelve O.W.L. subjects can only ever grade Troll — resolved 2026-10-06
+
+**Resolved** (`PROGRESSION_MAP.md` §9). Grades now come from live evidence through `owl/OWLGradeRules`: History
+of Magic reads lore tomes (which now drop in library, temple and cartographer chests), and Arithmancy,
+Divination, Astronomy and Muggle Studies are **not examined** — never graded, never required by a career —
+until play exists that could feed them. The text below is the original finding.
+
 
 `OWLGradeCalculator` reads seven counters that **nothing in the mod ever increments**:
 `combatSpellCasts` (on `PlayerSpellData`), and `metamorphFormsUsed`, `arithmancyInteractions`,
@@ -1092,7 +1158,17 @@ inventing those systems, not connecting existing ones. History of Magic is the c
 reachable: the Handbook exists, but it is a client-only screen with no server-side "chapter read"
 signal, so `recordLoreEntry` has nothing to call it.
 
-### 8a.3 Four selectable Animagus forms have no datapack definition
+### 8a.3 Four selectable Animagus forms have no datapack definition — resolved 2026-10-06
+
+**Resolved.** `stag`, `hawk`, `hare` and `beetle` definitions ship, with hitboxes equal to their size profiles and
+attribute deltas the size system does not own. A definition now declares only art that exists: `model`, `texture`
+and `animations` are optional, and `animation_map` roles are required only with an animation file. The stag names its
+real rig; the hawk and the beetle their own skins; cat, dog and hare render on vanilla models and declare none. The
+fake `geckolib/*/entity/form/*` paths are gone. Player-visible consequence: the innate-form draw (only defined
+forms) made every new Animagus a cat or a dog; all six are now drawn. Stored forms are unchanged. Hawk and hare are
+`canon_tier: mod` (a new value), not a false citation. `AnimagusFormDataParityTest` joins selectable ids, data and
+assets. Falcon and rat remain loaded and unreachable (the boot warning says so) — not player-visible. The text below
+is the original finding.
 
 The server says so itself on every boot:
 
@@ -1167,33 +1243,45 @@ in appearance.
 The audit hardened the wand release and hold lifecycle (see `CHANGELOG.md`). These it found and left
 alone, because each is a design decision or lies outside the release pipeline.
 
-### 8c.1 `/wandb magic spell learn` and `forget` need no permission
+### 8c.1 `/wandb magic spell learn` and `forget` need no permission — resolved 2026-10-06
+Both are admin-gated (`SpellLearningTests`: a non-admin is refused, an admin is taught).
 Neither node, nor the `/wandb` root, has a `requires`. Any player can teach themselves any spell,
 Unforgivables included, which clears the release's "spell not known" gate. `learn_all`, `reset` and
 `cast` are admin-gated. `SpellLearningTests` calls `learn` "operator level", so the gap looks
 unintended — a one-line `.requires(WizardsAndBeastsCommandPermissions.ADMIN)` each.
 
-### 8c.2 An interrupted channel costs nothing
+### 8c.2 An interrupted channel costs nothing — resolved 2026-10-06
+**Resolved.** A channel that *acted* (its beam counted as practice: a kill, a held victim, a lift, water placed)
+owes its spell's cooldown however it ends. Interrupted (slot swap, dropped wand, death, dimension change, logout,
+spell switch): charged at `endChannel`. Released: settled when the release resolves — a cast stamps the cooldown
+itself, a refusal or misfire charges it, and a release that never arrives is charged at the next hold or at logout.
+The charge is the spell's base cooldown and never shortens one already running (`leviosa_dropped_wand_ends_the_channel`).
+A channel that never acted still costs nothing.
 A beam spell's cooldown is stamped only by an accepted release. A channel ended any other way — slot
 swap, dropped wand, stun, spell switch, death — or a release refused by a random roll (mental misfire,
 Obscurial fizzle) applied its effects for free. The worst case is Avada Kedavra: the kill happens in the
 channel, and if the server-driven release then rolls a misfire the 1200-tick cooldown is never set.
 Stamping the cooldown when a channel that has *acted* ends is the obvious fix; it is a balance call.
 
-### 8c.3 Imperio on mobs does nothing after the first tick
+### 8c.3 Imperio on mobs does nothing after the first tick — resolved 2026-10-06
+**Resolved.** `ImperioServerLogic` is registered: a puppet carries out its command and its control counts down.
+Control ends with either party's death (a victim no longer wakes up bound), either party's change of dimension, and
+the caster's logout; a mob loaded under control no live caster holds is freed on join
+(`imperio_mob_obeys_after_the_first_tick`, `imperio_mob_control_runs_out`, `imperio_stale_saved_control_is_cleared`,
+`after_death_imperio_command_refused`).
 `ImperioServerLogic.onServerTick` carries `@SubscribeEvent` but its class is never registered, so
 commands to a controlled mob are never carried out and a mob's control state never counts down (it is
 saved with the mob). A controlled *player* keeps the control state through death — the attachment is
 `copyOnDeath`. Nothing clears a caster's bookkeeping on the caster's death or dimension change.
 
 ### 8c.4 Smaller ones
-- **Expecto Patronum's fizzle still costs a cast.** Its own comments say a weak memory or a heritage
+- ~~**Expecto Patronum's fizzle still costs a cast.**~~ **Resolved 2026-10-06:** a charm that never forms (no happy enough memory) is refused before execution through `Spell.castRefusal` — no cooldown, cast, global cooldown or wand corruption, like a misfire; a faint Patronus that does form is a cast and is charged (`patronus_without_a_memory_costs_nothing`). The heritage refusal no longer exists. Original: Its own comments say a weak memory or a heritage
   refusal should cost nothing, but `executeCast` returns normally, so `SpellCastService` stamps the
   cooldown and cast count anyway.
-- **No lifecycle hook ends an Apparition charge.** Logout, the abort packet and — for tiers that abort on
+- ~~**No lifecycle hook ends an Apparition charge.**~~ **Stale:** `ApparitionChargeLifecycle` (2026-09-29) aborts on death, respawn and dimension change; logout clears the scoped state. Found instead: an accepted side-along partner was matched by bounding box only, so one in another dimension at the same coordinates, or on the death screen, was taken along — now same level and alive (`side_along_partner_must_be_alive_and_here`). Original: Logout, the abort packet and — for tiers that abort on
   damage — being hurt clear it; death by a source that skips that, a respawn under the same id, or a
   dimension change do not. Not reproduced in-world.
-- **Beam proficiency is farmable by re-pressing.** The first hit of every new beam session records
+- ~~**Beam proficiency is farmable by re-pressing.**~~ **Resolved 2026-10-06:** practice spacing is kept on the world clock per player and spell across holds (`leviosa_repress_does_not_farm_practice`). Original: The first hit of every new beam session records
   immediately; the 20-tick spacing only applies within one hold.
 - **An Imperius-bound release leaves its token pending.** With a victim bound, letting go opens the
   command menu and the client sends no release, so the hold's single release stays available until the

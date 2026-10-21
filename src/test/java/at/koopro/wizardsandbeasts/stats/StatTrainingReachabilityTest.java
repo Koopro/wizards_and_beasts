@@ -76,6 +76,10 @@ class StatTrainingReachabilityTest {
 
         assertEquals(62, eventsToReach(StatTraining.WILLPOWER_PER_MIND_DEFENDED, 25));
         assertEquals(164, eventsToReach(StatTraining.WILLPOWER_PER_MIND_DEFENDED, 50));
+
+        // The solo path: Boggarts are rare, so each is worth the most.
+        assertEquals(39, eventsToReach(StatTraining.WILLPOWER_PER_BOGGART_BANISHED, 25));
+        assertTrue(StatTraining.WILLPOWER_PER_MIND_DEFENDED < StatTraining.WILLPOWER_PER_BOGGART_BANISHED);
     }
 
     @Test

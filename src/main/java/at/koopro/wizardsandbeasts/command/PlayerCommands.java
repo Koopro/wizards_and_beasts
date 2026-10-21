@@ -40,6 +40,7 @@ public final class PlayerCommands {
                 .then(StandingCommands.register())
                 .then(AbilityFrameworkCommands.register())
                 .then(PlayerVaultCommands.register())
-                .then(PlayerConditionCommands.register());
+                .then(PlayerConditionCommands.register())
+                .then(at.koopro.wizardsandbeasts.creature.companion.CompanionCommands.register());
     }
 }

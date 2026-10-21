@@ -33,8 +33,10 @@ class StandingModelTest {
      * will drift the first time the original is written through a path that predates this system.
      */
     @Test
-    void exactlyOneAxisIsStoredAndTheRestAreDerived() {
+    void onlyTheAxesNothingElseKeepsAreStored() {
         assertTrue(StandingAxis.TRADITION.isStored());
+        assertTrue(StandingAxis.PUBLIC.isStored(), "nothing else in the mod keeps what the public thinks");
+        assertTrue(StandingAxis.PROFESSION.isStored(), "nothing else keeps what a profession thinks");
         assertFalse(StandingAxis.ALIGNMENT.isStored(),
                 "alignment is light minus the pre-existing corruption meter");
         assertFalse(StandingAxis.MINISTRY.isStored(),
@@ -42,7 +44,27 @@ class StandingModelTest {
 
         long stored = java.util.Arrays.stream(StandingAxis.values())
                 .filter(StandingAxis::isStored).count();
-        assertEquals(1L, stored);
+        assertEquals(3L, stored);
+    }
+
+    @Test
+    void conductMovesMinistryStandingButNeverOutweighsAManhunt() {
+        float bound = 100.0f;
+        float clean = StandingBands.ministryOf(0.0f, 0.0f, 0, bound);
+        float cooperative = StandingBands.ministryOf(0.0f, 0.0f, 100, bound);
+        float evasive = StandingBands.ministryOf(0.0f, 0.0f, -100, bound);
+        assertTrue(cooperative > clean && evasive < clean);
+        assertEquals(StandingBands.CONDUCT_WEIGHT * bound, cooperative, 1.0e-4f);
+        assertTrue(StandingBands.ministryOf(0.0f, 90.0f, 100, bound) < 0.0f,
+                "a wanted wizard is not trusted however politely they have answered past summonses");
+    }
+
+    @Test
+    void professionalReputationBelongsToTheProfessionItWasEarnedIn() {
+        MagicalStanding standing = MagicalStanding.DEFAULT.withProfession(30.0f, "auror");
+        assertEquals(30.0f, standing.professionFor("auror"));
+        assertEquals(0.0f, standing.professionFor("healer"), "a new career starts from nothing");
+        assertEquals(0.0f, standing.professionFor(""));
     }
 
     @Test

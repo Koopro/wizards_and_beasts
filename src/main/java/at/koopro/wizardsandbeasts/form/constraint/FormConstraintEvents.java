@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.form.constraint;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
@@ -97,9 +98,16 @@ public final class FormConstraintEvents {
         if (!FormConstraints.denies(player, FormConstraint.NO_ITEM_DROP)) {
             return;
         }
-        if (player.getInventory().add(event.getEntity().getItem().copy())) {
+        // Inventory.add returns true on a partial insert and leaves the rest in the copy; cancelling then
+        // would destroy that rest. Cancel only when everything fit, otherwise let the toss through.
+        ItemStack toss = event.getEntity().getItem().copy();
+        player.getInventory().add(toss);
+        if (toss.isEmpty()) {
             event.setCanceled(true);
             player.containerMenu.broadcastChanges();
+        } else if (toss.getCount() < event.getEntity().getItem().getCount()) {
+            // Part went back into the inventory: the toss carries only what did not.
+            event.getEntity().setItem(toss);
         }
     }
 

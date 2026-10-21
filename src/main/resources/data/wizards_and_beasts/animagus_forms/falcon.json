@@ -1,17 +1,5 @@
 {
   "canon_tier": "pottermore",
-  "model": "wizards_and_beasts:geckolib/models/entity/form/falcon.geo.json",
-  "texture": "wizards_and_beasts:textures/entity/form/falcon.png",
-  "animations": "wizards_and_beasts:geckolib/animations/entity/form/falcon.animation.json",
-  "animation_map": {
-    "idle": "animation.falcon.idle",
-    "walk": "animation.falcon.walk",
-    "run": "animation.falcon.run",
-    "jump": "animation.falcon.jump",
-    "hurt": "animation.falcon.hurt",
-    "glide": "animation.falcon.glide",
-    "flap": "animation.falcon.flap"
-  },
   "hitbox": {
     "width": 0.5,
     "height": 0.5,
@@ -22,7 +10,10 @@
     "minecraft:scale": 0.4,
     "minecraft:safe_fall_distance": 20.0
   },
-  "capabilities": ["FLIGHT", "KEEN_SIGHT"],
+  "capabilities": [
+    "FLIGHT",
+    "KEEN_SIGHT"
+  ],
   "flight": {
     "takeoff_impulse": 0.55,
     "flap_impulse": 0.42,

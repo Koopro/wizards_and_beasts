@@ -66,6 +66,53 @@ public final class LeviosaThrowTests {
                 LeviosaThrowTests::silencedCasterCannotChannel);
         tests.add("leviosa_interrupt_is_not_undone", "leviosa: an interrupted channel stays down while silenced",
                 LeviosaThrowTests::interruptIsNotUndoneNextTick);
+        tests.add("leviosa_repress_does_not_farm_practice", "leviosa: letting go and pressing again is not extra practice",
+                LeviosaThrowTests::repressDoesNotFarmPractice);
+    }
+
+    // ── E: practice is spaced across holds ──────────────────────────────────────────────────────
+
+    /**
+     * A beam counts as practice at most once per its interval. Each hold used to start a fresh session whose
+     * first hit counted at once, so letting go and pressing again practised the spell every click
+     * (KNOWN_ISSUES 8c.4). Two lifts a few ticks apart are one practice.
+     */
+    private static void repressDoesNotFarmPractice(GameTestHelper helper) {
+        clearTheLane(helper);
+        ServerPlayer caster = readyCaster(helper, "wandb-leviosa-represser");
+        ArmorStand target = helper.spawn(EntityType.ARMOR_STAND, TARGET);
+        String spell = at.koopro.wizardsandbeasts.spell.core.Spells.byId(SPELL_ID).getId();
+        int[] firstHits = {0};
+
+        helper.startSequence()
+                .thenWaitUntil(() -> checkLaneTicks(helper))
+                .thenExecute(() -> beginCast(helper, caster))
+                .thenExecuteFor(HOLD_TICKS, caster::doTick)
+                .thenExecute(() -> {
+                    checkLifted(helper, caster, target);
+                    firstHits[0] = spellData(caster).getSuccessfulHits(spell);
+                    check(helper, firstHits[0] >= 1, () -> "the first lift was not practice: " + describe(caster, target));
+                    WandCastLifecycleTests.releaseWand(caster);
+                    // The cooldown is not under test; the spacing is.
+                    spellData(caster).setCooldown(spell, 0L);
+                    spellData(caster).setGlobalCooldownEndTick(0L);
+                    target.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+                })
+                .thenExecute(() -> beginCast(helper, caster))
+                .thenExecuteFor(HOLD_TICKS, caster::doTick)
+                .thenExecute(() -> {
+                    // The second hold lifted too, so an unchanged count is the spacing, not a miss.
+                    checkLifted(helper, caster, target);
+                    int hits = spellData(caster).getSuccessfulHits(spell);
+                    check(helper, hits == firstHits[0],
+                            () -> "a second hold a few ticks later counted as practice again: " + firstHits[0] + " -> " + hits);
+                    caster.releaseUsingItem();
+                })
+                .thenExecute(() -> {
+                    target.discard();
+                    retire(helper, caster);
+                })
+                .thenSucceed();
     }
 
     // ── A: letting go is a drop ─────────────────────────────────────────────────────────────────
@@ -177,6 +224,14 @@ public final class LeviosaThrowTests {
                             () -> "the channel outlived the dropped wand: " + describe(caster, target));
                     check(helper, !target.isNoGravity(),
                             () -> "the target kept floating after the wand was dropped: " + describe(caster, target));
+                    // The channel lifted something before the wand fell: it acted, so it owes its cooldown even
+                    // though no release ever cast (KNOWN_ISSUES 8c.2).
+                    var data = caster.getData(at.koopro.wizardsandbeasts.registry.ModAttachments.SPELL_DATA.get());
+                    String spell = data.getActiveSpellId();
+                    long now = helper.getLevel().getGameTime();
+                    check(helper, spell != null && data.isOnCooldown(
+                                    at.koopro.wizardsandbeasts.spell.core.Spells.byId(spell).getId(), now),
+                            () -> "an interrupted channel that lifted its target cost no cooldown: " + describe(caster, target));
                 })
                 .thenExecute(() -> {
                     target.discard();

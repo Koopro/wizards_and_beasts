@@ -417,6 +417,10 @@ public class FlooNetworkScreen extends Screen {
             String label = dto.networkAddress();
             if (!dto.isEnabled()) {
                 label += " " + Component.translatable("floo.wizards_and_beasts.gui.sealed_suffix").getString();
+            } else if (dto.tollKnuts() > 0) {
+                label += " " + Component.translatable("floo.wizards_and_beasts.gui.toll_suffix",
+                        at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper.formatFromKnuts(dto.tollKnuts()))
+                        .getString();
             }
             // Ellipsised, not clipped: an address can now be 48 characters and the row cannot. A hard
             // scissor cut would leave a name that looks like a different, shorter name.

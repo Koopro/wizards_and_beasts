@@ -1,0 +1,23 @@
+{
+  "replace": false,
+  "values": [
+    "wizards_and_beasts:ash_log",
+    "wizards_and_beasts:ash_sapling",
+    "wizards_and_beasts:blackthorn_log",
+    "wizards_and_beasts:blackthorn_sapling",
+    "wizards_and_beasts:elder_log",
+    "wizards_and_beasts:elder_sapling",
+    "wizards_and_beasts:hawthorn_log",
+    "wizards_and_beasts:hawthorn_sapling",
+    "wizards_and_beasts:holly_log",
+    "wizards_and_beasts:holly_sapling",
+    "wizards_and_beasts:rowan_log",
+    "wizards_and_beasts:rowan_sapling",
+    "wizards_and_beasts:walnut_log",
+    "wizards_and_beasts:walnut_sapling",
+    "wizards_and_beasts:willow_log",
+    "wizards_and_beasts:willow_sapling",
+    "wizards_and_beasts:yew_log",
+    "wizards_and_beasts:yew_sapling"
+  ]
+}

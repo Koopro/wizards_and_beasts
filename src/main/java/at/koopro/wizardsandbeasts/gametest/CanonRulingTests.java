@@ -222,11 +222,12 @@ public final class CanonRulingTests {
             check(helper, ElixirOfLife.canDrink(flamel), () -> "setup: could not drink");
             ElixirOfLife.drink(flamel);
             check(helper, !ElixirOfLife.canDrink(flamel), () -> "a second draught the same day");
-            flamel.kill(helper.getLevel());
+            // An ordinary fatal blow: the Elixir holds off death, not /kill or the void (elixir_does_not_save_from_kill).
+            flamel.hurtServer(helper.getLevel(), helper.getLevel().damageSources().magic(), 1000f);
             check(helper, flamel.isAlive() && flamel.getHealth() > 0, () -> "the Elixir did not hold death off");
             check(helper, !ElixirOfLife.sustains(flamel), () -> "the Elixir held on after being spent");
             flamel.invulnerableTime = 0; // vanilla ignores a second lethal blow inside the hurt cooldown
-            flamel.kill(helper.getLevel());
+            flamel.hurtServer(helper.getLevel(), helper.getLevel().damageSources().magic(), 1000f);
             check(helper, !flamel.isAlive(), () -> "the Elixir saved the drinker twice in one day");
             helper.succeed();
         } finally {

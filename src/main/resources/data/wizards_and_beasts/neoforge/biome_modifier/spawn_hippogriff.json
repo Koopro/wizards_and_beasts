@@ -1,0 +1,14 @@
+{
+  "type": "neoforge:add_spawns",
+  "biomes": [
+    "minecraft:meadow",
+    "minecraft:windswept_hills",
+    "minecraft:windswept_forest"
+  ],
+  "spawners": {
+    "type": "wizards_and_beasts:hippogriff",
+    "weight": 2,
+    "minCount": 1,
+    "maxCount": 3
+  }
+}

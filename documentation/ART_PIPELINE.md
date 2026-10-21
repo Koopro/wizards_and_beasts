@@ -172,7 +172,7 @@ that are not creatures, are:
 | `item_geo.py` | GeckoLib held items: `geckolib/{models,animations}/item`, `textures/item/model` (30) + Elder Wand sheet, `models/item/<id>_held.json`. **Protected owner.** |
 | `spawn_eggs.py` | 107 spawn eggs (skips the four hand-set ones, §7) |
 | `wizard_cards.py` | 24 card sheets `textures/item/card`, the blank card, card models, the card item definition |
-| `wand_model.py` | modular wand: `wand.geo.json` (handle/shaft/tip/core/ornament variants on the fixed 0-11-23-27.5 contract), `wand.png`, `wand.animation.json`; `--preview DIR` renders combination sheets, `--check` validates the geo. See `documentation/WAND_MODEL.md` |
+| `wand_model.py` | modular wand: `wand.geo.json` (handle/shaft/tip/core/ornament variants on the fixed 0-11-23-27.5 contract), `wand.png`, `wand.animation.json`, the grain sheets `wand/grain_*.png`, `wand_trim.png`, `wand_glint.png`, `wand_glint_bonded.png`; `--preview DIR` renders combination sheets, `--looks DIR` look sheets (woods, lengths, flexibility, cores, bond, rare), `--check` validates the geo. See `documentation/WAND_MODEL.md` |
 | `block_textures.py` | 41 block textures (unlit lights derived from vanilla, props) |
 | `location_textures.py` | 53 location-set blocks (Hogwarts, Gringotts, Ministry, …) and the one architectural gilt |
 | `wandwood_textures.py` | 63 wandwood block textures; heartwood = wand tint |

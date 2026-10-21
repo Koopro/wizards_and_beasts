@@ -106,4 +106,18 @@ public final class StandingBands {
     public static float ministryOf(float rankCredit, float notoriety, float bound) {
         return clamp(clampUnipolar(rankCredit, bound) - clampUnipolar(notoriety, bound), bound);
     }
+
+    /** How much one point of conduct is worth on the Ministry axis, as a fraction of the bound per hundred. */
+    public static final float CONDUCT_WEIGHT = 0.4f;
+
+    /**
+     * The Ministry axis with conduct: {@link #ministryOf(float, float, float)} plus how the wizard has dealt with
+     * the Ministry — answering summons, pleading honestly and winning appeals count for them; being caught
+     * after ignoring a summons counts against. Conduct runs ±100 and moves the axis by at most
+     * {@link #CONDUCT_WEIGHT} of its bound, so it can lift a clean record into trust but never outweigh a manhunt.
+     */
+    public static float ministryOf(float rankCredit, float notoriety, int conduct, float bound) {
+        float conductCredit = Math.max(-100, Math.min(100, conduct)) / 100.0f * CONDUCT_WEIGHT * bound;
+        return clamp(clampUnipolar(rankCredit, bound) - clampUnipolar(notoriety, bound) + conductCredit, bound);
+    }
 }

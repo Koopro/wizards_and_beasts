@@ -1,0 +1,17 @@
+{
+  "type": "neoforge:add_table",
+  "conditions": [
+    {
+      "condition": "minecraft:any_of",
+      "terms": [
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/woodland_mansion" },
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/jungle_temple" },
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/desert_pyramid" },
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/ancient_city" },
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/stronghold_library" }
+      ]
+    },
+    { "condition": "minecraft:random_chance", "chance": 0.12 }
+  ],
+  "table": "wizards_and_beasts:chests/hidden_wizarding_cache"
+}

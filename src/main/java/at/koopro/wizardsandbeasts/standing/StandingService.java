@@ -73,8 +73,10 @@ public final class StandingService {
                 }
                 PlayerMinistryRecord record = MinistryRecords.get(player);
                 yield StandingBands.ministryOf(
-                        rankCredit(record.rank()), record.notoriety(), bound);
+                        rankCredit(record.rank()), record.notoriety(), record.conduct(), bound);
             }
+            case PUBLIC -> StandingBands.clamp(get(player).publicRep(), bound);
+            case PROFESSION -> StandingBands.clamp(get(player).professionFor(professionKey(player)), bound);
         };
     }
 
@@ -89,6 +91,16 @@ public final class StandingService {
             values.put(axis, valueOf(player, axis));
         }
         return values;
+    }
+
+    /**
+     * The profession a player's professional reputation belongs to, or empty before one is chosen. The key is the
+     * profession's name, so a save keeps meaning the same thing if professions are reordered.
+     */
+    public static String professionKey(Player player) {
+        at.koopro.wizardsandbeasts.owl.Profession profession =
+                player.getData(ModAttachments.PROFESSION_DATA.get()).profession();
+        return profession == null ? "" : profession.name().toLowerCase(java.util.Locale.ROOT);
     }
 
     /**
@@ -131,6 +143,14 @@ public final class StandingService {
                 yield before.withLight(StandingBands.clampUnipolar(before.light() + delta, bound));
             }
             case MINISTRY -> before;
+            case PUBLIC -> before.withPublic(StandingBands.clamp(before.publicRep() + delta, bound));
+            case PROFESSION -> {
+                String holder = professionKey(player);
+                if (holder.isEmpty()) {
+                    yield before;
+                }
+                yield before.withProfession(StandingBands.clamp(before.professionFor(holder) + delta, bound), holder);
+            }
         };
 
         if (axis == StandingAxis.MINISTRY || (axis == StandingAxis.ALIGNMENT && delta < 0.0f)) {
@@ -152,7 +172,13 @@ public final class StandingService {
             return false;
         }
         float bound = bound();
-        MagicalStanding next = get(player).withTradition(StandingBands.clamp(value, bound));
+        float clamped = StandingBands.clamp(value, bound);
+        MagicalStanding current = get(player);
+        MagicalStanding next = switch (axis) {
+            case PUBLIC -> current.withPublic(clamped);
+            case PROFESSION -> current.withProfession(clamped, professionKey(player));
+            default -> current.withTradition(clamped);
+        };
         player.setData(ModAttachments.MAGICAL_STANDING.get(), next);
         sync(player);
         return true;

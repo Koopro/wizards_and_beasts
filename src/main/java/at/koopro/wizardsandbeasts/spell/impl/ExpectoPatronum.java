@@ -41,22 +41,44 @@ public class ExpectoPatronum extends Spell {
         return SpellRequirement.proficiency(Spells.PROTEGO, Proficiency.PROFICIENT);
     }
 
-    @Override
-    public void executeCast(CastContext ctx, ServerLevel level) {
-        ServerPlayer caster = ctx.caster();
+    /** Below this the charm finds no memory to hold and does not form. */
+    static final float MIN_FORMING_POWER = 15.0f;
+
+    /** How strongly this caster can conjure: happiness, happy memories and practice, dimmed by corruption. */
+    float patronusPower(ServerPlayer caster) {
         float happiness = caster.getData(ModAttachments.HAPPINESS.get());
         // Akkumulierte HAPPY-Memories: intensity-gewichtet + gedeckelt (MemoryService.MAX_MEMORY_BONUS).
         float memoryBonus = at.koopro.wizardsandbeasts.memory.MemoryService.patronusMemoryBonus(caster);
         float darkCorruption = caster.getData(ModAttachments.DARK_CORRUPTION.get());
-        float patronusPower = Mth.clamp(
+        return Mth.clamp(
                 happiness * 0.4f + memoryBonus + getProficiencyScalar(caster) * 20.0f - darkCorruption * 0.3f,
                 0.0f, 100.0f);
-        if (patronusPower < 15.0f) {
-            level.playSound(null, caster.blockPosition(), ModSounds.SPELL_FIZZLE.get(), SoundSource.PLAYERS, 0.55f, 1.0f);
-            caster.displayClientMessage(
-                    Component.literal("You cannot find a happy enough memory.").withStyle(net.minecraft.ChatFormatting.GRAY),
-                    true);
-            // Failed Patronus must not apply cooldown (lore: retry when memory is brighter).
+    }
+
+    /**
+     * No happy enough memory: the charm never forms, so it costs nothing and may be tried again when the memory
+     * is brighter. This used to return early from {@link #executeCast}, after which the cast service stamped the
+     * full 170-tick cooldown and a cast anyway. A faint Patronus that does form (mist) is a cast and is charged.
+     */
+    @Override
+    public @org.jspecify.annotations.Nullable String castRefusal(ServerPlayer caster, ServerLevel level) {
+        if (patronusPower(caster) >= MIN_FORMING_POWER) {
+            return null;
+        }
+        level.playSound(null, caster.blockPosition(), ModSounds.SPELL_FIZZLE.get(), SoundSource.PLAYERS, 0.55f, 1.0f);
+        caster.displayClientMessage(
+                Component.literal("You cannot find a happy enough memory.").withStyle(net.minecraft.ChatFormatting.GRAY),
+                true);
+        return at.koopro.wizardsandbeasts.spell.cast.SpellRejectCodes.withDetail(
+                at.koopro.wizardsandbeasts.spell.cast.SpellRejectCodes.REQUIREMENTS_UNMET, "patronus_no_memory");
+    }
+
+    @Override
+    public void executeCast(CastContext ctx, ServerLevel level) {
+        ServerPlayer caster = ctx.caster();
+        float patronusPower = patronusPower(caster);
+        if (patronusPower < MIN_FORMING_POWER) {
+            // Reached only by a path that skips SpellCastService (castRefusal is its gate): still nothing forms.
             return;
         }
         // Resolve the form up front. A stored form is reused; otherwise it is the caster's own animal,

@@ -51,7 +51,26 @@ public class ExaminationDeskBlock extends Block {
         if (!ModuleManager.isEnabled(Module.OWLS)) return InteractionResult.PASS;
         if (level.isClientSide() && onClientInteract != null) {
             onClientInteract.run();
+        } else if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+            // The desk screen draws the server's view; send a fresh one as it opens.
+            at.koopro.wizardsandbeasts.education.EducationService.sync(serverPlayer);
         }
         return InteractionResult.SUCCESS;
+    }
+
+    /**
+     * A brew or a herbal specimen handed to the examiner during a sitting is the Potions or Herbology practical.
+     * Anything else — or no sitting — falls through to opening the desk, so a full hand never blocks the paper.
+     */
+    @Override
+    protected InteractionResult useItemOn(net.minecraft.world.item.ItemStack stack, BlockState state, Level level,
+                                          BlockPos pos, Player player, net.minecraft.world.InteractionHand hand,
+                                          BlockHitResult hit) {
+        if (!level.isClientSide() && player instanceof net.minecraft.server.level.ServerPlayer serverPlayer
+                && ModuleManager.isEnabled(Module.OWLS)
+                && at.koopro.wizardsandbeasts.education.ExamSittings.handIn(serverPlayer, stack)) {
+            return InteractionResult.SUCCESS;
+        }
+        return InteractionResult.TRY_WITH_EMPTY_HAND;
     }
 }

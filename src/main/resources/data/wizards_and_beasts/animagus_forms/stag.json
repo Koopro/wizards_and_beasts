@@ -1,0 +1,26 @@
+{
+  "canon_tier": "book",
+  "model": "wizards_and_beasts:geckolib/models/entity/animagus_stag.geo.json",
+  "texture": "wizards_and_beasts:textures/entity/animagus_stag.png",
+  "animations": "wizards_and_beasts:geckolib/animations/entity/animagus_stag.animation.json",
+  "animation_map": {
+    "idle": "animation.animagus_stag.idle",
+    "walk": "animation.animagus_stag.walk",
+    "run": "animation.animagus_stag.run",
+    "jump": "animation.animagus_stag.leap",
+    "hurt": "animation.animagus_stag.hit"
+  },
+  "hitbox": {
+    "width": 0.9,
+    "height": 1.6,
+    "eye_height": 1.45
+  },
+  "attributes": {
+    "minecraft:movement_speed": 0.03,
+    "minecraft:max_health": 4.0
+  },
+  "capabilities": [
+    "SCENT_TRACK",
+    "SAFE_LANDING"
+  ]
+}

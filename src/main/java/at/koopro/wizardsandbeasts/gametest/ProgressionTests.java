@@ -4,6 +4,15 @@ import at.koopro.wizardsandbeasts.bestiary.BestiaryDataHelper;
 import at.koopro.wizardsandbeasts.bestiary.DiscoveryTier;
 import at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity;
 import at.koopro.wizardsandbeasts.event.bestiary.BestiaryDiscoveryHandler;
+import at.koopro.wizardsandbeasts.currency.vault.PlayerVaultData;
+import at.koopro.wizardsandbeasts.heritage.data.PlayerProfessionData;
+import at.koopro.wizardsandbeasts.owl.OWLExaminationHandler;
+import at.koopro.wizardsandbeasts.owl.OWLGrade;
+import at.koopro.wizardsandbeasts.owl.OWLSubject;
+import at.koopro.wizardsandbeasts.owl.Profession;
+import at.koopro.wizardsandbeasts.owl.career.CareerProfile;
+import at.koopro.wizardsandbeasts.owl.career.CareerWork;
+import at.koopro.wizardsandbeasts.owl.data.PlayerOWLData;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
@@ -42,6 +51,129 @@ public final class ProgressionTests {
         tests.add("progression_skill_points_come_from_magic_not_xp",
                 "progression: vanilla XP levels award no skill points; a bestiary page reaching KNOWN awards one",
                 ProgressionTests::skillPointsFromMagic);
+        tests.add("progression_owl_grades_what_was_practised",
+                "progression: the O.W.L. grades practised spells, leaves unexamined subjects ungraded, "
+                        + "and a resit waits a week",
+                ProgressionTests::owlGradesPractice);
+        tests.add("progression_career_is_paid_for_its_work",
+                "progression: a career's wage reaches the vault once a working day, only for its own work, "
+                        + "through the practice hook",
+                ProgressionTests::careerPaysForWork);
+        tests.add("progression_heritage_trade_pays_its_own_currency",
+                "progression: a heritage profession pays the GameplayStat its trade names and no longer "
+                        + "adds max health",
+                ProgressionTests::heritageTradePays);
+        tests.add("progression_wandlore_vocation_steadies_the_wand",
+                "progression: declaring the Wandlore vocation takes misfire off a cast (it boosted an "
+                        + "attribute no player carries)",
+                ProgressionTests::wandloreSteadies);
+    }
+
+    private static void wandloreSteadies(GameTestHelper helper) {
+        ServerPlayer wizard = player(helper, "WandloreWizard");
+        try {
+            HeritageAPI.commit(wizard, Heritage.WIZARDKIND, HeritageVariant.HALF_BLOOD);
+            at.koopro.wizardsandbeasts.spell.core.Spell lumos = Spells.byId("lumos");
+            float before = misfireAfterVocation(wizard, lumos);
+            wizard.setData(ModAttachments.VOCATION_DATA.get(), wizard.getData(ModAttachments.VOCATION_DATA.get())
+                    .withPrimary(java.util.Optional.of(Identifier.fromNamespaceAndPath("wizards_and_beasts", "wandlore"))));
+            float after = misfireAfterVocation(wizard, lumos);
+            float expected = before - at.koopro.wizardsandbeasts.skill.vocation.VocationAbilityHooks.WAND_STEADINESS;
+            WizardTestSupport.check(helper, Math.abs(after - expected) < 1e-4f,
+                    () -> "Wandlore misfire " + before + " -> " + after + ", expected " + expected);
+            helper.succeed();
+        } finally {
+            wizard.setData(ModAttachments.VOCATION_DATA.get(),
+                    at.koopro.wizardsandbeasts.skill.vocation.PlayerVocationData.EMPTY);
+            WizardTestSupport.retire(helper, wizard);
+        }
+    }
+
+    /** A cast's misfire after the vocation hooks, from a 10% starting chance (the total clamps at 0). */
+    private static float misfireAfterVocation(ServerPlayer wizard, at.koopro.wizardsandbeasts.spell.core.Spell spell) {
+        at.koopro.wizardsandbeasts.spell.cast.ModifierStack stack = new at.koopro.wizardsandbeasts.spell.cast.ModifierStack();
+        stack.addMisfireChance(0.10f, "test");
+        at.koopro.wizardsandbeasts.skill.vocation.VocationAbilityHooks.applyCastModifiers(stack, wizard, spell);
+        return stack.finalMisfireChance();
+    }
+
+    private static void heritageTradePays(GameTestHelper helper) {
+        ServerPlayer wizard = player(helper, "TradeWizard");
+        try {
+            HeritageAPI.commit(wizard, Heritage.WIZARDKIND, HeritageVariant.HALF_BLOOD);
+            double health = wizard.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+            wizard.getData(ModAttachments.HERITAGE_DATA.get()).addProfessionPoints(3);
+            boolean bought = at.koopro.wizardsandbeasts.heritage.profession.ProfessionSystemAPI.tryUnlock(wizard, "wizard_apprentice")
+                    && at.koopro.wizardsandbeasts.heritage.profession.ProfessionSystemAPI.tryUnlock(wizard, "wizard_wandmaker");
+            WizardTestSupport.check(helper, bought, () -> "Apprentice and Wandmaker could not be bought with 3+ points");
+            float grip = SkillSystemAPI.getGameplayBonus(wizard,
+                    at.koopro.wizardsandbeasts.skill.GameplayStat.ALLEGIANCE_GRIP);
+            WizardTestSupport.check(helper, grip >= 1.0f, () -> "a Wandmaker's allegiance grip read " + grip);
+            double after = wizard.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+            WizardTestSupport.check(helper, after == health,
+                    () -> "a heritage trade changed max health " + health + " -> " + after);
+            helper.succeed();
+        } finally {
+            WizardTestSupport.retire(helper, wizard);
+        }
+    }
+
+    private static void owlGradesPractice(GameTestHelper helper) {
+        ServerPlayer wizard = player(helper, "OwlCandidate");
+        try {
+            HeritageAPI.commit(wizard, Heritage.WIZARDKIND, HeritageVariant.HALF_BLOOD);
+            wizard.setData(ModAttachments.OWL_DATA.get(), PlayerOWLData.DEFAULT);
+            PlayerSpellData data = wizard.getData(ModAttachments.SPELL_DATA.get());
+            // Five Utility charms mastered: 10 tier points, an E in Charms (E needs 9, OWLGradeRules.CHARMS).
+            for (String id : new String[] {"lumos", "nox", "wingardium_leviosa", "reparo", "alohomora"}) {
+                String spell = Spells.byId(id).getId();
+                data.learnSpell(spell);
+                data.setSuccessfulHits(spell, Proficiency.MASTERED.getCastsRequired());
+            }
+            OWLExaminationHandler.conductExam(wizard);
+            PlayerOWLData owl = wizard.getData(ModAttachments.OWL_DATA.get());
+            WizardTestSupport.check(helper, owl.grades().get(OWLSubject.CHARMS) == OWLGrade.E,
+                    () -> "five mastered charms graded " + owl.grades().get(OWLSubject.CHARMS) + ", not E");
+            WizardTestSupport.check(helper, !owl.grades().containsKey(OWLSubject.ARITHMANCY),
+                    () -> "Arithmancy was graded though nothing in the game examines it");
+            WizardTestSupport.check(helper, owl.sittings() == 1, () -> "sittings " + owl.sittings());
+            long now = wizard.level().getGameTime();
+            WizardTestSupport.check(helper, !OWLExaminationHandler.maySit(owl, now),
+                    () -> "the exam could be resat the moment it was sat");
+            helper.succeed();
+        } finally {
+            WizardTestSupport.retire(helper, wizard);
+        }
+    }
+
+    private static void careerPaysForWork(GameTestHelper helper) {
+        ServerPlayer wizard = player(helper, "CareerWizard");
+        try {
+            HeritageAPI.commit(wizard, Heritage.WIZARDKIND, HeritageVariant.HALF_BLOOD);
+            wizard.setData(ModAttachments.PROFESSION_DATA.get(), PlayerProfessionData.chosen(Profession.AUROR, 1));
+            PlayerVaultData vault = wizard.getData(ModAttachments.VAULT_DATA.get());
+            long before = vault.getTotalInKnuts();
+            int wage = CareerProfile.of(Profession.AUROR).dailyWage();
+
+            boolean brewed = CareerWork.record(wizard, CareerWork.Kind.BREWING);
+            WizardTestSupport.check(helper, !brewed && vault.getTotalInKnuts() == before,
+                    () -> "an Auror was paid for brewing");
+
+            // Duelling practice through the real seam: a counted Stupefy.
+            String stupefy = Spells.byId("stupefy").getId();
+            SpellProficiencyTracker.recordSuccessfulHit(wizard, stupefy);
+            long afterWork = vault.getTotalInKnuts();
+            WizardTestSupport.check(helper, afterWork == before + wage,
+                    () -> "a day of duelling paid " + (afterWork - before) + " Knuts, not " + wage);
+
+            SpellProficiencyTracker.recordSuccessfulHit(wizard, stupefy);
+            CareerWork.record(wizard, CareerWork.Kind.DUELLING);
+            WizardTestSupport.check(helper, vault.getTotalInKnuts() == afterWork,
+                    () -> "the same day was paid twice");
+            helper.succeed();
+        } finally {
+            WizardTestSupport.retire(helper, wizard);
+        }
     }
 
     private static void practiceIsSpread(GameTestHelper helper) {

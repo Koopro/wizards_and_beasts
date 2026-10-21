@@ -70,7 +70,7 @@ public record SizeOverrideC2SPayload(
             if (!(sender.level() instanceof ServerLevel serverLevel)) return;
             MinecraftServer server = serverLevel.getServer();
 
-            if (!sender.createCommandSourceStack().permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
+            if (!at.koopro.wizardsandbeasts.command.AdminAccess.allows(sender.createCommandSourceStack())) {
                 PlayerFeedback.refuse(sender,
                         Component.translatable("form.wizards_and_beasts.change.refused"),
                         Component.translatable("form.wizards_and_beasts.change.no_permission"));

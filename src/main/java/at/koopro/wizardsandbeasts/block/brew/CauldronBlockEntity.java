@@ -302,7 +302,9 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
         /** The server's brewing rule is off. */
         BREWING_DISABLED,
         /** The recipe's brew has been disabled by an administrator. */
-        BREW_DISABLED
+        BREW_DISABLED,
+        /** The brew is advanced study the brewer is not qualified for ({@code education.QualificationGates}). */
+        UNQUALIFIED
     }
 
     /**
@@ -313,7 +315,20 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
      * not be able to start a brew the cauldron cannot actually make.
      */
     public StartResult startBrewing(CauldronTier tier, ServerPlayer brewer) {
+        // Checked here, where a player is known and before anything is consumed: an advanced brew asks for a
+        // qualification, and a refusal costs the brewer nothing.
+        String brewId = matchedBrewId(tier);
+        if (phase == CauldronPhase.IDLE && brewId != null && at.koopro.wizardsandbeasts.education.QualificationGates
+                .firstUnmet(brewer, at.koopro.wizardsandbeasts.education.QualificationGates.Kind.BREW, brewId) != null) {
+            return StartResult.UNQUALIFIED;
+        }
         return startBrewing(tier, brewer.getUUID());
+    }
+
+    /** The brew the pot's contents would make on {@code tier}, or {@code null} when nothing matches. */
+    public @org.jspecify.annotations.Nullable String matchedBrewId(CauldronTier tier) {
+        BrewingRecipe recipe = BrewingRecipes.findMatch(contentsView(), tier);
+        return recipe == null ? null : recipe.outputBrewId();
     }
 
     /**
@@ -436,6 +451,8 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
         // chance, because brew points are ones and twos — see HogwartsComfort#scaleStudy.
         skillData.addPotionBrewPoints(
                 at.koopro.wizardsandbeasts.pumpkinjuice.HogwartsComfort.scaleStudy(brewer, brewPoints));
+        // A brewing career is paid for the day's work at the cauldron.
+        at.koopro.wizardsandbeasts.owl.career.CareerWork.record(brewer, at.koopro.wizardsandbeasts.owl.career.CareerWork.Kind.BREWING);
     }
 
     // -- the clock -------------------------------------------------------------------------------

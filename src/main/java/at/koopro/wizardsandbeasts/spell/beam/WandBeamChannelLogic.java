@@ -41,6 +41,14 @@ public final class WandBeamChannelLogic {
     private static final PlayerScopedState<WandBeamSession> SESSIONS =
             PlayerScopedState.create("wand-beam-sessions");
 
+    /**
+     * A channel that acted and ended on a vanilla release whose cast has not resolved yet: its spell id, per
+     * player. Settled by {@link #settleReleasedChannel} — cleared when the release casts (the cast stamps the
+     * cooldown itself), charged when it is refused or never arrives.
+     */
+    private static final PlayerScopedState<String> PENDING_CHARGE =
+            PlayerScopedState.create("wand-beam-pending-charge");
+
     /** How often a running channel re-announces itself, so late trackers pick the beam up. */
     private static final int BEAM_ANNOUNCE_INTERVAL_TICKS = 20;
 
@@ -128,6 +136,9 @@ public final class WandBeamChannelLogic {
 
         WandBeamSession s = SESSIONS.computeIfAbsent(player.getUUID(), u -> new WandBeamSession());
         if (!Objects.equals(s.spellId, spellId)) {
+            if (s.acted && s.spellId != null) {
+                chargeCooldown(player, s.spellId);
+            }
             runChannelEndEffects(player, s);
             WandBeamSpellHandlers.clearSessionEffects(player, s);
         }
@@ -216,11 +227,60 @@ public final class WandBeamChannelLogic {
     public static void endChannel(ServerPlayer player) {
         WandBeamSession s = SESSIONS.remove(player.getUUID());
         if (s == null) return;
+        // A channel does its work while it is held (the kill, the held victim, the lift), and the cooldown is
+        // stamped only by an accepted release. A channel that acted and then ended any other way — slot swap,
+        // dropped wand, death, dimension change, logout — or whose release a random roll refused used to cost
+        // nothing: Avada Kedavra killed, misfired on release, and was ready again at once (KNOWN_ISSUES §8c.2).
+        if (s.acted && s.spellId != null) {
+            if (at.koopro.wizardsandbeasts.spell.cast.WandCastSessions.hasVanillaReleaseObserved(player)) {
+                PENDING_CHARGE.put(player.getUUID(), s.spellId);
+            } else {
+                chargeCooldown(player, s.spellId);
+            }
+        }
         // Every abort path funnels through here — guard failure, release, death, respawn, logout,
         // dimension change — so this is the one place the beam has to be called off.
         BeamChannelS2CPayload.sendEnd(player);
         runChannelEndEffects(player, s);
         WandBeamSpellHandlers.clearSessionEffects(player, s);
+    }
+
+    /**
+     * Resolves a channel that acted and ended on a release. {@code cast} is whether that release cast — the
+     * cast stamped the cooldown itself; anything else (a refusal, a misfire, no release at all) charges it here.
+     * Also settles a still-acting live channel for a server-driven release (Avada Kedavra resolves inside the
+     * channel tick). Cheap and a no-op for a player with nothing pending.
+     */
+    public static void settleReleasedChannel(ServerPlayer player, boolean cast) {
+        String pending = PENDING_CHARGE.remove(player.getUUID());
+        WandBeamSession live = SESSIONS.get(player.getUUID());
+        if (cast) {
+            return;
+        }
+        if (pending != null) {
+            chargeCooldown(player, pending);
+        }
+        if (live != null && live.acted && live.spellId != null && !live.spellId.equals(pending)) {
+            chargeCooldown(player, live.spellId);
+        }
+    }
+
+    /**
+     * Stamps the spell's own cooldown (unscaled: there is no cast context to compose modifiers from) unless one
+     * is already running. Never shortens a cooldown, so it cannot interfere with a cast that stamped first.
+     */
+    static void chargeCooldown(ServerPlayer player, String spellId) {
+        if (!(player.level() instanceof ServerLevel level)) return;
+        Spell spell = Spells.byId(spellId);
+        if (spell == null) return;
+        PlayerSpellData data = player.getData(ModAttachments.SPELL_DATA.get());
+        long now = level.getGameTime();
+        if (data.isOnCooldown(spell.getId(), now)) return;
+        long expiry = now + at.koopro.wizardsandbeasts.spell.cast.SpellCastGate.resolveCooldownTicks(
+                spell.getBaseCooldownTicks(), 1.0f);
+        data.setCooldown(spell.getId(), expiry);
+        at.koopro.wizardsandbeasts.network.spell.SpellDataDeltaS2CPayload.sendTo(player, spell.getId(), expiry,
+                data.getCastCount(spell.getId()), data.getSuccessfulHits(spell.getId()), data.getGlobalCooldownEndTick());
     }
 
     /**

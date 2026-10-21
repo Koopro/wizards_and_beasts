@@ -1,0 +1,16 @@
+{
+  "canon_tier": "mod",
+  "hitbox": {
+    "width": 0.4,
+    "height": 0.5,
+    "eye_height": 0.4
+  },
+  "attributes": {
+    "minecraft:movement_speed": 0.04,
+    "minecraft:max_health": -10.0
+  },
+  "capabilities": [
+    "SAFE_LANDING",
+    "LOW_PROFILE"
+  ]
+}

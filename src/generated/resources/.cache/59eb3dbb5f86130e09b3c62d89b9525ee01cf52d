@@ -1,4 +1,4 @@
-// 1.21.11	2026-09-28T12:58:33.161676	Loot Tables
+// 1.21.11	2026-10-13T23:09:45.6588412	Loot Tables
 05c7325d669887037604a240dc76ed0570decda2 data/wizards_and_beasts/loot_table/blocks/acromantula_web.json
 867bad6d013ba096052ad53738989dcfa000ba61 data/wizards_and_beasts/loot_table/blocks/ash_leaves.json
 8b9ac95b946ea568fd08f217a93dd6f450d08efe data/wizards_and_beasts/loot_table/blocks/ash_log.json
@@ -15,6 +15,7 @@ a00e86884416c7224f8c984b3ec44048c293d3da data/wizards_and_beasts/loot_table/bloc
 6c6589bc9edf4468c2b858e2efdbf49003ee9134 data/wizards_and_beasts/loot_table/blocks/blackthorn_stairs.json
 5976b4ded311e90f63356ae95dafbc5d00788360 data/wizards_and_beasts/loot_table/blocks/blackthorn_wood.json
 51fbefad80b397de4cfe47bc95370585fb2dc4e0 data/wizards_and_beasts/loot_table/blocks/brass_cauldron.json
+d774d898fb73a665107d85b1dd674c648c9988f3 data/wizards_and_beasts/loot_table/blocks/broom_rack.json
 e9a5d5e0bc9f3cfbebdbe95d2facd375d3a7b100 data/wizards_and_beasts/loot_table/blocks/deluminator_light.json
 1685b7136b24c10f3d499addbfdbd4ca8ef55d97 data/wizards_and_beasts/loot_table/blocks/devils_snare.json
 f7dcfaeb39287a6a119588cb355717400d4f4f77 data/wizards_and_beasts/loot_table/blocks/diagon_brick.json

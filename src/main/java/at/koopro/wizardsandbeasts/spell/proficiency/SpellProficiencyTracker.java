@@ -52,6 +52,9 @@ public final class SpellProficiencyTracker {
             // Landing spells is what trains PRECISION. Hooked here rather than at the six call sites
             // that reach this method, so every path that counts as a hit counts as practice.
             at.koopro.wizardsandbeasts.stats.StatTraining.onSpellHit(player);
+            // A duelling or charmwork career is paid for the day's practice (CareerWork).
+            at.koopro.wizardsandbeasts.owl.career.CareerWork.record(player, at.koopro.wizardsandbeasts.owl.career.CareerWork.forSpell(
+                    at.koopro.wizardsandbeasts.spell.core.Spells.byId(spellId)));
         }
         ItemStack wandStack = at.koopro.wizardsandbeasts.util.WandHelper.getWandStack(player);
         if (!wandStack.isEmpty()) {

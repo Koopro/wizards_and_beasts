@@ -50,6 +50,9 @@ public class WizardsAndBeastsCommands {
             boolean needsSelection = !HeritageAPI.hasHeritageSelected(player);
             PlayerStateSyncService.syncFullLoginState(player, needsSelection);
             OWLExaminationHandler.syncToPlayer(player);
+            at.koopro.wizardsandbeasts.owl.career.track.CareerProgression.sync(player);
+            // The sitting clock on the HUD survives a relog only if the client hears about the sitting at once.
+            at.koopro.wizardsandbeasts.education.EducationService.sync(player);
             PlayerStatsSyncPayload.syncToPlayer(player);
             // Outlines are broadcast on change, so a player joining afterwards would otherwise never
             // learn about anyone already outlined.
@@ -95,6 +98,8 @@ public class WizardsAndBeastsCommands {
     public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             WandBeamChannelLogic.endChannel(player);
+            // Logging out between letting go and the release packet must not make the channel free.
+            WandBeamChannelLogic.settleReleasedChannel(player, false);
             DebugWandState.cleanup(player.getUUID(), (ServerLevel) player.level());
             LumosFieldEffect.removeLight(player);
         }

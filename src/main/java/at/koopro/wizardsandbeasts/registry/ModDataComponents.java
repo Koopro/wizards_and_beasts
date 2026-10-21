@@ -37,6 +37,14 @@ public class ModDataComponents {
     public static final DeferredRegister<DataComponentType<?>> DATA_COMPONENTS =
             DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, WizardsAndBeastsMod.MODID);
 
+    /** A recovered artefact's site, curse, depth and worth (treasure/). */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<at.koopro.wizardsandbeasts.treasure.TreasureArtefact>> TREASURE_ARTEFACT =
+            DATA_COMPONENTS.register("treasure_artefact", () ->
+                    DataComponentType.<at.koopro.wizardsandbeasts.treasure.TreasureArtefact>builder()
+                            .persistent(at.koopro.wizardsandbeasts.treasure.TreasureArtefact.CODEC)
+                            .networkSynchronized(at.koopro.wizardsandbeasts.treasure.TreasureArtefact.STREAM_CODEC)
+                            .build());
+
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<WandWood>> WAND_WOOD =
             DATA_COMPONENTS.register("wand_wood_legacy", () ->
                     DataComponentType.<WandWood>builder()
@@ -176,6 +184,30 @@ public class ModDataComponents {
                             .networkSynchronized(ByteBufCodecs.STRING_UTF8.map(
                                     Identifier::parse,
                                     Identifier::toString))
+                            .build());
+
+    /** The fittings on a broom ({@code broom.fitting}); absent for none. */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<at.koopro.wizardsandbeasts.broom.fitting.BroomFittings>> BROOM_FITTINGS =
+            DATA_COMPONENTS.register("broom_fittings", () ->
+                    DataComponentType.<at.koopro.wizardsandbeasts.broom.fitting.BroomFittings>builder()
+                            .persistent(at.koopro.wizardsandbeasts.broom.fitting.BroomFittings.CODEC)
+                            .networkSynchronized(at.koopro.wizardsandbeasts.broom.fitting.BroomFittings.STREAM_CODEC)
+                            .build());
+
+    /** A courier parcel's addressing and deadline ({@code travel.courier.CourierParcel}). */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<at.koopro.wizardsandbeasts.travel.courier.CourierParcel>> COURIER_PARCEL =
+            DATA_COMPONENTS.register("courier_parcel", () ->
+                    DataComponentType.<at.koopro.wizardsandbeasts.travel.courier.CourierParcel>builder()
+                            .persistent(at.koopro.wizardsandbeasts.travel.courier.CourierParcel.CODEC)
+                            .networkSynchronized(at.koopro.wizardsandbeasts.travel.courier.CourierParcel.STREAM_CODEC)
+                            .build());
+
+    /** RGB a broom's slipstream is dyed; absent for the broom's own trail. */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> BROOM_TRAIL_DYE =
+            DATA_COMPONENTS.register("broom_trail_dye", () ->
+                    DataComponentType.<Integer>builder()
+                            .persistent(com.mojang.serialization.Codec.INT)
+                            .networkSynchronized(ByteBufCodecs.INT)
                             .build());
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<UUID>> POCKET_CASE_ID =

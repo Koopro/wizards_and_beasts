@@ -32,6 +32,16 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * The Imperius Curse's server side: who controls whom, what a controlled mob does, and when control ends.
+ *
+ * <p>Registered on the game bus. It used to carry {@code @SubscribeEvent} with no subscriber annotation, so
+ * {@link #onServerTick} never ran: a controlled mob never acted on a command after the first tick and its
+ * control state never counted down, and that state is saved with the mob (KNOWN_ISSUES 8c.3). Control now
+ * also ends with either party's death or change of dimension, the caster's logout, and a mob loaded with a
+ * control state no live caster holds.
+ */
+@EventBusSubscriber(modid = WizardsAndBeastsMod.MODID)
 public final class ImperioServerLogic {
 
     private static final Map<UUID, Long> LAST_RESIST_PACKET_TICK = new ConcurrentHashMap<>();
@@ -100,12 +110,7 @@ public final class ImperioServerLogic {
      */
     @SubscribeEvent
     public static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
-        if (!ModuleManager.isEnabled(Module.DARK_ARTS)) {
-            return;
-        }
-        if (event.getServer().getTickCount() % 5 != 0) {
-            return;
-        }
+        boolean act = ModuleManager.isEnabled(Module.DARK_ARTS) && event.getServer().getTickCount() % 5 == 0;
         for (Map.Entry<UUID, UUID> e : CASTER_TO_VICTIM.entrySet()) {
             ServerPlayer controller = event.getServer().getPlayerList().getPlayer(e.getKey());
             if (controller == null || !(controller.level() instanceof ServerLevel sl)) {
@@ -119,8 +124,104 @@ public final class ImperioServerLogic {
             if (!st.isControlled() || !st.controllerUUID().equals(controller.getUUID())) {
                 continue;
             }
-            executeMobCommand(sl, mob, controller, ImperioCommand.byOrdinal(st.imperioCommandOrdinal()));
+            // A mob's control counts down here, as a player's does in tickVictim. Every tick, whether or not
+            // the Dark Arts are switched on, so a curse cast before the switch still runs out.
+            ImperioControlState next = st.tickDown();
+            if (!next.isControlled()) {
+                clearControl(sl, mob, controller.getUUID());
+                continue;
+            }
+            mob.setData(ModAttachments.IMPERIO_CONTROL_STATE.get(), next);
+            if (act) {
+                executeMobCommand(sl, mob, controller, ImperioCommand.byOrdinal(next.imperioCommandOrdinal()));
+            }
         }
+    }
+
+    /** Ends whatever control {@code casterId} holds over a victim in {@code level}. */
+    public static void releaseVictimOf(ServerLevel level, UUID casterId) {
+        UUID victimId = CASTER_TO_VICTIM.get(casterId);
+        if (victimId == null) {
+            return;
+        }
+        LivingEntity victim = findLiving(level, victimId);
+        if (victim != null) {
+            ImperioControlState st = victim.getData(ModAttachments.IMPERIO_CONTROL_STATE.get());
+            if (st.isControlled() && casterId.equals(st.controllerUUID())) {
+                clearControl(level, victim, casterId);
+                return;
+            }
+        }
+        CASTER_TO_VICTIM.remove(casterId, victimId);
+    }
+
+    /** Frees {@code victim} from any Imperius control, and tells its caster. */
+    public static void releaseVictim(LivingEntity victim) {
+        if (!(victim.level() instanceof ServerLevel level)) {
+            return;
+        }
+        ImperioControlState st = victim.getData(ModAttachments.IMPERIO_CONTROL_STATE.get());
+        if (st.isControlled()) {
+            clearControl(level, victim, st.controllerUUID());
+        }
+    }
+
+    /**
+     * Death ends the curse from either side: a dead caster holds no one, and a dead victim (whose state is
+     * copied to the respawned player) must not wake up still bound.
+     */
+    @SubscribeEvent
+    public static void onDeath(net.neoforged.neoforge.event.entity.living.LivingDeathEvent event) {
+        LivingEntity dead = event.getEntity();
+        if (dead.level().isClientSide()) {
+            return;
+        }
+        releaseVictim(dead);
+        if (dead instanceof ServerPlayer caster && caster.level() instanceof ServerLevel level) {
+            releaseVictimOf(level, caster.getUUID());
+        }
+    }
+
+    /** Neither side can reach the other across dimensions, so control ends with the crossing. */
+    @SubscribeEvent
+    public static void onChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) {
+            return;
+        }
+        releaseVictim(player);
+        if (!CASTER_TO_VICTIM.containsKey(player.getUUID())) {
+            return;
+        }
+        // The victim stayed behind in the dimension the caster left.
+        ServerLevel old = player.level().getServer() == null ? null : player.level().getServer().getLevel(event.getFrom());
+        if (old != null) {
+            releaseVictimOf(old, player.getUUID());
+        } else {
+            CASTER_TO_VICTIM.remove(player.getUUID());
+        }
+    }
+
+    /**
+     * A mob saved under control is loaded with that state, but the caster mapping lives only in memory. A mob
+     * no live caster holds is free: otherwise it stayed controlled for good after a restart or its caster's
+     * logout, with nothing ever counting it down.
+     */
+    @SubscribeEvent
+    public static void onEntityJoin(net.neoforged.neoforge.event.entity.EntityJoinLevelEvent event) {
+        if (event.getLevel().isClientSide() || !(event.getEntity() instanceof Mob mob)
+                || !mob.hasData(ModAttachments.IMPERIO_CONTROL_STATE.get())) {
+            return;
+        }
+        ImperioControlState st = mob.getData(ModAttachments.IMPERIO_CONTROL_STATE.get());
+        if (st.isControlled() && !mob.getUUID().equals(CASTER_TO_VICTIM.get(st.controllerUUID()))) {
+            mob.removeEffect(ModEffects.IMPERIO_EUPHORIA);
+            mob.setData(ModAttachments.IMPERIO_CONTROL_STATE.get(), ImperioControlState.DEFAULT);
+        }
+    }
+
+    /** Whether {@code casterId} holds anyone under the curse. */
+    public static boolean holdsVictim(UUID casterId) {
+        return CASTER_TO_VICTIM.containsKey(casterId);
     }
 
     private static void executeMobCommand(ServerLevel level, Mob mob, ServerPlayer controller, ImperioCommand cmd) {
@@ -291,6 +392,12 @@ public final class ImperioServerLogic {
     public static final class LogoutCleanup {
         @SubscribeEvent
         public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+            // Free the caster's victim, and the player's own bonds, while both are still reachable; dropping
+            // only the mapping left a controlled mob controlled for good.
+            if (event.getEntity() instanceof ServerPlayer player && player.level() instanceof ServerLevel level) {
+                releaseVictimOf(level, player.getUUID());
+                releaseVictim(player);
+            }
             onPlayerDisconnect(event.getEntity().getUUID());
         }
     }

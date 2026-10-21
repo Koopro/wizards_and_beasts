@@ -107,6 +107,16 @@ public class LoreTomeItem extends Item {
                     Component.translatable("message.wizards_and_beasts.lore_tome.already_studied", title)
                             .withStyle(ChatFormatting.GRAY), true);
         }
+        // What the tome actually says. Shown on every reading, so a re-read is revision: the History of Magic
+        // paper asks only about these passages (education.ExamQuestions).
+        if (at.koopro.wizardsandbeasts.education.ExamQuestions.tomes().contains(loreId())) {
+            serverPlayer.sendSystemMessage(title.copy().withStyle(ChatFormatting.GOLD));
+            for (int n = 0; n < at.koopro.wizardsandbeasts.education.ExamQuestions.PASSAGES; n++) {
+                serverPlayer.sendSystemMessage(Component.literal("  ").append(Component.translatable(
+                        at.koopro.wizardsandbeasts.education.ExamQuestions.passageKey(loreId(), n)))
+                        .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+            }
+        }
         return stack;
     }
 }

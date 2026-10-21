@@ -97,8 +97,10 @@ public final class CanonItemRegistry {
             ModItems.ITEMS.registerItem("flying_ford_anglia", Item::new);
     public static final DeferredItem<Item> THESTRAL_CARRIAGE =
             ModItems.ITEMS.registerItem("thestral_carriage", Item::new);
-    public static final DeferredItem<Item> BROOMSTICK_SERVICING_KIT =
-            ModItems.ITEMS.registerItem("broomstick_servicing_kit", Item::new);
+    /** Strips a broom's fittings and trail dye; sixteen uses. */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.item.broom.BroomServicingKitItem> BROOMSTICK_SERVICING_KIT =
+            ModItems.ITEMS.registerItem("broomstick_servicing_kit",
+                    props -> new at.koopro.wizardsandbeasts.item.broom.BroomServicingKitItem(props.durability(16)));
 
     // --- Weasleys' Wizard Wheezes ------------------------------------------
     public static final DeferredItem<Item> SKIVING_SNACKBOX =
@@ -159,7 +161,7 @@ public final class CanonItemRegistry {
     public static final DeferredItem<Item> BRASS_SCALES =
             ModItems.ITEMS.registerItem("brass_scales", Item::new);
     public static final DeferredItem<Item> TELESCOPE =
-            ModItems.ITEMS.registerItem("telescope", Item::new);
+            ModItems.ITEMS.registerItem("telescope", at.koopro.wizardsandbeasts.education.TelescopeItem::new);
     public static final DeferredItem<Item> MAGICAL_DRAUGHTS_AND_POTIONS =
             ModItems.ITEMS.registerItem("magical_draughts_and_potions", Item::new);
     public static final DeferredItem<Item> FANTASTIC_BEASTS_AND_WHERE_TO_FIND_THEM =

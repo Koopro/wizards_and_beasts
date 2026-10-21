@@ -94,6 +94,19 @@ public final class BestiaryDiscoveryHandler {
         advance(player, creature.getType(), EncounterRule::onStudied);
     }
 
+    /**
+     * {@link #studied(ServerPlayer, Entity)}, naming what was done. The act is written into the journal's research
+     * checklist ({@code BestiaryDataHelper.recordStudyAct}) whether or not it moved the page's depth.
+     */
+    public static void studied(ServerPlayer player, EntityType<?> species,
+                               at.koopro.wizardsandbeasts.bestiary.CreatureProfile.StudyAct act) {
+        studied(player, species);
+        if (!ModuleManager.isEnabled(Module.BESTIARY)) return;
+        for (BestiaryEntry entry : entriesFor(species)) {
+            at.koopro.wizardsandbeasts.bestiary.BestiaryDataHelper.recordStudyAct(player, entry.id(), act);
+        }
+    }
+
     /** {@link #studied(ServerPlayer, Entity)} for a species with no creature at hand — a shed hair picked up. */
     public static void studied(ServerPlayer player, EntityType<?> species) {
         advance(player, species, EncounterRule::onStudied);
@@ -165,7 +178,9 @@ public final class BestiaryDiscoveryHandler {
     public static void scan(ServerPlayer player) {
         if (!ModuleManager.isEnabled(Module.BESTIARY) || player.isSpectator()) return;
 
-        double reach = Math.max(EncounterRule.SIGHTING_RANGE, EncounterRule.OBSERVATION_RANGE);
+        boolean onBroom = player.getVehicle() instanceof at.koopro.wizardsandbeasts.entity.broom.BroomEntity;
+        double reach = Math.max(EncounterRule.SIGHTING_RANGE, EncounterRule.OBSERVATION_RANGE)
+                * (onBroom ? EncounterRule.AERIAL_RANGE_SCALE : 1.0);
         List<Entity> nearby = player.level().getEntities(player, player.getBoundingBox().inflate(reach),
                 e -> e instanceof LivingEntity living && living.isAlive() && !(e instanceof ServerPlayer));
         if (nearby.isEmpty()) return;
@@ -179,20 +194,30 @@ public final class BestiaryDiscoveryHandler {
             LivingEntity creature = (LivingEntity) entity;
             List<BestiaryEntry> entries = entriesFor(creature.getType());
             if (entries.isEmpty()) continue;
-            double distanceSq = player.distanceToSqr(creature);
+            // A flyer meets flying beasts on their own terms: on a broom, a creature off the ground counts from
+            // further away (EncounterRule.AERIAL_RANGE_SCALE). Scaling the distance keeps every range below as-is.
+            double scale = onBroom && !creature.onGround() ? EncounterRule.AERIAL_RANGE_SCALE : 1.0;
+            double distanceSq = player.distanceToSqr(creature) / (scale * scale);
             // A creature that is invisible to this player — a Demiguise being looked at, a burrowed Mooncalf — is
-            // not seen, however close it stands.
-            boolean inSight = !creature.isInvisibleTo(player) && player.hasLineOfSight(creature);
+            // not seen, however close it stands. Line of sight is a raycast, the scan's main cost: worked out at most
+            // once per creature, and only when an entry's next check actually needs it (same answers as before).
+            Boolean inSight = null;
             for (BestiaryEntry entry : entries) {
                 if (!EncounterRule.automatic(entry.encounterTrigger())) continue;
                 DiscoveryTier tier = BestiaryDataHelper.getTier(player, entry.id());
-                if (inSight && distanceSq <= EncounterRule.SIGHTING_RANGE * EncounterRule.SIGHTING_RANGE) {
-                    apply(player, entry, tier, EncounterRule.onEncountered(tier));
-                    tier = BestiaryDataHelper.getTier(player, entry.id());
+                if (distanceSq <= EncounterRule.SIGHTING_RANGE * EncounterRule.SIGHTING_RANGE) {
+                    if (inSight == null) inSight = sees(player, creature);
+                    if (inSight) {
+                        apply(player, entry, tier, EncounterRule.onEncountered(tier));
+                        tier = BestiaryDataHelper.getTier(player, entry.id());
+                    }
                 }
-                if (!inSight || tier == DiscoveryTier.UNKNOWN
-                        || distanceSq > EncounterRule.OBSERVATION_RANGE * EncounterRule.OBSERVATION_RANGE
-                        || !calm(player, creature) || !watchedThisScan.add(entry.id())) {
+                if (tier == DiscoveryTier.UNKNOWN
+                        || distanceSq > EncounterRule.OBSERVATION_RANGE * EncounterRule.OBSERVATION_RANGE) {
+                    continue;
+                }
+                if (inSight == null) inSight = sees(player, creature);
+                if (!inSight || !calm(player, creature) || !watchedThisScan.add(entry.id())) {
                     continue;
                 }
                 float multiplier = multipliers.getOrDefault(entry.category(), 1.0f);
@@ -208,6 +233,10 @@ public final class BestiaryDiscoveryHandler {
         }
         // After the tier changes, from the latest record: a tier written above is carried through, not overwritten.
         BestiaryDataHelper.setObservedTicks(player, watchedTotals);
+    }
+
+    private static boolean sees(ServerPlayer player, LivingEntity creature) {
+        return !creature.isInvisibleTo(player) && player.hasLineOfSight(creature);
     }
 
     /**

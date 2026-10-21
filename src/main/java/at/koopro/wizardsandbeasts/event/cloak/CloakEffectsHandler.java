@@ -4,6 +4,7 @@ import org.jspecify.annotations.NullMarked;
 
 import at.koopro.wizardsandbeasts.Config;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.equipment.EquipmentAPI;
 import at.koopro.wizardsandbeasts.item.cloak.CloakItem;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
@@ -182,13 +183,23 @@ public class CloakEffectsHandler {
         return list;
     }
 
+    /**
+     * The cloak a player is wearing, wherever the equipment layer keeps it (the Curios back slot).
+     *
+     * <p>Every gameplay read in this handler goes through here, so it is server-side state only — a
+     * client cannot make itself invisible by claiming a cloak.
+     */
+    private static ItemStack wornCloak(Player player) {
+        ItemStack cloak = EquipmentAPI.getEquippedCloak(player);
+        return cloak.getItem() instanceof CloakItem ? cloak : ItemStack.EMPTY;
+    }
+
     private static boolean isCloakEquipped(Player player) {
-        return player.getItemBySlot(EquipmentSlot.CHEST).getItem() instanceof CloakItem;
+        return !wornCloak(player).isEmpty();
     }
 
     private static boolean isDeathlyCloaked(Player player) {
-        ItemStack chestItem = player.getItemBySlot(EquipmentSlot.CHEST);
-        return chestItem.getItem() instanceof CloakItem cloakItem && cloakItem.isDeathlyHallow();
+        return wornCloak(player).getItem() instanceof CloakItem cloakItem && cloakItem.isDeathlyHallow();
     }
 
     private static void syncTargetForObserver(ServerPlayer observer, ServerPlayer target) {
@@ -231,7 +242,7 @@ public class CloakEffectsHandler {
      * {@link at.koopro.wizardsandbeasts.demiguise.CloakCharges#isChargeable}.
      */
     private static boolean chargedEnough(ServerPlayer player, boolean spendTick) {
-        ItemStack cloak = player.getItemBySlot(EquipmentSlot.CHEST);
+        ItemStack cloak = wornCloak(player);
         if (!at.koopro.wizardsandbeasts.demiguise.CloakCharges.isChargeable(cloak)) {
             return true;
         }

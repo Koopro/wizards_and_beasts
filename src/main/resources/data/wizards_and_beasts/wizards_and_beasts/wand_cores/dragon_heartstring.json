@@ -20,5 +20,10 @@
     "extra_wins": -1,
     "bond_growth": 1.5,
     "transfer_bond_bonus": 0.25
+  },
+  "appearance": {
+    "glint": "#E8352B",
+    "pattern": "heartbeat",
+    "strength": 0.85
   }
 }

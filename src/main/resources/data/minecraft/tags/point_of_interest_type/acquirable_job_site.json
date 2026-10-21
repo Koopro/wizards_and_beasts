@@ -1,6 +1,9 @@
 {
   "replace": false,
   "values": [
-    "wizards_and_beasts:ollivanders_bench"
+    "wizards_and_beasts:ollivanders_bench",
+    "wizards_and_beasts:apothecary_cauldron",
+    "wizards_and_beasts:ministry_desk",
+    "wizards_and_beasts:broom_rack"
   ]
 }

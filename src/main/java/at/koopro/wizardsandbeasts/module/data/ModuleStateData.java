@@ -40,10 +40,10 @@ public final class ModuleStateData extends SavedData {
             WizardsAndBeastsMod.MODID + "_module_state",
             ModuleStateData::seeded,
             RecordCodecBuilder.create(instance -> instance.group(
-                    Codec.unboundedMap(ModuleIds.CODEC, ModuleState.CODEC)
+                    ModuleIds.lenientMap(ModuleState.CODEC)
                             .optionalFieldOf("states", Map.of())
                             .forGetter(d -> Map.copyOf(d.states)),
-                    Codec.unboundedMap(ModuleIds.CODEC, ModuleSettingsValues.CODEC)
+                    ModuleIds.lenientMap(ModuleSettingsValues.CODEC)
                             .optionalFieldOf("settings", Map.of())
                             .forGetter(d -> Map.copyOf(d.settings))
             ).apply(instance, ModuleStateData::ofCodec)));

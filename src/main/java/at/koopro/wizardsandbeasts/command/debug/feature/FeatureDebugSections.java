@@ -50,7 +50,7 @@ public final class FeatureDebugSections {
         register(new at.koopro.wizardsandbeasts.trunk.debug.PocketFeatureDebug());
         // What they are carrying, riding and studying.
         register(new at.koopro.wizardsandbeasts.entity.debug.BroomFeatureDebug());
-        register(new at.koopro.wizardsandbeasts.item.armor.debug.ArmorFeatureDebug());
+        register(new at.koopro.wizardsandbeasts.equipment.debug.EquipmentFeatureDebug());
         register(new at.koopro.wizardsandbeasts.bestiary.debug.BestiaryFeatureDebug());
         register(new at.koopro.wizardsandbeasts.brew.debug.BrewFeatureDebug());
         // The switches over all of it.

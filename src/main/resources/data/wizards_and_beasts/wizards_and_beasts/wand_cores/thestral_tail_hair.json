@@ -18,5 +18,10 @@
   },
   "temperament": {
     "mastery_needs_death_witness": true
+  },
+  "appearance": {
+    "glint": "#7E6AA8",
+    "pattern": "smoke",
+    "strength": 0.6
   }
 }

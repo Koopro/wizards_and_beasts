@@ -57,12 +57,21 @@ public final class StatTraining {
      */
     static final float WILLPOWER_PER_MIND_DEFENDED = 0.50f;
 
+    /**
+     * A Boggart finished with Riddikulus: facing the worst fear you have and laughing at it. The one
+     * WILLPOWER source a wizard playing alone can reach — the two above both need another player
+     * casting mind magic at you. Boggarts are rare and each dies to the charm, so it pays the most
+     * per event of any source: 39 Boggarts to WILLPOWER 25.
+     */
+    static final float WILLPOWER_PER_BOGGART_BANISHED = 0.80f;
+
     /** Every way a stat can be trained by playing, with what it trains and what it is worth. */
     public enum Source {
         SPELL_HIT(PlayerStat.PRECISION, PRECISION_PER_SPELL_HIT, "spell_hit"),
         PROTEGO_DEFLECT(PlayerStat.REFLEXES, REFLEXES_PER_DEFLECT, "protego_deflect"),
         IMPERIUS_ENDURED(PlayerStat.WILLPOWER, WILLPOWER_PER_IMPERIUS_ENDURED, "imperius_endured"),
-        MIND_DEFENDED(PlayerStat.WILLPOWER, WILLPOWER_PER_MIND_DEFENDED, "mind_defended");
+        MIND_DEFENDED(PlayerStat.WILLPOWER, WILLPOWER_PER_MIND_DEFENDED, "mind_defended"),
+        BOGGART_BANISHED(PlayerStat.WILLPOWER, WILLPOWER_PER_BOGGART_BANISHED, "boggart_banished");
 
         private final PlayerStat stat;
         private final float rawAmount;
@@ -118,6 +127,11 @@ public final class StatTraining {
     /** This player repelled a Legilimency intrusion. Trains WILLPOWER. */
     public static void onMindDefended(ServerPlayer player) {
         train(player, Source.MIND_DEFENDED);
+    }
+
+    /** This player's Riddikulus finished a Boggart. Trains WILLPOWER. */
+    public static void onBoggartBanished(ServerPlayer player) {
+        train(player, Source.BOGGART_BANISHED);
     }
 
     private static void train(ServerPlayer player, Source source) {

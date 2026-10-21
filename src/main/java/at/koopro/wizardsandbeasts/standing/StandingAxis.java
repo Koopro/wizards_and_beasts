@@ -20,8 +20,10 @@ import java.util.Locale;
  *       system and keeps all four of its writers — Unforgivables, Horcrux, Resurrection Stone,
  *       Riddle's diary — it simply becomes the dark half of a bipolar axis instead of a lone
  *       one-way counter you could never come back from.</li>
- *   <li>{@link #MINISTRY} is a view over {@code PlayerMinistryRecord}: rank credit minus notoriety.
- *       Nothing about it is stored here, because the criminal record already is.</li>
+ *   <li>{@link #MINISTRY} is a view over {@code PlayerMinistryRecord}: rank credit plus conduct minus
+ *       notoriety. Nothing about it is stored here, because the criminal record already is.</li>
+ *   <li>{@link #PUBLIC} and {@link #PROFESSION} are stored: nothing else in the mod already keeps what the
+ *       wizarding public, or a wizard's own colleagues, think of them.</li>
  * </ul>
  *
  * <p>Every axis runs {@code −bound … +bound} with zero as genuine neutrality, so one band table and
@@ -42,7 +44,21 @@ public enum StandingAxis implements StringRepresentable {
     ALIGNMENT("alignment", 0xFFE0C060),
 
     /** How the Ministry regards you. Derived from the criminal record. */
-    MINISTRY("ministry", 0xFF7FA8D0);
+    MINISTRY("ministry", 0xFF7FA8D0),
+
+    /**
+     * What the wizarding public thinks of you — the Daily Prophet's reading. Hearings move it (a conviction is
+     * news, an acquittal half undoes it) and so do public deeds. A wizard the public despises is not believed
+     * as a witness.
+     */
+    PUBLIC("public", 0xFFD9A066),
+
+    /**
+     * How your own profession regards you. Belongs to the profession you hold: change careers and you start
+     * again at zero. Contracts done well raise it; convictions lower it, twice as hard for those who enforce
+     * the law. Career promotions may require it.
+     */
+    PROFESSION("profession", 0xFF8FC27A);
 
     public static final Codec<StandingAxis> CODEC = StringRepresentable.fromEnum(StandingAxis::values);
 
@@ -65,11 +81,12 @@ public enum StandingAxis implements StringRepresentable {
     }
 
     /**
-     * True when this axis is a number in the save rather than a computation. Only {@link #TRADITION}
-     * is; a deed that tries to write a derived axis is a datapack error, not a silent no-op.
+     * True when this axis is a number in the save rather than a computation: {@link #TRADITION},
+     * {@link #PUBLIC} and {@link #PROFESSION}. A deed that tries to write a derived axis is a datapack error,
+     * not a silent no-op.
      */
     public boolean isStored() {
-        return this == TRADITION;
+        return this == TRADITION || this == PUBLIC || this == PROFESSION;
     }
 
     public Component displayName() {

@@ -175,4 +175,13 @@ class FelixFortuneTest {
         assertFalse(doc.has("effects") && !doc.getAsJsonArray("effects").isEmpty(),
                 "Felix must no longer rely on a placeholder mob-effect list for its identity");
     }
+
+    @Test
+    void aPlayerNeverSavedCanBeSavedAndTheLimiterThenHolds() {
+        // Long.MIN_VALUE is "never saved"; now - MIN_VALUE overflows, which used to read as "just saved".
+        assertTrue(FelixFortune.saveReady(1_000_000L, Long.MIN_VALUE), "a fresh dose could never save anyone");
+        assertTrue(FelixFortune.saveReady(0L, FelixState.NONE.lastSaveGameTime()));
+        assertFalse(FelixFortune.saveReady(1_000L, 1_000L - FelixFortune.SAVE_INTERNAL_COOLDOWN + 1));
+        assertTrue(FelixFortune.saveReady(1_000L, 1_000L - FelixFortune.SAVE_INTERNAL_COOLDOWN));
+    }
 }

@@ -93,6 +93,10 @@ public class ModCreativeTabs {
                         output.accept(BroomItemRegistry.OAKSHAFT_79.get());
                         output.accept(BroomItemRegistry.BROOM_POLISH.get());
                         output.accept(BroomItemRegistry.ENCHANTED_TWIG_BUNDLE.get());
+                        for (var fitting : BroomItemRegistry.FITTINGS.values()) {
+                            output.accept(fitting.get());
+                        }
+                        output.accept(CanonItemRegistry.BROOMSTICK_SERVICING_KIT.get());
                         output.accept(MiscItemRegistry.MARAUDERS_MAP.get());
                         output.accept(MiscItemRegistry.BESTIARY.get());
                         output.accept(MiscItemRegistry.MINISTRY_HANDBOOK.get());
@@ -127,6 +131,21 @@ public class ModCreativeTabs {
                         output.accept(CurrencyItemRegistry.DRAGOT.get());
                         output.accept(CurrencyItemRegistry.LEPRECHAUN_GOLD.get());
                         output.accept(CurrencyItemRegistry.COUNTERFEIT_GALLEON.get());
+                        // Recovered treasure, one per curse, as a tomb would give it: cursed and unread.
+                        for (var entry : java.util.Map.of(
+                                CurrencyItemRegistry.ANCIENT_GOBLET, at.koopro.wizardsandbeasts.treasure.CurseKind.JINX,
+                                CurrencyItemRegistry.WARDED_AMULET, at.koopro.wizardsandbeasts.treasure.CurseKind.WITHERING,
+                                CurrencyItemRegistry.SEALED_CASKET, at.koopro.wizardsandbeasts.treasure.CurseKind.SEALING,
+                                CurrencyItemRegistry.TOMB_MEDALLION, at.koopro.wizardsandbeasts.treasure.CurseKind.FLAGRANTE)
+                                .entrySet().stream().sorted(java.util.Comparator.comparing(e -> e.getValue())).toList()) {
+                            net.minecraft.world.item.ItemStack artefact = new net.minecraft.world.item.ItemStack(entry.getKey().get());
+                            at.koopro.wizardsandbeasts.treasure.TreasureArtefacts.set(artefact,
+                                    new at.koopro.wizardsandbeasts.treasure.TreasureArtefact(
+                                            net.minecraft.resources.Identifier.fromNamespaceAndPath(
+                                                    WizardsAndBeastsMod.MODID, "desert_tomb"),
+                                            java.util.Optional.of(entry.getValue()), 2, false, 580));
+                            output.accept(artefact);
+                        }
 
                         // Spawn Eggs
                         output.accept(MiscItemRegistry.GOBLIN_TELLER_SPAWN_EGG.get());
@@ -220,6 +239,7 @@ public class ModCreativeTabs {
                         // Wizarding blocks
                         output.accept(ModBlocks.WARDING_STONE_ITEM.get());
                         output.accept(ModBlocks.EXAMINATION_DESK_ITEM.get());
+                        output.accept(ModBlocks.BROOM_RACK_ITEM.get());
                         output.accept(ModBlocks.POCKET_CONFIGURATOR_ITEM.get());
                         output.accept(ModBlocks.DEVILS_SNARE.get());
                         output.accept(ModBlocks.MALLOWSWEET.get());

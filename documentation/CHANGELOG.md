@@ -4,6 +4,262 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Ministry law you can play: evidence, Aurors, pleas, appeals, licences, reputation (2026-10-15)
+
+`documentation/MINISTRY_LAW.md`.
+
+- **Evidence.** Every report now files evidence with its source; a name is put to an incident only when the
+  evidence reaches the bar, and a hearing convicts only on evidence that meets the charge's standard. Players'
+  testimony is capped and can never name anyone on its own; only a recorded eyewitness may testify.
+- **Your side of a case.** `/wandb ministry dossier` shows the evidence against you. Answer a summons contesting the
+  charges or pleading guilty (lighter ruling, no appeal); surrender after a lapsed summons rather than be caught;
+  appeal a contested ruling within three days — an overturned ruling gives back the conviction, heat, fine, wand
+  and licences. Cases go cold after ten fruitless searches.
+- **Aurors.** The Auror profession has a career track and works the Auror Office's board: examine scenes (or cast
+  Revelio), question witnesses by sneak-using them, identify, and take suspects in. Posted cases against dark
+  witches and wizards near villages give Aurors work on quiet servers, with a bounty for culprits taken alive.
+- **Reputation.** Public and professional reputation join Ministry standing, which now counts how you deal with the
+  Ministry. Career ranks may require a standing.
+- **Licences.** A licence office at Ministry clerks; new Restricted Magic and Magical Commerce licences; breeding
+  dangerous creatures needs a licence; hearings suspend licences.
+- **Black market.** A fence can bribe a clerk to lose an early case file, at a risk.
+- **Admin.** Ministry → Cases with every item of evidence and its source; case and suspension actions on the
+  player page; eight new settings.
+
+### The Character Sheet is the progression hub (2026-10-15)
+
+`documentation/CHARACTER_SHEET.md`.
+
+- **A page rail** replaces the two clipped tab rows: Identity, Attributes, Magic, Wand, Skills, Creatures, Education,
+  Profession, Reputation, Travel — each with an icon, its full name and a hover line saying what it holds. `↑`/`↓`
+  step through pages.
+- **Identity** (the page the sheet opens on): heritage, lineage, condition, patronus, Ministry standing and vault,
+  then "What you are becoming" — a card per road (build, magic, wand, profession, education, reputation,
+  creatures) with its progress; click one to open its page. Effects and your heritage in play follow.
+- **Magic**: spells grouped by family, each card counting successful casts to its next tier; overall mastery.
+- **Wand** (new): make, allegiance with the next bond state marked, what it does to your spells, its character,
+  history (first and former master, challenges), condition and how it suits you — for the wand in hand or in your
+  pack.
+- **Reputation**: now also lists where you are known — your profession and every place that keeps a standing.
+- **Creatures**: field journal summary above your companions.
+
+### Travel you get better at: broom fittings, flying work, a Ministry-run Apparition test, Floo you discover (2026-10-14)
+
+`documentation/TRAVEL.md`.
+
+- **Broom fittings.** Six canon fittings (Cushioning Charm, Braking Charm, Streamlined Tail Twigs, Balanced Tail,
+  Reinforced Binding, Anti-Jinx Varnish), each a trade; room by broom tier. Fit by using one on a broom; the
+  Broomstick Servicing Kit takes them back off. Dye a parked broom to colour its trail.
+- **Wear matters.** A worn broom wanders; a battered one also loses its edge. Polish and servicing put it right.
+- **Flying work.** Courier parcels from most counters (express pays more), broom time trials round the broom shop
+  (par is where a better broom shows), aerial survey and ruins spotted from the air, and flying beasts watched from
+  twice as far on a broom. A **Quidditch Player** career track pays fittings and, at the top, a Nimbus 2001.
+- **Apparition.** Memorise, forget and sit the test from the new Travel tab. With the Ministry on, the test is sat at
+  a Ministry clerk for 12 Galleons. While you hold a jump, the action bar says what is unsteadying you and how much
+  slack the release has.
+- **Floo.** The picker lists your address book: hearths you reached, stood at or own, plus landmarks. Speaking any
+  public address still works and adds it. Existing players keep every public address they had. Keepers may set a
+  toll of up to 3 Sickles on their public hearths (paid even while they are offline). Apparition wards now close
+  hearths too.
+- **Character Sheet ▸ Travel**: brooms, Apparition, Floo and flying work in one place.
+
+### Education: O.W.L.s you sit, N.E.W.T.s, and the road to a profession (2026-10-14)
+
+`documentation/EDUCATION.md`.
+
+- **The sitting.** The examination desk now runs a ten-minute sitting. Your coursework still sets every grade;
+  doing a subject's practical under the clock (a charm cast, a brew handed in, a crop harvested, a beast fed, a
+  wand finished, the Animagus form taken) or passing its written section raises it one grade. A clock on the HUD,
+  a written paper drawn only from the tomes you read and the stars you charted, best paper always kept.
+- **N.E.W.T.s.** An O.W.L. of Exceeds Expectations opens that subject's N.E.W.T. seat. Aurors, Healers,
+  Unspeakables, Hit Wizards and Curse-Breakers now need N.E.W.T.s; so do the Master Magizoologist rank, the
+  Ministry's top standing, Felix Felicis and the other advanced brews, and every build's capstone.
+- **Astronomy is examined.** The telescope charts the moon's phase and the night's constellation, one night at a
+  time. Lore tomes now show what they say, and the History paper asks about it.
+- **Lessons.** The apothecary, Ollivanders and the Ministry teach: one lesson a day, worth up to an Acceptable.
+- **Character Sheet ▸ Education:** subjects, grades, progress to the next grade, completed sittings, your career's
+  requirements and what to do next.
+- **Fixed:** a goblin saw Curse-Breaker greyed out that the server would accept.
+
+### Recognisable builds: seven roads, seven capstones, and a respec you can experiment with (2026-10-14)
+
+`documentation/SKILL_WEB.md` §7. No existing node was moved or removed.
+
+- **Builds.** Duelist, Wandmaster, Beastmaster, Dark Arts Specialist, Scholar, Healer and Explorer each name an
+  early / mid / advanced road through the existing web and end in a **capstone** that changes play: the
+  Counter-Jinx (a block readies your attack spells), the Wandkeeper's Hands (Reparo mends wands; strange wands
+  answer you), the Beast-Master's Voice (companions obey a stage early), Avada Kedavra, the Scholar's Method
+  (prerequisite practice halved), Healer's Hands (Episkey lifts a stun, mends your companion) and Seasoned
+  Traveller (lighter splinching, more destinations). One mastery per wizard; taking it declares the build.
+- **Respec.** Right-click a node to unlearn one level (a Sickle a point, only if nothing hangs from it); "Start
+  over" on the chart refunds everything, free the first time, a Galleon after. Previews say what you lose.
+- **Character sheet.** The Skills tab now opens with your build, your active roads, the next meaningful choices
+  and the capstone ahead. `/wandb skill build` prints the same.
+- **Fixed:** the Dark Arts web could be bought (and accrued corruption) with the Dark Arts switched off.
+
+### Heritage you can feel: the house-elf, and a Heritage tab for everyone (2026-10-14)
+
+Heritage now changes what a character can do, how the world treats them, what it costs and how they grow
+(`documentation/HERITAGE_IDENTITY_STATUS.md` §0). No heritage was opened for selection.
+
+- **The house-elf, complete** (still gated). Wandless elf magic on the ability wheel: a **snap** that throws back and
+  disarms one target, and a **kitchen charm** that cooks carried raw food without fire. A bound elf can **pledge
+  service** to a witch or wizard (sneak-use them; they sneak-use back to accept); the master can then **call** the
+  elf to their side, and the elf can never strike them — it punishes itself instead. A **garment** from the master's
+  hand sets the elf free for good. Practising elf arts earns profession points.
+- **Heritage tab** on the Character Sheet: advantages, disadvantages, what you can do, how the world treats you,
+  progression, and your state right now (blood and thirst, nights to the full moon, Obscurus stress, whom an elf
+  serves). Sent only to its owner, so a condition stays private.
+- **The Code of Wand Use.** Goblins, house-elves, centaurs and merpeople cannot buy a wand at Ollivanders, and
+  carrying one where a Ministry official can see is a fine.
+- **Practice for peoples without wands.** Goblin appraisal and centaur star reading (now on the wheel) count
+  towards profession points, which used to come only from mastering spells.
+- **Fixed:** the Clan Warden had the half-giant's body; goblins were not immune to Veela allure.
+
+### Economy gaps closed: Dragots at the till, wands to order, a broom shop (2026-10-13)
+
+The open items from the 2026-10-08 economy pass (`documentation/ECONOMY.md`).
+
+- **Dragots spend.** A keeper whose kind takes foreign coin (the travelling dealer, any `dragot/accepts` entity)
+  now offers *Buy 1 for N Dragots* on the board, paid from the pocket and never the vault. A till values a Dragot at
+  the bottom of the teller's spread, so Dragots bought at Gringotts never beat paying from the vault; it is where
+  foreign coin found as loot is worth something without the bank's commission. A shaved coin in the purse can still
+  be noticed: the sale is off and it goes on your file. Keepers in `dragot/only` refuse the vault.
+- **Wands to order.** Ollivanders (Regular and up): hold a shaped blank and a core, pay 3 Galleons × the wood's
+  rarity, and collect the wand a few days later — fewer the better you are known. No workshop tier needed, and the
+  wandmaker fits the flexibility and length to you; the wand still chooses. Elder wood is not made to order.
+- **The broom shop.** A new **Broom Rack** block makes a villager a **broommaker**, who keeps a broom shop:
+  polish, twig bundles, and brooms from a Cleansweep to (for its best customers, one a week) a Firebolt. Broom
+  servicing moved here from Ollivanders. The shop buys nothing back.
+- **O.W.L.s at the counter.** Trusted standing at the apothecary needs Potions E, at Ollivanders Care of Magical
+  Creatures A, and Ministry association Defence Against the Dark Arts A — met automatically while the O.W.L. module
+  is off.
+- **Fixed:** fifteen hand-overs (cauldron, grooming gifts, butterbeer, chocolate frog cards, broom pickup, licence
+  papers, treasure charts…) lost whatever did not fit in a nearly full inventory; a unit test now refuses the
+  pattern. Brooms bought from a trader arrive with their own model.
+
+### A working wizarding economy: traders, the black market, and where money goes (2026-10-08)
+
+Ways to earn and reasons to spend, built on the existing bank and places (`documentation/ECONOMY.md`).
+
+- **Traders with supply and demand.** The apothecary and Ollivanders buy creature materials, ingredients, brews,
+  wandwood, cores and finished unbonded wands, and sell ingredients, cores, blanks and supplies. Prices move with what
+  everyone on the server has recently sold or bought, recover over a few days, and one good a day is in short supply
+  and pays more. However hard a good is farmed, it can only pay so much a day.
+- **New keepers.** A villager working a wizarding cauldron becomes an **apothecary** (Slug & Jiggers); one at an
+  examination desk becomes a **Ministry clerk** (Ministry module). Sneak-use them to open their board.
+- **The law at the counter.** Restricted substances need the Restricted Substances licence at a lawful counter while
+  the Ministry module is on; contraband and stolen goods are refused.
+- **The black market** (Ministry module only). A wandering trader deals under the counter: restricted goods without
+  papers, contraband, wands of other masters, treasure kept from the Gringotts claim, smuggling runs, a memory charm
+  for your witnesses and a forged endorsement. It pays better than the law, and any deal may reach the Ministry:
+  four new offences (trafficking, stolen goods, contraband, procuring illegal magic), each a fine.
+- **Ministry notices.** Beast census, dangerous-beast records, curse clearance, and the lawful surrender of
+  contraband; the **Portkey Office** sells one registered Portkey a week (Portkeys had no survival source).
+- **New services.** Broom servicing (full repair and polish, priced by tier and wear) at Ollivanders' workshop;
+  creature treatment for bonded creatures at the apothecary.
+- **Finder's fees.** The Beast Division pays once for the first field record of each species, more for dangerous ones.
+- **Certification.** Magizoologist and Curse-Breaker ranks charge a certification fee on promotion.
+- **Admin.** Economy → Markets (live flows and every trader's book), price/recovery/finder's-fee scales, black-market
+  detection scale, `/wandb admin economy market [reset]` and `journal <player>`, and a money journal on the Players
+  → Economy facet.
+- **Fixes.** Goblins could profit from the Dragot spread by re-rolling quotes (they now pay 3.5 %, still less than
+  anyone else); the counter had no packet rate limit; the dev kit minted untracked money; leprechaun gold never
+  vanished. Counter deposits and withdrawals are now visible in the ledger.
+
+### Places you can do things at: Gringotts and Ollivanders (2026-10-08)
+
+Wizarding locations are now gameplay hubs with standing, a daily board, services and rewards, on one reusable
+framework (`J/location/`). Gringotts is the first complete loop; Ollivanders proves the framework with a data file.
+Design, audit and roadmap: `documentation/LOCATIONS.md`.
+
+- **Gringotts standing.** Five tiers from Customer to Friend of the Goblins. Earned by returning treasure, breaking
+  curses and finishing the bank's contracts. Sneak-use a goblin teller, or press **Bank business** on the vault
+  screen.
+- **Expeditions.** Bank contracts send you to desert tombs, jungle temples, sunken ruins, woodland mansions and, for
+  trusted associates, the ancient cities. Taking one hands you a Gringotts chart to the nearest site.
+- **Cursed artefacts.** Tomb chests can hold an Ancient Goblet, Warded Amulet, Sealed Casket or Tomb Medallion,
+  cursed 1–4 layers deep. A carried curse harms you every few seconds until it is broken.
+- **Curse-breaking.** Cast Revelio with the artefact in your other hand to read the curse. Cast its counter (Finite
+  Incantatem, Glacius, Alohomora or Reparo) once per layer. The wrong counter makes it flare. Or pay the goblins.
+- **Bank services.** Appraisal, curse-breaking, surrendering treasure for a finder's fee, and a rented
+  high-security vault (27 slots, kept through death) from Account Holder.
+- **Curse-Breaker career track.** Four ranks with rising wages, fed by the same work.
+- **Ollivanders.** Sneak-use a wandmaker: supply contracts for cores and wandwood build standing, and a wand
+  evaluation reads the wand's history of allegiance.
+- **Fix.** The default Apparition ward at the Overworld origin (`gringotts_vaults`) is gone, including the copy
+  existing worlds saved.
+
+### Bonded creatures become companions (2026-10-08)
+
+Bonding used to end at "it follows you". A bonded creature is now a companion with a personality, a
+training record, orders it understands, abilities of its own, and a story. Design and data format:
+`documentation/COMPANIONS.md`.
+
+- **Six stages.** Wild → Curious → Trusting → Bonded → Trained → Mastered. Bond grows from feeding, care
+  (sneak + empty hand pats it), exploring new ground together, fighting together, training, a daily
+  favourite treat, and the help it gives. Each source has a daily cap, so clicking a creature repeatedly
+  earns nothing. Training comes only from orders carried out.
+- **Personality.** Each creature rolls two traits from its species' pool when first bonded and keeps them
+  for life. The traits are brave, skittish, greedy, playful, loyal, aggressive, territorial and curious.
+  They change what it values, how fast it learns, how close it keeps, when it flees, and which orders it
+  refuses until mastered.
+- **Orders.** Follow, stay, rest, return, search, assist, defend, attack and patrol. Each species takes only
+  the orders that suit it, and some open only as it trains. Give orders from the new **Beasts** tab of the
+  Character Sheet; sneak + empty hand toggles follow and stay.
+- **Abilities.** A niffler fetches loose items and sniffs out treasure. A bowtruckle finds wandwood. A thestral
+  reveals threats. A unicorn heals you and senses the Dark. A phoenix heals and cleanses. A demiguise scouts
+  unseen. **Unicorns and demiguises can now be bonded.**
+- **Ownership.**
+  - Only the owner and players they trust can feed, ride or calm a companion. A stranger's food is refused.
+  - A companion cannot be hurt by strangers or trusted friends, only by its owner and players the owner
+    marked hostile (`/wandb player companion trust|hostile <player>`). Server owners can make strangers
+    follow the PvP rule instead (`companionProtection = PVP_FLAG`).
+  - Owned creatures no longer despawn.
+- **Breeding.** Young inherit a trait from each parent and remember their parents and generation. Each
+  species needs the right surroundings to breed: bowtruckles need trees, mooncalves need open sky.
+- **Remembered.** The Beasts tab lists every companion, near or far, with its stage, bond, training,
+  personality, abilities, last known place and story. A companion that dies is kept there as a memorial.
+- **Careers.** Training a companion and mastering one count for the Magizoologist, and there are two new
+  contracts for them.
+- **Fixed on the way:**
+  - Owned creatures despawned when their owner went far away.
+  - Any player could feed someone else's creature and take the career credit for it.
+  - Anyone could ride another player's thestral.
+  - Clipped tab names on the Character Sheet now show in full on hover.
+
+### Careers go on after the choice: ranks, contracts and mastery (2026-10-08)
+
+A career used to end the moment it was chosen: one act a day for a flat wage. Careers can now carry a
+data-driven track (`career_tracks/<profession>.json`, documented in `documentation/PROFESSIONS.md`), and the
+Magizoologist ships with one.
+
+- **Five ranks**, from Trainee to Master Magizoologist. Each needs career experience *and* milestones: pages
+  observed, a creature raised to full trust, field research, a creature bred, an O in Care of Magical
+  Creatures. Promotions are announced to the server, raise the daily wage up to 3×, and hand over trunks;
+  the top rank brings Newt's Case.
+- **Contracts.** A daily board of commissioned work on a new **Career** tab of the Character Sheet: surveys,
+  feeding rounds, unicorn hair groomed for St Mungo's, demiguise hair, mooncalf dung, breeding programmes,
+  dangerous-creature surveys, research papers. Contracts pay coin into the vault and career experience. Every
+  contract targets creatures a default world spawns and materials given without a kill.
+- Experience comes from the work the mod already records (bestiary pages, research, feeding, bonds,
+  breeding, grooming), capped per day.
+- Careers without a track (every other career, for now) are unchanged.
+
+### Apparition no longer splinches a well-timed jump (2026-10-08)
+
+A perfectly timed release splinched whenever one everyday condition was true: walking, a pack more than
+80% full, or a food bar at six or below. Each added two ticks of miss, and any miss at all was a minor
+splinch (four hearts and a minute of Splinched), so most jumps ended in one.
+
+- **A little slack on the ladder.** An inflated miss of up to 3 ticks now lands clean. That absorbs one
+  careless condition, licensed or not, and a release a few ticks off the window, which is about one network
+  round trip. Minor is now 4–9, major 10–18, catastrophic 19+. Two conditions together, a hit taken during
+  the wind-up, tapping instead of holding, and never releasing all still splinch as before.
+- **Sneaking no longer counts as moving.** The movement check compared the speed attribute (0.03) directly
+  against a distance in blocks per tick, which put the line below sneak speed (about 0.065 b/t). It now
+  reads the movement the client reported and sets the line just above a sneak.
+
 ### The skill webs teach magic instead of handing out percentages (2026-09-17)
 
 Progression was an MMO talent tree wearing a wizard's hat. Thirty-four of the hundred-and-seven nodes were

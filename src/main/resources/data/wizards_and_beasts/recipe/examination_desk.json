@@ -1,0 +1,25 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "OWLS"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PIP",
+    "SSS",
+    "F F"
+  ],
+  "key": {
+    "P": "wizards_and_beasts:parchment",
+    "I": "wizards_and_beasts:ink_bottle",
+    "S": "#minecraft:wooden_slabs",
+    "F": "#minecraft:wooden_fences"
+  },
+  "result": {
+    "id": "wizards_and_beasts:examination_desk",
+    "count": 1
+  }
+}

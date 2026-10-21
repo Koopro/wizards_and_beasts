@@ -32,6 +32,17 @@ repositories {
             includeGroup('mezz.jei')
         }
     }
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'Curios'
+                url = 'https://maven.theillusivec4.top/'
+            }
+        }
+        filter {
+            includeGroup('top.theillusivec4.curios')
+        }
+    }
 }
 
 base {
@@ -174,11 +185,13 @@ tasks.named('processResources', ProcessResources).configure {
         if (mainLang.exists() && genLang.exists()) {
             def slurper = new groovy.json.JsonSlurper()
             def merged = new LinkedHashMap()
-            merged.putAll(slurper.parse(genLang))   // generated keys provide the base
-            merged.putAll(slurper.parse(mainLang))  // hand-authored main wins on conflict
+            // Read as UTF-8 explicitly: parse(File) uses the platform charset, which on Windows (cp1252) turned
+            // every non-ASCII character in the shipped lang file into mojibake ("·" read back as "Â·").
+            merged.putAll(slurper.parse(genLang, 'UTF-8'))   // generated keys provide the base
+            merged.putAll(slurper.parse(mainLang, 'UTF-8'))  // hand-authored main wins on conflict
             def outFile = new File(destinationDir, langPath)
             outFile.parentFile.mkdirs()
-            outFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(merged))
+            outFile.setText(groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(merged)), 'UTF-8')
         }
     }
 }
@@ -189,6 +202,13 @@ tasks.named('test', Test).configure {
 
 dependencies {
     implementation "software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}"
+
+    // Curios is a required dependency: every worn piece that is not vanilla armour (robes, cloaks,
+    // hats, masks, rings, amulets) lives in a Curios slot. Compile against the API jar only, so no
+    // Curios internals can leak into the mod; the full jar is on the runtime classpath for dev runs.
+    // Only `equipment/curios/` may import Curios types — see documentation/EQUIPMENT_ARCHITECTURE.md.
+    compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}:api"
+    runtimeOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
 
     testImplementation platform('org.junit:junit-bom:5.11.4')
     testImplementation 'org.junit.jupiter:junit-jupiter'

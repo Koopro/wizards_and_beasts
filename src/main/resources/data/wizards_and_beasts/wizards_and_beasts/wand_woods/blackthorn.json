@@ -33,6 +33,17 @@
     "tint": "#3E3330",
     "handle": "wizards_and_beasts:gnarled",
     "shaft": "wizards_and_beasts:barked",
-    "tip": "wizards_and_beasts:claw"
+    "tip": "wizards_and_beasts:claw",
+    "grain": "wizards_and_beasts:knotty",
+    "rare": [
+      {
+        "chance": 0.06,
+        "handle": "wizards_and_beasts:talon"
+      },
+      {
+        "chance": 0.04,
+        "tip": "wizards_and_beasts:hook"
+      }
+    ]
   }
 }

@@ -65,13 +65,18 @@ public final class SpellCommands {
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("spell")
+                // Admin only: spells are found and read (books, the web), never granted by asking. Ungated,
+                // any player could teach themselves an Unforgivable and clear the release's "not known" gate.
                 .then(Commands.literal("learn")
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .then(Commands.argument("spell", StringArgumentType.word())
                                 .suggests(SPELL_ID_SUGGESTIONS)
                                 .executes(ctx -> learnSpell(
                                         ctx.getSource().getPlayerOrException(),
                                         StringArgumentType.getString(ctx, "spell")))))
+                // Admin only: forgetting a web-taught spell outside a respec desyncs the web's refund ledger.
                 .then(Commands.literal("forget")
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                         .then(Commands.argument("spell", StringArgumentType.word())
                                 .suggests(SPELL_ID_SUGGESTIONS)
                                 .executes(ctx -> forgetSpell(

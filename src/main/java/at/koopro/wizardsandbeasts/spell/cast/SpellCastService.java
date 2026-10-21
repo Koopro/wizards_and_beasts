@@ -200,6 +200,14 @@ public final class SpellCastService {
             return CastResult.REJECTED;
         }
 
+        // The caster's own state can stop a spell forming (a Patronus without a happy enough memory). Like the
+        // fizzles above it is refused before anything is spent; the spell gives its own feedback.
+        String refusal = spell.castRefusal(player, serverLevel);
+        if (refusal != null) {
+            debugReject(player, refusal);
+            return CastResult.REJECTED;
+        }
+
         GampsLaw.Violation violation = GampsLaw.validate(castContext);
         if (violation != null) {
             GampViolationEvent event = new GampViolationEvent(player, violation, castContext);
@@ -251,6 +259,8 @@ public final class SpellCastService {
         long expiryTick = currentTick + cooldown;
         data.setCooldown(spellId, expiryTick);
         data.incrementCastCount(spellId);
+        // Creatures nearby notice magic: a curious one comes to look, a prey animal bolts (creature/ecology).
+        at.koopro.wizardsandbeasts.creature.ecology.CreatureStimuli.spellCast(serverLevel, player.position());
         // The Unforgivables are the corrupting acts in the lore; until now only dark artefacts stained the
         // caster. No-op for every other spell.
         at.koopro.wizardsandbeasts.corruption.UnforgivableToll.onCast(player, spellId);
@@ -263,6 +273,9 @@ public final class SpellCastService {
         // Magical standing: what a wizard repeatedly chooses to cast is the clearest statement they
         // make about themselves. Returns immediately unless a datapack authored a spell_cast deed.
         at.koopro.wizardsandbeasts.standing.deed.DeedService.onSpellCast(player, spellId);
+        // Curse-breaking: Revelio reads, a counter-spell lifts a layer of the curse on a held artefact. No-op unless
+        // one is in hand (treasure.CurseBreaking).
+        at.koopro.wizardsandbeasts.treasure.CurseBreaking.onSpellCast(player, spellId);
         int newCount = data.getCastCount(spellId);
         long gcdEndTick = currentTick + GLOBAL_COOLDOWN_TICKS;
         data.setGlobalCooldownEndTick(gcdEndTick);

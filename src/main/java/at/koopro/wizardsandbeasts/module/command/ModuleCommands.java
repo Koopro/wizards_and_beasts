@@ -41,8 +41,10 @@ public final class ModuleCommands {
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("module")
-                // Admin gate lives on the `admin` group above; operator permission alone is not
-                // enough there once an allow-list is configured.
+                // Module state changes straight through ModuleStateService, which checks no authority itself, so
+                // the subtree carries the capability the Control Center's module settings need.
+                .requires(at.koopro.wizardsandbeasts.admin.access.AdminPolicy.requires(
+                        at.koopro.wizardsandbeasts.admin.access.AdminCapability.CONFIG))
                 .executes(ctx -> listModules(ctx.getSource()))
                 .then(Commands.literal("list")
                         .executes(ctx -> listModules(ctx.getSource())))

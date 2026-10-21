@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    { "id": "wizards_and_beasts:basilisk_fang", "required": false },
+    { "id": "wizards_and_beasts:hand_of_glory", "required": false },
+    { "id": "wizards_and_beasts:blood_pact_vial", "required": false },
+    { "id": "wizards_and_beasts:dark_mark_brand", "required": false },
+    { "id": "wizards_and_beasts:counterfeit_galleon", "required": false }
+  ]
+}

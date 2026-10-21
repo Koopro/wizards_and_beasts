@@ -3863,7 +3863,7 @@
             23.0,
             0.0
           ],
-          "parent": "wand_root"
+          "parent": "shaft"
         },
         {
           "name": "tip_pointed",
@@ -6453,7 +6453,7 @@
             27.5,
             0.0
           ],
-          "parent": "wand_root"
+          "parent": "tip"
         }
       ]
     }

@@ -77,7 +77,7 @@ public class DemiguiseHairItem extends Item {
                 : InteractionHand.MAIN_HAND;
         ItemStack cloak = player.getItemInHand(other);
         if (!CloakCharges.isChargeable(cloak)) {
-            cloak = player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST);
+            cloak = at.koopro.wizardsandbeasts.equipment.EquipmentAPI.getEquippedCloak(player);
         }
         if (!CloakCharges.isChargeable(cloak)) {
             return InteractionResult.PASS;

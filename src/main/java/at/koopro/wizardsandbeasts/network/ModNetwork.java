@@ -51,7 +51,12 @@ public class ModNetwork {
         ModNetworkPocket.register(registrar);
         ModNetworkNiffler.register(registrar);
         ModNetworkOWLs.register(registrar);
+        at.koopro.wizardsandbeasts.network.career.ModNetworkCareer.register(registrar);
+        at.koopro.wizardsandbeasts.network.education.ModNetworkEducation.register(registrar);
+        at.koopro.wizardsandbeasts.network.location.ModNetworkLocation.register(registrar);
+        at.koopro.wizardsandbeasts.network.companion.ModNetworkCompanion.register(registrar);
         ModNetworkFloo.register(registrar);
+        at.koopro.wizardsandbeasts.network.travel.ModNetworkTravel.register(registrar);
         ModNetworkBloodPact.register(registrar);
         ModNetworkAzkaban.register(registrar);
         ModNetworkCharacter.register(registrar);

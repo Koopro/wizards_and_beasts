@@ -1,0 +1,19 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "BROOM_FLIGHT"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "tools",
+  "ingredients": [
+    "wizards_and_beasts:enchanted_twig_bundle",
+    "minecraft:feather",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:balanced_tail",
+    "count": 1
+  }
+}

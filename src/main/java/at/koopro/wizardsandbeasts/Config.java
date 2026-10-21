@@ -30,11 +30,45 @@ public class Config {
                     "failure this web must not have. Coins can be earned back; earned points cannot.",
                     "Charged only while the Gringotts module is on; set 0 to make respec free.")
             .defineInRange("skillRespecCostKnuts", 493, 0, Integer.MAX_VALUE);
+    private static final ModConfigSpec.IntValue SKILL_UNLEARN_COST_KNUTS_PER_POINT = BUILDER
+            .comment("Cost in knuts per skill point to unlearn one level of one node. Default 29 = one Sickle a point,",
+                    "never more than skillRespecCostKnuts in total. The cheap door, so trying a node is not a gamble",
+                    "with the whole web. Charged only while the Gringotts module is on; set 0 to make unlearning free.")
+            .defineInRange("skillUnlearnCostKnutsPerPoint", 29, 0, Integer.MAX_VALUE);
     private static final ModConfigSpec.IntValue OLLIVANDER_WAND_PRICE_KNUTS = BUILDER
             .comment("Price in knuts of every wand after a player's first from Ollivander's trial. Default 3451 =",
                     "seven Galleons (Philosopher's Stone ch. 5). The first wand is always free: a new character has",
                     "no money and cannot cast without one. Charged only while the Gringotts module is on; 0 = free.")
             .defineInRange("ollivanderWandPriceKnuts", 3451, 0, Integer.MAX_VALUE);
+    private static final ModConfigSpec.IntValue WAND_CARE_PRICE_KNUTS = BUILDER
+            .comment("What Ollivander charges, in knuts, to tend a wand on the brink of snapping; a less worn wand costs",
+                    "its share of this, rounded up to a Sickle. Default 986 = two Galleons. Wands wear only from",
+                    "explosions; a snapped wand is beyond him. Charged only while the Gringotts module is on; 0 = free.")
+            .defineInRange("wandCarePriceKnuts", 986, 0, Integer.MAX_VALUE);
+    private static final ModConfigSpec.IntValue LICENCE_ENDORSEMENT_FEE_KNUTS = BUILDER
+            .comment("The Ministry's fee, in knuts, per rank when a licence is endorsed: rank 1 costs this, rank 2 twice",
+                    "it, rank 3 three times. Default 986 = 2, 4 and 6 Galleons, twelve in all (the canon Apparition",
+                    "course fee). Taken only when every other requirement is met. Charged only while the Gringotts",
+                    "module is on; 0 = endorsements cost only parchment and ink.")
+            .defineInRange("licenceEndorsementFeeKnuts", 986, 0, Integer.MAX_VALUE);
+    private static final ModConfigSpec.IntValue MARKET_PRICE_SCALE_PERCENT = BUILDER
+            .comment("Percentage applied to every trader's prices (location markets), both what they pay for goods and",
+                    "what they ask. 100 ships the books as written. Supply and demand still move each good around it.")
+            .defineInRange("marketPriceScalePercent", 100, 10, 1000);
+    private static final ModConfigSpec.IntValue MARKET_RECOVERY_SCALE_PERCENT = BUILDER
+            .comment("Percentage applied to how fast a trader forgets what was recently sold to it (each market's",
+                    "half-life). 100 = as written; 200 = demand comes back twice as fast, which also doubles the most",
+                    "any one good can pay the server per day. Lower it if materials are flooding in.")
+            .defineInRange("marketRecoveryScalePercent", 100, 25, 400);
+    private static final ModConfigSpec.IntValue ILLICIT_DETECTION_SCALE_PERCENT = BUILDER
+            .comment("Percentage applied to the chance that a deal with a fence reaches the Ministry. 100 as designed,",
+                    "0 = never (the black market becomes a better-paying shop), 300 = the Ministry hears of most deals.",
+                    "Fences only trade while the Ministry module is on.")
+            .defineInRange("illicitDetectionScalePercent", 100, 0, 1000);
+    private static final ModConfigSpec.IntValue EXPLORATION_FEE_SCALE_PERCENT = BUILDER
+            .comment("Percentage applied to the Ministry's finder's fee for the first field record of each species",
+                    "(paid once per species per player, scaled by its Ministry rating). 0 turns the fee off.")
+            .defineInRange("explorationFeeScalePercent", 100, 0, 1000);
     private static final ModConfigSpec.IntValue MINISTRY_FINE_SCALE_PERCENT = BUILDER
             .comment("Percentage applied to every Ministry fine. 100 ships the tariff as designed",
                     "(2 Galleons for unlicensed Apparition, 10 for an unregistered Animagus), 200 doubles it,",
@@ -57,6 +91,39 @@ public class Config {
             .comment("Notoriety a wizard sheds per second while lying low (no unpaid fine, not a fugitive).",
                     "0.05 ships the designed pace: a spree takes real time to cool. 0 keeps notoriety forever.")
             .defineInRange("ministryNotorietyDecayPerSecond", 0.05, 0.0, 1.0);
+    private static final ModConfigSpec.IntValue MINISTRY_APPEAL_WINDOW_DAYS = BUILDER
+            .comment("In-game days after a hearing during which a contested ruling may be appealed to the full",
+                    "Wizengamot. 0 turns appeals off.")
+            .defineInRange("ministryAppealWindowDays", 3, 0, 30);
+    private static final ModConfigSpec.IntValue MINISTRY_APPEAL_FEE_KNUTS = BUILDER
+            .comment("Fee in Knuts to lodge an appeal, taken from the vault and refunded in full if the ruling is",
+                    "reduced or overturned. 2465 = 5 Galleons. 0 makes appeals free. Charged only with Gringotts on.")
+            .defineInRange("ministryAppealFeeKnuts", 2465, 0, 1000000);
+    private static final ModConfigSpec.IntValue MINISTRY_LICENCE_FEE_KNUTS = BUILDER
+            .comment("Fee in Knuts the Ministry's licence office charges to issue or renew a licence. 986 = 2",
+                    "Galleons. 0 makes licences free. Licences won by examination are still issued free.")
+            .defineInRange("ministryLicenceFeeKnuts", 986, 0, 1000000);
+    private static final ModConfigSpec.IntValue MINISTRY_LICENCE_TERM_DAYS = BUILDER
+            .comment("In-game days a licence issued or renewed at the licence office stays valid. 0 (the default)",
+                    "issues licences that never expire. Licences already in the world are never changed.")
+            .defineInRange("ministryLicenceTermDays", 0, 0, 3650);
+    private static final ModConfigSpec.IntValue MINISTRY_UNLICENSED_SALES_KNUTS_PER_WEEK = BUILDER
+            .comment("Knuts a wizard without a Magical Commerce licence may take at trader counters per in-game",
+                    "week. Past it the counter refuses to buy (never a crime). 9860 = 20 Galleons; 0 = no limit.")
+            .defineInRange("ministryUnlicensedSalesKnutsPerWeek", 9860, 0, 100000000);
+    private static final ModConfigSpec.BooleanValue MINISTRY_PLAYER_AURORS = BUILDER
+            .comment("Whether players with the Auror profession (or Ministry rank Auror) may work cases from the",
+                    "Auror Office's board: examine scenes, question witnesses and apprehend suspects. The",
+                    "Ministry's own procedural Aurors keep working either way.")
+            .define("ministryPlayerAurors", true);
+    private static final ModConfigSpec.BooleanValue MINISTRY_NPC_CASES = BUILDER
+            .comment("Whether the Auror Office posts cases against non-player culprits, so an Auror has work",
+                    "when no player breaks the law.")
+            .define("ministryNpcCases", true);
+    private static final ModConfigSpec.BooleanValue MINISTRY_BRIBERY = BUILDER
+            .comment("Whether a Knockturn fence can bribe a clerk to lose a case file. Only while a case is still",
+                    "under investigation and never for an Unforgivable; a bribe that is caught is its own offence.")
+            .define("ministryBribery", true);
     private static final ModConfigSpec.IntValue STANDING_AXIS_BOUND = BUILDER
             .comment("Magnitude of every magical-standing axis. Each axis runs -bound to +bound with 0",
                     "as true neutrality. Raising it makes standing slower to move, not deeper: the deed",
@@ -206,6 +273,11 @@ public class Config {
                     "comes from. The number is computed by the same class the server casts with, so it",
                     "cannot drift from what a cast actually does.")
             .define("showSpellPowerInTooltip", true);
+    private static final ModConfigSpec.EnumValue<at.koopro.wizardsandbeasts.creature.companion.CompanionRules.Protection> COMPANION_PROTECTION = BUILDER
+            .comment("Who may hurt another player's bonded companion.",
+                    "  OWNER_ONLY - only its owner, and players the owner has marked hostile (default).",
+                    "  PVP_FLAG   - strangers too, whenever the server allows PvP. Trusted friends never.")
+            .defineEnum("companionProtection", at.koopro.wizardsandbeasts.creature.companion.CompanionRules.Protection.OWNER_ONLY);
     private static final ModConfigSpec.EnumValue<CreatureSpawns> CREATURE_NATURAL_SPAWNS = BUILDER
             .comment("Which wizarding creatures may spawn naturally.",
                     "  ALPHA_ONLY - only the creatures on the finished alpha roster, plus the ones the mod's",
@@ -433,16 +505,32 @@ public class Config {
     public static boolean enforceSpellRequirements;
     public static boolean debugLogSpellGateReasons;
     public static boolean enableDebugTools;
-    public static int skillRespecCostKnuts;
+    public static int skillRespecCostKnuts = 493;
+    public static int skillUnlearnCostKnutsPerPoint = 29;
     public static int ollivanderWandPriceKnuts = 3451;
+    public static int wandCarePriceKnuts = 986;
+    public static int licenceEndorsementFeeKnuts = 986;
     /**
      * Seeded with the shipped default rather than left at 0: an uninitialised scale reads as "fines are
      * switched off", so a fine assessed before the config load event would silently cost nothing.
      */
     public static int ministryFineScalePercent = 100;
+    /** Seeded with the shipped defaults: a 0 before the config loads would make every trade free or refused. */
+    public static int marketPriceScalePercent = 100;
+    public static int marketRecoveryScalePercent = 100;
+    public static int illicitDetectionScalePercent = 100;
+    public static int explorationFeeScalePercent = 100;
     public static int ministryDaysPerYear = 8;
     public static int ministryNewCharacterAge = 0;
     public static double ministryNotorietyDecayPerSecond = 0.05;
+    public static int ministryAppealWindowDays = 3;
+    public static int ministryAppealFeeKnuts = 2465;
+    public static int ministryLicenceFeeKnuts = 986;
+    public static int ministryLicenceTermDays = 0;
+    public static int ministryUnlicensedSalesKnutsPerWeek = 9860;
+    public static boolean ministryPlayerAurors = true;
+    public static boolean ministryNpcCases = true;
+    public static boolean ministryBribery = true;
     /**
      * Seeded with the shipped defaults for the same reason the fine scale is: standing is read from the
      * character sheet and from the skill-gate path, and a bound of 0 before the config load event would
@@ -470,6 +558,8 @@ public class Config {
     public static boolean reduceScreenEffects;
     /** Seeded with the shipped default so a spawn check before config load still answers sanely. */
     public static CreatureSpawns creatureNaturalSpawns = CreatureSpawns.ALPHA_ONLY;
+    public static at.koopro.wizardsandbeasts.creature.companion.CompanionRules.Protection companionProtection =
+            at.koopro.wizardsandbeasts.creature.companion.CompanionRules.Protection.OWNER_ONLY;
     public static boolean showPlaceholderSpawnEggs;
     public static DummyNumberMode dummyDamageNumbers = DummyNumberMode.SELF;
     public static boolean dummyShowHearts = false;
@@ -556,11 +646,26 @@ public class Config {
         debugLogSpellGateReasons = DEBUG_LOG_SPELL_GATE_REASONS.get();
         enableDebugTools = ENABLE_DEBUG_TOOLS.get();
         skillRespecCostKnuts = SKILL_RESPEC_COST_KNUTS.get();
+        skillUnlearnCostKnutsPerPoint = SKILL_UNLEARN_COST_KNUTS_PER_POINT.get();
         ollivanderWandPriceKnuts = OLLIVANDER_WAND_PRICE_KNUTS.get();
+        wandCarePriceKnuts = WAND_CARE_PRICE_KNUTS.get();
+        licenceEndorsementFeeKnuts = LICENCE_ENDORSEMENT_FEE_KNUTS.get();
         ministryFineScalePercent = MINISTRY_FINE_SCALE_PERCENT.get();
+        marketPriceScalePercent = MARKET_PRICE_SCALE_PERCENT.get();
+        marketRecoveryScalePercent = MARKET_RECOVERY_SCALE_PERCENT.get();
+        illicitDetectionScalePercent = ILLICIT_DETECTION_SCALE_PERCENT.get();
+        explorationFeeScalePercent = EXPLORATION_FEE_SCALE_PERCENT.get();
         ministryDaysPerYear = MINISTRY_DAYS_PER_YEAR.get();
         ministryNewCharacterAge = MINISTRY_NEW_CHARACTER_AGE.get();
         ministryNotorietyDecayPerSecond = MINISTRY_NOTORIETY_DECAY_PER_SECOND.get();
+        ministryAppealWindowDays = MINISTRY_APPEAL_WINDOW_DAYS.get();
+        ministryAppealFeeKnuts = MINISTRY_APPEAL_FEE_KNUTS.get();
+        ministryLicenceFeeKnuts = MINISTRY_LICENCE_FEE_KNUTS.get();
+        ministryLicenceTermDays = MINISTRY_LICENCE_TERM_DAYS.get();
+        ministryUnlicensedSalesKnutsPerWeek = MINISTRY_UNLICENSED_SALES_KNUTS_PER_WEEK.get();
+        ministryPlayerAurors = MINISTRY_PLAYER_AURORS.get();
+        ministryNpcCases = MINISTRY_NPC_CASES.get();
+        ministryBribery = MINISTRY_BRIBERY.get();
         standingAxisBound = STANDING_AXIS_BOUND.get();
         standingLeanThresholdPercent = STANDING_LEAN_THRESHOLD_PERCENT.get();
         standingStrongThresholdPercent = STANDING_STRONG_THRESHOLD_PERCENT.get();
@@ -587,6 +692,7 @@ public class Config {
         showSpellHudOverlay = SHOW_SPELL_HUD_OVERLAY.get();
         reduceScreenEffects = REDUCE_SCREEN_EFFECTS.get();
         creatureNaturalSpawns = CREATURE_NATURAL_SPAWNS.get();
+        companionProtection = COMPANION_PROTECTION.get();
         showPlaceholderSpawnEggs = SHOW_PLACEHOLDER_SPAWN_EGGS.get();
         dummyDamageNumbers = DUMMY_DAMAGE_NUMBERS.get();
         dummyShowHearts = DUMMY_SHOW_HEARTS.get();

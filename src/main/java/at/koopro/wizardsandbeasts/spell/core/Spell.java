@@ -81,6 +81,19 @@ public abstract class Spell {
         SpellExecutor.dispatchGeneric(ctx, level);
     }
 
+    /**
+     * Whether the caster's own state stops this spell from forming at all, checked by {@code SpellCastService}
+     * after the rule gates and before anything is executed or spent. Returns a reject code, or {@code null} to
+     * cast. An override gives its own feedback.
+     *
+     * <p>A refusal here costs what a misfire costs — nothing: no cooldown, no cast count, no global cooldown,
+     * no wand corruption. A spell that forms and then underperforms is a cast and is charged in full; only a
+     * spell that never forms belongs here.
+     */
+    public @Nullable String castRefusal(ServerPlayer caster, ServerLevel level) {
+        return null;
+    }
+
     // ── Getters ─────────────────────────────────────────────────────────
 
     public String getId() { return id; }

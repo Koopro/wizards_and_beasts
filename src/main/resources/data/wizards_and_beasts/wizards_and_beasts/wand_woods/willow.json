@@ -28,6 +28,17 @@
     "tint": "#BFA97E",
     "handle": "wizards_and_beasts:flared",
     "shaft": "wizards_and_beasts:spiral",
-    "tip": "wizards_and_beasts:needle"
+    "tip": "wizards_and_beasts:needle",
+    "grain": "wizards_and_beasts:wavy",
+    "rare": [
+      {
+        "chance": 0.06,
+        "shaft": "wizards_and_beasts:sinuous"
+      },
+      {
+        "chance": 0.04,
+        "ornament": "wizards_and_beasts:wire_wrap"
+      }
+    ]
   }
 }
