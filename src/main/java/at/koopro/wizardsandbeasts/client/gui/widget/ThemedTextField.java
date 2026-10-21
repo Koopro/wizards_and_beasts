@@ -1,6 +1,8 @@
 package at.koopro.wizardsandbeasts.client.gui.widget;
 
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
+import at.koopro.wizardsandbeasts.client.gui.ui.NightChrome;
+import at.koopro.wizardsandbeasts.client.gui.ui.UiSurface;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GuiSkin;
 import net.minecraft.client.gui.Font;
@@ -33,6 +35,8 @@ public class ThemedTextField extends EditBox {
     private @Nullable Component inkHint;
     /** The material the well is pressed into; {@code null} is the default page. */
     private @Nullable GuiSkin skin;
+    /** Pressed into the night sheet ({@code UiSurface.NIGHT_SHEET}) instead of paper. */
+    private boolean night;
 
     public ThemedTextField(@NonNull Font font, int x, int y, int w, int h, @NonNull Component narration) {
         super(font, x, y, w, h, narration);
@@ -62,6 +66,19 @@ public class ThemedTextField extends EditBox {
         return this;
     }
 
+    /**
+     * Presses the well into the night sheet, in the night card's cream ink with a shadow: on the dark
+     * cloth an unshadowed glyph fizzes, which is the rule {@code UiSurface} keeps for that family.
+     */
+    public ThemedTextField night() {
+        this.night = true;
+        this.skin = null;
+        setTextColor(UiSurface.NIGHT_SHEET.ink());
+        setTextColorUneditable(UiSurface.NIGHT_SHEET.disabled());
+        setTextShadow(true);
+        return this;
+    }
+
     @Override
     public boolean isBordered() {
         return false;
@@ -77,20 +94,22 @@ public class ThemedTextField extends EditBox {
         if (!isVisible()) {
             return;
         }
-        if (skin == null) {
+        if (night) {
+            NightChrome.inset(g, getX(), getY(), getWidth(), getHeight());
+        } else if (skin == null) {
             McStylePanel.drawThemedInset(g, getX(), getY(), getWidth(), getHeight());
         } else {
             McStylePanel.drawSkinInset(g, skin, getX(), getY(), getWidth(), getHeight());
         }
         if (isFocused()) {
             // Gilt rather than a brighter ink: focus is furniture, and the well's own ink line stays.
-            int gilt = skin == null ? WizardsPalette.GILT : skin.accent();
+            int gilt = night ? WizardsPalette.GILT_DARK : skin == null ? WizardsPalette.GILT : skin.accent();
             McStylePanel.drawBorder(g, getX() + 1, getY() + 1, getWidth() - 2, getHeight() - 2, gilt, gilt);
         }
         super.renderWidget(g, mouseX, mouseY, partialTick);
         if (inkHint != null && getValue().isEmpty() && !isFocused()) {
             g.drawString(font, inkHint, getX() + TEXT_INSET, getY() + (getHeight() - GLYPH_H) / 2,
-                    skin == null ? WizardsPalette.PAGE_INK_3 : skin.muted(), false);
+                    night ? UiSurface.NIGHT_SHEET.ink3() : skin == null ? WizardsPalette.PAGE_INK_3 : skin.muted(), night);
         }
     }
 }

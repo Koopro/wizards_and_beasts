@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class UiSurfaceTest {
 
     private static List<UiSurface> surfaces() {
-        List<UiSurface> all = new ArrayList<>(List.of(UiSurface.PAGE, UiSurface.NIGHT));
+        List<UiSurface> all = new ArrayList<>(List.of(UiSurface.PAGE, UiSurface.NIGHT, UiSurface.NIGHT_SHEET));
         for (GuiSkin skin : GuiSkin.values()) {
             all.add(UiSurface.of(skin));
         }
@@ -31,7 +31,8 @@ class UiSurfaceTest {
     }
 
     private static String name(UiSurface s) {
-        return s == UiSurface.PAGE ? "PAGE" : s == UiSurface.NIGHT ? "NIGHT" : String.valueOf(s.skin());
+        return s == UiSurface.PAGE ? "PAGE" : s == UiSurface.NIGHT ? "NIGHT"
+                : s == UiSurface.NIGHT_SHEET ? "NIGHT_SHEET" : String.valueOf(s.skin());
     }
 
     private static void atLeast(UiSurface s, String role, int ink, double floor) {
@@ -59,6 +60,27 @@ class UiSurfaceTest {
             atLeast(s, "bad", s.bad(), UiContrast.AA_LARGE);
             atLeast(s, "warn", s.warn(), UiContrast.AA_LARGE);
             atLeast(s, "disabled", s.disabled(), UiContrast.AA_LARGE);
+        }
+    }
+
+    /**
+     * The night sheet's text mostly sits in its wells (the spell list, the details card) and on its
+     * cloth, whose posterised grain has a lighter tone than the field ({@code gui_parchment.py}
+     * {@code field_l}). Its inks must hold on both, not only on the field the record names.
+     */
+    @Test
+    void nightSheetInksHoldOnItsWellAndItsLightestCloth() {
+        UiSurface s = UiSurface.NIGHT_SHEET;
+        for (int ground : new int[]{s.well(), 0xFF241E2C}) {
+            UiSurface on = new UiSurface(ground, s.well(), s.edge(), s.ink(), s.ink2(), s.ink3(), s.heading(),
+                    s.good(), s.bad(), s.warn(), s.accent(), s.disabled(), s.selectWash(), s.hoverWash(),
+                    s.shadow(), null);
+            atLeast(on, "ink", on.ink(), UiContrast.AA_TEXT);
+            atLeast(on, "ink2", on.ink2(), UiContrast.AA_TEXT);
+            atLeast(on, "heading", on.heading(), UiContrast.AA_TEXT);
+            atLeast(on, "ink3", on.ink3(), UiContrast.AA_LARGE);
+            atLeast(on, "warn", on.warn(), UiContrast.AA_LARGE);
+            atLeast(on, "disabled", on.disabled(), UiContrast.AA_LARGE);
         }
     }
 

@@ -169,6 +169,7 @@ The rules every screen follows so the mod reads as one game. Components that imp
 |---|---|---|---|---|
 | `PAGE` | parchment `#E4D2A6` | `#2E1F16` / `#5C4330` / `#8A6E52` | rubric `#8E2320` | no |
 | `NIGHT` | soot-violet `#1C1722` @ 94% | `#F3E6D2` / `#C2A78F` / `#9A8878` | gilt `#EBC874` | yes |
+| `NIGHT_SHEET` | opaque bookcloth `#1C1722` (grain `#17131D`/`#241E2C`), wells `#120F16` | as `NIGHT` | as `NIGHT` | yes |
 | `of(GuiSkin)` | the skin's paper | the skin's ink; label and meaning colours lifted to AA on its paper | skin ink | no |
 
 `UiSurfaceTest` pins every surface: ink, label and heading at 4.5 : 1, caption / good / bad / warn /
@@ -176,6 +177,12 @@ disabled at 3 : 1, shadow exactly on the dark surfaces. A screen has one body su
 float over it. Each screen keeps its own identity through its material, its art and its layout — the
 skill web stays a star chart, the bestiary a field notebook, the wand trial a workbench — while the type,
 spacing, controls, states and tooltips are shared.
+
+**Hybrid direction (2026-10-21, user decision).** Book-like screens (handbook, bestiary, research, O.W.L.,
+Ministry) stay parchment. The magical *systems* — spell loadout, heritage, character, skills, workstations,
+artefacts — move to `NIGHT_SHEET`: gilt for structure only, violet (`#6A4C93` family) only for magical
+significance (gems, the chosen face, a drop target). This reverses the 2026-09-23 "parchment for every
+full screen" rule for those screens only. Rollout order and status: `tasks/todo_ui_overhaul_2026_10_21.md`.
 
 ### Typography hierarchy
 

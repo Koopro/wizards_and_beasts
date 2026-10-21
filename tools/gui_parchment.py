@@ -827,6 +827,248 @@ def tooltip_frame(s):
     return img
 
 
+# --------------------------------------------------------------------------- night sheet
+#
+# The dark material for the system screens (spell loadout, heritage, character, skills, the
+# bench): bookcloth the colour of the night card, a gilt bezel lit from the top-left, an amethyst
+# set in each corner clasp. It is the tooltip card's family grown into a full sheet, so a tooltip
+# over one of these screens reads as a piece of the same board. Java: `NightChrome`,
+# `UiSurface.NIGHT_SHEET`. Parchment stays the material of everything that is read like a book.
+
+NIGHT = dict(
+    void=rgb("#07060A"),      # outlines and the gap between bezel rings
+    deep=rgb("#0E0B12"),      # the floor of a recess
+    well=rgb("#120F16"),      # UiSurface.NIGHT_WELL
+    field_d=rgb("#17131D"),
+    field=rgb("#1C1722"),     # UiSurface.NIGHT_FIELD, opaque
+    field_l=rgb("#241E2C"),
+    field_ll=rgb("#2F2838"),
+    arcane_d=rgb("#3A2A55"),  # the restrained violet: gems, the selected face, a drop target
+    arcane=rgb("#6A4C93"),
+    arcane_l=rgb("#9C7FD0"),
+)
+SOCKET = 30     # wand socket sprite edge, drawn 1:1
+ARROW = 7       # direction chevron edge
+ORNAMENT_W, ORNAMENT_H = 13, 7
+
+
+def night_cloth(w, h, seed, base="field"):
+    """Bookcloth: three posterised tones of the field, periodic in INNER like the paper grain, and
+    held to small steps so cream ink on it never meets a light patch."""
+    n = NIGHT
+    lo, mid, hi = {"field": (n["field_d"], n["field"], n["field_l"]),
+                   "well": (n["deep"], n["well"], n["field_d"])}[base]
+    field = grain_field(w + INNER, h + INNER, seed, 0.7)
+    img = Image.new("RGBA", (w, h))
+    px = img.load()
+    for y in range(h):
+        for x in range(w):
+            v = field[(y - BORDER) % INNER][(x - BORDER) % INNER]
+            px[x, y] = (lo if v < -0.62 else hi if v > 0.66 else mid) + (255,)
+    return img
+
+
+def lit_shape(px, cells, s, tones=("gilt_l", "gilt", "gilt_d")):
+    """Shade a set of pixels as one gilt casting under the global top-left light: an edge facing up
+    or left is lit, one facing down or right is in shade, the rest is the metal's own tone. The rule
+    is the panel bosses' -- light is global, never mirrored with the corner."""
+    hi, mid, lo = (s[t] for t in tones)
+    for (x, y) in cells:
+        up_left_open = (x - 1, y) not in cells or (x, y - 1) not in cells
+        down_right_open = (x + 1, y) not in cells or (x, y + 1) not in cells
+        if up_left_open and not down_right_open:
+            c = hi
+        elif down_right_open and not up_left_open:
+            c = lo
+        else:
+            c = mid
+        px[x, y] = c + (255,)
+
+
+def gem(px, x, y):
+    """A 3x3 amethyst, lit top-left."""
+    n = NIGHT
+    rows = (("arcane_l", "arcane", "arcane"),
+            ("arcane", "arcane", "arcane_d"),
+            ("arcane", "arcane_d", "arcane_d"))
+    for j in range(3):
+        for i in range(3):
+            px[x + i, y + j] = n[rows[j][i]] + (255,)
+
+
+def night_panel(s, seed=71):
+    """The sheet, 64x64 on an 8px border, tiled. Border, outside in: void / lit gilt bevel (two
+    rows) / void / shadow / a dim gilt rule (the parchment kit's double rule, at night) / cloth.
+    Every border row is uniform along its edge, so the tiled edges have no seam to show."""
+    n = NIGHT
+    img = night_cloth(PANEL, PANEL, seed)
+    px = img.load()
+    P = PANEL
+    rule = mix(n["field"], s["gilt_d"], 0.55)
+    for y in range(P):
+        for x in range(P):
+            e = min(x, y, P - 1 - x, P - 1 - y)
+            if e > 6:
+                continue
+            # Which edge this pixel is nearest decides its light: top and left are lit.
+            lit = (y == e or x == e) and not (P - 1 - y == e or P - 1 - x == e)
+            if e == 0 or e == 3:
+                c = n["void"]
+            elif e == 1:
+                c = s["gilt_l"] if lit else s["gilt_d"]
+            elif e == 2:
+                c = s["gilt"] if lit else shade(s["gilt_d"], 0.78)
+            elif e == 4:
+                c = mix(n["field_d"], n["void"], 0.45 if lit else 0.15)
+            elif e == 5:
+                c = rule
+            else:
+                c = mix(px[x, y][:3], n["void"], 0.25) if lit else px[x, y][:3]
+            px[x, y] = c + (255,)
+    # Corner clasps: a 7x7 gilt boss over the bevel with an amethyst set in it; the boss's own
+    # outer corner pixel is knocked out, which is what rounds the sheet.
+    for ox, oy in ((0, 0), (P - 7, 0), (0, P - 7), (P - 7, P - 7)):
+        cells = {(ox + i, oy + j) for i in range(1, 6) for j in range(1, 6)}
+        for i in range(7):
+            for j in range(7):
+                if i in (0, 6) or j in (0, 6):
+                    px[ox + i, oy + j] = n["void"] + (255,)
+        lit_shape(px, cells, s)
+        gem(px, ox + 2, oy + 2)
+    for c in ((0, 0), (P - 1, 0), (0, P - 1), (P - 1, P - 1)):
+        px[c] = (0, 0, 0, 0)
+    return img
+
+
+def night_inset(s, seed=83):
+    """A recess in the cloth: darker stock, shadow on the top-left, a faint gilt lip bottom-right.
+    Only the outer two pixels carry the edge, so content inset by 4 already sits on the floor."""
+    n = NIGHT
+    img = night_cloth(PANEL, PANEL, seed, base="well")
+    d = ImageDraw.Draw(img)
+    P = PANEL
+    d.line([(0, 0), (P - 1, 0)], fill=n["void"])
+    d.line([(0, 0), (0, P - 1)], fill=n["void"])
+    d.line([(1, 1), (P - 2, 1)], fill=n["deep"])
+    d.line([(1, 1), (1, P - 2)], fill=n["deep"])
+    lip = mix(n["well"], s["gilt_d"], 0.42)
+    d.line([(1, P - 1), (P - 1, P - 1)], fill=lip)
+    d.line([(P - 1, 1), (P - 1, P - 1)], fill=lip)
+    return img
+
+
+def night_button(s, state=""):
+    """A raised cloth face on a gilt-lined edge, 32x32 cut on 4. Rows uniform across x so the
+    stretched centre is exact. `_select` is the arcane face of a chosen filter or tab."""
+    n = NIGHT
+    face, hi, lo, edge = n["field_l"], n["field_ll"], n["field_d"], mix(s["gilt_d"], n["void"], 0.3)
+    if state == "_hover":
+        face, hi, lo, edge = mix(n["field_l"], n["arcane_d"], 0.35), mix(n["field_ll"], s["gilt"], 0.22), \
+            n["field_d"], s["gilt"]
+    elif state == "_off":
+        face, hi, lo, edge = n["field_d"], n["field_d"], n["field_d"], mix(n["field_ll"], n["void"], 0.25)
+    elif state == "_select":
+        face, hi, lo, edge = mix(n["field_l"], n["arcane"], 0.45), mix(n["arcane"], n["arcane_l"], 0.4), \
+            n["arcane_d"], s["gilt_l"]
+    B = BTN
+    img = Image.new("RGBA", (B, B), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.rectangle([0, 0, B - 1, B - 1], fill=face)
+    d.line([(1, 1), (B - 2, 1)], fill=hi)
+    d.line([(1, 1), (1, B - 2)], fill=hi)
+    d.line([(1, B - 2), (B - 2, B - 2)], fill=lo)
+    d.line([(B - 2, 1), (B - 2, B - 2)], fill=lo)
+    d.rectangle([0, 0, B - 1, B - 1], outline=edge)
+    for c in ((0, 0), (B - 1, 0), (0, B - 1), (B - 1, B - 1)):
+        img.putpixel(c, (0, 0, 0, 0))
+    return img
+
+
+def night_divider(s):
+    """32x8, stretched in x: a gilt rule with its shadow under it."""
+    img = Image.new("RGBA", (32, 8), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.line([(0, 3), (31, 3)], fill=mix(s["gilt_d"], s["gilt"], 0.35))
+    d.line([(0, 4), (31, 4)], fill=NIGHT["void"] + (170,))
+    return img
+
+
+def night_ornament(s):
+    """13x7: a gilt lozenge with an amethyst eye, laid on the title rule's centre."""
+    img = Image.new("RGBA", (ORNAMENT_W, ORNAMENT_H), (0, 0, 0, 0))
+    px = img.load()
+    cx, cy = ORNAMENT_W // 2, ORNAMENT_H // 2
+    cells = {(x, y) for x in range(ORNAMENT_W) for y in range(ORNAMENT_H) if abs(x - cx) + abs(y - cy) <= 3}
+    cells |= {(x, cy) for x in range(ORNAMENT_W)}
+    lit_shape(px, cells, s)
+    n = NIGHT
+    for (x, y), t in (((cx, cy - 1), "arcane_l"), ((cx - 1, cy), "arcane_l"), ((cx, cy), "arcane"),
+                      ((cx + 1, cy), "arcane_d"), ((cx, cy + 1), "arcane_d")):
+        px[x, y] = n[t] + (255,)
+    return img
+
+
+def night_socket(s, state=""):
+    """A wand socket, 30x30: an octagonal gilt bezel around a deep recess. The spell's category ring
+    and icon are drawn over it by code; the sprite carries only the state the frame shows.
+
+    idle -- a dim bezel; `_hover` -- the bezel lit; `_target` -- something is being dragged over it:
+    bright bezel and an arcane rim inside it, so the change does not rest on brightness alone."""
+    n = NIGHT
+    S = SOCKET
+    cut = 7
+    inside = {(x, y) for x in range(S) for y in range(S)
+              if x + y >= cut and (S - 1 - x) + y >= cut and x + (S - 1 - y) >= cut
+              and (S - 1 - x) + (S - 1 - y) >= cut}
+    # Depth of each pixel into the octagon, by 8-neighbour erosion: keeps the chamfers straight.
+    depth, ring, d = {}, set(inside), 0
+    while ring:
+        edge = {p for p in ring if any((p[0] + dx, p[1] + dy) not in ring
+                                       for dx in (-1, 0, 1) for dy in (-1, 0, 1))}
+        for p in edge:
+            depth[p] = d
+        ring -= edge
+        d += 1
+    bezel_hi, bezel, bezel_lo = {"": ("gilt", "gilt_d", "gilt_d"),
+                                 "_hover": ("gilt_l", "gilt", "gilt_d"),
+                                 "_target": ("gilt_ll", "gilt_l", "gilt")}[state]
+    rim = {"": n["void"], "_hover": n["void"], "_target": n["arcane_l"]}[state]
+    floor = {"": n["deep"], "_hover": n["well"], "_target": mix(n["deep"], n["arcane_d"], 0.45)}[state]
+    img = Image.new("RGBA", (S, S), (0, 0, 0, 0))
+    px = img.load()
+    c0 = (S - 1) / 2
+    for (x, y), k in depth.items():
+        if k == 0:
+            c = n["void"]
+        elif k in (1, 2):
+            # Global light on the bezel: the half of the ring facing the top-left is lit.
+            side = (x - c0) + (y - c0)
+            c = s[bezel_hi] if side < -2 else s[bezel_lo] if side > 2 else s[bezel]
+            if k == 2:
+                c = shade(c, 0.86)
+        elif k == 3:
+            c = rim
+        else:
+            # The recess darkens toward its walls.
+            c = mix(floor, n["void"], 0.35) if k == 4 else floor
+        px[x, y] = c + (255,)
+    return img
+
+
+def night_arrow(s, direction):
+    """7x7 gilt chevron pointing up/right/down/left: the direction a socket answers to, so an empty
+    socket says which way it is without colour or text."""
+    img = Image.new("RGBA", (ARROW, ARROW), (0, 0, 0, 0))
+    px = img.load()
+    rows = ((3, 3), (2, 4), (1, 5), (0, 6))
+    cells = {(x, y + 1) for y, (a, b) in enumerate(rows) for x in range(a, b + 1)}
+    lit_shape(px, cells, s)
+    turns = {"up": None, "right": Image.Transpose.ROTATE_270, "down": Image.Transpose.ROTATE_180,
+             "left": Image.Transpose.ROTATE_90}
+    t = turns[direction]
+    return img if t is None else img.transpose(t)
+
+
 # Sprites that carry vanilla's own nine-slice metadata rather than the panels' 64/8.
 VANILLA_SLICE = {
     "sprites/tooltip/night_background.png": {"width": TOOLTIP, "height": TOOLTIP, "border": 9},
@@ -850,7 +1092,21 @@ def assets():
         "character_sheet/panel_sel.png": lambda: button(d, "", "_hover", 24),
         "sprites/tooltip/night_background.png": lambda: tooltip_background(d),
         "sprites/tooltip/night_frame.png": lambda: tooltip_frame(d),
+        # The night sheet -- see NightChrome.
+        "sprites/night/panel.png": lambda: night_panel(d),
+        "sprites/night/panel_inset.png": lambda: night_inset(d),
+        "sprites/night/divider.png": lambda: night_divider(d),
+        "sprites/night/ornament.png": lambda: night_ornament(d),
+        "sprites/night/button.png": lambda: night_button(d),
+        "sprites/night/button_hover.png": lambda: night_button(d, "_hover"),
+        "sprites/night/button_off.png": lambda: night_button(d, "_off"),
+        "sprites/night/button_select.png": lambda: night_button(d, "_select"),
+        "sprites/night/socket.png": lambda: night_socket(d),
+        "sprites/night/socket_hover.png": lambda: night_socket(d, "_hover"),
+        "sprites/night/socket_target.png": lambda: night_socket(d, "_target"),
     }
+    for direction in ("up", "right", "down", "left"):
+        out[f"sprites/night/arrow_{direction}.png"] = lambda direction=direction: night_arrow(d, direction)
     for i, name in enumerate(SKINS):
         sk = skin(name)
         per = {
