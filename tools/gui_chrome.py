@@ -50,27 +50,6 @@ def canvas(w, h):
     return img, ImageDraw.Draw(img)
 
 
-def bare_sheet(s, w, h, seed):
-    """The torn sheet with no rule at all, for a vanilla-layout screen whose slots and bars run
-    to within a few pixels of the edge.
-
-    The slip's single rule sits at 4px; on the bench the tier bar occupies y 187-192 of a 196px
-    sheet, so any rule would be struck through by it. The rule is painted out of the 64px tile
-    before composing, from the pixel one step further in -- same grain phase, same edge stain.
-    """
-    tile = panel(s, seed=seed, slip=True)
-    px = tile.load()
-    lo, hi = 4, PANEL - 5
-    for i in range(lo, hi + 1):
-        px[i, lo] = px[i, lo + 1]
-        px[i, hi] = px[i, hi - 1]
-        px[lo, i] = px[lo + 1, i]
-        px[hi, i] = px[hi - 1, i]
-    img, _ = canvas(w, h)
-    slice_tiled(img, tile, 0, 0, w, h, BORDER)
-    return img
-
-
 # --------------------------------------------------------------------------- slots
 
 def slot_colours(s):
@@ -81,31 +60,6 @@ def slot_colours(s):
         face=mix(s["paper_d"], s["paper_dd"], 0.55),
         lip=s["paper_ll"],
     )
-
-
-def slot_well(img, x, y, s):
-    """An 18x18 slot recess at the *background* coordinate (one out from the Slot's), in vanilla's
-    exact pixel pattern: shadow along the top and left, lit lip along the bottom and right, and
-    the two corners where they meet left at the face colour."""
-    c = slot_colours(s)
-    d = ImageDraw.Draw(img)
-    d.rectangle([x, y, x + 17, y + 17], fill=opaque(c["face"]))
-    d.line([(x, y), (x + 16, y)], fill=opaque(c["shadow"]))
-    d.line([(x, y), (x, y + 16)], fill=opaque(c["shadow"]))
-    d.line([(x + 1, y + 17), (x + 17, y + 17)], fill=opaque(c["lip"]))
-    d.line([(x + 17, y + 1), (x + 17, y + 17)], fill=opaque(c["lip"]))
-
-
-def recess(img, box, s):
-    """A shallow rectangular well: darker stock, shadow top-left, lit lip bottom-right."""
-    x0, y0, x1, y1 = box
-    d = ImageDraw.Draw(img)
-    d.rectangle([x0, y0, x1, y1], fill=opaque(mix(s["paper"], s["paper_d"], 0.6)))
-    shadow = opaque(mix(s["paper_dd"], s["ink_2"], 0.3))
-    d.line([(x0, y0), (x1, y0)], fill=shadow)
-    d.line([(x0, y0), (x0, y1)], fill=shadow)
-    d.line([(x0 + 1, y1), (x1, y1)], fill=opaque(s["paper_ll"]))
-    d.line([(x1, y0 + 1), (x1, y1)], fill=opaque(s["paper_ll"]))
 
 
 # --------------------------------------------------------------------------- character sheet
@@ -135,52 +89,6 @@ def a_icon_tab():
     # A wax dot, so it is this mod's scroll.
     img.putpixel((10, 10), opaque(s["wax"]))
     img.putpixel((11, 10), opaque(s["wax_d"]))
-    return img
-
-
-# --------------------------------------------------------------------------- wandmaker's bench
-
-def a_wandmakers_bench():
-    """The bench background, on Ollivander's pattern paper (`workbench`).
-
-    Every coordinate is `WandmakersBenchMenu`'s, not a new one. The bench slots are at (44,35),
-    (80,35) and (134,35); the inventory is the vanilla 9x3 at (8, 112) stepping 18, and the hotbar at
-    (8, 170). Those are Slot coordinates, so each well is drawn one pixel out from them. Get this
-    wrong and every slot renders off its socket, which is the one way this file can break function
-    rather than looks.
-
-    The bands the screen draws into are left clear: the flexibility picker at y 66, the status line
-    at y 90, and the strip below the hotbar at y 187-193 where the tier bar sits -- which is why the
-    sheet carries no frame rule (see `bare_sheet`).
-    """
-    s = WORKBENCH
-    W, H = 176, 196
-    img = bare_sheet(s, W, H, 17)
-    d = ImageDraw.Draw(img)
-
-    # Title rule, clear of the vanilla title at (8, 6): the kit's thick-and-thin.
-    d.line([(8, 16), (W - 9, 16)], fill=opaque(s["ink"]))
-    d.line([(8, 18), (W - 9, 18)], fill=opaque(s["ink_2"]))
-
-    for sx in (44, 80, 134):
-        slot_well(img, sx - 1, 34, s)
-    # The arrow that says which way the work goes: gilt, outlined in ink.
-    d.polygon([(108, 43), (116, 43), (116, 40), (122, 45), (116, 50), (116, 47), (108, 47)],
-              fill=opaque(s["gilt"]), outline=opaque(s["ink"]))
-    d.line([(109, 44), (116, 44)], fill=opaque(s["gilt_l"]))
-
-    # Flexibility picker well: the cycler's 18px row at y 66 with a two-pixel margin. The screen's
-    # `FLEX_ROW_Y` is the number that decides it.
-    recess(img, (14, 64, W - 15, 85), s)
-
-    for row in range(3):
-        for col in range(9):
-            slot_well(img, 7 + col * 18, 111 + row * 18, s)
-    for col in range(9):
-        slot_well(img, 7 + col * 18, 169, s)
-
-    # The tier bar's track, in the 187-193 strip below the hotbar. Java paints only the fill.
-    recess(img, (16, 187, W - 17, 192), s)
     return img
 
 
@@ -308,7 +216,6 @@ ASSETS = {
     "container/creative_inventory/tab_main.png": lambda: a_creative_background(PAGE, 3),
     "container/creative_inventory/tab_decorative.png": lambda: a_creative_background(VELLUM, 7),
     "container/hermiones_bag.png": a_hermiones_bag,
-    "wandmakers_bench.png": a_wandmakers_bench,
     "character_sheet/icon_tab.png": a_icon_tab,
 }
 

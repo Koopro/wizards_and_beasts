@@ -386,6 +386,57 @@ public final class Ui {
         return new Rect(x + i * (tw + gap), y, tw, TAB_H);
     }
 
+    // ── slots ─────────────────────────────────────────────────────────────────
+
+    /** An item slot's frame: one pixel out from the item on every side. */
+    public static final int SLOT = 18;
+
+    /**
+     * The well a container slot sits in, for an item drawn at ({@code itemX}, {@code itemY}) -- the
+     * coordinates the menu gives its {@code Slot}. Drawn procedurally so the frame is placed by the same
+     * numbers as the slot and can never sit off it: a sunk face, shadow on the top-left, lit lip on the
+     * bottom-right (light is top-left everywhere).
+     */
+    public static void slot(GuiGraphics g, int itemX, int itemY) {
+        slotWell(g, itemX - 1, itemY - 1, SLOT, SLOT);
+    }
+
+    /**
+     * A larger, framed slot for a result: the same well {@code pad} pixels wider on each side inside a
+     * gilt ring, so the thing a station makes reads apart from the things it takes.
+     */
+    public static void resultSlot(GuiGraphics g, int itemX, int itemY, int pad) {
+        int x = itemX - 1 - pad;
+        int y = itemY - 1 - pad;
+        int size = SLOT + 2 * pad;
+        g.fill(x - 1, y - 1, x + size + 1, y + size + 1, WizardsPalette.GILT_DARK);
+        g.fill(x - 1, y - 1, x + size, y, WizardsPalette.GILT);
+        g.fill(x - 1, y - 1, x, y + size, WizardsPalette.GILT);
+        slotWell(g, x, y, size, size);
+    }
+
+    /**
+     * A one-pixel wash ring just outside a slot: where the carried item will go. A shape, so it does not
+     * rest on the colour alone.
+     */
+    public static void slotTarget(GuiGraphics g, int itemX, int itemY, int pad, int colour) {
+        int x = itemX - 2 - pad;
+        int y = itemY - 2 - pad;
+        int size = SLOT + 2 + 2 * pad;
+        g.fill(x, y, x + size, y + 1, colour);
+        g.fill(x, y + size - 1, x + size, y + size, colour);
+        g.fill(x, y + 1, x + 1, y + size - 1, colour);
+        g.fill(x + size - 1, y + 1, x + size, y + size - 1, colour);
+    }
+
+    private static void slotWell(GuiGraphics g, int x, int y, int w, int h) {
+        g.fill(x, y, x + w, y + h, WizardsPalette.PAGE_SHADE);
+        g.fill(x, y, x + w - 1, y + 1, WizardsPalette.PAGE_DEEP);
+        g.fill(x, y + 1, x + 1, y + h - 1, WizardsPalette.PAGE_DEEP);
+        g.fill(x + 1, y + h - 1, x + w, y + h, WizardsPalette.PAGE_LIGHT);
+        g.fill(x + w - 1, y + 1, x + w, y + h - 1, WizardsPalette.PAGE_LIGHT);
+    }
+
     // ── direction ─────────────────────────────────────────────────────────────
 
     /** Edge of {@link #arrow}'s box. */

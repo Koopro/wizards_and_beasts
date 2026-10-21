@@ -215,3 +215,20 @@ Plan and per-milestone status: `tasks/todo_ui_overhaul_2026_10_21.md`.
 - `HeritageDossierRenderer` now takes a `UiSurface`; the Control Center's `HeritagePreview` keeps parchment.
 - Seen: 1080p GUI 2/3/4, 1366x768 + 1280x720 GUI 3, confirm card GUI 3/4 (`run/screenshots/ui_overhaul_m3*`).
 
+### Wandmaker's Bench — `client/wand/gui` + `wand/gui/WandmakersBenchMenu` (redesigned)
+- Was: 176x196 generated sheet on the workbench paper whose wells were kept in step with the menu by hand;
+  station slots unlabelled; status cut to one line ("Place a shaped blank and…"); tier bar unlabelled under
+  the hotbar (open item 4 of the 10-07 audit); title on the sheet's frame rule.
+- Now: 180x232 on the shared parchment, drawn procedurally from the menu's own constants
+  (`GUI_W/GUI_H`, `slotOrigins()`), which the menu's `Slot`s also use — frames cannot sit off a slot.
+  Station row Blank + Core → Wand (larger gilt-ringed result frame), captions under each, the slot that
+  takes the carried blank/core outlined, arrow turns gilt when a wand is ready. Flexibility cycler on paper.
+  Status wraps to two lines. "Bench tier" row: caption, bar over its real 0–3 range, value; tooltip on the
+  whole row. Inventory 4px lower and 2px in, clear of the frame rule.
+- Slot order unchanged (0 blank, 1 core, 2 output, 3–29 inventory, 30–38 hotbar), so `quickMoveStack` is
+  untouched. `WandmakersBenchGeometryTest` pins order, bounds and no-overlap.
+- Retired: `textures/gui/wandmakers_bench.png` and `gui_chrome.py`'s `a_wandmakers_bench` with its
+  bench-only helpers. New kit: `Ui.slot`, `Ui.resultSlot`, `Ui.slotTarget`.
+- Seen: 1080p GUI 3/4 and 720p GUI 3, empty and with a blank + core seated (`run/screenshots/ui_bench_after`).
+- ⏳ Not exercised by hand in a live client: shift-click, drag-split, taking the wand. Code paths unchanged.
+

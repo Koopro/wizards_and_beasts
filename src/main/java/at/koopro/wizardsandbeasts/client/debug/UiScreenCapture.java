@@ -189,6 +189,7 @@ public final class UiScreenCapture {
                 Step.client("owl_profession", () -> open(new ProfessionSelectionScreen(grades))),
                 Step.client("ministry_licence", () -> open(new MinistryLicenceScreen(false))),
                 Step.server("wandmakers_bench", UiScreenCapture::openBench),
+                Step.server("wandmakers_bench_loaded", UiScreenCapture::openBenchLoaded),
                 Step.server("ollivander_trial", OllivanderInteractHandler::openTrial),
                 Step.client("admin_control_center", AdminClientRequests::open),
                 // The 2026-10-15 finishing pass: the screens the first audit did not reach.
@@ -281,6 +282,22 @@ public final class UiScreenCapture {
     }
 
     /** Uses the bench, as a right click does. */
+    /**
+     * The bench with a blank and a core seated, so the shot shows items sitting in the station frames
+     * (an unshaped blank: the status line then explains it). The capture world is a disposable copy.
+     */
+    private static void openBenchLoaded(ServerPlayer player) {
+        if (benchPos != null && player.level().getBlockEntity(benchPos)
+                instanceof at.koopro.wizardsandbeasts.wand.bench.WandmakersBenchBlockEntity bench) {
+            var inv = bench.getInventory();
+            inv.set(0, net.neoforged.neoforge.transfer.item.ItemResource.of(
+                    new net.minecraft.world.item.ItemStack(at.koopro.wizardsandbeasts.registry.WandItemRegistry.WAND_BLANK.get())), 1);
+            inv.set(1, net.neoforged.neoforge.transfer.item.ItemResource.of(
+                    new net.minecraft.world.item.ItemStack(at.koopro.wizardsandbeasts.registry.WandItemRegistry.PHOENIX_FEATHER.get())), 1);
+        }
+        openBench(player);
+    }
+
     private static void openBench(ServerPlayer player) {
         if (benchPos == null) {
             return;
