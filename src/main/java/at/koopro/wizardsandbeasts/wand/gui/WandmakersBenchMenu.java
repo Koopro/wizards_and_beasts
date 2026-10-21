@@ -341,6 +341,10 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
                 tx.commit();
             }
             super.onTake(player, stack);
+            // A wand finished at the bench is a Wandmaker's day of work.
+            if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+                at.koopro.wizardsandbeasts.owl.career.CareerWork.record(serverPlayer, at.koopro.wizardsandbeasts.owl.career.CareerWork.Kind.WANDCRAFT);
+            }
             menu.updateCraftingResult();
         }
     }

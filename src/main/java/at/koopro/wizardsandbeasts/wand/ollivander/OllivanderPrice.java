@@ -2,12 +2,12 @@ package at.koopro.wizardsandbeasts.wand.ollivander;
 
 import at.koopro.wizardsandbeasts.Config;
 import at.koopro.wizardsandbeasts.ability.PlayerAbilityHelper;
+import at.koopro.wizardsandbeasts.currency.billing.GringottsBilling;
+import at.koopro.wizardsandbeasts.currency.billing.MoneyFlow;
 import at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper;
-import at.koopro.wizardsandbeasts.currency.vault.PlayerVaultData;
 import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
-import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -48,12 +48,7 @@ public final class OllivanderPrice {
         if (price <= 0) {
             return true;
         }
-        PlayerVaultData vault = player.getData(ModAttachments.VAULT_DATA.get());
-        long withdrawn = vault.withdrawSmartKnuts(price);
-        if (withdrawn < price) {
-            if (withdrawn > 0) {
-                vault.depositKnuts(withdrawn); // never pocket a partial payment
-            }
+        if (!GringottsBilling.charge(player, MoneyFlow.WAND_PURCHASE, price)) {
             PlayerFeedback.actionBar(player, Component.translatable("wandcraft.trial.price.short",
                     CurrencyHelper.formatFromKnuts(price)).withStyle(ChatFormatting.RED));
             return false;

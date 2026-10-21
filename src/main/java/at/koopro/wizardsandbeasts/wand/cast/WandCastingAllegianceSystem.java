@@ -42,7 +42,7 @@ public final class WandCastingAllegianceSystem {
         if (!Config.enableWandAllegiance || !(wand.getItem() instanceof at.koopro.wizardsandbeasts.item.wand.WandItem)) {
             return new Compatibility.Score(0.5f, 0.5f);
         }
-        WandBondState state = WandAllegianceService.stateFor(ctx.caster().getUUID(), wand);
+        WandBondState state = WandAllegianceService.castingState(ctx.caster(), wand);
         String source = "wand_bond_" + state.name().toLowerCase(Locale.ROOT);
         ctx.modifiers().multiplyDamage(
                 WandAllegianceService.powerMultiplier(ctx.caster(), wand, level.registryAccess()), source);

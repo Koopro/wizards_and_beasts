@@ -83,8 +83,13 @@ class WandModelContractTest {
                 assertEquals(slot.slotId(), bone.get("parent").getAsString(),
                         module.boneName() + " must hang directly off the '" + slot.slotId() + "' bone");
             }
-            // And the other way: geometry under a slot that no module can select is dead weight.
+            // And the other way: geometry under a slot that no module can select is dead weight. The
+            // length chain's links (the tip slot under the shaft, the attachment under the tip) are
+            // structure, not variants.
             for (String variant : CHILDREN.getOrDefault(slot.slotId(), List.of())) {
+                if (WandSlot.byId(variant).isPresent() || variant.equals("wand_spell_attachment")) {
+                    continue;
+                }
                 assertTrue(modules.stream().anyMatch(m -> m.boneName().equals(variant)),
                         variant + " is on the rig but no module selects it");
             }
@@ -141,8 +146,14 @@ class WandModelContractTest {
         }
     }
 
+    /**
+     * The modular wand's attachment rides the length chain (wand_root > shaft > tip > attachment), so
+     * when a look lengthens or bows the shaft the place a spell leaves stays on the drawn point. The
+     * Elder Wand is never reshaped and keeps it on wand_root. Either way no variant owns it.
+     */
     @Test
     void theSpellAttachmentIsOwnedByNoVariantInEitherWand() throws IOException {
+        Map<String, String> parent = Map.of("wand", "tip", "elder_wand", "wand_root");
         for (String model : new String[]{"wand", "elder_wand"}) {
             JsonObject attachment = null;
             for (JsonElement e : geometry(model).getAsJsonArray("bones")) {
@@ -151,10 +162,24 @@ class WandModelContractTest {
                 }
             }
             assertNotNull(attachment, model + " has no wand_spell_attachment");
-            assertEquals("wand_root", attachment.get("parent").getAsString(), model + ": attachment must hang off wand_root");
+            assertEquals(parent.get(model), attachment.get("parent").getAsString(),
+                    model + ": attachment must hang off " + parent.get(model));
             assertArrayEquals(ATTACHMENT, vec(attachment.getAsJsonArray("pivot")), EPS, model + ": attachment moved");
             assertFalse(attachment.has("rotation") || attachment.has("cubes"), model + ": attachment carries geometry");
         }
+    }
+
+    /** WandRenderer scales the shaft slot bone and expects the tip slot to ride on it. */
+    @Test
+    void theTipRidesOnTheShaft() {
+        assertEquals("wand_root", BONES.get("shaft").get("parent").getAsString());
+        assertEquals("shaft", BONES.get("tip").get("parent").getAsString(),
+                "the tip slot must hang off the shaft slot, or a longer wand's point floats off its shaft");
+        assertEquals("wand_root", BONES.get("handle").get("parent").getAsString());
+        assertArrayEquals(new double[]{0, HANDLE_TOP, 0}, vec(BONES.get("shaft").getAsJsonArray("pivot")), EPS,
+                "the shaft scales about the grip plane");
+        assertArrayEquals(new double[]{0, SHAFT_TOP, 0}, vec(BONES.get("tip").getAsJsonArray("pivot")), EPS,
+                "the tip unscales about the shaft's top plane");
     }
 
     @Test

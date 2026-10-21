@@ -2,9 +2,12 @@ package at.koopro.wizardsandbeasts.wand;
 
 import at.koopro.wizardsandbeasts.wand.customization.WandConfiguration;
 import at.koopro.wizardsandbeasts.wand.customization.WandSlot;
+import at.koopro.wizardsandbeasts.wand.registry.WandCoreDefinition;
 import at.koopro.wizardsandbeasts.wand.registry.WandDatapackRegistries;
+import at.koopro.wizardsandbeasts.wand.registry.WandRareConstruction;
 import at.koopro.wizardsandbeasts.wand.registry.WandWoodAppearance;
 import at.koopro.wizardsandbeasts.wand.registry.WandWoodDefinition;
+import at.koopro.wizardsandbeasts.wand.visual.WandLookResolver;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.Identifier;
@@ -13,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -60,6 +64,18 @@ public final class WandAppearance {
                 .orElse(null);
     }
 
+    /** The core's datapack entry, or null when there is no registry to ask or the core is unknown. */
+    public static @Nullable WandCoreDefinition coreDefinition(HolderLookup.@Nullable Provider registries,
+                                                              @Nullable Identifier core) {
+        if (registries == null || core == null) {
+            return null;
+        }
+        return registries.lookup(WandDatapackRegistries.WAND_CORE_REGISTRY)
+                .flatMap(cores -> cores.get(ResourceKey.create(WandDatapackRegistries.WAND_CORE_REGISTRY, core)))
+                .map(Holder::value)
+                .orElse(null);
+    }
+
     /**
      * ARGB multiplier for a wand of this wood: the wood's own tint, a colour derived from its id when
      * it names none, or {@link #NO_WOOD_TINT} for a wand with no wood at all.
@@ -83,18 +99,28 @@ public final class WandAppearance {
     /**
      * Which handle, shaft and tip a wand shows. An explicit configuration on the stack (set by
      * {@code /wandb wand config}) is kept exactly; otherwise the wood's modules are laid over the base
-     * wand, so a slot the wood leaves open keeps the base wand's choice.
+     * wand, so a slot the wood leaves open keeps the base wand's choice, and a wand whose make falls on
+     * one of the wood's rare constructions gets that construction's modules on top.
      */
     public static WandConfiguration configuration(HolderLookup.@Nullable Provider registries, ItemStack stack) {
         WandConfiguration explicit = stack.get(WandComponents.WAND_CONFIGURATION.get());
         if (explicit != null) {
             return explicit;
         }
-        return configurationFor(definition(registries, WandComponents.getWood(stack)));
+        Identifier wood = WandComponents.getWood(stack);
+        WandWoodDefinition definition = definition(registries, wood);
+        long seed = WandLookResolver.seed(wood, WandComponents.getCore(stack),
+                WandComponents.getLength(stack), WandComponents.getFlexibility(stack));
+        return configurationFor(definition, rareIndex(definition, seed));
     }
 
     /** The base wand with this wood's modules laid over it. */
     public static WandConfiguration configurationFor(@Nullable WandWoodDefinition definition) {
+        return configurationFor(definition, -1);
+    }
+
+    /** The base wand with this wood's modules, then rare construction {@code rare} (-1 for none), laid over it. */
+    public static WandConfiguration configurationFor(@Nullable WandWoodDefinition definition, int rare) {
         WandConfiguration config = WandConfiguration.DEFAULT;
         if (definition == null) {
             return config;
@@ -102,7 +128,33 @@ public final class WandAppearance {
         for (Map.Entry<WandSlot, Identifier> module : definition.appearance().modules().entrySet()) {
             config = config.withModule(module.getKey(), module.getValue());
         }
+        List<WandRareConstruction> rares = definition.appearance().rare();
+        if (rare >= 0 && rare < rares.size()) {
+            for (Map.Entry<WandSlot, Identifier> module : rares.get(rare).modules().entrySet()) {
+                config = config.withModule(module.getKey(), module.getValue());
+            }
+        }
         return config;
+    }
+
+    /**
+     * Which of the wood's rare constructions a wand of this make is, or -1 for the ordinary one. Each
+     * construction takes its {@code chance} share of the seed's range, in the order the wood lists them.
+     */
+    public static int rareIndex(@Nullable WandWoodDefinition definition, long seed) {
+        if (definition == null || definition.appearance().rare().isEmpty()) {
+            return -1;
+        }
+        float roll = WandLookResolver.unit(seed, WandLookResolver.SALT_RARE);
+        float upTo = 0.0f;
+        List<WandRareConstruction> rares = definition.appearance().rare();
+        for (int i = 0; i < rares.size(); i++) {
+            upTo += rares.get(i).chance();
+            if (roll < upTo) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /**
@@ -117,7 +169,7 @@ public final class WandAppearance {
         float hue = ((hash >>> 8) % 360) / 360.0f * 0.12f + 0.03f;   // 11deg..54deg: amber to straw
         float saturation = 0.28f + ((hash >>> 3) & 0x3F) / 63.0f * 0.22f;
         float value = 0.55f + (hash & 0x3F) / 63.0f * 0.35f;
-        return hsbToArgb(hue, saturation, value);
+        return hsb(hue, saturation, value);
     }
 
     /**
@@ -127,7 +179,7 @@ public final class WandAppearance {
      * initialisation can touch a display, and on a dedicated server this class is reachable from the
      * tooltip side. Twenty lines of arithmetic is the cheaper dependency.
      */
-    private static int hsbToArgb(float hue, float saturation, float value) {
+    public static int hsb(float hue, float saturation, float value) {
         float h = (hue - (float) Math.floor(hue)) * 6.0f;
         float f = h - (float) Math.floor(h);
         float p = value * (1.0f - saturation);

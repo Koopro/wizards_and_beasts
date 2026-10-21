@@ -48,6 +48,22 @@ public final class OllivanderInteractHandler {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
+        // Clause Three of the Code of Wand Use: no wandmaker sells to a people the law forbids a wand.
+        if (at.koopro.wizardsandbeasts.ministry.law.CodeOfWandUse.forbidden(player)) {
+            at.koopro.wizardsandbeasts.feedback.PlayerFeedback.refuse(player,
+                    Component.translatable("gui.wizards_and_beasts.ollivander_trial"),
+                    at.koopro.wizardsandbeasts.ministry.law.CodeOfWandUse.refusal());
+            return;
+        }
+        // A worn wand in hand is shown to him for tending; anything else (or a snapped wand) goes to the trial.
+        if (WandCare.offer(player)) {
+            return;
+        }
+        openTrial(player);
+    }
+
+    /** Opens a wand trial for this player: three wands picked for them, scored against them. */
+    public static void openTrial(ServerPlayer player) {
         List<OllivanderPoolEntry> picks = OllivanderTrialMenu.pickTrials(player);
         float[] scores = OllivanderTrialMenu.computeInitialScores(player, picks);
         player.openMenu(new MenuProvider() {

@@ -143,6 +143,9 @@ public class WandItem extends GeoItemBase {
             // to land on. Only a hold that actually began: vanilla reads a use packet even while the wand is
             // already in use (startUsingItem is then a no-op), and a cancelled use-start begins nothing either.
             // Opening a session for those replaced the running hold's session and everything it knew.
+            // The previous hold's release has resolved by now (the client sends it before the next use); a channel
+            // it left owing — its release packet never came — is charged rather than forgotten.
+            at.koopro.wizardsandbeasts.spell.beam.WandBeamChannelLogic.settleReleasedChannel(sp, false);
             WandCastSessions.begin(sp, WandCastSessions.gameTickOf(sp),
                     sp.getData(ModAttachments.SPELL_DATA.get()).getActiveSpellId());
             if (SpellClashLocks.isLocked(sp)) {

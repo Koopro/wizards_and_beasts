@@ -38,7 +38,7 @@ public class MorphWandItem extends Item {
         if (level.isClientSide()) return InteractionResult.SUCCESS;
 
         if (!(context.getPlayer() instanceof ServerPlayer player)) return InteractionResult.PASS;
-        if (!player.createCommandSourceStack().permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
+        if (!at.koopro.wizardsandbeasts.command.AdminAccess.allows(player.createCommandSourceStack())) {
             player.displayClientMessage(
                     Component.literal("\u00A7cRequires operator permission"), true);
             return InteractionResult.FAIL;

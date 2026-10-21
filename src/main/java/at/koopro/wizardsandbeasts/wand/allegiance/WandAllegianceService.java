@@ -136,17 +136,27 @@ public final class WandAllegianceService {
 
     // ── the cast ────────────────────────────────────────────────────────────────────────────────
 
+    /**
+     * The state a wand behaves in for {@code caster}: the recorded bond, lifted for a Wandkeeper
+     * ({@link at.koopro.wizardsandbeasts.skill.build.capstone.WandkeepersHands}). Every cast-time read goes through
+     * this; {@link #stateFor} stays the stored truth that allegiance transfers are decided on.
+     */
+    public static WandBondState castingState(Player caster, ItemStack wand) {
+        return at.koopro.wizardsandbeasts.skill.build.capstone.WandkeepersHands.answeringState(
+                caster, stateFor(caster.getUUID(), wand));
+    }
+
     public static float powerMultiplier(Player caster, ItemStack wand, HolderLookup.@Nullable Provider registries) {
-        return WandAllegianceRules.powerMultiplier(stateFor(caster.getUUID(), wand), temperamentOf(wand, registries),
+        return WandAllegianceRules.powerMultiplier(castingState(caster, wand), temperamentOf(wand, registries),
                 passedOn(wand), isElderWand(wand));
     }
 
     public static float cooldownMultiplier(Player caster, ItemStack wand, HolderLookup.@Nullable Provider registries) {
-        return WandAllegianceRules.cooldownMultiplier(stateFor(caster.getUUID(), wand), temperamentOf(wand, registries));
+        return WandAllegianceRules.cooldownMultiplier(castingState(caster, wand), temperamentOf(wand, registries));
     }
 
     public static boolean wouldBackfire(Player caster, ItemStack wand, HolderLookup.@Nullable Provider registries) {
-        return WandAllegianceRules.backfires(stateFor(caster.getUUID(), wand), temperamentOf(wand, registries),
+        return WandAllegianceRules.backfires(castingState(caster, wand), temperamentOf(wand, registries),
                 WandComponents.getIntegrity(wand));
     }
 
@@ -394,12 +404,22 @@ public final class WandAllegianceService {
     }
 
     /**
-     * Reparo on a wand. Only the Elder Wand mends one ({@code DH} ch. 36); ordinary magic cannot.
+     * Reparo on a wand. The Elder Wand mends one ({@code DH} ch. 36), even snapped; ordinary magic cannot — except in
+     * the hands of a Wandkeeper, who mends wear and damage short of a snapped wand.
      *
      * @return whether the wand was mended
      */
     public static boolean mendWand(ServerPlayer caster, ItemStack castingWand, ItemStack target) {
         if (!isElderWand(castingWand)) {
+            float integrity = WandComponents.getIntegrity(target);
+            if (at.koopro.wizardsandbeasts.skill.build.capstone.WandkeepersHands.mayMend(caster, integrity)) {
+                target.set(WandComponents.WAND_INTEGRITY.get(), 1.0f);
+                PlayerFeedback.actionBar(caster, Component.translatable("wandcraft.wand.repair.wandkeeper"));
+                caster.level().playSound(null, caster.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME,
+                        SoundSource.PLAYERS, 0.7f, 1.2f);
+                wandMotes(caster, ParticleTypes.ENCHANT);
+                return true;
+            }
             PlayerFeedback.actionBar(caster, Component.translatable("wandcraft.wand.repair.refused"));
             return false;
         }

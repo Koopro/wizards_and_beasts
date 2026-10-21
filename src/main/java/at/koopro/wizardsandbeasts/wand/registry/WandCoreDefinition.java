@@ -13,6 +13,8 @@ import net.minecraft.network.chat.ComponentSerialization;
  *                      neutral. {@code consistency}, {@code loyalty}, {@code darkAffinity} and
  *                      {@code initiative} predate it and are read by nothing; temperament is where those
  *                      traits act.
+ * @param appearance    how the core shows through the wand — see {@link WandCoreAppearance}. Absent means a
+ *                      muted light derived from the core's id. Looks only; nothing in a cast reads it.
  */
 public record WandCoreDefinition(
         Component displayName,
@@ -24,7 +26,8 @@ public record WandCoreDefinition(
         float initiative,
         float allegianceTransferResistance,
         WandCastModifiers castModifiers,
-        WandTemperament temperament) {
+        WandTemperament temperament,
+        WandCoreAppearance appearance) {
     public static final Codec<WandCoreDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ComponentSerialization.CODEC.fieldOf("display_name").forGetter(WandCoreDefinition::displayName),
             Codec.STRING.fieldOf("source_key").forGetter(WandCoreDefinition::sourceKey),
@@ -37,6 +40,8 @@ public record WandCoreDefinition(
             WandCastModifiers.CODEC.optionalFieldOf("cast_modifiers", WandCastModifiers.NEUTRAL)
                     .forGetter(WandCoreDefinition::castModifiers),
             WandTemperament.CODEC.optionalFieldOf("temperament", WandTemperament.NEUTRAL)
-                    .forGetter(WandCoreDefinition::temperament)
+                    .forGetter(WandCoreDefinition::temperament),
+            WandCoreAppearance.CODEC.optionalFieldOf("appearance", WandCoreAppearance.NONE)
+                    .forGetter(WandCoreDefinition::appearance)
     ).apply(instance, WandCoreDefinition::new));
 }
