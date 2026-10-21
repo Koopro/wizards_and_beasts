@@ -94,7 +94,48 @@ public enum MagicalOffence implements StringRepresentable {
      * Dark magic or a dangerous creature loosed in front of Muggles. Arrestable: the breach and the danger
      * together are no longer a matter for a bill.
      */
-    GRAVE_SECRECY_BREACH("grave_secrecy_breach", 25.0f, Remedy.SENTENCE, 0);
+    GRAVE_SECRECY_BREACH("grave_secrecy_breach", 25.0f, Remedy.SENTENCE, 0),
+    /**
+     * Selling or buying a Ministry-controlled substance (item tag {@code restricted_ingredient}) outside a licensed
+     * counter. The cheapest of the trade offences: the goods are legal to hold, only the deal skipped the paperwork.
+     * Filed when a fence's deal reaches the Ministry ({@code market.IllicitDealing}).
+     */
+    TRAFFICKING_RESTRICTED("trafficking_restricted", 5.0f, Remedy.FINE, 4 * CurrencyHelper.KNUTS_PER_GALLEON),
+    /**
+     * Handling a wand another wizard is master of, or treasure from a Gringotts-claimed site that was never
+     * surrendered to the bank. Dearer than a restricted sale: someone else was robbed.
+     */
+    HANDLING_STOLEN_GOODS("handling_stolen_goods", 8.0f, Remedy.FINE, 6 * CurrencyHelper.KNUTS_PER_GALLEON),
+    /**
+     * Paying for magic the law forbids: a memory charm on the witnesses to a crime, a forged endorsement. The
+     * service is the dealer's crime; buying it is this one.
+     */
+    PROCURING_ILLEGAL_MAGIC("procuring_illegal_magic", 10.0f, Remedy.FINE, 8 * CurrencyHelper.KNUTS_PER_GALLEON),
+    /**
+     * Trading goods nobody may trade (item tag {@code contraband}): dark artefacts, basilisk parts, a Hand of
+     * Glory. Still a fine rather than a sentence, because the goods are the danger and the fine follows the
+     * money — but the heaviest one, and twice in quick succession puts a wizard on the Aurors' list.
+     */
+    DEALING_CONTRABAND("dealing_contraband", 14.0f, Remedy.FINE, 12 * CurrencyHelper.KNUTS_PER_GALLEON),
+    /**
+     * Clause Three of the Code of Wand Use: a non-human carrying a wand, seen by a Ministry official
+     * ({@code CodeOfWandUse}). Winky's offence under the Dark Mark (GoF ch.9). A fine, not a sentence: the wand is
+     * confiscated in canon and nobody went to Azkaban for holding one.
+     */
+    NON_HUMAN_WAND("non_human_wand", 3.0f, Remedy.FINE, 2 * CurrencyHelper.KNUTS_PER_GALLEON),
+    /**
+     * Breeding an XXXX-class beast without a Dangerous Creatures licence, in an official's sight
+     * ({@code ministry.licence.DangerousCreatureLicensing}). Six Galleons: dearer than skipping a form, because a
+     * dragon raised without the Ministry knowing is a danger to the neighbours, not just a filing error.
+     */
+    UNLICENSED_DANGEROUS_CREATURE("unlicensed_dangerous_creature", 4.0f, Remedy.FINE, 6 * CurrencyHelper.KNUTS_PER_GALLEON),
+    /**
+     * Paying a Ministry clerk to lose a case file, and being caught at it ({@code FenceServices} {@code bribe_clerk}).
+     * The heaviest fine on the books, fifteen Galleons, and the case it was meant to bury goes straight to a summons:
+     * a bribe that fails costs more than the hearing it tried to avoid. A fine rather than a sentence — corrupting
+     * an official is serious, but it is not a curse.
+     */
+    BRIBERY_OF_OFFICIAL("bribery_of_official", 12.0f, Remedy.FINE, 15 * CurrencyHelper.KNUTS_PER_GALLEON);
 
     /** How an offence is answered once it is on the file. Exactly one per offence. */
     public enum Remedy {

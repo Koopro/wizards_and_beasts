@@ -42,8 +42,25 @@ public final class TraceService {
      * @return the wanted level after the report, or {@link WantedLevel#CLEAR} when the Trace is off
      */
     public static WantedLevel report(ServerPlayer offender, MagicalOffence offence) {
+        return file(offender, offence, 100).wantedLevel();
+    }
+
+    /**
+     * What one filing did: the wanted level after it, the heat it added and the fine it billed. Kept so a ruling
+     * that is later overturned on appeal can take back exactly what it cost.
+     */
+    public record Filing(WantedLevel wantedLevel, float notorietyAdded, long fineKnuts) {
+
+        public static final Filing NONE = new Filing(WantedLevel.CLEAR, 0.0f, 0L);
+    }
+
+    /**
+     * {@link #report}, billing only {@code finePercent} of the tariff — a hearing's leniency for a guilty plea or a
+     * good character. Heat and the file are never discounted: leniency is about the bill, not the record.
+     */
+    public static Filing file(ServerPlayer offender, MagicalOffence offence, int finePercent) {
         if (!isActive()) {
-            return WantedLevel.CLEAR;
+            return Filing.NONE;
         }
         PlayerMinistryRecord before = MinistryRecords.get(offender);
         float priors = before.repeatMultiplier(offence);
@@ -57,13 +74,13 @@ public final class TraceService {
         // Filed first, billed second, so the fine notice follows the record of what it is for. The
         // multiplier passed is the one measured *before* this offence was filed — the same value the
         // notoriety gain used — so heat and fine escalate in step and a first offence is unscaled in both.
-        MinistryFines.assessFor(offender, offence, priors);
+        long fine = MinistryFines.assessFor(offender, offence, priors, finePercent);
 
         // Standing reads the *act*, not the heat. The Ministry axis already tracks notoriety on its
         // own, so a deed on this trigger is for the other axes — a crime that says something about
         // who you are becoming rather than about how badly you are wanted.
         at.koopro.wizardsandbeasts.standing.deed.DeedService.onOffence(offender, offence.getSerializedName());
-        return after.wantedLevel();
+        return new Filing(after.wantedLevel(), after.notoriety() - before.notoriety(), fine);
     }
 
     /**

@@ -29,6 +29,12 @@ public final class CaseRules {
     /** Secrecy breaches on file, counting this one, that turn a note into a warning and then a hearing. */
     public static final int BREACHES_BEFORE_WARNING = 2;
     public static final int BREACHES_BEFORE_HEARING = 3;
+    /**
+     * Fruitless searches after which the Aurors stop looking: ten, an in-game half day at one search a minute.
+     * The case stays open and on file; the next report about the wizard warms it again. Evading works, for as
+     * long as the wizard keeps out of sight.
+     */
+    public static final int SEARCHES_BEFORE_COLD = 10;
 
     private CaseRules() {}
 
@@ -84,6 +90,10 @@ public final class CaseRules {
         if (stage != null && stage.ordinal() > open.stage().ordinal()) {
             open = open.withStage(stage, now, deadlineFor(stage, now), searchFor(stage, now), open.failedToAppear());
         }
+        if (open.cold()) {
+            // Somebody saw them again: the Aurors have somewhere new to look.
+            open = open.warmed(now + AUROR_RESPONSE_TICKS);
+        }
         return Optional.of(open);
     }
 
@@ -110,7 +120,7 @@ public final class CaseRules {
                     ? new Advance(Step.FAILED_TO_APPEAR, open.withStage(CaseStage.AURORS_ASSIGNED, now, 0L,
                             searchFor(CaseStage.AURORS_ASSIGNED, now), true))
                     : new Advance(Step.NOTHING, open);
-            case AURORS_ASSIGNED -> now >= open.nextSearch()
+            case AURORS_ASSIGNED -> !open.cold() && now >= open.nextSearch()
                     ? new Advance(Step.SEARCH_DUE, open)
                     : new Advance(Step.NOTHING, open);
         };
@@ -127,6 +137,12 @@ public final class CaseRules {
     /** When the Aurors look again after finding nobody. */
     public static long nextSearchAfter(long now) {
         return now + AUROR_RESPONSE_TICKS;
+    }
+
+    /** The case after a search that found nobody: searched again later, or gone cold. */
+    public static OpenCase afterFruitlessSearch(OpenCase open, long now) {
+        OpenCase searched = open.afterFruitlessSearch(nextSearchAfter(now));
+        return searched.searches() >= SEARCHES_BEFORE_COLD ? searched.goneCold() : searched;
     }
 
     private static long deadlineFor(CaseStage stage, long now) {

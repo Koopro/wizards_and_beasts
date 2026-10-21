@@ -7,7 +7,6 @@ import at.koopro.wizardsandbeasts.map.MapLandmarkTags;
 import at.koopro.wizardsandbeasts.ministry.MinistryRecords;
 import at.koopro.wizardsandbeasts.ministry.licence.MinistryArea;
 import at.koopro.wizardsandbeasts.ministry.licence.MinistryLicenceTags;
-import at.koopro.wizardsandbeasts.registry.ModVillager;
 import at.koopro.wizardsandbeasts.util.ImmediateDanger;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -60,9 +59,12 @@ public final class CastSurvey {
         AABB box = caster.getBoundingBox().inflate(radius);
         List<LivingEntity> muggles = level.getEntitiesOfClass(LivingEntity.class, box,
                 entity -> isMuggle(entity) && sees(entity, caster, radius));
-        int officials = level.getEntitiesOfClass(LivingEntity.class, box,
-                entity -> entity.getType().is(MinistryLicenceTags.MINISTRY_OFFICIALS) && sees(entity, caster, radius))
-                .size();
+        List<LivingEntity> officialsSeeing = level.getEntitiesOfClass(LivingEntity.class, box,
+                entity -> entity.getType().is(MinistryLicenceTags.MINISTRY_OFFICIALS) && sees(entity, caster, radius));
+        int officials = officialsSeeing.size();
+        List<UUID> witnessEntities = new ArrayList<>(muggles.size() + officials);
+        muggles.forEach(muggle -> witnessEntities.add(muggle.getUUID()));
+        officialsSeeing.forEach(official -> witnessEntities.add(official.getUUID()));
 
         int adultsNearby = 0;
         List<UUID> wizardWitnesses = new ArrayList<>();
@@ -81,8 +83,10 @@ public final class CastSurvey {
         }
 
         boolean creatureSeen = !muggles.isEmpty() && dangerousCreatureInView(level, box, muggles);
+        boolean licensed = at.koopro.wizardsandbeasts.ministry.licence.MinistryLicences.has(caster,
+                at.koopro.wizardsandbeasts.ministry.licence.LicenseType.RESTRICTED_MAGIC);
         return new CastScene(underage, ImmediateDanger.test(caster), atHogwarts, muggles.size(), adultsNearby,
-                officials, creatureSeen, wizardWitnesses);
+                officials, creatureSeen, wizardWitnesses, witnessEntities, licensed);
     }
 
     /** A Muggle by the tag, less the villagers who practise a wizarding trade. */
@@ -90,8 +94,11 @@ public final class CastSurvey {
         if (!entity.getType().is(MUGGLES)) {
             return false;
         }
+        // A villager in a wizarding trade (wandmaker, apothecary, Ministry clerk) is no Muggle.
         return !(entity instanceof Villager villager)
-                || !villager.getVillagerData().profession().is(ModVillager.WANDMAKER.getKey());
+                || villager.getVillagerData().profession().unwrapKey()
+                        .map(key -> !key.identifier().getNamespace().equals(at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID))
+                        .orElse(true);
     }
 
     private static boolean sees(LivingEntity witness, Entity subject, double radius) {
@@ -114,7 +121,8 @@ public final class CastSurvey {
         return false;
     }
 
-    private static int ratingOf(Entity entity) {
+    /** The Ministry classification (1–5) of a creature by its bestiary entry, or 0 when it has none. */
+    public static int ratingOf(Entity entity) {
         Identifier type = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
         for (BestiaryEntry entry : BestiaryEntryRegistry.getAll()) {
             Optional<Identifier> entityType = entry.entityType();

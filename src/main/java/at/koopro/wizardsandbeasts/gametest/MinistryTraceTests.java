@@ -62,8 +62,9 @@ import static at.koopro.wizardsandbeasts.gametest.WizardTestSupport.spellData;
  * clock is run ahead through {@link MinistryTrace#process(MinecraftServer, long, java.util.function.Predicate)}
  * for this scenario's wizards only.
  *
- * <p>Scenarios sit high above the grid and far apart: witnesses count out to 48 blocks, and a neighbour's
- * player or villager inside that range would be a witness this scenario never placed.
+ * <p>Scenarios sit high above the grid and each runs in a batch of its own ({@code addAlone}): witnesses count out
+ * to 48 blocks, and a neighbour's player or villager inside that range would be a witness this scenario never
+ * placed.
  */
 public final class MinistryTraceTests {
 
@@ -80,22 +81,24 @@ public final class MinistryTraceTests {
     private MinistryTraceTests() {}
 
     static void contribute(WizardTestSupport.Registrar tests) {
-        tests.add("ministry_trace_child_is_warned_then_heard",
+        // Each in a batch of its own: every one reads who is nearby (an adult within 16 blocks hides a child from
+        // the Trace), and Y bands alone stopped being enough once other suites placed players at Y 88-124.
+        tests.addAlone("ministry_trace_child_is_warned_then_heard",
                 "ministry: an underage wizard is warned, then summoned, then loses the wand",
                 MinistryTraceTests::aChildIsWarnedThenHeard);
-        tests.add("ministry_trace_nobody_saw_it",
+        tests.addAlone("ministry_trace_nobody_saw_it",
                 "ministry: an adult alone, or a child among adults, is known to nobody",
                 MinistryTraceTests::nobodySawIt);
-        tests.add("ministry_trace_hogwarts_lets_children_learn",
+        tests.addAlone("ministry_trace_hogwarts_lets_children_learn",
                 "ministry: underage magic at Hogwarts is not a breach",
                 MinistryTraceTests::hogwartsLetsChildrenLearn);
-        tests.add("ministry_trace_muggles_see_magic",
+        tests.addAlone("ministry_trace_muggles_see_magic",
                 "ministry: one Muggle is tidied up; a crowd opens an inquiry that names the caster",
                 MinistryTraceTests::mugglesSeeMagic);
-        tests.add("ministry_trace_wand_examination_finds_an_unforgivable",
+        tests.addAlone("ministry_trace_wand_examination_finds_an_unforgivable",
                 "ministry: an unseen Unforgivable is found when a later hearing examines the wand",
                 MinistryTraceTests::aWandExaminationFindsAnUnforgivable);
-        tests.add("ministry_trace_aurors_follow_the_last_report",
+        tests.addAlone("ministry_trace_aurors_follow_the_last_report",
                 "ministry: Aurors miss the dead, the departed and the logged out, then arrest where reported",
                 MinistryTraceTests::aurorsFollowTheLastReport);
     }

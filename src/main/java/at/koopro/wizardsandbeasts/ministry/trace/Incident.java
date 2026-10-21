@@ -34,6 +34,7 @@ import java.util.UUID;
  * @param wizardWitnesses other players who saw it
  * @param offence         the crime the spell is in itself, if any
  * @param attributed      whether the Ministry knows who did it
+ * @param licensedPractice the caster held a Restricted Magic licence at the time
  */
 @NullMarked
 public record Incident(
@@ -51,7 +52,8 @@ public record Incident(
         int muggleWitnesses,
         List<UUID> wizardWitnesses,
         Optional<MagicalOffence> offence,
-        boolean attributed) {
+        boolean attributed,
+        boolean licensedPractice) {
 
     public static final Codec<Incident> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.LONG.fieldOf("id").forGetter(Incident::id),
@@ -69,7 +71,8 @@ public record Incident(
             UUIDUtil.CODEC.listOf().optionalFieldOf("wizard_witnesses", List.of())
                     .forGetter(Incident::wizardWitnesses),
             MagicalOffence.CODEC.optionalFieldOf("offence").forGetter(Incident::offence),
-            Codec.BOOL.optionalFieldOf("attributed", false).forGetter(Incident::attributed)
+            Codec.BOOL.optionalFieldOf("attributed", false).forGetter(Incident::attributed),
+            Codec.BOOL.optionalFieldOf("licensed", false).forGetter(Incident::licensedPractice)
     ).apply(instance, Incident::new));
 
     public Incident {
@@ -77,9 +80,18 @@ public record Incident(
         muggleWitnesses = Math.max(0, muggleWitnesses);
     }
 
+    /** An incident with no licence in play. */
+    public Incident(long id, UUID caster, String casterName, String spellId, Identifier dimension, BlockPos pos,
+                    long tick, LegalClass legalClass, Exposure exposure, boolean underageBreach, boolean inDanger,
+                    int muggleWitnesses, List<UUID> wizardWitnesses, Optional<MagicalOffence> offence,
+                    boolean attributed) {
+        this(id, caster, casterName, spellId, dimension, pos, tick, legalClass, exposure, underageBreach, inDanger,
+                muggleWitnesses, wizardWitnesses, offence, attributed, false);
+    }
+
     public Incident asAttributed() {
         return attributed ? this : new Incident(id, caster, casterName, spellId, dimension, pos, tick, legalClass,
-                exposure, underageBreach, inDanger, muggleWitnesses, wizardWitnesses, offence, true);
+                exposure, underageBreach, inDanger, muggleWitnesses, wizardWitnesses, offence, true, licensedPractice);
     }
 
     /** The weight of this incident, for choosing the worst charge. */

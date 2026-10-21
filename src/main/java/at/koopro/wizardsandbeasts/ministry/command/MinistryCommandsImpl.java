@@ -42,7 +42,7 @@ public final class MinistryCommandsImpl {
     private MinistryCommandsImpl() {}
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
-        return Commands.literal("ministry")
+        return MinistryCaseworkCommands.attach(Commands.literal("ministry"))
                 // Your own record is public to you and needs no rank.
                 .then(Commands.literal("record")
                         .executes(ctx -> showRecord(ctx.getSource(), ctx.getSource().getPlayerOrException()))
@@ -52,9 +52,9 @@ public final class MinistryCommandsImpl {
 
                 // A summons is answered by the wizard it names; nobody needs a rank to turn up to their own hearing.
                 .then(Commands.literal("summons")
-                        .then(Commands.literal("answer")
+                        .then(MinistryCaseworkCommands.answerWithPlea(Commands.literal("answer")
                                 .executes(ctx -> answerSummons(ctx.getSource(),
-                                        ctx.getSource().getPlayerOrException()))))
+                                        ctx.getSource().getPlayerOrException())))))
 
                 .then(Commands.literal("case")
                         .executes(ctx -> showCase(ctx.getSource(), ctx.getSource().getPlayerOrException()))

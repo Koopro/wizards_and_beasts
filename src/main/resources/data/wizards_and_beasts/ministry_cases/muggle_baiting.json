@@ -1,0 +1,9 @@
+{
+  "_comment": "Muggle-baiting: setting fire to a farmer's hay for the fun of watching him run. Restricted magic in front of Muggles, a trainee case.",
+  "culprit": "minecraft:witch",
+  "spell": "incendio",
+  "legal_class": "restricted",
+  "bounty_knuts": 348,
+  "min_rank": 0,
+  "weight": 10
+}

@@ -33,7 +33,31 @@ public final class MinistryRecords {
         if (!next.equals(previous)) {
             player.setData(ModAttachments.MINISTRY_RECORD.get(), next);
             MinistryRecordSyncS2CPayload.syncToPlayer(player);
+            if (ministryStandingMoved(previous, next)) {
+                // The Ministry axis is derived from this record; without this the sheet showed yesterday's band.
+                at.koopro.wizardsandbeasts.standing.StandingService.sync(player);
+            }
         }
+    }
+
+    /**
+     * Whether a record change moves what the client shows on the Ministry standing axis: rank, conduct, or a
+     * notoriety change that crosses a band. Heat decays every second, so a plain inequality would resend standing
+     * every second to every wizard cooling off.
+     */
+    static boolean ministryStandingMoved(PlayerMinistryRecord previous, PlayerMinistryRecord next) {
+        return previous.rank() != next.rank() || previous.conduct() != next.conduct()
+                || ministryBand(previous) != ministryBand(next);
+    }
+
+    private static at.koopro.wizardsandbeasts.standing.StandingBand ministryBand(PlayerMinistryRecord record) {
+        float bound = at.koopro.wizardsandbeasts.Config.standingAxisBound;
+        float value = at.koopro.wizardsandbeasts.standing.StandingBands.ministryOf(
+                at.koopro.wizardsandbeasts.standing.StandingService.rankCredit(record.rank()), record.notoriety(),
+                record.conduct(), bound);
+        return at.koopro.wizardsandbeasts.standing.StandingBands.bandFor(value, bound,
+                at.koopro.wizardsandbeasts.Config.standingLeanThresholdPercent,
+                at.koopro.wizardsandbeasts.Config.standingStrongThresholdPercent);
     }
 
     public static void set(ServerPlayer player, PlayerMinistryRecord record) {

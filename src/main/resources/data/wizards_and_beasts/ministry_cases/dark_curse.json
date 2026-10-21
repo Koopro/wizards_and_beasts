@@ -1,0 +1,9 @@
+{
+  "_comment": "A dark wizard cutting a villager with Sectumsempra. Dark magic; the culprit summons Vexes. Auror rank and above.",
+  "culprit": "minecraft:evoker",
+  "spell": "sectumsempra",
+  "legal_class": "dark",
+  "bounty_knuts": 986,
+  "min_rank": 1,
+  "weight": 8
+}

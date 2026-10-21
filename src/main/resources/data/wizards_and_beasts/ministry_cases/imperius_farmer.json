@@ -1,0 +1,9 @@
+{
+  "_comment": "A farmer put under the Imperius Curse. An Unforgivable on a person; Senior Auror and above.",
+  "culprit": "minecraft:illusioner",
+  "spell": "imperio",
+  "legal_class": "unforgivable",
+  "bounty_knuts": 2465,
+  "min_rank": 2,
+  "weight": 4
+}

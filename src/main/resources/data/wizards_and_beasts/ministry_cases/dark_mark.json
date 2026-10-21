@@ -1,0 +1,9 @@
+{
+  "_comment": "The Dark Mark cast over a village. Dark magic meant to terrify; the culprit is an illusionist who hides among copies of himself. Senior Auror and above.",
+  "culprit": "minecraft:illusioner",
+  "spell": "morsmordre",
+  "legal_class": "dark",
+  "bounty_knuts": 1479,
+  "min_rank": 2,
+  "weight": 5
+}

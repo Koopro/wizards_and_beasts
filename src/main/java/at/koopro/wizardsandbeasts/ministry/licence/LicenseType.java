@@ -38,7 +38,18 @@ public enum LicenseType implements StringRepresentable {
     /** Ordinary access to Ministry premises, for people who do not work there. */
     MINISTRY_ACCESS("ministry_access", OWLSubject.HISTORY_OF_MAGIC),
     /** Buying and selling the ingredients the Ministry controls. */
-    RESTRICTED_SUBSTANCES("restricted_substances", OWLSubject.POTIONS);
+    RESTRICTED_SUBSTANCES("restricted_substances", OWLSubject.POTIONS),
+    /**
+     * Licensed practice of dark magic short of the Unforgivables — the Curse-Breaker's and the Auror's working
+     * knowledge. A hearing does not convict a holder for dark magic no Muggle saw ("licensed practice"); a dark
+     * conviction suspends it. Appended last: the wire codec sends the ordinal.
+     */
+    RESTRICTED_MAGIC("restricted_magic", OWLSubject.DEFENCE_AGAINST_DARK_ARTS),
+    /**
+     * Trading across a counter past the weekly allowance an unlicensed seller is given. Examined on History of
+     * Magic (goblin-wizard trade law) because Arithmancy is not sat at all.
+     */
+    MAGICAL_COMMERCE("magical_commerce", OWLSubject.HISTORY_OF_MAGIC);
 
     public static final Codec<LicenseType> CODEC = StringRepresentable.fromEnum(LicenseType::values);
 

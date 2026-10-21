@@ -1,6 +1,8 @@
 package at.koopro.wizardsandbeasts.ministry.law;
 
 import at.koopro.wizardsandbeasts.Config;
+import at.koopro.wizardsandbeasts.currency.billing.GringottsBilling;
+import at.koopro.wizardsandbeasts.currency.billing.MoneyFlow;
 import at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper;
 import at.koopro.wizardsandbeasts.currency.vault.PlayerVaultData;
 import at.koopro.wizardsandbeasts.ministry.MinistryRecords;
@@ -8,7 +10,6 @@ import at.koopro.wizardsandbeasts.ministry.data.PlayerMinistryRecord;
 import at.koopro.wizardsandbeasts.ministry.post.MinistryPost;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
-import at.koopro.wizardsandbeasts.network.currency.VaultSyncS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -52,10 +53,16 @@ public final class MinistryFines {
      * @return the amount added to the debt, or 0 when this offence carries no fine
      */
     public static long assessFor(ServerPlayer offender, MagicalOffence offence, float priorsMultiplier) {
-        if (!isActive() || !offence.fineable()) {
+        return assessFor(offender, offence, priorsMultiplier, 100);
+    }
+
+    /** {@link #assessFor}, billing {@code percent} of the tariff — a hearing's leniency. */
+    public static long assessFor(ServerPlayer offender, MagicalOffence offence, float priorsMultiplier, int percent) {
+        if (!isActive() || !offence.fineable() || percent <= 0) {
             return 0L;
         }
-        long amount = FineSchedule.assess(offence.fineKnuts(), priorsMultiplier, Config.ministryFineScalePercent);
+        long amount = FineSchedule.assess(offence.fineKnuts(), priorsMultiplier,
+                (int) Math.max(1L, (long) Config.ministryFineScalePercent * Math.min(100, percent) / 100L));
         if (amount <= 0L) {
             return 0L;
         }
@@ -98,12 +105,12 @@ public final class MinistryFines {
         if (take <= 0L) {
             return 0L;
         }
-        long withdrawn = vault.withdrawSmartKnuts(take);
-        if (withdrawn <= 0L) {
+        // take never exceeds the balance (FineSchedule.collectable), so the charge is exact; billing syncs the vault.
+        if (!GringottsBilling.charge(player, MoneyFlow.MINISTRY_FINE, take)) {
             return 0L;
         }
+        long withdrawn = take;
         MinistryRecords.mutate(player, r -> r.withFineAdjusted(-withdrawn));
-        VaultSyncS2CPayload.syncToPlayer(player);
 
         long remaining = MinistryRecords.get(player).outstandingFineKnuts();
         if (remaining > 0L) {

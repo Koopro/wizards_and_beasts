@@ -1,0 +1,9 @@
+{
+  "_comment": "A witch hexing villagers with Confundus Charms for sport. The trainee case: restricted magic, a culprit who throws potions but is not lethal at range. Bounty in Knuts; min_rank is the Auror-track rank index (0 trainee).",
+  "culprit": "minecraft:witch",
+  "spell": "confundo",
+  "legal_class": "restricted",
+  "bounty_knuts": 290,
+  "min_rank": 0,
+  "weight": 12
+}

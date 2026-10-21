@@ -94,4 +94,70 @@ public final class LicenceRules {
     public static boolean isMinistryDensity(int blocks) {
         return blocks >= AREA_BLOCK_THRESHOLD;
     }
+
+    // ── the licence office ──
+
+    /**
+     * The licences a wizard may apply for over the counter. Apparition has its own test, Animagus its own
+     * register, and the Auror's warrant comes only with the career; everything else is paperwork and a fee.
+     */
+    public static boolean soldAtOffice(LicenseType type) {
+        return switch (type) {
+            case APPARITION, ANIMAGUS, AUROR_TRAINEE -> false;
+            default -> true;
+        };
+    }
+
+    /**
+     * The O.W.L. an application needs in the licence's examined subject. Licensed dark practice asks for an
+     * Exceeds Expectations in Defence; everything else for a pass.
+     */
+    public static OWLGrade gradeToApply(LicenseType type) {
+        return type == LicenseType.RESTRICTED_MAGIC ? OWLGrade.E : OWLGrade.A;
+    }
+
+    /** Why the licence office would refuse an application, or {@link #ISSUE}. */
+    public enum Application {
+        ISSUE,
+        RENEW,
+        NOT_SOLD_HERE,
+        GRADE,
+        SUSPENDED,
+        OPEN_CASE,
+        DISTRUSTED,
+        ALREADY_HELD
+    }
+
+    /**
+     * What the office does with an application. A suspension, an open case or a Ministry that thinks the applicant
+     * a criminal ({@code distrusted}) refuses before anything else; a licence already held and valid is not issued
+     * twice, but one that has expired is renewed.
+     *
+     * @param held        the applicant carries a licence of this type made out to them, not revoked
+     * @param heldExpired that licence has expired
+     */
+    public static Application apply(LicenseType type, OWLGrade grade, boolean suspended, boolean openCase,
+                                    boolean distrusted, boolean held, boolean heldExpired) {
+        if (!soldAtOffice(type)) {
+            return Application.NOT_SOLD_HERE;
+        }
+        if (suspended) {
+            return Application.SUSPENDED;
+        }
+        if (openCase) {
+            return Application.OPEN_CASE;
+        }
+        if (distrusted) {
+            return Application.DISTRUSTED;
+        }
+        if (held) {
+            return heldExpired ? Application.RENEW : Application.ALREADY_HELD;
+        }
+        return gradeSatisfies(grade, gradeToApply(type)) ? Application.ISSUE : Application.GRADE;
+    }
+
+    /** When a licence issued at {@code now} expires: never when the term is 0. */
+    public static long expiryFor(long now, int termDays) {
+        return termDays <= 0 ? LicenseData.NEVER_EXPIRES : now + termDays * 24000L;
+    }
 }

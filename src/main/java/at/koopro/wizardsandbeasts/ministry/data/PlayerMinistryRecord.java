@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.ministry.data;
 
 import at.koopro.wizardsandbeasts.ministry.law.MagicalOffence;
 import at.koopro.wizardsandbeasts.ministry.law.WantedLevel;
+import at.koopro.wizardsandbeasts.ministry.licence.LicenseType;
 import at.koopro.wizardsandbeasts.ministry.trace.WizardingAge;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -32,6 +33,9 @@ import java.util.Map;
  * @param ageYears             age at {@code ageAnchorTick}, or {@link WizardingAge#UNSET} — no birth record, of age
  * @param ageAnchorTick        game tick {@code ageYears} was recorded at
  * @param wandConfiscatedUntil game tick the Ministry returns a confiscated wand; 0 when none is held
+ * @param suspensions          licences a hearing suspended, each until a game tick
+ * @param conduct              how the wizard has dealt with the Ministry: answering, cooperating and winning
+ *                             appeals raise it, ignoring summons and running lower it; {@code ±MAX_CONDUCT}
  */
 @NullMarked
 public record PlayerMinistryRecord(
@@ -43,12 +47,16 @@ public record PlayerMinistryRecord(
         long outstandingFineKnuts,
         int ageYears,
         long ageAnchorTick,
-        long wandConfiscatedUntil) {
+        long wandConfiscatedUntil,
+        Map<LicenseType, Long> suspensions,
+        int conduct) {
 
     public static final float MAX_NOTORIETY = 100.0f;
+    /** How far conduct can go either way. */
+    public static final int MAX_CONDUCT = 100;
 
     public static final PlayerMinistryRecord DEFAULT =
-            new PlayerMinistryRecord(0.0f, Map.of(), 0, false, MinistryRank.NONE, 0L, -1, 0L, 0L);
+            new PlayerMinistryRecord(0.0f, Map.of(), 0, false, MinistryRank.NONE, 0L, -1, 0L, 0L, Map.of(), 0);
 
     public PlayerMinistryRecord {
         notoriety = Math.max(0.0f, Math.min(MAX_NOTORIETY, notoriety));
@@ -57,6 +65,16 @@ public record PlayerMinistryRecord(
         outstandingFineKnuts = Math.max(0L, outstandingFineKnuts);
         ageYears = Math.max(-1, ageYears);
         wandConfiscatedUntil = Math.max(0L, wandConfiscatedUntil);
+        suspensions = Map.copyOf(suspensions);
+        conduct = Math.max(-MAX_CONDUCT, Math.min(MAX_CONDUCT, conduct));
+    }
+
+    /** A record as it was before suspensions and conduct. */
+    public PlayerMinistryRecord(float notoriety, Map<MagicalOffence, Integer> offences, int sentenceTicks,
+                                boolean fugitive, MinistryRank rank, long outstandingFineKnuts, int ageYears,
+                                long ageAnchorTick, long wandConfiscatedUntil) {
+        this(notoriety, offences, sentenceTicks, fugitive, rank, outstandingFineKnuts, ageYears, ageAnchorTick,
+                wandConfiscatedUntil, Map.of(), 0);
     }
 
     public static final Codec<PlayerMinistryRecord> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -75,7 +93,10 @@ public record PlayerMinistryRecord(
             Codec.INT.optionalFieldOf("ageYears", -1).forGetter(PlayerMinistryRecord::ageYears),
             Codec.LONG.optionalFieldOf("ageAnchorTick", 0L).forGetter(PlayerMinistryRecord::ageAnchorTick),
             Codec.LONG.optionalFieldOf("wandConfiscatedUntil", 0L)
-                    .forGetter(PlayerMinistryRecord::wandConfiscatedUntil)
+                    .forGetter(PlayerMinistryRecord::wandConfiscatedUntil),
+            Codec.unboundedMap(LicenseType.CODEC, Codec.LONG).optionalFieldOf("suspensions", Map.of())
+                    .forGetter(PlayerMinistryRecord::suspensions),
+            Codec.INT.optionalFieldOf("conduct", 0).forGetter(PlayerMinistryRecord::conduct)
     ).apply(instance, PlayerMinistryRecord::new));
 
     // ── derived ──
@@ -128,7 +149,7 @@ public record PlayerMinistryRecord(
 
     public PlayerMinistryRecord withNotoriety(float value) {
         return new PlayerMinistryRecord(value, offences, sentenceTicks, fugitive, rank,
-                outstandingFineKnuts, ageYears, ageAnchorTick, wandConfiscatedUntil);
+                outstandingFineKnuts, ageYears, ageAnchorTick, wandConfiscatedUntil, suspensions, conduct);
     }
 
     /** Adds heat and files the offence. The two move together on every conviction. */
@@ -137,28 +158,28 @@ public record PlayerMinistryRecord(
         next.putAll(offences);
         next.merge(offence, 1, Integer::sum);
         return new PlayerMinistryRecord(notoriety + notorietyGain, next, sentenceTicks, fugitive, rank,
-                outstandingFineKnuts, ageYears, ageAnchorTick, wandConfiscatedUntil);
+                outstandingFineKnuts, ageYears, ageAnchorTick, wandConfiscatedUntil, suspensions, conduct);
     }
 
     public PlayerMinistryRecord withSentenceTicks(int value) {
         return new PlayerMinistryRecord(notoriety, offences, value, fugitive, rank,
-                outstandingFineKnuts, ageYears, ageAnchorTick, wandConfiscatedUntil);
+                outstandingFineKnuts, ageYears, ageAnchorTick, wandConfiscatedUntil, suspensions, conduct);
     }
 
     public PlayerMinistryRecord withFugitive(boolean value) {
         return new PlayerMinistryRecord(notoriety, offences, sentenceTicks, value, rank,
-                outstandingFineKnuts, ageYears, ageAnchorTick, wandConfiscatedUntil);
+                outstandingFineKnuts, ageYears, ageAnchorTick, wandConfiscatedUntil, suspensions, conduct);
     }
 
     public PlayerMinistryRecord withRank(MinistryRank value) {
         return new PlayerMinistryRecord(notoriety, offences, sentenceTicks, fugitive, value,
-                outstandingFineKnuts, ageYears, ageAnchorTick, wandConfiscatedUntil);
+                outstandingFineKnuts, ageYears, ageAnchorTick, wandConfiscatedUntil, suspensions, conduct);
     }
 
     /** Sets the outstanding debt outright. Negative values clamp to zero in the compact constructor. */
     public PlayerMinistryRecord withOutstandingFine(long knuts) {
         return new PlayerMinistryRecord(notoriety, offences, sentenceTicks, fugitive, rank, knuts,
-                ageYears, ageAnchorTick, wandConfiscatedUntil);
+                ageYears, ageAnchorTick, wandConfiscatedUntil, suspensions, conduct);
     }
 
     /** Adds to the debt; {@code knuts} may be negative to settle part of it. */
@@ -169,13 +190,13 @@ public record PlayerMinistryRecord(
     /** Records an age as of {@code now}; {@link WizardingAge#UNSET} clears the birth record. */
     public PlayerMinistryRecord withAge(int years, long now) {
         return new PlayerMinistryRecord(notoriety, offences, sentenceTicks, fugitive, rank, outstandingFineKnuts,
-                years, now, wandConfiscatedUntil);
+                years, now, wandConfiscatedUntil, suspensions, conduct);
     }
 
     /** Holds the wand until {@code tick}; 0 returns it. */
     public PlayerMinistryRecord withWandConfiscatedUntil(long tick) {
         return new PlayerMinistryRecord(notoriety, offences, sentenceTicks, fugitive, rank, outstandingFineKnuts,
-                ageYears, ageAnchorTick, tick);
+                ageYears, ageAnchorTick, tick, suspensions, conduct);
     }
 
     /**
@@ -185,7 +206,72 @@ public record PlayerMinistryRecord(
      */
     public PlayerMinistryRecord pardoned() {
         return new PlayerMinistryRecord(0.0f, offences, 0, false, rank, 0L, ageYears, ageAnchorTick,
-                wandConfiscatedUntil);
+                wandConfiscatedUntil, suspensions, conduct);
+    }
+
+    /** Whether a hearing has this licence suspended at {@code now}. */
+    public boolean suspendedAt(LicenseType type, long now) {
+        Long until = suspensions.get(type);
+        return until != null && now < until;
+    }
+
+    /** Suspends {@code type} until {@code until}, never shortening a longer suspension already running. */
+    public PlayerMinistryRecord withSuspension(LicenseType type, long until) {
+        Map<LicenseType, Long> next = new EnumMap<>(LicenseType.class);
+        next.putAll(suspensions);
+        next.merge(type, until, Math::max);
+        return new PlayerMinistryRecord(notoriety, offences, sentenceTicks, fugitive, rank, outstandingFineKnuts,
+                ageYears, ageAnchorTick, wandConfiscatedUntil, next, conduct);
+    }
+
+    /** Lifts a suspension — an appeal won, or an operator's decision. */
+    public PlayerMinistryRecord withoutSuspension(LicenseType type) {
+        Map<LicenseType, Long> next = new EnumMap<>(LicenseType.class);
+        next.putAll(suspensions);
+        next.remove(type);
+        return new PlayerMinistryRecord(notoriety, offences, sentenceTicks, fugitive, rank, outstandingFineKnuts,
+                ageYears, ageAnchorTick, wandConfiscatedUntil, next, conduct);
+    }
+
+    /** Drops every suspension that has run out by {@code now}, so the file does not grow forever. */
+    public PlayerMinistryRecord withoutLapsedSuspensions(long now) {
+        if (suspensions.values().stream().allMatch(until -> now < until)) {
+            return this;
+        }
+        Map<LicenseType, Long> next = new EnumMap<>(LicenseType.class);
+        suspensions.forEach((type, until) -> {
+            if (now < until) {
+                next.put(type, until);
+            }
+        });
+        return new PlayerMinistryRecord(notoriety, offences, sentenceTicks, fugitive, rank, outstandingFineKnuts,
+                ageYears, ageAnchorTick, wandConfiscatedUntil, next, conduct);
+    }
+
+    /** Moves conduct by {@code delta}, clamped. */
+    public PlayerMinistryRecord withConductAdjusted(int delta) {
+        return new PlayerMinistryRecord(notoriety, offences, sentenceTicks, fugitive, rank, outstandingFineKnuts,
+                ageYears, ageAnchorTick, wandConfiscatedUntil, suspensions, conduct + delta);
+    }
+
+    /**
+     * Takes one conviction back off the file — an appeal overturned it. The count drops by one and the heat it
+     * added comes off again; nothing else on the file moves.
+     */
+    public PlayerMinistryRecord withOffenceWithdrawn(MagicalOffence offence, float notorietyAdded) {
+        Map<MagicalOffence, Integer> next = new EnumMap<>(MagicalOffence.class);
+        next.putAll(offences);
+        Integer count = next.get(offence);
+        if (count == null) {
+            return this;
+        }
+        if (count <= 1) {
+            next.remove(offence);
+        } else {
+            next.put(offence, count - 1);
+        }
+        return new PlayerMinistryRecord(notoriety - Math.max(0.0f, notorietyAdded), next, sentenceTicks, fugitive,
+                rank, outstandingFineKnuts, ageYears, ageAnchorTick, wandConfiscatedUntil, suspensions, conduct);
     }
 
     /** Insertion-ordered view for display, heaviest offence first. */

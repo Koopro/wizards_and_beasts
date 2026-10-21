@@ -84,6 +84,9 @@ public final class MinistryLicences {
 
     /** Full check at a required endorsement rank. Rank 0 means "any valid licence of this type". */
     public static Verdict verdict(Player player, LicenseType type, int requiredRank) {
+        if (suspended(player, type)) {
+            return Verdict.refuse("ministry.wizards_and_beasts.licence.deny.suspended");
+        }
         ItemStack document = findDocument(player, type);
         if (document == null) {
             return Verdict.refuse();
@@ -109,6 +112,16 @@ public final class MinistryLicences {
 
     public static Verdict verdict(Player player, LicenseType type) {
         return verdict(player, type, 0);
+    }
+
+    /**
+     * Whether a hearing has suspended this player's {@code type} licence. A suspension is on the Ministry's file,
+     * not on the scroll, so it holds whichever copy the wizard carries — and lifts when it runs out or an appeal
+     * succeeds, without anyone having to find the scroll.
+     */
+    public static boolean suspended(Player player, LicenseType type) {
+        return at.koopro.wizardsandbeasts.ministry.MinistryRecords.get(player)
+                .suspendedAt(type, player.level().getGameTime());
     }
 
     /** Terse form for call sites that only branch. */

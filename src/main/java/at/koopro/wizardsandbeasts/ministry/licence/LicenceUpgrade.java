@@ -1,5 +1,11 @@
 package at.koopro.wizardsandbeasts.ministry.licence;
 
+import at.koopro.wizardsandbeasts.Config;
+import at.koopro.wizardsandbeasts.currency.billing.GringottsBilling;
+import at.koopro.wizardsandbeasts.currency.billing.MoneyFlow;
+import at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper;
+import at.koopro.wizardsandbeasts.module.Module;
+import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.owl.OWLGrade;
 import at.koopro.wizardsandbeasts.owl.data.PlayerOWLData;
 import at.koopro.wizardsandbeasts.registry.MiscItemRegistry;
@@ -20,7 +26,8 @@ import org.jspecify.annotations.Nullable;
  * A player who is told only "cannot upgrade" learns nothing about which of the two they are missing.
  *
  * <p>The parchment and ink are consumed only on a success. A refused endorsement costs nothing,
- * because the Ministry does not keep your stationery for telling you no.
+ * because the Ministry does not keep your stationery for telling you no. The Ministry's fee ({@link #fee}, billed
+ * through Gringotts) is taken last, after every other requirement is met, and only while Gringotts is open.
  *
  * <p><b>No N.E.W.T.s.</b> The brief asked for "OWL/NEWT knowledge flags"; the repo has O.W.L.s
  * ({@link PlayerOWLData}) and no N.E.W.T. system at all. Rather than stub one, the ladder is built
@@ -80,12 +87,41 @@ public final class LicenceUpgrade {
             return Outcome.no("ministry.wizards_and_beasts.licence.upgrade.no_ink");
         }
 
+        // The Ministry's fee, last of all: every other refusal has been given, so a wizard is never billed for an
+        // endorsement they were not going to get. A short vault takes nothing and keeps the parchment and ink.
+        long fee = feeFor(targetRank);
+        if (!GringottsBilling.charge(player, MoneyFlow.LICENCE_ENDORSEMENT, fee)) {
+            return Outcome.no("ministry.wizards_and_beasts.licence.upgrade.fee", CurrencyHelper.formatFromKnuts(fee));
+        }
+
         player.getInventory().removeItem(parchmentSlot, 1);
         player.getInventory().removeItem(inkSlot, 1);
         scroll.set(ModDataComponents.LICENSE_DATA.get(), data.withRank(targetRank));
 
-        return new Outcome(true, Component.translatable(
-                "ministry.wizards_and_beasts.licence.upgrade.done", data.type().displayName(), targetRank));
+        return new Outcome(true, fee > 0
+                ? Component.translatable("ministry.wizards_and_beasts.licence.upgrade.done_paid",
+                        data.type().displayName(), targetRank, CurrencyHelper.formatFromKnuts(fee))
+                : Component.translatable("ministry.wizards_and_beasts.licence.upgrade.done",
+                        data.type().displayName(), targetRank));
+    }
+
+    /**
+     * The fee for endorsing a licence to {@code targetRank} when the per-rank fee is {@code feePerRank}: rank × fee,
+     * so the ladder costs 1 + 2 + 3 = 6 fees in all. 0 for a rank below 1 or no fee. Pure.
+     */
+    public static long fee(int targetRank, long feePerRank) {
+        if (targetRank < 1 || feePerRank <= 0) {
+            return 0L;
+        }
+        return Math.multiplyExact(feePerRank, (long) targetRank);
+    }
+
+    /** What endorsing to {@code targetRank} costs now: nothing while Gringotts is closed. */
+    public static long feeFor(int targetRank) {
+        if (!ModuleManager.isEnabled(Module.GRINGOTTS)) {
+            return 0L;
+        }
+        return fee(targetRank, Config.licenceEndorsementFeeKnuts);
     }
 
     /** The player's grade in the subject this licence is examined on; {@link OWLGrade#T} if untested. */
