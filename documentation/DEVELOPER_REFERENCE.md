@@ -513,7 +513,6 @@ The following high-leverage classes are the primary map for contributors (full n
 | `at.koopro.wizardsandbeasts.azkaban.structure.AzkabanStructure` | Structure generation | Worldgen |
 | `at.koopro.wizardsandbeasts.registry.ModFeatures` | Feature registration | Worldgen |
 | `at.koopro.wizardsandbeasts.world.ModConfiguredFeatures` | Feature keys | Worldgen |
-| `at.koopro.wizardsandbeasts.world.ModPlacedFeatures` | Placement keys | Worldgen |
 | `at.koopro.wizardsandbeasts.client.ClientSetup` | Renderer/layer setup | Client |
 | `at.koopro.wizardsandbeasts.client.spell.SpellClientInputHandler` | Spell input | Client |
 | `at.koopro.wizardsandbeasts.client.spell.hud.SpellDiamondOverlay` | Spell HUD | Client |

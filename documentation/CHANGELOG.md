@@ -4,6 +4,19 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Source and repo cleanup (2026-10-21)
+
+- **Fixed:** any player could read another player's heritage, hidden werewolf condition and blood pool through
+  `/wandb player heritage info|werewolf status|blood get <player>`; the `<player>` form now needs admin, like every
+  other read of someone else.
+- **Fixed:** two Java packages (`skill/build/`, `admin/config/`) were never committed because `.gitignore` matched
+  any directory named `build/` or `config/`; the patterns are now anchored to the repository root.
+- **Fixed:** `/wandb admin broom` refused with the wand tools' message.
+- Removed dead code (unused types, ~40 members, 120 imports, deprecated module and werewolf shims) and 53 redundant
+  casts; exception handling around id parsing no longer catches `Exception`.
+- Repeated code now goes through one helper each: spell-key resolution, bounded list/enum codecs, admin request
+  gate, per-player request throttle, payload broadcast, location block properties, game-test console capture.
+
 ### Ministry law you can play: evidence, Aurors, pleas, appeals, licences, reputation (2026-10-15)
 
 `documentation/MINISTRY_LAW.md`.

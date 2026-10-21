@@ -1051,6 +1051,8 @@ is a statement about the build, changeable in code or in the config seed, not by
 `ModuleManager.State` is **retained as `@Deprecated`** with a `toModuleState()` bridge so any reference to
 the old nested type still compiles.
 
+*Update 2026-10-21:* the alias and its cache-only setter are gone. Use `ModuleState`; tests and capture scenes that need a cache-only flip call `ModuleManager.overrideCached(Module, ModuleState)`.
+
 ## Hardcoded defaults → config seed
 
 The static initialiser's table moved verbatim to `ModuleDefaults.SHIPPED`, and `ModuleConfig` declares one
