@@ -53,7 +53,6 @@ public final class ArmorDevKit implements FeatureDevKit {
         log.changed("equipment", "3 robe sets, a hat, a mask, 2 cloaks and netherite helmet + chestplate");
     }
 
-    @SafeVarargs
     private static void give(ServerPlayer target, String label, DeferredItem<?>... items) {
         for (DeferredItem<?> item : items) {
             target.getInventory().add(new ItemStack(item.get()));

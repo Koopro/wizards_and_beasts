@@ -51,7 +51,7 @@ final class PocketSanctuaryFurnisher {
                 int zone = getSanctuaryZone(dx, dz, thirdR);
                 if (zone == 0) continue; // shed footprint handled by placeSanctuaryShed
                 long hash = seed ^ ((long) dx * 0x9E3779B97F4A7C15L) ^ ((long) dz * 0x6C62272E07BB0142L);
-                int r = (int) Math.floorMod(hash, 6);
+                int r = Math.floorMod(hash, 6);
                 BlockState floor = switch (zone) {
                     case 1 -> r < 2 ? Blocks.SAND.defaultBlockState()
                                     : r < 5 ? Blocks.RED_SAND.defaultBlockState()
@@ -250,7 +250,7 @@ final class PocketSanctuaryFurnisher {
             int bx = bamX + off[0];
             int bz = bamZ + off[1];
             long hash = seed ^ ((long) bx * 0xDEADBEEFL) ^ ((long) bz * 0xCAFEBABEL);
-            int height = 2 + (int) Math.floorMod(hash, 3);
+            int height = 2 + Math.floorMod(hash, 3);
             for (int h = 0; h < height; h++) {
                 level.setBlock(new BlockPos(bx, cy + h, bz), Blocks.BAMBOO.defaultBlockState(), 3);
             }

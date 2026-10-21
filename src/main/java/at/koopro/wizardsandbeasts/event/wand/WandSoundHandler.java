@@ -58,7 +58,7 @@ public final class WandSoundHandler {
         if (!(player.level() instanceof ServerLevel)) {
             return;
         }
-        ServerLevel level = (ServerLevel) player.level();
+        ServerLevel level = player.level();
         if (!(player.getMainHandItem().getItem() instanceof WandItem)) {
             return;
         }

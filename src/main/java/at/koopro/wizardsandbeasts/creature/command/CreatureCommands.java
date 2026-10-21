@@ -82,7 +82,7 @@ public final class CreatureCommands {
     private static int lineup(CommandSourceStack src, int spacing)
             throws com.mojang.brigadier.exceptions.CommandSyntaxException {
         ServerPlayer player = src.getPlayerOrException();
-        ServerLevel level = (ServerLevel) player.level();
+        ServerLevel level = player.level();
 
         List<EntityType<?>> mobs = new ArrayList<>();
         for (EntityType<?> type : BuiltInRegistries.ENTITY_TYPE) {
@@ -137,7 +137,7 @@ public final class CreatureCommands {
     private static int clearLineup(CommandSourceStack src)
             throws com.mojang.brigadier.exceptions.CommandSyntaxException {
         ServerPlayer player = src.getPlayerOrException();
-        ServerLevel level = (ServerLevel) player.level();
+        ServerLevel level = player.level();
         List<Entity> tagged = new ArrayList<>();
         level.getEntities((EntityType<?>) null, entity -> entity.getTags().contains(LINEUP_TAG), tagged);
         for (Entity entity : tagged) {
@@ -161,7 +161,7 @@ public final class CreatureCommands {
             return 0;
         }
         ServerPlayer player = src.getPlayerOrException();
-        ServerLevel level = (ServerLevel) player.level();
+        ServerLevel level = player.level();
         EntityType<?> type = holder.get();
         int spawned = 0;
         for (int i = 0; i < count; i++) {

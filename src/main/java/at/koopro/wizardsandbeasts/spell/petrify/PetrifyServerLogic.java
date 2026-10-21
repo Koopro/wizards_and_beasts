@@ -125,7 +125,7 @@ public final class PetrifyServerLogic {
             if (!state.isPetrified()) {
                 continue;
             }
-            ServerLevel playerLevel = (ServerLevel) player.level();
+            ServerLevel playerLevel = player.level();
             if (playerLevel.getGameTime() - state.petrifiedAtGameTime() >= NATURAL_CURE_TICKS) {
                 naturalCure(playerLevel, player);
                 continue;

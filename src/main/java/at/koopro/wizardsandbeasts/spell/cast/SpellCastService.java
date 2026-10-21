@@ -3,7 +3,6 @@ package at.koopro.wizardsandbeasts.spell.cast;
 import at.koopro.wizardsandbeasts.spell.core.*;
 
 import at.koopro.wizardsandbeasts.Config;
-import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.network.spell.SpellDeniedS2CPayload;
@@ -29,7 +28,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -62,13 +60,8 @@ public final class SpellCastService {
                 spell.getProficiency(player));
         castContext = castContext.withAllegiance(WandCastingAllegianceSystem.resolve(wandStack));
         castContext = castContext.withCompatibility(WandCastingAllegianceSystem.applyLayer(castContext, serverLevel));
-        Identifier spellKey;
-        try {
-            spellKey = Identifier.parse(spell.getId());
-        } catch (Exception ignored) {
-            spellKey = Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, spell.getId());
-        }
-        return castContext.withScalingProfile(ProficiencyScaler.getProfileForPlayer(player, spellKey));
+        return castContext.withScalingProfile(
+                ProficiencyScaler.getProfileForPlayer(player, ProficiencyScaler.spellKey(spell.getId())));
     }
 
     public static CastResult completeWandCastRelease(ServerPlayer player) {

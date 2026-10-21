@@ -106,7 +106,7 @@ public class CloakEffectsHandler {
         if (!(event.getEntity() instanceof ServerPlayer observer)) {
             return;
         }
-        ServerLevel serverLevel = (ServerLevel) observer.level();
+        ServerLevel serverLevel = observer.level();
         for (ServerPlayer target : serverLevel.getServer().getPlayerList().getPlayers()) {
             syncTargetForObserver(observer, target);
         }
@@ -215,7 +215,7 @@ public class CloakEffectsHandler {
     }
 
     private static void resyncTargetToAllObservers(ServerPlayer target) {
-        ServerLevel serverLevel = (ServerLevel) target.level();
+        ServerLevel serverLevel = target.level();
         boolean deathly = isDeathlyCloaked(target);
         broadcastEquipment(serverLevel.getServer().getPlayerList().getPlayers(), target, deathly);
         if (deathly) {

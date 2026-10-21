@@ -90,7 +90,7 @@ public final class HerbologyAbilityHandler {
 
     /** Green Thumb: advance one random not-yet-grown crop near the herbologist. */
     private static void nudgeNearbyCrop(ServerPlayer player) {
-        ServerLevel level = (ServerLevel) player.level();
+        ServerLevel level = player.level();
         RandomSource random = level.getRandom();
         BlockPos origin = player.blockPosition();
 

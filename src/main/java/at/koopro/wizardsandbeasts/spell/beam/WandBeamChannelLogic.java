@@ -5,7 +5,6 @@ import at.koopro.wizardsandbeasts.util.PlayerScopedState;
 import at.koopro.wizardsandbeasts.spell.core.*;
 
 import at.koopro.wizardsandbeasts.spell.cast.SpellCastService;
-import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.item.wand.WandItem;
 import at.koopro.wizardsandbeasts.network.spell.BeamChannelS2CPayload;
@@ -19,7 +18,6 @@ import at.koopro.wizardsandbeasts.spell.effect.SpellEffectRunner;
 import at.koopro.wizardsandbeasts.spell.proficiency.ProficiencyScaler;
 import at.koopro.wizardsandbeasts.spell.proficiency.SpellScalingProfile;
 import at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -330,21 +328,13 @@ public final class WandBeamChannelLogic {
      */
     private static SpellEffectContext channelContext(ServerLevel level, ServerPlayer player, Spell spell,
                                                      @Nullable LivingEntity target) {
-        SpellScalingProfile profile = ProficiencyScaler.getProfileForPlayer(player, spellKey(spell.getId()));
+        SpellScalingProfile profile = ProficiencyScaler.getProfileForPlayer(player, ProficiencyScaler.spellKey(spell.getId()));
         SpellEffectContext ctx = target != null
                 ? SpellEffectContext.ofTarget(player, target, level)
                 : SpellEffectContext.ofSelf(player, level);
         return ctx.withScaling(profile.damageMult(), profile.durationMult(), profile.controlMult());
     }
 
-    /** Mirrors {@code SpellCastService}'s spell-key resolution for the proficiency profile. */
-    private static Identifier spellKey(String spellId) {
-        try {
-            return Identifier.parse(spellId);
-        } catch (Exception ignored) {
-            return Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, spellId);
-        }
-    }
 
     public static void adjustLeviosaDistance(ServerPlayer player, float delta) {
         if (Math.abs(delta) < 1.0e-4f) return;

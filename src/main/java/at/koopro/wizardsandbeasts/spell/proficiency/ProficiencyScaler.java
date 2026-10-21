@@ -1,7 +1,6 @@
 package at.koopro.wizardsandbeasts.spell.proficiency;
 
-import at.koopro.wizardsandbeasts.spell.core.*;
-
+import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
@@ -10,40 +9,21 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * AUDIT FINDINGS (captured before implementation):
- *
- * 1) Player spell attachment and proficiency source:
- * - File: data/PlayerSpellData.java
- * - Existing progression was tracked via successfulHits map (spellId -> int) and Proficiency enum tiers.
- * - No existing float map for per-spell proficiency in [0.0, 1.0] was present; this class now reads
- *   PlayerSpellData#getSpellProficiency(spellId) introduced for cast-scaling.
- *
- * 2) Existing proficiency increment point:
- * - File: spell/SpellProficiencyTracker.java
- * - recordSuccessfulHit(...) was called after successful cast effects from SpellExecutor / SpellProjectileEntity /
- *   WandBeamChannelLogic and incremented successfulHits by +1 with no diminishing returns.
- *
- * 3) Cast execution and cooldown application points:
- * - File: spell/cast/SpellCastService.java
- * - Cast execution call: SpellExecutor.executeGeneric(castContext, serverLevel).
- * - Cooldown stamping after execution: data.setCooldown(spellId, expiryTick) using
- *   spell.getBaseCooldownTicks() * castContext.modifiers().finalCooldown().
- *
- * 4) SpellScalingProfile pre-existence:
- * - No existing SpellScalingProfile record/class existed in the codebase.
- *
- * 5) MobEffectInstance duration source:
- * - Durations were mixed:
- *   - hardcoded in Java spell handlers (e.g. SpellCastHandlers and spell classes),
- *   - and JSON-defined target/self effects in SpellDefinition.MobEffectDef used by JsonSpell.
- *
- * 6) SpellDefinition base fields and projectile controls:
- * - File: spell/def/SpellDefinition.java
- * - Existing fields included baseDamage and cooldownTicks, but no dedicated baseCooldownTicks alias,
- *   projectileSpeed, projectileSpread, baseEffectDurationTicks, baseKnockback, or baseAoeRadius.
+ * Turns a player's per-spell proficiency (stored on {@link PlayerSpellData}, kept honest by
+ * {@link SpellPractice}) into the {@link SpellScalingProfile} a cast multiplies its damage, cooldown,
+ * duration, control and accuracy by.
  */
 public final class ProficiencyScaler {
     private ProficiencyScaler() {}
+
+    /**
+     * The proficiency key for a spell id. Spell ids are already {@code namespace:path}; an id that does not
+     * parse falls back to this mod's namespace. Every cast path resolves the key here so they cannot drift.
+     */
+    public static Identifier spellKey(String spellId) {
+        Identifier parsed = Identifier.tryParse(spellId);
+        return parsed != null ? parsed : Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, spellId);
+    }
 
     public static SpellScalingProfile computeProfile(float proficiency) {
         float p = clamp01(proficiency);

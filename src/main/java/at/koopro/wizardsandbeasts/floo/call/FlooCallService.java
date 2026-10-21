@@ -70,7 +70,7 @@ public final class FlooCallService {
             return;
         }
 
-        FlooNetworkManager manager = FlooNetworkManager.get((ServerLevel) caller.level());
+        FlooNetworkManager manager = FlooNetworkManager.get(caller.level());
         FlooRegistryEntry dest = FlooAccess.resolveSpoken(caller, manager, address);
         if (dest == null) {
             // The same sentence the travel path gives, and deliberately: "no such connection" has to
@@ -91,7 +91,7 @@ public final class FlooCallService {
             return;
         }
 
-        MinecraftServer server = ((ServerLevel) caller.level()).getServer();
+        MinecraftServer server = caller.level().getServer();
         // Replace any prior call by this player.
         endCall(server, caller.getUUID(), null);
 
@@ -120,7 +120,7 @@ public final class FlooCallService {
         FlooCall call = SESSIONS.get(player.getUUID());
         if (call == null) return;
 
-        MinecraftServer server = ((ServerLevel) player.level()).getServer();
+        MinecraftServer server = player.level().getServer();
         call.ticksRemaining--;
         if (call.ticksRemaining <= 0) {
             endCall(server, player.getUUID(),
@@ -162,7 +162,7 @@ public final class FlooCallService {
 
     /** Bridges chat across an active call. Returns silently — never cancels normal chat. */
     public static void handleChat(@NonNull ServerPlayer speaker, @NonNull String message) {
-        MinecraftServer server = ((ServerLevel) speaker.level()).getServer();
+        MinecraftServer server = speaker.level().getServer();
         // Caller speaking -> remote grate hears.
         FlooCall ownCall = SESSIONS.get(speaker.getUUID());
         if (ownCall != null) {

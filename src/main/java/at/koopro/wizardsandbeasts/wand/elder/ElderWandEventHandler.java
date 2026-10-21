@@ -66,7 +66,7 @@ public final class ElderWandEventHandler {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (player.tickCount % 20 != 0) return;
 
-        ServerLevel level = (ServerLevel) player.level();
+        ServerLevel level = player.level();
         ElderWandSavedData data = ElderWandSavedData.get(level);
 
         int size = player.getInventory().getContainerSize();

@@ -105,7 +105,7 @@ public final class CurseBreaking {
         }
         TreasureArtefact next = apply(artefact, outcome);
         TreasureArtefacts.set(stack, next);
-        ServerLevel level = (ServerLevel) player.level();
+        ServerLevel level = player.level();
         switch (outcome) {
             case IDENTIFIED -> PlayerFeedback.actionBar(player, Component.translatable(
                     "treasure.wizards_and_beasts.revealed", artefact.curse().orElseThrow().displayName(),
@@ -133,7 +133,7 @@ public final class CurseBreaking {
 
     /** The wrong counter: the curse flares — its hazard at once, and a sting that grows with its depth. */
     static void backlash(ServerPlayer player, TreasureArtefact artefact) {
-        ServerLevel level = (ServerLevel) player.level();
+        ServerLevel level = player.level();
         level.playSound(null, player.blockPosition(), SoundEvents.EVOKER_CAST_SPELL, SoundSource.PLAYERS, 0.8f, 0.6f);
         player.hurtServer(level, level.damageSources().magic(), 1.0f + artefact.layers());
         hazard(player, artefact.curse().orElseThrow());

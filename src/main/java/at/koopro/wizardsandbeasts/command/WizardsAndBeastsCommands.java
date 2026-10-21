@@ -13,7 +13,6 @@ import at.koopro.wizardsandbeasts.sync.PlayerStateSyncService;
 import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
 import at.koopro.wizardsandbeasts.network.debug.DebugModeS2CPayload;
 import at.koopro.wizardsandbeasts.network.stats.PlayerStatsSyncPayload;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -99,7 +98,7 @@ public class WizardsAndBeastsCommands {
             WandBeamChannelLogic.endChannel(player);
             // Logging out between letting go and the release packet must not make the channel free.
             WandBeamChannelLogic.settleReleasedChannel(player, false);
-            DebugWandState.cleanup(player.getUUID(), (ServerLevel) player.level());
+            DebugWandState.cleanup(player.getUUID(), player.level());
             LumosFieldEffect.removeLight(player);
         }
     }

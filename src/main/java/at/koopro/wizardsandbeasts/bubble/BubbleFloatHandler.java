@@ -4,7 +4,6 @@ import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.registry.ConsumableItemRegistry;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
@@ -71,7 +70,7 @@ public final class BubbleFloatHandler {
         }
 
         if (player.tickCount % TRAIL_INTERVAL == 0) {
-            ((ServerLevel) player.level()).sendParticles(ParticleTypes.BUBBLE,
+            player.level().sendParticles(ParticleTypes.BUBBLE,
                     player.getX(), player.getY() + 0.2, player.getZ(), 3, 0.25, 0.1, 0.25, 0.0);
         }
     }
@@ -97,7 +96,7 @@ public final class BubbleFloatHandler {
         double radius = 0.12 + 0.28 * progress;
 
         Vec3 mouth = player.getEyePosition().add(player.getLookAngle().scale(0.35));
-        ((ServerLevel) player.level()).sendParticles(ParticleTypes.BUBBLE,
+        player.level().sendParticles(ParticleTypes.BUBBLE,
                 mouth.x, mouth.y, mouth.z, 4, radius, radius, radius, 0.0);
     }
 

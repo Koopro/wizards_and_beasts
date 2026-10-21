@@ -10,6 +10,7 @@ import at.koopro.wizardsandbeasts.bestiary.EncounterRule;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.skill.PlayerSkillBonusData;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -79,7 +80,7 @@ public final class BestiaryDiscoveryHandler {
             rebuildIndex();
             index = byEntityType;
         }
-        return index.getOrDefault(type.builtInRegistryHolder().key().identifier(), List.of());
+        return index.getOrDefault(BuiltInRegistries.ENTITY_TYPE.getKey(type), List.of());
     }
 
     // -- the doors species code uses ------------------------------------------------------------

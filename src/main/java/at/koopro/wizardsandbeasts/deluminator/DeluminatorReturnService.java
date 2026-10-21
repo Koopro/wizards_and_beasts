@@ -62,7 +62,7 @@ public final class DeluminatorReturnService {
         if (!(player.level() instanceof ServerLevel)) {
             return false;
         }
-        ServerLevel level = (ServerLevel) player.level();
+        ServerLevel level = player.level();
         ServerPlayer target = getGuidedPlayer(player, stack);
 
         if (target == null) {
@@ -106,8 +106,8 @@ public final class DeluminatorReturnService {
                 iterator.remove();
                 continue;
             }
-            ServerLevel userLevel = (ServerLevel) user.level();
-            ServerLevel targetLevel = (ServerLevel) target.level();
+            ServerLevel userLevel = user.level();
+            ServerLevel targetLevel = target.level();
 
             if (pending.ticksRemaining > 0) {
                 pending.ticksRemaining--;
@@ -193,7 +193,7 @@ public final class DeluminatorReturnService {
         if (targetId.isBlank() || !(user.level() instanceof ServerLevel)) {
             return null;
         }
-        ServerLevel level = (ServerLevel) user.level();
+        ServerLevel level = user.level();
         UUID parsedId;
         try {
             parsedId = UUID.fromString(targetId);

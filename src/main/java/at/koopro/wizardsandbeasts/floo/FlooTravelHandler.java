@@ -202,7 +202,7 @@ public final class FlooTravelHandler {
             return;
         }
 
-        FlooNetworkManager manager = FlooNetworkManager.get((ServerLevel) player.level());
+        FlooNetworkManager manager = FlooNetworkManager.get(player.level());
 
         FlooRegistryEntry heard = spoken
                 ? FlooAccess.resolveSpoken(player, manager, requestedAddress)
@@ -308,7 +308,7 @@ public final class FlooTravelHandler {
      */
     public static void commitTravel(@NonNull ServerPlayer player, @NonNull BlockPos originPos,
                                     @NonNull String actualAddress, @NonNull String intended) {
-        ServerLevel originLevel = (ServerLevel) player.level();
+        ServerLevel originLevel = player.level();
         FlooNetworkManager manager = FlooNetworkManager.get(originLevel);
 
         // Two different things can have happened during the departure window, and they are told
@@ -434,7 +434,7 @@ public final class FlooTravelHandler {
     }
 
     public static void forceTeleport(@NonNull ServerPlayer player, @NonNull String address) {
-        FlooNetworkManager manager = FlooNetworkManager.get((ServerLevel) player.level());
+        FlooNetworkManager manager = FlooNetworkManager.get(player.level());
         FlooRegistryEntry dest = manager.getEntry(address);
         if (dest == null) {
             PlayerFeedback.actionBar(player,
@@ -743,7 +743,7 @@ public final class FlooTravelHandler {
     @Nullable
     private static ServerLevel resolveLevel(@NonNull ServerPlayer player, @NonNull Identifier dimensionId) {
         ResourceKey<Level> key = ResourceKey.create(Registries.DIMENSION, dimensionId);
-        ServerLevel result = ((ServerLevel) player.level()).getServer().getLevel(key);
+        ServerLevel result = player.level().getServer().getLevel(key);
         if (result == null) {
             LOGGER.warn("[FlooNetwork] Destination dimension not found: {}", dimensionId);
         }

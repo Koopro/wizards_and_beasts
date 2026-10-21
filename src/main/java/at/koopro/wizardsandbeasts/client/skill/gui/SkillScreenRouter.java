@@ -3,10 +3,14 @@ package at.koopro.wizardsandbeasts.client.skill.gui;
 import at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageDataState;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
+import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import org.slf4j.Logger;
 
 public final class SkillScreenRouter {
+
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     private SkillScreenRouter() {
     }
@@ -35,7 +39,8 @@ public final class SkillScreenRouter {
             }
 
             mc.setScreen(new SkillTreeScreen());
-        } catch (Throwable ignored) {
+        } catch (RuntimeException failure) {
+            LOGGER.error("Could not open the skill chart", failure);
             mc.setScreen(new SkillAccessDeniedScreen(
                     Component.translatable("screen.wizards_and_beasts.skill_access_denied.generic_error")));
         }

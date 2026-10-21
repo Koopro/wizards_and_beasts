@@ -240,7 +240,7 @@ public final class CanonRulingTests {
         ServerPlayer stunner = player(helper, "DragonTamer", GameType.SURVIVAL);
         try {
             EntityType<GenericBeastEntity> type =
-                    (EntityType<GenericBeastEntity>) ModCreatures.ENTITIES.get("hungarian_horntail").get();
+                    ModCreatures.ENTITIES.get("hungarian_horntail").get();
             GenericBeastEntity horntail = helper.spawn(type, new BlockPos(3, 1, 3));
             horntail.setNoAi(true);
             Spell stupefy = Spells.byId("wizards_and_beasts:stupefy");

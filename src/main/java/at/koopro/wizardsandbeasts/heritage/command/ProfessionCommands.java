@@ -88,16 +88,12 @@ public final class ProfessionCommands {
     }
 
     private static Stream<String> suggestProfessions(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) {
-        try {
-            ServerPlayer player = ctx.getSource().getPlayerOrException();
-            Heritage type = player.getData(ModAttachments.HERITAGE_DATA.get()).getSelectedHeritage();
-            if (type == null) {
-                return Stream.of();
-            }
-            return ProfessionNode.byHeritage(type).stream().map(ProfessionNode::getId);
-        } catch (Exception ignored) {
+        ServerPlayer player = ctx.getSource().getPlayer();
+        Heritage type = player == null ? null : player.getData(ModAttachments.HERITAGE_DATA.get()).getSelectedHeritage();
+        if (type == null) {
             return Stream.of();
         }
+        return ProfessionNode.byHeritage(type).stream().map(ProfessionNode::getId);
     }
 
     private static int professionList(CommandSourceStack source, ServerPlayer target) {

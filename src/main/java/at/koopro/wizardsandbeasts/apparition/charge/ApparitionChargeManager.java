@@ -9,9 +9,9 @@ import at.koopro.wizardsandbeasts.apparition.ApparitionServerLogic;
 import at.koopro.wizardsandbeasts.apparition.ApparitionStartResult;
 import at.koopro.wizardsandbeasts.apparition.ApparitionTier;
 import at.koopro.wizardsandbeasts.util.PlayerScopedState;
+import net.neoforged.neoforge.common.NeoForgeMod;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.phys.BlockHitResult;
@@ -211,7 +211,7 @@ public final class ApparitionChargeManager {
         return new Destabilization(
                 charge.damageInstances(),
                 isMovingFasterThanSneak(player),
-                player.isEyeInFluid(FluidTags.WATER) || player.isEyeInFluid(FluidTags.LAVA),
+                player.isEyeInFluidType(NeoForgeMod.WATER_TYPE.value()) || player.isEyeInFluidType(NeoForgeMod.LAVA_TYPE.value()),
                 isEncumbered(player),
                 isFamished(player),
                 false,

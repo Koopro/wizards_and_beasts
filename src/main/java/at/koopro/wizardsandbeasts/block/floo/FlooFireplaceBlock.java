@@ -140,7 +140,7 @@ public class FlooFireplaceBlock extends BaseEntityBlock {
                         FlooCues.sealed(sp);
                         return InteractionResult.SUCCESS;
                     }
-                    FlooAccess.openPicker(sp, FlooNetworkManager.get((ServerLevel) sp.level()),
+                    FlooAccess.openPicker(sp, FlooNetworkManager.get(sp.level()),
                             be.getNetworkAddress(), false);
                 }
             }

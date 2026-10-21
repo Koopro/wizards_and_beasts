@@ -116,7 +116,7 @@ public final class FlooCommands {
         }
 
         Identifier dimension = player.level().dimension().identifier();
-        FlooNetworkManager manager = FlooNetworkManager.get((ServerLevel) player.level());
+        FlooNetworkManager manager = FlooNetworkManager.get(player.level());
         FlooRegistryEntry existing = manager.findByPos(dimension, pos);
         if (existing != null && !mayAdminister(source, existing)) {
             source.sendFailure(Component.translatable(KEY + "fail.not_owner"));

@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.trunk;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
@@ -75,7 +76,7 @@ final class PocketShellGenerator {
                     for (int z = -radius; z <= radius; z++) {
                         if (x * x + z * z > radius * radius) continue;
                         long hash = seed ^ ((long) x * 0x9E3779B97F4A7C15L) ^ ((long) z * 0x6C62272E07BB0142L);
-                        int r = (int) Math.floorMod(hash, 6);
+                        int r = Math.floorMod(hash, 6);
                         if (r == 0) {
                             cursor.set(center.getX() + x, center.getY() - 1, center.getZ() + z);
                             level.setBlock(cursor, Blocks.DIRT.defaultBlockState(), 3);
@@ -198,21 +199,21 @@ final class PocketShellGenerator {
                         .setValue(BlockStateProperties.OPEN, false), 3);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"}) // generic array of Holder
     static void applyBiome(@NonNull ServerLevel level, @NonNull TrunkRecord record) {
         List<String> zones = record.biomeZones().isEmpty()
                 ? record.archetype().defaultBiomeZones()
                 : record.biomeZones();
         int n = zones.size();
 
+        Registry<Biome> biomes = level.registryAccess().lookupOrThrow(Registries.BIOME);
+        Holder<Biome> plains = biomes.getOrThrow(Biomes.PLAINS);
         Holder<Biome>[] holders = new Holder[n];
         for (int i = 0; i < n; i++) {
-            try {
-                ResourceKey<Biome> key = ResourceKey.create(Registries.BIOME, Identifier.parse(zones.get(i)));
-                holders[i] = level.registryAccess().lookupOrThrow(Registries.BIOME).getOrThrow(key);
-            } catch (Exception e) {
-                holders[i] = level.registryAccess().lookupOrThrow(Registries.BIOME).getOrThrow(Biomes.PLAINS);
-            }
+            // An unparseable or unknown biome id (a removed datapack, a hand-edited save) reads as plains.
+            Identifier id = Identifier.tryParse(zones.get(i));
+            holders[i] = id == null ? plains
+                    : biomes.get(ResourceKey.create(Registries.BIOME, id)).<Holder<Biome>>map(h -> h).orElse(plains);
         }
 
         BlockPos center = record.spawnPos();

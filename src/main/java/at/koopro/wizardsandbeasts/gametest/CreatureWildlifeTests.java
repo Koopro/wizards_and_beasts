@@ -1623,7 +1623,7 @@ public final class CreatureWildlifeTests {
 
     static GenericBeastEntity still(GameTestHelper helper, String id, int y, int x, int z) {
         @SuppressWarnings("unchecked")
-        EntityType<GenericBeastEntity> type = (EntityType<GenericBeastEntity>) ModCreatures.ENTITIES.get(id).get();
+        EntityType<GenericBeastEntity> type = ModCreatures.ENTITIES.get(id).get();
         GenericBeastEntity creature = helper.spawn(type, new BlockPos(x, y, z));
         creature.setNoAi(true);
         return creature;

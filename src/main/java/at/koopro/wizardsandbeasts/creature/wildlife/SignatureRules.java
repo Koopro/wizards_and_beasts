@@ -53,7 +53,7 @@ public final class SignatureRules {
      */
     public static int streelerColour(long dayTime, int phase) {
         long hour = Math.floorDiv(dayTime, HOUR_TICKS) + phase;
-        return STREELER_COLOURS.get((int) Math.floorMod(hour, STREELER_COLOURS.size()));
+        return STREELER_COLOURS.get(Math.floorMod(hour, STREELER_COLOURS.size()));
     }
 
     // ── the Cornish Pixie ──────────────────────────────────────────────────

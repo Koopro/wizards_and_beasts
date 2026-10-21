@@ -69,7 +69,7 @@ public final class ScreenShakeHandler {
         // about three casts and then reads as a glitch. Randomising the weights keeps each hit
         // feeling like its own event; pitch stays the weaker axis because vertical camera movement
         // is the part players notice as nausea.
-        float angle = (float) (mc.level != null ? mc.level.random.nextFloat() : 0.5f) * Mth.TWO_PI;
+        float angle = (mc.level != null ? mc.level.random.nextFloat() : 0.5f) * Mth.TWO_PI;
         yawDirection = Mth.cos(angle);
         pitchDirection = Mth.sin(angle) * 0.6F;
     }

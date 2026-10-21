@@ -98,7 +98,7 @@ public final class AzkabanCommands {
     private static int teleport(CommandSourceStack src)
             throws com.mojang.brigadier.exceptions.CommandSyntaxException {
         ServerPlayer player = src.getPlayerOrException();
-        ServerLevel level = (ServerLevel) player.level();
+        ServerLevel level = player.level();
         BlockPos center = findCenter(level, player.blockPosition());
         if (center == null) {
             src.sendFailure(Component.literal("No Azkaban Fortress found within search range."));
@@ -192,7 +192,7 @@ public final class AzkabanCommands {
     private static int summonDementor(CommandSourceStack src)
             throws com.mojang.brigadier.exceptions.CommandSyntaxException {
         ServerPlayer executor = src.getPlayerOrException();
-        ServerLevel level = (ServerLevel) executor.level();
+        ServerLevel level = executor.level();
         DementorEntity dementor = new DementorEntity(ModEntities.DEMENTOR.get(), level);
         dementor.setPos(executor.getX(), executor.getY(), executor.getZ());
         level.addFreshEntity(dementor);
@@ -203,7 +203,7 @@ public final class AzkabanCommands {
     private static int dissipateNearby(CommandSourceStack src)
             throws com.mojang.brigadier.exceptions.CommandSyntaxException {
         ServerPlayer executor = src.getPlayerOrException();
-        ServerLevel level = (ServerLevel) executor.level();
+        ServerLevel level = executor.level();
         AABB box = executor.getBoundingBox().inflate(32);
         List<DementorEntity> dementors = level.getEntitiesOfClass(DementorEntity.class, box, LivingEntity::isAlive);
         for (DementorEntity d : dementors) {

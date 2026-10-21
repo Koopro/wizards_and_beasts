@@ -10,6 +10,7 @@ import at.koopro.wizardsandbeasts.module.ModuleManager;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -85,7 +86,7 @@ public class BestiaryHarvestLootModifier extends LootModifier {
             return generatedLoot;
         }
         List<HarvestRule> rules = HarvestTable.forEntityType(
-                victim.getType().builtInRegistryHolder().key().identifier());
+                BuiltInRegistries.ENTITY_TYPE.getKey(victim.getType()));
         if (rules.isEmpty()) {
             return generatedLoot;
         }

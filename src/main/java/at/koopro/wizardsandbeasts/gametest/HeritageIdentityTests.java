@@ -220,7 +220,7 @@ public final class HeritageIdentityTests {
         try {
             HeritageAPI.commit(squib, Heritage.WIZARDKIND, HeritageVariant.SQUIB);
             HeritageAPI.commit(wizard, Heritage.WIZARDKIND, HeritageVariant.HALF_BLOOD);
-            GenericBeastEntity unicorn = (GenericBeastEntity) still(helper,
+            GenericBeastEntity unicorn = still(helper,
                     ModCreatures.ENTITIES.get("unicorn").get(), 3);
             for (ServerPlayer player : new ServerPlayer[] {squib, wizard}) {
                 BestiaryDiscoveryHandler.encountered(player, unicorn);

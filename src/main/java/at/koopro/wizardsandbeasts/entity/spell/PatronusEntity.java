@@ -149,7 +149,7 @@ public class PatronusEntity extends Mob {
                 darkMob.hurtMarked = true;
             }
         } else {
-            orbitAngle += 0.8 + proficiencyScalar * 0.4;
+            orbitAngle += 0.8f + proficiencyScalar * 0.4f;
             double radius = 3.0 + patronusPower * 0.05;
             double ox = owner.getX() + Math.cos(orbitAngle) * radius;
             double oz = owner.getZ() + Math.sin(orbitAngle) * radius;

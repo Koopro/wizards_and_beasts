@@ -372,7 +372,7 @@ final class EquipmentTests {
             wear(player, new ItemStack(DarkArtefactItemRegistry.INVISIBILITY_CLOAK.get()));
             wear(player, new ItemStack(ArmorItemRegistry.AUROR_ROBE_CHEST.get()));
             ServerLevel nether = helper.getLevel().getServer().getLevel(Level.NETHER);
-            ServerPlayer moved = (ServerPlayer) player.teleport(new TeleportTransition(nether, player.position(),
+            ServerPlayer moved = player.teleport(new TeleportTransition(nether, player.position(),
                     Vec3.ZERO, 0f, 0f, TeleportTransition.DO_NOTHING));
             check(helper, moved != null && moved.level() == nether, () -> "setup: the player did not change dimension");
             check(helper, EquipmentAPI.snapshot(moved).worn().size() == 2,

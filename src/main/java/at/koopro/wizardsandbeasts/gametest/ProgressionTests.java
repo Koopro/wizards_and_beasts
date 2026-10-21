@@ -230,7 +230,7 @@ public final class ProgressionTests {
                     () -> "ten XP levels bought " + (afterXp - before) + " skill points");
 
             @SuppressWarnings("unchecked")
-            EntityType<GenericBeastEntity> type = (EntityType<GenericBeastEntity>) ModCreatures.ENTITIES.get("horklump").get();
+            EntityType<GenericBeastEntity> type = ModCreatures.ENTITIES.get("horklump").get();
             GenericBeastEntity horklump = helper.spawn(type, new BlockPos(2, 1, 0));
             horklump.setNoAi(true);
             BestiaryDiscoveryHandler.witnessedSignature(wizard, horklump);

@@ -14,7 +14,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
 
@@ -192,16 +191,16 @@ public final class ExtensionCharmService {
         String dimStr = data.getReturnDimension(player.getUUID()).orElse(null);
         BlockPos savedPos = data.getReturnPosition(player.getUUID()).orElse(null);
         if (dimStr != null && savedPos != null) {
-            try {
-                ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION, Identifier.parse(dimStr));
-                ServerLevel candidate = sourceLevel.getServer().getLevel(dimKey);
+            Identifier dimId = Identifier.tryParse(dimStr);
+            if (dimId == null) {
+                LOGGER.warn("[WizardsAndBeasts] Failed to parse saved return dimension '{}' for {} — falling back to overworld spawn",
+                        dimStr, player.getUUID());
+            } else {
+                ServerLevel candidate = sourceLevel.getServer().getLevel(ResourceKey.create(Registries.DIMENSION, dimId));
                 if (candidate != null) {
                     returnLevel = candidate;
                     returnPos = savedPos;
                 }
-            } catch (Exception ex) {
-                LOGGER.warn("[WizardsAndBeasts] Failed to parse saved return dimension '{}' for {} — falling back to overworld spawn",
-                        dimStr, player.getUUID(), ex);
             }
         }
         data.clearReturnData(player.getUUID());

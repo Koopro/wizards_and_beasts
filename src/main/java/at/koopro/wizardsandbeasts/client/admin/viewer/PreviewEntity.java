@@ -138,7 +138,7 @@ public final class PreviewEntity {
         if (!(entity instanceof GeoAnimatable animatable)) {
             return null;
         }
-        return (AnimatableManager<GeoAnimatable>) animatable.getAnimatableInstanceCache().getManagerForId(entity.getId());
+        return animatable.getAnimatableInstanceCache().getManagerForId(entity.getId());
     }
 
     /** Every clip in the creature's animation file (and its fallbacks), sorted. Empty when not a GeckoLib model. */

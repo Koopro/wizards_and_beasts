@@ -115,11 +115,10 @@ public record BroomDefinition(
                     return DataResult.error(() -> "repairMaterial must not be blank");
                 }
                 String value = raw.startsWith("#") ? raw.substring(1) : raw;
-                try {
-                    return DataResult.success(TagKey.create(Registries.ITEM, Identifier.parse(value)));
-                } catch (Exception ex) {
-                    return DataResult.error(() -> "Invalid repairMaterial value: " + raw);
-                }
+                Identifier id = Identifier.tryParse(value);
+                return id == null
+                        ? DataResult.error(() -> "Invalid repairMaterial value: " + raw)
+                        : DataResult.success(TagKey.create(Registries.ITEM, id));
             },
             tag -> "#" + tag.location());
 

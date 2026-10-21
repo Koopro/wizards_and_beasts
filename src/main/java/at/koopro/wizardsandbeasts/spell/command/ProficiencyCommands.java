@@ -120,12 +120,7 @@ public final class ProficiencyCommands {
 
     private static int preview(CommandSourceStack source, ServerPlayer player, String spellId) {
         String normalizedSpellId = normalizeSpellId(spellId);
-        Identifier key;
-        try {
-            key = Identifier.parse(normalizedSpellId);
-        } catch (Exception ignored) {
-            key = Identifier.fromNamespaceAndPath("wizards_and_beasts", normalizedSpellId);
-        }
+        Identifier key = ProficiencyScaler.spellKey(normalizedSpellId);
         PlayerSpellData spellData = player.getData(ModAttachments.SPELL_DATA.get());
         // What the spell casts at: the stored value, lifted to what its practised hits guarantee.
         float value = at.koopro.wizardsandbeasts.spell.proficiency.SpellPractice.effective(

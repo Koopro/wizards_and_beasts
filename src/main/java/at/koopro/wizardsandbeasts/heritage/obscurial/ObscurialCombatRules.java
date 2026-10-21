@@ -61,7 +61,7 @@ public final class ObscurialCombatRules {
         PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
         if (!ObscurialRules.isObscurial(data)) return 1.0f;
 
-        ServerLevel level = (ServerLevel) player.level();
+        ServerLevel level = player.level();
         float multiplier = ObscurialRules.isDarkForm(data) ? BASE_TRANSFORMED_DAMAGE_MULT : BASE_NORMAL_DAMAGE_MULT;
 
         if (ObscurialRules.isDaylightStrained(level, player)) {
@@ -83,7 +83,7 @@ public final class ObscurialCombatRules {
         PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
         if (!ObscurialRules.isObscurial(data)) return 1.0f;
 
-        ServerLevel level = (ServerLevel) player.level();
+        ServerLevel level = player.level();
         float multiplier = ObscurialRules.isDarkForm(data) ? BASE_TRANSFORMED_COOLDOWN_MULT : BASE_NORMAL_COOLDOWN_MULT;
 
         if (ObscurialRules.isDaylightStrained(level, player)) {
@@ -111,7 +111,7 @@ public final class ObscurialCombatRules {
     public static float getAbilityCooldownMultiplier(ServerPlayer player) {
         PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
         if (!ObscurialRules.isObscurial(data)) return 1.0f;
-        ServerLevel level = (ServerLevel) player.level();
+        ServerLevel level = player.level();
         float mult = getCooldownMultiplier(player);
         if (ObscurialRules.isDarkForm(data)) {
             mult += ABILITY_DARK_FORM_BONUS;
@@ -207,7 +207,7 @@ public final class ObscurialCombatRules {
 
     private static void applyAbilityCosts(ServerPlayer player, float drainCost, float pressureCost, float stressCost) {
         float stressPenalty = ObscurialRules.getStressAbilityPenaltyMultiplier(player);
-        if (ObscurialRules.isDaylightStrained((ServerLevel) player.level(), player)) {
+        if (ObscurialRules.isDaylightStrained(player.level(), player)) {
             stressPenalty += 0.15f;
         }
         ObscurialResourceManager.setDrain(player, ObscurialResourceManager.getDrain(player) - (drainCost * stressPenalty));

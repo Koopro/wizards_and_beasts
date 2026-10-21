@@ -167,7 +167,7 @@ public final class SystemInteractionTests {
 
     @SuppressWarnings("unchecked")
     private static GenericBeastEntity beast(GameTestHelper helper, String id, BlockPos pos) {
-        EntityType<GenericBeastEntity> type = (EntityType<GenericBeastEntity>) ModCreatures.ENTITIES.get(id).get();
+        EntityType<GenericBeastEntity> type = ModCreatures.ENTITIES.get(id).get();
         GenericBeastEntity beast = helper.spawn(type, pos);
         beast.setNoAi(true);
         return beast;

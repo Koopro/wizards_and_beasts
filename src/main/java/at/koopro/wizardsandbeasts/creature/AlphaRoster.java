@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.creature;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import org.jspecify.annotations.NullMarked;
@@ -103,12 +104,12 @@ public final class AlphaRoster {
     }
 
     public static boolean isAlpha(EntityType<?> type) {
-        return isAlpha(type.builtInRegistryHolder().key().identifier());
+        return isAlpha(BuiltInRegistries.ENTITY_TYPE.getKey(type));
     }
 
     /** True when this creature may spawn naturally under the {@code ALPHA_ONLY} spawn setting. */
     public static boolean mayNaturallySpawnInAlphaSlice(EntityType<?> type) {
-        Identifier id = type.builtInRegistryHolder().key().identifier();
+        Identifier id = BuiltInRegistries.ENTITY_TYPE.getKey(type);
         if (!WizardsAndBeastsMod.MODID.equals(id.getNamespace())) {
             return true;
         }

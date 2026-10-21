@@ -67,7 +67,7 @@ public final class EntityOutlines {
         event.registerEntityModifier(
                 (Class) EntityRenderer.class,
                 (entity, renderState) -> {
-                    int argb = resolve((Entity) entity);
+                    int argb = resolve(entity);
                     // Only ever write a colour, never clear one. Vanilla has already put the Glowing
                     // effect's outline in this field, and zeroing it here would make this layer able to
                     // silently cancel a real glow it knows nothing about.

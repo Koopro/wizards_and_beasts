@@ -97,7 +97,7 @@ public final class LocationShowcaseCapture {
     private LocationShowcaseCapture() {}
 
     private static GoblinTellerEntity teller(ServerPlayer p) {
-        ServerLevel level = (ServerLevel) p.level();
+        ServerLevel level = p.level();
         GoblinTellerEntity goblin = ModEntities.GOBLIN_TELLER.get().spawn(level,
                 BlockPos.containing(p.position().add(p.getLookAngle().scale(2.0))), EntitySpawnReason.COMMAND);
         goblin.setNoAi(true);
@@ -126,7 +126,7 @@ public final class LocationShowcaseCapture {
     }
 
     private static void wandmaker(ServerPlayer p) {
-        ServerLevel level = (ServerLevel) p.level();
+        ServerLevel level = p.level();
         Villager villager = EntityType.VILLAGER.spawn(level,
                 BlockPos.containing(p.position().add(p.getLookAngle().scale(2.0))), EntitySpawnReason.COMMAND);
         villager.setNoAi(true);
@@ -147,7 +147,7 @@ public final class LocationShowcaseCapture {
 
     /** The apothecary's board with goods in hand to sell: the market section's Buying and For sale lines. */
     private static void apothecary(ServerPlayer p) {
-        ServerLevel level = (ServerLevel) p.level();
+        ServerLevel level = p.level();
         p.getInventory().add(new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(
                 Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "dittany")), 12));
         p.getInventory().add(new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(
@@ -164,7 +164,7 @@ public final class LocationShowcaseCapture {
     private static void fence(ServerPlayer p) {
         at.koopro.wizardsandbeasts.module.ModuleManager.overrideCached(at.koopro.wizardsandbeasts.module.Module.MINISTRY,
                 at.koopro.wizardsandbeasts.module.ModuleState.ENABLED);
-        ServerLevel level = (ServerLevel) p.level();
+        ServerLevel level = p.level();
         var trader = EntityType.WANDERING_TRADER.spawn(level,
                 BlockPos.containing(p.position().add(p.getLookAngle().scale(2.0))), EntitySpawnReason.COMMAND);
         trader.setNoAi(true);

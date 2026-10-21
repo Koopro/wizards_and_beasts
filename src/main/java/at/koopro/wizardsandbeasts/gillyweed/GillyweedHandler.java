@@ -56,7 +56,7 @@ public final class GillyweedHandler {
         if (gills == null) {
             return;
         }
-        ServerLevel level = (ServerLevel) player.level();
+        ServerLevel level = player.level();
 
         if (Gillyweed.isFading(gills.getDuration())) {
             fadeWarning(player, level, gills.getDuration());
