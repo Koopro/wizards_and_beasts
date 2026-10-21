@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.gametest;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.commands.CommandSource;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
@@ -420,4 +422,28 @@ public final class WizardTestSupport {
         }
     }
 
+    /** A console-like command source that records everything a command says back into {@code sink}. */
+    public static CommandSource recordingSource(List<String> sink) {
+        return new CommandSource() {
+            @Override
+            public void sendSystemMessage(Component message) {
+                sink.add(message.getString());
+            }
+
+            @Override
+            public boolean acceptsSuccess() {
+                return true;
+            }
+
+            @Override
+            public boolean acceptsFailure() {
+                return true;
+            }
+
+            @Override
+            public boolean shouldInformAdmins() {
+                return false;
+            }
+        };
+    }
 }

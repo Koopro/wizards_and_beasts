@@ -9,7 +9,6 @@ import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -308,27 +307,7 @@ public final class SpellClashTests {
          */
         List<String> console(String command) {
             List<String> said = new ArrayList<>();
-            CommandSource listener = new CommandSource() {
-                @Override
-                public void sendSystemMessage(Component message) {
-                    said.add(message.getString());
-                }
-
-                @Override
-                public boolean acceptsSuccess() {
-                    return true;
-                }
-
-                @Override
-                public boolean acceptsFailure() {
-                    return true;
-                }
-
-                @Override
-                public boolean shouldInformAdmins() {
-                    return false;
-                }
-            };
+            CommandSource listener = WizardTestSupport.recordingSource(said);
             CommandSourceStack source = helper.getLevel().getServer().createCommandSourceStack().withSource(listener);
             helper.getLevel().getServer().getCommands().performPrefixedCommand(source, command);
             return said;

@@ -14,7 +14,6 @@ import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
@@ -140,27 +139,7 @@ final class AdminReportTests {
 
     private static List<String> console(MinecraftServer server, String command) {
         List<String> said = new ArrayList<>();
-        CommandSource listener = new CommandSource() {
-            @Override
-            public void sendSystemMessage(Component message) {
-                said.add(message.getString());
-            }
-
-            @Override
-            public boolean acceptsSuccess() {
-                return true;
-            }
-
-            @Override
-            public boolean acceptsFailure() {
-                return true;
-            }
-
-            @Override
-            public boolean shouldInformAdmins() {
-                return false;
-            }
-        };
+        CommandSource listener = WizardTestSupport.recordingSource(said);
         CommandSourceStack source = server.createCommandSourceStack().withSource(listener);
         server.getCommands().performPrefixedCommand(source, command);
         return said;

@@ -23,7 +23,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.ServerLevel;
@@ -609,27 +608,7 @@ public final class WandAllegianceTests {
 
     private static List<String> castAs(GameTestHelper helper, ServerPlayer caster, String spellId) {
         List<String> said = new ArrayList<>();
-        CommandSource listener = new CommandSource() {
-            @Override
-            public void sendSystemMessage(Component message) {
-                said.add(message.getString());
-            }
-
-            @Override
-            public boolean acceptsSuccess() {
-                return true;
-            }
-
-            @Override
-            public boolean acceptsFailure() {
-                return true;
-            }
-
-            @Override
-            public boolean shouldInformAdmins() {
-                return false;
-            }
-        };
+        CommandSource listener = WizardTestSupport.recordingSource(said);
         CommandSourceStack source = helper.getLevel().getServer().createCommandSourceStack().withSource(listener);
         helper.getLevel().getServer().getCommands().performPrefixedCommand(source,
                 "execute as " + caster.getStringUUID() + " at @s run wandb magic spell cast " + spellId);
