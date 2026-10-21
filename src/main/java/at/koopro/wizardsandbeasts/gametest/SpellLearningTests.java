@@ -50,7 +50,7 @@ public final class SpellLearningTests {
 
     static void contribute(WizardTestSupport.Registrar tests) {
         tests.add("spell_source_teaches_the_spell_written_in_it",
-                "spell source: finishing a read learns the spell and leaves the book intact",
+                "spell source: finishing a read opens the trace; passing it learns the spell and keeps the book",
                 SpellLearningTests::sourceTeachesItsSpell);
         tests.add("spell_source_refuses_a_spell_already_known",
                 "spell source: the eligibility gates still refuse through the reading path",
@@ -65,10 +65,10 @@ public final class SpellLearningTests {
                 "spell source: a page naming a spell that does not exist refuses instead of throwing",
                 SpellLearningTests::badIdIsRefusedNotThrown);
         tests.add("spell_source_page_is_spent_only_on_success",
-                "torn page: destroyed by a successful read, kept when a gate refuses it",
+                "torn page: destroyed by a passed trace, kept when a gate refuses it",
                 SpellLearningTests::pageIsSpentOnlyOnSuccess);
         tests.add("skill_node_still_teaches_its_spell",
-                "skill web: a learn_spell keystone still grants, with the vendor's service gone",
+                "skill web: a learn_spell keystone owes a traced lesson, and passing it grants and ledgers the spell",
                 SpellLearningTests::skillNodeStillTeaches);
         tests.add("spell_learn_command_still_works",
                 "command: /wandb magic spell learn teaches an admin a canonical id and refuses a non-admin",
@@ -97,8 +97,13 @@ public final class SpellLearningTests {
 
             book.getItem().finishUsingItem(book, helper.getLevel(), player);
 
+            WizardTestSupport.check(helper, !data.knowsSpell(spell.getId()),
+                    () -> "finishing the read taught " + spell.getId() + " without a trace");
+            var outcome = TraceTestSupport.pass(player);
+            WizardTestSupport.check(helper, outcome == at.koopro.wizardsandbeasts.spell.learning.tracing.TraceOutcome.PASSED,
+                    () -> "a faithful trace of " + spell.getId() + " was not passed: " + outcome);
             WizardTestSupport.check(helper, data.knowsSpell(spell.getId()),
-                    () -> "finishing the read did not teach " + spell.getId());
+                    () -> "passing the trace did not teach " + spell.getId());
             // Not consumed: a textbook someone has read is still a textbook, and a server's second
             // wizard has to be able to borrow it.
             WizardTestSupport.check(helper, !book.isEmpty() && SpellSource.spellOf(book) != null,
@@ -160,8 +165,8 @@ public final class SpellLearningTests {
      * The skill web's own learning path, which never went through the vendor and must not have been
      * caught by its removal.
      *
-     * <p>`SkillSystemAPI.teachSpell` writes `PlayerSpellData` and records the grant in the web-taught
-     * ledger — the ledger being what a respec later revokes, and the reason a spell learned some other
+     * <p>Allocation owes a lesson; passing its trace goes through `SpellLearningService.commit` on the
+     * web route, which writes `PlayerSpellData` and records the grant in the web-taught ledger — the ledger being what a respec later revokes, and the reason a spell learned some other
      * way is never confiscated by one. Both halves are asserted, because a grant that skipped the
      * ledger would look correct here and quietly survive a respec forever.
      */
@@ -175,8 +180,13 @@ public final class SpellLearningTests {
 
             at.koopro.wizardsandbeasts.skill.SkillSystemAPI.forceUnlock(player, SKILL_NODE);
 
+            WizardTestSupport.check(helper, !data.knowsSpell(spell.getId()),
+                    () -> "allocating " + SKILL_NODE + " taught " + spell.getId() + " without a trace");
+            var outcome = TraceTestSupport.pass(player);
+            WizardTestSupport.check(helper, outcome == at.koopro.wizardsandbeasts.spell.learning.tracing.TraceOutcome.PASSED,
+                    () -> "allocating " + SKILL_NODE + " did not open a passable lesson: " + outcome);
             WizardTestSupport.check(helper, data.knowsSpell(spell.getId()),
-                    () -> "allocating " + SKILL_NODE + " did not teach " + spell.getId());
+                    () -> "passing the lesson did not teach " + spell.getId());
             WizardTestSupport.check(helper,
                     at.koopro.wizardsandbeasts.skill.SkillSystemAPI.getSkillData(player)
                             .getWebTaughtSpells().contains(spell.getId()),
@@ -331,9 +341,12 @@ public final class SpellLearningTests {
 
             page.getItem().use(helper.getLevel(), player, InteractionHand.MAIN_HAND);
             page.getItem().finishUsingItem(page, helper.getLevel(), player);
+            WizardTestSupport.check(helper, page.getCount() == 2,
+                    () -> "opening the trace spent a page before anything was traced");
+            TraceTestSupport.pass(player);
 
             WizardTestSupport.check(helper, WizardTestSupport.spellData(player).knowsSpell(spell.getId()),
-                    () -> "reading the page did not teach " + spell.getId());
+                    () -> "reading and tracing the page did not teach " + spell.getId());
             WizardTestSupport.check(helper, page.getCount() == 1,
                     () -> "a successful read did not spend exactly one page (" + page.getCount() + " left)");
 

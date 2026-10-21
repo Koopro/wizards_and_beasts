@@ -445,10 +445,29 @@ public class SkillTreeScreen extends Screen {
             return; // sealed region: non-interactive (server would reject the payload anyway)
         }
         PlayerSkillData data = ClientSkillDataState.get();
+        String lesson = owedLesson(node, data);
+        if (lesson != null) {
+            // An allocated node whose spell has not been traced yet: the click is the lesson.
+            ClientPacketDistributor.sendToServer(
+                    new at.koopro.wizardsandbeasts.network.spell.SpellTraceRequestC2SPayload(lesson));
+            return;
+        }
         if (data.getSkillLevel(node.getId()) >= node.getMaxLevel()) {
             return;
         }
         ClientPacketDistributor.sendToServer(new SkillUnlockC2SPayload(node.getId()));
+    }
+
+    /** The spell this allocated node still owes a traced lesson for, or null. */
+    private static @org.jspecify.annotations.Nullable String owedLesson(Skill node, PlayerSkillData data) {
+        if (data.getSkillLevel(node.getId()) <= 0) {
+            return null;
+        }
+        String spellId = at.koopro.wizardsandbeasts.spell.learning.tracing.SpellLessons.spellOf(node);
+        if (spellId == null || at.koopro.wizardsandbeasts.client.spell.state.ClientSpellDataState.get().knowsSpell(spellId)) {
+            return null;
+        }
+        return spellId;
     }
 
     private boolean insideChart(double mouseX, double mouseY) {
@@ -504,6 +523,11 @@ public class SkillTreeScreen extends Screen {
      */
     private List<SkillTreeRenderHelper.Note> buildNotes(Skill node, PlayerSkillData data) {
         List<SkillTreeRenderHelper.Note> notes = new java.util.ArrayList<>();
+        if (owedLesson(node, data) != null) {
+            notes.add(new SkillTreeRenderHelper.Note(
+                    Component.translatable("spell.wizards_and_beasts.trace.lesson_owed"),
+                    at.koopro.wizardsandbeasts.client.gui.WizardsPalette.PAGE_RUBRIC));
+        }
         var tags = at.koopro.wizardsandbeasts.skill.build.Builds.tagsOf(node.getId());
         if (!tags.isEmpty()) {
             net.minecraft.network.chat.MutableComponent line = Component.empty();

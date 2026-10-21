@@ -27,6 +27,18 @@ public final class SpellLearningEligibility {
     }
 
     public static Result evaluate(@Nullable ServerPlayer player, Spell spell, PlayerSpellData spellData, @Nullable PlayerHeritageData heritage) {
+        return evaluate(player, spell, spellData, heritage, false);
+    }
+
+    /**
+     * @param nodeIsTheRequirement true for a skill-web lesson: the allocated node stands in for the spell's
+     *        own progression gates (prerequisite spell, required skill, profession, mastery), because the web's
+     *        layout is the progression the player paid points for and may not match the spell's authored
+     *        prerequisite. Every gate on whether the spell may exist for this player at all — module,
+     *        implementation, heritage, already known, Spell Law — still applies.
+     */
+    public static Result evaluate(@Nullable ServerPlayer player, Spell spell, PlayerSpellData spellData,
+                                  @Nullable PlayerHeritageData heritage, boolean nodeIsTheRequirement) {
         if (spell == null) {
             return Result.deny("Unknown spell.");
         }
@@ -57,6 +69,9 @@ public final class SpellLearningEligibility {
         if (lawRefusal != null) {
             return Result.deny(lawRefusal.getString());
         }
+        if (nodeIsTheRequirement) {
+            return Result.allow();
+        }
         if (!spell.getRequirement().isMet(player, spellData)) {
             return Result.deny(spell.getRequirement().describe().getString());
         }
@@ -80,6 +95,15 @@ public final class SpellLearningEligibility {
 
         String masterySpellId = spell.getMasterySourceSpellId();
         PlayerSpellData.MasteryTier masteryTier = spell.getRequiredMasteryTier();
+        // Hits are recorded under the canonical id ("wizards_and_beasts:reparo"); a datapack names the
+        // mastery spell bare ("reparo"). Resolve first, as SpellRequirement does for prerequisites, or the
+        // count is always zero and the gate can never open.
+        if (masterySpellId != null && !masterySpellId.isBlank()) {
+            Spell masterySpell = at.koopro.wizardsandbeasts.spell.core.Spells.byId(masterySpellId);
+            if (masterySpell != null) {
+                masterySpellId = masterySpell.getId();
+            }
+        }
         if (masterySpellId != null && !masterySpellId.isBlank() && masteryTier != null
                 && !spellData.hasReachedMasteryTier(masterySpellId, masteryTier)) {
             return Result.deny("Requires " + masteryTier.name().toLowerCase() + " mastery in " + masterySpellId);

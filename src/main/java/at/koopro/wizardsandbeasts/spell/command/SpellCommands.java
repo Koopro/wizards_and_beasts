@@ -144,7 +144,7 @@ public final class SpellCommands {
         // and `PlayerSpellData` is a plain string set with no normalisation of its own. Writing the
         // argument stored `alohomora` while every reader in the mod looks up
         // `wizards_and_beasts:alohomora`, which learned the spell and left it uncastable.
-        // `SkillSystemAPI.teachSpell` canonicalises for the same reason.
+        // `SpellLessons` canonicalises for the same reason.
         String canonicalId = spell.getId();
         PlayerSpellData data = player.getData(ModAttachments.SPELL_DATA.get());
         if (data.knowsSpell(canonicalId)) {

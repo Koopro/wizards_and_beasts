@@ -5,10 +5,9 @@ import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.learning.SpellLearningService;
 import at.koopro.wizardsandbeasts.spell.learning.SpellSource;
+import at.koopro.wizardsandbeasts.spell.learning.tracing.SpellTraceService;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -27,7 +26,8 @@ import org.jspecify.annotations.Nullable;
 import java.util.function.Consumer;
 
 /**
- * A book, page or set of notes with one spell written in it. Reading it teaches that spell.
+ * A book, page or set of notes with one spell written in it. Reading it, then tracing the spell's
+ * gesture ({@link SpellTraceService}), teaches that spell.
  *
  * <p>This replaces the spell teacher. The teacher was a lectern that opened a catalogue of every
  * spell the player was eligible for and sold them one for Knuts — a shop, and a shop is the one
@@ -108,34 +108,26 @@ public class SpellSourceItem extends Item {
         return ItemUseAnimation.NONE;
     }
 
+    /**
+     * The end of the reading channel opens the tracing challenge; it does not teach. The spell is written
+     * into the player only by {@link SpellTraceService} after a passed trace, and only then is a loose page
+     * spent — a page refused by a gate, or traced badly, has not been studied to pieces.
+     */
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
         if (level.isClientSide() || !(entity instanceof ServerPlayer player)) {
             return stack;
         }
-        Spell spell = SpellSource.spellOf(stack);
-        if (spell == null) {
-            return stack;
-        }
-        SpellLearningService.LearnResult result = SpellLearningService.tryLearnSpell(player, spell.getId());
-        if (result.success()) {
-            // Spent only on success. A page refused by a gate has not been studied to pieces — it has
-            // been picked up and put down again, and destroying it would make an unmet requirement
-            // cost the player the only copy they had of the spell they cannot learn yet.
-            if (spentOnRead && !player.getAbilities().instabuild) {
-                stack.shrink(1);
-            }
-            level.playSound(null, player.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6f, 1.6f);
-            PlayerFeedback.unlocked(player,
-                    Component.translatable("spell.wizards_and_beasts.learning.learned",
-                            SpellSource.writtenName(spell.getId())),
-                    Component.translatable("spell.wizards_and_beasts.learning.learned.detail"));
-        } else {
-            PlayerFeedback.refuse(player,
-                    Component.translatable("spell.wizards_and_beasts.learning.refused"),
-                    Component.literal(result.message()));
+        InteractionHand hand = player.getUsedItemHand();
+        if (SpellSource.spellOf(stack) != null) {
+            SpellTraceService.openFromBook(player, hand);
         }
         return stack;
+    }
+
+    /** Whether a passed trace uses this source up: a loose page, as opposed to a bound book. */
+    public boolean spentOnRead() {
+        return spentOnRead;
     }
 
     /**

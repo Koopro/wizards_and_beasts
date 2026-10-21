@@ -99,6 +99,7 @@ public final class WizardsAndBeastsGameTests {
         ChoranaptyxisTests.contribute(registrar);
         PlacementFacingTests.contribute(registrar);
         SpellLearningTests.contribute(registrar);
+        SpellTraceTests.contribute(registrar);
         DisguiseTests.contribute(registrar);
         LeviosaThrowTests.contribute(registrar);
         BroomRideTests.contribute(registrar);

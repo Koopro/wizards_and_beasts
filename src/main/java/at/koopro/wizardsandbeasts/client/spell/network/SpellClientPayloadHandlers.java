@@ -123,6 +123,18 @@ public final class SpellClientPayloadHandlers {
         ctx.enqueueWork(() -> ClientSpellDataState.applyFullSync(pkt));
     }
 
+    /** Opens the tracing screen. The screen class is named only inside the lambda, so it loads client-side. */
+    public static void handleSpellTraceOpen(at.koopro.wizardsandbeasts.network.spell.SpellTraceOpenS2CPayload pkt,
+                                            IPayloadContext ctx) {
+        ctx.enqueueWork(() -> at.koopro.wizardsandbeasts.client.spell.trace.SpellTraceClient.open(pkt));
+    }
+
+    /** Hands the server's verdict to an open tracing screen. */
+    public static void handleSpellTraceResult(at.koopro.wizardsandbeasts.network.spell.SpellTraceResultS2CPayload pkt,
+                                              IPayloadContext ctx) {
+        ctx.enqueueWork(() -> at.koopro.wizardsandbeasts.client.spell.trace.SpellTraceClient.result(pkt));
+    }
+
     public static void handleSpellDenied(SpellDeniedS2CPayload pkt, IPayloadContext ctx) {
         // Routed through ClientSpellRejectFeedback (not an inline SoundManager.play) so this class —
         // loaded server-side when the registrar resolves the method ref — never forces

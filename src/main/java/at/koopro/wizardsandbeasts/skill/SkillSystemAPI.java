@@ -400,7 +400,9 @@ public final class SkillSystemAPI {
      * {@link at.koopro.wizardsandbeasts.ability.grant.AbilityGrantService}, attributes are re-applied
      * wholesale by {@link SkillAttributeApplicator}, and the multiplier maps are rebuilt from the
      * cache. Spell knowledge is the exception, because it lives in {@code PlayerSpellData} as one flat
-     * set shared with the teacher and has no source column to derive from.
+     * set shared with the books and has no source column to derive from. A node's spell is not written
+     * here: the node opens a traced lesson, and {@code SpellLearningService.commit} records the spell in
+     * the web ledger once it is passed — which is what {@link #revokeWebTaughtSpells} acts on.
      */
     private static void applyImmediateEffects(ServerPlayer player, Skill skill) {
         for (SkillEffect effect : skill.getEffects()) {
@@ -408,35 +410,16 @@ public final class SkillSystemAPI {
                 // Ability availability is derived from unlocked skill levels via SkillEffectCache.
                 // Keep this branch explicit so unlock effects remain discoverable in one place.
             } else if (effect instanceof SkillEffect.LearnSpell learn) {
-                teachSpell(player, learn.spellId());
+                // The node owes a lesson; the spell is learned when its trace is passed. Opened now so
+                // the allocation and the lesson read as one act. If it is refused, closed or failed,
+                // the lesson stays owed (SpellLessons) and a click on the node opens it again.
+                at.koopro.wizardsandbeasts.spell.learning.tracing.SpellTraceService.openLesson(player, learn.spellId());
             } else if (effect instanceof SkillEffect.DarkStudy study) {
                 // The consequence half of the Dark Arts web. Accrued at allocation and never given back.
                 at.koopro.wizardsandbeasts.corruption.DarkCorruptionService.accrue(player, study.corruption());
                 at.koopro.wizardsandbeasts.corruption.DarkCorruptionService.syncDisplay(player);
             }
         }
-    }
-
-    /**
-     * Teaches a node's spell, recording it only if the player did not already know it.
-     *
-     * <p>The ledger entry is what {@link #revokeWebTaughtSpells} later acts on, and skipping it for a
-     * spell the player already had is the whole reason a respec cannot confiscate a lesson bought
-     * from a teacher with Knuts.
-     */
-    private static void teachSpell(ServerPlayer player, String spellId) {
-        var spell = at.koopro.wizardsandbeasts.spell.core.Spells.byId(spellId);
-        if (spell == null) {
-            return;
-        }
-        String canonicalId = spell.getId();
-        var spellData = player.getData(ModAttachments.SPELL_DATA.get());
-        if (spellData.knowsSpell(canonicalId)) {
-            return;
-        }
-        spellData.learnSpell(canonicalId);
-        getSkillData(player).recordWebTaughtSpell(canonicalId);
-        at.koopro.wizardsandbeasts.network.spell.SpellDataSyncS2CPayload.syncToPlayer(player);
     }
 
     /**

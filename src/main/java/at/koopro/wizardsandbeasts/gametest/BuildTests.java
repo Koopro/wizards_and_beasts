@@ -171,7 +171,10 @@ public final class BuildTests {
 
             check(helper, walk(player, List.of("wizard_core", "basic_casting", "expelliarmus_unlock")),
                     () -> "the short road could not be walked");
-            check(helper, spells.knowsSpell(expelliarmus.getId()), () -> "the node did not teach its spell");
+            check(helper, !spells.knowsSpell(expelliarmus.getId()), () -> "the node taught its spell untraced");
+            var traced = TraceTestSupport.pass(player);
+            check(helper, spells.knowsSpell(expelliarmus.getId()),
+                    () -> "the node's lesson did not teach its spell once traced: " + traced);
 
             SkillRespecService.Quote bridge = SkillRespecService.quoteUnlearn(player, "basic_casting");
             check(helper, "would_strand".equals(bridge.reason()) && bridge.stranded().contains("expelliarmus_unlock"),

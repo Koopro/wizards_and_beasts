@@ -6,10 +6,16 @@ import at.koopro.wizardsandbeasts.network.stats.PlayerStatsSyncPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.core.Spells;
+import at.koopro.wizardsandbeasts.spell.effect.SpellEffectComponent;
+import at.koopro.wizardsandbeasts.spell.effect.SpellEffectEntry;
+import at.koopro.wizardsandbeasts.spell.effect.SpellEffectRunner;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import net.minecraft.server.level.ServerPlayer;
 
 import org.jspecify.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The one place a spell becomes known.
@@ -25,13 +31,18 @@ import org.jspecify.annotations.Nullable;
  * <h2>What it is now</h2>
  * Eligibility and the write are unchanged and still live here — every gate in
  * {@link SpellLearningEligibility} applies to every caller. What is gone is the trigger and the
- * price. Learning is triggered by:
+ * price. Learning starts from one of two {@link Route}s:
  *
  * <ul>
  *   <li>reading a <em>spell source</em> — {@link SpellSource}, the book/page/notes path;</li>
- *   <li>allocating a skill node carrying a {@code learn_spell} effect, via
- *       {@code SkillSystemAPI.teachSpell}.</li>
+ *   <li>allocating a skill node carrying a {@code learn_spell} effect, which owes the player a
+ *       lesson.</li>
  * </ul>
+ *
+ * <p>Neither route writes the spell itself any more. Both open a tracing challenge
+ * ({@code SpellTraceService}), and only a judged, passed trace reaches {@link #commit}. That is the
+ * whole of the "no normal route bypasses the trace" rule: there is one gameplay caller of
+ * {@link #commit}, and an architecture test pins it.
  *
  * <p>Neither charges. Money buys objects — a wand, a broom, a book someone else wrote — and not the
  * contents of your own head.
@@ -46,29 +57,107 @@ public final class SpellLearningService {
     private SpellLearningService() {
     }
 
+    /** Where a lesson came from. Decides the one side effect that differs between them. */
+    public enum Route {
+        /** A book, page or notes. Reading dark writing stains the reader ({@link SpellLawLearningGate}). */
+        BOOK,
+        /**
+         * A skill-web node. The node already charged its own {@code dark_study}, so no second stain;
+         * instead the spell goes in the web ledger, which is what lets a respec take it back.
+         */
+        WEB_LESSON
+    }
+
+    /** Book-route {@link #commit}, by id. Kept for the gate tests, which exercise the gates directly. */
+    public static LearnResult tryLearnSpell(ServerPlayer player, String spellId) {
+        return commit(player, Spells.byId(spellId), Route.BOOK);
+    }
+
     /**
-     * Teaches a spell if every gate allows it, then syncs.
+     * Teaches a spell if every gate allows it, then syncs. Called once a trace has passed; every gate is
+     * re-run here because the player has had the whole challenge to lose a profession, a heritage or a
+     * module, or to learn the spell some other way.
+     *
+     * <p>The spell's <em>companions</em> come with it — the counter-charm its own effects switch to
+     * (Lumos teaches Nox). One trace, one lesson: Nox is the second half of Lumos, not a second spell to
+     * go and find.
      *
      * <p>The stats sync is not incidental: KNOWLEDGE derives partly from how many spells are known,
      * so a client that learned a spell without it would show a stale figure until the next full sync.
      */
-    public static LearnResult tryLearnSpell(ServerPlayer player, String spellId) {
-        Spell spell = Spells.byId(spellId);
+    public static LearnResult commit(ServerPlayer player, @Nullable Spell spell, Route route) {
         PlayerSpellData data = player.getData(ModAttachments.SPELL_DATA.get());
-        PlayerHeritageData type = player.getData(ModAttachments.HERITAGE_DATA.get());
-        LearnResult validation = validateLearnAttempt(player, spell, data, type);
+        LearnResult validation = validateLearnAttempt(player, spell, route);
         if (!validation.success()) {
             return validation;
         }
 
         data.learnSpell(spell.getId());
-        // Here rather than in validateLearnAttempt, which also answers the preview SpellSourceItem
-        // runs on the first right-click: a player who picks a book up, reads the refusal and puts it
-        // down again has not studied anything and must not be charged for it.
-        SpellLawLearningGate.stainForLearning(player, spell);
+        for (String companionId : companionsOf(spell)) {
+            Spell companion = Spells.byId(companionId);
+            if (companion != null && validateLearnAttempt(player, companion, route).success()) {
+                data.learnSpell(companion.getId());
+            }
+        }
+        if (route == Route.BOOK) {
+            // Here rather than in validateLearnAttempt, which also answers the preview SpellSourceItem
+            // runs on the first right-click: a player who picks a book up, reads the refusal and puts it
+            // down again has not studied anything and must not be charged for it.
+            SpellLawLearningGate.stainForLearning(player, spell);
+        } else {
+            player.getData(ModAttachments.SKILL_DATA.get()).recordWebTaughtSpell(spell.getId());
+        }
         SpellDataSyncS2CPayload.syncToPlayer(player);
         PlayerStatsSyncPayload.syncToPlayer(player); // KNOWLEDGE derives from spells learned
         return LearnResult.success(spell.getDisplayName());
+    }
+
+    /**
+     * Teaches a companion at cast time — only for a save that knew the parent before tracing existed and
+     * so never had the companion taught alongside it. Reachable only by casting the parent, which the
+     * caster already knows, so it is the tail of a lesson already traced rather than a new one.
+     */
+    public static void teachCompanionOfKnownSpell(ServerPlayer player, Spell companion) {
+        PlayerSpellData data = player.getData(ModAttachments.SPELL_DATA.get());
+        if (data.knowsSpell(companion.getId())) {
+            return;
+        }
+        for (String knownId : data.getKnownSpells()) {
+            if (companionsOf(Spells.byId(knownId)).contains(companion.getId())) {
+                data.learnSpell(companion.getId());
+                return;
+            }
+        }
+    }
+
+    /**
+     * The spells a spell teaches alongside itself: the targets of its {@code swap_active_spell} effects
+     * marked {@code learn}. Read from data, so a pack can pair its own spells the same way.
+     */
+    public static List<String> companionsOf(@Nullable Spell spell) {
+        List<String> out = new ArrayList<>();
+        for (SpellEffectEntry entry : SpellEffectRunner.effectsOf(spell)) {
+            if (entry.component() instanceof SpellEffectComponent.SwapActiveSpell swap && swap.learn()) {
+                Spell target = Spells.byId(swap.spell());
+                out.add(target != null ? target.getId() : swap.spell());
+            }
+        }
+        return out;
+    }
+
+    /**
+     * Whether this player could learn this spell by {@code route} right now. A web lesson's node stands in
+     * for the spell's own progression gates ({@link SpellLearningEligibility#evaluate(ServerPlayer, Spell,
+     * PlayerSpellData, PlayerHeritageData, boolean)}).
+     */
+    public static LearnResult validateLearnAttempt(ServerPlayer player, @Nullable Spell spell, Route route) {
+        if (spell == null) {
+            return LearnResult.failure("Unknown spell.");
+        }
+        SpellLearningEligibility.Result eligibility = SpellLearningEligibility.evaluate(player, spell,
+                player.getData(ModAttachments.SPELL_DATA.get()), player.getData(ModAttachments.HERITAGE_DATA.get()),
+                route == Route.WEB_LESSON);
+        return eligibility.learnable() ? LearnResult.success("ok") : LearnResult.failure(eligibility.reason());
     }
 
     /** Whether this player could learn this spell right now, without learning it. */

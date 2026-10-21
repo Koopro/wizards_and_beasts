@@ -122,5 +122,23 @@ public final class ModNetworkSpells {
                 ImperioResistC2SPayload.TYPE,
                 ImperioResistC2SPayload.STREAM_CODEC,
                 ImperioResistC2SPayload::handle);
+
+        // Spell tracing: the challenge every newly learned spell passes through.
+        registrar.playToClient(
+                SpellTraceOpenS2CPayload.TYPE,
+                SpellTraceOpenS2CPayload.STREAM_CODEC,
+                SpellClientPayloadHandlers::handleSpellTraceOpen);
+        registrar.playToClient(
+                SpellTraceResultS2CPayload.TYPE,
+                SpellTraceResultS2CPayload.STREAM_CODEC,
+                SpellClientPayloadHandlers::handleSpellTraceResult);
+        registrar.playToServer(
+                SpellTraceSubmitC2SPayload.TYPE,
+                SpellTraceSubmitC2SPayload.STREAM_CODEC,
+                SpellTraceSubmitC2SPayload::handle);
+        registrar.playToServer(
+                SpellTraceRequestC2SPayload.TYPE,
+                SpellTraceRequestC2SPayload.STREAM_CODEC,
+                SpellTraceRequestC2SPayload::handle);
     }
 }

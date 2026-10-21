@@ -590,7 +590,10 @@ public sealed interface SpellEffectComponent permits
             String canonicalId = swapTarget.getId();
             PlayerSpellData data = ctx.caster().getData(ModAttachments.SPELL_DATA.get());
             if (learn) {
-                data.learnSpell(canonicalId);
+                // The trace that taught the parent taught this too (SpellLearningService.companionsOf);
+                // this only fills the gap for a save that knew the parent before tracing existed.
+                at.koopro.wizardsandbeasts.spell.learning.SpellLearningService
+                        .teachCompanionOfKnownSpell(ctx.caster(), swapTarget);
             }
             data.setLoadoutSpell(data.getActiveSlot(), canonicalId);
             SpellDataSyncS2CPayload.syncToPlayer(ctx.caster());
