@@ -54,6 +54,9 @@ A preset is only a set of values for existing settings. Applying one goes throug
 service: all or nothing, authority checked per setting, one history group `perf_preset:<id>:<millis>` (revertible in
 Profiles → History). CUSTOM is shown when the values match no preset. The dialog lists each "from → to".
 
+Command: `/wandb admin performance preset <low|medium|high> [confirm]` applies the same preset through the same applier
+(unconfirmed it only explains itself; 2026-10-07).
+
 ### Classification
 
 | Setting | Kinds |

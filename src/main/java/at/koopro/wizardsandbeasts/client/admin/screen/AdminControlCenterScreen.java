@@ -6,6 +6,7 @@ import at.koopro.wizardsandbeasts.client.admin.ClientAdminState;
 import at.koopro.wizardsandbeasts.client.admin.search.AdminSearchIndex;
 import at.koopro.wizardsandbeasts.client.admin.widget.AdminButton;
 import at.koopro.wizardsandbeasts.client.admin.widget.AdminConfirmDialog;
+import at.koopro.wizardsandbeasts.client.admin.widget.AdminPicker;
 import at.koopro.wizardsandbeasts.client.admin.widget.AdminText;
 import at.koopro.wizardsandbeasts.client.admin.widget.AdminTheme;
 import at.koopro.wizardsandbeasts.network.admin.AdminSessionInfo;
@@ -14,6 +15,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -250,7 +252,11 @@ public final class AdminControlCenterScreen extends Screen implements AdminPanel
                 }
             }
             case MINISTRY -> MinistryPanel.tab = "law".equals(tabName) ? 1 : 0;
-            case ECONOMY -> EconomyPanel.tab = "rules".equals(tabName) ? 1 : 0;
+            case ECONOMY -> EconomyPanel.tab = switch (tabName) {
+                case "markets" -> EconomyPanel.MARKETS_TAB;
+                case "rules" -> EconomyPanel.RULES_TAB;
+                default -> 0;
+            };
             case WORLD -> WorldPanel.tab = "rules".equals(tabName) ? 1 : 0;
             case MODULES -> ModulesPanel.tab = "profiles".equals(tabName) ? 1 : 0;
             case PROFILES -> ProfilesPanel.tab = ProfilesPanel.tabIndex(tabName);
@@ -435,7 +441,7 @@ public final class AdminControlCenterScreen extends Screen implements AdminPanel
             case VISUALS -> VisualsPanel.tab = VisualsPanel.tabFor(id);
             case MINISTRY -> MinistryPanel.tab = 0;
             case ECONOMY, WORLD -> {
-                EconomyPanel.tab = category == AdminCategory.ECONOMY ? 1 : EconomyPanel.tab;
+                EconomyPanel.tab = category == AdminCategory.ECONOMY ? EconomyPanel.RULES_TAB : EconomyPanel.tab;
                 WorldPanel.tab = category == AdminCategory.WORLD ? 1 : WorldPanel.tab;
             }
             case PERFORMANCE -> PerformancePanel.tab = PerformancePanel.tabIndex("settings");
@@ -899,9 +905,10 @@ public final class AdminControlCenterScreen extends Screen implements AdminPanel
             return true;
         }
         if (!typing && (key == GLFW.GLFW_KEY_PAGE_DOWN || key == GLFW.GLFW_KEY_PAGE_UP)) {
-            List<AdminCategory> order = List.of(AdminCategory.values());
+            List<AdminCategory> order = sidebarSections();
             int step = key == GLFW.GLFW_KEY_PAGE_DOWN ? 1 : -1;
-            navigate(order.get(Math.floorMod(section.ordinal() + step, order.size())));
+            int at = Math.max(0, order.indexOf(section));
+            navigate(order.get(Math.floorMod(at + step, order.size())));
             return true;
         }
         return null;
@@ -918,7 +925,33 @@ public final class AdminControlCenterScreen extends Screen implements AdminPanel
     }
 
     private double maxSidebarScroll() {
-        return Math.max(0, AdminCategory.values().length * ENTRY_H - (sidebarBottom() - sidebarTop()));
+        return Math.max(0, sidebarSections().size() * ENTRY_H - (sidebarBottom() - sidebarTop()));
+    }
+
+    /**
+     * The sections the sidebar lists, in order: every section with a page. A section with nothing in it yet is left
+     * out rather than listed as "soon" -- an administrator's tool should not advertise pages that do not exist, and
+     * it reappears by itself the moment a setting is registered in it ({@link AdminPanels#isLive}).
+     */
+    /** The picker whose list is open on the current panel, if any (at most one has focus, so at most one is open). */
+    private @Nullable AdminPicker openPicker() {
+        for (GuiEventListener child : children()) {
+            if (child instanceof AdminPicker picker && picker.isOpen()) {
+                return picker;
+            }
+        }
+        return null;
+    }
+
+    private List<AdminCategory> sidebarSections() {
+        java.util.Set<AdminCategory> live = AdminPanels.liveSet();
+        List<AdminCategory> out = new java.util.ArrayList<>(live.size());
+        for (AdminCategory category : AdminCategory.values()) {
+            if (live.contains(category)) {
+                out.add(category);
+            }
+        }
+        return out;
     }
 
     private boolean inSidebar(double mouseX, double mouseY) {
@@ -930,8 +963,8 @@ public final class AdminControlCenterScreen extends Screen implements AdminPanel
             return null;
         }
         int index = (int) ((mouseY - sidebarTop() + sidebarScroll) / ENTRY_H);
-        AdminCategory[] all = AdminCategory.values();
-        return index >= 0 && index < all.length ? all[index] : null;
+        List<AdminCategory> all = sidebarSections();
+        return index >= 0 && index < all.size() ? all.get(index) : null;
     }
 
     // ── drawing ──
@@ -958,9 +991,16 @@ public final class AdminControlCenterScreen extends Screen implements AdminPanel
         drawFooterStatus(g);
 
         if (dialog == null) {
-            super.render(g, mouseX, mouseY, partialTick);
+            // An open picker list covers the widgets below it: they must not light up under it.
+            AdminPicker picker = openPicker();
+            boolean underPicker = picker != null && picker.isMouseOver(mouseX, mouseY);
+            super.render(g, underPicker ? -1 : mouseX, underPicker ? -1 : mouseY, partialTick);
             if (overlay == null) {
                 guard(() -> panel.renderOverlay(g, mouseX, mouseY));
+            }
+            if (picker != null) {
+                g.nextStratum();
+                picker.renderPopup(g, mouseX, mouseY);
             }
             if (sidebarW == SIDEBAR_NARROW_W) {
                 AdminCategory hovered = sidebarEntryAt(mouseX, mouseY);
@@ -1050,10 +1090,10 @@ public final class AdminControlCenterScreen extends Screen implements AdminPanel
         int areaTop = sidebarTop();
         int areaBottom = sidebarBottom();
         g.enableScissor(left, areaTop, left + sidebarW, areaBottom);
-        AdminCategory[] all = AdminCategory.values();
+        List<AdminCategory> all = sidebarSections();
         AdminCategory hovered = dialog == null ? sidebarEntryAt(mouseX, mouseY) : null;
-        for (int i = 0; i < all.length; i++) {
-            AdminCategory entry = all[i];
+        for (int i = 0; i < all.size(); i++) {
+            AdminCategory entry = all.get(i);
             int ey = areaTop + i * ENTRY_H - (int) sidebarScroll;
             if (ey + ENTRY_H < areaTop || ey > areaBottom) {
                 continue;
@@ -1156,6 +1196,7 @@ public final class AdminControlCenterScreen extends Screen implements AdminPanel
             case VISUALS -> "◐";
             case PERFORMANCE -> "⚙";
             case DEBUG -> "✒";
+            case DIAGNOSTICS -> "✚";
             case ADVANCED -> "☰";
         };
     }

@@ -106,6 +106,24 @@ class AdminSettingServiceTest {
         assertEquals(5, count.get());
         assertEquals("", result.value(), "a refusal to an outsider must not disclose the value");
         assertTrue(observed.isEmpty());
+        assertTrue(history.recent(1).isEmpty(), "a stranger's refusal must not enter the bounded history");
+    }
+
+    @Test
+    void aStrangerCannotFloodRealChangesOutOfTheHistory() {
+        service.change(ADMIN, id("count"), "9");
+        for (int i = 0; i < 5_000; i++) {
+            service.change(OUTSIDER, id("count"), "1");
+            service.reset(OUTSIDER, id("count"));
+        }
+        assertEquals(1, history.recent(10).size());
+        assertTrue(history.recent(1).get(0).applied());
+        assertTrue(service.undoLast(ADMIN).applied(), "undo must still find the real change");
+    }
+
+    @Test
+    void anAdministratorMissingTheCapabilityIsStillRecorded() {
+        service.change(CONFIG_ONLY, id("debug_switch"), "true");
         AdminChangeRecord record = history.recent(1).get(0);
         assertFalse(record.applied());
         assertEquals(AdminRejection.UNAUTHORIZED, record.rejection());

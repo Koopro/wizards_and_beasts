@@ -20,7 +20,13 @@ final class WorldPanel extends TabbedPanel {
         super(AdminCategory.WORLD, List.of(
                 new Tab("admin.wizards_and_beasts.tab.world_overview", WorldOverviewPanel::new),
                 new Tab("admin.wizards_and_beasts.tab.rules", () -> new SettingsPanel(AdminCategory.WORLD, id -> true,
-                        null, null).note(Component.translatable("admin.wizards_and_beasts.world_rules.note")))),
+                        null, null).note(Component.translatable("admin.wizards_and_beasts.world_rules.note"))),
+                new Tab("admin.wizards_and_beasts.tab.world_generation",
+                        () -> new AdminReportPanel(AdminCategory.WORLD, "world_generation", 0)),
+                new Tab("admin.wizards_and_beasts.tab.world_locations",
+                        () -> new AdminReportPanel(AdminCategory.WORLD, "world_locations", 0)),
+                new Tab("admin.wizards_and_beasts.tab.world_floo",
+                        () -> new AdminReportPanel(AdminCategory.WORLD, "world_floo"))),
                 () -> tab, index -> tab = index);
     }
 }

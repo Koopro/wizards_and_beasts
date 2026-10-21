@@ -126,16 +126,9 @@ public final class AdminVisualPayloads {
 
     /** Runs a preset operation for an authorised sender and answers with its outcome and a fresh listing. */
     public static String runPreset(ServerPlayer player, PresetRequest request) {
-        AdminContext actor = AdminContext.of(player);
-        if (!BeamVisualAdminService.authorised(actor)) {
-            LOGGER.warn("[Admin] Refused beam preset {} from unauthorised {} ({})", request.op(),
-                    player.getName().getString(), player.getUUID());
-            PacketDistributor.sendToPlayer(player, new ActionReply(request.op(), "unauthorized", ""));
-            return "unauthorized";
-        }
-        BeamVisualService.PresetResult result = BeamVisualAdminService.run(player.level().getServer(), request.op(),
-                request.presetId(), request.name(), request.values());
-        String outcome = result.outcome().name().toLowerCase(java.util.Locale.ROOT);
+        BeamVisualAdminService.Performed result = BeamVisualAdminService.perform(AdminContext.of(player),
+                player.level().getServer(), request.op(), request.presetId(), request.name(), request.values());
+        String outcome = result.outcome();
         PacketDistributor.sendToPlayer(player, new ActionReply(request.op(), outcome, result.presetId()));
         if (result.ok()) {
             // Every open Visuals page, the requester's included, lists the library afresh.

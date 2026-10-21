@@ -106,7 +106,7 @@ public final class AdminNetworkService {
             if (Objects.equals(online.getUUID(), actor.actorId())) {
                 continue;
             }
-            if (AdminAccess.allows(online.createCommandSourceStack())) {
+            if (at.koopro.wizardsandbeasts.admin.access.AdminPolicy.isAdministrator(online.createCommandSourceStack())) {
                 PacketDistributor.sendToPlayer(online, payload);
             }
         }

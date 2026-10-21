@@ -164,6 +164,10 @@ Open it from a creature page, or from a variant's Preview button, which opens it
   a disconnect), and when the level it was made for goes away. Its GeckoLib state lives in the instance's own cache
   and goes with it. No global render state is touched.
 
+**Scale** (2026-10-07): a selector (×0.5 … ×3) sets `Attributes.SCALE` on the preview entity only, so model and
+hitbox scale together exactly as in the world. **Creatures → Spawning** lists every creature with its natural-spawn
+switch as one multi-select (`ADMIN_UI.md` §3); each tick is the creature's existing setting.
+
 ## 7. How to add a creature without touching the admin UI
 
 1. Register it as the game requires: add a `Spec` to `ModCreatures.MANIFEST` (or put a bespoke id in

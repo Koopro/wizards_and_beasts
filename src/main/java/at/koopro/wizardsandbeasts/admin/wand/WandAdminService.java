@@ -326,6 +326,8 @@ public final class WandAdminService {
             return new Outcome(false, KEY + "inventory_full", "");
         }
         LOGGER.info("[Admin] {} took a test wand: {} + {}", admin.getName().getString(), request.wood(), request.core());
+        at.koopro.wizardsandbeasts.admin.operation.AdminOperationService.record(server, AdminContext.of(admin), "wands", "test_wand",
+                request.wood() + " + " + request.core(), "", true, "");
         return new Outcome(true, KEY + "given", request.wood() + " + " + request.core());
     }
 }

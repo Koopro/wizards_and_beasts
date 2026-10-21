@@ -88,6 +88,10 @@ preview TTL, `BeamChannelClient.restyleAll`.
 - **Reset**: the row's ↺, "Reset to default" (drafts every row to its default), or "Reset section" on the Impacts tab.
 - The browser labels each spell `Default`, `Custom`, or the preset its look matches exactly.
 
+Commands (2026-10-07): `/wandb admin visual preset list | duplicate <id> <name> | rename <id> <name> | delete <id> [confirm]`
+go through `BeamVisualAdminService.perform`, the same entry point as the panel; every operation is logged, built-ins
+cannot be deleted, a delete needs `confirm`, and open Visuals panels refresh their list.
+
 ## 5. Server / client classification
 
 | Value | Scope | Travels | Why |

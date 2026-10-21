@@ -74,17 +74,22 @@ class TabbedPanel implements AdminPanel {
             activeIndex = wanted;
             active = tabs.get(activeIndex).page().get();
         }
-        int tabW = tabWidth(w, tabs.size());
+        // More tabs than fit at the narrowest width wrap onto further rows instead of running off the page.
+        int perRow = Math.max(1, Math.min(tabs.size(), (w + TAB_GAP) / (MIN_TAB_W + TAB_GAP)));
+        int rows = (tabs.size() + perRow - 1) / perRow;
+        int tabW = tabWidth(w, perRow);
         for (int i = 0; i < tabs.size(); i++) {
             int index = i;
             Component label = Component.translatable(tabs.get(i).labelKey());
-            AdminButton button = host.addPanelWidget(new AdminButton(x + i * (tabW + TAB_GAP), y, tabW, TAB_H, label,
+            AdminButton button = host.addPanelWidget(new AdminButton(x + (i % perRow) * (tabW + TAB_GAP),
+                    y + (i / perRow) * (TAB_H + TAB_GAP), tabW, TAB_H, label,
                     i == activeIndex ? AdminButton.Tone.PRIMARY : AdminButton.Tone.QUIET, () -> show(index)));
             if (host.font().width(label) > tabW - 8) {
                 button.setTooltip(Tooltip.create(label));
             }
         }
-        active.init(host, x, y + TAB_H + 6, w, h - TAB_H - 6);
+        int bar = rows * TAB_H + (rows - 1) * TAB_GAP + 6;
+        active.init(host, x, y + bar, w, h - bar);
     }
 
     private void show(int index) {

@@ -15,7 +15,7 @@ reads, at its one read point, and anything without a single read point is shown 
 | Brooms | Phase 6 panel | broom combat (a broom cannot be damaged) |
 | Ministry | `MINISTRY` module (ships disabled); deterministic Trace; data-driven spell law; fines from the vault; notoriety bands; case ladder + Wizengamot | detection chance, fine expiry, Auror creatures/arrest, imprisonment, a separate enforcement switch |
 | Azkaban | one-per-world fortress (new chunks only); Dementors (summoned by command) | a prison: a referral confiscates the wand for 7 days |
-| Economy | coinage 29/17/493 (one source); Dragot exchange; 4 priced services; `GRINGOTTS` module | reward multipliers (money enters only as datapack loot) |
+| Economy | coinage 29/17/493 (one source); Dragot exchange; 6 priced services (2026-10-07: wand care, endorsements); one billing door + ledger (`ECONOMY.md`); `GRINGOTTS` module | reward multipliers (money enters as loot and career wages) |
 | World | Azkaban, Chamber of Secrets (module-gated at generation); trees/plants (biome modifiers); pocket realm; 29 modules | a world-event scheduler (full moon, ageing and owl post are their own clocks) |
 
 **Found and fixed on the way (security):**
@@ -90,6 +90,20 @@ does not do.
 | `floo_registration_fee_knuts` | Config | runtime | — |
 | `skill_respec_cost_knuts` (moved from Game Rules) | Config | runtime | — |
 | `dragot_galleon_rate` | Config | runtime | — |
+| `wand_care_price_knuts` (2026-10-07; Ollivander tending a wand on the brink, less for less wear) | Config | runtime | — |
+| `licence_endorsement_fee_knuts` (2026-10-07; per rank, so ranks 1–3 cost 1×, 2×, 3×) | Config | runtime | — |
+| `market_price_scale_percent` (2026-10-08; every trader's book, both directions) | Config | runtime | — |
+| `market_recovery_scale_percent` (2026-10-08; how fast traders forget recent trade — also scales each good's daily ceiling) | Config | runtime | — |
+| `exploration_fee_scale_percent` (2026-10-08; the Beast Division's finder's fee) | Config | runtime | — |
+
+Ministry → Rules gained `illicit_detection_scale_percent` (2026-10-08; chance a fence's deal reaches the Ministry;
+warns when turned to 0, which makes the black market risk-free).
+
+**Markets tab (2026-10-08):** every money flow (sources, sinks, exchange, circulation, admin) and every open trader's
+book — the next unit's price, saturation, today's short good, and each good's daily ceiling — polled every two
+seconds while shown (`AdminEconomyPayloads`, the Economy capability; same builder as `/wandb admin economy market`).
+Console: `/wandb admin economy market reset <location|all> confirm` restores list prices; `/wandb admin economy
+journal <player>` prints the player's last 32 money movements (also on Players → Economy).
 
 Read-only on the Gringotts tab: coinage, Dragot fee (5%), spread (±3%), quote lifetime, forgery rates — fixed in code
 and read in several places (one of them a client tooltip), so not settings — plus money sources and the integrity rule.
@@ -137,6 +151,7 @@ Module states reach clients through the existing `ModuleStateSyncPayload`. Nothi
 | GameTest `admin_world_runtime_changes_reach_readers` | Floo cooldown/misfire, Apparition cooldown/licence, notoriety cooling reach their readers at once; Apparition rule stored in world data; under-half anchored cooldown asks first; reset restores authored rules |
 | GameTest `admin_world_apply_mode_flags` | Azkaban/Chamber are NEW_CHUNKS on setting and descriptor, others runtime; Economy/World have settings |
 | GameTest `admin_economy_integrity` | every Economy setting changed, vault untouched; console vault deposit/withdraw still work |
+| GameTests `economy_*` (2026-10-07) | refused charges leave every coin; wand care quote → one charge; endorsement fee only on success; ledger books flows (`ECONOMY.md` §6) |
 | GameTest `admin_ministry_rules` | opening the Ministry asks to confirm; fine scale reaches `FineSchedule.assess`; module drives `TraceService.isActive`; cooling 20 → 15 over 10 s at 0.5/s; nothing cools while closed |
 | GameTest `admin_travel_restrictions` | Apparition switch gates `evaluateStart`; Lenient vs Hybrid changes a hit's outcome; severity 0 never splinches, 100 is the authored ladder |
 

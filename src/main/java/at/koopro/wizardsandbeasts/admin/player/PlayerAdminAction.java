@@ -46,7 +46,14 @@ public enum PlayerAdminAction {
     /** Argument {@code galleons|sickles|knuts}, amount bounded. Creates money: MONEY authority. */
     MONEY_DEPOSIT(AdminCapability.MONEY, true),
     /** Argument {@code galleons|sickles|knuts}, amount bounded. Refused when the vault does not hold it. */
-    MONEY_WITHDRAW(AdminCapability.MONEY, true);
+    MONEY_WITHDRAW(AdminCapability.MONEY, true),
+    /**
+     * Closes the open case without a hearing — an operator's ruling that it should never have been opened. Nothing
+     * is filed and nothing is charged; warnings and breaches already counted stay.
+     */
+    MINISTRY_CLOSE_CASE(AdminCapability.PLAYERS, true),
+    /** Lifts every licence suspension a hearing imposed. */
+    MINISTRY_LIFT_SUSPENSIONS(AdminCapability.PLAYERS, true);
 
     private final AdminCapability capability;
     private final boolean destructive;

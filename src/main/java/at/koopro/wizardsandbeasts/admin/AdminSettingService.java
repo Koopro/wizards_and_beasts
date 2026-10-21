@@ -328,8 +328,15 @@ public final class AdminSettingService {
 
     private AdminResult refuse(AdminContext actor, Identifier id, AdminChangeRecord.Kind kind, String current,
                                String requested, AdminRejection why, @Nullable String detailKey) {
-        history.record(id, kind, current, clip(requested), actor.actorId(), actor.actorName(), clock.getAsLong(),
-                false, why, group);
+        // A stranger's refusals stay out of the history. It is a bounded ring that undo, revert and the
+        // restart banner read from, and any connected client can send write packets: recording them would
+        // let one player push every real change out of it. Refusals of people who hold some admin
+        // authority (a missing capability) are still recorded.
+        boolean stranger = why == AdminRejection.UNAUTHORIZED && !actor.canRead();
+        if (!stranger) {
+            history.record(id, kind, current, clip(requested), actor.actorId(), actor.actorName(), clock.getAsLong(),
+                    false, why, group);
+        }
         if (why == AdminRejection.UNAUTHORIZED) {
             LOGGER.warn("[Admin] Refused {} of {} from unauthorised {} ({})",
                     verb(kind), id, actor.actorName(), actor.actorId());

@@ -26,6 +26,7 @@ public final class ClientAdminOpsState {
     private static final int SAMPLE_TICKS = 20;
 
     private static AdminOpsPayloads.@Nullable MetricsReply metrics;
+    private static at.koopro.wizardsandbeasts.market.EconomyReport.@Nullable Snapshot economy;
     private static AdminOpsPayloads.@Nullable DiagnosticsReply diagnostics;
     private static AdminOpsPayloads.@Nullable PresetReply lastPreset;
     private static AdminOpsPayloads.@Nullable ToolReply lastTool;
@@ -41,6 +42,37 @@ public final class ClientAdminOpsState {
     private static int ticksSinceSample = SAMPLE_TICKS;
 
     private ClientAdminOpsState() {}
+
+    static void accept(at.koopro.wizardsandbeasts.network.admin.AdminEconomyPayloads.Reply reply) {
+        economy = reply.snapshot();
+        version++;
+    }
+
+    /** The economy report as last answered; null until the Markets page has asked. */
+    public static at.koopro.wizardsandbeasts.market.EconomyReport.@Nullable Snapshot economy() {
+        return economy;
+    }
+
+    public static void requestEconomy() {
+        ClientPacketDistributor.sendToServer(at.koopro.wizardsandbeasts.network.admin.AdminEconomyPayloads.Request.INSTANCE);
+    }
+
+    private static at.koopro.wizardsandbeasts.ministry.trace.CaseReport.@Nullable Snapshot ministryCases;
+
+    static void accept(at.koopro.wizardsandbeasts.network.admin.AdminMinistryPayloads.Reply reply) {
+        ministryCases = reply.snapshot();
+        version++;
+    }
+
+    /** The Ministry's cases as last answered; null until the Cases page has asked. */
+    public static at.koopro.wizardsandbeasts.ministry.trace.CaseReport.@Nullable Snapshot ministryCases() {
+        return ministryCases;
+    }
+
+    public static void requestMinistryCases() {
+        ClientPacketDistributor.sendToServer(
+                at.koopro.wizardsandbeasts.network.admin.AdminMinistryPayloads.Request.INSTANCE);
+    }
 
     static void accept(AdminOpsPayloads.MetricsReply reply) {
         metrics = reply;

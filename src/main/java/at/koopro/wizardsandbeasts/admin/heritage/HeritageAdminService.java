@@ -184,6 +184,8 @@ public final class HeritageAdminService {
         HeritageAssignment.assign(target, heritage, variant);
         LOGGER.info("[Admin] {} assigned {} / {} to {}", actor.actorName(), heritage.getId(), variant.getId(),
                 target.getName().getString());
+        at.koopro.wizardsandbeasts.admin.operation.AdminOperationService.record(server, actor, "heritages", "heritage_assign", target.getName().getString(),
+                heritage.getId() + "/" + variant.getId(), true, "");
         return new Outcome(true, KEY + (HeritageRules.selectable(heritage) ? "assigned" : "assigned_closed"),
                 target.getName().getString());
     }
@@ -204,6 +206,8 @@ public final class HeritageAdminService {
         HeritageAssignment.resetOnboarding(target);
         LOGGER.info("[Admin] {} reset the heritage of {} (back to onboarding)", actor.actorName(),
                 target.getName().getString());
+        at.koopro.wizardsandbeasts.admin.operation.AdminOperationService.record(server, actor, "heritages", "heritage_reset", target.getName().getString(), "",
+                true, "back to onboarding");
         return new Outcome(true, KEY + "reset", target.getName().getString());
     }
 

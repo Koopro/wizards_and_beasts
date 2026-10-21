@@ -33,6 +33,7 @@ public enum AdminCategory {
     VISUALS(AdminCapability.VISUAL),
     PERFORMANCE(AdminCapability.CONFIG),
     DEBUG(AdminCapability.DEBUG),
+    DIAGNOSTICS(AdminCapability.DEBUG),
     ADVANCED(AdminCapability.CONFIG);
 
     private static final String KEY_PREFIX = "admin.wizards_and_beasts.section.";

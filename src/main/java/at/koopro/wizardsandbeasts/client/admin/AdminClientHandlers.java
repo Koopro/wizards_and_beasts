@@ -173,6 +173,16 @@ public final class AdminClientHandlers {
         notifyScreen();
     }
 
+    public static void onEconomy(at.koopro.wizardsandbeasts.network.admin.AdminEconomyPayloads.Reply payload) {
+        ClientAdminOpsState.accept(payload);
+        notifyScreen();
+    }
+
+    public static void onMinistryCases(at.koopro.wizardsandbeasts.network.admin.AdminMinistryPayloads.Reply payload) {
+        ClientAdminOpsState.accept(payload);
+        notifyScreen();
+    }
+
     public static void onMetrics(at.koopro.wizardsandbeasts.network.admin.AdminOpsPayloads.MetricsReply payload) {
         ClientAdminOpsState.accept(payload);
         notifyScreen();
@@ -190,6 +200,16 @@ public final class AdminClientHandlers {
 
     public static void onToolReply(at.koopro.wizardsandbeasts.network.admin.AdminOpsPayloads.ToolReply payload) {
         ClientAdminOpsState.accept(payload);
+        notifyScreen();
+    }
+
+    public static void onReport(at.koopro.wizardsandbeasts.network.admin.AdminReportPayloads.ReportReply payload) {
+        ClientAdminReportState.accept(payload);
+        notifyScreen();
+    }
+
+    public static void onOperation(at.koopro.wizardsandbeasts.network.admin.AdminReportPayloads.OperationReply payload) {
+        ClientAdminReportState.accept(payload);
         notifyScreen();
     }
 
@@ -211,5 +231,6 @@ public final class AdminClientHandlers {
         ClientAdminProfileState.clear();
         ClientAdminPlayerState.clear();
         ClientAdminOpsState.clear();
+        ClientAdminReportState.clear();
     }
 }

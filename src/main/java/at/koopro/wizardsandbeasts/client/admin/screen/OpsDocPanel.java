@@ -83,7 +83,7 @@ abstract class OpsDocPanel implements AdminPanel {
         this.h = h;
         int strip = controls(host, host.font(), x, y + HEADER_H, w - SCROLLBAR_W - 4);
         docTop = y + HEADER_H + (strip > 0 ? strip + AdminTheme.GAP : 0);
-        builtVersion = ClientAdminOpsState.version();
+        builtVersion = stateVersion();
         layout();
         if (pollTicks() > 0 && !polled) {
             polled = true;
@@ -125,14 +125,24 @@ abstract class OpsDocPanel implements AdminPanel {
 
     @Override
     public void onServerState() {
-        if (host != null && builtVersion != ClientAdminOpsState.version()) {
-            builtVersion = ClientAdminOpsState.version();
+        if (host != null && builtVersion != stateVersion()) {
+            builtVersion = stateVersion();
             if (rebuildsControls()) {
                 host.requestRebuild();
             } else {
                 layout();
             }
         }
+    }
+
+    /** The client mirror this page draws from moved when this changes. */
+    protected int stateVersion() {
+        return ClientAdminOpsState.version();
+    }
+
+    /** Lays the document out again from {@link #lines()} (a filter changed) without rebuilding the controls. */
+    protected void relayout() {
+        layout();
     }
 
     /** Whether an answer can change the controls (a toggle's label), so the page is rebuilt rather than relaid. */

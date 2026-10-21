@@ -69,6 +69,9 @@ final class AdminPanels {
         if (section == AdminCategory.DEBUG) {
             return new DebugPanel();
         }
+        if (section == AdminCategory.DIAGNOSTICS) {
+            return new DiagnosticsPanel();
+        }
         return isLive(section) ? new SettingsPanel(section) : new ComingSoonPanel(section);
     }
 
@@ -126,6 +129,9 @@ final class AdminPanels {
         if (section == AdminCategory.DEBUG) {
             return panel instanceof DebugPanel;
         }
+        if (section == AdminCategory.DIAGNOSTICS) {
+            return panel instanceof DiagnosticsPanel;
+        }
         return isLive(section) ? panel instanceof SettingsPanel : panel instanceof ComingSoonPanel;
     }
 
@@ -137,7 +143,7 @@ final class AdminPanels {
                 || section == AdminCategory.MINISTRY || section == AdminCategory.ECONOMY || section == AdminCategory.WORLD
                 || section == AdminCategory.MODULES || section == AdminCategory.PROFILES
                 || section == AdminCategory.PLAYERS || section == AdminCategory.PERFORMANCE
-                || section == AdminCategory.DEBUG
+                || section == AdminCategory.DEBUG || section == AdminCategory.DIAGNOSTICS
                 || !ClientAdminState.inCategory(section).isEmpty();
     }
 

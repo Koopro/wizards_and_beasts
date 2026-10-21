@@ -68,21 +68,35 @@ courtesy. The server re-checks against the definition, never against the metadat
 `AdminContext.of(ServerPlayer)`, which goes through the same command source, so a packet can never carry
 more authority than the same player would have typing the command.
 
-`AdminPolicy.capabilitiesOf(source)` in Phase 1:
+`AdminPolicy.capabilitiesOf(source)`:
 
-- asks `AdminAccess.allows(source)` and reuses its rules unchanged: the `adminUuids` allow-list when one
-  is configured, operator permission when it is not, and the console / command blocks / RCON always;
-- returns every capability for an admin and none for anyone else.
+- the console, command blocks and RCON (any non-player source) hold every capability;
+- a player holds each capability whose NeoForge permission node resolves true
+  (`AdminPermissions`, one `PermissionNode<Boolean>` per capability, registered in `PermissionGatherEvent.Nodes`).
 
 `AdminCapability` names seven areas: `admin.config`, `admin.content`, `admin.visual`, `admin.debug`,
-`admin.players`, `admin.world` and (Phase 11) `admin.money`, which alone may create or destroy a player's money. Each `AdminCategory` has a default capability, and each setting may name
-its own. To introduce roles, replace `AdminPolicy.capabilitiesOf`, for example with one NeoForge
-PermissionAPI node per `AdminCapability.node()`. Nothing downstream changes: the service already checks
-per-setting capabilities, descriptors already carry `editable` per viewer, and the dashboard already
-lists the viewer's authority.
+`admin.players`, `admin.world` and (Phase 11) `admin.money`, which alone may create or destroy a player's money.
+The full node names are `wizards_and_beasts.admin.config` … `wizards_and_beasts.admin.money`.
 
-The `/wandb admin` command group keeps its `requires(ADMIN)`. The service checks again anyway, because it
-must not depend on having been reached through a gated node.
+**Every node defaults to the old administrator rule** (`AdminAccess`: the `adminUuids` allow-list when one is
+configured, operator permission when it is not). Without a permissions mod nothing changes: an administrator holds
+every capability and nobody else holds any. With one (LuckPerms and the like) a server can grant a moderator
+`admin.players` without `admin.money`, or a builder `admin.visual` alone. If the permission API is not ready yet,
+`AdminPermissions.has` falls back to that default rather than refusing every request.
+
+Each `AdminCategory` has a default capability, and each setting may name its own. Downstream nothing had to change
+for roles: the service checks per-setting capabilities, descriptors carry `editable` per viewer, the sidebar marks
+sections a viewer may see but not change, and the dashboard lists the viewer's authority.
+
+`AdminPolicy.isAdministrator(source)` (holds any capability) gates the `/wandb admin` group, the Control Center
+packets and the admin broadcasts; `AdminPolicy.requires(capability)` gates command subtrees that bypass the setting
+service (`/wandb admin module …` needs `admin.config`). The services check again anyway: they must not depend on
+having been reached through a gated node.
+
+**Request rate.** Every Control Center C2S payload is registered through `ModNetworkAdmin.toServer`, which passes
+it through `AdminRequestLimiter` first: a per-sender token bucket (burst 80, 30 per second). A request over the
+limit is dropped before its handler runs, with a throttled server log warning; a cold open with global search fits
+in one burst, a key-held slider in the steady rate.
 
 ## 4. Settings
 
@@ -256,11 +270,13 @@ How the client stays in sync:
 
 A write request from a non-admin **does** get a `REJECTED/UNAUTHORIZED` reply with an empty value. An
 administrator whose access is revoked mid-session sees the refusal instead of a row stuck on "saving",
-and the reply discloses nothing.
+and the reply discloses nothing. A refusal to someone with no admin authority at all is **not** written to the
+change history (any client can send these packets, and the history is a bounded ring that undo and revert read);
+a refusal to an administrator who lacks the setting's capability still is.
 
 ## 8. Commands
 
-`/wandb admin` (group, `requires(ADMIN)`):
+`/wandb admin` (group, `requires(AdminPolicy::isAdministrator)`):
 
 - `panel`: opens the Control Center for the calling player (`AdminNetworkService.openFor`).
 - `config [list [section]]`
@@ -279,8 +295,17 @@ bound or store a value in the command.
 `/wandb admin profile …` (Phase 10) lists, previews, applies, saves, snapshots, exports, imports and reverts
 profiles and history through `ProfileService`; see `ADMIN_PROFILES.md` §9.
 
-The existing `/wandb admin module …` tree is unchanged. It still calls `ModuleStateService`, the
-module system's own "one door".
+The existing `/wandb admin module …` tree still calls `ModuleStateService`, the module system's own "one door";
+it now requires `admin.config`.
+
+Command equivalents of the remaining panel mutations (2026-10-07, `ADMIN_UI.md` §4):
+
+- `players act <player> <action> [argument|amount] [confirm]`: any `PlayerAdminAction` through
+  `PlayerAdminService.perform` (same pipeline and log as the Players section; destructive actions are held until
+  repeated with `confirm`).
+- `performance preset <low|medium|high> [confirm]`: `PerformancePresets.apply` (same applier as the panel).
+- `visual preset list | duplicate <id> <name> | rename <id> <name> | delete <id> [confirm]`:
+  `BeamVisualAdminService.perform` (built-ins protected, every operation logged).
 
 ## 9. Control Center screen
 
@@ -332,12 +357,21 @@ module system's own "one door".
 | `AdminSearchIndexTest` | "phoenix" finds creature (first), variant, setting and wand core; every word must match; limit keeps the total; rebuild only on a new signature |
 | `AdminSessionInfoCodecTest` | dashboard header round-trips with Undo data and counts; only the newest recent changes are sent |
 | `AdminCatalogLangTest` | every catalog / section / rejection lang key exists; paths unique and typeable |
-| `CommandTreeShapeTest` | `admin panel`, `admin config set`, `admin config reset_all confirm`, `admin config undo` resolve |
+| `CommandTreeShapeTest` | `admin panel`, `admin config set`, `admin config reset_all confirm`, `admin config undo`, `admin players act`, `admin performance preset`, `admin visual preset …` resolve |
 | GameTest `admin_packet_from_a_non_admin_is_refused` | the packet entry points against the live server: no change, no disclosure, no snapshot, no screen |
 | GameTest `admin_packet_from_an_admin_is_applied_and_echoed` | applied → `Config` static updated synchronously; result echoed with `requestId`; out-of-range / malformed / unknown / client-only refused; reset restores the default; the original value is restored in `finally` |
 | GameTest `admin_catalog_binds_to_config` | every catalog entry binds; ranges come from the spec; enums become choices |
+| GameTest `admin_permission_nodes_default_to_the_admin_rule` | one registered node per capability; outsider holds none, administrator and console all |
+| GameTest `admin_players_act_command_uses_the_service` | `players act` held until `confirm`, then applied; unknown action / bad argument refused; every attempt logged |
+| GameTest `admin_ops_commands_use_the_services` | performance and beam preset commands: outsider refused, unconfirmed held, confirmed applied; built-in preset protected |
+| `AdminRequestLimiterTest` | burst admitted then refused; refill rate; per-sender buckets; throttled warning; the real screen fits |
 
 ## 11. Phase 2 and later
+
+**Done 2026-10-07** (`ADMIN_UI.md`): roles (one permission node per capability, defaulting to the admin rule),
+rate limiting of every admin C2S request, command equivalents for player actions and performance/beam presets, the
+`AdminPicker` (filterable single choice) and `AdminMultiSelect` (bulk ticks over existing per-entity settings:
+Magic → Availability, Creatures → Spawning), entity scale in the Entity Viewer, empty sections hidden from the sidebar.
 
 **Done in Phase 2** (`ADMIN_MAGIC.md`): setting providers, server-enforced confirmation (`confirmed` flag on
 the change/reset payloads, `AdminConfirmations` + `/wandb admin config confirm` for commands, `BATCH` result
@@ -404,10 +438,9 @@ for a few rows beside a preview.
   `broom_gentle_landing` is still read from each rider's own config.
 - ~~Modules panel~~ — done in Phase 9 (`ADMIN_MODULES.md`).
 - **Content sections** (spells, heritages, creatures, brewing, wands, Floo, Apparition, Gringotts): each
-  exposes its existing store through a binding. Allowed-lists become a new `SettingKind` (set of ids)
-  with its own control.
-- **Roles.** Replace `AdminPolicy.capabilitiesOf` with per-capability permission nodes.
+  exposes its existing store through a binding. Allowed-lists are covered by `AdminMultiSelect` over the
+  per-entity boolean settings (no new `SettingKind` needed so far).
+- ~~Roles~~ — done 2026-10-07 (§3).
 - ~~History UI and persistence~~ and ~~Presets~~ — done in Phase 10 (`ADMIN_PROFILES.md`).
 - ~~Visual / beam settings and entity/model preview tools~~ — done in Phase 7 (`ADMIN_VISUALS.md`).
-- **Rate limiting** of admin C2S requests. Today they are bounded (packet size, history ring) but not
-  throttled.
+- ~~Rate limiting~~ of admin C2S requests — done 2026-10-07 (§3).

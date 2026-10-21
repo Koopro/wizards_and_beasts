@@ -243,6 +243,10 @@ cooldown sweep, with the selected spell armed.
 All go through the same services as the panel. The existing `/wandb magic spell …` tree (learn, forget,
 cast, cooldowns) edits players' spell knowledge, not server state, and is unchanged.
 
+**Magic → Availability** (2026-10-07) shows every spell's `enabled` setting as one multi-select with a filter and
+bulk tick / untick; Apply sends one ordinary change per spell (`ADMIN_UI.md` §3), so the server confirmation and
+history apply unchanged. Command equivalent: `config set` per spell id.
+
 ## 9. Tests
 
 | Test | What it proves |

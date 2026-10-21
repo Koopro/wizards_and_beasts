@@ -97,7 +97,9 @@ class AdminWorldEconomyTest {
         }
         // Pinned: a new Economy setting is a deliberate change to this list, and never a way to move money.
         assertEquals(new TreeSet<>(Set.of("ollivander_wand_price_knuts", "floo_registration_fee_knuts",
-                "skill_respec_cost_knuts", "dragot_galleon_rate")), economy);
+                "skill_respec_cost_knuts", "skill_unlearn_cost_knuts_per_point", "dragot_galleon_rate", "wand_care_price_knuts",
+                "licence_endorsement_fee_knuts", "market_price_scale_percent", "market_recovery_scale_percent",
+                "exploration_fee_scale_percent")), economy);
         assertEquals(7, travel.size(), () -> "Floo settings under Travel: " + travel);
     }
 

@@ -15,6 +15,7 @@ import at.koopro.wizardsandbeasts.client.admin.ClientAdminPlayerState;
 import at.koopro.wizardsandbeasts.client.admin.widget.AdminButton;
 import at.koopro.wizardsandbeasts.client.admin.widget.AdminConfirmDialog;
 import at.koopro.wizardsandbeasts.client.admin.widget.AdminEnumSelector;
+import at.koopro.wizardsandbeasts.client.admin.widget.AdminPicker;
 import at.koopro.wizardsandbeasts.client.admin.widget.AdminTextField;
 import at.koopro.wizardsandbeasts.client.admin.widget.AdminTheme;
 import at.koopro.wizardsandbeasts.network.admin.AdminPlayerPayloads;
@@ -41,13 +42,11 @@ final class PlayerFacetPanel extends AdminBrowserPanel<PlayerRow> {
 
     static final String KEY = "admin.wizards_and_beasts.players.";
     private static final int BUTTON_H = 16;
-    private static final int MAX_FILTERED = 400;
 
     /** Shared by every tab: the player stays selected when the tab changes. */
     static @Nullable String selected;
-    /** The choice in each tab's selector, and its filter text. */
+    /** The choice in each tab's picker. */
     private static String choice = "";
-    private static String filter = "";
     private static String coin = "galleons";
     private static String amount = "1";
 
@@ -112,7 +111,6 @@ final class PlayerFacetPanel extends AdminBrowserPanel<PlayerRow> {
     protected void setSelected(String id) {
         selected = id;
         choice = "";
-        filter = "";
     }
 
     @Override
@@ -191,6 +189,10 @@ final class PlayerFacetPanel extends AdminBrowserPanel<PlayerRow> {
             case MINISTRY -> items(host, font, view, ministryActions(host, font, entry, doc, rowW), rowW, "offences", null);
             case ECONOMY -> economyActions(host, font, entry, doc, rowW);
             case DEBUG -> items(host, font, view, doc, rowW, "rejects", null);
+            case CONDITIONS -> doc;
+            case WAND -> items(host, font, view, doc, rowW, "wands", null);
+            case PROFESSION -> items(host, font, view, doc, rowW, "progress", null);
+            case CREATURES -> items(host, font, view, doc, rowW, "companions", null);
         };
     }
 
@@ -288,6 +290,14 @@ final class PlayerFacetPanel extends AdminBrowserPanel<PlayerRow> {
                 () -> act(host, entry.id(), PlayerAdminAction.MINISTRY_WAIVE_FINE, "", 0, Component.literal(entry.name()))),
                 half + AdminTheme.GAP, doc);
         doc += BUTTON_H + AdminTheme.GAP;
+        place(button(host, "ministry_close_case", half, AdminButton.Tone.DANGER, true,
+                () -> act(host, entry.id(), PlayerAdminAction.MINISTRY_CLOSE_CASE, "", 0, Component.literal(entry.name()))),
+                0, doc);
+        place(button(host, "ministry_lift_suspensions", half, AdminButton.Tone.NEUTRAL, true,
+                () -> act(host, entry.id(), PlayerAdminAction.MINISTRY_LIFT_SUSPENSIONS, "", 0,
+                        Component.literal(entry.name()))),
+                half + AdminTheme.GAP, doc);
+        doc += BUTTON_H + AdminTheme.GAP;
         return wrap(font, doc, rowW, Component.translatable(KEY + "ministry_note"), AdminTheme.INK_3);
     }
 
@@ -346,44 +356,25 @@ final class PlayerFacetPanel extends AdminBrowserPanel<PlayerRow> {
     // ── shared pieces ──
 
     /**
-     * A filter field and a selector over the options that match it. Typing narrows the selector in place (no page
-     * rebuild, so the field keeps focus); the buttons read the choice when clicked.
+     * A picker over the options: click, type to narrow, choose. The buttons beside it read the choice when clicked.
+     * (Was a filter field next to a ◀ ▶ cycler, which stepped through the filtered options one click at a time.)
      */
     private int chooser(AdminPanelHost host, Font font, List<Option> options, int doc, int rowW) {
         if (options.isEmpty()) {
             return wrap(font, doc, rowW, Component.translatable(KEY + "nothing_to_choose"), AdminTheme.INK_3);
         }
-        int half = (rowW - AdminTheme.GAP) / 2;
-        AdminEnumSelector selector = new AdminEnumSelector(0, 0, half, BUTTON_H, filtered(options), currentChoice(options),
-                value -> choice = value, id -> id.isEmpty() ? Component.translatable("admin.wizards_and_beasts.filter.empty")
-                : optionLabel(options, id));
-        AdminTextField field = new AdminTextField(font, 0, 0, half, BUTTON_H, SettingKind.STRING, 32, filter, text -> {
-            filter = text;
-            selector.setOptions(filtered(options), currentChoice(options));
-            choice = currentChoice(options);
-        });
-        field.inkHint(Component.translatable(KEY + "filter_hint"));
-        place(field, 0, doc);
-        place(selector, half + AdminTheme.GAP, doc);
+        List<AdminPicker.Option> items = new ArrayList<>(options.size());
+        for (Option option : options) {
+            items.add(new AdminPicker.Option(option.id(),
+                    option.labelKey() ? Component.translatable(option.label()) : Component.literal(option.label())));
+        }
+        AdminPicker picker = new AdminPicker(0, 0, rowW, BUTTON_H, items, currentChoice(options),
+                Component.translatable(KEY + "choose_hint"), value -> choice = value);
+        place(picker, 0, doc);
         return doc + BUTTON_H + AdminTheme.GAP;
     }
 
-    private static List<String> filtered(List<Option> options) {
-        String needle = filter.trim().toLowerCase(Locale.ROOT);
-        List<String> ids = new ArrayList<>();
-        for (Option option : options) {
-            String label = option.labelKey() ? I18n.get(option.label()) : option.label();
-            if (needle.isEmpty() || option.id().contains(needle) || label.toLowerCase(Locale.ROOT).contains(needle)) {
-                ids.add(option.id());
-                if (ids.size() >= MAX_FILTERED) {
-                    break;
-                }
-            }
-        }
-        return ids;
-    }
-
-    /** Runs {@code then} with the current choice, when the filter leaves one. */
+    /** Runs {@code then} with the current choice, when one has been picked. */
     private static void withChoice(List<Option> options, java.util.function.Consumer<String> then) {
         String pick = currentChoice(options);
         if (!pick.isEmpty()) {
@@ -391,12 +382,14 @@ final class PlayerFacetPanel extends AdminBrowserPanel<PlayerRow> {
         }
     }
 
+    /** The picked option, or nothing: an action never runs on an option nobody chose. */
     private static String currentChoice(List<Option> options) {
-        List<String> ids = filtered(options);
-        if (ids.isEmpty()) {
-            return "";
+        for (Option option : options) {
+            if (option.id().equals(choice)) {
+                return choice;
+            }
         }
-        return ids.contains(choice) ? choice : ids.get(0);
+        return "";
     }
 
     private static Component optionLabel(List<Option> options, String id) {

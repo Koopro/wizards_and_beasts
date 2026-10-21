@@ -245,6 +245,19 @@ public final class PreviewEntity {
     }
 
     /** Every controller's playback speed: the creature's own and the viewer's. */
+    /**
+     * Scales this preview instance through the same {@code SCALE} attribute the game scales an entity with (the
+     * Occamy's choranaptyxis, a datapack attribute modifier), so model and hitbox grow together exactly as they would
+     * in the world. Only this unspawned instance changes; nothing is sent anywhere.
+     */
+    public void setScale(double scale) {
+        var attribute = entity.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.SCALE);
+        if (attribute != null) {
+            attribute.setBaseValue(scale);
+            entity.refreshDimensions();
+        }
+    }
+
     public void setSpeed(double speed) {
         this.speed = speed;
         AnimatableManager<GeoAnimatable> manager = manager();

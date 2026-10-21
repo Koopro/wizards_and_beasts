@@ -78,6 +78,9 @@ public final class EntityViewerScreen extends Screen {
     private String speed = "1";
     /** Light the model is drawn under: full daylight down to darkness, so glow layers can be judged. */
     private String light = "full";
+    /** The preview's entity scale (the SCALE attribute), as a multiplier. */
+    private String scale = "1";
+    private static final List<String> SCALES = List.of("0.5", "0.75", "1", "1.5", "2", "3");
     private @Nullable List<PreviewEntity.BoneLine> bones;
     private boolean dragging;
 
@@ -97,6 +100,7 @@ public final class EntityViewerScreen extends Screen {
                 if (!requestedVariant.isEmpty()) {
                     preview.applyVariant(requestedVariant);
                 }
+                preview.setScale(Double.parseDouble(scale));
                 clips = preview.animations();
             }
         }
@@ -151,6 +155,12 @@ public final class EntityViewerScreen extends Screen {
             y += 4;
             addRenderableWidget(new AdminEnumSelector(x, y, w, 16, LIGHTS, light, value -> light = value,
                     value -> Component.translatable(KEY + "light." + value)));
+            y += 20;
+            // Preview only: the instance's own SCALE attribute, so model and hitbox change together as in the world.
+            addRenderableWidget(new AdminEnumSelector(x, y, w, 16, SCALES, scale, value -> {
+                scale = value;
+                entity.setScale(Double.parseDouble(value));
+            }, value -> Component.translatable(KEY + "scale", value)));
             y += 20;
             addRenderableWidget(new AdminCheckbox(x, y, Component.translatable(KEY + "hitbox"), showHitbox, c -> showHitbox = c));
             y += 16;

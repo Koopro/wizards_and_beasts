@@ -41,7 +41,7 @@ Nothing above was duplicated. The two operator-command quirks found are document
 | Log | `admin/player/PlayerActionLog` | world SavedData `wizards_and_beasts_admin_player_log`, last 2000 entries |
 | Network | `network/admin/AdminPlayerPayloads` | search / facet / action / log requests and replies |
 | Client | `client/admin/ClientAdminPlayerState`, `screen/PlayersPanel`, `screen/PlayerFacetPanel` | nine tabs over one shared player selection |
-| Commands | `admin/command/AdminPlayerCommands` | `/wandb admin players list [query] | inspect <player> <facet> | log [player]` (read-only) |
+| Commands | `admin/command/AdminPlayerCommands` | `/wandb admin players list [query] | inspect <player> <facet> | log [player]` (read-only); `act <player> <action> [argument|amount] [confirm]` runs any action through `perform` (2026-10-07) |
 
 ## 3. Actions
 
@@ -97,8 +97,8 @@ entries out of it; they are in the server log with the sender's name and UUID.
 Players section, tabs **Overview | Heritage | Skills | Spells | Effects | Ministry | Economy | Debug | Log**. The left
 list is the online players (search by name or UUID; ✦ has effects, ⚠ is of interest to the Ministry). Each tab shows
 its facts, then its actions, then its list (a list can be every spell known). Lists with an action carry a
-button per line (Revoke, Remove). Choosers (spell to unlock, effect to preview, lineage to assign) have a filter field
-that narrows the selector in place. Destructive buttons end in "…" and open a dialog naming the action, its subject
+button per line (Revoke, Remove). Choosers (spell to unlock, effect to preview, lineage to assign) are an `AdminPicker`:
+click or Enter opens a list, typing filters it, Enter picks (2026-10-07; was a filter field beside a ◀ ▶ cycler). Destructive buttons end in "…" and open a dialog naming the action, its subject
 and the player. The last outcome on the selected player is shown at the top of every tab.
 
 ## 7. Tests

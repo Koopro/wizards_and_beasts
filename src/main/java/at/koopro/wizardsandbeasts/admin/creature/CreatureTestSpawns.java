@@ -117,6 +117,8 @@ public final class CreatureTestSpawns {
             return Outcome.refused("failed", creatureId);
         }
         LOGGER.info("[Admin] {} spawned test {} at {}", admin.getName().getString(), creatureId, entity.blockPosition());
+        at.koopro.wizardsandbeasts.admin.operation.AdminOperationService.record(level.getServer(), AdminContext.of(admin), "creatures", "test_spawn", creatureId,
+                variantId == null ? "" : variantId, true, entity.getStringUUID());
         return new Outcome(true, KEY + "spawned", creatureId);
     }
 
@@ -127,6 +129,8 @@ public final class CreatureTestSpawns {
             return Outcome.refused("unauthorized", "");
         }
         int removed = removeOwned(admin.level().getServer(), admin.getUUID());
+        at.koopro.wizardsandbeasts.admin.operation.AdminOperationService.record(admin.level().getServer(), actor, "creatures", "test_cleanup", "", "", true,
+                removed + " removed");
         return new Outcome(true, KEY + "cleaned", Integer.toString(removed));
     }
 

@@ -4,6 +4,8 @@ import at.koopro.wizardsandbeasts.admin.access.AdminCapability;
 import at.koopro.wizardsandbeasts.admin.access.AdminContext;
 import at.koopro.wizardsandbeasts.admin.heritage.HeritageAdminService;
 import at.koopro.wizardsandbeasts.command.debug.DebugModeService;
+import at.koopro.wizardsandbeasts.currency.billing.GringottsBilling;
+import at.koopro.wizardsandbeasts.currency.billing.MoneyFlow;
 import at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper;
 import at.koopro.wizardsandbeasts.currency.vault.PlayerVaultData;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
@@ -106,7 +108,7 @@ public final class PlayerAdminService {
 
     /** The facets of one player's page. */
     public enum Facet {
-        OVERVIEW, HERITAGE, SKILLS, SPELLS, EFFECTS, MINISTRY, ECONOMY, DEBUG;
+        OVERVIEW, HERITAGE, CONDITIONS, SKILLS, SPELLS, WAND, PROFESSION, CREATURES, EFFECTS, MINISTRY, ECONOMY, DEBUG;
 
         public String id() {
             return name().toLowerCase(Locale.ROOT);
@@ -215,11 +217,15 @@ public final class PlayerAdminService {
         switch (facet) {
             case OVERVIEW -> overview(actor, target, facts, items);
             case HERITAGE -> heritage(target, facts, options);
+            case CONDITIONS -> PlayerFacets.conditions(target, facts);
+            case WAND -> PlayerFacets.wand(target, facts, items);
+            case PROFESSION -> PlayerFacets.profession(target, facts, items);
+            case CREATURES -> PlayerFacets.creatures(actor, target, facts, items);
             case SKILLS -> skills(target, facts, items);
             case SPELLS -> spells(target, facts, items, options);
             case EFFECTS -> effects(target, facts, items, options);
             case MINISTRY -> ministry(server, target, facts, items);
-            case ECONOMY -> economy(actor, target, facts);
+            case ECONOMY -> economy(actor, target, facts, items);
             case DEBUG -> debug(target, facts, items);
         }
         return new FacetView(facet, target.getUUID(), target.getName().getString(), List.copyOf(facts),
@@ -344,15 +350,53 @@ public final class PlayerAdminService {
         facts.add(text("fine", money(MinistryFines.owed(target))));
         facts.add(keyed("underage", FACT + (MinistryTrace.isUnderage(target) ? "yes" : "no")));
         facts.add(keyed("wand_confiscated", FACT + (MinistryTrace.wandConfiscated(target) ? "yes" : "no")));
-        facts.add(keyed("open_case", FACT + (MinistryCaseData.get(server).dossier(target.getUUID()).openCase().isPresent()
-                ? "yes" : "no")));
+        at.koopro.wizardsandbeasts.ministry.trace.Dossier dossier = MinistryCaseData.get(server).dossier(target.getUUID());
+        facts.add(keyed("open_case", FACT + (dossier.openCase().isPresent() ? "yes" : "no")));
+        facts.add(text("conduct", Integer.toString(record.conduct())));
+        long now = MinistryTrace.now(server);
+        StringBuilder suspended = new StringBuilder();
+        record.suspensions().forEach((type, until) -> {
+            if (now < until) {
+                suspended.append(suspended.isEmpty() ? "" : ", ").append(type.getSerializedName());
+            }
+        });
+        facts.add(text("suspensions", suspended.isEmpty() ? "—" : suspended.toString()));
+        dossier.openCase().ifPresent(open -> {
+            facts.add(text("case", "#" + open.caseId() + " · " + open.stage().getSerializedName()
+                    + (open.cold() ? " · cold" : "") + (open.failedToAppear() ? " · failed to appear" : "")
+                    + " · searches " + open.searches()));
+            facts.add(text("case_auror", open.aurorAt(now).map(id -> {
+                ServerPlayer holder = server.getPlayerList().getPlayer(id);
+                return holder == null ? id.toString() : holder.getGameProfile().name();
+            }).orElse("—")));
+            MinistryCaseData data = MinistryCaseData.get(server);
+            for (long id : open.incidents()) {
+                at.koopro.wizardsandbeasts.ministry.trace.Incident incident = data.incident(id);
+                if (incident == null) {
+                    continue;
+                }
+                StringBuilder provenance = new StringBuilder();
+                for (at.koopro.wizardsandbeasts.ministry.trace.Evidence item : data.evidence(id)) {
+                    provenance.append(provenance.isEmpty() ? "" : ", ").append(item.kind().getSerializedName())
+                            .append(item.sourceLabel().isEmpty() ? "" : "(" + item.sourceLabel() + ")");
+                }
+                items.add(new Item("incident_" + id, incident.spellId() + " #" + id, false,
+                        incident.legalClass().getSerializedName() + "/" + incident.exposure().getSerializedName()
+                                + " · evidence " + data.strength(id) + "/"
+                                + at.koopro.wizardsandbeasts.ministry.trace.EvidenceRules.standardFor(incident.legalClass())
+                                + (provenance.isEmpty() ? "" : " · " + provenance), false));
+            }
+        });
+        dossier.lastCase().ifPresent(closed -> facts.add(text("last_ruling", closed.ruling().verdict()
+                .getSerializedName() + (closed.appeal() == at.koopro.wizardsandbeasts.ministry.trace.ClosedCase.Appeal.NONE
+                ? "" : " · appeal " + closed.appeal().getSerializedName()))));
         for (Map.Entry<MagicalOffence, Integer> offence : record.offencesByWeight().entrySet()) {
             items.add(new Item(offence.getKey().name().toLowerCase(Locale.ROOT), keyOf(offence.getKey().displayName()), true,
                     "×" + offence.getValue(), false));
         }
     }
 
-    private static void economy(AdminContext actor, ServerPlayer target, List<AdminSpellFact> facts) {
+    private static void economy(AdminContext actor, ServerPlayer target, List<AdminSpellFact> facts, List<Item> items) {
         PlayerVaultData vault = vault(target);
         facts.add(keyed("gringotts_module", FACT + (ModuleManager.isEnabled(Module.GRINGOTTS) ? "on" : "off")));
         facts.add(text("galleons", Long.toString(vault.getGalleons())));
@@ -361,6 +405,16 @@ public final class PlayerAdminService {
         facts.add(text("balance", money(vault.getTotalInKnuts())));
         facts.add(text("fine", money(MinistryFines.owed(target))));
         facts.add(keyed("money_authority", FACT + (actor.canModify(AdminCapability.MONEY) ? "yes" : "no")));
+        // The player's last money movements, newest first: where a balance came from (currency.billing.MoneyJournal).
+        var journal = target.getData(at.koopro.wizardsandbeasts.registry.ModAttachments.MONEY_JOURNAL.get()).entries();
+        for (int i = journal.size() - 1; i >= 0; i--) {
+            var entry = journal.get(i);
+            at.koopro.wizardsandbeasts.currency.billing.MoneyFlow flow =
+                    at.koopro.wizardsandbeasts.currency.billing.MoneyFlow.byId(entry.flow());
+            boolean in = flow != null && flow.credits() == entry.knuts() >= 0;
+            items.add(new Item("journal_" + i, flow == null ? entry.flow() : flow.translationKey(), flow != null,
+                    (in ? "+" : "−") + money(Math.abs(entry.knuts())), false));
+        }
     }
 
     private static void debug(ServerPlayer target, List<AdminSpellFact> facts, List<Item> items) {
@@ -550,12 +604,46 @@ public final class PlayerAdminService {
                 MinistryFines.waive(target);
                 yield ok(money(owed) + " waived");
             }
+            case MINISTRY_CLOSE_CASE -> {
+                MinistryCaseData data = MinistryCaseData.get(server);
+                at.koopro.wizardsandbeasts.ministry.trace.Dossier dossier = data.dossier(target.getUUID());
+                if (dossier.openCase().isEmpty()) {
+                    yield Outcome.refused("nothing_to_do", "");
+                }
+                long caseId = dossier.openCase().get().caseId();
+                data.putDossier(target.getUUID(), dossier.withOpenCase(java.util.Optional.empty()));
+                data.collectGarbage();
+                yield ok("case #" + caseId + " closed without a hearing");
+            }
+            case MINISTRY_LIFT_SUSPENSIONS -> {
+                PlayerMinistryRecord record = MinistryRecords.get(target);
+                if (record.suspensions().isEmpty()) {
+                    yield Outcome.refused("nothing_to_do", "");
+                }
+                MinistryRecords.mutate(target, current -> {
+                    PlayerMinistryRecord next = current;
+                    for (at.koopro.wizardsandbeasts.ministry.licence.LicenseType type : current.suspensions().keySet()) {
+                        next = next.withoutSuspension(type);
+                    }
+                    return next;
+                });
+                yield ok(record.suspensions().size() + " suspension(s) lifted");
+            }
             case MONEY_DEPOSIT, MONEY_WITHDRAW -> {
                 Coin coin = Coin.byId(argument);
                 PlayerVaultData vault = vault(target);
                 long before = coin.count(vault);
-                boolean done = request.action() == PlayerAdminAction.MONEY_DEPOSIT
-                        ? coin.deposit(vault, request.amount()) : coin.withdraw(vault, request.amount());
+                boolean deposit = request.action() == PlayerAdminAction.MONEY_DEPOSIT;
+                long knuts = coin.knuts(request.amount());
+                if (deposit && (knuts < 0 || !vault.canCredit(knuts))) {
+                    // Past the vault ceiling (or a count whose value overflows): refused, never wrapped.
+                    yield Outcome.refused("invalid_argument", coin.id + " " + request.amount() + " exceeds the vault ceiling");
+                }
+                boolean done = deposit ? coin.deposit(vault, request.amount()) : coin.withdraw(vault, request.amount());
+                if (done) {
+                    GringottsBilling.recordAdjustment(target,
+                            deposit ? MoneyFlow.ADMIN_DEPOSIT : MoneyFlow.ADMIN_WITHDRAWAL, knuts);
+                }
                 VaultSyncS2CPayload.syncToPlayer(target);
                 yield done ? ok(coin.id + " " + before + " → " + coin.count(vault))
                         : Outcome.refused("insufficient", coin.id + " " + before);
@@ -584,7 +672,8 @@ public final class PlayerAdminService {
      * routine and is not covered — it either completes or reports why it did not.
      */
     private record Snapshot(CompoundTag spells, CompoundTag skills, CompoundTag vault, PlayerStatsData stats,
-                            PlayerMinistryRecord ministry, List<MobEffectInstance> effects) {
+                            PlayerMinistryRecord ministry, List<MobEffectInstance> effects,
+                            at.koopro.wizardsandbeasts.ministry.trace.Dossier dossier) {
 
         static Snapshot of(ServerPlayer player) {
             List<MobEffectInstance> effects = new ArrayList<>();
@@ -592,7 +681,8 @@ public final class PlayerAdminService {
                 effects.add(new MobEffectInstance(instance));
             }
             return new Snapshot(spellData(player).save(), SkillSystemAPI.getSkillData(player).save(), PlayerAdminService.vault(player).save(),
-                    PlayerStatsAPI.getData(player), MinistryRecords.get(player), effects);
+                    PlayerStatsAPI.getData(player), MinistryRecords.get(player), effects,
+                    MinistryCaseData.get(player.level().getServer()).dossier(player.getUUID()));
         }
 
         void restore(ServerPlayer player) {
@@ -607,6 +697,8 @@ public final class PlayerAdminService {
             player.setData(ModAttachments.VAULT_DATA.get(), vaultData);
             PlayerStatsAPI.setAndSync(player, stats);
             MinistryRecords.set(player, ministry);
+            // The case file is world data, not the player's, but an action here can close it: put it back too.
+            MinistryCaseData.get(player.level().getServer()).putDossier(player.getUUID(), dossier);
             player.removeAllEffects();
             for (MobEffectInstance instance : effects) {
                 player.addEffect(new MobEffectInstance(instance));
@@ -638,6 +730,20 @@ public final class PlayerAdminService {
                 }
             }
             return null;
+        }
+
+        /** The value of {@code count} of this coin in Knuts, or -1 when it would overflow. */
+        long knuts(long count) {
+            long each = switch (this) {
+                case GALLEONS -> CurrencyHelper.KNUTS_PER_GALLEON;
+                case SICKLES -> CurrencyHelper.KNUTS_PER_SICKLE;
+                case KNUTS -> 1L;
+            };
+            try {
+                return Math.multiplyExact(count, each);
+            } catch (ArithmeticException overflow) {
+                return -1L;
+            }
         }
 
         long count(PlayerVaultData vault) {
@@ -694,16 +800,16 @@ public final class PlayerAdminService {
         return keyOf(record.wantedLevel().displayName());
     }
 
-    private static String keyOf(Component component) {
+    static String keyOf(Component component) {
         return component.getContents() instanceof TranslatableContents translatable ? translatable.getKey()
                 : component.getString();
     }
 
-    private static AdminSpellFact keyed(String label, String valueKey) {
+    static AdminSpellFact keyed(String label, String valueKey) {
         return new AdminSpellFact(FACT + label, valueKey, true);
     }
 
-    private static AdminSpellFact text(String label, String value) {
+    static AdminSpellFact text(String label, String value) {
         return new AdminSpellFact(FACT + label, value, false);
     }
 }

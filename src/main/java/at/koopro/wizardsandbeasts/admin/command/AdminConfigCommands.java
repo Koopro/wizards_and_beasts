@@ -113,6 +113,18 @@ public final class AdminConfigCommands {
 
     // ── executors ──
 
+    /**
+     * Bare {@code /wandb admin}: an administrator in the game gets the Control Center; the console (which has no
+     * screen) gets the command list instead.
+     */
+    public static int openOrList(CommandSourceStack source) {
+        if (source.getPlayer() == null) {
+            source.sendSuccess(() -> Component.translatable("command.wizards_and_beasts.admin.console_help"), false);
+            return 1;
+        }
+        return openPanel(source);
+    }
+
     private static int openPanel(CommandSourceStack source) {
         ServerPlayer player = source.getPlayer();
         if (player == null) {

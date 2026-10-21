@@ -9,6 +9,7 @@ import at.koopro.wizardsandbeasts.client.beam.BeamChannelClient;
 import at.koopro.wizardsandbeasts.client.beam.BeamQuality;
 import at.koopro.wizardsandbeasts.client.beam.ClientBeamVisuals;
 import at.koopro.wizardsandbeasts.client.spell.gui.BeamStyleScreen;
+import at.koopro.wizardsandbeasts.client.wand.WandLookPreviewScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -22,7 +23,7 @@ import java.util.Arrays;
 /**
  * Visuals → Debug: this client's beam render budget ({@link BeamQuality}, the same switch as
  * {@code /wandb debug beam preset}), the beam debug editor (a global override of every beam on this client only), a
- * readout of what the beam renderer is holding, and a way to the Debug section's server switches. Nothing here is a
+ * readout of what the beam renderer is holding, the wand look preview, and a way to the Debug section's server switches. Nothing here is a
  * server setting and nothing here reaches another player.
  */
 @NullMarked
@@ -61,6 +62,9 @@ final class DebugRenderingPanel implements AdminPanel {
                 Component.translatable(KEY + "debug_section"), AdminButton.Tone.QUIET,
                 () -> host.navigate(AdminCategory.DEBUG)));
         row += 20 + font.split(Component.translatable(KEY + "editor_note"), w).size() * 10 + 6;
+        host.addPanelWidget(new AdminButton(x, row, Math.min(160, w), 16, Component.translatable(KEY + "open_wand_looks"),
+                AdminButton.Tone.NEUTRAL, () -> Minecraft.getInstance().setScreen(new WandLookPreviewScreen())));
+        row += 20 + font.split(Component.translatable(KEY + "wand_looks_note"), w).size() * 10 + 6;
         readoutTop = row;
     }
 
@@ -76,7 +80,9 @@ final class DebugRenderingPanel implements AdminPanel {
         row += 20;
         row = paragraph(g, font, row, Component.translatable(KEY + "quality_note")) + 6;
         row += 20;
-        paragraph(g, font, row, Component.translatable(KEY + "editor_note"));
+        row = paragraph(g, font, row, Component.translatable(KEY + "editor_note")) + 6;
+        row += 20;
+        paragraph(g, font, row, Component.translatable(KEY + "wand_looks_note"));
 
         int ry = readoutTop;
         g.drawString(font, Component.translatable(KEY + "readout"), x, ry, AdminTheme.RUBRIC, false);

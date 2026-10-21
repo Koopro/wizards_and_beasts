@@ -27,6 +27,8 @@ import java.util.Map;
 @NullMarked
 public final class BeamVisualAdminService {
 
+    private static final org.slf4j.Logger LOGGER = com.mojang.logging.LogUtils.getLogger();
+
     private BeamVisualAdminService() {}
 
     public static boolean authorised(AdminContext actor) {
@@ -83,6 +85,29 @@ public final class BeamVisualAdminService {
             case RENAME -> BeamVisualService.rename(server, id, name);
             case DELETE -> BeamVisualService.delete(server, id);
         };
+    }
+
+    /** What {@link #perform} did: {@code unauthorized}, or the preset outcome ({@code ok}, {@code name_taken}, …). */
+    public record Performed(String outcome, String presetId, boolean ok) {}
+
+    /**
+     * The one entry point for a preset operation, used by the Visuals page and {@code /wandb admin visual preset}
+     * alike: authority, then the operation, then an audit line. {@link #run} itself checks nothing, so nothing else
+     * should call it.
+     */
+    public static Performed perform(AdminContext actor, MinecraftServer server, PresetOp op, String id, String name,
+                                    Map<String, String> values) {
+        if (!authorised(actor)) {
+            LOGGER.warn("[Admin] Refused beam preset {} {} from unauthorised {}", op, id, actor.actorName());
+            return new Performed("unauthorized", "", false);
+        }
+        BeamVisualService.PresetResult result = run(server, op, id, name, values);
+        String outcome = result.outcome().name().toLowerCase(java.util.Locale.ROOT);
+        LOGGER.info("[Admin] {} beam preset {} {}{}: {}", actor.actorName(), op.name().toLowerCase(java.util.Locale.ROOT),
+                id.isEmpty() ? "" : id, name.isEmpty() ? "" : " -> " + name, outcome);
+        at.koopro.wizardsandbeasts.admin.operation.AdminOperationService.record(server, actor, "visuals", "beam_preset_" + op.name().toLowerCase(java.util.Locale.ROOT), id,
+                name, result.ok(), outcome);
+        return new Performed(outcome, result.presetId(), result.ok());
     }
 
     /** For the preset list: a built-in preset is named by its spell. */
