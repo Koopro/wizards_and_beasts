@@ -129,8 +129,6 @@ public class GringottsScreen extends Screen {
     private static final int BTN_H = 26;
 
     private static final int MOVE_BTN_W = 22;
-    private static final int WIDE_BTN_W = 74;
-    private static final int SMALL_BTN_W = 56;
 
     /** Gold, silver and bronze. Semantic, and lifted onto this material by {@link UiContrast}. */
     private final int goldInk;
@@ -211,7 +209,9 @@ public class GringottsScreen extends Screen {
         }
 
         int bulkY = y(BULK_ROW_Y);
-        int wideW = layout.s(WIDE_BTN_W);
+        // Half a column each, not a fixed design width: the panel scales and its text does not, so a
+        // 74px "Withdraw all" came out at 53px at GUI 4 and read "Withdraw...".
+        int wideW = halfCol();
         addRenderableWidget(ledgerButton(leftX, bulkY, wideW, btnH,
                 "gui.wizards_and_beasts.gringotts.deposit_all", () -> send(Action.DEPOSIT_ALL, 1)));
         addRenderableWidget(ledgerButton(leftX + leftW - wideW, bulkY, wideW, btnH,
@@ -219,7 +219,7 @@ public class GringottsScreen extends Screen {
 
         // Exchange: four fixed integer ratios inside one currency, as a 2x2 so each pair of
         // opposite directions reads as a pair.
-        int deskStep = colW() - layout.s(SMALL_BTN_W);
+        int deskStep = halfCol() + WizardsMetrics.SPACE_S;
         int deskRow = layout.s(DESK_ROW_H);
         addExchange(rightX, y(EXCHANGE_ROW_Y), btnH, 0, "knuts_to_sickle",
                 Action.EXCHANGE_KNUTS_TO_SICKLE, CurrencyHelper.KNUTS_PER_SICKLE, deskStep);
@@ -232,7 +232,7 @@ public class GringottsScreen extends Screen {
 
         // Dragots: a rate that moves and a bank that takes a cut. Its own desk, because that is not
         // the same operation as the four fixed ratios above it.
-        int smallW = layout.s(SMALL_BTN_W);
+        int smallW = halfCol();
         int dragotY = y(DRAGOT_ROW_Y);
         addRenderableWidget(ledgerButton(rightX, dragotY, smallW, btnH,
                 "gui.wizards_and_beasts.dragot.sell", () -> send(Action.SELL_DRAGOTS, 1), 1));
@@ -254,7 +254,7 @@ public class GringottsScreen extends Screen {
 
     private void addExchange(int x, int y, int h, int slot, String key,
                              Action action, int ratio, int step) {
-        ThemedButton button = ThemedButton.skinned(x + step * slot, y, layout.s(SMALL_BTN_W), h,
+        ThemedButton button = ThemedButton.skinned(x + step * slot, y, halfCol(), h,
                 Component.translatable("gui.wizards_and_beasts.gringotts.exchange." + key, ratio),
                 () -> send(action, 1), SKIN);
         // The label is a ratio like "29K -> 1S". What that means belongs in a tooltip rather than in
@@ -306,6 +306,11 @@ public class GringottsScreen extends Screen {
     }
 
     /** Each column gets half the content width, less half a gutter. */
+    /** A button that shares a column with one other: half of it, less the gap between the two. */
+    private int halfCol() {
+        return (colW() - WizardsMetrics.SPACE_S) / 2;
+    }
+
     private int colW() {
         return (layout.panelW() - 2 * (FRAME + PAD) - WizardsMetrics.SPACE_XXL) / 2;
     }

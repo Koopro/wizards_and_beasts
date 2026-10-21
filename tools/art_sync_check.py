@@ -69,7 +69,7 @@ PLAIN = [
     "animagus_skins", "animate_textures", "banner_textures", "bestiary_portraits", "block_textures",
     "chocolate_frog", "config_textures", "duelling_dummy", "effect_icons", "gui_chrome",
     "gui_parchment", "hud_blood_icons", "item_geo", "item_models_3d", "location_textures",
-    "map_textures", "omnioculars_scope", "particle_sprites", "player_geo", "pouch_textures",
+    "map_textures", "omnioculars_scope", "particle_sprites", "player_geo",
     "protego_shield_skin", "skill_chart_textures", "skill_web_layout", "spawn_eggs", "spell_sigils",
     "stat_icons", "tent_skin", "texture_cleanup", "villager_trades", "villager_wandmaker", "wand_model",
     "wandwood_textures", "wizard_cards",

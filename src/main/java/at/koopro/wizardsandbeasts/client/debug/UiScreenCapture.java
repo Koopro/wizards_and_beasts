@@ -192,6 +192,26 @@ public final class UiScreenCapture {
                 Step.server("wandmakers_bench", UiScreenCapture::openBench),
                 Step.server("wandmakers_bench_loaded", UiScreenCapture::openBenchLoaded),
                 Step.server("hermiones_bag", UiScreenCapture::openHermionesBag),
+                Step.server("niffler_pouch", UiScreenCapture::openNifflerPouch),
+                Step.client("gringotts", () -> open(new at.koopro.wizardsandbeasts.client.currency.gui.GringottsScreen())),
+                Step.client("floo_network", () -> open(new at.koopro.wizardsandbeasts.client.floo.gui.FlooNetworkScreen(
+                        List.of(new at.koopro.wizardsandbeasts.floo.FlooDestinationDto("Diagon Alley", "Overworld", true, 0),
+                                new at.koopro.wizardsandbeasts.floo.FlooDestinationDto("The Burrow", "Overworld", true, 3),
+                                new at.koopro.wizardsandbeasts.floo.FlooDestinationDto("Ministry of Magic, Atrium", "Overworld", true, 12),
+                                new at.koopro.wizardsandbeasts.floo.FlooDestinationDto("Hogsmeade, Three Broomsticks", "Overworld", false, 5)),
+                        "Home", false))),
+                Step.client("floo_registration", () -> open(new at.koopro.wizardsandbeasts.client.floo.gui.FlooRegistrationScreen(
+                        Minecraft.getInstance().player.blockPosition(), "Home", 10))),
+                Step.client("marauders_map", () -> open(new at.koopro.wizardsandbeasts.client.map.MaraudersMapScreen())),
+                Step.client("vocation_selection", () -> open(
+                        new at.koopro.wizardsandbeasts.client.skill.gui.VocationSelectionScreen(null))),
+                Step.client("skill_access_denied", () -> open(new at.koopro.wizardsandbeasts.client.skill.gui.SkillAccessDeniedScreen(
+                        net.minecraft.network.chat.Component.literal("Capture: the skill web is closed on this server.")))),
+                Step.client("pensieve", () -> open(new at.koopro.wizardsandbeasts.client.trinket.gui.PensieveScreen(List.of(
+                        new at.koopro.wizardsandbeasts.memory.MemoryEntry(at.koopro.wizardsandbeasts.memory.MemoryType.HAPPY, 0.9f, "first_broom_ride", 1200L),
+                        new at.koopro.wizardsandbeasts.memory.MemoryEntry(at.koopro.wizardsandbeasts.memory.MemoryType.MUNDANE, 0.4f, "a_rainy_tuesday", 24000L),
+                        new at.koopro.wizardsandbeasts.memory.MemoryEntry(at.koopro.wizardsandbeasts.memory.MemoryType.HAPPY, 0.7f, "wand_chooses_wizard", 48000L))))),
+                Step.client("hud", () -> open(null)),
                 Step.server("ollivander_trial", OllivanderInteractHandler::openTrial),
                 Step.client("admin_control_center", AdminClientRequests::open),
                 // The 2026-10-15 finishing pass: the screens the first audit did not reach.
@@ -321,6 +341,27 @@ public final class UiScreenCapture {
             }
             menu.broadcastChanges();
         }
+    }
+
+    /**
+     * A niffler's pouch, opened through its real menu on a niffler spawned beside the player. The bond
+     * check of {@code NifflerEntity.mobInteract} is skipped: this photographs the screen, not the taming.
+     */
+    private static void openNifflerPouch(ServerPlayer player) {
+        var level = player.level();
+        var niffler = at.koopro.wizardsandbeasts.registry.ModEntities.NIFFLER.get().create(level,
+                net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+        if (niffler == null) {
+            return;
+        }
+        niffler.setPos(player.getX() + 2, player.getY(), player.getZ());
+        niffler.setNoAi(true);
+        level.addFreshEntity(niffler);
+        int eid = niffler.getId();
+        player.openMenu(new net.minecraft.world.SimpleMenuProvider(
+                (id, inv, p) -> new at.koopro.wizardsandbeasts.entity.niffler.NifflerPouchMenu(id, inv, niffler),
+                net.minecraft.network.chat.Component.translatable("container.wizards_and_beasts.niffler_pouch")),
+                buf -> buf.writeInt(eid));
     }
 
     private static void openBench(ServerPlayer player) {

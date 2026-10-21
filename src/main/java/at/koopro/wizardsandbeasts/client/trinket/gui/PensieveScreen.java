@@ -224,7 +224,9 @@ public class PensieveScreen extends Screen {
                     isSelected || (hovered != null && hovered == index));
 
             int tx = listX + WizardsMetrics.SPACE_S;
-            int tw = rowW - 2 * WizardsMetrics.SPACE_S;
+            // Text stops short of the scrollbar's column: the age was right-aligned onto the bar ("0s agc").
+            int textRight = listX + rowW - WizardsMetrics.SPACE_S - WizardsMetrics.SCROLLBAR_W;
+            int tw = textRight - tx;
             graphics.drawString(font, typeLabel(memory.type()), tx, rowY + 2,
                     typeInk(memory.type()), false);
 
@@ -235,7 +237,7 @@ public class PensieveScreen extends Screen {
             renderIntensity(graphics, tx, rowY + 2 + WizardsMetrics.LINE_TIGHT + 1,
                     tw / 2, memory.intensity());
             String age = ageText(now, memory.createdGameTime()).getString();
-            graphics.drawString(font, age, listX + rowW - WizardsMetrics.SPACE_S - font.width(age),
+            graphics.drawString(font, age, textRight - font.width(age),
                     rowY + 2 + WizardsMetrics.LINE_TIGHT, SKIN.muted(), false);
         }
 

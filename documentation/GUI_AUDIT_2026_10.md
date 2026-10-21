@@ -265,3 +265,24 @@ sheet's Skills tab and its tooltip covered every page).
   carry no words, and the tooltip covered the seals being read.
 - ✅ Bestiary: search placeholder ("Search creatures"). (Closes the 10-07 open item.)
 - ⏳ Handbook landing flavour's second sentence does not fit the left page at its current crest/title sizes.
+
+### M7 — remaining screens (2026-10-22; spell HUD untouched at the user's request)
+Captured all 25 remaining player screens at GUI 4 (new harness steps: niffler_pouch, gringotts, floo_network,
+floo_registration, marauders_map, vocation_selection, skill_access_denied, pensieve, hud).
+- ✅ Gringotts: exchange, Dragot and bulk buttons were fixed design widths that shrank with the panel while their
+  labels did not ("29K →…", "Withdraw…"); each now takes half its column. The move buttons' glyphs were U+25B8/
+  U+25C2, small triangles that render as dots; now ◀ (into the vault column) and ▶ (into the wallet).
+- ✅ Marauder's Map: two footer lines a scaled 10px apart (7px at GUI 4) overprinted each other and the frame; now
+  one line — position first, the charted count ellipsised — beside filter buttons sized to their labels.
+- ✅ O.W.L. desk: status lines wrap to two lines instead of being cut ("…Exceeds Expecta"); the button row is
+  split by what each says ("Choose Your Path" read "Choose Your…").
+- ✅ Pensieve: text stops short of the scrollbar column ("0s agc").
+- ✅ Niffler's pouch: object-led like Hermione's bag — tufted black velvet fur with a blue-grey sheen and stolen
+  coins caught in it, slots sunk into brown suede, the name on a coin-gold tag; inventory on a parchment strip.
+  Geometry in `NifflerPouchMenu` (`slotOrigins(rows)`, adult 3 rows / baby 1), `NifflerPouchGeometryTest`.
+  Title translated (`container.wizards_and_beasts.niffler_pouch[.named]`; was English literals). Retired
+  `tools/pouch_textures.py` and its two sheets; art in `gui_chrome.py` `container/niffler_pouch/`.
+- ➖ Checked, no change: ability wheel, apparition, config board/chapter/gate, diary write/possession, Floo network
+  and registration, Imperio, ministry licence, mirror call/view, Ollivander trial, O.W.L. results/sitting/profession,
+  skill-access notice, vocation selection, HUD (no spell HUD changes).
+

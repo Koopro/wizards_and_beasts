@@ -356,11 +356,13 @@ public class NifflerEntity extends GeoEntityBase implements BondableBeast,
         NeoForge.EVENT_BUS.post(new NifflerPouchOpenEvent(this, player));
         ticksSincePouchAccess = 60;
 
-        String title = hasCustomName() ? getCustomName().getString() + "'s Pouch" : "Niffler's Pouch";
+        net.minecraft.network.chat.Component title = hasCustomName()
+                ? net.minecraft.network.chat.Component.translatable("container.wizards_and_beasts.niffler_pouch.named", getCustomName())
+                : net.minecraft.network.chat.Component.translatable("container.wizards_and_beasts.niffler_pouch");
         final int eid = this.getId();
         sp.openMenu(new SimpleMenuProvider(
                 (id, inv, p) -> new NifflerPouchMenu(id, inv, this),
-                net.minecraft.network.chat.Component.literal(title)),
+                title),
                 buf -> buf.writeInt(eid));
         return InteractionResult.SUCCESS;
     }

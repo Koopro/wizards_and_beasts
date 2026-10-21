@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.client.map;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel.Sprite;
 import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
+import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton;
 import at.koopro.wizardsandbeasts.client.gui.widget.ThemedTextField;
@@ -101,6 +102,8 @@ public class MaraudersMapScreen extends Screen {
 
     private final MapView view = new MapView();
     private GuiScaleHelper.Layout layout;
+    /** Where the footer's text must stop: the left edge of the filter buttons, less a gap. */
+    private int footerTextRight;
 
     private int panelX;
     private int panelY;
@@ -209,7 +212,11 @@ public class MaraudersMapScreen extends Screen {
         addIcon(x, y, size, MaraudersMapTextures.ICON_ZOOM_OUT, "zoom_out",
                 () -> view.zoomAboutCenter(1.0 / (MapView.ZOOM_STEP * MapView.ZOOM_STEP)));
 
-        int filterW = layout.s(58);
+        // Wide enough for the longer of each filter's two labels: a scaled 58px read "Foes:..." at GUI 4.
+        int filterW = Math.max(layout.s(58), Math.max(
+                Math.max(font.width(filterLabel("hostile", true)), font.width(filterLabel("hostile", false))),
+                Math.max(font.width(filterLabel("passive", true)), font.width(filterLabel("passive", false)))) + 12);
+        footerTextRight = panelX + panelW - layout.s(VIEW_INSET) - filterW * 2 - gap - 6;
         int filterH = skinned(MIN_SKINNED);
         int filterY = panelY + panelH - layout.s(FOOTER_H) + layout.s(4);
         addRenderableWidget(mapButton(panelX + panelW - layout.s(VIEW_INSET) - filterW * 2 - gap,
@@ -382,15 +389,29 @@ public class MaraudersMapScreen extends Screen {
      * position otherwise, which is the behaviour that answers both "where am I" and "what is that"
      * without a second readout or a mode switch.
      */
+    /**
+     * One line beside the filters: how much is charted, then where you are (or the cursor's spot).
+     *
+     * <p>It was two lines a scaled 10px apart -- 7px at GUI 4, under a 9px glyph -- so they overprinted
+     * each other and the lower one ran into the sheet's rule. Ellipsised before the filter buttons.
+     */
     private void renderFooter(GuiGraphics gfx) {
-        int textY = panelY + panelH - layout.s(FOOTER_H) + layout.s(13);
+        int filterH = skinned(MIN_SKINNED);
+        int textY = panelY + panelH - layout.s(FOOTER_H) + layout.s(4) + (filterH - font.lineHeight) / 2 + 1;
         int left = panelX + layout.s(VIEW_INSET);
 
-        gfx.drawString(font, coordinateReadout(), left, textY, PARCHMENT_INK, false);
-
+        // Where you are (or where the cursor points) first: it is what the line is read for. The charted
+        // count follows and is the part that gives way when the footer is narrow.
+        int room = Math.max(0, footerTextRight - left);
+        String coords = UiText.fit(font, coordinateReadout().getString(), room);
+        gfx.drawString(font, coords, left, textY, PARCHMENT_INK, false);
         Component charted = Component.translatable(
                 "screen.wizards_and_beasts.marauders_map.charted", ClientMapAtlas.chartedTiles());
-        gfx.drawString(font, charted, left, textY - layout.s(10), PARCHMENT_INK_DIM, false);
+        int chartedX = left + font.width(coords);
+        String tail = UiText.fit(font, "  ·  " + charted.getString(), Math.max(0, footerTextRight - chartedX));
+        if (tail.length() > 6) {
+            gfx.drawString(font, tail, chartedX, textY, PARCHMENT_INK_DIM, false);
+        }
     }
 
     private Component coordinateReadout() {

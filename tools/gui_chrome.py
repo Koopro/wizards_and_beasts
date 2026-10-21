@@ -20,6 +20,7 @@ Run from the repo root:  python tools/gui_chrome.py [--force] [--only name,name]
 """
 
 import argparse
+import random
 import os
 import sys
 
@@ -304,6 +305,89 @@ def a_bag_clasp_ball():
     return img
 
 
+# --------------------------------------------------------------------------- niffler's pouch
+#
+# The pouch on a niffler's belly: black velvet fur with a blue-grey sheen around the opening, a few
+# stolen coins caught in it, and soft brown suede inside where the slots sink. Java: `NifflerPouchScreen`
+# (fur and lining tile on 64/8 like the kit's panels).
+
+NIFFLER = dict(
+    fur_dd=rgb("#0B0A0D"), fur_d=rgb("#151318"), fur=rgb("#1E1C23"), fur_l=rgb("#2B2933"),
+    sheen=rgb("#4A5566"), sheen_l=rgb("#6E7C90"),
+    coin_d=rgb("#8F6522"), coin=rgb("#D4AF37"), coin_l=rgb("#F6DE8A"),
+    suede_dd=rgb("#24160C"), suede_d=rgb("#3E2716"), suede=rgb("#55361F"), suede_l=rgb("#6A4630"),
+    lip=rgb("#7A5238"),
+)
+
+
+def a_pouch_fur():
+    """Black velvet fur, 64x64 on 8. Strands are short vertical runs, each lit at its tip and dark at its
+    root, scattered on a period of INNER so tiled centre and edges meet; the outer edge is tufted rather
+    than ruled (fur has no border), and five stolen coins are caught in each 48px tile."""
+    n = NIFFLER
+    P = BAG_TILE
+    img = Image.new("RGBA", (P, P), opaque(n["fur"]))
+    px = img.load()
+    rng = random.Random(83)
+    # Base: two-tone mottling so the coat is never a flat fill.
+    mottle = grain_field(P + INNER, P + INNER, 73, 0.9)
+    for y in range(P):
+        for x in range(P):
+            v = mottle[(y - BORDER) % INNER][(x - BORDER) % INNER]
+            px[x, y] = opaque(n["fur_d"] if v < -0.3 else n["fur"])
+    # Strands: 70 per tile, 3-6px long, tip lit, root dark.
+    strands = [(rng.randrange(INNER), rng.randrange(INNER), rng.randint(3, 6), rng.random() < 0.25)
+               for _ in range(70)]
+    for sx, sy, length, sheen in strands:
+        for i in range(length):
+            tone = (n["sheen_l"] if sheen else n["fur_l"]) if i == 0 else \
+                (n["sheen"] if sheen else n["fur_l"]) if i < length // 2 else n["fur_dd"]
+            for yy in range((sy + i - BORDER) % INNER + BORDER - INNER, P, INNER):
+                for xx in range(sx + BORDER - INNER, P, INNER):
+                    if 0 <= xx < P and 0 <= yy < P:
+                        px[xx, yy] = opaque(tone)
+    # Coins caught in the fur.
+    for gx, gy in ((7, 9), (29, 33), (41, 15), (17, 40), (36, 4)):
+        for xx in range(gx + BORDER - INNER, P, INNER):
+            for yy in range(gy + BORDER - INNER, P, INNER):
+                if 0 <= xx and xx + 3 < P and 0 <= yy and yy + 3 < P:
+                    for (dx, dy), c in (((1, 0), "coin_l"), ((2, 0), "coin"), ((0, 1), "coin_l"), ((1, 1), "coin_l"),
+                                        ((2, 1), "coin"), ((3, 1), "coin_d"), ((0, 2), "coin"), ((1, 2), "coin"),
+                                        ((2, 2), "coin_d"), ((3, 2), "coin_d"), ((1, 3), "coin_d"), ((2, 3), "coin_d")):
+                        px[xx + dx, yy + dy] = opaque(n[c])
+    # Tufted edge: a ragged silhouette two pixels deep, periodic along each edge.
+    tuft = [rng.randint(0, 2) for _ in range(INNER)]
+    for i in range(P):
+        depth = tuft[(i - BORDER) % INNER]
+        for d in range(depth):
+            for (x, y) in ((i, d), (i, P - 1 - d), (d, i), (P - 1 - d, i)):
+                px[x, y] = (0, 0, 0, 0)
+        for (x, y) in ((i, depth), (i, P - 1 - depth), (depth, i), (P - 1 - depth, i)):
+            if px[x, y][3]:
+                px[x, y] = opaque(n["fur_dd"])
+    return img
+
+
+def a_pouch_lining():
+    """Soft brown suede, 64x64 on 8: a nap grain in three tones, shadow top-left, a lit lip bottom-right."""
+    n = NIFFLER
+    P = BAG_TILE
+    img = Image.new("RGBA", (P, P))
+    px = img.load()
+    nap = grain_field(P + INNER, P + INNER, 79, 0.8)
+    for y in range(P):
+        for x in range(P):
+            v = nap[(y - BORDER) % INNER][(x - BORDER) % INNER]
+            px[x, y] = opaque(n["suede_d"] if v < -0.6 else n["suede_l"] if v > 0.9 else n["suede"])
+    d = ImageDraw.Draw(img)
+    for i in (0, 1):
+        d.line([(i, i), (P - 1 - i, i)], fill=opaque(n["suede_dd"]))
+        d.line([(i, i), (i, P - 1 - i)], fill=opaque(n["suede_dd"]))
+    d.line([(1, P - 1), (P - 1, P - 1)], fill=opaque(n["lip"]))
+    d.line([(P - 1, 1), (P - 1, P - 1)], fill=opaque(n["lip"]))
+    return img
+
+
 # --------------------------------------------------------------------------- table
 
 ASSETS = {
@@ -313,6 +397,8 @@ ASSETS = {
     "container/hermiones_bag/lining.png": a_bag_lining,
     "container/hermiones_bag/clasp_bar.png": a_bag_clasp_bar,
     "container/hermiones_bag/clasp_ball.png": a_bag_clasp_ball,
+    "container/niffler_pouch/fur.png": a_pouch_fur,
+    "container/niffler_pouch/lining.png": a_pouch_lining,
     "character_sheet/icon_tab.png": a_icon_tab,
 }
 

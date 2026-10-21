@@ -182,7 +182,7 @@ that are not creatures, are:
 | `effect_sprites.py --write`, `effect_icons.py` | 20 + 3 mob-effect icons |
 | `gui_parchment.py` | the parchment kit: `gui/theme`, eight skins in `gui/sprites/<skin>`, controls atlas. **Protected owner.** |
 | `gui_chrome.py` | per-screen GUI (bestiary, wandmaker's bench, Hermione's bag, creative tabs). **Protected owner.** |
-| `config_textures.py`, `pouch_textures.py`, `map_textures.py`, `skill_chart_textures.py`, `stat_icons.py`, `hud_blood_icons.py` | config screens, Niffler pouches, Marauder's Map (9), skill chart (35), stat glyphs, blood meter |
+| `config_textures.py`, `map_textures.py`, `skill_chart_textures.py`, `stat_icons.py`, `hud_blood_icons.py` | config screens, Marauder's Map (9), skill chart (35), stat glyphs, blood meter |
 | `spell_sigils.py` | 159 spell icons `gui/sprites/wand_hud/spells`. **Protected owner.** Class A1 in the report: due for a redraw. |
 | `bestiary_portraits.py` | 107 bestiary icons + silhouettes, rendered from the real rigs and skins |
 | `chocolate_frog.py`, `duelling_dummy.py`, `villager_wandmaker.py`, `protego_shield_skin.py`, `animagus_skins.py`, `omnioculars_scope.py` | one-off entity skins, villager profession + hat, Protego ward, Animagus hawk/beetle, scope overlay |
