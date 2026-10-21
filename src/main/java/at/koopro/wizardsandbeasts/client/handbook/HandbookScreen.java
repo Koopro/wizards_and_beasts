@@ -170,27 +170,32 @@ public final class HandbookScreen extends Screen {
         int lx0 = x + FRAME + PAD;
         int lx1 = centerX - GUTTER - PAD;
         int lcx = (lx0 + lx1) / 2;
-        int ly = y + FRAME + 6;
+        int ly = y + FRAME + 4;
 
         // Ministry "M" emblem crest, centred above the title.
         int em = 26;
         // Scale the whole 72×72 crest down into em×em (12-arg blit). The 10-arg overload would sample
         // only a 26×26 corner of the source, cropping the emblem to its top-left quarter.
         gg.blit(RenderPipelines.GUI_TEXTURED, TEX_EMBLEM, lcx - em / 2, ly, 0.0F, 0.0F, em, em, 72, 72, 72, 72);
-        ly += em + 4;
+        ly += em + 2;
 
-        ly += titleBox(gg, lcx, lx0, lx1, ly, Component.translatable("gui.wizards_and_beasts.handbook.title")) + 12;
-        ly = body(gg, Component.translatable("gui.wizards_and_beasts.handbook.landing.body"), lx0, ly, lx1 - lx0);
-        ly += 6;
-        body(gg, Component.literal("§o").append(Component.translatable("gui.wizards_and_beasts.handbook.landing.flavor")),
-                lx0, ly, lx1 - lx0, INK_GREY);
-
-        // progress bar pinned to the bottom of the left page; the caption wraps upwards so a long
-        // translation grows into the page instead of bleeding over the spine.
+        // The progress block is pinned to the foot of the page, and its caption wraps upwards so a long
+        // translation grows into the page instead of bleeding over the spine. Measured first: the text
+        // above has to stop short of its rule, which it used to run straight through.
         int total = chapters().size();
         Component unlocked = Component.translatable("gui.wizards_and_beasts.handbook.unlocked", total, total);
         List<FormattedCharSequence> unlockedLines = font.split(unlocked, lx1 - lx0);
         int barY = y + H - FRAME - 24 - (unlockedLines.size() - 1) * LINE_H;
+        // A glyph is 8px tall plus a descender; the rule sits 6px above the caption.
+        int textFloor = barY - 7;
+
+        ly += titleBox(gg, lcx, lx0, lx1, ly, Component.translatable("gui.wizards_and_beasts.handbook.title")) + 6;
+        ly = body(gg, Component.translatable("gui.wizards_and_beasts.handbook.landing.body"), lx0, ly, lx1 - lx0,
+                INK, textFloor);
+        ly += 4;
+        body(gg, Component.literal("§o").append(Component.translatable("gui.wizards_and_beasts.handbook.landing.flavor")),
+                lx0, ly, lx1 - lx0, INK_GREY, textFloor);
+
         divider(gg, lx0, lx1, barY - 6);
         int cy = barY;
         for (FormattedCharSequence line : unlockedLines) {
@@ -228,8 +233,22 @@ public final class HandbookScreen extends Screen {
             gg.renderItem(iconStack(ch.get(i)), cx0 + (CELL - 16) / 2, cy0 + 4);
             catCells.add(new int[]{cx0, cy0, cx0 + CELL, cy0 + CELL, i});
         }
-        if (hovered != null) {
-            gg.setTooltipForNextFrame(font, Component.translatable(hovered.title()), mouseX, mouseY);
+        // The seals carry no words, so the page says which part is under the cursor -- in full, on the
+        // page, where a tooltip covered the very seals being read. Without a hover it says what to do.
+        int rows = (ch.size() + GRID_COLS - 1) / GRID_COLS;
+        int capY = ry + rows * CELL + 4;
+        divider(gg, rx0 + 10, rx1 - 10, capY);
+        Component caption = hovered != null ? Component.translatable(hovered.title())
+                : Component.translatable("gui.wizards_and_beasts.handbook.categories_hint");
+        int colour = hovered != null ? INK_TITLE : INK_GREY;
+        int capFloor = y + H - FRAME - 4;
+        int ty = capY + 6;
+        for (FormattedCharSequence line : font.split(caption, rx1 - rx0)) {
+            if (ty + LINE_H > capFloor) {
+                break;
+            }
+            ink(gg, line, rcx - font.width(line) / 2, ty, colour);
+            ty += LINE_H;
         }
     }
 
@@ -388,6 +407,28 @@ public final class HandbookScreen extends Screen {
 
     private int body(GuiGraphics gg, Component text, int x0, int y0, int wrapWidth) {
         return body(gg, text, x0, y0, wrapWidth, INK);
+    }
+
+    /** {@link #body(GuiGraphics, Component, int, int, int, int)} that stops above {@code floor}, ending in "…". */
+    private int body(GuiGraphics gg, Component text, int x0, int y0, int wrapWidth, int color, int floor) {
+        List<FormattedCharSequence> lines = font.split(text, wrapWidth);
+        int fit = Math.max(0, (floor - y0) / LINE_H);
+        int yy = y0;
+        for (int i = 0; i < lines.size() && i < fit; i++) {
+            if (i == fit - 1 && lines.size() > fit) {
+                StringBuilder sb = new StringBuilder();
+                lines.get(i).accept((index, style, cp) -> {
+                    sb.appendCodePoint(cp);
+                    return true;
+                });
+                String cut = font.plainSubstrByWidth(sb.toString(), Math.max(0, wrapWidth - font.width("…"))).stripTrailing();
+                ink(gg, Component.literal(cut + "…").getVisualOrderText(), x0, yy, color);
+            } else {
+                ink(gg, lines.get(i), x0, yy, color);
+            }
+            yy += LINE_H;
+        }
+        return yy;
     }
 
     private int body(GuiGraphics gg, Component text, int x0, int y0, int wrapWidth, int color) {

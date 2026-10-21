@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.gui.character.tab;
 
+import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.character.StatIcons;
 import at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageDataState;
@@ -64,7 +65,7 @@ public final class AttributesTab implements CharacterTab {
      * number the game already explains, where "Precision 37" means nothing without "−2.96% misfire"
      * printed under it.
      */
-    private static final int STAT_ROW_H = 26;
+    private static final int STAT_ROW_H = 33;
     /** Left gutter: the 16px glyph plus its clearance. */
     private static final int STAT_TEXT_X = StatIcons.SIZE + 4;
     /** Right gutter reserved for the row's state mark (heritage padlock, prodigy star). */
@@ -187,11 +188,18 @@ public final class AttributesTab implements CharacterTab {
 
         // Declaration order, not a hand-written list: the sheet was one of the places a sixth stat
         // would have had to be remembered, and nothing would have failed if it were not.
-        for (PlayerStat stat : PlayerStat.values()) {
-            drawStatRow(g, font, x, y, w, stat, stats, powerCap, mouseX, mouseY);
+        PlayerStat[] all = PlayerStat.values();
+        for (int i = 0; i < all.length; i++) {
+            drawStatRow(g, font, x, y, w, all[i], stats, powerCap, mouseX, mouseY);
+            // A rule between groups: each stat's effect line belongs to the stat above it, and with no
+            // break "Spell Damage" read as the heading of "Precision" below it.
+            if (i < all.length - 1) {
+                g.fill(x + STAT_TEXT_X, y + STAT_ROW_H - 4, x + w - STAT_STATUS_W, y + STAT_ROW_H - 3,
+                        (0x80 << 24) | (COLOR_BAR_TRACK & 0xFFFFFF));
+            }
             y += STAT_ROW_H;
         }
-        return y + 2;
+        return y + 6;
     }
 
     /**
@@ -232,7 +240,7 @@ public final class AttributesTab implements CharacterTab {
         int valueColor = capped ? COLOR_PRODIGY : COLOR_VALUE;
         int valueX = x + w - STAT_STATUS_W - font.width(valueText);
         int labelW = Math.max(0, valueX - textX - LABEL_VALUE_GAP);
-        g.drawString(font, font.plainSubstrByWidth(label, labelW), textX, y + 1, COLOR_LABEL, false);
+        g.drawString(font, UiText.fit(font, label, labelW), textX, y + 1, COLOR_LABEL, false);
         g.drawString(font, valueText, valueX, y + 1, valueColor, false);
 
         // ── the state mark, if this row has one ──
@@ -274,7 +282,7 @@ public final class AttributesTab implements CharacterTab {
         String effectValue = StatReadout.effectValue(stat, value).getString();
         int effectY = y + 18;
         int effectValueX = x + w - STAT_STATUS_W - font.width(effectValue);
-        g.drawString(font, font.plainSubstrByWidth(effectLabel,
+        g.drawString(font, UiText.fit(font, effectLabel,
                         Math.max(0, effectValueX - textX - LABEL_VALUE_GAP)),
                 textX, effectY, COLOR_LABEL, false);
         g.drawString(font, effectValue, effectValueX, effectY,
@@ -383,7 +391,7 @@ public final class AttributesTab implements CharacterTab {
     private void drawMeterRow(@NonNull GuiGraphics g, @NonNull Font font, int x, int y, int w,
                               @NonNull RowGutters gut, @NonNull String label, @NonNull String value,
                               double fraction) {
-        g.drawString(font, font.plainSubstrByWidth(label, gut.labelW()), x, y + 1, COLOR_LABEL, false);
+        g.drawString(font, UiText.fit(font, label, gut.labelW()), x, y + 1, COLOR_LABEL, false);
         g.drawString(font, value, x + w - font.width(value), y + 1, COLOR_VALUE, false);
 
         int barW = gut.barW();

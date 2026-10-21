@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.gui.character.tab;
 
+import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 import at.koopro.wizardsandbeasts.client.career.ClientCareerState;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper;
@@ -108,7 +109,7 @@ public final class CareerTab implements CharacterTab {
     }
 
     private int header(GuiGraphics g, Font font, int x, int y, int w, CareerView view) {
-        g.drawString(font, font.plainSubstrByWidth(view.profession().getString(), w), x, y, COLOR_SECTION, false);
+        g.drawString(font, UiText.fit(font, view.profession().getString(), w), x, y, COLOR_SECTION, false);
         y += ROW_H + 1;
         String wageLabel = Component.translatable(KEY + "career.wage").getString() + ": ";
         g.drawString(font, wageLabel, x, y, COLOR_LABEL, false);
@@ -116,13 +117,13 @@ public final class CareerTab implements CharacterTab {
         if (!view.coinPaid()) {
             wage += " " + Component.translatable(KEY + "career.no_vault").getString();
         }
-        g.drawString(font, font.plainSubstrByWidth(wage, w - font.width(wageLabel)), x + font.width(wageLabel), y,
+        g.drawString(font, UiText.fit(font, wage, w - font.width(wageLabel)), x + font.width(wageLabel), y,
                 COLOR_VALUE, false);
         return y + ROW_H;
     }
 
     private int rank(GuiGraphics g, Font font, int x, int y, int w, CareerView view) {
-        g.drawString(font, font.plainSubstrByWidth(view.rank().getString(), w), x, y, COLOR_VALUE, false);
+        g.drawString(font, UiText.fit(font, view.rank().getString(), w), x, y, COLOR_VALUE, false);
         String of = Component.translatable(KEY + "career.rank", view.rankIndex() + 1, view.rankCount()).getString();
         g.drawString(font, of, x + w - font.width(of), y, COLOR_MUTED, false);
         y += ROW_H + 1;
@@ -138,14 +139,14 @@ public final class CareerTab implements CharacterTab {
         bar(g, x, y, w, view.xp() / (float) Math.max(1, view.nextXp()));
         y += BAR_H + 3;
         if (!view.goals().isEmpty()) {
-            g.drawString(font, font.plainSubstrByWidth(
+            g.drawString(font, UiText.fit(font, 
                     Component.translatable(KEY + "career.next", view.nextRank()).getString(), w), x, y, COLOR_LABEL, false);
             y += ROW_H;
             for (CareerView.GoalLine goal : view.goals()) {
                 String count = Math.min(goal.progress(), goal.target()) + "/" + goal.target();
                 int colour = goal.met() ? COLOR_GOOD : COLOR_VALUE;
                 String mark = goal.met() ? "✔ " : "• ";
-                g.drawString(font, font.plainSubstrByWidth(mark + goal.text().getString(), w - font.width(count) - 4),
+                g.drawString(font, UiText.fit(font, mark + goal.text().getString(), w - font.width(count) - 4),
                         x + 2, y, colour, false);
                 g.drawString(font, count, x + w - font.width(count), y, colour, false);
                 y += ROW_H;
@@ -178,11 +179,11 @@ public final class CareerTab implements CharacterTab {
 
     private int contract(GuiGraphics g, Font font, int x, int y, int w, CareerView.ContractLine line, boolean held,
                          CareerView view, int mx, int my) {
-        g.drawString(font, font.plainSubstrByWidth(line.title().getString(), w), x, y, COLOR_VALUE, false);
+        g.drawString(font, UiText.fit(font, line.title().getString(), w), x, y, COLOR_VALUE, false);
         y += ROW_H;
         y = paragraph(g, font, x + 4, y, w - 4, line.brief(), COLOR_MUTED);
         String count = held ? Math.min(line.progress(), line.target()) + "/" + line.target() : "×" + line.target();
-        g.drawString(font, font.plainSubstrByWidth(line.objective().getString(), w - font.width(count) - 8),
+        g.drawString(font, UiText.fit(font, line.objective().getString(), w - font.width(count) - 8),
                 x + 4, y, COLOR_LABEL, false);
         g.drawString(font, count, x + w - font.width(count), y, line.ready() ? COLOR_GOOD : COLOR_LABEL, false);
         y += ROW_H;
@@ -191,7 +192,7 @@ public final class CareerTab implements CharacterTab {
         Component pays = line.knuts() > 0 && view.coinPaid()
                 ? Component.translatable(KEY + "career.pays", CurrencyHelper.formatFromKnuts(line.knuts()), line.xp())
                 : Component.translatable(KEY + "career.pays_xp", line.xp());
-        g.drawString(font, font.plainSubstrByWidth(pays.getString() + " · " + days, w - 4), x + 4, y, COLOR_MUTED,
+        g.drawString(font, UiText.fit(font, pays.getString() + " · " + days, w - 4), x + 4, y, COLOR_MUTED,
                 false);
         y += ROW_H + 1;
 

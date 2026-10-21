@@ -248,3 +248,20 @@ Plan and per-milestone status: `tasks/todo_ui_overhaul_2026_10_21.md`.
 - Seen: 1080p GUI 3/4 and 720p GUI 3 with items packed (`run/screenshots/ui_bag`, harness step `hermiones_bag`).
 - ⏳ Not exercised by hand: shift-click both ways, drag-split, the pinned slot refusing a swap.
 
+### M6 — character sheet, skill web, handbook, bestiary (2026-10-22, parchment, layout fixes only)
+Audited from clean GUI-4 shots (the harness now parks the cursor top-left; before, it sat mid-screen over the
+sheet's Skills tab and its tooltip covered every page).
+- ✅ Attributes: a stat group's effect line ended where the next stat's name began ("Spell Damage" read as the
+  heading of "Precision"). Groups are 33px with a rule between them; a gap before the Attributes section.
+  (Closes the 10-07 open item.)
+- ✅ Skills: pathway names ran under their E/M/A counters ("Dark Arts SpecE 3/3"); counters first, name
+  ellipsised to what is left; the build header's value fitted the same way.
+- ✅ Reputation: each axis's pole names sat on the next axis's title; a rule and space after every axis.
+- ✅ Every tab: 17 hard cuts (`plainSubstrByWidth`, e.g. "Professional Reputati") now end in an ellipsis
+  (`UiText.fit`).
+- ✅ Skill web: constellation labels near the chart's rim slide inboard instead of being cut ("Monocer").
+- ✅ Handbook: the landing text ran through the progress block's rule; it is bounded above it with an ellipsis.
+  The seal grid now has a caption under it naming the part under the cursor (or how to use it) — the seals
+  carry no words, and the tooltip covered the seals being read.
+- ✅ Bestiary: search placeholder ("Search creatures"). (Closes the 10-07 open item.)
+- ⏳ Handbook landing flavour's second sentence does not fit the left page at its current crest/title sizes.

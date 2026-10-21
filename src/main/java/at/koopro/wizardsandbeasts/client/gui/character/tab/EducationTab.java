@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.gui.character.tab;
 
+import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 import at.koopro.wizardsandbeasts.client.education.ClientEducationState;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.owl.ClientOWLCache;
@@ -164,7 +165,7 @@ public final class EducationTab implements CharacterTab {
             hovers.add(new Hover(y0, y, line.subject(), line.practical()));
             y += 2;
         }
-        g.drawString(font, font.plainSubstrByWidth(Component.translatable(KEY + "not_examined").getString(), w),
+        g.drawString(font, UiText.fit(font, Component.translatable(KEY + "not_examined").getString(), w),
                 x, y, COLOR_MUTED, false);
         return y + ROW_H;
     }
@@ -189,7 +190,7 @@ public final class EducationTab implements CharacterTab {
         if (lessons > 0) {
             right = Component.translatable(KEY + "lessons", lessons, OWLGradeRules.LESSONS_TO_A).getString() + " · " + right;
         }
-        g.drawString(font, font.plainSubstrByWidth(left, w - font.width(right) - 4), x, y, COLOR_LABEL, false);
+        g.drawString(font, UiText.fit(font, left, w - font.width(right) - 4), x, y, COLOR_LABEL, false);
         g.drawString(font, right, x + w - font.width(right), y, targetGrade == null ? COLOR_GOOD : COLOR_MUTED, false);
         y += ROW_H;
         bar(g, x, y, w, target <= 0 ? 1f : score / (float) target);
@@ -222,7 +223,7 @@ public final class EducationTab implements CharacterTab {
         if (profession == null) {
             return y;
         }
-        g.drawString(font, font.plainSubstrByWidth(Component.translatable(KEY + "career",
+        g.drawString(font, UiText.fit(font, Component.translatable(KEY + "career",
                 Component.translatable(profession.translationKey())).getString(), w), x, y, COLOR_SECTION, false);
         y += ROW_H + 1;
         List<ProfessionEligibility.Requirement> reqs = ProfessionEligibility.requirements(profession, ClientOWLCache.isGoblin());
@@ -234,7 +235,7 @@ public final class EducationTab implements CharacterTab {
             String text = (met ? "✔ " : "• ") + Component.translatable(KEY + "requirement",
                     Component.translatable(r.level().translationKey()), Component.translatable(r.subject().translationKey()),
                     Component.translatable(r.minGrade().translationKey())).getString();
-            g.drawString(font, font.plainSubstrByWidth(text, w - 2), x + 2, y, met ? COLOR_GOOD : COLOR_VALUE, false);
+            g.drawString(font, UiText.fit(font, text, w - 2), x + 2, y, met ? COLOR_GOOD : COLOR_VALUE, false);
             y += ROW_H;
         }
         return y;

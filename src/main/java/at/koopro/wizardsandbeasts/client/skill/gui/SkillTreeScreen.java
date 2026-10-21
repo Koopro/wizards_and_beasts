@@ -884,7 +884,13 @@ public class SkillTreeScreen extends Screen {
             }
             int tint = SkillTreeChartTextures.regionTint(entry.getKey());
             int textW = font.width(text);
-            int groupX = cx - (glyph + gap + textW) / 2;
+            int groupW = glyph + gap + textW;
+            // Slid inside the chart rather than cut by its edge: a cluster near the rim used to show
+            // "Monocer" with the rest of its name under the frame. The label still names the cluster;
+            // it just stands a little inboard of it.
+            int margin = 4;
+            int groupX = Math.max(chartX + margin, Math.min(cx - groupW / 2, chartX + chartW - margin - groupW));
+            cy = Math.max(chartY + margin + glyph / 2, Math.min(cy, chartY + chartH - margin - glyph / 2));
             McStylePanel.drawTintedCentered(graphics, SkillTreeChartTextures.regionGlyph(entry.getKey()),
                     groupX + glyph / 2, cy, glyph, SkillTreeChartTextures.withAlpha(tint, alpha));
             // Shadowless, in the region's ink darkened to AA on the vellum: a label fades by alpha

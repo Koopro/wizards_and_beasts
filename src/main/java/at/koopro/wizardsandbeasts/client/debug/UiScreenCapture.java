@@ -182,6 +182,7 @@ public final class UiScreenCapture {
                 Step.client("heritage_confirm", UiScreenCapture::openHeritageConfirm),
                 Step.client("ability_wheel", () -> open(new AbilityWheelScreen())),
                 Step.client("bestiary", () -> open(new BestiaryScreen())),
+                Step.client("handbook", () -> open(new at.koopro.wizardsandbeasts.client.handbook.HandbookScreen())),
                 Step.client("owl_exam", () -> open(new OWLExamScreen())),
                 Step.client("education_tab", () -> open(CharacterSheetScreen.onEducationTab())),
                 Step.client("owl_sitting", UiScreenCapture::openSitting),
@@ -385,12 +386,31 @@ public final class UiScreenCapture {
         captureThisFrame = true;
     }
 
+    /**
+     * Moves the cursor to the window's top-left corner before a shot. Left where GLFW put it -- the middle
+     * of the window -- it hovered whatever sat there, so a character-sheet tab's tooltip covered the page
+     * in every shot. MouseHandler only learns of a move through its own callback, so its fields are set too.
+     */
+    private static void parkCursor(Minecraft mc) {
+        GLFW.glfwSetCursorPos(mc.getWindow().handle(), 1.0, 1.0);
+        try {
+            for (String name : new String[]{"xpos", "ypos"}) {
+                var f = net.minecraft.client.MouseHandler.class.getDeclaredField(name);
+                f.setAccessible(true);
+                f.setDouble(mc.mouseHandler, 1.0);
+            }
+        } catch (ReflectiveOperationException e) {
+            LOGGER.warn("UI capture: cannot park the cursor", e);
+        }
+    }
+
     /** Sets the scale for this shot and opens the step's screen. */
     private static void present(Minecraft mc, MinecraftServer server) {
         if (mc.options.guiScale().get() != SCALES[scale]) {
             mc.options.guiScale().set(SCALES[scale]);
             mc.resizeDisplay();
         }
+        parkCursor(mc);
         Step step = steps.get(index);
         if (step.client() != null) {
             step.client().run();
