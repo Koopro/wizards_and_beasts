@@ -112,6 +112,8 @@ public final class OwlPostService {
 
         sender.level().playSound(null, sender.blockPosition(),
                 SoundEvents.PHANTOM_FLAP, SoundSource.PLAYERS, 0.6f, 1.4f);
+        // Correspondence is a Journalist's working day.
+        at.koopro.wizardsandbeasts.owl.career.CareerWork.record(sender, at.koopro.wizardsandbeasts.owl.career.CareerWork.Kind.CORRESPONDENCE);
         return SendResult.SENT;
     }
 
@@ -147,9 +149,11 @@ public final class OwlPostService {
         }
 
         ItemStack payload = parcel.payload().copy();
-        boolean accepted = target.getInventory().add(payload);
+        // Inventory.add returns true on a PARTIAL insert and leaves the rest in `payload`; only an empty
+        // payload means everything arrived. Whatever is left must stay with the parcel, never be discarded.
+        target.getInventory().add(payload);
 
-        if (accepted) {
+        if (payload.isEmpty()) {
             data.remove(parcel.id());
             target.level().playSound(null, target.blockPosition(),
                     SoundEvents.PHANTOM_FLAP, SoundSource.PLAYERS, 0.7f, 1.1f);
@@ -165,7 +169,7 @@ public final class OwlPostService {
         if (!parcel.returning()) {
             // Inventory full. Turn the owl around rather than dropping the stack at the feet of
             // someone who did not ask for it, and tell the sender why when it lands.
-            data.replace(parcel.turnedAround(now, FLIGHT_TICKS));
+            data.replace(parcel.withPayload(payload).turnedAround(now, FLIGHT_TICKS));
             PlayerFeedback.actionBar(target, Component.translatable("owl.wizards_and_beasts.fail.full_recipient"));
             return;
         }

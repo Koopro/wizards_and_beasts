@@ -96,6 +96,17 @@ class OwlParcelTest {
     }
 
     @Test
+    void aPartialDeliveryTurnsAroundWithOnlyTheRemainder() {
+        // Inventory.add leaves what did not fit in the stack; that remainder is what must keep flying.
+        OwlParcel original = outbound(100L);
+        OwlParcel back = original.withPayload(new ItemStack(Items.DIAMOND, 1)).turnedAround(100L, 2400L);
+        assertEquals(1, back.payload().getCount(), "the part that arrived must not be delivered twice");
+        assertEquals(original.id(), back.id());
+        assertTrue(back.returning());
+        assertEquals(3, original.payload().getCount(), "the original record is immutable");
+    }
+
+    @Test
     void aParcelAlreadyReturningStaysAddressedToTheSender() {
         // Guards the loop the service relies on: a returning parcel that failed again must not
         // flip back to the recipient and ping-pong forever.

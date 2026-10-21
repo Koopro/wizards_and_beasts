@@ -1,0 +1,30 @@
+{
+  "_comment": "What a qualification opens beyond careers (education.QualificationGates). Advanced brews are N.E.W.T. work (Felix Felicis, Amortentia and the Draught of Living Death are Slughorn's N.E.W.T. class, HBP ch. 9); Polyjuice is restricted-section brewing, so an O.W.L. Exceeds Expectations. Each build's capstone is advanced training and asks for the N.E.W.T. in its discipline. Everyday brews and the rest of the web carry no gate. With the O.W.L. module off, none is checked.",
+  "gates": [
+    { "kind": "brew", "id": "wizards_and_beasts:felix_felicis",
+      "requires": [ { "level": "newt", "subject": "potions", "grade": "A" } ] },
+    { "kind": "brew", "id": "wizards_and_beasts:amortentia",
+      "requires": [ { "level": "newt", "subject": "potions", "grade": "A" } ] },
+    { "kind": "brew", "id": "wizards_and_beasts:draught_of_living_death",
+      "requires": [ { "level": "newt", "subject": "potions", "grade": "A" } ] },
+    { "kind": "brew", "id": "wizards_and_beasts:veritaserum",
+      "requires": [ { "level": "newt", "subject": "potions", "grade": "E" } ] },
+    { "kind": "brew", "id": "wizards_and_beasts:wolfsbane_potion",
+      "requires": [ { "level": "newt", "subject": "potions", "grade": "E" } ] },
+    { "kind": "brew", "id": "wizards_and_beasts:polyjuice_potion",
+      "requires": [ { "level": "owl", "subject": "potions", "grade": "E" } ] },
+
+    { "kind": "skill_node", "id": "duelling_riposte",
+      "requires": [ { "level": "newt", "subject": "defence_against_dark_arts", "grade": "A" } ] },
+    { "kind": "skill_node", "id": "healers_hands",
+      "requires": [ { "level": "newt", "subject": "herbology", "grade": "A" } ] },
+    { "kind": "skill_node", "id": "beast_masters_voice",
+      "requires": [ { "level": "newt", "subject": "care_of_magical_creatures", "grade": "A" } ] },
+    { "kind": "skill_node", "id": "scholars_method",
+      "requires": [ { "level": "newt", "subject": "potions", "grade": "A" } ] },
+    { "kind": "skill_node", "id": "wandkeepers_hands",
+      "requires": [ { "level": "newt", "subject": "ancient_runes", "grade": "A" } ] },
+    { "kind": "skill_node", "id": "seasoned_traveller",
+      "requires": [ { "level": "newt", "subject": "astronomy", "grade": "A" } ] }
+  ]
+}

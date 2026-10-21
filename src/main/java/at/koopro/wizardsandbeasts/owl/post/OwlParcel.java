@@ -51,6 +51,11 @@ public record OwlParcel(UUID id, UUID sender, UUID recipient, ItemStack payload,
         return now >= arrivalTick;
     }
 
+    /** The same parcel carrying {@code remainder} — what a partial delivery could not fit. */
+    public OwlParcel withPayload(ItemStack remainder) {
+        return new OwlParcel(id, sender, recipient, remainder, arrivalTick, returning);
+    }
+
     /**
      * The same parcel, turned around and re-timed.
      *

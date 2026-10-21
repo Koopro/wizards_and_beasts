@@ -2,9 +2,6 @@ package at.koopro.wizardsandbeasts.network.owl;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import at.koopro.wizardsandbeasts.owl.data.PlayerOWLData;
-import at.koopro.wizardsandbeasts.owl.OWLExaminationHandler;
-import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -26,16 +23,11 @@ public record RequestOWLExamPacket() implements CustomPacketPayload {
     public static void handleServer(RequestOWLExamPacket packet, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (!(context.player() instanceof ServerPlayer player)) return;
-            PlayerOWLData current = player.getData(ModAttachments.OWL_DATA.get());
-            if (current.examTaken()) return;
-            // The exam screen is opened client-side from the desk, so the server never saw the desk. Without
-            // these two checks the packet sat the exam anywhere, with the OWLS module off (2026-09-29,
-            // documentation/MULTIPLAYER_AUDIT.md).
-            if (!at.koopro.wizardsandbeasts.module.ModuleManager.isEnabled(at.koopro.wizardsandbeasts.module.Module.OWLS)
-                    || !atExaminationDesk(player)) {
-                return;
-            }
-            OWLExaminationHandler.conductExam(player);
+            // Opens an O.W.L. sitting. ExamSittings.begin makes every check — the module, the desk within reach
+            // (the screen is opened client-side, so the server never saw the desk: 2026-09-29,
+            // documentation/MULTIPLAYER_AUDIT.md), the resit wait, a sitting already open.
+            at.koopro.wizardsandbeasts.education.ExamSittings.begin(player,
+                    at.koopro.wizardsandbeasts.owl.Qualification.OWL, true);
         });
     }
 

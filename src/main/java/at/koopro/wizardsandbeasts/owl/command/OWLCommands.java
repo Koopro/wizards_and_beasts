@@ -77,15 +77,18 @@ public final class OWLCommands {
             return 0;
         }
 
+        long examined = Arrays.stream(OWLSubject.values()).filter(OWLSubject::examined).count();
         long passed = Arrays.stream(OWLSubject.values())
+                .filter(OWLSubject::examined)
                 .filter(subject -> data.grades().getOrDefault(subject, OWLGrade.T).passing)
                 .count();
 
         ChatReport report = ChatReport.of(Component.literal("O.W.L. Results — ")
                         .append(player.getDisplayName().plainCopy()))
-                .subtitle(passed + " of " + OWLSubject.values().length + " passed");
+                .subtitle(passed + " of " + examined + " passed, " + data.sittings() + " sitting(s)");
 
         for (OWLSubject subject : OWLSubject.values()) {
+            if (!subject.examined()) continue;
             OWLGrade grade = data.grades().getOrDefault(subject, OWLGrade.T);
             // A grade is a status rather than a value, so it takes the state colour: passing grades
             // read at a glance against the ones that need retaking.
@@ -120,8 +123,10 @@ public final class OWLCommands {
             source.sendFailure(Component.literal("Unknown profession: " + profName).withStyle(ChatFormatting.RED));
             return 0;
         }
-        player.setData(ModAttachments.PROFESSION_DATA.get(), new PlayerProfessionData(profession));
-        PacketDistributor.sendToPlayer(player, new ProfessionSyncPayload(profession));
+        int sittings = player.getData(ModAttachments.OWL_DATA.get()).sittings();
+        long lastPaid = player.getData(ModAttachments.PROFESSION_DATA.get()).lastPaidDay();
+        player.setData(ModAttachments.PROFESSION_DATA.get(), new PlayerProfessionData(profession, sittings, lastPaid));
+        OWLExaminationHandler.syncToPlayer(player);
         source.sendSuccess(() -> Component.literal("Set profession of ")
                 .withStyle(ChatFormatting.GREEN)
                 .append(player.getDisplayName().plainCopy().withStyle(ChatFormatting.WHITE))
@@ -149,9 +154,9 @@ public final class OWLCommands {
         PlayerOWLData existing = player.getData(ModAttachments.OWL_DATA.get());
         Map<OWLSubject, OWLGrade> newGrades = new EnumMap<>(existing.grades());
         newGrades.put(subject, grade);
-        PlayerOWLData updated = new PlayerOWLData(java.util.Collections.unmodifiableMap(newGrades), existing.examTaken());
+        PlayerOWLData updated = existing.withGrades(java.util.Collections.unmodifiableMap(newGrades));
         player.setData(ModAttachments.OWL_DATA.get(), updated);
-        PacketDistributor.sendToPlayer(player, new OWLDataSyncPayload(newGrades, existing.examTaken()));
+        OWLExaminationHandler.syncToPlayer(player);
 
         source.sendSuccess(() -> Component.literal("Set ")
                 .withStyle(ChatFormatting.GREEN)
