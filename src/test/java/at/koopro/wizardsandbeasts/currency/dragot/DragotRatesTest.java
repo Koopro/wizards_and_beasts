@@ -91,6 +91,52 @@ class DragotRatesTest {
     }
 
     @Test
+    void noFeeLetsACustomerPlayTheSpread() {
+        // Walking back to the counter re-rolls the quote, so the honest adversary buys at the bottom of the spread
+        // and sells at the top. For every fee the bank charges anyone — goblins included — that must still lose.
+        for (float fee : new float[] {DragotRates.GRINGOTTS_FEE, DragotRates.GOBLIN_FEE}) {
+            for (int buyRoll = 0; buyRoll <= 10; buyRoll++) {
+                for (int sellRoll = 0; sellRoll <= 10; sellRoll++) {
+                    float buyRate = DragotRates.quotedRate(BASE, buyRoll / 10.0f);
+                    float sellRate = DragotRates.quotedRate(BASE, Math.min(0.9999f, sellRoll / 10.0f));
+                    for (int dragots : new int[] {1, 10, 100, 4096}) {
+                        long cost = DragotRates.knutsToBuyDragots(dragots, buyRate, fee);
+                        long back = DragotRates.dragotsToKnuts(dragots, sellRate, fee);
+                        assertTrue(back < cost, "fee " + fee + ": bought " + dragots + " at " + buyRate
+                                + " for " + cost + ", sold at " + sellRate + " for " + back);
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    void spendingBoughtDragotsNeverBeatsTheVault() {
+        // Best case for the customer: Dragots bought at the bottom of the spread, by a goblin (the smallest fee),
+        // then spent at a till. The goods they buy must still cost more than paying from the vault would.
+        for (double base : new double[] {0.01, 0.23, 0.8, 1.0, 7.5, 100.0}) {
+            float cheapest = DragotRates.quotedRate(base, 0.0f);
+            for (long goods : new long[] {1L, 29L, 100L, 493L, 1_234L, 98_600L}) {
+                int dragots = DragotRates.dragotsToPay(goods, base);
+                long paidAtTheBank = DragotRates.knutsToBuyDragots(dragots, cheapest, DragotRates.GOBLIN_FEE);
+                assertTrue(paidAtTheBank > goods,
+                        () -> "base " + base + ": " + goods + " K of goods for " + paidAtTheBank + " K of Dragots");
+            }
+        }
+    }
+
+    @Test
+    void aTillAlwaysAsksEnoughDragotsToCoverThePrice() {
+        for (long goods = 1; goods < 5_000; goods += 37) {
+            int dragots = DragotRates.dragotsToPay(goods, BASE);
+            assertTrue(dragots * DragotRates.vendorKnutsPerDragot(BASE) >= goods, "short at " + goods);
+            assertTrue((dragots - 1) * DragotRates.vendorKnutsPerDragot(BASE) < goods, "over-asked at " + goods);
+        }
+        assertEquals(0, DragotRates.dragotsToPay(0L, BASE));
+        assertEquals(0, DragotRates.dragotsToPay(-5L, BASE));
+    }
+
+    @Test
     void nothingIsExchangedForNothing() {
         assertEquals(0L, DragotRates.dragotsToKnuts(0, 0.8f));
         assertEquals(0L, DragotRates.dragotsToKnuts(-5, 0.8f));

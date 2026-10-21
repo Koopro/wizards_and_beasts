@@ -3,7 +3,6 @@ package at.koopro.wizardsandbeasts.currency.debug;
 import at.koopro.wizardsandbeasts.command.debug.dev.DevLog;
 import at.koopro.wizardsandbeasts.command.debug.dev.FeatureDevKit;
 import at.koopro.wizardsandbeasts.currency.vault.PlayerVaultData;
-import at.koopro.wizardsandbeasts.network.currency.VaultSyncS2CPayload;
 import at.koopro.wizardsandbeasts.registry.CurrencyItemRegistry;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import net.minecraft.server.level.ServerPlayer;
@@ -48,7 +47,10 @@ public final class GringottsDevKit implements FeatureDevKit {
         vault.depositGalleons(GALLEONS);
         vault.depositSickles(SICKLES);
         vault.depositKnuts(KNUTS);
-        VaultSyncS2CPayload.syncToPlayer(target);
+        // An administrator's hand, booked like every other one so the ledger never reads it as gameplay income.
+        at.koopro.wizardsandbeasts.currency.billing.GringottsBilling.recordAdjustment(target,
+                at.koopro.wizardsandbeasts.currency.billing.MoneyFlow.ADMIN_DEPOSIT,
+                at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper.toKnuts(GALLEONS, SICKLES, KNUTS));
         log.changed("vault", vault.getGalleons() + "g " + vault.getSickles()
                 + "s " + vault.getKnuts() + "k");
     }
@@ -69,7 +71,8 @@ public final class GringottsDevKit implements FeatureDevKit {
         PlayerVaultData vault = target.getData(ModAttachments.VAULT_DATA.get());
         long had = vault.getTotalInKnuts();
         vault.resetAll();
-        VaultSyncS2CPayload.syncToPlayer(target);
+        at.koopro.wizardsandbeasts.currency.billing.GringottsBilling.recordAdjustment(target,
+                at.koopro.wizardsandbeasts.currency.billing.MoneyFlow.ADMIN_WITHDRAWAL, had);
         log.changed("vault emptied", had + " knuts removed");
     }
 }

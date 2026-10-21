@@ -1,0 +1,26 @@
+{
+  "_comment": "Gringotts treasure site: which vanilla chests may carry a cursed artefact (treasure/TreasureSite). The chart handed out with an expedition contract points at the structure tag.",
+  "structures": "wizards_and_beasts:treasure_site/woodland_mansion",
+  "loot_tables": [
+    "minecraft:chests/woodland_mansion"
+  ],
+  "chance": 0.2,
+  "expedition_chance": 0.9,
+  "value": {
+    "min": 870,
+    "max": 1740
+  },
+  "layers": {
+    "min": 2,
+    "max": 3
+  },
+  "curses": [
+    "withering",
+    "sealing",
+    "flagrante"
+  ],
+  "artefacts": [
+    "wizards_and_beasts:sealed_casket",
+    "wizards_and_beasts:warded_amulet"
+  ]
+}

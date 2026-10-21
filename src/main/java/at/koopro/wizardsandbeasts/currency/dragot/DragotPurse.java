@@ -117,9 +117,7 @@ public final class DragotPurse {
         while (remaining > 0) {
             int batch = Math.min(remaining, CurrencyItemRegistry.DRAGOT.get().getDefaultMaxStackSize());
             ItemStack stack = new ItemStack(CurrencyItemRegistry.DRAGOT.get(), batch);
-            if (!player.getInventory().add(stack)) {
-                player.drop(stack, false);
-            }
+            at.koopro.wizardsandbeasts.util.InventoryHandover.giveOrDrop(player, stack);
             remaining -= batch;
         }
     }

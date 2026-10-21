@@ -1,0 +1,27 @@
+{
+  "_comment": "Gringotts treasure site: which vanilla chests may carry a cursed artefact (treasure/TreasureSite). The chart handed out with an expedition contract points at the structure tag.",
+  "structures": "wizards_and_beasts:treasure_site/jungle_temple",
+  "loot_tables": [
+    "minecraft:chests/jungle_temple"
+  ],
+  "chance": 0.15,
+  "expedition_chance": 0.85,
+  "value": {
+    "min": 435,
+    "max": 1160
+  },
+  "layers": {
+    "min": 1,
+    "max": 3
+  },
+  "curses": [
+    "jinx",
+    "withering",
+    "sealing"
+  ],
+  "artefacts": [
+    "wizards_and_beasts:warded_amulet",
+    "wizards_and_beasts:tomb_medallion",
+    "wizards_and_beasts:ancient_goblet"
+  ]
+}

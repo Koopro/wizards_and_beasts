@@ -31,8 +31,24 @@ public final class CurrencyHelper {
     private CurrencyHelper() {
     }
 
+    /**
+     * The most a vault may hold, in Knuts: about two trillion Galleons. Far beyond anything play produces, and far
+     * enough below {@code Long.MAX_VALUE} that a total in Knuts can never overflow. Credits past it are refused
+     * ({@link PlayerVaultData#credit}) rather than wrapping a balance negative.
+     */
+    public static final long MAX_VAULT_KNUTS = 1_000_000_000_000_000L;
+
+    /**
+     * The value of a pile of coins in Knuts. Saturates at {@code Long.MAX_VALUE} instead of wrapping, so a corrupt
+     * or hand-edited vault can never read as negative (and so never as "can afford" by accident).
+     */
     public static long toKnuts(long galleons, long sickles, long knuts) {
-        return galleons * KNUTS_PER_GALLEON + sickles * KNUTS_PER_SICKLE + knuts;
+        try {
+            return Math.addExact(Math.addExact(Math.multiplyExact(galleons, (long) KNUTS_PER_GALLEON),
+                    Math.multiplyExact(sickles, (long) KNUTS_PER_SICKLE)), knuts);
+        } catch (ArithmeticException overflow) {
+            return galleons < 0 || sickles < 0 || knuts < 0 ? Long.MIN_VALUE : Long.MAX_VALUE;
+        }
     }
 
     public static int countItem(Inventory inventory, Item item) {
@@ -64,9 +80,7 @@ public final class CurrencyHelper {
         while (remaining > 0) {
             int batch = Math.min(remaining, item.getDefaultMaxStackSize());
             ItemStack stack = new ItemStack(item, batch);
-            if (!inventory.add(stack)) {
-                inventory.player.drop(stack, false);
-            }
+            at.koopro.wizardsandbeasts.util.InventoryHandover.giveOrDrop(inventory.player, stack);
             remaining -= batch;
         }
     }
@@ -75,7 +89,18 @@ public final class CurrencyHelper {
      * Break a total knut value into optimal Galleon/Sickle/Knut denominations.
      * Returns {galleons, sickles, knuts}.
      */
+    /** {@code knuts} rounded up to a whole Sickle, as a counter quotes a service; 0 stays 0, negatives are 0. */
+    public static long roundUpToSickle(long knuts) {
+        if (knuts <= 0) {
+            return 0L;
+        }
+        return Math.ceilDiv(knuts, KNUTS_PER_SICKLE) * KNUTS_PER_SICKLE;
+    }
+
     public static long[] fromKnuts(long totalKnuts) {
+        if (totalKnuts < 0) {
+            throw new IllegalArgumentException("negative amount of money: " + totalKnuts);
+        }
         long g = totalKnuts / KNUTS_PER_GALLEON;
         long remainder = totalKnuts % KNUTS_PER_GALLEON;
         long s = remainder / KNUTS_PER_SICKLE;
@@ -104,6 +129,10 @@ public final class CurrencyHelper {
      * Format a total knut value as a denomination breakdown string.
      */
     public static String formatFromKnuts(long totalKnuts) {
+        if (totalKnuts < 0) {
+            // A debt or a difference: the same coins with a sign, never a negative Sickle count.
+            return "-" + formatFromKnuts(totalKnuts == Long.MIN_VALUE ? Long.MAX_VALUE : -totalKnuts);
+        }
         long[] parts = fromKnuts(totalKnuts);
         return formatCurrency(parts[0], parts[1], parts[2]);
     }

@@ -1,0 +1,332 @@
+{
+  "_comment": "Gringotts as a place (location/): goblin tellers keep it, Gringotts marble marks it. Standing tiers are earned by returning recovered treasure and breaking curses; expeditions send the customer to vanilla tombs with a Gringotts chart (treasure_sites/). Services: location/gringotts/GringottsServices.",
+  "module": "gringotts",
+  "papers": "ministry_access",
+  "skin": "goblin_ledger",
+  "presence": {
+    "hosts": [
+      "wizards_and_beasts:goblin_teller"
+    ],
+    "host_reach": 8.0,
+    "landmark": "wizards_and_beasts:landmark/gringotts"
+  },
+  "standing": {
+    "max_active": 2,
+    "board_size": 3,
+    "xp_rules": [
+      { "when": { "activity": "courier_delivered", "species": ["wizards_and_beasts:gringotts"] }, "xp": 12, "daily_cap": 36 },
+      {
+        "when": {
+          "activity": "treasure_returned"
+        },
+        "xp": 30,
+        "daily_cap": 120
+      },
+      {
+        "when": {
+          "activity": "curse_broken"
+        },
+        "xp": 20,
+        "daily_cap": 80
+      }
+    ],
+    "ranks": [
+      {
+        "id": "customer",
+        "xp": 0
+      },
+      {
+        "id": "account_holder",
+        "xp": 150,
+        "rewards": [
+          {
+            "id": "wizards_and_beasts:galleon",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "id": "trusted_client",
+        "xp": 450,
+        "requires": [
+          {
+            "type": "contracts_completed",
+            "count": 3
+          }
+        ]
+      },
+      {
+        "id": "curse_breaker_associate",
+        "xp": 1000,
+        "requires": [
+          {
+            "type": "activity_total",
+            "when": {
+              "activity": "treasure_returned"
+            },
+            "count": 3,
+            "distinct": true
+          },
+          {
+            "type": "activity_total",
+            "when": {
+              "activity": "curse_broken"
+            },
+            "count": 6
+          }
+        ],
+        "rewards": [
+          {
+            "id": "wizards_and_beasts:galleon",
+            "count": 3
+          }
+        ]
+      },
+      {
+        "id": "friend_of_the_goblins",
+        "xp": 2000,
+        "requires": [
+          {
+            "type": "contracts_completed",
+            "count": 12
+          },
+          {
+            "type": "activity_total",
+            "when": {
+              "activity": "curse_broken"
+            },
+            "count": 15
+          }
+        ],
+        "rewards": [
+          {
+            "id": "wizards_and_beasts:galleon",
+            "count": 10
+          }
+        ]
+      }
+    ],
+    "contracts": [
+      {
+        "id": "desert_expedition",
+        "min_rank": "customer",
+        "duration_days": 6,
+        "cooldown_days": 2,
+        "weight": 14,
+        "objective": {
+          "type": "activity",
+          "when": {
+            "activity": "treasure_returned",
+            "species": [
+              "wizards_and_beasts:desert_tomb"
+            ]
+          },
+          "count": 1
+        },
+        "reward": {
+          "knuts": 290,
+          "xp": 60
+        }
+      },
+      {
+        "id": "practice_curses",
+        "min_rank": "customer",
+        "duration_days": 4,
+        "cooldown_days": 1,
+        "weight": 10,
+        "objective": {
+          "type": "activity",
+          "when": {
+            "activity": "curse_broken"
+          },
+          "count": 2
+        },
+        "reward": {
+          "knuts": 145,
+          "xp": 40
+        }
+      },
+      {
+        "id": "goblin_gold",
+        "min_rank": "customer",
+        "duration_days": 3,
+        "cooldown_days": 2,
+        "weight": 10,
+        "objective": {
+          "type": "delivery",
+          "item": "minecraft:gold_ingot",
+          "count": 12
+        },
+        "reward": {
+          "knuts": 493,
+          "xp": 30
+        }
+      },
+      {
+        "id": "jungle_expedition",
+        "min_rank": "account_holder",
+        "duration_days": 6,
+        "cooldown_days": 2,
+        "weight": 10,
+        "objective": {
+          "type": "activity",
+          "when": {
+            "activity": "treasure_returned",
+            "species": [
+              "wizards_and_beasts:jungle_temple"
+            ]
+          },
+          "count": 1
+        },
+        "reward": {
+          "knuts": 493,
+          "xp": 80
+        }
+      },
+      {
+        "id": "sunken_expedition",
+        "min_rank": "account_holder",
+        "duration_days": 6,
+        "cooldown_days": 2,
+        "weight": 10,
+        "objective": {
+          "type": "activity",
+          "when": {
+            "activity": "treasure_returned",
+            "species": [
+              "wizards_and_beasts:sunken_ruins"
+            ]
+          },
+          "count": 1
+        },
+        "reward": {
+          "knuts": 580,
+          "xp": 90
+        }
+      },
+      {
+        "id": "flagrante_specialist",
+        "min_rank": "trusted_client",
+        "duration_days": 5,
+        "cooldown_days": 1,
+        "weight": 10,
+        "objective": {
+          "type": "activity",
+          "when": {
+            "activity": "curse_broken",
+            "species": [
+              "wizards_and_beasts:flagrante"
+            ]
+          },
+          "count": 2
+        },
+        "reward": {
+          "knuts": 435,
+          "xp": 70
+        }
+      },
+      {
+        "id": "mansion_expedition",
+        "min_rank": "trusted_client",
+        "duration_days": 10,
+        "cooldown_days": 3,
+        "weight": 10,
+        "objective": {
+          "type": "activity",
+          "when": {
+            "activity": "treasure_returned",
+            "species": [
+              "wizards_and_beasts:woodland_mansion"
+            ]
+          },
+          "count": 1
+        },
+        "reward": {
+          "knuts": 986,
+          "xp": 120
+        }
+      },
+      {
+        "id": "emerald_commission",
+        "min_rank": "trusted_client",
+        "duration_days": 3,
+        "cooldown_days": 2,
+        "weight": 10,
+        "objective": {
+          "type": "delivery",
+          "item": "minecraft:emerald",
+          "count": 8
+        },
+        "reward": {
+          "knuts": 580,
+          "xp": 40
+        }
+      },
+      {
+        "id": "ancient_city_hoard",
+        "min_rank": "curse_breaker_associate",
+        "duration_days": 10,
+        "cooldown_days": 4,
+        "weight": 8,
+        "objective": {
+          "type": "activity",
+          "when": {
+            "activity": "treasure_returned",
+            "species": [
+              "wizards_and_beasts:ancient_city"
+            ]
+          },
+          "count": 2
+        },
+        "reward": {
+          "knuts": 2465,
+          "xp": 250
+        }
+      },
+      {
+        "id": "director_diamonds",
+        "min_rank": "curse_breaker_associate",
+        "duration_days": 4,
+        "cooldown_days": 3,
+        "weight": 10,
+        "objective": {
+          "type": "delivery",
+          "item": "minecraft:diamond",
+          "count": 6
+        },
+        "reward": {
+          "knuts": 1479,
+          "xp": 90
+        }
+      }
+    ]
+  },
+  "services": [
+    { "service": "wizards_and_beasts:courier_dispatch", "min_tier": "customer" },
+    {
+      "service": "wizards_and_beasts:appraisal",
+      "min_tier": "customer",
+      "fee_knuts": 58,
+      "discount_per_tier": 0.1
+    },
+    {
+      "service": "wizards_and_beasts:curse_breaking",
+      "min_tier": "customer",
+      "fee_knuts": 87,
+      "rate": 0.4,
+      "rate_per_tier": -0.05
+    },
+    {
+      "service": "wizards_and_beasts:surrender_treasure",
+      "min_tier": "customer",
+      "rate": 0.5,
+      "rate_per_tier": 0.06
+    },
+    {
+      "service": "wizards_and_beasts:high_security_vault",
+      "min_tier": "account_holder",
+      "fee_knuts": 290,
+      "discount_per_tier": 0.1
+    }
+  ]
+}

@@ -23,6 +23,14 @@ public final class DragotRates {
     /** Gringotts' cut on any exchange, taken from the proceeds. */
     public static final float GRINGOTTS_FEE = 0.05f;
 
+    /**
+     * A goblin's cut: Gringotts is theirs, so less than anyone else pays — but never nothing. The quote can be
+     * re-rolled by walking back to the counter, so a fee at or below {@link #VARIANCE} would let a customer buy at
+     * the bottom of the spread and sell at the top for a profit every cycle ({@code (1+v)/(1-v) > (1+f)/(1-f)}).
+     * At 3.5 % the best round trip still loses about 1 %.
+     */
+    public static final float GOBLIN_FEE = 0.035f;
+
     /** How far either side of the base rate a quote may land. */
     public static final float VARIANCE = 0.03f;
 
@@ -108,6 +116,27 @@ public final class DragotRates {
             return 0;
         }
         return (int) Math.min(Integer.MAX_VALUE, Math.floor(knuts / perDragot));
+    }
+
+    /**
+     * What a shopkeeper credits one Dragot at, in Knuts: the bottom of the teller's spread, with no commission.
+     *
+     * <p>A till is not a bank: it takes no fee, so it must not take the coin above the worst rate Gringotts could
+     * have sold it at. Anything higher and a wizard buys Dragots at a low quote and spends them at the till for more
+     * than they cost ({@code DragotRatesTest.spendingBoughtDragotsNeverBeatsTheVault}). What the till offers is a
+     * home for foreign coin found as loot, without the bank's five percent.
+     */
+    public static double vendorKnutsPerDragot(double baseRate) {
+        return quotedRate(baseRate, 0.0f) * (double) CurrencyHelper.KNUTS_PER_GALLEON;
+    }
+
+    /** Whole Dragots a till asks for {@code knuts} of goods, rounded up. 0 for nothing. */
+    public static int dragotsToPay(long knuts, double baseRate) {
+        if (knuts <= 0L) {
+            return 0;
+        }
+        double each = vendorKnutsPerDragot(baseRate);
+        return (int) Math.min(Integer.MAX_VALUE, Math.ceil(knuts / each));
     }
 
     /** The same sum with a grudging vendor's markup applied. */

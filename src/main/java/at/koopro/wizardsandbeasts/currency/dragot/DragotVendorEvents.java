@@ -88,7 +88,7 @@ public final class DragotVendorEvents {
     }
 
     /** The sale is off, it is on your file, and this particular shopkeeper will not forget it. */
-    private static void refuseAndRemember(ServerPlayer player, Entity vendor) {
+    public static void refuseAndRemember(ServerPlayer player, Entity vendor) {
         PlayerFeedback.refuse(player,
                 Component.translatable("currency.wizards_and_beasts.dragot.caught"),
                 Component.translatable("currency.wizards_and_beasts.dragot.caught.detail"));

@@ -1,0 +1,107 @@
+{
+  "_comment": "Auror career track: casework on the Auror Office's board (ministry.trace.MinistryCasework). Experience comes from the work - evidence, interviews, identifications, apprehensions, cases closed - and never from convictions: a case closed by an acquittal pays the same. Reaching 'auror' puts the post on the Ministry record (ministry_rank), which is what lets a player work cases without the profession. Promotion past trainee asks that the profession still respects you.",
+  "max_active": 2,
+  "board_size": 3,
+  "xp_rules": [
+    { "when": { "activity": "evidence_gathered" }, "xp": 15, "daily_cap": 90 },
+    { "when": { "activity": "witness_interviewed" }, "xp": 10, "daily_cap": 60 },
+    { "when": { "activity": "suspect_identified" }, "xp": 40, "daily_cap": 120 },
+    { "when": { "activity": "suspect_apprehended" }, "xp": 60, "daily_cap": 180 },
+    { "when": { "activity": "case_closed" }, "xp": 50, "daily_cap": 150 }
+  ],
+  "ranks": [
+    { "id": "trainee", "xp": 0 },
+    {
+      "id": "auror",
+      "xp": 300,
+      "wage_multiplier": 1.4,
+      "ministry_rank": "auror",
+      "requires": [
+        { "type": "fee", "knuts": 493 },
+        { "type": "activity_total", "when": { "activity": "case_closed" }, "count": 2 },
+        { "type": "standing", "axis": "profession", "min_band": "neutral" }
+      ]
+    },
+    {
+      "id": "senior_auror",
+      "xp": 900,
+      "wage_multiplier": 1.8,
+      "requires": [
+        { "type": "fee", "knuts": 1479 },
+        { "type": "activity_total", "when": { "activity": "suspect_apprehended" }, "count": 4 },
+        { "type": "contracts_completed", "count": 4 },
+        { "type": "newt_grade", "subject": "defence_against_dark_arts", "grade": "E" },
+        { "type": "standing", "axis": "profession", "min_band": "leaning_positive" }
+      ]
+    },
+    {
+      "id": "head_auror",
+      "xp": 2000,
+      "wage_multiplier": 2.3,
+      "requires": [
+        { "type": "fee", "knuts": 2465 },
+        { "type": "contracts_completed", "count": 10 },
+        { "type": "activity_total", "when": { "activity": "case_closed" }, "count": 15 },
+        { "type": "standing", "axis": "public", "min_band": "leaning_positive" }
+      ]
+    }
+  ],
+  "contracts": [
+    {
+      "id": "scene_work",
+      "min_rank": "trainee",
+      "duration_days": 4,
+      "cooldown_days": 1,
+      "weight": 12,
+      "objective": { "type": "activity", "when": { "activity": "evidence_gathered" }, "count": 3 },
+      "reward": { "knuts": 232, "xp": 40 }
+    },
+    {
+      "id": "witness_round",
+      "min_rank": "trainee",
+      "duration_days": 4,
+      "cooldown_days": 1,
+      "weight": 10,
+      "objective": { "type": "activity", "when": { "activity": "witness_interviewed" }, "count": 3 },
+      "reward": { "knuts": 174, "xp": 30 }
+    },
+    {
+      "id": "bring_one_in",
+      "min_rank": "trainee",
+      "duration_days": 6,
+      "cooldown_days": 2,
+      "weight": 10,
+      "objective": { "type": "activity", "when": { "activity": "suspect_apprehended" }, "count": 1 },
+      "reward": { "knuts": 435, "xp": 70 }
+    },
+    {
+      "id": "clear_the_board",
+      "min_rank": "auror",
+      "duration_days": 8,
+      "cooldown_days": 3,
+      "weight": 8,
+      "objective": { "type": "activity", "when": { "activity": "case_closed" }, "count": 2 },
+      "reward": { "knuts": 986, "xp": 120 }
+    },
+    {
+      "id": "dark_wizard_hunt",
+      "min_rank": "senior_auror",
+      "duration_days": 10,
+      "cooldown_days": 4,
+      "weight": 6,
+      "objective": {
+        "type": "activity",
+        "when": {
+          "activity": "case_closed",
+          "species": [
+            "wizards_and_beasts:dark_curse",
+            "wizards_and_beasts:dark_mark",
+            "wizards_and_beasts:imperius_farmer"
+          ]
+        },
+        "count": 1
+      },
+      "reward": { "knuts": 1479, "xp": 200 }
+    }
+  ]
+}

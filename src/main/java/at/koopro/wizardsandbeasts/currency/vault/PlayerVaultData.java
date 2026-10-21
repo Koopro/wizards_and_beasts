@@ -1,6 +1,5 @@
 package at.koopro.wizardsandbeasts.currency.vault;
 
-import at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper;
 import net.minecraft.nbt.CompoundTag;
 
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
@@ -17,24 +16,92 @@ public class PlayerVaultData implements ModAttachments.NbtSerializable {
     public long getSickles() { return sickles; }
     public long getGalleons() { return galleons; }
 
-    public void depositKnuts(long amount) { knuts += amount; }
-    public void depositSickles(long amount) { sickles += amount; }
-    public void depositGalleons(long amount) { galleons += amount; }
+    public void depositKnuts(long amount) { knuts += requireCoins(amount); }
+    public void depositSickles(long amount) { sickles += requireCoins(amount); }
+    public void depositGalleons(long amount) { galleons += requireCoins(amount); }
+
+    private static long requireCoins(long amount) {
+        if (amount < 0) {
+            throw new IllegalArgumentException("negative deposit: " + amount);
+        }
+        return amount;
+    }
+
+    /** Whether the vault holds at least {@code price} Knuts' worth, in any coins. */
+    public boolean canAfford(long price) {
+        return price <= 0 || getTotalInKnuts() >= price;
+    }
+
+    /**
+     * Pays {@code price} Knuts, all or nothing.
+     *
+     * <p>Refused, the vault is untouched — every coin of every denomination. That is the point of this method: the
+     * pattern it replaces ("withdraw what you can, then deposit the partial back as Knuts") kept the value of a
+     * refused customer's vault but broke their Galleons and Sickles into Knuts. Accepted, Knuts are spent first,
+     * then Sickles, then Galleons, and the change from a broken coin comes back in the largest coins.
+     *
+     * @return whether the price was paid
+     */
+    public boolean pay(long price) {
+        if (price < 0) {
+            throw new IllegalArgumentException("negative price: " + price);
+        }
+        if (price == 0) {
+            return true;
+        }
+        if (!canAfford(price)) {
+            return false;
+        }
+        long taken = withdrawSmartKnuts(price);
+        if (taken != price) {
+            // Unreachable while every denomination is non-negative (load() guarantees it): the total covered the
+            // price, and the smart withdrawal breaks coins until it is met.
+            throw new IllegalStateException("vault paid " + taken + " of " + price);
+        }
+        return true;
+    }
+
+    /** Whether {@code amount} Knuts would fit under {@link CurrencyHelper#MAX_VAULT_KNUTS}. */
+    public boolean canCredit(long amount) {
+        requireCoins(amount);
+        return getTotalInKnuts() <= CurrencyHelper.MAX_VAULT_KNUTS - amount;
+    }
+
+    /**
+     * Credits {@code amount} Knuts in the largest coins, as Gringotts pays a wage: 500 Knuts arrive as one Galleon
+     * and seven Knuts, not as a pile of Knuts.
+     *
+     * @return whether it was credited; refused (and the vault untouched) when it would pass
+     *     {@link CurrencyHelper#MAX_VAULT_KNUTS}
+     */
+    public boolean credit(long amount) {
+        if (!canCredit(amount)) {
+            return false;
+        }
+        if (amount == 0) {
+            return true;
+        }
+        long[] coins = CurrencyHelper.fromKnuts(amount);
+        galleons += coins[0];
+        sickles += coins[1];
+        knuts += coins[2];
+        return true;
+    }
 
     public boolean withdrawKnuts(long amount) {
-        if (knuts < amount) return false;
+        if (amount < 0 || knuts < amount) return false; // a negative withdrawal would mint coins
         knuts -= amount;
         return true;
     }
 
     public boolean withdrawSickles(long amount) {
-        if (sickles < amount) return false;
+        if (amount < 0 || sickles < amount) return false; // a negative withdrawal would mint coins
         sickles -= amount;
         return true;
     }
 
     public boolean withdrawGalleons(long amount) {
-        if (galleons < amount) return false;
+        if (amount < 0 || galleons < amount) return false; // a negative withdrawal would mint coins
         galleons -= amount;
         return true;
     }
@@ -44,6 +111,7 @@ public class PlayerVaultData implements ModAttachments.NbtSerializable {
      * Returns the number of knuts actually withdrawn.
      */
     public long withdrawSmartKnuts(long amount) {
+        if (amount <= 0) return 0; // a negative withdrawal would mint coins
         long needed = amount;
 
         // 1. Take from knuts directly
@@ -86,6 +154,7 @@ public class PlayerVaultData implements ModAttachments.NbtSerializable {
      * Returns the number of sickles actually withdrawn.
      */
     public long withdrawSmartSickles(long amount) {
+        if (amount <= 0) return 0; // a negative withdrawal would mint coins
         long needed = amount;
 
         // 1. Take from sickles directly
@@ -155,9 +224,11 @@ public class PlayerVaultData implements ModAttachments.NbtSerializable {
 
     public void load(CompoundTag tag) {
         PlayerVaultDataMigrator.migrate(tag);
-        knuts = tag.getLong("Knuts").orElse(0L);
-        sickles = tag.getLong("Sickles").orElse(0L);
-        galleons = tag.getLong("Galleons").orElse(0L);
+        // A negative coin count can only come from a hand-edited or corrupt save; read it as none, so no total
+        // goes negative and pay()'s smart withdrawal always meets a price the total covers.
+        knuts = Math.max(0L, tag.getLong("Knuts").orElse(0L));
+        sickles = Math.max(0L, tag.getLong("Sickles").orElse(0L));
+        galleons = Math.max(0L, tag.getLong("Galleons").orElse(0L));
     }
 
     public void resetAll() {

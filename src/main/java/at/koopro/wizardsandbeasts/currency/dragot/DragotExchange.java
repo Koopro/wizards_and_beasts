@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.currency.dragot;
 
+import at.koopro.wizardsandbeasts.currency.billing.GringottsBilling;
+import at.koopro.wizardsandbeasts.currency.billing.MoneyFlow;
 import at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper;
 import at.koopro.wizardsandbeasts.currency.vault.PlayerVaultData;
 import at.koopro.wizardsandbeasts.ministry.law.MagicalOffence;
@@ -57,6 +59,11 @@ public final class DragotExchange {
         }
 
         float rate = DragotQuotes.rateFor(player);
+        long knuts = DragotRates.dragotsToKnuts(dragots, rate, feeFor(player));
+        // Asked before a coin leaves the purse, so a full vault never strands the sale halfway.
+        if (!vault(player).canCredit(knuts)) {
+            return Result.no("currency.wizards_and_beasts.dragot.exchange.full");
+        }
         int badTaken = DragotPurse.take(player, dragots);
         if (badTaken < 0) {
             return Result.no("currency.wizards_and_beasts.dragot.exchange.short");
@@ -64,13 +71,13 @@ public final class DragotExchange {
 
         if (badTaken > 0 && (isGoblin(player)
                 || player.getRandom().nextFloat() < DragotRates.DEVALUED_NOTICE_CHANCE)) {
-            // Caught. The coins are already out of the purse and stay out — confiscated, not refunded.
+            // Caught. Only the devalued coins are confiscated; the sound ones come back with the failed sale.
+            DragotPurse.give(player, dragots - badTaken);
             reportBadMoney(player);
             return Result.no("currency.wizards_and_beasts.dragot.exchange.caught", badTaken);
         }
 
-        long knuts = DragotRates.dragotsToKnuts(dragots, rate, feeFor(player));
-        vault(player).depositKnuts(knuts);
+        GringottsBilling.credit(player, MoneyFlow.DRAGOT_SALE, knuts);
         return new Result(true, Component.translatable("currency.wizards_and_beasts.dragot.exchange.sold",
                 dragots, CurrencyHelper.formatFromKnuts(knuts)));
     }
@@ -82,12 +89,7 @@ public final class DragotExchange {
         }
         float rate = DragotQuotes.rateFor(player);
         long cost = DragotRates.knutsToBuyDragots(dragots, rate, feeFor(player));
-        PlayerVaultData vault = vault(player);
-        if (vault.getTotalInKnuts() < cost) {
-            return Result.no("currency.wizards_and_beasts.dragot.exchange.funds",
-                    CurrencyHelper.formatFromKnuts(cost));
-        }
-        if (vault.withdrawSmartKnuts(cost) < cost) {
+        if (!GringottsBilling.charge(player, MoneyFlow.DRAGOT_PURCHASE, cost)) {
             return Result.no("currency.wizards_and_beasts.dragot.exchange.funds",
                     CurrencyHelper.formatFromKnuts(cost));
         }
@@ -121,9 +123,9 @@ public final class DragotExchange {
         return at.koopro.wizardsandbeasts.heritage.HeritageAPI.getData(player).hasTrait("goblin_property");
     }
 
-    /** The commission this customer is charged: nothing for a goblin, the standing Gringotts fee for everyone else. */
+    /** The commission this customer is charged: the goblins' own rate for a goblin, the standing fee for everyone else. */
     private static float feeFor(ServerPlayer player) {
-        return isGoblin(player) ? 0.0f : DragotRates.GRINGOTTS_FEE;
+        return isGoblin(player) ? DragotRates.GOBLIN_FEE : DragotRates.GRINGOTTS_FEE;
     }
 
     private static void reportBadMoney(ServerPlayer player) {

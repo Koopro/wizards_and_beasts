@@ -1,0 +1,182 @@
+{
+  "_comment": "Ollivanders as a place: any wandmaker villager keeps it (sneak-use opens the board; a plain visit keeps the trial and wand care). Standing is earned by supplying cores and wandwood; the evaluation service reads a wand history of allegiance. The market buys wandwood, cores and finished unbonded wands (crafting income) and sells blanks and cores; wand_commission makes a wand to order from the customer's own blank and core, fitted to them (WandCommission). Brooms went to the broom shop (broom_shop.json).",
+  "module": "wands",
+  "skin": "workbench",
+  "presence": {
+    "hosts": [
+      "minecraft:villager"
+    ],
+    "host_profession": "wizards_and_beasts:wandmaker",
+    "host_reach": 6.0
+  },
+  "standing": {
+    "max_active": 2,
+    "board_size": 3,
+    "ranks": [
+      {
+        "id": "patron",
+        "xp": 0
+      },
+      {
+        "id": "regular",
+        "xp": 120
+      },
+      {
+        "id": "trusted_supplier",
+        "xp": 400,
+        "requires": [
+          {
+            "type": "contracts_completed",
+            "count": 4
+          }, { "type": "owl_grade", "subject": "care_of_magical_creatures", "grade": "A" }]
+      },
+      {
+        "id": "wandmakers_friend",
+        "xp": 900,
+        "requires": [
+          {
+            "type": "contracts_completed",
+            "count": 10
+          }
+        ]
+      }
+    ],
+    "contracts": [
+      {
+        "id": "unicorn_hair",
+        "min_rank": "patron",
+        "duration_days": 5,
+        "cooldown_days": 2,
+        "weight": 10,
+        "objective": {
+          "type": "delivery",
+          "item": "wizards_and_beasts:unicorn_hair",
+          "count": 2
+        },
+        "reward": {
+          "knuts": 290,
+          "xp": 40
+        }
+      },
+      {
+        "id": "holly_stock",
+        "min_rank": "patron",
+        "duration_days": 4,
+        "cooldown_days": 2,
+        "weight": 10,
+        "objective": {
+          "type": "delivery",
+          "item": "wizards_and_beasts:holly_log",
+          "count": 16
+        },
+        "reward": {
+          "knuts": 174,
+          "xp": 30
+        }
+      },
+      {
+        "id": "yew_stock",
+        "min_rank": "regular",
+        "duration_days": 4,
+        "cooldown_days": 2,
+        "weight": 10,
+        "objective": {
+          "type": "delivery",
+          "item": "wizards_and_beasts:yew_log",
+          "count": 16
+        },
+        "reward": {
+          "knuts": 232,
+          "xp": 40
+        }
+      },
+      {
+        "id": "phoenix_feather",
+        "min_rank": "regular",
+        "duration_days": 7,
+        "cooldown_days": 4,
+        "weight": 6,
+        "objective": {
+          "type": "delivery",
+          "item": "wizards_and_beasts:phoenix_feather",
+          "count": 1
+        },
+        "reward": {
+          "knuts": 986,
+          "xp": 90
+        }
+      },
+      {
+        "id": "elder_stock",
+        "min_rank": "trusted_supplier",
+        "duration_days": 5,
+        "cooldown_days": 3,
+        "weight": 10,
+        "objective": {
+          "type": "delivery",
+          "item": "wizards_and_beasts:elder_log",
+          "count": 8
+        },
+        "reward": {
+          "knuts": 493,
+          "xp": 70
+        }
+      }
+    ]
+  },
+  "services": [
+    { "service": "wizards_and_beasts:courier_dispatch", "min_tier": "patron" },
+    {
+      "service": "wizards_and_beasts:wand_evaluation",
+      "min_tier": "patron",
+      "fee_knuts": 87,
+      "discount_per_tier": 0.15
+    },
+    {
+      "service": "wizards_and_beasts:wand_commission",
+      "min_tier": "regular",
+      "fee_knuts": 1479,
+      "discount_per_tier": 0.05
+    },
+    {
+      "service": "wizards_and_beasts:lesson_ancient_runes",
+      "min_tier": "patron",
+      "fee_knuts": 145,
+      "discount_per_tier": 0.1
+    },
+    {
+      "service": "wizards_and_beasts:lesson_charms",
+      "min_tier": "patron",
+      "fee_knuts": 145,
+      "discount_per_tier": 0.1
+    }
+  ],
+  "market": {
+    "half_life_days": 3.0,
+    "demand_bonus": 0.5,
+    "buys": [
+      { "id": "rowan_log", "item": "wizards_and_beasts:rowan_log", "price_knuts": 5, "depth": 64 },
+      { "id": "willow_log", "item": "wizards_and_beasts:willow_log", "price_knuts": 5, "depth": 64 },
+      { "id": "holly_log", "item": "wizards_and_beasts:holly_log", "price_knuts": 6, "depth": 64 },
+      { "id": "ash_log", "item": "wizards_and_beasts:ash_log", "price_knuts": 6, "depth": 64 },
+      { "id": "hawthorn_log", "item": "wizards_and_beasts:hawthorn_log", "price_knuts": 7, "depth": 48 },
+      { "id": "yew_log", "item": "wizards_and_beasts:yew_log", "price_knuts": 9, "depth": 48 },
+      { "id": "walnut_log", "item": "wizards_and_beasts:walnut_log", "price_knuts": 9, "depth": 48 },
+      { "id": "blackthorn_log", "item": "wizards_and_beasts:blackthorn_log", "price_knuts": 9, "depth": 48 },
+      { "id": "elder_log", "item": "wizards_and_beasts:elder_log", "price_knuts": 20, "depth": 16, "min_tier": "regular" },
+      { "id": "troll_whisker", "item": "wizards_and_beasts:troll_whisker", "price_knuts": 29, "depth": 8 },
+      { "id": "unicorn_hair", "item": "wizards_and_beasts:unicorn_hair", "price_knuts": 116, "depth": 6 },
+      { "id": "thestral_tail_hair", "item": "wizards_and_beasts:thestral_tail_hair", "price_knuts": 174, "depth": 4, "min_tier": "regular" },
+      { "id": "wampus_cat_hair", "item": "wizards_and_beasts:wampus_cat_hair", "price_knuts": 145, "depth": 4, "min_tier": "regular" },
+      { "id": "dragon_heartstring", "item": "wizards_and_beasts:dragon_heartstring", "price_knuts": 232, "depth": 4, "min_tier": "regular" },
+      { "id": "thunderbird_tail_feather", "item": "wizards_and_beasts:thunderbird_tail_feather", "price_knuts": 232, "depth": 3, "min_tier": "trusted_supplier" },
+      { "id": "spare_wands", "kind": "wand", "condition": "unbonded", "price_knuts": 290, "depth": 6 }
+    ],
+    "sells": [
+      { "id": "wand_blank", "item": "wizards_and_beasts:wand_blank", "price_knuts": 87, "depth": 8 },
+      { "id": "holly_log", "item": "wizards_and_beasts:holly_log", "price_knuts": 29, "depth": 32 },
+      { "id": "unicorn_hair", "item": "wizards_and_beasts:unicorn_hair", "price_knuts": 348, "depth": 3, "weekly_limit": 2 },
+      { "id": "dragon_heartstring", "item": "wizards_and_beasts:dragon_heartstring", "price_knuts": 696, "depth": 2, "weekly_limit": 1, "min_tier": "trusted_supplier" }
+    ]
+  }
+}

@@ -1,0 +1,220 @@
+{
+  "_comment": "Slug & Jiggers as a place: any villager with the apothecary profession (job site: a wizarding cauldron) keeps it. Sneak-use opens the board. The market buys creature materials, ingredients and finished brews, and sells ingredients - restricted ones only to a Restricted Substances licence while the Ministry module is on. Prices move with trade (market/MarketPricing). Service: creature_treatment heals bonded creatures brought to the counter. Lessons: Potions, Herbology and Care of Magical Creatures, one a day, count toward the O.W.L. (education.LessonServices). Standing is earned by trading here and by supply contracts.",
+  "module": "gringotts",
+  "skin": "field_notebook",
+  "presence": {
+    "hosts": [
+      "minecraft:villager"
+    ],
+    "host_profession": "wizards_and_beasts:apothecary",
+    "host_reach": 6.0
+  },
+  "standing": {
+    "max_active": 2,
+    "board_size": 3,
+    "xp_rules": [
+      { "when": { "activity": "courier_delivered", "species": ["wizards_and_beasts:apothecary"] }, "xp": 12, "daily_cap": 36 },
+      {
+        "when": {
+          "activity": "goods_traded",
+          "species": ["wizards_and_beasts:apothecary"]
+        },
+        "xp": 6,
+        "daily_cap": 36
+      }
+    ],
+    "ranks": [
+      {
+        "id": "customer",
+        "xp": 0
+      },
+      {
+        "id": "regular",
+        "xp": 120
+      },
+      {
+        "id": "trusted_supplier",
+        "xp": 400,
+        "requires": [
+          {
+            "type": "contracts_completed",
+            "count": 4
+          }, { "type": "owl_grade", "subject": "potions", "grade": "E" }]
+      },
+      {
+        "id": "potioneers_friend",
+        "xp": 900,
+        "requires": [
+          {
+            "type": "contracts_completed",
+            "count": 10
+          }
+        ]
+      }
+    ],
+    "contracts": [
+      {
+        "id": "dittany_stock",
+        "min_rank": "customer",
+        "duration_days": 4,
+        "cooldown_days": 2,
+        "weight": 10,
+        "objective": {
+          "type": "delivery",
+          "item": "wizards_and_beasts:dittany",
+          "count": 12
+        },
+        "reward": {
+          "knuts": 174,
+          "xp": 30
+        }
+      },
+      {
+        "id": "mandrake_order",
+        "min_rank": "customer",
+        "duration_days": 5,
+        "cooldown_days": 2,
+        "weight": 10,
+        "objective": {
+          "type": "delivery",
+          "item": "wizards_and_beasts:mandrake",
+          "count": 6
+        },
+        "reward": {
+          "knuts": 174,
+          "xp": 30
+        }
+      },
+      {
+        "id": "gillyweed_order",
+        "min_rank": "customer",
+        "duration_days": 4,
+        "cooldown_days": 2,
+        "weight": 8,
+        "objective": {
+          "type": "delivery",
+          "item": "wizards_and_beasts:gillyweed",
+          "count": 8
+        },
+        "reward": {
+          "knuts": 145,
+          "xp": 30
+        }
+      },
+      {
+        "id": "murtlap_order",
+        "min_rank": "regular",
+        "duration_days": 5,
+        "cooldown_days": 2,
+        "weight": 10,
+        "objective": {
+          "type": "delivery",
+          "item": "wizards_and_beasts:murtlap_essence",
+          "count": 4
+        },
+        "reward": {
+          "knuts": 174,
+          "xp": 30
+        }
+      },
+      {
+        "id": "demiguise_hair",
+        "min_rank": "regular",
+        "duration_days": 6,
+        "cooldown_days": 3,
+        "weight": 8,
+        "objective": {
+          "type": "delivery",
+          "item": "wizards_and_beasts:demiguise_hair",
+          "count": 2
+        },
+        "reward": {
+          "knuts": 290,
+          "xp": 50
+        }
+      },
+      {
+        "id": "occamy_shell",
+        "min_rank": "trusted_supplier",
+        "duration_days": 7,
+        "cooldown_days": 3,
+        "weight": 8,
+        "objective": {
+          "type": "delivery",
+          "item": "wizards_and_beasts:occamy_eggshell",
+          "count": 2
+        },
+        "reward": {
+          "knuts": 493,
+          "xp": 70
+        }
+      }
+    ]
+  },
+  "services": [
+    { "service": "wizards_and_beasts:courier_dispatch", "min_tier": "customer" },
+    {
+      "service": "wizards_and_beasts:creature_treatment",
+      "min_tier": "customer",
+      "fee_knuts": 29,
+      "discount_per_tier": 0.1
+    },
+    {
+      "service": "wizards_and_beasts:lesson_potions",
+      "min_tier": "customer",
+      "fee_knuts": 145,
+      "discount_per_tier": 0.1
+    },
+    {
+      "service": "wizards_and_beasts:lesson_herbology",
+      "min_tier": "customer",
+      "fee_knuts": 145,
+      "discount_per_tier": 0.1
+    },
+    {
+      "service": "wizards_and_beasts:lesson_care_of_magical_creatures",
+      "min_tier": "customer",
+      "fee_knuts": 145,
+      "discount_per_tier": 0.1
+    }
+  ],
+  "market": {
+    "half_life_days": 2.0,
+    "demand_bonus": 0.5,
+    "buys": [
+      { "id": "dittany", "item": "wizards_and_beasts:dittany", "price_knuts": 12, "depth": 32 },
+      { "id": "mandrake", "item": "wizards_and_beasts:mandrake", "price_knuts": 20, "depth": 24 },
+      { "id": "gillyweed", "item": "wizards_and_beasts:gillyweed", "price_knuts": 15, "depth": 24 },
+      { "id": "mooncalf_dung", "item": "wizards_and_beasts:mooncalf_dung", "price_knuts": 8, "depth": 32 },
+      { "id": "ghoul_slime", "item": "wizards_and_beasts:ghoul_slime", "price_knuts": 6, "depth": 32 },
+      { "id": "murtlap_essence", "item": "wizards_and_beasts:murtlap_essence", "price_knuts": 29, "depth": 16 },
+      { "id": "troll_whisker", "item": "wizards_and_beasts:troll_whisker", "price_knuts": 29, "depth": 12 },
+      { "id": "yeti_fur", "item": "wizards_and_beasts:yeti_fur", "price_knuts": 43, "depth": 8 },
+      { "id": "bezoar", "item": "wizards_and_beasts:bezoar", "price_knuts": 58, "depth": 8 },
+      { "id": "demiguise_hair", "item": "wizards_and_beasts:demiguise_hair", "price_knuts": 87, "depth": 8 },
+      { "id": "occamy_eggshell", "item": "wizards_and_beasts:occamy_eggshell", "price_knuts": 145, "depth": 6, "min_tier": "regular" },
+      { "id": "unicorn_hair", "item": "wizards_and_beasts:unicorn_hair", "price_knuts": 116, "depth": 6, "min_tier": "regular" },
+      { "id": "erumpent_horn", "item": "wizards_and_beasts:erumpent_horn", "price_knuts": 232, "depth": 4, "min_tier": "regular" },
+      { "id": "acromantula_venom", "item": "wizards_and_beasts:acromantula_venom", "price_knuts": 348, "depth": 4, "min_tier": "trusted_supplier" },
+      { "id": "pepperup", "item": "wizards_and_beasts:brew", "brew": "wizards_and_beasts:pepperup_potion", "price_knuts": 43, "depth": 12 },
+      { "id": "wiggenweld", "item": "wizards_and_beasts:brew", "brew": "wizards_and_beasts:wiggenweld_potion", "price_knuts": 58, "depth": 12 },
+      { "id": "skele_gro", "item": "wizards_and_beasts:brew", "brew": "wizards_and_beasts:skele_gro", "price_knuts": 87, "depth": 8 },
+      { "id": "mandrake_draught", "item": "wizards_and_beasts:brew", "brew": "wizards_and_beasts:mandrake_restoration_draught", "price_knuts": 174, "depth": 6 },
+      { "id": "amortentia", "item": "wizards_and_beasts:brew", "brew": "wizards_and_beasts:amortentia", "price_knuts": 145, "depth": 4 },
+      { "id": "wolfsbane", "item": "wizards_and_beasts:brew", "brew": "wizards_and_beasts:wolfsbane_potion", "price_knuts": 232, "depth": 4, "min_tier": "regular" },
+      { "id": "polyjuice", "item": "wizards_and_beasts:brew", "brew": "wizards_and_beasts:polyjuice_potion", "price_knuts": 290, "depth": 4, "min_tier": "regular" },
+      { "id": "living_death", "item": "wizards_and_beasts:brew", "brew": "wizards_and_beasts:draught_of_living_death", "price_knuts": 348, "depth": 3, "min_tier": "trusted_supplier" },
+      { "id": "felix_felicis", "item": "wizards_and_beasts:brew", "brew": "wizards_and_beasts:felix_felicis", "price_knuts": 986, "depth": 2, "min_tier": "trusted_supplier" }
+    ],
+    "sells": [
+      { "id": "dittany", "item": "wizards_and_beasts:dittany", "price_knuts": 29, "depth": 16 },
+      { "id": "mandrake_seeds", "item": "wizards_and_beasts:mandrake_seeds", "price_knuts": 29, "depth": 16 },
+      { "id": "essence_of_dittany", "item": "wizards_and_beasts:essence_of_dittany", "price_knuts": 87, "depth": 8 },
+      { "id": "floo_powder", "item": "wizards_and_beasts:floo_powder", "price_knuts": 14, "depth": 32 },
+      { "id": "bezoar", "item": "wizards_and_beasts:bezoar", "price_knuts": 174, "depth": 4, "weekly_limit": 3 },
+      { "id": "wiggenweld", "item": "wizards_and_beasts:brew", "brew": "wizards_and_beasts:wiggenweld_potion", "price_knuts": 145, "depth": 8, "weekly_limit": 4 },
+      { "id": "unicorn_hair", "item": "wizards_and_beasts:unicorn_hair", "price_knuts": 348, "depth": 3, "weekly_limit": 2, "min_tier": "regular" },
+      { "id": "occamy_eggshell", "item": "wizards_and_beasts:occamy_eggshell", "price_knuts": 435, "depth": 3, "weekly_limit": 2, "min_tier": "trusted_supplier" }
+    ]
+  }
+}

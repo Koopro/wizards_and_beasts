@@ -1,0 +1,242 @@
+{
+  "_comment": "Quidditch player career track: flying is the work. Time trials (travel.trial), aerial survey (travel.aerial) and courier runs (travel.courier) earn experience; rank rewards are broom fittings and, at the top, a racing broom. The daily wage is CareerWork FLYING (CareerProfile).",
+  "max_active": 2,
+  "board_size": 3,
+  "xp_rules": [
+    {
+      "when": {
+        "activity": "time_trial_finished"
+      },
+      "xp": 20,
+      "daily_cap": 100
+    },
+    {
+      "when": {
+        "activity": "time_trial_par"
+      },
+      "xp": 30,
+      "daily_cap": 90
+    },
+    {
+      "when": {
+        "activity": "aerial_survey"
+      },
+      "xp": 4,
+      "daily_cap": 60
+    },
+    {
+      "when": {
+        "activity": "courier_delivered"
+      },
+      "xp": 15,
+      "daily_cap": 60
+    }
+  ],
+  "ranks": [
+    {
+      "id": "reserve",
+      "xp": 0
+    },
+    {
+      "id": "squad_flyer",
+      "xp": 250,
+      "requires": [
+        {
+          "type": "activity_total",
+          "when": {
+            "activity": "time_trial_par"
+          },
+          "count": 2
+        }
+      ],
+      "rewards": [
+        {
+          "id": "wizards_and_beasts:balanced_tail",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "first_team",
+      "xp": 800,
+      "wage_multiplier": 1.4,
+      "requires": [
+        {
+          "type": "fee",
+          "knuts": 986
+        },
+        {
+          "type": "contracts_completed",
+          "count": 4
+        }
+      ],
+      "rewards": [
+        {
+          "id": "wizards_and_beasts:streamlined_twigs",
+          "count": 1
+        },
+        {
+          "id": "wizards_and_beasts:anti_jinx_varnish",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "professional",
+      "xp": 2000,
+      "wage_multiplier": 2.0,
+      "requires": [
+        {
+          "type": "fee",
+          "knuts": 2465
+        },
+        {
+          "type": "contracts_completed",
+          "count": 10
+        },
+        {
+          "type": "activity_total",
+          "when": {
+            "activity": "time_trial_par"
+          },
+          "count": 10
+        }
+      ],
+      "rewards": [
+        {
+          "id": "wizards_and_beasts:nimbus_2001",
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "contracts": [
+    {
+      "id": "hoop_drill",
+      "min_rank": "reserve",
+      "duration_days": 3,
+      "cooldown_days": 1,
+      "weight": 10,
+      "objective": {
+        "type": "activity",
+        "when": {
+          "activity": "time_trial_finished"
+        },
+        "count": 2
+      },
+      "reward": {
+        "knuts": 145,
+        "xp": 40
+      }
+    },
+    {
+      "id": "scouting_flight",
+      "min_rank": "reserve",
+      "duration_days": 4,
+      "cooldown_days": 1,
+      "weight": 10,
+      "objective": {
+        "type": "activity",
+        "when": {
+          "activity": "aerial_survey"
+        },
+        "count": 12
+      },
+      "reward": {
+        "knuts": 174,
+        "xp": 45
+      }
+    },
+    {
+      "id": "team_post",
+      "min_rank": "reserve",
+      "duration_days": 4,
+      "cooldown_days": 2,
+      "weight": 8,
+      "objective": {
+        "type": "activity",
+        "when": {
+          "activity": "courier_delivered"
+        },
+        "count": 2
+      },
+      "reward": {
+        "knuts": 203,
+        "xp": 50
+      }
+    },
+    {
+      "id": "beat_par",
+      "min_rank": "squad_flyer",
+      "duration_days": 4,
+      "cooldown_days": 2,
+      "weight": 10,
+      "objective": {
+        "type": "activity",
+        "when": {
+          "activity": "time_trial_par"
+        },
+        "count": 1
+      },
+      "reward": {
+        "knuts": 232,
+        "xp": 60
+      }
+    },
+    {
+      "id": "country_scout",
+      "min_rank": "squad_flyer",
+      "duration_days": 6,
+      "cooldown_days": 2,
+      "weight": 8,
+      "objective": {
+        "type": "activity",
+        "when": {
+          "activity": "aerial_survey"
+        },
+        "count": 4,
+        "distinct": true
+      },
+      "reward": {
+        "knuts": 348,
+        "xp": 80
+      }
+    },
+    {
+      "id": "express_post",
+      "min_rank": "first_team",
+      "duration_days": 5,
+      "cooldown_days": 2,
+      "weight": 8,
+      "objective": {
+        "type": "activity",
+        "when": {
+          "activity": "courier_express"
+        },
+        "count": 1
+      },
+      "reward": {
+        "knuts": 290,
+        "xp": 70
+      }
+    },
+    {
+      "id": "record_run",
+      "min_rank": "first_team",
+      "duration_days": 6,
+      "cooldown_days": 3,
+      "weight": 6,
+      "objective": {
+        "type": "activity",
+        "when": {
+          "activity": "time_trial_par"
+        },
+        "count": 3
+      },
+      "reward": {
+        "knuts": 580,
+        "xp": 120
+      }
+    }
+  ]
+}

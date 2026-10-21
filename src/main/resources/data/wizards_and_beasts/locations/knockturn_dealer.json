@@ -1,0 +1,68 @@
+{
+  "_comment": "A travelling fence (Knockturn Alley trade on the road): any wandering trader keeps it. Ministry module only: crime without the law that punishes it would only be a better-paying shop. Every deal here may reach the Ministry (risk): restricted goods without papers, contraband, stolen wands, treasure kept from the Gringotts claim, and the services sold under the counter (memory_charm, forge_papers, bribe_clerk - a case file lost while it is still under investigation, fee per incident). Detection files a fine offence through TraceService. Contracts are smuggling runs. Pays better than the law, which is the whole point and the whole risk.",
+  "module": "ministry",
+  "skin": "marauders_map",
+  "risk": { "chance": 0.08, "watch_radius": 16.0 },
+  "presence": {
+    "hosts": ["minecraft:wandering_trader"],
+    "host_reach": 6.0
+  },
+  "standing": {
+    "max_active": 2,
+    "board_size": 3,
+    "xp_rules": [
+      { "when": { "activity": "goods_traded", "species": ["wizards_and_beasts:knockturn_dealer"] }, "xp": 8, "daily_cap": 40 }
+    ],
+    "ranks": [
+      { "id": "stranger", "xp": 0 },
+      { "id": "known_face", "xp": 100 },
+      { "id": "trusted_contact", "xp": 300, "requires": [ { "type": "contracts_completed", "count": 3 } ] },
+      { "id": "inner_circle", "xp": 800, "requires": [ { "type": "contracts_completed", "count": 8 } ] }
+    ],
+    "contracts": [
+      { "id": "venom_run", "min_rank": "stranger", "duration_days": 5, "cooldown_days": 3, "weight": 10,
+        "objective": { "type": "delivery", "item": "wizards_and_beasts:acromantula_venom", "count": 2 },
+        "reward": { "knuts": 1160, "xp": 40 } },
+      { "id": "hair_run", "min_rank": "stranger", "duration_days": 5, "cooldown_days": 2, "weight": 10,
+        "objective": { "type": "delivery", "item": "wizards_and_beasts:unicorn_hair", "count": 3 },
+        "reward": { "knuts": 580, "xp": 30 } },
+      { "id": "heartstring_run", "min_rank": "known_face", "duration_days": 6, "cooldown_days": 3, "weight": 8,
+        "objective": { "type": "delivery", "item": "wizards_and_beasts:dragon_heartstring", "count": 2 },
+        "reward": { "knuts": 986, "xp": 50 } },
+      { "id": "counterfeit_run", "min_rank": "known_face", "duration_days": 4, "cooldown_days": 2, "weight": 8,
+        "objective": { "type": "delivery", "item": "wizards_and_beasts:counterfeit_galleon", "count": 5 },
+        "reward": { "knuts": 493, "xp": 40 } },
+      { "id": "fang_job", "min_rank": "trusted_contact", "duration_days": 10, "cooldown_days": 4, "weight": 6,
+        "objective": { "type": "delivery", "item": "wizards_and_beasts:basilisk_fang", "count": 1 },
+        "reward": { "knuts": 1972, "xp": 90 } }
+    ]
+  },
+  "services": [
+    { "service": "wizards_and_beasts:memory_charm", "min_tier": "known_face", "fee_knuts": 290, "rate": 0.5 },
+    { "service": "wizards_and_beasts:forge_papers", "min_tier": "trusted_contact", "fee_knuts": 986 },
+    { "service": "wizards_and_beasts:bribe_clerk", "min_tier": "trusted_contact", "fee_knuts": 1972 }
+  ],
+  "market": {
+    "half_life_days": 3.0,
+    "demand_bonus": 0.25,
+    "buys": [
+      { "id": "artefacts", "kind": "treasure", "condition": "any", "rate": 0.85, "depth": 6 },
+      { "id": "stolen_wands", "kind": "wand", "condition": "stolen", "price_knuts": 348, "depth": 4, "min_tier": "known_face" },
+      { "id": "counterfeit_galleon", "item": "wizards_and_beasts:counterfeit_galleon", "price_knuts": 58, "depth": 16 },
+      { "id": "unicorn_hair", "item": "wizards_and_beasts:unicorn_hair", "price_knuts": 87, "depth": 6 },
+      { "id": "occamy_eggshell", "item": "wizards_and_beasts:occamy_eggshell", "price_knuts": 116, "depth": 6 },
+      { "id": "erumpent_horn", "item": "wizards_and_beasts:erumpent_horn", "price_knuts": 174, "depth": 4 },
+      { "id": "dragon_heartstring", "item": "wizards_and_beasts:dragon_heartstring", "price_knuts": 174, "depth": 4 },
+      { "id": "acromantula_venom", "item": "wizards_and_beasts:acromantula_venom", "price_knuts": 261, "depth": 4 },
+      { "id": "basilisk_fang", "item": "wizards_and_beasts:basilisk_fang", "price_knuts": 986, "depth": 2, "min_tier": "known_face" },
+      { "id": "hand_of_glory", "item": "wizards_and_beasts:hand_of_glory", "price_knuts": 696, "depth": 2, "min_tier": "trusted_contact" },
+      { "id": "blood_pact_vial", "item": "wizards_and_beasts:blood_pact_vial", "price_knuts": 348, "depth": 2, "min_tier": "inner_circle" }
+    ],
+    "sells": [
+      { "id": "unicorn_hair", "item": "wizards_and_beasts:unicorn_hair", "price_knuts": 435, "depth": 3 },
+      { "id": "acromantula_venom", "item": "wizards_and_beasts:acromantula_venom", "price_knuts": 696, "depth": 3 },
+      { "id": "dragon_heartstring", "item": "wizards_and_beasts:dragon_heartstring", "price_knuts": 696, "depth": 2, "min_tier": "known_face" },
+      { "id": "basilisk_fang", "item": "wizards_and_beasts:basilisk_fang", "price_knuts": 2465, "depth": 1, "weekly_limit": 1, "min_tier": "trusted_contact" }
+    ]
+  }
+}

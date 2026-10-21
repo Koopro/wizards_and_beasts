@@ -1,0 +1,556 @@
+{
+  "_comment": "Magizoologist career track: ranks earned with career experience AND milestones, a daily board of Department for the Regulation and Control of Magical Creatures contracts. Every contract targets creatures a default world spawns (AlphaRoster + spawn modifiers) and only non-lethal materials; CareerTrackDataTest joins this file against that data.",
+  "max_active": 2,
+  "board_size": 3,
+  "xp_rules": [
+    {
+      "when": {
+        "activity": "bestiary_tier",
+        "min_tier": "KNOWN"
+      },
+      "xp": 40,
+      "daily_cap": 120
+    },
+    {
+      "when": {
+        "activity": "bestiary_tier",
+        "min_tier": "STUDIED"
+      },
+      "xp": 20,
+      "daily_cap": 80
+    },
+    {
+      "when": {
+        "activity": "bestiary_tier",
+        "min_tier": "OBSERVED"
+      },
+      "xp": 10,
+      "daily_cap": 60
+    },
+    {
+      "when": {
+        "activity": "bestiary_tier"
+      },
+      "xp": 5,
+      "daily_cap": 30
+    },
+    {
+      "when": {
+        "activity": "research_completed"
+      },
+      "xp": 60,
+      "daily_cap": 180
+    },
+    {
+      "when": {
+        "activity": "companion_trained"
+      },
+      "xp": 100,
+      "daily_cap": 200
+    },
+    {
+      "when": {
+        "activity": "companion_mastered"
+      },
+      "xp": 200,
+      "daily_cap": 400
+    },
+    {
+      "when": {
+        "activity": "bond_mastered"
+      },
+      "xp": 80,
+      "daily_cap": 160
+    },
+    {
+      "when": {
+        "activity": "bond_milestone"
+      },
+      "xp": 15,
+      "daily_cap": 60
+    },
+    {
+      "when": {
+        "activity": "creature_bred"
+      },
+      "xp": 40,
+      "daily_cap": 80
+    },
+    {
+      "when": {
+        "activity": "creature_groomed"
+      },
+      "xp": 10,
+      "daily_cap": 20
+    },
+    {
+      "when": {
+        "activity": "creature_fed"
+      },
+      "xp": 3,
+      "daily_cap": 15
+    }
+  ],
+  "ranks": [
+    {
+      "id": "trainee",
+      "xp": 0
+    },
+    {
+      "id": "field_naturalist",
+      "xp": 200,
+      "wage_multiplier": 1.25,
+      "requires": [
+        {
+          "type": "fee",
+          "knuts": 493
+        },
+        {
+          "type": "bestiary_pages",
+          "min_tier": "OBSERVED",
+          "count": 5
+        }
+      ]
+    },
+    {
+      "id": "beast_keeper",
+      "xp": 600,
+      "wage_multiplier": 1.5,
+      "requires": [
+        {
+          "type": "fee",
+          "knuts": 986
+        },
+        {
+          "type": "activity_total",
+          "when": {
+            "activity": "bond_mastered"
+          },
+          "count": 1
+        },
+        {
+          "type": "contracts_completed",
+          "count": 2
+        }
+      ],
+      "rewards": [
+        {
+          "id": "wizards_and_beasts:enchanted_trunk",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "senior_magizoologist",
+      "xp": 1400,
+      "wage_multiplier": 2.0,
+      "requires": [
+        {
+          "type": "fee",
+          "knuts": 1972
+        },
+        {
+          "type": "research_completed",
+          "count": 3
+        },
+        {
+          "type": "activity_total",
+          "when": {
+            "activity": "creature_bred"
+          },
+          "count": 1
+        },
+        {
+          "type": "contracts_completed",
+          "count": 6
+        }
+      ],
+      "rewards": [
+        {
+          "id": "wizards_and_beasts:expanded_trunk",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "master_magizoologist",
+      "xp": 2800,
+      "wage_multiplier": 3.0,
+      "requires": [
+        {
+          "type": "fee",
+          "knuts": 2958
+        },
+        {
+          "type": "bestiary_pages",
+          "min_tier": "KNOWN",
+          "count": 6
+        },
+        {
+          "type": "bestiary_pages",
+          "min_tier": "KNOWN",
+          "count": 2,
+          "min_rating": 4
+        },
+        {
+          "type": "contracts_completed",
+          "count": 12
+        },
+        {
+          "type": "owl_grade",
+          "subject": "care_of_magical_creatures",
+          "grade": "O"
+        },
+        {
+          "type": "newt_grade",
+          "subject": "care_of_magical_creatures",
+          "grade": "A"
+        }
+      ],
+      "rewards": [
+        {
+          "id": "wizards_and_beasts:newts_case_item",
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "contracts": [
+    {
+      "id": "local_survey",
+      "min_rank": "trainee",
+      "objective": {
+        "type": "activity",
+        "when": {
+          "activity": "bestiary_tier",
+          "min_tier": "OBSERVED"
+        },
+        "count": 3,
+        "distinct": true
+      },
+      "duration_days": 4,
+      "cooldown_days": 1,
+      "weight": 10,
+      "reward": {
+        "knuts": 435,
+        "xp": 60
+      }
+    },
+    {
+      "id": "first_sightings",
+      "min_rank": "trainee",
+      "objective": {
+        "type": "activity",
+        "when": {
+          "activity": "bestiary_tier",
+          "min_tier": "ENCOUNTERED"
+        },
+        "count": 2,
+        "distinct": true
+      },
+      "duration_days": 5,
+      "cooldown_days": 1,
+      "weight": 10,
+      "reward": {
+        "knuts": 290,
+        "xp": 40
+      }
+    },
+    {
+      "id": "feeding_rounds",
+      "min_rank": "trainee",
+      "objective": {
+        "type": "activity",
+        "when": {
+          "activity": "creature_fed"
+        },
+        "count": 6
+      },
+      "duration_days": 2,
+      "cooldown_days": 1,
+      "weight": 10,
+      "reward": {
+        "knuts": 232,
+        "xp": 40
+      }
+    },
+    {
+      "id": "niffler_study",
+      "min_rank": "trainee",
+      "objective": {
+        "type": "activity",
+        "when": {
+          "activity": "bestiary_tier",
+          "min_tier": "STUDIED",
+          "species": [
+            "wizards_and_beasts:niffler"
+          ]
+        },
+        "count": 1
+      },
+      "duration_days": 5,
+      "cooldown_days": 3,
+      "weight": 6,
+      "reward": {
+        "knuts": 290,
+        "xp": 50
+      }
+    },
+    {
+      "id": "unicorn_hair",
+      "min_rank": "field_naturalist",
+      "objective": {
+        "type": "delivery",
+        "item": "wizards_and_beasts:unicorn_hair",
+        "count": 2
+      },
+      "duration_days": 6,
+      "cooldown_days": 2,
+      "weight": 10,
+      "reward": {
+        "knuts": 638,
+        "xp": 90
+      }
+    },
+    {
+      "id": "demiguise_hair",
+      "min_rank": "field_naturalist",
+      "objective": {
+        "type": "delivery",
+        "item": "wizards_and_beasts:demiguise_hair",
+        "count": 2
+      },
+      "duration_days": 6,
+      "cooldown_days": 2,
+      "weight": 10,
+      "reward": {
+        "knuts": 580,
+        "xp": 80
+      }
+    },
+    {
+      "id": "mooncalf_dung",
+      "min_rank": "field_naturalist",
+      "objective": {
+        "type": "delivery",
+        "item": "wizards_and_beasts:mooncalf_dung",
+        "count": 6
+      },
+      "duration_days": 4,
+      "cooldown_days": 2,
+      "weight": 10,
+      "reward": {
+        "knuts": 348,
+        "xp": 50
+      }
+    },
+    {
+      "id": "trust_programme",
+      "min_rank": "field_naturalist",
+      "objective": {
+        "type": "activity",
+        "when": {
+          "activity": "bond_milestone"
+        },
+        "count": 3
+      },
+      "duration_days": 6,
+      "cooldown_days": 1,
+      "weight": 10,
+      "reward": {
+        "knuts": 493,
+        "xp": 100
+      }
+    },
+    {
+      "id": "dangerous_survey",
+      "min_rank": "beast_keeper",
+      "objective": {
+        "type": "activity",
+        "when": {
+          "activity": "bestiary_tier",
+          "min_tier": "STUDIED",
+          "min_rating": 4
+        },
+        "count": 2,
+        "distinct": true
+      },
+      "duration_days": 7,
+      "cooldown_days": 2,
+      "weight": 10,
+      "reward": {
+        "knuts": 986,
+        "xp": 150
+      }
+    },
+    {
+      "id": "holly_for_ollivander",
+      "min_rank": "beast_keeper",
+      "objective": {
+        "type": "delivery",
+        "item": "wizards_and_beasts:holly_sapling",
+        "count": 1
+      },
+      "duration_days": 6,
+      "cooldown_days": 2,
+      "weight": 10,
+      "reward": {
+        "knuts": 638,
+        "xp": 100
+      }
+    },
+    {
+      "id": "grooming_round",
+      "min_rank": "beast_keeper",
+      "objective": {
+        "type": "activity",
+        "when": {
+          "activity": "creature_groomed"
+        },
+        "count": 2
+      },
+      "duration_days": 5,
+      "cooldown_days": 1,
+      "weight": 10,
+      "reward": {
+        "knuts": 493,
+        "xp": 80
+      }
+    },
+    {
+      "id": "breeding_programme",
+      "min_rank": "senior_magizoologist",
+      "objective": {
+        "type": "activity",
+        "when": {
+          "activity": "creature_bred",
+          "species": [
+            "wizards_and_beasts:mooncalf",
+            "wizards_and_beasts:bowtruckle"
+          ]
+        },
+        "count": 1
+      },
+      "duration_days": 8,
+      "cooldown_days": 3,
+      "weight": 10,
+      "reward": {
+        "knuts": 986,
+        "xp": 160
+      }
+    },
+    {
+      "id": "phoenix_feather",
+      "min_rank": "senior_magizoologist",
+      "objective": {
+        "type": "delivery",
+        "item": "wizards_and_beasts:phoenix_feather",
+        "count": 1
+      },
+      "duration_days": 10,
+      "cooldown_days": 4,
+      "weight": 5,
+      "reward": {
+        "knuts": 1972,
+        "xp": 220
+      }
+    },
+    {
+      "id": "research_paper",
+      "min_rank": "senior_magizoologist",
+      "objective": {
+        "type": "activity",
+        "when": {
+          "activity": "research_completed",
+          "min_rating": 3
+        },
+        "count": 1
+      },
+      "duration_days": 7,
+      "cooldown_days": 2,
+      "weight": 10,
+      "reward": {
+        "knuts": 1479,
+        "xp": 200
+      }
+    },
+    {
+      "id": "dragon_survey",
+      "min_rank": "senior_magizoologist",
+      "objective": {
+        "type": "activity",
+        "when": {
+          "activity": "bestiary_tier",
+          "min_tier": "STUDIED",
+          "species": [
+            "wizards_and_beasts:common_welsh_green"
+          ]
+        },
+        "count": 1
+      },
+      "duration_days": 8,
+      "cooldown_days": 4,
+      "weight": 5,
+      "reward": {
+        "knuts": 1972,
+        "xp": 250
+      }
+    },
+    {
+      "id": "rare_research",
+      "min_rank": "master_magizoologist",
+      "objective": {
+        "type": "activity",
+        "when": {
+          "activity": "research_completed",
+          "min_rating": 4
+        },
+        "count": 2,
+        "distinct": true
+      },
+      "duration_days": 12,
+      "cooldown_days": 4,
+      "weight": 10,
+      "reward": {
+        "knuts": 2958,
+        "xp": 300
+      }
+    },
+    {
+      "id": "field_partner",
+      "min_rank": "beast_keeper",
+      "objective": {
+        "type": "activity",
+        "when": {
+          "activity": "companion_trained"
+        },
+        "count": 1
+      },
+      "duration_days": 12,
+      "cooldown_days": 4,
+      "weight": 6,
+      "reward": {
+        "knuts": 1479,
+        "xp": 180
+      }
+    },
+    {
+      "id": "master_companion",
+      "min_rank": "senior_magizoologist",
+      "objective": {
+        "type": "activity",
+        "when": {
+          "activity": "companion_mastered"
+        },
+        "count": 1
+      },
+      "duration_days": 30,
+      "cooldown_days": 10,
+      "weight": 4,
+      "reward": {
+        "knuts": 4930,
+        "xp": 400
+      }
+    }
+  ]
+}

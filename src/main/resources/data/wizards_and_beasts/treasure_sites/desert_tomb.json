@@ -1,0 +1,27 @@
+{
+  "_comment": "Gringotts treasure site: which vanilla chests may carry a cursed artefact (treasure/TreasureSite). The chart handed out with an expedition contract points at the structure tag.",
+  "structures": "wizards_and_beasts:treasure_site/desert_tomb",
+  "loot_tables": [
+    "minecraft:chests/desert_pyramid"
+  ],
+  "chance": 0.12,
+  "expedition_chance": 0.8,
+  "value": {
+    "min": 290,
+    "max": 870
+  },
+  "layers": {
+    "min": 1,
+    "max": 2
+  },
+  "curses": [
+    "jinx",
+    "sealing",
+    "flagrante"
+  ],
+  "artefacts": [
+    "wizards_and_beasts:ancient_goblet",
+    "wizards_and_beasts:sealed_casket",
+    "wizards_and_beasts:tomb_medallion"
+  ]
+}

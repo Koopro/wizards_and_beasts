@@ -1,0 +1,28 @@
+{
+  "_comment": "Gringotts treasure site: which vanilla chests may carry a cursed artefact (treasure/TreasureSite). The chart handed out with an expedition contract points at the structure tag.",
+  "structures": "wizards_and_beasts:treasure_site/ancient_city",
+  "loot_tables": [
+    "minecraft:chests/ancient_city"
+  ],
+  "chance": 0.08,
+  "expedition_chance": 0.6,
+  "value": {
+    "min": 1450,
+    "max": 2900
+  },
+  "layers": {
+    "min": 3,
+    "max": 4
+  },
+  "curses": [
+    "withering",
+    "flagrante",
+    "jinx",
+    "sealing"
+  ],
+  "artefacts": [
+    "wizards_and_beasts:tomb_medallion",
+    "wizards_and_beasts:warded_amulet",
+    "wizards_and_beasts:sealed_casket"
+  ]
+}

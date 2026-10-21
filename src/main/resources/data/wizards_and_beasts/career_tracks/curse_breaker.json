@@ -1,0 +1,198 @@
+{
+  "_comment": "Curse-Breaker career track: the same work Gringotts pays for (treasure_returned, curse_broken) advances the career. Treasure contracts hand over a Gringotts chart when taken.",
+  "max_active": 2,
+  "board_size": 3,
+  "xp_rules": [
+    {
+      "when": {
+        "activity": "curse_broken"
+      },
+      "xp": 30,
+      "daily_cap": 120
+    },
+    {
+      "when": {
+        "activity": "treasure_returned"
+      },
+      "xp": 25,
+      "daily_cap": 100
+    }
+  ],
+  "ranks": [
+    {
+      "id": "apprentice",
+      "xp": 0
+    },
+    {
+      "id": "curse_breaker",
+      "xp": 300,
+      "wage_multiplier": 1.3,
+      "requires": [
+        {
+          "type": "fee",
+          "knuts": 493
+        },
+        {
+          "type": "activity_total",
+          "when": {
+            "activity": "curse_broken"
+          },
+          "count": 4
+        }
+      ]
+    },
+    {
+      "id": "senior_curse_breaker",
+      "xp": 900,
+      "wage_multiplier": 1.7,
+      "requires": [
+        {
+          "type": "fee",
+          "knuts": 1479
+        },
+        {
+          "type": "activity_total",
+          "when": {
+            "activity": "treasure_returned"
+          },
+          "count": 3,
+          "distinct": true
+        },
+        {
+          "type": "contracts_completed",
+          "count": 4
+        }
+      ]
+    },
+    {
+      "id": "master_curse_breaker",
+      "xp": 2000,
+      "wage_multiplier": 2.2,
+      "requires": [
+        {
+          "type": "fee",
+          "knuts": 2465
+        },
+        {
+          "type": "activity_total",
+          "when": {
+            "activity": "curse_broken"
+          },
+          "count": 4,
+          "distinct": true
+        },
+        {
+          "type": "contracts_completed",
+          "count": 10
+        }
+      ]
+    }
+  ],
+  "contracts": [
+    {
+      "id": "field_survey",
+      "min_rank": "apprentice",
+      "duration_days": 6,
+      "cooldown_days": 2,
+      "weight": 10,
+      "objective": {
+        "type": "activity",
+        "when": {
+          "activity": "treasure_returned",
+          "species": [
+            "wizards_and_beasts:desert_tomb"
+          ]
+        },
+        "count": 1
+      },
+      "reward": {
+        "knuts": 232,
+        "xp": 60
+      }
+    },
+    {
+      "id": "jinx_drill",
+      "min_rank": "apprentice",
+      "duration_days": 4,
+      "cooldown_days": 1,
+      "weight": 10,
+      "objective": {
+        "type": "activity",
+        "when": {
+          "activity": "curse_broken",
+          "species": [
+            "wizards_and_beasts:jinx"
+          ]
+        },
+        "count": 2
+      },
+      "reward": {
+        "knuts": 145,
+        "xp": 40
+      }
+    },
+    {
+      "id": "temple_survey",
+      "min_rank": "curse_breaker",
+      "duration_days": 6,
+      "cooldown_days": 2,
+      "weight": 10,
+      "objective": {
+        "type": "activity",
+        "when": {
+          "activity": "treasure_returned",
+          "species": [
+            "wizards_and_beasts:jungle_temple"
+          ]
+        },
+        "count": 1
+      },
+      "reward": {
+        "knuts": 435,
+        "xp": 80
+      }
+    },
+    {
+      "id": "withering_study",
+      "min_rank": "curse_breaker",
+      "duration_days": 6,
+      "cooldown_days": 1,
+      "weight": 10,
+      "objective": {
+        "type": "activity",
+        "when": {
+          "activity": "curse_broken",
+          "species": [
+            "wizards_and_beasts:withering"
+          ]
+        },
+        "count": 2
+      },
+      "reward": {
+        "knuts": 435,
+        "xp": 80
+      }
+    },
+    {
+      "id": "deep_dark_survey",
+      "min_rank": "senior_curse_breaker",
+      "duration_days": 10,
+      "cooldown_days": 4,
+      "weight": 10,
+      "objective": {
+        "type": "activity",
+        "when": {
+          "activity": "treasure_returned",
+          "species": [
+            "wizards_and_beasts:ancient_city"
+          ]
+        },
+        "count": 1
+      },
+      "reward": {
+        "knuts": 1479,
+        "xp": 200
+      }
+    }
+  ]
+}
