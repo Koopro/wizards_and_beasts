@@ -1,12 +1,17 @@
 package at.koopro.wizardsandbeasts.network;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.DecoderException;
 import net.minecraft.resources.Identifier;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
@@ -113,6 +118,37 @@ public final class PacketCodecUtils {
             throw new IllegalArgumentException("Invalid " + label + " count: " + count + " (max=" + max + ")");
         }
         return count;
+    }
+
+    /**
+     * Writes at most {@code max} items behind an int count. Over-long lists are cut, not refused:
+     * {@link #readList} throws on a count above the same {@code max}, so the two must agree on it.
+     */
+    public static <T> void writeList(ByteBuf buf, List<T> list, int max, BiConsumer<ByteBuf, T> writer) {
+        int count = Math.min(list.size(), max);
+        buf.writeInt(count);
+        for (int i = 0; i < count; i++) {
+            writer.accept(buf, list.get(i));
+        }
+    }
+
+    /** Reads a list written by {@link #writeList}; a count outside {@code [0, max]} fails the decode. */
+    public static <T> List<T> readList(ByteBuf buf, int max, String what, Function<ByteBuf, T> reader) {
+        int count = readBoundedCount(buf, max, what);
+        List<T> out = new ArrayList<>(count);
+        for (int i = 0; i < count; i++) {
+            out.add(reader.apply(buf));
+        }
+        return List.copyOf(out);
+    }
+
+    /** Reads an enum written as its ordinal byte; an unknown ordinal fails the decode. */
+    public static <E extends Enum<E>> E readEnum(ByteBuf buf, E[] values, String what) {
+        int ordinal = buf.readByte();
+        if (ordinal < 0 || ordinal >= values.length) {
+            throw new DecoderException("unknown " + what + " " + ordinal);
+        }
+        return values[ordinal];
     }
 
     public static int clampNonNegative(int value) {

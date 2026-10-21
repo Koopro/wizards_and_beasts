@@ -12,10 +12,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jspecify.annotations.NullMarked;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
+
+import static at.koopro.wizardsandbeasts.network.PacketCodecUtils.writeList;
+import static at.koopro.wizardsandbeasts.network.PacketCodecUtils.readList;
 
 /**
  * The Creatures section's payloads. Rule edits are not here — they are ordinary settings and travel as
@@ -102,23 +102,6 @@ public final class AdminCreaturePayloads {
             return new VariantInfo(PacketCodecUtils.readString(buf), PacketCodecUtils.readString(buf), buf.readInt(),
                     buf.readInt(), buf.readBoolean());
         }
-    }
-
-    private static <T> void writeList(ByteBuf buf, List<T> list, int max, BiConsumer<ByteBuf, T> writer) {
-        int count = Math.min(list.size(), max);
-        buf.writeInt(count);
-        for (int i = 0; i < count; i++) {
-            writer.accept(buf, list.get(i));
-        }
-    }
-
-    private static <T> List<T> readList(ByteBuf buf, int max, String what, Function<ByteBuf, T> reader) {
-        int count = PacketCodecUtils.readBoundedCount(buf, max, what);
-        List<T> out = new ArrayList<>(count);
-        for (int i = 0; i < count; i++) {
-            out.add(reader.apply(buf));
-        }
-        return List.copyOf(out);
     }
 
     // ── client → server ──

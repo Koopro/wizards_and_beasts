@@ -16,10 +16,10 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
+
+import static at.koopro.wizardsandbeasts.network.PacketCodecUtils.writeList;
+import static at.koopro.wizardsandbeasts.network.PacketCodecUtils.readList;
 
 /**
  * The Wands section's payloads: the catalog (woods, cores, pairings, presets and their rule settings), a generator
@@ -95,23 +95,6 @@ public final class AdminWandPayloads {
     static WandAdminService.Request readRequest(ByteBuf buf) {
         return new WandAdminService.Request(PacketCodecUtils.readString(buf), PacketCodecUtils.readString(buf),
                 buf.readFloat(), PacketCodecUtils.readString(buf), PacketCodecUtils.readString(buf));
-    }
-
-    private static <T> void writeList(ByteBuf buf, List<T> list, int max, BiConsumer<ByteBuf, T> writer) {
-        int count = Math.min(list.size(), max);
-        buf.writeInt(count);
-        for (int i = 0; i < count; i++) {
-            writer.accept(buf, list.get(i));
-        }
-    }
-
-    private static <T> List<T> readList(ByteBuf buf, int max, String what, Function<ByteBuf, T> reader) {
-        int count = PacketCodecUtils.readBoundedCount(buf, max, what);
-        List<T> out = new ArrayList<>(count);
-        for (int i = 0; i < count; i++) {
-            out.add(reader.apply(buf));
-        }
-        return List.copyOf(out);
     }
 
     private static boolean authorised(ServerPlayer player, String what) {

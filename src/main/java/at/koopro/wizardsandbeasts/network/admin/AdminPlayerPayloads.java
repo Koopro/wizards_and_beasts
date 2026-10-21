@@ -15,7 +15,6 @@ import at.koopro.wizardsandbeasts.client.admin.AdminClientHandlers;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
 import com.mojang.logging.LogUtils;
 import io.netty.buffer.ByteBuf;
-import io.netty.handler.codec.DecoderException;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
@@ -26,11 +25,12 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
+
+import static at.koopro.wizardsandbeasts.network.PacketCodecUtils.writeList;
+import static at.koopro.wizardsandbeasts.network.PacketCodecUtils.readList;
+import static at.koopro.wizardsandbeasts.network.PacketCodecUtils.readEnum;
 
 /**
  * The Players section on the wire: search, one facet of one player, one action, the action log. Requests name a
@@ -59,33 +59,8 @@ public final class AdminPlayerPayloads {
 
     // ── list helpers ──
 
-    private static <T> void writeList(ByteBuf buf, List<T> list, int max, BiConsumer<ByteBuf, T> writer) {
-        int count = Math.min(list.size(), max);
-        buf.writeInt(count);
-        for (int i = 0; i < count; i++) {
-            writer.accept(buf, list.get(i));
-        }
-    }
-
-    private static <T> List<T> readList(ByteBuf buf, int max, String what, Function<ByteBuf, T> reader) {
-        int count = PacketCodecUtils.readBoundedCount(buf, max, what);
-        List<T> out = new ArrayList<>(count);
-        for (int i = 0; i < count; i++) {
-            out.add(reader.apply(buf));
-        }
-        return List.copyOf(out);
-    }
-
     private static String clip(String text, int max) {
         return text.length() <= max ? text : text.substring(0, max);
-    }
-
-    private static <E extends Enum<E>> E readEnum(ByteBuf buf, E[] values, String what) {
-        int ordinal = buf.readByte();
-        if (ordinal < 0 || ordinal >= values.length) {
-            throw new DecoderException("unknown " + what + " " + ordinal);
-        }
-        return values[ordinal];
     }
 
     // ── wire records ──

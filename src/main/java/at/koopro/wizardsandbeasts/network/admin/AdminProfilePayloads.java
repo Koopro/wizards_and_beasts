@@ -25,10 +25,10 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
+
+import static at.koopro.wizardsandbeasts.network.PacketCodecUtils.writeList;
+import static at.koopro.wizardsandbeasts.network.PacketCodecUtils.readList;
 
 /**
  * The Profiles section: the profile and snapshot library, the change history, the importable files, a profile's
@@ -209,23 +209,6 @@ public final class AdminProfilePayloads {
     private static ProfileDocument.Kind kind(int ordinal) {
         ProfileDocument.Kind[] kinds = ProfileDocument.Kind.values();
         return ordinal >= 0 && ordinal < kinds.length ? kinds[ordinal] : ProfileDocument.Kind.CUSTOM;
-    }
-
-    private static <T> void writeList(ByteBuf buf, List<T> list, int max, BiConsumer<ByteBuf, T> writer) {
-        int count = Math.min(list.size(), max);
-        buf.writeInt(count);
-        for (int i = 0; i < count; i++) {
-            writer.accept(buf, list.get(i));
-        }
-    }
-
-    private static <T> List<T> readList(ByteBuf buf, int max, String what, Function<ByteBuf, T> reader) {
-        int count = PacketCodecUtils.readBoundedCount(buf, max, what);
-        List<T> out = new ArrayList<>(count);
-        for (int i = 0; i < count; i++) {
-            out.add(reader.apply(buf));
-        }
-        return List.copyOf(out);
     }
 
     private static List<IssueRow> issues(List<ProfileCodec.Issue> issues) {

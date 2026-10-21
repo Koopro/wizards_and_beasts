@@ -16,7 +16,6 @@ import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
 import at.koopro.wizardsandbeasts.util.PlayerScopedState;
 import com.mojang.logging.LogUtils;
 import io.netty.buffer.ByteBuf;
-import io.netty.handler.codec.DecoderException;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
@@ -26,12 +25,12 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import static at.koopro.wizardsandbeasts.network.PacketCodecUtils.readEnum;
 
 /**
  * The Performance and Debug sections on the wire. Metrics and diagnostics are read on request by an open page (at most
@@ -55,32 +54,15 @@ public final class AdminOpsPayloads {
     }
 
     private static <T> void writeList(ByteBuf buf, List<T> list, BiConsumer<ByteBuf, T> writer) {
-        int count = Math.min(list.size(), MAX_LIST);
-        buf.writeInt(count);
-        for (int i = 0; i < count; i++) {
-            writer.accept(buf, list.get(i));
-        }
+        PacketCodecUtils.writeList(buf, list, MAX_LIST, writer);
     }
 
     private static <T> List<T> readList(ByteBuf buf, String what, Function<ByteBuf, T> reader) {
-        int count = PacketCodecUtils.readBoundedCount(buf, MAX_LIST, what);
-        List<T> out = new ArrayList<>(count);
-        for (int i = 0; i < count; i++) {
-            out.add(reader.apply(buf));
-        }
-        return List.copyOf(out);
+        return PacketCodecUtils.readList(buf, MAX_LIST, what, reader);
     }
 
     private static String clip(String text) {
         return text.length() <= 200 ? text : text.substring(0, 200);
-    }
-
-    private static <E extends Enum<E>> E readEnum(ByteBuf buf, E[] values, String what) {
-        int ordinal = buf.readByte();
-        if (ordinal < 0 || ordinal >= values.length) {
-            throw new DecoderException("unknown " + what + " " + ordinal);
-        }
-        return values[ordinal];
     }
 
     /** Whether this request may run now; refreshes the stamp when it may. */
