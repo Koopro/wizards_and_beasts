@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.creature.ability;
 
+import at.koopro.wizardsandbeasts.creature.schedule.AiCadence;
 import at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -68,7 +69,7 @@ public record OccamyChoranaptyxis(float minScale, float maxScale, float calmScal
 
     @Override
     public void tick(@NonNull GenericBeastEntity entity) {
-        if (entity.level().isClientSide() || entity.tickCount % INTERVAL != 0) {
+        if (entity.level().isClientSide() || !AiCadence.every(entity, INTERVAL)) {
             return;
         }
         float floor = Math.min(minScale, maxScale);

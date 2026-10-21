@@ -23,6 +23,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -77,11 +78,27 @@ public final class AbilitySupport {
         }
     }
 
-    /** Living players within {@code radius} of the entity (server-side AoE source). */
+    /**
+     * Living players within {@code radius} of the entity (server-side AoE source).
+     *
+     * <p>Walks the level's player list — a handful of entries — instead of an entity query over every section in a
+     * {@code radius} box, which is the vanilla way to find players ({@code getNearestPlayer} does the same). Same
+     * answer: a player within {@code radius} of the creature always overlaps the old query box. No list is made when
+     * nobody is near, which is nearly always for abilities that ask every tick while off cooldown.
+     */
     public static List<Player> nearbyPlayers(@NonNull Mob source, double radius) {
-        AABB box = source.getBoundingBox().inflate(radius);
-        return source.level().getEntitiesOfClass(Player.class, box,
-                p -> p.isAlive() && !p.isCreative() && !p.isSpectator() && source.distanceToSqr(p) <= radius * radius);
+        double radiusSqr = radius * radius;
+        List<Player> found = null;
+        for (Player player : source.level().players()) {
+            if (player.isAlive() && !player.isCreative() && !player.isSpectator()
+                    && source.distanceToSqr(player) <= radiusSqr) {
+                if (found == null) {
+                    found = new ArrayList<>(2);
+                }
+                found.add(player);
+            }
+        }
+        return found == null ? List.of() : found;
     }
 
     /** Living non-self entities within {@code radius} (for heal auras / leech targeting). */

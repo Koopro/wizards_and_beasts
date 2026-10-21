@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.entity.creature;
 
 import at.koopro.wizardsandbeasts.entity.BeastNavigation;
+import at.koopro.wizardsandbeasts.entity.creature.ai.DirectFlightWanderGoal;
 import at.koopro.wizardsandbeasts.util.AnimHelper;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.PathfinderMob;
@@ -25,7 +26,14 @@ public class GenericFlyingBeastEntity extends GenericBeastEntity {
 
     @Override
     protected void addMovementGoals() {
-        goalSelector.addGoal(5, new WaterAvoidingRandomFlyingGoal(this, 1.0));
+        // A large body wanders by straight, collision-checked flight (vanilla's Ghast pattern); planning each wander
+        // with the 3D path finder costs milliseconds for a dragon-sized box. Small fliers keep the planned flight,
+        // which is cheap for them and threads them between leaves and branches.
+        if (getBbWidth() >= DirectFlightWanderGoal.LARGE_BODY_WIDTH) {
+            goalSelector.addGoal(5, new DirectFlightWanderGoal(this, 1.0));
+        } else {
+            goalSelector.addGoal(5, new WaterAvoidingRandomFlyingGoal(this, 1.0));
+        }
     }
 
     @Override

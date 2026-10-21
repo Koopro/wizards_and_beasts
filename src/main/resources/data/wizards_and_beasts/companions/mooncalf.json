@@ -1,0 +1,43 @@
+{
+  "_comment": "Shy moon-dancer: nothing to fight with, everything to grow with \u2014 its dung is a gardener's treasure.",
+  "trait_pool": [
+    {
+      "trait": "skittish",
+      "weight": 5
+    },
+    {
+      "trait": "playful",
+      "weight": 3
+    },
+    {
+      "trait": "curious",
+      "weight": 2
+    }
+  ],
+  "commands": [
+    "follow",
+    "stay",
+    "rest",
+    "return"
+  ],
+  "abilities": [
+    {
+      "kind": "innate",
+      "id": "moon_dance"
+    },
+    {
+      "kind": "innate",
+      "id": "fertile_dung"
+    }
+  ],
+  "favourite": "minecraft:beetroot",
+  "breeding": {
+    "habitat": {
+      "needs_sky": true,
+      "blocks": "minecraft:dirt",
+      "count": 8,
+      "radius": 4
+    },
+    "mutation_chance": 0.2
+  }
+}

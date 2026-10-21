@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.creature.ability;
 
+import at.koopro.wizardsandbeasts.creature.schedule.AiCadence;
 import at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -29,7 +30,7 @@ public record Anchor(double radius, int slowAmplifier) implements CreatureAbilit
 
     @Override
     public void tick(@NonNull GenericBeastEntity entity) {
-        if (!(entity.level() instanceof ServerLevel level) || entity.tickCount % 20 != 0 || !entity.isInWater()) {
+        if (!(entity.level() instanceof ServerLevel level) || !AiCadence.every(entity, 20) || !entity.isInWater()) {
             return;
         }
         for (LivingEntity target : AbilitySupport.nearbyLiving(entity, radius)) {

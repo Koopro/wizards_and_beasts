@@ -558,9 +558,7 @@ public class DuellingDummyEntity extends Mob {
         if (!held.isEmpty()) {
             held.shrink(1);
         }
-        if (!worn.isEmpty() && !player.getInventory().add(worn)) {
-            player.drop(worn, false);
-        }
+        at.koopro.wizardsandbeasts.util.InventoryHandover.giveOrDrop(player, worn);
         this.playSound(SoundEvents.ARMOR_EQUIP_LEATHER.value(), 0.7f, 1.0f);
         return true;
     }

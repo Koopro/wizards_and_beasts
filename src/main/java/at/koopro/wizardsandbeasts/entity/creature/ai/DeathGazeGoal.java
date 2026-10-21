@@ -104,8 +104,11 @@ public final class DeathGazeGoal extends Goal {
         Vec3 facing = Vec3.directionFromRotation(0, mob.getYHeadRot());
         Set<UUID> seen = new HashSet<>();
         boolean landedNew = false;
-        for (Player player : level.getEntitiesOfClass(Player.class, mob.getBoundingBox().inflate(BasiliskGaze.RANGE + 4),
-                p -> p.isAlive() && !p.isSpectator())) {
+        net.minecraft.world.phys.AABB reach = mob.getBoundingBox().inflate(BasiliskGaze.RANGE + 4);
+        for (Player player : level.players()) {
+            if (!player.isAlive() || player.isSpectator() || !reach.intersects(player.getBoundingBox())) {
+                continue;
+            }
             BasiliskGaze.Outcome outcome = BasiliskGaze.evaluate(level, eyes, facing, player);
             if (outcome == BasiliskGaze.Outcome.NONE) {
                 continue;
@@ -170,8 +173,11 @@ public final class DeathGazeGoal extends Goal {
     private void debuffGaze() {
         Vec3 mobEye = mob.getEyePosition();
         boolean gazed = false;
-        for (Player player : mob.level().getEntitiesOfClass(Player.class, mob.getBoundingBox().inflate(DEBUFF_RANGE),
-                p -> p.isAlive() && !p.isSpectator())) {
+        net.minecraft.world.phys.AABB reach = mob.getBoundingBox().inflate(DEBUFF_RANGE);
+        for (Player player : mob.level().players()) {
+            if (!player.isAlive() || player.isSpectator() || !reach.intersects(player.getBoundingBox())) {
+                continue;
+            }
             if (isGazeImmune(player) || !mob.hasLineOfSight(player)) {
                 continue;
             }

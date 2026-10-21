@@ -1,0 +1,9 @@
+{
+  "capabilities": [
+    "territorial",
+    "aggressive",
+    "predator"
+  ],
+  "territory_radius": 12,
+  "sense_radius": 16
+}

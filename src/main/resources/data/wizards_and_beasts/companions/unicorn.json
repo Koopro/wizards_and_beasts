@@ -1,0 +1,43 @@
+{
+  "_comment": "Pure and wary: heals its friend, and feels the Dark before it arrives.",
+  "trait_pool": [
+    {
+      "trait": "skittish",
+      "weight": 4
+    },
+    {
+      "trait": "loyal",
+      "weight": 3
+    },
+    {
+      "trait": "curious",
+      "weight": 2
+    }
+  ],
+  "commands": [
+    "follow",
+    "stay",
+    "rest",
+    "return",
+    "assist",
+    "search"
+  ],
+  "abilities": [
+    {
+      "kind": "heal_owner",
+      "amount": 5.0,
+      "cooldown_seconds": 90
+    },
+    {
+      "kind": "reveal",
+      "target": "dark",
+      "radius": 24,
+      "cooldown_seconds": 120
+    },
+    {
+      "kind": "innate",
+      "id": "purity"
+    }
+  ],
+  "favourite": "minecraft:golden_apple"
+}

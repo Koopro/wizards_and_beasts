@@ -65,7 +65,19 @@ public class FollowBondedOwnerGoal<T extends PathfinderMob & BondableBeast> exte
         if (owner == null || !owner.isAlive() || owner.isSpectator()) {
             return false;
         }
-        return beast.distanceToSqr(owner) > START_DISTANCE * START_DISTANCE;
+        double start = START_DISTANCE * distanceFactor();
+        return beast.distanceToSqr(owner) > start * start;
+    }
+
+    /** A loyal creature keeps closer, a territorial one lets you get further ahead. */
+    private double distanceFactor() {
+        double factor = 1.0;
+        for (at.koopro.wizardsandbeasts.creature.companion.PersonalityTrait trait
+                : at.koopro.wizardsandbeasts.creature.companion.Companions.traits(
+                        at.koopro.wizardsandbeasts.creature.companion.Companions.memory(beast))) {
+            factor *= trait.followDistance();
+        }
+        return factor;
     }
 
     @Override
@@ -73,7 +85,8 @@ public class FollowBondedOwnerGoal<T extends PathfinderMob & BondableBeast> exte
         if (owner == null || !owner.isAlive() || !extraCondition.test(beast)) {
             return false;
         }
-        return beast.distanceToSqr(owner) > STOP_DISTANCE * STOP_DISTANCE;
+        double stop = STOP_DISTANCE * distanceFactor();
+        return beast.distanceToSqr(owner) > stop * stop;
     }
 
     @Override

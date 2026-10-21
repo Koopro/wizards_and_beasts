@@ -1,0 +1,42 @@
+{
+  "_comment": "Proud and dangerous: bow first. Carries its rider through the air and fights at your side.",
+  "trait_pool": [
+    {
+      "trait": "brave",
+      "weight": 4
+    },
+    {
+      "trait": "aggressive",
+      "weight": 3
+    },
+    {
+      "trait": "territorial",
+      "weight": 2
+    },
+    {
+      "trait": "loyal",
+      "weight": 2
+    }
+  ],
+  "commands": [
+    "follow",
+    "stay",
+    "rest",
+    "return",
+    "defend",
+    "attack",
+    "patrol"
+  ],
+  "abilities": [
+    {
+      "kind": "innate",
+      "id": "mount"
+    },
+    {
+      "kind": "innate",
+      "id": "aerial_travel"
+    }
+  ],
+  "can_fight": true,
+  "favourite": "minecraft:rabbit"
+}

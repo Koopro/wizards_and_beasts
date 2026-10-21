@@ -1,0 +1,9 @@
+{
+  "_comment": "Quick to fight for you and slow to be soothed; guards you untold.",
+  "bond_multipliers": {
+    "combat": 1.5,
+    "care": 0.75
+  },
+  "guards_owner": true,
+  "flee_below_health": 0.0
+}

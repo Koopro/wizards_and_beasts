@@ -1,0 +1,45 @@
+{
+  "_comment": "Healer and cleanser: its tears close wounds, and it is reborn from its ashes.",
+  "trait_pool": [
+    {
+      "trait": "loyal",
+      "weight": 5
+    },
+    {
+      "trait": "brave",
+      "weight": 3
+    },
+    {
+      "trait": "playful",
+      "weight": 2
+    }
+  ],
+  "commands": [
+    "follow",
+    "stay",
+    "rest",
+    "return",
+    "assist",
+    "defend"
+  ],
+  "abilities": [
+    {
+      "kind": "heal_owner",
+      "amount": 8.0,
+      "cooldown_seconds": 120
+    },
+    {
+      "kind": "cleanse_owner",
+      "cooldown_seconds": 180
+    },
+    {
+      "kind": "innate",
+      "id": "rebirth"
+    },
+    {
+      "kind": "innate",
+      "id": "flame_travel"
+    }
+  ],
+  "can_fight": true
+}

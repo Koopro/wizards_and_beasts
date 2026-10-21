@@ -211,6 +211,8 @@ public class GoblinTellerEntity extends GeoEntityBase {
             }
             // The server's record of the visit: vault actions are honoured only at this counter.
             at.koopro.wizardsandbeasts.currency.vault.GringottsCounter.admit(serverPlayer, this);
+            // And at Gringotts as a place: the vault screen's "bank business" opens the bank's board from here.
+            at.koopro.wizardsandbeasts.location.LocationPresence.admit(serverPlayer, this);
             // "The goblin bowed them through the silver doors." Fires as the vault screen opens.
             triggerAnim(ACTION_CONTROLLER, "bow");
             // Walking up to the counter is what moves the rate: a fresh roll here, and the same

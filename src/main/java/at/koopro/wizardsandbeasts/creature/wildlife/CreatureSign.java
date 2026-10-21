@@ -86,7 +86,8 @@ public final class CreatureSign {
         }
         EntityType<?> species = speciesOf(event.getItemEntity());
         if (species != null) {
-            BestiaryDiscoveryHandler.studied(player, species);
+            BestiaryDiscoveryHandler.studied(player, species,
+                    at.koopro.wizardsandbeasts.bestiary.CreatureProfile.StudyAct.HARVEST);
         }
     }
 }

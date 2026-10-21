@@ -1,0 +1,9 @@
+{
+  "capabilities": [
+    "human-avoidant",
+    "illusion-aware",
+    "cowardly",
+    "climbing"
+  ],
+  "sense_radius": 16
+}

@@ -1,0 +1,10 @@
+{
+  "capabilities": [
+    "aquatic",
+    "territorial",
+    "social",
+    "magical-sense"
+  ],
+  "territory_radius": 16,
+  "sense_radius": 20
+}

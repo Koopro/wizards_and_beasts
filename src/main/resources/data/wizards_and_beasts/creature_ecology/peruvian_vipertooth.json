@@ -1,0 +1,11 @@
+{
+  "capabilities": [
+    "predator",
+    "territorial",
+    "aggressive",
+    "flying"
+  ],
+  "territory_radius": 32,
+  "sense_radius": 32,
+  "fed_ticks": 24000
+}

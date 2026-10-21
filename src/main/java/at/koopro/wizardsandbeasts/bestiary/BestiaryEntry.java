@@ -36,7 +36,9 @@ public record BestiaryEntry(
          * The creature as a living animal — classification, diet, behaviour, society, materials, how to study it.
          * Optional so a datapack entry written before profiles existed still loads; every shipped entry has one.
          */
-        Optional<CreatureProfile> profile) {
+        Optional<CreatureProfile> profile,
+        // Optional `journal` block: art overrides and the signature caption (field journal).
+        at.koopro.wizardsandbeasts.bestiary.journal.JournalArt journal) {
 
     /**
      * The sixteen original fields. {@code RecordCodecBuilder.group} stops at sixteen, so the profile is a second
@@ -69,19 +71,21 @@ public record BestiaryEntry(
     ).apply(instance, Core::new));
 
     public static final Codec<BestiaryEntry> CODEC = Codec.mapPair(CORE,
-                    CreatureProfile.CODEC.optionalFieldOf("profile"))
+                    Codec.mapPair(CreatureProfile.CODEC.optionalFieldOf("profile"),
+                            at.koopro.wizardsandbeasts.bestiary.journal.JournalArt.CODEC.optionalFieldOf("journal",
+                                    at.koopro.wizardsandbeasts.bestiary.journal.JournalArt.NONE)))
             .codec()
             .xmap(pair -> {
                 Core c = pair.getFirst();
                 return new BestiaryEntry(c.id(), c.displayNameKey(), c.category(), c.mmRating(), c.habitatKey(),
                         c.size(), c.shortLoreKey(), c.fullLoreKey(), c.magicAbilityKeys(), c.threatKeys(),
                         c.weaknessKeys(), c.encounterTrigger(), c.entityType(), c.iconTexture(),
-                        c.silhouetteTexture(), c.sortOrder(), pair.getSecond());
+                        c.silhouetteTexture(), c.sortOrder(), pair.getSecond().getFirst(), pair.getSecond().getSecond());
             }, entry -> com.mojang.datafixers.util.Pair.of(new Core(entry.id(), entry.displayNameKey(),
                     entry.category(), entry.mmRating(), entry.habitatKey(), entry.size(), entry.shortLoreKey(),
                     entry.fullLoreKey(), entry.magicAbilityKeys(), entry.threatKeys(), entry.weaknessKeys(),
                     entry.encounterTrigger(), entry.entityType(), entry.iconTexture(), entry.silhouetteTexture(),
-                    entry.sortOrder()), entry.profile()));
+                    entry.sortOrder()), com.mojang.datafixers.util.Pair.of(entry.profile(), entry.journal())));
 
     public Component displayName() { return Component.translatable(displayNameKey); }
     public Component habitat() { return Component.translatable(habitatKey); }

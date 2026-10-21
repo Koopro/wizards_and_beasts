@@ -1,0 +1,7 @@
+{
+  "_comment": "Stands its ground: never breaks off a fight, and a fight won together means more to it.",
+  "bond_multipliers": {
+    "combat": 1.5
+  },
+  "flee_below_health": 0.0
+}

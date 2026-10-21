@@ -1,0 +1,12 @@
+{
+  "_comment": "Shies from violence until it trusts you completely; bolts when hurt; loves gentle care.",
+  "bond_multipliers": {
+    "care": 1.5,
+    "combat": 0.5
+  },
+  "refuses": [
+    "attack",
+    "defend"
+  ],
+  "flee_below_health": 0.5
+}

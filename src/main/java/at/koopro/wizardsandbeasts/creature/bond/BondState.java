@@ -33,6 +33,7 @@ public final class BondState {
     private static final String KEY_BREED_COOLDOWN = "BreedCooldown";
     private static final String KEY_GROWTH_TICKS = "GrowthTicks";
     private static final String KEY_JUVENILE = "Juvenile";
+    private static final String KEY_COMPANION = "Companion";
 
     @Nullable
     private UUID ownerUUID;
@@ -44,6 +45,31 @@ public final class BondState {
     /** Ticks a juvenile has left to grow. Zero on an adult, which is what {@link #juvenile} means. */
     private int growthTicks;
     private boolean juvenile;
+
+    /** Personality, training, trust and history ({@code creature.companion}); empty for a creature never bonded. */
+    private at.koopro.wizardsandbeasts.creature.companion.CompanionMemory companion =
+            at.koopro.wizardsandbeasts.creature.companion.CompanionMemory.EMPTY;
+
+    /** Seconds counted by the companion tick; transient, it only staggers slow work. */
+    private int companionSeconds;
+    /** Chunks recently walked together, for the exploration bond; transient by design. */
+    private final java.util.LinkedHashSet<Long> visitedChunks = new java.util.LinkedHashSet<>();
+
+    public int nextCompanionSecond() {
+        return companionSeconds++;
+    }
+
+    /** Records a chunk walked together; true when it is new to this creature's recent memory. */
+    public boolean visitChunk(long chunk) {
+        if (visitedChunks.contains(chunk)) {
+            return false;
+        }
+        visitedChunks.add(chunk);
+        while (visitedChunks.size() > 64) {
+            visitedChunks.remove(visitedChunks.iterator().next());
+        }
+        return visitedChunks.size() > 1;
+    }
 
     /** Company accrued toward the next proximity tick. Transient by design — the Niffler's was too. */
     private int proximityTicks;
@@ -69,6 +95,14 @@ public final class BondState {
 
     public int level() {
         return level;
+    }
+
+    public at.koopro.wizardsandbeasts.creature.companion.CompanionMemory companion() {
+        return companion;
+    }
+
+    public void setCompanion(at.koopro.wizardsandbeasts.creature.companion.CompanionMemory next) {
+        this.companion = next;
     }
 
     /** Set the bond, clamped into {@code [0, maxBond]}. Returns the level actually stored. */
@@ -176,6 +210,9 @@ public final class BondState {
             output.store(KEY_JUVENILE, Codec.BOOL, true);
             output.store(KEY_GROWTH_TICKS, Codec.INT, growthTicks);
         }
+        if (!companion.equals(at.koopro.wizardsandbeasts.creature.companion.CompanionMemory.EMPTY)) {
+            output.store(KEY_COMPANION, at.koopro.wizardsandbeasts.creature.companion.CompanionMemory.CODEC, companion);
+        }
     }
 
     /**
@@ -192,6 +229,8 @@ public final class BondState {
         setBreedCooldown(input.read(KEY_BREED_COOLDOWN, Codec.INT).orElse(0));
         juvenile = input.read(KEY_JUVENILE, Codec.BOOL).orElse(false);
         growthTicks = juvenile ? Math.max(0, input.read(KEY_GROWTH_TICKS, Codec.INT).orElse(0)) : 0;
+        companion = input.read(KEY_COMPANION, at.koopro.wizardsandbeasts.creature.companion.CompanionMemory.CODEC)
+                .orElse(at.koopro.wizardsandbeasts.creature.companion.CompanionMemory.EMPTY);
         proximityTicks = 0;
         loveTicks = 0;
     }

@@ -150,8 +150,10 @@ heavy one rarely and slowly (300/700).
 
 ## Reaction vocabulary
 
-Use `CreatureReaction`. **Most stimuli have no event raising them yet** — this is intended design
-documentation, not a request to wire events. Record only reactions with a real rationale.
+Use `CreatureReaction`. **Since 2026-10-06 `SPELL`, `CREATURE_DEATH` and `DAMAGE` are raised** (`CreatureStimuli`,
+`CREATURE_ECOLOGY.md` §5), and a creature that declares no reaction answers from its ecology profile. `PLAYER`,
+`LIGHT`, `DARKNESS`, `FIRE` and `ENVIRONMENT` are still not raised. The per-creature "Ecology" lines below are now
+data in `creature_ecology/<id>.json`. Record only reactions with a real rationale.
 
 Roster-wide conventions:
 - `FEARFUL` creatures (12) already panic on damage through vanilla goals. Do not duplicate that with a

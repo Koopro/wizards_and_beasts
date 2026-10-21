@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.creature.ability;
 
+import at.koopro.wizardsandbeasts.creature.schedule.AiCadence;
 import at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity;
 import at.koopro.wizardsandbeasts.entity.creature.ai.SeekFireGoal;
 import com.mojang.serialization.Codec;
@@ -87,7 +88,7 @@ public record FireAffinity(
         boolean inFire = isInFireOrLava(entity);
         if (inFire) {
             entity.setFireDryTicks(0);
-            if (regenInFire > 0 && entity.tickCount % 20 == 0 && entity.getHealth() < entity.getMaxHealth()) {
+            if (regenInFire > 0 && AiCadence.every(entity, 20) && entity.getHealth() < entity.getMaxHealth()) {
                 entity.heal(regenInFire);
             }
         } else if (requiresFire) {

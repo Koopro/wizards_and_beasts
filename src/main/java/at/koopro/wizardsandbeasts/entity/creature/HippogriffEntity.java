@@ -342,7 +342,7 @@ public class HippogriffEntity extends GenericFlyingBeastEntity implements Winged
             return fed;
         }
         if (bondLevel() < WildlifeRules.HIPPOGRIFF_RIDE_BOND
-                || (bondOwner() != null && !bondOwner().equals(player.getUUID()))) {
+                || !at.koopro.wizardsandbeasts.creature.companion.Companions.mayHandle(this, player)) {
             PlayerFeedback.actionBar(player, Component.translatable("creature.wizards_and_beasts.hippogriff.not_yet"));
             return InteractionResult.SUCCESS;
         }

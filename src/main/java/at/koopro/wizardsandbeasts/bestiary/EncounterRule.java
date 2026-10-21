@@ -35,6 +35,13 @@ public final class EncounterRule {
     /** Blocks a player may be from a creature and still be watching it. */
     public static final double OBSERVATION_RANGE = 16.0;
 
+    /**
+     * How much further a player on a broom sees and watches a creature that is off the ground. A Thestral or a
+     * Hippogriff on the wing is out of reach from the ground and in plain view from a broom alongside it, which is
+     * what makes aerial work a way to study flying beasts.
+     */
+    public static final double AERIAL_RANGE_SCALE = 2.0;
+
     /** Thirty seconds of calm watching. */
     public static final int OBSERVED_TICKS = 600;
 

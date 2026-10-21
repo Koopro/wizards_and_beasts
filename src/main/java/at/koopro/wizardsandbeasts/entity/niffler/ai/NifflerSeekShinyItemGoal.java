@@ -64,6 +64,8 @@ public class NifflerSeekShinyItemGoal extends Goal {
         if (niffler.distanceToSqr(t) < REACH_SQR) {
             niffler.pickUp(t);
             target = null;
+            // Treasure vanishing into a pouch far smaller than it is the Niffler's signature: whoever sees it, knows it.
+            at.koopro.wizardsandbeasts.event.bestiary.BestiaryDiscoveryHandler.signatureSeenByNearby(niffler, 16.0);
         } else if (niffler.getNavigation().isDone() || niffler.tickCount % 10 == 0) {
             niffler.getNavigation().moveTo(t, 1.25);
         }

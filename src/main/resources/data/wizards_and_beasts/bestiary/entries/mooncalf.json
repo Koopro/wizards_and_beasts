@@ -45,5 +45,8 @@
       "bond"
     ],
     "signature": "bestiary.wizards_and_beasts.mooncalf.signature"
+  },
+  "journal": {
+    "signature_caption": "bestiary.wizards_and_beasts.mooncalf.signature_caption"
   }
 }

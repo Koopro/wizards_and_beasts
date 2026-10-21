@@ -1,0 +1,8 @@
+{
+  "_comment": "Happiest holding ground: patrols eagerly, dislikes being dragged about.",
+  "bond_multipliers": {
+    "explore": 0.5,
+    "training": 1.25
+  },
+  "follow_distance": 1.4
+}

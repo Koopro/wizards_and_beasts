@@ -1,0 +1,11 @@
+{
+  "capabilities": [
+    "herd",
+    "predator",
+    "flying",
+    "social"
+  ],
+  "herd_radius": 16,
+  "sense_radius": 20,
+  "fed_ticks": 12000
+}

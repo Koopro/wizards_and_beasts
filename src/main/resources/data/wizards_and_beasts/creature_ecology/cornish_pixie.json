@@ -1,0 +1,8 @@
+{
+  "capabilities": [
+    "flying",
+    "curious",
+    "social"
+  ],
+  "sense_radius": 14
+}

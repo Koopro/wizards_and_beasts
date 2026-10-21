@@ -68,6 +68,10 @@ public final class BeastSpawnHandler {
         // is shed and given rather than taken from a body. (The Niffler's placement is NifflerSpawnHandler's; its
         // badlands spawn lives in data/.../biome_modifier/spawn_niffler.json.)
         daySpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("demiguise"));
+        // Two shipped alpha creatures that never appeared on their own: a Hippogriff herd on high meadows and windswept
+        // hills (a herd is what its ecology is about), and the rare Occamy in jungle and bamboo, its canon range.
+        daySpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("hippogriff"));
+        daySpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("occamy"));
         // The basilisk comes only from the Chamber of Secrets' spawn override, and only one to a Chamber that has
         // not lost its basilisk already: without a rule the Chamber woke a new one every creature cycle.
         var basilisk = at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("basilisk");

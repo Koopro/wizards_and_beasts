@@ -107,6 +107,10 @@ public class CornishPixieEntity extends GeoEntityBase {
     protected void registerGoals() {
         goalSelector.addGoal(1, new MakeOffGoal());
         goalSelector.addGoal(2, new PesterGoal());
+        // Ecology (curious, social): the swarm answers one of its own being struck. Pestering is the pixie's own
+        // curiosity, so the generic approach is left to PesterGoal.
+        goalSelector.addGoal(3, new at.koopro.wizardsandbeasts.creature.ecology.EcologyGoal(this, java.util.Set.of(
+                at.koopro.wizardsandbeasts.creature.ecology.EcologyIntent.INVESTIGATE)));
         goalSelector.addGoal(3, new WaterAvoidingRandomFlyingGoal(this, 1.0));
         goalSelector.addGoal(4, new LookAtPlayerGoal(this, Player.class, 6.0f));
         goalSelector.addGoal(5, new RandomLookAroundGoal(this));

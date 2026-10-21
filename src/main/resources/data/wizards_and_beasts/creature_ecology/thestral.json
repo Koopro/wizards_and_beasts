@@ -1,0 +1,10 @@
+{
+  "capabilities": [
+    "herd",
+    "scavenger",
+    "flying",
+    "illusion-aware"
+  ],
+  "herd_radius": 16,
+  "sense_radius": 24
+}

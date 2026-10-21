@@ -1,0 +1,11 @@
+{
+  "capabilities": [
+    "prey",
+    "herd",
+    "human-avoidant",
+    "magical-corruption-sensitive",
+    "magical-sense"
+  ],
+  "herd_radius": 12,
+  "sense_radius": 24
+}

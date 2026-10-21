@@ -1,0 +1,8 @@
+{
+  "_comment": "Treats and shiny things are the way to its heart; ordinary meals less so.",
+  "bond_multipliers": {
+    "gift": 2.0,
+    "feed": 0.75,
+    "help": 1.5
+  }
+}

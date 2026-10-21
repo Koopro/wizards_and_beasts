@@ -464,3 +464,11 @@ a clip naming a bone that no longer exists fails silently. The `PLACEHOLDER box 
 dropped from the rig, the clips and the definition — `RigMarkerConsistencyTest` would otherwise turn
 red, which is the point of it — and the Occamy joins `AlphaRoster` as the 21st creature, the rig
 having been the only one of the four roster tests it failed.
+
+## 15. Ecology — predator, prey, herd, territory, night (2026-10-06)
+
+Creatures now relate to each other and to the world through a data-driven ecology layer:
+`data/wizards_and_beasts/creature_ecology/<id>.json` declares capabilities (`predator`, `prey`, `herd`, `territorial`,
+`nocturnal`, `curious`, …), `EcologyBrain` decides from a once-a-second perception, `EcologyGoal` acts, spells,
+deaths and wounds raise the existing `CreatureReaction` stimuli, and what a player watches becomes a bestiary field
+note. Reference: `CREATURE_ECOLOGY.md`. Where each creature stands: `CREATURE_QUALITY_MATRIX.md`.

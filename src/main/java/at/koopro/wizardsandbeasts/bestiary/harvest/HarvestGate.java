@@ -65,13 +65,27 @@ public final class HarvestGate {
      * the world's life. A clock that has gone backwards is treated as a fresh start.
      */
     public static boolean isOffCooldown(HarvestRule rule, long lastTick, long nowTick) {
+        return isOffCooldown(rule, lastTick, nowTick, false);
+    }
+
+    /**
+     * {@link #isOffCooldown(HarvestRule, long, long)}, halved for a player whose research on the creature is complete
+     * (the field journal's reward: careful hands that know the animal come back sooner — {@code ResearchRewards}).
+     */
+    public static boolean isOffCooldown(HarvestRule rule, long lastTick, long nowTick, boolean researched) {
         if (rule.cooldownSeconds() <= 0 || lastTick == NEVER) {
             return true;
         }
         if (nowTick < lastTick) {
             return true;
         }
-        return nowTick - lastTick >= (long) rule.cooldownSeconds() * 20L;
+        long cooldown = (long) rule.cooldownSeconds() * 20L;
+        return nowTick - lastTick >= (researched ? cooldown / 2 : cooldown);
+    }
+
+    /** {@link #isEligible(HarvestRule, DiscoveryTier, long, long)} with the research reward applied. */
+    public static boolean isEligible(HarvestRule rule, DiscoveryTier held, long lastTick, long nowTick, boolean researched) {
+        return rule.tierSatisfiedBy(held) && isOffCooldown(rule, lastTick, nowTick, researched);
     }
 
     /**

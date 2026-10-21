@@ -1,0 +1,9 @@
+{
+  "capabilities": [
+    "flying",
+    "magical-sense",
+    "curious",
+    "magical-corruption-sensitive"
+  ],
+  "sense_radius": 20
+}

@@ -261,7 +261,14 @@ public class MooncalfEntity extends GeoEntityBase implements BondableBeast {
         goalSelector.addGoal(2, new AvoidEntityGoal<>(this, Player.class,
                 living -> isWild() && !living.isShiftKeyDown(), 8.0f, 1.0, 1.4, EntitySelector.NO_SPECTATORS));
         goalSelector.addGoal(3, new FollowBondedOwnerGoal<>(this));
+        // Companion modes (stay, rest, patrol, defend): live-gated on the companion profile, inert without one.
+        at.koopro.wizardsandbeasts.creature.companion.CompanionGoals.register(this, goalSelector, targetSelector);
         goalSelector.addGoal(4, new GatherToDanceGoal(this));
+        // Ecology (herd, prey, nocturnal). The burrow is how a Mooncalf spends the day, so the generic rest and
+        // shelter-seeking are left to StayInBurrowGoal.
+        goalSelector.addGoal(3, new at.koopro.wizardsandbeasts.creature.ecology.EcologyGoal(this, java.util.Set.of(
+                at.koopro.wizardsandbeasts.creature.ecology.EcologyIntent.REST,
+                at.koopro.wizardsandbeasts.creature.ecology.EcologyIntent.SEEK_SHELTER)));
         goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 0.7) {
             @Override
             public boolean canUse() {

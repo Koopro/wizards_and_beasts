@@ -524,7 +524,14 @@ public class BowtruckleEntity extends GeoEntityBase implements BondableBeast {
         goalSelector.addGoal(3, new TemptGoal(this, 1.1,
                 Ingredient.of(Items.STICK, Items.OAK_SAPLING), false));
         goalSelector.addGoal(4, new BowtruckleHideGoal(this));
+        // Ecology (tree-dwelling, territorial, social). The tree is held by its restriction and defended by its own
+        // melee and target goals; the ecology layer adds the warning before the attack and the alarm to its kin.
+        goalSelector.addGoal(3, new at.koopro.wizardsandbeasts.creature.ecology.EcologyGoal(this, java.util.Set.of(
+                at.koopro.wizardsandbeasts.creature.ecology.EcologyIntent.RETURN_HOME,
+                at.koopro.wizardsandbeasts.creature.ecology.EcologyIntent.DEFEND_TERRITORY)));
         goalSelector.addGoal(4, new FollowBondedOwnerGoal<>(this));
+        // Companion modes (stay, rest, patrol, defend): live-gated on the companion profile, inert without one.
+        at.koopro.wizardsandbeasts.creature.companion.CompanionGoals.register(this, goalSelector, targetSelector);
         goalSelector.addGoal(5, new MoveTowardsRestrictionGoal(this, 0.8));
         goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.8));
         goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 5.0f));

@@ -1,0 +1,93 @@
+{
+  "_comment": "The shape of every Bestiary journal page (JournalLayout). Reorder, move between pages or change the depth a section opens at; no creature has a page of its own. 'partial' is an earlier depth that shows what the player could only partly know.",
+  "sections": [
+    {
+      "section": "classification",
+      "page": "plate",
+      "reveal": "ENCOUNTERED"
+    },
+    {
+      "section": "size",
+      "page": "plate",
+      "reveal": "ENCOUNTERED"
+    },
+    {
+      "section": "habitat",
+      "page": "plate",
+      "reveal": "OBSERVED",
+      "partial": "ENCOUNTERED"
+    },
+    {
+      "section": "temperament",
+      "page": "plate",
+      "reveal": "OBSERVED"
+    },
+    {
+      "section": "danger",
+      "page": "plate",
+      "reveal": "OBSERVED"
+    },
+    {
+      "section": "research",
+      "page": "plate",
+      "reveal": "ENCOUNTERED"
+    },
+    {
+      "section": "history",
+      "page": "plate",
+      "reveal": "ENCOUNTERED"
+    },
+    {
+      "section": "observed_behaviour",
+      "page": "notes",
+      "reveal": "ENCOUNTERED"
+    },
+    {
+      "section": "known_behaviour",
+      "page": "notes",
+      "reveal": "OBSERVED"
+    },
+    {
+      "section": "diet",
+      "page": "notes",
+      "reveal": "OBSERVED"
+    },
+    {
+      "section": "feeding_bonding",
+      "page": "notes",
+      "reveal": "STUDIED",
+      "partial": "OBSERVED"
+    },
+    {
+      "section": "magic",
+      "page": "notes",
+      "reveal": "STUDIED"
+    },
+    {
+      "section": "weaknesses",
+      "page": "notes",
+      "reveal": "STUDIED"
+    },
+    {
+      "section": "harvesting",
+      "page": "notes",
+      "reveal": "STUDIED"
+    },
+    {
+      "section": "materials",
+      "page": "notes",
+      "reveal": "STUDIED"
+    },
+    {
+      "section": "lore",
+      "page": "notes",
+      "reveal": "STUDIED"
+    },
+    {
+      "section": "signature",
+      "page": "notes",
+      "reveal": "KNOWN",
+      "partial": "STUDIED"
+    }
+  ]
+}

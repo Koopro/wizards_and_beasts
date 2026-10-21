@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.creature.ability;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.bestiary.BestiaryEntry;
 import at.koopro.wizardsandbeasts.bestiary.DiscoveryTier;
+import at.koopro.wizardsandbeasts.creature.schedule.AiCadence;
 import at.koopro.wizardsandbeasts.creature.wildlife.SignatureRules;
 import at.koopro.wizardsandbeasts.creature.wildlife.WildlifeWorld;
 import at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity;
@@ -94,7 +95,7 @@ public record BoggartDread(double range, int fearDurationTicks, List<FearForm> f
 
     @Override
     public void tick(@NonNull GenericBeastEntity entity) {
-        if (!(entity.level() instanceof ServerLevel level) || entity.tickCount % 10 != 0) {
+        if (!(entity.level() instanceof ServerLevel level) || !AiCadence.every(entity, 10)) {
             return;
         }
         confront(entity, level, watchers(entity));

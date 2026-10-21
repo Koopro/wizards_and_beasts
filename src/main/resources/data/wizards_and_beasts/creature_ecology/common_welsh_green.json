@@ -1,0 +1,9 @@
+{
+  "capabilities": [
+    "predator",
+    "flying",
+    "human-avoidant"
+  ],
+  "sense_radius": 32,
+  "fed_ticks": 24000
+}

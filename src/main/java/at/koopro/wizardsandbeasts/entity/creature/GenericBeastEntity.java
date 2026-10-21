@@ -15,6 +15,7 @@ import at.koopro.wizardsandbeasts.creature.ability.FireAffinity;
 import at.koopro.wizardsandbeasts.creature.bond.BondState;
 import at.koopro.wizardsandbeasts.creature.bond.BondableBeast;
 import at.koopro.wizardsandbeasts.creature.bond.FollowBondedOwnerGoal;
+import at.koopro.wizardsandbeasts.creature.schedule.AiCadence;
 import at.koopro.wizardsandbeasts.entity.GeoEntityBase;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
@@ -552,6 +553,11 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
         // at construction, and a datapack reload that adds a bond profile must reach creatures that
         // are already in the world. The goal self-gates instead — it does nothing without a profile.
         goalSelector.addGoal(6, new FollowBondedOwnerGoal<>(this));
+        // Companion modes (stay, rest, patrol, defend): live-gated on the companion profile, inert without one.
+        at.koopro.wizardsandbeasts.creature.companion.CompanionGoals.register(this, goalSelector, targetSelector);
+        // Ecology: predator, prey, herd, territory, night (creature_ecology/<id>.json). Always registered and
+        // reading the profile live, like the bond goal above; a creature with no ecology file never starts it.
+        goalSelector.addGoal(3, new at.koopro.wizardsandbeasts.creature.ecology.EcologyGoal(this, java.util.Set.of()));
         // Ability-contributed goals. Always registered; each goal self-gates on Module.CREATURES at canUse().
         for (CreatureAbility ability : abilities()) {
             ability.registerGoals(this, goalSelector);
@@ -751,7 +757,7 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
     public void tick() {
         super.tick();
         tickBond();
-        if (!level().isClientSide() && has(Trait.REGEN) && this.tickCount % 40 == 0
+        if (!level().isClientSide() && has(Trait.REGEN) && AiCadence.every(this, 40)
                 && getHealth() < getMaxHealth() && isAlive()) {
             heal(1.0f);
         }

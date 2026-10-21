@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.entity.creature.ai;
 
 import at.koopro.wizardsandbeasts.creature.profile.IdleProfile;
+import at.koopro.wizardsandbeasts.creature.schedule.AiCadence;
 import at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
@@ -30,6 +31,10 @@ public class CreatureIdleGoal extends Goal {
 
     private final GenericBeastEntity beast;
     private int cooldown;
+    /** The playable actions, recomputed only when the profile's action list or the rig's clip list changes. */
+    private List<String> playable = List.of();
+    private @org.jspecify.annotations.Nullable List<String> playableFrom;
+    private @org.jspecify.annotations.Nullable List<String> playableClips;
 
     public CreatureIdleGoal(GenericBeastEntity beast) {
         this.beast = beast;
@@ -51,7 +56,14 @@ public class CreatureIdleGoal extends Goal {
         if (--cooldown > 0) {
             return false;
         }
-        return !playableActions().isEmpty();
+        if (playableActions().isEmpty()) {
+            // Nothing this rig can play: ask again after a SLOW period, not on every goal evaluation (most of the
+            // roster has no idle clip on disk yet, so this is the common case). A datapack reload that adds clips
+            // is picked up within that period.
+            cooldown = AiCadence.SLOW.period();
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -86,6 +98,14 @@ public class CreatureIdleGoal extends Goal {
      */
     private List<String> playableActions() {
         List<String> declared = beast.declaredClipNames();
-        return beast.idleProfile().actions().stream().filter(declared::contains).toList();
+        List<String> actions = beast.idleProfile().actions();
+        // Both lists are the definition's own (a body plan's default actions are a shared constant), so identity
+        // says whether anything changed; a reload replaces them and the next call recomputes.
+        if (actions != playableFrom || declared != playableClips) {
+            playableFrom = actions;
+            playableClips = declared;
+            playable = actions.stream().filter(declared::contains).toList();
+        }
+        return playable;
     }
 }

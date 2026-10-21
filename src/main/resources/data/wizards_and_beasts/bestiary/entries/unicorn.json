@@ -49,5 +49,8 @@
       "handle"
     ],
     "signature": "bestiary.wizards_and_beasts.unicorn.signature"
+  },
+  "journal": {
+    "signature_caption": "bestiary.wizards_and_beasts.unicorn.signature_caption"
   }
 }

@@ -212,7 +212,12 @@ public class NifflerEntity extends GeoEntityBase implements BondableBeast,
         goalSelector.addGoal(4, new NifflerSeekShinyBlockGoal(this));
         // A pocketed Niffler is inside the player; it must not also be pathing to them.
         goalSelector.addGoal(5, new FollowBondedOwnerGoal<>(this, n -> !n.isCarried()));
+        // Companion modes (stay, rest, patrol, defend): live-gated on the companion profile, inert without one.
+        at.koopro.wizardsandbeasts.creature.companion.CompanionGoals.register(this, goalSelector, targetSelector);
         goalSelector.addGoal(6, new NifflerHoardGoal(this));
+        // Ecology (treasure-seeker, curious, burrowing). Pocketing treasure is the Niffler's own goals' work.
+        goalSelector.addGoal(4, new at.koopro.wizardsandbeasts.creature.ecology.EcologyGoal(this, java.util.Set.of(
+                at.koopro.wizardsandbeasts.creature.ecology.EcologyIntent.SEEK_ITEM)));
         goalSelector.addGoal(7, new MoveTowardsRestrictionGoal(this, 0.8));
         goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 0.4));
         goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 6.0f));

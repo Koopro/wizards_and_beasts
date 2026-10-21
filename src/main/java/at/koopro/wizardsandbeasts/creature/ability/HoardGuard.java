@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.creature.ability;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.creature.schedule.AiCadence;
 import at.koopro.wizardsandbeasts.creature.wildlife.SignatureRules;
 import at.koopro.wizardsandbeasts.creature.wildlife.WildlifeRules;
 import at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity;
@@ -72,7 +73,7 @@ public record HoardGuard(double searchRadius, int tolerateBond) implements Creat
 
     @Override
     public void tick(@NonNull GenericBeastEntity entity) {
-        if (!(entity.level() instanceof ServerLevel level) || entity.tickCount % 10 != 0) {
+        if (!(entity.level() instanceof ServerLevel level) || !AiCadence.every(entity, 10)) {
             return;
         }
         if (entity.hasHome() && !level.getBlockState(entity.getHomePosition()).is(HOARD)) {

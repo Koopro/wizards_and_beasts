@@ -69,16 +69,17 @@ public record Groomable(Identifier item, int count, int cooldownTicks, boolean r
         }
         Item resolved = BuiltInRegistries.ITEM.getValue(item);
         ItemStack gift = new ItemStack(resolved, count);
-        if (!serverPlayer.getInventory().add(gift)) {
-            serverPlayer.drop(gift, false);
-        }
+        at.koopro.wizardsandbeasts.util.InventoryHandover.giveOrDrop(serverPlayer, gift);
         entity.setCooldown(COOLDOWN, cooldownTicks);
         level.sendParticles(ParticleTypes.HEART, entity.getX(), entity.getY() + entity.getBbHeight(), entity.getZ(),
                 3, 0.3, 0.2, 0.3, 0.0);
         level.playSound(null, entity.blockPosition(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.NEUTRAL,
                 0.6f, 1.4f);
-        BestiaryDiscoveryHandler.studied(serverPlayer, entity);
+        BestiaryDiscoveryHandler.studied(serverPlayer, entity.getType(),
+                at.koopro.wizardsandbeasts.bestiary.CreatureProfile.StudyAct.HANDLE);
         BestiaryDiscoveryHandler.witnessedSignature(serverPlayer, entity);
+        at.koopro.wizardsandbeasts.owl.career.track.CareerProgression.record(serverPlayer, at.koopro.wizardsandbeasts.owl.career.track.ActivityType.CREATURE_GROOMED,
+                BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()));
         return InteractionResult.SUCCESS;
     }
 }

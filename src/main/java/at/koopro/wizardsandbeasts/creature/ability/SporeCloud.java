@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.creature.ability;
 
+import at.koopro.wizardsandbeasts.creature.schedule.AiCadence;
 import at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -34,7 +35,7 @@ public record SporeCloud(int interval, double radius, List<AbilitySupport.Effect
     @Override
     public void tick(@NonNull GenericBeastEntity entity) {
         int period = Math.max(1, interval);
-        if (!(entity.level() instanceof ServerLevel level) || entity.tickCount % period != 0) {
+        if (!(entity.level() instanceof ServerLevel level) || !AiCadence.every(entity, period)) {
             return;
         }
         AbilitySupport.emitAt(level, particle,

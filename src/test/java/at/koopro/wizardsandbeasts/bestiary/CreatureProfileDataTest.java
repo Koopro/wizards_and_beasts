@@ -137,7 +137,9 @@ class CreatureProfileDataTest {
     /** A creature whose signature completes its page must be one of those whose code shows it. */
     @Test
     void signaturesAreOnlyClaimedWhereSomethingTriggersThem() throws IOException {
-        List<String> triggered = List.of("bowtruckle", "demiguise", "mooncalf", "phoenix", "unicorn");
+        // hippogriff: HippogriffEntity answers a bow (witnessedSignature); niffler: NifflerSeekShinyItemGoal pockets
+        // treasure in sight of a player (signatureSeenByNearby) — both added with the field journal, 2026-10-07.
+        List<String> triggered = List.of("bowtruckle", "demiguise", "hippogriff", "mooncalf", "niffler", "phoenix", "unicorn");
         for (Path file : entries()) {
             boolean claims = parse(file).profile().orElseThrow().hasSignature();
             assertEquals(triggered.contains(id(file)), claims,

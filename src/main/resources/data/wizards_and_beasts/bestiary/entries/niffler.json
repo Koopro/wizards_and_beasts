@@ -39,6 +39,10 @@
       "feed",
       "handle",
       "bond"
-    ]
+    ],
+    "signature": "bestiary.wizards_and_beasts.niffler.signature"
+  },
+  "journal": {
+    "signature_caption": "bestiary.wizards_and_beasts.niffler.signature_caption"
   }
 }

@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.creature.ability;
 
+import at.koopro.wizardsandbeasts.creature.schedule.AiCadence;
 import at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity;
 import at.koopro.wizardsandbeasts.entity.creature.ai.SeekWaterGoal;
 import com.mojang.serialization.Codec;
@@ -58,14 +59,14 @@ public record WaterAffinity(
             if (breatheUnderwater) {
                 entity.setAirSupply(entity.getMaxAirSupply());
             }
-            if (regenInWater > 0 && entity.tickCount % 20 == 0 && entity.getHealth() < entity.getMaxHealth()) {
+            if (regenInWater > 0 && AiCadence.every(entity, 20) && entity.getHealth() < entity.getMaxHealth()) {
                 entity.heal(regenInWater);
             }
             if (bubbleParticles && entity.tickCount % 8 == 0) {
                 AbilitySupport.emitAtBody(level, entity, AbilitySupport.Particle.BUBBLE, 2);
             }
         } else {
-            if (slowOnLand && entity.tickCount % 40 == 0) {
+            if (slowOnLand && AiCadence.every(entity, 40)) {
                 entity.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 60, 1, true, false));
             }
             if (requiresWater) {

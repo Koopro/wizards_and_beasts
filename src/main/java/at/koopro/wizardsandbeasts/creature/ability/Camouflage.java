@@ -27,14 +27,22 @@ public record Camouflage(int revealTicks) implements CreatureAbility {
         return CreatureAbility.Type.CAMOUFLAGE;
     }
 
+    /** Remaining Invisibility below which it is topped up (the effect lasts 40 ticks). */
+    public static final int REFRESH_BELOW_TICKS = 20;
+
     @Override
     public void tick(@NonNull GenericBeastEntity entity) {
         if (entity.level().isClientSide()) {
             return;
         }
         // Revealed window: counts down on its own keyed timer after a hit (set in onHurt / onMeleeContact).
+        // Topped up before it can lapse rather than every tick: the creature is just as continuously invisible, but a
+        // fresh effect (and the effect-update bookkeeping it triggers) is made twice a second, not twenty times.
         if (entity.getCooldown(REVEAL_KEY) <= 0) {
-            entity.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 40, 0, true, false));
+            MobEffectInstance current = entity.getEffect(MobEffects.INVISIBILITY);
+            if (current == null || current.getDuration() <= REFRESH_BELOW_TICKS) {
+                entity.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 40, 0, true, false));
+            }
         }
     }
 

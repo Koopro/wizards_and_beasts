@@ -1,0 +1,29 @@
+{
+  "_comment": "A unicorn bonds slowly and only to the gentle: its wariness (the 'wary' ability, purity, the slayer curse) still decides who may come near. Apples and golden food are accepted from a quiet hand.",
+  "feeds": [
+    {
+      "item": "minecraft:apple",
+      "gain": 4,
+      "cooldownSeconds": 120
+    },
+    {
+      "item": "minecraft:golden_carrot",
+      "gain": 6,
+      "cooldownSeconds": 120
+    }
+  ],
+  "followThreshold": 60,
+  "milestones": [
+    20,
+    40,
+    60,
+    100
+  ],
+  "proximityRange": 8.0,
+  "proximitySeconds": 90,
+  "proximityGain": 1,
+  "betrayalPenalty": 40,
+  "masteryBond": 100,
+  "feedSound": "minecraft:entity.horse.eat",
+  "refuseSound": "minecraft:entity.horse.angry"
+}

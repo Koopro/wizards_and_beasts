@@ -45,5 +45,8 @@
       "bond"
     ],
     "signature": "bestiary.wizards_and_beasts.bowtruckle.signature"
+  },
+  "journal": {
+    "signature_caption": "bestiary.wizards_and_beasts.bowtruckle.signature_caption"
   }
 }

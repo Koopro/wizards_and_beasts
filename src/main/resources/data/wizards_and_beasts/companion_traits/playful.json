@@ -1,0 +1,8 @@
+{
+  "_comment": "Company is everything: roaming together and fuss win it over fast, drills bore it.",
+  "bond_multipliers": {
+    "explore": 1.5,
+    "care": 1.25
+  },
+  "training_rate": 0.8
+}

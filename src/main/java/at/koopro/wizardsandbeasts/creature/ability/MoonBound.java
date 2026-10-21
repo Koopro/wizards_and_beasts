@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.creature.ability;
 
+import at.koopro.wizardsandbeasts.creature.schedule.AiCadence;
 import at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity;
 import at.koopro.wizardsandbeasts.heritage.werewolf.WerewolfRules;
 import at.koopro.wizardsandbeasts.particle.MagicSmoke;
@@ -28,7 +29,7 @@ public record MoonBound() implements CreatureAbility {
 
     @Override
     public void tick(@NonNull GenericBeastEntity entity) {
-        if (!(entity.level() instanceof ServerLevel level) || entity.tickCount % CHECK_TICKS != 0) {
+        if (!(entity.level() instanceof ServerLevel level) || !AiCadence.every(entity, CHECK_TICKS)) {
             return;
         }
         if (!WerewolfRules.fullMoonNight(level)) {

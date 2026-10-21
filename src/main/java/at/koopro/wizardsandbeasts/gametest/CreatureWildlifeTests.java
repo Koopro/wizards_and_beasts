@@ -1042,7 +1042,14 @@ public final class CreatureWildlifeTests {
                     check(helper, saved != null && saved.bondLevel() == ThestralEntity.RIDE_BOND,
                             () -> "a thestral's trust did not survive a save");
 
-                    // Struck, it throws its rider and turns on whoever struck it.
+                    // Fed, it is the feeder's now: a stranger's blow does not land on another player's companion.
+                    thestral.hurtServer(level, level.damageSources().playerAttack(witness), 1.0f);
+                    check(helper, unseeing.getVehicle() == thestral, () -> "a stranger's blow landed on an owned thestral");
+                    // Once its owner marks the striker an enemy the blow lands, and it throws its rider and turns on them.
+                    at.koopro.wizardsandbeasts.creature.companion.CompanionCommands.setRelation(unseeing, witness.getUUID(),
+                            witness.getGameProfile().name(), false, true);
+                    at.koopro.wizardsandbeasts.creature.companion.Companions.refreshTrust(thestral);
+                    thestral.invulnerableTime = 0;
                     thestral.hurtServer(level, level.damageSources().playerAttack(witness), 1.0f);
                     check(helper, !unseeing.isPassenger(), () -> "a struck thestral kept its rider");
                     check(helper, level.getEntitiesOfClass(ThestralEntity.class, thestral.getBoundingBox().inflate(8)).size() == 1,

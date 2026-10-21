@@ -1,0 +1,37 @@
+{
+  "_comment": "Invisible and prescient: slips out of sight and watches for danger.",
+  "trait_pool": [
+    {
+      "trait": "skittish",
+      "weight": 4
+    },
+    {
+      "trait": "curious",
+      "weight": 3
+    },
+    {
+      "trait": "playful",
+      "weight": 2
+    }
+  ],
+  "commands": [
+    "follow",
+    "stay",
+    "rest",
+    "return",
+    "search"
+  ],
+  "abilities": [
+    {
+      "kind": "scout",
+      "radius": 20,
+      "seconds": 30,
+      "cooldown_seconds": 150
+    },
+    {
+      "kind": "innate",
+      "id": "foresight"
+    }
+  ],
+  "favourite": "minecraft:sweet_berries"
+}

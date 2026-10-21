@@ -1,0 +1,8 @@
+{
+  "capabilities": [
+    "herd",
+    "magical-sense"
+  ],
+  "herd_radius": 16,
+  "sense_radius": 24
+}

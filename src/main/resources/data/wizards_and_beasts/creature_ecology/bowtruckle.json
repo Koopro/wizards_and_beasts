@@ -1,0 +1,10 @@
+{
+  "capabilities": [
+    "tree-dwelling",
+    "territorial",
+    "social",
+    "climbing"
+  ],
+  "territory_radius": 8,
+  "sense_radius": 10
+}

@@ -1,0 +1,8 @@
+{
+  "_comment": "Keeps close, learns to please, and turns on whatever hurts its person.",
+  "bond_multipliers": {
+    "training": 1.5
+  },
+  "follow_distance": 0.6,
+  "guards_owner": true
+}

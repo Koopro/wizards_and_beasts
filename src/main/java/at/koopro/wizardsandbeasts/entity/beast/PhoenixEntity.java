@@ -176,6 +176,10 @@ public class PhoenixEntity extends GeoEntityBase implements BondableBeast {
         goalSelector.addGoal(3, new AvoidEntityGoal<>(this, Player.class,
                 living -> living == getLastHurtByMob(), 16.0f, 1.2, 1.5, EntitySelector.NO_SPECTATORS));
         goalSelector.addGoal(4, new FollowBondedOwnerGoal<>(this));
+        // Companion modes (stay, rest, patrol, defend): live-gated on the companion profile, inert without one.
+        at.koopro.wizardsandbeasts.creature.companion.CompanionGoals.register(this, goalSelector, targetSelector);
+        // Ecology (curious, magical sense, shuns the corrupted): comes to look at magic and at quiet visitors.
+        goalSelector.addGoal(4, new at.koopro.wizardsandbeasts.creature.ecology.EcologyGoal(this, java.util.Set.of()));
         // Parrot-style wandering: prefers to land on leaves and logs, which is how it perches.
         goalSelector.addGoal(5, new WaterAvoidingRandomFlyingGoal(this, 1.0));
         goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 8.0f));

@@ -479,6 +479,7 @@ public class ProtegoShieldEntity extends Entity implements GeoEntity {
     private void trainCasterReflexes(@Nullable ServerPlayer caster) {
         if (caster != null) {
             at.koopro.wizardsandbeasts.stats.StatTraining.onSpellDeflected(caster);
+            at.koopro.wizardsandbeasts.skill.build.capstone.CounterJinx.onWardBlock(caster);
         }
     }
 

@@ -1,0 +1,8 @@
+{
+  "capabilities": [
+    "flying",
+    "magical-sense",
+    "illusion-aware"
+  ],
+  "sense_radius": 24
+}

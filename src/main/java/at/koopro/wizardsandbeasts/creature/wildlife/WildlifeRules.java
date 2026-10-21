@@ -96,7 +96,17 @@ public final class WildlifeRules {
 
     public static boolean letsNear(DiscoveryTier tier, boolean sneaking, boolean emptyHanded, boolean puritySensitive,
                                    boolean slayer, float corruption) {
-        if (!tier.atLeast(DiscoveryTier.OBSERVED) || !sneaking || !emptyHanded) {
+        return letsNear(tier, sneaking, emptyHanded, puritySensitive, slayer, corruption, false);
+    }
+
+    /**
+     * {@link #letsNear}, for a player whose research on the species is complete (the field journal): such a
+     * naturalist is known to the creature, so it no longer needs them to creep up empty-handed. Purity is not study —
+     * a slayer or a darkened soul is refused however well they know the animal.
+     */
+    public static boolean letsNear(DiscoveryTier tier, boolean sneaking, boolean emptyHanded, boolean puritySensitive,
+                                   boolean slayer, float corruption, boolean researched) {
+        if (!tier.atLeast(DiscoveryTier.OBSERVED) || !(sneaking || researched) || !(emptyHanded || researched)) {
             return false;
         }
         return !puritySensitive || (!slayer && corruption < PURITY_LIMIT);

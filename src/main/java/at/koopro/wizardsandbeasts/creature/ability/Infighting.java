@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.creature.ability;
 
+import at.koopro.wizardsandbeasts.creature.schedule.AiCadence;
 import at.koopro.wizardsandbeasts.creature.wildlife.SignatureRules;
 import at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity;
 import com.mojang.serialization.Codec;
@@ -33,7 +34,7 @@ public record Infighting(double radius, int checkIntervalTicks) implements Creat
 
     @Override
     public void tick(@NonNull GenericBeastEntity entity) {
-        if (entity.tickCount % Math.max(1, checkIntervalTicks) != 0 || entity.getTarget() != null) {
+        if (!AiCadence.every(entity, Math.max(1, checkIntervalTicks)) || entity.getTarget() != null) {
             return;
         }
         GenericBeastEntity rival = rival(entity);

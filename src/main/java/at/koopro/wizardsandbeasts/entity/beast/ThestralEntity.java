@@ -124,8 +124,12 @@ public class ThestralEntity extends GeoEntityBase implements WingedWalker, Bonda
         goalSelector.addGoal(0, new FloatGoal(this));
         goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.3, true));
         goalSelector.addGoal(3, new FollowBondedOwnerGoal<>(this));
+        // Companion modes (stay, rest, patrol, defend): live-gated on the companion profile, inert without one.
+        at.koopro.wizardsandbeasts.creature.companion.CompanionGoals.register(this, goalSelector, targetSelector);
         goalSelector.addGoal(4, new WingedWalkerFlightGoal<>(this, 1200));
         goalSelector.addGoal(5, new ThestralGrazeGoal(this));
+        // Ecology (herd, scavenger, flying): a thestral goes to meat left on the ground and keeps with the herd.
+        goalSelector.addGoal(4, new at.koopro.wizardsandbeasts.creature.ecology.EcologyGoal(this, java.util.Set.of()));
         goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.7));
         goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0f));
         goalSelector.addGoal(8, new RandomLookAroundGoal(this));
@@ -257,7 +261,8 @@ public class ThestralEntity extends GeoEntityBase implements WingedWalker, Bonda
         if (level().isClientSide()) {
             return InteractionResult.SUCCESS;
         }
-        if (bondLevel() < RIDE_BOND) {
+        if (bondLevel() < RIDE_BOND
+                || !at.koopro.wizardsandbeasts.creature.companion.Companions.mayHandle(this, player)) {
             PlayerFeedback.actionBar(player, Component.translatable("creature.wizards_and_beasts.thestral.not_yet"));
             return InteractionResult.SUCCESS;
         }

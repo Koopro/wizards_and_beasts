@@ -21,13 +21,39 @@ import java.util.List;
  * that only works in a shared single-player JVM; on a dedicated server the client-side registry
  * is empty. Clients store the synced list via {@link BestiaryEntryRegistry#setClientEntries}.
  */
-public record SyncBestiaryEntriesPayload(List<BestiaryEntry> entries) implements CustomPacketPayload {
+public record SyncBestiaryEntriesPayload(List<BestiaryEntry> entries,
+                                         at.koopro.wizardsandbeasts.bestiary.journal.JournalLayout layout,
+                                         java.util.Map<Identifier, at.koopro.wizardsandbeasts.bestiary.journal.JournalFacts> facts)
+        implements CustomPacketPayload {
+
+    /**
+     * The entries, the journal's page layout, and each entry's server-derived facts (temperament, ecology, feeding,
+     * harvest) — the client holds no creature, ecology, bond or harvest registries to derive them itself.
+     */
+    public static final com.mojang.serialization.Codec<SyncBestiaryEntriesPayload> CODEC =
+            com.mojang.serialization.codecs.RecordCodecBuilder.create(instance -> instance.group(
+                    BestiaryEntry.CODEC.listOf().fieldOf("entries").forGetter(SyncBestiaryEntriesPayload::entries),
+                    at.koopro.wizardsandbeasts.bestiary.journal.JournalLayout.CODEC.fieldOf("layout")
+                            .forGetter(SyncBestiaryEntriesPayload::layout),
+                    com.mojang.serialization.Codec.unboundedMap(Identifier.CODEC,
+                                    at.koopro.wizardsandbeasts.bestiary.journal.JournalFacts.CODEC)
+                            .fieldOf("facts").forGetter(SyncBestiaryEntriesPayload::facts)
+            ).apply(instance, SyncBestiaryEntriesPayload::new));
+
+    /** The server's current book: every entry, the layout, and the facts derived for each. */
+    public static SyncBestiaryEntriesPayload current() {
+        List<BestiaryEntry> all = List.copyOf(BestiaryEntryRegistry.getAll());
+        java.util.Map<Identifier, at.koopro.wizardsandbeasts.bestiary.journal.JournalFacts> facts = new java.util.HashMap<>();
+        for (BestiaryEntry entry : all) {
+            facts.put(entry.id(), at.koopro.wizardsandbeasts.bestiary.journal.JournalFacts.compute(entry));
+        }
+        return new SyncBestiaryEntriesPayload(all, at.koopro.wizardsandbeasts.bestiary.journal.JournalBook.serverLayout(), facts);
+    }
     public static final Type<SyncBestiaryEntriesPayload> TYPE =
             new Type<>(Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "sync_bestiary_entries"));
 
     public static final StreamCodec<ByteBuf, SyncBestiaryEntriesPayload> STREAM_CODEC =
-            ByteBufCodecs.fromCodec(BestiaryEntry.CODEC.listOf())
-                    .map(SyncBestiaryEntriesPayload::new, SyncBestiaryEntriesPayload::entries);
+            ByteBufCodecs.fromCodec(CODEC);
 
     @Override
     public Type<? extends CustomPacketPayload> type() {
@@ -43,7 +69,7 @@ public record SyncBestiaryEntriesPayload(List<BestiaryEntry> entries) implements
     public static final class SyncOnDatapack {
         @SubscribeEvent
         public static void onDatapackSync(OnDatapackSyncEvent event) {
-            SyncBestiaryEntriesPayload payload = new SyncBestiaryEntriesPayload(List.copyOf(BestiaryEntryRegistry.getAll()));
+            SyncBestiaryEntriesPayload payload = current();
             PayloadBroadcast.toSyncTarget(event, payload);
         }
     }

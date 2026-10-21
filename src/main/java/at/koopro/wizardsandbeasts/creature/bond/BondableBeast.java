@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.creature.bond;
 
 import at.koopro.wizardsandbeasts.bestiary.BestiaryDataHelper;
 import at.koopro.wizardsandbeasts.bestiary.DiscoveryTier;
+import at.koopro.wizardsandbeasts.creature.schedule.AiCadence;
 import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
@@ -104,7 +105,8 @@ public interface BondableBeast {
     /** This species' profile, or {@code null} when no datapack declares one and it does not bond. */
     @Nullable
     default BondProfile bondProfile() {
-        return BondProfileRegistry.get(bondSpecies());
+        // By type through the registry's cache: asked every tick by tickBond, so never a registry lookup here.
+        return BondProfileRegistry.of(bondMob().getType());
     }
 
     /** True when this species bonds at all — the presence of a profile is the whole opt-in. */
@@ -131,7 +133,12 @@ public interface BondableBeast {
     /** True once the bond is deep enough for this species to follow its owner about. */
     default boolean followsOwner() {
         BondProfile profile = bondProfile();
-        return profile != null && bondLevel() >= profile.followThreshold();
+        if (profile == null || bondLevel() < profile.followThreshold()) {
+            return false;
+        }
+        // A companion follows only when its standing order keeps it at its owner's side; told to stay, it stays.
+        return !at.koopro.wizardsandbeasts.creature.companion.Companions.isCompanion(this)
+                || at.koopro.wizardsandbeasts.creature.companion.Companions.memory(this).modeOrFollow().keepsToOwner();
     }
 
     // ── feeding ──────────────────────────────────────────────────────────────
@@ -149,6 +156,38 @@ public interface BondableBeast {
             return InteractionResult.PASS;
         }
         ItemStack held = player.getItemInHand(hand);
+        // A companion answers to its owner and the friends they trust; anyone else is ignored, so no stranger can
+        // buy another player's creature's loyalty with a handful of food (or take the career credit for it).
+        if (!bondMob().level().isClientSide() && !at.koopro.wizardsandbeasts.creature.companion.Companions.mayHandle(this, player)) {
+            if (profile.feedFor(held) != null) {
+                player.displayClientMessage(net.minecraft.network.chat.Component.translatable(
+                        "companion.wizards_and_beasts.not_yours", bondMob().getDisplayName()), true);
+                return InteractionResult.SUCCESS;
+            }
+            return InteractionResult.PASS;
+        }
+        if (held.isEmpty() && player.isShiftKeyDown() && player instanceof net.minecraft.server.level.ServerPlayer owner
+                && owner.getUUID().equals(bondOwner()) && at.koopro.wizardsandbeasts.creature.companion.Companions.isCompanion(this)) {
+            // A pat, and stay-or-come: the one command that needs no sheet open.
+            at.koopro.wizardsandbeasts.creature.companion.Companions.interact(this, at.koopro.wizardsandbeasts.creature.companion.Interaction.CARE, owner);
+            at.koopro.wizardsandbeasts.creature.companion.CompanionCommand next = at.koopro.wizardsandbeasts.creature.companion.Companions.memory(this).modeOrFollow() == at.koopro.wizardsandbeasts.creature.companion.CompanionCommand.FOLLOW ? at.koopro.wizardsandbeasts.creature.companion.CompanionCommand.STAY : at.koopro.wizardsandbeasts.creature.companion.CompanionCommand.FOLLOW;
+            at.koopro.wizardsandbeasts.creature.companion.Companions.command(owner, this, next);
+            return InteractionResult.SUCCESS;
+        }
+        if (!bondMob().level().isClientSide() && player instanceof net.minecraft.server.level.ServerPlayer giver
+                && giver.getUUID().equals(bondOwner())) {
+            at.koopro.wizardsandbeasts.creature.companion.CompanionProfile companion = at.koopro.wizardsandbeasts.creature.companion.Companions.profile(this);
+            if (companion != null && companion.favourite().isPresent()
+                    && net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(held.getItem())
+                            .equals(companion.favourite().get())
+                    && at.koopro.wizardsandbeasts.creature.companion.Companions.interact(this, at.koopro.wizardsandbeasts.creature.companion.Interaction.GIFT, giver) > 0) {
+                if (!player.isCreative()) {
+                    held.shrink(1);
+                }
+                playBondSound(profile.feedSound(), 1.0f, 1.3f);
+                return InteractionResult.SUCCESS;
+            }
+        }
         BondFeed feed = profile.feedFor(held);
         if (feed == null) {
             return InteractionResult.PASS;
@@ -169,10 +208,20 @@ public interface BondableBeast {
             held.shrink(1);
         }
         bondState().setFeedCooldown(feed.cooldownSeconds() * 20);
-        increaseBond(player, feed.gain(), true);
+        increaseBond(player, at.koopro.wizardsandbeasts.creature.companion.Companions.feedGain(this, feed.gain()), true);
+        // Food for a hurt creature is care, and it mends a little.
+        if (bondMob().getHealth() < bondMob().getMaxHealth()
+                && player instanceof net.minecraft.server.level.ServerPlayer carer) {
+            bondMob().heal(2.0f);
+            at.koopro.wizardsandbeasts.creature.companion.Companions.interact(this, at.koopro.wizardsandbeasts.creature.companion.Interaction.CARE, carer);
+        }
         // Feeding a creature is how a naturalist studies it.
         if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
-            at.koopro.wizardsandbeasts.event.bestiary.BestiaryDiscoveryHandler.studied(serverPlayer, bondMob());
+            at.koopro.wizardsandbeasts.event.bestiary.BestiaryDiscoveryHandler.studied(serverPlayer, bondMob().getType(),
+                    at.koopro.wizardsandbeasts.bestiary.CreatureProfile.StudyAct.FEED);
+            // Keeping creatures fed is a Magizoologist's working day.
+            at.koopro.wizardsandbeasts.owl.career.CareerWork.record(serverPlayer, at.koopro.wizardsandbeasts.owl.career.CareerWork.Kind.CREATURE_CARE);
+            at.koopro.wizardsandbeasts.owl.career.track.CareerProgression.record(serverPlayer, at.koopro.wizardsandbeasts.owl.career.track.ActivityType.CREATURE_FED, bondSpecies());
         }
         playBondSound(profile.feedSound(), 1.0f, 1.0f);
         tryEnterLove(profile, offered);
@@ -192,8 +241,24 @@ public interface BondableBeast {
         if (profile == null || bondMob().level().isClientSide() || amount <= 0) {
             return;
         }
+        boolean claimed = false;
         if (bondState().ownerUUID() == null) {
             bondState().setOwner(player.getUUID());
+            claimed = true;
+        }
+        // A trusted friend's kindness deepens the bond, but the milestones, the bestiary page and the career
+        // credit belong to the creature's owner; with the owner away they simply go unannounced.
+        if (!player.getUUID().equals(bondState().ownerUUID())) {
+            Player owner = resolveBondOwner();
+            if (owner == null) {
+                setSyncedBondLevel(bondState().setLevel(bondState().level() + amount, profile.maxBond()));
+                at.koopro.wizardsandbeasts.creature.companion.Companions.afterChange(this);
+                return;
+            }
+            player = owner;
+        }
+        if (claimed && player instanceof net.minecraft.server.level.ServerPlayer claimer) {
+            at.koopro.wizardsandbeasts.creature.companion.Companions.onClaimed(this, claimer);
         }
         if (MagizoologyHelper.isMagizoologist(player)) {
             amount = (int) Math.ceil(amount * 1.5);
@@ -205,11 +270,21 @@ public interface BondableBeast {
         if (after == before) {
             return;
         }
+        final Player credited = player;
 
         if (fireXp) {
             for (int milestone : profile.milestones()) {
                 if (before < milestone && after >= milestone) {
                     announceMilestone(player, profile, milestone);
+                    if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+                        at.koopro.wizardsandbeasts.owl.career.track.CareerProgression.record(serverPlayer, at.koopro.wizardsandbeasts.owl.career.track.ActivityType.BOND_MILESTONE, bondSpecies());
+                    }
+                    // The first milestone is trust won: a study act in the journal's research.
+                    if (milestone == profile.milestones().get(0)
+                            && player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+                        at.koopro.wizardsandbeasts.event.bestiary.BestiaryDiscoveryHandler.studied(serverPlayer,
+                                bondMob().getType(), at.koopro.wizardsandbeasts.bestiary.CreatureProfile.StudyAct.BOND);
+                    }
                 }
             }
         }
@@ -217,9 +292,13 @@ public interface BondableBeast {
         // land whether the bond was earned by feeding or by keeping company.
         profile.masteryBond().ifPresent(mastery -> {
             if (before < mastery && after >= mastery) {
-                BestiaryDataHelper.setTier(player, bondSpecies(), DiscoveryTier.KNOWN);
+                BestiaryDataHelper.setTier(credited, bondSpecies(), DiscoveryTier.KNOWN);
+                if (credited instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+                    at.koopro.wizardsandbeasts.owl.career.track.CareerProgression.record(serverPlayer, at.koopro.wizardsandbeasts.owl.career.track.ActivityType.BOND_MASTERED, bondSpecies());
+                }
             }
         });
+        at.koopro.wizardsandbeasts.creature.companion.Companions.afterChange(this);
     }
 
     /** Lower the bond without changing ownership — a betrayal is not a divorce. */
@@ -282,13 +361,14 @@ public interface BondableBeast {
         }
         bondState().tickTimers();
         // Everything below is a once-a-second question asked of at most one nearby player.
-        if (mob.tickCount % 20 != 0) {
+        if (!AiCadence.every(mob, 20)) {
             return;
         }
         tickProximityBond(profile);
         tickGift(profile);
         tickBreeding(profile);
         tickGrowth(profile);
+        at.koopro.wizardsandbeasts.creature.companion.Companions.tick(this);
     }
 
     /** Time spent near the owner is worth bond, at the profile's rate. */
@@ -379,9 +459,18 @@ public interface BondableBeast {
         }
         for (PathfinderMob candidate : level.getEntitiesOfClass(PathfinderMob.class,
                 mob.getBoundingBox().inflate(breeding.partnerRange()),
-                other -> other != mob && other.getType() == mob.getType() && other.isAlive())) {
-            if (!(candidate instanceof BondableBeast partner) || partner.bondState().loveTicks() <= 0) {
+                other -> other != mob && other.isAlive()
+                        && at.koopro.wizardsandbeasts.creature.companion.CompanionBreeding.compatible(mob.getType(), other.getType()))) {
+            if (!(candidate instanceof BondableBeast partner) || partner.bondState().loveTicks() <= 0
+                    || partner.bondState().isJuvenile()) {
                 continue;
+            }
+            // Young are raised where the species would raise them; elsewhere the pair waits it out.
+            if (!at.koopro.wizardsandbeasts.creature.companion.CompanionBreeding.habitatOk(this)) {
+                bondState().setLoveTicks(0);
+                partner.bondState().setLoveTicks(0);
+                at.koopro.wizardsandbeasts.creature.companion.CompanionBreeding.tellWrongHabitat(this);
+                return;
             }
             bondState().setLoveTicks(0);
             partner.bondState().setLoveTicks(0);
@@ -413,7 +502,15 @@ public interface BondableBeast {
         baby.bondState().beginGrowth(breeding.growSeconds() * 20);
         baby.applyGrowthScale(breeding);
 
+        at.koopro.wizardsandbeasts.creature.companion.CompanionBreeding.onBorn(baby, this, partner);
         level.addFreshEntity(child);
+        // Young raised from your own creatures is a keeper's work, whoever's hand the parents ate from last.
+        java.util.UUID keeper = baby.bondState().ownerUUID();
+        net.minecraft.server.level.ServerPlayer owner = keeper == null ? null
+                : level.getServer().getPlayerList().getPlayer(keeper);
+        if (owner != null) {
+            at.koopro.wizardsandbeasts.owl.career.track.CareerProgression.record(owner, at.koopro.wizardsandbeasts.owl.career.track.ActivityType.CREATURE_BRED, bondSpecies());
+        }
         level.sendParticles(ParticleTypes.HAPPY_VILLAGER, mob.getX(),
                 mob.getY() + mob.getBbHeight() * 0.5, mob.getZ(), 8, 0.4, 0.4, 0.4, 0.0);
     }

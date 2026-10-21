@@ -1,0 +1,51 @@
+{
+  "_comment": "A thief with a nose for gold: fetches what glitters and points out what is buried.",
+  "trait_pool": [
+    {
+      "trait": "greedy",
+      "weight": 5
+    },
+    {
+      "trait": "curious",
+      "weight": 3
+    },
+    {
+      "trait": "playful",
+      "weight": 3
+    },
+    {
+      "trait": "skittish",
+      "weight": 2
+    },
+    {
+      "trait": "loyal",
+      "weight": 1
+    }
+  ],
+  "commands": [
+    "follow",
+    "stay",
+    "rest",
+    "return",
+    "search"
+  ],
+  "abilities": [
+    {
+      "kind": "retrieve_items",
+      "radius": 10,
+      "max_stacks": 8,
+      "cooldown_seconds": 60
+    },
+    {
+      "kind": "reveal",
+      "target": "valuables",
+      "radius": 12,
+      "cooldown_seconds": 180
+    },
+    {
+      "kind": "innate",
+      "id": "pouch"
+    }
+  ],
+  "favourite": "minecraft:gold_nugget"
+}

@@ -21,26 +21,14 @@ import java.util.Map;
 public record BestiaryDataSyncPayload(PlayerBestiaryData data) implements CustomPacketPayload {
     public static final Type<BestiaryDataSyncPayload> TYPE = new Type<>(Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "bestiary_data_sync"));
 
-    public static final StreamCodec<ByteBuf, BestiaryDataSyncPayload> STREAM_CODEC = new StreamCodec<>() {
-        @Override
-        public BestiaryDataSyncPayload decode(ByteBuf buf) {
-            int size = buf.readInt();
-            Map<Identifier, DiscoveryTier> map = new HashMap<>();
-            for (int i = 0; i < size; i++) {
-                map.put(Identifier.parse(PacketCodecUtils.readString(buf)), DiscoveryTier.valueOf(PacketCodecUtils.readString(buf)));
-            }
-            return new BestiaryDataSyncPayload(new PlayerBestiaryData(map));
-        }
-
-        @Override
-        public void encode(ByteBuf buf, BestiaryDataSyncPayload payload) {
-            buf.writeInt(payload.data.tiers().size());
-            payload.data.tiers().forEach((id, tier) -> {
-                PacketCodecUtils.writeString(buf, id.toString());
-                PacketCodecUtils.writeString(buf, tier.name());
-            });
-        }
-    };
+    /**
+     * The whole record, through its save codec: tiers, field notes, discovery history, watching time and harvest
+     * lockouts. The journal shows all of it — how long you have watched, when you can next harvest — and a
+     * hand-written codec that carried tiers and then notes was a second schema to keep in step with the first.
+     */
+    public static final StreamCodec<ByteBuf, BestiaryDataSyncPayload> STREAM_CODEC =
+            net.minecraft.network.codec.ByteBufCodecs.fromCodec(PlayerBestiaryData.CODEC)
+                    .map(BestiaryDataSyncPayload::new, BestiaryDataSyncPayload::data);
 
     @Override
     public Type<? extends CustomPacketPayload> type() { return TYPE; }

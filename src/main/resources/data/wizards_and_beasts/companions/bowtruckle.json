@@ -1,0 +1,52 @@
+{
+  "_comment": "Guardian of wand-trees: leads you to wandwood and goes for the eyes of anyone who threatens you.",
+  "trait_pool": [
+    {
+      "trait": "loyal",
+      "weight": 4
+    },
+    {
+      "trait": "territorial",
+      "weight": 4
+    },
+    {
+      "trait": "skittish",
+      "weight": 3
+    },
+    {
+      "trait": "curious",
+      "weight": 2
+    }
+  ],
+  "commands": [
+    "follow",
+    "stay",
+    "rest",
+    "return",
+    "search",
+    "defend",
+    "patrol"
+  ],
+  "abilities": [
+    {
+      "kind": "reveal",
+      "target": "wandwood",
+      "radius": 16,
+      "cooldown_seconds": 120
+    },
+    {
+      "kind": "innate",
+      "id": "lock_picking"
+    }
+  ],
+  "can_fight": true,
+  "favourite": "wizards_and_beasts:mallowsweet",
+  "breeding": {
+    "habitat": {
+      "blocks": "minecraft:logs",
+      "count": 6,
+      "radius": 4
+    },
+    "mutation_chance": 0.15
+  }
+}

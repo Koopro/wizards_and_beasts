@@ -45,9 +45,10 @@ public final class WildlifeWorld {
      * had watched this species longer than they have. It cannot make a slayer welcome — that check is its own.
      */
     public static boolean letsNear(Player player, EntityType<?> species, boolean puritySensitive, String slayerFlag) {
-        return WildlifeRules.letsNear(trusted(player, tierFor(player, species)), player.isShiftKeyDown(),
+        boolean researched = at.koopro.wizardsandbeasts.bestiary.BestiaryDataHelper.researchComplete(player, species);
+        return WildlifeRules.letsNear(trusted(player, species, tierFor(player, species)), player.isShiftKeyDown(),
                 player.getMainHandItem().isEmpty(), puritySensitive, isSlayer(player, slayerFlag),
-                DarkCorruptionService.get(player));
+                DarkCorruptionService.get(player), researched);
     }
 
     /** Whether a purity-sensitive creature flees this player from further off. */
@@ -61,7 +62,7 @@ public final class WildlifeWorld {
      * treat them as if they had watched a while longer; it opens the same doors study does, one step sooner, and
      * nothing that study could not.
      */
-    private static DiscoveryTier trusted(Player player, DiscoveryTier tier) {
+    private static DiscoveryTier trusted(Player player, EntityType<?> species, DiscoveryTier tier) {
         if (!(player instanceof net.minecraft.server.level.ServerPlayer server)) {
             return tier;
         }

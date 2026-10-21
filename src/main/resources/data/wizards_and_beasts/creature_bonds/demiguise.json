@@ -1,0 +1,29 @@
+{
+  "_comment": "A demiguise is won with patience and fruit; it never fights, and its shed hair keeps coming as before.",
+  "feeds": [
+    {
+      "item": "minecraft:sweet_berries",
+      "gain": 5,
+      "cooldownSeconds": 90
+    },
+    {
+      "item": "minecraft:glow_berries",
+      "gain": 6,
+      "cooldownSeconds": 90
+    }
+  ],
+  "followThreshold": 50,
+  "milestones": [
+    20,
+    50,
+    80,
+    100
+  ],
+  "proximityRange": 6.0,
+  "proximitySeconds": 60,
+  "proximityGain": 1,
+  "betrayalPenalty": 30,
+  "masteryBond": 100,
+  "feedSound": "minecraft:entity.fox.eat",
+  "refuseSound": "minecraft:entity.fox.screech"
+}

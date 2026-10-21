@@ -3,6 +3,10 @@ package at.koopro.wizardsandbeasts.entity.broom;
 import at.koopro.wizardsandbeasts.broom.BroomDefinition;
 import at.koopro.wizardsandbeasts.broom.BroomDefinitionRegistry;
 import at.koopro.wizardsandbeasts.broom.BroomGeometry;
+import at.koopro.wizardsandbeasts.broom.fitting.BroomFittings;
+import at.koopro.wizardsandbeasts.broom.fitting.BroomTune;
+import at.koopro.wizardsandbeasts.broom.fitting.BroomWear;
+import at.koopro.wizardsandbeasts.broom.fitting.BroomWorkshop;
 import at.koopro.wizardsandbeasts.broom.rules.BroomRules;
 import at.koopro.wizardsandbeasts.entity.broom.handling.HandlingProfileRegistry;
 import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
@@ -66,6 +70,17 @@ public class BroomEntity extends Entity implements GeoEntity {
             SynchedEntityData.defineId(BroomEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> CURRENT_DURABILITY =
             SynchedEntityData.defineId(BroomEntity.class, EntityDataSerializers.INT);
+    /**
+     * The fittings, as {@link BroomFittings#encode()}. Synced because the flight is simulated on the rider's client
+     * and checked on the server: a client that did not know about a fitting would fly a different broom from the one
+     * {@link BroomSpeedGuard} holds it to.
+     */
+    private static final EntityDataAccessor<String> FITTINGS =
+            SynchedEntityData.defineId(BroomEntity.class, EntityDataSerializers.STRING);
+    /** RGB the slipstream is dyed, or {@link #NO_DYE}. Cosmetic; read only by the client trail. */
+    private static final EntityDataAccessor<Integer> TRAIL_DYE =
+            SynchedEntityData.defineId(BroomEntity.class, EntityDataSerializers.INT);
+    public static final int NO_DYE = -1;
 
     private static final RawAnimation IDLE_ANIM = RawAnimation.begin().thenLoop("animation.broom.idle");
     private static final RawAnimation FLY_ANIM = RawAnimation.begin().thenLoop("animation.broom.fly_forward");
@@ -128,6 +143,8 @@ public class BroomEntity extends Entity implements GeoEntity {
         builder.define(BOOST_TICKS_REMAINING, 0);
         builder.define(BOOST_COOLDOWN_TICKS, 0);
         builder.define(CURRENT_DURABILITY, 120);
+        builder.define(FITTINGS, "");
+        builder.define(TRAIL_DYE, NO_DYE);
     }
 
     @Override
@@ -150,6 +167,12 @@ public class BroomEntity extends Entity implements GeoEntity {
             if (!level().isClientSide()) {
                 ensureBoostInitialized();
                 BroomMovement.tickBoost(this);
+                // Time in the air is a Quidditch player's training day; checked every five seconds.
+                if (tickCount % 100 == 0 && !onGround()
+                        && rider instanceof net.minecraft.server.level.ServerPlayer flyer) {
+                    at.koopro.wizardsandbeasts.owl.career.CareerWork.record(flyer,
+                            at.koopro.wizardsandbeasts.owl.career.CareerWork.Kind.FLYING);
+                }
             }
             // Vanilla's contract for a ridden vehicle, the one AbstractBoat#tick follows: simulate only
             // where you are the authority. Player.isClientAuthoritative() is true, so for a broom with a
@@ -199,7 +222,7 @@ public class BroomEntity extends Entity implements GeoEntity {
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
         super.onSyncedDataUpdated(key);
-        if (DEFINITION_ID.equals(key)) {
+        if (DEFINITION_ID.equals(key) || FITTINGS.equals(key)) {
             currentDef = null;
         }
     }
@@ -357,6 +380,61 @@ public class BroomEntity extends Entity implements GeoEntity {
         return InteractionResult.SUCCESS;
     }
 
+    private static boolean isWorkshopTool(ItemStack held) {
+        return held.getItem() instanceof at.koopro.wizardsandbeasts.item.broom.BroomFittingItem
+                || held.getItem() instanceof at.koopro.wizardsandbeasts.item.broom.BroomServicingKitItem
+                || held.getItem() instanceof net.minecraft.world.item.DyeItem;
+    }
+
+    /**
+     * Fits, strips or dyes this broom where it stands, through the same {@link BroomWorkshop} the in-hand path uses.
+     * Works on the entity's own stack and then re-reads it, so the synced fittings and dye follow the stack.
+     */
+    private InteractionResult workInPlace(Player player, InteractionHand hand, ItemStack held) {
+        if (!(player instanceof ServerPlayer server)) {
+            return InteractionResult.SUCCESS;
+        }
+        ItemStack broom = broomStack.isEmpty() ? new ItemStack(BroomItemRegistry.BROOM_ITEM.get()) : broomStack;
+        writeDurabilityToStack(broom);
+        boolean changed;
+        if (held.getItem() instanceof at.koopro.wizardsandbeasts.item.broom.BroomFittingItem) {
+            changed = BroomWorkshop.fit(server, broom, held);
+        } else if (held.getItem() instanceof at.koopro.wizardsandbeasts.item.broom.BroomServicingKitItem) {
+            changed = at.koopro.wizardsandbeasts.item.broom.BroomServicingKitItem.stripWith(server, broom, held, hand);
+        } else if (held.getItem() instanceof net.minecraft.world.item.DyeItem dye) {
+            changed = BroomWorkshop.dye(server, broom, held, dye.getDyeColor());
+        } else {
+            changed = false;
+        }
+        broomStack = broom;
+        refreshWorkshopData();
+        return changed ? InteractionResult.SUCCESS : InteractionResult.FAIL;
+    }
+
+    /** Copies the stack's fittings and dye into the synced entity data. */
+    private void refreshWorkshopData() {
+        BroomFittings fittings = broomStack.isEmpty() ? BroomFittings.NONE : BroomWorkshop.fittingsOf(broomStack);
+        entityData.set(FITTINGS, fittings.encode());
+        Integer dye = broomStack.isEmpty() ? null : broomStack.get(ModDataComponents.BROOM_TRAIL_DYE.get());
+        entityData.set(TRAIL_DYE, dye == null ? NO_DYE : dye);
+        currentDef = null;
+    }
+
+    /** The fittings this broom flies with, as synced. */
+    public BroomFittings getFittings() {
+        return BroomFittings.decode(entityData.get(FITTINGS));
+    }
+
+    /** RGB of the dyed slipstream, or {@link #NO_DYE}. */
+    public int getTrailDye() {
+        return entityData.get(TRAIL_DYE);
+    }
+
+    /** The condition band this broom's durability puts it in, against its authored durability. */
+    public BroomWear getWear() {
+        return BroomWear.of(getCurrentDurability(), baseDefinition().durability());
+    }
+
     /**
      * Keeps the synced polish flag in step with the stack's component.
      *
@@ -416,6 +494,9 @@ public class BroomEntity extends Entity implements GeoEntity {
         if (held.getItem() instanceof at.koopro.wizardsandbeasts.item.broom.BroomPolishItem) {
             return polishInPlace(player, held);
         }
+        if (isWorkshopTool(held) && getPassengers().isEmpty()) {
+            return workInPlace(player, hand, held);
+        }
 
         if (player.isShiftKeyDown()) {
             if (!(player instanceof ServerPlayer serverPlayer) || !getPassengers().isEmpty()) {
@@ -426,9 +507,7 @@ public class BroomEntity extends Entity implements GeoEntity {
                     ? new ItemStack(BroomItemRegistry.BROOM_ITEM.get())
                     : broomStack.copy();
             writeDurabilityToStack(pickupStack);
-            if (!serverPlayer.getInventory().add(pickupStack)) {
-                serverPlayer.drop(pickupStack, false);
-            }
+            at.koopro.wizardsandbeasts.util.InventoryHandover.giveOrDrop(serverPlayer, pickupStack);
             discard();
             return InteractionResult.SUCCESS;
         }
@@ -488,8 +567,9 @@ public class BroomEntity extends Entity implements GeoEntity {
         if (stack.isDamageableItem()) {
             setCurrentDurability(Math.max(1, stack.getMaxDamage() - stack.getDamageValue()));
         } else {
-            setCurrentDurability(resolveDefinition().durability());
+            setCurrentDurability(baseDefinition().durability());
         }
+        refreshWorkshopData();
     }
 
     @Override
@@ -659,26 +739,44 @@ public class BroomEntity extends Entity implements GeoEntity {
     /** {@link BroomSpeedGuard}'s running count of ticks over the server's ceiling. Server-side, not saved. */
     int speedStrikes;
 
+    /** Which {@link BroomWear} band {@link #currentDef} was resolved at. */
+    private @Nullable BroomWear currentDefWear;
+
+    /**
+     * The broom this entity actually flies: its published definition, fitted and worn ({@link BroomTune}).
+     *
+     * <p>Every flight reader goes through here — movement, the handling profiles, impacts, the client FX and
+     * {@link BroomSpeedGuard} — so the rider's client and the server agree on a fitted broom by construction. The
+     * inputs are all synced (definition id, fittings, durability), so both sides compute the same answer.
+     */
     public BroomDefinition resolveDefinition() {
         // The cache is only good for as long as the table it came from. A /reload swaps the table
         // without touching any entity's DEFINITION_ID, so the id-change hook never fires and a
-        // broom in the world would fly its pre-reload values until it unloaded.
+        // broom in the world would fly its pre-reload values until it unloaded. Wear is part of the
+        // key because a knock can move a broom into the next band mid-flight.
         int generation = BroomDefinitionRegistry.generation();
-        if (currentDef != null && currentDefGeneration == generation) {
+        if (currentDef != null && currentDefGeneration == generation
+                && currentDefWear == BroomWear.of(getCurrentDurability(), currentDef.durability())) {
             return currentDef;
         }
-        currentDef = null;
+        BroomDefinition base = baseDefinition();
+        BroomWear wear = BroomWear.of(getCurrentDurability(), base.durability());
         currentDefGeneration = generation;
+        currentDefWear = wear;
+        currentDef = BroomTune.apply(base, getFittings(), wear);
+        return currentDef;
+    }
+
+    /** The definition as published (authored plus any admin overlay), before fittings and wear. */
+    public BroomDefinition baseDefinition() {
         Identifier id = Identifier.tryParse(getDefinitionId());
         if (id != null) {
             BroomDefinition resolved = BroomDefinitionRegistry.get(id);
             if (resolved != null) {
-                currentDef = resolved;
                 return resolved;
             }
         }
-        currentDef = BroomDefinitionRegistry.getFallback();
-        return currentDef;
+        return BroomDefinitionRegistry.getFallback();
     }
 
     void applyDurabilityDamage(int amount) {

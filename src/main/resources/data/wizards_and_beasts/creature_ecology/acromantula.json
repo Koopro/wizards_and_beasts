@@ -1,0 +1,12 @@
+{
+  "capabilities": [
+    "predator",
+    "territorial",
+    "aggressive",
+    "nocturnal",
+    "social",
+    "climbing"
+  ],
+  "territory_radius": 20,
+  "sense_radius": 24
+}

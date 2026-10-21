@@ -1,0 +1,12 @@
+{
+  "capabilities": [
+    "prey",
+    "herd",
+    "nocturnal",
+    "burrowing",
+    "cowardly",
+    "human-avoidant"
+  ],
+  "herd_radius": 8,
+  "sense_radius": 14
+}

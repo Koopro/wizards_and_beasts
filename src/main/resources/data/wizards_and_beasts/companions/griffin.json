@@ -1,0 +1,38 @@
+{
+  "_comment": "Hoard-guarding hunter: ferocious in defence, slow to trust.",
+  "trait_pool": [
+    {
+      "trait": "aggressive",
+      "weight": 4
+    },
+    {
+      "trait": "territorial",
+      "weight": 4
+    },
+    {
+      "trait": "greedy",
+      "weight": 2
+    },
+    {
+      "trait": "brave",
+      "weight": 2
+    }
+  ],
+  "commands": [
+    "follow",
+    "stay",
+    "rest",
+    "return",
+    "defend",
+    "attack",
+    "patrol"
+  ],
+  "abilities": [
+    {
+      "kind": "innate",
+      "id": "hoard_guard"
+    }
+  ],
+  "can_fight": true,
+  "favourite": "minecraft:mutton"
+}

@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.creature.ability;
 
+import at.koopro.wizardsandbeasts.creature.schedule.AiCadence;
 import at.koopro.wizardsandbeasts.creature.wildlife.CreatureSign;
 import at.koopro.wizardsandbeasts.creature.wildlife.WildlifeRules;
 import at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity;
@@ -47,7 +48,7 @@ public record Shed(Identifier item, int intervalTicks, int count) implements Cre
             entity.setCooldown(TIMER, intervalTicks);
             return;
         }
-        if (entity.getCooldown(TIMER) > 0 || entity.tickCount % 20 != 0) {
+        if (entity.getCooldown(TIMER) > 0 || !AiCadence.every(entity, 20)) {
             return;
         }
         boolean calm = entity.getTarget() == null && (entity.getLastHurtByMob() == null

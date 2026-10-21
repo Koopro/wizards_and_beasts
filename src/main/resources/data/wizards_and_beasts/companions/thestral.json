@@ -1,0 +1,49 @@
+{
+  "_comment": "Unseen by most, sees what others cannot: marks hidden threats and carries its rider through the air.",
+  "trait_pool": [
+    {
+      "trait": "loyal",
+      "weight": 4
+    },
+    {
+      "trait": "brave",
+      "weight": 3
+    },
+    {
+      "trait": "territorial",
+      "weight": 2
+    },
+    {
+      "trait": "curious",
+      "weight": 1
+    }
+  ],
+  "commands": [
+    "follow",
+    "stay",
+    "rest",
+    "return",
+    "search",
+    "defend",
+    "attack",
+    "patrol"
+  ],
+  "abilities": [
+    {
+      "kind": "reveal",
+      "target": "threats",
+      "radius": 24,
+      "cooldown_seconds": 90
+    },
+    {
+      "kind": "innate",
+      "id": "mount"
+    },
+    {
+      "kind": "innate",
+      "id": "unseen"
+    }
+  ],
+  "can_fight": true,
+  "favourite": "minecraft:beef"
+}
