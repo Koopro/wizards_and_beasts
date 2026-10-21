@@ -44,7 +44,7 @@ public final class AdminBroomCommands {
         if (BroomAdminService.authorised(AdminContext.of(source))) {
             return false;
         }
-        source.sendFailure(Component.translatable("admin.wizards_and_beasts.wand_action.unauthorized"));
+        source.sendFailure(Component.translatable("admin.wizards_and_beasts.creature_action.unauthorized", ""));
         return true;
     }
 

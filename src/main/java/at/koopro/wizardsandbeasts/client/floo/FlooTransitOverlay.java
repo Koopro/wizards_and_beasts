@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.client.floo;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import net.minecraft.client.DeltaTracker;
+import at.koopro.wizardsandbeasts.client.hud.HudOverlays;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.Identifier;
@@ -46,10 +47,9 @@ public final class FlooTransitOverlay {
     }
 
     public static void render(GuiGraphics graphics, DeltaTracker delta) {
-        if (at.koopro.wizardsandbeasts.Config.reduceScreenEffects) return;
+        if (HudOverlays.overlayTarget() == null) return;
         long now = System.currentTimeMillis();
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return;
 
         if (now >= endMs) {
             renderSoot(graphics, mc, now);

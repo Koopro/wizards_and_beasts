@@ -6,6 +6,7 @@ import at.koopro.wizardsandbeasts.client.ui.UiStateProjection;
 import at.koopro.wizardsandbeasts.form.TransformationConfig;
 import at.koopro.wizardsandbeasts.client.form.state.ClientTransitionTracker;
 import net.minecraft.client.DeltaTracker;
+import at.koopro.wizardsandbeasts.client.hud.HudOverlays;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.Identifier;
@@ -22,9 +23,8 @@ public final class TransitionEffectRenderer {
     private TransitionEffectRenderer() {}
 
     public static void render(GuiGraphics graphics, DeltaTracker delta) {
-        if (at.koopro.wizardsandbeasts.Config.reduceScreenEffects) return;
+        if (HudOverlays.overlayTarget() == null) return;
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return;
         renderLowControlOverlay(graphics, mc);
 
         ClientTransitionTracker.TransitionState state =
