@@ -232,3 +232,19 @@ Plan and per-milestone status: `tasks/todo_ui_overhaul_2026_10_21.md`.
 - Seen: 1080p GUI 3/4 and 720p GUI 3, empty and with a blank + core seated (`run/screenshots/ui_bench_after`).
 - ⏳ Not exercised by hand in a live client: shift-click, drag-split, taking the wand. Code paths unchanged.
 
+### Hermione's Bag — `client/item/HermionesBagScreen` + `item/trinket/HermionesBagMenu` (redesigned)
+- Was: vanilla `generic_54` recoloured onto paper with a row of beads in the title band — the mod's
+  signature artefact opened as a double chest.
+- Now (user: "it's a pink bag, that needs to shape the design"): the bag half is pink beads set brick-fashion
+  on rose silk with the odd pearl, gilt piping, a gilt kiss-lock clasp across the top, the name on a satin
+  tag, and the 54 slots sunk into deep rose satin lining (rose slot wells). The player's inventory is a
+  parchment strip below, so bag and pockets are two things at a glance. The held bag's hotbar slot is
+  ringed in bead pink with a tooltip saying why it will not move.
+- Geometry in the menu (`GUI_W/GUI_H`, `slotOrigins()`), read by its slots and the screen's frames;
+  capacity (54) and slot order unchanged, so `quickMoveStack` is untouched. 180x239 — fits the 240px floor.
+  `HermionesBagGeometryTest` caught the hotbar frames touching the strip's inner rule at 237 high.
+- Art: `gui_chrome.py` `container/hermiones_bag/{fabric,lining,clasp_bar,clasp_ball}.png` (64/8 tiled);
+  the old `container/hermiones_bag.png` and its generator are gone. Kit: `Ui.slot(g, x, y, face, shadow, lip)`.
+- Seen: 1080p GUI 3/4 and 720p GUI 3 with items packed (`run/screenshots/ui_bag`, harness step `hermiones_bag`).
+- ⏳ Not exercised by hand: shift-click both ways, drag-split, the pinned slot refusing a swap.
+

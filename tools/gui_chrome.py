@@ -27,7 +27,7 @@ from PIL import Image, ImageDraw
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from artgen_common import client_jar_texture, is_regenerable, marker, save  # noqa: E402
-from gui_parchment import (BORDER, PANEL, grain_field, mix, panel,  # noqa: E402
+from gui_parchment import (BORDER, INNER, PANEL, grain_field, mix, panel,  # noqa: E402
                            paper_colour, shade, skin, slice_tiled)
 
 GUI = "src/main/resources/assets/wizards_and_beasts/textures/gui"
@@ -187,27 +187,121 @@ def brand_bands(out, s):
             d.point((x, FOOTER_Y + 1), fill=opaque(s["gilt_d"]))
 
 
-def a_hermiones_bag():
-    """Hermione's beaded bag, on paper, from vanilla's `generic_54`.
+# --------------------------------------------------------------------------- Hermione's bag
+#
+# The beaded evening bag: pink beads set brick-fashion on rose silk with the odd pearl, gilt piping, a
+# kiss-lock clasp across the top, and a deep rose satin lining the slots sink into -- reaching *into* the
+# bag, not opening a chest. Java: `HermionesBagScreen` (fabric and lining tile on 64/8 like the kit's
+# panels, so the beads never stretch; the clasp bar tiles along x).
 
-    Recoloured for the same reason as the creative tabs: the screen assembles itself from two fixed
-    regions of this sheet -- the six rows from the top and the player-inventory strip from v=126 --
-    with every slot at a hardcoded offset.
+def rgb(h):
+    h = h.lstrip("#")
+    return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
 
-    Branding goes in the title band (y=0..16), the one strip vanilla leaves flat, and only from
-    x=104 so it clears the title text at x=8. Beads on a drawstring, which is what the bag is.
-    """
+
+ROSE = dict(
+    cloth_dd=rgb("#4E1840"), cloth_d=rgb("#7E2A60"), cloth=rgb("#A63E7E"), cloth_l=rgb("#C2588F"),
+    bead_d=rgb("#B0407E"), bead=rgb("#E886BE"), bead_l=rgb("#FFD4EC"),
+    pearl_d=rgb("#B7A0B2"), pearl=rgb("#F2E6EE"), pearl_l=rgb("#FFFFFF"),
+    lining_dd=rgb("#1E0618"), lining_d=rgb("#2E0C26"), lining=rgb("#3C1232"), lining_l=rgb("#4E1C42"),
+)
+BEAD_STEP = 4      # one bead every 4px; 48 / 4 = 12 beads per tile, so the tile has no seam
+BAG_TILE = PANEL   # 64, cut on BORDER (8), as the kit's panels
+CLASP_BAR_W, CLASP_BAR_H = 16, 6
+CLASP_BALL = 7
+
+
+def bead_at(px, x, y, kind):
+    """A 3px diamond bead, lit from the top-left."""
+    r = ROSE
+    lit, body, dark = ((r["pearl_l"], r["pearl"], r["pearl_d"]) if kind == "pearl"
+                       else (r["bead_l"], r["bead"], r["bead_d"]))
+    for (dx, dy), c in (((1, 0), lit), ((0, 1), lit), ((1, 1), body), ((2, 1), dark), ((1, 2), dark)):
+        px[x + dx, y + dy] = opaque(c)
+
+
+def a_bag_fabric():
+    """Rose silk set with beads, 64x64 on an 8px border: outline, two rows of gilt piping, then beads to
+    the edge. Every pattern is periodic in INNER (48) from BORDER, so tiled centre and edges meet."""
+    r = ROSE
+    P = BAG_TILE
+    img = Image.new("RGBA", (P, P))
+    px = img.load()
+    weave = grain_field(P + INNER, P + INNER, 61, 0.5)
+    for y in range(P):
+        for x in range(P):
+            v = weave[(y - BORDER) % INNER][(x - BORDER) % INNER]
+            px[x, y] = opaque(r["cloth_d"] if v < -0.7 else r["cloth_l"] if v > 0.8 else r["cloth"])
+    for y in range(P):
+        gy = ((y - BORDER) % INNER) // BEAD_STEP
+        if ((y - BORDER) % INNER) % BEAD_STEP != 0:
+            continue
+        offset = 2 if gy % 2 else 0
+        for x in range(P):
+            phase = (x - BORDER - offset) % INNER
+            if phase % BEAD_STEP != 0 or x + 2 >= P or y + 2 >= P:
+                continue
+            gx = phase // BEAD_STEP
+            kind = "pearl" if (gx * 5 + gy * 7) % 13 == 0 else "bead"
+            bead_at(px, x, y, kind)
+    d = ImageDraw.Draw(img)
     s = PAGE
-    src = client_jar_texture("textures/gui/container/generic_54.png")
-    out = restyle(src, s, 176, 223, 5)
-    d = ImageDraw.Draw(out)
-    d.line([(104, 11), (168, 11)], fill=opaque(s["ink_2"]))
-    beads = (s["wax"], s["gilt"])
-    for i, x in enumerate(range(106, 169, 8)):
-        bead = beads[i % 2]
-        d.ellipse([x - 2, 6, x + 1, 9], fill=opaque(bead), outline=opaque(shade(bead, 0.6)))
-        d.point((x - 1, 7), fill=opaque(mix(bead, (255, 255, 255), 0.5)))
-    return out
+    d.rectangle([0, 0, P - 1, P - 1], outline=opaque(r["cloth_dd"]))
+    d.line([(1, 1), (P - 2, 1)], fill=opaque(s["gilt_l"]))
+    d.line([(1, 1), (1, P - 2)], fill=opaque(s["gilt_l"]))
+    d.line([(1, P - 2), (P - 2, P - 2)], fill=opaque(s["gilt_d"]))
+    d.line([(P - 2, 1), (P - 2, P - 2)], fill=opaque(s["gilt_d"]))
+    d.rectangle([2, 2, P - 3, P - 3], outline=opaque(s["gilt"]))
+    d.rectangle([3, 3, P - 4, P - 4], outline=opaque(r["cloth_dd"]))
+    for c in ((0, 0), (P - 1, 0), (0, P - 1), (P - 1, P - 1)):
+        px[c] = (0, 0, 0, 0)
+    return img
+
+
+def a_bag_lining():
+    """Deep rose satin, 64x64 on 8: a quiet two-tone grain (a diagonal sheen showed a seam where the tiled
+    centre met the edge strips), shadow along the top-left edge, a lit lip bottom-right. Only the outer 2px
+    carry the edge, so items sit on plain satin."""
+    r = ROSE
+    P = BAG_TILE
+    img = Image.new("RGBA", (P, P))
+    px = img.load()
+    grain = grain_field(P + INNER, P + INNER, 67, 0.6)
+    for y in range(P):
+        for x in range(P):
+            v = grain[(y - BORDER) % INNER][(x - BORDER) % INNER]
+            px[x, y] = opaque(r["lining_d"] if v < -0.6 else r["lining_l"] if v > 0.9 else r["lining"])
+    d = ImageDraw.Draw(img)
+    d.line([(0, 0), (P - 1, 0)], fill=opaque(r["lining_dd"]))
+    d.line([(0, 0), (0, P - 1)], fill=opaque(r["lining_dd"]))
+    d.line([(1, 1), (P - 2, 1)], fill=opaque(r["lining_dd"]))
+    d.line([(1, 1), (1, P - 2)], fill=opaque(r["lining_dd"]))
+    d.line([(1, P - 1), (P - 1, P - 1)], fill=opaque(r["cloth_d"]))
+    d.line([(P - 1, 1), (P - 1, P - 1)], fill=opaque(r["cloth_d"]))
+    return img
+
+
+def a_bag_clasp_bar():
+    """16x6, tiled along x: the kiss-lock frame, a gilt tube lit on top."""
+    s = PAGE
+    img, d = canvas(CLASP_BAR_W, CLASP_BAR_H)
+    rows = (shade(s["gilt_d"], 0.55), s["gilt_l"], s["gilt_ll"], s["gilt"], s["gilt_d"], shade(s["gilt_d"], 0.55))
+    for y, c in enumerate(rows):
+        d.line([(0, y), (CLASP_BAR_W - 1, y)], fill=opaque(c))
+    return img
+
+
+def a_bag_clasp_ball():
+    """7x7: one of the two clasp balls that meet at the top of the bag."""
+    s = PAGE
+    img, d = canvas(CLASP_BALL, CLASP_BALL)
+    d.ellipse([0, 0, 6, 6], fill=opaque(s["gilt"]), outline=opaque(shade(s["gilt_d"], 0.55)))
+    d.point((2, 2), fill=opaque(s["gilt_ll"]))
+    d.point((3, 2), fill=opaque(s["gilt_l"]))
+    d.point((2, 3), fill=opaque(s["gilt_l"]))
+    d.point((4, 5), fill=opaque(s["gilt_d"]))
+    d.point((5, 4), fill=opaque(s["gilt_d"]))
+    return img
 
 
 # --------------------------------------------------------------------------- table
@@ -215,7 +309,10 @@ def a_hermiones_bag():
 ASSETS = {
     "container/creative_inventory/tab_main.png": lambda: a_creative_background(PAGE, 3),
     "container/creative_inventory/tab_decorative.png": lambda: a_creative_background(VELLUM, 7),
-    "container/hermiones_bag.png": a_hermiones_bag,
+    "container/hermiones_bag/fabric.png": a_bag_fabric,
+    "container/hermiones_bag/lining.png": a_bag_lining,
+    "container/hermiones_bag/clasp_bar.png": a_bag_clasp_bar,
+    "container/hermiones_bag/clasp_ball.png": a_bag_clasp_ball,
     "character_sheet/icon_tab.png": a_icon_tab,
 }
 

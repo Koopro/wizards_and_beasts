@@ -398,7 +398,16 @@ public final class Ui {
      * bottom-right (light is top-left everywhere).
      */
     public static void slot(GuiGraphics g, int itemX, int itemY) {
-        slotWell(g, itemX - 1, itemY - 1, SLOT, SLOT);
+        slotWell(g, itemX - 1, itemY - 1, SLOT, SLOT,
+                WizardsPalette.PAGE_SHADE, WizardsPalette.PAGE_DEEP, WizardsPalette.PAGE_LIGHT);
+    }
+
+    /**
+     * The same well in a container's own material -- Hermione's bag sinks its slots into rose satin, not
+     * paper. Same construction: {@code face}, a {@code shadow} top-left, a lit {@code lip} bottom-right.
+     */
+    public static void slot(GuiGraphics g, int itemX, int itemY, int face, int shadow, int lip) {
+        slotWell(g, itemX - 1, itemY - 1, SLOT, SLOT, face, shadow, lip);
     }
 
     /**
@@ -412,7 +421,7 @@ public final class Ui {
         g.fill(x - 1, y - 1, x + size + 1, y + size + 1, WizardsPalette.GILT_DARK);
         g.fill(x - 1, y - 1, x + size, y, WizardsPalette.GILT);
         g.fill(x - 1, y - 1, x, y + size, WizardsPalette.GILT);
-        slotWell(g, x, y, size, size);
+        slotWell(g, x, y, size, size, WizardsPalette.PAGE_SHADE, WizardsPalette.PAGE_DEEP, WizardsPalette.PAGE_LIGHT);
     }
 
     /**
@@ -429,12 +438,12 @@ public final class Ui {
         g.fill(x + size - 1, y + 1, x + size, y + size - 1, colour);
     }
 
-    private static void slotWell(GuiGraphics g, int x, int y, int w, int h) {
-        g.fill(x, y, x + w, y + h, WizardsPalette.PAGE_SHADE);
-        g.fill(x, y, x + w - 1, y + 1, WizardsPalette.PAGE_DEEP);
-        g.fill(x, y + 1, x + 1, y + h - 1, WizardsPalette.PAGE_DEEP);
-        g.fill(x + 1, y + h - 1, x + w, y + h, WizardsPalette.PAGE_LIGHT);
-        g.fill(x + w - 1, y + 1, x + w, y + h - 1, WizardsPalette.PAGE_LIGHT);
+    private static void slotWell(GuiGraphics g, int x, int y, int w, int h, int face, int shadow, int lip) {
+        g.fill(x, y, x + w, y + h, face);
+        g.fill(x, y, x + w - 1, y + 1, shadow);
+        g.fill(x, y + 1, x + 1, y + h - 1, shadow);
+        g.fill(x + 1, y + h - 1, x + w, y + h, lip);
+        g.fill(x + w - 1, y + 1, x + w, y + h - 1, lip);
     }
 
     // ── direction ─────────────────────────────────────────────────────────────

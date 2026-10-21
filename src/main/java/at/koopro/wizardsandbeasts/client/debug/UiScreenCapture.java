@@ -190,6 +190,7 @@ public final class UiScreenCapture {
                 Step.client("ministry_licence", () -> open(new MinistryLicenceScreen(false))),
                 Step.server("wandmakers_bench", UiScreenCapture::openBench),
                 Step.server("wandmakers_bench_loaded", UiScreenCapture::openBenchLoaded),
+                Step.server("hermiones_bag", UiScreenCapture::openHermionesBag),
                 Step.server("ollivander_trial", OllivanderInteractHandler::openTrial),
                 Step.client("admin_control_center", AdminClientRequests::open),
                 // The 2026-10-15 finishing pass: the screens the first audit did not reach.
@@ -296,6 +297,29 @@ public final class UiScreenCapture {
                     new net.minecraft.world.item.ItemStack(at.koopro.wizardsandbeasts.registry.WandItemRegistry.PHOENIX_FEATHER.get())), 1);
         }
         openBench(player);
+    }
+
+    /**
+     * Hermione's bag opened from the main hand, as {@code HermionesBagItem.use} opens it, with a few
+     * things packed so items show against the lining and the held bag's ringed hotbar slot is in shot.
+     * The capture world is a disposable copy: the selected hotbar slot is overwritten.
+     */
+    private static void openHermionesBag(ServerPlayer player) {
+        var inv = player.getInventory();
+        inv.setItem(inv.getSelectedSlot(), new net.minecraft.world.item.ItemStack(
+                at.koopro.wizardsandbeasts.registry.TrinketItemRegistry.HERMIONES_BEADED_BAG.get()));
+        var bag = player.getMainHandItem();
+        bag.getItem().use(player.level(), player, net.minecraft.world.InteractionHand.MAIN_HAND);
+        if (player.containerMenu instanceof at.koopro.wizardsandbeasts.item.trinket.HermionesBagMenu menu) {
+            net.minecraft.world.item.Item[] packed = {net.minecraft.world.item.Items.BOOK,
+                    net.minecraft.world.item.Items.WRITABLE_BOOK, net.minecraft.world.item.Items.POTION,
+                    net.minecraft.world.item.Items.MAP, net.minecraft.world.item.Items.WHITE_WOOL,
+                    net.minecraft.world.item.Items.BREAD, net.minecraft.world.item.Items.LANTERN};
+            for (int i = 0; i < packed.length; i++) {
+                menu.getSlot(i * 3).set(new net.minecraft.world.item.ItemStack(packed[i], 1 + i));
+            }
+            menu.broadcastChanges();
+        }
     }
 
     private static void openBench(ServerPlayer player) {

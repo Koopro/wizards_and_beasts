@@ -501,6 +501,7 @@
   "gui.wizards_and_beasts.spell_menu.stat.requires": "Requires",
   "gui.wizards_and_beasts.spell_menu.value.seconds": "%ss",
   "gui.wizards_and_beasts.chip.selected": "Selected",
+  "gui.wizards_and_beasts.hermiones_bag.pinned": "The bag you are holding open: it stays put until you close it.",
   "gui.wizards_and_beasts.spell_menu.slot.up": "Up",
   "gui.wizards_and_beasts.spell_menu.slot.right": "Right",
   "gui.wizards_and_beasts.spell_menu.slot.down": "Down",
