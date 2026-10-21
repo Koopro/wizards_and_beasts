@@ -1,11 +1,8 @@
 package at.koopro.wizardsandbeasts.heritage.profession;
 
 import at.koopro.wizardsandbeasts.heritage.Heritage;
-import at.koopro.wizardsandbeasts.skill.SkillNodeEffect;
-import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
+import at.koopro.wizardsandbeasts.skill.GameplayStat;
+import at.koopro.wizardsandbeasts.skill.SkillEffect.GameplayBonus;
 
 import org.jspecify.annotations.Nullable;
 
@@ -16,6 +13,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * A heritage's own trades, bought with profession points (one per mastered spell, three at the
+ * ceremony).
+ *
+ * <p>Each node pays in the currency its description names, through a {@link GameplayStat} the skill
+ * web already reads at its point of use — a Wandmaker keeps a wand through a lost duel, a Ward Binder's
+ * shields stand longer, a Stalker is noticed from less far away. These used to share one formula
+ * whatever they said: a combat cooldown cut plus, for Wizardkind, utility damage and <b>+max health</b>
+ * ("Seer: reads omens" gave +2 hearts). That made a heritage a stat multiplier, which is what
+ * documentation/PROGRESSION_MAP.md §4 #4 ruled out. No node grants an attribute or a spell multiplier
+ * now; {@code ProfessionNodeTest} holds that line.
+ *
+ * <p>Saves need no migration: unlocked ids are unchanged, and {@code SkillAttributeApplicator.removeAll}
+ * strips every old {@code skill/profession/*} modifier the next time attributes are applied (login).
+ */
 public enum ProfessionNode {
     // Wizardkind
     WIZARD_APPRENTICE("wizard_apprentice", Heritage.WIZARDKIND, "Apprentice",
@@ -128,7 +140,7 @@ public enum ProfessionNode {
     private final int pointCost;
     private final Set<String> prerequisites;
     private final Set<String> tags;
-    private final List<SkillNodeEffect> effects;
+    private final List<GameplayBonus> bonuses;
 
     ProfessionNode(String id, Heritage parentHeritage, String displayName, String description,
                    int pointCost, Set<String> prerequisites, Set<String> tags) {
@@ -139,7 +151,7 @@ public enum ProfessionNode {
         this.pointCost = pointCost;
         this.prerequisites = prerequisites;
         this.tags = tags;
-        this.effects = defaultEffects(id, parentHeritage, pointCost);
+        this.bonuses = tradeBonuses(id);
     }
 
     public String getId() {
@@ -170,8 +182,22 @@ public enum ProfessionNode {
         return tags;
     }
 
-    public List<SkillNodeEffect> getEffects() {
-        return effects;
+    /** What this trade pays, read through {@code SkillSystemAPI.getGameplayBonus}. */
+    public List<GameplayBonus> getBonuses() {
+        return bonuses;
+    }
+
+    /** Summed bonus of {@code stat} over a set of unlocked profession ids; unknown ids count nothing. */
+    public static float bonus(Iterable<String> unlockedIds, GameplayStat stat) {
+        float sum = 0f;
+        for (String unlocked : unlockedIds) {
+            ProfessionNode node = byId(unlocked);
+            if (node == null) continue;
+            for (GameplayBonus b : node.bonuses) {
+                if (b.stat() == stat) sum += b.perLevel();
+            }
+        }
+        return sum;
     }
 
     public String getTranslationKey() {
@@ -197,30 +223,43 @@ public enum ProfessionNode {
         return BY_ID.get(id);
     }
 
-    private static List<SkillNodeEffect> defaultEffects(String id, Heritage heritage, int pointCost) {
-        List<SkillNodeEffect> result = new ArrayList<>();
-        float tierScale = 1.0f - (pointCost * 0.05f);
-        result.add(new SkillNodeEffect.SpellCooldownMultiplier(SpellCategory.COMBAT, Math.max(0.65f, tierScale)));
-        switch (heritage) {
-            case WIZARDKIND -> {
-                result.add(new SkillNodeEffect.SpellDamageMultiplier(SpellCategory.UTILITY, 1.0f + (pointCost * 0.04f)));
-                result.add(new SkillNodeEffect.AttributeBoost(Attributes.MAX_HEALTH, pointCost, AttributeModifier.Operation.ADD_VALUE,
-                        skillModifierId(id, "max_health")));
-            }
-            case GIANT -> result.add(new SkillNodeEffect.AttributeBoost(Attributes.ARMOR, pointCost * 0.5d,
-                    AttributeModifier.Operation.ADD_VALUE, skillModifierId(id, "armor")));
-            case VAMPIRE -> result.add(new SkillNodeEffect.SpellDamageMultiplier(SpellCategory.DARK_ARTS, 1.0f + (pointCost * 0.06f)));
-            case HOUSE_ELF -> result.add(new SkillNodeEffect.SpellCooldownMultiplier(SpellCategory.DEFENSE, 1.0f - (pointCost * 0.06f)));
-            case VEELA, MERPEOPLE -> result.add(new SkillNodeEffect.SpellCooldownMultiplier(SpellCategory.UTILITY, 1.0f - (pointCost * 0.05f)));
-            case GOBLIN, CENTAUR -> result.add(new SkillNodeEffect.AttributeBoost(Attributes.MOVEMENT_SPEED, pointCost * 0.01d,
-                    AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, skillModifierId(id, "movement_speed")));
-            default -> {
-            }
-        }
-        return List.copyOf(result);
-    }
-
-    private static Identifier skillModifierId(String nodeId, String attributePath) {
-        return Identifier.fromNamespaceAndPath("wizards_and_beasts", "skill/profession/" + nodeId + "/" + attributePath);
+    /** One trade, one currency; the top of a line may pay in two of its line's. */
+    private static List<GameplayBonus> tradeBonuses(String id) {
+        return switch (id) {
+            // Wizardkind: wandwork, wandlore, a sense for the unsaid, and the wards of high practice.
+            case "wizard_apprentice" -> List.of(new GameplayBonus(GameplayStat.SPELL_MISFIRE_REDUCTION, 0.03f));
+            case "wizard_wandmaker" -> List.of(new GameplayBonus(GameplayStat.ALLEGIANCE_GRIP, 1.0f));
+            case "wizard_seer" -> List.of(new GameplayBonus(GameplayStat.OCCLUMENCY_SHIELD, 0.15f));
+            case "wizard_archmage" -> List.of(new GameplayBonus(GameplayStat.WARD_INTEGRITY, 0.20f));
+            // Goblin: Gringotts keeps its counsel, and a goblin-made thing belongs to its maker.
+            case "goblin_clerk", "goblin_banker" -> List.of(new GameplayBonus(GameplayStat.TRACE_DISCRETION, 0.10f));
+            case "goblin_metalsmith" -> List.of(new GameplayBonus(GameplayStat.ALLEGIANCE_GRIP, 1.0f));
+            case "goblin_director" -> List.of(new GameplayBonus(GameplayStat.ALLEGIANCE_GRIP, 1.0f),
+                    new GameplayBonus(GameplayStat.TRACE_DISCRETION, 0.10f));
+            // House-elf: household wards, and binding-magic turned inward.
+            case "elf_steward" -> List.of(new GameplayBonus(GameplayStat.WARD_INTEGRITY, 0.10f));
+            case "elf_binder" -> List.of(new GameplayBonus(GameplayStat.WARD_LIFETIME, 0.20f));
+            case "elf_liberator" -> List.of(new GameplayBonus(GameplayStat.CURSE_BACKLASH, 0.05f));
+            // Veela: allure that creatures answer, a mind used to bending others, fire before the wand.
+            case "veela_charmer" -> List.of(new GameplayBonus(GameplayStat.CREATURE_TRUST, 1.0f));
+            case "veela_songbird" -> List.of(new GameplayBonus(GameplayStat.OCCLUMENCY_SHIELD, 0.15f));
+            case "veela_flame_dancer" -> List.of(new GameplayBonus(GameplayStat.SPELL_MISFIRE_REDUCTION, 0.03f));
+            // Giant: hide and weight against beasts.
+            case "giant_bruiser", "giant_ravager" -> List.of(new GameplayBonus(GameplayStat.BEAST_DAMAGE_RESISTANCE, 0.05f));
+            case "giant_warlord" -> List.of(new GameplayBonus(GameplayStat.BEAST_DAMAGE_RESISTANCE, 0.10f));
+            // Centaur: the forest's trust, light older than wands, a mind the stars already read.
+            case "centaur_ranger" -> List.of(new GameplayBonus(GameplayStat.CREATURE_TRUST, 1.0f));
+            case "centaur_stargazer_path" -> List.of(new GameplayBonus(GameplayStat.LIGHT_REACH, 1.0f));
+            case "centaur_oracle" -> List.of(new GameplayBonus(GameplayStat.OCCLUMENCY_SHIELD, 0.20f));
+            // Vampire: unseen, then undescribed, then at ease with dark magic.
+            case "vampire_stalker" -> List.of(new GameplayBonus(GameplayStat.TRACE_DISCRETION, 0.10f));
+            case "vampire_wraith" -> List.of(new GameplayBonus(GameplayStat.TRACE_DISCRETION, 0.15f));
+            case "vampire_nightlord" -> List.of(new GameplayBonus(GameplayStat.CURSE_BACKLASH, 0.05f));
+            // Merpeople: reef guardians, callers of the deep, and what the sea gives up to them.
+            case "merpeople_tidewarden" -> List.of(new GameplayBonus(GameplayStat.BEAST_DAMAGE_RESISTANCE, 0.05f));
+            case "merpeople_deepcaller" -> List.of(new GameplayBonus(GameplayStat.CREATURE_TRUST, 1.0f));
+            case "merpeople_songweaver" -> List.of(new GameplayBonus(GameplayStat.GENTLE_HARVEST, 0.25f));
+            default -> throw new IllegalStateException("profession node without a trade: " + id);
+        };
     }
 }

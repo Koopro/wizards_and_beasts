@@ -20,6 +20,81 @@ is selectable in the alpha (`Heritage.isAlphaAvailable`); Veela and Vampire are 
 
 ---
 
+## 0. 2026-10-14 — heritage as experience: the reference architecture
+
+The brief: a player should be able to say *my character is different because of their heritage* — through passive
+identity, active mechanics, social identity, restrictions and progression, never a stat spread. The House-Elf was
+built end to end as the reference (§0b); the shared layer below now carries every people and both conditions. No
+heritage was opened for selection: Wizardkind is still the only one.
+
+### 0a. The shared layer (`heritage/identity/`)
+
+| Piece | What it is | Why |
+|---|---|---|
+| **Trait polarity** (`HeritageTraits.Polarity`) | Every trait is an ADVANTAGE, DISADVANTAGE or MIXED (listed under both) | The sheet can say what helps and what costs without inventing numbers |
+| **`HeritageProfile`** + `HeritageProfiles.build` | Six sections — Advantages, Disadvantages, What you can do, How the world treats you, Progression, Right now — worded on the server from the rules that already hold (traits, body modifiers, the wand law, status abilities, professions, practice, live state) | One place answers "what does my heritage mean"; no second store |
+| **`HeritageProfileC2SPayload` / `S2CPayload`** | The tab asks; the server answers about the sender only, every 2 s while open (10-tick server throttle) | A condition stays private: nobody can ask for anyone else's |
+| **Heritage tab** (Character Sheet, 7th tab) | Draws the profile: polarity-coloured lines with their sentence | The identity column showed trait *names* only |
+| **Practice** (`HeritagePractice`, `PracticeKind`) | A people's own arts count towards profession points: 20 progress = 1 point, at most 8 a day | No-wand peoples earned points only by mastering spells, so they stopped at 3 |
+| **Code of Wand Use** (`ministry/law/CodeOfWandUse`) | Clause Three for every people that bonds no wand: Ollivanders refuses the trial and commissions; a wand carried in a Ministry official's sight files `NON_HUMAN_WAND` (2 G fine), once a day | Canon (GoF ch.9, Winky); the first Ministry/NPC/location rule that reads heritage |
+| **Lineage shift** (`HeritageAPI.shiftLineage`) | Moves a character to another lineage of their people because something happened in play; nothing re-rolled | Freedom must not re-roll POWER |
+| **Node gates** (`HeritageNodeGates`) | A skill node a lineage must reach in play (`elf_free` only for a free elf) | Freedom is given, not bought with skill points |
+
+### 0b. House-Elf — the reference
+
+| Pillar | Mechanic | Code | Canon |
+|---|---|---|---|
+| Passive | Small body; ward-ignoring Apparition with no licence and no Trace (existing) | `ApparitionServerLogic` | CoS ch.2; HBP ch.19 |
+| Active | **Snap** — one target within 8 blocks thrown back and disarmed; **Kitchen charm** — up to 8 carried raw foods cooked, no fire. Wandless; on the wheel; a miss spends no cooldown | `heritage/elf/ElfMagic`, `abilities/elf_snap.json`, `elf_kitchen.json` | Dobby vs Lucius (CoS ch.18); the Hogwarts kitchens (GoF ch.21) |
+| Social | **Service**: a bound elf pledges (sneak-use a player, empty hand), the player accepts (sneak-use back within 10 s). The master's wheel gains **Call House-Elf**: every bound elf in that world Apparates to their side | `HouseElfBond`, `HouseElfEvents`, `ElfBondData` (on the elf, survives death/relog) | Kreacher and Dobby answer summons |
+| Restrictions | A bound elf's blow at its master never lands and the elf takes 2 damage instead; it cannot snap its master; the Code of Wand Use | `HouseElfEvents.onIncomingDamage`, `ElfMagic.snapAt` | Dobby's self-punishment (CoS ch.2) |
+| Freedom | The master uses any garment (head/chest/legs/feet) on the elf: the garment passes over, lineage Bound/Hall → **Free** (POWER, Resolve, training kept), bond gone, permanently — a free elf cannot be bound again | `HouseElfBond.present`, `HeritageAPI.shiftLineage` | CoS ch.18 |
+| Progression | Practice — snaps, kitchen charms, summons answered, Apparating — pays profession points (Steward → Ward Binder → Liberated Adept); the `elf_free` node opens only once free | `PracticeKind.ELF_*`, `HeritageNodeGates` | — |
+| State on the sheet | Whom they serve, whether the master is in this world, summonses answered, practice towards the next point, the wand law | `HeritageProfiles.elf` | — |
+
+Integration: **Ministry** (Code of Wand Use; no Trace on elf magic), **NPCs/locations** (Ollivanders refuses non-humans,
+also the commission), **economy** (the fine through `GringottsBilling` via `MinistryFines`), **professions** (practice),
+**skills** (node gate), **player stats** (lineage modifiers listed; POWER untouched by freedom), **education** (no
+wandwork, so no O.W.L. casting evidence — listed under Disadvantages via `no_wand`).
+
+### 0c. The pillars, per identity
+
+| Identity | Passive | Active (wheel) | Social | Restrictions | Progression | State on sheet |
+|---|---|---|---|---|---|---|
+| Wizardkind | wandwork, learned arts, lineage culture | Apparition, Legilimency (learned) | Trace and licences | Squib: no wand | spells → profession points | Apparition licence |
+| **House-Elf** | **as §0b** | **snap, kitchen; call (master)** | **service bond; no Trace** | **no harm to master; wand law** | **practice** | **bond, master online, summons** |
+| Goblin | craft, property, runes; small body | — (appraisal is a skill node) | Gringotts commission 3.5 %, forgeries always seen; **immune to allure** (new) | wand law | **practice: appraisal** (new) | — |
+| Veela | allure | allure; harpy (Full/Half) | allure on people and susceptible mobs | Full: no wand; fury at low health | spells (Half/Quarter) | human / harpy |
+| Giant | spell-resistant hide; size; +health/+armour | — | beasts trust half-giants | Full/Clan: no wand | spells (Half) | — |
+| Centaur | star reading; size; +speed | **Read the Stars** (new; was a command only) | — | wand law | **practice: star reading** (new) | sky readable now |
+| Vampire | blood hunger, sunlight | bat (Turned) | feeding | burns in sun; food does nothing | spells | blood, thirst, sunlit |
+| Merpeople | water breathing | — (Selkie change is automatic) | — | wand law | — | underwater / ashore |
+| Lycanthropy | moon-sensitive | — (moon-forced) | silver bites the wolf | loss of control; no wand as wolf | — | nights to full moon, form, Wolfsbane |
+| Obscurus | obscurus form | form, vent, surge, grasp | — | no wand, no casting | tiers | stress, held / loose |
+
+Fixed on the way: the Clan Warden (a full-blood giant) was given the half-giant body; goblins were not immune to
+the allure although this document always said they were; stale "not yet mechanical" lines in `KNOWN_ISSUES.md`,
+`ALPHA_RELEASE_GATE.md` and `AUDIT_PUNCHLIST.md`; `water_breathing` comments that named a tag that does not exist.
+
+Still open, deliberately: `goblin_craft`, `forest_law` and `mermish` describe and do nothing; the VEELA, GIANT,
+CENTAUR and MERPEOPLE skill webs are empty; merpeople have no practice (no art of theirs has a hook yet); the
+vampire bat cannot fly and has no rig; every heritage ability icon is the placeholder.
+
+### 0d. Validation
+
+| Check | Result |
+|---|---|
+| Unit tests | green, incl. `HeritageIdentityArchitectureTest` (polarity and lang coverage, practice math, profile sections) and `ProfessionNodeTest` |
+| `runGameTestServer` | **340 / 340**, including the seven `HouseElfTests` scenarios (pledge/accept, harm to master, the call, freedom by garment, snap and kitchen, Code of Wand Use, profile) |
+| Mutation | Removing the cancel in `HouseElfEvents.onIncomingDamage` fails `heritage_elf_cannot_harm_master` ("the elf's blow landed on its master"); restored |
+
+That scenario first passed its "master unhurt" check vacuously — its players were creative, and a creative player
+is invulnerable before the damage event fires. It now uses survival players.
+
+**Not verified:** the Heritage tab in a running client; the bond and the call across two real clients.
+
+---
+
 ## 1. Summary
 
 | Identity | Kind | Before this pass | After |
@@ -175,6 +250,7 @@ running client.
 
 ## 8. Next, in order of value
 
-1. Open Veela and Vampire for play once their art and onboarding are ready — both now have real mechanics.
+1. Open the House-Elf for play once its art and onboarding are signed off — it is now the complete reference.
+   Then Veela and Vampire, which already have real mechanics.
 2. Lineage social reactions for Wizardkind, only once the world has people who would react (NPCs, portraits).
 3. Werewolf wound care: dittany with powdered silver (canon), on the existing Dittany rework.

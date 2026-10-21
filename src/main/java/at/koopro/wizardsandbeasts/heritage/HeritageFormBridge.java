@@ -42,8 +42,9 @@ public final class HeritageFormBridge {
             case HOUSE_ELF -> "house_elf_default";
             case VEELA -> state == TransformationState.TRANSFORMED
                     ? "veela_harpy" : "veela_human";
-            case GIANT -> variant != null && "full_giant".equals(variant.getId())
-                    ? "giant_default" : "half_giant_default";
+            // Only the half-giant has a human parent; the Clan Warden is a role within full-giant clans
+            // (SkillTreeId's audience note) and stands at full height.
+            case GIANT -> variant == HeritageVariant.GIANT_HALF ? "half_giant_default" : "giant_default";
             case CENTAUR -> "centaur_default";
             case VAMPIRE -> state == TransformationState.TRANSFORMED
                     ? "vampire_bat" : "vampire_human";

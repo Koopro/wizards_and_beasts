@@ -1,5 +1,14 @@
 package at.koopro.wizardsandbeasts.client.heritage.hud;
 
+import net.minecraft.client.resources.language.I18n;
+
+import java.util.Locale;
+
+/**
+ * The Obscurial HUD's own violet identity: a separate dark surface on purpose, since it is the one HUD
+ * that belongs to a condition rather than to the wizard. Its words come from
+ * {@code hud.wizards_and_beasts.obscurial.*}; {@link #text} is the one door to them.
+ */
 public final class ObscurialHudTheme {
     public static final int PANEL_BG = 0xA0120B19;
     public static final int PANEL_BG_SOFT = 0x90120B19;
@@ -17,5 +26,17 @@ public final class ObscurialHudTheme {
     public static final int EMPHASIS = 0xFFFF98D2;
     public static final int AUXILIARY = 0xFFEEB5F9;
 
+    private static final String KEY = "hud.wizards_and_beasts.obscurial.";
+
     private ObscurialHudTheme() {}
+
+    /** A HUD string by its short key. */
+    public static String text(String key, Object... args) {
+        return I18n.get(KEY + key, args);
+    }
+
+    /** A tier the model names ("Catastrophic", "Calm") in the player's language. */
+    public static String tier(String modelTier) {
+        return text("tier." + modelTier.toLowerCase(Locale.ROOT));
+    }
 }

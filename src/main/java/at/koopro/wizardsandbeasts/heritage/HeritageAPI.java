@@ -142,6 +142,26 @@ public final class HeritageAPI {
     }
 
     /**
+     * Moves a character to another lineage of the same people because something happened to them in play — a
+     * house-elf given clothes becomes a free elf. Unlike {@link #commit} nothing is re-rolled or re-seeded: POWER,
+     * Resolve, training and body stay; only the lineage, its traits and their stats change, and the change is
+     * published like a commit.
+     *
+     * @throws IllegalArgumentException when {@code variant} is not a lineage of the player's people
+     */
+    public static void shiftLineage(ServerPlayer player, HeritageVariant variant) {
+        PlayerHeritageData data = getData(player);
+        if (data.getSelectedHeritage() != variant.getParentHeritage()) {
+            throw new IllegalArgumentException(variant + " is not a lineage of " + data.getSelectedHeritage());
+        }
+        data.setSelectedHeritageVariant(variant);
+        applyStats(player);
+        HeritageDataSyncS2CPayload.syncToPlayer(player, false);
+        HeritageIdentitySyncS2CPayload.syncToTracking(player);
+        PlayerStateSyncService.syncAbilityGrants(player);
+    }
+
+    /**
      * A condition that has happened to a player — a werewolf's bite — rather than something they chose.
      *
      * <p>Heritage, lineage, POWER roll, Resolve and lock are all left exactly as they were: a wizard bitten by a

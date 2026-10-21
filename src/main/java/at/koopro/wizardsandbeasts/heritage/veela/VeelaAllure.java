@@ -114,6 +114,15 @@ public final class VeelaAllure {
     }
 
     /**
+     * Whether a player is past the allure altogether: another Veela, or a goblin — whose people answer to metal and
+     * contract, as HERITAGE_IDENTITY_STATUS.md's immunity list always said and the code never did.
+     */
+    static boolean immune(ServerPlayer player) {
+        Heritage heritage = HeritageAPI.getData(player).getSelectedHeritage();
+        return heritage == Heritage.VEELA || heritage == Heritage.GOBLIN;
+    }
+
+    /**
      * Lets the allure out.
      *
      * @return how many were entranced; {@code -1} when this player cannot allure at all
@@ -129,7 +138,7 @@ public final class VeelaAllure {
         for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class,
                 veela.getBoundingBox().inflate(strength.radius()), e -> e != veela && e.isAlive())) {
             if (near instanceof ServerPlayer player) {
-                if (player.isSpectator() || isVeela(player)) {
+                if (player.isSpectator() || immune(player)) {
                     continue;
                 }
                 if (resists(player.getRandom().nextFloat(), StatResistModifiers.resistScalar(player))) {

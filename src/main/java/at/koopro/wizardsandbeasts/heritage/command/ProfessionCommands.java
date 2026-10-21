@@ -119,6 +119,13 @@ public final class ProfessionCommands {
                     .append(Component.literal(node.getDisplayName()).withStyle(ChatFormatting.WHITE))
                     .append(Component.literal(" (" + node.getId() + ") [" + node.getPointCost() + " PP]")
                             .withStyle(ChatFormatting.DARK_GRAY)));
+            // What the trade pays, in the same words the skill web's tooltips use for the same stat.
+            for (var bonus : node.getBonuses()) {
+                Component line = at.koopro.wizardsandbeasts.skill.SkillEffectSummary.describe(bonus, 1);
+                if (line != null) {
+                    report.item(Component.literal("    ").append(line.copy().withStyle(ChatFormatting.GRAY)));
+                }
+            }
         }
         report.send(source);
         return 1;

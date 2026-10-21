@@ -22,17 +22,18 @@ public final class ObscurialDarkPanelRenderer {
         int barW = boxW - 16;
 
         graphics.fill(x, y, x + boxW, y + boxH, ObscurialHudTheme.PANEL_BG);
-        graphics.drawString(mc.font, "OBSCURUS FORM", x + 8, y + 7, ObscurialHudTheme.TITLE, true);
+        graphics.drawString(mc.font, ObscurialHudTheme.text("form_title"), x + 8, y + 7, ObscurialHudTheme.TITLE, true);
 
         int controlY = y + 20;
-        drawBar(graphics, mc, "Control", model.controlRatio(), barX, barW, controlY, ObscurialHudTheme.CONTROL_FILL);
+        drawBar(graphics, mc, ObscurialHudTheme.text("control"), model.controlRatio(), barX, barW, controlY, ObscurialHudTheme.CONTROL_FILL);
 
         int pressureY = y + 36;
-        drawBar(graphics, mc, "Obscurus Pressure", model.pressureRatio(), barX, barW, pressureY, ObscurialHudTheme.PRESSURE_FILL);
+        drawBar(graphics, mc, ObscurialHudTheme.text("pressure"), model.pressureRatio(), barX, barW, pressureY, ObscurialHudTheme.PRESSURE_FILL);
 
         float secondsRemaining = estimateSecondsRemaining(mc.player, model.control(), model.pressure());
-        String readout = String.format("%s  %.1fs left  Cntrl %.0f%%  Press %.0f%%",
-                model.controlTier(), secondsRemaining, model.control(), model.pressure());
+        String readout = ObscurialHudTheme.text("readout", ObscurialHudTheme.tier(model.controlTier()),
+                String.format("%.1f", secondsRemaining), String.format("%.0f", model.control()),
+                String.format("%.0f", model.pressure()));
         graphics.drawString(mc.font, readout, barX, y + 49, tierColor(model.controlTier()), false);
         renderAbilityQuickbar(graphics, mc, x + boxW + 6, y + 6);
         ObscurialStatusBadgeRenderer.renderDarkFormBadges(graphics, mc, model, x, boxW, y);
@@ -41,8 +42,8 @@ public final class ObscurialDarkPanelRenderer {
     private static void renderAbilityQuickbar(GuiGraphics graphics, Minecraft mc, int x, int y) {
         int panelW = 122;
         int panelH = 58;
-        graphics.fill(x, y, x + panelW, y + panelH, 0x82120B19);
-        graphics.drawString(mc.font, "Abilities", x + 6, y + 6, ObscurialHudTheme.TITLE, false);
+        graphics.fill(x, y, x + panelW, y + panelH, ObscurialHudTheme.PANEL_BG_SOFT);
+        graphics.drawString(mc.font, ObscurialHudTheme.text("abilities"), x + 6, y + 6, ObscurialHudTheme.TITLE, false);
         renderAbilityLine(graphics, mc, x + 6, y + 20, "N", ObscurialAbility.SURGE);
         renderAbilityLine(graphics, mc, x + 6, y + 34, "M", ObscurialAbility.GRASP);
     }
@@ -58,10 +59,11 @@ public final class ObscurialDarkPanelRenderer {
             status = String.format("%.1fs", sec);
             color = ObscurialHudTheme.WARN;
         } else {
-            status = "Ready";
+            status = ObscurialHudTheme.text("ready");
             color = ObscurialHudTheme.POSITIVE;
         }
-        graphics.drawString(mc.font, "[" + key + "] " + ability.displayName(), x, y, ObscurialHudTheme.LABEL, false);
+        graphics.drawString(mc.font, "[" + key + "] " + ObscurialHudTheme.text("ability." + ability.spellId()), x, y,
+                ObscurialHudTheme.LABEL, false);
         graphics.drawString(mc.font, status, x + 76, y, color, false);
     }
 

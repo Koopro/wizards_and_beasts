@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.heritage.werewolf;
 
+import at.koopro.wizardsandbeasts.equipment.EquipmentAPI;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -11,7 +12,8 @@ import java.util.List;
 /**
  * What a wolf cannot wear.
  *
- * <p>Called once when the change completes. Every armour and hand slot is emptied unless the item is
+ * <p>Called once when the change completes. Every armour and hand slot, and every worn W&amp;B piece
+ * (robe, cloak, hat, mask, jewellery), is emptied unless the item is
  * on {@link WerewolfConfig#isEquipmentWhitelisted(String)}, and the stack goes either into the
  * player's own inventory (the default) or onto the ground.
  *
@@ -60,6 +62,13 @@ public final class WerewolfEquipment {
             stow(player, taken);
             removed++;
         }
+        // Robes, cloaks, hats and masks are worn in Curios slots now. A cloak used to sit in the chest
+        // slot and so came off with the armour; going through the equipment layer keeps that true —
+        // a wolf under an Invisibility Cloak would otherwise stay invisible.
+        for (ItemStack taken : EquipmentAPI.stripWearables(player, WerewolfEquipment::isWhitelisted)) {
+            stow(player, taken);
+            removed++;
+        }
         if (removed > 0) {
             player.containerMenu.broadcastChanges();
         }
@@ -76,8 +85,12 @@ public final class WerewolfEquipment {
      * inventory is full — otherwise a wolf with 36 occupied slots would silently eat their own helmet.
      */
     private static void stow(ServerPlayer player, ItemStack stack) {
-        if (!WerewolfConfig.dropUnsafeEquipment && player.getInventory().add(stack)) {
-            return;
+        if (!WerewolfConfig.dropUnsafeEquipment) {
+            // add() is true on a partial insert and keeps the rest in the stack: drop only what is left.
+            player.getInventory().add(stack);
+            if (stack.isEmpty()) {
+                return;
+            }
         }
         player.drop(stack, false);
     }

@@ -51,8 +51,24 @@ public final class HeritageTraits {
         }
     }
 
-    /** One named trait: its heading, its name and its sentence. */
-    public record Trait(String id, Kind kind) {
+    /**
+     * Which way a trait cuts, for the character sheet's Advantages / Disadvantages lists. {@link #MIXED} is a trait
+     * that is both at once — an old family's name opens doors and old prejudices — and is listed under both.
+     */
+    public enum Polarity {
+        ADVANTAGE, DISADVANTAGE, MIXED;
+
+        public boolean isAdvantage() {
+            return this != DISADVANTAGE;
+        }
+
+        public boolean isDisadvantage() {
+            return this != ADVANTAGE;
+        }
+    }
+
+    /** One named trait: its heading, which way it cuts, its name and its sentence. */
+    public record Trait(String id, Kind kind, Polarity polarity) {
 
         public String getNameKey() {
             return "trait." + WizardsAndBeastsMod.MODID + "." + id;
@@ -65,59 +81,59 @@ public final class HeritageTraits {
 
     private static final Map<String, Trait> CATALOG = new LinkedHashMap<>();
 
-    private static void put(String id, Kind kind) {
-        CATALOG.put(id, new Trait(id, kind));
+    private static void put(String id, Kind kind, Polarity polarity) {
+        CATALOG.put(id, new Trait(id, kind, polarity));
     }
 
     static {
         // ── Wizardkind lineages: culture and standing, never strength ──
-        put("old_family", Kind.CHARACTERISTIC);      // doors open on a name; so do old prejudices
-        put("two_worlds", Kind.CHARACTERISTIC);      // at home in both, fully trusted by neither
-        put("muggle_raised", Kind.CHARACTERISTIC);   // arrived knowing nothing of this world and learned it anyway
-        put("wizard_raised", Kind.CHARACTERISTIC);
+        put("old_family", Kind.CHARACTERISTIC, Polarity.MIXED);      // doors open on a name; so do old prejudices
+        put("two_worlds", Kind.CHARACTERISTIC, Polarity.MIXED);      // at home in both, fully trusted by neither
+        put("muggle_raised", Kind.CHARACTERISTIC, Polarity.MIXED);   // arrived knowing nothing of this world and learned it anyway
+        put("wizard_raised", Kind.CHARACTERISTIC, Polarity.MIXED);
         // What every casting lineage shares, which is Wizardkind's identity: breadth, not strength. Both describe
         // rules that already hold — a wand bonds only to a people that uses wands (PlayerHeritageData.canUseWand),
         // every skill tree is open to them, and Apparition and Legilimency are Wizardkind-only arts
         // (ApparitionServerLogic, LegilimencyServerLogic).
-        put("wandwork", Kind.TRAIT);
-        put("learned_arts", Kind.TRAIT);
-        put("no_wand", Kind.TRAIT);
-        put("no_casting", Kind.TRAIT);
-        put("creature_kinship", Kind.AFFINITY);      // squibs and half-giants: beasts trust them
+        put("wandwork", Kind.TRAIT, Polarity.ADVANTAGE);
+        put("learned_arts", Kind.TRAIT, Polarity.ADVANTAGE);
+        put("no_wand", Kind.TRAIT, Polarity.DISADVANTAGE);
+        put("no_casting", Kind.TRAIT, Polarity.DISADVANTAGE);
+        put("creature_kinship", Kind.AFFINITY, Polarity.ADVANTAGE);      // squibs and half-giants: beasts trust them
 
         // ── Goblins ──
-        put("goblin_craft", Kind.AFFINITY);          // metalwork wizards cannot match and will not return
-        put("goblin_property", Kind.TRAIT);          // the maker owns it; Gringotts keeps the ledger
-        put("goblin_rebellions", Kind.CHARACTERISTIC);
-        put("rune_affinity", Kind.AFFINITY);
+        put("goblin_craft", Kind.AFFINITY, Polarity.ADVANTAGE);          // metalwork wizards cannot match and will not return
+        put("goblin_property", Kind.TRAIT, Polarity.ADVANTAGE);          // the maker owns it; Gringotts keeps the ledger
+        put("goblin_rebellions", Kind.CHARACTERISTIC, Polarity.MIXED);
+        put("rune_affinity", Kind.AFFINITY, Polarity.ADVANTAGE);
 
         // ── House-elves ──
-        put("innate_apparition", Kind.TRAIT);        // no wand, and wards do not hold them
-        put("household_magic", Kind.AFFINITY);
-        put("bound_service", Kind.CHARACTERISTIC);   // freed by a gift of clothing, and not before
+        put("innate_apparition", Kind.TRAIT, Polarity.ADVANTAGE);        // no wand, and wards do not hold them
+        put("household_magic", Kind.AFFINITY, Polarity.ADVANTAGE);
+        put("bound_service", Kind.CHARACTERISTIC, Polarity.DISADVANTAGE);   // freed by a gift of clothing, and not before
 
         // ── Veela ──
-        put("allure", Kind.CHARACTERISTIC);
+        put("allure", Kind.CHARACTERISTIC, Polarity.ADVANTAGE);
 
         // ── Giants ──
-        put("spell_resistant_hide", Kind.CHARACTERISTIC);
+        put("spell_resistant_hide", Kind.CHARACTERISTIC, Polarity.ADVANTAGE);
 
         // ── Centaurs ──
-        put("star_reading", Kind.AFFINITY);
-        put("forest_law", Kind.CHARACTERISTIC);      // their own laws, and no Ministry's
+        put("star_reading", Kind.AFFINITY, Polarity.ADVANTAGE);
+        put("forest_law", Kind.CHARACTERISTIC, Polarity.MIXED);      // their own laws, and no Ministry's
 
         // ── Vampires ──
-        put("sunlight_weakness", Kind.CHARACTERISTIC);
-        put("blood_hunger", Kind.CHARACTERISTIC);
+        put("sunlight_weakness", Kind.CHARACTERISTIC, Polarity.DISADVANTAGE);
+        put("blood_hunger", Kind.CHARACTERISTIC, Polarity.DISADVANTAGE);
 
         // ── Merpeople ──
-        put("water_dwelling", Kind.TRAIT);
-        put("mermish", Kind.AFFINITY);
+        put("water_dwelling", Kind.TRAIT, Polarity.ADVANTAGE);
+        put("mermish", Kind.AFFINITY, Polarity.ADVANTAGE);
 
         // ── Shared with conditions ──
-        put("transformation", Kind.TRAIT);
-        put("moon_sensitive", Kind.CHARACTERISTIC);
-        put("obscurus_form", Kind.CHARACTERISTIC);
+        put("transformation", Kind.TRAIT, Polarity.MIXED);
+        put("moon_sensitive", Kind.CHARACTERISTIC, Polarity.DISADVANTAGE);
+        put("obscurus_form", Kind.CHARACTERISTIC, Polarity.MIXED);
     }
 
     private HeritageTraits() {}

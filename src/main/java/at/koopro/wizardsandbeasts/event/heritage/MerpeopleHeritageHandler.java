@@ -24,7 +24,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
  * not a choice at all, it is where they happen to be. Under water they are {@code merfolk_water}; out of
  * it they are {@code merfolk_land}. No key, no ability, no cooldown.
  *
- * <p>Only Selkies. Merrow and Siren carry {@code water_breathing} but not {@code "transformation"} — they
+ * <p>Only Selkies. Merrow and Siren carry {@code water_dwelling} but not {@code "transformation"} — they
  * are at home in the water without changing shape, and {@link HeritageTransformService} enforces that.
  *
  * <h2>The grace period is the whole difficulty</h2>

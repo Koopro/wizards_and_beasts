@@ -56,9 +56,10 @@ public final class ObscurialHumanPanelRenderer {
         }
 
         int titleX = hudX + Math.round(50.0f * scale);
-        graphics.drawString(mc.font, "OBSCURUS STRAIN", titleX, hudY + 2, ObscurialHudTheme.TITLE, true);
+        graphics.drawString(mc.font, ObscurialHudTheme.text("strain_title"), titleX, hudY + 2, ObscurialHudTheme.TITLE, true);
 
-        graphics.drawString(mc.font, String.format("%s  %.0f%%", model.stressTier(), model.stress()),
+        graphics.drawString(mc.font, ObscurialHudTheme.text("stress", ObscurialHudTheme.tier(model.stressTier()),
+                        String.format("%.0f", model.stress())),
                 hudX + hudW - 78, hudY + 4, tierColor(model.stressTier()), false);
 
         ObscurialStatusBadgeRenderer.renderHumanFormBadges(graphics, mc, model, hudX, hudY + hudH + 2);

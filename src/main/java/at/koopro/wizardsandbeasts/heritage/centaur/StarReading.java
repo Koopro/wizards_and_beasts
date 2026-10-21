@@ -48,6 +48,24 @@ public final class StarReading {
 
     private StarReading() {}
 
+    /**
+     * The wheel's star reading: reads the sky into the centaur's chat, counts as practice, and spends the cooldown
+     * only when the sky could be read.
+     */
+    public static boolean readAloud(ServerPlayer player) {
+        Reading reading = read(player);
+        if (reading instanceof Reading.Seen seen) {
+            seen.lines().forEach(player::sendSystemMessage);
+            at.koopro.wizardsandbeasts.heritage.identity.HeritagePractice.record(player,
+                    at.koopro.wizardsandbeasts.heritage.identity.PracticeKind.CENTAUR_STARS);
+            return true;
+        }
+        if (reading instanceof Reading.Refused refused) {
+            at.koopro.wizardsandbeasts.feedback.PlayerFeedback.actionBar(player, refused.reason());
+        }
+        return false;
+    }
+
     /** Whether this character reads the stars at all. */
     public static boolean canRead(ServerPlayer player) {
         return HeritageAPI.getData(player).hasTrait("star_reading");

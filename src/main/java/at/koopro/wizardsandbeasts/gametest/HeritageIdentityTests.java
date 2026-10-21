@@ -46,9 +46,9 @@ public final class HeritageIdentityTests {
     private HeritageIdentityTests() {}
 
     static void contribute(WizardTestSupport.Registrar tests) {
-        tests.add("heritage_goblin_pays_no_commission_at_gringotts",
-                "heritage: Gringotts charges a wizard the fee and a goblin nothing",
-                HeritageIdentityTests::goblinPaysNoCommission);
+        tests.add("heritage_goblin_pays_less_commission_at_gringotts",
+                "heritage: Gringotts charges a wizard the full fee and a goblin its own smaller one",
+                HeritageIdentityTests::goblinPaysLessCommission);
         tests.add("heritage_elf_travels_where_wizards_cannot",
                 "heritage: a house-elf's Apparition is elf-magic, wards and all",
                 HeritageIdentityTests::elfTravelsWhereWizardsCannot);
@@ -71,10 +71,11 @@ public final class HeritageIdentityTests {
 
     /**
      * Gringotts is goblin-run and goblin law holds that goblin-made things stay goblin-owned; the five percent is
-     * what the bank charges outsiders. Asserted as a comparison rather than against a constant, so the scenario
-     * still means something if the fee is ever retuned.
+     * what the bank charges outsiders, and its own pay {@link DragotRates#GOBLIN_FEE}. Never nothing: the quote
+     * re-rolls at every visit, and a fee at or below the spread let a goblin buy low and sell high for a profit
+     * (economy audit 2026-10-08). Asserted against each customer's own quote, so a rate roll cannot fake a pass.
      */
-    private static void goblinPaysNoCommission(GameTestHelper helper) {
+    private static void goblinPaysLessCommission(GameTestHelper helper) {
         ServerPlayer wizard = player(helper, "GringottsWizard");
         ServerPlayer goblin = player(helper, "GringottsGoblin");
         try {
@@ -92,13 +93,16 @@ public final class HeritageIdentityTests {
 
             float goblinRate = DragotQuotes.rateFor(goblin);
             long goblinGain = sellTen(helper, goblin);
-            long goblinExpected = DragotRates.dragotsToKnuts(10, goblinRate, 0.0f);
+            long goblinExpected = DragotRates.dragotsToKnuts(10, goblinRate, DragotRates.GOBLIN_FEE);
             WizardTestSupport.check(helper, goblinGain == goblinExpected,
-                    () -> "the goblin was paid " + goblinGain + " rather than the full " + goblinExpected
+                    () -> "the goblin was paid " + goblinGain + " rather than the " + goblinExpected
                             + " Knuts their own bank owes them");
             WizardTestSupport.check(helper,
                     goblinExpected > DragotRates.dragotsToKnuts(10, goblinRate, DragotRates.GRINGOTTS_FEE),
-                    () -> "waiving the commission changed nothing, so this scenario proves nothing");
+                    () -> "the goblins' own rate is no better than an outsider's, so this scenario proves nothing");
+            WizardTestSupport.check(helper,
+                    goblinExpected < DragotRates.dragotsToKnuts(10, goblinRate, 0.0f),
+                    () -> "a goblin paid no commission at all: the spread can be played for profit");
 
             helper.succeed();
         } finally {

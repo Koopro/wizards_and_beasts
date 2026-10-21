@@ -23,8 +23,8 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
  * <ul>
  *   <li><b>{@code sunlight_weakness}</b> — a variant tag that was declared on Turned and Born vampires
  *       and <b>read by nothing</b>. Direct sun now burns. {@code blood_hunger} has since been picked up
- *       too, by {@code heritage.nutrition.NutritionPolicyResolver}; {@code water_breathing} is still
- *       declared and still unread.</li>
+ *       too, by {@code heritage.nutrition.NutritionPolicyResolver}; the merpeople's {@code water_dwelling}
+ *       by {@code HeritageTransformService} (water breathing).</li>
  *   <li><b>The bat form is voluntary</b>, so it is not triggered here at all — it lives on the ability
  *       wheel ({@code VampireFormAbilityBehavior} → {@code HeritageTransformService.toggle}). This class
  *       only ever pushes a vampire <em>out</em> of the sky, never into it.</li>
