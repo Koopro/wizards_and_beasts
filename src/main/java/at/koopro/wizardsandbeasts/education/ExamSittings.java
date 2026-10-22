@@ -121,7 +121,10 @@ public final class ExamSittings {
     /** A brew or a herbal specimen handed in at the desk. Takes one and credits the practical, or takes nothing. */
     public static boolean handIn(ServerPlayer player, ItemStack stack) {
         if (stack.isEmpty() || active(player).isEmpty()) return false;
-        OWLSubject subject = stack.getItem() instanceof BrewItem ? OWLSubject.POTIONS
+        // A ruined batch is not a potion: handing in the sludge of a failed brew used to pass the practical.
+        boolean ruined = at.koopro.wizardsandbeasts.block.brew.WizardingCauldronBlock.RUINED_BREW_ID.equals(
+                stack.get(at.koopro.wizardsandbeasts.registry.ModDataComponents.BREW_ID.get()));
+        OWLSubject subject = stack.getItem() instanceof BrewItem ? (ruined ? null : OWLSubject.POTIONS)
                 : stack.is(HERBOLOGY_SPECIMENS) ? OWLSubject.HERBOLOGY : null;
         if (subject == null || !practical(player, subject)) return false;
         stack.consume(1, player);

@@ -234,6 +234,13 @@ public class WizardingCauldronBlock extends BaseEntityBlock {
 
     private InteractionResult addIngredient(Level level, BlockPos pos, CauldronBlockEntity be,
                                              ServerPlayer player, ItemStack stack) {
+        // Tools, weapons, armour, wands: nothing that does not stack is a potion ingredient, and the pot used to
+        // swallow a sword or a wand like a handful of gravel. Refused, not consumed. Junk that stacks still
+        // contaminates a working pot -- that cost is by design (see timedAdd).
+        if (stack.getMaxStackSize() == 1) {
+            say(player, "brew.wizards_and_beasts.cauldron.wont_go_in");
+            return InteractionResult.SUCCESS;
+        }
         if (be.phase() == CauldronPhase.BREWING) {
             return timedAdd(level, pos, be, player, stack);
         }
@@ -272,6 +279,20 @@ public class WizardingCauldronBlock extends BaseEntityBlock {
      */
     private InteractionResult timedAdd(Level level, BlockPos pos, CauldronBlockEntity be,
                                         ServerPlayer player, ItemStack stack) {
+        // An Occamy eggshell dropped into a working pot refines a silver brew (SilverRefining). It used to reach
+        // that only on a sneak-click; a plain click took it as contamination and destroyed it. Refining consumes
+        // the shell only when it works, so a shell is never spent on the wrong pot -- unless this recipe names
+        // the shell as its own catalyst, in which case it goes in as one.
+        if (stack.getItem() instanceof at.koopro.wizardsandbeasts.item.consumable.OccamyEggshellItem
+                && !be.isCatalyst(stack)) {
+            at.koopro.wizardsandbeasts.brew.SilverRefining.Result refined =
+                    at.koopro.wizardsandbeasts.brew.SilverRefining.refine(level, pos);
+            if (refined.refined() && !player.getAbilities().instabuild) {
+                stack.shrink(1);
+            }
+            PlayerFeedback.actionBar(player, refined.message());
+            return InteractionResult.SUCCESS;
+        }
         CauldronBlockEntity.TimedAddResult result = be.timedAdd(stack);
         if (result == CauldronBlockEntity.TimedAddResult.CATALYST_ALREADY) {
             say(player, "brew.wizards_and_beasts.cauldron.catalyst_already");
@@ -447,7 +468,7 @@ public class WizardingCauldronBlock extends BaseEntityBlock {
     }
 
     /** The consolation prize. Defined in data; absent means a ruined pot simply gives nothing. */
-    private static final String RUINED_BREW_ID = "wizards_and_beasts:ruined_potion";
+    public static final String RUINED_BREW_ID = "wizards_and_beasts:ruined_potion";
 
     private static void say(ServerPlayer player, String key) {
         PlayerFeedback.actionBar(player, Component.translatable(key));

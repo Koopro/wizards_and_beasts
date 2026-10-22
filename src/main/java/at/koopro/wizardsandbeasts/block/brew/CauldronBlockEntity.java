@@ -374,7 +374,9 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
         this.remainingTicks = this.totalTicks;
         this.phase = CauldronPhase.BREWING;
         this.brewerId = brewerId;
-        this.brewPoints = tier.brewPoints();
+        // The recipe's own tier, not the pot's: a Pepperup in a copper cauldron is first-year work, and paying it
+        // as N.E.W.T. work made the cheapest brew in the richest pot the fastest route to an Outstanding.
+        this.brewPoints = recipe.cauldronTier().brewPoints();
         this.spoilTicksWithoutHeat = 0;
         this.stirCount = 0;
         setChangedAndSync();
@@ -406,7 +408,10 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
             return null;
         }
         Brew brew = Brews.byId(brewId);
-        awardBrewPoints();
+        // A brew a datapack has since removed bottles as nothing and earns nothing: it was paid as a success.
+        if (brew != null) {
+            awardBrewPoints();
+        }
         resetToIdle();
         return brew;
     }
@@ -433,8 +438,37 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
         // The water goes with the brew. A pot you have just poured out of is an empty pot, and
         // leaving it filled would let one bucket serve every brew a cauldron ever makes.
         filled = false;
+        // Whatever the recipe did not use comes back out rather than vanishing with the water.
+        popLeftovers();
         items.clear();
         setChangedAndSync();
+    }
+
+    /** Drops every item still in the slots on top of the cauldron. */
+    private void popLeftovers() {
+        if (level == null || level.isClientSide()) {
+            return;
+        }
+        for (ItemStack stack : items) {
+            if (!stack.isEmpty()) {
+                net.minecraft.world.Containers.dropItemStack(level, worldPosition.getX() + 0.5,
+                        worldPosition.getY() + 1.0, worldPosition.getZ() + 0.5, stack.copy());
+            }
+        }
+    }
+
+    /** A toast for the brewer, if they are online. */
+    private void tellBrewer(ServerLevel level, String titleKey, String bodyKey) {
+        if (brewerId == null || level.getServer() == null) {
+            return;
+        }
+        ServerPlayer brewer = level.getServer().getPlayerList().getPlayer(brewerId);
+        if (brewer != null) {
+            at.koopro.wizardsandbeasts.feedback.PlayerFeedback.toast(brewer,
+                    at.koopro.wizardsandbeasts.feedback.NoticeKind.FAIL,
+                    net.minecraft.network.chat.Component.translatable(titleKey),
+                    net.minecraft.network.chat.Component.translatable(bodyKey));
+        }
     }
 
     private void awardBrewPoints() {
@@ -473,6 +507,9 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
         if (!at.koopro.wizardsandbeasts.brew.tuning.BrewTuningService.heated(serverLevel, pos.below())) {
             be.spoilTicksWithoutHeat++;
             if (be.spoilTicksWithoutHeat >= SPOIL_TICKS_WITHOUT_HEAT) {
+                // Said out loud: a pot that went cold used to spoil with no word to anyone.
+                be.tellBrewer(serverLevel, "brew.wizards_and_beasts.spoiled_cold.title",
+                        "brew.wizards_and_beasts.spoiled_cold.body");
                 be.spoil(serverLevel, pos);
             } else if (be.spoilTicksWithoutHeat % 40 == 0) {
                 // Only sync on the beat, not every tick: this is a cosmetic countdown and a packet
@@ -598,6 +635,12 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
      * costs them dearly — but each individual click is survivable, which is the difference between a
      * mistake and a griefing tool.
      */
+    /** Whether {@code stack} is the catalyst the recipe heating here asks for. */
+    public boolean isCatalyst(ItemStack stack) {
+        BrewingRecipe recipe = recipeId == null ? null : BrewingRecipes.byId(recipeId);
+        return recipe != null && recipe.catalyst().isPresent() && stack.is(recipe.catalyst().get().item());
+    }
+
     public TimedAddResult timedAdd(ItemStack stack) {
         BrewingRecipe recipe = recipeId == null ? null : BrewingRecipes.byId(recipeId);
         var catalyst = recipe == null ? java.util.Optional.<BrewingRecipe.Catalyst>empty()

@@ -9,12 +9,12 @@
   "category": "equipment",
   "pattern": [
     " C ",
-    "CVC",
+    "CPC",
     " C "
   ],
   "key": {
     "C": "minecraft:copper_ingot",
-    "V": "minecraft:cauldron"
+    "P": "wizards_and_beasts:pewter_cauldron"
   },
   "result": {
     "id": "wizards_and_beasts:brass_cauldron",

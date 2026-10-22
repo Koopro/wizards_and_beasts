@@ -54,8 +54,9 @@ public record BrewingRecipeDefinition(
         ).apply(inst, CatalystEntry::new));
 
         @Nullable Catalyst resolve() {
+            // The item registry is defaulted: getValue on a missing id returns air, never null.
+            if (!BuiltInRegistries.ITEM.containsKey(item)) return null;
             Item resolved = BuiltInRegistries.ITEM.getValue(item);
-            if (resolved == null) return null;
             // A window the wrong way round is a datapack typo, not a recipe. Dropping the catalyst
             // rather than throwing keeps the rest of the recipe usable and logs nothing the player
             // can act on -- the brew simply has no timed add.
@@ -65,16 +66,25 @@ public record BrewingRecipeDefinition(
     }
 
     /**
-     * Resolves this definition into a {@link BrewingRecipe}, dropping any
-     * ingredient whose item id is unknown. Returns {@code null} if every
-     * ingredient was dropped (a recipe with zero ingredients can never match).
+     * Resolves this definition into a {@link BrewingRecipe}, or {@code null} -- logged -- when any ingredient names
+     * an item that does not exist. Dropping just that ingredient (as this once did) would quietly make the recipe
+     * easier than written; and a registry miss used to resolve to air rather than nothing, so a typo produced a
+     * recipe that could never match and said nothing (2026-10-22).
      */
     public @Nullable BrewingRecipe toRecipe(String fullId) {
         List<BrewingRecipe.Ingredient> resolved = ingredients.stream()
                 .map(IngredientEntry::resolve)
                 .filter(Objects::nonNull)
                 .toList();
-        if (resolved.isEmpty()) return null;
+        if (resolved.isEmpty() || resolved.size() != ingredients.size()) {
+            com.mojang.logging.LogUtils.getLogger().error("[Brewing] recipe {} refused: an ingredient names an unknown item {}",
+                    fullId, ingredients.stream().map(IngredientEntry::item).toList());
+            return null;
+        }
+        if (catalyst.isPresent() && catalyst.get().resolve() == null) {
+            com.mojang.logging.LogUtils.getLogger().error("[Brewing] recipe {}: catalyst {} is unknown or its window is"
+                    + " backwards; the recipe has no timed add", fullId, catalyst.get().item());
+        }
         return new BrewingRecipe(fullId, resolved, cauldronTier, heatTimeTicks, outputBrewId,
                 failureChance, catalyst.map(CatalystEntry::resolve)
                         .filter(java.util.Objects::nonNull));
@@ -108,8 +118,8 @@ public record BrewingRecipeDefinition(
         ).apply(inst, IngredientEntry::new));
 
         BrewingRecipe.Ingredient resolve() {
+            if (!BuiltInRegistries.ITEM.containsKey(item)) return null;
             Item resolved = BuiltInRegistries.ITEM.getValue(item);
-            if (resolved == null) return null;
             return new BrewingRecipe.Ingredient(resolved, count);
         }
     }

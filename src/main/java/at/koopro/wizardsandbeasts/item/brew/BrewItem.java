@@ -135,6 +135,11 @@ public class BrewItem extends ConsumedItem {
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
                 SoundEvents.GENERIC_DRINK.value(), player.getSoundSource(), 1.0f, 1.0f);
         stack.consume(1, player);
+        // The bottle comes back, as a vanilla potion's does.
+        if (!level.isClientSide() && !player.getAbilities().instabuild) {
+            at.koopro.wizardsandbeasts.util.InventoryHandover.giveOrDrop(player,
+                    new ItemStack(net.minecraft.world.item.Items.GLASS_BOTTLE));
+        }
         player.getCooldowns().addCooldown(stack, 20);
         if (player instanceof ServerPlayer sp) {
             sp.awardStat(Stats.ITEM_USED.get(this));

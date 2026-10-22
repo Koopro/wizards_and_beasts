@@ -13,8 +13,8 @@
     " I "
   ],
   "key": {
-    "I": "minecraft:iron_block",
-    "C": "wizards_and_beasts:wizarding_copper_cauldron"
+    "I": "minecraft:iron_ingot",
+    "C": "minecraft:cauldron"
   },
   "result": {
     "id": "wizards_and_beasts:pewter_cauldron",
