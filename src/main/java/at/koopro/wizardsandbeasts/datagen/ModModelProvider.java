@@ -298,6 +298,8 @@ public class ModModelProvider extends ModelProvider {
         createHouseBanner(blockModels, ModBlocks.RAVENCLAW_BANNER.get());
         createHouseBanner(blockModels, ModBlocks.HUFFLEPUFF_BANNER.get());
 
+        createVanishingCabinet(blockModels, ModBlocks.VANISHING_CABINET.get());
+
         TextureMapping torchCross = TextureMapping.cross(Identifier.withDefaultNamespace("block/torch"));
         // The placed candle used to draw the vanilla torch cross, so the block in the world
         // was a plain torch and floating_candle.png only ever showed up on the item. Pointing
@@ -774,6 +776,57 @@ public class ModModelProvider extends ModelProvider {
 
         blockModels.registerSimpleItemModel(block,
                 blockModels.createFlatItemModelWithBlockTexture(block.asItem(), block, "_item"));
+    }
+
+    /**
+     * Lower half of a Vanishing Cabinet, authored facing north: a plinth a little proud of the body, and the body
+     * whose north face is the lower half of the two doors.
+     */
+    private static ExtendedModelTemplate cabinetLowerModel() {
+        return prop(TextureSlot.PARTICLE, TextureSlot.SIDE, TextureSlot.FRONT, TextureSlot.TOP)
+                .element(e -> e.from(1, 0, 2).to(15, 2, 16)
+                        .textureAll(TextureSlot.SIDE)
+                        .face(Direction.UP, f -> f.texture(TextureSlot.TOP))
+                        .face(Direction.DOWN, f -> f.texture(TextureSlot.TOP).cullface(Direction.DOWN)))
+                .element(e -> e.from(1.5F, 2, 2.5F).to(14.5F, 16, 16)
+                        .textureAll(TextureSlot.SIDE)
+                        .face(Direction.NORTH, f -> f.texture(TextureSlot.FRONT)))
+                .build();
+    }
+
+    /** Upper half: the rest of the doors under a cornice that overhangs them as the plinth does. */
+    private static ExtendedModelTemplate cabinetUpperModel() {
+        return prop(TextureSlot.PARTICLE, TextureSlot.SIDE, TextureSlot.FRONT, TextureSlot.TOP)
+                .element(e -> e.from(1.5F, 0, 2.5F).to(14.5F, 13, 16)
+                        .textureAll(TextureSlot.SIDE)
+                        .face(Direction.NORTH, f -> f.texture(TextureSlot.FRONT)))
+                .element(e -> e.from(1, 13, 2).to(15, 15, 16)
+                        .textureAll(TextureSlot.SIDE)
+                        .face(Direction.UP, f -> f.texture(TextureSlot.TOP))
+                        .face(Direction.DOWN, f -> f.texture(TextureSlot.TOP)))
+                .build();
+    }
+
+    /**
+     * The Vanishing Cabinet: two halves chosen by {@code DOUBLE_BLOCK_HALF}, rotated as one by facing (as the
+     * banners are). No item model here -- the item keeps its own icon and hand model from the canon-stub loop.
+     */
+    private void createVanishingCabinet(BlockModelGenerators blockModels, Block block) {
+        Identifier side = TextureMapping.getBlockTexture(block, "_side");
+        Identifier top = TextureMapping.getBlockTexture(block, "_top");
+        TextureMapping lowerTextures = new TextureMapping()
+                .put(TextureSlot.PARTICLE, side).put(TextureSlot.SIDE, side).put(TextureSlot.TOP, top)
+                .put(TextureSlot.FRONT, TextureMapping.getBlockTexture(block, "_front_bottom"));
+        TextureMapping upperTextures = lowerTextures.copyAndUpdate(TextureSlot.FRONT,
+                TextureMapping.getBlockTexture(block, "_front_top"));
+        Identifier lower = cabinetLowerModel().createWithSuffix(block, "_bottom", lowerTextures, blockModels.modelOutput);
+        Identifier upper = cabinetUpperModel().createWithSuffix(block, "_upper", upperTextures, blockModels.modelOutput);
+
+        blockModels.blockStateOutput.accept(MultiVariantGenerator.dispatch(block)
+                .with(PropertyDispatch.initial(BlockStateProperties.DOUBLE_BLOCK_HALF)
+                        .select(DoubleBlockHalf.LOWER, BlockModelGenerators.plainVariant(lower))
+                        .select(DoubleBlockHalf.UPPER, BlockModelGenerators.plainVariant(upper)))
+                .with(BlockModelGenerators.ROTATION_HORIZONTAL_FACING));
     }
 
     /**

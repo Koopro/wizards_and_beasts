@@ -659,6 +659,86 @@ def occamy_eggshell_top():
     return img
 
 
+# Vanishing Cabinet: the ebony and gold of its item sprite (textures/item/vanishing_cabinet.png),
+# so the placed wardrobe and the thing in your hand are recognisably one object.
+CABINET_WOOD = (36, 24, 21)
+CABINET_DARK = (16, 9, 10)
+CABINET_GOLD = (230, 180, 58)
+
+
+def _cabinet_field(seed, vertical=True):
+    """Ebony boards: a low-contrast grain running up the face, as a wardrobe's would."""
+    img = Image.new("RGBA", (16, 16), CABINET_WOOD + (255,))
+    px = img.load()
+    for y in range(16):
+        for x in range(16):
+            along, across = (y, x) if vertical else (x, y)
+            g = 0.8 + 0.3 * noise(seed + across // 4, across, along // 2) + 0.16 * noise(seed + 97, x, y)
+            px[x, y] = shade(CABINET_WOOD + (255,), g)
+    return img
+
+
+def _cabinet_doors(d, top, bottom, arch=False):
+    """Two tall doors meeting at the centre seam, each with a sunk panel between `top` and `bottom`."""
+    dark = CABINET_DARK + (255,)
+    lit = shade(CABINET_WOOD + (255,), 1.35)
+    sunk = shade(CABINET_WOOD + (255,), 0.78)
+    d.line([(7, 0), (7, 15)], fill=dark)
+    d.line([(8, 0), (8, 15)], fill=lit)
+    for x0, x1 in ((3, 5), (10, 12)):
+        d.rectangle([x0, top, x1, bottom], fill=sunk)
+        d.line([(x0 - 1, top), (x0 - 1, bottom)], fill=dark)
+        d.line([(x1 + 1, top), (x1 + 1, bottom)], fill=lit)
+        if arch:
+            # A rounded head to the panel: the corners filled back to the frame.
+            d.point((x0, top), fill=CABINET_WOOD + (255,))
+            d.point((x1, top), fill=CABINET_WOOD + (255,))
+            d.line([(x0, top - 1), (x1, top - 1)], fill=dark)
+        else:
+            d.line([(x0, bottom + 1), (x1, bottom + 1)], fill=lit)
+
+
+def vanishing_cabinet_front_bottom():
+    """Lower half of the doors. The gold latch sits on the seam at the top edge -- the cabinet's mid-height."""
+    img = _cabinet_field(41)
+    d = ImageDraw.Draw(img)
+    _cabinet_doors(d, 4, 12)
+    gold = CABINET_GOLD + (255,)
+    dim = shade(gold, 0.7)
+    img.info["accents"] = [((7, 1), gold), ((8, 1), gold), ((7, 2), gold), ((8, 2), dim)]
+    return img
+
+
+def vanishing_cabinet_front_top():
+    """Upper half: arched panels, and the doors' upper hinges as gold pins at the outer edges."""
+    img = _cabinet_field(43)
+    d = ImageDraw.Draw(img)
+    _cabinet_doors(d, 5, 15, arch=True)
+    hinge = shade(CABINET_GOLD + (255,), 0.8)
+    img.info["accents"] = [((2, 6), hinge), ((13, 6), hinge)]
+    return img
+
+
+def vanishing_cabinet_side():
+    """The flank: one framed panel, no doors."""
+    img = _cabinet_field(47)
+    d = ImageDraw.Draw(img)
+    dark = CABINET_DARK + (255,)
+    lit = shade(CABINET_WOOD + (255,), 1.3)
+    d.rectangle([3, 1, 12, 14], outline=dark)
+    d.line([(4, 14), (12, 14)], fill=lit)
+    d.line([(12, 2), (12, 14)], fill=lit)
+    return img
+
+
+def vanishing_cabinet_top():
+    """Cornice and plinth from above and below: boards running side to side."""
+    img = _cabinet_field(53, vertical=False)
+    d = ImageDraw.Draw(img)
+    d.rectangle([0, 0, 15, 15], outline=CABINET_DARK + (255,))
+    return img
+
+
 ASSETS = {
     # Wall torches deliberately absent: vanilla's template_torch_wall takes the *standing*
     # torch sprite, so a separate <name>_wall_torch.png is never sampled by any model.
@@ -722,6 +802,11 @@ ASSETS = {
     "brass_cauldron_top": lambda: cauldron_top((154, 125, 58), (95, 143, 107), 11),
     "wizarding_copper_cauldron_top": lambda: cauldron_top((165, 103, 60), (122, 90, 168), 23),
     "pewter_cauldron_top": lambda: cauldron_top((141, 143, 150), (107, 122, 143), 37),
+
+    "vanishing_cabinet_front_bottom": vanishing_cabinet_front_bottom,
+    "vanishing_cabinet_front_top": vanishing_cabinet_front_top,
+    "vanishing_cabinet_side": vanishing_cabinet_side,
+    "vanishing_cabinet_top": vanishing_cabinet_top,
 }
 
 
@@ -741,9 +826,15 @@ def main():
             skipped.append(name)
             continue
         img = fn()
+        # A few texels of metal on a large wood field (a latch, a hinge pin) share a median-cut box
+        # with the brightest wood and come out mud. A generator lists those in info["accents"];
+        # they are stamped back after posterising, so the palette stays small and the gold stays gold.
+        accents = img.info.get("accents", ())
         # Vanilla block textures run 4-9 colours. Generated fills were landing near 50,
         # which is what made them read as rendered rather than drawn.
         img = posterise(img, 8)
+        for xy, colour in accents:
+            img.putpixel(xy, colour)
         # The derived size wins. A vanilla-derived texture must keep the vanilla
         # layout or its model's UVs sample the wrong region — `unlit_lantern` shipped
         # 16x16 against `template_hanging_lantern`, which expects vanilla's 16x48.

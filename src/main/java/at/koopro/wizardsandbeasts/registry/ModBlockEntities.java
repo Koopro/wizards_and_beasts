@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.artefact.cabinet.VanishingCabinetBlockEntity;
 import at.koopro.wizardsandbeasts.block.ExpansionFocusBlockEntity;
 import at.koopro.wizardsandbeasts.block.HouseBannerBlockEntity;
 import at.koopro.wizardsandbeasts.block.brew.CauldronBlockEntity;
@@ -77,6 +78,11 @@ public final class ModBlockEntities {
             BLOCK_ENTITY_TYPES.register("tent_grand", () ->
                     new BlockEntityType<>((pos, state) -> new TentBlockEntity(ModBlockEntities.TENT_GRAND.get(), pos, state),
                             Set.of(ModBlocks.TENT_GRAND.get())));
+
+    /** Lower half only; holds who placed it. The link itself lives in {@code CabinetPairs}. */
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<VanishingCabinetBlockEntity>> VANISHING_CABINET =
+            BLOCK_ENTITY_TYPES.register("vanishing_cabinet", () ->
+                    new BlockEntityType<>(VanishingCabinetBlockEntity::new, Set.of(ModBlocks.VANISHING_CABINET.get())));
 
     private ModBlockEntities() {
     }

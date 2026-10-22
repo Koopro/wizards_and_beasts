@@ -1,0 +1,76 @@
+{
+  "parent": "minecraft:block/block",
+  "elements": [
+    {
+      "faces": {
+        "down": {
+          "cullface": "down",
+          "texture": "#top"
+        },
+        "east": {
+          "texture": "#side"
+        },
+        "north": {
+          "texture": "#side"
+        },
+        "south": {
+          "texture": "#side"
+        },
+        "up": {
+          "texture": "#top"
+        },
+        "west": {
+          "texture": "#side"
+        }
+      },
+      "from": [
+        1,
+        0,
+        2
+      ],
+      "to": [
+        15,
+        2,
+        16
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#side"
+        },
+        "east": {
+          "texture": "#side"
+        },
+        "north": {
+          "texture": "#front"
+        },
+        "south": {
+          "texture": "#side"
+        },
+        "up": {
+          "texture": "#side"
+        },
+        "west": {
+          "texture": "#side"
+        }
+      },
+      "from": [
+        1.5,
+        2,
+        2.5
+      ],
+      "to": [
+        14.5,
+        16,
+        16
+      ]
+    }
+  ],
+  "textures": {
+    "front": "wizards_and_beasts:block/vanishing_cabinet_front_bottom",
+    "particle": "wizards_and_beasts:block/vanishing_cabinet_side",
+    "side": "wizards_and_beasts:block/vanishing_cabinet_side",
+    "top": "wizards_and_beasts:block/vanishing_cabinet_top"
+  }
+}

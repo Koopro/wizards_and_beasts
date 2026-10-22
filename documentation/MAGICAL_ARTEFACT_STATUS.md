@@ -44,6 +44,7 @@ be had in creative mode or through commands.
 | Remembrall | "It turns red when you've forgotten something" | Flashes foil on a timer | C (§5.4) | Recipe |
 | Extendable Ears | Eavesdropping | A plain `Item` | C (§5.4) | Recipe |
 | Omnioculars | Replay and slow motion of a match | A vanilla spyglass | C (§5.4) | Recipe |
+| **Vanishing Cabinet** | Two places joined: what enters one leaves the other | **C.** A bare `Item` whose tooltip promised a function | **A** (Update 2026-10-22) | Recipe; Knockturn dealer |
 | Peruvian Instant Darkness Powder, Decoy Detonator | Darkness cloud; a distraction | Thrown entities (`WizardingThrownKind`) | A | Recipe |
 
 ## 1. Time-Turner: the wearer goes back, the world does not
@@ -161,3 +162,26 @@ the owner can revert this classification.
 - **Remembrall.** No longer flashes; it is honestly decorative (C-10). §5 item 4 remains for the other two
   decorative items.
 - **Wands from Ollivander.** The first is free, later ones cost seven Galleons (C-8).
+
+## Update 2026-10-22 — Vanishing Cabinet
+
+The cabinet is now a placed, two-block-tall wardrobe (`artefact/cabinet/`). The item id `vanishing_cabinet` is
+unchanged, so cabinets already in inventories become placeable.
+
+- **Linking.** Sneak and touch a cabinet with a wand, then touch a second cabinet within a minute. To unlink, make
+  the same gesture on a linked cabinet; a second gesture within five seconds confirms. Only the player who placed a
+  cabinet may link it, and only where they could build.
+- **Travel.** Click a linked cabinet to step out in front of its partner. This works across dimensions, but never
+  into or out of the pocket realm. It is refused when the exit is walled up or has no floor at door level, when an
+  anti-Apparition ward covers the far side, and for two seconds after a trip.
+- **Access.** A pair is private to the player who linked it. That player can share it with everyone by sneaking
+  and clicking with an empty hand, and the same gesture makes it private again. Operators can always use and
+  unlink a pair.
+- **One record.** Links live only in `CabinetPairs` (overworld saved data); a cabinet block holds only who placed
+  it. Breaking either cabinet dissolves the pair at once. A partner removed by `/setblock` (which skips removal
+  hooks) dissolves the pair the next time anyone tries to travel to it.
+- **Getting one.** A shaped recipe (dark oak planks, an ender pearl, a dark oak door) when the Artefacts module is
+  on, and one a week from the Knockturn dealer for trusted contacts.
+- **Tests.** Unit: `CabinetPairsTest` (link/sever/share, save round-trip that drops a double-booked cabinet, access
+  rule, pocket realm). Game tests: `CabinetTests` (link, travel, private, share, confirmed unlink; breaking severs;
+  walled exit; ward).

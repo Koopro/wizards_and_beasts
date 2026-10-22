@@ -221,3 +221,20 @@ Manual — the screen has no automated client test. Fresh survival world, `/wand
 7. Resize the window / change GUI scale mid-challenge → corridor re-rasterises, still aligned with the markers.
 8. Dark Arts spell (with `dark_knowledge` held): edges are red; after a fail, Try again is disabled with
    "You can try again in 10s" until the delay passes.
+
+## Vanishing Cabinet (2026-10-22, `feat/vanishing-cabinet`)
+
+Manual. You need a survival world, two cabinets (from the recipe or `/give`) and a wand.
+
+1. Place both cabinets. Each is two blocks tall, faces you, and shows a gold latch at mid-height.
+2. Sneak and click cabinet A with the wand: "The cabinet hums…". The wand does **not** cast. Sneak and click
+   cabinet B: "The cabinets are linked…".
+3. Click A (no sneak, any item in hand): you come out in front of B, facing away from it. Click B straight away:
+   nothing happens (cooldown). Click B again: you come out at A.
+4. As a second player, click A: "The door will not open for you." As the owner, sneak and click with an empty
+   hand: "Anyone may now step through…". The second player can now travel.
+5. Put a block in front of B's doors and click A: "Something blocks the way out…". You do not move.
+6. Sneak and click A with the wand: "Touch your wand to it again…". Within 5 s do it again: "The link is broken."
+7. Re-link, then break B: you get one cabinet back, and A reads "Just a cabinet…".
+8. Link a cabinet in the Nether to one in the Overworld and travel both ways. Then try a cabinet inside a trunk
+   (pocket realm): it refuses to link.

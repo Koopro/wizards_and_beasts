@@ -53,8 +53,10 @@ public final class CanonItemRegistry {
     // --- Dark artefacts & cursed objects -----------------------------------
     public static final DeferredItem<at.koopro.wizardsandbeasts.item.darkartefact.BasiliskFangItem> BASILISK_FANG =
             ModItems.ITEMS.registerItem("basilisk_fang", at.koopro.wizardsandbeasts.item.darkartefact.BasiliskFangItem::new);
-    public static final DeferredItem<Item> VANISHING_CABINET =
-            ModItems.ITEMS.registerItem("vanishing_cabinet", Item::new);
+    /** Places a {@code VanishingCabinetBlock}; same id as when it was a plain item, so held cabinets carry over. */
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> VANISHING_CABINET =
+            ModItems.ITEMS.registerItem("vanishing_cabinet",
+                    props -> new net.minecraft.world.item.BlockItem(ModBlocks.VANISHING_CABINET.get(), props.stacksTo(1)));
     public static final DeferredItem<Item> OPAL_NECKLACE =
             ModItems.ITEMS.registerItem("opal_necklace", Item::new);
     public static final DeferredItem<Item> SECRETS_OF_THE_DARKEST_ART =

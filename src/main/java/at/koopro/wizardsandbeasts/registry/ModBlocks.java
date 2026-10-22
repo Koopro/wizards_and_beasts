@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.block.OccamyEggshellBlock;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.artefact.cabinet.VanishingCabinetBlock;
 import at.koopro.wizardsandbeasts.block.ExaminationDeskBlock;
 import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlock;
 import at.koopro.wizardsandbeasts.block.floo.FlooFlamesBlock;
@@ -182,6 +183,15 @@ public class ModBlocks {
     public static final DeferredBlock<at.koopro.wizardsandbeasts.block.AcromantulaWebBlock> ACROMANTULA_WEB =
             BLOCKS.registerBlock("acromantula_web", at.koopro.wizardsandbeasts.block.AcromantulaWebBlock::new,
                     () -> BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.COBWEB));
+
+    /**
+     * A Vanishing Cabinet, two blocks tall. Its item stays {@code CanonItemRegistry.VANISHING_CABINET} (the id
+     * players already hold), now a BlockItem of this.
+     */
+    public static final DeferredBlock<VanishingCabinetBlock> VANISHING_CABINET =
+            BLOCKS.registerBlock("vanishing_cabinet", VanishingCabinetBlock::new,
+                    () -> BlockBehaviour.Properties.of().strength(2.5f, 6.0f).sound(SoundType.WOOD)
+                            .noOcclusion().pushReaction(PushReaction.BLOCK));
 
     // --- Pocket dimension blocks ---
 

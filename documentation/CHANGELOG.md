@@ -4,6 +4,15 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Vanishing Cabinet (2026-10-22)
+
+- **Added:** the Vanishing Cabinet is a placeable two-tall block. Link two cabinets with a wand: sneak and touch
+  one, then the other within a minute. After that, clicking either one carries you out in front of the other,
+  across dimensions. Pairs are private until the owner shares them (sneak with an empty hand). Unlinking asks for
+  a second gesture to confirm. Anti-Apparition wards and a blocked exit stop arrivals, and breaking either cabinet
+  dissolves the pair. Craftable (Artefacts module); the Knockturn dealer sells one a week to trusted contacts.
+  Existing `vanishing_cabinet` items now place the block.
+
 ### Source and repo cleanup (2026-10-21)
 
 - **Fixed:** any player could read another player's heritage, hidden werewolf condition and blood pool through

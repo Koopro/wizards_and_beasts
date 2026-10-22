@@ -1,0 +1,24 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "ARTEFACTS"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PPP",
+    "PEP",
+    "PDP"
+  ],
+  "key": {
+    "P": "minecraft:dark_oak_planks",
+    "E": "minecraft:ender_pearl",
+    "D": "minecraft:dark_oak_door"
+  },
+  "result": {
+    "id": "wizards_and_beasts:vanishing_cabinet",
+    "count": 1
+  }
+}

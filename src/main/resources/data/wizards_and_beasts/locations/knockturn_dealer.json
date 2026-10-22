@@ -62,7 +62,8 @@
       { "id": "unicorn_hair", "item": "wizards_and_beasts:unicorn_hair", "price_knuts": 435, "depth": 3 },
       { "id": "acromantula_venom", "item": "wizards_and_beasts:acromantula_venom", "price_knuts": 696, "depth": 3 },
       { "id": "dragon_heartstring", "item": "wizards_and_beasts:dragon_heartstring", "price_knuts": 696, "depth": 2, "min_tier": "known_face" },
-      { "id": "basilisk_fang", "item": "wizards_and_beasts:basilisk_fang", "price_knuts": 2465, "depth": 1, "weekly_limit": 1, "min_tier": "trusted_contact" }
+      { "id": "basilisk_fang", "item": "wizards_and_beasts:basilisk_fang", "price_knuts": 2465, "depth": 1, "weekly_limit": 1, "min_tier": "trusted_contact" },
+      { "id": "vanishing_cabinet", "item": "wizards_and_beasts:vanishing_cabinet", "price_knuts": 1740, "depth": 1, "weekly_limit": 1, "min_tier": "trusted_contact" }
     ]
   }
 }

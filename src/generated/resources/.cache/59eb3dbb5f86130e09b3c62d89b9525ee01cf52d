@@ -1,4 +1,4 @@
-// 1.21.11	2026-10-13T23:09:45.6588412	Loot Tables
+// 1.21.11	2026-10-22T10:51:25.3834936	Loot Tables
 05c7325d669887037604a240dc76ed0570decda2 data/wizards_and_beasts/loot_table/blocks/acromantula_web.json
 867bad6d013ba096052ad53738989dcfa000ba61 data/wizards_and_beasts/loot_table/blocks/ash_leaves.json
 8b9ac95b946ea568fd08f217a93dd6f450d08efe data/wizards_and_beasts/loot_table/blocks/ash_log.json
@@ -225,6 +225,7 @@ c290070f75a7c1719647478cf3873aac22c36324 data/wizards_and_beasts/loot_table/bloc
 e022ed428a84c07e498de38db31f05291e8de826 data/wizards_and_beasts/loot_table/blocks/unlit_soul_wall_torch.json
 367507d0f3b056dc1258a3249a340399be969042 data/wizards_and_beasts/loot_table/blocks/unlit_torch.json
 91e3ad0a30abf1f9969a1769fdafb84ecb64e5b2 data/wizards_and_beasts/loot_table/blocks/unlit_wall_torch.json
+cee154ad444b8a367cb9139442fe5de406633c4c data/wizards_and_beasts/loot_table/blocks/vanishing_cabinet.json
 b155a6b5d26b5341d63dd99bdd3bdad44e7e1197 data/wizards_and_beasts/loot_table/blocks/walnut_leaves.json
 98ed2b042420bc31d16be0c67ec38e97e691fbd0 data/wizards_and_beasts/loot_table/blocks/walnut_log.json
 86e682b3e0e0a124a62a143f461f433add0091d1 data/wizards_and_beasts/loot_table/blocks/walnut_planks.json
