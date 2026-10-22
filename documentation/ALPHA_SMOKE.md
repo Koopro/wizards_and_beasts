@@ -273,3 +273,19 @@ Manual. You need a survival world and `/give @s wizards_and_beasts:sorting_hat`.
    it is impregnated.
 6. Hold Riddle's diary in the off hand and use the sword: the diary is destroyed and the sword stays (needs the
    Dark Arts module).
+
+## Wandmaking (2026-10-22, `feat/wandmaking`)
+
+Manual. You need a survival world, a bench and a few enhancers.
+
+1. Ollivanders, at the wandmaker's friend tier: thunderbird tail feather, wampus cat hair, troll whisker and
+   White River Monster spine are for sale. Knockturn (trusted contact) sells the first three and rougarou hair.
+2. Make a holly + rougarou hair wand at a bench of tier 4.6 or more. Its tooltip shows a Dark Arts bonus and
+   extra misfire. A holly + unicorn hair wand shows a Dark Arts penalty and −misfire in green.
+3. Right-click the bench holding a finished wand: "Refining a Wand" opens (plain right-click still opens the
+   bench). Polish with honeycomb: the output wand's integrity rises. Take it: the honeycomb and the old wand are
+   spent.
+4. Re-fit stiffer with a log of the wand's own wood (spruce for holly). Without Wandlore's "Grain of the Wood"
+   and with no lectern by the bench it says "Needs Grain of the Wood".
+5. "New handle" with any log: the wand's handle changes, and nothing else does.
+6. Find a rougarou in a swamp (default spawn setting): it drops rougarou hair.

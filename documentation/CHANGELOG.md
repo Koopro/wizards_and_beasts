@@ -4,6 +4,35 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Wandmaking (2026-10-22)
+
+- **Fixed:** 30 of the 80 wand recipes could not be made. The thunderbird, troll and wampus cat cores came from
+  creatures that never spawn. They are now imports:
+  - Ollivanders sells them once you are a wandmaker's friend;
+  - the Knockturn dealer smuggles them to trusted contacts;
+  - hidden caches sometimes hold one.
+- **Added:** rougarou hair and White River Monster spine are wand cores now, with 10 recipes each at a
+  well-furnished bench.
+  - Rougarou hair is the Dark core: strongest in the Dark Arts, it corrupts faster and warms only to a Dark
+    caster. Rougarou now roam the swamps, and Knockturn sells their hair.
+  - The spine has the longest reach and hits as hard as any core, but misfires more and is the hardest to bond.
+    It comes from caches and as an Ollivanders import.
+  - Every rare core's tooltip says where to find it.
+- **Added:** the bench's second role. Right-click a Wandmaker's Bench holding a finished wand to refine it.
+  - **Polish** with honeycomb restores integrity: +25%, or +40% with a pewter cauldron by the bench. A snapped
+    wand stays snapped.
+  - **Re-fit** with a log of the wand's own wood moves its flexibility one step. It needs bench tier 4 and
+    Wandlore's "The Grain of the Wood", or a spell teacher's lectern at the bench.
+  - **Re-handle**, **re-tip** or add an ornament with any log.
+  - Nothing is ever destroyed, and wood, core and bond never change.
+- **Changed:** every declared wand stat now does something.
+  - A core's consistency moves misfire, and its dark affinity moves Dark Arts power and how fast the wand
+    corrupts.
+  - A steady wand's negative misfire now actually lowers misfire (unicorn hair's −5% did nothing before).
+  - Beam spells take the wand's damage, and spell bolts its range.
+  - The wand's cast count is recorded.
+  - Unread stats (core loyalty, initiative, transfer resistance; a per-cast compatibility score) were removed.
+
 ### Sword of Gryffindor and the Sorting Hat (2026-10-22)
 
 - **Added:** the Sorting Hat can be worn, and hidden caches sometimes hold it. Wear it, fight a basilisk,
