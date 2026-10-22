@@ -101,8 +101,8 @@ public class ModCreativeTabs {
                         output.accept(WandItemRegistry.TROLL_WHISKER.get());
                         output.accept(WandItemRegistry.VEELA_HAIR.get());
                         output.accept(WandItemRegistry.WAMPUS_CAT_HAIR.get());
-                        output.accept(ConsumableItemRegistry.ROUGAROU_HAIR.get());
-                        output.accept(ConsumableItemRegistry.WHITE_RIVER_MONSTER_SPINE.get());
+                        output.accept(WandItemRegistry.ROUGAROU_HAIR.get());
+                        output.accept(WandItemRegistry.WHITE_RIVER_MONSTER_SPINE.get());
                         output.accept(WandItemRegistry.THESTRAL_TAIL_HAIR.get());
 
                         // Crafting Materials

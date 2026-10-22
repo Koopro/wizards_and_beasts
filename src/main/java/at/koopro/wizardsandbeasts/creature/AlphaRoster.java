@@ -88,8 +88,12 @@ public final class AlphaRoster {
      * <p>The Demiguise is the only wild source of demiguise hair now that its hair is shed and given rather than
      * taken from a body. Its rig is below the roster's cube bar, so it is exempted from the spawn gate here rather
      * than claimed as finished. (The Unicorn was listed here until 2026-09-17, when it joined the roster.)
+     *
+     * <p>The Rougarou (swamps) joined on 2026-10-22 for the same reason: it is the wild source of rougarou hair, the
+     * Dark-leaning wand core, which would otherwise come only from a Knockturn trader. Its rig is not claimed as
+     * roster-standard either.
      */
-    public static final Set<String> PROGRESSION_CRITICAL = Set.of("demiguise");
+    public static final Set<String> PROGRESSION_CRITICAL = Set.of("demiguise", "rougarou");
 
     private AlphaRoster() {}
 

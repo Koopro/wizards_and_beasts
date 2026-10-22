@@ -133,10 +133,7 @@ public final class ConsumableItemRegistry {
     public static final DeferredItem<WizardingProjectileItem> BABY_MANDRAKE =
             ModItems.ITEMS.registerItem("baby_mandrake",
                     props -> new WizardingProjectileItem(props.stacksTo(16)));
-    public static final DeferredItem<Item> ROUGAROU_HAIR =
-            ModItems.ITEMS.registerSimpleItem("rougarou_hair");
-    public static final DeferredItem<Item> WHITE_RIVER_MONSTER_SPINE =
-            ModItems.ITEMS.registerSimpleItem("white_river_monster_spine");
+    // rougarou_hair and white_river_monster_spine are wand cores now: WandItemRegistry (same ids).
     /** Roughly half an ender pearl's throw — see {@link WizardingProjectileItem}. */
     private static final float SHADOW_ESSENCE_VELOCITY = 0.75f;
 

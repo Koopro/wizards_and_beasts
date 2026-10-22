@@ -112,8 +112,8 @@ public class ModItemTagsProvider extends BlockTagCopyingItemTagProvider {
                 WandItemRegistry.UNICORN_HAIR.get(), WandItemRegistry.THUNDERBIRD_TAIL_FEATHER.get(),
                 WandItemRegistry.TROLL_WHISKER.get(), WandItemRegistry.VEELA_HAIR.get(),
                 WandItemRegistry.WAMPUS_CAT_HAIR.get(), WandItemRegistry.THESTRAL_TAIL_HAIR.get(),
-                ConsumableItemRegistry.ROUGAROU_HAIR.get(),
-                ConsumableItemRegistry.WHITE_RIVER_MONSTER_SPINE.get());
+                WandItemRegistry.ROUGAROU_HAIR.get(),
+                WandItemRegistry.WHITE_RIVER_MONSTER_SPINE.get());
 
         add(Module.BROOM_FLIGHT,
                 BroomItemRegistry.BROOM_ITEM.get(), BroomItemRegistry.CLEANSWEEP_SEVEN.get(),

@@ -168,6 +168,16 @@
           "weight": 29
         }
       ]
+    },
+    {
+      "_comment": "The American wand cores. Their creatures do not walk these lands (none is on the spawn roster), so they come to a British wandmaker as imports (Ollivanders, Knockturn) or, now and then, in a cache someone left.",
+      "rolls": 1,
+      "entries": [
+        { "type": "minecraft:item", "name": "wizards_and_beasts:thunderbird_tail_feather", "weight": 1 },
+        { "type": "minecraft:item", "name": "wizards_and_beasts:wampus_cat_hair", "weight": 1 },
+        { "type": "minecraft:item", "name": "wizards_and_beasts:troll_whisker", "weight": 1 },
+        { "type": "minecraft:empty", "weight": 17 }
+      ]
     }
   ]
 }

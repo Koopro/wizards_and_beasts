@@ -59,6 +59,13 @@ public final class WandItemRegistry {
     public static final DeferredItem<WandCoreMaterialItem> THUNDERBIRD_TAIL_FEATHER =
             ModItems.ITEMS.registerItem("thunderbird_tail_feather", props -> new WandCoreMaterialItem(props,
                     Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "thunderbird_tail_feather")));
+    // Plain items until 2026-10-22, so no bench would take them though both cores were fully defined.
+    public static final DeferredItem<WandCoreMaterialItem> ROUGAROU_HAIR =
+            ModItems.ITEMS.registerItem("rougarou_hair", props -> new WandCoreMaterialItem(props,
+                    Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "rougarou_hair")));
+    public static final DeferredItem<WandCoreMaterialItem> WHITE_RIVER_MONSTER_SPINE =
+            ModItems.ITEMS.registerItem("white_river_monster_spine", props -> new WandCoreMaterialItem(props,
+                    Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "white_river_monster_spine")));
 
     public static void init() {}
 

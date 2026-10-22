@@ -145,8 +145,8 @@ public class ModModelProvider extends ModelProvider {
         itemModels.generateFlatItem(WandItemRegistry.TROLL_WHISKER.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(WandItemRegistry.WAMPUS_CAT_HAIR.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(WandItemRegistry.THUNDERBIRD_TAIL_FEATHER.get(), ModelTemplates.FLAT_ITEM);
-        itemModels.generateFlatItem(ConsumableItemRegistry.ROUGAROU_HAIR.get(), ModelTemplates.FLAT_ITEM);
-        itemModels.generateFlatItem(ConsumableItemRegistry.WHITE_RIVER_MONSTER_SPINE.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(WandItemRegistry.ROUGAROU_HAIR.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(WandItemRegistry.WHITE_RIVER_MONSTER_SPINE.get(), ModelTemplates.FLAT_ITEM);
         iconInSlotModelInHand(itemModels, ConsumableItemRegistry.HIDEBEHIND_SHADOW_ESSENCE.get());
         itemModels.generateFlatItem(ConsumableItemRegistry.HIDEBEHIND_CLAW.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(ConsumableItemRegistry.GHOUL_SLIME.get(), ModelTemplates.FLAT_ITEM);

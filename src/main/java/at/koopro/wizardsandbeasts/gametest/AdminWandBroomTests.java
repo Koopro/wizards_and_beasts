@@ -23,6 +23,7 @@ import at.koopro.wizardsandbeasts.registry.ModEntities;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.gui.OllivanderTrialMenu;
 import at.koopro.wizardsandbeasts.wand.ollivander.OllivanderPoolEntry;
+import at.koopro.wizardsandbeasts.wand.registry.WandDatapackRegistries;
 import at.koopro.wizardsandbeasts.wand.rules.WandRules;
 import at.koopro.wizardsandbeasts.wand.rules.WandRulesService;
 import net.minecraft.core.BlockPos;
@@ -57,8 +58,18 @@ public final class AdminWandBroomTests {
     private static final Identifier HOLLY = Identifier.fromNamespaceAndPath(NS, "holly");
     private static final Identifier PHOENIX = Identifier.fromNamespaceAndPath(NS, "phoenix_feather");
     private static final Identifier UNICORN = Identifier.fromNamespaceAndPath(NS, "unicorn_hair");
-    /** A shipped core no wandmaking recipe uses. */
-    private static final Identifier UNPAIRED_CORE = Identifier.fromNamespaceAndPath(NS, "rougarou_hair");
+    /**
+     * A core no holly recipe uses, if the loaded data has one. Rougarou hair served until 2026-10-22, when it and the
+     * White River Monster spine became cores and the shipped grid went full (10 woods x 10 cores); the "no recipe"
+     * branch is still real for a datapack that adds a core without recipes.
+     */
+    private static java.util.Optional<Identifier> unpairedCore(MinecraftServer server) {
+        return server.registryAccess().lookupOrThrow(WandDatapackRegistries.WAND_CORE_REGISTRY).listElementIds()
+                .map(key -> key.identifier())
+                .filter(core -> WandRulesService.recipeFor(server, HOLLY, core).isEmpty())
+                .sorted(java.util.Comparator.comparing(Identifier::toString))
+                .findFirst();
+    }
     private static final Identifier NIMBUS = Identifier.fromNamespaceAndPath(NS, "nimbus_2000");
     /** The school broom: no tier licence, so only the module and the withdrawal can refuse it. */
     private static final Identifier SCHOOL_BROOM = Identifier.fromNamespaceAndPath(NS, "broom");
@@ -114,15 +125,16 @@ public final class AdminWandBroomTests {
         MinecraftServer server = helper.getLevel().getServer();
         record Case(WandAdminService.Request request, String reason) {}
         Identifier nowhere = Identifier.fromNamespaceAndPath(NS, "no_such_part");
-        List<Case> cases = List.of(
+        java.util.Optional<Identifier> unpairedCore = unpairedCore(server);
+        List<Case> cases = new java.util.ArrayList<>(List.of(
                 new Case(make(nowhere, PHOENIX, 11f, "SUPPLE", ""), "unknown_wood"),
                 new Case(make(HOLLY, nowhere, 11f, "SUPPLE", ""), "unknown_core"),
                 new Case(new WandAdminService.Request("not an id", PHOENIX.toString(), 11f, "SUPPLE", ""), "unknown_wood"),
-                new Case(make(HOLLY, UNPAIRED_CORE, 11f, "SUPPLE", ""), "no_recipe"),
                 new Case(make(HOLLY, PHOENIX, 30f, "SUPPLE", ""), "bad_length"),
                 new Case(make(HOLLY, PHOENIX, Float.NaN, "SUPPLE", ""), "bad_length"),
                 new Case(make(HOLLY, PHOENIX, 11f, "WOBBLY", ""), "bad_flexibility"),
-                new Case(make(HOLLY, PHOENIX, 11f, "SUPPLE", "wizards_and_beasts:no_such_look"), "bad_preset"));
+                new Case(make(HOLLY, PHOENIX, 11f, "SUPPLE", "wizards_and_beasts:no_such_look"), "bad_preset")));
+        unpairedCore.ifPresent(core -> cases.add(new Case(make(HOLLY, core, 11f, "SUPPLE", ""), "no_recipe")));
         for (Case c : cases) {
             String problem = WandAdminService.problem(server, c.request());
             check(helper, c.reason().equals(problem), () -> c.request() + " → " + problem + ", expected " + c.reason());
@@ -137,8 +149,13 @@ public final class AdminWandBroomTests {
         check(helper, holly != null && !holly.lore().isEmpty() && !holly.facts().isEmpty(),
                 () -> "holly's page is missing its lore or facts: " + holly);
         check(helper, catalog.pairs().contains(WandRules.pairKey(HOLLY, PHOENIX))
-                        && !catalog.pairs().contains(WandRules.pairKey(HOLLY, UNPAIRED_CORE)),
+                        && unpairedCore.map(core -> !catalog.pairs().contains(WandRules.pairKey(HOLLY, core))).orElse(true),
                 () -> "the catalog's pairings are not the recipes'");
+        if (unpairedCore.isEmpty()) {
+            // The shipped grid is full: every core pairs with every wood, so there is no shipped "no recipe" case.
+            long cores = server.registryAccess().lookupOrThrow(WandDatapackRegistries.WAND_CORE_REGISTRY).listElementIds().count();
+            check(helper, cores == 10, () -> "expected the ten shipped cores, found " + cores);
+        }
 
         AdminWandPayloads.Preview valid = WandAdminService.preview(server, make(HOLLY, PHOENIX, 11f, "SUPPLE", "wizards_and_beasts:harry"));
         check(helper, valid.valid() && !valid.facts().isEmpty(), () -> "holly + phoenix feather was refused: " + valid);
@@ -155,10 +172,12 @@ public final class AdminWandBroomTests {
             service().reset(CONSOLE, pair, true);
         }
         check(helper, WandRules.mayMake(HOLLY, PHOENIX), () -> "reset did not restore the pairing");
-        AdminResult unpaired = service().change(CONSOLE,
-                WandSettingProvider.pairId(HOLLY, UNPAIRED_CORE), "false", true);
-        check(helper, unpaired.rejection() == AdminRejection.UNKNOWN_SETTING,
-                () -> "a pairing no recipe defines became a setting: " + unpaired);
+        if (unpairedCore.isPresent()) {
+            AdminResult unpaired = service().change(CONSOLE,
+                    WandSettingProvider.pairId(HOLLY, unpairedCore.get()), "false", true);
+            check(helper, unpaired.rejection() == AdminRejection.UNKNOWN_SETTING,
+                    () -> "a pairing no recipe defines became a setting: " + unpaired);
+        }
         helper.succeed();
     }
 
@@ -237,8 +256,16 @@ public final class AdminWandBroomTests {
         try {
             // A fresh player may be handed a starter wand on join; only the wand given here counts.
             wandmaker.getInventory().clearContent();
-            WandAdminService.Outcome refused = WandAdminService.giveTestWand(wandmaker, make(HOLLY, UNPAIRED_CORE, 11f, "SUPPLE", ""));
-            check(helper, !refused.success(), () -> "a pairing no recipe allows was handed out");
+            // A pairing the server will not make is refused: withdrawn here, since the shipped grid has no
+            // pairing without a recipe any more (see unpairedCore).
+            Identifier pair = WandSettingProvider.pairId(HOLLY, PHOENIX);
+            service().change(CONSOLE, pair, "false", true);
+            try {
+                WandAdminService.Outcome refused = WandAdminService.giveTestWand(wandmaker, make(HOLLY, PHOENIX, 11f, "SUPPLE", ""));
+                check(helper, !refused.success(), () -> "a pairing the server will not make was handed out");
+            } finally {
+                service().reset(CONSOLE, pair, true);
+            }
 
             WandAdminService.Outcome given = WandAdminService.giveTestWand(wandmaker,
                     make(HOLLY, UNICORN, 10.5f, "PLIANT", "wizards_and_beasts:harry"));

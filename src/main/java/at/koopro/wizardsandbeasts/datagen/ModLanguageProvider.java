@@ -193,9 +193,9 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.wizards_and_beasts.thunderbird_tail_feather", "Thunderbird Tail Feather");
         add("item.wizards_and_beasts.thunderbird_tail_feather.desc", "Powerful long-range core with broad magical reach.");
         add("item.wizards_and_beasts.rougarou_hair", "Rougarou Hair");
-        add("item.wizards_and_beasts.rougarou_hair.desc", "Wild and volatile core associated with difficult arts.");
+        add("item.wizards_and_beasts.rougarou_hair.desc", "A Dark-leaning core: strong in the Dark Arts, slow to trust.");
         add("item.wizards_and_beasts.white_river_monster_spine", "White River Monster Spine");
-        add("item.wizards_and_beasts.white_river_monster_spine.desc", "Rare spine core balancing reach and heavy spell output.");
+        add("item.wizards_and_beasts.white_river_monster_spine.desc", "The longest reach of any core; heavy-handed and wild.");
 
     }
 

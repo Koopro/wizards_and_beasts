@@ -64,7 +64,11 @@
       { "id": "dragon_heartstring", "item": "wizards_and_beasts:dragon_heartstring", "price_knuts": 696, "depth": 2, "min_tier": "known_face" },
       { "id": "basilisk_fang", "item": "wizards_and_beasts:basilisk_fang", "price_knuts": 2465, "depth": 1, "weekly_limit": 1, "min_tier": "trusted_contact" },
       { "id": "vanishing_cabinet", "item": "wizards_and_beasts:vanishing_cabinet", "price_knuts": 1740, "depth": 1, "weekly_limit": 1, "min_tier": "trusted_contact" },
-      { "id": "mirror_of_erised", "item": "wizards_and_beasts:mirror_of_erised", "price_knuts": 4930, "depth": 1, "weekly_limit": 1, "min_tier": "inner_circle" }
+      { "id": "mirror_of_erised", "item": "wizards_and_beasts:mirror_of_erised", "price_knuts": 4930, "depth": 1, "weekly_limit": 1, "min_tier": "inner_circle" },
+      { "id": "rougarou_hair", "item": "wizards_and_beasts:rougarou_hair", "price_knuts": 435, "depth": 3, "min_tier": "known_face" },
+      { "id": "thunderbird_tail_feather", "item": "wizards_and_beasts:thunderbird_tail_feather", "price_knuts": 1044, "depth": 1, "weekly_limit": 1, "min_tier": "trusted_contact" },
+      { "id": "wampus_cat_hair", "item": "wizards_and_beasts:wampus_cat_hair", "price_knuts": 870, "depth": 1, "weekly_limit": 1, "min_tier": "trusted_contact" },
+      { "id": "troll_whisker", "item": "wizards_and_beasts:troll_whisker", "price_knuts": 609, "depth": 1, "weekly_limit": 1, "min_tier": "trusted_contact" }
     ]
   }
 }
