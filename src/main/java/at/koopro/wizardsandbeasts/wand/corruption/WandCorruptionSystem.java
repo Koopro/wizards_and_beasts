@@ -33,11 +33,11 @@ public final class WandCorruptionSystem {
         if (!ModuleManager.isEnabled(Module.WANDS) || !(wand.getItem() instanceof WandItem)) {
             return;
         }
-        // Spell system integration: read corruption_increment from spell definition when available.
-        float increment = category == SpellCategory.DARK_ARTS ? 0.02f : 0.0f;
-        if (increment <= 0.0f) {
+        if (category != SpellCategory.DARK_ARTS) {
             return;
         }
+        // The core's dark affinity sets how fast the Dark Arts take hold of the wand (WandStatsResolver.corruptionRate).
+        float increment = BASE_DARK_CORRUPTION * coreCorruptionRate(wand, player.level().registryAccess());
         float oldCorruption = WandComponents.getCorruption(wand);
         float newCorruption = Math.min(1.0f, oldCorruption + increment);
         wand.set(WandComponents.WAND_CORRUPTION.get(), newCorruption);
@@ -56,6 +56,16 @@ public final class WandCorruptionSystem {
         }
     }
 
+    /** Corruption one Dark Arts cast adds to a wand whose core has a neutral (0.5) dark affinity. */
+    public static final float BASE_DARK_CORRUPTION = 0.02f;
+
+    private static float coreCorruptionRate(ItemStack wand, RegistryAccess registries) {
+        Identifier core = at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver.resolveCoreId(wand);
+        return core == null ? 1.0f : at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver.coreDefinition(core, registries)
+                .map(d -> at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver.corruptionRate(d.darkAffinity()))
+                .orElse(1.0f);
+    }
+
     public static float getEffectivePowerMultiplier(ItemStack wand, SpellCategory category, RegistryAccess registryAccess) {
         float integrity = WandComponents.getIntegrity(wand);
         float corruption = WandComponents.getCorruption(wand);
@@ -64,7 +74,7 @@ public final class WandCorruptionSystem {
         if (corruption > darkBonusThreshold && category == SpellCategory.DARK_ARTS) {
             mult *= 1.0f + (corruption - darkBonusThreshold);
         }
-        Identifier woodId = WandComponents.getWood(wand);
+        Identifier woodId = at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver.resolveWoodId(wand);
         if (woodId != null && corruption > darkBonusThreshold && category == SpellCategory.DEFENSE) {
             Optional<Holder.Reference<WandWoodDefinition>> wood =
                     registryAccess.lookupOrThrow(WandDatapackRegistries.WAND_WOOD_REGISTRY).get(woodId);

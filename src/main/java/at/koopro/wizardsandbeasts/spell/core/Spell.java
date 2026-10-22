@@ -337,7 +337,11 @@ public abstract class Spell {
         projectile.setDamageMultiplier(damageMultiplier);
         float baseSpeed = this instanceof JsonSpell jsonSpell ? jsonSpell.definition().projectileSpeed() : getProjectileSpeed();
         float baseSpread = this instanceof JsonSpell jsonSpell ? jsonSpell.definition().projectileSpread() : getProjectileSpread();
-        float speed = baseSpeed * profile.controlMult();
+        // A bolt lives a fixed 100 ticks, so its reach is its speed: the wand's range (a long wand, a White River
+        // Monster spine) carries it further, as range already widened cone, targeted and beam spells.
+        float wandRange = at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver
+                .resolve(getWandStack(caster), level.registryAccess()).rangeFor(this);
+        float speed = baseSpeed * profile.controlMult() * wandRange;
         float spread = baseSpread * profile.accuracyMult();
         projectile.shootFromRotation(caster, caster.getXRot(), caster.getYRot(), 0.0f, speed, spread);
         level.addFreshEntity(projectile);

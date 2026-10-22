@@ -9,6 +9,7 @@ import at.koopro.wizardsandbeasts.wand.stat.WandLength;
 import at.koopro.wizardsandbeasts.wand.stat.WandWood;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
+import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 import at.koopro.wizardsandbeasts.spell.cast.ModifierStack;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.registry.WandCastModifiers;
@@ -77,12 +78,42 @@ public final class WandStatsResolver {
         return b.build();
     }
 
+    /**
+     * Folds the wand into a cast's modifiers. A negative fizzle -- a steady wand -- is added too: it offsets misfire
+     * from other sources (an unfamiliar spell, an unsettled bond) and the stack clamps the total at zero. It used to
+     * be dropped, so unicorn hair's authored -5% and an unyielding wand's -3% did nothing (2026-10-22).
+     */
     public static void applyToStack(ModifierStack stack, WandStats wandStats, Spell spell) {
         stack.multiplyDamage(wandStats.damageFor(spell), "wand");
         stack.multiplyCooldown(wandStats.cooldownFor(spell), "wand");
-        if (wandStats.fizzleChance() > 0.0f) {
+        if (wandStats.fizzleChance() != 0.0f) {
             stack.addMisfireChance(wandStats.fizzleChance(), "wand");
         }
+    }
+
+    /** Consistency moves misfire around a steady 0.7: unicorn hair (0.95) -1%, troll whisker (0.45) +1%. */
+    static final float CONSISTENCY_PIVOT = 0.7f;
+    static final float CONSISTENCY_WEIGHT = 0.04f;
+    /** Dark affinity sets Dark Arts power around a neutral 0.5: thestral (0.8) +6%, unicorn (0.05) -9%. */
+    static final float DARK_PIVOT = 0.5f;
+    static final float DARK_WEIGHT = 0.2f;
+
+    /** The misfire a core's consistency adds (negative: removes). */
+    public static float consistencyFizzle(float consistency) {
+        return (CONSISTENCY_PIVOT - consistency) * CONSISTENCY_WEIGHT;
+    }
+
+    /** The Dark Arts damage bonus a core's dark affinity gives (negative: a penalty). */
+    public static float darkArtsBonus(float darkAffinity) {
+        return (darkAffinity - DARK_PIVOT) * DARK_WEIGHT;
+    }
+
+    /**
+     * How fast Dark Arts casts corrupt a wand with this core, relative to the base rate: half the base plus the
+     * affinity, so a unicorn-hair wand (0.05) corrupts at 0.55x and a rougarou-hair wand (0.7) at 1.2x.
+     */
+    public static float corruptionRate(float darkAffinity) {
+        return 0.5f + darkAffinity;
     }
 
     // ── Cores: the dominant flavor knob ──────────────────────────────────
@@ -102,9 +133,14 @@ public final class WandStatsResolver {
     private static void applyCore(WandStats.Builder b, @Nullable Identifier coreId,
                                   HolderLookup.@Nullable Provider registries) {
         if (coreId == null || registries == null) return;
-        WandCastModifiers mods = castModifiersForCore(coreId, registries);
-        if (mods.isNeutral()) return;
-        applyModifiers(b, mods);
+        Optional<WandCoreDefinition> core = coreDefinition(coreId, registries);
+        if (core.isEmpty()) return;
+        applyModifiers(b, core.get().castModifiers());
+        // Two traits every core declares, read here so neither is decoration: how steady it is, and how readily
+        // it lends itself to the Dark Arts. Scaled by the same affinity rule as the authored modifiers.
+        b.addFizzle(WandGlobals.scaled(consistencyFizzle(core.get().consistency()), 0.0f));
+        b.addCategoryDamageBonus(SpellCategory.DARK_ARTS,
+                WandGlobals.scaled(darkArtsBonus(core.get().darkAffinity()), 0.0f));
     }
 
     /**
@@ -112,7 +148,7 @@ public final class WandStatsResolver {
      * {@link #castModifiersFor} does for wood. Warned once per id for the same reason: this runs once
      * per cast and once per beam tick.
      */
-    private static WandCastModifiers castModifiersForCore(Identifier coreId, HolderLookup.Provider registries) {
+    public static Optional<WandCoreDefinition> coreDefinition(Identifier coreId, HolderLookup.Provider registries) {
         Optional<Holder.Reference<WandCoreDefinition>> holder =
                 registries.lookup(WandDatapackRegistries.WAND_CORE_REGISTRY)
                         .flatMap(lookup -> lookup.get(
@@ -121,9 +157,9 @@ public final class WandStatsResolver {
             if (WARNED_MISSING_CORES.add(coreId)) {
                 LOGGER.warn("Wand core '{}' has no definition; it contributes nothing to casts.", coreId);
             }
-            return WandCastModifiers.NEUTRAL;
+            return Optional.empty();
         }
-        return holder.get().value().castModifiers();
+        return Optional.of(holder.get().value());
     }
 
     /** Shared by wood and core: fold one {@link WandCastModifiers} into the builder. */

@@ -8,11 +8,13 @@ import net.minecraft.util.StringRepresentable;
 import java.util.Locale;
 
 public enum WandFlexibility implements StringRepresentable {
-    UNYIELDING(0.7f),
-    RIGID(0.85f),
-    PLIANT(1.0f),
-    SUPPLE(1.1f),
-    SPRINGY(1.2f);
+    // What each step does to a cast lives in WandStatsResolver.applyFlexibility; a per-constant
+    // "scaling factor" stood here and was read by nothing (removed 2026-10-22).
+    UNYIELDING,
+    RIGID,
+    PLIANT,
+    SUPPLE,
+    SPRINGY;
 
     public static final Codec<WandFlexibility> CODEC = Codec.stringResolver(
             WandFlexibility::getSerializedName,
@@ -30,12 +32,6 @@ public enum WandFlexibility implements StringRepresentable {
     public static final StreamCodec<ByteBuf, WandFlexibility> STREAM_CODEC = StreamCodec.of(
             (buf, flexibility) -> buf.writeByte(flexibility.ordinal()),
             buf -> values()[buf.readUnsignedByte()]);
-
-    private final float scalingFactor;
-
-    WandFlexibility(float scalingFactor) {
-        this.scalingFactor = scalingFactor;
-    }
 
     @Override
     public String getSerializedName() {

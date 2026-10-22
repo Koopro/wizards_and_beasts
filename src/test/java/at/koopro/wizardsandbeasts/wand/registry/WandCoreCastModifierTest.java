@@ -60,8 +60,10 @@ class WandCoreCastModifierTest {
             Map.entry("troll_whisker", new WandCastModifiers(1.04f, 1.00f, 0.95f, 0.05f, Map.of())),
             Map.entry("rougarou_hair", new WandCastModifiers(1.00f, 1.00f, 1.00f, 0.03f,
                     Map.of(SpellCategory.DARK_ARTS, 0.10f))),
+            // Retuned 2026-10-22 (user decision): the longest-reaching core and, with dragon heartstring, the
+            // hardest-hitting, paid for in misfires and in how hard it is to bond (slow growth, one more defeat).
             Map.entry("white_river_monster_spine",
-                    new WandCastModifiers(1.00f, 1.00f, 1.08f, -0.02f, Map.of())));
+                    new WandCastModifiers(1.10f, 1.00f, 1.12f, 0.06f, Map.of())));
 
     @Test
     void everyCoreDefinition_decodes() throws IOException {

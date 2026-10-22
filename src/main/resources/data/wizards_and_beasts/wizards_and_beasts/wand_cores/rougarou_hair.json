@@ -1,15 +1,12 @@
 {
-  "_lore": "Canon (Ilvermorny writing, via summaries): Violetta Beauvais's core, with an affinity for Dark magic. Gameplay: a Dark lean and a little less control.",
+  "_lore": "Canon (Ilvermorny writing, via summaries): Violetta Beauvais's core, with an affinity for Dark magic. Gameplay: more Dark Arts power (authored +10%, plus its dark affinity), the wand corrupts faster, and it warms only to a Dark caster: its ordinary bond growth is half, while each Dark cast deepens the bond by more than an ordinary cast would.",
   "display_name": {
     "translate": "wand_core.wizards_and_beasts.rougarou_hair"
   },
   "source_key": "rougarou",
   "raw_power": 1.65,
   "consistency": 0.5,
-  "loyalty": 0.4,
   "dark_affinity": 0.7,
-  "initiative": 0.9,
-  "allegiance_transfer_resistance": 0.45,
   "cast_modifiers": {
     "damage": 1.0,
     "cooldown": 1.0,
@@ -18,6 +15,10 @@
     "category_damage_bonus": {
       "dark_arts": 0.1
     }
+  },
+  "temperament": {
+    "bond_growth": 0.5,
+    "dark_arts_bond_cost": -0.006
   },
   "appearance": {
     "glint": "#7A2E46",

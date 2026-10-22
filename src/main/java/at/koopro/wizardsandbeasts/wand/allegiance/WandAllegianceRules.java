@@ -109,7 +109,9 @@ public final class WandAllegianceRules {
      * </ul>
      */
     public static float bondAfterSuccessfulCast(float bond, WandTemperament t, CastCircumstances c) {
-        if (c.darkArts() && t.darkArtsBondCost() > 0.0f) {
+        if (c.darkArts() && t.darkArtsBondCost() != 0.0f) {
+            // Positive: a wand that resents the Dark Arts loses bond. Negative: one drawn to them (rougarou hair)
+            // deepens by that much instead of its ordinary growth -- it warms to a Dark caster, not a light one.
             return clamp01(bond - t.darkArtsBondCost());
         }
         float growth = BASE_BOND_GROWTH * t.bondGrowth() * WandGlobals.current().bondGrowth();

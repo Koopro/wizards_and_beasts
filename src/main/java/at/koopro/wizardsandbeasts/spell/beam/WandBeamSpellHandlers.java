@@ -306,7 +306,8 @@ final class WandBeamSpellHandlers {
         // holds ONE victim (crucioHoldTicks resets when the beam moves to a new target).
         if (s.crucioHoldTicks >= 30 && s.crucioHoldTicks % 20 == 0) {
             float intent = crucioIntentMultiplier(caster, spell);
-            float rampDamage = Math.min(2.5f, 0.4f + (s.crucioHoldTicks / 80f)) * intent;
+            float rampDamage = Math.min(2.5f, 0.4f + (s.crucioHoldTicks / 80f)) * intent
+                    * WandBeamChannelLogic.wandDamage(caster, spell, (ServerLevel) caster.level());
             // Same attribution fix as the Aguamenti jet: the curse belongs to whoever is holding it,
             // which is what lets a Shield Charm stand in front of it. The Cruciatus *pain* rides an
             // effect component and is deliberately untouched — a ward never stopped that.

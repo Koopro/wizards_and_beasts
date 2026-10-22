@@ -98,24 +98,24 @@ class WandCastLinesTest {
         assertEquals(List.of(
                 "wandcraft.tooltip.cast.damage +20%",
                 "wandcraft.tooltip.cast.cooldown -15%",
-                "wandcraft.tooltip.cast.range +15%"), lines,
-                "elder authors fizzle -0.03, but WandStats clamps fizzleChance to [0,1], so its net "
-                        + "misfire contribution really is zero and must not be claimed as a benefit");
+                "wandcraft.tooltip.cast.range +15%",
+                "wandcraft.tooltip.cast.misfire -3%"), lines,
+                "elder authors fizzle -0.03, and since 2026-10-22 a steady wand's negative share reaches the cast");
     }
 
     /**
-     * A net-negative misfire contribution is not representable, and must not be shown as one.
+     * A net-negative misfire contribution is a benefit, shown as one.
      *
-     * <p>{@code WandStats}'s compact constructor clamps {@code fizzleChance} to [0, 1] — there is no
-     * such thing as less than no chance to misfire — so a wand whose fizzle sums below zero carries
-     * exactly zero. The cast pipeline reads the same clamped value, so omitting the row keeps the
-     * tooltip and the cast in agreement. A negative contribution still does real work inside the
-     * builder, by cancelling a positive one from the other pillar.
+     * <p>Until 2026-10-22 {@code WandStats} clamped {@code fizzleChance} to [0, 1] and the cast dropped a
+     * negative share, so a steady wand's -6% did nothing and the row was rightly hidden. The share is now
+     * signed and the cast offsets misfire from other sources with it (the stack clamps the total at 0), so the
+     * tooltip says what the cast does: fewer misfires, in green.
      */
     @Test
-    void aNetNegativeMisfireContributionShowsNoRow() {
-        assertEquals(List.of(), text(stats(1.0f, 1.0f, 1.0f, -0.06f, Map.of())));
-        // ...but it cancels a positive one, and the remainder is shown.
+    void aNetNegativeMisfireContributionShowsAsABenefit() {
+        assertEquals(List.of("wandcraft.tooltip.cast.misfire -6%"), text(stats(1.0f, 1.0f, 1.0f, -0.06f, Map.of())));
+        Component steady = WandCastLines.build(stats(1.0f, 1.0f, 1.0f, -0.06f, Map.of())).get(0);
+        assertEquals(TextColor.fromLegacyFormat(ChatFormatting.GREEN), colourOf(steady));
         assertEquals(List.of("wandcraft.tooltip.cast.misfire +2%"),
                 text(stats(1.0f, 1.0f, 1.0f, 0.02f, Map.of())));
     }

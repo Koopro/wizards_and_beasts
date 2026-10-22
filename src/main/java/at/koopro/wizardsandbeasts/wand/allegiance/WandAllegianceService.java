@@ -203,7 +203,13 @@ public final class WandAllegianceService {
      *                  way the master has used the wand — neglect is reset and a challenger's wins answered.
      */
     public static void onSuccessfulCast(ServerPlayer caster, ItemStack wand, @Nullable Spell spell, boolean practised) {
-        if (!Config.enableWandAllegiance || !(wand.getItem() instanceof WandItem)) {
+        if (!(wand.getItem() instanceof WandItem)) {
+            return;
+        }
+        // Every landed cast counts, whoever cast it and whatever the bond rules: the wand's own record of use, which
+        // Ollivander's evaluation and the character sheet show. Nothing wrote it before, so both always said 0.
+        wand.set(WandComponents.WAND_CAST_COUNT.get(), WandComponents.getCastCount(wand) + 1);
+        if (!Config.enableWandAllegiance) {
             return;
         }
         Optional<UUID> master = WandComponents.getMaster(wand);

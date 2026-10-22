@@ -6,10 +6,7 @@
   "source_key": "thestral",
   "raw_power": 1.95,
   "consistency": 0.7,
-  "loyalty": 0.45,
   "dark_affinity": 0.8,
-  "initiative": 0.85,
-  "allegiance_transfer_resistance": 0.4,
   "cast_modifiers": {
     "damage": 1.05,
     "cooldown": 1.0,

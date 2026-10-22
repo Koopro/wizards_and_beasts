@@ -210,8 +210,15 @@ public final class WandAllegianceTests {
                     float ownerPower = WandAllegianceService.powerMultiplier(owner, wand, registries);
                     check(helper, strangerPower < 1.0f && strangerPower < ownerPower,
                             () -> "a stranger drew " + strangerPower + "x from the wand, its master " + ownerPower + "x");
-                    check(helper, ItemStack.isSameItemSameComponents(before, wand),
+                    // Everything but the wand's record of use: a stranger's landed cast is still a cast (2026-10-22).
+                    ItemStack beforeBond = before.copy();
+                    ItemStack afterBond = wand.copy();
+                    beforeBond.remove(WandComponents.WAND_CAST_COUNT.get());
+                    afterBond.remove(WandComponents.WAND_CAST_COUNT.get());
+                    check(helper, ItemStack.isSameItemSameComponents(beforeBond, afterBond),
                             () -> "casting with another's wand changed its allegiance: " + describe(before) + " -> " + describe(wand));
+                    check(helper, WandComponents.getCastCount(wand) == WandComponents.getCastCount(before) + 1,
+                            () -> "the stranger's landed cast was not counted on the wand");
                     checkNoLegacyState(helper, stranger, wand);
                 })
                 .thenExecute(() -> {

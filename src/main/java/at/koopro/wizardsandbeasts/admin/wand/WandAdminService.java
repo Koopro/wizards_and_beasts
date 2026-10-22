@@ -149,10 +149,7 @@ public final class WandAdminService {
         facts.add(text("source", d.sourceKey()));
         facts.add(text("raw_power", format(d.rawPower())));
         facts.add(text("consistency", format(d.consistency())));
-        facts.add(text("loyalty", format(d.loyalty())));
         facts.add(text("dark_affinity", format(d.darkAffinity())));
-        facts.add(text("initiative", format(d.initiative())));
-        facts.add(text("transfer_resistance", format(d.allegianceTransferResistance())));
         castFacts(facts, d.castModifiers());
         temperamentFacts(facts, d.temperament());
         Component name = d.displayName();

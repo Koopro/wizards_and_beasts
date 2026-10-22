@@ -6,10 +6,7 @@
   "source_key": "veela",
   "raw_power": 1.5,
   "consistency": 0.55,
-  "loyalty": 0.55,
   "dark_affinity": 0.4,
-  "initiative": 1.0,
-  "allegiance_transfer_resistance": 0.6,
   "cast_modifiers": {
     "damage": 1.05,
     "cooldown": 1.0,

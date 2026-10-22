@@ -43,7 +43,7 @@ public final class SpellCastService {
 
     /**
      * Everything a cast knows about its caster before the modifier pipeline runs: the wand in hand and
-     * its stats, the wand's allegiance and compatibility, and the caster's proficiency with this spell.
+     * its stats, the wand's bond with this caster (applied to the modifiers), and the caster's proficiency.
      *
      * <p>Shared with {@code /wandb magic spell cast}, which skips the gates above a cast but must
      * still hit exactly as hard as one.
@@ -58,8 +58,7 @@ public final class SpellCastService {
                 spell instanceof JsonSpell jsonSpell ? jsonSpell.definition() : null,
                 wandStats,
                 spell.getProficiency(player));
-        castContext = castContext.withAllegiance(WandCastingAllegianceSystem.resolve(wandStack));
-        castContext = castContext.withCompatibility(WandCastingAllegianceSystem.applyLayer(castContext, serverLevel));
+        WandCastingAllegianceSystem.applyLayer(castContext, serverLevel);
         return castContext.withScalingProfile(
                 ProficiencyScaler.getProfileForPlayer(player, ProficiencyScaler.spellKey(spell.getId())));
     }

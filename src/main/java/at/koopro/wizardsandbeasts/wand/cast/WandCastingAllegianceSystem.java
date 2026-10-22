@@ -25,22 +25,17 @@ public final class WandCastingAllegianceSystem {
 
     private WandCastingAllegianceSystem() {}
 
-    /** The legacy record, for the one place {@link CastContext} still carries it. Nothing decides on it. */
-    public static WandAllegiance resolve(ItemStack wandStack) {
-        WandAllegiance value = wandStack.get(ModDataComponents.WAND_ALLEGIANCE.get());
-        return value == null ? WandAllegiance.unbound() : value;
-    }
-
     /**
      * Applies the relationship to the cast's modifier stack.
      *
-     * @return the wood/heritage compatibility score, which the cast context still records
+     * <p>It used to also return a wood/heritage "compatibility" score that the cast context stored and nothing
+     * ever read; bonding is decided by resonance and the bond itself, so the score is gone (2026-10-22).
      */
-    public static Compatibility.Score applyLayer(CastContext ctx, ServerLevel level) {
+    public static void applyLayer(CastContext ctx, ServerLevel level) {
         ItemStack wand = ctx.wandStack();
         // No wand, no relationship: an empty-handed admin cast is not "another wizard's wand".
         if (!Config.enableWandAllegiance || !(wand.getItem() instanceof at.koopro.wizardsandbeasts.item.wand.WandItem)) {
-            return new Compatibility.Score(0.5f, 0.5f);
+            return;
         }
         WandBondState state = WandAllegianceService.castingState(ctx.caster(), wand);
         String source = "wand_bond_" + state.name().toLowerCase(Locale.ROOT);
@@ -49,7 +44,5 @@ public final class WandCastingAllegianceSystem {
         ctx.modifiers().multiplyCooldown(
                 WandAllegianceService.cooldownMultiplier(ctx.caster(), wand, level.registryAccess()), source);
 
-        PlayerHeritageData typeData = ctx.caster().getData(ModAttachments.HERITAGE_DATA.get());
-        return Compatibility.score(wand, typeData, resolve(wand));
     }
 }

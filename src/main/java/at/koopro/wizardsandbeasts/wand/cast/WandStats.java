@@ -20,8 +20,8 @@ import java.util.Map;
  *       and proficiency math.</li>
  *   <li>{@code categoryDamageBonus} is <em>additive</em>: a value of {@code 0.15}
  *       means +15% damage when the cast spell belongs to that category.</li>
- *   <li>{@code fizzleChance} is a probability in {@code [0, 1]} that the cast
- *       fails outright; resolved per-cast in {@code SpellExecutor}.</li>
+ *   <li>{@code fizzleChance} is the wand's share of the cast's misfire chance, in {@code [-1, 1]}: negative
+ *       for a steady wand, which offsets misfire from other sources; resolved per-cast in {@code SpellExecutor}.</li>
  * </ul>
  */
 public record WandStats(
@@ -43,7 +43,8 @@ public record WandStats(
         }
         categoryDamageBonus = Collections.unmodifiableMap(copy);
 
-        if (fizzleChance < 0.0f) fizzleChance = 0.0f;
+        // Negative is a steady wand: it offsets misfire from elsewhere (the cast's stack clamps the total at 0).
+        if (fizzleChance < -1.0f) fizzleChance = -1.0f;
         if (fizzleChance > 1.0f) fizzleChance = 1.0f;
     }
 

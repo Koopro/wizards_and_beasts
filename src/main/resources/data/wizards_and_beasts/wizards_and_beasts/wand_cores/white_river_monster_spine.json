@@ -1,20 +1,21 @@
 {
-  "_lore": "Canon (Ilvermorny writing, via summaries): Thiago Quintana's sleek, lengthy wands producing spells of force and elegance. Gameplay: reach and clean casting.",
+  "_lore": "Canon (Ilvermorny writing): Thiago Quintana's core, producing wands of powerful and elegant spellwork; he alone knew how to take the spine. Gameplay: the longest-reaching core and, with dragon heartstring, the hardest-hitting (the 10% cap every wood and core keeps), but the least steady, and the hardest to bond: slow bond growth and one more defeat before it changes hands.",
   "display_name": {
     "translate": "wand_core.wizards_and_beasts.white_river_monster_spine"
   },
   "source_key": "white_river_monster",
   "raw_power": 1.55,
-  "consistency": 0.72,
-  "loyalty": 0.6,
+  "consistency": 0.5,
   "dark_affinity": 0.3,
-  "initiative": 0.6,
-  "allegiance_transfer_resistance": 0.65,
   "cast_modifiers": {
-    "damage": 1.0,
+    "damage": 1.1,
     "cooldown": 1.0,
-    "range": 1.08,
-    "fizzle": -0.02
+    "range": 1.12,
+    "fizzle": 0.06
+  },
+  "temperament": {
+    "bond_growth": 0.6,
+    "extra_wins": 1
   },
   "appearance": {
     "glint": "#6FD8C8",

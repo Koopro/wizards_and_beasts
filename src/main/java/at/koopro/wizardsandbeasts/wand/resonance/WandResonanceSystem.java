@@ -62,8 +62,9 @@ public final class WandResonanceSystem {
     }
 
     public static float computeResonance(Player player, ItemStack wandStack, RegistryAccess registryAccess) {
-        Identifier woodKey = WandComponents.getWood(wandStack);
-        Identifier coreKey = WandComponents.getCore(wandStack);
+        // Through the resolver, as a cast reads them: an older wand carrying only the legacy components scored 0.
+        Identifier woodKey = at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver.resolveWoodId(wandStack);
+        Identifier coreKey = at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver.resolveCoreId(wandStack);
         WandFlexibility flex = WandComponents.getFlexibility(wandStack);
         if (woodKey == null || coreKey == null || flex == null) {
             return 0.0f;

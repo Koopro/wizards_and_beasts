@@ -18,7 +18,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
  * @param bondGrowth               multiplier on the bond a successful cast adds
  * @param extraWins                added to the baseline number of defeats that win the wand from its master
  * @param transferBondBonus        added to the bond a wand holds for a wizard who has just won it
- * @param darkArtsBondCost         bond lost when the master casts Dark Arts with it; that cast adds none
+ * @param darkArtsBondCost         bond lost when the master casts Dark Arts with it; that cast adds none. Negative:
+ *                                 a Dark cast <em>adds</em> that much bond instead of the ordinary growth
  * @param bondNeedsDanger          the bond only deepens through casts made in danger
  * @param backfiresInForeignHands  spells backfire for anyone who is not its master
  * @param foreignHandPower         multiplier on the power it lends a wizard who is not its master

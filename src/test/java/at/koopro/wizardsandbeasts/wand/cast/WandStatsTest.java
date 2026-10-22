@@ -30,13 +30,20 @@ class WandStatsTest {
         assertTrue(neutral.categoryDamageBonus().isEmpty());
     }
 
+    /**
+     * The wand's share of misfire is signed since 2026-10-22: a steady wand's negative share offsets misfire from
+     * other sources, and the cast's {@code ModifierStack} clamps the total at zero. Only the share itself is bounded.
+     */
     @Test
-    void fizzleChance_isClampedTo0to1() {
+    void fizzleChance_isClampedToMinus1to1() {
         WandStats high = new WandStats(1.0f, 1.0f, 1.0f, 5.0f, Map.of());
         assertEquals(1.0f, high.fizzleChance(), "fizzle > 1 must clamp to 1");
 
-        WandStats low = new WandStats(1.0f, 1.0f, 1.0f, -0.5f, Map.of());
-        assertEquals(0.0f, low.fizzleChance(), "fizzle < 0 must clamp to 0");
+        WandStats steady = new WandStats(1.0f, 1.0f, 1.0f, -0.5f, Map.of());
+        assertEquals(-0.5f, steady.fizzleChance(), "a steady wand keeps its negative share");
+
+        WandStats low = new WandStats(1.0f, 1.0f, 1.0f, -5.0f, Map.of());
+        assertEquals(-1.0f, low.fizzleChance(), "fizzle < -1 must clamp to -1");
     }
 
     @Test

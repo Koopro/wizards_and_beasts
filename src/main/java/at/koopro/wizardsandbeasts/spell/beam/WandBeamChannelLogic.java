@@ -332,7 +332,25 @@ public final class WandBeamChannelLogic {
         SpellEffectContext ctx = target != null
                 ? SpellEffectContext.ofTarget(player, target, level)
                 : SpellEffectContext.ofSelf(player, level);
-        return ctx.withScaling(profile.damageMult(), profile.durationMult(), profile.controlMult());
+        return ctx.withScaling(profile.damageMult() * wandDamage(player, spell, level), profile.durationMult(),
+                profile.controlMult());
+    }
+
+    /**
+     * What the wand in hand does to a held spell's damage: its wood, core, length and flexibility, the bond with
+     * this caster, and its integrity and corruption -- the factors a released cast takes from {@code SpellExecutor}.
+     * Beams took only proficiency, so the strongest wand and a cracked stranger's wand cursed alike (2026-10-22).
+     */
+    public static float wandDamage(ServerPlayer player, Spell spell, ServerLevel level) {
+        net.minecraft.world.item.ItemStack wand = at.koopro.wizardsandbeasts.util.WandHelper.getWandStack(player);
+        if (!(wand.getItem() instanceof at.koopro.wizardsandbeasts.item.wand.WandItem)) {
+            return 1.0f;
+        }
+        var registries = level.registryAccess();
+        return at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver.resolve(wand, registries).damageFor(spell)
+                * at.koopro.wizardsandbeasts.wand.allegiance.WandAllegianceService.powerMultiplier(player, wand, registries)
+                * at.koopro.wizardsandbeasts.wand.corruption.WandCorruptionSystem
+                        .getEffectivePowerMultiplier(wand, spell.getCategory(), registries);
     }
 
 

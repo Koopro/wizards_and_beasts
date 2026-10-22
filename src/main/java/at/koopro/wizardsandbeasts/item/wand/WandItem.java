@@ -243,8 +243,9 @@ public class WandItem extends GeoItemBase {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltipAdder, TooltipFlag flag) {
-        Identifier wood = WandComponents.getWood(stack);
-        Identifier core = WandComponents.getCore(stack);
+        // Through the resolver, so an older wand carrying only the legacy components names what it casts with.
+        Identifier wood = at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver.resolveWoodId(stack);
+        Identifier core = at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver.resolveCoreId(stack);
         WandFlexibility flexibility = WandComponents.getFlexibility(stack);
 
         tooltipAdder.accept(Component.translatable("wandcraft.tooltip.wood",
