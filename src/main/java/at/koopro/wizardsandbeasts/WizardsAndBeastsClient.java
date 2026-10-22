@@ -142,6 +142,7 @@ public class WizardsAndBeastsClient {
 
     private static void registerMenus(RegisterMenuScreensEvent event) {
         event.register(ModMenuTypes.WANDMAKERS_BENCH.get(), WandmakersBenchScreen::new);
+        event.register(ModMenuTypes.WAND_REFINE.get(), at.koopro.wizardsandbeasts.client.wand.gui.WandRefineScreen::new);
         event.register(ModMenuTypes.OLLIVANDER_TRIAL.get(), OllivanderTrialScreen::new);
         event.register(ModMenuTypes.POCKET_CONFIGURATOR.get(), PocketConfiguratorScreen::new);
         event.register(ModMenuTypes.NIFFLER_POUCH.get(), NifflerPouchScreen::new);

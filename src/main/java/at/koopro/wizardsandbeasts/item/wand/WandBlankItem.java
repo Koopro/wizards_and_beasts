@@ -195,6 +195,12 @@ public class WandBlankItem extends Item {
      * that now <em>looks</em> like dark oak is blackthorn) — deliberately left alone here, since
      * retuning them changes what existing worlds produce.
      */
+    /** The wand wood a log item would shape a blank into, or null for anything else (refinement uses it too). */
+    public static @Nullable Identifier wandWoodOf(net.minecraft.world.item.ItemStack stack) {
+        return stack.getItem() instanceof net.minecraft.world.item.BlockItem block
+                ? wandWoodFromLogBlock(block.getBlock().defaultBlockState()) : null;
+    }
+
     private static @Nullable Identifier wandWoodFromLogBlock(BlockState state) {
         for (WoodSet set : ModBlocks.ALL_WOOD_SETS) {
             if (state.is(set.log().get()) || state.is(set.strippedLog().get())

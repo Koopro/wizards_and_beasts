@@ -44,6 +44,31 @@ public class WandmakersBenchBlock extends BaseEntityBlock implements EntityBlock
         return CODEC;
     }
 
+    /**
+     * A finished wand in hand opens the bench's second role, refining that wand; anything else is the bench as
+     * ever. The click is the bench's either way when a wand is held, so the wand does not also start a cast.
+     */
+    @Override
+    protected InteractionResult useItemOn(net.minecraft.world.item.ItemStack stack, BlockState state, Level level,
+                                          BlockPos pos, Player player, net.minecraft.world.InteractionHand hand,
+                                          BlockHitResult hitResult) {
+        if (!at.koopro.wizardsandbeasts.wand.refine.WandRefineMenu.isFinishedWand(stack)) {
+            return InteractionResult.TRY_WITH_EMPTY_HAND;
+        }
+        if (!WandModuleHooks.isWandsEnabled()) {
+            return InteractionResult.FAIL;
+        }
+        if (!(level.getBlockEntity(pos) instanceof WandmakersBenchBlockEntity bench)) {
+            return InteractionResult.PASS;
+        }
+        if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
+            serverPlayer.openMenu(new net.minecraft.world.SimpleMenuProvider(
+                    (id, inventory, p) -> new at.koopro.wizardsandbeasts.wand.refine.WandRefineMenu(id, inventory, bench),
+                    Component.translatable("gui.wizards_and_beasts.wand_refine")), buf -> buf.writeBlockPos(pos));
+        }
+        return InteractionResult.SUCCESS;
+    }
+
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if (!WandModuleHooks.isWandsEnabled()) {

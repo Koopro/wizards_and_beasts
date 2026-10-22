@@ -19,6 +19,11 @@ public final class ModMenuTypes {
     public static final DeferredHolder<MenuType<?>, MenuType<WandmakersBenchMenu>> WANDMAKERS_BENCH =
             MENUS.register("wandmakers_bench", () -> IMenuTypeExtension.create(WandmakersBenchMenu::fromNetwork));
 
+    /** The bench's second role: refining a finished wand (polish, re-fit, re-handle). */
+    public static final DeferredHolder<MenuType<?>, MenuType<at.koopro.wizardsandbeasts.wand.refine.WandRefineMenu>> WAND_REFINE =
+            MENUS.register("wand_refine", () -> IMenuTypeExtension.create(
+                    at.koopro.wizardsandbeasts.wand.refine.WandRefineMenu::fromNetwork));
+
     public static final DeferredHolder<MenuType<?>, MenuType<OllivanderTrialMenu>> OLLIVANDER_TRIAL =
             MENUS.register("ollivander_trial", () -> IMenuTypeExtension.create(OllivanderTrialMenu::fromNetwork));
 

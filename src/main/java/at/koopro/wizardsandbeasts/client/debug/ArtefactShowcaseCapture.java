@@ -70,7 +70,9 @@ public final class ArtefactShowcaseCapture {
             new Step("sorting_hat_worn", 10, p -> {}),
             new Step("", 30, ArtefactShowcaseCapture::presentTheSword),
             new Step("", 10, ArtefactShowcaseCapture::drawTheSword),
-            new Step("sword_presented", 10, p -> {}));
+            new Step("sword_presented", 10, p -> {}),
+            new Step("", 30, ArtefactShowcaseCapture::openRefinement),
+            new Step("wand_refine", 10, p -> {}));
 
 
     /** Where the stage was built: the player's feet when it started. */
@@ -112,6 +114,9 @@ public final class ArtefactShowcaseCapture {
                 .setValue(VanishingCabinetBlock.FACING, Direction.SOUTH);
         level.setBlock(erised(), mirror.setValue(VanishingCabinetBlock.HALF, DoubleBlockHalf.LOWER), 3);
         level.setBlock(erised().above(), mirror.setValue(VanishingCabinetBlock.HALF, DoubleBlockHalf.UPPER), 3);
+        level.setBlock(benchAt(), at.koopro.wizardsandbeasts.registry.ModBlocks.WANDMAKERS_BENCH.get().defaultBlockState(), 3);
+        level.setBlock(benchAt().offset(1, 0, 0), at.koopro.wizardsandbeasts.registry.ModBlocks.SPELL_TEACHER.get().defaultBlockState(), 3);
+        level.setBlock(benchAt().offset(-1, 0, 0), at.koopro.wizardsandbeasts.registry.ModBlocks.PEWTER_CAULDRON.get().defaultBlockState(), 3);
         p.setData(at.koopro.wizardsandbeasts.registry.ModAttachments.ERISED_HISTORY.get(),
                 at.koopro.wizardsandbeasts.artefact.erised.ErisedHistory.EMPTY);
         look(p, 0.5, 0.5, 180f, 8f);
@@ -177,6 +182,36 @@ public final class ArtefactShowcaseCapture {
                 return;
             }
         }
+    }
+
+    private static BlockPos benchAt() {
+        return origin.offset(4, 0, -3);
+    }
+
+    /** A furnished bench beside the stage, refining a worn holly wand with honeycomb: the bench's second role. */
+    private static void openRefinement(ServerPlayer p) {
+        ServerLevel level = p.level();
+        // The bench was set in stage(): opening its menu in the tick it is placed races its block entity to the
+        // client, which then cannot build the menu and disconnects.
+        BlockPos benchAt = benchAt();
+        if (!(level.getBlockEntity(benchAt) instanceof at.koopro.wizardsandbeasts.wand.bench.WandmakersBenchBlockEntity bench)) {
+            return;
+        }
+        p.openMenu(new net.minecraft.world.SimpleMenuProvider(
+                (id, inventory, player) -> new at.koopro.wizardsandbeasts.wand.refine.WandRefineMenu(id, inventory, bench),
+                net.minecraft.network.chat.Component.translatable("gui.wizards_and_beasts.wand_refine")),
+                buf -> buf.writeBlockPos(benchAt));
+        if (p.containerMenu instanceof at.koopro.wizardsandbeasts.wand.refine.WandRefineMenu menu) {
+            net.minecraft.world.item.ItemStack wand = at.koopro.wizardsandbeasts.item.wand.WandItem.createWand(
+                    at.koopro.wizardsandbeasts.wand.stat.WandWood.HOLLY, at.koopro.wizardsandbeasts.wand.stat.WandCore.PHOENIX_FEATHER,
+                    at.koopro.wizardsandbeasts.wand.stat.WandLength.MEDIUM, at.koopro.wizardsandbeasts.wand.stat.WandFlexibility.PLIANT);
+            wand.set(at.koopro.wizardsandbeasts.wand.WandComponents.WAND_INTEGRITY.get(), 0.6f);
+            menu.slots.get(0).set(wand);
+            menu.slots.get(1).set(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.HONEYCOMB, 3));
+            menu.chooseAction(at.koopro.wizardsandbeasts.wand.refine.WandRefinement.Action.POLISH.ordinal());
+        }
+        Minecraft.getInstance().execute(() ->
+                Minecraft.getInstance().options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON));
     }
 
     /** Uses up the day's gazes, so the next look shows only a reflection. */
