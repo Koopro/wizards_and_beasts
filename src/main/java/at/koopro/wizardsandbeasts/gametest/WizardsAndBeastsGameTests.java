@@ -85,6 +85,7 @@ public final class WizardsAndBeastsGameTests {
         ArtefactTests.contribute(registrar);
         CabinetTests.contribute(registrar);
         ErisedTests.contribute(registrar);
+        GryffindorTests.contribute(registrar);
         AuthorityTests.contribute(registrar);
         CanonRulingTests.contribute(registrar);
         CauldronBrewingTests.contribute(registrar);

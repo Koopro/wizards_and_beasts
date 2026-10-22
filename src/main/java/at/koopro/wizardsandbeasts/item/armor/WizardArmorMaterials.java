@@ -67,6 +67,17 @@ public final class WizardArmorMaterials {
             ItemTags.REPAIRS_IRON_ARMOR,
             asset("death_eater_robe"));
 
+    /** The Sorting Hat: old felt, as little cover as the wizard's hat. */
+    public static final ArmorMaterial SORTING_HAT = new ArmorMaterial(
+            2,
+            helmetOnly(1),
+            25,
+            SoundEvents.ARMOR_EQUIP_LEATHER,
+            0.0F,
+            0.0F,
+            ItemTags.REPAIRS_LEATHER_ARMOR,
+            asset("sorting_hat"));
+
     /** Pointed felt hat. Worn for the look, not the cover — one point of armour and little else. */
     public static final ArmorMaterial WIZARD_HAT = new ArmorMaterial(
             2,

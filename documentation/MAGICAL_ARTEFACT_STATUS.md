@@ -46,6 +46,8 @@ be had in creative mode or through commands.
 | Omnioculars | Replay and slow motion of a match | A vanilla spyglass | C (§5.4) | Recipe |
 | **Vanishing Cabinet** | Two places joined: what enters one leaves the other | **C.** A bare `Item` whose tooltip promised a function | **A** (Update 2026-10-22) | Recipe; Knockturn dealer |
 | **Mirror of Erised** | Shows the gazer's deepest desire -- and, now and then, the way toward something they have not yet found | **C.** An animated item whose tooltip was its inscription | **A** (Update 2026-10-22, Erised) | Knockturn dealer (inner circle); hidden caches |
+| **Sword of Gryffindor** | Presented by the Sorting Hat to one in need; once it has killed a basilisk, it ends Horcruxes | **C.** A bare `Item` | **A** (Update 2026-10-22, Sword) | Sorting Hat, in need |
+| **Sorting Hat** | Gryffindor's hat: worn, it gives up the sword | **C.** A bare `Item` | **A** (same) | Hidden caches |
 | Peruvian Instant Darkness Powder, Decoy Detonator | Darkness cloud; a distraction | Thrown entities (`WizardingThrownKind`) | A | Recipe |
 
 ## 1. Time-Turner: the wearer goes back, the world does not
@@ -218,3 +220,33 @@ unchanged and keeps its animated model in the hand.
     round trip), `ErisedLayoutTest`, `SpellSitesTest`.
   - Game tests: `ErisedTests` (each gazer sees their own; the pull, then the reflection, then a new day; every clue
     candidate is reachable, with one clue per day).
+
+## Update 2026-10-22 — Sword of Gryffindor and the Sorting Hat
+
+`artefact/gryffindor/`. Both item ids are unchanged.
+
+- **The Sorting Hat** is a worn head piece, in the head slot or the Curios head slot. It is drawn by the armour
+  pipeline as a patched, slumped brown hat (`tools/armor_model.py`, set `sorting_hat`). Hidden wizarding caches
+  hold one in thirty.
+- **Presentation.** The Hat gives up the sword when all of these hold:
+  - its wearer is hurt to 30% health or less;
+  - the hurt comes from a foe in `wizards_and_beasts:sword_of_gryffindor_foes` (basilisk, Dementor, Obscurus,
+    acromantula, Wither, Warden);
+  - the wearer struck that foe within the last 10 seconds (standing their ground).
+
+  The sword falls out of the Hat at the wearer's head, and a line says so. The mod has no house system, so
+  "a true Gryffindor" is read from what the wearer is doing.
+- **One per world, and it returns.** `GryffindorSword` (overworld saved data) records the one sword's id, which is
+  also stored on the stack. While that sword exists, the Hat presents no other. When that stack is destroyed as a
+  dropped item (void, explosion, cactus, despawn; it is fire-proof), the world forgets it and the Hat can present
+  it again. A copy made in creative mode or by a command is not that sword. A sword lost somewhere the record
+  cannot see (for example, cleared by a command) keeps the record set; `GryffindorSword.forget()` is the reset.
+- **The weapon.** Netherite stats, unbreakable (goblin silver), fire-proof, epic.
+- **Venom.** Killing a basilisk with it imbues it for good. An imbued sword carries basilisk venom into what it
+  strikes, as a fang does. With a Horcrux in the other hand, use ends the Horcrux and keeps the sword. That needs
+  the Dark Arts module, as the fang does.
+- **Tests.**
+  - Unit: `SwordPresentationTest` (every condition of the rule; the record forgets only its own sword; codec).
+  - Game tests: `GryffindorTests`. One runs alone, because the sword is one per world: no sword without the Hat,
+    one with it, none while it exists, and one again once it is destroyed. The other covers imbuing (a basilisk
+    imbues, a zombie does not) and the imbued sword ending a Horcrux without being spent.

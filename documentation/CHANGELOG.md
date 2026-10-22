@@ -4,6 +4,16 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Sword of Gryffindor and the Sorting Hat (2026-10-22)
+
+- **Added:** the Sorting Hat can be worn, and hidden caches sometimes hold it. Wear it, fight a basilisk,
+  Dementor, Obscurus, acromantula, Wither or Warden, and stand your ground: when it brings you to 30% health or
+  less, the Sword of Gryffindor falls out of the Hat. There is one sword per world. If it is destroyed, the Hat
+  can present it again.
+- **Added:** the Sword of Gryffindor is a netherite-class blade that never wears. Kill a basilisk with it and it
+  takes in the venom. From then on its blows carry venom, and with a Horcrux in your other hand it destroys the
+  Horcrux without being used up.
+
 ### Mirror of Erised (2026-10-22)
 
 - **Added:** the Mirror of Erised is a placeable two-tall mirror. Look into it to see what you most want: the

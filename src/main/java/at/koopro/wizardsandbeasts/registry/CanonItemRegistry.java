@@ -33,8 +33,15 @@ public final class CanonItemRegistry {
     // --- Deathly Hallows & legendary artefacts -----------------------------
     public static final DeferredItem<Item> TALES_OF_BEEDLE_THE_BARD =
             ModItems.ITEMS.registerItem("tales_of_beedle_the_bard", Item::new);
-    public static final DeferredItem<Item> SWORD_OF_GRYFFINDOR =
-            ModItems.ITEMS.registerItem("sword_of_gryffindor", Item::new);
+    /** Netherite-class, never wears (goblin silver); only ever presented by the Sorting Hat. Same id as before. */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.artefact.gryffindor.SwordOfGryffindorItem> SWORD_OF_GRYFFINDOR =
+            ModItems.ITEMS.registerItem("sword_of_gryffindor",
+                    props -> new at.koopro.wizardsandbeasts.artefact.gryffindor.SwordOfGryffindorItem(props
+                            .sword(net.minecraft.world.item.ToolMaterial.NETHERITE, 3.0F, -2.4F)
+                            .fireResistant()
+                            .rarity(net.minecraft.world.item.Rarity.EPIC)
+                            .component(net.minecraft.core.component.DataComponents.UNBREAKABLE,
+                                    net.minecraft.util.Unit.INSTANCE)));
     /** Places the Mirror of Erised block; same id as the plain item it was, so carried mirrors carry over. */
     public static final DeferredItem<at.koopro.wizardsandbeasts.artefact.erised.MirrorOfErisedItem> MIRROR_OF_ERISED =
             ModItems.ITEMS.registerItem("mirror_of_erised", props -> new at.koopro.wizardsandbeasts.artefact.erised
@@ -49,8 +56,10 @@ public final class CanonItemRegistry {
             ModItems.ITEMS.registerItem("golden_egg", Item::new);
 
     // --- Founders' artefacts -----------------------------------------------
-    public static final DeferredItem<Item> SORTING_HAT =
-            ModItems.ITEMS.registerItem("sorting_hat", Item::new);
+    /** Worn on the head; the Sword of Gryffindor comes out of it. Same id as when it was a plain item. */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.artefact.gryffindor.SortingHatItem> SORTING_HAT =
+            ModItems.ITEMS.registerItem("sorting_hat", props ->
+                    new at.koopro.wizardsandbeasts.artefact.gryffindor.SortingHatItem(props.stacksTo(1)));
 
     // --- Dark artefacts & cursed objects -----------------------------------
     public static final DeferredItem<at.koopro.wizardsandbeasts.item.darkartefact.BasiliskFangItem> BASILISK_FANG =

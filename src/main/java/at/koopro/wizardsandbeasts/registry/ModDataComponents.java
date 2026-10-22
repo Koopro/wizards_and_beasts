@@ -310,6 +310,22 @@ public class ModDataComponents {
 
     // ── Horcrux Vessels (shared) ─────────────────────────────────
 
+    /** Which Sword of Gryffindor this is: the id the world's {@code GryffindorSword} record holds for the one sword. */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<java.util.UUID>> GRYFFINDOR_SWORD_ID =
+            DATA_COMPONENTS.register("gryffindor_sword_id", () ->
+                    DataComponentType.<java.util.UUID>builder()
+                            .persistent(net.minecraft.core.UUIDUtil.CODEC)
+                            .networkSynchronized(net.minecraft.core.UUIDUtil.STREAM_CODEC)
+                            .build());
+
+    /** The Sword of Gryffindor has taken in basilisk venom (by killing a basilisk) and can end a Horcrux. */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> VENOM_IMBUED =
+            DATA_COMPONENTS.register("venom_imbued", () ->
+                    DataComponentType.<Boolean>builder()
+                            .persistent(com.mojang.serialization.Codec.BOOL)
+                            .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.BOOL)
+                            .build());
+
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> SOUL_FRAGMENT_INTACT =
             DATA_COMPONENTS.register("soul_fragment_intact", () ->
                     DataComponentType.<Boolean>builder()

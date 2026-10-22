@@ -64,7 +64,7 @@ class ArmorGeoAssetTest {
     private static final List<String> BODY_SETS = List.of("student_robe", "auror_robe", "death_eater_robe");
 
     /** Sets that only ever occupy the head slot. */
-    private static final List<String> HEAD_SETS = List.of("wizard_hat", "death_eater_mask");
+    private static final List<String> HEAD_SETS = List.of("wizard_hat", "sorting_hat", "death_eater_mask");
 
     @Test
     void theBoneVocabularyStillMatchesGeckolib() {

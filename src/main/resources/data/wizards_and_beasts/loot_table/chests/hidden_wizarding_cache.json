@@ -153,6 +153,21 @@
           "weight": 39
         }
       ]
+    },
+    {
+      "_comment": "The Sorting Hat: one cache in thirty. It is the only way the Sword of Gryffindor ever comes to anyone.",
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "wizards_and_beasts:sorting_hat",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 29
+        }
+      ]
     }
   ]
 }

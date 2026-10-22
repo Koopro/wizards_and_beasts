@@ -65,7 +65,12 @@ public final class ArtefactShowcaseCapture {
             new Step("", 40, p -> at.koopro.wizardsandbeasts.artefact.erised.ErisedService.gaze(p, erised())),
             new Step("erised_vision", 10, p -> {}),
             new Step("", 40, ArtefactShowcaseCapture::spendTheDay),
-            new Step("erised_reflection", 10, p -> {}));
+            new Step("erised_reflection", 10, p -> {}),
+            new Step("", 30, ArtefactShowcaseCapture::wearTheHat),
+            new Step("sorting_hat_worn", 10, p -> {}),
+            new Step("", 30, ArtefactShowcaseCapture::presentTheSword),
+            new Step("", 10, ArtefactShowcaseCapture::drawTheSword),
+            new Step("sword_presented", 10, p -> {}));
 
 
     /** Where the stage was built: the player's feet when it started. */
@@ -83,6 +88,9 @@ public final class ArtefactShowcaseCapture {
     private static void stage(ServerPlayer p) {
         ServerLevel level = p.level();
         origin = p.blockPosition();
+        // Whatever the capture world left standing about the player stays out of the shots.
+        level.getEntities(p, p.getBoundingBox().inflate(16), e -> !(e instanceof net.minecraft.world.entity.player.Player))
+                .forEach(net.minecraft.world.entity.Entity::discard);
         level.setDayTime(6000);
         level.setWeatherParameters(6000, 0, false, false);
         for (int x = -6; x <= 6; x++) {
@@ -132,6 +140,43 @@ public final class ArtefactShowcaseCapture {
     /** Where the Mirror of Erised stands: left of the cabinets, against the same wall. */
     private static BlockPos erised() {
         return origin.offset(-4, 0, -6);
+    }
+
+    /** The Sorting Hat on the player's head, seen from in front (third person). */
+    private static void wearTheHat(ServerPlayer p) {
+        // The capture world's player is dressed (a Death Eater mask hides the head slot); undress for the shot.
+        at.koopro.wizardsandbeasts.equipment.EquipmentAPI.stripWearables(p, s -> false);
+        for (net.minecraft.world.entity.EquipmentSlot slot : net.minecraft.world.entity.EquipmentSlot.values()) {
+            if (slot.isArmor()) {
+                p.setItemSlot(slot, net.minecraft.world.item.ItemStack.EMPTY);
+            }
+        }
+        at.koopro.wizardsandbeasts.equipment.curios.CuriosEquipment.equip(p, "head",
+                new net.minecraft.world.item.ItemStack(at.koopro.wizardsandbeasts.registry.CanonItemRegistry.SORTING_HAT.get()));
+        look(p, 0.5, 0.5, 180f, 0f);
+        Minecraft.getInstance().execute(() ->
+                Minecraft.getInstance().options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT));
+    }
+
+    /** The sword fallen out of the Hat at the wearer's feet, seen from in front, with the line it brings. */
+    private static void presentTheSword(ServerPlayer p) {
+        at.koopro.wizardsandbeasts.artefact.gryffindor.GryffindorSword.get(p.level()).forget();
+        look(p, 0.5, 0.5, 180f, 0f);
+        at.koopro.wizardsandbeasts.artefact.gryffindor.GryffindorService.present(p);
+        // A step back, so the sword lies between the wearer and the camera rather than under their feet.
+        look(p, 0.5, 1.8, 180f, 0f);
+    }
+
+    /** The wearer picked the sword up as it landed; into the hand with it, raised for the camera. */
+    private static void drawTheSword(ServerPlayer p) {
+        var inventory = p.getInventory();
+        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+            if (inventory.getItem(slot).is(at.koopro.wizardsandbeasts.registry.CanonItemRegistry.SWORD_OF_GRYFFINDOR.get())) {
+                net.minecraft.world.item.ItemStack sword = inventory.removeItemNoUpdate(slot);
+                p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, sword);
+                return;
+            }
+        }
     }
 
     /** Uses up the day's gazes, so the next look shows only a reflection. */

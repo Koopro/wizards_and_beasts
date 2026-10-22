@@ -62,6 +62,19 @@
         }
       ]
     },
+    "wizards_and_beasts:sorting_hat": {
+      "equipment_type": "headwear",
+      "hides": [
+        "head"
+      ],
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 1,
+          "operation": "add_value"
+        }
+      ]
+    },
     "wizards_and_beasts:wizard_hat": {
       "equipment_type": "headwear",
       "hides": [

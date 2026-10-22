@@ -7,6 +7,7 @@ Five sets:
     auror_robe          midnight-blue duelling coat, standing collar, tails, gunmetal
     death_eater_robe    floor-length, deep hood, heavy vertical drape
     wizard_hat          pointed felt, wide waved brim, bent tip
+    sorting_hat         patched, frayed brown felt, floppy brim, crown slumped back, a rip for a mouth
     death_eater_mask    full-face bone mask, six castings on one sculpt
 
 Six things are dictated by GeckoLib, by box geometry or by the wearer rather than chosen,
@@ -124,6 +125,12 @@ CLOTH = {
         "base": hx("#35333F"), "dark": hx("#1C1C24"), "light": hx("#4C4A5A"),
         "trim": hx("#4A4557"), "accent": hx("#8C7A4E"), "leather": hx("#38291B"),
     },
+    "sorting_hat": {
+        # Old felt gone the brown of a thousand years on a shelf: dull, uneven, nothing lit
+        # cleanly. The patches are a step lighter; the stitching is the darkest thing on it.
+        "base": hx("#5B4431"), "dark": hx("#2F2217"), "light": hx("#7B5E42"),
+        "trim": hx("#4A3725"), "accent": hx("#1E150D"), "leather": hx("#3A2A1B"),
+    },
     "death_eater_mask": {
         # Bone rather than silver: "carved, pale, bone-like or porcelain", sickly ivory.
         "base": hx("#D9D0BB"), "dark": hx("#948973"), "light": hx("#F2ECDF"),
@@ -137,7 +144,7 @@ CLOTH = {
 # computed.
 POSTERISE = {
     "student_robe": 26, "auror_robe": 26, "death_eater_robe": 22,
-    "wizard_hat": 22, "death_eater_mask": 20,
+    "wizard_hat": 22, "sorting_hat": 22, "death_eater_mask": 20,
 }
 
 # --------------------------------------------------------------------------- rigs
@@ -321,6 +328,21 @@ RIGS = {
         # The tip bends rather than continuing straight.
         ("head", "tip", (-1.5, 42.8, -1.5), (3, 3, 3), 0.0, (-26, 0, 0), (0, 36, 0)),
     ],
+    "sorting_hat": [
+        # The wizard hat's brim, gone soft: the sides droop past the plates. The crown is
+        # shorter and fatter, and everything above it slumps back and to one side -- a hat
+        # that has been sat on, folded and shelved for centuries. The mouth is painted on
+        # the crown's front (`_detail`), where the brim seam has torn.
+        ("head", "brim_under", (-7.5, 31.0, -6.5), (15, 1, 13), 0.0),
+        ("head", "brim_over", (-6.5, 31.5, -7.5), (13, 1, 15), 0.0),
+        ("head", "brim_droop_r", (-8.4, 30.1, -4.5), (2, 1, 9), 0.0),
+        ("head", "brim_droop_l", (6.4, 30.3, -4.5), (2, 1, 9), 0.0),
+        ("head", "crown", (-4.6, 32.0, -4.6), (9, 4, 9), 0.0),
+        ("head", "fold1", (-4.0, 35.4, -3.8), (8, 3, 8), 0.0, (8, 0, 5), (0, 36, 0)),
+        ("head", "fold2", (-3.5, 37.0, -2.5), (7, 3, 7), 0.0, (18, 0, 9), (0, 36, 0)),
+        ("head", "fold3", (-2.5, 38.4, -0.8), (5, 3, 5), 0.0, (32, 0, 12), (0, 36, 0)),
+        ("head", "tip", (-1.5, 39.2, 1.2), (3, 3, 3), 0.0, (52, 0, 16), (0, 36, 0)),
+    ],
     "death_eater_mask": [
         # A full-face mask over the head, not a plate hung on the front of it: the sides
         # wrap the temples and the jaw closes under the chin. The plate is half a pixel
@@ -339,7 +361,7 @@ RIGS = {
     ],
 }
 
-HEAD_SETS = ("wizard_hat", "death_eater_mask")
+HEAD_SETS = ("wizard_hat", "sorting_hat", "death_eater_mask")
 
 # Pieces that hang rather than wrap, and so gather into vertical folds.
 HANGING = ("skirt", "skirt_low", "coat", "panel_f", "panel_b", "panel_r", "panel_l",
@@ -674,7 +696,7 @@ def paint_set(name, packer, tex, variant=None):
                 paint_leather(d, px, rect, pal, fname, seed)
             else:
                 paint_cloth(d, px, rect, pal, fname, seed,
-                            hanging=cube in HANGING, matte=(name == "wizard_hat"))
+                            hanging=cube in HANGING, matte=name in ("wizard_hat", "sorting_hat"))
 
         _detail(d, px, name, cube, f, pal, variant)
 
@@ -708,6 +730,9 @@ def _edge_light(d, px, f, pal, strength=0.55, sides=("north", "south", "east", "
 
 def _detail(d, px, name, cube, f, pal, variant):
     """Per-cube marks: hems, seams, closures, buckles, mask chasing."""
+    if name == "sorting_hat":
+        _sorting_hat_detail(d, px, cube, f, pal)
+        return
     if cube in HEMMED:
         _hem_band(d, px, f, pal)
 
@@ -908,6 +933,38 @@ def _mask_face(d, px, rect, pal, variant):
 
 
 # --------------------------------------------------------------------------- output
+
+
+def _sorting_hat_detail(d, px, cube, f, pal):
+    """The rip that is its mouth and the two creases over it, on the crown's front; patches
+    stitched over the folds; a frayed edge on the brim."""
+    if cube == "crown":
+        x0, y0, w, h = f["north"]
+        for x in range(x0 + 1, x0 + w - 1):
+            jag = 1 if (x * 7) % 3 == 0 else 0
+            _tint(px, x, y0 + 2 + jag, pal["accent"], 0.95)
+        for x in (x0 + 2, x0 + 3, x0 + w - 4, x0 + w - 3):
+            _tint(px, x, y0, pal["dark"], 0.75)
+    if cube in ("fold1", "fold2", "brim_over"):
+        for fname in ("north", "east"):
+            x0, y0, w, h = f[fname]
+            if w < 5 or h < 3:
+                continue
+            pw, ph = 3, min(3, h)
+            seed = sum(ord(c) for c in cube + fname)
+            px0 = x0 + 1 + seed % max(1, w - pw - 1)
+            for y in range(y0, y0 + ph):
+                for x in range(px0, px0 + pw):
+                    edge = x in (px0, px0 + pw - 1) or y in (y0, y0 + ph - 1)
+                    if edge and (x + y) % 2 == 0:
+                        _tint(px, x, y, pal["accent"], 0.8)
+                    elif not edge:
+                        _tint(px, x, y, pal["light"], 0.5)
+    if cube.startswith("brim"):
+        for fname in ("north", "south", "east", "west"):
+            x0, y0, w, h = f[fname]
+            for x in range(x0, x0 + w, 3):
+                _tint(px, x, y0 + h - 1, pal["dark"], 0.6)
 
 
 def texture_paths(name):

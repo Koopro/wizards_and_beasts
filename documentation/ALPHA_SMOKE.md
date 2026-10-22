@@ -257,3 +257,19 @@ Manual. You need a survival world and a mirror (`/give @s wizards_and_beasts:mir
 
 `ArtefactShowcaseCapture` (`WB_ARTEFACT_SHOWCASE=1`, world `wb_cabinet_capture`) photographs it in
 `run/screenshots/artefact_showcase/`.
+
+## Sword of Gryffindor and the Sorting Hat (2026-10-22, `feat/sword-of-gryffindor`)
+
+Manual. You need a survival world and `/give @s wizards_and_beasts:sorting_hat`.
+
+1. Wear the Hat (head slot or the Curios head slot): a patched, slumped brown hat on your head in third person.
+2. Without the Hat, let a Warden (or a basilisk, or a Dementor) beat you below a third of your health while you
+   fight back: nothing happens.
+3. With the Hat, do the same: "Something heavy and gleaming falls out of the Sorting Hat…", and the sword is in
+   your inventory. It has an epic name and never loses durability.
+4. Repeat the fight: no second sword. Throw the sword into the void (or blow it up), then fight again: it comes
+   back.
+5. Kill a basilisk with the sword: "The blade drinks the basilisk's venom…". It now glints, and its tooltip says
+   it is impregnated.
+6. Hold Riddle's diary in the off hand and use the sword: the diary is destroyed and the sword stays (needs the
+   Dark Arts module).

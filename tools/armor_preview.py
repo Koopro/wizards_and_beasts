@@ -33,8 +33,8 @@ ASSETS = "src/main/resources/assets/wizards_and_beasts"
 GEO_DIR = f"{ASSETS}/geckolib/models/armor"
 TEX_DIR = f"{ASSETS}/textures/armor"
 
-SETS = ["student_robe", "auror_robe", "death_eater_robe", "wizard_hat", "death_eater_mask"]
-HEAD_SETS = ("wizard_hat", "death_eater_mask")
+SETS = ["student_robe", "auror_robe", "death_eater_robe", "wizard_hat", "sorting_hat", "death_eater_mask"]
+HEAD_SETS = ("wizard_hat", "sorting_hat", "death_eater_mask")
 
 # Vanilla humanoid boxes, the ones GeoArmorRenderer snaps each armour bone onto.
 MANNEQUIN = [

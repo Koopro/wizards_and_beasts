@@ -105,6 +105,7 @@ class WearableDataTest {
         assertStats(values, "auror_robe_chest", WizardArmorMaterials.AUROR_ROBE, ArmorType.CHESTPLATE);
         assertStats(values, "death_eater_robe_chest", WizardArmorMaterials.DEATH_EATER_ROBE, ArmorType.CHESTPLATE);
         assertStats(values, "wizard_hat", WizardArmorMaterials.WIZARD_HAT, ArmorType.HELMET);
+        assertStats(values, "sorting_hat", WizardArmorMaterials.SORTING_HAT, ArmorType.HELMET);
         for (String mask : new String[]{"death_eater_mask", "death_eater_mask_1", "death_eater_mask_2",
                 "death_eater_mask_3", "death_eater_mask_4", "death_eater_mask_5"}) {
             assertStats(values, mask, WizardArmorMaterials.DEATH_EATER_MASK, ArmorType.HELMET);

@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    { "id": "wizards_and_beasts:basilisk", "required": false },
+    { "id": "wizards_and_beasts:dementor", "required": false },
+    { "id": "wizards_and_beasts:obscurus", "required": false },
+    { "id": "wizards_and_beasts:acromantula", "required": false },
+    "minecraft:wither",
+    "minecraft:warden"
+  ]
+}
