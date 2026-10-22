@@ -33,6 +33,10 @@ public class ThemedTextField extends EditBox {
     private @Nullable Component inkHint;
     /** The material the well is pressed into; {@code null} is the default page. */
     private @Nullable GuiSkin skin;
+    /** Bare: no well of its own, drawn straight onto what the screen put behind it (glass, a page). */
+    private boolean bare;
+    private int hintColour;
+    private int focusColour;
 
     public ThemedTextField(@NonNull Font font, int x, int y, int w, int h, @NonNull Component narration) {
         super(font, x, y, w, h, narration);
@@ -62,6 +66,20 @@ public class ThemedTextField extends EditBox {
         return this;
     }
 
+    /**
+     * No well of its own: the text is written straight onto whatever the screen drew behind the field --
+     * breath-fog on a mirror, the page of a diary. Focus shows as a one-pixel underline in
+     * {@code focusColour}, since there is no frame to light.
+     */
+    public ThemedTextField bare(int textColour, int hintColour, int focusColour) {
+        this.bare = true;
+        this.hintColour = hintColour;
+        this.focusColour = focusColour;
+        setTextColor(textColour);
+        setTextColorUneditable(hintColour);
+        return this;
+    }
+
     @Override
     public boolean isBordered() {
         return false;
@@ -77,12 +95,16 @@ public class ThemedTextField extends EditBox {
         if (!isVisible()) {
             return;
         }
-        if (skin == null) {
+        if (bare) {
+            if (isFocused()) {
+                g.fill(getX() + 2, getY() + getHeight() - 2, getX() + getWidth() - 2, getY() + getHeight() - 1, focusColour);
+            }
+        } else if (skin == null) {
             McStylePanel.drawThemedInset(g, getX(), getY(), getWidth(), getHeight());
         } else {
             McStylePanel.drawSkinInset(g, skin, getX(), getY(), getWidth(), getHeight());
         }
-        if (isFocused()) {
+        if (isFocused() && !bare) {
             // Gilt rather than a brighter ink: focus is furniture, and the well's own ink line stays.
             int gilt = skin == null ? WizardsPalette.GILT : skin.accent();
             McStylePanel.drawBorder(g, getX() + 1, getY() + 1, getWidth() - 2, getHeight() - 2, gilt, gilt);
@@ -90,7 +112,7 @@ public class ThemedTextField extends EditBox {
         super.renderWidget(g, mouseX, mouseY, partialTick);
         if (inkHint != null && getValue().isEmpty() && !isFocused()) {
             g.drawString(font, inkHint, getX() + TEXT_INSET, getY() + (getHeight() - GLYPH_H) / 2,
-                    skin == null ? WizardsPalette.PAGE_INK_3 : skin.muted(), false);
+                    bare ? hintColour : skin == null ? WizardsPalette.PAGE_INK_3 : skin.muted(), false);
         }
     }
 }

@@ -302,3 +302,19 @@ floo_registration, marauders_map, vocation_selection, skill_access_denied, pensi
   a native-pixel layout like the spell menu's would remove the remaining squeeze.
 - ⏳ Not exercised by hand in a live client: bench, bag and pouch transfers (shift-click, drag-split, pinned slot).
 
+### Artefacts from their objects (2026-10-22, after M8)
+Same treatment as Hermione's bag and the Niffler's pouch; art in `gui_chrome.py` `artefact/<name>/`.
+- **Two-way mirror** (`MirrorChrome`): call screen is silvered glass in an engraved pewter frame with rosette
+  corners; the name is breathed onto a patch of fog (`ThemedTextField.bare`: no paper well, an underline for
+  focus). View screen: dark glass in the same frame, face drawn into it, name on an engraved pewter plaque,
+  pewter buttons (`sprites/mirror/`). Slate inks on the light glass (7.3 / 4.9 : 1).
+- **Riddle's diary**: worn black leather cover with a gold-tooled line, aged cream page, ruled under every line of
+  the transcript with a faint red margin, the line written straight onto the page, a leather "Write" tab. Riddle's
+  reply inks (grey → purple → blood red by tier) are clamped onto the new page stock.
+- **Pensieve**: carved stone basin with runes cut round the rim; the list and detail sit in pools of silvery
+  memory-stuff (slow currents, low contrast so text stays clear) inside a carved lip; hovered/chosen rows lift as
+  a brighter wisp.
+- Unchanged: the possession overlay (already its own red-on-dark), the Marauder's Map (its own hand-drawn
+  parchment is the object).
+- Seen at 1080p GUI 3/4 and 720p GUI 3 (`run/screenshots/ui_artefacts*`).
+

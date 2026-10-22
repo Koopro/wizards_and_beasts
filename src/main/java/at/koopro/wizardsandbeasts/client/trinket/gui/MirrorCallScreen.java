@@ -50,18 +50,23 @@ public class MirrorCallScreen extends Screen {
         panelY = (height - PANEL_H) / 2;
         int innerW = PANEL_W - 2 * EDGE;
 
+        // Written onto a patch of breath on the glass, not into a paper well.
         nameField = new ThemedTextField(font, panelX + EDGE, panelY + FIELD_Y, innerW, FIELD_H,
-                Component.translatable(KEY + "name")).inkHint(Component.translatable(KEY + "name_hint"));
+                Component.translatable(KEY + "name"))
+                .bare(MirrorChrome.INK, MirrorChrome.INK_2, MirrorChrome.INK)
+                .inkHint(Component.translatable(KEY + "name_hint"));
         nameField.setMaxLength(40);
         addRenderableWidget(nameField);
         setInitialFocus(nameField);
 
         int buttonW = (innerW - WizardsMetrics.SPACE_M) / 2;
         int buttonY = panelY + PANEL_H - EDGE - BUTTON_H;
-        addRenderableWidget(new ThemedButton(panelX + EDGE, buttonY, buttonW, BUTTON_H,
-                Component.translatable(KEY + "call"), this::connect));
-        addRenderableWidget(new ThemedButton(panelX + PANEL_W - EDGE - buttonW, buttonY, buttonW,
-                BUTTON_H, Component.translatable("gui.cancel"), this::onClose));
+        addRenderableWidget(ThemedButton.skinned(panelX + EDGE, buttonY, buttonW, BUTTON_H,
+                Component.translatable(KEY + "call"), this::connect, MirrorChrome.BUTTONS, null, 0,
+                MirrorChrome.INK, MirrorChrome.INK_OFF));
+        addRenderableWidget(ThemedButton.skinned(panelX + PANEL_W - EDGE - buttonW, buttonY, buttonW,
+                BUTTON_H, Component.translatable("gui.cancel"), this::onClose, MirrorChrome.BUTTONS, null, 0,
+                MirrorChrome.INK, MirrorChrome.INK_OFF));
     }
 
     private void connect() {
@@ -85,12 +90,14 @@ public class MirrorCallScreen extends Screen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        McStylePanel.drawThemedPanel(graphics, panelX, panelY, PANEL_W, PANEL_H);
-        graphics.drawString(font, this.title, panelX + EDGE, panelY + TITLE_Y,
-                WizardsPalette.PAGE_INK, false);
-        McStylePanel.drawDivider(graphics, panelX + EDGE, panelY + TITLE_RULE_Y, PANEL_W - 2 * EDGE);
+        // The mirror itself: silvered glass in an engraved pewter frame, the name breathed onto a patch
+        // of fog. It was a parchment memo, the same sheet as every other prompt in the mod.
+        MirrorChrome.mirror(graphics, panelX, panelY, PANEL_W, PANEL_H, false);
+        graphics.drawString(font, this.title, panelX + EDGE, panelY + TITLE_Y, MirrorChrome.INK, false);
+        MirrorChrome.rule(graphics, panelX + EDGE, panelY + TITLE_RULE_Y + 2, PANEL_W - 2 * EDGE);
         graphics.drawString(font, Component.translatable(KEY + "prompt"), panelX + EDGE,
-                panelY + PROMPT_Y, WizardsPalette.PAGE_INK_2, false);
+                panelY + PROMPT_Y, MirrorChrome.INK_2, false);
+        MirrorChrome.fog(graphics, panelX + EDGE - 6, panelY + FIELD_Y - 5, PANEL_W - 2 * EDGE + 12, FIELD_H + 10);
 
         super.render(graphics, mouseX, mouseY, partialTick);
     }

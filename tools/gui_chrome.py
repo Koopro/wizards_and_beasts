@@ -388,6 +388,326 @@ def a_pouch_lining():
     return img
 
 
+# --------------------------------------------------------------------------- two-way mirror
+#
+# Sirius's mirror: a small square of silvered glass in an engraved pewter frame. The call screen is the
+# glass itself (you breathe a name onto a patch of fog); the view screen keeps dark glass behind the
+# face it shows, with the name on an engraved pewter plaque. Java: `MirrorCallScreen`, `MirrorViewScreen`.
+
+PEWTER = dict(
+    void=rgb("#15181C"), d=rgb("#3B4048"), m=rgb("#6F7782"), l=rgb("#A2AAB4"), ll=rgb("#D4DAE1"),
+    glass_d=rgb("#8C98A6"), glass=rgb("#A9B4C0"), glass_l=rgb("#C8D1DA"), glass_ll=rgb("#E6ECF2"),
+    dark_d=rgb("#171B21"), dark=rgb("#212730"), dark_l=rgb("#2C3440"), dark_ll=rgb("#3C4757"),
+)
+GLASS_TILE = 64   # drawn with drawTiled: the sheen repeats every 64px and the sprite has no edge strips
+
+
+def pewter_shape(px, cells, p):
+    """A raised pewter casting under the global top-left light."""
+    for (x, y) in cells:
+        ul = (x - 1, y) not in cells or (x, y - 1) not in cells
+        dr = (x + 1, y) not in cells or (x, y + 1) not in cells
+        px[x, y] = opaque(p["ll"] if ul and not dr else p["d"] if dr and not ul else p["l"])
+
+
+def a_mirror_frame():
+    """Engraved pewter, 64x64 on 8, transparent inside (the glass is drawn under it). Outside in: outline,
+    a bevel lit top-left, an engraved band with a dotted chase every 4px, a groove, the shadowed lip
+    the glass sits behind; a rosette cartouche in each corner."""
+    p = PEWTER
+    P = BAG_TILE
+    img = Image.new("RGBA", (P, P), (0, 0, 0, 0))
+    px = img.load()
+    for y in range(P):
+        for x in range(P):
+            e = min(x, y, P - 1 - x, P - 1 - y)
+            if e > 6:
+                continue
+            lit = (y == e or x == e) and not (P - 1 - y == e or P - 1 - x == e)
+            along = (x if (y == e or P - 1 - y == e) else y) - BORDER
+            if e in (0, 6):
+                c = p["void"]
+            elif e == 1:
+                c = p["ll"] if lit else p["d"]
+            elif e == 2:
+                c = p["l"] if lit else p["m"]
+            elif e == 3:
+                c = p["d"] if along % 4 == 0 else p["m"]
+            elif e == 4:
+                c = p["l"] if lit else p["m"]
+            else:
+                c = p["d"]
+            px[x, y] = opaque(c)
+    for ox, oy in ((0, 0), (P - 9, 0), (0, P - 9), (P - 9, P - 9)):
+        cells = {(ox + i, oy + j) for i in range(9) for j in range(9)
+                 if abs(i - 4) + abs(j - 4) <= 4}
+        for (x, y) in cells:
+            px[x, y] = opaque(p["void"])
+        inner = {(x, y) for (x, y) in cells if abs(x - ox - 4) + abs(y - oy - 4) <= 3}
+        pewter_shape(px, inner, p)
+        px[ox + 4, oy + 4] = opaque(p["void"])
+    return img
+
+
+def _glass(tones, seed):
+    """Silvered glass, periodic in GLASS_TILE: a base, a long diagonal sheen and a fainter echo of it,
+    the slow shading a mirror has where it catches the room."""
+    lo, base, hi, top = tones
+    T = GLASS_TILE
+    img = Image.new("RGBA", (T, T))
+    px = img.load()
+    shade = grain_field(T + INNER, T + INNER, seed, 0.5)
+    for y in range(T):
+        for x in range(T):
+            band = (x + y) % T
+            if band == 11:
+                c = top
+            elif band in (10, 12, 40):
+                c = hi
+            else:
+                c = lo if shade[y % INNER][x % INNER] < -0.8 else base
+            px[x, y] = opaque(c)
+    return img
+
+
+def a_mirror_glass():
+    p = PEWTER
+    return _glass((p["glass_d"], p["glass"], p["glass_l"], p["glass_ll"]), 89)
+
+
+def a_mirror_glass_dark():
+    p = PEWTER
+    return _glass((p["dark_d"], p["dark"], p["dark_l"], p["dark_ll"]), 97)
+
+
+def a_mirror_fog():
+    """Breath on glass, 64x64 on 8: a translucent pale field whose alpha falls off over the border, so a
+    patch of any size has soft edges."""
+    P = BAG_TILE
+    img = Image.new("RGBA", (P, P), (0, 0, 0, 0))
+    px = img.load()
+    for y in range(P):
+        for x in range(P):
+            e = min(x, y, P - 1 - x, P - 1 - y)
+            a = 150 if e >= BORDER else int(150 * (e + 1) / (BORDER + 1))
+            px[x, y] = (236, 242, 247, a)
+    return img
+
+
+def a_mirror_plaque():
+    """An engraved pewter plate, 64x64 on 8: outline, bevel, an engraved rule two pixels in, a flat face."""
+    p = PEWTER
+    P = BAG_TILE
+    img = Image.new("RGBA", (P, P), opaque(p["l"]))
+    px = img.load()
+    for y in range(P):
+        for x in range(P):
+            e = min(x, y, P - 1 - x, P - 1 - y)
+            lit = (y == e or x == e) and not (P - 1 - y == e or P - 1 - x == e)
+            if e == 0:
+                px[x, y] = opaque(p["void"])
+            elif e == 1:
+                px[x, y] = opaque(p["ll"] if lit else p["m"])
+            elif e == 3:
+                px[x, y] = opaque(p["m"] if lit else p["ll"])
+    for c in ((0, 0), (P - 1, 0), (0, P - 1), (P - 1, P - 1)):
+        px[c] = (0, 0, 0, 0)
+    return img
+
+
+def mirror_button(state=""):
+    """A pewter button, 32x32 cut on 4, rows uniform across x."""
+    p = PEWTER
+    face, hi, lo, edge = p["l"], p["ll"], p["m"], p["void"]
+    if state == "_hover":
+        face, hi, lo = p["ll"], (240, 244, 248), p["l"]
+    elif state == "_off":
+        face, hi, lo, edge = p["m"], p["m"], p["m"], p["d"]
+    B = 32
+    img, d = canvas(B, B)
+    d.rectangle([0, 0, B - 1, B - 1], fill=opaque(face))
+    d.line([(1, 1), (B - 2, 1)], fill=opaque(hi))
+    d.line([(1, 1), (1, B - 2)], fill=opaque(hi))
+    d.line([(1, B - 2), (B - 2, B - 2)], fill=opaque(lo))
+    d.line([(B - 2, 1), (B - 2, B - 2)], fill=opaque(lo))
+    d.rectangle([0, 0, B - 1, B - 1], outline=opaque(edge))
+    for c in ((0, 0), (B - 1, 0), (0, B - 1), (B - 1, B - 1)):
+        img.putpixel(c, (0, 0, 0, 0))
+    return img
+
+
+# --------------------------------------------------------------------------- Riddle's diary
+#
+# A small black diary from 1943: worn black leather with one gold-tooled line round the cover, an aged
+# cream page inside (the ruling is drawn by the screen, under each line of the transcript, so it lines up
+# with the text). Java: `DiaryWriteScreen`.
+
+DIARY = dict(
+    leather_dd=rgb("#0B0A0A"), leather_d=rgb("#151313"), leather=rgb("#1F1C1B"), leather_l=rgb("#2C2826"),
+    scuff=rgb("#3B3532"),
+    paper_dd=rgb("#B9A67E"), paper_d=rgb("#CDBF99"), paper=rgb("#DDD1AF"), paper_l=rgb("#E8DEC1"),
+    fox=rgb("#B49B6C"),
+)
+
+
+def a_diary_cover():
+    """Worn black leather, 64x64 on 8: a three-tone grain with the odd scuff, an outline, the cover's
+    edge rounded at the corners, and a single gold-tooled line three pixels in."""
+    d_ = DIARY
+    P = BAG_TILE
+    img = Image.new("RGBA", (P, P))
+    px = img.load()
+    grain = grain_field(P + INNER, P + INNER, 101, 1.1)
+    for y in range(P):
+        for x in range(P):
+            v = grain[(y - BORDER) % INNER][(x - BORDER) % INNER]
+            c = d_["leather_d"] if v < -0.5 else d_["leather_l"] if v > 0.75 else d_["leather"]
+            if v > 1.5:
+                c = d_["scuff"]
+            px[x, y] = opaque(c)
+    d = ImageDraw.Draw(img)
+    d.rectangle([0, 0, P - 1, P - 1], outline=opaque(d_["leather_dd"]))
+    d.rectangle([3, 3, P - 4, P - 4], outline=opaque(PAGE["gilt_d"]))
+    for c in ((0, 0), (P - 1, 0), (0, P - 1), (P - 1, P - 1), (1, 0), (0, 1), (P - 2, 0), (P - 1, 1),
+              (0, P - 2), (1, P - 1), (P - 1, P - 2), (P - 2, P - 1)):
+        px[c] = (0, 0, 0, 0)
+    return img
+
+
+def a_diary_page():
+    """An aged page, 64x64 on 8: cream stock with a slow grain and a few foxing specks, browning toward
+    its edges -- the screen rules it."""
+    d_ = DIARY
+    P = BAG_TILE
+    img = Image.new("RGBA", (P, P))
+    px = img.load()
+    grain = grain_field(P + INNER, P + INNER, 103, 0.8)
+    for y in range(P):
+        for x in range(P):
+            v = grain[(y - BORDER) % INNER][(x - BORDER) % INNER]
+            c = d_["paper_d"] if v < -0.7 else d_["paper_l"] if v > 0.9 else d_["paper"]
+            if v < -1.6:
+                c = d_["fox"]
+            e = min(x, y, P - 1 - x, P - 1 - y)
+            if e < 3:
+                c = mix(c, d_["paper_dd"], (3 - e) / 4.0)
+            px[x, y] = opaque(c)
+    return img
+
+
+def diary_button(state=""):
+    """A leather tab, 32x32 cut on 4: the cover's leather with the tooled gold line as its edge."""
+    d_ = DIARY
+    face, edge, hi = d_["leather"], PAGE["gilt_d"], d_["leather_l"]
+    if state == "_hover":
+        face, edge, hi = d_["leather_l"], PAGE["gilt"], d_["scuff"]
+    elif state == "_off":
+        face, edge, hi = d_["leather_d"], d_["scuff"], d_["leather_d"]
+    B = 32
+    img, d = canvas(B, B)
+    d.rectangle([0, 0, B - 1, B - 1], fill=opaque(face))
+    d.line([(1, 1), (B - 2, 1)], fill=opaque(hi))
+    d.rectangle([0, 0, B - 1, B - 1], outline=opaque(d_["leather_dd"]))
+    d.rectangle([1, 1, B - 2, B - 2], outline=opaque(edge))
+    for c in ((0, 0), (B - 1, 0), (0, B - 1), (B - 1, B - 1)):
+        img.putpixel(c, (0, 0, 0, 0))
+    return img
+
+
+# --------------------------------------------------------------------------- Pensieve
+#
+# A shallow stone basin with runes cut round its rim, holding memory: silvery stuff that is neither
+# liquid nor gas, turning slowly. Java: `PensieveScreen` (the rim tiles on 64/8; the memory-stuff is
+# drawn with drawTiled, periodic in 64, so it has no edge strips to seam).
+
+STONE = dict(
+    dd=rgb("#5E5A54"), d=rgb("#7E7A73"), m=rgb("#9C978F"), l=rgb("#B4AFA6"),
+    groove=rgb("#4A4640"), lip=rgb("#D2CDC4"),
+    mem_d=rgb("#BDC6D8"), mem=rgb("#CBD3E3"), mem_l=rgb("#D6DDEA"), mem_ll=rgb("#E2E8F2"),
+)
+# Five runes, 3x5, cut into the rim's top and bottom bands. Rows top to bottom, "#" is cut.
+RUNES = (
+    ("#.#", "##.", "#.#", "#..", "#.."),   # fehu-ish
+    ("#..", "##.", "#.#", "#.#", "#.#"),   # uruz-ish
+    ("#..", "##.", "#.#", "##.", "#.."),   # thurisaz-ish
+    (".#.", "##.", "#.#", ".##", ".#."),   # ingwaz-ish
+    ("#.#", "#.#", ".#.", "#.#", "#.#"),   # gebo-ish
+)
+MEMORY_TILE = 64
+
+
+def a_pensieve_rim():
+    """Carved stone, 64x64 on 8: a granite grain, an outline, a bevel lit top-left, runes cut into the
+    top and bottom bands every 12px (four per 48px span, so the tiled edge repeats cleanly), a groove
+    down the sides, chamfered corners."""
+    st = STONE
+    P = BAG_TILE
+    img = Image.new("RGBA", (P, P))
+    px = img.load()
+    grain = grain_field(P + INNER, P + INNER, 107, 1.0)
+    for y in range(P):
+        for x in range(P):
+            v = grain[(y - BORDER) % INNER][(x - BORDER) % INNER]
+            px[x, y] = opaque(st["d"] if v < -0.6 else st["l"] if v > 0.8 else st["m"])
+    for y in range(P):
+        for x in range(P):
+            e = min(x, y, P - 1 - x, P - 1 - y)
+            lit = (y == e or x == e) and not (P - 1 - y == e or P - 1 - x == e)
+            if e == 0:
+                px[x, y] = opaque(st["dd"])
+            elif e == 1:
+                px[x, y] = opaque(st["lip"] if lit else st["d"])
+            elif e == 7:
+                px[x, y] = opaque(st["d"] if lit else st["lip"])
+    # Runes on the top and bottom bands, and a groove down the sides.
+    for band_y in (2, P - 7):
+        for x in range(BORDER - INNER, P, 12):
+            along = (x - BORDER) % INNER
+            glyph = RUNES[(along // 12 + (0 if band_y == 2 else 2)) % len(RUNES)]
+            gx = x + 4
+            for j, row in enumerate(glyph):
+                for i, ch in enumerate(row):
+                    xx, yy = gx + i, band_y + j
+                    if ch == "#" and 2 <= xx < P - 2:
+                        px[xx, yy] = opaque(st["groove"])
+                        if xx + 1 < P - 2 and row[i + 1:i + 2] != "#":
+                            px[xx + 1, yy] = opaque(st["lip"])
+    for gx in (3, P - 4):
+        for y in range(9, P - 9):
+            px[gx, y] = opaque(st["groove"])
+            px[gx + 1, y] = opaque(st["lip"])
+    for (cx, cy) in ((0, 0), (P - 1, 0), (0, P - 1), (P - 1, P - 1)):
+        sx, sy = (1 if cx == 0 else -1), (1 if cy == 0 else -1)
+        for dx, dy in ((0, 0), (1, 0), (0, 1)):
+            px[cx + sx * dx, cy + sy * dy] = (0, 0, 0, 0)
+    return img
+
+
+def a_pensieve_memory():
+    """Memory-stuff, periodic in 64: slow wavy currents of light drifting across a silver-blue field,
+    every 16px, each a bright core between softer edges, with a fainter shadow current between them.
+    The waves are sines of x with a 64px period, so the tile wraps without a seam."""
+    import math
+    st = STONE
+    T = MEMORY_TILE
+    img = Image.new("RGBA", (T, T))
+    px = img.load()
+    for y in range(T):
+        for x in range(T):
+            w = y + 5 * math.sin(2 * math.pi * x / T) + 2 * math.sin(2 * math.pi * 2 * x / T + 1.0)
+            k = w % 16
+            if 0 <= k < 1:
+                c = st["mem_ll"]
+            elif k < 2.2 or k > 15.2:
+                c = st["mem_l"]
+            elif 8.5 <= k < 9.5:
+                c = st["mem_d"]
+            else:
+                c = st["mem"]
+            px[x, y] = opaque(c)
+    return img
+
+
 # --------------------------------------------------------------------------- table
 
 ASSETS = {
@@ -399,6 +719,21 @@ ASSETS = {
     "container/hermiones_bag/clasp_ball.png": a_bag_clasp_ball,
     "container/niffler_pouch/fur.png": a_pouch_fur,
     "container/niffler_pouch/lining.png": a_pouch_lining,
+    "artefact/mirror/frame.png": a_mirror_frame,
+    "artefact/mirror/glass.png": a_mirror_glass,
+    "artefact/mirror/glass_dark.png": a_mirror_glass_dark,
+    "artefact/mirror/fog.png": a_mirror_fog,
+    "artefact/mirror/plaque.png": a_mirror_plaque,
+    "sprites/mirror/button.png": lambda: mirror_button(),
+    "sprites/mirror/button_hover.png": lambda: mirror_button("_hover"),
+    "sprites/mirror/button_off.png": lambda: mirror_button("_off"),
+    "artefact/diary/cover.png": a_diary_cover,
+    "artefact/diary/page.png": a_diary_page,
+    "sprites/diary/button.png": lambda: diary_button(),
+    "sprites/diary/button_hover.png": lambda: diary_button("_hover"),
+    "sprites/diary/button_off.png": lambda: diary_button("_off"),
+    "artefact/pensieve/rim.png": a_pensieve_rim,
+    "artefact/pensieve/memory.png": a_pensieve_memory,
     "character_sheet/icon_tab.png": a_icon_tab,
 }
 
