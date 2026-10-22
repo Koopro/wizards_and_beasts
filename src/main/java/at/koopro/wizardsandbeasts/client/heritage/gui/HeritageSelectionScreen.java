@@ -114,7 +114,7 @@ public class HeritageSelectionScreen extends Screen {
         super.init();
         if (selectedHeritage == null) {
             selectedHeritage = Heritage.values()[0];
-            selectedVariant = selectedHeritage.getSubtypes().get(0);
+            selectedVariant = selectedHeritage.getSubtypes().isEmpty() ? null : selectedHeritage.getSubtypes().get(0);
         }
         rebuild();
     }

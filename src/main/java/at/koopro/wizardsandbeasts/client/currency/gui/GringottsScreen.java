@@ -197,7 +197,7 @@ public class GringottsScreen extends Screen {
         // Deposit and withdraw sit on each coin's own line, at that line's right-hand end. A button
         // beside the number it changes, which the old two rows of "Deposit Galleon" never were.
         Coin[] coins = Coin.values();
-        int moveW = layout.s(MOVE_BTN_W);
+        int moveW = moveW();
         for (int i = 0; i < coins.length; i++) {
             Coin coin = coins[i];
             int rowY = coinRowY(i);
@@ -306,6 +306,16 @@ public class GringottsScreen extends Screen {
     }
 
     /** Each column gets half the content width, less half a gutter. */
+    /**
+     * A coin's deposit/withdraw button. Never narrower than its arrow plus the button's padding: scaled to
+     * 0.85 at 720p the 22px design width left no room for the glyph, and the buttons drew blank. Shared by
+     * the layout and the painting, which clips the coin row's text short of the buttons.
+     */
+    private int moveW() {
+        return Math.max(layout.s(MOVE_BTN_W), font.width(Component.translatable(
+                "gui.wizards_and_beasts.gringotts.deposit.glyph")) + 16);
+    }
+
     /** A button that shares a column with one other: half of it, less the gap between the two. */
     private int halfCol() {
         return (colW() - WizardsMetrics.SPACE_S) / 2;
@@ -355,10 +365,17 @@ public class GringottsScreen extends Screen {
         // Column origins, and the width each figure has before the next thing starts. The wallet
         // column used to be set from the right edge and ran straight under the two move buttons,
         // which is 44px of this row that is not text.
-        int moveW = layout.s(MOVE_BTN_W);
+        int moveW = moveW();
         int buttonsX = x + w - 2 * moveW - WizardsMetrics.SPACE_XS;
-        int vaultCol = x + layout.s(56);
-        int walletCol = x + layout.s(104);
+        // The design positions when they fit; on a narrow panel (720p) the two figure columns slide left of
+        // the buttons, each keeping room for three digits, and the coin name is what gives way.
+        int digits = font.width("000");
+        int walletNeed = Math.max(digits, font.width(Component.translatable("gui.wizards_and_beasts.gringotts.wallet")))
+                + WizardsMetrics.SPACE_S;
+        int vaultNeed = Math.max(digits, font.width(Component.translatable("gui.wizards_and_beasts.gringotts.vault")))
+                + WizardsMetrics.SPACE_S;
+        int walletCol = Math.min(x + layout.s(104), buttonsX - walletNeed);
+        int vaultCol = Math.min(x + layout.s(56), walletCol - vaultNeed);
         int labelW = vaultCol - x - WizardsMetrics.SPACE_S;
         int vaultW = walletCol - vaultCol - WizardsMetrics.SPACE_S;
         int walletW = buttonsX - walletCol - WizardsMetrics.SPACE_S;
@@ -383,7 +400,13 @@ public class GringottsScreen extends Screen {
 
             // Fitted, not clipped. A vault can hold six figures and this column is not six figures
             // wide; GuiText shrinks the glyphs rather than letting the number run into the next one.
-            GuiText.drawFitted(graphics, font, coin.label().getString(), x, textY, labelW, ink);
+            // The full name where it fits; on a narrow panel the coin's unit letter -- the same "G/S/K" the
+            // exchange buttons already speak in -- rather than "G…".
+            String name = coin.label().getString();
+            if (font.width(name) > labelW) {
+                name = Component.translatable("gui.wizards_and_beasts.gringotts.coin." + coin.key + ".short").getString();
+            }
+            GuiText.drawFitted(graphics, font, name, x, textY, labelW, ink);
             GuiText.drawFitted(graphics, font, count(vaultAmount(vault, coin)).getString(),
                     vaultCol, textY, vaultW, ink);
             GuiText.drawFitted(graphics, font, count(walletAmount(inventory, coin)).getString(),

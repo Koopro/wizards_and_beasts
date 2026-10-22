@@ -286,3 +286,19 @@ floo_registration, marauders_map, vocation_selection, skill_access_denied, pensi
   and registration, Imperio, ministry licence, mirror call/view, Ollivander trial, O.W.L. results/sitting/profession,
   skill-access notice, vocation selection, HUD (no spell HUD changes).
 
+### M8 — final validation (2026-10-22)
+- Capture sweep: the ten redesigned screens at 1920x1080 GUI 2/3/4, 1366x768 and 1280x720 GUI 3 (50 shots,
+  `run/screenshots/ui_m8`), reviewed per screen.
+- ✅ Gringotts at 720p: the coin move buttons scaled below the width of their arrow and drew blank; they keep a
+  native minimum (shared by layout and painting). That pushed them over the Wallet figures, so the figure
+  columns now slide left of the buttons sized to their header words, and a coin whose name no longer fits shows
+  its unit letter (G/S/K — the screen's own exchange shorthand) instead of "G…".
+- ✅ Branch review (read-only agent over `dev...feature/ui-overhaul`): slot order vs `quickMoveStack` verified for
+  bench, bag and pouch (incl. baby pouch and pinned slot); heritage gate keeps Esc swallowed and sends nothing in
+  preview; scissors balanced; new lang keys present. Two low risks fixed (heritage first-open guard for a heritage
+  without lineages; spell list never forced taller than its well). Kept by design: ↑/↓ walk the spell list
+  while the search field is focused.
+- ⏳ Gringotts at 720p still shortens "Deposit all/Withdraw all" — the screen scales its whole layout (`Layout.panel`);
+  a native-pixel layout like the spell menu's would remove the remaining squeeze.
+- ⏳ Not exercised by hand in a live client: bench, bag and pouch transfers (shift-click, drag-split, pinned slot).
+

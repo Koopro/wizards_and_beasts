@@ -101,7 +101,8 @@ public record SpellMenuLayout(Mode mode, Rect panel, Rect content, Rect title, i
         int listTop = chipsBottom + 4;
         int listH = library.bottom() - WELL_PAD - listTop;
         // Whole rows only, so the last row is never half under the well's edge.
-        listH = Math.max(ROW_STEP, listH - listH % ROW_STEP);
+        // Never taller than the well leaves: a window too short for one row shows none, not one past the edge.
+        listH = Math.max(0, listH - Math.floorMod(listH, ROW_STEP));
         Rect list = new Rect(library.x() + WELL_PAD, listTop,
                 library.w() - 2 * WELL_PAD - SCROLLBAR_W - 2, listH);
         Rect scrollbar = new Rect(list.right() + 2, listTop, SCROLLBAR_W, listH);
