@@ -138,6 +138,21 @@
           "weight": 12
         }
       ]
+    },
+    {
+      "_comment": "The Mirror of Erised: one cache in forty. The Knockturn dealer's inner circle is the only other way to one.",
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "wizards_and_beasts:mirror_of_erised",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 39
+        }
+      ]
     }
   ]
 }

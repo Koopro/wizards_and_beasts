@@ -1,0 +1,14 @@
+{
+  "text": "erised.wizards_and_beasts.vision.charms_outstanding",
+  "weight": 8,
+  "when": [
+    {
+      "type": "goal",
+      "goal": {
+        "type": "owl_grade",
+        "subject": "charms",
+        "grade": "O"
+      }
+    }
+  ]
+}

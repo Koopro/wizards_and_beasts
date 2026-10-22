@@ -36,28 +36,37 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 /**
- * Photographs a pair of placed Vanishing Cabinets: head-on, from three-quarters, and just after the wand gesture
- * links them (the action-bar line in frame), so the block's look can be judged in the world, not in a model viewer.
+ * Photographs the placed artefacts, so a block's look is judged in the world rather than in a model viewer: a pair
+ * of Vanishing Cabinets head-on, from three-quarters and just after the wand gesture links them (the action-bar line
+ * in frame); then the Mirror of Erised close up, the vision screen of a first gaze, and the reflection it shows once
+ * the day's gazes are spent.
  *
- * <p>Development only, inert unless {@code WB_CABINET_SHOWCASE=1}. {@code WB_CABINET_SHOWCASE_WORLD} names a
- * disposable save (the stage is built into it); shots go to {@code screenshots/cabinet_showcase}.
+ * <p>Development only, inert unless {@code WB_ARTEFACT_SHOWCASE=1}. {@code WB_ARTEFACT_SHOWCASE_WORLD} names a
+ * disposable save (the stage is built into it); shots go to {@code screenshots/artefact_showcase}.
  */
 @EventBusSubscriber(modid = at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID, value = Dist.CLIENT)
-public final class CabinetShowcaseCapture {
+public final class ArtefactShowcaseCapture {
 
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final boolean ENABLED =
-            System.getenv("WB_CABINET_SHOWCASE") != null && !FMLEnvironment.isProduction();
+            System.getenv("WB_ARTEFACT_SHOWCASE") != null && !FMLEnvironment.isProduction();
 
     private record Step(String shot, int ticks, Consumer<ServerPlayer> server) {}
 
     private static final List<Step> SCRIPT = List.of(
-            new Step("", 60, CabinetShowcaseCapture::stage),
+            new Step("", 60, ArtefactShowcaseCapture::stage),
             new Step("front", 20, p -> {}),
             new Step("", 30, p -> look(p, 3.5, -0.5, 135f, 12f)),
             new Step("three_quarter", 20, p -> {}),
-            new Step("", 20, CabinetShowcaseCapture::link),
-            new Step("linked", 10, p -> {}));
+            new Step("", 20, ArtefactShowcaseCapture::link),
+            new Step("linked", 10, p -> {}),
+            new Step("", 30, p -> look(p, -3.5, -3.0, 180f, 12f)),
+            new Step("erised_world", 20, p -> {}),
+            new Step("", 40, p -> at.koopro.wizardsandbeasts.artefact.erised.ErisedService.gaze(p, erised())),
+            new Step("erised_vision", 10, p -> {}),
+            new Step("", 40, ArtefactShowcaseCapture::spendTheDay),
+            new Step("erised_reflection", 10, p -> {}));
+
 
     /** Where the stage was built: the player's feet when it started. */
     private static BlockPos origin = BlockPos.ZERO;
@@ -68,7 +77,7 @@ public final class CabinetShowcaseCapture {
     private static int step;
     private static boolean captureThisFrame;
 
-    private CabinetShowcaseCapture() {}
+    private ArtefactShowcaseCapture() {}
 
     /** A stone floor, a clear box above it, noon, and two cabinets facing the camera across it. */
     private static void stage(ServerPlayer p) {
@@ -91,6 +100,12 @@ public final class CabinetShowcaseCapture {
         }
         place(level, origin.offset(-1, 0, -6), Direction.SOUTH, p);
         place(level, origin.offset(2, 0, -6), Direction.SOUTH, p);
+        BlockState mirror = ModBlocks.MIRROR_OF_ERISED.get().defaultBlockState()
+                .setValue(VanishingCabinetBlock.FACING, Direction.SOUTH);
+        level.setBlock(erised(), mirror.setValue(VanishingCabinetBlock.HALF, DoubleBlockHalf.LOWER), 3);
+        level.setBlock(erised().above(), mirror.setValue(VanishingCabinetBlock.HALF, DoubleBlockHalf.UPPER), 3);
+        p.setData(at.koopro.wizardsandbeasts.registry.ModAttachments.ERISED_HISTORY.get(),
+                at.koopro.wizardsandbeasts.artefact.erised.ErisedHistory.EMPTY);
         look(p, 0.5, 0.5, 180f, 8f);
     }
 
@@ -114,6 +129,18 @@ public final class CabinetShowcaseCapture {
         look(p, 0.5, 0.5, 180f, 8f);
     }
 
+    /** Where the Mirror of Erised stands: left of the cabinets, against the same wall. */
+    private static BlockPos erised() {
+        return origin.offset(-4, 0, -6);
+    }
+
+    /** Uses up the day's gazes, so the next look shows only a reflection. */
+    private static void spendTheDay(ServerPlayer p) {
+        for (int i = 0; i < 3; i++) {
+            at.koopro.wizardsandbeasts.artefact.erised.ErisedService.gaze(p, erised());
+        }
+    }
+
     @SubscribeEvent
     public static void onScreenInit(ScreenEvent.Init.Post event) {
         if (!ENABLED || opened || !(event.getScreen() instanceof TitleScreen)) {
@@ -126,7 +153,7 @@ public final class CabinetShowcaseCapture {
         stage = 1;
         wait = 80;
         mc.createWorldOpenFlows().openWorld(
-                System.getenv().getOrDefault("WB_CABINET_SHOWCASE_WORLD", "wb_cabinet_capture"), () -> stage = 3);
+                System.getenv().getOrDefault("WB_ARTEFACT_SHOWCASE_WORLD", "wb_cabinet_capture"), () -> stage = 3);
     }
 
     @SubscribeEvent
@@ -166,14 +193,14 @@ public final class CabinetShowcaseCapture {
         }
         captureThisFrame = false;
         Minecraft mc = Minecraft.getInstance();
-        Path file = mc.gameDirectory.toPath().resolve(Path.of(Screenshot.SCREENSHOT_DIR, "cabinet_showcase"))
+        Path file = mc.gameDirectory.toPath().resolve(Path.of(Screenshot.SCREENSHOT_DIR, "artefact_showcase"))
                 .resolve(SCRIPT.get(step).shot() + ".png");
         Screenshot.takeScreenshot(mc.getMainRenderTarget(), image -> Util.ioPool().execute(() -> {
             try (image) {
                 Files.createDirectories(file.getParent());
                 image.writeToFile(file);
             } catch (IOException e) {
-                LOGGER.error("Cabinet showcase: cannot write {}", file, e);
+                LOGGER.error("Artefact showcase: cannot write {}", file, e);
             }
         }));
         MinecraftServer server = mc.getSingleplayerServer();
@@ -186,7 +213,7 @@ public final class CabinetShowcaseCapture {
         step++;
         if (step >= SCRIPT.size()) {
             stage = 3;
-            LOGGER.info("Cabinet showcase: done");
+            LOGGER.info("Artefact showcase: done");
             mc.stop();
             return;
         }

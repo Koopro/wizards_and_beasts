@@ -1,0 +1,10 @@
+{
+  "text": "erised.wizards_and_beasts.vision.lycanthropy_moon",
+  "weight": 20,
+  "when": [
+    {
+      "type": "condition",
+      "condition": "lycanthropy"
+    }
+  ]
+}

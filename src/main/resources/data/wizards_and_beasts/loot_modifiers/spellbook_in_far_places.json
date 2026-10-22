@@ -12,6 +12,7 @@
       ]
     }
   ],
+  "place": "far_places",
   "spells": [
     "protego",
     "expecto_patronum",

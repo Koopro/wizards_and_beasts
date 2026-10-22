@@ -1,0 +1,13 @@
+{
+  "text": "erised.wizards_and_beasts.vision.auror_last_dark_wizard",
+  "weight": 10,
+  "when": [
+    {
+      "type": "profession",
+      "professions": [
+        "auror",
+        "hit_wizard"
+      ]
+    }
+  ]
+}

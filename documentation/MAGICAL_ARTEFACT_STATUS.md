@@ -45,6 +45,7 @@ be had in creative mode or through commands.
 | Extendable Ears | Eavesdropping | A plain `Item` | C (§5.4) | Recipe |
 | Omnioculars | Replay and slow motion of a match | A vanilla spyglass | C (§5.4) | Recipe |
 | **Vanishing Cabinet** | Two places joined: what enters one leaves the other | **C.** A bare `Item` whose tooltip promised a function | **A** (Update 2026-10-22) | Recipe; Knockturn dealer |
+| **Mirror of Erised** | Shows the gazer's deepest desire -- and, now and then, the way toward something they have not yet found | **C.** An animated item whose tooltip was its inscription | **A** (Update 2026-10-22, Erised) | Knockturn dealer (inner circle); hidden caches |
 | Peruvian Instant Darkness Powder, Decoy Detonator | Darkness cloud; a distraction | Thrown entities (`WizardingThrownKind`) | A | Recipe |
 
 ## 1. Time-Turner: the wearer goes back, the world does not
@@ -185,3 +186,35 @@ unchanged, so cabinets already in inventories become placeable.
 - **Tests.** Unit: `CabinetPairsTest` (link/sever/share, save round-trip that drops a double-booked cabinet, access
   rule, pocket realm). Game tests: `CabinetTests` (link, travel, private, share, confirmed unlink; breaking severs;
   walled exit; ward).
+
+## Update 2026-10-22 — Mirror of Erised
+
+The Mirror is now a placed, two-block-tall gilded mirror (`artefact/erised/`). The item id `mirror_of_erised` is
+unchanged and keeps its animated model in the hand.
+
+- **What it shows.** Clicking the mirror opens a screen styled as the mirror itself. The vision comes from a
+  datapack table (`data/<ns>/erised_visions/*.json`) whose conditions read the gazer's own records: heritage and
+  variant, lycanthropy or an Obscurus, a companion that died, how many spells and creatures they know, their
+  profession, and career goals such as O.W.L. grades.
+  - Every heritage has visions of its own, with substance rather than a renamed noun: a giant's clans at peace, a
+    centaur's sky read at once, a bound elf's sock.
+  - A unit test checks that no two heritages share a vision.
+  - The last four visions a player saw are not repeated.
+- **Clues.** The day's first gaze may add one clue. A clue points at something the player has not found that they
+  could reach at that moment:
+  - a creature they have not yet observed, in a biome where it actually spawns;
+  - a spell they may learn, with the kind of place whose loot holds it;
+  - a Floo fireplace they may use but never have;
+  - a shop or office they have never dealt with.
+
+  A clue is never given twice.
+- **The pull.** Three gazes a day. The second and third leave Slowness and Hunger (30 s, then 60 s stronger).
+  After the third, the mirror shows only the gazer's reflection until the next day.
+- **Getting one.** The Knockturn dealer sells one a week to inner-circle contacts, and hidden wizarding caches hold
+  one in forty. There is no recipe.
+- **Tests.**
+  - Unit: `ErisedSelectorTest` (the shipped table parses and has its lines; heritage visions are disjoint;
+    conditions, goal, selection determinism and no-repeat; clues never repeat; the day's rules; history limits and
+    round trip), `ErisedLayoutTest`, `SpellSitesTest`.
+  - Game tests: `ErisedTests` (each gazer sees their own; the pull, then the reflection, then a new day; every clue
+    candidate is reachable, with one clue per day).

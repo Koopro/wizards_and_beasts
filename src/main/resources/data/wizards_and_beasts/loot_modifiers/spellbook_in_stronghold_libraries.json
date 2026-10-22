@@ -11,6 +11,7 @@
       ]
     }
   ],
+  "place": "stronghold_library",
   "spells": [
     "stupefy",
     "protego",

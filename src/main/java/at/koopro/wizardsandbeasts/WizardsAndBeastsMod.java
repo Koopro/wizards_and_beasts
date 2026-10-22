@@ -185,6 +185,10 @@ public class WizardsAndBeastsMod {
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "location_reload_listener"),
                     new at.koopro.wizardsandbeasts.location.Locations.Loader());
+            // Mirror of Erised: what the Mirror can show, and to whom (artefact/erised/).
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "erised_vision_reload_listener"),
+                    new at.koopro.wizardsandbeasts.artefact.erised.ErisedVisions.Loader());
             // Treasure sites: which tomb loot carries cursed artefacts, and what curses they bear (treasure/).
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "treasure_site_reload_listener"),

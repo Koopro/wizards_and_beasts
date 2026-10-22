@@ -304,7 +304,132 @@ def a_hermiones_bag():
 
 # --------------------------------------------------------------------------- table
 
+# Mirror of Erised: the screen is the mirror itself -- a gilded frame with a crest for the inscription, smoky
+# glass for the vision, and the clawed feet it stands on. Layout constants are mirrored by `ErisedScreen`.
+ERISED_W, ERISED_H = 192, 232
+ERISED_FRAME = (8, 18, 183, 211)      # outer frame box (x0, y0, x1, y1), inclusive
+ERISED_GLASS = (20, 38, 171, 199)     # the glass inside it
+ERISED_GOLD = [(70, 46, 16), (118, 84, 32), (168, 124, 48), (214, 170, 82), (246, 218, 140)]
+
+
+def _gold(t):
+    """A tone on the gilt ramp, t in [0, 1]."""
+    t = max(0.0, min(1.0, t))
+    i = min(len(ERISED_GOLD) - 2, int(t * (len(ERISED_GOLD) - 1)))
+    f = t * (len(ERISED_GOLD) - 1) - i
+    return mix(ERISED_GOLD[i], ERISED_GOLD[i + 1], f)
+
+
+def a_erised_mirror():
+    """The Mirror of Erised as a screen. The frame is a rounded gilt moulding (lit along its crown, shadowed into
+    the glass and out at the rim) with a bead run, rosettes at the corners and a medallion on the crest; the glass
+    is near-black at the rim, misted and faintly lit toward the centre, with one diagonal sheen."""
+    import math
+    img = Image.new("RGBA", (ERISED_W, ERISED_H), (0, 0, 0, 0))
+    px = img.load()
+    grain = grain_field(ERISED_W, ERISED_H, 41)
+    fx0, fy0, fx1, fy1 = ERISED_FRAME
+    gx0, gy0, gx1, gy1 = ERISED_GLASS
+
+    def gilt(x, y, base):
+        px[x, y] = opaque(_gold(base + grain[y][x] * 0.12))
+
+    def moulding(t):
+        """Tone across a rail, t in [0, 1] from the rim to the glass: dark rim, lit crown, shadowed groove."""
+        return 0.25 + 0.65 * math.sin(math.pi * min(1.0, max(0.0, t))) ** 0.8
+
+    cx = ERISED_W // 2
+    # Crest: an arch over the top rail, moulded along its height, with a medallion at the crown.
+    for x in range(34, ERISED_W - 34):
+        rel = (x - cx) / (ERISED_W / 2 - 34)
+        top = int(round(3 + 15 * rel * rel))
+        for y in range(top, fy0):
+            t = (y - top) / max(1, fy0 - top)
+            tone = moulding(t * 0.9 + 0.05)
+            if y == top:
+                tone = 0.1
+            elif x in (34, ERISED_W - 35):
+                tone = 0.15
+            gilt(x, y, tone)
+    for y in range(0, 16):
+        for x in range(cx - 8, cx + 8):
+            d = math.hypot(x + 0.5 - cx, y + 0.5 - 9)
+            if d <= 7.5:
+                gilt(x, y, 0.1 if d > 6.6 else (0.95 if d < 2.5 else 0.6 - 0.04 * (y - 9)))
+    # Frame rails.
+    side = gx0 - fx0
+    for y in range(fy0, fy1 + 1):
+        for x in range(fx0, fx1 + 1):
+            if gx0 <= x <= gx1 and gy0 <= y <= gy1:
+                continue
+            ts = [(x - fx0) / side if x < gx0 else None,
+                  (fx1 - x) / side if x > gx1 else None,
+                  (y - fy0) / (gy0 - fy0) if y < gy0 else None,
+                  (fy1 - y) / (fy1 - gy1) if y > gy1 else None]
+            t = min(v for v in ts if v is not None)
+            tone = moulding(t)
+            if x in (fx0, fx1) or y in (fy0, fy1):
+                tone = 0.08
+            elif x == fx0 + 1 or y == fy0 + 1:
+                tone = 0.97
+            if gx0 - 1 <= x <= gx1 + 1 and gy0 - 1 <= y <= gy1 + 1:
+                tone = 0.12  # the groove where gilt meets glass
+            gilt(x, y, tone)
+    # The inscription, engraved along the crown of the top rail: glyph-like cuts, not letters -- the words are
+    # mirror-written in canon anyway, and the screen shows the reading as a tooltip.
+    rng = __import__("random").Random(7)
+    ry0 = (fy0 + gy0) // 2 - 2
+    x = gx0 + 6
+    while x < gx1 - 6:
+        width = rng.choice((2, 3, 3, 4))
+        for gx in range(x, min(x + width, gx1 - 6)):
+            for gy in range(ry0, ry0 + 5):
+                if rng.random() < 0.55 or gy in (ry0, ry0 + 4) and rng.random() < 0.4:
+                    px[gx, gy] = opaque(_gold(0.12))
+        x += width + (3 if rng.random() < 0.2 else 1)
+    # Corner rosettes.
+    for rx, ry in (((fx0 + gx0) // 2, (fy0 + gy0) // 2), ((fx1 + gx1) // 2 + 1, (fy0 + gy0) // 2),
+                   ((fx0 + gx0) // 2, (fy1 + gy1) // 2 + 1), ((fx1 + gx1) // 2 + 1, (fy1 + gy1) // 2 + 1)):
+        for y in range(ry - 5, ry + 6):
+            for x in range(rx - 5, rx + 6):
+                d = math.hypot(x - rx, y - ry)
+                if d <= 5.2:
+                    gilt(x, y, 0.1 if d > 4.3 else (0.98 if d < 1.5 else 0.45 + 0.08 * ((x + y) % 2)))
+    # Bead runs, between the rosettes.
+    for y in range(gy0 + 8, gy1 - 6, 6):
+        for x in ((fx0 + gx0) // 2, (fx1 + gx1) // 2 + 1):
+            px[x, y] = opaque(_gold(1.0))
+            px[x, y + 1] = opaque(_gold(0.2))
+    for x in range(gx0 + 8, gx1 - 6, 6):
+        y = (gy1 + fy1) // 2 + 1
+        px[x, y] = opaque(_gold(1.0))
+        px[x + 1, y] = opaque(_gold(0.2))
+    # Glass.
+    gw, gh = gx1 - gx0, gy1 - gy0
+    for y in range(gy0, gy1 + 1):
+        for x in range(gx0, gx1 + 1):
+            u, v = (x - gx0) / gw - 0.5, (y - gy0) / gh - 0.42
+            centre = max(0.0, 1.0 - (u * u * 2.4 + v * v * 2.2))
+            mist = 0.55 + grain[y][x] * 0.6
+            sheen = 1.0 if abs((x - gx0) - 0.6 * (y - gy0) - 14) < 2.5 else 0.0
+            t = 0.06 + 0.62 * centre * centre * mist + 0.07 * sheen
+            px[x, y] = opaque(mix((8, 8, 14), (74, 78, 102), max(0.0, min(1.0, t))))
+    # Clawed feet under the bottom rail: a tapering leg and three toes.
+    for x0 in (gx0 + 2, gx1 - 26):
+        for y in range(fy1 + 1, ERISED_H - 4):
+            half = 10 - (y - fy1) // 2
+            for x in range(x0 + 12 - half, x0 + 12 + half + 1):
+                gilt(x, y, 0.08 if abs(x - (x0 + 12)) == half else moulding((x - (x0 + 12 - half)) / (2 * half)))
+        for toe in (x0 + 4, x0 + 12, x0 + 20):
+            for y in range(ERISED_H - 4, ERISED_H):
+                for x in range(toe - 3, toe + 4):
+                    edge = abs(x - toe) == 3 or y == ERISED_H - 1
+                    gilt(x, y, 0.08 if edge else (0.95 if y == ERISED_H - 4 else 0.5))
+    return img
+
+
 ASSETS = {
+    "erised/mirror.png": a_erised_mirror,
     "container/creative_inventory/tab_main.png": lambda: a_creative_background(PAGE, 3),
     "container/creative_inventory/tab_decorative.png": lambda: a_creative_background(VELLUM, 7),
     "container/hermiones_bag.png": a_hermiones_bag,

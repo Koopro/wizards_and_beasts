@@ -1,0 +1,12 @@
+{
+  "text": "erised.wizards_and_beasts.vision.healer_empty_ward",
+  "weight": 10,
+  "when": [
+    {
+      "type": "profession",
+      "professions": [
+        "healer"
+      ]
+    }
+  ]
+}

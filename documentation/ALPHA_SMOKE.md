@@ -238,3 +238,22 @@ Manual. You need a survival world, two cabinets (from the recipe or `/give`) and
 7. Re-link, then break B: you get one cabinet back, and A reads "Just a cabinet…".
 8. Link a cabinet in the Nether to one in the Overworld and travel both ways. Then try a cabinet inside a trunk
    (pocket realm): it refuses to link.
+
+## Mirror of Erised (2026-10-22, `feat/mirror-of-erised`)
+
+Manual. You need a survival world and a mirror (`/give @s wizards_and_beasts:mirror_of_erised`).
+
+1. Place it: a gilded mirror two blocks tall on clawed feet, facing you.
+2. Click it: the mirror screen opens. The vision fades in from the dark. In a fresh world an italic clue line
+   should appear under the vision (a creature and a biome, a spell and a kind of place, a fireplace, or a shop).
+   Hover the engraved top rail to see the inscription and its reading.
+3. Click it again: a different vision, no clue, "It is hard to look away.", and Slowness plus Hunger.
+4. Click a third time: the effects are stronger. A fourth time: "Only your own face looks back at you, tired."
+   and "Enough for today."
+5. Sleep through to the next day: the mirror shows visions again.
+6. As a giant (or centaur, house-elf, vampire…), the visions are that heritage's own. A player who lost a
+   companion sees it named.
+7. Break it: you get one mirror back, whichever half you broke.
+
+`ArtefactShowcaseCapture` (`WB_ARTEFACT_SHOWCASE=1`, world `wb_cabinet_capture`) photographs it in
+`run/screenshots/artefact_showcase/`.

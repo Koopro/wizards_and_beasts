@@ -77,6 +77,7 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         add(ModBlocks.HUFFLEPUFF_BANNER.get(), this::createDoorTable);
         // Two tall as well: one cabinet back, whichever half was broken.
         add(ModBlocks.VANISHING_CABINET.get(), this::createDoorTable);
+        add(ModBlocks.MIRROR_OF_ERISED.get(), this::createDoorTable);
         dropSelf(ModBlocks.FLOATING_CANDLE.get());
         dropSelf(ModBlocks.BRASS_CAULDRON.get());
         dropSelf(ModBlocks.WIZARDING_COPPER_CAULDRON.get());

@@ -1,0 +1,10 @@
+{
+  "text": "erised.wizards_and_beasts.vision.dragon_bows",
+  "weight": 6,
+  "when": [
+    {
+      "type": "creatures_known",
+      "max": 3
+    }
+  ]
+}

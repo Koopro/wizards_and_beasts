@@ -70,6 +70,10 @@ public final class ClientScreenHooks {
                 new at.koopro.wizardsandbeasts.client.ministry.gui.MinistryLicenceScreen(offHand));
     }
 
+    public static void openErisedScreen(at.koopro.wizardsandbeasts.artefact.erised.ErisedVisionS2CPayload vision) {
+        Minecraft.getInstance().setScreen(new at.koopro.wizardsandbeasts.client.artefact.ErisedScreen(vision));
+    }
+
     public static void openPensieveScreen(List<MemoryEntry> memories) {
         Minecraft.getInstance().setScreen(new PensieveScreen(memories));
     }

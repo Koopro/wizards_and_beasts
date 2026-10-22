@@ -1,0 +1,12 @@
+{
+  "text": "erised.wizards_and_beasts.vision.squib_sparks",
+  "weight": 16,
+  "when": [
+    {
+      "type": "heritage",
+      "variants": [
+        "squib"
+      ]
+    }
+  ]
+}

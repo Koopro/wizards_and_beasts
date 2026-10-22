@@ -1,0 +1,12 @@
+{
+  "text": "erised.wizards_and_beasts.vision.pure_blood_portrait",
+  "weight": 10,
+  "when": [
+    {
+      "type": "heritage",
+      "variants": [
+        "pure_blood"
+      ]
+    }
+  ]
+}

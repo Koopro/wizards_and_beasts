@@ -1,0 +1,12 @@
+{
+  "text": "erised.wizards_and_beasts.vision.goblin_made_returned",
+  "weight": 14,
+  "when": [
+    {
+      "type": "heritage",
+      "heritages": [
+        "goblin"
+      ]
+    }
+  ]
+}

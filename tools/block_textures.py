@@ -739,6 +739,50 @@ def vanishing_cabinet_top():
     return img
 
 
+# Mirror of Erised: the same gilt and smoky glass as its screen (gui_chrome.py `a_erised_mirror`), at block size.
+ERISED_GILT = (176, 132, 54)
+ERISED_GILT_DARK = (96, 64, 22)
+ERISED_GILT_LIGHT = (240, 206, 120)
+ERISED_GLASS = (24, 26, 38)
+
+
+def mirror_of_erised_frame():
+    """Gilt moulding: lit along each 2-px rail's crown, a bead every few texels."""
+    img = Image.new("RGBA", (16, 16), ERISED_GILT + (255,))
+    px = img.load()
+    for y in range(16):
+        for x in range(16):
+            g = 0.82 + 0.3 * noise(61, x, y // 2) + (0.18 if x % 2 == 0 else -0.1)
+            px[x, y] = shade(ERISED_GILT + (255,), g)
+    accents = [((x, y), ERISED_GILT_LIGHT + (255,)) for y in (2, 7, 12) for x in (0, 8)]
+    accents += [((x + 1, y + 1), ERISED_GILT_DARK + (255,)) for (x, y), _ in list(accents)]
+    img.info["accents"] = accents
+    return img
+
+
+def _erised_glass(seed, sheen_offset):
+    """Near-black glass, misted and faintly lit, with one diagonal sheen that runs on across both halves."""
+    img = Image.new("RGBA", (16, 16), ERISED_GLASS + (255,))
+    px = img.load()
+    for y in range(16):
+        for x in range(16):
+            g = 0.7 + 0.5 * noise(seed, x // 2, y // 3) + 0.3 * noise(seed + 9, x, y)
+            if abs(x - 0.6 * (y + sheen_offset) - 2) < 1.0:
+                g += 0.55
+            px[x, y] = shade(ERISED_GLASS + (255,), g)
+    return img
+
+
+def mirror_of_erised_back():
+    """The back: dark boards in a framed panel, as a looking-glass's back is."""
+    img = _cabinet_field(67)
+    d = ImageDraw.Draw(img)
+    d.rectangle([1, 1, 14, 14], outline=CABINET_DARK + (255,))
+    d.line([(2, 14), (14, 14)], fill=shade(CABINET_WOOD + (255,), 1.3))
+    d.line([(14, 2), (14, 14)], fill=shade(CABINET_WOOD + (255,), 1.3))
+    return img
+
+
 ASSETS = {
     # Wall torches deliberately absent: vanilla's template_torch_wall takes the *standing*
     # torch sprite, so a separate <name>_wall_torch.png is never sampled by any model.
@@ -807,6 +851,11 @@ ASSETS = {
     "vanishing_cabinet_front_top": vanishing_cabinet_front_top,
     "vanishing_cabinet_side": vanishing_cabinet_side,
     "vanishing_cabinet_top": vanishing_cabinet_top,
+
+    "mirror_of_erised_frame": mirror_of_erised_frame,
+    "mirror_of_erised_glass_bottom": lambda: _erised_glass(71, 16),
+    "mirror_of_erised_glass_top": lambda: _erised_glass(73, 0),
+    "mirror_of_erised_back": mirror_of_erised_back,
 }
 
 

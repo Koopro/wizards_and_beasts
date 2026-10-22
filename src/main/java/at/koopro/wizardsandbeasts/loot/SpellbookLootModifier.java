@@ -64,19 +64,24 @@ public class SpellbookLootModifier extends LootModifier {
             codecStart(instance).and(instance.group(
                     Codec.STRING.listOf().fieldOf("spells").forGetter(m -> m.spells),
                     Codec.FLOAT.optionalFieldOf("chance", 1.0f).forGetter(m -> m.chance),
-                    SOURCE_ITEM_CODEC.optionalFieldOf("item").forGetter(m -> m.item)
+                    SOURCE_ITEM_CODEC.optionalFieldOf("item").forGetter(m -> m.item),
+                    Codec.STRING.optionalFieldOf("place").forGetter(m -> m.place)
             )).apply(instance, SpellbookLootModifier::new));
 
     private final List<String> spells;
     private final float chance;
     private final Optional<Item> item;
+    /** What kind of place this pool stands for ("village_library"), recorded in {@link SpellSites} when named. */
+    private final Optional<String> place;
 
     public SpellbookLootModifier(LootItemCondition[] conditions, List<String> spells, float chance,
-                                 Optional<Item> item) {
+                                 Optional<Item> item, Optional<String> place) {
         super(conditions);
         this.spells = List.copyOf(spells);
         this.chance = chance;
         this.item = item;
+        this.place = place;
+        place.ifPresent(p -> SpellSites.record(p, this.spells));
     }
 
     @Override

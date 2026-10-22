@@ -1,0 +1,10 @@
+{
+  "text": "erised.wizards_and_beasts.vision.obscurus_quiet",
+  "weight": 20,
+  "when": [
+    {
+      "type": "condition",
+      "condition": "obscurus"
+    }
+  ]
+}

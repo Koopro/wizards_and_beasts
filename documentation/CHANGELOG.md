@@ -4,6 +4,18 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Mirror of Erised (2026-10-22)
+
+- **Added:** the Mirror of Erised is a placeable two-tall mirror. Look into it to see what you most want: the
+  vision depends on who you are (heritage, conditions, lost companions, what you know and do). The day's first look
+  may also hint at something you have not yet found and can reach: a creature, a spell's hiding place, a fireplace,
+  a door. Three looks a day; the second and third pull at you (Slowness, Hunger). It is sold by the Knockturn
+  dealer to the inner circle and found in hidden caches. Existing `mirror_of_erised` items now place it.
+- **Fixed (tests):** `wand_duo_observer_sees_the_beam` failed in about one run in three. Mock players never
+  acknowledge chunk batches, so the test lane's chunk could stay unsent; the harness now acknowledges them.
+  `spell_trace_failure_keeps_book_and_teaches_nothing` failed on some seeds because its "stray" sample could land
+  back inside the corridor.
+
 ### Vanishing Cabinet (2026-10-22)
 
 - **Added:** the Vanishing Cabinet is a placeable two-tall block. Link two cabinets with a wand: sneak and touch

@@ -1,0 +1,28 @@
+{
+  "text": "erised.wizards_and_beasts.vision.not_yet_chosen",
+  "weight": 6,
+  "when": [
+    {
+      "type": "not",
+      "condition": {
+        "type": "profession",
+        "professions": [
+          "auror",
+          "healer",
+          "wandmaker",
+          "magizoologist",
+          "curse_breaker",
+          "potioneer",
+          "hit_wizard",
+          "obliviator",
+          "unspeakable",
+          "professor",
+          "quidditch_player",
+          "journalist",
+          "arithmancer",
+          "herbologist"
+        ]
+      }
+    }
+  ]
+}

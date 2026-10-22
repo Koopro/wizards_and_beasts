@@ -193,6 +193,15 @@ public class ModBlocks {
                     () -> BlockBehaviour.Properties.of().strength(2.5f, 6.0f).sound(SoundType.WOOD)
                             .noOcclusion().pushReaction(PushReaction.BLOCK));
 
+    /**
+     * The Mirror of Erised, two blocks tall. Its item stays {@code CanonItemRegistry.MIRROR_OF_ERISED} (same id), now
+     * a BlockItem of this that keeps its animated hand model.
+     */
+    public static final DeferredBlock<at.koopro.wizardsandbeasts.artefact.erised.MirrorOfErisedBlock> MIRROR_OF_ERISED =
+            BLOCKS.registerBlock("mirror_of_erised", at.koopro.wizardsandbeasts.artefact.erised.MirrorOfErisedBlock::new,
+                    () -> BlockBehaviour.Properties.of().strength(2.0f, 6.0f).sound(SoundType.GLASS)
+                            .noOcclusion().pushReaction(PushReaction.BLOCK));
+
     // --- Pocket dimension blocks ---
 
     public static final DeferredBlock<WardingStoneBlock> WARDING_STONE =

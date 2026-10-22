@@ -472,6 +472,14 @@ public class ModAttachments {
                             .serialize(VeritaserumState.CODEC.fieldOf("veritaserum"))
                             .build());
 
+    /** What the Mirror of Erised has shown this player: gazes today, recent visions, clues given. */
+    public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.artefact.erised.ErisedHistory>> ERISED_HISTORY =
+            ATTACHMENTS.register("erised_history", () -> AttachmentType.builder(
+                            () -> at.koopro.wizardsandbeasts.artefact.erised.ErisedHistory.EMPTY)
+                    .serialize(at.koopro.wizardsandbeasts.artefact.erised.ErisedHistory.CODEC.fieldOf("data"))
+                    .copyOnDeath()
+                    .build());
+
     /** Trials, parcels, survey and Floo seeding ({@code travel.TravelRecord}). */
     public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.travel.TravelRecord>> TRAVEL_RECORD =
             ATTACHMENTS.register("travel_record", () -> AttachmentType.builder(

@@ -612,6 +612,13 @@ public final class ClientPayloadHandlers {
                 ClientScreenHooksInvoker.invoke("openPensieveScreen", List.class, pkt.memories()));
     }
 
+    public static void handleErisedVision(at.koopro.wizardsandbeasts.artefact.erised.ErisedVisionS2CPayload pkt,
+                                          IPayloadContext ctx) {
+        // Reflection invoker, like the Pensieve: keeps the client-only ErisedScreen out of this common class.
+        ctx.enqueueWork(() -> ClientScreenHooksInvoker.invoke("openErisedScreen",
+                at.koopro.wizardsandbeasts.artefact.erised.ErisedVisionS2CPayload.class, pkt));
+    }
+
     public static void handleLicenceOpen(at.koopro.wizardsandbeasts.network.ministry.LicenceOpenS2CPayload pkt,
                                          IPayloadContext ctx) {
         // Reflection invoker, like the Pensieve: keeps this common-side class from forcing

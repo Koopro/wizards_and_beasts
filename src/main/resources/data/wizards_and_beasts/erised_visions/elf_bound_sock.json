@@ -1,0 +1,12 @@
+{
+  "text": "erised.wizards_and_beasts.vision.elf_bound_sock",
+  "weight": 16,
+  "when": [
+    {
+      "type": "heritage",
+      "variants": [
+        "elf_bound"
+      ]
+    }
+  ]
+}

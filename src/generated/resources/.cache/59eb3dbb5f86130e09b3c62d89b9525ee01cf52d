@@ -1,4 +1,4 @@
-// 1.21.11	2026-10-22T10:51:25.3834936	Loot Tables
+// 1.21.11	2026-10-22T16:05:54.0207373	Loot Tables
 05c7325d669887037604a240dc76ed0570decda2 data/wizards_and_beasts/loot_table/blocks/acromantula_web.json
 867bad6d013ba096052ad53738989dcfa000ba61 data/wizards_and_beasts/loot_table/blocks/ash_leaves.json
 8b9ac95b946ea568fd08f217a93dd6f450d08efe data/wizards_and_beasts/loot_table/blocks/ash_log.json
@@ -174,6 +174,7 @@ be323df445e3d957d49c13f20421386e22c1ada8 data/wizards_and_beasts/loot_table/bloc
 0977b57c3992e28918d4fedd6980a3b92490c563 data/wizards_and_beasts/loot_table/blocks/ministry_gilded_black_marble_wall.json
 944e1a8f90a289423517680af9b420998baddd7a data/wizards_and_beasts/loot_table/blocks/ministry_gilded_trim.json
 87b3a890ebb11da2fa7be8d8b7372c9c6df007e5 data/wizards_and_beasts/loot_table/blocks/ministry_wall_panel.json
+6f0745e66df09101f337718b61e8a34f5c6ea788 data/wizards_and_beasts/loot_table/blocks/mirror_of_erised.json
 0c59ca86f3fae603cae47af130b23f73624fd36f data/wizards_and_beasts/loot_table/blocks/moodys_trunk.json
 2a5676be63cb4cf532a9cbf5a78a4bad22b4778e data/wizards_and_beasts/loot_table/blocks/newts_case_item.json
 27092da19a8fa44a42c092313fc791b4e1ae3bc9 data/wizards_and_beasts/loot_table/blocks/occamy_eggshell.json

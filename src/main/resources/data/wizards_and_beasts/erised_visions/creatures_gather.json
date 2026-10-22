@@ -1,0 +1,10 @@
+{
+  "text": "erised.wizards_and_beasts.vision.creatures_gather",
+  "weight": 8,
+  "when": [
+    {
+      "type": "creatures_known",
+      "min": 15
+    }
+  ]
+}

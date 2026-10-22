@@ -35,8 +35,10 @@ public final class CanonItemRegistry {
             ModItems.ITEMS.registerItem("tales_of_beedle_the_bard", Item::new);
     public static final DeferredItem<Item> SWORD_OF_GRYFFINDOR =
             ModItems.ITEMS.registerItem("sword_of_gryffindor", Item::new);
-    public static final DeferredItem<Item> MIRROR_OF_ERISED =
-            ModItems.ITEMS.registerItem("mirror_of_erised", AnimatedItem.Plain::new);
+    /** Places the Mirror of Erised block; same id as the plain item it was, so carried mirrors carry over. */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.artefact.erised.MirrorOfErisedItem> MIRROR_OF_ERISED =
+            ModItems.ITEMS.registerItem("mirror_of_erised", props -> new at.koopro.wizardsandbeasts.artefact.erised
+                    .MirrorOfErisedItem(ModBlocks.MIRROR_OF_ERISED.get(), props.stacksTo(1)));
     public static final DeferredItem<Item> ELIXIR_OF_LIFE =
             ModItems.ITEMS.registerItem("elixir_of_life", Item::new);
     public static final DeferredItem<Item> GOBLET_OF_FIRE =

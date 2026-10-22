@@ -1,0 +1,13 @@
+{
+  "text": "erised.wizards_and_beasts.vision.elf_free_table",
+  "weight": 14,
+  "when": [
+    {
+      "type": "heritage",
+      "variants": [
+        "elf_free",
+        "elf_hall"
+      ]
+    }
+  ]
+}

@@ -14,6 +14,12 @@ public final class ModNetworkTrinkets {
                 PensieveOpenS2CPayload.STREAM_CODEC,
                 ClientPayloadHandlers::handlePensieveOpen);
 
+        // Mirror of Erised
+        registrar.playToClient(
+                at.koopro.wizardsandbeasts.artefact.erised.ErisedVisionS2CPayload.TYPE,
+                at.koopro.wizardsandbeasts.artefact.erised.ErisedVisionS2CPayload.STREAM_CODEC,
+                ClientPayloadHandlers::handleErisedVision);
+
         // Two-Way Mirror
         registrar.playToClient(
                 MirrorOpenS2CPayload.TYPE,

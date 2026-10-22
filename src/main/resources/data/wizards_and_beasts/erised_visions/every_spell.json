@@ -1,0 +1,10 @@
+{
+  "text": "erised.wizards_and_beasts.vision.every_spell",
+  "weight": 8,
+  "when": [
+    {
+      "type": "spells_known",
+      "min": 20
+    }
+  ]
+}

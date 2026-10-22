@@ -1,0 +1,12 @@
+{
+  "text": "erised.wizards_and_beasts.vision.muggle_born_platform",
+  "weight": 14,
+  "when": [
+    {
+      "type": "heritage",
+      "variants": [
+        "muggle_born"
+      ]
+    }
+  ]
+}

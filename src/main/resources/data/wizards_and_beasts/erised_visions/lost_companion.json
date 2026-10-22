@@ -1,0 +1,10 @@
+{
+  "text": "erised.wizards_and_beasts.vision.lost_companion",
+  "weight": 22,
+  "when": [
+    {
+      "type": "lost_companion"
+    }
+  ],
+  "arg": "lost_companion"
+}

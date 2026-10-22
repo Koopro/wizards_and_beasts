@@ -1,0 +1,12 @@
+{
+  "text": "erised.wizards_and_beasts.vision.wizardkind_atrium",
+  "weight": 8,
+  "when": [
+    {
+      "type": "heritage",
+      "heritages": [
+        "wizardkind"
+      ]
+    }
+  ]
+}

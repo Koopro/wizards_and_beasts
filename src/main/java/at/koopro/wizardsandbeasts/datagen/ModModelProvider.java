@@ -299,6 +299,7 @@ public class ModModelProvider extends ModelProvider {
         createHouseBanner(blockModels, ModBlocks.HUFFLEPUFF_BANNER.get());
 
         createVanishingCabinet(blockModels, ModBlocks.VANISHING_CABINET.get());
+        createMirrorOfErised(blockModels, ModBlocks.MIRROR_OF_ERISED.get());
 
         TextureMapping torchCross = TextureMapping.cross(Identifier.withDefaultNamespace("block/torch"));
         // The placed candle used to draw the vanilla torch cross, so the block in the world
@@ -821,6 +822,67 @@ public class ModModelProvider extends ModelProvider {
                 TextureMapping.getBlockTexture(block, "_front_top"));
         Identifier lower = cabinetLowerModel().createWithSuffix(block, "_bottom", lowerTextures, blockModels.modelOutput);
         Identifier upper = cabinetUpperModel().createWithSuffix(block, "_upper", upperTextures, blockModels.modelOutput);
+
+        blockModels.blockStateOutput.accept(MultiVariantGenerator.dispatch(block)
+                .with(PropertyDispatch.initial(BlockStateProperties.DOUBLE_BLOCK_HALF)
+                        .select(DoubleBlockHalf.LOWER, BlockModelGenerators.plainVariant(lower))
+                        .select(DoubleBlockHalf.UPPER, BlockModelGenerators.plainVariant(upper)))
+                .with(BlockModelGenerators.ROTATION_HORIZONTAL_FACING));
+    }
+
+    /**
+     * Lower half of the Mirror of Erised, authored facing north: two clawed feet, the side posts, the bottom rail and
+     * the glass, whose north face is the mirror and south face its wooden back.
+     */
+    private static ExtendedModelTemplate erisedLowerModel() {
+        ExtendedModelTemplateBuilder builder = prop(TextureSlot.PARTICLE, TextureSlot.SIDE, TextureSlot.FRONT, TextureSlot.END);
+        for (float x : new float[] { 2, 11 }) {
+            builder.element(e -> e.from(x, 0, 6).to(x + 3, 2, 11)
+                    .textureAll(TextureSlot.SIDE)
+                    .face(Direction.DOWN, f -> f.texture(TextureSlot.SIDE).cullface(Direction.DOWN)));
+        }
+        for (float x : new float[] { 1, 13 }) {
+            builder.element(e -> e.from(x, 2, 7).to(x + 2, 16, 9).textureAll(TextureSlot.SIDE));
+        }
+        return builder
+                .element(e -> e.from(3, 2, 7).to(13, 4, 9).textureAll(TextureSlot.SIDE))
+                .element(e -> e.from(3, 4, 7.5F).to(13, 16, 8.5F)
+                        .textureAll(TextureSlot.SIDE)
+                        .face(Direction.NORTH, f -> f.texture(TextureSlot.FRONT))
+                        .face(Direction.SOUTH, f -> f.texture(TextureSlot.END)))
+                .build();
+    }
+
+    /** Upper half: the rest of the glass between the posts, the top rail, and a crest over it. */
+    private static ExtendedModelTemplate erisedUpperModel() {
+        ExtendedModelTemplateBuilder builder = prop(TextureSlot.PARTICLE, TextureSlot.SIDE, TextureSlot.FRONT, TextureSlot.END);
+        for (float x : new float[] { 1, 13 }) {
+            builder.element(e -> e.from(x, 0, 7).to(x + 2, 12, 9).textureAll(TextureSlot.SIDE));
+        }
+        return builder
+                .element(e -> e.from(1, 12, 7).to(15, 14, 9).textureAll(TextureSlot.SIDE))
+                .element(e -> e.from(4, 14, 7.25F).to(12, 16, 8.75F).textureAll(TextureSlot.SIDE))
+                .element(e -> e.from(3, 0, 7.5F).to(13, 12, 8.5F)
+                        .textureAll(TextureSlot.SIDE)
+                        .face(Direction.NORTH, f -> f.texture(TextureSlot.FRONT))
+                        .face(Direction.SOUTH, f -> f.texture(TextureSlot.END)))
+                .build();
+    }
+
+    /**
+     * The Mirror of Erised: two halves by {@code DOUBLE_BLOCK_HALF}, rotated as one by facing, as the cabinet. The
+     * item keeps its animated hand model and flat icon from the canon-stub loop.
+     */
+    private void createMirrorOfErised(BlockModelGenerators blockModels, Block block) {
+        Identifier frame = TextureMapping.getBlockTexture(block, "_frame");
+        TextureMapping lowerTextures = new TextureMapping()
+                .put(TextureSlot.PARTICLE, frame).put(TextureSlot.SIDE, frame)
+                .put(TextureSlot.END, TextureMapping.getBlockTexture(block, "_back"))
+                .put(TextureSlot.FRONT, TextureMapping.getBlockTexture(block, "_glass_bottom"));
+        TextureMapping upperTextures = lowerTextures.copyAndUpdate(TextureSlot.FRONT,
+                TextureMapping.getBlockTexture(block, "_glass_top"));
+        Identifier lower = erisedLowerModel().createWithSuffix(block, "_bottom", lowerTextures, blockModels.modelOutput);
+        Identifier upper = erisedUpperModel().createWithSuffix(block, "_upper", upperTextures, blockModels.modelOutput);
 
         blockModels.blockStateOutput.accept(MultiVariantGenerator.dispatch(block)
                 .with(PropertyDispatch.initial(BlockStateProperties.DOUBLE_BLOCK_HALF)
