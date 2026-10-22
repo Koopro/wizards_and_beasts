@@ -194,6 +194,7 @@ public final class UiScreenCapture {
                 Step.server("hermiones_bag", UiScreenCapture::openHermionesBag),
                 Step.server("niffler_pouch", UiScreenCapture::openNifflerPouch),
                 Step.client("gringotts", () -> open(new at.koopro.wizardsandbeasts.client.currency.gui.GringottsScreen())),
+                Step.server("gringotts_filled", UiScreenCapture::openGringottsFilled),
                 Step.client("floo_network", () -> open(new at.koopro.wizardsandbeasts.client.floo.gui.FlooNetworkScreen(
                         List.of(new at.koopro.wizardsandbeasts.floo.FlooDestinationDto("Diagon Alley", "Overworld", true, 0),
                                 new at.koopro.wizardsandbeasts.floo.FlooDestinationDto("The Burrow", "Overworld", true, 3),
@@ -362,6 +363,25 @@ public final class UiScreenCapture {
                 (id, inv, p) -> new at.koopro.wizardsandbeasts.entity.niffler.NifflerPouchMenu(id, inv, niffler),
                 net.minecraft.network.chat.Component.translatable("container.wizards_and_beasts.niffler_pouch")),
                 buf -> buf.writeInt(eid));
+    }
+
+    /**
+     * The counter with something to show: coins in the inventory, a vault holding some of each, a Dragot or
+     * two in the purse, opened through the server's own sync (which also sends the Dragot quote when the
+     * market is on). The capture world is a disposable copy.
+     */
+    private static void openGringottsFilled(ServerPlayer player) {
+        var inv = player.getInventory();
+        inv.add(new net.minecraft.world.item.ItemStack(at.koopro.wizardsandbeasts.registry.CurrencyItemRegistry.GALLEON.get(), 23));
+        inv.add(new net.minecraft.world.item.ItemStack(at.koopro.wizardsandbeasts.registry.CurrencyItemRegistry.SICKLE.get(), 41));
+        inv.add(new net.minecraft.world.item.ItemStack(at.koopro.wizardsandbeasts.registry.CurrencyItemRegistry.KNUT.get(), 57));
+        inv.add(new net.minecraft.world.item.ItemStack(at.koopro.wizardsandbeasts.registry.CurrencyItemRegistry.DRAGOT.get(), 3));
+        var vault = player.getData(at.koopro.wizardsandbeasts.registry.ModAttachments.VAULT_DATA.get());
+        vault.depositGalleons(1250);
+        vault.depositSickles(16);
+        vault.depositKnuts(28);
+        at.koopro.wizardsandbeasts.network.currency.DragotQuoteS2CPayload.sendToPlayer(player);
+        at.koopro.wizardsandbeasts.network.currency.GringottsOpenS2CPayload.sendToPlayer(player);
     }
 
     private static void openBench(ServerPlayer player) {

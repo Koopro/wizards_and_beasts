@@ -28,7 +28,7 @@ from PIL import Image, ImageDraw
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from artgen_common import client_jar_texture, is_regenerable, marker, save  # noqa: E402
-from gui_parchment import (BORDER, INNER, PANEL, grain_field, mix, panel,  # noqa: E402
+from gui_parchment import (BORDER, INNER, PANEL, grain_field, mix, panel, periodic_noise,  # noqa: E402
                            paper_colour, shade, skin, slice_tiled)
 
 GUI = "src/main/resources/assets/wizards_and_beasts/textures/gui"
@@ -708,6 +708,114 @@ def a_pensieve_memory():
     return img
 
 
+# --------------------------------------------------------------------------- Gringotts
+#
+# The bank's hall: white marble veined in grey with a gold inlay line, framing two ledger pages (the
+# goblins' cream stock with an oxblood edge; the screen rules it). Polished gold buttons, with a pressed
+# face for the chosen amount. Java: `GringottsScreen`.
+
+MARBLE = dict(
+    outline=rgb("#4A453D"), d=rgb("#D3CFC7"), m=rgb("#E9E6E0"), l=rgb("#F4F2EE"),
+    vein=rgb("#BDB8AF"), vein_faint=rgb("#D6D2CA"),
+)
+LEDGER = dict(
+    paper=rgb("#EFE4C6"), paper_d=rgb("#E3D5B0"), paper_l=rgb("#F5ECD3"), edge=rgb("#8E6A60"),
+    shadow=rgb("#CDBD97"),
+)
+GOLD = dict(
+    edge=rgb("#6E4F1C"), lo=rgb("#B8954A"), face=rgb("#E3C77F"), hi=rgb("#F6E3A8"),
+    face_hover=rgb("#EED593"), face_off=rgb("#CDBF9E"), edge_off=rgb("#9A8B6E"),
+    face_sel=rgb("#C79A45"), hi_sel=rgb("#A87E33"), lo_sel=rgb("#DDB766"), edge_sel=rgb("#4E3410"),
+)
+
+
+def a_gringotts_marble():
+    """White marble, 64x64 on 8: a soft cloud in three tones crossed by thin grey veins (diagonal runs,
+    periodic in INNER), an outline, a lit bevel, and a gold inlay line five pixels in."""
+    mb = MARBLE
+    P = BAG_TILE
+    img = Image.new("RGBA", (P, P))
+    px = img.load()
+    cloud = grain_field(P + INNER, P + INNER, 109, 0.9)
+    # Veins: one long meandering diagonal and a fainter companion per tile. y = x + sines of x, taken
+    # mod INNER, so each wraps onto itself across the tile; consecutive points are joined so the line is
+    # unbroken.
+    import math
+    for y in range(P):
+        for x in range(P):
+            v = cloud[(y - BORDER) % INNER][(x - BORDER) % INNER]
+            px[x, y] = opaque(mb["d"] if v < -0.7 else mb["l"] if v > 0.6 else mb["m"])
+    veins = (("vein", 0, 5.0, 2.0), ("vein_faint", 22, 3.0, 1.5))
+    for tone, shift, a1, a2 in veins:
+        prev = None
+        for gx in range(INNER + 1):
+            gy = int(round(gx + shift + a1 * math.sin(2 * math.pi * gx / INNER)
+                           + a2 * math.sin(6 * math.pi * gx / INNER + 1.0)))
+            ys = [gy] if prev is None else range(min(prev, gy), max(prev, gy) + 1)
+            for yy in ys:
+                for tx in range(gx + BORDER - INNER, P, INNER):
+                    for ty in range((yy % INNER) + BORDER - INNER, P, INNER):
+                        if 0 <= tx < P and 0 <= ty < P:
+                            px[tx, ty] = opaque(mb[tone])
+            prev = gy
+    for y in range(P):
+        for x in range(P):
+            e = min(x, y, P - 1 - x, P - 1 - y)
+            lit = (y == e or x == e) and not (P - 1 - y == e or P - 1 - x == e)
+            if e == 0:
+                px[x, y] = opaque(mb["outline"])
+            elif e == 1:
+                px[x, y] = opaque(mb["l"] if lit else mb["vein"])
+            elif e == 4:
+                px[x, y] = opaque(PAGE["gilt"] if lit else PAGE["gilt_d"])
+            elif e == 5:
+                px[x, y] = opaque(PAGE["gilt_l"] if lit else PAGE["gilt"])
+    return img
+
+
+def a_gringotts_ledger():
+    """A ledger page, 64x64 on 8: cream stock with a slow grain, an oxblood edge, a shadow along the top
+    and left where it lies on the marble. Ruling is the screen's, under each row."""
+    lg = LEDGER
+    P = BAG_TILE
+    img = Image.new("RGBA", (P, P))
+    px = img.load()
+    grain = grain_field(P + INNER, P + INNER, 113, 0.6)
+    for y in range(P):
+        for x in range(P):
+            v = grain[(y - BORDER) % INNER][(x - BORDER) % INNER]
+            px[x, y] = opaque(lg["paper_d"] if v < -0.8 else lg["paper_l"] if v > 0.9 else lg["paper"])
+    d = ImageDraw.Draw(img)
+    d.rectangle([0, 0, P - 1, P - 1], outline=opaque(lg["edge"]))
+    d.line([(1, 1), (P - 2, 1)], fill=opaque(lg["shadow"]))
+    d.line([(1, 1), (1, P - 2)], fill=opaque(lg["shadow"]))
+    return img
+
+
+def gringotts_button(state=""):
+    """Polished gold, 32x32 cut on 4, rows uniform across x. `_select` is pressed: darker face, the
+    bevel inverted, so a chosen amount reads as held down rather than as merely tinted."""
+    g = GOLD
+    face, hi, lo, edge = g["face"], g["hi"], g["lo"], g["edge"]
+    if state == "_hover":
+        face = g["face_hover"]
+    elif state == "_off":
+        face, hi, lo, edge = g["face_off"], g["face_off"], g["face_off"], g["edge_off"]
+    elif state == "_select":
+        face, hi, lo, edge = g["face_sel"], g["hi_sel"], g["lo_sel"], g["edge_sel"]
+    B = 32
+    img, d = canvas(B, B)
+    d.rectangle([0, 0, B - 1, B - 1], fill=opaque(face))
+    d.line([(1, 1), (B - 2, 1)], fill=opaque(hi))
+    d.line([(1, 1), (1, B - 2)], fill=opaque(hi))
+    d.line([(1, B - 2), (B - 2, B - 2)], fill=opaque(lo))
+    d.line([(B - 2, 1), (B - 2, B - 2)], fill=opaque(lo))
+    d.rectangle([0, 0, B - 1, B - 1], outline=opaque(edge))
+    for c in ((0, 0), (B - 1, 0), (0, B - 1), (B - 1, B - 1)):
+        img.putpixel(c, (0, 0, 0, 0))
+    return img
+
+
 # --------------------------------------------------------------------------- table
 
 ASSETS = {
@@ -734,6 +842,12 @@ ASSETS = {
     "sprites/diary/button_off.png": lambda: diary_button("_off"),
     "artefact/pensieve/rim.png": a_pensieve_rim,
     "artefact/pensieve/memory.png": a_pensieve_memory,
+    "artefact/gringotts/marble.png": a_gringotts_marble,
+    "artefact/gringotts/ledger.png": a_gringotts_ledger,
+    "sprites/gringotts/button.png": lambda: gringotts_button(),
+    "sprites/gringotts/button_hover.png": lambda: gringotts_button("_hover"),
+    "sprites/gringotts/button_off.png": lambda: gringotts_button("_off"),
+    "sprites/gringotts/button_select.png": lambda: gringotts_button("_select"),
     "character_sheet/icon_tab.png": a_icon_tab,
 }
 

@@ -318,3 +318,20 @@ Same treatment as Hermione's bag and the Niffler's pouch; art in `gui_chrome.py`
   parchment is the object).
 - Seen at 1080p GUI 3/4 and 720p GUI 3 (`run/screenshots/ui_artefacts*`).
 
+### Gringotts — rebuilt from scratch (2026-10-22, user: "scrap the structure and redo it")
+- Was: a scaled 400x256 ledger sheet, fifteen buttons at fixed design widths (labels and arrows no longer fitted
+  at 720p), and the whole screen recreated on every vault sync (the server re-sends "open" after each action).
+- Now: the bank's white marble (gold inlay) round two ledger pages, native-pixel `GringottsLayout` + test
+  (1080p GUI 2/3/4, 768p, 720p, 320x240; tabs "Vault | Counter" under 360px of content).
+  - **Vault page:** each coin a row — real item icon, name, vault count, ◀ ▶, wallet count — so the arrows sit
+    between the two figures they move coins between. Amount picker 1 / 10 / 64 / All (the server always took an
+    amount and caps it at 4096). Deposit all / Withdraw all; totals on a double-ruled foot (Knut total on hover).
+  - **Counter page:** "Exchange, within your vault" (4 trades), Dragots with the rate, a ▲/▼ drift chip and the
+    purse, Sell/Buy 1 and 10, Bank business.
+  - Controls that cannot act are greyed from the synced vault and inventory, mirroring the server's checks
+    (it still decides). Arrow tooltips say how many move ("Deposit 10 Galleons into your vault").
+  - `ClientScreenHooks.openGringottsScreen` keeps an open counter instead of replacing it, so the amount, tab
+    and focus survive each action.
+- Kit: `ThemedChip.skinned(…)` (a `button_select` pressed face). Art: `gui_chrome.py` `artefact/gringotts/`,
+  `sprites/gringotts/`. 8 obsolete lang keys removed, 23 added. Capture step `gringotts_filled`.
+

@@ -39,7 +39,15 @@ public final class ClientScreenHooks {
                         hearthPos, currentAddress, feeKnuts));
     }
 
+    /**
+     * Opens the counter -- or, when it is already open, leaves it be: the server sends this after every
+     * vault action, and the screen reads the synced vault live. Replacing it each time reset the chosen
+     * amount, the tab and keyboard focus on every click.
+     */
     public static void openGringottsScreen() {
+        if (Minecraft.getInstance().screen instanceof GringottsScreen) {
+            return;
+        }
         Minecraft.getInstance().setScreen(new GringottsScreen());
     }
 
