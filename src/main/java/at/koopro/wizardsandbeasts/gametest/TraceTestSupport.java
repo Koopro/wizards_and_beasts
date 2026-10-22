@@ -43,8 +43,30 @@ final class TraceTestSupport {
         SpellTraceService.backdateForTest(player, HUMAN_TICKS);
         double[] xy = centreLine(c.path());
         int mid = xy.length / 4 * 2;
-        xy[mid] = Math.min(1.0, xy[mid] + c.difficulty().halfWidth() * 4);
+        double[] stray = offPath(c.path(), xy[mid], xy[mid + 1], c.difficulty().halfWidth());
+        xy[mid] = stray[0];
+        xy[mid + 1] = stray[1];
         return SpellTraceService.submit(player, c.id(), false, xy);
+    }
+
+    /**
+     * A point on the canvas near ({@code x}, {@code y}) that lies well outside the corridor. It used to be the
+     * sample nudged right by four half-widths and clamped to the canvas. Where the path hugged the right edge, or
+     * ran sideways at that sample, the nudge stayed inside the corridor and the "stray" trace passed. Which template
+     * a seed drew decided it, so the test failed in some runs (2026-10-22).
+     */
+    static double[] offPath(TracePath path, double x, double y, double halfWidth) {
+        for (double reach = 4 * halfWidth; reach <= 1.0; reach += halfWidth) {
+            for (int dir = 0; dir < 8; dir++) {
+                double a = dir * Math.PI / 4;
+                double px = x + Math.cos(a) * reach;
+                double py = y + Math.sin(a) * reach;
+                if (px >= 0 && px <= 1 && py >= 0 && py <= 1 && path.nearest(px, py).distance() > 3 * halfWidth) {
+                    return new double[] { px, py };
+                }
+            }
+        }
+        throw new IllegalStateException("no point on the canvas is off this path");
     }
 
     /** The path's centre line, sampled every 0.004 canvas units. */

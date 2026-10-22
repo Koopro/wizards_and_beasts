@@ -321,6 +321,31 @@ public final class WizardTestSupport {
      * a cleanup step can run for a player the failed step never got as far as creating — and a {@code null} handed
      * to {@code PlayerList.remove} crashes the whole game-test server from inside a logout listener.
      */
+    /**
+     * Delivers the chunks under {@code watched} to {@code player} the way a real client would let the server: by
+     * acknowledging each chunk batch.
+     *
+     * <p>A mock connection never acknowledges one, and {@code PlayerChunkSender} sends no second batch until the
+     * first is acknowledged. So every chunk a mock player comes to view after its first batch stays <em>pending</em>,
+     * and {@code ChunkMap.isChunkTracked} refuses to pair the player with any entity standing in a pending chunk.
+     * Whether a scenario's chunk made the first batch depends on where the batch layout put it: that is how
+     * {@code wand_duo_observer_sees_the_beam} came to fail in some runs and pass in others (2026-10-22).
+     */
+    public static void deliverChunks(ServerPlayer player, net.minecraft.world.entity.Entity... watched) {
+        var sender = player.connection.chunkSender;
+        for (int batch = 0; batch < 32; batch++) {
+            boolean pending = sender.isPending(player.chunkPosition().toLong());
+            for (net.minecraft.world.entity.Entity entity : watched) {
+                pending |= sender.isPending(entity.chunkPosition().toLong());
+            }
+            if (!pending) {
+                return;
+            }
+            sender.onChunkBatchReceivedByClient(64.0f);
+            sender.sendNextChunks(player);
+        }
+    }
+
     public static void retire(GameTestHelper helper, @org.jspecify.annotations.Nullable ServerPlayer player) {
         if (player != null) {
             helper.getLevel().getServer().getPlayerList().remove(player);

@@ -516,7 +516,10 @@ public final class WandCastRaceTests {
                 .thenIdle(TRACKING_SETTLE_TICKS)
                 .thenExecute(() -> {
                     // A real client's movement packets run ServerChunkCache.move, which is where vanilla pairs a
-                    // player with the entities in chunks it has been sent. A mock client sends none.
+                    // player with the entities in chunks it has been sent. A mock client sends none -- and never
+                    // acknowledges a chunk batch either, so the lane's chunk may not have been sent at all.
+                    WizardTestSupport.deliverChunks(a, b, target);
+                    WizardTestSupport.deliverChunks(b, a, target);
                     helper.getLevel().getChunkSource().move(a);
                     helper.getLevel().getChunkSource().move(b);
                 })
