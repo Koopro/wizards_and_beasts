@@ -16,6 +16,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUseAnimation;
@@ -107,6 +110,77 @@ public class BrewItem extends ConsumedItem {
         ItemStack stack = new ItemStack(at.koopro.wizardsandbeasts.registry.ConsumableItemRegistry.BREW.get());
         stack.set(ModDataComponents.BREW_ID.get(), brew.id());
         return stack;
+    }
+
+    /** The brew whose bottle takes a hair from the person it is pressed against. */
+    public static final String POLYJUICE = "wizards_and_beasts:polyjuice_potion";
+    /** The brew that is poured over a petrified person rather than drunk by them. */
+    public static final String MANDRAKE_RESTORATION = "wizards_and_beasts:mandrake_restoration_draught";
+
+    /**
+     * Two brews are used on another person. A Polyjuice bottle pressed to someone takes one of their hairs (a
+     * bottle of a stack is split off for it); a Mandrake Restoration Draught is poured over someone petrified, who
+     * cannot lift a bottle themselves. Both answer on the client too, so the click is not also taken as a drink.
+     */
+    @Override
+    public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity target,
+                                                  InteractionHand hand) {
+        String brewId = stack.get(ModDataComponents.BREW_ID.get());
+        if (!(target instanceof Player other) || other == player
+                || !(POLYJUICE.equals(brewId) || MANDRAKE_RESTORATION.equals(brewId))) {
+            return InteractionResult.PASS;
+        }
+        if (player instanceof ServerPlayer user && other instanceof ServerPlayer patient) {
+            if (POLYJUICE.equals(brewId)) {
+                takeHair(stack, user, patient);
+            } else {
+                pourOver(stack, user, patient);
+            }
+        }
+        return InteractionResult.SUCCESS;
+    }
+
+    private static void takeHair(ItemStack stack, ServerPlayer user, ServerPlayer target) {
+        if (at.koopro.wizardsandbeasts.polyjuice.PolyjuiceSample.read(stack).isPresent()) {
+            user.displayClientMessage(Component.translatable("brew.wizards_and_beasts.polyjuice.has_hair"), true);
+            return;
+        }
+        ItemStack bottle = stack.getCount() > 1 ? stack.split(1) : stack;
+        at.koopro.wizardsandbeasts.polyjuice.PolyjuiceSample.write(bottle, target.getUUID(), target.getName().getString());
+        if (bottle != stack) {
+            at.koopro.wizardsandbeasts.util.InventoryHandover.giveOrDrop(user, bottle);
+        }
+        user.displayClientMessage(Component.translatable("brew.wizards_and_beasts.polyjuice.took_hair",
+                target.getDisplayName()), true);
+        // Not who: a hair goes missing unnoticed, but not unfelt.
+        target.displayClientMessage(Component.translatable("brew.wizards_and_beasts.polyjuice.hair_taken")
+                .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC), true);
+        user.level().playSound(null, target.getX(), target.getY(), target.getZ(),
+                SoundEvents.SHEEP_SHEAR, user.getSoundSource(), 0.4f, 1.6f);
+    }
+
+    private static void pourOver(ItemStack stack, ServerPlayer user, ServerPlayer target) {
+        if (!at.koopro.wizardsandbeasts.spell.petrify.PetrifyServerLogic.isPetrified(target)) {
+            user.displayClientMessage(Component.translatable("brew.wizards_and_beasts.restoration.not_petrified",
+                    target.getDisplayName()), true);
+            return;
+        }
+        if (!at.koopro.wizardsandbeasts.brew.tuning.BrewTuning.enabled(MANDRAKE_RESTORATION)) {
+            user.displayClientMessage(Component.translatable("brew.wizards_and_beasts.brew_disabled"), true);
+            return;
+        }
+        at.koopro.wizardsandbeasts.spell.petrify.PetrifyServerLogic.cure((net.minecraft.server.level.ServerLevel)
+                target.level(), target);
+        if (!user.getAbilities().instabuild) {
+            stack.shrink(1);
+            at.koopro.wizardsandbeasts.util.InventoryHandover.giveOrDrop(user,
+                    new ItemStack(net.minecraft.world.item.Items.GLASS_BOTTLE));
+        }
+        user.displayClientMessage(Component.translatable("brew.wizards_and_beasts.restoration.restored",
+                target.getDisplayName()), true);
+        target.displayClientMessage(Component.translatable("brew.wizards_and_beasts.restoration.restored_by",
+                user.getDisplayName()), true);
+        user.awardStat(Stats.ITEM_USED.get(stack.getItem()));
     }
 
     @Override

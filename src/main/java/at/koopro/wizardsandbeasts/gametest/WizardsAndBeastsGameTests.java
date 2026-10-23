@@ -91,6 +91,7 @@ public final class WizardsAndBeastsGameTests {
         BrewingFixTests.contribute(registrar);
         RecipeKnowledgeTests.contribute(registrar);
         BrewQualityTests.contribute(registrar);
+        BrewSourceTests.contribute(registrar);
         AuthorityTests.contribute(registrar);
         CanonRulingTests.contribute(registrar);
         CauldronBrewingTests.contribute(registrar);

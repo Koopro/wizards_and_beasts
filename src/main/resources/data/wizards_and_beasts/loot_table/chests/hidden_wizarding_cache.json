@@ -178,6 +178,21 @@
       ]
     },
     {
+      "_comment": "Hidebehind shadow essence: one cache in six. The Hidebehind does not walk these lands, so the essence for the shadow draught is something a smuggler left behind, never something hunted.",
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "wizards_and_beasts:hidebehind_shadow_essence",
+          "weight": 1,
+          "functions": [
+            { "function": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 1, "max": 2 } }
+          ]
+        },
+        { "type": "minecraft:empty", "weight": 5 }
+      ]
+    },
+    {
       "_comment": "The American wand cores. Their creatures do not walk these lands (none is on the spawn roster), so they come to a British wandmaker as imports (Ollivanders, Knockturn) or, now and then, in a cache someone left.",
       "rolls": 1,
       "entries": [

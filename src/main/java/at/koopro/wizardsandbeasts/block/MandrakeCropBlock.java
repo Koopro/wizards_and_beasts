@@ -8,16 +8,21 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 
 public class MandrakeCropBlock extends CropBlock {
+
+    /** The age the wild patch places a Mandrake at (worldgen/configured_feature/mandrake_patch.json). */
+    public static final int WILD_AGE = 3;
 
     public MandrakeCropBlock(Properties properties) {
         super(properties);
@@ -31,6 +36,20 @@ public class MandrakeCropBlock extends CropBlock {
     @Override
     public int getMaxAge() {
         return 7;
+    }
+
+    /**
+     * A wild Mandrake -- one past its seedling stage, as the worldgen patch places them -- roots in plain ground; a
+     * seed still wants tilled soil. Without this the wild patch could never exist: a crop survives only on farmland,
+     * so every one the feature placed would break at its first neighbour update.
+     */
+    @Override
+    protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+        if (super.canSurvive(state, level, pos)) {
+            return true;
+        }
+        return getAge(state) >= WILD_AGE && level.getBlockState(pos.below()).is(BlockTags.DIRT)
+                && (level.getRawBrightness(pos, 0) >= 8 || level.canSeeSky(pos));
     }
 
     @Override

@@ -25,22 +25,25 @@
           "predicate": {
             "type": "minecraft:matching_blocks",
             "blocks": [
-              "minecraft:grass_block",
-              "minecraft:dirt",
-              "minecraft:coarse_dirt"
+              "minecraft:air"
             ]
           }
         },
         {
           "type": "minecraft:block_predicate_filter",
           "predicate": {
-            "type": "minecraft:would_survive",
-            "state": {
-              "Name": "wizards_and_beasts:mandrake_crop",
-              "Properties": {
-                "age": "3"
-              }
-            }
+            "type": "minecraft:matching_blocks",
+            "offset": [
+              0,
+              -1,
+              0
+            ],
+            "blocks": [
+              "minecraft:grass_block",
+              "minecraft:dirt",
+              "minecraft:coarse_dirt",
+              "minecraft:podzol"
+            ]
           }
         }
       ]

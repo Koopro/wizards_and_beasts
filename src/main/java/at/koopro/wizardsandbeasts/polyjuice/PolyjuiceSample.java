@@ -20,11 +20,10 @@ import java.util.UUID;
  * meaningless apart: a UUID with no name cannot be drawn on a nameplate and a name with no UUID
  * cannot fetch a skin. One field makes a half-set sample unrepresentable rather than merely unlikely.
  *
- * <h2>Until the cauldron takes hair</h2>
- * <p>The station accepts arbitrary ingredients but has no notion of an item that carries an identity,
- * so there is no hair item yet. Samples are set with {@code /wandb brew polyjuice sample} in the
- * meantime — see {@code PolyjuiceCommands}. When a hair item lands, it writes this same component and
- * nothing downstream changes.
+ * <h2>How the hair gets in</h2>
+ * <p>A finished bottle pressed to another player takes one of their hairs ({@code BrewItem.interactLivingEntity}).
+ * Admins can still set one with {@code /wandb brew polyjuice sample} — see {@code PolyjuiceCommands}. Both write
+ * this same component.
  */
 @NullMarked
 public record PolyjuiceSample(Optional<UUID> id, String name) {

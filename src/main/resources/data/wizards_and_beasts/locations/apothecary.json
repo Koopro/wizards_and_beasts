@@ -209,6 +209,7 @@
     "sells": [
       { "id": "dittany", "item": "wizards_and_beasts:dittany", "price_knuts": 29, "depth": 16 },
       { "id": "mandrake_seeds", "item": "wizards_and_beasts:mandrake_seeds", "price_knuts": 29, "depth": 16 },
+      { "id": "gillyweed", "item": "wizards_and_beasts:gillyweed", "price_knuts": 43, "depth": 12 },
       { "id": "essence_of_dittany", "item": "wizards_and_beasts:essence_of_dittany", "price_knuts": 87, "depth": 8 },
       { "id": "floo_powder", "item": "wizards_and_beasts:floo_powder", "price_knuts": 14, "depth": 32 },
       { "id": "bezoar", "item": "wizards_and_beasts:bezoar", "price_knuts": 174, "depth": 4, "weekly_limit": 3 },

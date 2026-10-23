@@ -21,8 +21,16 @@ import net.neoforged.neoforge.registries.DeferredItem;
 
 final class WizardingWorldBlockRegistry {
     static final DeferredBlock<Block> DEVILS_SNARE =
+            // A cobweb's shape and push reaction, not its tool rule: a cobweb drops nothing to a bare hand, and
+            // Devil's Snare is a plant a potioneer pulls up, so it must come away whole.
             ModBlocks.BLOCKS.registerBlock("devils_snare", Block::new,
-                    () -> BlockBehaviour.Properties.ofFullCopy(Blocks.COBWEB));
+                    () -> BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.PLANT)
+                            .sound(SoundType.GRASS)
+                            .forceSolidOn()
+                            .noCollision()
+                            .strength(1.0f)
+                            .pushReaction(PushReaction.DESTROY));
 
     static final DeferredBlock<MallowsweetBlock> MALLOWSWEET =
             ModBlocks.BLOCKS.registerBlock("mallowsweet", MallowsweetBlock::new,
