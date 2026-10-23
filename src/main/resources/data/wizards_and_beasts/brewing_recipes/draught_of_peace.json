@@ -1,0 +1,19 @@
+{
+  "ingredients": [
+    {
+      "item": "wizards_and_beasts:matagot_essence",
+      "count": 1
+    },
+    {
+      "item": "minecraft:quartz",
+      "count": 2
+    },
+    {
+      "item": "minecraft:sweet_berries",
+      "count": 2
+    }
+  ],
+  "cauldronTier": "brass",
+  "heatTimeTicks": 600,
+  "outputBrewId": "wizards_and_beasts:draught_of_peace"
+}

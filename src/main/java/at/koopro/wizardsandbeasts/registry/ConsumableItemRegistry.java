@@ -159,8 +159,16 @@ public final class ConsumableItemRegistry {
                             props.durability(at.koopro.wizardsandbeasts.broom.SnidgetFeather.DURABILITY)));
     public static final DeferredItem<Item> GRANIAN_HAIR =
             ModItems.ITEMS.registerSimpleItem("granian_hair");
+    /** The jewel from a Horned Serpent's brow, set into armour at a smithing table as a trim (horned_serpent_trim). */
     public static final DeferredItem<Item> HORNED_SERPENT_GEM =
-            ModItems.ITEMS.registerSimpleItem("horned_serpent_gem");
+            ModItems.ITEMS.registerItem("horned_serpent_gem", props -> new Item(
+                    props.component(net.minecraft.core.component.DataComponents.PROVIDES_TRIM_MATERIAL,
+                            new net.minecraft.world.item.component.ProvidesTrimMaterial(
+                                    net.minecraft.resources.ResourceKey.create(
+                                            net.minecraft.core.registries.Registries.TRIM_MATERIAL,
+                                            net.minecraft.resources.Identifier.fromNamespaceAndPath(
+                                                    at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID,
+                                                    "horned_serpent"))))));
     public static final DeferredItem<Item> PUKWUDGIE_VENOM_SAC =
             ModItems.ITEMS.registerSimpleItem("pukwudgie_venom_sac");
     public static final DeferredItem<Item> YETI_FUR =

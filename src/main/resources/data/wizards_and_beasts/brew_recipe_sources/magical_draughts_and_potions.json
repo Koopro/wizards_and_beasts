@@ -1,1 +1,9 @@
-{ "_comment": "Arsenius Jigger, the first-year text: the everyday healing and silver work.", "recipes": ["wizards_and_beasts:skele_gro", "wizards_and_beasts:silver_solution", "wizards_and_beasts:mandrake_restoration_draught"] }
+{
+  "_comment": "Arsenius Jigger, the first-year text: the everyday healing and silver work.",
+  "recipes": [
+    "wizards_and_beasts:skele_gro",
+    "wizards_and_beasts:silver_solution",
+    "wizards_and_beasts:mandrake_restoration_draught",
+    "wizards_and_beasts:draught_of_peace"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:smithing_trim",
+  "template": "#wizards_and_beasts:trim_templates",
+  "base": "#minecraft:trimmable_armor",
+  "addition": "wizards_and_beasts:horned_serpent_gem",
+  "pattern": "minecraft:eye"
+}

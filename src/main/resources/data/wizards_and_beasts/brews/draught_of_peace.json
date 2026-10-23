@@ -1,0 +1,36 @@
+{
+  "displayName": "brew.wizards_and_beasts.draught_of_peace.name",
+  "color": -6697729,
+  "flavorText": "Calms agitation and anxiety. Brewed too strong, it sends the drinker into a deep sleep.",
+  "components": [
+    {
+      "type": "heal_and_cure",
+      "cure": [
+        "minecraft:nausea",
+        "minecraft:blindness",
+        "minecraft:darkness",
+        "minecraft:slowness",
+        "minecraft:mining_fatigue",
+        "wizards_and_beasts:confundo",
+        "wizards_and_beasts:infatuation"
+      ]
+    },
+    {
+      "type": "apply_effects",
+      "effects": [
+        {
+          "id": "minecraft:regeneration",
+          "duration": 200
+        },
+        {
+          "id": "minecraft:resistance",
+          "duration": 600
+        }
+      ]
+    },
+    {
+      "type": "flourish",
+      "count": 16
+    }
+  ]
+}

@@ -35,6 +35,32 @@ public final class HarvestRouteTests {
                 "creatures: a thestral killed by someone who never studied thestrals yields no tail hair; one who "
                         + "has studied them takes it, and then not again until the harvest cooldown has passed",
                 HarvestRouteTests::killNeedsStudy);
+        tests.add("harvest_foreign_parts_have_uses",
+                "creatures: the five foreign beast parts each have a use loaded -- the venom-arrow and darkness-powder "
+                        + "recipes, the horned serpent trim, the Draught of Peace brew, and granian hair in the Nimbus 2001",
+                HarvestRouteTests::foreignPartsHaveUses);
+    }
+
+    private static void foreignPartsHaveUses(GameTestHelper helper) {
+        var server = helper.getLevel().getServer();
+        java.util.Set<String> recipes = new java.util.HashSet<>();
+        for (var holder : server.getRecipeManager().getRecipes()) {
+            recipes.add(holder.id().identifier().getPath());
+        }
+        for (String recipe : java.util.List.of("pukwudgie_venom_arrows", "peruvian_instant_darkness_powder_from_claw",
+                "horned_serpent_trim", "nimbus_2001")) {
+            check(helper, recipes.contains(recipe), () -> "recipe " + recipe + " did not load");
+        }
+        check(helper, server.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.TRIM_MATERIAL)
+                        .containsKey(net.minecraft.resources.ResourceKey.create(
+                                net.minecraft.core.registries.Registries.TRIM_MATERIAL,
+                                Identifier.fromNamespaceAndPath("wizards_and_beasts", "horned_serpent"))),
+                () -> "the horned serpent trim material did not load");
+        check(helper, at.koopro.wizardsandbeasts.brew.Brews.byId("wizards_and_beasts:draught_of_peace") != null,
+                () -> "the Draught of Peace brew did not load");
+        check(helper, at.koopro.wizardsandbeasts.brew.BrewingRecipes.byId("wizards_and_beasts:draught_of_peace") != null,
+                () -> "the Draught of Peace has no brewing recipe");
+        helper.succeed();
     }
 
     private static void killNeedsStudy(GameTestHelper helper) {

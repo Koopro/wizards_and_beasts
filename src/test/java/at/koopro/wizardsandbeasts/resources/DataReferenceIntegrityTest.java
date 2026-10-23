@@ -43,7 +43,9 @@ class DataReferenceIntegrityTest {
      * item id. The brew key is checked against {@code brews/} by the brew tests.
      */
     private static final Set<String> NON_ID_KEYS = Set.of("type", "category", "group", "pattern",
-            "neoforge:ingredient_type", "wood_key", "core_key", "wizards_and_beasts:brew_id");
+            "neoforge:ingredient_type", "wood_key", "core_key", "wizards_and_beasts:brew_id",
+            // a tipped arrow's potion_contents names a potion, not an item (pukwudgie_venom_arrows)
+            "potion");
 
     private static List<Path> files(String subdir) throws IOException {
         List<Path> out = new ArrayList<>();
