@@ -4,6 +4,42 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Creature harvesting (2026-10-23)
+
+- **Changed:** killing a creature is never the better way to get its parts.
+  - Every creature material taken on a kill now needs a player's kill, a studied creature (Bestiary STUDIED;
+    KNOWN for the golden snidget) and a per-player cooldown. This covers dragon heartstrings, thestral tail
+    hair, occamy eggshells, acromantula venom, rougarou hair and the rest.
+  - Lava pits and mob farms harvest nothing. Basilisk fang and ghoul slime also need a player's kill.
+  - Occamies leave eggshells in their nests. A bonded thestral or an occamy's nest yields more over time than
+    killing ever can.
+  - Switching the Bestiary off no longer withholds these materials.
+- **Changed:** Gentle Hands and finished field-journal research reward the gentle routes.
+  - Grooming, picking up what a creature shed and bond gifts give a quarter more per Gentle Hands level.
+  - A fully researched species can be groomed or gives its gift again in half the time.
+  - A bond gift is handed to its owner when they are within 16 blocks.
+- **Fixed:** eleven creature materials could not be had in a new world. Their creatures don't spawn at default
+  settings, and Knockturn ships off.
+  - The apothecary now sells murtlap essence, yeti fur, pukwudgie venom sacs, matagot essence, erumpent horn,
+    acromantula venom and hidebehind claws at its higher ranks. The murtlap order can be completed.
+  - The broom shop sells granian hair, and Ollivanders sells the horned serpent gem.
+  - Hidden caches hold imported and foreign beast parts, including golden snidget feathers.
+- **Added:** uses for five parts that had none.
+  - Granian hair binds the tail of the Nimbus 2001.
+  - The horned serpent gem is an armour trim.
+  - Pukwudgie venom makes poison-tipped arrows.
+  - Matagot essence is the base of a working **Draught of Peace**, which calms confusion, nausea, blindness
+    and infatuation.
+  - A hidebehind claw makes Darkness Powder.
+- **Added:** poaching is an offence (Ministry module).
+  - Killing a unicorn, golden snidget, phoenix, thestral or occamy where a Ministry official can see it is
+    fined eight Galleons.
+  - A unicorn slayer can no longer gather shed unicorn hair.
+  - The slayer's mark is lifted once a thestral, phoenix or other protected creature trusts them completely
+    (bond 80).
+- **Fixed:** each creature's drops now come from exactly one loot table. Datagen used to write a second set for
+  39 creatures, which won or lost depending on build order.
+
 ### Brewing (2026-10-23)
 
 - **Added:** recipes are learned.

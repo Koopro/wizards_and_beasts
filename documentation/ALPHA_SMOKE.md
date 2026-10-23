@@ -290,6 +290,22 @@ Manual. You need a survival world, a bench and a few enhancers.
 5. "New handle" with any log: the wand's handle changes, and nothing else does.
 6. Find a rougarou in a swamp (default spawn setting): it drops rougarou hair.
 
+## Creature harvesting (2026-10-23, `feat/creature-harvest`)
+
+Manual. Survival world, Bestiary and Magizoology on (default).
+
+1. Kill a thestral without having studied thestrals: no tail hair. Study them to STUDIED (watch them, read the
+   journal page) and kill another: sometimes a hair. A second kill straight after gives none.
+2. Bond a thestral to 60 and stand near it: its tail hair is handed to you rather than dropped.
+3. Find an occamy and wait near it for a few in-game days without hurting it: eggshells appear at its feet.
+4. Apothecary, rank regular: murtlap essence, yeti fur, pukwudgie venom sac and matagot essence are for sale.
+   Deliver four murtlap essence to a murtlap order.
+5. Craft eight arrows around a pukwudgie venom sac: eight Arrows of Poison (strong).
+6. Brew matagot essence, 2 quartz and 2 sweet berries in a brass cauldron: Draught of Peace. Drink it while
+   nauseous: the nausea goes.
+7. Run `/wandb admin module set ministry enabled` and stand near a goblin teller. Kill a unicorn: a Poaching toast,
+   and the offence is on your record. Then bond a thestral to 80: an "Atoned" toast, and unicorns let you near.
+
 ## Brewing (2026-10-23, `feat/brewing`)
 
 Manual. You need a survival world, a pewter and a brass cauldron on a heat source, and two players for steps 7-8.
