@@ -290,6 +290,22 @@ Manual. You need a survival world, a bench and a few enhancers.
 5. "New handle" with any log: the wand's handle changes, and nothing else does.
 6. Find a rougarou in a swamp (default spawn setting): it drops rougarou hair.
 
+## Learning spells (2026-10-23, `feat/spell-acquisition`)
+
+Manual. New survival world.
+
+1. Choose a Wizardkind heritage: a "Your first light" toast. Lumos and Nox are in the spell list, and you still
+   have 3 skill points.
+2. Open the skill web: the Lumos node costs 0.
+3. Open village chests until a spellbook drops. Hold right-click to read it. It always opens a trace, because
+   every village book can be read from scratch.
+4. Close the trace screen of an advanced spell (any book a skill gates), log out and back in, then try again: it
+   is still waiting.
+5. Craft a book + ink bottle + feather: a blank spellbook. At a study lectern, with a known spell active and ink
+   in your pack, use the blank on the lectern: a written copy.
+6. Learn Petrificus Totalus from a book and cast it at a zombie: it stops dead.
+7. As a goblin, try to read any spellbook: "Only someone who can use a wand can learn spells."
+
 ## Creature harvesting (2026-10-23, `feat/creature-harvest`)
 
 Manual. Survival world, Bestiary and Magizoology on (default).

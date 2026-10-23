@@ -4,6 +4,36 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Learning spells (2026-10-23)
+
+- **Changed:** every witch or wizard who can use a wand starts knowing Lumos and Nox.
+  - The Lumos node in the skill web is free, so all three starting points go to new spells.
+  - Village libraries and ruin pages now hold only spells a beginner can read. Six of the nine village books
+    used to need another spell first.
+- **Added:** ten spells that were "coming soon":
+  - Petrificus Totalus, Impedimenta, Tarantallegra, Confundo, Langlock;
+  - Engorgio, Reducio, Obscuro, Furnunculus, Expulso.
+
+  Each is found on at least two kinds of shelf. A confunded creature now loses track of its target.
+- **Added:** blank spellbooks.
+  - Craft one from a book, an ink bottle and a feather, or buy one at Ollivanders for 29 Knuts.
+  - Copy a spell you know into one at a study lectern.
+- **Changed:** the handbook explains how spells are learned: books, tracing, the spell wheel and copying.
+- **Changed:** "First Lessons" is earned by learning a spell from a book, not by picking a book up.
+- **Changed:** the spell trace can't be rerolled for free.
+  - Closing it, dying or asking for a fresh path counts as a failed attempt.
+  - The retry wait now survives logging out.
+  - "Try again" needs a book you have read in the last two minutes.
+  - "Steady hand" is a setting the server remembers.
+- **Fixed:**
+  - Refusals read in your language and name skills and spells properly.
+  - Resetting the skill web now takes back the Nox that came with a web-learned Lumos.
+  - Goblins, house-elves and Squibs can no longer learn spells they could never cast.
+  - A skill node whose spell you could never learn won't take your points.
+  - Admin commands teach companion spells and update your stats.
+  - The study lectern won't copy an Obscurial's power, and copying dark magic needs the same clearance as
+    learning it.
+
 ### Creature harvesting (2026-10-23)
 
 - **Changed:** killing a creature is never the better way to get its parts.
