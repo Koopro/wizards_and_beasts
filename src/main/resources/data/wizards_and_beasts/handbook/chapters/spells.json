@@ -11,6 +11,16 @@
     },
     {
       "type": "text",
+      "heading": "handbook.wizards_and_beasts.spells.learning.heading",
+      "body": "handbook.wizards_and_beasts.spells.learning.body"
+    },
+    {
+      "type": "text",
+      "heading": "handbook.wizards_and_beasts.spells.copying.heading",
+      "body": "handbook.wizards_and_beasts.spells.copying.body"
+    },
+    {
+      "type": "text",
       "heading": "handbook.wizards_and_beasts.spells.page2.heading",
       "body": "handbook.wizards_and_beasts.spells.page2.body"
     },

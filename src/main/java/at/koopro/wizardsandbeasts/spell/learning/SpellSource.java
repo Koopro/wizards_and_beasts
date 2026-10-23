@@ -23,7 +23,7 @@ import org.jspecify.annotations.Nullable;
  * loot table, a recipe, a command, a creative-tab stack and {@code SpellScriptoriumBlock}'s scribing
  * path all write the same field, and the item itself stays a single registered thing.
  *
- * <p>A stack with no component is a <em>blank</em> book — legal, purchasable, and the input to
+ * <p>A stack with no component is a <em>blank</em> book — crafted (book, ink, feather) or bought at Ollivanders, and the input to
  * scribing. {@link #spellOf} returning {@code null} means blank, not broken.
  */
 @NullMarked

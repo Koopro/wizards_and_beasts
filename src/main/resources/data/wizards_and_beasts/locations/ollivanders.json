@@ -173,6 +173,7 @@
       { "id": "spare_wands", "kind": "wand", "condition": "unbonded", "price_knuts": 290, "depth": 6 }
     ],
     "sells": [
+      { "id": "blank_book_of_spells", "item": "wizards_and_beasts:standard_book_of_spells", "price_knuts": 29, "depth": 64 },
       { "id": "wand_blank", "item": "wizards_and_beasts:wand_blank", "price_knuts": 87, "depth": 8 },
       { "id": "holly_log", "item": "wizards_and_beasts:holly_log", "price_knuts": 29, "depth": 32 },
       { "id": "unicorn_hair", "item": "wizards_and_beasts:unicorn_hair", "price_knuts": 348, "depth": 3, "weekly_limit": 2 },

@@ -15,20 +15,13 @@
     "announce_to_chat": false
   },
   "criteria": {
-    "spellbook": {
-      "trigger": "minecraft:inventory_changed",
-      "conditions": {
-        "items": [
-          {
-            "items": "wizards_and_beasts:standard_book_of_spells"
-          }
-        ]
-      }
+    "read": {
+      "trigger": "minecraft:impossible"
     }
   },
   "requirements": [
     [
-      "spellbook"
+      "read"
     ]
   ]
 }

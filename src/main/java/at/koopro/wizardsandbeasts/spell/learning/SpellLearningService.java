@@ -149,12 +149,23 @@ public final class SpellLearningService {
             // runs on the first right-click: a player who picks a book up, reads the refusal and puts it
             // down again has not studied anything and must not be charged for it.
             SpellLawLearningGate.stainForLearning(player, spell);
+            awardFirstLessons(player);
         } else {
             player.getData(ModAttachments.SKILL_DATA.get()).recordWebTaughtSpell(spell.getId());
         }
         SpellDataSyncS2CPayload.syncToPlayer(player);
         PlayerStatsSyncPayload.syncToPlayer(player); // KNOWLEDGE derives from spells learned
         return LearnResult.success(spell.getDisplayName());
+    }
+
+    /** "First Lessons": a spell read out of a book. Declared {@code minecraft:impossible}, awarded here only. */
+    private static void awardFirstLessons(ServerPlayer player) {
+        net.minecraft.server.MinecraftServer server = player.level().getServer();
+        net.minecraft.advancements.AdvancementHolder holder = server == null ? null : server.getAdvancements().get(
+                net.minecraft.resources.Identifier.fromNamespaceAndPath("wizards_and_beasts", "progression/spell_teacher"));
+        if (holder != null) {
+            player.getAdvancements().award(holder, "read");
+        }
     }
 
     /**

@@ -1,0 +1,19 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "SCHOLARSHIP"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:book",
+    "wizards_and_beasts:ink_bottle",
+    "minecraft:feather"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:standard_book_of_spells",
+    "count": 1
+  }
+}

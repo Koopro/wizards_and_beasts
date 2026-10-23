@@ -28,6 +28,42 @@ public final class SpellAcquisitionTests {
                 "spells: a wizard knows Lumos and Nox without a book, kept out of the web ledger so a respec cannot "
                         + "take them; a goblin, who cannot use a wand, is taught nothing",
                 SpellAcquisitionTests::starterCharm);
+        tests.add("spell_acquisition_books_to_copy_and_first_lessons",
+                "spells: blank spellbooks can be crafted and are sold at Ollivanders; First Lessons is earned by "
+                        + "learning from a book, not by picking one up",
+                SpellAcquisitionTests::blanksAndFirstLessons);
+    }
+
+    private static void blanksAndFirstLessons(GameTestHelper helper) {
+        ServerPlayer reader = player(helper, "FirstReader");
+        try {
+            var server = helper.getLevel().getServer();
+            boolean recipe = server.getRecipeManager().getRecipes().stream()
+                    .anyMatch(h -> h.id().identifier().getPath().equals("blank_book_of_spells"));
+            check(helper, recipe, () -> "the blank spellbook recipe did not load");
+            var ollivanders = at.koopro.wizardsandbeasts.location.Locations.get(
+                    net.minecraft.resources.Identifier.fromNamespaceAndPath("wizards_and_beasts", "ollivanders"));
+            check(helper, ollivanders != null && ollivanders.market().isPresent()
+                            && ollivanders.market().get().sells().stream().anyMatch(g -> g.id().equals("blank_book_of_spells")),
+                    () -> "Ollivanders sells no blank spellbooks");
+
+            HeritageAPI.commit(reader, Heritage.WIZARDKIND, HeritageVariant.HALF_BLOOD);
+            var holder = server.getAdvancements().get(net.minecraft.resources.Identifier.fromNamespaceAndPath(
+                    "wizards_and_beasts", "progression/spell_teacher"));
+            check(helper, holder != null, () -> "setup: First Lessons is not loaded");
+            reader.getInventory().add(new net.minecraft.world.item.ItemStack(
+                    at.koopro.wizardsandbeasts.registry.CanonItemRegistry.STANDARD_BOOK_OF_SPELLS.get()));
+            check(helper, !reader.getAdvancements().getOrStartProgress(holder).isDone(),
+                    () -> "First Lessons was earned by picking up a book");
+            reader.getData(ModAttachments.SPELL_DATA.get()).forgetSpell("wizards_and_beasts:stupefy");
+            var result = SpellLearningService.tryLearnSpell(reader, "wizards_and_beasts:stupefy");
+            check(helper, result.success(), () -> "setup: Stupefy was not learned: " + result);
+            check(helper, reader.getAdvancements().getOrStartProgress(holder).isDone(),
+                    () -> "learning from a book did not earn First Lessons");
+            helper.succeed();
+        } finally {
+            retire(helper, reader);
+        }
     }
 
     private static void starterCharm(GameTestHelper helper) {
