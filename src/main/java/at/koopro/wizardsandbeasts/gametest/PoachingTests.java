@@ -34,7 +34,9 @@ public final class PoachingTests {
     private PoachingTests() {}
 
     static void contribute(WizardTestSupport.Registrar tests) {
-        tests.add("poaching_is_filed_when_an_official_sees_it",
+        // Alone: "nobody watching" must be true, and other scenarios (HouseElfTests' Code of Wand Use) stand a goblin
+        // official in a neighbouring plot, well inside an official's watch radius.
+        tests.addAlone("poaching_is_filed_when_an_official_sees_it",
                 "ministry: killing a unicorn out of an official's sight files nothing; in sight it is poaching; a "
                         + "ghoul is not a protected species",
                 PoachingTests::filedWhenSeen);
@@ -58,6 +60,8 @@ public final class PoachingTests {
             ghoul.setNoAi(true);
             check(helper, Poaching.isProtected(unicorn) && !Poaching.isProtected(ghoul),
                     () -> "the protected-species tag is wrong");
+            check(helper, !at.koopro.wizardsandbeasts.ministry.law.CodeOfWandUse.seenByOfficial(hunter),
+                    () -> "setup: an official from elsewhere is watching");
             check(helper, !Poaching.check(hunter, unicorn), () -> "poaching was filed with nobody watching");
             check(helper, MinistryRecords.get(hunter).offenceCount(MagicalOffence.POACHING) == 0,
                     () -> "an unseen killing reached the file");

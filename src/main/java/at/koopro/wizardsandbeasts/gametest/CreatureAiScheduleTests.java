@@ -61,6 +61,11 @@ final class CreatureAiScheduleTests {
 
     private static void eventWake(GameTestHelper helper) {
         CreatureArena arena = CreatureArena.at(helper, Y);
+        // The blow makes a unicorn blink up to 8 blocks (BlinkAway). The arena's forced strip is only a few blocks
+        // deep, so a blink across it landed the unicorn in a chunk that does not tick: no AI, no look, and an
+        // intermittent failure that read like a scheduling bug. Keep everything a blink can reach ticking.
+        WizardTestSupport.forceChunks(helper, new net.minecraft.core.BlockPos(-10, Y, -10),
+                new net.minecraft.core.BlockPos(12, Y, 12));
         PathfinderMob unicorn = arena.creature("unicorn", 1, 1);
         unicorn.setNoAi(false);
         int[] tick = {0};
@@ -91,7 +96,8 @@ final class CreatureAiScheduleTests {
                 arena.clear();
                 helper.fail("a hurt unicorn did not answer the blow before its next scheduled look ("
                         + EcologySensing.state(unicorn).intent() + " after " + elapsed + " ticks; awake="
-                        + EcologySensing.state(unicorn).awake() + ", looks since=" + (AiMetrics.get(
+                        + EcologySensing.state(unicorn).awake() + ", ticking="
+                        + helper.getLevel().isPositionEntityTicking(unicorn.blockPosition()) + ", looks since=" + (AiMetrics.get(
                         AiMetrics.Metric.ECOLOGY_LOOK) - looksAtHurt[0]) + ", perceived "
                         + EcologySensing.state(unicorn).perception() + ")");
             }
