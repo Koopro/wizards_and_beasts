@@ -112,6 +112,7 @@ public final class WizardsAndBeastsGameTests {
         SpellLearningTests.contribute(registrar);
         SpellTraceTests.contribute(registrar);
         SpellAcquisitionTests.contribute(registrar);
+        CuratedSpellTests.contribute(registrar);
         DisguiseTests.contribute(registrar);
         LeviosaThrowTests.contribute(registrar);
         BroomRideTests.contribute(registrar);

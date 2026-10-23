@@ -1,10 +1,36 @@
 {
   "displayName": "spell.wizards_and_beasts.langlock.name",
-  "category": "combat",
-  "cooldownTicks": 20,
-  "color": -5423817,
-  "castType": "self",
   "canonTier": "books",
-  "implementationState": "coming_soon",
+  "category": "combat",
+  "cooldownTicks": 200,
+  "baseDamage": 0.0,
+  "color": -5423817,
+  "sound": {
+    "id": "minecraft:entity.illusioner.cast_spell",
+    "volume": 0.7,
+    "pitch": 0.9
+  },
+  "projectileSpeed": 1.8,
+  "projectileSpread": 0.04,
+  "castType": "projectile",
+  "requirement": {
+    "type": "knows",
+    "prerequisiteId": "levicorpus"
+  },
+  "effects": [
+    {
+      "type": "apply_effect",
+      "effect": "wizards_and_beasts:langlock",
+      "duration": 100,
+      "amplifier": 0,
+      "target": true
+    }
+  ],
+  "vfx": {
+    "trail": "arcane_mote",
+    "impact": "arcane_mote",
+    "trailDensity": 2,
+    "impactCount": 16
+  },
   "relation": "base"
 }

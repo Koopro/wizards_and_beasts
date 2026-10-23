@@ -1,10 +1,40 @@
 {
   "displayName": "spell.wizards_and_beasts.expulso.name",
-  "category": "combat",
-  "cooldownTicks": 20,
-  "color": -5416390,
-  "castType": "self",
   "canonTier": "books",
-  "implementationState": "coming_soon",
+  "category": "combat",
+  "cooldownTicks": 120,
+  "baseDamage": 5.0,
+  "color": -5416390,
+  "sound": {
+    "id": "minecraft:entity.blaze.shoot",
+    "volume": 1.0,
+    "pitch": 0.8
+  },
+  "projectileSpeed": 1.8,
+  "projectileSpread": 0.04,
+  "castType": "projectile",
+  "requirement": {
+    "type": "knows",
+    "prerequisiteId": "confringo"
+  },
+  "effects": [
+    {
+      "type": "explosion",
+      "radius": 2.0,
+      "fire": false,
+      "breakBlocks": false
+    },
+    {
+      "type": "impulse",
+      "strength": 1.6,
+      "direction": "push"
+    }
+  ],
+  "vfx": {
+    "trail": "fire_ember",
+    "impact": "fire_ember",
+    "trailDensity": 2,
+    "impactCount": 16
+  },
   "relation": "base"
 }

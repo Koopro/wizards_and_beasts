@@ -44,7 +44,9 @@
     "aguamenti",
     "flipendo",
     "finite_incantatem",
-    "riddikulus"
+    "riddikulus",
+    "petrificus_totalus",
+    "engorgio"
   ],
   "chance": 0.35,
   "_comment": "A beginner's shelf: every spell here can be read by someone who knows only Lumos and Nox (the charms every wand hand starts with, SpellLearningService.STARTER_SPELLS). SpellbookLootPoolTest pins that. Lumos and Nox themselves are not here: everybody knows them."

@@ -1,11 +1,37 @@
 {
   "displayName": "spell.wizards_and_beasts.reducio.name",
-  "category": "utility",
-  "cooldownTicks": 20,
-  "color": -12210774,
-  "castType": "self",
   "canonTier": "books",
-  "implementationState": "coming_soon",
+  "category": "utility",
+  "cooldownTicks": 100,
+  "baseDamage": 0.0,
+  "color": -12210774,
+  "sound": {
+    "id": "minecraft:block.amethyst_block.chime",
+    "volume": 0.9,
+    "pitch": 1.6
+  },
+  "projectileSpeed": 1.8,
+  "projectileSpread": 0.04,
+  "castType": "projectile",
+  "requirement": {
+    "type": "knows",
+    "prerequisiteId": "engorgio"
+  },
+  "effects": [
+    {
+      "type": "apply_effect",
+      "effect": "wizards_and_beasts:reducio",
+      "duration": 600,
+      "amplifier": 0,
+      "target": true
+    }
+  ],
+  "vfx": {
+    "trail": "arcane_mote",
+    "impact": "arcane_mote",
+    "trailDensity": 2,
+    "impactCount": 16
+  },
   "relation": "counter_of",
   "relatedSpell": "wizards_and_beasts:engorgio"
 }

@@ -1,10 +1,36 @@
 {
   "displayName": "spell.wizards_and_beasts.confundo.name",
-  "category": "combat",
-  "cooldownTicks": 20,
-  "color": -5415361,
-  "castType": "self",
   "canonTier": "books",
-  "implementationState": "coming_soon",
+  "category": "utility",
+  "cooldownTicks": 80,
+  "baseDamage": 0.0,
+  "color": -5415361,
+  "sound": {
+    "id": "minecraft:entity.illusioner.cast_spell",
+    "volume": 0.7,
+    "pitch": 1.3
+  },
+  "projectileSpeed": 1.8,
+  "projectileSpread": 0.04,
+  "castType": "projectile",
+  "requirement": {
+    "type": "knows",
+    "prerequisiteId": "lumos"
+  },
+  "effects": [
+    {
+      "type": "apply_effect",
+      "effect": "wizards_and_beasts:confundo",
+      "duration": 200,
+      "amplifier": 0,
+      "target": true
+    }
+  ],
+  "vfx": {
+    "trail": "arcane_mote",
+    "impact": "arcane_mote",
+    "trailDensity": 2,
+    "impactCount": 16
+  },
   "relation": "base"
 }

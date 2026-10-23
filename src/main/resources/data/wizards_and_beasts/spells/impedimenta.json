@@ -1,10 +1,36 @@
 {
   "displayName": "spell.wizards_and_beasts.impedimenta.name",
-  "category": "combat",
-  "cooldownTicks": 20,
-  "color": -5422474,
-  "castType": "self",
   "canonTier": "books",
-  "implementationState": "coming_soon",
+  "category": "combat",
+  "cooldownTicks": 50,
+  "baseDamage": 0.0,
+  "color": -5422474,
+  "sound": {
+    "id": "minecraft:entity.evoker.cast_spell",
+    "volume": 0.8,
+    "pitch": 1.1
+  },
+  "projectileSpeed": 1.8,
+  "projectileSpread": 0.04,
+  "castType": "projectile",
+  "requirement": {
+    "type": "knows",
+    "prerequisiteId": "stupefy"
+  },
+  "effects": [
+    {
+      "type": "apply_effect",
+      "effect": "wizards_and_beasts:impedimenta",
+      "duration": 120,
+      "amplifier": 0,
+      "target": true
+    }
+  ],
+  "vfx": {
+    "trail": "arcane_mote",
+    "impact": "arcane_mote",
+    "trailDensity": 2,
+    "impactCount": 16
+  },
   "relation": "base"
 }

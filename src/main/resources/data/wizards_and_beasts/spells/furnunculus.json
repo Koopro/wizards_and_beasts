@@ -1,10 +1,35 @@
 {
   "displayName": "spell.wizards_and_beasts.furnunculus.name",
-  "category": "combat",
-  "cooldownTicks": 20,
-  "color": -5415809,
-  "castType": "self",
   "canonTier": "books",
-  "implementationState": "coming_soon",
+  "category": "combat",
+  "cooldownTicks": 80,
+  "baseDamage": 0.0,
+  "color": -5415809,
+  "sound": {
+    "id": "minecraft:entity.witch.throw",
+    "volume": 0.8,
+    "pitch": 1.2
+  },
+  "projectileSpeed": 1.8,
+  "projectileSpread": 0.04,
+  "castType": "projectile",
+  "requirement": {
+    "type": "none"
+  },
+  "effects": [
+    {
+      "type": "apply_effect",
+      "effect": "wizards_and_beasts:furnunculus",
+      "duration": 200,
+      "amplifier": 0,
+      "target": true
+    }
+  ],
+  "vfx": {
+    "trail": "arcane_mote",
+    "impact": "arcane_mote",
+    "trailDensity": 2,
+    "impactCount": 16
+  },
   "relation": "base"
 }

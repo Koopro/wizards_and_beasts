@@ -13,7 +13,13 @@ public final class ConfundoEffect extends MobEffect {
 
     @Override
     public boolean applyEffectTick(@NonNull ServerLevel level, @NonNull LivingEntity entity, int amplifier) {
-        // Client overlay: {@link at.koopro.wizardsandbeasts.client.hud.MobEffectFullscreenOverlays}
+        // A player sees the world swim (client overlay: {@link at.koopro.wizardsandbeasts.client.hud.MobEffectFullscreenOverlays}).
+        // A creature has no screen to swim, so it loses the thread instead: now and then it forgets what it was after
+        // and stops where it stands. Without this Confundo did nothing at all to anything that was not a player.
+        if (entity instanceof net.minecraft.world.entity.Mob mob && level.random.nextFloat() < 0.5f) {
+            mob.setTarget(null);
+            mob.getNavigation().stop();
+        }
         return true;
     }
 
