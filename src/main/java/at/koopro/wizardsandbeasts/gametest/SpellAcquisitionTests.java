@@ -6,6 +6,8 @@ import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.spell.learning.SpellLearningService;
+import at.koopro.wizardsandbeasts.spell.learning.tracing.SpellTraceService;
+import at.koopro.wizardsandbeasts.spell.learning.tracing.TraceOutcome;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
@@ -32,6 +34,73 @@ public final class SpellAcquisitionTests {
                 "spells: blank spellbooks can be crafted and are sold at Ollivanders; First Lessons is earned by "
                         + "learning from a book, not by picking one up",
                 SpellAcquisitionTests::blanksAndFirstLessons);
+        tests.add("spell_acquisition_trace_needs_a_read",
+                "tracing: asking for a book's trace without having read it is refused; after a read it opens, and "
+                        + "Try again works while the read is fresh",
+                SpellAcquisitionTests::traceNeedsARead);
+        tests.add("spell_acquisition_cancel_costs_the_wait",
+                "tracing: closing an advanced trace costs its retry wait, the wait is saved on the player, and the "
+                        + "Steady hand setting is the server's and cannot change mid-trace",
+                SpellAcquisitionTests::cancelCostsTheWait);
+    }
+
+    private static void traceNeedsARead(GameTestHelper helper) {
+        ServerPlayer reader = player(helper, "UnreadBook");
+        try {
+            reader.getAbilities().instabuild = false;
+            var spell = at.koopro.wizardsandbeasts.spell.core.Spells.byId("wizards_and_beasts:stupefy");
+            reader.getData(ModAttachments.SPELL_DATA.get()).forgetSpell(spell.getId());
+            var book = new net.minecraft.world.item.ItemStack(
+                    at.koopro.wizardsandbeasts.registry.CanonItemRegistry.STANDARD_BOOK_OF_SPELLS.get());
+            at.koopro.wizardsandbeasts.spell.learning.SpellSource.write(book, spell);
+            reader.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, book);
+
+            SpellTraceService.request(reader, spell.getId());
+            check(helper, SpellTraceService.active(reader) == null, () -> "a trace opened without the book being read");
+
+            book.getItem().use(helper.getLevel(), reader, net.minecraft.world.InteractionHand.MAIN_HAND);
+            book.getItem().finishUsingItem(book, helper.getLevel(), reader);
+            var first = SpellTraceService.active(reader);
+            check(helper, first != null, () -> "reading the book opened no trace");
+            SpellTraceService.submit(reader, first.id(), false, new double[0]);
+            SpellTraceService.request(reader, spell.getId());
+            check(helper, SpellTraceService.active(reader) != null, () -> "Try again failed while the read was fresh");
+            helper.succeed();
+        } finally {
+            SpellTraceService.cancel(reader);
+            retire(helper, reader);
+        }
+    }
+
+    private static void cancelCostsTheWait(GameTestHelper helper) {
+        ServerPlayer student = player(helper, "CancelledTrace");
+        try {
+            String incendio = "wizards_and_beasts:incendio";
+            student.getData(ModAttachments.SPELL_DATA.get()).forgetSpell(incendio);
+            SpellTraceService.setSteadyHand(student, true);
+            check(helper, SpellTraceService.steadyHand(student), () -> "the Steady hand setting was not kept");
+
+            at.koopro.wizardsandbeasts.skill.SkillSystemAPI.forceUnlock(student, "incendio_unlock");
+            var challenge = SpellTraceService.active(student);
+            check(helper, challenge != null && challenge.difficulty().retryDelayTicks() > 0,
+                    () -> "setup: no advanced Incendio lesson opened: " + challenge);
+            SpellTraceService.setSteadyHand(student, false);
+            check(helper, SpellTraceService.steadyHand(student), () -> "Steady hand changed in the middle of a trace");
+
+            var outcome = SpellTraceService.submit(student, challenge.id(), false, new double[0]);
+            check(helper, outcome == TraceOutcome.CANCELLED, () -> "expected CANCELLED, got " + outcome);
+            long now = student.level().getGameTime();
+            check(helper, SpellTraceService.retryWait(student, incendio, now) > 0,
+                    () -> "closing the trace cost nothing: a free reroll");
+            check(helper, student.getData(ModAttachments.TRACE_MEMORY.get()).waitFor(incendio, now) > 0,
+                    () -> "the retry wait is not saved on the player, so a relog would clear it");
+            check(helper, SpellTraceService.openLesson(student, incendio) == null,
+                    () -> "the lesson re-opened inside its retry wait");
+            helper.succeed();
+        } finally {
+            SpellTraceService.cancel(student);
+            retire(helper, student);
+        }
     }
 
     private static void blanksAndFirstLessons(GameTestHelper helper) {

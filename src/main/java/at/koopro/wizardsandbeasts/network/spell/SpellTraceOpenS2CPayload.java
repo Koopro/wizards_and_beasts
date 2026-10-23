@@ -19,7 +19,8 @@ import org.jspecify.annotations.NullMarked;
  */
 @NullMarked
 public record SpellTraceOpenS2CPayload(long challengeId, String spellId, int difficulty, int timeLimitTicks,
-                                       int startAllowanceTicks, boolean spendsSource, int[] points)
+                                       int startAllowanceTicks, boolean spendsSource, boolean steadyHand,
+                                       int[] points)
         implements CustomPacketPayload {
 
     /** A path is resampled at 0.01 canvas units and capped well under this by its length band. */
@@ -37,8 +38,9 @@ public record SpellTraceOpenS2CPayload(long challengeId, String spellId, int dif
             int limit = buf.readInt();
             int allowance = buf.readInt();
             boolean spends = buf.readBoolean();
+            boolean steady = buf.readBoolean();
             int[] points = readPairs(buf, MAX_POINTS);
-            return new SpellTraceOpenS2CPayload(id, spellId, difficulty, limit, allowance, spends, points);
+            return new SpellTraceOpenS2CPayload(id, spellId, difficulty, limit, allowance, spends, steady, points);
         }
 
         @Override
@@ -49,6 +51,7 @@ public record SpellTraceOpenS2CPayload(long challengeId, String spellId, int dif
             buf.writeInt(pkt.timeLimitTicks);
             buf.writeInt(pkt.startAllowanceTicks);
             buf.writeBoolean(pkt.spendsSource);
+            buf.writeBoolean(pkt.steadyHand);
             writePairs(buf, pkt.points, MAX_POINTS);
         }
     };

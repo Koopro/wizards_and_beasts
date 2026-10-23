@@ -137,6 +137,10 @@ public final class ModNetworkSpells {
                 SpellTraceSubmitC2SPayload.STREAM_CODEC,
                 SpellTraceSubmitC2SPayload::handle);
         registrar.playToServer(
+                SpellTraceAssistC2SPayload.TYPE,
+                SpellTraceAssistC2SPayload.STREAM_CODEC,
+                SpellTraceAssistC2SPayload::handle);
+        registrar.playToServer(
                 SpellTraceRequestC2SPayload.TYPE,
                 SpellTraceRequestC2SPayload.STREAM_CODEC,
                 SpellTraceRequestC2SPayload::handle);

@@ -16,10 +16,9 @@ import org.jspecify.annotations.NullMarked;
  * the path ({@link SpellTraceService#submit}). An empty sample list means the player closed the screen.
  *
  * @param samples interleaved quantised {@code x, y} pairs, at most {@link TraceJudge#MAX_SAMPLES}
- * @param assist  the "Steady hand" accessibility option: widens tolerance, never skips
  */
 @NullMarked
-public record SpellTraceSubmitC2SPayload(long challengeId, boolean assist, int[] samples)
+public record SpellTraceSubmitC2SPayload(long challengeId, int[] samples)
         implements CustomPacketPayload {
 
     public static final Type<SpellTraceSubmitC2SPayload> TYPE = new Type<>(
@@ -29,15 +28,13 @@ public record SpellTraceSubmitC2SPayload(long challengeId, boolean assist, int[]
         @Override
         public SpellTraceSubmitC2SPayload decode(ByteBuf buf) {
             long id = buf.readLong();
-            boolean assist = buf.readBoolean();
             int[] samples = SpellTraceOpenS2CPayload.readPairs(buf, TraceJudge.MAX_SAMPLES);
-            return new SpellTraceSubmitC2SPayload(id, assist, samples);
+            return new SpellTraceSubmitC2SPayload(id, samples);
         }
 
         @Override
         public void encode(ByteBuf buf, SpellTraceSubmitC2SPayload pkt) {
             buf.writeLong(pkt.challengeId);
-            buf.writeBoolean(pkt.assist);
             SpellTraceOpenS2CPayload.writePairs(buf, pkt.samples, TraceJudge.MAX_SAMPLES);
         }
     };
@@ -56,7 +53,8 @@ public record SpellTraceSubmitC2SPayload(long challengeId, boolean assist, int[]
             for (int i = 0; i < xy.length; i++) {
                 xy[i] = TraceJudge.dequantise(pkt.samples[i]);
             }
-            SpellTraceService.submit(player, pkt.challengeId, pkt.assist, xy);
+            // The assist is the setting the server holds (SpellTraceAssistC2SPayload), not a claim per submission.
+            SpellTraceService.submit(player, pkt.challengeId, SpellTraceService.steadyHand(player), xy);
         });
     }
 }

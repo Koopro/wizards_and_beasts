@@ -135,6 +135,8 @@ final class SpellTraceScreen extends Screen {
         ThemedButton steady = new ThemedButton(x, y, w, 16, steadyLabel(), () -> {
             if (phase == Phase.READY) {
                 SpellTraceClient.steadyHand = !SpellTraceClient.steadyHand;
+                ClientPacketDistributor.sendToServer(
+                        new at.koopro.wizardsandbeasts.network.spell.SpellTraceAssistC2SPayload(SpellTraceClient.steadyHand));
                 rasterise();
                 rebuildButtons();
             }
@@ -290,7 +292,7 @@ final class SpellTraceScreen extends Screen {
             q[2 * i + 1] = TraceJudge.quantise(samples.get(i)[1]);
         }
         ClientPacketDistributor.sendToServer(
-                new SpellTraceSubmitC2SPayload(challenge.challengeId(), SpellTraceClient.steadyHand, q));
+                new SpellTraceSubmitC2SPayload(challenge.challengeId(), q));
         rebuildButtons();
     }
 
@@ -331,7 +333,7 @@ final class SpellTraceScreen extends Screen {
     public void onClose() {
         if (phase == Phase.READY || phase == Phase.TRACING) {
             // Closing is giving up this attempt: tell the server, so the challenge does not linger.
-            ClientPacketDistributor.sendToServer(new SpellTraceSubmitC2SPayload(challenge.challengeId(), false, new int[0]));
+            ClientPacketDistributor.sendToServer(new SpellTraceSubmitC2SPayload(challenge.challengeId(), new int[0]));
         }
         minecraft.setScreen(previous);
     }

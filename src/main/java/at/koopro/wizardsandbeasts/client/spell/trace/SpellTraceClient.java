@@ -13,7 +13,7 @@ import org.jspecify.annotations.NullMarked;
 @NullMarked
 public final class SpellTraceClient {
 
-    /** "Steady hand", remembered for the session so a player who needs it sets it once. */
+    /** "Steady hand": the server's setting, told with every challenge (SpellTraceOpenS2CPayload.steadyHand). */
     static boolean steadyHand;
 
     private SpellTraceClient() {
@@ -22,6 +22,7 @@ public final class SpellTraceClient {
     public static void open(SpellTraceOpenS2CPayload pkt) {
         Minecraft mc = Minecraft.getInstance();
         Screen previous = mc.screen instanceof SpellTraceScreen open ? open.previous() : mc.screen;
+        steadyHand = pkt.steadyHand();
         mc.setScreen(new SpellTraceScreen(previous, pkt));
     }
 

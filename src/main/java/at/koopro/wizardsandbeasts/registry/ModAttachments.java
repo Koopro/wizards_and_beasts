@@ -473,6 +473,14 @@ public class ModAttachments {
                             .build());
 
     /** The brewing recipes this player has learned (the basics everyone knows are not stored). */
+    /** Spell-trace retry waits and the Steady hand setting, kept across logouts and deaths. */
+    public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.spell.learning.tracing.TraceMemory>> TRACE_MEMORY =
+            ATTACHMENTS.register("trace_memory", () -> AttachmentType.builder(
+                            () -> at.koopro.wizardsandbeasts.spell.learning.tracing.TraceMemory.EMPTY)
+                    .serialize(at.koopro.wizardsandbeasts.spell.learning.tracing.TraceMemory.CODEC.fieldOf("data"))
+                    .copyOnDeath()
+                    .build());
+
     public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.brew.knowledge.BrewRecipeBook>> BREW_RECIPE_BOOK =
             ATTACHMENTS.register("brew_recipe_book", () -> AttachmentType.builder(
                             () -> at.koopro.wizardsandbeasts.brew.knowledge.BrewRecipeBook.EMPTY)

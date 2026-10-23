@@ -52,8 +52,13 @@ public final class SpellTraceService {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private static final PlayerScopedState<TraceChallenge> ACTIVE = PlayerScopedState.create("spell-trace-active");
-    /** Spell id → game time from which another attempt may start. Only ever holds recent failures. */
-    private static final PlayerScopedState<Map<String, Long>> RETRY_AT = PlayerScopedState.create("spell-trace-retry");
+    /**
+     * Spell id → game time the player finished reading a book of it. "Try again" may re-open a trace from a book in
+     * hand only while that read is fresh: the client cannot skip the read by asking for the trace directly.
+     */
+    private static final PlayerScopedState<Map<String, Long>> READ_AT = PlayerScopedState.create("spell-trace-read");
+    /** How long a finished read stays good for "Try again": two minutes. */
+    public static final long READ_FRESH_TICKS = 2400;
 
     private SpellTraceService() {
     }
@@ -67,11 +72,21 @@ public final class SpellTraceService {
      */
     public static @Nullable TraceChallenge openFromBook(ServerPlayer player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        if (!(stack.getItem() instanceof SpellSourceItem item)) {
+        if (!(stack.getItem() instanceof SpellSourceItem)) {
             return null;
         }
         Spell spell = SpellSource.spellOf(stack);
         if (spell == null) {
+            return null;
+        }
+        READ_AT.computeIfAbsent(player.getUUID(), id -> new HashMap<>()).put(spell.getId(), player.level().getGameTime());
+        return reopenFromBook(player, hand, spell);
+    }
+
+    /** A trace from a book in hand, without the read: only for a read still fresh ({@link #request}). */
+    private static @Nullable TraceChallenge reopenFromBook(ServerPlayer player, InteractionHand hand, Spell spell) {
+        ItemStack stack = player.getItemInHand(hand);
+        if (!(stack.getItem() instanceof SpellSourceItem item)) {
             return null;
         }
         return open(player, spell, new TraceSource.Book(hand, stack.getItem(), spell.getId(), item.spentOnRead()));
@@ -107,7 +122,14 @@ public final class SpellTraceService {
         for (InteractionHand hand : InteractionHand.values()) {
             ItemStack stack = player.getItemInHand(hand);
             if (stack.getItem() instanceof SpellSourceItem && spell.getId().equals(SpellSource.spellIdOf(stack))) {
-                openFromBook(player, hand);
+                Map<String, Long> reads = READ_AT.get(player);
+                Long readAt = reads == null ? null : reads.get(spell.getId());
+                long now = player.level().getGameTime();
+                if (readAt == null || now < readAt || now - readAt > READ_FRESH_TICKS) {
+                    PlayerFeedback.actionBar(player, Component.translatable("spell.wizards_and_beasts.trace.read_first"));
+                    return;
+                }
+                reopenFromBook(player, hand, spell);
                 return;
             }
         }
@@ -131,6 +153,11 @@ public final class SpellTraceService {
                     SpellSource.writtenName(spell.getId()), (wait + 19) / 20));
             return null;
         }
+        // A fresh challenge in place of a live one is a reroll, and a reroll is an attempt given up.
+        TraceChallenge replaced = ACTIVE.get(player);
+        if (replaced != null) {
+            noteFailure(player, replaced, now);
+        }
         TraceDifficulty difficulty = TraceDifficulty.forSpell(spell);
         long seed = player.getRandom().nextLong();
         TracePath path = TracePathGenerator.generate(seed, difficulty);
@@ -144,7 +171,7 @@ public final class SpellTraceService {
         }
         PacketDistributor.sendToPlayer(player, new SpellTraceOpenS2CPayload(challenge.id(), spell.getId(),
                 difficulty.ordinal(), difficulty.timeLimitTicks(path.length()), TraceDifficulty.START_ALLOWANCE_TICKS,
-                source.spendsSource(), points));
+                source.spendsSource(), steadyHand(player), points));
         return challenge;
     }
 
@@ -163,11 +190,14 @@ public final class SpellTraceService {
         // Single use: gone before anything else can look at it.
         ACTIVE.remove(player);
 
+        long now = player.level().getGameTime();
         if (xy.length == 0) {
-            send(player, challenge, TraceOutcome.CANCELLED, -1, 0.0, true, "");
+            // Closing the screen gives the attempt up: it costs the retry wait, or a closed screen would be a free
+            // reroll of a path the player did not like.
+            int retry = noteFailure(player, challenge, now);
+            send(player, challenge, TraceOutcome.CANCELLED, -1, 0.0, true, "", retry);
             return TraceOutcome.CANCELLED;
         }
-        long now = player.level().getGameTime();
         long elapsed = now - challenge.issuedAt();
         TraceProgress.Verdict verdict;
         if (now > challenge.deadline(assist)) {
@@ -230,8 +260,23 @@ public final class SpellTraceService {
     public static void cancel(ServerPlayer player) {
         TraceChallenge challenge = ACTIVE.remove(player);
         if (challenge != null) {
-            send(player, challenge, TraceOutcome.CANCELLED, -1, 0.0, true, "");
+            int retry = noteFailure(player, challenge, player.level().getGameTime());
+            send(player, challenge, TraceOutcome.CANCELLED, -1, 0.0, true, "", retry);
         }
+    }
+
+    /** The "Steady hand" setting the server judges by. */
+    public static boolean steadyHand(ServerPlayer player) {
+        return player.getData(ModAttachments.TRACE_MEMORY.get()).steadyHand();
+    }
+
+    /** Changes the "Steady hand" setting; it applies to the next challenge opened, not to one already live. */
+    public static void setSteadyHand(ServerPlayer player, boolean steady) {
+        if (ACTIVE.get(player) != null) {
+            return;
+        }
+        player.setData(ModAttachments.TRACE_MEMORY.get(),
+                player.getData(ModAttachments.TRACE_MEMORY.get()).withSteadyHand(steady));
     }
 
     /** The player's live challenge. For tests and diagnostics; gameplay never needs to look. */
@@ -254,17 +299,14 @@ public final class SpellTraceService {
 
     /** Ticks until {@code spellId} may be attempted again; 0 when it may be now. */
     public static long retryWait(ServerPlayer player, String spellId, long now) {
-        Map<String, Long> table = RETRY_AT.get(player);
-        Long at = table == null ? null : table.get(spellId);
-        return at == null || at <= now ? 0 : at - now;
+        return player.getData(ModAttachments.TRACE_MEMORY.get()).waitFor(spellId, now);
     }
 
     private static int noteFailure(ServerPlayer player, TraceChallenge challenge, long now) {
         int delay = challenge.difficulty().retryDelayTicks();
         if (delay > 0) {
-            Map<String, Long> table = RETRY_AT.computeIfAbsent(player.getUUID(), id -> new HashMap<>());
-            table.values().removeIf(at -> at <= now); // keep the table to live entries only
-            table.put(challenge.spellId(), now + delay);
+            player.setData(ModAttachments.TRACE_MEMORY.get(), player.getData(ModAttachments.TRACE_MEMORY.get())
+                    .withRetry(challenge.spellId(), now + delay, now));
         }
         return delay;
     }
