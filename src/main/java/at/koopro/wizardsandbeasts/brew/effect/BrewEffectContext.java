@@ -13,7 +13,7 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>Mirrors {@code SpellEffectContext}: the subject, the world, and the one multiplier that scales
  * authored numbers. Brewing has a single multiplier rather than three because there is only one thing
- * a potion's strength means — {@code potion_potency} lengthens durations, and always has.
+ * a potion's strength means — how well it was brewed lengthens durations ({@code BrewQuality}).
  *
  * <h2>Why the drinker is a {@link LivingEntity}</h2>
  * <p>Not a {@code ServerPlayer}. A brew can be splashed, fed to a beast, or drunk by a villager later,
@@ -24,7 +24,7 @@ import org.jspecify.annotations.Nullable;
  * @param brew      the brew being applied, so a component can read its own colour or name
  * @param drinker   who it is happening to
  * @param level     the server world
- * @param potency   duration multiplier from {@code potion_potency}; 1.0 for an unskilled drinker
+ * @param potency   duration multiplier: the bottle's brew quality ({@code BrewQuality}); 1.0 for a plain bottle
  * @param phase     when this is running — see {@link BrewEffectPhase}
  */
 public record BrewEffectContext(

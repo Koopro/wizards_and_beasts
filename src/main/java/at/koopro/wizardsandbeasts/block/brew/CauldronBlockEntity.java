@@ -108,6 +108,8 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
     private boolean catalystAdded;
     /** Brewing a recipe its brewer was never taught: riskier, and taught to them if it works (BrewKnowledge). */
     private boolean experiment;
+    /** The quality the brewer puts in this batch, set as it starts (BrewQuality); plain when nobody is known. */
+    private int quality = at.koopro.wizardsandbeasts.brew.BrewQuality.PLAIN;
 
     /** The recipe being run, so completion can read its difficulty and its catalyst. */
     private @Nullable String recipeId;
@@ -328,6 +330,9 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
         if (result == StartResult.STARTED && match != null
                 && !at.koopro.wizardsandbeasts.brew.knowledge.BrewKnowledge.knows(brewer, match.id())) {
             experiment = true;
+        }
+        if (result == StartResult.STARTED) {
+            quality = at.koopro.wizardsandbeasts.brew.BrewQuality.of(brewer);
             setChangedAndSync();
         }
         return result;
@@ -336,6 +341,11 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
     /** Whether the brew heating here is an experiment: a recipe its brewer does not know. */
     public boolean isExperiment() {
         return experiment;
+    }
+
+    /** The quality the batch heating here will bottle at (BrewQuality percent). */
+    public int quality() {
+        return quality;
     }
 
     /** The brew the pot's contents would make on {@code tier}, or {@code null} when nothing matches. */
@@ -383,6 +393,7 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
         this.penalties = 0f;
         this.catalystAdded = false;
         this.experiment = false;
+        this.quality = at.koopro.wizardsandbeasts.brew.BrewQuality.PLAIN;
         this.brewId = brew.id();
         // The server's brewing-speed rule applies to the brew as it starts; a pot already on the heat keeps its time.
         this.totalTicks = at.koopro.wizardsandbeasts.brew.tuning.BrewTuningService.heatTimeFor(recipe);
@@ -450,6 +461,7 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
         penalties = 0f;
         catalystAdded = false;
         experiment = false;
+        quality = at.koopro.wizardsandbeasts.brew.BrewQuality.PLAIN;
         recipeId = null;
         // The water goes with the brew. A pot you have just poured out of is an empty pot, and
         // leaving it filled would let one bucket serve every brew a cauldron ever makes.
@@ -813,6 +825,7 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
         output.store("penalties", Codec.FLOAT, penalties);
         output.store("catalystAdded", Codec.BOOL, catalystAdded);
         output.store("experiment", Codec.BOOL, experiment);
+        output.store("quality", Codec.INT, quality);
         if (recipeId != null) {
             output.store("recipeId", Codec.STRING, recipeId);
         }
@@ -845,6 +858,7 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
         penalties = input.read("penalties", Codec.FLOAT).orElse(0f);
         catalystAdded = input.read("catalystAdded", Codec.BOOL).orElse(false);
         experiment = input.read("experiment", Codec.BOOL).orElse(false);
+        quality = input.read("quality", Codec.INT).orElse(at.koopro.wizardsandbeasts.brew.BrewQuality.PLAIN);
         recipeId = input.read("recipeId", Codec.STRING).orElse(null);
         brewId = input.read("brewId", Codec.STRING).orElse(null);
         brewerId = input.read("brewerId", UUIDUtil.CODEC).orElse(null);

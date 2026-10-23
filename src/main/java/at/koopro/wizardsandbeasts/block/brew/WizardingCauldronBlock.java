@@ -406,6 +406,7 @@ public class WizardingCauldronBlock extends BaseEntityBlock {
                                              ServerPlayer player, ItemStack bottle) {
         switch (be.phase()) {
             case DONE -> {
+                int quality = be.quality();
                 Brew brew = be.collect();
                 if (brew == null) {
                     say(player, "brew.wizards_and_beasts.cauldron.unknown_brew");
@@ -414,7 +415,7 @@ public class WizardingCauldronBlock extends BaseEntityBlock {
                 if (!player.getAbilities().instabuild) {
                     bottle.shrink(1);
                 }
-                ItemStack filled = BrewItem.of(brew);
+                ItemStack filled = at.koopro.wizardsandbeasts.brew.BrewQuality.stamp(BrewItem.of(brew), quality);
                 player.getInventory().add(filled); // true on a partial insert: pop whatever is left
                 if (!filled.isEmpty()) {
                     Block.popResource(level, pos.above(), filled);

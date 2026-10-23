@@ -2,7 +2,7 @@ package at.koopro.wizardsandbeasts.item.brew;
 
 import at.koopro.wizardsandbeasts.brew.Brew;
 import at.koopro.wizardsandbeasts.brew.BrewNaming;
-import at.koopro.wizardsandbeasts.brew.BrewPotency;
+import at.koopro.wizardsandbeasts.brew.BrewQuality;
 import at.koopro.wizardsandbeasts.brew.Brews;
 import at.koopro.wizardsandbeasts.brew.effect.BrewEffectContext;
 import at.koopro.wizardsandbeasts.brew.effect.BrewEffectEntry;
@@ -30,8 +30,8 @@ import java.util.function.Consumer;
  * The single, generic potion item produced by the brewing pillar. The
  * specific brew it carries is stored in the {@link ModDataComponents#BREW_ID}
  * data component as a fully-qualified {@link Brew} id; consumption resolves
- * the brew, scales effect durations by the drinker's {@code potion_potency}
- * skill level (via {@link BrewPotency}), and applies them.
+ * the brew, scales effect durations by the quality its brewer put in the bottle
+ * (via {@link BrewQuality}), and applies them.
  *
  * <p>Why one item instead of one item per brew: the registry of brewable
  * potions is dynamic (datapack-driven) so we can't know the full set at
@@ -80,6 +80,14 @@ public class BrewItem extends ConsumedItem {
             tooltipAdder.accept(Component.translatable(descKey)
                     .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
         }
+        Integer quality = stack.get(ModDataComponents.BREW_QUALITY.get());
+        if (quality != null) {
+            int q = BrewQuality.of(stack);
+            String band = q >= 120 ? "fine" : q >= 105 ? "good" : q >= BrewQuality.PLAIN ? "sound" : "thin";
+            tooltipAdder.accept(Component.translatable("brew.wizards_and_beasts.quality." + band, q)
+                    .withStyle(q >= 105 ? ChatFormatting.GOLD : q >= BrewQuality.PLAIN ? ChatFormatting.GRAY
+                            : ChatFormatting.DARK_GRAY));
+        }
     }
 
     /** {@code wizards_and_beasts:felix_felicis} → {@code Felix Felicis}. Last resort only. */
@@ -117,9 +125,8 @@ public class BrewItem extends ConsumedItem {
             return;
         }
 
-        float potency = (player instanceof ServerPlayer serverPlayer)
-                ? BrewPotency.multiplierFor(serverPlayer)
-                : 1.0f;
+        // The bottle's quality, set by whoever brewed it: the drinker's own skill does not matter.
+        float potency = BrewQuality.multiplier(stack);
 
         // Components, not the effect list. Every brew has at least one by the time it reaches here:
         // BrewDefinition wraps a legacy effects list in an apply_effects component at load, so this

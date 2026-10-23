@@ -125,7 +125,7 @@ public sealed interface BrewEffect permits
     /**
      * Apply a list of mob effects. What every brew used to be, and what most should stay.
      *
-     * <p>Durations are scaled by the drinker's potency; amplifiers are not. Potency is a
+     * <p>Durations are scaled by the bottle's quality; amplifiers are not. Quality comes from the brewer's
      * <em>herbology</em> skill about making a draught last, and a skill that also raised amplifiers
      * would silently turn Regeneration II into Regeneration III on a good brewer and break every
      * balance assumption a datapack author made.
@@ -305,7 +305,7 @@ public sealed interface BrewEffect permits
             if (!(ctx.drinker() instanceof net.minecraft.server.level.ServerPlayer player)) {
                 return;
             }
-            // Duration takes the drinker's potency, the way every other brewed duration does; the
+            // Duration takes the bottle's quality, the way every other brewed duration does; the
             // strength does not, because potency is about making a draught last rather than making it
             // better — see ApplyEffects.
             FelixFortune.drink(player, ctx.scaleDuration(durationTicks), strength,

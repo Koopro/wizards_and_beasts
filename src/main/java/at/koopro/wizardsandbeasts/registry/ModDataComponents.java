@@ -311,6 +311,14 @@ public class ModDataComponents {
     // ── Horcrux Vessels (shared) ─────────────────────────────────
 
     /** The brewing recipes written on a loose recipe page (full recipe ids). Textbooks read theirs from data. */
+    /** How well a bottle was brewed, a percentage of every duration it gives (brew/BrewQuality). */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> BREW_QUALITY =
+            DATA_COMPONENTS.register("brew_quality", () ->
+                    DataComponentType.<Integer>builder()
+                            .persistent(com.mojang.serialization.Codec.INT)
+                            .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.VAR_INT)
+                            .build());
+
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<java.util.List<String>>> BREW_RECIPES =
             DATA_COMPONENTS.register("brew_recipes", () ->
                     DataComponentType.<java.util.List<String>>builder()
