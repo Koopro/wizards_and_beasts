@@ -62,14 +62,15 @@ public class BestiaryHarvestLootModifier extends LootModifier {
     }
 
     /**
-     * True while study-gated materials exist at all.
+     * True while study-gated materials exist at all: {@code MAGIZOOLOGY} owns beast drops, which is what these are.
      *
-     * <p>Both modules are required. {@code BESTIARY} is where tiers come from — with it off nothing can
-     * advance, so a tier gate would make these materials permanently unobtainable rather than merely
-     * hard to get. {@code MAGIZOOLOGY} owns beast drops, which is what these are.
+     * <p>{@code BESTIARY} is not required. Since 2026-10-23 every creature material taken on a kill comes through
+     * here (a dragon's heartstring, a thestral's tail hair), so switching the journal off must not switch the
+     * materials off with it. Without it no tier can be earned, so the tier gate passes; the player kill and the
+     * cooldown still hold.
      */
     public static boolean isActive() {
-        return ModuleManager.isEnabled(Module.BESTIARY) && ModuleManager.isEnabled(Module.MAGIZOOLOGY);
+        return ModuleManager.isEnabled(Module.MAGIZOOLOGY);
     }
 
     @Override
@@ -102,7 +103,8 @@ public class BestiaryHarvestLootModifier extends LootModifier {
 
         long now = player.level().getGameTime();
         for (HarvestRule rule : rules) {
-            DiscoveryTier held = BestiaryDataHelper.getTier(player, rule.entry());
+            DiscoveryTier held = ModuleManager.isEnabled(Module.BESTIARY)
+                    ? BestiaryDataHelper.getTier(player, rule.entry()) : DiscoveryTier.KNOWN;
             long last = BestiaryDataHelper.getLastHarvestTick(player, rule.entry());
 
             boolean researched = BestiaryDataHelper.getData(player).historyOf(rule.entry()).complete();

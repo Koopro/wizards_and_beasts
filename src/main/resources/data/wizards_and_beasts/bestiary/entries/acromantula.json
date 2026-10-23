@@ -36,7 +36,7 @@
     "materials": [
       {
         "item": "wizards_and_beasts:acromantula_venom",
-        "how": "remains"
+        "how": "studied_kill"
       }
     ],
     "study": [

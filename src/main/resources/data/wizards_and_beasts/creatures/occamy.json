@@ -40,6 +40,12 @@
     {
       "type": "tint",
       "color": "#9FE0FF"
+    },
+    {
+      "type": "shed",
+      "item": "wizards_and_beasts:occamy_eggshell",
+      "interval_ticks": 48000,
+      "count": 1
     }
   ],
   "clips": [

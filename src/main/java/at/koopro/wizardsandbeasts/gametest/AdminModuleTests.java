@@ -242,7 +242,7 @@ public final class AdminModuleTests {
             set(server, Module.GRINGOTTS, ModuleState.ENABLED);
             check(helper, MinistryFines.isActive() || at.koopro.wizardsandbeasts.Config.ministryFineScalePercent == 0,
                     () -> "fines did not resume with Gringotts");
-            // PARTIAL both ways: study-gated drops need the Bestiary and Magizoology.
+            // Study-gated drops need Magizoology; the Bestiary only decides their tier gate.
             set(server, Module.BESTIARY, ModuleState.ENABLED);
             set(server, Module.MAGIZOOLOGY, ModuleState.DISABLED);
             check(helper, !BestiaryHarvestLootModifier.isActive(), () -> "study drops ran without Magizoology");

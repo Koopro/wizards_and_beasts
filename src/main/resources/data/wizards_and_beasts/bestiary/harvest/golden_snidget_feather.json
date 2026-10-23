@@ -1,0 +1,7 @@
+{
+  "entry": "wizards_and_beasts:golden_snidget",
+  "item": "wizards_and_beasts:golden_snidget_feather",
+  "minTier": "KNOWN",
+  "chance": 0.25,
+  "cooldownSeconds": 3600
+}

@@ -1,0 +1,7 @@
+{
+  "entry": "wizards_and_beasts:horned_serpent",
+  "item": "wizards_and_beasts:horned_serpent_gem",
+  "minTier": "STUDIED",
+  "chance": 0.25,
+  "cooldownSeconds": 1200
+}

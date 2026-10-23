@@ -31,6 +31,58 @@ public final class HarvestRouteTests {
                 "creatures: a bonded mooncalf's dung is handed to its owner standing by, and an owner whose research "
                         + "on mooncalves is complete gets the next one in half the time",
                 HarvestRouteTests::giftToResearchedOwner);
+        tests.add("harvest_kill_takes_parts_only_from_a_student",
+                "creatures: a thestral killed by someone who never studied thestrals yields no tail hair; one who "
+                        + "has studied them takes it, and then not again until the harvest cooldown has passed",
+                HarvestRouteTests::killNeedsStudy);
+    }
+
+    private static void killNeedsStudy(GameTestHelper helper) {
+        Runnable lease = WizardTestSupport.leaseModule(Module.CREATURES);
+        CreatureArena arena = CreatureArena.at(helper, ARENA_Y + 10);
+        ServerPlayer stranger = WizardTestSupport.placeMockPlayer(helper, "HairPoacher", GameType.SURVIVAL);
+        ServerPlayer student = WizardTestSupport.placeMockPlayer(helper, "HairStudent", GameType.SURVIVAL);
+        Item hair = BuiltInRegistries.ITEM.getValue(Identifier.fromNamespaceAndPath("wizards_and_beasts", "thestral_tail_hair"));
+        try {
+            for (BestiaryEntry entry : BestiaryDiscoveryHandler.entriesFor(
+                    at.koopro.wizardsandbeasts.registry.ModEntities.THESTRAL.get())) {
+                BestiaryDataHelper.setTier(student, entry.id(), at.koopro.wizardsandbeasts.bestiary.DiscoveryTier.STUDIED);
+            }
+            for (int i = 0; i < 6; i++) {
+                check(helper, killFor(helper, arena, stranger, hair) == 0, () -> "a thestral gave its hair to a stranger");
+            }
+            int tries = 0;
+            while (tries < 40 && killFor(helper, arena, student, hair) == 0) {
+                tries++;
+            }
+            int taken = tries;
+            check(helper, taken < 40, () -> "forty studied kills yielded no hair");
+            for (int i = 0; i < 6; i++) {
+                check(helper, killFor(helper, arena, student, hair) == 0,
+                        () -> "a second hair came before the harvest cooldown");
+            }
+            helper.succeed();
+        } finally {
+            arena.clear();
+            retire(helper, stranger);
+            retire(helper, student);
+            lease.run();
+        }
+    }
+
+    /** Spawns a thestral, has {@code killer} strike it dead, and returns how much hair fell (picked up again). */
+    private static int killFor(GameTestHelper helper, CreatureArena arena, ServerPlayer killer, Item hair) {
+        net.minecraft.world.entity.PathfinderMob thestral = arena.creature("thestral", 2, 0);
+        thestral.hurtServer(helper.getLevel(), helper.getLevel().damageSources().playerAttack(killer), 10000f);
+        int found = 0;
+        for (net.minecraft.world.entity.item.ItemEntity drop : helper.getLevel().getEntitiesOfClass(
+                net.minecraft.world.entity.item.ItemEntity.class, thestral.getBoundingBox().inflate(4))) {
+            if (drop.getItem().is(hair)) {
+                found += drop.getItem().getCount();
+            }
+            drop.discard();
+        }
+        return found;
     }
 
     private static void giftToResearchedOwner(GameTestHelper helper) {

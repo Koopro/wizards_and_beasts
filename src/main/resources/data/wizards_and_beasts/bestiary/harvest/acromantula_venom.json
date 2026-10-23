@@ -1,0 +1,7 @@
+{
+  "entry": "wizards_and_beasts:acromantula",
+  "item": "wizards_and_beasts:acromantula_venom",
+  "minTier": "STUDIED",
+  "chance": 0.5,
+  "cooldownSeconds": 600
+}

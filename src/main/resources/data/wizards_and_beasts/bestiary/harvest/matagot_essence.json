@@ -1,0 +1,7 @@
+{
+  "entry": "wizards_and_beasts:matagot",
+  "item": "wizards_and_beasts:matagot_essence",
+  "minTier": "STUDIED",
+  "chance": 0.5,
+  "cooldownSeconds": 600
+}

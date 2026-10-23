@@ -1,0 +1,7 @@
+{
+  "entry": "wizards_and_beasts:yeti",
+  "item": "wizards_and_beasts:yeti_fur",
+  "minTier": "STUDIED",
+  "chance": 0.5,
+  "cooldownSeconds": 600
+}

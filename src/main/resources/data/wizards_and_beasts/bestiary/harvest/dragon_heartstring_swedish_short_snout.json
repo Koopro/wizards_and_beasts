@@ -1,0 +1,7 @@
+{
+  "entry": "wizards_and_beasts:swedish_short_snout",
+  "item": "wizards_and_beasts:dragon_heartstring",
+  "minTier": "STUDIED",
+  "chance": 0.3,
+  "cooldownSeconds": 1200
+}

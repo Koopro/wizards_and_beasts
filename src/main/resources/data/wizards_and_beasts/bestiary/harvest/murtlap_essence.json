@@ -1,0 +1,7 @@
+{
+  "entry": "wizards_and_beasts:murtlap",
+  "item": "wizards_and_beasts:murtlap_essence",
+  "minTier": "STUDIED",
+  "chance": 0.5,
+  "cooldownSeconds": 600
+}

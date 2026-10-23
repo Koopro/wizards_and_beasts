@@ -1,0 +1,7 @@
+{
+  "entry": "wizards_and_beasts:thestral",
+  "item": "wizards_and_beasts:thestral_tail_hair",
+  "minTier": "STUDIED",
+  "chance": 0.35,
+  "cooldownSeconds": 3600
+}

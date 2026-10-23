@@ -36,7 +36,11 @@
     "materials": [
       {
         "item": "wizards_and_beasts:occamy_eggshell",
-        "how": "remains"
+        "how": "shed"
+      },
+      {
+        "item": "wizards_and_beasts:occamy_eggshell",
+        "how": "studied_kill"
       }
     ],
     "study": [

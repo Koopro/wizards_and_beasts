@@ -1,0 +1,7 @@
+{
+  "entry": "wizards_and_beasts:hidebehind",
+  "item": "wizards_and_beasts:hidebehind_claw",
+  "minTier": "STUDIED",
+  "chance": 0.5,
+  "cooldownSeconds": 600
+}

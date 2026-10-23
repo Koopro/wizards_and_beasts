@@ -1,0 +1,7 @@
+{
+  "entry": "wizards_and_beasts:occamy",
+  "item": "wizards_and_beasts:occamy_eggshell",
+  "minTier": "STUDIED",
+  "chance": 0.35,
+  "cooldownSeconds": 3600
+}

@@ -1,0 +1,7 @@
+{
+  "entry": "wizards_and_beasts:rougarou",
+  "item": "wizards_and_beasts:rougarou_hair",
+  "minTier": "STUDIED",
+  "chance": 0.5,
+  "cooldownSeconds": 300
+}

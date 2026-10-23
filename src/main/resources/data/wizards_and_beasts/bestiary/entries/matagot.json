@@ -33,7 +33,7 @@
     "materials": [
       {
         "item": "wizards_and_beasts:matagot_essence",
-        "how": "remains"
+        "how": "studied_kill"
       }
     ],
     "study": [

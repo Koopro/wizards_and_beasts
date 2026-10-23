@@ -634,9 +634,11 @@ public final class CreatureWildlifeTests {
                     AcromantulaEntity founder = spiders.get(0);
                     AcromantulaEntity kin = spiders.get(1);
                     kin.discard();
+                    // Venom is a studied harvest since Phase 6 (bestiary/harvest/acromantula_venom.json): a killer who
+                    // never studied acromantulas takes none. The studied side is HarvestRouteTests' business.
                     founder.hurtServer(level, level.damageSources().playerAttack(prey), 10_000.0f);
-                    check(helper, !itemsNear(helper, ACROMANTULA_Y, item("acromantula_venom")).isEmpty(),
-                            () -> "a dead acromantula dropped no venom");
+                    check(helper, itemsNear(helper, ACROMANTULA_Y, item("acromantula_venom")).isEmpty(),
+                            () -> "a dead acromantula gave its venom to someone who never studied it");
                 })
                 .thenIdle(25)
                 .thenExecute(() -> {
