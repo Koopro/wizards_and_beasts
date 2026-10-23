@@ -289,3 +289,25 @@ Manual. You need a survival world, a bench and a few enhancers.
    and with no lectern by the bench it says "Needs Grain of the Wood".
 5. "New handle" with any log: the wand's handle changes, and nothing else does.
 6. Find a rougarou in a swamp (default spawn setting): it drops rougarou hair.
+
+## Brewing (2026-10-23, `feat/brewing`)
+
+Manual. You need a survival world, a pewter and a brass cauldron on a heat source, and two players for steps 7-8.
+
+1. New player: brew Pepperup (blaze powder + sugar, pewter). It starts normally ("Ready in ...").
+2. Brew Skele-Gro (2 dittany, 3 bone meal, 1 ghast tear, brass) without having read anything. The message says
+   "An experiment begins". If it works, a toast says you learned it.
+3. Hover Magical Drafts and Potions (apothecary): it lists Skele-Gro, Silver Solution and the Mandrake draught.
+   Hold right-click for three seconds: a toast names what you learned, and the book stays in your hand.
+   Hover again: the known recipes now show their ingredients and cauldron.
+4. Open a stronghold library or village temple chest in a new world: a Potion Recipe Page sometimes appears.
+   Reading it teaches the one recipe on it.
+5. Bottle a brew with no skill and no O.W.L.: the tooltip says "Thinly brewed: lasts 85%". Then run
+   `/wandb player skill force_unlock @s potion_potency` and `/wandb player owls set_grade @s POTIONS O`; the next
+   bottle says "Finely brewed: lasts 130%".
+6. Pull a Devil's Snare by hand: it drops. Find a wild Mandrake on grass in a new world (rare, plains and
+   forests); it does not pop off.
+7. Hold a Polyjuice bottle and right-click the other player: "You drop one of <name>'s hairs into the Polyjuice".
+   The other player sees "Something tugs at your hair". Drinking the bottle disguises you as them.
+8. Petrify the other player (`/wandb player condition set petrified true <them>`). Right-click them with a Mandrake Restoration
+   Draught: they can move again, and you get the glass bottle back.

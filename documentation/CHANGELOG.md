@@ -4,6 +4,43 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Brewing (2026-10-23)
+
+- **Added:** recipes are learned.
+  - Everyone knows Pepperup and Wiggenweld from the start.
+  - Potions textbooks are read, not used up, and teach every recipe in them:
+    - Magical Drafts and Potions, at any apothecary;
+    - Advanced Potion-Making, at the apothecary for a trusted supplier;
+    - Moste Potente Potions, in hidden caches or under the Knockturn counter.
+  - Loose recipe pages turn up in libraries and ruins, one recipe each.
+  - Each apothecary Potions lesson teaches one recipe.
+  - A book's tooltip lists its recipes, and for the ones you know: ingredients, cauldron and catalyst.
+  - A correct recipe nobody taught you brews as an **experiment**: 30% more likely to fail, and you learn it if
+    it works.
+  - New handbook chapter, Part III(a).
+- **Changed:** a potion is as good as its brewer.
+  - When the brew starts, your potion_potency skill and Potions O.W.L. set its quality, from 85% to 130%. The
+    bottle keeps it.
+  - Quality lengthens or shortens durations; it never changes strength.
+  - Who drinks the bottle no longer matters. Bought and looted bottles are a plain 100%.
+- **Added:** two brews are used on someone else.
+  - Press a Polyjuice bottle to another player to take one of their hairs.
+  - Pour a Mandrake Restoration Draught over a petrified player to free them.
+- **Fixed:** the cauldron.
+  - It no longer destroys items that aren't ingredients.
+  - An Occamy eggshell refines silver solution on a plain click, and is kept if it can't.
+  - Unused ingredients come back out.
+  - O.W.L. points follow the recipe's tier, not the pot's.
+  - A brew spoiled by losing heat says so.
+  - Drinking gives the bottle back.
+  - A ruined potion no longer passes the Potions practical.
+  - Pewter is now the cheapest cauldron, as the lowest tier should be.
+- **Fixed:** ingredients that could not be had.
+  - The wild Mandrake and Devil's Snare patches never generated; they do now.
+  - Devil's Snare drops when pulled by hand.
+  - The apothecary sells gillyweed (Polyjuice).
+  - Hidebehind shadow essence (Shadow Form) is a rare cache find.
+
 ### Wandmaking (2026-10-22)
 
 - **Fixed:** 30 of the 80 wand recipes could not be made. The thunderbird, troll and wampus cat cores came from
