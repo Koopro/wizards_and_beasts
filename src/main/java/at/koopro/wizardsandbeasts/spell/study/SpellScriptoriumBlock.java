@@ -176,6 +176,16 @@ public class SpellScriptoriumBlock extends HorizontalDirectionalBlock {
         if (!data.knowsSpell(spell.getId())) {
             return Component.translatable("block.wizards_and_beasts.spell_teacher.unknown_spell");
         }
+        // An Obscurial's power is not a spell anybody can write down: a copy is ink on a page nobody can read.
+        if (at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialRules.isObscurialAbility(spell)) {
+            return Component.translatable("block.wizards_and_beasts.spell_teacher.not_writable");
+        }
+        // A copy carries the original's restrictions: writing out dark magic asks the scribe for the same Spell Law
+        // clearance learning it does (a spell granted past the rules does not come with it).
+        Component law = at.koopro.wizardsandbeasts.spell.learning.SpellLawLearningGate.refusal(player, spell);
+        if (law != null) {
+            return law;
+        }
         if (!player.getAbilities().instabuild && findInkSlot(player) < 0) {
             return Component.translatable("block.wizards_and_beasts.spell_teacher.no_ink");
         }

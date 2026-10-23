@@ -143,7 +143,7 @@ public final class SpellTraceService {
                         : SpellLearningService.Route.BOOK);
         if (!check.success()) {
             PlayerFeedback.refuse(player, Component.translatable("spell.wizards_and_beasts.learning.refused"),
-                    Component.literal(check.message()));
+                    check.text());
             return null;
         }
         long now = player.level().getGameTime();
@@ -239,7 +239,8 @@ public final class SpellTraceService {
                 : SpellLearningService.Route.BOOK;
         SpellLearningService.LearnResult result = SpellLearningService.commit(player, spell, route);
         if (!result.success()) {
-            send(player, challenge, TraceOutcome.REFUSED, -1, verdict.accuracy(), true, result.message());
+            send(player, challenge, TraceOutcome.REFUSED, -1, verdict.accuracy(), true,
+                    at.koopro.wizardsandbeasts.network.spell.SpellTraceResultS2CPayload.encodeDetail(result.text()));
             return TraceOutcome.REFUSED;
         }
         // Spent only now: a page refused by a gate, or traced badly, has not been studied to pieces.

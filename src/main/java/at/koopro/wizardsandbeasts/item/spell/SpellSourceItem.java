@@ -87,7 +87,7 @@ public class SpellSourceItem extends Item {
             Spell spell = SpellSource.spellOf(stack);
             SpellLearningService.LearnResult check = SpellLearningService.validateLearnAttempt(serverPlayer, spell);
             if (!check.success()) {
-                refuse(player, level, Component.literal(check.message()));
+                refuse(player, level, check.text());
                 return InteractionResult.FAIL;
             }
         }

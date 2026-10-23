@@ -489,7 +489,7 @@ final class SpellTraceScreen extends Screen {
                 SpellTraceResultS2CPayload r = result;
                 TraceOutcome outcome = r == null ? TraceOutcome.CANCELLED : TraceOutcome.byOrdinal(r.outcome());
                 status = r != null && !r.detail().isEmpty()
-                        ? Component.translatable(outcome.langKey()).append(" ").append(Component.literal(r.detail()))
+                        ? Component.translatable(outcome.langKey()).append(" ").append(r.detailText())
                         : Component.translatable(outcome.langKey());
             }
         }

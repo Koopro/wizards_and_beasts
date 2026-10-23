@@ -113,6 +113,35 @@ public final class SpellLearningService {
         return taught;
     }
 
+    /**
+     * The operator routes (a command, the admin panel): teaches {@code spell} and its companions with no trace, and
+     * syncs what learning syncs -- the spell list and the stats that count it. Before this each route wrote the
+     * spell alone and synced only the list, so the companion never came and KNOWLEDGE showed stale.
+     *
+     * @return false when the player already knew it
+     */
+    public static boolean grantWithoutTrace(ServerPlayer player, Spell spell) {
+        PlayerSpellData data = player.getData(ModAttachments.SPELL_DATA.get());
+        if (data.knowsSpell(spell.getId())) {
+            return false;
+        }
+        data.learnSpell(spell.getId());
+        for (String companionId : companionsOf(spell)) {
+            Spell companion = Spells.byId(companionId);
+            if (companion != null && companion.isImplemented()) {
+                data.learnSpell(companion.getId());
+            }
+        }
+        syncAfterGrant(player);
+        return true;
+    }
+
+    /** Sends the spell list and the stats that derive from it. */
+    public static void syncAfterGrant(ServerPlayer player) {
+        SpellDataSyncS2CPayload.syncToPlayer(player);
+        PlayerStatsSyncPayload.syncToPlayer(player);
+    }
+
     /** Book-route {@link #commit}, by id. Kept for the gate tests, which exercise the gates directly. */
     public static LearnResult tryLearnSpell(ServerPlayer player, String spellId) {
         return commit(player, Spells.byId(spellId), Route.BOOK);
@@ -138,10 +167,12 @@ public final class SpellLearningService {
         }
 
         data.learnSpell(spell.getId());
+        List<String> companionsTaught = new ArrayList<>();
         for (String companionId : companionsOf(spell)) {
             Spell companion = Spells.byId(companionId);
             if (companion != null && validateLearnAttempt(player, companion, route).success()) {
                 data.learnSpell(companion.getId());
+                companionsTaught.add(companion.getId());
             }
         }
         if (route == Route.BOOK) {
@@ -151,7 +182,9 @@ public final class SpellLearningService {
             SpellLawLearningGate.stainForLearning(player, spell);
             awardFirstLessons(player);
         } else {
+            // The companions too: a respec that takes back Lumos takes back the Nox that came with it.
             player.getData(ModAttachments.SKILL_DATA.get()).recordWebTaughtSpell(spell.getId());
+            companionsTaught.forEach(player.getData(ModAttachments.SKILL_DATA.get())::recordWebTaughtSpell);
         }
         SpellDataSyncS2CPayload.syncToPlayer(player);
         PlayerStatsSyncPayload.syncToPlayer(player); // KNOWLEDGE derives from spells learned
@@ -213,7 +246,7 @@ public final class SpellLearningService {
         SpellLearningEligibility.Result eligibility = SpellLearningEligibility.evaluate(player, spell,
                 player.getData(ModAttachments.SPELL_DATA.get()), player.getData(ModAttachments.HERITAGE_DATA.get()),
                 route == Route.WEB_LESSON);
-        return eligibility.learnable() ? LearnResult.success("ok") : LearnResult.failure(eligibility.reason());
+        return eligibility.learnable() ? LearnResult.success("ok") : LearnResult.failure(eligibility.why());
     }
 
     /** Whether this player could learn this spell right now, without learning it. */
@@ -240,18 +273,30 @@ public final class SpellLearningService {
         }
         SpellLearningEligibility.Result eligibility = SpellLearningEligibility.evaluate(player, spell, data, type);
         if (!eligibility.learnable()) {
-            return LearnResult.failure(eligibility.reason());
+            return LearnResult.failure(eligibility.why());
         }
         return LearnResult.success("ok");
     }
 
-    public record LearnResult(boolean success, String message) {
+    /**
+     * @param text what to tell the player: the spell learned, or the refusal as a translatable sentence.
+     *             {@link #message()} is its server-side English, for logs and admin output.
+     */
+    public record LearnResult(boolean success, net.minecraft.network.chat.Component text) {
         public static LearnResult success(String message) {
-            return new LearnResult(true, message);
+            return new LearnResult(true, net.minecraft.network.chat.Component.literal(message));
         }
 
         public static LearnResult failure(String message) {
-            return new LearnResult(false, message);
+            return new LearnResult(false, net.minecraft.network.chat.Component.literal(message));
+        }
+
+        public static LearnResult failure(net.minecraft.network.chat.Component why) {
+            return new LearnResult(false, why);
+        }
+
+        public String message() {
+            return text.getString();
         }
     }
 }

@@ -48,4 +48,28 @@ public record SpellTraceResultS2CPayload(long challengeId, int outcome, int fail
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
     }
+
+    /**
+     * A refusal sentence for {@code detail}: the component as JSON, so a translatable sentence crosses the wire and is
+     * read in the client's language. Plain text that is not JSON still reads as itself ({@link #detailText}).
+     */
+    public static String encodeDetail(net.minecraft.network.chat.Component text) {
+        return net.minecraft.network.chat.ComponentSerialization.CODEC
+                .encodeStart(com.mojang.serialization.JsonOps.INSTANCE, text)
+                .result().map(Object::toString).orElse(text.getString());
+    }
+
+    /** {@code detail} as the sentence to show. */
+    public net.minecraft.network.chat.Component detailText() {
+        if (detail.isEmpty()) {
+            return net.minecraft.network.chat.Component.empty();
+        }
+        try {
+            return net.minecraft.network.chat.ComponentSerialization.CODEC
+                    .parse(com.mojang.serialization.JsonOps.INSTANCE, com.google.gson.JsonParser.parseString(detail))
+                    .result().orElse(net.minecraft.network.chat.Component.literal(detail));
+        } catch (RuntimeException notJson) {
+            return net.minecraft.network.chat.Component.literal(detail);
+        }
+    }
 }

@@ -42,6 +42,62 @@ public final class SpellAcquisitionTests {
                 "tracing: closing an advanced trace costs its retry wait, the wait is saved on the player, and the "
                         + "Steady hand setting is the server's and cannot change mid-trace",
                 SpellAcquisitionTests::cancelCostsTheWait);
+        tests.add("spell_acquisition_refusals_and_wandless",
+                "spells: refusals are translatable sentences, not English strings; a goblin, who cannot use a wand, "
+                        + "cannot learn a spell from a book",
+                SpellAcquisitionTests::refusalsAndWandless);
+        tests.add("spell_acquisition_respec_takes_the_companion",
+                "spells: Lumos learned in the web brings Nox into the web ledger, and a respec takes both back",
+                SpellAcquisitionTests::respecTakesTheCompanion);
+    }
+
+    private static void refusalsAndWandless(GameTestHelper helper) {
+        ServerPlayer wizard = player(helper, "KnowsItAlready");
+        ServerPlayer goblin = player(helper, "GoblinReader");
+        try {
+            HeritageAPI.commit(wizard, Heritage.WIZARDKIND, HeritageVariant.HALF_BLOOD);
+            HeritageAPI.commit(goblin, Heritage.GOBLIN, HeritageVariant.GOBLIN_COMMON);
+            var stupefy = at.koopro.wizardsandbeasts.spell.core.Spells.byId("wizards_and_beasts:stupefy");
+            wizard.getData(ModAttachments.SPELL_DATA.get()).learnSpell(stupefy.getId());
+            var known = SpellLearningService.validateLearnAttempt(wizard, stupefy);
+            check(helper, !known.success() && known.text().getContents()
+                            instanceof net.minecraft.network.chat.contents.TranslatableContents t
+                            && t.getKey().endsWith(".refusal.known"),
+                    () -> "a known spell's refusal is not a translatable sentence: " + known.text());
+
+            goblin.getData(ModAttachments.SPELL_DATA.get()).forgetSpell(stupefy.getId());
+            var wandless = SpellLearningService.validateLearnAttempt(goblin, stupefy);
+            check(helper, !wandless.success() && wandless.text().getContents()
+                            instanceof net.minecraft.network.chat.contents.TranslatableContents t
+                            && t.getKey().endsWith(".refusal.no_wand"),
+                    () -> "a goblin was not refused for having no wand hand: " + wandless.message());
+            helper.succeed();
+        } finally {
+            retire(helper, wizard);
+            retire(helper, goblin);
+        }
+    }
+
+    private static void respecTakesTheCompanion(GameTestHelper helper) {
+        ServerPlayer student = player(helper, "WebLumos");
+        try {
+            var spells = student.getData(ModAttachments.SPELL_DATA.get());
+            spells.forgetSpell(LUMOS);
+            spells.forgetSpell(NOX);
+            at.koopro.wizardsandbeasts.skill.SkillSystemAPI.forceUnlock(student, "lumos_unlock");
+            var outcome = TraceTestSupport.pass(student);
+            check(helper, outcome == TraceOutcome.PASSED, () -> "setup: the Lumos lesson did not pass: " + outcome);
+            var ledger = student.getData(ModAttachments.SKILL_DATA.get()).getWebTaughtSpells();
+            check(helper, ledger.contains(LUMOS) && ledger.contains(NOX),
+                    () -> "the web ledger holds " + ledger + ", not Lumos and the Nox that came with it");
+            at.koopro.wizardsandbeasts.skill.SkillSystemAPI.getSkillData(student).setSkillLevel("lumos_unlock", 0);
+            at.koopro.wizardsandbeasts.skill.SkillSystemAPI.revokeWebTaughtSpells(student);
+            check(helper, !spells.knowsSpell(LUMOS) && !spells.knowsSpell(NOX),
+                    () -> "a respec left Lumos or Nox behind");
+            helper.succeed();
+        } finally {
+            retire(helper, student);
+        }
     }
 
     private static void traceNeedsARead(GameTestHelper helper) {

@@ -63,7 +63,7 @@ public final class SpellLawLearningGate {
     /**
      * What reading a dark book costs, over and above what casting will.
      *
-     * <p>Kept well under the skill web's own prices — {@code dark_knowledge} charges 2 and
+     * <p>Kept well under the skill web's own prices — {@code dark_knowledge} charges 2 corruption and
      * {@code avada_kedavra_unlock} charges 12 — because a book is a shortcut past the study, not a
      * replacement for it, and because the Ministry's real interest is in use rather than possession.
      * The point is that knowing changes you a little; casting changes you a lot.

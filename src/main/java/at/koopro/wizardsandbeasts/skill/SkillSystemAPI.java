@@ -195,6 +195,15 @@ public final class SkillSystemAPI {
             return new UnlockCheck(false, buildRefusal);
         }
 
+        // A node that teaches a spell this player can never learn -- unwritten, an Obscurial ability, or any spell for
+        // someone who cannot use a wand -- would take the points and owe a lesson that can never be passed. A spell
+        // they already know is fine: the node is still the path on (the starter Lumos).
+        for (SkillEffect effect : skill.getEffects()) {
+            if (effect instanceof SkillEffect.LearnSpell learn && !spellCanEverBeLearned(player, learn.spellId())) {
+                return new UnlockCheck(false, "spell_unlearnable");
+            }
+        }
+
         // Advanced training: a build's capstone asks for the N.E.W.T. in its discipline (education.QualificationGates).
         // Fail-open with the O.W.L. module off.
         if (at.koopro.wizardsandbeasts.education.QualificationGates.firstUnmet(player,
@@ -455,17 +464,9 @@ public final class SkillSystemAPI {
             forgotten++;
         }
         if (forgotten > 0) {
-            at.koopro.wizardsandbeasts.network.spell.SpellDataSyncS2CPayload.syncToPlayer(player);
+            at.koopro.wizardsandbeasts.spell.learning.SpellLearningService.syncAfterGrant(player);
         }
         return forgotten;
-    }
-
-    public static int getSpellGateOverride(ServerPlayer player, Spell spell) {
-        return PlayerSkillBonusData.forPlayer(player)
-                .spellGateOverrides()
-                .getOrDefault(
-                        net.minecraft.resources.Identifier.fromNamespaceAndPath("wizards_and_beasts", spell.getId()),
-                        spell.getProficiency(player).getCastsRequired());
     }
 
     public static float getCategoryDamageMultiplier(ServerPlayer player, SpellCategory category) {
@@ -474,5 +475,15 @@ public final class SkillSystemAPI {
 
     public static float getCategoryCooldownMultiplier(ServerPlayer player, SpellCategory category) {
         return PlayerSkillBonusData.forPlayer(player).cooldownMultipliers().getOrDefault(category, 1.0f);
+    }
+
+    private static boolean spellCanEverBeLearned(ServerPlayer player, String spellId) {
+        at.koopro.wizardsandbeasts.spell.core.Spell spell = at.koopro.wizardsandbeasts.spell.core.Spells.byId(spellId);
+        if (spell == null || !spell.isImplemented()
+                || at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialRules.isObscurialAbility(spell)) {
+            return false;
+        }
+        var heritage = player.getData(ModAttachments.HERITAGE_DATA.get());
+        return heritage.getSelectedHeritage() == null || (heritage.canUseWand() && heritage.canCast());
     }
 }

@@ -522,8 +522,7 @@ public final class PlayerAdminService {
                 if (!eligible.success()) {
                     yield Outcome.refused("not_eligible", eligible.message());
                 }
-                data.learnSpell(spell.getId());
-                syncSpells(target);
+                SpellLearningService.grantWithoutTrace(target, spell);
                 yield ok(spell.getId());
             }
             case SPELL_GRANT -> {
@@ -532,8 +531,7 @@ public final class PlayerAdminService {
                 if (data.knowsSpell(spell.getId())) {
                     yield Outcome.refused("nothing_to_do", spell.getId());
                 }
-                data.learnSpell(spell.getId());
-                syncSpells(target);
+                SpellLearningService.grantWithoutTrace(target, spell);
                 yield ok(spell.getId() + " (past the learning rules)");
             }
             case SPELL_REVOKE -> {

@@ -208,8 +208,7 @@ public final class SpellCommands {
             return 0;
         }
 
-        data.learnSpell(canonicalId);
-        PlayerStateSyncService.syncSpells(player);
+        at.koopro.wizardsandbeasts.spell.learning.SpellLearningService.grantWithoutTrace(player, spell);
         player.displayClientMessage(Component.translatable("spell.wizards_and_beasts.cmd.learned", Component.translatable(spell.getDisplayName())).withStyle(ChatFormatting.GREEN), false);
         return 1;
     }
@@ -453,13 +452,27 @@ public final class SpellCommands {
                 && spell.getProperties().getCastType() == CastType.PROJECTILE;
     }
 
+    /**
+     * Every spell that exists for this player: implemented, not an Obscurial ability, and not a Dark Art while the
+     * module is off. Teaching the unwritten ones filled the wheel with spells that do nothing on release.
+     */
     private static int learnAllSpells(ServerPlayer player) {
         PlayerSpellData data = player.getData(ModAttachments.SPELL_DATA.get());
+        int learned = 0;
         for (Spell spell : Spells.all()) {
+            if (!spell.isImplemented()
+                    || at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialRules.isObscurialAbility(spell)
+                    || (spell.getCategory() == at.koopro.wizardsandbeasts.spell.core.SpellCategory.DARK_ARTS
+                    && !at.koopro.wizardsandbeasts.module.ModuleManager.isEnabled(
+                    at.koopro.wizardsandbeasts.module.Module.DARK_ARTS))) {
+                continue;
+            }
             data.learnSpell(spell.getId());
+            learned++;
         }
-        PlayerStateSyncService.syncSpells(player);
-        player.displayClientMessage(Component.literal("Learned all " + Spells.count() + " spells!").withStyle(ChatFormatting.GREEN), false);
+        at.koopro.wizardsandbeasts.spell.learning.SpellLearningService.syncAfterGrant(player);
+        player.displayClientMessage(Component.literal("Learned all " + learned + " spells that exist for you.")
+                .withStyle(ChatFormatting.GREEN), false);
         return 1;
     }
 
