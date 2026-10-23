@@ -1,0 +1,14 @@
+{
+  "type": "wizards_and_beasts:recipe_page",
+  "conditions": [
+    {
+      "condition": "minecraft:any_of",
+      "terms": [
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/stronghold_library" },
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/woodland_mansion" },
+        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/village/village_temple" }
+      ]
+    }
+  ],
+  "chance": 0.35
+}

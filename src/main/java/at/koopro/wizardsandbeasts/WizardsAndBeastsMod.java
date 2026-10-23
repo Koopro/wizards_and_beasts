@@ -185,6 +185,10 @@ public class WizardsAndBeastsMod {
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "location_reload_listener"),
                     new at.koopro.wizardsandbeasts.location.Locations.Loader());
+            // Where brewing recipes are learned from: basics, textbooks, lessons, loose pages (brew/knowledge/).
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "brew_recipe_source_reload_listener"),
+                    new at.koopro.wizardsandbeasts.brew.knowledge.RecipeSources.Loader());
             // Mirror of Erised: what the Mirror can show, and to whom (artefact/erised/).
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "erised_vision_reload_listener"),

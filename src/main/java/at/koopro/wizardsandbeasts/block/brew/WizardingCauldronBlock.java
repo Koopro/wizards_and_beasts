@@ -355,8 +355,9 @@ public class WizardingCauldronBlock extends BaseEntityBlock {
             case STARTED -> {
                 Brew brew = Brews.byId(be.brewId());
                 level.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 0.8f, 1.0f);
+                // An experiment says so: nobody taught this brewer the method, and it is riskier for that.
                 PlayerFeedback.actionBar(player, Component.translatable(
-                        "brew.wizards_and_beasts.started",
+                        be.isExperiment() ? "brew.wizards_and_beasts.started_experiment" : "brew.wizards_and_beasts.started",
                         brew == null ? Component.literal("?") : Component.translatable(brew.displayName()),
                         brewDuration(be.totalTicks())));
             }

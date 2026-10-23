@@ -310,6 +310,15 @@ public class ModDataComponents {
 
     // ── Horcrux Vessels (shared) ─────────────────────────────────
 
+    /** The brewing recipes written on a loose recipe page (full recipe ids). Textbooks read theirs from data. */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<java.util.List<String>>> BREW_RECIPES =
+            DATA_COMPONENTS.register("brew_recipes", () ->
+                    DataComponentType.<java.util.List<String>>builder()
+                            .persistent(com.mojang.serialization.Codec.STRING.listOf())
+                            .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.STRING_UTF8
+                                    .apply(net.minecraft.network.codec.ByteBufCodecs.list(16)))
+                            .build());
+
     /** Which Sword of Gryffindor this is: the id the world's {@code GryffindorSword} record holds for the one sword. */
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<java.util.UUID>> GRYFFINDOR_SWORD_ID =
             DATA_COMPONENTS.register("gryffindor_sword_id", () ->

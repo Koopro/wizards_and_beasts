@@ -106,6 +106,8 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
 
     /** Whether this brew's timed add has been satisfied. Meaningless for a recipe without one. */
     private boolean catalystAdded;
+    /** Brewing a recipe its brewer was never taught: riskier, and taught to them if it works (BrewKnowledge). */
+    private boolean experiment;
 
     /** The recipe being run, so completion can read its difficulty and its catalyst. */
     private @Nullable String recipeId;
@@ -321,7 +323,19 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
                 .firstUnmet(brewer, at.koopro.wizardsandbeasts.education.QualificationGates.Kind.BREW, brewId) != null) {
             return StartResult.UNQUALIFIED;
         }
-        return startBrewing(tier, brewer.getUUID());
+        BrewingRecipe match = phase == CauldronPhase.IDLE ? BrewingRecipes.findMatch(contentsView(), tier) : null;
+        StartResult result = startBrewing(tier, brewer.getUUID());
+        if (result == StartResult.STARTED && match != null
+                && !at.koopro.wizardsandbeasts.brew.knowledge.BrewKnowledge.knows(brewer, match.id())) {
+            experiment = true;
+            setChangedAndSync();
+        }
+        return result;
+    }
+
+    /** Whether the brew heating here is an experiment: a recipe its brewer does not know. */
+    public boolean isExperiment() {
+        return experiment;
     }
 
     /** The brew the pot's contents would make on {@code tier}, or {@code null} when nothing matches. */
@@ -368,6 +382,7 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
         this.recipeId = recipe.id();
         this.penalties = 0f;
         this.catalystAdded = false;
+        this.experiment = false;
         this.brewId = brew.id();
         // The server's brewing-speed rule applies to the brew as it starts; a pot already on the heat keeps its time.
         this.totalTicks = at.koopro.wizardsandbeasts.brew.tuning.BrewTuningService.heatTimeFor(recipe);
@@ -434,6 +449,7 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
         stirCount = 0;
         penalties = 0f;
         catalystAdded = false;
+        experiment = false;
         recipeId = null;
         // The water goes with the brew. A pot you have just poured out of is an empty pot, and
         // leaving it filled would let one bucket serve every brew a cauldron ever makes.
@@ -454,6 +470,22 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
                 net.minecraft.world.Containers.dropItemStack(level, worldPosition.getX() + 0.5,
                         worldPosition.getY() + 1.0, worldPosition.getZ() + 0.5, stack.copy());
             }
+        }
+    }
+
+    /** An experiment that worked: the brewer now knows the recipe (they must be online to take it in). */
+    private void teachExperiment(ServerLevel level) {
+        if (!experiment || recipeId == null || brewerId == null || level.getServer() == null) {
+            return;
+        }
+        ServerPlayer brewer = level.getServer().getPlayerList().getPlayer(brewerId);
+        if (brewer != null && !at.koopro.wizardsandbeasts.brew.knowledge.BrewKnowledge.learn(brewer,
+                java.util.List.of(recipeId)).isEmpty()) {
+            at.koopro.wizardsandbeasts.feedback.PlayerFeedback.toast(brewer,
+                    at.koopro.wizardsandbeasts.feedback.NoticeKind.SUCCESS,
+                    net.minecraft.network.chat.Component.translatable("brew.wizards_and_beasts.experiment.learned.title"),
+                    net.minecraft.network.chat.Component.translatable("brew.wizards_and_beasts.experiment.learned.body",
+                            at.koopro.wizardsandbeasts.brew.knowledge.BrewKnowledge.name(recipeId)));
         }
     }
 
@@ -532,6 +564,7 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
                 return;
             }
             be.phase = CauldronPhase.DONE;
+            be.teachExperiment(serverLevel);
             serverLevel.playSound(null, pos, net.minecraft.sounds.SoundEvents.BREWING_STAND_BREW,
                     net.minecraft.sounds.SoundSource.BLOCKS, 0.8f, 1.1f);
             be.runBrewCompleteComponents(serverLevel);
@@ -585,6 +618,10 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
     private boolean rollFailure(ServerLevel level) {
         BrewingRecipe recipe = recipeId == null ? null : BrewingRecipes.byId(recipeId);
         float base = recipe == null ? 0f : at.koopro.wizardsandbeasts.brew.tuning.BrewTuningService.baseFailureFor(recipe);
+        if (experiment) {
+            // Nobody showed the brewer how: guessing the method costs a third of the batches.
+            base += at.koopro.wizardsandbeasts.brew.knowledge.BrewKnowledge.EXPERIMENT_PENALTY;
+        }
 
         // A catalyst that was never added is charged for here rather than when its window closed,
         // because the brewer can still be told about it in the same breath as the result.
@@ -775,6 +812,7 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
         output.store("stirCount", Codec.INT, stirCount);
         output.store("penalties", Codec.FLOAT, penalties);
         output.store("catalystAdded", Codec.BOOL, catalystAdded);
+        output.store("experiment", Codec.BOOL, experiment);
         if (recipeId != null) {
             output.store("recipeId", Codec.STRING, recipeId);
         }
@@ -806,6 +844,7 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
         stirCount = input.read("stirCount", Codec.INT).orElse(0);
         penalties = input.read("penalties", Codec.FLOAT).orElse(0f);
         catalystAdded = input.read("catalystAdded", Codec.BOOL).orElse(false);
+        experiment = input.read("experiment", Codec.BOOL).orElse(false);
         recipeId = input.read("recipeId", Codec.STRING).orElse(null);
         brewId = input.read("brewId", Codec.STRING).orElse(null);
         brewerId = input.read("brewerId", UUIDUtil.CODEC).orElse(null);

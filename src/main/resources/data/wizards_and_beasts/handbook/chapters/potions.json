@@ -1,0 +1,23 @@
+{
+  "id": "wizards_and_beasts:potions",
+  "title": "handbook.wizards_and_beasts.potions.title",
+  "icon": "wizards_and_beasts:magical_draughts_and_potions",
+  "sort_index": 35,
+  "pages": [
+    {
+      "type": "text",
+      "heading": "handbook.wizards_and_beasts.potions.page1.heading",
+      "body": "handbook.wizards_and_beasts.potions.page1.body"
+    },
+    {
+      "type": "text",
+      "heading": "handbook.wizards_and_beasts.potions.page2.heading",
+      "body": "handbook.wizards_and_beasts.potions.page2.body"
+    },
+    {
+      "type": "text",
+      "heading": "handbook.wizards_and_beasts.potions.page3.heading",
+      "body": "handbook.wizards_and_beasts.potions.page3.body"
+    }
+  ]
+}

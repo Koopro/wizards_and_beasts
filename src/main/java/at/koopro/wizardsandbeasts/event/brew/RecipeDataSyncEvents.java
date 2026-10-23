@@ -37,8 +37,10 @@ public final class RecipeDataSyncEvents {
         ServerPlayer player = event.getPlayer();
         if (player != null) {
             BrewDataSyncPayload.sendTo(player);
+            at.koopro.wizardsandbeasts.brew.knowledge.BrewKnowledgeS2CPayload.sendTo(player);
         } else {
             BrewDataSyncPayload.broadcast(event.getPlayerList().getServer());
+            at.koopro.wizardsandbeasts.brew.knowledge.BrewKnowledgeS2CPayload.broadcast(event.getPlayerList().getServer());
         }
     }
 }

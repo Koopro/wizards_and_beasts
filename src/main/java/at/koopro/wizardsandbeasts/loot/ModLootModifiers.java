@@ -45,5 +45,10 @@ public final class ModLootModifiers {
             GLOBAL_LOOT_MODIFIER_SERIALIZERS.register("spellbook",
                     () -> SpellbookLootModifier.CODEC);
 
+    /** Loose potion recipe pages in libraries and ruins (brew/knowledge). */
+    public static final Supplier<MapCodec<RecipePageLootModifier>> RECIPE_PAGE =
+            GLOBAL_LOOT_MODIFIER_SERIALIZERS.register("recipe_page",
+                    () -> RecipePageLootModifier.CODEC);
+
     private ModLootModifiers() {}
 }

@@ -1,5 +1,5 @@
 {
-  "_comment": "Slug & Jiggers as a place: any villager with the apothecary profession (job site: a wizarding cauldron) keeps it. Sneak-use opens the board. The market buys creature materials, ingredients and finished brews, and sells ingredients - restricted ones only to a Restricted Substances licence while the Ministry module is on. Prices move with trade (market/MarketPricing). Service: creature_treatment heals bonded creatures brought to the counter. Lessons: Potions, Herbology and Care of Magical Creatures, one a day, count toward the O.W.L. (education.LessonServices). Standing is earned by trading here and by supply contracts.",
+  "_comment": "Slug & Jiggers as a place: any villager with the apothecary profession (job site: a wizarding cauldron) keeps it. Sneak-use opens the board. The market buys creature materials, ingredients and finished brews, and sells ingredients - restricted ones only to a Restricted Substances licence while the Ministry module is on. Prices move with trade (market/MarketPricing). Service: creature_treatment heals bonded creatures brought to the counter. Recipes: the shop sells Magical Drafts and Potions to anyone and Advanced Potion-Making to a trusted supplier; each Potions lesson teaches one recipe (brew_recipe_sources/apothecary_lessons). Lessons: Potions, Herbology and Care of Magical Creatures, one a day, count toward the O.W.L. (education.LessonServices). Standing is earned by trading here and by supply contracts.",
   "module": "gringotts",
   "skin": "field_notebook",
   "presence": {
@@ -212,6 +212,8 @@
       { "id": "essence_of_dittany", "item": "wizards_and_beasts:essence_of_dittany", "price_knuts": 87, "depth": 8 },
       { "id": "floo_powder", "item": "wizards_and_beasts:floo_powder", "price_knuts": 14, "depth": 32 },
       { "id": "bezoar", "item": "wizards_and_beasts:bezoar", "price_knuts": 174, "depth": 4, "weekly_limit": 3 },
+      { "id": "magical_drafts_and_potions", "item": "wizards_and_beasts:magical_draughts_and_potions", "price_knuts": 87, "depth": 4 },
+      { "id": "advanced_potion_making", "item": "wizards_and_beasts:advanced_potion_making", "price_knuts": 348, "depth": 2, "weekly_limit": 1, "min_tier": "trusted_supplier" },
       { "id": "wiggenweld", "item": "wizards_and_beasts:brew", "brew": "wizards_and_beasts:wiggenweld_potion", "price_knuts": 145, "depth": 8, "weekly_limit": 4 },
       { "id": "unicorn_hair", "item": "wizards_and_beasts:unicorn_hair", "price_knuts": 348, "depth": 3, "weekly_limit": 2, "min_tier": "regular" },
       { "id": "occamy_eggshell", "item": "wizards_and_beasts:occamy_eggshell", "price_knuts": 435, "depth": 3, "weekly_limit": 2, "min_tier": "trusted_supplier" }

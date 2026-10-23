@@ -72,8 +72,9 @@ public final class CanonItemRegistry {
             ModItems.ITEMS.registerItem("opal_necklace", Item::new);
     public static final DeferredItem<Item> SECRETS_OF_THE_DARKEST_ART =
             ModItems.ITEMS.registerItem("secrets_of_the_darkest_art", Item::new);
-    public static final DeferredItem<Item> MOSTE_POTENTE_POTIONS =
-            ModItems.ITEMS.registerItem("moste_potente_potions", Item::new);
+    /** The Restricted Section book: reading it teaches Polyjuice and Shadow Form (brew_recipe_sources). */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.brew.knowledge.PotionRecipeItem> MOSTE_POTENTE_POTIONS =
+            ModItems.ITEMS.registerItem("moste_potente_potions", props -> new at.koopro.wizardsandbeasts.brew.knowledge.PotionRecipeItem(props.stacksTo(1)));
     public static final DeferredItem<Item> ACROMANTULA_VENOM =
             ModItems.ITEMS.registerItem("acromantula_venom", Item::new);
     public static final DeferredItem<Item> SHRUNKEN_HEAD =
@@ -167,16 +168,18 @@ public final class CanonItemRegistry {
             ModItems.ITEMS.registerItem("dragon_hide_gloves", Item::new);
     public static final DeferredItem<Item> MONSTER_BOOK_OF_MONSTERS =
             ModItems.ITEMS.registerItem("monster_book_of_monsters", AnimatedItem.Plain::new);
-    public static final DeferredItem<Item> ADVANCED_POTION_MAKING =
-            ModItems.ITEMS.registerItem("advanced_potion_making", Item::new);
+    /** The N.E.W.T. potions text: reading it teaches the advanced recipes (brewing them keeps the N.E.W.T. gates). */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.brew.knowledge.PotionRecipeItem> ADVANCED_POTION_MAKING =
+            ModItems.ITEMS.registerItem("advanced_potion_making", props -> new at.koopro.wizardsandbeasts.brew.knowledge.PotionRecipeItem(props.stacksTo(1)));
     public static final DeferredItem<Item> QUILL =
             ModItems.ITEMS.registerItem("quill", Item::new);
     public static final DeferredItem<Item> BRASS_SCALES =
             ModItems.ITEMS.registerItem("brass_scales", Item::new);
     public static final DeferredItem<Item> TELESCOPE =
             ModItems.ITEMS.registerItem("telescope", at.koopro.wizardsandbeasts.education.TelescopeItem::new);
-    public static final DeferredItem<Item> MAGICAL_DRAUGHTS_AND_POTIONS =
-            ModItems.ITEMS.registerItem("magical_draughts_and_potions", Item::new);
+    /** The first-year potions text: reading it teaches the everyday healing and silver recipes. */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.brew.knowledge.PotionRecipeItem> MAGICAL_DRAUGHTS_AND_POTIONS =
+            ModItems.ITEMS.registerItem("magical_draughts_and_potions", props -> new at.koopro.wizardsandbeasts.brew.knowledge.PotionRecipeItem(props.stacksTo(1)));
     public static final DeferredItem<Item> FANTASTIC_BEASTS_AND_WHERE_TO_FIND_THEM =
             ModItems.ITEMS.registerItem("fantastic_beasts_and_where_to_find_them", Item::new);
     public static final DeferredItem<Item> QUIDDITCH_THROUGH_THE_AGES =

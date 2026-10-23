@@ -285,6 +285,8 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.wizards_and_beasts.ink_bottle", "Ink Bottle");
         add("item.wizards_and_beasts.ink_bottle.desc", "A bottle of ink for writing magical notes.");
         add("item.wizards_and_beasts.torn_spell_page", "Torn Spell Page");
+        add("item.wizards_and_beasts.potion_recipe_page", "Potion Recipe Page");
+        add("item.wizards_and_beasts.potion_recipe_page.desc", "A leaf out of somebody's potions book.");
         add("item.wizards_and_beasts.torn_spell_page.desc", "A single leaf out of somebody else's spellbook.");
         add("item.wizards_and_beasts.broom", "Broom");
         add("item.wizards_and_beasts.broom.desc", "A flying broom for quick travel through the skies.");

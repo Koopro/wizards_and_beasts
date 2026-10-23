@@ -109,6 +109,7 @@ public class ModCreativeTabs {
                         output.accept(MiscItemRegistry.PARCHMENT.get());
                         output.accept(MiscItemRegistry.INK_BOTTLE.get());
                         output.accept(MiscItemRegistry.TORN_SPELL_PAGE.get());
+                        output.accept(MiscItemRegistry.POTION_RECIPE_PAGE.get());
 
                         // Lore tomes — studyable for KNOWLEDGE / History of Magic OWL credit
                         output.accept(LoreItemRegistry.A_HISTORY_OF_MAGIC.get());

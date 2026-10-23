@@ -170,6 +170,14 @@
       ]
     },
     {
+      "_comment": "Moste Potente Potions: one cache in eight. No shop in Diagon Alley stocks it -- Polyjuice and the shadow draught are learned from a copy someone hid, or bought under the counter in Knockturn Alley.",
+      "rolls": 1,
+      "entries": [
+        { "type": "minecraft:item", "name": "wizards_and_beasts:moste_potente_potions", "weight": 1 },
+        { "type": "minecraft:empty", "weight": 7 }
+      ]
+    },
+    {
       "_comment": "The American wand cores. Their creatures do not walk these lands (none is on the spawn roster), so they come to a British wandmaker as imports (Ollivanders, Knockturn) or, now and then, in a cache someone left.",
       "rolls": 1,
       "entries": [

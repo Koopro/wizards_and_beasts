@@ -93,6 +93,15 @@ public final class LessonServices {
             PlayerFeedback.toast(player, NoticeKind.SUCCESS,
                     Component.translatable(KEY + "done.title", Component.translatable(subject.translationKey())),
                     Component.translatable(KEY + "done.body", next.lessonsIn(subject), OWLGradeRules.LESSONS_TO_A));
+            // A Potions lesson also teaches a recipe: the next one on the apothecary's list the player does not know.
+            if (subject == OWLSubject.POTIONS) {
+                String recipe = at.koopro.wizardsandbeasts.brew.knowledge.BrewKnowledge.nextLesson(player);
+                if (recipe != null && !at.koopro.wizardsandbeasts.brew.knowledge.BrewKnowledge
+                        .learn(player, java.util.List.of(recipe)).isEmpty()) {
+                    PlayerFeedback.actionBar(player, Component.translatable(KEY + "recipe",
+                            at.koopro.wizardsandbeasts.brew.knowledge.BrewKnowledge.name(recipe)));
+                }
+            }
             EducationService.sync(player);
             return true;
         }

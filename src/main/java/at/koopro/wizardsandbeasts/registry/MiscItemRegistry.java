@@ -46,6 +46,11 @@ public final class MiscItemRegistry {
      * same as the book — a page nobody has written on is scrap paper, and the item makes no claim
      * about which spell it holds.
      */
+    /** A loose recipe page: one brewing recipe, written on the stack (brew_recipes), found in libraries and ruins. */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.brew.knowledge.PotionRecipeItem> POTION_RECIPE_PAGE =
+            ModItems.ITEMS.registerItem("potion_recipe_page",
+                    props -> new at.koopro.wizardsandbeasts.brew.knowledge.PotionRecipeItem(props.stacksTo(16)));
+
     public static final DeferredItem<SpellSourceItem> TORN_SPELL_PAGE =
             ModItems.ITEMS.registerItem("torn_spell_page",
                     props -> new SpellSourceItem(props.stacksTo(16), true));

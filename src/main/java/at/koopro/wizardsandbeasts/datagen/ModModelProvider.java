@@ -158,6 +158,7 @@ public class ModModelProvider extends ModelProvider {
         itemModels.generateFlatItem(ConsumableItemRegistry.MATAGOT_ESSENCE.get(), ModelTemplates.FLAT_ITEM);
 
         itemModels.generateFlatItem(MiscItemRegistry.TORN_SPELL_PAGE.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(MiscItemRegistry.POTION_RECIPE_PAGE.get(), ModelTemplates.FLAT_ITEM);
         iconInSlotModelInHand(itemModels, MiscItemRegistry.PARCHMENT.get());
         iconInSlotModelInHand(itemModels, MiscItemRegistry.INK_BOTTLE.get());
 

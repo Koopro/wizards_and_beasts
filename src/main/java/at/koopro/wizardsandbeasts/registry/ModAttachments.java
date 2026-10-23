@@ -472,6 +472,14 @@ public class ModAttachments {
                             .serialize(VeritaserumState.CODEC.fieldOf("veritaserum"))
                             .build());
 
+    /** The brewing recipes this player has learned (the basics everyone knows are not stored). */
+    public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.brew.knowledge.BrewRecipeBook>> BREW_RECIPE_BOOK =
+            ATTACHMENTS.register("brew_recipe_book", () -> AttachmentType.builder(
+                            () -> at.koopro.wizardsandbeasts.brew.knowledge.BrewRecipeBook.EMPTY)
+                    .serialize(at.koopro.wizardsandbeasts.brew.knowledge.BrewRecipeBook.CODEC.fieldOf("data"))
+                    .copyOnDeath()
+                    .build());
+
     /** What the Mirror of Erised has shown this player: gazes today, recent visions, clues given. */
     public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.artefact.erised.ErisedHistory>> ERISED_HISTORY =
             ATTACHMENTS.register("erised_history", () -> AttachmentType.builder(

@@ -17,5 +17,9 @@ public final class ModNetworkBrew {
                 BrewDataSyncPayload.TYPE,
                 BrewDataSyncPayload.STREAM_CODEC,
                 BrewDataSyncPayload::handle);
+        registrar.playToClient(
+                at.koopro.wizardsandbeasts.brew.knowledge.BrewKnowledgeS2CPayload.TYPE,
+                at.koopro.wizardsandbeasts.brew.knowledge.BrewKnowledgeS2CPayload.STREAM_CODEC,
+                at.koopro.wizardsandbeasts.brew.knowledge.BrewKnowledgeS2CPayload::handle);
     }
 }
