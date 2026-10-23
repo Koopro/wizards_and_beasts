@@ -135,7 +135,14 @@ public enum MagicalOffence implements StringRepresentable {
      * a bribe that fails costs more than the hearing it tried to avoid. A fine rather than a sentence — corrupting
      * an official is serious, but it is not a curse.
      */
-    BRIBERY_OF_OFFICIAL("bribery_of_official", 12.0f, Remedy.FINE, 15 * CurrencyHelper.KNUTS_PER_GALLEON);
+    BRIBERY_OF_OFFICIAL("bribery_of_official", 12.0f, Remedy.FINE, 15 * CurrencyHelper.KNUTS_PER_GALLEON),
+    /**
+     * Killing a protected species (unicorn, golden snidget, phoenix, thestral, occamy -- the entity tag
+     * {@code protected_species}) in an official's sight ({@code Poaching}). Eight Galleons: dearer than breeding a
+     * dangerous beast without a licence, because this one is dead. A fine, not a sentence: canon's Ministry regulates
+     * beasts through licences and the Beast Division, not Azkaban.
+     */
+    POACHING("poaching", 7.0f, Remedy.FINE, 8 * CurrencyHelper.KNUTS_PER_GALLEON);
 
     /** How an offence is answered once it is on the file. Exactly one per offence. */
     public enum Remedy {

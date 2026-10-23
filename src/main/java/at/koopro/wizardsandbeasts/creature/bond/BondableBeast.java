@@ -269,6 +269,11 @@ public interface BondableBeast {
             return;
         }
         final Player credited = player;
+        if (before < at.koopro.wizardsandbeasts.creature.wildlife.SlayerAtonement.ATONING_BOND
+                && after >= at.koopro.wizardsandbeasts.creature.wildlife.SlayerAtonement.ATONING_BOND
+                && player instanceof net.minecraft.server.level.ServerPlayer keeper) {
+            at.koopro.wizardsandbeasts.creature.wildlife.SlayerAtonement.onDeepTrust(keeper, bondMob());
+        }
 
         if (fireXp) {
             for (int milestone : profile.milestones()) {
