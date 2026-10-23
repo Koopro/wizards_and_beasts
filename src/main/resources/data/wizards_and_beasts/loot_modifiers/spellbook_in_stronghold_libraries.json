@@ -4,10 +4,22 @@
     {
       "condition": "minecraft:any_of",
       "terms": [
-        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/stronghold_library" },
-        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/stronghold_crossing" },
-        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/stronghold_corridor" },
-        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/bastion_treasure" }
+        {
+          "condition": "neoforge:loot_table_id",
+          "loot_table_id": "minecraft:chests/stronghold_library"
+        },
+        {
+          "condition": "neoforge:loot_table_id",
+          "loot_table_id": "minecraft:chests/stronghold_crossing"
+        },
+        {
+          "condition": "neoforge:loot_table_id",
+          "loot_table_id": "minecraft:chests/stronghold_corridor"
+        },
+        {
+          "condition": "neoforge:loot_table_id",
+          "loot_table_id": "minecraft:chests/bastion_treasure"
+        }
       ]
     }
   ],
@@ -24,7 +36,10 @@
     "flipendo",
     "diffindo",
     "aguamenti",
-    "confringo"
+    "confringo",
+    "accio",
+    "colloportus",
+    "depulso"
   ],
   "chance": 0.7
 }

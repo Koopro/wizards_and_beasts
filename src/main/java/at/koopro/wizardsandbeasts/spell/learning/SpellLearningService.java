@@ -68,6 +68,51 @@ public final class SpellLearningService {
         WEB_LESSON
     }
 
+    /**
+     * The charms every witch or wizard who can hold a wand knows before they find a single book: Lumos (and Nox with
+     * it). User decision (2026-10-23): the first spell was a lucky find -- six of the nine village books need another
+     * spell first -- and the cheapest web lesson cost all three starting points. Now the first light is free and the
+     * three points stay for the web.
+     */
+    public static final List<String> STARTER_SPELLS = List.of("wizards_and_beasts:lumos");
+
+    /**
+     * Teaches the {@link #STARTER_SPELLS} (and their companions) to a player whose heritage can use a wand and cast,
+     * if they do not know them yet. Not a lesson: nothing is traced, and nothing is written to the web ledger, so a
+     * respec never takes the starter charm away. Runs when a heritage is chosen and at every login (so saves from
+     * before this rule catch up).
+     *
+     * @return the spells newly taught, companions included
+     */
+    public static List<String> teachStarter(ServerPlayer player) {
+        PlayerHeritageData heritage = player.getData(ModAttachments.HERITAGE_DATA.get());
+        if (!heritage.canUseWand() || !heritage.canCast()) {
+            return List.of();
+        }
+        PlayerSpellData data = player.getData(ModAttachments.SPELL_DATA.get());
+        List<String> taught = new ArrayList<>();
+        for (String id : STARTER_SPELLS) {
+            Spell spell = Spells.byId(id);
+            if (spell == null || data.knowsSpell(spell.getId())) {
+                continue;
+            }
+            data.learnSpell(spell.getId());
+            taught.add(spell.getId());
+            for (String companionId : companionsOf(spell)) {
+                Spell companion = Spells.byId(companionId);
+                if (companion != null && !data.knowsSpell(companion.getId())) {
+                    data.learnSpell(companion.getId());
+                    taught.add(companion.getId());
+                }
+            }
+        }
+        if (!taught.isEmpty()) {
+            SpellDataSyncS2CPayload.syncToPlayer(player);
+            PlayerStatsSyncPayload.syncToPlayer(player);
+        }
+        return taught;
+    }
+
     /** Book-route {@link #commit}, by id. Kept for the gate tests, which exercise the gates directly. */
     public static LearnResult tryLearnSpell(ServerPlayer player, String spellId) {
         return commit(player, Spells.byId(spellId), Route.BOOK);

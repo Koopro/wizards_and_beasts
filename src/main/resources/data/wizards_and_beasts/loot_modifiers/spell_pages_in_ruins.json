@@ -5,31 +5,56 @@
     {
       "condition": "minecraft:any_of",
       "terms": [
-        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/abandoned_mineshaft" },
-        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/simple_dungeon" },
-        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/desert_pyramid" },
-        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/jungle_temple" },
-        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/underwater_ruin_big" },
-        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/shipwreck_supply" },
-        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/shipwreck_map" },
-        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/ruined_portal" },
-        { "condition": "neoforge:loot_table_id", "loot_table_id": "minecraft:chests/nether_bridge" }
+        {
+          "condition": "neoforge:loot_table_id",
+          "loot_table_id": "minecraft:chests/abandoned_mineshaft"
+        },
+        {
+          "condition": "neoforge:loot_table_id",
+          "loot_table_id": "minecraft:chests/simple_dungeon"
+        },
+        {
+          "condition": "neoforge:loot_table_id",
+          "loot_table_id": "minecraft:chests/desert_pyramid"
+        },
+        {
+          "condition": "neoforge:loot_table_id",
+          "loot_table_id": "minecraft:chests/jungle_temple"
+        },
+        {
+          "condition": "neoforge:loot_table_id",
+          "loot_table_id": "minecraft:chests/underwater_ruin_big"
+        },
+        {
+          "condition": "neoforge:loot_table_id",
+          "loot_table_id": "minecraft:chests/shipwreck_supply"
+        },
+        {
+          "condition": "neoforge:loot_table_id",
+          "loot_table_id": "minecraft:chests/shipwreck_map"
+        },
+        {
+          "condition": "neoforge:loot_table_id",
+          "loot_table_id": "minecraft:chests/ruined_portal"
+        },
+        {
+          "condition": "neoforge:loot_table_id",
+          "loot_table_id": "minecraft:chests/nether_bridge"
+        }
       ]
     }
   ],
   "place": "ruins",
   "spells": [
-    "episkey",
-    "arresto_momentum",
     "finite_incantatem",
-    "colloportus",
     "alohomora",
     "aguamenti",
-    "glacius",
-    "diffindo",
-    "levicorpus",
-    "liberacorpus",
-    "riddikulus"
+    "riddikulus",
+    "reparo",
+    "wingardium_leviosa",
+    "frigora",
+    "flipendo"
   ],
-  "chance": 0.4
+  "chance": 0.4,
+  "_comment": "Torn pages a beginner can use: every spell here needs at most the starter charms (SpellbookLootPoolTest)."
 }

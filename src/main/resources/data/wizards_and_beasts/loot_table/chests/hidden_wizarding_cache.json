@@ -74,7 +74,7 @@
             {
               "function": "minecraft:set_components",
               "components": {
-                "wizards_and_beasts:spell_source": "wizards_and_beasts:lumos"
+                "wizards_and_beasts:spell_source": "wizards_and_beasts:wingardium_leviosa"
               }
             }
           ]

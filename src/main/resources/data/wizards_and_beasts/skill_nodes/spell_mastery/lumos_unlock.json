@@ -5,7 +5,7 @@
   "lore": "skill.wizards_and_beasts.node.lumos_unlock.lore",
   "practice": "skill.wizards_and_beasts.node.lumos_unlock.practice",
   "tree": "spell_mastery",
-  "pointCost": 1,
+  "pointCost": 0,
   "provenance": {
     "citation": "Attested in the novels"
   },

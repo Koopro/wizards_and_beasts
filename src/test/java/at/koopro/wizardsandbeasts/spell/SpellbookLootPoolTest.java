@@ -129,4 +129,30 @@ class SpellbookLootPoolTest {
             }
         }
     }
+
+    /**
+     * The beginner's shelves (village libraries, torn pages in ruins) hold only what someone who knows nothing but the
+     * starter charms can read: no prerequisite, or a prerequisite that is a starter charm. Before 2026-10-23 six of
+     * the nine village books asked for a spell a new player could not have, and the Nox book could never be read at
+     * all. Lumos and Nox themselves are not on them: everyone who can hold a wand knows them.
+     */
+    @Test
+    void beginnerShelvesHoldOnlyWhatABeginnerCanRead() throws IOException {
+        List<String> starters = List.of("lumos", "nox");
+        for (String shelf : List.of("spellbook_in_village_libraries", "spell_pages_in_ruins")) {
+            for (String id : poolOf(MODIFIERS.resolve(shelf + ".json"))) {
+                String bare = id.replace("wizards_and_beasts:", "");
+                assertFalse(starters.contains(bare), shelf + ": '" + bare + "' is a starter charm everyone knows");
+                JsonObject definition = definitionOf(bare);
+                assertTrue(definition != null, shelf + ": '" + bare + "' has no JSON definition to check");
+                JsonObject requirement = definition.has("requirement") ? definition.getAsJsonObject("requirement")
+                        : new JsonObject();
+                String type = requirement.has("type") ? requirement.get("type").getAsString() : "none";
+                String prerequisite = requirement.has("prerequisiteId")
+                        ? requirement.get("prerequisiteId").getAsString().replace("wizards_and_beasts:", "") : "";
+                assertTrue(type.equals("none") || (type.equals("knows") && starters.contains(prerequisite)),
+                        shelf + ": a beginner cannot read '" + bare + "' (needs " + type + " " + prerequisite + ")");
+            }
+        }
+    }
 }
