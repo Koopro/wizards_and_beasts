@@ -217,6 +217,13 @@
       { "id": "advanced_potion_making", "item": "wizards_and_beasts:advanced_potion_making", "price_knuts": 348, "depth": 2, "weekly_limit": 1, "min_tier": "trusted_supplier" },
       { "id": "wiggenweld", "item": "wizards_and_beasts:brew", "brew": "wizards_and_beasts:wiggenweld_potion", "price_knuts": 145, "depth": 8, "weekly_limit": 4 },
       { "id": "unicorn_hair", "item": "wizards_and_beasts:unicorn_hair", "price_knuts": 348, "depth": 3, "weekly_limit": 2, "min_tier": "regular" },
+      { "id": "murtlap_essence", "item": "wizards_and_beasts:murtlap_essence", "price_knuts": 72, "depth": 8, "min_tier": "regular" },
+      { "id": "yeti_fur", "item": "wizards_and_beasts:yeti_fur", "price_knuts": 116, "depth": 4, "weekly_limit": 3, "min_tier": "regular" },
+      { "id": "erumpent_horn", "item": "wizards_and_beasts:erumpent_horn", "price_knuts": 580, "depth": 2, "weekly_limit": 2, "min_tier": "trusted_supplier" },
+      { "id": "pukwudgie_venom_sac", "item": "wizards_and_beasts:pukwudgie_venom_sac", "price_knuts": 145, "depth": 4, "weekly_limit": 4, "min_tier": "regular" },
+      { "id": "matagot_essence", "item": "wizards_and_beasts:matagot_essence", "price_knuts": 174, "depth": 4, "weekly_limit": 3, "min_tier": "regular" },
+      { "id": "hidebehind_claw", "item": "wizards_and_beasts:hidebehind_claw", "price_knuts": 232, "depth": 3, "weekly_limit": 2, "min_tier": "trusted_supplier" },
+      { "id": "acromantula_venom", "item": "wizards_and_beasts:acromantula_venom", "price_knuts": 870, "depth": 2, "weekly_limit": 2, "min_tier": "trusted_supplier" },
       { "id": "occamy_eggshell", "item": "wizards_and_beasts:occamy_eggshell", "price_knuts": 435, "depth": 3, "weekly_limit": 2, "min_tier": "trusted_supplier" }
     ]
   }

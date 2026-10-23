@@ -56,7 +56,7 @@ class CreatureMaterialObtainabilityTest {
      * {@code chocolate_bar} that happens to contain "scale" or "bar", and each exclusion then has to
      * be argued. This is the actual list: things a beast is the source of.
      */
-    private static final Set<String> CREATURE_MATERIALS = new TreeSet<>(List.of(
+    static final Set<String> CREATURE_MATERIALS = new TreeSet<>(List.of(
             "acromantula_venom",
             "basilisk_fang",
             "demiguise_hair",
@@ -68,6 +68,7 @@ class CreatureMaterialObtainabilityTest {
             "hidebehind_claw",
             "hidebehind_shadow_essence",
             "horned_serpent_gem",
+            "leprechaun_gold",
             "matagot_essence",
             "mooncalf_dung",
             "murtlap_essence",

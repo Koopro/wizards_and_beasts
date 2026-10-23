@@ -193,6 +193,34 @@
       ]
     },
     {
+      "_comment": "Imported beast parts. Their creatures do not walk these lands at default settings (no spawn rule, or not on the roster), so the apothecary imports some and the rest turn up where someone left them. The golden snidget is a protected species: its feathers come only from a cache or under the Knockturn counter.",
+      "rolls": 1,
+      "entries": [
+        { "type": "minecraft:item", "name": "wizards_and_beasts:acromantula_venom", "weight": 2 },
+        { "type": "minecraft:item", "name": "wizards_and_beasts:murtlap_essence", "weight": 3,
+          "functions": [ { "function": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 1, "max": 3 } } ] },
+        { "type": "minecraft:item", "name": "wizards_and_beasts:golden_snidget_feather", "weight": 1 },
+        { "type": "minecraft:item", "name": "wizards_and_beasts:erumpent_horn", "weight": 1 },
+        { "type": "minecraft:item", "name": "wizards_and_beasts:yeti_fur", "weight": 2,
+          "functions": [ { "function": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 1, "max": 2 } } ] },
+        { "type": "minecraft:item", "name": "wizards_and_beasts:leprechaun_gold", "weight": 3,
+          "functions": [ { "function": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 2, "max": 5 } } ] },
+        { "type": "minecraft:empty", "weight": 8 }
+      ]
+    },
+    {
+      "_comment": "Foreign beast parts, from creatures that do not walk these lands at default settings: what a traveller brought home and hid.",
+      "rolls": 1,
+      "entries": [
+        { "type": "minecraft:item", "name": "wizards_and_beasts:granian_hair", "weight": 2 },
+        { "type": "minecraft:item", "name": "wizards_and_beasts:horned_serpent_gem", "weight": 1 },
+        { "type": "minecraft:item", "name": "wizards_and_beasts:pukwudgie_venom_sac", "weight": 2 },
+        { "type": "minecraft:item", "name": "wizards_and_beasts:matagot_essence", "weight": 2 },
+        { "type": "minecraft:item", "name": "wizards_and_beasts:hidebehind_claw", "weight": 2 },
+        { "type": "minecraft:empty", "weight": 11 }
+      ]
+    },
+    {
       "_comment": "The American wand cores. Their creatures do not walk these lands (none is on the spawn roster), so they come to a British wandmaker as imports (Ollivanders, Knockturn) or, now and then, in a cache someone left.",
       "rolls": 1,
       "entries": [

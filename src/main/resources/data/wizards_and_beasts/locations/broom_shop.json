@@ -59,6 +59,7 @@
       { "id": "balanced_tail", "item": "wizards_and_beasts:balanced_tail", "price_knuts": 232, "depth": 4 },
       { "id": "reinforced_binding", "item": "wizards_and_beasts:reinforced_binding", "price_knuts": 348, "depth": 4, "min_tier": "regular" },
       { "id": "braking_charm", "item": "wizards_and_beasts:braking_charm", "price_knuts": 580, "depth": 3, "min_tier": "regular" },
+      { "id": "granian_hair", "item": "wizards_and_beasts:granian_hair", "price_knuts": 464, "depth": 3, "weekly_limit": 2, "min_tier": "team_supplier" },
       { "id": "streamlined_twigs", "item": "wizards_and_beasts:streamlined_twigs", "price_knuts": 870, "depth": 2, "weekly_limit": 2, "min_tier": "team_supplier" },
       { "id": "anti_jinx_varnish", "item": "wizards_and_beasts:anti_jinx_varnish", "price_knuts": 1740, "depth": 1, "weekly_limit": 1, "min_tier": "racing_patron" },
       { "id": "cleansweep_seven", "item": "wizards_and_beasts:cleansweep_seven", "price_knuts": 1479, "depth": 4 },
