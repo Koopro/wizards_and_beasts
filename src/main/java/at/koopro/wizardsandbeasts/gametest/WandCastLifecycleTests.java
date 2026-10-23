@@ -58,7 +58,9 @@ public final class WandCastLifecycleTests {
                 WandCastLifecycleTests::releaseWithoutCastDoesNothing);
         tests.add("duplicate_release_is_refused", "wand cast: duplicate release",
                 WandCastLifecycleTests::duplicateReleaseIsRefused);
-        tests.add("dead_caster_cannot_release", "wand cast: release after death",
+        // Alone: it asserts the dead caster carries no Slow Falling, and the neighbouring cast scenarios cast the same
+        // spell in plots a few blocks away.
+        tests.addAlone("dead_caster_cannot_release", "wand cast: release after death",
                 WandCastLifecycleTests::deadCasterCannotRelease);
         tests.add("interrupted_hold_cannot_release", "wand cast: interrupted hold cannot release",
                 WandCastLifecycleTests::interruptedHoldCannotRelease);
@@ -277,6 +279,8 @@ public final class WandCastLifecycleTests {
                             () -> "the caster was alive again a tick after dying, so the release below would "
                                     + "not be testing a dead caster: health=" + caster.getHealth());
 
+                    // Whatever reached the body before this tick is not this release's doing.
+                    caster.removeAllEffects();
                     releaseWand(caster);
 
                     check(helper, data.getCastCount(spellId) == 0,
