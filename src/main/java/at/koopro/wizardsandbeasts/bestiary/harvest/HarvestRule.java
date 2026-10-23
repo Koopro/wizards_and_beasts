@@ -16,11 +16,11 @@ import org.jspecify.annotations.NullMarked;
  *
  * <pre>{@code
  * {
- *   "entry": "wizards_and_beasts:unicorn",
- *   "item": "wizards_and_beasts:unicorn_tail_hair",
- *   "minTier": "MASTERED",
- *   "chance": 0.35,
- *   "cooldownSeconds": 600
+ *   "entry": "wizards_and_beasts:troll",
+ *   "item": "wizards_and_beasts:troll_whisker",
+ *   "minTier": "STUDIED",
+ *   "chance": 0.5,
+ *   "cooldownSeconds": 300
  * }
  * }</pre>
  *

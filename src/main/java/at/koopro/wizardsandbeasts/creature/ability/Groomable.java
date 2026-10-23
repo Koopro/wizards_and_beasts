@@ -68,9 +68,12 @@ public record Groomable(Identifier item, int count, int cooldownTicks, boolean r
             return InteractionResult.SUCCESS;
         }
         Item resolved = BuiltInRegistries.ITEM.getValue(item);
-        ItemStack gift = new ItemStack(resolved, count);
+        // A gentle hand combs out more; a handler who has finished studying the animal may groom it again sooner.
+        ItemStack gift = new ItemStack(resolved,
+                count + at.koopro.wizardsandbeasts.bestiary.harvest.GentleHarvest.extraFor(serverPlayer, count));
         at.koopro.wizardsandbeasts.util.InventoryHandover.giveOrDrop(serverPlayer, gift);
-        entity.setCooldown(COOLDOWN, cooldownTicks);
+        entity.setCooldown(COOLDOWN, at.koopro.wizardsandbeasts.bestiary.harvest.GentleHarvest.cooldown(cooldownTicks,
+                at.koopro.wizardsandbeasts.bestiary.harvest.GentleHarvest.researched(serverPlayer, entity.getType())));
         level.sendParticles(ParticleTypes.HEART, entity.getX(), entity.getY() + entity.getBbHeight(), entity.getZ(),
                 3, 0.3, 0.2, 0.3, 0.0);
         level.playSound(null, entity.blockPosition(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.NEUTRAL,

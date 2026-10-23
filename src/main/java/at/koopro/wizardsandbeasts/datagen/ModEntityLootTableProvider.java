@@ -2,7 +2,6 @@ package at.koopro.wizardsandbeasts.datagen;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.registry.ModCreatures;
-import at.koopro.wizardsandbeasts.registry.ModEntities;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.loot.EntityLootSubProvider;
@@ -24,10 +23,13 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * Entity drops for the data-configured creature roster ({@link ModCreatures#MANIFEST}) plus the
- * bespoke beasts with an obvious material. Beings and non-beings (centaur, merperson, boggart,
- * obscurus, ...) get a deliberately empty table so they are covered without dropping anything.
- * Niffler drops stay hand-authored in {@code data/wizards_and_beasts/loot_table/entities/}.
+ * Entity drops for the data-configured creature roster ({@link ModCreatures#MANIFEST}) that nobody wrote by hand.
+ * Beings and non-beings (centaur, merperson, boggart, obscurus, ...) get a deliberately empty table so they are
+ * covered without dropping anything.
+ *
+ * <p>Every creature with a material worth guarding -- the dragons, unicorn, thestral, occamy, the wand-core bearers
+ * -- has a hand-written table in {@code data/wizards_and_beasts/loot_table/entities/} instead, listed in
+ * {@link HandWrittenLoot}; this provider writes nothing for those ids.
  */
 public class ModEntityLootTableProvider extends EntityLootSubProvider {
 
@@ -40,54 +42,19 @@ public class ModEntityLootTableProvider extends EntityLootSubProvider {
     @Override
     public void generate() {
         for (var entry : ModCreatures.ENTITIES.entrySet()) {
-            addCovered(entry.getValue().get(), tableFor(entry.getKey()));
+            if (!HandWrittenLoot.ENTITY_TABLES.contains(entry.getKey())) {
+                addCovered(entry.getValue().get(), tableFor(entry.getKey()));
+            }
         }
-        addCovered(ModEntities.MOONCALF.get(), simple(modItem("mooncalf_dung"), 0, 2));
-        addCovered(ModEntities.THESTRAL.get(),
-                withRare(Items.LEATHER, 0, 2, modItem("thestral_tail_hair"), 0.35f));
-        addCovered(ModEntities.PHOENIX.get(),
-                withRare(Items.FEATHER, 1, 2, modItem("phoenix_feather"), 0.50f));
-        addCovered(ModEntities.AUGUREY.get(), simple(Items.FEATHER, 1, 2));
-        addCovered(ModEntities.BOWTRUCKLE.get(), simple(Items.STICK, 0, 2));
-        addCovered(ModEntities.RUNESPOOR.get(), simple(Items.SPIDER_EYE, 0, 2));
-        addCovered(ModEntities.HIDEBEHIND.get(),
-                two(modItem("hidebehind_shadow_essence"), 0, 2, modItem("hidebehind_claw"), 0, 1));
     }
 
     private LootTable.Builder tableFor(String id) {
-        if (ModCreatures.DRAGON_IDS.contains(id)) {
-            return withRare(Items.LEATHER, 1, 3, modItem("dragon_heartstring"), 0.30f);
-        }
         return switch (id) {
-            // signature wand/potion materials
-            case "unicorn" -> simple(modItem("unicorn_hair"), 1, 2);
-            case "demiguise" -> simple(modItem("demiguise_hair"), 1, 2);
-            case "erumpent" -> withRare(Items.LEATHER, 1, 2, modItem("erumpent_horn"), 0.50f);
-            case "occamy" -> withRare(Items.FEATHER, 1, 2, modItem("occamy_eggshell"), 0.35f);
             case "leprechaun" -> simple(modItem("leprechaun_gold"), 2, 5);
             // fire-aligned
             case "salamander" -> simple(Items.BLAZE_POWDER, 0, 2);
             case "ashwinder" -> simple(Items.BLAZE_POWDER, 0, 1);
             case "fire_crab" -> withRare(Items.BLAZE_POWDER, 0, 1, Items.EMERALD, 0.20f);
-            // venomous / arthropod
-            case "acromantula" -> two(modItem("acromantula_venom"), 1, 1, Items.STRING, 1, 3);
-            case "basilisk" -> two(modItem("basilisk_fang"), 1, 1, Items.LEATHER, 2, 4);
-            // Phase 3 additions
-            case "ghoul" -> two(modItem("ghoul_slime"), 0, 2, Items.BONE, 0, 1);
-            case "golden_snidget" -> withRare(Items.FEATHER, 0, 1, modItem("golden_snidget_feather"), 0.40f);
-            case "granian" -> two(modItem("granian_hair"), 0, 2, Items.LEATHER, 0, 2);
-            case "horned_serpent" -> withRare(Items.PRISMARINE_SHARD, 0, 2, modItem("horned_serpent_gem"), 0.25f);
-            case "pukwudgie" -> two(Items.ARROW, 0, 2, modItem("pukwudgie_venom_sac"), 0, 1);
-            case "yeti" -> two(modItem("yeti_fur"), 0, 2, Items.BONE, 0, 1);
-            case "rougarou" -> two(modItem("rougarou_hair"), 0, 1, Items.LEATHER, 0, 2);
-            // Wand-core bearers: these cores had no survival source, leaving the wandmaker's bench
-            // usable only with unicorn hair.
-            case "thunderbird" -> withRare(Items.FEATHER, 1, 2, modItem("thunderbird_tail_feather"), 0.35f);
-            case "wampus_cat" -> withRare(Items.LEATHER, 0, 2, modItem("wampus_cat_hair"), 0.40f);
-            case "troll" -> withRare(Items.BONE, 1, 2, modItem("troll_whisker"), 0.40f);
-            case "matagot" -> two(modItem("matagot_essence"), 0, 1, Items.PHANTOM_MEMBRANE, 0, 1);
-            case "bundimun" -> simple(Items.SLIME_BALL, 0, 2);
-            case "lobalug" -> withRare(Items.INK_SAC, 0, 2, modItem("gillyweed"), 0.35f);
             // aquatic. Gillyweed is a water plant with no world feature behind it, so the merfolk-water
             // beasts carry it — without a source the item was creative-only.
             case "kelpie", "kappa" -> withRare(Items.KELP, 1, 3, modItem("gillyweed"), 0.25f);
@@ -100,7 +67,7 @@ public class ModEntityLootTableProvider extends EntityLootSubProvider {
             case "fwooper", "jobberknoll", "diricawl" -> simple(Items.FEATHER, 1, 2);
             // winged mounts and raptors
             case "abraxan", "aethonan" -> two(Items.LEATHER, 1, 2, Items.FEATHER, 0, 2);
-            case "hippogriff", "griffin", "snallygaster" ->
+            case "griffin", "snallygaster" ->
                     two(Items.FEATHER, 1, 2, Items.LEATHER, 0, 2);
             // shadow-stuff
             case "lethifold" -> simple(Items.PHANTOM_MEMBRANE, 0, 2);

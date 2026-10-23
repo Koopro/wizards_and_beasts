@@ -77,6 +77,9 @@ import java.util.UUID;
 @NullMarked
 public interface BondableBeast {
 
+    /** How near the owner must be for a gift to be handed to them rather than left on the ground. */
+    double GIFT_HANDOVER_RANGE = 16.0;
+
     /** The bond storage this creature owns. Never null; a creature with no profile simply never fills it. */
     BondState bondState();
 
@@ -399,9 +402,21 @@ public interface BondableBeast {
         if (!(mob.level() instanceof ServerLevel serverLevel)) {
             return;
         }
-        bondState().setGiftCooldown(gift.cooldownSeconds() * 20);
         ItemStack stack = gift.roll(mob.getRandom());
-        mob.spawnAtLocation(serverLevel, stack);
+        // The gift goes to the owner when they are at hand, rather than onto the ground where it would despawn
+        // unseen; a gentle owner gets a little more, and one who has studied the animal fully hears from it sooner.
+        Player owner = resolveBondOwner();
+        if (owner instanceof net.minecraft.server.level.ServerPlayer keeper && keeper.isAlive()
+                && mob.distanceToSqr(keeper) <= GIFT_HANDOVER_RANGE * GIFT_HANDOVER_RANGE) {
+            bondState().setGiftCooldown(at.koopro.wizardsandbeasts.bestiary.harvest.GentleHarvest.cooldown(
+                    gift.cooldownSeconds() * 20,
+                    at.koopro.wizardsandbeasts.bestiary.harvest.GentleHarvest.researched(keeper, mob.getType())));
+            stack.grow(at.koopro.wizardsandbeasts.bestiary.harvest.GentleHarvest.extraFor(keeper, stack.getCount()));
+            at.koopro.wizardsandbeasts.util.InventoryHandover.giveOrDrop(keeper, stack);
+        } else {
+            bondState().setGiftCooldown(gift.cooldownSeconds() * 20);
+            mob.spawnAtLocation(serverLevel, stack);
+        }
         playBondSound(profile.feedSound(), 0.6f, 1.4f);
     }
 

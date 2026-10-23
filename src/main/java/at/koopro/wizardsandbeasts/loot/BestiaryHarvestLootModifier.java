@@ -35,8 +35,9 @@ import java.util.List;
  *
  * <p>The modifier appends to {@code generatedLoot} and never inspects, filters or removes what is
  * already there. Basic drops are therefore untouched <em>by construction</em> rather than by care: an
- * unstudied player killing a unicorn gets exactly the loot table's unicorn hair, the same as before this
- * existed, and no code path here can take it away.
+ * unstudied player killing a dragon gets exactly the loot table's leather, the same as before this
+ * existed, and no code path here can take it away. (A unicorn's hair is never a kill drop: it is groomed
+ * or found where the animal shed it.)
  *
  * <h2>Server authority</h2>
  *

@@ -78,7 +78,10 @@ public final class CreatureSign {
         return TAG_PREFIX + BuiltInRegistries.ENTITY_TYPE.getKey(species).toString().replace(':', '/');
     }
 
-    /** Picking up what a creature left behind is studying it. */
+    /**
+     * Picking up what a creature left behind is studying it, and a gentle hand finds a little more of it where it lay
+     * (Gentle Hands: a quarter more per level of what was picked up).
+     */
     @SubscribeEvent
     public static void onPickup(ItemEntityPickupEvent.Post event) {
         if (!(event.getPlayer() instanceof ServerPlayer player)) {
@@ -88,6 +91,12 @@ public final class CreatureSign {
         if (species != null) {
             BestiaryDiscoveryHandler.studied(player, species,
                     at.koopro.wizardsandbeasts.bestiary.CreatureProfile.StudyAct.HARVEST);
+            int picked = event.getOriginalStack().getCount() - event.getCurrentStack().getCount();
+            int more = at.koopro.wizardsandbeasts.bestiary.harvest.GentleHarvest.extraFor(player, picked);
+            if (more > 0) {
+                at.koopro.wizardsandbeasts.util.InventoryHandover.giveOrDrop(player,
+                        event.getOriginalStack().copyWithCount(more));
+            }
         }
     }
 }
