@@ -2,8 +2,6 @@ package at.koopro.wizardsandbeasts.event.heritage;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
-import at.koopro.wizardsandbeasts.heritage.Heritage;
-import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
@@ -65,7 +63,7 @@ public final class VampireHeritageHandler {
         }
         for (ServerPlayer player : event.getServer().getPlayerList().getPlayers()) {
             PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
-            if (data.getSelectedHeritage() != Heritage.VAMPIRE || !hasSunlightWeakness(data)) {
+            if (!hasSunlightWeakness(data)) {
                 continue;
             }
             if (!(player.level() instanceof ServerLevel level)) {
@@ -77,10 +75,13 @@ public final class VampireHeritageHandler {
         }
     }
 
-    /** True for a variant the mod has marked as harmed by daylight — Turned and Born, not Dhampir. */
+    /**
+     * True for a character the mod has marked as harmed by daylight — the Turned and Born lineages, not Dhampir, and
+     * anyone carrying vampirism. Asked of the lineage and the condition together, so the sun finds a sired wizard as
+     * surely as a born vampire.
+     */
     public static boolean hasSunlightWeakness(PlayerHeritageData data) {
-        HeritageVariant variant = data.getSelectedHeritageVariant();
-        return variant != null && variant.hasTag(TAG_SUNLIGHT_WEAKNESS);
+        return data.hasTrait(TAG_SUNLIGHT_WEAKNESS);
     }
 
     /**

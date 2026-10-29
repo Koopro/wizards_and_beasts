@@ -13,6 +13,16 @@ All notable changes to this project are documented in this file.
   werewolf). The command and the Control Center refuse and say why; nothing about the player changes.
 - **Fixed:** curing an Obscurial in the dark form takes away the dark form's flight and resets its meters.
 - Refusals are translatable sentences instead of English literals.
+- **Added:** vampirism is a condition. A witch, wizard or Veela can be turned in play and stays who they were, with
+  the thirst, the sun and the bat added.
+  - A vampire who thirsts and burns (Born, Turned, or sired) offers their blood by crouching and taking another
+    player's hand with an empty hand. The other player accepts by doing the same back within 30 seconds.
+  - Nobody is turned by one click, a feed or a fight. Both players have to act.
+  - Only Wizardkind and Veela can be turned. A werewolf, an Obscurial or a Goblin is refused, and both players are
+    told why.
+  - The sire gives up 35 blood. A sire too thirsty to spare it cannot offer.
+  - A turned Veela's shape is the bat, not the harpy, and she keeps her allure.
+- **Changed:** blood hunger and sunlight now follow the character's traits, not only the Vampire people.
 
 ### Learning spells (2026-10-23)
 

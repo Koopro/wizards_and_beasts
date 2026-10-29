@@ -27,6 +27,16 @@ sentence. `HeritageAPI.afflict` stays the raw write for tests and the gate's alr
 `HeritageAPI.cure` now also releases an Obscurus host (`ObscurialHeritageHandler.releaseHost`: dark-form flight,
 `obscurial_*` meters). Werewolf flags are left alone on a cure (`werewolf_equipment_stripped` guards stashed gear).
 
+**Vampirism is a condition (2026-10-29).** `MagicalCondition.VAMPIRISM`, origin `ConditionOrigin.SIRED` (traits
+`sunlight_weakness`, `blood_hunger`, `transformation`), carried by Wizardkind and Veela only. The Vampire people
+(Born, Dhampir, admin-only Turned) is unchanged. Everything that used to ask for the Vampire heritage now asks the
+character's traits: `NutritionPolicyResolver.resolve(data)` includes the condition, `VampireHeritageHandler` burns
+anyone with `sunlight_weakness`, and `HeritageTransformService.formHeritage` makes a carrier's toggle the bat (a turned
+Veela loses the harpy toggle and the fury change; her allure stays). `HeritageFormBridge` keeps the carrier's own
+body by day. Turning is `heritage/vampire/VampireSiring`: crouching empty-hand click = offer (30 s, `PlayerScopedState`),
+the same back = accept; both halves ask `ConditionRules` and the sire's blood (35) before anything is written.
+`HeritageAPI.cure` resets the blood pool.
+
 ---
 
 ## 0. 2026-10-14 — heritage as experience: the reference architecture

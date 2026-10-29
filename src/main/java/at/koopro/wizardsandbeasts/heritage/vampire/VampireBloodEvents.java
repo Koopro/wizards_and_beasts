@@ -82,6 +82,14 @@ public final class VampireBloodEvents {
         if (!(player.level() instanceof ServerLevel level)) {
             return;
         }
+        // A crouching hand on another player is a siring (offer or acceptance), never a feed: the feed hands every
+        // crouching click back to vanilla, so the two cannot collide.
+        if (target instanceof ServerPlayer other
+                && VampireSiring.interact(player, other, level.getGameTime()) != VampireSiring.Outcome.NONE) {
+            event.setCanceled(true);
+            event.setCancellationResult(InteractionResult.SUCCESS_SERVER);
+            return;
+        }
         if (VampireBloodHandler.attemptFeed(player, target, level)) {
             event.setCanceled(true);
             event.setCancellationResult(InteractionResult.SUCCESS_SERVER);

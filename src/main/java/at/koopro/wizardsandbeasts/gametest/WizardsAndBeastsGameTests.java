@@ -100,6 +100,7 @@ public final class WizardsAndBeastsGameTests {
         RegistrySyncTests.contribute(registrar);
         HeritageCommitTests.contribute(registrar);
         HeritageConditionDoorTests.contribute(registrar);
+        VampireSiringTests.contribute(registrar);
         HeritageIdentityTests.contribute(registrar);
         HouseElfTests.contribute(registrar);
         MerpeopleBreathTests.contribute(registrar);

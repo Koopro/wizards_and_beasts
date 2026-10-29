@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.heritage.nutrition;
 
+import at.koopro.wizardsandbeasts.heritage.ConditionOrigin;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
@@ -41,7 +42,17 @@ public final class NutritionPolicyResolver {
      * yet is an ordinary hungry human, which is also what they look like on screen.
      */
     public static NutritionPolicy resolve(@Nullable Heritage heritage, @Nullable HeritageVariant variant) {
-        if (variant != null && variant.hasTag(TAG_BLOOD_HUNGER)) {
+        return resolve(heritage, variant, null);
+    }
+
+    /**
+     * The same decision with a carried condition taken into account: the tag may come from the lineage or from the
+     * condition, which is how a wizard turned by a sire ({@link ConditionOrigin#SIRED}) comes to drink blood.
+     */
+    public static NutritionPolicy resolve(@Nullable Heritage heritage, @Nullable HeritageVariant variant,
+                                          @Nullable ConditionOrigin condition) {
+        if ((variant != null && variant.hasTag(TAG_BLOOD_HUNGER))
+                || (condition != null && condition.traits().contains(TAG_BLOOD_HUNGER))) {
             return NutritionPolicy.BLOOD;
         }
         return NutritionPolicy.VANILLA;
@@ -49,7 +60,7 @@ public final class NutritionPolicyResolver {
 
     /** Resolves from a heritage block, whichever side holds it. */
     public static NutritionPolicy resolve(PlayerHeritageData data) {
-        return resolve(data.getSelectedHeritage(), data.getSelectedHeritageVariant());
+        return resolve(data.getSelectedHeritage(), data.getSelectedHeritageVariant(), data.getCondition());
     }
 
     /** Server-side convenience. Reads the attachment, which only the server is authoritative for. */

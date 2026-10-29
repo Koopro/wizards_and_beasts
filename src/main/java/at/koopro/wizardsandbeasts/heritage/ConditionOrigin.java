@@ -28,7 +28,11 @@ public enum ConditionOrigin {
     /** Held beneath the ribs like a breath: present, hungry, not yet loose. */
     SUPPRESSED("suppressed", MagicalCondition.OBSCURUS, Set.of("obscurus_form", "no_casting", "no_wand")),
     /** Host and parasite braided so tight that windows break when composure does. */
-    UNLEASHED("unleashed", MagicalCondition.OBSCURUS, Set.of("obscurus_form", "no_casting", "no_wand", "transformation"));
+    UNLEASHED("unleashed", MagicalCondition.OBSCURUS, Set.of("obscurus_form", "no_casting", "no_wand", "transformation")),
+
+    // ── vampirism ──
+    /** Given a sire's blood, and took it. The same traits the Turned lineage of the Vampire people carries. */
+    SIRED("sired", MagicalCondition.VAMPIRISM, Set.of("sunlight_weakness", "blood_hunger", "transformation"));
 
     private final String id;
     private final MagicalCondition condition;

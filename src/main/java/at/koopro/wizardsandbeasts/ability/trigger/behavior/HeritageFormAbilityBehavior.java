@@ -43,7 +43,7 @@ public final class HeritageFormAbilityBehavior implements AbilityBehavior {
     @Override
     public boolean isToggledOn(ServerPlayer player, AbilityDefinition def) {
         PlayerHeritageData data = HeritageTransformService.data(player);
-        return data.getSelectedHeritage() == heritage && HeritageTransformService.isTransformed(data);
+        return HeritageTransformService.formHeritage(data) == heritage && HeritageTransformService.isTransformed(data);
     }
 
     /**
@@ -53,7 +53,8 @@ public final class HeritageFormAbilityBehavior implements AbilityBehavior {
      */
     @Override
     public void onToggle(ServerPlayer player, AbilityDefinition def, boolean nowOn) {
-        if (HeritageTransformService.data(player).getSelectedHeritage() == heritage) {
+        // formHeritage, not the selected heritage: a wizard turned by a sire presses the vampire's button.
+        if (HeritageTransformService.formHeritage(HeritageTransformService.data(player)) == heritage) {
             HeritageTransformService.toggle(player);
         }
     }

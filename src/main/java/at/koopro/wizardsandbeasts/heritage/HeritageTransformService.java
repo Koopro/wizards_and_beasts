@@ -59,10 +59,26 @@ public final class HeritageTransformService {
         return player.getData(ModAttachments.HERITAGE_DATA.get());
     }
 
-    /** True when this player's heritage <em>and</em> variant both permit a change of shape. */
+    /**
+     * Whose change of shape this character's toggle drives: the Vampire's when they carry vampirism, whatever people
+     * they are, and otherwise their own people's. A turned Veela's toggle is the bat, not the harpy — one body has one
+     * second shape, and the condition is the thing that changed it, exactly as a werewolf's wolf outranks their
+     * heritage in {@link HeritageFormBridge}.
+     */
+    public static @Nullable Heritage formHeritage(PlayerHeritageData data) {
+        return data.hasCondition(MagicalCondition.VAMPIRISM) ? Heritage.VAMPIRE : data.getSelectedHeritage();
+    }
+
+    /**
+     * True when this player's heritage <em>and</em> variant both permit a change of shape, or when they carry
+     * vampirism, whose {@code transformation} trait comes with the condition rather than the lineage.
+     */
     public static boolean canTransform(@Nullable PlayerHeritageData data) {
         if (data == null) {
             return false;
+        }
+        if (data.getSelectedHeritage() != null && data.hasCondition(MagicalCondition.VAMPIRISM)) {
+            return true;
         }
         Heritage heritage = data.getSelectedHeritage();
         HeritageVariant variant = data.getSelectedHeritageVariant();
@@ -74,7 +90,7 @@ public final class HeritageTransformService {
 
     /** Whether the server's heritage rules let this player's heritage begin its change (see {@link HeritageRules}). */
     public static boolean entryAllowed(PlayerHeritageData data) {
-        Heritage heritage = data.getSelectedHeritage();
+        Heritage heritage = formHeritage(data);
         return heritage != null && HeritageRules.transformationAllowed(heritage);
     }
 
@@ -126,7 +142,7 @@ public final class HeritageTransformService {
         if (!canTransform(data) || (!entryAllowed(data) && !isTransformed(data))) {
             return;
         }
-        Heritage heritage = data.getSelectedHeritage();
+        Heritage heritage = formHeritage(data);
         if (heritage == Heritage.VEELA) {
             out.add(at.koopro.wizardsandbeasts.ability.AbilityIds.VEELA_FORM.toString());
         } else if (heritage == Heritage.VAMPIRE) {

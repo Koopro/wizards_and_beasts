@@ -34,6 +34,9 @@ public final class HeritageFormBridge {
             return switch (condition.condition()) {
                 case LYCANTHROPY -> changed ? "werewolf_wolf" : "werewolf_human";
                 case OBSCURUS -> changed ? "obscurial_dark" : "obscurial_human";
+                // A turned wizard or Veela keeps their own body by day; only the bat is the condition's.
+                case VAMPIRISM -> changed ? "vampire_bat"
+                        : getDefaultFormId(heritage, variant, null, TransformationState.NORMAL);
             };
         }
         return switch (heritage) {
@@ -67,6 +70,10 @@ public final class HeritageFormBridge {
             switch (condition.condition()) {
                 case LYCANTHROPY -> { forms.add("werewolf_human"); forms.add("werewolf_wolf"); }
                 case OBSCURUS -> { forms.add("obscurial_human"); forms.add("obscurial_dark"); }
+                case VAMPIRISM -> {
+                    forms.add(getDefaultFormId(heritage, null, null, TransformationState.NORMAL));
+                    forms.add("vampire_bat");
+                }
             }
             return forms;
         }

@@ -182,8 +182,9 @@ public final class HeritageAPI {
     /**
      * Takes a condition off a player, leaving the witch or wizard underneath exactly as they were.
      *
-     * <p>No canon cure exists for either condition — Wolfsbane makes a werewolf's night survivable and an Obscurus
-     * kills its host — so this is an operator's eraser and a test seam, not a remedy the world offers.
+     * <p>No canon cure exists for any condition — Wolfsbane makes a werewolf's night survivable, an Obscurus kills its
+     * host, and nobody comes back from a sire's blood — so this is an operator's eraser and a test seam, not a remedy
+     * the world offers.
      */
     public static void cure(ServerPlayer player) {
         PlayerHeritageData data = getData(player);
@@ -196,6 +197,8 @@ public final class HeritageAPI {
         data.setCondition(null);
         data.setTransformationState(TransformationState.NORMAL);
         applyStats(player);
+        // A cured vampire's pool goes the way clear() sends it: reset, not left behind to come back at a stale value.
+        VampireBloodAPI.clear(player);
         FormSystemAPI.resetToDefault(player);
         HeritageDataSyncS2CPayload.syncToPlayer(player, false);
         HeritageIdentitySyncS2CPayload.syncToTracking(player);

@@ -299,7 +299,7 @@ class HeritageAppearanceCodecTest {
     @Test
     void conditionEntries_rejectUnknownIdsVariantsAndEmptiness() {
         assertTrue(parse("""
-                { "id": "wizards_and_beasts:a", "condition": "vampirism", "provenance": { "fanExtrapolation": true } }
+                { "id": "wizards_and_beasts:a", "condition": "petrification", "provenance": { "fanExtrapolation": true } }
                 """).error().orElseThrow().message().contains("unknown condition"));
         assertTrue(parse("""
                 { "id": "wizards_and_beasts:b", "condition": "lycanthropy", "variant": "bitten",

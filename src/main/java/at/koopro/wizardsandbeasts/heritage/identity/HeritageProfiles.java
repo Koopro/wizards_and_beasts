@@ -10,7 +10,6 @@ import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
 import at.koopro.wizardsandbeasts.heritage.HeritageTraits;
 import at.koopro.wizardsandbeasts.heritage.HeritageTransformService;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
-import at.koopro.wizardsandbeasts.heritage.MagicalCondition;
 import at.koopro.wizardsandbeasts.heritage.centaur.StarReading;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.heritage.elf.ElfBondData;
@@ -81,10 +80,11 @@ public final class HeritageProfiles {
             default -> { }
         }
         if (condition != null) {
-            if (condition.condition() == MagicalCondition.LYCANTHROPY) {
-                werewolf(b, player, data);
-            } else if (condition.condition() == MagicalCondition.OBSCURUS) {
-                obscurial(b, player);
+            switch (condition.condition()) {
+                case LYCANTHROPY -> werewolf(b, player, data);
+                case OBSCURUS -> obscurial(b, player);
+                // The thirst and the sun, read the same way as a born vampire's.
+                case VAMPIRISM -> vampire(b, player);
             }
         }
         return b.build();

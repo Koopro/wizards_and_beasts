@@ -65,7 +65,9 @@ public final class VeelaHeritageHandler {
         }
         for (ServerPlayer player : event.getServer().getPlayerList().getPlayers()) {
             PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
-            if (data.getSelectedHeritage() != Heritage.VEELA || !HeritageTransformService.canTransform(data)) {
+            // formHeritage: a Veela who has been turned changes into the bat now, and fury must not reach for it.
+            if (HeritageTransformService.formHeritage(data) != Heritage.VEELA
+                    || !HeritageTransformService.canTransform(data)) {
                 continue;
             }
             if (!(player.level() instanceof ServerLevel level)) {
