@@ -18,6 +18,15 @@ Werewolf and Obscurial in the brief are conditions in this mod, not heritages, a
 is selectable in the alpha (`Heritage.isAlphaAvailable`); Veela and Vampire are playable only through
 `/wandb player heritage set` until they are opened.
 
+**One condition slot, one door (2026-10-29).** A character carries at most one condition. Every writer asks
+`heritage/ConditionRules` first: `toAcquire` (no heritage / cannot carry / already carries / another condition) and
+`toReassign` (a heritage change may not strand a condition the new heritage cannot carry). The door is
+`HeritageAssignment.afflict`; `HeritageAssignment.assign` refuses before touching anything. The bite, the condition
+command, the heritage command, the Control Center and the gate all go through it, and every refusal is a translatable
+sentence. `HeritageAPI.afflict` stays the raw write for tests and the gate's already-validated selection.
+`HeritageAPI.cure` now also releases an Obscurus host (`ObscurialHeritageHandler.releaseHost`: dark-form flight,
+`obscurial_*` meters). Werewolf flags are left alone on a cure (`werewolf_equipment_stripped` guards stashed gear).
+
 ---
 
 ## 0. 2026-10-14 — heritage as experience: the reference architecture

@@ -183,6 +183,21 @@ public final class ObscurialHeritageHandler {
         }
     }
 
+    /**
+     * The Obscurus has been taken off {@code player} ({@code HeritageAPI.cure}): give back what the dark form took and
+     * drop every {@code obscurial_*} flag. The tick handler skips non-Obscurials, so without this a host cured in the
+     * dark form kept its flight for good, and a later Obscurus started from the old meters.
+     */
+    public static void releaseHost(ServerPlayer player, PlayerHeritageData data) {
+        if ("true".equals(data.getFlag(FLAG_FLIGHT_GRANTED)) && !player.isCreative() && !player.isSpectator()) {
+            player.getAbilities().mayfly = false;
+            player.getAbilities().flying = false;
+            player.getAbilities().setFlyingSpeed(0.05f);
+            player.onUpdateAbilities();
+        }
+        data.getCustomFlags().keySet().removeIf(key -> key.startsWith("obscurial_"));
+    }
+
     private static void updateDarkFormFlight(ServerPlayer player, PlayerHeritageData data) {
         boolean darkForm = ObscurialRules.isDarkForm(data);
         boolean canKeepNativeFlight = player.isCreative() || player.isSpectator();

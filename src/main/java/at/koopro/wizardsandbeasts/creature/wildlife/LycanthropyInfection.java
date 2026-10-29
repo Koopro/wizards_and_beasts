@@ -1,8 +1,10 @@
 package at.koopro.wizardsandbeasts.creature.wildlife;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.heritage.ConditionOrigin;
+import at.koopro.wizardsandbeasts.heritage.ConditionRules;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
-import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
+import at.koopro.wizardsandbeasts.heritage.HeritageAssignment;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.heritage.werewolf.WerewolfConfig;
 import at.koopro.wizardsandbeasts.heritage.werewolf.WerewolfRules;
@@ -24,7 +26,7 @@ import org.jspecify.annotations.NullMarked;
  * carries the curse from then on, and the moon claims them at the next full moon.
  *
  * <p>The bite comes from a werewolf creature ({@code lycanthropic_bite} ability) or from a transformed werewolf player.
- * The victim keeps everything that makes them who they are — {@link HeritageAPI#afflict} changes the body, not the
+ * The victim keeps everything that makes them who they are — {@link HeritageAssignment#afflict} changes the body, not the
  * character — and the existing moon lifecycle takes it from there: human, full moon, wolf, morning, human.
  */
 @NullMarked
@@ -54,7 +56,16 @@ public final class LycanthropyInfection {
                 WerewolfRules.isWerewolf(data), damageDealt)) {
             return false;
         }
-        HeritageAPI.afflict(victim, at.koopro.wizardsandbeasts.heritage.ConditionOrigin.BITTEN);
+        // One condition slot. An Obscurus was there first, and the bite used to replace it without a word; now the
+        // curse finds no room and the victim is told so.
+        ConditionRules.Refusal refusal = HeritageAssignment.afflict(victim, ConditionOrigin.BITTEN);
+        if (refusal != null) {
+            if (refusal == ConditionRules.Refusal.OTHER_CONDITION) {
+                victim.sendSystemMessage(Component.translatable("heritage.wizards_and_beasts.werewolf.bite_no_room")
+                        .withStyle(ChatFormatting.DARK_PURPLE));
+            }
+            return false;
+        }
         WerewolfState.setOnsetDay(data, WerewolfRules.nightOf(level.getDayTime()));
         victim.sendSystemMessage(Component.translatable("heritage.wizards_and_beasts.werewolf.bitten")
                 .withStyle(ChatFormatting.DARK_RED));

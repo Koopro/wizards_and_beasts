@@ -4,6 +4,7 @@ import at.koopro.wizardsandbeasts.command.WizardsAndBeastsCommandPermissions;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.heritage.ConditionOrigin;
+import at.koopro.wizardsandbeasts.heritage.ConditionRules;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageTraits;
 import at.koopro.wizardsandbeasts.heritage.centaur.StarReading;
@@ -348,19 +349,15 @@ public final class HeritageCommands {
             return 0;
         }
 
+        // The same door a werewolf's bite goes through: one slot, never overwritten. To change a condition, clear it.
         PlayerHeritageData data = target.getData(ModAttachments.HERITAGE_DATA.get());
-        if (!data.hasHeritageSelected()) {
-            source.sendFailure(Component.literal(target.getName().getString()
-                    + " has not chosen a heritage yet").withStyle(ChatFormatting.RED));
+        ConditionOrigin carried = data.getCondition();
+        ConditionRules.Refusal refusal = HeritageAssignment.afflict(target, origin);
+        if (refusal != null) {
+            source.sendFailure(ConditionRules.describe(refusal, target.getName(), origin, carried,
+                    data.getSelectedHeritageVariant()).copy().withStyle(ChatFormatting.RED));
             return 0;
         }
-        if (!origin.condition().canBeCarriedBy(data.getSelectedHeritage(), data.getSelectedHeritageVariant())) {
-            source.sendFailure(Component.literal(target.getName().getString() + " cannot carry "
-                    + origin.condition().getId()).withStyle(ChatFormatting.RED));
-            return 0;
-        }
-
-        HeritageAPI.afflict(target, origin);
         final ConditionOrigin given = origin;
         source.sendSuccess(() -> Component.literal(target.getName().getString() + " now carries "
                 + given.condition().getId() + "/" + given.getId()).withStyle(ChatFormatting.GREEN), false);
@@ -399,7 +396,13 @@ public final class HeritageCommands {
         // The same routine the first-join gate and the Control Center run. This used to set the fields, apply
         // the attribute modifiers and sync to the one player — which left the body, the POWER band, the ability
         // grants and every other client's copy describing the heritage the target used to be.
-        HeritageAssignment.assign(target, type, subtype);
+        ConditionOrigin carried = target.getData(ModAttachments.HERITAGE_DATA.get()).getCondition();
+        ConditionRules.Refusal refusal = HeritageAssignment.assign(target, type, subtype);
+        if (refusal != null && carried != null) {
+            source.sendFailure(ConditionRules.describe(refusal, target.getName(), carried, carried, subtype)
+                    .copy().withStyle(ChatFormatting.RED));
+            return 0;
+        }
 
         source.sendSuccess(() -> Component.literal("Set " + target.getName().getString()
                 + " to " + type.getDisplayName() + " (" + subtype.getDisplayName() + ")").withStyle(ChatFormatting.GREEN), false);

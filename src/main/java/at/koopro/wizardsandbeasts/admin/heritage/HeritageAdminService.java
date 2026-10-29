@@ -5,6 +5,7 @@ import at.koopro.wizardsandbeasts.admin.access.AdminContext;
 import at.koopro.wizardsandbeasts.heritage.ConditionOrigin;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
+import at.koopro.wizardsandbeasts.heritage.ConditionRules;
 import at.koopro.wizardsandbeasts.heritage.HeritageAssignment;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
@@ -178,10 +179,16 @@ public final class HeritageAdminService {
         if (problem != null || heritage == null || variant == null) {
             return Outcome.refused(problem == null ? "invalid_variant" : problem, heritageId + "/" + variantId);
         }
+        // Asked before the confirmation so the operator hears it first; asked again by assign itself.
+        if (ConditionRules.toReassign(HeritageAPI.getData(target).getCondition(), heritage, variant) != null) {
+            return Outcome.refused("condition_incompatible", target.getName().getString());
+        }
         if (!confirmed) {
             return Outcome.refused("confirm_required", target.getName().getString());
         }
-        HeritageAssignment.assign(target, heritage, variant);
+        if (HeritageAssignment.assign(target, heritage, variant) != null) {
+            return Outcome.refused("condition_incompatible", target.getName().getString());
+        }
         LOGGER.info("[Admin] {} assigned {} / {} to {}", actor.actorName(), heritage.getId(), variant.getId(),
                 target.getName().getString());
         at.koopro.wizardsandbeasts.admin.operation.AdminOperationService.record(server, actor, "heritages", "heritage_assign", target.getName().getString(),

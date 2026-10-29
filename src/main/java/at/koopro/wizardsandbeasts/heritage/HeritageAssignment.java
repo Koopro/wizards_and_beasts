@@ -9,7 +9,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * The three ways a player's heritage is decided, each written once: a player choosing at the onboarding gate,
- * an administrator assigning one, an administrator sending a player back to the gate.
+ * an administrator assigning one, an administrator sending a player back to the gate — and the one way a condition
+ * comes to a player who already has a heritage ({@link #afflict}).
  *
  * <p>{@link HeritageAPI#commit} / {@link HeritageAPI#clear} already own the body, the roll and the sync; what
  * each caller still wrote out for itself was the part around them — the profession points and which event to
@@ -58,11 +59,41 @@ public final class HeritageAssignment {
         NeoForge.EVENT_BUS.post(new HeritageEvents.PlayerHeritageSelectedEvent(player, heritage, variant));
     }
 
-    /** An administrator sets a player's heritage. Posts {@code Changed}: no starting skill points are re-awarded. */
-    public static void assign(ServerPlayer target, Heritage heritage, HeritageVariant variant) {
+    /**
+     * An administrator sets a player's heritage. Posts {@code Changed}: no starting skill points are re-awarded.
+     *
+     * <p>Refused, with nothing changed, when the player carries a condition the new heritage cannot carry: moving a
+     * werewolf to Goblin used to leave a Goblin werewolf. The operator clears the condition first, on purpose.
+     *
+     * @return {@code null} when assigned, otherwise why not
+     */
+    public static ConditionRules.@Nullable Refusal assign(ServerPlayer target, Heritage heritage,
+                                                         HeritageVariant variant) {
+        ConditionRules.Refusal refusal = ConditionRules.toReassign(HeritageAPI.getData(target).getCondition(),
+                heritage, variant);
+        if (refusal != null) {
+            return refusal;
+        }
         startProfession(target);
         HeritageAPI.commit(target, heritage, variant);
         NeoForge.EVENT_BUS.post(new HeritageEvents.PlayerHeritageChangedEvent(target, heritage, variant));
+        return null;
+    }
+
+    /**
+     * Something happens to a player — a werewolf's bite, an operator's command — that would leave them carrying a
+     * condition. The one door for that: {@link ConditionRules#toAcquire} is asked first, and a refusal changes nothing.
+     *
+     * @return {@code null} when the condition took hold, otherwise why not
+     */
+    public static ConditionRules.@Nullable Refusal afflict(ServerPlayer player, ConditionOrigin condition) {
+        PlayerHeritageData data = HeritageAPI.getData(player);
+        ConditionRules.Refusal refusal = ConditionRules.toAcquire(data.getSelectedHeritage(),
+                data.getSelectedHeritageVariant(), data.getCondition(), condition);
+        if (refusal == null) {
+            HeritageAPI.afflict(player, condition);
+        }
+        return refusal;
     }
 
     /**

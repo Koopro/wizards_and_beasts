@@ -5,6 +5,7 @@ import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.heritage.ConditionOrigin;
+import at.koopro.wizardsandbeasts.heritage.ConditionRules;
 import at.koopro.wizardsandbeasts.heritage.Heritage;
 import at.koopro.wizardsandbeasts.heritage.HeritageAssignment;
 import at.koopro.wizardsandbeasts.heritage.HeritageVariant;
@@ -119,7 +120,8 @@ public record HeritageSelectC2SPayload(String typeId, String subtypeId, String c
                             Component.literal("\u00A7cUnknown condition: " + safeConditionId), true);
                     return;
                 }
-                if (!condition.condition().canBeCarriedBy(heritage, variant)) {
+                // Nothing is carried yet at the gate, so the only refusal left is CANNOT_CARRY.
+                if (ConditionRules.toAcquire(heritage, variant, null, condition) != null) {
                     player.displayClientMessage(
                             Component.translatable("message.wizards_and_beasts.heritage.condition_not_possible",
                                     Component.translatable(condition.condition().getTranslationKey()),

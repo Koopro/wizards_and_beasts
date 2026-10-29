@@ -4,6 +4,16 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Heritage conditions (2026-10-29)
+
+- **Fixed:** a werewolf's bite no longer replaces an Obscurus. The curse finds no room, and the bitten host is told so.
+- **Fixed:** `/wandb player heritage condition set` no longer overwrites a condition a player already carries. Clear
+  it first.
+- **Fixed:** an operator can no longer move a player to a heritage that cannot carry their condition (a Goblin
+  werewolf). The command and the Control Center refuse and say why; nothing about the player changes.
+- **Fixed:** curing an Obscurial in the dark form takes away the dark form's flight and resets its meters.
+- Refusals are translatable sentences instead of English literals.
+
 ### Learning spells (2026-10-23)
 
 - **Changed:** every witch or wizard who can use a wand starts knowing Lumos and Nox.

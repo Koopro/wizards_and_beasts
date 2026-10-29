@@ -190,6 +190,9 @@ public final class HeritageAPI {
         if (data.getCondition() == null) {
             return;
         }
+        if (data.hasCondition(MagicalCondition.OBSCURUS)) {
+            at.koopro.wizardsandbeasts.event.heritage.ObscurialHeritageHandler.releaseHost(player, data);
+        }
         data.setCondition(null);
         data.setTransformationState(TransformationState.NORMAL);
         applyStats(player);
