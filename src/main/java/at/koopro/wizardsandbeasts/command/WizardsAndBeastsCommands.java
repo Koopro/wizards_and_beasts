@@ -10,7 +10,7 @@ import at.koopro.wizardsandbeasts.render.outline.EntityOutlineService;
 import at.koopro.wizardsandbeasts.spell.beam.WandBeamChannelLogic;
 import at.koopro.wizardsandbeasts.spell.cast.WandCastSessions;
 import at.koopro.wizardsandbeasts.sync.PlayerStateSyncService;
-import at.koopro.wizardsandbeasts.heritage.HeritageAPI;
+import at.koopro.wizardsandbeasts.event.heritage.HeritageOnboarding;
 import at.koopro.wizardsandbeasts.network.debug.DebugModeS2CPayload;
 import at.koopro.wizardsandbeasts.network.stats.PlayerStatsSyncPayload;
 import net.minecraft.server.level.ServerPlayer;
@@ -45,8 +45,9 @@ public class WizardsAndBeastsCommands {
     @SubscribeEvent
     public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            boolean needsSelection = !HeritageAPI.hasHeritageSelected(player);
-            PlayerStateSyncService.syncFullLoginState(player, needsSelection);
+            // The ceremony is opened once, by HeritageOnboarding, which honours the HERITAGE module. Opening it here
+            // as well sent a second gate and ignored a server that had switched heritage off.
+            PlayerStateSyncService.syncFullLoginState(player, false);
             OWLExaminationHandler.syncToPlayer(player);
             at.koopro.wizardsandbeasts.owl.career.track.CareerProgression.sync(player);
             // The sitting clock on the HUD survives a relog only if the client hears about the sitting at once.
@@ -81,6 +82,7 @@ public class WizardsAndBeastsCommands {
             WandCastSessions.abort(player);
             PlayerStateSyncService.syncFullLoginState(player, false);
             PlayerStatsSyncPayload.syncToPlayer(player);
+            HeritageOnboarding.promptIfNeeded(player);
         }
     }
 
@@ -110,6 +112,7 @@ public class WizardsAndBeastsCommands {
             WandCastSessions.abort(player);
             PlayerStateSyncService.syncFullLoginState(player, false);
             PlayerStatsSyncPayload.syncToPlayer(player);
+            HeritageOnboarding.promptIfNeeded(player);
         }
     }
 }

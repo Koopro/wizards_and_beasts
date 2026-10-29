@@ -53,6 +53,7 @@ public class ModNetwork {
         ModNetworkOWLs.register(registrar);
         at.koopro.wizardsandbeasts.network.career.ModNetworkCareer.register(registrar);
         at.koopro.wizardsandbeasts.network.education.ModNetworkEducation.register(registrar);
+        at.koopro.wizardsandbeasts.network.journey.ModNetworkJourney.register(registrar);
         at.koopro.wizardsandbeasts.network.location.ModNetworkLocation.register(registrar);
         at.koopro.wizardsandbeasts.network.companion.ModNetworkCompanion.register(registrar);
         ModNetworkFloo.register(registrar);

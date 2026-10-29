@@ -310,3 +310,36 @@ The O.W.L. is now a sitting (coursework + a timed practical/written paper), a N.
 O.W.L. and the elite careers, Astronomy is examined (telescope), keepers teach lessons up to an Acceptable, and
 grades gate advanced brews and the web's capstones. The graph above gains one rung (O.W.L. → N.E.W.T. → elite
 career / capstone). Design and tests: `documentation/EDUCATION.md`. §9.3 stands: no grade feeds spell power.
+
+## Update 2026-10-29 — the Apprentice's Path
+
+**The gap.** The front of the graph (HERITAGE → WAND → DISCOVERY → PRACTICE) was sound system by system, but nothing
+joined the systems for a new player:
+- no handbook was handed over, and no recipe was unlocked;
+- no village has a wandmaker, so the player has to craft a bench and set it by a jobless villager, and nothing said
+  so;
+- the spell-wheel key was never named;
+- Education told a player with no wand to sit their O.W.L.s.
+
+**The fix.** `journey/` adds the Apprentice's Path:
+
+```
+CEREMONY ─▶ WAND ─▶ FIRST LIGHT ─▶ A SPELL OF YOUR OWN ─▶ PRACTICE ─▶ FIELD STUDY ─▶ (Education: O.W.L.s, career)
+ handbook +   Lumos on   2 Sickles      +1 SP + duelling        1 Galleon   5 Sickles
+ recipes      the wheel  (blank books)  dummy (practice)
+```
+
+- **Facts, not a new database.** Every step is a fact another system owns: heritage data, the master of an
+  inventory wand, cast counts, known spells minus the starter set, mastery tier, bestiary tier.
+- **What is stored.** `PathRecord` (the attachment `apprentice_path`, kept on death) stores only the steps that are
+  done and paid, and whether the player walks the path. A reward is therefore paid once, and a step stays done if
+  the wand is lost later.
+- **Order.** Steps can be met in any order.
+- **Who walks which steps.** Wandless heritages walk only the ceremony and field study.
+- **The skill point.** It is the only point the path pays, once per player, under the same rule as a milestone
+  point. No coin buys a spell (§9.3 stands).
+- **Evaluation.** The server looks once a second and reads only the facts of unfinished steps.
+- **Tests.**
+  - The client gets step ids and builds the text itself.
+  - Unit tests: `ApprenticePathTest` (13).
+  - Game tests: `ApprenticePathTests` (8), which also cover the ceremony gate reopening after a respawn.

@@ -7,6 +7,7 @@ import at.koopro.wizardsandbeasts.client.companion.ClientCompanionState;
 import at.koopro.wizardsandbeasts.client.currency.state.ClientVaultDataState;
 import at.koopro.wizardsandbeasts.client.education.ClientEducationState;
 import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
+import at.koopro.wizardsandbeasts.client.journey.ClientApprenticePathState;
 import at.koopro.wizardsandbeasts.client.gui.character.SheetCaches;
 import at.koopro.wizardsandbeasts.client.gui.character.SheetTab;
 import at.koopro.wizardsandbeasts.client.gui.character.SheetWand;
@@ -24,6 +25,8 @@ import at.koopro.wizardsandbeasts.creature.companion.CompanionRoster;
 import at.koopro.wizardsandbeasts.creature.companion.CompanionCommand;
 import at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper;
 import at.koopro.wizardsandbeasts.education.EducationView;
+import at.koopro.wizardsandbeasts.journey.PathStep;
+import at.koopro.wizardsandbeasts.journey.PathText;
 import at.koopro.wizardsandbeasts.location.PlaceStanding;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
@@ -63,9 +66,9 @@ import java.util.function.Consumer;
  * The sheet's first page: who this wizard is, and what they are becoming.
  *
  * <p>Top to bottom: the identity facts (heritage, lineage, condition, patronus), where they stand with the Ministry
- * and the bank, one card per road they are walking — build, magic, wand, profession, education, reputation,
- * creatures — then the effects on them now and what their heritage means in play. Each card is a summary and a
- * link: it opens the page that holds the detail.
+ * and the bank, the Apprentice's Path while it is being walked, one card per road they are walking — build, magic,
+ * wand, profession, education, reputation, creatures — then the effects on them now and what their heritage means in
+ * play. Each card is a summary and a link: it opens the page that holds the detail.
  *
  * <p>Every number comes from state the server synced or a view it built; the cards only choose which numbers to put
  * side by side. They are rebuilt a few times a second, not every frame, and the expensive derivations underneath
@@ -123,6 +126,9 @@ public final class IdentityTab extends ScrollingTab {
             cards = buildCards(player);
         }
 
+        // ── the first days: first, because while it is open it is the one thing to do next ──
+        y = pathSection(g, font, x, y, w, mouseX, mouseY);
+
         // ── who ──
         y = Ui.sectionHeader(g, font, S, x, y, w, Component.translatable(KEY + "section.who"), null);
         y = HeritageBlockWidget.draw(g, x, y, w);
@@ -156,6 +162,40 @@ public final class IdentityTab extends ScrollingTab {
             y = heritage.draw(g, font, x, y, w);
         }
         return y;
+    }
+
+    /**
+     * The Apprentice's Path while it is being walked, at the top of the page: how far along, then the step to take now
+     * and how. The whole list of steps is a hover away, so the page leads with the one action rather than a checklist.
+     * Gone once every step is done, or when the player has switched the path off (the server then sends no steps).
+     */
+    private int pathSection(GuiGraphics g, Font font, int x, int y, int w, int mouseX, int mouseY) {
+        List<ClientApprenticePathState.Line> lines = ClientApprenticePathState.lines();
+        PathStep current = ClientApprenticePathState.current();
+        if (current == null) {
+            return y;
+        }
+        int done = 0;
+        List<Component> steps = new ArrayList<>(lines.size() + 1);
+        steps.add(Component.translatable(KEY + "section.path"));
+        for (ClientApprenticePathState.Line line : lines) {
+            boolean now = line.step() == current;
+            if (line.done()) {
+                done++;
+            }
+            steps.add(Component.literal(line.done() ? "✔ " : now ? "▶ " : "• ").append(PathText.title(line.step()))
+                    .append(" — ").append(Component.translatable(
+                            KEY + "path." + (line.done() ? "done" : now ? "now" : "later"))));
+        }
+        int top = y;
+        y = Ui.sectionHeader(g, font, S, x, y, w, Component.translatable(KEY + "section.path"),
+                Component.translatable(KEY + "section.path.caption", done, lines.size()));
+        Component now = Component.translatable(KEY + "path.callout", PathText.title(current), PathText.hint(current));
+        y += Ui.callout(g, font, S, x, y, w, Ui.Callout.INFO, now);
+        if (hovered(x, top, w, y - top, mouseX, mouseY)) {
+            tooltip(steps);
+        }
+        return y + WizardsMetrics.SPACE_M;
     }
 
     /** The Ministry's view of the wizard and what is in the vault: two facts a wizard is known by. */

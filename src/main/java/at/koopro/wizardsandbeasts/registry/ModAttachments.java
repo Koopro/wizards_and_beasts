@@ -473,6 +473,14 @@ public class ModAttachments {
                             .build());
 
     /** The brewing recipes this player has learned (the basics everyone knows are not stored). */
+    /** The Apprentice's Path: which steps are done and paid, and whether the player walks it. Kept across deaths. */
+    public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.journey.PathRecord>> APPRENTICE_PATH =
+            ATTACHMENTS.register("apprentice_path", () -> AttachmentType.builder(
+                            () -> at.koopro.wizardsandbeasts.journey.PathRecord.EMPTY)
+                    .serialize(at.koopro.wizardsandbeasts.journey.PathRecord.CODEC.fieldOf("data"))
+                    .copyOnDeath()
+                    .build());
+
     /** Spell-trace retry waits and the Steady hand setting, kept across logouts and deaths. */
     public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.spell.learning.tracing.TraceMemory>> TRACE_MEMORY =
             ATTACHMENTS.register("trace_memory", () -> AttachmentType.builder(

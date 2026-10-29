@@ -180,6 +180,13 @@ public final class WizardTestSupport {
                     .map(tag -> TagValueInput.create(reporter, level.getServer().registryAccess(), tag))
                     .ifPresent(player::load);
         }
+        // The Apprentice's Path pays steps once a second (a handbook, coins, a skill point). A scenario about anything
+        // else must not be paid by it, so mock players start with the path switched off; ApprenticePathTests turn it
+        // on for their own players. A reconnect keeps whatever the saved data said.
+        if (!player.hasData(at.koopro.wizardsandbeasts.registry.ModAttachments.APPRENTICE_PATH.get())) {
+            player.setData(at.koopro.wizardsandbeasts.registry.ModAttachments.APPRENTICE_PATH.get(),
+                    at.koopro.wizardsandbeasts.journey.PathRecord.EMPTY.guided(false));
+        }
         Connection connection = new Connection(PacketFlow.SERVERBOUND);
         new EmbeddedChannel(connection);
         NetworkRegistry.configureMockConnection(connection);

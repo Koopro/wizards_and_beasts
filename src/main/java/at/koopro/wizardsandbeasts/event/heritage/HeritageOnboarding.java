@@ -38,12 +38,26 @@ public final class HeritageOnboarding {
      */
     @SubscribeEvent
     public static void onLoginPromptSelection(PlayerEvent.PlayerLoggedInEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        if (!ModuleManager.isEnabled(Module.HERITAGE)) return;
+        if (event.getEntity() instanceof ServerPlayer player) {
+            promptIfNeeded(player);
+        }
+    }
+
+    /**
+     * The one place the ceremony is opened from: login, and again after a respawn or a dimension change. The gate is
+     * not a pause screen, so a player killed while it is up lands on the death screen instead; before this the
+     * respawn re-synced with the gate closed and they played on with no heritage (no wand hand, no Lumos) until
+     * they logged in again.
+     *
+     * @return whether the gate was opened
+     */
+    public static boolean promptIfNeeded(ServerPlayer player) {
+        if (!ModuleManager.isEnabled(Module.HERITAGE)) return false;
         PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
-        if (data.isLocked() || data.getSelectedHeritage() != null) return;
+        if (data.isLocked() || data.getSelectedHeritage() != null) return false;
 
         HeritageDataSyncS2CPayload.syncToPlayer(player, true);
+        return true;
     }
 
     /**

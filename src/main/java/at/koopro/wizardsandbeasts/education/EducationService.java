@@ -3,6 +3,9 @@ package at.koopro.wizardsandbeasts.education;
 import at.koopro.wizardsandbeasts.education.data.ExamSitting;
 import at.koopro.wizardsandbeasts.education.data.PlayerEducationData;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerProfessionData;
+import at.koopro.wizardsandbeasts.journey.ApprenticePathService;
+import at.koopro.wizardsandbeasts.journey.PathStep;
+import at.koopro.wizardsandbeasts.journey.PathText;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.network.education.EducationViewS2CPayload;
@@ -71,12 +74,27 @@ public final class EducationService {
                 ? nextSteps(record, projected, career.profession(), ProfessionEligibility.isGoblin(player),
                 education.sitting().orElse(null), now, OWLExaminationHandler.careerOpen(record, career))
                 : List.of();
+        next = withPathLead(next, ApprenticePathService.current(player));
 
         return new EducationView(enabled, record.sittings(), record.newtSittings(),
                 ExamRules.nextSittingTick(Qualification.OWL, record), ExamRules.nextSittingTick(Qualification.NEWT, record),
                 enabled && education.sitting().isEmpty() && ExamRules.maySit(Qualification.OWL, record, now),
                 enabled && education.sitting().isEmpty() && ExamRules.maySit(Qualification.NEWT, record, now),
                 OWLExaminationHandler.careerOpen(record, career), subjects, sitting, results, next);
+    }
+
+    /**
+     * A wizard still on the Apprentice's Path is told its next step first: "Sit your O.W.L.s" is no advice to someone
+     * who has no wand yet. Pure over its arguments; the list stays within {@link #MAX_NEXT}.
+     */
+    public static List<Component> withPathLead(List<Component> next, @Nullable PathStep current) {
+        if (current == null) {
+            return next;
+        }
+        List<Component> out = new ArrayList<>(next.size() + 1);
+        out.add(Component.translatable("education.next.path", PathText.title(current), PathText.hint(current)));
+        out.addAll(next);
+        return out.size() > MAX_NEXT ? List.copyOf(out.subList(0, MAX_NEXT)) : List.copyOf(out);
     }
 
     private static int[] ladder(OWLGradeRules.@Nullable Ladder ladder) {

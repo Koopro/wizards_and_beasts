@@ -545,6 +545,11 @@ public final class ClientPayloadHandlers {
         context.enqueueWork(() -> at.koopro.wizardsandbeasts.client.education.ClientEducationState.set(payload.view()));
     }
 
+    public static void handleApprenticePath(at.koopro.wizardsandbeasts.network.journey.ApprenticePathS2CPayload payload,
+                                            IPayloadContext context) {
+        context.enqueueWork(() -> at.koopro.wizardsandbeasts.client.journey.ClientApprenticePathState.set(payload));
+    }
+
     public static void handleCareerView(at.koopro.wizardsandbeasts.network.career.CareerViewS2CPayload payload,
                                         IPayloadContext context) {
         context.enqueueWork(() -> at.koopro.wizardsandbeasts.client.career.ClientCareerState.set(payload.view()));

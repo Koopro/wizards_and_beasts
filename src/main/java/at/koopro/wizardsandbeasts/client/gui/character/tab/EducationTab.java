@@ -88,11 +88,14 @@ public final class EducationTab implements CharacterTab {
         if (!view.enabled()) {
             cy = paragraph(g, font, cx, cy, innerW, Component.translatable(KEY + "off"), COLOR_MUTED);
         } else {
+            // What to do next leads: it was last, below every subject, where a new wizard never scrolled to it.
+            if (!view.next().isEmpty()) {
+                cy = next(g, font, cx, cy, innerW, view) + 4;
+            }
             cy = summary(g, font, cx, cy, innerW, view);
             cy = subjects(g, font, cx, cy + 4, innerW, view);
             cy = results(g, font, cx, cy + 4, innerW, view);
             cy = career(g, font, cx, cy + 4, innerW);
-            cy = next(g, font, cx, cy + 4, innerW, view);
         }
 
         g.disableScissor();
