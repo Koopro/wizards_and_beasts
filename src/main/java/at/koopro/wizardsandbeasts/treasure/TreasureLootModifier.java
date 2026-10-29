@@ -5,6 +5,7 @@ import at.koopro.wizardsandbeasts.module.ModuleManager;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -12,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
 import net.neoforged.neoforge.common.loot.LootModifier;
 import org.jspecify.annotations.NullMarked;
@@ -45,6 +47,16 @@ public class TreasureLootModifier extends LootModifier {
         List<Identifier> sites = TreasureSites.forLootTable(context.getQueriedLootTableId());
         if (sites.isEmpty()) {
             return generatedLoot;
+        }
+        // Whatever the roll, this chest's site has now given up its treasure: no later chart is drawn to it.
+        Vec3 origin = context.getOptionalParameter(LootContextParams.ORIGIN);
+        if (origin != null) {
+            for (Identifier siteId : sites) {
+                TreasureSite site = TreasureSites.get(siteId);
+                if (site != null) {
+                    TreasureCharts.spendSiteAt(context.getLevel(), BlockPos.containing(origin), site);
+                }
+            }
         }
         Entity opener = context.getOptionalParameter(LootContextParams.THIS_ENTITY);
         Set<Identifier> expeditions = opener instanceof ServerPlayer player ? Expeditions.targets(player) : Set.of();

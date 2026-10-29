@@ -43,7 +43,10 @@ public final class Expeditions {
         Set<Identifier> sites = new HashSet<>();
         PlayerLocationStanding standing = player.getData(ModAttachments.LOCATION_STANDING.get());
         for (Map.Entry<Identifier, LocationDefinition> entry : Locations.all().entrySet()) {
-            collect(entry.getValue().standing(), standing.at(entry.getKey().toString()), sites);
+            // A location whose module is off offers no expedition, so a contract held there raises no odds.
+            if (Locations.open(entry.getKey()) != null) {
+                collect(entry.getValue().standing(), standing.at(entry.getKey().toString()), sites);
+            }
         }
         Profession profession = player.getData(ModAttachments.PROFESSION_DATA.get()).profession();
         CareerTrack career = CareerTracks.get(profession);
