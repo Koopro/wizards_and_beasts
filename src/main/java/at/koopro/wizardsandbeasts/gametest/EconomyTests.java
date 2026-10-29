@@ -45,7 +45,9 @@ final class EconomyTests {
     private EconomyTests() {}
 
     static void contribute(WizardTestSupport.Registrar tests) {
-        tests.add("economy_refused_charge_leaves_vault_identical",
+        // Alone: it sets static Config prices, and a neighbour's admin setting change reloads Config back to the
+        // shipped 2G endorsement fee mid-scenario (seen 2026-10-29: "The Ministry's fee of 2G was drawn").
+        tests.addAlone("economy_refused_charge_leaves_vault_identical",
                 "economy: a short vault keeps its exact coins through the wand price, wand care and an endorsement",
                 EconomyTests::refusedChargesLeaveTheVault);
         tests.add("economy_wand_care",
