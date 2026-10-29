@@ -4,6 +4,50 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### The Apprentice's Path (2026-10-29)
+
+- **Added:** the Apprentice's Path. It guides a new witch or wizard through their first days, from the ceremony to
+  the O.W.L.s. It has six steps, which can be done in any order:
+  1. The ceremony.
+  2. A wand of your own.
+  3. First light (cast a spell).
+  4. A spell of your own (found and traced, or a web lesson).
+  5. Practice (one spell to Proficient).
+  6. Field study (a creature's journal page to Observed).
+- Each step pays once, and each reward is the tool for the next step:
+  - Ministry Handbook, plus recipe unlocks for the Wandmaker's Bench, wand blank, handbook, blank spellbook,
+    duelling dummy and pewter cauldron;
+  - Lumos on the spell wheel;
+  - two Sickles;
+  - a skill point and a duelling dummy;
+  - a Galleon;
+  - five Sickles.
+- A toast and a chat line name the next step, with your own key bindings. The toast names only what was actually
+  paid: with the handbook or the skill web switched off, that part is neither given nor promised.
+- The character sheet's Identity page opens with "Your first days" while the path is open: how far along, and the
+  step to take now with how to take it. Hover it for the whole list.
+- Education's "what next" list now leads its page, and leads with the current step.
+- A player who played before the path existed is not paid for the past: at their first login the steps they already
+  met are marked done and the arrival recipes unlocked, with one chat line saying so.
+- A reward is recorded before it is handed over and struck once paid; one that fails to arrive is paid at the next
+  login, never twice.
+- A goblin or another wandless heritage walks only the ceremony and field study.
+- `/wandb player path` repeats the next step. `/wandb player path off` and `on` hide and restore it; steps already
+  done are kept.
+- **Fixed:** the heritage ceremony is no longer opened at login on a server with heritage switched off, and it is no
+  longer opened twice.
+- **Fixed:** a player killed while the ceremony was open respawned without a heritage, with no wand hand and no
+  Lumos, until they logged in again. A respawn or a dimension change now reopens the ceremony.
+
+### Expedition charts (2026-10-29)
+
+- **Fixed:** a second Gringotts or Curse-Breaker expedition was charted to the same tomb as the first, whose chests
+  were already empty, so its treasure could never be found. A chart now points to the nearest site of its kind whose
+  treasure has not been taken. A site is taken once any of its treasure chests has been opened, by anyone.
+- When every site within reach has been taken, the goblins say they know of none, and no chart is handed over.
+- Charts already handed out keep their target.
+- **Fixed:** a contract held at a location whose module is switched off no longer raises treasure odds.
+
 ### Heritage conditions (2026-10-29)
 
 - **Fixed:** a werewolf's bite no longer replaces an Obscurus. The curse finds no room, and the bitten host is told so.

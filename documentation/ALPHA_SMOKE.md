@@ -338,6 +338,34 @@ Manual. You need a survival world and two players: A (an operator) and B.
    The character sheet shows "Unleashed path - mastery 0 / 100". In dark form, Grasp is refused with "needs 20
    mastery".
 
+## The Apprentice's Path (2026-10-29, `feat/apprentice-path`)
+
+Manual. Start a new survival world with a village nearby, then open the character sheet with C after each step.
+
+1. Choose Wizardkind at the ceremony. You get a "Your path: The ceremony" toast and a Ministry Handbook in your
+   pack. The recipe book lists the Wandmaker's Bench, and a chat line names the next step. The Identity page shows
+   "Your first days" with the wand step marked Now.
+2. Craft the bench and place it beside a jobless villager. Run the wand trial and take a wand. The toast says Lumos
+   is on your spell wheel, and it is selected.
+3. Hold right-click with the wand and let go. You get the First light toast and two Sickles.
+4. Read a village spellbook and pass its trace, or unlock a web lesson and trace it. You get one skill point and a
+   duelling dummy.
+5. Watch a bowtruckle or a mooncalf calmly until its page reaches Observed. You get five Sickles.
+6. Run `/wandb player path off`. The section disappears from the sheet. Run `/wandb player path on` and it comes
+   back, with nothing paid twice.
+7. In a fresh world, die while the ceremony is open (for example, stand in lava). After you respawn, the ceremony
+   opens again.
+
+## Expedition charts (2026-10-29, `feat/apprentice-path`)
+
+Manual. Survival world with the Gringotts module on (the default), standing at a Gringotts teller.
+
+1. Accept a desert expedition. The chart's X marks the nearest desert pyramid. Go there and open one of its chests.
+2. Abandon or finish the contract, wait out the board cooldown, then accept a desert expedition again. The new chart's
+   X marks a different, farther pyramid, not the one you emptied.
+3. Run `/locate structure minecraft:desert_pyramid` to confirm the first site is still the nearest; the chart
+   skipped it.
+
 ## Brewing (2026-10-23, `feat/brewing`)
 
 Manual. You need a survival world, a pewter and a brass cauldron on a heat source, and two players for steps 7-8.
