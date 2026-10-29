@@ -390,6 +390,20 @@ public final class WizardTestSupport {
         };
     }
 
+    /**
+     * Puts a leased module back on if something wiped the cache under the lease. {@code ModuleStateService} replaces the
+     * whole module cache whenever any scenario changes any module through it, which reverts every
+     * {@link at.koopro.wizardsandbeasts.module.ModuleManager#overrideCached} write, leases included. A scenario that needs a module across many ticks calls
+     * this on each of them; a one-tick scenario never needs it.
+     */
+    public static void keepLeased(at.koopro.wizardsandbeasts.module.Module module) {
+        if (MODULE_LEASES.getOrDefault(module, 0) > 0
+                && !at.koopro.wizardsandbeasts.module.ModuleManager.isEnabled(module)) {
+            at.koopro.wizardsandbeasts.module.ModuleManager.overrideCached(module,
+                    at.koopro.wizardsandbeasts.module.ModuleState.ENABLED);
+        }
+    }
+
     // ── small conveniences ──────────────────────────────────────────────────────────────────────
 
     public static PlayerSpellData spellData(ServerPlayer player) {

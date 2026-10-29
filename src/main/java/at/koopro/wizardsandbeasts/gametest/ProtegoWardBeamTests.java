@@ -2,8 +2,6 @@ package at.koopro.wizardsandbeasts.gametest;
 
 import at.koopro.wizardsandbeasts.entity.spell.ProtegoShieldEntity;
 import at.koopro.wizardsandbeasts.module.Module;
-import at.koopro.wizardsandbeasts.module.ModuleState;
-import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.spell.data.PlayerSpellData;
 import at.koopro.wizardsandbeasts.spell.protego.ProtegoTier;
@@ -65,7 +63,10 @@ public final class ProtegoWardBeamTests {
 
     private static void absorbsACrucioBeam(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
-        ModuleState darkArtsBefore = swapDarkArts(ModuleState.ENABLED);
+        // A lease shared with the other Dark Arts scenarios, re-applied every tick of the hold (keepLeased): a direct
+        // cache swap was wiped whenever a scenario running alongside changed any module through the service, and the
+        // beam stopped silently mid-hold.
+        Runnable darkArts = WizardTestSupport.leaseModule(Module.DARK_ARTS);
 
         Vec3 casterAt = new Vec3(1.5, 2.0, 1.5);
         Vec3 victimAt = new Vec3(1.5, 2.0, 3.5);
@@ -80,6 +81,8 @@ public final class ProtegoWardBeamTests {
                 .thenExecute(() -> caster.gameMode.useItem(caster, level, caster.getMainHandItem(), InteractionHand.MAIN_HAND))
                 // A mock player is never ticked by the server, so the hold has to be driven by hand.
                 .thenExecuteFor(CRUCIO_HOLD_TICKS, () -> {
+                    // Another scenario changing any module through the service wipes the cache, lease and all.
+                    WizardTestSupport.keepLeased(Module.DARK_ARTS);
                     aimAt(caster, victim);
                     caster.doTick();
                 })
@@ -93,7 +96,7 @@ public final class ProtegoWardBeamTests {
                 })
                 .thenExecute(() -> {
                     caster.releaseUsingItem();
-                    swapDarkArts(darkArtsBefore);
+                    darkArts.run();
                     cleanUp(helper, victim, shield);
                     retire(helper, caster);
                 })
@@ -261,21 +264,6 @@ public final class ProtegoWardBeamTests {
         PlayerSpellData data = player.getData(ModAttachments.SPELL_DATA.get());
         data.learnSpell(spellId);
         data.setSuccessfulHits(spellId, 10_000);
-    }
-
-    /**
-     * Dark magic ships disabled, and a disabled module makes the whole Crucio channel a no-op.
-     *
-     * <p>Written to the module <em>cache</em> rather than through {@code ModuleStateService}: the
-     * service is the operator path, and it reloads every datapack so recipe conditions can be
-     * re-evaluated. In a game-test run the scenarios share one server and overlap, so that reload
-     * swapped the creature-ability definitions out from under an unrelated Occamy test and failed it.
-     * The cache write touches nothing else and is put back when this scenario ends.
-     */
-    private static ModuleState swapDarkArts(ModuleState state) {
-        ModuleState before = ModuleManager.state(Module.DARK_ARTS);
-        ModuleManager.overrideCached(Module.DARK_ARTS, state);
-        return before;
     }
 
     /**
