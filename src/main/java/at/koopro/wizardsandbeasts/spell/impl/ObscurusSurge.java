@@ -1,6 +1,5 @@
 package at.koopro.wizardsandbeasts.spell.impl;
 
-import at.koopro.wizardsandbeasts.spell.core.Proficiency;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 import at.koopro.wizardsandbeasts.spell.lib.SpellHelper;
@@ -35,8 +34,9 @@ public class ObscurusSurge extends Spell {
 
     @Override
     protected SpellRequirement buildRequirement() {
-        // F2: crucio is a JSON spell now — id-string requirement (resolved lazily at isMet time).
-        return SpellRequirement.proficiency("crucio", Proficiency.PROFICIENT);
+        // Not Crucio: an Obscurial cannot cast, so a spell proficiency was a lock with no key. The Obscurus asks
+        // mastery instead (ObscurialMastery.required, enforced in ObscurialServerLogic.useAbility).
+        return SpellRequirement.none();
     }
 
     @Override

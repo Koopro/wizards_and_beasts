@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.event.heritage;
 
+import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialMastery;
+import net.minecraft.ChatFormatting;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.form.TransitionManager;
@@ -239,7 +241,8 @@ public final class ObscurialHeritageHandler {
         long readyTick = ObscurialValueCodec.parseLong(data.getFlag(FLAG_AUTO_TRANSFORM_READY_TICK), 0L);
         if (now < readyTick) return;
 
-        boolean lowHpTrigger = hpRatio <= AUTO_TRANSFORM_HP_THRESHOLD;
+        boolean lowHpTrigger = hpRatio <= ObscurialMastery.forcedBreakThreshold(ObscurialResourceManager.getPath(player),
+                ObscurialResourceManager.getMastery(player), AUTO_TRANSFORM_HP_THRESHOLD);
         boolean volatileStressTrigger = ObscurialRules.getStressTier(ObscurialResourceManager.getStress(player))
                 == ObscurialRules.StressTier.VOLATILE
                 && ObscurialRules.getLoreControlTier(control)
@@ -251,7 +254,8 @@ public final class ObscurialHeritageHandler {
         if (TransitionManager.startTransition(player, "obscurial_dark")) {
             data.setFlag(FLAG_AUTO_TRANSFORM_READY_TICK, String.valueOf(now + AUTO_TRANSFORM_COOLDOWN_TICKS));
             data.setFlag(FLAG_FORCED_DARK_UNTIL_TICK, String.valueOf(now + ObscurialCombatRules.getForcedDarkFormDurationTicks()));
-            player.displayClientMessage(Component.literal("\u00A75Your obscurus breaks loose under emotional strain."), true);
+            player.displayClientMessage(Component.translatable("obscurial.wizards_and_beasts.breaks_loose")
+                    .withStyle(ChatFormatting.DARK_PURPLE), true);
         }
     }
 
@@ -259,8 +263,12 @@ public final class ObscurialHeritageHandler {
         long gameTime = level.getGameTime();
         float stability = ObscurialResourceManager.getDrain(player);
         float charge = ObscurialResourceManager.getCharge(player);
+        ObscurialMastery.Path path = ObscurialResourceManager.getPath(player);
+        float mastery = ObscurialResourceManager.getMastery(player);
+        float stressScale = ObscurialMastery.stressGainMultiplier(path);
         if (ObscurialRules.isDarkForm(data)) {
-            stability -= ObscurialRules.computeDarkDrainPerTick(player, level);
+            stability -= ObscurialRules.computeDarkDrainPerTick(player, level)
+                    * ObscurialMastery.darkDrainMultiplier(path, mastery);
             charge -= ObscurialRules.computeDarkChargeCostPerTick(player, level);
         } else {
             stability += ObscurialRules.computeHumanRegenPerTick(player, level);
@@ -285,23 +293,29 @@ public final class ObscurialHeritageHandler {
                 data.setFlag(FLAG_RAGE_ACTIVE, "false");
             }
             if (nearbyHostiles > 0) {
-                ObscurialResourceManager.addStress(player, Math.min(1.3f, nearbyHostiles * 0.10f));
+                ObscurialResourceManager.addStress(player, Math.min(1.3f, nearbyHostiles * 0.10f) * stressScale);
             }
             if (ObscurialRules.isDaylightStrained(level, player)) {
-                ObscurialResourceManager.addStress(player, 0.10f);
+                ObscurialResourceManager.addStress(player, 0.10f * stressScale);
             }
             if (ObscurialRules.getStressTier(ObscurialResourceManager.getStress(player)) == ObscurialRules.StressTier.VOLATILE) {
                 long lastVolatileWarn = ObscurialValueCodec.parseLong(data.getFlag(FLAG_LAST_VOLATILE_WARN_TICK), 0L);
                 if (gameTime - lastVolatileWarn >= 40L) {
                     data.setFlag(FLAG_LAST_VOLATILE_WARN_TICK, String.valueOf(gameTime));
-                    player.displayClientMessage(Component.literal("\u00A74Volatile obscurus strain is accelerating collapse."), true);
+                    player.displayClientMessage(Component.translatable("obscurial.wizards_and_beasts.volatile")
+                            .withStyle(ChatFormatting.DARK_RED), true);
                 }
             }
         } else {
             data.setFlag(FLAG_RAGE_ACTIVE, "false");
-            float stressGain = ObscurialRules.computeStressGainPerTick(player, level, nearbyHostiles);
+            float stressGain = ObscurialRules.computeStressGainPerTick(player, level, nearbyHostiles) * stressScale;
             float stressRecovery = ObscurialRules.computeStressRecoveryPerTick(player, level, nearbyHostiles > 0);
             ObscurialResourceManager.setStress(player, ObscurialResourceManager.getStress(player) + stressGain - stressRecovery);
+            // Holding human form while agitated is the discipline mastery is made of.
+            if (ObscurialRules.getStressTier(ObscurialResourceManager.getStress(player)) != ObscurialRules.StressTier.CALM
+                    && !TransitionManager.isTransitioning(player.getUUID())) {
+                ObscurialResourceManager.addMastery(player, ObscurialMastery.HELD_GAIN_PER_TICK);
+            }
         }
 
         if (updatedStability <= ObscurialResourceManager.getLowDrainWarning()
@@ -309,7 +323,8 @@ public final class ObscurialHeritageHandler {
             long lastWarn = ObscurialValueCodec.parseLong(data.getFlag(FLAG_LAST_DRAIN_WARN_TICK), 0L);
             if (gameTime - lastWarn >= 40L) {
                 data.setFlag(FLAG_LAST_DRAIN_WARN_TICK, String.valueOf(gameTime));
-                player.displayClientMessage(Component.literal("\u00A75Obscurus instability critical: collapse is imminent."), true);
+                player.displayClientMessage(Component.translatable("obscurial.wizards_and_beasts.critical")
+                        .withStyle(ChatFormatting.DARK_PURPLE), true);
             }
         }
 
@@ -317,16 +332,7 @@ public final class ObscurialHeritageHandler {
                 && (updatedStability <= 0f || updatedCharge <= 0f)
                 && !TransitionManager.isTransitioning(player.getUUID())) {
             if (TransitionManager.startTransition(player, "obscurial_human")) {
-                long lockoutUntil = gameTime + ObscurialResourceManager.getDefaultLockoutTicks();
-                ObscurialResourceManager.setLockoutUntilTick(player, lockoutUntil);
-                player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS,
-                        ObscurialCombatRules.getCollapseWeaknessTicks(),
-                        ObscurialCombatRules.getCollapseWeaknessAmplifier(),
-                        false, true, true));
-                player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS,
-                        ObscurialCombatRules.getCollapseSlownessTicks(),
-                        ObscurialCombatRules.getCollapseSlownessAmplifier(),
-                        false, true, true));
+                collapse(player, data, level, path, mastery);
                 data.setFlag(FLAG_COLLAPSE_CAST_INSTABILITY_UNTIL,
                         String.valueOf(gameTime + ObscurialCombatRules.getCollapseCastInstabilityTicks()));
                 at.koopro.wizardsandbeasts.feedback.PlayerFeedback.toast(player,
@@ -352,19 +358,53 @@ public final class ObscurialHeritageHandler {
             return;
         }
         player.hurt(level.damageSources().magic(), ObscurialRules.getDaylightVulnerabilityDamage());
-        player.displayClientMessage(Component.literal("\u00A7eDaylight scorches your obscurus and drives it unstable."), true);
+        player.displayClientMessage(Component.translatable("obscurial.wizards_and_beasts.daylight")
+                .withStyle(ChatFormatting.YELLOW), true);
     }
 
     private static void enforceForcedDarkFormDuration(ServerPlayer player, PlayerHeritageData data, ServerLevel level) {
-        if (!ObscurialRules.isDarkForm(data)) return;
+        if (!ObscurialRules.isDarkForm(data)) {
+            // A forced break that ended any other way (a collapse, a cure of the form) must not outlive it: a stale
+            // deadline in the past threw the next voluntary dark form straight back out.
+            if (data.getFlag(FLAG_FORCED_DARK_UNTIL_TICK) != null && !TransitionManager.isTransitioning(player.getUUID())) {
+                data.removeFlag(FLAG_FORCED_DARK_UNTIL_TICK);
+            }
+            return;
+        }
         long forcedUntil = ObscurialValueCodec.parseLong(data.getFlag(FLAG_FORCED_DARK_UNTIL_TICK), 0L);
         if (forcedUntil <= 0L) return;
         if (level.getGameTime() < forcedUntil) return;
         if (TransitionManager.isTransitioning(player.getUUID())) return;
         if (TransitionManager.startTransition(player, "obscurial_human")) {
             data.removeFlag(FLAG_FORCED_DARK_UNTIL_TICK);
-            player.displayClientMessage(Component.literal("\u00A75You force the obscurus back under control."), true);
+            player.displayClientMessage(Component.translatable("obscurial.wizards_and_beasts.forced_back")
+                    .withStyle(ChatFormatting.DARK_PURPLE), true);
         }
+    }
+
+    /**
+     * What a collapse costs. The lockout and the weakness and slowness scale with the path ({@link ObscurialMastery}):
+     * shortened by a controlled host's mastery, lengthened and made to wound on the unleashed path. Mastery is lost
+     * either way.
+     */
+    public static void collapse(ServerPlayer player, PlayerHeritageData data, ServerLevel level,
+                         ObscurialMastery.Path path, float mastery) {
+        long gameTime = level.getGameTime();
+        float scale = ObscurialMastery.collapseMultiplier(path, mastery);
+        ObscurialResourceManager.setLockoutUntilTick(player,
+                gameTime + Math.round(ObscurialResourceManager.getDefaultLockoutTicks() * scale));
+        player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS,
+                Math.max(1, Math.round(ObscurialCombatRules.getCollapseWeaknessTicks() * scale)),
+                ObscurialCombatRules.getCollapseWeaknessAmplifier(), false, true, true));
+        player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS,
+                Math.max(1, Math.round(ObscurialCombatRules.getCollapseSlownessTicks() * scale)),
+                ObscurialCombatRules.getCollapseSlownessAmplifier(), false, true, true));
+        float wound = ObscurialMastery.collapseDamage(path);
+        if (wound > 0f) {
+            player.hurtServer(level, level.damageSources().magic(), wound);
+        }
+        ObscurialResourceManager.addMastery(player, -ObscurialMastery.COLLAPSE_LOSS);
+        data.removeFlag(FLAG_FORCED_DARK_UNTIL_TICK);
     }
 
     private static int countNearbyHostiles(ServerPlayer player, ServerLevel level) {

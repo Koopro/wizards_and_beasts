@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.heritage.obscurial;
 
-import at.koopro.wizardsandbeasts.Config;
+import net.minecraft.ChatFormatting;
 import at.koopro.wizardsandbeasts.form.TransitionManager;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.network.PacketCodecUtils;
@@ -70,19 +70,22 @@ public final class ObscurialServerLogic {
         long gameTime = player.level().getGameTime();
         if (ObscurialResourceManager.isTransformLockedOut(player, gameTime)) {
             long remainSec = Math.max(1L, (ObscurialResourceManager.getLockoutUntilTick(player) - gameTime) / 20L);
-            player.displayClientMessage(Component.literal("§4Obscurus exhausted. You can re-form in " + remainSec + "s."), true);
+            player.displayClientMessage(Component.translatable("obscurial.wizards_and_beasts.exhausted", remainSec)
+                    .withStyle(ChatFormatting.DARK_RED), true);
             return;
         }
 
         String current = data.getActiveFormId();
         String target = "obscurial_dark".equals(current) ? "obscurial_human" : "obscurial_dark";
         if ("obscurial_dark".equals(target) && ObscurialResourceManager.getDrain(player) <= 5.0f) {
-            player.displayClientMessage(Component.literal("§4Not enough control to safely summon obscurus form."), true);
+            player.displayClientMessage(Component.translatable("obscurial.wizards_and_beasts.too_little_control")
+                    .withStyle(ChatFormatting.DARK_RED), true);
             return;
         }
         boolean started = TransitionManager.startTransition(player, target);
         if (!started) {
-            player.displayClientMessage(Component.literal("§cTransformation failed."), true);
+            player.displayClientMessage(Component.translatable("obscurial.wizards_and_beasts.change_failed")
+                    .withStyle(ChatFormatting.RED), true);
         }
     }
 
@@ -101,17 +104,25 @@ public final class ObscurialServerLogic {
         long cooldownUntil = ObscurialResourceManager.getStressVentCooldownUntil(player);
         if (now < cooldownUntil) {
             long remain = Math.max(1L, (cooldownUntil - now) / 20L);
-            player.displayClientMessage(Component.literal("§5Stress Vent recovering: " + remain + "s"), true);
+            player.displayClientMessage(Component.translatable("obscurial.wizards_and_beasts.vent_recovering", remain)
+                    .withStyle(ChatFormatting.DARK_PURPLE), true);
             return;
         }
 
+        // Discipline, not relief: only a vent taken under real strain teaches anything.
+        boolean earned = ObscurialResourceManager.getStress(player) >= ObscurialMastery.VENT_MIN_STRESS;
         ObscurialResourceManager.reduceStress(player, ObscurialResourceManager.getStressVentRecovery());
+        if (earned) {
+            ObscurialResourceManager.addMastery(player, ObscurialMastery.VENT_GAIN);
+        }
         ObscurialResourceManager.setStressVentCooldownUntil(player, now + ObscurialResourceManager.getStressVentCooldownTicks());
         player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS,
                 ObscurialResourceManager.getStressVentDrawbackTicks(), 0, false, true, true));
         player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS,
                 ObscurialResourceManager.getStressVentDrawbackTicks(), 0, false, true, true));
-        player.displayClientMessage(Component.literal("§dYou vent obscurus strain, but feel drained."), true);
+        player.displayClientMessage(Component.translatable(earned
+                ? "obscurial.wizards_and_beasts.vented_mastered" : "obscurial.wizards_and_beasts.vented")
+                .withStyle(ChatFormatting.LIGHT_PURPLE), true);
         HeritageDataSyncS2CPayload.syncToPlayer(player, false);
     }
 
@@ -157,9 +168,12 @@ public final class ObscurialServerLogic {
                     ability.displayName(), String.format("%.1f", Math.max(0f, sec))), true);
             return;
         }
-        if (Config.enforceSpellRequirements && !spell.getRequirement().isMet(player, spellData)) {
+        // The Obscurus's own requirement, always enforced: mastery, not a spell the host could never learn.
+        float needed = ObscurialMastery.required(ability);
+        if (ObscurialResourceManager.getMastery(player) < needed) {
             spellData.incrementRejectReason(SpellRejectCodes.ABILITY_REQUIREMENTS_UNMET);
-            player.displayClientMessage(Component.literal("§c").append(spell.getRequirement().describe()), true);
+            player.displayClientMessage(Component.translatable("obscurial.wizards_and_beasts.needs_mastery",
+                    ability.displayName(), Math.round(needed)).withStyle(ChatFormatting.RED), true);
             return;
         }
 
@@ -184,7 +198,8 @@ public final class ObscurialServerLogic {
                 spellData.getSuccessfulHits(spell.getId()),
                 spellData.getGlobalCooldownEndTick());
         if (ObscurialRules.getStressTier(ObscurialResourceManager.getStress(player)) == ObscurialRules.StressTier.VOLATILE) {
-            player.displayClientMessage(Component.literal("§5Volatile stress is prolonging your ability cooldowns."), true);
+            player.displayClientMessage(Component.translatable("obscurial.wizards_and_beasts.volatile_cooldowns")
+                    .withStyle(ChatFormatting.DARK_PURPLE), true);
         }
     }
 }

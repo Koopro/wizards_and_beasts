@@ -44,11 +44,12 @@ public final class ObscurialDarkPanelRenderer {
         int panelH = 58;
         graphics.fill(x, y, x + panelW, y + panelH, ObscurialHudTheme.PANEL_BG_SOFT);
         graphics.drawString(mc.font, ObscurialHudTheme.text("abilities"), x + 6, y + 6, ObscurialHudTheme.TITLE, false);
-        renderAbilityLine(graphics, mc, x + 6, y + 20, "N", ObscurialAbility.SURGE);
-        renderAbilityLine(graphics, mc, x + 6, y + 34, "M", ObscurialAbility.GRASP);
+        // No key labels: Surge and Grasp live on the ability wheel now, and N/M are not bound to anything.
+        renderAbilityLine(graphics, mc, x + 6, y + 20, ObscurialAbility.SURGE);
+        renderAbilityLine(graphics, mc, x + 6, y + 34, ObscurialAbility.GRASP);
     }
 
-    private static void renderAbilityLine(GuiGraphics graphics, Minecraft mc, int x, int y, String key, ObscurialAbility ability) {
+    private static void renderAbilityLine(GuiGraphics graphics, Minecraft mc, int x, int y, ObscurialAbility ability) {
         var spellData = ClientSpellDataState.get();
         long now = mc.level != null ? mc.level.getGameTime() : 0L;
         boolean onCooldown = spellData.isOnCooldown(ability.spellId(), now);
@@ -62,7 +63,7 @@ public final class ObscurialDarkPanelRenderer {
             status = ObscurialHudTheme.text("ready");
             color = ObscurialHudTheme.POSITIVE;
         }
-        graphics.drawString(mc.font, "[" + key + "] " + ObscurialHudTheme.text("ability." + ability.spellId()), x, y,
+        graphics.drawString(mc.font, ObscurialHudTheme.text("ability." + ability.spellId()), x, y,
                 ObscurialHudTheme.LABEL, false);
         graphics.drawString(mc.font, status, x + 76, y, color, false);
     }

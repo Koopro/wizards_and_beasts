@@ -23,6 +23,19 @@ All notable changes to this project are documented in this file.
   - The sire gives up 35 blood. A sire too thirsty to spare it cannot offer.
   - A turned Veela's shape is the bat, not the harpy, and she keeps her allure.
 - **Changed:** blood hunger and sunlight now follow the character's traits, not only the Vampire people.
+- **Added:** Obscurus mastery, a 0-100 score shown on the character sheet with the host's path.
+  - **Earned** by venting while agitated or worse, and by holding human form under strain.
+  - **Lost** in a collapse.
+  - **Path:** the origin chosen when the Obscurus came about, never changed afterwards.
+  - **Suppressed (controlled path):** the dark form lasts longer, the Obscurus is harder to tear loose, and a
+    collapse is shorter.
+  - **Unleashed path:** Surge and Grasp cost less and Grasp wounds what it pulls. In exchange, strain builds 25%
+    faster, and a collapse lasts longer and hurts.
+- **Fixed:** Surge and Grasp no longer require Cruciatus or Imperius proficiency, which an Obscurial can never learn.
+  Grasp needs 20 mastery instead.
+- **Fixed:** after a forced dark form ended in a collapse, the next dark form you chose snapped back at once.
+- **Fixed:** the dark-form HUD no longer shows the unbound N and M keys. The Obscurus's messages and the Surge and
+  Grasp descriptions are now translatable.
 
 ### Learning spells (2026-10-23)
 

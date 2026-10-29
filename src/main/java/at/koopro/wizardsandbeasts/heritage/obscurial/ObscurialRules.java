@@ -54,7 +54,6 @@ public final class ObscurialRules {
     private static final int DAYLIGHT_VULN_INTERVAL_TICKS = 50;
 
     private static final Set<String> DARK_FORM_ALLOWED_IDS = Set.of(
-            "obscurus_blast",
             "obscurus_surge",
             "obscurus_grasp"
     );

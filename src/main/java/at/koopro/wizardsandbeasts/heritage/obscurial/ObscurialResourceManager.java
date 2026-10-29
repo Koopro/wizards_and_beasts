@@ -107,6 +107,28 @@ public final class ObscurialResourceManager {
         return STRESS_VENT_DRAWBACK_TICKS;
     }
 
+    /** How far this host has learned to live with it (see {@link ObscurialMastery}). */
+    public static float getMastery(ServerPlayer player) {
+        PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
+        return ObscurialMastery.clamp(ObscurialValueCodec.parseFloat(data.getFlag(ObscurialMastery.FLAG), 0f));
+    }
+
+    public static void setMastery(ServerPlayer player, float value) {
+        PlayerHeritageData data = player.getData(ModAttachments.HERITAGE_DATA.get());
+        data.setFlag(ObscurialMastery.FLAG, String.valueOf(ObscurialMastery.clamp(value)));
+    }
+
+    public static void addMastery(ServerPlayer player, float delta) {
+        setMastery(player, getMastery(player) + delta);
+    }
+
+    /** The host's path, from the origin of their Obscurus; CONTROLLED when there is none, the harmless default. */
+    public static ObscurialMastery.Path getPath(ServerPlayer player) {
+        ObscurialMastery.Path path = ObscurialMastery.path(
+                player.getData(ModAttachments.HERITAGE_DATA.get()).getCondition());
+        return path == null ? ObscurialMastery.Path.CONTROLLED : path;
+    }
+
     static float clamp(float value) {
         return ObscurialValueCodec.clampPercent(value, MAX_DRAIN);
     }

@@ -322,6 +322,22 @@ Manual. Survival world, Bestiary and Magizoology on (default).
 7. Run `/wandb admin module set ministry enabled` and stand near a goblin teller. Kill a unicorn: a Poaching toast,
    and the offence is on your record. Then bond a thestral to 80: an "Atoned" toast, and unicorns let you near.
 
+## Heritage 2.0 (2026-10-29, `feat/heritage-2`)
+
+Manual. You need a survival world and two players: A (an operator) and B.
+
+1. Run `/wandb player heritage condition set B suppressed`, then `/wandb player heritage condition set B bitten`.
+   The second command is refused with a sentence, and B still carries the Obscurus.
+2. Run `/wandb player heritage condition clear B`, then `/wandb player heritage set A vampire born_vampire`.
+3. A crouches and right-clicks B with an empty hand. B reads "... offers you their blood". B crouches and
+   right-clicks A within 30 seconds. B is told the blood takes them, and A's blood bar drops.
+4. B eats bread: it does nothing. B stands in the sun at noon: B burns. B's ability wheel shows the bat form.
+5. Run `/wandb player heritage condition clear B`, then `/wandb player heritage set B goblin common`. Repeat step 3:
+   both players are told a Goblin cannot be turned, and nothing changes.
+6. Run `/wandb player heritage set B wizardkind half_blood` and `/wandb player heritage condition set B unleashed`.
+   The character sheet shows "Unleashed path - mastery 0 / 100". In dark form, Grasp is refused with "needs 20
+   mastery".
+
 ## Brewing (2026-10-23, `feat/brewing`)
 
 Manual. You need a survival world, a pewter and a brass cauldron on a heat source, and two players for steps 7-8.

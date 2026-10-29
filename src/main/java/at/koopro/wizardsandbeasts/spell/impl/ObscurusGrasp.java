@@ -1,12 +1,11 @@
 package at.koopro.wizardsandbeasts.spell.impl;
 
-import at.koopro.wizardsandbeasts.spell.core.Proficiency;
+import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialMastery;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 import at.koopro.wizardsandbeasts.spell.core.SpellProperties;
 import at.koopro.wizardsandbeasts.spell.core.SpellRequirement;
 import at.koopro.wizardsandbeasts.spell.lib.SpellHelper;
-import at.koopro.wizardsandbeasts.spell.core.Spells;
 import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialCombatRules;
 import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialResourceManager;
 import net.minecraft.core.particles.ParticleTypes;
@@ -44,7 +43,9 @@ public class ObscurusGrasp extends Spell {
 
     @Override
     protected SpellRequirement buildRequirement() {
-        return SpellRequirement.proficiency(Spells.IMPERIO, Proficiency.PROFICIENT);
+        // Not Imperio: an Obscurial cannot cast, so a spell proficiency was a lock with no key. Grasp asks mastery
+        // instead (ObscurialMastery.GRASP_MASTERY, enforced in ObscurialServerLogic.useAbility).
+        return SpellRequirement.none();
     }
 
     @Override
@@ -55,6 +56,9 @@ public class ObscurusGrasp extends Spell {
         List<Entity> entities = level.getEntities(caster, box,
                 entity -> entity instanceof LivingEntity living && living.isAlive() && entity != caster);
 
+        // The unleashed path's teeth: nothing until the Obscurus is held, then more as mastery grows.
+        float damage = ObscurialMastery.graspDamage(ObscurialResourceManager.getPath(caster),
+                ObscurialResourceManager.getMastery(caster));
         int affected = 0;
         for (Entity entity : entities) {
             if (!(entity instanceof LivingEntity living) || entity == caster) continue;
@@ -82,6 +86,9 @@ public class ObscurusGrasp extends Spell {
             entity.hurtMarked = true;
             entity.fallDistance = 0f;
             living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, 1, false, true, true));
+            if (damage > 0f) {
+                living.hurtServer(level, level.damageSources().indirectMagic(caster, caster), damage);
+            }
             affected++;
         }
 

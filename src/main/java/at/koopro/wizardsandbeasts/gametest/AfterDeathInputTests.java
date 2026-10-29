@@ -72,6 +72,9 @@ public final class AfterDeathInputTests {
         heritage.setSelectedHeritage(Heritage.WIZARDKIND);
         heritage.setCondition(at.koopro.wizardsandbeasts.heritage.ConditionOrigin.UNLEASHED);
         heritage.setActiveFormId("obscurial_dark");
+        // Grasp answers to mastery now (ObscurialMastery.GRASP_MASTERY); a fresh host could not fire it alive either.
+        at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialResourceManager.setMastery(player,
+                at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialMastery.GRASP_MASTERY);
         String grasp = Spells.OBSCURUS_GRASP.getId();
         PlayerSpellData data = spellData(player);
 

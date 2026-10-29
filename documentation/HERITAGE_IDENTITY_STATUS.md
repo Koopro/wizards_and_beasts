@@ -37,6 +37,19 @@ body by day. Turning is `heritage/vampire/VampireSiring`: crouching empty-hand c
 the same back = accept; both halves ask `ConditionRules` and the sire's blood (35) before anything is written.
 `HeritageAPI.cure` resets the blood pool.
 
+**Obscurus mastery (2026-10-29).** `heritage/obscurial/ObscurialMastery` (pure) holds the hybrid design.
+- **Storage:** mastery is the `obscurial_mastery` flag (0..100), so a cure clears it with the other meters.
+- **Path:** the origin decides it (SUPPRESSED = CONTROLLED, UNLEASHED = UNLEASHED), so no state is on both paths or
+  neither.
+- **Earned:** a vent at stress >= 40 gives +2; holding human form while not CALM gives +0.002/tick.
+- **Lost:** a collapse costs 6 (`ObscurialHeritageHandler.collapse`).
+- **Controlled path:** dark drain x(1-0.35m), collapse x(1-0.5m), forced break at 0.40-0.15m HP.
+- **Unleashed path:** ability costs x(1-0.3m) and Grasp damage 2+4m from 20 mastery, while stress gain is x1.25,
+  collapse x1.25 plus 4 damage.
+- **Grasp gate:** Grasp needs 20 mastery, enforced in `ObscurialServerLogic.useAbility`; it replaces the Crucio and
+  Imperio proficiency requirements.
+- **Stale forced break:** the forced-break deadline is cleared whenever the host is out of the dark form.
+
 ---
 
 ## 0. 2026-10-14 — heritage as experience: the reference architecture

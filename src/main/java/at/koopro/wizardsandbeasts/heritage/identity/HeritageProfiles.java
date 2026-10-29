@@ -16,6 +16,7 @@ import at.koopro.wizardsandbeasts.heritage.elf.ElfBondData;
 import at.koopro.wizardsandbeasts.heritage.elf.HouseElfBond;
 import at.koopro.wizardsandbeasts.heritage.identity.HeritageProfile.Section;
 import at.koopro.wizardsandbeasts.heritage.identity.HeritageProfile.Tone;
+import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialMastery;
 import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialResourceManager;
 import at.koopro.wizardsandbeasts.heritage.profession.ProfessionNode;
 import at.koopro.wizardsandbeasts.heritage.vampire.VampireBloodAPI;
@@ -282,6 +283,12 @@ public final class HeritageProfiles {
         b.add(Section.STATE, Component.translatable(K + "obscurus.stress", stress), stress >= 60 ? Tone.BAD : Tone.NEUTRAL);
         b.add(Section.STATE, Component.translatable(HeritageTransformService.isTransformed(HeritageAPI.getData(player))
                 ? K + "obscurus.unleashed" : K + "obscurus.held"), Tone.NEUTRAL);
+        // The path and how far along it: the hybrid mastery (ObscurialMastery).
+        ObscurialMastery.Path path = ObscurialResourceManager.getPath(player);
+        b.add(Section.STATE, Component.translatable(K + "obscurus.mastery",
+                        Component.translatable(path.translationKey()),
+                        Math.round(ObscurialResourceManager.getMastery(player))),
+                Component.translatable(path.translationKey() + ".desc"), Tone.NEUTRAL);
     }
 
     private static String signed(double value) {

@@ -210,6 +210,8 @@ public final class ObscurialCombatRules {
         if (ObscurialRules.isDaylightStrained(player.level(), player)) {
             stressPenalty += 0.15f;
         }
+        stressPenalty *= ObscurialMastery.abilityCostMultiplier(ObscurialResourceManager.getPath(player),
+                ObscurialResourceManager.getMastery(player));
         ObscurialResourceManager.setDrain(player, ObscurialResourceManager.getDrain(player) - (drainCost * stressPenalty));
         ObscurialResourceManager.setCharge(player, ObscurialResourceManager.getCharge(player) - (pressureCost * stressPenalty));
         ObscurialResourceManager.addStress(player, stressCost * stressPenalty);
