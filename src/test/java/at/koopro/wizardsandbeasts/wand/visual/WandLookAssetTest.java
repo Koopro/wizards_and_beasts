@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * The look system's shipped half: the wood and core {@code appearance} blocks, the sheets
@@ -203,6 +204,8 @@ class WandLookAssetTest {
     /** {@code wand_model.py --looks} copies the resolver's tables; a drift would make its sheets lie. */
     @Test
     void theLookSheetToolUsesTheResolversTables() throws IOException {
+        // tools/ is a local-only repository, so a clean checkout has no copy to compare.
+        assumeTrue(Files.exists(TOOL), "tools/wand_model.py is not on this machine");
         String tool = Files.readString(TOOL, StandardCharsets.UTF_8);
         Matcher constants = Pattern.compile(
                 "REFERENCE_INCHES, SCALE_PER_INCH, MIN_SCALE, MAX_SCALE = ([\\d.]+), ([\\d.]+), ([\\d.]+), ([\\d.]+)")

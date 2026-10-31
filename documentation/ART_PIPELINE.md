@@ -7,6 +7,10 @@ generator still matches the approved art. Written 2026-09-28 on `dev`.
 should look like; it explains how the files come to exist. Where the two meet (protected assets,
 §7), the report wins.
 
+Since 2026-10-31 `tools/` is a separate local git repository with no remote, ignored by this
+one, so Python stays off GitHub. A fresh clone has the generated assets but no generators;
+reproducing art needs a copy of that folder. Older commits here still hold the scripts.
+
 ---
 
 ## 0. Short version
@@ -228,9 +232,8 @@ Method: every generator was run in an isolated copy of the repository and its ou
 with the live files (pixels for PNG, parsed value for JSON), twice, under different hash seeds.
 Provenance came from the PNG markers (1,428 marked PNGs; 28 unmarked, all hand-made).
 
-**A — required, actively used: 167 scripts plus `requirements.txt`, tracked in git.** Everything
-in §3.2, the libraries, the validation tools and `art_sync_check.py`. `.gitignore` tracks `tools/*.py`
-by default and names the retired scripts below.
+**A — required, actively used: 167 scripts plus `requirements.txt`, tracked in the local `tools/`
+repository.** Everything in §3.2, the libraries, the validation tools and `art_sync_check.py`.
 
 **B — useful but obsolete** (local only, not tracked):
 
