@@ -1,0 +1,12 @@
+{
+  "name": "wizards_and_beasts:wizarding_hamlet/open_plot",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:empty_pool_element"
+      }
+    }
+  ]
+}

@@ -54,9 +54,11 @@ public final class ModuleAdminInfo {
         HOME.put(Module.CHAMBER_OF_SECRETS, AdminCategory.WORLD);
         HOME.put(Module.POCKET_DIMENSIONS, AdminCategory.WORLD);
         HOME.put(Module.STRUCTURES, AdminCategory.WORLD);
+        HOME.put(Module.SETTLEMENTS, AdminCategory.WORLD);
 
         APPLY.put(Module.AZKABAN, ApplyMode.NEW_CHUNKS);
         APPLY.put(Module.CHAMBER_OF_SECRETS, ApplyMode.NEW_CHUNKS);
+        APPLY.put(Module.SETTLEMENTS, ApplyMode.NEW_CHUNKS);
 
         SIDE.put(Module.CHARACTER_SHEET, Side.CLIENT);
         SIDE.put(Module.PLAYER_ANIMATION, Side.CLIENT);

@@ -813,6 +813,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("module.wizards_and_beasts.handbook.name", "Ministry Handbook");
         add("module.wizards_and_beasts.ministry.name", "Ministry of Magic");
         add("module.wizards_and_beasts.chamber_of_secrets.name", "Chamber of Secrets");
+        add("module.wizards_and_beasts.settlements.name", "Settlements");
         add("module.wizards_and_beasts.gringotts.name", "Gringotts");
         add("module.wizards_and_beasts.gringotts.desc", "Wizarding currency, vault balances and the vault commands. The decorative bank blocks belong to Structures.");
         add("module.wizards_and_beasts.wandwood.name", "Wandwood");

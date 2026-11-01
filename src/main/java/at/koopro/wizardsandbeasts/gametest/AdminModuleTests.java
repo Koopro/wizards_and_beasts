@@ -221,6 +221,7 @@ public final class AdminModuleTests {
             check(helper, setting != null, () -> "no switch for " + module);
             AdminSettingDescriptor descriptor = AdminSettingDescriptor.of(setting, CONSOLE);
             ApplyMode expected = module == Module.AZKABAN || module == Module.CHAMBER_OF_SECRETS
+                    || module == Module.SETTLEMENTS
                     ? ApplyMode.NEW_CHUNKS : ApplyMode.RUNTIME;
             check(helper, descriptor.applyMode() == expected && !descriptor.restartRequired(),
                     () -> module + " is " + descriptor.applyMode() + ", expected " + expected);

@@ -183,7 +183,8 @@ class ModuleDependenciesTest {
                     missing.add(key);
                 }
             }
-            boolean worldgen = module == Module.AZKABAN || module == Module.CHAMBER_OF_SECRETS;
+            boolean worldgen = module == Module.AZKABAN || module == Module.CHAMBER_OF_SECRETS
+                    || module == Module.SETTLEMENTS;
             assertEquals(worldgen ? ApplyMode.NEW_CHUNKS : ApplyMode.RUNTIME, ModuleAdminInfo.applyMode(module), module.name());
         }
         for (ModuleDependencies.Edge edge : ModuleDependencies.all()) {

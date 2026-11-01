@@ -35,7 +35,7 @@ class AdminWorldEconomyTest {
     /** Module switches added in Phase 8; each may warn, so each needs name, description and warning. */
     private static final List<String> MODULE_SETTINGS = List.of("module_floo_network", "module_apparition",
             "module_broom_flight", "module_ministry", "module_gringotts", "module_azkaban", "module_chamber_of_secrets",
-            "module_pocket_dimensions", "module_structures");
+            "module_pocket_dimensions", "module_structures", "module_settlements");
 
     @AfterEach
     void restoreRules() {

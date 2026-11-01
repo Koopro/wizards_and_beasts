@@ -1,0 +1,19 @@
+{
+  "structures": [
+    {
+      "structure": "wizards_and_beasts:wizarding_hamlet",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 51640927,
+    "spacing": 40,
+    "separation": 20,
+    "spread_type": "linear",
+    "exclusion_zone": {
+      "other_set": "minecraft:villages",
+      "chunk_count": 8
+    }
+  }
+}

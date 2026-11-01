@@ -64,10 +64,8 @@ public enum Module {
     /** Study materials — parchment, ink and the lore tomes that grant KNOWLEDGE / OWL credit. */
     SCHOLARSHIP,
     /**
-     * Chamber of Secrets structure + basilisk dark-breeding ritual. Mirrors {@code Module.AZKABAN}'s
-     * caution: the structure's start_pool currently points at a near-empty placeholder NBT template
-     * with no reachable content, which is why it ships {@code DISABLED}. Generation is gated on this
-     * flag by {@code ChamberOfSecretsStructure}, so a default install places no chamber at all.
+     * Chamber of Secrets structure + basilisk dark-breeding ritual. A playable dungeon since 2026-10-29, shipped as
+     * {@code PREVIEW}. Generation is gated on this flag by {@code ChamberOfSecretsStructure}.
      */
     CHAMBER_OF_SECRETS,
     /**
@@ -102,5 +100,13 @@ public enum Module {
      * <p>Gates the mechanic, never the registration: the ability, its keybind and the destination selector
      * all still exist with this switched off, and refuse at the point an attempt begins.
      */
-    APPARITION
+    APPARITION,
+    /**
+     * Generated wizarding hamlets and the people who keep them. Gates generation in new chunks and whether
+     * settlement staff work; a hamlet already written into a world stays there.
+     *
+     * <p>A new constant, so a world saved before it existed picks it up from the config default
+     * ({@code ModuleStateData.ofCodec}), which is how an upgraded world gets hamlets in land not yet explored.
+     */
+    SETTLEMENTS
 }

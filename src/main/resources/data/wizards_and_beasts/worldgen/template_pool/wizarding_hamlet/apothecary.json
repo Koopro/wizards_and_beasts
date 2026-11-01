@@ -1,0 +1,15 @@
+{
+  "name": "wizards_and_beasts:wizarding_hamlet/apothecary",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "wizards_and_beasts:wizarding_hamlet/apothecary/greybox",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      }
+    }
+  ]
+}

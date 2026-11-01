@@ -97,6 +97,14 @@ neoForge {
             programArgument '--nogui'
         }
 
+        // The same headless check for generated hamlets, in its own directory. Driven by WB_SETTLEMENT_PROBE
+        // (settlement/SettlementWorldProbe); inert without it.
+        settlementProbe {
+            server()
+            gameDirectory = project.file('build/settlement-probe')
+            programArgument '--nogui'
+        }
+
         // This run config launches GameTestServer and runs all registered gametests, then exits.
         // By default, the server will crash when no gametests are provided.
         // The gametest system is also enabled by default for other run configs under the /test command.

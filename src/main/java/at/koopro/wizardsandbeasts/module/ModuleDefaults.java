@@ -52,9 +52,9 @@ public final class ModuleDefaults {
         // Location decorative blocks ship craftable by default; set DISABLED to hide their recipes.
         SHIPPED.put(Module.STRUCTURES, ModuleState.ENABLED);
         SHIPPED.put(Module.HANDBOOK, ModuleState.ENABLED);
-        // Same placeholder-template caution as AZKABAN; likewise left DISABLED rather than COMING_SOON.
         // A playable dungeon since 2026-10-29 (seal, basin gate, basilisk encounter, the sword): preview, on.
         SHIPPED.put(Module.CHAMBER_OF_SECRETS, ModuleState.PREVIEW);
+        SHIPPED.put(Module.SETTLEMENTS, ModuleState.PREVIEW);
         // MINISTRY was never present in the old static table, so it resolved through getOrDefault to
         // DISABLED. Preserved exactly — see documentation/MIGRATION_DELTAS.md, this means the Ministry system is off
         // until an operator turns it on.
