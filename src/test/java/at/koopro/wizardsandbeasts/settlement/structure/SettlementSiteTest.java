@@ -46,7 +46,7 @@ class SettlementSiteTest {
 
     @Test
     void aTemplatesRoleIsTheFolderItSitsIn() {
-        assertEquals("bank", SettlementSite.roleOf("wizarding_hamlet/bank/greybox"));
+        assertEquals("bank", SettlementSite.roleOf("wizarding_hamlet/bank/a"));
         assertEquals("", SettlementSite.roleOf("chamber"));
     }
 

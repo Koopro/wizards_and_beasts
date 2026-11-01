@@ -6,7 +6,7 @@
       "weight": 1,
       "element": {
         "element_type": "minecraft:single_pool_element",
-        "location": "wizards_and_beasts:wizarding_hamlet/apothecary/greybox",
+        "location": "wizards_and_beasts:wizarding_hamlet/apothecary/a",
         "processors": "minecraft:empty",
         "projection": "rigid"
       }

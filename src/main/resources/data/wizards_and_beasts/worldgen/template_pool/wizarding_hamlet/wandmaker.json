@@ -6,7 +6,7 @@
       "weight": 1,
       "element": {
         "element_type": "minecraft:single_pool_element",
-        "location": "wizards_and_beasts:wizarding_hamlet/wandmaker/greybox",
+        "location": "wizards_and_beasts:wizarding_hamlet/wandmaker/a",
         "processors": "minecraft:empty",
         "projection": "rigid"
       }

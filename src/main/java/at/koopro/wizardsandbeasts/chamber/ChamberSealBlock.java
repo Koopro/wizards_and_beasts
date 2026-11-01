@@ -124,7 +124,8 @@ public class ChamberSealBlock extends Block {
         level.playSound(null, pos, open ? SoundEvents.STONE_BUTTON_CLICK_ON : SoundEvents.STONE_BUTTON_CLICK_OFF,
                 SoundSource.BLOCKS, 1.0f, 0.5f);
         level.playSound(null, pos, SoundEvents.GRINDSTONE_USE, SoundSource.BLOCKS, 0.8f, 0.6f);
-        if (open) {
+        // The same seal hides a hamlet's Undercroft; only a Chamber's counts toward the Chamber's quest.
+        if (open && ChamberBasilisk.chamberAt(server, pos) != null) {
             ChamberQuestService.reachNear(server, pos, WITNESS_RADIUS, ChamberStage.SEAL_OPENED);
         }
     }

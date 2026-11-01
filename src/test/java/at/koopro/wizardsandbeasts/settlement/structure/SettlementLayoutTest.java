@@ -80,6 +80,32 @@ class SettlementLayoutTest {
         }
     }
 
+    private static List<String> postRoles(Path template) throws IOException {
+        CompoundTag root = NbtIo.readCompressed(template, NbtAccounter.unlimitedHeap());
+        List<String> found = new ArrayList<>();
+        for (Tag tag : root.getListOrEmpty("blocks")) {
+            CompoundTag nbt = ((CompoundTag) tag).getCompoundOrEmpty("nbt");
+            if (nbt.getStringOr("id", "").equals("wizards_and_beasts:settlement_post")) {
+                found.add(nbt.getStringOr("role", ""));
+            }
+        }
+        return found;
+    }
+
+    @Test
+    void everyBuildingHasOnePostAndItsRoleHasAFile() throws IOException {
+        for (String role : SettlementSite.REQUIRED_ROLES) {
+            for (String template : templatesOf(role)) {
+                List<String> posts = postRoles(TEMPLATES.resolve(template + ".nbt"));
+                assertEquals(role.equals("plaza") ? 0 : 1, posts.size(), template);
+                for (String post : posts) {
+                    String file = post.replace("wizards_and_beasts:", "") + ".json";
+                    assertTrue(Files.exists(DATA.resolve("npc_roles").resolve(file)), template + " names " + post);
+                }
+            }
+        }
+    }
+
     @Test
     void everyBuildingHasTheConnectorThePlazaLooksFor() throws IOException {
         List<CompoundTag> plaza = jigsaws(TEMPLATES.resolve(templatesOf("plaza").get(0) + ".nbt"));

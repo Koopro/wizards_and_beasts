@@ -405,6 +405,20 @@ public final class MapSurveyor {
     }
 
     /**
+     * A generated hamlet is built of the same stone a player's Hogsmeade would be, but it is its own place with its own
+     * marker, not a statement by a builder. Read from the chunk's structure references, so it costs a map lookup.
+     */
+    private static boolean inGeneratedSettlement(LevelChunk chunk, ServerLevel level) {
+        Registry<Structure> registry = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
+        for (Structure structure : chunk.getAllReferences().keySet()) {
+            if (registry.wrapAsHolder(structure).is(at.koopro.wizardsandbeasts.settlement.HamletCharts.HAMLETS)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Counts landmark-palette blocks in one chunk and plants a marker where a rule's threshold is
      * met.
      *
@@ -420,7 +434,7 @@ public final class MapSurveyor {
     private static boolean scanLandmarksIn(LevelChunk chunk, MapAtlas atlas, UUID mapId,
                                            Identifier dimension, ServerLevel level) {
         List<MapDiscoveryRule.FromBlocks> rules = MapDiscoveryRules.blocks();
-        if (rules.isEmpty()) {
+        if (rules.isEmpty() || inGeneratedSettlement(chunk, level)) {
             return false;
         }
         boolean changed = false;

@@ -5,6 +5,7 @@ import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.module.ModuleState;
 import at.koopro.wizardsandbeasts.module.data.ModuleStateData;
+import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.settlement.structure.SettlementSite;
 import at.koopro.wizardsandbeasts.treasure.SiteSearch;
 import at.koopro.wizardsandbeasts.treasure.TreasureCharts;
@@ -21,6 +22,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
@@ -42,6 +44,7 @@ import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement
 import net.minecraft.world.level.levelgen.structure.pools.SinglePoolElement;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.loading.FMLEnvironment;
@@ -70,6 +73,8 @@ import java.util.TreeMap;
  * <ul>
  *   <li>{@code survey}: how often the placement grid yields a hamlet, where and in which biomes, then generates up to
  *       ten and reports what stands there. Results go to {@code settlement_probe_report.txt}.</li>
+ *   <li>{@code restart}: run after {@code survey} on the same directory. The survey leaves one hamlet staffed and saved;
+ *       this reports whether the same people came back, once each.</li>
  *   <li>{@code gate}: for a world whose config disagrees with the shipped defaults (the run script writes it). Reports
  *       what the module cache said when the first chunk arrived, and whether recipes followed the world's state.</li>
  * </ul>
@@ -80,6 +85,7 @@ public final class SettlementWorldProbe {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final String MODE = FMLEnvironment.isProduction() ? null : System.getenv("WB_SETTLEMENT_PROBE");
     private static final Path REPORT = Path.of("settlement_probe_report.txt");
+    private static final Path STATE = Path.of("settlement_probe_state.txt");
     private static final ResourceKey<Structure> HAMLET = ResourceKey.create(Registries.STRUCTURE,
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "wizarding_hamlet"));
     private static final TagKey<Structure> SETTLEMENTS = TagKey.create(Registries.STRUCTURE,
@@ -87,17 +93,26 @@ public final class SettlementWorldProbe {
     private static final int SURVEY_RINGS = 12;
     private static final int MAX_SITES = 10;
     private static final int SETTLE_TICKS = 100;
+    /** Long enough for forced chunks to load their entities, for every post's first look, and for spawns to settle. */
+    private static final int STAFF_TICKS = 300;
     /** How far past the footprint a walk may go, and where it counts as having left the hamlet. */
     private static final int WALK_MARGIN = 10;
     /** Floor cells over a cave or ravine a site may have and still count as clean: carvers run after any site check. */
     private static final int FLOATING_ALLOWED = 130;
-    /** Blocks whose template positions are compared with what stands there. */
-    private static final List<Block> CHECKED = List.of(Blocks.COBBLESTONE, Blocks.STONE_BRICKS, Blocks.DARK_OAK_PLANKS,
-            Blocks.YELLOW_CONCRETE, Blocks.PURPLE_CONCRETE, Blocks.LIME_CONCRETE, Blocks.BLUE_CONCRETE,
-            Blocks.WHITE_CONCRETE, Blocks.LODESTONE, Blocks.GRAVEL);
+    /** Blocks whose template positions are compared with what stands there: every wall, floor, roof and working part. */
+    private static final List<String> CHECKED = List.of("stone_bricks", "deepslate_bricks", "deepslate_tiles",
+            "spruce_planks", "gravel", "bookshelf", "wizards_and_beasts:hogsmeade_stone_bricks",
+            "wizards_and_beasts:hogsmeade_worn_stone", "wizards_and_beasts:hogsmeade_roof_tile",
+            "wizards_and_beasts:three_broomsticks_timber", "wizards_and_beasts:three_broomsticks_planks",
+            "wizards_and_beasts:diagon_cobblestone", "wizards_and_beasts:diagon_street_stone",
+            "wizards_and_beasts:gringotts_white_marble", "wizards_and_beasts:settlement_post",
+            "wizards_and_beasts:chamber_seal", "wizards_and_beasts:wandmakers_bench",
+            "wizards_and_beasts:examination_desk", "wizards_and_beasts:spell_teacher", "minecraft:chest");
 
     private static final List<String> lines = new ArrayList<>();
     private static int settle = -1;
+    private static BlockPos firstPlaza;
+    private static BlockPos staffed = BlockPos.ZERO;
     private static boolean firstChunkSeen;
     private static ModuleState settlementsAtFirstChunk = ModuleState.DISABLED;
     private static ModuleState chamberAtFirstChunk = ModuleState.DISABLED;
@@ -131,10 +146,13 @@ public final class SettlementWorldProbe {
         try {
             if (MODE.equals("gate")) {
                 settle = SETTLE_TICKS;
+            } else if (MODE.equals("restart")) {
+                staffed = BlockPos.of(Long.parseLong(Files.readAllLines(STATE).get(0)));
+                settle = STAFF_TICKS;
             } else {
                 survey(event.getServer());
                 write();
-                event.getServer().halt(false);
+                settle = STAFF_TICKS;
             }
         } catch (IOException e) {
             LOGGER.error("Settlement probe failed", e);
@@ -150,6 +168,15 @@ public final class SettlementWorldProbe {
         settle = -1;
         MinecraftServer server = event.getServer();
         ServerLevel level = server.overworld();
+        if (!MODE.equals("gate")) {
+            try {
+                people(server, level);
+            } catch (IOException e) {
+                LOGGER.error("Settlement probe failed", e);
+            }
+            server.halt(false);
+            return;
+        }
         ModuleStateData data = ModuleStateData.get(level);
         say("seed " + level.getSeed());
         say("first chunk saw: settlements " + settlementsAtFirstChunk + ", chamber " + chamberAtFirstChunk);
@@ -178,6 +205,35 @@ public final class SettlementWorldProbe {
             LOGGER.error("Settlement probe failed", e);
         }
         server.halt(false);
+    }
+
+    // ── people ────────────────────────────────────────────────────────────
+
+    /** Who stands in the staffed hamlet now. {@code survey} saves them and {@code restart} compares. */
+    private static void people(MinecraftServer server, ServerLevel level) throws IOException {
+        List<String> found = new ArrayList<>();
+        for (Entity entity : level.getEntities((Entity) null, new AABB(staffed).inflate(64.0),
+                e -> e.hasData(ModAttachments.SETTLEMENT_POST.get()))) {
+            String role = entity instanceof at.koopro.wizardsandbeasts.settlement.npc.SettlementNpcEntity npc
+                    ? npc.roleId() : BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString();
+            found.add(entity.getUUID() + " " + role + " " + entity.getName().getString());
+        }
+        java.util.Collections.sort(found);
+        if (MODE.equals("restart")) {
+            List<String> saved = Files.readAllLines(STATE);
+            saved = new ArrayList<>(saved.subList(1, saved.size()));
+            lines.addAll(Files.readAllLines(REPORT));
+            say("--- restart: " + found.size() + " people, was " + saved.size() + ", same people " + found.equals(saved));
+            found.forEach(line -> say("  " + line));
+        } else {
+            say("staffed hamlet at " + staffed.toShortString() + ": " + found.size() + " people");
+            found.forEach(line -> say("  " + line));
+            List<String> state = new ArrayList<>(List.of(Long.toString(staffed.asLong())));
+            state.addAll(found);
+            Files.write(STATE, state);
+            server.saveEverything(false, true, true);
+        }
+        write();
     }
 
     // ── survey ────────────────────────────────────────────────────────────
@@ -268,6 +324,15 @@ public final class SettlementWorldProbe {
             }
         }
         say(inspected + " inspected, " + clean + " clean");
+        if (firstPlaza != null) {
+            staffed = firstPlaza;
+            ChunkPos centre = new ChunkPos(staffed);
+            for (int x = -4; x <= 4; x++) {
+                for (int z = -4; z <= 4; z++) {
+                    level.setChunkForced(centre.x + x, centre.z + z, true);
+                }
+            }
+        }
     }
 
     /** How the rule's relief limit would change the yield, over the same grid, for the biomes the hamlet accepts. */
@@ -357,6 +422,7 @@ public final class SettlementWorldProbe {
         Map<String, Integer> became = new TreeMap<>();
         List<BlockPos> counters = new ArrayList<>();
         Set<BlockPos> meantAir = new HashSet<>();
+        Set<String> posts = new java.util.TreeSet<>();
         PoolElementStructurePiece plaza = null;
         Map<String, Integer> rotations = new TreeMap<>();
         for (StructurePiece raw : start.getPieces()) {
@@ -372,11 +438,16 @@ public final class SettlementWorldProbe {
             }
             StructureTemplate template = level.getStructureManager().getOrCreate(location);
             StructurePlaceSettings settings = new StructurePlaceSettings().setRotation(piece.getRotation());
-            for (Block block : CHECKED) {
+            for (String name : CHECKED) {
+                Block block = BuiltInRegistries.BLOCK.getValue(Identifier.parse(name));
                 for (var info : template.filterBlocks(piece.getPosition(), settings, block)) {
                     placed++;
-                    if (block == Blocks.LODESTONE) {
+                    if (block == at.koopro.wizardsandbeasts.registry.ModBlocks.SETTLEMENT_POST.get()) {
                         counters.add(info.pos());
+                        if (level.getBlockEntity(info.pos()) instanceof
+                                at.koopro.wizardsandbeasts.settlement.post.SettlementPostBlockEntity post) {
+                            posts.add(post.role());
+                        }
                     }
                     BlockState now = level.getBlockState(info.pos());
                     if (!now.is(block)) {
@@ -402,6 +473,9 @@ public final class SettlementWorldProbe {
             return false;
         }
         int floorY = plaza.getBoundingBox().minY();
+        if (firstPlaza == null) {
+            firstPlaza = plaza.getBoundingBox().getCenter();
+        }
         Ground ground = ground(level, start, floorY, meantAir);
         Walk walk = walk(level, plaza.getBoundingBox(), box, floorY, counters);
         Map<String, Integer> others = new TreeMap<>();
@@ -417,7 +491,7 @@ public final class SettlementWorldProbe {
             }
         }
         boolean rolesWhole = SettlementSite.complete(roles);
-        boolean clean = rolesWhole && changed == 0 && ground.floating <= FLOATING_ALLOWED && trunks == 0
+        boolean clean = rolesWhole && posts.size() == 5 && changed == 0 && ground.floating <= FLOATING_ALLOWED && trunks == 0
                 && walk.counters == counters.size() && walk.sides == 4 && !others.keySet().toString().contains("village");
         say("site " + start.getChunkPos() + " box " + box.getXSpan() + "x" + box.getZSpan() + "x" + box.getYSpan()
                 + " floor y " + floorY + " biome " + level.getBiome(plaza.getBoundingBox().getCenter()).unwrapKey()
@@ -425,7 +499,8 @@ public final class SettlementWorldProbe {
         say("  blocks " + placed + " placed, " + changed + " changed; air " + airPlaced + " placed, " + intruded
                 + " intruded " + became);
         say("  ground " + ground + "; walk " + walk + "; counters " + counters.size()
-                + (others.isEmpty() ? "" : "; overlaps " + others) + (clean ? "" : "  <-- NOT CLEAN"));
+                + "; roles " + posts.size() + (others.isEmpty() ? "" : "; overlaps " + others)
+                + (clean ? "" : "  <-- NOT CLEAN"));
         return clean;
     }
 
@@ -510,9 +585,10 @@ public final class SettlementWorldProbe {
         }
         int reached = 0;
         for (BlockPos counter : counters) {
+            // A post is under a person behind a counter: reached is near enough to speak to them.
             boolean near = false;
-            for (Direction direction : Direction.Plane.HORIZONTAL) {
-                near |= seen.contains(counter.relative(direction));
+            for (BlockPos cell : BlockPos.betweenClosed(counter.offset(-4, 0, -4), counter.offset(4, 2, 4))) {
+                near |= seen.contains(cell);
             }
             reached += near ? 1 : 0;
         }
