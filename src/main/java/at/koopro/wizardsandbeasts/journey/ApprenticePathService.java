@@ -102,6 +102,7 @@ public final class ApprenticePathService {
         player.setData(ModAttachments.APPRENTICE_PATH.get(), next);
         List<PathStep> paid = payOwed(player);
         announce(player, paid, ApprenticePath.current(record(player), facts));
+        offerAdventure(player);
         sync(player);
         return paid;
     }
@@ -149,6 +150,7 @@ public final class ApprenticePathService {
             List<PathStep> paid = payOwed(player);
             announce(player, paid, current(player));
         }
+        offerAdventure(player);
         sync(player);
     }
 
@@ -168,6 +170,17 @@ public final class ApprenticePathService {
             player.sendSystemMessage(nextLine(current(player)));
         }
         return met;
+    }
+
+    /**
+     * The path is walked: the wider world is next. A Serpent Chart to the nearest uncleared Chamber is handed over
+     * once, as a lead and not a task; the chart itself decides whether there is a Chamber to draw it to.
+     */
+    private static void offerAdventure(ServerPlayer player) {
+        PathRecord record = record(player);
+        if (record.guided() && record.has(PathStep.ARRIVE) && current(player) == null) {
+            at.koopro.wizardsandbeasts.chamber.ChamberCharts.offer(player);
+        }
     }
 
     private static PathReward.Systems systems() {
@@ -378,12 +391,16 @@ public final class ApprenticePathService {
     public static void sync(ServerPlayer player) {
         PathRecord record = record(player);
         List<String> steps = new ArrayList<>();
+        List<String> chamber = new ArrayList<>();
         if (record.guided()) {
             for (PathStep step : ApprenticePath.applicable(facts(player, record))) {
                 steps.add(step.id());
             }
+            if (ModuleManager.isEnabled(Module.CHAMBER_OF_SECRETS)) {
+                chamber.addAll(at.koopro.wizardsandbeasts.chamber.ChamberQuestService.quest(player).reached());
+            }
         }
-        ApprenticePathS2CPayload.send(player, new ApprenticePathS2CPayload(steps, List.copyOf(record.done())));
+        ApprenticePathS2CPayload.send(player, new ApprenticePathS2CPayload(steps, List.copyOf(record.done()), chamber));
     }
 
     /** Switches the path on or off for this player and tells their client. Done steps are kept either way. */

@@ -407,6 +407,12 @@ public class ModModelProvider extends ModelProvider {
         blockModels.createTrivialBlock(ModBlocks.UNLIT_GLOWSTONE.get(), TexturedModel.LEAVES);
 
         blockModels.createTrivialBlock(ModBlocks.WARDING_STONE.get(), TexturedModel.CUBE);
+        // The Chamber's working parts wear vanilla stone so they read as the wall they stand in; open, they are not
+        // drawn at all (their getRenderShape), so one model per block serves every state.
+        chamberBlock(blockModels, ModBlocks.CHAMBER_SEAL.get(), Identifier.withDefaultNamespace("block/stone_bricks"));
+        chamberBlock(blockModels, ModBlocks.CHAMBER_GATE.get(), Identifier.withDefaultNamespace("block/dark_prismarine"));
+        chamberBlock(blockModels, ModBlocks.CHAMBER_HEART.get(),
+                Identifier.withDefaultNamespace("block/gilded_blackstone"));
         blockModels.createTrivialBlock(ModBlocks.POCKET_CONFIGURATOR.get(), TexturedModel.CUBE);
 
         // Placed trunks. TrunkBlock has carried a FACING property all along, but with one
@@ -719,6 +725,13 @@ public class ModModelProvider extends ModelProvider {
                 MultiVariantGenerator.dispatch(block, BlockModelGenerators.plainVariant(model))
                         .with(BlockModelGenerators.ROTATION_HORIZONTAL_FACING));
         blockModels.registerSimpleFlatItemModel(block.asItem());
+    }
+
+    /** A full cube of one vanilla texture for every state of a block that has no item. */
+    private static void chamberBlock(BlockModelGenerators blockModels, Block block, Identifier texture) {
+        Identifier model = ModelTemplates.CUBE_ALL.create(block, TextureMapping.cube(texture), blockModels.modelOutput);
+        blockModels.blockStateOutput.accept(
+                MultiVariantGenerator.dispatch(block, BlockModelGenerators.plainVariant(model)));
     }
 
     private void propBlock(BlockModelGenerators blockModels, Block block,

@@ -82,12 +82,16 @@ public final class TreasureCharts {
         if (found == null) {
             return null;
         }
-        BlockPos target = new BlockPos(found.locateX(), 0, found.locateZ());
+        return draw(level, new BlockPos(found.locateX(), 0, found.locateZ()),
+                Component.translatable("item.wizards_and_beasts.gringotts_chart", siteName(siteId)));
+    }
+
+    /** A filled explorer's map centred on {@code target} with an X on it, the way a cartographer draws one. */
+    public static ItemStack draw(ServerLevel level, BlockPos target, Component name) {
         ItemStack map = MapItem.create(level, target.getX(), target.getZ(), (byte) 2, true, true);
         MapItem.renderBiomePreviewMap(level, map);
         MapItemSavedData.addTargetDecoration(map, target, "+", MapDecorationTypes.RED_X);
-        map.set(DataComponents.ITEM_NAME, Component.translatable("item.wizards_and_beasts.gringotts_chart",
-                siteName(siteId)));
+        map.set(DataComponents.ITEM_NAME, name);
         return map;
     }
 
@@ -96,6 +100,12 @@ public final class TreasureCharts {
      * walked: every treasure site is one, and a ring placement (strongholds) has no grid to walk.
      */
     static SiteSearch.@Nullable Site nearestUnspent(ServerLevel level, TagKey<Structure> tag, BlockPos origin) {
+        return nearest(level, tag, origin, SEARCH_RINGS, TreasureSiteLedger.get(level)::isSpent);
+    }
+
+    /** The nearest site in {@code tag} within {@code rings} grid rings that {@code passOver} does not reject, or null. */
+    public static SiteSearch.@Nullable Site nearest(ServerLevel level, TagKey<Structure> tag, BlockPos origin, int rings,
+                                                   java.util.function.Predicate<SiteSearch.Site> passOver) {
         var structures = level.registryAccess().lookupOrThrow(Registries.STRUCTURE).get(tag);
         if (structures.isEmpty()) {
             return null;
@@ -119,13 +129,12 @@ public final class TreasureCharts {
         }
         StructureManager manager = level.structureManager();
         long seed = state.getLevelSeed();
-        TreasureSiteLedger ledger = TreasureSiteLedger.get(level);
         return SiteSearch.nearest(SectionPos.blockToSectionCoord(origin.getX()),
-                SectionPos.blockToSectionCoord(origin.getZ()), grids, SEARCH_RINGS, (grid, cellX, cellZ) -> {
+                SectionPos.blockToSectionCoord(origin.getZ()), grids, rings, (grid, cellX, cellZ) -> {
                     RandomSpreadStructurePlacement placement = placements.get(grid);
                     ChunkPos potential = placement.getPotentialStructureChunk(seed, cellX, cellZ);
                     return siteAt(level, manager, placement, byPlacement.get(placement), potential);
-                }, ledger::isSpent);
+                }, passOver);
     }
 
     /** What vanilla's {@code getStructureGeneratingAt} does, minus the reference counting. */

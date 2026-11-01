@@ -67,6 +67,7 @@ final class SpellCastConeHandler {
                 }
 
                 if (damage > 0) {
+                    at.koopro.wizardsandbeasts.chamber.ChamberEvents.spellStruck(living, caster);
                     living.hurt(level.damageSources().magic(), damage);
                     successful = true;
                 }

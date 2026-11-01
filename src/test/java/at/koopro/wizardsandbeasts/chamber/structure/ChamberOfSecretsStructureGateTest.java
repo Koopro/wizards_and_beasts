@@ -141,11 +141,15 @@ class ChamberOfSecretsStructureGateTest {
         assertThrows(NullPointerException.class, ChamberOfSecretsStructureGateTest::findGenerationPoint);
     }
 
-    /** The bug this class exists to close: a default install must place no chamber. */
+    /**
+     * The Chamber shipped DISABLED while it was a sealed placeholder box; since it became a playable dungeon
+     * (2026-10-29, user decision) it ships as PREVIEW, so a default install does place Chambers.
+     */
     @Test
-    void shippedDefaultPlacesNoChamber() {
-        assertEquals(ModuleState.DISABLED, ModuleDefaults.shipped(Module.CHAMBER_OF_SECRETS));
-        assertTrue(findGenerationPoint().isEmpty());
+    void shippedDefaultIsPreviewAndPlacesChambers() {
+        assertEquals(ModuleState.PREVIEW, ModuleDefaults.shipped(Module.CHAMBER_OF_SECRETS));
+        chamberState(ModuleDefaults.shipped(Module.CHAMBER_OF_SECRETS));
+        assertThrows(NullPointerException.class, ChamberOfSecretsStructureGateTest::findGenerationPoint);
     }
 
     /** Biome placement, generation step, terrain adaptation and spawn overrides are the delegate's. */

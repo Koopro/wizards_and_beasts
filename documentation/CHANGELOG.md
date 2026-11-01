@@ -39,6 +39,47 @@ All notable changes to this project are documented in this file.
 - **Fixed:** a player killed while the ceremony was open respawned without a heritage, with no wand hand and no
   Lumos, until they logged in again. A respawn or a dimension change now reopens the ceremony.
 
+### The Chamber of Secrets (2026-10-29)
+
+- **Added:** the Chamber of Secrets is a dungeon you can play. It is on by default as a preview: a new world gets
+  Chambers in plains, forests, taigas, meadows, snowy plains and savannas.
+  - Module states are stored per world and seeded once, when a world is created. An existing world keeps the state it
+    stored: switch it on with `/wandb admin module set chamber_of_secrets preview`, and it gets Chambers in land not yet
+    explored.
+  - A config file written before this change also seeds new worlds with "disabled". Edit `moduleDefaults` in
+    `wizards_and_beasts-common.toml`, or delete that line.
+- **The route through it:**
+  - A ring of old stones with a trapdoor at its centre, and a ladder down to a lit landing.
+  - Flooded pipes ending in a blank wall. Part of the wall is a seal: Revelio shows it and Alohomora opens it.
+    Without a wand, the knocker (a button above the seal) opens it too. Two signs give the rule.
+  - A dry basin beside a stone gate. Fill it with Aguamenti, or with a bucket from the pipes, and the gate rises;
+    empty it and the gate falls.
+  - A pillared hall with pools along its sides.
+- **The basilisk:**
+  - Entering the hall wakes it, with a boss bar and a warning that names the counterplay.
+  - It cannot despawn and is kept to its hall.
+  - Leave the hall for two minutes and it sleeps again, whole.
+  - Its death clears the Chamber for good. Everyone who fought it, or stood in the hall, is credited.
+- **The sword:** the one who struck the last blow sees the Sword of Gryffindor rise over the dais, already imbued
+  with the basilisk's venom. Only they can pick it up.
+  - It is still one sword per world: a Chamber cleared while the sword is out says so and gives none.
+- **Changed:** the Sorting Hat no longer gives the sword to just anyone in need. It returns a lost or destroyed sword,
+  and only to a wearer who has slain a Chamber's basilisk.
+- **A Serpent Chart** leads to the nearest uncleared Chamber:
+  - one is handed over once, when the Apprentice's Path is walked;
+  - one hidden wizarding cache in eight holds one.
+  - Once the path is walked, the character sheet shows the quest's next stage.
+- A shortcut iron door from the hall back to the landing opens only from the hall side.
+- Once opened, a seal stays open, so nobody can be shut in or crushed by a second knock. The gate waits for anyone
+  standing in it before it falls.
+- **Fixed:** a basilisk killed with bolt or cone spells gave the last blow to whoever stood nearest the dais, and
+  dropped no fang, because those spells name no attacker. For a Chamber's basilisk the caster is now noted and credited.
+- **Fixed:** a mineshaft could cut through a Chamber's walls and let the hall be walked into past both puzzles.
+- **Fixed:** a Chamber could come up in a river, or with its hall standing out of a hillside.
+- **Fixed:** the Wandmaker's Bench logged "Item must not be minecraft:air" on every save. Nothing was ever lost.
+- **Fixed:** a basilisk bred by the ritual, or killed by a command, no longer marks a Chamber as cleared.
+- **Fixed:** a Chamber's basilisk no longer despawns when nobody is near.
+
 ### Expedition charts (2026-10-29)
 
 - **Fixed:** a second Gringotts or Curse-Breaker expedition was charted to the same tomb as the first, whose chests

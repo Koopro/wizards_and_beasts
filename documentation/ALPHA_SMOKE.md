@@ -366,6 +366,25 @@ Manual. Survival world with the Gringotts module on (the default), standing at a
 3. Run `/locate structure minecraft:desert_pyramid` to confirm the first site is still the nearest; the chart
    skipped it.
 
+## The Chamber of Secrets (2026-10-29, `feat/chamber-of-secrets`)
+
+Manual. Use a new survival world. In a world created before this change, or with an older config file, run
+`/wandb admin module set chamber_of_secrets preview` first, and look in land not yet explored.
+
+1. Walk the Apprentice's Path, or run `/locate structure wizards_and_beasts:chamber_of_secrets`. When the path is
+   walked, a Serpent Chart arrives, and the character sheet shows "An adventure".
+2. At the X: open the trapdoor in the ring of stones and climb down. Follow the pipes to the blank wall and cast
+   Revelio: two bricks outline. Cast Alohomora on one: the doorway opens, and a "hidden seal" toast appears.
+   (Without a wand: press the small button above the seal.)
+3. Fill the dry cauldron with Aguamenti or a water bucket: the green gate rises. Empty it: the gate falls.
+4. Enter the hall: a "basilisk wakes" toast, a boss bar, and the counsel line. Look away when it rears.
+5. Kill it: a "Chamber is cleared" toast, and the Sword of Gryffindor rises over the dais. Only you can pick it up,
+   and its tooltip shows the venom.
+6. Leave and come back after 2 minutes in a second Chamber where the basilisk was woken but not killed: it sleeps,
+   and wakes whole.
+7. Wear the Sorting Hat in a fight at low health with the sword out in the world: nothing. Destroy the sword (throw
+   it in lava), then fight again: it is returned to you, because you slew a basilisk.
+
 ## Brewing (2026-10-23, `feat/brewing`)
 
 Manual. You need a survival world, a pewter and a brass cauldron on a heat source, and two players for steps 7-8.

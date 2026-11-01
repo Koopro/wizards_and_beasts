@@ -100,6 +100,11 @@ public final class ChamberBasilisk {
             return slain.contains(chamber.getChunkPos().toLong());
         }
 
+        /** By the chunk the Chamber started in, as a chart search names it. */
+        public boolean isSlain(net.minecraft.world.level.ChunkPos start) {
+            return slain.contains(start.toLong());
+        }
+
         public void markSlain(StructureStart chamber) {
             if (slain.add(chamber.getChunkPos().toLong())) {
                 setDirty();

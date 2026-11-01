@@ -1,11 +1,13 @@
 package at.koopro.wizardsandbeasts.client.journey;
 
+import at.koopro.wizardsandbeasts.chamber.ChamberStage;
 import at.koopro.wizardsandbeasts.journey.PathStep;
 import at.koopro.wizardsandbeasts.network.journey.ApprenticePathS2CPayload;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
@@ -17,6 +19,7 @@ public final class ClientApprenticePathState {
     public record Line(PathStep step, boolean done) {}
 
     private static List<Line> lines = List.of();
+    private static Set<ChamberStage> chamber = Set.of();
 
     private ClientApprenticePathState() {}
 
@@ -31,6 +34,24 @@ public final class ClientApprenticePathState {
             }
         }
         lines = List.copyOf(out);
+        Set<ChamberStage> stages = EnumSet.noneOf(ChamberStage.class);
+        for (String id : payload.chamber()) {
+            ChamberStage stage = ChamberStage.byId(id);
+            if (stage != null) {
+                stages.add(stage);
+            }
+        }
+        chamber = stages;
+    }
+
+    /** True once every step of a path that is on is done. */
+    public static boolean walked() {
+        return !lines.isEmpty() && current() == null;
+    }
+
+    /** The Chamber stage to aim for next, or null when the quest has not begun or is over. */
+    public static @Nullable ChamberStage chamberNext() {
+        return ChamberStage.next(chamber);
     }
 
     /** The steps this player walks, in order; empty when the path is off or not yet heard of. */
@@ -50,5 +71,6 @@ public final class ClientApprenticePathState {
 
     public static void clear() {
         lines = List.of();
+        chamber = Set.of();
     }
 }

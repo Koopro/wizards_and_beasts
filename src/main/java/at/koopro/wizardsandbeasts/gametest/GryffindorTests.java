@@ -69,7 +69,14 @@ public final class GryffindorTests {
             strikeAndBeStruck(level, wearer, foe);
             check(helper, swords(helper, wearer).isEmpty(), () -> "the sword came without the Hat");
 
+            // With the Hat but never having cleared a Chamber: the Hat recalls the sword, it does not give it.
             wearer.setItemSlot(EquipmentSlot.HEAD, new ItemStack(CanonItemRegistry.SORTING_HAT.get()));
+            wearer.setHealth(wearer.getMaxHealth());
+            strikeAndBeStruck(level, wearer, foe);
+            check(helper, swords(helper, wearer).isEmpty(), () -> "the Hat gave the sword to one who never earned it");
+
+            at.koopro.wizardsandbeasts.chamber.ChamberQuestService.reach(wearer,
+                    at.koopro.wizardsandbeasts.chamber.ChamberStage.BASILISK_SLAIN);
             wearer.setHealth(wearer.getMaxHealth());
             strikeAndBeStruck(level, wearer, foe);
             List<ItemEntity> first = swords(helper, wearer);

@@ -481,6 +481,23 @@ public class ModAttachments {
                     .copyOnDeath()
                     .build());
 
+    /** The Chamber of Secrets quest: the stages a player has reached. Kept across deaths. */
+    public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.chamber.ChamberQuest>> CHAMBER_QUEST =
+            ATTACHMENTS.register("chamber_quest", () -> AttachmentType.builder(
+                            () -> at.koopro.wizardsandbeasts.chamber.ChamberQuest.EMPTY)
+                    .serialize(at.koopro.wizardsandbeasts.chamber.ChamberQuest.CODEC.fieldOf("data"))
+                    .copyOnDeath()
+                    .build());
+
+    /**
+     * On a basilisk woken by a Chamber: the position of the Chamber's heart, which its death reports to. A basilisk
+     * without it (bred by the ritual) is its own creature and clears no Chamber.
+     */
+    public static final Supplier<AttachmentType<Long>> CHAMBER_HEART =
+            ATTACHMENTS.register("chamber_heart", () -> AttachmentType.builder(() -> 0L)
+                    .serialize(Codec.LONG.fieldOf("pos"))
+                    .build());
+
     /** Spell-trace retry waits and the Steady hand setting, kept across logouts and deaths. */
     public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.spell.learning.tracing.TraceMemory>> TRACE_MEMORY =
             ATTACHMENTS.register("trace_memory", () -> AttachmentType.builder(

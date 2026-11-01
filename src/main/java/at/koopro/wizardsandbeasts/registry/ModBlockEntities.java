@@ -84,6 +84,13 @@ public final class ModBlockEntities {
             BLOCK_ENTITY_TYPES.register("vanishing_cabinet", () ->
                     new BlockEntityType<>(VanishingCabinetBlockEntity::new, Set.of(ModBlocks.VANISHING_CABINET.get())));
 
+    /** The Chamber of Secrets' heart: its basilisk encounter, saved with the block. */
+    public static final DeferredHolder<BlockEntityType<?>,
+            BlockEntityType<at.koopro.wizardsandbeasts.chamber.ChamberHeartBlockEntity>> CHAMBER_HEART =
+            BLOCK_ENTITY_TYPES.register("chamber_heart", () -> new BlockEntityType<>(
+                    at.koopro.wizardsandbeasts.chamber.ChamberHeartBlockEntity::new,
+                    Set.of(ModBlocks.CHAMBER_HEART.get())));
+
     private ModBlockEntities() {
     }
 }

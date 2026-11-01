@@ -127,6 +127,7 @@ public class SpellProjectileEntity extends ThrowableProjectile {
             damage = LethalGazeBossResistance.resolveAvadaKedavraDamage(damage, LethalGazeBossResistance.isBossTarget(hit));
         }
         if (damage > 0 && hit instanceof LivingEntity living) {
+            at.koopro.wizardsandbeasts.chamber.ChamberEvents.spellStruck(living, owner);
             living.hurt(level().damageSources().magic(), damage);
         }
         // An Unforgivable bolt is judged by whom it struck (MinistryTrace.onUnforgivableUse, CANON_AUDIT C-2).

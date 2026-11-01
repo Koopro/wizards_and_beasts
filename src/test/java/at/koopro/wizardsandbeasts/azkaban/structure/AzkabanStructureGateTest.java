@@ -145,9 +145,10 @@ class AzkabanStructureGateTest {
      * decision from "off by default" and is not the one that was made.
      */
     @Test
-    void bothPlaceholderStructuresShipDisabledAndOperatorReachable() {
+    void placeholderAzkabanShipsDisabledAndThePlayableChamberShipsPreview() {
         assertEquals(ModuleState.DISABLED, ModuleDefaults.shipped(Module.AZKABAN));
-        assertEquals(ModuleState.DISABLED, ModuleDefaults.shipped(Module.CHAMBER_OF_SECRETS));
+        // The Chamber stopped being a placeholder on 2026-10-29 (a playable dungeon) and ships as a preview.
+        assertEquals(ModuleState.PREVIEW, ModuleDefaults.shipped(Module.CHAMBER_OF_SECRETS));
     }
 
     @Test

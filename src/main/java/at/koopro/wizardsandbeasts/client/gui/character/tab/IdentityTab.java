@@ -7,6 +7,7 @@ import at.koopro.wizardsandbeasts.client.companion.ClientCompanionState;
 import at.koopro.wizardsandbeasts.client.currency.state.ClientVaultDataState;
 import at.koopro.wizardsandbeasts.client.education.ClientEducationState;
 import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
+import at.koopro.wizardsandbeasts.chamber.ChamberStage;
 import at.koopro.wizardsandbeasts.client.journey.ClientApprenticePathState;
 import at.koopro.wizardsandbeasts.client.gui.character.SheetCaches;
 import at.koopro.wizardsandbeasts.client.gui.character.SheetTab;
@@ -173,7 +174,7 @@ public final class IdentityTab extends ScrollingTab {
         List<ClientApprenticePathState.Line> lines = ClientApprenticePathState.lines();
         PathStep current = ClientApprenticePathState.current();
         if (current == null) {
-            return y;
+            return adventureSection(g, font, x, y, w);
         }
         int done = 0;
         List<Component> steps = new ArrayList<>(lines.size() + 1);
@@ -195,6 +196,21 @@ public final class IdentityTab extends ScrollingTab {
         if (hovered(x, top, w, y - top, mouseX, mouseY)) {
             tooltip(steps);
         }
+        return y + WizardsMetrics.SPACE_M;
+    }
+
+    /**
+     * Once the path is walked and a Chamber has been charted: the adventure's next stage, in the same place the path's
+     * next step stood. Gone when the quest has not begun (no chart yet) or the basilisk is slain.
+     */
+    private static int adventureSection(GuiGraphics g, Font font, int x, int y, int w) {
+        ChamberStage next = ClientApprenticePathState.walked() ? ClientApprenticePathState.chamberNext() : null;
+        if (next == null) {
+            return y;
+        }
+        y = Ui.sectionHeader(g, font, S, x, y, w, Component.translatable(KEY + "section.adventure"),
+                Component.translatable("chamber.wizards_and_beasts.title"));
+        y += Ui.callout(g, font, S, x, y, w, Ui.Callout.INFO, Component.translatable(next.hintKey()));
         return y + WizardsMetrics.SPACE_M;
     }
 

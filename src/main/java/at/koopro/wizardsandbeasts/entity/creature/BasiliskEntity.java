@@ -221,8 +221,10 @@ public class BasiliskEntity extends GenericGroundBeastEntity {
 
     @Override
     public void die(@NonNull DamageSource cause) {
+        // Only a basilisk a Chamber woke clears that Chamber: one bred by the ritual that happens to die in one, or one
+        // killed by a command, used to mark it slain as well.
         if (level() instanceof ServerLevel level && !isRemoved()) {
-            ChamberBasilisk.slainAt(level, blockPosition());
+            at.koopro.wizardsandbeasts.chamber.ChamberEvents.basiliskDied(level, this, cause);
         }
         super.die(cause);
     }

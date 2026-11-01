@@ -13,12 +13,13 @@ import org.jspecify.annotations.NullMarked;
 import java.util.List;
 
 /**
- * S→C: the Apprentice's Path as the server judges it — the step ids this player walks, in order, and the ids done.
- * Ids only: the client words them from its own lang file ({@code PathText}). An empty step list means the path is
- * switched off for this player.
+ * S→C: the Apprentice's Path as the server judges it — the step ids this player walks, in order, and the ids done —
+ * and the Chamber of Secrets stages reached, which the sheet points at once the path is walked. Ids only: the client
+ * words them from its own lang file. An empty step list means the path is switched off for this player.
  */
 @NullMarked
-public record ApprenticePathS2CPayload(List<String> steps, List<String> done) implements CustomPacketPayload {
+public record ApprenticePathS2CPayload(List<String> steps, List<String> done, List<String> chamber)
+        implements CustomPacketPayload {
 
     /** Far above the step count; bounds what a malformed packet can make the client allocate. */
     private static final int MAX_IDS = 64;
@@ -29,11 +30,13 @@ public record ApprenticePathS2CPayload(List<String> steps, List<String> done) im
     public static final StreamCodec<ByteBuf, ApprenticePathS2CPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list(MAX_IDS)), ApprenticePathS2CPayload::steps,
             ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list(MAX_IDS)), ApprenticePathS2CPayload::done,
+            ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list(MAX_IDS)), ApprenticePathS2CPayload::chamber,
             ApprenticePathS2CPayload::new);
 
     public ApprenticePathS2CPayload {
         steps = List.copyOf(steps);
         done = List.copyOf(done);
+        chamber = List.copyOf(chamber);
     }
 
     @Override

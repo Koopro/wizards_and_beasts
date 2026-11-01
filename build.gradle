@@ -89,6 +89,14 @@ neoForge {
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
+        // Headless check of Chambers on real terrain: a --nogui dedicated server in its own directory, so no save of
+        // ours is touched. Driven by WB_CHAMBER_PROBE (chamber/ChamberWorldProbe); inert without it.
+        chamberProbe {
+            server()
+            gameDirectory = project.file('build/chamber-probe')
+            programArgument '--nogui'
+        }
+
         // This run config launches GameTestServer and runs all registered gametests, then exits.
         // By default, the server will crash when no gametests are provided.
         // The gametest system is also enabled by default for other run configs under the /test command.

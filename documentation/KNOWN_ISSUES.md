@@ -41,7 +41,7 @@ exist in the registry, which is why a `/give` can hand you something the module 
 | Module | Why |
 |---|---|
 | `AZKABAN` | The fortress jigsaw start pool points at `data/wizards_and_beasts/structure/azkaban.nbt`, a **225-byte placeholder** with no reachable content. No Dementor spawn table, no loot. Turning it on generates an empty crag. |
-| `CHAMBER_OF_SECRETS` | Same failure mode: `structure/chamber_of_secrets/chamber.nbt` is a **1.3 KB placeholder**. `ChamberOfSecretsStructure` gates generation on the module, so a default install places no chamber. |
+| `CHAMBER_OF_SECRETS` | **Resolved 2026-10-29:** the placeholder box was replaced by a playable dungeon (`tools/gen_chamber_nbt.py`, `documentation/CHAMBER_OF_SECRETS.md`) and the module ships as PREVIEW. `ChamberOfSecretsStructure` still gates generation on the module. |
 | `MINISTRY` | Law enforcement — the Trace (by evidence, not by cast), cases, hearings, fines, licences, ranks. Aurors are procedural (no mob) and Azkaban sentences are not served in-game — see §5k. Never enabled in any shipped build; preserved off so existing worlds do not suddenly gain a police force. With it off, illegal magic is legal. |
 | `DARK_ARTS` | Dark-arts gating layer. Off, so the content it would gate falls back to whatever other module owns it. |
 

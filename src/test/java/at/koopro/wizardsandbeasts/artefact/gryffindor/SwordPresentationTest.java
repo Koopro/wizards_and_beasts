@@ -13,7 +13,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class SwordPresentationTest {
 
     private static boolean may(boolean module, boolean hat, boolean inWorld, boolean foe, float health, long since) {
-        return SwordPresentation.mayPresent(module, hat, inWorld, foe, health, 20f, since);
+        return SwordPresentation.mayPresent(module, hat, true, inWorld, foe, health, 20f, since);
+    }
+
+    @Test
+    void theHatOnlyRecallsTheSwordForOneWhoSlewAChambersBasilisk() {
+        assertFalse(SwordPresentation.mayPresent(true, true, false, false, true, 6f, 20f, 40),
+                "a wearer who never cleared a Chamber was given the sword");
+        assertTrue(SwordPresentation.mayPresent(true, true, true, false, true, 6f, 20f, 40));
     }
 
     @Test

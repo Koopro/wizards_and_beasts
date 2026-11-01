@@ -197,6 +197,27 @@ public class ModBlocks {
      * The Mirror of Erised, two blocks tall. Its item stays {@code CanonItemRegistry.MIRROR_OF_ERISED} (same id), now
      * a BlockItem of this that keeps its animated hand model.
      */
+    /**
+     * The Chamber of Secrets' working parts, placed only by the structure (no items): the hidden seal (Revelio shows it,
+     * Alohomora or its knocker opens it), the serpent's gate (held up by the basin's comparator) and the heart on the
+     * dais that runs the basilisk encounter. All three unbreakable, so no puzzle is dug through its own door.
+     */
+    public static final DeferredBlock<at.koopro.wizardsandbeasts.chamber.ChamberSealBlock> CHAMBER_SEAL =
+            BLOCKS.registerBlock("chamber_seal", at.koopro.wizardsandbeasts.chamber.ChamberSealBlock::new,
+                    () -> BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.STONE_BRICKS)
+                            .strength(-1.0f, 3600000.0f).noLootTable().noOcclusion()
+                            .pushReaction(PushReaction.BLOCK));
+    public static final DeferredBlock<at.koopro.wizardsandbeasts.chamber.ChamberGateBlock> CHAMBER_GATE =
+            BLOCKS.registerBlock("chamber_gate", at.koopro.wizardsandbeasts.chamber.ChamberGateBlock::new,
+                    () -> BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DARK_PRISMARINE)
+                            .strength(-1.0f, 3600000.0f).noLootTable().noOcclusion()
+                            .pushReaction(PushReaction.BLOCK));
+    public static final DeferredBlock<at.koopro.wizardsandbeasts.chamber.ChamberHeartBlock> CHAMBER_HEART =
+            BLOCKS.registerBlock("chamber_heart", at.koopro.wizardsandbeasts.chamber.ChamberHeartBlock::new,
+                    () -> BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.GILDED_BLACKSTONE)
+                            .strength(-1.0f, 3600000.0f).noLootTable().lightLevel(state -> 5)
+                            .pushReaction(PushReaction.BLOCK));
+
     public static final DeferredBlock<at.koopro.wizardsandbeasts.artefact.erised.MirrorOfErisedBlock> MIRROR_OF_ERISED =
             BLOCKS.registerBlock("mirror_of_erised", at.koopro.wizardsandbeasts.artefact.erised.MirrorOfErisedBlock::new,
                     () -> BlockBehaviour.Properties.of().strength(2.0f, 6.0f).sound(SoundType.GLASS)

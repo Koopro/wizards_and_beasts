@@ -343,3 +343,19 @@ CEREMONY ─▶ WAND ─▶ FIRST LIGHT ─▶ A SPELL OF YOUR OWN ─▶ PRACTI
   - The client gets step ids and builds the text itself.
   - Unit tests: `ApprenticePathTest` (13).
   - Game tests: `ApprenticePathTests` (8), which also cover the ceremony gate reopening after a respawn.
+
+## Update 2026-10-29 — the first adventure
+
+After the Apprentice's Path:
+
+```
+PATH WALKED ─▶ Serpent Chart ─▶ CHAMBER: seal (Revelio/Alohomora or the knocker) ─▶ basin gate (Aguamenti or a bucket)
+            ─▶ hall: the basilisk (boss bar, gaze counterplay) ─▶ cleared ─▶ Sword of Gryffindor (one per world)
+```
+
+- The Chamber is optional. It is a lead, not a step: Education's O.W.L. and career guidance carry on beside it.
+- The quest's stages live in the `chamber_quest` attachment, and the encounter in the heart block entity (saved
+  with the chunk).
+- The sword is never paid by a milestone, only by the basilisk's death.
+- The Sorting Hat recalls a lost sword only to a slayer.
+- Design and audit: `CHAMBER_OF_SECRETS.md`.

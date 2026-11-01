@@ -126,6 +126,8 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
                 ModBlocks.UNLIT_LANTERN.get(), ModBlocks.UNLIT_SOUL_LANTERN.get(),
                 ModBlocks.UNLIT_COPPER_LANTERN.get(), ModBlocks.UNLIT_GLOWSTONE.get());
         tag(ModuleTags.blocks(Module.ARTEFACTS)).add(ModBlocks.VANISHING_CABINET.get(), ModBlocks.MIRROR_OF_ERISED.get());
+        tag(ModuleTags.blocks(Module.CHAMBER_OF_SECRETS)).add(ModBlocks.CHAMBER_SEAL.get(), ModBlocks.CHAMBER_GATE.get(),
+                ModBlocks.CHAMBER_HEART.get());
         tag(BlockTags.MINEABLE_WITH_PICKAXE).add(ModBlocks.MIRROR_OF_ERISED.get());
         tag(BlockTags.MINEABLE_WITH_AXE).add(ModBlocks.VANISHING_CABINET.get());
     }

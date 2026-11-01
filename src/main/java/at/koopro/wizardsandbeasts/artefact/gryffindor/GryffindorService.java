@@ -31,6 +31,10 @@ import java.util.UUID;
  * The Sorting Hat and the Sword of Gryffindor, server side: noticing a wearer standing their ground, presenting the
  * sword, the sword drinking a basilisk's venom, and the world forgetting a sword that was destroyed.
  * {@link GryffindorEvents} routes the game's events here; the rule of when is {@link SwordPresentation}'s.
+ *
+ * <p>The sword is earned in a Chamber of Secrets ({@code chamber.ChamberSword} calls {@link #presentInChamber}). The Hat
+ * only recalls it: a wearer who has slain a Chamber's basilisk, in need, is given back a sword the world has lost.
+ * User decision, 2026-10-29.
  */
 @NullMarked
 public final class GryffindorService {
@@ -64,6 +68,7 @@ public final class GryffindorService {
         long since = strike != null && strike.foe().equals(attacker.getUUID())
                 ? level.getGameTime() - strike.tick() : -1L;
         boolean may = SwordPresentation.mayPresent(ModuleManager.isEnabled(Module.ARTEFACTS), wearsHat(wearer),
+                at.koopro.wizardsandbeasts.chamber.ChamberQuestService.worthy(wearer),
                 GryffindorSword.get(level).present() != null, attacker.getType().is(FOES),
                 wearer.getHealth(), wearer.getMaxHealth(), since);
         return may ? present(wearer) : null;
@@ -71,18 +76,41 @@ public final class GryffindorService {
 
     /** The sword falls out of the Hat at the wearer's head, ready to take. */
     public static ItemEntity present(ServerPlayer wearer) {
-        ServerLevel level = wearer.level();
+        ItemEntity drop = give(wearer.level(), wearer.getX(), wearer.getEyeY() + 0.4, wearer.getZ(), false, null);
+        wearer.level().playSound(null, wearer.blockPosition(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.5f, 1.6f);
+        wearer.displayClientMessage(Component.translatable(KEY + "presented"), false);
+        return drop;
+    }
+
+    /**
+     * The sword rises over a Chamber's dais for the one who slew its basilisk: already imbued with the venom it was
+     * earned against, and theirs alone to pick up. The caller has checked that no sword is out in the world.
+     */
+    public static ItemEntity presentInChamber(ServerLevel level, double x, double y, double z, ServerPlayer worthy) {
+        ItemEntity drop = give(level, x, y, z, true, worthy.getUUID());
+        level.playSound(null, drop.blockPosition(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.6f, 1.4f);
+        level.playSound(null, drop.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0f, 1.2f);
+        worthy.displayClientMessage(Component.translatable(KEY + "earned"), false);
+        return drop;
+    }
+
+    private static ItemEntity give(ServerLevel level, double x, double y, double z, boolean imbued,
+                                   @Nullable UUID owner) {
         UUID id = UUID.randomUUID();
         ItemStack sword = new ItemStack(CanonItemRegistry.SWORD_OF_GRYFFINDOR.get());
         sword.set(ModDataComponents.GRYFFINDOR_SWORD_ID.get(), id);
-        ItemEntity drop = new ItemEntity(level, wearer.getX(), wearer.getEyeY() + 0.4, wearer.getZ(), sword, 0, -0.1, 0);
+        if (imbued) {
+            sword.set(ModDataComponents.VENOM_IMBUED.get(), true);
+        }
+        ItemEntity drop = new ItemEntity(level, x, y, z, sword, 0, -0.1, 0);
         drop.setNoPickUpDelay();
         // It does not lie about for five minutes and vanish in the middle of the fight it was given for.
         drop.setUnlimitedLifetime();
+        if (owner != null) {
+            drop.setTarget(owner);
+        }
         level.addFreshEntity(drop);
         GryffindorSword.get(level).presented(id);
-        level.playSound(null, wearer.blockPosition(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.5f, 1.6f);
-        wearer.displayClientMessage(Component.translatable(KEY + "presented"), false);
         return drop;
     }
 

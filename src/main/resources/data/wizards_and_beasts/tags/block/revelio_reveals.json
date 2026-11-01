@@ -10,6 +10,7 @@
     "minecraft:tripwire_hook",
     "minecraft:note_block",
     "minecraft:target",
+    "wizards_and_beasts:chamber_seal",
     { "id": "#c:ores", "required": false }
   ]
 }

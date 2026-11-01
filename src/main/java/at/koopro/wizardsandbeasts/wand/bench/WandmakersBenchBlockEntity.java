@@ -166,7 +166,12 @@ public class WandmakersBenchBlockEntity extends BlockEntity implements GeoBlockE
         super.saveAdditional(output);
         output.store("flexibility_ordinal", Codec.INT, selectedFlexibilityOrdinal);
         for (int i = 0; i < 3; i++) {
-            output.store("slot_" + i, ItemStack.CODEC, getSlotStack(i));
+            // ItemStack.CODEC refuses an empty stack: storing one logged "Item must not be minecraft:air" on every
+            // save and update packet. An absent slot reads back as empty, which is also how the client learns of it.
+            ItemStack stack = getSlotStack(i);
+            if (!stack.isEmpty()) {
+                output.store("slot_" + i, ItemStack.CODEC, stack);
+            }
         }
     }
 

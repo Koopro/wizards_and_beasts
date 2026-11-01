@@ -134,7 +134,8 @@ class ModuleStateTest {
         assertEquals(ModuleState.PREVIEW, ModuleDefaults.shipped(Module.PLAYER_STATS));
         assertEquals(ModuleState.ENABLED, ModuleDefaults.shipped(Module.STRUCTURES));
         assertEquals(ModuleState.ENABLED, ModuleDefaults.shipped(Module.HANDBOOK));
-        assertEquals(ModuleState.DISABLED, ModuleDefaults.shipped(Module.CHAMBER_OF_SECRETS));
+        // Changed deliberately on 2026-10-29: the Chamber became a playable dungeon and ships as a preview.
+        assertEquals(ModuleState.PREVIEW, ModuleDefaults.shipped(Module.CHAMBER_OF_SECRETS));
         // Absent from the old table, so it resolved through getOrDefault to DISABLED.
         assertEquals(ModuleState.DISABLED, ModuleDefaults.shipped(Module.MINISTRY));
     }

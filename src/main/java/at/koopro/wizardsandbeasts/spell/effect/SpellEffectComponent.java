@@ -289,6 +289,7 @@ public sealed interface SpellEffectComponent permits
             if (!standardEnabled() || amount <= 0f) return;
             LivingEntity target = ctx.target();
             if (target == null) return;
+            at.koopro.wizardsandbeasts.chamber.ChamberEvents.spellStruck(target, ctx.caster());
             target.hurt(resolveDamageSource(ctx), amount * ctx.damageMult());
         }
 

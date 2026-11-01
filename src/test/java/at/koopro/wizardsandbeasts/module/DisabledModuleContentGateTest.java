@@ -187,9 +187,9 @@ class DisabledModuleContentGateTest {
      * deliberate. `DISABLED` keeps an operator able to switch them on; `COMING_SOON` would not.
      */
     @Test
-    void theFourNamedModulesShipDisabledAndOperatorReachable() {
-        for (Module module : List.of(Module.AZKABAN, Module.CHAMBER_OF_SECRETS,
-                Module.MINISTRY, Module.DARK_ARTS)) {
+    void theThreeNamedModulesShipDisabledAndOperatorReachable() {
+        // The Chamber of Secrets left this list on 2026-10-29: a playable dungeon now, shipped as a preview.
+        for (Module module : List.of(Module.AZKABAN, Module.MINISTRY, Module.DARK_ARTS)) {
             assertEquals(ModuleState.DISABLED, ModuleDefaults.shipped(module),
                     module + " must ship DISABLED — see KNOWN_ISSUES for why");
         }

@@ -3,6 +3,12 @@ package at.koopro.wizardsandbeasts.chamber.structure;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import com.mojang.serialization.MapCodec;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.QuartPos;
+import net.minecraft.world.level.LevelHeightAccessor;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.structures.JigsawStructure;
@@ -55,7 +61,33 @@ public final class ChamberOfSecretsStructure extends Structure {
         if (!ModuleManager.isEnabled(Module.CHAMBER_OF_SECRETS)) {
             return Optional.empty();
         }
-        return jigsaw.findGenerationPoint(context);
+        return jigsaw.findGenerationPoint(context).filter(stub -> groundSuits(context, stub.position()));
+    }
+
+    /** Measures the ground over the Chamber for {@link ChamberSite}; {@code at} is the piece's centre, the entrance. */
+    private boolean groundSuits(GenerationContext context, BlockPos at) {
+        ChunkGenerator generator = context.chunkGenerator();
+        LevelHeightAccessor height = context.heightAccessor();
+        RandomState random = context.randomState();
+        int x = at.getX();
+        int z = at.getZ();
+        int surface = generator.getFirstFreeHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, height, random);
+        var biome = context.biomeSource().getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(surface),
+                QuartPos.fromBlock(z), random.sampler());
+        // The cheap answer first: a chart's search asks this of hundreds of cells, and heights are the dear part.
+        if (!biomes().contains(biome)) {
+            return false;
+        }
+        int lowest = surface;
+        int reach = ChamberSite.SAMPLE_REACH;
+        for (int dx = -reach; dx <= reach; dx += reach) {
+            for (int dz = -reach; dz <= reach; dz += reach) {
+                lowest = Math.min(lowest,
+                        generator.getFirstFreeHeight(x + dx, z + dz, Heightmap.Types.WORLD_SURFACE_WG, height, random));
+            }
+        }
+        boolean liquid = !generator.getBaseColumn(x, z, height, random).getBlock(surface - 1).getFluidState().isEmpty();
+        return ChamberSite.suits(true, liquid, surface, lowest);
     }
 
     @Override
