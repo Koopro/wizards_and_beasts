@@ -1,7 +1,7 @@
 # The Living Wizarding World, Phase 1: audit and blueprint (2026-11-01)
 
-Status: **audit and design only, awaiting approval.** Nothing in this document has been built. No gameplay file, registry
-or dependency was changed, and no commit was made.
+Status: **approved 2026-11-01 with changes, and built on `feat/living-world`.** Sections 1 to 12 are the audit as written,
+with corrections marked. Section 13 records the decisions as approved, what was built and measured, and what is unverified.
 
 `J/` = `src/main/java/at/koopro/wizardsandbeasts/`, `D/` = `src/main/resources/data/wizards_and_beasts/`,
 `T/` = `src/test/java/at/koopro/wizardsandbeasts/`. Line numbers are from the dirty tree of `feat/chamber-of-secrets`.
@@ -763,3 +763,116 @@ which particles and whether the bell rings.
 - `ECONOMY.md` section 8 says the apothecary sells 8 goods (it sells 18), and section 9 says no Floo toll (`FlooTolls` exists).
 - `GUI_DESIGN_SYSTEM.md:96-101` describes dark skins; all skins are paper in code.
 - `ApprenticePathService:52` claims Sickles buy books at the wandmaker's; see section 7.
+
+---
+
+## 13. Results (2026-11-01)
+
+Written on `feat/living-world`. Nothing here was pushed or merged. **No graphical client was used:** everything below ran under
+Gradle, the game-test server or a `--nogui` dedicated server.
+
+### Where the build differs from the blueprint
+
+| Blueprint | As approved and built |
+|---|---|
+| Stock derived from `MarketBook` pressure, shared across hamlets | Prices global; stock per site in `SettlementData`, with assortment and shelf size seeded per site |
+| Back next dawn | Same, and never sooner than two minutes |
+| `rumour` service | Dropped. Rumours are talk topics; charts come from the Path and caches |
+| Scholar teaches five untaught subjects | Corrected: Astronomy, Defence, History. The other subjects cannot have lessons (section 3) |
+| Flat stock numbers | `shop` block on the role file |
+| `surface_structures`, `beard_thin`, spacing 72/32, relief 6 | `surface_structures`, `beard_box`, spacing 40/20, relief 10, exclusion 8 chunks from villages |
+
+### Data boundaries (requirement D)
+
+| Level | Holds | Where |
+|---|---|---|
+| Global | Prices, price pressure, economic rules, location and role files | `MarketBook`, `locations/*.json`, `npc_roles/*.json` |
+| Settlement | Who keeps each post, whether they are present or away, the site's seed, its shelves | `SettlementData`, overworld `SavedData` |
+| Player | Standing, boards, weekly limits, unlocks, places found, whether charted | `location_standing`, `market_record`, `known_places` attachments |
+
+### Module initialisation (requirement A)
+
+World state now reaches the cache at the overworld's `LevelEvent.Load`, which vanilla fires before the spawn search
+(`MinecraftServer.createLevels`). The old comparison that decides on a recipe reload is kept, because an early load
+would otherwise have silenced it.
+
+Proved on a fresh world configured with `settlements`, `chamber_of_secrets` and `structures` disabled:
+
+| Run | First chunk saw | World stores | Gated recipe after start |
+|---|---|---|---|
+| Fix in | DISABLED | DISABLED | absent, correct |
+| Fix removed | **PREVIEW**, the defect | DISABLED | absent |
+
+**Chamber implication:** before this fix a world configured with the Chamber off could get one in its first chunks, and
+Azkaban was the reverse. Existing worlds keep what generated. The fix is on `feat/living-world`, not on the Chamber checkpoint.
+
+### Generation (requirement B)
+
+Hub-and-spoke jigsaw is confirmed; the rigid NBT fallback was not needed. Seeds 4815162342, 271828182, 8675309, ten sites each.
+
+| Check | Result |
+|---|---|
+| All six pieces and all five posts present | 30/30 |
+| Rotations | All four, 30 of each |
+| Refused for a missing building | 0 |
+| Every counter reachable on foot | 30/30 |
+| Footprint can be left on all four sides | 30/30 |
+| Village overlap | 0 |
+| Template blocks changed | 39 of about 147,000, all at one site: a monster room in the Undercroft's outer wall |
+| Trunks in the hamlet's open air | 2 sites, 3 cells or fewer |
+| Floor cells over nothing | 0 at 16 sites, up to 68 at 13, and 311 at one, by a ravine; all still walkable |
+| Strict "clean" sites | 26/30 |
+| Grid yield | 3.8-6.9% of cells |
+| Distribution | One hamlet per 2,440-3,266 blocks. Nearest to spawn 975-2,296. Nearest neighbour median 969-1,547, least 419 |
+| Biomes | Forest and plains mostly, then snowy plains, birch, taiga |
+| Module off | 0 of 625 cells, no people |
+
+What the probe changed:
+- Yield was 0.6-1.6% at first. Water rejected three quarters of flat cells, and sampling a square rejected land for ponds at
+  corners nothing stands on. Sampling the cross-shaped footprint, relief 10 and a denser grid fixed it.
+- `top_layer_modification` left about 1,000 floating tree blocks, so it was abandoned.
+- `beard_box` supported floors better than `beard_thin`.
+- It found the bank's floor overwriting its post, and two wrong role names. `SettlementLayoutTest` now pins both.
+
+Chart search is 0.2-0.8 s if run at once, so `HamletCharts` runs it at 3 ms a tick. `SiteSearchWalkTest` proves the walk finds what
+the whole search finds. The tick-budgeted path itself has not run on real terrain with a real player.
+
+### NPC architecture (decision 6)
+
+Confirmed: one `SettlementNpcEntity` plays every role from data, and the goblin teller is bound by attachment with no change to
+its class. On all three seeds five people spawned on real terrain, and the same five, by UUID and name, came back through a real
+server restart, with no duplicates.
+
+### Tests
+
+Unit 2940 run, 6 failed: the known wand-model tests, unchanged. Game 473/473, 12 of them new.
+
+### Spell-world work (requirement E)
+
+Inspected, archived in `C:\tmp\wb-backups\2026-11-01`, and **not copied or changed**.
+- `C:\tmp\wb-spell-world` is at `cd45b5bb`, 63 commits behind the Chamber tip. Uncommitted: 21 modified files; new `spell/world/`
+  (1,340 lines), its tests, data maps, tags and `SPELL_WORLD_INTERACTIONS.md`; two crash reports from 2026-10-14, unexplained.
+- `git apply --check` of its 21 modified files against this stack failed at `WizardsAndBeastsGameTests.java`. A clean text apply
+  elsewhere would prove little: five more of those files changed since its base, and it rewrites `SpellHelper`.
+- It would need a planned port, with its own tests. It is not a dependency of anything here.
+
+### Still unverified (requirement F and this work)
+
+Nothing below should be read as done.
+
+**Hamlets:**
+- Nothing has been seen in a client: buildings, Spire, skins, talk section, sign text at each rotation, lighting, darkness at night.
+  The rule from the UI work stands: one building and one person are shown before the look is accepted.
+- No two-client run. "Two players" in the game tests are mock connections on one server.
+- Whether NPC strolling looks right, or a person gets stuck. No game test runs their AI at length.
+- A hamlet at the edge of explored land in an existing world: cut short by reasoning, never generated.
+- Whether a player actually finds one by chart; `HamletCharts` end to end on real terrain.
+- Whether Wandmaker's Bench, cauldrons, desk and lectern work in a generated building. Each is placed, and none was used.
+- Undercroft: seal rotation, the ladder, the button as knocker, Revelio. Only placement was checked.
+- Economy balance: prices are the existing ones, and the Keeper's contract rewards have never been played.
+- Marker art: the hamlet uses the existing village marker.
+
+**The Chamber, unchanged from `CHAMBER_OF_SECRETS.md` section 4:** no real-client walk of a natural Chamber, no survival fight,
+no two-client run, signs at each rotation unread, hall visibility, plus the open decisions on sword ownership and a gaze grace.
+
+**Parked:** Dark-theme comparison; `feature/ui-overhaul` merge; `SpellWorldGuard`.

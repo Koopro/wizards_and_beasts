@@ -385,6 +385,25 @@ Manual. Use a new survival world. In a world created before this change, or with
 7. Wear the Sorting Hat in a fight at low health with the sword out in the world: nothing. Destroy the sword (throw
    it in lava), then fight again: it is returned to you, because you slew a basilisk.
 
+## Wizarding hamlets (2026-11-01, `feat/living-world`)
+
+Manual, and **never yet run**: everything below was only checked headlessly. New survival world, and a second client
+for steps 9-10. If the module was off when the world was created: `/wandb admin module set settlements preview`.
+
+1. Finish the Apprentice's Path, or `/wandb player path off` and find a hidden cache: you get a Wayfarer's Chart.
+2. Follow it. The Spire should be visible over the trees from a distance. Does it read as a leaning tower?
+3. Walk in: a toast names the hamlet, once. Look at each building by day and by night. Is anything too dark, or
+   floating, or buried? Do the signs read at every rotation? Are the windows lit?
+4. Right-click each person: the board opens with a greeting and topics. Ask something. Do the skins read as people?
+5. Carry Sickles to the goblin teller, deposit, and buy dittany at the apothecary. Withdraw a Sickle.
+6. Buy down a rare good until it says sold out. Reload the world: still sold out. Wait two game days: some is back.
+7. Compare two hamlets' apothecaries: the goods differ, the prices match.
+8. Hit a person until they fall: a crack, smoke, nothing dropped. They return next dawn with the same name.
+9. Two players at one shelf, both buying the last unit.
+10. Two players at one board: each sees their own greeting and answers.
+11. In the apothecary cellar, Revelio the far wall, then Alohomora. Or use the button above the seal.
+12. Try a wand from the wandmaker's board. Sit an O.W.L. at the Reading Room desk.
+
 ## Brewing (2026-10-23, `feat/brewing`)
 
 Manual. You need a survival world, a pewter and a brass cauldron on a heat source, and two players for steps 7-8.

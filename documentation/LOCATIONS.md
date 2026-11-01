@@ -163,6 +163,17 @@ places and five services, with no change to the engine beyond the market section
 A new activity, `goods_traded` (subject: the location), lets a place's standing grow with trade. Contract rewards and
 service fees at a place with a `risk` are booked as illicit flows.
 
+## 4c. Hamlets (2026-11-01)
+
+A generated hamlet's people host the same locations: a `settlement_npc` playing a role keeps a place through
+`presence.host_role` (`RoleHost`), beside the villager host, which is unchanged. New places: `hamlet` (the Keeper's board)
+and `reading_room` (lessons). A role is `npc_roles/<id>.json`: who they are, what they say, and how they stock a shop.
+
+Stock is kept apart from price. `MarketBook` stays one global pressure per good. A settlement counter adds shelves
+(`settlement/shop`, stored in `SettlementData`), seeded per site. A villager host has no shelves and trades as before.
+
+See `LIVING_WORLD_AUDIT.md`.
+
 ## 5. Roadmap for the remaining places
 
 Each row is what the place needs **in the framework's terms**. Blockers come first; the module stays where it is.

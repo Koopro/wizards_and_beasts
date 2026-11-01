@@ -4,6 +4,34 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Wizarding hamlets (2026-11-01)
+
+- **Added:** generated wizarding hamlets around the leaning Crooked Spire, under the new `SETTLEMENTS` module (PREVIEW).
+  Each has a plaza, a Keeper's Post, a wandmaker, an apothecary, a Reading Room and a Gringotts branch. About one per
+  2,500-3,000 blocks, in the Overworld, on level ground, and never beside a village.
+- **Added:** a hamlet's people, one reusable NPC with a role per profession. Each has a name and a greeting, and a few
+  things you can ask them, some of which depend on who you are. What is said can change with heritage or a condition;
+  what a shop will do for you does not.
+- **Added:** the Keeper's board, with its own standing. The wandmaker and the apothecary are the existing Ollivanders and
+  apothecary, so their prices, standing and contracts are the ones you already have.
+- **Added:** the Scholar teaches Astronomy, Defence Against the Dark Arts and History of Magic, which no shop in a default
+  world taught. The Reading Room holds an examination desk and a Study Lectern. No spell is for sale.
+- **Added:** shops in hamlets have their own stock. Prices are the same everywhere; what is on the shelf is not. Each
+  hamlet carries its own selection, and a shelf fills again over a few days.
+- **Added:** if someone in a hamlet takes a lethal blow they Apparate away and return at dawn. They drop nothing.
+- **Added:** the Wayfarer's Chart. It is handed over when the Apprentice's Path is walked, with no new step, and hidden
+  caches hold one.
+- **Added:** the Undercroft, a secret under the apothecary's cellar.
+- **Changed:** the Path's two-Sickle message now says shops draw on the vault and coin goes to a goblin teller first. Coin
+  rewards are unchanged, and every hamlet has a teller for both directions.
+- **Fixed:** the first chunks of a new world were generated against the build's shipped module states, not the world's.
+  A world configured with the Chamber off could still get one near spawn. This affected Azkaban too.
+- **Changed:** only a seal in a real Chamber now counts toward the Chamber quest, because a hamlet uses the same seal.
+- **Existing worlds:** `SETTLEMENTS` is new, so a saved world picks it up from the config default. Hamlets then appear
+  only in chunks not yet generated, and one at the edge of explored land can come out cut short. To keep an existing
+  world as it is: `/wandb admin module set settlements disabled`. A config written before this version has no entry for
+  the module, and the shipped default applies.
+
 ### The Apprentice's Path (2026-10-29)
 
 - **Added:** the Apprentice's Path. It guides a new witch or wizard through their first days, from the ceremony to
