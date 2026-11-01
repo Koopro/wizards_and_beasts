@@ -1,0 +1,44 @@
+{
+  "_comment": "The Reading Room: a hamlet's scholar. Lessons in the teachable subjects no shop in a default world offers: Astronomy has no other teacher, and Defence and History sit at the Ministry, which ships off. One a day, counted toward the O.W.L. (education.LessonServices). No spell is sold here: spells are found and traced, and the shelves and the Study Lectern are for that.",
+  "module": "scholarship",
+  "skin": "field_notebook",
+  "presence": {
+    "hosts": [
+      "wizards_and_beasts:settlement_npc"
+    ],
+    "host_role": "wizards_and_beasts:scholar",
+    "host_reach": 6.0
+  },
+  "standing": {
+    "max_active": 2,
+    "board_size": 2,
+    "xp_rules": [],
+    "ranks": [
+      {
+        "id": "reader",
+        "xp": 0
+      }
+    ],
+    "contracts": []
+  },
+  "services": [
+    {
+      "service": "wizards_and_beasts:lesson_astronomy",
+      "min_tier": "reader",
+      "fee_knuts": 145,
+      "discount_per_tier": 0.1
+    },
+    {
+      "service": "wizards_and_beasts:lesson_defence_against_dark_arts",
+      "min_tier": "reader",
+      "fee_knuts": 145,
+      "discount_per_tier": 0.1
+    },
+    {
+      "service": "wizards_and_beasts:lesson_history_of_magic",
+      "min_tier": "reader",
+      "fee_knuts": 145,
+      "discount_per_tier": 0.1
+    }
+  ]
+}

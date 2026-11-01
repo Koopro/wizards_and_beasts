@@ -48,10 +48,13 @@ public final class LocationPresence {
         return null;
     }
 
-    /** Whether {@code entity} is one of the place's hosts: the right type, and for a villager the right trade. */
+    /** Whether {@code entity} is one of the place's hosts: the right type, and the right trade or role. */
     static boolean keeps(LocationDefinition.Presence presence, Entity entity) {
         if (!presence.hosts().contains(BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()))) {
             return false;
+        }
+        if (entity instanceof RoleHost host) {
+            return presence.hostRole().filter(host.hostRole()::equals).isPresent();
         }
         if (presence.hostProfession().isEmpty()) {
             return true;

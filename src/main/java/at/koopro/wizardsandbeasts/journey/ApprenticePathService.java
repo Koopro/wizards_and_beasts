@@ -49,7 +49,7 @@ import java.util.UUID;
  *   <li>Arrive: the Ministry Handbook, and the recipes a new wizard needs before anyone tells them (the bench a
  *       wandmaker takes up, the wand blank, the handbook, a blank spellbook, the duelling dummy, a cauldron)</li>
  *   <li>Wand: the starter charm put on the spell wheel</li>
- *   <li>First light: two Sickles, which buy blank spellbooks at the wandmaker's</li>
+ *   <li>First light: two Sickles. Shops draw on the vault, so coin goes over a goblin teller's counter first</li>
  *   <li>A spell of your own: one skill point and a duelling dummy to practise on</li>
  *   <li>Practice: a Galleon</li>
  *   <li>Field study: five Sickles</li>
@@ -173,13 +173,15 @@ public final class ApprenticePathService {
     }
 
     /**
-     * The path is walked: the wider world is next. A Serpent Chart to the nearest uncleared Chamber is handed over
-     * once, as a lead and not a task; the chart itself decides whether there is a Chamber to draw it to.
+     * The path is walked: the wider world is next. A Serpent Chart to the nearest uncleared Chamber and a Wayfarer's
+     * Chart to the nearest hamlet are handed over once, as leads and not tasks; each decides whether there is anywhere
+     * to draw it to. No path step asks for either.
      */
     private static void offerAdventure(ServerPlayer player) {
         PathRecord record = record(player);
         if (record.guided() && record.has(PathStep.ARRIVE) && current(player) == null) {
             at.koopro.wizardsandbeasts.chamber.ChamberCharts.offer(player);
+            at.koopro.wizardsandbeasts.settlement.HamletCharts.offer(player);
         }
     }
 

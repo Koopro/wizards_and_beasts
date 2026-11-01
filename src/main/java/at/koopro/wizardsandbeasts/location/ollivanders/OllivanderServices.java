@@ -34,6 +34,20 @@ public final class OllivanderServices {
     private OllivanderServices() {}
 
     public static void register(LocationServices.Sink sink) {
+        sink.register("wand_trial", new LocationService() {
+            @Override
+            public Quote quote(ServerPlayer player, Use use) {
+                return at.koopro.wizardsandbeasts.ministry.law.CodeOfWandUse.forbidden(player)
+                        ? Quote.no(at.koopro.wizardsandbeasts.ministry.law.CodeOfWandUse.refusal())
+                        : Quote.yes(Component.translatable("location.wizards_and_beasts.service.wand_trial.detail"));
+            }
+
+            @Override
+            public boolean perform(ServerPlayer player, Use use) {
+                at.koopro.wizardsandbeasts.wand.ollivander.OllivanderInteractHandler.visit(player);
+                return true;
+            }
+        });
         sink.register("wand_evaluation", new Evaluation());
         sink.register("broom_servicing", new BroomServicing());
         sink.register("wand_commission", new WandCommission());

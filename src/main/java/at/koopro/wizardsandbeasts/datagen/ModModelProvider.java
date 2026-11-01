@@ -410,6 +410,8 @@ public class ModModelProvider extends ModelProvider {
         // The Chamber's working parts wear vanilla stone so they read as the wall they stand in; open, they are not
         // drawn at all (their getRenderShape), so one model per block serves every state.
         chamberBlock(blockModels, ModBlocks.CHAMBER_SEAL.get(), Identifier.withDefaultNamespace("block/stone_bricks"));
+        chamberBlock(blockModels, ModBlocks.SETTLEMENT_POST.get(),
+                Identifier.fromNamespaceAndPath(at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID, "block/hogsmeade_worn_stone"));
         chamberBlock(blockModels, ModBlocks.CHAMBER_GATE.get(), Identifier.withDefaultNamespace("block/dark_prismarine"));
         chamberBlock(blockModels, ModBlocks.CHAMBER_HEART.get(),
                 Identifier.withDefaultNamespace("block/gilded_blackstone"));

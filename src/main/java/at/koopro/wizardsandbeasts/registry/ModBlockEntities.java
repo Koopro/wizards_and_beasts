@@ -91,6 +91,12 @@ public final class ModBlockEntities {
                     at.koopro.wizardsandbeasts.chamber.ChamberHeartBlockEntity::new,
                     Set.of(ModBlocks.CHAMBER_HEART.get())));
 
+    public static final DeferredHolder<BlockEntityType<?>,
+            BlockEntityType<at.koopro.wizardsandbeasts.settlement.post.SettlementPostBlockEntity>> SETTLEMENT_POST =
+            BLOCK_ENTITY_TYPES.register("settlement_post", () -> new BlockEntityType<>(
+                    at.koopro.wizardsandbeasts.settlement.post.SettlementPostBlockEntity::new,
+                    Set.of(ModBlocks.SETTLEMENT_POST.get())));
+
     private ModBlockEntities() {
     }
 }

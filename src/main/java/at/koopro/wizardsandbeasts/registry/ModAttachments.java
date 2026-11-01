@@ -498,6 +498,21 @@ public class ModAttachments {
                     .serialize(Codec.LONG.fieldOf("pos"))
                     .build());
 
+    /** On anyone keeping a settlement post: which post, so their death and their loading can report to it. */
+    public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.settlement.PostRef>> SETTLEMENT_POST =
+            ATTACHMENTS.register("settlement_post", () -> AttachmentType.builder(
+                            () -> at.koopro.wizardsandbeasts.settlement.PostRef.NONE)
+                    .serialize(at.koopro.wizardsandbeasts.settlement.PostRef.CODEC.fieldOf("data"))
+                    .build());
+
+    /** The settlements a player has reached. Theirs alone, kept across deaths. */
+    public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.settlement.KnownPlaces>> KNOWN_PLACES =
+            ATTACHMENTS.register("known_places", () -> AttachmentType.builder(
+                            () -> at.koopro.wizardsandbeasts.settlement.KnownPlaces.EMPTY)
+                    .serialize(at.koopro.wizardsandbeasts.settlement.KnownPlaces.CODEC.fieldOf("data"))
+                    .copyOnDeath()
+                    .build());
+
     /** Spell-trace retry waits and the Steady hand setting, kept across logouts and deaths. */
     public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.spell.learning.tracing.TraceMemory>> TRACE_MEMORY =
             ATTACHMENTS.register("trace_memory", () -> AttachmentType.builder(

@@ -113,12 +113,46 @@ public final class LocationScreen extends Screen {
         g.enableScissor(x0 + 2, clipTop, x0 + w - 2, clipBottom);
         int y = clipTop - (int) scroll;
         int start = y;
+        y = talk(g, s, x, y, innerW, mouseX, mouseY);
         y = standing(g, s, x, y, innerW);
         y = services(g, s, x, y + 4, innerW, mouseX, mouseY);
         y = market(g, s, x, y + 4, innerW, mouseX, mouseY);
         y = contracts(g, s, x, y + 4, innerW, mouseX, mouseY);
         g.disableScissor();
         contentH = y - start + 4;
+    }
+
+    /** The person at the counter: what they say, and what can be asked of them. */
+    private int talk(GuiGraphics g, UiSurface s, int x, int y, int w, int mx, int my) {
+        LocationView.Talk talk = view.talk();
+        if (!talk.present()) {
+            return y;
+        }
+        y = Ui.sectionHeader(g, font, s, x, y, w, talk.speaker(), null);
+        if (!talk.greeting().getString().isEmpty()) {
+            y = paragraph(g, x, y, w, talk.greeting(), s.ink2()) + 2;
+        }
+        for (LocationView.TopicLine topic : talk.topics()) {
+            y = button(g, s, x, y, topic.label(), w, Action.TOPIC, topic.id(), view.present(), mx, my) + 2;
+        }
+        if (!talk.reply().getString().isEmpty()) {
+            y = paragraph(g, x, y + 1, w, talk.reply(), s.ink()) + 2;
+        }
+        return y + 4;
+    }
+
+    /** A button as wide as the column, for a line of text rather than a verb. */
+    private int button(GuiGraphics g, UiSurface s, int x, int y, Component label, int w, Action action, String argument,
+                       boolean enabled, int mx, int my) {
+        boolean hover = enabled && mx >= x && mx < x + w && my >= y && my < y + BUTTON_H
+                && my >= clipTop && my < clipBottom;
+        g.fill(x, y, x + w, y + BUTTON_H, hover ? s.hoverWash() | 0xFF000000 : s.well());
+        g.renderOutline(x, y, w, BUTTON_H, enabled ? s.accent() : s.disabled());
+        draw(g, label, x + 4, y + 2, w - 8, enabled ? s.ink() : s.disabled());
+        if (enabled && y >= clipTop && y + BUTTON_H <= clipBottom) {
+            buttons.add(new Button(x, y, w, BUTTON_H, action, argument));
+        }
+        return y + BUTTON_H;
     }
 
     private int standing(GuiGraphics g, UiSurface s, int x, int y, int w) {

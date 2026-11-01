@@ -30,12 +30,13 @@ import java.util.List;
  * @param skin      the GUI skin to draw the board in; empty for plain parchment
  * @param market    the trader's goods at today's prices, when the place keeps a market
  * @param illicit   whether the place deals outside the law (its deals may reach the Ministry)
+ * @param talk      what the person at the counter says, when it is one of a settlement's people
  */
 @NullMarked
 public record LocationView(Identifier id, Component name, String skin, boolean present, Component tier, Component nextTier,
                            int rep, int nextRep, int tierIndex, int tierCount, int maxActive, List<GoalLine> goals,
                            List<ServiceLine> services, List<ContractLine> active, List<ContractLine> offers,
-                           List<MarketLine> market, boolean illicit) {
+                           List<MarketLine> market, boolean illicit, Talk talk) {
 
     private static final StreamCodec<ByteBuf, Component> TEXT = ComponentSerialization.TRUSTED_CONTEXT_FREE_STREAM_CODEC;
 
@@ -57,6 +58,41 @@ public record LocationView(Identifier id, Component name, String skin, boolean p
                 ServiceLine::new);
     }
 
+    /** One thing that can be asked: the id goes back in {@code TOPIC}, and the server judges it again. */
+    public record TopicLine(String id, Component label) {
+        static final StreamCodec<ByteBuf, TopicLine> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.stringUtf8(64), TopicLine::id,
+                TEXT, TopicLine::label,
+                TopicLine::new);
+    }
+
+    /**
+     * The person behind the counter.
+     *
+     * @param speaker  their name
+     * @param greeting what they say, already chosen by the server; empty when they have nothing to say
+     * @param topics   what this player may ask
+     * @param reply    the answer to the last thing asked; empty until something is
+     */
+    public record Talk(Component speaker, Component greeting, List<TopicLine> topics, Component reply) {
+        public static final Talk NONE = new Talk(Component.empty(), Component.empty(), List.of(), Component.empty());
+
+        public boolean present() {
+            return !speaker.getString().isEmpty();
+        }
+
+        static Talk decode(ByteBuf buf) {
+            return new Talk(TEXT.decode(buf), TEXT.decode(buf), list(buf, TopicLine.STREAM_CODEC), TEXT.decode(buf));
+        }
+
+        void encode(ByteBuf buf) {
+            TEXT.encode(buf, speaker);
+            TEXT.encode(buf, greeting);
+            writeList(buf, topics, TopicLine.STREAM_CODEC);
+            TEXT.encode(buf, reply);
+        }
+    }
+
     public static final StreamCodec<ByteBuf, LocationView> STREAM_CODEC = new StreamCodec<>() {
         @Override
         public LocationView decode(ByteBuf buf) {
@@ -74,7 +110,7 @@ public record LocationView(Identifier id, Component name, String skin, boolean p
             return new LocationView(id, name, skin, present, tier, nextTier, rep, nextRep, tierIndex, tierCount, maxActive,
                     list(buf, GoalLine.STREAM_CODEC), list(buf, ServiceLine.STREAM_CODEC),
                     list(buf, ContractLine.STREAM_CODEC), list(buf, ContractLine.STREAM_CODEC),
-                    list(buf, MarketLine.STREAM_CODEC), buf.readBoolean());
+                    list(buf, MarketLine.STREAM_CODEC), buf.readBoolean(), Talk.decode(buf));
         }
 
         @Override
@@ -96,6 +132,7 @@ public record LocationView(Identifier id, Component name, String skin, boolean p
             writeList(buf, view.offers(), ContractLine.STREAM_CODEC);
             writeList(buf, view.market(), MarketLine.STREAM_CODEC);
             buf.writeBoolean(view.illicit());
+            view.talk().encode(buf);
         }
     };
 

@@ -1,0 +1,6 @@
+{
+  "type": "structure",
+  "structure_tag": "wizards_and_beasts:settlement",
+  "marker": "wizards_and_beasts:village",
+  "label": "map.wizards_and_beasts.landmark.wizarding_hamlet"
+}

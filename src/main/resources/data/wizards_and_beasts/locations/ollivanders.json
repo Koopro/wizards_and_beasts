@@ -4,10 +4,12 @@
   "skin": "workbench",
   "presence": {
     "hosts": [
-      "minecraft:villager"
+      "minecraft:villager",
+      "wizards_and_beasts:settlement_npc"
     ],
     "host_profession": "wizards_and_beasts:wandmaker",
-    "host_reach": 6.0
+    "host_reach": 6.0,
+    "host_role": "wizards_and_beasts:wandmaker"
   },
   "standing": {
     "max_active": 2,
@@ -28,7 +30,13 @@
           {
             "type": "contracts_completed",
             "count": 4
-          }, { "type": "owl_grade", "subject": "care_of_magical_creatures", "grade": "A" }]
+          },
+          {
+            "type": "owl_grade",
+            "subject": "care_of_magical_creatures",
+            "grade": "A"
+          }
+        ]
       },
       {
         "id": "wandmakers_friend",
@@ -125,7 +133,14 @@
     ]
   },
   "services": [
-    { "service": "wizards_and_beasts:courier_dispatch", "min_tier": "patron" },
+    {
+      "service": "wizards_and_beasts:courier_dispatch",
+      "min_tier": "patron"
+    },
+    {
+      "service": "wizards_and_beasts:wand_trial",
+      "min_tier": "patron"
+    },
     {
       "service": "wizards_and_beasts:wand_evaluation",
       "min_tier": "patron",
@@ -155,34 +170,183 @@
     "half_life_days": 3.0,
     "demand_bonus": 0.5,
     "buys": [
-      { "id": "rowan_log", "item": "wizards_and_beasts:rowan_log", "price_knuts": 5, "depth": 64 },
-      { "id": "willow_log", "item": "wizards_and_beasts:willow_log", "price_knuts": 5, "depth": 64 },
-      { "id": "holly_log", "item": "wizards_and_beasts:holly_log", "price_knuts": 6, "depth": 64 },
-      { "id": "ash_log", "item": "wizards_and_beasts:ash_log", "price_knuts": 6, "depth": 64 },
-      { "id": "hawthorn_log", "item": "wizards_and_beasts:hawthorn_log", "price_knuts": 7, "depth": 48 },
-      { "id": "yew_log", "item": "wizards_and_beasts:yew_log", "price_knuts": 9, "depth": 48 },
-      { "id": "walnut_log", "item": "wizards_and_beasts:walnut_log", "price_knuts": 9, "depth": 48 },
-      { "id": "blackthorn_log", "item": "wizards_and_beasts:blackthorn_log", "price_knuts": 9, "depth": 48 },
-      { "id": "elder_log", "item": "wizards_and_beasts:elder_log", "price_knuts": 20, "depth": 16, "min_tier": "regular" },
-      { "id": "troll_whisker", "item": "wizards_and_beasts:troll_whisker", "price_knuts": 29, "depth": 8 },
-      { "id": "unicorn_hair", "item": "wizards_and_beasts:unicorn_hair", "price_knuts": 116, "depth": 6 },
-      { "id": "thestral_tail_hair", "item": "wizards_and_beasts:thestral_tail_hair", "price_knuts": 174, "depth": 4, "min_tier": "regular" },
-      { "id": "wampus_cat_hair", "item": "wizards_and_beasts:wampus_cat_hair", "price_knuts": 145, "depth": 4, "min_tier": "regular" },
-      { "id": "dragon_heartstring", "item": "wizards_and_beasts:dragon_heartstring", "price_knuts": 232, "depth": 4, "min_tier": "regular" },
-      { "id": "thunderbird_tail_feather", "item": "wizards_and_beasts:thunderbird_tail_feather", "price_knuts": 232, "depth": 3, "min_tier": "trusted_supplier" },
-      { "id": "spare_wands", "kind": "wand", "condition": "unbonded", "price_knuts": 290, "depth": 6 }
+      {
+        "id": "rowan_log",
+        "item": "wizards_and_beasts:rowan_log",
+        "price_knuts": 5,
+        "depth": 64
+      },
+      {
+        "id": "willow_log",
+        "item": "wizards_and_beasts:willow_log",
+        "price_knuts": 5,
+        "depth": 64
+      },
+      {
+        "id": "holly_log",
+        "item": "wizards_and_beasts:holly_log",
+        "price_knuts": 6,
+        "depth": 64
+      },
+      {
+        "id": "ash_log",
+        "item": "wizards_and_beasts:ash_log",
+        "price_knuts": 6,
+        "depth": 64
+      },
+      {
+        "id": "hawthorn_log",
+        "item": "wizards_and_beasts:hawthorn_log",
+        "price_knuts": 7,
+        "depth": 48
+      },
+      {
+        "id": "yew_log",
+        "item": "wizards_and_beasts:yew_log",
+        "price_knuts": 9,
+        "depth": 48
+      },
+      {
+        "id": "walnut_log",
+        "item": "wizards_and_beasts:walnut_log",
+        "price_knuts": 9,
+        "depth": 48
+      },
+      {
+        "id": "blackthorn_log",
+        "item": "wizards_and_beasts:blackthorn_log",
+        "price_knuts": 9,
+        "depth": 48
+      },
+      {
+        "id": "elder_log",
+        "item": "wizards_and_beasts:elder_log",
+        "price_knuts": 20,
+        "depth": 16,
+        "min_tier": "regular"
+      },
+      {
+        "id": "troll_whisker",
+        "item": "wizards_and_beasts:troll_whisker",
+        "price_knuts": 29,
+        "depth": 8
+      },
+      {
+        "id": "unicorn_hair",
+        "item": "wizards_and_beasts:unicorn_hair",
+        "price_knuts": 116,
+        "depth": 6
+      },
+      {
+        "id": "thestral_tail_hair",
+        "item": "wizards_and_beasts:thestral_tail_hair",
+        "price_knuts": 174,
+        "depth": 4,
+        "min_tier": "regular"
+      },
+      {
+        "id": "wampus_cat_hair",
+        "item": "wizards_and_beasts:wampus_cat_hair",
+        "price_knuts": 145,
+        "depth": 4,
+        "min_tier": "regular"
+      },
+      {
+        "id": "dragon_heartstring",
+        "item": "wizards_and_beasts:dragon_heartstring",
+        "price_knuts": 232,
+        "depth": 4,
+        "min_tier": "regular"
+      },
+      {
+        "id": "thunderbird_tail_feather",
+        "item": "wizards_and_beasts:thunderbird_tail_feather",
+        "price_knuts": 232,
+        "depth": 3,
+        "min_tier": "trusted_supplier"
+      },
+      {
+        "id": "spare_wands",
+        "kind": "wand",
+        "condition": "unbonded",
+        "price_knuts": 290,
+        "depth": 6
+      }
     ],
     "sells": [
-      { "id": "blank_book_of_spells", "item": "wizards_and_beasts:standard_book_of_spells", "price_knuts": 29, "depth": 64 },
-      { "id": "wand_blank", "item": "wizards_and_beasts:wand_blank", "price_knuts": 87, "depth": 8 },
-      { "id": "holly_log", "item": "wizards_and_beasts:holly_log", "price_knuts": 29, "depth": 32 },
-      { "id": "unicorn_hair", "item": "wizards_and_beasts:unicorn_hair", "price_knuts": 348, "depth": 3, "weekly_limit": 2 },
-      { "id": "dragon_heartstring", "item": "wizards_and_beasts:dragon_heartstring", "price_knuts": 696, "depth": 2, "weekly_limit": 1, "min_tier": "trusted_supplier" },
-      { "id": "thunderbird_tail_feather", "item": "wizards_and_beasts:thunderbird_tail_feather", "price_knuts": 870, "depth": 2, "weekly_limit": 1, "min_tier": "wandmakers_friend" },
-      { "id": "wampus_cat_hair", "item": "wizards_and_beasts:wampus_cat_hair", "price_knuts": 696, "depth": 2, "weekly_limit": 1, "min_tier": "wandmakers_friend" },
-      { "id": "troll_whisker", "item": "wizards_and_beasts:troll_whisker", "price_knuts": 522, "depth": 2, "weekly_limit": 1, "min_tier": "wandmakers_friend" },
-      { "id": "horned_serpent_gem", "item": "wizards_and_beasts:horned_serpent_gem", "price_knuts": 1044, "depth": 1, "weekly_limit": 1, "min_tier": "wandmakers_friend" },
-      { "id": "white_river_monster_spine", "item": "wizards_and_beasts:white_river_monster_spine", "price_knuts": 1392, "depth": 1, "weekly_limit": 1, "min_tier": "wandmakers_friend" }
+      {
+        "id": "blank_book_of_spells",
+        "item": "wizards_and_beasts:standard_book_of_spells",
+        "price_knuts": 29,
+        "depth": 64
+      },
+      {
+        "id": "wand_blank",
+        "item": "wizards_and_beasts:wand_blank",
+        "price_knuts": 87,
+        "depth": 8
+      },
+      {
+        "id": "holly_log",
+        "item": "wizards_and_beasts:holly_log",
+        "price_knuts": 29,
+        "depth": 32
+      },
+      {
+        "id": "unicorn_hair",
+        "item": "wizards_and_beasts:unicorn_hair",
+        "price_knuts": 348,
+        "depth": 3,
+        "weekly_limit": 2
+      },
+      {
+        "id": "dragon_heartstring",
+        "item": "wizards_and_beasts:dragon_heartstring",
+        "price_knuts": 696,
+        "depth": 2,
+        "weekly_limit": 1,
+        "min_tier": "trusted_supplier"
+      },
+      {
+        "id": "thunderbird_tail_feather",
+        "item": "wizards_and_beasts:thunderbird_tail_feather",
+        "price_knuts": 870,
+        "depth": 2,
+        "weekly_limit": 1,
+        "min_tier": "wandmakers_friend"
+      },
+      {
+        "id": "wampus_cat_hair",
+        "item": "wizards_and_beasts:wampus_cat_hair",
+        "price_knuts": 696,
+        "depth": 2,
+        "weekly_limit": 1,
+        "min_tier": "wandmakers_friend"
+      },
+      {
+        "id": "troll_whisker",
+        "item": "wizards_and_beasts:troll_whisker",
+        "price_knuts": 522,
+        "depth": 2,
+        "weekly_limit": 1,
+        "min_tier": "wandmakers_friend"
+      },
+      {
+        "id": "horned_serpent_gem",
+        "item": "wizards_and_beasts:horned_serpent_gem",
+        "price_knuts": 1044,
+        "depth": 1,
+        "weekly_limit": 1,
+        "min_tier": "wandmakers_friend"
+      },
+      {
+        "id": "white_river_monster_spine",
+        "item": "wizards_and_beasts:white_river_monster_spine",
+        "price_knuts": 1392,
+        "depth": 1,
+        "weekly_limit": 1,
+        "min_tier": "wandmakers_friend"
+      }
     ]
   }
 }

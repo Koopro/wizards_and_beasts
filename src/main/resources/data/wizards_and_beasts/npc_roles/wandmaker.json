@@ -1,0 +1,78 @@
+{
+  "location": "wizards_and_beasts:ollivanders",
+  "names": [
+    "npc.wizards_and_beasts.wandmaker.name.0",
+    "npc.wizards_and_beasts.wandmaker.name.1",
+    "npc.wizards_and_beasts.wandmaker.name.2",
+    "npc.wizards_and_beasts.wandmaker.name.3"
+  ],
+  "greetings": [
+    {
+      "text": "npc.wizards_and_beasts.wandmaker.greet.default"
+    },
+    {
+      "text": "npc.wizards_and_beasts.wandmaker.greet.again"
+    },
+    {
+      "text": "npc.wizards_and_beasts.wandmaker.greet.goblin",
+      "weight": 3,
+      "when": [
+        {
+          "type": "heritage",
+          "heritages": [
+            "goblin"
+          ]
+        }
+      ]
+    }
+  ],
+  "topics": [
+    {
+      "id": "woods",
+      "label": "npc.wizards_and_beasts.wandmaker.topic.woods",
+      "reply": "npc.wizards_and_beasts.wandmaker.reply.woods"
+    },
+    {
+      "id": "cores",
+      "label": "npc.wizards_and_beasts.wandmaker.topic.cores",
+      "reply": "npc.wizards_and_beasts.wandmaker.reply.cores"
+    },
+    {
+      "id": "bond",
+      "label": "npc.wizards_and_beasts.wandmaker.topic.bond",
+      "reply": "npc.wizards_and_beasts.wandmaker.reply.bond"
+    },
+    {
+      "id": "bench",
+      "label": "npc.wizards_and_beasts.wandmaker.topic.bench",
+      "reply": "npc.wizards_and_beasts.wandmaker.reply.bench"
+    }
+  ],
+  "shop": {
+    "carry": 0.7,
+    "stock": 6,
+    "restock_days": 4,
+    "goods": {
+      "blank_book_of_spells": {
+        "carry": 1.0,
+        "stock": 8
+      },
+      "wand_blank": {
+        "carry": 1.0,
+        "stock": 4
+      },
+      "thunderbird_tail_feather": {
+        "carry": 0.35,
+        "stock": 1
+      },
+      "horned_serpent_gem": {
+        "carry": 0.35,
+        "stock": 1
+      },
+      "white_river_monster_spine": {
+        "carry": 0.35,
+        "stock": 1
+      }
+    }
+  }
+}

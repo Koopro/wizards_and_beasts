@@ -137,6 +137,31 @@ public final class TreasureCharts {
                 }, passOver);
     }
 
+    /** The same search as {@link #nearest}, one cell at a time; null when {@code tag} has no walkable grid. */
+    public static SiteSearch.@Nullable Walk walk(ServerLevel level, TagKey<Structure> tag, BlockPos origin, int rings) {
+        var structures = level.registryAccess().lookupOrThrow(Registries.STRUCTURE).get(tag);
+        if (structures.isEmpty()) {
+            return null;
+        }
+        ChunkGeneratorStructureState state = level.getChunkSource().getGeneratorState();
+        for (Holder<Structure> holder : structures.get()) {
+            for (StructurePlacement placement : state.getPlacementsForStructure(holder)) {
+                if (placement instanceof RandomSpreadStructurePlacement spread) {
+                    StructureManager manager = level.structureManager();
+                    long seed = state.getLevelSeed();
+                    return new SiteSearch.Walk(SectionPos.blockToSectionCoord(origin.getX()),
+                            SectionPos.blockToSectionCoord(origin.getZ()), spread.spacing(), rings, (grid, cellX, cellZ) -> {
+                                ChunkPos potential = spread.getPotentialStructureChunk(seed, cellX, cellZ);
+                                // An exclusion zone is the placement's own check, and the presence check does not ask it.
+                                return spread.isStructureChunk(state, potential.x, potential.z)
+                                        ? siteAt(level, manager, spread, List.of(holder), potential) : null;
+                            });
+                }
+            }
+        }
+        return null;
+    }
+
     /** What vanilla's {@code getStructureGeneratingAt} does, minus the reference counting. */
     private static SiteSearch.@Nullable Site siteAt(ServerLevel level, StructureManager manager,
                                                    RandomSpreadStructurePlacement placement,

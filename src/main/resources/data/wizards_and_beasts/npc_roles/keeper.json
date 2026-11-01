@@ -1,0 +1,51 @@
+{
+  "location": "wizards_and_beasts:hamlet",
+  "names": [
+    "npc.wizards_and_beasts.keeper.name.0",
+    "npc.wizards_and_beasts.keeper.name.1",
+    "npc.wizards_and_beasts.keeper.name.2",
+    "npc.wizards_and_beasts.keeper.name.3"
+  ],
+  "greetings": [
+    {
+      "text": "npc.wizards_and_beasts.keeper.greet.default"
+    },
+    {
+      "text": "npc.wizards_and_beasts.keeper.greet.weather"
+    },
+    {
+      "text": "npc.wizards_and_beasts.keeper.greet.veela",
+      "weight": 3,
+      "when": [
+        {
+          "type": "heritage",
+          "heritages": [
+            "veela"
+          ]
+        }
+      ]
+    }
+  ],
+  "topics": [
+    {
+      "id": "place",
+      "label": "npc.wizards_and_beasts.keeper.topic.place",
+      "reply": "npc.wizards_and_beasts.keeper.reply.place"
+    },
+    {
+      "id": "work",
+      "label": "npc.wizards_and_beasts.keeper.topic.work",
+      "reply": "npc.wizards_and_beasts.keeper.reply.work"
+    },
+    {
+      "id": "spire",
+      "label": "npc.wizards_and_beasts.keeper.topic.spire",
+      "reply": "npc.wizards_and_beasts.keeper.reply.spire"
+    },
+    {
+      "id": "bank",
+      "label": "npc.wizards_and_beasts.keeper.topic.bank",
+      "reply": "npc.wizards_and_beasts.keeper.reply.bank"
+    }
+  ]
+}

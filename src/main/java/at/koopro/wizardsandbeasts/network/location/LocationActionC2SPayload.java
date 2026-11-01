@@ -22,14 +22,14 @@ import org.jspecify.annotations.NullMarked;
  * re-checks the module, the player's presence and tier, and counts items itself. {@code OPEN} is the Gringotts
  * screen's "bank business" button: honoured only when the player is already there.
  *
- * @param argument a contract id, a service id for {@link Action#USE_SERVICE}, or {@code good|count} for
- *                 {@link Action#SELL}, {@link Action#BUY} and {@link Action#BUY_DRAGOTS}
+ * @param argument a contract id, a service id for {@link Action#USE_SERVICE}, a topic for {@link Action#TOPIC}, or
+ *                 {@code good|count} for {@link Action#SELL}, {@link Action#BUY} and {@link Action#BUY_DRAGOTS}
  */
 @NullMarked
 public record LocationActionC2SPayload(Action action, Identifier location, String argument)
         implements CustomPacketPayload {
 
-    public enum Action { OPEN, REFRESH, ACCEPT, ABANDON, TURN_IN, USE_SERVICE, SELL, BUY, BUY_DRAGOTS }
+    public enum Action { OPEN, REFRESH, ACCEPT, ABANDON, TURN_IN, USE_SERVICE, SELL, BUY, BUY_DRAGOTS, TOPIC }
 
     public static final Type<LocationActionC2SPayload> TYPE = new Type<>(
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "location_action"));
@@ -89,6 +89,7 @@ public record LocationActionC2SPayload(Action action, Identifier location, Strin
                         LocationProgression.useService(player, location, service);
                     }
                 }
+                case TOPIC -> at.koopro.wizardsandbeasts.settlement.npc.NpcTalk.ask(player, location, payload.argument());
                 case SELL, BUY, BUY_DRAGOTS -> {
                     // "good|count": a malformed count is a refused deal, never a default.
                     String arg = payload.argument();

@@ -1,0 +1,49 @@
+{
+  "location": "wizards_and_beasts:reading_room",
+  "names": [
+    "npc.wizards_and_beasts.scholar.name.0",
+    "npc.wizards_and_beasts.scholar.name.1",
+    "npc.wizards_and_beasts.scholar.name.2",
+    "npc.wizards_and_beasts.scholar.name.3"
+  ],
+  "greetings": [
+    {
+      "text": "npc.wizards_and_beasts.scholar.greet.default"
+    },
+    {
+      "text": "npc.wizards_and_beasts.scholar.greet.quiet"
+    },
+    {
+      "text": "npc.wizards_and_beasts.scholar.greet.obscurus",
+      "weight": 3,
+      "when": [
+        {
+          "type": "condition",
+          "condition": "obscurus"
+        }
+      ]
+    }
+  ],
+  "topics": [
+    {
+      "id": "lessons",
+      "label": "npc.wizards_and_beasts.scholar.topic.lessons",
+      "reply": "npc.wizards_and_beasts.scholar.reply.lessons"
+    },
+    {
+      "id": "spells",
+      "label": "npc.wizards_and_beasts.scholar.topic.spells",
+      "reply": "npc.wizards_and_beasts.scholar.reply.spells"
+    },
+    {
+      "id": "theory",
+      "label": "npc.wizards_and_beasts.scholar.topic.theory",
+      "reply": "npc.wizards_and_beasts.scholar.reply.theory"
+    },
+    {
+      "id": "owls",
+      "label": "npc.wizards_and_beasts.scholar.topic.owls",
+      "reply": "npc.wizards_and_beasts.scholar.reply.owls"
+    }
+  ]
+}

@@ -41,6 +41,80 @@ public final class SiteSearch {
     }
 
     /**
+     * {@link #nearest} one cell at a time, for a search too dear to run in one tick. Each {@link #step} asks the world
+     * about a single cell; between steps the walk is only its own position.
+     */
+    public static final class Walk {
+        private final int originX;
+        private final int originZ;
+        private final int spacing;
+        private final int radius;
+        private final Probe probe;
+        private int ring;
+        private int dx;
+        private int dz;
+        private @Nullable Site best;
+        private long bestDist = Long.MAX_VALUE;
+        private boolean finished;
+
+        /** Walks one grid of {@code spacing} chunks. */
+        public Walk(int originChunkX, int originChunkZ, int spacing, int radius, Probe probe) {
+            this.originX = originChunkX;
+            this.originZ = originChunkZ;
+            this.spacing = spacing;
+            this.radius = radius;
+            this.probe = probe;
+        }
+
+        public boolean finished() {
+            return finished;
+        }
+
+        /** The nearest site, once {@link #finished}; null when none lies in reach. */
+        public @Nullable Site found() {
+            return best;
+        }
+
+        /** Asks about the next cell. A ring is always finished, so what is found is the nearest of its ring. */
+        public void step() {
+            if (finished) {
+                return;
+            }
+            Site site = probe.at(0, originX + spacing * (dx - ring), originZ + spacing * (dz - ring));
+            if (site != null) {
+                long ddx = site.locateX() - ((long) originX * 16 + 8);
+                long ddz = site.locateZ() - ((long) originZ * 16 + 8);
+                long dist = ddx * ddx + ddz * ddz;
+                if (dist < bestDist) {
+                    bestDist = dist;
+                    best = site;
+                }
+            }
+            advance();
+        }
+
+        private void advance() {
+            int side = 2 * ring;
+            do {
+                dz++;
+                if (dz > side) {
+                    dz = 0;
+                    dx++;
+                }
+            } while (dx <= side && dx != 0 && dx != side && dz != 0 && dz != side);
+            if (dx > side) {
+                if (best != null || ring >= radius) {
+                    finished = true;
+                    return;
+                }
+                ring++;
+                dx = 0;
+                dz = 0;
+            }
+        }
+    }
+
+    /**
      * Walks rings outward from {@code originChunk}, each grid's cells on the ring's edge, and returns the nearest
      * site that is not spent within the first ring holding one. Null when every site within {@code radius} rings is
      * spent or none generates; the walk always ends, after at most {@code (2r+1)^2} probes per grid.

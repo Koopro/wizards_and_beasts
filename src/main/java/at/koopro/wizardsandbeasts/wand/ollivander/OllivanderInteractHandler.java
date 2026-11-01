@@ -48,6 +48,11 @@ public final class OllivanderInteractHandler {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
+        visit(player);
+    }
+
+    /** A visit to the wandmaker, whoever keeps the shop: the law first, then wand care, then the trial. */
+    public static void visit(ServerPlayer player) {
         // Clause Three of the Code of Wand Use: no wandmaker sells to a people the law forbids a wand.
         if (at.koopro.wizardsandbeasts.ministry.law.CodeOfWandUse.forbidden(player)) {
             at.koopro.wizardsandbeasts.feedback.PlayerFeedback.refuse(player,

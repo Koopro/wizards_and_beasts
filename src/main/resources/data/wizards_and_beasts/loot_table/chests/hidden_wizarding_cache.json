@@ -204,6 +204,36 @@
       ]
     },
     {
+      "_comment": "A Wayfarer's Chart: one cache in eight. A vanilla explorer map to a hamlet, for players who switched the Apprentice's Path off.",
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:map",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "minecraft:exploration_map",
+              "destination": "wizards_and_beasts:settlement",
+              "decoration": "minecraft:red_x",
+              "zoom": 2,
+              "search_radius": 12,
+              "skip_existing_chunks": true
+            },
+            {
+              "function": "minecraft:set_name",
+              "target": "item_name",
+              "name": { "translate": "item.wizards_and_beasts.wayfarers_chart" }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 7
+        }
+      ]
+    },
+    {
       "_comment": "A Serpent Chart: one cache in eight. A vanilla explorer map to a Chamber of Secrets, for players who switched the Apprentice's Path off (the path hands one over when it is walked).",
       "rolls": 1,
       "entries": [

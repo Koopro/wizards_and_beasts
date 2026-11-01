@@ -94,16 +94,18 @@ public record LocationDefinition(Module module, Optional<LicenseType> papers, Pr
      *                  player, who stays "there" while within {@code hostReach} of it
      * @param hostReach blocks from the host that still count as at its counter
      * @param hostProfession for a villager host, the profession it must hold (a wandmaker, not any villager)
+     * @param hostRole  for a host that plays a role ({@link RoleHost}), the role it must play
      * @param landmark  a block palette whose density marks the place ({@code MinistryArea}'s rule), e.g.
      *                  {@code wizards_and_beasts:landmark/gringotts}
      * @param structure a worldgen structure whose pieces are the place
      */
     public record Presence(List<Identifier> hosts, double hostReach, Optional<Identifier> hostProfession,
-                           Optional<Identifier> landmark, Optional<Identifier> structure) {
+                           Optional<String> hostRole, Optional<Identifier> landmark, Optional<Identifier> structure) {
         public static final Codec<Presence> CODEC = RecordCodecBuilder.create(i -> i.group(
                 Identifier.CODEC.listOf().optionalFieldOf("hosts", List.of()).forGetter(Presence::hosts),
                 Codec.doubleRange(1.0, 32.0).optionalFieldOf("host_reach", 8.0).forGetter(Presence::hostReach),
                 Identifier.CODEC.optionalFieldOf("host_profession").forGetter(Presence::hostProfession),
+                Codec.STRING.optionalFieldOf("host_role").forGetter(Presence::hostRole),
                 Identifier.CODEC.optionalFieldOf("landmark").forGetter(Presence::landmark),
                 Identifier.CODEC.optionalFieldOf("structure").forGetter(Presence::structure)
         ).apply(i, Presence::new));

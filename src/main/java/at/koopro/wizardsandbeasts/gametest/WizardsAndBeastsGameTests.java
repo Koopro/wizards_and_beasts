@@ -117,6 +117,7 @@ public final class WizardsAndBeastsGameTests {
         SpellAcquisitionTests.contribute(registrar);
         ApprenticePathTests.contribute(registrar);
         ChamberTests.contribute(registrar);
+        SettlementTests.contribute(registrar);
         BenchPersistenceTests.contribute(registrar);
         CuratedSpellTests.contribute(registrar);
         DisguiseTests.contribute(registrar);

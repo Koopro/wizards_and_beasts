@@ -218,6 +218,12 @@ public class ModBlocks {
                             .strength(-1.0f, 3600000.0f).noLootTable().lightLevel(state -> 5)
                             .pushReaction(PushReaction.BLOCK));
 
+    /** Where a settlement's person belongs. Placed only by a structure, so it has no item, and unbreakable. */
+    public static final DeferredBlock<at.koopro.wizardsandbeasts.settlement.post.SettlementPostBlock> SETTLEMENT_POST =
+            BLOCKS.registerBlock("settlement_post", at.koopro.wizardsandbeasts.settlement.post.SettlementPostBlock::new,
+                    () -> BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.STONE_BRICKS)
+                            .strength(-1.0f, 3600000.0f).noLootTable().pushReaction(PushReaction.BLOCK));
+
     public static final DeferredBlock<at.koopro.wizardsandbeasts.artefact.erised.MirrorOfErisedBlock> MIRROR_OF_ERISED =
             BLOCKS.registerBlock("mirror_of_erised", at.koopro.wizardsandbeasts.artefact.erised.MirrorOfErisedBlock::new,
                     () -> BlockBehaviour.Properties.of().strength(2.0f, 6.0f).sound(SoundType.GLASS)

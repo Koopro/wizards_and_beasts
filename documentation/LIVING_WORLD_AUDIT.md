@@ -186,9 +186,10 @@ generation (`lessons.md:1162`).
 | **Trace** | `CastSurvey.isMuggle:93` ✓ | Existing, module off | Not in the `muggles` tag means not a witness. No settlement exemption needed |
 | **Griefing** | `spellBlockDamage`, Colloportus | Partial | Area protection **Missing** |
 
-**Lessons with no teacher ✓.** Shipped locations teach seven of twelve subjects. Transfiguration, Arithmancy, Divination, Astronomy
-and Muggle Studies have no teacher anywhere. Defence and History sit at the Ministry, which ships disabled, so in a default
-world **seven of the twelve have no teacher.** The Scholar fills a real gap with data alone.
+**Lessons with no teacher ✓.** Corrected 2026-11-01 (`OWLGradeRules.teachable`). Arithmancy, Divination and Muggle Studies are not
+examined, and Transfiguration is graded by Animagus work, so none of those four has lessons, by design. Of the teachable eight,
+Astronomy has no teacher anywhere, and Defence and History sit at the Ministry, which ships disabled. In a default world **three
+teachable subjects have no teacher**, and the Scholar covers them with data alone.
 
 ---
 
@@ -745,7 +746,7 @@ Generators stay in `tools/` and are never pushed. Their `.nbt` and `.png` output
 | 6 | **NPC model.** Shared entity on the player rig with robes baked into skins | Yes. Villagers remain for player-built shops |
 | 7 | **Generation.** Hub-and-spoke jigsaw; about one per 2,500-3,000 blocks | Yes. Fallback is one rigid NBT. Fix the number after the probe |
 | 8 | **Identity.** Hamlets with rolled names, built around the Crooked Spire; not Hogsmeade | Yes. Tell me if you prefer one named, unique place |
-| 9 | **Scholar and spells.** Lessons in the untaught subjects, never spells | Yes. Which subjects: I suggest Transfiguration, Arithmancy, Astronomy, Divination, Muggle Studies |
+| 9 | **Scholar and spells.** Lessons in the untaught subjects, never spells | Yes. Subjects, corrected: Astronomy, Defence Against the Dark Arts, History of Magic |
 | 10 | **Module.** New `SETTLEMENTS`, shipped PREVIEW. It reaches existing worlds on upgrade through backfill, in new chunks only, and sites at the frontier may be cut | PREVIEW, with a changelog line. Ship DISABLED if you would rather keep existing worlds untouched |
 | 11 | **Protection.** Hamlets breakable like vanilla villages, or wait for `SpellWorldGuard`? | Breakable in the slice; posts unbreakable. Land the guard as separate work |
 | 12 | **Path hand-off.** Hamlet chart offered at the end of the Path, beside the Serpent Chart, with no new step | Yes |

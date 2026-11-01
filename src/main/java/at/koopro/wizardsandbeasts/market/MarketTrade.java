@@ -22,6 +22,7 @@ import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.owl.career.track.ActivityType;
 import at.koopro.wizardsandbeasts.owl.career.track.CareerProgression;
+import at.koopro.wizardsandbeasts.settlement.shop.SettlementShops;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import net.minecraft.ChatFormatting;
@@ -67,6 +68,7 @@ public final class MarketTrade {
 
     /** Outcome of a deal, for callers and tests. */
     public enum Result {
+        SOLD_OUT,
         DONE, UNKNOWN, CLOSED, NOT_THERE, TIER_TOO_LOW, BAD_COUNT, NOTHING_TO_SELL, NOT_WANTED, REFUSED_GOODS,
         NO_PAPERS, CANNOT_AFFORD, VAULT_FULL, WEEKLY_LIMIT, NO_DRAGOTS, CAUGHT
     }
@@ -342,6 +344,17 @@ public final class MarketTrade {
             }
             count = Math.min(count, left);
         }
+        // At a settlement counter, what this shop has: global prices, its own shelves.
+        SettlementShops.Counter shelves = SettlementShops.at(player, location, counter.def());
+        if (shelves != null) {
+            int onShelf = shelves.carries(good.id()) ? shelves.left(good.id()) : 0;
+            if (onShelf <= 0) {
+                PlayerFeedback.refuse(player, Component.translatable("market.wizards_and_beasts.refused"),
+                        Component.translatable("market.wizards_and_beasts.sold_out"));
+                return Result.SOLD_OUT;
+            }
+            count = Math.min(count, onShelf);
+        }
         if (!BuiltInRegistries.ITEM.containsKey(good.item().get())) {
             return Result.UNKNOWN; // a datapack naming no real item: never charge for nothing
         }
@@ -397,6 +410,9 @@ public final class MarketTrade {
                 return Result.CANNOT_AFFORD;
             }
             paid = Component.translatable("market.wizards_and_beasts.cost", CurrencyHelper.formatFromKnuts(batch.knuts()));
+        }
+        if (shelves != null) {
+            shelves.take(good.id(), count);
         }
         int left = count;
         int perStack = Math.max(1, item.getDefaultMaxStackSize());
@@ -481,15 +497,25 @@ public final class MarketTrade {
                     unlocked ? Component.empty() : Component.translatable("location.wizards_and_beasts.tier_required",
                             LocationText.tier(location, good.minTier())), 0));
         }
+        SettlementShops.Counter shelves = SettlementShops.at(player, location, def);
         for (MarketGood good : market.sells()) {
+            if (shelves != null && !shelves.carries(good.id())) {
+                continue; // this hamlet's shop does not stock it; another might
+            }
             String key = MarketBook.key(location.toString(), MarketDefinition.Side.SELLS, good.id());
             double pressure = book.pressure(key, now, halfLife(market));
             long unit = (long) Math.ceil(MarketPricing.buyUnit(good.priceKnuts(), good.depth(), pressure) * scale());
             boolean unlocked = good.minTier().isEmpty() || tier >= def.standing().rankIndex(good.minTier());
             int left = good.weeklyLimit() > 0 ? Math.max(0, good.weeklyLimit() - record.line(key).boughtIn(week)) : -1;
+            int onShelf = shelves == null ? -1 : shelves.left(good.id());
+            if (onShelf >= 0) {
+                left = left < 0 ? onShelf : Math.min(left, onShelf);
+            }
             Component note = !unlocked
                     ? Component.translatable("location.wizards_and_beasts.tier_required",
                             LocationText.tier(location, good.minTier()))
+                    : onShelf == 0 ? Component.translatable("market.wizards_and_beasts.sold_out")
+                    : onShelf > 0 ? Component.translatable("market.wizards_and_beasts.on_shelf", onShelf)
                     : left >= 0 ? Component.translatable("market.wizards_and_beasts.weekly_left", left, good.weeklyLimit())
                     : Component.empty();
             DealClass deal = good.item().map(MarketGoods::classify).orElse(DealClass.LEGAL);

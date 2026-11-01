@@ -1,0 +1,10 @@
+{
+  "location": "wizards_and_beasts:gringotts",
+  "entity": "wizards_and_beasts:goblin_teller",
+  "names": [
+    "npc.wizards_and_beasts.teller.name.0",
+    "npc.wizards_and_beasts.teller.name.1",
+    "npc.wizards_and_beasts.teller.name.2",
+    "npc.wizards_and_beasts.teller.name.3"
+  ]
+}

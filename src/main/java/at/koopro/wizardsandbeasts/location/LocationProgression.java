@@ -432,7 +432,8 @@ public final class LocationProgression {
                 next == null ? Component.empty() : LocationText.tier(location, next.id()),
                 record.xp(), next == null ? -1 : next.xp(), tierIndex, standing.ranks().size(), standing.maxActive(),
                 goals, services, active, offers,
-                at.koopro.wizardsandbeasts.market.MarketTrade.lines(player, location, def), def.risk().isPresent());
+                at.koopro.wizardsandbeasts.market.MarketTrade.lines(player, location, def), def.risk().isPresent(),
+                at.koopro.wizardsandbeasts.settlement.npc.NpcTalk.section(player, location, def));
     }
 
     private static int progressOf(ServerPlayer player, ContractDefinition contract, ActiveContract held) {

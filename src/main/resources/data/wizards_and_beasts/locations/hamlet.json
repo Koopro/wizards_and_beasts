@@ -1,0 +1,120 @@
+{
+  "_comment": "A hamlet's keeper and notice board. One standing for every hamlet: the Keepers talk. Contracts are existing activity and delivery work, so nothing here is a second quest system.",
+  "module": "settlements",
+  "skin": "field_notebook",
+  "presence": {
+    "hosts": [
+      "wizards_and_beasts:settlement_npc"
+    ],
+    "host_role": "wizards_and_beasts:keeper",
+    "host_reach": 6.0
+  },
+  "standing": {
+    "max_active": 2,
+    "board_size": 3,
+    "xp_rules": [
+      {
+        "when": {
+          "activity": "courier_delivered",
+          "species": [
+            "wizards_and_beasts:hamlet"
+          ]
+        },
+        "xp": 10,
+        "daily_cap": 30
+      }
+    ],
+    "ranks": [
+      {
+        "id": "visitor",
+        "xp": 0
+      },
+      {
+        "id": "neighbour",
+        "xp": 100
+      },
+      {
+        "id": "friend_of_the_spire",
+        "xp": 300,
+        "requires": [
+          {
+            "type": "contracts_completed",
+            "count": 4
+          }
+        ]
+      }
+    ],
+    "contracts": [
+      {
+        "id": "firewood",
+        "min_rank": "visitor",
+        "duration_days": 3,
+        "cooldown_days": 2,
+        "weight": 10,
+        "objective": {
+          "type": "delivery",
+          "item": "minecraft:oak_log",
+          "count": 16
+        },
+        "reward": {
+          "knuts": 87,
+          "xp": 25
+        }
+      },
+      {
+        "id": "lamp_oil",
+        "min_rank": "visitor",
+        "duration_days": 3,
+        "cooldown_days": 2,
+        "weight": 10,
+        "objective": {
+          "type": "delivery",
+          "item": "minecraft:coal",
+          "count": 12
+        },
+        "reward": {
+          "knuts": 87,
+          "xp": 25
+        }
+      },
+      {
+        "id": "wool",
+        "min_rank": "visitor",
+        "duration_days": 4,
+        "cooldown_days": 2,
+        "weight": 8,
+        "objective": {
+          "type": "delivery",
+          "item": "minecraft:white_wool",
+          "count": 8
+        },
+        "reward": {
+          "knuts": 116,
+          "xp": 30
+        }
+      },
+      {
+        "id": "dittany_for_the_shop",
+        "min_rank": "neighbour",
+        "duration_days": 4,
+        "cooldown_days": 3,
+        "weight": 8,
+        "objective": {
+          "type": "delivery",
+          "item": "wizards_and_beasts:dittany",
+          "count": 8
+        },
+        "reward": {
+          "knuts": 145,
+          "xp": 40
+        }
+      }
+    ]
+  },
+  "services": [
+    {
+      "service": "wizards_and_beasts:courier_dispatch",
+      "min_tier": "visitor"
+    }
+  ]
+}

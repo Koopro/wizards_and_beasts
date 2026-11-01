@@ -42,6 +42,8 @@ public class ClientSetup {
         event.registerEntityRenderer(ModEntities.BABY_NIFFLER.get(), at.koopro.wizardsandbeasts.client.entity.NifflerRenderer::new);
         event.registerEntityRenderer(ModEntities.FORM_MANNEQUIN.get(), FormMannequinRenderer::new);
         event.registerEntityRenderer(ModEntities.DUELLING_DUMMY.get(), DuellingDummyRenderer::new);
+        event.registerEntityRenderer(ModEntities.SETTLEMENT_NPC.get(),
+                at.koopro.wizardsandbeasts.client.settlement.SettlementNpcRenderer::new);
         event.registerEntityRenderer(ModEntities.WIZARDING_THROWN.get(), ThrownItemRenderer::new);
         event.registerEntityRenderer(ModEntities.DEMENTOR.get(), DementorRenderer::new);
         event.registerEntityRenderer(ModEntities.BOWTRUCKLE.get(), at.koopro.wizardsandbeasts.client.entity.BowtruckleRenderer::new);

@@ -1,0 +1,104 @@
+{
+  "location": "wizards_and_beasts:apothecary",
+  "names": [
+    "npc.wizards_and_beasts.apothecary.name.0",
+    "npc.wizards_and_beasts.apothecary.name.1",
+    "npc.wizards_and_beasts.apothecary.name.2",
+    "npc.wizards_and_beasts.apothecary.name.3"
+  ],
+  "greetings": [
+    {
+      "text": "npc.wizards_and_beasts.apothecary.greet.default"
+    },
+    {
+      "text": "npc.wizards_and_beasts.apothecary.greet.busy"
+    },
+    {
+      "text": "npc.wizards_and_beasts.apothecary.greet.vampire",
+      "weight": 3,
+      "when": [
+        {
+          "type": "condition",
+          "condition": "vampirism"
+        }
+      ]
+    },
+    {
+      "text": "npc.wizards_and_beasts.apothecary.greet.wolf",
+      "weight": 3,
+      "when": [
+        {
+          "type": "condition",
+          "condition": "lycanthropy"
+        }
+      ]
+    }
+  ],
+  "topics": [
+    {
+      "id": "healing",
+      "label": "npc.wizards_and_beasts.apothecary.topic.healing",
+      "reply": "npc.wizards_and_beasts.apothecary.reply.healing"
+    },
+    {
+      "id": "mandrakes",
+      "label": "npc.wizards_and_beasts.apothecary.topic.mandrakes",
+      "reply": "npc.wizards_and_beasts.apothecary.reply.mandrakes"
+    },
+    {
+      "id": "wolfsbane",
+      "label": "npc.wizards_and_beasts.apothecary.topic.wolfsbane",
+      "reply": "npc.wizards_and_beasts.apothecary.reply.wolfsbane",
+      "when": [
+        {
+          "type": "condition",
+          "condition": "lycanthropy"
+        }
+      ]
+    },
+    {
+      "id": "cellar",
+      "label": "npc.wizards_and_beasts.apothecary.topic.cellar",
+      "reply": "npc.wizards_and_beasts.apothecary.reply.cellar"
+    }
+  ],
+  "shop": {
+    "carry": 0.75,
+    "stock": 12,
+    "restock_days": 3,
+    "goods": {
+      "dittany": {
+        "carry": 1.0,
+        "stock": 24
+      },
+      "magical_drafts_and_potions": {
+        "carry": 1.0,
+        "stock": 3
+      },
+      "wiggenweld": {
+        "carry": 1.0,
+        "stock": 6
+      },
+      "bezoar": {
+        "carry": 0.5,
+        "stock": 2
+      },
+      "advanced_potion_making": {
+        "carry": 0.5,
+        "stock": 1
+      },
+      "erumpent_horn": {
+        "carry": 0.3,
+        "stock": 1
+      },
+      "occamy_eggshell": {
+        "carry": 0.3,
+        "stock": 2
+      },
+      "acromantula_venom": {
+        "carry": 0.3,
+        "stock": 2
+      }
+    }
+  }
+}

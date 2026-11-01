@@ -41,6 +41,7 @@ public class ModEntityTypeTagsProvider extends EntityTypeTagsProvider {
                 ModEntities.STREELER.get(), ModEntities.RUNESPOOR.get(), ModEntities.HIDEBEHIND.get());
 
         tag(ModuleTags.entityTypes(Module.AZKABAN)).add(ModEntities.DEMENTOR.get());
+        tag(ModuleTags.entityTypes(Module.SETTLEMENTS)).add(ModEntities.SETTLEMENT_NPC.get());
         tag(ModuleTags.entityTypes(Module.BROOM_FLIGHT)).add(ModEntities.BROOM.get());
 
         // People a Veela's allure reaches (VeelaAllure): those with a mind to lose. Beasts, the undead and

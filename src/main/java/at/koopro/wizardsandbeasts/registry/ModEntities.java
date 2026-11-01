@@ -66,6 +66,15 @@ public class ModEntities {
             EntityHelper.register(ENTITY_TYPES, "goblin_teller", GoblinTellerEntity::new, MobCategory.CREATURE, 0.6f, 1.5f);
     static { EntityAttributeBindings.queue(GOBLIN_TELLER, GoblinTellerEntity::createAttributes); }
 
+    /** One entity for every settlement role; MISC, as a villager is, so no hamlet counts against a mob cap. */
+    public static final DeferredHolder<EntityType<?>, EntityType<at.koopro.wizardsandbeasts.settlement.npc.SettlementNpcEntity>>
+            SETTLEMENT_NPC = EntityHelper.register(ENTITY_TYPES, "settlement_npc",
+                    at.koopro.wizardsandbeasts.settlement.npc.SettlementNpcEntity::new, MobCategory.MISC, 0.6f, 1.8f);
+    static {
+        EntityAttributeBindings.queue(SETTLEMENT_NPC,
+                at.koopro.wizardsandbeasts.settlement.npc.SettlementNpcEntity::createAttributes);
+    }
+
     public static final DeferredHolder<EntityType<?>, EntityType<NifflerEntity>> NIFFLER =
             EntityHelper.register(ENTITY_TYPES, "niffler", NifflerEntity::new, MobCategory.CREATURE, 0.6f, 0.6f);
     static { EntityAttributeBindings.queue(NIFFLER, NifflerEntity::createAttributes); }
