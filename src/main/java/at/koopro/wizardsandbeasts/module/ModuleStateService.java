@@ -59,6 +59,9 @@ public final class ModuleStateService {
     /** Test seam: true only inside {@link #withoutDatapackReload}. */
     private static boolean reloadSuppressed;
 
+    /** The states the datapacks were read against, from {@link #loadBeforeGeneration} until the server has started. */
+    private static @Nullable Map<Module, ModuleState> packsReadAgainst;
+
     private ModuleStateService() {}
 
     /**
@@ -74,10 +77,24 @@ public final class ModuleStateService {
         }
     }
 
+    /**
+     * Brings the world's state into the read cache as soon as the overworld exists, before its first chunk generates.
+     * Structure gates read the cache on worldgen threads, and the first chunks are made long before
+     * {@code ServerStartedEvent}. Nothing is broadcast and no datapack is reloaded here: the server is not ready for
+     * either, so what the packs were read against is kept for {@link #refreshAndBroadcast} to compare.
+     */
+    static void loadBeforeGeneration(MinecraftServer server) {
+        packsReadAgainst = ModuleManager.snapshot();
+        ModuleStateData data = ModuleStateData.get(server.overworld());
+        ModuleManager.acceptAuthoritative(data.allStates());
+        ModuleManager.acceptAuthoritativeSettings(data.allSettings());
+    }
+
     /** Pushes the authoritative world state into the read cache and out to every client. */
     public static void refreshAndBroadcast(MinecraftServer server) {
         ModuleStateData data = ModuleStateData.get(server.overworld());
-        Map<Module, ModuleState> before = ModuleManager.snapshot();
+        Map<Module, ModuleState> before = packsReadAgainst != null ? packsReadAgainst : ModuleManager.snapshot();
+        packsReadAgainst = null;
         ModuleManager.acceptAuthoritative(data.allStates());
         ModuleManager.acceptAuthoritativeSettings(data.allSettings());
         ModuleStateSyncPayload.broadcast(server);
@@ -147,11 +164,11 @@ public final class ModuleStateService {
      * {@code /reload} and disabling one left them craftable, with the viewer confidently disagreeing with
      * the crafting table both ways.
      *
-     * <p><b>This matters at startup too, not just for operator commands.</b> Datapacks are read before
-     * {@code ServerStartedEvent}, which is where world state first reaches the cache — so a world whose
-     * stored state differs from the build's shipped defaults loaded its recipes against the defaults.
-     * Driving the reload off "did any state actually change" covers both, and costs nothing on the common
-     * path where a world agrees with the build.
+     * <p><b>This matters at startup too, not just for operator commands.</b> Datapacks are read before the
+     * overworld exists, which is where world state first reaches the cache ({@link #loadBeforeGeneration}) — so
+     * a world whose stored state differs from the build's shipped defaults loaded its recipes against the
+     * defaults. Driving the reload off "did any state actually change" covers both, and costs nothing on the
+     * common path where a world agrees with the build.
      *
      * <p>Settings cannot appear in a condition, so a settings-only change never reaches here.
      */

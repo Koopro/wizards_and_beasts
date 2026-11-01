@@ -1,26 +1,38 @@
 package at.koopro.wizardsandbeasts.module;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import org.jspecify.annotations.NullMarked;
 
 /**
- * Brings the world's module state into the read cache when the server is up, and hands each joining player
- * the current snapshot.
+ * Brings the world's module state into the read cache before any chunk generates, tells clients once the server
+ * is up, and hands each joining player the current snapshot.
  *
- * <p>The load on {@link ServerStartedEvent} matters: until it runs, {@link ModuleManager} is answering from
- * the build's shipped defaults, which may differ from what this particular world has stored.
+ * <p>The load on the overworld's {@link LevelEvent.Load} matters: until it runs, {@link ModuleManager} is answering
+ * from the build's shipped defaults, or from the last world this game had open, either of which may differ from what
+ * this world has stored. Vanilla fires it before the spawn search and the first chunks, which is why structure
+ * gates can trust the cache. {@link ServerStartedEvent} is too late for them.
  */
 @NullMarked
 @EventBusSubscriber(modid = WizardsAndBeastsMod.MODID)
 public final class ModuleLifecycleEvents {
 
     private ModuleLifecycleEvents() {}
+
+    @SubscribeEvent
+    public static void onLevelLoad(LevelEvent.Load event) {
+        if (event.getLevel() instanceof ServerLevel level && level.dimension() == Level.OVERWORLD) {
+            ModuleStateService.loadBeforeGeneration(level.getServer());
+        }
+    }
 
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent event) {
