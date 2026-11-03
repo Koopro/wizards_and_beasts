@@ -23,7 +23,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * with the rest rather than inventing a second atlas beside vanilla's.
  *
  * <h2>Why the icon lookup is cached</h2>
- * Resolving a spell icon has to fall back to a placeholder, because 34 icons exist for 155 spells.
+ * Resolving a spell icon has to fall back to a placeholder: every shipped spell has an icon, but a
+ * datapack can add spells that do not.
  * The old {@code ModTextures.resolveWandHudSpellIcon} answered that by asking the
  * {@link ResourceManager} whether the file was present — on every call, which meant six resource
  * lookups per frame from {@code SpellDiamondOverlay} alone, plus one per visible row in the spell

@@ -12,6 +12,7 @@ import at.koopro.wizardsandbeasts.wand.customization.WandConfiguration;
 import at.koopro.wizardsandbeasts.wand.customization.WandModule;
 import at.koopro.wizardsandbeasts.wand.customization.WandModuleRegistry;
 import at.koopro.wizardsandbeasts.wand.customization.WandSlot;
+import at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu;
 import at.koopro.wizardsandbeasts.wand.refine.WandRefinement.Action;
 import at.koopro.wizardsandbeasts.wand.refine.WandRefinement.Material;
 import at.koopro.wizardsandbeasts.wand.refine.WandRefinement.Status;
@@ -79,14 +80,16 @@ public class WandRefineMenu extends AbstractContainerMenu {
         this.level = player.level();
         this.access = ContainerLevelAccess.create(level, bench.getBlockPos());
 
-        addSlot(new Slot(inputs, 0, 44, 35) {
+        // The bench's own geometry, so both roles of the one bench sit on the same sheet.
+        List<int[]> origins = WandmakersBenchMenu.slotOrigins();
+        addSlot(new Slot(inputs, 0, origins.get(0)[0], origins.get(0)[1]) {
             @Override public boolean mayPlace(ItemStack stack) { return isFinishedWand(stack); }
             @Override public int getMaxStackSize() { return 1; }
         });
-        addSlot(new Slot(inputs, 1, 80, 35) {
+        addSlot(new Slot(inputs, 1, origins.get(1)[0], origins.get(1)[1]) {
             @Override public boolean mayPlace(ItemStack stack) { return !(stack.getItem() instanceof WandItem); }
         });
-        addSlot(new Slot(result, 0, 134, 35) {
+        addSlot(new Slot(result, 0, origins.get(2)[0], origins.get(2)[1]) {
             @Override public boolean mayPlace(ItemStack stack) { return false; }
 
             @Override
@@ -102,13 +105,10 @@ public class WandRefineMenu extends AbstractContainerMenu {
                 refresh();
             }
         });
-        for (int row = 0; row < 3; ++row) {
-            for (int col = 0; col < 9; ++col) {
-                addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 112 + row * 18));
-            }
-        }
-        for (int col = 0; col < 9; ++col) {
-            addSlot(new Slot(playerInventory, col, 8 + col * 18, 170));
+        for (int i = 0; i < 36; i++) {
+            int[] origin = origins.get(3 + i);
+            // 0-26 are the three inventory rows (container slots 9-35), 27-35 the hotbar (0-8).
+            addSlot(new Slot(playerInventory, i < 27 ? i + 9 : i - 27, origin[0], origin[1]));
         }
         addDataSlots(dataAccess);
         refresh();

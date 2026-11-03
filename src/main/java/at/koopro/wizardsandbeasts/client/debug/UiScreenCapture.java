@@ -191,6 +191,7 @@ public final class UiScreenCapture {
                 Step.client("ministry_licence", () -> open(new MinistryLicenceScreen(false))),
                 Step.server("wandmakers_bench", UiScreenCapture::openBench),
                 Step.server("wandmakers_bench_loaded", UiScreenCapture::openBenchLoaded),
+                Step.server("wand_refine", UiScreenCapture::openRefine),
                 Step.server("hermiones_bag", UiScreenCapture::openHermionesBag),
                 Step.server("niffler_pouch", UiScreenCapture::openNifflerPouch),
                 Step.client("gringotts", () -> open(new at.koopro.wizardsandbeasts.client.currency.gui.GringottsScreen())),
@@ -382,6 +383,17 @@ public final class UiScreenCapture {
         vault.depositKnuts(28);
         at.koopro.wizardsandbeasts.network.currency.DragotQuoteS2CPayload.sendToPlayer(player);
         at.koopro.wizardsandbeasts.network.currency.GringottsOpenS2CPayload.sendToPlayer(player);
+    }
+
+    /** The bench's refining role, opened as a finished wand's right click opens it (no wand needed for a photograph). */
+    private static void openRefine(ServerPlayer player) {
+        if (benchPos != null && player.level().getBlockEntity(benchPos)
+                instanceof at.koopro.wizardsandbeasts.wand.bench.WandmakersBenchBlockEntity bench) {
+            player.openMenu(new net.minecraft.world.SimpleMenuProvider(
+                    (id, inventory, p) -> new at.koopro.wizardsandbeasts.wand.refine.WandRefineMenu(id, inventory, bench),
+                    net.minecraft.network.chat.Component.translatable("gui.wizards_and_beasts.wand_refine")),
+                    buf -> buf.writeBlockPos(benchPos));
+        }
     }
 
     private static void openBench(ServerPlayer player) {
