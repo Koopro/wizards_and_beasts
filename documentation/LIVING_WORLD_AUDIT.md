@@ -808,6 +808,8 @@ Azkaban was the reverse. Existing worlds keep what generated. The fix is on `fea
 
 ### Generation (requirement B)
 
+**Superseded by section 14.** The figures below came from a weaker probe. Its monster-room, floor and counter rows understated the defects.
+
 Hub-and-spoke jigsaw is confirmed; the rigid NBT fallback was not needed. Seeds 4815162342, 271828182, 8675309, ten sites each.
 
 | Check | Result |
@@ -865,7 +867,7 @@ Nothing below should be read as done.
   The rule from the UI work stands: one building and one person are shown before the look is accepted.
 - No two-client run. "Two players" in the game tests are mock connections on one server.
 - Whether NPC strolling looks right, or a person gets stuck. No game test runs their AI at length.
-- A hamlet at the edge of explored land in an existing world: cut short by reasoning, never generated.
+- ~~A hamlet at the edge of explored land in an existing world.~~ Measured in section 14: it does not come out cut short.
 - Whether a player actually finds one by chart; `HamletCharts` end to end on real terrain.
 - Whether Wandmaker's Bench, cauldrons, desk and lectern work in a generated building. Each is placed, and none was used.
 - Undercroft: seal rotation, the ladder, the button as knocker, Revelio. Only placement was checked.
@@ -876,3 +878,599 @@ Nothing below should be read as done.
 no two-client run, signs at each rotation unread, hall visibility, plus the open decisions on sword ownership and a gaze grace.
 
 **Parked:** Dark-theme comparison; `feature/ui-overhaul` merge; `SpellWorldGuard`.
+
+## 14. Terrain integrity and generation hardening (2026-11-02)
+
+Branch `feat/living-world`, HEAD `33506296`, all of it uncommitted. Backup of the prior work: `C:\tmp\wb-backups\2026-11-02-generation-wip`.
+No building, profession, quest, UI or economy change. The jigsaw is unchanged.
+
+This section supersedes the generation figures in section 13. Three of them were wrong, because the old probe could not see the defect:
+
+| Section 13 said | Measured with a stricter probe, same three seeds, fixes off |
+|---|---|
+| Monster room breach at one site in 30 | Reproduced, and the wider sample found other structures doing the same |
+| Unsupported floor "up to 311, at one site" | 45 of 110 sites, 2,803 cells, most 409. Cellars, never measured: 19 sites, 358 cells |
+| Every counter reachable, 30/30 | That check used a window of 4 and counted doors as blocked. Replaced by a door-aware walk |
+| Strict clean 26/30 | 52/110 |
+
+### Root causes
+
+**A. Monster room in the Undercroft.** A vanilla feature, not a layout fault: 0 piece collisions in 110 sites. `MonsterRoomFeature` runs in an earlier step than the hamlet, but a room begun in a neighbouring chunk reaches 4 blocks into this one, and that chunk may decorate later, so it writes over pieces already placed. Its edge cells call `setBlock` with no `features_cannot_replace` check. Reproduced on seed 8675309 at chunk -110,211, plaza CLOCKWISE_90: 47 blocks changed below the floor, including a soul lantern and a sign.
+
+**B. Unsupported floors.** The site check runs at `STRUCTURE_STARTS`, before carvers, so it cannot see carver caves or ravines. `beard_box` works from the noise stage and cannot fill them either. Nothing placed under the floor afterwards. Reproduced at 409 cells, and the 311 from the audit on seed 4815162342. Deepest void 41.
+
+**C. Other structures through a hamlet (new).** The first twelve-seed sample found seven sites: ruined portals (5), a pillager outpost, trail ruins. On seed 987654321, chunk 177,164, a portal wrote 17 blocks of netherrack and magma through a floor and took a post, leaving four people. The Chamber overlaps at five control sites were the same fault: only a placement's exclusion zone keeps two structures apart, and most have none.
+
+**D. Vegetation in rooms (new).** A tree from the neighbouring chunk's pass grew through a room: 17 control sites, 122 cells. Same route as A: a neighbour's feature arriving late.
+
+### The fix
+
+| File | Change |
+|---|---|
+| `mixin/MonsterRoomFeatureMixin` (new, in `"mixins"`) | Cancels `MonsterRoomFeature.place` when the origin's chunk references a settlement. |
+| `settlement/structure/SettlementGround` (new) | Footing after placement: a 2-block plate under each floor column, stone piers on a 4-block grid, only if rock lies within 24. Bounded scan per column, and a floor over a canyon ends in a plate rather than a tower. |
+| `settlement/structure/SettlementRooms` (new) | On `ChunkEvent.Load` of a new chunk, clears non-air from a building's rooms. Open ground is left alone. Runs when all neighbours have finished features. |
+| `settlement/structure/SettlementStructure` | `assess()` returns a verdict as well as the stub. New `OCCUPIED` verdict: refuses a site if any other spread-placed structure would start within 12 chunks and reach the hamlet's box plus 12 blocks. A cheap biome read rejects most candidates first. |
+| `settlement/structure/SettlementSite` | Named verdicts, so the probe can report why each site was refused. |
+| `settlement/HamletCharts` | The settlement tag now has one home, in `SettlementGround`. |
+| Templates, six `.nbt` | Re-generated from `tools/gen_hamlet_nbt.py` (local only). |
+| `settlement/SettlementWorldProbe`, `SettlementLifeProbe` | Whole-template compare, piece collisions, cellar floors, door-aware walk, verdict tally, TSV per site, restart re-inspection, gate and existing-world modes. |
+| `gametest/SettlementTests`, `SettlementGroundTest`, `SettlementLayoutTest` | Regression tests below. |
+
+**Why a mixin:** NeoForge has no feature-placement event. A biome modifier would remove dungeons from every biome a hamlet can stand in. Overriding the placed-feature file would fight other mods. The room must be stopped before it starts, because it writes into placed pieces from a neighbouring chunk. The `OCCUPIED` rule and the footing use no mixin.
+
+**Why the footing is bounded:** the brief ruled out blindly filling ravines. Masonry is 21,792 blocks across 371 sites, 845 at most, deepest pier 23. 6,398 columns hang over a gap by design, on a plate.
+
+### Regression tests
+
+| Test | Covers | Proof it can fail |
+|---|---|---|
+| `settlement_assembly_holds_at_every_turn` | Every piece and connector, four rotations, overlap | Moved connector: "0 of reading_room" |
+| `settlement_stands_on_*`, 5 terrains × 4 rotations | Ravine, bottomless, flooded, uneven, cavern | `PIER_REACH` 400 alone: all four `bottomless` fail, "48 piers begun over a gap too deep" |
+| `settlement_no_monster_room_breaches_the_undercroft_*` ×4 | Monster room, real feature code | Fixes off: exactly these fail, "14 rooms started under a settlement" |
+| `settlement_floor_is_footed_over_a_gap_*` ×4 | Plate and piers per rotation | Fixes off |
+| `settlement_rooms_are_cleared_of_vegetation_*` ×4 | Plants in rooms, Undercroft boundary | Fixes off |
+| `settlement_gives_way_to_other_structures` | Eight sites that really collided, two free | `occupied` off: "seed 1234567 chunk -145, 123 came out STANDS" |
+| `SettlementGroundTest` | Pier rules, including a gap too deep | Unit |
+| `SettlementLayoutTest` | Overlap, clearance, posts, doors | Unit |
+
+Mutation 1 (mixin, footing and room clearing off) failed exactly 24 tests, each with its right message.
+
+### Expanded real terrain
+
+Twelve seeds, up to 60 sites each, `--nogui` server: 8675309, 271828182, 4815162342, 1234567, 20261101, 42, 1, 987654321, 3141592653, 1618033988, 7777777, -5577006791947779410.
+
+| Verdict over 7,500 grid cells | Cells |
+|---|---|
+| Stands | 371 |
+| Biome | 3,918 |
+| Inside a village's exclusion zone | 1,938 |
+| Relief | 866 |
+| Liquid | 344 |
+| Occupied | 63 |
+| Incomplete | 0 |
+
+| Check on 371 sites | Control (110 sites, 3 seeds) | Final |
+|---|---|---|
+| Template blocks changed | Present | 0 |
+| Cellar blocks changed | Present | 0 |
+| Monster rooms at the Undercroft | Present | 0 |
+| Floor cells over nothing | 2,803 | 0 |
+| Cellar cells over nothing | 358 | 0 |
+| Piece collisions | 0 | 0 |
+| Other structures clashing | 5 sites | 0 |
+| Plants in rooms | 122 cells | 0 |
+| Doors or counters unreachable | Not measured | 0 |
+| Site left on foot from every side | Not measured | 370 of 371 |
+| Clean | 52 of 110 | 370 of 371 |
+
+All four rotations appear, and results after a real server restart are identical.
+
+| Plaza rotation | Clean / sites |
+|---|---|
+| NONE | 94/94 |
+| CLOCKWISE_90 | 94/94 |
+| CLOCKWISE_180 | 91/92 |
+| COUNTERCLOCKWISE_90 | 91/91 |
+
+The one site not clean is seed 1234567, chunk 409,-389: its west side is a lake 14 blocks below the floor. All five entrances work. The walker cannot swim, so the site stays marked rather than reclassified.
+
+### Module checks (seed 271828182)
+
+| Check | Result |
+|---|---|
+| `SETTLEMENTS` disabled | 0 sites, no chart, no people |
+| Preview and enabled | 35 sites, identical start lists |
+| Restart | Identical |
+| Timing | First chunk saw the world's state with everything off and as shipped |
+| Chamber off | No hamlet refused for it: `OCCUPIED` 3 against 8 |
+| Existing world, explored land | 0 marks, 0 hamlets backdated across 16 sites |
+| Existing world, new land | 19 of 19 sites clear of the explored land grew a hamlet, all clean |
+| Azkaban with its module on | Started at its chunk, 2 pieces |
+| Azkaban with its module off | Not started, as designed: it ships disabled |
+
+**Correction to section 13 and the changelog:** a hamlet at the edge of explored land does not come out cut short. A chunk cannot reach the feature step until every start within 8 chunks is settled, so a start near old land was decided while the module was off and never appears. That costs a few hamlets near old land, not their shape. The first version of this run printed "none" everywhere and proved nothing, so it was repeated with new land as a positive control.
+
+**Chamber:** no regression from this work, and one older defect found. On seed 8675309, chunk -590,-547, an amethyst geode from a neighbouring chunk overwrites the Chamber's wall in some runs: 18 blocks in one of 5 runs with fixes off, 204 in two of 5 with them, 0 in the rest, with a walk of 384 cells instead of 426 in the worst case. It varies between runs of one tree, because it depends on which chunk decorates last. Five sites is too few to say whether the rate differs. It is the same route as defect A, and is **not fixed**, as the Chamber is outside this milestone. Hamlets are out of its reach: the lowest floor in the sample is y 59 and geodes begin at y 30 or below.
+
+### Performance
+
+| Measure | Control | Final |
+|---|---|---|
+| Generating a whole site | 8,965 ms | 8,562 ms, no measurable overhead |
+| Assess, per grid cell | | 82 ms mean (57-117 by seed) |
+| Cells reaching the other-structure check | | About 6%: median 550 ms, p95 2.5 s, max 7.2 s, hamlet's own terrain and jigsaw included |
+| `occupied()` alone | | 316 ms mean, 2.2 s max. 90% is asking other structures' own checks |
+| Chart search from spawn | 0.7-1.3 s | 2.0 s mean, 5.5 s max |
+
+Loops are bounded (25×25 chunks, one call per candidate, once), and nothing runs per tick. **Risk:** a chart search walks on the server thread, and one step cannot be interrupted, so a search can stall the server for up to a few seconds. It was kept because it is rare and exact. The yield cost is about 15% of candidates, wider than a strict collision by the 12-block margin.
+
+### Tests
+
+| Suite | Result |
+|---|---|
+| Unit, final code | 2,947 run, 6 failed: the same six wand-model tests as before the work |
+| Game, final code | 510/510 |
+| Game, 510 tests, seven runs in all | 6 clean, 1 with one failure |
+| Game, clean HEAD `33506296`, six runs | 4 clean, 2 with one failure each |
+
+**The baseline of 473/473 is not stable.** Single unrelated tests fail now and then, on clean HEAD too:
+
+| Tree | Test | Message |
+|---|---|---|
+| HEAD | `settlement_lethal_blow_apparates_them_away` | "something dropped" |
+| HEAD | `protego_horribilis_shrugs_off_dark` | "neither ward answered the blow" |
+| Fixes off | `creature_ai_camouflage_stays_continuous` | "the moke was visible on tick 4" |
+| Fixes off | `placement_dummy_faces_the_player_who_planted_it` | "found 0" |
+| Final | `poaching_is_filed_when_an_official_sees_it` | "an official from elsewhere is watching" |
+| Earlier, 509 tests | `ecology_looks_around_only_every_second` | "looked around 0 times" |
+| Earlier, 509 tests | `ministry_trace_muggles_see_magic` | "never started ticking entities" |
+
+None has repeated. The cause is unproven. Tests share one world, tellers left by other tests are a likely source for the poaching one, and `forceChunks` never releases, which the new tests add to. Nothing was reclassified or retried away. New failures from this work: none established.
+
+### Remaining limitations
+
+- Nothing has been seen in a client.
+- Strongholds and Azkaban are outside the `OCCUPIED` rule: neither uses spread placement. A stronghold through a hamlet was not seen in the sample and cannot be ruled out.
+- The `OCCUPIED` biome read samples, so a rare miss stays possible. It matched the exact check on all twelve seeds.
+- Neighbour-feature races depend on chunk order, and a site is generated once per sample. Zero in 371 is a measurement, not a proof. Other features than monster rooms and plants are not blocked, only measured.
+- The Chamber's geode race is open.
+- Chart search can stall the server for a few seconds.
+- Game tests fail singly at random, and the cause is open.
+- Modded biomes and other world types were not sampled.
+
+**Readiness:** READY for in-game visual alpha testing of hamlets. Everything in "Still unverified" in section 13 is still unverified, except the edge-of-explored-land item, answered above.
+
+## 15. Visual and gameplay alpha in a real client (2026-11-03)
+
+Branch `feat/living-world`, HEAD `33506296`, uncommitted, on top of the section 14 work. Backup first:
+`C:\tmp\wb-backups\2026-11-02-alpha-start`. No commit, push, merge, reset or branch switch. No building, profession, quest
+or system was added. Evidence: `C:\tmp\wb-lw-alpha\evidence` (screenshots and reports per run); chart measurements in
+`C:\tmp\wb-lw-alpha\srv-before`, `srv-after`, `srv-after3`, `srv-after4`; tests in `C:\tmp\wb-lw-alpha\tests`.
+
+### What kind of testing this was
+
+| Kind | Used for | What it is not |
+|---|---|---|
+| **Real client, scripted** | Three natural hamlets: tour, walkthrough, UI | Not a person. Keys and clicks come from `client/debug/HamletPlaytest` through `KeyMapping`s and the open screen's own `mouseClicked`. It shows what the client draws and does, and cannot say how a place feels |
+| **Two real clients, real dedicated server** | Multiplayer | Not a mock connection: two game processes, each joined over TCP. Scripted, through `settlement/SettlementMpProbe` |
+| **Headless server probe** | Chart search before and after (`settlement/ChartSearchProbe`) | No client |
+| **Game and unit tests** | Regressions, flakes | Mock players |
+
+No person has played a hamlet by hand. Nothing below is a judgement of fun.
+
+### The graphical environment
+
+The physical display was in use throughout: an unrelated Minecraft 26.3 window, an IDE, a browser, and a video encode at
+100% CPU until 06:20. No virtual display, VM or remote session existed, and installing one was ruled out. A **hidden Win32
+desktop** worked without installing or changing anything: `CreateDesktop`, then `CreateProcess` with `lpDesktop`. The client
+got the real GPU (`NVIDIA GeForce RTX 3060 ... GL 3.3.0`), screenshots are real frames, and a watchdog confirmed 0 windows on
+the visible desktop and an unmoved foreground every five seconds of every run. Clients were muted, ran below normal priority
+in their own directories under `C:\tmp\wb-lw-alpha`, and were started with `java` directly, never through Gradle, whose
+daemon would have forked them onto the visible desktop. Tools: `C:\tmp\wb-lw-alpha\tools`.
+
+Cost of the loaded machine: a client took 6 minutes to start, a fresh world 8 to 12, and the integrated server ran up to
+30 s behind. Several scripted steps timed out on that alone; they are marked as harness below, not as game defects.
+
+### Sites (naturally generated, fresh worlds, nothing placed by hand)
+
+| Site | Seed, chunk | Ground | Reached on foot from the plaza, 64 blocks out (cells at the W, E, N, S edges) |
+|---|---|---|---|
+| Lake | 1234567, 409,-389 | Forest on a terraced hill, lake 14 below on the west | 0, 528, 371, 304 |
+| Spawn | 271828182, the one nearest spawn, found by chart | Plains | 628, 634, 621, 660 |
+| Ravine | 271828182, 375,-227 | Savanna plateau, the most footing of the 371 sites | 409, 480, 557, 0 |
+
+### Visual findings
+
+- **Composition works.** From the air and from the plaza the hamlet reads as one place: a paved star around the stone Crooked
+  Spire, five buildings on its arms, lamp posts. The Spire is the landmark from every approach.
+- **Night works outside.** Lamps and lit windows mark the plaza. Interiors are dim, one candle each, but readable, and the
+  people can be seen.
+- **Sparse on open ground.** On plains it is five small buildings on bare grass: no paths, fences or gardens past the plaza.
+- **Repetition.** The Wandmaker's and Keeper's fronts are the same house. Only the bank (sandstone, iron doors) stands apart.
+- **Bare interiors.** About 70% empty floor behind one long counter. The Wandmaker and the Reading Room show the same
+  bookshelf wall, so the Wandmaker has no wand identity indoors. The bank (chiselled counter, checker floor, goblin) and the
+  Apothecary (cauldrons over coals) have one.
+- **Footing shows.** Where the land fell away, a building stands on a visible stone-and-dirt plinth.
+- **Names.** The hamlet's shops are titled "Ollivanders", kept by "Old Bartle Quince", and "Slug & Jiggers Apothecary":
+  Diagon Alley firms. Left for a decision.
+- **Screens** (parchment) are readable at GUI scales 1 to 4 (`scale_*.png`). The Heritage, Handbook, shop, Bench, O.W.L. and
+  Gringotts screens all drew correctly. Purchase and refusal feedback are toasts ("Bought 1 x ...", "Not enough in your
+  vault"). Signs above doors were not read at a readable distance.
+
+### Building by building (real client)
+
+| | Lake | Spawn | Ravine | Notes |
+|---|---|---|---|---|
+| Walk in on foot from outside the site | 84 cells | 100 cells | stuck on a 1-block terrace | Real keys over natural ground |
+| Keeper: board, 4 topics, 3 offers, contract accepted | not reached | no screen | **pass** | See the door below |
+| Wandmaker: board, 4 topics, buy, Bench screen | pass | pass | pass | 29 Knuts, shelf 9 to 8, each time |
+| Apothecary: board, 3 topics, buy, refused when broke | buy failed* | pass | pass | *the script ran out of scrolling: defect 2 |
+| Reading Room: board, 4 topics, lesson taken, O.W.L. desk, chest | aim failed | pass | pass | The Study Lectern opens nothing without a blank book and ink, as designed |
+| Teller: Gringotts counter | aim failed | pass | pass | Clicks dropped: defect 4 |
+| Undercroft: down through the trapdoor and the ladder | no route (harness) | no route (harness) | **67 cells, real trapdoor click** | Seal: defect 7 |
+
+### Defects found, and what was done
+
+| # | Defect | Evidence | Done |
+|---|---|---|---|
+| 1 | **Flooded cellar.** At the ravine site the cellar and Undercroft lay in an aquifer. Jigsaw's default `apply_waterlogging` placed the bottom ladder, a soul lantern and a sign *holding* the water, so they became springs, and the cellar flooded once a player was near and fluids ticked. The 371-site probe compared blocks before any fluid tick, so it could not see this. Dry at the other two sites | Region read of the saved world: `ladder[waterlogged=true]`, `soul_lantern[waterlogged=true]`; screenshots | **Fixed:** `"liquid_settings": "ignore_waterlogging"` in `worldgen/structure/wizarding_hamlet.json`. On a fresh dedicated-server world at the same site: 0 waterlogged blocks after 30 s of ticking near players, against 5 in the control run. The FLOODED terrain test now fails any template block that holds water (mutation below) |
+| 2 | **Shop lists bury what is for sale.** A board drew everything the keeper buys first: about 30 grey "Requires standing" rows above the Apothecary's one item for sale | Screenshots | **Fixed:** `LocationScreen` draws "For sale" first. The purchase that failed at the lake passed at both later sites |
+| 3 | **Back at dawn is not dawn.** `PostRules.backAt` is game time. Sleeping or `/time set` moves day time only, so after a skipped night the record still read "AWAY, back in 16,451 game ticks". Once that game time passed, they returned with the same name | Two real clients, dedicated server | **Not fixed:** the record's saved format would change. Proposed: keep the 2,400-tick floor, and also return once the day count has passed the dawn after the blow |
+| 4 | **Gringotts drops quick clicks without a word.** `VaultActionC2SPayload` allows one action per 2 server ticks and returns silently. On a lagging server honest clicks arrive together: 2 of 7, 3 of 7 and 9 of 10 deposits counted. No coin was ever lost or made | All three sites, both clients | **Not fixed:** shared economy code. Proposed: queue within the throttle, or tell the player |
+| 5 | **Stale board for the other player.** After both bought from one shelf, one open board still read 19, the other 18 | Two clients | Not fixed. The server re-prices each purchase, so a stale line can only be refused, never undercharged |
+| 6 | **The Keeper's door.** At two sites the scripted player could not open it: the crosshair did not register the door and three right clicks failed. The shot shows the door face with two people's names directly behind it. People are not pushable and close doors behind them | `stuck_to_the_keeper.png` | **Unproven.** Not shown that a person would be blocked |
+| 7 | **Knocker.** Right-clicked by the script in the flooded cellar, the Undercroft's button did not open the seal | Ravine run | **Unproven.** Retest now that the cellar stays dry |
+| 8 | Broom sound events name `minecraft:sounds/block/wood/break1.ogg` and others that 1.21.11 does not have | Client log | Unrelated to hamlets; recorded only |
+
+Harness faults that first read as defects, each disproved by its screenshot: a "no route" that was the player's death from a
+40-block drop; a door "stuck" that was the Ministry Handbook, which a new character holds, opened by a click that missed; the
+bank's flanking iron doors, which by design do not open by hand; a purchase that "failed" because the script stopped scrolling.
+
+### The Wayfarer's Chart
+
+The Path was finished through the real `ApprenticePathService.evaluate()`: every other step was recorded as setup, so the last
+was met for real. The chart arrived with "Tucked into your things you find a Wayfarer's Chart. Someone thinks you should
+meet your neighbours", 71 and 83 s later on the loaded machine, with the Serpent Chart beside it. The hamlet nearest spawn
+stood where the search said. Two Handbooks were in the pack; the setup recorded the first step last, so that may be the setup,
+and it is not called a defect.
+
+### Accessibility (Phase D)
+
+Seed 1234567, chunk 409,-389: the west is a lake 14 blocks down; east, north and south are open on foot 64 blocks out (528,
+371 and 304 cells reach the edge). All five doors face the plaza. **Decision: acceptable variation, no new rule.** What matters,
+reaching it at all, holds from three sides, and the ravine site showed the same picture (closed south, open three ways). A
+rule demanding four open sides would refuse every lakeside and clifftop hamlet for something no player needs. Section 14's
+"370 of 371" looked only 4 blocks out; this walk (part `approach` of the harness) is the better measure for the next probe run.
+
+### Chart search (Phase F)
+
+| Same seed, 16 origins 12,000 blocks out, same machine load | Before | First attempt | Final | No search (control) |
+|---|---|---|---|---|
+| Worst server pause | **43.2 s** | 15.9 s | **3.7 s** | 1.2 s, 2.9 s |
+| Ticks longer than 100 ms | 29% | 57% | **10.7%** | 9% to 10.5% |
+| Mean search | 24.0 s | 13.1 s | 15.7 s | |
+| Sites found | 16 | 16 | the same 16 | |
+
+Why it stalled: `HamletCharts` budgeted 3 ms a tick between `walk.step()` calls, but one step ran `checkStructurePresence`,
+which runs all of `SettlementStructure.assess()` (jigsaw and the other-structure check) on the server thread, and a standing
+site ran it a second time inside `getChunk(STRUCTURE_STARTS)`. The audit's 5.5 s was `nearest()` run once, not the walk.
+
+The fix leaves the question where vanilla already answers it, in the chunk generators. `TreasureCharts.AskedCell` turns a
+cell away by exclusion zone and biome on the server thread, asks for the chunk to `STRUCTURE_STARTS`, and answers
+`SiteSearch.PENDING` until it is done; the walk asks the same cell again next tick. The first attempt called
+`ServerChunkCache.getChunkFuture` from the tick, and sampled stacks showed it waiting inside (`managedBlock`): that is what it
+does on the server thread. It is now asked from a worker, where vanilla only queues the request on the server thread, and the
+one-tick ticket is renewed each turn. No world access moves off the server thread. Also fixed: a chart finished after the
+player changed dimension is drawn of the Overworld.
+
+Tests: `SiteSearchWalkTest` (a waiting cell is asked again and never passed; waiting never changes what is found, 200 worlds),
+`HamletChartsTest` (a waiting cell ends the tick's share; a spent budget asks nothing), and the game tests
+`settlement_chart_is_given_once_however_often_it_is_offered`, `settlement_chart_search_waits_on_the_world_a_cell_a_tick` and
+`settlement_chart_search_ends_with_a_logout`.
+
+Left: a search still costs wall time (16 s mean here), and the Chamber's Serpent Chart, handed over at the same moment, still
+searches synchronously (`ChamberCharts.offer`, Chamber scope).
+
+### Two clients (Phase E)
+
+Two client processes, one dedicated server, TCP, the ravine site.
+
+| Check | Result |
+|---|---|
+| Both join; five people present | Pass |
+| Both open the same person's board at once | Pass |
+| Six purchases at once from one shelf | Shelf 24 to 18 by the fresher reading; each paid only for what they got (101 and 103 Knuts) |
+| Two players at one teller | Pass, conserved; the throttle dropped 1 deposit (defect 4) |
+| A contract is one player's own | Pass, weakly: the other player's board was not open when asked |
+| Lethal blow | Gone from both clients, 0 items within 6 blocks |
+| Back at dawn after a skipped night | **Fail**, defect 3 |
+| Back once the record's game time passed | Pass, same name |
+| Disconnect and reconnect | Vault and pocket unchanged |
+| Chunks dropped and reloaded | **Inconclusive:** the probe's teleport back did not move one player, and the hamlet's chunk was not entity-ticking. It says nothing either way about people's persistence, which section 13 proved across a real restart |
+
+The first attempt timed both clients out: the probe generated 225 chunks under them. The site is now generated before they join.
+
+### Tests
+
+| Suite | Result |
+|---|---|
+| Unit, final code | 2,952 run, 6 failed: the same six wand-model tests as before. The five new chart tests pass |
+| Game, final code, runs 4 to 8 | **513/513, five runs of five** |
+| Game, runs 1 to 3 (before the two test corrections below) | 5, 12 and 6 failures; causes below |
+| Mutation: liquid fix removed from the built resources only | Exactly the four `settlement_stands_on_flooded_*` failed, "apothecary chest holds water" |
+
+Two corrections to Living World tests, neither loosening a check:
+- `settlement_stands_on_*` assembled its pieces with vanilla's default liquid setting, so it tested vanilla rather than the
+  structure file. It now reads `liquid_settings` from the registered structure through its own codec.
+- `settlement_gives_way_to_other_structures` failed on every run in this tree and never in `C:\tmp\wb-lw-fix`: one of its
+  taken sites is a Chamber, the Chamber only starts with its module on, and this tree's `run/config` still says
+  `chamber_of_secrets = "disabled"` while the fix tree's says `"preview"`. The section 14 figure of 510/510 came from the fix
+  tree. The test now leases the module for its check instead of reading the run's config. The config was not changed.
+
+### Random game-test failures
+
+Messages were sharpened, not loosened, on the three named tests: `settlement_lethal_blow_apparates_them_away` lists the items
+before and after; `poaching_is_filed_when_an_official_sees_it` names each official, its age and place; and
+`protego_horribilis_shrugs_off_dark` adds each caster's state and where the ward, the caster and the attacker stood. **None of
+the three recurred in eight runs**, so their causes remain unproven. What the runs did show:
+
+| Failure | Runs | Cause |
+|---|---|---|
+| `location_gringotts_loads_and_opens_at_the_teller`, `location_board_needs_presence`, `location_expedition_loop_end_to_end`, `location_goblins_break_curses_for_a_fee`, `location_tier_gates_high_security_vault`, together | 2 | **Shared global state, shown.** `AdminModuleTests` switches `GRINGOTTS` and `PLAYER_ABILITIES` off and on (logged: "GRINGOTTS enabled -> disabled") and is registered with `tests.add`, so it runs in the same batch as every other test. Module state is global. Fix, not made here (outside this milestone): register the admin module tests with `addAlone` |
+| `ministry_trace_child_is_warned_then_heard`, `ministry_casework_players_alone_cannot_name_anyone`, `ministry_trace_wand_examination_finds_an_unforgivable` | 2, 3 | "The chunks under the scenario never started ticking entities on tick 402": chunk lifetime under load. Not reproduced in runs 4 to 8 |
+
+Likely, and unproven: every `addAlone` scenario runs at the same spot, because each batch reuses the structure grid's first
+slot, so an entity or item a previous lone test left outside its bounds (a goblin teller is a Ministry official) is still
+there for the next. The poaching message now prints what it finds.
+
+The Chamber's geode race (section 14) was not touched; its evidence stays in `C:\tmp\wb-lw-results\chamber`. The Chamber
+is not validated.
+
+### Remaining risks
+
+- No person has played it. Scripted play cannot judge feel, pacing, or whether the place is found without being told.
+- Defects 3 to 7 are open.
+- The Undercroft's knocker and seal are not shown working in a real client.
+- The 371-site survey cannot see anything that needs ticking (fluids, falling blocks, leaf decay). The flood was one.
+- Existing worlds keep cellars generated before the fix, flooded or not.
+- Modded biomes and other world types were not sampled.
+
+## 16. Alpha stabilization (2026-11-03)
+
+Branch `feat/living-world`, HEAD `33506296`, uncommitted, on top of section 15. Backup first:
+`C:\tmp\wb-backups\2026-11-03-stabilization-start` (tracked patch, untracked tar, HEAD, status). No commit, push, merge,
+reset or branch switch. Nothing added: no hamlet, building, profession, quest or system. Earlier evidence and comparison
+trees are untouched. New evidence: `C:\tmp\wb-lw-stab` (client runs `k-*`, two-client run `mp`, `s-mp`, `c-one`, `c-two`,
+life probe `s-life`, test logs `tests`). Harness: `C:\tmp\wb-lw-stab\tools`, copies of section 15's pointed at that
+directory.
+
+### Repository state at the start
+
+As reported: `feat/living-world` at `33506296`, 32 entries (23 modified, 9 untracked). 16 come from the generation
+hardening (section 14), 5 more were there when section 15 began (three documents, `SettlementSite`, `SettlementRooms`),
+and 11 come from section 15 (`LocationScreen`, `PoachingTests`, `ProtegoShieldTests`, `SiteSearch`, `TreasureCharts`,
+`wizarding_hamlet.json`, `SiteSearchWalkTest`, `HamletPlaytest`, `ChartSearchProbe`, `SettlementMpProbe`,
+`HamletChartsTest`). The attribution comes from the earlier backups' file lists.
+
+### P0: back at dawn
+
+**Root cause.** `PostRules.backAt` turned "the next dawn" into a game time at the moment of the blow, and the post compared
+game time. A bed sleep sets day time to the next multiple of 24,000 (`ServerLevel.tick`, through `onSleepFinished`) and
+leaves game time alone; so does `/time add`; `/time set` writes day time outright; and `/neoforge day` changes how much day
+time a game tick is worth. None of these moved the record, so the person came back a day of game time later, whatever the
+clock showed.
+
+**Fix.** The record keeps two values: `dawn`, the day time of the dawn they return at, and `back_at`, a game-time backstop
+for the same moment at the day speed of the blow. They are back when either has passed (`PostRules.due`). Day time covers
+sleep, `/time add` and fast days; the backstop covers a clock turned back or stopped, and is scaled by
+`getDayTimePerTick` so a slow day does not bring them back at night. The 2,400-tick minimum is unchanged. `dawn` is a new
+optional saved field: a record written before it reads `NO_DAWN` and keeps the game time it was written with, so a world
+saved with someone away loads unchanged. Name index, UUID handling, the stale-copy refusal and the shelves are untouched.
+
+| Kind | What | Result |
+|---|---|---|
+| Unit, `PostRulesTest` (16) | a night slept through, ordinary time to the tick, `/time add`, a clock turned back, a stopped clock, half and 20x day speed, an old record | pass |
+| Unit, `SettlementDataTest` (7) | two people away survive two save round trips with the same dawn; an old-format record decodes with `NO_DAWN` | pass |
+| Game `settlement_back_at_dawn_as_the_day_runs` | blow at the vanilla rate, so game time is 3,000 ticks off; the day then runs 25x faster; the post's own tick brings them back at dawn | pass |
+| Game `settlement_back_at_the_dawn_slept_to` | a real bed, `startSleepInBed`, vanilla's wake; back with under 200 game ticks passed, against a backstop 10,000 away | pass |
+| Game `settlement_two_away_return_once_each` | two posts, both struck, both back at dawn as themselves after three looks each; the shelf unchanged | pass |
+| Game `settlement_away_while_the_hamlet_is_unloaded` | a post on a chunk of its own, unloaded (checked) while away, dawn passes, reloaded: nobody meanwhile, then one person | pass |
+| Game `settlement_blow_and_return_three_times` | three blows, three dawns: same name, new body each time, nothing dropped, the shelf unchanged | pass |
+| Mutation: `due` set back to the old game-time rule | the five scenarios above | **all five fail**, each at its own check |
+
+The unload scenario first failed: it looked 45 ticks after the chunk ticked, before the nine chunks' entities were back
+from disk, and a post judges nothing until they are, by design. It now waits for them. That was the test's timing, not the
+game.
+
+### P0: the Undercroft knocker
+
+**The alpha's failure was the harness.** Section 15's saved ravine world (`C:\tmp\wb-lw-alpha\c1\saves\playtest_ravine`)
+has the knocker intact: `polished_blackstone_button[facing=west]` on the brick above the upper seal block, both seal
+blocks `open=false, powered=false`. That is the geometry `chamber_seal_opens` already tests. The alpha's step aimed at the
+middle of the button's cell and clicked without checking the crosshair; its after-shot looks at the ceiling. The module
+gate stops right clicks on the Chamber's own blocks while `CHAMBER_OF_SECRETS` is off, but the knocker is a vanilla button
+and the seal opens from its redstone, so the gate does not apply.
+
+The new playtest part `knock` walks from the plaza on foot, empties the hand, aims at the button's own shape, does not
+click until the crosshair is on it, checks that the server saw the button pressed, and checks the seal.
+
+| Site (fresh world, natural generation) | Reached on foot | Crosshair | Server press | Seal | Walked through | Saved open |
+|---|---|---|---|---|---|---|
+| Ravine, 271828182 chunk 375,-227 (`k-ravine3`) | **56 cells**, trapdoor and ladder | button, 2.5 blocks | yes, empty hand | `open=true` | yes | yes (region file) |
+| Ravine again (`k-ravine2`) | set down (harness, below) | button, 2.6 blocks | yes | `open=true` | yes | yes |
+| Plains nearest spawn, 271828182 (`k-spawn`) | set down (harness, below) | button, 2.6 blocks | yes | `open=true` | yes | yes |
+
+The in-client reopen never started a world on this machine (no load line in ten minutes, three times), so persistence was
+read from each saved world after a clean save-and-quit. Harness faults found and fixed on the way: the walker took every
+trapdoor for a way through and opened the Apothecary's counter top (a row of top-half trapdoors) to climb over it, where
+the Apothecary stood at his counter; and a nested client call deadlocked the first ravine run. The spawn run's walker
+fell off a terrace outside the hamlet, with nobody near.
+
+The ravine cellar is dry on natural generation after twenty minutes with a player nearby: 0 of the cellar's 264 template
+room cells hold water in `k-ravine`, `k-ravine2` and `k-ravine3`, against **79** in section 15's pre-fix world at the same
+site, whose bottom ladder is still `waterlogged=true`. (A box of 9 blocks round the seal counts about 240 water blocks in
+every world: the aquifer outside the cellar walls.)
+
+### P1: the Keeper's door
+
+**Not reproduced; no game change.** The new part `door` traces the door from the server every tick (each swing, and who
+stood within four blocks, where, with which goal running), and walks up from the plaza, aims at the door at chest height,
+right-clicks, steps in and comes back out.
+
+| Site | Tries | Opened | Crosshair on a person | Shut on the player | Got through |
+|---|---|---|---|---|---|
+| Ravine (`k-ravine`) | 8 natural | 8 | 0 | 0 | 8 |
+| Plains (`k-spawn`) | 6 natural | 6 | 0 | 0 | 6 |
+| Plains, the keeper held still right behind the door (setup) | 1 | 1 | 0 | 0 | 1 |
+| Plains, the keeper held still in the doorway cell itself (setup) | 1 | 1 | 0 | 0 | 1, past the keeper |
+
+The crosshair landed on the door's upper half every time, as it does at eye height. A person behind the door or in the
+doorway did not stop it opening or the player passing, and the door log shows only the player's own swings: no inhabitant
+shut a door on the player in 16 tries. Inhabitants are not pushable, so a player pressing into one is pushed back gently
+and cannot move them; here that slowed the player and did not stop them. With no cause shown, there is no regression test
+for one; the harness now lists who stood within two blocks of any cell it is stuck at. Possible and not seen: an
+inhabitant standing in the one-block gap at the end of the Apothecary's counter, the only way to the Undercroft's hatch.
+A player can still get past a person there, slowly.
+
+### P1: Gringotts and the board under load
+
+**Cause.** `VaultActionC2SPayload` admitted one action per 2 server ticks and dropped the rest without a word.
+`enqueueWork` runs every packet that piled up during lag in one tick, at one game time, so a lagging server kept the
+first click of a burst and lost the rest. The board's `LocationActionC2SPayload` had the same gap throttle (4 ticks);
+section 15's two-client run shows it: six purchases, shelf 24 to 19.
+
+**Fix.** A per-tick budget (`util/TickBudget`) in place of the gap: up to 64 vault actions and 16 board actions per player
+per server tick are handled at once, in arrival order. Past the budget the first refusal of the tick is told on the action
+bar ("Too many requests at once: the goblin took the first 64 and nothing moved for the rest"). A click from someone who
+has left the counter is now told so; it was silent. A malformed packet stays unanswered, since no honest client sends one.
+
+Why not a queue or request ids: each action is decided on the vault and the pocket as they stand when it runs, so a burst
+can only move what is there; TCP delivers each packet once and in order and the client never resends, so an id would guard
+against a duplicate that cannot happen; and a queue would have to outlive a disconnect, which a budget does not. The budget
+keeps the bound, and the server stays authoritative.
+
+| Game test | Result |
+|---|---|
+| `settlement_teller_takes_every_click_of_a_burst`: 7 deposits and 29 withdrawals in one tick (the alpha's run) | 36 of 36, coin conserved |
+| `settlement_teller_refuses_past_its_budget_and_says_so`: 74 in one tick | 64 handled, 10 refused, one message; the retry next tick handled |
+| `settlement_teller_serves_two_players_at_once` | both whole, each conserved |
+| `settlement_teller_answers_what_it_cannot_do` | insufficient funds and coins not carried both answered, nothing moved |
+| `settlement_teller_across_a_disconnect_and_a_retry` | ten deposits count once across a reconnect; a retry off the counter is answered and moves nothing; at the counter it works |
+| `settlement_board_takes_a_burst_and_answers_the_rest` | 16 handled, the rest refused with one message |
+
+Also fixed: `gringotts.wizards_and_beasts.reject.full` was used and had no text.
+
+### P1: the shop board for the other player
+
+**Cause.** After a trade, `MarketTrade` refreshed only the trader's board. Prices are the whole market's and a settlement
+shelf is shared, so everyone else's open board went stale.
+
+**Fix.** `LocationProgression.refreshOthers` sends a fresh board after a purchase or a sale to every other player standing
+at one of that place's hosts, each built from its own player's standing, so unlocks stay private. A client without that
+board open ignores it (`LocationScreen.receive`). Prices stay global, shelves stay per site, and the server still re-prices
+and re-counts every purchase.
+
+`settlement_a_trade_refreshes_every_board_at_the_counter` reads what each mock client was actually sent: the watcher gets
+the new shelf and price without asking, still locked out of the buyer's unlocked good; the buyer keeps theirs; a player at
+no counter is sent nothing.
+
+### P2: flooded cellars in existing worlds
+
+- **Generated and saved cellars keep their water.** The waterlogged ladder, lantern and sign are blocks in saved chunks
+  (section 15's world still has 79 wet cells). Draining them automatically is not safe: the mod cannot tell water the
+  aquifer left from water or blocks a player placed since. Nothing rewrites them.
+- **A gap in the section 15 fix, closed.** A `PoolElementStructurePiece` saves its liquid setting only when it is not the
+  default and reads back the default (`apply_waterlogging`) when it is missing. A hamlet whose structure start was saved
+  before the fix, with its cellar chunk not yet generated, would still have flooded. `SettlementRooms`, which already runs
+  once on every newly generated hamlet chunk, now also sets back to dry every waterloggable block the template keeps dry.
+  Only chunks generating now are touched, so no player change is lost. `settlement_an_old_start_dries_its_cellar_*` (four
+  rotations) assembles the hamlet with vanilla's default on flooded ground, requires that it floods (the positive control),
+  runs the pass, and requires no template block holding water.
+- **For a cellar that has flooded already**, without tools: fill the water or use sponges, then break the waterlogged
+  ladder, lantern and sign and put them back. An operator command that dries only the template's own blocks in a named
+  hamlet would be safe (set `waterlogged` back on blocks the template placed, remove water only from template air cells),
+  but it is new work and was not made.
+
+### Visual proposal (nothing changed)
+
+Measured from the templates (`wizarding_hamlet/<role>/a.nbt`):
+
+- **One shell, five times.** Keeper, Wandmaker, Reading Room and Apothecary share walls, windows, roof and door. Their
+  fronts are identical cell for cell except an 8-block plank band at floor level (Keeper green painted wood, Wandmaker
+  purple, Reading Room plain shopfront planks); the Apothecary matches the Keeper in every front cell compared. The bank
+  differs (marble, vault bricks, gold trim). The four interiors are 86 to 93% identical to each other.
+- **Empty floor.** At floor level 20% (Keeper), 30% (Wandmaker), 39% (Reading Room), 26% (bank) and 27% (Apothecary) of
+  the 99 interior cells hold anything. At head height the Keeper's room is empty from the row behind the back counter
+  (z 3) to the door (z 11).
+- **Same wall indoors.** The Wandmaker's identity is 27 bookshelves and 9 chiselled bookshelves along the back and one
+  side; the Reading Room's is 57 bookshelves on the same back wall. From the door they read as one room.
+
+Proposals in the existing language (Hogsmeade stone, Three Broomsticks timber, painted wood):
+
+1. **Fronts:** one feature each, not a new shell. Wandmaker: a bay window with wand boxes behind it and a sign bracket.
+   Keeper: a porch roof on two posts with a lantern. Reading Room: two-block windows and a bench by the door. Apothecary:
+   herb boxes under the windows and a hanging cauldron sign.
+2. **Wandmaker indoors:** the side wall of bookshelves becomes shelves of wand boxes (barrels or decorated pots) and a
+   measuring stool by the Bench; bookshelves only behind the counter.
+3. **Floors:** furniture of the trade in about a third of the empty cells: the Keeper's notice board and map table, two
+   reading desks with candles, the Apothecary's drying racks and ingredient barrels, the bank's queue rail.
+4. **Plains:** a gravel path from each door to the plaza's paving, and a low fence or hedge round two back yards.
+5. **Footing:** face the top row of a plinth over falling ground with the timber or stone of the wall above, so it reads
+   as a foundation.
+
+None was built: each is a template edit that needs a look in a real client before rollout.
+
+### Two real clients on a dedicated server
+
+Seed 271828182, the ravine site, fresh world generated before the clients joined, two client processes over TCP
+(`C:\tmp\wb-lw-stab\mp\run1\mp_report_run1.txt`, and `mp\mp_report.txt` for the boards rerun).
+
+| Check | Section 15 | Now |
+|---|---|---|
+| Two players' deposits (10 Sickle clicks each) | 290 / **261** | 290 / 290 |
+| Two players' withdrawals (29 Knut clicks each) | 29 / **9** | 29 / 29 |
+| 10 Sickle clicks inside one client tick, and 29 Knut clicks inside one client tick | not tried | all land, worth conserved (30,160 and 29,870 before and after) |
+| One buys, the other only watches: the watcher's open board | not tried | follows, 24 to 23 on both |
+| Six purchases at once from one shelf | 24 to **19**, boards 19 / 18 | 23 to 17, boards 17 / 17, each paid only for what they got |
+| A real bed sleep by both clients after a blow | not tried (day time was set) | both asleep, woke at day time 24,036; back as themselves 210 game ticks after the blow, with the backstop 13,905 away; both clients see them |
+| Disconnect and reconnect | vault and pocket kept | vault and pocket kept |
+| Chunks dropped and reloaded | inconclusive | inconclusive again: the probe's teleport back did not move the players, as in section 15. The game test `settlement_away_while_the_hamlet_is_unloaded` covers it |
+
+The first run's board steps were void: the probe stood the two players a block apart in front of the Apothecary and each
+clicked the other (AlphaOne's shot is AlphaTwo's head). The probe now stands them apart; the boards were rerun alone.
+
+### A restart while two are away (dedicated server, life probe)
+
+Seed 271828182, the hamlet nearest spawn, `C:\tmp\wb-lw-stab\s-life`. First start (`life`): 77 checks, 0 failed, among them
+the wandmaker struck and back at their time under ordinary (sprinted) time, then the keeper and the scholar struck at day
+time 24,200, both recorded away for dawn 48,000, and the server saved and stopped. Second start on the same world
+(`return`): 15 checks, 0 failed. After the restart both were still away waiting for the same dawn and not back early
+(day time 24,500); the other three, the seal (open), the Bench slot and the shelf came through; then ordinary time ran to
+dawn and each came back once (day time 48,200), and the hamlet held its five.
+
+### Tests on the final code
+
+| Suite | Result |
+|---|---|
+| Game, five full runs (`C:\tmp\wb-lw-stab\tests\gt_full_1..5.log`) | **529 / 529** in runs 1, 2, 4 and 5; **528 / 529** in run 3 |
+| Run 3's failure | `creature_ai_camouflage_stays_continuous`, "the moke was visible on tick 4": a **known random failure**, seen with the same message on the section 14 control tree with every fix off (`C:\tmp\wb-lw-results\gametest_1.log`). Nothing in this work touches creatures or that scenario |
+| New game scenarios | 16 (dawn 5, counter 5, board 2, old start 4), 529 in all, up from 513 |
+| Settlement scenarios alone, during the work | 68 / 68 after setup fixes to the new scenarios (chunks forced a tick too early, a bed used before the sky darkened, plot-dependent positions, async entity load) |
+| Unit (`unit.log`) | 2,962 run, **6 failed**: the same six wand-model tests as the historical baseline. The 10 new unit tests pass |
+
+No new deterministic failure; one known random failure in one run; harness failures (the walker, the in-client reopen,
+the probe's teleport back) are named where they happened above and were not counted as game results.
+
+### Remaining issues
+
+- **No person has played a hamlet.** Every result here is scripted. `documentation/HAMLET_PLAYTEST.md` is the checklist for
+  the first human playtest.
+- Cellars generated and saved before section 15's fix keep their water (P2). New worlds, and new chunks of old hamlets,
+  are dry.
+- Inhabitants cannot be pushed. One in a one-block gap slows a player; not seen to stop one.
+- The two-client chunk-reload check is still inconclusive in a real client (the probe cannot move the players back); the
+  game test covers it.
+- The in-client reopen of a world never started on this machine; persistence was read from saved region files.
+- Buildings look alike and interiors are bare (proposal above, unbuilt). Shop names are Diagon Alley firms.
+- The Chamber's geode race (section 14) and the archived `SpellWorldGuard` work are untouched, as instructed.

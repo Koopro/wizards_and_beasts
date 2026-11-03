@@ -4,6 +4,50 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Hamlets made dependable for a first human playtest (2026-11-03)
+
+- **Fixed:** someone struck down in a hamlet now returns at the next dawn, including a dawn reached by sleeping, by
+  `/time add`, or on a server with a custom day length. Before, the return was a fixed amount of game time, which sleeping
+  does not move, so they came back a full day later. A clock turned back with `/time set` still brings them back by the
+  original time. People already away in a saved world keep the time they were given.
+- **Fixed:** the Gringotts counter no longer drops quick clicks. A busy server ran clicks that arrived together in one
+  tick and kept only the first. Every click is now handled; past 64 in a single tick the rest are refused with a message.
+  Nothing is applied twice and no coin is made or lost.
+- **Fixed:** the same for a shop board's buttons. Rapid purchases on a busy server were silently dropped too.
+- **Fixed:** when one player buys or sells at a hamlet's shop, everyone else standing at that shop sees their open
+  board update: the stock and the price. Each player still sees only their own unlocks.
+- **Fixed:** a hamlet whose generation began before the flooded-cellar fix, but whose cellar was not yet generated, would
+  still have flooded when it was. Its waterlogged blocks are now dried as the chunk generates. Cellars already generated
+  and saved are left as they are.
+- **Fixed:** "Your vault cannot hold that much more" was shown as a raw translation key.
+- **Added:** `documentation/HAMLET_PLAYTEST.md`, a checklist for a first playtest by players, with no developer tools.
+
+### Hamlets played in a real client (2026-11-03)
+
+- **Fixed:** an Apothecary cellar dug into an aquifer flooded once players came near. Its ladder, a lantern and a sign were
+  placed holding the water that was there, and became springs. Hamlets no longer take in water that way. Existing hamlets
+  keep what generated.
+- **Fixed:** finding a hamlet with a chart no longer holds up the server while it works. On a loaded machine the worst
+  pause fell from 43 seconds to under 4.
+- **Fixed:** a chart promised in the Overworld and finished after the player went elsewhere is still drawn of the
+  Overworld.
+- **Changed:** a shop's board lists what it sells first and what it buys after. An Apothecary's one item for sale sat
+  under thirty lines of wants.
+- **Known issue (fixed in the entry above):** someone struck down returns after a full day's game time, not at dawn:
+  sleeping through the night does not bring them back sooner.
+- **Known issue (fixed in the entry above):** clicking the Gringotts counter quickly on a busy server drops some clicks
+  without a word. No coin is lost.
+
+### Hamlet generation hardening (2026-11-02)
+
+- **Fixed:** a vanilla monster room could break into a hamlet's Undercroft.
+- **Fixed:** floors and cellars could hang over ravines and caves. Buildings now rest on a stone plate and piers. Over
+  a ravine too deep to reach, the plate spans the gap and no tower is built.
+- **Fixed:** ruined portals and other structures could generate through a hamlet. A hamlet now gives way to them, which
+  also ends the overlap with the Chamber. About one candidate site in seven is lost to this.
+- **Fixed:** trees from a neighbouring chunk could grow into a hamlet's rooms.
+- **Known issue:** finding a hamlet with a chart can pause the server for a few seconds.
+
 ### Wizarding hamlets (2026-11-01)
 
 - **Added:** generated wizarding hamlets around the leaning Crooked Spire, under the new `SETTLEMENTS` module (PREVIEW).
@@ -28,7 +72,7 @@ All notable changes to this project are documented in this file.
   A world configured with the Chamber off could still get one near spawn. This affected Azkaban too.
 - **Changed:** only a seal in a real Chamber now counts toward the Chamber quest, because a hamlet uses the same seal.
 - **Existing worlds:** `SETTLEMENTS` is new, so a saved world picks it up from the config default. Hamlets then appear
-  only in chunks not yet generated, and one at the edge of explored land can come out cut short. To keep an existing
+  only well beyond generated land, and never cut short: sites close to it stay empty. To keep an existing
   world as it is: `/wandb admin module set settlements disabled`. A config written before this version has no entry for
   the module, and the shipped default applies.
 
