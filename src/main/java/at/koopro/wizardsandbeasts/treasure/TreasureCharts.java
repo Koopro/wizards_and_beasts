@@ -4,14 +4,21 @@ import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 import at.koopro.wizardsandbeasts.owl.career.track.ContractDefinition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.QuartPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ChunkLevel;
+import net.minecraft.server.level.ChunkResult;
+import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.Ticket;
+import net.minecraft.server.level.TicketType;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.ChunkPos;
@@ -34,6 +41,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * The chart that comes with an expedition: a filled map to the nearest site of the kind the contract names whose
@@ -147,19 +155,82 @@ public final class TreasureCharts {
         for (Holder<Structure> holder : structures.get()) {
             for (StructurePlacement placement : state.getPlacementsForStructure(holder)) {
                 if (placement instanceof RandomSpreadStructurePlacement spread) {
-                    StructureManager manager = level.structureManager();
-                    long seed = state.getLevelSeed();
                     return new SiteSearch.Walk(SectionPos.blockToSectionCoord(origin.getX()),
-                            SectionPos.blockToSectionCoord(origin.getZ()), spread.spacing(), rings, (grid, cellX, cellZ) -> {
-                                ChunkPos potential = spread.getPotentialStructureChunk(seed, cellX, cellZ);
-                                // An exclusion zone is the placement's own check, and the presence check does not ask it.
-                                return spread.isStructureChunk(state, potential.x, potential.z)
-                                        ? siteAt(level, manager, spread, List.of(holder), potential) : null;
-                            });
+                            SectionPos.blockToSectionCoord(origin.getZ()), spread.spacing(), rings,
+                            new AskedCell(level, holder, spread, state));
                 }
             }
         }
         return null;
+    }
+
+    /**
+     * Answers a cell without holding up the server. Whether a start stands is the dear part, up to tens of seconds on a
+     * busy machine for a hamlet, and vanilla already works that out on its generation threads for any chunk that asks. So
+     * this asks for the chunk, and comes back on later ticks until it has it. The server thread only reads the finished
+     * chunk: no world access moves off it.
+     *
+     * <p>{@code getChunkFuture} waits for its chunk when the server thread calls it, which is the whole stall over again,
+     * and from any other thread only queues the request on the server thread and returns. So the request is made from a
+     * worker, which does nothing else; measured, the first version of this called it directly and still held the tick.
+     */
+    private static final class AskedCell implements SiteSearch.Probe {
+
+        private static final int TICKET_LEVEL = ChunkLevel.byStatus(ChunkStatus.STRUCTURE_STARTS);
+
+        private final ServerLevel level;
+        private final Holder<Structure> structure;
+        private final RandomSpreadStructurePlacement spread;
+        private final ChunkGeneratorStructureState state;
+        private @Nullable CompletableFuture<ChunkResult<ChunkAccess>> asked;
+
+        private AskedCell(ServerLevel level, Holder<Structure> structure, RandomSpreadStructurePlacement spread,
+                          ChunkGeneratorStructureState state) {
+            this.level = level;
+            this.structure = structure;
+            this.spread = spread;
+            this.state = state;
+        }
+
+        @Override
+        public SiteSearch.@Nullable Site at(int grid, int cellX, int cellZ) {
+            ChunkPos potential = spread.getPotentialStructureChunk(state.getLevelSeed(), cellX, cellZ);
+            ServerChunkCache chunks = level.getChunkSource();
+            if (asked == null) {
+                // Two cheap refusals first, so land nothing could stand on is not generated just to hear it. An exclusion
+                // zone is the placement's own check, and the biome is read where a surface site reads it.
+                if (!spread.isStructureChunk(state, potential.x, potential.z) || !biomeSuits(potential)) {
+                    return null;
+                }
+                asked = CompletableFuture.supplyAsync(() -> chunks.getChunkFuture(potential.x, potential.z,
+                        ChunkStatus.STRUCTURE_STARTS, true), Util.backgroundExecutor()).thenCompose(chunk -> chunk);
+            }
+            // The request's own ticket lasts a tick; without a fresh one each turn the generation is dropped half done.
+            chunks.addTicket(new Ticket(TicketType.UNKNOWN, TICKET_LEVEL), potential);
+            if (!asked.isDone()) {
+                return SiteSearch.PENDING;
+            }
+            ChunkAccess done = asked.join().orElse(null);
+            asked = null;
+            if (done == null) {
+                return null;
+            }
+            StructureStart found = level.structureManager().getStartForStructure(SectionPos.bottomOf(done), structure.value(), done);
+            if (found == null || !found.isValid()) {
+                return null;
+            }
+            ChunkPos start = found.getChunkPos();
+            BlockPos locate = spread.getLocatePos(start);
+            return new SiteSearch.Site(structure.unwrapKey().map(key -> key.identifier().toString()).orElse(""), start.x, start.z,
+                    locate.getX(), locate.getZ());
+        }
+
+        private boolean biomeSuits(ChunkPos chunk) {
+            var generator = level.getChunkSource().getGenerator();
+            return structure.value().biomes().contains(generator.getBiomeSource().getNoiseBiome(
+                    QuartPos.fromBlock(chunk.getMiddleBlockX()), QuartPos.fromBlock(generator.getSeaLevel()),
+                    QuartPos.fromBlock(chunk.getMiddleBlockZ()), level.getChunkSource().randomState().sampler()));
+        }
     }
 
     /** What vanilla's {@code getStructureGeneratingAt} does, minus the reference counting. */

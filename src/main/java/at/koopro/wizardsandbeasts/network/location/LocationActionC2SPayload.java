@@ -5,8 +5,11 @@ import at.koopro.wizardsandbeasts.location.LocationDefinition;
 import at.koopro.wizardsandbeasts.location.LocationPresence;
 import at.koopro.wizardsandbeasts.location.LocationProgression;
 import at.koopro.wizardsandbeasts.location.Locations;
-import at.koopro.wizardsandbeasts.util.PlayerScopedState;
+import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
+import at.koopro.wizardsandbeasts.util.TickBudget;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -35,10 +38,14 @@ public record LocationActionC2SPayload(Action action, Identifier location, Strin
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "location_action"));
 
     private static final StreamCodec<ByteBuf, String> ARG = ByteBufCodecs.stringUtf8(128);
-    /** Ticks between handled actions per player: a held mouse button is not a stream of purchases. */
-    private static final long MIN_TICKS_BETWEEN = 4;
+    /**
+     * Board actions handled per player per server tick. A gap between actions dropped every click but the first that a
+     * lagging server ran in one tick, silently; see {@code VaultActionC2SPayload#ACTIONS_PER_TICK}. A purchase rebuilds
+     * and sends boards, so the budget is smaller than the vault's.
+     */
+    public static final int ACTIONS_PER_TICK = 16;
 
-    private static final PlayerScopedState<Long> LAST_ACTION = PlayerScopedState.create("location_action");
+    private static final TickBudget BUDGET = new TickBudget("location_action", ACTIONS_PER_TICK);
 
     public static final StreamCodec<ByteBuf, LocationActionC2SPayload> STREAM_CODEC = new StreamCodec<>() {
         @Override
@@ -64,56 +71,74 @@ public record LocationActionC2SPayload(Action action, Identifier location, Strin
 
     public static void handle(LocationActionC2SPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
-            if (!(context.player() instanceof ServerPlayer player)) {
-                return;
-            }
-            long now = player.level().getGameTime();
-            if (!PlayerScopedState.throttle(LAST_ACTION, player, now, MIN_TICKS_BETWEEN)) {
-                return;
-            }
-            Identifier location = payload.location();
-            switch (payload.action()) {
-                case OPEN -> {
-                    LocationDefinition def = Locations.open(location);
-                    if (def != null && LocationPresence.isAt(player, def)) {
-                        LocationProgression.sync(player, location, true);
-                    }
-                }
-                case REFRESH -> LocationProgression.sync(player, location, false);
-                case ACCEPT -> LocationProgression.accept(player, location, payload.argument());
-                case ABANDON -> LocationProgression.abandon(player, location, payload.argument());
-                case TURN_IN -> LocationProgression.turnIn(player, location, payload.argument());
-                case USE_SERVICE -> {
-                    Identifier service = Identifier.tryParse(payload.argument());
-                    if (service != null) {
-                        LocationProgression.useService(player, location, service);
-                    }
-                }
-                case TOPIC -> at.koopro.wizardsandbeasts.settlement.npc.NpcTalk.ask(player, location, payload.argument());
-                case SELL, BUY, BUY_DRAGOTS -> {
-                    // "good|count": a malformed count is a refused deal, never a default.
-                    String arg = payload.argument();
-                    int bar = arg.lastIndexOf('|');
-                    if (bar <= 0) {
-                        return;
-                    }
-                    int count;
-                    try {
-                        count = Integer.parseInt(arg.substring(bar + 1));
-                    } catch (NumberFormatException e) {
-                        return;
-                    }
-                    String good = arg.substring(0, bar);
-                    if (payload.action() == Action.SELL) {
-                        at.koopro.wizardsandbeasts.market.MarketTrade.sell(player, location, good, count);
-                    } else {
-                        at.koopro.wizardsandbeasts.market.MarketTrade.buy(player, location, good, count,
-                                payload.action() == Action.BUY_DRAGOTS
-                                        ? at.koopro.wizardsandbeasts.market.MarketTrade.Tender.DRAGOTS
-                                        : at.koopro.wizardsandbeasts.market.MarketTrade.Tender.VAULT);
-                    }
-                }
+            if (context.player() instanceof ServerPlayer player) {
+                submit(player, payload);
             }
         });
+    }
+
+    /**
+     * One button press as it reaches the server: handled now, or refused with a word when the tick's budget is spent.
+     * Public for the tests, which send bursts the way a lagging server receives them.
+     *
+     * @return whether it was handled
+     */
+    public static boolean submit(ServerPlayer player, LocationActionC2SPayload payload) {
+        TickBudget.Verdict verdict = BUDGET.spend(player, player.level().getGameTime());
+        if (!verdict.taken()) {
+            if (verdict == TickBudget.Verdict.REFUSED_FIRST) {
+                PlayerFeedback.actionBar(player, Component.translatable("location.wizards_and_beasts.busy", ACTIONS_PER_TICK)
+                        .withStyle(ChatFormatting.RED));
+            }
+            return false;
+        }
+        perform(player, payload);
+        return true;
+    }
+
+    private static void perform(ServerPlayer player, LocationActionC2SPayload payload) {
+        Identifier location = payload.location();
+        switch (payload.action()) {
+            case OPEN -> {
+                LocationDefinition def = Locations.open(location);
+                if (def != null && LocationPresence.isAt(player, def)) {
+                    LocationProgression.sync(player, location, true);
+                }
+            }
+            case REFRESH -> LocationProgression.sync(player, location, false);
+            case ACCEPT -> LocationProgression.accept(player, location, payload.argument());
+            case ABANDON -> LocationProgression.abandon(player, location, payload.argument());
+            case TURN_IN -> LocationProgression.turnIn(player, location, payload.argument());
+            case USE_SERVICE -> {
+                Identifier service = Identifier.tryParse(payload.argument());
+                if (service != null) {
+                    LocationProgression.useService(player, location, service);
+                }
+            }
+            case TOPIC -> at.koopro.wizardsandbeasts.settlement.npc.NpcTalk.ask(player, location, payload.argument());
+            case SELL, BUY, BUY_DRAGOTS -> {
+                // "good|count": a malformed count is a refused deal, never a default.
+                String arg = payload.argument();
+                int bar = arg.lastIndexOf('|');
+                if (bar <= 0) {
+                    return;
+                }
+                int count;
+                try {
+                    count = Integer.parseInt(arg.substring(bar + 1));
+                } catch (NumberFormatException e) {
+                    return;
+                }
+                String good = arg.substring(0, bar);
+                if (payload.action() == Action.SELL) {
+                    at.koopro.wizardsandbeasts.market.MarketTrade.sell(player, location, good, count);
+                } else {
+                    at.koopro.wizardsandbeasts.market.MarketTrade.buy(player, location, good, count,
+                            payload.action() == Action.BUY_DRAGOTS
+                                    ? at.koopro.wizardsandbeasts.market.MarketTrade.Tender.DRAGOTS
+                                    : at.koopro.wizardsandbeasts.market.MarketTrade.Tender.VAULT);
+                }
+            }
+        }
     }
 }

@@ -30,6 +30,9 @@ public final class SiteSearch {
         }
     }
 
+    /** A {@link Probe}'s answer while the world is still deciding: nothing is known of the cell yet, so ask it again. */
+    public static final Site PENDING = new Site("", 0, 0, 0, 0);
+
     /** One placement grid (a structure set): its spacing in chunks, and which of the tag's structures share it. */
     public record Grid(int spacing) {}
 
@@ -42,7 +45,8 @@ public final class SiteSearch {
 
     /**
      * {@link #nearest} one cell at a time, for a search too dear to run in one tick. Each {@link #step} asks the world
-     * about a single cell; between steps the walk is only its own position.
+     * about a single cell; between steps the walk is only its own position. A cell the probe answers {@link #PENDING} is
+     * not passed: {@link #waiting} is true and the next step asks it again.
      */
     public static final class Walk {
         private final int originX;
@@ -56,6 +60,7 @@ public final class SiteSearch {
         private @Nullable Site best;
         private long bestDist = Long.MAX_VALUE;
         private boolean finished;
+        private boolean waiting;
 
         /** Walks one grid of {@code spacing} chunks. */
         public Walk(int originChunkX, int originChunkZ, int spacing, int radius, Probe probe) {
@@ -70,6 +75,11 @@ public final class SiteSearch {
             return finished;
         }
 
+        /** Whether the last step left its cell unanswered: asking again this tick would only spin. */
+        public boolean waiting() {
+            return waiting;
+        }
+
         /** The nearest site, once {@link #finished}; null when none lies in reach. */
         public @Nullable Site found() {
             return best;
@@ -81,6 +91,10 @@ public final class SiteSearch {
                 return;
             }
             Site site = probe.at(0, originX + spacing * (dx - ring), originZ + spacing * (dz - ring));
+            waiting = site == PENDING;
+            if (waiting) {
+                return;
+            }
             if (site != null) {
                 long ddx = site.locateX() - ((long) originX * 16 + 8);
                 long ddz = site.locateZ() - ((long) originZ * 16 + 8);

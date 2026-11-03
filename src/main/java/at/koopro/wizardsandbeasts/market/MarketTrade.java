@@ -304,6 +304,7 @@ public final class MarketTrade {
         CareerProgression.record(player, ActivityType.GOODS_TRADED, location);
         IllicitDealing.roll(player, counter.def(), deal, sold);
         LocationProgression.sync(player, location, false);
+        LocationProgression.refreshOthers(player, location);
         return Result.DONE;
     }
 
@@ -432,6 +433,7 @@ public final class MarketTrade {
         CareerProgression.record(player, ActivityType.GOODS_TRADED, location);
         IllicitDealing.roll(player, counter.def(), deal, count);
         LocationProgression.sync(player, location, false);
+        LocationProgression.refreshOthers(player, location);
         return Result.DONE;
     }
 

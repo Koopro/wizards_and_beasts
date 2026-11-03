@@ -80,6 +80,48 @@ class SettlementLayoutTest {
         }
     }
 
+    private static java.util.Map<String, String> blocks(Path template) throws IOException {
+        CompoundTag root = NbtIo.readCompressed(template, NbtAccounter.unlimitedHeap());
+        net.minecraft.nbt.ListTag palette = root.getListOrEmpty("palette");
+        java.util.Map<String, String> at = new java.util.HashMap<>();
+        for (Tag tag : root.getListOrEmpty("blocks")) {
+            CompoundTag block = (CompoundTag) tag;
+            List<Integer> pos = block.getListOrEmpty("pos").stream().map(t -> t.asInt().orElseThrow()).toList();
+            at.put(pos.get(0) + "," + pos.get(1) + "," + pos.get(2),
+                    palette.getCompoundOrEmpty(block.getIntOr("state", -1)).getStringOr("Name", ""));
+        }
+        return at;
+    }
+
+    @Test
+    void everyCauldronIsOnHeatBecauseABrewNeedsIt() throws IOException {
+        int cauldrons = 0;
+        for (var entry : blocks(TEMPLATES.resolve("apothecary/a.nbt")).entrySet()) {
+            if (entry.getValue().endsWith("_cauldron")) {
+                cauldrons++;
+                String[] xyz = entry.getKey().split(",");
+                String below = xyz[0] + "," + (Integer.parseInt(xyz[1]) - 1) + "," + xyz[2];
+                assertEquals("minecraft:magma_block", blocks(TEMPLATES.resolve("apothecary/a.nbt")).get(below), entry.getKey());
+            }
+        }
+        assertEquals(3, cauldrons);
+    }
+
+    /** A sign holds about fifteen characters a line in vanilla's font; longer is cut off at the edge. */
+    @Test
+    void everySignLineFitsOnASign() throws IOException {
+        JsonObject lang = JsonParser.parseString(Files.readString(Path.of("src", "main", "resources", "assets",
+                "wizards_and_beasts", "lang", "en_us.json"))).getAsJsonObject();
+        int lines = 0;
+        for (String key : lang.keySet()) {
+            if (key.startsWith("settlement.wizards_and_beasts.sign.")) {
+                lines++;
+                assertTrue(lang.get(key).getAsString().length() <= 15, key);
+            }
+        }
+        assertEquals(32, lines);
+    }
+
     private static List<String> postRoles(Path template) throws IOException {
         CompoundTag root = NbtIo.readCompressed(template, NbtAccounter.unlimitedHeap());
         List<String> found = new ArrayList<>();

@@ -436,24 +436,35 @@ public final class WizardTestSupport {
      * it, and appears only when some later packet happens to flush it.
      */
     public static List<CustomPacketPayload> drainClientboundPayloads(ServerPlayer player) {
-        List<CustomPacketPayload> payloads = new ArrayList<>();
+        return drainClientbound(player).payloads();
+    }
+
+    /** What a client was sent: mod payloads, and the chat and action-bar lines as their translation keys or text. */
+    public record Clientbound(List<CustomPacketPayload> payloads, List<String> lines) {}
+
+    /** {@link #drainClientboundPayloads}, keeping the lines a player is told as well; it drains the same buffer. */
+    public static Clientbound drainClientbound(ServerPlayer player) {
+        Clientbound sent = new Clientbound(new ArrayList<>(), new ArrayList<>());
         if (!(player.connection.getConnection().channel() instanceof EmbeddedChannel channel)) {
-            return payloads;
+            return sent;
         }
         channel.flushOutbound();
         Object message;
         while ((message = channel.readOutbound()) != null) {
-            collectPayloads(message, payloads);
+            collect(message, sent);
         }
-        return payloads;
+        return sent;
     }
 
-    private static void collectPayloads(Object message, List<CustomPacketPayload> into) {
+    private static void collect(Object message, Clientbound into) {
         if (message instanceof ClientboundCustomPayloadPacket custom) {
-            into.add(custom.payload());
+            into.payloads().add(custom.payload());
+        } else if (message instanceof net.minecraft.network.protocol.game.ClientboundSystemChatPacket chat) {
+            into.lines().add(chat.content().getContents()
+                    instanceof net.minecraft.network.chat.contents.TranslatableContents key ? key.getKey() : chat.content().getString());
         } else if (message instanceof BundlePacket<?> bundle) {
             for (Object sub : bundle.subPackets()) {
-                collectPayloads(sub, into);
+                collect(sub, into);
             }
         }
     }

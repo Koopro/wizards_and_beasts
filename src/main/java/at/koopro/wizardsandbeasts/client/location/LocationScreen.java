@@ -209,9 +209,10 @@ public final class LocationScreen extends Screen {
     }
 
     /**
-     * The trader's book: what it buys (sell one, or all you carry) and what it sells (buy one, or eight). Prices are
-     * the server's for the next unit; a deal re-prices on the server, so a stale line can only be refused, never
-     * underpaid.
+     * The trader's book: what it sells (buy one, or eight), then what it buys (sell one, or all you carry). What is for
+     * sale comes first: a keeper's list of wants can run to thirty lines, most of them closed to a newcomer, and the one
+     * thing on their shelf sat underneath it. Prices are the server's for the next unit; a deal re-prices on the server,
+     * so a stale line can only be refused, never underpaid.
      */
     private int market(GuiGraphics g, UiSurface s, int x, int y, int w, int mx, int my) {
         if (view.market().isEmpty()) {
@@ -220,15 +221,19 @@ public final class LocationScreen extends Screen {
         if (view.illicit()) {
             y = paragraph(g, x, y, w, Component.translatable(KEY + "illicit"), s.bad()) + 4;
         }
-        boolean buyingHeader = false;
-        boolean sellingHeader = false;
+        y = marketSide(g, s, x, y, w, false, "sells", mx, my);
+        return marketSide(g, s, x, y, w, true, "buys", mx, my);
+    }
+
+    private int marketSide(GuiGraphics g, UiSurface s, int x, int y, int w, boolean buying, String title, int mx, int my) {
+        boolean header = false;
         for (MarketLine line : view.market()) {
-            if (line.buying() && !buyingHeader) {
-                y = Ui.sectionHeader(g, font, s, x, y, w, Component.translatable(KEY + "buys"), null);
-                buyingHeader = true;
-            } else if (!line.buying() && !sellingHeader) {
-                y = Ui.sectionHeader(g, font, s, x, y + 2, w, Component.translatable(KEY + "sells"), null);
-                sellingHeader = true;
+            if (line.buying() != buying) {
+                continue;
+            }
+            if (!header) {
+                y = Ui.sectionHeader(g, font, s, x, y + 2, w, Component.translatable(KEY + title), null);
+                header = true;
             }
             y = marketLine(g, s, x, y, w, line, mx, my);
         }

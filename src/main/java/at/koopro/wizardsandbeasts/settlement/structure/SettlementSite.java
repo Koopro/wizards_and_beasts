@@ -37,6 +37,9 @@ public final class SettlementSite {
     public static final List<String> REQUIRED_ROLES =
             List.of("plaza", "keeper", "wandmaker", "apothecary", "reading_room", "bank");
 
+    /** What became of a candidate: it stands, or the first rule that refused it. */
+    public enum Verdict { STANDS, BIOME, NO_ROOM, RELIEF, LIQUID, INCOMPLETE, OCCUPIED }
+
     private SettlementSite() {}
 
     /**

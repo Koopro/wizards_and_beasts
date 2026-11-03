@@ -351,6 +351,30 @@ public final class LocationProgression {
     }
 
     /**
+     * After a trade at {@code location}: the boards of everyone else at one of its hosts, sent again. Prices are the whole
+     * market's, so a sale anywhere moves them, and at a settlement counter the shelf moved too; a board left as it was
+     * would offer a price or a unit that is gone. Each board is built from its own player's standing and unlocks, so
+     * nothing private crosses over. A client without that board open ignores it. The server still re-prices and re-counts
+     * every purchase, so a board that is stale for a moment can only be refused, never undercharged.
+     *
+     * @return who was sent one
+     */
+    public static List<ServerPlayer> refreshOthers(ServerPlayer trader, Identifier location) {
+        LocationDefinition def = Locations.open(location);
+        List<ServerPlayer> sent = new ArrayList<>();
+        if (def == null || def.presence().hosts().isEmpty()) {
+            return sent;
+        }
+        for (ServerPlayer other : trader.level().getServer().getPlayerList().getPlayers()) {
+            if (other != trader && LocationPresence.host(other, def) != null) {
+                sync(other, location, false);
+                sent.add(other);
+            }
+        }
+        return sent;
+    }
+
+    /**
      * The player's standing at every open place, for the Character Sheet: tier, reputation and the next tier, with
      * none of a board's contracts, services or prices. Places whose module is off are left out, as their boards are.
      * Sorted by id so the list does not reshuffle between refreshes.

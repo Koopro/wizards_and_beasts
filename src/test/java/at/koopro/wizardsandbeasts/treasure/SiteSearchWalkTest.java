@@ -83,6 +83,51 @@ class SiteSearchWalkTest {
     }
 
     @Test
+    void aCellStillBeingDecidedIsAskedAgainAndNeverPassed() {
+        List<String> asked = new java.util.ArrayList<>();
+        int[] waits = {3};
+        SiteSearch.Walk walk = new SiteSearch.Walk(0, 0, SPACING, 0, (grid, x, z) -> {
+            asked.add(x + "," + z);
+            return waits[0]-- > 0 ? SiteSearch.PENDING : site(x, z);
+        });
+        for (int i = 0; i < 3; i++) {
+            walk.step();
+            assertTrue(walk.waiting(), "step " + i);
+            assertFalse(walk.finished(), "step " + i);
+        }
+        walk.step();
+        assertFalse(walk.waiting());
+        assertTrue(walk.finished());
+        assertEquals(site(0, 0), walk.found());
+        assertEquals(List.of("0,0", "0,0", "0,0", "0,0"), asked, "the same cell, four times");
+    }
+
+    @Test
+    void waitingNeverChangesWhatIsFound() {
+        Random random = new Random(29);
+        for (int world = 0; world < 200; world++) {
+            Set<String> sites = new HashSet<>();
+            for (int i = 0; i < 6; i++) {
+                sites.add(random.nextInt(9) - 4 + "," + (random.nextInt(9) - 4));
+            }
+            SiteSearch.Probe plain = (grid, x, z) -> sites.contains(Math.floorDiv(x, SPACING) + "," + Math.floorDiv(z, SPACING))
+                    ? site(x + 1, z - 1) : null;
+            java.util.Map<String, Integer> left = new java.util.HashMap<>();
+            Random delays = new Random(world);
+            SiteSearch.Probe slow = (grid, x, z) -> {
+                String cell = x + "," + z;
+                int turns = left.computeIfAbsent(cell, c -> delays.nextInt(4));
+                if (turns > 0) {
+                    left.put(cell, turns - 1);
+                    return SiteSearch.PENDING;
+                }
+                return plain.at(grid, x, z);
+            };
+            assertEquals(run(new SiteSearch.Walk(0, 0, SPACING, 4, plain)), run(new SiteSearch.Walk(0, 0, SPACING, 4, slow)), "world " + world);
+        }
+    }
+
+    @Test
     void steppingAFinishedWalkAsksNothing() {
         int[] calls = {0};
         SiteSearch.Walk walk = new SiteSearch.Walk(0, 0, SPACING, 0, (grid, x, z) -> {

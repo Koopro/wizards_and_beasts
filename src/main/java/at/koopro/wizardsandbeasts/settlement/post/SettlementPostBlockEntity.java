@@ -124,7 +124,8 @@ public class SettlementPostBlockEntity extends BlockEntity {
         boolean watched = level.getNearestPlayer(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, WATCH_RANGE, false) != null;
         looks = person != null ? 0 : looks + 1;
         double distance = person == null ? 0.0 : person.distanceToSqr(pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5);
-        switch (PostRules.decide(post.status(), person != null, distance, watched, looks, level.getGameTime(), post.backAt())) {
+        switch (PostRules.decide(post.status(), person != null, distance, watched, looks,
+                post.due(level.getGameTime(), level.getDayTime()))) {
             case SPAWN -> spawn(level, pos, ref, post, definition);
             case RETURN -> person.teleportTo(pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5);
             case NOTHING -> { }

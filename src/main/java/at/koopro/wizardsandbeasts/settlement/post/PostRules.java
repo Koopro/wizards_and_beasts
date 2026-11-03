@@ -19,7 +19,7 @@ public final class PostRules {
         VACANT,
         /** Someone should be here, loaded or not. */
         PRESENT,
-        /** Apparated away, and due back at {@code backAt}. */
+        /** Apparated away, and due back at dawn ({@link #due}). */
         AWAY
     }
 
@@ -32,6 +32,8 @@ public final class PostRules {
     public static final int STRAY_BLOCKS = 24;
     /** The shortest time away, however close dawn is: a blow at five to six is not undone by six. */
     public static final long MIN_AWAY_TICKS = 2400;
+    /** The day time of an away record written before {@link #dawn} existed: such a record waits on game time alone. */
+    public static final long NO_DAWN = Long.MAX_VALUE;
     private static final long DAY = 24000;
 
     private PostRules() {}
@@ -41,14 +43,12 @@ public final class PostRules {
      * @param distanceSq their distance from the post, squared; ignored when not found
      * @param watched    a player is near enough to see them jump
      * @param looks      looks in a row they have not been found
-     * @param now        game time
-     * @param backAt     game time an absent person returns
+     * @param due        an absent person's time has come ({@link #due}); ignored unless away
      */
-    public static Act decide(Status status, boolean found, double distanceSq, boolean watched, int looks, long now,
-                             long backAt) {
+    public static Act decide(Status status, boolean found, double distanceSq, boolean watched, int looks, boolean due) {
         return switch (status) {
             case VACANT -> Act.SPAWN;
-            case AWAY -> now >= backAt ? Act.SPAWN : Act.NOTHING;
+            case AWAY -> due ? Act.SPAWN : Act.NOTHING;
             case PRESENT -> {
                 if (found) {
                     yield distanceSq > (double) STRAY_BLOCKS * STRAY_BLOCKS && !watched ? Act.RETURN : Act.NOTHING;
@@ -58,8 +58,33 @@ public final class PostRules {
         };
     }
 
-    /** When someone who Apparated away at {@code gameTime} is back: at the next dawn, and never at once. */
-    public static long backAt(long gameTime, long dayTime) {
-        return gameTime + Math.max(MIN_AWAY_TICKS, DAY - Math.floorMod(dayTime, DAY));
+    /**
+     * The day time of the dawn someone who Apparated away at {@code dayTime} returns at: the next dawn, and never at once.
+     * Day time, not game time, because a night slept through or a {@code /time add} moves only day time, and a server can
+     * run a day at a speed of its own ({@code /neoforge day}); game time knows nothing of either.
+     */
+    public static long dawn(long dayTime) {
+        return dayTime + awayFor(dayTime);
+    }
+
+    /**
+     * The game time by which they are back however the clock has been set: the same moment as {@link #dawn} while the day
+     * runs as it did at the blow. It is the backstop for a clock turned back ({@code /time set} writes day time outright),
+     * which would otherwise keep them away for as long as the clock was turned back, and for a stopped clock.
+     *
+     * @param dayTimePerTick day time per game tick ({@code ServerLevel.getDayTimePerTick}); negative is the vanilla 1
+     */
+    public static long backAt(long gameTime, long dayTime, float dayTimePerTick) {
+        double rate = dayTimePerTick > 0f ? dayTimePerTick : 1.0;
+        return gameTime + (long) Math.ceil(awayFor(dayTime) / rate);
+    }
+
+    /** Whether an absent person is due back: their dawn has come, or the backstop has passed. */
+    public static boolean due(long gameTime, long dayTime, long backAt, long dawn) {
+        return dayTime >= dawn || gameTime >= backAt;
+    }
+
+    private static long awayFor(long dayTime) {
+        return Math.max(MIN_AWAY_TICKS, DAY - Math.floorMod(dayTime, DAY));
     }
 }

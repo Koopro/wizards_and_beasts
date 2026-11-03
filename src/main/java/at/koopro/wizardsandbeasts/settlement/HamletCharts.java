@@ -8,9 +8,7 @@ import at.koopro.wizardsandbeasts.treasure.SiteSearch;
 import at.koopro.wizardsandbeasts.treasure.TreasureCharts;
 import at.koopro.wizardsandbeasts.util.InventoryHandover;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
@@ -21,6 +19,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,15 +30,15 @@ import java.util.UUID;
  * The Wayfarer's Chart: a vanilla explorer's map with an X over the nearest hamlet. Handed over once, when the
  * Apprentice's Path is walked, as a lead and not a task; caches hold one too.
  *
- * <p>Real terrain put the search at 0.6 to 1.4 seconds, because a site is only known by reading the ground and placing
- * its pieces. So it runs a few milliseconds a tick, over as many ticks as it needs, and never holds up the server.
+ * <p>A site is only known by reading the ground, placing its pieces and asking every other structure nearby, which on a
+ * busy machine is tens of seconds for one cell. So the search leaves that to the chunk generators and takes its turn each
+ * tick: a few milliseconds of its own, and no waiting on them ({@link SiteSearch.Walk#waiting}).
  */
 @NullMarked
 @EventBusSubscriber(modid = WizardsAndBeastsMod.MODID)
 public final class HamletCharts {
 
-    public static final TagKey<Structure> HAMLETS = TagKey.create(Registries.STRUCTURE,
-            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "settlement"));
+    public static final TagKey<Structure> HAMLETS = at.koopro.wizardsandbeasts.settlement.structure.SettlementGround.SETTLEMENTS;
     /** Grid rings searched: hamlets are 40 chunks apart, so 12 rings reach about 7,500 blocks. */
     static final int SEARCH_RINGS = 12;
     private static final long BUDGET_NANOS = 3_000_000L;
@@ -58,9 +57,13 @@ public final class HamletCharts {
                 || level.dimension() != Level.OVERWORLD) {
             return;
         }
-        SiteSearch.Walk walk = TreasureCharts.walk(level, HAMLETS, player.blockPosition(), SEARCH_RINGS);
-        if (walk != null) {
-            SEARCHES.put(player.getUUID(), walk);
+        begin(player, TreasureCharts.walk(level, HAMLETS, player.blockPosition(), SEARCH_RINGS));
+    }
+
+    /** Takes on a search for {@code player}, unless one is running or a chart was already given. Open for the game tests. */
+    public static void begin(ServerPlayer player, SiteSearch.@Nullable Walk walk) {
+        if (walk != null && !player.getData(ModAttachments.KNOWN_PLACES.get()).charted()) {
+            SEARCHES.putIfAbsent(player.getUUID(), walk);
         }
     }
 
@@ -74,9 +77,7 @@ public final class HamletCharts {
         while (searches.hasNext() && System.nanoTime() < deadline) {
             Map.Entry<UUID, SiteSearch.Walk> entry = searches.next();
             SiteSearch.Walk walk = entry.getValue();
-            while (!walk.finished() && System.nanoTime() < deadline) {
-                walk.step();
-            }
+            advance(walk, deadline);
             if (walk.finished()) {
                 searches.remove();
                 ServerPlayer player = event.getServer().getPlayerList().getPlayer(entry.getKey());
@@ -87,8 +88,19 @@ public final class HamletCharts {
         }
     }
 
+    /** One tick's share of a walk: until it ends, the budget does, or it is waiting on the world. */
+    static void advance(SiteSearch.Walk walk, long deadline) {
+        while (!walk.finished() && System.nanoTime() < deadline) {
+            walk.step();
+            if (walk.waiting()) {
+                return;
+            }
+        }
+    }
+
     private static void give(ServerPlayer player, SiteSearch.Site site) {
-        ServerLevel level = player.level();
+        // The Overworld's map, wherever the player has gone since they were promised it.
+        ServerLevel level = player.level().getServer().overworld();
         InventoryHandover.giveOrDrop(player, TreasureCharts.draw(level, new BlockPos(site.locateX(), 0, site.locateZ()),
                 Component.translatable("item.wizards_and_beasts.wayfarers_chart")));
         player.setData(ModAttachments.KNOWN_PLACES.get(), player.getData(ModAttachments.KNOWN_PLACES.get()).withChart());

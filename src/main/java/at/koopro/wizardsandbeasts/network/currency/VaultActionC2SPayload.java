@@ -1,6 +1,6 @@
 package at.koopro.wizardsandbeasts.network.currency;
 
-import at.koopro.wizardsandbeasts.util.PlayerScopedState;
+import at.koopro.wizardsandbeasts.util.TickBudget;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.command.debug.DebugHooks;
 import at.koopro.wizardsandbeasts.currency.dragot.DragotExchange;
@@ -48,31 +48,58 @@ public record VaultActionC2SPayload(int actionOrdinal, int amount) implements Cu
         return TYPE;
     }
 
-    /** Ticks between handled actions per player: a held button is not a stream of withdrawals. */
-    private static final long MIN_TICKS_BETWEEN = 2;
+    /**
+     * Actions handled per player per server tick. Not a gap between actions: a lagging server runs every click that piled
+     * up in one tick, and a gap of two ticks once dropped all but the first of them without a word. Each action is decided
+     * on the vault and the pocket as they stand when it runs, so a burst can move only what is there, and TCP delivers
+     * each click once and in order, so nothing is ever applied twice. The budget only bounds what a client can make the
+     * server do; anything over it is refused, and told.
+     */
+    public static final int ACTIONS_PER_TICK = 64;
+    private static final String REJECT_BUSY = "gringotts.wizards_and_beasts.reject.busy";
+    private static final String REJECT_NOT_AT_COUNTER = "gringotts.wizards_and_beasts.reject.not_at_counter";
 
-    private static final at.koopro.wizardsandbeasts.util.PlayerScopedState<Long> LAST_ACTION =
-            at.koopro.wizardsandbeasts.util.PlayerScopedState.create("vault_action");
+    private static final TickBudget BUDGET = new TickBudget("vault_action", ACTIONS_PER_TICK);
 
     public static void handle(VaultActionC2SPayload pkt, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
             if (ctx.player() instanceof ServerPlayer player) {
-                long now = player.level().getGameTime();
-                if (!PlayerScopedState.throttle(LAST_ACTION, player, now, MIN_TICKS_BETWEEN)) {
-                    return;
-                }
-                perform(player, pkt);
+                submit(player, pkt);
             }
         });
+    }
+
+    /**
+     * One click as it reaches the server: handled now, or refused with a word when the tick's budget is spent. Public for
+     * the tests, which send bursts the way a lagging server receives them.
+     *
+     * @return whether it was handled
+     */
+    public static boolean submit(ServerPlayer player, VaultActionC2SPayload pkt) {
+        TickBudget.Verdict verdict = BUDGET.spend(player, player.level().getGameTime());
+        if (!verdict.taken()) {
+            if (verdict == TickBudget.Verdict.REFUSED_FIRST) {
+                player.displayClientMessage(Component.translatable(REJECT_BUSY, ACTIONS_PER_TICK)
+                        .withStyle(ChatFormatting.RED), true);
+            }
+            return false;
+        }
+        perform(player, pkt);
+        return true;
     }
 
     /** The server's handling of one vault action, after the network hop. Public for the authority tests. */
     public static void perform(ServerPlayer player, VaultActionC2SPayload pkt) {
         {
+            // A malformed action comes from no honest client, and is not answered.
             if (pkt.actionOrdinal < 0 || pkt.actionOrdinal >= Action.values().length) return;
             if (pkt.amount <= 0 || pkt.amount > MAX_TRANSACTION_AMOUNT) return;
-            // Only at the counter of the teller that checked this player's papers — see GringottsCounter.
-            if (!at.koopro.wizardsandbeasts.currency.vault.GringottsCounter.atCounter(player)) return;
+            // Only at the counter of the teller that checked this player's papers — see GringottsCounter. An honest click
+            // lands here when the player walked off with the screen open, so it is answered.
+            if (!at.koopro.wizardsandbeasts.currency.vault.GringottsCounter.atCounter(player)) {
+                player.displayClientMessage(Component.translatable(REJECT_NOT_AT_COUNTER).withStyle(ChatFormatting.RED), true);
+                return;
+            }
 
             Action action = Action.values()[pkt.actionOrdinal];
             PlayerVaultData vault = player.getData(ModAttachments.VAULT_DATA.get());

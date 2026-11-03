@@ -37,8 +37,13 @@ import java.util.UUID;
 @NullMarked
 public final class SettlementData extends SavedData {
 
-    /** One post: who stands at it. {@code name} picks from the role's names, so the same person always returns. */
-    public record Post(String role, PostRules.Status status, Optional<UUID> npc, long backAt, int name) {
+    /**
+     * One post: who stands at it. {@code name} picks from the role's names, so the same person always returns. Someone
+     * away is back at the day time {@code dawn}, or by the game time {@code backAt} whatever the clock did
+     * ({@link PostRules#due}). A record saved before {@code dawn} existed reads {@link PostRules#NO_DAWN} and keeps to
+     * game time, as it was written to.
+     */
+    public record Post(String role, PostRules.Status status, Optional<UUID> npc, long backAt, long dawn, int name) {
         static final Codec<PostRules.Status> STATUS = StringRepresentable.fromEnum(StatusName::values)
                 .xmap(StatusName::status, StatusName::of);
         static final Codec<Post> CODEC = RecordCodecBuilder.create(i -> i.group(
@@ -46,19 +51,25 @@ public final class SettlementData extends SavedData {
                 STATUS.optionalFieldOf("status", PostRules.Status.VACANT).forGetter(Post::status),
                 UUIDUtil.STRING_CODEC.optionalFieldOf("npc").forGetter(Post::npc),
                 Codec.LONG.optionalFieldOf("back_at", 0L).forGetter(Post::backAt),
+                Codec.LONG.optionalFieldOf("dawn", PostRules.NO_DAWN).forGetter(Post::dawn),
                 Codec.INT.optionalFieldOf("name", 0).forGetter(Post::name)
         ).apply(i, Post::new));
 
         public static Post vacant(String role, int name) {
-            return new Post(role, PostRules.Status.VACANT, Optional.empty(), 0L, name);
+            return new Post(role, PostRules.Status.VACANT, Optional.empty(), 0L, PostRules.NO_DAWN, name);
         }
 
         public Post present(UUID id) {
-            return new Post(role, PostRules.Status.PRESENT, Optional.of(id), 0L, name);
+            return new Post(role, PostRules.Status.PRESENT, Optional.of(id), 0L, PostRules.NO_DAWN, name);
         }
 
-        public Post away(long until) {
-            return new Post(role, PostRules.Status.AWAY, Optional.empty(), until, name);
+        public Post away(long backAt, long dawn) {
+            return new Post(role, PostRules.Status.AWAY, Optional.empty(), backAt, dawn, name);
+        }
+
+        /** Whether someone away is due back now; see {@link PostRules#due}. */
+        public boolean due(long gameTime, long dayTime) {
+            return PostRules.due(gameTime, dayTime, backAt, dawn);
         }
     }
 

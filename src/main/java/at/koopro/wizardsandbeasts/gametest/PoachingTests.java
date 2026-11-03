@@ -61,7 +61,12 @@ public final class PoachingTests {
             check(helper, Poaching.isProtected(unicorn) && !Poaching.isProtected(ghoul),
                     () -> "the protected-species tag is wrong");
             check(helper, !at.koopro.wizardsandbeasts.ministry.law.CodeOfWandUse.seenByOfficial(hunter),
-                    () -> "setup: an official from elsewhere is watching");
+                    () -> "setup: an official from elsewhere is watching: " + helper.getLevel().getEntitiesOfClass(
+                            net.minecraft.world.entity.LivingEntity.class, hunter.getBoundingBox().inflate(32.0),
+                            e -> e != hunter && e.getType().is(at.koopro.wizardsandbeasts.ministry.licence.MinistryLicenceTags.MINISTRY_OFFICIALS))
+                            .stream().map(e -> e.getType().builtInRegistryHolder().getRegisteredName() + " age " + e.tickCount
+                                    + " at " + e.blockPosition().toShortString()).toList()
+                            + ", hunter at " + hunter.blockPosition().toShortString());
             check(helper, !Poaching.check(hunter, unicorn), () -> "poaching was filed with nobody watching");
             check(helper, MinistryRecords.get(hunter).offenceCount(MagicalOffence.POACHING) == 0,
                     () -> "an unseen killing reached the file");

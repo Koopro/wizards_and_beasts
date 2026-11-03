@@ -42,7 +42,8 @@ public final class SettlementEvents {
             return;
         }
         event.setCanceled(true);
-        data.setPost(ref, post.away(PostRules.backAt(level.getGameTime(), level.getDayTime())));
+        data.setPost(ref, post.away(PostRules.backAt(level.getGameTime(), level.getDayTime(), level.getDayTimePerTick()),
+                PostRules.dawn(level.getDayTime())));
         level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.APPARITION_CRACK_WIZARD.get(),
                 SoundSource.NEUTRAL, 1.0f, 1.0f);
         level.sendParticles(ParticleTypes.POOF, entity.getX(), entity.getY() + 1.0, entity.getZ(), 16, 0.3, 0.5, 0.3, 0.02);

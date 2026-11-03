@@ -264,7 +264,9 @@ public final class ProtegoShieldTests {
                     float domeSpent = POOL - maxima.getIntegrity();
                     check(helper, topSpent > 0.0f && domeSpent > 0.0f,
                             () -> "neither ward answered the blow at all: " + describe(horribilis)
-                                    + " / " + describe(maxima));
+                                    + " / " + describe(maxima) + diagnose(wardedByTop) + diagnose(wardedByDome)
+                                    + " wardedByDome at " + wardedByDome.position() + " dome at " + maxima.position()
+                                    + " attacker at " + dark.position());
                     check(helper, topSpent < domeSpent,
                             () -> "Horribilis spent " + topSpent + " on Dark magic where Maxima spent "
                                     + domeSpent + " — the top tier's whole clause is that it pays less");
