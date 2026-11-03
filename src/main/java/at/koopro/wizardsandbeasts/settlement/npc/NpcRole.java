@@ -12,7 +12,8 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Who a role is: {@code data/<ns>/npc_roles/<id>.json}. A profession is this file, a skin and some lang lines. What a
+ * Who a role is: {@code data/<ns>/npc_roles/<id>.json}. A profession is this file, skins and some lang lines: one
+ * skin per name ({@code settlement_npc/<id>_<n>.png} for {@code ….name.<n>}), or {@code <id>.png} for all. What a
  * role can do lives in the location it keeps, so there is no NPC-only copy of a shop, a board or a service.
  *
  * <pre>{@code

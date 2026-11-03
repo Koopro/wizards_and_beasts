@@ -139,6 +139,13 @@ paper. (`tasks/art_rework_phase2_brief.md`.)
 | Fwooper, Chinese Fireball, Salamander saturation | **C** | Vivid by canon / emissive. |
 | Bespoke creature reactions (Niffler, Pixie, Streeler, Bowtruckle, Augurey, Mooncalf) | **D** | 2026-09-27: all six flinch and die on a `<id>_action` controller registered after movement. Niffler and Bowtruckle already had it; the other four got `tools/bespoke_reactions.py` (shared beat + species overlay), wired into their generators. Verified in client (`hurt`/`death` views). |
 
+### Settlement people
+
+| Asset | Class | Note |
+|---|---|---|
+| Keeper, Wandmaker, Apothecary, Scholar (4 people each) | **D** | 2026-11-03: one skin per named person (`gen_npc_skins.py`), picked by the name key's number. Role signature on every person: keeper satchel + keys, wandmaker tape measure, apothecary apron + vial belt, scholar hood + stole. Vanilla player rig, no geometry change. |
+| Goblin teller (clerk, banker, director, metalsmith) | **D** | Own GeckoLib rigs from `goblin_model.py`; not touched. |
+
 ### Player forms
 
 | Asset | Class | Note |

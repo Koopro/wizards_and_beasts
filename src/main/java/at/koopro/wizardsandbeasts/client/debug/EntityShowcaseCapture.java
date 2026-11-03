@@ -2,6 +2,8 @@ package at.koopro.wizardsandbeasts.client.debug;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.ability.PlayerAbilityHelper;
+import at.koopro.wizardsandbeasts.registry.ModEntities;
+import at.koopro.wizardsandbeasts.settlement.npc.SettlementNpcEntity;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
@@ -10,6 +12,7 @@ import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
@@ -42,8 +45,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -58,7 +63,7 @@ import java.util.Set;
  * compared against the run before it.
  *
  * <p>Development only, and inert unless asked for. {@code WB_ENTITY_SHOWCASE} names a file of
- * creatures, one per line ({@code #} comments): {@code id [height [size]]}, where height and size
+ * creatures, one per line ({@code #} comments): {@code id [height [size]] [key=value …]}, where height and size
  * are the creature's drawn height and largest extent in blocks (they frame the camera; both default
  * to the hitbox). {@code WB_ENTITY_SHOWCASE_WORLD} names a disposable save, {@code
  * WB_ENTITY_SHOWCASE_OUT} the folder under {@code screenshots/}, and {@code WB_ENTITY_SHOWCASE_VIEWS}
@@ -102,14 +107,37 @@ public final class EntityShowcaseCapture {
 
     private EntityShowcaseCapture() {}
 
-    /** One line of the list: the entity id and the size of what is drawn, for framing. */
-    private record Entry(Identifier id, float height, float size) {
+    /**
+     * One line of the list: the entity id, the size of what is drawn (for framing), and {@code key=value} words. A
+     * settlement person takes {@code role=<id> person=<n>} (who they are, so their own skin is drawn) and {@code
+     * with=<role>:<n>;…} (more people in a row beside them, for a group shot).
+     */
+    private record Entry(Identifier id, float height, float size, Map<String, String> props) {
         static Entry parse(String line) {
             String[] parts = line.split("\\s+");
             String spec = parts[0].contains(":") ? parts[0] : WizardsAndBeastsMod.MODID + ":" + parts[0];
-            float height = parts.length > 1 ? Float.parseFloat(parts[1]) : -1.0F;
-            float size = parts.length > 2 ? Float.parseFloat(parts[2]) : -1.0F;
-            return new Entry(Identifier.parse(spec), height, size);
+            List<Float> numbers = new ArrayList<>();
+            Map<String, String> props = new LinkedHashMap<>();
+            for (int i = 1; i < parts.length; i++) {
+                int eq = parts[i].indexOf('=');
+                if (eq > 0) {
+                    props.put(parts[i].substring(0, eq), parts[i].substring(eq + 1));
+                } else {
+                    numbers.add(Float.parseFloat(parts[i]));
+                }
+            }
+            float height = numbers.size() > 0 ? numbers.get(0) : -1.0F;
+            float size = numbers.size() > 1 ? numbers.get(1) : -1.0F;
+            return new Entry(Identifier.parse(spec), height, size, props);
+        }
+
+        /** The file name's stem: the id, and who the person is when the line says. */
+        String stem() {
+            String stem = id.getPath().replace('/', '_');
+            if (props.containsKey("role")) {
+                stem += "_" + props.get("role") + "_" + props.getOrDefault("person", "0");
+            }
+            return props.containsKey("with") ? stem + "_group" : stem;
         }
     }
 
@@ -211,7 +239,7 @@ public final class EntityShowcaseCapture {
         captureThisFrame = false;
         Minecraft mc = Minecraft.getInstance();
         Entry entry = entry();
-        String name = entry.id().getPath().replace('/', '_') + "__" + view().name().toLowerCase(Locale.ROOT) + ".png";
+        String name = entry.stem() + "__" + view().name().toLowerCase(Locale.ROOT) + ".png";
         Path file = mc.gameDirectory.toPath().resolve(REQUEST.out()).resolve(name);
         Screenshot.takeScreenshot(mc.getMainRenderTarget(), image -> Util.ioPool().execute(() -> {
             try (image) {
@@ -337,6 +365,28 @@ public final class EntityShowcaseCapture {
             mob.setNoAi(true);
             mob.setPersistenceRequired();
         }
+        if (entity instanceof SettlementNpcEntity npc && entry.props().containsKey("role")) {
+            dress(npc, entry.props().get("role"), entry.props().getOrDefault("person", "0"));
+        }
+        String with = entry.props().get("with");
+        if (with != null) {
+            // The rest of the group, shoulder to shoulder either side of the subject, all facing the same way.
+            String[] others = with.split(";");
+            for (int i = 0; i < others.length; i++) {
+                String[] who = others[i].split(":");
+                if (ModEntities.SETTLEMENT_NPC.get().create(level, EntitySpawnReason.COMMAND) instanceof SettlementNpcEntity npc) {
+                    npc.setNoAi(true);
+                    npc.setSilent(true);
+                    npc.addTag(TAG);
+                    npc.addTag(TAG + "_crowd");
+                    dress(npc, who[0], who.length > 1 ? who[1] : "0");
+                    npc.snapTo(0.5 + 1.1 * (i / 2 + 1) * (i % 2 == 0 ? 1 : -1), STAGE_Y, 0.5, 0.0F, 0.0F);
+                    npc.setYHeadRot(0.0F);
+                    npc.setYBodyRot(0.0F);
+                    level.addFreshEntity(npc);
+                }
+            }
+        }
         // Gravity on, so a creature standing on the stage is on the ground and plays its ground clips;
         // the `air` view lifts it and turns gravity off.
         entity.setNoGravity(false);
@@ -351,8 +401,14 @@ public final class EntityShowcaseCapture {
 
     private static Entity subject(ServerLevel level) {
         AABB area = new AABB(-12, STAGE_Y - 4, -12, 12, STAGE_Y + 20, 12);
-        return level.getEntitiesOfClass(Entity.class, area,
-                e -> e.getTags().contains(TAG) && !e.getTags().contains(TAG + "_ref")).stream().findFirst().orElse(null);
+        return level.getEntitiesOfClass(Entity.class, area, e -> e.getTags().contains(TAG)
+                && !e.getTags().contains(TAG + "_ref") && !e.getTags().contains(TAG + "_crowd")).stream().findFirst().orElse(null);
+    }
+
+    /** Who a staged settlement person is: the role, and the name a post would give them, which picks their skin. */
+    private static void dress(SettlementNpcEntity npc, String role, String person) {
+        npc.setRoleId(WizardsAndBeastsMod.MODID + ":" + role);
+        npc.setCustomName(Component.translatable("npc." + WizardsAndBeastsMod.MODID + "." + role + ".name." + person));
     }
 
     private static Entity yardstick(ServerLevel level) {

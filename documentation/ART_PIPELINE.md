@@ -192,6 +192,7 @@ that are not creatures, are:
 | `spell_glyphs.py` (+ `spell_glyph_grids.py`, the per-spell pixel grids) | 159 icons `gui/sprites/spell_icon` (16 px, paper field, category-metal rim), drawn 1:1 by the spell menu and the admin spell panels. **Protected owner.** `--sheet OUT.png` renders a comparison without writing. |
 | `bestiary_portraits.py` | 107 bestiary icons + silhouettes, rendered from the real rigs and skins |
 | `chocolate_frog.py`, `duelling_dummy.py`, `villager_wandmaker.py`, `protego_shield_skin.py`, `animagus_skins.py`, `omnioculars_scope.py` | one-off entity skins, villager profession + hat, Protego ward, Animagus hawk/beetle, scope overlay |
+| `gen_npc_skins.py` | 16 settlement people, `settlement_npc/<role>_<n>.png` (one per name the role gives out). Classic player layout; outer garment on the overlay layers, hair/spectacles on the hat layer; `--out DIR` writes a sandbox copy |
 | `texture_cleanup.py` | the cleaned handbook book/emblem and Obscurial stress meter (idempotent) |
 | `player_geo.py` | `geckolib/models/entity/player.geo.json` (from vanilla's player mesh) |
 | `skill_web_layout.py` | node coordinates in `data/.../skill_nodes/` |
