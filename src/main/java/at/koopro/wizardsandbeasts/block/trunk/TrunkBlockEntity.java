@@ -10,6 +10,12 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+import software.bernie.geckolib.animatable.GeoBlockEntity;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.animatable.manager.AnimatableManager;
+import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.RawAnimation;
+import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.UUID;
 
@@ -21,11 +27,20 @@ import java.util.UUID;
  * (multiple players may enter the same trunk) and lives in {@code TrunkRegistryData}, captured at
  * entry time as the trunk's own position.
  */
-public class TrunkBlockEntity extends BlockEntity {
+public class TrunkBlockEntity extends BlockEntity implements GeoBlockEntity {
+
+    /** Stepping in: the lid swings back and falls shut. */
+    public static final String CLIP_OPEN = "open";
+    /** A lock cycle, the Muggle-Worthy switch, or a refused entry: the dial (or clasps) turn. */
+    public static final String CLIP_LOCK = "lock";
+    private static final String CONTROLLER = "trunk";
+    // Both rigs (trunk, Newt's case) name their clips animation.trunk.*, so one controller serves both.
+    private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.trunk.idle");
 
     private @Nullable UUID baseCaseId;
     private int activeLock = 1;
     private boolean muggleWorthy = false;
+    private final AnimatableInstanceCache animatableCache = GeckoLibUtil.createInstanceCache(this);
 
     public TrunkBlockEntity(@NonNull BlockPos pos, @NonNull BlockState state) {
         super(ModBlockEntities.TRUNK.get(), pos, state);
@@ -77,6 +92,23 @@ public class TrunkBlockEntity extends BlockEntity {
     public void setMuggleWorthy(boolean value) {
         this.muggleWorthy = value;
         setChanged();
+    }
+
+    /** Plays a one-shot clip for everyone watching; call on the server. */
+    public void play(@NonNull String clip) {
+        triggerAnim(CONTROLLER, clip);
+    }
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        controllers.add(new AnimationController<TrunkBlockEntity>(CONTROLLER, 0, state -> state.setAndContinue(IDLE))
+                .triggerableAnim(CLIP_OPEN, RawAnimation.begin().thenPlay("animation.trunk.open"))
+                .triggerableAnim(CLIP_LOCK, RawAnimation.begin().thenPlay("animation.trunk.lock")));
+    }
+
+    @Override
+    public @NonNull AnimatableInstanceCache getAnimatableInstanceCache() {
+        return animatableCache;
     }
 
     @Override

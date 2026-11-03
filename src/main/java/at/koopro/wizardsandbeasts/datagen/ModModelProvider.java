@@ -422,9 +422,10 @@ public class ModModelProvider extends ModelProvider {
         // give it meaning.
         ExtendedModelTemplate trunk = trunkModel();
         for (Block chest : java.util.List.of(ModBlocks.ENCHANTED_TRUNK.get(), ModBlocks.EXPANDED_TRUNK.get(),
-                ModBlocks.MASTERS_TRUNK.get(), ModBlocks.MOODYS_TRUNK.get(), ModBlocks.NEWTS_CASE.get())) {
+                ModBlocks.MASTERS_TRUNK.get(), ModBlocks.MOODYS_TRUNK.get())) {
             propBlock(blockModels, chest, trunk, sideFrontTop(chest), true);
         }
+        propBlock(blockModels, ModBlocks.NEWTS_CASE.get(), caseModel(), sideFrontTop(ModBlocks.NEWTS_CASE.get()), true);
 
         // Tents render entirely through GeoBlockRenderer (RenderShape.INVISIBLE), so these models are never
         // drawn — they exist so the blocks have a blockstate at all (no "Missing model for variant" spam)
@@ -568,14 +569,34 @@ public class ModModelProvider extends ModelProvider {
         return builder;
     }
 
-    /** Body plus a slightly inset lid, with the lock plate on the front face. */
+    /**
+     * Body, lid and crown, long and low like the placed trunk. This is the <em>inventory icon</em>: a placed trunk is
+     * {@link net.minecraft.world.level.block.RenderShape#INVISIBLE} and drawn by its GeckoLib rig
+     * ({@code tools/trunk_model.py}), whose lid opens; this keeps the same outline in the hand.
+     */
     private static ExtendedModelTemplate trunkModel() {
         return prop(TextureSlot.PARTICLE, TextureSlot.SIDE, TextureSlot.FRONT, TextureSlot.TOP)
-                .element(e -> e.from(1, 0, 1).to(15, 9, 15)
+                .element(e -> e.from(1, 0, 3).to(15, 7, 13)
                         .textureAll(TextureSlot.SIDE)
                         .face(Direction.NORTH, f -> f.texture(TextureSlot.FRONT))
                         .face(Direction.DOWN, f -> f.texture(TextureSlot.SIDE).cullface(Direction.DOWN)))
-                .element(e -> e.from(1, 9, 1).to(15, 14, 15)
+                .element(e -> e.from(1, 7, 3).to(15, 10, 13)
+                        .textureAll(TextureSlot.SIDE)
+                        .face(Direction.NORTH, f -> f.texture(TextureSlot.FRONT))
+                        .face(Direction.UP, f -> f.texture(TextureSlot.TOP)))
+                .element(e -> e.from(2, 10, 4).to(14, 11, 12)
+                        .textureAll(TextureSlot.TOP))
+                .build();
+    }
+
+    /** Newt's Case as its icon: a suitcase lying flat, lower and shallower than a trunk. */
+    private static ExtendedModelTemplate caseModel() {
+        return prop(TextureSlot.PARTICLE, TextureSlot.SIDE, TextureSlot.FRONT, TextureSlot.TOP)
+                .element(e -> e.from(1, 0, 4).to(15, 4, 12)
+                        .textureAll(TextureSlot.SIDE)
+                        .face(Direction.NORTH, f -> f.texture(TextureSlot.FRONT))
+                        .face(Direction.DOWN, f -> f.texture(TextureSlot.SIDE).cullface(Direction.DOWN)))
+                .element(e -> e.from(1, 4, 4).to(15, 7, 12)
                         .textureAll(TextureSlot.SIDE)
                         .face(Direction.NORTH, f -> f.texture(TextureSlot.FRONT))
                         .face(Direction.UP, f -> f.texture(TextureSlot.TOP)))

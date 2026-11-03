@@ -79,6 +79,11 @@ public class ClientSetup {
                 at.koopro.wizardsandbeasts.registry.ModBlockEntities.WANDMAKERS_BENCH.get(),
                 GeoRendererHelper.simpleBlock("wandmakers_bench_rig", 1.0));
 
+        // Trunks and Newt's Case: two rigs and five sheets behind one block entity type, picked per block, as
+        // the cauldron's metals are. The block is RenderShape.INVISIBLE; one margin block clears the open lid.
+        event.registerBlockEntityRenderer(at.koopro.wizardsandbeasts.registry.ModBlockEntities.TRUNK.get(),
+                GeoRendererHelper.simpleBlock(at.koopro.wizardsandbeasts.client.trunk.TrunkGeoModel::new, 1.0));
+
         // Generic data-driven creatures: one simple GeckoLib renderer per creature, keyed by id.
         // The ten dragon breeds get the breed-aware DragonRenderer (render-state scale + flame tint).
         for (at.koopro.wizardsandbeasts.registry.ModCreatures.Spec spec

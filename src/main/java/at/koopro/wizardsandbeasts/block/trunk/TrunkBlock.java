@@ -139,18 +139,35 @@ public class TrunkBlock extends BaseEntityBlock {
         return null;
     }
 
+    /**
+     * Drawn entirely by the GeckoLib rig ({@code tools/trunk_model.py}), whose lid opens; the JSON block model
+     * stays only for the item icon and break particles, as the cauldron's does.
+     */
     @Override
     protected @NonNull RenderShape getRenderShape(@NonNull BlockState state) {
-        return RenderShape.MODEL;
+        return RenderShape.INVISIBLE;
     }
 
-    /** Body plus lid, inset one pixel all round — the chest the model actually draws. */
-    private static final VoxelShape SHAPE = Block.box(1, 0, 1, 15, 14, 15);
+    /** A trunk is long and low: 14 across its front, 10 deep, 11 high (the rig's own bounds). */
+    private static final VoxelShape TRUNK_NS = Block.box(1, 0, 3, 15, 11, 13);
+    private static final VoxelShape TRUNK_EW = Block.box(3, 0, 1, 13, 11, 15);
+    /** Newt's Case is a suitcase lying flat: 14 long across its front, 8 deep, 7 high. */
+    private static final VoxelShape CASE_NS = Block.box(1, 0, 4, 15, 7, 12);
+    private static final VoxelShape CASE_EW = Block.box(4, 0, 1, 12, 7, 15);
+
+    /** The Scamander case, the one trunk that is a suitcase rather than a chest. */
+    public boolean isCase() {
+        return archetype == PocketArchetype.SCAMANDER_SANCTUARY;
+    }
 
     @Override
     protected @NonNull VoxelShape getShape(@NonNull BlockState state, @NonNull BlockGetter level,
                                            @NonNull BlockPos pos, @NonNull CollisionContext context) {
-        return SHAPE;
+        boolean alongX = state.getValue(FACING).getAxis() == Direction.Axis.Z;
+        if (isCase()) {
+            return alongX ? CASE_NS : CASE_EW;
+        }
+        return alongX ? TRUNK_NS : TRUNK_EW;
     }
 
     @Override
@@ -187,6 +204,7 @@ public class TrunkBlock extends BaseEntityBlock {
 
     private void cycleLock(ServerLevel level, BlockPos pos, ServerPlayer player, TrunkBlockEntity trunkEntity) {
         int next = trunkEntity.cycleActiveLock();
+        trunkEntity.play(TrunkBlockEntity.CLIP_LOCK);
         level.playSound(null, pos, SoundEvents.LEVER_CLICK, SoundSource.BLOCKS, 1.0f, 1.0f);
         player.displayClientMessage(
                 Component.literal("Lock " + next + " of " + lockCount() + " selected.").withStyle(ChatFormatting.GOLD),
@@ -196,6 +214,7 @@ public class TrunkBlock extends BaseEntityBlock {
     private void toggleMuggleWorthy(ServerLevel level, BlockPos pos, ServerPlayer player, TrunkBlockEntity trunkEntity) {
         boolean next = !trunkEntity.isMuggleWorthy();
         trunkEntity.setMuggleWorthy(next);
+        trunkEntity.play(TrunkBlockEntity.CLIP_LOCK);
         // Keep the bound record in sync so players already inside see the change.
         UUID base = trunkEntity.getBaseCaseId();
         if (base != null) {
@@ -236,6 +255,8 @@ public class TrunkBlock extends BaseEntityBlock {
         }
         // Muggle-Worthy blocks non-owner entry; the owner always gets in.
         if (record.muggleWorthy() && !record.owner().equals(player.getUUID())) {
+            // The latches rattle and hold: the case is shut to anyone but its owner.
+            trunkEntity.play(TrunkBlockEntity.CLIP_LOCK);
             player.displayClientMessage(
                     Component.literal("The case appears to contain only travel supplies."), true);
             return;
@@ -245,6 +266,8 @@ public class TrunkBlock extends BaseEntityBlock {
                     Component.literal("The compartment is empty. Wrong lock.").withStyle(ChatFormatting.DARK_GRAY), true);
         }
 
+        // The lid swings back as the traveller steps in, for everyone watching the trunk.
+        trunkEntity.play(TrunkBlockEntity.CLIP_OPEN);
         // Return anchor = the trunk itself, so climbing out lands the player back at the block.
         ExtensionCharmService.enterPocket(player, record, level, pos.above());
     }
