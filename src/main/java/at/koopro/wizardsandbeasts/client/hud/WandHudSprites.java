@@ -54,6 +54,8 @@ public final class WandHudSprites {
 
     /** Spell id -> resolved icon sprite. Cleared on resource reload; see the class doc. */
     private static final Map<String, Identifier> ICON_CACHE = new ConcurrentHashMap<>();
+    /** Spell id -> resolved 16 px menu icon. Same lifetime as {@link #ICON_CACHE}. */
+    private static final Map<String, Identifier> MENU_ICON_CACHE = new ConcurrentHashMap<>();
 
     private WandHudSprites() {}
 
@@ -73,6 +75,21 @@ public final class WandHudSprites {
         return ICON_CACHE.computeIfAbsent(path, WandHudSprites::resolveIcon);
     }
 
+    /** Shown in the menu when a spell has no 16 px icon of its own (a datapack's spell). */
+    public static final Identifier MENU_PLACEHOLDER = sprite("spell_icon/placeholder");
+
+    /**
+     * The 16 px pixel icon for {@code spellId}, drawn 1:1 by the spell menu and the admin panels. The HUD and
+     * the wheel keep {@link #spellIcon}: they are left as they are.
+     */
+    public static Identifier menuIcon(String spellId) {
+        String path = spellPathSegment(spellId);
+        return MENU_ICON_CACHE.computeIfAbsent(path, p -> {
+            Identifier icon = sprite("spell_icon/" + p);
+            return exists(icon) ? icon : MENU_PLACEHOLDER;
+        });
+    }
+
     /**
      * Drops the resolved-icon cache so a reloaded resource pack's icons are picked up.
      *
@@ -84,13 +101,18 @@ public final class WandHudSprites {
         @Override
         public void onResourceManagerReload(ResourceManager resourceManager) {
             ICON_CACHE.clear();
+            MENU_ICON_CACHE.clear();
         }
     }
 
     private static Identifier resolveIcon(String path) {
         Identifier icon = sprite("wand_hud/spells/" + path);
+        return exists(icon) ? icon : SPELL_PLACEHOLDER;
+    }
+
+    private static boolean exists(Identifier sprite) {
         ResourceManager resources = Minecraft.getInstance().getResourceManager();
-        return resources.getResource(texturePath(icon)).isPresent() ? icon : SPELL_PLACEHOLDER;
+        return resources.getResource(texturePath(sprite)).isPresent();
     }
 
     /** A GUI sprite id is a bare name; this is the file it is stitched from. */

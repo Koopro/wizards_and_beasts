@@ -57,7 +57,8 @@ import java.util.UUID;
 @NullMarked
 final class SpellBrowserPanel implements AdminPanel {
 
-    private static final int ROW_H = 13;
+    /** One 16 px spell icon tall, drawn 1:1, plus a pixel of air. */
+    private static final int ROW_H = 17;
     private static final int LIST_HEADER_H = 36;
     private static final int SCROLLBAR_W = 4;
     private static final int SUB_H = 14;
@@ -492,17 +493,17 @@ final class SpellBrowserPanel implements AdminPanel {
             } else if (hovered) {
                 g.fill(x, rowY, x + rowW, rowY + ROW_H, AdminTheme.ROW_HOVER);
             }
-            g.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.spellIcon(row.id()), x + 3, rowY + 1, 11, 11);
+            g.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.menuIcon(row.id()), x + 3, rowY, 16, 16);
             String badges = (row.unforgivable() ? "☠" : row.dark() ? "◆" : "") + (row.overridden() ? "•" : "");
             int badgeW = font.width(badges);
             int ink = !row.castAllowed() ? AdminTheme.INK_3 : row.implemented() ? AdminTheme.INK : AdminTheme.INK_2;
-            String name = AdminText.clip(font, GuiText.resolve(row.displayName()), rowW - 18 - badgeW - 4);
-            g.drawString(font, name, x + 17, rowY + 3, ink, false);
+            String name = AdminText.clip(font, GuiText.resolve(row.displayName()), rowW - 22 - badgeW - 4);
+            g.drawString(font, name, x + 22, rowY + 5, ink, false);
             if (!row.castAllowed()) {
-                g.fill(x + 17, rowY + 7, x + 17 + font.width(name), rowY + 8, AdminTheme.BAD);
+                g.fill(x + 22, rowY + 9, x + 22 + font.width(name), rowY + 10, AdminTheme.BAD);
             }
             if (!badges.isEmpty()) {
-                g.drawString(font, badges, x + rowW - badgeW - 2, rowY + 3,
+                g.drawString(font, badges, x + rowW - badgeW - 2, rowY + 5,
                         row.unforgivable() ? AdminTheme.RUBRIC : AdminTheme.GOLD_DARK, false);
             }
         }

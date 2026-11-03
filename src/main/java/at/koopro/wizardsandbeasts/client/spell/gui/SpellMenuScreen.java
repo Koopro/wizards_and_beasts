@@ -589,7 +589,7 @@ public class SpellMenuScreen extends Screen {
                     over && draggingSpellId != null, accentOf(spellId), age);
             if (spellId != null) {
                 int icon = 16;
-                g.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.spellIcon(spellId),
+                g.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.menuIcon(spellId),
                         s.x() + (s.w() - icon) / 2, s.y() + (s.h() - icon) / 2, icon, icon);
                 SpellSigilRenderer.proficiencyPips(g, s.x(), s.y(), s.w(),
                         SpellMenuRenderHelper.proficiencyPips(spellId));
@@ -715,7 +715,7 @@ public class SpellMenuScreen extends Screen {
         SpellSigilRenderer.dragThread(g, dragOriginX, dragOriginY, mouseX, mouseY, accentOf(draggingSpellId));
         int card = 22;
         Ui.inset(g, S, mouseX - card / 2, mouseY - card / 2, card, card);
-        g.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.spellIcon(draggingSpellId),
+        g.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.menuIcon(draggingSpellId),
                 mouseX - 8, mouseY - 8, 16, 16, overSocket ? 1.0f : 0.55f);
     }
 

@@ -38,7 +38,8 @@ public final class SpellMenuRenderHelper {
 
     /** Alpha a placeholder spell's icon is drawn at -- present, legible, obviously not available. */
     private static final float ALPHA_COMING_SOON = 0.35f;
-    private static final int ICON = 12;
+    /** The 16 px menu icons, drawn 1:1; a row is exactly one icon tall. */
+    private static final int ICON = 16;
     /** Proficiency pips at the end of a row: three 2px squares, so the count reads without colour. */
     private static final int PIP = 2;
     private static final int PIPS_W = 3 * PIP + 2;
@@ -92,7 +93,7 @@ public final class SpellMenuRenderHelper {
         }
 
         boolean comingSoon = !spell.isImplemented();
-        g.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.spellIcon(spell.getId()),
+        g.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.menuIcon(spell.getId()),
                 r.x() + 4, r.y() + (r.h() - ICON) / 2, ICON, ICON, comingSoon ? ALPHA_COMING_SOON : 1.0f);
 
         int textY = r.y() + (r.h() - font.lineHeight) / 2 + 1;
@@ -178,7 +179,7 @@ public final class SpellMenuRenderHelper {
         int w = area.w();
         int y = top;
 
-        g.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.spellIcon(spell.getId()), x, y, 16, 16,
+        g.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.menuIcon(spell.getId()), x, y, ICON, ICON,
                 spell.isImplemented() ? 1.0f : ALPHA_COMING_SOON);
         UiText.drawFit(g, font, S, Component.literal(GuiText.resolve(spell.getDisplayName())),
                 x + 20, y + 4, w - 20, hue(spell.getCategory()));

@@ -18,7 +18,8 @@ icons and particles would pass as one Minecraft expansion. They share:
 - one gold, one set of semantic magic colours;
 - a scale ladder that ranks correctly against the player.
 
-The one system that still breaks the language is the **spell icon / spell HUD art** (§2, A1).
+The one system that still breaks the language is the **spell HUD diamond and wheel** (§2), which the
+user has frozen; the spell menu got its own 16 px pixel icons on 2026-11-03.
 Everything else outstanding is B-grade: noticeable side by side, not jarring in play.
 
 Evidence behind this verdict:
@@ -182,7 +183,8 @@ paper. (`tasks/art_rework_phase2_brief.md`.)
 
 | Asset | Class | Note |
 |---|---|---|
-| **Spell sigils + spell HUD diamond** | **A1** | 92 px smooth-gradient icons drawn at 12 px (list) and ~34 px (HUD); HUD frame is 256 px drawn at 96 (×0.375). The only system still outside the pixel language, and on screen constantly. |
+| Spell menu icons (`spell_icon`, 159) | **D** | 2026-11-03: 16 px pixel icons drawn 1:1 in the spell menu and admin panels (`spell_glyphs.py`): paper field chosen by the user over a dark one, category-metal rim, a hand-pixelled glyph per spell in its colour. `SpellIconAssetTest`. |
+| Spell HUD diamond + wheel (92 px sigils, 256 px frame) | **Frozen** | Still outside the pixel language, but the user ruled twice (2026-10-21, 2026-11-03) to leave the HUD and wheel as they are. Not debt; do not redraw without asking. |
 | Parchment screen kit, eight skins, leather overlays | **D** | Approved 2026-09-23. |
 | Handbook book/emblem, Obscurial stress meter | **D** | Cleaned to hard-edged 1:1 pixel art. |
 | Mob-effect icons (42) | **D** | 20 redrawn; the rest already fit. |
@@ -198,10 +200,8 @@ paper. (`tasks/art_rework_phase2_brief.md`.)
 
 ## 3. Remaining outliers, in fix order
 
-1. **A1 — spell sigils and spell HUD.** Redraw all 159 as pixel icons in the item-sprite language:
-   16 or 24 px, rim colour by category, glyph in the spell's own colour. Author the HUD frame at its
-   on-screen size. Draw only at integer multiples: `SpellDiamondOverlay`, `SpellWheelScreen`,
-   `SpellMenuScreen` (`ICON_TEX_SIZE`, `HUD_TEX_SIZE`). Keep the resource paths.
+1. ~~**A1 — spell sigils.**~~ Menu side done 2026-11-03 (16 px `spell_icon` set). The HUD and wheel
+   keep the 92 px sigils by the user's ruling; see §2.
 2. ~~**B — Stag Animagus rig.**~~ — done 2026-09-28. (Animation parity for the six bespoke creatures: done 2026-09-27.)
 3. ~~**B — Griffin, Glumbumble, Blast-Ended Skrewt, Knarl** silhouettes~~ — done 2026-09-27
    (models only; bones, clips and definitions unchanged; portraits re-rendered; eggs unchanged).
@@ -220,7 +220,7 @@ paper. (`tasks/art_rework_phase2_brief.md`.)
 | Obscurus rig (`obscurus.geo.json` / `.animation.json`) | Never a full `obscurus_model.py` run: it drops the `add_reactions.py` clips and later geo fixes. Use `--form-only` for the player-form smoke. |
 | Spawn eggs of Bowtruckle, Cornish Pixie, Phoenix, Thestral | Hand-set by their redesigns; `spawn_eggs.py` would overwrite them. |
 | Wand rig (`wand.geo.json`) | Owned by `tools/wand_model.py`; base wand (classic/straight/pointed) keeps the author's 2x11 grip and 1.5 stick. Wood looks come from `wand_woods/*.json` `appearance`. |
-| Parchment GUI kit, spell sigils, item icons, item geo | Owned by `gui_parchment.py`, `gui_chrome.py`, `spell_sigils.py`, `item_sprites.py`, `item_geo.py`. `artgen_common.save` refuses other writers even with `--force`. Redraw through the owner. |
+| Parchment GUI kit, spell sigils, spell menu icons, item icons, item geo | Owned by `gui_parchment.py`, `gui_chrome.py`, `spell_sigils.py`, `spell_glyphs.py`, `item_sprites.py`, `item_geo.py`. `artgen_common.save` refuses other writers even with `--force`. Redraw through the owner. |
 | Wizard cards | Deliberate 128 px exception. |
 | `src/main/resources` after `runData` | `runData` stubs placeholder textures over real art. Never `git add -A` after it. Snapshot and compare instead. |
 

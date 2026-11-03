@@ -132,7 +132,8 @@ Every PNG a generator writes carries a PNG text chunk `Generator = wizards_and_b
 - `is_regenerable(path, marker)` — a tool rewrites a file only if it is missing, carries this
   tool's marker, or is a flat placeholder (≤ 8 colours, no marker). Anything else needs `--force`.
 - `PROTECTED` — files owned by `gui_parchment.py`, `gui_chrome.py`, `item_sprites.py`,
-  `item_geo.py` and `spell_sigils.py` cannot be overwritten by any other tool, even with `--force`.
+  `item_geo.py`, `spell_sigils.py` and `spell_glyphs.py` cannot be overwritten by any other tool, even
+  with `--force`.
 
 To find who owns a texture:
 
@@ -187,7 +188,8 @@ that are not creatures, are:
 | `gui_parchment.py` | the parchment kit: `gui/theme`, eight skins in `gui/sprites/<skin>`, controls atlas. **Protected owner.** |
 | `gui_chrome.py` | per-screen GUI (bestiary, wandmaker's bench, Hermione's bag, creative tabs). **Protected owner.** |
 | `config_textures.py`, `map_textures.py`, `skill_chart_textures.py`, `stat_icons.py`, `hud_blood_icons.py` | config screens, Marauder's Map (9), skill chart (35), stat glyphs, blood meter |
-| `spell_sigils.py` | 159 spell icons `gui/sprites/wand_hud/spells`. **Protected owner.** Class A1 in the report: due for a redraw. |
+| `spell_sigils.py` | 159 spell icons `gui/sprites/wand_hud/spells` (92 px), drawn by the HUD diamond and the spell wheel only. **Protected owner.** The HUD and wheel are frozen by the user (2026-10-21, 2026-11-03): do not redraw. |
+| `spell_glyphs.py` (+ `spell_glyph_grids.py`, the per-spell pixel grids) | 159 icons `gui/sprites/spell_icon` (16 px, paper field, category-metal rim), drawn 1:1 by the spell menu and the admin spell panels. **Protected owner.** `--sheet OUT.png` renders a comparison without writing. |
 | `bestiary_portraits.py` | 107 bestiary icons + silhouettes, rendered from the real rigs and skins |
 | `chocolate_frog.py`, `duelling_dummy.py`, `villager_wandmaker.py`, `protego_shield_skin.py`, `animagus_skins.py`, `omnioculars_scope.py` | one-off entity skins, villager profession + hat, Protego ward, Animagus hawk/beetle, scope overlay |
 | `texture_cleanup.py` | the cleaned handbook book/emblem and Obscurial stress meter (idempotent) |
@@ -351,7 +353,7 @@ Refreshing any of them is an owner decision, judged in the client.
 
 | File(s) | Generator | Cause |
 |---|---|---|
-| spell icons `accio`, `capacious_extremis`, `diffindo`, `episkey` | `spell_sigils.py` | The spells' colours in `data/.../spells/*.json` changed in the 2026-09-27 semantic-colour pass (R7) after the icons were drawn. The generator follows the data. Folds into the A1 sigil redraw. |
+| HUD sigils `accio`, `capacious_extremis`, `confundo`, `diffindo`, `episkey` | `spell_sigils.py` | The spells' colours in `data/.../spells/*.json` changed after the icons were drawn (the 2026-09-27 semantic-colour pass; `confundo` on 2026-10-23). The generator follows the data. The HUD is frozen, so these stay as shipped; the menu's 16 px icons (`spell_glyphs.py`) already follow the current colours. |
 | `textures/block/examination_desk_top.png` | `block_textures.py` | Derived from `examination_desk.png`'s palette; the desk side was repainted on 2026-09-08, the top was not refreshed (differs by ≤ 16 per channel). |
 | `textures/gui/map/controls.png` | `map_textures.py` | Last written 2026-09-02; the generator was reworked for the parchment kit on 2026-09-23 and this sheet was not re-emitted. |
 | bestiary icon `lethifold`, icon + silhouette `obscurus` | `bestiary_portraits.py` | Portraits predate the latest Lethifold skin and Obscurus rig. |

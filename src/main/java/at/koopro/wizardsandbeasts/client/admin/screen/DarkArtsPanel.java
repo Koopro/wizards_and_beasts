@@ -30,7 +30,8 @@ import java.util.List;
 @NullMarked
 final class DarkArtsPanel implements AdminPanel {
 
-    private static final int ROW_H = 13;
+    /** One 16 px spell icon tall, drawn 1:1, plus a pixel of air. */
+    private static final int ROW_H = 17;
 
     private final SettingsPanel rules = new SettingsPanel(AdminCategory.DARK_ARTS);
     private @Nullable AdminPanelHost host;
@@ -106,15 +107,15 @@ final class DarkArtsPanel implements AdminPanel {
             if (mouseX >= x && mouseX < x + w && mouseY >= rowY && mouseY < rowY + ROW_H && mouseY >= listTop) {
                 g.fill(x, rowY, x + w, rowY + ROW_H, AdminTheme.ROW_HOVER);
             }
-            g.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.spellIcon(row.id()), x + 2, rowY + 1, 11, 11);
-            g.drawString(font, AdminText.clip(font, GuiText.resolve(row.displayName()), stateX - x - 20), x + 16, rowY + 3,
+            g.blitSprite(RenderPipelines.GUI_TEXTURED, WandHudSprites.menuIcon(row.id()), x + 2, rowY, 16, 16);
+            g.drawString(font, AdminText.clip(font, GuiText.resolve(row.displayName()), stateX - x - 25), x + 21, rowY + 5,
                     row.unforgivable() ? AdminTheme.RUBRIC : AdminTheme.INK, false);
             String state = Component.translatable(row.castAllowed() ? "admin.wizards_and_beasts.badge.castable"
                     : row.enabled() ? "admin.wizards_and_beasts.badge.refused" : "admin.wizards_and_beasts.badge.disabled").getString()
                     + (row.unforgivable() ? " · " + Component.translatable("admin.wizards_and_beasts.badge.unforgivable").getString() : "");
-            g.drawString(font, AdminText.clip(font, state, reqX - stateX - 4), stateX, rowY + 3,
+            g.drawString(font, AdminText.clip(font, state, reqX - stateX - 4), stateX, rowY + 5,
                     row.castAllowed() ? (row.unforgivable() ? AdminTheme.WAX : AdminTheme.INK_2) : AdminTheme.GOOD, false);
-            g.drawString(font, AdminText.clip(font, row.requirement(), x + w - reqX), reqX, rowY + 3, AdminTheme.INK_3, false);
+            g.drawString(font, AdminText.clip(font, row.requirement(), x + w - reqX), reqX, rowY + 5, AdminTheme.INK_3, false);
         }
         g.disableScissor();
     }
