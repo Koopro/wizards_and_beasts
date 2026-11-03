@@ -11,7 +11,9 @@ import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
 import at.koopro.wizardsandbeasts.spell.core.Spells;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.ParticleTypes;
+import at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions;
+import at.koopro.wizardsandbeasts.registry.ModParticles;
+import at.koopro.wizardsandbeasts.spell.core.MagicColours;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -78,7 +80,8 @@ public final class ImperioServerLogic {
                 at.koopro.wizardsandbeasts.spell.core.SpellCategory.DARK_ARTS, target);
         level.playSound(null, target.blockPosition(), ModSounds.SPELL_CAST_DARK.get(), SoundSource.PLAYERS, 0.75f, 1.1f);
         Vec3 p = target.getBoundingBox().getCenter();
-        level.sendParticles(ParticleTypes.HAPPY_VILLAGER, p.x, p.y + 1.0, p.z, 20, 0.35, 0.2, 0.35, 0.02);
+        level.sendParticles(new SpellTintParticleOptions(ModParticles.DARK_WISP.get(), MagicColours.DARK_MAGIC),
+                p.x, p.y + 1.0, p.z, 20, 0.35, 0.2, 0.35, 0.02);
         CASTER_TO_VICTIM.put(caster.getUUID(), target.getUUID());
         PacketDistributor.sendToPlayer(caster, new ImperioVictimBoundS2CPayload(target.getUUID()));
     }

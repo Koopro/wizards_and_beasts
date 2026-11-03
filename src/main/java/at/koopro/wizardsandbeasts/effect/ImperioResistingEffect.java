@@ -1,6 +1,8 @@
 package at.koopro.wizardsandbeasts.effect;
 
-import net.minecraft.core.particles.ParticleTypes;
+import at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions;
+import at.koopro.wizardsandbeasts.registry.ModParticles;
+import at.koopro.wizardsandbeasts.spell.core.MagicColours;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
@@ -17,7 +19,9 @@ public final class ImperioResistingEffect extends MobEffect {
         double x = entity.getX();
         double y = entity.getEyeY();
         double z = entity.getZ();
-        level.sendParticles(ParticleTypes.FLAME, x, y, z, 6, 0.2, 0.1, 0.2, 0.01);
+        // The will straining against the curse: stun-scarlet sparks, not vanilla fire.
+        level.sendParticles(new SpellTintParticleOptions(ModParticles.ELECTRIC_ARC.get(), MagicColours.STUN),
+                x, y, z, 6, 0.2, 0.1, 0.2, 0.01);
         return true;
     }
 

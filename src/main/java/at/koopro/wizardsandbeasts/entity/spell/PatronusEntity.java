@@ -112,7 +112,9 @@ public class PatronusEntity extends Mob {
         super.tick();
         if (level().isClientSide()) {
             if (tickCount % 5 == 0) {
-                level().addParticle(net.minecraft.core.particles.ParticleTypes.END_ROD,
+                level().addParticle(new at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions(
+                                at.koopro.wizardsandbeasts.registry.ModParticles.LIGHT_GLOW.get(),
+                                at.koopro.wizardsandbeasts.spell.core.MagicColours.PROTECTION),
                         getX(), getY(), getZ(), 0.0, 0.02, 0.0);
             }
             return;

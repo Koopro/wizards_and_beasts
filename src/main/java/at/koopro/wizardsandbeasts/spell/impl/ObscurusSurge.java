@@ -6,7 +6,9 @@ import at.koopro.wizardsandbeasts.spell.lib.SpellHelper;
 import at.koopro.wizardsandbeasts.spell.core.SpellProperties;
 import at.koopro.wizardsandbeasts.spell.core.SpellRequirement;
 import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialCombatRules;
-import net.minecraft.core.particles.ParticleTypes;
+import at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions;
+import at.koopro.wizardsandbeasts.registry.ModParticles;
+import at.koopro.wizardsandbeasts.spell.core.MagicColours;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -63,7 +65,7 @@ public class ObscurusSurge extends Spell {
         caster.hurtMarked = true;
         ObscurialCombatRules.applySurgeCosts(caster);
 
-        level.sendParticles(ParticleTypes.LARGE_SMOKE,
+        level.sendParticles(new SpellTintParticleOptions(ModParticles.SMOKE_PUFF.get(), MagicColours.DARK_MAGIC),
                 caster.getX(), caster.getY() + 0.9, caster.getZ(),
                 14, 0.45, 0.25, 0.45, 0.01);
         SpellHelper.spawnBurst(level, this, caster.getBoundingBox().getCenter(), 20, 0.35);

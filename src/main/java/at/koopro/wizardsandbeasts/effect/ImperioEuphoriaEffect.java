@@ -1,6 +1,8 @@
 package at.koopro.wizardsandbeasts.effect;
 
-import net.minecraft.core.particles.ParticleTypes;
+import at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions;
+import at.koopro.wizardsandbeasts.registry.ModParticles;
+import at.koopro.wizardsandbeasts.spell.core.MagicColours;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
@@ -18,7 +20,8 @@ public final class ImperioEuphoriaEffect extends MobEffect {
             double x = entity.getX();
             double y = entity.getEyeY();
             double z = entity.getZ();
-            level.sendParticles(ParticleTypes.HAPPY_VILLAGER, x, y, z, 4, 0.25, 0.15, 0.25, 0.02);
+            level.sendParticles(new SpellTintParticleOptions(ModParticles.ARCANE_MOTE.get(), MagicColours.MAGIC),
+                    x, y, z, 4, 0.25, 0.15, 0.25, 0.02);
         }
         return true;
     }

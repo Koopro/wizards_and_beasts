@@ -10,7 +10,9 @@ import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.core.SpellProperties;
 import at.koopro.wizardsandbeasts.spell.effect.SpellEffectRunner;
 import at.koopro.wizardsandbeasts.spell.resistance.MagicResistanceRules.Strain;
-import net.minecraft.core.particles.ParticleTypes;
+import at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions;
+import at.koopro.wizardsandbeasts.registry.ModParticles;
+import at.koopro.wizardsandbeasts.spell.core.MagicColours;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -102,7 +104,7 @@ public final class MagicResistance {
             return true;
         }
         target.setData(ModAttachments.MAGIC_STRAIN.get(), next);
-        level.sendParticles(ParticleTypes.ENCHANT, target.getX(), target.getY() + target.getBbHeight() * 0.6,
+        level.sendParticles(new SpellTintParticleOptions(ModParticles.ARCANE_MOTE.get(), MagicColours.PROTECTION), target.getX(), target.getY() + target.getBbHeight() * 0.6,
                 target.getZ(), 12, target.getBbWidth() * 0.4, target.getBbHeight() * 0.3, target.getBbWidth() * 0.4, 0.4);
         level.playSound(null, target.blockPosition(), SoundEvents.SHIELD_BLOCK.value(), SoundSource.NEUTRAL, 0.6f, 0.7f);
         if (caster instanceof ServerPlayer player) {
