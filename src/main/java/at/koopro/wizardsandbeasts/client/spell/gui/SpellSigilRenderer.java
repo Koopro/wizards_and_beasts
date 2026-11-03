@@ -133,14 +133,9 @@ public final class SpellSigilRenderer {
         if (filled) {
             // A second, dimmer ring one step in reads as the socket being seated rather than empty.
             ring(g, x + 3, y + 3, size - 6, 1, pulse(accent, ageInTicks));
-        } else {
-            // An empty socket needs to read as *available*, not as a hole cut in the page. A single
-            // gilt stud at the centre is enough to say "something seats here" — without it the four
-            // wells look like damage.
-            int stud = Math.max(1, size / 12);
-            g.fill(x + size / 2 - stud, y + size / 2 - stud,
-                    x + size / 2 + stud, y + size / 2 + stud, WizardsPalette.GILT_DARK);
         }
+        // An empty socket's centre is the caller's: the chevron of the direction it answers to, which
+        // says "something seats here" and which way, where a gilt stud only said the first.
         if (dropTarget) {
             // Flare outward, so the target is obvious while something is over it.
             ring(g, x - 2, y - 2, size + 4, 1, WizardsPalette.GILT_DARK);

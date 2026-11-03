@@ -386,6 +386,88 @@ public final class Ui {
         return new Rect(x + i * (tw + gap), y, tw, TAB_H);
     }
 
+    // ── slots ─────────────────────────────────────────────────────────────────
+
+    /** An item slot's frame: one pixel out from the item on every side. */
+    public static final int SLOT = 18;
+
+    /**
+     * The well a container slot sits in, for an item drawn at ({@code itemX}, {@code itemY}) -- the
+     * coordinates the menu gives its {@code Slot}. Drawn procedurally so the frame is placed by the same
+     * numbers as the slot and can never sit off it: a sunk face, shadow on the top-left, lit lip on the
+     * bottom-right (light is top-left everywhere).
+     */
+    public static void slot(GuiGraphics g, int itemX, int itemY) {
+        slotWell(g, itemX - 1, itemY - 1, SLOT, SLOT,
+                WizardsPalette.PAGE_SHADE, WizardsPalette.PAGE_DEEP, WizardsPalette.PAGE_LIGHT);
+    }
+
+    /**
+     * The same well in a container's own material -- Hermione's bag sinks its slots into rose satin, not
+     * paper. Same construction: {@code face}, a {@code shadow} top-left, a lit {@code lip} bottom-right.
+     */
+    public static void slot(GuiGraphics g, int itemX, int itemY, int face, int shadow, int lip) {
+        slotWell(g, itemX - 1, itemY - 1, SLOT, SLOT, face, shadow, lip);
+    }
+
+    /**
+     * A larger, framed slot for a result: the same well {@code pad} pixels wider on each side inside a
+     * gilt ring, so the thing a station makes reads apart from the things it takes.
+     */
+    public static void resultSlot(GuiGraphics g, int itemX, int itemY, int pad) {
+        int x = itemX - 1 - pad;
+        int y = itemY - 1 - pad;
+        int size = SLOT + 2 * pad;
+        g.fill(x - 1, y - 1, x + size + 1, y + size + 1, WizardsPalette.GILT_DARK);
+        g.fill(x - 1, y - 1, x + size, y, WizardsPalette.GILT);
+        g.fill(x - 1, y - 1, x, y + size, WizardsPalette.GILT);
+        slotWell(g, x, y, size, size, WizardsPalette.PAGE_SHADE, WizardsPalette.PAGE_DEEP, WizardsPalette.PAGE_LIGHT);
+    }
+
+    /**
+     * A one-pixel wash ring just outside a slot: where the carried item will go. A shape, so it does not
+     * rest on the colour alone.
+     */
+    public static void slotTarget(GuiGraphics g, int itemX, int itemY, int pad, int colour) {
+        int x = itemX - 2 - pad;
+        int y = itemY - 2 - pad;
+        int size = SLOT + 2 + 2 * pad;
+        g.fill(x, y, x + size, y + 1, colour);
+        g.fill(x, y + size - 1, x + size, y + size, colour);
+        g.fill(x, y + 1, x + 1, y + size - 1, colour);
+        g.fill(x + size - 1, y + 1, x + size, y + size - 1, colour);
+    }
+
+    private static void slotWell(GuiGraphics g, int x, int y, int w, int h, int face, int shadow, int lip) {
+        g.fill(x, y, x + w, y + h, face);
+        g.fill(x, y, x + w - 1, y + 1, shadow);
+        g.fill(x, y + 1, x + 1, y + h - 1, shadow);
+        g.fill(x + 1, y + h - 1, x + w, y + h, lip);
+        g.fill(x + w - 1, y + 1, x + w, y + h - 1, lip);
+    }
+
+    // ── direction ─────────────────────────────────────────────────────────────
+
+    /** Edge of {@link #arrow}'s box. */
+    public static final int ARROW = 7;
+
+    /**
+     * A solid chevron in a 7x7 box pointing up (0), right (1), down (2) or left (3) -- the wand loadout's
+     * order, so an empty socket can say which way it answers without colour or a word.
+     */
+    public static void arrow(GuiGraphics g, int dir, int x, int y, int colour) {
+        for (int i = 0; i < 4; i++) {
+            int a = 3 - i;
+            int b = 4 + i;
+            switch (dir & 3) {
+                case 0 -> g.fill(x + a, y + 1 + i, x + b, y + 2 + i, colour);
+                case 1 -> g.fill(x + 5 - i, y + a, x + 6 - i, y + b, colour);
+                case 2 -> g.fill(x + a, y + 5 - i, x + b, y + 6 - i, colour);
+                default -> g.fill(x + 1 + i, y + a, x + 2 + i, y + b, colour);
+            }
+        }
+    }
+
     // ── previews ──────────────────────────────────────────────────────────────
 
     /**

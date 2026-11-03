@@ -25,10 +25,9 @@ import java.util.UUID;
  * The "head in the mirror" — shows the connected player's face (resolved from their skin) and name
  * while a two-way-mirror link is open. Updated live by the server's presence heartbeat.
  *
- * <p>The one screen in the trinket set that is not paper, on purpose: it <em>is</em> the mirror,
- * so its centre is dark glass with the other wizard's face in it. The chrome around the glass is
- * the ordinary kit — a gilt frame in the page's own gilt, the name on a paper slip beneath it like
- * a label under a portrait, and the themed button — so the only dark thing on screen is the glass.
+ * <p>It <em>is</em> the mirror: dark silvered glass with the other wizard's face in it, in the engraved
+ * pewter frame the call screen ({@link MirrorCallScreen}) wears, the name on a pewter plaque beneath
+ * it like the plate under a portrait, pewter buttons ({@link MirrorChrome}).
  */
 public class MirrorViewScreen extends Screen {
 
@@ -37,8 +36,8 @@ public class MirrorViewScreen extends Screen {
     /** Glass either side of the face; the look parallax is clamped to it, so the face stays in. */
     private static final int GLASS_MARGIN = 6;
     private static final int GLASS = FACE + 2 * GLASS_MARGIN;
-    /** The gilt frame: a dark outer line, then the gilt. */
-    private static final int FRAME_W = 3;
+    /** The pewter frame, up to where the glass begins. */
+    private static final int FRAME_W = MirrorChrome.FRAME;
     private static final int PLATE_PAD_X = WizardsMetrics.SPACE_L;
     private static final int PLATE_PAD_Y = WizardsMetrics.SPACE_M;
     private static final int PLATE_H = PLATE_PAD_Y + WizardsMetrics.LINE_BODY + 9 + PLATE_PAD_Y;
@@ -47,11 +46,6 @@ public class MirrorViewScreen extends Screen {
     private static final int GAP = 6;
     /** Glass, frame, plate and button, stacked; the whole is centred on the screen. */
     private static final int STACK_H = GLASS + 2 * FRAME_W + GAP + PLATE_H + GAP + BUTTON_H;
-    /**
-     * Mirror glass. A deliberately dark magical surface rather than a menu colour, so no palette
-     * token: the aubergine-black the old hand-drawn frame was filled with.
-     */
-    private static final int GLASS_COLOUR = 0xFF1A1326;
 
     @Nullable
     private static MirrorViewScreen active;
@@ -89,9 +83,10 @@ public class MirrorViewScreen extends Screen {
     protected void init() {
         super.init();
         active = this;
-        addRenderableWidget(new ThemedButton(width / 2 - BUTTON_W / 2,
+        addRenderableWidget(ThemedButton.skinned(width / 2 - BUTTON_W / 2,
                 stackTop() + STACK_H - BUTTON_H, BUTTON_W, BUTTON_H,
-                Component.translatable(MirrorCallScreen.KEY + "close"), this::onClose));
+                Component.translatable(MirrorCallScreen.KEY + "close"), this::onClose, MirrorChrome.BUTTONS, null, 0,
+                MirrorChrome.INK, MirrorChrome.INK_OFF));
     }
 
     private int stackTop() {
@@ -117,12 +112,9 @@ public class MirrorViewScreen extends Screen {
         int top = stackTop();
         int glassX = cx - GLASS / 2;
         int glassY = top + FRAME_W;
-        // Gilt frame, then the glass inside it.
-        graphics.fill(glassX - FRAME_W, glassY - FRAME_W, glassX + GLASS + FRAME_W,
-                glassY + GLASS + FRAME_W, WizardsPalette.GILT_DARK);
-        graphics.fill(glassX - FRAME_W + 1, glassY - FRAME_W + 1, glassX + GLASS + FRAME_W - 1,
-                glassY + GLASS + FRAME_W - 1, WizardsPalette.GILT);
-        graphics.fill(glassX, glassY, glassX + GLASS, glassY + GLASS, GLASS_COLOUR);
+        // Dark silvered glass in the engraved pewter frame the call screen wears; the face is drawn into
+        // the glass, and the frame goes over it last so the face never crosses the metal.
+        MirrorChrome.mirror(graphics, glassX - FRAME_W, glassY - FRAME_W, GLASS + 2 * FRAME_W, GLASS + 2 * FRAME_W, true);
 
         // Face, with a subtle look-driven parallax so the heartbeat reads as "alive".
         int parallax = (int) Math.max(-GLASS_MARGIN, Math.min(GLASS_MARGIN, otherYaw / 15f));
@@ -132,19 +124,19 @@ public class MirrorViewScreen extends Screen {
         // Face (u8,v8) + hat overlay (u40,v8), 8x8 region on a 64x64 skin.
         graphics.blit(RenderPipelines.GUI_TEXTURED, skin, faceX, faceY, 8f, 8f, FACE, FACE, 8, 8, 64, 64);
         graphics.blit(RenderPipelines.GUI_TEXTURED, skin, faceX, faceY, 40f, 8f, FACE, FACE, 8, 8, 64, 64);
+        MirrorChrome.frame(graphics, glassX - FRAME_W, glassY - FRAME_W, GLASS + 2 * FRAME_W, GLASS + 2 * FRAME_W);
 
-        // The name on a paper slip under the glass: ink, unshadowed, like the rest of the kit.
+        // The name on an engraved pewter plaque under the glass, like the plate under a portrait.
         Component name = Component.literal(otherName);
         Component status = Component.translatable(MirrorCallScreen.KEY + "connected").withStyle(ChatFormatting.ITALIC);
         int plateW = Math.max(GLASS + 2 * FRAME_W,
                 Math.max(font.width(name), font.width(status)) + 2 * PLATE_PAD_X);
         int plateY = glassY + GLASS + FRAME_W + GAP;
-        McStylePanel.drawThemedSlip(graphics, cx - plateW / 2, plateY, plateW, PLATE_H);
+        MirrorChrome.plaque(graphics, cx - plateW / 2, plateY, plateW, PLATE_H);
         int textY = plateY + PLATE_PAD_Y;
-        graphics.drawString(font, name, cx - font.width(name) / 2, textY,
-                WizardsPalette.PAGE_INK, false);
+        graphics.drawString(font, name, cx - font.width(name) / 2, textY, MirrorChrome.INK, false);
         graphics.drawString(font, status, cx - font.width(status) / 2,
-                textY + WizardsMetrics.LINE_BODY, WizardsPalette.PAGE_INK_2, false);
+                textY + WizardsMetrics.LINE_BODY, MirrorChrome.INK_2, false);
 
         super.render(graphics, mouseX, mouseY, partialTick);
     }

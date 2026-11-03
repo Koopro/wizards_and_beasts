@@ -46,6 +46,43 @@ public class HermionesBagMenu extends AbstractContainerMenu {
     public static final int ROWS = 6;
     public static final int COLS = 9;
     public static final int SIZE = ROWS * COLS;
+    // ── Geometry, shared with HermionesBagScreen ──────────────────────────────
+    //
+    // Slot x/y are the item's top-left; the screen draws each frame one pixel out from these same numbers.
+
+    /** The whole screen: the bag (with its clasp above) over a parchment strip for the player's inventory. */
+    public static final int GUI_W = 180;
+    public static final int GUI_H = 239;
+    /** The bag's 6x9 grid. */
+    public static final int BAG_X = 10;
+    public static final int BAG_Y = 24;
+    /** Player inventory: three rows, then the hotbar a vanilla 4px gap below. */
+    public static final int INV_X = 10;
+    public static final int INV_Y = 156;
+    public static final int HOTBAR_Y = INV_Y + 3 * 18 + 4;
+
+    /**
+     * Every slot's origin in slot-index order: the 54 bag slots row by row, the 27 inventory slots, the 9
+     * hotbar slots. {@code quickMoveStack} relies on that order.
+     */
+    public static List<int[]> slotOrigins() {
+        List<int[]> out = new java.util.ArrayList<>(SIZE + 36);
+        for (int row = 0; row < ROWS; row++) {
+            for (int col = 0; col < COLS; col++) {
+                out.add(new int[]{BAG_X + col * 18, BAG_Y + row * 18});
+            }
+        }
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 9; col++) {
+                out.add(new int[]{INV_X + col * 18, INV_Y + row * 18});
+            }
+        }
+        for (int col = 0; col < 9; col++) {
+            out.add(new int[]{INV_X + col * 18, HOTBAR_Y});
+        }
+        return out;
+    }
+
     /** The {@code SWAP} button that means "the offhand". */
     private static final int OFFHAND_SWAP_BUTTON = 40;
 
@@ -81,28 +118,32 @@ public class HermionesBagMenu extends AbstractContainerMenu {
         checkContainerSize(bag, SIZE);
         bag.startOpen(this.owner);
 
+        List<int[]> at = slotOrigins();
         // Bag grid (6 x 9)
-        for (int row = 0; row < ROWS; row++) {
-            for (int col = 0; col < COLS; col++) {
-                addSlot(new BagSlot(bag, row * COLS + col, 8 + col * 18, 18 + row * 18));
-            }
+        for (int i = 0; i < SIZE; i++) {
+            addSlot(new BagSlot(bag, i, at.get(i)[0], at.get(i)[1]));
         }
-        // Player inventory + hotbar, positioned to match the vanilla generic_54 layout.
-        for (int row = 0; row < 3; row++) {
-            for (int col = 0; col < 9; col++) {
-                addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 139 + row * 18));
-            }
+        // Player inventory, then the hotbar.
+        for (int i = 0; i < 27; i++) {
+            int[] o = at.get(SIZE + i);
+            addSlot(new Slot(playerInventory, i + 9, o[0], o[1]));
         }
         int locked = -1;
         for (int col = 0; col < 9; col++) {
+            int[] o = at.get(SIZE + 27 + col);
             if (col == lockedHotbar) {
                 locked = slots.size();
-                addSlot(new PinnedSlot(playerInventory, col, 8 + col * 18, 197));
+                addSlot(new PinnedSlot(playerInventory, col, o[0], o[1]));
             } else {
-                addSlot(new Slot(playerInventory, col, 8 + col * 18, 197));
+                addSlot(new Slot(playerInventory, col, o[0], o[1]));
             }
         }
         this.lockedSlot = locked;
+    }
+
+    /** Menu slot index of the open bag (it cannot be moved while open), or -1 when held in the offhand. */
+    public int lockedSlotIndex() {
+        return lockedSlot;
     }
 
     /** Client factory — an empty local container; vanilla syncs slot contents over the menu. */

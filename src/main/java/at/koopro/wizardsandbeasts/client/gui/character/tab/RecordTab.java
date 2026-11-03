@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.gui.character.tab;
 
+import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.util.UiContrast;
 import at.koopro.wizardsandbeasts.client.ministry.state.ClientMinistryRecordState;
@@ -178,7 +179,7 @@ public final class RecordTab implements CharacterTab {
             for (Map.Entry<MagicalOffence, Integer> entry : offences.entrySet()) {
                 String name = entry.getKey().displayName().getString();
                 String count = "×" + entry.getValue();
-                g.drawString(font, font.plainSubstrByWidth(name, innerW - font.width(count) - 4),
+                g.drawString(font, UiText.fit(font, name, innerW - font.width(count) - 4),
                         cx, cy, COLOR_VALUE, false);
                 g.drawString(font, count, cx + innerW - font.width(count), cy, COLOR_LABEL, false);
                 cy += ROW_H;
@@ -231,7 +232,7 @@ public final class RecordTab implements CharacterTab {
         for (StandingAxis axis : StandingAxis.values()) {
             String name = axis.displayName().getString();
             String band = axis.bandName(ClientStandingState.bandOf(axis)).getString();
-            g.drawString(font, font.plainSubstrByWidth(name, w - font.width(band) - 6),
+            g.drawString(font, UiText.fit(font, name, w - font.width(band) - 6),
                     x, y, COLOR_VALUE, false);
             g.drawString(font, band, x + w - font.width(band), y,
                     UiContrast.readableOn(axis.color(), WizardsPalette.PAGE), false);
@@ -246,7 +247,10 @@ public final class RecordTab implements CharacterTab {
             String positive = axis.positivePole().getString();
             g.drawString(font, negative, x, y, COLOR_MUTED, false);
             g.drawString(font, positive, x + w - font.width(positive), y, COLOR_MUTED, false);
-            y += ROW_H + 3;
+            y += ROW_H + 4;
+            // A rule after each axis: the pole names are this axis's scale, not the next axis's heading.
+            g.fill(x, y, x + w, y + 1, (0x80 << 24) | (WizardsPalette.PAGE_SHADE & 0xFFFFFF));
+            y += 5;
         }
         return y + 1;
     }
@@ -290,7 +294,7 @@ public final class RecordTab implements CharacterTab {
         String label = Component.translatable(KEY + labelId).getString();
         g.drawString(font, label + ":", x, y, COLOR_LABEL, false);
         int lw = font.width(label + ": ");
-        g.drawString(font, font.plainSubstrByWidth(value, w - lw), x + lw, y, valueColor, false);
+        g.drawString(font, UiText.fit(font, value, w - lw), x + lw, y, valueColor, false);
     }
 
     private static void drawBar(@NonNull GuiGraphics g, int x, int y, int w, float fraction) {

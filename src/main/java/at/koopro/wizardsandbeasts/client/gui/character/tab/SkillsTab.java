@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.gui.character.tab;
 
+import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.character.widget.SkillTreeBarWidget;
 import at.koopro.wizardsandbeasts.client.skill.state.ClientSkillDataState;
@@ -144,12 +145,14 @@ public final class SkillsTab implements CharacterTab {
                           @NonNull Map<String, Integer> unlocked) {
         // Cached on the skill sync: the profile walks every archetype's pathway and was rebuilt each frame.
         BuildProfile profile = at.koopro.wizardsandbeasts.client.gui.character.SheetCaches.build();
-        g.drawString(font, Component.translatable(B + "header"), x, y, COLOR_SECTION, false);
+        Component header = Component.translatable(B + "header");
+        g.drawString(font, header, x, y, COLOR_SECTION, false);
         Component current = profile.current() == null
                 ? Component.translatable(B + "status.undecided")
                 : Component.translatable(B + "status." + profile.status().name().toLowerCase(Locale.ROOT),
                         Component.translatable(profile.current().nameKey()));
-        g.drawString(font, current, x + w - font.width(current), y, COLOR_VALUE, false);
+        String currentText = UiText.fit(font, current.getString(), w - font.width(header) - 6);
+        g.drawString(font, currentText, x + w - font.width(currentText), y, COLOR_VALUE, false);
         y += 11;
 
         if (profile.pathways().isEmpty()) {
@@ -165,13 +168,14 @@ public final class SkillsTab implements CharacterTab {
             if (shown++ >= MAX_PATHWAYS) {
                 break;
             }
-            Component name = Component.translatable(p.archetype().nameKey());
-            g.drawString(font, name, x, y, COLOR_VALUE, false);
             String tiers = I18n.get(B + "tiers",
                     p.count(BuildTier.EARLY), p.size(BuildTier.EARLY),
                     p.count(BuildTier.MID), p.size(BuildTier.MID),
                     p.count(BuildTier.ADVANCED), p.size(BuildTier.ADVANCED));
+            // Counters first, then the name in what they leave: it used to run under them.
             g.drawString(font, tiers, x + w - font.width(tiers), y, COLOR_LABEL, false);
+            String name = Component.translatable(p.archetype().nameKey()).getString();
+            g.drawString(font, UiText.fit(font, name, w - font.width(tiers) - 6), x, y, COLOR_VALUE, false);
             y += 10;
 
             Skill capstone = SkillTrees.clientById(p.archetype().capstone());

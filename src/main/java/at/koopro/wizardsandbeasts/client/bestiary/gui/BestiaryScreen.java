@@ -122,7 +122,8 @@ public final class BestiaryScreen extends Screen {
         y = GuiScaleHelper.clampedTop(Math.round(H * guiScale), height, GuiScaleHelper.DEFAULT_MARGIN);
         search = new ThemedTextField(font, x + Math.round(LEFT * guiScale), y + Math.round((TOP + 16) * guiScale),
                 Math.round(PAGE_W * guiScale), Math.round(14 * guiScale),
-                Component.translatable("gui.wizards_and_beasts.bestiary.search")).skin(SKIN);
+                Component.translatable("gui.wizards_and_beasts.bestiary.search")).skin(SKIN)
+                .inkHint(Component.translatable("gui.wizards_and_beasts.bestiary.search_hint"));
         search.setResponder(value -> rebuildRows());
         search.visible = open == null;
         addRenderableWidget(search);

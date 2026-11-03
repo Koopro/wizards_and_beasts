@@ -48,6 +48,44 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
     /** A recipe pairs this wood and core, but the server has withdrawn the wood, the core or the pairing. */
     public static final int STATUS_WITHDRAWN = 5;
 
+    // ── Geometry, shared with WandmakersBenchScreen ─────────────────────────
+    //
+    // Slot x/y are the item's top-left, as vanilla's Slot takes them; the screen draws each frame one
+    // pixel out. These are the only copies: the screen reads them, so the art can never sit off a slot.
+
+    /** The sheet. Wider than vanilla's 176 so the inventory clears the parchment frame's inner rule. */
+    public static final int GUI_W = 180;
+    public static final int GUI_H = 232;
+    /** The station row: blank, core, and the finished wand to their right. */
+    public static final int STATION_Y = 30;
+    public static final int BLANK_X = 30;
+    public static final int CORE_X = 66;
+    public static final int OUTPUT_X = 130;
+    /** Player inventory: three rows from {@code INV_Y}, the hotbar a vanilla 4px gap below. */
+    public static final int INV_X = 10;
+    public static final int INV_Y = 150;
+    public static final int HOTBAR_Y = INV_Y + 3 * 18 + 4;
+
+    /**
+     * Every slot's origin, in slot-index order: blank, core, output, the 27 inventory slots, the 9 hotbar
+     * slots. {@code quickMoveStack} relies on that order (0-2 bench, 3-29 inventory, 30-38 hotbar).
+     */
+    public static List<int[]> slotOrigins() {
+        List<int[]> out = new ArrayList<>(39);
+        out.add(new int[]{BLANK_X, STATION_Y});
+        out.add(new int[]{CORE_X, STATION_Y});
+        out.add(new int[]{OUTPUT_X, STATION_Y});
+        for (int row = 0; row < 3; ++row) {
+            for (int col = 0; col < 9; ++col) {
+                out.add(new int[]{INV_X + col * 18, INV_Y + row * 18});
+            }
+        }
+        for (int col = 0; col < 9; ++col) {
+            out.add(new int[]{INV_X + col * 18, HOTBAR_Y});
+        }
+        return out;
+    }
+
     private static final int DATA_TIER = 0;
     private static final int DATA_FLEXIBILITY = 1;
     private static final int DATA_STATUS = 2;
@@ -86,17 +124,20 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
         this.enhancerBlockIds = List.copyOf(enhancerBlockIds);
 
         ItemStacksResourceHandler handler = bench.getInventory();
-        addSlot(new WandBlankSlot(handler, 0, 44, 35));
-        addSlot(new CoreSlot(handler, 1, 80, 35));
-        addSlot(new OutputSlot(this, handler, 2, 134, 35));
+        List<int[]> at = slotOrigins();
+        addSlot(new WandBlankSlot(handler, 0, at.get(0)[0], at.get(0)[1]));
+        addSlot(new CoreSlot(handler, 1, at.get(1)[0], at.get(1)[1]));
+        addSlot(new OutputSlot(this, handler, 2, at.get(2)[0], at.get(2)[1]));
 
         for (int row = 0; row < 3; ++row) {
             for (int col = 0; col < 9; ++col) {
-                addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 112 + row * 18));
+                int[] o = at.get(3 + row * 9 + col);
+                addSlot(new Slot(playerInventory, col + row * 9 + 9, o[0], o[1]));
             }
         }
         for (int col = 0; col < 9; ++col) {
-            addSlot(new Slot(playerInventory, col, 8 + col * 18, 170));
+            int[] o = at.get(30 + col);
+            addSlot(new Slot(playerInventory, col, o[0], o[1]));
         }
 
         addDataSlots(dataAccess);

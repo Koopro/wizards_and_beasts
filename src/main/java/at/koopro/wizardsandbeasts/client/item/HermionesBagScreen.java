@@ -1,79 +1,171 @@
 package at.koopro.wizardsandbeasts.client.item;
 
+import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
+import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
+import at.koopro.wizardsandbeasts.client.gui.ui.Ui;
+import at.koopro.wizardsandbeasts.client.gui.ui.UiSurface;
+import at.koopro.wizardsandbeasts.client.gui.ui.UiTooltips;
 import at.koopro.wizardsandbeasts.item.trinket.HermionesBagMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.Slot;
+
+import java.util.List;
+
+import static at.koopro.wizardsandbeasts.item.trinket.HermionesBagMenu.GUI_W;
+import static at.koopro.wizardsandbeasts.item.trinket.HermionesBagMenu.INV_X;
+import static at.koopro.wizardsandbeasts.item.trinket.HermionesBagMenu.INV_Y;
 
 /**
- * Screen for Hermione's Bag.
+ * Hermione's beaded bag: you reach <em>into</em> it.
  *
- * <p>This used to blit vanilla's {@code generic_54} directly, so one of the mod's signature
- * artefacts opened as a plain double chest. The sheet it draws now is that same panel
- * recoloured onto the mod's parchment by {@code tools/gui_chrome.py}, with beads
- * along the title band — same geometry, so every slot still lands where the menu puts it.
+ * <p>The bag is pink beads on rose silk with gilt piping, closed by a kiss-lock clasp across the top, and
+ * its 54 slots sink into a deep rose satin lining -- the Undetectable Extension Charm's inside, not a chest.
+ * The player's inventory is a parchment strip below it, so what is in the bag and what is on you are two
+ * different things at a glance. It used to be vanilla's {@code generic_54} recoloured onto paper with a
+ * row of beads in the title band: one of the mod's signature artefacts, opening as a double chest.
+ *
+ * <p>Art from {@code tools/gui_chrome.py} ({@code container/hermiones_bag/}); every frame is placed from
+ * {@link HermionesBagMenu}'s own geometry, which its slots also use.
  */
 public class HermionesBagScreen extends AbstractContainerScreen<HermionesBagMenu> {
 
-    private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(
-            "wizards_and_beasts", "textures/gui/container/hermiones_bag.png");
+    private static final Identifier FABRIC = art("fabric");
+    private static final Identifier LINING = art("lining");
+    private static final Identifier CLASP_BAR = art("clasp_bar");
+    private static final Identifier CLASP_BALL = art("clasp_ball");
 
-    /** Height of the chest half of the sheet: the rows plus the panel's own top border. */
-    private static final int CHEST_H = HermionesBagMenu.ROWS * 18 + 17;
-    /** The sheet's player-inventory strip starts at v=126 and is 96 tall, whatever the row count. */
-    private static final int INVENTORY_V = 126;
-    private static final int INVENTORY_H = 96;
-    private static final int SHEET = 256;
+    /** The bag's body: from under the clasp to just over the parchment strip. */
+    private static final int BAG_TOP = 6;
+    private static final int BAG_BOTTOM = 144;
+    /** The parchment strip the player's inventory sits on; the bag overlaps its top edge. */
+    private static final int STRIP_TOP = 136;
+    /** Clasp: a gilt bar across the middle of the top edge and two balls meeting at its centre. */
+    private static final int CLASP_Y = 3;
+    private static final int CLASP_INSET = 30;
+    private static final int CLASP_BAR_W = 16;
+    private static final int CLASP_BAR_H = 6;
+    private static final int BALL = 7;
+    /** The satin tag the bag's name is stitched on. */
+    private static final int TAG_X = 10;
+    private static final int TAG_Y = 10;
+    private static final int TAG_H = 11;
+
+    // The lining's colours, mirrored from gui_chrome.py's ROSE: the slot wells are drawn here, not in art.
+    private static final int WELL_FACE = 0xFF2A0B23;
+    private static final int WELL_SHADOW = 0xFF16040F;
+    private static final int WELL_LIP = 0xFF6E2A58;
+    private static final int TAG_FIELD = 0xFF2E0C26;
+    /** A bead's pink: the ring on the slot holding the bag that is open. */
+    private static final int BEAD = 0xFFE886BE;
 
     public HermionesBagScreen(HermionesBagMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
-        this.imageWidth = 176;
-        this.imageHeight = 222;
-        this.inventoryLabelY = this.imageHeight - 94;
+        this.imageWidth = GUI_W;
+        this.imageHeight = HermionesBagMenu.GUI_H;
+        this.titleLabelX = TAG_X + 4;
+        this.titleLabelY = TAG_Y + 2;
+        this.inventoryLabelX = INV_X;
+        this.inventoryLabelY = INV_Y - 11;
+    }
+
+    private static Identifier art(String name) {
+        return Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID,
+                "textures/gui/container/hermiones_bag/" + name + ".png");
+    }
+
+    @Override
+    protected void renderBg(GuiGraphics g, float partialTick, int mouseX, int mouseY) {
+        int x = leftPos;
+        int y = topPos;
+
+        // The parchment strip first: the bag hangs over its top edge.
+        Ui.panel(g, UiSurface.PAGE, x, y + STRIP_TOP, imageWidth, imageHeight - STRIP_TOP);
+
+        McStylePanel.drawNineSliceTiled(g, FABRIC, x, y + BAG_TOP, imageWidth, BAG_BOTTOM - BAG_TOP,
+                WizardsMetrics.PANEL_SPRITE_SIZE, WizardsMetrics.PANEL_SPRITE_BORDER);
+
+        // The lining: two pixels round the bag's slot frames.
+        int bagX = HermionesBagMenu.BAG_X - 3;
+        int bagY = HermionesBagMenu.BAG_Y - 3;
+        int bagW = HermionesBagMenu.COLS * 18 + 4;
+        int bagH = HermionesBagMenu.ROWS * 18 + 4;
+        McStylePanel.drawNineSliceTiled(g, LINING, x + bagX, y + bagY, bagW, bagH,
+                WizardsMetrics.PANEL_SPRITE_SIZE, WizardsMetrics.PANEL_SPRITE_BORDER);
+
+        renderClasp(g, x, y);
+
+        int tagW = font.width(title) + 8;
+        g.fill(x + TAG_X, y + TAG_Y, x + TAG_X + tagW, y + TAG_Y + TAG_H, TAG_FIELD);
+        outline(g, x + TAG_X, y + TAG_Y, tagW, TAG_H, WizardsPalette.GILT_DARK);
+
+        List<int[]> origins = HermionesBagMenu.slotOrigins();
+        for (int i = 0; i < origins.size(); i++) {
+            int[] o = origins.get(i);
+            if (i < HermionesBagMenu.SIZE) {
+                Ui.slot(g, x + o[0], y + o[1], WELL_FACE, WELL_SHADOW, WELL_LIP);
+            } else {
+                Ui.slot(g, x + o[0], y + o[1]);
+            }
+        }
+        int pinned = menu.lockedSlotIndex();
+        if (pinned >= 0) {
+            Slot slot = menu.slots.get(pinned);
+            Ui.slotTarget(g, x + slot.x, y + slot.y, 0, BEAD);
+        }
+    }
+
+    /** The kiss-lock: a gilt bar tiled across the top edge, the two balls meeting at the centre. */
+    private void renderClasp(GuiGraphics g, int x, int y) {
+        int from = x + CLASP_INSET;
+        int to = x + imageWidth - CLASP_INSET;
+        for (int bx = from; bx < to; bx += CLASP_BAR_W) {
+            int w = Math.min(CLASP_BAR_W, to - bx);
+            g.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, CLASP_BAR,
+                    bx, y + CLASP_Y, 0.0F, 0.0F, w, CLASP_BAR_H, CLASP_BAR_W, CLASP_BAR_H);
+        }
+        int cx = x + imageWidth / 2;
+        McStylePanel.drawTexture(g, CLASP_BALL, cx - BALL, y, BALL, BALL, BALL, BALL);
+        McStylePanel.drawTexture(g, CLASP_BALL, cx, y, BALL, BALL, BALL, BALL);
+    }
+
+    private static void outline(GuiGraphics g, int x, int y, int w, int h, int colour) {
+        g.fill(x, y, x + w, y + 1, colour);
+        g.fill(x, y + h - 1, x + w, y + h, colour);
+        g.fill(x, y + 1, x + 1, y + h - 1, colour);
+        g.fill(x + w - 1, y + 1, x + w, y + h - 1, colour);
     }
 
     /**
-     * Two blits, exactly as {@code ContainerScreen} does it: {@code generic_54} holds six rows and a
-     * player-inventory strip that always sits at v=126, so a container of any row count is assembled from
-     * the top of the sheet plus that strip — the sheet is not one contiguous panel to stretch.
-     *
-     * <p>This used to be a single {@code blit(TEXTURE, x, y, 0, 0, imageWidth, imageHeight, 256, 256)}.
-     * That is the 1.21.1 signature, and it no longer exists: the only pipeline-less overload in 1.21.11 is
-     * {@code blit(Identifier, x0, y0, x1, y1, u0, u1, v0, v1)} with float UVs, which the old call bound to
-     * silently because ints widen to floats. It resolved to a quad from the panel's corner back to the
-     * screen origin with reversed, out-of-range UVs — the background did not merely sit wrong, it was
-     * structurally meaningless.
+     * The bag's name in cream on its satin tag (with the shadow light text needs on a dark ground); the
+     * inventory label in ink on the parchment.
      */
     @Override
-    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        int x = (this.width - this.imageWidth) / 2;
-        int y = (this.height - this.imageHeight) / 2;
-        graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE,
-                x, y, 0.0F, 0.0F, this.imageWidth, CHEST_H, SHEET, SHEET);
-        graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE,
-                x, y + CHEST_H, 0.0F, INVENTORY_V, this.imageWidth, INVENTORY_H, SHEET, SHEET);
-    }
-
-    /**
-     * Both labels in iron-gall ink rather than vanilla's {@code #404040}: grey reads on grey, but on
-     * paper it is the one cold colour on the sheet.
-     */
-    @Override
-    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(font, this.title, this.titleLabelX, this.titleLabelY,
-                WizardsPalette.PAGE_INK, false);
-        graphics.drawString(font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY,
+    protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
+        g.drawString(font, this.title, this.titleLabelX, this.titleLabelY, WizardsPalette.TEXT, true);
+        g.drawString(font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY,
                 WizardsPalette.PAGE_INK_2, false);
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         // No renderBackground() here: the screen framework already ran it for this frame.
-        super.render(graphics, mouseX, mouseY, partialTick);
-        this.renderTooltip(graphics, mouseX, mouseY);
+        super.render(g, mouseX, mouseY, partialTick);
+        this.renderTooltip(g, mouseX, mouseY);
+        renderPinnedHint(g, mouseX, mouseY);
+    }
+
+    /** Why the ringed hotbar slot will not move: it is the bag you are holding open. */
+    private void renderPinnedHint(GuiGraphics g, int mouseX, int mouseY) {
+        int pinned = menu.lockedSlotIndex();
+        if (pinned < 0 || hoveredSlot != menu.slots.get(pinned)) {
+            return;
+        }
+        UiTooltips.show(g, font, Component.translatable("gui.wizards_and_beasts.hermiones_bag.pinned"), mouseX, mouseY);
     }
 }

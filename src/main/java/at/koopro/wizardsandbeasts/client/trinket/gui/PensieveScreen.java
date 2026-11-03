@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.trinket.gui;
 
+import net.minecraft.resources.Identifier;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GuiSkin;
@@ -50,7 +51,22 @@ import java.util.List;
  */
 public class PensieveScreen extends Screen {
 
+    /** Inks and the seal and scrollbar still come from the Pensieve skin; the material is the basin itself. */
     private static final GuiSkin SKIN = GuiSkin.PENSIEVE;
+    private static final Identifier RIM = art("rim");
+    private static final Identifier MEMORY = art("memory");
+    private static final int MEMORY_TILE = 64;
+    /** The basin's carved edge round a pool of memory: shadow inside the lip, the lip catching light. */
+    private static final int STONE_GROOVE = 0xFF4A4640;
+    private static final int STONE_LIP = 0xFFD2CDC4;
+    /** A memory row floating on the pool: hovered or chosen, a brighter wisp of the stuff. */
+    private static final int WISP = 0x66FFFFFF;
+    private static final int WISP_EDGE = 0xA0F1F5FB;
+
+    private static Identifier art(String name) {
+        return Identifier.fromNamespaceAndPath(at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID,
+                "textures/gui/artefact/pensieve/" + name + ".png");
+    }
 
     private static final int PANEL_W = WizardsMetrics.PANEL_STANDARD_W;
     private static final int PANEL_H = WizardsMetrics.PANEL_STANDARD_H;
@@ -175,14 +191,16 @@ public class PensieveScreen extends Screen {
 
         int panelW = layout.panelW();
         int panelH = layout.panelH();
-        McStylePanel.drawSkinPanel(graphics, SKIN, panelX, panelY, panelW, panelH);
+        // The basin: carved stone with runes round its rim. It was the silvered-vellum sheet of the skin.
+        McStylePanel.drawNineSliceTiled(graphics, RIM, panelX, panelY, panelW, panelH,
+                WizardsMetrics.PANEL_SPRITE_SIZE, WizardsMetrics.PANEL_SPRITE_BORDER);
         McStylePanel.drawSkinSeal(graphics, SKIN,
                 panelX + panelW - FRAME - McStylePanel.SEAL_SIZE, panelY + FRAME);
         // A gap under the rule, because the list's inset starts SPACE_S above the band's foot and
         // its edge would otherwise sit on the rule's lower line.
-        McStylePanel.drawSkinDivider(graphics, SKIN, panelX + EDGE,
-                panelY + headerH() - WizardsMetrics.DIVIDER_H - WizardsMetrics.SPACE_S,
-                panelW - 2 * EDGE);
+        int ruleY = panelY + headerH() - WizardsMetrics.DIVIDER_H - WizardsMetrics.SPACE_S + 3;
+        graphics.fill(panelX + EDGE, ruleY, panelX + panelW - EDGE, ruleY + 1, STONE_GROOVE);
+        graphics.fill(panelX + EDGE, ruleY + 1, panelX + panelW - EDGE, ruleY + 2, STONE_LIP);
 
         graphics.drawString(font, this.title, panelX + FRAME + PAD, panelY + TITLE_Y,
                 SKIN.ink(), false);
@@ -205,8 +223,7 @@ public class PensieveScreen extends Screen {
     private void renderList(GuiGraphics graphics, int mouseX, int mouseY) {
         int listX = list.rowLeft();
         int listY = panelY + headerH();
-        McStylePanel.drawSkinInset(graphics, SKIN, listX - WizardsMetrics.SPACE_S,
-                listY - WizardsMetrics.SPACE_S,
+        pool(graphics, listX - WizardsMetrics.SPACE_S, listY - WizardsMetrics.SPACE_S,
                 layout.panelW() - 2 * (FRAME + PAD) + 2 * WizardsMetrics.SPACE_S,
                 listHeight() + 2 * WizardsMetrics.SPACE_S);
 
@@ -220,11 +237,20 @@ public class PensieveScreen extends Screen {
             MemoryEntry memory = memories.get(index);
             boolean isSelected = index == selected;
 
-            McStylePanel.drawSkinRow(graphics, SKIN, listX, rowY, rowW, list.rowHeight() - 2,
-                    isSelected || (hovered != null && hovered == index));
+            // Rows float on the memory-stuff; the one under the cursor or chosen lifts as a brighter wisp.
+            if (isSelected || (hovered != null && hovered == index)) {
+                int rowH = list.rowHeight() - 2;
+                graphics.fill(listX, rowY, listX + rowW, rowY + rowH, WISP);
+                graphics.fill(listX, rowY, listX + rowW, rowY + 1, WISP_EDGE);
+                if (isSelected) {
+                    graphics.fill(listX, rowY, listX + 2, rowY + rowH, SKIN.ink());
+                }
+            }
 
             int tx = listX + WizardsMetrics.SPACE_S;
-            int tw = rowW - 2 * WizardsMetrics.SPACE_S;
+            // Text stops short of the scrollbar's column: the age was right-aligned onto the bar ("0s agc").
+            int textRight = listX + rowW - WizardsMetrics.SPACE_S - WizardsMetrics.SCROLLBAR_W;
+            int tw = textRight - tx;
             graphics.drawString(font, typeLabel(memory.type()), tx, rowY + 2,
                     typeInk(memory.type()), false);
 
@@ -235,7 +261,7 @@ public class PensieveScreen extends Screen {
             renderIntensity(graphics, tx, rowY + 2 + WizardsMetrics.LINE_TIGHT + 1,
                     tw / 2, memory.intensity());
             String age = ageText(now, memory.createdGameTime()).getString();
-            graphics.drawString(font, age, listX + rowW - WizardsMetrics.SPACE_S - font.width(age),
+            graphics.drawString(font, age, textRight - font.width(age),
                     rowY + 2 + WizardsMetrics.LINE_TIGHT, SKIN.muted(), false);
         }
 
@@ -263,8 +289,7 @@ public class PensieveScreen extends Screen {
         int w = layout.panelW() - 2 * (FRAME + PAD);
         int y = panelY + headerH() + listHeight() + WizardsMetrics.SPACE_M;
 
-        McStylePanel.drawSkinInset(graphics, SKIN, x - WizardsMetrics.SPACE_S, y,
-                w + 2 * WizardsMetrics.SPACE_S, detailH());
+        pool(graphics, x - WizardsMetrics.SPACE_S, y, w + 2 * WizardsMetrics.SPACE_S, detailH());
 
         int tx = x + WizardsMetrics.SPACE_S;
         int ty = y + WizardsMetrics.SPACE_M;
@@ -293,6 +318,18 @@ public class PensieveScreen extends Screen {
         graphics.drawString(font, Component.translatable(
                         "gui.wizards_and_beasts.pensieve.drawn", ageText(now, memory.createdGameTime())),
                 tx, ty, SKIN.muted(), false);
+    }
+
+    /**
+     * A pool of memory sunk into the stone: the silvery stuff (tiled, so it has no seam) inside a carved
+     * edge -- shadow along the top and left inside the lip, the lip lit along the bottom and right.
+     */
+    private void pool(GuiGraphics graphics, int x, int y, int w, int h) {
+        McStylePanel.drawTiled(graphics, MEMORY, x, y, w, h, MEMORY_TILE);
+        graphics.fill(x, y, x + w, y + 1, STONE_GROOVE);
+        graphics.fill(x, y, x + 1, y + h, STONE_GROOVE);
+        graphics.fill(x, y + h - 1, x + w, y + h, STONE_LIP);
+        graphics.fill(x + w - 1, y, x + w, y + h, STONE_LIP);
     }
 
     /** How many memories there are, and whether the list moves. */

@@ -173,3 +173,165 @@ fresh copy of `wb_admin_capture_visual`.
 3. Config value names and descriptions are the humanised key and the TOML comment until
    `wizards_and_beasts.configuration.*` keys are written (the screen picks them up with no code change).
 4. The Obscurial HUD badges are placed at fixed offsets measured on the English words.
+
+## UI overhaul — 2026-10-21 (branch `feature/ui-overhaul`)
+
+Material: **parchment**, as since 2026-09-23. A dark "night sheet" for the system screens was built and
+shown on 2026-10-21; the user preferred parchment, so it was removed and only the structural redesign kept.
+Plan and per-milestone status: `tasks/todo_ui_overhaul_2026_10_21.md`.
+
+### Spell Menu — `client/spell/gui` (redesigned)
+- Was: 310x250 design scaled 0.72–1.35 by `Layout.panel` while text stayed native, so at GUI 4 rows shrank
+  under unshrunk names; socket labels fought for 38px; details a fixed column of y-offsets.
+- Now: `SpellMenuLayout` (pure, unit-tested at 320x240 … 960x540) computes every rectangle in native pixels;
+  painting, hit-testing, widget bounds and drop targets all read it. WIDE (library | wand | details) from
+  440 GUI px wide, STACKED (library | wand over details) below.
+- Library: search field (a letter typed with nothing focused starts a search), category filter chips (`ThemedChip`,
+  disabled when nothing is known in the category), clipped list with headings, pips for proficiency,
+  the bound socket's chevron, recharge time.
+- Wand: engraved sockets in HUD order (hover ring, drop-target flare), at native 30px; empty sockets show
+  their direction as an ink chevron (`Ui.arrow`), bound-spell rows under/beside the diamond as larger targets.
+- Details: only fields the spell has (description only where the lang key exists, damage only if > 0),
+  status chips (category, bound where, recharging), proficiency bar over its real range, requirement with
+  ✔/✕, power lines; scrolls with the wheel and shows a track when taller than its well.
+- Keyboard: ↑/↓ walk the list, 1–4 bind, Esc closes. Sync while open rebuilds the list (a refused bind no
+  longer looks accepted until reopen).
+- Seen in the client: 1920x1080 at GUI 2/3/4, 1366x768 and 1280x720 at GUI 3 (`run/screenshots/ui_overhaul*`).
+- ⏳ At 1280x720 GUI 3 (STACKED) the details card is ~3 lines tall and relies on scrolling.
+
+### Heritage gate — `client/heritage/gui` (redesigned)
+- Was: three ◀ ▶ cyclers (heritage, lineage, condition) on parchment, a 424x240 design scaled up to 2.25x
+  while text stayed native; lore cut at the panel floor; trait headings ran out of their column.
+- Now: parchment, `HeritageSelectionLayout` (pure, unit-tested 320x240 … 960x540). All eight heritages
+  listed with a gem in their signature colour and a "Soon"/"Closed" chip from `HeritageRules.refusalKey`
+  (tooltip says why); lineages as chips; condition as a cycler only where the lineage can carry one;
+  dossier scrolls (adds the lineage note and the condition's description, where the lang has them);
+  preview + traits column (traits scroll, headings wrap). Under 360 GUI px content: two columns, traits
+  close the dossier.
+- Confirm card over the dimmed sheet: what is sworn (with any condition), "!"-marked final warning,
+  Not Yet / Seal It (green). Enter seals, Esc backs out, Tab/Space work the buttons.
+- Unchanged: first-join gate (Esc swallowed), admin preview sends nothing, server re-checks the rules,
+  `HeritageSelectC2SPayload` payload.
+- `HeritageDossierRenderer` now takes a `UiSurface`; the Control Center's `HeritagePreview` keeps parchment.
+- Seen: 1080p GUI 2/3/4, 1366x768 + 1280x720 GUI 3, confirm card GUI 3/4 (`run/screenshots/ui_overhaul_m3*`).
+
+### Wandmaker's Bench — `client/wand/gui` + `wand/gui/WandmakersBenchMenu` (redesigned)
+- Was: 176x196 generated sheet on the workbench paper whose wells were kept in step with the menu by hand;
+  station slots unlabelled; status cut to one line ("Place a shaped blank and…"); tier bar unlabelled under
+  the hotbar (open item 4 of the 10-07 audit); title on the sheet's frame rule.
+- Now: 180x232 on the shared parchment, drawn procedurally from the menu's own constants
+  (`GUI_W/GUI_H`, `slotOrigins()`), which the menu's `Slot`s also use — frames cannot sit off a slot.
+  Station row Blank + Core → Wand (larger gilt-ringed result frame), captions under each, the slot that
+  takes the carried blank/core outlined, arrow turns gilt when a wand is ready. Flexibility cycler on paper.
+  Status wraps to two lines. "Bench tier" row: caption, bar over its real 0–3 range, value; tooltip on the
+  whole row. Inventory 4px lower and 2px in, clear of the frame rule.
+- Slot order unchanged (0 blank, 1 core, 2 output, 3–29 inventory, 30–38 hotbar), so `quickMoveStack` is
+  untouched. `WandmakersBenchGeometryTest` pins order, bounds and no-overlap.
+- Retired: `textures/gui/wandmakers_bench.png` and `gui_chrome.py`'s `a_wandmakers_bench` with its
+  bench-only helpers. New kit: `Ui.slot`, `Ui.resultSlot`, `Ui.slotTarget`.
+- Seen: 1080p GUI 3/4 and 720p GUI 3, empty and with a blank + core seated (`run/screenshots/ui_bench_after`).
+- ⏳ Not exercised by hand in a live client: shift-click, drag-split, taking the wand. Code paths unchanged.
+
+### Hermione's Bag — `client/item/HermionesBagScreen` + `item/trinket/HermionesBagMenu` (redesigned)
+- Was: vanilla `generic_54` recoloured onto paper with a row of beads in the title band — the mod's
+  signature artefact opened as a double chest.
+- Now (user: "it's a pink bag, that needs to shape the design"): the bag half is pink beads set brick-fashion
+  on rose silk with the odd pearl, gilt piping, a gilt kiss-lock clasp across the top, the name on a satin
+  tag, and the 54 slots sunk into deep rose satin lining (rose slot wells). The player's inventory is a
+  parchment strip below, so bag and pockets are two things at a glance. The held bag's hotbar slot is
+  ringed in bead pink with a tooltip saying why it will not move.
+- Geometry in the menu (`GUI_W/GUI_H`, `slotOrigins()`), read by its slots and the screen's frames;
+  capacity (54) and slot order unchanged, so `quickMoveStack` is untouched. 180x239 — fits the 240px floor.
+  `HermionesBagGeometryTest` caught the hotbar frames touching the strip's inner rule at 237 high.
+- Art: `gui_chrome.py` `container/hermiones_bag/{fabric,lining,clasp_bar,clasp_ball}.png` (64/8 tiled);
+  the old `container/hermiones_bag.png` and its generator are gone. Kit: `Ui.slot(g, x, y, face, shadow, lip)`.
+- Seen: 1080p GUI 3/4 and 720p GUI 3 with items packed (`run/screenshots/ui_bag`, harness step `hermiones_bag`).
+- ⏳ Not exercised by hand: shift-click both ways, drag-split, the pinned slot refusing a swap.
+
+### M6 — character sheet, skill web, handbook, bestiary (2026-10-22, parchment, layout fixes only)
+Audited from clean GUI-4 shots (the harness now parks the cursor top-left; before, it sat mid-screen over the
+sheet's Skills tab and its tooltip covered every page).
+- ✅ Attributes: a stat group's effect line ended where the next stat's name began ("Spell Damage" read as the
+  heading of "Precision"). Groups are 33px with a rule between them; a gap before the Attributes section.
+  (Closes the 10-07 open item.)
+- ✅ Skills: pathway names ran under their E/M/A counters ("Dark Arts SpecE 3/3"); counters first, name
+  ellipsised to what is left; the build header's value fitted the same way.
+- ✅ Reputation: each axis's pole names sat on the next axis's title; a rule and space after every axis.
+- ✅ Every tab: 17 hard cuts (`plainSubstrByWidth`, e.g. "Professional Reputati") now end in an ellipsis
+  (`UiText.fit`).
+- ✅ Skill web: constellation labels near the chart's rim slide inboard instead of being cut ("Monocer").
+- ✅ Handbook: the landing text ran through the progress block's rule; it is bounded above it with an ellipsis.
+  The seal grid now has a caption under it naming the part under the cursor (or how to use it) — the seals
+  carry no words, and the tooltip covered the seals being read.
+- ✅ Bestiary: search placeholder ("Search creatures"). (Closes the 10-07 open item.)
+- ⏳ Handbook landing flavour's second sentence does not fit the left page at its current crest/title sizes.
+
+### M7 — remaining screens (2026-10-22; spell HUD untouched at the user's request)
+Captured all 25 remaining player screens at GUI 4 (new harness steps: niffler_pouch, gringotts, floo_network,
+floo_registration, marauders_map, vocation_selection, skill_access_denied, pensieve, hud).
+- ✅ Gringotts: exchange, Dragot and bulk buttons were fixed design widths that shrank with the panel while their
+  labels did not ("29K →…", "Withdraw…"); each now takes half its column. The move buttons' glyphs were U+25B8/
+  U+25C2, small triangles that render as dots; now ◀ (into the vault column) and ▶ (into the wallet).
+- ✅ Marauder's Map: two footer lines a scaled 10px apart (7px at GUI 4) overprinted each other and the frame; now
+  one line — position first, the charted count ellipsised — beside filter buttons sized to their labels.
+- ✅ O.W.L. desk: status lines wrap to two lines instead of being cut ("…Exceeds Expecta"); the button row is
+  split by what each says ("Choose Your Path" read "Choose Your…").
+- ✅ Pensieve: text stops short of the scrollbar column ("0s agc").
+- ✅ Niffler's pouch: object-led like Hermione's bag — tufted black velvet fur with a blue-grey sheen and stolen
+  coins caught in it, slots sunk into brown suede, the name on a coin-gold tag; inventory on a parchment strip.
+  Geometry in `NifflerPouchMenu` (`slotOrigins(rows)`, adult 3 rows / baby 1), `NifflerPouchGeometryTest`.
+  Title translated (`container.wizards_and_beasts.niffler_pouch[.named]`; was English literals). Retired
+  `tools/pouch_textures.py` and its two sheets; art in `gui_chrome.py` `container/niffler_pouch/`.
+- ➖ Checked, no change: ability wheel, apparition, config board/chapter/gate, diary write/possession, Floo network
+  and registration, Imperio, ministry licence, mirror call/view, Ollivander trial, O.W.L. results/sitting/profession,
+  skill-access notice, vocation selection, HUD (no spell HUD changes).
+
+### M8 — final validation (2026-10-22)
+- Capture sweep: the ten redesigned screens at 1920x1080 GUI 2/3/4, 1366x768 and 1280x720 GUI 3 (50 shots,
+  `run/screenshots/ui_m8`), reviewed per screen.
+- ✅ Gringotts at 720p: the coin move buttons scaled below the width of their arrow and drew blank; they keep a
+  native minimum (shared by layout and painting). That pushed them over the Wallet figures, so the figure
+  columns now slide left of the buttons sized to their header words, and a coin whose name no longer fits shows
+  its unit letter (G/S/K — the screen's own exchange shorthand) instead of "G…".
+- ✅ Branch review (read-only agent over `dev...feature/ui-overhaul`): slot order vs `quickMoveStack` verified for
+  bench, bag and pouch (incl. baby pouch and pinned slot); heritage gate keeps Esc swallowed and sends nothing in
+  preview; scissors balanced; new lang keys present. Two low risks fixed (heritage first-open guard for a heritage
+  without lineages; spell list never forced taller than its well). Kept by design: ↑/↓ walk the spell list
+  while the search field is focused.
+- ⏳ Gringotts at 720p still shortens "Deposit all/Withdraw all" — the screen scales its whole layout (`Layout.panel`);
+  a native-pixel layout like the spell menu's would remove the remaining squeeze.
+- ⏳ Not exercised by hand in a live client: bench, bag and pouch transfers (shift-click, drag-split, pinned slot).
+
+### Artefacts from their objects (2026-10-22, after M8)
+Same treatment as Hermione's bag and the Niffler's pouch; art in `gui_chrome.py` `artefact/<name>/`.
+- **Two-way mirror** (`MirrorChrome`): call screen is silvered glass in an engraved pewter frame with rosette
+  corners; the name is breathed onto a patch of fog (`ThemedTextField.bare`: no paper well, an underline for
+  focus). View screen: dark glass in the same frame, face drawn into it, name on an engraved pewter plaque,
+  pewter buttons (`sprites/mirror/`). Slate inks on the light glass (7.3 / 4.9 : 1).
+- **Riddle's diary**: worn black leather cover with a gold-tooled line, aged cream page, ruled under every line of
+  the transcript with a faint red margin, the line written straight onto the page, a leather "Write" tab. Riddle's
+  reply inks (grey → purple → blood red by tier) are clamped onto the new page stock.
+- **Pensieve**: carved stone basin with runes cut round the rim; the list and detail sit in pools of silvery
+  memory-stuff (slow currents, low contrast so text stays clear) inside a carved lip; hovered/chosen rows lift as
+  a brighter wisp.
+- Unchanged: the possession overlay (already its own red-on-dark), the Marauder's Map (its own hand-drawn
+  parchment is the object).
+- Seen at 1080p GUI 3/4 and 720p GUI 3 (`run/screenshots/ui_artefacts*`).
+
+### Gringotts — rebuilt from scratch (2026-10-22, user: "scrap the structure and redo it")
+- Was: a scaled 400x256 ledger sheet, fifteen buttons at fixed design widths (labels and arrows no longer fitted
+  at 720p), and the whole screen recreated on every vault sync (the server re-sends "open" after each action).
+- Now: the bank's white marble (gold inlay) round two ledger pages, native-pixel `GringottsLayout` + test
+  (1080p GUI 2/3/4, 768p, 720p, 320x240; tabs "Vault | Counter" under 360px of content).
+  - **Vault page:** each coin a row — real item icon, name, vault count, ◀ ▶, wallet count — so the arrows sit
+    between the two figures they move coins between. Amount picker 1 / 10 / 64 / All (the server always took an
+    amount and caps it at 4096). Deposit all / Withdraw all; totals on a double-ruled foot (Knut total on hover).
+  - **Counter page:** "Exchange, within your vault" (4 trades), Dragots with the rate, a ▲/▼ drift chip and the
+    purse, Sell/Buy 1 and 10, Bank business.
+  - Controls that cannot act are greyed from the synced vault and inventory, mirroring the server's checks
+    (it still decides). Arrow tooltips say how many move ("Deposit 10 Galleons into your vault").
+  - `ClientScreenHooks.openGringottsScreen` keeps an open counter instead of replacing it, so the amount, tab
+    and focus survive each action.
+- Kit: `ThemedChip.skinned(…)` (a `button_select` pressed face). Art: `gui_chrome.py` `artefact/gringotts/`,
+  `sprites/gringotts/`. 8 obsolete lang keys removed, 23 added. Capture step `gringotts_filled`.
+

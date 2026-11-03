@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.gui.character.tab;
 
+import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 import at.koopro.wizardsandbeasts.client.companion.ClientCompanionState;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.creature.companion.CompanionCommand;
@@ -152,7 +153,7 @@ public final class BeastsTab implements CharacterTab {
         }
         String stage = Component.translatable(entry.alive() ? entry.stage().key()
                 : "companion.wizards_and_beasts.memorial").getString();
-        g.drawString(font, font.plainSubstrByWidth(nameOf(entry).getString(), w - font.width(stage) - 4), x, y,
+        g.drawString(font, UiText.fit(font, nameOf(entry).getString(), w - font.width(stage) - 4), x, y,
                 entry.alive() ? COLOR_VALUE : COLOR_MUTED, false);
         g.drawString(font, stage, x + w - font.width(stage), y, entry.alive() ? stageColour(entry.stage()) : COLOR_MUTED,
                 false);
@@ -167,7 +168,7 @@ public final class BeastsTab implements CharacterTab {
     }
 
     private int detail(GuiGraphics g, Font font, int x, int y, int w, UUID id, CompanionRoster.Entry entry, int mx, int my) {
-        g.drawString(font, font.plainSubstrByWidth(nameOf(entry).getString(), w), x, y, COLOR_SECTION, false);
+        g.drawString(font, UiText.fit(font, nameOf(entry).getString(), w), x, y, COLOR_SECTION, false);
         y += ROW_H + 1;
         y = kv(g, font, x, y, w, "bond", entry.bond() + " / " + entry.maxBond());
         if (entry.alive()) {
@@ -260,7 +261,7 @@ public final class BeastsTab implements CharacterTab {
     private static int kv(GuiGraphics g, Font font, int x, int y, int w, String key, String value) {
         String label = Component.translatable(KEY + key).getString() + ": ";
         g.drawString(font, label, x, y, COLOR_LABEL, false);
-        g.drawString(font, font.plainSubstrByWidth(value, w - font.width(label)), x + font.width(label), y, COLOR_VALUE,
+        g.drawString(font, UiText.fit(font, value, w - font.width(label)), x + font.width(label), y, COLOR_VALUE,
                 false);
         return y + ROW_H;
     }

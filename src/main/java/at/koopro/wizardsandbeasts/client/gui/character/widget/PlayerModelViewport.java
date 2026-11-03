@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.client.gui.character.widget;
 
-import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
+import at.koopro.wizardsandbeasts.client.gui.ui.Ui;
+import at.koopro.wizardsandbeasts.client.gui.ui.UiSurface;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.player.LocalPlayer;
@@ -33,12 +34,17 @@ public final class PlayerModelViewport {
      */
     public void render(@NonNull GuiGraphics g, int x, int y, int w, int h,
                        float partialTick, @NonNull LocalPlayer player, float mouseX, float mouseY) {
+        render(g, UiSurface.PAGE, x, y, w, h, partialTick, player, mouseX, mouseY);
+    }
+
+    /** The same viewport recessed into {@code surface}'s well -- the night sheet's, or parchment's. */
+    public void render(@NonNull GuiGraphics g, @NonNull UiSurface surface, int x, int y, int w, int h,
+                       float partialTick, @NonNull LocalPlayer player, float mouseX, float mouseY) {
         this.vx = x; this.vy = y; this.vw = w; this.vh = h;
 
-        // Themed inset rather than a hand-mixed bevel: this is a recessed well, and the
-        // `gui/theme/` sprites are the shared vocabulary for one. The three COLOR_ constants it
+        // The surface's own well rather than a hand-mixed bevel: the three COLOR_ constants this
         // used were a private approximation of the same thing.
-        McStylePanel.drawThemedInset(g, x, y, w, h);
+        Ui.inset(g, surface, x, y, w, h);
 
         int scale = Math.max(1, Math.round(h * FILL_FRACTION / PLAYER_UNITS));
         // Vanilla helper: entity head/body track the cursor relative to the viewport rect.

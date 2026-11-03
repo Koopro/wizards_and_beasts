@@ -114,6 +114,39 @@ public final class UiScreenCapture {
         return Integer.parseInt(spec.split("x")[index]);
     }
 
+    /**
+     * The loadout screen with something on it: up to seven spells of every category taught (placeholder
+     * spells included, so their state is in the shot), two sockets bound, and a spell picked so the
+     * details card is filled. The capture world is a disposable copy.
+     */
+    private static void openSpellLoadout(ServerPlayer player) {
+        var data = player.getData(at.koopro.wizardsandbeasts.registry.ModAttachments.SPELL_DATA.get());
+        Map<at.koopro.wizardsandbeasts.spell.core.SpellCategory, Integer> taught =
+                new EnumMap<>(at.koopro.wizardsandbeasts.spell.core.SpellCategory.class);
+        String first = null;
+        String second = null;
+        for (var spell : at.koopro.wizardsandbeasts.spell.core.Spells.all()) {
+            int n = taught.merge(spell.getCategory(), 1, Integer::sum);
+            if (n > 7) {
+                continue;
+            }
+            data.learnSpell(spell.getId());
+            if (spell.isImplemented()) {
+                if (first == null) {
+                    first = spell.getId();
+                } else if (second == null && !spell.getCategory().equals(
+                        at.koopro.wizardsandbeasts.spell.core.Spells.byId(first).getCategory())) {
+                    second = spell.getId();
+                }
+            }
+        }
+        data.setLoadoutSpell(0, first);
+        data.setLoadoutSpell(1, second);
+        at.koopro.wizardsandbeasts.network.spell.SpellDataSyncS2CPayload.syncToPlayer(player);
+        String pick = second;
+        Minecraft.getInstance().execute(() -> open(new SpellMenuScreen(pick)));
+    }
+
     /** Sixteen memorised places, the most a seasoned Apparator keeps: enough to make the list scroll. */
     private static void openApparition() {
         Minecraft mc = Minecraft.getInstance();
@@ -144,8 +177,12 @@ public final class UiScreenCapture {
                 Step.client("character_sheet", () -> open(new CharacterSheetScreen())),
                 Step.client("skill_web", () -> open(new SkillTreeScreen())),
                 Step.client("spell_menu", () -> open(new SpellMenuScreen())),
+                Step.server("spell_menu_loadout", UiScreenCapture::openSpellLoadout),
+                Step.client("heritage_gate", () -> open(new at.koopro.wizardsandbeasts.client.heritage.gui.HeritageSelectionScreen())),
+                Step.client("heritage_confirm", UiScreenCapture::openHeritageConfirm),
                 Step.client("ability_wheel", () -> open(new AbilityWheelScreen())),
                 Step.client("bestiary", () -> open(new BestiaryScreen())),
+                Step.client("handbook", () -> open(new at.koopro.wizardsandbeasts.client.handbook.HandbookScreen())),
                 Step.client("owl_exam", () -> open(new OWLExamScreen())),
                 Step.client("education_tab", () -> open(CharacterSheetScreen.onEducationTab())),
                 Step.client("owl_sitting", UiScreenCapture::openSitting),
@@ -153,6 +190,29 @@ public final class UiScreenCapture {
                 Step.client("owl_profession", () -> open(new ProfessionSelectionScreen(grades))),
                 Step.client("ministry_licence", () -> open(new MinistryLicenceScreen(false))),
                 Step.server("wandmakers_bench", UiScreenCapture::openBench),
+                Step.server("wandmakers_bench_loaded", UiScreenCapture::openBenchLoaded),
+                Step.server("hermiones_bag", UiScreenCapture::openHermionesBag),
+                Step.server("niffler_pouch", UiScreenCapture::openNifflerPouch),
+                Step.client("gringotts", () -> open(new at.koopro.wizardsandbeasts.client.currency.gui.GringottsScreen())),
+                Step.server("gringotts_filled", UiScreenCapture::openGringottsFilled),
+                Step.client("floo_network", () -> open(new at.koopro.wizardsandbeasts.client.floo.gui.FlooNetworkScreen(
+                        List.of(new at.koopro.wizardsandbeasts.floo.FlooDestinationDto("Diagon Alley", "Overworld", true, 0),
+                                new at.koopro.wizardsandbeasts.floo.FlooDestinationDto("The Burrow", "Overworld", true, 3),
+                                new at.koopro.wizardsandbeasts.floo.FlooDestinationDto("Ministry of Magic, Atrium", "Overworld", true, 12),
+                                new at.koopro.wizardsandbeasts.floo.FlooDestinationDto("Hogsmeade, Three Broomsticks", "Overworld", false, 5)),
+                        "Home", false))),
+                Step.client("floo_registration", () -> open(new at.koopro.wizardsandbeasts.client.floo.gui.FlooRegistrationScreen(
+                        Minecraft.getInstance().player.blockPosition(), "Home", 10))),
+                Step.client("marauders_map", () -> open(new at.koopro.wizardsandbeasts.client.map.MaraudersMapScreen())),
+                Step.client("vocation_selection", () -> open(
+                        new at.koopro.wizardsandbeasts.client.skill.gui.VocationSelectionScreen(null))),
+                Step.client("skill_access_denied", () -> open(new at.koopro.wizardsandbeasts.client.skill.gui.SkillAccessDeniedScreen(
+                        net.minecraft.network.chat.Component.literal("Capture: the skill web is closed on this server.")))),
+                Step.client("pensieve", () -> open(new at.koopro.wizardsandbeasts.client.trinket.gui.PensieveScreen(List.of(
+                        new at.koopro.wizardsandbeasts.memory.MemoryEntry(at.koopro.wizardsandbeasts.memory.MemoryType.HAPPY, 0.9f, "first_broom_ride", 1200L),
+                        new at.koopro.wizardsandbeasts.memory.MemoryEntry(at.koopro.wizardsandbeasts.memory.MemoryType.MUNDANE, 0.4f, "a_rainy_tuesday", 24000L),
+                        new at.koopro.wizardsandbeasts.memory.MemoryEntry(at.koopro.wizardsandbeasts.memory.MemoryType.HAPPY, 0.7f, "wand_chooses_wizard", 48000L))))),
+                Step.client("hud", () -> open(null)),
                 Step.server("ollivander_trial", OllivanderInteractHandler::openTrial),
                 Step.client("admin_control_center", AdminClientRequests::open),
                 // The 2026-10-15 finishing pass: the screens the first audit did not reach.
@@ -187,6 +247,22 @@ public final class UiScreenCapture {
 
     private static void open(Screen screen) {
         Minecraft.getInstance().setScreen(screen);
+    }
+
+    /**
+     * The heritage gate with its "this is final" card open. The card has no public way in -- it is reached
+     * only through Confirm -- so the harness presses it the way a reflection-free test cannot. Dev only.
+     */
+    private static void openHeritageConfirm() {
+        var screen = new at.koopro.wizardsandbeasts.client.heritage.gui.HeritageSelectionScreen();
+        open(screen);
+        try {
+            var m = screen.getClass().getDeclaredMethod("openConfirm");
+            m.setAccessible(true);
+            m.invoke(screen);
+        } catch (ReflectiveOperationException e) {
+            LOGGER.error("UI capture: cannot open the heritage confirm card", e);
+        }
     }
 
     /**
@@ -229,6 +305,85 @@ public final class UiScreenCapture {
     }
 
     /** Uses the bench, as a right click does. */
+    /**
+     * The bench with a blank and a core seated, so the shot shows items sitting in the station frames
+     * (an unshaped blank: the status line then explains it). The capture world is a disposable copy.
+     */
+    private static void openBenchLoaded(ServerPlayer player) {
+        if (benchPos != null && player.level().getBlockEntity(benchPos)
+                instanceof at.koopro.wizardsandbeasts.wand.bench.WandmakersBenchBlockEntity bench) {
+            var inv = bench.getInventory();
+            inv.set(0, net.neoforged.neoforge.transfer.item.ItemResource.of(
+                    new net.minecraft.world.item.ItemStack(at.koopro.wizardsandbeasts.registry.WandItemRegistry.WAND_BLANK.get())), 1);
+            inv.set(1, net.neoforged.neoforge.transfer.item.ItemResource.of(
+                    new net.minecraft.world.item.ItemStack(at.koopro.wizardsandbeasts.registry.WandItemRegistry.PHOENIX_FEATHER.get())), 1);
+        }
+        openBench(player);
+    }
+
+    /**
+     * Hermione's bag opened from the main hand, as {@code HermionesBagItem.use} opens it, with a few
+     * things packed so items show against the lining and the held bag's ringed hotbar slot is in shot.
+     * The capture world is a disposable copy: the selected hotbar slot is overwritten.
+     */
+    private static void openHermionesBag(ServerPlayer player) {
+        var inv = player.getInventory();
+        inv.setItem(inv.getSelectedSlot(), new net.minecraft.world.item.ItemStack(
+                at.koopro.wizardsandbeasts.registry.TrinketItemRegistry.HERMIONES_BEADED_BAG.get()));
+        var bag = player.getMainHandItem();
+        bag.getItem().use(player.level(), player, net.minecraft.world.InteractionHand.MAIN_HAND);
+        if (player.containerMenu instanceof at.koopro.wizardsandbeasts.item.trinket.HermionesBagMenu menu) {
+            net.minecraft.world.item.Item[] packed = {net.minecraft.world.item.Items.BOOK,
+                    net.minecraft.world.item.Items.WRITABLE_BOOK, net.minecraft.world.item.Items.POTION,
+                    net.minecraft.world.item.Items.MAP, net.minecraft.world.item.Items.WHITE_WOOL,
+                    net.minecraft.world.item.Items.BREAD, net.minecraft.world.item.Items.LANTERN};
+            for (int i = 0; i < packed.length; i++) {
+                menu.getSlot(i * 3).set(new net.minecraft.world.item.ItemStack(packed[i], 1 + i));
+            }
+            menu.broadcastChanges();
+        }
+    }
+
+    /**
+     * A niffler's pouch, opened through its real menu on a niffler spawned beside the player. The bond
+     * check of {@code NifflerEntity.mobInteract} is skipped: this photographs the screen, not the taming.
+     */
+    private static void openNifflerPouch(ServerPlayer player) {
+        var level = player.level();
+        var niffler = at.koopro.wizardsandbeasts.registry.ModEntities.NIFFLER.get().create(level,
+                net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+        if (niffler == null) {
+            return;
+        }
+        niffler.setPos(player.getX() + 2, player.getY(), player.getZ());
+        niffler.setNoAi(true);
+        level.addFreshEntity(niffler);
+        int eid = niffler.getId();
+        player.openMenu(new net.minecraft.world.SimpleMenuProvider(
+                (id, inv, p) -> new at.koopro.wizardsandbeasts.entity.niffler.NifflerPouchMenu(id, inv, niffler),
+                net.minecraft.network.chat.Component.translatable("container.wizards_and_beasts.niffler_pouch")),
+                buf -> buf.writeInt(eid));
+    }
+
+    /**
+     * The counter with something to show: coins in the inventory, a vault holding some of each, a Dragot or
+     * two in the purse, opened through the server's own sync (which also sends the Dragot quote when the
+     * market is on). The capture world is a disposable copy.
+     */
+    private static void openGringottsFilled(ServerPlayer player) {
+        var inv = player.getInventory();
+        inv.add(new net.minecraft.world.item.ItemStack(at.koopro.wizardsandbeasts.registry.CurrencyItemRegistry.GALLEON.get(), 23));
+        inv.add(new net.minecraft.world.item.ItemStack(at.koopro.wizardsandbeasts.registry.CurrencyItemRegistry.SICKLE.get(), 41));
+        inv.add(new net.minecraft.world.item.ItemStack(at.koopro.wizardsandbeasts.registry.CurrencyItemRegistry.KNUT.get(), 57));
+        inv.add(new net.minecraft.world.item.ItemStack(at.koopro.wizardsandbeasts.registry.CurrencyItemRegistry.DRAGOT.get(), 3));
+        var vault = player.getData(at.koopro.wizardsandbeasts.registry.ModAttachments.VAULT_DATA.get());
+        vault.depositGalleons(1250);
+        vault.depositSickles(16);
+        vault.depositKnuts(28);
+        at.koopro.wizardsandbeasts.network.currency.DragotQuoteS2CPayload.sendToPlayer(player);
+        at.koopro.wizardsandbeasts.network.currency.GringottsOpenS2CPayload.sendToPlayer(player);
+    }
+
     private static void openBench(ServerPlayer player) {
         if (benchPos == null) {
             return;
@@ -292,12 +447,31 @@ public final class UiScreenCapture {
         captureThisFrame = true;
     }
 
+    /**
+     * Moves the cursor to the window's top-left corner before a shot. Left where GLFW put it -- the middle
+     * of the window -- it hovered whatever sat there, so a character-sheet tab's tooltip covered the page
+     * in every shot. MouseHandler only learns of a move through its own callback, so its fields are set too.
+     */
+    private static void parkCursor(Minecraft mc) {
+        GLFW.glfwSetCursorPos(mc.getWindow().handle(), 1.0, 1.0);
+        try {
+            for (String name : new String[]{"xpos", "ypos"}) {
+                var f = net.minecraft.client.MouseHandler.class.getDeclaredField(name);
+                f.setAccessible(true);
+                f.setDouble(mc.mouseHandler, 1.0);
+            }
+        } catch (ReflectiveOperationException e) {
+            LOGGER.warn("UI capture: cannot park the cursor", e);
+        }
+    }
+
     /** Sets the scale for this shot and opens the step's screen. */
     private static void present(Minecraft mc, MinecraftServer server) {
         if (mc.options.guiScale().get() != SCALES[scale]) {
             mc.options.guiScale().set(SCALES[scale]);
             mc.resizeDisplay();
         }
+        parkCursor(mc);
         Step step = steps.get(index);
         if (step.client() != null) {
             step.client().run();

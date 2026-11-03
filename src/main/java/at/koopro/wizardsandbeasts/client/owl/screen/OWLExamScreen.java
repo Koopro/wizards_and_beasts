@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.owl.screen;
 
+import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 import at.koopro.wizardsandbeasts.client.education.ClientEducationState;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
@@ -110,17 +111,18 @@ public class OWLExamScreen extends ScaledParchmentScreen {
         newt.tone(McStylePanel.ButtonTone.CONFIRM);
         newt.active = view.maySitNewt();
 
-        ThemedButton results = button(cx - 130, row2, 84, Component.translatable("owls.button.view_results"), () -> {
+        // Widths by what each says, not thirds: "Choose Your Path" read "Choose Your..." at 84.
+        ThemedButton results = button(cx - 130, row2, 76, Component.translatable("owls.button.view_results"), () -> {
             assert minecraft != null;
             minecraft.setScreen(new OWLResultsReadOnlyScreen(ClientOWLCache.getGrades(), ClientOWLCache.getProfession()));
         });
         results.active = view.owlSittings() > 0;
-        ThemedButton career = button(cx - 42, row2, 84, Component.translatable("owls.button.choose_path"), () -> {
+        ThemedButton career = button(cx - 52, row2, 116, Component.translatable("owls.button.choose_path"), () -> {
             assert minecraft != null;
             minecraft.setScreen(new ProfessionSelectionScreen(ClientOWLCache.getGrades()));
         });
         career.active = view.careerOpen();
-        button(cx + 46, row2, 84, Component.translatable(KEY + "close"), this::onClose);
+        button(cx + 66, row2, 64, Component.translatable(KEY + "close"), this::onClose);
     }
 
     private void renderDesk(GuiGraphics g) {
@@ -150,7 +152,7 @@ public class OWLExamScreen extends ScaledParchmentScreen {
             String mark = r.lifted() ? r.coursework().name() + "→" + r.result().name() : r.result().name();
             int cx = x + col * (w / 2);
             int cw = w / 2 - 6;
-            g.drawString(font, font.plainSubstrByWidth(Component.translatable(r.subject().translationKey()).getString(),
+            g.drawString(font, UiText.fit(font, Component.translatable(r.subject().translationKey()).getString(),
                     cw - font.width(mark) - 4), cx, y, WizardsPalette.PAGE_INK, false);
             g.drawString(font, mark, cx + cw - font.width(mark), y,
                     r.result().passing ? WizardsPalette.PAGE_GOOD : WizardsPalette.PAGE_INK_3, false);
@@ -189,10 +191,10 @@ public class OWLExamScreen extends ScaledParchmentScreen {
         // Two lines a paper: the subject, then its practical in smaller ink — one line cut the practical in half.
         for (EducationView.PaperLine paper : sitting.papers()) {
             String mark = paper.done() ? "✔ " : "• ";
-            g.drawString(font, font.plainSubstrByWidth(mark + Component.translatable(paper.subject().translationKey())
+            g.drawString(font, UiText.fit(font, mark + Component.translatable(paper.subject().translationKey())
                     .getString(), w), x, y, paper.done() ? WizardsPalette.PAGE_GOOD : WizardsPalette.PAGE_INK, false);
             y += 10;
-            g.drawString(font, font.plainSubstrByWidth(Component.translatable(paper.practical()).getString(), w - 10),
+            g.drawString(font, UiText.fit(font, Component.translatable(paper.practical()).getString(), w - 10),
                     x + 10, y, WizardsPalette.PAGE_INK_3, false);
             y += PAPER_H - 10;
         }
@@ -268,9 +270,26 @@ public class OWLExamScreen extends ScaledParchmentScreen {
         return addRenderableWidget(new ThemedButton(sx(designX), sy(designY), sw(designW), sw(BUTTON_H), label, action));
     }
 
+    /**
+     * A status line, wrapped to at most two lines and ellipsised past that. It was cut at the sheet's edge:
+     * "N.E.W.T.: no seat yet (an O.W.L. of Exceeds Expecta".
+     */
     private int line(GuiGraphics g, int x, int y, int w, Component text, int colour) {
-        g.drawString(font, font.plainSubstrByWidth(text.getString(), w), x, y, colour, false);
-        return y + 11;
+        List<FormattedCharSequence> lines = font.split(text, w);
+        for (int i = 0; i < lines.size() && i < 2; i++) {
+            if (i == 1 && lines.size() > 2) {
+                StringBuilder sb = new StringBuilder();
+                lines.get(i).accept((index, style, cp) -> {
+                    sb.appendCodePoint(cp);
+                    return true;
+                });
+                g.drawString(font, UiText.fit(font, sb + "…", w), x, y, colour, false);
+            } else {
+                g.drawString(font, lines.get(i), x, y, colour, false);
+            }
+            y += 10;
+        }
+        return y + 1;
     }
 
     private int paragraph(GuiGraphics g, int x, int y, int w, Component text, int colour) {
