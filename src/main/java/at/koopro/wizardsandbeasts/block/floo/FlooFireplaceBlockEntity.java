@@ -11,8 +11,40 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.NonNull;
+import software.bernie.geckolib.animatable.GeoBlockEntity;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.animatable.manager.AnimatableManager;
+import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.RawAnimation;
+import software.bernie.geckolib.util.GeckoLibUtil;
 
-public class FlooFireplaceBlockEntity extends BlockEntity {
+/**
+ * The hearth's network state, and the roar: a GeckoLib overlay ({@code tools/station_rigs.py}) drawn over the baked
+ * hearth model, empty at rest, that throws green flame out of the recess when a traveller leaves or arrives.
+ */
+public class FlooFireplaceBlockEntity extends BlockEntity implements GeoBlockEntity {
+
+    /** A traveller left or arrived: the hearth roars. */
+    public static final String CLIP_ROAR = "roar";
+    private static final String CONTROLLER = "roar";
+    private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.floo_roar.idle");
+    private final AnimatableInstanceCache animatableCache = GeckoLibUtil.createInstanceCache(this);
+
+    /** Plays a one-shot clip for everyone watching; call on the server. */
+    public void play(@NonNull String clip) {
+        triggerAnim(CONTROLLER, clip);
+    }
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        controllers.add(new AnimationController<FlooFireplaceBlockEntity>(CONTROLLER, 0, state -> state.setAndContinue(IDLE))
+                .triggerableAnim(CLIP_ROAR, RawAnimation.begin().thenPlay("animation.floo_roar.roar")));
+    }
+
+    @Override
+    public @NonNull AnimatableInstanceCache getAnimatableInstanceCache() {
+        return animatableCache;
+    }
 
     /**
      * How long a hearth stays green when nothing has configured it.

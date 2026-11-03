@@ -240,7 +240,10 @@ public class ModBlocks {
 
     public static final DeferredBlock<PocketConfiguratorBlock> POCKET_CONFIGURATOR =
             BLOCKS.registerBlock("pocket_configurator", PocketConfiguratorBlock::new,
-                    () -> BlockBehaviour.Properties.of().strength(2.0f).sound(SoundType.METAL).requiresCorrectToolForDrops());
+                    // noOcclusion: the armillary is drawn by its rig and fills little of its cube; a solid one would
+                    // sit in darkness (light 0 inside an opaque block) and cull the floor beneath it.
+                    () -> BlockBehaviour.Properties.of().strength(2.0f).sound(SoundType.METAL).requiresCorrectToolForDrops()
+                            .noOcclusion());
 
     public static final DeferredItem<BlockItem> POCKET_CONFIGURATOR_ITEM =
             ModItems.ITEMS.registerSimpleBlockItem("pocket_configurator", POCKET_CONFIGURATOR);

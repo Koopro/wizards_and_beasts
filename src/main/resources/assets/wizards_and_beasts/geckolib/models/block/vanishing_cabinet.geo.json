@@ -1,0 +1,238 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.vanishing_cabinet",
+        "texture_width": 128,
+        "texture_height": 128,
+        "visible_bounds_width": 2,
+        "visible_bounds_height": 2.2,
+        "visible_bounds_offset": [
+          0,
+          1.1,
+          0
+        ]
+      },
+      "bones": [
+        {
+          "name": "cabinet",
+          "pivot": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "carcass",
+          "pivot": [
+            0,
+            0,
+            0
+          ],
+          "parent": "cabinet",
+          "cubes": [
+            {
+              "origin": [
+                -7,
+                0,
+                -6
+              ],
+              "size": [
+                14,
+                2,
+                14
+              ],
+              "uv": [
+                0,
+                41
+              ]
+            },
+            {
+              "origin": [
+                -7,
+                2,
+                -6
+              ],
+              "size": [
+                1,
+                27,
+                14
+              ],
+              "uv": [
+                0,
+                0
+              ]
+            },
+            {
+              "origin": [
+                6,
+                2,
+                -6
+              ],
+              "size": [
+                1,
+                27,
+                14
+              ],
+              "uv": [
+                30,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -6,
+                2,
+                7
+              ],
+              "size": [
+                12,
+                27,
+                1
+              ],
+              "uv": [
+                60,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -6,
+                2,
+                -5
+              ],
+              "size": [
+                12,
+                1,
+                12
+              ],
+              "uv": [
+                0,
+                57
+              ]
+            },
+            {
+              "origin": [
+                -6,
+                28,
+                -5
+              ],
+              "size": [
+                12,
+                1,
+                12
+              ],
+              "uv": [
+                48,
+                57
+              ]
+            },
+            {
+              "origin": [
+                -7,
+                29,
+                -6
+              ],
+              "size": [
+                14,
+                2,
+                14
+              ],
+              "uv": [
+                56,
+                41
+              ]
+            }
+          ]
+        },
+        {
+          "name": "door_w",
+          "pivot": [
+            -6,
+            3,
+            -6
+          ],
+          "parent": "cabinet",
+          "cubes": [
+            {
+              "origin": [
+                -6,
+                3,
+                -6
+              ],
+              "size": [
+                6,
+                25,
+                1
+              ],
+              "uv": [
+                86,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -2,
+                14,
+                -7
+              ],
+              "size": [
+                1,
+                2,
+                1
+              ],
+              "uv": [
+                96,
+                57
+              ]
+            }
+          ]
+        },
+        {
+          "name": "door_e",
+          "pivot": [
+            6,
+            3,
+            -6
+          ],
+          "parent": "cabinet",
+          "cubes": [
+            {
+              "origin": [
+                0,
+                3,
+                -6
+              ],
+              "size": [
+                6,
+                25,
+                1
+              ],
+              "uv": [
+                100,
+                0
+              ]
+            },
+            {
+              "origin": [
+                1,
+                14,
+                -7
+              ],
+              "size": [
+                1,
+                2,
+                1
+              ],
+              "uv": [
+                100,
+                57
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -62,6 +62,15 @@ public class VanishingCabinetBlock extends TwoTallBlock implements EntityBlock {
         return state.getValue(HALF) == DoubleBlockHalf.LOWER ? new VanishingCabinetBlockEntity(pos, state) : null;
     }
 
+    /**
+     * Both halves draw nothing: the lower half's block entity draws the whole cabinet through its GeckoLib rig, so the
+     * doors can open. The JSON halves stay for break particles.
+     */
+    @Override
+    protected net.minecraft.world.level.block.@NonNull RenderShape getRenderShape(@NonNull BlockState state) {
+        return net.minecraft.world.level.block.RenderShape.INVISIBLE;
+    }
+
     @Override
     protected @NonNull VoxelShape getShape(@NonNull BlockState state, @NonNull BlockGetter level,
                                            @NonNull BlockPos pos, @NonNull CollisionContext context) {

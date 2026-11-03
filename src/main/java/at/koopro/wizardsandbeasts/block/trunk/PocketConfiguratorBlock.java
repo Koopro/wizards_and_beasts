@@ -46,15 +46,28 @@ public class PocketConfiguratorBlock extends BaseEntityBlock {
         return null;
     }
 
+    /** The plinth and the rings above it, not the whole cube. */
+    private static final net.minecraft.world.phys.shapes.VoxelShape SHAPE =
+            net.minecraft.world.phys.shapes.Shapes.or(net.minecraft.world.level.block.Block.box(2, 0, 2, 14, 8, 14),
+                    net.minecraft.world.level.block.Block.box(4, 8, 4, 12, 16, 12));
+
+    @Override
+    protected net.minecraft.world.phys.shapes.VoxelShape getShape(BlockState state, net.minecraft.world.level.BlockGetter level,
+                                                                  BlockPos pos, net.minecraft.world.phys.shapes.CollisionContext context) {
+        return SHAPE;
+    }
+
+    /** Drawn by the armillary rig; the JSON cube stays for the item icon and break particles. */
     @Override
     protected RenderShape getRenderShape(BlockState state) {
-        return RenderShape.MODEL;
+        return RenderShape.INVISIBLE;
     }
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (!level.isClientSide() && player instanceof ServerPlayer sp) {
             if (level.getBlockEntity(pos) instanceof ExpansionFocusBlockEntity be) {
+                be.play(ExpansionFocusBlockEntity.CLIP_ATTUNE);
                 sp.openMenu(be, buf -> buf.writeBlockPos(pos));
             }
         }

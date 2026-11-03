@@ -306,6 +306,13 @@ public final class FlooTravelHandler {
      * that assumed the checks from before the window would teleport a player into a wall for the sake
      * of not repeating three cheap lookups.
      */
+    /** The green roar out of a hearth's recess, seen by everyone in the room. */
+    private static void roar(@NonNull ServerLevel level, @NonNull BlockPos hearth) {
+        if (level.getBlockEntity(hearth) instanceof FlooFireplaceBlockEntity fireplace) {
+            fireplace.play(FlooFireplaceBlockEntity.CLIP_ROAR);
+        }
+    }
+
     public static void commitTravel(@NonNull ServerPlayer player, @NonNull BlockPos originPos,
                                     @NonNull String actualAddress, @NonNull String intended) {
         ServerLevel originLevel = player.level();
@@ -367,6 +374,7 @@ public final class FlooTravelHandler {
         originLevel.sendParticles(ParticleTypes.SOUL_FIRE_FLAME,
                 originPos.getX() + 0.5, originPos.getY() + 0.6, originPos.getZ() + 0.5,
                 20, 0.35, 0.5, 0.35, 0.06);
+        roar(originLevel, originPos);
 
         resetOriginFireplace(originLevel, originPos);
 
@@ -395,6 +403,7 @@ public final class FlooTravelHandler {
         applyTravelSickness(player, destLevel, destPos, wasMisfire);
 
         lightArrivalHearth(player, destLevel, dest.blockPos());
+        roar(destLevel, dest.blockPos());
 
         // A toast, not chat. Arriving somewhere is a discrete event worth a few seconds and worth
         // nothing afterwards, and a chat line for every hop buries whatever the player was reading

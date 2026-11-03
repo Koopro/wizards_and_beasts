@@ -105,4 +105,26 @@ public final class GeoRendererHelper {
             }
         };
     }
+
+    /**
+     * Same, with a glow layer: the model's {@code <texture>_glowmask.png} drawn full-bright. For a block whose light
+     * is a lore light source (style guide R8) -- the Floo roar.
+     */
+    public static <T extends BlockEntity & GeoBlockEntity, S extends BlockEntityRenderState & software.bernie.geckolib.renderer.base.GeoRenderState>
+            BlockEntityRendererProvider<T, S> glowingBlock(java.util.function.Supplier<software.bernie.geckolib.model.GeoModel<T>> model,
+                                                           double renderMargin) {
+        BlockEntityRendererProvider<T, S> plain = simpleBlock(model, renderMargin);
+        return context -> {
+            GeoBlockRenderer<T, S> renderer = (GeoBlockRenderer<T, S>) plain.create(context);
+            renderer.withRenderLayer(AutoGlowingGeoLayer::new);
+            return renderer;
+        };
+    }
+
+    /** A block rig whose sheet is not named after its geometry ({@code <name>_rig.png} beside a JSON block sprite). */
+    public static <T extends BlockEntity & GeoBlockEntity> java.util.function.Supplier<software.bernie.geckolib.model.GeoModel<T>>
+            rig(String geometry, String sheet) {
+        return () -> new DefaultedBlockGeoModel<T>(Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, geometry))
+                .withAltTexture(Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, sheet));
+    }
 }

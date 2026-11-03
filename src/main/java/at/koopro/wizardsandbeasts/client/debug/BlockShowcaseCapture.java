@@ -56,7 +56,10 @@ public final class BlockShowcaseCapture {
 
     /** Block ids per set, placed left to right facing the camera. */
     private static final Map<String, List<String>> SETS = Map.of(
-            "trunks", List.of("enchanted_trunk", "expanded_trunk", "masters_trunk", "moodys_trunk", "newts_case_item"));
+            "trunks", List.of("enchanted_trunk", "expanded_trunk", "masters_trunk", "moodys_trunk", "newts_case_item"),
+            "stations", List.of("floo_fireplace", "vanishing_cabinet", "settlement_post", "broom_rack",
+                    "pocket_configurator"),
+            "cabinet", List.of("vanishing_cabinet"));
 
     private record Step(String shot, int ticks, Consumer<ServerPlayer> server) {}
 
@@ -116,7 +119,7 @@ public final class BlockShowcaseCapture {
         for (String id : ids) {
             Block block = BuiltInRegistries.BLOCK.getValue(Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, id));
             BlockPos at = origin.offset(x, 0, -6);
-            level.setBlock(at, facing(block.defaultBlockState()), 3);
+            place(level, at, facing(block.defaultBlockState()));
             placed.add(at);
             x += 2;
         }
@@ -125,17 +128,46 @@ public final class BlockShowcaseCapture {
         look(p, 0.5, 0.5, 180f, 18f);
     }
 
+    /** Places one block as a player would see it working: both halves of a two-tall block, a Floo hearth lit. */
+    private static void place(ServerLevel level, BlockPos pos, BlockState state) {
+        if (state.hasProperty(BlockStateProperties.DOUBLE_BLOCK_HALF)) {
+            level.setBlock(pos, state.setValue(BlockStateProperties.DOUBLE_BLOCK_HALF,
+                    net.minecraft.world.level.block.state.properties.DoubleBlockHalf.LOWER), 3);
+            level.setBlock(pos.above(), state.setValue(BlockStateProperties.DOUBLE_BLOCK_HALF,
+                    net.minecraft.world.level.block.state.properties.DoubleBlockHalf.UPPER), 3);
+            return;
+        }
+        if (state.getBlock() instanceof at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlock) {
+            level.setBlock(pos, state.setValue(at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlock.LIT, true), 3);
+            at.koopro.wizardsandbeasts.block.floo.FlooFlamesBlock.light(level, pos, Direction.SOUTH);
+            return;
+        }
+        level.setBlock(pos, state, 3);
+    }
+
     private static BlockState facing(BlockState state) {
         return state.hasProperty(BlockStateProperties.HORIZONTAL_FACING)
                 ? state.setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.SOUTH) : state;
     }
 
-    /** Plays a clip on every other placed trunk, so the shot shows open and closed side by side. */
+    /**
+     * Plays each block's own one-shot: every other trunk (so open and closed stand side by side) the given clip; on an
+     * "open" step the cabinet passes, the hearth roars and the configurator attunes.
+     */
     private static void trigger(ServerPlayer p, String clip) {
+        boolean open = TrunkBlockEntity.CLIP_OPEN.equals(clip);
         for (int i = 0; i < placed.size(); i++) {
-            if (i % 2 == 0 && p.level().getBlockEntity(placed.get(i)) instanceof TrunkBlockEntity trunk
-                    && trunk.getBlockState().getBlock() instanceof TrunkBlock) {
-                trunk.play(clip);
+            var be = p.level().getBlockEntity(placed.get(i));
+            if (be instanceof TrunkBlockEntity trunk && trunk.getBlockState().getBlock() instanceof TrunkBlock) {
+                if (i % 2 == 0) {
+                    trunk.play(clip);
+                }
+            } else if (open && be instanceof at.koopro.wizardsandbeasts.artefact.cabinet.VanishingCabinetBlockEntity cabinet) {
+                cabinet.play(at.koopro.wizardsandbeasts.artefact.cabinet.VanishingCabinetBlockEntity.CLIP_PASS);
+            } else if (open && be instanceof at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlockEntity hearth) {
+                hearth.play(at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlockEntity.CLIP_ROAR);
+            } else if (open && be instanceof at.koopro.wizardsandbeasts.block.ExpansionFocusBlockEntity focus) {
+                focus.play(at.koopro.wizardsandbeasts.block.ExpansionFocusBlockEntity.CLIP_ATTUNE);
             }
         }
     }

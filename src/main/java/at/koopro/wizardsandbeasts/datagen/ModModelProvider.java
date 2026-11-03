@@ -333,11 +333,12 @@ public class ModModelProvider extends ModelProvider {
         blockModels.createTrivialBlock(ModBlocks.FLOO_GRATE.get(), TexturedModel.LEAVES);
         propBlock(blockModels, ModBlocks.SPELL_TEACHER.get(), lecternModel(),
                 sideTop(ModBlocks.SPELL_TEACHER.get(), ""), true);
+        // Walnut frame, an ash handle (the wand woods' own planks and stripped log), birch-twig bristles.
         propBlock(blockModels, ModBlocks.BROOM_RACK.get(), broomRackModel(), new TextureMapping()
-                .put(TextureSlot.PARTICLE, Identifier.withDefaultNamespace("block/spruce_planks"))
-                .put(TextureSlot.SIDE, Identifier.withDefaultNamespace("block/spruce_planks"))
-                .put(TextureSlot.END, Identifier.withDefaultNamespace("block/stripped_birch_log"))
-                .put(TextureSlot.TEXTURE, Identifier.withDefaultNamespace("block/hay_block_side")), true);
+                .put(TextureSlot.PARTICLE, modLoc("block/walnut_planks"))
+                .put(TextureSlot.SIDE, modLoc("block/walnut_planks"))
+                .put(TextureSlot.END, modLoc("block/stripped_ash_log"))
+                .put(TextureSlot.TEXTURE, modLoc("block/broom_rack_bristles")), true);
 
         java.util.List<net.minecraft.world.item.Item> wizardingItems = java.util.List.of(
                 ConsumableItemRegistry.BEZOAR.get(), ConsumableItemRegistry.MOONCALF_DUNG.get(),
@@ -560,6 +561,10 @@ public class ModModelProvider extends ModelProvider {
     // Faces with no explicit uv() inherit vanilla's automatic, world-aligned UVs, so each
     // element samples the part of the texture that sits at its own height.
 
+    private static Identifier modLoc(String path) {
+        return Identifier.fromNamespaceAndPath(at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID, path);
+    }
+
     private static ExtendedModelTemplateBuilder prop(TextureSlot... slots) {
         ExtendedModelTemplateBuilder builder = ExtendedModelTemplateBuilder.builder()
                 .parent(Identifier.withDefaultNamespace("block/block"));
@@ -720,6 +725,14 @@ public class ModModelProvider extends ModelProvider {
                 .element(e -> e.from(3, 0, 0).to(13, 2, 13)
                         .textureAll(TextureSlot.SIDE)
                         .face(Direction.DOWN, f -> f.texture(TextureSlot.SIDE).cullface(Direction.DOWN)))
+                // A mantel shelf proud of the breast, so the block reads as a fireplace and not a dark box.
+                .element(e -> e.from(-1, 13, -2).to(17, 14, 2)
+                        .textureAll(TextureSlot.TOP))
+                // The hearthstone, run out under the flames that burn in the block in front: they stand on the
+                // hearth instead of on bare floor.
+                .element(e -> e.from(-1, 0, -5).to(17, 1, 0)
+                        .textureAll(TextureSlot.TOP)
+                        .face(Direction.DOWN, f -> f.texture(TextureSlot.TOP).cullface(Direction.DOWN)))
                 .build();
     }
 

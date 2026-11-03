@@ -247,6 +247,9 @@ public final class CabinetService {
 
         LAST_TRIP.put(player, now);
         PENDING.remove(player);
+        // Both cabinets throw their doors open: the one stepped into, and the one stepped out of.
+        playPass(level, lower);
+        playPass(farLevel, far.pos());
         level.playSound(null, lower, SoundEvents.WOODEN_DOOR_CLOSE, SoundSource.BLOCKS, 0.9f, 0.8f);
         level.sendParticles(ParticleTypes.SMOKE, lower.getX() + 0.5, lower.getY() + 1.0, lower.getZ() + 0.5,
                 12, 0.3, 0.6, 0.3, 0.01);
@@ -260,6 +263,12 @@ public final class CabinetService {
         farLevel.sendParticles(ParticleTypes.SMOKE, far.pos().getX() + 0.5, far.pos().getY() + 1.0,
                 far.pos().getZ() + 0.5, 12, 0.3, 0.6, 0.3, 0.01);
         return Result.TRAVELLED;
+    }
+
+    private static void playPass(ServerLevel level, BlockPos lower) {
+        if (level.getBlockEntity(lower) instanceof VanishingCabinetBlockEntity cabinet) {
+            cabinet.play(VanishingCabinetBlockEntity.CLIP_PASS);
+        }
     }
 
     // ── breaking ──────────────────────────────────────────────────────────

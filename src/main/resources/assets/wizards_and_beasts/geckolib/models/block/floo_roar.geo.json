@@ -1,0 +1,137 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.floo_roar",
+        "texture_width": 64,
+        "texture_height": 64,
+        "visible_bounds_width": 2,
+        "visible_bounds_height": 1.6,
+        "visible_bounds_offset": [
+          0,
+          0.8,
+          0
+        ]
+      },
+      "bones": [
+        {
+          "name": "roar",
+          "pivot": [
+            0,
+            2,
+            -4
+          ]
+        },
+        {
+          "name": "tongue_core",
+          "pivot": [
+            0,
+            2,
+            -4
+          ],
+          "parent": "roar",
+          "cubes": [
+            {
+              "origin": [
+                -3,
+                2,
+                -7
+              ],
+              "size": [
+                6,
+                9,
+                5
+              ],
+              "uv": [
+                0,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tongue_w",
+          "pivot": [
+            -3,
+            2,
+            -6
+          ],
+          "parent": "roar",
+          "cubes": [
+            {
+              "origin": [
+                -5,
+                2,
+                -8
+              ],
+              "size": [
+                3,
+                7,
+                3
+              ],
+              "uv": [
+                22,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tongue_e",
+          "pivot": [
+            3,
+            2,
+            -6
+          ],
+          "parent": "roar",
+          "cubes": [
+            {
+              "origin": [
+                2,
+                2,
+                -8
+              ],
+              "size": [
+                3,
+                7,
+                3
+              ],
+              "uv": [
+                34,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tongue_top",
+          "pivot": [
+            0,
+            11,
+            -5
+          ],
+          "parent": "roar",
+          "cubes": [
+            {
+              "origin": [
+                -2,
+                11,
+                -6
+              ],
+              "size": [
+                4,
+                3,
+                3
+              ],
+              "uv": [
+                46,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

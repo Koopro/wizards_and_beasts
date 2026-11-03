@@ -198,9 +198,9 @@
     }
   ],
   "textures": {
-    "end": "minecraft:block/stripped_birch_log",
-    "particle": "minecraft:block/spruce_planks",
-    "side": "minecraft:block/spruce_planks",
-    "texture": "minecraft:block/hay_block_side"
+    "end": "wizards_and_beasts:block/stripped_ash_log",
+    "particle": "wizards_and_beasts:block/walnut_planks",
+    "side": "wizards_and_beasts:block/walnut_planks",
+    "texture": "wizards_and_beasts:block/broom_rack_bristles"
   }
 }

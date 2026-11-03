@@ -84,6 +84,16 @@ public class ClientSetup {
         event.registerBlockEntityRenderer(at.koopro.wizardsandbeasts.registry.ModBlockEntities.TRUNK.get(),
                 GeoRendererHelper.simpleBlock(at.koopro.wizardsandbeasts.client.trunk.TrunkGeoModel::new, 1.0));
 
+        // Station rigs (tools/station_rigs.py). The configurator and the cabinet draw the whole block (both are
+        // RenderShape.INVISIBLE; the cabinet two blocks tall from its lower half). The Floo roar is an overlay on the
+        // baked hearth, empty until a traveller leaves or arrives, and glows.
+        event.registerBlockEntityRenderer(at.koopro.wizardsandbeasts.registry.ModBlockEntities.POCKET_CONFIGURATOR.get(),
+                GeoRendererHelper.simpleBlock(GeoRendererHelper.rig("pocket_configurator", "pocket_configurator_rig"), 1.0));
+        event.registerBlockEntityRenderer(at.koopro.wizardsandbeasts.registry.ModBlockEntities.VANISHING_CABINET.get(),
+                GeoRendererHelper.simpleBlock(GeoRendererHelper.rig("vanishing_cabinet", "vanishing_cabinet_rig"), 2.0));
+        event.registerBlockEntityRenderer(at.koopro.wizardsandbeasts.registry.ModBlockEntities.FLOO_FIREPLACE.get(),
+                GeoRendererHelper.glowingBlock(GeoRendererHelper.rig("floo_roar", "floo_roar"), 2.0));
+
         // Generic data-driven creatures: one simple GeckoLib renderer per creature, keyed by id.
         // The ten dragon breeds get the breed-aware DragonRenderer (render-state scale + flame tint).
         for (at.koopro.wizardsandbeasts.registry.ModCreatures.Spec spec
