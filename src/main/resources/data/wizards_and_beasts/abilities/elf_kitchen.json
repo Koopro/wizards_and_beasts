@@ -1,7 +1,7 @@
 {
   "_comment": "House-elf household charm (ElfMagic.kitchen): up to 8 raw foods carried are cooked at once, no fire, no fuel (the Hogwarts kitchens, GoF ch.21). Only food. Nothing to cook spends no cooldown.",
   "type": "active",
-  "icon": "wizards_and_beasts:textures/ability/placeholder.png",
+  "icon": "wizards_and_beasts:textures/ability/elf_kitchen.png",
   "nameKey": "ability.wizards_and_beasts.elf_kitchen",
   "descriptionKey": "ability.wizards_and_beasts.elf_kitchen.desc",
   "cooldownTicks": 1200,

@@ -47,6 +47,7 @@ import java.nio.file.Path;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -238,6 +239,16 @@ public final class UiScreenCapture {
             all.add(Step.client("sheet_" + tab.name().toLowerCase(java.util.Locale.ROOT),
                     () -> open(CharacterSheetScreen.onTab(tab))));
         }
+        all.add(Step.server("inventory_icons", UiScreenCapture::openIconInventory));
+        // Every mod effect's icon where players see it: five at a time (vanilla squeezes a longer list
+        // until the rows overlap), in the inventory's effect panel and then in the HUD's status row.
+        var effects = List.copyOf(at.koopro.wizardsandbeasts.effect.ModEffects.MOB_EFFECTS.getEntries());
+        for (int b = 0; b * EFFECTS_PER_SHOT < effects.size(); b++) {
+            var batch = effects.subList(b * EFFECTS_PER_SHOT, Math.min(effects.size(), (b + 1) * EFFECTS_PER_SHOT));
+            all.add(Step.server("effects_" + b, p -> showEffects(p, batch)));
+            all.add(Step.client("effects_hud_" + b, () -> open(null)));
+        }
+        all.add(Step.client("ability_wheel_all", UiScreenCapture::openAbilityWheelAll));
         String only = System.getenv("WB_UI_CAPTURE_ONLY");
         if (only == null || only.isBlank()) {
             return all;
@@ -248,6 +259,100 @@ public final class UiScreenCapture {
 
     private static void open(Screen screen) {
         Minecraft.getInstance().setScreen(screen);
+    }
+
+    private static final int EFFECTS_PER_SHOT = 5;
+
+    /**
+     * Survival, so the inventory key's screen is the survival inventory with its full effect panel (creative swaps
+     * in the creative tabs and a bare icon column), and invulnerable, because several mod effects hurt. The
+     * capture world is a disposable copy.
+     */
+    private static void stageSurvival(ServerPlayer player) {
+        player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+        player.getAbilities().invulnerable = true;
+        player.onUpdateAbilities();
+    }
+
+    /**
+     * Icon families judged in real slots, beside their unchanged neighbours and two vanilla items for scale:
+     * the Death Eater castings, the hair cuts, the wand-core feathers, and the broom fittings with the kit
+     * they belong to.
+     */
+    private static final List<String> ICON_INVENTORY = List.of(
+            "death_eater_mask", "death_eater_mask_1", "death_eater_mask_2", "death_eater_mask_3",
+            "death_eater_mask_4", "death_eater_mask_5", "minecraft:string", "minecraft:feather", "minecraft:leather",
+            "unicorn_hair", "veela_hair", "demiguise_hair", "thestral_tail_hair", "troll_whisker", "granian_hair",
+            "rougarou_hair", "wampus_cat_hair", "dragon_heartstring",
+            "phoenix_feather", "golden_snidget_feather", "thunderbird_tail_feather", "streamlined_twigs",
+            "balanced_tail", "reinforced_binding", "anti_jinx_varnish", "braking_charm", "cushioning_charm",
+            "courier_parcel", "enchanted_twig_bundle", "broom_polish", "broomstick_servicing_kit");
+
+    /** Fills the main inventory with {@link #ICON_INVENTORY} and opens it. The capture world is a disposable copy. */
+    private static void openIconInventory(ServerPlayer player) {
+        stageSurvival(player);
+        player.removeAllEffects();
+        var inv = player.getInventory();
+        for (int i = 0; i < 36; i++) {
+            inv.setItem(i, net.minecraft.world.item.ItemStack.EMPTY);
+        }
+        for (int i = 0; i < ICON_INVENTORY.size(); i++) {
+            String id = ICON_INVENTORY.get(i);
+            var item = BuiltInRegistries.ITEM.getValue(Identifier.parse(id.contains(":") ? id
+                    : WizardsAndBeastsMod.MODID + ":" + id));
+            // Rows read top to bottom in the screen: the main grid (9..35) first, then the hotbar.
+            inv.setItem(i < 27 ? i + 9 : i - 27, new net.minecraft.world.item.ItemStack(item));
+        }
+        Minecraft.getInstance().execute(() -> {
+            var mc = Minecraft.getInstance();
+            if (mc.player != null) {
+                open(new net.minecraft.client.gui.screens.inventory.InventoryScreen(mc.player));
+                // Opening re-centres the cursor over the slot grid; its tooltip would cover the shot.
+                parkCursor(mc);
+            }
+        });
+    }
+
+    /**
+     * Replaces the player's effects with {@code batch}, shown as a potion shows them, then opens the inventory so
+     * the effect panel is in shot.
+     */
+    private static void showEffects(ServerPlayer player,
+                                    List<? extends net.minecraft.core.Holder<net.minecraft.world.effect.MobEffect>> batch) {
+        stageSurvival(player);
+        player.removeAllEffects();
+        for (var effect : batch) {
+            player.addEffect(new net.minecraft.world.effect.MobEffectInstance(effect, 20 * 600, 0, false, true, true));
+        }
+        Minecraft.getInstance().execute(() -> {
+            var mc = Minecraft.getInstance();
+            if (mc.player != null) {
+                open(new net.minecraft.client.gui.screens.inventory.InventoryScreen(mc.player));
+                // Opening re-centres the cursor over the slot grid; its tooltip would cover the shot.
+                parkCursor(mc);
+            }
+        });
+    }
+
+    /**
+     * The ability wheel with every wheel-eligible ability on it, so every icon is in one shot. The wheel reads
+     * only the server's grant mirror, which has no public way in -- the harness writes it the way a
+     * reflection-free test cannot. Dev only.
+     */
+    private static void openAbilityWheelAll() {
+        Set<Identifier> all = new java.util.LinkedHashSet<>();
+        for (var def : at.koopro.wizardsandbeasts.ability.def.AbilityDefinitionRegistry.wheelEligibleSorted()) {
+            all.add(def.id());
+        }
+        try {
+            var f = at.koopro.wizardsandbeasts.client.ability.state.ClientAbilitySelectionState.class
+                    .getDeclaredField("usable");
+            f.setAccessible(true);
+            f.set(null, all);
+        } catch (ReflectiveOperationException e) {
+            LOGGER.error("UI capture: cannot fill the ability wheel", e);
+        }
+        open(new AbilityWheelScreen());
     }
 
     /**

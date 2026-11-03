@@ -172,7 +172,7 @@ that are not creatures, are:
 
 | Generator | Owns (under `assets/wizards_and_beasts/`) |
 |---|---|
-| `item_sprites.py --write` | 210 item icons in `textures/item` — the reference style. Without `--write` it only renders a mockup. **Protected owner.** |
+| `item_sprites.py --write` | 210 item icons in `textures/item` — the reference style. Without `--write` it only renders a mockup. **Protected owner.** `HAND_SET` (the phoenix, snidget and thunderbird feathers, hand-made 2026-10-21) is never written unless named in `--only`. Since 2026-11-03 it also draws the seven broom fittings and courier parcel once owned by the retired `item_icons.py`. |
 | `item_models_3d.py` | cuboid held models (`models/item`) and their box-UV textures (90) |
 | `item_geo.py` | GeckoLib held items: `geckolib/{models,animations}/item`, `textures/item/model` (30) + Elder Wand sheet, `models/item/<id>_held.json`. **Protected owner.** |
 | `spawn_eggs.py` | 107 spawn eggs (skips the four hand-set ones, §7) |
@@ -184,7 +184,8 @@ that are not creatures, are:
 | `banner_textures.py` | 12 house-banner textures |
 | `animate_textures.py` | 6 animated strips + `.png.mcmeta` (see §8 for the three overlays) |
 | `particle_sprites.py` | 33 particle sprites and the particle JSON |
-| `effect_sprites.py --write`, `effect_icons.py` | 20 + 3 mob-effect icons |
+| `effect_sprites.py --write`, `effect_icons.py` | 38 + 2 mob-effect icons. `effect_sprites` took `mandrake_restoration` from `effect_icons` and ten hand-made icons on 2026-11-03, and draws the six registered effects that had none |
+| `ability_icons.py` | 16 ability icons `textures/ability/<id>.png` (16 px octagon, rim metal = kind, dark field for the night wheel), named by `data/.../abilities/<id>.json` `icon`. Reuses `spell_glyphs`' ramp, keyline and two spell glyphs. `--sheet OUT.png` writes nothing live |
 | `gui_parchment.py` | the parchment kit: `gui/theme`, eight skins in `gui/sprites/<skin>`, controls atlas. **Protected owner.** |
 | `gui_chrome.py` | per-screen GUI (bestiary, wandmaker's bench, Hermione's bag, creative tabs). **Protected owner.** |
 | `config_textures.py`, `map_textures.py`, `skill_chart_textures.py`, `stat_icons.py`, `hud_blood_icons.py` | config screens, Marauder's Map (9), skill chart (35), stat glyphs, blood meter |
@@ -340,7 +341,9 @@ From `VISUAL_STYLE_REPORT.md` §4, with how each is now enforced:
 | Wizard cards | 128 px exception | — |
 | `src/main/resources` after `runData` | never `git add -A` | datagen writes only `src/generated` now; still stage by path |
 
-Hand-made, no generator (keep, or claim into a generator explicitly): 19 mob-effect icons, the
+Hand-made, no generator (keep, or claim into a generator explicitly): 8 mob-effect icons (bat_bogey,
+cruciatus_pain, furnunculus, impedimenta, lumos_field, petrificus_totalus, soul_drained, tarantallegra),
+the phoenix / golden snidget / thunderbird feathers (`item_sprites.HAND_SET`), `item/wand/grain_knotty.png`, the
 spell-wheel sprites (`gui/sprites/wand_hud/bg.png`, `overlay.png`, `overlay_selected_0..3.png`),
 `entity/petrify/stone_statue.png`, `entity/form/placeholder.png`, and `src/main/resources/logo.png`.
 

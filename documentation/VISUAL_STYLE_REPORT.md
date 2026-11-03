@@ -166,8 +166,8 @@ paper. (`tasks/art_rework_phase2_brief.md`.)
 | Book cuboids, hold-class transforms, GeckoLib artefacts | **D** | |
 | Wizard cards (128 px portraits) | **C** | Deliberate large-format collectible. |
 | Spawn eggs | **D** | Vanilla egg shading from skin colours. |
-| Hair/strand items (unicorn, veela, demiguise ×6) | **B** | 1-px strands are the thinnest silhouettes in the set; a grouped lock shape would read better in a slot. |
-| Death Eater mask variants 1–5 | **B** | Near-identical at 16 px. |
+| Hair/strand items (unicorn, veela, demiguise ×6, thestral, troll whisker) | **D** | 2026-11-03: one cut per creature in `item_sprites.py` (tied tail, plait, silk fan, ring-bound switch, whiskers on hide) beside the unchanged Granian/Rougarou/Wampus hank. Strands are separated by the outline and wave out of phase; seen in real slots (`UiScreenCapture` `inventory_icons`). |
+| Death Eater mask variants 1–5 | **D** | 2026-11-03: carved bone like the worn castings (`armor_model.py`), one sculpt, one pushed feature each: tear runnels, scaled ridge, screaming mouth, horns, crack. |
 
 ### Blocks
 
@@ -194,7 +194,8 @@ paper. (`tasks/art_rework_phase2_brief.md`.)
 | Spell HUD diamond + wheel (92 px sigils, 256 px frame) | **Frozen** | Still outside the pixel language, but the user ruled twice (2026-10-21, 2026-11-03) to leave the HUD and wheel as they are. Not debt; do not redraw without asking. |
 | Parchment screen kit, eight skins, leather overlays | **D** | Approved 2026-09-23. |
 | Handbook book/emblem, Obscurial stress meter | **D** | Cleaned to hard-edged 1:1 pixel art. |
-| Mob-effect icons (42) | **D** | 20 redrawn; the rest already fit. |
+| Mob-effect icons (48) | **D** | 2026-11-03: every registered effect has one (6 were missing, 4 of them shown in the HUD); 11 flat hand-made icons and the olive mandrake heart redrawn in `effect_sprites.py`. `EffectAndAbilityIconAssetTest`. |
+| Ability icons (`textures/ability`, 16) | **D** | 2026-11-03: were gilt monograms (every JSON named a missing placeholder). Octagon medallion, rim metal = kind (offensive gilt, defensive steel, utility silver, dark iron, heritage bronze, transformation verdigris, legendary white gold), dark field for the night wheel (`ability_icons.py`). `debug_*` stay on the monogram. |
 | Particles (14 types, 29 sprites) | **D** | Crisp, greyscale-tinted, one set per type. |
 | Creature ability particles (arcane / light / healing / dread / poison) | **D** | |
 | Wand beam (`client/beam/BeamGeometry`) | **D** | Fixed 2026-09-27. The beam is untextured geometry (the `effect/wand_beam*.png` this report first blamed were unused orphans, now deleted). It had 0.5 px bloom shells at halving alpha, which drew a smooth anti-aliased glow. Now: a whole-pixel core with a 1 px lit spine, two stepped glow shells running core tone to spell colour, and sparse 1 px sparks that crawl every 2 ticks. Checked with an offline replica; not seen in a client (no harness casts a beam). |
@@ -212,7 +213,7 @@ paper. (`tasks/art_rework_phase2_brief.md`.)
 2. ~~**B — Stag Animagus rig.**~~ — done 2026-09-28. (Animation parity for the six bespoke creatures: done 2026-09-27.)
 3. ~~**B — Griffin, Glumbumble, Blast-Ended Skrewt, Knarl** silhouettes~~ — done 2026-09-27
    (models only; bones, clips and definitions unchanged; portraits re-rendered; eggs unchanged).
-4. **B — hair items, Death Eater mask variants** (icons).
+4. ~~**B — hair items, Death Eater mask variants** (icons).~~ — done 2026-11-03, with the effect and ability icon families.
 5. **B — Red Cap / Sea Serpent scale, student house robes** — need gameplay or data sign-off
    first.
 
@@ -233,7 +234,8 @@ paper. (`tasks/art_rework_phase2_brief.md`.)
 
 Hand-made textures with no generator (keep them as they are, or claim them into a generator
 explicitly):
-- 19 mob-effect icons;
+- 8 mob-effect icons (the rest are `effect_sprites.py` since 2026-11-03);
+- the phoenix, golden snidget and thunderbird feathers (`item_sprites.HAND_SET`);
 - the spell-wheel overlay sprites (`gui/sprites/*/bg.png`, `overlay*.png`);
 - `entity/petrify/stone_statue.png`;
 - `entity/form/placeholder.png`.

@@ -1,7 +1,7 @@
 {
   "_comment": "Migrated off the dedicated LEGILIMENCY keybind. Heritage gate, reach re-check, Occlumency resist and the 600-tick cooldown stay in LegilimencyServerLogic; cooldownTicks is 0 for that reason.",
   "type": "active",
-  "icon": "wizards_and_beasts:textures/ability/placeholder.png",
+  "icon": "wizards_and_beasts:textures/ability/legilimency.png",
   "nameKey": "ability.wizards_and_beasts.legilimency",
   "descriptionKey": "ability.wizards_and_beasts.legilimency.desc",
   "module": "wizards_and_beasts:player_abilities",

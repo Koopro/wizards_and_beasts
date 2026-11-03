@@ -1,7 +1,7 @@
 {
   "_comment": "The Veela's allure (VeelaAllure): people nearby cannot bring themselves to fight for a while. Reach and hold follow the lineage; a strong will resists; striking anyone breaks it. The framework cooldown is the only cooldown.",
   "type": "active",
-  "icon": "wizards_and_beasts:textures/ability/placeholder.png",
+  "icon": "wizards_and_beasts:textures/ability/veela_allure.png",
   "nameKey": "ability.wizards_and_beasts.veela_allure",
   "descriptionKey": "ability.wizards_and_beasts.veela_allure.desc",
   "cooldownTicks": 1200,

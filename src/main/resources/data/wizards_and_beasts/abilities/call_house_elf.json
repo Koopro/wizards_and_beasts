@@ -1,7 +1,7 @@
 {
   "_comment": "For a master with a house-elf bound to them (HouseElfBond.call): every bound elf online in the same world Apparates to their side. No elf answering spends no cooldown.",
   "type": "active",
-  "icon": "wizards_and_beasts:textures/ability/placeholder.png",
+  "icon": "wizards_and_beasts:textures/ability/call_house_elf.png",
   "nameKey": "ability.wizards_and_beasts.call_house_elf",
   "descriptionKey": "ability.wizards_and_beasts.call_house_elf.desc",
   "cooldownTicks": 600,
