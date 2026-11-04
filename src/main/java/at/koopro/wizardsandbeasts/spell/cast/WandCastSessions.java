@@ -202,7 +202,11 @@ public final class WandCastSessions {
      * rather than a session the caster no longer has any claim to.
      */
     public static void abort(ServerPlayer player) {
-        SESSIONS.remove(player.getUUID());
+        // Only a hold that was really open has an arm to lower: reconciliation calls this every tick a player is not
+        // using a wand, and an "off" each tick would cut short the strike of a cast that just succeeded.
+        if (SESSIONS.remove(player.getUUID()) != null) {
+            CastAnimationSync.ended(player);
+        }
     }
 
     /** Whether the player's open hold is sustaining a spell clash. See {@link #markClashHold}. */

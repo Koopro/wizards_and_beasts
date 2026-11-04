@@ -36,7 +36,8 @@ class NoUntracedLearningTest {
             "spell/command/SpellCommands.java",                // /wandb spell learn — operator override
             "admin/player/PlayerAdminService.java",            // admin panel grant — operator override
             "spell/debug/SpellDevKit.java",                    // dev kit — operator override
-            "client/debug/UiScreenCapture.java"                // screenshot harness — dev only, disposable world
+            "client/debug/UiScreenCapture.java",               // screenshot harness — dev only, disposable world
+            "client/debug/EquipmentShowcaseCapture.java"       // cast harness's real cast — dev only, disposable world
     );
 
     /** Files allowed to call the service's commit entry points. */

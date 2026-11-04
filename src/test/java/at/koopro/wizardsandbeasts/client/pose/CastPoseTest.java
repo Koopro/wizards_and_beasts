@@ -42,19 +42,32 @@ class CastPoseTest {
     }
 
     /**
-     * The release frame is the deepest arm rotation.
-     *
-     * <p>Pinned because it is the frame a viewer registers; if a tuning pass ever makes wind-up
-     * deeper than release, the cast reads as a recoil rather than a strike.
+     * The performance reads as gather, strike, settle: the wind-up lifts the arm above the strike, the strike points
+     * level along the look, and recovery falls back below it. (The 2026-08 placeholder had the opposite shape, a small
+     * forward swing before a deeper one, and read as a recoil.)
      */
     @Test
-    void releaseIsTheDeepestPose() {
-        assertTrue(CastPoseConstants.RELEASE.castingArm().xRot()
-                        < CastPoseConstants.WINDUP.castingArm().xRot(),
-                "release must swing further forward than wind-up");
-        assertTrue(CastPoseConstants.RELEASE.castingArm().xRot()
-                        < CastPoseConstants.RECOVERY.castingArm().xRot(),
-                "recovery must fall back from release");
+    void windupGathersAboveALevelStrikeAndRecoveryFallsBelowIt() {
+        float windup = CastPoseConstants.WINDUP.castingArm().xRot();
+        float strike = CastPoseConstants.RELEASE.castingArm().xRot();
+        float recovery = CastPoseConstants.RECOVERY.castingArm().xRot();
+        assertTrue(windup < strike, "the wind-up must raise the arm above the strike");
+        assertTrue(Math.abs(strike + 90f) <= 10f, "the strike must point level, give or take the look");
+        assertTrue(recovery > strike, "recovery must fall back from the strike");
+        assertTrue(CastPoseConstants.RELEASE.aim() == 1f, "the strike must follow the look entirely");
+        assertTrue(CastPoseConstants.WINDUP.aim() == 0f, "the gather must not follow the look");
+    }
+
+    /** G-1: Wingardium Leviosa alone plays the book's swish and flick; every other spell plays the default. */
+    @Test
+    void leviosaSwishesAcrossThenFlicksUp() {
+        assertTrue(CastPoseConstants.setFor("wizards_and_beasts:wingardium_leviosa") == CastPoseConstants.LEVIOSA);
+        assertTrue(CastPoseConstants.setFor("wizards_and_beasts:stupefy") == CastPoseConstants.DEFAULT);
+        var leviosa = CastPoseConstants.LEVIOSA;
+        assertTrue(leviosa.release().castingArm().yRot() - leviosa.windup().castingArm().yRot() >= 45f,
+                "the swish must sweep the arm across");
+        assertTrue(leviosa.recovery().castingArm().xRot() < leviosa.release().castingArm().xRot(),
+                "the flick must lift the wand above the swish");
     }
 
     /** D4: the pose layer owns the arm. Legs and the off arm are not this pass's business. */

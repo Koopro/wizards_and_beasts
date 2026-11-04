@@ -65,6 +65,13 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
     public static final DataTicket<Integer> HOLDER_ID =
             DataTicket.create("wand_holder_id", Integer.class);
 
+    /**
+     * 0..1: how far a cast turns the wand to lie along its arm (the cast pose's aim share). Vanilla hangs a held item
+     * at a right angle to the arm, so an arm thrown out to point at a target holds its wand straight up; during a
+     * strike or a channel the wand is turned onto the arm's line instead. Third-person hands only.
+     */
+    private static final DataTicket<Float> CAST_TILT = DataTicket.create("wand_cast_tilt", Float.class);
+
     /** The wand's resolved look; absent only for a draw that was never captured, which gets the base wand. */
     public static final DataTicket<WandLook> WAND_LOOK = DataTicket.create("wand_look", WandLook.class);
 
@@ -125,6 +132,15 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
             if (inHand(perspective)) {
                 renderState.addGeckolibData(WandItem.HOLDING_CAST,
                         WandItem.isUsingWand(holder) && holder.getUseItem() == stack);
+            }
+            if (perspective == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND
+                    || perspective == ItemDisplayContext.THIRD_PERSON_LEFT_HAND) {
+                long now = at.koopro.wizardsandbeasts.client.pose.ClientCastAnimationState.clientTick();
+                var cast = at.koopro.wizardsandbeasts.client.pose.ClientCastAnimationState.get(holder.getId(), now);
+                if (cast != null) {
+                    renderState.addGeckolibData(CAST_TILT, at.koopro.wizardsandbeasts.client.pose.CastPoseConstants
+                            .at(cast, cast.progress(now, partialTick)).aim());
+                }
             }
         }
     }
@@ -232,7 +248,14 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
         if (look != null && !look.elder()) {
             applyProportions(bones, look, Boolean.TRUE.equals(info.getGeckolibData(CENTRED)));
         }
+        Float tilt = info.getGeckolibData(CAST_TILT);
+        if (tilt != null && tilt > 0f) {
+            bones.ifPresent("wand_root", root -> root.setRotZ(CAST_TILT_DEGREES * tilt * Mth.DEG_TO_RAD));
+        }
     }
+
+    /** The full turn a strike gives the wand: from vanilla's right angle onto the arm's line. */
+    private static final float CAST_TILT_DEGREES = 90.0f;
 
     /**
      * Shows the one selected variant per slot and hides every other.

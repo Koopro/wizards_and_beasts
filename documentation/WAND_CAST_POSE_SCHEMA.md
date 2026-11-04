@@ -83,6 +83,13 @@ If casting is instant with no phases, report before building anything: a
 three-phase clip against a single-tick cast is a spec error, not a tuning
 problem.
 
+**Resolved 2026-11-04 (Christian): server moments.** Casting is a hold and a release (`CastReleaseGate`), not
+instant. `CastAnimationSync` sends on the existing `SpellCastAnimationS2CPayload`, format unchanged: the hold beginning
+(`WandItem.use`) sends a held wind-up (a beam spell sends a held strike, since it channels from its first tick); an
+accepted release whose spell casts sends the strike and settle timed from that moment; a hold that ends without a
+cast (refused, rejected, interrupted) sends off. A spell's `castTiming` still overrides the strike's timing; otherwise
+its `castType` picks it. The client never predicts.
+
 ---
 
 ## 5. Binding extensions

@@ -84,11 +84,18 @@ public record SpellCastC2SPayload() implements CustomPacketPayload {
                 player.getData(ModAttachments.SPELL_DATA.get()).incrementSyncCorrections();
             }
             debugReject(player, refused.rejectCode());
+            at.koopro.wizardsandbeasts.spell.cast.CastAnimationSync.ended(player);
             // A channel that already did its work still owes its cooldown when its release casts nothing.
             at.koopro.wizardsandbeasts.spell.beam.WandBeamChannelLogic.settleReleasedChannel(player, false);
             return;
         }
+        String castSpellId = player.getData(ModAttachments.SPELL_DATA.get()).getActiveSpellId();
         at.koopro.wizardsandbeasts.spell.cast.CastResult result = SpellCastService.completeWandCastRelease(player);
+        if (result == at.koopro.wizardsandbeasts.spell.cast.CastResult.SUCCESS) {
+            at.koopro.wizardsandbeasts.spell.cast.CastAnimationSync.released(player, castSpellId);
+        } else {
+            at.koopro.wizardsandbeasts.spell.cast.CastAnimationSync.ended(player);
+        }
         at.koopro.wizardsandbeasts.spell.beam.WandBeamChannelLogic.settleReleasedChannel(player,
                 result == at.koopro.wizardsandbeasts.spell.cast.CastResult.SUCCESS);
     }

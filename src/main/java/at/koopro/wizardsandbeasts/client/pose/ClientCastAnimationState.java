@@ -15,10 +15,8 @@ import java.util.Map;
  * because that is what a render state carries ({@code AvatarRenderState.id}), and the consumer is a
  * pose pass reading it during a render.
  *
- * <p><b>Nothing consumes this yet.</b> {@code KeyframePosePass} is the consumer and is not built —
- * it is the next piece of pose-layer wave 1. Until it exists, casts arrive, are stored, expire on
- * schedule, and are never drawn. Left visibly incomplete rather than faked: the alternative is a
- * client that invents its own timing, which the schema forbids outright.
+ * <p>Read by {@link CastPosePass} (the body) and {@link FirstPersonCast} (the held wand on screen). The server
+ * sends every phase change; the client never invents its own timing, which the schema forbids outright.
  */
 @NullMarked
 public final class ClientCastAnimationState {
@@ -36,14 +34,15 @@ public final class ClientCastAnimationState {
         /**
          * Progress 0..1 across the whole cast, interpolated across the tick boundary.
          *
-         * <p>A held cast pins progress to the midpoint of the held phase instead of advancing, so the
-         * debug command can park a pose and let it be looked at. Held casts never expire.
+         * <p>A held cast pins progress instead of advancing: phase 0 at the end of the wind-up (the gather, held
+         * while the wand is held), phase 1 at the end of the release (the strike, held through a channel), phase 2
+         * in the middle of recovery. Held casts never expire.
          */
         public float progress(long nowTick, float partialTicks) {
             if (held()) {
                 return switch (holdPhase) {
                     case 0 -> windupEnd * 0.999f;
-                    case 1 -> (windupEnd + releaseEnd) * 0.5f;
+                    case 1 -> releaseEnd * 0.999f;
                     default -> (releaseEnd + 1f) * 0.5f;
                 };
             }

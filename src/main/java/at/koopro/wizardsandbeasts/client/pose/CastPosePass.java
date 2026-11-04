@@ -58,9 +58,11 @@ public final class CastPosePass extends ProceduralPosePass {
         // The table is written for a right-handed cast; a left-hander mirrors yaw and roll.
         float side = arm == HumanoidArm.RIGHT ? 1f : -1f;
 
+        // The look pitch rides on the arm by the pose's aim share, so a strike points where the caster looks
+        // (positive pitch looks down, and a larger xRot swings the arm down: the same sign vanilla's bow uses).
         builder.get(armPart)
                 .multiplier(weight)
-                .setRotDeg(PoseTarget.X_ROT, pose.castingArm().xRot())
+                .setRotDeg(PoseTarget.X_ROT, pose.castingArm().xRot() + pose.aim() * context.state().xRot)
                 .setRotDeg(PoseTarget.Y_ROT, pose.castingArm().yRot() * side)
                 .setRotDeg(PoseTarget.Z_ROT, pose.castingArm().zRot() * side);
 
@@ -77,10 +79,11 @@ public final class CastPosePass extends ProceduralPosePass {
     }
 
     /**
-     * First person poses the arm on screen, and only when it is the casting arm.
+     * First person poses the bare arm on screen, and only when it is the casting arm.
      *
-     * <p>The off hand does not cast, so posing it would animate the wrong arm in the one view where
-     * the player is looking straight at it.
+     * <p>Only reached when the arm itself is drawn, which is a wandless cast: holding a wand, vanilla draws the item
+     * and not the arm, and {@link FirstPersonCast} moves the wand instead. The off hand does not cast, so posing it
+     * would animate the wrong arm in the one view where the player is looking straight at it.
      */
     private void poseFirstPerson(PoseBuilder builder, PoseContext context,
                                  CastPoseConstants.CastPose pose, float weight) {
@@ -91,8 +94,7 @@ public final class CastPosePass extends ProceduralPosePass {
         float side = context.state().mainArm == HumanoidArm.RIGHT ? 1f : -1f;
 
         // Added rather than set, and at a reduced share: a full third-person shoulder rotation swings
-        // the hand out of the viewport entirely. Reduced rather than given its own table because the
-        // table itself is a placeholder — a second placeholder set would be twice the fiction.
+        // the hand out of the viewport entirely.
         builder.get(part)
                 .multiplier(weight * FIRST_PERSON_SHARE)
                 .addRotDeg(PoseTarget.X_ROT, pose.castingArm().xRot())
@@ -100,13 +102,7 @@ public final class CastPosePass extends ProceduralPosePass {
                 .addRotDeg(PoseTarget.Z_ROT, pose.castingArm().zRot() * side);
     }
 
-    /**
-     * How much of the third-person arm rotation first person keeps.
-     *
-     * <p>Placeholder, like everything else here. Schema §3.5 requires first person to be a real
-     * branch with its own authored values; this is a stand-in that at least does not put the hand
-     * off screen.
-     */
+    /** How much of the third-person arm rotation a bare first-person arm keeps, so the hand stays on screen. */
     private static final float FIRST_PERSON_SHARE = 0.4f;
 
     /**

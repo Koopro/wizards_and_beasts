@@ -132,8 +132,9 @@ public class WandItem extends GeoItemBase {
             // The previous hold's release has resolved by now (the client sends it before the next use); a channel
             // it left owing — its release packet never came — is charged rather than forgotten.
             at.koopro.wizardsandbeasts.spell.beam.WandBeamChannelLogic.settleReleasedChannel(sp, false);
-            WandCastSessions.begin(sp, WandCastSessions.gameTickOf(sp),
-                    sp.getData(ModAttachments.SPELL_DATA.get()).getActiveSpellId());
+            String holdSpellId = sp.getData(ModAttachments.SPELL_DATA.get()).getActiveSpellId();
+            WandCastSessions.begin(sp, WandCastSessions.gameTickOf(sp), holdSpellId);
+            at.koopro.wizardsandbeasts.spell.cast.CastAnimationSync.holdStarted(sp, holdSpellId);
             if (SpellClashLocks.isLocked(sp)) {
                 // A hold inside a spell clash feeds the lock: its release must not cast.
                 WandCastSessions.markClashHold(sp);

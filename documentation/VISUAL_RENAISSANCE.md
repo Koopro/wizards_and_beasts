@@ -159,8 +159,8 @@ assessed for redesign. `UiSurfaceTest`/`GuiSkinTest` pin contrast.
 | # | Defect | Evidence | Pri |
 |---|---|---|---|
 | D1 | Wand rig and data disagreed: `tip` bone 0 cubes and 0 tip variants while all 10 woods named a tip (4 of the 6 failures); 0 core bones behind 5 registered core modules (masked); five fractional cubes on the Talon handle; 72 stray texels in the knotty grain sheet outside the UV layout. *Correction:* VR-0 first attributed all six failures to the tips. | `wand.geo.json` @ `fcfea8bd`; 6 failing tests | **P0 — fixed in VR-1a** |
-| D2 | Cast animation never plays in gameplay | `SpellCastAnimationS2CPayload.broadcast` uncalled; 0/152 spells with `castTiming` | **P1** |
-| D3 | Cast pose values are placeholders, first person included | `CastPoseConstants` header | P1 (with D2) |
+| D2 | Cast animation never plays in gameplay | `SpellCastAnimationS2CPayload.broadcast` uncalled; 0/152 spells with `castTiming` | **P1 — fixed in VR-1b** |
+| D3 | Cast pose values are placeholders, first person included | `CastPoseConstants` header | P1 — fixed in VR-1b |
 | D4 | Patronus: horse, fox, goat and bat forms draw as a stag | `PatronusRenderer` models only cat/wolf/rabbit/parrot; `PatronusFormDeterminer` hands out 8 forms | **P1** |
 | D5 | Hippogriff reads as a horse with a beak: horse-shaped head and neck in the body's brown, folded wings read as flank stripes | `visual_renaissance/hippogriff_side.jpg`; the griffin beside it has the eagle front it lacks | **P1** (alpha roster, canon icon) |
 | D6 | Hamlet buildings share one front; wandmaker has no wand identity indoors | `visual_renaissance/hamlet.jpg`; `LIVING_WORLD_AUDIT.md` §15 | **P1** (in progress) |
@@ -339,3 +339,27 @@ VR-4   Audio (owner decides sourcing) ─> event files swapped in sounds.json, n
 - Seen in client (`ItemShowcaseCapture`: ash, blackthorn, vine, Talon): hand and frame correct, no missing tip; found D13.
 - Tests: tip/core assumptions retargeted; `wand_looks.golden` regenerated (only the `tip:` entries and the four
   holly rare indices changed). `./gradlew test`: 2,997 run, **0 failed**, 0 errors, 0 skipped.
+
+## VR-1b — cast poses play (2026-11-04)
+
+Owner decision: **server moments** (`WAND_CAST_POSE_SCHEMA.md` §4). Record: `visual_renaissance/cast_poses.jpg`.
+
+- `CastAnimationSync` sends on the existing `SpellCastAnimationS2CPayload` (format unchanged) at the server's own
+  cast moments: hold begins (`WandItem.use`) → held wind-up (a beam holds the strike, it channels from tick one);
+  release accepted and the spell cast (`SpellCastC2SPayload` release funnel) → strike + settle timed from that moment;
+  hold ended without a cast (refused, rejected, `WandCastSessions.abort` of a live session) → off. Strike length by
+  `castType` (beam 8, cone 12, others 10 ticks); a spell's `castTiming` still overrides. The client never predicts.
+- `CastPoseConstants` authored, third and first person: wind-up gathers the wand above the shoulder with the chest
+  turned away, the strike points along the look (the arm adds the head's pitch by an `aim` share), the settle falls
+  below level, then neutral. Wingardium Leviosa gets the one per-spell set, the book's swish and flick (PS ch. 10).
+- Vanilla holds an item at a right angle to the arm, so a pointing arm held the wand straight up: `WandRenderer` turns
+  `wand_root` 90° about Z by the pose's aim share during a third-person cast.
+- First person draws the held wand, not the arm: `FirstPersonCast` (RenderHandEvent) moves the held wand, pivoting
+  on the hand.
+- Harness: `WB_EQUIPMENT_SHOWCASE=cast` shoots every phase (quarter/side/front/first person), the Leviosa set, and
+  a **real cast** of Arresto Momentum in survival through the use key: seen held wind-up (client `holdPhase=0`,
+  server using the wand), the strike after release (10 ticks, spell on cooldown), then settled.
+- Not in this pass: proficiency time-scale (D3 of the schema, 0.7× floor) and the broom variant (D7).
+- Tests: `CastPoseTest` (gather above a level strike, settle below; Leviosa swish across then flick up),
+  `CastAnimationSyncTest`; `NoUntracedLearningTest` allowlists the cast harness. `./gradlew test`: 3,001 run, **0 failed**.
+

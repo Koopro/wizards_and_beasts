@@ -121,6 +121,7 @@ public class WizardsAndBeastsClient {
         // a cancelled RenderHandEvent stops here, so theirs must get the first say.
         NeoForge.EVENT_BUS.addListener(
                 at.koopro.wizardsandbeasts.client.trinket.WizardCardHandRenderer::onRenderHand);
+        NeoForge.EVENT_BUS.addListener(at.koopro.wizardsandbeasts.client.pose.FirstPersonCast::onRenderHand);
         NeoForge.EVENT_BUS.addListener(AnimagusClientViewHandler::onRenderNameTag);
         NeoForge.EVENT_BUS.addListener(InventoryScreenInjector::onScreenInit);
         NeoForge.EVENT_BUS.addListener(CharacterSheetKeyHandler::onClientTick);

@@ -63,6 +63,10 @@ import java.util.function.Consumer;
  * {@code wb_equipment_capture}); {@code WB_EQUIPMENT_SHOWCASE_OUT} the folder under
  * {@code screenshots/} (default {@code equipment_showcase}). Shots are {@code <outfit>__<view>.png};
  * the client quits after the last one and logs which player model (slim/classic) it drew.
+ *
+ * <p>{@code WB_EQUIPMENT_SHOWCASE=cast} photographs the cast poses instead: a robed wizard with a wand, each
+ * cast phase parked by the same {@code SpellCastAnimationS2CPayload} a real cast sends, from three sides and in
+ * first person, plus a strike caught mid-release from a timed cast.
  */
 @EventBusSubscriber(modid = WizardsAndBeastsMod.MODID, value = Dist.CLIENT)
 public final class EquipmentShowcaseCapture {
@@ -71,6 +75,7 @@ public final class EquipmentShowcaseCapture {
 
     private static final boolean ENABLED =
             System.getenv("WB_EQUIPMENT_SHOWCASE") != null && !FMLEnvironment.isProduction();
+    private static final boolean CAST = "cast".equals(System.getenv("WB_EQUIPMENT_SHOWCASE"));
     private static final int LOAD_TICKS = 80;
     private static final int STAGE_Y = 200;
     private static final double START_X = -10.5;
@@ -126,6 +131,21 @@ public final class EquipmentShowcaseCapture {
                 wear(p, new ItemStack(DarkArtefactItemRegistry.DEATHLY_HALLOW_CLOAK.get()));
             }));
 
+    /** The cast mode's one subject: a student with an ash wand, so the arm reads against plain cloth. */
+    private static final List<Outfit> CAST_OUTFITS = List.of(new Outfit("cast", p -> {
+        p.setItemSlot(EquipmentSlot.LEGS, new ItemStack(ArmorItemRegistry.STUDENT_ROBE_LEGS.get()));
+        p.setItemSlot(EquipmentSlot.FEET, new ItemStack(ArmorItemRegistry.STUDENT_ROBE_BOOTS.get()));
+        wear(p, new ItemStack(ArmorItemRegistry.STUDENT_ROBE_CHEST.get()));
+        ItemStack wand = new ItemStack(at.koopro.wizardsandbeasts.registry.WandItemRegistry.WAND.get());
+        wand.set(at.koopro.wizardsandbeasts.wand.WandComponents.WAND_WOOD.get(),
+                net.minecraft.resources.Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "ash"));
+        p.setItemSlot(EquipmentSlot.MAINHAND, wand);
+    }));
+
+    private static List<Outfit> outfits() {
+        return CAST ? CAST_OUTFITS : OUTFITS;
+    }
+
     private static final List<Step> SCRIPT = new ArrayList<>();
     private static Stage stage = Stage.IDLE;
     private static int wait;
@@ -171,6 +191,10 @@ public final class EquipmentShowcaseCapture {
 
     private static void buildScript(Outfit current) {
         SCRIPT.clear();
+        if (CAST) {
+            buildCastScript(current);
+            return;
+        }
         SCRIPT.add(new Step("dress", 30, false, Cam.QUARTER, p -> moves(false, false), p -> {
             undress(p);
             p.teleportTo(p.level(), START_X, STAGE_Y, 0.5, Set.of(), -90.0F, 0.0F, true);
@@ -189,6 +213,103 @@ public final class EquipmentShowcaseCapture {
         SCRIPT.add(new Step("character_sheet", 10, true, Cam.SCREEN,
                 p -> Minecraft.getInstance().setScreen(new CharacterSheetScreen()), NOTHING));
         SCRIPT.add(new Step("close", 2, false, Cam.QUARTER, p -> Minecraft.getInstance().setScreen(null), NOTHING));
+    }
+
+    /** A cast parked on a phase (-1: none), sent exactly as the server sends a real one. */
+    private static Consumer<ServerPlayer> castPhase(int phase) {
+        return p -> at.koopro.wizardsandbeasts.network.spell.SpellCastAnimationS2CPayload.send(p,
+                new at.koopro.wizardsandbeasts.network.spell.SpellCastAnimationS2CPayload(p.getId(),
+                        "wizards_and_beasts:capture", phase < 0 ? 0 : 1, 0.35f, 0.6f, phase));
+    }
+
+    private static void buildCastScript(Outfit current) {
+        SCRIPT.add(new Step("dress", 30, false, Cam.QUARTER, p -> moves(false, false), p -> {
+            // The stage world hurt the subject (red flash, damage hearts in every shot): nothing here is about damage.
+            p.getAbilities().invulnerable = true;
+            p.onUpdateAbilities();
+            p.setHealth(p.getMaxHealth());
+            p.removeAllEffects();
+            undress(p);
+            p.teleportTo(p.level(), START_X, STAGE_Y, 0.5, Set.of(), -90.0F, 0.0F, true);
+            current.dress().accept(p);
+        }));
+        String[] phases = {"rest", "windup", "channel", "recovery"};
+        for (int i = 0; i < phases.length; i++) {
+            String phase = phases[i];
+            SCRIPT.add(new Step(phase + "_set", 6, false, Cam.QUARTER, NONE, castPhase(i - 1)));
+            SCRIPT.add(new Step(phase + "_quarter", 4, true, Cam.QUARTER, NONE, NOTHING));
+            SCRIPT.add(new Step(phase + "_side", 4, true, Cam.SIDE, NONE, NOTHING));
+            SCRIPT.add(new Step(phase + "_front", 4, true, Cam.FRONT, NONE, NOTHING));
+            SCRIPT.add(new Step(phase + "_first_person", 6, true, Cam.SELF, NONE, NOTHING));
+        }
+        // Wingardium Leviosa's swish (held, as its channel holds it) and flick, parked under its own spell id.
+        for (int i = 1; i <= 2; i++) {
+            int held = i;
+            SCRIPT.add(new Step("leviosa_" + (i == 1 ? "swish" : "flick") + "_set", 6, false, Cam.QUARTER, NONE, p ->
+                    at.koopro.wizardsandbeasts.network.spell.SpellCastAnimationS2CPayload.send(p,
+                            new at.koopro.wizardsandbeasts.network.spell.SpellCastAnimationS2CPayload(p.getId(),
+                                    "wizards_and_beasts:wingardium_leviosa", 1, 0.35f, 0.6f, held))));
+            SCRIPT.add(new Step("leviosa_" + (i == 1 ? "swish" : "flick") + "_front", 4, true, Cam.FRONT, NONE, NOTHING));
+            SCRIPT.add(new Step("leviosa_" + (i == 1 ? "swish" : "flick") + "_quarter", 4, true, Cam.QUARTER, NONE, NOTHING));
+        }
+        // A strike caught in motion: a 40-tick cast, shot just after the release window opens.
+        SCRIPT.add(new Step("strike_set", 15, false, Cam.SIDE, NONE, p ->
+                at.koopro.wizardsandbeasts.network.spell.SpellCastAnimationS2CPayload.send(p,
+                        new at.koopro.wizardsandbeasts.network.spell.SpellCastAnimationS2CPayload(p.getId(),
+                                "wizards_and_beasts:capture", 40, 0.35f, 0.6f, -1))));
+        SCRIPT.add(new Step("strike_side", 1, true, Cam.SIDE, NONE, NOTHING));
+
+        // A real cast through the gameplay path, not a parked pose: the use key held and let go, so the client sends
+        // the real use and release packets and the server's own cast moments send every pose (CastAnimationSync).
+        // (Starting the hold on the server alone made the client let go at once: vanilla releases a use whose key
+        // is not down.)
+        SCRIPT.add(new Step("real_ready", 10, false, Cam.SIDE, NONE, EquipmentShowcaseCapture::readyRealCaster));
+        SCRIPT.add(new Step("real_hold_set", 8, false, Cam.SIDE,
+                p -> Minecraft.getInstance().options.keyUse.setDown(true), NOTHING));
+        SCRIPT.add(new Step("real_hold_side", 2, true, Cam.SIDE, EquipmentShowcaseCapture::logClientCast, p ->
+                LOGGER.info("Cast showcase: server hold: usingWand={} session={}",
+                        at.koopro.wizardsandbeasts.item.wand.WandItem.isUsingWand(p),
+                        at.koopro.wizardsandbeasts.spell.cast.WandCastSessions.peek(p) != null)));
+        SCRIPT.add(new Step("real_hold_quarter", 2, true, Cam.QUARTER, NONE, NOTHING));
+        SCRIPT.add(new Step("real_release_set", 3, false, Cam.SIDE,
+                p -> Minecraft.getInstance().options.keyUse.setDown(false), NOTHING));
+        SCRIPT.add(new Step("real_strike_side", 1, true, Cam.SIDE, EquipmentShowcaseCapture::logClientCast, p -> {
+            var data = p.getData(at.koopro.wizardsandbeasts.registry.ModAttachments.SPELL_DATA.get());
+            LOGGER.info("Cast showcase: real cast of {} {}", REAL_SPELL,
+                    data.isOnCooldown(realSpellId(), p.level().getGameTime()) ? "SUCCEEDED (on cooldown)" : "did NOT cast");
+        }));
+        SCRIPT.add(new Step("real_settle_wait", 4, false, Cam.SIDE, NONE, NOTHING));
+        SCRIPT.add(new Step("real_settle_side", 1, true, Cam.SIDE, NONE, NOTHING));
+    }
+
+    private static void logClientCast(LocalPlayer player) {
+        long now = at.koopro.wizardsandbeasts.client.pose.ClientCastAnimationState.clientTick();
+        var cast = at.koopro.wizardsandbeasts.client.pose.ClientCastAnimationState.get(player.getId(), now);
+        LOGGER.info("Cast showcase: client cast state: {}", cast == null ? "none" : cast);
+    }
+
+    /** The lifecycle game tests' own spell, known to cast through this path ({@code WandCastLifecycleTests}). */
+    private static final String REAL_SPELL = "arresto_momentum";
+
+    private static String realSpellId() {
+        var spell = at.koopro.wizardsandbeasts.spell.core.Spells.byId(REAL_SPELL);
+        return spell == null ? REAL_SPELL : spell.getId();
+    }
+
+    private static void readyRealCaster(ServerPlayer p) {
+        at.koopro.wizardsandbeasts.gametest.WizardTestSupport.makeWandkind(p);
+        at.koopro.wizardsandbeasts.gametest.WizardTestSupport.giveBondedWand(p);
+        at.koopro.wizardsandbeasts.gametest.WizardTestSupport.settleAllegiance(p);
+        var data = p.getData(at.koopro.wizardsandbeasts.registry.ModAttachments.SPELL_DATA.get());
+        data.learnSpell(realSpellId());
+        var prerequisite = at.koopro.wizardsandbeasts.spell.core.Spells.byId("wingardium_leviosa");
+        if (prerequisite != null) {
+            data.learnSpell(prerequisite.getId());
+        }
+        data.setLoadoutSpell(0, realSpellId());
+        data.setActiveSlot(0);
+        data.setCooldown(realSpellId(), 0L);
+        data.setGlobalCooldownEndTick(0L);
     }
 
     private static void moves(boolean forward, boolean sneak) {
@@ -229,7 +350,7 @@ public final class EquipmentShowcaseCapture {
         GLFW.glfwSetWindowSize(mc.getWindow().handle(), 1600, 900);
         stage = Stage.OPENING;
         String world = System.getenv().getOrDefault("WB_EQUIPMENT_SHOWCASE_WORLD", "wb_equipment_capture");
-        LOGGER.info("Equipment showcase: {} outfits into {}", OUTFITS.size(), out());
+        LOGGER.info("Equipment showcase: {} outfits into {}", outfits().size(), out());
         mc.createWorldOpenFlows().openWorld(world, () -> stage = Stage.DONE);
     }
 
@@ -263,7 +384,7 @@ public final class EquipmentShowcaseCapture {
             LOGGER.info("Equipment showcase: player model is {}", mc.player.getSkin().model());
             outfit = 0;
             step = 0;
-            buildScript(OUTFITS.getFirst());
+            buildScript(outfits().getFirst());
             begin(mc, server);
             return;
         }
@@ -285,7 +406,7 @@ public final class EquipmentShowcaseCapture {
         }
         captureThisFrame = false;
         Minecraft mc = Minecraft.getInstance();
-        String name = OUTFITS.get(outfit).name() + "__" + SCRIPT.get(step).name() + ".png";
+        String name = outfits().get(outfit).name() + "__" + SCRIPT.get(step).name() + ".png";
         Path file = mc.gameDirectory.toPath().resolve(out()).resolve(name);
         Screenshot.takeScreenshot(mc.getMainRenderTarget(), image -> Util.ioPool().execute(() -> {
             try (image) {
@@ -306,14 +427,14 @@ public final class EquipmentShowcaseCapture {
         if (step >= SCRIPT.size()) {
             step = 0;
             outfit++;
-            if (outfit >= OUTFITS.size()) {
+            if (outfit >= outfits().size()) {
                 stage = Stage.DONE;
                 moves(false, false);
                 LOGGER.info("Equipment showcase: done");
                 mc.stop();
                 return;
             }
-            buildScript(OUTFITS.get(outfit));
+            buildScript(outfits().get(outfit));
         }
         begin(mc, server);
     }
