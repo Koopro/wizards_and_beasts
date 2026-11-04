@@ -213,8 +213,8 @@ public class WandRefineMenu extends AbstractContainerMenu {
                 }
                 out.set(WandComponents.WAND_FLEXIBILITY.get(), next.get());
             }
-            case HANDLE, TIP, ORNAMENT -> {
-                WandSlot slot = action == Action.HANDLE ? WandSlot.HANDLE : action == Action.TIP ? WandSlot.TIP : WandSlot.ORNAMENT;
+            case HANDLE, ORNAMENT -> {
+                WandSlot slot = action == Action.HANDLE ? WandSlot.HANDLE : WandSlot.ORNAMENT;
                 WandConfiguration config = WandAppearance.configuration(level.registryAccess(), wand);
                 List<Identifier> choices = WandModuleRegistry.getAllForSlot(slot).stream().map(WandModule::id).toList();
                 Optional<Identifier> next = WandRefinement.nextModule(choices, config.getModule(slot).orElse(null),

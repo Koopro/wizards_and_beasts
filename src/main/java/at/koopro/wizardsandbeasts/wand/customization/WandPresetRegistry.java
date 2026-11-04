@@ -36,37 +36,36 @@ public final class WandPresetRegistry {
         PRESETS.clear();
 
         // Plain holly, an unshowy wand: the base shape with a shaped grip.
-        register("harry", "Harry's Wand", "smooth", "straight", "pointed", null);
+        register("harry", "Harry's Wand", "smooth", "straight", null);
         // Vine wood, carved with a climbing vine.
-        register("hermione", "Hermione's Wand", "vine", "straight", "pointed", "vine_wrap");
-        // Thick and plain, with a heavy end.
-        register("ron", "Ron's Wand", "bulbous", "straight", "blunt", null);
+        register("hermione", "Hermione's Wand", "vine", "straight", "vine_wrap");
+        // Thick and plain.
+        register("ron", "Ron's Wand", "bulbous", "straight", null);
         // The Elder Wand: pale, with its run of nodes.
-        register("elder", "The Elder Wand", "classic", "nodular", "pointed", null);
+        register("elder", "The Elder Wand", "classic", "nodular", null);
         // Bone-white and thin, with the row of knuckles.
-        register("voldemort", "Yew Wand", "bone", "straight", "claw", null);
-        // One dark talon: sculpted clawed grip, bowed tapering shaft, curved point.
-        register("bellatrix", "Talon Wand", "bellatrix_handle", "bellatrix_shaft", "bellatrix_tip", null);
-        // A cane: flared grip under a serpent's head.
-        register("lucius", "Serpent Cane", "flared", "straight", "serpent", "serpent_coil");
+        register("voldemort", "Yew Wand", "bone", "straight", null);
+        // One dark talon: sculpted clawed grip, bowed tapering shaft.
+        register("bellatrix", "Talon Wand", "bellatrix_handle", "bellatrix_shaft", null);
+        // A cane: flared grip and a serpent's coil.
+        register("lucius", "Serpent Cane", "flared", "straight", "serpent_coil");
         // Slim and severe.
-        register("snape", "Ebony Wand", "smooth", "straight", "needle", null);
+        register("snape", "Ebony Wand", "smooth", "tapered", null);
         // Ornate, banded and engraved.
-        register("sirius", "Ornate Wand", "flared", "reeded", "spiralled", "runes");
+        register("sirius", "Ornate Wand", "flared", "reeded", "runes");
         // Chunky and hand-carved.
-        register("luna", "Carved Wand", "bulbous", "barked", "budded", null);
+        register("luna", "Carved Wand", "bulbous", "barked", null);
         // Neat, dark and unadorned.
-        register("draco", "Hawthorn Wand", "carved", "straight", "pointed", null);
+        register("draco", "Hawthorn Wand", "carved", "straight", null);
         // Precise, with a metal collar.
-        register("mcgonagall", "Fir Wand", "ribbed", "segmented", "pointed", "metal_band");
+        register("mcgonagall", "Fir Wand", "ribbed", "segmented", "metal_band");
     }
 
     private static void register(String presetId, String displayName,
-                                 String handle, String shaft, String tip, String ornament) {
+                                 String handle, String shaft, String ornament) {
         Map<WandSlot, Identifier> modules = new LinkedHashMap<>();
         if (!put(modules, presetId, WandSlot.HANDLE, handle)
-                || !put(modules, presetId, WandSlot.SHAFT, shaft)
-                || !put(modules, presetId, WandSlot.TIP, tip)) {
+                || !put(modules, presetId, WandSlot.SHAFT, shaft)) {
             return;
         }
         if (ornament != null && !put(modules, presetId, WandSlot.ORNAMENT, ornament)) {

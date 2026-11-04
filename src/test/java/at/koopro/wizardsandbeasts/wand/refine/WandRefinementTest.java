@@ -48,7 +48,7 @@ class WandRefinementTest {
         assertEquals(Status.NO_MATERIAL, check(Action.POLISH, FURNISHED, true, Material.NONE, 0.5f, WandFlexibility.PLIANT));
         assertEquals(Status.WRONG_MATERIAL, check(Action.POLISH, FURNISHED, true, Material.OTHER_LOG, 0.5f, WandFlexibility.PLIANT));
         assertEquals(Status.WRONG_MATERIAL, check(Action.STIFFER, FURNISHED, true, Material.OTHER_LOG, 1f, WandFlexibility.PLIANT));
-        assertEquals(Status.READY, check(Action.TIP, FURNISHED, true, Material.OWN_WOOD_LOG, 1f, WandFlexibility.PLIANT));
+        assertEquals(Status.READY, check(Action.HANDLE, FURNISHED, true, Material.OWN_WOOD_LOG, 1f, WandFlexibility.PLIANT));
         assertEquals(Status.WRONG_MATERIAL, check(Action.ORNAMENT, FURNISHED, true, Material.HONEYCOMB, 1f, WandFlexibility.PLIANT));
     }
 

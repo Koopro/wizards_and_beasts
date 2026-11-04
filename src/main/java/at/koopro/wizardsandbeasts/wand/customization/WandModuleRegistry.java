@@ -78,28 +78,8 @@ public final class WandModuleRegistry {
         register(WandSlot.SHAFT, "sinuous");
         register(WandSlot.SHAFT, "bellatrix_shaft", "bellatrix");
 
-        // TIP variants
-        register(WandSlot.TIP, "pointed");
-        register(WandSlot.TIP, "orb");
-        register(WandSlot.TIP, "split");
-        register(WandSlot.TIP, "crystal");
-        register(WandSlot.TIP, "blunt");
-        register(WandSlot.TIP, "needle");
-        register(WandSlot.TIP, "chisel");
-        register(WandSlot.TIP, "budded");
-        register(WandSlot.TIP, "claw");
-        register(WandSlot.TIP, "serpent");
-        register(WandSlot.TIP, "spiralled");
-        register(WandSlot.TIP, "leaf");
-        register(WandSlot.TIP, "hook");
-        register(WandSlot.TIP, "bellatrix_tip", "bellatrix");
-
-        // CORE variants
-        register(WandSlot.CORE, "phoenix_feather");
-        register(WandSlot.CORE, "dragon_heartstring");
-        register(WandSlot.CORE, "unicorn_hair");
-        register(WandSlot.CORE, "thestral_tail");
-        register(WandSlot.CORE, "veela_hair");
+        // No TIP or CORE variants (dropped 2026-11-04): the redone rig (fcfea8bd) ends at the shaft and has no core
+        // bones. A wand's core shows as the light at its point, from the core component (WandLookResolver), not here.
 
         // ORNAMENT variants
         register(WandSlot.ORNAMENT, "runes");

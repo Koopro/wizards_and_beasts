@@ -67,7 +67,7 @@ class WandAppearanceTest {
         Set<WandConfiguration> shapes = new HashSet<>();
         SHIPPED.forEach((id, def) -> {
             assertTrue(def.appearance().tint().isPresent(), id + " names no tint");
-            assertEquals(3, def.appearance().modules().size(), id + " must name a handle, a shaft and a tip");
+            assertEquals(2, def.appearance().modules().size(), id + " must name a handle and a shaft (tips were retired 2026-11-04)");
             assertTrue(tints.add(WandAppearance.woodTint(def, wood(id))),
                     id + " shares a colour with another wood -- two wands would look alike");
             assertTrue(shapes.add(WandAppearance.configurationFor(def)),

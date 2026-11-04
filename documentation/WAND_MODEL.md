@@ -5,6 +5,15 @@ One production wand model, `geckolib/models/item/wand.geo.json`, owned by `tools
 Built 2026-09-29 on the V5 "Blockbench-safe modular" foundation. The Elder Wand keeps its own model
 (`tools/item_geo.py`) but follows the same length and attachment.
 
+> **2026-11-04: tips and core modules retired.** The rig redone in `fcfea8bd` has no `tip_<variant>` and no
+> `core_<variant>` bones, so no TIP or CORE module is registered any more and no wood, rare construction or preset
+> names one (`WandSlot.TIP`/`CORE` remain so old saved wands still decode; the ids they name draw nothing). The
+> `tip` container and the `wand_spell_attachment` under it stay: beams and clashes read the point from there. The
+> wand-refine "New tip" action is gone. The Talon handle's five fractional cubes were rounded to whole units
+> (pommel narrowed to 2 so its UV island stays clear of the shaft islands). The contract below still describes the
+> tip band; read it as the attachment band. Where `wand_model.py` (local tools repo) still emits tips or cores, it no
+> longer matches the shipped rig.
+
 ## Contract
 
 ```

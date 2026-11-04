@@ -22,11 +22,10 @@ import java.util.Optional;
  */
 public record WandConfiguration(@NonNull Map<WandSlot, Identifier> modules) {
 
-    /** Default configuration: classic handle, straight shaft, pointed tip. No core or ornament. */
+    /** Default configuration: classic handle, straight shaft. No core or ornament (and no tip: retired). */
     public static final WandConfiguration DEFAULT = new WandConfiguration(Map.of(
             WandSlot.HANDLE, Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "classic"),
-            WandSlot.SHAFT,  Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "straight"),
-            WandSlot.TIP,    Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "pointed")
+            WandSlot.SHAFT,  Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "straight")
     ));
 
     /** Canonical constructor — ensures immutable copy of the provided map. */

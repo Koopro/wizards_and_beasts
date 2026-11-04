@@ -9,7 +9,11 @@ import java.util.Optional;
 public enum WandSlot implements StringRepresentable {
     HANDLE("handle_", "handle", true),
     SHAFT("shaft_", "shaft", true),
-    TIP("tip_", "tip", true),
+    /**
+     * Retired 2026-11-04: the redone rig has no tip variants, so no module is registered here. Kept so a wand saved
+     * with a tip still decodes; the id it names simply draws nothing.
+     */
+    TIP("tip_", "tip", false),
     CORE("core_", "core", false),
     ORNAMENT("ornament_", "ornament", false);
 

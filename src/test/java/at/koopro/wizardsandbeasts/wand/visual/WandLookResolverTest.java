@@ -170,7 +170,7 @@ class WandLookResolverTest {
 
     @Test
     void anExplicitConfigurationWinsOverEverythingTheWoodSays() {
-        WandConfiguration explicit = WandConfiguration.DEFAULT.withModule(WandSlot.TIP, id("hook"));
+        WandConfiguration explicit = WandConfiguration.DEFAULT.withModule(WandSlot.HANDLE, id("talon"));
         WandLook look = WandLookResolver.resolve(null, id("ash"), null, null, 12.0f, WandFlexibility.PLIANT,
                 explicit, false);
         assertEquals(explicit, look.configuration());
@@ -244,7 +244,7 @@ class WandLookResolverTest {
     @Test
     void theElderWandIsNeverReshapedOrTinted() {
         WandLook elder = WandLookResolver.resolve(null, id("elder"), null, id("thestral_tail_hair"), 9.0f,
-                WandFlexibility.SPRINGY, WandConfiguration.DEFAULT.withModule(WandSlot.TIP, id("hook")), true);
+                WandFlexibility.SPRINGY, WandConfiguration.DEFAULT.withModule(WandSlot.HANDLE, id("talon")), true);
         assertTrue(elder.elder());
         assertEquals(WandAppearance.UNTINTED, elder.tint());
         assertEquals(1.0f, elder.lengthScale());

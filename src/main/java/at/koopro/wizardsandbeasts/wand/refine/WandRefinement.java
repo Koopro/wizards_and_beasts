@@ -50,7 +50,7 @@ public final class WandRefinement {
     private WandRefinement() {}
 
     public enum Action {
-        POLISH, STIFFER, SUPPLER, HANDLE, TIP, ORNAMENT;
+        POLISH, STIFFER, SUPPLER, HANDLE, ORNAMENT;
 
         public String key() {
             return "gui.wizards_and_beasts.wand_refine.action." + name().toLowerCase(Locale.ROOT);
@@ -61,7 +61,7 @@ public final class WandRefinement {
         }
 
         public boolean look() {
-            return this == HANDLE || this == TIP || this == ORNAMENT;
+            return this == HANDLE || this == ORNAMENT;
         }
 
         public float requiredTier() {
@@ -125,7 +125,7 @@ public final class WandRefinement {
         return switch (action) {
             case POLISH -> material == Material.HONEYCOMB;
             case STIFFER, SUPPLER -> material == Material.OWN_WOOD_LOG;
-            case HANDLE, TIP, ORNAMENT -> material == Material.OWN_WOOD_LOG || material == Material.OTHER_LOG;
+            case HANDLE, ORNAMENT -> material == Material.OWN_WOOD_LOG || material == Material.OTHER_LOG;
         };
     }
 

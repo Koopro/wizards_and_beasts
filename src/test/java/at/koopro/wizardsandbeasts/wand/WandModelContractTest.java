@@ -76,6 +76,12 @@ class WandModelContractTest {
     void everyRegisteredModuleIsAVariantBoneOfItsSlot() {
         for (WandSlot slot : WandSlot.values()) {
             List<WandModule> modules = WandModuleRegistry.getAllForSlot(slot);
+            if (slot == WandSlot.TIP || slot == WandSlot.CORE) {
+                // Retired 2026-11-04: the rig ends at the shaft and has no core bones (the core is the light at the
+                // point). A module here would name a bone that does not exist.
+                assertTrue(modules.isEmpty(), slot + " was retired but has modules again");
+                continue;
+            }
             assertFalse(modules.isEmpty(), slot + " has no modules");
             for (WandModule module : modules) {
                 JsonObject bone = BONES.get(module.boneName());
@@ -137,12 +143,6 @@ class WandModelContractTest {
             assertTrue(top.minX >= -0.75 - EPS && top.maxX <= 0.75 + EPS && top.minX <= -0.5 + EPS && top.maxX >= 0.5 - EPS
                             && top.minZ >= -0.75 - EPS && top.maxZ <= 0.75 + EPS && top.minZ <= -0.5 + EPS && top.maxZ >= 0.5 - EPS,
                     module.boneName() + ": top is off the axis or outside 1.0..1.5");
-        }
-        for (WandModule module : WandModuleRegistry.getAllForSlot(WandSlot.TIP)) {
-            Bounds b = posed(module.boneName());
-            assertTrue(b.minY >= SHAFT_TOP - EPS, module.boneName() + " reaches below y 23");
-            Bounds base = posedTouching(module.boneName(), SHAFT_TOP, false);
-            assertTrue(base.minX <= -0.5 + EPS && base.maxX >= 0.5 - EPS, module.boneName() + ": no 1.0 neck on the joint");
         }
     }
 
