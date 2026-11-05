@@ -4,5 +4,9 @@
     "magical-sense"
   ],
   "herd_radius": 16,
-  "sense_radius": 24
+  "sense_radius": 24,
+  "needs": {
+    "social": 12000,
+    "thirst": 12000
+  }
 }

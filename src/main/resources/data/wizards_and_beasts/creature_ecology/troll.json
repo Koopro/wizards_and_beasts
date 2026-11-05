@@ -1,0 +1,11 @@
+{
+  "extends": "great_beast",
+  "capabilities": [
+    "aggressive",
+    "predator"
+  ],
+  "needs": {
+    "energy": 24000
+  },
+  "fed_ticks": 12000
+}

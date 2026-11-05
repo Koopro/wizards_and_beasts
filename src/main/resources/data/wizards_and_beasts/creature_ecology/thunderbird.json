@@ -1,0 +1,12 @@
+{
+  "capabilities": [
+    "flying",
+    "territorial",
+    "solitary",
+    "magical-sense",
+    "diurnal"
+  ],
+  "territory_radius": 32,
+  "sense_radius": 32,
+  "personal_space": 32
+}

@@ -1,0 +1,6 @@
+{
+  "extends": "aquatic_drifter",
+  "capabilities": [
+    "herd"
+  ]
+}

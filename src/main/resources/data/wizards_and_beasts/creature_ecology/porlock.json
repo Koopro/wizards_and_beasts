@@ -1,0 +1,12 @@
+{
+  "capabilities": [
+    "human-avoidant",
+    "cowardly",
+    "grazer"
+  ],
+  "needs": {
+    "hunger": 24000,
+    "thirst": 12000
+  },
+  "sense_radius": 12
+}

@@ -1,0 +1,5 @@
+{
+  "extends": "aquatic_ambusher",
+  "territory_radius": 16,
+  "sense_radius": 16
+}

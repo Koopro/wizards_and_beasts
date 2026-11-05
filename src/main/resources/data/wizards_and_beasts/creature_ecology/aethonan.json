@@ -1,0 +1,6 @@
+{
+  "extends": "winged_grazer",
+  "capabilities": [
+    "diurnal"
+  ]
+}

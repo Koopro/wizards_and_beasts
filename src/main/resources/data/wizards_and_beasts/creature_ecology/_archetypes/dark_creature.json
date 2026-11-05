@@ -1,0 +1,10 @@
+{
+  "capabilities": [
+    "nocturnal",
+    "territorial",
+    "aggressive",
+    "illusion-aware"
+  ],
+  "territory_radius": 12,
+  "sense_radius": 16
+}

@@ -5,5 +5,8 @@
     "burrowing",
     "cowardly"
   ],
-  "sense_radius": 12
+  "sense_radius": 12,
+  "needs": {
+    "curiosity": 6000
+  }
 }

@@ -1,0 +1,9 @@
+{
+  "capabilities": [
+    "flying",
+    "weather-shy",
+    "grooming",
+    "human-avoidant"
+  ],
+  "sense_radius": 14
+}

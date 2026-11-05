@@ -1,0 +1,10 @@
+{
+  "capabilities": [
+    "territorial",
+    "crepuscular",
+    "grooming",
+    "illusion-aware"
+  ],
+  "territory_radius": 12,
+  "sense_radius": 14
+}

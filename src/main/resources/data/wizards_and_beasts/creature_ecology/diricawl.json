@@ -1,0 +1,6 @@
+{
+  "extends": "grazer_herd",
+  "capabilities": [
+    "diurnal"
+  ]
+}

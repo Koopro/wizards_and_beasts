@@ -1,0 +1,10 @@
+{
+  "extends": "great_beast",
+  "capabilities": [
+    "browser",
+    "diurnal"
+  ],
+  "needs": {
+    "hunger": 24000
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "extends": "dark_creature",
+  "capabilities": [
+    "social"
+  ]
+}

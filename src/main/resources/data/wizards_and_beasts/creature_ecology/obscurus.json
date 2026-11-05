@@ -1,0 +1,6 @@
+{
+  "extends": "magical_being",
+  "capabilities": [
+    "flying"
+  ]
+}

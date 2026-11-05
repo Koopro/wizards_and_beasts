@@ -1,0 +1,10 @@
+{
+  "extends": "household_pest",
+  "capabilities": [
+    "magical-sense",
+    "social"
+  ],
+  "needs": {
+    "magic": 12000
+  }
+}

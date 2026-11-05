@@ -1,0 +1,10 @@
+{
+  "extends": "pet_creature",
+  "capabilities": [
+    "crepuscular",
+    "predator"
+  ],
+  "hunt_style": "stalk",
+  "fed_ticks": 12000,
+  "sense_radius": 12
+}

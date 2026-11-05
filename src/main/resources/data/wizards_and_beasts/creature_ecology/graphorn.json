@@ -1,0 +1,6 @@
+{
+  "extends": "great_beast",
+  "capabilities": [
+    "aggressive"
+  ]
+}

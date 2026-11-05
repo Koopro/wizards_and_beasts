@@ -1,0 +1,8 @@
+{
+  "capabilities": [
+    "aquatic",
+    "solitary"
+  ],
+  "personal_space": 24,
+  "sense_radius": 20
+}

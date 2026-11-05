@@ -1,0 +1,11 @@
+{
+  "capabilities": [
+    "predator",
+    "territorial",
+    "solitary"
+  ],
+  "hunt_style": "stalk",
+  "territory_radius": 12,
+  "sense_radius": 14,
+  "personal_space": 16
+}

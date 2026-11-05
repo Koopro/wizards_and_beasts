@@ -150,6 +150,22 @@ final class CreatureLiveReport implements AdminReport {
             EcologyCapability cause = ecology.decision().cause();
             out.row("cause", cause == null ? "—" : cause.getSerializedName());
             out.flag("awake", ecology.awake(), true);
+            out.row("held", (mob.level().getGameTime() - ecology.heldSince()) + " t");
+            out.row("recent", ecology.history().isEmpty() ? "—" : ecology.history());
+            StringBuilder needs = new StringBuilder();
+            for (at.koopro.wizardsandbeasts.creature.ecology.EcologyNeed need
+                    : EcologyProfileRegistry.of(mob.getType()).needs().keySet()) {
+                needs.append(needs.isEmpty() ? "" : " ").append(need.getSerializedName()).append('=')
+                        .append(String.format(Locale.ROOT, "%.2f", ecology.needs().get(need)));
+            }
+            out.row("needs", needs.isEmpty() ? "—" : needs.toString());
+            var me = ecology.personality();
+            out.row("temperament", me == null ? "—" : String.format(Locale.ROOT, "bold %.2f curious %.2f social %.2f"
+                    + " aggressive %.2f active %.2f", me.boldness(), me.curiosity(), me.sociability(), me.aggression(),
+                    me.activity()));
+            if (mob instanceof at.koopro.wizardsandbeasts.creature.profile.HasActivity shown) {
+                out.row("activity", shown.activity().name().toLowerCase(Locale.ROOT));
+            }
             Vec3 home = ecology.home();
             out.row("home", home == null ? "—" : positions
                     ? String.format(Locale.ROOT, "%.0f %.0f %.0f", home.x, home.y, home.z) : "set");

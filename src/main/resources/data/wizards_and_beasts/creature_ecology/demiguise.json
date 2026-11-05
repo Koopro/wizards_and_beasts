@@ -3,7 +3,13 @@
     "human-avoidant",
     "illusion-aware",
     "cowardly",
-    "climbing"
+    "climbing",
+    "browser"
   ],
-  "sense_radius": 16
+  "sense_radius": 16,
+  "needs": {
+    "hunger": 24000,
+    "thirst": 12000,
+    "safety": 1200
+  }
 }

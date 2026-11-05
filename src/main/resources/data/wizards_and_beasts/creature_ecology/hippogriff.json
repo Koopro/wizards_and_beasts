@@ -3,9 +3,14 @@
     "herd",
     "predator",
     "flying",
-    "social"
+    "social",
+    "diurnal",
+    "grooming"
   ],
   "herd_radius": 16,
   "sense_radius": 20,
-  "fed_ticks": 12000
+  "fed_ticks": 12000,
+  "needs": {
+    "thirst": 12000
+  }
 }

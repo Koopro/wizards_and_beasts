@@ -1,0 +1,15 @@
+{
+  "capabilities": [
+    "predator",
+    "solitary",
+    "territorial"
+  ],
+  "needs": {
+    "thirst": 12000
+  },
+  "personal_space": 24,
+  "hunt_style": "stalk",
+  "fed_ticks": 12000,
+  "territory_radius": 20,
+  "sense_radius": 20
+}

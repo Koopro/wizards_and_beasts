@@ -1,0 +1,10 @@
+{
+  "extends": "solitary_predator",
+  "capabilities": [
+    "flying",
+    "diurnal"
+  ],
+  "hunt_style": "chase",
+  "sense_radius": 28,
+  "territory_radius": 28
+}

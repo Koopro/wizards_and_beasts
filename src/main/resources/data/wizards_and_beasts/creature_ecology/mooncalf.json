@@ -8,5 +8,8 @@
     "human-avoidant"
   ],
   "herd_radius": 8,
-  "sense_radius": 14
+  "sense_radius": 14,
+  "needs": {
+    "safety": 1200
+  }
 }

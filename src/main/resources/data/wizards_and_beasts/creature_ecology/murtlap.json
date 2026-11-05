@@ -1,0 +1,11 @@
+{
+  "capabilities": [
+    "prey",
+    "cowardly",
+    "scavenger"
+  ],
+  "needs": {
+    "safety": 1200
+  },
+  "sense_radius": 10
+}

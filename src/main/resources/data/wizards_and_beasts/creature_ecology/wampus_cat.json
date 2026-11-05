@@ -1,0 +1,6 @@
+{
+  "extends": "solitary_predator",
+  "capabilities": [
+    "crepuscular"
+  ]
+}

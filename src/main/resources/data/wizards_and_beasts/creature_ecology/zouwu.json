@@ -3,5 +3,8 @@
     "curious",
     "magical-sense"
   ],
-  "sense_radius": 24
+  "sense_radius": 24,
+  "needs": {
+    "curiosity": 6000
+  }
 }

@@ -1,0 +1,8 @@
+{
+  "extends": "solitary_predator",
+  "capabilities": [
+    "flying",
+    "nocturnal"
+  ],
+  "hunt_style": "chase"
+}

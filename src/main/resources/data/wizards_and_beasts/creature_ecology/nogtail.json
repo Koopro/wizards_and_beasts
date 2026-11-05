@@ -1,0 +1,11 @@
+{
+  "capabilities": [
+    "nocturnal",
+    "cowardly",
+    "grazer"
+  ],
+  "needs": {
+    "hunger": 24000
+  },
+  "sense_radius": 12
+}

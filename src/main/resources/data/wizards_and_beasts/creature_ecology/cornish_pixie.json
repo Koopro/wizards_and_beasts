@@ -4,5 +4,8 @@
     "curious",
     "social"
   ],
-  "sense_radius": 14
+  "sense_radius": 14,
+  "needs": {
+    "curiosity": 4000
+  }
 }

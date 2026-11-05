@@ -28,7 +28,8 @@ class EcologyProfileDataTest {
     private static final Path CREATURES = Path.of("src/main/resources/data/wizards_and_beasts/creatures");
     /** Bespoke Java creatures: no creatures/*.json, registered in code. */
     private static final Set<String> BESPOKE = Set.of(
-            "niffler", "bowtruckle", "phoenix", "mooncalf", "thestral", "dementor", "cornish_pixie");
+            "niffler", "bowtruckle", "phoenix", "mooncalf", "thestral", "dementor", "cornish_pixie",
+            "runespoor", "hidebehind", "augurey", "streeler");
     /** The high-priority archetypes of the 2026-10-06 ecology pass; each must declare an ecology. */
     private static final List<String> PRIORITY = List.of(
             "niffler", "bowtruckle", "phoenix", "unicorn", "demiguise", "mooncalf", "hippogriff", "thestral",
@@ -77,6 +78,51 @@ class EcologyProfileDataTest {
         assertTrue(EcologyProfile.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(lonelyAggression)).isError());
     }
 
+    /** BR-2's exit: every creature on the roster has an ecology, so none of them is left out of daily life. */
+    @Test
+    void everyCreatureOnTheRosterHasAnEcology() throws IOException {
+        Map<String, EcologyProfile> profiles = load();
+        List<String> missing = new java.util.ArrayList<>();
+        try (var files = Files.list(CREATURES)) {
+            files.map(f -> f.getFileName().toString().replace(".json", "")).filter(id -> !profiles.containsKey(id))
+                    .forEach(missing::add);
+        }
+        BESPOKE.stream().filter(id -> !profiles.containsKey(id)).forEach(missing::add);
+        assertTrue(missing.isEmpty(), "creatures with no creature_ecology profile: " + missing);
+    }
+
+    /** An archetype nobody extends is dead data. */
+    @Test
+    void everyArchetypeIsUsed() throws IOException {
+        Set<String> used = new java.util.HashSet<>();
+        Set<String> archetypes = new java.util.HashSet<>();
+        try (var files = Files.walk(ECOLOGY)) {
+            for (Path file : files.filter(f -> f.toString().endsWith(".json")).toList()) {
+                JsonObject json = JsonParser.parseString(Files.readString(file)).getAsJsonObject();
+                if (json.has("extends")) {
+                    used.add(json.get("extends").getAsString());
+                }
+                if (file.getParent().getFileName().toString().equals("_archetypes")) {
+                    archetypes.add(file.getFileName().toString().replace(".json", ""));
+                }
+            }
+        }
+        archetypes.removeAll(used);
+        assertTrue(archetypes.isEmpty(), "archetypes nothing extends: " + archetypes);
+    }
+
+    /** A diet is shown through hunger, and every hungry creature has something it can eat. */
+    @Test
+    void everyHungerCanBeAnswered() throws IOException {
+        for (Map.Entry<String, EcologyProfile> e : load().entrySet()) {
+            EcologyProfile p = e.getValue();
+            if (p.needs(EcologyNeed.HUNGER)) {
+                assertTrue(p.foragesBlocks() || p.has(EcologyCapability.PREDATOR) || p.has(EcologyCapability.SCAVENGER)
+                        || p.foodItems().isPresent(), e.getKey() + " gets hungry with nothing to eat");
+            }
+        }
+    }
+
     @Test
     void theFoodWebHasBothEnds() throws IOException {
         Map<String, EcologyProfile> profiles = load();
@@ -85,15 +131,18 @@ class EcologyProfileDataTest {
         assertTrue(predators > 0 && prey > 0, "a food web needs hunters and hunted: " + predators + "/" + prey);
     }
 
-    private static Map<String, EcologyProfile> load() throws IOException {
-        Map<String, EcologyProfile> out = new HashMap<>();
-        try (var files = Files.list(ECOLOGY)) {
+    /** Every profile, resolved exactly as the reload listener does (archetypes included). */
+    static Map<String, EcologyProfile> load() throws IOException {
+        Map<String, com.google.gson.JsonElement> raw = new HashMap<>();
+        try (var files = Files.walk(ECOLOGY)) {
             for (Path file : files.filter(p -> p.toString().endsWith(".json")).toList()) {
-                String id = file.getFileName().toString().replace(".json", "");
-                out.put(id, EcologyProfile.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(Files.readString(file)))
-                        .getOrThrow(msg -> new AssertionError(id + ": " + msg)));
+                String id = ECOLOGY.relativize(file).toString().replace('\\', '/').replace(".json", "");
+                raw.put(id, JsonParser.parseString(Files.readString(file)));
             }
         }
+        Map<String, EcologyProfile> out = new HashMap<>();
+        EcologyProfileFiles.resolve(raw).forEach((id, result) ->
+                out.put(id, result.getOrThrow(msg -> new AssertionError(id + ": " + msg))));
         return out;
     }
 }

@@ -1,0 +1,9 @@
+{
+  "capabilities": [
+    "prey"
+  ],
+  "needs": {
+    "safety": 800
+  },
+  "sense_radius": 8
+}

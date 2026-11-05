@@ -1,0 +1,10 @@
+{
+  "extends": "great_beast",
+  "without": [
+    "solitary"
+  ],
+  "capabilities": [
+    "social"
+  ],
+  "territory_radius": 24
+}

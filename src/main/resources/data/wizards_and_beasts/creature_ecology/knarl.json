@@ -1,0 +1,10 @@
+{
+  "extends": "household_pest",
+  "capabilities": [
+    "insectivore",
+    "nocturnal"
+  ],
+  "needs": {
+    "hunger": 24000
+  }
+}

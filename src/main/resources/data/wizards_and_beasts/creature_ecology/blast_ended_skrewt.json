@@ -1,0 +1,10 @@
+{
+  "extends": "great_beast",
+  "without": [
+    "solitary"
+  ],
+  "capabilities": [
+    "aggressive",
+    "social"
+  ]
+}

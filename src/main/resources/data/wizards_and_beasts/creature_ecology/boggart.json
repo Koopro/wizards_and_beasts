@@ -1,0 +1,7 @@
+{
+  "extends": "magical_being",
+  "capabilities": [
+    "nocturnal",
+    "illusion-aware"
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "capabilities": [
+    "prey"
+  ],
+  "sense_radius": 6
+}

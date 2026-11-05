@@ -1,0 +1,10 @@
+{
+  "capabilities": [
+    "cowardly",
+    "human-avoidant"
+  ],
+  "needs": {
+    "safety": 800
+  },
+  "sense_radius": 10
+}

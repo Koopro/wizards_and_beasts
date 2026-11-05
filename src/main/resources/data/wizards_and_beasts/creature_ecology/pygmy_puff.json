@@ -1,0 +1,6 @@
+{
+  "extends": "pet_creature",
+  "capabilities": [
+    "diurnal"
+  ]
+}

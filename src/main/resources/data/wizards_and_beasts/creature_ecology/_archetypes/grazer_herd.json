@@ -1,0 +1,14 @@
+{
+  "capabilities": [
+    "prey",
+    "herd",
+    "grazer"
+  ],
+  "needs": {
+    "hunger": 24000,
+    "thirst": 12000,
+    "social": 8000,
+    "safety": 1200
+  },
+  "herd_radius": 10
+}

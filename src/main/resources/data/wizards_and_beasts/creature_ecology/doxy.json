@@ -1,0 +1,10 @@
+{
+  "capabilities": [
+    "flying",
+    "territorial",
+    "social",
+    "weather-shy"
+  ],
+  "territory_radius": 8,
+  "sense_radius": 10
+}

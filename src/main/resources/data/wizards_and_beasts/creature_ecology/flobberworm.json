@@ -1,0 +1,10 @@
+{
+  "capabilities": [
+    "prey",
+    "grazer"
+  ],
+  "needs": {
+    "hunger": 24000
+  },
+  "sense_radius": 6
+}

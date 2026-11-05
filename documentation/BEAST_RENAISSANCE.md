@@ -648,7 +648,7 @@ carried item, alpha-tint render type). Not verified in a client: D1 (needs a ded
 | D19 | S2 | All beasts are `CREATURE`, none `notInPeaceful`; hostile beasts exist on Peaceful | `ModCreatures.java:183` | open: owner decision §8.3 |
 | D20 | S2 | Admin "natural spawn" shows true for roster-blocked species | `CreatureAdminService.java:120` | fixed ffa2d138 |
 | D21 | S2 | Saved attribute bases block datapack retuning of existing creatures; `/reload` never rewires goals | `GenericBeastEntity` constructor | fixed ffa2d138 (reload re-applies definition stats; `/reload` still does not rewire goals → BR-1) |
-| D22 | S2 | Ecology home and fed state not saved | `ModAttachments.java:350` | not a defect: transient by documented design; persistence comes with BR-2 needs |
+| D22 | S2 | Ecology home and fed state not saved | `ModAttachments.java:350` | not a defect then (transient by design); saved since BR-2 (home, needs, fed-until), `ecology_life_state_survives_a_save` |
 | D23 | S3 | Dragon breath ~1,300 particle sends per breath per viewer | `DragonBreathGoal.java:212-227` | fixed 71116ca5 |
 | D24 | S3 | Flying melee uses a full 3D path search for 3–4-wide boxes | `GenericBeastEntity.java:595` | open → BR-1 flight framework |
 | D25 | S3 | Dementor spawner per entity (200-block box query) and aura re-query per victim | `DementorEntity.java:349,432` | fixed ffa2d138 |
@@ -1013,6 +1013,16 @@ Each milestone ends with tests green, the matrix script re-run, and a short revi
 | **BR-6 Voice** | §4.11 tier remap for all; own audio for P1 | 0 silent P1 and P2 species; no mute voice clip |
 | **BR-7 Lore pass** | every ✗ in §3 fixed or ruled; young and eggs (§4.10); canon interactions per family | lore matrix ≤ 5 ✗, each with an owner ruling |
 | **BR-8 Long tail** | P3 families to B behaviour and B visual, wave by wave | roster average B |
+
+**Status 2026-11-06 — BR-2 delivered** on `feat/creature-ai` (`tasks/todo_creature_ai_2026_11_05.md`), together with
+BR-1 §4.2 (the activity byte) pulled forward; the rest of BR-1 (§4.1 done in BR-0, §4.3, §4.6 flight) is still open.
+What landed, by §4.4–4.5: rhythm as capabilities (`diurnal`, `crepuscular`, `nocturnal`), diet as capabilities
+(`grazer`, `browser`, `insectivore`, plus `scavenger`/`predator`), needs (seven, declared per species), weather and
+climate (`weather-shy`, `cold-adapted`, `warmth-loving`), archetypes with `extends` (13), a profile for all 106 roster
+creatures, NOISE and PLAYER stimuli from vanilla game events, persistence (D22). Beyond the plan: commitment and
+hysteresis (`EcologyCommitment`), navigation timeouts and failure backoff, individual personality, carrion for
+scavengers. Not done from §4.4: `RETURN_TO_HABITAT`, `PERCH` (flight framework), a LIGHT/BLOOD stimulus.
+Reference: `CREATURE_ECOLOGY.md` §2–§12.
 
 BR-0 and BR-1 need no owner decision. BR-3, BR-5, BR-6 and BR-7 each start with the questions in §8.
 

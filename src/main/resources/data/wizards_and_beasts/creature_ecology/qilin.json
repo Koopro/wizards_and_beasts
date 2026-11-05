@@ -1,0 +1,9 @@
+{
+  "extends": "grazer_herd",
+  "capabilities": [
+    "magical-corruption-sensitive",
+    "magical-sense",
+    "diurnal"
+  ],
+  "sense_radius": 20
+}

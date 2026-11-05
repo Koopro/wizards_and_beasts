@@ -1,0 +1,6 @@
+{
+  "extends": "pack_predator",
+  "capabilities": [
+    "nocturnal"
+  ]
+}

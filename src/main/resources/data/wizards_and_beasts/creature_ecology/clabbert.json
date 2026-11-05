@@ -1,0 +1,13 @@
+{
+  "capabilities": [
+    "tree-dwelling",
+    "prey",
+    "climbing",
+    "cowardly"
+  ],
+  "needs": {
+    "safety": 800
+  },
+  "territory_radius": 10,
+  "sense_radius": 12
+}

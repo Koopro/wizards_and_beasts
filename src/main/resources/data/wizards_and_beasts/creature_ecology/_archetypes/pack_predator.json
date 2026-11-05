@@ -1,0 +1,14 @@
+{
+  "capabilities": [
+    "predator",
+    "herd",
+    "social"
+  ],
+  "needs": {
+    "thirst": 12000,
+    "social": 6000
+  },
+  "herd_radius": 14,
+  "fed_ticks": 12000,
+  "sense_radius": 20
+}

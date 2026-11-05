@@ -1,0 +1,7 @@
+{
+  "extends": "small_flier",
+  "capabilities": [
+    "diurnal"
+  ],
+  "sense_radius": 16
+}

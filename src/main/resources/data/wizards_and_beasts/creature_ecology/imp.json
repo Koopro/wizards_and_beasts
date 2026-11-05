@@ -1,0 +1,9 @@
+{
+  "extends": "household_pest",
+  "capabilities": [
+    "curious"
+  ],
+  "needs": {
+    "curiosity": 4000
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "capabilities": [
+    "flying",
+    "prey",
+    "cowardly",
+    "weather-shy"
+  ],
+  "needs": {
+    "safety": 800
+  },
+  "sense_radius": 10
+}

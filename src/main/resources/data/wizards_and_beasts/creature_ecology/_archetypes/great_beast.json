@@ -1,0 +1,12 @@
+{
+  "capabilities": [
+    "territorial",
+    "solitary"
+  ],
+  "needs": {
+    "thirst": 12000
+  },
+  "territory_radius": 16,
+  "personal_space": 20,
+  "sense_radius": 20
+}

@@ -1,0 +1,12 @@
+{
+  "extends": "household_pest",
+  "capabilities": [
+    "prey",
+    "diurnal",
+    "grazer",
+    "social"
+  ],
+  "needs": {
+    "hunger": 24000
+  }
+}

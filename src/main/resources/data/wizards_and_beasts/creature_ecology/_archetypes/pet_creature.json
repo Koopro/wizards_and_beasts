@@ -1,0 +1,12 @@
+{
+  "capabilities": [
+    "human-friendly",
+    "grooming",
+    "curious",
+    "weather-shy"
+  ],
+  "needs": {
+    "curiosity": 6000
+  },
+  "sense_radius": 10
+}

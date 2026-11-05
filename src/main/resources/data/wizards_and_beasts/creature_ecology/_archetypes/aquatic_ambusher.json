@@ -1,0 +1,10 @@
+{
+  "capabilities": [
+    "aquatic",
+    "predator",
+    "territorial"
+  ],
+  "fed_ticks": 6000,
+  "territory_radius": 10,
+  "sense_radius": 12
+}

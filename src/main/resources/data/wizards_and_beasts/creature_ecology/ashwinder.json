@@ -1,0 +1,7 @@
+{
+  "extends": "fire_creature",
+  "capabilities": [
+    "cowardly",
+    "nocturnal"
+  ]
+}

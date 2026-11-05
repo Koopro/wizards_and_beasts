@@ -1,0 +1,10 @@
+{
+  "capabilities": [
+    "aquatic",
+    "prey"
+  ],
+  "needs": {
+    "safety": 1200
+  },
+  "sense_radius": 12
+}

@@ -1,0 +1,11 @@
+{
+  "capabilities": [
+    "treasure-seeker",
+    "curious",
+    "cowardly"
+  ],
+  "needs": {
+    "curiosity": 6000
+  },
+  "sense_radius": 12
+}

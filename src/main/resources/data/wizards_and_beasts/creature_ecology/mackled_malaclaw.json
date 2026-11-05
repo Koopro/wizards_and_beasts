@@ -1,0 +1,10 @@
+{
+  "capabilities": [
+    "territorial",
+    "scavenger",
+    "solitary"
+  ],
+  "territory_radius": 8,
+  "personal_space": 8,
+  "sense_radius": 10
+}

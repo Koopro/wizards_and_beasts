@@ -4,8 +4,15 @@
     "herd",
     "human-avoidant",
     "magical-corruption-sensitive",
-    "magical-sense"
+    "magical-sense",
+    "grazer"
   ],
   "herd_radius": 12,
-  "sense_radius": 24
+  "sense_radius": 24,
+  "needs": {
+    "hunger": 24000,
+    "thirst": 12000,
+    "social": 8000,
+    "safety": 1200
+  }
 }

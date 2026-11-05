@@ -1,0 +1,9 @@
+{
+  "extends": "solitary_predator",
+  "capabilities": [
+    "diurnal"
+  ],
+  "personal_space": 12,
+  "territory_radius": 12,
+  "sense_radius": 14
+}

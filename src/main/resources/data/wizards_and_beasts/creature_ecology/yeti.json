@@ -1,0 +1,8 @@
+{
+  "extends": "solitary_predator",
+  "capabilities": [
+    "cold-adapted",
+    "aggressive"
+  ],
+  "hunt_style": "chase"
+}

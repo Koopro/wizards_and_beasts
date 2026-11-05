@@ -3,8 +3,12 @@
     "tree-dwelling",
     "territorial",
     "social",
-    "climbing"
+    "climbing",
+    "insectivore"
   ],
   "territory_radius": 8,
-  "sense_radius": 10
+  "sense_radius": 10,
+  "needs": {
+    "hunger": 24000
+  }
 }

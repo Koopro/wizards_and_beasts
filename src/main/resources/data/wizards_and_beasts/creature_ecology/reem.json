@@ -1,0 +1,7 @@
+{
+  "extends": "grazer_herd",
+  "capabilities": [
+    "diurnal"
+  ],
+  "sense_radius": 20
+}
