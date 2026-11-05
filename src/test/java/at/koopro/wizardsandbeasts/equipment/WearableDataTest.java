@@ -93,6 +93,34 @@ class WearableDataTest {
         }
     }
 
+    /** Slot ids Curios ships its own empty-slot icon for (data/curios/curios/slots in the Curios jar). */
+    private static final Set<String> CURIOS_PRESET_SLOTS = Set.of(
+            "back", "belt", "body", "bracelet", "charm", "curio", "feet", "hands", "head", "necklace", "ring");
+
+    /**
+     * A slot Curios does not know falls back to {@code curios:textures/gui/generic_icon.png}, which is
+     * not in the gui atlas, so the empty slot draws as the missing sprite. Every slot of ours that is
+     * not a Curios preset must name an icon, and Curios only stitches {@code textures/slot/*} into the
+     * atlas (as {@code slot/<name>}), so the icon must live there.
+     */
+    @Test
+    void everyOwnSlotHasAnIconInTheGuiAtlas() throws IOException {
+        try (var files = Files.list(DATA.resolve("curios/slots"))) {
+            for (Path slotFile : files.toList()) {
+                String id = slotFile.getFileName().toString().replace(".json", "");
+                if (CURIOS_PRESET_SLOTS.contains(id)) continue;
+                JsonObject slot = read(slotFile);
+                assertTrue(slot.has("icon"), "slot '" + id + "' has no icon, so its empty slot draws as the missing sprite");
+                String icon = slot.get("icon").getAsString();
+                assertTrue(icon.startsWith("wizards_and_beasts:slot/"),
+                        "slot '" + id + "' icon " + icon + " is outside textures/slot/, which Curios does not stitch");
+                Path png = Path.of("src/main/resources/assets/wizards_and_beasts/textures/"
+                        + icon.substring("wizards_and_beasts:".length()) + ".png");
+                assertTrue(Files.exists(png), "slot '" + id + "' icon " + icon + " has no texture at " + png);
+            }
+        }
+    }
+
     @Test
     void ringSlotsAreMoreThanOne() throws IOException {
         assertTrue(read(DATA.resolve("curios/slots/ring.json")).get("size").getAsInt() >= 2);
