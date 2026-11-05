@@ -282,15 +282,35 @@ public class ModModelProvider extends ModelProvider {
         }
     }
 
+    /**
+     * The same generators, but every block model they write is cut out.
+     *
+     * <p>Vanilla's cross, crop, torch and lantern templates carry no render type: vanilla gives its own
+     * saplings and torches {@code cutout} from a hard-coded table in {@code ItemBlockRenderTypes}, and a
+     * block missing from that table renders {@code SOLID}. So every mod sapling, crop, torch and lantern
+     * built from those templates drew its transparent pixels as opaque colour: a mandrake crop was four
+     * green walls, mallowsweet a pink-and-green box (seen in a real client, 2026-11-05). NeoForge reads
+     * {@code render_type} from the model, so this adds it to each block model on its way out, and the
+     * vanilla template code stays the single source of the geometry.
+     */
+    private static BlockModelGenerators cutout(BlockModelGenerators blockModels) {
+        return new BlockModelGenerators(blockModels.blockStateOutput, blockModels.itemModelOutput,
+                (id, instance) -> blockModels.modelOutput.accept(id, !id.getPath().startsWith("block/") ? instance : () -> {
+                    com.google.gson.JsonObject json = instance.get().getAsJsonObject().deepCopy();
+                    json.addProperty("render_type", "minecraft:cutout");
+                    return json;
+                }));
+    }
+
     private void generateWizardingWorld(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
         TextureMapping cobwebCross = TextureMapping.cross(Identifier.withDefaultNamespace("block/cobweb"));
-        blockModels.createCrossBlockWithDefaultItem(ModBlocks.DEVILS_SNARE.get(),
+        cutout(blockModels).createCrossBlockWithDefaultItem(ModBlocks.DEVILS_SNARE.get(),
                 BlockModelGenerators.PlantType.NOT_TINTED, cobwebCross);
 
-        blockModels.createCropBlock(ModBlocks.MANDRAKE_CROP.get(), BlockStateProperties.AGE_7,
+        cutout(blockModels).createCropBlock(ModBlocks.MANDRAKE_CROP.get(), BlockStateProperties.AGE_7,
                 new int[] { 0, 1, 1, 2, 2, 3, 3, 3 });
 
-        blockModels.createCrossBlockWithDefaultItem(ModBlocks.MALLOWSWEET.get(), BlockModelGenerators.PlantType.NOT_TINTED);
+        cutout(blockModels).createCrossBlockWithDefaultItem(ModBlocks.MALLOWSWEET.get(), BlockModelGenerators.PlantType.NOT_TINTED);
 
         createAcromantulaWeb(blockModels, ModBlocks.ACROMANTULA_WEB.get());
 
@@ -311,14 +331,14 @@ public class ModModelProvider extends ModelProvider {
         // into a wafer. It is a real candle now, wax and flame.
         propBlock(blockModels, ModBlocks.FLOATING_CANDLE.get(), floatingCandleModel(),
                 floatingCandleTexture(), false);
-        blockModels.createCrossBlock(ModBlocks.DELUMINATOR_LIGHT.get(), BlockModelGenerators.PlantType.NOT_TINTED, torchCross);
+        cutout(blockModels).createCrossBlock(ModBlocks.DELUMINATOR_LIGHT.get(), BlockModelGenerators.PlantType.NOT_TINTED, torchCross);
         // These were emitting TexturedModel.LEAVES — a full cube — so every unlit torch
         // rendered as a solid block with the torch sprite tiled over all six faces.
         // createNormalTorch emits the real torch/wall-torch models (and the flat item
         // model) from the same texture, exactly as vanilla does for its own torches.
-        blockModels.createNormalTorch(ModBlocks.UNLIT_TORCH.get(), ModBlocks.UNLIT_WALL_TORCH.get());
-        blockModels.createNormalTorch(ModBlocks.UNLIT_SOUL_TORCH.get(), ModBlocks.UNLIT_SOUL_WALL_TORCH.get());
-        blockModels.createNormalTorch(ModBlocks.UNLIT_COPPER_TORCH.get(), ModBlocks.UNLIT_COPPER_WALL_TORCH.get());
+        cutout(blockModels).createNormalTorch(ModBlocks.UNLIT_TORCH.get(), ModBlocks.UNLIT_WALL_TORCH.get());
+        cutout(blockModels).createNormalTorch(ModBlocks.UNLIT_SOUL_TORCH.get(), ModBlocks.UNLIT_SOUL_WALL_TORCH.get());
+        cutout(blockModels).createNormalTorch(ModBlocks.UNLIT_COPPER_TORCH.get(), ModBlocks.UNLIT_COPPER_WALL_TORCH.get());
 
         // A cube-shaped cauldron gave no sign there was anything in it, which is the entire
         // point of a cauldron. These get a real footed vessel with an open rim, so the brew
@@ -402,9 +422,9 @@ public class ModModelProvider extends ModelProvider {
         // Same cube problem as the torches. All three are real LanternBlocks, so they
         // carry the HANGING property to dispatch on, and get both the standing and
         // hanging variants built from the 16x48 lantern texture layout.
-        createLanternWithoutItem(blockModels, ModBlocks.UNLIT_LANTERN.get());
-        createLanternWithoutItem(blockModels, ModBlocks.UNLIT_SOUL_LANTERN.get());
-        createLanternWithoutItem(blockModels, ModBlocks.UNLIT_COPPER_LANTERN.get());
+        createLanternWithoutItem(cutout(blockModels), ModBlocks.UNLIT_LANTERN.get());
+        createLanternWithoutItem(cutout(blockModels), ModBlocks.UNLIT_SOUL_LANTERN.get());
+        createLanternWithoutItem(cutout(blockModels), ModBlocks.UNLIT_COPPER_LANTERN.get());
         blockModels.createTrivialBlock(ModBlocks.UNLIT_GLOWSTONE.get(), TexturedModel.LEAVES);
 
         blockModels.createTrivialBlock(ModBlocks.WARDING_STONE.get(), TexturedModel.CUBE);
@@ -544,7 +564,7 @@ public class ModModelProvider extends ModelProvider {
 
         blockModels.createTrivialBlock(leaves, TexturedModel.LEAVES);
 
-        blockModels.createCrossBlockWithDefaultItem(sapling, BlockModelGenerators.PlantType.NOT_TINTED);
+        cutout(blockModels).createCrossBlockWithDefaultItem(sapling, BlockModelGenerators.PlantType.NOT_TINTED);
     }
 
     // --- Prop geometry -------------------------------------------------------------
@@ -621,25 +641,35 @@ public class ModModelProvider extends ModelProvider {
      * over the block, so it could never do the job it was added for.
      */
     private static ExtendedModelTemplate cauldronModel() {
-        ExtendedModelTemplateBuilder builder =
-                prop(TextureSlot.PARTICLE, TextureSlot.SIDE, TextureSlot.TOP)
-                        .element(e -> e.from(5, 0, 5).to(11, 3, 11)
-                                .textureAll(TextureSlot.SIDE)
-                                .face(Direction.DOWN, f -> f.texture(TextureSlot.SIDE).cullface(Direction.DOWN)))
-                        .element(e -> e.from(2, 3, 2).to(14, 12, 14)
-                                .textureAll(TextureSlot.SIDE)
-                                .face(Direction.UP, f -> f.texture(TextureSlot.TOP)));
-        // Rim as four walls rather than a slab: a slab would cap the pot and hide the brew.
-        float[][] rim = {
-                { 1, 1, 15, 2 },   // north
-                { 1, 14, 15, 15 }, // south
-                { 1, 2, 2, 14 },   // west
-                { 14, 2, 15, 14 }, // east
-        };
-        for (float[] r : rim) {
-            builder.element(e -> e.from(r[0], 12, r[1]).to(r[2], 14, r[3])
+        // The same silhouette as the placed rig (tools/cauldron_model.py): splayed feet, a bowl,
+        // the widest belly, a shoulder, a pinched neck and a flared lip -- so the item in the hand
+        // is the pot on the floor, not a box. Solid here: an icon has no inside to look into.
+        ExtendedModelTemplateBuilder builder = prop(TextureSlot.PARTICLE, TextureSlot.SIDE, TextureSlot.TOP);
+        float[][] feet = { { 2, 2 }, { 12, 2 }, { 2, 12 }, { 12, 12 } };
+        for (float[] foot : feet) {
+            builder.element(e -> e.from(foot[0], 0, foot[1]).to(foot[0] + 2, 4, foot[1] + 2)
                     .textureAll(TextureSlot.SIDE));
         }
+        // {y0, y1, inset}: each layer a square inset from the block's edge.
+        float[][] layers = { { 3, 6, 2 }, { 6, 9, 1 }, { 9, 11, 2 }, { 11, 12, 3 } };
+        for (float[] l : layers) {
+            builder.element(e -> e.from(l[2], l[0], l[2]).to(16 - l[2], l[1], 16 - l[2])
+                    .textureAll(TextureSlot.SIDE));
+        }
+        // Lip as four walls rather than a slab: a slab would cap the pot and hide the brew.
+        float[][] rim = {
+                { 2, 2, 14, 4 },   // north
+                { 2, 12, 14, 14 }, // south
+                { 2, 4, 4, 12 },   // west
+                { 12, 4, 14, 12 }, // east
+        };
+        for (float[] r : rim) {
+            builder.element(e -> e.from(r[0], 12, r[1]).to(r[2], 13, r[3])
+                    .textureAll(TextureSlot.SIDE));
+        }
+        builder.element(e -> e.from(4, 11.5F, 4).to(12, 12, 12)
+                .textureAll(TextureSlot.SIDE)
+                .face(Direction.UP, f -> f.texture(TextureSlot.TOP)));
         return builder.build();
     }
 
@@ -959,16 +989,29 @@ public class ModModelProvider extends ModelProvider {
      * underneath, and the hole belongs on the one face you can see into.
      */
     private static ExtendedModelTemplate eggshellModel() {
-        return prop(TextureSlot.PARTICLE, TextureSlot.SIDE, TextureSlot.TOP)
+        // An opened half-shell, not a box (owner, 2026-11-05: "a small grey box, hard to read"): a
+        // rounded base, four thin walls broken off at different heights so the rim is jagged and the
+        // inside shows, and two fragments on the ground beside it. The base's top face takes the
+        // TOP texture -- the dark inside of the shell.
+        ExtendedModelTemplateBuilder builder = prop(TextureSlot.PARTICLE, TextureSlot.SIDE, TextureSlot.TOP)
                 .renderType("minecraft:cutout")
-                .element(e -> e.from(5, 0, 5).to(11, 5, 11)
-                        .face(Direction.NORTH, f -> f.texture(TextureSlot.SIDE).uvs(0, 0, 16, 16))
-                        .face(Direction.SOUTH, f -> f.texture(TextureSlot.SIDE).uvs(0, 0, 16, 16))
-                        .face(Direction.EAST, f -> f.texture(TextureSlot.SIDE).uvs(0, 0, 16, 16))
-                        .face(Direction.WEST, f -> f.texture(TextureSlot.SIDE).uvs(0, 0, 16, 16))
-                        .face(Direction.UP, f -> f.texture(TextureSlot.TOP).uvs(0, 0, 16, 16))
-                        .face(Direction.DOWN, f -> f.texture(TextureSlot.SIDE).uvs(0, 0, 16, 16)))
-                .build();
+                .element(e -> e.from(6, 0, 6).to(10, 1, 10)
+                        .textureAll(TextureSlot.SIDE)
+                        .face(Direction.UP, f -> f.texture(TextureSlot.TOP)));
+        // {x0, z0, x1, z1, height}: the broken walls, each a different height.
+        float[][] walls = {
+                { 5, 5, 11, 6, 5 },   // north, the tall shard
+                { 5, 10, 11, 11, 3 }, // south, low
+                { 5, 6, 6, 10, 4 },   // west
+                { 10, 6, 11, 10, 2 }, // east, broken down to the base
+        };
+        for (float[] w : walls) {
+            builder.element(e -> e.from(w[0], 1, w[1]).to(w[2], 1 + w[4], w[3])
+                    .textureAll(TextureSlot.SIDE));
+        }
+        builder.element(e -> e.from(12, 0, 8).to(14, 1, 10).textureAll(TextureSlot.SIDE));
+        builder.element(e -> e.from(3, 0, 3).to(4, 1, 5).textureAll(TextureSlot.SIDE));
+        return builder.build();
     }
 
     /**
