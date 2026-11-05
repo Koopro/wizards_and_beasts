@@ -36,6 +36,16 @@ public class GenericFlyingBeastEntity extends GenericBeastEntity {
         }
     }
 
+    /**
+     * A flier is never hurt by falling. {@code FlyingMoveControl} hands gravity back between flight targets, so every
+     * wander ended in a drop from up to ten blocks, and every dragon, winged horse and griffin took fall damage after
+     * it (Beast Renaissance D7). The Hippogriff, Thestral and Phoenix already opted out; this covers the rest.
+     */
+    @Override
+    public boolean causeFallDamage(double distance, float multiplier, net.minecraft.world.damagesource.DamageSource source) {
+        return false;
+    }
+
     @Override
     protected void addMovementController(AnimatableManager.ControllerRegistrar controllers) {
         String name = assetName();

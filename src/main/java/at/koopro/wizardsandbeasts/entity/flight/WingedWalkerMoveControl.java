@@ -72,6 +72,12 @@ public final class WingedWalkerMoveControl<T extends Mob & WingedWalker> extends
             // Leaving the air: gravity back on, and the flight control's last target forgotten.
             creature.setNoGravity(false);
             creature.setYya(0.0F);
+        } else if (!flying && creature.isNoGravity()) {
+            // Not flying, yet weightless: only the flying control ever sets NoGravity on a winged walker, and vanilla
+            // saves that flag while the creature's own flying state is not saved. A Hippogriff or Thestral saved
+            // mid-flight therefore loaded hanging in the air, and its flight goal (which starts on the ground) never
+            // ran again to bring it down (Beast Renaissance D5).
+            creature.setNoGravity(false);
         }
         wasFlying = flying;
         active().tick();

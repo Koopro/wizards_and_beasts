@@ -1,0 +1,157 @@
+package at.koopro.wizardsandbeasts.gametest;
+
+import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.entity.beast.HidebehindEntity;
+import at.koopro.wizardsandbeasts.entity.beast.RunespoorEntity;
+import at.koopro.wizardsandbeasts.entity.beast.ai.HidebehindStalkGoal;
+import at.koopro.wizardsandbeasts.entity.creature.HippogriffEntity;
+import at.koopro.wizardsandbeasts.registry.ModEntities;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Blocks;
+import net.neoforged.neoforge.entity.PartEntity;
+
+import static at.koopro.wizardsandbeasts.gametest.WizardTestSupport.check;
+import static at.koopro.wizardsandbeasts.gametest.WizardTestSupport.retire;
+
+/**
+ * Regressions for the Beast Renaissance correctness pass (BR-0, {@code documentation/BEAST_RENAISSANCE.md} §2.3).
+ * Each scenario names the defect it pins. Rules that need no world are unit tests; these are the claims only a
+ * running server can answer.
+ */
+public final class BeastRenaissanceTests {
+
+    private BeastRenaissanceTests() {}
+
+    static void contribute(WizardTestSupport.Registrar tests) {
+        tests.add("br0_winged_walker_loaded_weightless_comes_down",
+                "D5: a hippogriff that loads weightless but not flying gets its gravity back",
+                BeastRenaissanceTests::wingedWalkerLoadedWeightlessComesDown);
+        tests.add("br0_fliers_take_no_fall_damage",
+                "D7: dragons and other generic fliers are not hurt by the drop between flight targets",
+                BeastRenaissanceTests::fliersTakeNoFallDamage);
+        tests.add("br0_runespoor_heads_follow_the_body_id",
+                "D4: the runespoor's head ids follow its own, so a client's click on a head reaches the server",
+                BeastRenaissanceTests::runespoorHeadsFollowTheBodyId);
+        tests.addAlone("br0_hidebehind_strikes_a_turned_back",
+                "D3: the hidebehind stops stalking and lets its attack run once it is behind a turned back",
+                BeastRenaissanceTests::hidebehindStrikesATurnedBack);
+        tests.add("br0_streeler_floats",
+                "D14: the streeler floats and avoids water instead of walking in and drowning",
+                BeastRenaissanceTests::streelerFloats);
+    }
+
+    // -- scenarios ---------------------------------------------------------------------------------
+
+    private static void wingedWalkerLoadedWeightlessComesDown(GameTestHelper helper) {
+        BlockPos min = new BlockPos(0, 0, 0);
+        BlockPos max = new BlockPos(4, 6, 4);
+        WizardTestSupport.forceChunks(helper, min, max);
+        HippogriffEntity[] hippogriff = new HippogriffEntity[1];
+        helper.startSequence()
+                .thenWaitUntil(() -> WizardTestSupport.checkChunksTick(helper, min, max))
+                .thenExecute(() -> {
+                    for (int x = 0; x <= 4; x++) {
+                        for (int z = 0; z <= 4; z++) {
+                            helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+                        }
+                    }
+                    hippogriff[0] = helper.spawn(creature("hippogriff", HippogriffEntity.class), new BlockPos(2, 4, 2));
+                    // What a reload leaves behind: vanilla saved NoGravity, the creature's own flying flag was not.
+                    hippogriff[0].setFlying(false);
+                    hippogriff[0].setNoGravity(true);
+                })
+                .thenWaitUntil(() -> check(helper, !hippogriff[0].isNoGravity(),
+                        () -> "a hippogriff that is not flying stayed weightless; it would hang in the air forever"))
+                .thenExecute(() -> hippogriff[0].discard())
+                .thenSucceed();
+    }
+
+    private static void fliersTakeNoFallDamage(GameTestHelper helper) {
+        for (String id : new String[] {"common_welsh_green", "hungarian_horntail", "griffin", "abraxan"}) {
+            Mob flier = (Mob) helper.spawn(type(id), new BlockPos(1, 2, 1));
+            flier.setNoAi(true);
+            float before = flier.getHealth();
+            boolean hurt = flier.causeFallDamage(20.0, 1.0f, helper.getLevel().damageSources().fall());
+            check(helper, !hurt && flier.getHealth() == before,
+                    () -> id + " took fall damage (" + before + " -> " + flier.getHealth() + ")");
+            flier.discard();
+        }
+        helper.succeed();
+    }
+
+    private static void runespoorHeadsFollowTheBodyId(GameTestHelper helper) {
+        RunespoorEntity runespoor = helper.spawn(ModEntities.RUNESPOOR.get(), new BlockPos(1, 2, 1));
+        runespoor.setNoAi(true);
+        PartEntity<?>[] heads = runespoor.getParts();
+        check(helper, heads.length == 3, () -> "a runespoor has " + heads.length + " heads");
+        for (int i = 0; i < heads.length; i++) {
+            int expected = runespoor.getId() + i + 1;
+            int actual = heads[i].getId();
+            check(helper, actual == expected, () -> "head id " + actual + ", expected " + expected
+                    + ": a client and the server would disagree on which entity a head is");
+        }
+        // A client gets the body's id from the spawn packet and sets it the same way; so must every later id.
+        runespoor.setId(runespoor.getId() + 100);
+        check(helper, heads[0].getId() == runespoor.getId() + 1, () -> "re-assigning the body's id left the heads behind");
+        runespoor.discard();
+        helper.succeed();
+    }
+
+    private static void hidebehindStrikesATurnedBack(GameTestHelper helper) {
+        HidebehindEntity hidebehind = helper.spawn(ModEntities.HIDEBEHIND.get(), new BlockPos(2, 2, 4));
+        hidebehind.setNoAi(true);
+        hidebehind.setNoGravity(true);
+        ServerPlayer player = WizardTestSupport.placeMockPlayer(helper, "wandb-br0-hidebehind", GameType.SURVIVAL);
+        player.snapTo(helper.absoluteVec(new net.minecraft.world.phys.Vec3(2.5, 2, 2.5)));
+        hidebehind.snapTo(helper.absoluteVec(new net.minecraft.world.phys.Vec3(2.5, 2, 4.5)));
+
+        // Looking away (north, -z): the hidebehind 2 blocks behind it may strike, so stalking lets go.
+        face(player, 180.0f);
+        check(helper, !new HidebehindStalkGoal(hidebehind).canUse(),
+                () -> "behind a turned back and within reach, the hidebehind kept stalking; its attack could never run");
+
+        // Turned round to face it (south, +z): it slips away to stalk again.
+        face(player, 0.0f);
+        check(helper, new HidebehindStalkGoal(hidebehind).canUse(),
+                () -> "a player facing the hidebehind did not send it back to stalking");
+
+        retire(helper, player);
+        hidebehind.discard();
+        helper.succeed();
+    }
+
+    private static void streelerFloats(GameTestHelper helper) {
+        Entity streeler = helper.spawn(ModEntities.STREELER.get(), new BlockPos(1, 2, 1));
+        boolean floats = ((Mob) streeler).goalSelector.getAvailableGoals().stream()
+                .anyMatch(goal -> goal.getGoal() instanceof FloatGoal);
+        check(helper, floats, () -> "the streeler has no float goal, so water drowns it");
+        streeler.discard();
+        helper.succeed();
+    }
+
+    // -- helpers -----------------------------------------------------------------------------------
+
+    private static void face(ServerPlayer player, float yaw) {
+        player.setYRot(yaw);
+        player.setYHeadRot(yaw);
+        player.setXRot(0.0f);
+    }
+
+    private static EntityType<?> type(String id) {
+        return BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, id));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <E extends Entity> EntityType<E> creature(String id, Class<E> type) {
+        return (EntityType<E>) type(id);
+    }
+}

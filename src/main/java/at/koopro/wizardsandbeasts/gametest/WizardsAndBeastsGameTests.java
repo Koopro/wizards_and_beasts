@@ -153,5 +153,6 @@ public final class WizardsAndBeastsGameTests {
         LocationTests.contribute(registrar);
         CompanionTests.contribute(registrar);
         BuildTests.contribute(registrar);
+        BeastRenaissanceTests.contribute(registrar);
     }
 }

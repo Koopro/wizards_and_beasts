@@ -56,6 +56,21 @@ public class RunespoorEntity extends GeoEntityBase {
         this.judgeHead = new RunespoorHeadPart(this, "judge", 0.6f, 0.6f);
         this.criticHead = new RunespoorHeadPart(this, "critic", 0.6f, 0.6f);
         this.parts = new RunespoorHeadPart[] {planHead, judgeHead, criticHead};
+        // Reserve the ids right after this one for the heads, as vanilla's EnderDragon does (MC-158205): a part
+        // keeps its own counter id otherwise, which differs between client and server, so a click on a head
+        // named an entity the server did not know (Beast Renaissance D4).
+        setId(ENTITY_COUNTER.getAndAdd(parts.length + 1) + 1);
+    }
+
+    /** The heads' ids follow the body's, on both sides, so a hit on a head reaches the server as that head. */
+    @Override
+    public void setId(int id) {
+        super.setId(id);
+        if (parts != null) {
+            for (int i = 0; i < parts.length; i++) {
+                parts[i].setId(id + i + 1);
+            }
+        }
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -90,9 +105,9 @@ public class RunespoorEntity extends GeoEntityBase {
     @Override
     public void tick() {
         super.tick();
-        if (!level().isClientSide()) {
-            positionParts();
-        }
+        // Both sides: the client picks a head by its box, so the box has to be where the head is there too.
+        // Positioned only on the server, the client's heads sat at the spawn origin and could never be clicked.
+        positionParts();
     }
 
     private void positionParts() {

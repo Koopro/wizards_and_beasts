@@ -19,7 +19,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -159,7 +158,10 @@ public class StreelerEntity extends GeoEntityBase {
 
     @Override
     protected void registerGoals() {
-        goalSelector.addGoal(1, new RandomStrollGoal(this, 0.6));
+        // A snail cannot swim: it floats if it ends up in water and strolls around it, never into it. With a plain
+        // stroll and no float goal it walked into the swamp water it spawns beside and drowned (Beast Renaissance D14).
+        goalSelector.addGoal(0, new net.minecraft.world.entity.ai.goal.FloatGoal(this));
+        goalSelector.addGoal(1, new net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal(this, 0.6));
         goalSelector.addGoal(2, new LookAtPlayerGoal(this, Player.class, 5.0f));
         goalSelector.addGoal(3, new RandomLookAroundGoal(this));
     }
