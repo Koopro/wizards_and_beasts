@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.event.bestiary.niffler;
 
+import at.koopro.wizardsandbeasts.creature.rules.SpawnTime;
+import at.koopro.wizardsandbeasts.entity.beast.BeastSpawnHandler;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.registry.ModEntities;
@@ -13,15 +15,18 @@ public final class NifflerSpawnHandler {
 
     public static void registerSpawnPlacements(RegisterSpawnPlacementsEvent event) {
         // What the predicate tests, for the Creature Lab (a lambda cannot be read back).
-        at.koopro.wizardsandbeasts.creature.rules.SpawnConditionNotes.note("niffler", "module_creatures", "solid_ground", "light_night");
+        // Same gates as every other beast: the roster setting (it skipped it, so creatureNaturalSpawns=NONE still
+        // spawned Nifflers) and the night rule by real time (Beast Renaissance D2, D9).
+        at.koopro.wizardsandbeasts.creature.rules.SpawnConditionNotes.note("niffler", "module_creatures", "roster_setting", "solid_ground", "light_night");
         event.register(
                 ModEntities.NIFFLER.get(),
                 SpawnPlacementTypes.ON_GROUND,
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 (entityType, level, spawnReason, pos, random) ->
                         ModuleManager.isEnabled(Module.CREATURES)
-                                && level.getRawBrightness(pos, 0) <= 7
-                                && level.getBlockState(pos.below()).isSolidRender(),
+                                && BeastSpawnHandler.spawnsNaturally(entityType)
+                                && level.getBlockState(pos.below()).isSolidRender()
+                                && SpawnTime.fits(false, level, pos),
                 RegisterSpawnPlacementsEvent.Operation.OR);
 
         event.register(
@@ -30,8 +35,9 @@ public final class NifflerSpawnHandler {
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 (entityType, level, spawnReason, pos, random) ->
                         ModuleManager.isEnabled(Module.CREATURES)
-                                && level.getRawBrightness(pos, 0) <= 7
-                                && level.getBlockState(pos.below()).isSolidRender(),
+                                && BeastSpawnHandler.spawnsNaturally(entityType)
+                                && level.getBlockState(pos.below()).isSolidRender()
+                                && SpawnTime.fits(false, level, pos),
                 RegisterSpawnPlacementsEvent.Operation.OR);
     }
 }

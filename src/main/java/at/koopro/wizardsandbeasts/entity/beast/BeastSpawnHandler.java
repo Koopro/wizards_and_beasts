@@ -40,9 +40,11 @@ public final class BeastSpawnHandler {
         // Phase 3 additions (generic CreatureDefinition pipeline).
         daySpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("golden_snidget"));
         daySpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("granian"));
-        daySpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("horned_serpent"));
         daySpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("yeti"));
-        daySpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("lobalug"));
+        // Water creatures are placed in the water, not on the bank: both were registered as ground spawns, so a
+        // river serpent and a sea-floor lobalug could only ever appear on dry land (Beast Renaissance D18).
+        waterSpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("horned_serpent"));
+        waterSpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("lobalug"));
         nightSpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("ghoul"));
         nightSpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("pukwudgie"));
         nightSpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("rougarou"));
@@ -72,8 +74,9 @@ public final class BeastSpawnHandler {
         // hills (a herd is what its ecology is about), and the rare Occamy in jungle and bamboo, its canon range.
         daySpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("hippogriff"));
         daySpawn(event, at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("occamy"));
-        // The basilisk comes only from the Chamber of Secrets' spawn override, and only one to a Chamber that has
-        // not lost its basilisk already: without a rule the Chamber woke a new one every creature cycle.
+        // The basilisk has no biome spawn and the Chamber structure ships no spawn override: it wakes from the
+        // Chamber heart (ChamberHeartBlockEntity) or the breeding ritual. This rule stays as the guard for any
+        // structure override a datapack adds, so such an override can still wake only one per Chamber.
         var basilisk = at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES.get("basilisk");
         registerAt(event, basilisk, false, (level, pos) -> at.koopro.wizardsandbeasts.chamber.ChamberBasilisk.mayWake(
                 level.getLevel(), pos, at.koopro.wizardsandbeasts.chamber.ChamberBasilisk.ofType(basilisk.get())));
@@ -112,7 +115,7 @@ public final class BeastSpawnHandler {
      * spawn attempt; deciding at registration would freeze the answer for the session and make the
      * config need a restart. It is a cheap set lookup either way.
      */
-    private static boolean spawnsNaturally(EntityType<?> entityType) {
+    public static boolean spawnsNaturally(EntityType<?> entityType) {
         return switch (Config.creatureNaturalSpawns) {
             case NONE -> false;
             case ALL -> true;
@@ -185,9 +188,21 @@ public final class BeastSpawnHandler {
                     if (!level.getBlockState(pos.below()).isSolidRender()) {
                         return false;
                     }
-                    int light = level.getRawBrightness(pos, 0);
-                    return daytime ? light >= 7 : light <= 7;
+                    return at.koopro.wizardsandbeasts.creature.rules.SpawnTime.fits(daytime, level, pos);
                 },
+                RegisterSpawnPlacementsEvent.Operation.OR);
+    }
+
+    /** A creature that lives in water: placed in water with water above it, by the roster gate, at any hour. */
+    private static void waterSpawn(RegisterSpawnPlacementsEvent event,
+                                   DeferredHolder<EntityType<?>, ? extends EntityType<? extends PathfinderMob>> holder) {
+        at.koopro.wizardsandbeasts.creature.rules.SpawnConditionNotes.note(holder.getId().getPath(),
+                "module_creatures", "roster_setting", "in_deep_water");
+        event.register(holder.get(), SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR,
+                (entityType, level, reason, pos, random) -> ModuleManager.isEnabled(Module.CREATURES)
+                        && spawnsNaturally(entityType)
+                        && level.getFluidState(pos).is(net.minecraft.tags.FluidTags.WATER)
+                        && level.getFluidState(pos.above()).is(net.minecraft.tags.FluidTags.WATER),
                 RegisterSpawnPlacementsEvent.Operation.OR);
     }
 }
