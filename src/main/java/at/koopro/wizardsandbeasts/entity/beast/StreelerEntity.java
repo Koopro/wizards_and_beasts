@@ -164,6 +164,8 @@ public class StreelerEntity extends GeoEntityBase {
         goalSelector.addGoal(1, new net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal(this, 0.6));
         goalSelector.addGoal(2, new LookAtPlayerGoal(this, Player.class, 5.0f));
         goalSelector.addGoal(3, new RandomLookAroundGoal(this));
+        // Ecology: keeps apart from other streelers, flees fire.
+        goalSelector.addGoal(1, new at.koopro.wizardsandbeasts.creature.ecology.EcologyGoal(this, java.util.Set.of()));
     }
 
     @Override

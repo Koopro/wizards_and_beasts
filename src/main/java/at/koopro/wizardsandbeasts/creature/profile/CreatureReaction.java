@@ -59,7 +59,12 @@ public record CreatureReaction(Stimulus stimulus, Response response, double radi
         /** This creature took damage. Distinct from the vanilla retaliation target goal. */
         DAMAGE("damage"),
         /** A broader world change: weather, a block placed, a structure disturbed. */
-        ENVIRONMENT("environment");
+        ENVIRONMENT("environment"),
+        /**
+         * Something heard: a block broken, an explosion, a projectile landing, a bell, lightning. Raised from vanilla
+         * game events ({@code CreatureStimuli.onGameEvent}), rate-limited per chunk.
+         */
+        NOISE("noise");
 
         public static final Codec<Stimulus> CODEC = StringRepresentable.fromEnum(Stimulus::values);
 

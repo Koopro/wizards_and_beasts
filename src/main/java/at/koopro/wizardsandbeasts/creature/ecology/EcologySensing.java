@@ -25,6 +25,10 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.entity.EntityTypeTest;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -88,16 +92,25 @@ public final class EcologySensing {
         ServerLevel level = (ServerLevel) mob.level();
         EcologyState state = state(mob);
         long now = level.getGameTime();
+        if (state.needsAt == Long.MIN_VALUE) {
+            firstLook(mob, profile, state, now);
+        }
         if (state.home == null) {
             state.home = profile.has(EcologyCapability.TREE_DWELLING) ? treeNear(mob) : mob.position();
         }
 
         boolean night = level.isDarkOutside();
-        boolean exposed = !night && level.canSeeSky(mob.blockPosition().above());
+        BlockPos feet = mob.blockPosition();
+        boolean skyAbove = level.canSeeSky(feet.above());
+        boolean exposed = !night && skyAbove;
         float health = mob.getHealth() / Math.max(1.0f, mob.getMaxHealth());
         boolean bonded = mob instanceof BondableBeast beast && beast.bondOwner() != null;
         boolean canAttack = mob.getAttribute(Attributes.ATTACK_DAMAGE) != null
                 && mob.getAttributeValue(Attributes.ATTACK_DAMAGE) > 0;
+        if (state.personality == null || state.personalityFrom != profile) {
+            state.personality = EcologyPersonality.of(mob.getUUID(), profile.personalityRanges());
+            state.personalityFrom = profile;
+        }
 
         double radius = profile.senseRadius();
         List<Entity> around = AiScratch.borrow();
@@ -107,29 +120,30 @@ public final class EcologySensing {
                     // be hunted or feared.
                     e -> e != mob && e.isAlive() && ((e instanceof LivingEntity && e.isAttackable()) || e instanceof ItemEntity),
                     around, Integer.MAX_VALUE);
-            return classify(mob, profile, state, now, night, exposed, health, bonded, canAttack, around);
+            return classify(mob, profile, state, level, now, night, exposed, skyAbove, health, bonded, canAttack, around);
         } finally {
             AiScratch.release(around);
         }
     }
 
-    private static Perception classify(PathfinderMob mob, EcologyProfile profile, EcologyState state,
-                                       long now, boolean night, boolean exposed, float health, boolean bonded,
-                                       boolean canAttack, List<Entity> around) {
+    private static Perception classify(PathfinderMob mob, EcologyProfile profile, EcologyState state, ServerLevel level,
+                                       long now, boolean night, boolean exposed, boolean skyAbove, float health,
+                                       boolean bonded, boolean canAttack, List<Entity> around) {
         Vec3 here = mob.position();
-        // Squared distances throughout; the four nearest are square-rooted once, at the end.
+        // Squared distances throughout; the nearest ones are square-rooted once, at the end.
         double far = Perception.FAR * Perception.FAR;
-        double threatD = far, preyD = far, itemD = far, playerD = far;
-        Vec3 threatAt = null, preyAt = null, itemAt = null;
+        double threatD = far, preyD = far, itemD = far, playerD = far, kinD = far;
+        Vec3 threatAt = null, preyAt = null, itemAt = null, kinAt = null;
         Entity prey = null;
         Player person = null;
         int kin = 0;
         double kx = 0, ky = 0, kz = 0;
+        boolean hungry = state.needs.get(EcologyNeed.HUNGER) >= EcologyBrain.NEED_START;
 
         for (Entity e : around) {
             double d = e.distanceToSqr(mob);
             if (e instanceof ItemEntity item) {
-                if (d < itemD && wants(profile, item.getItem())) {
+                if (d < itemD && wants(profile, item.getItem(), hungry)) {
                     itemD = d;
                     itemAt = item.position();
                 }
@@ -151,6 +165,10 @@ public final class EcologySensing {
                 kx += other.getX();
                 ky += other.getY();
                 kz += other.getZ();
+                if (d < kinD) {
+                    kinD = d;
+                    kinAt = other.position();
+                }
                 continue;
             }
             if (d < threatD && threatens(profile, mob, other)) {
@@ -162,6 +180,17 @@ public final class EcologySensing {
                 preyAt = other.position();
                 prey = other;
             }
+        }
+
+        // Needs move on by the time since the last look (none on the first look after a load).
+        long elapsed = state.needsAt == Long.MIN_VALUE ? 0 : now - state.needsAt;
+        state.needsAt = now;
+        double company = EcologyBrain.COMPANY * 2;
+        boolean withKin = kinAt != null && kinD <= company * company;
+        state.needs.advance(profile, state.personality, elapsed, state.intent().resting(), withKin);
+        double fleeRange = profile.senseRadius() * EcologyBrain.FLEE_SHARE;
+        if (threatAt != null && threatD <= fleeRange * fleeRange) {
+            state.needs.alarm(profile);
         }
 
         Perception.Kin kinView = kin == 0 ? Perception.Kin.NONE : kinView(here, kin, kx, ky, kz);
@@ -177,9 +206,77 @@ public final class EcologySensing {
         Perception.Stimulus stimulus = state.stimulus != null && now < state.stimulusUntil ? state.stimulus : null;
         Perception perception = new Perception(night, exposed, health, bonded, state.fedAt(now),
                 state.home.distanceTo(here), sighting(Math.sqrt(threatD), threatAt), sighting(Math.sqrt(preyD), preyAt),
-                kinView, playerView, sighting(Math.sqrt(itemD), itemAt), stimulus);
+                kinView, playerView, sighting(Math.sqrt(itemD), itemAt), stimulus,
+                surroundings(mob, level, state, now, skyAbove, sighting(Math.sqrt(kinD), kinAt)),
+                state.needs.view(), state.personality);
         state.perception = perception;
         return perception;
+    }
+
+    /**
+     * The first look since it was spawned or loaded. A creature met for the first time (no home, no needs yet) is not
+     * found fresh from nowhere: its needs start part-way, different for each individual, so a herd does not all get
+     * thirsty in the same minute. And nobody grooms the moment they arrive. Deterministic from the UUID.
+     */
+    private static void firstLook(PathfinderMob mob, EcologyProfile profile, EcologyState state, long now) {
+        long seed = mob.getUUID().getLeastSignificantBits() ^ mob.getUUID().getMostSignificantBits();
+        state.coolUntil(EcologyIntent.GROOM, now + 600 + Math.floorMod(seed, 1800));
+        if (state.home != null || !state.needs.saved().isEmpty()) {
+            return; // loaded with its needs, or set up by someone (a test, an admin): leave them be
+        }
+        for (EcologyNeed need : profile.needs().keySet()) {
+            if (need != EcologyNeed.SAFETY && need != EcologyNeed.MAGIC) {
+                seed = seed * 6364136223846793005L + 1442695040888963407L;
+                state.needs.set(need, (seed >>> 40) / (float) (1L << 24) * 0.4f);
+            }
+        }
+    }
+
+    /** Weather, time and hazards at the creature's own position (a few reads), and the places it remembers. */
+    private static Perception.Surroundings surroundings(PathfinderMob mob, ServerLevel level, EcologyState state,
+                                                        long now, boolean skyAbove, Perception.Sighting nearestKin) {
+        BlockPos feet = mob.blockPosition();
+        Biome biome = level.getBiome(feet).value();
+        if (EcologyProfileRegistry.of(mob.getType()).has(EcologyCapability.SCAVENGER)) {
+            // Every look (at most 64 distance checks): a fresher kill nearer than the remains it knows of wins.
+            Vec3 remains = CarrionLog.of(level).nearest(mob.position(), CreatureStimuli.CARRION_RADIUS, now,
+                    CreatureStimuli.CARRION_TICKS, state.carrionEaten);
+            boolean known = state.carrionAt != null && now < state.carrionUntil;
+            if (remains != null && (!known || remains.distanceToSqr(mob.position())
+                    < state.carrionAt.distanceToSqr(mob.position()))) {
+                state.noteCarrion(remains, now + CreatureStimuli.CARRION_TICKS);
+            }
+        }
+        boolean raining = level.isRaining() && biome.hasPrecipitation();
+        int dayTime = (int) Math.floorMod(level.getDayTime(), 24000L);
+        Vec3 here = mob.position();
+        return new Perception.Surroundings(raining, raining && level.isThundering(), skyAbove,
+                biome.getBaseTemperature(), dayTime, hazard(mob, level, feet),
+                remembered(here, state.waterAt, state.waterUntil, now),
+                remembered(here, state.forageAt, state.forageUntil, now),
+                remembered(here, state.carrionAt, state.carrionUntil, now),
+                nearestKin);
+    }
+
+    private static Perception.Sighting remembered(Vec3 here, @Nullable Vec3 at, long until, long now) {
+        return at == null || now >= until ? Perception.Sighting.NONE : new Perception.Sighting(at.distanceTo(here), at);
+    }
+
+    /** Burning, in lava, in fire, on magma or in powder snow — and not made for it. Reads two blocks at most. */
+    static boolean hazard(PathfinderMob mob, ServerLevel level, BlockPos feet) {
+        if (!mob.fireImmune()) {
+            if (mob.isOnFire() || mob.isInLava()) {
+                return true;
+            }
+            BlockState at = level.getBlockState(feet);
+            if (at.is(BlockTags.FIRE) || (at.is(BlockTags.CAMPFIRES) && at.getValue(CampfireBlock.LIT))) {
+                return true;
+            }
+            if (mob.onGround() && level.getBlockState(feet.below()).is(Blocks.MAGMA_BLOCK)) {
+                return true;
+            }
+        }
+        return mob.isInPowderSnow && mob.canFreeze();
     }
 
     private static Perception.Kin kinView(Vec3 here, int count, double x, double y, double z) {
@@ -232,12 +329,20 @@ public final class EcologySensing {
         return other.getType().is(PREY_TAG) || EcologyProfileRegistry.of(other.getType()).has(EcologyCapability.PREY);
     }
 
-    static boolean wants(EcologyProfile profile, ItemStack stack) {
+    static boolean wants(EcologyProfile profile, ItemStack stack, boolean hungry) {
         if (profile.has(EcologyCapability.TREASURE_SEEKER)
                 && (stack.is(NifflerTreasure.HIGH) || stack.is(NifflerTreasure.MEDIUM))) {
             return true;
         }
-        return profile.has(EcologyCapability.SCAVENGER) && (stack.is(ItemTags.MEAT) || stack.is(ItemTags.FISHES));
+        return isFood(profile, stack, hungry);
+    }
+
+    /** Food it eats off the ground: meat and fish for a scavenger; its {@code food_items} once it is hungry. */
+    static boolean isFood(EcologyProfile profile, ItemStack stack, boolean hungry) {
+        if (profile.has(EcologyCapability.SCAVENGER) && (stack.is(ItemTags.MEAT) || stack.is(ItemTags.FISHES))) {
+            return true;
+        }
+        return hungry && profile.foodItems().isPresent() && stack.is(profile.foodItems().get());
     }
 
     /** A tree-dweller's home: the nearest log within a few blocks of where it was first seen, else where it stands. */

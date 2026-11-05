@@ -8,30 +8,46 @@ import at.koopro.wizardsandbeasts.creature.schedule.AiMetrics;
 import at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
+import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.VanillaGameEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Map;
+import java.util.WeakHashMap;
+
 import static at.koopro.wizardsandbeasts.creature.ecology.EcologyCapability.*;
 
 /**
  * Raises the {@link CreatureReaction} stimuli from the things that actually happen: a spell cast, a creature dying, a
- * creature being hurt. Until now the reaction vocabulary was declared on creatures and raised by nothing.
+ * creature being hurt, a noise, a person running. Until 2026-10 the reaction vocabulary was declared on creatures
+ * and raised by nothing.
  *
  * <p>Each event does one bounded query around where it happened — per event, never per tick. A creature's answer is
- * what its definition declares for that stimulus; a creature that declares nothing answers from its ecology
- * (a herd scatters when one of it falls, a curious creature with a sense for magic comes to see a spell, a prey
- * animal bolts from one). The answer is held for {@link EcologySensing#STIMULUS_TICKS} and acted on by
- * {@link EcologyGoal} through {@link EcologyBrain}, so it competes with everything else in one ordered policy.
+ * what its definition declares for that stimulus; a creature that declares nothing answers from its ecology and
+ * temperament (a herd scatters when one of it falls, a curious creature comes to see a spell or a noise, a timid prey
+ * animal bolts from a crash a bold one only looks up at). The answer is held for {@link EcologySensing#STIMULUS_TICKS}
+ * and acted on by {@link EcologyGoal} through {@link EcologyBrain}, so it competes with everything else in one
+ * ordered policy.
+ *
+ * <p><b>Noise</b> comes from vanilla's game events ({@link VanillaGameEvent}), which fire for every step and block
+ * change in the world, so the listener is built to say no fast: an identity check against a handful of events,
+ * then a per-chunk rate limit (one noise of each loudness per chunk per {@link #NOISE_GAP} ticks), and only then one
+ * bounded query. A sleeping creature sleeps through a soft noise.
  */
 @NullMarked
 @EventBusSubscriber(modid = WizardsAndBeastsMod.MODID)
@@ -41,6 +57,28 @@ public final class CreatureStimuli {
     public static final double SPELL_RADIUS = 12.0;
     /** Kin falling is noticed this far. */
     public static final double DEATH_RADIUS = 16.0;
+    /** A scavenger smells a death this far off... */
+    public static final double CARRION_RADIUS = 24.0;
+    /** ...and remembers it this long. */
+    public static final int CARRION_TICKS = 2400;
+    /** One noise of each loudness per chunk per this many ticks; the rest are dropped. */
+    public static final int NOISE_GAP = 20;
+
+    /** How far a noise carries, and how alarming it is. */
+    public enum Loudness {
+        /** A block placed. */
+        SOFT(6),
+        /** A block broken, an arrow landing, a note block, a fuse lit, a person running. */
+        MEDIUM(10),
+        /** An explosion, lightning, a horn. */
+        LOUD(32);
+
+        public final double radius;
+
+        Loudness(double radius) {
+            this.radius = radius;
+        }
+    }
 
     private CreatureStimuli() {}
 
@@ -60,6 +98,7 @@ public final class CreatureStimuli {
             } else {
                 AiMetrics.inc(AiMetrics.Metric.STIMULUS_SKIPPED);
             }
+            carrion(level, dead);
             // A predator that killed its prey — by its hunt or by any other bite — has eaten.
             if (event.getSource().getEntity() instanceof PathfinderMob killer) {
                 EcologyProfile hunter = EcologyProfileRegistry.of(killer.getType());
@@ -70,7 +109,19 @@ public final class CreatureStimuli {
         }
     }
 
-    /** A hurt creature answers, and — if social — so do its kin within its herd radius. */
+    /**
+     * Logs a death for scavengers to find ({@link CarrionLog}): a few array writes, no query — only scavengers pay,
+     * when they look around. Nothing at all while no scavenger is loaded in the data.
+     */
+    private static void carrion(ServerLevel level, LivingEntity dead) {
+        if (!ModuleManager.isEnabled(Module.CREATURES) || !EcologyProfileRegistry.anyHas(SCAVENGER)
+                || dead instanceof Player) {
+            return;
+        }
+        CarrionLog.of(level).record(dead.position(), level.getGameTime());
+    }
+
+    /** A hurt creature is frightened and answers, and — if social — so do its kin within its herd radius. */
     @SubscribeEvent
     public static void onDamaged(LivingDamageEvent.Post event) {
         if (!(event.getEntity() instanceof PathfinderMob hurt) || !(hurt.level() instanceof ServerLevel level)
@@ -81,9 +132,12 @@ public final class CreatureStimuli {
         Vec3 from = attacker != null ? attacker.position()
                 : event.getSource().getSourcePosition() != null ? event.getSource().getSourcePosition() : hurt.position();
         EcologyProfile profile = EcologyProfileRegistry.of(hurt.getType());
+        if (!profile.isEmpty()) {
+            EcologySensing.state(hurt).needs.alarm(profile);
+        }
         Response own = responseOf(hurt, profile, Stimulus.DAMAGE);
         if (own != Response.IGNORE) {
-            hold(hurt, own, from, level.getGameTime());
+            hold(hurt, own, from, level.getGameTime(), Stimulus.DAMAGE);
         }
         if (profile.has(SOCIAL)) {
             AiMetrics.inc(AiMetrics.Metric.STIMULUS_QUERY);
@@ -91,7 +145,7 @@ public final class CreatureStimuli {
                     hurt.getBoundingBox().inflate(profile.herdRadius() * 1.5), e -> e.getType() == hurt.getType() && e != hurt)) {
                 Response answer = profile.has(AGGRESSIVE) || profile.has(TERRITORIAL) ? Response.ATTACK
                         : profile.has(PREY) || profile.has(COWARDLY) ? Response.FLEE : Response.BECOME_ALERT;
-                hold(kin, answer, from, level.getGameTime());
+                hold(kin, answer, from, level.getGameTime(), Stimulus.DAMAGE);
             }
         }
     }
@@ -104,7 +158,7 @@ public final class CreatureStimuli {
         AiMetrics.inc(AiMetrics.Metric.STIMULUS_QUERY);
         boolean causeIsPrey = cause != null && EcologyProfileRegistry.of(cause.getType()).has(PREY);
         for (PathfinderMob mob : level.getEntitiesOfClass(PathfinderMob.class,
-                new net.minecraft.world.phys.AABB(at, at).inflate(reach), e -> e != cause && e.isAlive())) {
+                new AABB(at, at).inflate(reach), e -> e != cause && e.isAlive())) {
             EcologyProfile profile = EcologyProfileRegistry.of(mob.getType());
             if (stimulus == Stimulus.CREATURE_DEATH && cause != null && cause.getType() != mob.getType()
                     && !(profile.has(PREY) && causeIsPrey)) {
@@ -116,10 +170,130 @@ public final class CreatureStimuli {
             }
             Response answer = responseOf(mob, profile, stimulus);
             if (answer != Response.IGNORE) {
-                hold(mob, answer, at, now);
+                if (stimulus == Stimulus.SPELL) {
+                    EcologySensing.state(mob).needs.set(EcologyNeed.MAGIC, 0); // magic done nearby feeds a magivore
+                }
+                hold(mob, answer, at, now, stimulus);
             }
         }
     }
+
+    // ── noise ───────────────────────────────────────────────────────────────────────────────────
+
+    /** Last tick a noise of each loudness was let through, per chunk, per level. */
+    private static final Map<ServerLevel, Long2LongOpenHashMap> HEARD = new WeakHashMap<>();
+
+    @SubscribeEvent
+    public static void onGameEvent(VanillaGameEvent event) {
+        Loudness loudness = loudness(event.getVanillaEvent(), event.getCause());
+        if (loudness == null || !(event.getLevel() instanceof ServerLevel level)) {
+            return;
+        }
+        if (!ModuleManager.isEnabled(Module.CREATURES) || !EcologyProfileRegistry.anyLoaded()) {
+            return;
+        }
+        Vec3 at = event.getEventPosition();
+        long now = level.getGameTime();
+        if (!admit(level, at, loudness, now)) {
+            AiMetrics.inc(AiMetrics.Metric.NOISE_DROPPED);
+            return;
+        }
+        Stimulus kind = event.getVanillaEvent().is(GameEvent.STEP) ? Stimulus.PLAYER : Stimulus.NOISE;
+        noise(level, at, loudness, kind, event.getCause(), now);
+    }
+
+    /** Raises a noise at {@code at}. Public for the test harness, which makes noises on demand. */
+    public static void noise(ServerLevel level, Vec3 at, Loudness loudness, Stimulus kind, @Nullable Entity cause,
+                             long now) {
+        AiMetrics.inc(AiMetrics.Metric.NOISE_QUERY);
+        for (PathfinderMob mob : level.getEntitiesOfClass(PathfinderMob.class, new AABB(at, at).inflate(loudness.radius),
+                e -> e != cause && e.isAlive())) {
+            EcologyProfile profile = EcologyProfileRegistry.of(mob.getType());
+            if (profile.isEmpty()) {
+                continue;
+            }
+            EcologyState state = EcologySensing.state(mob);
+            double distance = mob.position().distanceTo(at);
+            if (distance > loudness.radius) {
+                continue;
+            }
+            // Asleep, a soft noise goes unheard, and a medium one only close by.
+            if (state.intent().resting() && (loudness == Loudness.SOFT
+                    || (loudness == Loudness.MEDIUM && distance > loudness.radius * 0.5))) {
+                continue;
+            }
+            Response answer = mob instanceof GenericBeastEntity beast && beast.reactionTo(kind) != Response.IGNORE
+                    ? beast.reactionTo(kind)
+                    : heard(profile, kind, loudness,
+                            state.personality != null ? state.personality : EcologyPersonality.NEUTRAL);
+            if (answer != Response.IGNORE) {
+                hold(mob, answer, at, now, kind);
+            }
+        }
+    }
+
+    /** Which game events are noises, and how loud. Identity checks only: this runs for every event in the world. */
+    static @Nullable Loudness loudness(Holder<GameEvent> event, @Nullable Entity cause) {
+        if (event.is(GameEvent.STEP)) {
+            // Only a person running is worth hearing; sneaking makes no step event at all.
+            return cause instanceof Player player && player.isSprinting() && !player.isSpectator() ? Loudness.MEDIUM : null;
+        }
+        if (event.is(GameEvent.EXPLODE) || event.is(GameEvent.LIGHTNING_STRIKE) || event.is(GameEvent.INSTRUMENT_PLAY)) {
+            return Loudness.LOUD;
+        }
+        if (event.is(GameEvent.PROJECTILE_LAND) || event.is(GameEvent.NOTE_BLOCK_PLAY) || event.is(GameEvent.PRIME_FUSE)) {
+            return Loudness.MEDIUM;
+        }
+        // Blocks changing are noise only when a person does it: a grazing herd-mate cropping grass, fire spreading or
+        // a crop growing is the background a creature lives in.
+        if (!(cause instanceof Player)) {
+            return null;
+        }
+        return event.is(GameEvent.BLOCK_DESTROY) ? Loudness.MEDIUM : event.is(GameEvent.BLOCK_PLACE) ? Loudness.SOFT : null;
+    }
+
+    /** The per-chunk rate limit. Pruned when it grows, so a long session does not accumulate chunks. */
+    static synchronized boolean admit(ServerLevel level, Vec3 at, Loudness loudness, long now) {
+        Long2LongOpenHashMap heard = HEARD.computeIfAbsent(level, l -> new Long2LongOpenHashMap());
+        long key = (((long) ((int) Math.floor(at.x) >> 4)) << 34) ^ (((long) ((int) Math.floor(at.z) >> 4)) << 2)
+                ^ loudness.ordinal();
+        long last = heard.getOrDefault(key, Long.MIN_VALUE / 2);
+        if (now - last < NOISE_GAP) {
+            return false;
+        }
+        if (heard.size() > 4096) {
+            heard.long2LongEntrySet().removeIf(e -> now - e.getLongValue() > NOISE_GAP * 10L);
+        }
+        heard.put(key, now);
+        return true;
+    }
+
+    /**
+     * What a creature that declared nothing does about a noise or a running person. Pure. Loud: prey and the
+     * avoidant run, the territorial bristle, the curious come to look. Medium: only the timid run. Soft: only the
+     * curious care. A running person frightens the timid and the avoidant and makes the territorial bristle; the
+     * curious only ever come to quiet people.
+     */
+    public static Response heard(EcologyProfile profile, Stimulus kind, Loudness loudness, EcologyPersonality me) {
+        boolean skittish = profile.has(PREY) || profile.has(COWARDLY) || profile.has(HUMAN_AVOIDANT);
+        boolean timid = skittish && me.boldness() < 0.35f;
+        if (kind == Stimulus.PLAYER) {
+            if (timid || profile.has(HUMAN_AVOIDANT)) {
+                return Response.FLEE;
+            }
+            return profile.has(TERRITORIAL) ? Response.BECOME_ALERT : Response.IGNORE;
+        }
+        return switch (loudness) {
+            case LOUD -> skittish ? Response.FLEE
+                    : profile.has(TERRITORIAL) ? Response.BECOME_ALERT
+                    : profile.has(CURIOUS) ? Response.INVESTIGATE : Response.IGNORE;
+            case MEDIUM -> timid ? Response.FLEE
+                    : profile.has(CURIOUS) ? Response.INVESTIGATE : Response.IGNORE;
+            case SOFT -> profile.has(CURIOUS) && !timid ? Response.INVESTIGATE : Response.IGNORE;
+        };
+    }
+
+    // ── answers ─────────────────────────────────────────────────────────────────────────────────
 
     static double radiusFor(PathfinderMob mob, EcologyProfile profile, Stimulus stimulus) {
         if (mob instanceof GenericBeastEntity beast && beast.reactionTo(stimulus) != Response.IGNORE) {
@@ -147,7 +321,7 @@ public final class CreatureStimuli {
     public static Response implied(EcologyProfile profile, Stimulus stimulus) {
         return switch (stimulus) {
             case SPELL -> profile.has(MAGICAL_SENSE)
-                    ? (profile.has(CURIOUS) ? Response.INVESTIGATE
+                    ? (profile.has(CURIOUS) || profile.needs(EcologyNeed.MAGIC) ? Response.INVESTIGATE
                         : profile.has(PREY) || profile.has(COWARDLY) || profile.has(HUMAN_AVOIDANT) ? Response.FLEE
                         : Response.BECOME_ALERT)
                     : Response.IGNORE;
@@ -160,9 +334,12 @@ public final class CreatureStimuli {
     }
 
     /** Records the answer and wakes the creature, so it acts on it within a few ticks (the EVENT tier). */
-    private static void hold(PathfinderMob mob, Response response, Vec3 source, long now) {
+    private static void hold(PathfinderMob mob, Response response, Vec3 source, long now, Stimulus kind) {
         EcologyState state = EcologySensing.state(mob);
-        state.react(new Perception.Stimulus(response, source), now, now + EcologySensing.STIMULUS_TICKS);
+        state.react(new Perception.Stimulus(response, source, kind), now, now + EcologySensing.STIMULUS_TICKS);
+        if (response == Response.FLEE) {
+            state.needs.alarm(EcologyProfileRegistry.of(mob.getType()));
+        }
         state.wake();
     }
 

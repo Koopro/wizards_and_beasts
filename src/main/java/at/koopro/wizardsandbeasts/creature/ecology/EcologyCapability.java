@@ -62,7 +62,27 @@ public enum EcologyCapability implements StringRepresentable {
     /** Seeks out people. */
     HUMAN_FRIENDLY(Kind.DRIVEN),
     /** Shuns the dark-corrupted and those who have killed its kind. */
-    MAGICAL_CORRUPTION_SENSITIVE(Kind.PERCEPTUAL);
+    MAGICAL_CORRUPTION_SENSITIVE(Kind.PERCEPTUAL),
+    /** Active by day; sleeps through the night where it stands or at home. */
+    DIURNAL(Kind.DRIVEN),
+    /** Active at dawn and dusk; rests through midday and the dead of night. */
+    CREPUSCULAR(Kind.DRIVEN),
+    /** Keeps its own kind at a distance ({@code personal_space}); never herds. */
+    SOLITARY(Kind.DRIVEN),
+    /** Eats grass, ferns and flowers when hungry. */
+    GRAZER(Kind.DRIVEN),
+    /** Eats leaves when hungry. */
+    BROWSER(Kind.DRIVEN),
+    /** Picks at bark and wood for the insects in it when hungry. */
+    INSECTIVORE(Kind.DRIVEN),
+    /** Takes cover from rain and thunder. */
+    WEATHER_SHY(Kind.DRIVEN),
+    /** Made for cold: seeks shade in a hot place by day. */
+    COLD_ADAPTED(Kind.DRIVEN),
+    /** Made for heat: seeks cover in a cold place. */
+    WARMTH_LOVING(Kind.DRIVEN),
+    /** Spends calm, sated moments grooming itself. */
+    GROOMING(Kind.DRIVEN);
 
     /** How a capability reaches play. */
     public enum Kind {

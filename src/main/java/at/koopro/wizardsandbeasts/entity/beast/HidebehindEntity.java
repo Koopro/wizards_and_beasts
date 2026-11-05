@@ -92,6 +92,12 @@ public class HidebehindEntity extends GeoEntityBase {
         goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.2, true));
         goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 0.8));
         goalSelector.addGoal(9, new RandomLookAroundGoal(this));
+        // Ecology: rest by day, keep apart, flee fire. Its own stalk and melee goals keep the hunting and the fight.
+        goalSelector.addGoal(3, new at.koopro.wizardsandbeasts.creature.ecology.EcologyGoal(this, java.util.Set.of(
+                at.koopro.wizardsandbeasts.creature.ecology.EcologyIntent.HUNT,
+                at.koopro.wizardsandbeasts.creature.ecology.EcologyIntent.STALK,
+                at.koopro.wizardsandbeasts.creature.ecology.EcologyIntent.WARN_INTRUDER,
+                at.koopro.wizardsandbeasts.creature.ecology.EcologyIntent.DEFEND_TERRITORY)));
         targetSelector.addGoal(1, new HurtByTargetGoal(this));
         targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
     }

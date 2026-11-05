@@ -30,7 +30,15 @@ public final class AiMetrics {
         /** One query around a stimulus (spell, death, herd alarm). */
         STIMULUS_QUERY,
         /** A death no creature could care about, answered without a query. */
-        STIMULUS_SKIPPED
+        STIMULUS_SKIPPED,
+        /** One bounded block search for water or food (at most 96 block reads). */
+        RESOURCE_SEARCH,
+        /** One query around a noise that passed the rate limit. */
+        NOISE_QUERY,
+        /** A noise dropped by the per-chunk rate limit, or because nobody could hear it. */
+        NOISE_DROPPED,
+        /** An ecology move that made no progress and was given up. */
+        NAV_TIMEOUT
     }
 
     private static final Map<Metric, LongAdder> COUNTERS = new EnumMap<>(Metric.class);

@@ -143,6 +143,8 @@ public class AugureyEntity extends GeoEntityBase {
         });
         goalSelector.addGoal(4, new LookAtPlayerGoal(this, Player.class, 7.0f));
         goalSelector.addGoal(5, new RandomLookAroundGoal(this));
+        // Ecology (creature_ecology/augurey.json): weather, grooming, keeping from people. Below its own avoidance.
+        goalSelector.addGoal(2, new at.koopro.wizardsandbeasts.creature.ecology.EcologyGoal(this, java.util.Set.of()));
     }
 
     /** Rain falling where it is, which is the only weather it flies in. */

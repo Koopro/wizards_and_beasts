@@ -18,8 +18,51 @@ public final class EcologyProfileRegistry {
 
     private EcologyProfileRegistry() {}
 
+    /** Every capability some loaded profile has: lets an event skip its query when nobody could care. */
+    private static volatile java.util.Set<EcologyCapability> PRESENT = java.util.EnumSet.noneOf(EcologyCapability.class);
+
+    /** What the datapacks declare, before overrides. */
+    private static volatile Map<Identifier, EcologyProfile> LOADED = Map.of();
+    /** Test overrides, laid over {@link #LOADED}; each removed only by its own handle. */
+    private static final Map<Identifier, EcologyProfile> OVERRIDES = new java.util.concurrent.ConcurrentHashMap<>();
+
     public static void replaceAll(Map<Identifier, EcologyProfile> loaded) {
-        PROFILES = Map.copyOf(loaded);
+        LOADED = Map.copyOf(loaded);
+        rebuild();
+    }
+
+    private static synchronized void rebuild() {
+        Map<Identifier, EcologyProfile> merged = new java.util.HashMap<>(LOADED);
+        merged.putAll(OVERRIDES);
+        java.util.Set<EcologyCapability> present = java.util.EnumSet.noneOf(EcologyCapability.class);
+        merged.values().forEach(p -> present.addAll(p.capabilities()));
+        PRESENT = present;
+        PROFILES = Map.copyOf(merged);
+    }
+
+    /** Whether any loaded creature has {@code capability}. */
+    public static boolean anyHas(EcologyCapability capability) {
+        return PRESENT.contains(capability);
+    }
+
+    /**
+     * Lays a profile over one creature's until the returned handle is closed — for GameTests that need a creature with
+     * exactly the capabilities under test, whatever the shipped data says. Survives a reload; not for gameplay.
+     */
+    public static AutoCloseable override(Identifier creatureId, EcologyProfile profile) {
+        // A layer, not a snapshot: closing removes this override only, so two scenarios running side by side cannot
+        // restore each other's "before" over a profile the other has just set.
+        OVERRIDES.put(creatureId, profile);
+        rebuild();
+        return () -> {
+            OVERRIDES.remove(creatureId, profile);
+            rebuild();
+        };
+    }
+
+    /** Whether any creature has an ecology at all. */
+    public static boolean anyLoaded() {
+        return !PROFILES.isEmpty();
     }
 
     public static EcologyProfile get(Identifier creatureId) {

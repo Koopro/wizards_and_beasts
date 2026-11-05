@@ -98,6 +98,9 @@ public class RunespoorEntity extends GeoEntityBase {
         goalSelector.addGoal(3, new MeleeAttackGoal(this, 1.2, true));
         goalSelector.addGoal(9, new LookAtPlayerGoal(this, Player.class, 8.0f));
         goalSelector.addGoal(10, new RandomLookAroundGoal(this));
+        // Ecology: stalks prey, keeps apart, flees fire. Its melee goal keeps fights with people.
+        goalSelector.addGoal(1, new at.koopro.wizardsandbeasts.creature.ecology.EcologyGoal(this, java.util.Set.of(
+                at.koopro.wizardsandbeasts.creature.ecology.EcologyIntent.DEFEND_TERRITORY)));
         targetSelector.addGoal(1, new HurtByTargetGoal(this));
         targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
     }

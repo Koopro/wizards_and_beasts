@@ -80,6 +80,7 @@ public final class WizardsAndBeastsGameTests {
         LifecycleDefectTests.contribute(registrar);
         AuditRegressionTests.contribute(registrar);
         EcologyTests.contribute(registrar);
+        CreatureLifeTests.contribute(registrar);
         JournalTests.contribute(registrar);
         SystemInteractionTests.contribute(registrar);
         ArtefactTests.contribute(registrar);

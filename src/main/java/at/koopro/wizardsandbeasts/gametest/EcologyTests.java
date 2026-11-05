@@ -7,6 +7,7 @@ import at.koopro.wizardsandbeasts.creature.ecology.EcologyIntent;
 import at.koopro.wizardsandbeasts.creature.ecology.EcologySensing;
 import at.koopro.wizardsandbeasts.event.bestiary.BestiaryDiscoveryHandler;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
+import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
@@ -208,6 +209,8 @@ public final class EcologyTests {
         PathfinderMob[] unicorn = new PathfinderMob[1];
         long[] before = new long[1];
         helper.startSequence()
+                // The forced chunk can take a few ticks to tick entities; an unticked unicorn looks around 0 times.
+                .thenWaitUntil(() -> WizardTestSupport.checkChunksTick(helper, new BlockPos(-2, Y, -2), new BlockPos(24, Y, 4)))
                 .thenExecute(() -> {
                     unicorn[0] = arena.creature("unicorn", 1, 1);
                     unicorn[0].setNoAi(false);

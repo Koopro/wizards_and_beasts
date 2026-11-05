@@ -98,12 +98,17 @@ public final class WizardTestSupport {
          * reset values a neighbour in the same batch has just set; its own environment puts it in a batch of its own.
          */
         public void addAlone(String name, String description, Consumer<GameTestHelper> scenario) {
+            addAlone(name, description, scenario, maxTicks);
+        }
+
+        /** {@link #addAlone(String, String, Consumer)} with its own timeout, for a scenario that measures over time. */
+        public void addAlone(String name, String description, Consumer<GameTestHelper> scenario, int ticks) {
             Holder<TestEnvironmentDefinition> own = event.registerEnvironment(
                     Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "alone_" + name),
                     new TestEnvironmentDefinition.AllOf());
             event.registerTest(
                     Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, name),
-                    new ScenarioTest(description, scenario, new TestData<>(own, EMPTY_STRUCTURE, maxTicks, 0, true)));
+                    new ScenarioTest(description, scenario, new TestData<>(own, EMPTY_STRUCTURE, ticks, 0, true)));
         }
 
         /** Registers one scenario against a named structure. */

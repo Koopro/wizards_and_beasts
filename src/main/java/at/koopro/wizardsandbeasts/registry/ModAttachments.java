@@ -346,10 +346,15 @@ public class ModAttachments {
                     .copyOnDeath()
                     .build());
 
-    /** A creature's ecological working memory (creature/ecology). Transient: never saved, never synced. */
+    /**
+     * A creature's ecological working memory (creature/ecology). Home, needs and fed-until are saved, and only once it
+     * has looked around; everything else is rebuilt within a second of loading. Never synced.
+     */
     public static final Supplier<AttachmentType<at.koopro.wizardsandbeasts.creature.ecology.EcologyState>> ECOLOGY_STATE =
             ATTACHMENTS.register("ecology_state", () -> AttachmentType
                     .builder(at.koopro.wizardsandbeasts.creature.ecology.EcologyState::new)
+                    .serialize(at.koopro.wizardsandbeasts.creature.ecology.EcologyState.CODEC,
+                            at.koopro.wizardsandbeasts.creature.ecology.EcologyState::worthSaving)
                     .build());
 
     public static final Supplier<AttachmentType<ImperioControlState>> IMPERIO_CONTROL_STATE =
