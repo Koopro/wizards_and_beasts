@@ -78,6 +78,8 @@ public final class EquipmentShowcaseCapture {
     private static final boolean CAST = "cast".equals(System.getenv("WB_EQUIPMENT_SHOWCASE"));
     /** Wardrobe Renaissance Phase D: the five prototype cuts standing, walking, sprinting, sneaking, seated. */
     private static final boolean WARDROBE = "wardrobe".equals(System.getenv("WB_EQUIPMENT_SHOWCASE"));
+    /** Wearable icons pass (2026-11-05): every wearable's inventory icon, then the Curios screen's empty slots. */
+    private static final boolean ICONS = "icons".equals(System.getenv("WB_EQUIPMENT_SHOWCASE"));
     private static final int LOAD_TICKS = 80;
     private static final int STAGE_Y = 200;
     private static final double START_X = -10.5;
@@ -147,6 +149,87 @@ public final class EquipmentShowcaseCapture {
     }));
 
     /** One per prototype cut, each at the rank that shows the most of it (WARDROBE_RENAISSANCE Phase C). */
+    /** The wearables whose inventory icons {@code tools/wearable_icons.py} draws, plus the Probity Probe. */
+    private static final List<String> ICON_IDS = List.of(
+            "student_robe_chest", "auror_robe_chest", "death_eater_robe_chest", "wizard_robe_chest",
+            "scholar_gown_chest", "travel_coat_chest", "healer_coat_chest", "ministry_robe_chest",
+            "master_mantle_chest", "quidditch_robes", "student_robe_legs", "student_robe_boots",
+            "auror_robe_legs", "auror_robe_boots", "death_eater_robe_legs", "death_eater_robe_boots",
+            "school_cape", "travel_cloak", "invisibility_cloak", "deathly_hallow_cloak", "shield_cloak",
+            "wizard_hat", "sorting_hat", "headless_hat", "professor_hat", "travel_hat", "shield_hat",
+            "death_eater_mask", "death_eater_mask_1", "death_eater_mask_2", "death_eater_mask_3",
+            "death_eater_mask_4", "death_eater_mask_5", "gloves", "dragon_hide_gloves", "shield_gloves",
+            "leather_belt", "duty_belt", "scarf", "time_turner", "probity_probe");
+
+    private static final List<Outfit> ICON_OUTFITS = List.of(new Outfit("icons", p -> {}));
+
+    /** Fills the main inventory (slots 0..35) with {@code ICON_IDS[from..]}, the rest empty. */
+    private static void stock(ServerPlayer p, int from) {
+        undress(p);
+        p.getInventory().clearContent();
+        for (int i = from; i < ICON_IDS.size() && i - from < 36; i++) {
+            var id = net.minecraft.resources.Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, ICON_IDS.get(i));
+            var item = net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(id);
+            if (item == Items.AIR) {
+                LOGGER.warn("Icon showcase: no item {}", id);
+                continue;
+            }
+            // Main grid first (9..35), then the hotbar (0..8), so the order reads top-left to bottom-right.
+            int n = i - from;
+            p.getInventory().setItem(n < 27 ? 9 + n : n - 27, new ItemStack(item));
+        }
+        p.inventoryMenu.broadcastChanges();
+    }
+
+    /**
+     * Opens the Curios screen from the server. The mod compiles against the Curios API only, which has no
+     * open call; Curios' own key is ignored unless the window has focus, which a hidden-desktop client never
+     * has. Reflection keeps this dev-only harness off Curios internals at compile time.
+     */
+    private static void openCurios(ServerPlayer p) {
+        try {
+            Object provider = Class.forName("top.theillusivec4.curios.common.inventory.container.CuriosMenuProvider")
+                    .getConstructor().newInstance();
+            p.openMenu((net.minecraft.world.MenuProvider) provider);
+        } catch (ReflectiveOperationException e) {
+            LOGGER.warn("Icon showcase: cannot open the Curios screen", e);
+        }
+    }
+
+    /**
+     * Parks the cursor in the window's corner so no tooltip covers the grid. A hidden-desktop window never
+     * gets OS cursor events, so {@code glfwSetCursorPos} alone does nothing; the mouse handler's own
+     * position is what screens read, set here by reflection (dev harness only).
+     */
+    private static void parkCursor() {
+        Minecraft mc = Minecraft.getInstance();
+        GLFW.glfwSetCursorPos(mc.getWindow().handle(), 1.0, 1.0);
+        for (String name : new String[]{"xpos", "ypos"}) {
+            try {
+                var field = mc.mouseHandler.getClass().getDeclaredField(name);
+                field.setAccessible(true);
+                field.setDouble(mc.mouseHandler, 1.0);
+            } catch (ReflectiveOperationException e) {
+                LOGGER.warn("Icon showcase: cannot park the cursor ({})", name, e);
+            }
+        }
+    }
+
+    private static void buildIconsScript() {
+        SCRIPT.add(new Step("stock_a", 20, false, Cam.SCREEN, p -> {
+            moves(false, false);
+            parkCursor();
+        }, p -> stock(p, 0)));
+        SCRIPT.add(new Step("inventory_a", 10, true, Cam.SCREEN, p -> {
+            Minecraft.getInstance().setScreen(new InventoryScreen(p));
+            parkCursor();
+        }, NOTHING));
+        SCRIPT.add(new Step("close_a", 4, false, Cam.SCREEN, p -> Minecraft.getInstance().setScreen(null), NOTHING));
+        SCRIPT.add(new Step("stock_b", 20, false, Cam.SCREEN, NONE, p -> stock(p, 36)));
+        SCRIPT.add(new Step("curios_b", 20, true, Cam.SCREEN, p -> parkCursor(), EquipmentShowcaseCapture::openCurios));
+        SCRIPT.add(new Step("close_b", 4, false, Cam.SCREEN, p -> p.closeContainer(), NOTHING));
+    }
+
     private static final List<Outfit> WARDROBE_OUTFITS = List.of(
             new Outfit("school_lion_graduate", p -> {
                 p.setItemSlot(EquipmentSlot.LEGS, new ItemStack(ArmorItemRegistry.STUDENT_ROBE_LEGS.get()));
@@ -252,7 +335,7 @@ public final class EquipmentShowcaseCapture {
     private static final String ONLY = System.getenv().getOrDefault("WB_EQUIPMENT_SHOWCASE_ONLY", "");
 
     private static List<Outfit> outfits() {
-        List<Outfit> all = CAST ? CAST_OUTFITS : WARDROBE ? WARDROBE_OUTFITS : OUTFITS;
+        List<Outfit> all = ICONS ? ICON_OUTFITS : CAST ? CAST_OUTFITS : WARDROBE ? WARDROBE_OUTFITS : OUTFITS;
         if (ONLY.isEmpty()) {
             return all;
         }
@@ -313,6 +396,10 @@ public final class EquipmentShowcaseCapture {
         }
         if (WARDROBE) {
             buildWardrobeScript(current);
+            return;
+        }
+        if (ICONS) {
+            buildIconsScript();
             return;
         }
         SCRIPT.add(new Step("dress", 30, false, Cam.QUARTER, p -> moves(false, false), p -> {
