@@ -6102,6 +6102,7 @@
   "admin.wizards_and_beasts.creature.badge.no_spawns": "no natural spawns",
   "admin.wizards_and_beasts.creature.badge.spawns": "spawns naturally",
   "admin.wizards_and_beasts.creature.badge.spawns_off": "natural spawning off",
+  "admin.wizards_and_beasts.creature.badge.spawns_roster": "kept out by the roster setting (creatureNaturalSpawns)",
   "admin.wizards_and_beasts.creature.badge.bespoke": "bespoke class",
   "admin.wizards_and_beasts.creature_fact.max_health": "Max health",
   "admin.wizards_and_beasts.creature_fact.attack_damage": "Attack damage",

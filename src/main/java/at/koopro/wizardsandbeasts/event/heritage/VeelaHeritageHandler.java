@@ -77,25 +77,38 @@ public final class VeelaHeritageHandler {
         }
     }
 
+    /**
+     * Veela whose current change was forced by fury, by player id. Only these revert on their own when they recover.
+     * Server memory, not saved: after a restart a fury change simply stays until its Veela toggles it, which errs on
+     * the side the player chose.
+     */
+    private static final java.util.Set<java.util.UUID> FURY_FORCED = java.util.concurrent.ConcurrentHashMap.newKeySet();
+
     private static void scan(ServerPlayer player, ServerLevel level, PlayerHeritageData data) {
         float ratio = player.getHealth() / Math.max(1.0f, player.getMaxHealth());
         boolean transformed = HeritageTransformService.isTransformed(data);
 
-        if (!transformed && ratio <= FURY_HP_THRESHOLD) {
-            if (HeritageTransformService.enter(player, data)) {
+        if (!transformed) {
+            FURY_FORCED.remove(player.getUUID());
+            if (ratio <= FURY_HP_THRESHOLD && HeritageTransformService.enter(player, data)) {
+                FURY_FORCED.add(player.getUUID());
                 onFury(player, level);
             }
             return;
         }
 
-        // Only the *forced* change reverses on its own. A Veela who chose the shape keeps it until they
-        // choose otherwise, so recovering past the calm threshold is not on its own a reason to revert —
-        // it only is if the wings came out uninvited. That intent is not stored anywhere, so the rule
-        // used here is the conservative one: recovery reverts, and a player who wanted to stay simply
-        // toggles again. See the note in the class javadoc of HeritageTransformService about state.
-        if (transformed && ratio >= CALM_HP_THRESHOLD) {
+        // Only the *forced* change reverses on its own. A Veela who chose the shape keeps it until they choose
+        // otherwise. This used to revert any change at full health, so a chosen harpy form lasted one scan (Beast
+        // Renaissance D17).
+        if (revertsOnRecovery(FURY_FORCED.contains(player.getUUID()), ratio)) {
+            FURY_FORCED.remove(player.getUUID());
             HeritageTransformService.exit(player, data);
         }
+    }
+
+    /** Whether a transformed Veela changes back now: only a change fury forced, and only once calm again. */
+    static boolean revertsOnRecovery(boolean forcedByFury, float healthRatio) {
+        return forcedByFury && healthRatio >= CALM_HP_THRESHOLD;
     }
 
     private static void onFury(ServerPlayer player, ServerLevel level) {

@@ -751,6 +751,33 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
             abilityCooldowns.put("legacy", legacy);
         }
         loadBond(input);
+        reapplyDefinitionBases();
+    }
+
+    /**
+     * The definition's stats over what the save remembered. Vanilla restores saved attribute base values after the
+     * constructor applied the definition, so a datapack retune never reached a creature that already existed (Beast
+     * Renaissance D21). Nothing else writes these five bases on a generic creature; size stays the SCALE attribute's.
+     * Health keeps its share of the new maximum.
+     */
+    private void reapplyDefinitionBases() {
+        CreatureDefinition def = definition();
+        if (def == null || level().isClientSide()) {
+            return;
+        }
+        float share = getHealth() / Math.max(1.0f, getMaxHealth());
+        setBase(Attributes.MAX_HEALTH, def.maxHealth());
+        setBase(Attributes.MOVEMENT_SPEED, def.movementSpeed());
+        setBase(Attributes.FOLLOW_RANGE, def.followRange());
+        if (def.flyingSpeed() > 0) {
+            setBase(Attributes.FLYING_SPEED, def.flyingSpeed());
+        }
+        if (def.attackDamage() > 0) {
+            setBase(Attributes.ATTACK_DAMAGE, def.attackDamage());
+        }
+        if (getHealth() > 0.0f) {
+            setHealth(Math.max(0.5f, share * getMaxHealth()));
+        }
     }
 
     @Override

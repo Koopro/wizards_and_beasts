@@ -552,8 +552,10 @@ final class CreatureBrowserPanel implements AdminPanel {
                 g.fill(x, rowY, x + rowW, rowY + ROW_H, AdminTheme.ROW_HOVER);
             }
             drawIcon(g, x + 3, rowY + 1, 11, row.icon(), row.id());
-            // ✕: its natural spawning is switched off; ◇n: it has n variants.
-            String badges = (row.naturalSpawnRule() ? "" : "✕") + (row.variants() > 0 ? "◇" + row.variants() : "");
+            // ✕: its natural spawning is switched off; ⊘: the rule is on but the roster setting keeps it out;
+            // ◇n: it has n variants.
+            String spawnBadge = !row.naturalSpawnRule() ? "✕" : row.rosterAllows() ? "" : "⊘";
+            String badges = spawnBadge + (row.variants() > 0 ? "◇" + row.variants() : "");
             int badgeW = font.width(badges);
             String name = AdminText.clip(font, Component.translatable(row.nameKey()).getString(), rowW - 18 - badgeW - 4);
             g.drawString(font, name, x + 17, rowY + 3, row.naturalSpawnRule() ? AdminTheme.INK : AdminTheme.INK_3, false);
@@ -642,7 +644,8 @@ final class CreatureBrowserPanel implements AdminPanel {
             out.add(Component.translatable(KEY + (summary.breedable() ? "badge.breedable" : "badge.tameable")).getString());
         }
         out.add(Component.translatable(summary.spawnEntries() == 0 ? KEY + "badge.no_spawns"
-                : summary.naturalSpawnRule() ? KEY + "badge.spawns" : KEY + "badge.spawns_off").getString());
+                : !summary.naturalSpawnRule() ? KEY + "badge.spawns_off"
+                : summary.rosterAllows() ? KEY + "badge.spawns" : KEY + "badge.spawns_roster").getString());
         if (summary.bespoke()) {
             out.add(Component.translatable(KEY + "badge.bespoke").getString());
         }

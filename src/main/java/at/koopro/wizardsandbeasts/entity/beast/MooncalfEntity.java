@@ -344,7 +344,8 @@ public class MooncalfEntity extends GeoEntityBase implements BondableBeast {
         @Override
         public void tick() {
             BlockPos home = mooncalf.burrow();
-            if (home != null && mooncalf.blockPosition().distSqr(home) > 4) {
+            // Back to the burrow when it has strayed, with a path asked for only when the last one is done.
+            if (home != null && mooncalf.blockPosition().distSqr(home) > 4 && mooncalf.getNavigation().isDone()) {
                 mooncalf.getNavigation().moveTo(home.getX() + 0.5, home.getY(), home.getZ() + 0.5, 0.8);
             }
         }

@@ -74,6 +74,9 @@ public final class BeastRenaissanceTests {
         tests.add("br0_burrowed_mooncalf_cannot_be_struck",
                 "D10: a burrowed mooncalf is underground: not pickable, not attackable, not hurt",
                 BeastRenaissanceTests::burrowedMooncalfCannotBeStruck);
+        tests.add("br0_saved_creature_takes_its_definition_stats",
+                "D21: a reloaded creature takes its definition's stats, not the ones saved with it",
+                BeastRenaissanceTests::savedCreatureTakesItsDefinitionStats);
         tests.add("br0_grown_niffler_keeps_its_name_and_brings_no_litter",
                 "D9: a baby niffler grows into the same animal: name, health share, and no fresh litter",
                 BeastRenaissanceTests::grownNifflerKeepsItsNameAndBringsNoLitter);
@@ -208,6 +211,24 @@ public final class BeastRenaissanceTests {
         check(helper, !mooncalf.isPickable() && !mooncalf.isAttackable(),
                 () -> "a burrowed mooncalf can still be clicked or targeted");
         mooncalf.discard();
+        helper.succeed();
+    }
+
+    private static void savedCreatureTakesItsDefinitionStats(GameTestHelper helper) {
+        Mob unicorn = (Mob) helper.spawn(type("unicorn"), new BlockPos(1, 2, 1));
+        unicorn.setNoAi(true);
+        double defined = unicorn.getAttributeBaseValue(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+        // An older save: different stats from a datapack since retuned.
+        unicorn.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(defined * 3);
+        unicorn.setHealth((float) (defined * 3) * 0.5f);
+        Mob loaded = CreatureWildlifeTests.roundTrip(helper, unicorn);
+        check(helper, loaded != null, () -> "the unicorn did not load back");
+        double after = loaded.getAttributeBaseValue(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+        check(helper, after == defined, () -> "a reloaded unicorn kept the saved max health " + after + ", not " + defined);
+        float share = loaded.getHealth() / loaded.getMaxHealth();
+        check(helper, Math.abs(share - 0.5f) < 0.02f, () -> "a half-hurt unicorn reloaded at " + share + " of its health");
+        unicorn.discard();
+        loaded.discard();
         helper.succeed();
     }
 

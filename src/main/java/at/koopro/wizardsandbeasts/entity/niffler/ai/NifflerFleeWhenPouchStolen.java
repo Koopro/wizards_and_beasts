@@ -53,7 +53,11 @@ public class NifflerFleeWhenPouchStolen extends Goal {
 
     @Override
     public void tick() {
-        fleeAwayFrom(fleeTarget);
+        // A fresh escape route when the last one runs out or every half second, not a path search every tick
+        // (Beast Renaissance D27).
+        if (niffler.getNavigation().isDone() || niffler.tickCount % 10 == 0) {
+            fleeAwayFrom(fleeTarget);
+        }
     }
 
     @Override

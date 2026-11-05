@@ -92,7 +92,10 @@ final class PhoenixDefendOwnerGoal extends Goal {
             strikeCooldown--;
         }
         phoenix.getLookControl().setLookAt(attacker, 30.0f, 30.0f);
-        phoenix.getNavigation().moveTo(attacker.getX(), attacker.getEyeY(), attacker.getZ(), 1.4);
+        if (ticks % 5 == 0 || phoenix.getNavigation().isDone()) {
+            // Re-aimed every few ticks, not every tick: a path search per tick per phoenix (Beast Renaissance D27).
+            phoenix.getNavigation().moveTo(attacker.getX(), attacker.getEyeY(), attacker.getZ(), 1.4);
+        }
         double reach = phoenix.getBbWidth() * 0.5 + attacker.getBbWidth() * 0.5 + 1.2;
         if (strikeCooldown == 0 && phoenix.distanceToSqr(attacker) <= reach * reach * 2.5
                 && phoenix.level() instanceof ServerLevel level) {

@@ -346,13 +346,20 @@ public class DementorEntity extends Monster implements GeoEntity {
      * the nearest Dementor, so each victim gets one effect per second however many Dementors surround them.
      */
     private void pulseAura(ServerLevel sl) {
+        // Every Dementor that could be nearest to any victim in reach, looked up once per pulse rather than once per
+        // victim (Beast Renaissance D25): a victim is within COLD_RADIUS of this one, so its rivals are within twice that.
+        List<DementorEntity> rivals = sl.getEntitiesOfClass(DementorEntity.class,
+                getBoundingBox().inflate(DementorAura.COLD_RADIUS * 2), d -> d.isAlive() && !d.isDissipating());
         for (LivingEntity victim : sl.getEntitiesOfClass(LivingEntity.class,
                 getBoundingBox().inflate(DementorAura.COLD_RADIUS), DementorAura::canFeedOn)) {
             double mine = distanceTo(victim);
             if (mine > DementorAura.COLD_RADIUS) continue;
-            List<DementorEntity> near = sl.getEntitiesOfClass(DementorEntity.class,
-                    victim.getBoundingBox().inflate(DementorAura.COLD_RADIUS),
-                    d -> d.isAlive() && !d.isDissipating() && d.distanceTo(victim) <= DementorAura.COLD_RADIUS);
+            List<DementorEntity> near = new java.util.ArrayList<>(rivals.size());
+            for (DementorEntity d : rivals) {
+                if (d.distanceTo(victim) <= DementorAura.COLD_RADIUS) {
+                    near.add(d);
+                }
+            }
             DementorEntity closest = near.stream()
                     .min(Comparator.<DementorEntity>comparingDouble(d -> d.distanceToSqr(victim))
                             .thenComparingInt(DementorEntity::getId))
@@ -422,8 +429,21 @@ public class DementorEntity extends Monster implements GeoEntity {
         return level() instanceof ServerLevel sl && AzkabanStructures.isInsideAzkabanArea(sl, getX(), getZ(), 16);
     }
 
+    /**
+     * Game time of the last spawn attempt, per dimension. Every Dementor used to try on its own 600-tick beat, each with
+     * a 400-block box query: a full wing ran the query dozens of times a cycle. One attempt per cycle per dimension is
+     * the same rate of reinforcement (Beast Renaissance D25).
+     */
+    private static final java.util.Map<net.minecraft.resources.ResourceKey<Level>, Long> LAST_SPAWN_ATTEMPT =
+            new java.util.concurrent.ConcurrentHashMap<>();
+    private static final long SPAWN_ATTEMPT_INTERVAL = 600L;
+
     private void trySpawnAdditionalDementor(ServerLevel sl) {
         if (!insideAzkaban()) return;
+        long now = sl.getGameTime();
+        Long last = LAST_SPAWN_ATTEMPT.get(sl.dimension());
+        if (last != null && now - last < SPAWN_ATTEMPT_INTERVAL && now >= last) return;
+        LAST_SPAWN_ATTEMPT.put(sl.dimension(), now);
         List<Player> insidePlayers = sl.getEntitiesOfClass(Player.class, getBoundingBox().inflate(96),
                 p -> AzkabanStructures.isInsideAzkabanArea(sl, p.getX(), p.getZ(), 32));
         if (insidePlayers.isEmpty()) return;
@@ -437,6 +457,11 @@ public class DementorEntity extends Monster implements GeoEntity {
         if (spawnPos == null) return;
         DementorEntity newDementor = new DementorEntity(ModEntities.DEMENTOR.get(), sl);
         newDementor.setPos(spawnPos.getX() + 0.5, spawnPos.getY() + 0.5, spawnPos.getZ() + 0.5);
+        // Only into open air: the spawn point is a random spot in the fortress and used to put Dementors inside walls.
+        if (!sl.noCollision(newDementor)) {
+            newDementor.discard();
+            return;
+        }
         sl.addFreshEntity(newDementor);
     }
 

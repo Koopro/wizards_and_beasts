@@ -21,7 +21,7 @@ import java.util.Optional;
  * @param blockEffect what the breath does to blocks it hits
  * @param biteVenom   when present, melee applies this status effect
  * @param rideable    data-only forward-compat flag; mount behaviour ships in a follow-up
- * @param scale       render-only model scale (no hitbox change; hitbox is registry-frozen in ModCreatures)
+ * @param scale       unused: size is the definition's top-level {@code scale} (Attributes.SCALE); kept so packs parse
  */
 public record DragonTraits(
         float fireRange,

@@ -20,7 +20,7 @@ class AdminCreaturePayloadCodecTest {
 
     private static final AdminCreaturePayloads.CreatureSummary SUMMARY = new AdminCreaturePayloads.CreatureSummary(
             "hippogriff", "entity.wizards_and_beasts.hippogriff", "WINGED_BEAST", true, "NEUTRAL", true, true, false,
-            false, 2, 5, "wizards_and_beasts:textures/bestiary/icons/hippogriff.png", false);
+            false, true, 2, 5, "wizards_and_beasts:textures/bestiary/icons/hippogriff.png", false);
 
     @Test
     void listAndDetailRoundTrip() {

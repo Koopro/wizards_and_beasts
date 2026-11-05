@@ -46,7 +46,16 @@ public final class AdminCreaturePayloads {
      */
     public record CreatureSummary(String id, String nameKey, String category, boolean magical, String temperament,
                                   boolean flying, boolean tameable, boolean breedable, boolean naturalSpawnRule,
-                                  int spawnEntries, int variants, String icon, boolean bespoke) {
+                                  boolean rosterAllows, int spawnEntries, int variants, String icon, boolean bespoke) {
+
+        /**
+         * Whether it can appear on its own right now: the admin rule is on, the {@code creatureNaturalSpawns} roster
+         * gate lets it through, and a biome spawn names it. The rule alone read "spawns" for creatures the roster
+         * blocks (Beast Renaissance D20).
+         */
+        public boolean spawnsNow() {
+            return naturalSpawnRule && rosterAllows && spawnEntries > 0;
+        }
 
         static void write(ByteBuf buf, CreatureSummary s) {
             PacketCodecUtils.writeString(buf, s.id);
@@ -58,6 +67,7 @@ public final class AdminCreaturePayloads {
             buf.writeBoolean(s.tameable);
             buf.writeBoolean(s.breedable);
             buf.writeBoolean(s.naturalSpawnRule);
+            buf.writeBoolean(s.rosterAllows);
             buf.writeInt(s.spawnEntries);
             buf.writeInt(s.variants);
             PacketCodecUtils.writeString(buf, s.icon);
@@ -67,7 +77,7 @@ public final class AdminCreaturePayloads {
         static CreatureSummary read(ByteBuf buf) {
             return new CreatureSummary(PacketCodecUtils.readString(buf), PacketCodecUtils.readString(buf),
                     PacketCodecUtils.readString(buf), buf.readBoolean(), PacketCodecUtils.readString(buf),
-                    buf.readBoolean(), buf.readBoolean(), buf.readBoolean(), buf.readBoolean(),
+                    buf.readBoolean(), buf.readBoolean(), buf.readBoolean(), buf.readBoolean(), buf.readBoolean(),
                     buf.readInt(), buf.readInt(), PacketCodecUtils.readString(buf), buf.readBoolean());
         }
     }

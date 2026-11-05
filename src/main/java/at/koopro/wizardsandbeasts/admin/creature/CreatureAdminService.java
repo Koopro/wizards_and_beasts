@@ -118,6 +118,7 @@ public final class CreatureAdminService {
                 bond.isPresent(),
                 bond.flatMap(BondProfile::breeding).isPresent(),
                 CreatureRules.naturalSpawn(id),
+                at.koopro.wizardsandbeasts.entity.beast.BeastSpawnHandler.spawnsNaturally(type),
                 spawnEntries,
                 CreatureVariants.of(id).size(),
                 entry == null ? "" : entry.iconTexture().toString(),
