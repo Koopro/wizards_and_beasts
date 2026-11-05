@@ -173,23 +173,24 @@ roster is a separate decision; none of the rebuilt rigs has been checked in a ru
   and `thunderbird_tail_feather` are each consumed by ten wand recipes and could not be obtained, so
   half the wand catalogue advertised a core nobody could hold. All eight are now reachable, and
   `CreatureMaterialObtainabilityTest` fails the build if one stops being.
-- **The Hippogriff does not bow.** Canon's greeting ritual — you bow, it bows back, and only then may
-  it be ridden — is not implemented. It is approached and ridden by the generic path.
-- **Three creatures are art-complete but behaviour-thin**: `augurey`, `cornish_pixie` and `streeler`
-  have hand-drawn rigs and skins but wander-and-look AI only, so they are not on the alpha roster.
-  The Streeler's colour-shift and venomous trail, and the Augurey's rain-cry, are both unwritten.
+- **The Hippogriff bows** (fixed): bow etiquette is implemented in `HippogriffEntity` (respect list saved).
+- **Augurey, Cornish Pixie and Streeler are off the alpha roster** although their signatures now exist (the rain
+  cry, the snatch-and-hoist, the colour shift and venomous trail). Their spawn files do nothing under the default
+  `creatureNaturalSpawns=ALPHA_ONLY`; see `BEAST_RENAISSANCE.md` §2.
 - **The eight extra dragon breeds are on the roster now.** They were held back for a loot table and
   for the argument that "an alpha slice of twenty is not a slice". They have loot, and the count
   argument does not survive contact with what they are: one family sharing one implementation, not
   eight unrelated creatures.
-- **Bonding reaches four creatures, not ninety-six.** `niffler`, `bowtruckle`, `mooncalf` and
-  `hippogriff` ship `creature_bonds/*.json`; every other creature has no profile and does not bond.
+- **Bonding reaches nine creatures, not 107.** `niffler`, `bowtruckle`, `mooncalf`, `hippogriff`, `thestral`,
+  `phoenix`, `unicorn`, `demiguise` and `griffin` ship `creature_bonds/*.json`; every other creature has no profile
+  and does not bond.
   Adding one is a datapack file and no Java (see 4d), so this is a content gap rather than a
   technical one.
 - **A bonded creature is not protected from anyone but its owner.** The betrayal penalty only reads
   the owner's blows, so another player can kill a companion without the bond noticing. There is no
   ownership check on damage at all; that is a multiplayer question this pass did not open.
-- **No creature has a sound of its own.** Every beast reuses vanilla sound events.
+- **No creature has a sound of its own.** All 103 creature sound events play vanilla samples, and 90 creatures
+  have no voice at all (`BEAST_RENAISSANCE.md` §1.1; own audio is milestone BR-6).
 
 ### 4.4 Choranaptyxis — the one creature whose hitbox changes size
 
@@ -363,7 +364,7 @@ creatures can use them from JSON.
 | Creature | Now |
 |---|---|
 | **Demiguise** | Invisible while any player within 16 blocks looks straight at it (`watched_invisibility`); sidesteps anyone walking straight at it (`foresight`), so only an unpredictable approach reaches it; reached, it gives a tuft of hair (`groomable`) and its page is complete; sheds a tuft about once a day where it rests; rare, alone, in jungle and dark forest. Killing it yields nothing. |
-| **Unicorn** | Keeps away from anyone within 12 blocks who is not quiet (sneaking), empty-handed and already familiar with unicorns (`OBSERVED`); flees unicorn slayers and badly corrupted wizards from 24 (`wary`). The right person can comb loose a hair once a day (`groomable`), which completes its page. Sheds hair where it grazes. Killing one yields nothing, stains the killer (dark corruption, weakness, bad luck) and marks them — no unicorn lets them near again (`slayer_curse`). Rarer, in old birch and dark forest; now on the alpha roster. |
+| **Unicorn** | Keeps away from anyone within 12 blocks who is not quiet (sneaking), empty-handed and already familiar with unicorns (`OBSERVED`); flees unicorn slayers and badly corrupted wizards from 24 (`wary`). The right person can comb loose a hair once a day (`groomable`), which completes its page. Sheds hair where it grazes. Killing one yields nothing, stains the killer (15 dark corruption, per ruling C-6) and marks them — no unicorn lets them near again (`slayer_curse`). Rarer, in old birch and dark forest; now on the alpha roster. |
 | **Phoenix** | Is reborn instead of dying: a killing blow sets it alight and it rises as a chick that grows back over five minutes; only the void or a command ends it. Loyalty is the bond system (`creature_bonds/phoenix.json`): killing something that just hurt a phoenix earns its notice, calm company deepens it, one blow breaks it. At 60 it weeps healing tears over its badly hurt person, at 80 it gives feathers, at 90 it follows. Sheds a feather about once a day. Avoids whoever last hurt it. |
 | **Mooncalf** | A wild mooncalf is burrowed — unseen and still — except under a full moon, when the herd walks to its centre and dances; watching the dance completes its page. At dawn each dancer leaves dung. It scatters from anyone who comes at it upright. A kept (bonded) mooncalf lives above ground. Killing one yields nothing. |
 | **Bowtruckle** | Settles on the nearest tree (wandwood first) and stays within 10 blocks of it. Breaking that tree's logs or leaves sets every bowtruckle living there on the culprit for 30 s: a scratch and a moment's blindness. Its bonded wandmaker is spared. |
