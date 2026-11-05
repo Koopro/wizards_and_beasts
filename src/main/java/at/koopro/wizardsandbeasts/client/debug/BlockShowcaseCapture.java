@@ -63,7 +63,9 @@ public final class BlockShowcaseCapture {
 
     private record Step(String shot, int ticks, Consumer<ServerPlayer> server) {}
 
-    private static final List<Step> SCRIPT = List.of(
+    private static List<Step> SCRIPT = List.of();
+
+    private static final List<Step> SET_SCRIPT = List.of(
             new Step("", 60, BlockShowcaseCapture::stage),
             new Step("front", 20, p -> {}),
             new Step("", 20, p -> look(p, 4.5, -1.5, 135f, 22f)),
@@ -83,6 +85,81 @@ public final class BlockShowcaseCapture {
             new Step("", 4, p -> trigger(p, TrunkBlockEntity.CLIP_LOCK)),
             new Step("lock", 1, p -> {}));
 
+    /**
+     * {@code WB_BLOCK_SHOWCASE=gallery}: every block of this mod whose model is not a plain cube (by shape or by
+     * render type), five to a row, front and three-quarter, so a block-model pass starts from pictures of all of
+     * them. Wood and stone families (stairs, slabs, doors, fences ...), leaves and saplings are left out: their
+     * shapes are vanilla's. Each batch's ids are written beside its shots as {@code bNN.txt}.
+     */
+    private static final int GALLERY_ROW = 5;
+    private static final List<String> SHAPE_SUFFIXES = List.of("_stairs", "_slab", "_door", "_trapdoor", "_fence",
+            "_fence_gate", "_wall", "_button", "_pressure_plate", "_sign", "_hanging_sign", "_wall_sign",
+            "_wall_hanging_sign", "_leaves", "_sapling", "_log", "_wood", "_planks", "_pane", "_carpet");
+    private static List<List<String>> gallery = List.of();
+
+    private static List<List<String>> galleryBatches() {
+        List<String> ids = new ArrayList<>();
+        // WB_BLOCK_SHOWCASE_IDS=a,b,c photographs exactly those blocks instead of the non-cube sweep.
+        String only = System.getenv("WB_BLOCK_SHOWCASE_IDS");
+        if (only != null && !only.isBlank()) {
+            ids.addAll(java.util.Arrays.stream(only.split(",")).map(String::trim).filter(x -> !x.isEmpty()).toList());
+        }
+        if (ids.isEmpty()) {
+        for (Block block : BuiltInRegistries.BLOCK) {
+            Identifier id = BuiltInRegistries.BLOCK.getKey(block);
+            if (!WizardsAndBeastsMod.MODID.equals(id.getNamespace()) || block.asItem() == net.minecraft.world.item.Items.AIR) {
+                continue;
+            }
+            String path = id.getPath();
+            if (path.startsWith("potted_") || SHAPE_SUFFIXES.stream().anyMatch(path::endsWith)) {
+                continue;
+            }
+            BlockState state = block.defaultBlockState();
+            boolean cube = Block.isShapeFullBlock(state.getShape(net.minecraft.world.level.EmptyBlockGetter.INSTANCE, BlockPos.ZERO));
+            if (!cube || state.getRenderShape() != net.minecraft.world.level.block.RenderShape.MODEL) {
+                ids.add(path);
+            }
+        }
+        java.util.Collections.sort(ids);
+        }
+        List<List<String>> batches = new ArrayList<>();
+        for (int i = 0; i < ids.size(); i += GALLERY_ROW) {
+            batches.add(ids.subList(i, Math.min(ids.size(), i + GALLERY_ROW)));
+        }
+        LOGGER.info("Block showcase: gallery of {} blocks in {} rows", ids.size(), batches.size());
+        return batches;
+    }
+
+    private static List<Step> galleryScript() {
+        gallery = galleryBatches();
+        List<Step> steps = new ArrayList<>();
+        steps.add(new Step("", 60, p -> stage(p, List.of())));
+        for (int i = 0; i < gallery.size(); i++) {
+            List<String> batch = gallery.get(i);
+            String tag = String.format("b%02d", i);
+            steps.add(new Step("", 30, p -> {
+                stage(p, batch);
+                writeBatch(tag, batch);
+                look(p, 0.5, -1.5, 180f, 20f);
+            }));
+            steps.add(new Step(tag + "_front", 20, p -> {}));
+            steps.add(new Step("", 15, p -> look(p, 4.0, -3.0, 135f, 24f)));
+            steps.add(new Step(tag + "_quarter", 20, p -> {}));
+        }
+        return steps;
+    }
+
+    private static void writeBatch(String tag, List<String> batch) {
+        Path file = Minecraft.getInstance().gameDirectory.toPath()
+                .resolve(Path.of(Screenshot.SCREENSHOT_DIR, "block_showcase", SET, tag + ".txt"));
+        try {
+            Files.createDirectories(file.getParent());
+            Files.writeString(file, String.join(System.lineSeparator(), batch));
+        } catch (IOException e) {
+            LOGGER.error("Block showcase: cannot write {}", file, e);
+        }
+    }
+
     private static BlockPos origin = BlockPos.ZERO;
     private static final List<BlockPos> placed = new ArrayList<>();
 
@@ -96,8 +173,14 @@ public final class BlockShowcaseCapture {
 
     /** A stone floor and back wall, noon, the set's blocks in a row two apart, and a vanilla chest at the end. */
     private static void stage(ServerPlayer p) {
+        stage(p, SETS.getOrDefault(SET, List.of()));
+    }
+
+    private static void stage(ServerPlayer p, List<String> ids) {
         ServerLevel level = p.level();
-        origin = p.blockPosition();
+        if (placed.isEmpty() && origin.equals(BlockPos.ZERO)) {
+            origin = p.blockPosition();
+        }
         level.getEntities(p, p.getBoundingBox().inflate(16), e -> !(e instanceof net.minecraft.world.entity.player.Player))
                 .forEach(net.minecraft.world.entity.Entity::discard);
         level.setDayTime(6000);
@@ -114,7 +197,6 @@ public final class BlockShowcaseCapture {
             }
         }
         placed.clear();
-        List<String> ids = SETS.getOrDefault(SET, List.of());
         int x = -ids.size();
         for (String id : ids) {
             Block block = BuiltInRegistries.BLOCK.getValue(Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, id));
@@ -125,6 +207,9 @@ public final class BlockShowcaseCapture {
         }
         level.setBlock(origin.offset(x, 0, -6),
                 Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, Direction.SOUTH), 3);
+        if (placed.isEmpty() && !ids.isEmpty()) {
+            LOGGER.warn("Block showcase: nothing placed for {}", ids);
+        }
         look(p, 0.5, 0.5, 180f, 18f);
     }
 
@@ -182,6 +267,7 @@ public final class BlockShowcaseCapture {
             return;
         }
         opened = true;
+        SCRIPT = "gallery".equals(SET) ? galleryScript() : SET_SCRIPT;
         Minecraft mc = Minecraft.getInstance();
         mc.options.pauseOnLostFocus = false;
         GLFW.glfwSetWindowSize(mc.getWindow().handle(), 1280, 720);
