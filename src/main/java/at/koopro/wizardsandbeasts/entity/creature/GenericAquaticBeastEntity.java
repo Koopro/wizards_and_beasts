@@ -35,7 +35,6 @@ public class GenericAquaticBeastEntity extends GenericBeastEntity {
     @Override
     protected void addMovementController(AnimatableManager.ControllerRegistrar controllers) {
         String name = assetName();
-        controllers.add(AnimHelper.movementController(name, 5,
-                AnimHelper.loop(name, "idle"), AnimHelper.loop(name, "swim")));
+        controllers.add(AnimHelper.<GenericBeastEntity>activityController(name, 5, "swim"));
     }
 }

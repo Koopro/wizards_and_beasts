@@ -75,7 +75,8 @@ import java.util.Set;
  * {@link CreatureDefinition} ({@link Temperament} + {@link Trait} vocabulary). No bespoke per-creature
  * subclass exists — only the four locomotion subclasses, which supply movement goals + animation.
  */
-public abstract class GenericBeastEntity extends GeoEntityBase implements BondableBeast {
+public abstract class GenericBeastEntity extends GeoEntityBase implements BondableBeast,
+        at.koopro.wizardsandbeasts.creature.profile.HasActivity {
 
     /**
      * Controller for one-shot reaction clips. Named distinctly from {@code dragon_action},
@@ -189,6 +190,13 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
     private static final EntityDataAccessor<String> DATA_GUISE =
             SynchedEntityData.defineId(GenericBeastEntity.class, EntityDataSerializers.STRING);
 
+    /**
+     * What it is visibly doing ({@link at.koopro.wizardsandbeasts.creature.profile.CreatureActivity}), written by the
+     * ecology goal on the server and read by the movement controller on the client. Not saved.
+     */
+    private static final EntityDataAccessor<Byte> DATA_ACTIVITY =
+            SynchedEntityData.defineId(GenericBeastEntity.class, EntityDataSerializers.BYTE);
+
     private final BondState bond = new BondState();
 
     protected GenericBeastEntity(EntityType<? extends PathfinderMob> type, Level level) {
@@ -205,6 +213,17 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
         builder.define(DATA_DISGUISED, false);
         builder.define(DATA_BOND_LEVEL, 0);
         builder.define(DATA_GUISE, "");
+        builder.define(DATA_ACTIVITY, at.koopro.wizardsandbeasts.creature.profile.CreatureActivity.IDLE.id());
+    }
+
+    @Override
+    public at.koopro.wizardsandbeasts.creature.profile.CreatureActivity activity() {
+        return at.koopro.wizardsandbeasts.creature.profile.CreatureActivity.byId(entityData.get(DATA_ACTIVITY));
+    }
+
+    @Override
+    public void setActivity(at.koopro.wizardsandbeasts.creature.profile.CreatureActivity activity) {
+        entityData.set(DATA_ACTIVITY, activity.id());
     }
 
     // ── bond layer ────────────────────────────────────────────────────────────

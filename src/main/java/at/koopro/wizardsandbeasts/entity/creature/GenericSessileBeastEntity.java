@@ -21,6 +21,6 @@ public class GenericSessileBeastEntity extends GenericBeastEntity {
     @Override
     protected void addMovementController(AnimatableManager.ControllerRegistrar controllers) {
         String name = assetName();
-        controllers.add(AnimHelper.idleController(name, 5, AnimHelper.loop(name, "idle")));
+        controllers.add(AnimHelper.<GenericBeastEntity>activityController(name, 5, "idle"));
     }
 }
