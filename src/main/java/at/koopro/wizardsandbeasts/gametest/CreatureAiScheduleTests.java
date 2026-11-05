@@ -183,14 +183,25 @@ final class CreatureAiScheduleTests {
     private static void camouflageContinuous(GameTestHelper helper) {
         CreatureArena arena = CreatureArena.at(helper, Y);
         PathfinderMob moke = arena.creature("moke", 1, 1);
+        // The claim is continuity once camouflaged, so the watch starts at the first invisible tick. It used to start at
+        // tick 3, and the arena's forced chunk does not always tick entities that soon: the moke had simply not ticked
+        // yet, and the test failed now and then for a reason that was not the camouflage's.
         int[] tick = {0};
+        int[] since = {-1};
         helper.onEachTick(() -> {
             tick[0]++;
-            if (tick[0] < 3) {
+            if (since[0] < 0) {
+                if (moke.hasEffect(MobEffects.INVISIBILITY)) {
+                    since[0] = tick[0];
+                } else if (tick[0] > 100) {
+                    arena.clear();
+                    helper.fail("the moke never camouflaged in five seconds");
+                }
                 return;
             }
-            check(helper, moke.hasEffect(MobEffects.INVISIBILITY), () -> "the moke was visible on tick " + tick[0]);
-            if (tick[0] >= 120) {
+            check(helper, moke.hasEffect(MobEffects.INVISIBILITY),
+                    () -> "the moke was visible on tick " + tick[0] + ", " + (tick[0] - since[0]) + " ticks after it hid");
+            if (tick[0] - since[0] >= 120) {
                 arena.clear();
                 helper.succeed();
             }
