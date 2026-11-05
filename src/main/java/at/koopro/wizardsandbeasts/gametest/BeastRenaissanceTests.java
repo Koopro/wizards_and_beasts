@@ -2,6 +2,8 @@ package at.koopro.wizardsandbeasts.gametest;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.entity.beast.BowtruckleEntity;
+import at.koopro.wizardsandbeasts.entity.beast.CornishPixieEntity;
+import at.koopro.wizardsandbeasts.entity.beast.MooncalfEntity;
 import at.koopro.wizardsandbeasts.entity.beast.HidebehindEntity;
 import at.koopro.wizardsandbeasts.entity.niffler.BabyNifflerEntity;
 import at.koopro.wizardsandbeasts.entity.niffler.NifflerEntity;
@@ -12,7 +14,9 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import java.util.List;
 import at.koopro.wizardsandbeasts.entity.beast.RunespoorEntity;
 import at.koopro.wizardsandbeasts.entity.beast.ai.HidebehindStalkGoal;
+import at.koopro.wizardsandbeasts.entity.creature.DragonEntity;
 import at.koopro.wizardsandbeasts.entity.creature.HippogriffEntity;
+import at.koopro.wizardsandbeasts.entity.creature.ai.DragonBreathGoal;
 import at.koopro.wizardsandbeasts.registry.ModEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -61,6 +65,15 @@ public final class BeastRenaissanceTests {
         tests.add("br0_bowtruckle_sneak_click_picks_a_lock",
                 "D6: an owner's sneak + empty hand sets a trusting bowtruckle to the nearby lock",
                 BeastRenaissanceTests::bowtruckleSneakClickPicksALock);
+        tests.addAlone("br0_dragon_breath_respects_mob_griefing",
+                "D8: dragon fire scorches the ground only where mobs may grief",
+                BeastRenaissanceTests::dragonBreathRespectsMobGriefing);
+        tests.add("br0_pixie_never_drops_into_lava",
+                "D12: a pixie's stolen item lands on ground, never into lava",
+                BeastRenaissanceTests::pixieNeverDropsIntoLava);
+        tests.add("br0_burrowed_mooncalf_cannot_be_struck",
+                "D10: a burrowed mooncalf is underground: not pickable, not attackable, not hurt",
+                BeastRenaissanceTests::burrowedMooncalfCannotBeStruck);
         tests.add("br0_grown_niffler_keeps_its_name_and_brings_no_litter",
                 "D9: a baby niffler grows into the same animal: name, health share, and no fresh litter",
                 BeastRenaissanceTests::grownNifflerKeepsItsNameAndBringsNoLitter);
@@ -122,6 +135,90 @@ public final class BeastRenaissanceTests {
         retire(helper, owner);
         bowtruckle.discard();
         helper.succeed();
+    }
+
+    private static void dragonBreathRespectsMobGriefing(GameTestHelper helper) {
+        BlockPos min = new BlockPos(0, 0, 0);
+        BlockPos max = new BlockPos(12, 6, 12);
+        WizardTestSupport.forceChunks(helper, min, max);
+        for (int x = 0; x <= 12; x++) {
+            for (int z = 0; z <= 12; z++) {
+                helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+            }
+        }
+        DragonEntity dragon = (DragonEntity) helper.spawn(type("common_welsh_green"), new BlockPos(2, 1, 6));
+        dragon.setNoAi(true);
+        dragon.setNoGravity(true);
+        // Facing +x and down onto the stone floor.
+        dragon.setYRot(-90.0f);
+        dragon.setYHeadRot(-90.0f);
+        dragon.setXRot(40.0f);
+        DragonBreathGoal breath = new DragonBreathGoal(dragon);
+        net.minecraft.server.level.ServerLevel level = helper.getLevel();
+        boolean griefing = level.getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_GRIEFING);
+        try {
+            level.getGameRules().set(net.minecraft.world.level.gamerules.GameRules.MOB_GRIEFING, false, level.getServer());
+            breath.breathe();
+            int withGriefingOff = fires(helper, min, max);
+            check(helper, withGriefingOff == 0,
+                    () -> "with mobGriefing off a dragon's breath still set " + withGriefingOff + " fires");
+            level.getGameRules().set(net.minecraft.world.level.gamerules.GameRules.MOB_GRIEFING, true, level.getServer());
+            breath.breathe();
+            int withGriefingOn = fires(helper, min, max);
+            check(helper, withGriefingOn > 0, () -> "with mobGriefing on a dragon's breath set no fire on the stone");
+        } finally {
+            level.getGameRules().set(net.minecraft.world.level.gamerules.GameRules.MOB_GRIEFING, griefing, level.getServer());
+            for (int x = 0; x <= 12; x++) {
+                for (int y = 1; y <= 6; y++) {
+                    for (int z = 0; z <= 12; z++) {
+                        if (helper.getBlockState(new BlockPos(x, y, z)).is(Blocks.FIRE)) {
+                            helper.setBlock(new BlockPos(x, y, z), Blocks.AIR);
+                        }
+                    }
+                }
+            }
+            dragon.discard();
+        }
+        helper.succeed();
+    }
+
+    private static void pixieNeverDropsIntoLava(GameTestHelper helper) {
+        helper.setBlock(new BlockPos(1, 0, 1), Blocks.STONE);
+        helper.setBlock(new BlockPos(3, 0, 1), Blocks.LAVA);
+        net.minecraft.server.level.ServerLevel level = helper.getLevel();
+        check(helper, CornishPixieEntity.safeToDrop(level, helper.absolutePos(new BlockPos(1, 4, 1))),
+                () -> "a drop over stone was judged unsafe");
+        check(helper, !CornishPixieEntity.safeToDrop(level, helper.absolutePos(new BlockPos(3, 4, 1))),
+                () -> "a drop over lava was judged safe; a stolen wand would burn");
+        helper.succeed();
+    }
+
+    private static void burrowedMooncalfCannotBeStruck(GameTestHelper helper) {
+        MooncalfEntity mooncalf = helper.spawn(ModEntities.MOONCALF.get(), new BlockPos(1, 2, 1));
+        mooncalf.setNoAi(true);
+        if (!mooncalf.isBurrowed()) {
+            // A full moon tonight: the claim is about a burrowed mooncalf, so there is nothing to check.
+            mooncalf.discard();
+            helper.succeed();
+            return;
+        }
+        float before = mooncalf.getHealth();
+        boolean hurt = mooncalf.hurtServer(helper.getLevel(), helper.getLevel().damageSources().generic(), 4.0f);
+        check(helper, !hurt && mooncalf.getHealth() == before, () -> "a burrowed mooncalf was hurt on the surface");
+        check(helper, !mooncalf.isPickable() && !mooncalf.isAttackable(),
+                () -> "a burrowed mooncalf can still be clicked or targeted");
+        mooncalf.discard();
+        helper.succeed();
+    }
+
+    private static int fires(GameTestHelper helper, BlockPos min, BlockPos max) {
+        int count = 0;
+        for (BlockPos pos : BlockPos.betweenClosed(min, max)) {
+            if (helper.getBlockState(pos).is(Blocks.FIRE)) {
+                count++;
+            }
+        }
+        return count;
     }
 
     private static void grownNifflerKeepsItsNameAndBringsNoLitter(GameTestHelper helper) {

@@ -48,6 +48,12 @@ public final class DragonBreathGoal extends Goal {
 
     private static final int COOLDOWN_TICKS = 80;
     private static final int RAYS = 18;
+    /**
+     * Only one ray in this many draws its flame. The rays still all burn and scorch; drawing every one sent about
+     * 1,300 particle packets per breath to each viewer (Beast Renaissance D23). Six drawn rays at one sample a block,
+     * with denser bursts per sample, read as the same jet.
+     */
+    private static final int DRAWN_RAY_EVERY = 3;
     private static final float DAMAGE = 5.0f;
     private static final int BURN_SECONDS = 5;
 
@@ -93,7 +99,8 @@ public final class DragonBreathGoal extends Goal {
         breathe();
     }
 
-    private void breathe() {
+    /** One breath now, ignoring cooldown and target. Public for the BR-0 GameTest. */
+    public void breathe() {
         DragonTraits traits = mob.dragonTraits();
         if (traits == null || !(mob.level() instanceof ServerLevel level)) {
             return;
@@ -113,9 +120,12 @@ public final class DragonBreathGoal extends Goal {
         // Shared set dedupes block writes so the overlapping cone rays form one fire carpet, not N writes.
         Set<BlockPos> touched = new HashSet<>();
         double splash = splashRadius(shape);
+        // The ground only burns where mobs may grief: the mobGriefing rule and any protection mod (Beast Renaissance
+        // D8). Creatures in the cone still burn either way, as a creeper still hurts with griefing off.
+        boolean scorch = net.neoforged.neoforge.event.EventHooks.canEntityGrief(level, mob);
         for (int i = 0; i < RAYS; i++) {
             Vec3 dir = sampleCone(look, right, up, halfAngle);
-            castRay(level, traits, origin, dir, range, splash, touched);
+            castRay(level, traits, origin, dir, range, splash, touched, scorch, i % DRAWN_RAY_EVERY == 0);
         }
     }
 
@@ -143,13 +153,15 @@ public final class DragonBreathGoal extends Goal {
      * blocks), so terrain visibly burns instead of merely singeing the victim.
      */
     private void castRay(ServerLevel level, DragonTraits traits, Vec3 origin, Vec3 dir, double range,
-                         double splash, Set<BlockPos> touched) {
+                         double splash, Set<BlockPos> touched, boolean scorch, boolean drawn) {
         Vec3 end = origin.add(dir.scale(range));
         BlockHitResult hit = level.clip(new ClipContext(
                 origin, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mob));
         Vec3 stop = hit.getType() == HitResult.Type.BLOCK ? hit.getLocation() : end;
-        spawnFlame(level, traits, origin, stop);
-        if (hit.getType() != HitResult.Type.BLOCK) {
+        if (drawn) {
+            spawnFlame(level, traits, origin, stop);
+        }
+        if (!scorch || hit.getType() != HitResult.Type.BLOCK) {
             return;
         }
         BlockPos impact = BlockPos.containing(hit.getLocation());
@@ -213,15 +225,16 @@ public final class DragonBreathGoal extends Goal {
         DustParticleOptions tint = new DustParticleOptions(0xFF000000 | traits.fireColor(), 1.6f);
         Vec3 delta = stop.subtract(origin);
         double length = delta.length();
-        // One sample per ~half block so the jet reads as a continuous stream, not dots; widen along its length.
-        int steps = Math.max(4, (int) (length * 2));
+        // One sample per block, each a small burst, so the jet reads as a stream; widen along its length. Each
+        // sendParticles call is a packet per viewer, so the count goes into the burst, not into more calls.
+        int steps = Math.max(4, (int) length);
         Vec3 step = delta.scale(1.0 / steps);
         for (int s = 1; s <= steps; s++) {
             Vec3 p = origin.add(step.scale(s));
-            double spread = 0.05 + 0.06 * s / steps; // cone widens downrange
-            level.sendParticles(tint, p.x, p.y, p.z, 2, spread, spread, spread, 0.0);
-            level.sendParticles(ParticleTypes.FLAME, p.x, p.y, p.z, 1, spread, spread, spread, 0.01);
-            if (s % 3 == 0) {
+            double spread = 0.08 + 0.10 * s / steps; // cone widens downrange
+            level.sendParticles(tint, p.x, p.y, p.z, 5, spread, spread, spread, 0.0);
+            level.sendParticles(ParticleTypes.FLAME, p.x, p.y, p.z, 3, spread, spread, spread, 0.01);
+            if (s % 4 == 0) {
                 level.sendParticles(ParticleTypes.LAVA, p.x, p.y, p.z, 1, spread, spread, spread, 0.0);
             }
         }

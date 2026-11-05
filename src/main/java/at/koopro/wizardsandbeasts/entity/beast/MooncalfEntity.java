@@ -102,6 +102,11 @@ public class MooncalfEntity extends GeoEntityBase implements BondableBeast {
     private final BondState bond = new BondState();
     private @Nullable BlockPos burrow;
     private boolean dancedTonight;
+    private boolean burrowSettled;
+    /** {@link #herdCentre()}, kept for {@link #HERD_CENTRE_TICKS}: the goals ask for it every evaluation. */
+    private @Nullable Vec3 cachedHerdCentre;
+    private int herdCentreAt = Integer.MIN_VALUE;
+    private static final int HERD_CENTRE_TICKS = 40;
 
     public MooncalfEntity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
@@ -148,6 +153,11 @@ public class MooncalfEntity extends GeoEntityBase implements BondableBeast {
 
     @Override
     public boolean hurtServer(@NonNull ServerLevel level, @NonNull DamageSource source, float amount) {
+        // Burrowed, it is underground: nothing on the surface can reach it (only /kill and the void can). It used to be
+        // an invisible body standing on the grass that could be struck forever without fleeing (Beast Renaissance D10).
+        if (isBurrowed() && !source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+            return false;
+        }
         boolean hurt = super.hurtServer(level, source, amount);
         if (hurt) {
             onBondedHurt(source);
@@ -189,6 +199,22 @@ public class MooncalfEntity extends GeoEntityBase implements BondableBeast {
         return burrow;
     }
 
+    /** Burrowed, it is not there to be clicked, pushed, hunted or targeted. */
+    @Override
+    public boolean isPickable() {
+        return !isBurrowed() && super.isPickable();
+    }
+
+    @Override
+    public boolean isPushable() {
+        return !isBurrowed() && super.isPushable();
+    }
+
+    @Override
+    public boolean isAttackable() {
+        return !isBurrowed() && super.isAttackable();
+    }
+
     @Override
     public void tick() {
         super.tick();
@@ -198,6 +224,12 @@ public class MooncalfEntity extends GeoEntityBase implements BondableBeast {
         }
         if (burrow == null) {
             burrow = blockPosition();
+        }
+        if (!burrowSettled && onGround()) {
+            // Moved once to where it first stands: a spawn egg or a drop can start it in mid-air, and it used to keep a
+            // burrow in the air for good. A burrow read from a save is already settled.
+            burrow = blockPosition();
+            burrowSettled = true;
         }
         if (tickCount % MOON_CHECK_INTERVAL == 0) {
             refreshMoon(serverLevel, WerewolfMoonHandler.moonIsUp(serverLevel));
@@ -228,8 +260,18 @@ public class MooncalfEntity extends GeoEntityBase implements BondableBeast {
         return dancedTonight;
     }
 
-    /** The middle of the wild herd around it, itself included. */
+    /** The middle of the wild herd around it, itself included; looked up at most every two seconds. */
     public Vec3 herdCentre() {
+        if (cachedHerdCentre == null || tickCount - herdCentreAt >= HERD_CENTRE_TICKS) {
+            cachedHerdCentre = computeHerdCentre();
+            herdCentreAt = tickCount;
+        }
+        return cachedHerdCentre;
+    }
+
+    // The gather goal asked for this on every canUse and canContinueToUse, an entity query each time: a herd of n on a
+    // full-moon night ran n queries every other tick (Beast Renaissance D26).
+    private Vec3 computeHerdCentre() {
         List<MooncalfEntity> herd = level().getEntitiesOfClass(MooncalfEntity.class,
                 getBoundingBox().inflate(HERD_RADIUS), other -> other.isAlive() && other.isWild());
         if (herd.isEmpty()) {
@@ -352,6 +394,7 @@ public class MooncalfEntity extends GeoEntityBase implements BondableBeast {
         super.readAdditionalSaveData(input);
         loadBond(input);
         burrow = input.read(KEY_BURROW, BlockPos.CODEC).orElse(null);
+        burrowSettled = burrow != null;
         dancedTonight = input.read(KEY_DANCED, Codec.BOOL).orElse(false);
     }
 

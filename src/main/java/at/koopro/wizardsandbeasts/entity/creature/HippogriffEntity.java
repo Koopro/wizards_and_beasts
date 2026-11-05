@@ -234,6 +234,13 @@ public class HippogriffEntity extends GenericFlyingBeastEntity implements Winged
         if (tickCount % 4 == 0 && !isVehicle()) {
             watchForRespect(level);
         }
+        if (tickCount % 200 == 0) {
+            // Old grudges and warnings are forgotten in the maps too, not only in the check: a hippogriff on a busy
+            // server kept every stranger it ever met (Beast Renaissance D13).
+            int now = tickCount;
+            grudges.values().removeIf(at -> now - at >= WildlifeRules.GRUDGE_TICKS);
+            warned.values().removeIf(at -> now - at >= WildlifeRules.WARNING_MEMORY_TICKS);
+        }
     }
 
     /** Bows, crowding and warnings, from everyone within sight. */

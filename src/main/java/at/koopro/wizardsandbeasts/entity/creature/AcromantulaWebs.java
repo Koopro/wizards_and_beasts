@@ -32,6 +32,10 @@ public final class AcromantulaWebs {
         if (!level.isLoaded(pos) || !level.mayInteract(null, pos) || level.isOutsideBuildHeight(pos)) {
             return false;
         }
+        // Silk is a block placed by a mob: none where mobs may not grief (Beast Renaissance D15).
+        if (!level.getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_GRIEFING)) {
+            return false;
+        }
         BlockState state = level.getBlockState(pos);
         if (!state.isAir() || !level.getFluidState(pos).isEmpty()) {
             return false;

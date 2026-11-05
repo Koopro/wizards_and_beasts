@@ -82,6 +82,10 @@ public class CornishPixieEntity extends GeoEntityBase {
 
     private ItemStack carried = ItemStack.EMPTY;
     private int carryLeft;
+    /** Whom it robbed, so a drop with nowhere safe to land goes back to them. */
+    private java.util.@Nullable UUID robbed;
+    /** How far down it looks for ground to drop a stolen item on. */
+    static final int DROP_SEARCH = 48;
     private int snatchCooldown;
     private int hoistCooldown;
 
@@ -168,6 +172,7 @@ public class CornishPixieEntity extends GeoEntityBase {
             return false;
         }
         carried = held.copy();
+        robbed = player.getUUID();
         player.setItemInHand(hand, ItemStack.EMPTY);
         carryLeft = CARRY_TICKS;
         snatchCooldown = SNATCH_COOLDOWN;
@@ -180,16 +185,47 @@ public class CornishPixieEntity extends GeoEntityBase {
         return true;
     }
 
-    /** Drops whatever it carries, where it is. */
+    /**
+     * Drops whatever it carries, onto the ground below it. A pixie is a nuisance, not a thief of wands for good: over
+     * lava or the void the item goes back to whoever it was taken from, and a dropped wand never despawns. Both could
+     * lose a one-of-a-kind wand before (Beast Renaissance D12).
+     */
     public void letGo() {
         if (carried.isEmpty() || !(level() instanceof ServerLevel level)) {
             return;
         }
-        ItemEntity dropped = new ItemEntity(level, getX(), getY(), getZ(), carried);
+        Vec3 at = position();
+        if (!safeToDrop(level, blockPosition())) {
+            Player owner = robbed == null ? null : level.getPlayerByUUID(robbed);
+            if (owner != null) {
+                at = owner.position();
+            }
+        }
+        ItemEntity dropped = new ItemEntity(level, at.x, at.y, at.z, carried);
         dropped.setDefaultPickUpDelay();
+        if (carried.getItem() instanceof WandItem) {
+            dropped.setUnlimitedLifetime();
+        }
         level.addFreshEntity(dropped);
         carried = ItemStack.EMPTY;
         carryLeft = 0;
+        robbed = null;
+    }
+
+    /** Whether something dropped from {@code from} lands on ground that is not lava, within reach of the search. */
+    public static boolean safeToDrop(ServerLevel level, net.minecraft.core.BlockPos from) {
+        net.minecraft.core.BlockPos.MutableBlockPos pos = from.mutable();
+        for (int i = 0; i < DROP_SEARCH && pos.getY() > level.getMinY(); i++) {
+            net.minecraft.world.level.block.state.BlockState state = level.getBlockState(pos);
+            if (state.getFluidState().is(net.minecraft.tags.FluidTags.LAVA) || state.is(net.minecraft.tags.BlockTags.FIRE)) {
+                return false;
+            }
+            if (!state.getCollisionShape(level, pos).isEmpty() || !state.getFluidState().isEmpty()) {
+                return true;
+            }
+            pos.move(net.minecraft.core.Direction.DOWN);
+        }
+        return false;
     }
 
     /**
@@ -234,8 +270,11 @@ public class CornishPixieEntity extends GeoEntityBase {
             if (snatchCooldown > 0 || !carried.isEmpty() || !ModuleManager.isEnabled(Module.CREATURES)) {
                 return false;
             }
-            Player nearest = level().getNearestPlayer(CornishPixieEntity.this, 10.0);
-            if (nearest == null || !canLoseItems(nearest) || nearest.getItemInHand(handToRob(nearest)).isEmpty()) {
+            // The nearest person it can actually rob: a creative builder standing closer used to shield everyone else.
+            Player nearest = level().getNearestPlayer(getX(), getY(), getZ(), 10.0,
+                    entity -> entity instanceof Player player && canLoseItems(player)
+                            && !player.getItemInHand(handToRob(player)).isEmpty());
+            if (nearest == null) {
                 return false;
             }
             target = nearest;
@@ -254,7 +293,10 @@ public class CornishPixieEntity extends GeoEntityBase {
                 return;
             }
             getLookControl().setLookAt(target);
-            getNavigation().moveTo(target.getX(), target.getEyeY(), target.getZ(), 1.4);
+            if (tickCount % 5 == 0 || getNavigation().isDone()) {
+                // Re-aimed every few ticks, not every tick (Beast Renaissance D27).
+                getNavigation().moveTo(target.getX(), target.getEyeY(), target.getZ(), 1.4);
+            }
             if (distanceToSqr(target.getX(), target.getEyeY(), target.getZ()) < SNATCH_REACH_SQR) {
                 snatchFrom(target);
             }
@@ -276,6 +318,12 @@ public class CornishPixieEntity extends GeoEntityBase {
         @Override
         public boolean canUse() {
             return !carried.isEmpty() && getNavigation().isDone();
+        }
+
+        /** Keeps going until it gets there; the default (canUse again) ended it the tick after it set off. */
+        @Override
+        public boolean canContinueToUse() {
+            return !carried.isEmpty() && !getNavigation().isDone();
         }
 
         @Override
@@ -312,6 +360,9 @@ public class CornishPixieEntity extends GeoEntityBase {
         if (!carried.isEmpty()) {
             output.store("Carried", ItemStack.CODEC, carried);
             output.putInt("CarryLeft", carryLeft);
+            if (robbed != null) {
+                output.store("Robbed", net.minecraft.core.UUIDUtil.CODEC, robbed);
+            }
         }
         output.putInt("SnatchCooldown", snatchCooldown);
         output.putInt("HoistCooldown", hoistCooldown);
@@ -322,6 +373,7 @@ public class CornishPixieEntity extends GeoEntityBase {
         super.readAdditionalSaveData(input);
         carried = input.read("Carried", ItemStack.CODEC).orElse(ItemStack.EMPTY);
         carryLeft = input.getIntOr("CarryLeft", 0);
+        robbed = input.read("Robbed", net.minecraft.core.UUIDUtil.CODEC).orElse(null);
         snatchCooldown = input.getIntOr("SnatchCooldown", 0);
         hoistCooldown = input.getIntOr("HoistCooldown", 0);
     }

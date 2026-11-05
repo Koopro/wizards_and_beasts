@@ -103,7 +103,9 @@ public final class EcologySensing {
         List<Entity> around = AiScratch.borrow();
         try {
             level.getEntities(ANY, mob.getBoundingBox().inflate(radius),
-                    e -> e != mob && e.isAlive() && (e instanceof LivingEntity || e instanceof ItemEntity),
+                    // A creature that is not attackable just now (a burrowed mooncalf underground) is not there to
+                    // be hunted or feared.
+                    e -> e != mob && e.isAlive() && ((e instanceof LivingEntity && e.isAttackable()) || e instanceof ItemEntity),
                     around, Integer.MAX_VALUE);
             return classify(mob, profile, state, now, night, exposed, health, bonded, canAttack, around);
         } finally {

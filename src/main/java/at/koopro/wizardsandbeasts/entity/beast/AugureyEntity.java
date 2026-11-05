@@ -62,9 +62,48 @@ public class AugureyEntity extends GeoEntityBase {
 
     private int nextCry = CRY_INTERVAL;
 
+    /**
+     * It flies only in rain, so it carries both ways of getting about and uses the one the weather allows. With flying
+     * navigation alone, its avoid and roost goals flew it about in fine weather too, and the "grounding" was only a
+     * nudge downward once its path was done (Beast Renaissance D16).
+     */
+    private final PathNavigation airNavigation;
+    private final PathNavigation groundNavigation;
+    private final net.minecraft.world.entity.ai.control.MoveControl airMove;
+    private final net.minecraft.world.entity.ai.control.MoveControl groundMove;
+    private boolean airborneMode = true;
+
     public AugureyEntity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
-        this.moveControl = new FlyingMoveControl(this, 10, false);
+        this.airMove = new FlyingMoveControl(this, 10, false);
+        this.groundMove = new net.minecraft.world.entity.ai.control.MoveControl(this);
+        this.moveControl = airMove;
+        this.airNavigation = this.navigation;
+        this.groundNavigation = new net.minecraft.world.entity.ai.navigation.GroundPathNavigation(this, level);
+    }
+
+    /** A bird is not hurt by coming down when the rain stops. */
+    @Override
+    public boolean causeFallDamage(double distance, float multiplier, net.minecraft.world.damagesource.DamageSource source) {
+        return false;
+    }
+
+    /** True while rain lets it fly: flying navigation and control; otherwise it walks. */
+    public boolean airborneMode() {
+        return airborneMode;
+    }
+
+    private void useAirborneMode(boolean air) {
+        if (air == airborneMode) {
+            return;
+        }
+        navigation.stop();
+        airborneMode = air;
+        navigation = air ? airNavigation : groundNavigation;
+        moveControl = air ? airMove : groundMove;
+        if (!air) {
+            setNoGravity(false);
+        }
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -121,10 +160,7 @@ public class AugureyEntity extends GeoEntityBase {
             // Its roost is where it was found: the thicket it came out of.
             setHomeTo(blockPosition(), ROOST_RADIUS);
         }
-        if (!inRain() && !onGround() && !isInWater() && getNavigation().isDone()) {
-            // Fine weather grounds it: settle rather than hang in the air.
-            setDeltaMovement(getDeltaMovement().add(0, -0.04, 0));
-        }
+        useAirborneMode(inRain());
         if (--nextCry <= 0) {
             nextCry = CRY_INTERVAL + getRandom().nextInt(CRY_INTERVAL / 2);
             cryIfRainComing(WildlifeWorld.rainComing(level));
